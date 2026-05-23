@@ -1,0 +1,52 @@
+{
+  "platform": "destroyer_baseline",
+  "description": "HVAC zone links for CONTAM-style airflow modeling",
+  "hvac_zones": [
+    {
+      "id": "zone_upper",
+      "rooms": ["Bridge"],
+      "ach": 6.0,
+      "description": "Upper deck isolated ventilation"
+    },
+    {
+      "id": "zone_main",
+      "rooms": ["MedBay", "Mess_Hall", "Galley"],
+      "ach": 8.0,
+      "description": "Main deck shared ventilation"
+    },
+    {
+      "id": "zone_lower",
+      "rooms": ["Engine_Room", "Berthing"],
+      "ach": 10.0,
+      "description": "Lower deck high-ventilation zone"
+    }
+  ],
+  "cross_zone_links": [
+    {
+      "from": "zone_upper",
+      "to": "zone_main",
+      "flow_rate_m3h": 50,
+      "path": "ladder_well_fore"
+    },
+    {
+      "from": "zone_main",
+      "to": "zone_lower",
+      "flow_rate_m3h": 80,
+      "path": "ladder_well_mid"
+    },
+    {
+      "from": "zone_upper",
+      "to": "zone_lower",
+      "flow_rate_m3h": 20,
+      "path": "ventilation_shaft_aft"
+    }
+  ],
+  "adjacency": [
+    {"from": "Bridge",      "to": "MedBay",      "type": "passageway"},
+    {"from": "MedBay",      "to": "Mess_Hall",   "type": "passageway"},
+    {"from": "Mess_Hall",   "to": "Galley",      "type": "service_hatch"},
+    {"from": "Galley",      "to": "Berthing",    "type": "passageway"},
+    {"from": "Berthing",    "to": "Engine_Room", "type": "passageway"},
+    {"from": "Engine_Room", "to": "Bridge",      "type": "ladder_well"}
+  ]
+}

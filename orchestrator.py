@@ -27,6 +27,7 @@ Usage::
 
 from __future__ import annotations
 
+import json
 import math
 import os
 import sys
@@ -54,16 +55,45 @@ STATUS_CONFIRMED = "CONFIRMED"
 
 # ── Initialization ───────────────────────────────────────────────────────
 
+_REPO_ROOT = os.path.dirname(os.path.abspath(__file__))
+
+
+def _load_spatial_layout(cfg: dict[str, Any]) -> list[dict[str, Any]] | None:
+    """Load zones from the spatial layout JSON if configured."""
+    graph_cfg = cfg.get("ship_graph", {})
+    layout_path = graph_cfg.get("spatial_layout")
+    if not layout_path:
+        return None
+    full_path = os.path.join(_REPO_ROOT, layout_path)
+    if not os.path.isfile(full_path):
+        return None
+    with open(full_path, "r", encoding="utf-8") as fh:
+        layout = json.load(fh)
+    return [
+        {
+            "name": z["id"],
+            "type": z["type"],
+            "traffic": z.get("traffic", "medium"),
+            "volume_m3": z.get("volume_m3", 100),
+            "display": z.get("display", {}),
+            "deck": z.get("deck", "main"),
+        }
+        for z in layout.get("zones", [])
+    ]
+
+
 def _initialize_ship_graph(cfg: dict[str, Any]) -> dict[str, Any]:
-    """Build the ship graph from config (infection-dynamics reference).
+    """Build the ship graph from spatial layout JSON or inline config.
 
     Returns zone list, agent role assignments, and traffic classifications.
     """
     graph_cfg = cfg.get("ship_graph", {})
-    zones = graph_cfg.get("zones", [])
     num_agents = graph_cfg.get("num_agents", 20)
     roles_cfg = graph_cfg.get("agent_roles", {})
     passenger_frac = roles_cfg.get("passenger_fraction", 0.70)
+
+    spatial_zones = _load_spatial_layout(cfg)
+    zones = spatial_zones if spatial_zones else graph_cfg.get("zones", [])
 
     agent_roles: dict[int, str] = {}
     for aid in range(num_agents):
@@ -290,6 +320,7 @@ def run() -> None:
     quarantine_order_epoch: dict[int, int] = {}
     escalation_log: list[dict[str, Any]] = []
     compliance_log: list[dict[str, Any]] = []
+    simulation_history: list[dict[str, Any]] = []
 
     num_epochs = 24
 
@@ -395,12 +426,85 @@ def run() -> None:
                             "action": "refused_quarantine",
                         })
 
-        # ── 10. Console output ──────────────────────────────────────
+        # ── 10. Record simulation history ───────────────────────────
+        epoch_record: dict[str, Any] = {
+            "epoch": epoch,
+            "trigger_status": trigger_status,
+            "agents": [],
+            "spaces": {},
+            "summary": {
+                "susceptible": 0,
+                "infected": 0,
+                "symptomatic": 0,
+                "recovered": 0,
+                "immune": 0,
+                "isolated": len(isolated_ids),
+                "quarantine_refusers": len(quarantine_refusers),
+                "sick_call_count": syn_result["sick_call_count"],
+            },
+            "crusher_ops": {
+                "surface_wipe_zones": [],
+                "pcr_results": {},
+                "rdt_positive_count": sum(1 for r in rdt_result["results"] if r["positive"]),
+                "rdt_tested_count": rdt_result["tested_count"],
+            },
+        }
+
+        for a in agents:
+            status = a["symptom_status"]
+            if status == "isolated":
+                pass
+            elif status in ("symptomatic", "non_compliant", "asymptomatic_shedding"):
+                epoch_record["summary"]["infected"] += 1
+                if status == "symptomatic":
+                    epoch_record["summary"]["symptomatic"] += 1
+            elif status == "recovered":
+                epoch_record["summary"]["recovered"] += 1
+            elif status == "immune":
+                epoch_record["summary"]["immune"] += 1
+            else:
+                epoch_record["summary"]["susceptible"] += 1
+
+            epoch_record["agents"].append({
+                "agent_id": a["agent_id"],
+                "status": status,
+                "shedding_rate": a.get("shedding_rate", 0.0),
+                "location": a.get("location", "unknown"),
+            })
+
+        for zname, zdata in spaces.items():
+            epoch_record["spaces"][zname] = {
+                "pathogen_mass": zdata.get("pathogen_mass", 0.0),
+            }
+
+        if pcr_result is not None:
+            epoch_record["crusher_ops"]["surface_wipe_zones"] = list(
+                pcr_result.get("zone_results", {}).keys()
+            )
+            for zname, zdata in pcr_result.get("zone_results", {}).items():
+                epoch_record["crusher_ops"]["pcr_results"][zname] = {
+                    "ct_value": zdata.get("ct_value"),
+                    "detected": zdata.get("detected", False),
+                }
+
+        epoch_record["crusher_ops"]["isolated_agents"] = sorted(isolated_ids)
+
+        simulation_history.append(epoch_record)
+
+        # ── 11. Console output ──────────────────────────────────────
         _print_epoch(
             epoch, trigger_status, syn_result, rdt_result,
             pcr_result, seq_result, active_symptomatic,
             len(isolated_ids), len(quarantine_refusers), prev_status,
         )
+
+    # ── Save simulation history ──────────────────────────────────────
+    history_path = os.path.join(
+        _REPO_ROOT, "telemetry_buffer", "simulation_history.json",
+    )
+    with open(history_path, "w", encoding="utf-8") as fh:
+        json.dump(simulation_history, fh, indent=2)
+    print(f"\n  Simulation history saved to: {history_path}")
 
     # ── Summary ──────────────────────────────────────────────────────
     print()
