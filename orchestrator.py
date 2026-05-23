@@ -1,18 +1,23 @@
 #!/usr/bin/env python3
 """
-orchestrator.py – The Master Intercom Loop  (Phase 2.5)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+orchestrator.py – The Master Intercom Loop  (Phase 3)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Full human and clinical envelope initialization:
+Real infection-dynamics engine integration:
 
-1. **Structural Environment (infection-dynamics + GRUMB):**
+1. **Real ABM Core (Korkin Lab infection-dynamics):**
+   Agent graph initialised from the actual Norwalk model parameters
+   (shedding curves, dose-response, SEIQR progression, spatial nodes).
+   Replaces all mock agent/space generation.
+
+2. **Structural Environment (GRUMB):**
    Ship graph zones seeded with multi-kingdom log-ratio abundance arrays.
 
-2. **Human Behavior (FRED reference):**
+3. **Human Behavior (FRED reference):**
    Categorized background sick-call noise + quarantine compliance
    multiplier with stochastic behavioral failure.
 
-3. **Clinical Progression (EMOD reference):**
+4. **Clinical Progression (EMOD reference):**
    Shedding-phase-gated RDT sensitivity with early/peak/late caps.
 
 Usage::
@@ -39,6 +44,7 @@ from telemetry_buffer.schema import (
     write_ground_truth,
 )
 from crusher_labs import build_modalities, load_config
+from engines.infection_dynamics_bridge import KorkinShipEngine
 
 # ── Trigger status constants ─────────────────────────────────────────────
 STATUS_BASELINE = "BASELINE"
@@ -127,95 +133,81 @@ def _print_initialization(
     print()
 
 
-# ── Mock Bridge engine helpers ───────────────────────────────────────────
+# ── Korkin Lab engine helpers ────────────────────────────────────────────
 
-def _generate_mock_agents(
-    epoch: int,
-    num_agents: int,
+def _build_engine(
+    cfg: dict[str, Any],
+    seed: int = 42,
+) -> KorkinShipEngine:
+    """Initialise the real infection-dynamics engine from config.
+
+    Uses the ship_graph zones from config.yaml, mapping them to the
+    Korkin Lab zone types (Room, Dining, Free).
+    """
+    graph_cfg = cfg.get("ship_graph", {})
+    zones = graph_cfg.get("zones", [])
+    num_agents = graph_cfg.get("num_agents", 20)
+    roles_cfg = graph_cfg.get("agent_roles", {})
+    passenger_frac = roles_cfg.get("passenger_fraction", 0.70)
+    num_passengers = int(num_agents * passenger_frac)
+    num_crew = num_agents - num_passengers
+
+    engine_zones = [
+        {"name": z["name"], "type": z["type"], "capacity": z.get("traffic", "medium")}
+        for z in zones
+    ]
+
+    return KorkinShipEngine(
+        num_passengers=num_passengers,
+        num_crew=num_crew,
+        initial_infected=cfg.get("initial_infected", 1),
+        zones=engine_zones,
+        seed=seed,
+    )
+
+
+def _engine_payload_to_schema(
+    engine_payload: dict[str, Any],
     isolated_ids: set[int],
     quarantine_refusers: set[int],
-    rng: np.random.Generator,
-) -> list[dict[str, Any]]:
-    """Create agent states with a realistic outbreak curve.
+) -> tuple[list[dict[str, Any]], dict[str, dict[str, Any]]]:
+    """Convert Korkin engine output to telemetry_buffer schema format.
 
-    Agents in ``quarantine_refusers`` are ordered to isolate but have not
-    yet complied (FRED behavioral failure).
+    Applies FRED compliance overrides for isolated / non-compliant agents.
     """
-    agents: list[dict[str, Any]] = []
-    for aid in range(num_agents):
+    agents_out: list[dict[str, Any]] = []
+    for a in engine_payload["agents"]:
+        aid = a["agent_id"]
         if aid in isolated_ids:
-            agents.append(make_agent(
+            agents_out.append(make_agent(
                 agent_id=aid,
                 symptom_status="isolated",
                 shedding_rate=0.0,
                 location="Isolated_In_Quarters",
             ))
-            continue
-
-        if aid in quarantine_refusers:
-            shedding = _shedding_curve(epoch, aid)
-            agents.append(make_agent(
+        elif aid in quarantine_refusers:
+            agents_out.append(make_agent(
                 agent_id=aid,
                 symptom_status="non_compliant",
-                shedding_rate=round(shedding, 2),
-                location="Mess_Hall",
-            ))
-            continue
-
-        infection_prob = _infection_probability(epoch, aid, num_agents)
-        is_infected = rng.random() < infection_prob
-
-        if is_infected:
-            shedding = _shedding_curve(epoch, aid)
-            agents.append(make_agent(
-                agent_id=aid,
-                symptom_status="symptomatic",
-                shedding_rate=round(shedding, 2),
+                shedding_rate=a.get("shedding_rate", 0.0),
+                location=a.get("location", "unknown"),
             ))
         else:
-            agents.append(make_agent(
+            agents_out.append(make_agent(
                 agent_id=aid,
-                symptom_status="asymptomatic",
-                shedding_rate=0.0,
+                symptom_status=a["symptom_status"],
+                shedding_rate=a.get("shedding_rate", 0.0),
+                location=a.get("location"),
             ))
-    return agents
 
-
-def _infection_probability(epoch: int, aid: int, num_agents: int) -> float:
-    """Logistic infection curve: slow start, accelerating spread."""
-    onset = 3 + (aid % 5)
-    if epoch < onset:
-        return 0.0
-    x = (epoch - onset) / 4.0
-    return min(0.85, 1.0 / (1.0 + math.exp(-1.5 * (x - 1.5))))
-
-
-def _shedding_curve(epoch: int, aid: int) -> float:
-    """Shedding ramps up over time from initial infection."""
-    onset = 3 + (aid % 5)
-    days_infected = max(0, epoch - onset)
-    peak = 80.0 + (aid % 3) * 10.0
-    return peak * (1.0 - math.exp(-0.5 * days_infected))
-
-
-def _generate_mock_spaces(
-    epoch: int,
-    active_agent_count: int,
-    zone_names: list[str],
-    rng: np.random.Generator,
-) -> dict[str, dict[str, Any]]:
-    """Create zone states with pathogen mass from shedding agents."""
-    spaces: dict[str, dict[str, Any]] = {}
-    for i, zone in enumerate(zone_names):
-        base_mass = max(0.0, (epoch - 2) * 2.5 * (1.0 + i * 0.3))
-        agent_contribution = active_agent_count * 0.6 * epoch * 0.2
-        noise = rng.normal(0, 0.5)
-        mass = max(0.0, base_mass + agent_contribution + noise)
-        spaces[zone] = make_space(
-            pathogen_mass=round(mass, 3),
-            microbiome_id=f"profile_{zone.lower()}",
+    spaces_out: dict[str, dict[str, Any]] = {}
+    for zname, zdata in engine_payload.get("spaces", {}).items():
+        spaces_out[zname] = make_space(
+            pathogen_mass=zdata.get("pathogen_mass", 0.0),
+            microbiome_id=zdata.get("microbiome_id", f"profile_{zname.lower()}"),
         )
-    return spaces
+
+    return agents_out, spaces_out
 
 
 # ── Escalation logic ────────────────────────────────────────────────────
@@ -251,7 +243,7 @@ def run() -> None:
     thin = "─" * 80
 
     print(sep)
-    print("  CRUSHER TO THE BRIDGE  ·  Phase 2.5 – Full Envelope Initialization")
+    print("  CRUSHER TO THE BRIDGE  ·  Phase 3 – Real Infection-Dynamics Engine")
     print(sep)
     print()
 
@@ -270,6 +262,24 @@ def run() -> None:
     num_agents = ship["num_agents"]
     zone_names = ship["zone_names"]
     high_traffic = ship["high_traffic_zones"]
+
+    # Initialise the real Korkin Lab infection-dynamics engine
+    engine = _build_engine(cfg, seed=seed)
+
+    thin_line = "─" * 80
+    print(thin_line)
+    print("  KORKIN LAB ENGINE  ·  infection-dynamics ABM initialized")
+    print(thin_line)
+    engine_summary = engine.get_summary()
+    print(f"\n  Population: {engine_summary['total']} agents "
+          f"({engine.num_passengers} passengers, {engine.num_crew} crew)")
+    print(f"  Immune (negative secretors): {engine_summary['immune']}")
+    print(f"  Initial infected: {engine_summary['infected']}")
+    print(f"  Zones: {', '.join(z['name'] for z in engine.zones)}")
+    print(f"  VSP isolation: {'enabled' if engine.vsp_isolation else 'disabled'}")
+    print(f"  Model: Norwalk virus dose-response (α={0.111}, β={32.81})")
+    print(f"  Shedding: symptomatic log10 curve [7.75..8.0] over 15 days")
+    print()
 
     grumb_seeds = _initialize_grumb_seeding(seq, ship["zones"])
     _print_initialization(ship, grumb_seeds, cfg)
@@ -298,15 +308,20 @@ def run() -> None:
                     "delay": epochs_since,
                 })
 
-        # ── 2. Bridge writes ground-truth ────────────────────────────
-        agents = _generate_mock_agents(
-            epoch, num_agents, isolated_ids, quarantine_refusers, rng,
+        # ── 2. Real engine step ───────────────────────────────────────
+        # Feed FRED isolation overrides into engine before stepping
+        engine.isolated_ids = set(isolated_ids)
+        engine_payload = engine.step()
+
+        # Convert engine output → telemetry schema, applying FRED overrides
+        agents, spaces = _engine_payload_to_schema(
+            engine_payload, isolated_ids, quarantine_refusers,
         )
         active_symptomatic = sum(
             1 for a in agents
-            if a["symptom_status"] in ("symptomatic", "non_compliant")
+            if a["symptom_status"] in ("symptomatic", "non_compliant",
+                                       "asymptomatic_shedding")
         )
-        spaces = _generate_mock_spaces(epoch, active_symptomatic, zone_names, rng)
 
         payload = make_ground_truth(epoch=epoch, agents=agents, spaces=spaces)
         write_ground_truth(payload)
@@ -390,6 +405,20 @@ def run() -> None:
     # ── Summary ──────────────────────────────────────────────────────
     print()
     print(sep)
+
+    # Engine final state
+    final_summary = engine.get_summary()
+    print("  KORKIN LAB ENGINE – FINAL STATE")
+    print(thin)
+    print(f"  Susceptible: {final_summary['susceptible']}")
+    print(f"  Infected:    {final_summary['infected']}")
+    print(f"  Symptomatic: {final_summary['symptomatic']}")
+    print(f"  Recovered:   {final_summary['recovered']}")
+    print(f"  Immune:      {final_summary['immune']}")
+    print(f"  Isolated:    {final_summary['isolated']}")
+    print(f"  VSP triggered: {final_summary['vsp_triggered']}")
+    print()
+
     print("  ESCALATION TIMELINE")
     print(thin)
     for entry in escalation_log:
