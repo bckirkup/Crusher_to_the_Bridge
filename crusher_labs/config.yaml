@@ -1,0 +1,32 @@
+# ──────────────────────────────────────────────
+# Crusher Labs – Diagnostic Configuration
+# ──────────────────────────────────────────────
+# LOD  = Limit of Detection (minimum pathogen mass to register positive)
+# Efficiency = Probability of detecting a true positive above LOD
+# Cadence = How often (in epochs) this modality is sampled
+
+syndromic:
+  description: "Symptom-based screening (fever, GI distress, etc.)"
+  sensitivity: 0.60
+  specificity: 0.85
+  cadence: 1          # checked every epoch
+
+clinical_rdt:
+  description: "Rapid Diagnostic Test (antigen lateral-flow)"
+  lod_pathogen_mass: 100.0
+  sensitivity: 0.75
+  specificity: 0.95
+  cadence: 2          # every other epoch
+
+targeted_pcr:
+  description: "RT-qPCR panel targeting known pathogen signatures"
+  lod_pathogen_mass: 1.0
+  sensitivity: 0.98
+  specificity: 0.99
+  cadence: 4          # every 4th epoch
+
+sequencing:
+  description: "Metagenomic shotgun sequencing of environmental samples"
+  lod_pathogen_mass: 0.1
+  read_depth: 100000
+  cadence: 8          # every 8th epoch
