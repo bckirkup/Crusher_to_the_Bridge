@@ -19,7 +19,7 @@ from typing import Any
 # Schema helpers
 # ---------------------------------------------------------------------------
 
-SCHEMA_VERSION = "0.1.0"
+SCHEMA_VERSION = "0.2.0"
 
 BUFFER_DIR = os.path.dirname(os.path.abspath(__file__))
 GROUND_TRUTH_PATH = os.path.join(BUFFER_DIR, "ground_truth.json")
@@ -29,13 +29,17 @@ def make_agent(
     agent_id: int,
     symptom_status: str = "asymptomatic",
     shedding_rate: float = 0.0,
+    location: str | None = None,
 ) -> dict[str, Any]:
     """Return a single agent state dictionary."""
-    return {
+    d: dict[str, Any] = {
         "agent_id": agent_id,
         "symptom_status": symptom_status,
         "shedding_rate": shedding_rate,
     }
+    if location is not None:
+        d["location"] = location
+    return d
 
 
 def make_space(
