@@ -1,32 +1,47 @@
-# ──────────────────────────────────────────────
-# Crusher Labs – Diagnostic Configuration
-# ──────────────────────────────────────────────
-# LOD  = Limit of Detection (minimum pathogen mass to register positive)
-# Efficiency = Probability of detecting a true positive above LOD
+# ──────────────────────────────────────────────────────────────
+# Crusher Labs – Diagnostic Configuration  (Phase 2)
+# ──────────────────────────────────────────────────────────────
+# LOD  = Limit of Detection
 # Cadence = How often (in epochs) this modality is sampled
+#           (overridden dynamically by the Escalation Matrix)
 
+# ── Global ────────────────────────────────────────────────────
+random_seed: 42
+
+# ── Escalation thresholds ─────────────────────────────────────
+escalation:
+  syndromic_suspect_threshold: 3     # daily sick-call count to trigger SUSPECTED
+  pcr_confirm_ct_threshold: 35.0     # Ct ≤ this value triggers CONFIRMED
+
+# ── Syndromic Surveillance ────────────────────────────────────
 syndromic:
   description: "Symptom-based screening (fever, GI distress, etc.)"
-  sensitivity: 0.60
-  specificity: 0.85
-  cadence: 1          # checked every epoch
+  sick_call_probability: 0.70        # P(symptomatic agent reports to sick-call)
+  background_noise_rate: 0.015       # P(healthy agent reports daily – seasickness etc.)
+  cadence: 1
 
+# ── Clinical RDT (Rapid Diagnostic Test) ─────────────────────
 clinical_rdt:
   description: "Rapid Diagnostic Test (antigen lateral-flow)"
-  lod_pathogen_mass: 100.0
-  sensitivity: 0.75
-  specificity: 0.95
-  cadence: 2          # every other epoch
+  # EMOD-style sigmoid sensitivity curve:  S(r) = S_max / (1 + exp(-k*(r - r_mid)))
+  base_sensitivity: 0.95             # S_max – peak sensitivity at high shedding
+  sigmoid_k: 0.08                    # steepness of the sensitivity curve
+  sigmoid_midpoint: 50.0             # shedding rate at which sensitivity = S_max/2
+  specificity: 0.97
+  cadence: 1                         # applied per sick-call agent (on-demand)
 
+# ── Targeted PCR ─────────────────────────────────────────────
 targeted_pcr:
-  description: "RT-qPCR panel targeting known pathogen signatures"
-  lod_pathogen_mass: 1.0
-  sensitivity: 0.98
-  specificity: 0.99
-  cadence: 4          # every 4th epoch
+  description: "RT-qPCR panel for environmental / surface wipe samples"
+  extraction_efficiency: 0.35        # η – fraction of pathogen mass recovered
+  ct_slope: -3.322                   # k  in  Ct = -k * log10(M) + b  (≈ 100% efficiency)
+  ct_intercept: 40.0                 # b  (Ct at 1 unit of recovered mass)
+  lod_ct_threshold: 38.0             # Ct > this ⇒ Negative
+  cadence: 4                         # baseline; escalation overrides to 1
 
+# ── Metagenomic Sequencing ───────────────────────────────────
 sequencing:
   description: "Metagenomic shotgun sequencing of environmental samples"
-  lod_pathogen_mass: 0.1
-  read_depth: 100000
-  cadence: 8          # every 8th epoch
+  read_depth: 100000                 # total reads per sample
+  pseudocount: 1.0e-6                # for CLR zero-handling
+  cadence: 8                         # baseline; escalation may override
