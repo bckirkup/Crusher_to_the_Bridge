@@ -9,9 +9,14 @@ agent's current shedding rate:
 
     S(r) = S_max / (1 + exp(-k * (r - r_mid)))
 
-Early shedders (low rate) have a high false-negative rate; sensitivity
-peaks only as shedding intensifies.  Reference: EMOD-Generic
-``Base_Sensitivity`` diagnostic pattern.
+The sensitivity cap is further modulated by the agent's clinical
+progression phase (early / peak / late) as defined in the EMOD-style
+``emod_progression`` config block.  Early shedders have a hard cap on
+achievable sensitivity, simulating the biological reality that antigen
+tests miss low-titer infections.
+
+Reference: EMOD-Generic ``Base_Sensitivity`` diagnostic pattern +
+``Treatment_Fraction`` phase gating.
 """
 
 from __future__ import annotations
@@ -22,22 +27,52 @@ from typing import Any
 import numpy as np
 
 
+# ── EMOD clinical phase resolution ──────────────────────────────────
+
+def _resolve_shedding_phase(
+    shedding_rate: float,
+    phases: list[dict[str, Any]],
+) -> dict[str, Any]:
+    """Determine the EMOD shedding phase for a given rate.
+
+    Phases are ordered ``[early, peak, late]`` with ascending
+    ``max_rate`` thresholds.  Returns the matching phase dict.
+    """
+    for phase in phases:
+        if shedding_rate <= phase["max_rate"]:
+            return phase
+    return phases[-1]
+
+
 def _sigmoid_sensitivity(
     shedding_rate: float,
     s_max: float,
     k: float,
     midpoint: float,
+    sensitivity_cap: float = 1.0,
 ) -> float:
-    """EMOD-style sigmoid sensitivity as a function of shedding rate."""
+    """EMOD-style sigmoid sensitivity with phase-dependent cap.
+
+    The raw sigmoid ``S(r)`` is clamped to ``sensitivity_cap`` so that
+    early-phase agents can never exceed a low detection ceiling.
+    """
     exponent = -k * (shedding_rate - midpoint)
     exponent = max(min(exponent, 500.0), -500.0)
-    return s_max / (1.0 + math.exp(exponent))
+    raw = s_max / (1.0 + math.exp(exponent))
+    return min(raw, sensitivity_cap)
 
 
 class ClinicalRDT:
-    """Rapid antigen test modality with shedding-dependent sensitivity."""
+    """Rapid antigen test modality with EMOD-style state-dependent sensitivity."""
 
     name = "clinical_rdt"
+
+    # Default shedding phases from EMOD progression config
+    DEFAULT_PHASES = [
+        {"name": "early", "max_rate": 20.0, "sensitivity_cap": 0.30},
+        {"name": "peak",  "max_rate": 80.0, "sensitivity_cap": 0.95},
+        {"name": "late",  "max_rate": 40.0, "sensitivity_cap": 0.80},
+    ]
 
     def __init__(
         self,
@@ -45,12 +80,14 @@ class ClinicalRDT:
         sigmoid_k: float = 0.08,
         sigmoid_midpoint: float = 50.0,
         specificity: float = 0.97,
+        shedding_phases: list[dict[str, Any]] | None = None,
         rng: np.random.Generator | None = None,
     ) -> None:
         self.base_sensitivity = base_sensitivity
         self.sigmoid_k = sigmoid_k
         self.sigmoid_midpoint = sigmoid_midpoint
         self.specificity = specificity
+        self.shedding_phases = shedding_phases or self.DEFAULT_PHASES
         self.rng = rng if rng is not None else np.random.default_rng()
 
     def query_ground_truth(
@@ -85,26 +122,31 @@ class ClinicalRDT:
             is_truly_infected = shedding > 0.0
 
             if is_truly_infected:
+                phase = _resolve_shedding_phase(shedding, self.shedding_phases)
                 sensitivity = _sigmoid_sensitivity(
                     shedding,
                     self.base_sensitivity,
                     self.sigmoid_k,
                     self.sigmoid_midpoint,
+                    sensitivity_cap=phase["sensitivity_cap"],
                 )
                 positive = self.rng.random() < sensitivity
             else:
+                phase = None
                 positive = self.rng.random() > self.specificity
 
             results.append({
                 "agent_id": aid,
                 "positive": bool(positive),
                 "shedding_rate": shedding,
+                "clinical_phase": phase["name"] if phase else None,
                 "effective_sensitivity": round(
                     _sigmoid_sensitivity(
                         shedding,
                         self.base_sensitivity,
                         self.sigmoid_k,
                         self.sigmoid_midpoint,
+                        sensitivity_cap=phase["sensitivity_cap"],
                     ),
                     4,
                 )
