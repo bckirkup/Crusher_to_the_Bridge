@@ -46,6 +46,7 @@ from telemetry_buffer.schema import (
 )
 from crusher_labs import build_modalities, load_config
 from engines.infection_dynamics_bridge import KorkinShipEngine
+from engines.py_contam_bridge import build_transport_engine, ContamTransportEngine
 
 # ── Trigger status constants ─────────────────────────────────────────────
 STATUS_BASELINE = "BASELINE"
@@ -273,7 +274,7 @@ def run() -> None:
     thin = "─" * 80
 
     print(sep)
-    print("  CRUSHER TO THE BRIDGE  ·  Phase 3 – Real Infection-Dynamics Engine")
+    print("  CRUSHER TO THE BRIDGE  ·  Phase 3.5 – CONTAM Aerosol Transport")
     print(sep)
     print()
 
@@ -311,6 +312,27 @@ def run() -> None:
     print(f"  Shedding: symptomatic log10 curve [7.75..8.0] over 15 days")
     print()
 
+    # Initialise the CONTAM transport engine for aerosol mass transport
+    contam_engine = build_transport_engine(_REPO_ROOT, cfg)
+    if contam_engine is not None:
+        engine.enable_external_transport()
+        hvac_cfg = cfg.get("hvac", {})
+        filter_type = hvac_cfg.get("filter_type", "MERV-13")
+        print(thin_line)
+        print("  CONTAM TRANSPORT ENGINE  ·  py-contam multi-zone airflow initialized")
+        print(thin_line)
+        transport_summary = contam_engine.get_transport_summary(engine.zone_pathogen_mass)
+        print(f"\n  Filter type:        {filter_type}")
+        print(f"  Filter efficiency:  {contam_engine.filter_efficiency:.1%}")
+        print(f"  Natural decay rate: {contam_engine.natural_decay_rate:.1%} per epoch")
+        print(f"  HVAC-ducted paths:  {transport_summary['total_hvac_paths']}")
+        print(f"  Passive paths:      {transport_summary['total_passive_paths']}")
+        print(f"  Zone nodes:         {len(contam_engine.zone_nodes)}")
+        print()
+    else:
+        print("  [WARN] CONTAM transport engine not available – using legacy flat decay")
+        print()
+
     grumb_seeds = _initialize_grumb_seeding(seq, ship["zones"])
     _print_initialization(ship, grumb_seeds, cfg)
 
@@ -343,6 +365,18 @@ def run() -> None:
         # Feed FRED isolation overrides into engine before stepping
         engine.isolated_ids = set(isolated_ids)
         engine_payload = engine.step()
+
+        # ── 2b. CONTAM aerosol mass transport ─────────────────────────
+        # After shedding deposits are added by the engine, run the
+        # CONTAM multi-zone transport to distribute airborne pathogen
+        # mass through the HVAC network with filter efficiency applied.
+        if contam_engine is not None:
+            updated_masses = contam_engine.transport_step(
+                engine.zone_pathogen_mass,
+            )
+            engine.zone_pathogen_mass = updated_masses
+            # Re-export payload with updated zone masses
+            engine_payload = engine._export_payload()
 
         # Convert engine output → telemetry schema, applying FRED overrides
         agents, spaces = _engine_payload_to_schema(
@@ -442,6 +476,13 @@ def run() -> None:
                 "quarantine_refusers": len(quarantine_refusers),
                 "sick_call_count": syn_result["sick_call_count"],
             },
+            "hvac": {
+                "filter_type": cfg.get("hvac", {}).get("filter_type", "none"),
+                "filter_efficiency": (
+                    contam_engine.filter_efficiency if contam_engine else 0.0
+                ),
+                "transport_active": contam_engine is not None,
+            },
             "crusher_ops": {
                 "surface_wipe_zones": [],
                 "pcr_results": {},
@@ -473,9 +514,17 @@ def run() -> None:
             })
 
         for zname, zdata in spaces.items():
-            epoch_record["spaces"][zname] = {
+            zone_entry: dict[str, Any] = {
                 "pathogen_mass": zdata.get("pathogen_mass", 0.0),
             }
+            if contam_engine is not None:
+                node = contam_engine.zone_nodes.get(zname)
+                if node is not None:
+                    zone_entry["concentration_per_m3"] = round(
+                        node.concentration(zdata.get("pathogen_mass", 0.0)), 3,
+                    )
+                    zone_entry["volume_m3"] = node.volume_m3
+            epoch_record["spaces"][zname] = zone_entry
 
         if pcr_result is not None:
             epoch_record["crusher_ops"]["surface_wipe_zones"] = list(
@@ -522,6 +571,20 @@ def run() -> None:
     print(f"  Isolated:    {final_summary['isolated']}")
     print(f"  VSP triggered: {final_summary['vsp_triggered']}")
     print()
+
+    if contam_engine is not None:
+        print("  CONTAM TRANSPORT ENGINE – FINAL STATE")
+        print(thin)
+        transport_final = contam_engine.get_transport_summary(engine.zone_pathogen_mass)
+        hvac_cfg = cfg.get("hvac", {})
+        print(f"  Filter type:        {hvac_cfg.get('filter_type', 'MERV-13')}")
+        print(f"  Filter efficiency:  {contam_engine.filter_efficiency:.1%}")
+        print(f"  Natural decay rate: {contam_engine.natural_decay_rate:.1%} per epoch")
+        for zname, zdata in transport_final["zone_concentrations"].items():
+            print(f"    {zname:15s}  mass={zdata['mass']:8.3f}  "
+                  f"conc={zdata['concentration_per_m3']:8.3f}/m³  "
+                  f"vol={zdata['volume_m3']}m³")
+        print()
 
     print("  ESCALATION TIMELINE")
     print(thin)

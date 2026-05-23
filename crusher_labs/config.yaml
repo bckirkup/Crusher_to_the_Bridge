@@ -53,6 +53,17 @@ emod_progression:
     - {name: "late",   max_rate: 40.0, sensitivity_cap: 0.80}
   phase_durations: [3, 5, 4]          # epochs per phase
 
+# ── HVAC / CONTAM Transport ────────────────────────────────────
+hvac:
+  filter_efficiency: 0.50           # η – HVAC filter removal efficiency
+                                    #   MERV-8  = 0.20 (residential baseline)
+                                    #   MERV-13 = 0.50 (commercial standard)
+                                    #   MERV-16 = 0.95 (hospital grade)
+                                    #   HEPA    = 0.999 (biocontainment)
+  natural_decay_rate: 0.10          # fraction of airborne pathogen lost per
+                                    # epoch to settling + viral inactivation
+  filter_type: "MERV-13"           # human-readable label for console output
+
 # ── Escalation thresholds ─────────────────────────────────────
 escalation:
   syndromic_suspect_threshold: 3      # daily sick-call count to trigger SUSPECTED

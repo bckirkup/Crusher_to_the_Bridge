@@ -61,7 +61,7 @@ RECOVERY_DAY = 3
 # Environmental deposition: fraction of shedding that deposits on surfaces
 # (ViralParticle.java: particles survive 86400 steps = 1 day)
 SURFACE_DEPOSITION_FRACTION = 1e-4
-ENV_DECAY_RATE = 0.5  # 50% daily decay of surface contamination
+ENV_DECAY_RATE = 0.5  # legacy flat daily decay (unused when CONTAM transport is active)
 
 # SEIQR compartmental parameters (from compartmental-models/SEIQR-SCM-diamond.Rmd)
 SEIQR_R0 = 2.1
@@ -306,6 +306,7 @@ class KorkinShipEngine:
         self.isolated_ids: set[int] = set()
 
         self._zone_pathogen_mass: dict[str, float] = {z["name"]: 0.0 for z in self.zones}
+        self._external_transport: bool = False
 
         self._initialize_agents()
 
@@ -469,9 +470,14 @@ class KorkinShipEngine:
                 if agent.is_symptomatic and agent.agent_id not in self.isolated_ids:
                     self.isolated_ids.add(agent.agent_id)
 
-        # 6. Zone pathogen mass: decay existing + new deposits from shedders
-        for zname in self._all_zone_names:
-            self._zone_pathogen_mass[zname] *= ENV_DECAY_RATE
+        # 6. Zone pathogen mass: new deposits from shedders
+        # NOTE: Decay is now handled externally by the CONTAM transport
+        # engine (py_contam_bridge) when available.  If no transport engine
+        # is configured, the orchestrator falls back to the legacy flat
+        # decay rate (ENV_DECAY_RATE).
+        if not self._external_transport:
+            for zname in self._all_zone_names:
+                self._zone_pathogen_mass[zname] *= ENV_DECAY_RATE
 
         for agent in self.agents:
             if agent.is_infected and agent.current_shedding > 0:
@@ -498,6 +504,19 @@ class KorkinShipEngine:
             "agents": agents_out,
             "spaces": spaces_out,
         }
+
+    @property
+    def zone_pathogen_mass(self) -> dict[str, float]:
+        """Read/write access to per-zone pathogen mass for CONTAM transport."""
+        return self._zone_pathogen_mass
+
+    @zone_pathogen_mass.setter
+    def zone_pathogen_mass(self, value: dict[str, float]) -> None:
+        self._zone_pathogen_mass = value
+
+    def enable_external_transport(self) -> None:
+        """Disable internal flat decay — transport handled externally."""
+        self._external_transport = True
 
     def get_summary(self) -> dict[str, Any]:
         """Return a summary of the current population state."""

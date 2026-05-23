@@ -378,6 +378,18 @@ def main() -> None:
 
         st.divider()
 
+        # HVAC transport status
+        hvac = record.get("hvac", {})
+        if hvac.get("transport_active"):
+            st.subheader("HVAC Transport")
+            filter_type = hvac.get("filter_type", "Unknown")
+            filter_eff = hvac.get("filter_efficiency", 0.0)
+            st.markdown(
+                f"**Filter:** {filter_type} ({filter_eff:.0%} efficiency)"
+            )
+
+            st.divider()
+
         # Isolated agents
         isolated_agents = crusher.get("isolated_agents", [])
         st.subheader(f"Isolated Agents ({len(isolated_agents)})")
