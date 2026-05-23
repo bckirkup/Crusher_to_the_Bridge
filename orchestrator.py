@@ -47,6 +47,11 @@ from telemetry_buffer.schema import (
 from crusher_labs import build_modalities, load_config
 from engines.infection_dynamics_bridge import KorkinShipEngine
 from engines.py_contam_bridge import build_transport_engine, ContamTransportEngine
+from engines.transmission_core import (
+    TransmissionCore,
+    build_hvac_downstream_map,
+)
+from engines.py_contam_bridge import load_air_flow_paths
 
 # ── Trigger status constants ─────────────────────────────────────────────
 STATUS_BASELINE = "BASELINE"
@@ -274,7 +279,7 @@ def run() -> None:
     thin = "─" * 80
 
     print(sep)
-    print("  CRUSHER TO THE BRIDGE  ·  Phase 3.5 – CONTAM Aerosol Transport")
+    print("  CRUSHER TO THE BRIDGE  ·  Phase 3.5b – Four-Pathway Transmission Core")
     print(sep)
     print()
 
@@ -333,6 +338,30 @@ def run() -> None:
         print("  [WARN] CONTAM transport engine not available – using legacy flat decay")
         print()
 
+    # Initialise the four-pathway TransmissionCore
+    airflow_data = load_air_flow_paths(_REPO_ROOT, cfg)
+    zone_volumes = {
+        z["name"]: z.get("volume_m3", 100.0)
+        for z in ship.get("zones", [])
+    }
+    hvac_downstream = build_hvac_downstream_map(airflow_data) if airflow_data else {}
+    tx_core = TransmissionCore(
+        rng=np.random.default_rng(seed),
+        zone_volumes=zone_volumes,
+    )
+    tx_core.initialize_zones(zone_names)
+    engine.enable_external_transmission()
+
+    print(thin_line)
+    print("  TRANSMISSION CORE  ·  four-pathway model initialized")
+    print(thin_line)
+    print("    1. Direct Contact      (zone-colocation, avgR scaling)")
+    print("    2. Short-Range Droplet (immediate room aerosol)")
+    print("    3. Long-Range Airborne (HVAC drift via py-contam)")
+    print("    4. Fomite Deposition   (surface pools + stochastic pickup)")
+    print(f"   HVAC downstream links: {sum(len(v) for v in hvac_downstream.values())}")
+    print()
+
     grumb_seeds = _initialize_grumb_seeding(seq, ship["zones"])
     _print_initialization(ship, grumb_seeds, cfg)
 
@@ -366,7 +395,17 @@ def run() -> None:
         engine.isolated_ids = set(isolated_ids)
         engine_payload = engine.step()
 
-        # ── 2b. CONTAM aerosol mass transport ─────────────────────────
+        # ── 2b. Four-pathway transmission ────────────────────────────
+        # Execute all four pathways (direct, droplet, HVAC, fomite)
+        # using the TransmissionCore engine.
+        tracing_matrix, tx_events = tx_core.execute_transmission(
+            epoch=epoch,
+            agents=engine.agents,
+            zone_pathogen_mass=engine.zone_pathogen_mass,
+            hvac_downstream_zones=hvac_downstream,
+        )
+
+        # ── 2c. CONTAM aerosol mass transport ─────────────────────────
         # After shedding deposits are added by the engine, run the
         # CONTAM multi-zone transport to distribute airborne pathogen
         # mass through the HVAC network with filter efficiency applied.
@@ -375,8 +414,9 @@ def run() -> None:
                 engine.zone_pathogen_mass,
             )
             engine.zone_pathogen_mass = updated_masses
-            # Re-export payload with updated zone masses
-            engine_payload = engine._export_payload()
+
+        # Re-export payload with updated zone masses and agent states
+        engine_payload = engine._export_payload()
 
         # Convert engine output → telemetry schema, applying FRED overrides
         agents, spaces = _engine_payload_to_schema(
@@ -483,6 +523,7 @@ def run() -> None:
                 ),
                 "transport_active": contam_engine is not None,
             },
+            "contact_tracing": tracing_matrix.to_dict(),
             "crusher_ops": {
                 "surface_wipe_zones": [],
                 "pcr_results": {},

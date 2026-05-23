@@ -307,6 +307,7 @@ class KorkinShipEngine:
 
         self._zone_pathogen_mass: dict[str, float] = {z["name"]: 0.0 for z in self.zones}
         self._external_transport: bool = False
+        self._external_transmission: bool = False
 
         self._initialize_agents()
 
@@ -407,38 +408,41 @@ class KorkinShipEngine:
             randomness = self.rng.uniform(-1.0, 1.0)
             agent.current_location = agent.get_location_for_hour(hour, randomness)
 
-        # 2. Infection transmission (zone colocation model)
-        zone_occupants: dict[str, list[KorkinAgent]] = {z: [] for z in self._all_zone_names}
-        zone_occupants["Isolated_In_Quarters"] = []
-        for agent in self.agents:
-            loc = agent.current_location
-            if loc in zone_occupants:
-                zone_occupants[loc].append(agent)
+        # 2. Infection transmission
+        # When TransmissionCore is active (_external_transmission=True),
+        # this step is skipped — the orchestrator calls TransmissionCore
+        # which handles all four pathways (direct, droplet, HVAC, fomite).
+        if not self._external_transmission:
+            zone_occupants: dict[str, list[KorkinAgent]] = {z: [] for z in self._all_zone_names}
+            zone_occupants["Isolated_In_Quarters"] = []
+            for agent in self.agents:
+                loc = agent.current_location
+                if loc in zone_occupants:
+                    zone_occupants[loc].append(agent)
 
-        for zone_name, occupants in zone_occupants.items():
-            if zone_name == "Isolated_In_Quarters":
-                continue
+            for zone_name, occupants in zone_occupants.items():
+                if zone_name == "Isolated_In_Quarters":
+                    continue
 
-            shedders = [a for a in occupants if a.is_infected and a.current_shedding > 0]
-            susceptible = [a for a in occupants
-                           if a.infection_status == InfectionStatus.SUSCEPTIBLE]
+                shedders = [a for a in occupants if a.is_infected and a.current_shedding > 0]
+                susceptible = [a for a in occupants
+                               if a.infection_status == InfectionStatus.SUSCEPTIBLE]
 
-            if not shedders or not susceptible:
-                continue
+                if not shedders or not susceptible:
+                    continue
 
-            total_shedding = sum(s.current_shedding for s in shedders)
+                total_shedding = sum(s.current_shedding for s in shedders)
 
-            # R0-calibrated contact model (from Person.java avgR array)
-            avg_r_pool = [1, 2, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2]
-            for target in susceptible:
-                r0_draw = int(self.rng.choice(avg_r_pool))
-                contact_shedding = total_shedding / max(len(occupants), 1) * r0_draw
-                inf_prob = infection_probability(contact_shedding)
-                if self.rng.random() < inf_prob:
-                    target.infection_status = InfectionStatus.INFECTED
-                    target.illness_status = IllnessStatus.NOT_ILL
-                    target.time_infected = 0
-                    target.acquired_particles = contact_shedding
+                avg_r_pool = [1, 2, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2]
+                for target in susceptible:
+                    r0_draw = int(self.rng.choice(avg_r_pool))
+                    contact_shedding = total_shedding / max(len(occupants), 1) * r0_draw
+                    inf_prob = infection_probability(contact_shedding)
+                    if self.rng.random() < inf_prob:
+                        target.infection_status = InfectionStatus.INFECTED
+                        target.illness_status = IllnessStatus.NOT_ILL
+                        target.time_infected = 0
+                        target.acquired_particles = contact_shedding
 
         # 3. Illness progression
         for agent in self.agents:
@@ -517,6 +521,10 @@ class KorkinShipEngine:
     def enable_external_transport(self) -> None:
         """Disable internal flat decay — transport handled externally."""
         self._external_transport = True
+
+    def enable_external_transmission(self) -> None:
+        """Disable internal monolithic transmission — handled by TransmissionCore."""
+        self._external_transmission = True
 
     def get_summary(self) -> dict[str, Any]:
         """Return a summary of the current population state."""
