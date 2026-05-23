@@ -14,6 +14,10 @@ ship_graph:
   agent_roles:                        # infection-dynamics: Passenger / StrucCrew
     passenger_fraction: 0.70
     crew_fraction: 0.30
+  # Zones loaded from spatial layout JSON at runtime
+  spatial_layout: "data/platforms/destroyer_baseline/spatial_layout.json"
+  air_flow_paths: "data/platforms/destroyer_baseline/air_flow_paths.json"
+  # Fallback inline zones (used if spatial_layout file not found)
   zones:
     - {name: "Bridge",      type: "Free",     traffic: "low"}
     - {name: "MedBay",      type: "Free",     traffic: "low"}
