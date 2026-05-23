@@ -1,6 +1,6 @@
 {
   "platform": "destroyer_baseline",
-  "description": "HVAC zone links for CONTAM-style airflow modeling",
+  "description": "HVAC zone links and airflow network for CONTAM-style multi-zone aerosol transport modeling",
   "hvac_zones": [
     {
       "id": "zone_upper",
@@ -26,19 +26,25 @@
       "from": "zone_upper",
       "to": "zone_main",
       "flow_rate_m3h": 50,
-      "path": "ladder_well_fore"
+      "path": "ladder_well_fore",
+      "is_hvac_ducted": false,
+      "description": "Passive airflow through forward ladder well (no HVAC filtration)"
     },
     {
       "from": "zone_main",
       "to": "zone_lower",
       "flow_rate_m3h": 80,
-      "path": "ladder_well_mid"
+      "path": "ladder_well_mid",
+      "is_hvac_ducted": false,
+      "description": "Passive airflow through midship ladder well"
     },
     {
       "from": "zone_upper",
       "to": "zone_lower",
       "flow_rate_m3h": 20,
-      "path": "ventilation_shaft_aft"
+      "path": "ventilation_shaft_aft",
+      "is_hvac_ducted": true,
+      "description": "HVAC-ducted ventilation shaft with inline filtration"
     }
   ],
   "adjacency": [
