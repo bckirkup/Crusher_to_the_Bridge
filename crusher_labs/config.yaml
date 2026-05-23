@@ -1,5 +1,5 @@
 # ──────────────────────────────────────────────────────────────
-# Crusher Labs – Diagnostic Configuration  (Phase 2)
+# Crusher Labs – Diagnostic Configuration  (Phase 2.5)
 # ──────────────────────────────────────────────────────────────
 # LOD  = Limit of Detection
 # Cadence = How often (in epochs) this modality is sampled
@@ -8,40 +8,81 @@
 # ── Global ────────────────────────────────────────────────────
 random_seed: 42
 
+# ── Ship Graph (infection-dynamics reference) ─────────────────
+ship_graph:
+  num_agents: 20
+  agent_roles:                        # infection-dynamics: Passenger / StrucCrew
+    passenger_fraction: 0.70
+    crew_fraction: 0.30
+  zones:
+    - {name: "Bridge",      type: "Free",     traffic: "low"}
+    - {name: "MedBay",      type: "Free",     traffic: "low"}
+    - {name: "Mess_Hall",   type: "Dining",   traffic: "high"}
+    - {name: "Engine_Room", type: "Room",      traffic: "medium"}
+    - {name: "Galley",      type: "Dining",   traffic: "high"}
+    - {name: "Berthing",    type: "Room",      traffic: "medium"}
+
+# ── GRUMB Multi-Kingdom Seeding ───────────────────────────────
+grumb_seeding:
+  kingdoms:
+    - "Bacteria"
+    - "Archaea"
+    - "Fungi"
+    - "Virus"
+  pseudocount: 1.0e-6                 # CLR zero-handling
+
+# ── FRED-Style Behavioral Compliance ─────────────────────────
+fred_behavior:
+  quarantine_compliance: 0.85         # P(agent complies with isolation order)
+  compliance_delay_epochs: 1          # epochs before non-compliant agent eventually isolates
+  healthy_noise_categories:           # background sick-call reasons for healthy agents
+    - {reason: "seasickness",  probability: 0.008}
+    - {reason: "fatigue",      probability: 0.005}
+    - {reason: "minor_injury", probability: 0.002}
+
+# ── EMOD-Style Clinical Progression ──────────────────────────
+emod_progression:
+  incubation_epochs: 2                # epochs from exposure before shedding starts
+  shedding_phases:
+    - {name: "early",  max_rate: 20.0, sensitivity_cap: 0.30}
+    - {name: "peak",   max_rate: 80.0, sensitivity_cap: 0.95}
+    - {name: "late",   max_rate: 40.0, sensitivity_cap: 0.80}
+  phase_durations: [3, 5, 4]          # epochs per phase
+
 # ── Escalation thresholds ─────────────────────────────────────
 escalation:
-  syndromic_suspect_threshold: 3     # daily sick-call count to trigger SUSPECTED
-  pcr_confirm_ct_threshold: 35.0     # Ct ≤ this value triggers CONFIRMED
+  syndromic_suspect_threshold: 3      # daily sick-call count to trigger SUSPECTED
+  pcr_confirm_ct_threshold: 35.0      # Ct ≤ this value triggers CONFIRMED
 
 # ── Syndromic Surveillance ────────────────────────────────────
 syndromic:
   description: "Symptom-based screening (fever, GI distress, etc.)"
-  sick_call_probability: 0.70        # P(symptomatic agent reports to sick-call)
-  background_noise_rate: 0.015       # P(healthy agent reports daily – seasickness etc.)
+  sick_call_probability: 0.70         # P(symptomatic agent reports to sick-call)
+  background_noise_rate: 0.015        # P(healthy agent reports daily – seasickness etc.)
   cadence: 1
 
 # ── Clinical RDT (Rapid Diagnostic Test) ─────────────────────
 clinical_rdt:
   description: "Rapid Diagnostic Test (antigen lateral-flow)"
   # EMOD-style sigmoid sensitivity curve:  S(r) = S_max / (1 + exp(-k*(r - r_mid)))
-  base_sensitivity: 0.95             # S_max – peak sensitivity at high shedding
-  sigmoid_k: 0.08                    # steepness of the sensitivity curve
-  sigmoid_midpoint: 50.0             # shedding rate at which sensitivity = S_max/2
+  base_sensitivity: 0.95              # S_max – peak sensitivity at high shedding
+  sigmoid_k: 0.08                     # steepness of the sensitivity curve
+  sigmoid_midpoint: 50.0              # shedding rate at which sensitivity = S_max/2
   specificity: 0.97
-  cadence: 1                         # applied per sick-call agent (on-demand)
+  cadence: 1                          # applied per sick-call agent (on-demand)
 
 # ── Targeted PCR ─────────────────────────────────────────────
 targeted_pcr:
   description: "RT-qPCR panel for environmental / surface wipe samples"
-  extraction_efficiency: 0.35        # η – fraction of pathogen mass recovered
-  ct_slope: -3.322                   # k  in  Ct = -k * log10(M) + b  (≈ 100% efficiency)
-  ct_intercept: 40.0                 # b  (Ct at 1 unit of recovered mass)
-  lod_ct_threshold: 38.0             # Ct > this ⇒ Negative
-  cadence: 4                         # baseline; escalation overrides to 1
+  extraction_efficiency: 0.35         # η – fraction of pathogen mass recovered
+  ct_slope: -3.322                    # k  in  Ct = -k * log10(M) + b  (≈ 100% efficiency)
+  ct_intercept: 40.0                  # b  (Ct at 1 unit of recovered mass)
+  lod_ct_threshold: 38.0              # Ct > this ⇒ Negative
+  cadence: 4                          # baseline; escalation overrides to 1
 
 # ── Metagenomic Sequencing ───────────────────────────────────
 sequencing:
   description: "Metagenomic shotgun sequencing of environmental samples"
-  read_depth: 100000                 # total reads per sample
-  pseudocount: 1.0e-6                # for CLR zero-handling
-  cadence: 8                         # baseline; escalation may override
+  read_depth: 100000                  # total reads per sample
+  pseudocount: 1.0e-6                 # for CLR zero-handling
+  cadence: 8                          # baseline; escalation may override

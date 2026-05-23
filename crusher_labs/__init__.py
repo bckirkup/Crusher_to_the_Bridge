@@ -5,7 +5,8 @@ crusher_labs – Dr. Crusher's Bio-Diagnostic Suite
 Consumes ground-truth state from ``telemetry_buffer/ground_truth.json``
 and returns modality-specific, noise-injected sensor telemetry.
 
-Phase 2: config-driven initialisation with shared RNG for reproducibility.
+Phase 2.5: Full human/clinical envelope with GRUMB seeding, FRED
+behavioral compliance, and EMOD clinical progression phases.
 """
 
 from __future__ import annotations
@@ -48,11 +49,16 @@ def build_modalities(
     rdt_cfg = cfg.get("clinical_rdt", {})
     pcr_cfg = cfg.get("targeted_pcr", {})
     seq_cfg = cfg.get("sequencing", {})
+    fred_cfg = cfg.get("fred_behavior", {})
+    emod_cfg = cfg.get("emod_progression", {})
 
     return {
         "syndromic": SyndromicSurveillance(
             sick_call_probability=syn_cfg.get("sick_call_probability", 0.70),
             background_noise_rate=syn_cfg.get("background_noise_rate", 0.015),
+            noise_categories=fred_cfg.get("healthy_noise_categories"),
+            quarantine_compliance=fred_cfg.get("quarantine_compliance", 0.85),
+            compliance_delay_epochs=fred_cfg.get("compliance_delay_epochs", 1),
             rng=rng,
         ),
         "clinical_rdt": ClinicalRDT(
@@ -60,6 +66,7 @@ def build_modalities(
             sigmoid_k=rdt_cfg.get("sigmoid_k", 0.08),
             sigmoid_midpoint=rdt_cfg.get("sigmoid_midpoint", 50.0),
             specificity=rdt_cfg.get("specificity", 0.97),
+            shedding_phases=emod_cfg.get("shedding_phases"),
             rng=rng,
         ),
         "targeted_pcr": TargetedPCR(

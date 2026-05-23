@@ -14,6 +14,10 @@ Uses GRUMB-validated compositional math:
 Implements ecological drift: the marine baseline shifts stochastically
 from a Coastal Port profile to an Open Ocean profile and back over the
 simulation timeline.
+
+Phase 2.5: Multi-kingdom log-ratio seeding at t=0 — spatial nodes are
+initialized with realistic multi-kingdom relative-abundance arrays
+derived from the infection-dynamics ship graph zones.
 """
 
 from __future__ import annotations
@@ -23,10 +27,48 @@ from typing import Any
 import numpy as np
 
 
-# ── Mock background profiles (relative abundance vectors) ────────────
-# Keys are pseudo-taxa; values are relative abundances that sum to ~1.
-# These represent distinct ecological baselines for the two regimes.
+# ── Multi-Kingdom baseline profiles (GRUMB reference) ────────────────
+# Each kingdom contributes taxa to a unified relative-abundance vector.
+# Zone-specific modifiers adjust the balance (e.g. Galley has more Fungi
+# from food-borne communities, Engine_Room has more Archaea from fuel
+# contamination).
 
+MULTI_KINGDOM_TAXA: dict[str, dict[str, float]] = {
+    # Kingdom: {taxon: base_relative_abundance}
+    "Bacteria": {
+        "Vibrio_spp":           0.10,
+        "Pseudoalteromonas":    0.08,
+        "Enterobacter":         0.06,
+        "Acinetobacter":        0.05,
+        "Shewanella":           0.04,
+        "Bacillus_subtilis":    0.04,
+        "Staphylococcus_epi":   0.03,
+    },
+    "Archaea": {
+        "Nitrosopumilus":       0.03,
+        "Halobacterium":        0.02,
+        "Methanobrevibacter":   0.01,
+    },
+    "Fungi": {
+        "Aspergillus_spp":     0.02,
+        "Cladosporium":        0.02,
+        "Candida_spp":         0.01,
+    },
+    "Virus": {
+        "Phage_community":     0.04,
+        "ssRNA_marine":        0.02,
+    },
+}
+
+# Zone-type modifiers — scale kingdom abundances per zone type
+# (infection-dynamics: Room, Dining, Free, Boarding)
+ZONE_TYPE_MODIFIERS: dict[str, dict[str, float]] = {
+    "Dining":  {"Bacteria": 1.3, "Archaea": 0.7, "Fungi": 1.6, "Virus": 1.0},
+    "Room":    {"Bacteria": 1.1, "Archaea": 0.9, "Fungi": 1.0, "Virus": 1.2},
+    "Free":    {"Bacteria": 1.0, "Archaea": 1.0, "Fungi": 0.8, "Virus": 0.9},
+}
+
+# Ecological drift profiles
 COASTAL_PORT_PROFILE: dict[str, float] = {
     "Vibrio_spp":           0.18,
     "Pseudoalteromonas":    0.12,
@@ -89,6 +131,54 @@ def _blend_clr(
     return _inv_clr(blended_clr)
 
 
+# ── Multi-kingdom seeding (GRUMB + infection-dynamics) ───────────────
+
+def seed_zone_microbiome(
+    zone_name: str,
+    zone_type: str,
+    rng: np.random.Generator,
+    pseudocount: float = 1e-6,
+) -> dict[str, Any]:
+    """Seed a spatial node with a multi-kingdom log-ratio abundance array.
+
+    Constructs a relative-abundance vector spanning all four kingdoms,
+    applies zone-type modifiers (from infection-dynamics room categories),
+    then normalises via CLR → inv-CLR to produce a valid simplex composition.
+
+    Returns a dict with ``taxa``, ``abundances``, and ``kingdom_fractions``.
+    """
+    modifiers = ZONE_TYPE_MODIFIERS.get(zone_type, {})
+    taxa_names: list[str] = []
+    raw_abundances: list[float] = []
+    kingdom_labels: list[str] = []
+
+    for kingdom, taxa_dict in MULTI_KINGDOM_TAXA.items():
+        mod = modifiers.get(kingdom, 1.0)
+        for taxon, base_abund in taxa_dict.items():
+            taxa_names.append(taxon)
+            raw_abundances.append(base_abund * mod)
+            kingdom_labels.append(kingdom)
+
+    raw = np.array(raw_abundances, dtype=np.float64)
+    noise = rng.normal(0, 0.005, size=len(raw))
+    raw = np.clip(raw + noise, 1e-10, None)
+
+    clr_vec = _clr_transform(raw, pseudocount)
+    abundances = _inv_clr(clr_vec)
+
+    kingdom_fracs: dict[str, float] = {}
+    for k_label, abund in zip(kingdom_labels, abundances):
+        kingdom_fracs[k_label] = kingdom_fracs.get(k_label, 0.0) + abund
+
+    return {
+        "zone": zone_name,
+        "zone_type": zone_type,
+        "taxa": taxa_names,
+        "abundances": abundances.tolist(),
+        "kingdom_fractions": {k: round(v, 4) for k, v in kingdom_fracs.items()},
+    }
+
+
 # ── Ecological drift ─────────────────────────────────────────────────
 
 def _drift_alpha(epoch: int, total_epochs: int = 24) -> float:
@@ -148,6 +238,25 @@ class MetagenomicSequencing:
         self.pseudocount = pseudocount
         self.total_epochs = total_epochs
         self.rng = rng if rng is not None else np.random.default_rng()
+        self._zone_seeds: dict[str, dict[str, Any]] = {}
+
+    def seed_zones(self, zone_configs: list[dict[str, str]]) -> dict[str, dict[str, Any]]:
+        """Seed all zones with multi-kingdom log-ratio abundance arrays at t=0.
+
+        Parameters
+        ----------
+        zone_configs:
+            List of dicts with ``name`` and ``type`` keys (from config.yaml
+            ``ship_graph.zones``).
+
+        Returns the seeded profiles keyed by zone name.
+        """
+        for zc in zone_configs:
+            seed = seed_zone_microbiome(
+                zc["name"], zc["type"], self.rng, self.pseudocount,
+            )
+            self._zone_seeds[zc["name"]] = seed
+        return dict(self._zone_seeds)
 
     def query_ground_truth(self, json_data: dict[str, Any]) -> dict[str, Any]:
         """Consume ground-truth spaces and produce sequencing telemetry.
@@ -181,6 +290,8 @@ class MetagenomicSequencing:
                 t: int(c) for t, c in zip(taxa_with_pathogen, reads) if c > 0
             }
 
+            seed_info = self._zone_seeds.get(zone_id)
+
             zone_results[zone_id] = {
                 "microbiome_id": zone.get("microbiome_id", "unknown"),
                 "drift_alpha": round(_drift_alpha(epoch, self.total_epochs), 4),
@@ -192,6 +303,9 @@ class MetagenomicSequencing:
                 "total_reads": self.read_depth,
                 "pathogen_reads": read_dict.get(PATHOGEN_TAXON, 0),
                 "read_counts": read_dict,
+                "seeded_kingdoms": (
+                    seed_info["kingdom_fractions"] if seed_info else None
+                ),
             }
 
         return {
