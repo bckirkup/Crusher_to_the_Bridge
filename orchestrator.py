@@ -1114,16 +1114,12 @@ def run() -> None:
 
         simulation_history.append(epoch_record)
 
-        # ── 11. Console output ──────────────────────────────────────
-        active_protocol_names = [m["name"] for m in active_mods]
-        _print_epoch(
-            epoch, trigger_status, syn_result, rdt_result,
-            pcr_result, seq_result, active_symptomatic,
-            len(isolated_ids), len(quarantine_refusers), prev_status,
-            multi_pathogen_summary=multi_pathogen_summary,
-            zone_microflora_shifts=zone_microflora_shifts,
-            active_protocols=active_protocol_names,
-            epoch_cost=epoch_cost,
+        # ── 11. Live progress bar ───────────────────────────────────
+        n_active_sops = len(active_mods)
+        running_balance = cost_ledger.financial_balance
+        _print_progress(
+            epoch, num_epochs, trigger_status,
+            n_active_sops, running_balance, prev_status,
         )
 
     # ── Save simulation history ──────────────────────────────────────
@@ -1156,199 +1152,201 @@ def run() -> None:
         )
         print(f"  Lab notebook saved to: {nb_path} ({len(notebook.records)} records)")
 
-    # ── Summary ──────────────────────────────────────────────────────
-    print()
-    print(sep)
-
-    # Engine final state
+    # ── Executive Summary ──────────────────────────────────────────────
     final_summary = engine.get_summary()
-    print("  KORKIN LAB ENGINE – FINAL STATE")
-    print(thin)
-    print(f"  Susceptible: {final_summary['susceptible']}")
-    print(f"  Infected:    {final_summary['infected']}")
-    print(f"  Symptomatic: {final_summary['symptomatic']}")
-    print(f"  Recovered:   {final_summary['recovered']}")
-    print(f"  Immune:      {final_summary['immune']}")
-    print(f"  Isolated:    {final_summary['isolated']}")
-    print(f"  VSP triggered: {final_summary['vsp_triggered']}")
-    print()
-
-    if contam_engine is not None:
-        print("  CONTAM TRANSPORT ENGINE – FINAL STATE")
-        print(thin)
-        transport_final = contam_engine.get_transport_summary(engine.zone_pathogen_mass)
-        hvac_cfg = cfg.get("hvac", {})
-        print(f"  Filter type:        {hvac_cfg.get('filter_type', 'MERV-13')}")
-        print(f"  Filter efficiency:  {contam_engine.filter_efficiency:.1%}")
-        print(f"  Natural decay rate: {contam_engine.natural_decay_rate:.1%} per epoch")
-        for zname, zdata in transport_final["zone_concentrations"].items():
-            print(f"    {zname:15s}  mass={zdata['mass']:8.3f}  "
-                  f"conc={zdata['concentration_per_m3']:8.3f}/m³  "
-                  f"vol={zdata['volume_m3']}m³")
-        print()
-
-    print("  ESCALATION TIMELINE")
-    print(thin)
-    for entry in escalation_log:
-        print(f"  Epoch {entry['epoch']:02d}:  {entry['from']}  →  {entry['to']}")
-    if not escalation_log:
-        print("  (no escalations triggered)")
-
-    if compliance_log:
-        print()
-        print("  FRED COMPLIANCE LOG")
-        print(thin)
-        refused = [c for c in compliance_log if c["action"] == "refused_quarantine"]
-        delayed = [c for c in compliance_log if c["action"] == "delayed_compliance"]
-        immediate = [c for c in compliance_log if c["action"] == "immediate_compliance"]
-        print(f"  Immediate compliance: {len(immediate)}")
-        print(f"  Refused (then delayed): {len(refused)} refused, {len(delayed)} eventually complied")
-
-    # Protocol engine summary
-    print()
-    print("  REACTIVE PROTOCOL ENGINE – SUMMARY")
-    print(thin)
-    proto_summary = protocol_engine.generate_protocol_summary()
-    print(f"  Total protocol activations:   {proto_summary['total_activations']}")
-    print(f"  Total protocol deactivations: {proto_summary['total_deactivations']}")
-    still_active = proto_summary["protocols_still_active"]
-    print(f"  Protocols still active:       {len(still_active)}")
-    for pid in still_active:
-        print(f"    - {pid}")
-    print()
-
-    # Cost accounting summary
-    print("  COST ACCOUNTING – FINANCIAL AUDIT")
-    print(thin)
     audit = cost_ledger.generate_financial_audit()
-    summary = audit["summary"]
-    print(f"  Starting budget:      ${summary['starting_financial_budget_usd']:>10,.2f}")
-    print(f"  Total expenditure:    ${summary['total_expenditure_usd']:>10,.2f}")
-    print(f"    Surveillance cost:  ${summary['surveillance_cost_usd']:>10,.2f}")
-    print(f"    Intervention cost:  ${summary['intervention_cost_usd']:>10,.2f}")
-    print(f"  Remaining balance:    ${summary['remaining_balance_usd']:>10,.2f}")
-    print()
-    print(f"  Starting labor:       {summary['starting_labor_capacity_hours']:>8.1f} person-hours")
-    print(f"  Total labor consumed: {summary['total_labor_consumed_hours']:>8.1f} person-hours")
-    print(f"    Surveillance:       {summary['surveillance_labor_hours']:>8.1f} person-hours")
-    print(f"    Intervention:       {summary['intervention_labor_hours']:>8.1f} person-hours")
-    print(f"  Remaining labor:      {summary['remaining_labor_hours']:>8.1f} person-hours")
-    print()
+    proto_summary = protocol_engine.generate_protocol_summary()
 
-    # Material inventory status
-    depleted = [
-        item for item, data in audit["material_inventory"].items()
-        if data["remaining"] == 0 and data["consumed"] > 0
-    ]
-    if depleted:
-        print(f"  ⚠ Depleted materials: {', '.join(depleted)}")
-
-    print(thin)
-    print(f"  Final status: {trigger_status}")
-    print(f"  Agents isolated: {len(isolated_ids)}/{num_agents}")
-    print(f"  Non-compliant remaining: {len(quarantine_refusers)}")
-    print(f"  All {num_epochs} epochs completed.  Data bridged cleanly.")
-    print(sep)
+    _print_executive_summary(
+        num_agents=num_agents,
+        num_epochs=num_epochs,
+        engine_summary=final_summary,
+        audit=audit,
+        proto_summary=proto_summary,
+        escalation_log=escalation_log,
+        compliance_log=compliance_log,
+        trigger_status=trigger_status,
+        isolated_count=len(isolated_ids),
+        refuser_count=len(quarantine_refusers),
+        contam_engine=contam_engine,
+        zone_pathogen_mass=engine.zone_pathogen_mass,
+        hvac_cfg=cfg.get("hvac", {}),
+        pathogen_profiles=pathogen_profiles,
+    )
 
 
-def _print_epoch(
+def _print_progress(
     epoch: int,
+    num_epochs: int,
     trigger_status: str,
-    syn: dict[str, Any],
-    rdt: dict[str, Any],
-    pcr: dict[str, Any] | None,
-    seq: dict[str, Any] | None,
-    symptomatic_count: int,
-    isolated_count: int,
-    refuser_count: int,
+    n_active_sops: int,
+    running_balance: float,
     prev_status: str,
-    multi_pathogen_summary: dict[str, dict[str, int]] | None = None,
-    zone_microflora_shifts: dict[str, dict[str, float]] | None = None,
-    active_protocols: list[str] | None = None,
-    epoch_cost: dict[str, Any] | None = None,
 ) -> None:
-    """Print a single epoch's diagnostic summary line."""
-    status_icon = {
-        STATUS_BASELINE: "●",
-        STATUS_SUSPECTED: "▲",
-        STATUS_CONFIRMED: "■",
-    }.get(trigger_status, "?")
+    """Overwrite a single terminal line with a dynamic progress bar."""
+    pct = (epoch + 1) / num_epochs * 100
+    bar_width = 30
+    filled = int(bar_width * (epoch + 1) / num_epochs)
+    bar = "█" * filled + "░" * (bar_width - filled)
 
-    rdt_pos = sum(1 for r in rdt["results"] if r["positive"])
-    rdt_total = rdt["tested_count"]
-
-    phases = {}
-    for r in rdt["results"]:
-        ph = r.get("clinical_phase", "—")
-        if ph:
-            phases[ph] = phases.get(ph, 0) + 1
-
-    pcr_str = "—"
-    if pcr is not None:
-        detected = sum(1 for z in pcr["zone_results"].values() if z["detected"])
-        total_z = len(pcr["zone_results"])
-        best_ct = min(
-            (z["ct_value"] for z in pcr["zone_results"].values() if z["ct_value"] is not None),
-            default=None,
-        )
-        ct_label = f"Ct={best_ct:.1f}" if best_ct is not None else "Ct=n/a"
-        mode = "WIPE" if pcr.get("surface_wipe_mode") else "env"
-        pcr_str = f"{detected}/{total_z} {ct_label} [{mode}]"
-
-    seq_str = "—"
-    if seq is not None:
-        first_zone = next(iter(seq["zone_results"].values()), {})
-        regime = first_zone.get("regime", "?")
-        drift = first_zone.get("drift_alpha", 0)
-        path_reads = sum(
-            z.get("pathogen_reads", 0) for z in seq["zone_results"].values()
-        )
-        seq_str = f"{regime}(α={drift:.2f}) pReads={path_reads}"
+    status_icon = {"BASELINE": "●", "SUSPECTED": "▲", "CONFIRMED": "■"}.get(
+        trigger_status, "?"
+    )
 
     transition = ""
     if trigger_status != prev_status:
         transition = f"  *** {prev_status} → {trigger_status} ***"
 
-    noise_reasons = syn.get("noise_reasons", [])
-    noise_str = ""
-    if noise_reasons:
-        reasons = [r["reason"] for r in noise_reasons]
-        noise_str = f" [{','.join(reasons)}]"
-
-    # Multi-pathogen breakdown
-    mp_str = ""
-    if multi_pathogen_summary:
-        parts = []
-        for pid, ms in multi_pathogen_summary.items():
-            short = pid[:8]
-            parts.append(f"{short}:I={ms['infected']}S={ms['symptomatic']}R={ms['recovered']}")
-        mp_str = f" MP:[{' '.join(parts)}]"
-
-    # Microflora shift indicator
-    mf_str = ""
-    if zone_microflora_shifts:
-        n_shifted = sum(1 for s in zone_microflora_shifts.values() if s)
-        if n_shifted > 0:
-            mf_str = f" MF:{n_shifted}zones"
-
-    # Protocol / cost indicator
-    proto_str = ""
-    if active_protocols:
-        proto_str = f" SOP:[{','.join(p[:12] for p in active_protocols)}]"
-    cost_str = ""
-    if epoch_cost:
-        cost_str = f" ${epoch_cost['total_financial_usd']:.0f}"
-
-    print(
-        f"[Epoch {epoch:02d}] {status_icon} {trigger_status:<10s} | "
-        f"Sick: {syn['sick_call_count']:2d} "
-        f"(TP:{len(syn['true_positive_ids'])} noise:{len(syn['noise_ids'])}){noise_str} | "
-        f"RDT: {rdt_pos}/{rdt_total} | "
-        f"PCR: {pcr_str} | "
-        f"Seq: {seq_str} | "
-        f"Symp:{symptomatic_count:2d} Iso:{isolated_count:2d} Ref:{refuser_count:1d}"
-        f"{mp_str}{mf_str}{proto_str}{cost_str}{transition}"
+    line = (
+        f"\r  {bar} {pct:5.1f}%  "
+        f"Epoch {epoch + 1:02d}/{num_epochs:02d}  "
+        f"{status_icon} {trigger_status:<10s}  "
+        f"SOPs:{n_active_sops}  "
+        f"Budget:${running_balance:>10,.0f}"
+        f"{transition}"
     )
+
+    sys.stdout.write(line)
+    sys.stdout.flush()
+
+    if epoch == num_epochs - 1:
+        sys.stdout.write("\n")
+
+
+def _print_executive_summary(
+    *,
+    num_agents: int,
+    num_epochs: int,
+    engine_summary: dict[str, Any],
+    audit: dict[str, Any],
+    proto_summary: dict[str, Any],
+    escalation_log: list[dict[str, Any]],
+    compliance_log: list[dict[str, Any]],
+    trigger_status: str,
+    isolated_count: int,
+    refuser_count: int,
+    contam_engine: Any | None,
+    zone_pathogen_mass: dict[str, float],
+    hvac_cfg: dict[str, Any],
+    pathogen_profiles: dict[str, Any] | None,
+) -> None:
+    """Print a highly visible ASCII executive summary box."""
+    W = 80
+    border = "╔" + "═" * (W - 2) + "╗"
+    bottom = "╚" + "═" * (W - 2) + "╝"
+    divider = "╠" + "═" * (W - 2) + "╣"
+    thin_div = "╟" + "─" * (W - 2) + "╢"
+
+    def row(text: str = "") -> str:
+        stripped = text.rstrip()
+        pad = W - 4 - len(stripped)
+        if pad < 0:
+            stripped = stripped[: W - 4]
+            pad = 0
+        return f"║ {stripped}{' ' * pad}  ║"
+
+    lines: list[str] = []
+    lines.append(border)
+    lines.append(row("CRUSHER TO THE BRIDGE  ─  EXECUTIVE SUMMARY"))
+    lines.append(divider)
+
+    # ── Section 1: Epidemiological Metrics ────────────────────────
+    lines.append(row("EPIDEMIOLOGICAL METRICS"))
+    lines.append(thin_div)
+    lines.append(row(f"Total crew:          {num_agents}"))
+    lines.append(row(f"Total infected:      {engine_summary['infected'] + engine_summary['recovered'] + engine_summary['isolated']}"))
+    lines.append(row(f"  Currently infected: {engine_summary['infected']}"))
+    lines.append(row(f"  Recovered:          {engine_summary['recovered']}"))
+    lines.append(row(f"  Isolated:           {engine_summary['isolated']}"))
+    lines.append(row(f"  Immune (neg sec):   {engine_summary['immune']}"))
+    lines.append(row(f"  Symptomatic:        {engine_summary['symptomatic']}"))
+    lines.append(row(f"VSP triggered:       {'Yes' if engine_summary['vsp_triggered'] else 'No'}"))
+    lines.append(row(f"Final status:        {trigger_status}"))
+
+    # Co-infection
+    if pathogen_profiles and len(pathogen_profiles) > 1:
+        lines.append(row(f"Pathogen count:      {len(pathogen_profiles)}"))
+        for pid in pathogen_profiles:
+            lines.append(row(f"  - {pid}"))
+
+    # Escalation timeline
+    if escalation_log:
+        lines.append(row())
+        lines.append(row("Escalation timeline:"))
+        for entry in escalation_log:
+            lines.append(row(f"  Epoch {entry['epoch']:02d}:  {entry['from']}  ->  {entry['to']}"))
+
+    # FRED compliance
+    if compliance_log:
+        refused = sum(1 for c in compliance_log if c["action"] == "refused_quarantine")
+        immediate = sum(1 for c in compliance_log if c["action"] == "immediate_compliance")
+        lines.append(row(f"Compliance:          {immediate} immediate, {refused} refused"))
+
+    # Labor
+    summary = audit["summary"]
+    lines.append(row(f"Person-hours remaining: {summary['remaining_labor_hours']:.1f} / {summary['starting_labor_capacity_hours']:.0f}"))
+
+    lines.append(divider)
+
+    # ── Section 2: Financial & Resource Audit ─────────────────────
+    lines.append(row("FINANCIAL & RESOURCE AUDIT"))
+    lines.append(thin_div)
+    lines.append(row(f"Starting budget:     ${summary['starting_financial_budget_usd']:>10,.2f}"))
+    lines.append(row(f"Total spent:         ${summary['total_expenditure_usd']:>10,.2f}"))
+    lines.append(row(f"  Surveillance:      ${summary['surveillance_cost_usd']:>10,.2f}"))
+    lines.append(row(f"  Intervention:      ${summary['intervention_cost_usd']:>10,.2f}"))
+    lines.append(row(f"Remaining balance:   ${summary['remaining_balance_usd']:>10,.2f}"))
+    lines.append(row())
+    lines.append(row(f"Labor consumed:      {summary['total_labor_consumed_hours']:>8.1f} person-hours"))
+    lines.append(row(f"  Surveillance:      {summary['surveillance_labor_hours']:>8.1f} person-hours"))
+    lines.append(row(f"  Intervention:      {summary['intervention_labor_hours']:>8.1f} person-hours"))
+
+    # Depleted materials warning
+    depleted = [
+        item for item, data in audit["material_inventory"].items()
+        if data["remaining"] == 0 and data["consumed"] > 0
+    ]
+    if depleted:
+        lines.append(row())
+        lines.append(row("!! WARNING — DEPLETED SUPPLIES !!"))
+        for item in depleted:
+            data = audit["material_inventory"][item]
+            lines.append(row(f"  {item}: {data['starting']} -> 0  (${data['total_cost_usd']:.2f})"))
+
+    lines.append(divider)
+
+    # ── Section 3: SOP History ────────────────────────────────────
+    lines.append(row("SOP ACTIVATION HISTORY"))
+    lines.append(thin_div)
+
+    activations = [e for e in proto_summary["event_log"] if e["event"] == "ACTIVATED"]
+    if activations:
+        seen: set[str] = set()
+        for ev in activations:
+            pid = ev["protocol_id"]
+            if pid not in seen:
+                seen.add(pid)
+                lines.append(row(f"  {pid}  {ev['name'][:40]:<40s}  Epoch {ev['epoch']:02d}"))
+    else:
+        lines.append(row("  (no protocols activated)"))
+
+    still_active = proto_summary["protocols_still_active"]
+    if still_active:
+        lines.append(row())
+        lines.append(row(f"Still active at end: {', '.join(still_active)}"))
+
+    lines.append(row(f"Total activations:   {proto_summary['total_activations']}"))
+    lines.append(row(f"Total deactivations: {proto_summary['total_deactivations']}"))
+
+    lines.append(divider)
+
+    # ── Footer ────────────────────────────────────────────────────
+    lines.append(row(f"{num_epochs} epochs completed.  Data bridged cleanly."))
+    lines.append(row(f"Isolated: {isolated_count}/{num_agents}   Non-compliant: {refuser_count}"))
+    lines.append(bottom)
+
+    print()
+    print("\n".join(lines))
 
 
 if __name__ == "__main__":
