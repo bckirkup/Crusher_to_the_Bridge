@@ -1,0 +1,342 @@
+{
+  "meta": {
+    "description": "Cruise Ship X spatial layout template — derived from the Korkin Lab infection-dynamics GIS shapefiles (NorwalkVirus/Dependencies/maps/). This template maps the cruise ship's 22 functional zones across 3 decks with HVAC interconnections. Zone centroids computed from polygon geometries; volumes derived from GIS areas × ceiling heights.",
+    "source_repository": "infection-dynamics (KorkinLab)",
+    "source_files": {
+      "diningAreas.shp": "6 polygons — Main Dining Room, Buffet, Specialty restaurants",
+      "barAreas.shp": "4 polygons — Cocktail lounges and bars across multiple decks",
+      "casinoAreas.shp": "1 polygon — Casino floor",
+      "gymAreas.shp": "1 polygon — Fitness center and spa",
+      "loungeAreas.shp": "4 polygons — Observation lounges and quiet areas",
+      "poolAreas.shp": "2 polygons — Main pool deck and indoor pool",
+      "shoppingAreas.shp": "1 polygon — Retail promenade",
+      "theaterAreas.shp": "3 polygons — Main theater and entertainment venues",
+      "roomAreas.shp": "896 polygons — 814 crew cabins + 1888 passenger staterooms (sampled)",
+      "CruiseNet.shp": "28568 line segments — Corridor and elevator network (elevConec=1 marks elevator connections)"
+    },
+    "gis_coordinate_system": "Projected, ship-relative meters from bow",
+    "population": {
+      "passengers": 1888,
+      "structured_crew": 814,
+      "unstructured_crew": 0,
+      "total_onboard": 2702
+    },
+    "simulation_parameters": {
+      "sim_end_day": 15,
+      "one_step_seconds": 1,
+      "contact_check_interval_steps": 1200,
+      "vsp_isolation": true,
+      "initial_infected": 2
+    }
+  },
+  "spatial_layout": {
+    "platform": "Cruise_Ship_X_NorwalkSim",
+    "description": "22-zone cruise ship layout derived from Korkin Lab GIS data. Zones aggregated from 918 individual room/area polygons into functional compartments across 3 decks.",
+    "zones": [
+      {
+        "id": "Main_Dining_Aft",
+        "type": "Dining",
+        "traffic": "high",
+        "volume_m3": 3329.5,
+        "deck": "main",
+        "display": {"x": 74.3, "y": 245.1},
+        "description": "Main dining room (aft), seats ~500. Source: diningAreas.shp polygon 0, area=1109.8m²"
+      },
+      {
+        "id": "Buffet_Midship",
+        "type": "Dining",
+        "traffic": "high",
+        "volume_m3": 1420.6,
+        "deck": "main",
+        "display": {"x": 66.0, "y": 156.7},
+        "description": "Buffet restaurant (midship). Source: diningAreas.shp polygon 1, area=473.5m²"
+      },
+      {
+        "id": "Main_Dining_Fwd",
+        "type": "Dining",
+        "traffic": "high",
+        "volume_m3": 2802.8,
+        "deck": "main",
+        "display": {"x": 122.2, "y": 244.3},
+        "description": "Main dining room (forward). Source: diningAreas.shp polygon 2, area=934.3m²"
+      },
+      {
+        "id": "Lido_Deck_Dining",
+        "type": "Dining",
+        "traffic": "high",
+        "volume_m3": 2094.9,
+        "deck": "upper",
+        "display": {"x": 457.3, "y": 37.9},
+        "description": "Lido deck outdoor/indoor dining. Source: diningAreas.shp polygon 3, area=698.3m²"
+      },
+      {
+        "id": "Grand_Dining",
+        "type": "Dining",
+        "traffic": "high",
+        "volume_m3": 4928.5,
+        "deck": "main",
+        "display": {"x": 408.5, "y": 173.7},
+        "description": "Grand dining hall (largest venue). Source: diningAreas.shp polygon 4, area=1642.8m²"
+      },
+      {
+        "id": "Casino",
+        "type": "Free",
+        "traffic": "high",
+        "volume_m3": 1077.9,
+        "deck": "main",
+        "display": {"x": 66.6, "y": 78.9},
+        "description": "Casino floor. Source: casinoAreas.shp, area=359.3m²"
+      },
+      {
+        "id": "Bar_Aft",
+        "type": "Dining",
+        "traffic": "high",
+        "volume_m3": 424.2,
+        "deck": "upper",
+        "display": {"x": 400.5, "y": 119.8},
+        "description": "Aft cocktail lounge. Source: barAreas.shp polygon 0, area=141.4m²"
+      },
+      {
+        "id": "Bar_Main",
+        "type": "Dining",
+        "traffic": "high",
+        "volume_m3": 1565.7,
+        "deck": "main",
+        "display": {"x": 121.9, "y": 157.8},
+        "description": "Main bar/lounge. Source: barAreas.shp polygon 1, area=521.9m²"
+      },
+      {
+        "id": "Fitness_Center",
+        "type": "Free",
+        "traffic": "medium",
+        "volume_m3": 1483.2,
+        "deck": "upper",
+        "display": {"x": 408.5, "y": 33.5},
+        "description": "Fitness center and spa. Source: gymAreas.shp, area=494.4m²"
+      },
+      {
+        "id": "Observation_Lounge",
+        "type": "Free",
+        "traffic": "medium",
+        "volume_m3": 902.7,
+        "deck": "upper",
+        "display": {"x": 458.0, "y": 154.8},
+        "description": "Forward observation lounge. Source: loungeAreas.shp polygon 0, area=300.9m²"
+      },
+      {
+        "id": "Library_Lounge",
+        "type": "Free",
+        "traffic": "low",
+        "volume_m3": 337.5,
+        "deck": "main",
+        "display": {"x": 313.0, "y": 112.5},
+        "description": "Library and quiet lounge. Source: loungeAreas.shp polygon 1, area=112.5m²"
+      },
+      {
+        "id": "Pool_Outdoor",
+        "type": "Free",
+        "traffic": "high",
+        "volume_m3": 3460.5,
+        "deck": "upper",
+        "display": {"x": 408.9, "y": 236.4},
+        "description": "Main outdoor pool deck. Source: poolAreas.shp polygon 0, area=1153.5m². Note: partially open-air, effective HVAC volume reduced."
+      },
+      {
+        "id": "Pool_Indoor",
+        "type": "Free",
+        "traffic": "medium",
+        "volume_m3": 3212.7,
+        "deck": "upper",
+        "display": {"x": 408.6, "y": 94.5},
+        "description": "Indoor pool and whirlpool area. Source: poolAreas.shp polygon 1, area=1070.9m²"
+      },
+      {
+        "id": "Shopping_Promenade",
+        "type": "Free",
+        "traffic": "medium",
+        "volume_m3": 2101.5,
+        "deck": "main",
+        "display": {"x": 120.9, "y": 109.6},
+        "description": "Retail promenade. Source: shoppingAreas.shp, area=700.5m²"
+      },
+      {
+        "id": "Main_Theater",
+        "type": "Free",
+        "traffic": "high",
+        "volume_m3": 4874.0,
+        "deck": "main",
+        "display": {"x": 120.5, "y": 33.7},
+        "description": "Main theater (2-deck, ~800 seats). Source: theaterAreas.shp polygon 0, area=974.8m². Volume includes balcony level (5m effective ceiling)."
+      },
+      {
+        "id": "Secondary_Theater",
+        "type": "Free",
+        "traffic": "medium",
+        "volume_m3": 2186.7,
+        "deck": "main",
+        "display": {"x": 72.1, "y": 35.9},
+        "description": "Secondary performance venue. Source: theaterAreas.shp polygon 1, area=728.9m²"
+      },
+      {
+        "id": "MedBay",
+        "type": "Medical",
+        "traffic": "low",
+        "volume_m3": 150.0,
+        "deck": "main",
+        "display": {"x": 250.0, "y": 150.0},
+        "description": "Medical center / sick bay. Inferred zone (not in GIS data). Standard cruise ship medical facility."
+      },
+      {
+        "id": "Passenger_Cabin_Block_A",
+        "type": "Room",
+        "traffic": "low",
+        "volume_m3": 39.8,
+        "deck": "main",
+        "display": {"x": 158.2, "y": 10.4},
+        "description": "Representative passenger cabin block (port side forward). Source: roomAreas.shp, Type=Passenger, area=15.9m²"
+      },
+      {
+        "id": "Passenger_Cabin_Block_B",
+        "type": "Room",
+        "traffic": "low",
+        "volume_m3": 40.0,
+        "deck": "main",
+        "display": {"x": 179.1, "y": 10.4},
+        "description": "Representative passenger cabin block (port side midship). Source: roomAreas.shp, Type=Passenger, area=16.0m²"
+      },
+      {
+        "id": "Passenger_Cabin_Block_C",
+        "type": "Room",
+        "traffic": "low",
+        "volume_m3": 80.0,
+        "deck": "main",
+        "display": {"x": 206.5, "y": 10.6},
+        "description": "Representative passenger suite (larger stateroom). Source: roomAreas.shp, Type=Passenger, area=32.0m²"
+      },
+      {
+        "id": "Crew_Quarters_A",
+        "type": "Room",
+        "traffic": "low",
+        "volume_m3": 30.0,
+        "deck": "lower",
+        "display": {"x": 200.0, "y": 250.0},
+        "description": "Crew berthing block A. Source: roomAreas.shp, Type=Crew. 814 structured crew members berthed below main deck."
+      },
+      {
+        "id": "Engine_Room",
+        "type": "Engineering",
+        "traffic": "low",
+        "volume_m3": 5000.0,
+        "deck": "lower",
+        "display": {"x": 300.0, "y": 280.0},
+        "description": "Engine room and machinery spaces. Inferred zone (not in GIS data). Includes graywater/blackwater processing for wastewater sequencing grid."
+      }
+    ]
+  },
+  "air_flow_paths": {
+    "description": "HVAC zone definitions and airflow interconnections derived from CruiseNet.shp (28568 corridor/elevator line segments). Elevator connections identified by elevConec=1 attribute. Three HVAC zones by deck with cross-zone links via elevator shafts and stairwells.",
+    "hvac_zones": [
+      {
+        "id": "HVAC_Upper_Deck",
+        "rooms": ["Lido_Deck_Dining", "Bar_Aft", "Fitness_Center", "Observation_Lounge", "Pool_Outdoor", "Pool_Indoor"],
+        "ach": 8.0,
+        "description": "Upper deck HVAC recirculation loop. Higher ACH due to food service and pool areas."
+      },
+      {
+        "id": "HVAC_Main_Deck",
+        "rooms": ["Main_Dining_Aft", "Buffet_Midship", "Main_Dining_Fwd", "Grand_Dining", "Casino", "Bar_Main", "Library_Lounge", "Shopping_Promenade", "Main_Theater", "Secondary_Theater", "MedBay", "Passenger_Cabin_Block_A", "Passenger_Cabin_Block_B", "Passenger_Cabin_Block_C"],
+        "ach": 6.0,
+        "description": "Main deck HVAC recirculation loop. Standard passenger area ventilation."
+      },
+      {
+        "id": "HVAC_Lower_Deck",
+        "rooms": ["Crew_Quarters_A", "Engine_Room"],
+        "ach": 10.0,
+        "description": "Lower deck / machinery HVAC. Higher ACH for engine room ventilation requirements."
+      }
+    ],
+    "cross_zone_links": [
+      {
+        "from": "HVAC_Main_Deck",
+        "to": "HVAC_Upper_Deck",
+        "flow_rate_m3h": 2500.0,
+        "is_hvac_ducted": true,
+        "path": "Forward_Elevator_Shaft",
+        "description": "Ducted supply air from main AHU to upper deck. Source: CruiseNet.shp elevator connections (elevConec=1)."
+      },
+      {
+        "from": "HVAC_Upper_Deck",
+        "to": "HVAC_Main_Deck",
+        "flow_rate_m3h": 2200.0,
+        "is_hvac_ducted": true,
+        "path": "Aft_Elevator_Shaft",
+        "description": "Return air from upper deck to main AHU."
+      },
+      {
+        "from": "HVAC_Main_Deck",
+        "to": "HVAC_Lower_Deck",
+        "flow_rate_m3h": 1800.0,
+        "is_hvac_ducted": true,
+        "path": "Service_Stairwell_Duct",
+        "description": "Supply air to crew quarters and engine spaces."
+      },
+      {
+        "from": "HVAC_Lower_Deck",
+        "to": "HVAC_Main_Deck",
+        "flow_rate_m3h": 1500.0,
+        "is_hvac_ducted": true,
+        "path": "Engine_Exhaust_Return",
+        "description": "Engine room exhaust return (partially filtered before recirculation)."
+      },
+      {
+        "from": "Main_Dining_Aft",
+        "to": "Buffet_Midship",
+        "flow_rate_m3h": 800.0,
+        "is_hvac_ducted": false,
+        "path": "Dining_Corridor",
+        "description": "Passive airflow through open dining corridor."
+      },
+      {
+        "from": "Casino",
+        "to": "Shopping_Promenade",
+        "flow_rate_m3h": 600.0,
+        "is_hvac_ducted": false,
+        "path": "Promenade_Passageway",
+        "description": "Open promenade deck passageway."
+      },
+      {
+        "from": "Grand_Dining",
+        "to": "Main_Theater",
+        "flow_rate_m3h": 500.0,
+        "is_hvac_ducted": false,
+        "path": "Central_Atrium",
+        "description": "Multi-deck central atrium connecting dining and entertainment."
+      },
+      {
+        "from": "Crew_Quarters_A",
+        "to": "Engine_Room",
+        "flow_rate_m3h": 400.0,
+        "is_hvac_ducted": false,
+        "path": "Crew_Service_Corridor",
+        "description": "Below-deck crew service corridor."
+      }
+    ],
+    "adjacency": [
+      {"from": "Main_Dining_Aft", "to": "Main_Dining_Fwd", "type": "passageway"},
+      {"from": "Buffet_Midship", "to": "Bar_Main", "type": "passageway"},
+      {"from": "Casino", "to": "Bar_Main", "type": "doorway"},
+      {"from": "Shopping_Promenade", "to": "Main_Theater", "type": "passageway"},
+      {"from": "Main_Theater", "to": "Secondary_Theater", "type": "passageway"},
+      {"from": "Fitness_Center", "to": "Pool_Indoor", "type": "doorway"},
+      {"from": "Pool_Indoor", "to": "Pool_Outdoor", "type": "doorway"},
+      {"from": "Observation_Lounge", "to": "Bar_Aft", "type": "passageway"},
+      {"from": "Lido_Deck_Dining", "to": "Fitness_Center", "type": "passageway"},
+      {"from": "MedBay", "to": "Library_Lounge", "type": "doorway"},
+      {"from": "Passenger_Cabin_Block_A", "to": "Passenger_Cabin_Block_B", "type": "corridor"},
+      {"from": "Passenger_Cabin_Block_B", "to": "Passenger_Cabin_Block_C", "type": "corridor"},
+      {"from": "Passenger_Cabin_Block_A", "to": "Buffet_Midship", "type": "stairwell"},
+      {"from": "Crew_Quarters_A", "to": "Buffet_Midship", "type": "service_stairwell"},
+      {"from": "Engine_Room", "to": "Crew_Quarters_A", "type": "service_corridor"}
+    ]
+  }
+}

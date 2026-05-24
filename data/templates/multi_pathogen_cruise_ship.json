@@ -1,0 +1,110 @@
+{
+  "meta": {
+    "description": "Multi-pathogen concurrent profile: Norwalk Virus (GII.4) + SARS-CoV-2 (BA.5 subvariant). Epidemiological parameters extracted from the Korkin Lab infection-dynamics repository (Person.java, SEIQR-SCM-diamond.Rmd) and peer-reviewed literature.",
+    "source_repository": "infection-dynamics (KorkinLab)",
+    "citation": "Srinivasan S, King J, Collins JM, Colubri A, Korkin D. Real-time spatiotemporal tracking of infectious outbreaks in confined environments with a host-pathogen agent-based system. PNAS 2026;123(4):e2422574123.",
+    "version": "1.0",
+    "notes": "This template demonstrates concurrent pathogen simulation with mid-cruise introduction. Norwalk starts at epoch 0 (boarding index case). SARS-CoV-2 is introduced at epoch 6 (simulating mid-cruise airborne exposure). Both pathogens maintain independent mass pools per room and produce distinct microflora disruption signatures."
+  },
+  "pathogens": [
+    {
+      "pathogen_id": "norwalk_gii4",
+      "name": "Norwalk Virus (Norovirus GII.4)",
+      "category": "enteric_viral",
+      "description": "Norovirus genogroup II genotype 4. Primary fecal-oral and fomite transmission with environmental persistence on ship surfaces. Dose-response parameters from Teunis et al. 'Norwalk virus: How infectious is it?' (Table III, non-aggregated particles). Shedding curves from Atmar et al. 'Norwalk Virus Shedding after Experimental Human Infection' (Figure 1C and 1E).",
+      "transmission_routes": ["direct_contact", "fomite", "droplet", "hvac_airborne"],
+      "shedding_curve_log10": [7.75, 9.0, 11.0, 11.0, 11.0, 10.0, 10.0, 9.5, 9.0, 9.0, 8.0, 8.0, 8.0, 8.0, 8.0],
+      "asymptomatic_shedding_log10": [7.75, 9.5, 10.5, 10.0, 9.0, 8.0, 7.75, 7.75, 7.75, 7.75, 7.75, 7.75, 7.75, 7.75, 7.75],
+      "dose_adjustment": 4.0,
+      "dose_response": {
+        "model": "beta_poisson",
+        "alpha": 0.111,
+        "beta": 32.81
+      },
+      "illness_probability": {
+        "eta": 0.508,
+        "gamma": 0.095
+      },
+      "recovery_day": 3,
+      "surface_deposition_fraction": 0.40,
+      "base_susceptibility": 1.0,
+      "immune_ratio": 0.20,
+      "microflora_disruption": {
+        "causes_disruption": true,
+        "disruption_type": "gastrointestinal",
+        "disruption_magnitude": 0.4,
+        "affected_kingdoms": {
+          "Bacteria": {
+            "Bacteroides_fragilis": 3.0,
+            "Enterococcus_faecalis": 2.5,
+            "Clostridioides_difficile": 1.8
+          },
+          "Virus": {
+            "Caliciviridae_Norovirus": 5.0
+          }
+        }
+      },
+      "introduction_epoch": 0,
+      "initial_infected": 3,
+      "containment_parameters": {
+        "notes": "Mapped from Ship.java containment flags. diningRestricted, vspIsolation, selfIsolation, improvedHygiene (50% reduction), improvedCleaning, facemasks.",
+        "vsp_isolation_threshold_fraction": 0.03,
+        "improved_hygiene_transmission_reduction": 0.50,
+        "fomite_surface_persistence_seconds": 86400,
+        "contact_check_interval_seconds": 1200
+      }
+    },
+    {
+      "pathogen_id": "sars_cov2_ba5",
+      "name": "SARS-CoV-2 (Omicron BA.5)",
+      "category": "respiratory_viral",
+      "description": "SARS-CoV-2 Omicron subvariant BA.5. Primarily airborne transmission via HVAC ductwork and short-range droplets. Compartmental model parameters extracted from SEIQR-SCM-diamond.Rmd (Diamond Princess calibration: R0=2.1, exposure_duration=5d, infectious_duration=11d, sigma=0.20, gamma=0.091).",
+      "transmission_routes": ["direct_contact", "droplet", "hvac_airborne"],
+      "shedding_curve_log10": [3.0, 5.0, 7.0, 8.5, 9.0, 9.0, 8.5, 8.0, 7.5, 7.0, 6.0, 5.0, 4.0, 3.0, 2.0],
+      "asymptomatic_shedding_log10": [3.0, 5.0, 6.5, 7.5, 7.5, 7.0, 6.5, 6.0, 5.5, 5.0, 4.5, 4.0, 3.5, 3.0, 2.5],
+      "dose_adjustment": 2.0,
+      "dose_response": {
+        "model": "beta_poisson",
+        "alpha": 0.18,
+        "beta": 580.0
+      },
+      "illness_probability": {
+        "eta": 0.40,
+        "gamma": 0.091
+      },
+      "recovery_day": 11,
+      "surface_deposition_fraction": 0.05,
+      "base_susceptibility": 1.0,
+      "immune_ratio": 0.0,
+      "microflora_disruption": {
+        "causes_disruption": true,
+        "disruption_type": "respiratory",
+        "disruption_magnitude": 0.35,
+        "affected_kingdoms": {
+          "Bacteria": {
+            "Streptococcus_pneumoniae": 2.0,
+            "Haemophilus_influenzae": 1.5,
+            "Staphylococcus_aureus": 1.2
+          },
+          "Fungi": {
+            "Aspergillus_fumigatus": 0.8
+          }
+        }
+      },
+      "introduction_epoch": 6,
+      "initial_infected": 1,
+      "compartmental_reference": {
+        "notes": "Diamond Princess SEIQR-SCM calibration parameters from infection-dynamics/compartmental-models/SEIQR-SCM-diamond.Rmd",
+        "R0": 2.1,
+        "exposure_duration_days": 5,
+        "infectious_duration_days": 11,
+        "beta_per_day": 0.19,
+        "sigma_per_day": 0.20,
+        "gamma_per_day": 0.091,
+        "vsp_threshold": 0.03,
+        "population_passengers": 2664,
+        "population_crew": 1044
+      }
+    }
+  ]
+}
