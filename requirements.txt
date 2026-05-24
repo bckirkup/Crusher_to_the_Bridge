@@ -1,0 +1,18 @@
+# Core simulation dependencies
+numpy>=1.24
+pyyaml>=6.0
+
+# Validation
+pydantic>=2.0
+
+# Dashboard (optional for CI — only needed to run dashboard.py)
+streamlit>=1.28
+plotly>=5.0
+pandas>=2.0
+
+# GIS spatial bridge (optional)
+geopandas>=0.14
+networkx>=3.0
+
+# Testing
+pytest>=7.0
