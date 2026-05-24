@@ -1,58 +1,186 @@
 # Crusher-to-the-Bridge — AI Assistant Rules
 #
-# This file defines project conventions, data contracts, and architectural
-# guardrails for AI code-generation assistants (Cursor, Copilot, Devin, etc.).
+# This file defines project conventions, data contracts, architectural
+# guardrails, and strict configuration laws for AI code-generation
+# assistants (Cursor, Copilot, Devin, Edison Science, etc.).
+#
+# For the full AI context framework see: docs/ai_handshake.md
 
 ## Project Overview
 
 Crusher-to-the-Bridge is a biodefense digital twin that simulates
-multi-pathogen outbreaks on naval vessels.  It integrates:
+multi-pathogen outbreaks aboard naval vessels.  It is a **bridging
+package** — middleware that connects five independent simulation domains
+into a single orchestrated loop:
 
-- Agent-based modeling (Korkin Lab infection-dynamics engine)
-- Four-pathway transmission core (direct, droplet, HVAC airborne, fomite)
-- CONTAM-style multi-zone aerosol mass transport (py-contam bridge)
-- GRUMB metagenomic surveillance (Dirichlet-multinomial CLR arrays)
-- Instrument-level diagnostic simulation (6 modalities)
-- Reactive Protocol Engine with cost-accounting ledger
-- Multi-fidelity Artificial Lab Notebook (LOW/MID/HIGH)
+1. **Korkin Lab infection-dynamics** (Java ABM) → agent state, dose-response
+2. **Four-pathway transmission core** (Python) → direct, droplet, HVAC airborne, fomite
+3. **py-contam airflow transport** (CONTAM mass-balance) → inter-zone aerosol drift
+4. **GRUMB metagenomic surveillance** (Dirichlet-multinomial CLR) → 4-kingdom microbiome shift detection
+5. **Crusher Labs Observation Engine** (6 instruments + QC) → diagnostic telemetry with noise models
+6. **Reactive Protocol Engine** → stoplight-triggered SOPs with cost-accounting ledger
+7. **Artificial Lab Notebook** → three-tier fidelity output (LOW/MID/HIGH)
 
 ## Repository Structure
 
 ```
-orchestrator.py              — Main simulation loop (24 epochs)
-dashboard.py                 — Streamlit multi-tab Tactical Command Deck
+orchestrator.py                    — Main simulation loop (configurable epoch count)
+dashboard.py                       — Streamlit 4-tab Tactical Command Deck
 engines/
-  infection_dynamics_bridge.py — Korkin Lab ABM adapter
-  transmission_core.py       — Four-pathway dose model
-  py_contam_bridge.py        — HVAC aerosol transport
+  infection_dynamics_bridge.py     — Korkin Lab ABM adapter (KorkinAgent, dose-response)
+  transmission_core.py             — Four-pathway dose model + ContactTracingMatrix
+  py_contam_bridge.py              — CONTAM-style multi-zone HVAC aerosol transport
 crusher_labs/
-  observation_core.py        — 6 diagnostic instruments + QC
-  lab_notebook.py            — Three-tier fidelity serializer
-  protocol_engine.py         — Stoplight-triggered SOP engine
-  cost_ledger.py             — Financial/material/labor accounting
-  modalities/                — Syndromic, PCR, RDT, sequencing
+  observation_core.py              — 6 diagnostic instruments + InstrumentQC
+  lab_notebook.py                  — Three-tier fidelity serializer
+  protocol_engine.py               — Stoplight-triggered SOP evaluator
+  cost_ledger.py                   — Financial / material / labor accounting
+  modalities/                      — Syndromic, PCR, RDT, sequencing modules
 tools/
-  sanity_checker.py          — Pydantic config validator
-  gis_spatial_bridge.py      — GIS → JSON layout converter
+  sanity_checker.py                — Pydantic-based config validator (run before orchestrator)
+  gis_spatial_bridge.py            — GIS Shapefile/GeoJSON → JSON layout converter
 data/
   config/
-    protocols.json           — 7 standing operating protocols
-    resource_costs.json      — Budget, inventory, per-test costs
-    logging_profile.json     — Fidelity tier selection
+    protocols.json                 — 7 standing operating protocols (SOPs)
+    resource_costs.json            — Budgets, material inventory, per-test costs
+    logging_profile.json           — Fidelity tier selection + QC parameters
   pathogens/
-    active_profiles.json     — Multi-pathogen definitions
+    active_profiles.json           — Multi-pathogen definitions (concurrent)
   platforms/destroyer_baseline/
-    spatial_layout.json      — Zone nodes with display coords
-    air_flow_paths.json      — HVAC zones, cross-zone links, adjacency
+    spatial_layout.json            — Zone nodes with display coordinates
+    air_flow_paths.json            — HVAC zones, cross-zone links, adjacency graph
+  shp/
+    test_destroyer_deck.geojson    — Test GIS data for gis_spatial_bridge.py
 telemetry_buffer/
-  simulation_history.json    — Per-epoch full state (24 records)
-  artificial_lab_notebook.json — Instrument records (595+ per run)
-schemas/                     — JSON Schema definitions for all data contracts
+  simulation_history.json          — Per-epoch full simulation state
+  artificial_lab_notebook.json     — Instrument records in biosurveillance schema
+schemas/                           — JSON Schema (draft 2020-12) for all data contracts
+docs/
+  ai_handshake.md                  — Full AI context framework and architecture manifest
+OPERATORS_MANUAL.md                — Human operator's manual
 ```
+
+---
+
+## ⚠ Strict Configuration Laws
+
+These rules are **inviolable**.  Any AI-generated code that violates them
+will produce incorrect simulation results.
+
+### Law 1: No Hardcoded Epoch Schedules
+**Never output hardcoded epoch execution lists for interventions.**
+All operational actions MUST evaluate dynamically via trigger conditions
+matching the Crusher Labs stoplight signals in `protocols.json`.
+The protocol engine reads LOW_FIDELITY stoplights every epoch and
+activates/deactivates SOPs autonomously.
+
+### Law 2: No Hardcoded Zone or Pathogen Names
+- Zone names MUST be read from `spatial_layout.json` at runtime
+- Pathogen IDs MUST be iterated from `active_profiles.json`
+- Never assume "Bridge", "MedBay", "Galley" etc. exist
+
+### Law 3: Scalar Bounds Are Physical Laws
+These configuration scalars MUST be in `[0.0, 1.0]`:
+- `hvac_filter_efficiency_override`
+- `surface_decontamination_factor`
+- `surface_decay_rate_override`
+- `ppe_transmission_reduction`
+- `direct_contact_scalar`, `droplet_scalar`, `hvac_airborne_scalar`
+- `surface_deposition_fraction`
+- Probabilities: `eta`, `gamma`, compliance rates
+
+These MUST be non-negative:
+- `volume_m3`, `ach`, `flow_rate_m3h`, `recovery_day`
+- `starting_balance`, `starting_capacity`, `starting_count`
+- All `financial_usd`, `labor_person_hours` cost values
+
+### Law 4: Referential Integrity Is Mandatory
+- Every room in `air_flow_paths.json` MUST exist in `spatial_layout.json`
+- Every `close_zones` target in `protocols.json` MUST exist in `spatial_layout.json`
+- Every `transmission_routes` entry MUST be one of: `direct_contact`, `fomite`, `droplet`, `hvac_airborne`
+
+### Law 5: Instruments Use Native Python Noise Models
+All diagnostic instruments use fast, matrix-driven sampling noise
+models implemented natively in Python (numpy, scipy).  **Do not
+introduce raw command-line bioinformatics package dependencies**
+(e.g., BLAST, Bowtie2, MEGAHIT) into the instrument simulation
+pipeline.  External bioinformatics tools belong in the GRUMB
+repository, not in this bridging package.
+
+### Law 6: Sibling Repos Are Read-Only
+These repositories provide mathematical foundations and reference
+implementations.  **Never modify them** from this project:
+- `infection-dynamics` — Korkin Lab Java ABM
+- `py-contam` — CONTAM I/O library
+- `GRUMB` — Maritime microbiome pipeline
+- `EMOD-Generic` — Epidemiological MODeling framework
+- `FRED` — Agent scheduling framework
+
+---
+
+## Core Architecture — Decoupled Design
+
+```
+                    ┌─────────────────────────────────────┐
+                    │         orchestrator.py              │
+                    │   (main loop: for epoch in epochs)   │
+                    └──────────┬──────────────────────────┘
+                               │
+            ┌──────────────────┼──────────────────────┐
+            │                  │                      │
+            ▼                  ▼                      ▼
+   ┌────────────────┐  ┌──────────────┐   ┌──────────────────┐
+   │ infection_      │  │ transmission │   │ py_contam_       │
+   │ dynamics_bridge │  │ _core.py     │   │ bridge.py        │
+   │                 │  │              │   │                  │
+   │ Agent states    │  │ 4 pathways:  │   │ CONTAM mass-     │
+   │ Dose-response   │  │ 1.Direct     │   │ balance equation │
+   │ FRED compliance │  │ 2.Droplet    │   │ dM/dt = ΣQ·C·   │
+   │ SIR transitions │  │ 3.HVAC air   │   │ (1-η) - λ·M     │
+   │                 │  │ 4.Fomite     │   │                  │
+   └────────────────┘  └──────────────┘   └──────────────────┘
+            │                  │                      │
+            └──────────────────┼──────────────────────┘
+                               │
+            ┌──────────────────┼──────────────────────┐
+            │                  │                      │
+            ▼                  ▼                      ▼
+   ┌────────────────┐  ┌──────────────┐   ┌──────────────────┐
+   │ observation_    │  │ protocol_    │   │ cost_ledger.py   │
+   │ core.py         │  │ engine.py    │   │                  │
+   │                 │  │              │   │ Budget tracking   │
+   │ 6 instruments   │  │ Stoplight →  │   │ Material depletion│
+   │ + QC pipeline   │  │ SOP triggers │   │ Labor accounting  │
+   │ + noise models  │  │ + modifiers  │   │ FINANCIAL_AUDIT   │
+   └────────────────┘  └──────────────┘   └──────────────────┘
+            │                                         │
+            ▼                                         ▼
+   ┌──────────────────────────────────────────────────────┐
+   │              lab_notebook.py                          │
+   │  HIGH: raw curves, Dirichlet params, culture plates   │
+   │  MID:  DETECTED/NOT DETECTED, Ct, QC flags            │
+   │  LOW:  GREEN / AMBER / RED stoplight only             │
+   └──────────────────────────────────────────────────────┘
+```
+
+The **Reactive Protocol Engine** closes the feedback loop:
+1. Instruments produce LOW_FIDELITY stoplights each epoch
+2. Protocol engine evaluates trigger conditions against stoplights
+3. Active SOPs inject physics modifiers (HVAC efficiency, PPE scalars, zone closures)
+4. Transmission core reads modified scalars on the next epoch
+5. Cost ledger debits financial/material/labor for each active SOP
+
+The **Microflora Disruption** pathway is parallel:
+1. Infected agents with `microflora_disruption.causes_disruption == true` shed altered microbial signatures
+2. GRUMB CLR-space arrays shift in affected rooms and downstream graywater zones
+3. Wastewater sequencing instrument detects kingdom-level anomalies
+4. This triggers AMBER/RED independently of direct pathogen detection
+
+---
 
 ## Critical Data Contracts
 
-### Pathogen Profile Keys (data/pathogens/active_profiles.json)
+### Pathogen Profile Keys (`data/pathogens/active_profiles.json`)
 ```
 pathogen_id: str
 name: str
@@ -61,154 +189,73 @@ transmission_routes: list[str]    # subset of: direct_contact, fomite, droplet, 
 shedding_curve_log10: list[float] # 15 entries (day-by-day)
 asymptomatic_shedding_log10: list[float]
 dose_adjustment: float
-dose_response: {model: str, alpha: float, beta: float}
-illness_probability: {eta: float, gamma: float}
+dose_response: {model, alpha, beta}
+illness_probability: {eta, gamma}
 recovery_day: int
-surface_deposition_fraction: float  # must be in [0.0, 1.0]
+surface_deposition_fraction: float  # [0.0, 1.0]
 base_susceptibility: float
-microflora_disruption: {
-  causes_disruption: bool,
-  disruption_type: str,             # "gastrointestinal" | "respiratory"
-  disruption_magnitude: float,
-  affected_kingdoms: {Kingdom: {Taxon: float}}
-}
+microflora_disruption: {causes_disruption, disruption_type, disruption_magnitude, affected_kingdoms}
 introduction_epoch: int
 initial_infected: int
 ```
 
-### Spatial Zone Keys (data/platforms/*/spatial_layout.json)
+### Spatial Zone Keys (`data/platforms/*/spatial_layout.json`)
 ```
-id: str              # zone name (e.g. "Bridge", "MedBay")
-type: str            # "Free" | "Dining" | "Room"
-traffic: str         # "low" | "medium" | "high"
-volume_m3: float     # must be positive
-deck: str            # "upper" | "main" | "lower"
-display: {x: float, y: float}
+id: str, type: str, traffic: str, volume_m3: float (>0), deck: str, display: {x, y}
 ```
 
-### Airflow Path Keys (data/platforms/*/air_flow_paths.json)
+### Airflow Path Keys (`data/platforms/*/air_flow_paths.json`)
 ```
-hvac_zones[]: {id: str, rooms: list[str], ach: float}
-cross_zone_links[]: {from: str, to: str, flow_rate_m3h: float, is_hvac_ducted: bool, path: str}
-adjacency[]: {from: str, to: str, type: str}
+hvac_zones[]: {id, rooms[], ach}
+cross_zone_links[]: {from, to, flow_rate_m3h, is_hvac_ducted, path}
+adjacency[]: {from, to, type}
 ```
-All zone/room references MUST exist in spatial_layout.json.
+**All room/zone references MUST exist in spatial_layout.json.**
 
-### Simulation History Per-Epoch Keys (telemetry_buffer/simulation_history.json)
+### Protocol Keys (`data/config/protocols.json`)
 ```
-epoch: int
-trigger_status: str                          # "BASELINE" | "SUSPECTED" | "CONFIRMED"
-agents: list[{agent_id, status, location, ...}]
-spaces: {zone: {pathogen_mass, pathogen_mass_by_id, concentration_per_m3, volume_m3}}
-summary: {susceptible, infected, isolated, recovered, immune, symptomatic, sick_call_count, disrupted_microflora_count, quarantine_refusers}
-multi_pathogen: {pathogen_id: {infected, symptomatic, recovered, co_infected_count}}
-contact_tracing: {epoch, shared_room_exposures, droplet_exposures, hvac_downstream_exposures, fomite_trailing_exposures, transmission_events}
-reactive_protocols: {active_protocols, merged_modifiers, stoplights}
-cost_accounting: {epoch, total_financial_usd, total_labor_hours, financial_balance_remaining, labor_hours_remaining, entries_count}
-observation_engine: {air_sniffer, surface_swab, wastewater_sequencing, clinical_rdt, clinical_qpcr, clinical_microbiology, logging_fidelity}
-microflora_shifts: {zone: {type, magnitude, delta_clr, ...}}
-hvac: {transport_active, filter_type, filter_efficiency, ...}
-crusher_ops: {surface_wipe_zones, pcr_results, rdt_positive_count, rdt_tested_count, isolated_agents}
-```
-
-### Lab Notebook Record Keys (telemetry_buffer/artificial_lab_notebook.json)
-Common to all records:
-```
-sample_id: str                    # "CLN-{epoch}-{zone}-{assay}-{hash}"
-timestamp_epoch: int
-collection_point_type: str
-collection_zone: str
-assay_type: str                   # aerosol_pcr | surface_pcr | metagenomic_sequencing | lateral_flow_antigen | patient_qpcr | culture_and_staining | microflora_disruption_status | trigger_transition
-fidelity_tier: str                # HIGH_FIDELITY | MID_FIDELITY | LOW_FIDELITY
-binary_result: str                # "DETECTED" | "NOT DETECTED"
-inferred_anomaly_score: float
-qc_status: str                   # "QC_PASS" | "QC_FAILURE"
-cross_contamination_carryover: float
-```
-HIGH_FIDELITY additions: raw_amplification_curve (list[40 floats]), background_fluorescence, kingdom_reads, kingdom_clr_deltas, read_counts, dirichlet_concentration
-
-### Protocol Keys (data/config/protocols.json)
-```
-protocol_id: str                  # "SOP-001" through "SOP-007"
-name: str
-trigger: {instrument_class: str, stoplight_level: str, min_zones_affected: int}
-modifiers: dict                   # keys vary by protocol type
+protocol_id: str                  # "SOP-001" .. "SOP-007"
+trigger: {instrument_class, stoplight_level, min_zones_affected}
+modifiers: dict                   # physics/behavior overrides
 costs_per_epoch: {financial_usd, materials: {item: count}, labor_person_hours}
 activation_costs: {financial_usd, materials: {item: count}, labor_person_hours}
 category: str                     # "intervention" | "surveillance"
 ```
 
-## Modifier Scalar Constraints
-These keys in protocol modifiers MUST be in [0.0, 1.0]:
-- hvac_filter_efficiency_override
-- surface_decontamination_factor
-- surface_decay_rate_override
-- ppe_transmission_reduction
-- direct_contact_scalar
-- droplet_scalar
-- hvac_airborne_scalar
+### Simulation History (`telemetry_buffer/simulation_history.json`)
+```
+epoch, trigger_status, agents[], spaces{zone: {pathogen_mass, pathogen_mass_by_id, concentration_per_m3, volume_m3}},
+summary{susceptible, infected, isolated, recovered, immune, symptomatic, ...},
+multi_pathogen{pid: {infected, symptomatic, recovered, co_infected_count}},
+contact_tracing{shared_room, droplet, hvac_downstream, fomite_trailing, transmission_events},
+reactive_protocols{active_protocols, merged_modifiers, stoplights},
+cost_accounting{total_financial_usd, total_labor_hours, ...},
+observation_engine{air_sniffer, surface_swab, wastewater_sequencing, clinical_rdt, clinical_qpcr, clinical_microbiology}
+```
 
-## Cross-Module Pipeline Flow
-```
-orchestrator.py
-  ├─ infection_dynamics_bridge.py  →  agents, zone_pathogen_mass
-  ├─ transmission_core.py         ←  agents, zone_pathogen_mass
-  │                                →  ContactTracingMatrix, TransmissionEvents
-  ├─ py_contam_bridge.py          ←  zone_pathogen_mass
-  │                                →  updated_masses (HVAC transport)
-  ├─ observation_core.py
-  │   ├─ AirSniffer                ←  zone_airborne (60% of pathogen_mass)
-  │   ├─ SurfaceSwab               ←  zone_surface  (40% of pathogen_mass)
-  │   ├─ WastewaterSeq             ←  ww_pathogen_mass + microflora_shifts
-  │   ├─ ClinicalRDT               ←  agent shedding_rate, symptom_status
-  │   ├─ ClinicalQPCR              ←  agent specimen_mass
-  │   └─ ClinicalMicrobiology      ←  agent microflora_disruption_status
-  ├─ lab_notebook.py               ←  all instrument outputs
-  │                                →  records[] in biosurveillance schema
-  ├─ protocol_engine.py            ←  stoplights from observation_engine
-  │                                →  active SOPs, physics modifiers
-  └─ cost_ledger.py                ←  per-test + per-epoch costs
-                                   →  FINANCIAL_AUDIT, running balances
-```
+### Lab Notebook Records (`telemetry_buffer/artificial_lab_notebook.json`)
+Common fields: `sample_id, timestamp_epoch, collection_point_type, collection_zone, assay_type, fidelity_tier, binary_result, inferred_anomaly_score, qc_status`
+
+---
 
 ## Coding Conventions
 
 - Python 3.10+ with `from __future__ import annotations`
 - Type hints on all function signatures
-- Use `np.random.Generator` (not legacy `np.random.RandomState`)
-- Constants at module top, UPPER_SNAKE_CASE
-- Classes use PascalCase; functions/methods use snake_case
-- All file paths use `os.path.join()` for cross-platform support
-- JSON files use UTF-8 encoding with 2-space indent
-- Never hardcode zone names — always read from spatial_layout.json
-- Never hardcode pathogen IDs — always iterate pathogen_profiles
-- Probabilities and scalar modifiers must be validated in [0.0, 1.0]
-- Room volumes, budgets, and ACH values must be non-negative
+- `np.random.Generator` (not legacy `np.random.RandomState`)
+- Constants: module-level `UPPER_SNAKE_CASE`
+- Classes: `PascalCase`; functions: `snake_case`
+- File paths: `os.path.join()` for cross-platform
+- JSON: UTF-8, 2-space indent
 - Run `python tools/sanity_checker.py` before committing config changes
+- Formal JSON Schemas live in `schemas/` — validate with `check-jsonschema`
 
-## Testing
+## Commands
 
 ```bash
-# Generate simulation data (24-epoch run)
-python orchestrator.py
-
-# Validate configuration files
-python tools/sanity_checker.py
-
-# Launch dashboard
-streamlit run dashboard.py
-
-# Run from any directory (Windows)
-run_dashboard.bat
+python orchestrator.py              # Run simulation
+python tools/sanity_checker.py      # Validate configs
+streamlit run dashboard.py          # Launch dashboard
+run_dashboard.bat                   # Windows launcher (any directory)
+./run_dashboard.sh                  # Linux/Mac launcher
 ```
-
-## Sibling Repositories
-
-These repositories provide mathematical foundations but are NOT modified
-by this project:
-
-- `infection-dynamics` — Korkin Lab Java ABM (MASON/GeoMason)
-- `py-contam` — CONTAM I/O library for indoor air quality modeling
-- `GRUMB` — Maritime microbiome bioinformatics pipeline
-- `EMOD-Generic` — Epidemiological MODeling framework
-- `FRED` — Agent scheduling and compliance framework
