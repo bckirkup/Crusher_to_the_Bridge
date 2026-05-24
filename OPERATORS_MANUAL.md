@@ -35,8 +35,11 @@ pip install pyyaml numpy streamlit plotly pandas pydantic geopandas networkx
 # Step 1: Validate configuration files
 python tools/sanity_checker.py
 
-# Step 2: Execute the 24-epoch simulation
+# Step 2: Execute the simulation (default 24 epochs from config.yaml)
 python orchestrator.py
+
+# Or override the epoch count via CLI:
+python orchestrator.py --epochs 250
 
 # Step 3: Launch the interactive dashboard
 streamlit run dashboard.py
@@ -367,7 +370,8 @@ python tools/sanity_checker.py
 
 # 3. Run simulation with new platform
 # (update config.yaml platform path, then run orchestrator)
-python orchestrator.py
+python orchestrator.py              # uses num_epochs from config.yaml
+python orchestrator.py --epochs 100 # or override via CLI
 ```
 
 ---
