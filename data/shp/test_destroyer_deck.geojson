@@ -1,0 +1,143 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "ROOM_NAME": "Bridge",
+        "ROOM_TYPE": "Free",
+        "VOLUME_M3": 80,
+        "BASE_ACH": 6.0,
+        "DECK": "upper",
+        "TRAFFIC": "low"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[95, 10], [105, 10], [105, 14], [95, 14], [95, 10]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ROOM_NAME": "MedBay",
+        "ROOM_TYPE": "Free",
+        "VOLUME_M3": 45,
+        "BASE_ACH": 8.0,
+        "DECK": "main",
+        "TRAFFIC": "low"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[70, 3], [80, 3], [80, 7], [70, 7], [70, 3]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ROOM_NAME": "Mess_Hall",
+        "ROOM_TYPE": "Dining",
+        "VOLUME_M3": 120,
+        "BASE_ACH": 8.0,
+        "DECK": "main",
+        "TRAFFIC": "high"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[48, 5], [62, 5], [62, 11], [48, 11], [48, 5]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ROOM_NAME": "Engine_Room",
+        "ROOM_TYPE": "Room",
+        "VOLUME_M3": 200,
+        "BASE_ACH": 10.0,
+        "DECK": "lower",
+        "TRAFFIC": "medium"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[10, 4], [30, 4], [30, 10], [10, 10], [10, 4]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ROOM_NAME": "Galley",
+        "ROOM_TYPE": "Dining",
+        "VOLUME_M3": 60,
+        "BASE_ACH": 8.0,
+        "DECK": "main",
+        "TRAFFIC": "high"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[44, 10], [56, 10], [56, 14], [44, 14], [44, 10]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ROOM_NAME": "Berthing",
+        "ROOM_TYPE": "Room",
+        "VOLUME_M3": 150,
+        "BASE_ACH": 10.0,
+        "DECK": "lower",
+        "TRAFFIC": "medium"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[28, 1], [42, 1], [42, 5], [28, 5], [28, 1]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {"FLOW_RATE_M3H": 50, "IS_DUCTED": false},
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [[100, 10], [75, 5]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {"FLOW_RATE_M3H": 80, "IS_DUCTED": false},
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [[75, 5], [55, 8]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {"FLOW_RATE_M3H": 40, "IS_DUCTED": false},
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [[55, 8], [50, 12]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {"FLOW_RATE_M3H": 60, "IS_DUCTED": false},
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [[50, 12], [35, 3]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {"FLOW_RATE_M3H": 70, "IS_DUCTED": false},
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [[35, 3], [20, 7]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {"FLOW_RATE_M3H": 20, "IS_DUCTED": true},
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [[100, 12], [20, 7]]
+      }
+    }
+  ]
+}
