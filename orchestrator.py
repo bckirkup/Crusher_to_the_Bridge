@@ -51,6 +51,9 @@ from crusher_labs.observation_core import (
     ContinuousAirSniffer,
     TargetedSurfaceSwab,
     WastewaterSequencingGrid,
+    ClinicalRapidDiagnostic,
+    ClinicalQPCR,
+    ClinicalMicrobiology,
 )
 from crusher_labs.lab_notebook import (
     ArtificialLabNotebook,
@@ -545,19 +548,57 @@ def run() -> None:
     fidelity_name, fidelity, logging_config = load_logging_profile(obs_cfg_path)
     lab_notebook_enabled = logging_config.get("lab_notebook", {}).get("enabled", True)
 
-    air_sniffer = ContinuousAirSniffer(rng=np.random.default_rng(seed))
-    surface_swab = TargetedSurfaceSwab(rng=np.random.default_rng(seed))
-    wastewater_seq = WastewaterSequencingGrid(rng=np.random.default_rng(seed))
+    qc_cfg = logging_config.get("quality_control", {})
+    xcontam_rate = qc_cfg.get("cross_contamination_rate", 0.0001)
+    ctrl_intensity = qc_cfg.get("control_run_intensity", "medium")
+
+    air_sniffer = ContinuousAirSniffer(
+        cross_contamination_rate=xcontam_rate,
+        control_intensity=ctrl_intensity,
+        rng=np.random.default_rng(seed),
+    )
+    surface_swab = TargetedSurfaceSwab(
+        cross_contamination_rate=xcontam_rate,
+        control_intensity=ctrl_intensity,
+        rng=np.random.default_rng(seed),
+    )
+    wastewater_seq = WastewaterSequencingGrid(
+        cross_contamination_rate=xcontam_rate,
+        control_intensity=ctrl_intensity,
+        rng=np.random.default_rng(seed),
+    )
+
+    # Individual patient clinical diagnostics (Sick Call)
+    clin_rdt = ClinicalRapidDiagnostic(
+        cross_contamination_rate=xcontam_rate,
+        control_intensity=ctrl_intensity,
+        rng=np.random.default_rng(seed),
+    )
+    clin_qpcr = ClinicalQPCR(
+        cross_contamination_rate=xcontam_rate,
+        control_intensity=ctrl_intensity,
+        rng=np.random.default_rng(seed),
+    )
+    clin_microbio = ClinicalMicrobiology(
+        cross_contamination_rate=xcontam_rate,
+        control_intensity=ctrl_intensity,
+        rng=np.random.default_rng(seed),
+    )
 
     notebook = build_notebook_from_config(obs_cfg_path)
 
     print(thin_line)
     print("  OBSERVATION ENGINE  ·  instrument-level diagnostics initialized")
     print(thin_line)
-    print(f"    1. Continuous Air Sniffer   (aerosol Ct from airborne mass pools)")
-    print(f"    2. Targeted Surface Swab    (fomite PCR with compliance variance)")
-    print(f"    3. Wastewater Seq Grid      (Dirichlet-multinomial metagenomic sampling)")
-    print(f"   Logging fidelity: {fidelity_name}")
+    print(f"    ENV 1. Continuous Air Sniffer   (aerosol Ct)")
+    print(f"    ENV 2. Targeted Surface Swab    (fomite PCR + compliance variance)")
+    print(f"    ENV 3. Wastewater Seq Grid      (Dirichlet-multinomial metagenomics)")
+    print(f"    CLN 4. Clinical RDT             (lateral-flow antigen, binary)")
+    print(f"    CLN 5. Clinical qPCR            (patient viral load Ct)")
+    print(f"    CLN 6. Clinical Microbiology    (culture/staining, flora shifts)")
+    print(f"   Logging fidelity:   {fidelity_name}")
+    print(f"   Cross-contamination: {xcontam_rate:.4%} carryover")
+    print(f"   QC control intensity: {ctrl_intensity}")
     print(f"   Lab notebook: {'enabled' if lab_notebook_enabled else 'disabled'}")
     print()
 
@@ -786,10 +827,27 @@ def run() -> None:
             wastewater_zones=ww_target_zones,
         )
 
+        # ── 7c. Individual Patient Clinical Diagnostics (Sick Call) ───
+        sick_call_agents = [
+            a for a in agents
+            if a["agent_id"] in syn_result.get("sick_call_agents", [])
+        ]
+        clin_rdt_results: dict[int, dict[str, Any]] = {}
+        clin_qpcr_results: dict[int, dict[str, Any]] = {}
+        clin_microbio_results: dict[int, dict[str, Any]] = {}
+
+        if sick_call_agents:
+            clin_rdt_results = clin_rdt.test_sick_call_agents(sick_call_agents)
+            clin_qpcr_results = clin_qpcr.test_sick_call_agents(sick_call_agents)
+            clin_microbio_results = clin_microbio.test_sick_call_agents(sick_call_agents)
+
         # Log instrument results to lab notebook
         notebook.log_air_sniffer(epoch, air_results)
         notebook.log_surface_swab(epoch, swab_results)
         notebook.log_wastewater_seq(epoch, ww_results)
+        notebook.log_clinical_rdt(epoch, clin_rdt_results)
+        notebook.log_clinical_qpcr(epoch, clin_qpcr_results)
+        notebook.log_clinical_microbiology(epoch, clin_microbio_results)
         notebook.log_agent_summary(epoch, agents)
 
         # ── 8. Escalation check ─────────────────────────────────────
@@ -964,6 +1022,9 @@ def run() -> None:
             "air_sniffer": air_results,
             "surface_swab": swab_results,
             "wastewater_sequencing": ww_results,
+            "clinical_rdt": clin_rdt_results,
+            "clinical_qpcr": clin_qpcr_results,
+            "clinical_microbiology": clin_microbio_results,
             "logging_fidelity": fidelity_name,
         }
 

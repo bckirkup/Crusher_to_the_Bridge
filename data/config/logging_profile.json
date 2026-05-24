@@ -3,32 +3,43 @@
   "description": "Controls the diagnostic logging output detail level for the Crusher Labs Observation Engine.",
   "fidelity_levels": {
     "LOW_FIDELITY": {
-      "label": "Strategic",
-      "description": "Binary diagnostic states only (POSITIVE/NEGATIVE per zone).",
+      "label": "Command/Strategic",
+      "description": "Stoplight indicators: GREEN (Clear), AMBER (Elevated Anomaly), RED (Critical Hazard). No numeric detail.",
       "log_binary_states": true,
       "log_numeric_outputs": false,
       "log_raw_matrices": false,
       "log_host_microflora_variance": false,
-      "log_contact_tracing": false
+      "log_contact_tracing": false,
+      "log_raw_instrument_telemetry": false,
+      "log_qc_validation": false
     },
     "MID_FIDELITY": {
-      "label": "Clinical",
-      "description": "Numeric instrument outputs: PCR Ct values, absolute pathogen mass, trigger states.",
+      "label": "Certified Clinical",
+      "description": "CAP-style certified lab reports: Patient/Zone ID, Assay Target, DETECTED/NOT DETECTED, formal Ct values, explicit QC validation flags.",
       "log_binary_states": true,
       "log_numeric_outputs": true,
       "log_raw_matrices": false,
-      "log_host_microflora_variance": false,
-      "log_contact_tracing": true
+      "log_host_microflora_variance": true,
+      "log_contact_tracing": true,
+      "log_raw_instrument_telemetry": false,
+      "log_qc_validation": true
     },
     "HIGH_FIDELITY": {
-      "label": "Bioinformatic",
-      "description": "Full raw data matrices including 4-kingdom log-ratio tables and individual host microflora tracking.",
+      "label": "Raw Synthetic Instrument",
+      "description": "Raw machine telemetry: cycle-by-cycle amplification curves, raw background fluorescence, pre-normalization read counts, Dirichlet parameters, culture results, control line intensities.",
       "log_binary_states": true,
       "log_numeric_outputs": true,
       "log_raw_matrices": true,
       "log_host_microflora_variance": true,
-      "log_contact_tracing": true
+      "log_contact_tracing": true,
+      "log_raw_instrument_telemetry": true,
+      "log_qc_validation": true
     }
+  },
+  "quality_control": {
+    "cross_contamination_rate": 0.0001,
+    "control_run_intensity": "medium",
+    "description": "Cross-contamination: 0.01% mass carryover between consecutive samples. Negative controls run at frequency determined by intensity (low=1/12, medium=1/6, high=1/3)."
   },
   "lab_notebook": {
     "enabled": true,

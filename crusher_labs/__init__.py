@@ -25,6 +25,10 @@ from crusher_labs.observation_core import (
     ContinuousAirSniffer,
     TargetedSurfaceSwab,
     WastewaterSequencingGrid,
+    ClinicalRapidDiagnostic,
+    ClinicalQPCR,
+    ClinicalMicrobiology,
+    InstrumentQC,
 )
 from crusher_labs.lab_notebook import ArtificialLabNotebook
 
@@ -101,6 +105,9 @@ ALL_INSTRUMENTS = [
     ContinuousAirSniffer,
     TargetedSurfaceSwab,
     WastewaterSequencingGrid,
+    ClinicalRapidDiagnostic,
+    ClinicalQPCR,
+    ClinicalMicrobiology,
 ]
 
 __all__ = [
@@ -111,6 +118,10 @@ __all__ = [
     "ContinuousAirSniffer",
     "TargetedSurfaceSwab",
     "WastewaterSequencingGrid",
+    "ClinicalRapidDiagnostic",
+    "ClinicalQPCR",
+    "ClinicalMicrobiology",
+    "InstrumentQC",
     "ArtificialLabNotebook",
     "ALL_MODALITIES",
     "ALL_INSTRUMENTS",
