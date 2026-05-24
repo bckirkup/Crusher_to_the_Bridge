@@ -1,0 +1,51 @@
+{
+  "logging_fidelity": "HIGH_FIDELITY",
+  "description": "Controls the diagnostic logging output detail level for the Crusher Labs Observation Engine.",
+  "fidelity_levels": {
+    "LOW_FIDELITY": {
+      "label": "Command/Strategic",
+      "description": "Stoplight indicators: GREEN (Clear), AMBER (Elevated Anomaly), RED (Critical Hazard). No numeric detail.",
+      "log_binary_states": true,
+      "log_numeric_outputs": false,
+      "log_raw_matrices": false,
+      "log_host_microflora_variance": false,
+      "log_contact_tracing": false,
+      "log_raw_instrument_telemetry": false,
+      "log_qc_validation": false
+    },
+    "MID_FIDELITY": {
+      "label": "Certified Clinical",
+      "description": "CAP-style certified lab reports: Patient/Zone ID, Assay Target, DETECTED/NOT DETECTED, formal Ct values, explicit QC validation flags.",
+      "log_binary_states": true,
+      "log_numeric_outputs": true,
+      "log_raw_matrices": false,
+      "log_host_microflora_variance": true,
+      "log_contact_tracing": true,
+      "log_raw_instrument_telemetry": false,
+      "log_qc_validation": true
+    },
+    "HIGH_FIDELITY": {
+      "label": "Raw Synthetic Instrument",
+      "description": "Raw machine telemetry: cycle-by-cycle amplification curves, raw background fluorescence, pre-normalization read counts, Dirichlet parameters, culture results, control line intensities.",
+      "log_binary_states": true,
+      "log_numeric_outputs": true,
+      "log_raw_matrices": true,
+      "log_host_microflora_variance": true,
+      "log_contact_tracing": true,
+      "log_raw_instrument_telemetry": true,
+      "log_qc_validation": true
+    }
+  },
+  "quality_control": {
+    "cross_contamination_rate": 0.0001,
+    "control_run_intensity": "medium",
+    "description": "Cross-contamination: 0.01% mass carryover between consecutive samples. Negative controls run at frequency determined by intensity (low=1/12, medium=1/6, high=1/3)."
+  },
+  "lab_notebook": {
+    "enabled": true,
+    "output_path": "telemetry_buffer/artificial_lab_notebook.json",
+    "include_sample_metadata": true,
+    "include_anomaly_scores": true,
+    "flatten_records": true
+  }
+}
