@@ -54,6 +54,19 @@ STATUS_ICONS = {
     "CONFIRMED": "■",
 }
 STOPLIGHT_COLORS = {"GREEN": "#2ecc71", "AMBER": "#f39c12", "RED": "#e74c3c"}
+_STOPLIGHT_SEVERITY = {"GREEN": 0, "AMBER": 1, "RED": 2}
+
+
+def _worst_stoplight(level: Any) -> str:
+    """Return the worst stoplight string when level may be a per-zone dict."""
+    if isinstance(level, dict):
+        worst = "GREEN"
+        for v in level.values():
+            s = str(v)
+            if _STOPLIGHT_SEVERITY.get(s, 0) > _STOPLIGHT_SEVERITY.get(worst, 0):
+                worst = s
+        return worst
+    return str(level)
 
 
 # ── Data loading ─────────────────────────────────────────────────────────
@@ -400,14 +413,15 @@ def render_spatial_deck(
         st.markdown("**Instrument Stoplights**")
         cols = st.columns(len(stoplights))
         for i, (inst, level) in enumerate(stoplights.items()):
-            color = STOPLIGHT_COLORS.get(level, "gray")
+            resolved = _worst_stoplight(level)
+            color = STOPLIGHT_COLORS.get(resolved, "gray")
             short = inst.replace("_", " ").title()[:20]
             with cols[i]:
                 st.markdown(
                     f"<div style='background:{color}; padding:4px; "
                     f"border-radius:4px; text-align:center; color:white; "
                     f"font-size:11px; font-weight:bold;'>"
-                    f"{short}<br>{level}</div>",
+                    f"{short}<br>{resolved}</div>",
                     unsafe_allow_html=True,
                 )
 
@@ -613,7 +627,8 @@ def _render_low_fidelity(
                 sl = rec.get("reactive_protocols", {}).get("stoplights", {})
                 row: dict[str, Any] = {"Epoch": rec["epoch"]}
                 for inst in instruments_sorted:
-                    row[inst.replace("_", " ").title()[:22]] = sl.get(inst, "—")
+                    raw = sl.get(inst, "—")
+                    row[inst.replace("_", " ").title()[:22]] = _worst_stoplight(raw) if isinstance(raw, dict) else raw
                 rows.append(row)
 
             df = pd.DataFrame(rows)
