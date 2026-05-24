@@ -24,11 +24,13 @@ Multi-pathogen concurrent simulation with microflora disruption:
 
 Usage::
 
-    python orchestrator.py
+    python orchestrator.py              # uses num_epochs from config.yaml (default 24)
+    python orchestrator.py --epochs 250 # override to 250 epochs
 """
 
 from __future__ import annotations
 
+import argparse
 import json
 import math
 import os
@@ -391,10 +393,16 @@ def run() -> None:
     print(sep)
     print()
 
+    parser = argparse.ArgumentParser(description="Crusher to the Bridge – simulation orchestrator")
+    parser.add_argument("--epochs", type=int, default=None,
+                        help="Number of simulation epochs (overrides config.yaml num_epochs)")
+    args = parser.parse_args()
+
     cfg = load_config()
+    num_epochs = args.epochs if args.epochs is not None else cfg.get("num_epochs", 24)
     seed = cfg.get("random_seed", 42)
     rng = np.random.default_rng(seed)
-    modalities = build_modalities(cfg, rng, total_epochs=24)
+    modalities = build_modalities(cfg, rng, total_epochs=num_epochs)
 
     syndromic = modalities["syndromic"]
     rdt = modalities["clinical_rdt"]
@@ -651,8 +659,6 @@ def run() -> None:
     escalation_log: list[dict[str, Any]] = []
     compliance_log: list[dict[str, Any]] = []
     simulation_history: list[dict[str, Any]] = []
-
-    num_epochs = 24
 
     for epoch in range(num_epochs):
         # ── 1. FRED compliance check for pending quarantine orders ────
