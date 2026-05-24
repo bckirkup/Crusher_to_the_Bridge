@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "protocols.schema.json",
+  "title": "Standing Operating Protocols",
+  "description": "Stoplight-triggered SOPs for the Reactive Protocol Engine.",
+  "type": "object",
+  "required": ["protocols"],
+  "properties": {
+    "description": {"type": "string"},
+    "protocols": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Protocol"
+      }
+    }
+  },
+  "$defs": {
+    "Protocol": {
+      "type": "object",
+      "required": ["protocol_id", "name", "trigger"],
+      "properties": {
+        "protocol_id": {
+          "type": "string",
+          "pattern": "^SOP-\\d{3}$",
+          "description": "Unique protocol identifier (e.g. 'SOP-001')"
+        },
+        "name": {"type": "string"},
+        "description": {"type": "string"},
+        "trigger": {
+          "$ref": "#/$defs/Trigger"
+        },
+        "modifiers": {
+          "type": "object",
+          "description": "Physics/behavior modifier keys applied while active",
+          "properties": {
+            "hvac_filter_efficiency_override": {"type": "number", "minimum": 0, "maximum": 1},
+            "hvac_filter_type_label": {"type": "string"},
+            "surface_decontamination_factor": {"type": "number", "minimum": 0, "maximum": 1},
+            "surface_decay_rate_override": {"type": "number", "minimum": 0, "maximum": 1},
+            "ppe_transmission_reduction": {"type": "number", "minimum": 0, "maximum": 1},
+            "direct_contact_scalar": {"type": "number", "minimum": 0, "maximum": 1},
+            "droplet_scalar": {"type": "number", "minimum": 0, "maximum": 1},
+            "hvac_airborne_scalar": {"type": "number", "minimum": 0, "maximum": 1},
+            "diagnostic_cadence_multiplier": {"type": "number", "minimum": 0},
+            "close_zones": {
+              "type": "array",
+              "items": {"type": "string"},
+              "description": "Zone IDs to close — MUST exist in spatial_layout.json"
+            },
+            "zone_occupancy_cap": {"type": "integer", "minimum": 0}
+          }
+        },
+        "costs_per_epoch": {
+          "$ref": "#/$defs/CostBlock"
+        },
+        "activation_costs": {
+          "$ref": "#/$defs/CostBlock"
+        },
+        "category": {
+          "type": "string",
+          "enum": ["intervention", "surveillance"]
+        }
+      }
+    },
+    "Trigger": {
+      "type": "object",
+      "required": ["instrument_class", "stoplight_level"],
+      "properties": {
+        "instrument_class": {
+          "type": "string",
+          "description": "Observation engine instrument class name"
+        },
+        "stoplight_level": {
+          "type": "string",
+          "enum": ["GREEN", "AMBER", "RED"]
+        },
+        "min_zones_affected": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 1
+        }
+      }
+    },
+    "CostBlock": {
+      "type": "object",
+      "properties": {
+        "financial_usd": {"type": "number", "minimum": 0},
+        "materials": {
+          "type": "object",
+          "additionalProperties": {"type": "integer", "minimum": 0},
+          "description": "Material item name → count consumed"
+        },
+        "labor_person_hours": {"type": "number", "minimum": 0}
+      }
+    }
+  }
+}

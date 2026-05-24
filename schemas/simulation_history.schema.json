@@ -1,0 +1,189 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "simulation_history.schema.json",
+  "title": "Simulation History",
+  "description": "Per-epoch simulation state logged to telemetry_buffer/simulation_history.json.",
+  "type": "array",
+  "items": {
+    "$ref": "#/$defs/EpochRecord"
+  },
+  "$defs": {
+    "EpochRecord": {
+      "type": "object",
+      "required": ["epoch", "summary", "spaces", "agents", "trigger_status"],
+      "properties": {
+        "epoch": {"type": "integer", "minimum": 0},
+        "trigger_status": {
+          "type": "string",
+          "enum": ["BASELINE", "SUSPECTED", "CONFIRMED"]
+        },
+        "summary": {
+          "type": "object",
+          "required": ["susceptible", "infected", "isolated", "recovered", "immune"],
+          "properties": {
+            "susceptible": {"type": "integer", "minimum": 0},
+            "infected": {"type": "integer", "minimum": 0},
+            "isolated": {"type": "integer", "minimum": 0},
+            "recovered": {"type": "integer", "minimum": 0},
+            "immune": {"type": "integer", "minimum": 0},
+            "symptomatic": {"type": "integer", "minimum": 0},
+            "sick_call_count": {"type": "integer", "minimum": 0},
+            "disrupted_microflora_count": {"type": "integer", "minimum": 0},
+            "quarantine_refusers": {"type": "integer", "minimum": 0}
+          }
+        },
+        "spaces": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/ZoneState"
+          }
+        },
+        "agents": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AgentState"
+          }
+        },
+        "contact_tracing": {
+          "$ref": "#/$defs/ContactTracingMatrix"
+        },
+        "multi_pathogen": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/PathogenEpochSummary"
+          }
+        },
+        "reactive_protocols": {
+          "type": "object",
+          "properties": {
+            "active_protocols": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "protocol_id": {"type": "string"},
+                  "name": {"type": "string"},
+                  "newly_activated": {"type": "boolean"}
+                },
+                "required": ["protocol_id"]
+              }
+            },
+            "merged_modifiers": {"type": "object"},
+            "stoplights": {"type": "object"}
+          }
+        },
+        "cost_accounting": {
+          "type": "object",
+          "properties": {
+            "epoch": {"type": "integer"},
+            "total_financial_usd": {"type": "number"},
+            "total_labor_hours": {"type": "number"},
+            "financial_balance_remaining": {"type": "number"},
+            "labor_hours_remaining": {"type": "number"},
+            "entries_count": {"type": "integer"}
+          }
+        },
+        "observation_engine": {
+          "type": "object",
+          "properties": {
+            "logging_fidelity": {"type": "string"},
+            "air_sniffer": {"type": "object"},
+            "surface_swab": {"type": "object"},
+            "wastewater_sequencing": {"type": "object"},
+            "clinical_rdt": {"type": "object"},
+            "clinical_qpcr": {"type": "object"},
+            "clinical_microbiology": {"type": "object"}
+          }
+        },
+        "microflora_shifts": {
+          "type": "object",
+          "additionalProperties": {"type": "object"}
+        },
+        "microflora_sequencing": {
+          "type": "object",
+          "additionalProperties": {"type": "object"}
+        },
+        "hvac": {"type": "object"},
+        "crusher_ops": {
+          "type": "object",
+          "properties": {
+            "surface_wipe_zones": {"type": "array", "items": {"type": "string"}},
+            "pcr_results": {"type": "object"},
+            "rdt_positive_count": {"type": "integer"},
+            "rdt_tested_count": {"type": "integer"},
+            "isolated_agents": {"type": "array", "items": {"type": "integer"}}
+          }
+        }
+      }
+    },
+    "ZoneState": {
+      "type": "object",
+      "properties": {
+        "pathogen_mass": {"type": "number", "minimum": 0},
+        "pathogen_mass_by_id": {
+          "type": "object",
+          "additionalProperties": {"type": "number"}
+        },
+        "concentration_per_m3": {"type": "number", "minimum": 0},
+        "volume_m3": {"type": "number", "exclusiveMinimum": 0}
+      }
+    },
+    "AgentState": {
+      "type": "object",
+      "properties": {
+        "agent_id": {"type": "integer"},
+        "status": {"type": "string"},
+        "location": {"type": "string"},
+        "shedding_rate": {"type": "number"},
+        "day_of_infection": {"type": "integer"},
+        "symptom_status": {"type": "string"},
+        "infection_pathway": {"type": "string"},
+        "susceptibility_multiplier": {
+          "type": "object",
+          "additionalProperties": {"type": "number"}
+        },
+        "microflora_disruption": {"type": "number"},
+        "active_pathogen_ids": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      }
+    },
+    "ContactTracingMatrix": {
+      "type": "object",
+      "required": ["epoch"],
+      "properties": {
+        "epoch": {"type": "integer"},
+        "shared_room_exposures": {
+          "type": "array",
+          "items": {"type": "object"}
+        },
+        "droplet_exposures": {
+          "type": "array",
+          "items": {"type": "object"}
+        },
+        "hvac_downstream_exposures": {
+          "type": "array",
+          "items": {"type": "object"}
+        },
+        "fomite_trailing_exposures": {
+          "type": "array",
+          "items": {"type": "object"}
+        },
+        "transmission_events": {
+          "type": "array",
+          "items": {"type": "object"}
+        }
+      }
+    },
+    "PathogenEpochSummary": {
+      "type": "object",
+      "properties": {
+        "infected": {"type": "integer", "minimum": 0},
+        "symptomatic": {"type": "integer", "minimum": 0},
+        "recovered": {"type": "integer", "minimum": 0},
+        "co_infected_count": {"type": "integer", "minimum": 0}
+      }
+    }
+  }
+}

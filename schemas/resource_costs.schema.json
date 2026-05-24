@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "resource_costs.schema.json",
+  "title": "Resource Costs",
+  "description": "Budget, material inventory, and per-test cost definitions for the Cost-Accounting Ledger.",
+  "type": "object",
+  "properties": {
+    "description": {"type": "string"},
+    "budgets": {
+      "type": "object",
+      "properties": {
+        "financial_usd": {
+          "type": "object",
+          "properties": {
+            "starting_balance": {"type": "number", "minimum": 0},
+            "description": {"type": "string"}
+          }
+        },
+        "labor_person_hours": {
+          "type": "object",
+          "properties": {
+            "starting_capacity": {"type": "number", "minimum": 0},
+            "description": {"type": "string"}
+          }
+        }
+      }
+    },
+    "material_inventory": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/MaterialItem"
+      }
+    },
+    "baseline_surveillance_costs_per_epoch": {
+      "type": "object",
+      "properties": {
+        "financial_usd": {"type": "number", "minimum": 0},
+        "labor_person_hours": {"type": "number", "minimum": 0},
+        "materials": {
+          "type": "object",
+          "additionalProperties": {"type": "integer", "minimum": 0}
+        }
+      }
+    },
+    "per_test_costs": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/PerTestCost"
+      }
+    }
+  },
+  "$defs": {
+    "MaterialItem": {
+      "type": "object",
+      "properties": {
+        "starting_count": {"type": "integer", "minimum": 0},
+        "unit_cost_usd": {"type": "number", "minimum": 0},
+        "description": {"type": "string"}
+      }
+    },
+    "PerTestCost": {
+      "type": "object",
+      "properties": {
+        "financial_usd": {"type": "number", "minimum": 0},
+        "labor_person_hours": {"type": "number", "minimum": 0},
+        "materials": {
+          "type": "object",
+          "additionalProperties": {"type": "integer", "minimum": 0}
+        }
+      }
+    }
+  }
+}
