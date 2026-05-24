@@ -95,6 +95,24 @@ targeted_pcr:
   lod_ct_threshold: 38.0              # Ct > this ⇒ Negative
   cadence: 4                          # baseline; escalation overrides to 1
 
+# ── Multi-Pathogen Configuration ──────────────────────────────
+multi_pathogen:
+  profiles_path: "data/pathogens/active_profiles.json"
+  enable_coinfection: true            # allow agents to carry multiple pathogens
+  # Default susceptibility multiplier for immunocompromised agents
+  immunocompromised_fraction: 0.05    # fraction of agents with elevated susceptibility
+  immunocompromised_multiplier: 2.0   # dose scaling for immunocompromised
+
+# ── Microflora Disruption ────────────────────────────────────
+microflora:
+  enable_dual_signal: true            # shed altered microflora alongside pathogen
+  # Per-zone microbial mass pool shed by disrupted hosts per epoch
+  disrupted_shed_mass: 50.0           # baseline microbial mass units per shedding agent
+  # GRUMB CLR shift magnitude scaling
+  clr_shift_scale: 0.15              # scales the kingdom-level CLR perturbation
+  # Graywater downstream zones (accumulate microbial signatures)
+  graywater_zones: ["Engine_Room"]
+
 # ── Metagenomic Sequencing ───────────────────────────────────
 sequencing:
   description: "Metagenomic shotgun sequencing of environmental samples"

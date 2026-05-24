@@ -1,0 +1,75 @@
+{
+  "meta": {
+    "description": "Multi-pathogen profile definitions for concurrent simulation",
+    "version": "1.0",
+    "notes": "Each pathogen runs as an independent instance with separate mass pools per room. Profiles can be activated at initiation or introduced mid-cruise via 'introduction_epoch'."
+  },
+  "pathogens": [
+    {
+      "pathogen_id": "norwalk_gi",
+      "name": "Norwalk Virus (Norovirus GII.4)",
+      "category": "enteric_viral",
+      "transmission_routes": ["direct_contact", "fomite", "droplet", "hvac_airborne"],
+      "shedding_curve_log10": [7.75, 9.0, 11.0, 11.0, 11.0, 10.0, 10.0, 9.5, 9.0, 9.0, 8.0, 8.0, 8.0, 8.0, 8.0],
+      "asymptomatic_shedding_log10": [7.75, 9.5, 10.5, 10.0, 9.0, 8.0, 7.75, 7.75, 7.75, 7.75, 7.75, 7.75, 7.75, 7.75, 7.75],
+      "dose_adjustment": 4.0,
+      "dose_response": {
+        "model": "beta_poisson",
+        "alpha": 0.111,
+        "beta": 32.81
+      },
+      "illness_probability": {
+        "eta": 0.508,
+        "gamma": 0.095
+      },
+      "recovery_day": 3,
+      "surface_deposition_fraction": 1e-4,
+      "base_susceptibility": 1.0,
+      "microflora_disruption": {
+        "causes_disruption": true,
+        "disruption_type": "gastrointestinal",
+        "disruption_magnitude": 0.8,
+        "affected_kingdoms": {
+          "Bacteria": {"Enterobacter": 3.5, "Vibrio_spp": 2.0},
+          "Fungi": {"Candida_spp": 2.5},
+          "Virus": {"Phage_community": 1.8}
+        }
+      },
+      "introduction_epoch": 0,
+      "initial_infected": 1
+    },
+    {
+      "pathogen_id": "sars_cov2_resp",
+      "name": "SARS-CoV-2 (Respiratory)",
+      "category": "respiratory_viral",
+      "transmission_routes": ["droplet", "hvac_airborne", "direct_contact", "fomite"],
+      "shedding_curve_log10": [3.0, 5.0, 7.0, 8.5, 9.0, 8.5, 7.5, 6.5, 5.5, 4.5, 3.5, 3.0, 2.5, 2.0, 2.0],
+      "asymptomatic_shedding_log10": [3.0, 4.5, 6.0, 7.0, 7.5, 7.0, 6.0, 5.0, 4.0, 3.5, 3.0, 2.5, 2.0, 2.0, 2.0],
+      "dose_adjustment": 3.0,
+      "dose_response": {
+        "model": "beta_poisson",
+        "alpha": 0.18,
+        "beta": 58.0
+      },
+      "illness_probability": {
+        "eta": 0.40,
+        "gamma": 0.12
+      },
+      "recovery_day": 7,
+      "surface_deposition_fraction": 5e-5,
+      "base_susceptibility": 1.0,
+      "microflora_disruption": {
+        "causes_disruption": true,
+        "disruption_type": "respiratory",
+        "disruption_magnitude": 0.6,
+        "affected_kingdoms": {
+          "Bacteria": {"Pseudoalteromonas": 2.0, "Staphylococcus_epi": 3.0},
+          "Fungi": {"Aspergillus_spp": 2.2},
+          "Virus": {"ssRNA_marine": 1.5}
+        }
+      },
+      "introduction_epoch": 6,
+      "initial_infected": 1
+    }
+  ]
+}

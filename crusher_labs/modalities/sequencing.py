@@ -18,6 +18,12 @@ simulation timeline.
 Phase 2.5: Multi-kingdom log-ratio seeding at t=0 — spatial nodes are
 initialized with realistic multi-kingdom relative-abundance arrays
 derived from the infection-dynamics ship graph zones.
+
+Phase 4+: Microflora disruption detection — when hosts with disrupted
+microbiomes shed altered native microbial signatures into the
+environment, this modality detects the resulting kingdom-level
+log-ratio shifts via GRUMB CLR-space anomaly scoring, independently
+of direct pathogen identification.
 """
 
 from __future__ import annotations
@@ -96,6 +102,28 @@ OPEN_OCEAN_PROFILE: dict[str, float] = {
 }
 
 PATHOGEN_TAXON = "Pathogen_target"
+
+# Microflora disruption markers — altered taxa signatures shed by
+# hosts with disrupted microbiomes.  Keyed by disruption type.
+DISRUPTION_MARKERS: dict[str, dict[str, float]] = {
+    "gastrointestinal": {
+        "Enterobacter":       3.5,   # bloom from GI dysbiosis
+        "Candida_spp":        2.5,   # fungal opportunist
+        "Vibrio_spp":         2.0,   # enteric pathobiont
+        "Phage_community":    1.8,   # phage bloom tracks bacterial bloom
+    },
+    "respiratory": {
+        "Pseudoalteromonas":  2.0,   # respiratory tract commensal shift
+        "Staphylococcus_epi": 3.0,   # skin/nares dysbiosis
+        "Aspergillus_spp":    2.2,   # fungal opportunist
+        "ssRNA_marine":       1.5,   # viral community shift
+    },
+    "skin": {
+        "Staphylococcus_epi": 2.5,
+        "Candida_spp":        2.0,
+        "Bacillus_subtilis":  1.5,
+    },
+}
 
 
 # ── GRUMB compositional math helpers ─────────────────────────────────
@@ -233,11 +261,13 @@ class MetagenomicSequencing:
         pseudocount: float = 1e-6,
         total_epochs: int = 24,
         rng: np.random.Generator | None = None,
+        clr_shift_scale: float = 0.15,
     ) -> None:
         self.read_depth = read_depth
         self.pseudocount = pseudocount
         self.total_epochs = total_epochs
         self.rng = rng if rng is not None else np.random.default_rng()
+        self.clr_shift_scale = clr_shift_scale
         self._zone_seeds: dict[str, dict[str, Any]] = {}
 
     def seed_zones(self, zone_configs: list[dict[str, str]]) -> dict[str, dict[str, Any]]:
@@ -258,17 +288,94 @@ class MetagenomicSequencing:
             self._zone_seeds[zc["name"]] = seed
         return dict(self._zone_seeds)
 
-    def query_ground_truth(self, json_data: dict[str, Any]) -> dict[str, Any]:
+    def apply_microflora_disruption(
+        self,
+        baseline: np.ndarray,
+        taxa: list[str],
+        disruption_shifts: dict[str, dict[str, float]],
+        total_disruption_magnitude: float,
+    ) -> tuple[np.ndarray, dict[str, float]]:
+        """Apply microflora disruption shifts to a baseline profile via CLR.
+
+        When hosts with disrupted microbiomes shed altered native microbial
+        signatures, the local community composition shifts.  This uses
+        GRUMB CLR-space perturbation to modify the baseline profile.
+
+        Returns the shifted profile and a dict of kingdom-level CLR deltas.
+        """
+        if total_disruption_magnitude <= 0 or not disruption_shifts:
+            return baseline, {}
+
+        clr_baseline = _clr_transform(baseline, self.pseudocount)
+        shift_vec = np.zeros(len(taxa), dtype=np.float64)
+
+        for disruption_type, markers in disruption_shifts.items():
+            for taxon, multiplier in markers.items():
+                if taxon in taxa:
+                    idx = taxa.index(taxon)
+                    shift_vec[idx] += (
+                        np.log(multiplier)
+                        * total_disruption_magnitude
+                        * self.clr_shift_scale
+                    )
+
+        shifted_clr = clr_baseline + shift_vec
+        shifted_profile = _inv_clr(shifted_clr)
+
+        # Compute kingdom-level CLR deltas for anomaly scoring
+        kingdom_deltas: dict[str, float] = {}
+        for kingdom, kingdom_taxa in MULTI_KINGDOM_TAXA.items():
+            indices = [taxa.index(t) for t in kingdom_taxa if t in taxa]
+            if indices:
+                baseline_kingdom_clr = float(np.mean(clr_baseline[indices]))
+                shifted_kingdom_clr = float(np.mean(shifted_clr[indices]))
+                kingdom_deltas[kingdom] = round(
+                    shifted_kingdom_clr - baseline_kingdom_clr, 6,
+                )
+
+        return shifted_profile, kingdom_deltas
+
+    def detect_microflora_anomaly(
+        self,
+        kingdom_deltas: dict[str, float],
+        threshold: float = 0.05,
+    ) -> dict[str, Any]:
+        """Score kingdom-level CLR shifts for anomaly detection."""
+        anomalies = {}
+        overall_shift = 0.0
+        for kingdom, delta in kingdom_deltas.items():
+            abs_delta = abs(delta)
+            overall_shift += abs_delta
+            if abs_delta > threshold:
+                anomalies[kingdom] = {
+                    "clr_delta": delta,
+                    "direction": "elevated" if delta > 0 else "depleted",
+                    "anomaly_detected": True,
+                }
+        return {
+            "anomaly_detected": len(anomalies) > 0,
+            "overall_shift_magnitude": round(overall_shift, 6),
+            "kingdom_anomalies": anomalies,
+        }
+
+    def query_ground_truth(
+        self,
+        json_data: dict[str, Any],
+        zone_microflora_shifts: dict[str, dict[str, float]] | None = None,
+    ) -> dict[str, Any]:
         """Consume ground-truth spaces and produce sequencing telemetry.
 
         For each zone:
         1. Build the time-dependent drifting baseline.
-        2. Inject the pathogen as an additional taxon proportional to
+        2. Apply microflora disruption shifts (if any) via GRUMB CLR.
+        3. Inject the pathogen as an additional taxon proportional to
            ``pathogen_mass`` using GRUMB CLR-space blending.
-        3. Draw observed reads via ``numpy.random.multinomial``.
+        4. Draw observed reads via ``numpy.random.multinomial``.
+        5. Score kingdom-level anomalies from microflora shifts.
         """
         epoch = json_data.get("epoch", 0)
         spaces = json_data.get("spaces", {})
+        zone_microflora_shifts = zone_microflora_shifts or {}
 
         zone_results: dict[str, dict[str, Any]] = {}
 
@@ -278,6 +385,22 @@ class MetagenomicSequencing:
             baseline, taxa = _get_drifted_baseline(
                 epoch, self.total_epochs, self.rng
             )
+
+            # Apply microflora disruption shifts from dual-signal shedding
+            mf_shifts = zone_microflora_shifts.get(zone_id, {})
+            total_disruption = sum(mf_shifts.values()) if mf_shifts else 0.0
+            kingdom_deltas: dict[str, float] = {}
+
+            if total_disruption > 0:
+                disruption_markers: dict[str, dict[str, float]] = {}
+                for d_type in mf_shifts:
+                    if d_type in DISRUPTION_MARKERS:
+                        disruption_markers[d_type] = DISRUPTION_MARKERS[d_type]
+                baseline, kingdom_deltas = self.apply_microflora_disruption(
+                    baseline, taxa, disruption_markers, total_disruption,
+                )
+
+            anomaly_report = self.detect_microflora_anomaly(kingdom_deltas)
 
             taxa_with_pathogen = taxa + [PATHOGEN_TAXON]
             pathogen_frac = pathogen_mass / (pathogen_mass + 100.0)
@@ -306,6 +429,13 @@ class MetagenomicSequencing:
                 "seeded_kingdoms": (
                     seed_info["kingdom_fractions"] if seed_info else None
                 ),
+                "pathogen_mass_by_id": zone.get("pathogen_mass_by_id", {}),
+                "microflora_disruption": {
+                    "kingdom_clr_deltas": kingdom_deltas,
+                    "anomaly_report": anomaly_report,
+                    "disruption_types_present": list(mf_shifts.keys()),
+                    "total_disruption_magnitude": round(total_disruption, 4),
+                },
             }
 
         return {
