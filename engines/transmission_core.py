@@ -173,6 +173,11 @@ class TransmissionCore:
         self._prev_zone_shedders: dict[str, list[int]] = {}
         self._prev_zone_shedders_by_pathogen: dict[str, dict[str, list[int]]] = {}
 
+        # Protocol-driven pathway scalars (1.0 = no modification)
+        self.direct_contact_scalar: float = 1.0
+        self.droplet_scalar: float = 1.0
+        self.hvac_airborne_scalar: float = 1.0
+
     def initialize_zones(self, zone_names: list[str]) -> None:
         """Set up pools for all zones."""
         for z in zone_names:
@@ -369,6 +374,7 @@ class TransmissionCore:
             for target in susceptible:
                 r0_draw = int(self.rng.choice(AVG_R_POOL))
                 dose = total_shedding / n_occupants * r0_draw
+                dose *= self.direct_contact_scalar
                 agent_doses[target.agent_id] = (
                     agent_doses.get(target.agent_id, 0.0) + dose
                 )
@@ -420,6 +426,7 @@ class TransmissionCore:
 
             for target in susceptible:
                 dose = concentration * volume * AEROSOL_INHALATION_FRACTION
+                dose *= self.droplet_scalar
                 agent_doses[target.agent_id] = (
                     agent_doses.get(target.agent_id, 0.0) + dose
                 )
@@ -481,6 +488,7 @@ class TransmissionCore:
 
                 for target in susceptible:
                     dose = concentration * AEROSOL_INHALATION_FRACTION * volume
+                    dose *= self.hvac_airborne_scalar
                     agent_doses[target.agent_id] = (
                         agent_doses.get(target.agent_id, 0.0) + dose
                     )

@@ -595,10 +595,15 @@ class ArtificialLabNotebook:
 
             self.records.append(record)
 
-    def serialize(self, output_path: str) -> str:
-        notebook = {
+    def serialize(
+        self,
+        output_path: str,
+        financial_audit: dict[str, Any] | None = None,
+        protocol_summary: dict[str, Any] | None = None,
+    ) -> str:
+        notebook: dict[str, Any] = {
             "notebook_type": "artificial_lab_notebook",
-            "version": "2.0",
+            "version": "3.0",
             "run_metadata": self._metadata,
             "total_records": len(self.records),
             "fidelity_tier_definitions": {
@@ -608,6 +613,12 @@ class ArtificialLabNotebook:
             },
             "records": self.records,
         }
+
+        if financial_audit is not None:
+            notebook["FINANCIAL_AUDIT"] = financial_audit
+
+        if protocol_summary is not None:
+            notebook["PROTOCOL_SUMMARY"] = protocol_summary
 
         os.makedirs(os.path.dirname(os.path.abspath(output_path)), exist_ok=True)
         with open(output_path, "w", encoding="utf-8") as fh:

@@ -72,6 +72,19 @@ from engines.transmission_core import (
     build_hvac_downstream_map,
 )
 from engines.py_contam_bridge import load_air_flow_paths
+from crusher_labs.protocol_engine import (
+    ProtocolEngine,
+    compute_stoplights,
+    load_protocols,
+    apply_hvac_modifiers,
+    apply_transmission_modifiers,
+    reset_modifiers,
+)
+from crusher_labs.cost_ledger import (
+    CostLedger,
+    build_ledger_from_config,
+    load_resource_costs,
+)
 
 # ── Trigger status constants ─────────────────────────────────────────────
 STATUS_BASELINE = "BASELINE"
@@ -602,6 +615,32 @@ def run() -> None:
     print(f"   Lab notebook: {'enabled' if lab_notebook_enabled else 'disabled'}")
     print()
 
+    # ── Initialize Reactive Protocol Engine & Cost Ledger ────────────
+    protocols_cfg_path = os.path.join(_REPO_ROOT, "data", "config", "protocols.json")
+    resource_cfg_path = os.path.join(_REPO_ROOT, "data", "config", "resource_costs.json")
+
+    cost_ledger = build_ledger_from_config(resource_cfg_path)
+    resource_costs_cfg = load_resource_costs(resource_cfg_path)
+    standing_protocols = load_protocols(protocols_cfg_path)
+    protocol_engine = ProtocolEngine(standing_protocols, cost_ledger)
+
+    original_filter_eff = (
+        contam_engine.filter_efficiency if contam_engine is not None else 0.50
+    )
+
+    print(thin_line)
+    print("  REACTIVE PROTOCOL ENGINE  ·  standing protocols loaded")
+    print(thin_line)
+    for sp in standing_protocols:
+        trigger = sp.trigger
+        print(f"    {sp.protocol_id}  {sp.name}")
+        print(f"      Trigger: {trigger['instrument_class']} ≥ {trigger['stoplight_level']}")
+    print(f"   Protocols loaded: {len(standing_protocols)}")
+    print(f"   Starting budget: ${cost_ledger.financial_balance:,.2f}")
+    print(f"   Starting labor:  {cost_ledger.labor_remaining:.1f} person-hours")
+    print(f"   Material items:  {len(cost_ledger.inventory)}")
+    print()
+
     grumb_seeds = _initialize_grumb_seeding(seq, ship["zones"])
     _print_initialization(ship, grumb_seeds, cfg)
 
@@ -864,6 +903,38 @@ def run() -> None:
             })
             notebook.log_trigger_transition(epoch, prev_status, trigger_status)
 
+        # ── 8b. Reactive Protocol Engine evaluation ────────────────
+        stoplights = compute_stoplights(
+            air_results, swab_results, ww_results,
+            clin_rdt_results, clin_qpcr_results, clin_microbio_results,
+        )
+
+        # Reset modifiers to baseline before re-evaluating
+        reset_modifiers(contam_engine, tx_core, original_filter_eff)
+
+        active_mods = protocol_engine.evaluate_epoch(epoch, stoplights)
+        merged_mods = protocol_engine.get_merged_modifiers(active_mods)
+
+        # Apply physics/behavior modifiers from active protocols
+        if merged_mods:
+            apply_hvac_modifiers(contam_engine, merged_mods)
+            apply_transmission_modifiers(tx_core, merged_mods)
+
+        # ── 8c. Cost accounting — baseline surveillance + per-test ───
+        baseline_costs = resource_costs_cfg.get("baseline_surveillance_costs_per_epoch", {})
+        cost_ledger.debit_baseline_surveillance(epoch, baseline_costs)
+
+        per_test = resource_costs_cfg.get("per_test_costs", {})
+        # Environmental instruments
+        cost_ledger.debit_per_test(epoch, "air_sniffer_sample", len(air_results), per_test)
+        cost_ledger.debit_per_test(epoch, "surface_swab", len(swab_results), per_test)
+        cost_ledger.debit_per_test(epoch, "wastewater_sequencing", len(ww_results), per_test)
+        # Clinical instruments (per sick-call patient)
+        n_sick = len(clin_rdt_results)
+        cost_ledger.debit_per_test(epoch, "clinical_rdt", n_sick, per_test)
+        cost_ledger.debit_per_test(epoch, "clinical_qpcr", n_sick, per_test)
+        cost_ledger.debit_per_test(epoch, "clinical_microbiology", n_sick, per_test)
+
         # ── 9. CONFIRMED → quarantine with FRED compliance ──────────
         if trigger_status == STATUS_CONFIRMED:
             for agent in agents:
@@ -1028,15 +1099,31 @@ def run() -> None:
             "logging_fidelity": fidelity_name,
         }
 
+        # Protocol engine + cost accounting
+        epoch_record["reactive_protocols"] = {
+            "active_protocols": [
+                {"protocol_id": m["protocol_id"], "name": m["name"],
+                 "newly_activated": m["newly_activated"]}
+                for m in active_mods
+            ],
+            "merged_modifiers": merged_mods,
+            "stoplights": stoplights,
+        }
+        epoch_cost = cost_ledger.get_epoch_summary(epoch)
+        epoch_record["cost_accounting"] = epoch_cost
+
         simulation_history.append(epoch_record)
 
         # ── 11. Console output ──────────────────────────────────────
+        active_protocol_names = [m["name"] for m in active_mods]
         _print_epoch(
             epoch, trigger_status, syn_result, rdt_result,
             pcr_result, seq_result, active_symptomatic,
             len(isolated_ids), len(quarantine_refusers), prev_status,
             multi_pathogen_summary=multi_pathogen_summary,
             zone_microflora_shifts=zone_microflora_shifts,
+            active_protocols=active_protocol_names,
+            epoch_cost=epoch_cost,
         )
 
     # ── Save simulation history ──────────────────────────────────────
@@ -1060,7 +1147,13 @@ def run() -> None:
             "output_path", "telemetry_buffer/artificial_lab_notebook.json",
         )
         nb_path = os.path.join(_REPO_ROOT, nb_output)
-        notebook.serialize(nb_path)
+        financial_audit = cost_ledger.generate_financial_audit()
+        protocol_summary = protocol_engine.generate_protocol_summary()
+        notebook.serialize(
+            nb_path,
+            financial_audit=financial_audit,
+            protocol_summary=protocol_summary,
+        )
         print(f"  Lab notebook saved to: {nb_path} ({len(notebook.records)} records)")
 
     # ── Summary ──────────────────────────────────────────────────────
@@ -1111,6 +1204,45 @@ def run() -> None:
         print(f"  Immediate compliance: {len(immediate)}")
         print(f"  Refused (then delayed): {len(refused)} refused, {len(delayed)} eventually complied")
 
+    # Protocol engine summary
+    print()
+    print("  REACTIVE PROTOCOL ENGINE – SUMMARY")
+    print(thin)
+    proto_summary = protocol_engine.generate_protocol_summary()
+    print(f"  Total protocol activations:   {proto_summary['total_activations']}")
+    print(f"  Total protocol deactivations: {proto_summary['total_deactivations']}")
+    still_active = proto_summary["protocols_still_active"]
+    print(f"  Protocols still active:       {len(still_active)}")
+    for pid in still_active:
+        print(f"    - {pid}")
+    print()
+
+    # Cost accounting summary
+    print("  COST ACCOUNTING – FINANCIAL AUDIT")
+    print(thin)
+    audit = cost_ledger.generate_financial_audit()
+    summary = audit["summary"]
+    print(f"  Starting budget:      ${summary['starting_financial_budget_usd']:>10,.2f}")
+    print(f"  Total expenditure:    ${summary['total_expenditure_usd']:>10,.2f}")
+    print(f"    Surveillance cost:  ${summary['surveillance_cost_usd']:>10,.2f}")
+    print(f"    Intervention cost:  ${summary['intervention_cost_usd']:>10,.2f}")
+    print(f"  Remaining balance:    ${summary['remaining_balance_usd']:>10,.2f}")
+    print()
+    print(f"  Starting labor:       {summary['starting_labor_capacity_hours']:>8.1f} person-hours")
+    print(f"  Total labor consumed: {summary['total_labor_consumed_hours']:>8.1f} person-hours")
+    print(f"    Surveillance:       {summary['surveillance_labor_hours']:>8.1f} person-hours")
+    print(f"    Intervention:       {summary['intervention_labor_hours']:>8.1f} person-hours")
+    print(f"  Remaining labor:      {summary['remaining_labor_hours']:>8.1f} person-hours")
+    print()
+
+    # Material inventory status
+    depleted = [
+        item for item, data in audit["material_inventory"].items()
+        if data["remaining"] == 0 and data["consumed"] > 0
+    ]
+    if depleted:
+        print(f"  ⚠ Depleted materials: {', '.join(depleted)}")
+
     print(thin)
     print(f"  Final status: {trigger_status}")
     print(f"  Agents isolated: {len(isolated_ids)}/{num_agents}")
@@ -1132,6 +1264,8 @@ def _print_epoch(
     prev_status: str,
     multi_pathogen_summary: dict[str, dict[str, int]] | None = None,
     zone_microflora_shifts: dict[str, dict[str, float]] | None = None,
+    active_protocols: list[str] | None = None,
+    epoch_cost: dict[str, Any] | None = None,
 ) -> None:
     """Print a single epoch's diagnostic summary line."""
     status_icon = {
@@ -1197,6 +1331,14 @@ def _print_epoch(
         if n_shifted > 0:
             mf_str = f" MF:{n_shifted}zones"
 
+    # Protocol / cost indicator
+    proto_str = ""
+    if active_protocols:
+        proto_str = f" SOP:[{','.join(p[:12] for p in active_protocols)}]"
+    cost_str = ""
+    if epoch_cost:
+        cost_str = f" ${epoch_cost['total_financial_usd']:.0f}"
+
     print(
         f"[Epoch {epoch:02d}] {status_icon} {trigger_status:<10s} | "
         f"Sick: {syn['sick_call_count']:2d} "
@@ -1205,7 +1347,7 @@ def _print_epoch(
         f"PCR: {pcr_str} | "
         f"Seq: {seq_str} | "
         f"Symp:{symptomatic_count:2d} Iso:{isolated_count:2d} Ref:{refuser_count:1d}"
-        f"{mp_str}{mf_str}{transition}"
+        f"{mp_str}{mf_str}{proto_str}{cost_str}{transition}"
     )
 
 

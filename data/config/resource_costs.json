@@ -1,0 +1,107 @@
+{
+  "description": "Resource cost definitions for the Cost-Accounting Ledger. Defines unit costs, starting budgets, and material inventories.",
+  "budgets": {
+    "financial_usd": {
+      "starting_balance": 50000.00,
+      "description": "Total USD budget available for the simulation run."
+    },
+    "labor_person_hours": {
+      "starting_capacity": 480.0,
+      "description": "Total crew person-hours available (20 crew × 24 hours). Depleted by surveillance and intervention labor."
+    }
+  },
+  "material_inventory": {
+    "surgical_masks": {
+      "starting_count": 500,
+      "unit_cost_usd": 0.50,
+      "description": "Standard surgical face masks."
+    },
+    "n95_respirators": {
+      "starting_count": 100,
+      "unit_cost_usd": 3.50,
+      "description": "N95 particulate respirators."
+    },
+    "face_shields": {
+      "starting_count": 50,
+      "unit_cost_usd": 5.00,
+      "description": "Full-face protective shields."
+    },
+    "gloves_pairs": {
+      "starting_count": 1000,
+      "unit_cost_usd": 0.25,
+      "description": "Disposable nitrile glove pairs."
+    },
+    "sanitizer_units": {
+      "starting_count": 200,
+      "unit_cost_usd": 8.00,
+      "description": "Industrial sanitizer spray bottles/units."
+    },
+    "rdt_kits": {
+      "starting_count": 200,
+      "unit_cost_usd": 12.00,
+      "description": "Rapid diagnostic test kits (lateral flow antigen)."
+    },
+    "pcr_kits": {
+      "starting_count": 100,
+      "unit_cost_usd": 45.00,
+      "description": "qPCR reagent kits for clinical and environmental testing."
+    },
+    "swab_kits": {
+      "starting_count": 300,
+      "unit_cost_usd": 2.00,
+      "description": "Surface and patient swab collection kits."
+    },
+    "hvac_filters": {
+      "starting_count": 20,
+      "unit_cost_usd": 75.00,
+      "description": "HVAC replacement filter units (MERV-13/16/HEPA)."
+    },
+    "meal_trays": {
+      "starting_count": 500,
+      "unit_cost_usd": 1.50,
+      "description": "Individual meal trays for isolation feeding."
+    }
+  },
+  "baseline_surveillance_costs_per_epoch": {
+    "description": "Fixed surveillance costs incurred every epoch regardless of protocol activation.",
+    "financial_usd": 50.00,
+    "materials": {
+      "swab_kits": 1,
+      "pcr_kits": 1
+    },
+    "labor_person_hours": 2.0,
+    "category": "surveillance"
+  },
+  "per_test_costs": {
+    "clinical_rdt": {
+      "financial_usd": 15.00,
+      "materials": {"rdt_kits": 1},
+      "labor_person_hours": 0.25
+    },
+    "clinical_qpcr": {
+      "financial_usd": 55.00,
+      "materials": {"pcr_kits": 1, "swab_kits": 1},
+      "labor_person_hours": 0.5
+    },
+    "clinical_microbiology": {
+      "financial_usd": 35.00,
+      "materials": {"swab_kits": 1},
+      "labor_person_hours": 0.75
+    },
+    "surface_swab": {
+      "financial_usd": 10.00,
+      "materials": {"swab_kits": 1},
+      "labor_person_hours": 0.25
+    },
+    "air_sniffer_sample": {
+      "financial_usd": 5.00,
+      "materials": {},
+      "labor_person_hours": 0.1
+    },
+    "wastewater_sequencing": {
+      "financial_usd": 120.00,
+      "materials": {"pcr_kits": 1},
+      "labor_person_hours": 1.0
+    }
+  }
+}
