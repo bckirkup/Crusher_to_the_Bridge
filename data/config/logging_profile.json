@@ -1,0 +1,40 @@
+{
+  "logging_fidelity": "HIGH_FIDELITY",
+  "description": "Controls the diagnostic logging output detail level for the Crusher Labs Observation Engine.",
+  "fidelity_levels": {
+    "LOW_FIDELITY": {
+      "label": "Strategic",
+      "description": "Binary diagnostic states only (POSITIVE/NEGATIVE per zone).",
+      "log_binary_states": true,
+      "log_numeric_outputs": false,
+      "log_raw_matrices": false,
+      "log_host_microflora_variance": false,
+      "log_contact_tracing": false
+    },
+    "MID_FIDELITY": {
+      "label": "Clinical",
+      "description": "Numeric instrument outputs: PCR Ct values, absolute pathogen mass, trigger states.",
+      "log_binary_states": true,
+      "log_numeric_outputs": true,
+      "log_raw_matrices": false,
+      "log_host_microflora_variance": false,
+      "log_contact_tracing": true
+    },
+    "HIGH_FIDELITY": {
+      "label": "Bioinformatic",
+      "description": "Full raw data matrices including 4-kingdom log-ratio tables and individual host microflora tracking.",
+      "log_binary_states": true,
+      "log_numeric_outputs": true,
+      "log_raw_matrices": true,
+      "log_host_microflora_variance": true,
+      "log_contact_tracing": true
+    }
+  },
+  "lab_notebook": {
+    "enabled": true,
+    "output_path": "telemetry_buffer/artificial_lab_notebook.json",
+    "include_sample_metadata": true,
+    "include_anomaly_scores": true,
+    "flatten_records": true
+  }
+}

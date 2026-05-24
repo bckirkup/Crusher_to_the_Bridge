@@ -21,6 +21,12 @@ from crusher_labs.modalities.syndromic import SyndromicSurveillance
 from crusher_labs.modalities.clinical_rdt import ClinicalRDT
 from crusher_labs.modalities.targeted_pcr import TargetedPCR
 from crusher_labs.modalities.sequencing import MetagenomicSequencing
+from crusher_labs.observation_core import (
+    ContinuousAirSniffer,
+    TargetedSurfaceSwab,
+    WastewaterSequencingGrid,
+)
+from crusher_labs.lab_notebook import ArtificialLabNotebook
 
 _CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.yaml")
 
@@ -91,12 +97,23 @@ ALL_MODALITIES = [
     MetagenomicSequencing,
 ]
 
+ALL_INSTRUMENTS = [
+    ContinuousAirSniffer,
+    TargetedSurfaceSwab,
+    WastewaterSequencingGrid,
+]
+
 __all__ = [
     "SyndromicSurveillance",
     "ClinicalRDT",
     "TargetedPCR",
     "MetagenomicSequencing",
+    "ContinuousAirSniffer",
+    "TargetedSurfaceSwab",
+    "WastewaterSequencingGrid",
+    "ArtificialLabNotebook",
     "ALL_MODALITIES",
+    "ALL_INSTRUMENTS",
     "build_modalities",
     "load_config",
 ]

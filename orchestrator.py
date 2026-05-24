@@ -47,6 +47,16 @@ from telemetry_buffer.schema import (
     write_ground_truth,
 )
 from crusher_labs import build_modalities, load_config
+from crusher_labs.observation_core import (
+    ContinuousAirSniffer,
+    TargetedSurfaceSwab,
+    WastewaterSequencingGrid,
+)
+from crusher_labs.lab_notebook import (
+    ArtificialLabNotebook,
+    build_notebook_from_config,
+    load_logging_profile,
+)
 from engines.infection_dynamics_bridge import (
     KorkinShipEngine,
     InfectionStatus,
@@ -530,6 +540,27 @@ def run() -> None:
         print(f"   Active pathogens: {', '.join(pathogen_profiles.keys())}")
     print()
 
+    # ── Initialize Observation Engine instruments ─────────────────
+    obs_cfg_path = os.path.join(_REPO_ROOT, "data", "config", "logging_profile.json")
+    fidelity_name, fidelity, logging_config = load_logging_profile(obs_cfg_path)
+    lab_notebook_enabled = logging_config.get("lab_notebook", {}).get("enabled", True)
+
+    air_sniffer = ContinuousAirSniffer(rng=np.random.default_rng(seed))
+    surface_swab = TargetedSurfaceSwab(rng=np.random.default_rng(seed))
+    wastewater_seq = WastewaterSequencingGrid(rng=np.random.default_rng(seed))
+
+    notebook = build_notebook_from_config(obs_cfg_path)
+
+    print(thin_line)
+    print("  OBSERVATION ENGINE  ·  instrument-level diagnostics initialized")
+    print(thin_line)
+    print(f"    1. Continuous Air Sniffer   (aerosol Ct from airborne mass pools)")
+    print(f"    2. Targeted Surface Swab    (fomite PCR with compliance variance)")
+    print(f"    3. Wastewater Seq Grid      (Dirichlet-multinomial metagenomic sampling)")
+    print(f"   Logging fidelity: {fidelity_name}")
+    print(f"   Lab notebook: {'enabled' if lab_notebook_enabled else 'disabled'}")
+    print()
+
     grumb_seeds = _initialize_grumb_seeding(seq, ship["zones"])
     _print_initialization(ship, grumb_seeds, cfg)
 
@@ -716,6 +747,51 @@ def run() -> None:
                 zone_microflora_shifts=zone_microflora_shifts,
             )
 
+        # ── 7b. Observation Engine instruments ────────────────────────
+        zone_airborne: dict[str, float] = {}
+        zone_surface: dict[str, float] = {}
+        for zname, zdata in spaces.items():
+            total_mass = zdata.get("pathogen_mass", 0.0)
+            zone_airborne[zname] = total_mass * 0.6  # 60% airborne fraction
+            zone_surface[zname] = total_mass * 0.4   # 40% surface fraction
+
+        air_results = air_sniffer.sample_all_zones(zone_airborne, zone_volumes)
+
+        fred_compliance = cfg.get("fred_behavior", {}).get(
+            "quarantine_compliance", 0.85,
+        )
+        swab_targets = None
+        if trigger_status in (STATUS_SUSPECTED, STATUS_CONFIRMED):
+            swab_targets = high_traffic if trigger_status == STATUS_SUSPECTED else zone_names
+        swab_results = surface_swab.swab_zones(
+            zone_surface, fred_compliance, target_zones=swab_targets,
+        )
+
+        # Wastewater: combine pathogen mass + microflora shifts
+        ww_pathogen_mass: dict[str, float] = {}
+        for zname in zone_names:
+            ww_pathogen_mass[zname] = zone_surface.get(zname, 0.0) * 0.1  # greywater fraction
+        ww_microflora: dict[str, dict[str, float]] = {}
+        for zname, mf_data in zone_microflora_shifts.items():
+            ww_microflora[zname] = mf_data
+        ww_per_pathogen = (
+            {pid: engine.get_pathogen_zone_mass(pid) for pid in pathogen_profiles}
+            if pathogen_profiles else None
+        )
+        graywater_zones = cfg.get("microflora", {}).get("graywater_zones", [])
+        ww_target_zones = graywater_zones if graywater_zones else zone_names
+        ww_results = wastewater_seq.sample_all_zones(
+            ww_pathogen_mass, ww_microflora,
+            pathogen_mass_by_id=ww_per_pathogen,
+            wastewater_zones=ww_target_zones,
+        )
+
+        # Log instrument results to lab notebook
+        notebook.log_air_sniffer(epoch, air_results)
+        notebook.log_surface_swab(epoch, swab_results)
+        notebook.log_wastewater_seq(epoch, ww_results)
+        notebook.log_agent_summary(epoch, agents)
+
         # ── 8. Escalation check ─────────────────────────────────────
         prev_status = trigger_status
         trigger_status = _check_escalation(
@@ -728,6 +804,7 @@ def run() -> None:
                 "from": prev_status,
                 "to": trigger_status,
             })
+            notebook.log_trigger_transition(epoch, prev_status, trigger_status)
 
         # ── 9. CONFIRMED → quarantine with FRED compliance ──────────
         if trigger_status == STATUS_CONFIRMED:
@@ -882,6 +959,14 @@ def run() -> None:
 
         epoch_record["crusher_ops"]["isolated_agents"] = sorted(isolated_ids)
 
+        # Observation Engine instrument records
+        epoch_record["observation_engine"] = {
+            "air_sniffer": air_results,
+            "surface_swab": swab_results,
+            "wastewater_sequencing": ww_results,
+            "logging_fidelity": fidelity_name,
+        }
+
         simulation_history.append(epoch_record)
 
         # ── 11. Console output ──────────────────────────────────────
@@ -900,6 +985,22 @@ def run() -> None:
     with open(history_path, "w", encoding="utf-8") as fh:
         json.dump(simulation_history, fh, indent=2)
     print(f"\n  Simulation history saved to: {history_path}")
+
+    # ── Serialize the Artificial Lab Notebook ───────────────────────
+    if lab_notebook_enabled:
+        notebook.set_run_metadata(
+            num_agents=num_agents,
+            num_epochs=num_epochs,
+            pathogens=list(pathogen_profiles.keys()) if pathogen_profiles else [],
+            zones=zone_names,
+            trigger_timeline=escalation_log,
+        )
+        nb_output = logging_config.get("lab_notebook", {}).get(
+            "output_path", "telemetry_buffer/artificial_lab_notebook.json",
+        )
+        nb_path = os.path.join(_REPO_ROOT, nb_output)
+        notebook.serialize(nb_path)
+        print(f"  Lab notebook saved to: {nb_path} ({len(notebook.records)} records)")
 
     # ── Summary ──────────────────────────────────────────────────────
     print()
