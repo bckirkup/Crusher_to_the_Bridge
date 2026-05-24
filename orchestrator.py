@@ -1,24 +1,26 @@
 #!/usr/bin/env python3
 """
-orchestrator.py – The Master Intercom Loop  (Phase 3)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+orchestrator.py – The Master Intercom Loop  (Phase 4+)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Real infection-dynamics engine integration:
+Multi-pathogen concurrent simulation with microflora disruption:
 
 1. **Real ABM Core (Korkin Lab infection-dynamics):**
-   Agent graph initialised from the actual Norwalk model parameters
-   (shedding curves, dose-response, SEIQR progression, spatial nodes).
-   Replaces all mock agent/space generation.
+   Agent graph with multi-pathogen co-infection tracking.
 
 2. **Structural Environment (GRUMB):**
    Ship graph zones seeded with multi-kingdom log-ratio abundance arrays.
+   Microflora disruption shifts detected via CLR-space anomaly scoring.
 
 3. **Human Behavior (FRED reference):**
-   Categorized background sick-call noise + quarantine compliance
-   multiplier with stochastic behavioral failure.
+   Categorized background sick-call noise + quarantine compliance.
 
 4. **Clinical Progression (EMOD reference):**
    Shedding-phase-gated RDT sensitivity with early/peak/late caps.
+
+5. **Multi-Pathogen Engine:**
+   Concurrent pathogen instances with separate mass pools per room.
+   Dual-signal shedding: pathogen + altered microflora.
 
 Usage::
 
@@ -45,7 +47,12 @@ from telemetry_buffer.schema import (
     write_ground_truth,
 )
 from crusher_labs import build_modalities, load_config
-from engines.infection_dynamics_bridge import KorkinShipEngine
+from engines.infection_dynamics_bridge import (
+    KorkinShipEngine,
+    InfectionStatus,
+    IllnessStatus,
+    illness_probability,
+)
 from engines.py_contam_bridge import build_transport_engine, ContamTransportEngine
 from engines.transmission_core import (
     TransmissionCore,
@@ -215,33 +222,46 @@ def _engine_payload_to_schema(
     for a in engine_payload["agents"]:
         aid = a["agent_id"]
         if aid in isolated_ids:
-            agents_out.append(make_agent(
+            agent_dict = make_agent(
                 agent_id=aid,
                 symptom_status="isolated",
                 shedding_rate=0.0,
                 location="Isolated_In_Quarters",
-            ))
+            )
         elif aid in quarantine_refusers:
-            agents_out.append(make_agent(
+            agent_dict = make_agent(
                 agent_id=aid,
                 symptom_status="non_compliant",
                 shedding_rate=a.get("shedding_rate", 0.0),
                 location=a.get("location", "unknown"),
-            ))
+            )
         else:
-            agents_out.append(make_agent(
+            agent_dict = make_agent(
                 agent_id=aid,
                 symptom_status=a["symptom_status"],
                 shedding_rate=a.get("shedding_rate", 0.0),
                 location=a.get("location"),
-            ))
+            )
+
+        # Attach multi-pathogen metadata
+        if "pathogen_infections" in a:
+            agent_dict["pathogen_infections"] = a["pathogen_infections"]
+        if "susceptibility_multiplier" in a:
+            agent_dict["susceptibility_multiplier"] = a["susceptibility_multiplier"]
+        if "microflora_disruption" in a:
+            agent_dict["microflora_disruption"] = a["microflora_disruption"]
+
+        agents_out.append(agent_dict)
 
     spaces_out: dict[str, dict[str, Any]] = {}
     for zname, zdata in engine_payload.get("spaces", {}).items():
-        spaces_out[zname] = make_space(
+        space_dict = make_space(
             pathogen_mass=zdata.get("pathogen_mass", 0.0),
             microbiome_id=zdata.get("microbiome_id", f"profile_{zname.lower()}"),
         )
+        if "pathogen_mass_by_id" in zdata:
+            space_dict["pathogen_mass_by_id"] = zdata["pathogen_mass_by_id"]
+        spaces_out[zname] = space_dict
 
     return agents_out, spaces_out
 
@@ -274,12 +294,74 @@ def _check_escalation(
 
 # ── Main loop ────────────────────────────────────────────────────────────
 
+def _load_pathogen_profiles(
+    cfg: dict[str, Any],
+) -> dict[str, dict[str, Any]]:
+    """Load multi-pathogen profiles from active_profiles.json."""
+    mp_cfg = cfg.get("multi_pathogen", {})
+    profiles_path = mp_cfg.get("profiles_path", "data/pathogens/active_profiles.json")
+    full_path = os.path.join(_REPO_ROOT, profiles_path)
+    if not os.path.isfile(full_path):
+        return {}
+    with open(full_path, "r", encoding="utf-8") as fh:
+        data = json.load(fh)
+    profiles: dict[str, dict[str, Any]] = {}
+    for p in data.get("pathogens", []):
+        pid = p.get("pathogen_id", "unknown")
+        profiles[pid] = p
+    return profiles
+
+
+def _compute_zone_microflora_shifts(
+    agents: list,
+    pathogen_profiles: dict[str, dict[str, Any]],
+    cfg: dict[str, Any],
+) -> dict[str, dict[str, float]]:
+    """Compute per-zone microflora disruption shift magnitudes.
+
+    For each zone, aggregate the microflora disruption from all agents
+    with active disruption status, producing a dict of
+    {zone: {disruption_type: magnitude}} for feeding into the GRUMB
+    sequencing modality.
+    """
+    mf_cfg = cfg.get("microflora", {})
+    shed_mass = mf_cfg.get("disrupted_shed_mass", 50.0)
+    graywater_zones = mf_cfg.get("graywater_zones", [])
+
+    zone_shifts: dict[str, dict[str, float]] = {}
+
+    for agent in agents:
+        if agent.microflora_disruption_status <= 0:
+            continue
+        loc = agent.current_location
+        if loc == "Isolated_In_Quarters":
+            continue
+
+        for pid in agent.active_pathogen_ids:
+            profile = pathogen_profiles.get(pid, {})
+            mf = profile.get("microflora_disruption", {})
+            if not mf.get("causes_disruption", False):
+                continue
+            d_type = mf.get("disruption_type", "gastrointestinal")
+            mag = agent.microflora_disruption_status * shed_mass / 100.0
+
+            zs = zone_shifts.setdefault(loc, {})
+            zs[d_type] = zs.get(d_type, 0.0) + mag
+
+            # Propagate to graywater downstream zones (reduced magnitude)
+            for gz in graywater_zones:
+                gzs = zone_shifts.setdefault(gz, {})
+                gzs[d_type] = gzs.get(d_type, 0.0) + mag * 0.3
+
+    return zone_shifts
+
+
 def run() -> None:
     sep = "═" * 80
     thin = "─" * 80
 
     print(sep)
-    print("  CRUSHER TO THE BRIDGE  ·  Phase 3.5b – Four-Pathway Transmission Core")
+    print("  CRUSHER TO THE BRIDGE  ·  Phase 4+ – Multi-Pathogen & Microflora")
     print(sep)
     print()
 
@@ -338,6 +420,89 @@ def run() -> None:
         print("  [WARN] CONTAM transport engine not available – using legacy flat decay")
         print()
 
+    # ── Load multi-pathogen profiles ───────────────────────────────
+    pathogen_profiles = _load_pathogen_profiles(cfg)
+    mp_cfg = cfg.get("multi_pathogen", {})
+    mf_cfg = cfg.get("microflora", {})
+    enable_dual_signal = mf_cfg.get("enable_dual_signal", True)
+
+    if pathogen_profiles:
+        print(thin_line)
+        print("  MULTI-PATHOGEN ENGINE  ·  active profiles loaded")
+        print(thin_line)
+        for pid, prof in pathogen_profiles.items():
+            print(f"    {pid:20s}  {prof['name']}")
+            print(f"      Category: {prof.get('category', '?')}")
+            print(f"      Routes:   {', '.join(prof.get('transmission_routes', []))}")
+            intro = prof.get("introduction_epoch", 0)
+            print(f"      Intro:    epoch {intro}")
+            mf = prof.get("microflora_disruption", {})
+            if mf.get("causes_disruption"):
+                print(f"      Microflora disruption: {mf.get('disruption_type')} "
+                      f"(mag={mf.get('disruption_magnitude', 0)})")
+        print()
+
+        # Initialize per-pathogen mass pools in the engine
+        for pid in pathogen_profiles:
+            engine.initialize_pathogen(pid)
+
+        # Initialize agent susceptibility multipliers
+        imm_frac = mp_cfg.get("immunocompromised_fraction", 0.05)
+        imm_mult = mp_cfg.get("immunocompromised_multiplier", 2.0)
+        n_immunocompromised = int(len(engine.agents) * imm_frac)
+        immunocompromised_ids: set[int] = set()
+
+        for agent in engine.agents:
+            for pid, prof in pathogen_profiles.items():
+                base_susc = prof.get("base_susceptibility", 1.0)
+                agent.init_pathogen_susceptibility(pid, base_susc)
+
+        # Assign elevated susceptibility to a fraction of agents
+        candidate_ids = [
+            a.agent_id for a in engine.agents
+            if not a.immune and a.infection_status == InfectionStatus.SUSCEPTIBLE
+        ]
+        if candidate_ids and n_immunocompromised > 0:
+            chosen = rng.choice(
+                candidate_ids,
+                size=min(n_immunocompromised, len(candidate_ids)),
+                replace=False,
+            )
+            for aid in chosen:
+                immunocompromised_ids.add(int(aid))
+                agent = engine.agents[int(aid)]
+                for pid in pathogen_profiles:
+                    agent.susceptibility_multiplier[pid] = imm_mult
+
+        print(f"  Immunocompromised agents: {len(immunocompromised_ids)}/{len(engine.agents)} "
+              f"(mult={imm_mult}x)")
+        print(f"  Dual-signal shedding: {'enabled' if enable_dual_signal else 'disabled'}")
+        print()
+
+        # Seed initial infections per pathogen profile
+        for pid, prof in pathogen_profiles.items():
+            intro_epoch = prof.get("introduction_epoch", 0)
+            if intro_epoch == 0:
+                n_init = prof.get("initial_infected", 1)
+                candidates = [
+                    a for a in engine.agents
+                    if not a.immune
+                    and not a.is_infected_with(pid)
+                    and a.infection_status != InfectionStatus.RECOVERED
+                ]
+                if candidates:
+                    chosen = rng.choice(
+                        candidates,
+                        size=min(n_init, len(candidates)),
+                        replace=False,
+                    )
+                    for agent in chosen:
+                        agent.infect_with_pathogen(pid, 1e4, 0)
+                        print(f"  Seeded {pid} → agent {agent.agent_id}")
+        print()
+    else:
+        immunocompromised_ids = set()
+
     # Initialise the four-pathway TransmissionCore
     airflow_data = load_air_flow_paths(_REPO_ROOT, cfg)
     zone_volumes = {
@@ -348,6 +513,7 @@ def run() -> None:
     tx_core = TransmissionCore(
         rng=np.random.default_rng(seed),
         zone_volumes=zone_volumes,
+        pathogen_profiles=pathogen_profiles,
     )
     tx_core.initialize_zones(zone_names)
     engine.enable_external_transmission()
@@ -360,6 +526,8 @@ def run() -> None:
     print("    3. Long-Range Airborne (HVAC drift via py-contam)")
     print("    4. Fomite Deposition   (surface pools + stochastic pickup)")
     print(f"   HVAC downstream links: {sum(len(v) for v in hvac_downstream.values())}")
+    if pathogen_profiles:
+        print(f"   Active pathogens: {', '.join(pathogen_profiles.keys())}")
     print()
 
     grumb_seeds = _initialize_grumb_seeding(seq, ship["zones"])
@@ -390,30 +558,112 @@ def run() -> None:
                     "delay": epochs_since,
                 })
 
+        # ── 1b. Mid-cruise pathogen introductions ──────────────────────
+        if pathogen_profiles:
+            for pid, prof in pathogen_profiles.items():
+                intro_epoch = prof.get("introduction_epoch", 0)
+                if intro_epoch == epoch and epoch > 0:
+                    n_init = prof.get("initial_infected", 1)
+                    candidates = [
+                        a for a in engine.agents
+                        if not a.immune
+                        and not a.is_infected_with(pid)
+                        and a.infection_status != InfectionStatus.RECOVERED
+                        and a.current_location != "Isolated_In_Quarters"
+                    ]
+                    if candidates:
+                        chosen = rng.choice(
+                            candidates,
+                            size=min(n_init, len(candidates)),
+                            replace=False,
+                        )
+                        for agent in chosen:
+                            agent.infect_with_pathogen(pid, 1e4, epoch)
+
         # ── 2. Real engine step ───────────────────────────────────────
-        # Feed FRED isolation overrides into engine before stepping
         engine.isolated_ids = set(isolated_ids)
         engine_payload = engine.step()
 
+        # ── 2a. Multi-pathogen infection progression ─────────────────
+        if pathogen_profiles:
+            for agent in engine.agents:
+                for pid, inf in list(agent.infections.items()):
+                    if inf["status"] != InfectionStatus.INFECTED:
+                        continue
+                    prof = pathogen_profiles.get(pid, {})
+
+                    # Advance time post infection
+                    if inf["time_infected"] is not None:
+                        inf["time_infected"] += 1
+
+                    # Illness progression
+                    dpi = inf["time_infected"] or 0
+                    if dpi >= 1 and inf["illness"] == IllnessStatus.NOT_ILL:
+                        ill_params = prof.get("illness_probability", {})
+                        eta_p = ill_params.get("eta", 0.508)
+                        gamma_p = ill_params.get("gamma", 0.095)
+                        dose = inf["acquired_particles"]
+                        ill_prob = 1.0 - math.pow(1.0 + eta_p * dose, -gamma_p)
+                        if ill_prob > 0.3:
+                            inf["illness"] = IllnessStatus.SYMPTOMATIC
+                            if agent.illness_status == IllnessStatus.NOT_ILL:
+                                agent.illness_status = IllnessStatus.SYMPTOMATIC
+
+                    # Recovery
+                    recovery_day = prof.get("recovery_day", 3)
+                    if dpi >= recovery_day:
+                        inf["status"] = InfectionStatus.RECOVERED
+                        inf["illness"] = IllnessStatus.RECOVERED
+
+                # Update legacy status if all infections resolved
+                any_active = any(
+                    inf["status"] == InfectionStatus.INFECTED
+                    for inf in agent.infections.values()
+                )
+                if agent.infections and not any_active:
+                    if agent.infection_status == InfectionStatus.INFECTED:
+                        agent.infection_status = InfectionStatus.RECOVERED
+                        agent.illness_status = IllnessStatus.RECOVERED
+
+                # Update microflora disruption status
+                agent.update_microflora_disruption(pathogen_profiles)
+
+            # ── 2a-ii. Per-pathogen mass accumulation ────────────────
+            for pid, prof in pathogen_profiles.items():
+                dep_frac = prof.get("surface_deposition_fraction", 1e-4)
+                masses = engine.get_pathogen_zone_mass(pid)
+                for agent in engine.agents:
+                    sv = agent.get_pathogen_shedding(pid, prof)
+                    if sv > 0:
+                        loc = agent.current_location
+                        if loc in masses:
+                            masses[loc] += sv * dep_frac
+                engine.set_pathogen_zone_mass(pid, masses)
+
         # ── 2b. Four-pathway transmission ────────────────────────────
-        # Execute all four pathways (direct, droplet, HVAC, fomite)
-        # using the TransmissionCore engine.
         tracing_matrix, tx_events = tx_core.execute_transmission(
             epoch=epoch,
             agents=engine.agents,
             zone_pathogen_mass=engine.zone_pathogen_mass,
             hvac_downstream_zones=hvac_downstream,
+            multi_pathogen_mass=(
+                engine.multi_pathogen_mass if pathogen_profiles else None
+            ),
         )
 
         # ── 2c. CONTAM aerosol mass transport ─────────────────────────
-        # After shedding deposits are added by the engine, run the
-        # CONTAM multi-zone transport to distribute airborne pathogen
-        # mass through the HVAC network with filter efficiency applied.
         if contam_engine is not None:
             updated_masses = contam_engine.transport_step(
                 engine.zone_pathogen_mass,
             )
             engine.zone_pathogen_mass = updated_masses
+
+        # ── 2d. Dual-signal shedding: compute microflora shifts ──────
+        zone_microflora_shifts: dict[str, dict[str, float]] = {}
+        if pathogen_profiles and enable_dual_signal:
+            zone_microflora_shifts = _compute_zone_microflora_shifts(
+                engine.agents, pathogen_profiles, cfg,
+            )
 
         # Re-export payload with updated zone masses and agent states
         engine_payload = engine._export_payload()
@@ -457,11 +707,14 @@ def run() -> None:
             if epoch % pcr_cadence == 0:
                 pcr_result = pcr.query_ground_truth(truth)
 
-        # ── 7. Metagenomic sequencing ───────────────────────────────
+        # ── 7. Metagenomic sequencing (with microflora shift detection) ─
         seq_result = None
         seq_cadence = cfg.get("sequencing", {}).get("cadence", 8)
         if epoch % seq_cadence == 0:
-            seq_result = seq.query_ground_truth(truth)
+            seq_result = seq.query_ground_truth(
+                truth,
+                zone_microflora_shifts=zone_microflora_shifts,
+            )
 
         # ── 8. Escalation check ─────────────────────────────────────
         prev_status = trigger_status
@@ -501,6 +754,28 @@ def run() -> None:
                         })
 
         # ── 10. Record simulation history ───────────────────────────
+        # Multi-pathogen summary
+        multi_pathogen_summary: dict[str, dict[str, int]] = {}
+        if pathogen_profiles:
+            for pid in pathogen_profiles:
+                mp_s = {"infected": 0, "symptomatic": 0, "recovered": 0}
+                for agent in engine.agents:
+                    inf = agent.infections.get(pid)
+                    if inf is None:
+                        continue
+                    if inf["status"] == InfectionStatus.INFECTED:
+                        mp_s["infected"] += 1
+                        if inf["illness"] == IllnessStatus.SYMPTOMATIC:
+                            mp_s["symptomatic"] += 1
+                    elif inf["status"] == InfectionStatus.RECOVERED:
+                        mp_s["recovered"] += 1
+                multi_pathogen_summary[pid] = mp_s
+
+        # Disrupted agent count
+        disrupted_count = sum(
+            1 for a in engine.agents if a.microflora_disruption_status > 0
+        )
+
         epoch_record: dict[str, Any] = {
             "epoch": epoch,
             "trigger_status": trigger_status,
@@ -515,7 +790,10 @@ def run() -> None:
                 "isolated": len(isolated_ids),
                 "quarantine_refusers": len(quarantine_refusers),
                 "sick_call_count": syn_result["sick_call_count"],
+                "disrupted_microflora_count": disrupted_count,
             },
+            "multi_pathogen": multi_pathogen_summary,
+            "microflora_shifts": {},
             "hvac": {
                 "filter_type": cfg.get("hvac", {}).get("filter_type", "none"),
                 "filter_efficiency": (
@@ -547,17 +825,24 @@ def run() -> None:
             else:
                 epoch_record["summary"]["susceptible"] += 1
 
-            epoch_record["agents"].append({
+            agent_record: dict[str, Any] = {
                 "agent_id": a["agent_id"],
                 "status": status,
                 "shedding_rate": a.get("shedding_rate", 0.0),
                 "location": a.get("location", "unknown"),
-            })
+            }
+            if pathogen_profiles:
+                agent_record["pathogen_infections"] = a.get("pathogen_infections", {})
+                agent_record["susceptibility_multiplier"] = a.get("susceptibility_multiplier", {})
+                agent_record["microflora_disruption"] = a.get("microflora_disruption", 0.0)
+            epoch_record["agents"].append(agent_record)
 
         for zname, zdata in spaces.items():
             zone_entry: dict[str, Any] = {
                 "pathogen_mass": zdata.get("pathogen_mass", 0.0),
             }
+            if pathogen_profiles:
+                zone_entry["pathogen_mass_by_id"] = zdata.get("pathogen_mass_by_id", {})
             if contam_engine is not None:
                 node = contam_engine.zone_nodes.get(zname)
                 if node is not None:
@@ -566,6 +851,24 @@ def run() -> None:
                     )
                     zone_entry["volume_m3"] = node.volume_m3
             epoch_record["spaces"][zname] = zone_entry
+
+        # Log microflora shifts per room-epoch
+        for zname in zone_names:
+            mf_shift = zone_microflora_shifts.get(zname, {})
+            if mf_shift:
+                epoch_record["microflora_shifts"][zname] = {
+                    "disruption_types": list(mf_shift.keys()),
+                    "magnitudes": {k: round(v, 4) for k, v in mf_shift.items()},
+                    "total_magnitude": round(sum(mf_shift.values()), 4),
+                }
+
+        # Log sequencing microflora anomaly results
+        if seq_result is not None:
+            epoch_record["microflora_sequencing"] = {}
+            for zname, zr in seq_result.get("zone_results", {}).items():
+                mf_data = zr.get("microflora_disruption", {})
+                if mf_data.get("total_disruption_magnitude", 0) > 0:
+                    epoch_record["microflora_sequencing"][zname] = mf_data
 
         if pcr_result is not None:
             epoch_record["crusher_ops"]["surface_wipe_zones"] = list(
@@ -586,6 +889,8 @@ def run() -> None:
             epoch, trigger_status, syn_result, rdt_result,
             pcr_result, seq_result, active_symptomatic,
             len(isolated_ids), len(quarantine_refusers), prev_status,
+            multi_pathogen_summary=multi_pathogen_summary,
+            zone_microflora_shifts=zone_microflora_shifts,
         )
 
     # ── Save simulation history ──────────────────────────────────────
@@ -663,6 +968,8 @@ def _print_epoch(
     isolated_count: int,
     refuser_count: int,
     prev_status: str,
+    multi_pathogen_summary: dict[str, dict[str, int]] | None = None,
+    zone_microflora_shifts: dict[str, dict[str, float]] | None = None,
 ) -> None:
     """Print a single epoch's diagnostic summary line."""
     status_icon = {
@@ -674,7 +981,6 @@ def _print_epoch(
     rdt_pos = sum(1 for r in rdt["results"] if r["positive"])
     rdt_total = rdt["tested_count"]
 
-    # Show clinical phases for RDT results
     phases = {}
     for r in rdt["results"]:
         ph = r.get("clinical_phase", "—")
@@ -713,6 +1019,22 @@ def _print_epoch(
         reasons = [r["reason"] for r in noise_reasons]
         noise_str = f" [{','.join(reasons)}]"
 
+    # Multi-pathogen breakdown
+    mp_str = ""
+    if multi_pathogen_summary:
+        parts = []
+        for pid, ms in multi_pathogen_summary.items():
+            short = pid[:8]
+            parts.append(f"{short}:I={ms['infected']}S={ms['symptomatic']}R={ms['recovered']}")
+        mp_str = f" MP:[{' '.join(parts)}]"
+
+    # Microflora shift indicator
+    mf_str = ""
+    if zone_microflora_shifts:
+        n_shifted = sum(1 for s in zone_microflora_shifts.values() if s)
+        if n_shifted > 0:
+            mf_str = f" MF:{n_shifted}zones"
+
     print(
         f"[Epoch {epoch:02d}] {status_icon} {trigger_status:<10s} | "
         f"Sick: {syn['sick_call_count']:2d} "
@@ -721,7 +1043,7 @@ def _print_epoch(
         f"PCR: {pcr_str} | "
         f"Seq: {seq_str} | "
         f"Symp:{symptomatic_count:2d} Iso:{isolated_count:2d} Ref:{refuser_count:1d}"
-        f"{transition}"
+        f"{mp_str}{mf_str}{transition}"
     )
 
 

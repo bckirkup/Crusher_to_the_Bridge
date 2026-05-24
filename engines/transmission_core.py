@@ -133,33 +133,45 @@ class TransmissionCore:
     pathways. Each pathway contributes a dose that is summed before
     applying the Korkin Lab dose-response function.
 
+    Supports multi-pathogen concurrent simulation: each pathogen runs
+    through all four pathways independently with separate mass pools
+    and per-agent susceptibility multipliers.
+
     Parameters
     ----------
     rng : np.random.Generator
         Shared RNG for reproducibility.
     zone_volumes : dict
         Zone name → volume in m³ (from spatial_layout.json).
+    pathogen_profiles : dict, optional
+        Pathogen ID → profile dict (from active_profiles.json).
     """
 
     def __init__(
         self,
         rng: np.random.Generator,
         zone_volumes: dict[str, float] | None = None,
+        pathogen_profiles: dict[str, dict] | None = None,
     ) -> None:
         self.rng = rng
         self.zone_volumes = zone_volumes or {}
+        self.pathogen_profiles = pathogen_profiles or {}
 
-        # Persistent state: surface fomite pools per zone [copies]
-        self.surface_pools: dict[str, float] = {}
+        # Persistent state: surface fomite pools per zone per pathogen
+        # {pathogen_id: {zone: mass}}
+        self.surface_pools: dict[str, float] = {}  # aggregate (legacy)
+        self.surface_pools_by_pathogen: dict[str, dict[str, float]] = {}
 
-        # Persistent state: airborne aerosol pools per zone [copies]
-        self.aerosol_pools: dict[str, float] = {}
+        # Persistent state: airborne aerosol pools per zone per pathogen
+        self.aerosol_pools: dict[str, float] = {}  # aggregate (legacy)
+        self.aerosol_pools_by_pathogen: dict[str, dict[str, float]] = {}
 
         # Previous epoch's zone occupancy (for fomite trailing detection)
         self._prev_zone_occupants: dict[str, set[int]] = {}
 
-        # Previous epoch's zone shedders (for fomite trailing attribution)
+        # Previous epoch's zone shedders per pathogen
         self._prev_zone_shedders: dict[str, list[int]] = {}
+        self._prev_zone_shedders_by_pathogen: dict[str, dict[str, list[int]]] = {}
 
     def initialize_zones(self, zone_names: list[str]) -> None:
         """Set up pools for all zones."""
@@ -168,6 +180,15 @@ class TransmissionCore:
             self.aerosol_pools.setdefault(z, 0.0)
             self._prev_zone_occupants.setdefault(z, set())
             self._prev_zone_shedders.setdefault(z, [])
+        # Initialize per-pathogen pools
+        for pid in self.pathogen_profiles:
+            self.surface_pools_by_pathogen.setdefault(pid, {})
+            self.aerosol_pools_by_pathogen.setdefault(pid, {})
+            self._prev_zone_shedders_by_pathogen.setdefault(pid, {})
+            for z in zone_names:
+                self.surface_pools_by_pathogen[pid].setdefault(z, 0.0)
+                self.aerosol_pools_by_pathogen[pid].setdefault(z, 0.0)
+                self._prev_zone_shedders_by_pathogen[pid].setdefault(z, [])
 
     def execute_transmission(
         self,
@@ -175,6 +196,7 @@ class TransmissionCore:
         agents: list[KorkinAgent],
         zone_pathogen_mass: dict[str, float],
         hvac_downstream_zones: dict[str, list[str]] | None = None,
+        multi_pathogen_mass: dict[str, dict[str, float]] | None = None,
     ) -> tuple[ContactTracingMatrix, list[TransmissionEvent]]:
         """Run all four transmission pathways for one epoch.
 
@@ -185,10 +207,11 @@ class TransmissionCore:
         agents : list[KorkinAgent]
             All agents (locations already updated for this epoch).
         zone_pathogen_mass : dict
-            Current airborne pathogen mass per zone (from engine).
+            Current aggregate airborne pathogen mass per zone.
         hvac_downstream_zones : dict, optional
             Map of zone → list of downstream zones receiving its air.
-            Built from ``air_flow_paths.json`` adjacency and HVAC links.
+        multi_pathogen_mass : dict, optional
+            Per-pathogen mass pools: {pathogen_id: {zone: mass}}.
 
         Returns
         -------
@@ -206,72 +229,112 @@ class TransmissionCore:
                 continue
             zone_occupants.setdefault(loc, []).append(agent)
 
-        # Per-agent accumulated dose across all pathways
+        # Per-agent accumulated dose across all pathways (aggregate)
         agent_doses: dict[int, float] = {}
         # Track per-agent per-pathway dose breakdown for attribution
         agent_pathway_doses: dict[int, dict[str, float]] = {}
+        # Per-agent per-pathogen dose accumulator
+        agent_pathogen_doses: dict[int, dict[str, float]] = {}
 
-        # ── Pathway 1: Direct Contact ────────────────────────────────
-        self._pathway_direct_contact(
-            epoch, zone_occupants, agent_doses, matrix, events,
-            agent_pathway_doses,
-        )
+        # Determine which pathogens are active this epoch
+        active_pathogens = list(self.pathogen_profiles.keys()) if self.pathogen_profiles else ["_default"]
 
-        # ── Pathway 2: Short-Range Droplet ───────────────────────────
-        self._pathway_droplet(
-            epoch, zone_occupants, agent_doses, matrix, events,
-            agent_pathway_doses,
-        )
+        for pathogen_id in active_pathogens:
+            profile = self.pathogen_profiles.get(pathogen_id, {})
+            p_mass = (multi_pathogen_mass or {}).get(pathogen_id, zone_pathogen_mass)
 
-        # ── Pathway 3: Long-Range Airborne (HVAC Drift) ──────────────
-        self._pathway_hvac_airborne(
-            epoch, zone_occupants, zone_pathogen_mass,
-            hvac_downstream_zones or {},
-            agent_doses, matrix, events,
-            agent_pathway_doses,
-        )
+            # Per-pathogen per-agent dose this pathogen
+            p_agent_doses: dict[int, float] = {}
+            p_agent_pw: dict[int, dict[str, float]] = {}
 
-        # ── Pathway 4: Fomite Deposition & Surface Touch ─────────────
-        self._pathway_fomite(
-            epoch, zone_occupants, agent_doses, matrix, events,
-            agent_pathway_doses,
-        )
+            # ── Pathway 1: Direct Contact ────────────────────────
+            self._pathway_direct_contact(
+                epoch, zone_occupants, p_agent_doses, matrix, events,
+                p_agent_pw, pathogen_id=pathogen_id, profile=profile,
+            )
 
-        # ── Apply combined dose-response ─────────────────────────────
+            # ── Pathway 2: Short-Range Droplet ───────────────────
+            self._pathway_droplet(
+                epoch, zone_occupants, p_agent_doses, matrix, events,
+                p_agent_pw, pathogen_id=pathogen_id, profile=profile,
+            )
+
+            # ── Pathway 3: Long-Range Airborne (HVAC Drift) ──────
+            self._pathway_hvac_airborne(
+                epoch, zone_occupants, p_mass,
+                hvac_downstream_zones or {},
+                p_agent_doses, matrix, events,
+                p_agent_pw, pathogen_id=pathogen_id,
+            )
+
+            # ── Pathway 4: Fomite Deposition & Surface Touch ─────
+            self._pathway_fomite(
+                epoch, zone_occupants, p_agent_doses, matrix, events,
+                p_agent_pw, pathogen_id=pathogen_id, profile=profile,
+            )
+
+            # Apply susceptibility multiplier per agent per pathogen
+            for aid, dose in p_agent_doses.items():
+                agent_obj = next((a for a in agents if a.agent_id == aid), None)
+                if agent_obj is not None:
+                    mult = agent_obj.susceptibility_multiplier.get(pathogen_id, 1.0)
+                    scaled_dose = dose * mult
+                else:
+                    scaled_dose = dose
+                agent_doses[aid] = agent_doses.get(aid, 0.0) + scaled_dose
+                apd = agent_pathogen_doses.setdefault(aid, {})
+                apd[pathogen_id] = apd.get(pathogen_id, 0.0) + scaled_dose
+
+            # Merge pathway breakdowns
+            for aid, pw in p_agent_pw.items():
+                merged = agent_pathway_doses.setdefault(aid, {})
+                for pw_name, pw_dose in pw.items():
+                    key = f"{pw_name}:{pathogen_id}" if pathogen_id != "_default" else pw_name
+                    merged[key] = merged.get(key, 0.0) + pw_dose
+
+        # ── Apply combined dose-response per pathogen ───────────────
         for agent in agents:
-            if agent.infection_status != InfectionStatus.SUSCEPTIBLE:
-                continue
-            total_dose = agent_doses.get(agent.agent_id, 0.0)
-            if total_dose <= 0:
-                continue
-            inf_prob = infection_probability(total_dose)
-            if self.rng.random() < inf_prob:
-                agent.infection_status = InfectionStatus.INFECTED
-                agent.illness_status = IllnessStatus.NOT_ILL
-                agent.time_infected = 0
-                agent.acquired_particles = total_dose
+            for pathogen_id in active_pathogens:
+                if agent.is_infected_with(pathogen_id):
+                    continue
+                if agent.immune:
+                    continue
+                p_dose = agent_pathogen_doses.get(agent.agent_id, {}).get(pathogen_id, 0.0)
+                if p_dose <= 0:
+                    continue
 
-                # Determine dominant pathway for this infection
-                pw_doses = agent_pathway_doses.get(agent.agent_id, {})
-                dominant = max(pw_doses, key=pw_doses.get) if pw_doses else "unknown"
-                event = TransmissionEvent(
-                    epoch=epoch,
-                    pathway=dominant,
-                    source_agent_id=None,
-                    target_agent_id=agent.agent_id,
-                    zone=agent.current_location,
-                    dose=total_dose,
-                )
-                events.append(event)
-                matrix.transmission_events.append({
-                    "target_id": agent.agent_id,
-                    "zone": agent.current_location,
-                    "dominant_pathway": dominant,
-                    "total_dose": round(total_dose, 4),
-                    "pathway_breakdown": {
-                        k: round(v, 4) for k, v in pw_doses.items()
-                    },
-                })
+                profile = self.pathogen_profiles.get(pathogen_id, {})
+                dr = profile.get("dose_response", {})
+                p_alpha = dr.get("alpha", ALPHA)
+                p_beta = dr.get("beta", BETA)
+                inf_prob = 1.0 - math.pow(1.0 + p_dose / p_beta, -p_alpha)
+
+                if self.rng.random() < inf_prob:
+                    agent.infect_with_pathogen(pathogen_id, p_dose, epoch)
+
+                    pw_doses = agent_pathway_doses.get(agent.agent_id, {})
+                    dominant = max(pw_doses, key=pw_doses.get) if pw_doses else "unknown"
+                    event = TransmissionEvent(
+                        epoch=epoch,
+                        pathway=dominant,
+                        source_agent_id=None,
+                        target_agent_id=agent.agent_id,
+                        zone=agent.current_location,
+                        dose=p_dose,
+                    )
+                    events.append(event)
+                    matrix.transmission_events.append({
+                        "target_id": agent.agent_id,
+                        "zone": agent.current_location,
+                        "pathogen_id": pathogen_id,
+                        "dominant_pathway": dominant,
+                        "total_dose": round(p_dose, 4),
+                        "pathway_breakdown": {
+                            k: round(v, 4)
+                            for k, v in pw_doses.items()
+                            if pathogen_id in k or pathogen_id == "_default"
+                        },
+                    })
 
         # ── Update persistent state for next epoch ───────────────────
         self._update_surface_pools(zone_occupants)
@@ -289,22 +352,18 @@ class TransmissionCore:
         matrix: ContactTracingMatrix,
         events: list[TransmissionEvent],
         agent_pathway_doses: dict[int, dict[str, float]] | None = None,
+        pathogen_id: str = "_default",
+        profile: dict | None = None,
     ) -> None:
         """Person-to-person transmission via close contact in shared rooms."""
         for zone_name, occupants in zone_occupants.items():
-            shedders = [
-                a for a in occupants
-                if a.is_infected and a.current_shedding > 0
-            ]
-            susceptible = [
-                a for a in occupants
-                if a.infection_status == InfectionStatus.SUSCEPTIBLE
-            ]
+            shedders = self._get_shedders(occupants, pathogen_id, profile)
+            susceptible = self._get_susceptible(occupants, pathogen_id)
             if not shedders or not susceptible:
                 continue
 
-            total_shedding = sum(s.current_shedding for s in shedders)
-            shedder_ids = [s.agent_id for s in shedders]
+            total_shedding = sum(sv for _, sv in shedders)
+            shedder_ids = [s.agent_id for s, _ in shedders]
             n_occupants = max(len(occupants), 1)
 
             for target in susceptible:
@@ -321,6 +380,7 @@ class TransmissionCore:
                     "target_id": target.agent_id,
                     "zone": zone_name,
                     "source_ids": shedder_ids,
+                    "pathogen_id": pathogen_id,
                     "dose": round(dose, 4),
                     "occupant_count": len(occupants),
                     "r0_draw": r0_draw,
@@ -336,35 +396,27 @@ class TransmissionCore:
         matrix: ContactTracingMatrix,
         events: list[TransmissionEvent],
         agent_pathway_doses: dict[int, dict[str, float]] | None = None,
+        pathogen_id: str = "_default",
+        profile: dict | None = None,
     ) -> None:
         """Immediate aerosol exposure from shedders in the same room."""
         for zone_name, occupants in zone_occupants.items():
-            shedders = [
-                a for a in occupants
-                if a.is_infected and a.current_shedding > 0
-            ]
-            susceptible = [
-                a for a in occupants
-                if a.infection_status == InfectionStatus.SUSCEPTIBLE
-            ]
+            shedders = self._get_shedders(occupants, pathogen_id, profile)
+            susceptible = self._get_susceptible(occupants, pathogen_id)
             if not shedders or not susceptible:
                 continue
 
-            # Total droplet aerosol generated this epoch
             total_aerosol = sum(
-                s.current_shedding * DROPLET_AEROSOL_FRACTION
-                for s in shedders
+                sv * DROPLET_AEROSOL_FRACTION for _, sv in shedders
             )
 
-            # Add to room's aerosol pool
             self.aerosol_pools[zone_name] = (
                 self.aerosol_pools.get(zone_name, 0.0) + total_aerosol
             )
 
-            # Each susceptible inhales a fraction of the room aerosol
             volume = self.zone_volumes.get(zone_name, 100.0)
             concentration = total_aerosol / max(volume, 1.0)
-            shedder_ids = [s.agent_id for s in shedders]
+            shedder_ids = [s.agent_id for s, _ in shedders]
 
             for target in susceptible:
                 dose = concentration * volume * AEROSOL_INHALATION_FRACTION
@@ -379,6 +431,7 @@ class TransmissionCore:
                     "target_id": target.agent_id,
                     "zone": zone_name,
                     "source_ids": shedder_ids,
+                    "pathogen_id": pathogen_id,
                     "dose": round(dose, 4),
                     "aerosol_mass": round(total_aerosol, 4),
                     "concentration_per_m3": round(concentration, 6),
@@ -396,21 +449,14 @@ class TransmissionCore:
         matrix: ContactTracingMatrix,
         events: list[TransmissionEvent],
         agent_pathway_doses: dict[int, dict[str, float]] | None = None,
+        pathogen_id: str = "_default",
     ) -> None:
-        """Exposure from airborne pathogen drifted via HVAC from upstream zones.
-
-        Uses the zone_pathogen_mass (post-CONTAM transport) to determine
-        which zones have received contaminated air from upstream rooms.
-        """
-        # Identify zones with active shedders (upstream sources)
+        """Exposure from airborne pathogen drifted via HVAC from upstream zones."""
         shedding_zones: dict[str, list[int]] = {}
         for zone_name, occupants in zone_occupants.items():
-            shedders = [
-                a for a in occupants
-                if a.is_infected and a.current_shedding > 0
-            ]
+            shedders = self._get_shedders(occupants, pathogen_id, None)
             if shedders:
-                shedding_zones[zone_name] = [s.agent_id for s in shedders]
+                shedding_zones[zone_name] = [s.agent_id for s, _ in shedders]
 
         # For each downstream zone receiving HVAC air from a shedding zone
         for source_zone, shedder_ids in shedding_zones.items():
@@ -429,10 +475,7 @@ class TransmissionCore:
 
                 # Susceptible agents in the downstream zone get exposed
                 target_occupants = zone_occupants.get(target_zone, [])
-                susceptible = [
-                    a for a in target_occupants
-                    if a.infection_status == InfectionStatus.SUSCEPTIBLE
-                ]
+                susceptible = self._get_susceptible(target_occupants, pathogen_id)
                 if not susceptible:
                     continue
 
@@ -450,6 +493,7 @@ class TransmissionCore:
                         "target_zone": target_zone,
                         "source_zone": source_zone,
                         "source_agent_ids": shedder_ids,
+                        "pathogen_id": pathogen_id,
                         "dose": round(dose, 4),
                         "airborne_mass": round(mass_in_target, 4),
                         "concentration_per_m3": round(concentration, 6),
@@ -465,27 +509,22 @@ class TransmissionCore:
         matrix: ContactTracingMatrix,
         events: list[TransmissionEvent],
         agent_pathway_doses: dict[int, dict[str, float]] | None = None,
+        pathogen_id: str = "_default",
+        profile: dict | None = None,
     ) -> None:
-        """Surface contamination from shedders; stochastic pickup by later visitors.
+        """Surface contamination from shedders; stochastic pickup by later visitors."""
+        dep_frac = SURFACE_DEPOSITION_FRACTION
+        if profile:
+            dep_frac = profile.get("surface_deposition_fraction", dep_frac)
 
-        Two sub-processes:
-        a) Deposit: shedding agents deposit pathogen mass onto the room's
-           fixed surface pool.
-        b) Pickup: susceptible agents entering a room with surface contamination
-           have a stochastic probability of transferring fomite mass to
-           their hands, contributing to their dose.
-
-        Fomite trailing is detected when an agent enters a room that was
-        previously occupied by a shedder (previous epoch).
-        """
         # a) Deposit new fomite mass from current shedders
         for zone_name, occupants in zone_occupants.items():
-            for agent in occupants:
-                if agent.is_infected and agent.current_shedding > 0:
-                    deposit = agent.current_shedding * SURFACE_DEPOSITION_FRACTION
-                    self.surface_pools[zone_name] = (
-                        self.surface_pools.get(zone_name, 0.0) + deposit
-                    )
+            shedders = self._get_shedders(occupants, pathogen_id, profile)
+            for agent, sv in shedders:
+                deposit = sv * dep_frac
+                self.surface_pools[zone_name] = (
+                    self.surface_pools.get(zone_name, 0.0) + deposit
+                )
 
         # b) Fomite trailing detection + pickup
         for zone_name, occupants in zone_occupants.items():
@@ -493,10 +532,7 @@ class TransmissionCore:
             if surface_mass <= 0:
                 continue
 
-            susceptible = [
-                a for a in occupants
-                if a.infection_status == InfectionStatus.SUSCEPTIBLE
-            ]
+            susceptible = self._get_susceptible(occupants, pathogen_id)
             if not susceptible:
                 continue
 
@@ -526,11 +562,50 @@ class TransmissionCore:
                 matrix.fomite_trailing_exposures.append({
                     "target_id": target.agent_id,
                     "zone": zone_name,
+                    "pathogen_id": pathogen_id,
                     "surface_mass": round(surface_mass, 4),
                     "dose": round(dose, 4),
                     "is_trailing": is_trailing,
                     "prev_shedder_ids": prev_shedders if is_trailing else [],
                 })
+
+    # ── Multi-pathogen shedder/susceptible helpers ─────────────────────
+
+    def _get_shedders(
+        self,
+        occupants: list[KorkinAgent],
+        pathogen_id: str,
+        profile: dict | None,
+    ) -> list[tuple[KorkinAgent, float]]:
+        """Return (agent, shedding_value) for agents shedding this pathogen."""
+        result = []
+        for a in occupants:
+            if pathogen_id == "_default":
+                if a.is_infected and a.current_shedding > 0:
+                    result.append((a, a.current_shedding))
+            else:
+                sv = a.get_pathogen_shedding(pathogen_id, profile or {})
+                if sv > 0:
+                    result.append((a, sv))
+        return result
+
+    def _get_susceptible(
+        self,
+        occupants: list[KorkinAgent],
+        pathogen_id: str,
+    ) -> list[KorkinAgent]:
+        """Return agents susceptible to this specific pathogen."""
+        result = []
+        for a in occupants:
+            if a.immune:
+                continue
+            if pathogen_id == "_default":
+                if a.infection_status == InfectionStatus.SUSCEPTIBLE:
+                    result.append(a)
+            else:
+                if not a.is_infected_with(pathogen_id):
+                    result.append(a)
+        return result
 
     # ── State management ─────────────────────────────────────────────
 

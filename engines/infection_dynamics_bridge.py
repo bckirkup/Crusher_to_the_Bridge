@@ -163,6 +163,12 @@ class KorkinAgent:
     - shedding, acquired_particles, time_infected (epoch)
     - role (passenger/crew), home_zone, schedule
     - current_location (zone name)
+
+    Multi-pathogen extensions:
+    - infections: dict keyed by pathogen_id tracking per-pathogen state
+    - susceptibility_multiplier: dict keyed by pathogen_id → scalar
+    - microflora_disruption_status: scalar [0.0..1.0] indicating
+      compromised native microbiome
     """
 
     __slots__ = (
@@ -171,6 +177,9 @@ class KorkinAgent:
         "time_infected", "acquired_particles",
         "home_zone", "dining_zone", "work_zone", "free_zone",
         "current_location", "schedule",
+        # Multi-pathogen extensions
+        "infections", "susceptibility_multiplier",
+        "microflora_disruption_status",
     )
 
     def __init__(
@@ -197,6 +206,17 @@ class KorkinAgent:
         self.free_zone = free_zone
         self.current_location = home_zone
         self.schedule = list(schedule)
+
+        # Multi-pathogen co-infection tracking:
+        # {pathogen_id: {"status": InfectionStatus, "illness": IllnessStatus,
+        #   "time_infected": int|None, "acquired_particles": float}}
+        self.infections: dict[str, dict[str, Any]] = {}
+
+        # Per-pathogen susceptibility scaling (higher = more vulnerable)
+        self.susceptibility_multiplier: dict[str, float] = {}
+
+        # Microflora disruption scalar [0.0 = healthy, 1.0 = fully disrupted]
+        self.microflora_disruption_status: float = 0.0
 
     @property
     def days_post_infection(self) -> int:
@@ -244,6 +264,78 @@ class KorkinAgent:
             return self.work_zone
         return self.home_zone
 
+    def init_pathogen_susceptibility(
+        self, pathogen_id: str, base_susceptibility: float = 1.0,
+    ) -> None:
+        """Set default susceptibility for a pathogen if not already set."""
+        if pathogen_id not in self.susceptibility_multiplier:
+            self.susceptibility_multiplier[pathogen_id] = base_susceptibility
+
+    def infect_with_pathogen(
+        self, pathogen_id: str, dose: float, epoch: int,
+    ) -> None:
+        """Record co-infection for a specific pathogen."""
+        self.infections[pathogen_id] = {
+            "status": InfectionStatus.INFECTED,
+            "illness": IllnessStatus.NOT_ILL,
+            "time_infected": 0,
+            "acquired_particles": dose,
+            "infection_epoch": epoch,
+        }
+        # Set legacy fields to infected if this is the first infection
+        if self.infection_status == InfectionStatus.SUSCEPTIBLE:
+            self.infection_status = InfectionStatus.INFECTED
+            self.illness_status = IllnessStatus.NOT_ILL
+            self.time_infected = 0
+            self.acquired_particles = dose
+
+    def is_infected_with(self, pathogen_id: str) -> bool:
+        """Check if agent is infected with a specific pathogen."""
+        inf = self.infections.get(pathogen_id)
+        if inf is None:
+            return False
+        return inf["status"] == InfectionStatus.INFECTED
+
+    def get_pathogen_shedding(self, pathogen_id: str, profile: dict) -> float:
+        """Shedding value for a specific pathogen based on its profile."""
+        inf = self.infections.get(pathogen_id)
+        if inf is None or inf["status"] != InfectionStatus.INFECTED:
+            return 0.0
+        dpi = inf["time_infected"]
+        if dpi is None or dpi < 0:
+            return 0.0
+        is_symp = inf["illness"] == IllnessStatus.SYMPTOMATIC
+        curve = profile.get(
+            "shedding_curve_log10",
+            SYMPTOMATIC_SHEDDING if is_symp else ASYMPTOMATIC_SHEDDING,
+        )
+        if not is_symp:
+            curve = profile.get("asymptomatic_shedding_log10", curve)
+        adj = profile.get("dose_adjustment", DOSE_ADJUSTMENT)
+        idx = min(dpi, len(curve) - 1)
+        return math.pow(10, curve[idx] - adj)
+
+    def update_microflora_disruption(self, pathogen_profiles: dict) -> None:
+        """Recompute microflora_disruption_status from all active infections."""
+        max_disruption = 0.0
+        for pid, inf in self.infections.items():
+            if inf["status"] != InfectionStatus.INFECTED:
+                continue
+            profile = pathogen_profiles.get(pid, {})
+            mf = profile.get("microflora_disruption", {})
+            if mf.get("causes_disruption", False):
+                mag = mf.get("disruption_magnitude", 0.5)
+                max_disruption = max(max_disruption, mag)
+        self.microflora_disruption_status = max_disruption
+
+    @property
+    def active_pathogen_ids(self) -> list[str]:
+        """List of pathogen IDs this agent is actively infected with."""
+        return [
+            pid for pid, inf in self.infections.items()
+            if inf["status"] == InfectionStatus.INFECTED
+        ]
+
     def to_schema_dict(self) -> dict[str, Any]:
         """Export agent state in telemetry_buffer.schema format."""
         if self.infection_status == InfectionStatus.INFECTED:
@@ -258,6 +350,15 @@ class KorkinAgent:
         else:
             symptom_status = "asymptomatic"
 
+        # Multi-pathogen infection summary
+        pathogen_states = {}
+        for pid, inf in self.infections.items():
+            pathogen_states[pid] = {
+                "status": inf["status"].name,
+                "illness": inf["illness"].name,
+                "days_post_infection": inf["time_infected"],
+            }
+
         return {
             "agent_id": self.agent_id,
             "symptom_status": symptom_status,
@@ -265,6 +366,9 @@ class KorkinAgent:
             "location": self.current_location,
             "role": self.role,
             "days_post_infection": self.days_post_infection if self.is_infected else None,
+            "pathogen_infections": pathogen_states,
+            "susceptibility_multiplier": dict(self.susceptibility_multiplier),
+            "microflora_disruption": round(self.microflora_disruption_status, 4),
         }
 
 
@@ -306,6 +410,8 @@ class KorkinShipEngine:
         self.isolated_ids: set[int] = set()
 
         self._zone_pathogen_mass: dict[str, float] = {z["name"]: 0.0 for z in self.zones}
+        # Multi-pathogen mass pools: {pathogen_id: {zone_name: float}}
+        self._multi_pathogen_mass: dict[str, dict[str, float]] = {}
         self._external_transport: bool = False
         self._external_transmission: bool = False
 
@@ -499,8 +605,12 @@ class KorkinShipEngine:
         spaces_out = {}
         for zone in self.zones:
             zname = zone["name"]
+            per_pathogen = {}
+            for pid, masses in self._multi_pathogen_mass.items():
+                per_pathogen[pid] = round(masses.get(zname, 0.0), 3)
             spaces_out[zname] = {
                 "pathogen_mass": round(self._zone_pathogen_mass.get(zname, 0.0), 3),
+                "pathogen_mass_by_id": per_pathogen,
                 "microbiome_id": f"profile_{zname.lower()}",
             }
         return {
@@ -511,12 +621,50 @@ class KorkinShipEngine:
 
     @property
     def zone_pathogen_mass(self) -> dict[str, float]:
-        """Read/write access to per-zone pathogen mass for CONTAM transport."""
+        """Read/write access to per-zone pathogen mass for CONTAM transport.
+
+        Returns the aggregate (summed) mass across all pathogens.
+        """
         return self._zone_pathogen_mass
 
     @zone_pathogen_mass.setter
     def zone_pathogen_mass(self, value: dict[str, float]) -> None:
         self._zone_pathogen_mass = value
+
+    @property
+    def multi_pathogen_mass(self) -> dict[str, dict[str, float]]:
+        """Per-pathogen mass pools: {pathogen_id: {zone: mass}}."""
+        return self._multi_pathogen_mass
+
+    @multi_pathogen_mass.setter
+    def multi_pathogen_mass(self, value: dict[str, dict[str, float]]) -> None:
+        self._multi_pathogen_mass = value
+
+    def initialize_pathogen(self, pathogen_id: str) -> None:
+        """Set up zero-mass pools for a new pathogen across all zones."""
+        self._multi_pathogen_mass[pathogen_id] = {
+            z["name"]: 0.0 for z in self.zones
+        }
+
+    def get_pathogen_zone_mass(self, pathogen_id: str) -> dict[str, float]:
+        """Get per-zone mass for a specific pathogen."""
+        return self._multi_pathogen_mass.get(pathogen_id, {})
+
+    def set_pathogen_zone_mass(
+        self, pathogen_id: str, masses: dict[str, float],
+    ) -> None:
+        """Update per-zone mass for a specific pathogen."""
+        self._multi_pathogen_mass[pathogen_id] = masses
+        # Recompute aggregate
+        self._recompute_aggregate_mass()
+
+    def _recompute_aggregate_mass(self) -> None:
+        """Recompute the aggregate zone_pathogen_mass from all pathogens."""
+        agg: dict[str, float] = {z["name"]: 0.0 for z in self.zones}
+        for pid, masses in self._multi_pathogen_mass.items():
+            for zname, mass in masses.items():
+                agg[zname] = agg.get(zname, 0.0) + mass
+        self._zone_pathogen_mass = agg
 
     def enable_external_transport(self) -> None:
         """Disable internal flat decay — transport handled externally."""
