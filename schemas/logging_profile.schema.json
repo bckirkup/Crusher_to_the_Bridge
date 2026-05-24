@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "logging_profile.schema.json",
+  "title": "Logging Profile",
+  "description": "Multi-fidelity diagnostic logging configuration for the Artificial Lab Notebook.",
+  "type": "object",
+  "required": ["logging_fidelity"],
+  "properties": {
+    "description": {"type": "string"},
+    "logging_fidelity": {
+      "type": "string",
+      "enum": ["LOW_FIDELITY", "MID_FIDELITY", "HIGH_FIDELITY"],
+      "description": "Active fidelity tier for the run"
+    },
+    "fidelity_levels": {
+      "type": "object",
+      "properties": {
+        "HIGH_FIDELITY": {"$ref": "#/$defs/FidelityConfig"},
+        "MID_FIDELITY": {"$ref": "#/$defs/FidelityConfig"},
+        "LOW_FIDELITY": {"$ref": "#/$defs/FidelityConfig"}
+      }
+    }
+  },
+  "$defs": {
+    "FidelityConfig": {
+      "type": "object",
+      "properties": {
+        "description": {"type": "string"},
+        "log_binary_states": {"type": "boolean"},
+        "log_numeric_outputs": {"type": "boolean"},
+        "log_raw_matrices": {"type": "boolean"},
+        "log_host_microflora_variance": {"type": "boolean"},
+        "log_contact_tracing": {"type": "boolean"},
+        "log_raw_instrument_telemetry": {"type": "boolean"},
+        "log_qc_validation": {"type": "boolean"}
+      }
+    }
+  }
+}

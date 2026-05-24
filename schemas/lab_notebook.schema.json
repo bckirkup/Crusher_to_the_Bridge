@@ -1,0 +1,198 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "lab_notebook.schema.json",
+  "title": "Artificial Lab Notebook",
+  "description": "Machine-readable diagnostic records from the Crusher Labs Observation Engine. Structured for CDC/fleet biosurveillance portal ingestion.",
+  "type": "object",
+  "required": ["notebook_type", "version", "records", "total_records"],
+  "properties": {
+    "notebook_type": {
+      "type": "string",
+      "const": "artificial_lab_notebook"
+    },
+    "version": {"type": "string"},
+    "run_metadata": {
+      "type": "object",
+      "properties": {
+        "total_epochs": {"type": "integer"},
+        "platform": {"type": "string"},
+        "fidelity_tier": {"type": "string"},
+        "active_pathogens": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "fidelity_tier_definitions": {
+      "type": "object",
+      "properties": {
+        "HIGH_FIDELITY": {"type": "string"},
+        "MID_FIDELITY": {"type": "string"},
+        "LOW_FIDELITY": {"type": "string"}
+      }
+    },
+    "total_records": {"type": "integer", "minimum": 0},
+    "records": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/NotebookRecord"
+      }
+    },
+    "FINANCIAL_AUDIT": {
+      "$ref": "#/$defs/FinancialAudit"
+    },
+    "PROTOCOL_SUMMARY": {
+      "$ref": "#/$defs/ProtocolSummary"
+    }
+  },
+  "$defs": {
+    "NotebookRecord": {
+      "type": "object",
+      "required": ["sample_id", "timestamp_epoch", "collection_point_type", "assay_type", "fidelity_tier"],
+      "properties": {
+        "sample_id": {
+          "type": "string",
+          "pattern": "^CLN-\\d{3}-[A-Z0-9_]{1,6}-[A-Z_]{1,5}-[a-f0-9]{8}$"
+        },
+        "timestamp_epoch": {"type": "integer", "minimum": 0},
+        "collection_point_type": {
+          "type": "string",
+          "enum": [
+            "continuous_air_sampler",
+            "targeted_surface_swab",
+            "pooled_wastewater",
+            "wastewater_sequencing_grid",
+            "individual_patient_rdt",
+            "individual_patient_qpcr",
+            "individual_patient_microbiology",
+            "clinical_rdt",
+            "clinical_qpcr",
+            "clinical_microbiology",
+            "host_biomarker",
+            "trigger_event",
+            "system_escalation"
+          ]
+        },
+        "collection_zone": {"type": "string"},
+        "assay_type": {
+          "type": "string",
+          "enum": [
+            "aerosol_pcr",
+            "surface_pcr",
+            "metagenomic_sequencing",
+            "lateral_flow_antigen",
+            "patient_qpcr",
+            "culture_and_staining",
+            "microflora_disruption_status",
+            "trigger_transition"
+          ]
+        },
+        "fidelity_tier": {
+          "type": "string",
+          "enum": ["HIGH_FIDELITY", "MID_FIDELITY", "LOW_FIDELITY"]
+        },
+        "binary_result": {
+          "type": "string",
+          "enum": ["DETECTED", "NOT DETECTED", "NORMAL", "DISRUPTED", "SECONDARY_INFECTION", "SUSPECTED", "CONFIRMED"]
+        },
+        "inferred_anomaly_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "qc_status": {
+          "type": "string",
+          "enum": ["QC_PASS", "QC_FAILURE", "QC_NOT_RUN"]
+        },
+        "cross_contamination_carryover": {
+          "type": "number",
+          "minimum": 0
+        },
+        "stoplight": {
+          "type": "string",
+          "enum": ["GREEN", "AMBER", "RED"],
+          "description": "Only present in LOW_FIDELITY tier"
+        },
+        "ct_value": {
+          "type": ["number", "null"],
+          "description": "qPCR cycle threshold (MID/HIGH fidelity)"
+        },
+        "raw_amplification_curve": {
+          "type": "array",
+          "items": {"type": "number"},
+          "minItems": 40,
+          "maxItems": 40,
+          "description": "40-cycle fluorescence curve (HIGH fidelity only)"
+        },
+        "background_fluorescence": {
+          "type": "number",
+          "description": "Baseline fluorescence noise (HIGH fidelity only)"
+        },
+        "kingdom_reads": {
+          "type": "object",
+          "description": "Dirichlet-multinomial read counts per kingdom (HIGH fidelity)",
+          "additionalProperties": {"type": "integer"}
+        },
+        "kingdom_clr_deltas": {
+          "type": "object",
+          "description": "CLR-space anomaly deltas per kingdom",
+          "additionalProperties": {"type": "number"}
+        },
+        "patient_id": {
+          "type": "integer",
+          "description": "Agent ID for clinical instruments"
+        }
+      }
+    },
+    "FinancialAudit": {
+      "type": "object",
+      "properties": {
+        "summary": {
+          "type": "object",
+          "properties": {
+            "total_spent_usd": {"type": "number"},
+            "surveillance_cost_usd": {"type": "number"},
+            "intervention_cost_usd": {"type": "number"},
+            "budget_remaining_usd": {"type": "number"},
+            "labor_consumed_hours": {"type": "number"},
+            "labor_remaining_hours": {"type": "number"}
+          }
+        },
+        "material_consumption": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "starting_count": {"type": "integer"},
+              "consumed": {"type": "integer"},
+              "remaining": {"type": "integer"},
+              "total_cost_usd": {"type": "number"},
+              "depleted": {"type": "boolean"}
+            }
+          }
+        },
+        "itemized_entries": {
+          "type": "array",
+          "items": {"type": "object"}
+        }
+      }
+    },
+    "ProtocolSummary": {
+      "type": "object",
+      "properties": {
+        "protocols_triggered": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "protocol_id": {"type": "string"},
+              "name": {"type": "string"},
+              "first_activation_epoch": {"type": "integer"},
+              "total_activations": {"type": "integer"},
+              "category": {"type": "string"}
+            }
+          }
+        },
+        "total_activations": {"type": "integer"},
+        "total_deactivations": {"type": "integer"}
+      }
+    }
+  }
+}

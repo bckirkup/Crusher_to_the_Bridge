@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "air_flow_paths.schema.json",
+  "title": "Air Flow Paths",
+  "description": "HVAC zone definitions, cross-zone links, and adjacency graph for CONTAM-style multi-zone aerosol transport.",
+  "type": "object",
+  "required": ["platform"],
+  "properties": {
+    "platform": {"type": "string"},
+    "description": {"type": "string"},
+    "hvac_zones": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/HVACZone"
+      }
+    },
+    "cross_zone_links": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/CrossZoneLink"
+      }
+    },
+    "adjacency": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/AdjacencyEdge"
+      }
+    }
+  },
+  "$defs": {
+    "HVACZone": {
+      "type": "object",
+      "required": ["id", "rooms"],
+      "properties": {
+        "id": {"type": "string"},
+        "rooms": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Room IDs that MUST exist in spatial_layout.json"
+        },
+        "ach": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Air changes per hour for this HVAC zone"
+        },
+        "description": {"type": "string"}
+      }
+    },
+    "CrossZoneLink": {
+      "type": "object",
+      "required": ["from", "to", "flow_rate_m3h"],
+      "properties": {
+        "from": {
+          "type": "string",
+          "description": "Source zone or HVAC zone ID"
+        },
+        "to": {
+          "type": "string",
+          "description": "Destination zone or HVAC zone ID"
+        },
+        "flow_rate_m3h": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Volumetric flow rate in m³/hour"
+        },
+        "is_hvac_ducted": {
+          "type": "boolean",
+          "description": "Whether airflow passes through HVAC filtration"
+        },
+        "path": {"type": "string"},
+        "description": {"type": "string"}
+      }
+    },
+    "AdjacencyEdge": {
+      "type": "object",
+      "required": ["from", "to"],
+      "properties": {
+        "from": {"type": "string"},
+        "to": {"type": "string"},
+        "type": {
+          "type": "string",
+          "enum": ["passageway", "service_hatch", "ladder_well", "hvac_duct"]
+        }
+      }
+    }
+  }
+}
