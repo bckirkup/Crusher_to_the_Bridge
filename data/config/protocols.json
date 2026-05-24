@@ -1,0 +1,224 @@
+{
+  "description": "Standing Operating Protocols (SOPs) for the Reactive Protocol Engine. Each protocol maps a LOW_FIDELITY stoplight trigger condition from a specific instrument class to physics/behavior modifiers and resource costs.",
+  "protocols": [
+    {
+      "protocol_id": "SOP-001",
+      "name": "Enhanced Ventilation",
+      "description": "Upgrade HVAC filtration when airborne anomaly is detected.",
+      "trigger": {
+        "instrument_class": "continuous_air_sampler",
+        "stoplight_level": "AMBER",
+        "min_zones_affected": 1
+      },
+      "modifiers": {
+        "hvac_filter_efficiency_override": 0.80,
+        "hvac_filter_type_label": "MERV-16"
+      },
+      "costs_per_epoch": {
+        "financial_usd": 150.00,
+        "materials": {
+          "hvac_filters": 0
+        },
+        "labor_person_hours": 1.0
+      },
+      "activation_costs": {
+        "financial_usd": 500.00,
+        "materials": {
+          "hvac_filters": 2
+        },
+        "labor_person_hours": 4.0
+      },
+      "category": "intervention"
+    },
+    {
+      "protocol_id": "SOP-002",
+      "name": "HEPA Lockdown Ventilation",
+      "description": "Deploy maximum HEPA filtration on RED airborne alert.",
+      "trigger": {
+        "instrument_class": "continuous_air_sampler",
+        "stoplight_level": "RED",
+        "min_zones_affected": 1
+      },
+      "modifiers": {
+        "hvac_filter_efficiency_override": 0.999,
+        "hvac_filter_type_label": "HEPA"
+      },
+      "costs_per_epoch": {
+        "financial_usd": 350.00,
+        "materials": {
+          "hvac_filters": 0
+        },
+        "labor_person_hours": 2.0
+      },
+      "activation_costs": {
+        "financial_usd": 2000.00,
+        "materials": {
+          "hvac_filters": 6
+        },
+        "labor_person_hours": 8.0
+      },
+      "category": "intervention"
+    },
+    {
+      "protocol_id": "SOP-003",
+      "name": "Surface Decontamination Protocol",
+      "description": "Deploy sanitizer teams when surface swab triggers AMBER or above.",
+      "trigger": {
+        "instrument_class": "targeted_surface_swab",
+        "stoplight_level": "AMBER",
+        "min_zones_affected": 1
+      },
+      "modifiers": {
+        "surface_decontamination_factor": 0.50,
+        "surface_decay_rate_override": 0.30
+      },
+      "costs_per_epoch": {
+        "financial_usd": 200.00,
+        "materials": {
+          "sanitizer_units": 5,
+          "gloves_pairs": 10
+        },
+        "labor_person_hours": 6.0
+      },
+      "activation_costs": {
+        "financial_usd": 100.00,
+        "materials": {
+          "sanitizer_units": 2,
+          "gloves_pairs": 5
+        },
+        "labor_person_hours": 1.0
+      },
+      "category": "intervention"
+    },
+    {
+      "protocol_id": "SOP-004",
+      "name": "PPE Deployment — Standard",
+      "description": "Issue surgical masks and gloves when wastewater flags AMBER.",
+      "trigger": {
+        "instrument_class": "wastewater_sequencing_grid",
+        "stoplight_level": "AMBER",
+        "min_zones_affected": 1
+      },
+      "modifiers": {
+        "ppe_transmission_reduction": 0.40,
+        "direct_contact_scalar": 0.60,
+        "droplet_scalar": 0.60
+      },
+      "costs_per_epoch": {
+        "financial_usd": 100.00,
+        "materials": {
+          "surgical_masks": 20,
+          "gloves_pairs": 20
+        },
+        "labor_person_hours": 0.5
+      },
+      "activation_costs": {
+        "financial_usd": 50.00,
+        "materials": {
+          "surgical_masks": 5,
+          "gloves_pairs": 5
+        },
+        "labor_person_hours": 0.5
+      },
+      "category": "intervention"
+    },
+    {
+      "protocol_id": "SOP-005",
+      "name": "PPE Deployment — Full N95",
+      "description": "Issue N95 respirators and face shields on RED wastewater or RED air alert.",
+      "trigger": {
+        "instrument_class": "wastewater_sequencing_grid",
+        "stoplight_level": "RED",
+        "min_zones_affected": 1
+      },
+      "modifiers": {
+        "ppe_transmission_reduction": 0.80,
+        "direct_contact_scalar": 0.30,
+        "droplet_scalar": 0.20,
+        "hvac_airborne_scalar": 0.50
+      },
+      "costs_per_epoch": {
+        "financial_usd": 400.00,
+        "materials": {
+          "n95_respirators": 20,
+          "face_shields": 10,
+          "gloves_pairs": 40
+        },
+        "labor_person_hours": 1.0
+      },
+      "activation_costs": {
+        "financial_usd": 200.00,
+        "materials": {
+          "n95_respirators": 5,
+          "face_shields": 5,
+          "gloves_pairs": 10
+        },
+        "labor_person_hours": 1.0
+      },
+      "category": "intervention"
+    },
+    {
+      "protocol_id": "SOP-006",
+      "name": "Increased Diagnostic Cadence",
+      "description": "Double diagnostic testing frequency when clinical RDT flags AMBER.",
+      "trigger": {
+        "instrument_class": "clinical_rdt",
+        "stoplight_level": "AMBER",
+        "min_agents_affected": 1
+      },
+      "modifiers": {
+        "diagnostic_cadence_multiplier": 2.0
+      },
+      "costs_per_epoch": {
+        "financial_usd": 300.00,
+        "materials": {
+          "rdt_kits": 10,
+          "pcr_kits": 5,
+          "swab_kits": 10
+        },
+        "labor_person_hours": 4.0
+      },
+      "activation_costs": {
+        "financial_usd": 100.00,
+        "materials": {
+          "rdt_kits": 5,
+          "pcr_kits": 2,
+          "swab_kits": 5
+        },
+        "labor_person_hours": 1.0
+      },
+      "category": "surveillance"
+    },
+    {
+      "protocol_id": "SOP-007",
+      "name": "Galley Closure & Meal Isolation",
+      "description": "Close communal dining on RED clinical microbiology (GI flora disruption).",
+      "trigger": {
+        "instrument_class": "clinical_microbiology",
+        "stoplight_level": "RED",
+        "min_agents_affected": 1
+      },
+      "modifiers": {
+        "close_zones": ["Galley", "Mess_Hall"],
+        "zone_occupancy_cap": 2
+      },
+      "costs_per_epoch": {
+        "financial_usd": 500.00,
+        "materials": {
+          "meal_trays": 20,
+          "sanitizer_units": 3
+        },
+        "labor_person_hours": 8.0
+      },
+      "activation_costs": {
+        "financial_usd": 200.00,
+        "materials": {
+          "meal_trays": 40,
+          "sanitizer_units": 5
+        },
+        "labor_person_hours": 4.0
+      },
+      "category": "intervention"
+    }
+  ]
+}

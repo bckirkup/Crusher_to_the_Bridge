@@ -31,6 +31,8 @@ from crusher_labs.observation_core import (
     InstrumentQC,
 )
 from crusher_labs.lab_notebook import ArtificialLabNotebook
+from crusher_labs.protocol_engine import ProtocolEngine
+from crusher_labs.cost_ledger import CostLedger
 
 _CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.yaml")
 
@@ -123,6 +125,8 @@ __all__ = [
     "ClinicalMicrobiology",
     "InstrumentQC",
     "ArtificialLabNotebook",
+    "ProtocolEngine",
+    "CostLedger",
     "ALL_MODALITIES",
     "ALL_INSTRUMENTS",
     "build_modalities",
