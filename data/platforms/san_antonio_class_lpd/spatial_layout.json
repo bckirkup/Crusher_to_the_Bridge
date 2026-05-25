@@ -1,0 +1,296 @@
+{
+  "platform": "san_antonio_class_lpd",
+  "description": "San Antonio-class amphibious transport dock (LPD-17). 208.5m LOA, 31.9m beam. ~360 ship's company + ~800 embarked Marines. Modern HVAC with NBC filtration capability. Well deck and flight deck for amphibious operations.",
+  "deck_dimensions": {
+    "length_m": 208.5,
+    "beam_m": 31.9
+  },
+  "zones": [
+    {
+      "id": "Bridge",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 180,
+      "deck": "07_level",
+      "max_occupancy": 20,
+      "display": {
+        "x": 175,
+        "y": 16
+      },
+      "description": "Navigation bridge and bridge wings. Full integrated bridge system."
+    },
+    {
+      "id": "CIC",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 250,
+      "deck": "03_level",
+      "max_occupancy": 35,
+      "display": {
+        "x": 160,
+        "y": 16
+      },
+      "description": "Combat Information Center. ACDS Block 1 combat system. Ship's Signals Exploitation Space (SSES)."
+    },
+    {
+      "id": "Ship_Officers_Quarters",
+      "type": "Room",
+      "traffic": "low",
+      "volume_m3": 320,
+      "deck": "02_level",
+      "max_occupancy": 40,
+      "display": {
+        "x": 155,
+        "y": 10
+      },
+      "description": "Ship's company officer staterooms. 2-person rooms, ~8 m\u00b3 per person."
+    },
+    {
+      "id": "Ship_CPO_Quarters",
+      "type": "Room",
+      "traffic": "low",
+      "volume_m3": 280,
+      "deck": "02_level",
+      "max_occupancy": 50,
+      "display": {
+        "x": 150,
+        "y": 22
+      },
+      "description": "Ship's company CPO berthing. Curtained bunks, slightly more space than enlisted."
+    },
+    {
+      "id": "Ship_Enlisted_Berthing",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 650,
+      "deck": "3rd_deck",
+      "max_occupancy": 270,
+      "display": {
+        "x": 140,
+        "y": 10
+      },
+      "description": "Ship's company enlisted berthing. 3-high bunks with personal storage. ~2.4 m\u00b3 per person."
+    },
+    {
+      "id": "Troop_Berthing_Fwd",
+      "type": "Room",
+      "traffic": "high",
+      "volume_m3": 800,
+      "deck": "3rd_deck",
+      "max_occupancy": 280,
+      "display": {
+        "x": 120,
+        "y": 10
+      },
+      "description": "Forward Marine berthing. 3-high racks, extremely dense. ~2.9 m\u00b3 per person. Shared heads (latrines)."
+    },
+    {
+      "id": "Troop_Berthing_Mid",
+      "type": "Room",
+      "traffic": "high",
+      "volume_m3": 750,
+      "deck": "3rd_deck",
+      "max_occupancy": 260,
+      "display": {
+        "x": 100,
+        "y": 10
+      },
+      "description": "Midships Marine berthing. 3-high racks, extremely dense. ~2.9 m\u00b3 per person."
+    },
+    {
+      "id": "Troop_Berthing_Aft",
+      "type": "Room",
+      "traffic": "high",
+      "volume_m3": 700,
+      "deck": "3rd_deck",
+      "max_occupancy": 260,
+      "display": {
+        "x": 80,
+        "y": 10
+      },
+      "description": "Aft Marine berthing. 3-high racks, extremely dense. Closest to well deck \u2014 first to embark."
+    },
+    {
+      "id": "Crew_Mess",
+      "type": "Dining",
+      "traffic": "high",
+      "volume_m3": 350,
+      "deck": "2nd_deck",
+      "max_occupancy": 120,
+      "display": {
+        "x": 135,
+        "y": 16
+      },
+      "description": "Ship's company mess deck. Serves ~360 crew in multiple seatings."
+    },
+    {
+      "id": "Troop_Mess",
+      "type": "Dining",
+      "traffic": "high",
+      "volume_m3": 500,
+      "deck": "2nd_deck",
+      "max_occupancy": 200,
+      "display": {
+        "x": 110,
+        "y": 16
+      },
+      "description": "Marine mess deck. Serves ~800 Marines in continuous seatings. Largest single dining space on ship."
+    },
+    {
+      "id": "Wardroom",
+      "type": "Dining",
+      "traffic": "medium",
+      "volume_m3": 120,
+      "deck": "01_level",
+      "max_occupancy": 40,
+      "display": {
+        "x": 155,
+        "y": 20
+      },
+      "description": "Officers wardroom. Ship's company and embarked Marine officers."
+    },
+    {
+      "id": "Galley",
+      "type": "Dining",
+      "traffic": "high",
+      "volume_m3": 200,
+      "deck": "2nd_deck",
+      "max_occupancy": 20,
+      "display": {
+        "x": 120,
+        "y": 22
+      },
+      "description": "Ship's galley. Industrial kitchen serving 1,160+ personnel. Connected to both crew and troop mess decks."
+    },
+    {
+      "id": "Medical_Ward",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 280,
+      "deck": "2nd_deck",
+      "max_occupancy": 30,
+      "display": {
+        "x": 145,
+        "y": 22
+      },
+      "description": "24-bed medical ward with 2 operating rooms, dental suite, pharmacy. Fleet surgical capability."
+    },
+    {
+      "id": "Vehicle_Deck",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 2360,
+      "deck": "2nd_deck",
+      "max_occupancy": 60,
+      "display": {
+        "x": 90,
+        "y": 16
+      },
+      "description": "Vehicle storage deck. 2,322 m\u00b2 for AAVs, LAVs, HMMWVs. Connected to well deck via ramp. Marine staging area before embarkation."
+    },
+    {
+      "id": "Well_Deck",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 3800,
+      "deck": "1st_platform",
+      "max_occupancy": 80,
+      "display": {
+        "x": 50,
+        "y": 16
+      },
+      "description": "Well deck (64m \u00d7 15m). Floodable for LCAC operations. Two LCAC or one LCU capacity. Partially open to sea when flooded."
+    },
+    {
+      "id": "Flight_Deck",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 600,
+      "deck": "weather_deck",
+      "max_occupancy": 40,
+      "display": {
+        "x": 35,
+        "y": 16
+      },
+      "description": "Flight deck with 2 MV-22/CH-53 spots. Open to weather. Aircraft handling and fueling stations."
+    },
+    {
+      "id": "Hangar",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 1200,
+      "deck": "01_level",
+      "max_occupancy": 30,
+      "display": {
+        "x": 40,
+        "y": 16
+      },
+      "description": "Aircraft hangar for 2 helicopters/MV-22. Maintenance shops, aviation stores."
+    },
+    {
+      "id": "Engine_Room_Fwd",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 800,
+      "deck": "1st_platform",
+      "max_occupancy": 15,
+      "display": {
+        "x": 130,
+        "y": 6
+      },
+      "description": "Forward machinery room. Colt-Pielstick diesel engines. Auxiliary machinery."
+    },
+    {
+      "id": "Engine_Room_Aft",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 900,
+      "deck": "1st_platform",
+      "max_occupancy": 15,
+      "display": {
+        "x": 100,
+        "y": 6
+      },
+      "description": "Aft machinery room. GE LM2500 gas turbines. Main reduction gears, ship service generators."
+    },
+    {
+      "id": "Troop_Recreation",
+      "type": "Free",
+      "traffic": "high",
+      "volume_m3": 300,
+      "deck": "2nd_deck",
+      "max_occupancy": 80,
+      "display": {
+        "x": 95,
+        "y": 22
+      },
+      "description": "Marine recreation area and PT room. Fitness equipment, small library. Primary congregation point for off-duty Marines."
+    },
+    {
+      "id": "Marine_Planning",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 180,
+      "deck": "01_level",
+      "max_occupancy": 40,
+      "display": {
+        "x": 130,
+        "y": 22
+      },
+      "description": "Marine Expeditionary Unit planning and briefing spaces. Joint Operations Center (JOC)."
+    },
+    {
+      "id": "Passageway_Main",
+      "type": "Free",
+      "traffic": "high",
+      "volume_m3": 400,
+      "deck": "2nd_deck",
+      "max_occupancy": 50,
+      "display": {
+        "x": 110,
+        "y": 6
+      },
+      "description": "Main fore-aft passageway on 2nd deck. Primary transit corridor for 1,160 personnel."
+    }
+  ]
+}

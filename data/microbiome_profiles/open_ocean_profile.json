@@ -1,0 +1,82 @@
+{
+  "_meta": {
+    "name": "open_ocean_profile",
+    "description": "Multi-kingdom relative abundance vector for built-environment surfaces in an open-ocean (off-shore, oligotrophic) setting. Dominated by Prochlorococcus, Pelagibacter (SAR11), and marine phages.",
+    "units": "relative_abundance",
+    "sum": 1.0,
+    "basis": "Surface swab composite, 16S/18S/ITS/virome metagenomic markers",
+    "notes": "High virus:bacteria ratio typical of oligotrophic waters. Prochlorococcus and SAR11 dominant. Minimal Vibrio/Enterobacteriaceae. Cyanophages and pelagiphages prominent in virome. Very low fungal fraction."
+  },
+  "Bacteria": {
+    "_kingdom_fraction": 0.65,
+    "taxa": {
+      "Prochlorococcus": 0.14,
+      "Pelagibacter_ubique_SAR11": 0.155,
+      "SAR11_clade_other": 0.03,
+      "SAR86_clade": 0.045,
+      "SAR116_clade": 0.02,
+      "SAR324_clade": 0.01,
+      "SAR202_clade": 0.008,
+      "Puniceispirillum_SAR116": 0.01,
+      "Synechococcus": 0.02,
+      "Crocosphaera": 0.005,
+      "Roseobacter_clade": 0.015,
+      "Rhodobacteraceae_unclassified": 0.01,
+      "Flavobacteriaceae_unclassified": 0.015,
+      "Polaribacter": 0.005,
+      "Alteromonas": 0.01,
+      "Pseudoalteromonas": 0.005,
+      "Marinobacter": 0.008,
+      "Alcanivorax": 0.006,
+      "Oleiphilus": 0.004,
+      "Sphingomonas": 0.005,
+      "Erythrobacter": 0.008,
+      "Rhodospirillaceae_unclassified": 0.006,
+      "Verrucomicrobiaceae_unclassified": 0.005,
+      "Roseibacillus": 0.003,
+      "Planctomycetaceae_unclassified": 0.005,
+      "Actinobacteriota_marine": 0.018,
+      "Vibrio": 0.003,
+      "Pseudomonas": 0.004,
+      "Enterobacteriaceae_unclassified": 0.002,
+      "Gammaproteobacteria_other": 0.02,
+      "Alphaproteobacteria_other": 0.03,
+      "Bacteria_other": 0.02
+    }
+  },
+  "Archaea": {
+    "_kingdom_fraction": 0.05,
+    "taxa": {
+      "Nitrosopumilus_Thaumarchaeota": 0.023,
+      "Marine_Group_II_Euryarchaeota": 0.015,
+      "Marine_Group_III_Euryarchaeota": 0.005,
+      "Archaea_other": 0.007
+    }
+  },
+  "Fungi": {
+    "_kingdom_fraction": 0.02,
+    "taxa": {
+      "Malassezia": 0.003,
+      "Cladosporium": 0.004,
+      "Aspergillus": 0.002,
+      "Rhodotorula": 0.002,
+      "Fungi_marine_unclassified": 0.006,
+      "Fungi_other": 0.003
+    }
+  },
+  "Virus": {
+    "_kingdom_fraction": 0.28,
+    "taxa": {
+      "Caudovirales_unclassified": 0.06,
+      "Myoviridae_cyanophage": 0.055,
+      "Siphoviridae": 0.03,
+      "Podoviridae_cyanophage": 0.035,
+      "Pelagiphage_HTVC": 0.04,
+      "Phycodnaviridae": 0.02,
+      "Mimiviridae": 0.008,
+      "SAR11_phage": 0.015,
+      "SAR116_phage": 0.005,
+      "Virus_other": 0.012
+    }
+  }
+}

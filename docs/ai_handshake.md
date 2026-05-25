@@ -248,9 +248,12 @@ orchestrator.py (epoch loop)
 ```
 active_profiles.json ──────────────────────────────────────────────────┐
   (pathogen definitions: shedding, dose-response, microflora)         │
+  Default: 2 pathogens (destroyer baseline)                           │
+  Alt: edison_10pathogen_profiles.json (10 pathogens, QMRA-sourced)   │
                                                                        │
 spatial_layout.json ────────────────────────────────────────────────┐  │
   (zone nodes: id, volume, deck, display coords)                   │  │
+  6 pre-built platforms in data/platforms/                          │  │
                                                                     │  │
 air_flow_paths.json ────────────────────────────────────────────┐  │  │
   (HVAC zones, cross-zone links, adjacency)                    │  │  │
@@ -264,7 +267,12 @@ protocols.json ─────────────────────�
                                                                       
 resource_costs.json                                                   
   (budgets, material inventory, per-test costs)                      
+  Alt: edison_resource_costs.json (expanded sequencing + culture costs)
   Protocols reference material items defined here                     
+                                                                      
+microbiome_profiles/                                                  
+  (coastal_port, open_ocean baselines + zone_type_modifiers)          
+  Seed profiles for GRUMB environmental microbiome simulation         
                                                                       
 logging_profile.json                                                  
   (fidelity tier selection, QC parameters)                           

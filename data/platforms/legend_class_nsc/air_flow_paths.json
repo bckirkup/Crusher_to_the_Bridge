@@ -1,0 +1,293 @@
+{
+  "platform": "legend_class_nsc",
+  "description": "Legend-class NSC HVAC network. Full CBRN collective protection system with HEPA/charcoal filtration capability. Normal operations at MERV-13. NBC mode activates HEPA filtration and positive pressure citadel. Independent engine room and hangar ventilation.",
+  "hvac_zones": [
+    {
+      "id": "HVAC_Superstructure",
+      "rooms": [
+        "Bridge",
+        "CIC"
+      ],
+      "ach": 10.0,
+      "filter_efficiency": 0.5,
+      "filter_type": "MERV-13",
+      "nbc_filter_efficiency": 0.999,
+      "nbc_filter_type": "HEPA_charcoal",
+      "description": "Superstructure HVAC zone. Primary NBC citadel. Positive pressure maintained in NBC mode."
+    },
+    {
+      "id": "HVAC_Officer_Spaces",
+      "rooms": [
+        "Officers_Quarters",
+        "Wardroom"
+      ],
+      "ach": 8.0,
+      "filter_efficiency": 0.5,
+      "filter_type": "MERV-13",
+      "nbc_filter_efficiency": 0.999,
+      "nbc_filter_type": "HEPA_charcoal",
+      "description": "Officer quarters and wardroom. NBC citadel protected."
+    },
+    {
+      "id": "HVAC_Enlisted_Fwd",
+      "rooms": [
+        "CPO_Berthing",
+        "Enlisted_Berthing_Fwd",
+        "Crew_Mess"
+      ],
+      "ach": 8.0,
+      "filter_efficiency": 0.5,
+      "filter_type": "MERV-13",
+      "nbc_filter_efficiency": 0.999,
+      "nbc_filter_type": "HEPA_charcoal",
+      "description": "Forward enlisted berthing, CPO berthing, and crew mess. NBC citadel protected."
+    },
+    {
+      "id": "HVAC_Enlisted_Aft",
+      "rooms": [
+        "Enlisted_Berthing_Aft",
+        "Aviation_Det_Berthing",
+        "Boarding_Team_Staging"
+      ],
+      "ach": 8.0,
+      "filter_efficiency": 0.5,
+      "filter_type": "MERV-13",
+      "nbc_filter_efficiency": 0.999,
+      "nbc_filter_type": "HEPA_charcoal",
+      "description": "Aft enlisted and aviation det berthing. NBC citadel protected."
+    },
+    {
+      "id": "HVAC_Medical",
+      "rooms": [
+        "Sickbay"
+      ],
+      "ach": 12.0,
+      "filter_efficiency": 0.5,
+      "filter_type": "MERV-13",
+      "nbc_filter_efficiency": 0.999,
+      "nbc_filter_type": "HEPA_charcoal",
+      "description": "Sickbay HVAC. Negative pressure capability for patient isolation. NBC citadel protected."
+    },
+    {
+      "id": "HVAC_Galley",
+      "rooms": [
+        "Galley"
+      ],
+      "ach": 15.0,
+      "filter_efficiency": 0.5,
+      "filter_type": "MERV-13",
+      "description": "Galley ventilation. High ACH for cooking exhaust. Hood system vents topside."
+    },
+    {
+      "id": "HVAC_Midships_Utility",
+      "rooms": [
+        "Passageway_Main",
+        "Armory"
+      ],
+      "ach": 6.0,
+      "filter_efficiency": 0.5,
+      "filter_type": "MERV-13",
+      "nbc_filter_efficiency": 0.999,
+      "nbc_filter_type": "HEPA_charcoal",
+      "description": "Main passageway and armory. NBC citadel protected."
+    },
+    {
+      "id": "HVAC_Aviation",
+      "rooms": [
+        "Helicopter_Hangar",
+        "Flight_Deck",
+        "Boat_Deck"
+      ],
+      "ach": 8.0,
+      "filter_efficiency": 0.2,
+      "filter_type": "MERV-8",
+      "description": "Aviation and boat deck ventilation. Hangar has fuel vapor extraction. Flight deck and boat deck largely open to weather. Outside NBC citadel boundary."
+    },
+    {
+      "id": "HVAC_Engine_Room",
+      "rooms": [
+        "Engine_Room"
+      ],
+      "ach": 20.0,
+      "filter_efficiency": 0.0,
+      "filter_type": "none",
+      "description": "Engine room independent ventilation. Gas turbine combustion air supply and heat removal. Outside NBC citadel."
+    }
+  ],
+  "cross_zone_links": [
+    {
+      "from": "HVAC_Superstructure",
+      "to": "HVAC_Officer_Spaces",
+      "flow_rate_m3h": 300,
+      "path": "superstructure_trunk",
+      "is_hvac_ducted": true,
+      "description": "Ducted HVAC supply from superstructure AHU to officer spaces. MERV-13 filtered (HEPA in NBC mode)."
+    },
+    {
+      "from": "HVAC_Officer_Spaces",
+      "to": "HVAC_Enlisted_Fwd",
+      "flow_rate_m3h": 350,
+      "path": "main_supply_duct_fwd",
+      "is_hvac_ducted": true,
+      "description": "Main supply duct from officer spaces AHU to forward enlisted zone."
+    },
+    {
+      "from": "HVAC_Enlisted_Fwd",
+      "to": "HVAC_Enlisted_Aft",
+      "flow_rate_m3h": 400,
+      "path": "main_supply_duct_aft",
+      "is_hvac_ducted": true,
+      "description": "Main supply duct continuing aft from forward to aft enlisted zone."
+    },
+    {
+      "from": "HVAC_Enlisted_Aft",
+      "to": "HVAC_Enlisted_Fwd",
+      "flow_rate_m3h": 300,
+      "path": "return_duct",
+      "is_hvac_ducted": true,
+      "description": "Return air duct from aft to forward zone."
+    },
+    {
+      "from": "HVAC_Enlisted_Fwd",
+      "to": "HVAC_Galley",
+      "flow_rate_m3h": 200,
+      "path": "galley_supply",
+      "is_hvac_ducted": true,
+      "description": "Supply to galley from crew mess zone AHU."
+    },
+    {
+      "from": "HVAC_Medical",
+      "to": "HVAC_Enlisted_Fwd",
+      "flow_rate_m3h": 100,
+      "path": "medical_exhaust",
+      "is_hvac_ducted": true,
+      "description": "Medical exhaust. Sickbay maintained at negative pressure relative to adjacent spaces."
+    },
+    {
+      "from": "HVAC_Enlisted_Aft",
+      "to": "HVAC_Aviation",
+      "flow_rate_m3h": 150,
+      "path": "aft_access_to_hangar",
+      "is_hvac_ducted": false,
+      "description": "Passive airflow between aft berthing and helicopter hangar through access door. Crosses NBC citadel boundary."
+    },
+    {
+      "from": "HVAC_Midships_Utility",
+      "to": "HVAC_Enlisted_Fwd",
+      "flow_rate_m3h": 200,
+      "path": "passageway_to_berthing",
+      "is_hvac_ducted": false,
+      "description": "Passive airflow from main passageway to forward berthing/mess area."
+    },
+    {
+      "from": "HVAC_Midships_Utility",
+      "to": "HVAC_Engine_Room",
+      "flow_rate_m3h": 80,
+      "path": "engine_access_trunk",
+      "is_hvac_ducted": false,
+      "description": "Passive airflow through engine room access trunk. Minimal exchange due to pressure differential."
+    }
+  ],
+  "adjacency": [
+    {
+      "from": "Bridge",
+      "to": "CIC",
+      "type": "ladder_well"
+    },
+    {
+      "from": "CIC",
+      "to": "Officers_Quarters",
+      "type": "ladder_well"
+    },
+    {
+      "from": "Officers_Quarters",
+      "to": "Wardroom",
+      "type": "passageway"
+    },
+    {
+      "from": "CPO_Berthing",
+      "to": "Passageway_Main",
+      "type": "passageway"
+    },
+    {
+      "from": "Enlisted_Berthing_Fwd",
+      "to": "Crew_Mess",
+      "type": "ladder_well"
+    },
+    {
+      "from": "Crew_Mess",
+      "to": "Galley",
+      "type": "service_hatch"
+    },
+    {
+      "from": "Crew_Mess",
+      "to": "Passageway_Main",
+      "type": "passageway"
+    },
+    {
+      "from": "Sickbay",
+      "to": "Passageway_Main",
+      "type": "sealed_door"
+    },
+    {
+      "from": "Enlisted_Berthing_Aft",
+      "to": "Aviation_Det_Berthing",
+      "type": "passageway"
+    },
+    {
+      "from": "Enlisted_Berthing_Aft",
+      "to": "Boarding_Team_Staging",
+      "type": "passageway"
+    },
+    {
+      "from": "Boarding_Team_Staging",
+      "to": "Armory",
+      "type": "sealed_door"
+    },
+    {
+      "from": "Boarding_Team_Staging",
+      "to": "Boat_Deck",
+      "type": "passageway"
+    },
+    {
+      "from": "Helicopter_Hangar",
+      "to": "Flight_Deck",
+      "type": "passageway"
+    },
+    {
+      "from": "Helicopter_Hangar",
+      "to": "Passageway_Main",
+      "type": "passageway"
+    },
+    {
+      "from": "Passageway_Main",
+      "to": "Wardroom",
+      "type": "passageway"
+    },
+    {
+      "from": "Passageway_Main",
+      "to": "Sickbay",
+      "type": "passageway"
+    },
+    {
+      "from": "Engine_Room",
+      "to": "Enlisted_Berthing_Fwd",
+      "type": "ladder_well"
+    },
+    {
+      "from": "Enlisted_Berthing_Fwd",
+      "to": "Enlisted_Berthing_Aft",
+      "type": "passageway"
+    },
+    {
+      "from": "Flight_Deck",
+      "to": "Boat_Deck",
+      "type": "passageway"
+    },
+    {
+      "from": "Galley",
+      "to": "Passageway_Main",
+      "type": "passageway"
+    }
+  ]
+}

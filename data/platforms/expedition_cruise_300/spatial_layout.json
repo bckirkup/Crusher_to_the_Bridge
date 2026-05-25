@@ -1,0 +1,335 @@
+{
+  "platform": "expedition_cruise_300",
+  "description": "Small expedition cruise ship (~300 passengers, ~150 crew). Based on Silver Cloud / Le Bor\u00e9al class vessels: ~157m LOA \u00d7 21m beam, 7 passenger decks, ~17,000 GT. Volumes estimated from published deck plans and standard cruise ship deck heights (2.8m cabins, 3.0-3.5m public, 5.0m theater).",
+  "deck_dimensions": {
+    "length_m": 157,
+    "beam_m": 21
+  },
+  "zones": [
+    {
+      "id": "Bridge",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 180,
+      "deck": "7_Sun",
+      "max_occupancy": 8,
+      "display": {
+        "x": 150,
+        "y": 10
+      },
+      "description": "Navigation bridge and chart room. Forward Deck 7. ~60 m\u00b2 \u00d7 3.0m."
+    },
+    {
+      "id": "Pool_Deck",
+      "type": "Free",
+      "traffic": "high",
+      "volume_m3": 1050,
+      "deck": "7_Sun",
+      "max_occupancy": 120,
+      "display": {
+        "x": 80,
+        "y": 10
+      },
+      "description": "Pool deck with jacuzzis, sun loungers. Midship Deck 7. ~350 m\u00b2 semi-open."
+    },
+    {
+      "id": "Observation_Lounge",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 525,
+      "deck": "7_Sun",
+      "max_occupancy": 80,
+      "display": {
+        "x": 40,
+        "y": 10
+      },
+      "description": "Forward observation lounge with panoramic windows. Deck 7. ~150 m\u00b2 \u00d7 3.5m."
+    },
+    {
+      "id": "Gym",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 270,
+      "deck": "6_Explorer",
+      "max_occupancy": 30,
+      "display": {
+        "x": 140,
+        "y": 25
+      },
+      "description": "Fitness center with cardio and weights. Forward Deck 6. ~90 m\u00b2 \u00d7 3.0m."
+    },
+    {
+      "id": "Spa",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 240,
+      "deck": "6_Explorer",
+      "max_occupancy": 20,
+      "display": {
+        "x": 130,
+        "y": 25
+      },
+      "description": "Spa with treatment rooms, sauna, steam room. Deck 6. ~80 m\u00b2 \u00d7 3.0m."
+    },
+    {
+      "id": "Buffet_Lido",
+      "type": "Dining",
+      "traffic": "high",
+      "volume_m3": 630,
+      "deck": "6_Explorer",
+      "max_occupancy": 150,
+      "display": {
+        "x": 60,
+        "y": 25
+      },
+      "description": "Lido buffet restaurant (casual dining). Midship Deck 6. ~180 m\u00b2 \u00d7 3.5m."
+    },
+    {
+      "id": "Expedition_Lounge",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 420,
+      "deck": "6_Explorer",
+      "max_occupancy": 100,
+      "display": {
+        "x": 30,
+        "y": 25
+      },
+      "description": "Expedition briefing lounge and lecture hall. Aft Deck 6. ~120 m\u00b2 \u00d7 3.5m."
+    },
+    {
+      "id": "Cabin_Deck6_Port",
+      "type": "Room",
+      "traffic": "low",
+      "volume_m3": 1400,
+      "deck": "6_Explorer",
+      "max_occupancy": 50,
+      "display": {
+        "x": 100,
+        "y": 30
+      },
+      "description": "Balcony suites, port side Deck 6. ~25 cabins \u00d7 20 m\u00b2 \u00d7 2.8m."
+    },
+    {
+      "id": "Cabin_Deck6_Stbd",
+      "type": "Room",
+      "traffic": "low",
+      "volume_m3": 1400,
+      "deck": "6_Explorer",
+      "max_occupancy": 50,
+      "display": {
+        "x": 100,
+        "y": 20
+      },
+      "description": "Balcony suites, starboard side Deck 6. ~25 cabins \u00d7 20 m\u00b2 \u00d7 2.8m."
+    },
+    {
+      "id": "Main_Dining_Room",
+      "type": "Dining",
+      "traffic": "high",
+      "volume_m3": 1050,
+      "deck": "5_Panorama",
+      "max_occupancy": 200,
+      "display": {
+        "x": 35,
+        "y": 40
+      },
+      "description": "Main dining room (single seating). Aft Deck 5. ~300 m\u00b2 \u00d7 3.5m."
+    },
+    {
+      "id": "Theater_Lounge",
+      "type": "Free",
+      "traffic": "high",
+      "volume_m3": 1250,
+      "deck": "5_Panorama",
+      "max_occupancy": 250,
+      "display": {
+        "x": 70,
+        "y": 40
+      },
+      "description": "Show lounge / theater (double-height). Midship Deck 5-6. ~250 m\u00b2 \u00d7 5.0m."
+    },
+    {
+      "id": "Casino",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 210,
+      "deck": "5_Panorama",
+      "max_occupancy": 40,
+      "display": {
+        "x": 100,
+        "y": 40
+      },
+      "description": "Small casino. Deck 5. ~60 m\u00b2 \u00d7 3.5m."
+    },
+    {
+      "id": "Library",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 105,
+      "deck": "5_Panorama",
+      "max_occupancy": 20,
+      "display": {
+        "x": 120,
+        "y": 40
+      },
+      "description": "Library and card room. Deck 5. ~30 m\u00b2 \u00d7 3.5m."
+    },
+    {
+      "id": "Cabin_Deck5_Port",
+      "type": "Room",
+      "traffic": "low",
+      "volume_m3": 1400,
+      "deck": "5_Panorama",
+      "max_occupancy": 50,
+      "display": {
+        "x": 100,
+        "y": 48
+      },
+      "description": "Outside cabins, port side Deck 5. ~25 cabins \u00d7 20 m\u00b2 \u00d7 2.8m."
+    },
+    {
+      "id": "Cabin_Deck5_Stbd",
+      "type": "Room",
+      "traffic": "low",
+      "volume_m3": 1400,
+      "deck": "5_Panorama",
+      "max_occupancy": 50,
+      "display": {
+        "x": 100,
+        "y": 32
+      },
+      "description": "Outside cabins, starboard side Deck 5. ~25 cabins \u00d7 20 m\u00b2 \u00d7 2.8m."
+    },
+    {
+      "id": "MedBay",
+      "type": "Medical",
+      "traffic": "low",
+      "volume_m3": 105,
+      "deck": "4_Voyager",
+      "max_occupancy": 10,
+      "display": {
+        "x": 80,
+        "y": 55
+      },
+      "description": "Medical center with examination room and small ward. Deck 4. ~35 m\u00b2 \u00d7 3.0m."
+    },
+    {
+      "id": "Reception_Lobby",
+      "type": "Free",
+      "traffic": "high",
+      "volume_m3": 350,
+      "deck": "4_Voyager",
+      "max_occupancy": 60,
+      "display": {
+        "x": 70,
+        "y": 55
+      },
+      "description": "Main reception and lobby atrium. Deck 4. ~100 m\u00b2 \u00d7 3.5m."
+    },
+    {
+      "id": "Cabin_Deck4_Port",
+      "type": "Room",
+      "traffic": "low",
+      "volume_m3": 1400,
+      "deck": "4_Voyager",
+      "max_occupancy": 50,
+      "display": {
+        "x": 100,
+        "y": 60
+      },
+      "description": "Outside cabins, port side Deck 4. ~25 cabins \u00d7 20 m\u00b2 \u00d7 2.8m."
+    },
+    {
+      "id": "Cabin_Deck4_Stbd",
+      "type": "Room",
+      "traffic": "low",
+      "volume_m3": 1400,
+      "deck": "4_Voyager",
+      "max_occupancy": 50,
+      "display": {
+        "x": 100,
+        "y": 50
+      },
+      "description": "Outside cabins, starboard side Deck 4. ~25 cabins \u00d7 20 m\u00b2 \u00d7 2.8m."
+    },
+    {
+      "id": "Galley",
+      "type": "Dining",
+      "traffic": "high",
+      "volume_m3": 525,
+      "deck": "3_Marina",
+      "max_occupancy": 30,
+      "display": {
+        "x": 45,
+        "y": 68
+      },
+      "description": "Main galley (food production). Deck 3. ~150 m\u00b2 \u00d7 3.5m."
+    },
+    {
+      "id": "Crew_Mess",
+      "type": "Dining",
+      "traffic": "high",
+      "volume_m3": 210,
+      "deck": "3_Marina",
+      "max_occupancy": 50,
+      "display": {
+        "x": 60,
+        "y": 68
+      },
+      "description": "Crew mess and recreation area. Deck 3. ~60 m\u00b2 \u00d7 3.5m."
+    },
+    {
+      "id": "Laundry",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 168,
+      "deck": "3_Marina",
+      "max_occupancy": 10,
+      "display": {
+        "x": 100,
+        "y": 68
+      },
+      "description": "Industrial laundry. Deck 3. ~60 m\u00b2 \u00d7 2.8m."
+    },
+    {
+      "id": "Crew_Quarters",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 1680,
+      "deck": "3_Marina",
+      "max_occupancy": 150,
+      "display": {
+        "x": 80,
+        "y": 72
+      },
+      "description": "Crew accommodation. Deck 3. ~75 cabins \u00d7 8 m\u00b2 \u00d7 2.8m."
+    },
+    {
+      "id": "Stores",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 420,
+      "deck": "3_Marina",
+      "max_occupancy": 5,
+      "display": {
+        "x": 120,
+        "y": 68
+      },
+      "description": "Provision stores, dry and cold storage. Deck 3. ~150 m\u00b2 \u00d7 2.8m."
+    },
+    {
+      "id": "Engine_Room",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 2520,
+      "deck": "2_Engine",
+      "max_occupancy": 15,
+      "display": {
+        "x": 60,
+        "y": 82
+      },
+      "description": "Main engine room spanning Decks 1-2. ~300 m\u00b2 footprint \u00d7 8.4m effective height."
+    }
+  ]
+}

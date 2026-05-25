@@ -1,0 +1,244 @@
+{
+  "platform": "legend_class_nsc",
+  "description": "Legend-class National Security Cutter (WMSL-750). 127.4m LOA, 16.5m beam. ~148 crew + aviation det. Modern HVAC with CBRN collective protection system. Helicopter and stern-launch boat capability.",
+  "deck_dimensions": {
+    "length_m": 127.4,
+    "beam_m": 16.5
+  },
+  "zones": [
+    {
+      "id": "Bridge",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 120,
+      "deck": "04_level",
+      "max_occupancy": 12,
+      "display": {
+        "x": 115,
+        "y": 8
+      },
+      "description": "Integrated bridge system with full 360-degree visibility. Navigation, helm, communications."
+    },
+    {
+      "id": "CIC",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 100,
+      "deck": "02_level",
+      "max_occupancy": 18,
+      "display": {
+        "x": 108,
+        "y": 8
+      },
+      "description": "Combat Information Center. C4ISR suite, radar/sonar consoles, tactical data links."
+    },
+    {
+      "id": "Officers_Quarters",
+      "type": "Room",
+      "traffic": "low",
+      "volume_m3": 160,
+      "deck": "01_level",
+      "max_occupancy": 22,
+      "display": {
+        "x": 100,
+        "y": 6
+      },
+      "description": "Officer staterooms. 2-person rooms, ~7.3 m\u00b3 per person. Includes CO/XO at-sea cabins."
+    },
+    {
+      "id": "CPO_Berthing",
+      "type": "Room",
+      "traffic": "low",
+      "volume_m3": 100,
+      "deck": "main_deck",
+      "max_occupancy": 18,
+      "display": {
+        "x": 95,
+        "y": 12
+      },
+      "description": "Chief Petty Officers berthing. Curtained bunks with personal storage lockers."
+    },
+    {
+      "id": "Enlisted_Berthing_Fwd",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 180,
+      "deck": "2nd_deck",
+      "max_occupancy": 45,
+      "display": {
+        "x": 85,
+        "y": 6
+      },
+      "description": "Forward enlisted berthing. 3-high racks. ~4.0 m\u00b3 per person \u2014 significantly better than Navy destroyers."
+    },
+    {
+      "id": "Enlisted_Berthing_Aft",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 180,
+      "deck": "2nd_deck",
+      "max_occupancy": 45,
+      "display": {
+        "x": 50,
+        "y": 6
+      },
+      "description": "Aft enlisted berthing. 3-high racks. ~4.0 m\u00b3 per person. Adjacent to aviation berthing."
+    },
+    {
+      "id": "Aviation_Det_Berthing",
+      "type": "Room",
+      "traffic": "low",
+      "volume_m3": 65,
+      "deck": "2nd_deck",
+      "max_occupancy": 18,
+      "display": {
+        "x": 40,
+        "y": 6
+      },
+      "description": "Aviation detachment berthing. 18 personnel for helo maintenance and operations."
+    },
+    {
+      "id": "Wardroom",
+      "type": "Dining",
+      "traffic": "medium",
+      "volume_m3": 55,
+      "deck": "01_level",
+      "max_occupancy": 20,
+      "display": {
+        "x": 98,
+        "y": 12
+      },
+      "description": "Officers wardroom/dining. Also serves as briefing room."
+    },
+    {
+      "id": "Crew_Mess",
+      "type": "Dining",
+      "traffic": "high",
+      "volume_m3": 140,
+      "deck": "main_deck",
+      "max_occupancy": 50,
+      "display": {
+        "x": 80,
+        "y": 8
+      },
+      "description": "Enlisted crew mess deck. Serves 110 enlisted in 2-3 seatings per meal."
+    },
+    {
+      "id": "Galley",
+      "type": "Dining",
+      "traffic": "high",
+      "volume_m3": 55,
+      "deck": "main_deck",
+      "max_occupancy": 8,
+      "display": {
+        "x": 78,
+        "y": 12
+      },
+      "description": "Ship's galley. Modern electric ranges, steam kettles. Serves 148 crew."
+    },
+    {
+      "id": "Sickbay",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 45,
+      "deck": "main_deck",
+      "max_occupancy": 8,
+      "display": {
+        "x": 88,
+        "y": 12
+      },
+      "description": "Medical sickbay. 2 beds, minor surgery capability, pharmacy. Health Services Technician staffed."
+    },
+    {
+      "id": "Helicopter_Hangar",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 450,
+      "deck": "main_deck",
+      "max_occupancy": 15,
+      "display": {
+        "x": 30,
+        "y": 8
+      },
+      "description": "Helicopter hangar for MH-65 Dolphin or MH-60 Jayhawk. Maintenance workspace, fuel systems."
+    },
+    {
+      "id": "Flight_Deck",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 200,
+      "deck": "weather_deck",
+      "max_occupancy": 15,
+      "display": {
+        "x": 20,
+        "y": 8
+      },
+      "description": "Flight deck with helicopter landing area. Open to weather. RAST system for rough-weather recovery."
+    },
+    {
+      "id": "Engine_Room",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 600,
+      "deck": "lower_deck",
+      "max_occupancy": 10,
+      "display": {
+        "x": 65,
+        "y": 8
+      },
+      "description": "Main machinery room. CODLAG: 1 GE LM2500+ gas turbine, 2 MTU 20V 1163 diesels, 2 electric motors. Auxiliary machinery."
+    },
+    {
+      "id": "Boarding_Team_Staging",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 60,
+      "deck": "main_deck",
+      "max_occupancy": 14,
+      "display": {
+        "x": 45,
+        "y": 12
+      },
+      "description": "Boarding team staging/ready room. Gear storage, weapons prep. LEDET/boarding party musters here before operations."
+    },
+    {
+      "id": "Armory",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 25,
+      "deck": "main_deck",
+      "max_occupancy": 4,
+      "display": {
+        "x": 47,
+        "y": 14
+      },
+      "description": "Ship's armory. Small arms, ammunition storage. Restricted access."
+    },
+    {
+      "id": "Boat_Deck",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 80,
+      "deck": "weather_deck",
+      "max_occupancy": 12,
+      "display": {
+        "x": 55,
+        "y": 8
+      },
+      "description": "Stern boat deck with RHIB launch/recovery system. Open to weather. Small boat operations station."
+    },
+    {
+      "id": "Passageway_Main",
+      "type": "Free",
+      "traffic": "high",
+      "volume_m3": 120,
+      "deck": "main_deck",
+      "max_occupancy": 20,
+      "display": {
+        "x": 70,
+        "y": 8
+      },
+      "description": "Main deck central passageway. Primary fore-aft transit route."
+    }
+  ]
+}
