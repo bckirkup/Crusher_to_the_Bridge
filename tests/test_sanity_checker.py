@@ -1,36 +1,25 @@
-"""
-test_sanity_checker.py – Verify the sanity checker passes on current configs
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Imports and runs the sanity checker programmatically to ensure all
-configuration files are internally consistent.
-"""
-
+"""test_sanity_checker.py – sanity checker vs orchestrator config paths."""
 from __future__ import annotations
-
-import os
-import sys
-
-import pytest
-
+import os, sys
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, REPO_ROOT)
+from tools.sanity_checker import Report, paths_from_run_config, run_checks
 
-from tools.sanity_checker import run_checks
+def _assert_passed(report: Report) -> None:
+    msgs = [f"[{f.rule}] {f.file}: {f.message}" for f in report.errors]
+    assert report.passed, f"{len(report.errors)} error(s):\n" + "\n".join(msgs)
 
-
-def test_default_configs_pass_sanity_checks() -> None:
-    """The shipped configuration files must pass all sanity checks."""
-    config_dir = os.path.join(REPO_ROOT, "data", "config")
-    platform_dir = os.path.join(REPO_ROOT, "data", "platforms", "destroyer_baseline")
-    pathogen_dir = os.path.join(REPO_ROOT, "data", "pathogens")
-
-    report = run_checks(config_dir, platform_dir, pathogen_dir)
-
-    error_msgs = [
-        f"[{f.rule}] {f.file}: {f.message}" for f in report.errors
-    ]
-    assert report.passed, (
-        f"Sanity checker found {len(report.errors)} error(s):\n"
-        + "\n".join(error_msgs)
+def test_default_destroyer_and_active_profiles() -> None:
+    report = run_checks(
+        os.path.join(REPO_ROOT, "data", "config"),
+        os.path.join(REPO_ROOT, "data", "platforms", "destroyer_baseline"),
+        pathogen_file=os.path.join(REPO_ROOT, "data", "pathogens", "active_profiles.json"),
     )
+    _assert_passed(report)
+
+def test_from_config_yaml_matches_orchestrator() -> None:
+    paths = paths_from_run_config(REPO_ROOT)
+    report = run_checks(
+        paths["config_dir"], paths["platform_dir"], pathogen_file=paths["pathogen_file"],
+    )
+    _assert_passed(report)

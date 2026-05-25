@@ -564,35 +564,63 @@ def _parse_model(
         return None
 
 
+
+# ── Path resolution (orchestrator-aligned) ───────────────────────────────
+
+def paths_from_run_config(repo_root: str, config_yaml: str | None = None) -> dict[str, str]:
+    """Resolve platform + pathogen paths from crusher_labs/config.yaml."""
+    if config_yaml is None:
+        config_yaml = os.path.join(repo_root, "crusher_labs", "config.yaml")
+    import sys
+    sys.path.insert(0, repo_root)
+    from crusher_labs import load_config
+    cfg = load_config(config_yaml)
+    layout_rel = cfg.get("ship_graph", {}).get(
+        "spatial_layout", "data/platforms/destroyer_baseline/spatial_layout.json")
+    platform_dir = os.path.dirname(os.path.join(repo_root, layout_rel))
+    profiles_rel = cfg.get("multi_pathogen", {}).get(
+        "profiles_path", "data/pathogens/active_profiles.json")
+    return {
+        "config_dir": os.path.join(repo_root, "data", "config"),
+        "platform_dir": platform_dir,
+        "pathogen_file": os.path.join(repo_root, profiles_rel),
+    }
+
 # ── Main ─────────────────────────────────────────────────────────────────
 
 def run_checks(
     config_dir: str,
     platform_dir: str,
-    pathogen_dir: str,
+    pathogen_dir: str | None = None,
+    *,
+    pathogen_file: str | None = None,
 ) -> Report:
-    """Run all sanity checks and return a report."""
+    """Run all sanity checks. Uses pathogen_file or {pathogen_dir}/active_profiles.json."""
+    if pathogen_file is None:
+        base = pathogen_dir or os.path.join(config_dir, "..", "pathogens")
+        pathogen_file = os.path.join(base, "active_profiles.json")
+    pathogen_label = os.path.basename(pathogen_file)
     report = Report()
 
     print(f"\n{_CYAN}{_BOLD}  CRUSHER LABS SANITY CHECKER{_RESET}")
     print(f"  {'─' * 50}")
-    print(f"  Config dir:   {config_dir}")
-    print(f"  Platform dir: {platform_dir}")
-    print(f"  Pathogen dir: {pathogen_dir}")
+    print(f"  Config dir:     {config_dir}")
+    print(f"  Platform dir:   {platform_dir}")
+    print(f"  Pathogen file:  {pathogen_file}")
     print(f"  {'─' * 50}\n")
 
     # Load files
     spatial_data = _load_json(os.path.join(platform_dir, "spatial_layout.json"))
     airflow_data = _load_json(os.path.join(platform_dir, "air_flow_paths.json"))
     protocols_data = _load_json(os.path.join(config_dir, "protocols.json"))
-    pathogen_data = _load_json(os.path.join(pathogen_dir, "active_profiles.json"))
+    pathogen_data = _load_json(pathogen_file)
     resource_data = _load_json(os.path.join(config_dir, "resource_costs.json"))
 
     files_found = {
         "spatial_layout.json": spatial_data is not None,
         "air_flow_paths.json": airflow_data is not None,
         "protocols.json": protocols_data is not None,
-        "active_profiles.json": pathogen_data is not None,
+        pathogen_label: pathogen_data is not None,
         "resource_costs.json": resource_data is not None,
     }
 
@@ -610,7 +638,7 @@ def run_checks(
     layout = _parse_model(SpatialLayout, spatial_data, "spatial_layout.json", report)
     airflow = _parse_model(AirFlowPaths, airflow_data, "air_flow_paths.json", report)
     protocols = _parse_model(ProtocolsConfig, protocols_data, "protocols.json", report)
-    pathogens = _parse_model(PathogensFile, pathogen_data, "active_profiles.json", report)
+    pathogens = _parse_model(PathogensFile, pathogen_data, pathogen_label, report)
     resource_costs = _parse_model(ResourceCosts, resource_data, "resource_costs.json", report)
 
     schema_errors = len(report.errors)
@@ -705,13 +733,32 @@ def main() -> None:
         help="Path to platform directory (default: data/platforms/destroyer_baseline/)",
     )
     parser.add_argument(
+        "--from-config",
+        action="store_true",
+        help="Use platform and pathogen paths from crusher_labs/config.yaml.",
+    )
+    parser.add_argument(
+        "--config-yaml",
+        default=os.path.join(_REPO_ROOT, "crusher_labs", "config.yaml"),
+    )
+    parser.add_argument(
         "--pathogen-dir",
         default=os.path.join(_REPO_ROOT, "data", "pathogens"),
-        help="Path to pathogen profiles directory (default: data/pathogens/)",
+        help="Directory for active_profiles.json when --pathogen-file omitted",
+    )
+    parser.add_argument(
+        "--pathogen-file",
+        default=None,
+        help="Pathogen profiles JSON (multi_pathogen.profiles_path)",
     )
     args = parser.parse_args()
-
-    report = run_checks(args.config_dir, args.platform_dir, args.pathogen_dir)
+    if args.from_config:
+        r = paths_from_run_config(_REPO_ROOT, args.config_yaml)
+        print(f"  Paths from {args.config_yaml}\n")
+        report = run_checks(r["config_dir"], r["platform_dir"], pathogen_file=r["pathogen_file"])
+    else:
+        pf = args.pathogen_file or os.path.join(args.pathogen_dir, "active_profiles.json")
+        report = run_checks(args.config_dir, args.platform_dir, pathogen_file=pf)
     print_report(report)
 
     sys.exit(0 if report.passed else 1)
