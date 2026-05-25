@@ -8,9 +8,9 @@ throws explicit errors if the data contains logical or physical
 contradictions.  Uses pydantic models for strict structural validation.
 
 Checks:
-  1. Mathematical bound violations (probabilities, volumes, budgets)
+  1. Mathematical bound violations (probabilities, volumes, non-negative constraints)
   2. Graph referential integrity (orphan edges, ghost destinations)
-  3. Logical contradictions (cost vs budget, transmission weights)
+  3. Logical contradictions (transmission routes, material references)
 
 Usage::
 
@@ -453,50 +453,9 @@ def _check_logical_contradictions(
 ) -> None:
     """Check for logical contradictions between config files."""
 
-    starting_budget = 0.0
-    if resource_costs:
-        fin = resource_costs.budgets.get("financial_usd")
-        if fin and fin.starting_balance is not None:
-            starting_budget = fin.starting_balance
-
-    if protocols and starting_budget > 0:
-        for proto in protocols.protocols:
-            epoch_cost = proto.costs_per_epoch.financial_usd
-            if epoch_cost > starting_budget:
-                report.warn(
-                    "protocols.json",
-                    "LOGIC_COST",
-                    f"{proto.protocol_id} costs_per_epoch (${epoch_cost:,.2f}) "
-                    f"exceeds the starting budget (${starting_budget:,.2f}). "
-                    f"A single epoch of this protocol would exhaust funds.",
-                )
-
-            act_cost = proto.activation_costs.financial_usd
-            if act_cost > starting_budget:
-                report.warn(
-                    "protocols.json",
-                    "LOGIC_COST",
-                    f"{proto.protocol_id} activation_costs (${act_cost:,.2f}) "
-                    f"exceeds the starting budget (${starting_budget:,.2f}).",
-                )
-
-    # Check labor capacity
-    starting_labor = 0.0
-    if resource_costs:
-        lab = resource_costs.budgets.get("labor_person_hours")
-        if lab and lab.starting_capacity is not None:
-            starting_labor = lab.starting_capacity
-
-    if protocols and starting_labor > 0:
-        for proto in protocols.protocols:
-            epoch_labor = proto.costs_per_epoch.labor_person_hours
-            if epoch_labor > starting_labor:
-                report.warn(
-                    "protocols.json",
-                    "LOGIC_LABOR",
-                    f"{proto.protocol_id} labor per epoch ({epoch_labor:.1f} hrs) "
-                    f"exceeds starting capacity ({starting_labor:.1f} hrs).",
-                )
+    # Note: Budget/labor values are tracked for reporting, not enforced
+    # as limits.  No warnings are emitted for costs exceeding starting
+    # allocations — the ledger is a spend tracker, not a constraint.
 
     # Validate pathogen transmission route names
     if pathogens:

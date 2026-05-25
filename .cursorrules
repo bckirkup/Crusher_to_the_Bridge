@@ -107,6 +107,11 @@ These MUST be non-negative:
 - `starting_balance`, `starting_capacity`, `starting_count`
 - All `financial_usd`, `labor_person_hours` cost values
 
+**Budget is a tracker, not a limiter.**  The cost ledger records all
+spending but never blocks actions due to exhausted funds, labor, or
+materials.  Starting values are reference baselines for spend-to-date
+reporting.
+
 ### Law 4: Referential Integrity Is Mandatory
 - Every room in `air_flow_paths.json` MUST exist in `spatial_layout.json`
 - Every `close_zones` target in `protocols.json` MUST exist in `spatial_layout.json`

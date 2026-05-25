@@ -644,7 +644,7 @@ def run() -> None:
         print(f"    {sp.protocol_id}  {sp.name}")
         print(f"      Trigger: {trigger['instrument_class']} ≥ {trigger['stoplight_level']}")
     print(f"   Protocols loaded: {len(standing_protocols)}")
-    print(f"   Starting budget: ${cost_ledger.financial_balance:,.2f}")
+    print(f"   Starting allocation: ${cost_ledger.financial_balance:,.2f}")
     print(f"   Starting labor:  {cost_ledger.labor_remaining:.1f} person-hours")
     print(f"   Material items:  {len(cost_ledger.inventory)}")
     print()
@@ -1149,10 +1149,10 @@ def run() -> None:
 
         # ── 11. Live progress bar ───────────────────────────────────
         n_active_sops = len(active_mods)
-        running_balance = cost_ledger.financial_balance
+        total_spent = cost_ledger.starting_financial_usd - cost_ledger.financial_balance
         _print_progress(
             epoch, num_epochs, trigger_status,
-            n_active_sops, running_balance, prev_status,
+            n_active_sops, total_spent, prev_status,
         )
 
     # ── Save simulation history ──────────────────────────────────────
@@ -1213,7 +1213,7 @@ def _print_progress(
     num_epochs: int,
     trigger_status: str,
     n_active_sops: int,
-    running_balance: float,
+    total_spent: float,
     prev_status: str,
 ) -> None:
     """Overwrite a single terminal line with a dynamic progress bar."""
@@ -1235,7 +1235,7 @@ def _print_progress(
         f"Epoch {epoch + 1:02d}/{num_epochs:02d}  "
         f"{status_icon} {trigger_status:<10s}  "
         f"SOPs:{n_active_sops}  "
-        f"Budget:${running_balance:>10,.0f}"
+        f"Spent:${total_spent:>10,.0f}"
         f"{transition}"
     )
 
@@ -1317,18 +1317,18 @@ def _print_executive_summary(
 
     # Labor
     summary = audit["summary"]
-    lines.append(row(f"Person-hours remaining: {summary['remaining_labor_hours']:.1f} / {summary['starting_labor_capacity_hours']:.0f}"))
+    lines.append(row(f"Person-hours used: {summary['total_labor_consumed_hours']:.1f} / {summary['starting_labor_capacity_hours']:.0f}"))
 
     lines.append(divider)
 
     # ── Section 2: Financial & Resource Audit ─────────────────────
     lines.append(row("FINANCIAL & RESOURCE AUDIT"))
     lines.append(thin_div)
-    lines.append(row(f"Starting budget:     ${summary['starting_financial_budget_usd']:>10,.2f}"))
+    lines.append(row(f"Starting allocation: ${summary['starting_financial_budget_usd']:>10,.2f}"))
     lines.append(row(f"Total spent:         ${summary['total_expenditure_usd']:>10,.2f}"))
     lines.append(row(f"  Surveillance:      ${summary['surveillance_cost_usd']:>10,.2f}"))
     lines.append(row(f"  Intervention:      ${summary['intervention_cost_usd']:>10,.2f}"))
-    lines.append(row(f"Remaining balance:   ${summary['remaining_balance_usd']:>10,.2f}"))
+    lines.append(row(f"Remaining:           ${summary['remaining_balance_usd']:>10,.2f}"))
     lines.append(row())
     lines.append(row(f"Labor consumed:      {summary['total_labor_consumed_hours']:>8.1f} person-hours"))
     lines.append(row(f"  Surveillance:      {summary['surveillance_labor_hours']:>8.1f} person-hours"))
@@ -1341,7 +1341,7 @@ def _print_executive_summary(
     ]
     if depleted:
         lines.append(row())
-        lines.append(row("!! WARNING — DEPLETED SUPPLIES !!"))
+        lines.append(row("DEPLETED SUPPLIES (fully consumed)"))
         for item in depleted:
             data = audit["material_inventory"][item]
             lines.append(row(f"  {item}: {data['starting']} -> 0  (${data['total_cost_usd']:.2f})"))

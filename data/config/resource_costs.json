@@ -1,13 +1,13 @@
 {
-  "description": "Resource cost definitions for the Cost-Accounting Ledger. Defines unit costs, starting budgets, material inventories, and per-test costs. Prices are rough-order-of-magnitude (ROM) estimates in 2024-2025 USD.",
+  "description": "Resource cost definitions for the Cost-Accounting Ledger. Defines unit costs, starting allocations (for spend tracking — not enforced as limits), material inventories, and per-test costs. Prices are rough-order-of-magnitude (ROM) estimates in 2024-2025 USD.",
   "budgets": {
     "financial_usd": {
       "starting_balance": 75000.00,
-      "description": "Total USD budget available for the simulation run. Increased from $50k to accommodate sequencing costs."
+      "description": "Starting USD allocation for spend tracking. Not enforced as a limit."
     },
     "labor_person_hours": {
       "starting_capacity": 480.0,
-      "description": "Total crew person-hours available (20 crew x 24 hours). Depleted by surveillance and intervention labor."
+      "description": "Starting crew person-hours allocation (20 crew x 24 hours). Tracked for reporting, not enforced as a limit."
     }
   },
   "material_inventory": {

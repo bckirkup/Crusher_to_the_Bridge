@@ -4,9 +4,13 @@ cost_ledger.py – Comprehensive Cost-Accounting Ledger
 
 Tracks three resource dimensions across a simulation run:
 
-1. **Financial Budget** ($USD) — decremented by surveillance and intervention costs.
+1. **Financial Spend** ($USD) — cumulative surveillance and intervention costs.
 2. **Material Inventory** — item counts (masks, test kits, sanitizers, etc.).
-3. **Labor Capacity** — crew person-hours consumed per epoch.
+3. **Labor Hours** — crew person-hours consumed per epoch.
+
+The ledger is a **tracker**, not a limiter — spending is never blocked
+by exhausting a balance.  Starting values are recorded for reporting
+purposes (spend-to-date vs. initial allocation).
 
 Produces a ``FINANCIAL_AUDIT`` block for inclusion in the Artificial Lab Notebook,
 itemizing total expenditures split by *Surveillance Cost* vs *Intervention Cost*.
@@ -63,7 +67,12 @@ class LedgerEntry:
 
 
 class CostLedger:
-    """Tracks financial, material, and labor budgets across a simulation."""
+    """Tracks financial, material, and labor spend across a simulation.
+
+    The ledger records all cost events but never blocks actions due to
+    exhausted funds, labor, or materials.  Negative balances simply
+    indicate overspend relative to the initial allocation.
+    """
 
     def __init__(
         self,
@@ -104,7 +113,7 @@ class CostLedger:
         labor_hours: float = 0.0,
         description: str = "",
     ) -> LedgerEntry:
-        """Record a cost event, decrementing all tracked budgets."""
+        """Record a cost event, updating all tracked spend totals."""
         materials = materials or {}
 
         self.financial_balance -= financial_usd
@@ -204,15 +213,10 @@ class CostLedger:
             description=f"{protocol_name} ({cost_type})",
         )
 
-    # ── Budget status queries ────────────────────────────────────────
-
-    def is_budget_exhausted(self) -> bool:
-        return self.financial_balance <= 0
-
-    def is_labor_exhausted(self) -> bool:
-        return self.labor_remaining <= 0
+    # ── Spend status queries ─────────────────────────────────────────
 
     def is_material_depleted(self, item_name: str) -> bool:
+        """Check if a material item has been fully consumed."""
         return self.inventory.get(item_name, 0) <= 0
 
     def get_epoch_summary(self, epoch: int) -> dict[str, Any]:
