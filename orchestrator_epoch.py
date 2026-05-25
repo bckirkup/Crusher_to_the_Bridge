@@ -20,6 +20,8 @@ from engines.infection_dynamics_bridge import (
     InfectionStatus,
     IllnessStatus,
 )
+from engines.wearable_monitor import WearableMonitor
+from crusher_labs.modalities.wearable import WearableDataStream
 from orchestrator_types import (
     STATUS_SUSPECTED,
     STATUS_CONFIRMED,
@@ -390,3 +392,26 @@ def compute_zone_microflora_shifts(
                 gzs[d_type] = gzs.get(d_type, 0.0) + mag * gw_factor
 
     return zone_shifts
+
+
+# ── Wearable monitoring ──────────────────────────────────────────────────
+
+def step_wearable_monitoring(
+    epoch: int,
+    engine: KorkinShipEngine,
+    monitor: WearableMonitor | None,
+    modality: WearableDataStream | None,
+    truth: dict[str, Any],
+    pathogen_profiles: dict[str, dict[str, Any]],
+) -> dict[str, Any] | None:
+    """Generate wearable data and run through the observation modality.
+
+    Returns the modality result dict, or None if wearable monitoring
+    is disabled.
+    """
+    if monitor is None or modality is None:
+        return None
+
+    raw_data = monitor.generate_epoch_data(engine.agents, pathogen_profiles)
+    result = modality.query_ground_truth(truth, raw_data)
+    return result

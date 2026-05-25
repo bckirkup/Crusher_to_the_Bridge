@@ -103,6 +103,20 @@
           "type": "object",
           "additionalProperties": {"type": "object"}
         },
+        "wearable_monitoring": {
+          "type": "object",
+          "properties": {
+            "total_monitored": {"type": "integer", "minimum": 0},
+            "fever_count": {"type": "integer", "minimum": 0},
+            "fever_rate": {"type": "number", "minimum": 0, "maximum": 1},
+            "anomaly_count": {"type": "integer", "minimum": 0},
+            "anomaly_rate": {"type": "number", "minimum": 0, "maximum": 1},
+            "channel_anomaly_counts": {
+              "type": "object",
+              "additionalProperties": {"type": "integer"}
+            }
+          }
+        },
         "hvac": {"type": "object"},
         "crusher_ops": {
           "type": "object",

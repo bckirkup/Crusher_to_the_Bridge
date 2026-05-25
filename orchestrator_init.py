@@ -22,6 +22,11 @@ from engines.infection_dynamics_bridge import (
     InfectionStatus,
     IllnessStatus,
 )
+from engines.wearable_monitor import (
+    WearableMonitor,
+    build_wearable_monitor_from_config,
+)
+from crusher_labs.modalities.wearable import WearableDataStream
 from engines.py_contam_bridge import ContamTransportEngine
 from crusher_labs.observation_core import (
     ContinuousAirSniffer,
@@ -445,3 +450,33 @@ def init_protocol_engine(
         standing_protocols=standing_protocols,
         original_filter_eff=original_filter_eff,
     )
+
+
+# ── Wearable monitor initialization ─────────────────────────────────────
+
+def init_wearable_monitors(
+    engine: KorkinShipEngine,
+    cfg: dict[str, Any],
+    seed: int = 42,
+) -> tuple[WearableMonitor | None, WearableDataStream | None]:
+    """Initialise wearable physiological monitors and the Crusher Labs modality.
+
+    Returns ``(None, None)`` when wearable monitoring is disabled or absent.
+    """
+    rng = np.random.default_rng(seed)
+    monitor = build_wearable_monitor_from_config(cfg, rng)
+    if monitor is None:
+        return None, None
+
+    for agent in engine.agents:
+        monitor.initialize_agent(agent)
+
+    wm_cfg = cfg.get("wearable_monitoring", {})
+    modality = WearableDataStream(
+        observation_noise_sigma=wm_cfg.get("observation_noise_sigma", 0.5),
+        sync_dropout_prob=wm_cfg.get("sync_dropout_prob", 0.02),
+        anomaly_z_threshold=wm_cfg.get("anomaly_z_threshold", 2.0),
+        rng=np.random.default_rng(seed),
+    )
+
+    return monitor, modality

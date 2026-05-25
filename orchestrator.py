@@ -65,6 +65,7 @@ from orchestrator_init import (
     init_multi_pathogen,
     init_observation_engine,
     init_protocol_engine,
+    init_wearable_monitors,
 )
 from orchestrator_epoch import (
     sync_vsp_isolation,
@@ -75,6 +76,7 @@ from orchestrator_epoch import (
     step_quarantine_confinement,
     step_cost_accounting,
     compute_zone_microflora_shifts,
+    step_wearable_monitoring,
 )
 from orchestrator_record import (
     record_epoch,
@@ -83,6 +85,7 @@ from orchestrator_record import (
 from orchestrator_display import (
     print_initialization,
     print_korkin_engine,
+    print_wearable_monitoring,
     print_contam_engine,
     print_multi_pathogen,
     print_transmission_core,
@@ -155,6 +158,9 @@ def run() -> None:
     obs = init_observation_engine(cfg, seed)
     proto_ctx = init_protocol_engine(cfg, contam_engine)
 
+    wearable_monitor, wearable_modality = init_wearable_monitors(engine, cfg, seed)
+    print_wearable_monitoring(wearable_monitor)
+
     grumb_seeds = initialize_grumb_seeding(seq, ship["zones"])
     print_initialization(ship, grumb_seeds, cfg)
 
@@ -202,6 +208,11 @@ def run() -> None:
 
         truth = read_ground_truth()
         assert truth is not payload, "Shared-memory leak!"
+
+        wearable_result = step_wearable_monitoring(
+            epoch, engine, wearable_monitor, wearable_modality,
+            truth, pathogen_profiles,
+        )
 
         syn_result = syndromic.query_ground_truth(truth)
 
@@ -297,6 +308,7 @@ def run() -> None:
             clin_rdt_results=clin_rdt_results,
             clin_qpcr_results=clin_qpcr_results,
             clin_microbio_results=clin_microbio_results,
+            wearable_result=wearable_result,
         )
         state.simulation_history.append(epoch_record)
 
