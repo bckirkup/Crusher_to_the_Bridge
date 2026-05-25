@@ -160,9 +160,17 @@ def engine_payload_to_schema(
     """Convert Korkin engine output to telemetry_buffer schema format.
 
     Applies FRED compliance overrides for isolated / non-compliant agents.
+    Validates structural expectations at the module boundary.
     """
+    raw_agents = engine_payload.get("agents")
+    if raw_agents is None:
+        raise ValueError("engine_payload missing 'agents' key")
+    raw_spaces = engine_payload.get("spaces")
+    if raw_spaces is None:
+        raise ValueError("engine_payload missing 'spaces' key")
+
     agents_out: list[dict[str, Any]] = []
-    for a in engine_payload["agents"]:
+    for a in raw_agents:
         aid = a["agent_id"]
         if aid in isolated_ids:
             agent_dict = make_agent(
@@ -175,14 +183,14 @@ def engine_payload_to_schema(
             agent_dict = make_agent(
                 agent_id=aid,
                 symptom_status="non_compliant",
-                shedding_rate=a.get("shedding_rate", 0.0),
+                shedding_rate=float(a.get("shedding_rate", 0.0)),
                 location=a.get("location", "unknown"),
             )
         else:
             agent_dict = make_agent(
                 agent_id=aid,
                 symptom_status=a["symptom_status"],
-                shedding_rate=a.get("shedding_rate", 0.0),
+                shedding_rate=float(a.get("shedding_rate", 0.0)),
                 location=a.get("location"),
             )
 
@@ -196,9 +204,9 @@ def engine_payload_to_schema(
         agents_out.append(agent_dict)
 
     spaces_out: dict[str, dict[str, Any]] = {}
-    for zname, zdata in engine_payload.get("spaces", {}).items():
+    for zname, zdata in raw_spaces.items():
         space_dict = make_space(
-            pathogen_mass=zdata.get("pathogen_mass", 0.0),
+            pathogen_mass=float(zdata.get("pathogen_mass", 0.0)),
             microbiome_id=zdata.get("microbiome_id", f"profile_{zname.lower()}"),
         )
         if "pathogen_mass_by_id" in zdata:

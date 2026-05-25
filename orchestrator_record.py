@@ -58,7 +58,18 @@ def record_epoch(
     clin_qpcr_results: dict[int, dict[str, Any]],
     clin_microbio_results: dict[int, dict[str, Any]],
 ) -> dict[str, Any]:
-    """Build a complete epoch record for simulation_history."""
+    """Build a complete epoch record for simulation_history.
+
+    Validates that key data structures have the expected shape before
+    recording, to catch seam corruption between modules early.
+    """
+    if not isinstance(agents, list):
+        raise TypeError(f"record_epoch: agents must be list, got {type(agents).__name__}")
+    if not isinstance(spaces, dict):
+        raise TypeError(f"record_epoch: spaces must be dict, got {type(spaces).__name__}")
+    if not isinstance(stoplights, dict):
+        raise TypeError(f"record_epoch: stoplights must be dict, got {type(stoplights).__name__}")
+
     multi_pathogen_summary: dict[str, dict[str, int]] = {}
     if pathogen_profiles:
         for pid in pathogen_profiles:
