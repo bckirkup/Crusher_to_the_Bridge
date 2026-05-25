@@ -1,0 +1,130 @@
+{
+  "repo_notes": [
+    {
+      "content": "Crusher-to-the-Bridge is a biodefense digital twin that simulates multi-pathogen outbreaks aboard naval vessels. It is a bridging package — middleware connecting five independent simulation domains (Korkin Lab ABM, four-pathway transmission core, py-contam HVAC transport, GRUMB metagenomic surveillance, and Crusher Labs observation engine) into a single orchestrated epoch loop. The codebase is Python 3.10+ with JSON data contracts validated by JSON Schema (draft 2020-12). Key directories: orchestrator*.py (main loop and helpers), engines/ (simulation bridges), crusher_labs/ (diagnostics, protocols, cost accounting), data/ (config, pathogens, platforms, microbiome profiles), schemas/ (JSON Schema definitions), tools/ (sanity checker, GIS bridge), tests/ (pytest suite).",
+      "author": "Maintainer"
+    },
+    {
+      "content": "The simulation follows a strict decoupled architecture. The orchestrator runs an epoch loop that calls: (1) infection_dynamics_bridge for agent SIR state and dose-response, (2) transmission_core for four-pathway dose delivery (direct contact, droplet, HVAC airborne, fomite), (3) py_contam_bridge for CONTAM mass-balance HVAC aerosol transport, (4) observation_core with six diagnostic instruments plus QC, (5) protocol_engine for stoplight-triggered SOP activation, and (6) cost_ledger for financial/material/labor accounting. Output flows to lab_notebook (three fidelity tiers: LOW/MID/HIGH) and telemetry_buffer JSON files.",
+      "author": "Maintainer"
+    },
+    {
+      "content": "The repository has six strict configuration laws that are architectural invariants: (1) No hardcoded epoch schedules — all interventions trigger dynamically via stoplight signals, (2) No hardcoded zone or pathogen names — read from JSON at runtime, (3) Scalar bounds are physical laws — probabilities in [0,1], volumes non-negative, (4) Referential integrity — all cross-references between JSON configs must resolve, (5) Native Python noise models only — no external bioinformatics CLI tools, (6) Sibling repos are read-only (infection-dynamics, py-contam, GRUMB, EMOD-Generic, FRED).",
+      "author": "Maintainer"
+    },
+    {
+      "content": "The data/ directory contains six vessel platforms (destroyer_baseline, fletcher_class_destroyer, legend_class_nsc, san_antonio_class_lpd, expedition_cruise_300, mega_cruise_5000), each with spatial_layout.json and air_flow_paths.json. Pathogen profiles under data/pathogens/ define dose-response parameters, shedding curves, transmission routes, and microflora disruption. Protocols in data/config/protocols.json define SOPs triggered by instrument stoplights. All JSON files are validated against schemas in the schemas/ directory.",
+      "author": "Maintainer"
+    }
+  ],
+  "pages": [
+    {
+      "title": "Architecture Overview",
+      "purpose": "High-level system architecture showing the five decoupled simulation domains, the epoch-driven orchestration loop, and how data flows between engines, instruments, protocols, and output tiers. Cover orchestrator.py and its helper modules (orchestrator_types.py, orchestrator_init.py, orchestrator_epoch.py, orchestrator_record.py, orchestrator_display.py)."
+    },
+    {
+      "title": "Infection Dynamics Bridge",
+      "purpose": "Document engines/infection_dynamics_bridge.py — the adapter for the Korkin Lab Java ABM. Cover KorkinAgent dataclass, SIR state transitions, dose-response probability functions (beta-Poisson and exponential models), EMOD-style clinical progression phases, and FRED-style behavioral compliance.",
+      "parent": "Architecture Overview"
+    },
+    {
+      "title": "Four-Pathway Transmission Core",
+      "purpose": "Document engines/transmission_core.py — the multi-route pathogen transmission engine. Cover the four independent pathways (direct contact, short-range droplet, long-range HVAC airborne, fomite deposition), dose contribution calculations, ContactTracingMatrix, and TransmissionEvent records.",
+      "parent": "Architecture Overview"
+    },
+    {
+      "title": "CONTAM HVAC Transport Bridge",
+      "purpose": "Document engines/py_contam_bridge.py — the CONTAM-style multi-zone mass-balance airflow model. Cover the dM/dt equation, intra-zone HVAC recirculation, cross-zone links, passive adjacency, filter efficiency parameters (MERV-8/13/HEPA), and how air_flow_paths.json drives the transport graph.",
+      "parent": "Architecture Overview"
+    },
+    {
+      "title": "Wearable Physiological Monitoring",
+      "purpose": "Document engines/wearable_monitor.py — the wearable device registry and physiological monitoring system. Cover the device model (Oura Ring, Garmin Watch), sensor channels, noise models (Gaussian, drift, dropout), infection response profiles, anomaly z-score detection, and class-to-device mapping.",
+      "parent": "Architecture Overview"
+    },
+    {
+      "title": "Observation Engine and Instruments",
+      "purpose": "Document crusher_labs/observation_core.py and the six diagnostic instrument classes: ContinuousAirSniffer, TargetedSurfaceSwab, WastewaterSequencingGrid, ClinicalRapidDiagnostic, ClinicalQPCR, and ClinicalMicrobiology. Cover InstrumentQC (cross-contamination, negative controls), native Python noise models (log-normal, Gaussian, sigmoid, Dirichlet-multinomial), and the Ct-to-stoplight conversion in crusher_labs/stoplight.py.",
+      "parent": "Architecture Overview"
+    },
+    {
+      "title": "Diagnostic Modalities",
+      "purpose": "Document the modality modules under crusher_labs/modalities/ — syndromic.py (symptom screening), clinical_rdt.py (rapid antigen test), targeted_pcr.py (RT-qPCR panel), sequencing.py (metagenomic shotgun sequencing), and wearable.py (wearable data stream). Cover each modality's sensitivity model, cadence, noise parameters, and configuration in config.yaml.",
+      "parent": "Observation Engine and Instruments"
+    },
+    {
+      "title": "Reactive Protocol Engine",
+      "purpose": "Document crusher_labs/protocol_engine.py — the stoplight-triggered SOP evaluation system. Cover trigger conditions (instrument_class, stoplight_level, min_zones_affected/min_agents_affected), SOP activation/deactivation logic, physics modifier injection (HVAC efficiency, PPE scalars, zone closures), and the feedback loop between instrument stoplights and next-epoch transmission parameters.",
+      "parent": "Architecture Overview"
+    },
+    {
+      "title": "Cost Ledger",
+      "purpose": "Document crusher_labs/cost_ledger.py — the financial, material, and labor cost tracking system. Cover budget-as-tracker semantics (never blocks actions), per-epoch debits, activation costs, material inventory depletion, the FINANCIAL_AUDIT summary block, and configuration in data/config/resource_costs.json and edison_resource_costs.json.",
+      "parent": "Architecture Overview"
+    },
+    {
+      "title": "Artificial Lab Notebook",
+      "purpose": "Document crusher_labs/lab_notebook.py — the three-tier fidelity serializer. Cover the HIGH (raw curves, Dirichlet params, culture plates), MID (DETECTED/NOT DETECTED, Ct, QC flags), and LOW (GREEN/AMBER/RED stoplight) fidelity tiers. Document the flat biosurveillance schema for lab notebook records and the telemetry_buffer/artificial_lab_notebook.json output format.",
+      "parent": "Architecture Overview"
+    },
+    {
+      "title": "Configuration Reference",
+      "purpose": "Document crusher_labs/config.yaml — the master configuration file. Cover all sections: global settings, ship_graph (spatial layout, agent classes, gender distribution), HVAC, EMOD clinical progression, FRED behavioral compliance, escalation thresholds, diagnostic modalities, multi-pathogen settings, microflora disruption, and wearable monitoring."
+    },
+    {
+      "title": "Vessel Platforms",
+      "purpose": "Document the six pre-built vessel platforms under data/platforms/: destroyer_baseline (11 zones), fletcher_class_destroyer (20 zones), legend_class_nsc (18 zones), san_antonio_class_lpd (22 zones), expedition_cruise_300 (25 zones), and mega_cruise_5000 (67 zones). Cover spatial_layout.json schema (id, type, traffic, volume_m3, deck, display) and air_flow_paths.json schema (hvac_zones, cross_zone_links, adjacency).",
+      "parent": "Configuration Reference"
+    },
+    {
+      "title": "Pathogen Profiles",
+      "purpose": "Document the pathogen profile data contract under data/pathogens/. Cover active_profiles.json and edison_10pathogen_profiles.json. Detail the profile schema: pathogen_id, category, transmission_routes, shedding_curve_log10, dose_response models (beta-Poisson alpha/beta, exponential k), illness_probability, recovery_day, surface_deposition_fraction, microflora_disruption, introduction_epoch, and initial_infected.",
+      "parent": "Configuration Reference"
+    },
+    {
+      "title": "Protocols and SOPs",
+      "purpose": "Document data/config/protocols.json — the standing operating procedure definitions. Cover the protocol schema: protocol_id (SOP-001 through SOP-010), trigger conditions, physics/behavior modifiers (including confinement keys), per-epoch costs, activation costs, and category (intervention vs surveillance).",
+      "parent": "Configuration Reference"
+    },
+    {
+      "title": "Microbiome Profiles",
+      "purpose": "Document the GRUMB microbiome integration under data/microbiome_profiles/. Cover coastal_port_profile.json (61 taxa near-shore baseline), open_ocean_profile.json (52 taxa oligotrophic baseline), zone_type_modifiers.json, and the dual-signal shedding concept where infected agents shed altered microflora alongside pathogen particles, detectable via CLR-space anomaly scoring.",
+      "parent": "Configuration Reference"
+    },
+    {
+      "title": "JSON Schemas and Data Contracts",
+      "purpose": "Document the schemas/ directory containing JSON Schema (draft 2020-12) definitions for all data contracts: spatial_layout, air_flow_paths, pathogen_profiles, protocols, resource_costs, logging_profile, lab_notebook, and simulation_history. Explain validation workflow using check-jsonschema and the sanity_checker tool."
+    },
+    {
+      "title": "Sanity Checker and Validation Tools",
+      "purpose": "Document tools/sanity_checker.py — the Pydantic-based configuration validator. Cover bound checking (scalar [0,1] constraints, non-negative values), referential integrity checks (rooms in airflow paths must exist in spatial layout), fraction-sum validation, and the --from-config flag. Also cover tools/gis_spatial_bridge.py for converting GIS Shapefiles/GeoJSON to spatial_layout.json.",
+      "parent": "JSON Schemas and Data Contracts"
+    },
+    {
+      "title": "Simulation Output and Telemetry",
+      "purpose": "Document the telemetry_buffer/ directory and simulation output formats. Cover simulation_history.json (per-epoch state: agents, spaces, summary, multi_pathogen, contact_tracing, reactive_protocols, cost_accounting, observation_engine) and artificial_lab_notebook.json (flat biosurveillance records). Also cover telemetry_buffer/schema.py.",
+      "parent": "Architecture Overview"
+    },
+    {
+      "title": "Streamlit Dashboard",
+      "purpose": "Document dashboard.py — the Streamlit 4-tab Tactical Command Deck for visualization. Cover the dashboard tabs, how it reads simulation_history.json and lab_notebook outputs, and launch instructions (streamlit run dashboard.py, run_dashboard.bat, run_dashboard.sh)."
+    },
+    {
+      "title": "Test Suite",
+      "purpose": "Document the tests/ directory with its 10+ test modules: test_orchestrator.py, test_data_contracts.py, test_law_compliance.py, test_protocol_engine.py, test_cost_ledger.py, test_sanity_checker.py, test_schema_module.py, test_telemetry_seams.py, test_stoplight.py, and conftest.py. Cover the testing philosophy and how to run pytest."
+    },
+    {
+      "title": "Strict Configuration Laws",
+      "purpose": "Document the six inviolable architectural constraints: (1) No hardcoded epoch schedules, (2) No hardcoded zone/pathogen names, (3) Scalar bounds as physical laws, (4) Referential integrity mandatory, (5) Native Python noise models only, (6) Sibling repos read-only. These are defined in .cursorrules and enforced by tests and the sanity checker."
+    },
+    {
+      "title": "Sibling Repositories",
+      "purpose": "Document the five read-only sibling repositories that provide mathematical foundations: infection-dynamics (Korkin Lab Java ABM), py-contam (CONTAM I/O library), GRUMB (maritime microbiome pipeline), EMOD-Generic (epidemiological modeling framework), and FRED (agent scheduling framework). Explain the bridging relationship — this repo adapts their contracts without modifying them."
+    },
+    {
+      "title": "Adding New Platforms and Pathogens",
+      "purpose": "Document the extension workflow for adding new vessel platforms (spatial_layout.json + air_flow_paths.json, referential integrity requirements) and new pathogen profiles (dose-response parameters, shedding curves, transmission routes, microflora disruption). Reference the .agents/skills/ SKILL.md files for guided workflows.",
+      "parent": "Configuration Reference"
+    }
+  ]
+}
