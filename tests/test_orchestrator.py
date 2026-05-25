@@ -19,7 +19,7 @@ import numpy as np
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, REPO_ROOT)
 
-from orchestrator import (
+from orchestrator_types import (
     STATUS_BASELINE,
     STATUS_SUSPECTED,
     STATUS_CONFIRMED,
@@ -28,14 +28,18 @@ from orchestrator import (
     DEFAULT_GREYWATER_FRACTION,
     DEFAULT_GRAYWATER_PROPAGATION_FACTOR,
     SimulationState,
-    _load_spatial_layout,
-    _initialize_ship_graph,
-    _check_escalation,
-    _load_pathogen_profiles,
-    _engine_payload_to_schema,
-    _step_quarantine_confinement,
-    _confine_agents,
-    _step_cost_accounting,
+)
+from orchestrator_init import (
+    load_spatial_layout as _load_spatial_layout,
+    initialize_ship_graph as _initialize_ship_graph,
+    check_escalation as _check_escalation,
+    load_pathogen_profiles as _load_pathogen_profiles,
+    engine_payload_to_schema as _engine_payload_to_schema,
+)
+from orchestrator_epoch import (
+    step_quarantine_confinement as _step_quarantine_confinement,
+    confine_agents as _confine_agents,
+    step_cost_accounting as _step_cost_accounting,
 )
 from crusher_labs import load_config
 from telemetry_buffer.schema import make_agent

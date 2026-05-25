@@ -32,7 +32,7 @@ jobs:
       - name: Run test suite
         run: pytest tests/ -v --tb=short
 
-      - name: Verify import hygiene (stoplight deduplication)
+      - name: Verify import hygiene (module split + stoplight deduplication)
         env:
           PYTHONPATH: .
         run: |
@@ -40,7 +40,12 @@ jobs:
           from crusher_labs.stoplight import stoplight_from_ct, meets_threshold
           from crusher_labs.protocol_engine import compute_stoplights
           from crusher_labs.lab_notebook import _stoplight_from_ct
-          print('Import hygiene OK: stoplight module is canonical source')
+          from orchestrator_types import SimulationState, ObservationEngine, ProtocolContext
+          from orchestrator_init import initialize_ship_graph, build_engine
+          from orchestrator_epoch import step_fred_compliance, run_observation_sampling
+          from orchestrator_record import record_epoch, finalize_simulation
+          from orchestrator_display import print_executive_summary
+          print('Import hygiene OK: modules split correctly, stoplight canonical')
           "
 
       - name: Run orchestrator (24-epoch smoke test)
