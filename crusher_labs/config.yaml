@@ -15,6 +15,62 @@ ship_graph:
   agent_roles:                        # infection-dynamics: Passenger / StrucCrew
     passenger_fraction: 0.70
     crew_fraction: 0.30
+
+  # ── Agent Class Taxonomy ────────────────────────────────────
+  # Each class specifies a fraction of total agents, role group,
+  # schedule profile, preferred zones, and duty station.  When
+  # present, these override the legacy passenger/crew binary split.
+  # Fractions must sum to 1.0.
+  agent_classes:
+    - class_id: "passenger_general"
+      role_group: "passenger"
+      fraction: 0.50
+      home_zone_preference: "Berthing"
+      free_zone_preference: ""
+      duty_zone: ""
+    - class_id: "passenger_family"
+      role_group: "passenger"
+      fraction: 0.10
+      home_zone_preference: "Berthing"
+      free_zone_preference: ""
+      duty_zone: ""
+    - class_id: "passenger_elderly"
+      role_group: "passenger"
+      fraction: 0.10
+      home_zone_preference: "Berthing"
+      free_zone_preference: ""
+      duty_zone: ""
+    - class_id: "crew_general"
+      role_group: "crew"
+      fraction: 0.10
+      home_zone_preference: "Berthing"
+      free_zone_preference: ""
+      duty_zone: ""
+    - class_id: "crew_medical"
+      role_group: "crew"
+      fraction: 0.05
+      home_zone_preference: "Berthing"
+      free_zone_preference: "MedBay"
+      duty_zone: "MedBay"
+    - class_id: "crew_engineering"
+      role_group: "crew"
+      fraction: 0.10
+      home_zone_preference: "Berthing"
+      free_zone_preference: "Engine"
+      duty_zone: "Engine"
+    - class_id: "crew_galley"
+      role_group: "crew"
+      fraction: 0.05
+      home_zone_preference: "Berthing"
+      free_zone_preference: ""
+      duty_zone: "Galley"
+
+  # ── Gender Distribution ─────────────────────────────────────
+  # Orthogonal to agent class.  Assigned randomly at startup.
+  gender_distribution:
+    male: 0.50
+    female: 0.50
+
   # Zones loaded from spatial layout JSON at runtime
   spatial_layout: "data/platforms/destroyer_baseline/spatial_layout.json"
   air_flow_paths: "data/platforms/destroyer_baseline/air_flow_paths.json"

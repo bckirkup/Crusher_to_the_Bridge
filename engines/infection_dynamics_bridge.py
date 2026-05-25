@@ -125,6 +125,85 @@ CREW_SCHEDULE = [
     "Work", "Work", "Work", "Work",
 ]
 
+# ── Extended agent class schedules ───────────────────────────────────────
+
+# Medical crew: duty station = MedBay; on-call overnight
+MEDICAL_CREW_SCHEDULE = [
+    "Work", "Work", "Sleep", "Sleep", "Sleep", "Sleep",
+    "Sleep", "Sleep",
+    "Meal:Breakfast",
+    "Work", "Work", "Work", "Work",
+    "Meal:Lunch",
+    "Work", "Work", "Work", "Work", "Work",
+    "Meal:Dinner",
+    "Work", "Work", "Free", "Work",
+]
+
+# Engineering crew: 3-section watchbill, heavy work hours
+ENGINEERING_CREW_SCHEDULE = [
+    "Work", "Work", "Work", "Work", "Sleep", "Sleep",
+    "Sleep", "Sleep",
+    "Meal:Breakfast",
+    "Work", "Work", "Work", "Work",
+    "Meal:Lunch",
+    "Work", "Work", "Work", "Free",
+    "Meal:Dinner",
+    "Work", "Work", "Sleep", "Sleep",
+]
+
+# Galley crew: early starts for meal prep, split shifts
+GALLEY_CREW_SCHEDULE = [
+    "Sleep", "Sleep", "Sleep", "Sleep", "Sleep",
+    "Work", "Work", "Work",
+    "Work",
+    "Work", "Work", "Free", "Free",
+    "Work",
+    "Work", "Free", "Free", "Work", "Work",
+    "Work",
+    "Work", "Sleep", "Sleep", "Sleep",
+]
+
+# Elderly passenger: more rest, fewer free circulation hours
+PASSENGER_ELDERLY_SCHEDULE = [
+    "Sleep", "Sleep", "Sleep", "Sleep", "Sleep", "Sleep",
+    "Sleep", "Sleep", "Sleep",
+    "Meal:Breakfast", "Meal:Breakfast",
+    "Free",
+    "Meal:Lunch", "Meal:Lunch",
+    "Sleep", "Free", "Free", "Free",
+    "Meal:Dinner", "Meal:Dinner",
+    "Free", "Sleep", "Sleep", "Sleep",
+]
+
+# Family passenger: includes Kids_Club activity blocks
+PASSENGER_FAMILY_SCHEDULE = [
+    "Sleep", "Sleep", "Sleep", "Sleep", "Sleep", "Sleep",
+    "Sleep", "Sleep", "Sleep",
+    "Meal:Breakfast", "Meal:Breakfast",
+    "Free",
+    "Meal:Lunch", "Meal:Lunch",
+    "Free", "Free", "Free", "Free",
+    "Meal:Dinner", "Meal:Dinner",
+    "Free", "Free", "Free", "Sleep",
+]
+
+# Lookup table: class_id → default schedule
+CLASS_SCHEDULES: dict[str, list[str]] = {
+    "passenger_general": PASSENGER_SCHEDULE,
+    "passenger_family": PASSENGER_FAMILY_SCHEDULE,
+    "passenger_elderly": PASSENGER_ELDERLY_SCHEDULE,
+    "crew_general": CREW_SCHEDULE,
+    "crew_medical": MEDICAL_CREW_SCHEDULE,
+    "crew_engineering": ENGINEERING_CREW_SCHEDULE,
+    "crew_galley": GALLEY_CREW_SCHEDULE,
+}
+
+# Default gender distribution
+DEFAULT_GENDER_DISTRIBUTION: dict[str, float] = {
+    "male": 0.50,
+    "female": 0.50,
+}
+
 
 # ── Dose-response functions (from Person.java) ──────────────────────────
 
@@ -172,7 +251,7 @@ class KorkinAgent:
     """
 
     __slots__ = (
-        "agent_id", "role", "immune",
+        "agent_id", "role", "agent_class", "gender", "immune",
         "infection_status", "illness_status",
         "time_infected", "acquired_particles",
         "home_zone", "dining_zone", "work_zone", "free_zone",
@@ -192,9 +271,13 @@ class KorkinAgent:
         work_zone: str,
         free_zone: str,
         schedule: list[str],
+        agent_class: str = "",
+        gender: str = "unknown",
     ) -> None:
         self.agent_id = agent_id
         self.role = role
+        self.agent_class = agent_class or role
+        self.gender = gender
         self.immune = immune
         self.infection_status = InfectionStatus.IMMUNE if immune else InfectionStatus.SUSCEPTIBLE
         self.illness_status = IllnessStatus.NOT_ILL
@@ -365,6 +448,8 @@ class KorkinAgent:
             "shedding_rate": round(self.current_shedding, 2),
             "location": self.current_location,
             "role": self.role,
+            "agent_class": self.agent_class,
+            "gender": self.gender,
             "days_post_infection": self.days_post_infection if self.is_infected else None,
             "pathogen_infections": pathogen_states,
             "susceptibility_multiplier": dict(self.susceptibility_multiplier),
@@ -390,6 +475,8 @@ class KorkinShipEngine:
         immune_ratio: float = IMMUNE_RATIO,
         vsp_isolation: bool = True,
         seed: int = 42,
+        agent_classes: list[dict[str, Any]] | None = None,
+        gender_distribution: dict[str, float] | None = None,
     ) -> None:
         self.rng = np.random.default_rng(seed)
         self.zones = zones or DEFAULT_ZONES
@@ -398,6 +485,8 @@ class KorkinShipEngine:
         self.initial_infected = initial_infected
         self.immune_ratio = immune_ratio
         self.vsp_isolation = vsp_isolation
+        self._agent_classes = agent_classes
+        self._gender_distribution = gender_distribution or DEFAULT_GENDER_DISTRIBUTION
 
         self._dining_zones = [z["name"] for z in self.zones if z["type"] == "Dining"]
         self._free_zones = [z["name"] for z in self.zones if z["type"] == "Free"]
@@ -417,12 +506,130 @@ class KorkinShipEngine:
 
         self._initialize_agents()
 
+    def _assign_gender(self) -> str:
+        """Sample a gender string from the configured distribution."""
+        labels = list(self._gender_distribution.keys())
+        weights = [self._gender_distribution[g] for g in labels]
+        total = sum(weights)
+        if total <= 0:
+            return "unknown"
+        probs = [w / total for w in weights]
+        return str(self.rng.choice(labels, p=probs))
+
+    def _resolve_zone(self, preference: str, fallback_zones: list[str]) -> str:
+        """Pick a zone matching *preference* substring, or fall back."""
+        matches = [z for z in fallback_zones if preference.lower() in z.lower()]
+        if matches:
+            return str(self.rng.choice(matches))
+        if fallback_zones:
+            return str(self.rng.choice(fallback_zones))
+        return fallback_zones[0] if fallback_zones else "unknown"
+
     def _initialize_agents(self) -> None:
-        """Create the full agent population (infection-dynamics ``agentAdder`` pattern)."""
+        """Create the full agent population.
+
+        When ``agent_classes`` are provided (from config), agents are
+        distributed across the defined classes.  Otherwise falls back to
+        the legacy two-class (passenger / crew) split.
+        """
         total = self.num_passengers + self.num_crew
         immune_remaining = int(total * self.immune_ratio)
         infected_remaining = self.initial_infected
         agent_id = 0
+
+        if self._agent_classes:
+            agent_id = self._initialize_agents_from_classes(
+                agent_id, immune_remaining, infected_remaining,
+            )
+        else:
+            agent_id = self._initialize_agents_legacy(
+                agent_id, immune_remaining, infected_remaining,
+            )
+
+    def _initialize_agents_from_classes(
+        self,
+        start_id: int,
+        immune_remaining: int,
+        infected_remaining: int,
+    ) -> int:
+        """Create agents distributed across configured agent classes."""
+        total = self.num_passengers + self.num_crew
+        agent_id = start_id
+
+        # Build ordered list of (class_cfg, count) pairs
+        class_counts: list[tuple[dict[str, Any], int]] = []
+        allocated = 0
+        for cls_cfg in self._agent_classes:
+            fraction = cls_cfg.get("fraction", 0.0)
+            count = int(total * fraction)
+            class_counts.append((cls_cfg, count))
+            allocated += count
+        # Assign remainder to the first class
+        if allocated < total and class_counts:
+            first_cls, first_count = class_counts[0]
+            class_counts[0] = (first_cls, first_count + (total - allocated))
+
+        for cls_cfg, count in class_counts:
+            class_id = cls_cfg.get("class_id", "crew_general")
+            role_group = cls_cfg.get("role_group", "crew")
+            schedule_template = CLASS_SCHEDULES.get(
+                class_id, CREW_SCHEDULE if role_group == "crew" else PASSENGER_SCHEDULE,
+            )
+            home_pref = cls_cfg.get("home_zone_preference", "Berthing")
+            duty_zone = cls_cfg.get("duty_zone", "")
+            free_pref = cls_cfg.get("free_zone_preference", "")
+
+            for _ in range(count):
+                immune = False
+                if immune_remaining > 0 and (agent_id % 5 == 0):
+                    immune = True
+                    immune_remaining -= 1
+
+                home = self._resolve_zone(home_pref, self._room_zones)
+                dining = str(self.rng.choice(self._dining_zones))
+                if duty_zone:
+                    work = self._resolve_zone(duty_zone, self._free_zones + self._dining_zones)
+                elif role_group == "crew":
+                    work = str(self.rng.choice(self._free_zones + self._dining_zones))
+                else:
+                    work = str(self.rng.choice(self._free_zones))
+                if free_pref:
+                    free = self._resolve_zone(free_pref, self._free_zones)
+                else:
+                    free = str(self.rng.choice(self._free_zones))
+
+                gender = self._assign_gender()
+                schedule = list(schedule_template)
+
+                agent = KorkinAgent(
+                    agent_id=agent_id, role=role_group, immune=immune,
+                    home_zone=home, dining_zone=dining,
+                    work_zone=work, free_zone=free, schedule=schedule,
+                    agent_class=class_id, gender=gender,
+                )
+
+                if not immune and infected_remaining > 0:
+                    agent.infection_status = InfectionStatus.INFECTED
+                    agent.illness_status = IllnessStatus.SYMPTOMATIC
+                    agent.time_infected = 1
+                    agent.acquired_particles = math.pow(
+                        10, SYMPTOMATIC_SHEDDING[1] - DOSE_ADJUSTMENT,
+                    )
+                    infected_remaining -= 1
+
+                self.agents.append(agent)
+                agent_id += 1
+
+        return agent_id
+
+    def _initialize_agents_legacy(
+        self,
+        start_id: int,
+        immune_remaining: int,
+        infected_remaining: int,
+    ) -> int:
+        """Legacy two-class (passenger/crew) initialization."""
+        agent_id = start_id
 
         # Passengers
         for _ in range(self.num_passengers):
@@ -437,13 +644,14 @@ class KorkinShipEngine:
             dining = self.rng.choice(self._dining_zones)
             free = self.rng.choice(self._free_zones)
             work = self.rng.choice(self._free_zones)
-            randomness = self.rng.uniform(-2.0, 2.0)
-            schedule = [s for s in PASSENGER_SCHEDULE]
+            gender = self._assign_gender()
+            schedule = list(PASSENGER_SCHEDULE)
 
             agent = KorkinAgent(
                 agent_id=agent_id, role="passenger", immune=immune,
                 home_zone=home, dining_zone=dining,
                 work_zone=work, free_zone=free, schedule=schedule,
+                agent_class="passenger_general", gender=gender,
             )
 
             if not immune and infected_remaining > 0:
@@ -469,12 +677,14 @@ class KorkinShipEngine:
             dining = self.rng.choice(self._dining_zones)
             free = self.rng.choice(self._free_zones)
             work = self.rng.choice(self._free_zones + self._dining_zones)
-            schedule = [s for s in CREW_SCHEDULE]
+            gender = self._assign_gender()
+            schedule = list(CREW_SCHEDULE)
 
             agent = KorkinAgent(
                 agent_id=agent_id, role="crew", immune=immune,
                 home_zone=home, dining_zone=dining,
                 work_zone=work, free_zone=free, schedule=schedule,
+                agent_class="crew_general", gender=gender,
             )
 
             if not immune and infected_remaining > 0:
@@ -486,6 +696,8 @@ class KorkinShipEngine:
 
             self.agents.append(agent)
             agent_id += 1
+
+        return agent_id
 
     def step(self) -> dict[str, Any]:
         """Advance the simulation by one epoch (≈ one day).
@@ -684,6 +896,16 @@ class KorkinShipEngine:
         immune = sum(1 for a in self.agents if a.immune)
         isolated = len(self.isolated_ids)
 
+        # Agent class breakdown
+        class_counts: dict[str, int] = {}
+        for a in self.agents:
+            class_counts[a.agent_class] = class_counts.get(a.agent_class, 0) + 1
+
+        # Gender breakdown
+        gender_counts: dict[str, int] = {}
+        for a in self.agents:
+            gender_counts[a.gender] = gender_counts.get(a.gender, 0) + 1
+
         return {
             "epoch": self.epoch,
             "total": total,
@@ -694,4 +916,6 @@ class KorkinShipEngine:
             "immune": immune,
             "isolated": isolated,
             "vsp_triggered": self.vsp_triggered,
+            "agent_classes": class_counts,
+            "gender_distribution": gender_counts,
         }

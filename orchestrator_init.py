@@ -83,7 +83,8 @@ def load_spatial_layout(cfg: dict[str, Any]) -> list[dict[str, Any]] | None:
 def initialize_ship_graph(cfg: dict[str, Any]) -> dict[str, Any]:
     """Build the ship graph from spatial layout JSON or inline config.
 
-    Returns zone list, agent role assignments, and traffic classifications.
+    Returns zone list, agent role assignments, traffic classifications,
+    and (when configured) agent class definitions.
     """
     graph_cfg = cfg.get("ship_graph", {})
     num_agents = graph_cfg.get("num_agents", 20)
@@ -93,6 +94,9 @@ def initialize_ship_graph(cfg: dict[str, Any]) -> dict[str, Any]:
     spatial_zones = load_spatial_layout(cfg)
     zones = spatial_zones if spatial_zones else graph_cfg.get("zones", [])
 
+    agent_classes = graph_cfg.get("agent_classes")
+    gender_distribution = graph_cfg.get("gender_distribution")
+
     agent_roles: dict[int, str] = {}
     for aid in range(num_agents):
         agent_roles[aid] = "passenger" if aid < int(num_agents * passenger_frac) else "crew"
@@ -100,13 +104,18 @@ def initialize_ship_graph(cfg: dict[str, Any]) -> dict[str, Any]:
     high_traffic = [z["name"] for z in zones if z.get("traffic") == "high"]
     zone_names = [z["name"] for z in zones]
 
-    return {
+    result: dict[str, Any] = {
         "zones": zones,
         "zone_names": zone_names,
         "high_traffic_zones": high_traffic,
         "num_agents": num_agents,
         "agent_roles": agent_roles,
     }
+    if agent_classes:
+        result["agent_classes"] = agent_classes
+    if gender_distribution:
+        result["gender_distribution"] = gender_distribution
+    return result
 
 
 def initialize_grumb_seeding(
@@ -143,12 +152,17 @@ def build_engine(
         for z in zones
     ]
 
+    agent_classes = graph_cfg.get("agent_classes")
+    gender_distribution = graph_cfg.get("gender_distribution")
+
     return KorkinShipEngine(
         num_passengers=num_passengers,
         num_crew=num_crew,
         initial_infected=cfg.get("initial_infected", 1),
         zones=engine_zones,
         seed=seed,
+        agent_classes=agent_classes,
+        gender_distribution=gender_distribution,
     )
 
 
@@ -172,12 +186,16 @@ def engine_payload_to_schema(
     agents_out: list[dict[str, Any]] = []
     for a in raw_agents:
         aid = a["agent_id"]
+        a_class = a.get("agent_class")
+        a_gender = a.get("gender")
         if aid in isolated_ids:
             agent_dict = make_agent(
                 agent_id=aid,
                 symptom_status="isolated",
                 shedding_rate=0.0,
                 location="Isolated_In_Quarters",
+                agent_class=a_class,
+                gender=a_gender,
             )
         elif aid in quarantine_refusers:
             agent_dict = make_agent(
@@ -185,6 +203,8 @@ def engine_payload_to_schema(
                 symptom_status="non_compliant",
                 shedding_rate=float(a.get("shedding_rate", 0.0)),
                 location=a.get("location", "unknown"),
+                agent_class=a_class,
+                gender=a_gender,
             )
         else:
             agent_dict = make_agent(
@@ -192,6 +212,8 @@ def engine_payload_to_schema(
                 symptom_status=a["symptom_status"],
                 shedding_rate=float(a.get("shedding_rate", 0.0)),
                 location=a.get("location"),
+                agent_class=a_class,
+                gender=a_gender,
             )
 
         if "pathogen_infections" in a:

@@ -144,6 +144,8 @@ def record_epoch(
             "status": status,
             "shedding_rate": a.get("shedding_rate", 0.0),
             "location": a.get("location", "unknown"),
+            "agent_class": a.get("agent_class", "unknown"),
+            "gender": a.get("gender", "unknown"),
         }
         if pathogen_profiles:
             agent_record["pathogen_infections"] = a.get("pathogen_infections", {})
