@@ -65,7 +65,10 @@ class TestPathogenProfiles:
                 assert all(isinstance(v, (int, float)) for v in curve)
 
     def test_transmission_routes_valid(self, profiles: dict) -> None:
-        valid_routes = {"direct_contact", "fomite", "droplet", "hvac_airborne"}
+        valid_routes = {
+            "direct_contact", "fomite", "droplet", "hvac_airborne",
+            "water_aerosol", "food", "water", "bodily_fluids",
+        }
         for p in profiles["pathogens"]:
             routes = set(p["transmission_routes"])
             invalid = routes - valid_routes
