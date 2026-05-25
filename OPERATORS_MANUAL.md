@@ -1,6 +1,6 @@
 # Crusher-to-the-Bridge — Operator's Manual
 
-**Version:** 1.0  
+**Version:** 2.0  
 **Platform:** Biodefense Digital Twin for Maritime Outbreak Simulation  
 **License:** MIT
 
@@ -10,14 +10,15 @@
 
 1. [Quick Start](#1-quick-start)
 2. [System Architecture Overview](#2-system-architecture-overview)
-3. [Configuration Files Reference](#3-configuration-files-reference)
-4. [Drafting Custom Standing Operating Procedures](#4-drafting-custom-standing-operating-procedures)
-5. [GIS Spatial Bridge Tool](#5-gis-spatial-bridge-tool)
-6. [Configuration Sanity Checker](#6-configuration-sanity-checker)
-7. [The Artificial Lab Notebook — Fidelity Tiers](#7-the-artificial-lab-notebook--fidelity-tiers)
-8. [The Streamlit Tactical Command Deck](#8-the-streamlit-tactical-command-deck)
-9. [Simulation Output Reference](#9-simulation-output-reference)
-10. [Contributors & Sibling Repositories](#10-contributors--sibling-repositories)
+3. [Master Configuration (`config.yaml`)](#3-master-configuration-configyaml)
+4. [Data Files Reference](#4-data-files-reference)
+5. [Drafting Custom Standing Operating Procedures](#5-drafting-custom-standing-operating-procedures)
+6. [GIS Spatial Bridge Tool](#6-gis-spatial-bridge-tool)
+7. [Configuration Sanity Checker](#7-configuration-sanity-checker)
+8. [The Artificial Lab Notebook — Fidelity Tiers](#8-the-artificial-lab-notebook--fidelity-tiers)
+9. [The Streamlit Tactical Command Deck](#9-the-streamlit-tactical-command-deck)
+10. [Simulation Output Reference](#10-simulation-output-reference)
+11. [Contributors & Sibling Repositories](#11-contributors--sibling-repositories)
 
 ---
 
@@ -26,14 +27,14 @@
 ### Prerequisites
 
 ```bash
-pip install pyyaml numpy streamlit plotly pandas pydantic geopandas networkx
+pip install pyyaml numpy streamlit plotly pandas pydantic geopandas networkx pytest check-jsonschema
 ```
 
 ### Run a Simulation
 
 ```bash
-# Step 1: Validate configuration files
-python tools/sanity_checker.py
+# Step 1: Validate configuration files (including config.yaml)
+python tools/sanity_checker.py --from-config
 
 # Step 2: Execute the simulation (default 24 epochs from config.yaml)
 python orchestrator.py
@@ -67,37 +68,39 @@ connects five independent simulation domains into a single orchestrated
 epoch loop:
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                    orchestrator.py                       │
-│         Main simulation loop (for epoch in epochs)      │
-└───────────┬─────────────┬─────────────┬────────────────┘
-            │             │             │
-            ▼             ▼             ▼
-  ┌──────────────┐ ┌────────────┐ ┌────────────────┐
-  │ Korkin Lab   │ │ 4-Pathway  │ │ py-contam      │
-  │ ABM Bridge   │ │ Transmis.  │ │ HVAC Transport │
-  │              │ │ Core       │ │                │
-  │ Agent states │ │ Direct     │ │ Mass-balance   │
-  │ SIR model    │ │ Droplet    │ │ equation       │
-  │ Dose-response│ │ HVAC Air   │ │ Filter η       │
-  │              │ │ Fomite     │ │                │
-  └──────────────┘ └────────────┘ └────────────────┘
-            │             │             │
-            └─────────────┼─────────────┘
-                          ▼
-  ┌──────────────┐ ┌────────────┐ ┌────────────────┐
-  │ Observation  │ │ Protocol   │ │ Cost Ledger    │
-  │ Engine       │ │ Engine     │ │                │
-  │ 6 instruments│ │ Stoplight  │ │ $USD budget    │
-  │ + QC         │ │ → SOP      │ │ Materials      │
-  │              │ │ triggers   │ │ Labor hours    │
-  └──────────────┘ └────────────┘ └────────────────┘
-            │                           │
-            ▼                           ▼
-  ┌─────────────────────────────────────────────────┐
-  │            Artificial Lab Notebook               │
-  │  HIGH / MID / LOW fidelity output tiers          │
-  └─────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│                    orchestrator.py                           │
+│         Main simulation loop (for epoch in epochs)          │
+│         Driven by crusher_labs/config.yaml                   │
+└──────┬──────────┬─────────────┬──────────────┬─────────────┘
+       │          │             │              │
+       ▼          ▼             ▼              ▼
+ ┌──────────┐ ┌────────────┐ ┌────────────┐ ┌────────────────┐
+ │ Korkin   │ │ 4-Pathway  │ │ py-contam  │ │ Wearable       │
+ │ Lab ABM  │ │ Transmis.  │ │ HVAC       │ │ Monitor        │
+ │ Bridge   │ │ Core       │ │ Transport  │ │                │
+ │          │ │            │ │            │ │ Oura Ring      │
+ │ Agents   │ │ Direct     │ │ Mass-      │ │ Garmin Watch   │
+ │ SIR      │ │ Droplet    │ │ balance    │ │ HR, HRV, Temp  │
+ │ Dose-resp│ │ HVAC Air   │ │ equation   │ │ SpO2, Activity │
+ │          │ │ Fomite     │ │ Filter η   │ │ Anomaly z-score│
+ └──────────┘ └────────────┘ └────────────┘ └────────────────┘
+       │          │             │              │
+       └──────────┼─────────────┼──────────────┘
+                  ▼             ▼
+ ┌──────────────┐ ┌────────────┐ ┌────────────────┐
+ │ Observation  │ │ Protocol   │ │ Cost Ledger    │
+ │ Engine       │ │ Engine     │ │                │
+ │ 6 instruments│ │ Stoplight  │ │ $USD budget    │
+ │ + QC         │ │ → SOP      │ │ Materials      │
+ │              │ │ triggers   │ │ Labor hours    │
+ └──────────────┘ └────────────┘ └────────────────┘
+       │                             │
+       ▼                             ▼
+ ┌─────────────────────────────────────────────────┐
+ │            Artificial Lab Notebook               │
+ │  HIGH / MID / LOW fidelity output tiers          │
+ └─────────────────────────────────────────────────┘
 ```
 
 ### The Feedback Loop
@@ -114,11 +117,370 @@ The simulation runs a closed-loop control cycle:
 This loop is **fully autonomous** — SOPs activate and deactivate based
 on diagnostic conditions.  There are no hardcoded epoch schedules.
 
+### Wearable Monitoring Pipeline
+
+In parallel with the diagnostic feedback loop, the wearable monitoring
+system (`engines/wearable_monitor.py`) provides continuous physiological
+surveillance:
+
+1. **Device Registry** — Config-driven device definitions (Oura Ring,
+   Garmin Watch) with per-channel sensor specifications
+2. **Baseline Personalization** — Per-agent baselines adjusted by agent
+   class (e.g., elderly passengers have elevated resting heart rate)
+   and gender
+3. **Infection Response** — Pathogen-category-specific channel deltas
+   modulated by EMOD shedding phase (early → peak → late → recovery)
+4. **Noise Injection** — Gaussian noise, sensor drift, and random
+   dropout simulate real-world wearable data quality
+5. **Anomaly Detection** — Z-score threshold flags physiological
+   deviations that may indicate pre-symptomatic infection
+
 ---
 
-## 3. Configuration Files Reference
+## 3. Master Configuration (`config.yaml`)
 
-### 3.0 Pre-Built Configurations (Edison Science)
+The file `crusher_labs/config.yaml` is the **single master configuration
+file** that drives all simulation parameters.  The sanity checker
+validates every section when run with `--from-config`.
+
+### 3.1 Global Settings
+
+```yaml
+random_seed: 42
+num_epochs: 24           # override via --epochs CLI flag
+```
+
+### 3.2 Agent Class Taxonomy
+
+Replaces the legacy binary passenger/crew split with a configurable
+taxonomy.  Each class specifies a fraction of the total population,
+role group, and preferred zones.
+
+```yaml
+ship_graph:
+  num_agents: 20
+  agent_roles:
+    passenger_fraction: 0.70
+    crew_fraction: 0.30
+
+  agent_classes:
+    - class_id: "passenger_general"
+      role_group: "passenger"       # "passenger" or "crew"
+      fraction: 0.50
+      home_zone_preference: "Berthing"
+      free_zone_preference: ""
+      duty_zone: ""
+    - class_id: "crew_medical"
+      role_group: "crew"
+      fraction: 0.05
+      duty_zone: "MedBay"
+    # ... additional classes
+```
+
+**Seven built-in classes:**
+
+| Class ID | Role Group | Fraction | Duty Zone | Description |
+|----------|-----------|----------|-----------|-------------|
+| `passenger_general` | passenger | 0.50 | — | General passengers |
+| `passenger_family` | passenger | 0.10 | — | Family groups |
+| `passenger_elderly` | passenger | 0.10 | — | Elderly passengers (elevated baseline HR, reduced SpO2) |
+| `crew_general` | crew | 0.10 | — | General crew members |
+| `crew_medical` | crew | 0.05 | MedBay | Medical staff |
+| `crew_engineering` | crew | 0.10 | Engine | Engineering crew |
+| `crew_galley` | crew | 0.05 | Galley | Galley / food service crew |
+
+**Rules:**
+- Class fractions **must sum to 1.0**
+- Each class_id must be unique
+- `role_group` must be `"passenger"` or `"crew"`
+- `duty_zone` values are cross-referenced against `spatial_layout.json`
+
+To add a new class, append an entry to the `agent_classes` list.
+No code changes required.
+
+### 3.3 Gender Distribution
+
+Orthogonal to agent class.  Assigned randomly at startup.
+**Values must sum to 1.0.**
+
+```yaml
+  gender_distribution:
+    male: 0.50
+    female: 0.50
+```
+
+Gender affects wearable baseline offsets (e.g., females have a +2 bpm
+heart rate offset) but does not influence transmission dynamics.
+
+### 3.4 HVAC / CONTAM Transport
+
+```yaml
+hvac:
+  filter_efficiency: 0.50      # [0,1] — MERV-8=0.20, MERV-13=0.50, HEPA=0.999
+  natural_decay_rate: 0.10     # fraction lost per epoch to settling/inactivation
+  filter_type: "MERV-13"       # human-readable label
+```
+
+The filter efficiency (`η`) feeds into the CONTAM mass-balance equation:
+`dM_i/dt = Σ Q_ji · C_j · (1−η) − Q_out · C_i + S_i − λ · M_i`
+
+### 3.5 EMOD-Style Clinical Progression
+
+Models the time course of infection through shedding phases aligned
+with the EMOD epidemiological modeling framework.
+
+```yaml
+emod_progression:
+  incubation_epochs: 2
+  shedding_phases:
+    - {name: "early",  max_rate: 20.0, sensitivity_cap: 0.30}
+    - {name: "peak",   max_rate: 80.0, sensitivity_cap: 0.95}
+    - {name: "late",   max_rate: 40.0, sensitivity_cap: 0.80}
+  phase_durations: [3, 5, 4]   # must match shedding_phases count
+```
+
+| Phase | Duration | Shedding Rate | Diagnostic Sensitivity |
+|-------|----------|--------------|------------------------|
+| Incubation | 2 epochs | 0 (not yet shedding) | — |
+| Early | 3 epochs | Up to 20.0 | 30% |
+| Peak | 5 epochs | Up to 80.0 | 95% |
+| Late | 4 epochs | Up to 40.0 | 80% |
+
+These phases also drive the wearable infection response profiles
+(heart rate elevation, temperature rise, SpO2 drop, etc.).
+
+**Rules:**
+- `phase_durations` count must match `shedding_phases` count
+- All durations must be positive
+- `sensitivity_cap` values must be in [0.0, 1.0]
+
+### 3.6 FRED-Style Behavioral Compliance
+
+Models human behavior and quarantine compliance based on the FRED
+(Framework for Reconstructing Epidemiological Dynamics) approach.
+
+```yaml
+fred_behavior:
+  quarantine_compliance: 0.85   # [0,1] — P(agent complies with isolation)
+  compliance_delay_epochs: 1
+  healthy_noise_categories:
+    - {reason: "seasickness",  probability: 0.008}
+    - {reason: "fatigue",      probability: 0.005}
+    - {reason: "minor_injury", probability: 0.002}
+```
+
+- `quarantine_compliance` — Probability that an infected agent will
+  comply with an isolation order.  Non-compliant agents remain in the
+  general population, continuing to shed and transmit.
+- `compliance_delay_epochs` — Delay before a non-compliant agent
+  eventually isolates.
+- `healthy_noise_categories` — Background sick-call reasons for healthy
+  agents (seasickness, fatigue, minor injury).  These generate false
+  positive syndromic signals that the observation engine must
+  distinguish from true infections.
+
+### 3.7 Escalation Thresholds
+
+```yaml
+escalation:
+  syndromic_suspect_threshold: 3    # daily sick-call count → SUSPECTED
+  pcr_confirm_ct_threshold: 35.0    # Ct ≤ this → CONFIRMED
+```
+
+The trigger status transitions through three phases:
+`BASELINE → SUSPECTED → CONFIRMED`
+
+### 3.8 Diagnostic Modality Parameters
+
+Each diagnostic modality has configuration parameters controlling
+sensitivity, specificity, noise, and sampling cadence.
+
+```yaml
+syndromic:
+  sick_call_probability: 0.70       # [0,1]
+  background_noise_rate: 0.015      # [0,1]
+  cadence: 1
+
+clinical_rdt:
+  base_sensitivity: 0.95            # [0,1]
+  sigmoid_k: 0.08
+  sigmoid_midpoint: 50.0
+  specificity: 0.97                 # [0,1]
+  cadence: 1
+
+targeted_pcr:
+  extraction_efficiency: 0.35
+  ct_slope: -3.322
+  ct_intercept: 40.0
+  lod_ct_threshold: 38.0
+  cadence: 4
+
+sequencing:
+  read_depth: 100000
+  pseudocount: 1.0e-6
+  cadence: 8
+```
+
+### 3.9 Multi-Pathogen Configuration
+
+Enables concurrent simulation of multiple pathogens with independent
+mass pools, dose-response models, and shedding kinetics.
+
+```yaml
+multi_pathogen:
+  profiles_path: "data/pathogens/active_profiles.json"
+  enable_coinfection: true
+  immunocompromised_fraction: 0.05    # [0,1]
+  immunocompromised_multiplier: 2.0
+```
+
+- `enable_coinfection` — When `true`, agents can carry multiple
+  pathogens simultaneously.  Each pathogen maintains independent SIR
+  state and shedding curves.
+- `immunocompromised_fraction` — Fraction of agents with elevated
+  susceptibility (dose scaling multiplied by `immunocompromised_multiplier`).
+
+### 3.10 Microflora Disruption
+
+```yaml
+microflora:
+  enable_dual_signal: true
+  disrupted_shed_mass: 50.0
+  clr_shift_scale: 0.15
+  graywater_zones: ["Engine_Room"]
+```
+
+When a pathogen has `microflora_disruption.causes_disruption == true`,
+infected agents shed altered microbial signatures alongside pathogen
+particles.  The wastewater sequencing grid can detect these
+background kingdom-level CLR shifts even when pathogen mass is below
+direct detection limits.
+
+`graywater_zones` accumulate downstream microbial signatures and must
+be cross-referenced against `spatial_layout.json`.
+
+### 3.11 Wearable Physiological Monitoring
+
+An extensible device registry that simulates wearable sensors
+(Oura Ring, Garmin Watch) for continuous physiological surveillance.
+
+```yaml
+wearable_monitoring:
+  enabled: true
+
+  devices:
+    - device_id: "oura_ring"
+      channels: [heart_rate, hrv, body_temp, spo2, sleep_score, respiratory_rate]
+      noise:
+        - {channel: heart_rate,  sigma: 2.5, drift_rate: 0.1, dropout_prob: 0.01}
+        # ... per-channel noise parameters
+      infection_responses:
+        - pathogen_category: "enteric_viral"
+          channel_responses:
+            - {channel: heart_rate, early: 3.0, peak: 10.0, late: 5.0, recovery: 1.0}
+            # ... per-channel deltas for each EMOD phase
+        - pathogen_category: "respiratory_viral"
+          channel_responses: [...]
+      phase_boundaries:
+        - {day: 0,  phase: "early"}
+        - {day: 3,  phase: "peak"}
+        - {day: 8,  phase: "late"}
+        - {day: 12, phase: "recovery"}
+
+    - device_id: "garmin_watch"
+      channels: [heart_rate, hrv, body_temp, spo2, activity_score, respiratory_rate]
+      # ... same structure
+
+  class_device_map:
+    - {agent_class: "default",           device_id: "oura_ring"}
+    - {agent_class: "crew_medical",      device_id: "garmin_watch"}
+    - {agent_class: "crew_engineering",  device_id: "garmin_watch"}
+    - {agent_class: "crew_galley",       device_id: "garmin_watch"}
+    - {agent_class: "passenger_elderly", device_id: "oura_ring"}
+
+  observation_noise_sigma: 0.5     # ≥ 0
+  sync_dropout_prob: 0.02          # [0,1]
+  anomaly_z_threshold: 2.0         # > 0 — z-score threshold for anomaly detection
+```
+
+#### Built-In Devices
+
+| Device | Channels | Strengths |
+|--------|----------|-----------|
+| `oura_ring` | heart_rate, hrv, body_temp, spo2, sleep_score, respiratory_rate | Sleep quality tracking, low-profile form factor |
+| `garmin_watch` | heart_rate, hrv, body_temp, spo2, activity_score, respiratory_rate | Continuous HR, activity tracking |
+
+#### Sensor Channels
+
+| Channel | Unit | Default Baseline | Description |
+|---------|------|-----------------|-------------|
+| `heart_rate` | bpm | 68 ± 4 | Resting heart rate |
+| `hrv` | ms | 45 ± 8 | Heart rate variability (RMSSD) |
+| `body_temp` | °C | 36.6 ± 0.15 | Core/wrist temperature |
+| `spo2` | % | 97.5 ± 0.5 | Blood oxygen saturation |
+| `sleep_score` | score | 80 ± 5 | Composite sleep quality (Oura only) |
+| `activity_score` | score | 50 ± 10 | Daily activity level (Garmin only) |
+| `respiratory_rate` | breaths/min | 15 ± 1.5 | Breathing rate |
+
+#### Noise Model
+
+Each channel has three independent noise parameters:
+
+| Parameter | Description |
+|-----------|-------------|
+| `sigma` | Gaussian noise standard deviation per reading |
+| `drift_rate` | Cumulative sensor drift per epoch |
+| `dropout_prob` | Probability of a missing/null reading |
+
+#### Infection Response
+
+Per-pathogen-category deltas are applied to each channel based on the
+agent's current EMOD phase.  For example, a Norovirus (enteric_viral)
+infection at peak phase adds +10 bpm to heart rate and +1.5°C to
+body temperature.
+
+| Phase | Heart Rate Δ | Body Temp Δ | SpO2 Δ | HRV Δ |
+|-------|-------------|-------------|--------|-------|
+| Early | +3 bpm | +0.3°C | 0 | −3 ms |
+| Peak | +10 bpm | +1.5°C | −0.5% | −15 ms |
+| Late | +5 bpm | +0.8°C | −0.3% | −8 ms |
+| Recovery | +1 bpm | +0.1°C | 0 | −2 ms |
+
+*(Values shown for enteric_viral; respiratory_viral has stronger
+SpO2 and respiratory_rate effects.)*
+
+#### Class & Gender Baseline Offsets
+
+Baselines are personalized per agent:
+
+- **Class offsets:** `passenger_elderly` → +4 bpm HR, −1.5% SpO2,
+  −10 ms HRV; `crew_engineering` → +10 activity score
+- **Gender offsets:** Female → +2 bpm HR, +0.1°C body temp;
+  Male → −1 bpm HR
+
+#### Adding a New Device
+
+Add an entry to `devices` with a unique `device_id`, its channel list,
+noise parameters, and infection response profiles.  Then assign it to
+agent classes via `class_device_map`.  No code changes required.
+
+### 3.12 GRUMB Multi-Kingdom Seeding
+
+```yaml
+grumb_seeding:
+  kingdoms: ["Bacteria", "Archaea", "Fungi", "Virus"]
+  pseudocount: 1.0e-6
+```
+
+Seeds the four-kingdom environmental microbiome arrays used by the
+wastewater sequencing instrument.  The pseudocount prevents log-zero
+errors in CLR (Centered Log-Ratio) transformations.
+
+---
+
+## 4. Data Files Reference
+
+### 4.0 Pre-Built Configurations (Edison Science)
 
 A library of ready-to-use configuration files is included in the
 repository, contributed by Edison Science.  These provide a range of
@@ -210,7 +572,7 @@ See `docs/pricing_notes.md` for sourcing details.
 
 ---
 
-### 3.1 Pathogen Profiles (`data/pathogens/active_profiles.json`)
+### 4.1 Pathogen Profiles (`data/pathogens/active_profiles.json`)
 
 Defines one or more pathogens that run concurrently with independent mass
 pools per room.  Key properties:
@@ -253,7 +615,7 @@ pools per room.  Key properties:
 }
 ```
 
-### 3.2 Spatial Layout (`data/platforms/*/spatial_layout.json`)
+### 4.2 Spatial Layout (`data/platforms/*/spatial_layout.json`)
 
 Defines the room/zone node graph with display coordinates:
 
@@ -266,7 +628,7 @@ Defines the room/zone node graph with display coordinates:
 | `deck` | string | `upper`, `main`, `lower` — vertical position |
 | `display` | object | `{x, y}` — Plotly spatial deck map coordinates |
 
-### 3.3 Airflow Paths (`data/platforms/*/air_flow_paths.json`)
+### 4.3 Airflow Paths (`data/platforms/*/air_flow_paths.json`)
 
 Three edge types connecting the spatial graph:
 
@@ -279,12 +641,12 @@ Three edge types connecting the spatial graph:
 **Referential Integrity:** Every room referenced MUST exist in
 `spatial_layout.json`.  The sanity checker enforces this.
 
-### 3.4 Protocols (`data/config/protocols.json`)
+### 4.4 Protocols (`data/config/protocols.json`)
 
-See [Section 4](#4-drafting-custom-standing-operating-procedures) for
+See [Section 5](#5-drafting-custom-standing-operating-procedures) for
 detailed SOP authoring guidance.
 
-### 3.5 Resource Costs (`data/config/resource_costs.json`)
+### 4.5 Resource Costs (`data/config/resource_costs.json`)
 
 Defines three resource categories tracked by the cost ledger:
 
@@ -298,7 +660,7 @@ Each material item has `starting_count`, `unit_cost_usd`, and a description.
 SOPs reference materials by name — ensure SOP material keys match items
 defined in this file.
 
-### 3.6 Logging Profile (`data/config/logging_profile.json`)
+### 4.6 Logging Profile (`data/config/logging_profile.json`)
 
 Controls the diagnostic output fidelity.  Change `logging_fidelity`
 to one of:
@@ -311,13 +673,13 @@ to one of:
 
 ---
 
-## 4. Drafting Custom Standing Operating Procedures
+## 5. Drafting Custom Standing Operating Procedures
 
 SOPs are the heart of the Reactive Protocol Engine.  Each SOP maps a
 diagnostic alert condition to a set of physics/behavior modifications
 and a cost footprint.
 
-### 4.1 SOP Structure
+### 5.1 SOP Structure
 
 ```json
 {
@@ -346,7 +708,7 @@ and a cost footprint.
 }
 ```
 
-### 4.2 Trigger Configuration
+### 5.2 Trigger Configuration
 
 The trigger defines **when** the SOP activates:
 
@@ -357,7 +719,7 @@ The trigger defines **when** the SOP activates:
 | `min_zones_affected` | integer ≥ 1 | How many zones must show this level |
 | `min_agents_affected` | integer ≥ 1 | For clinical instruments: how many patients |
 
-### 4.3 Available Modifier Keys
+### 5.3 Available Modifier Keys
 
 | Modifier | Range | Effect |
 |----------|-------|--------|
@@ -370,10 +732,13 @@ The trigger defines **when** the SOP activates:
 | `droplet_scalar` | [0.0, 1.0] | Scale Pathway 2 dose |
 | `hvac_airborne_scalar` | [0.0, 1.0] | Scale Pathway 3 dose |
 | `diagnostic_cadence_multiplier` | ≥ 0 | Multiply testing frequency |
+| `fomite_scalar` | [0.0, 1.0] | Scale Pathway 4 dose |
 | `close_zones` | list of zone IDs | Zones to close (restrict occupancy) |
 | `zone_occupancy_cap` | integer ≥ 0 | Max agents in closed zones |
+| `confine_all_to_quarters` | boolean | Relocate all agents to home zones (full-ship lockdown) |
+| `surface_decontamination_factor` | [0.0, 1.0] | Emergency zone surface mass reduction factor |
 
-### 4.4 Cost Accounting
+### 5.4 Cost Accounting
 
 Each SOP has two cost blocks:
 
@@ -384,7 +749,7 @@ Material items in the `materials` dict MUST match items defined in
 `resource_costs.json`.  If a material is depleted (reaches 0), the
 cost ledger flags a `DEPLETED` warning in the executive summary.
 
-### 4.5 Existing SOPs (Destroyer Baseline)
+### 5.5 Existing SOPs (Destroyer Baseline)
 
 | SOP | Name | Trigger | Modifier |
 |-----|------|---------|----------|
@@ -395,22 +760,24 @@ cost ledger flags a `DEPLETED` warning in the executive summary.
 | SOP-005 | PPE — Full N95 | Wastewater RED | N95 respirators, 80% reduction |
 | SOP-006 | Increased Diagnostics | Clinical RDT AMBER | 2× testing frequency |
 | SOP-007 | Galley Closure | Clinical micro RED | Close Galley + Mess_Hall |
+| SOP-009 | Full-Ship Lockdown | RED stoplight | `confine_all_to_quarters` — relocate all agents to home zones |
+| SOP-010 | Emergency Surface Decon | RED stoplight | `surface_decontamination_factor` — zone mass reduction |
 
 ---
 
-## 5. GIS Spatial Bridge Tool
+## 6. GIS Spatial Bridge Tool
 
 The GIS spatial bridge converts standardized GIS vector files
 (Shapefiles or GeoJSON) into the platform's native JSON layout
 specifications.
 
-### 5.1 Basic Usage
+### 6.1 Basic Usage
 
 ```bash
 python tools/gis_spatial_bridge.py --input data/shp/my_ship.shp --output data/platforms/my_ship/
 ```
 
-### 5.2 Full CLI Reference
+### 6.2 Full CLI Reference
 
 | Flag | Description |
 |------|-------------|
@@ -425,7 +792,7 @@ python tools/gis_spatial_bridge.py --input data/shp/my_ship.shp --output data/pl
 | `--col-deck` | Column name for deck/level |
 | `--col-traffic` | Column name for traffic density |
 
-### 5.3 How It Works
+### 6.3 How It Works
 
 1. **Polygon Ingestion:** Reads polygon features (compartments) via geopandas
 2. **Centroid Computation:** Computes geometric centroids → dashboard `display.x`, `display.y`
@@ -434,7 +801,7 @@ python tools/gis_spatial_bridge.py --input data/shp/my_ship.shp --output data/pl
 5. **HVAC Zone Grouping:** Groups rooms by deck into HVAC zones with per-zone ACH
 6. **Output:** Generates `spatial_layout.json` and `air_flow_paths.json`
 
-### 5.4 GeoJSON/Shapefile Column Requirements
+### 6.4 GeoJSON/Shapefile Column Requirements
 
 The tool uses case-insensitive column matching with fallback candidates:
 
@@ -447,7 +814,7 @@ The tool uses case-insensitive column matching with fallback candidates:
 | Deck | `DECK` | `LEVEL`, `FLOOR` |
 | Traffic | `TRAFFIC` | `DENSITY`, `USAGE` |
 
-### 5.5 Example Workflow
+### 6.5 Example Workflow
 
 ```bash
 # 1. Convert GIS data
@@ -468,20 +835,49 @@ python orchestrator.py --epochs 100 # or override via CLI
 
 ---
 
-## 6. Configuration Sanity Checker
+## 7. Configuration Sanity Checker
 
-The sanity checker scans all configuration files and throws explicit
-errors if the data contains logical or physical contradictions.
+The sanity checker (`tools/sanity_checker.py`) scans all configuration
+files — including `config.yaml` when `--from-config` is passed — and
+throws explicit errors if the data contains logical or physical
+contradictions.
 
-### 6.1 Usage
+### 7.1 Usage
 
 ```bash
+# Validate JSON data files only
 python tools/sanity_checker.py
+
+# Validate JSON data files AND config.yaml (recommended)
+python tools/sanity_checker.py --from-config
+
+# Validate a specific platform directory
+python tools/sanity_checker.py --platform-dir data/platforms/mega_cruise_5000
+
+# Validate specific files manually
+python tools/sanity_checker.py --config-dir data/config \
+                               --platform-dir data/platforms/destroyer_baseline \
+                               --pathogen-file data/pathogens/active_profiles.json
 ```
 
-### 6.2 What It Checks
+### 7.2 What It Checks
 
-The checker uses pydantic models and performs three categories of validation:
+The checker uses pydantic models and performs four categories of validation:
+
+#### Category 0: config.yaml Validation (`--from-config`)
+
+| Check | Rule |
+|-------|------|
+| Agent class fractions | Must sum to 1.0; valid role_groups; no duplicate class_ids |
+| Gender distribution | Must sum to 1.0; non-negative values |
+| Wearable device config | Unique device_ids; channel consistency; noise/dropout bounds; valid class_device_map |
+| Modality probabilities | Sensitivity, specificity, compliance rates ∈ [0.0, 1.0] |
+| HVAC parameters | `filter_efficiency` ∈ [0,1]; non-negative `natural_decay_rate` |
+| EMOD progression | Phase/duration count match; positive durations; sensitivity caps ∈ [0,1] |
+| Escalation thresholds | Non-negative values |
+| FRED compliance | Probability ∈ [0,1]; noise category probabilities valid |
+| Multi-pathogen config | Fraction/multiplier bounds |
+| Microflora config | `graywater_zones` cross-referenced against spatial layout |
 
 #### Category 1: Mathematical Bound Violations
 
@@ -513,7 +909,7 @@ The checker uses pydantic models and performs three categories of validation:
 | Unknown transmission routes | ERROR | Only `direct_contact`, `fomite`, `droplet`, `hvac_airborne` allowed |
 | Material inventory mismatch | WARN | SOP material keys should match `resource_costs.json` items |
 
-### 6.3 Output Format
+### 7.3 Output Format
 
 ```
 ✓  VALIDATION PASSED — all configuration files are structurally sound.
@@ -534,13 +930,13 @@ Exit code: `0` on pass, `1` on failure.
 
 ---
 
-## 7. The Artificial Lab Notebook — Fidelity Tiers
+## 8. The Artificial Lab Notebook — Fidelity Tiers
 
 The lab notebook (`telemetry_buffer/artificial_lab_notebook.json`) is a
 machine-readable diagnostic report structured for CDC/fleet
 biosurveillance portal ingestion.
 
-### 7.1 Tier Comparison
+### 8.1 Tier Comparison
 
 | Aspect | `LOW_FIDELITY` | `MID_FIDELITY` | `HIGH_FIDELITY` |
 |--------|---------------|----------------|-----------------|
@@ -559,7 +955,7 @@ biosurveillance portal ingestion.
 | **Control Line Intensities** | — | — | RDT control/test line measurements |
 | **Host Microflora Variance** | — | Per-agent disruption level | Full kingdom-taxon breakdown |
 
-### 7.2 LOW_FIDELITY — Stoplight Indicators
+### 8.2 LOW_FIDELITY — Stoplight Indicators
 
 Each record contains only a `stoplight` field:
 
@@ -586,7 +982,7 @@ Each record contains only a `stoplight` field:
 - Clinical RDT: positive → RED
 - Microflora: disruption ≥ 0.6 → RED, ≥ 0.3 → AMBER
 
-### 7.3 MID_FIDELITY — Certified Clinical Reports
+### 8.3 MID_FIDELITY — Certified Clinical Reports
 
 CAP-style certified laboratory reports with formal numeric metrics:
 
@@ -607,7 +1003,7 @@ CAP-style certified laboratory reports with formal numeric metrics:
 }
 ```
 
-### 7.4 HIGH_FIDELITY — Raw Synthetic Instrument Telemetry
+### 8.4 HIGH_FIDELITY — Raw Synthetic Instrument Telemetry
 
 Full machine telemetry including raw cycle-by-cycle data:
 
@@ -642,7 +1038,7 @@ For **wastewater sequencing** at HIGH_FIDELITY:
 }
 ```
 
-### 7.5 Selecting Fidelity
+### 8.5 Selecting Fidelity
 
 Edit `data/config/logging_profile.json`:
 
@@ -656,7 +1052,7 @@ All six instruments output at the selected fidelity.  You do not need
 to change any other configuration — the notebook serializer
 automatically adapts record structure per tier.
 
-### 7.6 Top-Level Notebook Blocks
+### 8.6 Top-Level Notebook Blocks
 
 Beyond the `records` array, the notebook includes:
 
@@ -669,7 +1065,7 @@ Beyond the `records` array, the notebook includes:
 
 ---
 
-## 8. The Streamlit Tactical Command Deck
+## 9. The Streamlit Tactical Command Deck
 
 The dashboard (`dashboard.py`) provides four analytical tabs:
 
@@ -707,9 +1103,9 @@ The dashboard (`dashboard.py`) provides four analytical tabs:
 
 ---
 
-## 9. Simulation Output Reference
+## 10. Simulation Output Reference
 
-### 9.1 Executive Summary Box
+### 10.1 Executive Summary Box
 
 At the end of every run, the orchestrator prints a formatted ASCII
 executive summary with three sections:
@@ -720,14 +1116,14 @@ executive summary with three sections:
    intervention), depleted supply warnings
 3. **SOP Activation History** — Which SOPs fired and at what epoch
 
-### 9.2 Live Progress Bar
+### 10.2 Live Progress Bar
 
 During execution, a single-line progress bar shows:
 ```
 ██████████████████████████████ 100.0%  Epoch 24/24  ■ CONFIRMED   SOPs:1  Budget:$26,145
 ```
 
-### 9.3 Output Files
+### 10.3 Output Files
 
 | File | Location | Description |
 |------|----------|-------------|
@@ -738,19 +1134,19 @@ Both files have formal JSON Schema definitions in `schemas/`.
 
 ---
 
-## 10. Contributors & Sibling Repositories
+## 11. Contributors & Sibling Repositories
 
 Crusher-to-the-Bridge is a bridging package that connects work from
 multiple research groups and open-source projects:
 
-### 10.1 Core Platform
+### 11.1 Core Platform
 
 | Role | Contributor |
 |------|------------|
 | **Platform Architect** | Benjamin Kirkup |
 | **Integration & Development** | Devin (Cognition AI) |
 
-### 10.2 Infection Dynamics Engine
+### 11.2 Infection Dynamics Engine
 
 **Repository:** [`infection-dynamics`](https://github.com/KorkinLab/infection-dynamics)
 
@@ -765,7 +1161,7 @@ environments with a host–pathogen agent-based system."
 Provides the dose-response model (`P(inf) = 1 − (1 + dose/β)^{−α}`),
 avgR contact arrays from `Person.java`, and SIR state machine transitions.
 
-### 10.3 py-contam — Indoor Air Quality Modeling
+### 11.3 py-contam — Indoor Air Quality Modeling
 
 **Repository:** [`py-contam`](https://github.com/vonw/py-contam)
 
@@ -775,7 +1171,7 @@ avgR contact arrays from `Person.java`, and SIR state machine transitions.
 Provides the multi-zone mass-balance equation used by `py_contam_bridge.py`
 for inter-zone aerosol transport through HVAC ductwork.
 
-### 10.4 GRUMB — Genome-Resolved Urban Microbiome Biosurveillance
+### 11.4 GRUMB — Genome-Resolved Urban Microbiome Biosurveillance
 
 **Repository:** [`GRUMB`](https://github.com/bckirkup/GRUMB)
 
@@ -786,7 +1182,7 @@ mathematical framework for 4-kingdom CLR-space anomaly detection,
 Dirichlet-multinomial sampling, and contamination risk indexing used by
 the wastewater sequencing instrument.
 
-### 10.5 EMOD-Generic — Epidemiological MODeling
+### 11.5 EMOD-Generic — Epidemiological MODeling
 
 **Repository:** [`EMOD-Generic`](https://github.com/InstituteforDiseaseModeling/EMOD)
 
@@ -796,7 +1192,7 @@ the wastewater sequencing instrument.
 disease simulation.  Provides reference implementations of SIR/SEIR
 compartmental transitions and Euler-multinomial stochastic engines.
 
-### 10.6 FRED — Framework for Reconstructing Epidemiological Dynamics
+### 11.6 FRED — Framework for Reconstructing Epidemiological Dynamics
 
 **Repository:** [`FRED`](https://github.com/PublicHealthDynamicsLab/FRED)
 
