@@ -43,6 +43,20 @@ from orchestrator_epoch import (
 )
 from crusher_labs import load_config
 from telemetry_buffer.schema import make_agent
+from engines.wearable_monitor import (
+    WearableDevice,
+    WearableMonitor,
+    AgentWearableState,
+    build_wearable_device_from_config,
+    build_wearable_monitor_from_config,
+    DEFAULT_CHANNEL_BASELINES,
+    DEFAULT_INFECTION_RESPONSES,
+    DEFAULT_PHASE_BOUNDARIES,
+    _get_infection_phase,
+    _clamp_channel,
+)
+from crusher_labs.modalities.wearable import WearableDataStream
+from engines.infection_dynamics_bridge import KorkinShipEngine
 
 
 # ── SimulationState tests ────────────────────────────────────────────────
@@ -438,3 +452,237 @@ class TestDefaultConstants:
         assert 0.0 < DEFAULT_SURFACE_FRACTION < 1.0
         assert 0.0 < DEFAULT_GREYWATER_FRACTION < 1.0
         assert 0.0 < DEFAULT_GRAYWATER_PROPAGATION_FACTOR < 1.0
+
+
+# ── Wearable monitoring tests ───────────────────────────────────────────
+
+def _build_test_engine() -> KorkinShipEngine:
+    """Build a minimal engine for wearable tests."""
+    cfg = load_config()
+    graph_cfg = cfg.get("ship_graph", {})
+    num_agents = graph_cfg.get("num_agents", 20)
+    roles_cfg = graph_cfg.get("agent_roles", {})
+    pf = roles_cfg.get("passenger_fraction", 0.70)
+    np_ = int(num_agents * pf)
+    nc = num_agents - np_
+    zones = graph_cfg.get("zones", [])
+    engine_zones = [
+        {"name": z["name"], "type": z["type"], "capacity": z.get("traffic", "medium")}
+        for z in zones
+    ]
+    return KorkinShipEngine(
+        num_passengers=np_,
+        num_crew=nc,
+        initial_infected=1,
+        zones=engine_zones,
+        seed=42,
+        agent_classes=graph_cfg.get("agent_classes"),
+        gender_distribution=graph_cfg.get("gender_distribution"),
+    )
+
+
+class TestWearableDevice:
+    def test_device_creation(self) -> None:
+        dev = WearableDevice(
+            device_id="test_ring",
+            channels=["heart_rate", "body_temp"],
+        )
+        assert dev.device_id == "test_ring"
+        assert len(dev.channels) == 2
+
+    def test_device_noise_defaults(self) -> None:
+        dev = WearableDevice(device_id="x", channels=["heart_rate"])
+        noise = dev.get_channel_noise("heart_rate")
+        assert "sigma" in noise
+        assert noise["sigma"] > 0
+
+    def test_device_custom_noise(self) -> None:
+        dev = WearableDevice(
+            device_id="x",
+            channels=["heart_rate"],
+            noise={"heart_rate": {"sigma": 99.0, "drift_rate": 0.0, "dropout_prob": 0.0}},
+        )
+        assert dev.get_channel_noise("heart_rate")["sigma"] == 99.0
+
+    def test_device_to_dict(self) -> None:
+        dev = WearableDevice(device_id="ring", channels=["spo2", "hrv"])
+        d = dev.to_dict()
+        assert d["device_id"] == "ring"
+        assert "spo2" in d["channels"]
+
+    def test_build_from_config(self) -> None:
+        cfg = {
+            "device_id": "test_watch",
+            "channels": ["heart_rate", "spo2"],
+            "noise": [
+                {"channel": "heart_rate", "sigma": 3.0, "drift_rate": 0.1, "dropout_prob": 0.01},
+            ],
+        }
+        dev = build_wearable_device_from_config(cfg)
+        assert dev.device_id == "test_watch"
+        assert dev.get_channel_noise("heart_rate")["sigma"] == 3.0
+        assert dev.channels == ["heart_rate", "spo2"]
+
+
+class TestWearableMonitor:
+    def test_monitor_from_config(self) -> None:
+        cfg = load_config()
+        rng = np.random.default_rng(42)
+        monitor = build_wearable_monitor_from_config(cfg, rng)
+        assert monitor is not None
+        assert "oura_ring" in monitor.devices
+        assert "garmin_watch" in monitor.devices
+
+    def test_disabled_config(self) -> None:
+        cfg = {"wearable_monitoring": {"enabled": False}}
+        assert build_wearable_monitor_from_config(cfg) is None
+
+    def test_absent_config(self) -> None:
+        assert build_wearable_monitor_from_config({}) is None
+
+    def test_initialize_agents(self) -> None:
+        cfg = load_config()
+        rng = np.random.default_rng(42)
+        monitor = build_wearable_monitor_from_config(cfg, rng)
+        assert monitor is not None
+        engine = _build_test_engine()
+        for agent in engine.agents:
+            monitor.initialize_agent(agent)
+        assert len(monitor.agent_states) == len(engine.agents)
+
+    def test_agent_baselines_vary_by_class(self) -> None:
+        cfg = load_config()
+        rng = np.random.default_rng(42)
+        monitor = build_wearable_monitor_from_config(cfg, rng)
+        assert monitor is not None
+        engine = _build_test_engine()
+        for agent in engine.agents:
+            monitor.initialize_agent(agent)
+
+        baselines_by_class: dict[str, list[float]] = {}
+        for state in monitor.agent_states.values():
+            hr = state.baselines.get("heart_rate", 0.0)
+            cls = next(
+                (a.agent_class for a in engine.agents if a.agent_id == state.agent_id),
+                "unknown",
+            )
+            baselines_by_class.setdefault(cls, []).append(hr)
+        assert len(baselines_by_class) > 1
+
+    def test_generate_epoch_data(self) -> None:
+        cfg = load_config()
+        rng = np.random.default_rng(42)
+        monitor = build_wearable_monitor_from_config(cfg, rng)
+        assert monitor is not None
+        engine = _build_test_engine()
+        for agent in engine.agents:
+            monitor.initialize_agent(agent)
+
+        data = monitor.generate_epoch_data(engine.agents, {})
+        assert len(data) == len(engine.agents)
+        for aid, epoch_data in data.items():
+            assert "hourly" in epoch_data
+            assert "summary" in epoch_data
+            assert "device_id" in epoch_data
+            assert "fever" in epoch_data
+            assert "anomaly_count" in epoch_data
+            for ch, readings in epoch_data["hourly"].items():
+                assert len(readings) == 24
+
+    def test_fleet_summary(self) -> None:
+        cfg = load_config()
+        rng = np.random.default_rng(42)
+        monitor = build_wearable_monitor_from_config(cfg, rng)
+        assert monitor is not None
+        engine = _build_test_engine()
+        for agent in engine.agents:
+            monitor.initialize_agent(agent)
+
+        summary = monitor.get_fleet_summary()
+        assert summary["total_monitored"] == len(engine.agents)
+        assert "oura_ring" in summary["devices"]
+        assert "garmin_watch" in summary["devices"]
+
+    def test_class_device_deployment(self) -> None:
+        cfg = load_config()
+        rng = np.random.default_rng(42)
+        monitor = build_wearable_monitor_from_config(cfg, rng)
+        assert monitor is not None
+        engine = _build_test_engine()
+        for agent in engine.agents:
+            monitor.initialize_agent(agent)
+
+        for agent in engine.agents:
+            state = monitor.agent_states.get(agent.agent_id)
+            assert state is not None
+            if agent.agent_class in ("crew_medical", "crew_engineering", "crew_galley"):
+                assert state.device.device_id == "garmin_watch"
+            else:
+                assert state.device.device_id == "oura_ring"
+
+
+class TestWearableDataStream:
+    def test_query_ground_truth(self) -> None:
+        rng = np.random.default_rng(42)
+        modality = WearableDataStream(rng=rng)
+        truth = {"epoch": 0, "agents": [], "spaces": {}}
+        raw_data = {
+            0: {
+                "device_id": "oura_ring",
+                "hourly": {"heart_rate": [70.0] * 24},
+                "summary": {
+                    "heart_rate": {
+                        "mean": 70.0, "min": 65.0, "max": 75.0,
+                        "readings_count": 24, "dropout_count": 0,
+                        "z_score": 0.5, "anomaly": False,
+                    },
+                },
+                "fever": False,
+                "anomaly_channels": [],
+                "anomaly_count": 0,
+            },
+        }
+        result = modality.query_ground_truth(truth, raw_data)
+        assert result["modality"] == "wearable"
+        assert result["epoch"] == 0
+        assert result["fleet_summary"]["total_monitored"] == 1
+        assert 0 in result["agent_results"]
+
+    def test_empty_wearable_data(self) -> None:
+        modality = WearableDataStream()
+        truth = {"epoch": 5}
+        result = modality.query_ground_truth(truth, {})
+        assert result["fleet_summary"]["total_monitored"] == 0
+        assert result["fleet_summary"]["fever_count"] == 0
+
+
+class TestWearableHelpers:
+    def test_infection_phase_early(self) -> None:
+        assert _get_infection_phase(0, DEFAULT_PHASE_BOUNDARIES) == "early"
+        assert _get_infection_phase(2, DEFAULT_PHASE_BOUNDARIES) == "early"
+
+    def test_infection_phase_peak(self) -> None:
+        assert _get_infection_phase(3, DEFAULT_PHASE_BOUNDARIES) == "peak"
+        assert _get_infection_phase(7, DEFAULT_PHASE_BOUNDARIES) == "peak"
+
+    def test_infection_phase_late(self) -> None:
+        assert _get_infection_phase(8, DEFAULT_PHASE_BOUNDARIES) == "late"
+        assert _get_infection_phase(11, DEFAULT_PHASE_BOUNDARIES) == "late"
+
+    def test_infection_phase_recovery(self) -> None:
+        assert _get_infection_phase(12, DEFAULT_PHASE_BOUNDARIES) == "recovery"
+        assert _get_infection_phase(20, DEFAULT_PHASE_BOUNDARIES) == "recovery"
+
+    def test_clamp_heart_rate(self) -> None:
+        assert _clamp_channel("heart_rate", 10.0) == 30.0
+        assert _clamp_channel("heart_rate", 300.0) == 200.0
+        assert _clamp_channel("heart_rate", 80.0) == 80.0
+
+    def test_clamp_spo2(self) -> None:
+        assert _clamp_channel("spo2", 50.0) == 70.0
+        assert _clamp_channel("spo2", 105.0) == 100.0
+        assert _clamp_channel("spo2", 97.0) == 97.0
+
+    def test_clamp_body_temp(self) -> None:
+        assert _clamp_channel("body_temp", 30.0) == 34.0
+        assert _clamp_channel("body_temp", 45.0) == 42.0

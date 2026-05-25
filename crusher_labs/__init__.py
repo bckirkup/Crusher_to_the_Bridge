@@ -21,6 +21,7 @@ from crusher_labs.modalities.syndromic import SyndromicSurveillance
 from crusher_labs.modalities.clinical_rdt import ClinicalRDT
 from crusher_labs.modalities.targeted_pcr import TargetedPCR
 from crusher_labs.modalities.sequencing import MetagenomicSequencing
+from crusher_labs.modalities.wearable import WearableDataStream
 from crusher_labs.observation_core import (
     ContinuousAirSniffer,
     TargetedSurfaceSwab,
@@ -101,6 +102,7 @@ ALL_MODALITIES = [
     ClinicalRDT,
     TargetedPCR,
     MetagenomicSequencing,
+    WearableDataStream,
 ]
 
 ALL_INSTRUMENTS = [
@@ -127,6 +129,7 @@ __all__ = [
     "ArtificialLabNotebook",
     "ProtocolEngine",
     "CostLedger",
+    "WearableDataStream",
     "ALL_MODALITIES",
     "ALL_INSTRUMENTS",
     "build_modalities",

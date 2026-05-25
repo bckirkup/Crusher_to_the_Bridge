@@ -176,3 +176,107 @@ sequencing:
   read_depth: 100000                  # total reads per sample
   pseudocount: 1.0e-6                 # for CLR zero-handling
   cadence: 8                          # baseline; escalation may override
+
+# ── Wearable Physiological Monitoring ────────────────────────
+# Extensible device registry.  Each device defines its sensor
+# channels, noise model, and infection-response profiles.
+# The class_device_map deploys devices to agent classes.
+wearable_monitoring:
+  enabled: true
+
+  # ── Sample Device 1: Oura Ring ───────────────────────────────
+  # Focus on sleep, HRV, body temperature, SpO2.
+  # Lightweight form factor → no continuous HR during activity.
+  devices:
+    - device_id: "oura_ring"
+      channels:
+        - heart_rate
+        - hrv
+        - body_temp
+        - spo2
+        - sleep_score
+        - respiratory_rate
+      noise:
+        - {channel: heart_rate,      sigma: 2.5,  drift_rate: 0.1,  dropout_prob: 0.01}
+        - {channel: hrv,             sigma: 6.0,  drift_rate: 0.5,  dropout_prob: 0.01}
+        - {channel: body_temp,       sigma: 0.10, drift_rate: 0.01, dropout_prob: 0.005}
+        - {channel: spo2,            sigma: 0.4,  drift_rate: 0.02, dropout_prob: 0.008}
+        - {channel: sleep_score,     sigma: 3.0,  drift_rate: 0.0,  dropout_prob: 0.0}
+        - {channel: respiratory_rate, sigma: 1.0, drift_rate: 0.05, dropout_prob: 0.005}
+      infection_responses:
+        - pathogen_category: "enteric_viral"
+          channel_responses:
+            - {channel: heart_rate,       early: 3.0,  peak: 10.0, late: 5.0,  recovery: 1.0}
+            - {channel: body_temp,        early: 0.3,  peak: 1.5,  late: 0.8,  recovery: 0.1}
+            - {channel: spo2,             early: 0.0,  peak: -0.5, late: -0.3, recovery: 0.0}
+            - {channel: respiratory_rate,  early: 0.5, peak: 2.0,  late: 1.0,  recovery: 0.2}
+            - {channel: hrv,              early: -3.0, peak: -15.0, late: -8.0, recovery: -2.0}
+            - {channel: sleep_score,      early: -5.0, peak: -25.0, late: -15.0, recovery: -3.0}
+        - pathogen_category: "respiratory_viral"
+          channel_responses:
+            - {channel: heart_rate,       early: 2.0,  peak: 12.0, late: 6.0,  recovery: 1.5}
+            - {channel: body_temp,        early: 0.4,  peak: 1.8,  late: 1.0,  recovery: 0.2}
+            - {channel: spo2,             early: -0.5, peak: -3.0, late: -1.5, recovery: -0.3}
+            - {channel: respiratory_rate,  early: 1.0, peak: 5.0,  late: 2.5,  recovery: 0.5}
+            - {channel: hrv,              early: -4.0, peak: -18.0, late: -10.0, recovery: -3.0}
+            - {channel: sleep_score,      early: -5.0, peak: -30.0, late: -18.0, recovery: -5.0}
+      phase_boundaries:
+        - {day: 0,  phase: "early"}
+        - {day: 3,  phase: "peak"}
+        - {day: 8,  phase: "late"}
+        - {day: 12, phase: "recovery"}
+
+    # ── Sample Device 2: Garmin Watch ────────────────────────────
+    # Full-spectrum fitness watch: continuous HR, activity, SpO2.
+    # Less precise on temperature (wrist-based) but adds activity tracking.
+    - device_id: "garmin_watch"
+      channels:
+        - heart_rate
+        - hrv
+        - body_temp
+        - spo2
+        - activity_score
+        - respiratory_rate
+      noise:
+        - {channel: heart_rate,      sigma: 1.8,  drift_rate: 0.08, dropout_prob: 0.003}
+        - {channel: hrv,             sigma: 5.0,  drift_rate: 0.4,  dropout_prob: 0.008}
+        - {channel: body_temp,       sigma: 0.15, drift_rate: 0.02, dropout_prob: 0.01}
+        - {channel: spo2,            sigma: 0.5,  drift_rate: 0.03, dropout_prob: 0.005}
+        - {channel: activity_score,  sigma: 4.0,  drift_rate: 0.0,  dropout_prob: 0.0}
+        - {channel: respiratory_rate, sigma: 0.9, drift_rate: 0.04, dropout_prob: 0.004}
+      infection_responses:
+        - pathogen_category: "enteric_viral"
+          channel_responses:
+            - {channel: heart_rate,       early: 3.0,  peak: 10.0, late: 5.0,  recovery: 1.0}
+            - {channel: body_temp,        early: 0.2,  peak: 1.2,  late: 0.6,  recovery: 0.1}
+            - {channel: spo2,             early: 0.0,  peak: -0.5, late: -0.3, recovery: 0.0}
+            - {channel: respiratory_rate,  early: 0.5, peak: 2.0,  late: 1.0,  recovery: 0.2}
+            - {channel: hrv,              early: -3.0, peak: -14.0, late: -7.0, recovery: -2.0}
+            - {channel: activity_score,   early: -5.0, peak: -20.0, late: -10.0, recovery: -2.0}
+        - pathogen_category: "respiratory_viral"
+          channel_responses:
+            - {channel: heart_rate,       early: 2.0,  peak: 12.0, late: 6.0,  recovery: 1.5}
+            - {channel: body_temp,        early: 0.3,  peak: 1.4,  late: 0.8,  recovery: 0.15}
+            - {channel: spo2,             early: -0.5, peak: -3.0, late: -1.5, recovery: -0.3}
+            - {channel: respiratory_rate,  early: 1.0, peak: 5.0,  late: 2.5,  recovery: 0.5}
+            - {channel: hrv,              early: -4.0, peak: -18.0, late: -10.0, recovery: -3.0}
+            - {channel: activity_score,   early: -5.0, peak: -25.0, late: -12.0, recovery: -3.0}
+      phase_boundaries:
+        - {day: 0,  phase: "early"}
+        - {day: 3,  phase: "peak"}
+        - {day: 8,  phase: "late"}
+        - {day: 12, phase: "recovery"}
+
+  # ── Device Deployment Map ──────────────────────────────────────
+  # Maps agent classes → device type.  "default" is the fallback.
+  class_device_map:
+    - {agent_class: "default",            device_id: "oura_ring"}
+    - {agent_class: "crew_medical",       device_id: "garmin_watch"}
+    - {agent_class: "crew_engineering",   device_id: "garmin_watch"}
+    - {agent_class: "crew_galley",        device_id: "garmin_watch"}
+    - {agent_class: "passenger_elderly",  device_id: "oura_ring"}
+
+  # ── Observation layer noise (Crusher Labs) ─────────────────────
+  observation_noise_sigma: 0.5
+  sync_dropout_prob: 0.02
+  anomaly_z_threshold: 2.0

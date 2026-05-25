@@ -57,6 +57,7 @@ def record_epoch(
     clin_rdt_results: dict[int, dict[str, Any]],
     clin_qpcr_results: dict[int, dict[str, Any]],
     clin_microbio_results: dict[int, dict[str, Any]],
+    wearable_result: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Build a complete epoch record for simulation_history.
 
@@ -205,6 +206,17 @@ def record_epoch(
         "clinical_microbiology": clin_microbio_results,
         "logging_fidelity": obs.fidelity_name,
     }
+
+    if wearable_result is not None:
+        fleet = wearable_result.get("fleet_summary", {})
+        epoch_record["wearable_monitoring"] = {
+            "total_monitored": fleet.get("total_monitored", 0),
+            "fever_count": fleet.get("fever_count", 0),
+            "fever_rate": fleet.get("fever_rate", 0.0),
+            "anomaly_count": fleet.get("anomaly_count", 0),
+            "anomaly_rate": fleet.get("anomaly_rate", 0.0),
+            "channel_anomaly_counts": fleet.get("channel_anomaly_counts", {}),
+        }
 
     epoch_record["reactive_protocols"] = {
         "active_protocols": [
