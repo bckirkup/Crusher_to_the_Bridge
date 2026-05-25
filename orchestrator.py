@@ -67,6 +67,7 @@ from orchestrator_init import (
     init_protocol_engine,
 )
 from orchestrator_epoch import (
+    sync_vsp_isolation,
     step_fred_compliance,
     step_mid_cruise_introductions,
     step_infection_progression,
@@ -166,6 +167,7 @@ def run() -> None:
 
         engine.isolated_ids = set(state.isolated_ids)
         engine_payload = engine.step()
+        sync_vsp_isolation(epoch, engine, state)
 
         step_infection_progression(engine, pathogen_profiles)
 

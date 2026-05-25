@@ -33,6 +33,31 @@ from orchestrator_types import (
 )
 
 
+# ── VSP state synchronization ────────────────────────────────────────────
+
+def sync_vsp_isolation(
+    epoch: int,
+    engine: KorkinShipEngine,
+    state: SimulationState,
+) -> None:
+    """Sync VSP-triggered isolation from the engine back to SimulationState.
+
+    The Korkin engine's ``step()`` may independently isolate agents via the
+    VSP 3% threshold.  Those IDs must be merged into SimulationState so that
+    downstream functions (telemetry, quarantine, recording) see a consistent
+    isolation set.
+    """
+    vsp_new = engine.isolated_ids - state.isolated_ids
+    if vsp_new:
+        state.isolated_ids.update(vsp_new)
+        for aid in sorted(vsp_new):
+            state.compliance_log.append({
+                "epoch": epoch,
+                "agent_id": aid,
+                "action": "vsp_isolation",
+            })
+
+
 # ── FRED compliance ──────────────────────────────────────────────────────
 
 def step_fred_compliance(
