@@ -32,6 +32,13 @@ import os
 import hashlib
 from typing import Any
 
+from crusher_labs.stoplight import (
+    stoplight_from_ct,
+    stoplight_from_anomaly,
+    stoplight_from_rdt,
+    stoplight_from_disruption,
+)
+
 
 # ── Fidelity model ───────────────────────────────────────────────────────
 
@@ -88,36 +95,11 @@ def _sample_id(epoch: int, zone: str, assay: str) -> str:
     return f"CLN-{epoch:03d}-{zone[:6].upper()}-{assay[:4].upper()}-{h}"
 
 
-# ── Stoplight classification (LOW_FIDELITY) ─────────────────────────────
-
-def _stoplight_from_ct(ct: float | None, detected: bool) -> str:
-    if not detected or ct is None:
-        return "GREEN"
-    if ct <= 30:
-        return "RED"
-    if ct <= 35:
-        return "AMBER"
-    return "GREEN"
-
-
-def _stoplight_from_anomaly(anomaly_score: float) -> str:
-    if anomaly_score >= 0.7:
-        return "RED"
-    if anomaly_score >= 0.3:
-        return "AMBER"
-    return "GREEN"
-
-
-def _stoplight_from_rdt(positive: bool) -> str:
-    return "RED" if positive else "GREEN"
-
-
-def _stoplight_from_disruption(level: float) -> str:
-    if level >= 0.6:
-        return "RED"
-    if level >= 0.3:
-        return "AMBER"
-    return "GREEN"
+# Stoplight functions imported from crusher_labs.stoplight
+_stoplight_from_ct = stoplight_from_ct
+_stoplight_from_anomaly = stoplight_from_anomaly
+_stoplight_from_rdt = stoplight_from_rdt
+_stoplight_from_disruption = stoplight_from_disruption
 
 
 # ── Record builders ──────────────────────────────────────────────────────

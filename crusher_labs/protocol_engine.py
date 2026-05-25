@@ -19,46 +19,13 @@ import math
 from typing import Any
 
 from crusher_labs.cost_ledger import CostLedger, CATEGORY_INTERVENTION, CATEGORY_SURVEILLANCE
-
-
-# ── Stoplight derivation (mirrors lab_notebook.py thresholds) ────────────
-
-STOPLIGHT_ORDER = {"GREEN": 0, "AMBER": 1, "RED": 2}
-
-
-def _stoplight_from_ct(ct: float | None, detected: bool) -> str:
-    if not detected or ct is None:
-        return "GREEN"
-    if ct <= 30:
-        return "RED"
-    if ct <= 35:
-        return "AMBER"
-    return "GREEN"
-
-
-def _stoplight_from_anomaly(anomaly_score: float) -> str:
-    if anomaly_score >= 0.7:
-        return "RED"
-    if anomaly_score >= 0.3:
-        return "AMBER"
-    return "GREEN"
-
-
-def _stoplight_from_rdt(positive: bool) -> str:
-    return "RED" if positive else "GREEN"
-
-
-def _stoplight_from_disruption(level: float) -> str:
-    if level >= 0.6:
-        return "RED"
-    if level >= 0.3:
-        return "AMBER"
-    return "GREEN"
-
-
-def _meets_threshold(actual: str, required: str) -> bool:
-    """Return True if *actual* stoplight level meets or exceeds *required*."""
-    return STOPLIGHT_ORDER.get(actual, 0) >= STOPLIGHT_ORDER.get(required, 0)
+from crusher_labs.stoplight import (
+    stoplight_from_ct,
+    stoplight_from_anomaly,
+    stoplight_from_rdt,
+    stoplight_from_disruption,
+    meets_threshold,
+)
 
 
 # ── Compute stoplight arrays from instrument results ─────────────────────
@@ -89,35 +56,35 @@ def compute_stoplights(
     # Environmental instruments (keyed by zone)
     air_lights: dict[str, str] = {}
     for zone, data in air_results.items():
-        air_lights[zone] = _stoplight_from_ct(data.get("ct_value"), data.get("detected", False))
+        air_lights[zone] = stoplight_from_ct(data.get("ct_value"), data.get("detected", False))
     lights["continuous_air_sampler"] = air_lights
 
     swab_lights: dict[str, str] = {}
     for zone, data in swab_results.items():
-        swab_lights[zone] = _stoplight_from_ct(data.get("ct_value"), data.get("detected", False))
+        swab_lights[zone] = stoplight_from_ct(data.get("ct_value"), data.get("detected", False))
     lights["targeted_surface_swab"] = swab_lights
 
     ww_lights: dict[str, str] = {}
     for zone, data in ww_results.items():
         anomaly = data.get("anomaly_score", 0.0)
-        ww_lights[zone] = _stoplight_from_anomaly(anomaly)
+        ww_lights[zone] = stoplight_from_anomaly(anomaly)
     lights["wastewater_sequencing_grid"] = ww_lights
 
     # Clinical instruments (keyed by agent id string)
     rdt_lights: dict[str, str] = {}
     for aid, data in clin_rdt_results.items():
-        rdt_lights[str(aid)] = _stoplight_from_rdt(data.get("positive", False))
+        rdt_lights[str(aid)] = stoplight_from_rdt(data.get("positive", False))
     lights["clinical_rdt"] = rdt_lights
 
     qpcr_lights: dict[str, str] = {}
     for aid, data in clin_qpcr_results.items():
-        qpcr_lights[str(aid)] = _stoplight_from_ct(data.get("ct_value"), data.get("detected", False))
+        qpcr_lights[str(aid)] = stoplight_from_ct(data.get("ct_value"), data.get("detected", False))
     lights["clinical_qpcr"] = qpcr_lights
 
     microbio_lights: dict[str, str] = {}
     for aid, data in clin_microbio_results.items():
         disruption = data.get("microflora_disruption_level", 0.0)
-        microbio_lights[str(aid)] = _stoplight_from_disruption(disruption)
+        microbio_lights[str(aid)] = stoplight_from_disruption(disruption)
     lights["clinical_microbiology"] = microbio_lights
 
     return lights
@@ -150,7 +117,7 @@ class StandingProtocol:
         # Count how many zones/agents meet the threshold
         matching = sum(
             1 for light in instrument_lights.values()
-            if _meets_threshold(light, required_level)
+            if meets_threshold(light, required_level)
         )
 
         min_zones = self.trigger.get("min_zones_affected", 0)
