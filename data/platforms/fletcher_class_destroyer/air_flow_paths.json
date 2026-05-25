@@ -1,0 +1,285 @@
+{
+  "platform": "fletcher_class_destroyer",
+  "description": "WWII Fletcher-class destroyer ventilation network. Forced-draft supply ventilation only, no filtration, no recirculation. Boiler rooms maintained positive pressure for combustion air. Extreme inter-compartment airflow through open hatches and ladder wells during non-battle conditions.",
+  "hvac_zones": [
+    {
+      "id": "HVAC_Superstructure",
+      "rooms": [
+        "Bridge",
+        "CIC",
+        "Radio_Room",
+        "Gun_Mount_51"
+      ],
+      "ach": 6.0,
+      "filter_efficiency": 0.0,
+      "filter_type": "none",
+      "description": "Superstructure supply ventilation. Unfiltered outside air via mushroom vents and forced-draft blowers. No recirculation."
+    },
+    {
+      "id": "HVAC_Main_Deck_Fwd",
+      "rooms": [
+        "Officers_Quarters",
+        "Wardroom",
+        "Sickbay",
+        "CPO_Quarters"
+      ],
+      "ach": 5.0,
+      "filter_efficiency": 0.0,
+      "filter_type": "none",
+      "description": "Forward main deck ventilation. Supply blowers draw outside air through vent trunks. No filtration."
+    },
+    {
+      "id": "HVAC_Main_Deck_Mid",
+      "rooms": [
+        "Galley",
+        "Torpedo_Mount_Midships",
+        "Passageway_Main"
+      ],
+      "ach": 8.0,
+      "filter_efficiency": 0.0,
+      "filter_type": "none",
+      "description": "Midships main deck ventilation. Higher ACH in galley for cooking exhaust. Torpedo mount partially open to weather."
+    },
+    {
+      "id": "HVAC_Berthing",
+      "rooms": [
+        "Enlisted_Berthing_Fwd",
+        "Enlisted_Berthing_Aft",
+        "Mess_Deck"
+      ],
+      "ach": 4.0,
+      "filter_efficiency": 0.0,
+      "filter_type": "none",
+      "description": "Below-deck berthing and mess ventilation. Chronically inadequate in tropical waters. Supply blowers only, no exhaust fans in many compartments."
+    },
+    {
+      "id": "HVAC_Boiler_Rooms",
+      "rooms": [
+        "Boiler_Room_1",
+        "Boiler_Room_2"
+      ],
+      "ach": 25.0,
+      "filter_efficiency": 0.0,
+      "filter_type": "none",
+      "description": "Forced-draft boiler room ventilation. Massive airflow for combustion supply. Positive pressure maintained. Air drawn from topside and exhausted through stacks."
+    },
+    {
+      "id": "HVAC_Engine_Rooms",
+      "rooms": [
+        "Engine_Room_Fwd",
+        "Engine_Room_Aft"
+      ],
+      "ach": 18.0,
+      "filter_efficiency": 0.0,
+      "filter_type": "none",
+      "description": "Engine room forced ventilation. High ACH for heat removal from turbines and reduction gears."
+    },
+    {
+      "id": "HVAC_Magazines",
+      "rooms": [
+        "Magazine_Fwd",
+        "Magazine_Aft"
+      ],
+      "ach": 8.0,
+      "filter_efficiency": 0.0,
+      "filter_type": "none",
+      "description": "Magazine ventilation for ordnance temperature control. Supply blowers with some temperature monitoring."
+    }
+  ],
+  "cross_zone_links": [
+    {
+      "from": "HVAC_Superstructure",
+      "to": "HVAC_Main_Deck_Fwd",
+      "flow_rate_m3h": 120,
+      "path": "ladder_well_bridge",
+      "is_hvac_ducted": false,
+      "description": "Passive airflow down from superstructure through bridge access ladder. Frequently open during normal operations."
+    },
+    {
+      "from": "HVAC_Main_Deck_Fwd",
+      "to": "HVAC_Berthing",
+      "flow_rate_m3h": 200,
+      "path": "ladder_well_fwd",
+      "is_hvac_ducted": false,
+      "description": "Forward ladder well connecting main deck to second deck berthing. Major cross-contamination pathway."
+    },
+    {
+      "from": "HVAC_Main_Deck_Mid",
+      "to": "HVAC_Berthing",
+      "flow_rate_m3h": 250,
+      "path": "ladder_well_midships",
+      "is_hvac_ducted": false,
+      "description": "Midships ladder well. High traffic route between mess/galley and berthing. Significant bidirectional airflow."
+    },
+    {
+      "from": "HVAC_Main_Deck_Mid",
+      "to": "HVAC_Main_Deck_Fwd",
+      "flow_rate_m3h": 100,
+      "path": "main_deck_passageway",
+      "is_hvac_ducted": false,
+      "description": "Fore-aft airflow through main deck passageway. Narrow corridor acts as duct."
+    },
+    {
+      "from": "HVAC_Berthing",
+      "to": "HVAC_Boiler_Rooms",
+      "flow_rate_m3h": 150,
+      "path": "access_trunk_boilers",
+      "is_hvac_ducted": false,
+      "description": "Access trunk from second deck to boiler rooms. Boiler room positive pressure normally pushes air upward."
+    },
+    {
+      "from": "HVAC_Berthing",
+      "to": "HVAC_Engine_Rooms",
+      "flow_rate_m3h": 100,
+      "path": "access_trunk_engines",
+      "is_hvac_ducted": false,
+      "description": "Access trunk from berthing level to engine rooms."
+    },
+    {
+      "from": "HVAC_Boiler_Rooms",
+      "to": "HVAC_Engine_Rooms",
+      "flow_rate_m3h": 80,
+      "path": "engineering_passageway",
+      "is_hvac_ducted": false,
+      "description": "Cross-connection between boiler and engine rooms through watertight doors (normally open at sea)."
+    },
+    {
+      "from": "HVAC_Main_Deck_Fwd",
+      "to": "HVAC_Magazines",
+      "flow_rate_m3h": 40,
+      "path": "magazine_access_trunk_fwd",
+      "is_hvac_ducted": true,
+      "description": "Forward magazine ventilation trunk. Ducted supply for ordnance temperature control."
+    },
+    {
+      "from": "HVAC_Berthing",
+      "to": "HVAC_Magazines",
+      "flow_rate_m3h": 30,
+      "path": "magazine_access_trunk_aft",
+      "is_hvac_ducted": true,
+      "description": "Aft magazine ventilation trunk."
+    }
+  ],
+  "adjacency": [
+    {
+      "from": "Bridge",
+      "to": "CIC",
+      "type": "ladder_well"
+    },
+    {
+      "from": "CIC",
+      "to": "Radio_Room",
+      "type": "passageway"
+    },
+    {
+      "from": "Bridge",
+      "to": "Gun_Mount_51",
+      "type": "passageway"
+    },
+    {
+      "from": "Officers_Quarters",
+      "to": "Wardroom",
+      "type": "passageway"
+    },
+    {
+      "from": "Officers_Quarters",
+      "to": "Sickbay",
+      "type": "passageway"
+    },
+    {
+      "from": "Wardroom",
+      "to": "Galley",
+      "type": "service_hatch"
+    },
+    {
+      "from": "CPO_Quarters",
+      "to": "Passageway_Main",
+      "type": "passageway"
+    },
+    {
+      "from": "Galley",
+      "to": "Mess_Deck",
+      "type": "service_hatch"
+    },
+    {
+      "from": "Galley",
+      "to": "Passageway_Main",
+      "type": "passageway"
+    },
+    {
+      "from": "Passageway_Main",
+      "to": "Torpedo_Mount_Midships",
+      "type": "passageway"
+    },
+    {
+      "from": "Sickbay",
+      "to": "Passageway_Main",
+      "type": "passageway"
+    },
+    {
+      "from": "Enlisted_Berthing_Fwd",
+      "to": "Mess_Deck",
+      "type": "passageway"
+    },
+    {
+      "from": "Enlisted_Berthing_Aft",
+      "to": "Mess_Deck",
+      "type": "passageway"
+    },
+    {
+      "from": "Enlisted_Berthing_Fwd",
+      "to": "Enlisted_Berthing_Aft",
+      "type": "passageway"
+    },
+    {
+      "from": "Mess_Deck",
+      "to": "Passageway_Main",
+      "type": "ladder_well"
+    },
+    {
+      "from": "Enlisted_Berthing_Fwd",
+      "to": "Magazine_Fwd",
+      "type": "sealed_door"
+    },
+    {
+      "from": "Enlisted_Berthing_Aft",
+      "to": "Magazine_Aft",
+      "type": "sealed_door"
+    },
+    {
+      "from": "Enlisted_Berthing_Fwd",
+      "to": "Boiler_Room_1",
+      "type": "ladder_well"
+    },
+    {
+      "from": "Enlisted_Berthing_Aft",
+      "to": "Engine_Room_Aft",
+      "type": "ladder_well"
+    },
+    {
+      "from": "Boiler_Room_1",
+      "to": "Boiler_Room_2",
+      "type": "passageway"
+    },
+    {
+      "from": "Boiler_Room_2",
+      "to": "Engine_Room_Fwd",
+      "type": "passageway"
+    },
+    {
+      "from": "Engine_Room_Fwd",
+      "to": "Engine_Room_Aft",
+      "type": "passageway"
+    },
+    {
+      "from": "CIC",
+      "to": "Officers_Quarters",
+      "type": "ladder_well"
+    },
+    {
+      "from": "Radio_Room",
+      "to": "CIC",
+      "type": "passageway"
+    }
+  ]
+}

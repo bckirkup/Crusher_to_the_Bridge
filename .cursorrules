@@ -43,12 +43,22 @@ data/
   config/
     protocols.json                 — 7 standing operating protocols (SOPs)
     resource_costs.json            — Budgets, material inventory, per-test costs
+    edison_resource_costs.json     — Expanded costs with sequencing + culture pricing
     logging_profile.json           — Fidelity tier selection + QC parameters
   pathogens/
-    active_profiles.json           — Multi-pathogen definitions (concurrent)
-  platforms/destroyer_baseline/
-    spatial_layout.json            — Zone nodes with display coordinates
-    air_flow_paths.json            — HVAC zones, cross-zone links, adjacency graph
+    active_profiles.json           — Multi-pathogen definitions (default 2-pathogen)
+    edison_10pathogen_profiles.json — 10 QMRA-sourced pathogen profiles (Edison)
+  microbiome_profiles/
+    coastal_port_profile.json      — Near-shore 4-kingdom baseline (61 taxa)
+    open_ocean_profile.json        — Off-shore oligotrophic baseline (52 taxa)
+    zone_type_modifiers.json       — Per-zone-type microbiome modifiers
+  platforms/                       — 6 pre-built vessel platforms:
+    destroyer_baseline/            — Default baseline destroyer (11 zones)
+    fletcher_class_destroyer/      — WWII DD (20 zones, poor ventilation)
+    legend_class_nsc/              — USCG cutter (18 zones, NBC filtration)
+    san_antonio_class_lpd/         — Troop transport (22 zones, high density)
+    expedition_cruise_300/         — Small cruise (25 zones)
+    mega_cruise_5000/              — Mega cruise (67 zones, complex HVAC)
   shp/
     test_destroyer_deck.geojson    — Test GIS data for gis_spatial_bridge.py
 telemetry_buffer/
@@ -57,6 +67,8 @@ telemetry_buffer/
 schemas/                           — JSON Schema (draft 2020-12) for all data contracts
 docs/
   ai_handshake.md                  — Full AI context framework and architecture manifest
+  pathogen_notes.md                — Literature justifications for pathogen dose-response params
+  pricing_notes.md                 — ROM pricing sources for resource_costs configurations
 OPERATORS_MANUAL.md                — Human operator's manual
 ```
 

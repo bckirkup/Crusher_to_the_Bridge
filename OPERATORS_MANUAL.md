@@ -118,6 +118,98 @@ on diagnostic conditions.  There are no hardcoded epoch schedules.
 
 ## 3. Configuration Files Reference
 
+### 3.0 Pre-Built Configurations (Edison Science)
+
+A library of ready-to-use configuration files is included in the
+repository, contributed by Edison Science.  These provide a range of
+vessel platforms, pathogen profiles, microbiome baselines, and costing
+models so that users can run meaningful simulations without creating
+every configuration from scratch.
+
+#### Available Vessel Platforms (`data/platforms/`)
+
+| Directory | Vessel Type | Personnel | Zones | Key Feature |
+|-----------|-------------|-----------|-------|-------------|
+| `destroyer_baseline` | Generic baseline destroyer | ~300 crew | 11 | Default platform; minimal HVAC topology |
+| `fletcher_class_destroyer` | WWII Fletcher-class DD | ~300 crew | 20 | Cramped, poor ventilation, hot-bunking |
+| `legend_class_nsc` | USCG Legend-class cutter | ~150 crew | 18 | Modern HVAC with NBC filtration |
+| `san_antonio_class_lpd` | San Antonio-class LPD | ~1,160 total | 22 | Extreme density in troop berthing |
+| `expedition_cruise_300` | Small expedition cruise | ~450 total | 25 | Intimate scale, 6–8 decks |
+| `mega_cruise_5000` | Mega cruise ship | ~7,000 total | 67 | Complex HVAC, 16+ decks, multiple dining venues |
+
+Each directory contains `spatial_layout.json` and `air_flow_paths.json`.
+To switch platforms, update the graph paths in `config.yaml`:
+
+```yaml
+graph:
+  spatial_layout: "data/platforms/mega_cruise_5000/spatial_layout.json"
+  air_flow_paths: "data/platforms/mega_cruise_5000/air_flow_paths.json"
+```
+
+> **Note:** The default `protocols.json` contains zone-closure SOPs
+> (e.g., SOP-007 closing `Galley` and `Mess_Hall`) that reference zones
+> in the `destroyer_baseline` platform.  When switching to a different
+> platform, update `close_zones` targets in `protocols.json` to match
+> the new platform's zone names, or remove zone-closure SOPs.
+> Run `python tools/sanity_checker.py --platform-dir data/platforms/<your_platform>`
+> to verify referential integrity.
+
+#### Expanded Pathogen Library (`data/pathogens/edison_10pathogen_profiles.json`)
+
+A 10-pathogen profile set with literature-grounded dose-response
+parameters, shedding kinetics, and microflora disruption signatures:
+
+| Pathogen | Category | Key Transmission | Dose-Response Source |
+|----------|----------|-----------------|---------------------|
+| Norovirus GII.4 | enteric_viral | fomite, droplet | Teunis et al. (beta-Poisson) |
+| SARS-CoV-2 | respiratory_viral | airborne, droplet | Watanabe et al. (exponential) |
+| Influenza A | respiratory_viral | droplet, airborne | Alford 1966 (exponential) |
+| Measles | respiratory_viral | hvac_airborne | Riley-Wells airborne model |
+| Legionella pneumophila | bacterial_waterborne | hvac_airborne | Armstrong & Haas (exponential) |
+| Vibrio cholerae/parahaemolyticus | enteric_bacterial | food, water | Hornick et al. (beta-Poisson) |
+| Campylobacter jejuni | enteric_bacterial | food | Black et al. (beta-Poisson) |
+| C. difficile | enteric_bacterial | fomite, spore | QMRA estimates |
+| Andes hantavirus | respiratory_viral | aerosol, direct_contact | Hamster LD50 proxy |
+| Ebola virus | filovirus | direct_contact, fomite | Watanabe et al. (exponential) |
+
+To use this profile set instead of the default 2-pathogen baseline:
+
+```bash
+cp data/pathogens/edison_10pathogen_profiles.json data/pathogens/active_profiles.json
+python tools/sanity_checker.py
+```
+
+See `docs/pathogen_notes.md` for detailed literature justifications.
+
+#### Microbiome Baseline Profiles (`data/microbiome_profiles/`)
+
+Multi-kingdom (Bacteria, Archaea, Fungi, Virus) relative-abundance
+profiles for seeding the GRUMB environmental microbiome simulation:
+
+| File | Description |
+|------|-------------|
+| `coastal_port_profile.json` | Near-shore baseline (61 taxa). Enriched in Vibrio, Enterobacteriaceae, coastal phytoplankton. Based on Tara Oceans, ICOMM, and harbor studies. |
+| `open_ocean_profile.json` | Off-shore oligotrophic baseline (52 taxa). Dominated by Prochlorococcus, SAR11/Pelagibacter, marine phages. Based on Tara Oceans, HOT/BATS. |
+| `zone_type_modifiers.json` | Ship zone-type modifiers (Dining, Room, Free, Engine Room, Galley, Medical) that skew baselines based on built-environment microbiome literature. |
+
+#### Expanded Resource Costs (`data/config/edison_resource_costs.json`)
+
+An expanded cost model with literature-sourced ROM (rough order of
+magnitude) pricing for sequencing platforms, bioaerosol samplers, and
+culture-based diagnostics.  Adds material inventory items for
+`culture_media_sets`, `air_sniffer_cartridges`, `wastewater_collection_kits`,
+`library_prep_kits`, and `sequencing_flow_cells`.
+
+See `docs/pricing_notes.md` for sourcing details.
+
+> **Note:** The expanded cost file uses different per-test-cost keys
+> (`surface_swab_culture`, `surface_swab_pcr`, `wastewater_sequencing_panel`,
+> `metagenomic_shotgun_sequencing`, `amplicon_16s_sequencing`) than the
+> default `resource_costs.json`.  Adopting it may require updating code
+> references in the orchestrator and observation engine.
+
+---
+
 ### 3.1 Pathogen Profiles (`data/pathogens/active_profiles.json`)
 
 Defines one or more pathogens that run concurrently with independent mass

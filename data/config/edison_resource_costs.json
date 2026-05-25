@@ -1,0 +1,181 @@
+{
+  "description": "Resource cost definitions for the Cost-Accounting Ledger. Defines unit costs, starting budgets, material inventories, and per-test costs. Prices are rough-order-of-magnitude (ROM) estimates in 2024-2025 USD based on public health and diagnostic pricing.",
+  "budgets": {
+    "financial_usd": {
+      "starting_balance": 75000.0,
+      "description": "Total USD budget available for the simulation run. Increased from $50k to accommodate sequencing costs."
+    },
+    "labor_person_hours": {
+      "starting_capacity": 480.0,
+      "description": "Total crew person-hours available (20 crew x 24 hours). Depleted by surveillance and intervention labor."
+    }
+  },
+  "material_inventory": {
+    "surgical_masks": {
+      "starting_count": 500,
+      "unit_cost_usd": 0.5,
+      "description": "Standard surgical face masks."
+    },
+    "n95_respirators": {
+      "starting_count": 100,
+      "unit_cost_usd": 3.5,
+      "description": "N95 particulate respirators."
+    },
+    "face_shields": {
+      "starting_count": 50,
+      "unit_cost_usd": 5.0,
+      "description": "Full-face protective shields."
+    },
+    "gloves_pairs": {
+      "starting_count": 1000,
+      "unit_cost_usd": 0.25,
+      "description": "Disposable nitrile glove pairs."
+    },
+    "sanitizer_units": {
+      "starting_count": 200,
+      "unit_cost_usd": 8.0,
+      "description": "Industrial sanitizer spray bottles/units."
+    },
+    "rdt_kits": {
+      "starting_count": 200,
+      "unit_cost_usd": 10.0,
+      "description": "Rapid diagnostic test kits (lateral flow antigen). ROM $5-15/test depending on pathogen target; $3-4 bulk COVID Ag, $10-15 multi-pathogen panels."
+    },
+    "pcr_kits": {
+      "starting_count": 100,
+      "unit_cost_usd": 45.0,
+      "description": "qPCR reagent kits for clinical and environmental testing. Covers extraction + RT-qPCR master mix + primers/probes per reaction. ROM $30-60/rxn all-in for clinical-grade assays."
+    },
+    "swab_kits": {
+      "starting_count": 300,
+      "unit_cost_usd": 2.0,
+      "description": "Surface and patient swab collection kits (swab + transport medium + tube)."
+    },
+    "hvac_filters": {
+      "starting_count": 20,
+      "unit_cost_usd": 75.0,
+      "description": "HVAC replacement filter units (MERV-13/16/HEPA)."
+    },
+    "meal_trays": {
+      "starting_count": 500,
+      "unit_cost_usd": 1.5,
+      "description": "Individual meal trays for isolation feeding."
+    },
+    "culture_media_sets": {
+      "starting_count": 100,
+      "unit_cost_usd": 8.0,
+      "description": "Clinical microbiology culture media set (blood agar plate + MacConkey or chocolate agar + broth). ROM $6-10/set based on BD BACTEC vials (~$8/ea) and agar plates (~$0.60-1.00/plate)."
+    },
+    "air_sniffer_cartridges": {
+      "starting_count": 30,
+      "unit_cost_usd": 60.0,
+      "description": "Bioaerosol sampler filter cartridges (e.g., Thermo AerosolSense cartridge). ROM $50-75/cartridge per Thermo Fisher published pricing."
+    },
+    "wastewater_collection_kits": {
+      "starting_count": 50,
+      "unit_cost_usd": 15.0,
+      "description": "Wastewater composite sample collection kits (autosampler bottles, preservative, shipping container). ROM $10-20/kit."
+    },
+    "library_prep_kits": {
+      "starting_count": 10,
+      "unit_cost_usd": 25.0,
+      "description": "NGS library preparation reagents per reaction (e.g., Illumina DNA Prep ~$23/rxn from 96-rxn kit at ~$2,200; Zymo Quick-16S Plus similar range). Covers tagmentation/amplification reagents and index adapters."
+    },
+    "sequencing_flow_cells": {
+      "starting_count": 3,
+      "unit_cost_usd": 900.0,
+      "description": "Sequencing flow cells. ROM covers ONT MinION R10.4.1 ($630-840/cell) or Illumina MiSeq v3 reagent kit (~$2,133/run for ~25M clusters). Blended ROM ~$900 for shipboard MinION/portable use."
+    }
+  },
+  "baseline_surveillance_costs_per_epoch": {
+    "description": "Fixed surveillance costs incurred every epoch regardless of protocol activation. Covers routine environmental swab + qPCR check.",
+    "financial_usd": 55.0,
+    "materials": {
+      "swab_kits": 1,
+      "pcr_kits": 1
+    },
+    "labor_person_hours": 2.0,
+    "category": "surveillance"
+  },
+  "per_test_costs": {
+    "clinical_rdt": {
+      "financial_usd": 12.0,
+      "materials": {
+        "rdt_kits": 1
+      },
+      "labor_person_hours": 0.25,
+      "description": "Point-of-care rapid diagnostic test (lateral flow antigen). ROM $5-15 per test. Includes kit cost + minimal technician time (~15 min). Sources: iHealth bulk COVID Ag ~$3-4/test; multi-pathogen RDTs $10-15."
+    },
+    "clinical_qpcr": {
+      "financial_usd": 50.0,
+      "materials": {
+        "pcr_kits": 1,
+        "swab_kits": 1
+      },
+      "labor_person_hours": 1.0,
+      "description": "Clinical qPCR assay including sample collection, nucleic acid extraction, and RT-qPCR. ROM $40-100 per test all-in. Sources: PANDORA RT-qPCR kit analysis; hospital qPCR billing ~$50-100; reagent cost per rxn ~$3-5 plus extraction ~$5-10 plus controls/consumables."
+    },
+    "clinical_microbiology": {
+      "financial_usd": 35.0,
+      "materials": {
+        "swab_kits": 1,
+        "culture_media_sets": 1
+      },
+      "labor_person_hours": 1.5,
+      "description": "Clinical microbiology culture including inoculation, incubation (24-48h), colony identification, and basic susceptibility. ROM $30-70 per test. Sources: Veterinary/clinical fee schedules (blood culture & susceptibility ~$70; body fluid culture ~$43); consumables ~$10-15; labor-intensive due to manual reads."
+    },
+    "surface_swab_culture": {
+      "financial_usd": 10.0,
+      "materials": {
+        "swab_kits": 1
+      },
+      "labor_person_hours": 0.25,
+      "description": "Environmental surface swab with culture-based analysis. Quick collection, minimal lab processing. ROM $8-15."
+    },
+    "surface_swab_pcr": {
+      "financial_usd": 55.0,
+      "materials": {
+        "swab_kits": 1,
+        "pcr_kits": 1
+      },
+      "labor_person_hours": 0.75,
+      "description": "Targeted environmental surface swab with qPCR analysis. Combines swab collection with molecular detection for specific pathogens. ROM $40-70 per test."
+    },
+    "air_sniffer_sample": {
+      "financial_usd": 75.0,
+      "materials": {
+        "air_sniffer_cartridges": 1
+      },
+      "labor_person_hours": 0.5,
+      "description": "Continuous bioaerosol sampler filter collection and downstream qPCR analysis. ROM $50-100 per sample. Cartridge ~$50-75 (Thermo AerosolSense); PCR analysis adds ~$15-25; labor for cartridge swap + PCR. Sampler unit cost ($4,995) amortized separately."
+    },
+    "wastewater_sequencing_panel": {
+      "financial_usd": 250.0,
+      "materials": {
+        "wastewater_collection_kits": 1,
+        "library_prep_kits": 1,
+        "pcr_kits": 1
+      },
+      "labor_person_hours": 3.0,
+      "description": "Wastewater-based epidemiology sequencing panel targeting viral/pathogen markers (e.g., Illumina Viral Surveillance Panel). Includes sample concentration, nucleic acid extraction, targeted enrichment, and sequencing. ROM $150-500/sample. Sources: Biobot contracted rate ~$120-1,200; Illumina VSP kit + MiSeq run amortized ~$200-400/sample."
+    },
+    "metagenomic_shotgun_sequencing": {
+      "financial_usd": 300.0,
+      "materials": {
+        "library_prep_kits": 1,
+        "sequencing_flow_cells": 0.1
+      },
+      "labor_person_hours": 4.0,
+      "description": "Full metagenomic shotgun sequencing per sample (Illumina or Nanopore). Includes DNA extraction, library preparation, sequencing (~5-10 Gb/sample), and basic bioinformatics. ROM $100-475/sample. Sources: SeqCenter shotgun metagenome $145-475; Psomagen FAST-Meta $69-119; Novogene from $30 (bulk 50+). Self-run costs: library prep ~$25 + sequencing ~$40-75 (NovaSeq X at $7.51/Gb) + labor. Flow cell fraction reflects multiplexing ~10 samples/cell."
+    },
+    "amplicon_16s_sequencing": {
+      "financial_usd": 65.0,
+      "materials": {
+        "library_prep_kits": 1,
+        "sequencing_flow_cells": 0.04
+      },
+      "labor_person_hours": 2.5,
+      "description": "16S rRNA amplicon sequencing per sample. Includes PCR amplification of V3/V4 region, library prep, sequencing (~20-100k reads/sample), and taxonomic classification. ROM $45-100/sample. Sources: SeqCenter 16S $45-75/sample; typical core facilities $50-100. Flow cell fraction reflects multiplexing ~25 samples/MiSeq run."
+    }
+  }
+}

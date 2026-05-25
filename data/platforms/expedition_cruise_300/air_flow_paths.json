@@ -1,0 +1,278 @@
+{
+  "platform": "expedition_cruise_300",
+  "description": "HVAC zone definitions and airflow network for small expedition cruise ship. 2 main air handling units (AHUs): one serving upper/public decks, one serving lower/service decks. Cabin HVAC uses fan-coil units with partial recirculation (~30% fresh air, ~70% recirculated per ISO 7547). Medical bay on dedicated exhaust with negative pressure. ACH values from ASHRAE 62.1 and classification society guidelines (Lloyd's Register, DNV).",
+  "hvac_zones": [
+    {
+      "id": "AHU_1_Upper",
+      "rooms": [
+        "Bridge",
+        "Pool_Deck",
+        "Observation_Lounge",
+        "Gym",
+        "Spa",
+        "Buffet_Lido",
+        "Expedition_Lounge",
+        "Cabin_Deck6_Port",
+        "Cabin_Deck6_Stbd"
+      ],
+      "ach": 8.0,
+      "description": "Primary AHU serving Decks 6-7. Public areas at 8 ACH; cabin fan-coil units draw from this supply with ~30% fresh air fraction."
+    },
+    {
+      "id": "AHU_2_Main",
+      "rooms": [
+        "Main_Dining_Room",
+        "Theater_Lounge",
+        "Casino",
+        "Library",
+        "Cabin_Deck5_Port",
+        "Cabin_Deck5_Stbd",
+        "Reception_Lobby",
+        "Cabin_Deck4_Port",
+        "Cabin_Deck4_Stbd"
+      ],
+      "ach": 6.0,
+      "description": "Secondary AHU serving Decks 4-5. Standard passenger area ventilation at 6 ACH."
+    },
+    {
+      "id": "AHU_3_Service",
+      "rooms": [
+        "Galley",
+        "Crew_Mess",
+        "Laundry",
+        "Crew_Quarters",
+        "Stores",
+        "Engine_Room"
+      ],
+      "ach": 12.0,
+      "description": "Service AHU serving Decks 2-3. Higher ACH for galley exhaust, engine room, and laundry ventilation requirements."
+    },
+    {
+      "id": "AHU_MedBay_Dedicated",
+      "rooms": [
+        "MedBay"
+      ],
+      "ach": 15.0,
+      "description": "Dedicated medical bay ventilation with negative pressure isolation capability. 100% exhaust, no recirculation. 15 ACH per CDC/ASHRAE healthcare guidelines."
+    }
+  ],
+  "cross_zone_links": [
+    {
+      "from": "AHU_1_Upper",
+      "to": "AHU_2_Main",
+      "flow_rate_m3h": 1200.0,
+      "is_hvac_ducted": true,
+      "path": "Forward_Stairwell_Duct",
+      "description": "Ducted supply air transfer from upper AHU to main deck AHU via forward stairwell riser."
+    },
+    {
+      "from": "AHU_2_Main",
+      "to": "AHU_1_Upper",
+      "flow_rate_m3h": 1000.0,
+      "is_hvac_ducted": true,
+      "path": "Aft_Stairwell_Return",
+      "description": "Return air from main deck areas back to upper AHU via aft stairwell."
+    },
+    {
+      "from": "AHU_2_Main",
+      "to": "AHU_3_Service",
+      "flow_rate_m3h": 800.0,
+      "is_hvac_ducted": true,
+      "path": "Service_Trunk_Duct",
+      "description": "Supply air to service decks. Filtered at AHU_3_Service intake."
+    },
+    {
+      "from": "AHU_3_Service",
+      "to": "AHU_2_Main",
+      "flow_rate_m3h": 600.0,
+      "is_hvac_ducted": true,
+      "path": "Galley_Exhaust_Return",
+      "description": "Partial return from service areas. Galley grease-hood exhaust is 100% overboard; remaining service air partially recirculated."
+    },
+    {
+      "from": "AHU_MedBay_Dedicated",
+      "to": "AHU_2_Main",
+      "flow_rate_m3h": 50.0,
+      "is_hvac_ducted": false,
+      "path": "MedBay_Door_Leakage",
+      "description": "Minimal passive leakage around MedBay door seal. Negative pressure ensures net inflow from corridor."
+    },
+    {
+      "from": "Buffet_Lido",
+      "to": "Pool_Deck",
+      "flow_rate_m3h": 400.0,
+      "is_hvac_ducted": false,
+      "path": "Lido_Open_Doorway",
+      "description": "Open doorway between lido buffet and pool deck (frequent door opening)."
+    },
+    {
+      "from": "Main_Dining_Room",
+      "to": "Galley",
+      "flow_rate_m3h": 300.0,
+      "is_hvac_ducted": false,
+      "path": "Galley_Service_Door",
+      "description": "Service doors between galley and main dining (frequent traffic during service)."
+    },
+    {
+      "from": "Theater_Lounge",
+      "to": "Reception_Lobby",
+      "flow_rate_m3h": 250.0,
+      "is_hvac_ducted": false,
+      "path": "Central_Stairwell_Lobby",
+      "description": "Open stairwell connecting theater level to reception lobby."
+    },
+    {
+      "from": "Crew_Mess",
+      "to": "Crew_Quarters",
+      "flow_rate_m3h": 200.0,
+      "is_hvac_ducted": false,
+      "path": "Crew_Corridor",
+      "description": "Crew corridor connecting mess to quarters."
+    },
+    {
+      "from": "Engine_Room",
+      "to": "Stores",
+      "flow_rate_m3h": 150.0,
+      "is_hvac_ducted": false,
+      "path": "Service_Passageway_Lower",
+      "description": "Lower deck service passageway between engine room and stores."
+    }
+  ],
+  "adjacency": [
+    {
+      "from": "Bridge",
+      "to": "Observation_Lounge",
+      "type": "passageway"
+    },
+    {
+      "from": "Observation_Lounge",
+      "to": "Pool_Deck",
+      "type": "open_deck"
+    },
+    {
+      "from": "Gym",
+      "to": "Spa",
+      "type": "doorway"
+    },
+    {
+      "from": "Spa",
+      "to": "Cabin_Deck6_Port",
+      "type": "corridor"
+    },
+    {
+      "from": "Buffet_Lido",
+      "to": "Pool_Deck",
+      "type": "doorway"
+    },
+    {
+      "from": "Buffet_Lido",
+      "to": "Cabin_Deck6_Stbd",
+      "type": "corridor"
+    },
+    {
+      "from": "Expedition_Lounge",
+      "to": "Buffet_Lido",
+      "type": "passageway"
+    },
+    {
+      "from": "Cabin_Deck6_Port",
+      "to": "Cabin_Deck6_Stbd",
+      "type": "corridor"
+    },
+    {
+      "from": "Main_Dining_Room",
+      "to": "Theater_Lounge",
+      "type": "passageway"
+    },
+    {
+      "from": "Theater_Lounge",
+      "to": "Casino",
+      "type": "doorway"
+    },
+    {
+      "from": "Casino",
+      "to": "Library",
+      "type": "passageway"
+    },
+    {
+      "from": "Cabin_Deck5_Port",
+      "to": "Cabin_Deck5_Stbd",
+      "type": "corridor"
+    },
+    {
+      "from": "Cabin_Deck5_Port",
+      "to": "Main_Dining_Room",
+      "type": "stairwell"
+    },
+    {
+      "from": "MedBay",
+      "to": "Reception_Lobby",
+      "type": "doorway"
+    },
+    {
+      "from": "Reception_Lobby",
+      "to": "Cabin_Deck4_Port",
+      "type": "corridor"
+    },
+    {
+      "from": "Cabin_Deck4_Port",
+      "to": "Cabin_Deck4_Stbd",
+      "type": "corridor"
+    },
+    {
+      "from": "Reception_Lobby",
+      "to": "Cabin_Deck4_Stbd",
+      "type": "corridor"
+    },
+    {
+      "from": "Galley",
+      "to": "Crew_Mess",
+      "type": "service_hatch"
+    },
+    {
+      "from": "Crew_Mess",
+      "to": "Crew_Quarters",
+      "type": "corridor"
+    },
+    {
+      "from": "Crew_Quarters",
+      "to": "Laundry",
+      "type": "corridor"
+    },
+    {
+      "from": "Stores",
+      "to": "Galley",
+      "type": "service_corridor"
+    },
+    {
+      "from": "Engine_Room",
+      "to": "Stores",
+      "type": "service_corridor"
+    },
+    {
+      "from": "Engine_Room",
+      "to": "Crew_Quarters",
+      "type": "ladder_well"
+    },
+    {
+      "from": "Buffet_Lido",
+      "to": "Main_Dining_Room",
+      "type": "stairwell"
+    },
+    {
+      "from": "Reception_Lobby",
+      "to": "Theater_Lounge",
+      "type": "stairwell"
+    },
+    {
+      "from": "Galley",
+      "to": "Main_Dining_Room",
+      "type": "service_stairwell"
+    },
+    {
+      "from": "Crew_Quarters",
+      "to": "Reception_Lobby",
+      "type": "service_stairwell"
+    }
+  ]
+}

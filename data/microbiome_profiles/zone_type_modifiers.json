@@ -1,0 +1,326 @@
+{
+  "_meta": {
+    "name": "zone_type_modifiers",
+    "description": "Shipboard built-environment room-type modifiers for coastal_port_profile.json and open_ocean_profile.json. Use taxon_multipliers to skew a baseline, add marker_additions if absent, then renormalize the whole multi-kingdom vector to sum to 1.0.",
+    "units": {
+      "kingdom_fraction_vector": "relative_abundance; each zone sums to 1.0",
+      "taxon_multipliers": "dimensionless multiplicative factors; neutral value is 1.0; not summed",
+      "marker_additions": "small relative-abundance priors before final renormalization"
+    },
+    "application_order": [
+      "start_with_coastal_or_open_ocean_profile",
+      "multiply_matching_taxa_by_zone_taxon_multipliers",
+      "inject_marker_additions_for_missing_taxa",
+      "adjust_to_zone_kingdom_fraction_vector",
+      "renormalize_total_relative_abundance_to_1.0"
+    ],
+    "taxonomic_style": "GRUMB/metagenomic-compatible marker names where possible: genus, family, clade, or viral group labels."
+  },
+  "Dining": {
+    "description": "Shared dining area: human oral/skin carryover, food residue, mild enteric signal, and mixed airborne fungi.",
+    "kingdom_fraction_vector": {
+      "Bacteria": 0.76,
+      "Archaea": 0.02,
+      "Fungi": 0.1,
+      "Virus": 0.12
+    },
+    "taxon_multipliers": {
+      "Streptococcus": 3.0,
+      "Veillonella": 2.5,
+      "Rothia": 2.5,
+      "Neisseria": 2.0,
+      "Staphylococcus": 2.2,
+      "Corynebacterium": 1.8,
+      "Cutibacterium": 1.6,
+      "Enterobacteriaceae_unclassified": 1.8,
+      "Escherichia-Shigella": 1.5,
+      "Enterococcus": 1.7,
+      "Lactobacillus": 2.0,
+      "Saccharomyces": 2.5,
+      "Candida": 1.8,
+      "Aspergillus": 1.3,
+      "Penicillium": 1.4,
+      "crAssphage": 1.6,
+      "Caudovirales_unclassified": 1.1,
+      "Vibrio": 0.8,
+      "Prochlorococcus": 0.6,
+      "Pelagibacter_ubique_SAR11": 0.6
+    },
+    "marker_additions": {
+      "Bacteria": {
+        "Streptococcus": 0.02,
+        "Veillonella": 0.01,
+        "Rothia": 0.008,
+        "Staphylococcus": 0.012,
+        "Lactobacillus": 0.006
+      },
+      "Archaea": {
+        "Methanobrevibacter": 0.002
+      },
+      "Fungi": {
+        "Saccharomyces": 0.01,
+        "Candida": 0.006
+      },
+      "Virus": {
+        "crAssphage": 0.004,
+        "Human_adenovirus": 0.002
+      }
+    }
+  },
+  "Room": {
+    "description": "Private cabin/berth: enriched for human skin commensals, low ventilation dust fungi, and human-associated viruses/phages.",
+    "kingdom_fraction_vector": {
+      "Bacteria": 0.74,
+      "Archaea": 0.02,
+      "Fungi": 0.12,
+      "Virus": 0.12
+    },
+    "taxon_multipliers": {
+      "Staphylococcus": 4.0,
+      "Staphylococcus_epidermidis": 3.5,
+      "Corynebacterium": 3.5,
+      "Cutibacterium": 4.0,
+      "Micrococcus": 2.5,
+      "Streptococcus": 1.6,
+      "Acinetobacter": 1.4,
+      "Malassezia": 3.5,
+      "Cladosporium": 1.4,
+      "Aspergillus": 1.2,
+      "Penicillium": 1.2,
+      "Anelloviridae": 2.0,
+      "Caudovirales_unclassified": 1.1,
+      "Vibrio": 0.5,
+      "Synechococcus": 0.5,
+      "Prochlorococcus": 0.4,
+      "Pelagibacter_ubique_SAR11": 0.4
+    },
+    "marker_additions": {
+      "Bacteria": {
+        "Staphylococcus": 0.03,
+        "Corynebacterium": 0.025,
+        "Cutibacterium": 0.03,
+        "Micrococcus": 0.01
+      },
+      "Archaea": {
+        "Methanobrevibacter": 0.002
+      },
+      "Fungi": {
+        "Malassezia": 0.02,
+        "Cladosporium": 0.01
+      },
+      "Virus": {
+        "Anelloviridae": 0.004,
+        "Human_betaherpesvirus": 0.001
+      }
+    }
+  },
+  "Free": {
+    "description": "Open/free/common circulation area: mixed tracking from shoes, hands, seawater aerosol, dust, and ventilation. Less strongly human-associated than cabins.",
+    "kingdom_fraction_vector": {
+      "Bacteria": 0.72,
+      "Archaea": 0.03,
+      "Fungi": 0.1,
+      "Virus": 0.15
+    },
+    "taxon_multipliers": {
+      "Pseudomonas": 1.8,
+      "Acinetobacter": 1.6,
+      "Sphingomonas": 1.8,
+      "Methylobacterium": 1.8,
+      "Staphylococcus": 1.6,
+      "Corynebacterium": 1.5,
+      "Bacillus": 1.8,
+      "Cladosporium": 1.6,
+      "Aureobasidium": 1.4,
+      "Aspergillus": 1.3,
+      "Caudovirales_unclassified": 1.2,
+      "Vibrio": 1.0,
+      "Synechococcus": 1.0,
+      "Prochlorococcus": 0.8,
+      "Pelagibacter_ubique_SAR11": 0.8
+    },
+    "marker_additions": {
+      "Bacteria": {
+        "Bacillus": 0.01,
+        "Staphylococcus": 0.012,
+        "Corynebacterium": 0.01
+      },
+      "Archaea": {
+        "Nitrosopumilus": 0.002
+      },
+      "Fungi": {
+        "Cladosporium": 0.012,
+        "Aureobasidium": 0.006
+      },
+      "Virus": {
+        "Caudovirales_unclassified": 0.006
+      }
+    }
+  },
+  "Engine Room": {
+    "description": "Hot, oily, metal-rich machinery space: enriched for hydrocarbon degraders, heat-tolerant spore-formers, thermophiles, and Archaea; depleted in human commensals and phototrophs.",
+    "kingdom_fraction_vector": {
+      "Bacteria": 0.68,
+      "Archaea": 0.12,
+      "Fungi": 0.05,
+      "Virus": 0.15
+    },
+    "taxon_multipliers": {
+      "Marinobacter": 3.5,
+      "Alcanivorax": 4.0,
+      "Oleiphilus": 3.5,
+      "Pseudomonas": 2.0,
+      "Bacillus": 3.0,
+      "Geobacillus": 5.0,
+      "Thermus": 5.0,
+      "Deinococcus": 2.5,
+      "Desulfovibrio": 2.2,
+      "Halomonas": 2.0,
+      "Nitrosopumilus": 2.0,
+      "Halobacteriales_unclassified": 3.0,
+      "Thermococcales_unclassified": 5.0,
+      "Archaeoglobus": 4.0,
+      "Aspergillus": 0.8,
+      "Penicillium": 0.8,
+      "Malassezia": 0.4,
+      "Staphylococcus": 0.5,
+      "Cutibacterium": 0.4,
+      "Prochlorococcus": 0.2,
+      "Synechococcus": 0.3,
+      "Pelagibacter_ubique_SAR11": 0.4,
+      "Phycodnaviridae": 0.5
+    },
+    "marker_additions": {
+      "Bacteria": {
+        "Geobacillus": 0.02,
+        "Thermus": 0.015,
+        "Bacillus": 0.015,
+        "Alcanivorax": 0.012,
+        "Deinococcus": 0.006
+      },
+      "Archaea": {
+        "Thermococcales_unclassified": 0.025,
+        "Archaeoglobus": 0.015,
+        "Halobacteriales_unclassified": 0.01
+      },
+      "Fungi": {
+        "Aspergillus": 0.004
+      },
+      "Virus": {
+        "Thermophilic_archaeal_virus": 0.006,
+        "Caudovirales_unclassified": 0.004
+      }
+    }
+  },
+  "Galley": {
+    "description": "Food preparation area: enriched for food-associated lactic acid bacteria, yeasts, molds, Enterobacteriaceae, and cleaning-resistant biofilm taxa.",
+    "kingdom_fraction_vector": {
+      "Bacteria": 0.7,
+      "Archaea": 0.01,
+      "Fungi": 0.18,
+      "Virus": 0.11
+    },
+    "taxon_multipliers": {
+      "Lactobacillus": 4.0,
+      "Leuconostoc": 3.0,
+      "Lactococcus": 3.0,
+      "Enterococcus": 2.0,
+      "Enterobacteriaceae_unclassified": 2.2,
+      "Escherichia-Shigella": 1.7,
+      "Klebsiella": 1.5,
+      "Pseudomonas": 2.0,
+      "Acinetobacter": 1.6,
+      "Staphylococcus": 1.6,
+      "Bacillus": 1.8,
+      "Saccharomyces": 4.0,
+      "Candida": 2.5,
+      "Penicillium": 2.5,
+      "Aspergillus": 2.0,
+      "Cladosporium": 1.5,
+      "Rhodotorula": 1.8,
+      "crAssphage": 1.4,
+      "Vibrio": 0.8,
+      "Prochlorococcus": 0.3,
+      "Pelagibacter_ubique_SAR11": 0.3,
+      "Nitrosopumilus_Thaumarchaeota": 0.4
+    },
+    "marker_additions": {
+      "Bacteria": {
+        "Lactobacillus": 0.025,
+        "Leuconostoc": 0.01,
+        "Lactococcus": 0.01,
+        "Bacillus": 0.008,
+        "Staphylococcus": 0.01
+      },
+      "Archaea": {
+        "Methanobrevibacter": 0.001
+      },
+      "Fungi": {
+        "Saccharomyces": 0.03,
+        "Candida": 0.015,
+        "Penicillium": 0.018,
+        "Aspergillus": 0.012
+      },
+      "Virus": {
+        "crAssphage": 0.004,
+        "Caudovirales_unclassified": 0.004
+      }
+    }
+  },
+  "Medical": {
+    "description": "Medical/infirmary area: enriched for human skin and respiratory taxa but with disinfectant pressure; includes low-level healthcare-associated opportunists and reduced fungi.",
+    "kingdom_fraction_vector": {
+      "Bacteria": 0.78,
+      "Archaea": 0.01,
+      "Fungi": 0.06,
+      "Virus": 0.15
+    },
+    "taxon_multipliers": {
+      "Staphylococcus": 3.5,
+      "Staphylococcus_epidermidis": 3.0,
+      "Staphylococcus_aureus": 2.0,
+      "Corynebacterium": 2.5,
+      "Cutibacterium": 2.5,
+      "Streptococcus": 2.0,
+      "Acinetobacter": 2.5,
+      "Pseudomonas": 2.2,
+      "Enterococcus": 2.0,
+      "Klebsiella": 1.8,
+      "Enterobacteriaceae_unclassified": 1.6,
+      "Sphingomonas": 1.5,
+      "Methylobacterium": 1.5,
+      "Malassezia": 1.4,
+      "Candida": 1.6,
+      "Aspergillus": 0.8,
+      "Penicillium": 0.8,
+      "Anelloviridae": 2.0,
+      "Human_adenovirus": 1.5,
+      "Caudovirales_unclassified": 1.1,
+      "Vibrio": 0.4,
+      "Prochlorococcus": 0.2,
+      "Pelagibacter_ubique_SAR11": 0.2,
+      "Phycodnaviridae": 0.3
+    },
+    "marker_additions": {
+      "Bacteria": {
+        "Staphylococcus": 0.03,
+        "Staphylococcus_aureus": 0.006,
+        "Corynebacterium": 0.02,
+        "Cutibacterium": 0.02,
+        "Acinetobacter": 0.012
+      },
+      "Archaea": {
+        "Methanobrevibacter": 0.001
+      },
+      "Fungi": {
+        "Candida": 0.008,
+        "Malassezia": 0.006
+      },
+      "Virus": {
+        "Anelloviridae": 0.005,
+        "Human_adenovirus": 0.002,
+        "Human_alphaherpesvirus": 0.001
+      }
+    }
+  }
+}

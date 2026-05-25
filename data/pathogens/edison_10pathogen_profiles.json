@@ -1,0 +1,758 @@
+{
+  "meta": {
+    "description": "Multi-pathogen profile definitions for shipboard outbreak simulation",
+    "version": "2.0",
+    "notes": "10 pathogen profiles covering enteric viral, respiratory viral, bacterial waterborne, enteric bacterial, and filovirus categories. Parameters grounded in published dose-response models (Teunis, Watanabe, Alford) and shedding kinetics literature.",
+    "pathogens_count": 10
+  },
+  "pathogens": [
+    {
+      "pathogen_id": "norovirus_gii4",
+      "name": "Norovirus GII.4",
+      "category": "enteric_viral",
+      "transmission_routes": [
+        "direct_contact",
+        "fomite",
+        "droplet"
+      ],
+      "shedding_curve_log10": [
+        7.75,
+        9.0,
+        11.0,
+        11.0,
+        10.8,
+        10.2,
+        9.8,
+        9.5,
+        9.0,
+        8.8,
+        8.5,
+        8.2,
+        8.0,
+        7.8,
+        7.5
+      ],
+      "asymptomatic_shedding_log10": [
+        7.0,
+        8.5,
+        9.5,
+        10.0,
+        9.4,
+        8.8,
+        8.2,
+        7.8,
+        7.4,
+        7.0,
+        6.6,
+        6.2,
+        5.8,
+        5.4,
+        5.0
+      ],
+      "dose_adjustment": 4.0,
+      "dose_response": {
+        "model": "beta_poisson",
+        "alpha": 0.111,
+        "beta": 32.81
+      },
+      "illness_probability": {
+        "eta": 0.508,
+        "gamma": 0.095
+      },
+      "recovery_day": 3,
+      "surface_deposition_fraction": 0.0001,
+      "base_susceptibility": 1.0,
+      "microflora_disruption": {
+        "causes_disruption": true,
+        "disruption_type": "gastrointestinal",
+        "disruption_magnitude": 0.8,
+        "affected_kingdoms": {
+          "Bacteria": {
+            "Enterobacter": 3.5,
+            "Vibrio_spp": 2.0,
+            "Bacteroides": -1.4
+          },
+          "Fungi": {
+            "Candida_spp": 2.0
+          },
+          "Virus": {
+            "Phage_community": 1.5
+          }
+        }
+      },
+      "introduction_epoch": 0,
+      "initial_infected": 1
+    },
+    {
+      "pathogen_id": "sars_cov2_resp",
+      "name": "SARS-CoV-2",
+      "category": "respiratory_viral",
+      "transmission_routes": [
+        "droplet",
+        "hvac_airborne",
+        "direct_contact",
+        "fomite"
+      ],
+      "shedding_curve_log10": [
+        3.0,
+        5.0,
+        7.0,
+        8.5,
+        9.0,
+        8.5,
+        7.5,
+        6.5,
+        5.5,
+        4.5,
+        3.5,
+        3.0,
+        2.5,
+        2.0,
+        2.0
+      ],
+      "asymptomatic_shedding_log10": [
+        3.0,
+        4.5,
+        6.0,
+        7.0,
+        7.5,
+        7.0,
+        6.0,
+        5.0,
+        4.0,
+        3.5,
+        3.0,
+        2.5,
+        2.0,
+        2.0,
+        2.0
+      ],
+      "dose_adjustment": 3.0,
+      "dose_response": {
+        "model": "beta_poisson",
+        "alpha": 0.18,
+        "beta": 58.0
+      },
+      "illness_probability": {
+        "eta": 0.4,
+        "gamma": 0.12
+      },
+      "recovery_day": 7,
+      "surface_deposition_fraction": 5e-05,
+      "base_susceptibility": 1.0,
+      "microflora_disruption": {
+        "causes_disruption": true,
+        "disruption_type": "respiratory",
+        "disruption_magnitude": 0.6,
+        "affected_kingdoms": {
+          "Bacteria": {
+            "Staphylococcus_epi": 3.0,
+            "Streptococcus": 1.5,
+            "Dolosigranulum": -1.3
+          },
+          "Fungi": {
+            "Aspergillus_spp": 1.5
+          },
+          "Virus": {
+            "ssRNA_respiratory": 1.5
+          }
+        }
+      },
+      "introduction_epoch": 6,
+      "initial_infected": 1
+    },
+    {
+      "pathogen_id": "influenza_a",
+      "name": "Influenza A",
+      "category": "respiratory_viral",
+      "transmission_routes": [
+        "droplet",
+        "hvac_airborne",
+        "fomite"
+      ],
+      "shedding_curve_log10": [
+        2.5,
+        4.5,
+        6.5,
+        7.2,
+        6.8,
+        5.8,
+        4.8,
+        3.8,
+        3.0,
+        2.2,
+        1.5,
+        1.0,
+        0.5,
+        0.0,
+        0.0
+      ],
+      "asymptomatic_shedding_log10": [
+        2.0,
+        3.5,
+        5.0,
+        5.6,
+        5.2,
+        4.4,
+        3.5,
+        2.6,
+        1.8,
+        1.0,
+        0.5,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dose_adjustment": 1.5,
+      "dose_response": {
+        "model": "exponential",
+        "k": 0.18
+      },
+      "illness_probability": {
+        "eta": 0.67,
+        "gamma": 0.1
+      },
+      "recovery_day": 5,
+      "surface_deposition_fraction": 0.001,
+      "base_susceptibility": 0.65,
+      "microflora_disruption": {
+        "causes_disruption": true,
+        "disruption_type": "respiratory",
+        "disruption_magnitude": 0.5,
+        "affected_kingdoms": {
+          "Bacteria": {
+            "Staphylococcus_aureus": 2.2,
+            "Streptococcus_pneumoniae": 2.0,
+            "Lactobacillus": -1.4
+          },
+          "Fungi": {
+            "Candida_spp": 1.3
+          },
+          "Virus": {
+            "Influenza_A": 10.0
+          }
+        }
+      },
+      "introduction_epoch": 12,
+      "initial_infected": 1
+    },
+    {
+      "pathogen_id": "measles_virus",
+      "name": "Measles virus",
+      "category": "respiratory_viral",
+      "transmission_routes": [
+        "hvac_airborne",
+        "droplet"
+      ],
+      "shedding_curve_log10": [
+        2.0,
+        3.0,
+        4.2,
+        5.5,
+        6.8,
+        7.5,
+        7.2,
+        6.2,
+        5.0,
+        3.8,
+        2.6,
+        1.5,
+        0.8,
+        0.0,
+        0.0
+      ],
+      "asymptomatic_shedding_log10": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dose_adjustment": 2.0,
+      "dose_response": {
+        "model": "exponential",
+        "k": 0.5
+      },
+      "illness_probability": {
+        "eta": 0.95,
+        "gamma": 0.05
+      },
+      "recovery_day": 9,
+      "surface_deposition_fraction": 1e-05,
+      "base_susceptibility": 0.08,
+      "microflora_disruption": {
+        "causes_disruption": true,
+        "disruption_type": "immune_memory_and_respiratory",
+        "disruption_magnitude": 0.4,
+        "affected_kingdoms": {
+          "Bacteria": {
+            "Streptococcus_pneumoniae": 1.8,
+            "Haemophilus": 1.5
+          },
+          "Fungi": {},
+          "Virus": {
+            "Measles_virus": 10.0
+          }
+        }
+      },
+      "introduction_epoch": 20,
+      "initial_infected": 1
+    },
+    {
+      "pathogen_id": "legionella_pneumophila",
+      "name": "Legionella pneumophila",
+      "category": "bacterial_waterborne",
+      "transmission_routes": [
+        "hvac_airborne",
+        "water_aerosol"
+      ],
+      "shedding_curve_log10": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "asymptomatic_shedding_log10": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dose_adjustment": 1.0,
+      "dose_response": {
+        "model": "exponential",
+        "k": 0.059
+      },
+      "illness_probability": {
+        "eta": 0.05,
+        "gamma": 0.02
+      },
+      "recovery_day": 10,
+      "surface_deposition_fraction": 2e-05,
+      "base_susceptibility": 0.25,
+      "microflora_disruption": {
+        "causes_disruption": true,
+        "disruption_type": "respiratory",
+        "disruption_magnitude": 0.5,
+        "affected_kingdoms": {
+          "Bacteria": {
+            "Legionella": 10.0,
+            "Pseudomonas": 1.5
+          },
+          "Fungi": {},
+          "Virus": {}
+        }
+      },
+      "introduction_epoch": 30,
+      "initial_infected": 0
+    },
+    {
+      "pathogen_id": "vibrio_cholerae_parahaemolyticus",
+      "name": "Vibrio cholerae/parahaemolyticus",
+      "category": "enteric_bacterial",
+      "transmission_routes": [
+        "food",
+        "water",
+        "direct_contact",
+        "fomite"
+      ],
+      "shedding_curve_log10": [
+        4.0,
+        6.5,
+        9.0,
+        11.0,
+        11.0,
+        10.2,
+        9.0,
+        7.8,
+        6.8,
+        5.8,
+        5.0,
+        4.2,
+        3.5,
+        3.0,
+        2.5
+      ],
+      "asymptomatic_shedding_log10": [
+        3.0,
+        4.5,
+        6.0,
+        7.0,
+        7.0,
+        6.2,
+        5.4,
+        4.6,
+        3.8,
+        3.0,
+        2.4,
+        1.8,
+        1.2,
+        0.6,
+        0.0
+      ],
+      "dose_adjustment": 1.0,
+      "dose_response": {
+        "model": "beta_poisson",
+        "alpha": 0.25,
+        "beta": 16.2
+      },
+      "illness_probability": {
+        "eta": 0.25,
+        "gamma": 0.1
+      },
+      "recovery_day": 5,
+      "surface_deposition_fraction": 0.0001,
+      "base_susceptibility": 1.0,
+      "microflora_disruption": {
+        "causes_disruption": true,
+        "disruption_type": "gastrointestinal",
+        "disruption_magnitude": 0.9,
+        "affected_kingdoms": {
+          "Bacteria": {
+            "Vibrio_spp": 10.0,
+            "Bacteroides": -2.0,
+            "Bifidobacterium": -1.8
+          },
+          "Fungi": {
+            "Candida_spp": 1.4
+          },
+          "Virus": {
+            "Phage_community": 1.2
+          }
+        }
+      },
+      "introduction_epoch": 40,
+      "initial_infected": 1
+    },
+    {
+      "pathogen_id": "campylobacter_jejuni",
+      "name": "Campylobacter jejuni",
+      "category": "enteric_bacterial",
+      "transmission_routes": [
+        "food",
+        "direct_contact",
+        "fomite"
+      ],
+      "shedding_curve_log10": [
+        2.0,
+        4.0,
+        6.0,
+        7.5,
+        8.0,
+        7.8,
+        7.4,
+        7.0,
+        6.5,
+        6.0,
+        5.5,
+        5.0,
+        4.5,
+        4.0,
+        3.5
+      ],
+      "asymptomatic_shedding_log10": [
+        1.5,
+        3.0,
+        4.5,
+        5.5,
+        5.8,
+        5.6,
+        5.2,
+        4.8,
+        4.2,
+        3.6,
+        3.0,
+        2.4,
+        1.8,
+        1.2,
+        0.6
+      ],
+      "dose_adjustment": 1.0,
+      "dose_response": {
+        "model": "beta_poisson",
+        "alpha": 0.145,
+        "beta": 7.59
+      },
+      "illness_probability": {
+        "eta": 0.3,
+        "gamma": 0.1
+      },
+      "recovery_day": 7,
+      "surface_deposition_fraction": 0.0005,
+      "base_susceptibility": 1.0,
+      "microflora_disruption": {
+        "causes_disruption": true,
+        "disruption_type": "gastrointestinal",
+        "disruption_magnitude": 0.6,
+        "affected_kingdoms": {
+          "Bacteria": {
+            "Campylobacter": 10.0,
+            "Faecalibacterium": -1.5,
+            "Bacteroides": -1.2
+          },
+          "Fungi": {},
+          "Virus": {}
+        }
+      },
+      "introduction_epoch": 50,
+      "initial_infected": 1
+    },
+    {
+      "pathogen_id": "clostridioides_difficile",
+      "name": "Clostridioides difficile",
+      "category": "enteric_bacterial",
+      "transmission_routes": [
+        "fomite",
+        "direct_contact"
+      ],
+      "shedding_curve_log10": [
+        3.0,
+        4.5,
+        6.0,
+        7.5,
+        8.0,
+        8.0,
+        7.5,
+        7.0,
+        6.5,
+        6.0,
+        5.5,
+        5.0,
+        4.5,
+        4.0,
+        3.5
+      ],
+      "asymptomatic_shedding_log10": [
+        2.0,
+        3.0,
+        4.0,
+        4.8,
+        5.0,
+        4.8,
+        4.5,
+        4.2,
+        3.8,
+        3.4,
+        3.0,
+        2.6,
+        2.2,
+        1.8,
+        1.4
+      ],
+      "dose_adjustment": 1.0,
+      "dose_response": {
+        "model": "exponential",
+        "k": 0.001
+      },
+      "illness_probability": {
+        "eta": 0.15,
+        "gamma": 0.2
+      },
+      "recovery_day": 10,
+      "surface_deposition_fraction": 0.05,
+      "base_susceptibility": 0.15,
+      "microflora_disruption": {
+        "causes_disruption": true,
+        "disruption_type": "gastrointestinal_spore_antibiotic_associated",
+        "disruption_magnitude": 0.95,
+        "affected_kingdoms": {
+          "Bacteria": {
+            "Clostridioides": 10.0,
+            "Lachnospiraceae": -3.0,
+            "Bifidobacterium": -2.5,
+            "Lactobacillus": -2.0
+          },
+          "Fungi": {
+            "Candida_spp": 2.0
+          },
+          "Virus": {
+            "Phage_community": 1.5
+          }
+        }
+      },
+      "introduction_epoch": 60,
+      "initial_infected": 1
+    },
+    {
+      "pathogen_id": "andes_hantavirus",
+      "name": "Andes hantavirus",
+      "category": "respiratory_viral",
+      "transmission_routes": [
+        "hvac_airborne",
+        "droplet",
+        "direct_contact"
+      ],
+      "shedding_curve_log10": [
+        1.0,
+        2.0,
+        3.2,
+        4.5,
+        5.8,
+        6.5,
+        6.8,
+        6.5,
+        5.8,
+        4.8,
+        3.8,
+        2.8,
+        1.8,
+        1.0,
+        0.5
+      ],
+      "asymptomatic_shedding_log10": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dose_adjustment": 1.0,
+      "dose_response": {
+        "model": "exponential",
+        "k": 0.01
+      },
+      "illness_probability": {
+        "eta": 0.8,
+        "gamma": 0.1
+      },
+      "recovery_day": 14,
+      "surface_deposition_fraction": 0.0002,
+      "base_susceptibility": 1.0,
+      "microflora_disruption": {
+        "causes_disruption": true,
+        "disruption_type": "systemic_respiratory",
+        "disruption_magnitude": 0.3,
+        "affected_kingdoms": {
+          "Bacteria": {
+            "Streptococcus": 1.2
+          },
+          "Fungi": {},
+          "Virus": {
+            "Hantavirus": 10.0
+          }
+        }
+      },
+      "introduction_epoch": 70,
+      "initial_infected": 1
+    },
+    {
+      "pathogen_id": "ebola_virus",
+      "name": "Ebola virus",
+      "category": "filovirus",
+      "transmission_routes": [
+        "direct_contact",
+        "fomite",
+        "bodily_fluids"
+      ],
+      "shedding_curve_log10": [
+        2.0,
+        3.5,
+        5.0,
+        6.5,
+        8.0,
+        9.0,
+        9.5,
+        9.5,
+        9.0,
+        8.2,
+        7.4,
+        6.6,
+        5.8,
+        5.0,
+        4.2
+      ],
+      "asymptomatic_shedding_log10": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dose_adjustment": 1.0,
+      "dose_response": {
+        "model": "exponential",
+        "k": 0.5
+      },
+      "illness_probability": {
+        "eta": 0.99,
+        "gamma": 0.05
+      },
+      "recovery_day": 12,
+      "surface_deposition_fraction": 0.01,
+      "base_susceptibility": 1.0,
+      "microflora_disruption": {
+        "causes_disruption": true,
+        "disruption_type": "systemic_gastrointestinal",
+        "disruption_magnitude": 0.8,
+        "affected_kingdoms": {
+          "Bacteria": {
+            "Enterobacteriaceae": 2.5,
+            "Akkermansia": -2.0,
+            "Bacteroides": -1.5
+          },
+          "Fungi": {
+            "Candida_spp": 1.5
+          },
+          "Virus": {
+            "Ebola_virus": 10.0
+          }
+        }
+      },
+      "introduction_epoch": 80,
+      "initial_infected": 1
+    }
+  ]
+}

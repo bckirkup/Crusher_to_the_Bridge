@@ -1,0 +1,91 @@
+{
+  "_meta": {
+    "name": "coastal_port_profile",
+    "description": "Multi-kingdom relative abundance vector for built-environment surfaces in a coastal/port setting. Reflects eutrophic, anthropogenically-influenced near-shore marine microbiome.",
+    "units": "relative_abundance",
+    "sum": 1.0,
+    "basis": "Surface swab composite, 16S/18S/ITS/virome metagenomic markers",
+    "notes": "Enriched in Vibrio, Enterobacteriaceae, fecal indicators, and coastal phytoplankton-associated Flavobacteriaceae. Synechococcus dominant cyanobacterium (coastal ecotype). crAssphage included as sewage/fecal viral indicator."
+  },
+  "Bacteria": {
+    "_kingdom_fraction": 0.72,
+    "taxa": {
+      "Vibrio": 0.065,
+      "Vibrio_parahaemolyticus": 0.025,
+      "Vibrio_vulnificus": 0.01,
+      "Enterobacteriaceae_unclassified": 0.03,
+      "Escherichia-Shigella": 0.018,
+      "Klebsiella": 0.008,
+      "Bacteroides": 0.022,
+      "Clostridium_sensu_stricto": 0.01,
+      "Faecalibacterium": 0.006,
+      "Enterococcus": 0.012,
+      "Alteromonas": 0.045,
+      "Pseudoalteromonas": 0.035,
+      "Marinobacter": 0.025,
+      "Roseobacter_clade": 0.04,
+      "Ruegeria": 0.012,
+      "Pseudomonas": 0.03,
+      "Acinetobacter": 0.015,
+      "Sphingomonas": 0.012,
+      "Methylobacterium": 0.008,
+      "Desulfovibrio": 0.01,
+      "Sulfitobacter": 0.008,
+      "Flavobacteriaceae_unclassified": 0.04,
+      "Polaribacter": 0.015,
+      "Formosa": 0.008,
+      "Nitrospira": 0.008,
+      "Nitrosomonas": 0.006,
+      "Synechococcus": 0.035,
+      "Trichodesmium": 0.005,
+      "Erythrobacter": 0.01,
+      "Halomonas": 0.015,
+      "Photobacterium": 0.012,
+      "SAR11_clade_coastal_ecotype": 0.02,
+      "Rhodobacteraceae_unclassified": 0.025,
+      "Gammaproteobacteria_other": 0.035,
+      "Alphaproteobacteria_other": 0.02,
+      "Bacteria_other": 0.02
+    }
+  },
+  "Archaea": {
+    "_kingdom_fraction": 0.04,
+    "taxa": {
+      "Marine_Group_II_Euryarchaeota": 0.012,
+      "Nitrosopumilus": 0.01,
+      "Halobacteriales_unclassified": 0.008,
+      "Methanobrevibacter": 0.004,
+      "Archaea_other": 0.006
+    }
+  },
+  "Fungi": {
+    "_kingdom_fraction": 0.09,
+    "taxa": {
+      "Aspergillus": 0.015,
+      "Cladosporium": 0.018,
+      "Penicillium": 0.012,
+      "Candida": 0.008,
+      "Malassezia": 0.006,
+      "Rhodotorula": 0.005,
+      "Aureobasidium": 0.008,
+      "Fusarium": 0.005,
+      "Fungi_marine_unclassified": 0.008,
+      "Fungi_other": 0.005
+    }
+  },
+  "Virus": {
+    "_kingdom_fraction": 0.15,
+    "taxa": {
+      "Caudovirales_unclassified": 0.04,
+      "Myoviridae": 0.025,
+      "Siphoviridae": 0.02,
+      "Podoviridae": 0.015,
+      "Phycodnaviridae": 0.015,
+      "Mimiviridae": 0.005,
+      "crAssphage": 0.01,
+      "Vibriophage": 0.008,
+      "Inoviridae": 0.004,
+      "Virus_other": 0.008
+    }
+  }
+}

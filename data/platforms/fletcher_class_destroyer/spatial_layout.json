@@ -1,0 +1,270 @@
+{
+  "platform": "fletcher_class_destroyer",
+  "description": "WWII Fletcher-class destroyer (DD-445 class). 114.7m LOA, 12.0m beam, ~329 crew. Forced-draft ventilation, no HVAC filtration. Hot-bunking in enlisted berthing.",
+  "deck_dimensions": {
+    "length_m": 114.7,
+    "beam_m": 12.0
+  },
+  "zones": [
+    {
+      "id": "Bridge",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 55,
+      "deck": "03_level",
+      "max_occupancy": 12,
+      "display": {
+        "x": 105,
+        "y": 6
+      },
+      "description": "Pilothouse and open bridge wings. Navigation, helm, lookout stations."
+    },
+    {
+      "id": "CIC",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 48,
+      "deck": "02_level",
+      "max_occupancy": 15,
+      "display": {
+        "x": 100,
+        "y": 6
+      },
+      "description": "Combat Information Center. Radar plots, fire control coordination. Windowless, below bridge."
+    },
+    {
+      "id": "Officers_Quarters",
+      "type": "Room",
+      "traffic": "low",
+      "volume_m3": 90,
+      "deck": "main_deck",
+      "max_occupancy": 22,
+      "display": {
+        "x": 90,
+        "y": 6
+      },
+      "description": "Officers staterooms (11 double-occupancy rooms). Aft of bridge superstructure on main deck."
+    },
+    {
+      "id": "Enlisted_Berthing_Fwd",
+      "type": "Room",
+      "traffic": "high",
+      "volume_m3": 180,
+      "deck": "second_deck",
+      "max_occupancy": 120,
+      "display": {
+        "x": 70,
+        "y": 4
+      },
+      "description": "Forward enlisted berthing. Stacked canvas racks 3-high, 18-inch spacing. Hot-bunking for ~120 men. Extremely cramped: ~1.5 m\u00b3 per person."
+    },
+    {
+      "id": "Enlisted_Berthing_Aft",
+      "type": "Room",
+      "traffic": "high",
+      "volume_m3": 200,
+      "deck": "second_deck",
+      "max_occupancy": 140,
+      "display": {
+        "x": 35,
+        "y": 4
+      },
+      "description": "Aft enlisted berthing. Stacked canvas racks 3-high. Hot-bunking for ~140 men. Ventilated by forced-draft blowers only."
+    },
+    {
+      "id": "CPO_Quarters",
+      "type": "Room",
+      "traffic": "low",
+      "volume_m3": 50,
+      "deck": "main_deck",
+      "max_occupancy": 20,
+      "display": {
+        "x": 55,
+        "y": 8
+      },
+      "description": "Chief Petty Officers quarters. Slightly less cramped than enlisted berthing. ~2.5 m\u00b3 per person."
+    },
+    {
+      "id": "Wardroom",
+      "type": "Dining",
+      "traffic": "medium",
+      "volume_m3": 40,
+      "deck": "main_deck",
+      "max_occupancy": 16,
+      "display": {
+        "x": 85,
+        "y": 8
+      },
+      "description": "Officers wardroom/dining. Also serves as officers meeting room and surgery overflow."
+    },
+    {
+      "id": "Mess_Deck",
+      "type": "Dining",
+      "traffic": "high",
+      "volume_m3": 110,
+      "deck": "second_deck",
+      "max_occupancy": 60,
+      "display": {
+        "x": 50,
+        "y": 6
+      },
+      "description": "Enlisted mess deck. Crew ate in shifts (3-4 seatings per meal). Benches and folding tables."
+    },
+    {
+      "id": "Galley",
+      "type": "Dining",
+      "traffic": "high",
+      "volume_m3": 45,
+      "deck": "main_deck",
+      "max_occupancy": 8,
+      "display": {
+        "x": 48,
+        "y": 10
+      },
+      "description": "Ship's galley (kitchen). Coal/oil-fired ranges. Served 329 crew in continuous meal cycles."
+    },
+    {
+      "id": "Boiler_Room_1",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 280,
+      "deck": "lower_deck",
+      "max_occupancy": 12,
+      "display": {
+        "x": 55,
+        "y": 6
+      },
+      "description": "Forward boiler room. Babcock & Wilcox 600psi boiler #1 and #2. Extreme heat (~60\u00b0C ambient). Forced-draft ventilation via uptakes."
+    },
+    {
+      "id": "Boiler_Room_2",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 280,
+      "deck": "lower_deck",
+      "max_occupancy": 12,
+      "display": {
+        "x": 40,
+        "y": 6
+      },
+      "description": "Aft boiler room. Babcock & Wilcox 600psi boiler #3 and #4. Separated from fwd boiler room by watertight bulkhead."
+    },
+    {
+      "id": "Engine_Room_Fwd",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 220,
+      "deck": "lower_deck",
+      "max_occupancy": 8,
+      "display": {
+        "x": 30,
+        "y": 6
+      },
+      "description": "Forward engine room. GE geared turbine driving starboard shaft. Reduction gears, condensers."
+    },
+    {
+      "id": "Engine_Room_Aft",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 220,
+      "deck": "lower_deck",
+      "max_occupancy": 8,
+      "display": {
+        "x": 20,
+        "y": 6
+      },
+      "description": "Aft engine room. GE geared turbine driving port shaft. Separated by watertight bulkhead from fwd engine room."
+    },
+    {
+      "id": "Magazine_Fwd",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 60,
+      "deck": "hold",
+      "max_occupancy": 6,
+      "display": {
+        "x": 95,
+        "y": 3
+      },
+      "description": "Forward 5-inch magazine. Serves mounts 51 and 52. Heavily insulated, limited access."
+    },
+    {
+      "id": "Magazine_Aft",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 65,
+      "deck": "hold",
+      "max_occupancy": 6,
+      "display": {
+        "x": 15,
+        "y": 3
+      },
+      "description": "Aft 5-inch magazine. Serves mounts 53, 54, and 55. Torpedo warhead storage adjacent."
+    },
+    {
+      "id": "Sickbay",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 30,
+      "deck": "main_deck",
+      "max_occupancy": 8,
+      "display": {
+        "x": 75,
+        "y": 10
+      },
+      "description": "Ship's sickbay. 2-4 bunks, pharmacy locker, minor surgery capability. Staffed by pharmacist's mate."
+    },
+    {
+      "id": "Torpedo_Mount_Midships",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 35,
+      "deck": "main_deck",
+      "max_occupancy": 10,
+      "display": {
+        "x": 57,
+        "y": 6
+      },
+      "description": "Midships quintuple torpedo tube mount. Open to weather. Handling room below."
+    },
+    {
+      "id": "Gun_Mount_51",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 15,
+      "deck": "01_level",
+      "max_occupancy": 8,
+      "display": {
+        "x": 108,
+        "y": 6
+      },
+      "description": "5-inch/38 gun mount 51 (forward). Enclosed turret, cramped handling room."
+    },
+    {
+      "id": "Radio_Room",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 25,
+      "deck": "02_level",
+      "max_occupancy": 6,
+      "display": {
+        "x": 95,
+        "y": 8
+      },
+      "description": "Radio central / communications shack. Continuous watch stations. Adjacent to CIC."
+    },
+    {
+      "id": "Passageway_Main",
+      "type": "Free",
+      "traffic": "high",
+      "volume_m3": 80,
+      "deck": "main_deck",
+      "max_occupancy": 20,
+      "display": {
+        "x": 60,
+        "y": 6
+      },
+      "description": "Main deck central passageway. Primary fore-aft transit route. Extremely narrow (~0.9m wide)."
+    }
+  ]
+}

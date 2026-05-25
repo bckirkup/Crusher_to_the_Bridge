@@ -1,0 +1,345 @@
+{
+  "platform": "san_antonio_class_lpd",
+  "description": "San Antonio-class LPD HVAC network. Modern centralized air handling with MERV-13 filtration. NBC collective protection system (citadel) covers superstructure and inhabited spaces. Engine rooms on independent ventilation. Well deck and flight deck partially open.",
+  "hvac_zones": [
+    {
+      "id": "HVAC_Superstructure",
+      "rooms": [
+        "Bridge",
+        "CIC",
+        "Marine_Planning"
+      ],
+      "ach": 10.0,
+      "filter_efficiency": 0.5,
+      "filter_type": "MERV-13",
+      "description": "Superstructure HVAC zone. NBC citadel protected. Positive pressure maintained for CPS."
+    },
+    {
+      "id": "HVAC_Officer_Berthing",
+      "rooms": [
+        "Ship_Officers_Quarters",
+        "Ship_CPO_Quarters",
+        "Wardroom"
+      ],
+      "ach": 8.0,
+      "filter_efficiency": 0.5,
+      "filter_type": "MERV-13",
+      "description": "Officer/CPO berthing and wardroom HVAC. Standard Navy habitability ventilation."
+    },
+    {
+      "id": "HVAC_Crew_Habitable",
+      "rooms": [
+        "Ship_Enlisted_Berthing",
+        "Crew_Mess",
+        "Passageway_Main"
+      ],
+      "ach": 8.0,
+      "filter_efficiency": 0.5,
+      "filter_type": "MERV-13",
+      "description": "Ship's company enlisted berthing, mess, and main passageway. Standard habitability HVAC."
+    },
+    {
+      "id": "HVAC_Troop_Berthing",
+      "rooms": [
+        "Troop_Berthing_Fwd",
+        "Troop_Berthing_Mid",
+        "Troop_Berthing_Aft",
+        "Troop_Mess",
+        "Troop_Recreation"
+      ],
+      "ach": 7.0,
+      "filter_efficiency": 0.5,
+      "filter_type": "MERV-13",
+      "description": "Marine troop berthing and mess HVAC zone. Despite MERV-13 filtration, high occupancy density (800 Marines) in relatively small volume creates high aerosol concentrations. This zone is the primary transmission risk area."
+    },
+    {
+      "id": "HVAC_Medical",
+      "rooms": [
+        "Medical_Ward"
+      ],
+      "ach": 12.0,
+      "filter_efficiency": 0.5,
+      "filter_type": "MERV-13",
+      "description": "Medical ward HVAC. Higher ACH than standard. Negative pressure capability for isolation rooms."
+    },
+    {
+      "id": "HVAC_Galley",
+      "rooms": [
+        "Galley"
+      ],
+      "ach": 15.0,
+      "filter_efficiency": 0.5,
+      "filter_type": "MERV-13",
+      "description": "Galley ventilation. High ACH for heat/steam/grease removal. Supply and exhaust with makeup air."
+    },
+    {
+      "id": "HVAC_Vehicle_Deck",
+      "rooms": [
+        "Vehicle_Deck"
+      ],
+      "ach": 10.0,
+      "filter_efficiency": 0.2,
+      "filter_type": "MERV-8",
+      "description": "Vehicle deck ventilation for exhaust gas removal. Lower filtration grade, primarily CO/fumes extraction."
+    },
+    {
+      "id": "HVAC_Aviation",
+      "rooms": [
+        "Hangar",
+        "Flight_Deck"
+      ],
+      "ach": 8.0,
+      "filter_efficiency": 0.2,
+      "filter_type": "MERV-8",
+      "description": "Aviation spaces ventilation. Hangar has fuel vapor extraction. Flight deck largely open to weather."
+    },
+    {
+      "id": "HVAC_Well_Deck",
+      "rooms": [
+        "Well_Deck"
+      ],
+      "ach": 6.0,
+      "filter_efficiency": 0.0,
+      "filter_type": "none",
+      "description": "Well deck ventilation. Partially open to sea when stern gate lowered. Exhaust ventilation for LCAC operations."
+    },
+    {
+      "id": "HVAC_Machinery",
+      "rooms": [
+        "Engine_Room_Fwd",
+        "Engine_Room_Aft"
+      ],
+      "ach": 20.0,
+      "filter_efficiency": 0.0,
+      "filter_type": "none",
+      "description": "Machinery room ventilation. Independent from habitability HVAC. High ACH for gas turbine combustion air and heat removal."
+    }
+  ],
+  "cross_zone_links": [
+    {
+      "from": "HVAC_Superstructure",
+      "to": "HVAC_Officer_Berthing",
+      "flow_rate_m3h": 500,
+      "path": "ladder_well_officers",
+      "is_hvac_ducted": true,
+      "description": "Ducted supply from superstructure AHU to officer berthing. Filtered through MERV-13."
+    },
+    {
+      "from": "HVAC_Officer_Berthing",
+      "to": "HVAC_Crew_Habitable",
+      "flow_rate_m3h": 600,
+      "path": "main_trunk_duct",
+      "is_hvac_ducted": true,
+      "description": "Main trunk HVAC duct connecting officer and crew habitable zones."
+    },
+    {
+      "from": "HVAC_Crew_Habitable",
+      "to": "HVAC_Troop_Berthing",
+      "flow_rate_m3h": 800,
+      "path": "cross_duct_troop",
+      "is_hvac_ducted": true,
+      "description": "Cross-duct between crew and troop habitable zones. Major aerosol transfer pathway between populations."
+    },
+    {
+      "from": "HVAC_Troop_Berthing",
+      "to": "HVAC_Crew_Habitable",
+      "flow_rate_m3h": 600,
+      "path": "return_duct_troop",
+      "is_hvac_ducted": true,
+      "description": "Return air from troop zones back to shared AHU. Significant recirculation risk."
+    },
+    {
+      "from": "HVAC_Galley",
+      "to": "HVAC_Crew_Habitable",
+      "flow_rate_m3h": 400,
+      "path": "galley_exhaust_to_mess",
+      "is_hvac_ducted": true,
+      "description": "Galley exhaust partially recirculated to mess decks. Hood exhaust vented topside."
+    },
+    {
+      "from": "HVAC_Galley",
+      "to": "HVAC_Troop_Berthing",
+      "flow_rate_m3h": 350,
+      "path": "galley_to_troop_mess",
+      "is_hvac_ducted": true,
+      "description": "Galley supply to troop mess deck."
+    },
+    {
+      "from": "HVAC_Medical",
+      "to": "HVAC_Crew_Habitable",
+      "flow_rate_m3h": 200,
+      "path": "medical_exhaust",
+      "is_hvac_ducted": true,
+      "description": "Medical ward exhaust. Designed for negative pressure relative to surrounding spaces."
+    },
+    {
+      "from": "HVAC_Vehicle_Deck",
+      "to": "HVAC_Well_Deck",
+      "flow_rate_m3h": 500,
+      "path": "vehicle_ramp",
+      "is_hvac_ducted": false,
+      "description": "Passive airflow through vehicle ramp opening connecting vehicle deck to well deck."
+    },
+    {
+      "from": "HVAC_Aviation",
+      "to": "HVAC_Well_Deck",
+      "flow_rate_m3h": 300,
+      "path": "aft_passageway",
+      "is_hvac_ducted": false,
+      "description": "Passive airflow between hangar/flight deck and well deck through aft passageways."
+    },
+    {
+      "from": "HVAC_Troop_Berthing",
+      "to": "HVAC_Vehicle_Deck",
+      "flow_rate_m3h": 250,
+      "path": "troop_staging_trunk",
+      "is_hvac_ducted": false,
+      "description": "Passive airflow between troop berthing and vehicle deck through staging area access."
+    },
+    {
+      "from": "HVAC_Crew_Habitable",
+      "to": "HVAC_Machinery",
+      "flow_rate_m3h": 150,
+      "path": "machinery_access_trunk",
+      "is_hvac_ducted": false,
+      "description": "Passive airflow to machinery spaces through access trunks. Minimal exchange due to pressure differential."
+    }
+  ],
+  "adjacency": [
+    {
+      "from": "Bridge",
+      "to": "CIC",
+      "type": "ladder_well"
+    },
+    {
+      "from": "CIC",
+      "to": "Ship_Officers_Quarters",
+      "type": "ladder_well"
+    },
+    {
+      "from": "Ship_Officers_Quarters",
+      "to": "Ship_CPO_Quarters",
+      "type": "passageway"
+    },
+    {
+      "from": "Ship_Officers_Quarters",
+      "to": "Wardroom",
+      "type": "passageway"
+    },
+    {
+      "from": "Ship_CPO_Quarters",
+      "to": "Passageway_Main",
+      "type": "passageway"
+    },
+    {
+      "from": "Ship_Enlisted_Berthing",
+      "to": "Passageway_Main",
+      "type": "passageway"
+    },
+    {
+      "from": "Ship_Enlisted_Berthing",
+      "to": "Crew_Mess",
+      "type": "ladder_well"
+    },
+    {
+      "from": "Crew_Mess",
+      "to": "Galley",
+      "type": "service_hatch"
+    },
+    {
+      "from": "Galley",
+      "to": "Troop_Mess",
+      "type": "service_hatch"
+    },
+    {
+      "from": "Troop_Mess",
+      "to": "Troop_Recreation",
+      "type": "passageway"
+    },
+    {
+      "from": "Troop_Berthing_Fwd",
+      "to": "Troop_Berthing_Mid",
+      "type": "passageway"
+    },
+    {
+      "from": "Troop_Berthing_Mid",
+      "to": "Troop_Berthing_Aft",
+      "type": "passageway"
+    },
+    {
+      "from": "Troop_Berthing_Fwd",
+      "to": "Troop_Mess",
+      "type": "ladder_well"
+    },
+    {
+      "from": "Troop_Berthing_Mid",
+      "to": "Troop_Mess",
+      "type": "ladder_well"
+    },
+    {
+      "from": "Troop_Berthing_Aft",
+      "to": "Vehicle_Deck",
+      "type": "ladder_well"
+    },
+    {
+      "from": "Troop_Recreation",
+      "to": "Passageway_Main",
+      "type": "passageway"
+    },
+    {
+      "from": "Medical_Ward",
+      "to": "Passageway_Main",
+      "type": "sealed_door"
+    },
+    {
+      "from": "Marine_Planning",
+      "to": "CIC",
+      "type": "passageway"
+    },
+    {
+      "from": "Marine_Planning",
+      "to": "Wardroom",
+      "type": "passageway"
+    },
+    {
+      "from": "Vehicle_Deck",
+      "to": "Well_Deck",
+      "type": "passageway"
+    },
+    {
+      "from": "Hangar",
+      "to": "Flight_Deck",
+      "type": "passageway"
+    },
+    {
+      "from": "Hangar",
+      "to": "Vehicle_Deck",
+      "type": "passageway"
+    },
+    {
+      "from": "Well_Deck",
+      "to": "Flight_Deck",
+      "type": "passageway"
+    },
+    {
+      "from": "Engine_Room_Fwd",
+      "to": "Engine_Room_Aft",
+      "type": "passageway"
+    },
+    {
+      "from": "Engine_Room_Fwd",
+      "to": "Ship_Enlisted_Berthing",
+      "type": "ladder_well"
+    },
+    {
+      "from": "Passageway_Main",
+      "to": "Galley",
+      "type": "passageway"
+    },
+    {
+      "from": "Passageway_Main",
+      "to": "Medical_Ward",
+      "type": "passageway"
+    }
+  ]
+}
