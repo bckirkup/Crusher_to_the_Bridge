@@ -248,10 +248,12 @@ class WearableMonitor:
         devices: dict[str, WearableDevice],
         class_device_map: dict[str, str],
         rng: np.random.Generator | None = None,
+        anomaly_z_threshold: float = 2.0,
     ) -> None:
         self.devices = devices
         self.class_device_map = class_device_map
         self.rng = rng if rng is not None else np.random.default_rng()
+        self.anomaly_z_threshold = anomaly_z_threshold
         self._agent_states: dict[int, AgentWearableState] = {}
 
     @property
@@ -383,7 +385,7 @@ class WearableMonitor:
                 value = baseline + inf_delta + circadian + sleep_mod + state.drift[ch]
 
                 if ch in ("heart_rate", "activity_score"):
-                    value = baseline + (value - baseline) * activity_mult + inf_delta
+                    value = baseline + (circadian + sleep_mod + state.drift[ch]) * activity_mult + inf_delta
 
                 # Add measurement noise
                 value += float(self.rng.normal(0, sigma))
@@ -412,7 +414,7 @@ class WearableMonitor:
                 if baseline_std > 0:
                     z_score = abs(mean_val - baseline_val) / baseline_std
                     ch_summary["z_score"] = round(z_score, 2)
-                    ch_summary["anomaly"] = z_score > 2.0
+                    ch_summary["anomaly"] = z_score > self.anomaly_z_threshold
                 else:
                     ch_summary["z_score"] = 0.0
                     ch_summary["anomaly"] = False
@@ -557,8 +559,11 @@ def build_wearable_monitor_from_config(
     if not devices:
         return None
 
+    anomaly_z_threshold = wm_cfg.get("anomaly_z_threshold", 2.0)
+
     return WearableMonitor(
         devices=devices,
         class_device_map=class_device_map,
         rng=rng,
+        anomaly_z_threshold=anomaly_z_threshold,
     )
