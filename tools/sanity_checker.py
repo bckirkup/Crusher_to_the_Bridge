@@ -565,13 +565,429 @@ def _parse_model(
 
 
 
+# ── Pydantic models for config.yaml sections ─────────────────────────────
+
+class AgentClassEntry(BaseModel):
+    class_id: str
+    role_group: str
+    fraction: float
+    home_zone_preference: str = ""
+    free_zone_preference: str = ""
+    duty_zone: str = ""
+
+    @field_validator("fraction")
+    @classmethod
+    def fraction_bounded(cls, v: float) -> float:
+        if v < 0 or v > 1:
+            raise ValueError(f"fraction must be in [0,1], got {v}")
+        return v
+
+    @field_validator("role_group")
+    @classmethod
+    def valid_role_group(cls, v: str) -> str:
+        if v not in ("passenger", "crew"):
+            raise ValueError(f"role_group must be 'passenger' or 'crew', got '{v}'")
+        return v
+
+
+class WearableNoiseEntry(BaseModel):
+    channel: str
+    sigma: float = 0.0
+    drift_rate: float = 0.0
+    dropout_prob: float = 0.0
+
+    @field_validator("sigma")
+    @classmethod
+    def sigma_non_negative(cls, v: float) -> float:
+        if v < 0:
+            raise ValueError(f"sigma must be non-negative, got {v}")
+        return v
+
+    @field_validator("drift_rate")
+    @classmethod
+    def drift_non_negative(cls, v: float) -> float:
+        if v < 0:
+            raise ValueError(f"drift_rate must be non-negative, got {v}")
+        return v
+
+    @field_validator("dropout_prob")
+    @classmethod
+    def dropout_bounded(cls, v: float) -> float:
+        if v < 0 or v > 1:
+            raise ValueError(f"dropout_prob must be in [0,1], got {v}")
+        return v
+
+
+class WearableChannelResponse(BaseModel):
+    channel: str
+    early: float = 0.0
+    peak: float = 0.0
+    late: float = 0.0
+    recovery: float = 0.0
+
+
+class WearableInfectionResponse(BaseModel):
+    pathogen_category: str
+    channel_responses: list[WearableChannelResponse] = []
+
+
+class WearablePhaseBoundary(BaseModel):
+    day: int
+    phase: str
+
+    @field_validator("day")
+    @classmethod
+    def day_non_negative(cls, v: int) -> int:
+        if v < 0:
+            raise ValueError(f"day must be non-negative, got {v}")
+        return v
+
+
+class WearableDeviceEntry(BaseModel):
+    device_id: str
+    channels: list[str]
+    noise: list[WearableNoiseEntry] = []
+    infection_responses: list[WearableInfectionResponse] = []
+    phase_boundaries: list[WearablePhaseBoundary] = []
+
+
+class ClassDeviceMapEntry(BaseModel):
+    agent_class: str
+    device_id: str
+
+
+class EmodPhase(BaseModel):
+    name: str
+    max_rate: float = 0.0
+    sensitivity_cap: float = 0.0
+
+    @field_validator("max_rate")
+    @classmethod
+    def rate_non_negative(cls, v: float) -> float:
+        if v < 0:
+            raise ValueError(f"max_rate must be non-negative, got {v}")
+        return v
+
+    @field_validator("sensitivity_cap")
+    @classmethod
+    def cap_bounded(cls, v: float) -> float:
+        if v < 0 or v > 1:
+            raise ValueError(f"sensitivity_cap must be in [0,1], got {v}")
+        return v
+
+
+# ── config.yaml validation checks ────────────────────────────────────────
+
+def _check_config_yaml(
+    cfg: dict[str, Any],
+    report: Report,
+    zone_ids: set[str] | None = None,
+) -> None:
+    """Validate config.yaml values: bounds, fractions, cross-references."""
+    _check_agent_classes(cfg, report, zone_ids)
+    _check_gender_distribution(cfg, report)
+    _check_wearable_monitoring(cfg, report)
+    _check_modality_params(cfg, report)
+    _check_hvac_params(cfg, report)
+    _check_emod_progression(cfg, report)
+    _check_escalation_params(cfg, report)
+    _check_fred_behavior(cfg, report)
+    _check_multi_pathogen_params(cfg, report)
+    _check_microflora_params(cfg, report, zone_ids)
+
+
+def _check_agent_classes(
+    cfg: dict[str, Any],
+    report: Report,
+    zone_ids: set[str] | None = None,
+) -> None:
+    """Validate agent_classes fractions, role_groups, and zone references."""
+    graph_cfg = cfg.get("ship_graph", {})
+    classes = graph_cfg.get("agent_classes")
+    if not classes:
+        return
+
+    parsed: list[AgentClassEntry] = []
+    for i, entry in enumerate(classes):
+        try:
+            parsed.append(AgentClassEntry.model_validate(entry))
+        except Exception as e:
+            report.error("config.yaml", "SCHEMA",
+                         f"agent_classes[{i}]: {e}")
+
+    if parsed:
+        total = sum(c.fraction for c in parsed)
+        if abs(total - 1.0) > 0.01:
+            report.error("config.yaml", "MATH_BOUND",
+                         f"agent_classes fractions sum to {total:.4f}, "
+                         f"expected ~1.0 (tolerance 0.01)")
+
+        ids = [c.class_id for c in parsed]
+        if len(ids) != len(set(ids)):
+            report.error("config.yaml", "LOGIC_DUP",
+                         f"Duplicate class_id values in agent_classes: {ids}")
+
+    if zone_ids and parsed:
+        for c in parsed:
+            for field_name in ("home_zone_preference", "free_zone_preference", "duty_zone"):
+                val = getattr(c, field_name)
+                if val and not any(val in zid for zid in zone_ids):
+                    report.warn("config.yaml", "GRAPH_REF",
+                                f"agent_classes.{c.class_id}.{field_name} = '{val}' "
+                                f"does not match any zone in spatial_layout")
+
+
+def _check_gender_distribution(cfg: dict[str, Any], report: Report) -> None:
+    """Validate gender_distribution values sum to ~1.0 and are non-negative."""
+    graph_cfg = cfg.get("ship_graph", {})
+    gender = graph_cfg.get("gender_distribution")
+    if not gender:
+        return
+
+    for k, v in gender.items():
+        if not isinstance(v, (int, float)):
+            continue
+        if v < 0:
+            report.error("config.yaml", "MATH_BOUND",
+                         f"gender_distribution.{k} = {v} is negative")
+
+    total = sum(v for v in gender.values() if isinstance(v, (int, float)))
+    if abs(total - 1.0) > 0.01:
+        report.error("config.yaml", "MATH_BOUND",
+                     f"gender_distribution values sum to {total:.4f}, "
+                     f"expected ~1.0 (tolerance 0.01)")
+
+
+def _check_wearable_monitoring(cfg: dict[str, Any], report: Report) -> None:
+    """Validate wearable monitoring devices, noise, and deployment map."""
+    wm = cfg.get("wearable_monitoring")
+    if not wm or not wm.get("enabled", False):
+        return
+
+    devices = wm.get("devices", [])
+    device_ids: set[str] = set()
+    device_channels: dict[str, set[str]] = {}
+
+    for i, dev_raw in enumerate(devices):
+        try:
+            dev = WearableDeviceEntry.model_validate(dev_raw)
+        except Exception as e:
+            report.error("config.yaml", "SCHEMA",
+                         f"wearable_monitoring.devices[{i}]: {e}")
+            continue
+
+        if dev.device_id in device_ids:
+            report.error("config.yaml", "LOGIC_DUP",
+                         f"Duplicate device_id '{dev.device_id}' in wearable_monitoring.devices")
+        device_ids.add(dev.device_id)
+        device_channels[dev.device_id] = set(dev.channels)
+
+        ch_set = set(dev.channels)
+        for noise in dev.noise:
+            if noise.channel not in ch_set:
+                report.error("config.yaml", "GRAPH_REF",
+                             f"Device '{dev.device_id}' noise references channel "
+                             f"'{noise.channel}' not in device channels: {ch_set}")
+
+        for ir in dev.infection_responses:
+            for cr in ir.channel_responses:
+                if cr.channel not in ch_set:
+                    report.error("config.yaml", "GRAPH_REF",
+                                 f"Device '{dev.device_id}' infection_response for "
+                                 f"'{ir.pathogen_category}' references channel "
+                                 f"'{cr.channel}' not in device channels: {ch_set}")
+
+    cdm = wm.get("class_device_map", [])
+    for entry_raw in cdm:
+        try:
+            entry = ClassDeviceMapEntry.model_validate(entry_raw)
+        except Exception as e:
+            report.error("config.yaml", "SCHEMA",
+                         f"wearable_monitoring.class_device_map: {e}")
+            continue
+        if entry.device_id not in device_ids:
+            report.error("config.yaml", "GRAPH_REF",
+                         f"class_device_map assigns '{entry.agent_class}' → "
+                         f"'{entry.device_id}' which is not in devices: {device_ids}")
+
+    obs_sigma = wm.get("observation_noise_sigma", 0.5)
+    if isinstance(obs_sigma, (int, float)) and obs_sigma < 0:
+        report.error("config.yaml", "MATH_BOUND",
+                     f"wearable_monitoring.observation_noise_sigma = {obs_sigma} is negative")
+
+    dropout = wm.get("sync_dropout_prob", 0.02)
+    if isinstance(dropout, (int, float)) and (dropout < 0 or dropout > 1):
+        report.error("config.yaml", "MATH_BOUND",
+                     f"wearable_monitoring.sync_dropout_prob = {dropout} outside [0,1]")
+
+    z_thresh = wm.get("anomaly_z_threshold", 2.0)
+    if isinstance(z_thresh, (int, float)) and z_thresh <= 0:
+        report.error("config.yaml", "MATH_BOUND",
+                     f"wearable_monitoring.anomaly_z_threshold = {z_thresh} must be positive")
+
+
+def _check_modality_params(cfg: dict[str, Any], report: Report) -> None:
+    """Validate probability/scalar parameters for syndromic, RDT, PCR, sequencing."""
+    _prob_fields = [
+        ("syndromic", "sick_call_probability"),
+        ("syndromic", "background_noise_rate"),
+        ("clinical_rdt", "base_sensitivity"),
+        ("clinical_rdt", "specificity"),
+    ]
+    for section, key in _prob_fields:
+        val = cfg.get(section, {}).get(key)
+        if val is not None and isinstance(val, (int, float)):
+            if val < 0 or val > 1:
+                report.error("config.yaml", "MATH_BOUND",
+                             f"{section}.{key} = {val} outside [0,1]")
+
+    _non_neg_fields = [
+        ("syndromic", "cadence"),
+        ("clinical_rdt", "cadence"),
+        ("targeted_pcr", "cadence"),
+        ("targeted_pcr", "extraction_efficiency"),
+        ("targeted_pcr", "lod_ct_threshold"),
+        ("sequencing", "cadence"),
+        ("sequencing", "read_depth"),
+    ]
+    for section, key in _non_neg_fields:
+        val = cfg.get(section, {}).get(key)
+        if val is not None and isinstance(val, (int, float)):
+            if val < 0:
+                report.error("config.yaml", "MATH_BOUND",
+                             f"{section}.{key} = {val} is negative")
+
+
+def _check_hvac_params(cfg: dict[str, Any], report: Report) -> None:
+    """Validate HVAC filter efficiency and decay rate."""
+    hvac = cfg.get("hvac", {})
+    eff = hvac.get("filter_efficiency")
+    if eff is not None and isinstance(eff, (int, float)):
+        if eff < 0 or eff > 1:
+            report.error("config.yaml", "MATH_BOUND",
+                         f"hvac.filter_efficiency = {eff} outside [0,1]")
+    decay = hvac.get("natural_decay_rate")
+    if decay is not None and isinstance(decay, (int, float)):
+        if decay < 0:
+            report.error("config.yaml", "MATH_BOUND",
+                         f"hvac.natural_decay_rate = {decay} is negative")
+
+
+def _check_emod_progression(cfg: dict[str, Any], report: Report) -> None:
+    """Validate EMOD progression phases and durations."""
+    emod = cfg.get("emod_progression", {})
+    incub = emod.get("incubation_epochs")
+    if incub is not None and isinstance(incub, (int, float)) and incub < 0:
+        report.error("config.yaml", "MATH_BOUND",
+                     f"emod_progression.incubation_epochs = {incub} is negative")
+
+    phases_raw = emod.get("shedding_phases", [])
+    durations = emod.get("phase_durations", [])
+
+    for i, p in enumerate(phases_raw):
+        try:
+            EmodPhase.model_validate(p)
+        except Exception as e:
+            report.error("config.yaml", "SCHEMA",
+                         f"emod_progression.shedding_phases[{i}]: {e}")
+
+    if phases_raw and durations:
+        if len(phases_raw) != len(durations):
+            report.error("config.yaml", "LOGIC_MISMATCH",
+                         f"emod_progression has {len(phases_raw)} shedding_phases "
+                         f"but {len(durations)} phase_durations — counts must match")
+        for i, d in enumerate(durations):
+            if isinstance(d, (int, float)) and d <= 0:
+                report.error("config.yaml", "MATH_BOUND",
+                             f"emod_progression.phase_durations[{i}] = {d} must be positive")
+
+
+def _check_escalation_params(cfg: dict[str, Any], report: Report) -> None:
+    """Validate escalation thresholds."""
+    esc = cfg.get("escalation", {})
+    sst = esc.get("syndromic_suspect_threshold")
+    if sst is not None and isinstance(sst, (int, float)) and sst < 0:
+        report.error("config.yaml", "MATH_BOUND",
+                     f"escalation.syndromic_suspect_threshold = {sst} is negative")
+    pct = esc.get("pcr_confirm_ct_threshold")
+    if pct is not None and isinstance(pct, (int, float)) and pct <= 0:
+        report.error("config.yaml", "MATH_BOUND",
+                     f"escalation.pcr_confirm_ct_threshold = {pct} must be positive")
+
+
+def _check_fred_behavior(cfg: dict[str, Any], report: Report) -> None:
+    """Validate FRED behavioral compliance parameters."""
+    fred = cfg.get("fred_behavior", {})
+    qc = fred.get("quarantine_compliance")
+    if qc is not None and isinstance(qc, (int, float)):
+        if qc < 0 or qc > 1:
+            report.error("config.yaml", "MATH_BOUND",
+                         f"fred_behavior.quarantine_compliance = {qc} outside [0,1]")
+    delay = fred.get("compliance_delay_epochs")
+    if delay is not None and isinstance(delay, (int, float)) and delay < 0:
+        report.error("config.yaml", "MATH_BOUND",
+                     f"fred_behavior.compliance_delay_epochs = {delay} is negative")
+
+    for i, cat in enumerate(fred.get("healthy_noise_categories", [])):
+        prob = cat.get("probability")
+        if prob is not None and isinstance(prob, (int, float)):
+            if prob < 0 or prob > 1:
+                report.error("config.yaml", "MATH_BOUND",
+                             f"fred_behavior.healthy_noise_categories[{i}].probability "
+                             f"= {prob} outside [0,1]")
+
+
+def _check_multi_pathogen_params(cfg: dict[str, Any], report: Report) -> None:
+    """Validate multi-pathogen config parameters."""
+    mp = cfg.get("multi_pathogen", {})
+    imm_frac = mp.get("immunocompromised_fraction")
+    if imm_frac is not None and isinstance(imm_frac, (int, float)):
+        if imm_frac < 0 or imm_frac > 1:
+            report.error("config.yaml", "MATH_BOUND",
+                         f"multi_pathogen.immunocompromised_fraction = {imm_frac} "
+                         f"outside [0,1]")
+    imm_mult = mp.get("immunocompromised_multiplier")
+    if imm_mult is not None and isinstance(imm_mult, (int, float)):
+        if imm_mult < 0:
+            report.error("config.yaml", "MATH_BOUND",
+                         f"multi_pathogen.immunocompromised_multiplier = {imm_mult} "
+                         f"is negative")
+
+
+def _check_microflora_params(
+    cfg: dict[str, Any],
+    report: Report,
+    zone_ids: set[str] | None = None,
+) -> None:
+    """Validate microflora config and cross-reference graywater zones."""
+    mf = cfg.get("microflora", {})
+    shed = mf.get("disrupted_shed_mass")
+    if shed is not None and isinstance(shed, (int, float)) and shed < 0:
+        report.error("config.yaml", "MATH_BOUND",
+                     f"microflora.disrupted_shed_mass = {shed} is negative")
+    scale = mf.get("clr_shift_scale")
+    if scale is not None and isinstance(scale, (int, float)) and scale < 0:
+        report.error("config.yaml", "MATH_BOUND",
+                     f"microflora.clr_shift_scale = {scale} is negative")
+
+    if zone_ids:
+        for gz in mf.get("graywater_zones", []):
+            if gz not in zone_ids:
+                report.warn("config.yaml", "GRAPH_REF",
+                            f"microflora.graywater_zones references '{gz}' "
+                            f"not found in spatial_layout zones")
+
+
 # ── Path resolution (orchestrator-aligned) ───────────────────────────────
 
-def paths_from_run_config(repo_root: str, config_yaml: str | None = None) -> dict[str, str]:
-    """Resolve platform + pathogen paths from crusher_labs/config.yaml."""
+def paths_from_run_config(repo_root: str, config_yaml: str | None = None) -> dict[str, Any]:
+    """Resolve platform + pathogen paths from crusher_labs/config.yaml.
+
+    Returns a dict with ``config_dir``, ``platform_dir``, ``pathogen_file``,
+    and ``cfg`` (the raw parsed config dict for downstream validation).
+    """
     if config_yaml is None:
         config_yaml = os.path.join(repo_root, "crusher_labs", "config.yaml")
-    import sys
     sys.path.insert(0, repo_root)
     from crusher_labs import load_config
     cfg = load_config(config_yaml)
@@ -584,6 +1000,7 @@ def paths_from_run_config(repo_root: str, config_yaml: str | None = None) -> dic
         "config_dir": os.path.join(repo_root, "data", "config"),
         "platform_dir": platform_dir,
         "pathogen_file": os.path.join(repo_root, profiles_rel),
+        "cfg": cfg,
     }
 
 # ── Main ─────────────────────────────────────────────────────────────────
@@ -594,8 +1011,14 @@ def run_checks(
     pathogen_dir: str | None = None,
     *,
     pathogen_file: str | None = None,
+    cfg: dict[str, Any] | None = None,
 ) -> Report:
-    """Run all sanity checks. Uses pathogen_file or {pathogen_dir}/active_profiles.json."""
+    """Run all sanity checks.
+
+    Uses pathogen_file or {pathogen_dir}/active_profiles.json.
+    When *cfg* is provided (the parsed config.yaml dict), also validates
+    config.yaml values: bounds, fractions, cross-references.
+    """
     if pathogen_file is None:
         base = pathogen_dir or os.path.join(config_dir, "..", "pathogens")
         pathogen_file = os.path.join(base, "active_profiles.json")
@@ -676,6 +1099,25 @@ def run_checks(
     else:
         print(f"  {_GREEN}No contradictions detected{_RESET}")
 
+    if cfg is not None:
+        zone_ids = {z.id for z in layout.zones} if layout else None
+        print(f"\n  {_CYAN}Running config.yaml validation checks...{_RESET}")
+        pre = len(report.findings)
+        _check_config_yaml(cfg, report, zone_ids)
+        added = len(report.findings) - pre
+        if added:
+            errs = sum(1 for f in report.findings[pre:] if f.severity == Severity.ERROR)
+            warns = added - errs
+            parts = []
+            if errs:
+                parts.append(f"{errs} error(s)")
+            if warns:
+                parts.append(f"{warns} warning(s)")
+            color = _RED if errs else _YELLOW
+            print(f"  {color}Found {', '.join(parts)}{_RESET}")
+        else:
+            print(f"  {_GREEN}All config.yaml values valid{_RESET}")
+
     return report
 
 
@@ -755,7 +1197,10 @@ def main() -> None:
     if args.from_config:
         r = paths_from_run_config(_REPO_ROOT, args.config_yaml)
         print(f"  Paths from {args.config_yaml}\n")
-        report = run_checks(r["config_dir"], r["platform_dir"], pathogen_file=r["pathogen_file"])
+        report = run_checks(
+            r["config_dir"], r["platform_dir"],
+            pathogen_file=r["pathogen_file"], cfg=r["cfg"],
+        )
     else:
         pf = args.pathogen_file or os.path.join(args.pathogen_dir, "active_profiles.json")
         report = run_checks(args.config_dir, args.platform_dir, pathogen_file=pf)
