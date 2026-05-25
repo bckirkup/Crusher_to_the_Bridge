@@ -50,6 +50,9 @@ from crusher_labs.cost_ledger import (
 )
 from orchestrator_types import (
     REPO_ROOT,
+    SYMPTOM_ISOLATED,
+    SYMPTOM_NON_COMPLIANT,
+    LOCATION_ISOLATED,
     ObservationEngine,
     ProtocolContext,
 )
@@ -196,16 +199,16 @@ def engine_payload_to_schema(
         if aid in isolated_ids:
             agent_dict = make_agent(
                 agent_id=aid,
-                symptom_status="isolated",
+                symptom_status=SYMPTOM_ISOLATED,
                 shedding_rate=0.0,
-                location="Isolated_In_Quarters",
+                location=LOCATION_ISOLATED,
                 agent_class=a_class,
                 gender=a_gender,
             )
         elif aid in quarantine_refusers:
             agent_dict = make_agent(
                 agent_id=aid,
-                symptom_status="non_compliant",
+                symptom_status=SYMPTOM_NON_COMPLIANT,
                 shedding_rate=float(a.get("shedding_rate", 0.0)),
                 location=a.get("location", "unknown"),
                 agent_class=a_class,

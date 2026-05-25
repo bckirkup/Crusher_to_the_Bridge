@@ -40,7 +40,12 @@ jobs:
           from crusher_labs.stoplight import stoplight_from_ct, meets_threshold
           from crusher_labs.protocol_engine import compute_stoplights
           from crusher_labs.lab_notebook import _stoplight_from_ct
-          print('Import hygiene OK: stoplight module is canonical source')
+          from orchestrator_types import SimulationState, ObservationEngine, ProtocolContext
+          from orchestrator_init import initialize_ship_graph, build_engine
+          from orchestrator_epoch import sync_vsp_isolation, step_fred_compliance, run_observation_sampling, confine_all_agents, apply_surface_decontamination, apply_zone_closures
+          from orchestrator_record import record_epoch, finalize_simulation
+          from orchestrator_display import print_executive_summary
+          print('Import hygiene OK: modules split correctly, stoplight canonical')
           "
 
       - name: Run orchestrator (24-epoch smoke test)

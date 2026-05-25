@@ -25,6 +25,9 @@ from crusher_labs.modalities.wearable import WearableDataStream
 from orchestrator_types import (
     STATUS_SUSPECTED,
     STATUS_CONFIRMED,
+    SYMPTOM_SYMPTOMATIC,
+    SYMPTOM_NON_COMPLIANT,
+    LOCATION_ISOLATED,
     DEFAULT_AIRBORNE_FRACTION,
     DEFAULT_SURFACE_FRACTION,
     DEFAULT_GREYWATER_FRACTION,
@@ -100,7 +103,7 @@ def step_mid_cruise_introductions(
                 if not a.immune
                 and not a.is_infected_with(pid)
                 and a.infection_status != InfectionStatus.RECOVERED
-                and a.current_location != "Isolated_In_Quarters"
+                and a.current_location != LOCATION_ISOLATED
             ]
             if candidates:
                 chosen = rng.choice(
@@ -278,11 +281,24 @@ def step_quarantine_confinement(
     state: SimulationState,
     syndromic: Any,
 ) -> None:
-    """Apply quarantine confinement from protocol modifiers or legacy CONFIRMED fallback."""
+    """Apply quarantine confinement from protocol modifiers or legacy CONFIRMED fallback.
+
+    Handles three confinement modes:
+    - SOP-009 ``confine_all_to_quarters``: full-ship lockdown of ALL agents
+    - SOP-008/010 ``confine_symptomatic_to_quarters``: symptomatic only
+    - Legacy fallback: confine symptomatic + shedding when CONFIRMED
+    """
+    # SOP-009: full-ship lockdown — confine every agent
+    if merged_mods.get("confine_all_to_quarters", False):
+        confine_all_agents(epoch, agents, state, syndromic)
+        return
+
+    # SOP-008/010: symptomatic-only confinement
     if merged_mods.get("confine_symptomatic_to_quarters", False):
         confine_agents(epoch, agents, state, syndromic, include_shedding=False)
         return
 
+    # Legacy fallback when CONFIRMED but no protocol modifier active
     if trigger_status == STATUS_CONFIRMED:
         confine_agents(epoch, agents, state, syndromic, include_shedding=True)
 
@@ -299,7 +315,7 @@ def confine_agents(
         aid = agent["agent_id"]
         if aid in state.isolated_ids or aid in state.quarantine_refusers:
             continue
-        is_symptomatic = agent["symptom_status"] in ("symptomatic", "non_compliant")
+        is_symptomatic = agent["symptom_status"] in (SYMPTOM_SYMPTOMATIC, SYMPTOM_NON_COMPLIANT)
         is_shedding = include_shedding and agent.get("shedding_rate", 0.0) > 0.0
         if not (is_symptomatic or is_shedding):
             continue
@@ -316,6 +332,57 @@ def confine_agents(
                 "epoch": epoch, "agent_id": aid,
                 "action": "refused_quarantine",
             })
+
+
+def confine_all_agents(
+    epoch: int,
+    agents: list[dict[str, Any]],
+    state: SimulationState,
+    syndromic: Any,
+) -> None:
+    """SOP-009: confine ALL agents to quarters (full-ship lockdown)."""
+    for agent in agents:
+        aid = agent["agent_id"]
+        if aid in state.isolated_ids or aid in state.quarantine_refusers:
+            continue
+        if syndromic.check_quarantine_compliance(aid, 0):
+            state.isolated_ids.add(aid)
+            state.compliance_log.append({
+                "epoch": epoch, "agent_id": aid,
+                "action": "general_confinement",
+            })
+        else:
+            state.quarantine_refusers.add(aid)
+            state.quarantine_order_epoch[aid] = epoch
+            state.compliance_log.append({
+                "epoch": epoch, "agent_id": aid,
+                "action": "refused_general_confinement",
+            })
+
+
+def apply_surface_decontamination(
+    engine: KorkinShipEngine,
+    factor: float,
+) -> None:
+    """SOP-010: reduce surface pathogen mass by a decontamination factor.
+
+    ``factor`` is the *reduction* fraction (e.g. 0.60 means remove 60% of
+    surface mass, retaining 40%).
+    """
+    retention = 1.0 - max(0.0, min(1.0, factor))
+    for zname in list(engine.zone_pathogen_mass):
+        engine.zone_pathogen_mass[zname] *= retention
+
+
+def apply_zone_closures(
+    engine: KorkinShipEngine,
+    closed_zones: list[str],
+) -> None:
+    """SOP-009: relocate agents from closed zones to their home zones."""
+    closed_set = set(closed_zones)
+    for agent in engine.agents:
+        if agent.current_location in closed_set:
+            agent.current_location = agent.home_zone
 
 
 # ── Cost accounting ──────────────────────────────────────────────────────
@@ -373,7 +440,7 @@ def compute_zone_microflora_shifts(
         if agent.microflora_disruption_status <= 0:
             continue
         loc = agent.current_location
-        if loc == "Isolated_In_Quarters":
+        if loc == LOCATION_ISOLATED:
             continue
 
         for pid in agent.active_pathogen_ids:

@@ -38,6 +38,7 @@ from engines.py_contam_bridge import (
     build_transport_engine,
     load_air_flow_paths,
 )
+from engines.infection_dynamics_bridge import VSP_THRESHOLD_FRACTION
 from engines.transmission_core import (
     TransmissionCore,
     build_hvac_downstream_map,
@@ -77,6 +78,8 @@ from orchestrator_epoch import (
     step_cost_accounting,
     compute_zone_microflora_shifts,
     step_wearable_monitoring,
+    apply_surface_decontamination,
+    apply_zone_closures,
 )
 from orchestrator_record import (
     record_epoch,
@@ -262,12 +265,27 @@ def run() -> None:
             clin_rdt_results, clin_qpcr_results, clin_microbio_results,
         )
         reset_modifiers(contam_engine, tx_core, proto_ctx.original_filter_eff)
+        engine.vsp_threshold_fraction = VSP_THRESHOLD_FRACTION
         active_mods = proto_ctx.protocol_engine.evaluate_epoch(epoch, stoplights)
         merged_mods = proto_ctx.protocol_engine.get_merged_modifiers(active_mods)
 
         if merged_mods:
             apply_hvac_modifiers(contam_engine, merged_mods)
             apply_transmission_modifiers(tx_core, merged_mods)
+
+            # SOP-009: close specified zones, relocating agents
+            if "close_zones" in merged_mods:
+                apply_zone_closures(engine, merged_mods["close_zones"])
+
+            # SOP-010: surface decontamination
+            if "surface_decontamination_factor" in merged_mods:
+                apply_surface_decontamination(
+                    engine, merged_mods["surface_decontamination_factor"],
+                )
+
+            # SOP-010: override engine VSP threshold from protocol config
+            if "vsp_isolation_threshold_fraction" in merged_mods:
+                engine.vsp_threshold_fraction = merged_mods["vsp_isolation_threshold_fraction"]
 
         step_cost_accounting(
             epoch, proto_ctx,

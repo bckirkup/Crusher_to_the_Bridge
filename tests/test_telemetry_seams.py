@@ -24,6 +24,11 @@ from orchestrator_types import (
     STATUS_BASELINE,
     STATUS_SUSPECTED,
     STATUS_CONFIRMED,
+    SYMPTOM_ASYMPTOMATIC,
+    SYMPTOM_SYMPTOMATIC,
+    SYMPTOM_ISOLATED,
+    SYMPTOM_NON_COMPLIANT,
+    LOCATION_ISOLATED,
     SimulationState,
 )
 from orchestrator_init import (
@@ -110,7 +115,7 @@ class TestEnginePayloadBoundary:
     def test_shedding_rate_always_float(self) -> None:
         payload = {
             "agents": [
-                {"agent_id": 0, "symptom_status": "asymptomatic",
+                {"agent_id": 0, "symptom_status": SYMPTOM_ASYMPTOMATIC,
                  "shedding_rate": 5, "location": "Bridge"},
             ],
             "spaces": {"Bridge": {"pathogen_mass": 10}},
@@ -122,14 +127,14 @@ class TestEnginePayloadBoundary:
     def test_shedding_rate_zero_for_isolated(self) -> None:
         payload = {
             "agents": [
-                {"agent_id": 1, "symptom_status": "symptomatic",
+                {"agent_id": 1, "symptom_status": SYMPTOM_SYMPTOMATIC,
                  "shedding_rate": 999.0, "location": "MedBay"},
             ],
             "spaces": {},
         }
         agents, _ = engine_payload_to_schema(payload, {1}, set())
         assert agents[0]["shedding_rate"] == 0.0
-        assert agents[0]["location"] == "Isolated_In_Quarters"
+        assert agents[0]["location"] == LOCATION_ISOLATED
 
     def test_pathogen_mass_coerced_to_float(self) -> None:
         payload = {
@@ -156,19 +161,19 @@ class TestEnginePayloadBoundary:
     def test_non_compliant_preserves_shedding(self) -> None:
         payload = {
             "agents": [
-                {"agent_id": 3, "symptom_status": "symptomatic",
+                {"agent_id": 3, "symptom_status": SYMPTOM_SYMPTOMATIC,
                  "shedding_rate": 42.5, "location": "Galley"},
             ],
             "spaces": {},
         }
         agents, _ = engine_payload_to_schema(payload, set(), {3})
-        assert agents[0]["symptom_status"] == "non_compliant"
+        assert agents[0]["symptom_status"] == SYMPTOM_NON_COMPLIANT
         assert agents[0]["shedding_rate"] == 42.5
 
     def test_microflora_disruption_field_preserved(self) -> None:
         payload = {
             "agents": [
-                {"agent_id": 0, "symptom_status": "asymptomatic",
+                {"agent_id": 0, "symptom_status": SYMPTOM_ASYMPTOMATIC,
                  "microflora_disruption": 0.75},
             ],
             "spaces": {},

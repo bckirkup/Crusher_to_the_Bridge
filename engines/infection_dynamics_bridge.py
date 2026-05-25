@@ -487,6 +487,7 @@ class KorkinShipEngine:
         self.vsp_isolation = vsp_isolation
         self._agent_classes = agent_classes
         self._gender_distribution = gender_distribution or DEFAULT_GENDER_DISTRIBUTION
+        self.vsp_threshold_fraction: float = VSP_THRESHOLD_FRACTION
 
         self._dining_zones = [z["name"] for z in self.zones if z["type"] == "Dining"]
         self._free_zones = [z["name"] for z in self.zones if z["type"] == "Free"]
@@ -783,7 +784,7 @@ class KorkinShipEngine:
         # 5. VSP isolation check (Agent.java: 3% threshold)
         total_pop = len(self.agents)
         total_ill = sum(1 for a in self.agents if a.is_symptomatic)
-        vsp_threshold = int(VSP_THRESHOLD_FRACTION * total_pop)
+        vsp_threshold = int(self.vsp_threshold_fraction * total_pop)
         if self.vsp_isolation and total_ill >= vsp_threshold and not self.vsp_triggered:
             self.vsp_triggered = True
 
