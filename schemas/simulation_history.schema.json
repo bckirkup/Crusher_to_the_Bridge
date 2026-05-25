@@ -138,6 +138,14 @@
         "day_of_infection": {"type": "integer"},
         "symptom_status": {"type": "string"},
         "infection_pathway": {"type": "string"},
+        "agent_class": {
+          "type": "string",
+          "description": "Agent class identifier (e.g. crew_medical, passenger_general)"
+        },
+        "gender": {
+          "type": "string",
+          "description": "Agent gender (e.g. male, female)"
+        },
         "susceptibility_multiplier": {
           "type": "object",
           "additionalProperties": {"type": "number"}

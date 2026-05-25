@@ -30,6 +30,8 @@ def make_agent(
     symptom_status: str = "asymptomatic",
     shedding_rate: float = 0.0,
     location: str | None = None,
+    agent_class: str | None = None,
+    gender: str | None = None,
 ) -> dict[str, Any]:
     """Return a single agent state dictionary."""
     d: dict[str, Any] = {
@@ -39,6 +41,10 @@ def make_agent(
     }
     if location is not None:
         d["location"] = location
+    if agent_class is not None:
+        d["agent_class"] = agent_class
+    if gender is not None:
+        d["gender"] = gender
     return d
 
 

@@ -126,6 +126,118 @@ class TestInitializeShipGraph:
         for ht in ship["high_traffic_zones"]:
             assert ht in ship["zone_names"]
 
+    def test_agent_classes_present(self) -> None:
+        cfg = load_config()
+        ship = _initialize_ship_graph(cfg)
+        assert "agent_classes" in ship
+        class_ids = [c["class_id"] for c in ship["agent_classes"]]
+        assert "crew_medical" in class_ids
+        assert "passenger_general" in class_ids
+
+    def test_gender_distribution_present(self) -> None:
+        cfg = load_config()
+        ship = _initialize_ship_graph(cfg)
+        assert "gender_distribution" in ship
+        gd = ship["gender_distribution"]
+        assert "male" in gd
+        assert "female" in gd
+
+    def test_agent_class_fractions_sum_to_one(self) -> None:
+        cfg = load_config()
+        ship = _initialize_ship_graph(cfg)
+        classes = ship.get("agent_classes", [])
+        total_frac = sum(c.get("fraction", 0) for c in classes)
+        assert abs(total_frac - 1.0) < 0.01
+
+
+# ── Agent class engine tests ────────────────────────────────────────────
+
+class TestAgentClassEngine:
+    def test_engine_creates_agents_with_classes(self) -> None:
+        from engines.infection_dynamics_bridge import KorkinShipEngine
+        engine = KorkinShipEngine(
+            num_passengers=10, num_crew=10, initial_infected=1,
+            agent_classes=[
+                {"class_id": "passenger_general", "role_group": "passenger", "fraction": 0.50,
+                 "home_zone_preference": "Berthing", "duty_zone": "", "free_zone_preference": ""},
+                {"class_id": "crew_medical", "role_group": "crew", "fraction": 0.25,
+                 "home_zone_preference": "Berthing", "duty_zone": "MedBay", "free_zone_preference": "MedBay"},
+                {"class_id": "crew_general", "role_group": "crew", "fraction": 0.25,
+                 "home_zone_preference": "Berthing", "duty_zone": "", "free_zone_preference": ""},
+            ],
+            seed=42,
+        )
+        assert len(engine.agents) == 20
+        classes = {a.agent_class for a in engine.agents}
+        assert "passenger_general" in classes
+        assert "crew_medical" in classes
+        assert "crew_general" in classes
+
+    def test_engine_assigns_gender(self) -> None:
+        from engines.infection_dynamics_bridge import KorkinShipEngine
+        engine = KorkinShipEngine(
+            num_passengers=50, num_crew=50, initial_infected=1,
+            gender_distribution={"male": 0.50, "female": 0.50},
+            seed=42,
+        )
+        genders = {a.gender for a in engine.agents}
+        assert "male" in genders
+        assert "female" in genders
+        for a in engine.agents:
+            assert a.gender in ("male", "female")
+
+    def test_legacy_mode_still_works(self) -> None:
+        from engines.infection_dynamics_bridge import KorkinShipEngine
+        engine = KorkinShipEngine(
+            num_passengers=10, num_crew=5, initial_infected=1,
+            seed=42,
+        )
+        assert len(engine.agents) == 15
+        roles = {a.role for a in engine.agents}
+        assert "passenger" in roles
+        assert "crew" in roles
+        for a in engine.agents:
+            assert a.agent_class in ("passenger_general", "crew_general")
+            assert a.gender in ("male", "female", "unknown")
+
+    def test_medical_crew_duty_zone(self) -> None:
+        from engines.infection_dynamics_bridge import KorkinShipEngine
+        engine = KorkinShipEngine(
+            num_passengers=0, num_crew=20, initial_infected=0,
+            agent_classes=[
+                {"class_id": "crew_medical", "role_group": "crew", "fraction": 1.0,
+                 "home_zone_preference": "Berthing", "duty_zone": "MedBay",
+                 "free_zone_preference": "MedBay"},
+            ],
+            seed=42,
+        )
+        for a in engine.agents:
+            assert a.agent_class == "crew_medical"
+            assert "MedBay" in a.work_zone or "MedBay" == a.work_zone
+
+    def test_gender_in_schema_export(self) -> None:
+        from engines.infection_dynamics_bridge import KorkinShipEngine
+        engine = KorkinShipEngine(
+            num_passengers=5, num_crew=5, initial_infected=1,
+            seed=42,
+        )
+        for a in engine.agents:
+            d = a.to_schema_dict()
+            assert "agent_class" in d
+            assert "gender" in d
+            assert d["gender"] in ("male", "female", "unknown")
+
+    def test_summary_includes_class_and_gender(self) -> None:
+        from engines.infection_dynamics_bridge import KorkinShipEngine
+        engine = KorkinShipEngine(
+            num_passengers=10, num_crew=10, initial_infected=1, seed=42,
+        )
+        summary = engine.get_summary()
+        assert "agent_classes" in summary
+        assert "gender_distribution" in summary
+        assert sum(summary["agent_classes"].values()) == 20
+        assert sum(summary["gender_distribution"].values()) == 20
+
 
 # ── Escalation tests ────────────────────────────────────────────────────
 

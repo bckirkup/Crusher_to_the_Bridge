@@ -32,6 +32,16 @@ def print_initialization(
     print(f"\n  Ship graph: {ship['num_agents']} agents  "
           f"({sum(1 for r in ship['agent_roles'].values() if r == 'passenger')} passengers, "
           f"{sum(1 for r in ship['agent_roles'].values() if r == 'crew')} crew)")
+    if "agent_classes" in ship:
+        print("  Agent classes:")
+        for cls in ship["agent_classes"]:
+            cid = cls.get("class_id", "?")
+            frac = cls.get("fraction", 0)
+            print(f"    {cid:25s} {frac:.0%}")
+    if "gender_distribution" in ship:
+        gd = ship["gender_distribution"]
+        gd_str = "  ".join(f"{k}={v:.0%}" for k, v in gd.items())
+        print(f"  Gender distribution: {gd_str}")
     print(f"  Zones: {', '.join(ship['zone_names'])}")
     print(f"  High-traffic: {', '.join(ship['high_traffic_zones'])}")
 
@@ -72,6 +82,16 @@ def print_korkin_engine(engine: KorkinShipEngine) -> None:
           f"({engine.num_passengers} passengers, {engine.num_crew} crew)")
     print(f"  Immune (negative secretors): {engine_summary['immune']}")
     print(f"  Initial infected: {engine_summary['infected']}")
+    if engine_summary.get("agent_classes"):
+        cls_str = "  ".join(
+            f"{c}={n}" for c, n in sorted(engine_summary["agent_classes"].items())
+        )
+        print(f"  Agent classes: {cls_str}")
+    if engine_summary.get("gender_distribution"):
+        g_str = "  ".join(
+            f"{g}={n}" for g, n in sorted(engine_summary["gender_distribution"].items())
+        )
+        print(f"  Gender: {g_str}")
     print(f"  Zones: {', '.join(z['name'] for z in engine.zones)}")
     print(f"  VSP isolation: {'enabled' if engine.vsp_isolation else 'disabled'}")
     print()
