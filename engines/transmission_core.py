@@ -29,8 +29,9 @@ Each pathway produces:
 - A **dose contribution** to susceptible agents
 - A **contact-tracing record** for the surveillance inference hook
 
-The combined dose from all pathways feeds the Korkin Lab dose-response
-function: ``P(inf) = 1 - (1 + dose/β)^{-α}``.
+The combined dose from all pathways feeds the dose-response function:
+- **Beta-Poisson**: ``P(inf) = 1 - (1 + dose/β)^{-α}``
+- **Exponential**: ``P(inf) = 1 - exp(-k * dose)``
 """
 
 from __future__ import annotations
@@ -310,9 +311,14 @@ class TransmissionCore:
 
                 profile = self.pathogen_profiles.get(pathogen_id, {})
                 dr = profile.get("dose_response", {})
-                p_alpha = dr.get("alpha", ALPHA)
-                p_beta = dr.get("beta", BETA)
-                inf_prob = 1.0 - math.pow(1.0 + p_dose / p_beta, -p_alpha)
+                model_type = dr.get("model", "beta_poisson")
+                if model_type == "exponential":
+                    k = dr.get("k", 0.01)
+                    inf_prob = 1.0 - math.exp(-k * p_dose)
+                else:
+                    p_alpha = dr.get("alpha", ALPHA)
+                    p_beta = dr.get("beta", BETA)
+                    inf_prob = 1.0 - math.pow(1.0 + p_dose / p_beta, -p_alpha)
 
                 if self.rng.random() < inf_prob:
                     agent.infect_with_pathogen(pathogen_id, p_dose, epoch)

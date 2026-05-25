@@ -324,6 +324,8 @@ def apply_transmission_modifiers(
         transmission_core.droplet_scalar = merged_modifiers["droplet_scalar"]
     if "hvac_airborne_scalar" in merged_modifiers:
         transmission_core.hvac_airborne_scalar = merged_modifiers["hvac_airborne_scalar"]
+    if "fomite_scalar" in merged_modifiers:
+        transmission_core.fomite_scalar = merged_modifiers["fomite_scalar"]
 
 
 def reset_modifiers(
@@ -338,6 +340,7 @@ def reset_modifiers(
         transmission_core.direct_contact_scalar = 1.0
         transmission_core.droplet_scalar = 1.0
         transmission_core.hvac_airborne_scalar = 1.0
+        transmission_core.fomite_scalar = 1.0
 
 
 # ── Factory ──────────────────────────────────────────────────────────────

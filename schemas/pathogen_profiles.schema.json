@@ -34,13 +34,13 @@
         "name": {"type": "string"},
         "category": {
           "type": "string",
-          "enum": ["enteric_viral", "respiratory_viral", "bacterial", "fungal"]
+          "enum": ["enteric_viral", "respiratory_viral", "bacterial", "fungal", "bacterial_waterborne", "enteric_bacterial", "filovirus"]
         },
         "transmission_routes": {
           "type": "array",
           "items": {
             "type": "string",
-            "enum": ["direct_contact", "fomite", "droplet", "hvac_airborne"]
+            "enum": ["direct_contact", "fomite", "droplet", "hvac_airborne", "water_aerosol", "food", "water", "bodily_fluids"]
           },
           "minItems": 1
         },
@@ -60,11 +60,18 @@
         },
         "dose_response": {
           "type": "object",
-          "required": ["model", "alpha", "beta"],
+          "required": ["model"],
           "properties": {
             "model": {"type": "string", "enum": ["beta_poisson", "exponential"]},
             "alpha": {"type": "number", "exclusiveMinimum": 0},
-            "beta": {"type": "number", "exclusiveMinimum": 0}
+            "beta": {"type": "number", "exclusiveMinimum": 0},
+            "k": {"type": "number", "exclusiveMinimum": 0, "description": "Rate parameter for exponential model"}
+          },
+          "if": {"properties": {"model": {"const": "beta_poisson"}}},
+          "then": {"required": ["alpha", "beta"]},
+          "else": {
+            "if": {"properties": {"model": {"const": "exponential"}}},
+            "then": {"required": ["k"]}
           }
         },
         "illness_probability": {
@@ -87,7 +94,7 @@
             "causes_disruption": {"type": "boolean"},
             "disruption_type": {
               "type": "string",
-              "enum": ["gastrointestinal", "respiratory", "dermal"]
+              "enum": ["gastrointestinal", "respiratory", "dermal", "immune_memory_and_respiratory", "gastrointestinal_spore_antibiotic_associated", "systemic_respiratory", "systemic_gastrointestinal"]
             },
             "disruption_magnitude": {"type": "number", "minimum": 0, "maximum": 1},
             "affected_kingdoms": {

@@ -52,7 +52,7 @@
         },
         "category": {
           "type": "string",
-          "enum": ["enteric_viral", "respiratory_viral", "bacterial", "fungal"],
+          "enum": ["enteric_viral", "respiratory_viral", "bacterial", "fungal", "bacterial_waterborne", "enteric_bacterial", "filovirus"],
           "description": "Epidemiological category. Determines default shedding pathway weights and microflora disruption sites."
         },
         "transmission_routes": {
@@ -60,7 +60,7 @@
           "description": "Which of the four transmission pathways this pathogen uses. All four pathways are evaluated independently per epoch. The order determines relative weighting in dose attribution logging.",
           "items": {
             "type": "string",
-            "enum": ["direct_contact", "fomite", "droplet", "hvac_airborne"]
+            "enum": ["direct_contact", "fomite", "droplet", "hvac_airborne", "water_aerosol", "food", "water", "bodily_fluids"]
           },
           "minItems": 1,
           "uniqueItems": true
@@ -84,24 +84,35 @@
         },
         "dose_response": {
           "type": "object",
-          "description": "Korkin Lab dose-response model parameters. P(infection) = 1 - (1 + dose/beta)^{-alpha}",
-          "required": ["model", "alpha", "beta"],
+          "description": "Dose-response model parameters. For beta_poisson: P(infection) = 1 - (1 + dose/beta)^{-alpha}. For exponential: P(infection) = 1 - exp(-k * dose).",
+          "required": ["model"],
           "properties": {
             "model": {
               "type": "string",
               "enum": ["beta_poisson", "exponential"],
-              "description": "Dose-response model type. 'beta_poisson' is the standard for Norovirus and respiratory pathogens."
+              "description": "Dose-response model type. 'beta_poisson' uses alpha/beta parameters. 'exponential' uses k parameter."
             },
             "alpha": {
               "type": "number",
               "exclusiveMinimum": 0,
-              "description": "Shape parameter. Lower alpha = steeper dose-response curve."
+              "description": "Shape parameter for beta-Poisson model. Lower alpha = steeper dose-response curve."
             },
             "beta": {
               "type": "number",
               "exclusiveMinimum": 0,
-              "description": "Scale parameter. Higher beta = higher dose required for infection."
+              "description": "Scale parameter for beta-Poisson model. Higher beta = higher dose required for infection."
+            },
+            "k": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "description": "Rate parameter for exponential model. P(infection) = 1 - exp(-k * dose)."
             }
+          },
+          "if": {"properties": {"model": {"const": "beta_poisson"}}, "required": ["model"]},
+          "then": {"required": ["alpha", "beta"]},
+          "else": {
+            "if": {"properties": {"model": {"const": "exponential"}}, "required": ["model"]},
+            "then": {"required": ["k"]}
           }
         },
         "illness_probability": {
@@ -145,7 +156,7 @@
             },
             "disruption_type": {
               "type": "string",
-              "enum": ["gastrointestinal", "respiratory", "dermal"],
+              "enum": ["gastrointestinal", "respiratory", "dermal", "immune_memory_and_respiratory", "gastrointestinal_spore_antibiotic_associated", "systemic_respiratory", "systemic_gastrointestinal"],
               "description": "Which microbiome site is affected."
             },
             "disruption_magnitude": {
@@ -159,19 +170,23 @@
               "properties": {
                 "Bacteria": {
                   "type": "object",
-                  "additionalProperties": {"type": "number", "minimum": 0}
+                  "additionalProperties": {"type": "number"},
+                  "description": "CLR shift magnitudes per taxon. Positive = enrichment, negative = depletion."
                 },
                 "Archaea": {
                   "type": "object",
-                  "additionalProperties": {"type": "number", "minimum": 0}
+                  "additionalProperties": {"type": "number"},
+                  "description": "CLR shift magnitudes per taxon. Positive = enrichment, negative = depletion."
                 },
                 "Fungi": {
                   "type": "object",
-                  "additionalProperties": {"type": "number", "minimum": 0}
+                  "additionalProperties": {"type": "number"},
+                  "description": "CLR shift magnitudes per taxon. Positive = enrichment, negative = depletion."
                 },
                 "Virus": {
                   "type": "object",
-                  "additionalProperties": {"type": "number", "minimum": 0}
+                  "additionalProperties": {"type": "number"},
+                  "description": "CLR shift magnitudes per taxon. Positive = enrichment, negative = depletion."
                 }
               }
             }

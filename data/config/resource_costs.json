@@ -1,13 +1,13 @@
 {
-  "description": "Resource cost definitions for the Cost-Accounting Ledger. Defines unit costs, starting budgets, and material inventories.",
+  "description": "Resource cost definitions for the Cost-Accounting Ledger. Defines unit costs, starting budgets, material inventories, and per-test costs. Prices are rough-order-of-magnitude (ROM) estimates in 2024-2025 USD.",
   "budgets": {
     "financial_usd": {
-      "starting_balance": 50000.00,
-      "description": "Total USD budget available for the simulation run."
+      "starting_balance": 75000.00,
+      "description": "Total USD budget available for the simulation run. Increased from $50k to accommodate sequencing costs."
     },
     "labor_person_hours": {
       "starting_capacity": 480.0,
-      "description": "Total crew person-hours available (20 crew × 24 hours). Depleted by surveillance and intervention labor."
+      "description": "Total crew person-hours available (20 crew x 24 hours). Depleted by surveillance and intervention labor."
     }
   },
   "material_inventory": {
@@ -38,18 +38,18 @@
     },
     "rdt_kits": {
       "starting_count": 200,
-      "unit_cost_usd": 12.00,
-      "description": "Rapid diagnostic test kits (lateral flow antigen)."
+      "unit_cost_usd": 10.00,
+      "description": "Rapid diagnostic test kits (lateral flow antigen). ROM $5-15/test."
     },
     "pcr_kits": {
       "starting_count": 100,
       "unit_cost_usd": 45.00,
-      "description": "qPCR reagent kits for clinical and environmental testing."
+      "description": "qPCR reagent kits for clinical and environmental testing. ROM $30-60/rxn."
     },
     "swab_kits": {
       "starting_count": 300,
       "unit_cost_usd": 2.00,
-      "description": "Surface and patient swab collection kits."
+      "description": "Surface and patient swab collection kits (swab + transport medium + tube)."
     },
     "hvac_filters": {
       "starting_count": 20,
@@ -60,11 +60,36 @@
       "starting_count": 500,
       "unit_cost_usd": 1.50,
       "description": "Individual meal trays for isolation feeding."
+    },
+    "culture_media_sets": {
+      "starting_count": 100,
+      "unit_cost_usd": 8.00,
+      "description": "Clinical microbiology culture media set (blood agar plate + MacConkey or chocolate agar + broth). ROM $6-10/set."
+    },
+    "air_sniffer_cartridges": {
+      "starting_count": 30,
+      "unit_cost_usd": 60.00,
+      "description": "Bioaerosol sampler filter cartridges (e.g., Thermo AerosolSense cartridge). ROM $50-75/cartridge."
+    },
+    "wastewater_collection_kits": {
+      "starting_count": 50,
+      "unit_cost_usd": 15.00,
+      "description": "Wastewater composite sample collection kits (autosampler bottles, preservative, shipping container). ROM $10-20/kit."
+    },
+    "library_prep_kits": {
+      "starting_count": 10,
+      "unit_cost_usd": 25.00,
+      "description": "NGS library preparation reagents per reaction (e.g., Illumina DNA Prep ~$23/rxn). Covers tagmentation/amplification reagents and index adapters."
+    },
+    "sequencing_flow_cells": {
+      "starting_count": 3,
+      "unit_cost_usd": 900.00,
+      "description": "Sequencing flow cells. ROM covers ONT MinION R10.4.1 ($630-840/cell) or Illumina MiSeq v3 reagent kit. Blended ROM ~$900."
     }
   },
   "baseline_surveillance_costs_per_epoch": {
-    "description": "Fixed surveillance costs incurred every epoch regardless of protocol activation.",
-    "financial_usd": 50.00,
+    "description": "Fixed surveillance costs incurred every epoch regardless of protocol activation. Covers routine environmental swab + qPCR check.",
+    "financial_usd": 55.00,
     "materials": {
       "swab_kits": 1,
       "pcr_kits": 1
@@ -74,34 +99,70 @@
   },
   "per_test_costs": {
     "clinical_rdt": {
-      "financial_usd": 15.00,
+      "financial_usd": 12.00,
       "materials": {"rdt_kits": 1},
-      "labor_person_hours": 0.25
+      "labor_person_hours": 0.25,
+      "description": "Point-of-care rapid diagnostic test (lateral flow antigen). ROM $5-15 per test."
     },
     "clinical_qpcr": {
-      "financial_usd": 55.00,
+      "financial_usd": 50.00,
       "materials": {"pcr_kits": 1, "swab_kits": 1},
-      "labor_person_hours": 0.5
+      "labor_person_hours": 1.0,
+      "description": "Clinical qPCR assay including sample collection, nucleic acid extraction, and RT-qPCR. ROM $40-100."
     },
     "clinical_microbiology": {
       "financial_usd": 35.00,
-      "materials": {"swab_kits": 1},
-      "labor_person_hours": 0.75
+      "materials": {"swab_kits": 1, "culture_media_sets": 1},
+      "labor_person_hours": 1.5,
+      "description": "Clinical microbiology culture including inoculation, incubation (24-48h), colony identification, and basic susceptibility. ROM $30-70."
     },
     "surface_swab": {
       "financial_usd": 10.00,
       "materials": {"swab_kits": 1},
-      "labor_person_hours": 0.25
+      "labor_person_hours": 0.25,
+      "description": "Environmental surface swab with culture-based analysis. Quick collection, minimal lab processing."
+    },
+    "surface_swab_culture": {
+      "financial_usd": 10.00,
+      "materials": {"swab_kits": 1},
+      "labor_person_hours": 0.25,
+      "description": "Environmental surface swab with culture-based analysis. ROM $8-15."
+    },
+    "surface_swab_pcr": {
+      "financial_usd": 55.00,
+      "materials": {"swab_kits": 1, "pcr_kits": 1},
+      "labor_person_hours": 0.75,
+      "description": "Targeted environmental surface swab with qPCR analysis. ROM $40-70."
     },
     "air_sniffer_sample": {
-      "financial_usd": 5.00,
-      "materials": {},
-      "labor_person_hours": 0.1
+      "financial_usd": 75.00,
+      "materials": {"air_sniffer_cartridges": 1},
+      "labor_person_hours": 0.5,
+      "description": "Continuous bioaerosol sampler filter collection and downstream qPCR analysis. ROM $50-100."
     },
     "wastewater_sequencing": {
-      "financial_usd": 120.00,
-      "materials": {"pcr_kits": 1},
-      "labor_person_hours": 1.0
+      "financial_usd": 250.00,
+      "materials": {"wastewater_collection_kits": 1, "library_prep_kits": 1, "pcr_kits": 1},
+      "labor_person_hours": 3.0,
+      "description": "Wastewater-based epidemiology sequencing panel. ROM $150-500/sample."
+    },
+    "wastewater_sequencing_panel": {
+      "financial_usd": 250.00,
+      "materials": {"wastewater_collection_kits": 1, "library_prep_kits": 1, "pcr_kits": 1},
+      "labor_person_hours": 3.0,
+      "description": "Wastewater-based epidemiology sequencing panel targeting viral/pathogen markers. ROM $150-500/sample."
+    },
+    "metagenomic_shotgun_sequencing": {
+      "financial_usd": 300.00,
+      "materials": {"library_prep_kits": 1},
+      "labor_person_hours": 4.0,
+      "description": "Full metagenomic shotgun sequencing per sample (Illumina or Nanopore). ROM $100-475/sample."
+    },
+    "amplicon_16s_sequencing": {
+      "financial_usd": 65.00,
+      "materials": {"library_prep_kits": 1},
+      "labor_person_hours": 2.5,
+      "description": "16S rRNA amplicon sequencing per sample. ROM $45-100/sample."
     }
   }
 }
