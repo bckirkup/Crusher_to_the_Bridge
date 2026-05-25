@@ -23,24 +23,55 @@ import pytest
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, REPO_ROOT)
 
+# All orchestrator modules that contain logic (not just data/display)
+ORCHESTRATOR_MODULES = [
+    "orchestrator.py",
+    "orchestrator_types.py",
+    "orchestrator_init.py",
+    "orchestrator_epoch.py",
+    "orchestrator_record.py",
+]
+
+
+def _read_orchestrator_sources() -> dict[str, str]:
+    """Read all orchestrator module source files into a dict."""
+    sources: dict[str, str] = {}
+    for mod in ORCHESTRATOR_MODULES:
+        path = os.path.join(REPO_ROOT, mod)
+        with open(path, encoding="utf-8") as f:
+            sources[mod] = f.read()
+    return sources
+
+
+def _strip_non_logic(src: str) -> str:
+    """Strip comments, docstrings, and print lines from source."""
+    logic_lines = []
+    for line in src.split("\n"):
+        stripped = line.strip()
+        if stripped.startswith("#"):
+            continue
+        if stripped.startswith('"""') or stripped.startswith("'''"):
+            continue
+        if "print(" in line:
+            continue
+        logic_lines.append(line)
+    return "\n".join(logic_lines)
+
 
 class TestLaw1NoHardcodedEpochSchedules:
     """Verify no hardcoded epoch lists drive intervention activation."""
 
-    def _get_orchestrator_source(self) -> str:
-        path = os.path.join(REPO_ROOT, "orchestrator.py")
-        with open(path, encoding="utf-8") as f:
-            return f.read()
-
     def test_no_epoch_intervention_lists(self) -> None:
-        src = self._get_orchestrator_source()
         patterns = [
             r"intervention_epochs\s*=\s*\[",
             r"activate_at_epoch\s*=\s*\[",
             r"sop_schedule\s*=\s*\{",
         ]
-        for pat in patterns:
-            assert not re.search(pat, src), f"Hardcoded epoch schedule pattern found: {pat}"
+        for mod, src in _read_orchestrator_sources().items():
+            for pat in patterns:
+                assert not re.search(pat, src), (
+                    f"Hardcoded epoch schedule in {mod}: {pat}"
+                )
 
 
 class TestLaw2NoHardcodedNames:
@@ -61,47 +92,23 @@ class TestLaw2NoHardcodedNames:
         r'"vibrio_cholerae"',
     ]
 
-    def _get_orchestrator_source(self) -> str:
-        path = os.path.join(REPO_ROOT, "orchestrator.py")
-        with open(path, encoding="utf-8") as f:
-            return f.read()
-
     def test_no_hardcoded_zone_names_in_logic(self) -> None:
-        src = self._get_orchestrator_source()
-        # Filter out print/display/docstring lines
-        logic_lines = []
-        for line in src.split("\n"):
-            stripped = line.strip()
-            if stripped.startswith("#"):
-                continue
-            if stripped.startswith('"""') or stripped.startswith("'''"):
-                continue
-            if "print(" in line:
-                continue
-            logic_lines.append(line)
-        logic_src = "\n".join(logic_lines)
-
-        for pat in self.HARDCODED_ZONE_PATTERNS:
-            matches = re.findall(pat, logic_src)
-            assert not matches, f"Hardcoded zone name found: {pat} ({len(matches)} occurrences)"
+        for mod, src in _read_orchestrator_sources().items():
+            logic_src = _strip_non_logic(src)
+            for pat in self.HARDCODED_ZONE_PATTERNS:
+                matches = re.findall(pat, logic_src)
+                assert not matches, (
+                    f"Hardcoded zone name in {mod}: {pat} ({len(matches)} occurrences)"
+                )
 
     def test_no_hardcoded_pathogen_names_in_logic(self) -> None:
-        src = self._get_orchestrator_source()
-        logic_lines = []
-        for line in src.split("\n"):
-            stripped = line.strip()
-            if stripped.startswith("#"):
-                continue
-            if stripped.startswith('"""') or stripped.startswith("'''"):
-                continue
-            if "print(" in line:
-                continue
-            logic_lines.append(line)
-        logic_src = "\n".join(logic_lines)
-
-        for pat in self.HARDCODED_PATHOGEN_PATTERNS:
-            matches = re.findall(pat, logic_src)
-            assert not matches, f"Hardcoded pathogen name found: {pat}"
+        for mod, src in _read_orchestrator_sources().items():
+            logic_src = _strip_non_logic(src)
+            for pat in self.HARDCODED_PATHOGEN_PATTERNS:
+                matches = re.findall(pat, logic_src)
+                assert not matches, (
+                    f"Hardcoded pathogen name in {mod}: {pat}"
+                )
 
 
 class TestLaw3ScalarBounds:
@@ -182,16 +189,135 @@ class TestLaw6NoSiblingRepoModification:
     ]
 
     def test_no_write_imports_to_siblings(self) -> None:
-        src_path = os.path.join(REPO_ROOT, "orchestrator.py")
-        with open(src_path, encoding="utf-8") as f:
-            src = f.read()
-        for repo in self.SIBLING_REPOS:
-            write_patterns = [
-                f"{repo}.*\\.write",
-                f"{repo}.*\\.save",
-                f"{repo}.*\\.modify",
-            ]
-            for pat in write_patterns:
-                assert not re.search(pat, src), (
-                    f"Potential sibling repo modification: {pat}"
-                )
+        for mod, src in _read_orchestrator_sources().items():
+            for repo in self.SIBLING_REPOS:
+                write_patterns = [
+                    f"{repo}.*\\.write",
+                    f"{repo}.*\\.save",
+                    f"{repo}.*\\.modify",
+                ]
+                for pat in write_patterns:
+                    assert not re.search(pat, src), (
+                        f"Potential sibling repo modification in {mod}: {pat}"
+                    )
+
+
+# ── Pure state isolation tests ───────────────────────────────────────────
+
+class TestPureStateIsolation:
+    """Verify segregated functions don't mutate global state or use globals."""
+
+    def test_no_global_keyword_in_orchestrator_modules(self) -> None:
+        """No function should use the 'global' keyword."""
+        for mod, src in _read_orchestrator_sources().items():
+            if mod == "orchestrator.py":
+                continue  # thin coordinator may have module-level state
+            tree = ast.parse(src, filename=mod)
+            for node in ast.walk(tree):
+                if isinstance(node, ast.Global):
+                    pytest.fail(
+                        f"{mod} uses 'global' keyword at line {node.lineno}"
+                    )
+
+    def test_no_module_level_mutable_state(self) -> None:
+        """Module-level assignments should be constants (UPPER_CASE) or imports."""
+        skip_modules = {"orchestrator.py"}
+        for mod, src in _read_orchestrator_sources().items():
+            if mod in skip_modules:
+                continue
+            tree = ast.parse(src, filename=mod)
+            for node in ast.iter_child_nodes(tree):
+                if isinstance(node, ast.Assign):
+                    for target in node.targets:
+                        if isinstance(target, ast.Name):
+                            name = target.id
+                            if not name.startswith("_") and name != name.upper():
+                                pytest.fail(
+                                    f"{mod}:{node.lineno} has mutable module-level "
+                                    f"variable '{name}' (not UPPER_CASE constant)"
+                                )
+
+    def test_step_functions_accept_state_as_parameter(self) -> None:
+        """Step functions must receive SimulationState as a parameter, not access it globally."""
+        epoch_src = _read_orchestrator_sources()["orchestrator_epoch.py"]
+        tree = ast.parse(epoch_src, filename="orchestrator_epoch.py")
+
+        step_functions = [
+            node for node in ast.walk(tree)
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+            and node.name.startswith("step_")
+        ]
+
+        for func in step_functions:
+            param_names = [a.arg for a in func.args.args]
+            has_state = "state" in param_names
+            has_syndromic_or_engine = any(
+                p in param_names
+                for p in ("engine", "syndromic", "proto_ctx", "obs")
+            )
+            assert has_state or has_syndromic_or_engine, (
+                f"step function '{func.name}' at line {func.lineno} does not "
+                f"accept state-carrying parameters (found: {param_names})"
+            )
+
+    def test_no_os_environ_mutation(self) -> None:
+        """Orchestrator modules must not mutate os.environ."""
+        for mod, src in _read_orchestrator_sources().items():
+            assert "os.environ[" not in src, (
+                f"{mod} mutates os.environ"
+            )
+            assert "os.putenv(" not in src, (
+                f"{mod} uses os.putenv"
+            )
+
+    def test_no_sys_path_manipulation_in_submodules(self) -> None:
+        """Submodules should not manipulate sys.path — only orchestrator.py may."""
+        skip = {"orchestrator.py"}
+        for mod, src in _read_orchestrator_sources().items():
+            if mod in skip:
+                continue
+            assert "sys.path" not in src, (
+                f"{mod} manipulates sys.path"
+            )
+
+    def test_confine_agents_only_mutates_state_parameter(self) -> None:
+        """confine_agents must only mutate its 'state' parameter."""
+        from orchestrator_types import SimulationState
+        from orchestrator_epoch import confine_agents
+        from unittest.mock import MagicMock
+
+        state = SimulationState()
+        agents = [
+            {"agent_id": 0, "symptom_status": "symptomatic", "shedding_rate": 50.0},
+        ]
+        syndromic = MagicMock()
+        syndromic.check_quarantine_compliance.return_value = True
+
+        confine_agents(1, agents, state, syndromic, include_shedding=False)
+
+        # state was mutated (expected)
+        assert 0 in state.isolated_ids
+        # agents list itself was NOT mutated (no items added/removed)
+        assert len(agents) == 1
+        # agent dict was NOT mutated
+        assert agents[0]["symptom_status"] == "symptomatic"
+
+    def test_sync_vsp_isolation_only_mutates_state(self) -> None:
+        """sync_vsp_isolation must only mutate state, not engine."""
+        from orchestrator_types import SimulationState
+        from orchestrator_epoch import sync_vsp_isolation
+        from orchestrator_init import build_engine
+        from crusher_labs import load_config
+
+        cfg = load_config()
+        engine = build_engine(cfg, seed=42)
+        state = SimulationState()
+        engine.isolated_ids = {5, 10}
+
+        original_engine_ids = set(engine.isolated_ids)
+        sync_vsp_isolation(1, engine, state)
+
+        # state was mutated (expected)
+        assert state.isolated_ids == {5, 10}
+        # engine.isolated_ids was NOT mutated by sync
+        assert engine.isolated_ids == original_engine_ids
