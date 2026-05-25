@@ -30,6 +30,16 @@ STATUS_BASELINE = "BASELINE"
 STATUS_SUSPECTED = "SUSPECTED"
 STATUS_CONFIRMED = "CONFIRMED"
 
+# ── Agent symptom-status constants (used in telemetry schema) ────────────
+SYMPTOM_ASYMPTOMATIC = "asymptomatic"
+SYMPTOM_SYMPTOMATIC = "symptomatic"
+SYMPTOM_ISOLATED = "isolated"
+SYMPTOM_NON_COMPLIANT = "non_compliant"
+SYMPTOM_ASYMPTOMATIC_SHEDDING = "asymptomatic_shedding"
+
+# ── Synthetic location for isolated agents ───────────────────────────────
+LOCATION_ISOLATED = "Isolated_In_Quarters"
+
 # ── Defaults for configurable fractions (Law 1: no hardcoded ops) ────────
 DEFAULT_AIRBORNE_FRACTION = 0.6
 DEFAULT_SURFACE_FRACTION = 0.4
