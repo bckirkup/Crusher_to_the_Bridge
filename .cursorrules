@@ -97,7 +97,8 @@ These configuration scalars MUST be in `[0.0, 1.0]`:
 - `surface_decontamination_factor`
 - `surface_decay_rate_override`
 - `ppe_transmission_reduction`
-- `direct_contact_scalar`, `droplet_scalar`, `hvac_airborne_scalar`
+- `direct_contact_scalar`, `droplet_scalar`, `hvac_airborne_scalar`, `fomite_scalar`
+- `vsp_isolation_threshold_fraction`
 - `surface_deposition_fraction`
 - Probabilities: `eta`, `gamma`, compliance rates
 
@@ -109,7 +110,8 @@ These MUST be non-negative:
 ### Law 4: Referential Integrity Is Mandatory
 - Every room in `air_flow_paths.json` MUST exist in `spatial_layout.json`
 - Every `close_zones` target in `protocols.json` MUST exist in `spatial_layout.json`
-- Every `transmission_routes` entry MUST be one of: `direct_contact`, `fomite`, `droplet`, `hvac_airborne`
+- Every `transmission_routes` entry MUST be one of: `direct_contact`, `fomite`, `droplet`, `hvac_airborne`, `water_aerosol`, `food`, `water`, `bodily_fluids`
+- Every `per_test_costs` material reference MUST exist in `material_inventory`
 
 ### Law 5: Instruments Use Native Python Noise Models
 All diagnostic instruments use fast, matrix-driven sampling noise
@@ -196,12 +198,12 @@ The **Microflora Disruption** pathway is parallel:
 ```
 pathogen_id: str
 name: str
-category: str                     # "enteric_viral" | "respiratory_viral"
-transmission_routes: list[str]    # subset of: direct_contact, fomite, droplet, hvac_airborne
+category: str                     # "enteric_viral" | "respiratory_viral" | "bacterial" | "fungal" | "bacterial_waterborne" | "enteric_bacterial" | "filovirus"
+transmission_routes: list[str]    # subset of: direct_contact, fomite, droplet, hvac_airborne, water_aerosol, food, water, bodily_fluids
 shedding_curve_log10: list[float] # 15 entries (day-by-day)
 asymptomatic_shedding_log10: list[float]
 dose_adjustment: float
-dose_response: {model, alpha, beta}
+dose_response: {model, alpha, beta} | {model, k}  # beta_poisson uses alpha/beta; exponential uses k
 illness_probability: {eta, gamma}
 recovery_day: int
 surface_deposition_fraction: float  # [0.0, 1.0]
@@ -226,9 +228,9 @@ adjacency[]: {from, to, type}
 
 ### Protocol Keys (`data/config/protocols.json`)
 ```
-protocol_id: str                  # "SOP-001" .. "SOP-007"
-trigger: {instrument_class, stoplight_level, min_zones_affected}
-modifiers: dict                   # physics/behavior overrides
+protocol_id: str                  # "SOP-001" .. "SOP-010"
+trigger: {instrument_class, stoplight_level, min_zones_affected | min_agents_affected}
+modifiers: dict                   # physics/behavior overrides (including confinement keys)
 costs_per_epoch: {financial_usd, materials: {item: count}, labor_person_hours}
 activation_costs: {financial_usd, materials: {item: count}, labor_person_hours}
 category: str                     # "intervention" | "surveillance"

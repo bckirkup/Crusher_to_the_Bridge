@@ -219,6 +219,108 @@
         "labor_person_hours": 4.0
       },
       "category": "intervention"
+    },
+    {
+      "protocol_id": "SOP-008",
+      "name": "Individual Symptomatic Confinement to Quarters",
+      "description": "Confine symptomatic agents to their berthing compartments upon RED clinical RDT. Replaces the legacy hardcoded VSP confinement with a protocol-driven mechanism. FRED quarantine compliance governs whether agents comply immediately or delay.",
+      "trigger": {
+        "instrument_class": "clinical_rdt",
+        "stoplight_level": "RED",
+        "min_agents_affected": 2
+      },
+      "modifiers": {
+        "confine_symptomatic_to_quarters": true
+      },
+      "costs_per_epoch": {
+        "financial_usd": 250.00,
+        "materials": {
+          "meal_trays": 10,
+          "surgical_masks": 10,
+          "gloves_pairs": 10
+        },
+        "labor_person_hours": 4.0
+      },
+      "activation_costs": {
+        "financial_usd": 100.00,
+        "materials": {
+          "meal_trays": 20,
+          "gloves_pairs": 5
+        },
+        "labor_person_hours": 2.0
+      },
+      "category": "intervention"
+    },
+    {
+      "protocol_id": "SOP-009",
+      "name": "General Confinement to Quarters",
+      "description": "Full ship-wide confinement to quarters (lockdown). Triggered when multiple instrument classes show RED simultaneously. All non-essential personnel confined; only watchstanders and medical crew exempt. Severe transmission reduction across all pathways.",
+      "trigger": {
+        "instrument_class": "clinical_qpcr",
+        "stoplight_level": "RED",
+        "min_agents_affected": 3
+      },
+      "modifiers": {
+        "confine_all_to_quarters": true,
+        "direct_contact_scalar": 0.10,
+        "droplet_scalar": 0.10,
+        "fomite_scalar": 0.20,
+        "hvac_airborne_scalar": 0.70,
+        "close_zones": ["Galley", "Mess_Hall"]
+      },
+      "costs_per_epoch": {
+        "financial_usd": 800.00,
+        "materials": {
+          "meal_trays": 50,
+          "surgical_masks": 30,
+          "sanitizer_units": 10
+        },
+        "labor_person_hours": 16.0
+      },
+      "activation_costs": {
+        "financial_usd": 500.00,
+        "materials": {
+          "meal_trays": 100,
+          "sanitizer_units": 20
+        },
+        "labor_person_hours": 8.0
+      },
+      "category": "intervention"
+    },
+    {
+      "protocol_id": "SOP-010",
+      "name": "VSP-Threshold Mass Isolation",
+      "description": "When symptomatic fraction exceeds the Vessel Sanitation Program (VSP) threshold (default 3%), activate mass isolation of all symptomatic agents. This SOP replaces the hardcoded VSP isolation logic in the infection dynamics engine with a configurable, protocol-driven mechanism.",
+      "trigger": {
+        "instrument_class": "clinical_rdt",
+        "stoplight_level": "RED",
+        "min_agents_affected": 1
+      },
+      "modifiers": {
+        "confine_symptomatic_to_quarters": true,
+        "vsp_isolation_threshold_fraction": 0.03,
+        "surface_decontamination_factor": 0.60
+      },
+      "costs_per_epoch": {
+        "financial_usd": 600.00,
+        "materials": {
+          "meal_trays": 30,
+          "surgical_masks": 20,
+          "gloves_pairs": 30,
+          "sanitizer_units": 8
+        },
+        "labor_person_hours": 10.0
+      },
+      "activation_costs": {
+        "financial_usd": 300.00,
+        "materials": {
+          "meal_trays": 60,
+          "surgical_masks": 10,
+          "sanitizer_units": 10
+        },
+        "labor_person_hours": 6.0
+      },
+      "category": "intervention"
     }
   ]
 }

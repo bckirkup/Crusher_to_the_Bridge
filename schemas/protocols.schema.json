@@ -21,7 +21,7 @@
       "properties": {
         "protocol_id": {
           "type": "string",
-          "pattern": "^SOP-\\d{3}$",
+          "pattern": "^SOP-\\d{3,4}$",
           "description": "Unique protocol identifier (e.g. 'SOP-001')"
         },
         "name": {"type": "string"},
@@ -41,13 +41,33 @@
             "direct_contact_scalar": {"type": "number", "minimum": 0, "maximum": 1},
             "droplet_scalar": {"type": "number", "minimum": 0, "maximum": 1},
             "hvac_airborne_scalar": {"type": "number", "minimum": 0, "maximum": 1},
+            "fomite_scalar": {"type": "number", "minimum": 0, "maximum": 1},
             "diagnostic_cadence_multiplier": {"type": "number", "minimum": 0},
             "close_zones": {
               "type": "array",
               "items": {"type": "string"},
               "description": "Zone IDs to close — MUST exist in spatial_layout.json"
             },
-            "zone_occupancy_cap": {"type": "integer", "minimum": 0}
+            "zone_occupancy_cap": {"type": "integer", "minimum": 0},
+            "confine_symptomatic_to_quarters": {
+              "type": "boolean",
+              "description": "When true, symptomatic agents are confined to quarters via FRED compliance check."
+            },
+            "confine_all_to_quarters": {
+              "type": "boolean",
+              "description": "When true, ALL agents are confined to quarters (general lockdown)."
+            },
+            "vsp_isolation_threshold_fraction": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Fraction of crew that must be symptomatic to trigger VSP-style mass isolation."
+            },
+            "restrict_movement_zones": {
+              "type": "array",
+              "items": {"type": "string"},
+              "description": "Zone IDs where movement is restricted but not closed entirely."
+            }
           }
         },
         "costs_per_epoch": {
@@ -78,6 +98,11 @@
           "type": "integer",
           "minimum": 1,
           "default": 1
+        },
+        "min_agents_affected": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Minimum number of agents that must trip the stoplight for this trigger to fire."
         }
       }
     },

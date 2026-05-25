@@ -162,6 +162,7 @@ class ProtocolTrigger(BaseModel):
     instrument_class: str
     stoplight_level: str
     min_zones_affected: int = 1
+    min_agents_affected: int | None = None
 
     @field_validator("stoplight_level")
     @classmethod
@@ -210,15 +211,29 @@ class ProtocolsConfig(BaseModel):
 
 class DoseResponse(BaseModel):
     model: str = "beta_poisson"
-    alpha: float = 0.111
-    beta: float = 32.81
+    alpha: float | None = None
+    beta: float | None = None
+    k: float | None = None
 
-    @field_validator("alpha", "beta")
-    @classmethod
-    def positive_params(cls, v: float) -> float:
-        if v <= 0:
-            raise ValueError(f"dose-response parameter must be positive, got {v}")
-        return v
+    @model_validator(mode="after")
+    def check_model_params(self) -> "DoseResponse":
+        if self.model == "beta_poisson":
+            if self.alpha is None:
+                raise ValueError("beta_poisson model requires 'alpha' parameter")
+            if self.beta is None:
+                raise ValueError("beta_poisson model requires 'beta' parameter")
+            if self.alpha <= 0:
+                raise ValueError(f"alpha must be positive, got {self.alpha}")
+            if self.beta <= 0:
+                raise ValueError(f"beta must be positive, got {self.beta}")
+        elif self.model == "exponential":
+            if self.k is None:
+                raise ValueError("exponential model requires 'k' parameter")
+            if self.k <= 0:
+                raise ValueError(f"k must be positive, got {self.k}")
+        else:
+            raise ValueError(f"Unknown dose-response model: {self.model}")
+        return self
 
 
 class PathogenProfile(BaseModel):
@@ -317,6 +332,8 @@ _PROBABILITY_MODIFIER_KEYS = {
     "direct_contact_scalar",
     "droplet_scalar",
     "hvac_airborne_scalar",
+    "fomite_scalar",
+    "vsp_isolation_threshold_fraction",
 }
 
 _VALID_TRANSMISSION_ROUTES = {
@@ -324,6 +341,10 @@ _VALID_TRANSMISSION_ROUTES = {
     "fomite",
     "droplet",
     "hvac_airborne",
+    "water_aerosol",
+    "food",
+    "water",
+    "bodily_fluids",
 }
 
 
@@ -541,6 +562,22 @@ def _check_logical_contradictions(
                             f"material '{mat_name}' not found in "
                             f"resource_costs.json material_inventory: "
                             f"{known_materials}",
+                        )
+
+    # Material references in per_test_costs
+    if resource_costs:
+        known_materials = set(resource_costs.material_inventory.keys())
+        per_test = resource_costs.per_test_costs
+        for test_type, cost_data in per_test.items():
+            if isinstance(cost_data, dict):
+                for mat_name in cost_data.get("materials", {}):
+                    if mat_name not in known_materials:
+                        report.warn(
+                            "resource_costs.json",
+                            "LOGIC_MATERIAL",
+                            f"per_test_costs.{test_type} references "
+                            f"material '{mat_name}' not found in "
+                            f"material_inventory: {known_materials}",
                         )
 
 

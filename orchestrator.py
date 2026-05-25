@@ -941,8 +941,35 @@ def run() -> None:
         cost_ledger.debit_per_test(epoch, "clinical_qpcr", n_sick, per_test)
         cost_ledger.debit_per_test(epoch, "clinical_microbiology", n_sick, per_test)
 
-        # ── 9. CONFIRMED → quarantine with FRED compliance ──────────
-        if trigger_status == STATUS_CONFIRMED:
+        # ── 9a. Protocol-driven confinement to quarters ──────────
+        if merged_mods.get("confine_symptomatic_to_quarters", False):
+            for agent in agents:
+                aid = agent["agent_id"]
+                if aid in isolated_ids or aid in quarantine_refusers:
+                    continue
+                if agent["symptom_status"] in ("symptomatic", "non_compliant"):
+                    if syndromic.check_quarantine_compliance(aid, 0):
+                        isolated_ids.add(aid)
+                        compliance_log.append({
+                            "epoch": epoch, "agent_id": aid,
+                            "action": "immediate_compliance",
+                        })
+                    else:
+                        quarantine_refusers.add(aid)
+                        quarantine_order_epoch[aid] = epoch
+                        compliance_log.append({
+                            "epoch": epoch, "agent_id": aid,
+                            "action": "refused_quarantine",
+                        })
+
+        # ── 9b. Legacy CONFIRMED → quarantine fallback ─────────────
+        # Retained for backward compatibility when no protocol sets
+        # confine_symptomatic_to_quarters. If the protocol engine is
+        # already handling confinement via 9a, skip this block.
+        if (
+            trigger_status == STATUS_CONFIRMED
+            and not merged_mods.get("confine_symptomatic_to_quarters", False)
+        ):
             for agent in agents:
                 aid = agent["agent_id"]
                 if aid in isolated_ids or aid in quarantine_refusers:
