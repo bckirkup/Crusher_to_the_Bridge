@@ -262,6 +262,7 @@
       },
       "modifiers": {
         "confine_all_to_quarters": true,
+        "exempt_classes": ["crew_medical", "crew_engineering"],
         "direct_contact_scalar": 0.10,
         "droplet_scalar": 0.10,
         "fomite_scalar": 0.20,
@@ -319,6 +320,38 @@
           "sanitizer_units": 10
         },
         "labor_person_hours": 6.0
+      },
+      "category": "intervention"
+    },
+    {
+      "protocol_id": "SOP-011",
+      "name": "Selective Passenger Confinement (Diamond Princess)",
+      "description": "Confine symptomatic passengers to quarters while crew remain operational. Reflects the Diamond Princess precedent where crew continued service duties during outbreak containment. All crew classes are exempt from confinement orders. Passengers are quarantined to their home zones (HVAC-connected) upon RED clinical RDT.",
+      "trigger": {
+        "instrument_class": "clinical_rdt",
+        "stoplight_level": "RED",
+        "min_agents_affected": 2
+      },
+      "modifiers": {
+        "confine_symptomatic_to_quarters": true,
+        "exempt_classes": ["crew_general", "crew_medical", "crew_engineering", "crew_galley"]
+      },
+      "costs_per_epoch": {
+        "financial_usd": 200.00,
+        "materials": {
+          "meal_trays": 10,
+          "surgical_masks": 5,
+          "gloves_pairs": 5
+        },
+        "labor_person_hours": 3.0
+      },
+      "activation_costs": {
+        "financial_usd": 100.00,
+        "materials": {
+          "meal_trays": 20,
+          "gloves_pairs": 5
+        },
+        "labor_person_hours": 2.0
       },
       "category": "intervention"
     }

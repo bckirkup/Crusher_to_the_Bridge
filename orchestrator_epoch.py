@@ -293,14 +293,19 @@ def step_quarantine_confinement(
     - SOP-008/010 ``confine_symptomatic_to_quarters``: symptomatic only
     - Legacy fallback: confine symptomatic + shedding when CONFIRMED
     """
+    exempt_classes: set[str] = set(merged_mods.get("exempt_classes", []))
+
     # SOP-009: full-ship lockdown — confine every agent
     if merged_mods.get("confine_all_to_quarters", False):
-        confine_all_agents(epoch, agents, state, syndromic)
+        confine_all_agents(epoch, agents, state, syndromic, exempt_classes)
         return
 
     # SOP-008/010: symptomatic-only confinement
     if merged_mods.get("confine_symptomatic_to_quarters", False):
-        confine_agents(epoch, agents, state, syndromic, include_shedding=False)
+        confine_agents(
+            epoch, agents, state, syndromic,
+            include_shedding=False, exempt_classes=exempt_classes,
+        )
         return
 
     # Legacy fallback when CONFIRMED but no protocol modifier active
@@ -314,12 +319,19 @@ def confine_agents(
     state: SimulationState,
     syndromic: Any,
     include_shedding: bool,
+    exempt_classes: set[str] | None = None,
 ) -> None:
-    """Confine symptomatic (and optionally shedding) agents to quarters (quarantine)."""
+    """Confine symptomatic (and optionally shedding) agents to quarters (quarantine).
+
+    Agents whose ``agent_class`` is in *exempt_classes* are skipped.
+    """
     confined = _all_confined(state)
+    _exempt = exempt_classes or set()
     for agent in agents:
         aid = agent["agent_id"]
         if aid in confined or aid in state.quarantine_refusers:
+            continue
+        if agent.get("agent_class", "") in _exempt:
             continue
         is_symptomatic = agent["symptom_status"] in (SYMPTOM_SYMPTOMATIC, SYMPTOM_NON_COMPLIANT)
         is_shedding = include_shedding and agent.get("shedding_rate", 0.0) > 0.0
@@ -345,12 +357,19 @@ def confine_all_agents(
     agents: list[dict[str, Any]],
     state: SimulationState,
     syndromic: Any,
+    exempt_classes: set[str] | None = None,
 ) -> None:
-    """SOP-009: confine ALL agents to quarters (quarantine lockdown)."""
+    """SOP-009: confine ALL agents to quarters (quarantine lockdown).
+
+    Agents whose ``agent_class`` is in *exempt_classes* are skipped.
+    """
     confined = _all_confined(state)
+    _exempt = exempt_classes or set()
     for agent in agents:
         aid = agent["agent_id"]
         if aid in confined or aid in state.quarantine_refusers:
+            continue
+        if agent.get("agent_class", "") in _exempt:
             continue
         if syndromic.check_quarantine_compliance(aid, 0):
             state.quarantined_ids.add(aid)
