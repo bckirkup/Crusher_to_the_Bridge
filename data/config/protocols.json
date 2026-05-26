@@ -290,7 +290,7 @@
     {
       "protocol_id": "SOP-010",
       "name": "VSP-Threshold Mass Isolation",
-      "description": "When symptomatic fraction exceeds the Vessel Sanitation Program (VSP) threshold (default 3%), quarantine all symptomatic agents to quarters. Agents remain HVAC-connected in their home zone. True isolation (separate facility, no HVAC contribution) is reserved for extreme cases and limited by the platform isolation_unit_capacity.",
+      "description": "Quarantine symptomatic agents upon RED clinical RDT with surface decontamination. The VSP 3% attack-rate threshold is now enforced via configurable infection_counters in config.yaml rather than an engine-internal check. Agents remain HVAC-connected in their home zone.",
       "trigger": {
         "instrument_class": "clinical_rdt",
         "stoplight_level": "RED",
@@ -298,7 +298,6 @@
       },
       "modifiers": {
         "confine_symptomatic_to_quarters": true,
-        "vsp_isolation_threshold_fraction": 0.03,
         "surface_decontamination_factor": 0.60
       },
       "costs_per_epoch": {

@@ -735,6 +735,7 @@ def _check_config_yaml(
     """Validate config.yaml values: bounds, fractions, cross-references."""
     _check_agent_classes(cfg, report, zone_ids)
     _check_gender_distribution(cfg, report)
+    _check_infection_counters(cfg, report)
     _check_wearable_monitoring(cfg, report)
     _check_modality_params(cfg, report)
     _check_hvac_params(cfg, report)
@@ -805,6 +806,84 @@ def _check_gender_distribution(cfg: dict[str, Any], report: Report) -> None:
         report.error("config.yaml", "MATH_BOUND",
                      f"gender_distribution values sum to {total:.4f}, "
                      f"expected ~1.0 (tolerance 0.01)")
+
+
+_VALID_COUNTER_METRICS = {
+    "attack_rate", "infected_count", "symptomatic_count",
+    "recovered_count", "susceptible_count",
+}
+
+_VALID_ON_EXCEED = {"log_only", "confine_symptomatic"}
+
+
+def _check_infection_counters(cfg: dict[str, Any], report: Report) -> None:
+    """Validate infection_counters definitions in config.yaml."""
+    graph_cfg = cfg.get("ship_graph", {})
+    counters = graph_cfg.get("infection_counters")
+    if not counters:
+        return
+
+    class_ids: set[str] = set()
+    classes = graph_cfg.get("agent_classes", [])
+    for cls in classes:
+        cid = cls.get("class_id")
+        if cid:
+            class_ids.add(cid)
+
+    counter_ids: list[str] = []
+    for i, cdef in enumerate(counters):
+        cid = cdef.get("counter_id")
+        if not cid:
+            report.error("config.yaml", "SCHEMA",
+                         f"infection_counters[{i}] missing counter_id")
+            continue
+        counter_ids.append(cid)
+
+        metric = cdef.get("metric")
+        if metric not in _VALID_COUNTER_METRICS:
+            report.error("config.yaml", "SCHEMA",
+                         f"infection_counters.{cid}.metric = '{metric}' "
+                         f"not in {_VALID_COUNTER_METRICS}")
+
+        on_exceed = cdef.get("on_exceed", "log_only")
+        if on_exceed not in _VALID_ON_EXCEED:
+            report.error("config.yaml", "SCHEMA",
+                         f"infection_counters.{cid}.on_exceed = '{on_exceed}' "
+                         f"not in {_VALID_ON_EXCEED}")
+
+        threshold = cdef.get("threshold")
+        if threshold is not None:
+            if not isinstance(threshold, (int, float)) or threshold < 0:
+                report.error("config.yaml", "MATH_BOUND",
+                             f"infection_counters.{cid}.threshold = {threshold} "
+                             f"must be a non-negative number")
+
+        cfilter = cdef.get("filter", {})
+        rg = cfilter.get("role_group")
+        if rg and rg not in ("crew", "passenger"):
+            report.error("config.yaml", "SCHEMA",
+                         f"infection_counters.{cid}.filter.role_group = '{rg}' "
+                         f"must be 'crew' or 'passenger'")
+
+        filter_classes = cfilter.get("classes", [])
+        if class_ids and filter_classes:
+            for fc in filter_classes:
+                if fc not in class_ids:
+                    report.warn("config.yaml", "GRAPH_REF",
+                                f"infection_counters.{cid}.filter.classes "
+                                f"references '{fc}' not in agent_classes")
+
+        exempt = cdef.get("exempt_classes", [])
+        if class_ids and exempt:
+            for ec in exempt:
+                if ec not in class_ids:
+                    report.warn("config.yaml", "GRAPH_REF",
+                                f"infection_counters.{cid}.exempt_classes "
+                                f"references '{ec}' not in agent_classes")
+
+    if len(counter_ids) != len(set(counter_ids)):
+        report.error("config.yaml", "LOGIC_DUP",
+                     f"Duplicate counter_id values: {counter_ids}")
 
 
 def _check_wearable_monitoring(cfg: dict[str, Any], report: Report) -> None:

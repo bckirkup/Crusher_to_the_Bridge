@@ -58,6 +58,7 @@ def record_epoch(
     clin_qpcr_results: dict[int, dict[str, Any]],
     clin_microbio_results: dict[int, dict[str, Any]],
     wearable_result: dict[str, Any] | None = None,
+    infection_counters: dict[str, dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """Build a complete epoch record for simulation_history.
 
@@ -124,6 +125,7 @@ def record_epoch(
             "rdt_positive_count": sum(1 for r in rdt_result["results"] if r["positive"]),
             "rdt_tested_count": rdt_result["tested_count"],
         },
+        "infection_counters": infection_counters or {},
     }
 
     for a in agents:
@@ -286,6 +288,10 @@ def finalize_simulation(
     audit = proto_ctx.cost_ledger.generate_financial_audit()
     proto_summary = proto_ctx.protocol_engine.generate_protocol_summary()
 
+    final_counters: dict[str, dict[str, Any]] = {}
+    if state.simulation_history:
+        final_counters = state.simulation_history[-1].get("infection_counters", {})
+
     print_executive_summary(
         num_agents=num_agents,
         num_epochs=num_epochs,
@@ -302,4 +308,5 @@ def finalize_simulation(
         zone_pathogen_mass=engine.zone_pathogen_mass,
         hvac_cfg=cfg.get("hvac", {}),
         pathogen_profiles=pathogen_profiles,
+        infection_counters=final_counters,
     )

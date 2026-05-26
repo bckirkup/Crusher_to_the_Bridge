@@ -178,12 +178,15 @@ def build_engine(
     agent_classes = graph_cfg.get("agent_classes")
     gender_distribution = graph_cfg.get("gender_distribution")
 
+    # VSP threshold confinement is now handled by configurable infection
+    # counters in the orchestrator, not by the engine's internal check.
     return KorkinShipEngine(
         num_passengers=num_passengers,
         num_crew=num_crew,
         initial_infected=cfg.get("initial_infected", 1),
         zones=engine_zones,
         seed=seed,
+        vsp_isolation=False,
         agent_classes=agent_classes,
         gender_distribution=gender_distribution,
     )

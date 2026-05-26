@@ -51,6 +51,18 @@ def print_initialization(
         kf_str = "  ".join(f"{k}={v:.3f}" for k, v in kf.items())
         print(f"    {zone_name:15s} [{seed['zone_type']:7s}]  {kf_str}")
 
+    counter_defs = cfg.get("ship_graph", {}).get("infection_counters", [])
+    if counter_defs:
+        print(f"\n  Infection counters: {len(counter_defs)} configured")
+        for cdef in counter_defs:
+            cid = cdef.get("counter_id", "?")
+            label = cdef.get("label", cid)
+            metric = cdef.get("metric", "?")
+            threshold = cdef.get("threshold")
+            on_exceed = cdef.get("on_exceed", "log_only")
+            thr_str = f"  threshold={threshold}  on_exceed={on_exceed}" if threshold is not None else ""
+            print(f"    {cid:30s} {metric:20s}{thr_str}")
+
     fred_cfg = cfg.get("fred_behavior", {})
     print(f"\n  FRED behavioral params:")
     print(f"    Quarantine compliance:   {fred_cfg.get('quarantine_compliance', 0.85):.0%}")
@@ -93,7 +105,7 @@ def print_korkin_engine(engine: KorkinShipEngine) -> None:
         )
         print(f"  Gender: {g_str}")
     print(f"  Zones: {', '.join(z['name'] for z in engine.zones)}")
-    print(f"  VSP isolation: {'enabled' if engine.vsp_isolation else 'disabled'}")
+    print(f"  VSP isolation: counter-driven (engine-internal disabled)")
     print()
 
 
@@ -310,6 +322,7 @@ def print_executive_summary(
     zone_pathogen_mass: dict[str, float],
     hvac_cfg: dict[str, Any],
     pathogen_profiles: dict[str, Any] | None,
+    infection_counters: dict[str, dict[str, Any]] | None = None,
 ) -> None:
     """Print a highly visible ASCII executive summary box."""
     W = 80
@@ -341,8 +354,29 @@ def print_executive_summary(
     lines.append(row(f"  Quarantined:        {engine_summary.get('quarantined', 0)}"))
     lines.append(row(f"  Immune (neg sec):   {engine_summary['immune']}"))
     lines.append(row(f"  Symptomatic:        {engine_summary['symptomatic']}"))
-    lines.append(row(f"VSP triggered:       {'Yes' if engine_summary['vsp_triggered'] else 'No'}"))
     lines.append(row(f"Final status:        {trigger_status}"))
+
+    if infection_counters:
+        lines.append(row())
+        lines.append(row("INFECTION COUNTERS"))
+        lines.append(thin_div)
+        for cid, cdata in infection_counters.items():
+            label = cdata.get('label', cid)
+            value = cdata.get('value', 0)
+            pop = cdata.get('population', 0)
+            threshold = cdata.get('threshold')
+            exceeded = cdata.get('exceeded', False)
+            if 'rate' in cid:
+                val_str = f"{value:.1%}"
+            else:
+                val_str = f"{value:.0f}"
+            thr_str = ""
+            if threshold is not None:
+                if 'rate' in cid:
+                    thr_str = f"  thr={threshold:.1%}  {'EXCEEDED' if exceeded else 'ok'}"
+                else:
+                    thr_str = f"  thr={threshold}  {'EXCEEDED' if exceeded else 'ok'}"
+            lines.append(row(f"  {label:30s} {val_str:>8s}  (n={pop}){thr_str}"))
 
     if pathogen_profiles and len(pathogen_profiles) > 1:
         lines.append(row(f"Pathogen count:      {len(pathogen_profiles)}"))

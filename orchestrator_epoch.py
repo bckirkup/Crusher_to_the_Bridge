@@ -489,3 +489,127 @@ def step_wearable_monitoring(
     raw_data = monitor.generate_epoch_data(engine.agents, pathogen_profiles)
     result = modality.query_ground_truth(truth, raw_data)
     return result
+
+
+# ── Infection counters ───────────────────────────────────────────────────
+
+_SYMPTOMATIC_STATUSES = {SYMPTOM_SYMPTOMATIC, SYMPTOM_NON_COMPLIANT}
+_INFECTED_STATUSES = {
+    SYMPTOM_SYMPTOMATIC, SYMPTOM_NON_COMPLIANT,
+    "asymptomatic_shedding", "quarantined",
+}
+
+VALID_COUNTER_METRICS = {
+    "attack_rate",
+    "infected_count",
+    "symptomatic_count",
+    "recovered_count",
+    "susceptible_count",
+}
+
+
+def _agent_matches_filter(
+    agent: dict[str, Any],
+    counter_filter: dict[str, Any],
+) -> bool:
+    """Check whether an agent matches a counter's filter criteria."""
+    if not counter_filter:
+        return True
+    role_group = counter_filter.get("role_group")
+    classes = counter_filter.get("classes")
+
+    agent_class = agent.get("agent_class", "")
+    if role_group and not agent_class.startswith(role_group):
+        return False
+    if classes and agent_class not in classes:
+        return False
+    return True
+
+
+def compute_infection_counters(
+    agents: list[dict[str, Any]],
+    counter_defs: list[dict[str, Any]],
+) -> dict[str, dict[str, Any]]:
+    """Evaluate all configured infection counters for the current epoch.
+
+    Returns ``{counter_id: {"value": float, "label": str, "exceeded": bool}}``
+    where *exceeded* is ``True`` when the value meets or exceeds the
+    counter's optional ``threshold``.
+    """
+    results: dict[str, dict[str, Any]] = {}
+    for cdef in counter_defs:
+        cid = cdef.get("counter_id", "")
+        metric = cdef.get("metric", "infected_count")
+        cfilter = cdef.get("filter", {})
+        threshold = cdef.get("threshold")
+        label = cdef.get("label", cid)
+
+        group = [a for a in agents if _agent_matches_filter(a, cfilter)]
+        pop = len(group)
+
+        if metric == "attack_rate":
+            n_symptomatic = sum(
+                1 for a in group
+                if a["symptom_status"] in _SYMPTOMATIC_STATUSES
+            )
+            value = (n_symptomatic / pop) if pop > 0 else 0.0
+        elif metric == "infected_count":
+            value = float(sum(
+                1 for a in group
+                if a["symptom_status"] in _INFECTED_STATUSES
+            ))
+        elif metric == "symptomatic_count":
+            value = float(sum(
+                1 for a in group
+                if a["symptom_status"] in _SYMPTOMATIC_STATUSES
+            ))
+        elif metric == "recovered_count":
+            value = float(sum(
+                1 for a in group if a["symptom_status"] == "recovered"
+            ))
+        elif metric == "susceptible_count":
+            value = float(sum(
+                1 for a in group if a["symptom_status"] == "asymptomatic"
+            ))
+        else:
+            value = 0.0
+
+        exceeded = threshold is not None and value >= threshold
+        entry: dict[str, Any] = {
+            "value": round(value, 6),
+            "label": label,
+            "population": pop,
+        }
+        if threshold is not None:
+            entry["threshold"] = threshold
+            entry["exceeded"] = exceeded
+        results[cid] = entry
+
+    return results
+
+
+def step_counter_thresholds(
+    epoch: int,
+    agents: list[dict[str, Any]],
+    counter_results: dict[str, dict[str, Any]],
+    counter_defs: list[dict[str, Any]],
+    state: SimulationState,
+    syndromic: Any,
+) -> None:
+    """Apply confinement actions for counters that exceed their thresholds.
+
+    Replaces the legacy engine-internal VSP whole-population check with
+    configurable, per-group counter thresholds.
+    """
+    for cdef in counter_defs:
+        cid = cdef.get("counter_id", "")
+        on_exceed = cdef.get("on_exceed", "log_only")
+        result = counter_results.get(cid, {})
+        if not result.get("exceeded", False):
+            continue
+        if on_exceed == "confine_symptomatic":
+            exempt = set(cdef.get("exempt_classes", []))
+            confine_agents(
+                epoch, agents, state, syndromic,
+                include_shedding=False, exempt_classes=exempt,
+            )
