@@ -141,7 +141,7 @@ def step_infection_progression(
                 gamma_p = ill_params.get("gamma", 0.095)
                 dose = inf["acquired_particles"]
                 ill_prob = 1.0 - math.pow(1.0 + eta_p * dose, -gamma_p)
-                if ill_prob > 0.3:
+                if engine.rng.random() < ill_prob:
                     inf["illness"] = IllnessStatus.SYMPTOMATIC
                     if agent.illness_status == IllnessStatus.NOT_ILL:
                         agent.illness_status = IllnessStatus.SYMPTOMATIC

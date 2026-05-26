@@ -214,11 +214,15 @@ def infection_probability(dose: float) -> float:
     return 1.0 - math.pow(1.0 + dose / BETA, -ALPHA)
 
 
-def illness_probability(dose: float) -> float:
+def illness_probability(
+    dose: float,
+    eta: float = ETA,
+    gamma: float = GAMMA,
+) -> float:
     """P(ill) = 1 - (1 + η·dose)^{-γ}.  (Person.java line 193)"""
     if dose <= 0:
         return 0.0
-    return 1.0 - math.pow(1.0 + ETA * dose, -GAMMA)
+    return 1.0 - math.pow(1.0 + eta * dose, -gamma)
 
 
 def shedding_value(day_post_infection: int, is_symptomatic: bool) -> float:
@@ -615,11 +619,13 @@ class KorkinShipEngine:
 
                 if not immune and infected_remaining > 0:
                     agent.infection_status = InfectionStatus.INFECTED
-                    agent.illness_status = IllnessStatus.SYMPTOMATIC
                     agent.time_infected = 1
                     agent.acquired_particles = math.pow(
                         10, SYMPTOMATIC_SHEDDING[1] - DOSE_ADJUSTMENT,
                     )
+                    ill_prob = illness_probability(agent.acquired_particles)
+                    if self.rng.random() < ill_prob:
+                        agent.illness_status = IllnessStatus.SYMPTOMATIC
                     infected_remaining -= 1
 
                 self.agents.append(agent)
@@ -665,9 +671,11 @@ class KorkinShipEngine:
 
             if not immune and infected_remaining > 0:
                 agent.infection_status = InfectionStatus.INFECTED
-                agent.illness_status = IllnessStatus.SYMPTOMATIC
                 agent.time_infected = 1
                 agent.acquired_particles = math.pow(10, SYMPTOMATIC_SHEDDING[1] - DOSE_ADJUSTMENT)
+                ill_prob = illness_probability(agent.acquired_particles)
+                if self.rng.random() < ill_prob:
+                    agent.illness_status = IllnessStatus.SYMPTOMATIC
                 infected_remaining -= 1
 
             self.agents.append(agent)
@@ -700,9 +708,11 @@ class KorkinShipEngine:
 
             if not immune and infected_remaining > 0:
                 agent.infection_status = InfectionStatus.INFECTED
-                agent.illness_status = IllnessStatus.SYMPTOMATIC
                 agent.time_infected = 1
                 agent.acquired_particles = math.pow(10, SYMPTOMATIC_SHEDDING[1] - DOSE_ADJUSTMENT)
+                ill_prob = illness_probability(agent.acquired_particles)
+                if self.rng.random() < ill_prob:
+                    agent.illness_status = IllnessStatus.SYMPTOMATIC
                 infected_remaining -= 1
 
             self.agents.append(agent)
@@ -782,7 +792,7 @@ class KorkinShipEngine:
             dpi = agent.days_post_infection
             if dpi >= 1 and agent.illness_status == IllnessStatus.NOT_ILL:
                 ill_prob = illness_probability(agent.acquired_particles)
-                if ill_prob > 0.3:
+                if self.rng.random() < ill_prob:
                     agent.illness_status = IllnessStatus.SYMPTOMATIC
 
         # 4. Recovery (Person.java: dpi >= 3)
