@@ -296,7 +296,7 @@ class TestPureStateIsolation:
         confine_agents(1, agents, state, syndromic, include_shedding=False)
 
         # state was mutated (expected)
-        assert 0 in state.isolated_ids
+        assert 0 in state.quarantined_ids
         # agents list itself was NOT mutated (no items added/removed)
         assert len(agents) == 1
         # agent dict was NOT mutated
@@ -312,12 +312,12 @@ class TestPureStateIsolation:
         cfg = load_config()
         engine = build_engine(cfg, seed=42)
         state = SimulationState()
-        engine.isolated_ids = {5, 10}
+        engine.quarantined_ids = {5, 10}
 
-        original_engine_ids = set(engine.isolated_ids)
+        original_engine_ids = set(engine.quarantined_ids)
         sync_vsp_isolation(1, engine, state)
 
         # state was mutated (expected)
-        assert state.isolated_ids == {5, 10}
-        # engine.isolated_ids was NOT mutated by sync
-        assert engine.isolated_ids == original_engine_ids
+        assert state.quarantined_ids == {5, 10}
+        # engine.quarantined_ids was NOT mutated by sync
+        assert engine.quarantined_ids == original_engine_ids

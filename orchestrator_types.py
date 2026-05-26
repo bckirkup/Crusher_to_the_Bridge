@@ -34,11 +34,13 @@ STATUS_CONFIRMED = "CONFIRMED"
 SYMPTOM_ASYMPTOMATIC = "asymptomatic"
 SYMPTOM_SYMPTOMATIC = "symptomatic"
 SYMPTOM_ISOLATED = "isolated"
+SYMPTOM_QUARANTINED = "quarantined"
 SYMPTOM_NON_COMPLIANT = "non_compliant"
 SYMPTOM_ASYMPTOMATIC_SHEDDING = "asymptomatic_shedding"
 
-# ── Synthetic location for isolated agents ───────────────────────────────
+# ── Synthetic locations for confined agents ──────────────────────────────
 LOCATION_ISOLATED = "Isolated_In_Quarters"
+LOCATION_QUARANTINED = "Quarantined_In_Quarters"
 
 # ── Defaults for configurable fractions (Law 1: no hardcoded ops) ────────
 DEFAULT_AIRBORNE_FRACTION = 0.6
@@ -57,6 +59,8 @@ class SimulationState:
 
     trigger_status: str = STATUS_BASELINE
     isolated_ids: set[int] = field(default_factory=set)
+    quarantined_ids: set[int] = field(default_factory=set)
+    isolation_unit_capacity: int = 0
     quarantine_refusers: set[int] = field(default_factory=set)
     quarantine_order_epoch: dict[int, int] = field(default_factory=dict)
     escalation_log: list[dict[str, Any]] = field(default_factory=list)

@@ -1,6 +1,7 @@
 {
   "platform": "legend_class_nsc",
   "description": "Legend-class National Security Cutter (WMSL-750). 127.4m LOA, 16.5m beam. ~148 crew + aviation det. Modern HVAC with CBRN collective protection system. Helicopter and stern-launch boat capability.",
+  "isolation_unit_capacity": 0,
   "deck_dimensions": {
     "length_m": 127.4,
     "beam_m": 16.5

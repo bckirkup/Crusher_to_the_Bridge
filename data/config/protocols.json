@@ -223,7 +223,7 @@
     {
       "protocol_id": "SOP-008",
       "name": "Individual Symptomatic Confinement to Quarters",
-      "description": "Confine symptomatic agents to their berthing compartments upon RED clinical RDT. Replaces the legacy hardcoded VSP confinement with a protocol-driven mechanism. FRED quarantine compliance governs whether agents comply immediately or delay.",
+      "description": "Quarantine symptomatic agents to their berthing compartments upon RED clinical RDT. Agents remain HVAC-connected in their home zone. FRED quarantine compliance governs whether agents comply immediately or delay.",
       "trigger": {
         "instrument_class": "clinical_rdt",
         "stoplight_level": "RED",
@@ -254,7 +254,7 @@
     {
       "protocol_id": "SOP-009",
       "name": "General Confinement to Quarters",
-      "description": "Full ship-wide confinement to quarters (lockdown). Triggered when multiple instrument classes show RED simultaneously. All non-essential personnel confined; only watchstanders and medical crew exempt. Severe transmission reduction across all pathways.",
+      "description": "Full ship-wide quarantine to quarters (lockdown). All non-essential personnel confined to home zones; only watchstanders and medical crew exempt. Quarantined agents remain HVAC-connected. Severe reduction in direct contact, droplet, and fomite transmission.",
       "trigger": {
         "instrument_class": "clinical_qpcr",
         "stoplight_level": "RED",
@@ -290,7 +290,7 @@
     {
       "protocol_id": "SOP-010",
       "name": "VSP-Threshold Mass Isolation",
-      "description": "When symptomatic fraction exceeds the Vessel Sanitation Program (VSP) threshold (default 3%), activate mass isolation of all symptomatic agents. This SOP replaces the hardcoded VSP isolation logic in the infection dynamics engine with a configurable, protocol-driven mechanism.",
+      "description": "When symptomatic fraction exceeds the Vessel Sanitation Program (VSP) threshold (default 3%), quarantine all symptomatic agents to quarters. Agents remain HVAC-connected in their home zone. True isolation (separate facility, no HVAC contribution) is reserved for extreme cases and limited by the platform isolation_unit_capacity.",
       "trigger": {
         "instrument_class": "clinical_rdt",
         "stoplight_level": "RED",

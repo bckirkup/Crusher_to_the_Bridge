@@ -103,6 +103,7 @@ def record_epoch(
             "recovered": 0,
             "immune": 0,
             "isolated": len(state.isolated_ids),
+            "quarantined": len(state.quarantined_ids),
             "quarantine_refusers": len(state.quarantine_refusers),
             "sick_call_count": syn_result["sick_call_count"],
             "disrupted_microflora_count": disrupted_count,
@@ -129,6 +130,8 @@ def record_epoch(
         status = a["symptom_status"]
         if status == "isolated":
             pass
+        elif status == "quarantined":
+            epoch_record["summary"]["infected"] += 1
         elif status in ("symptomatic", "non_compliant", "asymptomatic_shedding"):
             epoch_record["summary"]["infected"] += 1
             if status == "symptomatic":
@@ -196,6 +199,7 @@ def record_epoch(
             }
 
     epoch_record["crusher_ops"]["isolated_agents"] = sorted(state.isolated_ids)
+    epoch_record["crusher_ops"]["quarantined_agents"] = sorted(state.quarantined_ids)
 
     epoch_record["observation_engine"] = {
         "air_sniffer": air_results,
@@ -292,6 +296,7 @@ def finalize_simulation(
         compliance_log=state.compliance_log,
         trigger_status=state.trigger_status,
         isolated_count=len(state.isolated_ids),
+        quarantined_count=len(state.quarantined_ids),
         refuser_count=len(state.quarantine_refusers),
         contam_engine=contam_engine,
         zone_pathogen_mass=engine.zone_pathogen_mass,

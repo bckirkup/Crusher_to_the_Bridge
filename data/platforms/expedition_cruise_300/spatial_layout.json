@@ -1,6 +1,7 @@
 {
   "platform": "expedition_cruise_300",
   "description": "Small expedition cruise ship (~300 passengers, ~150 crew). Based on Silver Cloud / Le Bor\u00e9al class vessels: ~157m LOA \u00d7 21m beam, 7 passenger decks, ~17,000 GT. Volumes estimated from published deck plans and standard cruise ship deck heights (2.8m cabins, 3.0-3.5m public, 5.0m theater).",
+  "isolation_unit_capacity": 0,
   "deck_dimensions": {
     "length_m": 157,
     "beam_m": 21
