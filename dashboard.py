@@ -822,6 +822,15 @@ def render_protocol_config(
                     if shed:
                         st.markdown(f"**Peak Shedding:** {shed.get('peak_log10', '?')} log10")
                         st.markdown(f"**Duration:** {shed.get('duration_days', '?')} days")
+                    fc = p.get("food_contamination", {})
+                    if fc.get("enabled"):
+                        st.markdown(f"**Food Contamination:** growth={fc.get('growth_rate_per_epoch', 0)}/epoch, "
+                                    f"decay={fc.get('decay_rate_per_epoch', 0)}/epoch")
+                    ecc = p.get("environmental_contamination", {})
+                    if ecc.get("enabled"):
+                        st.markdown(f"**Env Contamination:** {ecc.get('source_type', '?')} "
+                                    f"(load={ecc.get('baseline_environmental_load', 0)}, "
+                                    f"p2p={'yes' if ecc.get('person_to_person', True) else 'no'})")
                     disrupt = p.get("microflora_disruption", {})
                     if disrupt:
                         st.markdown(f"**Microflora Target:** {disrupt.get('target_system', '?')}")

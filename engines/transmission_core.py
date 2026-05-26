@@ -110,6 +110,12 @@ class ContactTracingMatrix:
     # Pathway 4: Fomite trailing — who entered a room after an infectious
     # agent left, contacting contaminated surfaces
     fomite_trailing_exposures: list[dict[str, Any]] = field(default_factory=list)
+    # Pathway 5: Food contamination — ingestion dose from contaminated
+    # food in Dining-type zones
+    food_contamination_exposures: list[dict[str, Any]] = field(default_factory=list)
+    # Pathway 6: Environmental source — dose from HVAC-colonized pathogen
+    # (e.g. Legionella biofilm) independent of infected agents
+    environmental_exposures: list[dict[str, Any]] = field(default_factory=list)
     # Actual infection events across all pathways
     transmission_events: list[dict[str, Any]] = field(default_factory=list)
 
@@ -120,23 +126,30 @@ class ContactTracingMatrix:
             "droplet_exposures": self.droplet_exposures,
             "hvac_downstream_exposures": self.hvac_downstream_exposures,
             "fomite_trailing_exposures": self.fomite_trailing_exposures,
+            "food_contamination_exposures": self.food_contamination_exposures,
+            "environmental_exposures": self.environmental_exposures,
             "transmission_events": self.transmission_events,
         }
 
 
 # ── Four-pathway transmission engine ────────────────────────────────────
 
+# Fraction of shedding deposited into food pools in Dining-type zones
+FOOD_DEPOSITION_FRACTION = 1e-4
+
+# Fraction of food-pool pathogen ingested per agent per epoch
+FOOD_INGESTION_FRACTION = 0.05
+
+# Fraction of environmental load delivered per zone per epoch
+ENV_DELIVERY_FRACTION = 0.01
+
+
 class TransmissionCore:
-    """Executes all four transmission pathways per epoch.
+    """Executes six transmission pathways per epoch.
 
-    Replaces the monolithic zone-colocation model in
-    ``infection_dynamics_bridge.py`` with explicit, independently-tracked
-    pathways. Each pathway contributes a dose that is summed before
-    applying the Korkin Lab dose-response function.
-
-    Supports multi-pathogen concurrent simulation: each pathogen runs
-    through all four pathways independently with separate mass pools
-    and per-agent susceptibility multipliers.
+    Pathways 1–4 are the original four-pathway model.  Pathway 5 (food
+    contamination) and pathway 6 (environmental source) extend coverage
+    to enteric foodborne and environmentally-colonised pathogens.
 
     Parameters
     ----------
@@ -146,6 +159,8 @@ class TransmissionCore:
         Zone name → volume in m³ (from spatial_layout.json).
     pathogen_profiles : dict, optional
         Pathogen ID → profile dict (from active_profiles.json).
+    zone_types : dict, optional
+        Zone name → type string (from spatial_layout.json).
     """
 
     def __init__(
@@ -153,10 +168,12 @@ class TransmissionCore:
         rng: np.random.Generator,
         zone_volumes: dict[str, float] | None = None,
         pathogen_profiles: dict[str, dict] | None = None,
+        zone_types: dict[str, str] | None = None,
     ) -> None:
         self.rng = rng
         self.zone_volumes = zone_volumes or {}
         self.pathogen_profiles = pathogen_profiles or {}
+        self.zone_types = zone_types or {}
 
         # Persistent state: surface fomite pools per zone per pathogen
         # {pathogen_id: {zone: mass}}
@@ -166,6 +183,12 @@ class TransmissionCore:
         # Persistent state: airborne aerosol pools per zone per pathogen
         self.aerosol_pools: dict[str, float] = {}  # aggregate (legacy)
         self.aerosol_pools_by_pathogen: dict[str, dict[str, float]] = {}
+
+        # Pathway 5: food contamination pools per Dining zone per pathogen
+        self.food_pools: dict[str, dict[str, float]] = {}
+
+        # Pathway 6: environmental contamination load per pathogen
+        self.environmental_load: dict[str, float] = {}
 
         # Previous epoch's zone occupancy (for fomite trailing detection)
         self._prev_zone_occupants: dict[str, set[int]] = {}
@@ -186,8 +209,13 @@ class TransmissionCore:
             self.aerosol_pools.setdefault(z, 0.0)
             self._prev_zone_occupants.setdefault(z, set())
             self._prev_zone_shedders.setdefault(z, [])
+        # Identify Dining-type zones for food contamination
+        dining_zones = [
+            z for z in zone_names
+            if self.zone_types.get(z, "") == "Dining"
+        ]
         # Initialize per-pathogen pools
-        for pid in self.pathogen_profiles:
+        for pid, profile in self.pathogen_profiles.items():
             self.surface_pools_by_pathogen.setdefault(pid, {})
             self.aerosol_pools_by_pathogen.setdefault(pid, {})
             self._prev_zone_shedders_by_pathogen.setdefault(pid, {})
@@ -195,6 +223,19 @@ class TransmissionCore:
                 self.surface_pools_by_pathogen[pid].setdefault(z, 0.0)
                 self.aerosol_pools_by_pathogen[pid].setdefault(z, 0.0)
                 self._prev_zone_shedders_by_pathogen[pid].setdefault(z, [])
+            # Initialize food contamination pools for Dining zones
+            fc = profile.get("food_contamination", {})
+            if fc.get("enabled", False):
+                food_zones = fc.get("food_zones", dining_zones)
+                self.food_pools.setdefault(pid, {})
+                for fz in food_zones:
+                    self.food_pools[pid].setdefault(fz, 0.0)
+            # Initialize environmental contamination load
+            ec = profile.get("environmental_contamination", {})
+            if ec.get("enabled", False):
+                self.environmental_load[pid] = ec.get(
+                    "baseline_environmental_load", 0.0
+                )
 
     def execute_transmission(
         self,
@@ -253,17 +294,23 @@ class TransmissionCore:
             p_agent_doses: dict[int, float] = {}
             p_agent_pw: dict[int, dict[str, float]] = {}
 
+            # Check if this pathogen spreads person-to-person
+            ec = profile.get("environmental_contamination", {})
+            person_to_person = ec.get("person_to_person", True)
+
             # ── Pathway 1: Direct Contact ────────────────────────
-            self._pathway_direct_contact(
-                epoch, zone_occupants, p_agent_doses, matrix, events,
-                p_agent_pw, pathogen_id=pathogen_id, profile=profile,
-            )
+            if person_to_person:
+                self._pathway_direct_contact(
+                    epoch, zone_occupants, p_agent_doses, matrix, events,
+                    p_agent_pw, pathogen_id=pathogen_id, profile=profile,
+                )
 
             # ── Pathway 2: Short-Range Droplet ───────────────────
-            self._pathway_droplet(
-                epoch, zone_occupants, p_agent_doses, matrix, events,
-                p_agent_pw, pathogen_id=pathogen_id, profile=profile,
-            )
+            if person_to_person:
+                self._pathway_droplet(
+                    epoch, zone_occupants, p_agent_doses, matrix, events,
+                    p_agent_pw, pathogen_id=pathogen_id, profile=profile,
+                )
 
             # ── Pathway 3: Long-Range Airborne (HVAC Drift) ──────
             self._pathway_hvac_airborne(
@@ -274,10 +321,26 @@ class TransmissionCore:
             )
 
             # ── Pathway 4: Fomite Deposition & Surface Touch ─────
-            self._pathway_fomite(
-                epoch, zone_occupants, p_agent_doses, matrix, events,
-                p_agent_pw, pathogen_id=pathogen_id, profile=profile,
-            )
+            if person_to_person:
+                self._pathway_fomite(
+                    epoch, zone_occupants, p_agent_doses, matrix, events,
+                    p_agent_pw, pathogen_id=pathogen_id, profile=profile,
+                )
+
+            # ── Pathway 5: Food Contamination ────────────────────
+            fc = profile.get("food_contamination", {})
+            if fc.get("enabled", False):
+                self._pathway_food_contamination(
+                    epoch, zone_occupants, p_agent_doses, matrix,
+                    p_agent_pw, pathogen_id=pathogen_id, profile=profile,
+                )
+
+            # ── Pathway 6: Environmental Source ──────────────────
+            if ec.get("enabled", False):
+                self._pathway_environmental(
+                    epoch, zone_occupants, p_agent_doses, matrix,
+                    p_agent_pw, pathogen_id=pathogen_id, profile=profile,
+                )
 
             # Apply susceptibility multiplier per agent per pathogen
             for aid, dose in p_agent_doses.items():
@@ -581,6 +644,131 @@ class TransmissionCore:
                     "dose": round(dose, 4),
                     "is_trailing": is_trailing,
                     "prev_shedder_ids": prev_shedders if is_trailing else [],
+                })
+
+    # ── Pathway 5: Food Contamination ────────────────────────────────
+
+    def _pathway_food_contamination(
+        self,
+        epoch: int,
+        zone_occupants: dict[str, list[KorkinAgent]],
+        agent_doses: dict[int, float],
+        matrix: ContactTracingMatrix,
+        agent_pathway_doses: dict[int, dict[str, float]] | None = None,
+        pathogen_id: str = "_default",
+        profile: dict | None = None,
+    ) -> None:
+        """Food contamination in Dining-type zones.
+
+        Infected agents shedding in a food zone deposit pathogen into a
+        persistent food pool.  The pool grows each epoch (bacterial
+        reproduction) and decays slowly.  Susceptible agents eating in the
+        zone receive an ingestion dose from the pool.
+        """
+        fc = (profile or {}).get("food_contamination", {})
+        if not fc.get("enabled", False):
+            return
+
+        food_zones = self.food_pools.get(pathogen_id, {})
+        if not food_zones:
+            return
+
+        growth = fc.get("growth_rate_per_epoch", 0.0)
+        decay = fc.get("decay_rate_per_epoch", 0.1)
+
+        for zone_name in list(food_zones):
+            occupants = zone_occupants.get(zone_name, [])
+
+            # Deposit from shedders present in this food zone
+            shedders = self._get_shedders(occupants, pathogen_id, profile)
+            for _, sv in shedders:
+                food_zones[zone_name] += sv * FOOD_DEPOSITION_FRACTION
+
+            # Net growth (reproduction minus decay)
+            pool = food_zones[zone_name]
+            if pool > 0:
+                pool *= (1.0 + growth - decay)
+                food_zones[zone_name] = max(pool, 0.0)
+
+            if food_zones[zone_name] <= 0:
+                continue
+
+            # Dose to susceptible agents eating here
+            susceptible = self._get_susceptible(occupants, pathogen_id)
+            for target in susceptible:
+                dose = food_zones[zone_name] * FOOD_INGESTION_FRACTION
+                agent_doses[target.agent_id] = (
+                    agent_doses.get(target.agent_id, 0.0) + dose
+                )
+                if agent_pathway_doses is not None:
+                    pw = agent_pathway_doses.setdefault(target.agent_id, {})
+                    pw["food"] = pw.get("food", 0.0) + dose
+
+                matrix.food_contamination_exposures.append({
+                    "target_id": target.agent_id,
+                    "zone": zone_name,
+                    "pathogen_id": pathogen_id,
+                    "food_pool_mass": round(food_zones[zone_name], 4),
+                    "dose": round(dose, 4),
+                })
+
+    # ── Pathway 6: Environmental Source ─────────────────────────────
+
+    def _pathway_environmental(
+        self,
+        epoch: int,
+        zone_occupants: dict[str, list[KorkinAgent]],
+        agent_doses: dict[int, float],
+        matrix: ContactTracingMatrix,
+        agent_pathway_doses: dict[int, dict[str, float]] | None = None,
+        pathogen_id: str = "_default",
+        profile: dict | None = None,
+    ) -> None:
+        """Environmental source pathway for HVAC-colonised pathogens.
+
+        The HVAC system itself harbours the pathogen (e.g. Legionella
+        biofilm).  Each epoch the environmental load grows at the
+        colonisation rate and delivers a fraction of its mass to every
+        HVAC-connected zone.  Agents inhale the delivered dose.
+        """
+        ec = (profile or {}).get("environmental_contamination", {})
+        if not ec.get("enabled", False):
+            return
+
+        load = self.environmental_load.get(pathogen_id, 0.0)
+        col_rate = ec.get("colonization_rate_per_epoch", 0.0)
+
+        # Grow the HVAC biofilm load
+        load *= (1.0 + col_rate)
+        self.environmental_load[pathogen_id] = load
+
+        if load <= 0:
+            return
+
+        # Deliver to all zones (environmental pathogen is HVAC-systemic)
+        for zone_name, occupants in zone_occupants.items():
+            volume = self.zone_volumes.get(zone_name, 100.0)
+            delivered = load * ENV_DELIVERY_FRACTION
+            concentration = delivered / max(volume, 1.0)
+
+            susceptible = self._get_susceptible(occupants, pathogen_id)
+            for target in susceptible:
+                dose = concentration * AEROSOL_INHALATION_FRACTION * volume
+                dose *= self.hvac_airborne_scalar
+                agent_doses[target.agent_id] = (
+                    agent_doses.get(target.agent_id, 0.0) + dose
+                )
+                if agent_pathway_doses is not None:
+                    pw = agent_pathway_doses.setdefault(target.agent_id, {})
+                    pw["environmental"] = pw.get("environmental", 0.0) + dose
+
+                matrix.environmental_exposures.append({
+                    "target_id": target.agent_id,
+                    "zone": zone_name,
+                    "pathogen_id": pathogen_id,
+                    "environmental_load": round(load, 4),
+                    "delivered_mass": round(delivered, 4),
+                    "dose": round(dose, 4),
                 })
 
     # ── Multi-pathogen shedder/susceptible helpers ─────────────────────

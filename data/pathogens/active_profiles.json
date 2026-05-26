@@ -9,7 +9,7 @@
       "pathogen_id": "norwalk_gi",
       "name": "Norwalk Virus (Norovirus GII.4)",
       "category": "enteric_viral",
-      "transmission_routes": ["direct_contact", "fomite", "droplet", "hvac_airborne"],
+      "transmission_routes": ["direct_contact", "fomite", "droplet", "hvac_airborne", "food"],
       "shedding_curve_log10": [7.75, 9.0, 11.0, 11.0, 11.0, 10.0, 10.0, 9.5, 9.0, 9.0, 8.0, 8.0, 8.0, 8.0, 8.0],
       "asymptomatic_shedding_log10": [7.75, 9.5, 10.5, 10.0, 9.0, 8.0, 7.75, 7.75, 7.75, 7.75, 7.75, 7.75, 7.75, 7.75, 7.75],
       "dose_adjustment": 4.0,
@@ -34,6 +34,11 @@
           "Fungi": {"Candida_spp": 2.5},
           "Virus": {"Phage_community": 1.8}
         }
+      },
+      "food_contamination": {
+        "enabled": true,
+        "growth_rate_per_epoch": 0.3,
+        "decay_rate_per_epoch": 0.1
       },
       "introduction_epoch": 0,
       "initial_infected": 1
@@ -67,6 +72,9 @@
           "Fungi": {"Aspergillus_spp": 2.2},
           "Virus": {"ssRNA_marine": 1.5}
         }
+      },
+      "food_contamination": {
+        "enabled": false
       },
       "introduction_epoch": 6,
       "initial_infected": 1

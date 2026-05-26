@@ -250,6 +250,8 @@ class PathogenProfile(BaseModel):
     surface_deposition_fraction: float = 0.0001
     base_susceptibility: float = 1.0
     microflora_disruption: dict[str, Any] = {}
+    food_contamination: dict[str, Any] = {}
+    environmental_contamination: dict[str, Any] = {}
     introduction_epoch: int = 0
     initial_infected: int = 1
     shedding_profile: dict[str, Any] = {}
@@ -505,6 +507,53 @@ def _check_logical_contradictions(
                     f"{p.pathogen_id}.introduction_epoch = {p.introduction_epoch} "
                     f"is negative.",
                 )
+
+            # Validate food_contamination config
+            fc = p.food_contamination
+            if fc.get("enabled", False):
+                gr = fc.get("growth_rate_per_epoch", 0.0)
+                dr = fc.get("decay_rate_per_epoch", 0.0)
+                if gr < 0:
+                    report.error(
+                        "active_profiles.json",
+                        "MATH_BOUND",
+                        f"{p.pathogen_id}.food_contamination."
+                        f"growth_rate_per_epoch = {gr} is negative.",
+                    )
+                if dr < 0 or dr > 1:
+                    report.warn(
+                        "active_profiles.json",
+                        "MATH_BOUND",
+                        f"{p.pathogen_id}.food_contamination."
+                        f"decay_rate_per_epoch = {dr} outside [0, 1].",
+                    )
+                if "food" not in p.transmission_routes:
+                    report.warn(
+                        "active_profiles.json",
+                        "LOGIC_ROUTE",
+                        f"{p.pathogen_id} has food_contamination enabled "
+                        f"but 'food' not in transmission_routes.",
+                    )
+
+            # Validate environmental_contamination config
+            ecc = p.environmental_contamination
+            if ecc.get("enabled", False):
+                bl = ecc.get("baseline_environmental_load", 0.0)
+                cr = ecc.get("colonization_rate_per_epoch", 0.0)
+                if bl < 0:
+                    report.error(
+                        "active_profiles.json",
+                        "MATH_BOUND",
+                        f"{p.pathogen_id}.environmental_contamination."
+                        f"baseline_environmental_load = {bl} is negative.",
+                    )
+                if cr < 0:
+                    report.error(
+                        "active_profiles.json",
+                        "MATH_BOUND",
+                        f"{p.pathogen_id}.environmental_contamination."
+                        f"colonization_rate_per_epoch = {cr} is negative.",
+                    )
 
     # Material references in protocol costs
     if protocols and resource_costs:

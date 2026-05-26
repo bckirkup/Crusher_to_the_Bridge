@@ -80,6 +80,11 @@
           }
         }
       },
+      "food_contamination": {
+        "enabled": true,
+        "growth_rate_per_epoch": 0.3,
+        "decay_rate_per_epoch": 0.1
+      },
       "introduction_epoch": 0,
       "initial_infected": 1
     },
@@ -158,6 +163,9 @@
           }
         }
       },
+      "food_contamination": {
+        "enabled": false
+      },
       "introduction_epoch": 6,
       "initial_infected": 1
     },
@@ -234,6 +242,9 @@
           }
         }
       },
+      "food_contamination": {
+        "enabled": false
+      },
       "introduction_epoch": 12,
       "initial_infected": 1
     },
@@ -306,6 +317,9 @@
           }
         }
       },
+      "food_contamination": {
+        "enabled": false
+      },
       "introduction_epoch": 20,
       "initial_infected": 1
     },
@@ -375,6 +389,13 @@
           "Fungi": {},
           "Virus": {}
         }
+      },
+      "environmental_contamination": {
+        "enabled": true,
+        "source_type": "hvac",
+        "colonization_rate_per_epoch": 0.02,
+        "baseline_environmental_load": 100.0,
+        "person_to_person": false
       },
       "introduction_epoch": 30,
       "initial_infected": 0
@@ -454,6 +475,11 @@
           }
         }
       },
+      "food_contamination": {
+        "enabled": true,
+        "growth_rate_per_epoch": 0.5,
+        "decay_rate_per_epoch": 0.1
+      },
       "introduction_epoch": 40,
       "initial_infected": 1
     },
@@ -526,6 +552,11 @@
           "Fungi": {},
           "Virus": {}
         }
+      },
+      "food_contamination": {
+        "enabled": true,
+        "growth_rate_per_epoch": 0.2,
+        "decay_rate_per_epoch": 0.05
       },
       "introduction_epoch": 50,
       "initial_infected": 1
@@ -603,6 +634,9 @@
           }
         }
       },
+      "food_contamination": {
+        "enabled": false
+      },
       "introduction_epoch": 60,
       "initial_infected": 1
     },
@@ -674,6 +708,9 @@
             "Hantavirus": 10.0
           }
         }
+      },
+      "food_contamination": {
+        "enabled": false
       },
       "introduction_epoch": 70,
       "initial_infected": 1
@@ -750,6 +787,9 @@
             "Ebola_virus": 10.0
           }
         }
+      },
+      "food_contamination": {
+        "enabled": false
       },
       "introduction_epoch": 80,
       "initial_infected": 1

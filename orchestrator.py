@@ -148,11 +148,16 @@ def run() -> None:
         z["name"]: z.get("volume_m3", 100.0)
         for z in ship.get("zones", [])
     }
+    zone_types = {
+        z["name"]: z.get("type", "")
+        for z in ship.get("zones", [])
+    }
     hvac_downstream = build_hvac_downstream_map(airflow_data) if airflow_data else {}
     tx_core = TransmissionCore(
         rng=np.random.default_rng(seed),
         zone_volumes=zone_volumes,
         pathogen_profiles=pathogen_profiles,
+        zone_types=zone_types,
     )
     tx_core.initialize_zones(zone_names)
     engine.enable_external_transmission()
