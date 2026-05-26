@@ -67,6 +67,7 @@ from orchestrator_init import (
     init_observation_engine,
     init_protocol_engine,
     init_wearable_monitors,
+    load_isolation_unit_capacity,
 )
 from orchestrator_epoch import (
     sync_vsp_isolation,
@@ -167,7 +168,9 @@ def run() -> None:
     grumb_seeds = initialize_grumb_seeding(seq, ship["zones"])
     print_initialization(ship, grumb_seeds, cfg)
 
-    state = SimulationState()
+    state = SimulationState(
+        isolation_unit_capacity=load_isolation_unit_capacity(cfg),
+    )
 
     # ── EPOCH LOOP ───────────────────────────────────────────────────
     for epoch in range(num_epochs):
@@ -175,6 +178,7 @@ def run() -> None:
         step_mid_cruise_introductions(epoch, engine, pathogen_profiles, rng)
 
         engine.isolated_ids = set(state.isolated_ids)
+        engine.quarantined_ids = set(state.quarantined_ids)
         engine_payload = engine.step()
         sync_vsp_isolation(epoch, engine, state)
 
@@ -203,7 +207,8 @@ def run() -> None:
         engine_payload = engine._export_payload()
 
         agents, spaces = engine_payload_to_schema(
-            engine_payload, state.isolated_ids, state.quarantine_refusers,
+            engine_payload, state.isolated_ids, state.quarantined_ids,
+            state.quarantine_refusers,
         )
 
         payload = make_ground_truth(epoch=epoch, agents=agents, spaces=spaces)

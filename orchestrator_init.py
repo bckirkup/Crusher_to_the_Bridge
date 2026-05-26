@@ -51,6 +51,7 @@ from crusher_labs.cost_ledger import (
 from orchestrator_types import (
     REPO_ROOT,
     SYMPTOM_ISOLATED,
+    SYMPTOM_QUARANTINED,
     SYMPTOM_NON_COMPLIANT,
     LOCATION_ISOLATED,
     ObservationEngine,
@@ -86,6 +87,20 @@ def load_spatial_layout(cfg: dict[str, Any]) -> list[dict[str, Any]] | None:
         }
         for z in layout.get("zones", [])
     ]
+
+
+def load_isolation_unit_capacity(cfg: dict[str, Any], default: int = 2) -> int:
+    """Read isolation_unit_capacity from the platform spatial layout."""
+    graph_cfg = cfg.get("ship_graph", {})
+    layout_path = graph_cfg.get("spatial_layout")
+    if not layout_path:
+        return default
+    full_path = os.path.join(REPO_ROOT, layout_path)
+    if not os.path.isfile(full_path):
+        return default
+    with open(full_path, "r", encoding="utf-8") as fh:
+        layout = json.load(fh)
+    return int(layout.get("isolation_unit_capacity", default))
 
 
 def initialize_ship_graph(cfg: dict[str, Any]) -> dict[str, Any]:
@@ -177,12 +192,15 @@ def build_engine(
 def engine_payload_to_schema(
     engine_payload: dict[str, Any],
     isolated_ids: set[int],
+    quarantined_ids: set[int],
     quarantine_refusers: set[int],
 ) -> tuple[list[dict[str, Any]], dict[str, dict[str, Any]]]:
     """Convert Korkin engine output to telemetry_buffer schema format.
 
-    Applies FRED compliance overrides for isolated / non-compliant agents.
-    Validates structural expectations at the module boundary.
+    Applies FRED compliance overrides for isolated, quarantined, and
+    non-compliant agents.  Isolated agents (in isolation units) have
+    zero shedding; quarantined agents (confined to quarters) retain
+    their actual shedding rate and home-zone location.
     """
     raw_agents = engine_payload.get("agents")
     if raw_agents is None:
@@ -202,6 +220,15 @@ def engine_payload_to_schema(
                 symptom_status=SYMPTOM_ISOLATED,
                 shedding_rate=0.0,
                 location=LOCATION_ISOLATED,
+                agent_class=a_class,
+                gender=a_gender,
+            )
+        elif aid in quarantined_ids:
+            agent_dict = make_agent(
+                agent_id=aid,
+                symptom_status=SYMPTOM_QUARANTINED,
+                shedding_rate=float(a.get("shedding_rate", 0.0)),
+                location=a.get("location", "unknown"),
                 agent_class=a_class,
                 gender=a_gender,
             )

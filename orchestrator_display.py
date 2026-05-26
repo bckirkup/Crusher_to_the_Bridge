@@ -292,7 +292,8 @@ def print_executive_summary(
     compliance_log: list[dict[str, Any]],
     trigger_status: str,
     isolated_count: int,
-    refuser_count: int,
+    quarantined_count: int = 0,
+    refuser_count: int = 0,
     contam_engine: Any | None,
     zone_pathogen_mass: dict[str, float],
     hvac_cfg: dict[str, Any],
@@ -324,7 +325,8 @@ def print_executive_summary(
     lines.append(row(f"Total infected:      {engine_summary['infected'] + engine_summary['recovered'] + engine_summary['isolated']}"))
     lines.append(row(f"  Currently infected: {engine_summary['infected']}"))
     lines.append(row(f"  Recovered:          {engine_summary['recovered']}"))
-    lines.append(row(f"  Isolated:           {engine_summary['isolated']}"))
+    lines.append(row(f"  Isolated:           {engine_summary.get('isolated', 0)}"))
+    lines.append(row(f"  Quarantined:        {engine_summary.get('quarantined', 0)}"))
     lines.append(row(f"  Immune (neg sec):   {engine_summary['immune']}"))
     lines.append(row(f"  Symptomatic:        {engine_summary['symptomatic']}"))
     lines.append(row(f"VSP triggered:       {'Yes' if engine_summary['vsp_triggered'] else 'No'}"))
@@ -401,7 +403,8 @@ def print_executive_summary(
     lines.append(divider)
 
     lines.append(row(f"{num_epochs} epochs completed.  Data bridged cleanly."))
-    lines.append(row(f"Isolated: {isolated_count}/{num_agents}   Non-compliant: {refuser_count}"))
+    confined = isolated_count + quarantined_count
+    lines.append(row(f"Isolated: {isolated_count}  Quarantined: {quarantined_count}  Total confined: {confined}/{num_agents}   Non-compliant: {refuser_count}"))
     lines.append(bottom)
 
     print()

@@ -502,6 +502,7 @@ class KorkinShipEngine:
         self.epoch: int = 0
         self.vsp_triggered: bool = False
         self.isolated_ids: set[int] = set()
+        self.quarantined_ids: set[int] = set()
 
         self._zone_pathogen_mass: dict[str, float] = {z["name"]: 0.0 for z in self.zones}
         # Multi-pathogen mass pools: {pathogen_id: {zone_name: float}}
@@ -744,6 +745,9 @@ class KorkinShipEngine:
             if agent.agent_id in self.isolated_ids:
                 agent.current_location = "Isolated_In_Quarters"
                 continue
+            if agent.agent_id in self.quarantined_ids:
+                agent.current_location = agent.home_zone
+                continue
             randomness = self.rng.uniform(-1.0, 1.0)
             agent.current_location = agent.get_location_for_hour(hour, randomness)
 
@@ -801,7 +805,9 @@ class KorkinShipEngine:
                 agent.infection_status = InfectionStatus.RECOVERED
                 agent.illness_status = IllnessStatus.RECOVERED
 
-        # 5. VSP isolation check (Agent.java: 3% threshold)
+        # 5. VSP quarantine check (Agent.java: 3% threshold)
+        # VSP confinement sends symptomatic agents to quarters (quarantine),
+        # not to isolation units.  Quarantined agents remain HVAC-connected.
         total_pop = len(self.agents)
         total_ill = sum(1 for a in self.agents if a.is_symptomatic)
         vsp_threshold = int(self.vsp_threshold_fraction * total_pop)
@@ -809,9 +815,10 @@ class KorkinShipEngine:
             self.vsp_triggered = True
 
         if self.vsp_triggered:
+            confined = self.isolated_ids | self.quarantined_ids
             for agent in self.agents:
-                if agent.is_symptomatic and agent.agent_id not in self.isolated_ids:
-                    self.isolated_ids.add(agent.agent_id)
+                if agent.is_symptomatic and agent.agent_id not in confined:
+                    self.quarantined_ids.add(agent.agent_id)
 
         # 6. Zone pathogen mass: new deposits from shedders
         # NOTE: Decay is now handled externally by the CONTAM transport
@@ -916,6 +923,7 @@ class KorkinShipEngine:
         recovered = sum(1 for a in self.agents if a.is_recovered)
         immune = sum(1 for a in self.agents if a.immune)
         isolated = len(self.isolated_ids)
+        quarantined = len(self.quarantined_ids)
 
         # Agent class breakdown
         class_counts: dict[str, int] = {}
@@ -936,6 +944,7 @@ class KorkinShipEngine:
             "recovered": recovered,
             "immune": immune,
             "isolated": isolated,
+            "quarantined": quarantined,
             "vsp_triggered": self.vsp_triggered,
             "agent_classes": class_counts,
             "gender_distribution": gender_counts,

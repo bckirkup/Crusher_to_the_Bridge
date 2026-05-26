@@ -331,7 +331,7 @@ class TestEnginePayloadToSchema:
                 "Bridge": {"pathogen_mass": 10.0},
             },
         }
-        agents, spaces = _engine_payload_to_schema(engine_payload, set(), set())
+        agents, spaces = _engine_payload_to_schema(engine_payload, set(), set(), set())
         assert len(agents) == 1
         assert agents[0]["agent_id"] == 0
         assert agents[0]["symptom_status"] == SYMPTOM_ASYMPTOMATIC
@@ -345,7 +345,7 @@ class TestEnginePayloadToSchema:
             ],
             "spaces": {},
         }
-        agents, _ = _engine_payload_to_schema(engine_payload, {5}, set())
+        agents, _ = _engine_payload_to_schema(engine_payload, {5}, set(), set())
         assert agents[0]["symptom_status"] == SYMPTOM_ISOLATED
         assert agents[0]["location"] == LOCATION_ISOLATED
         assert agents[0]["shedding_rate"] == 0.0
@@ -358,7 +358,7 @@ class TestEnginePayloadToSchema:
             ],
             "spaces": {},
         }
-        agents, _ = _engine_payload_to_schema(engine_payload, set(), {3})
+        agents, _ = _engine_payload_to_schema(engine_payload, set(), set(), {3})
         assert agents[0]["symptom_status"] == SYMPTOM_NON_COMPLIANT
         assert agents[0]["shedding_rate"] == 30.0
 
@@ -372,7 +372,7 @@ class TestEnginePayloadToSchema:
             ],
             "spaces": {},
         }
-        agents, _ = _engine_payload_to_schema(engine_payload, set(), set())
+        agents, _ = _engine_payload_to_schema(engine_payload, set(), set(), set())
         assert "pathogen_infections" in agents[0]
         assert "susceptibility_multiplier" in agents[0]
         assert agents[0]["microflora_disruption"] == 0.5
@@ -387,7 +387,7 @@ class TestEnginePayloadToSchema:
                 },
             },
         }
-        _, spaces = _engine_payload_to_schema(engine_payload, set(), set())
+        _, spaces = _engine_payload_to_schema(engine_payload, set(), set(), set())
         assert spaces["Bridge"]["pathogen_mass_by_id"]["norovirus"] == 8.0
 
 
@@ -406,7 +406,7 @@ class TestStepQuarantineConfinement:
         syndromic = self._make_syndromic_mock(compliance=True)
 
         _step_quarantine_confinement(5, agents, merged, STATUS_CONFIRMED, state, syndromic)
-        assert 0 in state.isolated_ids
+        assert 0 in state.quarantined_ids
 
     def test_legacy_confirmed_fallback(self) -> None:
         state = SimulationState()
@@ -415,7 +415,7 @@ class TestStepQuarantineConfinement:
         syndromic = self._make_syndromic_mock(compliance=True)
 
         _step_quarantine_confinement(5, agents, merged, STATUS_CONFIRMED, state, syndromic)
-        assert 1 in state.isolated_ids
+        assert 1 in state.quarantined_ids
 
     def test_no_confinement_at_baseline(self) -> None:
         state = SimulationState()
@@ -424,7 +424,7 @@ class TestStepQuarantineConfinement:
         syndromic = self._make_syndromic_mock(compliance=True)
 
         _step_quarantine_confinement(5, agents, merged, STATUS_BASELINE, state, syndromic)
-        assert len(state.isolated_ids) == 0
+        assert len(state.quarantined_ids) == 0
 
     def test_refusal_tracked(self) -> None:
         state = SimulationState()
@@ -439,6 +439,16 @@ class TestStepQuarantineConfinement:
     def test_already_isolated_skipped(self) -> None:
         state = SimulationState()
         state.isolated_ids.add(0)
+        agents = [{"agent_id": 0, "symptom_status": SYMPTOM_SYMPTOMATIC}]
+        merged = {"confine_symptomatic_to_quarters": True}
+        syndromic = self._make_syndromic_mock(compliance=True)
+
+        _step_quarantine_confinement(5, agents, merged, STATUS_CONFIRMED, state, syndromic)
+        assert len(state.compliance_log) == 0
+
+    def test_already_quarantined_skipped(self) -> None:
+        state = SimulationState()
+        state.quarantined_ids.add(0)
         agents = [{"agent_id": 0, "symptom_status": SYMPTOM_SYMPTOMATIC}]
         merged = {"confine_symptomatic_to_quarters": True}
         syndromic = self._make_syndromic_mock(compliance=True)
@@ -464,8 +474,8 @@ class TestSOP009GeneralConfinement:
         merged = {"confine_all_to_quarters": True}
         syndromic = self._make_syndromic_mock(compliance=True)
         _step_quarantine_confinement(5, agents, merged, STATUS_CONFIRMED, state, syndromic)
-        assert 0 in state.isolated_ids
-        assert 1 in state.isolated_ids
+        assert 0 in state.quarantined_ids
+        assert 1 in state.quarantined_ids
 
     def test_confine_all_takes_priority_over_symptomatic_only(self) -> None:
         state = SimulationState()
@@ -478,7 +488,7 @@ class TestSOP009GeneralConfinement:
         }
         syndromic = self._make_syndromic_mock(compliance=True)
         _step_quarantine_confinement(5, agents, merged, STATUS_CONFIRMED, state, syndromic)
-        assert 0 in state.isolated_ids
+        assert 0 in state.quarantined_ids
 
     def test_confine_all_skips_already_isolated(self) -> None:
         state = SimulationState()
@@ -571,7 +581,7 @@ class TestEdgeCaseBoundaries:
         syndromic = MagicMock()
         syndromic.check_quarantine_compliance.return_value = True
         _step_quarantine_confinement(1, agents, merged, STATUS_CONFIRMED, state, syndromic)
-        assert 0 not in state.isolated_ids
+        assert 0 not in state.quarantined_ids
 
     def test_empty_agent_list(self) -> None:
         state = SimulationState()
@@ -580,7 +590,7 @@ class TestEdgeCaseBoundaries:
             1, [], {"confine_symptomatic_to_quarters": True},
             STATUS_CONFIRMED, state, syndromic,
         )
-        assert len(state.isolated_ids) == 0
+        assert len(state.quarantined_ids) == 0
         assert len(state.compliance_log) == 0
 
     def test_all_agents_already_isolated(self) -> None:

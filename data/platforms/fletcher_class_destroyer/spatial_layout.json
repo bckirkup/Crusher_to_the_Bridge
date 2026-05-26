@@ -1,6 +1,7 @@
 {
   "platform": "fletcher_class_destroyer",
   "description": "WWII Fletcher-class destroyer (DD-445 class). 114.7m LOA, 12.0m beam, ~329 crew. Forced-draft ventilation, no HVAC filtration. Hot-bunking in enlisted berthing.",
+  "isolation_unit_capacity": 1,
   "deck_dimensions": {
     "length_m": 114.7,
     "beam_m": 12.0

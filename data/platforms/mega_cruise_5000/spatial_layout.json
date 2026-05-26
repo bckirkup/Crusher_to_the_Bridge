@@ -1,6 +1,7 @@
 {
   "platform": "mega_cruise_5000",
   "description": "Mega cruise ship (~5,000 passengers, ~2,000 crew), Oasis-class scale. Based on published Oasis-class specifications (~360-362m LOA, ~64-66m maximum beam, 18 decks, ~226,000 GT, ~2,700-2,800 cabins). Individual cabins are aggregated into 27 passenger cabin blocks across 9 cabin decks, plus 4 crew-quarter blocks. Volumes estimated from published ship dimensions/deck plans and standard ceiling heights.",
+  "isolation_unit_capacity": 10,
   "deck_dimensions": {
     "length_m": 362,
     "beam_m": 64

@@ -1,6 +1,7 @@
 {
   "platform": "san_antonio_class_lpd",
   "description": "San Antonio-class amphibious transport dock (LPD-17). 208.5m LOA, 31.9m beam. ~360 ship's company + ~800 embarked Marines. Modern HVAC with NBC filtration capability. Well deck and flight deck for amphibious operations.",
+  "isolation_unit_capacity": 4,
   "deck_dimensions": {
     "length_m": 208.5,
     "beam_m": 31.9

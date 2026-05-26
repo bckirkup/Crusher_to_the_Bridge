@@ -37,6 +37,10 @@ from orchestrator_types import (
     ProtocolContext,
 )
 
+# All confined IDs (quarantined + isolated) helper
+def _all_confined(state: SimulationState) -> set[int]:
+    return state.isolated_ids | state.quarantined_ids
+
 
 # ── VSP state synchronization ────────────────────────────────────────────
 
@@ -45,21 +49,22 @@ def sync_vsp_isolation(
     engine: KorkinShipEngine,
     state: SimulationState,
 ) -> None:
-    """Sync VSP-triggered isolation from the engine back to SimulationState.
+    """Sync VSP-triggered quarantine from the engine back to SimulationState.
 
-    The Korkin engine's ``step()`` may independently isolate agents via the
+    The Korkin engine's ``step()`` may independently quarantine agents via the
     VSP 3% threshold.  Those IDs must be merged into SimulationState so that
-    downstream functions (telemetry, quarantine, recording) see a consistent
-    isolation set.
+    downstream functions (telemetry, confinement, recording) see a consistent
+    set.  VSP confinement is quarantine (confined to quarters, still
+    HVAC-connected), not true isolation.
     """
-    vsp_new = engine.isolated_ids - state.isolated_ids
+    vsp_new = engine.quarantined_ids - _all_confined(state)
     if vsp_new:
-        state.isolated_ids.update(vsp_new)
+        state.quarantined_ids.update(vsp_new)
         for aid in sorted(vsp_new):
             state.compliance_log.append({
                 "epoch": epoch,
                 "agent_id": aid,
-                "action": "vsp_isolation",
+                "action": "vsp_quarantine",
             })
 
 
@@ -75,7 +80,7 @@ def step_fred_compliance(
         epochs_since = epoch - state.quarantine_order_epoch.get(aid, epoch)
         if syndromic.check_quarantine_compliance(aid, epochs_since):
             state.quarantine_refusers.discard(aid)
-            state.isolated_ids.add(aid)
+            state.quarantined_ids.add(aid)
             state.compliance_log.append({
                 "epoch": epoch, "agent_id": aid,
                 "action": "delayed_compliance",
@@ -310,17 +315,18 @@ def confine_agents(
     syndromic: Any,
     include_shedding: bool,
 ) -> None:
-    """Confine symptomatic (and optionally shedding) agents to quarters."""
+    """Confine symptomatic (and optionally shedding) agents to quarters (quarantine)."""
+    confined = _all_confined(state)
     for agent in agents:
         aid = agent["agent_id"]
-        if aid in state.isolated_ids or aid in state.quarantine_refusers:
+        if aid in confined or aid in state.quarantine_refusers:
             continue
         is_symptomatic = agent["symptom_status"] in (SYMPTOM_SYMPTOMATIC, SYMPTOM_NON_COMPLIANT)
         is_shedding = include_shedding and agent.get("shedding_rate", 0.0) > 0.0
         if not (is_symptomatic or is_shedding):
             continue
         if syndromic.check_quarantine_compliance(aid, 0):
-            state.isolated_ids.add(aid)
+            state.quarantined_ids.add(aid)
             state.compliance_log.append({
                 "epoch": epoch, "agent_id": aid,
                 "action": "immediate_compliance",
@@ -340,13 +346,14 @@ def confine_all_agents(
     state: SimulationState,
     syndromic: Any,
 ) -> None:
-    """SOP-009: confine ALL agents to quarters (full-ship lockdown)."""
+    """SOP-009: confine ALL agents to quarters (quarantine lockdown)."""
+    confined = _all_confined(state)
     for agent in agents:
         aid = agent["agent_id"]
-        if aid in state.isolated_ids or aid in state.quarantine_refusers:
+        if aid in confined or aid in state.quarantine_refusers:
             continue
         if syndromic.check_quarantine_compliance(aid, 0):
-            state.isolated_ids.add(aid)
+            state.quarantined_ids.add(aid)
             state.compliance_log.append({
                 "epoch": epoch, "agent_id": aid,
                 "action": "general_confinement",

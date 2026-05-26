@@ -65,37 +65,37 @@ class TestSyncVspIsolation:
     def test_vsp_ids_flow_back_to_state(self) -> None:
         engine = self._build_engine_with_vsp()
         state = SimulationState()
-        engine.isolated_ids = {3, 7}
+        engine.quarantined_ids = {3, 7}
         sync_vsp_isolation(epoch=5, engine=engine, state=state)
-        assert 3 in state.isolated_ids
-        assert 7 in state.isolated_ids
+        assert 3 in state.quarantined_ids
+        assert 7 in state.quarantined_ids
 
     def test_no_duplicates_on_repeated_sync(self) -> None:
         engine = self._build_engine_with_vsp()
         state = SimulationState()
-        state.isolated_ids = {3}
-        engine.isolated_ids = {3, 7}
+        state.quarantined_ids = {3}
+        engine.quarantined_ids = {3, 7}
         sync_vsp_isolation(epoch=5, engine=engine, state=state)
-        assert state.isolated_ids == {3, 7}
-        vsp_entries = [c for c in state.compliance_log if c["action"] == "vsp_isolation"]
+        assert state.quarantined_ids == {3, 7}
+        vsp_entries = [c for c in state.compliance_log if c["action"] == "vsp_quarantine"]
         assert len(vsp_entries) == 1
         assert vsp_entries[0]["agent_id"] == 7
 
     def test_noop_when_no_new_vsp(self) -> None:
         engine = self._build_engine_with_vsp()
         state = SimulationState()
-        state.isolated_ids = {3, 7}
-        engine.isolated_ids = {3, 7}
+        state.quarantined_ids = {3, 7}
+        engine.quarantined_ids = {3, 7}
         sync_vsp_isolation(epoch=5, engine=engine, state=state)
         assert len(state.compliance_log) == 0
 
     def test_compliance_log_records_epoch(self) -> None:
         engine = self._build_engine_with_vsp()
         state = SimulationState()
-        engine.isolated_ids = {2}
+        engine.quarantined_ids = {2}
         sync_vsp_isolation(epoch=10, engine=engine, state=state)
         assert state.compliance_log[0]["epoch"] == 10
-        assert state.compliance_log[0]["action"] == "vsp_isolation"
+        assert state.compliance_log[0]["action"] == "vsp_quarantine"
         assert state.compliance_log[0]["agent_id"] == 2
 
 
@@ -106,11 +106,11 @@ class TestEnginePayloadBoundary:
 
     def test_missing_agents_raises(self) -> None:
         with pytest.raises(ValueError, match="missing 'agents'"):
-            engine_payload_to_schema({"spaces": {}}, set(), set())
+            engine_payload_to_schema({"spaces": {}}, set(), set(), set())
 
     def test_missing_spaces_raises(self) -> None:
         with pytest.raises(ValueError, match="missing 'spaces'"):
-            engine_payload_to_schema({"agents": []}, set(), set())
+            engine_payload_to_schema({"agents": []}, set(), set(), set())
 
     def test_shedding_rate_always_float(self) -> None:
         payload = {
@@ -120,7 +120,7 @@ class TestEnginePayloadBoundary:
             ],
             "spaces": {"Bridge": {"pathogen_mass": 10}},
         }
-        agents, spaces = engine_payload_to_schema(payload, set(), set())
+        agents, spaces = engine_payload_to_schema(payload, set(), set(), set())
         assert isinstance(agents[0]["shedding_rate"], float)
         assert isinstance(spaces["Bridge"]["pathogen_mass"], float)
 
@@ -132,7 +132,7 @@ class TestEnginePayloadBoundary:
             ],
             "spaces": {},
         }
-        agents, _ = engine_payload_to_schema(payload, {1}, set())
+        agents, _ = engine_payload_to_schema(payload, {1}, set(), set())
         assert agents[0]["shedding_rate"] == 0.0
         assert agents[0]["location"] == LOCATION_ISOLATED
 
@@ -141,7 +141,7 @@ class TestEnginePayloadBoundary:
             "agents": [],
             "spaces": {"Bridge": {"pathogen_mass": 42}},
         }
-        _, spaces = engine_payload_to_schema(payload, set(), set())
+        _, spaces = engine_payload_to_schema(payload, set(), set(), set())
         assert isinstance(spaces["Bridge"]["pathogen_mass"], float)
 
     def test_pathogen_mass_by_id_preserved(self) -> None:
@@ -154,7 +154,7 @@ class TestEnginePayloadBoundary:
                 },
             },
         }
-        _, spaces = engine_payload_to_schema(payload, set(), set())
+        _, spaces = engine_payload_to_schema(payload, set(), set(), set())
         assert spaces["Bridge"]["pathogen_mass_by_id"]["noro"] == 6.0
         assert spaces["Bridge"]["pathogen_mass_by_id"]["sars"] == 4.0
 
@@ -166,7 +166,7 @@ class TestEnginePayloadBoundary:
             ],
             "spaces": {},
         }
-        agents, _ = engine_payload_to_schema(payload, set(), {3})
+        agents, _ = engine_payload_to_schema(payload, set(), set(), {3})
         assert agents[0]["symptom_status"] == SYMPTOM_NON_COMPLIANT
         assert agents[0]["shedding_rate"] == 42.5
 
@@ -178,7 +178,7 @@ class TestEnginePayloadBoundary:
             ],
             "spaces": {},
         }
-        agents, _ = engine_payload_to_schema(payload, set(), set())
+        agents, _ = engine_payload_to_schema(payload, set(), set(), set())
         assert agents[0]["microflora_disruption"] == 0.75
 
 
@@ -273,7 +273,7 @@ class TestCrossModuleDataFlow:
         engine.step()
         payload = engine._export_payload()
 
-        agents, spaces = engine_payload_to_schema(payload, set(), set())
+        agents, spaces = engine_payload_to_schema(payload, set(), set(), set())
 
         assert len(agents) == len(payload["agents"])
         assert set(spaces.keys()) == set(payload["spaces"].keys())
