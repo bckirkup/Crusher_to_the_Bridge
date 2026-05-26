@@ -678,15 +678,21 @@ def _render_wearable_monitoring(history: list[dict[str, Any]]) -> None:
 
 def _render_transmission_pathways(history: list[dict[str, Any]]) -> None:
     """Transmission pathway breakdown from contact tracing data."""
-    # Aggregate transmission events across all epochs
-    pathway_totals: dict[str, int] = {}
+    pathway_totals: dict[str, float] = {}
     for rec in history:
         ct = rec.get("contact_tracing", {})
         events = ct.get("transmission_events", [])
         for ev in events:
-            pathway = ev.get("pathway", "unknown")
-            pathway_totals[pathway] = pathway_totals.get(pathway, 0) + 1
+            breakdown = ev.get("pathway_breakdown", {})
+            if breakdown:
+                for key, dose in breakdown.items():
+                    pw = key.split(":")[0] if ":" in key else key
+                    pathway_totals[pw] = pathway_totals.get(pw, 0) + dose
+            else:
+                pw = ev.get("dominant_pathway", ev.get("pathway", "unknown"))
+                pathway_totals[pw] = pathway_totals.get(pw, 0) + ev.get("total_dose", 1)
 
+    pathway_totals.pop("none", None)
     if not pathway_totals:
         return
 
@@ -724,8 +730,8 @@ def _render_transmission_pathways(history: list[dict[str, Any]]) -> None:
     )
     st.plotly_chart(fig, use_container_width=True)
 
-    # Pathway counts table
-    pw_rows = [{"Pathway": l, "Events": v} for l, v in zip(labels, values)]
+    # Pathway dose table
+    pw_rows = [{"Pathway": l, "Total Dose": f"{v:,.1f}"} for l, v in zip(labels, values)]
     st.dataframe(pd.DataFrame(pw_rows), use_container_width=True, hide_index=True)
 
 
