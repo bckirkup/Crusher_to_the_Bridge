@@ -570,6 +570,8 @@ class KorkinShipEngine:
             first_cls, first_count = class_counts[0]
             class_counts[0] = (first_cls, first_count + (total - allocated))
 
+        agents_left = sum(c for _, c in class_counts)
+
         for cls_cfg, count in class_counts:
             class_id = cls_cfg.get("class_id", "crew_general")
             role_group = cls_cfg.get("role_group", "crew")
@@ -582,9 +584,11 @@ class KorkinShipEngine:
 
             for _ in range(count):
                 immune = False
-                if immune_remaining > 0 and (agent_id % 5 == 0):
-                    immune = True
-                    immune_remaining -= 1
+                if immune_remaining > 0 and agents_left > 0:
+                    if self.rng.random() < immune_remaining / agents_left:
+                        immune = True
+                        immune_remaining -= 1
+                agents_left -= 1
 
                 home = self._resolve_zone(home_pref, self._room_zones)
                 dining = str(self.rng.choice(self._dining_zones))
@@ -632,12 +636,16 @@ class KorkinShipEngine:
         """Legacy two-class (passenger/crew) initialization."""
         agent_id = start_id
 
+        agents_left = self.num_passengers + self.num_crew
+
         # Passengers
         for _ in range(self.num_passengers):
             immune = False
-            if immune_remaining > 0 and (agent_id % 5 == 0):
-                immune = True
-                immune_remaining -= 1
+            if immune_remaining > 0 and agents_left > 0:
+                if self.rng.random() < immune_remaining / agents_left:
+                    immune = True
+                    immune_remaining -= 1
+            agents_left -= 1
 
             home = self.rng.choice([z for z in self._room_zones if "Passenger" in z or "Berthing" in z]
                                    if any("Passenger" in z for z in self._room_zones)
@@ -668,9 +676,11 @@ class KorkinShipEngine:
         # Crew
         for _ in range(self.num_crew):
             immune = False
-            if immune_remaining > 0 and (agent_id % 5 == 0):
-                immune = True
-                immune_remaining -= 1
+            if immune_remaining > 0 and agents_left > 0:
+                if self.rng.random() < immune_remaining / agents_left:
+                    immune = True
+                    immune_remaining -= 1
+            agents_left -= 1
 
             home = self.rng.choice([z for z in self._room_zones if "Crew" in z or "Berthing" in z]
                                    if any("Crew" in z for z in self._room_zones)
