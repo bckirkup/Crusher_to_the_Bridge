@@ -1,7 +1,7 @@
 {
   "platform": "destroyer_baseline",
   "description": "Baseline destroyer-class spatial layout for infection-dynamics simulation",
-  "isolation_unit_capacity": 2,
+  "isolation_unit_capacity": 0,
   "deck_dimensions": {
     "length_m": 120,
     "beam_m": 15

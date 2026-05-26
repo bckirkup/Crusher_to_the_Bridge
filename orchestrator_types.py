@@ -60,7 +60,7 @@ class SimulationState:
     trigger_status: str = STATUS_BASELINE
     isolated_ids: set[int] = field(default_factory=set)
     quarantined_ids: set[int] = field(default_factory=set)
-    isolation_unit_capacity: int = 2
+    isolation_unit_capacity: int = 0
     quarantine_refusers: set[int] = field(default_factory=set)
     quarantine_order_epoch: dict[int, int] = field(default_factory=dict)
     escalation_log: list[dict[str, Any]] = field(default_factory=list)

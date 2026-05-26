@@ -89,7 +89,7 @@ def load_spatial_layout(cfg: dict[str, Any]) -> list[dict[str, Any]] | None:
     ]
 
 
-def load_isolation_unit_capacity(cfg: dict[str, Any], default: int = 2) -> int:
+def load_isolation_unit_capacity(cfg: dict[str, Any], default: int = 0) -> int:
     """Read isolation_unit_capacity from the platform spatial layout."""
     graph_cfg = cfg.get("ship_graph", {})
     layout_path = graph_cfg.get("spatial_layout")
