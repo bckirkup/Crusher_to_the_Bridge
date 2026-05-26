@@ -65,6 +65,56 @@ ship_graph:
       free_zone_preference: ""
       duty_zone: "Galley"
 
+  # ── Infection Counters ─────────────────────────────────────
+  # Configurable per-group attack rate and infection count
+  # metrics evaluated each epoch and reported in telemetry.
+  # VSP cares separately about crew vs passenger attack rates.
+  #
+  # Supported metrics:
+  #   attack_rate        – symptomatic / population in group
+  #   infected_count     – currently infected agents in group
+  #   symptomatic_count  – symptomatic agents in group
+  #   recovered_count    – recovered agents in group
+  #   susceptible_count  – susceptible agents in group
+  #
+  # Filters (all optional, combinable):
+  #   role_group  – "crew" or "passenger" (matches agent_class prefix)
+  #   classes     – explicit list of agent_class IDs
+  #
+  # Optional threshold fields:
+  #   threshold      – numeric value; counter is "exceeded" when metric >= threshold
+  #   on_exceed      – action when threshold is first breached:
+  #                    "confine_symptomatic" triggers quarantine of symptomatic agents
+  #                    "log_only" (default) records the breach in telemetry
+  #   exempt_classes  – agent classes exempt from confinement (same as SOP exempt_classes)
+  infection_counters:
+    - counter_id: "crew_attack_rate"
+      label: "Crew Attack Rate"
+      metric: "attack_rate"
+      filter:
+        role_group: "crew"
+    - counter_id: "passenger_attack_rate"
+      label: "Passenger Attack Rate"
+      metric: "attack_rate"
+      filter:
+        role_group: "passenger"
+    - counter_id: "all_attack_rate"
+      label: "Overall Attack Rate"
+      metric: "attack_rate"
+      filter: {}
+      threshold: 0.03
+      on_exceed: "confine_symptomatic"
+    - counter_id: "crew_infected_count"
+      label: "Crew Infected"
+      metric: "infected_count"
+      filter:
+        role_group: "crew"
+    - counter_id: "passenger_infected_count"
+      label: "Passenger Infected"
+      metric: "infected_count"
+      filter:
+        role_group: "passenger"
+
   # ── Gender Distribution ─────────────────────────────────────
   # Orthogonal to agent class.  Assigned randomly at startup.
   gender_distribution:

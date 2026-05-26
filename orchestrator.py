@@ -38,7 +38,7 @@ from engines.py_contam_bridge import (
     build_transport_engine,
     load_air_flow_paths,
 )
-from engines.infection_dynamics_bridge import VSP_THRESHOLD_FRACTION
+
 from engines.transmission_core import (
     TransmissionCore,
     build_hvac_downstream_map,
@@ -70,7 +70,6 @@ from orchestrator_init import (
     load_isolation_unit_capacity,
 )
 from orchestrator_epoch import (
-    sync_vsp_isolation,
     step_fred_compliance,
     step_mid_cruise_introductions,
     step_infection_progression,
@@ -81,6 +80,8 @@ from orchestrator_epoch import (
     step_wearable_monitoring,
     apply_surface_decontamination,
     apply_zone_closures,
+    compute_infection_counters,
+    step_counter_thresholds,
 )
 from orchestrator_record import (
     record_epoch,
@@ -177,6 +178,8 @@ def run() -> None:
         isolation_unit_capacity=load_isolation_unit_capacity(cfg),
     )
 
+    graph_cfg = cfg.get("ship_graph", {})
+
     # ── EPOCH LOOP ───────────────────────────────────────────────────
     for epoch in range(num_epochs):
         step_fred_compliance(epoch, state, syndromic)
@@ -185,7 +188,6 @@ def run() -> None:
         engine.isolated_ids = set(state.isolated_ids)
         engine.quarantined_ids = set(state.quarantined_ids)
         engine_payload = engine.step()
-        sync_vsp_isolation(epoch, engine, state)
 
         step_infection_progression(engine, pathogen_profiles)
 
@@ -275,7 +277,6 @@ def run() -> None:
             clin_rdt_results, clin_qpcr_results, clin_microbio_results,
         )
         reset_modifiers(contam_engine, tx_core, proto_ctx.original_filter_eff)
-        engine.vsp_threshold_fraction = VSP_THRESHOLD_FRACTION
         active_mods = proto_ctx.protocol_engine.evaluate_epoch(epoch, stoplights)
         merged_mods = proto_ctx.protocol_engine.get_merged_modifiers(active_mods)
 
@@ -293,10 +294,6 @@ def run() -> None:
                     engine, merged_mods["surface_decontamination_factor"],
                 )
 
-            # SOP-010: override engine VSP threshold from protocol config
-            if "vsp_isolation_threshold_fraction" in merged_mods:
-                engine.vsp_threshold_fraction = merged_mods["vsp_isolation_threshold_fraction"]
-
         step_cost_accounting(
             epoch, proto_ctx,
             air_results, swab_results, ww_results,
@@ -305,6 +302,14 @@ def run() -> None:
 
         step_quarantine_confinement(
             epoch, agents, merged_mods, state.trigger_status, state, syndromic,
+        )
+
+        # Infection counters: evaluate per-group metrics and apply
+        # threshold-driven confinement (replaces legacy engine VSP check)
+        counter_defs = graph_cfg.get("infection_counters", [])
+        counter_results = compute_infection_counters(agents, counter_defs)
+        step_counter_thresholds(
+            epoch, agents, counter_results, counter_defs, state, syndromic,
         )
 
         epoch_cost = proto_ctx.cost_ledger.get_epoch_summary(epoch)
@@ -337,6 +342,7 @@ def run() -> None:
             clin_qpcr_results=clin_qpcr_results,
             clin_microbio_results=clin_microbio_results,
             wearable_result=wearable_result,
+            infection_counters=counter_results,
         )
         state.simulation_history.append(epoch_record)
 

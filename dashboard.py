@@ -186,6 +186,33 @@ def render_mission_summary(
         unsafe_allow_html=True,
     )
 
+    # ── Infection Counters ─────────────────────────────────────────
+    counters = last.get("infection_counters", {})
+    if counters:
+        st.subheader("Infection Counters (VSP Reporting)")
+        counter_cols = st.columns(min(len(counters), 5))
+        for idx, (cid, cdata) in enumerate(counters.items()):
+            col = counter_cols[idx % len(counter_cols)]
+            label = cdata.get("label", cid)
+            value = cdata.get("value", 0)
+            threshold = cdata.get("threshold")
+            exceeded = cdata.get("exceeded", False)
+            if "attack_rate" in cid:
+                display_val = f"{value:.1%}"
+            else:
+                display_val = f"{value:.0f}"
+            suffix = ""
+            if threshold is not None:
+                if "attack_rate" in cid:
+                    suffix = f" (thr: {threshold:.1%})"
+                else:
+                    suffix = f" (thr: {threshold})"
+            with col:
+                if exceeded:
+                    st.metric(f"🔴 {label}", display_val + suffix)
+                else:
+                    st.metric(label, display_val + suffix)
+
     # ── Epidemic curve ────────────────────────────────────────────
     st.subheader("Epidemic Timeline")
     fig = _build_epidemic_curve(history)
