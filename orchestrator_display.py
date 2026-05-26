@@ -244,6 +244,9 @@ def print_protocol_engine(
         trigger = sp.trigger
         print(f"    {sp.protocol_id}  {sp.name}")
         print(f"      Trigger: {trigger['instrument_class']} ≥ {trigger['stoplight_level']}")
+        exempt = sp.modifiers.get("exempt_classes", [])
+        if exempt:
+            print(f"      Exempt:  {', '.join(exempt)}")
     print(f"   Protocols loaded: {len(standing_protocols)}")
     print(f"   Starting allocation: ${cost_ledger.financial_balance:,.2f}")
     print(f"   Starting labor:  {cost_ledger.labor_remaining:.1f} person-hours")
