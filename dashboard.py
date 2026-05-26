@@ -891,7 +891,7 @@ def _build_deck_map(
                 x=[zone_coords[fz]["x"], zone_coords[tz]["x"]],
                 y=[zone_coords[fz]["y"], zone_coords[tz]["y"]],
                 mode="lines",
-                line={"color": f"{LCARS_GOLD}40", "width": 1.5},
+                line={"color": "rgba(255,153,0,0.25)", "width": 1.5},
                 hoverinfo="skip", showlegend=False,
             ))
 
