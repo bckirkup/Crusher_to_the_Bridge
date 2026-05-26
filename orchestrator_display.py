@@ -165,6 +165,18 @@ def print_multi_pathogen(
             print(f"      Routes:   {', '.join(prof.get('transmission_routes', []))}")
             intro = prof.get("introduction_epoch", 0)
             print(f"      Intro:    epoch {intro}")
+            fc = prof.get("food_contamination", {})
+            if fc.get("enabled"):
+                gr = fc.get("growth_rate_per_epoch", 0)
+                dr = fc.get("decay_rate_per_epoch", 0)
+                print(f"      Food contam: growth={gr}/epoch  decay={dr}/epoch")
+            ec = prof.get("environmental_contamination", {})
+            if ec.get("enabled"):
+                src = ec.get("source_type", "?")
+                p2p = ec.get("person_to_person", True)
+                bl = ec.get("baseline_environmental_load", 0)
+                print(f"      Env contam:  source={src}  load={bl}  "
+                      f"person-to-person={'yes' if p2p else 'no'}")
             mf = prof.get("microflora_disruption", {})
             if mf.get("causes_disruption"):
                 print(f"      Microflora disruption: {mf.get('disruption_type')} "
