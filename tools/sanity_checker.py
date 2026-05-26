@@ -572,6 +572,31 @@ def _check_logical_contradictions(
                             f"{known_materials}",
                         )
 
+    # Validate exempt_classes references in protocols
+    if protocols:
+        for proto in protocols.protocols:
+            ec = proto.modifiers.get("exempt_classes", [])
+            if ec and not isinstance(ec, list):
+                report.error(
+                    "protocols.json",
+                    "SCHEMA",
+                    f"{proto.protocol_id}.modifiers.exempt_classes must be "
+                    f"a list of agent class IDs, got {type(ec).__name__}",
+                )
+            elif ec:
+                has_confinement = (
+                    proto.modifiers.get("confine_symptomatic_to_quarters", False)
+                    or proto.modifiers.get("confine_all_to_quarters", False)
+                )
+                if not has_confinement:
+                    report.warn(
+                        "protocols.json",
+                        "LOGIC_EXEMPT",
+                        f"{proto.protocol_id} has exempt_classes but no "
+                        f"confinement modifier (confine_symptomatic_to_quarters "
+                        f"or confine_all_to_quarters).",
+                    )
+
     # Material references in per_test_costs
     if resource_costs:
         known_materials = set(resource_costs.material_inventory.keys())
