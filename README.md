@@ -12,9 +12,9 @@ maritime disease outbreaks.
 
 ```bash
 # Install dependencies
-pip install pyyaml numpy pydantic pytest
+pip install -r requirements.txt
 
-# Validate configuration
+# Validate configuration (JSON + crusher_labs/config.yaml)
 python tools/sanity_checker.py --from-config
 
 # Run a 24-epoch simulation (default)
@@ -23,12 +23,15 @@ python orchestrator.py
 # Override epoch count
 python orchestrator.py --epochs 250
 
+# Launch LCARS dashboard (after simulation)
+streamlit run dashboard.py
+
 # Run the test suite
 pytest tests/ -v --tb=short
 ```
 
 Output is written to `telemetry_buffer/simulation_history.json` and
-`telemetry_buffer/artificial_lab_notebook.json`.
+`telemetry_buffer/artificial_lab_notebook.json` (gitignored runtime artifacts).
 
 ## Architecture
 
@@ -58,7 +61,7 @@ crusher_labs/                Dr. Crusher's Bio-Diagnostic Suite
 engines/                     External simulation bridges
 ├── infection_dynamics_bridge.py   Korkin agent-based model (KorkinShipEngine)
 ├── py_contam_bridge.py            HVAC zone-to-zone airborne transport
-├── transmission_core.py           Multi-route pathogen transmission
+├── transmission_core.py           Six-pathway pathogen transmission
 └── wearable_monitor.py            Wearable device registry & physiological model
 
 tools/
@@ -81,7 +84,8 @@ data/
 
 schemas/                     JSON Schema definitions for all data contracts
 telemetry_buffer/            Runtime output (simulation_history, ground_truth, lab_notebook)
-tests/                       238 tests across 10 modules
+dashboard.py                 LCARS Main Bridge Display (4 stations)
+tests/                       254 tests across 13 modules
 ```
 
 ## Configuration Reference (`crusher_labs/config.yaml`)
@@ -135,6 +139,11 @@ role group, and preferred zones.  **Fractions must sum to 1.0.**
 Seven built-in classes: `passenger_general`, `passenger_family`,
 `passenger_elderly`, `crew_general`, `crew_medical`, `crew_engineering`,
 `crew_galley`.  Add new classes by extending this list.
+
+#### Infection Counters
+
+Per-group metrics in `ship_graph.infection_counters` (attack rates, thresholds,
+`on_exceed: confine_symptomatic`, `exempt_classes`). See `crusher_labs/config.yaml`.
 
 #### Gender Distribution
 
@@ -329,20 +338,35 @@ paths in `config.yaml`, then validate:
 python tools/sanity_checker.py --from-config
 ```
 
+## Transmission Pathways
+
+Six pathways in `engines/transmission_core.py`: direct contact, droplet,
+HVAC airborne, fomite, food contamination (`food_contamination` profile block),
+environmental (`environmental_contamination` profile block).
+
+## Confinement: Quarantine vs. Isolation
+
+- **Quarantine** (`quarantined`): confined to quarters, HVAC-connected
+- **Isolation** (`isolated`): isolation ward, no HVAC shedding (rare capacity)
+
+FRED compliance vs. `quarantine_refusers` tracked in telemetry and dashboard.
+
 ## Standing Operating Procedures (SOPs)
 
-Protocols are defined in `data/config/protocols.json` and activated
-automatically by the protocol engine based on stoplight levels.
+Protocols in `data/config/protocols.json` (SOP-001..SOP-011), activated from
+stoplights (no hardcoded epoch schedules).
 
-| SOP | Function | Trigger |
-|-----|----------|---------|
-| SOP-001 | Enhanced environmental sampling | AMBER stoplight |
-| SOP-009 | Full-ship lockdown / zone closures | RED stoplight, `confine_all_to_quarters` |
-| SOP-010 | Surface decontamination | RED stoplight, `surface_decontamination_factor` |
-
-Zone closures (`close_zones`) relocate agents from closed zones to
-their home zones.  Surface decontamination reduces zone pathogen mass
-by a configurable factor.
+| SOP | Name | Key modifiers |
+|-----|------|---------------|
+| SOP-001–002 | Ventilation upgrades | HVAC filters |
+| SOP-003 | Surface Decontamination | `surface_decontamination_factor` |
+| SOP-004–005 | PPE | Transmission scalars |
+| SOP-006 | Diagnostics | `diagnostic_cadence_multiplier` |
+| SOP-007 | Galley Closure | `close_zones` |
+| SOP-008 | Symptomatic Confinement | `confine_symptomatic_to_quarters` |
+| SOP-009 | General Confinement | `confine_all_to_quarters`, `exempt_classes` |
+| SOP-010 | VSP Threshold | Confinement + surface decon |
+| SOP-011 | Passenger-only Confinement | Crew `exempt_classes` |
 
 ## Sanity Checker
 
@@ -416,7 +440,8 @@ avoid hardcoded strings across the codebase:
 | `STATUS_CONFIRMED` | `"CONFIRMED"` | PCR-confirmed outbreak |
 | `SYMPTOM_ASYMPTOMATIC` | `"asymptomatic"` | Agent symptom status |
 | `SYMPTOM_SYMPTOMATIC` | `"symptomatic"` | Agent symptom status |
-| `SYMPTOM_ISOLATED` | `"isolated"` | Agent in quarantine |
+| `SYMPTOM_ISOLATED` | `"isolated"` | Isolation ward (no HVAC) |
+| `SYMPTOM_QUARANTINED` | `"quarantined"` | Confined to quarters |
 | `SYMPTOM_NON_COMPLIANT` | `"non_compliant"` | Agent refusing quarantine |
 | `LOCATION_ISOLATED` | `"Isolated_In_Quarters"` | Quarantine location |
 
