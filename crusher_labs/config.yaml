@@ -220,12 +220,22 @@ microflora:
   # Graywater downstream zones (accumulate microbial signatures)
   graywater_zones: ["Engine_Room"]
 
-# ── Metagenomic Sequencing ───────────────────────────────────
+# ── Metagenomic Sequencing (orchestrator modality) ───────────
+# Shotgun metagenomics via MetagenomicSequencing.query_ground_truth().
 sequencing:
   description: "Metagenomic shotgun sequencing of environmental samples"
-  read_depth: 100000                  # total reads per sample
+  read_depth: 100000                  # total reads per zone per sequencing epoch
   pseudocount: 1.0e-6                 # for CLR zero-handling
+  clr_shift_scale: 0.15               # microflora disruption CLR perturbation scale
   cadence: 8                          # baseline; escalation may override
+
+# ── Wastewater Sequencing Grid (observation instrument) ──────
+# Pooled greywater metagenomics via WastewaterSequencingGrid (every epoch).
+wastewater_sequencing:
+  description: "Dirichlet-multinomial metagenomic sampling from wastewater pools"
+  read_depth: 50000                   # total reads per zone sample
+  dirichlet_concentration: 100.0      # Dirichlet prior strength (compositional noise)
+  pseudocount: 1.0e-6                 # for CLR zero-handling
 
 # ── Wearable Physiological Monitoring ────────────────────────
 # Extensible device registry.  Each device defines its sensor

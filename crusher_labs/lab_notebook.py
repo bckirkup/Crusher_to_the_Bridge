@@ -220,7 +220,7 @@ def _wastewater_record(
 ) -> dict[str, Any]:
     anomaly_detected = data.get("anomaly_detected", False)
     pathogen_reads = data.get("total_pathogen_reads", 0)
-    read_depth = data.get("read_depth", 50000)
+    read_depth = data.get("read_depth", DEFAULT_WW_READ_DEPTH)
     pathogen_frac = pathogen_reads / max(read_depth, 1)
     kingdom_shift = sum(abs(d) for d in data.get("kingdom_clr_deltas", {}).values())
     anomaly = round(min(1.0, pathogen_frac * 10 + kingdom_shift * 2), 4)

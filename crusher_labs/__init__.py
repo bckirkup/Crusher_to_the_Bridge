@@ -30,6 +30,9 @@ from crusher_labs.observation_core import (
     ClinicalQPCR,
     ClinicalMicrobiology,
     InstrumentQC,
+    DEFAULT_WW_DIRICHLET_CONCENTRATION,
+    DEFAULT_WW_PSEUDOCOUNT,
+    DEFAULT_WW_READ_DEPTH,
 )
 from crusher_labs.lab_notebook import ArtificialLabNotebook
 from crusher_labs.protocol_engine import ProtocolEngine
@@ -42,6 +45,41 @@ def load_config(path: str = _CONFIG_PATH) -> dict[str, Any]:
     """Load and return the Crusher Labs YAML configuration."""
     with open(path, "r", encoding="utf-8") as fh:
         return yaml.safe_load(fh)
+
+
+def wastewater_sequencing_params(cfg: dict[str, Any] | None = None) -> dict[str, Any]:
+    """Resolve ``wastewater_sequencing`` instrument parameters from *cfg*."""
+    if cfg is None:
+        cfg = load_config()
+    ww_cfg = cfg.get("wastewater_sequencing", {})
+    grumb_cfg = cfg.get("grumb_seeding", {})
+    return {
+        "read_depth": int(ww_cfg.get("read_depth", DEFAULT_WW_READ_DEPTH)),
+        "dirichlet_concentration": float(
+            ww_cfg.get("dirichlet_concentration", DEFAULT_WW_DIRICHLET_CONCENTRATION),
+        ),
+        "pseudocount": float(
+            ww_cfg.get("pseudocount", grumb_cfg.get("pseudocount", DEFAULT_WW_PSEUDOCOUNT)),
+        ),
+    }
+
+
+def metagenomic_sequencing_params(cfg: dict[str, Any] | None = None) -> dict[str, Any]:
+    """Resolve ``sequencing`` modality parameters from *cfg*."""
+    if cfg is None:
+        cfg = load_config()
+    seq_cfg = cfg.get("sequencing", {})
+    micro_cfg = cfg.get("microflora", {})
+    grumb_cfg = cfg.get("grumb_seeding", {})
+    return {
+        "read_depth": int(seq_cfg.get("read_depth", 100_000)),
+        "pseudocount": float(
+            seq_cfg.get("pseudocount", grumb_cfg.get("pseudocount", 1e-6)),
+        ),
+        "clr_shift_scale": float(
+            seq_cfg.get("clr_shift_scale", micro_cfg.get("clr_shift_scale", 0.15)),
+        ),
+    }
 
 
 def build_modalities(
@@ -61,9 +99,9 @@ def build_modalities(
     syn_cfg = cfg.get("syndromic", {})
     rdt_cfg = cfg.get("clinical_rdt", {})
     pcr_cfg = cfg.get("targeted_pcr", {})
-    seq_cfg = cfg.get("sequencing", {})
     fred_cfg = cfg.get("fred_behavior", {})
     emod_cfg = cfg.get("emod_progression", {})
+    seq_params = metagenomic_sequencing_params(cfg)
 
     return {
         "syndromic": SyndromicSurveillance(
@@ -89,8 +127,9 @@ def build_modalities(
             lod_ct_threshold=pcr_cfg.get("lod_ct_threshold", 38.0),
         ),
         "sequencing": MetagenomicSequencing(
-            read_depth=seq_cfg.get("read_depth", 100_000),
-            pseudocount=seq_cfg.get("pseudocount", 1e-6),
+            read_depth=seq_params["read_depth"],
+            pseudocount=seq_params["pseudocount"],
+            clr_shift_scale=seq_params["clr_shift_scale"],
             total_epochs=total_epochs,
             rng=rng,
         ),
@@ -134,4 +173,9 @@ __all__ = [
     "ALL_INSTRUMENTS",
     "build_modalities",
     "load_config",
+    "wastewater_sequencing_params",
+    "metagenomic_sequencing_params",
+    "DEFAULT_WW_READ_DEPTH",
+    "DEFAULT_WW_DIRICHLET_CONCENTRATION",
+    "DEFAULT_WW_PSEUDOCOUNT",
 ]
