@@ -1,6 +1,6 @@
 # Crusher-to-the-Bridge — Operator's Manual
 
-**Version:** 2.0  
+**Version:** 2.1  
 **Platform:** Biodefense Digital Twin for Maritime Outbreak Simulation  
 **License:** MIT
 
@@ -16,7 +16,7 @@
 6. [GIS Spatial Bridge Tool](#6-gis-spatial-bridge-tool)
 7. [Configuration Sanity Checker](#7-configuration-sanity-checker)
 8. [The Artificial Lab Notebook — Fidelity Tiers](#8-the-artificial-lab-notebook--fidelity-tiers)
-9. [The Streamlit Tactical Command Deck](#9-the-streamlit-tactical-command-deck)
+9. [The USS Crusher LCARS Command Deck](#9-the-uss-crusher-lcars-command-deck)
 10. [Simulation Output Reference](#10-simulation-output-reference)
 11. [Contributors & Sibling Repositories](#11-contributors--sibling-repositories)
 
@@ -27,7 +27,8 @@
 ### Prerequisites
 
 ```bash
-pip install pyyaml numpy streamlit plotly pandas pydantic geopandas networkx pytest check-jsonschema
+pip install -r requirements.txt
+# Optional: pip install check-jsonschema
 ```
 
 ### Run a Simulation
@@ -117,6 +118,22 @@ The simulation runs a closed-loop control cycle:
 This loop is **fully autonomous** — SOPs activate and deactivate based
 on diagnostic conditions.  There are no hardcoded epoch schedules.
 
+### Six-Pathway Transmission Core
+
+Pathways 1–4: direct, droplet, HVAC airborne, fomite. Pathways 5–6: food
+contamination and environmental colonization (per-pathogen profile blocks).
+Dashboard uses `pathway_breakdown` in contact-tracing events.
+
+### Quarantine vs. Isolation
+
+| Mode | Field | HVAC |
+|------|-------|------|
+| Quarantine | `summary.quarantined` | Connected in home zone |
+| Isolation | `summary.isolated` | No shedding (ward) |
+
+`confine_symptomatic_to_quarters` / `confine_all_to_quarters` trigger quarantine.
+`exempt_classes` skips confinement for listed agent classes.
+
 ### Wearable Monitoring Pipeline
 
 In parallel with the diagnostic feedback loop, the wearable monitoring
@@ -197,6 +214,12 @@ ship_graph:
 
 To add a new class, append an entry to the `agent_classes` list.
 No code changes required.
+
+#### Infection Counters
+
+Configured under `ship_graph.infection_counters` in `config.yaml`. Supports
+`attack_rate`, thresholds, `on_exceed: confine_symptomatic`, and `exempt_classes`.
+Reported in telemetry and the LCARS Bridge Status Display.
 
 ### 3.3 Gender Distribution
 
@@ -759,9 +782,11 @@ cost ledger flags a `DEPLETED` warning in the executive summary.
 | SOP-004 | PPE — Standard | Wastewater AMBER | Surgical masks, 40% reduction |
 | SOP-005 | PPE — Full N95 | Wastewater RED | N95 respirators, 80% reduction |
 | SOP-006 | Increased Diagnostics | Clinical RDT AMBER | 2× testing frequency |
-| SOP-007 | Galley Closure | Clinical micro RED | Close Galley + Mess_Hall |
-| SOP-009 | Full-Ship Lockdown | RED stoplight | `confine_all_to_quarters` — relocate all agents to home zones |
-| SOP-010 | Emergency Surface Decon | RED stoplight | `surface_decontamination_factor` — zone mass reduction |
+| SOP-007 | Galley Closure | Clinical micro RED | `close_zones` |
+| SOP-008 | Symptomatic Confinement | Clinical RDT RED (≥2) | `confine_symptomatic_to_quarters` |
+| SOP-009 | General Confinement | Clinical qPCR RED (≥3) | `confine_all_to_quarters`, `exempt_classes` |
+| SOP-010 | VSP-Threshold Isolation | Clinical RDT RED | Confinement + surface decon |
+| SOP-011 | Selective Passenger Confinement | Clinical RDT RED (≥2) | Crew `exempt_classes` |
 
 ---
 
@@ -1065,41 +1090,30 @@ Beyond the `records` array, the notebook includes:
 
 ---
 
-## 9. The Streamlit Tactical Command Deck
+## 9. The USS Crusher LCARS Command Deck
 
-The dashboard (`dashboard.py`) provides four analytical tabs:
+TNG LCARS-styled Streamlit UI (`dashboard.py`). Run `python orchestrator.py`, then
+`streamlit run dashboard.py` or `./run_dashboard.sh`.
 
-### Tab 1: Mission Summary & Ledger
+**USS Crusher — Main Bridge Display** with Condition Green / Yellow / Red Alert banners.
 
-- Epidemiological metrics: total infected, co-infections, person-hours remaining
-- Epidemic curve (infections over time)
-- Cumulative cost chart (surveillance vs. intervention)
-- Material supply table with depletion warnings
-- SOP activation history log
+### Station 1: Bridge Status Display
 
-### Tab 2: Spatial Outbreak Deck
+Infection metrics, **confined to quarters** / **isolation ward** / refusers,
+infection counter charts, Crew Manifest by Division, wearable monitoring,
+transmission vector analysis, epidemic curves, cost ledger.
 
-- Plotly room node map with epoch slider (scrub through all epochs)
-- Color toggle between three visualization modes:
-  - **Aerosol** — Airborne pathogen mass per zone
-  - **Fomite** — Surface contamination per zone
-  - **Symptomatic** — Count of symptomatic agents per zone
-- Stoplight status row for each zone
+### Station 2: Tactical Sensor Grid
 
-### Tab 3: Crusher Labs Portal
+Deck map (Stardate slider); aerosol / fomite / symptomatic overlays.
 
-- Lab notebook explorer with fidelity toggle (LOW/MID/HIGH)
-- LOW: Stoplight grid
-- MID: Clinical data table
-- HIGH:
-  - Interactive qPCR 40-cycle amplification curves (line charts)
-  - GRUMB multi-kingdom relative abundance (stacked bar charts)
-  - CLR anomaly delta visualization
+### Station 3: Sickbay Diagnostic Console
 
-### Tab 4: Protocol & Configuration Profile
+Lab notebook LOW / MID / HIGH fidelity.
 
-- Active pathogen profiles with transmission routes and microflora disruption settings
-- Standing protocols with trigger conditions and cost footprints
+### Station 4: Standing Orders & Threat Profiles
+
+Pathogen dossiers; SOP cards with **Exempt Divisions** when `exempt_classes` is set.
 
 ---
 
@@ -1123,14 +1137,19 @@ During execution, a single-line progress bar shows:
 ██████████████████████████████ 100.0%  Epoch 24/24  ■ CONFIRMED   SOPs:1  Budget:$26,145
 ```
 
-### 10.3 Output Files
+### 10.3 Telemetry Highlights
+
+`summary.quarantined`, `summary.isolated`, `summary.quarantine_refusers`,
+`infection_counters`, `wearable_monitoring`, `contact_tracing.transmission_events`.
+
+### 10.4 Output Files
 
 | File | Location | Description |
 |------|----------|-------------|
-| `simulation_history.json` | `telemetry_buffer/` | Per-epoch full state (24 records) |
-| `artificial_lab_notebook.json` | `telemetry_buffer/` | Instrument records (595+ per run at HIGH_FIDELITY) |
+| `simulation_history.json` | `telemetry_buffer/` | Per-epoch state (gitignored) |
+| `artificial_lab_notebook.json` | `telemetry_buffer/` | Instrument records (gitignored) |
 
-Both files have formal JSON Schema definitions in `schemas/`.
+JSON Schemas in `schemas/`. Regenerate before opening the dashboard.
 
 ---
 
@@ -1208,7 +1227,29 @@ movement patterns used by the orchestrator's agent routing logic.
 
 ---
 
-## Appendix A: JSON Schema Validation
+## Appendix A: Test Suite
+
+```bash
+python tools/sanity_checker.py --from-config
+pytest tests/ -v --tb=short
+```
+
+The suite includes **254 tests** across data contracts, sanity checker,
+orchestrator/quarantine logic, infection counters, transmission pathways
+(food/environmental), dashboard helpers, protocol engine, law compliance,
+and telemetry seams.  CI runs the same checks plus a 24-epoch orchestrator
+smoke test (see `.github/workflows/ci.yml`).
+
+| Module | Focus |
+|--------|-------|
+| `test_infection_counters.py` | Attack-rate counters, thresholds, `exempt_classes` |
+| `test_transmission_pathways.py` | Food/environmental pool initialization |
+| `test_dashboard.py` | LCARS dashboard imports, pathway aggregation |
+| `test_orchestrator.py` | Epoch loop, quarantine confinement, SOP modifiers |
+
+---
+
+## Appendix B: JSON Schema Validation
 
 All data contracts have formal JSON Schema (draft 2020-12) definitions
 in `schemas/`:

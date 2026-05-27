@@ -35,9 +35,15 @@ class TestCostLedger:
 
     def test_get_epoch_summary(self) -> None:
         ledger = CostLedger(starting_financial_usd=500.0)
-        ledger.debit_baseline_surveillance(0, {"per_epoch_usd": 10.0})
+        ledger.debit_baseline_surveillance(0, {"financial_usd": 10.0, "materials": {"rdt_kits": 2}})
         summary = ledger.get_epoch_summary(0)
         assert isinstance(summary, dict)
+        assert summary["epoch"] == 0
+        assert summary["entries_count"] >= 1
+        assert "materials_consumed" in summary
+        assert summary["materials_consumed"]["rdt_kits"] == 2
+        assert "by_category" in summary
+        assert summary["by_category"][CATEGORY_SURVEILLANCE]["financial_usd"] >= 0.0
 
     def test_generate_financial_audit(self) -> None:
         ledger = CostLedger(starting_financial_usd=500.0)
