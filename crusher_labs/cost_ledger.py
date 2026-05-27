@@ -224,11 +224,41 @@ class CostLedger:
         epoch_entries = [e for e in self.entries if e.epoch == epoch]
         total_usd = sum(e.financial_usd for e in epoch_entries)
         total_labor = sum(e.labor_hours for e in epoch_entries)
+        materials: dict[str, int] = {}
+        for e in epoch_entries:
+            for item_name, qty in (e.materials or {}).items():
+                materials[item_name] = materials.get(item_name, 0) + qty
+
+        by_category: dict[str, dict[str, Any]] = {
+            CATEGORY_SURVEILLANCE: {"financial_usd": 0.0, "labor_hours": 0.0, "materials": {}},
+            CATEGORY_INTERVENTION: {"financial_usd": 0.0, "labor_hours": 0.0, "materials": {}},
+        }
+        for e in epoch_entries:
+            cat = CATEGORY_SURVEILLANCE if e.category == CATEGORY_SURVEILLANCE else CATEGORY_INTERVENTION
+            by_category[cat]["financial_usd"] += e.financial_usd
+            by_category[cat]["labor_hours"] += e.labor_hours
+            mats = by_category[cat]["materials"]
+            for item_name, qty in (e.materials or {}).items():
+                mats[item_name] = mats.get(item_name, 0) + qty
+
         return {
             "epoch": epoch,
             "entries_count": len(epoch_entries),
             "total_financial_usd": round(total_usd, 2),
             "total_labor_hours": round(total_labor, 2),
+            "materials_consumed": materials,
+            "by_category": {
+                CATEGORY_SURVEILLANCE: {
+                    "financial_usd": round(by_category[CATEGORY_SURVEILLANCE]["financial_usd"], 2),
+                    "labor_hours": round(by_category[CATEGORY_SURVEILLANCE]["labor_hours"], 2),
+                    "materials": by_category[CATEGORY_SURVEILLANCE]["materials"],
+                },
+                CATEGORY_INTERVENTION: {
+                    "financial_usd": round(by_category[CATEGORY_INTERVENTION]["financial_usd"], 2),
+                    "labor_hours": round(by_category[CATEGORY_INTERVENTION]["labor_hours"], 2),
+                    "materials": by_category[CATEGORY_INTERVENTION]["materials"],
+                },
+            },
             "financial_balance_remaining": round(self.financial_balance, 2),
             "labor_hours_remaining": round(self.labor_remaining, 2),
         }

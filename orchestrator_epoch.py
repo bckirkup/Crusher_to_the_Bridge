@@ -432,8 +432,10 @@ def step_cost_accounting(
 
     per_test = resource_costs_cfg.get("per_test_costs", {})
     ledger.debit_per_test(epoch, "air_sniffer_sample", len(air_results), per_test)
-    ledger.debit_per_test(epoch, "surface_swab", len(swab_results), per_test)
-    ledger.debit_per_test(epoch, "wastewater_sequencing", len(ww_results), per_test)
+    # Observation engine surface swabs are PCR-style (Ct/LOD), not culture.
+    ledger.debit_per_test(epoch, "surface_swab_pcr", len(swab_results), per_test)
+    # Wastewater instrument is a sequencing grid.
+    ledger.debit_per_test(epoch, "wastewater_sequencing_panel", len(ww_results), per_test)
     n_sick = len(clin_rdt_results)
     ledger.debit_per_test(epoch, "clinical_rdt", n_sick, per_test)
     ledger.debit_per_test(epoch, "clinical_qpcr", n_sick, per_test)
