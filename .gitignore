@@ -1,6 +1,7 @@
 # Runtime artifacts
 telemetry_buffer/ground_truth.json
 telemetry_buffer/simulation_history.json
+telemetry_buffer/artificial_lab_notebook.json
 
 # Python
 __pycache__/

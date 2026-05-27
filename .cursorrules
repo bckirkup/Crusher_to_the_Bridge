@@ -28,7 +28,7 @@ orchestrator.py                    — Main simulation loop (configurable epoch 
 dashboard.py                       — Streamlit 4-tab Tactical Command Deck
 engines/
   infection_dynamics_bridge.py     — Korkin Lab ABM adapter (KorkinAgent, dose-response)
-  transmission_core.py             — Four-pathway dose model + ContactTracingMatrix
+  transmission_core.py             — Six-pathway dose model + ContactTracingMatrix
   py_contam_bridge.py              — CONTAM-style multi-zone HVAC aerosol transport
 crusher_labs/
   observation_core.py              — 6 diagnostic instruments + InstrumentQC
@@ -41,7 +41,7 @@ tools/
   gis_spatial_bridge.py            — GIS Shapefile/GeoJSON → JSON layout converter
 data/
   config/
-    protocols.json                 — 11 standing operating protocols (SOP-001..SOP-011)
+    protocols.json                 — 7 standing operating protocols (SOPs)
     resource_costs.json            — Budgets, material inventory, per-test costs
     edison_resource_costs.json     — Expanded costs with sequencing + culture pricing
     logging_profile.json           — Fidelity tier selection + QC parameters
