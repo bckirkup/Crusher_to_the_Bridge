@@ -376,20 +376,27 @@ python tools/sanity_checker.py --config-dir data/config \
 - FRED compliance probability in [0,1], noise category probabilities
 - Multi-pathogen fraction/multiplier bounds
 - Microflora graywater_zones cross-referenced against spatial layout
+- Infection counter metrics, thresholds, and `exempt_classes` referential integrity
 
 ## Testing
 
 ```bash
-# Full suite (238 tests)
+# Full suite (254 tests)
 pytest tests/ -v --tb=short
 
 # Specific modules
-pytest tests/test_orchestrator.py      # orchestrator integration
-pytest tests/test_sanity_checker.py    # config validation (40 tests)
-pytest tests/test_law_compliance.py    # law compliance across all modules
-pytest tests/test_data_contracts.py    # JSON schema / referential integrity
-pytest tests/test_telemetry_seams.py   # cross-module data flow
+pytest tests/test_orchestrator.py           # orchestrator, quarantine/SOP confinement
+pytest tests/test_infection_counters.py     # attack-rate counters, exempt_classes
+pytest tests/test_transmission_pathways.py  # food/environmental pool init
+pytest tests/test_dashboard.py              # LCARS dashboard imports
+pytest tests/test_sanity_checker.py         # config validation
+pytest tests/test_law_compliance.py         # architectural law invariants
+pytest tests/test_data_contracts.py         # JSON schema / referential integrity
+pytest tests/test_telemetry_seams.py        # cross-module data flow
 ```
+
+CI (`.github/workflows/ci.yml`) runs sanity checks, the full pytest suite,
+import hygiene checks, a dashboard import smoke test, and a 24-epoch orchestrator run.
 
 ## Data Contracts
 

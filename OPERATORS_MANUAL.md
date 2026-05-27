@@ -1208,7 +1208,29 @@ movement patterns used by the orchestrator's agent routing logic.
 
 ---
 
-## Appendix A: JSON Schema Validation
+## Appendix A: Test Suite
+
+```bash
+python tools/sanity_checker.py --from-config
+pytest tests/ -v --tb=short
+```
+
+The suite includes **254 tests** across data contracts, sanity checker,
+orchestrator/quarantine logic, infection counters, transmission pathways
+(food/environmental), dashboard helpers, protocol engine, law compliance,
+and telemetry seams.  CI runs the same checks plus a 24-epoch orchestrator
+smoke test (see `.github/workflows/ci.yml`).
+
+| Module | Focus |
+|--------|-------|
+| `test_infection_counters.py` | Attack-rate counters, thresholds, `exempt_classes` |
+| `test_transmission_pathways.py` | Food/environmental pool initialization |
+| `test_dashboard.py` | LCARS dashboard imports, pathway aggregation |
+| `test_orchestrator.py` | Epoch loop, quarantine confinement, SOP modifiers |
+
+---
+
+## Appendix B: JSON Schema Validation
 
 All data contracts have formal JSON Schema (draft 2020-12) definitions
 in `schemas/`:
