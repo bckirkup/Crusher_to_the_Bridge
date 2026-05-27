@@ -25,64 +25,69 @@ Use snake_case for the directory name (e.g., `arleigh_burke_ddg`, `freedom_class
 
 ### 2. Create `spatial_layout.json`
 
-Copy the schema structure from an existing platform and adapt:
+Copy from an existing platform and adapt:
 ```bash
 cp data/platforms/destroyer_baseline/spatial_layout.json data/platforms/<platform_name>/spatial_layout.json
 ```
 
-Required structure per zone:
+Required structure per zone (matches `schemas/spatial_layout.schema.json`):
 ```json
 {
   "zones": [
     {
-      "zone_id": "unique_zone_name",
-      "zone_type": "Free|Dining|Room|Engineering|Medical|Weather",
+      "id": "unique_zone_name",
+      "type": "Free",
+      "traffic": "low",
       "volume_m3": 150.0,
-      "display_x": 0.5,
-      "display_y": 0.3
+      "deck": "main",
+      "display": {"x": 100, "y": 12}
     }
   ]
 }
 ```
 
+Zone `type` values include `Free`, `Dining`, `Room`, etc. **Dining** zones enable food-contamination pathway pools.
+
 **Law 3 constraints:**
 - `volume_m3` must be > 0
-- `display_x` and `display_y` must be present (used by dashboard)
-- All `zone_id` values must be unique
+- `display.x` and `display.y` must be present (used by LCARS dashboard tactical deck)
+- All `id` values must be unique
 
 ### 3. Create `air_flow_paths.json`
 
-Required structure:
+Required structure (matches `schemas/air_flow_paths.schema.json`):
 ```json
 {
   "hvac_zones": [
     {
-      "hvac_zone_id": "HVAC_Zone_1",
-      "rooms": ["zone_id_1", "zone_id_2"],
+      "id": "zone_main",
+      "rooms": ["MedBay", "Galley"],
       "ach": 6.0
     }
   ],
   "cross_zone_links": [
     {
-      "from_hvac_zone": "HVAC_Zone_1",
-      "to_hvac_zone": "HVAC_Zone_2",
-      "flow_rate_m3h": 50.0
+      "from": "zone_main",
+      "to": "zone_upper",
+      "flow_rate_m3h": 50.0,
+      "is_hvac_ducted": false,
+      "path": "ladder_well"
     }
   ],
   "adjacency": [
     {
-      "zone_a": "zone_id_1",
-      "zone_b": "zone_id_2",
-      "flow_rate_m3h": 10.0
+      "from": "Bridge",
+      "to": "MedBay",
+      "type": "door"
     }
   ]
 }
 ```
 
 **Law 4 referential integrity constraints:**
-- Every room in `hvac_zones[].rooms` must reference a valid `zone_id` from `spatial_layout.json`
-- Every `from_hvac_zone` / `to_hvac_zone` must reference a valid `hvac_zone_id`
-- Every `zone_a` / `zone_b` in adjacency must reference a valid `zone_id`
+- Every room in `hvac_zones[].rooms` must reference a valid zone `id` from `spatial_layout.json`
+- Every `from` / `to` in `cross_zone_links` must reference a valid `hvac_zones[].id`
+- Every `from` / `to` in `adjacency` must reference a valid spatial zone `id`
 - `ach` and `flow_rate_m3h` must be >= 0
 
 ### 4. Validate with the sanity checker
@@ -93,7 +98,7 @@ Expected: No ERROR findings.
 
 ### 5. Validate against JSON schemas
 ```bash
-pip install check-jsonschema  # if not installed
+pip install check-jsonschema
 check-jsonschema --schemafile schemas/spatial_layout.schema.json data/platforms/<platform_name>/spatial_layout.json
 check-jsonschema --schemafile schemas/air_flow_paths.schema.json data/platforms/<platform_name>/air_flow_paths.json
 ```
@@ -105,13 +110,7 @@ python -m pytest tests/test_data_contracts.py -v --tb=short
 
 ### 7. Test with the orchestrator (optional)
 
-Update `crusher_labs/config.yaml` to point to the new platform:
-```yaml
-ship_graph:
-  spatial_layout: "data/platforms/<platform_name>/spatial_layout.json"
-  air_flow_paths: "data/platforms/<platform_name>/air_flow_paths.json"
-```
-Then run:
+Update `crusher_labs/config.yaml` to point to the new platform paths, then run:
 ```bash
 python orchestrator.py --epochs 10
 ```
@@ -129,7 +128,8 @@ python orchestrator.py --epochs 10
 
 ## Common Mistakes
 
-- Forgetting to add display coordinates (`display_x`, `display_y`) — dashboard will error
-- Using zone names in `air_flow_paths.json` that don't exist in `spatial_layout.json` — fails Law 4
+- Using `zone_id` instead of `id` — fails schema and sanity checker
+- Forgetting `display` coordinates — LCARS tactical deck map will misplace zones
+- Referencing zone names in `air_flow_paths.json` that don't exist in `spatial_layout.json` — fails Law 4
 - Setting `volume_m3` to 0 — fails Law 3 (must be > 0)
-- Duplicate `zone_id` values — fails uniqueness check
+- Duplicate zone `id` values — fails uniqueness check

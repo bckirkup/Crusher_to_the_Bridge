@@ -7,7 +7,7 @@ description: Run the complete Crusher-to-the-Bridge pytest suite including data 
 
 ## Prerequisites
 
-- Python 3.11+ with pydantic, numpy, pyyaml, and pytest installed
+- Python 3.11+ with dependencies from `requirements.txt` installed
 - Working directory: repo root (`Crusher_to_the_Bridge/`)
 
 ## Devin Secrets Needed
@@ -20,7 +20,7 @@ None — all tests run locally.
 ```bash
 python -m pytest tests/ -v --tb=short
 ```
-Expected: All tests pass. Current test files cover data contracts, sanity checker, orchestrator, protocol engine, stoplight, cost ledger, telemetry seams, schema module, and law compliance.
+Expected: All tests pass (~250+). Coverage includes data contracts, sanity checker, orchestrator, protocol engine, stoplight, cost ledger, telemetry seams, schema module, law compliance, infection counters, transmission pathways (food/environmental), and dashboard helpers.
 
 ### Run individual test modules
 ```bash
@@ -30,8 +30,17 @@ python -m pytest tests/test_data_contracts.py -v --tb=short
 # Sanity checker (pydantic model validation + referential integrity)
 python -m pytest tests/test_sanity_checker.py -v --tb=short
 
-# Orchestrator integration tests
+# Orchestrator integration tests (quarantine, SOP confinement, zone closures)
 python -m pytest tests/test_orchestrator.py -v --tb=short
+
+# Infection counters and exempt_classes confinement (PR #45, #44)
+python -m pytest tests/test_infection_counters.py -v --tb=short
+
+# Food/environmental transmission pools (PR #43)
+python -m pytest tests/test_transmission_pathways.py -v --tb=short
+
+# Dashboard import and pathway aggregation (PR #46)
+python -m pytest tests/test_dashboard.py -v --tb=short
 
 # Protocol engine (stoplight evaluation, SOP activation)
 python -m pytest tests/test_protocol_engine.py -v --tb=short
@@ -54,7 +63,7 @@ python -m pytest tests/test_schema_module.py -v --tb=short
 
 ### Run the sanity checker directly (CLI)
 ```bash
-python tools/sanity_checker.py
+python tools/sanity_checker.py --from-config
 ```
 Expected: All checks pass with no ERROR findings.
 
@@ -67,14 +76,17 @@ Expected: 24-epoch run completes with no exceptions.
 ## CI Pipeline Equivalence
 
 The full CI pipeline (`.github/workflows/ci.yml`) runs these steps in order:
-1. `python tools/sanity_checker.py` — config validation
-2. `pytest tests/ -v --tb=short` — full test suite
-3. Import hygiene check — verifies module split
-4. `python orchestrator.py` — 24-epoch smoke test
+1. `pip install -r requirements.txt`
+2. `python tools/sanity_checker.py --from-config` — config validation from `crusher_labs/config.yaml`
+3. `pytest tests/ -v --tb=short` — full test suite
+4. Import hygiene check — verifies orchestrator module split and stoplight deduplication
+5. Dashboard import check — verifies LCARS dashboard and `aggregate_transmission_pathway_totals`
+6. `python orchestrator.py` — 24-epoch smoke test
 
 To replicate CI locally:
 ```bash
-python tools/sanity_checker.py && \
+pip install -r requirements.txt && \
+python tools/sanity_checker.py --from-config && \
 python -m pytest tests/ -v --tb=short && \
 PYTHONPATH=. python -c "
 from crusher_labs.stoplight import stoplight_from_ct, meets_threshold
@@ -87,6 +99,11 @@ from orchestrator_record import record_epoch, finalize_simulation
 from orchestrator_display import print_executive_summary
 print('Import hygiene OK')
 " && \
+PYTHONPATH=. python -c "
+import dashboard
+from dashboard import aggregate_transmission_pathway_totals
+print('Dashboard import OK')
+" && \
 python orchestrator.py
 ```
 
@@ -96,7 +113,10 @@ python orchestrator.py
 |-----------|-----------------|-------|
 | `test_data_contracts.py` | JSON config files | Schema conformance, uniqueness, bounds |
 | `test_sanity_checker.py` | `tools/sanity_checker.py` | Pydantic validation, referential integrity |
-| `test_orchestrator.py` | `orchestrator*.py` | End-to-end simulation flow |
+| `test_orchestrator.py` | `orchestrator*.py` | End-to-end simulation flow, quarantine/SOP |
+| `test_infection_counters.py` | `orchestrator_epoch.py` | Attack-rate counters, thresholds, exempt_classes |
+| `test_transmission_pathways.py` | `engines/transmission_core.py` | Food/environmental pool initialization |
+| `test_dashboard.py` | `dashboard.py` | LCARS dashboard imports, pathway aggregation |
 | `test_protocol_engine.py` | `crusher_labs/protocol_engine.py` | Stoplight triggers, SOP activation, modifiers |
 | `test_stoplight.py` | `crusher_labs/stoplight.py` | Ct-to-stoplight mapping, threshold logic |
 | `test_cost_ledger.py` | `crusher_labs/cost_ledger.py` | Budget tracking, material deductions |

@@ -22,29 +22,43 @@ Profiles live in `data/pathogens/active_profiles.json`. Each pathogen entry requ
 
 ```json
 {
-  "pathogens": [
-    {
-      "pathogen_id": "unique_snake_case_id",
-      "name": "Human-readable name",
-      "transmission_routes": ["direct_contact", "droplet", "airborne", "fomite"],
-      "dose_response": {
-        "model": "beta_poisson",
-        "alpha": 0.04,
-        "beta": 0.055
-      },
-      "shedding_curve": [
-        {"epoch_offset": 0, "rate": 10.0},
-        {"epoch_offset": 1, "rate": 50.0},
-        {"epoch_offset": 2, "rate": 80.0},
-        {"epoch_offset": 3, "rate": 40.0},
-        {"epoch_offset": 4, "rate": 10.0}
-      ],
-      "incubation_epochs": 2,
-      "recovery_epochs": 8,
-      "base_susceptibility": 1.0,
-      "microflora_disruption": true
-    }
-  ]
+  "pathogen_id": "unique_snake_case_id",
+  "name": "Human-readable name",
+  "category": "enteric_viral",
+  "transmission_routes": ["direct_contact", "fomite", "food"],
+  "shedding_curve_log10": [2.0, 3.5, 4.0],
+  "asymptomatic_shedding_log10": [1.0, 2.0, 2.5],
+  "dose_response": {
+    "model": "beta_poisson",
+    "alpha": 0.04,
+    "beta": 0.055
+  },
+  "illness_probability": {"eta": 0.6, "gamma": 0.4},
+  "recovery_day": 5,
+  "surface_deposition_fraction": 0.3,
+  "base_susceptibility": 1.0,
+  "introduction_epoch": 0,
+  "initial_infected": 1,
+  "microflora_disruption": {
+    "causes_disruption": false,
+    "disruption_type": "",
+    "disruption_magnitude": 0.0,
+    "affected_kingdoms": []
+  }
+}
+```
+
+Optional blocks for extended transmission pathways (PR #43):
+
+```json
+"food_contamination": {
+  "enabled": true,
+  "food_zones": ["Galley", "Mess_Hall"]
+},
+"environmental_contamination": {
+  "enabled": true,
+  "baseline_environmental_load": 0.01,
+  "growth_rate_per_epoch": 0.05
 }
 ```
 
@@ -57,9 +71,10 @@ Edit `data/pathogens/active_profiles.json` and add a new object to the `pathogen
 **Law 3 constraints:**
 - `dose_response.alpha` and `dose_response.beta` must be > 0 (for `beta_poisson` model)
 - For `exponential` model, `dose_response.k` must be > 0
-- `shedding_curve` must be non-empty
+- `shedding_curve_log10` must be non-empty
+- `surface_deposition_fraction` must be in [0.0, 1.0]
 - `base_susceptibility` must be >= 0
-- All shedding `rate` values should be >= 0
+- `illness_probability.eta` and `gamma` must be in [0.0, 1.0]
 
 ### 3. Choose the dose-response model
 
@@ -75,40 +90,40 @@ Reference: `engines/infection_dynamics_bridge.py::infection_probability()`
 Valid routes (used by `engines/transmission_core.py`):
 - `direct_contact` — zone colocation
 - `droplet` — short-range aerosolization
-- `airborne` — long-range HVAC transport
+- `hvac_airborne` — long-range HVAC transport
 - `fomite` — surface deposition and pickup
+- `water_aerosol`, `food`, `water`, `bodily_fluids` — route-specific pathways
+
+Pathways 5–6 are enabled per-profile via `food_contamination` and `environmental_contamination` blocks, not via `transmission_routes` alone.
 
 ### 5. Validate the new profile
 
 ```bash
-# Sanity checker validates dose-response bounds and shedding curves
-python tools/sanity_checker.py
-
-# JSON schema validation
+python tools/sanity_checker.py --from-config
 check-jsonschema --schemafile schemas/pathogen_profiles.schema.json data/pathogens/active_profiles.json
-
-# Data contract tests
 python -m pytest tests/test_data_contracts.py::TestPathogenProfiles -v --tb=short
+python -m pytest tests/test_transmission_pathways.py -v --tb=short
 ```
 
 ### 6. Run the orchestrator smoke test
 ```bash
 python orchestrator.py --epochs 10
 ```
-The orchestrator should pick up the new pathogen automatically and simulate multi-pathogen dynamics.
+The orchestrator picks up the new pathogen automatically and simulates multi-pathogen dynamics.
 
 ## Reference Profiles
 
 | Pathogen ID | Model | Notes |
 |-------------|-------|-------|
-| `norwalk_gi` | beta_poisson | GI-tract Norovirus; high fomite route |
-| `sars_cov2_resp` | beta_poisson | Respiratory SARS-CoV-2; high airborne route |
+| `norwalk_gi` | beta_poisson | GI Norovirus; food contamination enabled |
+| `sars_cov2_resp` | beta_poisson | Respiratory SARS-CoV-2; HVAC airborne route |
 
 For the extended 10-pathogen set, see `data/pathogens/edison_10pathogen_profiles.json`.
 
 ## Common Mistakes
 
-- Forgetting `shedding_curve` — test will fail on empty check
-- Setting `alpha` or `beta` to 0 — sanity checker will report ERROR
+- Empty `shedding_curve_log10` — fails data contract tests
+- Setting `alpha` or `beta` to 0 — sanity checker reports ERROR
 - Adding hardcoded `if pathogen_id == "my_new_pathogen"` logic — violates Law 2
 - Duplicate `pathogen_id` — fails uniqueness validation
+- Using `airborne` instead of `hvac_airborne` in `transmission_routes` — invalid route name

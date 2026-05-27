@@ -24,7 +24,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pyyaml numpy pydantic pytest
+          pip install -r requirements.txt
 
       - name: Run sanity checker
         run: python tools/sanity_checker.py --from-config
@@ -46,6 +46,22 @@ jobs:
           from orchestrator_record import record_epoch, finalize_simulation
           from orchestrator_display import print_executive_summary
           print('Import hygiene OK: modules split correctly, stoplight canonical')
+          "
+
+      - name: Verify dashboard imports (LCARS command deck)
+        env:
+          PYTHONPATH: .
+        run: |
+          python -c "
+          import dashboard
+          from dashboard import aggregate_transmission_pathway_totals
+          totals = aggregate_transmission_pathway_totals([{
+              'contact_tracing': {'transmission_events': [
+                  {'pathway_breakdown': {'food:test': 1.0}}
+              ]}
+          }])
+          assert totals.get('food') == 1.0
+          print('Dashboard import OK')
           "
 
       - name: Run orchestrator (24-epoch smoke test)

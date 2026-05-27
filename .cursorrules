@@ -28,7 +28,7 @@ orchestrator.py                    — Main simulation loop (configurable epoch 
 dashboard.py                       — Streamlit 4-tab Tactical Command Deck
 engines/
   infection_dynamics_bridge.py     — Korkin Lab ABM adapter (KorkinAgent, dose-response)
-  transmission_core.py             — Four-pathway dose model + ContactTracingMatrix
+  transmission_core.py             — Six-pathway dose model + ContactTracingMatrix
   py_contam_bridge.py              — CONTAM-style multi-zone HVAC aerosol transport
 crusher_labs/
   observation_core.py              — 6 diagnostic instruments + InstrumentQC
