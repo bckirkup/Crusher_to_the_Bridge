@@ -38,6 +38,7 @@ from crusher_labs.stoplight import (
     stoplight_from_rdt,
     stoplight_from_disruption,
 )
+from telemetry_buffer.agent_axes import clinical_axes_for_notebook
 
 
 # ── Fidelity model ───────────────────────────────────────────────────────
@@ -292,7 +293,7 @@ def _clinical_rdt_record(
     record["patient_id"] = agent_id
     record["binary_result"] = "DETECTED" if positive else "NOT DETECTED"
     record["inferred_anomaly_score"] = anomaly
-    record["symptom_status"] = data.get("symptom_status")
+    record.update(clinical_axes_for_notebook(data))
 
     qc = data.get("qc_control")
     if qc:
@@ -345,7 +346,7 @@ def _clinical_qpcr_record(
     record["inferred_anomaly_score"] = anomaly
     record["ct_value"] = ct
     record["viral_load_copies_ml"] = data.get("viral_load_copies_ml")
-    record["symptom_status"] = data.get("symptom_status")
+    record.update(clinical_axes_for_notebook(data))
 
     qc = data.get("qc_control")
     if qc:
@@ -400,7 +401,7 @@ def _clinical_microbio_record(
     record["gram_stain_result"] = data.get("gram_stain_result")
     record["flora_shift_detected"] = flora_shift
     record["secondary_infection_detected"] = secondary
-    record["symptom_status"] = data.get("symptom_status")
+    record.update(clinical_axes_for_notebook(data))
 
     qc = data.get("qc_control")
     if qc:

@@ -15,11 +15,18 @@ import json
 import os
 from typing import Any
 
+from telemetry_buffer.agent_axes import (
+    COMPLIANCE_COMPLIANT,
+    INFECTION_SUSCEPTIBLE,
+    PRESENTATION_ASYMPTOMATIC,
+    agent_axes_dict,
+)
+
 # ---------------------------------------------------------------------------
 # Schema helpers
 # ---------------------------------------------------------------------------
 
-SCHEMA_VERSION = "0.2.0"
+SCHEMA_VERSION = "0.3.0"
 
 BUFFER_DIR = os.path.dirname(os.path.abspath(__file__))
 GROUND_TRUTH_PATH = os.path.join(BUFFER_DIR, "ground_truth.json")
@@ -27,16 +34,31 @@ GROUND_TRUTH_PATH = os.path.join(BUFFER_DIR, "ground_truth.json")
 
 def make_agent(
     agent_id: int,
-    symptom_status: str = "asymptomatic",
+    infection_state: str = INFECTION_SUSCEPTIBLE,
+    symptom_presentation: str = PRESENTATION_ASYMPTOMATIC,
+    compliance_status: str = COMPLIANCE_COMPLIANT,
     shedding_rate: float = 0.0,
     location: str | None = None,
     agent_class: str | None = None,
     gender: str | None = None,
+    *,
+    symptom_status: str | None = None,
 ) -> dict[str, Any]:
-    """Return a single agent state dictionary."""
+    """Return a single agent state dictionary with orthogonal status axes.
+
+    ``symptom_status`` is accepted only for backward-compatible call sites
+    and is not written to the output dict.
+    """
+    if symptom_status is not None:
+        from telemetry_buffer.agent_axes import axes_from_legacy_symptom_status
+
+        infection_state, symptom_presentation, compliance_status = (
+            axes_from_legacy_symptom_status(symptom_status)
+        )
+
     d: dict[str, Any] = {
         "agent_id": agent_id,
-        "symptom_status": symptom_status,
+        **agent_axes_dict(infection_state, symptom_presentation, compliance_status),
         "shedding_rate": shedding_rate,
     }
     if location is not None:

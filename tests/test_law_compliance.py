@@ -288,7 +288,13 @@ class TestPureStateIsolation:
 
         state = SimulationState()
         agents = [
-            {"agent_id": 0, "symptom_status": "symptomatic", "shedding_rate": 50.0},
+            {
+                "agent_id": 0,
+                "infection_state": "infected",
+                "symptom_presentation": "symptomatic",
+                "compliance_status": "compliant",
+                "shedding_rate": 50.0,
+            },
         ]
         syndromic = MagicMock()
         syndromic.check_quarantine_compliance.return_value = True
@@ -300,7 +306,7 @@ class TestPureStateIsolation:
         # agents list itself was NOT mutated (no items added/removed)
         assert len(agents) == 1
         # agent dict was NOT mutated
-        assert agents[0]["symptom_status"] == "symptomatic"
+        assert agents[0]["symptom_presentation"] == "symptomatic"
 
     def test_sync_vsp_isolation_only_mutates_state(self) -> None:
         """sync_vsp_isolation must only mutate state, not engine."""

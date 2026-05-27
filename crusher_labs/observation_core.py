@@ -26,6 +26,12 @@ from typing import Any
 
 import numpy as np
 
+from telemetry_buffer.agent_axes import (
+    agent_axes_dict,
+    agent_is_infected,
+    resolve_agent_axes,
+)
+
 
 # ── Constants ────────────────────────────────────────────────────────────
 
@@ -554,7 +560,9 @@ class ClinicalRapidDiagnostic:
         agent_id: int,
         shedding_rate: float,
         is_infected: bool,
-        symptom_status: str,
+        infection_state: str,
+        symptom_presentation: str,
+        compliance_status: str,
         location: str,
     ) -> dict[str, Any]:
         """Run a rapid antigen test on a single agent."""
@@ -585,7 +593,7 @@ class ClinicalRapidDiagnostic:
             "instrument": self.name,
             "agent_id": agent_id,
             "location": location,
-            "symptom_status": symptom_status,
+            **agent_axes_dict(infection_state, symptom_presentation, compliance_status),
             "positive": positive,
             "effective_sensitivity": round(eff_sens, 4),
             "shedding_rate": round(shedding_rate, 2),
@@ -608,12 +616,15 @@ class ClinicalRapidDiagnostic:
         for ag in agents:
             aid = ag["agent_id"]
             shedding = ag.get("shedding_rate", 0.0)
-            infected = ag.get("symptom_status") in (
-                "symptomatic", "asymptomatic_shedding",
-            )
+            infected = agent_is_infected(ag)
+            infection, presentation, compliance = resolve_agent_axes(ag)
             results[aid] = self.test_agent(
-                aid, shedding, infected,
-                ag.get("symptom_status", "unknown"),
+                aid,
+                shedding,
+                infected,
+                infection,
+                presentation,
+                compliance,
                 ag.get("location", "unknown"),
             )
         return results
@@ -650,7 +661,9 @@ class ClinicalQPCR:
         self,
         agent_id: int,
         shedding_rate: float,
-        symptom_status: str,
+        infection_state: str,
+        symptom_presentation: str,
+        compliance_status: str,
         location: str,
     ) -> dict[str, Any]:
         """Run clinical qPCR on a patient specimen."""
@@ -671,7 +684,7 @@ class ClinicalQPCR:
             "instrument": self.name,
             "agent_id": agent_id,
             "location": location,
-            "symptom_status": symptom_status,
+            **agent_axes_dict(infection_state, symptom_presentation, compliance_status),
             "ct_value": ct,
             "detected": detected,
             "viral_load_copies_ml": viral_load_copies_ml,
@@ -694,10 +707,13 @@ class ClinicalQPCR:
         results: dict[int, dict[str, Any]] = {}
         for ag in agents:
             aid = ag["agent_id"]
+            infection, presentation, compliance = resolve_agent_axes(ag)
             results[aid] = self.test_agent(
                 aid,
                 ag.get("shedding_rate", 0.0),
-                ag.get("symptom_status", "unknown"),
+                infection,
+                presentation,
+                compliance,
                 ag.get("location", "unknown"),
             )
         return results
@@ -780,7 +796,9 @@ class ClinicalMicrobiology:
         self,
         agent_id: int,
         microflora_disruption: float,
-        symptom_status: str,
+        infection_state: str,
+        symptom_presentation: str,
+        compliance_status: str,
         location: str,
         pathogen_infections: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
@@ -831,7 +849,7 @@ class ClinicalMicrobiology:
             "instrument": self.name,
             "agent_id": agent_id,
             "location": location,
-            "symptom_status": symptom_status,
+            **agent_axes_dict(infection_state, symptom_presentation, compliance_status),
             "disruption_site": disruption_site,
             "microflora_disruption_level": round(microflora_disruption, 4),
             "gram_stain_result": gram_stain,
@@ -854,10 +872,13 @@ class ClinicalMicrobiology:
         results: dict[int, dict[str, Any]] = {}
         for ag in agents:
             aid = ag["agent_id"]
+            infection, presentation, compliance = resolve_agent_axes(ag)
             results[aid] = self.test_agent(
                 aid,
                 ag.get("microflora_disruption", 0.0),
-                ag.get("symptom_status", "unknown"),
+                infection,
+                presentation,
+                compliance,
                 ag.get("location", "unknown"),
                 ag.get("pathogen_infections"),
             )

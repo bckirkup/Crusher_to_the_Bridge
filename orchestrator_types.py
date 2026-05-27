@@ -30,12 +30,29 @@ STATUS_BASELINE = "BASELINE"
 STATUS_SUSPECTED = "SUSPECTED"
 STATUS_CONFIRMED = "CONFIRMED"
 
-# ── Agent symptom-status constants (used in telemetry schema) ────────────
-SYMPTOM_ASYMPTOMATIC = "asymptomatic"
-SYMPTOM_SYMPTOMATIC = "symptomatic"
-SYMPTOM_ISOLATED = "isolated"
-SYMPTOM_QUARANTINED = "quarantined"
-SYMPTOM_NON_COMPLIANT = "non_compliant"
+# ── Agent orthogonal status axes (telemetry_buffer.agent_axes) ───────────
+from telemetry_buffer.agent_axes import (  # noqa: E402
+    INFECTION_SUSCEPTIBLE,
+    INFECTION_INFECTED,
+    INFECTION_RECOVERED,
+    INFECTION_IMMUNE,
+    PRESENTATION_ASYMPTOMATIC,
+    PRESENTATION_MILD,
+    PRESENTATION_SYMPTOMATIC,
+    PRESENTATION_SEVERE,
+    COMPLIANCE_COMPLIANT,
+    COMPLIANCE_NON_COMPLIANT,
+    COMPLIANCE_ISOLATED,
+    COMPLIANCE_QUARANTINED,
+    PRESENTATION_SYMPTOMATIC_LEVELS,
+)
+
+# Deprecated aliases — legacy combined ``symptom_status`` string values
+SYMPTOM_ASYMPTOMATIC = PRESENTATION_ASYMPTOMATIC
+SYMPTOM_SYMPTOMATIC = PRESENTATION_SYMPTOMATIC
+SYMPTOM_ISOLATED = COMPLIANCE_ISOLATED
+SYMPTOM_QUARANTINED = COMPLIANCE_QUARANTINED
+SYMPTOM_NON_COMPLIANT = COMPLIANCE_NON_COMPLIANT
 SYMPTOM_ASYMPTOMATIC_SHEDDING = "asymptomatic_shedding"
 
 # ── Synthetic locations for confined agents ──────────────────────────────

@@ -438,11 +438,9 @@ avoid hardcoded strings across the codebase:
 | `STATUS_BASELINE` | `"BASELINE"` | Initial trigger status |
 | `STATUS_SUSPECTED` | `"SUSPECTED"` | Syndromic threshold exceeded |
 | `STATUS_CONFIRMED` | `"CONFIRMED"` | PCR-confirmed outbreak |
-| `SYMPTOM_ASYMPTOMATIC` | `"asymptomatic"` | Agent symptom status |
-| `SYMPTOM_SYMPTOMATIC` | `"symptomatic"` | Agent symptom status |
-| `SYMPTOM_ISOLATED` | `"isolated"` | Isolation ward (no HVAC) |
-| `SYMPTOM_QUARANTINED` | `"quarantined"` | Confined to quarters |
-| `SYMPTOM_NON_COMPLIANT` | `"non_compliant"` | Agent refusing quarantine |
+| `INFECTION_*` | susceptible / infected / recovered / immune | SIR infection axis |
+| `PRESENTATION_*` | asymptomatic / mild / symptomatic / severe | Clinical presentation axis |
+| `COMPLIANCE_*` | compliant / non_compliant / isolated / quarantined | FRED confinement axis |
 | `LOCATION_ISOLATED` | `"Isolated_In_Quarters"` | Quarantine location |
 
 ## License
