@@ -67,7 +67,7 @@ class SyndromicSurveillance:
             aid = agent["agent_id"]
             status = agent.get("symptom_status", "asymptomatic")
             is_isolated = status == "isolated"
-            is_symptomatic = status not in ("asymptomatic", "isolated")
+            is_symptomatic = status in ("symptomatic", "non_compliant", "asymptomatic_shedding")
 
             if is_isolated:
                 continue
