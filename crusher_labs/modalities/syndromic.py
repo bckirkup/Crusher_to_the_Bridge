@@ -63,11 +63,21 @@ class SyndromicSurveillance:
         noise_ids: list[int] = []
         noise_reasons: list[dict[str, Any]] = []
 
+        from telemetry_buffer.agent_axes import (
+            COMPLIANCE_NON_COMPLIANT,
+            agent_has_symptomatic_presentation,
+            agent_is_isolated,
+            resolve_agent_axes,
+        )
+
         for agent in agents:
             aid = agent["agent_id"]
-            status = agent.get("symptom_status", "asymptomatic")
-            is_isolated = status == "isolated"
-            is_symptomatic = status in ("symptomatic", "non_compliant", "asymptomatic_shedding")
+            is_isolated = agent_is_isolated(agent)
+            _, _, compliance = resolve_agent_axes(agent)
+            is_symptomatic = (
+                agent_has_symptomatic_presentation(agent)
+                or compliance == COMPLIANCE_NON_COMPLIANT
+            )
 
             if is_isolated:
                 continue

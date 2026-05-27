@@ -22,11 +22,16 @@ from engines.infection_dynamics_bridge import (
 )
 from engines.wearable_monitor import WearableMonitor
 from crusher_labs.modalities.wearable import WearableDataStream
+from telemetry_buffer.agent_axes import (
+    agent_requires_confinement,
+    agent_is_infected,
+    agent_has_symptomatic_presentation,
+    INFECTION_RECOVERED,
+    INFECTION_SUSCEPTIBLE,
+)
 from orchestrator_types import (
     STATUS_SUSPECTED,
     STATUS_CONFIRMED,
-    SYMPTOM_SYMPTOMATIC,
-    SYMPTOM_NON_COMPLIANT,
     LOCATION_ISOLATED,
     DEFAULT_AIRBORNE_FRACTION,
     DEFAULT_SURFACE_FRACTION,
@@ -333,7 +338,7 @@ def confine_agents(
             continue
         if agent.get("agent_class", "") in _exempt:
             continue
-        is_symptomatic = agent["symptom_status"] in (SYMPTOM_SYMPTOMATIC, SYMPTOM_NON_COMPLIANT)
+        is_symptomatic = agent_requires_confinement(agent)
         is_shedding = include_shedding and agent.get("shedding_rate", 0.0) > 0.0
         if not (is_symptomatic or is_shedding):
             continue
@@ -514,12 +519,6 @@ def step_wearable_monitoring(
 
 # ── Infection counters ───────────────────────────────────────────────────
 
-_SYMPTOMATIC_STATUSES = {SYMPTOM_SYMPTOMATIC, SYMPTOM_NON_COMPLIANT}
-_INFECTED_STATUSES = {
-    SYMPTOM_SYMPTOMATIC, SYMPTOM_NON_COMPLIANT,
-    "asymptomatic_shedding", "quarantined",
-}
-
 VALID_COUNTER_METRICS = {
     "attack_rate",
     "infected_count",
@@ -571,26 +570,30 @@ def compute_infection_counters(
         if metric == "attack_rate":
             n_symptomatic = sum(
                 1 for a in group
-                if a["symptom_status"] in _SYMPTOMATIC_STATUSES
+                if agent_has_symptomatic_presentation(a)
             )
             value = (n_symptomatic / pop) if pop > 0 else 0.0
         elif metric == "infected_count":
-            value = float(sum(
-                1 for a in group
-                if a["symptom_status"] in _INFECTED_STATUSES
-            ))
+            value = float(sum(1 for a in group if agent_is_infected(a)))
         elif metric == "symptomatic_count":
             value = float(sum(
                 1 for a in group
-                if a["symptom_status"] in _SYMPTOMATIC_STATUSES
+                if agent_has_symptomatic_presentation(a)
             ))
         elif metric == "recovered_count":
             value = float(sum(
-                1 for a in group if a["symptom_status"] == "recovered"
+                1 for a in group
+                if a.get("infection_state") == INFECTION_RECOVERED
+                or a.get("symptom_status") == "recovered"
             ))
         elif metric == "susceptible_count":
             value = float(sum(
-                1 for a in group if a["symptom_status"] == "asymptomatic"
+                1 for a in group
+                if a.get("infection_state") == INFECTION_SUSCEPTIBLE
+                or (
+                    "infection_state" not in a
+                    and a.get("symptom_status") == "asymptomatic"
+                )
             ))
         else:
             value = 0.0

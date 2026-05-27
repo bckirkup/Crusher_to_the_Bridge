@@ -425,17 +425,32 @@ class KorkinAgent:
 
     def to_schema_dict(self) -> dict[str, Any]:
         """Export agent state in telemetry_buffer.schema format."""
+        from telemetry_buffer.agent_axes import (
+            COMPLIANCE_COMPLIANT,
+            INFECTION_IMMUNE,
+            INFECTION_INFECTED,
+            INFECTION_RECOVERED,
+            INFECTION_SUSCEPTIBLE,
+            PRESENTATION_ASYMPTOMATIC,
+            PRESENTATION_SYMPTOMATIC,
+        )
+
         if self.infection_status == InfectionStatus.INFECTED:
-            if self.is_symptomatic:
-                symptom_status = "symptomatic"
-            else:
-                symptom_status = "asymptomatic_shedding"
+            infection_state = INFECTION_INFECTED
+            symptom_presentation = (
+                PRESENTATION_SYMPTOMATIC
+                if self.is_symptomatic
+                else PRESENTATION_ASYMPTOMATIC
+            )
         elif self.is_recovered:
-            symptom_status = "recovered"
+            infection_state = INFECTION_RECOVERED
+            symptom_presentation = PRESENTATION_ASYMPTOMATIC
         elif self.immune:
-            symptom_status = "immune"
+            infection_state = INFECTION_IMMUNE
+            symptom_presentation = PRESENTATION_ASYMPTOMATIC
         else:
-            symptom_status = "asymptomatic"
+            infection_state = INFECTION_SUSCEPTIBLE
+            symptom_presentation = PRESENTATION_ASYMPTOMATIC
 
         # Multi-pathogen infection summary
         pathogen_states = {}
@@ -448,7 +463,9 @@ class KorkinAgent:
 
         return {
             "agent_id": self.agent_id,
-            "symptom_status": symptom_status,
+            "infection_state": infection_state,
+            "symptom_presentation": symptom_presentation,
+            "compliance_status": COMPLIANCE_COMPLIANT,
             "shedding_rate": round(self.current_shedding, 2),
             "location": self.current_location,
             "role": self.role,

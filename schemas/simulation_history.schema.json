@@ -146,11 +146,29 @@
       "type": "object",
       "properties": {
         "agent_id": {"type": "integer"},
-        "status": {"type": "string"},
+        "status": {
+          "type": "string",
+          "description": "Deprecated combined status; use orthogonal axes below."
+        },
+        "infection_state": {
+          "type": "string",
+          "enum": ["susceptible", "infected", "recovered", "immune"]
+        },
+        "symptom_presentation": {
+          "type": "string",
+          "enum": ["asymptomatic", "mild", "symptomatic", "severe"]
+        },
+        "compliance_status": {
+          "type": "string",
+          "enum": ["compliant", "non_compliant", "isolated", "quarantined"]
+        },
         "location": {"type": "string"},
         "shedding_rate": {"type": "number"},
         "day_of_infection": {"type": "integer"},
-        "symptom_status": {"type": "string"},
+        "symptom_status": {
+          "type": "string",
+          "description": "Deprecated; use infection_state, symptom_presentation, compliance_status."
+        },
         "infection_pathway": {"type": "string"},
         "agent_class": {
           "type": "string",

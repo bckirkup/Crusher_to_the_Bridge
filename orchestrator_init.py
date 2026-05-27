@@ -16,6 +16,7 @@ from typing import Any
 
 import numpy as np
 
+from telemetry_buffer.agent_axes import resolve_agent_axes
 from telemetry_buffer.schema import make_agent, make_space
 from engines.infection_dynamics_bridge import (
     KorkinShipEngine,
@@ -50,9 +51,10 @@ from crusher_labs.cost_ledger import (
 )
 from orchestrator_types import (
     REPO_ROOT,
-    SYMPTOM_ISOLATED,
-    SYMPTOM_QUARANTINED,
-    SYMPTOM_NON_COMPLIANT,
+    COMPLIANCE_ISOLATED,
+    COMPLIANCE_QUARANTINED,
+    COMPLIANCE_NON_COMPLIANT,
+    COMPLIANCE_COMPLIANT,
     LOCATION_ISOLATED,
     ObservationEngine,
     ProtocolContext,
@@ -217,42 +219,34 @@ def engine_payload_to_schema(
         aid = a["agent_id"]
         a_class = a.get("agent_class")
         a_gender = a.get("gender")
+        infection_state, symptom_presentation, compliance_status = resolve_agent_axes(a)
         if aid in isolated_ids:
-            agent_dict = make_agent(
-                agent_id=aid,
-                symptom_status=SYMPTOM_ISOLATED,
-                shedding_rate=0.0,
-                location=LOCATION_ISOLATED,
-                agent_class=a_class,
-                gender=a_gender,
-            )
+            compliance_status = COMPLIANCE_ISOLATED
+            shedding = 0.0
+            location = LOCATION_ISOLATED
         elif aid in quarantined_ids:
-            agent_dict = make_agent(
-                agent_id=aid,
-                symptom_status=SYMPTOM_QUARANTINED,
-                shedding_rate=float(a.get("shedding_rate", 0.0)),
-                location=a.get("location", "unknown"),
-                agent_class=a_class,
-                gender=a_gender,
-            )
+            compliance_status = COMPLIANCE_QUARANTINED
+            shedding = float(a.get("shedding_rate", 0.0))
+            location = a.get("location", "unknown")
         elif aid in quarantine_refusers:
-            agent_dict = make_agent(
-                agent_id=aid,
-                symptom_status=SYMPTOM_NON_COMPLIANT,
-                shedding_rate=float(a.get("shedding_rate", 0.0)),
-                location=a.get("location", "unknown"),
-                agent_class=a_class,
-                gender=a_gender,
-            )
+            compliance_status = COMPLIANCE_NON_COMPLIANT
+            shedding = float(a.get("shedding_rate", 0.0))
+            location = a.get("location", "unknown")
         else:
-            agent_dict = make_agent(
-                agent_id=aid,
-                symptom_status=a["symptom_status"],
-                shedding_rate=float(a.get("shedding_rate", 0.0)),
-                location=a.get("location"),
-                agent_class=a_class,
-                gender=a_gender,
-            )
+            shedding = float(a.get("shedding_rate", 0.0))
+            location = a.get("location")
+            compliance_status = COMPLIANCE_COMPLIANT
+
+        agent_dict = make_agent(
+            agent_id=aid,
+            infection_state=infection_state,
+            symptom_presentation=symptom_presentation,
+            compliance_status=compliance_status,
+            shedding_rate=shedding,
+            location=location,
+            agent_class=a_class,
+            gender=a_gender,
+        )
 
         if "pathogen_infections" in a:
             agent_dict["pathogen_infections"] = a["pathogen_infections"]

@@ -23,10 +23,15 @@ from orchestrator_types import (
     STATUS_BASELINE,
     STATUS_SUSPECTED,
     STATUS_CONFIRMED,
+    INFECTION_SUSCEPTIBLE,
+    INFECTION_INFECTED,
+    PRESENTATION_ASYMPTOMATIC,
+    PRESENTATION_SYMPTOMATIC,
+    COMPLIANCE_COMPLIANT,
+    COMPLIANCE_ISOLATED,
+    COMPLIANCE_NON_COMPLIANT,
     SYMPTOM_ASYMPTOMATIC,
     SYMPTOM_SYMPTOMATIC,
-    SYMPTOM_ISOLATED,
-    SYMPTOM_NON_COMPLIANT,
     LOCATION_ISOLATED,
     DEFAULT_AIRBORNE_FRACTION,
     DEFAULT_SURFACE_FRACTION,
@@ -334,32 +339,48 @@ class TestEnginePayloadToSchema:
         agents, spaces = _engine_payload_to_schema(engine_payload, set(), set(), set())
         assert len(agents) == 1
         assert agents[0]["agent_id"] == 0
-        assert agents[0]["symptom_status"] == SYMPTOM_ASYMPTOMATIC
+        assert agents[0]["infection_state"] == INFECTION_SUSCEPTIBLE
+        assert agents[0]["compliance_status"] == COMPLIANCE_COMPLIANT
         assert "Bridge" in spaces
 
     def test_isolated_agent(self) -> None:
         engine_payload = {
             "agents": [
-                {"agent_id": 5, "symptom_status": SYMPTOM_SYMPTOMATIC,
-                 "shedding_rate": 50.0, "location": "MedBay"},
+                {
+                    "agent_id": 5,
+                    "infection_state": INFECTION_INFECTED,
+                    "symptom_presentation": PRESENTATION_SYMPTOMATIC,
+                    "compliance_status": COMPLIANCE_COMPLIANT,
+                    "shedding_rate": 50.0,
+                    "location": "MedBay",
+                },
             ],
             "spaces": {},
         }
         agents, _ = _engine_payload_to_schema(engine_payload, {5}, set(), set())
-        assert agents[0]["symptom_status"] == SYMPTOM_ISOLATED
+        assert agents[0]["compliance_status"] == COMPLIANCE_ISOLATED
+        assert agents[0]["infection_state"] == INFECTION_INFECTED
+        assert agents[0]["symptom_presentation"] == PRESENTATION_SYMPTOMATIC
         assert agents[0]["location"] == LOCATION_ISOLATED
         assert agents[0]["shedding_rate"] == 0.0
 
     def test_non_compliant_agent(self) -> None:
         engine_payload = {
             "agents": [
-                {"agent_id": 3, "symptom_status": SYMPTOM_SYMPTOMATIC,
-                 "shedding_rate": 30.0, "location": "Galley"},
+                {
+                    "agent_id": 3,
+                    "infection_state": INFECTION_INFECTED,
+                    "symptom_presentation": PRESENTATION_SYMPTOMATIC,
+                    "compliance_status": COMPLIANCE_COMPLIANT,
+                    "shedding_rate": 30.0,
+                    "location": "Galley",
+                },
             ],
             "spaces": {},
         }
         agents, _ = _engine_payload_to_schema(engine_payload, set(), set(), {3})
-        assert agents[0]["symptom_status"] == SYMPTOM_NON_COMPLIANT
+        assert agents[0]["compliance_status"] == COMPLIANCE_NON_COMPLIANT
+        assert agents[0]["infection_state"] == INFECTION_INFECTED
         assert agents[0]["shedding_rate"] == 30.0
 
     def test_pathogen_metadata_preserved(self) -> None:

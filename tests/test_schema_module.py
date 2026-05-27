@@ -31,7 +31,9 @@ class TestMakeAgent:
     def test_default_agent(self) -> None:
         agent = make_agent(agent_id=0)
         assert agent["agent_id"] == 0
-        assert agent["symptom_status"] == "asymptomatic"
+        assert agent["infection_state"] == "susceptible"
+        assert agent["symptom_presentation"] == "asymptomatic"
+        assert agent["compliance_status"] == "compliant"
         assert agent["shedding_rate"] == 0.0
 
     def test_agent_with_location(self) -> None:

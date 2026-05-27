@@ -27,6 +27,14 @@ from orchestrator_types import (
     ProtocolContext,
 )
 from orchestrator_display import print_executive_summary
+from telemetry_buffer.agent_axes import (
+    agent_has_symptomatic_presentation,
+    agent_is_infected,
+    agent_is_isolated,
+    INFECTION_RECOVERED,
+    INFECTION_IMMUNE,
+    resolve_agent_axes,
+)
 
 
 def record_epoch(
@@ -129,25 +137,25 @@ def record_epoch(
     }
 
     for a in agents:
-        status = a["symptom_status"]
-        if status == "isolated":
-            pass
-        elif status == "quarantined":
+        infection_state, symptom_presentation, compliance_status = resolve_agent_axes(a)
+
+        if agent_is_infected(a):
             epoch_record["summary"]["infected"] += 1
-        elif status in ("symptomatic", "non_compliant", "asymptomatic_shedding"):
-            epoch_record["summary"]["infected"] += 1
-            if status == "symptomatic":
-                epoch_record["summary"]["symptomatic"] += 1
-        elif status == "recovered":
+        elif infection_state == INFECTION_RECOVERED:
             epoch_record["summary"]["recovered"] += 1
-        elif status == "immune":
+        elif infection_state == INFECTION_IMMUNE:
             epoch_record["summary"]["immune"] += 1
         else:
             epoch_record["summary"]["susceptible"] += 1
 
+        if agent_has_symptomatic_presentation(a) and not agent_is_isolated(a):
+            epoch_record["summary"]["symptomatic"] += 1
+
         agent_record: dict[str, Any] = {
             "agent_id": a["agent_id"],
-            "status": status,
+            "infection_state": infection_state,
+            "symptom_presentation": symptom_presentation,
+            "compliance_status": compliance_status,
             "shedding_rate": a.get("shedding_rate", 0.0),
             "location": a.get("location", "unknown"),
             "agent_class": a.get("agent_class", "unknown"),

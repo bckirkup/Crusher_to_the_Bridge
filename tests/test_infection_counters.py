@@ -21,6 +21,7 @@ from orchestrator_types import (
     SYMPTOM_ASYMPTOMATIC_SHEDDING,
     SYMPTOM_SYMPTOMATIC,
 )
+from telemetry_buffer.agent_axes import agent_axes_dict, axes_from_legacy_symptom_status
 
 
 def _agent(
@@ -28,9 +29,12 @@ def _agent(
     symptom_status: str,
     agent_class: str = "passenger_general",
 ) -> dict[str, Any]:
+    infection, presentation, compliance = axes_from_legacy_symptom_status(
+        symptom_status,
+    )
     return {
         "agent_id": agent_id,
-        "symptom_status": symptom_status,
+        **agent_axes_dict(infection, presentation, compliance),
         "agent_class": agent_class,
         "shedding_rate": 0.0,
     }

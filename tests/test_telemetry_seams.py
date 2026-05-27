@@ -24,10 +24,12 @@ from orchestrator_types import (
     STATUS_BASELINE,
     STATUS_SUSPECTED,
     STATUS_CONFIRMED,
+    COMPLIANCE_NON_COMPLIANT,
+    INFECTION_SUSCEPTIBLE,
+    INFECTION_INFECTED,
+    PRESENTATION_SYMPTOMATIC,
     SYMPTOM_ASYMPTOMATIC,
     SYMPTOM_SYMPTOMATIC,
-    SYMPTOM_ISOLATED,
-    SYMPTOM_NON_COMPLIANT,
     LOCATION_ISOLATED,
     SimulationState,
 )
@@ -167,7 +169,8 @@ class TestEnginePayloadBoundary:
             "spaces": {},
         }
         agents, _ = engine_payload_to_schema(payload, set(), set(), {3})
-        assert agents[0]["symptom_status"] == SYMPTOM_NON_COMPLIANT
+        assert agents[0]["compliance_status"] == COMPLIANCE_NON_COMPLIANT
+        assert agents[0]["infection_state"] == INFECTION_INFECTED
         assert agents[0]["shedding_rate"] == 42.5
 
     def test_microflora_disruption_field_preserved(self) -> None:
@@ -257,7 +260,9 @@ class TestCrossModuleDataFlow:
 
         for a in payload["agents"]:
             assert "agent_id" in a
-            assert "symptom_status" in a
+            assert "infection_state" in a
+            assert "symptom_presentation" in a
+            assert "compliance_status" in a
             assert isinstance(a["shedding_rate"], (int, float))
 
         for zname, zdata in payload["spaces"].items():
