@@ -41,7 +41,7 @@ tools/
   gis_spatial_bridge.py            — GIS Shapefile/GeoJSON → JSON layout converter
 data/
   config/
-    protocols.json                 — 7 standing operating protocols (SOPs)
+    protocols.json                 — 11 standing operating protocols (SOP-001..SOP-011)
     resource_costs.json            — Budgets, material inventory, per-test costs
     edison_resource_costs.json     — Expanded costs with sequencing + culture pricing
     logging_profile.json           — Fidelity tier selection + QC parameters

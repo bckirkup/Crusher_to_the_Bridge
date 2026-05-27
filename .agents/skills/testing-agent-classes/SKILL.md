@@ -63,29 +63,32 @@ for c, s in [('crew_medical','MedBay'),('crew_engineering','Engine'),('crew_gall
 "
 ```
 
-### 4. Schema validation
+### 4. Test SOP exempt_classes (PR #44)
+```bash
+python -m pytest tests/test_infection_counters.py::TestExemptClassesConfinement -v --tb=short
+```
+
+### 5. Schema validation
 ```bash
 check-jsonschema --schemafile schemas/simulation_history.schema.json telemetry_buffer/simulation_history.json
 ```
 Expected: `ok -- validation done`
 
-### 5. Full test suite
+### 6. Full test suite
 ```bash
-python -m pytest tests/ -v
+python -m pytest tests/ -v --tb=short
 ```
-Expected: All tests pass (158+ tests). The `TestAgentClassEngine` class contains tests specific to agent class diversification.
-
-### 6. Backward compatibility (legacy mode)
-Build engine without `agent_classes` parameter and verify it creates agents with `passenger_general`/`crew_general` classes (not raw role strings). Legacy mode still assigns gender from DEFAULT_GENDER_DISTRIBUTION.
+Expected: All tests pass (250+). Agent-class behavior is covered in `test_orchestrator.py` and `test_infection_counters.py`.
 
 ## Key Implementation Details
 
 - `simulation_history.json` is a **list** of epoch records (not a dict with an `epochs` key)
 - Agent class fractions are in `crusher_labs/config.yaml` under `ship_graph.agent_classes`
 - Remainder from fraction rounding is assigned to the first class
-- In legacy mode (no agent_classes config), `agent_class` defaults to `passenger_general`/`crew_general`, not the raw role string
+- In legacy mode (no agent_classes config), `agent_class` defaults to `passenger_general`/`crew_general`
 - `_resolve_zone()` uses **substring matching** (case-insensitive) against available zone names
 - Zone names come from `data/platforms/destroyer_baseline/spatial_layout.json` (field `id`, not `name`)
+- `exempt_classes` in protocols and infection counters skip confinement for listed agent classes
 
 ## Troubleshooting
 

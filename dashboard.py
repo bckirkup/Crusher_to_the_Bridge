@@ -676,8 +676,14 @@ def _render_wearable_monitoring(history: list[dict[str, Any]]) -> None:
         st.plotly_chart(fig, use_container_width=True)
 
 
-def _render_transmission_pathways(history: list[dict[str, Any]]) -> None:
-    """Transmission pathway breakdown from contact tracing data."""
+def aggregate_transmission_pathway_totals(
+    history: list[dict[str, Any]],
+) -> dict[str, float]:
+    """Sum transmission doses by pathway across epoch records.
+
+    Uses ``pathway_breakdown`` keys (``pathway:pathogen_id``) when present;
+    otherwise falls back to ``dominant_pathway`` / legacy ``pathway`` fields.
+    """
     pathway_totals: dict[str, float] = {}
     for rec in history:
         ct = rec.get("contact_tracing", {})
@@ -691,8 +697,13 @@ def _render_transmission_pathways(history: list[dict[str, Any]]) -> None:
             else:
                 pw = ev.get("dominant_pathway", ev.get("pathway", "unknown"))
                 pathway_totals[pw] = pathway_totals.get(pw, 0) + ev.get("total_dose", 1)
-
     pathway_totals.pop("none", None)
+    return pathway_totals
+
+
+def _render_transmission_pathways(history: list[dict[str, Any]]) -> None:
+    """Transmission pathway breakdown from contact tracing data."""
+    pathway_totals = aggregate_transmission_pathway_totals(history)
     if not pathway_totals:
         return
 

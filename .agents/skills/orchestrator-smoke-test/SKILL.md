@@ -7,7 +7,7 @@ description: Run the Crusher-to-the-Bridge orchestrator for a quick 24-epoch smo
 
 ## Prerequisites
 
-- Python 3.11+ with numpy, pyyaml, and pydantic installed
+- Python 3.11+ with dependencies from `requirements.txt` installed
 - Working directory: repo root (`Crusher_to_the_Bridge/`)
 
 ## Devin Secrets Needed
@@ -20,13 +20,18 @@ None — the orchestrator runs locally against bundled config and data files.
 ```bash
 python orchestrator.py
 ```
-Expected: Completes 24 epochs with no exceptions. Prints `CRUSHER TO THE BRIDGE` banner, per-epoch progress, and an executive summary at the end.
+Expected: Completes 24 epochs with no exceptions. Prints `CRUSHER TO THE BRIDGE` banner, per-epoch progress, infection counter readouts, and an executive summary at the end.
 
 ### Run with a custom epoch count
 ```bash
 python orchestrator.py --epochs 10
 ```
 Expected: Completes 10 epochs. Useful for faster iteration during development.
+
+### Validate config before running
+```bash
+python tools/sanity_checker.py --from-config
+```
 
 ### Verify import hygiene after module changes
 ```bash
@@ -48,9 +53,13 @@ Expected: Prints success message with no ImportError.
 
 | Area | What It Checks |
 |------|----------------|
-| Initialization | Ship graph loads from `spatial_layout.json`, engine builds from config, pathogen profiles parsed |
+| Initialization | Ship graph loads from platform JSON, engine builds from `crusher_labs/config.yaml`, pathogen profiles parsed |
+| Agent classes | Multi-class crew/passenger taxonomy with duty zones |
+| Infection counters | Per-group attack rates and threshold confinement in telemetry |
 | CONTAM Bridge | `py_contam_bridge.build_transport_engine()` succeeds (or gracefully returns None) |
 | Multi-Pathogen | All pathogens in `active_profiles.json` initialize with valid dose-response params |
+| Six pathways | Direct, droplet, HVAC airborne, fomite, food contamination, environmental |
+| Quarantine vs isolation | Quarters confinement vs rare isolation ward (no HVAC) |
 | Epoch Loop | Transmission core, observation sampling, protocol evaluation, cost accounting all execute |
 | Finalization | `simulation_history.json` and `artificial_lab_notebook.json` written to `telemetry_buffer/` |
 
@@ -61,8 +70,13 @@ Expected: Prints success message with no ImportError.
 | Simulation History | `telemetry_buffer/simulation_history.json` |
 | Lab Notebook | `telemetry_buffer/artificial_lab_notebook.json` |
 
+After a successful run, launch the LCARS dashboard:
+```bash
+streamlit run dashboard.py
+```
+
 ## Troubleshooting
 
 - **ModuleNotFoundError**: Ensure `PYTHONPATH` includes the repo root, or run from the repo root.
-- **FileNotFoundError on spatial_layout.json**: Verify `data/platforms/destroyer_baseline/` exists and contains `spatial_layout.json`.
-- **numpy/pydantic not found**: Run `pip install numpy pyyaml pydantic`.
+- **FileNotFoundError on spatial_layout.json**: Verify the platform path in `crusher_labs/config.yaml` points to a valid `data/platforms/<platform>/` directory.
+- **numpy/pydantic not found**: Run `pip install -r requirements.txt`.

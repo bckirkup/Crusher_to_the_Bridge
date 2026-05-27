@@ -56,12 +56,13 @@ check-jsonschema --schemafile schemas/lab_notebook.schema.json telemetry_buffer/
 
 ### Run pydantic-based deep validation (sanity checker)
 ```bash
-python tools/sanity_checker.py
+python tools/sanity_checker.py --from-config
 ```
 The sanity checker goes beyond JSON Schema to validate:
 - Mathematical bounds (volumes > 0, probabilities in [0,1], etc.)
 - Cross-file referential integrity (airflow rooms reference valid zones)
 - Dose-response parameter validity
+- `config.yaml` infection counters and `exempt_classes` in protocols
 
 ### Run data contract tests
 ```bash

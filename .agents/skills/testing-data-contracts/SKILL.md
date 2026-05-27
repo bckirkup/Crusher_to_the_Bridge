@@ -54,7 +54,7 @@ Expected: 22 tests pass in ~0.2s.
 | Pathogens (Edison) | `data/pathogens/edison_10pathogen_profiles.json` | Extended 10-pathogen profiles |
 | Spatial Layout | `data/platforms/<platform>/spatial_layout.json` | Zone definitions per platform |
 | Air Flow Paths | `data/platforms/<platform>/air_flow_paths.json` | HVAC zones, cross-zone links, adjacency |
-| Protocols | `data/config/protocols.json` | SOP definitions (SOP-001 through SOP-010) |
+| Protocols | `data/config/protocols.json` | SOP definitions (SOP-001 through SOP-011) |
 | Resource Costs | `data/config/resource_costs.json` | Budget, labor, material inventory |
 | Logging Profile | `data/config/logging_profile.json` | Observation engine logging config |
 | Microbiome | `data/microbiome_profiles/*.json` | Coastal/ocean profiles, zone type modifiers |
