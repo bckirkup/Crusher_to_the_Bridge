@@ -275,6 +275,9 @@ def run() -> None:
         stoplights = compute_stoplights(
             air_results, swab_results, ww_results,
             clin_rdt_results, clin_qpcr_results, clin_microbio_results,
+            wearable_result=wearable_result,
+            syndromic_result=syn_result,
+            cfg=cfg,
         )
         reset_modifiers(contam_engine, tx_core, proto_ctx.original_filter_eff)
         active_mods = proto_ctx.protocol_engine.evaluate_epoch(epoch, stoplights)

@@ -19,6 +19,10 @@ from crusher_labs.stoplight import (
     stoplight_from_anomaly,
     stoplight_from_rdt,
     stoplight_from_disruption,
+    stoplight_from_wearable_agent,
+    stoplight_from_wearable_fleet_rates,
+    stoplight_from_sick_call_count,
+    aggregate_stoplight_max,
     meets_threshold,
 )
 
@@ -89,6 +93,41 @@ class TestStoplightFromDisruption:
 
     def test_red(self) -> None:
         assert stoplight_from_disruption(0.9) == "RED"
+
+
+class TestStoplightFromWearable:
+    def test_agent_red_fever(self) -> None:
+        assert stoplight_from_wearable_agent(fever=True, anomaly_count=0) == "RED"
+
+    def test_agent_amber_single_anomaly(self) -> None:
+        assert stoplight_from_wearable_agent(fever=False, anomaly_count=1) == "AMBER"
+
+    def test_agent_green(self) -> None:
+        assert stoplight_from_wearable_agent(fever=False, anomaly_count=0) == "GREEN"
+
+    def test_fleet_red_fever_rate(self) -> None:
+        assert stoplight_from_wearable_fleet_rates(
+            0.10, 0.0, red_fever_rate=0.08,
+        ) == "RED"
+
+    def test_fleet_amber(self) -> None:
+        assert stoplight_from_wearable_fleet_rates(0.04, 0.0) == "AMBER"
+
+
+class TestStoplightFromSickCall:
+    def test_red(self) -> None:
+        assert stoplight_from_sick_call_count(6, red_threshold=5) == "RED"
+
+    def test_amber(self) -> None:
+        assert stoplight_from_sick_call_count(3, amber_threshold=2, red_threshold=5) == "AMBER"
+
+
+class TestAggregateStoplightMax:
+    def test_empty(self) -> None:
+        assert aggregate_stoplight_max([]) == "GREEN"
+
+    def test_max_red(self) -> None:
+        assert aggregate_stoplight_max(["GREEN", "AMBER", "RED"]) == "RED"
 
 
 class TestMeetsThreshold:

@@ -163,6 +163,7 @@ class ProtocolTrigger(BaseModel):
     stoplight_level: str
     min_zones_affected: int = 1
     min_agents_affected: int | None = None
+    min_modes_affected: int | None = None
 
     @field_validator("stoplight_level")
     @classmethod

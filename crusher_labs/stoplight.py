@@ -51,6 +51,56 @@ def stoplight_from_disruption(level: float) -> str:
     return "GREEN"
 
 
+def stoplight_from_wearable_agent(
+    fever: bool,
+    anomaly_count: int,
+) -> str:
+    """Derive per-agent stoplight from wearable physiological signals."""
+    if fever or anomaly_count >= 2:
+        return "RED"
+    if anomaly_count >= 1:
+        return "AMBER"
+    return "GREEN"
+
+
+def stoplight_from_wearable_fleet_rates(
+    fever_rate: float,
+    anomaly_rate: float,
+    *,
+    amber_fever_rate: float = 0.03,
+    red_fever_rate: float = 0.08,
+    amber_anomaly_rate: float = 0.05,
+    red_anomaly_rate: float = 0.12,
+) -> str:
+    """Derive shipwide fleet stoplight from aggregate wearable rates."""
+    if fever_rate >= red_fever_rate or anomaly_rate >= red_anomaly_rate:
+        return "RED"
+    if fever_rate >= amber_fever_rate or anomaly_rate >= amber_anomaly_rate:
+        return "AMBER"
+    return "GREEN"
+
+
+def stoplight_from_sick_call_count(
+    sick_call_count: int,
+    *,
+    amber_threshold: int = 2,
+    red_threshold: int = 5,
+) -> str:
+    """Derive syndromic detection-mode stoplight from daily sick-call volume."""
+    if sick_call_count >= red_threshold:
+        return "RED"
+    if sick_call_count >= amber_threshold:
+        return "AMBER"
+    return "GREEN"
+
+
+def aggregate_stoplight_max(levels: list[str]) -> str:
+    """Return the most severe stoplight in *levels* (GREEN if empty)."""
+    if not levels:
+        return "GREEN"
+    return max(levels, key=lambda lvl: STOPLIGHT_ORDER.get(lvl, 0))
+
+
 def meets_threshold(actual: str, required: str) -> bool:
     """Return True if *actual* stoplight level meets or exceeds *required*."""
     return STOPLIGHT_ORDER.get(actual, 0) >= STOPLIGHT_ORDER.get(required, 0)

@@ -353,6 +353,165 @@
         "labor_person_hours": 2.0
       },
       "category": "intervention"
+    },
+    {
+      "protocol_id": "SOP-012",
+      "name": "Wearable Individual Health Triage",
+      "description": "Route agents with RED wearable physiological alerts to symptomatic confinement. Individual-scope response triggered by per-agent fever or multi-channel anomaly.",
+      "trigger": {
+        "instrument_class": "wearable_physiological_monitor",
+        "stoplight_level": "RED",
+        "min_agents_affected": 1
+      },
+      "modifiers": {
+        "confine_symptomatic_to_quarters": true
+      },
+      "costs_per_epoch": {
+        "financial_usd": 150.00,
+        "materials": {
+          "meal_trays": 5,
+          "surgical_masks": 5
+        },
+        "labor_person_hours": 2.0
+      },
+      "activation_costs": {
+        "financial_usd": 75.00,
+        "materials": {
+          "meal_trays": 10,
+          "gloves_pairs": 5
+        },
+        "labor_person_hours": 1.0
+      },
+      "category": "intervention"
+    },
+    {
+      "protocol_id": "SOP-013",
+      "name": "Wearable Fleet Surveillance Escalation",
+      "description": "Shipwide increase in diagnostic cadence when fleet-level wearable fever or anomaly rates reach AMBER.",
+      "trigger": {
+        "instrument_class": "wearable_fleet_monitor",
+        "stoplight_level": "AMBER",
+        "min_zones_affected": 1
+      },
+      "modifiers": {
+        "diagnostic_cadence_multiplier": 1.5
+      },
+      "costs_per_epoch": {
+        "financial_usd": 200.00,
+        "materials": {
+          "rdt_kits": 5,
+          "swab_kits": 5
+        },
+        "labor_person_hours": 3.0
+      },
+      "activation_costs": {
+        "financial_usd": 50.00,
+        "materials": {
+          "rdt_kits": 3,
+          "swab_kits": 3
+        },
+        "labor_person_hours": 0.5
+      },
+      "category": "surveillance"
+    },
+    {
+      "protocol_id": "SOP-014",
+      "name": "Wearable Fleet Outbreak Response",
+      "description": "Shipwide PPE deployment when fleet wearable monitor reaches RED (elevated fever or anomaly rates across the monitored population).",
+      "trigger": {
+        "instrument_class": "wearable_fleet_monitor",
+        "stoplight_level": "RED",
+        "min_zones_affected": 1
+      },
+      "modifiers": {
+        "ppe_transmission_reduction": 0.50,
+        "direct_contact_scalar": 0.50,
+        "droplet_scalar": 0.50
+      },
+      "costs_per_epoch": {
+        "financial_usd": 250.00,
+        "materials": {
+          "surgical_masks": 30,
+          "gloves_pairs": 30
+        },
+        "labor_person_hours": 2.0
+      },
+      "activation_costs": {
+        "financial_usd": 100.00,
+        "materials": {
+          "surgical_masks": 10,
+          "gloves_pairs": 10
+        },
+        "labor_person_hours": 1.0
+      },
+      "category": "intervention"
+    },
+    {
+      "protocol_id": "SOP-015",
+      "name": "Integrated Detection Escalation — Elevated",
+      "description": "Escalation SOP integrating syndromic, wearable, environmental, and clinical detection modes. Activates when at least two modes simultaneously reach AMBER or worse.",
+      "trigger": {
+        "instrument_class": "detection_escalation",
+        "stoplight_level": "AMBER",
+        "min_modes_affected": 2
+      },
+      "modifiers": {
+        "diagnostic_cadence_multiplier": 2.0
+      },
+      "costs_per_epoch": {
+        "financial_usd": 350.00,
+        "materials": {
+          "rdt_kits": 10,
+          "pcr_kits": 5,
+          "swab_kits": 10
+        },
+        "labor_person_hours": 5.0
+      },
+      "activation_costs": {
+        "financial_usd": 150.00,
+        "materials": {
+          "rdt_kits": 5,
+          "pcr_kits": 2
+        },
+        "labor_person_hours": 2.0
+      },
+      "category": "surveillance"
+    },
+    {
+      "protocol_id": "SOP-016",
+      "name": "Integrated Detection Escalation — Critical",
+      "description": "Critical escalation when at least two integrated detection modes reach RED simultaneously. Combines symptomatic confinement with standard PPE and surface decontamination.",
+      "trigger": {
+        "instrument_class": "detection_escalation",
+        "stoplight_level": "RED",
+        "min_modes_affected": 2
+      },
+      "modifiers": {
+        "confine_symptomatic_to_quarters": true,
+        "ppe_transmission_reduction": 0.60,
+        "direct_contact_scalar": 0.40,
+        "droplet_scalar": 0.40,
+        "surface_decontamination_factor": 0.40
+      },
+      "costs_per_epoch": {
+        "financial_usd": 700.00,
+        "materials": {
+          "meal_trays": 25,
+          "surgical_masks": 25,
+          "sanitizer_units": 8,
+          "gloves_pairs": 25
+        },
+        "labor_person_hours": 12.0
+      },
+      "activation_costs": {
+        "financial_usd": 400.00,
+        "materials": {
+          "meal_trays": 50,
+          "sanitizer_units": 10
+        },
+        "labor_person_hours": 6.0
+      },
+      "category": "intervention"
     }
   ]
 }

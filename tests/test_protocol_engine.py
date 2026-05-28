@@ -18,10 +18,13 @@ from crusher_labs.protocol_engine import (
     StandingProtocol,
     ProtocolEngine,
     compute_stoplights,
+    compute_detection_escalation_stoplights,
+    compute_wearable_stoplights,
     load_protocols,
     apply_hvac_modifiers,
     apply_transmission_modifiers,
     reset_modifiers,
+    DETECTION_ESCALATION_INSTRUMENT,
 )
 from crusher_labs.cost_ledger import CostLedger
 
@@ -176,6 +179,82 @@ class TestComputeStoplights:
         for instrument, zones in lights.items():
             for zone, level in zones.items():
                 assert level == "GREEN"
+
+    def test_wearable_agent_stoplights(self) -> None:
+        wearable = {
+            "agent_results": {
+                1: {"fever": True, "anomaly_count": 0},
+                2: {"fever": False, "anomaly_count": 0},
+            },
+            "fleet_summary": {
+                "fever_rate": 0.5,
+                "anomaly_rate": 0.0,
+            },
+        }
+        lights = compute_stoplights({}, {}, {}, {}, {}, {}, wearable_result=wearable)
+        assert lights["wearable_physiological_monitor"]["1"] == "RED"
+        assert lights["wearable_physiological_monitor"]["2"] == "GREEN"
+        assert lights["wearable_fleet_monitor"]["fleet"] == "RED"
+
+    def test_detection_escalation_integrates_modes(self) -> None:
+        base = {
+            "continuous_air_sampler": {"Z1": "RED"},
+            "clinical_rdt": {},
+        }
+        syndromic = {"sick_call_count": 6}
+        modes = compute_detection_escalation_stoplights(base, syndromic, None)
+        assert modes["syndromic"] == "RED"
+        assert modes["environmental"] == "RED"
+        assert modes["clinical"] == "GREEN"
+
+
+class TestDetectionEscalationProtocol:
+    def _make_escalation_protocol(self, level: str = "AMBER", min_modes: int = 2) -> StandingProtocol:
+        return StandingProtocol({
+            "protocol_id": "SOP-ESC",
+            "name": "Escalation Test",
+            "trigger": {
+                "instrument_class": DETECTION_ESCALATION_INSTRUMENT,
+                "stoplight_level": level,
+                "min_modes_affected": min_modes,
+            },
+            "modifiers": {},
+            "costs_per_epoch": {},
+            "activation_costs": {},
+        })
+
+    def test_triggers_when_min_modes_met(self) -> None:
+        proto = self._make_escalation_protocol()
+        stoplights = {
+            DETECTION_ESCALATION_INSTRUMENT: {
+                "syndromic": "AMBER",
+                "wearable_individual": "GREEN",
+                "wearable_fleet": "AMBER",
+                "environmental": "GREEN",
+                "clinical": "GREEN",
+            },
+        }
+        assert proto.is_triggered(stoplights) is True
+
+    def test_not_triggered_when_one_mode(self) -> None:
+        proto = self._make_escalation_protocol()
+        stoplights = {
+            DETECTION_ESCALATION_INSTRUMENT: {
+                "syndromic": "RED",
+                "wearable_individual": "GREEN",
+                "wearable_fleet": "GREEN",
+                "environmental": "GREEN",
+                "clinical": "GREEN",
+            },
+        }
+        assert proto.is_triggered(stoplights) is False
+
+
+class TestWearableStoplightsHelper:
+    def test_compute_wearable_stoplights_empty(self) -> None:
+        agents, fleet = compute_wearable_stoplights(None)
+        assert agents == {}
+        assert fleet == {}
 
 
 class TestModifierHelpers:

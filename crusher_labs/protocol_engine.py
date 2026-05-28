@@ -15,7 +15,6 @@ of the configured fidelity tier.
 from __future__ import annotations
 
 import json
-import math
 from typing import Any
 
 from crusher_labs.cost_ledger import CostLedger, CATEGORY_INTERVENTION, CATEGORY_SURVEILLANCE
@@ -24,11 +23,117 @@ from crusher_labs.stoplight import (
     stoplight_from_anomaly,
     stoplight_from_rdt,
     stoplight_from_disruption,
+    stoplight_from_wearable_agent,
+    stoplight_from_wearable_fleet_rates,
+    stoplight_from_sick_call_count,
+    aggregate_stoplight_max,
     meets_threshold,
 )
 
+WEARABLE_AGENT_INSTRUMENT = "wearable_physiological_monitor"
+WEARABLE_FLEET_INSTRUMENT = "wearable_fleet_monitor"
+DETECTION_ESCALATION_INSTRUMENT = "detection_escalation"
+
 
 # ── Compute stoplight arrays from instrument results ─────────────────────
+
+def _default_wearable_fleet_thresholds(
+    cfg: dict[str, Any] | None,
+) -> dict[str, float]:
+    """Resolve fleet wearable rate thresholds from config."""
+    wm = (cfg or {}).get("wearable_monitoring", {})
+    thresholds = wm.get("stoplight_thresholds", {})
+    return {
+        "amber_fever_rate": float(thresholds.get("fleet_fever_rate_amber", 0.03)),
+        "red_fever_rate": float(thresholds.get("fleet_fever_rate_red", 0.08)),
+        "amber_anomaly_rate": float(thresholds.get("fleet_anomaly_rate_amber", 0.05)),
+        "red_anomaly_rate": float(thresholds.get("fleet_anomaly_rate_red", 0.12)),
+    }
+
+
+def _default_detection_mode_thresholds(cfg: dict[str, Any] | None) -> dict[str, Any]:
+    """Resolve integrated detection-mode thresholds from config."""
+    esc = (cfg or {}).get("escalation", {})
+    modes = esc.get("detection_modes", {})
+    syndromic = modes.get("syndromic", {})
+    return {
+        "syndromic_amber": int(syndromic.get("amber_sick_call_count", 2)),
+        "syndromic_red": int(syndromic.get("red_sick_call_count", 5)),
+    }
+
+
+def compute_wearable_stoplights(
+    wearable_result: dict[str, Any] | None,
+    cfg: dict[str, Any] | None = None,
+) -> tuple[dict[str, str], dict[str, str]]:
+    """Derive per-agent and fleet wearable stoplights.
+
+    Returns ``(agent_lights, fleet_lights)`` where fleet uses key ``fleet``.
+    """
+    if not wearable_result:
+        return {}, {}
+
+    fleet_thresholds = _default_wearable_fleet_thresholds(cfg)
+    agent_lights: dict[str, str] = {}
+    for aid, data in wearable_result.get("agent_results", {}).items():
+        agent_lights[str(aid)] = stoplight_from_wearable_agent(
+            fever=bool(data.get("fever", False)),
+            anomaly_count=int(data.get("anomaly_count", 0)),
+        )
+
+    fleet = wearable_result.get("fleet_summary", {})
+    fleet_level = stoplight_from_wearable_fleet_rates(
+        float(fleet.get("fever_rate", 0.0)),
+        float(fleet.get("anomaly_rate", 0.0)),
+        **fleet_thresholds,
+    )
+    return agent_lights, {"fleet": fleet_level}
+
+
+def compute_detection_escalation_stoplights(
+    base_lights: dict[str, dict[str, str]],
+    syndromic_result: dict[str, Any] | None,
+    wearable_result: dict[str, Any] | None,
+    cfg: dict[str, Any] | None = None,
+) -> dict[str, str]:
+    """Integrate syndromic, wearable, environmental, and clinical detection modes.
+
+    Each mode contributes one stoplight used by escalation-category SOPs that
+    require multiple concurrent detection signals (``min_modes_affected``).
+    """
+    mode_thresholds = _default_detection_mode_thresholds(cfg)
+    modes: dict[str, str] = {}
+
+    sick_calls = int((syndromic_result or {}).get("sick_call_count", 0))
+    modes["syndromic"] = stoplight_from_sick_call_count(
+        sick_calls,
+        amber_threshold=mode_thresholds["syndromic_amber"],
+        red_threshold=mode_thresholds["syndromic_red"],
+    )
+
+    agent_wearable, fleet_wearable = compute_wearable_stoplights(wearable_result, cfg)
+    if agent_wearable:
+        modes["wearable_individual"] = aggregate_stoplight_max(list(agent_wearable.values()))
+    else:
+        modes["wearable_individual"] = "GREEN"
+    modes["wearable_fleet"] = fleet_wearable.get("fleet", "GREEN")
+
+    env_levels: list[str] = []
+    for instrument in (
+        "continuous_air_sampler",
+        "targeted_surface_swab",
+        "wastewater_sequencing_grid",
+    ):
+        env_levels.extend(base_lights.get(instrument, {}).values())
+    modes["environmental"] = aggregate_stoplight_max(env_levels)
+
+    clinical_levels: list[str] = []
+    for instrument in ("clinical_rdt", "clinical_qpcr", "clinical_microbiology"):
+        clinical_levels.extend(base_lights.get(instrument, {}).values())
+    modes["clinical"] = aggregate_stoplight_max(clinical_levels)
+
+    return modes
+
 
 def compute_stoplights(
     air_results: dict[str, dict[str, Any]],
@@ -37,6 +142,9 @@ def compute_stoplights(
     clin_rdt_results: dict[int, dict[str, Any]],
     clin_qpcr_results: dict[int, dict[str, Any]],
     clin_microbio_results: dict[int, dict[str, Any]],
+    wearable_result: dict[str, Any] | None = None,
+    syndromic_result: dict[str, Any] | None = None,
+    cfg: dict[str, Any] | None = None,
 ) -> dict[str, dict[str, str]]:
     """Derive per-zone and per-agent stoplight levels from raw instrument results.
 
@@ -49,6 +157,9 @@ def compute_stoplights(
             "clinical_rdt": {<agent_id_str>: "GREEN"|"RED", ...},
             "clinical_qpcr": {<agent_id_str>: "GREEN"|"AMBER"|"RED", ...},
             "clinical_microbiology": {<agent_id_str>: "GREEN"|"AMBER"|"RED", ...},
+            "wearable_physiological_monitor": {<agent_id_str>: ...},
+            "wearable_fleet_monitor": {"fleet": "GREEN"|"AMBER"|"RED"},
+            "detection_escalation": {mode: "GREEN"|"AMBER"|"RED", ...},
         }
     """
     lights: dict[str, dict[str, str]] = {}
@@ -87,6 +198,16 @@ def compute_stoplights(
         microbio_lights[str(aid)] = stoplight_from_disruption(disruption)
     lights["clinical_microbiology"] = microbio_lights
 
+    agent_wearable, fleet_wearable = compute_wearable_stoplights(wearable_result, cfg)
+    if agent_wearable:
+        lights[WEARABLE_AGENT_INSTRUMENT] = agent_wearable
+    if fleet_wearable:
+        lights[WEARABLE_FLEET_INSTRUMENT] = fleet_wearable
+
+    lights[DETECTION_ESCALATION_INSTRUMENT] = compute_detection_escalation_stoplights(
+        lights, syndromic_result, wearable_result, cfg,
+    )
+
     return lights
 
 
@@ -114,11 +235,14 @@ class StandingProtocol:
         if not instrument_lights:
             return False
 
-        # Count how many zones/agents meet the threshold
         matching = sum(
             1 for light in instrument_lights.values()
             if meets_threshold(light, required_level)
         )
+
+        if instrument_class == DETECTION_ESCALATION_INSTRUMENT:
+            min_modes = self.trigger.get("min_modes_affected", 2)
+            return matching >= min_modes
 
         min_zones = self.trigger.get("min_zones_affected", 0)
         min_agents = self.trigger.get("min_agents_affected", 0)
