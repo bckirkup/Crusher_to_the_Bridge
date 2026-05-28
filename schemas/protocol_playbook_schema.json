@@ -72,7 +72,10 @@
             "wastewater_sequencing_grid",
             "clinical_rdt",
             "clinical_qpcr",
-            "clinical_microbiology"
+            "clinical_microbiology",
+            "wearable_physiological_monitor",
+            "wearable_fleet_monitor",
+            "detection_escalation"
           ]
         },
         "stoplight_level": {
@@ -90,6 +93,11 @@
           "type": "integer",
           "minimum": 1,
           "description": "Alternative to min_zones_affected for patient-level instruments (clinical_rdt, clinical_qpcr, clinical_microbiology)."
+        },
+        "min_modes_affected": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "For detection_escalation: minimum integrated detection modes at the required stoplight level."
         }
       }
     },

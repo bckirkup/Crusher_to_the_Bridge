@@ -161,6 +161,9 @@ class TestLaw5ReferentialIntegrity:
             "clinical_rdt",
             "clinical_qpcr",
             "clinical_microbiology",
+            "wearable_physiological_monitor",
+            "wearable_fleet_monitor",
+            "detection_escalation",
         }
         protocols = self._load_json("data/config/protocols.json")
         for proto in protocols.get("protocols", []):
@@ -175,6 +178,15 @@ class TestLaw5ReferentialIntegrity:
         for proto in protocols.get("protocols", []):
             level = proto.get("trigger", {}).get("stoplight_level", "RED")
             assert level in valid_levels, f"{proto['protocol_id']}: invalid level '{level}'"
+
+    def test_detection_escalation_protocols_require_min_modes(self) -> None:
+        protocols = self._load_json("data/config/protocols.json")
+        for proto in protocols.get("protocols", []):
+            trigger = proto.get("trigger", {})
+            if trigger.get("instrument_class") == "detection_escalation":
+                assert trigger.get("min_modes_affected", 0) >= 1, (
+                    f"{proto['protocol_id']}: detection_escalation requires min_modes_affected"
+                )
 
 
 class TestLaw6NoSiblingRepoModification:

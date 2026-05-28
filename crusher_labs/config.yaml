@@ -175,6 +175,11 @@ hvac:
 escalation:
   syndromic_suspect_threshold: 3      # daily sick-call count to trigger SUSPECTED
   pcr_confirm_ct_threshold: 35.0      # Ct ≤ this value triggers CONFIRMED
+  # Integrated detection-mode stoplights (SOP-015 / SOP-016)
+  detection_modes:
+    syndromic:
+      amber_sick_call_count: 2
+      red_sick_call_count: 5
 
 # ── Syndromic Surveillance ────────────────────────────────────
 syndromic:
@@ -330,3 +335,9 @@ wearable_monitoring:
   observation_noise_sigma: 0.5
   sync_dropout_prob: 0.02
   anomaly_z_threshold: 2.0
+  # Fleet stoplight thresholds for shipwide wearable SOPs (SOP-013 / SOP-014)
+  stoplight_thresholds:
+    fleet_fever_rate_amber: 0.03
+    fleet_fever_rate_red: 0.08
+    fleet_anomaly_rate_amber: 0.05
+    fleet_anomaly_rate_red: 0.12

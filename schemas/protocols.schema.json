@@ -88,7 +88,18 @@
       "properties": {
         "instrument_class": {
           "type": "string",
-          "description": "Observation engine instrument class name"
+          "description": "Observation engine instrument class name",
+          "enum": [
+            "continuous_air_sampler",
+            "targeted_surface_swab",
+            "wastewater_sequencing_grid",
+            "clinical_rdt",
+            "clinical_qpcr",
+            "clinical_microbiology",
+            "wearable_physiological_monitor",
+            "wearable_fleet_monitor",
+            "detection_escalation"
+          ]
         },
         "stoplight_level": {
           "type": "string",
@@ -103,6 +114,11 @@
           "type": "integer",
           "minimum": 1,
           "description": "Minimum number of agents that must trip the stoplight for this trigger to fire."
+        },
+        "min_modes_affected": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "For detection_escalation: minimum integrated detection modes at the required stoplight level."
         }
       }
     },
