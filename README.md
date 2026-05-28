@@ -83,9 +83,11 @@ data/
 └── templates/               Reference configs (cruise ship, multi-pathogen)
 
 schemas/                     JSON Schema definitions for all data contracts
-telemetry_buffer/            Runtime output (simulation_history, ground_truth, lab_notebook)
+telemetry_buffer/            Runtime output (simulation_history, lab_notebook)
+│   agent_axes.py            Orthogonal agent state (infection / presentation / compliance)
 dashboard.py                 LCARS Main Bridge Display (4 stations)
-tests/                       254 tests across 13 modules
+tests/                       278 tests across 15 modules
+AGENTS.md                    Cursor Cloud / agent development notes
 ```
 
 ## Configuration Reference (`crusher_labs/config.yaml`)
@@ -220,10 +222,20 @@ targeted_pcr:
   cadence: 4
 
 sequencing:
-  read_depth: 100000
+  read_depth: 100000                  # MetagenomicSequencing modality (environmental shotgun)
   pseudocount: 1.0e-6
+  clr_shift_scale: 0.15
   cadence: 8
+
+wastewater_sequencing:
+  read_depth: 50000                   # WastewaterSequencingGrid instrument (pooled greywater)
+  dirichlet_concentration: 100.0
+  pseudocount: 1.0e-6
 ```
+
+Read depths are centralized here (not hardcoded in observation modules). The
+orchestrator and Crusher Labs loader use `wastewater_sequencing_params()` /
+`sequencing_params()` from `crusher_labs/__init__.py`.
 
 ### Multi-Pathogen Configuration
 
@@ -294,7 +306,18 @@ wearable_monitoring:
   observation_noise_sigma: 0.5     # ≥ 0
   sync_dropout_prob: 0.02          # [0,1]
   anomaly_z_threshold: 2.0         # > 0 — z-score threshold for anomaly detection
+
+  fleet_thresholds:                # shipwide rates for wearable_fleet_monitor stoplights
+    fleet_fever_rate_amber: 0.03
+    fleet_fever_rate_red: 0.08
+    fleet_anomaly_rate_amber: 0.05
+    fleet_anomaly_rate_red: 0.12
 ```
+
+Wearable stoplights feed SOP-012..SOP-014; integrated **detection escalation**
+(SOP-015..SOP-016) fires when multiple detection modes (syndromic, wearable,
+environmental, clinical) reach AMBER/RED together (`min_modes_affected` in
+`protocols.json`).
 
 **Adding a new device:** Add an entry to `devices` with a unique
 `device_id`, its channel list, noise parameters, and infection response
@@ -351,22 +374,55 @@ environmental (`environmental_contamination` profile block).
 
 FRED compliance vs. `quarantine_refusers` tracked in telemetry and dashboard.
 
+## Agent State (Orthogonal Axes)
+
+Each agent in `simulation_history.json` carries three independent fields
+(see `telemetry_buffer/agent_axes.py`):
+
+| Axis | Values | Meaning |
+|------|--------|---------|
+| `infection_state` | susceptible, infected, recovered, immune | SIR / immune biology |
+| `symptom_presentation` | asymptomatic, mild, symptomatic, severe | Clinical presentation |
+| `compliance_status` | compliant, non_compliant, isolated, quarantined | FRED confinement |
+
+The legacy `symptom_status` field is still emitted for backward compatibility
+but is deprecated. Counters, syndromic logic, and confinement SOPs resolve
+axes via `resolve_agent_axes()`.
+
+## Cost Accounting
+
+Per-epoch `cost_accounting` in simulation history includes
+`materials_consumed` and `by_category` (surveillance vs. intervention).
+The ledger debits `resource_costs.json` **`per_test_costs`** for each
+environmental sample and sick-call clinical test, plus SOP activation and
+per-epoch protocol costs. Budget balances are tracked for reporting only —
+spending is never blocked when inventory is depleted.
+
 ## Standing Operating Procedures (SOPs)
 
-Protocols in `data/config/protocols.json` (SOP-001..SOP-011), activated from
+Protocols in `data/config/protocols.json` (SOP-001..SOP-016), activated from
 stoplights (no hardcoded epoch schedules).
 
-| SOP | Name | Key modifiers |
-|-----|------|---------------|
-| SOP-001–002 | Ventilation upgrades | HVAC filters |
-| SOP-003 | Surface Decontamination | `surface_decontamination_factor` |
-| SOP-004–005 | PPE | Transmission scalars |
-| SOP-006 | Diagnostics | `diagnostic_cadence_multiplier` |
-| SOP-007 | Galley Closure | `close_zones` |
-| SOP-008 | Symptomatic Confinement | `confine_symptomatic_to_quarters` |
-| SOP-009 | General Confinement | `confine_all_to_quarters`, `exempt_classes` |
-| SOP-010 | VSP Threshold | Confinement + surface decon |
-| SOP-011 | Passenger-only Confinement | Crew `exempt_classes` |
+| SOP | Name | Trigger instrument | Key modifiers |
+|-----|------|-------------------|---------------|
+| SOP-001–002 | Ventilation upgrades | Air sniffer | HVAC filters |
+| SOP-003 | Surface Decontamination | Surface swab | `surface_decontamination_factor` |
+| SOP-004–005 | PPE | Wastewater | Transmission scalars |
+| SOP-006 | Diagnostics | Clinical RDT | `diagnostic_cadence_multiplier` |
+| SOP-007 | Galley Closure | Clinical micro | `close_zones` |
+| SOP-008 | Symptomatic Confinement | Clinical RDT | `confine_symptomatic_to_quarters` |
+| SOP-009 | General Confinement | Clinical qPCR | `confine_all_to_quarters`, `exempt_classes` |
+| SOP-010 | VSP Threshold | Clinical RDT | Confinement + surface decon |
+| SOP-011 | Passenger-only Confinement | Clinical RDT | Crew `exempt_classes` |
+| SOP-012 | Wearable Individual Triage | `wearable_physiological_monitor` | Symptomatic confinement |
+| SOP-013 | Wearable Fleet Surveillance | `wearable_fleet_monitor` | 1.5× diagnostic cadence |
+| SOP-014 | Wearable Fleet Outbreak | `wearable_fleet_monitor` | PPE + contact/droplet scalars |
+| SOP-015 | Integrated Escalation (Elevated) | `detection_escalation` | 2× diagnostic cadence |
+| SOP-016 | Integrated Escalation (Critical) | `detection_escalation` | Confinement + PPE + surface decon |
+
+**Detection escalation** SOPs use `min_modes_affected` (default 2) instead of
+zone counts — the protocol engine aggregates syndromic, wearable, environmental,
+and clinical stoplight modes before evaluating the trigger.
 
 ## Sanity Checker
 
@@ -405,12 +461,16 @@ python tools/sanity_checker.py --config-dir data/config \
 ## Testing
 
 ```bash
-# Full suite (254 tests)
+# Full suite (278 tests)
 pytest tests/ -v --tb=short
 
 # Specific modules
 pytest tests/test_orchestrator.py           # orchestrator, quarantine/SOP confinement
 pytest tests/test_infection_counters.py     # attack-rate counters, exempt_classes
+pytest tests/test_agent_axes.py             # orthogonal infection/presentation/compliance
+pytest tests/test_protocol_engine.py        # wearable + detection-escalation stoplights
+pytest tests/test_sequencing_config.py      # config.yaml read_depth wiring
+pytest tests/test_cost_accounting.py        # per-test debits and materials telemetry
 pytest tests/test_transmission_pathways.py  # food/environmental pool init
 pytest tests/test_dashboard.py              # LCARS dashboard imports
 pytest tests/test_sanity_checker.py         # config validation
@@ -418,6 +478,8 @@ pytest tests/test_law_compliance.py         # architectural law invariants
 pytest tests/test_data_contracts.py         # JSON schema / referential integrity
 pytest tests/test_telemetry_seams.py        # cross-module data flow
 ```
+
+Cloud agents and CI environments: see `AGENTS.md` (`python3`, headless Streamlit).
 
 CI (`.github/workflows/ci.yml`) runs sanity checks, the full pytest suite,
 import hygiene checks, a dashboard import smoke test, and a 24-epoch orchestrator run.
@@ -430,18 +492,17 @@ mapping and validation instructions.
 
 ## Constants
 
-String literal constants are defined in `orchestrator_types.py` to
-avoid hardcoded strings across the codebase:
+Trigger-status constants live in `orchestrator_types.py`. Orthogonal agent
+axis literals are canonical in `telemetry_buffer/agent_axes.py` and re-exported
+from `orchestrator_types.py`:
 
-| Constant | Value | Usage |
-|----------|-------|-------|
-| `STATUS_BASELINE` | `"BASELINE"` | Initial trigger status |
-| `STATUS_SUSPECTED` | `"SUSPECTED"` | Syndromic threshold exceeded |
-| `STATUS_CONFIRMED` | `"CONFIRMED"` | PCR-confirmed outbreak |
-| `INFECTION_*` | susceptible / infected / recovered / immune | SIR infection axis |
-| `PRESENTATION_*` | asymptomatic / mild / symptomatic / severe | Clinical presentation axis |
-| `COMPLIANCE_*` | compliant / non_compliant / isolated / quarantined | FRED confinement axis |
-| `LOCATION_ISOLATED` | `"Isolated_In_Quarters"` | Quarantine location |
+| Constant family | Module | Usage |
+|-----------------|--------|-------|
+| `STATUS_*` | `orchestrator_types` | BASELINE / SUSPECTED / CONFIRMED escalation |
+| `INFECTION_*` | `agent_axes` | SIR infection axis |
+| `PRESENTATION_*` | `agent_axes` | Clinical presentation (mild counts as symptomatic for counters) |
+| `COMPLIANCE_*` | `agent_axes` | FRED confinement (quarantine vs. isolation ward) |
+| `LOCATION_*` | `orchestrator_types` | Synthetic quarters locations for confined agents |
 
 ## License
 
