@@ -1,6 +1,6 @@
 # Crusher-to-the-Bridge — Operator's Manual
 
-**Version:** 2.1  
+**Version:** 2.2  
 **Platform:** Biodefense Digital Twin for Maritime Outbreak Simulation  
 **License:** MIT
 
@@ -77,14 +77,13 @@ epoch loop:
        │          │             │              │
        ▼          ▼             ▼              ▼
  ┌──────────┐ ┌────────────┐ ┌────────────┐ ┌────────────────┐
- │ Korkin   │ │ 4-Pathway  │ │ py-contam  │ │ Wearable       │
+ │ Korkin   │ │ Six-Pathway│ │ py-contam  │ │ Wearable       │
  │ Lab ABM  │ │ Transmis.  │ │ HVAC       │ │ Monitor        │
  │ Bridge   │ │ Core       │ │ Transport  │ │                │
- │          │ │            │ │            │ │ Oura Ring      │
- │ Agents   │ │ Direct     │ │ Mass-      │ │ Garmin Watch   │
- │ SIR      │ │ Droplet    │ │ balance    │ │ HR, HRV, Temp  │
- │ Dose-resp│ │ HVAC Air   │ │ equation   │ │ SpO2, Activity │
- │          │ │ Fomite     │ │ Filter η   │ │ Anomaly z-score│
+ │          │ │ Direct–4   │ │ Mass-      │ │ Oura / Garmin  │
+ │ Agents   │ │ Food/Env   │ │ balance    │ │ Agent + fleet  │
+ │ SIR      │ │ 5–6        │ │ Filter η   │ │ stoplights     │
+ │ Dose-resp│ │            │ │            │ │                │
  └──────────┘ └────────────┘ └────────────┘ └────────────────┘
        │          │             │              │
        └──────────┼─────────────┼──────────────┘
@@ -110,10 +109,15 @@ The simulation runs a closed-loop control cycle:
 
 1. **Instruments** sample environmental and patient data each epoch
 2. **Observation Engine** classifies results into LOW_FIDELITY stoplights (GREEN/AMBER/RED)
-3. **Protocol Engine** evaluates stoplight conditions against SOP trigger rules
-4. **Active SOPs** inject physics modifiers (HVAC efficiency, PPE scalars, zone closures)
-5. **Transmission Core** reads modified scalars on the next epoch
-6. **Cost Ledger** debits financial/material/labor costs for each active SOP
+3. **Wearable pipeline** adds per-agent (`wearable_physiological_monitor`) and
+   fleet (`wearable_fleet_monitor`) stoplights from fever/anomaly rates
+4. **Detection escalation** aggregates syndromic, wearable, environmental, and
+   clinical modes into `detection_escalation` stoplights (SOP-015/016)
+5. **Protocol Engine** evaluates stoplight conditions against SOP trigger rules
+6. **Active SOPs** inject physics modifiers (HVAC efficiency, PPE scalars, zone closures)
+7. **Transmission Core** reads modified scalars on the next epoch
+8. **Cost Ledger** debits per-test surveillance costs, protocol costs, and
+   material consumption (reported per epoch in telemetry)
 
 This loop is **fully autonomous** — SOPs activate and deactivate based
 on diagnostic conditions.  There are no hardcoded epoch schedules.
@@ -151,6 +155,24 @@ surveillance:
    dropout simulate real-world wearable data quality
 5. **Anomaly Detection** — Z-score threshold flags physiological
    deviations that may indicate pre-symptomatic infection
+6. **Protocol triggers** — RED per-agent alerts can activate SOP-012
+   (symptomatic confinement); fleet AMBER/RED rates activate SOP-013/014
+
+### Orthogonal Agent State Axes
+
+Ground-truth and per-epoch telemetry use three independent fields per agent
+(`telemetry_buffer/agent_axes.py`), replacing the legacy combined
+`symptom_status` string:
+
+| Field | Role |
+|-------|------|
+| `infection_state` | SIR biology: susceptible, infected, recovered, immune |
+| `symptom_presentation` | Clinical: asymptomatic, mild, symptomatic, severe |
+| `compliance_status` | FRED confinement: compliant, non_compliant, isolated, quarantined |
+
+Infection counters, syndromic sick-call logic, and confinement SOPs call
+`resolve_agent_axes()`. Downstream tools should prefer the three-axis fields;
+`symptom_status` remains in JSON output for backward compatibility only.
 
 ---
 
@@ -339,10 +361,22 @@ targeted_pcr:
   cadence: 4
 
 sequencing:
-  read_depth: 100000
+  read_depth: 100000                  # MetagenomicSequencing modality
   pseudocount: 1.0e-6
+  clr_shift_scale: 0.15
   cadence: 8
+
+wastewater_sequencing:
+  read_depth: 50000                   # WastewaterSequencingGrid instrument
+  dirichlet_concentration: 100.0
+  pseudocount: 1.0e-6
 ```
+
+**Read depth** for shotgun environmental sequencing and pooled wastewater
+grid sampling is defined only in `config.yaml`. The orchestrator passes
+`wastewater_sequencing_params()` into `WastewaterSequencingGrid`; the lab
+notebook and modalities read the same values (no duplicate constants in
+instrument code).
 
 ### 3.9 Multi-Pathogen Configuration
 
@@ -424,7 +458,17 @@ wearable_monitoring:
   observation_noise_sigma: 0.5     # ≥ 0
   sync_dropout_prob: 0.02          # [0,1]
   anomaly_z_threshold: 2.0         # > 0 — z-score threshold for anomaly detection
+
+  fleet_thresholds:
+    fleet_fever_rate_amber: 0.03
+    fleet_fever_rate_red: 0.08
+    fleet_anomaly_rate_amber: 0.05
+    fleet_anomaly_rate_red: 0.12
 ```
+
+Fleet thresholds drive `wearable_fleet_monitor` stoplights (SOP-013/014).
+Per-agent fever and multi-channel anomalies drive `wearable_physiological_monitor`
+(SOP-012).
 
 #### Built-In Devices
 
@@ -515,7 +559,7 @@ every configuration from scratch.
 
 | Directory | Vessel Type | Personnel | Zones | Key Feature |
 |-----------|-------------|-----------|-------|-------------|
-| `destroyer_baseline` | Generic baseline destroyer | ~300 crew | 11 | Default platform; minimal HVAC topology |
+| `destroyer_baseline` | Generic baseline destroyer | 20 agents (config) | 6 | Default platform; minimal HVAC topology |
 | `fletcher_class_destroyer` | WWII Fletcher-class DD | ~300 crew | 20 | Cramped, poor ventilation, hot-bunking |
 | `legend_class_nsc` | USCG Legend-class cutter | ~150 crew | 18 | Modern HVAC with NBC filtration |
 | `san_antonio_class_lpd` | San Antonio-class LPD | ~1,160 total | 22 | Extreme density in troop berthing |
@@ -604,7 +648,7 @@ pools per room.  Key properties:
 |----------|------|-------------|
 | `pathogen_id` | string | Unique machine-readable ID (e.g., `norwalk_gi`) |
 | `category` | string | `enteric_viral`, `respiratory_viral`, `bacterial`, `fungal` |
-| `transmission_routes` | array | Subset of: `direct_contact`, `fomite`, `droplet`, `hvac_airborne` |
+| `transmission_routes` | array | Subset of: `direct_contact`, `fomite`, `droplet`, `hvac_airborne`, `food`, `water`, `water_aerosol`, `bodily_fluids` |
 | `shedding_curve_log10` | array | Day-by-day symptomatic shedding (log10 copies), typically 15 entries |
 | `dose_response` | object | `{model, alpha, beta}` — Korkin Lab dose-response parameters |
 | `recovery_day` | int | Day of infection → Recovered transition |
@@ -675,13 +719,20 @@ Defines three resource categories tracked by the cost ledger:
 
 | Category | Starting Value | Description |
 |----------|---------------|-------------|
-| **Financial (USD)** | $50,000 | Total budget for surveillance + intervention |
+| **Financial (USD)** | $75,000 | Starting balance for spend tracking (not a hard limit) |
 | **Labor (person-hours)** | 480 | 20 crew × 24 hours available |
 | **Material Inventory** | Per-item | Masks, respirators, test kits, filters, etc. |
 
 Each material item has `starting_count`, `unit_cost_usd`, and a description.
 SOPs reference materials by name — ensure SOP material keys match items
 defined in this file.
+
+**Per-test costs** (`per_test_costs`) debit the ledger each epoch for
+environmental samples (`air_sniffer_sample`, `surface_swab_pcr`,
+`wastewater_sequencing_panel`) and per sick-call clinical tests (`clinical_rdt`,
+`clinical_qpcr`, `clinical_microbiology`). Consumed materials appear under
+`cost_accounting.materials_consumed` and `by_category` in
+`simulation_history.json`.
 
 ### 4.6 Logging Profile (`data/config/logging_profile.json`)
 
@@ -737,10 +788,23 @@ The trigger defines **when** the SOP activates:
 
 | Field | Options | Description |
 |-------|---------|-------------|
-| `instrument_class` | `continuous_air_sampler`, `targeted_surface_swab`, `wastewater_sequencing_grid`, `clinical_rdt`, `clinical_qpcr`, `clinical_microbiology` | Which instrument's stoplight to watch |
+| `instrument_class` | See table below | Which instrument's stoplight to watch |
 | `stoplight_level` | `GREEN`, `AMBER`, `RED` | Minimum alert level (AMBER = elevated, RED = critical) |
 | `min_zones_affected` | integer ≥ 1 | How many zones must show this level |
-| `min_agents_affected` | integer ≥ 1 | For clinical instruments: how many patients |
+| `min_agents_affected` | integer ≥ 1 | For clinical / per-agent wearable triggers |
+| `min_modes_affected` | integer ≥ 2 | For `detection_escalation`: concurrent modes at level |
+
+**Instrument classes:**
+
+| Class | Source |
+|-------|--------|
+| `continuous_air_sampler` | Air sniffer |
+| `targeted_surface_swab` | Surface swab |
+| `wastewater_sequencing_grid` | Wastewater grid |
+| `clinical_rdt`, `clinical_qpcr`, `clinical_microbiology` | Sickbay instruments |
+| `wearable_physiological_monitor` | Per-agent wearable RED (e.g. fever) |
+| `wearable_fleet_monitor` | Shipwide fever/anomaly rates |
+| `detection_escalation` | Integrated syndromic + wearable + env + clinical modes |
 
 ### 5.3 Available Modifier Keys
 
@@ -787,6 +851,11 @@ cost ledger flags a `DEPLETED` warning in the executive summary.
 | SOP-009 | General Confinement | Clinical qPCR RED (≥3) | `confine_all_to_quarters`, `exempt_classes` |
 | SOP-010 | VSP-Threshold Isolation | Clinical RDT RED | Confinement + surface decon |
 | SOP-011 | Selective Passenger Confinement | Clinical RDT RED (≥2) | Crew `exempt_classes` |
+| SOP-012 | Wearable Individual Health Triage | Wearable agent RED (≥1) | `confine_symptomatic_to_quarters` |
+| SOP-013 | Wearable Fleet Surveillance Escalation | Wearable fleet AMBER | 1.5× `diagnostic_cadence_multiplier` |
+| SOP-014 | Wearable Fleet Outbreak Response | Wearable fleet RED | PPE + contact/droplet scalars |
+| SOP-015 | Integrated Detection — Elevated | Detection escalation AMBER (≥2 modes) | 2× diagnostic cadence |
+| SOP-016 | Integrated Detection — Critical | Detection escalation RED (≥2 modes) | Confinement + PPE + surface decon |
 
 ---
 
@@ -931,7 +1000,7 @@ The checker uses pydantic models and performs four categories of validation:
 |-------|----------|------|
 | Cost exceeds budget | WARN | `costs_per_epoch.financial_usd` should not exceed `budgets.financial_usd.starting_balance` |
 | Labor exceeds capacity | WARN | `labor_person_hours` should not exceed available hours |
-| Unknown transmission routes | ERROR | Only `direct_contact`, `fomite`, `droplet`, `hvac_airborne` allowed |
+| Unknown transmission routes | ERROR | Routes must match schema-allowed set (includes `food`, `water`, etc.) |
 | Material inventory mismatch | WARN | SOP material keys should match `resource_costs.json` items |
 
 ### 7.3 Output Format
@@ -1142,6 +1211,13 @@ During execution, a single-line progress bar shows:
 `summary.quarantined`, `summary.isolated`, `summary.quarantine_refusers`,
 `infection_counters`, `wearable_monitoring`, `contact_tracing.transmission_events`.
 
+**Per-agent telemetry** uses `infection_state`, `symptom_presentation`, and
+`compliance_status` (legacy `symptom_status` is deprecated).
+
+**Cost accounting** per epoch includes `materials_consumed`,
+`by_category.surveillance` / `by_category.intervention`, and remaining
+balance fields. Per-test debits are tagged `test:<type>` in the ledger.
+
 ### 10.4 Output Files
 
 | File | Location | Description |
@@ -1234,14 +1310,20 @@ python tools/sanity_checker.py --from-config
 pytest tests/ -v --tb=short
 ```
 
-The suite includes **254 tests** across data contracts, sanity checker,
-orchestrator/quarantine logic, infection counters, transmission pathways
-(food/environmental), dashboard helpers, protocol engine, law compliance,
-and telemetry seams.  CI runs the same checks plus a 24-epoch orchestrator
-smoke test (see `.github/workflows/ci.yml`).
+The suite includes **278 tests** across data contracts, sanity checker,
+orchestrator/quarantine logic, infection counters, orthogonal agent axes,
+wearable/detection-escalation protocol engine, sequencing config wiring,
+per-test cost accounting, transmission pathways (food/environmental),
+dashboard helpers, law compliance, and telemetry seams.  CI runs the same
+checks plus a 24-epoch orchestrator smoke test (see `.github/workflows/ci.yml`
+and `AGENTS.md` for cloud agent commands).
 
 | Module | Focus |
 |--------|-------|
+| `test_agent_axes.py` | Orthogonal infection / presentation / compliance axes |
+| `test_protocol_engine.py` | Wearable and detection-escalation stoplights |
+| `test_sequencing_config.py` | `config.yaml` read_depth for WW grid and modalities |
+| `test_cost_accounting.py` | Per-test debits and materials in telemetry |
 | `test_infection_counters.py` | Attack-rate counters, thresholds, `exempt_classes` |
 | `test_transmission_pathways.py` | Food/environmental pool initialization |
 | `test_dashboard.py` | LCARS dashboard imports, pathway aggregation |
