@@ -74,6 +74,11 @@ class TestPathogenProfiles:
             invalid = routes - valid_routes
             assert not invalid, f"{p['pathogen_id']}: invalid routes {invalid}"
 
+    def test_initial_time_infected_non_negative(self, profiles: dict) -> None:
+        for p in profiles["pathogens"]:
+            dpi = p.get("initial_time_infected", 0)
+            assert dpi >= 0, f"{p['pathogen_id']}: initial_time_infected must be >= 0"
+
 
 class TestSpatialLayout:
     """Validate data/platforms/destroyer_baseline/spatial_layout.json."""

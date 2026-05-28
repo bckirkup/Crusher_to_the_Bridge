@@ -39,6 +39,7 @@ Profiles live in `data/pathogens/active_profiles.json`. Each pathogen entry requ
   "base_susceptibility": 1.0,
   "introduction_epoch": 0,
   "initial_infected": 1,
+  "initial_time_infected": 0,
   "microflora_disruption": {
     "causes_disruption": false,
     "disruption_type": "",

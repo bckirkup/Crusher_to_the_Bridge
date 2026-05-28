@@ -216,6 +216,7 @@ base_susceptibility: float
 microflora_disruption: {causes_disruption, disruption_type, disruption_magnitude, affected_kingdoms}
 introduction_epoch: int
 initial_infected: int
+initial_time_infected: int  # days post-infection at seeding (≥0); transmission uses 0
 ```
 
 ### Spatial Zone Keys (`data/platforms/*/spatial_layout.json`)

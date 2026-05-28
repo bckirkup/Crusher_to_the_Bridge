@@ -201,6 +201,11 @@
           "type": "integer",
           "minimum": 0,
           "description": "Number of agents infected with this pathogen at introduction_epoch."
+        },
+        "initial_time_infected": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Days post-infection for seeded agents at introduction (shedding-curve index). Transmission-acquired infections always start at 0."
         }
       }
     }

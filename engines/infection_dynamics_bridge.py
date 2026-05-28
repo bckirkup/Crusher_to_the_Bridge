@@ -359,13 +359,25 @@ class KorkinAgent:
             self.susceptibility_multiplier[pathogen_id] = base_susceptibility
 
     def infect_with_pathogen(
-        self, pathogen_id: str, dose: float, epoch: int,
+        self,
+        pathogen_id: str,
+        dose: float,
+        epoch: int,
+        *,
+        time_infected: int = 0,
     ) -> None:
-        """Record co-infection for a specific pathogen."""
+        """Record co-infection for a specific pathogen.
+
+        ``time_infected`` is days post-infection at assignment (index into
+        shedding curves). Seeded introductions read ``initial_time_infected``
+        from the pathogen profile; transmission events use the default 0.
+        """
+        if time_infected < 0:
+            raise ValueError(f"time_infected must be non-negative, got {time_infected}")
         self.infections[pathogen_id] = {
             "status": InfectionStatus.INFECTED,
             "illness": IllnessStatus.NOT_ILL,
-            "time_infected": 0,
+            "time_infected": time_infected,
             "acquired_particles": dose,
             "infection_epoch": epoch,
         }
@@ -373,7 +385,7 @@ class KorkinAgent:
         if self.infection_status == InfectionStatus.SUSCEPTIBLE:
             self.infection_status = InfectionStatus.INFECTED
             self.illness_status = IllnessStatus.NOT_ILL
-            self.time_infected = 0
+            self.time_infected = time_infected
             self.acquired_particles = dose
 
     def is_infected_with(self, pathogen_id: str) -> bool:

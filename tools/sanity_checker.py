@@ -255,7 +255,15 @@ class PathogenProfile(BaseModel):
     environmental_contamination: dict[str, Any] = {}
     introduction_epoch: int = 0
     initial_infected: int = 1
+    initial_time_infected: int = 0
     shedding_profile: dict[str, Any] = {}
+
+    @field_validator("initial_time_infected")
+    @classmethod
+    def initial_time_non_negative(cls, v: int) -> int:
+        if v < 0:
+            raise ValueError(f"initial_time_infected must be non-negative, got {v}")
+        return v
 
     @field_validator("surface_deposition_fraction")
     @classmethod
@@ -507,6 +515,23 @@ def _check_logical_contradictions(
                     "MATH_BOUND",
                     f"{p.pathogen_id}.introduction_epoch = {p.introduction_epoch} "
                     f"is negative.",
+                )
+
+            if p.initial_time_infected < 0:
+                report.error(
+                    "active_profiles.json",
+                    "MATH_BOUND",
+                    f"{p.pathogen_id}.initial_time_infected = "
+                    f"{p.initial_time_infected} is negative.",
+                )
+            curve_len = len(p.shedding_curve_log10)
+            if curve_len and p.initial_time_infected >= curve_len:
+                report.warn(
+                    "active_profiles.json",
+                    "LOGIC",
+                    f"{p.pathogen_id}.initial_time_infected = "
+                    f"{p.initial_time_infected} is beyond shedding_curve_log10 "
+                    f"length ({curve_len}); shedding will clamp to final day.",
                 )
 
             # Validate food_contamination config
