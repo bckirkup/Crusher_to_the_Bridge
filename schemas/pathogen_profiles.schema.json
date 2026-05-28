@@ -109,7 +109,12 @@
           }
         },
         "introduction_epoch": {"type": "integer", "minimum": 0},
-        "initial_infected": {"type": "integer", "minimum": 0}
+        "initial_infected": {"type": "integer", "minimum": 0},
+        "initial_time_infected": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Days post-infection when seeding initial_infected agents at introduction_epoch. Transmission-acquired infections always start at 0."
+        }
       }
     }
   }

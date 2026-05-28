@@ -378,8 +378,9 @@ def init_multi_pathogen(
                     size=min(n_init, len(candidates)),
                     replace=False,
                 )
+                dpi = int(prof.get("initial_time_infected", 0))
                 for agent in chosen:
-                    agent.infect_with_pathogen(pid, 1e4, 0)
+                    agent.infect_with_pathogen(pid, 1e4, 0, time_infected=dpi)
                     print(f"  Seeded {pid} → agent {agent.agent_id}")
     print()
 

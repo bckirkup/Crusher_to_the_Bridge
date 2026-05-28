@@ -86,7 +86,8 @@
         "decay_rate_per_epoch": 0.1
       },
       "introduction_epoch": 0,
-      "initial_infected": 1
+      "initial_infected": 1,
+      "initial_time_infected": 0
     },
     {
       "pathogen_id": "sars_cov2_resp",
@@ -167,7 +168,8 @@
         "enabled": false
       },
       "introduction_epoch": 6,
-      "initial_infected": 1
+      "initial_infected": 1,
+      "initial_time_infected": 0
     },
     {
       "pathogen_id": "influenza_a",
@@ -246,7 +248,8 @@
         "enabled": false
       },
       "introduction_epoch": 12,
-      "initial_infected": 1
+      "initial_infected": 1,
+      "initial_time_infected": 0
     },
     {
       "pathogen_id": "measles_virus",
@@ -321,7 +324,8 @@
         "enabled": false
       },
       "introduction_epoch": 20,
-      "initial_infected": 1
+      "initial_infected": 1,
+      "initial_time_infected": 0
     },
     {
       "pathogen_id": "legionella_pneumophila",
@@ -398,7 +402,8 @@
         "person_to_person": false
       },
       "introduction_epoch": 30,
-      "initial_infected": 0
+      "initial_infected": 0,
+      "initial_time_infected": 0
     },
     {
       "pathogen_id": "vibrio_cholerae_parahaemolyticus",
@@ -481,7 +486,8 @@
         "decay_rate_per_epoch": 0.1
       },
       "introduction_epoch": 40,
-      "initial_infected": 1
+      "initial_infected": 1,
+      "initial_time_infected": 0
     },
     {
       "pathogen_id": "campylobacter_jejuni",
@@ -559,7 +565,8 @@
         "decay_rate_per_epoch": 0.05
       },
       "introduction_epoch": 50,
-      "initial_infected": 1
+      "initial_infected": 1,
+      "initial_time_infected": 0
     },
     {
       "pathogen_id": "clostridioides_difficile",
@@ -638,7 +645,8 @@
         "enabled": false
       },
       "introduction_epoch": 60,
-      "initial_infected": 1
+      "initial_infected": 1,
+      "initial_time_infected": 0
     },
     {
       "pathogen_id": "andes_hantavirus",
@@ -713,7 +721,8 @@
         "enabled": false
       },
       "introduction_epoch": 70,
-      "initial_infected": 1
+      "initial_infected": 1,
+      "initial_time_infected": 0
     },
     {
       "pathogen_id": "ebola_virus",
@@ -792,7 +801,8 @@
         "enabled": false
       },
       "introduction_epoch": 80,
-      "initial_infected": 1
+      "initial_infected": 1,
+      "initial_time_infected": 0
     }
   ]
 }
