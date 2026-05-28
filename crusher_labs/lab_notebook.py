@@ -32,6 +32,7 @@ import os
 import hashlib
 from typing import Any
 
+from crusher_labs.observation_core import DEFAULT_WW_READ_DEPTH
 from crusher_labs.stoplight import (
     stoplight_from_ct,
     stoplight_from_anomaly,

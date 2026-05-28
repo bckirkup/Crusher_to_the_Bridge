@@ -1003,6 +1003,8 @@ def _check_modality_params(cfg: dict[str, Any], report: Report) -> None:
         ("targeted_pcr", "lod_ct_threshold"),
         ("sequencing", "cadence"),
         ("sequencing", "read_depth"),
+        ("wastewater_sequencing", "read_depth"),
+        ("wastewater_sequencing", "dirichlet_concentration"),
     ]
     for section, key in _non_neg_fields:
         val = cfg.get(section, {}).get(key)

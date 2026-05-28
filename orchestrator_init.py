@@ -411,7 +411,13 @@ def init_observation_engine(
         control_intensity=ctrl_intensity,
         rng=np.random.default_rng(seed),
     )
+    from crusher_labs import wastewater_sequencing_params
+
+    ww_params = wastewater_sequencing_params(cfg)
     wastewater_seq = WastewaterSequencingGrid(
+        read_depth=ww_params["read_depth"],
+        dirichlet_concentration=ww_params["dirichlet_concentration"],
+        pseudocount=ww_params["pseudocount"],
         cross_contamination_rate=xcontam_rate,
         control_intensity=ctrl_intensity,
         rng=np.random.default_rng(seed),
