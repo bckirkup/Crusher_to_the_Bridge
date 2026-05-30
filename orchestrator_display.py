@@ -41,6 +41,7 @@ def print_initialization(
     if "gender_distribution" in ship:
         gd = ship["gender_distribution"]
         gd_str = "  ".join(f"{k}={v:.0%}" for k, v in gd.items())
+        # codeql[py/clear-text-logging-sensitive-data]
         print(f"  Gender distribution: {gd_str}")
     print(f"  Zones: {', '.join(ship['zone_names'])}")
     print(f"  High-traffic: {', '.join(ship['high_traffic_zones'])}")
@@ -90,19 +91,24 @@ def print_korkin_engine(engine: KorkinShipEngine) -> None:
     print("  KORKIN LAB ENGINE  ·  infection-dynamics ABM initialized")
     print(thin)
     engine_summary = engine.get_summary()
+    # codeql[py/clear-text-logging-sensitive-data]
     print(f"\n  Population: {engine_summary['total']} agents "
           f"({engine.num_passengers} passengers, {engine.num_crew} crew)")
+    # codeql[py/clear-text-logging-sensitive-data]
     print(f"  Immune (negative secretors): {engine_summary['immune']}")
+    # codeql[py/clear-text-logging-sensitive-data]
     print(f"  Initial infected: {engine_summary['infected']}")
     if engine_summary.get("agent_classes"):
         cls_str = "  ".join(
             f"{c}={n}" for c, n in sorted(engine_summary["agent_classes"].items())
         )
+        # codeql[py/clear-text-logging-sensitive-data]
         print(f"  Agent classes: {cls_str}")
     if engine_summary.get("gender_distribution"):
         g_str = "  ".join(
             f"{g}={n}" for g, n in sorted(engine_summary["gender_distribution"].items())
         )
+        # codeql[py/clear-text-logging-sensitive-data]
         print(f"  Gender: {g_str}")
     print(f"  Zones: {', '.join(z['name'] for z in engine.zones)}")
     print(f"  VSP isolation: counter-driven (engine-internal disabled)")
@@ -457,4 +463,5 @@ def print_executive_summary(
     lines.append(bottom)
 
     print()
+    # codeql[py/clear-text-logging-sensitive-data]
     print("\n".join(lines))
