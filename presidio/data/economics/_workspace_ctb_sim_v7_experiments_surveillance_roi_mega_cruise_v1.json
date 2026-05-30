@@ -1,0 +1,210 @@
+{
+  "experiment_name": "surveillance_roi_mega_cruise_v1",
+  "description": "100-cruise fleet evaluation of surveillance modality ROI under realistic outbreak base rates. Tests whether wastewater/wearable surveillance reduces total fleet harm (infections + operational disruption) or increases it through false-positive-driven intervention costs.",
+  "version": "1.0",
+  "platform": {
+    "platform_id": "mega_cruise_5000",
+    "num_agents": 500,
+    "epochs_per_cruise": 14
+  },
+  "fleet": {
+    "num_cruises": 100,
+    "random_seed_base": 4242
+  },
+  "base_rates": {
+    "description": "Per-cruise probability of each pathogen scenario. Must sum to 1.0. Based on CDC VSP MIDRS 2006-2019: ~1-2% of voyages have reportable AGE, with norovirus dominant.",
+    "none": 0.85,
+    "norovirus_subclinical": 0.1,
+    "norovirus_outbreak": 0.04,
+    "respiratory_outbreak": 0.01,
+    "sources": [
+      "Jenkins et al. 2021 MMWR SS 70(6):1-19 \u2014 127M passengers, 252 ships, 2006-2019",
+      "Freeland et al. 2016 MMWR 65(1) \u2014 2008-2014 summary"
+    ]
+  },
+  "pathogen_configs": {
+    "norovirus_subclinical": {
+      "pathogen_id": "norovirus_gii4",
+      "initial_infected": 1,
+      "dose_adjustment": 8.0,
+      "initial_time_infected": 0,
+      "immune_ratio": 0.2,
+      "notes": "High dose_adj = low transmission. Single case that usually fizzles."
+    },
+    "norovirus_outbreak": {
+      "pathogen_id": "norovirus_gii4",
+      "initial_infected": 3,
+      "dose_adjustment": 6.0,
+      "initial_time_infected": 0,
+      "immune_ratio": 0.2,
+      "notes": "Multiple index cases, moderate transmission. ~5-20% expected AR."
+    },
+    "respiratory_outbreak": {
+      "pathogen_id": "sars_cov2_resp",
+      "initial_infected": 1,
+      "dose_adjustment": 5.5,
+      "initial_time_infected": 0,
+      "immune_ratio": 0.0,
+      "notes": "Single respiratory case. Variable outcome."
+    }
+  },
+  "regimes": {
+    "status_quo": {
+      "description": "Current industry standard: syndromic surveillance + clinical RDT. No environmental or wearable monitoring.",
+      "wearable_enabled": false,
+      "sequencing_cadence": 999,
+      "sops_disabled": [
+        "SOP-004",
+        "SOP-005",
+        "SOP-012",
+        "SOP-013",
+        "SOP-014"
+      ],
+      "sop_015_016_min_modes": 4,
+      "social_config": "presidio/data/social/information_diffusion_default.json"
+    },
+    "wastewater_added": {
+      "description": "Status quo + wastewater sequencing grid. Enables SOP-004/005 (PPE on wastewater signal).",
+      "wearable_enabled": false,
+      "sequencing_cadence": 4,
+      "sops_disabled": [
+        "SOP-012",
+        "SOP-013",
+        "SOP-014"
+      ],
+      "sop_015_016_min_modes": 3,
+      "social_config": "presidio/data/social/information_diffusion_default.json"
+    },
+    "wearable_added": {
+      "description": "Status quo + wearable physiological monitoring. Enables SOP-012/013/014.",
+      "wearable_enabled": true,
+      "sequencing_cadence": 999,
+      "sops_disabled": [
+        "SOP-004",
+        "SOP-005"
+      ],
+      "sop_015_016_min_modes": 3,
+      "social_config": "presidio/data/social/information_diffusion_default.json"
+    },
+    "full_stack": {
+      "description": "All modalities active. Maximum detection sensitivity. Tests whether added sensitivity creates net benefit or net harm from false positives.",
+      "wearable_enabled": true,
+      "sequencing_cadence": 4,
+      "sops_disabled": [],
+      "sop_015_016_min_modes": 3,
+      "social_config": "presidio/data/social/information_diffusion_default.json"
+    },
+    "full_stack_relaxed_vsp": {
+      "description": "Full stack + relaxed VSP threshold (5% instead of 3%). Tests whether higher threshold offsets increased detection sensitivity.",
+      "wearable_enabled": true,
+      "sequencing_cadence": 4,
+      "sops_disabled": [],
+      "sop_015_016_min_modes": 3,
+      "vsp_threshold_override": 0.05,
+      "social_config": "presidio/data/social/information_diffusion_default.json"
+    }
+  },
+  "evaluation_metrics": {
+    "primary": [
+      {
+        "name": "total_fleet_infections",
+        "description": "Sum of true infections across all 100 cruises"
+      },
+      {
+        "name": "total_fleet_ois",
+        "description": "Sum of OIS across all 100 cruises"
+      },
+      {
+        "name": "total_financial_cost",
+        "description": "Sum of financial costs"
+      },
+      {
+        "name": "net_fleet_reward",
+        "description": "Sum of Presidio fleet rewards (combines infection + cost penalties)"
+      }
+    ],
+    "secondary": [
+      {
+        "name": "false_positive_confinement_days",
+        "description": "Agent-epochs of confinement for uninfected agents"
+      },
+      {
+        "name": "detection_lead_time_outbreaks_only",
+        "description": "Epochs from pathogen intro to first detection, averaged over actual outbreaks only"
+      },
+      {
+        "name": "outbreak_final_ar",
+        "description": "Attack rate in cruises with actual outbreaks"
+      },
+      {
+        "name": "quiet_cruise_ois",
+        "description": "OIS accumulated on cruises with NO outbreak \u2014 pure false-positive cost"
+      }
+    ],
+    "policy_implications": [
+      {
+        "name": "ois_per_infection_prevented",
+        "description": "Marginal OIS cost per infection prevented vs status quo"
+      },
+      {
+        "name": "break_even_outbreak_rate",
+        "description": "At what base rate of outbreaks does this surveillance regime break even on total fleet cost?"
+      }
+    ]
+  },
+  "sensitivity_parameters": {
+    "description": "Parameters to sweep for sensitivity analysis",
+    "axes": [
+      {
+        "name": "base_rate_outbreak",
+        "range": [
+          0.01,
+          0.02,
+          0.05,
+          0.1
+        ],
+        "description": "What if outbreaks are more common?"
+      },
+      {
+        "name": "sick_call_probability",
+        "range": [
+          0.3,
+          0.45,
+          0.6,
+          0.8
+        ],
+        "description": "Passenger willingness to report"
+      },
+      {
+        "name": "trust_command_initial",
+        "range": [
+          0.45,
+          0.6,
+          0.75,
+          0.9
+        ],
+        "description": "Baseline trust in authority"
+      },
+      {
+        "name": "ois_false_positive_multiplier",
+        "range": [
+          1.0,
+          2.0,
+          3.0,
+          5.0
+        ],
+        "description": "How much worse is unnecessary intervention?"
+      },
+      {
+        "name": "vsp_threshold",
+        "range": [
+          0.02,
+          0.03,
+          0.05,
+          0.08
+        ],
+        "description": "CDC reporting threshold"
+      }
+    ]
+  }
+}
