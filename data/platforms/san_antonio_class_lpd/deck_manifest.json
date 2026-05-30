@@ -1,0 +1,45 @@
+{
+  "platform_id": "san_antonio_class_lpd",
+  "ship_class_label": "San Antonio-class LPD (representative)",
+  "footprint_tier": "representative",
+  "representative_of": "San Antonio-class amphibious transport dock (LPD-17). 208.5m LOA, 31.9m beam. ~360 ship's company + ~800 embarked Marines. Modern HVAC with NBC filtration capability. Well deck and flight deck for amp",
+  "provenance": [
+    "spatial_layout.json description and deck_dimensions",
+    "zone count: 22"
+  ],
+  "disclaimer": "Footprints are class-representative for simulation zones, not a surveyed deck plan of one vessel.",
+  "zone_ids": [
+    "Bridge",
+    "CIC",
+    "Ship_Officers_Quarters",
+    "Ship_CPO_Quarters",
+    "Ship_Enlisted_Berthing",
+    "Troop_Berthing_Fwd",
+    "Troop_Berthing_Mid",
+    "Troop_Berthing_Aft",
+    "Crew_Mess",
+    "Troop_Mess",
+    "Wardroom",
+    "Galley",
+    "Medical_Ward",
+    "Vehicle_Deck",
+    "Well_Deck",
+    "Flight_Deck",
+    "Hangar",
+    "Engine_Room_Fwd",
+    "Engine_Room_Aft",
+    "Troop_Recreation",
+    "Marine_Planning",
+    "Passageway_Main"
+  ],
+  "view_bounds": {
+    "xmin": 5.425000000000001,
+    "xmax": 203.075,
+    "ymin": -3.4624999999999995,
+    "ymax": 35.30499999999999
+  },
+  "assets": {
+    "deck_graphics": "deck_graphics.geojson",
+    "deck_hull": "deck_hull.png"
+  }
+}

@@ -1,0 +1,1275 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hull_outline",
+        "platform_id": "fletcher_class_destroyer"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              5.735,
+              5.4
+            ],
+            [
+              22.94,
+              1.44
+            ],
+            [
+              86.025,
+              0.96
+            ],
+            [
+              108.965,
+              4.199999999999999
+            ],
+            [
+              105.524,
+              8.399999999999999
+            ],
+            [
+              68.82,
+              10.56
+            ],
+            [
+              22.94,
+              10.2
+            ],
+            [
+              5.735,
+              5.4
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "compartment",
+        "zone_id": "Bridge",
+        "deck": "03_level",
+        "room_type": "Free"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              103.0,
+              4.3
+            ],
+            [
+              107.0,
+              4.3
+            ],
+            [
+              107.0,
+              7.7
+            ],
+            [
+              103.0,
+              7.7
+            ],
+            [
+              103.0,
+              4.3
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "compartment",
+        "zone_id": "CIC",
+        "deck": "02_level",
+        "room_type": "Free"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              98.0,
+              4.3
+            ],
+            [
+              102.0,
+              4.3
+            ],
+            [
+              102.0,
+              7.7
+            ],
+            [
+              98.0,
+              7.7
+            ],
+            [
+              98.0,
+              4.3
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "compartment",
+        "zone_id": "Officers_Quarters",
+        "deck": "main_deck",
+        "room_type": "Room"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              87.8,
+              3.8
+            ],
+            [
+              92.2,
+              3.8
+            ],
+            [
+              92.2,
+              8.2
+            ],
+            [
+              87.8,
+              8.2
+            ],
+            [
+              87.8,
+              3.8
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "compartment",
+        "zone_id": "Enlisted_Berthing_Fwd",
+        "deck": "second_deck",
+        "room_type": "Room"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              67.41734148598775,
+              1.417341485987743
+            ],
+            [
+              72.58265851401225,
+              1.417341485987743
+            ],
+            [
+              72.58265851401225,
+              6.582658514012257
+            ],
+            [
+              67.41734148598775,
+              6.582658514012257
+            ],
+            [
+              67.41734148598775,
+              1.417341485987743
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "compartment",
+        "zone_id": "Enlisted_Berthing_Aft",
+        "deck": "second_deck",
+        "room_type": "Room"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              32.27763889243179,
+              1.2776388924317916
+            ],
+            [
+              37.72236110756821,
+              1.2776388924317916
+            ],
+            [
+              37.72236110756821,
+              6.722361107568208
+            ],
+            [
+              32.27763889243179,
+              6.722361107568208
+            ],
+            [
+              32.27763889243179,
+              1.2776388924317916
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "compartment",
+        "zone_id": "CPO_Quarters",
+        "deck": "main_deck",
+        "room_type": "Room"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              52.8,
+              5.8
+            ],
+            [
+              57.2,
+              5.8
+            ],
+            [
+              57.2,
+              10.2
+            ],
+            [
+              52.8,
+              10.2
+            ],
+            [
+              52.8,
+              5.8
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "compartment",
+        "zone_id": "Wardroom",
+        "deck": "main_deck",
+        "room_type": "Dining"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              82.2,
+              6.2
+            ],
+            [
+              87.8,
+              6.2
+            ],
+            [
+              87.8,
+              9.8
+            ],
+            [
+              82.2,
+              9.8
+            ],
+            [
+              82.2,
+              6.2
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "compartment",
+        "zone_id": "Mess_Deck",
+        "deck": "second_deck",
+        "room_type": "Dining"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              47.2,
+              4.2
+            ],
+            [
+              52.8,
+              4.2
+            ],
+            [
+              52.8,
+              7.8
+            ],
+            [
+              47.2,
+              7.8
+            ],
+            [
+              47.2,
+              4.2
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "compartment",
+        "zone_id": "Galley",
+        "deck": "main_deck",
+        "room_type": "Dining"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              45.2,
+              8.2
+            ],
+            [
+              50.8,
+              8.2
+            ],
+            [
+              50.8,
+              11.8
+            ],
+            [
+              45.2,
+              11.8
+            ],
+            [
+              45.2,
+              8.2
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "compartment",
+        "zone_id": "Boiler_Room_1",
+        "deck": "lower_deck",
+        "room_type": "Free"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              52.07168990713073,
+              3.510936421061125
+            ],
+            [
+              57.92831009286927,
+              3.510936421061125
+            ],
+            [
+              57.92831009286927,
+              8.489063578938875
+            ],
+            [
+              52.07168990713073,
+              8.489063578938875
+            ],
+            [
+              52.07168990713073,
+              3.510936421061125
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "compartment",
+        "zone_id": "Boiler_Room_2",
+        "deck": "lower_deck",
+        "room_type": "Free"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              37.07168990713073,
+              3.510936421061125
+            ],
+            [
+              42.92831009286927,
+              3.510936421061125
+            ],
+            [
+              42.92831009286927,
+              8.489063578938875
+            ],
+            [
+              37.07168990713073,
+              8.489063578938875
+            ],
+            [
+              37.07168990713073,
+              3.510936421061125
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "compartment",
+        "zone_id": "Engine_Room_Fwd",
+        "deck": "lower_deck",
+        "room_type": "Free"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              27.404330529516518,
+              3.7936809500890405
+            ],
+            [
+              32.59566947048348,
+              3.7936809500890405
+            ],
+            [
+              32.59566947048348,
+              8.20631904991096
+            ],
+            [
+              27.404330529516518,
+              8.20631904991096
+            ],
+            [
+              27.404330529516518,
+              3.7936809500890405
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "compartment",
+        "zone_id": "Engine_Room_Aft",
+        "deck": "lower_deck",
+        "room_type": "Free"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              17.404330529516518,
+              3.7936809500890405
+            ],
+            [
+              22.595669470483482,
+              3.7936809500890405
+            ],
+            [
+              22.595669470483482,
+              8.20631904991096
+            ],
+            [
+              17.404330529516518,
+              8.20631904991096
+            ],
+            [
+              17.404330529516518,
+              3.7936809500890405
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "compartment",
+        "zone_id": "Magazine_Fwd",
+        "deck": "hold",
+        "room_type": "Free"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              93.0,
+              1.3
+            ],
+            [
+              97.0,
+              1.3
+            ],
+            [
+              97.0,
+              4.7
+            ],
+            [
+              93.0,
+              4.7
+            ],
+            [
+              93.0,
+              1.3
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "compartment",
+        "zone_id": "Magazine_Aft",
+        "deck": "hold",
+        "room_type": "Free"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              13.0,
+              1.3
+            ],
+            [
+              17.0,
+              1.3
+            ],
+            [
+              17.0,
+              4.7
+            ],
+            [
+              13.0,
+              4.7
+            ],
+            [
+              13.0,
+              1.3
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "compartment",
+        "zone_id": "Sickbay",
+        "deck": "main_deck",
+        "room_type": "Free"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              73.0,
+              8.3
+            ],
+            [
+              77.0,
+              8.3
+            ],
+            [
+              77.0,
+              11.7
+            ],
+            [
+              73.0,
+              11.7
+            ],
+            [
+              73.0,
+              8.3
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "compartment",
+        "zone_id": "Torpedo_Mount_Midships",
+        "deck": "main_deck",
+        "room_type": "Free"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              55.0,
+              4.3
+            ],
+            [
+              59.0,
+              4.3
+            ],
+            [
+              59.0,
+              7.7
+            ],
+            [
+              55.0,
+              7.7
+            ],
+            [
+              55.0,
+              4.3
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "compartment",
+        "zone_id": "Gun_Mount_51",
+        "deck": "01_level",
+        "room_type": "Free"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              106.0,
+              4.3
+            ],
+            [
+              110.0,
+              4.3
+            ],
+            [
+              110.0,
+              7.7
+            ],
+            [
+              106.0,
+              7.7
+            ],
+            [
+              106.0,
+              4.3
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "compartment",
+        "zone_id": "Radio_Room",
+        "deck": "02_level",
+        "room_type": "Free"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              93.0,
+              6.3
+            ],
+            [
+              97.0,
+              6.3
+            ],
+            [
+              97.0,
+              9.7
+            ],
+            [
+              93.0,
+              9.7
+            ],
+            [
+              93.0,
+              6.3
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "compartment",
+        "zone_id": "Passageway_Main",
+        "deck": "main_deck",
+        "room_type": "Free"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              58.0,
+              4.3
+            ],
+            [
+              62.0,
+              4.3
+            ],
+            [
+              62.0,
+              7.7
+            ],
+            [
+              58.0,
+              7.7
+            ],
+            [
+              58.0,
+              4.3
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "Bridge",
+        "to": "CIC"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.0,
+            6.0
+          ],
+          [
+            100.0,
+            6.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "CIC",
+        "to": "Radio_Room"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            100.0,
+            6.0
+          ],
+          [
+            95.0,
+            8.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "Bridge",
+        "to": "Gun_Mount_51"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.0,
+            6.0
+          ],
+          [
+            108.0,
+            6.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "Officers_Quarters",
+        "to": "Wardroom"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            90.0,
+            6.0
+          ],
+          [
+            85.0,
+            8.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "Officers_Quarters",
+        "to": "Sickbay"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            90.0,
+            6.0
+          ],
+          [
+            75.0,
+            10.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "Wardroom",
+        "to": "Galley"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            85.0,
+            8.0
+          ],
+          [
+            48.0,
+            10.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "CPO_Quarters",
+        "to": "Passageway_Main"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            55.0,
+            8.0
+          ],
+          [
+            60.0,
+            6.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "Galley",
+        "to": "Mess_Deck"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            48.0,
+            10.0
+          ],
+          [
+            50.0,
+            6.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "Galley",
+        "to": "Passageway_Main"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            48.0,
+            10.0
+          ],
+          [
+            60.0,
+            6.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "Passageway_Main",
+        "to": "Torpedo_Mount_Midships"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            60.0,
+            6.0
+          ],
+          [
+            57.0,
+            6.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "Sickbay",
+        "to": "Passageway_Main"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            75.0,
+            10.0
+          ],
+          [
+            60.0,
+            6.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "Enlisted_Berthing_Fwd",
+        "to": "Mess_Deck"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            70.0,
+            4.0
+          ],
+          [
+            50.0,
+            6.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "Enlisted_Berthing_Aft",
+        "to": "Mess_Deck"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            35.0,
+            4.0
+          ],
+          [
+            50.0,
+            6.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "Enlisted_Berthing_Fwd",
+        "to": "Enlisted_Berthing_Aft"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            70.0,
+            4.0
+          ],
+          [
+            35.0,
+            4.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "Mess_Deck",
+        "to": "Passageway_Main"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            50.0,
+            6.0
+          ],
+          [
+            60.0,
+            6.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "Enlisted_Berthing_Fwd",
+        "to": "Magazine_Fwd"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            70.0,
+            4.0
+          ],
+          [
+            95.0,
+            3.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "Enlisted_Berthing_Aft",
+        "to": "Magazine_Aft"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            35.0,
+            4.0
+          ],
+          [
+            15.0,
+            3.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "Enlisted_Berthing_Fwd",
+        "to": "Boiler_Room_1"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            70.0,
+            4.0
+          ],
+          [
+            55.0,
+            6.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "Enlisted_Berthing_Aft",
+        "to": "Engine_Room_Aft"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            35.0,
+            4.0
+          ],
+          [
+            20.0,
+            6.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "Boiler_Room_1",
+        "to": "Boiler_Room_2"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            55.0,
+            6.0
+          ],
+          [
+            40.0,
+            6.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "Boiler_Room_2",
+        "to": "Engine_Room_Fwd"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            40.0,
+            6.0
+          ],
+          [
+            30.0,
+            6.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "Engine_Room_Fwd",
+        "to": "Engine_Room_Aft"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            30.0,
+            6.0
+          ],
+          [
+            20.0,
+            6.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "CIC",
+        "to": "Officers_Quarters"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            100.0,
+            6.0
+          ],
+          [
+            90.0,
+            6.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "Radio_Room",
+        "to": "CIC"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            95.0,
+            8.0
+          ],
+          [
+            100.0,
+            6.0
+          ]
+        ]
+      }
+    }
+  ]
+}

@@ -1198,8 +1198,21 @@ Beyond the `records` array, the notebook includes:
 
 ## 9. The USS Crusher LCARS Command Deck
 
-TNG LCARS-styled Streamlit UI (`dashboard.py`). Run `python orchestrator.py`, then
-`streamlit run dashboard.py` or `./run_dashboard.sh`.
+TNG LCARS-styled Streamlit UI (`dashboard/` package; entry: `streamlit run dashboard.py`).
+Run `python3 orchestrator.py`, then `streamlit run dashboard.py` or `./run_dashboard.sh`.
+
+**Ship class:** The dashboard resolves the active platform from telemetry zone
+fingerprints, `crusher_labs/config.yaml`, or the sidebar selector. Precomputed deck
+assets live under `data/platforms/<platform_id>/`:
+
+```bash
+python3 scripts/precompute_deck_assets.py   # all catalog platforms
+```
+
+This writes `deck_graphics.geojson`, `deck_hull.png`, and `deck_manifest.json`
+(visual-only; simulation JSON unchanged). Regenerate after editing
+`spatial_layout.json` zones. GIS import: `python3 tools/gis_spatial_bridge.py
+--input data/shp/....geojson --output data/platforms/<id>/ --emit-deck-graphics`.
 
 **USS Crusher — Main Bridge Display** with Condition Green / Yellow / Red Alert banners.
 

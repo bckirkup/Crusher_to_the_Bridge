@@ -1,0 +1,369 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hull_outline",
+        "platform_id": "destroyer_baseline"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              7.0,
+              -2.0
+            ],
+            [
+              108.0,
+              -2.0
+            ],
+            [
+              108.0,
+              17.0
+            ],
+            [
+              7.0,
+              17.0
+            ],
+            [
+              7.0,
+              -2.0
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "compartment",
+        "zone_id": "Bridge",
+        "deck": "upper",
+        "room_type": "Free"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              95.0,
+              10.0
+            ],
+            [
+              105.0,
+              10.0
+            ],
+            [
+              105.0,
+              14.0
+            ],
+            [
+              95.0,
+              14.0
+            ],
+            [
+              95.0,
+              10.0
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "compartment",
+        "zone_id": "MedBay",
+        "deck": "main",
+        "room_type": "Free"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              70.0,
+              3.0
+            ],
+            [
+              80.0,
+              3.0
+            ],
+            [
+              80.0,
+              7.0
+            ],
+            [
+              70.0,
+              7.0
+            ],
+            [
+              70.0,
+              3.0
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "compartment",
+        "zone_id": "Mess_Hall",
+        "deck": "main",
+        "room_type": "Dining"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              48.0,
+              5.0
+            ],
+            [
+              62.0,
+              5.0
+            ],
+            [
+              62.0,
+              11.0
+            ],
+            [
+              48.0,
+              11.0
+            ],
+            [
+              48.0,
+              5.0
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "compartment",
+        "zone_id": "Engine_Room",
+        "deck": "lower",
+        "room_type": "Room"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              10.0,
+              4.0
+            ],
+            [
+              30.0,
+              4.0
+            ],
+            [
+              30.0,
+              10.0
+            ],
+            [
+              10.0,
+              10.0
+            ],
+            [
+              10.0,
+              4.0
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "compartment",
+        "zone_id": "Galley",
+        "deck": "main",
+        "room_type": "Dining"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              44.0,
+              10.0
+            ],
+            [
+              56.0,
+              10.0
+            ],
+            [
+              56.0,
+              14.0
+            ],
+            [
+              44.0,
+              14.0
+            ],
+            [
+              44.0,
+              10.0
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "compartment",
+        "zone_id": "Berthing",
+        "deck": "lower",
+        "room_type": "Room"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              28.0,
+              1.0
+            ],
+            [
+              42.0,
+              1.0
+            ],
+            [
+              42.0,
+              5.0
+            ],
+            [
+              28.0,
+              5.0
+            ],
+            [
+              28.0,
+              1.0
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            100.0,
+            10.0
+          ],
+          [
+            75.0,
+            5.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            75.0,
+            5.0
+          ],
+          [
+            55.0,
+            8.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            55.0,
+            8.0
+          ],
+          [
+            50.0,
+            12.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            50.0,
+            12.0
+          ],
+          [
+            35.0,
+            3.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            35.0,
+            3.0
+          ],
+          [
+            20.0,
+            7.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            100.0,
+            12.0
+          ],
+          [
+            20.0,
+            7.0
+          ]
+        ]
+      }
+    }
+  ]
+}
