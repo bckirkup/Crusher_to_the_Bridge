@@ -1,0 +1,139 @@
+{
+  "platform": "enterprise_constitution_tos",
+  "description": "Constitution-class HVAC: saucer primary ring, engineering secondary hull, limited cross-hull ducting.",
+  "hvac_zones": [
+    {
+      "id": "zone_saucer_command",
+      "rooms": [
+        "Bridge",
+        "Communications",
+        "Library"
+      ],
+      "ach": 8.0,
+      "description": "Forward saucer command spaces"
+    },
+    {
+      "id": "zone_saucer_ops",
+      "rooms": [
+        "Sickbay",
+        "Security_Station",
+        "Transporter_Room",
+        "Science_Lab"
+      ],
+      "ach": 10.0,
+      "description": "Mid-saucer operational deck"
+    },
+    {
+      "id": "zone_saucer_living",
+      "rooms": [
+        "Rec_Deck",
+        "Galley",
+        "Crew_Quarters",
+        "Officer_Quarters",
+        "Mess_Hall"
+      ],
+      "ach": 7.0,
+      "description": "Crew living and dining ring"
+    },
+    {
+      "id": "zone_engineering",
+      "rooms": [
+        "Engineering"
+      ],
+      "ach": 14.0,
+      "description": "Secondary hull high-exchange engineering"
+    }
+  ],
+  "cross_zone_links": [
+    {
+      "from": "zone_saucer_command",
+      "to": "zone_saucer_ops",
+      "flow_rate_m3h": 120,
+      "path": "turbolift_shaft_fore",
+      "is_hvac_ducted": true
+    },
+    {
+      "from": "zone_saucer_ops",
+      "to": "zone_saucer_living",
+      "flow_rate_m3h": 180,
+      "path": "corridor_ring_mid",
+      "is_hvac_ducted": false
+    },
+    {
+      "from": "zone_saucer_living",
+      "to": "zone_engineering",
+      "flow_rate_m3h": 90,
+      "path": "connecting_tube_aft",
+      "is_hvac_ducted": true
+    },
+    {
+      "from": "zone_saucer_command",
+      "to": "zone_engineering",
+      "flow_rate_m3h": 40,
+      "path": "emergency_vent_shaft",
+      "is_hvac_ducted": false
+    }
+  ],
+  "adjacency": [
+    {
+      "from": "Bridge",
+      "to": "Communications",
+      "type": "turbolift"
+    },
+    {
+      "from": "Bridge",
+      "to": "Library",
+      "type": "passageway"
+    },
+    {
+      "from": "Sickbay",
+      "to": "Transporter_Room",
+      "type": "passageway"
+    },
+    {
+      "from": "Sickbay",
+      "to": "Security_Station",
+      "type": "passageway"
+    },
+    {
+      "from": "Science_Lab",
+      "to": "Library",
+      "type": "passageway"
+    },
+    {
+      "from": "Rec_Deck",
+      "to": "Galley",
+      "type": "service_hatch"
+    },
+    {
+      "from": "Galley",
+      "to": "Crew_Quarters",
+      "type": "passageway"
+    },
+    {
+      "from": "Crew_Quarters",
+      "to": "Officer_Quarters",
+      "type": "passageway"
+    },
+    {
+      "from": "Officer_Quarters",
+      "to": "Engineering",
+      "type": "turbolift"
+    },
+    {
+      "from": "Engineering",
+      "to": "Sickbay",
+      "type": "turbolift"
+    },
+    {
+      "from": "Rec_Deck",
+      "to": "Bridge",
+      "type": "turbolift"
+    },
+    {
+      "from": "Galley",
+      "to": "Mess_Hall",
+      "type": "service_hatch"
+    }
+  ]
+}
