@@ -21,11 +21,11 @@ from dashboard.pydeck_builder import build_pydeck_deck
 from dashboard.theme import (
     LCARS_GOLD,
     LCARS_PEACH,
-    LCARS_PLOTLY,
     STOPLIGHT_COLORS,
     _lcars_alert_banner,
     _lcars_banner,
     _worst_stoplight,
+    apply_lcars_layout,
 )
 
 
@@ -181,33 +181,31 @@ def _build_plotly_deck_map(
 
     label = bundle.manifest.get("ship_class_label", bundle.platform_id)
     n_zones = len(metrics)
-    fig.update_layout(
-        **{
-            **LCARS_PLOTLY,
-            "title": (
-                f"Tactical Deck Scan — {label} — Epoch {record['epoch']} "
-                f"({color_mode}, {n_zones} zones)"
-            ),
-            "plot_bgcolor": "rgba(0,0,0,0.85)",
-            "height": 520,
-            "xaxis": {
-                "range": [xmin, xmax],
-                "showgrid": True,
-                "gridcolor": "rgba(255,153,0,0.08)",
-                "title": "Ship length (m)",
-                "scaleanchor": "y",
-                "scaleratio": 1,
-                "constrain": "domain",
-            },
-            "yaxis": {
-                "range": [ymin, ymax],
-                "showgrid": True,
-                "gridcolor": "rgba(255,153,0,0.08)",
-                "title": "Beam (m)",
-                "constrain": "domain",
-            },
-            "margin": {"t": 60, "b": 50, "l": 55, "r": 30},
-        }
+    apply_lcars_layout(
+        fig,
+        title=(
+            f"Tactical Deck Scan — {label} — Epoch {record['epoch']} "
+            f"({color_mode}, {n_zones} zones)"
+        ),
+        plot_bgcolor="rgba(0,0,0,0.85)",
+        height=520,
+        xaxis={
+            "range": [xmin, xmax],
+            "showgrid": True,
+            "gridcolor": "rgba(255,153,0,0.08)",
+            "title": "Ship length (m)",
+            "scaleanchor": "y",
+            "scaleratio": 1,
+            "constrain": "domain",
+        },
+        yaxis={
+            "range": [ymin, ymax],
+            "showgrid": True,
+            "gridcolor": "rgba(255,153,0,0.08)",
+            "title": "Beam (m)",
+            "constrain": "domain",
+        },
+        margin={"t": 60, "b": 50, "l": 55, "r": 30},
     )
     return fig
 

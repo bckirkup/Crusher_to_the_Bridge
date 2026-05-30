@@ -22,6 +22,16 @@ class TestDashboardImports:
         assert dashboard.LCARS_GOLD == "#FF9900"
         assert dashboard.HISTORY_PATH.endswith("simulation_history.json")
 
+    def test_apply_lcars_layout_plot_bgcolor_override(self) -> None:
+        import plotly.graph_objects as go
+
+        from dashboard.theme import apply_lcars_layout
+
+        fig = go.Figure(data=[go.Scatter(x=[1], y=[1])])
+        apply_lcars_layout(fig, plot_bgcolor="rgba(0,0,0,0.85)", height=200)
+        assert fig.layout.plot_bgcolor == "rgba(0,0,0,0.85)"
+        assert fig.layout.height == 200
+
 
 class TestAggregateTransmissionPathways:
     def test_pathway_breakdown_keys(self) -> None:

@@ -20,7 +20,7 @@ from dashboard.theme import (
     LCARS_GREEN,
     LCARS_PANEL,
     LCARS_PEACH,
-    LCARS_PLOTLY,
+    apply_lcars_layout,
     LCARS_PURPLE,
     LCARS_RED,
     LCARS_TAN,
@@ -192,8 +192,9 @@ def render_bridge_status(
                 name="Intervention", fill="tozeroy",
                 line={"color": LCARS_RED},
             ))
-            cost_fig.update_layout(
-                **LCARS_PLOTLY, height=280,
+            apply_lcars_layout(
+                cost_fig,
+                height=280,
                 xaxis_title="Epoch (Stardate)", yaxis_title="Cumulative Credits (USD)",
                 margin={"t": 30, "b": 40, "l": 50, "r": 20},
                 legend={"orientation": "h", "y": 1.1, "x": 0.5, "xanchor": "center"},
@@ -299,8 +300,9 @@ def _render_counter_time_series(history: list[dict[str, Any]]) -> None:
                     annotation_font_color=LCARS_RED,
                 )
 
-        fig.update_layout(
-            **LCARS_PLOTLY, height=300,
+        apply_lcars_layout(
+            fig,
+            height=300,
             title="Attack Rate Tracking",
             xaxis_title="Epoch", yaxis_title="Rate",
             yaxis_tickformat=".1%",
@@ -324,8 +326,9 @@ def _render_counter_time_series(history: list[dict[str, Any]]) -> None:
                 name=cid_labels.get(cid, cid),
                 marker_color=colors[i % len(colors)],
             ))
-        fig.update_layout(
-            **LCARS_PLOTLY, height=280,
+        apply_lcars_layout(
+            fig,
+            height=280,
             title="Infection Count Tracking",
             xaxis_title="Epoch", yaxis_title="Count",
             barmode="group",
@@ -409,8 +412,9 @@ def _render_pathogen_curves(history: list[dict[str, Any]]) -> None:
             line={"color": colors[i % len(colors)], "width": 2},
         ))
 
-    fig.update_layout(
-        **LCARS_PLOTLY, height=300,
+    apply_lcars_layout(
+        fig,
+        height=300,
         title="Per-Pathogen Active Infections",
         xaxis_title="Epoch", yaxis_title="Active Infections",
         margin={"t": 50, "b": 40, "l": 50, "r": 20},
@@ -468,8 +472,9 @@ def _render_wearable_monitoring(history: list[dict[str, Any]]) -> None:
             x=epochs, y=anomaly_rates, mode="lines+markers",
             name="Anomaly Rate", line={"color": LCARS_GOLD, "width": 2},
         ))
-        fig.update_layout(
-            **LCARS_PLOTLY, height=260,
+        apply_lcars_layout(
+            fig,
+            height=260,
             title="Wearable Monitoring Trends",
             xaxis_title="Epoch", yaxis_title="Rate",
             yaxis_tickformat=".1%",
@@ -536,8 +541,9 @@ def _render_transmission_pathways(history: list[dict[str, Any]]) -> None:
         textfont=dict(color="white"),
         hole=0.4,
     )])
-    fig.update_layout(
-        **LCARS_PLOTLY, height=350,
+    apply_lcars_layout(
+        fig,
+        height=350,
         title="Transmission Pathway Distribution",
         margin={"t": 50, "b": 20, "l": 20, "r": 20},
         showlegend=False,
@@ -601,8 +607,9 @@ def _build_epidemic_curve(history: list[dict[str, Any]]) -> go.Figure:
                     annotation_font_color=ALERT_COLORS.get(status, "gray"),
                 )
 
-    fig.update_layout(
-        **LCARS_PLOTLY, height=350,
+    apply_lcars_layout(
+        fig,
+        height=350,
         xaxis_title="Epoch (Stardate)", yaxis_title="Personnel Count",
         legend={"orientation": "h", "y": 1.08, "x": 0.5, "xanchor": "center"},
         margin={"t": 50, "b": 40, "l": 50, "r": 20},
@@ -790,9 +797,10 @@ def _build_deck_map(
         hovertext=hover_texts, hoverinfo="text", showlegend=False,
     ))
 
-    fig.update_layout(
+    apply_lcars_layout(
+        fig,
         title=f"Tactical Deck Scan — Epoch {record['epoch']} ({color_mode})",
-        **LCARS_PLOTLY, height=420,
+        height=420,
         xaxis={"title": "Ship Length (m)", "range": [0, 120], "showgrid": False},
         yaxis={
             "title": "Beam (m)", "range": [0, 15], "showgrid": False,
@@ -989,8 +997,9 @@ def _render_amplification_curves(records: list[dict[str, Any]]) -> None:
                 line={"width": 1.5},
             ))
 
-        fig.update_layout(
-            **LCARS_PLOTLY, height=350,
+        apply_lcars_layout(
+            fig,
+            height=350,
             xaxis_title="Cycle", yaxis_title="Fluorescence (RFU)",
             margin={"t": 30, "b": 40, "l": 50, "r": 20},
             legend={"font": {"size": 9}},
@@ -1033,9 +1042,10 @@ def _render_kingdom_charts(records: list[dict[str, Any]]) -> None:
             marker_color=kingdom_colors.get(kingdom, "gray"),
         ))
 
-    fig.update_layout(
+    apply_lcars_layout(
+        fig,
         barmode="stack",
-        **LCARS_PLOTLY, height=380,
+        height=380,
         xaxis_title="Sample", yaxis_title="Read Counts",
         title="Multi-Kingdom Metagenomic Analysis",
         margin={"t": 50, "b": 60, "l": 50, "r": 20},
