@@ -1,112 +1,78 @@
-"""Build pydeck Deck for tactical compartment contamination overlay."""
+"""Build pydeck Deck in ship-local Cartesian coordinates (not a world map)."""
 from __future__ import annotations
 
 from typing import Any
 
-from dashboard.theme import LCARS_AMBER, LCARS_GOLD, LCARS_GREEN, LCARS_RED
+from dashboard.deck_geometry import (
+    collect_zone_metrics,
+    color_scale_max,
+    iter_compartment_rings,
+    iter_hull_rings,
+    iter_hvac_paths,
+    metric_fraction,
+)
+from dashboard.theme import LCARS_GOLD, LCARS_GREEN, LCARS_RED
 
 try:
     import pydeck as pdk
 except ImportError:
     pdk = None  # type: ignore[assignment]
 
-
-def _hex_to_rgb(hex_color: str) -> list[int]:
-    h = hex_color.lstrip("#")
-    return [int(h[i : i + 2], 16) for i in (0, 2, 4)]
+# deck.gl COORDINATE_SYSTEM.CARTESIAN — local meters, no globe
+_CARTESIAN = 1
 
 
-def metric_to_rgba(value: float, max_val: float) -> list[int]:
-    if max_val <= 0:
-        return _hex_to_rgb(LCARS_GREEN) + [180]
-    t = min(1.0, max(0.0, value / max_val))
-    if t < 0.33:
-        base = _hex_to_rgb(LCARS_GREEN)
-    elif t < 0.66:
-        base = _hex_to_rgb(LCARS_GOLD)
-    else:
-        base = _hex_to_rgb(LCARS_RED)
-    alpha = int(120 + 100 * t)
-    return base + [alpha]
-
-
-def _zone_metric(record: dict[str, Any], zone_id: str, color_mode: str) -> float:
-    spaces = record.get("spaces", {})
-    obs = record.get("observation_engine", {})
-    if color_mode == "Airborne Aerosol Mass":
-        return float(spaces.get(zone_id, {}).get("pathogen_mass", 0.0))
-    if color_mode == "Surface Fomite Contamination":
-        return float(obs.get("surface_swab", {}).get(zone_id, {}).get("surface_mass", 0.0))
-    count = 0
-    for agent in record.get("agents", []):
-        if agent.get("location") == zone_id and agent.get("status") in (
-            "symptomatic", "infected",
-        ):
-            count += 1
-    return float(count)
-
-
-def _features_to_rows(
-    geojson: dict[str, Any],
-    record: dict[str, Any],
-    color_mode: str,
-    deck_filter: str | None,
-) -> tuple[list[dict[str, Any]], float]:
-    rows: list[dict[str, Any]] = []
-    max_val = 0.0
-    for feat in geojson.get("features", []):
-        props = feat.get("properties", {})
-        kind = props.get("kind", "")
-        geom = feat.get("geometry", {})
-        if kind == "compartment":
-            zid = props.get("zone_id", "")
-            if deck_filter and deck_filter != "All Decks":
-                if str(props.get("deck", "")) != deck_filter:
-                    continue
-            val = _zone_metric(record, zid, color_mode)
-            max_val = max(max_val, val)
-            if geom.get("type") != "Polygon":
-                continue
-            ring = geom["coordinates"][0]
-            rows.append({
-                "zone_id": zid,
-                "kind": kind,
-                "polygon": ring,
-                "metric": val,
-            })
-        elif kind in ("hull_outline", "hvac_path"):
-            if kind == "hull_outline" or (
-                deck_filter is None or deck_filter == "All Decks"
-            ):
-                if geom.get("type") == "Polygon":
-                    path = geom["coordinates"][0]
-                elif geom.get("type") == "LineString":
-                    path = geom["coordinates"]
-                else:
-                    continue
-                rows.append({
-                    "zone_id": props.get("zone_id", kind),
-                    "kind": kind,
-                    "path": path,
-                    "metric": 0.0,
-                })
-    return rows, max_val
+def _lcars_rgba(fraction: float, alpha: int = 200) -> list[int]:
+    if fraction <= 0.01:
+        return [26, 26, 46, 140]
+    if fraction < 0.33:
+        return [153, 204, 153, alpha]
+    if fraction < 0.66:
+        return [255, 153, 0, alpha]
+    return [204, 102, 102, min(255, alpha + 40)]
 
 
 def build_pydeck_deck(
-    geojson: dict[str, Any],
+    bundle: Any,
     record: dict[str, Any],
     manifest: dict[str, Any],
     color_mode: str,
     deck_filter: str | None = None,
 ) -> Any | None:
-    if pdk is None or not geojson.get("features"):
+    if pdk is None:
         return None
 
-    rows, max_val = _features_to_rows(geojson, record, color_mode, deck_filter)
-    for row in rows:
-        if row["kind"] == "compartment":
-            row["fill_color"] = metric_to_rgba(row["metric"], max(max_val, 0.01))
+    metrics = collect_zone_metrics(record, bundle, color_mode, deck_filter)
+    scale_max = color_scale_max(metrics)
+
+    compartments: list[dict[str, Any]] = []
+    for zid, ring, _deck in iter_compartment_rings(bundle, deck_filter):
+        frac = metric_fraction(metrics.get(zid, 0.0), scale_max)
+        compartments.append({
+            "zone_id": zid,
+            "polygon": ring,
+            "fill_color": _lcars_rgba(frac),
+            "line_color": [255, 204, 153, 255],
+        })
+
+    if not compartments:
+        return None
+
+    hull_paths: list[dict[str, Any]] = []
+    for ring in iter_hull_rings(bundle):
+        hull_paths.append({
+            "path": ring + [ring[0]] if ring else ring,
+            "color": [255, 153, 0, 255],
+            "width": 8,
+        })
+
+    hvac_paths: list[dict[str, Any]] = []
+    for path in iter_hvac_paths(bundle, deck_filter):
+        hvac_paths.append({
+            "path": path,
+            "color": [255, 153, 0, 90],
+            "width": 2,
+        })
 
     bounds = manifest.get("view_bounds", {})
     xmin = float(bounds.get("xmin", 0))
@@ -114,51 +80,66 @@ def build_pydeck_deck(
     ymin = float(bounds.get("ymin", 0))
     ymax = float(bounds.get("ymax", 15))
     cx, cy = (xmin + xmax) / 2, (ymin + ymax) / 2
+    span = max(xmax - xmin, ymax - ymin, 1.0)
+    zoom = max(0.5, min(8.0, 14.0 / span))
 
-    compartment_layer = pdk.Layer(
-        "PolygonLayer",
-        data=[r for r in rows if r["kind"] == "compartment"],
-        get_polygon="polygon",
-        get_fill_color="fill_color",
-        get_line_color=[255, 204, 153],
-        get_line_width=2,
-        pickable=True,
-        auto_highlight=True,
-    )
+    layers: list[Any] = []
 
-    path_data = []
-    for r in rows:
-        if r["kind"] == "hull_outline":
-            path_data.append({"path": r["path"], "color": [255, 153, 0, 200]})
-        elif r["kind"] == "hvac_path":
-            path_data.append({"path": r["path"], "color": [255, 153, 0, 80]})
-
-    layers = []
-    if path_data:
+    if hull_paths:
         layers.append(
             pdk.Layer(
                 "PathLayer",
-                data=path_data,
+                data=hull_paths,
                 get_path="path",
                 get_color="color",
-                get_width=3,
-                width_min_pixels=1,
+                get_width="width",
+                width_min_pixels=4,
+                coordinate_system=_CARTESIAN,
             )
         )
-    layers.append(compartment_layer)
 
-    view = pdk.ViewState(
-        latitude=cy,
-        longitude=cx,
-        zoom=0.8,
-        pitch=25,
-        min_zoom=0.2,
-        max_zoom=5,
+    if hvac_paths:
+        layers.append(
+            pdk.Layer(
+                "PathLayer",
+                data=hvac_paths,
+                get_path="path",
+                get_color="color",
+                get_width="width",
+                width_min_pixels=1,
+                coordinate_system=_CARTESIAN,
+            )
+        )
+
+    layers.append(
+        pdk.Layer(
+            "PolygonLayer",
+            data=compartments,
+            get_polygon="polygon",
+            get_fill_color="fill_color",
+            get_line_color="line_color",
+            get_line_width=2,
+            line_width_min_pixels=1,
+            stroked=True,
+            filled=True,
+            pickable=True,
+            auto_highlight=True,
+            coordinate_system=_CARTESIAN,
+        )
+    )
+
+    view_state = pdk.ViewState(
+        target=[cx, cy, 0],
+        zoom=zoom,
+        rotation_x=0,
+        rotation_orbit=0,
     )
 
     return pdk.Deck(
         layers=layers,
-        initial_view_state=view,
+        initial_view_state=view_state,
+        views=[pdk.View(type="OrthographicView", controller=True)],
+        map_provider=None,
         map_style=None,
         tooltip={"text": "{zone_id}"},
     )
