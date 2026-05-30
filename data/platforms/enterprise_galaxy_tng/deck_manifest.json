@@ -37,5 +37,12 @@
     "deck_graphics": "deck_graphics.geojson",
     "deck_hull": "deck_hull.png",
     "deck_blueprint_bg": "deck_blueprint_bg.png"
+  },
+  "background_plate": "reference_photo_composite",
+  "reference_photo": {
+    "wikimedia_title": "File:DD Fletcher silhouette.png",
+    "license": "Public domain (US Navy)",
+    "credit": "US Navy — destroyer silhouette; fiction-adapted Galaxy-class explorer (no real-world counterpart)",
+    "local_file": "reference_photo.jpg"
   }
 }

@@ -24,6 +24,11 @@ from deck_footprint_builder import (  # noqa: E402
     build_representative_geojson,
     compute_view_bounds,
 )
+from deck_photo_plate import (  # noqa: E402
+    catalog_entry,
+    fetch_reference_photo,
+    render_photo_plate,
+)
 
 PLATFORMS = [
     "destroyer_baseline",
@@ -210,13 +215,38 @@ def precompute_platform(platform_id: str) -> None:
     manifest = build_manifest(platform_id, layout, tier, bounds)
     labels = manifest.get("ship_class_label", platform_id)
     bg_path = os.path.join(pdir, "deck_blueprint_bg.png")
-    _render_blueprint_background(
-        geojson,
-        bg_path,
-        title=labels,
-        subtitle=manifest.get("representative_of", "")[:90],
-        fiction=tier == "fiction_adapted",
-    )
+    photo_entry = catalog_entry(platform_id)
+    ref_path = fetch_reference_photo(platform_id, pdir)
+    plate_ok = False
+    if ref_path and photo_entry:
+        plate_ok = render_photo_plate(
+            geojson,
+            ref_path,
+            bg_path,
+            title=labels,
+            subtitle=manifest.get("representative_of", "")[:90],
+            credit=photo_entry.get("credit", ""),
+            license_label=photo_entry.get("license", ""),
+            fiction=tier == "fiction_adapted" or bool(photo_entry.get("fiction_adapted")),
+            photo_style=photo_entry.get("photo_style", "profile"),
+        )
+        if plate_ok:
+            manifest["background_plate"] = "reference_photo_composite"
+            manifest["reference_photo"] = {
+                "wikimedia_title": photo_entry.get("wikimedia_title"),
+                "license": photo_entry.get("license"),
+                "credit": photo_entry.get("credit"),
+                "local_file": photo_entry.get("local_file", "reference_photo.jpg"),
+            }
+    if not plate_ok:
+        _render_blueprint_background(
+            geojson,
+            bg_path,
+            title=labels,
+            subtitle=manifest.get("representative_of", "")[:90],
+            fiction=tier == "fiction_adapted",
+        )
+        manifest["background_plate"] = "synthetic_blueprint"
     manifest_path = os.path.join(pdir, "deck_manifest.json")
     with open(manifest_path, "w", encoding="utf-8") as fh:
         json.dump(manifest, fh, indent=2, ensure_ascii=False)

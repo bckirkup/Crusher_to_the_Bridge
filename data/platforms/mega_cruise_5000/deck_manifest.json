@@ -87,5 +87,12 @@
     "deck_graphics": "deck_graphics.geojson",
     "deck_hull": "deck_hull.png",
     "deck_blueprint_bg": "deck_blueprint_bg.png"
+  },
+  "background_plate": "reference_photo_composite",
+  "reference_photo": {
+    "wikimedia_title": "File:Icon of the Seas (kahunapulej).jpg",
+    "license": "CC BY-SA 2.0",
+    "credit": "Kahunapule Michael Johnson / Wikimedia Commons — Icon of the Seas (Royal Caribbean)",
+    "local_file": "reference_photo.jpg"
   }
 }

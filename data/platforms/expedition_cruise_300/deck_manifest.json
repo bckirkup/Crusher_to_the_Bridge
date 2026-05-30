@@ -45,5 +45,12 @@
     "deck_graphics": "deck_graphics.geojson",
     "deck_hull": "deck_hull.png",
     "deck_blueprint_bg": "deck_blueprint_bg.png"
+  },
+  "background_plate": "reference_photo_composite",
+  "reference_photo": {
+    "wikimedia_title": "File:Cruise ship side view.png",
+    "license": "CC BY-SA 3.0",
+    "credit": "Marcusroos / Wikimedia Commons — cruise ship side elevation (schematic)",
+    "local_file": "reference_photo.jpg"
   }
 }

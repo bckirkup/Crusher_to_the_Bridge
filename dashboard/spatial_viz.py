@@ -32,16 +32,24 @@ from dashboard.theme import (
 def footprint_caption(manifest: dict[str, Any]) -> str:
     tier = manifest.get("footprint_tier", "unknown")
     label = manifest.get("ship_class_label", "Vessel")
+    ref = manifest.get("reference_photo") or {}
+    credit = ref.get("credit", "")
+    plate = manifest.get("background_plate", "")
+    photo_note = ""
+    if plate == "reference_photo_composite" and credit:
+        photo_note = f" Reference underlay: {credit}."
     if tier == "representative":
         return (
             f"*Class-representative deck plan for **{label}** — simulation zones shown; "
-            f"not a specific vessel survey.*"
+            f"not a specific vessel survey.{photo_note}*"
         )
     if tier == "fiction_adapted":
-        return f"*Fiction-adapted layout for **{label}** — demonstration only.*"
+        return (
+            f"*Fiction-adapted layout for **{label}** — demonstration only.{photo_note}*"
+        )
     if tier == "gis_traced":
-        return f"*GIS-traced compartments for **{label}**.*"
-    return f"*{label}*"
+        return f"*GIS-traced compartments for **{label}**.{photo_note}*"
+    return f"*{label}*{photo_note}"
 
 
 def _image_uri(path: str) -> str | None:

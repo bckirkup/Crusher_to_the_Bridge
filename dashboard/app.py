@@ -121,9 +121,15 @@ def main() -> None:
         )
 
         if bundle.blueprint_bg_path:
+            plate_kind = bundle.manifest.get("background_plate", "deck_plate")
+            cap = (
+                "Class reference photo plate"
+                if plate_kind == "reference_photo_composite"
+                else "Class blueprint plate"
+            )
             st.image(
                 bundle.blueprint_bg_path,
-                caption="Class blueprint plate",
+                caption=cap,
                 use_container_width=True,
             )
         elif bundle.hull_png_path:
