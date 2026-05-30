@@ -125,8 +125,10 @@ class DecisionRuntime:
                     economics_weights = json.load(fh).get("reward_weights", {})
 
         export_dir = social.get("export_utility_dir")
+        import_dir = social.get("import_actions_dir")
         rt.stackelberg = StackelbergRound(
             export_utility_dir=export_dir,
+            import_actions_dir=import_dir,
             cruise_id=str(social.get("cruise_id", "0")),
             incentives=incentives,
             economics_weights=economics_weights,

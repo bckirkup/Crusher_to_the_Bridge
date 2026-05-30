@@ -101,3 +101,47 @@ def test_class_interaction_matrix_zone_weight() -> None:
     m = ClassInteractionMatrix.from_json(path)
     w = m.interaction_weight("crew_galley", "passenger_general", "Galley")
     assert w > 0
+
+
+def test_import_action_envelope_round_trip(tmp_path) -> None:
+    import json
+    from decision_engine.utility.io import import_action_envelope
+
+    actions_path = tmp_path / "cruise_0_epoch_0002_actions.json"
+    actions_path.write_text(
+        json.dumps({
+            "epoch": 2,
+            "actions": {
+                "command": [{"kind": "directive_to_medical", "parameters": {"text": "isolate"}}],
+            },
+        }),
+        encoding="utf-8",
+    )
+    env = import_action_envelope(str(tmp_path), 2, "0")
+    assert env is not None
+    assert env.epoch == 2
+    assert env.actions.get("command")
+
+
+def test_stackelberg_uses_imported_envelope(tmp_path) -> None:
+    import json
+    from decision_engine.information.reputation import ReputationTracker
+
+    actions_path = tmp_path / "cruise_0_epoch_0000_actions.json"
+    actions_path.write_text(
+        json.dumps({"epoch": 0, "actions": {"medical": [{"kind": "recommend_sop", "parameters": {"sop_id": "SOP-001"}}]}}),
+        encoding="utf-8",
+    )
+    rnd = StackelbergRound(cruise_id="0", import_actions_dir=str(tmp_path))
+    env = rnd.solve(
+        0,
+        {"epoch": 0, "trigger_status": "BASELINE", "summary": {}, "reactive_protocols": {"stoplights": {}}},
+        EpochDecisionContext(),
+        AgentLivedExperienceStore(),
+        {},
+        ReputationTracker(),
+        {"briefings": []},
+        ExperienceStore(""),
+        [],
+    )
+    assert env.actions.get("medical")

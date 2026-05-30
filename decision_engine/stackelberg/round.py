@@ -12,7 +12,7 @@ from decision_engine.observation.command import build_command_observation
 from decision_engine.observation.medical import build_medical_observation
 from decision_engine.policy import Policy, RuleBasedPolicy
 from decision_engine.utility.features import UtilityFeatureExtractor
-from decision_engine.utility.io import export_utility_bundle
+from decision_engine.utility.io import export_utility_bundle, import_action_envelope
 
 
 class StackelbergRound:
@@ -24,6 +24,7 @@ class StackelbergRound:
         medical_policy: Policy | None = None,
         population_policy: Policy | None = None,
         export_utility_dir: str | None = None,
+        import_actions_dir: str | None = None,
         cruise_id: str = "0",
         incentives: dict[str, float] | None = None,
         economics_weights: dict[str, float] | None = None,
@@ -33,6 +34,7 @@ class StackelbergRound:
         self.medical_policy = medical_policy or RuleBasedPolicy()
         self.population_policy = population_policy or RuleBasedPolicy()
         self.export_utility_dir = export_utility_dir
+        self.import_actions_dir = import_actions_dir
         self.cruise_id = cruise_id
         self.incentives = incentives or {}
         self.economics_weights = economics_weights or {}
@@ -107,6 +109,13 @@ class StackelbergRound:
             )
             self.last_bundle = bundle
             export_utility_bundle(bundle, self.export_utility_dir, epoch, self.cruise_id)
+
+        if self.import_actions_dir:
+            imported = import_action_envelope(
+                self.import_actions_dir, epoch, self.cruise_id,
+            )
+            if imported is not None:
+                envelope = imported
 
         return envelope
 
