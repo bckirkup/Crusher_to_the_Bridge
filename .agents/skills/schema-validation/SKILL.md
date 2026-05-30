@@ -39,9 +39,13 @@ check-jsonschema --schemafile schemas/logging_profile.schema.json data/config/lo
 ```
 
 ### Validate all platforms in a loop
+
+Skips catalog/metadata files (`class_photo_catalog.json`, `deck_provenance.json`) automatically — only directories with `spatial_layout.json` are checked.
+
 ```bash
 for dir in data/platforms/*/; do
   platform=$(basename "$dir")
+  [ -f "$dir/spatial_layout.json" ] || continue
   echo "=== $platform ==="
   check-jsonschema --schemafile schemas/spatial_layout.schema.json "$dir/spatial_layout.json"
   check-jsonschema --schemafile schemas/air_flow_paths.schema.json "$dir/air_flow_paths.json"
@@ -96,8 +100,10 @@ python -m pytest tests/test_data_contracts.py -v --tb=short
 
 - Before every commit that touches files in `data/` or `schemas/`
 - After generating output with the orchestrator
-- When adding new platforms or pathogens
+- When adding new platforms or pathogens (including Enterprise fiction-adapted bundles)
 - As part of the CI-equivalent local validation
+
+CI: `.github/workflows/picard-presidio.yml` validates all eight platforms plus Stackelberg social schemas on `main` and `cursor/**` branches.
 
 ## Picard / Presidio / Stackelberg schemas
 

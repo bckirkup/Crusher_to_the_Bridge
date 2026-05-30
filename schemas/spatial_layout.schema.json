@@ -47,7 +47,7 @@
         },
         "deck": {
           "type": "string",
-          "enum": ["upper", "main", "lower"]
+          "description": "Deck or level identifier (platform-specific, e.g. main, saucer_10, 3_Marina)"
         },
         "display": {
           "type": "object",

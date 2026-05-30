@@ -115,11 +115,23 @@ Update `crusher_labs/config.yaml` to point to the new platform paths, then run:
 python orchestrator.py --epochs 10
 ```
 
+### 8. Precompute deck assets (optional, for LCARS tactical map)
+
+After spatial layout is stable, generate visual-only deck assets:
+
+```bash
+python3 scripts/precompute_deck_assets.py --platform <platform_name>
+```
+
+This writes `deck_graphics.geojson`, `deck_hull.png`, and `deck_manifest.json` under the platform directory. Add a class photo entry to `data/platforms/class_photo_catalog.json` if you want a reference photo plate behind the deck outline (see `CLASS_PHOTO_ATTRIBUTION.md`).
+
 ## Available Platforms for Reference
 
 | Platform | Directory |
 |----------|-----------|
 | Destroyer Baseline | `data/platforms/destroyer_baseline` |
+| Enterprise Constitution (TOS) | `data/platforms/enterprise_constitution_tos` |
+| Enterprise Galaxy (TNG) | `data/platforms/enterprise_galaxy_tng` |
 | Expedition Cruise 300 | `data/platforms/expedition_cruise_300` |
 | Fletcher-class Destroyer | `data/platforms/fletcher_class_destroyer` |
 | Legend-class NSC | `data/platforms/legend_class_nsc` |

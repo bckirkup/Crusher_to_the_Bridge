@@ -89,14 +89,19 @@ jobs:
           PYTHONPATH: .
         run: |
           python -c "
+          import plotly.graph_objects as go
           import dashboard
           from dashboard import aggregate_transmission_pathway_totals
+          from dashboard.theme import apply_lcars_layout
           totals = aggregate_transmission_pathway_totals([{
               'contact_tracing': {'transmission_events': [
                   {'pathway_breakdown': {'food:test': 1.0}}
               ]}
           }])
           assert totals.get('food') == 1.0
+          fig = go.Figure(data=[go.Scatter(x=[1], y=[1])])
+          apply_lcars_layout(fig, plot_bgcolor='rgba(0,0,0,0.85)', height=200)
+          assert fig.layout.plot_bgcolor == 'rgba(0,0,0,0.85)'
           print('Dashboard import OK')
           "
 

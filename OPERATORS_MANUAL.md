@@ -1366,7 +1366,7 @@ python tools/sanity_checker.py --from-config
 pytest tests/ -v --tb=short
 ```
 
-The suite includes **~330 tests** across data contracts, sanity checker,
+The suite includes **~337 tests** across data contracts, sanity checker,
 orchestrator/quarantine logic, infection counters, orthogonal agent axes,
 wearable/detection-escalation protocol engine, sequencing config wiring,
 long-read Nanopore verification, instrument turnaround (TAT),
@@ -1374,13 +1374,16 @@ per-test cost accounting, **operational impact (OIS)**, **action applier**,
 **behavioral syndromic**, transmission pathways (food/environmental),
 dashboard helpers, law compliance, telemetry seams, and **Picard / Presidio /
 Stackelberg** framework tests. CI (`.github/workflows/ci.yml`) runs sanity checks,
-full pytest, Picard/Presidio import hygiene, Presidio smoke, orchestrator import
-hygiene, dashboard import, and a 24-epoch orchestrator run. Framework-focused
-checks, long-read/TAT tests, and Stackelberg JSON schema validation run in `.github/workflows/picard-presidio.yml`.
+full pytest (~337 tests), Picard/Presidio import hygiene, Presidio smoke, long-read/TAT
+targeted tests, orchestrator import hygiene, dashboard import (including LCARS theme),
+24-epoch orchestrator run, and OIS telemetry verification. Framework-focused checks,
+enterprise platform tests, and Stackelberg + platform JSON schema validation run in
+`.github/workflows/picard-presidio.yml`.
 See `AGENTS.md` for cloud agent commands.
 
 | Module | Focus |
 |--------|-------|
+| `test_enterprise_platforms.py` | Enterprise platform HVAC referential integrity |
 | `test_agent_axes.py` | Orthogonal infection / presentation / compliance axes |
 | `test_protocol_engine.py` | Wearable and detection-escalation stoplights |
 | `test_sequencing_config.py` | `config.yaml` read_depth for WW grid and modalities |

@@ -253,7 +253,7 @@ active_profiles.json ───────────────────�
                                                                        │
 spatial_layout.json ────────────────────────────────────────────────┐  │
   (zone nodes: id, volume, deck, display coords)                   │  │
-  6 pre-built platforms in data/platforms/                          │  │
+  8 pre-built platforms in data/platforms/                          │  │
                                                                     │  │
 air_flow_paths.json ────────────────────────────────────────────┐  │  │
   (HVAC zones, cross-zone links, adjacency)                    │  │  │

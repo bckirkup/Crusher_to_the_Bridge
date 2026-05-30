@@ -38,7 +38,8 @@ jobs:
             tests/test_law_compliance.py tests/test_operational_impact.py \
             tests/test_action_applier.py tests/test_behavioral_syndromic.py \
             tests/test_long_read_sequencing.py tests/test_instrument_turnaround.py \
-            -v --tb=short
+            tests/test_enterprise_platforms.py tests/test_agent_axes.py \
+            tests/test_sequencing_config.py -v --tb=short
 
       - name: Import hygiene (Picard / Presidio / Stackelberg)
         env:
@@ -72,6 +73,15 @@ jobs:
             picard_framework/data/agent_profiles/default_ship_population.json
           check-jsonschema --schemafile schemas/resource_costs.schema.json \
             data/config/resource_costs.json
+          for dir in data/platforms/*/; do
+            platform=$(basename "$dir")
+            [ -f "$dir/spatial_layout.json" ] || continue
+            echo "=== platform schema: $platform ==="
+            check-jsonschema --schemafile schemas/spatial_layout.schema.json \
+              "$dir/spatial_layout.json"
+            check-jsonschema --schemafile schemas/air_flow_paths.schema.json \
+              "$dir/air_flow_paths.json"
+          done
 
       - name: Presidio smoke (1 cruise, 2 epochs)
         env:

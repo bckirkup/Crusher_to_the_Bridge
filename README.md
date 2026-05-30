@@ -26,7 +26,7 @@ python orchestrator.py --epochs 250
 # Launch LCARS dashboard (after simulation)
 streamlit run dashboard.py
 
-# Run the test suite (~330 tests)
+# Run the test suite (~337 tests)
 pytest tests/ -v --tb=short
 ```
 
@@ -105,16 +105,20 @@ data/
 │   ├── fletcher_class_destroyer/
 │   ├── legend_class_nsc/
 │   ├── mega_cruise_5000/
-│   └── san_antonio_class_lpd/
+│   ├── san_antonio_class_lpd/
+│   ├── enterprise_constitution_tos/
+│   └── enterprise_galaxy_tng/
 ├── microbiome_profiles/     GRUMB kingdom profiles by environment
 ├── shp/                     GIS shapefiles for spatial bridge
 └── templates/               Reference configs (cruise ship, multi-pathogen)
 
 schemas/                     JSON Schema definitions for all data contracts
-telemetry_buffer/            Runtime output (simulation_history, lab_notebook)
+dashboard.py                 Streamlit entry script → dashboard/ LCARS package
+dashboard/                   Modular command deck (theme, charts, spatial_viz, deck_geometry)
+scripts/                     Enterprise platform builder, deck graphics, asset precompute
+telemetry_buffer/
 │   agent_axes.py            Orthogonal agent state (infection / presentation / compliance)
-dashboard.py                 LCARS Main Bridge Display (4 stations)
-tests/                       ~330 tests (ship, fleet, Stackelberg, OIS, behavioral, long-read, TAT)
+tests/                       ~337 tests (ship, fleet, Stackelberg, OIS, behavioral, long-read, TAT, enterprise)
 AGENTS.md                    Cursor Cloud / agent development notes
 ```
 
@@ -503,7 +507,7 @@ python tools/sanity_checker.py --config-dir data/config \
 ## Testing
 
 ```bash
-# Full suite (~330 tests)
+# Full suite (~337 tests)
 pytest tests/ -v --tb=short
 
 # Picard / Presidio / Stackelberg
@@ -513,7 +517,8 @@ pytest tests/test_picard_framework.py tests/test_decision_engine.py \
 # Specific modules
 pytest tests/test_orchestrator.py           # orchestrator, quarantine/SOP confinement
 pytest tests/test_infection_counters.py     # attack-rate counters, exempt_classes
-pytest tests/test_agent_axes.py             # orthogonal infection/presentation/compliance
+pytest tests/test_enterprise_platforms.py # Enterprise platform referential integrity
+pytest tests/test_agent_axes.py           # orthogonal infection/presentation/compliance
 pytest tests/test_protocol_engine.py        # wearable + detection-escalation stoplights
 pytest tests/test_sequencing_config.py      # config.yaml read_depth wiring
 pytest tests/test_cost_accounting.py        # per-test debits and materials telemetry

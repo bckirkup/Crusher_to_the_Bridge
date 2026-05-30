@@ -24,13 +24,13 @@ Expected: Completes 24 epochs with no exceptions. Prints `CRUSHER TO THE BRIDGE`
 
 ### Run with a custom epoch count
 ```bash
-python orchestrator.py --epochs 10
+python3 orchestrator.py --epochs 10
 ```
 Expected: Completes 10 epochs. Useful for faster iteration during development.
 
 ### Validate config before running
 ```bash
-python tools/sanity_checker.py --from-config
+python3 tools/sanity_checker.py --from-config
 ```
 
 ### Verify import hygiene after module changes
@@ -86,7 +86,12 @@ print('OIS OK:', c['operational_impact_cumulative'])
 
 After a successful run, launch the LCARS dashboard:
 ```bash
-streamlit run dashboard.py
+python3 -m streamlit run dashboard.py
+```
+
+Optional: precompute deck assets for the active platform before opening the tactical map:
+```bash
+python3 scripts/precompute_deck_assets.py
 ```
 
 ## Troubleshooting
