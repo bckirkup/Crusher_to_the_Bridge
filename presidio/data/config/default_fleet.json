@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.0.0",
+  "catalog": {
+    "libraries_index": "presidio/data/catalog/libraries.json",
+    "picard_run_spec": "picard_framework/runs/destroyer_baseline_default.json",
+    "economics_id": "presidio/data/economics/fleet_economics.json"
+  },
+  "fleet": {
+    "num_cruises": 2
+  },
+  "run": {
+    "seed_base": 42,
+    "experience_store": "presidio/data/experiences/fleet_experience.json",
+    "output_root": "presidio/data/experiences/runs"
+  },
+  "actors": [
+    {"actor_id": "command", "role": "commanding_officer"},
+    {"actor_id": "medical", "role": "medical_officer"}
+  ],
+  "incentives": {
+    "biodefense_weight": 1.0,
+    "budget_weight": 0.1,
+    "operational_tempo_weight": 0.0
+  }
+}

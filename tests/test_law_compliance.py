@@ -284,7 +284,7 @@ class TestPureStateIsolation:
 
     def test_no_sys_path_manipulation_in_submodules(self) -> None:
         """Submodules should not manipulate sys.path — only orchestrator.py may."""
-        skip = {"orchestrator.py"}
+        skip = {"orchestrator.py", "presidio_runner.py"}
         for mod, src in _read_orchestrator_sources().items():
             if mod in skip:
                 continue

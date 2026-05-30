@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://crusher-to-the-bridge/schemas/decision_action.schema.json",
+  "title": "DecisionAction",
+  "type": "object",
+  "required": ["kind"],
+  "properties": {
+    "kind": {
+      "type": "string",
+      "enum": ["noop", "set_surveillance_cadence"]
+    },
+    "pcr_cadence": { "type": "integer", "minimum": 1 },
+    "sequencing_cadence": { "type": "integer", "minimum": 1 }
+  },
+  "additionalProperties": true
+}

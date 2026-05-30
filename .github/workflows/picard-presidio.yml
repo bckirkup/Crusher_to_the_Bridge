@@ -1,0 +1,58 @@
+name: Picard & Presidio
+
+on:
+  push:
+    branches: [main, 'cursor/**']
+  pull_request:
+    branches: [main]
+
+jobs:
+  framework:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Sanity checker (ship + fleet libraries)
+        run: python tools/sanity_checker.py --from-config
+
+      - name: Picard & Presidio unit tests
+        env:
+          PYTHONPATH: .
+        run: |
+          pytest tests/test_picard_framework.py tests/test_decision_engine.py \
+            tests/test_presidio_runner.py tests/test_golden_orchestrator.py \
+            tests/test_law_compliance.py -v --tb=short
+
+      - name: Import hygiene (Picard / Presidio / decision_engine)
+        env:
+          PYTHONPATH: .
+        run: |
+          python -c "
+          from picard_framework import PicardRunSpec, ShipSimulation
+          from presidio import PresidioRunSpec
+          from decision_engine import DecisionRound, ExperienceStore
+          import presidio_runner
+          print('Picard/Presidio import hygiene OK')
+          "
+
+      - name: Presidio smoke (1 cruise, 2 epochs)
+        env:
+          PYTHONPATH: .
+        run: |
+          python presidio_runner.py \
+            --fleet-config presidio/data/config/smoke_fleet.json \
+            --cruises 1

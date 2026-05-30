@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0.0",
+  "description": "Presidio fleet configuration library index",
+  "picard_runs": [
+    "picard_framework/runs/destroyer_baseline_default.json"
+  ],
+  "fleet_configs": [
+    "presidio/data/config/default_fleet.json"
+  ],
+  "economics": [
+    "presidio/data/economics/fleet_economics.json"
+  ],
+  "experience_stores": [
+    "presidio/data/experiences/fleet_experience.json"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0.0",
+  "description": "Fleet-level economics parameters for Presidio reward and budgeting",
+  "currency": "USD",
+  "cruise_budget_reference_usd": 500000.0,
+  "reward_weights": {
+    "biodefense": 1.0,
+    "budget": 0.1,
+    "operational_tempo": 0.05,
+    "morale": 0.05
+  },
+  "penalties": {
+    "per_infected_agent": 1.0,
+    "per_symptomatic_agent": 2.0,
+    "per_usd_spent": 0.001
+  }
+}

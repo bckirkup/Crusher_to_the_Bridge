@@ -1338,6 +1338,57 @@ def print_report(report: Report) -> None:
         )
 
 
+
+def _check_picard_presidio_configs(repo_root: str, report: Report) -> None:
+    """Validate Picard run specs and Presidio fleet/economics libraries."""
+    picard_default = os.path.join(
+        repo_root, "picard_framework", "runs", "destroyer_baseline_default.json",
+    )
+    presidio_fleet = os.path.join(
+        repo_root, "presidio", "data", "config", "default_fleet.json",
+    )
+    presidio_econ = os.path.join(
+        repo_root, "presidio", "data", "economics", "fleet_economics.json",
+    )
+    for label, path in (
+        ("picard_run_spec", picard_default),
+        ("presidio_fleet", presidio_fleet),
+        ("presidio_economics", presidio_econ),
+    ):
+        if not os.path.isfile(path):
+            report.warn(path, "PICARD_PRESIDIO", f"Missing {label} file (optional): {path}")
+            continue
+        data = _load_json(path)
+        if data is None:
+            report.error(path, "PICARD_PRESIDIO", f"Could not parse {label} JSON")
+            continue
+        if label == "picard_run_spec":
+            if not data.get("catalog", {}).get("platform_id"):
+                report.error(path, "PICARD_RUN_SPEC", "catalog.platform_id is required")
+            if data.get("run", {}).get("num_epochs", 24) < 1:
+                report.error(path, "PICARD_RUN_SPEC", "run.num_epochs must be >= 1")
+        elif label == "presidio_fleet":
+            if data.get("fleet", {}).get("num_cruises", 0) < 1:
+                report.error(path, "PRESIDIO_FLEET", "fleet.num_cruises must be >= 1")
+            picard_ref = data.get("catalog", {}).get("picard_run_spec", "")
+            picard_abs = (
+                picard_ref if os.path.isabs(picard_ref)
+                else os.path.join(repo_root, picard_ref)
+            )
+            if picard_ref and not os.path.isfile(picard_abs):
+                report.error(
+                    path, "PRESIDIO_FLEET",
+                    f"catalog.picard_run_spec not found: {picard_abs}",
+                )
+        elif label == "presidio_economics":
+            for key, val in data.get("reward_weights", {}).items():
+                if val < 0:
+                    report.error(
+                        presidio_econ, "PRESIDIO_ECON",
+                        f"reward_weights.{key} must be non-negative",
+                    )
+
+
 def main() -> None:
     _REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -1382,6 +1433,7 @@ def main() -> None:
             r["config_dir"], r["platform_dir"],
             pathogen_file=r["pathogen_file"], cfg=r["cfg"],
         )
+        _check_picard_presidio_configs(_REPO_ROOT, report)
     else:
         pf = args.pathogen_file or os.path.join(args.pathogen_dir, "active_profiles.json")
         report = run_checks(args.config_dir, args.platform_dir, pathogen_file=pf)

@@ -461,10 +461,19 @@ def init_observation_engine(
 def init_protocol_engine(
     cfg: dict[str, Any],
     contam_engine: ContamTransportEngine | None,
+    *,
+    protocols_path: str | None = None,
+    resource_costs_path: str | None = None,
+    logging_profile_path: str | None = None,
 ) -> ProtocolContext:
     """Initialise the reactive protocol engine and cost ledger."""
-    protocols_cfg_path = os.path.join(REPO_ROOT, "data", "config", "protocols.json")
-    resource_cfg_path = os.path.join(REPO_ROOT, "data", "config", "resource_costs.json")
+    _ = logging_profile_path
+    protocols_cfg_path = protocols_path or os.path.join(
+        REPO_ROOT, "data", "config", "protocols.json",
+    )
+    resource_cfg_path = resource_costs_path or os.path.join(
+        REPO_ROOT, "data", "config", "resource_costs.json",
+    )
 
     cost_ledger = build_ledger_from_config(resource_cfg_path)
     resource_costs_cfg = load_resource_costs(resource_cfg_path)

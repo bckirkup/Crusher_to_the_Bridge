@@ -54,6 +54,16 @@ check-jsonschema --schemafile schemas/simulation_history.schema.json telemetry_b
 check-jsonschema --schemafile schemas/lab_notebook.schema.json telemetry_buffer/artificial_lab_notebook.json
 ```
 
+### Validate Picard & Presidio configs
+```bash
+check-jsonschema --schemafile schemas/picard_run_spec.schema.json \
+  picard_framework/runs/destroyer_baseline_default.json
+check-jsonschema --schemafile schemas/presidio_fleet_config.schema.json \
+  presidio/data/config/default_fleet.json
+check-jsonschema --schemafile schemas/presidio_fleet_economics.schema.json \
+  presidio/data/economics/fleet_economics.json
+```
+
 ### Run pydantic-based deep validation (sanity checker)
 ```bash
 python tools/sanity_checker.py --from-config

@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://crusher-to-the-bridge/schemas/presidio_fleet_economics.schema.json",
+  "title": "PresidioFleetEconomics",
+  "type": "object",
+  "required": ["reward_weights", "penalties"],
+  "properties": {
+    "schema_version": { "type": "string" },
+    "currency": { "type": "string" },
+    "cruise_budget_reference_usd": { "type": "number", "minimum": 0 },
+    "reward_weights": {
+      "type": "object",
+      "additionalProperties": { "type": "number" }
+    },
+    "penalties": {
+      "type": "object",
+      "additionalProperties": { "type": "number", "minimum": 0 }
+    }
+  },
+  "additionalProperties": true
+}

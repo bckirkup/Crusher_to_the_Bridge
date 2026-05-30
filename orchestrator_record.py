@@ -259,16 +259,26 @@ def finalize_simulation(
     num_epochs: int,
     contam_engine: ContamTransportEngine | None,
     cfg: dict[str, Any],
+    *,
+    history_path: str | None = None,
+    logging_profile_path: str | None = None,
+    display: bool = True,
 ) -> None:
     """Save simulation history, lab notebook, and print executive summary."""
-    history_path = os.path.join(
-        REPO_ROOT, "telemetry_buffer", "simulation_history.json",
-    )
+    if history_path is None:
+        history_path = os.path.join(
+            REPO_ROOT, "telemetry_buffer", "simulation_history.json",
+        )
     with open(history_path, "w", encoding="utf-8") as fh:
         json.dump(state.simulation_history, fh, indent=2)
-    print(f"\n  Simulation history saved to: {history_path}")
+    if display:
+        print(f"\n  Simulation history saved to: {history_path}")
 
-    logging_config_path = os.path.join(REPO_ROOT, "data", "config", "logging_profile.json")
+    if logging_profile_path is None:
+        logging_profile_path = os.path.join(
+            REPO_ROOT, "data", "config", "logging_profile.json",
+        )
+    logging_config_path = logging_profile_path
     _, _, logging_config = load_logging_profile(logging_config_path)
 
     if obs.lab_notebook_enabled:
