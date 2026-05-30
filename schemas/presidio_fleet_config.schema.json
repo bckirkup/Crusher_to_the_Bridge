@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://crusher-to-the-bridge/schemas/presidio_fleet_config.schema.json",
+  "title": "PresidioFleetConfig",
+  "type": "object",
+  "required": ["catalog", "fleet", "run"],
+  "properties": {
+    "schema_version": { "type": "string" },
+    "catalog": {
+      "type": "object",
+      "required": ["picard_run_spec"],
+      "properties": {
+        "libraries_index": { "type": "string" },
+        "picard_run_spec": { "type": "string", "minLength": 1 },
+        "economics_id": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "fleet": {
+      "type": "object",
+      "required": ["num_cruises"],
+      "properties": {
+        "num_cruises": { "type": "integer", "minimum": 1 }
+      },
+      "additionalProperties": true
+    },
+    "run": {
+      "type": "object",
+      "properties": {
+        "seed_base": { "type": "integer" },
+        "experience_store": { "type": "string" },
+        "output_root": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "actors": { "type": "array" },
+    "incentives": { "type": "object" }
+  },
+  "additionalProperties": true
+}

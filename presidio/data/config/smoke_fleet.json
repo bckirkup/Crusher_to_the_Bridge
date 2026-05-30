@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0.0",
+  "catalog": {
+    "libraries_index": "presidio/data/catalog/libraries.json",
+    "picard_run_spec": "picard_framework/runs/smoke_2epoch.json",
+    "economics_id": "presidio/data/economics/fleet_economics.json"
+  },
+  "fleet": {
+    "num_cruises": 1
+  },
+  "run": {
+    "seed_base": 42,
+    "experience_store": "presidio/data/experiences/smoke_experience.json",
+    "output_root": "presidio/data/experiences/smoke_runs"
+  },
+  "actors": [
+    {"actor_id": "command", "role": "commanding_officer"}
+  ],
+  "incentives": {
+    "biodefense_weight": 1.0,
+    "budget_weight": 0.1
+  }
+}

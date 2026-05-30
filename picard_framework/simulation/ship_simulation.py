@@ -1,0 +1,462 @@
+"""
+Steppable ship simulation extracted from orchestrator.py.
+"""
+
+from __future__ import annotations
+
+import os
+from dataclasses import dataclass, field
+from typing import Any
+
+import numpy as np
+
+from crusher_labs import build_modalities
+from crusher_labs.protocol_engine import (
+    apply_hvac_modifiers,
+    apply_transmission_modifiers,
+    compute_stoplights,
+    reset_modifiers,
+)
+from decision_engine.actions import ActionEnvelope
+from engines.py_contam_bridge import build_transport_engine, load_air_flow_paths
+from engines.transmission_core import TransmissionCore, build_hvac_downstream_map
+from orchestrator_epoch import (
+    apply_surface_decontamination,
+    apply_zone_closures,
+    compute_infection_counters,
+    compute_zone_microflora_shifts,
+    run_observation_sampling,
+    step_cost_accounting,
+    step_counter_thresholds,
+    step_fred_compliance,
+    step_infection_progression,
+    step_mid_cruise_introductions,
+    step_quarantine_confinement,
+    step_wearable_monitoring,
+)
+from orchestrator_init import (
+    build_engine,
+    check_escalation,
+    engine_payload_to_schema,
+    init_multi_pathogen,
+    init_observation_engine,
+    init_protocol_engine,
+    init_wearable_monitors,
+    initialize_grumb_seeding,
+    initialize_ship_graph,
+    load_isolation_unit_capacity,
+    load_pathogen_profiles,
+)
+from orchestrator_record import finalize_simulation, record_epoch
+from orchestrator_types import (
+    REPO_ROOT,
+    STATUS_CONFIRMED,
+    STATUS_SUSPECTED,
+    SimulationState,
+)
+from picard_framework.run_spec import PicardRunSpec
+from picard_framework.simulation.action_applier import apply_action_envelope
+from picard_framework.simulation.step_result import StepResult
+from picard_framework.world_state import WorldState
+from telemetry_buffer.schema import make_ground_truth, read_ground_truth, write_ground_truth
+
+
+@dataclass
+class RunResult:
+    num_epochs: int
+    final_trigger_status: str
+    history: list[dict[str, Any]] = field(default_factory=list)
+
+
+class ShipSimulation:
+    """One ship cruise: init, step, run, finalize."""
+
+    def __init__(
+        self,
+        run_spec: PicardRunSpec,
+        *,
+        display: bool = False,
+        repo_root: str | None = None,
+    ) -> None:
+        self.run_spec = run_spec
+        self.display = display
+        self.repo_root = repo_root or run_spec.repo_root or REPO_ROOT
+        self._epoch = -1
+        self._initialized = False
+
+        self.cfg = run_spec.inject_into_cfg()
+        self.seed = run_spec.random_seed
+        self.rng = np.random.default_rng(self.seed)
+        self.num_epochs = run_spec.num_epochs
+
+        self.state: SimulationState | None = None
+        self.world: WorldState | None = None
+        self.engine = None
+        self.contam_engine = None
+        self.tx_core = None
+        self.obs = None
+        self.proto_ctx = None
+        self.pathogen_profiles: dict[str, dict[str, Any]] = {}
+        self.zone_names: list[str] = []
+        self.high_traffic: list[str] = []
+        self.zone_volumes: dict[str, float] = {}
+        self.hvac_downstream: dict[str, list[str]] = {}
+        self.modalities: dict[str, Any] = {}
+        self.wearable_monitor = None
+        self.wearable_modality = None
+        self.enable_dual_signal = True
+        self.mp_cfg: dict[str, Any] = {}
+        self.mf_cfg: dict[str, Any] = {}
+        self.graph_cfg: dict[str, Any] = {}
+
+    @property
+    def epoch(self) -> int:
+        return self._epoch
+
+    def initialize(self) -> WorldState:
+        if self._initialized:
+            return self.world  # type: ignore[return-value]
+
+        cfg = self.cfg
+        self.modalities = build_modalities(cfg, self.rng, total_epochs=self.num_epochs)
+        ship = initialize_ship_graph(cfg)
+        self.zone_names = ship["zone_names"]
+        self.high_traffic = ship["high_traffic_zones"]
+        self.graph_cfg = cfg.get("ship_graph", {})
+
+        self.engine = build_engine(cfg, seed=self.seed)
+        if self.display:
+            from orchestrator_display import print_korkin_engine
+            print_korkin_engine(self.engine)
+
+        self.contam_engine = build_transport_engine(self.repo_root, cfg)
+        if self.contam_engine is not None:
+            self.engine.enable_external_transport()
+        if self.display:
+            from orchestrator_display import print_contam_engine
+            print_contam_engine(self.contam_engine, self.engine, cfg)
+
+        self.pathogen_profiles = load_pathogen_profiles(cfg)
+        self.mp_cfg = cfg.get("multi_pathogen", {})
+        self.mf_cfg = cfg.get("microflora", {})
+        self.enable_dual_signal = self.mf_cfg.get("enable_dual_signal", True)
+        init_multi_pathogen(self.engine, self.pathogen_profiles, cfg, self.rng)
+
+        if self.display:
+            from orchestrator_display import print_multi_pathogen
+            imm_mult = self.mp_cfg.get("immunocompromised_multiplier", 2.0)
+            print_multi_pathogen(
+                self.pathogen_profiles, set(), self.engine, imm_mult, self.enable_dual_signal,
+            )
+
+        airflow_data = load_air_flow_paths(self.repo_root, cfg)
+        self.zone_volumes = {
+            z["name"]: z.get("volume_m3", 100.0) for z in ship.get("zones", [])
+        }
+        zone_types = {z["name"]: z.get("type", "") for z in ship.get("zones", [])}
+        self.hvac_downstream = (
+            build_hvac_downstream_map(airflow_data) if airflow_data else {}
+        )
+        self.tx_core = TransmissionCore(
+            rng=np.random.default_rng(self.seed),
+            zone_volumes=self.zone_volumes,
+            pathogen_profiles=self.pathogen_profiles,
+            zone_types=zone_types,
+        )
+        self.tx_core.initialize_zones(self.zone_names)
+        self.engine.enable_external_transmission()
+        if self.display:
+            from orchestrator_display import print_transmission_core
+            print_transmission_core(self.hvac_downstream, self.pathogen_profiles)
+
+        self.obs = init_observation_engine(cfg, self.seed)
+        self.proto_ctx = init_protocol_engine(
+            cfg,
+            self.contam_engine,
+            protocols_path=self.run_spec.protocols_path,
+            resource_costs_path=self.run_spec.resource_costs_path,
+            logging_profile_path=self.run_spec.logging_profile_path,
+        )
+        self.wearable_monitor, self.wearable_modality = init_wearable_monitors(
+            self.engine, cfg, self.seed,
+        )
+        if self.display:
+            from orchestrator_display import print_wearable_monitoring
+            print_wearable_monitoring(self.wearable_monitor)
+
+        seq = self.modalities["sequencing"]
+        grumb_seeds = initialize_grumb_seeding(seq, ship["zones"])
+        if self.display:
+            from orchestrator_display import print_initialization
+            print_initialization(ship, grumb_seeds, cfg)
+
+        sim_state = SimulationState(
+            isolation_unit_capacity=load_isolation_unit_capacity(cfg),
+        )
+        self.state = sim_state
+        self.world = WorldState(
+            simulation=sim_state,
+            observation=self.obs,
+            protocol=self.proto_ctx,
+        )
+        self._initialized = True
+        return self.world
+
+    def step(self, actions: ActionEnvelope | None = None) -> StepResult:
+        if not self._initialized:
+            self.initialize()
+        assert self.state is not None
+        assert self.engine is not None
+        assert self.tx_core is not None
+        assert self.obs is not None
+        assert self.proto_ctx is not None
+
+        epoch = self._epoch + 1
+        if epoch >= self.num_epochs:
+            raise RuntimeError(f"Simulation complete ({self.num_epochs} epochs)")
+
+        state = self.state
+        cfg = self.cfg
+        syndromic = self.modalities["syndromic"]
+        rdt = self.modalities["clinical_rdt"]
+        pcr = self.modalities["targeted_pcr"]
+        seq = self.modalities["sequencing"]
+
+        applied = apply_action_envelope(actions, state, cfg)
+        if applied:
+            self.world.decisions_log.append({"epoch": epoch, "applied": applied})
+
+        step_fred_compliance(epoch, state, syndromic)
+        step_mid_cruise_introductions(epoch, self.engine, self.pathogen_profiles, self.rng)
+
+        self.engine.isolated_ids = set(state.isolated_ids)
+        self.engine.quarantined_ids = set(state.quarantined_ids)
+        self.engine.step()
+
+        step_infection_progression(self.engine, self.pathogen_profiles)
+
+        tracing_matrix, _tx_events = self.tx_core.execute_transmission(
+            epoch=epoch,
+            agents=self.engine.agents,
+            zone_pathogen_mass=self.engine.zone_pathogen_mass,
+            hvac_downstream_zones=self.hvac_downstream,
+            multi_pathogen_mass=(
+                self.engine.multi_pathogen_mass if self.pathogen_profiles else None
+            ),
+        )
+
+        if self.contam_engine is not None:
+            updated = self.contam_engine.transport_step(self.engine.zone_pathogen_mass)
+            self.engine.zone_pathogen_mass = updated
+
+        zone_microflora_shifts: dict[str, dict[str, float]] = {}
+        if self.pathogen_profiles and self.enable_dual_signal:
+            zone_microflora_shifts = compute_zone_microflora_shifts(
+                self.engine.agents, self.pathogen_profiles, cfg,
+            )
+
+        engine_payload = self.engine._export_payload()
+        agents, spaces = engine_payload_to_schema(
+            engine_payload,
+            state.isolated_ids,
+            state.quarantined_ids,
+            state.quarantine_refusers,
+        )
+
+        payload = make_ground_truth(epoch=epoch, agents=agents, spaces=spaces)
+        gt_path = self.run_spec.telemetry.ground_truth if self.run_spec.telemetry else None
+        if self.run_spec.write_ground_truth:
+            if gt_path:
+                write_ground_truth(payload, path=gt_path)
+                truth = read_ground_truth(path=gt_path)
+            else:
+                write_ground_truth(payload)
+                truth = read_ground_truth()
+            assert truth is not payload, "Shared-memory leak!"
+        else:
+            truth = payload
+
+        wearable_result = step_wearable_monitoring(
+            epoch, self.engine, self.wearable_monitor, self.wearable_modality,
+            truth, self.pathogen_profiles,
+        )
+        syn_result = syndromic.query_ground_truth(truth)
+        sick_call_ids = syn_result["sick_call_agents"]
+        rdt_result = rdt.query_ground_truth(truth, sick_call_ids=sick_call_ids)
+
+        overrides = cfg.get("_picard_epoch_overrides", {})
+        pcr_cadence = overrides.get(
+            "pcr_cadence", cfg.get("targeted_pcr", {}).get("cadence", 4),
+        )
+        seq_cadence = overrides.get(
+            "sequencing_cadence", cfg.get("sequencing", {}).get("cadence", 8),
+        )
+
+        pcr_result = None
+        if state.trigger_status == STATUS_SUSPECTED:
+            pcr_result = pcr.query_ground_truth(truth, surface_wipe_zones=self.high_traffic)
+        elif state.trigger_status == STATUS_CONFIRMED:
+            pcr_result = pcr.query_ground_truth(truth, surface_wipe_zones=self.zone_names)
+        elif epoch % int(pcr_cadence) == 0:
+            pcr_result = pcr.query_ground_truth(truth)
+
+        seq_result = None
+        if epoch % int(seq_cadence) == 0:
+            seq_result = seq.query_ground_truth(
+                truth, zone_microflora_shifts=zone_microflora_shifts,
+            )
+
+        (air_results, swab_results, ww_results,
+         clin_rdt_results, clin_qpcr_results, clin_microbio_results) = (
+            run_observation_sampling(
+                epoch, self.obs, agents, spaces, self.zone_names, self.zone_volumes,
+                zone_microflora_shifts, state.trigger_status, self.high_traffic,
+                syn_result, self.engine, self.pathogen_profiles, cfg,
+            )
+        )
+
+        prev_status = state.trigger_status
+        state.trigger_status = check_escalation(
+            state.trigger_status, syn_result, pcr_result, cfg,
+        )
+        if state.trigger_status != prev_status:
+            state.escalation_log.append({
+                "epoch": epoch, "from": prev_status, "to": state.trigger_status,
+            })
+            self.obs.notebook.log_trigger_transition(
+                epoch, prev_status, state.trigger_status,
+            )
+
+        stoplights = compute_stoplights(
+            air_results, swab_results, ww_results,
+            clin_rdt_results, clin_qpcr_results, clin_microbio_results,
+            wearable_result=wearable_result,
+            syndromic_result=syn_result,
+            cfg=cfg,
+        )
+        reset_modifiers(
+            self.contam_engine, self.tx_core, self.proto_ctx.original_filter_eff,
+        )
+        active_mods = self.proto_ctx.protocol_engine.evaluate_epoch(epoch, stoplights)
+        merged_mods = self.proto_ctx.protocol_engine.get_merged_modifiers(active_mods)
+
+        if merged_mods:
+            apply_hvac_modifiers(self.contam_engine, merged_mods)
+            apply_transmission_modifiers(self.tx_core, merged_mods)
+            if "close_zones" in merged_mods:
+                apply_zone_closures(self.engine, merged_mods["close_zones"])
+            if "surface_decontamination_factor" in merged_mods:
+                apply_surface_decontamination(
+                    self.engine, merged_mods["surface_decontamination_factor"],
+                )
+
+        step_cost_accounting(
+            epoch, self.proto_ctx,
+            air_results, swab_results, ww_results,
+            clin_rdt_results, clin_qpcr_results, clin_microbio_results,
+        )
+        step_quarantine_confinement(
+            epoch, agents, merged_mods, state.trigger_status, state, syndromic,
+        )
+
+        counter_defs = self.graph_cfg.get("infection_counters", [])
+        counter_results = compute_infection_counters(agents, counter_defs)
+        step_counter_thresholds(
+            epoch, agents, counter_results, counter_defs, state, syndromic,
+        )
+
+        epoch_cost = self.proto_ctx.cost_ledger.get_epoch_summary(epoch)
+        epoch_record = record_epoch(
+            epoch=epoch,
+            trigger_status=state.trigger_status,
+            agents=agents,
+            spaces=spaces,
+            engine=self.engine,
+            contam_engine=self.contam_engine,
+            pathogen_profiles=self.pathogen_profiles,
+            zone_names=self.zone_names,
+            zone_microflora_shifts=zone_microflora_shifts,
+            syn_result=syn_result,
+            rdt_result=rdt_result,
+            pcr_result=pcr_result,
+            seq_result=seq_result,
+            tracing_matrix=tracing_matrix,
+            state=state,
+            obs=self.obs,
+            active_mods=active_mods,
+            merged_mods=merged_mods,
+            stoplights=stoplights,
+            epoch_cost=epoch_cost,
+            cfg=cfg,
+            air_results=air_results,
+            swab_results=swab_results,
+            ww_results=ww_results,
+            clin_rdt_results=clin_rdt_results,
+            clin_qpcr_results=clin_qpcr_results,
+            clin_microbio_results=clin_microbio_results,
+            wearable_result=wearable_result,
+            infection_counters=counter_results,
+        )
+        if applied:
+            epoch_record["decisions"] = applied
+        state.simulation_history.append(epoch_record)
+        self._epoch = epoch
+
+        if self.display:
+            from orchestrator_display import print_progress
+            total_spent = (
+                self.proto_ctx.cost_ledger.starting_financial_usd
+                - self.proto_ctx.cost_ledger.financial_balance
+            )
+            print_progress(
+                epoch, self.num_epochs, state.trigger_status,
+                len(active_mods), total_spent, prev_status,
+            )
+
+        return StepResult(
+            epoch=epoch,
+            trigger_status=state.trigger_status,
+            stoplights=stoplights,
+            epoch_record=epoch_record,
+            ground_truth=payload,
+            active_protocols=active_mods,
+            merged_modifiers=merged_mods,
+            decisions=applied,
+        )
+
+    def run(self, n_epochs: int | None = None) -> RunResult:
+        if not self._initialized:
+            self.initialize()
+        target = n_epochs if n_epochs is not None else self.num_epochs
+        while self._epoch + 1 < target:
+            self.step()
+        assert self.state is not None
+        return RunResult(
+            num_epochs=target,
+            final_trigger_status=self.state.trigger_status,
+            history=list(self.state.simulation_history),
+        )
+
+    def finalize(self, *, display: bool | None = None) -> None:
+        if not self._initialized or self.state is None:
+            return
+        show = self.display if display is None else display
+        paths = self.run_spec.telemetry
+        history_path = paths.simulation_history if paths else None
+        logging_path = self.run_spec.logging_profile_path
+
+        finalize_simulation(
+            state=self.state,
+            engine=self.engine,
+            obs=self.obs,
+            proto_ctx=self.proto_ctx,
+            pathogen_profiles=self.pathogen_profiles,
+            zone_names=self.zone_names,
+            num_agents=len(self.engine.agents) if self.engine else 0,
+            num_epochs=self.num_epochs,
+            contam_engine=self.contam_engine,
+            cfg=self.cfg,
+            history_path=history_path,
+            logging_profile_path=logging_path,
+            display=show,
+        )

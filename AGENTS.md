@@ -18,5 +18,6 @@ This is a pure-Python simulation project with no external services (no databases
 - Use `python3` (not `python`) — the VM does not alias `python` to `python3`.
 - The dashboard reads from `telemetry_buffer/simulation_history.json` and `telemetry_buffer/artificial_lab_notebook.json`. Run the orchestrator first to generate these files.
 - All standard commands are documented in the README Quick Start section and `.github/workflows/ci.yml`.
-- The CI workflow validates: sanity checker → pytest → import hygiene → dashboard import → 24-epoch run.
+- The CI workflow validates: sanity checker → pytest → import hygiene → dashboard import → 24-epoch run. See also `.github/workflows/picard-presidio.yml`.
+- Picard ship docs: `OPERATORS_MANUAL_SHIP.md`. Presidio / game theory: `OPERATORS_MANUAL_GAME_THEORY.md`.
 - No linter (flake8/ruff/pylint) is configured in the repo; validation is done via `sanity_checker.py` and the test suite.

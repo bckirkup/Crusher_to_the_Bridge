@@ -33,9 +33,27 @@ pytest tests/ -v --tb=short
 Output is written to `telemetry_buffer/simulation_history.json` and
 `telemetry_buffer/artificial_lab_notebook.json` (gitignored runtime artifacts).
 
+## Picard & Presidio
+
+| Component | Entry | Role |
+|-----------|-------|------|
+| **Picard_Framework** | `orchestrator.py`, `picard_framework/` | Steppable single-ship simulation |
+| **decision_engine** | `decision_engine/` | Multi-agent decisions (model-agnostic) |
+| **Presidio** | `presidio_runner.py`, `presidio/data/` | Fleet meta-simulation + experience store |
+
+```bash
+python3 presidio_runner.py --fleet-config presidio/data/config/smoke_fleet.json --cruises 1
+```
+
+Manuals: [OPERATORS_MANUAL_SHIP.md](OPERATORS_MANUAL_SHIP.md), [OPERATORS_MANUAL_GAME_THEORY.md](OPERATORS_MANUAL_GAME_THEORY.md).
+
 ## Architecture
 
 ```
+orchestrator.py              Legacy CLI → picard_framework.ShipSimulation
+presidio_runner.py           Fleet loop: decision_engine + ShipSimulation
+picard_framework/            PicardRunSpec, catalog, ShipSimulation
+decision_engine/             Policies, observations, ExperienceStore
 orchestrator.py              Thin coordinator: init → epoch loop → finalize
 ├── orchestrator_types.py    Dataclasses, constants, state container
 ├── orchestrator_init.py     Spatial/engine/observation/wearable setup

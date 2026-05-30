@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0.0",
+  "catalog": {
+    "platform_id": "destroyer_baseline",
+    "pathogen_bundle_id": "active_profiles"
+  },
+  "run": {
+    "random_seed": 42,
+    "num_epochs": 24,
+    "write_ground_truth": true
+  },
+  "legacy_yaml": "crusher_labs/config.yaml",
+  "actors": [],
+  "incentives": {}
+}

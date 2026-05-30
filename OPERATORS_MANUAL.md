@@ -1,8 +1,14 @@
 # Crusher-to-the-Bridge — Operator's Manual
 
-**Version:** 2.2  
+**Version:** 2.3  
 **Platform:** Biodefense Digital Twin for Maritime Outbreak Simulation  
 **License:** MIT
+
+> **Manuals bifurcated (v2.3):**
+> - **Ship / Picard:** [OPERATORS_MANUAL_SHIP.md](OPERATORS_MANUAL_SHIP.md) — single-cruise simulation, config.yaml, instruments, SOPs
+> - **Fleet / game theory / Presidio:** [OPERATORS_MANUAL_GAME_THEORY.md](OPERATORS_MANUAL_GAME_THEORY.md) — multi-cruise decisions, experience, economics
+>
+> This file retains the full historical reference for the repository. GUI (dashboard) documentation is unchanged here but deferred for future LCARS updates.
 
 ---
 

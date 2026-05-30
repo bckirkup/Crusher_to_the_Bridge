@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://crusher-to-the-bridge/schemas/picard_run_spec.schema.json",
+  "title": "PicardRunSpec",
+  "type": "object",
+  "required": ["catalog", "run"],
+  "properties": {
+    "schema_version": { "type": "string" },
+    "catalog": {
+      "type": "object",
+      "required": ["platform_id", "pathogen_bundle_id"],
+      "properties": {
+        "platform_id": { "type": "string", "minLength": 1 },
+        "pathogen_bundle_id": { "type": "string", "minLength": 1 },
+        "protocols_path": { "type": "string" },
+        "resource_costs_path": { "type": "string" },
+        "logging_profile_path": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "run": {
+      "type": "object",
+      "properties": {
+        "random_seed": { "type": "integer" },
+        "num_epochs": { "type": "integer", "minimum": 1 },
+        "write_ground_truth": { "type": "boolean" }
+      },
+      "additionalProperties": true
+    },
+    "legacy_yaml": { "type": "string" },
+    "actors": { "type": "array" },
+    "incentives": { "type": "object" }
+  },
+  "additionalProperties": true
+}
