@@ -1,6 +1,10 @@
 """LCARS theme constants and HTML helpers."""
 from __future__ import annotations
-from typing import Any
+
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    import plotly.graph_objects as go
 
 # ── LCARS Styling ────────────────────────────────────────────────────────
 
@@ -37,6 +41,17 @@ LCARS_PLOTLY = dict(
     plot_bgcolor="rgba(26,26,46,0.6)",
     font=dict(family="Helvetica Neue, Arial, sans-serif", color=LCARS_PEACH),
 )
+
+
+def apply_lcars_layout(fig: go.Figure, **overrides: Any) -> None:
+    """Apply LCARS Plotly styling without duplicate layout keyword errors.
+
+    Plotly 5.x/6.x rejects ``update_layout(**LCARS_PLOTLY, plot_bgcolor=...)``
+    when the same key appears in both the spread dict and explicit kwargs.
+    Passing one merged dict (positional) is safe across versions.
+    """
+    fig.update_layout({**LCARS_PLOTLY, **overrides})
+
 
 LCARS_CSS = """
 <style>

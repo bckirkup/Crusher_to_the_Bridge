@@ -24,7 +24,7 @@ from dashboard.theme import (
     LCARS_BLUE,
     LCARS_GOLD,
     LCARS_GREEN,
-    LCARS_PLOTLY,
+    apply_lcars_layout,
     LCARS_RED,
     _lcars_alert_banner,
     _lcars_banner,
@@ -146,8 +146,8 @@ def _render_fleet_comparison(cruise_dirs: list[str]) -> None:
     fig = go.Figure()
     fig.add_trace(go.Bar(name="Infected", x=labels, y=infected, marker_color=LCARS_RED))
     fig.add_trace(go.Bar(name="Symptomatic", x=labels, y=symptomatic, marker_color=LCARS_GOLD))
-    fig.update_layout(
-        **LCARS_PLOTLY,
+    apply_lcars_layout(
+        fig,
         height=280,
         barmode="group",
         title="Final epoch — fleet cruise comparison",
@@ -173,8 +173,9 @@ def _render_fleet_comparison(cruise_dirs: list[str]) -> None:
             name=os.path.basename(cdir),
             line={"width": 2},
         ))
-    fig2.update_layout(
-        **LCARS_PLOTLY, height=240,
+    apply_lcars_layout(
+        fig2,
+        height=240,
         title="Infection pressure across cruises",
         xaxis_title="Epoch", yaxis_title="Active cases",
     )
