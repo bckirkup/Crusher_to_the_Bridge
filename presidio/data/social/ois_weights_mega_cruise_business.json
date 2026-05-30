@@ -1,0 +1,26 @@
+{
+  "description": "Mega cruise OIS \u2014 revenue-weighted. Per-passenger quarantine reflects $300/day lost onboard spend. Galley closure is severe (affects all dining). Reputational multiplier higher.",
+  "per_passenger_quarantined": 1.5,
+  "per_crew_quarantined": 0.8,
+  "per_essential_crew_quarantined": 2.5,
+  "per_medical_crew_quarantined": 4.0,
+  "per_passenger_isolated": 0.8,
+  "per_closed_galley_zone": 3.0,
+  "per_closed_recreation_zone": 1.5,
+  "per_closed_engine_zone": 4.0,
+  "per_fleet_ppe_active": 0.15,
+  "per_enhanced_testing_round": 0.05,
+  "per_general_confinement_epoch": 15.0,
+  "false_positive_multiplier": 3.0,
+  "essential_crew_classes": [
+    "crew_medical",
+    "crew_engineering",
+    "crew_galley"
+  ],
+  "galley_zone_types": [
+    "galley",
+    "mess",
+    "dining"
+  ],
+  "notes": "False positive multiplier=3.0 reflects that unnecessary confinement on a mega cruise generates media coverage, refund claims, and long-tail booking damage."
+}

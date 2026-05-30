@@ -1,7 +1,7 @@
 {
   "meta": {
-    "description": "Information diffusion parameters \u2014 default",
-    "variant": "default",
+    "description": "Information diffusion parameters \u2014 low_trust",
+    "variant": "low_trust",
     "sources": [
       "Holland et al. 2021 (cruise passenger risk perception)",
       "Brooks et al. 2020 (quarantine psychological impact, Lancet)",
@@ -16,17 +16,17 @@
       "severity_diffusion_rate": "Per-contact probability of sharing health concern information. Higher on expedition (tight community)."
     }
   },
-  "initial_severity_belief": 0.1,
-  "initial_trust_command": 0.7,
-  "initial_trust_medical": 0.78,
-  "severity_diffusion_rate": 0.15,
-  "severity_decay_rate": 0.02,
-  "trust_decay_per_confinement": -0.04,
-  "trust_recovery_per_clean_epoch": 0.005,
-  "reputation_command_delta_on_confinement_spike": -0.03,
-  "reputation_medical_delta_on_test_cadence": 0.01,
-  "rumor_amplification_rate": 2.0,
-  "rumor_decay_rate": 0.1,
-  "announcement_severity_boost": 0.15,
-  "announcement_trust_boost": 0.05
+  "initial_severity_belief": 0.05,
+  "initial_trust_command": 0.45,
+  "initial_trust_medical": 0.55,
+  "severity_diffusion_rate": 0.25,
+  "severity_decay_rate": 0.01,
+  "trust_decay_per_confinement": -0.08,
+  "trust_recovery_per_clean_epoch": 0.002,
+  "reputation_command_delta_on_confinement_spike": -0.06,
+  "reputation_medical_delta_on_test_cadence": 0.005,
+  "rumor_amplification_rate": 3.5,
+  "rumor_decay_rate": 0.05,
+  "announcement_severity_boost": 0.05,
+  "announcement_trust_boost": 0.01
 }

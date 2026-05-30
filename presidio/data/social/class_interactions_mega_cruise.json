@@ -1,7 +1,7 @@
 {
   "meta": {
-    "description": "Class interaction matrix \u2014 default",
-    "variant": "default",
+    "description": "Class interaction matrix \u2014 mega_cruise",
+    "variant": "mega_cruise",
     "weight_interpretation": "Relative contact intensity per epoch (0=no contact, 1=continuous contact)",
     "sources": [
       "CLIA cruise operations descriptions",
@@ -19,133 +19,133 @@
     {
       "class_a": "passenger_general",
       "class_b": "passenger_general",
-      "weight": 0.4,
+      "weight": 0.28,
       "context": "dining",
       "notes": "Shared dining, pool, entertainment"
     },
     {
       "class_a": "passenger_general",
       "class_b": "passenger_elderly",
-      "weight": 0.25,
+      "weight": 0.17,
       "context": "dining",
       "notes": "Mixed dining; elderly segregate to quieter venues on mega"
     },
     {
       "class_a": "passenger_general",
       "class_b": "passenger_family",
-      "weight": 0.3,
+      "weight": 0.21,
       "context": "recreation",
       "notes": "Pool deck, shows"
     },
     {
       "class_a": "passenger_elderly",
       "class_b": "passenger_elderly",
-      "weight": 0.5,
+      "weight": 0.35,
       "context": "dining",
       "notes": "Elderly cluster at same dining times/venues"
     },
     {
       "class_a": "passenger_family",
       "class_b": "passenger_family",
-      "weight": 0.6,
+      "weight": 0.42,
       "context": "recreation",
       "notes": "Kids club proximity, family activities"
     },
     {
       "class_a": "crew_general",
       "class_b": "crew_general",
-      "weight": 0.7,
+      "weight": 0.49,
       "context": "crew_quarters",
       "notes": "Shared berthing, crew mess"
     },
     {
       "class_a": "crew_general",
       "class_b": "crew_galley",
-      "weight": 0.5,
+      "weight": 0.35,
       "context": "crew_mess",
       "notes": "Crew dining together"
     },
     {
       "class_a": "crew_general",
       "class_b": "crew_engineering",
-      "weight": 0.3,
+      "weight": 0.21,
       "context": "crew_quarters",
       "notes": "Shared quarters, different duty zones"
     },
     {
       "class_a": "crew_general",
       "class_b": "crew_medical",
-      "weight": 0.2,
+      "weight": 0.14,
       "context": "crew_quarters",
       "notes": "Limited overlap except quarters"
     },
     {
       "class_a": "crew_galley",
       "class_b": "crew_galley",
-      "weight": 0.9,
+      "weight": 0.63,
       "context": "galley",
       "notes": "Tight galley workspace, continuous contact"
     },
     {
       "class_a": "crew_engineering",
       "class_b": "crew_engineering",
-      "weight": 0.8,
+      "weight": 0.56,
       "context": "engine_room",
       "notes": "Shared watch stations"
     },
     {
       "class_a": "crew_medical",
       "class_b": "crew_medical",
-      "weight": 0.6,
+      "weight": 0.42,
       "context": "medical",
       "notes": "Small medical team"
     },
     {
       "class_a": "crew_galley",
       "class_b": "passenger_general",
-      "weight": 0.6,
+      "weight": 0.42,
       "context": "dining",
       "notes": "Buffet/restaurant service \u2014 primary transmission interface"
     },
     {
       "class_a": "crew_galley",
       "class_b": "passenger_elderly",
-      "weight": 0.55,
+      "weight": 0.39,
       "context": "dining",
       "notes": "Dining service; elderly may use room service more"
     },
     {
       "class_a": "crew_galley",
       "class_b": "passenger_family",
-      "weight": 0.65,
+      "weight": 0.45,
       "context": "dining",
       "notes": "Families eat frequently, kids touch everything"
     },
     {
       "class_a": "crew_general",
       "class_b": "passenger_general",
-      "weight": 0.3,
+      "weight": 0.21,
       "context": "housekeeping",
       "notes": "Cabin stewards, pool attendants"
     },
     {
       "class_a": "crew_general",
       "class_b": "passenger_elderly",
-      "weight": 0.35,
+      "weight": 0.24,
       "context": "housekeeping",
       "notes": "More service contact with elderly passengers"
     },
     {
       "class_a": "crew_medical",
       "class_b": "passenger_general",
-      "weight": 0.05,
+      "weight": 0.03,
       "context": "medical",
       "notes": "Baseline: only during sick-call. Spikes during outbreak."
     },
     {
       "class_a": "crew_medical",
       "class_b": "passenger_elderly",
-      "weight": 0.08,
+      "weight": 0.06,
       "context": "medical",
       "notes": "Elderly more likely to visit medical center"
     }

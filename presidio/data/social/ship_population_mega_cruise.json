@@ -1,0 +1,285 @@
+{
+  "meta": {
+    "description": "Agent profile bundle \u2014 mega_cruise cruise ship population",
+    "variant": "mega_cruise",
+    "sources": [
+      "CLIA 2023 State of the Cruise Industry",
+      "CDC National Health Interview Survey 2022",
+      "CDC National Immunization Survey 2023",
+      "WHO Maritime Health Guidelines"
+    ]
+  },
+  "default_template": {
+    "age_bands": [
+      "18-34",
+      "35-49",
+      "50-64",
+      "65-74",
+      "75+"
+    ],
+    "age_weights": [
+      0.12,
+      0.18,
+      0.3,
+      0.25,
+      0.15
+    ],
+    "comorbidities": [
+      "diabetes",
+      "hypertension",
+      "obesity",
+      "copd",
+      "asthma",
+      "cardiovascular"
+    ],
+    "comorbidity_prevalence": {
+      "diabetes": 0.12,
+      "hypertension": 0.3,
+      "obesity": 0.25,
+      "copd": 0.05,
+      "asthma": 0.08,
+      "cardiovascular": 0.1
+    },
+    "vaccinations": [
+      "influenza_current_season",
+      "measles_mmr",
+      "covid_primary_series",
+      "covid_bivalent_booster",
+      "norovirus"
+    ],
+    "vaccination_coverage": {
+      "influenza_current_season": 0.52,
+      "measles_mmr": 0.93,
+      "covid_primary_series": 0.8,
+      "covid_bivalent_booster": 0.35,
+      "norovirus": 0.0
+    }
+  },
+  "class_templates": {
+    "passenger_general": {
+      "age_bands": [
+        "18-34",
+        "35-49",
+        "50-64",
+        "65-74",
+        "75+"
+      ],
+      "age_weights": [
+        0.12,
+        0.18,
+        0.3,
+        0.25,
+        0.15
+      ],
+      "comorbidities": [
+        "diabetes",
+        "hypertension",
+        "obesity",
+        "copd",
+        "asthma",
+        "cardiovascular"
+      ],
+      "comorbidity_prevalence": {
+        "diabetes": 0.12,
+        "hypertension": 0.3,
+        "obesity": 0.25,
+        "copd": 0.05,
+        "asthma": 0.08,
+        "cardiovascular": 0.1
+      },
+      "vaccination_coverage": {
+        "influenza_current_season": 0.52,
+        "measles_mmr": 0.93,
+        "covid_primary_series": 0.8,
+        "covid_bivalent_booster": 0.35,
+        "norovirus": 0.0
+      }
+    },
+    "passenger_family": {
+      "age_bands": [
+        "18-34",
+        "35-49",
+        "5-17",
+        "0-4"
+      ],
+      "age_weights": [
+        0.3,
+        0.4,
+        0.25,
+        0.05
+      ],
+      "comorbidities": [
+        "asthma"
+      ],
+      "comorbidity_prevalence": {
+        "asthma": 0.1
+      },
+      "vaccination_coverage": {
+        "influenza_current_season": 0.52,
+        "measles_mmr": 0.96,
+        "covid_primary_series": 0.8,
+        "covid_bivalent_booster": 0.35,
+        "norovirus": 0.0
+      }
+    },
+    "passenger_elderly": {
+      "age_bands": [
+        "65-74",
+        "75+"
+      ],
+      "age_weights": [
+        0.55,
+        0.45
+      ],
+      "comorbidities": [
+        "diabetes",
+        "hypertension",
+        "obesity",
+        "copd",
+        "asthma",
+        "cardiovascular"
+      ],
+      "comorbidity_prevalence": {
+        "diabetes": 0.216,
+        "hypertension": 0.54,
+        "obesity": 0.45,
+        "copd": 0.09000000000000001,
+        "asthma": 0.14400000000000002,
+        "cardiovascular": 0.18000000000000002
+      },
+      "vaccination_coverage": {
+        "influenza_current_season": 0.7,
+        "measles_mmr": 0.93,
+        "covid_primary_series": 0.8,
+        "covid_bivalent_booster": 0.35,
+        "norovirus": 0.0
+      }
+    },
+    "crew_general": {
+      "age_bands": [
+        "18-24",
+        "25-34",
+        "35-44",
+        "45-54",
+        "55+"
+      ],
+      "age_weights": [
+        0.15,
+        0.4,
+        0.3,
+        0.12,
+        0.03
+      ],
+      "comorbidities": [
+        "diabetes",
+        "hypertension",
+        "obesity",
+        "asthma"
+      ],
+      "comorbidity_prevalence": {
+        "diabetes": 0.03,
+        "hypertension": 0.08,
+        "obesity": 0.1,
+        "asthma": 0.05
+      },
+      "vaccination_coverage": {
+        "influenza_current_season": 0.4,
+        "measles_mmr": 0.88,
+        "covid_primary_series": 0.85,
+        "covid_bivalent_booster": 0.25,
+        "norovirus": 0.0
+      }
+    },
+    "crew_medical": {
+      "age_bands": [
+        "25-34",
+        "35-44",
+        "45-54"
+      ],
+      "age_weights": [
+        0.35,
+        0.45,
+        0.2
+      ],
+      "comorbidities": [],
+      "comorbidity_prevalence": {},
+      "vaccination_coverage": {
+        "influenza_current_season": 0.8,
+        "measles_mmr": 0.98,
+        "covid_primary_series": 0.85,
+        "covid_bivalent_booster": 0.25,
+        "norovirus": 0.0
+      }
+    },
+    "crew_engineering": {
+      "age_bands": [
+        "18-24",
+        "25-34",
+        "35-44",
+        "45-54",
+        "55+"
+      ],
+      "age_weights": [
+        0.15,
+        0.4,
+        0.3,
+        0.12,
+        0.03
+      ],
+      "comorbidities": [
+        "diabetes",
+        "hypertension",
+        "obesity",
+        "asthma"
+      ],
+      "comorbidity_prevalence": {
+        "diabetes": 0.03,
+        "hypertension": 0.08,
+        "obesity": 0.1,
+        "asthma": 0.05
+      },
+      "vaccination_coverage": {
+        "influenza_current_season": 0.4,
+        "measles_mmr": 0.88,
+        "covid_primary_series": 0.85,
+        "covid_bivalent_booster": 0.25,
+        "norovirus": 0.0
+      }
+    },
+    "crew_galley": {
+      "age_bands": [
+        "18-24",
+        "25-34",
+        "35-44",
+        "45-54",
+        "55+"
+      ],
+      "age_weights": [
+        0.15,
+        0.4,
+        0.3,
+        0.12,
+        0.03
+      ],
+      "comorbidities": [
+        "diabetes",
+        "hypertension",
+        "obesity",
+        "asthma"
+      ],
+      "comorbidity_prevalence": {
+        "diabetes": 0.03,
+        "hypertension": 0.08,
+        "obesity": 0.1,
+        "asthma": 0.05
+      },
+      "vaccination_coverage": {
+        "influenza_current_season": 0.4,
+        "measles_mmr": 0.88,
+        "covid_primary_series": 0.85,
+        "covid_bivalent_booster": 0.25,
+        "norovirus": 0.0
+      }
+    }
+  }
+}

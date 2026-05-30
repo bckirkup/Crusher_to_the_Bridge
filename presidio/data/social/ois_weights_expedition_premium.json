@@ -1,0 +1,26 @@
+{
+  "description": "Expedition cruise OIS \u2014 premium product, higher per-passenger cost. Small crew means each crew member is more critical. Single galley = total disruption.",
+  "per_passenger_quarantined": 2.5,
+  "per_crew_quarantined": 1.5,
+  "per_essential_crew_quarantined": 5.0,
+  "per_medical_crew_quarantined": 8.0,
+  "per_passenger_isolated": 1.2,
+  "per_closed_galley_zone": 5.0,
+  "per_closed_recreation_zone": 2.0,
+  "per_closed_engine_zone": 6.0,
+  "per_fleet_ppe_active": 0.2,
+  "per_enhanced_testing_round": 0.08,
+  "per_general_confinement_epoch": 20.0,
+  "false_positive_multiplier": 2.5,
+  "essential_crew_classes": [
+    "crew_medical",
+    "crew_engineering",
+    "crew_galley"
+  ],
+  "galley_zone_types": [
+    "galley",
+    "mess",
+    "dining"
+  ],
+  "notes": "Expedition passengers pay $500-1000/day; each confined day is a proportionally larger loss. Medical crew quarantine rated 8.0 because there may be only 1-2 medical staff aboard."
+}
