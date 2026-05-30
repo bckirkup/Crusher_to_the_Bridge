@@ -27,6 +27,7 @@ from orchestrator_epoch import (
     compute_zone_microflora_shifts,
     run_observation_sampling,
     step_cost_accounting,
+    step_long_read_cost_accounting,
     step_counter_thresholds,
     step_fred_compliance,
     step_infection_progression,
@@ -316,7 +317,8 @@ class ShipSimulation:
             )
 
         (air_results, swab_results, ww_results,
-         clin_rdt_results, clin_qpcr_results, clin_microbio_results) = (
+         clin_rdt_results, clin_qpcr_results, clin_microbio_results,
+         long_read_results) = (
             run_observation_sampling(
                 epoch, self.obs, agents, spaces, self.zone_names, self.zone_volumes,
                 zone_microflora_shifts, state.trigger_status, self.high_traffic,
@@ -341,6 +343,7 @@ class ShipSimulation:
             clin_rdt_results, clin_qpcr_results, clin_microbio_results,
             wearable_result=wearable_result,
             syndromic_result=syn_result,
+            long_read_results=long_read_results,
             cfg=cfg,
         )
 
@@ -426,6 +429,7 @@ class ShipSimulation:
             air_results, swab_results, ww_results,
             clin_rdt_results, clin_qpcr_results, clin_microbio_results,
         )
+        step_long_read_cost_accounting(epoch, self.proto_ctx, long_read_results)
         step_quarantine_confinement(
             epoch, agents, merged_mods, state.trigger_status, state, syndromic,
         )
@@ -467,6 +471,7 @@ class ShipSimulation:
             clin_microbio_results=clin_microbio_results,
             wearable_result=wearable_result,
             infection_counters=counter_results,
+            long_read_results=long_read_results,
         )
         if applied:
             epoch_record["decisions"] = applied

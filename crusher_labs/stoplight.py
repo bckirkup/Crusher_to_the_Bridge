@@ -51,6 +51,17 @@ def stoplight_from_disruption(level: float) -> str:
     return "GREEN"
 
 
+def stoplight_from_long_read_verification(result: dict[str, Any]) -> str:
+    """Map long-read escalation output to stoplight (framework stub → AMBER)."""
+    if result.get("pathogen_calls"):
+        return "RED"
+    if result.get("status") == "framework_stub":
+        return "AMBER"
+    if result.get("consensus_ready"):
+        return "GREEN"
+    return "AMBER"
+
+
 def stoplight_from_wearable_agent(
     fever: bool,
     anomaly_count: int,

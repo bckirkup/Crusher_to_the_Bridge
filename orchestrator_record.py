@@ -67,6 +67,7 @@ def record_epoch(
     clin_microbio_results: dict[int, dict[str, Any]],
     wearable_result: dict[str, Any] | None = None,
     infection_counters: dict[str, dict[str, Any]] | None = None,
+    long_read_results: dict[str, dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """Build a complete epoch record for simulation_history.
 
@@ -218,6 +219,7 @@ def record_epoch(
         "clinical_rdt": clin_rdt_results,
         "clinical_qpcr": clin_qpcr_results,
         "clinical_microbiology": clin_microbio_results,
+        "long_read_verification": long_read_results or {},
         "logging_fidelity": obs.fidelity_name,
     }
 
@@ -261,6 +263,7 @@ def finalize_simulation(
     cfg: dict[str, Any],
     *,
     history_path: str | None = None,
+    lab_notebook_path: str | None = None,
     logging_profile_path: str | None = None,
     display: bool = True,
 ) -> None:
@@ -271,14 +274,9 @@ def finalize_simulation(
         )
     with open(history_path, "w", encoding="utf-8") as fh:
         json.dump(state.simulation_history, fh, indent=2)
-    if display:
-        print(f"\n  Simulation history saved to: {history_path}")
+    print(f"\n  Simulation history saved to: {history_path}")
 
-    if logging_profile_path is None:
-        logging_profile_path = os.path.join(
-            REPO_ROOT, "data", "config", "logging_profile.json",
-        )
-    logging_config_path = logging_profile_path
+    logging_config_path = os.path.join(REPO_ROOT, "data", "config", "logging_profile.json")
     _, _, logging_config = load_logging_profile(logging_config_path)
 
     if obs.lab_notebook_enabled:
@@ -289,10 +287,13 @@ def finalize_simulation(
             zones=zone_names,
             trigger_timeline=state.escalation_log,
         )
-        nb_output = logging_config.get("lab_notebook", {}).get(
-            "output_path", "telemetry_buffer/artificial_lab_notebook.json",
-        )
-        nb_path = os.path.join(REPO_ROOT, nb_output)
+        if lab_notebook_path:
+            nb_path = lab_notebook_path
+        else:
+            nb_output = logging_config.get("lab_notebook", {}).get(
+                "output_path", "telemetry_buffer/artificial_lab_notebook.json",
+            )
+            nb_path = os.path.join(REPO_ROOT, nb_output)
         financial_audit = proto_ctx.cost_ledger.generate_financial_audit()
         protocol_summary = proto_ctx.protocol_engine.generate_protocol_summary()
         obs.notebook.serialize(
@@ -310,21 +311,22 @@ def finalize_simulation(
     if state.simulation_history:
         final_counters = state.simulation_history[-1].get("infection_counters", {})
 
-    print_executive_summary(
-        num_agents=num_agents,
-        num_epochs=num_epochs,
-        engine_summary=final_summary,
-        audit=audit,
-        proto_summary=proto_summary,
-        escalation_log=state.escalation_log,
-        compliance_log=state.compliance_log,
-        trigger_status=state.trigger_status,
-        isolated_count=len(state.isolated_ids),
-        quarantined_count=len(state.quarantined_ids),
-        refuser_count=len(state.quarantine_refusers),
-        contam_engine=contam_engine,
-        zone_pathogen_mass=engine.zone_pathogen_mass,
-        hvac_cfg=cfg.get("hvac", {}),
-        pathogen_profiles=pathogen_profiles,
-        infection_counters=final_counters,
-    )
+    if display:
+        print_executive_summary(
+            num_agents=num_agents,
+            num_epochs=num_epochs,
+            engine_summary=final_summary,
+            audit=audit,
+            proto_summary=proto_summary,
+            escalation_log=state.escalation_log,
+            compliance_log=state.compliance_log,
+            trigger_status=state.trigger_status,
+            isolated_count=len(state.isolated_ids),
+            quarantined_count=len(state.quarantined_ids),
+            refuser_count=len(state.quarantine_refusers),
+            contam_engine=contam_engine,
+            zone_pathogen_mass=engine.zone_pathogen_mass,
+            hvac_cfg=cfg.get("hvac", {}),
+            pathogen_profiles=pathogen_profiles,
+            infection_counters=final_counters,
+        )

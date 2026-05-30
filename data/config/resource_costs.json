@@ -152,6 +152,12 @@
       "labor_person_hours": 3.0,
       "description": "Wastewater-based epidemiology sequencing panel targeting viral/pathogen markers. ROM $150-500/sample."
     },
+    "long_read_verification": {
+      "financial_usd": 0.0,
+      "materials": {"sequencing_flow_cells": 1},
+      "labor_person_hours": 0.0,
+      "description": "Oxford Nanopore long-read escalation for verification/typing (framework placeholder; configure externally)."
+    },
     "metagenomic_shotgun_sequencing": {
       "financial_usd": 300.00,
       "materials": {"library_prep_kits": 1},

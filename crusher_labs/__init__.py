@@ -21,7 +21,13 @@ from crusher_labs.modalities.syndromic import SyndromicSurveillance
 from crusher_labs.modalities.clinical_rdt import ClinicalRDT
 from crusher_labs.modalities.targeted_pcr import TargetedPCR
 from crusher_labs.modalities.sequencing import MetagenomicSequencing
+from crusher_labs.modalities.long_read_sequencing import LongReadNanoporeSequencing
 from crusher_labs.modalities.wearable import WearableDataStream
+from crusher_labs.long_read_escalation import (
+    collect_long_read_escalation_requests,
+    is_long_read_enabled,
+    long_read_config,
+)
 from crusher_labs.observation_core import (
     ContinuousAirSniffer,
     TargetedSurfaceSwab,

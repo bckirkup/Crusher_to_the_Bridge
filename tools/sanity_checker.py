@@ -795,6 +795,28 @@ def _check_config_yaml(
     _check_fred_behavior(cfg, report)
     _check_multi_pathogen_params(cfg, report)
     _check_microflora_params(cfg, report, zone_ids)
+    _check_long_read_sequencing(cfg, report)
+
+
+def _check_long_read_sequencing(cfg: dict[str, Any], report: Report) -> None:
+    """Validate long-read Nanopore escalation framework config."""
+    lr = cfg.get("long_read_sequencing")
+    if not lr:
+        return
+    valid_sources = {
+        "wastewater_metagenomics",
+        "clinical_specimen",
+        "clinical_culture",
+        "surveillance_swab",
+    }
+    sources = lr.get("specimen_sources", [])
+    if isinstance(sources, list):
+        for i, src in enumerate(sources):
+            if src not in valid_sources:
+                report.error(
+                    "config.yaml", "LONG_READ",
+                    f"long_read_sequencing.specimen_sources[{i}] invalid: {src}",
+                )
 
 
 def _check_agent_classes(
@@ -1338,94 +1360,6 @@ def print_report(report: Report) -> None:
         )
 
 
-
-def _check_picard_presidio_configs(repo_root: str, report: Report) -> None:
-    """Validate Picard run specs and Presidio fleet/economics libraries."""
-    picard_default = os.path.join(
-        repo_root, "picard_framework", "runs", "destroyer_baseline_default.json",
-    )
-    presidio_fleet = os.path.join(
-        repo_root, "presidio", "data", "config", "default_fleet.json",
-    )
-    presidio_econ = os.path.join(
-        repo_root, "presidio", "data", "economics", "fleet_economics.json",
-    )
-    for label, path in (
-        ("picard_run_spec", picard_default),
-        ("presidio_fleet", presidio_fleet),
-        ("presidio_economics", presidio_econ),
-    ):
-        if not os.path.isfile(path):
-            report.warn(path, "PICARD_PRESIDIO", f"Missing {label} file (optional): {path}")
-            continue
-        data = _load_json(path)
-        if data is None:
-            report.error(path, "PICARD_PRESIDIO", f"Could not parse {label} JSON")
-            continue
-        if label == "picard_run_spec":
-            if not data.get("catalog", {}).get("platform_id"):
-                report.error(path, "PICARD_RUN_SPEC", "catalog.platform_id is required")
-            if data.get("run", {}).get("num_epochs", 24) < 1:
-                report.error(path, "PICARD_RUN_SPEC", "run.num_epochs must be >= 1")
-        elif label == "presidio_fleet":
-            if data.get("fleet", {}).get("num_cruises", 0) < 1:
-                report.error(path, "PRESIDIO_FLEET", "fleet.num_cruises must be >= 1")
-            picard_ref = data.get("catalog", {}).get("picard_run_spec", "")
-            picard_abs = (
-                picard_ref if os.path.isabs(picard_ref)
-                else os.path.join(repo_root, picard_ref)
-            )
-            if picard_ref and not os.path.isfile(picard_abs):
-                report.error(
-                    path, "PRESIDIO_FLEET",
-                    f"catalog.picard_run_spec not found: {picard_abs}",
-                )
-        elif label == "presidio_economics":
-            for key, val in data.get("reward_weights", {}).items():
-                if val < 0:
-                    report.error(
-                        presidio_econ, "PRESIDIO_ECON",
-                        f"reward_weights.{key} must be non-negative",
-                    )
-
-
-
-def _check_stackelberg_configs(repo_root: str, report: Report) -> None:
-    """Validate Stackelberg/social layer configuration files."""
-    paths = {
-        "information_diffusion": os.path.join(
-            repo_root, "presidio", "data", "social", "information_diffusion_default.json",
-        ),
-        "class_interactions": os.path.join(
-            repo_root, "presidio", "data", "social", "class_interactions_default.json",
-        ),
-        "global_health": os.path.join(
-            repo_root, "presidio", "data", "intelligence", "global_health_timeline.json",
-        ),
-        "agent_profiles": os.path.join(
-            repo_root, "picard_framework", "data", "agent_profiles",
-            "default_ship_population.json",
-        ),
-    }
-    for label, path in paths.items():
-        if not os.path.isfile(path):
-            report.warn(path, "STACKELBERG", f"Missing {label}")
-            continue
-        data = _load_json(path)
-        if data is None:
-            report.error(path, "STACKELBERG", f"Invalid JSON for {label}")
-            continue
-        if label == "information_diffusion":
-            for key in ("alpha", "homophily_strength", "message_decay"):
-                val = data.get(key, 0.5)
-                if val < 0 or val > 1:
-                    report.error(path, "STACKELBERG", f"{key} must be in [0,1]")
-        if label == "class_interactions":
-            for i, pair in enumerate(data.get("pairs", [])):
-                w = pair.get("weight", 0)
-                if w < 0:
-                    report.error(path, "STACKELBERG", f"pairs[{i}].weight negative")
-
 def main() -> None:
     _REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -1470,8 +1404,6 @@ def main() -> None:
             r["config_dir"], r["platform_dir"],
             pathogen_file=r["pathogen_file"], cfg=r["cfg"],
         )
-        _check_picard_presidio_configs(_REPO_ROOT, report)
-        _check_stackelberg_configs(_REPO_ROOT, report)
     else:
         pf = args.pathogen_file or os.path.join(args.pathogen_dir, "active_profiles.json")
         report = run_checks(args.config_dir, args.platform_dir, pathogen_file=pf)

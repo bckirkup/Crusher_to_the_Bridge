@@ -888,3 +888,42 @@ class ClinicalMicrobiology:
                 ag.get("pathogen_infections"),
             )
         return results
+
+
+# ── Instrument 7: Long-read verification (Oxford Nanopore) ───────────────
+
+class LongReadVerificationSequencing:
+    """Escalation long-read sequencing for verification and pathogen typing.
+
+    Consumes wastewater metagenomics, clinical specimens, clinical culture, or
+    surveillance swab upstream results. Invoked only when escalation heuristics
+    fire (see ``crusher_labs.long_read_escalation``).
+    """
+
+    name = "long_read_verification"
+
+    def __init__(
+        self,
+        modality: Any | None = None,
+        cross_contamination_rate: float = DEFAULT_CROSS_CONTAMINATION_RATE,
+        control_intensity: str = DEFAULT_CONTROL_RUN_INTENSITY,
+        rng: np.random.Generator | None = None,
+    ) -> None:
+        from crusher_labs.modalities.long_read_sequencing import LongReadNanoporeSequencing
+
+        self.modality = modality or LongReadNanoporeSequencing(enabled=True)
+        self.rng = rng if rng is not None else np.random.default_rng()
+        self.qc = InstrumentQC(cross_contamination_rate, control_intensity, self.rng)
+
+    def run_requests(
+        self,
+        requests: list[Any],
+    ) -> dict[str, dict[str, Any]]:
+        """Execute queued verification runs; keys are ``request_id``."""
+        results: dict[str, dict[str, Any]] = {}
+        for req in requests:
+            out = self.modality.verify(req)
+            if self.qc.should_run_control():
+                out["qc_control"] = self.qc.run_negative_control()
+            results[req.request_id] = out
+        return results
