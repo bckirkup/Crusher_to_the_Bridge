@@ -431,9 +431,10 @@
       },
       "background_plate": "reference_photo_composite",
       "reference_photo": {
-        "wikimedia_title": "File:DD Fletcher silhouette.png",
-        "license": "Public domain (US Navy)",
-        "credit": "US Navy — destroyer silhouette; fiction-adapted Galaxy-class explorer (no real-world counterpart)",
+        "wikimedia_title": null,
+        "source_page": "https://memory-beta.fandom.com/wiki/File:Galaxy_class_ortho.jpg",
+        "license": "Fan reference (Memory Beta; Star Trek © Paramount)",
+        "credit": "Memory Beta — Galaxy-class orthographic schematic (non-canon fan wiki)",
         "local_file": "reference_photo.jpg"
       }
     }

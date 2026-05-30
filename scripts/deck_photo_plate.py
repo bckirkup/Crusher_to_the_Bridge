@@ -25,6 +25,30 @@ def catalog_entry(platform_id: str) -> dict[str, Any] | None:
     return (cat.get("platforms") or {}).get(platform_id)
 
 
+def _trim_dark_border(img: Any, *, threshold: int = 32) -> Any:
+    """Crop letterbox/black padding around orthographic schematics."""
+    gray = img.convert("L")
+    mask = gray.point(lambda p: 255 if p > threshold else 0)
+    bbox = mask.getbbox()
+    if bbox:
+        return img.crop(bbox)
+    return img
+
+
+def _apply_relative_crop(img: Any, crop: list[float]) -> Any:
+    """Crop by fractions [left, top, right, bottom] in 0..1."""
+    if len(crop) != 4:
+        return img
+    w, h = img.size
+    left = int(w * crop[0])
+    top = int(h * crop[1])
+    right = int(w * crop[2])
+    bottom = int(h * crop[3])
+    if right > left and bottom > top:
+        return img.crop((left, top, right, bottom))
+    return img
+
+
 def fetch_reference_photo(platform_id: str, pdir: str, *, force: bool = False) -> str | None:
     """Download reference_photo.jpg if catalog entry exists. Returns path or None."""
     entry = catalog_entry(platform_id)
@@ -61,6 +85,8 @@ def render_photo_plate(
     license_label: str,
     fiction: bool,
     photo_style: str = "profile",
+    auto_trim: bool = False,
+    crop_fraction: list[float] | None = None,
 ) -> bool:
     """Composite reference photo under vector hull / compartment overlay."""
     from PIL import Image, ImageDraw, ImageEnhance, ImageOps
@@ -88,13 +114,20 @@ def render_photo_plate(
     except OSError:
         return False
 
+    if photo_style == "ortho" or auto_trim:
+        photo = _trim_dark_border(photo)
+    if crop_fraction:
+        photo = _apply_relative_crop(photo, crop_fraction)
+
     # Fit photo to plot area (cover crop).
     plot_h = img_h - header - footer
     plot_w = img_w
     photo = ImageOps.fit(photo, (plot_w, plot_h), method=Image.Resampling.LANCZOS)
     if photo_style == "plan":
-        # Technical drawings read better upright and slightly boosted.
         photo = ImageEnhance.Contrast(photo).enhance(1.15)
+    elif photo_style == "ortho":
+        photo = ImageEnhance.Brightness(photo).enhance(0.62)
+        photo = ImageEnhance.Contrast(photo).enhance(1.2)
     else:
         photo = ImageEnhance.Brightness(photo).enhance(0.55)
         photo = ImageEnhance.Contrast(photo).enhance(1.05)
@@ -151,11 +184,12 @@ def render_photo_plate(
             pts = [to_px(p[0], p[1]) for p in geom["coordinates"][0]]
             draw.polygon(pts, fill=None, outline=gold, width=4)
 
-    banner = (
-        "FICTION-ADAPTED — IMAGINARY CLASS (photo stand-in)"
-        if fiction
-        else "CLASS REPRESENTATIVE — REFERENCE PHOTO UNDERLAY"
-    )
+    if fiction and photo_style == "ortho":
+        banner = "FICTION-ADAPTED — GALAXY-CLASS ORTHO (NON-CANON FAN REFERENCE)"
+    elif fiction:
+        banner = "FICTION-ADAPTED — IMAGINARY CLASS (photo stand-in)"
+    else:
+        banner = "CLASS REPRESENTATIVE — REFERENCE PHOTO UNDERLAY"
     draw.rectangle([(0, 0), (img_w, header)], fill="#061018")
     draw.text((24, 10), title[:70], fill=gold)
     draw.text((24, 30), subtitle[:90], fill=hull_edge)

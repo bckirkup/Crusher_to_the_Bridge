@@ -229,11 +229,14 @@ def precompute_platform(platform_id: str) -> None:
             license_label=photo_entry.get("license", ""),
             fiction=tier == "fiction_adapted" or bool(photo_entry.get("fiction_adapted")),
             photo_style=photo_entry.get("photo_style", "profile"),
+            auto_trim=bool(photo_entry.get("auto_trim")),
+            crop_fraction=photo_entry.get("crop_fraction"),
         )
         if plate_ok:
             manifest["background_plate"] = "reference_photo_composite"
             manifest["reference_photo"] = {
                 "wikimedia_title": photo_entry.get("wikimedia_title"),
+                "source_page": photo_entry.get("source_page"),
                 "license": photo_entry.get("license"),
                 "credit": photo_entry.get("credit"),
                 "local_file": photo_entry.get("local_file", "reference_photo.jpg"),

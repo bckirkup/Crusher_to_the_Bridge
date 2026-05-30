@@ -20,7 +20,7 @@ Sources and URLs: `class_photo_catalog.json`
 | expedition_cruise_300 | Cruise ship side elevation | CC BY-SA 3.0 (Marcusroos) |
 | mega_cruise_5000 | Icon of the Seas | CC BY-SA 2.0 (Kahunapule Michael Johnson) |
 | enterprise_constitution_tos | USS Enterprise (CVN-65) | US Navy — public domain; **fiction-adapted** |
-| enterprise_galaxy_tng | DD silhouette | US Navy — public domain; **fiction-adapted** |
+| enterprise_galaxy_tng | [Galaxy-class ortho](https://memory-beta.fandom.com/wiki/File:Galaxy_class_ortho.jpg) | Memory Beta (Fandom) fan wiki; **fiction-adapted**; Star Trek © Paramount — not for commercial redistribution |
 
 Fiction-adapted platforms use real-world photos as **visual stand-ins** only;
 they are not official Star Trek blueprints.

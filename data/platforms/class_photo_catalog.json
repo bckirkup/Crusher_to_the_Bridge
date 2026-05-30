@@ -60,11 +60,13 @@
       "fiction_adapted": true
     },
     "enterprise_galaxy_tng": {
-      "wikimedia_title": "File:DD Fletcher silhouette.png",
-      "download_url": "https://upload.wikimedia.org/wikipedia/commons/2/2b/DD_Fletcher_silhouette.png",
-      "license": "Public domain (US Navy)",
-      "credit": "US Navy — destroyer silhouette; fiction-adapted Galaxy-class explorer (no real-world counterpart)",
-      "photo_style": "silhouette",
+      "source_page": "https://memory-beta.fandom.com/wiki/File:Galaxy_class_ortho.jpg",
+      "download_url": "https://static.wikia.nocookie.net/startrek/images/a/ac/Galaxy_class_ortho.jpg/revision/latest?cb=20220428195132",
+      "license": "Fan reference (Memory Beta; Star Trek © Paramount)",
+      "credit": "Memory Beta — Galaxy-class orthographic schematic (non-canon fan wiki)",
+      "photo_style": "ortho",
+      "auto_trim": true,
+      "crop_fraction": [0.02, 0.04, 0.98, 0.96],
       "local_file": "reference_photo.jpg",
       "fiction_adapted": true
     }
