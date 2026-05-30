@@ -1224,7 +1224,13 @@ transmission vector analysis, epidemic curves, cost ledger.
 
 ### Station 2: Tactical Sensor Grid
 
-Deck map (Stardate slider); aerosol / fomite / symptomatic overlays.
+Class-accurate deck plan (pydeck or Plotly): hull silhouette, compartment footprints,
+deck filter, epoch slider; aerosol / fomite / symptomatic overlays.
+
+### Station 5: Fleet Operations
+
+Presidio `output_root` (e.g. `presidio/data/experiences/smoke_runs`): cruise comparison,
+per-cruise hull thumbnail, and tactical grid for each cruise.
 
 ### Station 3: Sickbay Diagnostic Console
 

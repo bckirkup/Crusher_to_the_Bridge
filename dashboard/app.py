@@ -14,7 +14,6 @@ from dashboard.charts import (
 from dashboard.fleet_viz import render_fleet_operations
 from dashboard.loaders import (
     default_telemetry_dir,
-    list_platform_ids,
     load_history_from,
     load_notebook_from,
     load_platform_bundle,
@@ -23,7 +22,6 @@ from dashboard.loaders import (
     telemetry_paths,
 )
 from dashboard.paths import (
-    CONFIG_YAML,
     DEFAULT_FLEET_OUTPUT,
     PATHOGEN_PATH,
     PROTOCOLS_PATH,
@@ -35,7 +33,9 @@ from dashboard.theme import (
     LCARS_BG,
     LCARS_CSS,
     LCARS_GOLD,
+    LCARS_PEACH,
     _lcars_alert_banner,
+    _lcars_banner,
 )
 
 
@@ -55,6 +55,26 @@ def _load_protocols() -> dict:
         return json.load(fh)
 
 
+def _detection_label(method: str) -> str:
+    return {
+        "exact": "matched simulation zones",
+        "subset": "matched simulation zones",
+        "fingerprint": "matched telemetry zones",
+        "config": "crusher_labs/config.yaml",
+        "picard_spec": "Picard run spec",
+        "manual": "environment override",
+        "default": "catalog default",
+    }.get(method, method)
+
+
+def _locked_platform_id(history: list) -> tuple[str, str]:
+    """Single source of truth for vessel class — no UI picker."""
+    env_override = os.environ.get("CTTB_PLATFORM_OVERRIDE", "").strip()
+    if env_override:
+        return env_override, "manual"
+    return resolve_platform_id(history)
+
+
 def main() -> None:
     st.set_page_config(
         page_title="USS Crusher — Main Bridge Display",
@@ -67,11 +87,6 @@ def main() -> None:
     hist_path, nb_path = telemetry_paths(tel_dir)
     history = load_history_from(hist_path)
     notebook = load_notebook_from(nb_path)
-
-    platform_ids = list_platform_ids()
-    default_pid = resolve_platform_id(history) if history else (
-        platform_ids[0] if platform_ids else "destroyer_baseline"
-    )
 
     with st.sidebar:
         st.markdown(
@@ -92,25 +107,27 @@ def main() -> None:
             notebook = load_notebook_from(nb_path)
             tel_dir = tel_dir_input
 
-        fp_pid = resolve_platform_id(history) if history else default_pid
-        idx = platform_ids.index(fp_pid) if fp_pid in platform_ids else 0
-        selected_platform = st.selectbox(
-            "Vessel class (platform)",
-            platform_ids,
-            index=idx,
-            key="platform_select",
-        )
-        if history and selected_platform != fp_pid:
-            st.warning(
-                f"Telemetry fingerprint suggests **{fp_pid}**; "
-                f"viewing **{selected_platform}**."
-            )
+        active_pid, detect_method = _locked_platform_id(history)
+        bundle = load_platform_bundle(active_pid)
+        ship_label = bundle.manifest.get("ship_class_label", active_pid)
 
-        bundle = load_platform_bundle(selected_platform)
-        if bundle.hull_png_path:
+        st.markdown(
+            _lcars_banner(f"LOCKED VESSEL CLASS<br>{ship_label}", LCARS_GOLD),
+            unsafe_allow_html=True,
+        )
+        st.caption(
+            f"**{active_pid}** — {_detection_label(detect_method)}. "
+            "Deck plan and tactical map follow this class automatically."
+        )
+
+        if bundle.blueprint_bg_path:
+            st.image(
+                bundle.blueprint_bg_path,
+                caption="Class blueprint plate",
+                use_container_width=True,
+            )
+        elif bundle.hull_png_path:
             st.image(bundle.hull_png_path, use_container_width=True)
-        st.caption(bundle.manifest.get("ship_class_label", selected_platform))
-        st.caption(bundle.manifest.get("disclaimer", ""))
 
         if history:
             last = history[-1]
@@ -136,14 +153,13 @@ def main() -> None:
 
     if not history:
         st.error(
-            "No sensor telemetry found. Run `python3 orchestrator.py` "
+            "No sensor telemetry found. Run `python orchestrator.py` "
             "or point Telemetry directory at a Presidio cruise folder."
         )
         return
 
-    bundle = load_platform_bundle(selected_platform)
     ship_label = bundle.manifest.get("ship_class_label", bundle.platform_id)
-    desc = (bundle.layout.get("description") or "")[:80]
+    desc = (bundle.layout.get("description") or "")[:120]
 
     st.markdown(
         f"<div style='background:linear-gradient(90deg,{LCARS_GOLD},{LCARS_AMBER});"
@@ -154,8 +170,11 @@ def main() -> None:
         f"{ship_label}</span></div>",
         unsafe_allow_html=True,
     )
-    if desc:
-        st.caption(desc)
+    st.markdown(
+        f"<span style='color:{LCARS_PEACH};font-size:13px;'>"
+        f"Locked deck plan: **{bundle.platform_id}** — {desc}</span>",
+        unsafe_allow_html=True,
+    )
 
     pathogen_data = _load_pathogen_profiles()
     protocol_data = _load_protocols()

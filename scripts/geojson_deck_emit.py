@@ -4,13 +4,17 @@ from __future__ import annotations
 import json
 from typing import Any
 
+from blueprint_shapes import hull_feature, hull_waterline_feature
 
-def emit_from_geojson_file(input_path: str, platform_id: str) -> dict[str, Any]:
+
+def emit_from_geojson_file(
+    input_path: str,
+    platform_id: str,
+    layout: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     with open(input_path, encoding="utf-8") as fh:
         raw = json.load(fh)
     features: list[dict[str, Any]] = []
-    xs: list[float] = []
-    ys: list[float] = []
 
     for feat in raw.get("features", []):
         geom = feat.get("geometry", {})
@@ -19,9 +23,6 @@ def emit_from_geojson_file(input_path: str, platform_id: str) -> dict[str, Any]:
 
         if gtype == "Polygon":
             ring = [[float(p[0]), float(p[1])] for p in geom["coordinates"][0]]
-            for pt in ring:
-                xs.append(pt[0])
-                ys.append(pt[1])
             zid = props.get("ROOM_NAME", props.get("NAME", "zone")).replace(" ", "_")
             features.append({
                 "type": "Feature",
@@ -35,28 +36,21 @@ def emit_from_geojson_file(input_path: str, platform_id: str) -> dict[str, Any]:
             })
         elif gtype == "LineString":
             coords = [[float(p[0]), float(p[1])] for p in geom["coordinates"]]
-            for pt in coords:
-                xs.append(pt[0])
-                ys.append(pt[1])
             features.append({
                 "type": "Feature",
                 "properties": {"kind": "hvac_path"},
                 "geometry": {"type": "LineString", "coordinates": coords},
             })
 
-    if xs and ys:
-        pad = 3.0
-        hull = [
-            [min(xs) - pad, min(ys) - pad],
-            [max(xs) + pad, min(ys) - pad],
-            [max(xs) + pad, max(ys) + pad],
-            [min(xs) - pad, max(ys) + pad],
-            [min(xs) - pad, min(ys) - pad],
-        ]
-        features.insert(0, {
-            "type": "Feature",
-            "properties": {"kind": "hull_outline", "platform_id": platform_id},
-            "geometry": {"type": "Polygon", "coordinates": [hull]},
-        })
+    dims = (layout or {}).get("deck_dimensions", {}) or {}
+    length_m = float(dims.get("length_m", 120))
+    beam_m = float(dims.get("beam_m", 15))
+
+    hull_feats = [
+        hull_feature(platform_id, length_m, beam_m),
+        hull_waterline_feature(platform_id, length_m, beam_m),
+    ]
+    features = [f for f in features if f.get("properties", {}).get("kind") != "hull_outline"]
+    features = hull_feats + features
 
     return {"type": "FeatureCollection", "features": features}

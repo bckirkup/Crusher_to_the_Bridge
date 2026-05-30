@@ -82,7 +82,7 @@ def render_fleet_operations(default_fleet_root: str) -> None:
         st.warning(f"No telemetry in {cruise_dir}")
         return
 
-    platform_id = resolve_platform_id(history)
+    platform_id, _ = resolve_platform_id(history)
     bundle = load_platform_bundle(platform_id)
 
     c1, c2 = st.columns([1, 3])

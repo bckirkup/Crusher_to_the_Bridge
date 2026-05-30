@@ -33,13 +33,14 @@
     "Passageway_Main"
   ],
   "view_bounds": {
-    "xmin": 5.425000000000001,
-    "xmax": 203.075,
-    "ymin": -3.4624999999999995,
-    "ymax": 35.30499999999999
+    "xmin": 7.51,
+    "xmax": 205.16,
+    "ymin": -3.6739999999999995,
+    "ymax": 34.986
   },
   "assets": {
     "deck_graphics": "deck_graphics.geojson",
-    "deck_hull": "deck_hull.png"
+    "deck_hull": "deck_hull.png",
+    "deck_blueprint_bg": "deck_blueprint_bg.png"
   }
 }

@@ -17,13 +17,14 @@
     "Berthing"
   ],
   "view_bounds": {
-    "xmin": 2.0,
-    "xmax": 113.0,
-    "ymin": -7.0,
-    "ymax": 22.0
+    "xmin": -0.20000000000000018,
+    "xmax": 122.6,
+    "ymin": -4.0,
+    "ymax": 19.0
   },
   "assets": {
     "deck_graphics": "deck_graphics.geojson",
-    "deck_hull": "deck_hull.png"
+    "deck_hull": "deck_hull.png",
+    "deck_blueprint_bg": "deck_blueprint_bg.png"
   }
 }
