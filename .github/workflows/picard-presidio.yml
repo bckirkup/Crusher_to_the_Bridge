@@ -36,7 +36,9 @@ jobs:
           pytest tests/test_picard_framework.py tests/test_decision_engine.py \
             tests/test_presidio_runner.py tests/test_golden_orchestrator.py tests/test_stackelberg.py \
             tests/test_law_compliance.py tests/test_operational_impact.py \
-            tests/test_action_applier.py tests/test_behavioral_syndromic.py -v --tb=short
+            tests/test_action_applier.py tests/test_behavioral_syndromic.py \
+            tests/test_long_read_sequencing.py tests/test_instrument_turnaround.py \
+            -v --tb=short
 
       - name: Import hygiene (Picard / Presidio / Stackelberg)
         env:

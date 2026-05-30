@@ -42,6 +42,8 @@ from crusher_labs.lab_notebook import _stoplight_from_ct
 from orchestrator_types import SimulationState, ObservationEngine, ProtocolContext
 from orchestrator_init import initialize_ship_graph, build_engine
 from orchestrator_epoch import sync_vsp_isolation, step_fred_compliance, run_observation_sampling
+from crusher_labs.instrument_turnaround import InstrumentTurnaroundQueue
+from crusher_labs.modalities.long_read_sequencing import LongReadNanoporeSequencing
 from orchestrator_record import record_epoch, finalize_simulation
 from orchestrator_display import print_executive_summary
 print('Import hygiene OK: modules split correctly, stoplight canonical')
@@ -60,7 +62,9 @@ Expected: Prints success message with no ImportError.
 | Multi-Pathogen | All pathogens in `active_profiles.json` initialize with valid dose-response params |
 | Six pathways | Direct, droplet, HVAC airborne, fomite, food contamination, environmental |
 | Quarantine vs isolation | Quarters confinement vs rare isolation ward (no HVAC) |
-| Epoch Loop | Transmission core, observation sampling, protocol evaluation, cost accounting, **OIS** all execute |
+| Epoch Loop | Transmission core, observation sampling (with TAT delivery), protocol evaluation, cost accounting, **OIS** all execute |
+| Instrument TAT | Delivered `observation_engine` results lag collection per `instrument_turnaround.json` |
+| Long-read (optional) | Enable `long_read_sequencing.enabled` for Nanopore escalation runs |
 | Finalization | `simulation_history.json` and `artificial_lab_notebook.json` written to `telemetry_buffer/` |
 
 ### Verify OIS telemetry (after run)

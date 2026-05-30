@@ -20,7 +20,7 @@ None — all tests run locally.
 ```bash
 python -m pytest tests/ -v --tb=short
 ```
-Expected: All tests pass (~318). Coverage includes data contracts, sanity checker, orchestrator, protocol engine, stoplight, cost ledger, OIS, action applier, behavioral syndromic, telemetry seams, schema module, law compliance, infection counters, transmission pathways (food/environmental), and dashboard helpers.
+Expected: All tests pass (~330). Coverage includes data contracts, sanity checker, orchestrator, protocol engine, stoplight, cost ledger, OIS, action applier, behavioral syndromic, long-read sequencing, instrument TAT, telemetry seams, schema module, law compliance, infection counters, transmission pathways (food/environmental), and dashboard helpers.
 
 ### Run individual test modules
 ```bash
@@ -93,14 +93,13 @@ Expected: 24-epoch run completes with no exceptions; final epoch includes OIS fi
 The full CI pipeline (`.github/workflows/ci.yml`) runs these steps in order:
 1. `pip install -r requirements.txt`
 2. `python tools/sanity_checker.py --from-config` — config validation from `crusher_labs/config.yaml`
-3. `pytest tests/ -v --tb=short` — full test suite
-4. Import hygiene check — verifies orchestrator module split and stoplight deduplication
-5. Dashboard import check — verifies LCARS dashboard and `aggregate_transmission_pathway_totals`
-6. Picard/Presidio/Stackelberg import hygiene
-7. Presidio smoke (`presidio_runner.py` smoke fleet)
-8. Orchestrator import hygiene
-9. Dashboard import
-10. `python orchestrator.py` — 24-epoch smoke test
+3. `pytest tests/ -v --tb=short` — full test suite (~330 tests)
+4. Long-read / TAT targeted tests — `test_long_read_sequencing`, `test_instrument_turnaround`, observation init
+5. Import hygiene check — orchestrator split, stoplights, long-read/TAT imports
+6. Dashboard import check — LCARS dashboard and `aggregate_transmission_pathway_totals`
+7. Picard/Presidio/Stackelberg import hygiene
+8. Presidio smoke (`presidio_runner.py` smoke fleet)
+9. `python orchestrator.py` — 24-epoch smoke test
 
 To replicate CI locally:
 ```bash

@@ -376,7 +376,29 @@ wastewater_sequencing:
   read_depth: 50000                   # WastewaterSequencingGrid instrument
   dirichlet_concentration: 100.0
   pseudocount: 1.0e-6
+
+instrument_turnaround:
+  config_path: "data/config/instrument_turnaround.json"
+
+long_read_sequencing:
+  enabled: false                      # Escalation-only Oxford Nanopore verification
+  params_path: "data/config/long_read_sequencing_params.json"
+  default_profile: "flongle_rapid"    # or minion_standard
 ```
+
+**Instrument turnaround (TAT):** `data/config/instrument_turnaround.json` defines
+how many epochs elapse before each observation instrument’s results appear in
+`observation_engine` and drive stoplights. Defaults include wastewater +1 epoch
+(next-day pooled result), clinical microbiology +3 epochs (culture incubation),
+and rapid assays at 0 epochs. Long-read TAT is taken from the active Nanopore
+deployment profile (`epoch_fraction` or `full_run_hours` in
+`long_read_sequencing_params.json`).
+
+**Long-read sequencing:** When `long_read_sequencing.enabled` is true, mixed-
+infection, discordant, or unexpected signals from **delivered** routine results
+queue Nanopore verification runs. Parameters (read depth, detection limits,
+error injection) live in `data/config/long_read_sequencing_params.json`. Flow-
+cell costs debit when a run is **ordered**, not when results deliver.
 
 **Read depth** for shotgun environmental sequencing and pooled wastewater
 grid sampling is defined only in `config.yaml`. The orchestrator passes
@@ -816,6 +838,7 @@ The trigger defines **when** the SOP activates:
 | `targeted_surface_swab` | Surface swab |
 | `wastewater_sequencing_grid` | Wastewater grid |
 | `clinical_rdt`, `clinical_qpcr`, `clinical_microbiology` | Sickbay instruments |
+| `long_read_verification_sequencing` | Escalation Nanopore verification (per request id) |
 | `wearable_physiological_monitor` | Per-agent wearable RED (e.g. fever) |
 | `wearable_fleet_monitor` | Shipwide fever/anomaly rates |
 | `detection_escalation` | Integrated syndromic + wearable + env + clinical modes |
@@ -1324,16 +1347,17 @@ python tools/sanity_checker.py --from-config
 pytest tests/ -v --tb=short
 ```
 
-The suite includes **~318 tests** across data contracts, sanity checker,
+The suite includes **~330 tests** across data contracts, sanity checker,
 orchestrator/quarantine logic, infection counters, orthogonal agent axes,
 wearable/detection-escalation protocol engine, sequencing config wiring,
+long-read Nanopore verification, instrument turnaround (TAT),
 per-test cost accounting, **operational impact (OIS)**, **action applier**,
 **behavioral syndromic**, transmission pathways (food/environmental),
 dashboard helpers, law compliance, telemetry seams, and **Picard / Presidio /
 Stackelberg** framework tests. CI (`.github/workflows/ci.yml`) runs sanity checks,
 full pytest, Picard/Presidio import hygiene, Presidio smoke, orchestrator import
 hygiene, dashboard import, and a 24-epoch orchestrator run. Framework-focused
-checks and Stackelberg JSON schema validation run in `.github/workflows/picard-presidio.yml`.
+checks, long-read/TAT tests, and Stackelberg JSON schema validation run in `.github/workflows/picard-presidio.yml`.
 See `AGENTS.md` for cloud agent commands.
 
 | Module | Focus |
