@@ -37,5 +37,13 @@
     "deck_graphics": "deck_graphics.geojson",
     "deck_hull": "deck_hull.png",
     "deck_blueprint_bg": "deck_blueprint_bg.png"
+  },
+  "background_plate": "reference_photo_composite",
+  "reference_photo": {
+    "wikimedia_title": null,
+    "source_page": "https://memory-beta.fandom.com/wiki/File:Galaxy_class_ortho.jpg",
+    "license": "Fan reference (Memory Beta; Star Trek © Paramount)",
+    "credit": "Memory Beta — Galaxy-class orthographic schematic (non-canon fan wiki)",
+    "local_file": "reference_photo.jpg"
   }
 }

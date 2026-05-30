@@ -38,5 +38,12 @@
     "deck_graphics": "deck_graphics.geojson",
     "deck_hull": "deck_hull.png",
     "deck_blueprint_bg": "deck_blueprint_bg.png"
+  },
+  "background_plate": "reference_photo_composite",
+  "reference_photo": {
+    "wikimedia_title": "File:USCG National Security Cutter BERTHOLF (WMSL-750).jpeg",
+    "license": "Public domain (US Coast Guard)",
+    "credit": "US Coast Guard — USCGC Bertholf (WMSL-750), sea trials, 2007",
+    "local_file": "reference_photo.jpg"
   }
 }

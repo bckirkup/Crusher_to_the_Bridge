@@ -29,6 +29,13 @@
         "deck_graphics": "deck_graphics.geojson",
         "deck_hull": "deck_hull.png",
         "deck_blueprint_bg": "deck_blueprint_bg.png"
+      },
+      "background_plate": "reference_photo_composite",
+      "reference_photo": {
+        "wikimedia_title": "File:USS Arleigh Burke (DDG 51) steams through the Mediterranean Sea.jpg",
+        "license": "Public domain (US Navy)",
+        "credit": "US Navy — USS Arleigh Burke (DDG-51), Mediterranean Sea",
+        "local_file": "reference_photo.jpg"
       }
     },
     "fletcher_class_destroyer": {
@@ -73,6 +80,13 @@
         "deck_graphics": "deck_graphics.geojson",
         "deck_hull": "deck_hull.png",
         "deck_blueprint_bg": "deck_blueprint_bg.png"
+      },
+      "background_plate": "reference_photo_composite",
+      "reference_photo": {
+        "wikimedia_title": "File:Fletcher-class destroyer technical drawing 1954.jpg",
+        "license": "Public domain (US Navy)",
+        "credit": "US Navy All Hands magazine, 1954 — Fletcher-class technical drawing",
+        "local_file": "reference_photo.jpg"
       }
     },
     "legend_class_nsc": {
@@ -115,6 +129,13 @@
         "deck_graphics": "deck_graphics.geojson",
         "deck_hull": "deck_hull.png",
         "deck_blueprint_bg": "deck_blueprint_bg.png"
+      },
+      "background_plate": "reference_photo_composite",
+      "reference_photo": {
+        "wikimedia_title": "File:USCG National Security Cutter BERTHOLF (WMSL-750).jpeg",
+        "license": "Public domain (US Coast Guard)",
+        "credit": "US Coast Guard — USCGC Bertholf (WMSL-750), sea trials, 2007",
+        "local_file": "reference_photo.jpg"
       }
     },
     "san_antonio_class_lpd": {
@@ -161,6 +182,13 @@
         "deck_graphics": "deck_graphics.geojson",
         "deck_hull": "deck_hull.png",
         "deck_blueprint_bg": "deck_blueprint_bg.png"
+      },
+      "background_plate": "reference_photo_composite",
+      "reference_photo": {
+        "wikimedia_title": "File:LPD-17 Class.jpg",
+        "license": "Public domain (US Navy)",
+        "credit": "US Navy — USS San Antonio (LPD-17), San Antonio class",
+        "local_file": "reference_photo.jpg"
       }
     },
     "expedition_cruise_300": {
@@ -210,6 +238,13 @@
         "deck_graphics": "deck_graphics.geojson",
         "deck_hull": "deck_hull.png",
         "deck_blueprint_bg": "deck_blueprint_bg.png"
+      },
+      "background_plate": "reference_photo_composite",
+      "reference_photo": {
+        "wikimedia_title": "File:Cruise ship side view.png",
+        "license": "CC BY-SA 3.0",
+        "credit": "Marcusroos / Wikimedia Commons — cruise ship side elevation (schematic)",
+        "local_file": "reference_photo.jpg"
       }
     },
     "mega_cruise_5000": {
@@ -301,6 +336,13 @@
         "deck_graphics": "deck_graphics.geojson",
         "deck_hull": "deck_hull.png",
         "deck_blueprint_bg": "deck_blueprint_bg.png"
+      },
+      "background_plate": "reference_photo_composite",
+      "reference_photo": {
+        "wikimedia_title": "File:Icon of the Seas (kahunapulej).jpg",
+        "license": "CC BY-SA 2.0",
+        "credit": "Kahunapule Michael Johnson / Wikimedia Commons — Icon of the Seas (Royal Caribbean)",
+        "local_file": "reference_photo.jpg"
       }
     },
     "enterprise_constitution_tos": {
@@ -338,6 +380,13 @@
         "deck_graphics": "deck_graphics.geojson",
         "deck_hull": "deck_hull.png",
         "deck_blueprint_bg": "deck_blueprint_bg.png"
+      },
+      "background_plate": "reference_photo_composite",
+      "reference_photo": {
+        "wikimedia_title": "File:USS Enterprise (CVN-65) underway in the Atlantic Ocean on 14 June 2004 (040614-N-0119G-020).jpg",
+        "license": "Public domain (US Navy)",
+        "credit": "US Navy — USS Enterprise (CVN-65); fiction-adapted Constitution-era explorer silhouette",
+        "local_file": "reference_photo.jpg"
       }
     },
     "enterprise_galaxy_tng": {
@@ -379,6 +428,14 @@
         "deck_graphics": "deck_graphics.geojson",
         "deck_hull": "deck_hull.png",
         "deck_blueprint_bg": "deck_blueprint_bg.png"
+      },
+      "background_plate": "reference_photo_composite",
+      "reference_photo": {
+        "wikimedia_title": null,
+        "source_page": "https://memory-beta.fandom.com/wiki/File:Galaxy_class_ortho.jpg",
+        "license": "Fan reference (Memory Beta; Star Trek © Paramount)",
+        "credit": "Memory Beta — Galaxy-class orthographic schematic (non-canon fan wiki)",
+        "local_file": "reference_photo.jpg"
       }
     }
   }
