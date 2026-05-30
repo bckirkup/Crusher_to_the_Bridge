@@ -1,0 +1,1518 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hull_outline",
+        "platform_id": "expedition_cruise_300"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              7.8500000000000005,
+              8.4
+            ],
+            [
+              31.400000000000002,
+              2.1
+            ],
+            [
+              117.75,
+              1.68
+            ],
+            [
+              149.15,
+              7.35
+            ],
+            [
+              141.3,
+              14.7
+            ],
+            [
+              78.5,
+              19.32
+            ],
+            [
+              15.700000000000001,
+              16.8
+            ],
+            [
+              7.8500000000000005,
+              8.4
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "compartment",
+        "zone_id": "Bridge",
+        "deck": "7_Sun",
+        "room_type": "Free"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              147.65212862362523,
+              8.004309330081437
+            ],
+            [
+              152.34787137637477,
+              8.004309330081437
+            ],
+            [
+              152.34787137637477,
+              11.995690669918563
+            ],
+            [
+              147.65212862362523,
+              11.995690669918563
+            ],
+            [
+              147.65212862362523,
+              8.004309330081437
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "compartment",
+        "zone_id": "Pool_Deck",
+        "deck": "7_Sun",
+        "room_type": "Free"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              74.32935188889313,
+              5.179949105559155
+            ],
+            [
+              85.67064811110687,
+              5.179949105559155
+            ],
+            [
+              85.67064811110687,
+              14.820050894440845
+            ],
+            [
+              74.32935188889313,
+              14.820050894440845
+            ],
+            [
+              74.32935188889313,
+              5.179949105559155
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "compartment",
+        "zone_id": "Observation_Lounge",
+        "deck": "7_Sun",
+        "room_type": "Free"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              35.990246266913644,
+              6.591709326876595
+            ],
+            [
+              44.009753733086356,
+              6.591709326876595
+            ],
+            [
+              44.009753733086356,
+              13.408290673123405
+            ],
+            [
+              35.990246266913644,
+              13.408290673123405
+            ],
+            [
+              35.990246266913644,
+              6.591709326876595
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "compartment",
+        "zone_id": "Gym",
+        "deck": "6_Explorer",
+        "room_type": "Free"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              137.1244565730979,
+              22.555788087133198
+            ],
+            [
+              142.8755434269021,
+              22.555788087133198
+            ],
+            [
+              142.8755434269021,
+              27.444211912866802
+            ],
+            [
+              137.1244565730979,
+              27.444211912866802
+            ],
+            [
+              137.1244565730979,
+              22.555788087133198
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "compartment",
+        "zone_id": "Spa",
+        "deck": "6_Explorer",
+        "room_type": "Free"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              127.28891165765481,
+              22.695574909006588
+            ],
+            [
+              132.7110883423452,
+              22.695574909006588
+            ],
+            [
+              132.7110883423452,
+              27.304425090993412
+            ],
+            [
+              127.28891165765481,
+              27.304425090993412
+            ],
+            [
+              127.28891165765481,
+              22.695574909006588
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "compartment",
+        "zone_id": "Buffet_Lido",
+        "deck": "6_Explorer",
+        "room_type": "Dining"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              53.850548804974544,
+              21.046781374626494
+            ],
+            [
+              66.14945119502545,
+              21.046781374626494
+            ],
+            [
+              66.14945119502545,
+              28.953218625373506
+            ],
+            [
+              53.850548804974544,
+              28.953218625373506
+            ],
+            [
+              53.850548804974544,
+              21.046781374626494
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "compartment",
+        "zone_id": "Expedition_Lounge",
+        "deck": "6_Explorer",
+        "room_type": "Free"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              26.41356723191414,
+              21.95153214712702
+            ],
+            [
+              33.58643276808586,
+              21.95153214712702
+            ],
+            [
+              33.58643276808586,
+              28.04846785287298
+            ],
+            [
+              26.41356723191414,
+              28.04846785287298
+            ],
+            [
+              26.41356723191414,
+              21.95153214712702
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "compartment",
+        "zone_id": "Cabin_Deck6_Port",
+        "deck": "6_Explorer",
+        "room_type": "Room"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              92.79730953046017,
+              22.79730953046016
+            ],
+            [
+              107.20269046953983,
+              22.79730953046016
+            ],
+            [
+              107.20269046953983,
+              37.20269046953984
+            ],
+            [
+              92.79730953046017,
+              37.20269046953984
+            ],
+            [
+              92.79730953046017,
+              22.79730953046016
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "compartment",
+        "zone_id": "Cabin_Deck6_Stbd",
+        "deck": "6_Explorer",
+        "room_type": "Room"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              92.79730953046017,
+              12.797309530460161
+            ],
+            [
+              107.20269046953983,
+              12.797309530460161
+            ],
+            [
+              107.20269046953983,
+              27.20269046953984
+            ],
+            [
+              92.79730953046017,
+              27.20269046953984
+            ],
+            [
+              92.79730953046017,
+              12.797309530460161
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "compartment",
+        "zone_id": "Main_Dining_Room",
+        "deck": "5_Panorama",
+        "room_type": "Dining"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              27.061092644450373,
+              34.89641670000381
+            ],
+            [
+              42.938907355549624,
+              34.89641670000381
+            ],
+            [
+              42.938907355549624,
+              45.10358329999619
+            ],
+            [
+              27.061092644450373,
+              45.10358329999619
+            ],
+            [
+              27.061092644450373,
+              34.89641670000381
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "compartment",
+        "zone_id": "Theater_Lounge",
+        "deck": "5_Panorama",
+        "room_type": "Free"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              63.81281566461771,
+              34.74089331492505
+            ],
+            [
+              76.18718433538228,
+              34.74089331492505
+            ],
+            [
+              76.18718433538228,
+              45.25910668507495
+            ],
+            [
+              63.81281566461771,
+              45.25910668507495
+            ],
+            [
+              63.81281566461771,
+              34.74089331492505
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "compartment",
+        "zone_id": "Casino",
+        "deck": "5_Panorama",
+        "room_type": "Free"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              97.46400906941685,
+              37.84440770900432
+            ],
+            [
+              102.53599093058315,
+              37.84440770900432
+            ],
+            [
+              102.53599093058315,
+              42.15559229099568
+            ],
+            [
+              97.46400906941685,
+              42.15559229099568
+            ],
+            [
+              97.46400906941685,
+              37.84440770900432
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "compartment",
+        "zone_id": "Library",
+        "deck": "5_Panorama",
+        "room_type": "Free"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              118.0,
+              38.3
+            ],
+            [
+              122.0,
+              38.3
+            ],
+            [
+              122.0,
+              41.7
+            ],
+            [
+              118.0,
+              41.7
+            ],
+            [
+              118.0,
+              38.3
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "compartment",
+        "zone_id": "Cabin_Deck5_Port",
+        "deck": "5_Panorama",
+        "room_type": "Room"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              92.79730953046017,
+              40.79730953046016
+            ],
+            [
+              107.20269046953983,
+              40.79730953046016
+            ],
+            [
+              107.20269046953983,
+              55.20269046953984
+            ],
+            [
+              92.79730953046017,
+              55.20269046953984
+            ],
+            [
+              92.79730953046017,
+              40.79730953046016
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "compartment",
+        "zone_id": "Cabin_Deck5_Stbd",
+        "deck": "5_Panorama",
+        "room_type": "Room"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              92.79730953046017,
+              24.79730953046016
+            ],
+            [
+              107.20269046953983,
+              24.79730953046016
+            ],
+            [
+              107.20269046953983,
+              39.20269046953984
+            ],
+            [
+              92.79730953046017,
+              39.20269046953984
+            ],
+            [
+              92.79730953046017,
+              24.79730953046016
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "compartment",
+        "zone_id": "MedBay",
+        "deck": "4_Voyager",
+        "room_type": "Medical"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              78.0,
+              53.3
+            ],
+            [
+              82.0,
+              53.3
+            ],
+            [
+              82.0,
+              56.7
+            ],
+            [
+              78.0,
+              56.7
+            ],
+            [
+              78.0,
+              53.3
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "compartment",
+        "zone_id": "Reception_Lobby",
+        "deck": "4_Voyager",
+        "room_type": "Free"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              66.7260497865728,
+              52.21714231858688
+            ],
+            [
+              73.2739502134272,
+              52.21714231858688
+            ],
+            [
+              73.2739502134272,
+              57.78285768141312
+            ],
+            [
+              66.7260497865728,
+              57.78285768141312
+            ],
+            [
+              66.7260497865728,
+              52.21714231858688
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "compartment",
+        "zone_id": "Cabin_Deck4_Port",
+        "deck": "4_Voyager",
+        "room_type": "Room"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              92.79730953046017,
+              52.79730953046016
+            ],
+            [
+              107.20269046953983,
+              52.79730953046016
+            ],
+            [
+              107.20269046953983,
+              67.20269046953983
+            ],
+            [
+              92.79730953046017,
+              67.20269046953983
+            ],
+            [
+              92.79730953046017,
+              52.79730953046016
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "compartment",
+        "zone_id": "Cabin_Deck4_Stbd",
+        "deck": "4_Voyager",
+        "room_type": "Room"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              92.79730953046017,
+              42.79730953046016
+            ],
+            [
+              107.20269046953983,
+              42.79730953046016
+            ],
+            [
+              107.20269046953983,
+              57.20269046953984
+            ],
+            [
+              92.79730953046017,
+              57.20269046953984
+            ],
+            [
+              92.79730953046017,
+              42.79730953046016
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "compartment",
+        "zone_id": "Galley",
+        "deck": "3_Marina",
+        "room_type": "Dining"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              39.3863447736791,
+              64.39122164022227
+            ],
+            [
+              50.6136552263209,
+              64.39122164022227
+            ],
+            [
+              50.6136552263209,
+              71.60877835977773
+            ],
+            [
+              39.3863447736791,
+              71.60877835977773
+            ],
+            [
+              39.3863447736791,
+              64.39122164022227
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "compartment",
+        "zone_id": "Crew_Mess",
+        "deck": "3_Marina",
+        "room_type": "Dining"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              56.44961269718359,
+              65.71760816247516
+            ],
+            [
+              63.55038730281641,
+              65.71760816247516
+            ],
+            [
+              63.55038730281641,
+              70.28239183752484
+            ],
+            [
+              56.44961269718359,
+              70.28239183752484
+            ],
+            [
+              56.44961269718359,
+              65.71760816247516
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "compartment",
+        "zone_id": "Laundry",
+        "deck": "3_Marina",
+        "room_type": "Free"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              97.73174075555725,
+              66.07197964222367
+            ],
+            [
+              102.26825924444275,
+              66.07197964222367
+            ],
+            [
+              102.26825924444275,
+              69.92802035777633
+            ],
+            [
+              97.73174075555725,
+              69.92802035777633
+            ],
+            [
+              97.73174075555725,
+              66.07197964222367
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "compartment",
+        "zone_id": "Crew_Quarters",
+        "deck": "3_Marina",
+        "room_type": "Room"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.10984791021112,
+              64.10984791021112
+            ],
+            [
+              87.89015208978888,
+              64.10984791021112
+            ],
+            [
+              87.89015208978888,
+              79.89015208978888
+            ],
+            [
+              72.10984791021112,
+              79.89015208978888
+            ],
+            [
+              72.10984791021112,
+              64.10984791021112
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "compartment",
+        "zone_id": "Stores",
+        "deck": "3_Marina",
+        "room_type": "Free"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              116.41356723191414,
+              64.95153214712703
+            ],
+            [
+              123.58643276808586,
+              64.95153214712703
+            ],
+            [
+              123.58643276808586,
+              71.04846785287297
+            ],
+            [
+              116.41356723191414,
+              71.04846785287297
+            ],
+            [
+              116.41356723191414,
+              64.95153214712703
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "compartment",
+        "zone_id": "Engine_Room",
+        "deck": "2_Engine",
+        "room_type": "Free"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              51.21506972139221,
+              74.53280926318338
+            ],
+            [
+              68.78493027860779,
+              74.53280926318338
+            ],
+            [
+              68.78493027860779,
+              89.46719073681662
+            ],
+            [
+              51.21506972139221,
+              89.46719073681662
+            ],
+            [
+              51.21506972139221,
+              74.53280926318338
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "Bridge",
+        "to": "Observation_Lounge"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            150.0,
+            10.0
+          ],
+          [
+            40.0,
+            10.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "Observation_Lounge",
+        "to": "Pool_Deck"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            40.0,
+            10.0
+          ],
+          [
+            80.0,
+            10.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "Gym",
+        "to": "Spa"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            140.0,
+            25.0
+          ],
+          [
+            130.0,
+            25.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "Spa",
+        "to": "Cabin_Deck6_Port"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            130.0,
+            25.0
+          ],
+          [
+            100.0,
+            30.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "Buffet_Lido",
+        "to": "Pool_Deck"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            60.0,
+            25.0
+          ],
+          [
+            80.0,
+            10.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "Buffet_Lido",
+        "to": "Cabin_Deck6_Stbd"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            60.0,
+            25.0
+          ],
+          [
+            100.0,
+            20.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "Expedition_Lounge",
+        "to": "Buffet_Lido"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            30.0,
+            25.0
+          ],
+          [
+            60.0,
+            25.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "Cabin_Deck6_Port",
+        "to": "Cabin_Deck6_Stbd"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            100.0,
+            30.0
+          ],
+          [
+            100.0,
+            20.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "Main_Dining_Room",
+        "to": "Theater_Lounge"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            35.0,
+            40.0
+          ],
+          [
+            70.0,
+            40.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "Theater_Lounge",
+        "to": "Casino"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            70.0,
+            40.0
+          ],
+          [
+            100.0,
+            40.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "Casino",
+        "to": "Library"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            100.0,
+            40.0
+          ],
+          [
+            120.0,
+            40.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "Cabin_Deck5_Port",
+        "to": "Cabin_Deck5_Stbd"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            100.0,
+            48.0
+          ],
+          [
+            100.0,
+            32.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "Cabin_Deck5_Port",
+        "to": "Main_Dining_Room"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            100.0,
+            48.0
+          ],
+          [
+            35.0,
+            40.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "MedBay",
+        "to": "Reception_Lobby"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            80.0,
+            55.0
+          ],
+          [
+            70.0,
+            55.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "Reception_Lobby",
+        "to": "Cabin_Deck4_Port"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            70.0,
+            55.0
+          ],
+          [
+            100.0,
+            60.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "Cabin_Deck4_Port",
+        "to": "Cabin_Deck4_Stbd"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            100.0,
+            60.0
+          ],
+          [
+            100.0,
+            50.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "Reception_Lobby",
+        "to": "Cabin_Deck4_Stbd"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            70.0,
+            55.0
+          ],
+          [
+            100.0,
+            50.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "Galley",
+        "to": "Crew_Mess"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            45.0,
+            68.0
+          ],
+          [
+            60.0,
+            68.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "Crew_Mess",
+        "to": "Crew_Quarters"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            60.0,
+            68.0
+          ],
+          [
+            80.0,
+            72.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "Crew_Quarters",
+        "to": "Laundry"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            80.0,
+            72.0
+          ],
+          [
+            100.0,
+            68.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "Stores",
+        "to": "Galley"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            120.0,
+            68.0
+          ],
+          [
+            45.0,
+            68.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "Engine_Room",
+        "to": "Stores"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            60.0,
+            82.0
+          ],
+          [
+            120.0,
+            68.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "Engine_Room",
+        "to": "Crew_Quarters"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            60.0,
+            82.0
+          ],
+          [
+            80.0,
+            72.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "Buffet_Lido",
+        "to": "Main_Dining_Room"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            60.0,
+            25.0
+          ],
+          [
+            35.0,
+            40.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "Reception_Lobby",
+        "to": "Theater_Lounge"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            70.0,
+            55.0
+          ],
+          [
+            70.0,
+            40.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "Galley",
+        "to": "Main_Dining_Room"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            45.0,
+            68.0
+          ],
+          [
+            35.0,
+            40.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "Crew_Quarters",
+        "to": "Reception_Lobby"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            80.0,
+            72.0
+          ],
+          [
+            70.0,
+            55.0
+          ]
+        ]
+      }
+    }
+  ]
+}

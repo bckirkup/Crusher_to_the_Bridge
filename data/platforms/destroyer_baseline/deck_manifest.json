@@ -1,0 +1,29 @@
+{
+  "platform_id": "destroyer_baseline",
+  "ship_class_label": "Destroyer baseline",
+  "footprint_tier": "gis_traced",
+  "representative_of": "Baseline destroyer-class spatial layout for infection-dynamics simulation",
+  "provenance": [
+    "spatial_layout.json description and deck_dimensions",
+    "zone count: 6"
+  ],
+  "disclaimer": "Derived from GIS-traced compartment polygons.",
+  "zone_ids": [
+    "Bridge",
+    "MedBay",
+    "Mess_Hall",
+    "Engine_Room",
+    "Galley",
+    "Berthing"
+  ],
+  "view_bounds": {
+    "xmin": 2.0,
+    "xmax": 113.0,
+    "ymin": -7.0,
+    "ymax": 22.0
+  },
+  "assets": {
+    "deck_graphics": "deck_graphics.geojson",
+    "deck_hull": "deck_hull.png"
+  }
+}

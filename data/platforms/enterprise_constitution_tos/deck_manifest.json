@@ -1,0 +1,36 @@
+{
+  "platform_id": "enterprise_constitution_tos",
+  "ship_class_label": "Constitution-class (fiction-adapted)",
+  "footprint_tier": "fiction_adapted",
+  "representative_of": "Constitution-class heavy cruiser (NCC-1701 era). Fiction-adapted 12-zone layout for Crusher-to-the-Bridge demos; ~430 crew complement.",
+  "provenance": [
+    "spatial_layout.json description and deck_dimensions",
+    "zone count: 13"
+  ],
+  "disclaimer": "Fiction-adapted layout for demonstration; not an official starship blueprint.",
+  "zone_ids": [
+    "Bridge",
+    "Sickbay",
+    "Engineering",
+    "Transporter_Room",
+    "Rec_Deck",
+    "Galley",
+    "Science_Lab",
+    "Communications",
+    "Security_Station",
+    "Crew_Quarters",
+    "Officer_Quarters",
+    "Library",
+    "Mess_Hall"
+  ],
+  "view_bounds": {
+    "xmin": 3.0,
+    "xmax": 127.0,
+    "ymin": -2.0,
+    "ymax": 51.0
+  },
+  "assets": {
+    "deck_graphics": "deck_graphics.geojson",
+    "deck_hull": "deck_hull.png"
+  }
+}

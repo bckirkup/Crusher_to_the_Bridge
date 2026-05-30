@@ -1,0 +1,40 @@
+{
+  "platform_id": "enterprise_galaxy_tng",
+  "ship_class_label": "Galaxy-class (fiction-adapted)",
+  "footprint_tier": "fiction_adapted",
+  "representative_of": "Galaxy-class explorer (NCC-1701-D era). Fiction-adapted 16-zone layout; mixed crew and civilian families.",
+  "provenance": [
+    "spatial_layout.json description and deck_dimensions",
+    "zone count: 17"
+  ],
+  "disclaimer": "Fiction-adapted layout for demonstration; not an official starship blueprint.",
+  "zone_ids": [
+    "Bridge",
+    "Ten_Forward",
+    "Sickbay",
+    "Main_Engineering",
+    "Holodeck",
+    "Crew_Quarters",
+    "Family_Quarters",
+    "Science_Labs",
+    "Shuttlebay",
+    "Cargo_Bay",
+    "Galley",
+    "Crew_Lounge",
+    "Security_Office",
+    "Arboretum",
+    "Stellar_Cartography",
+    "Schoolroom",
+    "Mess_Hall"
+  ],
+  "view_bounds": {
+    "xmin": 0.0,
+    "xmax": 133.0,
+    "ymin": -3.0,
+    "ymax": 55.0
+  },
+  "assets": {
+    "deck_graphics": "deck_graphics.geojson",
+    "deck_hull": "deck_hull.png"
+  }
+}

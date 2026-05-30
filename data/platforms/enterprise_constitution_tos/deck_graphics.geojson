@@ -1,0 +1,530 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "platform_id": "enterprise_constitution_tos",
+        "kind": "hull_outline"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              30,
+              6
+            ],
+            [
+              70,
+              3
+            ],
+            [
+              110,
+              10
+            ],
+            [
+              115,
+              28
+            ],
+            [
+              108,
+              40
+            ],
+            [
+              75,
+              45
+            ],
+            [
+              45,
+              42
+            ],
+            [
+              25,
+              32
+            ],
+            [
+              20,
+              18
+            ],
+            [
+              30,
+              6
+            ],
+            [
+              15,
+              38
+            ],
+            [
+              8,
+              42
+            ],
+            [
+              12,
+              44
+            ],
+            [
+              30,
+              6
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "zone_id": "Bridge",
+        "deck": "saucer_primary",
+        "kind": "compartment"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              112,
+              6
+            ],
+            [
+              122,
+              6
+            ],
+            [
+              122,
+              12
+            ],
+            [
+              112,
+              12
+            ],
+            [
+              112,
+              6
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "zone_id": "Sickbay",
+        "deck": "saucer_primary",
+        "kind": "compartment"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              88,
+              14
+            ],
+            [
+              102,
+              14
+            ],
+            [
+              102,
+              22
+            ],
+            [
+              88,
+              22
+            ],
+            [
+              88,
+              14
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "zone_id": "Engineering",
+        "deck": "saucer_primary",
+        "kind": "compartment"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              48,
+              38
+            ],
+            [
+              62,
+              38
+            ],
+            [
+              62,
+              46
+            ],
+            [
+              48,
+              46
+            ],
+            [
+              48,
+              38
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "zone_id": "Transporter_Room",
+        "deck": "saucer_primary",
+        "kind": "compartment"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72,
+              24
+            ],
+            [
+              84,
+              24
+            ],
+            [
+              84,
+              32
+            ],
+            [
+              72,
+              32
+            ],
+            [
+              72,
+              24
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "zone_id": "Rec_Deck",
+        "deck": "saucer_primary",
+        "kind": "compartment"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              58,
+              8
+            ],
+            [
+              72,
+              8
+            ],
+            [
+              72,
+              16
+            ],
+            [
+              58,
+              16
+            ],
+            [
+              58,
+              8
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "zone_id": "Galley",
+        "deck": "saucer_primary",
+        "kind": "compartment"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              52,
+              14
+            ],
+            [
+              62,
+              14
+            ],
+            [
+              62,
+              20
+            ],
+            [
+              52,
+              20
+            ],
+            [
+              52,
+              14
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "zone_id": "Science_Lab",
+        "deck": "saucer_primary",
+        "kind": "compartment"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              82,
+              28
+            ],
+            [
+              96,
+              28
+            ],
+            [
+              96,
+              36
+            ],
+            [
+              82,
+              36
+            ],
+            [
+              82,
+              28
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "zone_id": "Communications",
+        "deck": "saucer_primary",
+        "kind": "compartment"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              100,
+              18
+            ],
+            [
+              110,
+              18
+            ],
+            [
+              110,
+              26
+            ],
+            [
+              100,
+              26
+            ],
+            [
+              100,
+              18
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "zone_id": "Security_Station",
+        "deck": "saucer_primary",
+        "kind": "compartment"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              68,
+              32
+            ],
+            [
+              78,
+              32
+            ],
+            [
+              78,
+              38
+            ],
+            [
+              68,
+              38
+            ],
+            [
+              68,
+              32
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "zone_id": "Crew_Quarters",
+        "deck": "saucer_primary",
+        "kind": "compartment"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              38,
+              4
+            ],
+            [
+              52,
+              4
+            ],
+            [
+              52,
+              12
+            ],
+            [
+              38,
+              12
+            ],
+            [
+              38,
+              4
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "zone_id": "Officer_Quarters",
+        "deck": "saucer_primary",
+        "kind": "compartment"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              44,
+              18
+            ],
+            [
+              56,
+              18
+            ],
+            [
+              56,
+              26
+            ],
+            [
+              44,
+              26
+            ],
+            [
+              44,
+              18
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "zone_id": "Library",
+        "deck": "saucer_primary",
+        "kind": "compartment"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              56,
+              34
+            ],
+            [
+              68,
+              34
+            ],
+            [
+              68,
+              42
+            ],
+            [
+              56,
+              42
+            ],
+            [
+              56,
+              34
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "zone_id": "Mess_Hall",
+        "deck": "saucer_primary",
+        "kind": "compartment"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              62,
+              5
+            ],
+            [
+              72,
+              5
+            ],
+            [
+              72,
+              11
+            ],
+            [
+              62,
+              11
+            ],
+            [
+              62,
+              5
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}

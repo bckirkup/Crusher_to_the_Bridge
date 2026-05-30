@@ -1,0 +1,43 @@
+{
+  "platform_id": "fletcher_class_destroyer",
+  "ship_class_label": "Fletcher-class DD (representative)",
+  "footprint_tier": "representative",
+  "representative_of": "WWII Fletcher-class destroyer (DD-445 class). 114.7m LOA, 12.0m beam, ~329 crew. Forced-draft ventilation, no HVAC filtration. Hot-bunking in enlisted berthing.",
+  "provenance": [
+    "spatial_layout.json description and deck_dimensions",
+    "zone count: 20"
+  ],
+  "disclaimer": "Footprints are class-representative for simulation zones, not a surveyed deck plan of one vessel.",
+  "zone_ids": [
+    "Bridge",
+    "CIC",
+    "Officers_Quarters",
+    "Enlisted_Berthing_Fwd",
+    "Enlisted_Berthing_Aft",
+    "CPO_Quarters",
+    "Wardroom",
+    "Mess_Deck",
+    "Galley",
+    "Boiler_Room_1",
+    "Boiler_Room_2",
+    "Engine_Room_Fwd",
+    "Engine_Room_Aft",
+    "Magazine_Fwd",
+    "Magazine_Aft",
+    "Sickbay",
+    "Torpedo_Mount_Midships",
+    "Gun_Mount_51",
+    "Radio_Room",
+    "Passageway_Main"
+  ],
+  "view_bounds": {
+    "xmin": 0.7350000000000003,
+    "xmax": 115.0,
+    "ymin": -4.04,
+    "ymax": 16.8
+  },
+  "assets": {
+    "deck_graphics": "deck_graphics.geojson",
+    "deck_hull": "deck_hull.png"
+  }
+}

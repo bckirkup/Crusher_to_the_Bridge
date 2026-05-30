@@ -1,0 +1,377 @@
+{
+  "schema_version": "1.0",
+  "platforms": {
+    "destroyer_baseline": {
+      "platform_id": "destroyer_baseline",
+      "ship_class_label": "Destroyer baseline",
+      "footprint_tier": "gis_traced",
+      "representative_of": "Baseline destroyer-class spatial layout for infection-dynamics simulation",
+      "provenance": [
+        "spatial_layout.json description and deck_dimensions",
+        "zone count: 6"
+      ],
+      "disclaimer": "Derived from GIS-traced compartment polygons.",
+      "zone_ids": [
+        "Bridge",
+        "MedBay",
+        "Mess_Hall",
+        "Engine_Room",
+        "Galley",
+        "Berthing"
+      ],
+      "view_bounds": {
+        "xmin": 2.0,
+        "xmax": 113.0,
+        "ymin": -7.0,
+        "ymax": 22.0
+      },
+      "assets": {
+        "deck_graphics": "deck_graphics.geojson",
+        "deck_hull": "deck_hull.png"
+      }
+    },
+    "fletcher_class_destroyer": {
+      "platform_id": "fletcher_class_destroyer",
+      "ship_class_label": "Fletcher-class DD (representative)",
+      "footprint_tier": "representative",
+      "representative_of": "WWII Fletcher-class destroyer (DD-445 class). 114.7m LOA, 12.0m beam, ~329 crew. Forced-draft ventilation, no HVAC filtration. Hot-bunking in enlisted berthing.",
+      "provenance": [
+        "spatial_layout.json description and deck_dimensions",
+        "zone count: 20"
+      ],
+      "disclaimer": "Footprints are class-representative for simulation zones, not a surveyed deck plan of one vessel.",
+      "zone_ids": [
+        "Bridge",
+        "CIC",
+        "Officers_Quarters",
+        "Enlisted_Berthing_Fwd",
+        "Enlisted_Berthing_Aft",
+        "CPO_Quarters",
+        "Wardroom",
+        "Mess_Deck",
+        "Galley",
+        "Boiler_Room_1",
+        "Boiler_Room_2",
+        "Engine_Room_Fwd",
+        "Engine_Room_Aft",
+        "Magazine_Fwd",
+        "Magazine_Aft",
+        "Sickbay",
+        "Torpedo_Mount_Midships",
+        "Gun_Mount_51",
+        "Radio_Room",
+        "Passageway_Main"
+      ],
+      "view_bounds": {
+        "xmin": 0.7350000000000003,
+        "xmax": 115.0,
+        "ymin": -4.04,
+        "ymax": 16.8
+      },
+      "assets": {
+        "deck_graphics": "deck_graphics.geojson",
+        "deck_hull": "deck_hull.png"
+      }
+    },
+    "legend_class_nsc": {
+      "platform_id": "legend_class_nsc",
+      "ship_class_label": "Legend-class NSC (representative)",
+      "footprint_tier": "representative",
+      "representative_of": "Legend-class National Security Cutter (WMSL-750). 127.4m LOA, 16.5m beam. ~148 crew + aviation det. Modern HVAC with CBRN collective protection system. Helicopter and stern-launch boat capability.",
+      "provenance": [
+        "spatial_layout.json description and deck_dimensions",
+        "zone count: 18"
+      ],
+      "disclaimer": "Footprints are class-representative for simulation zones, not a surveyed deck plan of one vessel.",
+      "zone_ids": [
+        "Bridge",
+        "CIC",
+        "Officers_Quarters",
+        "CPO_Berthing",
+        "Enlisted_Berthing_Fwd",
+        "Enlisted_Berthing_Aft",
+        "Aviation_Det_Berthing",
+        "Wardroom",
+        "Crew_Mess",
+        "Galley",
+        "Sickbay",
+        "Helicopter_Hangar",
+        "Flight_Deck",
+        "Engine_Room",
+        "Boarding_Team_Staging",
+        "Armory",
+        "Boat_Deck",
+        "Passageway_Main"
+      ],
+      "view_bounds": {
+        "xmin": 5.192,
+        "xmax": 126.03,
+        "ymin": -3.6799999999999997,
+        "ymax": 20.7
+      },
+      "assets": {
+        "deck_graphics": "deck_graphics.geojson",
+        "deck_hull": "deck_hull.png"
+      }
+    },
+    "san_antonio_class_lpd": {
+      "platform_id": "san_antonio_class_lpd",
+      "ship_class_label": "San Antonio-class LPD (representative)",
+      "footprint_tier": "representative",
+      "representative_of": "San Antonio-class amphibious transport dock (LPD-17). 208.5m LOA, 31.9m beam. ~360 ship's company + ~800 embarked Marines. Modern HVAC with NBC filtration capability. Well deck and flight deck for amp",
+      "provenance": [
+        "spatial_layout.json description and deck_dimensions",
+        "zone count: 22"
+      ],
+      "disclaimer": "Footprints are class-representative for simulation zones, not a surveyed deck plan of one vessel.",
+      "zone_ids": [
+        "Bridge",
+        "CIC",
+        "Ship_Officers_Quarters",
+        "Ship_CPO_Quarters",
+        "Ship_Enlisted_Berthing",
+        "Troop_Berthing_Fwd",
+        "Troop_Berthing_Mid",
+        "Troop_Berthing_Aft",
+        "Crew_Mess",
+        "Troop_Mess",
+        "Wardroom",
+        "Galley",
+        "Medical_Ward",
+        "Vehicle_Deck",
+        "Well_Deck",
+        "Flight_Deck",
+        "Hangar",
+        "Engine_Room_Fwd",
+        "Engine_Room_Aft",
+        "Troop_Recreation",
+        "Marine_Planning",
+        "Passageway_Main"
+      ],
+      "view_bounds": {
+        "xmin": 5.425000000000001,
+        "xmax": 203.075,
+        "ymin": -3.4624999999999995,
+        "ymax": 35.30499999999999
+      },
+      "assets": {
+        "deck_graphics": "deck_graphics.geojson",
+        "deck_hull": "deck_hull.png"
+      }
+    },
+    "expedition_cruise_300": {
+      "platform_id": "expedition_cruise_300",
+      "ship_class_label": "Expedition cruise (representative)",
+      "footprint_tier": "representative",
+      "representative_of": "Small expedition cruise ship (~300 passengers, ~150 crew). Based on Silver Cloud / Le Boréal class vessels: ~157m LOA × 21m beam, 7 passenger decks, ~17,000 GT. Volumes estimated from published deck p",
+      "provenance": [
+        "spatial_layout.json description and deck_dimensions",
+        "zone count: 25"
+      ],
+      "disclaimer": "Footprints are class-representative for simulation zones, not a surveyed deck plan of one vessel.",
+      "zone_ids": [
+        "Bridge",
+        "Pool_Deck",
+        "Observation_Lounge",
+        "Gym",
+        "Spa",
+        "Buffet_Lido",
+        "Expedition_Lounge",
+        "Cabin_Deck6_Port",
+        "Cabin_Deck6_Stbd",
+        "Main_Dining_Room",
+        "Theater_Lounge",
+        "Casino",
+        "Library",
+        "Cabin_Deck5_Port",
+        "Cabin_Deck5_Stbd",
+        "MedBay",
+        "Reception_Lobby",
+        "Cabin_Deck4_Port",
+        "Cabin_Deck4_Stbd",
+        "Galley",
+        "Crew_Mess",
+        "Laundry",
+        "Crew_Quarters",
+        "Stores",
+        "Engine_Room"
+      ],
+      "view_bounds": {
+        "xmin": 2.8500000000000005,
+        "xmax": 157.34787137637477,
+        "ymin": -3.3200000000000003,
+        "ymax": 94.46719073681662
+      },
+      "assets": {
+        "deck_graphics": "deck_graphics.geojson",
+        "deck_hull": "deck_hull.png"
+      }
+    },
+    "mega_cruise_5000": {
+      "platform_id": "mega_cruise_5000",
+      "ship_class_label": "Mega cruise (representative)",
+      "footprint_tier": "representative",
+      "representative_of": "Mega cruise ship (~5,000 passengers, ~2,000 crew), Oasis-class scale. Based on published Oasis-class specifications (~360-362m LOA, ~64-66m maximum beam, 18 decks, ~226,000 GT, ~2,700-2,800 cabins). I",
+      "provenance": [
+        "spatial_layout.json description and deck_dimensions",
+        "zone count: 67"
+      ],
+      "disclaimer": "Footprints are class-representative for simulation zones, not a surveyed deck plan of one vessel.",
+      "zone_ids": [
+        "Bridge",
+        "Solarium",
+        "Main_Pool_Deck",
+        "Sports_Court",
+        "Waterpark",
+        "Pool_Bar_Grill",
+        "Spa_Fitness_Complex",
+        "Kids_Club",
+        "Teen_Zone",
+        "Central_Park_Open_Atrium",
+        "Royal_Promenade",
+        "Shopping_Retail_Block",
+        "Casino",
+        "Library_Card_Room",
+        "Main_Dining_Room_Lower",
+        "Main_Dining_Room_Upper",
+        "Windjammer_Buffet",
+        "Specialty_Restaurant_Block_A",
+        "Specialty_Restaurant_Block_B",
+        "Cafe_Bakery_Block",
+        "Crew_Mess_Main",
+        "Crew_Mess_Forward",
+        "Main_Theater",
+        "Aqua_Theater",
+        "Ice_Rink_Studio",
+        "Comedy_Club_Lounge",
+        "Medical_Center",
+        "Isolation_Ward",
+        "Main_Galley_Aft",
+        "Buffet_Galley_Upper",
+        "Specialty_Galley_Block",
+        "Central_Stores",
+        "Laundry_Main",
+        "Waste_Treatment_Plant",
+        "Engine_Room_Aft",
+        "Engine_Control_Room",
+        "Passenger_Cabins_D6_Port",
+        "Passenger_Cabins_D6_Stbd",
+        "Passenger_Cabins_D6_Central",
+        "Passenger_Cabins_D7_Port",
+        "Passenger_Cabins_D7_Stbd",
+        "Passenger_Cabins_D7_Central",
+        "Passenger_Cabins_D8_Port",
+        "Passenger_Cabins_D8_Stbd",
+        "Passenger_Cabins_D8_Central",
+        "Passenger_Cabins_D9_Port",
+        "Passenger_Cabins_D9_Stbd",
+        "Passenger_Cabins_D9_Central",
+        "Passenger_Cabins_D10_Port",
+        "Passenger_Cabins_D10_Stbd",
+        "Passenger_Cabins_D10_Central",
+        "Passenger_Cabins_D11_Port",
+        "Passenger_Cabins_D11_Stbd",
+        "Passenger_Cabins_D11_Central",
+        "Passenger_Cabins_D12_Port",
+        "Passenger_Cabins_D12_Stbd",
+        "Passenger_Cabins_D12_Central",
+        "Passenger_Cabins_D13_Port",
+        "Passenger_Cabins_D13_Stbd",
+        "Passenger_Cabins_D13_Central",
+        "Passenger_Cabins_D14_Port",
+        "Passenger_Cabins_D14_Stbd",
+        "Passenger_Cabins_D14_Central",
+        "Crew_Quarters_D1",
+        "Crew_Quarters_D2",
+        "Crew_Quarters_D3",
+        "Crew_Quarters_D4"
+      ],
+      "view_bounds": {
+        "xmin": 2.24,
+        "xmax": 359.76,
+        "ymin": -13.138947456386369,
+        "ymax": 131.4846785287298
+      },
+      "assets": {
+        "deck_graphics": "deck_graphics.geojson",
+        "deck_hull": "deck_hull.png"
+      }
+    },
+    "enterprise_constitution_tos": {
+      "platform_id": "enterprise_constitution_tos",
+      "ship_class_label": "Constitution-class (fiction-adapted)",
+      "footprint_tier": "fiction_adapted",
+      "representative_of": "Constitution-class heavy cruiser (NCC-1701 era). Fiction-adapted 12-zone layout for Crusher-to-the-Bridge demos; ~430 crew complement.",
+      "provenance": [
+        "spatial_layout.json description and deck_dimensions",
+        "zone count: 13"
+      ],
+      "disclaimer": "Fiction-adapted layout for demonstration; not an official starship blueprint.",
+      "zone_ids": [
+        "Bridge",
+        "Sickbay",
+        "Engineering",
+        "Transporter_Room",
+        "Rec_Deck",
+        "Galley",
+        "Science_Lab",
+        "Communications",
+        "Security_Station",
+        "Crew_Quarters",
+        "Officer_Quarters",
+        "Library",
+        "Mess_Hall"
+      ],
+      "view_bounds": {
+        "xmin": 3.0,
+        "xmax": 127.0,
+        "ymin": -2.0,
+        "ymax": 51.0
+      },
+      "assets": {
+        "deck_graphics": "deck_graphics.geojson",
+        "deck_hull": "deck_hull.png"
+      }
+    },
+    "enterprise_galaxy_tng": {
+      "platform_id": "enterprise_galaxy_tng",
+      "ship_class_label": "Galaxy-class (fiction-adapted)",
+      "footprint_tier": "fiction_adapted",
+      "representative_of": "Galaxy-class explorer (NCC-1701-D era). Fiction-adapted 16-zone layout; mixed crew and civilian families.",
+      "provenance": [
+        "spatial_layout.json description and deck_dimensions",
+        "zone count: 17"
+      ],
+      "disclaimer": "Fiction-adapted layout for demonstration; not an official starship blueprint.",
+      "zone_ids": [
+        "Bridge",
+        "Ten_Forward",
+        "Sickbay",
+        "Main_Engineering",
+        "Holodeck",
+        "Crew_Quarters",
+        "Family_Quarters",
+        "Science_Labs",
+        "Shuttlebay",
+        "Cargo_Bay",
+        "Galley",
+        "Crew_Lounge",
+        "Security_Office",
+        "Arboretum",
+        "Stellar_Cartography",
+        "Schoolroom",
+        "Mess_Hall"
+      ],
+      "view_bounds": {
+        "xmin": 0.0,
+        "xmax": 133.0,
+        "ymin": -3.0,
+        "ymax": 55.0
+      },
+      "assets": {
+        "deck_graphics": "deck_graphics.geojson",
+        "deck_hull": "deck_hull.png"
+      }
+    }
+  }
+}

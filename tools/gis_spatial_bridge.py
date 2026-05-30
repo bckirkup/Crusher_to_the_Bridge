@@ -400,6 +400,112 @@ def convert(
     return spatial_path, airflow_path
 
 
+def emit_deck_graphics(
+    input_path: str,
+    output_path: str,
+    platform_id: str | None = None,
+) -> str:
+    """
+    Write deck_graphics.geojson from GIS polygons and lines (visual-only sidecar).
+
+    Compartment polygons use ROOM_NAME/NAME as zone_id; lines become hvac_path features.
+    """
+    gdf = gpd.read_file(input_path)
+    pid = platform_id or os.path.splitext(os.path.basename(input_path))[0]
+
+    poly_mask = gdf.geometry.apply(
+        lambda g: isinstance(g, (Polygon, MultiPolygon)) if g else False
+    )
+    line_mask = gdf.geometry.apply(
+        lambda g: isinstance(g, (LineString, MultiLineString)) if g else False
+    )
+    poly_gdf = gdf[poly_mask].reset_index(drop=True)
+    line_gdf = gdf[line_mask].reset_index(drop=True)
+
+    cols = list(gdf.columns)
+    id_col = _resolve_column(cols, _ID_CANDIDATES, None)
+    deck_col = _resolve_column(cols, _DECK_CANDIDATES, None)
+    type_col = _resolve_column(cols, _TYPE_CANDIDATES, None)
+
+    features: list[dict[str, Any]] = []
+
+    def _ring_from_geom(geom: Any) -> list[list[float]] | None:
+        if geom is None or geom.is_empty:
+            return None
+        if isinstance(geom, MultiPolygon):
+            geom = max(geom.geoms, key=lambda g: g.area)
+        if not isinstance(geom, Polygon):
+            return None
+        ext = list(geom.exterior.coords)
+        return [[float(x), float(y)] for x, y in ext]
+
+    xs: list[float] = []
+    ys: list[float] = []
+
+    for idx, row in poly_gdf.iterrows():
+        geom = row.geometry
+        ring = _ring_from_geom(geom)
+        if not ring:
+            continue
+        for pt in ring:
+            xs.append(pt[0])
+            ys.append(pt[1])
+        zid = str(row[id_col]) if id_col and id_col in row.index else f"Zone_{idx}"
+        zid = zid.replace(" ", "_")
+        props: dict[str, Any] = {
+            "kind": "compartment",
+            "zone_id": zid,
+            "deck": str(row[deck_col]) if deck_col and deck_col in row.index else "main",
+        }
+        if type_col and type_col in row.index:
+            props["room_type"] = str(row[type_col])
+        features.append({
+            "type": "Feature",
+            "properties": props,
+            "geometry": {"type": "Polygon", "coordinates": [ring]},
+        })
+
+    for _, row in line_gdf.iterrows():
+        geom = row.geometry
+        if geom is None or geom.is_empty:
+            continue
+        if isinstance(geom, MultiLineString):
+            lines = list(geom.geoms)
+            geom = lines[0] if lines else None
+        if not isinstance(geom, LineString):
+            continue
+        coords = [[float(x), float(y)] for x, y in geom.coords]
+        for pt in coords:
+            xs.append(pt[0])
+            ys.append(pt[1])
+        features.append({
+            "type": "Feature",
+            "properties": {"kind": "hvac_path"},
+            "geometry": {"type": "LineString", "coordinates": coords},
+        })
+
+    if xs and ys:
+        pad = 3.0
+        hull_ring = [
+            [min(xs) - pad, min(ys) - pad],
+            [max(xs) + pad, min(ys) - pad],
+            [max(xs) + pad, max(ys) + pad],
+            [min(xs) - pad, max(ys) + pad],
+            [min(xs) - pad, min(ys) - pad],
+        ]
+        features.insert(0, {
+            "type": "Feature",
+            "properties": {"kind": "hull_outline", "platform_id": pid},
+            "geometry": {"type": "Polygon", "coordinates": [hull_ring]},
+        })
+
+    collection = {"type": "FeatureCollection", "features": features}
+    os.makedirs(os.path.dirname(output_path) or ".", exist_ok=True)
+    with open(output_path, "w", encoding="utf-8") as fh:
+        json.dump(collection, fh, indent=2, ensure_ascii=False)
+    return output_path
+
+
 # ── CLI ──────────────────────────────────────────────────────────────────
 
 def main() -> None:
@@ -433,6 +539,14 @@ def main() -> None:
     parser.add_argument("--col-ach", help="Column name for air changes per hour")
     parser.add_argument("--col-deck", help="Column name for deck/level")
     parser.add_argument("--col-traffic", help="Column name for traffic density")
+    parser.add_argument(
+        "--emit-deck-graphics",
+        nargs="?",
+        const="",
+        default=None,
+        metavar="PATH",
+        help="Also write deck_graphics.geojson to PATH or <output>/deck_graphics.geojson",
+    )
 
     args = parser.parse_args()
 
@@ -452,6 +566,13 @@ def main() -> None:
         col_deck=args.col_deck,
         col_traffic=args.col_traffic,
     )
+
+    if args.emit_deck_graphics is not None:
+        gfx_path = args.emit_deck_graphics
+        if not gfx_path or not str(gfx_path).endswith(".geojson"):
+            gfx_path = os.path.join(args.output, "deck_graphics.geojson")
+        emit_deck_graphics(args.input, gfx_path, platform_name=args.platform)
+        print(f"  Wrote deck graphics: {gfx_path}")
 
     print("=" * 70)
     print("  Conversion complete.")
