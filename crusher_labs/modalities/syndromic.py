@@ -45,7 +45,23 @@ class SyndromicSurveillance:
             {"reason": "minor_injury", "probability": 0.002},
         ]
 
-    def query_ground_truth(self, json_data: dict[str, Any]) -> dict[str, Any]:
+    @staticmethod
+    def effective_sick_call_probability(
+        base_probability: float,
+        severity_belief: float = 0.5,
+        trust_medical: float = 0.75,
+    ) -> float:
+        """Scale base sick-call rate by agent beliefs (Layer 1)."""
+        sev = max(0.1, min(1.0, float(severity_belief)))
+        trust = max(0.0, min(1.0, float(trust_medical)))
+        return base_probability * sev * (0.5 + 0.5 * trust)
+
+    def query_ground_truth(
+        self,
+        json_data: dict[str, Any],
+        behavioral_overrides: dict[int, str] | None = None,
+        information_beliefs: dict[int, dict[str, float]] | None = None,
+    ) -> dict[str, Any]:
         """Parse ground-truth agent states and return sick-call roster.
 
         Returns:
@@ -70,6 +86,9 @@ class SyndromicSurveillance:
             resolve_agent_axes,
         )
 
+        overrides = behavioral_overrides or {}
+        beliefs = information_beliefs or {}
+
         for agent in agents:
             aid = agent["agent_id"]
             is_isolated = agent_is_isolated(agent)
@@ -83,7 +102,20 @@ class SyndromicSurveillance:
                 continue
 
             if is_symptomatic:
-                if self.rng.random() < self.sick_call_probability:
+                override = overrides.get(aid, "")
+                if override == "hide_symptoms":
+                    continue
+                if override == "report_sick_call":
+                    sick_call_ids.append(aid)
+                    true_positive_ids.append(aid)
+                    continue
+                inf = beliefs.get(aid, {})
+                prob = self.effective_sick_call_probability(
+                    self.sick_call_probability,
+                    severity_belief=inf.get("severity_belief", 0.5),
+                    trust_medical=inf.get("trust_medical", 0.75),
+                )
+                if self.rng.random() < prob:
                     sick_call_ids.append(aid)
                     true_positive_ids.append(aid)
             else:
@@ -119,6 +151,7 @@ class SyndromicSurveillance:
         self,
         agent_id: int,
         epochs_since_order: int,
+        behavioral_override: str | None = None,
     ) -> bool:
         """FRED-style quarantine compliance check.
 
@@ -126,6 +159,10 @@ class SyndromicSurveillance:
         Non-compliant agents eventually comply after a delay period
         (ref: FRED ``refuses_vaccines`` behavioral failure pattern).
         """
+        if behavioral_override == "refuse_quarantine":
+            if epochs_since_order >= self.compliance_delay_epochs:
+                return True
+            return False
         if self.rng.random() < self.quarantine_compliance:
             return True
         if epochs_since_order >= self.compliance_delay_epochs:

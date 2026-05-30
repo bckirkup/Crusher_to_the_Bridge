@@ -170,5 +170,19 @@
       "labor_person_hours": 2.5,
       "description": "16S rRNA amplicon sequencing per sample. ROM $45-100/sample."
     }
+  },
+  "operational_impact_weights": {
+    "per_passenger_quarantined": 1.0,
+    "per_essential_crew_quarantined": 3.0,
+    "per_passenger_isolated": 0.5,
+    "per_closed_galley_zone": 2.0,
+    "per_fleet_ppe_active": 0.1,
+    "essential_crew_classes": [
+      "crew_medical",
+      "crew_engineering",
+      "crew_galley",
+      "crew_general"
+    ],
+    "galley_zone_types": ["galley", "mess"]
   }
 }

@@ -374,3 +374,19 @@ wearable_monitoring:
     fleet_fever_rate_red: 0.08
     fleet_anomaly_rate_amber: 0.05
     fleet_anomaly_rate_red: 0.12
+
+# ── Decision engine (Stackelberg policies) ─────────────────────
+decision_engine:
+  population_policy: threshold_belief
+  command_policy: threshold
+  medical_policy: threshold
+  threshold_belief:
+    severity_report_threshold: 0.35
+    trust_report_floor: 0.4
+    hide_trust_ceiling: 0.35
+    hide_severity_ceiling: 0.25
+  command_threshold:
+    ois_escalation_threshold: 15.0
+    infected_rate_threshold: 0.05
+  medical_threshold:
+    sick_call_threshold: 3

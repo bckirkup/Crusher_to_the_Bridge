@@ -157,6 +157,18 @@ class TestProtocolEngine:
         summary = engine.generate_protocol_summary()
         assert summary["total_activations"] == 1
 
+    def test_forced_protocol_without_stoplight(self) -> None:
+        proto = _make_protocol("SOP-FORCED")
+        ledger = CostLedger()
+        engine = ProtocolEngine([proto], ledger)
+        stoplights_off: dict = {"continuous_air_sampler": {}}
+        active = engine.evaluate_epoch(
+            0, stoplights_off, forced_protocol_ids={"SOP-FORCED"},
+        )
+        assert len(active) == 1
+        assert active[0]["protocol_id"] == "SOP-FORCED"
+        assert "SOP-FORCED" in engine.get_active_protocols()
+
 
 class TestComputeStoplights:
     def test_air_results_to_stoplights(self) -> None:

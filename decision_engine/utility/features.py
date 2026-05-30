@@ -32,6 +32,10 @@ class UtilityFeatureExtractor:
             "infected_rate": infected_rate,
             "symptomatic_rate": symptomatic_rate,
             "budget_spent_usd": float(cost.get("total_financial_usd", 0.0)),
+            "operational_impact_epoch": float(cost.get("operational_impact_epoch", 0.0)),
+            "operational_impact_cumulative": float(
+                cost.get("operational_impact_cumulative", 0.0),
+            ),
             "reputation_risk": reputation.corporate_reputation_risk,
             "trust_command": reputation.trust_command,
             "biodefense_weight": float(incentives.get("biodefense_weight", 1.0)),

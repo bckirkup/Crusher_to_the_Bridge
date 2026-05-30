@@ -17,7 +17,13 @@
         "issue_crew_instruction",
         "recommend_sop",
         "request_sop_activation",
-        "set_surveillance_budget_emphasis"
+        "set_surveillance_budget_emphasis",
+        "activate_sop",
+        "deactivate_sop",
+        "order_verification_test",
+        "hide_symptoms",
+        "report_sick_call",
+        "refuse_quarantine"
       ]
     },
     "pcr_cadence": { "type": "integer", "minimum": 1 },
@@ -27,6 +33,10 @@
     "stance": { "type": "number", "minimum": 0, "maximum": 1 },
     "message": { "type": "string" },
     "directive": { "type": "object" },
-    "threshold_scale": { "type": "number", "minimum": 0, "maximum": 2 }
+    "threshold_scale": { "type": "number", "minimum": 0, "maximum": 2 },
+    "sop_id": { "type": "string" },
+    "zone": { "type": "string" },
+    "agent_id": { "type": "integer", "minimum": 0 },
+    "emphasis": { "type": "string" }
   }
 }

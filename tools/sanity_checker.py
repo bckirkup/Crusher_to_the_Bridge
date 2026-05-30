@@ -325,12 +325,23 @@ class MaterialItem(BaseModel):
         return v
 
 
+class OperationalImpactWeights(BaseModel):
+    per_passenger_quarantined: float = 1.0
+    per_essential_crew_quarantined: float = 3.0
+    per_passenger_isolated: float = 0.5
+    per_closed_galley_zone: float = 2.0
+    per_fleet_ppe_active: float = 0.1
+    essential_crew_classes: list[str] = []
+    galley_zone_types: list[str] = []
+
+
 class ResourceCosts(BaseModel):
     description: str | None = None
     budgets: dict[str, BudgetEntry] = {}
     material_inventory: dict[str, MaterialItem] = {}
     baseline_surveillance_costs_per_epoch: dict[str, Any] = {}
     per_test_costs: dict[str, Any] = {}
+    operational_impact_weights: OperationalImpactWeights | None = None
 
 
 # ── Validation checks ───────────────────────────────────────────────────
@@ -638,6 +649,23 @@ def _check_logical_contradictions(
                             f"material '{mat_name}' not found in "
                             f"material_inventory: {known_materials}",
                         )
+
+        ois = resource_costs.operational_impact_weights
+        if ois is not None:
+            for field_name in (
+                "per_passenger_quarantined",
+                "per_essential_crew_quarantined",
+                "per_passenger_isolated",
+                "per_closed_galley_zone",
+                "per_fleet_ppe_active",
+            ):
+                val = getattr(ois, field_name, 0.0)
+                if val < 0:
+                    report.error(
+                        "resource_costs.json",
+                        "BOUNDS_OIS",
+                        f"operational_impact_weights.{field_name} = {val} must be non-negative",
+                    )
 
 
 # ── File loading + pydantic parse ────────────────────────────────────────

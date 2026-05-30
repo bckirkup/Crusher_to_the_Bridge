@@ -2,11 +2,13 @@
 cost_ledger.py – Comprehensive Cost-Accounting Ledger
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Tracks three resource dimensions across a simulation run:
+Tracks four resource dimensions across a simulation run:
 
 1. **Financial Spend** ($USD) — cumulative surveillance and intervention costs.
 2. **Material Inventory** — item counts (masks, test kits, sanitizers, etc.).
 3. **Labor Hours** — crew person-hours consumed per epoch.
+4. **Operational Impact Score (OIS)** — cumulative operational degradation from
+   confinement, zone closures, and fleet-wide interventions (tracker only).
 
 The ledger is a **tracker**, not a limiter — spending is never blocked
 by exhausting a balance.  Starting values are recorded for reporting
@@ -74,12 +76,28 @@ class CostLedger:
     indicate overspend relative to the initial allocation.
     """
 
+    DEFAULT_OIS_WEIGHTS: dict[str, Any] = {
+        "per_passenger_quarantined": 1.0,
+        "per_essential_crew_quarantined": 3.0,
+        "per_passenger_isolated": 0.5,
+        "per_closed_galley_zone": 2.0,
+        "per_fleet_ppe_active": 0.1,
+        "essential_crew_classes": [
+            "crew_medical",
+            "crew_engineering",
+            "crew_galley",
+            "crew_general",
+        ],
+        "galley_zone_types": ["galley", "mess"],
+    }
+
     def __init__(
         self,
         starting_financial_usd: float = 50_000.0,
         starting_labor_hours: float = 480.0,
         starting_inventory: dict[str, int] | None = None,
         material_unit_costs: dict[str, float] | None = None,
+        ois_weights: dict[str, Any] | None = None,
     ) -> None:
         self.starting_financial_usd = starting_financial_usd
         self.starting_labor_hours = starting_labor_hours
@@ -100,6 +118,43 @@ class CostLedger:
             CATEGORY_SURVEILLANCE: {},
             CATEGORY_INTERVENTION: {},
         }
+
+        self.ois_weights: dict[str, Any] = dict(self.DEFAULT_OIS_WEIGHTS)
+        if ois_weights:
+            self.ois_weights.update(ois_weights)
+        self._cumulative_ois: float = 0.0
+        self._epoch_ois: dict[int, float] = {}
+        self._epoch_ois_breakdown: dict[int, dict[str, float]] = {}
+
+    # ── Operational impact (tracker only) ─────────────────────────────
+
+    def accumulate_operational_impact(
+        self,
+        epoch: int,
+        ois_delta: float,
+        source: str = "operational_state",
+        breakdown: dict[str, float] | None = None,
+    ) -> None:
+        """Record operational degradation for an epoch (never blocks actions)."""
+        if ois_delta <= 0 and not breakdown:
+            return
+        delta = max(0.0, float(ois_delta))
+        self._cumulative_ois += delta
+        self._epoch_ois[epoch] = self._epoch_ois.get(epoch, 0.0) + delta
+        if breakdown:
+            existing = self._epoch_ois_breakdown.setdefault(epoch, {})
+            for key, val in breakdown.items():
+                existing[key] = existing.get(key, 0.0) + float(val)
+
+    def get_epoch_operational_impact(self, epoch: int) -> float:
+        return self._epoch_ois.get(epoch, 0.0)
+
+    def get_operational_impact_breakdown(self, epoch: int) -> dict[str, float]:
+        return dict(self._epoch_ois_breakdown.get(epoch, {}))
+
+    @property
+    def operational_impact_cumulative(self) -> float:
+        return self._cumulative_ois
 
     # ── Core debit method ────────────────────────────────────────────
 
@@ -261,6 +316,12 @@ class CostLedger:
             },
             "financial_balance_remaining": round(self.financial_balance, 2),
             "labor_hours_remaining": round(self.labor_remaining, 2),
+            "operational_impact_epoch": round(self.get_epoch_operational_impact(epoch), 3),
+            "operational_impact_cumulative": round(self._cumulative_ois, 3),
+            "operational_impact_breakdown": {
+                k: round(v, 3)
+                for k, v in self.get_operational_impact_breakdown(epoch).items()
+            },
         }
 
     # ── Financial Audit Report ───────────────────────────────────────
@@ -315,11 +376,77 @@ class CostLedger:
                 "remaining_labor_hours": round(self.labor_remaining, 2),
                 "surveillance_labor_hours": round(self._total_surveillance_labor, 2),
                 "intervention_labor_hours": round(self._total_intervention_labor, 2),
+                "total_operational_impact_score": round(self._cumulative_ois, 3),
             },
             "material_inventory": inventory_status,
             "cost_by_epoch": per_epoch,
             "itemized_entries": [e.to_dict() for e in self.entries],
         }
+
+
+# ── Operational impact computation ───────────────────────────────────────
+
+def compute_operational_impact(
+    agents: list[dict[str, Any]],
+    quarantined_ids: set[int],
+    isolated_ids: set[int],
+    merged_modifiers: dict[str, Any],
+    active_protocol_ids: list[str],
+    ois_weights: dict[str, Any],
+    zone_type_by_id: dict[str, str] | None = None,
+) -> tuple[float, dict[str, float]]:
+    """Compute epoch OIS delta and component breakdown from simulation state."""
+    weights = {**CostLedger.DEFAULT_OIS_WEIGHTS, **(ois_weights or {})}
+    essential_classes = set(weights.get("essential_crew_classes", []))
+    galley_types = {t.lower() for t in weights.get("galley_zone_types", [])}
+    zone_types = zone_type_by_id or {}
+
+    breakdown: dict[str, float] = {}
+    quarantined_set = set(quarantined_ids)
+    isolated_set = set(isolated_ids)
+
+    passenger_q = 0
+    essential_q = 0
+    passenger_iso = 0
+    for agent in agents:
+        aid = agent["agent_id"]
+        agent_class = agent.get("agent_class", agent.get("role", ""))
+        if aid in quarantined_set:
+            if agent_class in essential_classes:
+                essential_q += 1
+            elif agent.get("role") == "passenger" or str(agent_class).startswith("passenger"):
+                passenger_q += 1
+        if aid in isolated_set:
+            if agent.get("role") == "passenger" or str(agent_class).startswith("passenger"):
+                passenger_iso += 1
+
+    w_pq = float(weights.get("per_passenger_quarantined", 1.0))
+    w_ec = float(weights.get("per_essential_crew_quarantined", 3.0))
+    w_pi = float(weights.get("per_passenger_isolated", 0.5))
+    if passenger_q:
+        breakdown["passenger_quarantine"] = passenger_q * w_pq
+    if essential_q:
+        breakdown["essential_crew_quarantine"] = essential_q * w_ec
+    if passenger_iso:
+        breakdown["passenger_isolation"] = passenger_iso * w_pi
+
+    closed = merged_modifiers.get("close_zones", [])
+    galley_closed = 0
+    for zone_id in closed:
+        ztype = zone_types.get(zone_id, "").lower()
+        if ztype in galley_types:
+            galley_closed += 1
+    w_galley = float(weights.get("per_closed_galley_zone", 2.0))
+    if galley_closed:
+        breakdown["closed_galley_zones"] = galley_closed * w_galley
+
+    ppe_reduction = float(merged_modifiers.get("ppe_transmission_reduction", 0.0))
+    w_ppe = float(weights.get("per_fleet_ppe_active", 0.1))
+    if ppe_reduction > 0.0 or "SOP-004" in active_protocol_ids:
+        breakdown["fleet_ppe"] = w_ppe
+
+    total = sum(breakdown.values())
+    return total, breakdown
 
 
 # ── Factory ──────────────────────────────────────────────────────────────
@@ -340,11 +467,14 @@ def build_ledger_from_config(config_path: str) -> CostLedger:
         starting_inv[item_name] = item_data.get("starting_count", 0)
         unit_costs[item_name] = item_data.get("unit_cost_usd", 0.0)
 
+    ois_weights = cfg.get("operational_impact_weights")
+
     return CostLedger(
         starting_financial_usd=starting_usd,
         starting_labor_hours=starting_labor,
         starting_inventory=starting_inv,
         material_unit_costs=unit_costs,
+        ois_weights=ois_weights,
     )
 
 
