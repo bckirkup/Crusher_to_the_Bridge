@@ -1,0 +1,227 @@
+{
+  "meta": {
+    "description": "Oxford Nanopore long-read sequencing parameters for shipboard deployment",
+    "version": "1.0",
+    "notes": [
+      "Primary use case: verification and pathogen typing when routine modalities flag ambiguous signals",
+      "Two deployment profiles: Flongle (rapid point-of-care) and MinION (deeper characterization)",
+      "Parameters grounded in ONT R10.4.1 chemistry with SUP basecalling (2024-2025 performance)",
+      "Sensitivity values assume metagenomic (untargeted) sequencing without enrichment"
+    ]
+  },
+  "deployment_profiles": {
+    "flongle_rapid": {
+      "description": "Flongle flow cell with rapid library prep. First result in <1 hour. Designed for single-sample verification at point of care.",
+      "flow_cell": "FLO-FLG114",
+      "chemistry": "R10.4.1",
+      "basecalling": "SUP",
+      "throughput": {
+        "total_bases_gb": 1.5,
+        "total_reads": 500000,
+        "mean_read_length_bp": 3000,
+        "median_read_length_bp": 1800,
+        "n50_bp": 5000,
+        "max_read_length_bp": 50000
+      },
+      "accuracy": {
+        "raw_error_rate": 0.05,
+        "modal_qscore": 20,
+        "q20_fraction": 0.9,
+        "q30_fraction": 0.5,
+        "homopolymer_error_rate": 0.08,
+        "notes": "Q20 = 99% accuracy per base; Q30 = 99.9%. Homopolymer errors dominate residual error."
+      },
+      "turnaround": {
+        "library_prep_minutes": 15,
+        "sequencing_to_first_classification_minutes": 10,
+        "sequencing_to_species_id_minutes": 30,
+        "sequencing_to_strain_typing_hours": 2,
+        "full_run_hours": 16,
+        "epoch_fraction": 0.04,
+        "notes": "epoch_fraction assumes 1 epoch = 1 day. Species ID available within 0.02 epochs."
+      },
+      "detection": {
+        "reads_for_species_id": 100,
+        "reads_for_genus_id": 20,
+        "reads_for_strain_typing": 10000,
+        "reads_for_amr_detection": 3000,
+        "reads_for_mixed_infection_resolution": 5000,
+        "min_fraction_for_detection": 0.0001,
+        "species_classification_accuracy": 0.96,
+        "genus_classification_accuracy": 0.99,
+        "mixed_infection_discrimination": true,
+        "notes": "min_fraction_for_detection: target must be >0.01% of total reads for reliable detection without enrichment"
+      },
+      "costs": {
+        "flow_cell_usd": 90.0,
+        "rapid_library_prep_usd": 32.0,
+        "consumables_per_run_usd": 15.0,
+        "total_per_run_usd": 137.0,
+        "labor_hours_per_run": 1.0,
+        "notes": "Rapid prep (SQK-RAD114) requires minimal hands-on time. Labor is primarily monitoring."
+      }
+    },
+    "minion_standard": {
+      "description": "MinION flow cell with ligation library prep. Deep characterization over 24-48h. For detailed outbreak genomics when time allows.",
+      "flow_cell": "FLO-MIN114",
+      "chemistry": "R10.4.1",
+      "basecalling": "SUP",
+      "throughput": {
+        "total_bases_gb": 30.0,
+        "total_reads": 5000000,
+        "mean_read_length_bp": 6000,
+        "median_read_length_bp": 3500,
+        "n50_bp": 12000,
+        "max_read_length_bp": 200000
+      },
+      "accuracy": {
+        "raw_error_rate": 0.05,
+        "modal_qscore": 20,
+        "q20_fraction": 0.92,
+        "q30_fraction": 0.55,
+        "homopolymer_error_rate": 0.08
+      },
+      "turnaround": {
+        "library_prep_minutes": 120,
+        "sequencing_to_first_classification_minutes": 15,
+        "sequencing_to_species_id_minutes": 30,
+        "sequencing_to_strain_typing_hours": 4,
+        "sequencing_to_full_genome_hours": 12,
+        "full_run_hours": 48,
+        "epoch_fraction": 0.08
+      },
+      "detection": {
+        "reads_for_species_id": 100,
+        "reads_for_genus_id": 20,
+        "reads_for_strain_typing": 10000,
+        "reads_for_full_genome": 100000,
+        "reads_for_amr_detection": 3000,
+        "reads_for_mixed_infection_resolution": 5000,
+        "reads_for_phylogenetic_placement": 50000,
+        "min_fraction_for_detection": 5e-05,
+        "species_classification_accuracy": 0.97,
+        "genus_classification_accuracy": 0.99,
+        "mixed_infection_discrimination": true,
+        "notes": "Higher depth enables detection at 0.005% abundance and SNP-level phylogenetics"
+      },
+      "costs": {
+        "flow_cell_usd": 675.0,
+        "ligation_library_prep_usd": 85.0,
+        "consumables_per_run_usd": 40.0,
+        "total_per_run_usd": 800.0,
+        "labor_hours_per_run": 3.0,
+        "notes": "Ligation prep (SQK-LSK114) gives longer reads but requires 2h hands-on. Flow cell can be washed and reused 1-2x."
+      }
+    }
+  },
+  "simulation_parameters": {
+    "description": "Parameters for the simulation engine's LongReadNanoporeSequencing modality",
+    "default_profile": "flongle_rapid",
+    "detection_model": {
+      "description": "Multinomial sampling from the same compositional vector as short-read sequencing, but with different read depth and error characteristics",
+      "read_depth": 500000,
+      "pseudocount": 1e-06,
+      "error_injection": {
+        "enabled": true,
+        "substitution_rate": 0.02,
+        "insertion_rate": 0.015,
+        "deletion_rate": 0.015,
+        "homopolymer_collapse_prob": 0.08,
+        "notes": "Error rates reflect post-SUP-basecalling residual errors on R10.4.1"
+      },
+      "classification": {
+        "species_sensitivity": 0.96,
+        "species_specificity": 0.998,
+        "genus_sensitivity": 0.99,
+        "genus_specificity": 0.999,
+        "confidence_threshold": 0.8,
+        "min_reads_for_call": 5,
+        "notes": "Based on published Kraken2/WIMP benchmarks on ONT data"
+      }
+    },
+    "verification_outputs": {
+      "pathogen_calls": {
+        "description": "List of identified organisms with read counts and confidence",
+        "fields": [
+          "taxon_id",
+          "taxon_name",
+          "rank",
+          "classified_reads",
+          "fraction_total",
+          "confidence",
+          "amr_genes_detected"
+        ]
+      },
+      "consensus_assembly": {
+        "description": "Whether sufficient depth exists for draft genome assembly",
+        "min_coverage_for_draft": 10,
+        "min_coverage_for_polished": 30
+      },
+      "mixed_infection_report": {
+        "description": "Deconvolution of co-occurring pathogens",
+        "min_reads_per_organism": 100,
+        "max_organisms_reportable": 5
+      },
+      "strain_typing": {
+        "description": "MLST or SNP-based strain identification",
+        "min_reads_for_mlst": 5000,
+        "min_reads_for_snp_typing": 20000
+      }
+    },
+    "escalation_integration": {
+      "description": "How long-read results feed back into the decision engine",
+      "pathogen_confirmed": {
+        "action": "update_detection_escalation_mode",
+        "target_mode": "clinical",
+        "stoplight": "RED",
+        "notes": "Confirmed pathogen ID from long-read should set clinical mode to RED"
+      },
+      "mixed_infection_confirmed": {
+        "action": "flag_coinfection",
+        "notes": "Triggers coinfection-aware treatment protocols"
+      },
+      "amr_detected": {
+        "action": "flag_amr",
+        "notes": "Adjusts treatment recommendations; may trigger enhanced decontamination"
+      },
+      "negative_verification": {
+        "action": "downgrade_detection_escalation",
+        "notes": "If long-read finds no pathogen, can de-escalate a false alarm cheaply"
+      }
+    }
+  },
+  "specimen_processing": {
+    "wastewater_metagenomics": {
+      "concentration_method": "PEG precipitation or centrifugal ultrafiltration",
+      "expected_host_fraction": 0.01,
+      "expected_bacterial_fraction": 0.9,
+      "expected_viral_fraction": 0.05,
+      "extraction_efficiency": 0.4,
+      "notes": "Wastewater is bacteria-dominated; pathogen signal may be <0.1% of reads"
+    },
+    "clinical_specimen": {
+      "concentration_method": "Direct extraction or host depletion",
+      "expected_host_fraction": 0.9,
+      "expected_bacterial_fraction": 0.05,
+      "expected_viral_fraction": 0.01,
+      "extraction_efficiency": 0.55,
+      "notes": "Host depletion critical for respiratory specimens; less needed for stool"
+    },
+    "clinical_culture": {
+      "concentration_method": "Colony pick or sweep",
+      "expected_host_fraction": 0.001,
+      "expected_bacterial_fraction": 0.95,
+      "expected_viral_fraction": 0.0,
+      "extraction_efficiency": 0.7,
+      "notes": "Near-pure isolate; highest sensitivity for strain typing and AMR"
+    },
+    "surveillance_swab": {
+      "concentration_method": "Direct extraction",
+      "expected_host_fraction": 0.3,
+      "expected_bacterial_fraction": 0.5,
+      "expected_viral_fraction": 0.02,
+      "extraction_efficiency": 0.35,
+      "notes": "Mixed environmental sample; similar to short-read surface swab processing"
+    }
+  }
+}
