@@ -40,14 +40,19 @@ Place files at:
   "epoch": 3,
   "actions": {
     "command": [{"kind": "authorize_sop_subset", "protocol_ids": ["SOP-001"]}],
-    "medical": [{"kind": "set_surveillance_cadence", "pcr_cadence": 2}]
+    "medical": [{"kind": "order_verification_test", "zone": "Galley"}],
+    "population": [{"kind": "report_sick_call", "agent_id": 4}]
   }
 }
 ```
 
-## Stackelberg order
+Use top-level fields (`protocol_id`, `zone`, `agent_id`) — not nested `parameters` objects.
 
-1. Command → 2. Medical → 3. Population (noop default)
+## Stackelberg order (Picard)
+
+1. **Population** (pre-syndromic) → 2. Instruments / stoplights → 3. **Command** → 4. **Medical**
+
+Utility bundles include `operational_impact_cumulative` when OIS is enabled.
 
 Optimization and weight fitting are **out of repo**; only feature vectors are exported.
 

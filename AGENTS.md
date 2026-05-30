@@ -15,7 +15,7 @@ Pure-Python simulation (no databases, Docker, or external APIs). **Python 3.11+*
 | Action import (external optimizer) | `python3 presidio_runner.py --import-actions-dir <dir>` | Per-epoch `cruise_*_epoch_*_actions.json` |
 | Streamlit dashboard | `python3 -m streamlit run dashboard.py --server.headless true` | Run orchestrator first for telemetry |
 | Sanity checker | `python3 tools/sanity_checker.py --from-config` | Ship + fleet + Stackelberg social configs |
-| Full test suite | `python3 -m pytest tests/ -v --tb=short` | ~298 tests, ~3s |
+| Full test suite | `python3 -m pytest tests/ -v --tb=short` | ~318 tests, ~4s |
 
 ### Framework layout
 
@@ -47,12 +47,14 @@ Pure-Python simulation (no databases, Docker, or external APIs). **Python 3.11+*
 | `stackelberg-utility-export` | Social config, utility bundles, action import |
 | `testing-picard-presidio` | Before PRs on framework code |
 | `configuring-stackelberg-social` | Adding/editing diffusion, class interactions, profiles |
+| `operational-impact-behavioral-policies` | OIS weights, action kinds, ThresholdBeliefPolicy |
 | `run-full-test-suite` | Any pre-PR validation |
 
 ### Important caveats
 
 - Use `python3` (not `python`) on Linux cloud VMs.
 - Dashboard reads `telemetry_buffer/simulation_history.json` and `telemetry_buffer/artificial_lab_notebook.json`.
-- **Law 1:** No hardcoded epoch SOP schedules; Stackelberg `authorize_sop_subset` only filters stoplight-eligible SOPs.
+- **Law 1:** No hardcoded epoch SOP schedules; Stackelberg `authorize_sop_subset` filters stoplight-eligible SOPs; `activate_sop` can force protocols via `forced_protocol_ids`.
+- **OIS:** Fourth ledger dimension in `cost_accounting`; configured via `operational_impact_weights` in `resource_costs.json`.
 - Utility **weights and optimization** are out-of-repo; only feature export and action apply are in-repo.
 - No flake8/ruff in repo; use `sanity_checker.py` and pytest.

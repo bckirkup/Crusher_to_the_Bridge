@@ -42,6 +42,10 @@ jobs:
           from decision_engine import (
               DecisionRound, ExperienceStore, StackelbergRound, DecisionRuntime,
           )
+          from decision_engine.policy import (
+              ThresholdBeliefPolicy, CommandThresholdPolicy, build_policies_from_config,
+          )
+          from crusher_labs.cost_ledger import compute_operational_impact
           import presidio_runner
           print('Picard/Presidio/Stackelberg import hygiene OK')
           "
@@ -88,3 +92,14 @@ jobs:
 
       - name: Run orchestrator (24-epoch smoke test)
         run: python orchestrator.py
+
+      - name: Verify OIS in simulation telemetry
+        run: |
+          python -c "
+          import json
+          h = json.load(open('telemetry_buffer/simulation_history.json'))
+          c = h[-1]['cost_accounting']
+          assert 'operational_impact_cumulative' in c, c.keys()
+          assert 'operational_impact_breakdown' in c
+          print('OIS cumulative:', c['operational_impact_cumulative'])
+          "

@@ -26,22 +26,47 @@ python orchestrator.py --epochs 250
 # Launch LCARS dashboard (after simulation)
 streamlit run dashboard.py
 
-# Run the test suite
+# Run the test suite (~319 tests)
 pytest tests/ -v --tb=short
 ```
 
 Output is written to `telemetry_buffer/simulation_history.json` and
 `telemetry_buffer/artificial_lab_notebook.json` (gitignored runtime artifacts).
 
+## Picard, Presidio & Stackelberg
+
+| Component | Entry | Role |
+|-----------|-------|------|
+| **Picard_Framework** | `orchestrator.py`, `picard_framework/` | Steppable single-ship simulation |
+| **decision_engine** | `decision_engine/` | Multi-agent decisions, information diffusion, utility features |
+| **Presidio** | `presidio_runner.py`, `presidio/data/` | Fleet meta-simulation + experience store |
+
+Each epoch (when `social` is enabled): **population** (pre-syndromic behavioral actions) → instruments/stoplights → **command / medical** → stoplight-driven SOP physics. The cost ledger tracks **operational impact score (OIS)** alongside USD, labor, and materials. Utility **features** export to JSON; **optimization** stays external.
+
+```bash
+python3 presidio_runner.py \
+  --fleet-config presidio/data/config/smoke_fleet.json \
+  --cruises 1 \
+  --export-utility-dir presidio/data/experiences/utility_bundles
+```
+
+Manuals: [OPERATORS_MANUAL_SHIP.md](OPERATORS_MANUAL_SHIP.md) (ship), [OPERATORS_MANUAL_GAME_THEORY.md](OPERATORS_MANUAL_GAME_THEORY.md) (fleet / Stackelberg).
+
 ## Architecture
 
 ```
-orchestrator.py              Thin coordinator: init → epoch loop → finalize
+orchestrator.py              Legacy CLI → picard_framework.ShipSimulation
 ├── orchestrator_types.py    Dataclasses, constants, state container
 ├── orchestrator_init.py     Spatial/engine/observation/wearable setup
 ├── orchestrator_epoch.py    Per-epoch step functions
 ├── orchestrator_record.py   History recording and JSON export
 └── orchestrator_display.py  Terminal output helpers
+
+presidio_runner.py           Fleet loop over Picard cruises + experience store
+picard_framework/            PicardRunSpec, catalog, ShipSimulation.step()
+decision_engine/             StackelbergRound, diffusion, lived experience, utility I/O
+presidio/data/               Fleet catalog, economics, social, intelligence libraries
+picard_framework/data/       Agent profile bundles
 
 crusher_labs/                Dr. Crusher's Bio-Diagnostic Suite
 ├── __init__.py              Config loader, modality builder
@@ -49,7 +74,7 @@ crusher_labs/                Dr. Crusher's Bio-Diagnostic Suite
 ├── observation_core.py      Six instrument classes (air, surface, wastewater, RDT, qPCR, microbio)
 ├── protocol_engine.py       Stoplight computation, SOP activation, modifier application
 ├── lab_notebook.py          Artificial lab notebook (audit trail)
-├── cost_ledger.py           Financial/material/labor cost tracking
+├── cost_ledger.py           Financial/material/labor/OIS cost tracking
 ├── stoplight.py             Ct → stoplight conversion
 └── modalities/
     ├── syndromic.py         Symptom-based screening
@@ -86,9 +111,11 @@ schemas/                     JSON Schema definitions for all data contracts
 telemetry_buffer/            Runtime output (simulation_history, lab_notebook)
 │   agent_axes.py            Orthogonal agent state (infection / presentation / compliance)
 dashboard.py                 LCARS Main Bridge Display (4 stations)
-tests/                       278 tests across 15 modules
+tests/                       ~319 tests (ship, fleet, Stackelberg, OIS, behavioral)
 AGENTS.md                    Cursor Cloud / agent development notes
 ```
+
+CI: `.github/workflows/ci.yml` (full suite + Presidio smoke) and `.github/workflows/picard-presidio.yml` (framework-focused + Stackelberg schema checks).
 
 ## Configuration Reference (`crusher_labs/config.yaml`)
 
@@ -398,11 +425,17 @@ axes via `resolve_agent_axes()`.
 ## Cost Accounting
 
 Per-epoch `cost_accounting` in simulation history includes
-`materials_consumed` and `by_category` (surveillance vs. intervention).
-The ledger debits `resource_costs.json` **`per_test_costs`** for each
-environmental sample and sick-call clinical test, plus SOP activation and
-per-epoch protocol costs. Budget balances are tracked for reporting only —
-spending is never blocked when inventory is depleted.
+`materials_consumed`, `by_category` (surveillance vs. intervention), and
+**operational impact score (OIS)** fields:
+
+- `operational_impact_epoch` — degradation accumulated this epoch
+- `operational_impact_cumulative` — run total (tracker only, never blocks actions)
+- `operational_impact_breakdown` — components (quarantine, galley closures, fleet PPE)
+
+OIS weights live in `data/config/resource_costs.json` → `operational_impact_weights`.
+The ledger also debits **`per_test_costs`** for environmental and clinical tests, plus SOP
+activation and per-epoch protocol costs. Financial and labor balances are tracked for
+reporting only — spending is never blocked when inventory is depleted.
 
 ## Standing Operating Procedures (SOPs)
 
@@ -467,8 +500,12 @@ python tools/sanity_checker.py --config-dir data/config \
 ## Testing
 
 ```bash
-# Full suite (278 tests)
+# Full suite (~319 tests)
 pytest tests/ -v --tb=short
+
+# Picard / Presidio / Stackelberg
+pytest tests/test_picard_framework.py tests/test_decision_engine.py \
+  tests/test_presidio_runner.py tests/test_stackelberg.py tests/test_golden_orchestrator.py -v
 
 # Specific modules
 pytest tests/test_orchestrator.py           # orchestrator, quarantine/SOP confinement
@@ -477,6 +514,9 @@ pytest tests/test_agent_axes.py             # orthogonal infection/presentation/
 pytest tests/test_protocol_engine.py        # wearable + detection-escalation stoplights
 pytest tests/test_sequencing_config.py      # config.yaml read_depth wiring
 pytest tests/test_cost_accounting.py        # per-test debits and materials telemetry
+pytest tests/test_operational_impact.py     # OIS weight computation
+pytest tests/test_action_applier.py         # activate_sop, verification queue, behavioral kinds
+pytest tests/test_behavioral_syndromic.py   # hide_symptoms, belief-scaled sick-call
 pytest tests/test_transmission_pathways.py  # food/environmental pool init
 pytest tests/test_dashboard.py              # LCARS dashboard imports
 pytest tests/test_sanity_checker.py         # config validation
