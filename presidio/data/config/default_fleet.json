@@ -14,12 +14,23 @@
     "output_root": "presidio/data/experiences/runs"
   },
   "actors": [
-    {"actor_id": "command", "role": "commanding_officer"},
-    {"actor_id": "medical", "role": "medical_officer"}
+    {
+      "actor_id": "command",
+      "role": "commanding_officer"
+    },
+    {
+      "actor_id": "medical",
+      "role": "medical_officer"
+    }
   ],
   "incentives": {
     "biodefense_weight": 1.0,
     "budget_weight": 0.1,
     "operational_tempo_weight": 0.0
+  },
+  "social": {
+    "class_interactions": "presidio/data/social/class_interactions_default.json",
+    "information_diffusion": "presidio/data/social/information_diffusion_default.json",
+    "economics_weights_path": "presidio/data/economics/fleet_economics.json"
   }
 }

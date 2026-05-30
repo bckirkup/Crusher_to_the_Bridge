@@ -1,0 +1,142 @@
+"""Stackelberg-ordered decision round: command → medical → population."""
+
+from __future__ import annotations
+
+from typing import Any
+
+from decision_engine.actions import Action, ActionEnvelope
+from decision_engine.context import EpochDecisionContext
+from decision_engine.experience import ExperienceStore
+from decision_engine.lived_experience import AgentLivedExperienceStore
+from decision_engine.observation.command import build_command_observation
+from decision_engine.observation.medical import build_medical_observation
+from decision_engine.policy import Policy, RuleBasedPolicy
+from decision_engine.utility.features import UtilityFeatureExtractor
+from decision_engine.utility.io import export_utility_bundle
+
+
+class StackelbergRound:
+    """Three-stage decision pass with optional utility export."""
+
+    def __init__(
+        self,
+        command_policy: Policy | None = None,
+        medical_policy: Policy | None = None,
+        population_policy: Policy | None = None,
+        export_utility_dir: str | None = None,
+        cruise_id: str = "0",
+        incentives: dict[str, float] | None = None,
+        economics_weights: dict[str, float] | None = None,
+        all_protocol_ids: list[str] | None = None,
+    ) -> None:
+        self.command_policy = command_policy or RuleBasedPolicy()
+        self.medical_policy = medical_policy or RuleBasedPolicy()
+        self.population_policy = population_policy or RuleBasedPolicy()
+        self.export_utility_dir = export_utility_dir
+        self.cruise_id = cruise_id
+        self.incentives = incentives or {}
+        self.economics_weights = economics_weights or {}
+        self.all_protocol_ids = all_protocol_ids or []
+        self.feature_extractor = UtilityFeatureExtractor()
+        self.last_bundle: dict[str, Any] | None = None
+
+    def solve(
+        self,
+        epoch: int,
+        epoch_snapshot: dict[str, Any],
+        decision_ctx: EpochDecisionContext,
+        lived_store: AgentLivedExperienceStore,
+        information_state: dict[str, Any],
+        reputation: Any,
+        global_health_timeline: dict[str, Any],
+        experience: ExperienceStore,
+        stoplight_eligible_sop_ids: list[str],
+    ) -> ActionEnvelope:
+        decision_ctx.epoch = epoch
+
+        command_obs = build_command_observation(
+            epoch,
+            epoch_snapshot,
+            reputation,
+            self.all_protocol_ids,
+            stoplight_eligible_sop_ids,
+            self.economics_weights,
+        )
+        from decision_engine.views import ObservationModel
+        cmd_view = ObservationModel.build(
+            {**epoch_snapshot, "epoch": epoch}, "command", "commanding_officer",
+        )
+        cmd_actions = self.command_policy.decide(cmd_view, experience)
+        self._apply_command_actions(cmd_actions, decision_ctx)
+
+        medical_obs = build_medical_observation(
+            epoch, epoch_snapshot, decision_ctx, global_health_timeline,
+        )
+        med_view = ObservationModel.build(
+            {**epoch_snapshot, "epoch": epoch, **medical_obs},
+            "medical", "medical_officer",
+        )
+        med_actions = self.medical_policy.decide(med_view, experience)
+        self._apply_medical_actions(med_actions, decision_ctx)
+
+        envelope = ActionEnvelope(epoch=epoch)
+        if cmd_actions:
+            envelope.actions["command"] = cmd_actions
+        if med_actions:
+            envelope.actions["medical"] = med_actions
+
+        pop_view = ObservationModel.build(
+            {"epoch": epoch, "summary": epoch_snapshot.get("summary", {})},
+            "population", "crew_agent",
+        )
+        pop_actions = self.population_policy.decide(pop_view, experience)
+        if pop_actions:
+            envelope.actions["population"] = pop_actions
+
+        if self.export_utility_dir:
+            bundle = self.feature_extractor.build_bundle(
+                epoch=epoch,
+                cruise_id=self.cruise_id,
+                command_obs=command_obs,
+                medical_obs=medical_obs,
+                reputation=reputation,
+                lived=lived_store,
+                information_state=information_state,
+                incentives=self.incentives,
+                economics_weights=self.economics_weights,
+            )
+            self.last_bundle = bundle
+            export_utility_bundle(bundle, self.export_utility_dir, epoch, self.cruise_id)
+
+        return envelope
+
+    def _apply_command_actions(
+        self,
+        actions: list[Action],
+        ctx: EpochDecisionContext,
+    ) -> None:
+        for act in actions:
+            kind = act.get("kind", "")
+            if kind == "directive_to_medical":
+                ctx.command_directives.append(act.get("directive", act))
+            elif kind == "authorize_sop_subset":
+                ids = act.get("protocol_ids")
+                if isinstance(ids, list):
+                    ctx.authorized_sop_ids = [str(x) for x in ids]
+            elif kind == "corporate_communication_stance":
+                ctx.corporate_communication_stance = float(
+                    act.get("stance", 0.0),
+                )
+
+    def _apply_medical_actions(
+        self,
+        actions: list[Action],
+        ctx: EpochDecisionContext,
+    ) -> None:
+        for act in actions:
+            kind = act.get("kind", "")
+            if kind == "issue_crew_instruction":
+                msg = act.get("message", "")
+                if msg:
+                    ctx.medical_announcements.append(msg)
+                    ctx.sop_announcements.append(msg)

@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0.0",
+  "briefings": [
+    {
+      "epoch": 0,
+      "alerts": ["routine_maritime_health_watch"],
+      "pandemic_declarations": [],
+      "travel_advisories": []
+    },
+    {
+      "epoch": 3,
+      "alerts": ["regional_gastroenteritis_cluster"],
+      "pandemic_declarations": [],
+      "travel_advisories": []
+    },
+    {
+      "epoch": 6,
+      "alerts": ["respiratory_virus_surveillance_elevated"],
+      "pandemic_declarations": [],
+      "travel_advisories": ["port_alpha_restricted_movement"]
+    },
+    {
+      "epoch": 12,
+      "alerts": ["who_maritime_outbreak_advisory"],
+      "pandemic_declarations": [],
+      "travel_advisories": []
+    }
+  ]
+}

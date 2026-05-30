@@ -1389,6 +1389,43 @@ def _check_picard_presidio_configs(repo_root: str, report: Report) -> None:
                     )
 
 
+
+def _check_stackelberg_configs(repo_root: str, report: Report) -> None:
+    """Validate Stackelberg/social layer configuration files."""
+    paths = {
+        "information_diffusion": os.path.join(
+            repo_root, "presidio", "data", "social", "information_diffusion_default.json",
+        ),
+        "class_interactions": os.path.join(
+            repo_root, "presidio", "data", "social", "class_interactions_default.json",
+        ),
+        "global_health": os.path.join(
+            repo_root, "presidio", "data", "intelligence", "global_health_timeline.json",
+        ),
+        "agent_profiles": os.path.join(
+            repo_root, "picard_framework", "data", "agent_profiles",
+            "default_ship_population.json",
+        ),
+    }
+    for label, path in paths.items():
+        if not os.path.isfile(path):
+            report.warn(path, "STACKELBERG", f"Missing {label}")
+            continue
+        data = _load_json(path)
+        if data is None:
+            report.error(path, "STACKELBERG", f"Invalid JSON for {label}")
+            continue
+        if label == "information_diffusion":
+            for key in ("alpha", "homophily_strength", "message_decay"):
+                val = data.get(key, 0.5)
+                if val < 0 or val > 1:
+                    report.error(path, "STACKELBERG", f"{key} must be in [0,1]")
+        if label == "class_interactions":
+            for i, pair in enumerate(data.get("pairs", [])):
+                w = pair.get("weight", 0)
+                if w < 0:
+                    report.error(path, "STACKELBERG", f"pairs[{i}].weight negative")
+
 def main() -> None:
     _REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -1434,6 +1471,7 @@ def main() -> None:
             pathogen_file=r["pathogen_file"], cfg=r["cfg"],
         )
         _check_picard_presidio_configs(_REPO_ROOT, report)
+        _check_stackelberg_configs(_REPO_ROOT, report)
     else:
         pf = args.pathogen_file or os.path.join(args.pathogen_dir, "active_profiles.json")
         report = run_checks(args.config_dir, args.platform_dir, pathogen_file=pf)

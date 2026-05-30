@@ -1,0 +1,38 @@
+{
+  "schema_version": "1.0.0",
+  "description": "Default agent profile templates by agent_class",
+  "default_template": {
+    "age_bands": ["adult"],
+    "monitored_channels": ["heart_rate", "body_temp", "spo2", "respiratory_rate"]
+  },
+  "class_templates": {
+    "passenger_general": {
+      "age_bands": ["young_adult", "adult", "middle_aged"],
+      "vaccinations": ["routine_childhood"]
+    },
+    "passenger_elderly": {
+      "age_bands": ["senior"],
+      "comorbidities": ["hypertension"],
+      "vaccinations": ["influenza_annual"]
+    },
+    "passenger_family": {
+      "age_bands": ["child", "young_adult", "adult"]
+    },
+    "crew_medical": {
+      "age_bands": ["adult"],
+      "device_id": "garmin_watch",
+      "vaccinations": ["occupational_health"]
+    },
+    "crew_galley": {
+      "age_bands": ["adult", "middle_aged"],
+      "device_id": "garmin_watch"
+    },
+    "crew_engineering": {
+      "age_bands": ["adult"],
+      "device_id": "garmin_watch"
+    },
+    "crew_general": {
+      "age_bands": ["adult", "young_adult"]
+    }
+  }
+}

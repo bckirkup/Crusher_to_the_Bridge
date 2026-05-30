@@ -1,0 +1,41 @@
+{
+  "schema_version": "1.0.0",
+  "pairs": [
+    {
+      "from_class": "crew_medical",
+      "to_class": "passenger_elderly",
+      "context_zones": ["MedBay"],
+      "weight": 1.0
+    },
+    {
+      "from_class": "crew_medical",
+      "to_class": "passenger_general",
+      "context_zones": ["MedBay"],
+      "weight": 0.9
+    },
+    {
+      "from_class": "crew_galley",
+      "to_class": "passenger_general",
+      "context_zones": ["Galley", "Mess_Hall"],
+      "weight": 0.85
+    },
+    {
+      "from_class": "crew_galley",
+      "to_class": "passenger_family",
+      "context_zones": ["Galley", "Mess_Hall"],
+      "weight": 0.8
+    },
+    {
+      "from_class": "crew_general",
+      "to_class": "passenger_general",
+      "context_zones": ["Mess_Hall", "Bridge"],
+      "weight": 0.5
+    },
+    {
+      "from_class": "passenger_general",
+      "to_class": "passenger_general",
+      "context_zones": ["Mess_Hall", "Berthing"],
+      "weight": 0.6
+    }
+  ]
+}

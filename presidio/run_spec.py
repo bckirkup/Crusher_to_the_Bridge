@@ -26,6 +26,7 @@ class PresidioRunSpec:
     actors: list[dict[str, Any]] = field(default_factory=list)
     incentives: dict[str, Any] = field(default_factory=dict)
     output_root: str = ""
+    social_config: dict = field(default_factory=dict)
 
     @classmethod
     def from_fleet_json(cls, repo_root: str, fleet_config_path: str) -> PresidioRunSpec:
@@ -89,6 +90,7 @@ class PresidioRunSpec:
             actors=raw.get("actors", []),
             incentives=raw.get("incentives", {}),
             output_root=output_root,
+            social_config=raw.get("social", {}),
         )
 
     @classmethod

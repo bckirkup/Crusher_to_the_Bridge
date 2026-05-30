@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://crusher-to-the-bridge/schemas/global_health_briefing.schema.json",
+  "title": "GlobalHealthTimeline",
+  "type": "object",
+  "required": ["briefings"],
+  "properties": {
+    "schema_version": { "type": "string" },
+    "briefings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["epoch"],
+        "properties": {
+          "epoch": { "type": "integer", "minimum": 0 },
+          "alerts": { "type": "array", "items": { "type": "string" } },
+          "pandemic_declarations": { "type": "array", "items": { "type": "string" } },
+          "travel_advisories": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    }
+  }
+}

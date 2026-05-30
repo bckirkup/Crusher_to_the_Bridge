@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://crusher-to-the-bridge/schemas/information_diffusion.schema.json",
+  "title": "InformationDiffusionConfig",
+  "type": "object",
+  "properties": {
+    "schema_version": { "type": "string" },
+    "alpha": { "type": "number", "minimum": 0, "maximum": 1 },
+    "homophily_strength": { "type": "number", "minimum": 0, "maximum": 1 },
+    "message_decay": { "type": "number", "minimum": 0, "maximum": 1 },
+    "initial_severity_belief": { "type": "number", "minimum": 0, "maximum": 1 },
+    "initial_trust_command": { "type": "number", "minimum": 0, "maximum": 1 },
+    "initial_trust_medical": { "type": "number", "minimum": 0, "maximum": 1 }
+  }
+}

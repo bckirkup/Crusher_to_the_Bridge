@@ -17,7 +17,7 @@ class ExperienceStore:
     policy_params: dict[str, Any] = field(default_factory=dict)
 
     def load(self) -> None:
-        if not os.path.isfile(self.store_path):
+        if not self.store_path or not os.path.isfile(self.store_path):
             return
         with open(self.store_path, encoding="utf-8") as fh:
             data = json.load(fh)
@@ -25,6 +25,8 @@ class ExperienceStore:
         self.policy_params = data.get("policy_params", {})
 
     def save(self) -> None:
+        if not self.store_path:
+            return
         os.makedirs(os.path.dirname(self.store_path) or ".", exist_ok=True)
         with open(self.store_path, "w", encoding="utf-8") as fh:
             json.dump(

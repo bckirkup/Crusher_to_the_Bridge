@@ -56,6 +56,9 @@ from orchestrator_types import (
 )
 from picard_framework.run_spec import PicardRunSpec
 from picard_framework.simulation.action_applier import apply_action_envelope
+from decision_engine.runtime import DecisionRuntime
+from decision_engine.protocol_filter import eligible_protocol_ids, filter_active_modifiers
+from decision_engine.experience import ExperienceStore
 from picard_framework.simulation.step_result import StepResult
 from picard_framework.world_state import WorldState
 from telemetry_buffer.schema import make_ground_truth, read_ground_truth, write_ground_truth
@@ -108,6 +111,8 @@ class ShipSimulation:
         self.mp_cfg: dict[str, Any] = {}
         self.mf_cfg: dict[str, Any] = {}
         self.graph_cfg: dict[str, Any] = {}
+        self.decision_runtime: DecisionRuntime | None = None
+        self.decision_experience = ExperienceStore("")
 
     @property
     def epoch(self) -> int:
@@ -199,6 +204,14 @@ class ShipSimulation:
             observation=self.obs,
             protocol=self.proto_ctx,
         )
+        self.decision_runtime = DecisionRuntime.from_run_spec(
+            self.run_spec, self.engine, self.proto_ctx,
+        )
+        exp_path = self.run_spec.social_config.get("experience_store", "")
+        if exp_path:
+            ep = exp_path if os.path.isabs(exp_path) else os.path.join(self.repo_root, exp_path)
+            self.decision_experience = ExperienceStore(ep)
+            self.decision_experience.load()
         self._initialized = True
         return self.world
 
@@ -221,10 +234,6 @@ class ShipSimulation:
         rdt = self.modalities["clinical_rdt"]
         pcr = self.modalities["targeted_pcr"]
         seq = self.modalities["sequencing"]
-
-        applied = apply_action_envelope(actions, state, cfg)
-        if applied:
-            self.world.decisions_log.append({"epoch": epoch, "applied": applied})
 
         step_fred_compliance(epoch, state, syndromic)
         step_mid_cruise_introductions(epoch, self.engine, self.pathogen_profiles, self.rng)
@@ -334,10 +343,72 @@ class ShipSimulation:
             syndromic_result=syn_result,
             cfg=cfg,
         )
+
+        applied = apply_action_envelope(
+            actions, state, cfg,
+            decision_ctx=self.decision_runtime.decision_ctx if self.decision_runtime else None,
+        )
+
+        dr = self.decision_runtime
+        stack_envelope = actions
+        information_state: dict = {}
+        if dr is not None:
+            tracing_dict = tracing_matrix.to_dict()
+            dr.contact_graph.update(
+                agents, tracing_dict, dr.class_matrix,
+            )
+            dr.lived_store.update(
+                epoch, agents, syn_result,
+                [], state.quarantined_ids, state.isolated_ids,
+                dr.contact_graph.agent_adjacency,
+                wearable_result, dr.profiles,
+            )
+            pop = max(1, len(agents))
+            conf_rate = len(state.quarantined_ids) / pop
+            agent_classes = {int(a["agent_id"]): a.get("agent_class", "unknown") for a in agents}
+            for msg in dr.decision_ctx.sop_announcements + dr.lived_store.sop_announcements:
+                dr.information_engine.seed_public_message(msg)
+            information_state = dr.information_engine.step(
+                dr.contact_graph.agent_adjacency,
+                agent_classes,
+                state.trigger_status,
+                conf_rate,
+            )
+            dr.information_engine.reputation.on_corporate_stance(
+                dr.decision_ctx.corporate_communication_stance,
+            )
+            epoch_snapshot = {
+                "epoch": epoch,
+                "trigger_status": state.trigger_status,
+                "summary": {"sick_call_count": syn_result.get("sick_call_count", 0)},
+                "reactive_protocols": {"stoplights": stoplights},
+                "observation_engine": {},
+                "cost_accounting": {},
+                "infection_counters": {},
+            }
+            eligible = eligible_protocol_ids(
+                self.proto_ctx.standing_protocols, stoplights,
+            )
+            if dr.stackelberg is not None:
+                stack_envelope = dr.stackelberg.solve(
+                    epoch, epoch_snapshot, dr.decision_ctx, dr.lived_store,
+                    information_state, dr.information_engine.reputation,
+                    dr.global_health_timeline, self.decision_experience, eligible,
+                )
+                applied2 = apply_action_envelope(
+                    stack_envelope, state, cfg, dr.decision_ctx,
+                )
+                if applied2:
+                    applied = applied2 if not applied else {**applied, **applied2}
+
         reset_modifiers(
             self.contam_engine, self.tx_core, self.proto_ctx.original_filter_eff,
         )
         active_mods = self.proto_ctx.protocol_engine.evaluate_epoch(epoch, stoplights)
+        if dr is not None and dr.decision_ctx.authorized_sop_ids is not None:
+            active_mods = filter_active_modifiers(
+                active_mods, dr.decision_ctx.authorized_sop_ids,
+            )
         merged_mods = self.proto_ctx.protocol_engine.get_merged_modifiers(active_mods)
 
         if merged_mods:
@@ -399,6 +470,19 @@ class ShipSimulation:
         )
         if applied:
             epoch_record["decisions"] = applied
+        if dr is not None:
+            dr.capture_sop_events(self.proto_ctx.protocol_engine, epoch)
+            epoch_record.setdefault("reactive_protocols", {})["sop_events"] = dr.sop_events_buffer
+            epoch_record["information_state"] = information_state
+            if dr.decision_detail_telemetry and wearable_result:
+                epoch_record["wearable_agent_snapshot"] = wearable_result.get("agent_results", {})
+            for ag in epoch_record.get("agents", []):
+                pid = dr.profiles.get(int(ag.get("agent_id", -1)))
+                if pid:
+                    ag["profile_id"] = pid.profile_id
+            epoch_record.setdefault("contact_tracing", {})["agent_adjacency"] = (
+                dr.contact_graph.to_dict().get("agent_adjacency", {})
+            )
         state.simulation_history.append(epoch_record)
         self._epoch = epoch
 

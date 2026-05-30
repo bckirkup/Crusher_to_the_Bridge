@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://crusher-to-the-bridge/schemas/class_interactions.schema.json",
+  "title": "ClassInteractions",
+  "type": "object",
+  "required": ["pairs"],
+  "properties": {
+    "schema_version": { "type": "string" },
+    "pairs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["from_class", "to_class", "weight"],
+        "properties": {
+          "from_class": { "type": "string" },
+          "to_class": { "type": "string" },
+          "context_zones": { "type": "array", "items": { "type": "string" } },
+          "weight": { "type": "number", "minimum": 0, "maximum": 10 }
+        }
+      }
+    }
+  }
+}

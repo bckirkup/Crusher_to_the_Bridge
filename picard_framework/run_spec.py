@@ -67,6 +67,7 @@ class PicardRunSpec:
     legacy_cfg: dict[str, Any] = field(default_factory=dict)
     actors: list[dict[str, Any]] = field(default_factory=list)
     incentives: dict[str, Any] = field(default_factory=dict)
+    social_config: dict[str, Any] = field(default_factory=dict)
     telemetry: TelemetryPaths | None = None
     write_ground_truth: bool = True
 
@@ -214,6 +215,7 @@ class PicardRunSpec:
             legacy_cfg=legacy_cfg,
             actors=raw.get("actors", []),
             incentives=raw.get("incentives", {}),
+            social_config=raw.get("social", {}),
             telemetry=TelemetryPaths(
                 repo_root=repo_root,
                 ground_truth=run.get("ground_truth", ""),

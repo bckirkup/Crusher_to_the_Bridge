@@ -7,7 +7,7 @@ from typing import Any
 
 from decision_engine.actions import Action, ActionEnvelope
 from decision_engine.experience import ExperienceStore
-from decision_engine.observation import ObservationModel, ObservationView
+from decision_engine.views import ObservationModel, ObservationView
 
 
 class Policy(ABC):
