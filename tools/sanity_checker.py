@@ -796,6 +796,55 @@ def _check_config_yaml(
     _check_multi_pathogen_params(cfg, report)
     _check_microflora_params(cfg, report, zone_ids)
     _check_long_read_sequencing(cfg, report)
+    _check_instrument_turnaround(cfg, report)
+
+
+def _check_instrument_turnaround(cfg: dict[str, Any], report: Report) -> None:
+    """Validate instrument TAT config file and instrument keys."""
+    tat_cfg = cfg.get("instrument_turnaround", {})
+    config_path = tat_cfg.get("config_path")
+    if not config_path:
+        return
+    _root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    full = config_path if os.path.isabs(config_path) else os.path.join(_root, config_path)
+    if not os.path.isfile(full):
+        report.error(
+            "config.yaml", "TAT",
+            f"instrument_turnaround.config_path not found: {config_path}",
+        )
+        return
+    try:
+        with open(full, "r", encoding="utf-8") as fh:
+            data = json.load(fh)
+    except json.JSONDecodeError as exc:
+        report.error(config_path, "TAT", f"instrument_turnaround JSON invalid: {exc}")
+        return
+    instruments = data.get("instruments", {})
+    if not isinstance(instruments, dict):
+        report.error(config_path, "TAT", "instruments must be an object")
+        return
+    known = {
+        "continuous_air_sampler",
+        "targeted_surface_swab",
+        "clinical_rdt",
+        "clinical_qpcr",
+        "clinical_microbiology",
+        "wastewater_sequencing",
+        "long_read_verification",
+    }
+    for key, block in instruments.items():
+        if key not in known:
+            report.warn(
+                config_path, "TAT",
+                f"unknown instrument key in turnaround config: {key}",
+            )
+        if not isinstance(block, dict):
+            continue
+        if "delay_epochs" in block and int(block["delay_epochs"]) < 0:
+            report.error(
+                config_path, "TAT",
+                f"{key}.delay_epochs must be non-negative",
+            )
 
 
 def _check_long_read_sequencing(cfg: dict[str, Any], report: Report) -> None:

@@ -299,7 +299,7 @@ simulation state:
 | `contact_tracing` | dict | Four exposure matrices + transmission events |
 | `reactive_protocols` | dict | Active SOPs, merged modifiers, stoplight states |
 | `cost_accounting` | dict | Running financial balance, labor hours, material consumption |
-| `observation_engine` | dict | Instrument results per zone/agent |
+| `observation_engine` | dict | **Delivered** instrument results per zone/agent (after TAT queue). Keys: `air_sniffer`, `surface_swab`, `wastewater_sequencing`, `clinical_rdt`, `clinical_qpcr`, `clinical_microbiology`, `long_read_verification`. Entries may include `status` (`pending`/`complete`), `ordered_epoch`, `available_epoch`. |
 | `microflora_shifts` | dict | Per-zone CLR-space anomaly data |
 | `hvac` | dict | CONTAM transport state: filter type, efficiency, transport active |
 
@@ -313,7 +313,7 @@ Flat, CDC/fleet-ingestible biosurveillance records:
 | `timestamp_epoch` | int | Epoch when sample was collected |
 | `collection_point_type` | str | Instrument category |
 | `collection_zone` | str | Zone or patient identifier |
-| `assay_type` | str | `aerosol_pcr`, `surface_pcr`, `metagenomic_sequencing`, `lateral_flow_antigen`, `patient_qpcr`, `culture_and_staining`, `microflora_disruption_status`, `trigger_transition` |
+| `assay_type` | str | `aerosol_pcr`, `surface_pcr`, `metagenomic_sequencing`, `lateral_flow_antigen`, `patient_qpcr`, `culture_and_staining`, `oxford_nanopore_long_read`, `microflora_disruption_status`, `trigger_transition` |
 | `fidelity_tier` | str | `HIGH_FIDELITY` / `MID_FIDELITY` / `LOW_FIDELITY` |
 | `binary_result` | str | `DETECTED` / `NOT DETECTED` / `NORMAL` / `DISRUPTED` / etc. |
 | `inferred_anomaly_score` | float | 0.0–1.0 (0=normal, 1=critical) |

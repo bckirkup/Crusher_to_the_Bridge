@@ -219,3 +219,45 @@ class TestResourceCosts:
             assert data.get("starting_count", 0) >= 0, (
                 f"Material '{item}' has negative starting count"
             )
+
+
+class TestLongReadSequencingParams:
+    """Validate data/config/long_read_sequencing_params.json."""
+
+    @pytest.fixture
+    def params(self) -> dict:
+        return _load_json(
+            os.path.join(DATA_DIR, "config", "long_read_sequencing_params.json"),
+        )
+
+    def test_has_deployment_profiles(self, params: dict) -> None:
+        profiles = params.get("deployment_profiles", {})
+        assert "flongle_rapid" in profiles
+        assert "minion_standard" in profiles
+
+    def test_profiles_have_detection_and_turnaround(self, params: dict) -> None:
+        for name, prof in params["deployment_profiles"].items():
+            assert "detection" in prof, f"{name} missing detection"
+            assert "turnaround" in prof, f"{name} missing turnaround"
+            assert "min_fraction_for_detection" in prof["detection"]
+
+
+class TestInstrumentTurnaroundConfig:
+    """Validate data/config/instrument_turnaround.json."""
+
+    @pytest.fixture
+    def tat(self) -> dict:
+        return _load_json(
+            os.path.join(DATA_DIR, "config", "instrument_turnaround.json"),
+        )
+
+    def test_has_instruments(self, tat: dict) -> None:
+        instruments = tat.get("instruments", {})
+        assert "wastewater_sequencing" in instruments
+        assert "clinical_microbiology" in instruments
+        assert "long_read_verification" in instruments
+
+    def test_delay_epochs_non_negative(self, tat: dict) -> None:
+        for key, block in tat.get("instruments", {}).items():
+            if "delay_epochs" in block:
+                assert int(block["delay_epochs"]) >= 0, f"{key} negative delay"

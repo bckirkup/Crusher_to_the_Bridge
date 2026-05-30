@@ -42,3 +42,14 @@ def test_init_observation_engine_wastewater_read_depth() -> None:
     engine = init_observation_engine(cfg, seed=42)
     expected = wastewater_sequencing_params(cfg)["read_depth"]
     assert engine.wastewater_seq.read_depth == expected
+
+
+def test_init_observation_engine_turnaround_and_long_read() -> None:
+    import copy
+
+    cfg = copy.deepcopy(load_config())
+    cfg["long_read_sequencing"]["enabled"] = True
+    engine = init_observation_engine(cfg, seed=42)
+    assert engine.turnaround is not None
+    assert engine.long_read is not None
+    assert engine.long_read.modality.profile_name == cfg["long_read_sequencing"]["default_profile"]

@@ -5,8 +5,10 @@ crusher_labs.long_read_escalation
 Heuristic escalation hooks that queue Oxford Nanopore long-read verification
 when routine modalities raise mixed-infection, discordant, or ambiguous signals.
 
-Trigger toggles live in ``config.yaml`` under ``long_read_sequencing``; no
-fitted assay parameters here.
+Trigger toggles live in ``config.yaml`` under ``long_read_sequencing``.
+Assay physics and detection live in ``long_read_sequencing_params.json`` and
+``crusher_labs.modalities.long_read_sequencing``. Escalation reads **delivered**
+upstream instrument results (after instrument TAT), not same-epoch raw samples.
 """
 
 from __future__ import annotations

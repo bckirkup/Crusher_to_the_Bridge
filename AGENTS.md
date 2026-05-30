@@ -15,7 +15,8 @@ Pure-Python simulation (no databases, Docker, or external APIs). **Python 3.11+*
 | Action import (external optimizer) | `python3 presidio_runner.py --import-actions-dir <dir>` | Per-epoch `cruise_*_epoch_*_actions.json` |
 | Streamlit dashboard | `python3 -m streamlit run dashboard.py --server.headless true` | Run orchestrator first for telemetry |
 | Sanity checker | `python3 tools/sanity_checker.py --from-config` | Ship + fleet + Stackelberg social configs |
-| Full test suite | `python3 -m pytest tests/ -v --tb=short` | ~298 tests, ~3s |
+| Full test suite | `python3 -m pytest tests/ -v --tb=short` | ~310 tests, ~3s |
+| Long-read / TAT tests | `python3 -m pytest tests/test_long_read_sequencing.py tests/test_instrument_turnaround.py -v` | Nanopore + turnaround queue |
 
 ### Framework layout
 
@@ -48,11 +49,13 @@ Pure-Python simulation (no databases, Docker, or external APIs). **Python 3.11+*
 | `testing-picard-presidio` | Before PRs on framework code |
 | `configuring-stackelberg-social` | Adding/editing diffusion, class interactions, profiles |
 | `run-full-test-suite` | Any pre-PR validation |
+| `long-read-sequencing` | Long-read params, TAT config, escalation, `LongReadNanoporeSequencing` |
 
 ### Important caveats
 
 - Use `python3` (not `python`) on Linux cloud VMs.
 - Dashboard reads `telemetry_buffer/simulation_history.json` and `telemetry_buffer/artificial_lab_notebook.json`.
+- Observation results in telemetry reflect **delivered** assays (TAT queue), including `pending` long-read runs until `available_epoch`.
 - **Law 1:** No hardcoded epoch SOP schedules; Stackelberg `authorize_sop_subset` only filters stoplight-eligible SOPs.
 - Utility **weights and optimization** are out-of-repo; only feature export and action apply are in-repo.
 - No flake8/ruff in repo; use `sanity_checker.py` and pytest.

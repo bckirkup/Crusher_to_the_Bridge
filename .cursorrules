@@ -31,11 +31,13 @@ engines/
   transmission_core.py             — Six-pathway dose model + ContactTracingMatrix
   py_contam_bridge.py              — CONTAM-style multi-zone HVAC aerosol transport
 crusher_labs/
-  observation_core.py              — 6 diagnostic instruments + InstrumentQC
+  observation_core.py              — 6 diagnostic instruments + optional long-read + InstrumentQC
   lab_notebook.py                  — Three-tier fidelity serializer
   protocol_engine.py               — Stoplight-triggered SOP evaluator
+  instrument_turnaround.py         — TAT queue for delivered observation results
+  long_read_escalation.py          — Nanopore verification escalation heuristics
   cost_ledger.py                   — Financial / material / labor accounting
-  modalities/                      — Syndromic, PCR, RDT, sequencing modules
+  modalities/                      — Syndromic, PCR, RDT, sequencing, long_read_sequencing
 tools/
   sanity_checker.py                — Pydantic-based config validator (run before orchestrator)
   gis_spatial_bridge.py            — GIS Shapefile/GeoJSON → JSON layout converter
@@ -45,6 +47,8 @@ data/
     resource_costs.json            — Budgets, material inventory, per-test costs
     edison_resource_costs.json     — Expanded costs with sequencing + culture pricing
     logging_profile.json           — Fidelity tier selection + QC parameters
+    instrument_turnaround.json     — Per-instrument assay delivery delays (epochs)
+    long_read_sequencing_params.json — Oxford Nanopore deployment profiles & detection
   pathogens/
     active_profiles.json           — Multi-pathogen definitions (default 2-pathogen)
     edison_10pathogen_profiles.json — 10 QMRA-sourced pathogen profiles (Edison)
@@ -250,7 +254,7 @@ multi_pathogen{pid: {infected, symptomatic, recovered, co_infected_count}},
 contact_tracing{shared_room, droplet, hvac_downstream, fomite_trailing, transmission_events},
 reactive_protocols{active_protocols, merged_modifiers, stoplights},
 cost_accounting{total_financial_usd, total_labor_hours, ...},
-observation_engine{air_sniffer, surface_swab, wastewater_sequencing, clinical_rdt, clinical_qpcr, clinical_microbiology}
+observation_engine{air_sniffer, surface_swab, wastewater_sequencing, clinical_rdt, clinical_qpcr, clinical_microbiology, long_read_verification}
 ```
 
 ### Lab Notebook Records (`telemetry_buffer/artificial_lab_notebook.json`)

@@ -20,7 +20,7 @@ None — all data contract tests run locally against JSON files in the repo.
 ```bash
 python -m pytest tests/test_data_contracts.py -v --tb=short
 ```
-Expected: 21 tests pass. Validates pathogen profiles, spatial layout, air flow paths, protocols, and resource costs.
+Expected: 25+ tests pass. Validates pathogen profiles, spatial layout, air flow paths, protocols, resource costs, long-read params, and instrument TAT.
 
 ### Run sanity checker tests
 ```bash
@@ -57,6 +57,8 @@ Expected: 22 tests pass in ~0.2s.
 | Protocols | `data/config/protocols.json` | SOP definitions (SOP-001 through SOP-011) |
 | Resource Costs | `data/config/resource_costs.json` | Budget, labor, material inventory |
 | Logging Profile | `data/config/logging_profile.json` | Observation engine logging config |
+| Instrument TAT | `data/config/instrument_turnaround.json` | Per-instrument delivery delay (epochs) |
+| Long-read params | `data/config/long_read_sequencing_params.json` | Nanopore deployment profiles & detection |
 | Microbiome | `data/microbiome_profiles/*.json` | Coastal/ocean profiles, zone type modifiers |
 
 ### Available Platforms
@@ -94,6 +96,8 @@ JSON schemas live in `schemas/`:
 | `TestAirFlowPaths` | 4 | HVAC zone rooms reference valid zones, cross-zone links reference valid HVAC zones, adjacency edges reference valid zones, flow rates non-negative |
 | `TestProtocols` | 3 | Has protocols key, unique protocol IDs, valid stoplight levels (GREEN/AMBER/RED) |
 | `TestResourceCosts` | 4 | Positive starting budget, positive labor capacity, material inventory non-empty, non-negative unit costs and starting counts |
+| `TestLongReadSequencingParams` | 2 | Deployment profiles present, detection and turnaround blocks |
+| `TestInstrumentTurnaroundConfig` | 2 | Instrument keys present, non-negative delay_epochs |
 
 ### `test_sanity_checker.py`
 

@@ -54,16 +54,26 @@ jobs:
             --fleet-config presidio/data/config/smoke_fleet.json \
             --cruises 1
 
+      - name: Long-read sequencing and instrument TAT tests
+        env:
+          PYTHONPATH: .
+        run: |
+          pytest tests/test_long_read_sequencing.py tests/test_instrument_turnaround.py \
+            tests/test_sequencing_config.py::test_init_observation_engine_turnaround_and_long_read -v --tb=short
+
       - name: Verify import hygiene (stoplight deduplication)
         env:
           PYTHONPATH: .
         run: |
           python -c "
-          from crusher_labs.stoplight import stoplight_from_ct, meets_threshold
+          from crusher_labs.stoplight import stoplight_from_ct, meets_threshold, stoplight_from_long_read_verification
           from crusher_labs.protocol_engine import compute_stoplights
           from crusher_labs.lab_notebook import _stoplight_from_ct
+          from crusher_labs.instrument_turnaround import InstrumentTurnaroundQueue, InstrumentTurnaroundRegistry
+          from crusher_labs.modalities.long_read_sequencing import LongReadNanoporeSequencing
+          from crusher_labs.long_read_escalation import collect_long_read_escalation_requests, is_long_read_enabled
           from orchestrator_types import SimulationState, ObservationEngine, ProtocolContext
-          from orchestrator_init import initialize_ship_graph, build_engine
+          from orchestrator_init import initialize_ship_graph, build_engine, init_observation_engine
           from orchestrator_epoch import sync_vsp_isolation, step_fred_compliance, run_observation_sampling, confine_all_agents, apply_surface_decontamination, apply_zone_closures
           from orchestrator_record import record_epoch, finalize_simulation
           from orchestrator_display import print_executive_summary

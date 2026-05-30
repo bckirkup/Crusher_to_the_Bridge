@@ -26,7 +26,7 @@ python orchestrator.py --epochs 250
 # Launch LCARS dashboard (after simulation)
 streamlit run dashboard.py
 
-# Run the test suite (~298 tests)
+# Run the test suite (~310 tests)
 pytest tests/ -v --tb=short
 
 # Fleet smoke (1 cruise × 2 epochs)
@@ -75,7 +75,9 @@ picard_framework/data/       Agent profile bundles
 crusher_labs/                Dr. Crusher's Bio-Diagnostic Suite
 ├── __init__.py              Config loader, modality builder
 ├── config.yaml              ★ Master configuration file (see below)
-├── observation_core.py      Six instrument classes (air, surface, wastewater, RDT, qPCR, microbio)
+├── observation_core.py      Six routine instruments + optional long-read verification
+├── instrument_turnaround.py Per-instrument assay delivery delays (TAT queue)
+├── long_read_escalation.py  Nanopore escalation from routine modality signals
 ├── protocol_engine.py       Stoplight computation, SOP activation, modifier application
 ├── lab_notebook.py          Artificial lab notebook (audit trail)
 ├── cost_ledger.py           Financial/material/labor cost tracking
@@ -85,6 +87,7 @@ crusher_labs/                Dr. Crusher's Bio-Diagnostic Suite
     ├── clinical_rdt.py      Rapid antigen lateral-flow test
     ├── targeted_pcr.py      RT-qPCR panel
     ├── sequencing.py        Metagenomic shotgun sequencing
+    ├── long_read_sequencing.py  Oxford Nanopore verification & pathogen typing
     └── wearable.py          Wearable physiological data stream
 
 engines/                     External simulation bridges
@@ -98,7 +101,7 @@ tools/
 └── gis_spatial_bridge.py    GIS shapefile → spatial layout converter
 
 data/
-├── config/                  Standing protocols, resource costs, logging
+├── config/                  Standing protocols, resource costs, logging, TAT, long-read params
 ├── pathogens/               Pathogen profiles (dose-response, shedding curves)
 ├── platforms/               Ship spatial layouts and HVAC definitions
 │   ├── destroyer_baseline/
@@ -115,7 +118,7 @@ schemas/                     JSON Schema definitions for all data contracts
 telemetry_buffer/            Runtime output (simulation_history, lab_notebook)
 │   agent_axes.py            Orthogonal agent state (infection / presentation / compliance)
 dashboard.py                 LCARS Main Bridge Display (4 stations)
-tests/                       ~298 tests (ship, fleet, Stackelberg, contracts)
+tests/                       ~310 tests (ship, fleet, Stackelberg, long-read, TAT, contracts)
 AGENTS.md                    Cursor Cloud / agent development notes
 ```
 
@@ -492,7 +495,7 @@ python tools/sanity_checker.py --config-dir data/config \
 ## Testing
 
 ```bash
-# Full suite (~298 tests)
+# Full suite (~310 tests)
 pytest tests/ -v --tb=short
 
 # Picard / Presidio / Stackelberg
