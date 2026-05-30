@@ -103,6 +103,7 @@ class ObservationEngine:
     notebook: ArtificialLabNotebook
     fidelity_name: str
     lab_notebook_enabled: bool
+    turnaround: Any = None  # InstrumentTurnaroundQueue
     long_read: LongReadVerificationSequencing | None = None
 
 

@@ -1,0 +1,115 @@
+{
+  "meta": {
+    "description": "USS Enterprise-D (Galaxy class, TNG) scenario bundle",
+    "platform": "enterprise_galaxy_tng",
+    "fiction_note": "Includes civilian families; excludes android-specific classes."
+  },
+  "recommended_ship_graph": {
+    "num_agents": 400,
+    "agent_roles": {
+      "passenger_fraction": 0.25,
+      "crew_fraction": 0.75
+    },
+    "spatial_layout": "data/platforms/enterprise_galaxy_tng/spatial_layout.json",
+    "air_flow_paths": "data/platforms/enterprise_galaxy_tng/air_flow_paths.json",
+    "pathogen_profiles": "data/pathogens/enterprise_tng_profiles.json",
+    "graywater_zones": [
+      "Main_Engineering",
+      "Cargo_Bay"
+    ]
+  },
+  "agent_classes": [
+    {
+      "class_id": "crew_command",
+      "role_group": "crew",
+      "fraction": 0.06,
+      "home_zone_preference": "Crew_Quarters",
+      "free_zone_preference": "Bridge",
+      "duty_zone": "Bridge"
+    },
+    {
+      "class_id": "crew_helm_ops",
+      "role_group": "crew",
+      "fraction": 0.06,
+      "home_zone_preference": "Crew_Quarters",
+      "free_zone_preference": "Bridge",
+      "duty_zone": "Bridge"
+    },
+    {
+      "class_id": "crew_security",
+      "role_group": "crew",
+      "fraction": 0.07,
+      "home_zone_preference": "Crew_Quarters",
+      "free_zone_preference": "Security",
+      "duty_zone": "Security_Office"
+    },
+    {
+      "class_id": "crew_engineering",
+      "role_group": "crew",
+      "fraction": 0.14,
+      "home_zone_preference": "Crew_Quarters",
+      "free_zone_preference": "Engineering",
+      "duty_zone": "Main_Engineering"
+    },
+    {
+      "class_id": "crew_sciences",
+      "role_group": "crew",
+      "fraction": 0.09,
+      "home_zone_preference": "Crew_Quarters",
+      "free_zone_preference": "Science",
+      "duty_zone": "Science_Labs"
+    },
+    {
+      "class_id": "crew_medical",
+      "role_group": "crew",
+      "fraction": 0.07,
+      "home_zone_preference": "Crew_Quarters",
+      "free_zone_preference": "Sickbay",
+      "duty_zone": "Sickbay"
+    },
+    {
+      "class_id": "crew_operations",
+      "role_group": "crew",
+      "fraction": 0.05,
+      "home_zone_preference": "Crew_Quarters",
+      "free_zone_preference": "Ten_Forward",
+      "duty_zone": "Ten_Forward"
+    },
+    {
+      "class_id": "crew_services",
+      "role_group": "crew",
+      "fraction": 0.08,
+      "home_zone_preference": "Crew_Quarters",
+      "free_zone_preference": "Galley",
+      "duty_zone": "Galley"
+    },
+    {
+      "class_id": "passenger_family",
+      "role_group": "passenger",
+      "fraction": 0.14,
+      "home_zone_preference": "Family",
+      "free_zone_preference": "School",
+      "duty_zone": "Schoolroom"
+    },
+    {
+      "class_id": "passenger_civilian",
+      "role_group": "passenger",
+      "fraction": 0.09,
+      "home_zone_preference": "Family",
+      "free_zone_preference": "Ten_Forward",
+      "duty_zone": ""
+    },
+    {
+      "class_id": "crew_general",
+      "role_group": "crew",
+      "fraction": 0.15,
+      "home_zone_preference": "Crew_Quarters",
+      "free_zone_preference": "Mess",
+      "duty_zone": "Mess_Hall"
+    }
+  ],
+  "gender_distribution": {
+    "male": 0.5,
+    "female": 0.5
+  }
+}

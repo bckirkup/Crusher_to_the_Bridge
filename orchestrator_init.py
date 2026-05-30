@@ -441,6 +441,46 @@ def init_observation_engine(
 
     notebook = build_notebook_from_config(obs_cfg_path)
 
+    from crusher_labs.instrument_turnaround import (
+        InstrumentTurnaroundQueue,
+        InstrumentTurnaroundRegistry,
+    )
+    from crusher_labs.long_read_escalation import is_long_read_enabled, long_read_config
+    from crusher_labs.modalities.long_read_sequencing import LongReadNanoporeSequencing
+    from crusher_labs.observation_core import LongReadVerificationSequencing
+
+    tat_cfg = cfg.get("instrument_turnaround", {})
+    tat_path = tat_cfg.get("config_path", "data/config/instrument_turnaround.json")
+    lr_profile_turnaround: dict[str, Any] | None = None
+    long_read_inst: LongReadVerificationSequencing | None = None
+    if is_long_read_enabled(cfg):
+        lr_cfg = long_read_config(cfg)
+        params_path = lr_cfg.get(
+            "params_path", "data/config/long_read_sequencing_params.json",
+        )
+        profile = lr_cfg.get("default_profile", "flongle_rapid")
+        modality = LongReadNanoporeSequencing.from_params_path(
+            params_path,
+            profile,
+            enabled=True,
+            rng=np.random.default_rng(seed + 7),
+            repo_root=REPO_ROOT,
+        )
+        lr_profile_turnaround = modality.turnaround
+        long_read_inst = LongReadVerificationSequencing(
+            modality=modality,
+            cross_contamination_rate=xcontam_rate,
+            control_intensity=ctrl_intensity,
+            rng=np.random.default_rng(seed + 8),
+        )
+
+    tat_registry = InstrumentTurnaroundRegistry.load(
+        tat_path,
+        repo_root=REPO_ROOT,
+        long_read_profile_turnaround=lr_profile_turnaround,
+    )
+    turnaround = InstrumentTurnaroundQueue(tat_registry)
+
     print_observation_engine(fidelity_name, xcontam_rate, ctrl_intensity, lab_notebook_enabled)
 
     return ObservationEngine(
@@ -453,6 +493,8 @@ def init_observation_engine(
         notebook=notebook,
         fidelity_name=fidelity_name,
         lab_notebook_enabled=lab_notebook_enabled,
+        turnaround=turnaround,
+        long_read=long_read_inst,
     )
 
 

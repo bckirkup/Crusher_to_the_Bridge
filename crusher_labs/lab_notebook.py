@@ -276,8 +276,11 @@ def _long_read_verification_record(
 ) -> dict[str, Any]:
     from crusher_labs.stoplight import stoplight_from_long_read_verification
 
-    anomaly = 0.5 if data.get("status") == "framework_stub" else 0.0
-    if data.get("mixed_infection_flag") or data.get("unexpected_pathogen_flag"):
+    status = data.get("status", "")
+    anomaly = 0.0
+    if status == "pending":
+        anomaly = 0.2
+    elif data.get("mixed_infection_flag") or data.get("unexpected_pathogen_flag"):
         anomaly = max(anomaly, 0.7)
 
     record: dict[str, Any] = {
@@ -296,7 +299,10 @@ def _long_read_verification_record(
         record["inferred_anomaly_score"] = anomaly
         return record
 
-    record["binary_result"] = "PENDING" if not data.get("consensus_ready") else "TYPED"
+    if status == "pending":
+        record["binary_result"] = "PENDING"
+    else:
+        record["binary_result"] = "PENDING" if not data.get("consensus_ready") else "TYPED"
     record["inferred_anomaly_score"] = anomaly
     record["pathogen_calls"] = data.get("pathogen_calls", [])
     record["upstream_instrument"] = data.get("upstream_instrument", "")

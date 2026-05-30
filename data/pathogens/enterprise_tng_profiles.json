@@ -1,0 +1,168 @@
+{
+  "meta": {
+    "description": "TNG-inspired pathogen profiles (fiction-adapted)",
+    "version": "1.0",
+    "notes": "barclay_protomorphosis evokes Genesis; tng_shipboard_influenza evokes generic epidemic story beats."
+  },
+  "pathogens": [
+    {
+      "pathogen_id": "barclay_protomorphosis",
+      "name": "Barclay Protomorphosis Virus (fiction-adapted)",
+      "category": "respiratory_viral",
+      "transmission_routes": [
+        "droplet",
+        "hvac_airborne",
+        "direct_contact",
+        "fomite",
+        "bodily_fluids"
+      ],
+      "shedding_curve_log10": [
+        2.5,
+        4.5,
+        7.0,
+        8.5,
+        9.5,
+        9.0,
+        8.0,
+        7.0,
+        6.0,
+        5.0,
+        4.0,
+        3.5,
+        3.0,
+        2.5,
+        2.0
+      ],
+      "asymptomatic_shedding_log10": [
+        2.5,
+        4.0,
+        6.0,
+        7.0,
+        7.5,
+        7.0,
+        6.5,
+        6.0,
+        5.5,
+        5.0,
+        4.5,
+        4.0,
+        3.5,
+        3.0,
+        2.5
+      ],
+      "dose_adjustment": 2.2,
+      "dose_response": {
+        "model": "beta_poisson",
+        "alpha": 0.1,
+        "beta": 22.0
+      },
+      "illness_probability": {
+        "eta": 0.62,
+        "gamma": 0.09
+      },
+      "recovery_day": 12,
+      "surface_deposition_fraction": 0.04,
+      "base_susceptibility": 1.0,
+      "microflora_disruption": {
+        "causes_disruption": true,
+        "disruption_type": "systemic",
+        "disruption_magnitude": 0.75,
+        "affected_kingdoms": {
+          "Bacteria": {
+            "Enterobacter": 3.0,
+            "Staphylococcus_epi": 2.8
+          },
+          "Fungi": {
+            "Candida_spp": 2.2
+          },
+          "Virus": {
+            "ssRNA_marine": 2.0
+          }
+        }
+      },
+      "food_contamination": {
+        "enabled": false
+      },
+      "introduction_epoch": 0,
+      "initial_infected": 1,
+      "initial_time_infected": 0
+    },
+    {
+      "pathogen_id": "tng_shipboard_influenza",
+      "name": "Shipboard Influenza Analog (fiction-adapted)",
+      "category": "respiratory_viral",
+      "transmission_routes": [
+        "droplet",
+        "hvac_airborne",
+        "direct_contact",
+        "fomite"
+      ],
+      "shedding_curve_log10": [
+        3.0,
+        5.0,
+        7.0,
+        8.5,
+        9.0,
+        8.5,
+        7.5,
+        6.5,
+        5.5,
+        4.5,
+        3.5,
+        3.0,
+        2.5,
+        2.0,
+        2.0
+      ],
+      "asymptomatic_shedding_log10": [
+        3.0,
+        4.5,
+        6.0,
+        7.0,
+        7.5,
+        7.0,
+        6.0,
+        5.0,
+        4.0,
+        3.5,
+        3.0,
+        2.5,
+        2.0,
+        2.0,
+        2.0
+      ],
+      "dose_adjustment": 2.8,
+      "dose_response": {
+        "model": "beta_poisson",
+        "alpha": 0.18,
+        "beta": 55.0
+      },
+      "illness_probability": {
+        "eta": 0.42,
+        "gamma": 0.11
+      },
+      "recovery_day": 7,
+      "surface_deposition_fraction": 0.03,
+      "base_susceptibility": 1.0,
+      "microflora_disruption": {
+        "causes_disruption": true,
+        "disruption_type": "respiratory",
+        "disruption_magnitude": 0.45,
+        "affected_kingdoms": {
+          "Bacteria": {
+            "Haemophilus_influenzae": 1.5
+          },
+          "Fungi": {
+            "Aspergillus_spp": 1.0
+          }
+        }
+      },
+      "food_contamination": {
+        "enabled": false
+      },
+      "introduction_epoch": 8,
+      "initial_infected": 2,
+      "initial_time_infected": 0
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-"""Long-read Nanopore verification modality framework tests."""
+"""Long-read Nanopore verification modality tests."""
 
 from __future__ import annotations
 
@@ -19,6 +19,7 @@ from crusher_labs.modalities.long_read_sequencing import (
     ALL_SPECIMEN_SOURCES,
     LongReadNanoporeSequencing,
     LongReadVerificationRequest,
+    SPECIMEN_WASTEWATER_METAGENOMICS,
 )
 from crusher_labs.observation_core import LongReadVerificationSequencing
 from crusher_labs.protocol_engine import compute_stoplights
@@ -55,8 +56,34 @@ def test_escalation_mixed_infection_wastewater() -> None:
     assert reqs[0].specimen_source == "wastewater_metagenomics"
 
 
-def test_instrument_run_requests_stub() -> None:
-    mod = LongReadNanoporeSequencing(enabled=True)
+def test_verify_detects_pathogen_from_zone_mass() -> None:
+    params_path = os.path.join(REPO_ROOT, "data/config/long_read_sequencing_params.json")
+    mod = LongReadNanoporeSequencing.from_params_path(
+        params_path, "flongle_rapid", rng=__import__("numpy").random.default_rng(0),
+        repo_root=REPO_ROOT,
+    )
+    req = LongReadVerificationRequest(
+        request_id="lr_test",
+        specimen_source=SPECIMEN_WASTEWATER_METAGENOMICS,
+        collection_key="Engine_Room",
+        trigger_reasons=["mixed_infection_suspected"],
+    )
+    spaces = {
+        "Engine_Room": {
+            "pathogen_mass": 5000.0,
+            "pathogen_mass_by_id": {"norovirus": 5000.0},
+        },
+    }
+    out = mod.verify(req, epoch=1, spaces=spaces, agents=[], pathogen_profiles={})
+    assert out["status"] == "complete"
+    assert isinstance(out["pathogen_calls"], list)
+
+
+def test_instrument_run_requests_complete() -> None:
+    params_path = os.path.join(REPO_ROOT, "data/config/long_read_sequencing_params.json")
+    mod = LongReadNanoporeSequencing.from_params_path(
+        params_path, "flongle_rapid", repo_root=REPO_ROOT,
+    )
     inst = LongReadVerificationSequencing(modality=mod)
     req = LongReadVerificationRequest(
         request_id="lr_0001",
@@ -64,24 +91,37 @@ def test_instrument_run_requests_stub() -> None:
         collection_key="3",
         trigger_reasons=["discordant_modalities"],
     )
-    out = inst.run_requests([req])
+    agents = [
+        {
+            "agent_id": 3,
+            "shedding_rate": 5000.0,
+            "pathogen_infections": {"norovirus": {"status": "INFECTED"}},
+        },
+    ]
+    out = inst.run_requests(
+        [req], epoch=0, spaces={}, agents=agents, pathogen_profiles={},
+    )
     assert "lr_0001" in out
-    assert out["lr_0001"]["status"] == "framework_stub"
-    assert out["lr_0001"]["pathogen_calls"] == []
+    assert out["lr_0001"]["status"] == "complete"
+    assert "pathogen_calls" in out["lr_0001"]
 
 
 def test_stoplights_include_long_read_when_results_present() -> None:
     lr = {
         "lr_0001": {
-            "status": "framework_stub",
+            "status": "complete",
             "pathogen_calls": [],
             "consensus_ready": False,
         },
     }
     lights = compute_stoplights({}, {}, {}, {}, {}, {}, long_read_results=lr)
     assert "long_read_verification_sequencing" in lights
-    assert lights["long_read_verification_sequencing"]["lr_0001"] == "AMBER"
+    assert lights["long_read_verification_sequencing"]["lr_0001"] == "GREEN"
 
 
 def test_stoplight_from_long_read_with_calls() -> None:
-    assert stoplight_from_long_read_verification({"pathogen_calls": ["X"]}) == "RED"
+    assert stoplight_from_long_read_verification({"pathogen_calls": [{"taxon_id": "X"}]}) == "RED"
+
+
+def test_stoplight_pending_is_green() -> None:
+    assert stoplight_from_long_read_verification({"status": "pending"}) == "GREEN"
