@@ -254,7 +254,7 @@ def run() -> None:
 
         (air_results, swab_results, ww_results,
          clin_rdt_results, clin_qpcr_results, clin_microbio_results,
-         long_read_results) = (
+         long_read_results, long_read_ordered_count) = (
             run_observation_sampling(
                 epoch, obs, agents, spaces, zone_names, zone_volumes,
                 zone_microflora_shifts, state.trigger_status, high_traffic,
@@ -305,7 +305,7 @@ def run() -> None:
             air_results, swab_results, ww_results,
             clin_rdt_results, clin_qpcr_results, clin_microbio_results,
         )
-        step_long_read_cost_accounting(epoch, proto_ctx, long_read_results)
+        step_long_read_cost_accounting(epoch, proto_ctx, long_read_ordered_count)
 
         step_quarantine_confinement(
             epoch, agents, merged_mods, state.trigger_status, state, syndromic,
