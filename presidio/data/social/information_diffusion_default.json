@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0.0",
+  "alpha": 0.25,
+  "homophily_strength": 0.15,
+  "message_decay": 0.05,
+  "initial_severity_belief": 0.1,
+  "initial_trust_command": 0.7,
+  "initial_trust_medical": 0.75,
+  "reputation_command_delta_on_confinement_spike": -0.02,
+  "reputation_medical_delta_on_test_cadence": 0.01
+}

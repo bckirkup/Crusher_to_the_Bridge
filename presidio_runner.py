@@ -58,8 +58,17 @@ def run(fleet_spec: PresidioRunSpec, *, display: bool = False) -> None:
             fleet_spec.picard_run_spec_path,
         )
         cfg = base_spec.inject_into_cfg()
+        merged_social = dict(fleet_spec.picard_run_spec.get("social", {}))
+        merged_social.update(fleet_spec.social_config if hasattr(fleet_spec, "social_config") else {})
+        if not hasattr(base_spec, "social_config"):
+            base_spec.social_config = merged_social
+        else:
+            base_spec.social_config = merged_social
         cruise_dir = os.path.join(fleet_spec.output_root, f"cruise_{cruise_id:03d}")
         os.makedirs(cruise_dir, exist_ok=True)
+
+        cruise_social = dict(merged_social)
+        cruise_social["cruise_id"] = f"{cruise_id:03d}"
 
         picard_spec = PicardRunSpec(
             repo_root=base_spec.repo_root,
@@ -76,6 +85,7 @@ def run(fleet_spec: PresidioRunSpec, *, display: bool = False) -> None:
             legacy_cfg=cfg,
             actors=fleet_spec.actors,
             incentives=fleet_spec.incentives,
+            social_config=cruise_social,
             telemetry=TelemetryPaths(
                 repo_root=fleet_spec.repo_root,
                 ground_truth=os.path.join(cruise_dir, "ground_truth.json"),
@@ -134,6 +144,8 @@ def main() -> None:
     parser.add_argument("--fleet-config", default=None)
     parser.add_argument("--cruises", type=int, default=None)
     parser.add_argument("--display", action="store_true")
+    parser.add_argument("--export-utility-dir", default=None)
+    parser.add_argument("--import-actions-dir", default=None)
     args = parser.parse_args()
 
     repo_root = os.path.dirname(os.path.abspath(__file__))
@@ -144,6 +156,13 @@ def main() -> None:
     if args.cruises is not None:
         fleet_spec.num_cruises = args.cruises
 
+    social_cli: dict = dict(getattr(fleet_spec, "social_config", {}) or {})
+    if args.export_utility_dir:
+        social_cli["export_utility_dir"] = args.export_utility_dir
+    if args.import_actions_dir:
+        social_cli["import_actions_dir"] = args.import_actions_dir
+    if social_cli:
+        fleet_spec.social_config = social_cli
     run(fleet_spec, display=args.display)
 
 

@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://crusher-to-the-bridge/schemas/utility_observation_bundle.schema.json",
+  "title": "UtilityObservationBundle",
+  "type": "object",
+  "required": ["epoch", "command", "medical"],
+  "properties": {
+    "schema_version": { "type": "string" },
+    "epoch": { "type": "integer", "minimum": 0 },
+    "cruise_id": { "type": "string" },
+    "command": {
+      "type": "object",
+      "properties": {
+        "features": { "type": "object" },
+        "eligible_sops": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "medical": { "type": "object" },
+    "agents": { "type": "object" },
+    "agent_classes": { "type": "object" },
+    "economics_weights": { "type": "object" }
+  }
+}

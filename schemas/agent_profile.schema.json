@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://crusher-to-the-bridge/schemas/agent_profile.schema.json",
+  "title": "AgentProfileBundle",
+  "type": "object",
+  "properties": {
+    "schema_version": { "type": "string" },
+    "class_templates": { "type": "object" },
+    "default_template": { "type": "object" }
+  }
+}

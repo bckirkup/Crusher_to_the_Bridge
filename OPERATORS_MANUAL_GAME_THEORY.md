@@ -1,75 +1,62 @@
 # Crusher-to-the-Bridge — Game Theory & Fleet Operator's Manual (Presidio)
 
-**Scope:** Multi-cruise fleet meta-simulation, hierarchical decisions, incomplete information, and cross-cruise experience.  
-**Single-ship operations:** see [OPERATORS_MANUAL_SHIP.md](OPERATORS_MANUAL_SHIP.md).
+**Scope:** Stackelberg decisions, information diffusion, reputation, and external utility optimization.
+
+Single-ship Picard operations: [OPERATORS_MANUAL_SHIP.md](OPERATORS_MANUAL_SHIP.md).
 
 ---
 
-## Architecture
+## Stackelberg move order (each epoch)
 
-```text
-presidio_runner.py
-  └── decision_engine.DecisionRound (per epoch, per actor)
-  └── picard_framework.ShipSimulation (physics + diagnostics)
-  └── decision_engine.ExperienceStore (between cruises)
-```
+1. **Command** — Authorize SOP subsets, corporate communication stance, directives to medical
+2. **Medical** — Surveillance cadence, crew instructions, recommendations (stoplight-gated physics)
+3. **Population** — Class-aggregated or per-agent actions (default noop)
 
-**Law 1:** Standing SOPs remain stoplight-driven. Strategic actors augment surveillance cadence and related hooks; they do not use hardcoded epoch schedules.
+Standing SOP **physics** remains driven by Crusher Labs stoplights (Law 1). Command can restrict which SOP IDs may auto-activate; medical cannot force activation without stoplight eligibility.
 
-## Presidio configuration directories
+---
 
-| Directory | Files | Role |
-|-----------|-------|------|
-| `presidio/data/catalog/` | `libraries.json` | Index of fleet configs, economics, Picard run specs |
-| `presidio/data/config/` | `default_fleet.json`, `smoke_fleet.json` | Fleet run specifications |
-| `presidio/data/economics/` | `fleet_economics.json` | Reward weights and penalties |
-| `presidio/data/experiences/` | `fleet_experience.json`, `runs/` | Cross-cruise memory and per-cruise telemetry |
+## Configuration
 
-## Fleet quick start
+| Path | Purpose |
+|------|---------|
+| `presidio/data/social/information_diffusion_default.json` | Belief propagation parameters |
+| `presidio/data/social/class_interactions_default.json` | Crew/passenger contact weights by zone |
+| `presidio/data/intelligence/global_health_timeline.json` | Epoch-static global health briefings |
+| `picard_framework/data/agent_profiles/default_ship_population.json` | Demographics/medical templates |
+| `presidio/data/economics/fleet_economics.json` | Reward weight references (not optimized in-repo) |
 
-```bash
-python3 tools/sanity_checker.py --from-config
+Picard run spec `social` block references these paths. See `picard_framework/runs/destroyer_baseline_default.json`.
 
-# Smoke (1 cruise × 2 epochs)
-python3 presidio_runner.py \
-  --fleet-config presidio/data/config/smoke_fleet.json \
-  --cruises 1
+---
 
-# Default fleet profile
-python3 presidio_runner.py
-```
+## External optimization workflow
 
-## Actor roles and information
+1. Run simulation with `social.export_utility_dir` set
+2. External tool reads `utility_observation_bundle` JSON per epoch
+3. External tool writes `actions.json` per epoch
+4. Re-run or wire `--import-actions-dir` on `presidio_runner.py` (when enabled)
 
-| Role | Typical observation |
-|------|---------------------|
-| `crew_agent` | Own location and health axes |
-| `medical_officer` | Instrument summaries, sick calls |
-| `commanding_officer` | Fleet aggregates, costs, escalation status |
+Utility **features** are in-repo; **weights and optimization** are out-of-repo.
 
-Observations are built by `decision_engine.ObservationModel` from a public epoch snapshot — not full ground truth.
+---
 
-## Incentives
+## Agent hooks
 
-Fleet-level weights live in:
+| Hook | Module |
+|------|--------|
+| Lived experience | `decision_engine/lived_experience.py` |
+| Wearable (per-agent) | Epoch `wearable_agent_snapshot` when `social.telemetry.decision_detail: true` |
+| Contact graph | `decision_engine/social/contact_graph.py` |
+| Information state | `simulation_history[].information_state` |
 
-- `presidio/data/config/*.json` → `incentives` block
-- `presidio/data/economics/fleet_economics.json` → `reward_weights`, `penalties`
-
-## Schemas
-
-- `schemas/presidio_fleet_config.schema.json`
-- `schemas/presidio_fleet_economics.schema.json`
-- `schemas/decision_action.schema.json`
-
-## Reusing decision_engine elsewhere
-
-`decision_engine` has **no** imports from `engines.*`. Provide your own host loop, public snapshot builder, and action applier.
+---
 
 ## Validation
 
 ```bash
-python3 -m pytest tests/test_decision_engine.py tests/test_presidio_runner.py -v
+python3 tools/sanity_checker.py --from-config
+python3 -m pytest tests/test_stackelberg.py tests/test_picard_framework.py -v
 ```
 
-See skill: `.agents/skills/testing-picard-presidio/SKILL.md`
+Skill: `.agents/skills/stackelberg-utility-export/SKILL.md`
