@@ -62,10 +62,20 @@ Expected: Prints success message with no ImportError.
 | Multi-Pathogen | All pathogens in `active_profiles.json` initialize with valid dose-response params |
 | Six pathways | Direct, droplet, HVAC airborne, fomite, food contamination, environmental |
 | Quarantine vs isolation | Quarters confinement vs rare isolation ward (no HVAC) |
-| Epoch Loop | Transmission core, observation sampling (with TAT delivery), protocol evaluation, cost accounting all execute |
+| Epoch Loop | Transmission core, observation sampling (with TAT delivery), protocol evaluation, cost accounting, **OIS** all execute |
 | Instrument TAT | Delivered `observation_engine` results lag collection per `instrument_turnaround.json` |
 | Long-read (optional) | Enable `long_read_sequencing.enabled` for Nanopore escalation runs |
 | Finalization | `simulation_history.json` and `artificial_lab_notebook.json` written to `telemetry_buffer/` |
+
+### Verify OIS telemetry (after run)
+```bash
+python3 -c "
+import json
+c = json.load(open('telemetry_buffer/simulation_history.json'))[-1]['cost_accounting']
+assert 'operational_impact_cumulative' in c
+print('OIS OK:', c['operational_impact_cumulative'])
+"
+```
 
 ## Output Files
 

@@ -112,4 +112,6 @@ check-jsonschema --schemafile schemas/global_health_briefing.schema.json \
   presidio/data/intelligence/global_health_timeline.json
 check-jsonschema --schemafile schemas/agent_profile.schema.json \
   picard_framework/data/agent_profiles/default_ship_population.json
+check-jsonschema --schemafile schemas/resource_costs.schema.json \
+  data/config/resource_costs.json
 ```

@@ -221,6 +221,19 @@ class TestResourceCosts:
             )
 
 
+    def test_operational_impact_weights_present(self, costs: dict) -> None:
+        ois = costs.get("operational_impact_weights", {})
+        assert ois, "operational_impact_weights block is required"
+        for key in (
+            "per_passenger_quarantined",
+            "per_essential_crew_quarantined",
+            "per_closed_galley_zone",
+        ):
+            assert ois.get(key, 0) >= 0, f"OIS weight {key} must be non-negative"
+        assert isinstance(ois.get("essential_crew_classes", []), list)
+        assert isinstance(ois.get("galley_zone_types", []), list)
+
+
 class TestLongReadSequencingParams:
     """Validate data/config/long_read_sequencing_params.json."""
 

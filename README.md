@@ -26,11 +26,8 @@ python orchestrator.py --epochs 250
 # Launch LCARS dashboard (after simulation)
 streamlit run dashboard.py
 
-# Run the test suite (~310 tests)
+# Run the test suite (~330 tests)
 pytest tests/ -v --tb=short
-
-# Fleet smoke (1 cruise × 2 epochs)
-python3 presidio_runner.py --fleet-config presidio/data/config/smoke_fleet.json --cruises 1
 ```
 
 Output is written to `telemetry_buffer/simulation_history.json` and
@@ -44,7 +41,7 @@ Output is written to `telemetry_buffer/simulation_history.json` and
 | **decision_engine** | `decision_engine/` | Multi-agent decisions, information diffusion, utility features |
 | **Presidio** | `presidio_runner.py`, `presidio/data/` | Fleet meta-simulation + experience store |
 
-Each epoch (when `social` is enabled on the Picard run spec): **command → medical → population** Stackelberg pass, then Crusher Labs stoplight-driven SOP physics. Utility **features** export to JSON; **optimization** stays external.
+Each epoch (when `social` is enabled): **population** (pre-syndromic behavioral actions) → instruments/stoplights → **command / medical** → stoplight-driven SOP physics. The cost ledger tracks **operational impact score (OIS)** alongside USD, labor, and materials. Utility **features** export to JSON; **optimization** stays external.
 
 ```bash
 python3 presidio_runner.py \
@@ -54,7 +51,6 @@ python3 presidio_runner.py \
 ```
 
 Manuals: [OPERATORS_MANUAL_SHIP.md](OPERATORS_MANUAL_SHIP.md) (ship), [OPERATORS_MANUAL_GAME_THEORY.md](OPERATORS_MANUAL_GAME_THEORY.md) (fleet / Stackelberg).
-
 
 ## Architecture
 
@@ -80,7 +76,7 @@ crusher_labs/                Dr. Crusher's Bio-Diagnostic Suite
 ├── long_read_escalation.py  Nanopore escalation from routine modality signals
 ├── protocol_engine.py       Stoplight computation, SOP activation, modifier application
 ├── lab_notebook.py          Artificial lab notebook (audit trail)
-├── cost_ledger.py           Financial/material/labor cost tracking
+├── cost_ledger.py           Financial/material/labor/OIS cost tracking
 ├── stoplight.py             Ct → stoplight conversion
 └── modalities/
     ├── syndromic.py         Symptom-based screening
@@ -118,7 +114,7 @@ schemas/                     JSON Schema definitions for all data contracts
 telemetry_buffer/            Runtime output (simulation_history, lab_notebook)
 │   agent_axes.py            Orthogonal agent state (infection / presentation / compliance)
 dashboard.py                 LCARS Main Bridge Display (4 stations)
-tests/                       ~310 tests (ship, fleet, Stackelberg, long-read, TAT, contracts)
+tests/                       ~330 tests (ship, fleet, Stackelberg, OIS, behavioral, long-read, TAT)
 AGENTS.md                    Cursor Cloud / agent development notes
 ```
 
@@ -376,17 +372,23 @@ grumb_seeding:
 
 ## Platforms
 
-Six ship platforms are included, each with spatial layout and HVAC
+Eight ship platforms are included, each with spatial layout and HVAC
 airflow definitions:
 
 | Platform | Description |
 |----------|-------------|
 | `destroyer_baseline` | Gleaves-class destroyer (default, 6 zones) |
+| `enterprise_constitution_tos` | Constitution-class cruiser (TOS fiction-adapted, 13 zones) |
+| `enterprise_galaxy_tng` | Galaxy-class explorer (TNG fiction-adapted, 17 zones) |
 | `expedition_cruise_300` | 300-passenger expedition cruise ship |
 | `fletcher_class_destroyer` | Fletcher-class WWII destroyer |
 | `legend_class_nsc` | USCG Legend-class National Security Cutter |
 | `mega_cruise_5000` | 5000-passenger mega cruise ship |
 | `san_antonio_class_lpd` | USN San Antonio-class LPD |
+
+Fiction-adapted Star Trek scenario bundles (platform paths, agent classes,
+pathogen profiles) live under `data/templates/enterprise_constitution_tos.json`
+and `data/templates/enterprise_galaxy_tng.json`.
 
 To switch platforms, update the `spatial_layout` and `air_flow_paths`
 paths in `config.yaml`, then validate:
@@ -426,11 +428,17 @@ axes via `resolve_agent_axes()`.
 ## Cost Accounting
 
 Per-epoch `cost_accounting` in simulation history includes
-`materials_consumed` and `by_category` (surveillance vs. intervention).
-The ledger debits `resource_costs.json` **`per_test_costs`** for each
-environmental sample and sick-call clinical test, plus SOP activation and
-per-epoch protocol costs. Budget balances are tracked for reporting only —
-spending is never blocked when inventory is depleted.
+`materials_consumed`, `by_category` (surveillance vs. intervention), and
+**operational impact score (OIS)** fields:
+
+- `operational_impact_epoch` — degradation accumulated this epoch
+- `operational_impact_cumulative` — run total (tracker only, never blocks actions)
+- `operational_impact_breakdown` — components (quarantine, galley closures, fleet PPE)
+
+OIS weights live in `data/config/resource_costs.json` → `operational_impact_weights`.
+The ledger also debits **`per_test_costs`** for environmental and clinical tests, plus SOP
+activation and per-epoch protocol costs. Financial and labor balances are tracked for
+reporting only — spending is never blocked when inventory is depleted.
 
 ## Standing Operating Procedures (SOPs)
 
@@ -495,7 +503,7 @@ python tools/sanity_checker.py --config-dir data/config \
 ## Testing
 
 ```bash
-# Full suite (~310 tests)
+# Full suite (~330 tests)
 pytest tests/ -v --tb=short
 
 # Picard / Presidio / Stackelberg
@@ -509,6 +517,9 @@ pytest tests/test_agent_axes.py             # orthogonal infection/presentation/
 pytest tests/test_protocol_engine.py        # wearable + detection-escalation stoplights
 pytest tests/test_sequencing_config.py      # config.yaml read_depth wiring
 pytest tests/test_cost_accounting.py        # per-test debits and materials telemetry
+pytest tests/test_operational_impact.py     # OIS weight computation
+pytest tests/test_action_applier.py         # activate_sop, verification queue, behavioral kinds
+pytest tests/test_behavioral_syndromic.py   # hide_symptoms, belief-scaled sick-call
 pytest tests/test_transmission_pathways.py  # food/environmental pool init
 pytest tests/test_dashboard.py              # LCARS dashboard imports
 pytest tests/test_sanity_checker.py         # config validation

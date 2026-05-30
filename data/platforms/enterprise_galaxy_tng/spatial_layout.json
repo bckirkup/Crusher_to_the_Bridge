@@ -1,0 +1,215 @@
+{
+  "platform": "enterprise_galaxy_tng",
+  "description": "Galaxy-class explorer (NCC-1701-D era). Fiction-adapted 16-zone layout; mixed crew and civilian families.",
+  "isolation_unit_capacity": 24,
+  "deck_dimensions": {
+    "length_m": 642,
+    "beam_m": 463
+  },
+  "zones": [
+    {
+      "id": "Bridge",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 280,
+      "deck": "saucer_1",
+      "display": {
+        "x": 130,
+        "y": 10
+      },
+      "description": "Command center"
+    },
+    {
+      "id": "Ten_Forward",
+      "type": "Dining",
+      "traffic": "high",
+      "volume_m3": 420,
+      "deck": "saucer_10",
+      "display": {
+        "x": 70,
+        "y": 8
+      },
+      "description": "Forward lounge and observation"
+    },
+    {
+      "id": "Sickbay",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 350,
+      "deck": "saucer_12",
+      "display": {
+        "x": 90,
+        "y": 20
+      },
+      "description": "Primary care"
+    },
+    {
+      "id": "Main_Engineering",
+      "type": "Room",
+      "traffic": "high",
+      "volume_m3": 680,
+      "deck": "drive_section",
+      "display": {
+        "x": 50,
+        "y": 45
+      },
+      "description": "Warp core and EPS"
+    },
+    {
+      "id": "Holodeck",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 260,
+      "deck": "saucer_9",
+      "display": {
+        "x": 75,
+        "y": 28
+      },
+      "description": "Holodeck complex"
+    },
+    {
+      "id": "Crew_Quarters",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 620,
+      "deck": "saucer_25",
+      "display": {
+        "x": 45,
+        "y": 12
+      },
+      "description": "Enlisted berthing"
+    },
+    {
+      "id": "Family_Quarters",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 540,
+      "deck": "saucer_24",
+      "display": {
+        "x": 55,
+        "y": 18
+      },
+      "description": "Family staterooms"
+    },
+    {
+      "id": "Science_Labs",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 400,
+      "deck": "saucer_15",
+      "display": {
+        "x": 85,
+        "y": 32
+      },
+      "description": "Research laboratories"
+    },
+    {
+      "id": "Shuttlebay",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 1200,
+      "deck": "saucer_4",
+      "display": {
+        "x": 40,
+        "y": 40
+      },
+      "description": "Shuttlecraft bay"
+    },
+    {
+      "id": "Cargo_Bay",
+      "type": "Room",
+      "traffic": "low",
+      "volume_m3": 900,
+      "deck": "saucer_6",
+      "display": {
+        "x": 35,
+        "y": 38
+      },
+      "description": "Cargo and stores"
+    },
+    {
+      "id": "Galley",
+      "type": "Dining",
+      "traffic": "medium",
+      "volume_m3": 200,
+      "deck": "saucer_8",
+      "display": {
+        "x": 60,
+        "y": 22
+      },
+      "description": "Food preparation"
+    },
+    {
+      "id": "Crew_Lounge",
+      "type": "Dining",
+      "traffic": "high",
+      "volume_m3": 380,
+      "deck": "saucer_10",
+      "display": {
+        "x": 65,
+        "y": 14
+      },
+      "description": "Off-duty crew lounge"
+    },
+    {
+      "id": "Security_Office",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 120,
+      "deck": "saucer_11",
+      "display": {
+        "x": 78,
+        "y": 35
+      },
+      "description": "Security and brig"
+    },
+    {
+      "id": "Arboretum",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 480,
+      "deck": "saucer_17",
+      "display": {
+        "x": 95,
+        "y": 42
+      },
+      "description": "Hydroponics and arboretum"
+    },
+    {
+      "id": "Stellar_Cartography",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 180,
+      "deck": "saucer_16",
+      "display": {
+        "x": 100,
+        "y": 38
+      },
+      "description": "Stellar cartography"
+    },
+    {
+      "id": "Schoolroom",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 160,
+      "deck": "saucer_23",
+      "display": {
+        "x": 52,
+        "y": 25
+      },
+      "description": "Shipboard school"
+    },
+    {
+      "id": "Mess_Hall",
+      "type": "Dining",
+      "traffic": "high",
+      "volume_m3": 120,
+      "deck": "saucer_8",
+      "display": {
+        "x": 62,
+        "y": 20
+      },
+      "description": "Primary crew mess (protocol-compatible zone id)"
+    }
+  ]
+}

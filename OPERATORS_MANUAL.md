@@ -743,13 +743,14 @@ detailed SOP authoring guidance.
 
 ### 4.5 Resource Costs (`data/config/resource_costs.json`)
 
-Defines three resource categories tracked by the cost ledger:
+Defines four resource dimensions tracked by the cost ledger:
 
 | Category | Starting Value | Description |
 |----------|---------------|-------------|
 | **Financial (USD)** | $75,000 | Starting balance for spend tracking (not a hard limit) |
 | **Labor (person-hours)** | 480 | 20 crew × 24 hours available |
 | **Material Inventory** | Per-item | Masks, respirators, test kits, filters, etc. |
+| **Operational Impact (OIS)** | 0 (cumulative) | Societal/operational degradation from confinement, galley closures, fleet PPE (tracker only) |
 
 Each material item has `starting_count`, `unit_cost_usd`, and a description.
 SOPs reference materials by name — ensure SOP material keys match items
@@ -759,8 +760,15 @@ defined in this file.
 environmental samples (`air_sniffer_sample`, `surface_swab_pcr`,
 `wastewater_sequencing_panel`) and per sick-call clinical tests (`clinical_rdt`,
 `clinical_qpcr`, `clinical_microbiology`). Consumed materials appear under
-`cost_accounting.materials_consumed` and `by_category` in
-`simulation_history.json`.
+`cost_accounting.materials_consumed`, `by_category`, and OIS fields
+(`operational_impact_epoch`, `operational_impact_cumulative`,
+`operational_impact_breakdown`) in `simulation_history.json`.
+
+**OIS weights** (`operational_impact_weights`): per-passenger quarantine,
+essential-crew quarantine, closed galley zones (matched by zone **type** from
+spatial layout, not hardcoded zone names), and fleet-wide PPE. See
+[OPERATORS_MANUAL_GAME_THEORY.md](OPERATORS_MANUAL_GAME_THEORY.md) for Stackelberg
+and behavioral policy integration.
 
 ### 4.6 Logging Profile (`data/config/logging_profile.json`)
 
@@ -1339,11 +1347,12 @@ python tools/sanity_checker.py --from-config
 pytest tests/ -v --tb=short
 ```
 
-The suite includes **~310 tests** across data contracts, sanity checker,
+The suite includes **~330 tests** across data contracts, sanity checker,
 orchestrator/quarantine logic, infection counters, orthogonal agent axes,
 wearable/detection-escalation protocol engine, sequencing config wiring,
 long-read Nanopore verification, instrument turnaround (TAT),
-per-test cost accounting, transmission pathways (food/environmental),
+per-test cost accounting, **operational impact (OIS)**, **action applier**,
+**behavioral syndromic**, transmission pathways (food/environmental),
 dashboard helpers, law compliance, telemetry seams, and **Picard / Presidio /
 Stackelberg** framework tests. CI (`.github/workflows/ci.yml`) runs sanity checks,
 full pytest, Picard/Presidio import hygiene, Presidio smoke, orchestrator import
@@ -1357,6 +1366,9 @@ See `AGENTS.md` for cloud agent commands.
 | `test_protocol_engine.py` | Wearable and detection-escalation stoplights |
 | `test_sequencing_config.py` | `config.yaml` read_depth for WW grid and modalities |
 | `test_cost_accounting.py` | Per-test debits and materials in telemetry |
+| `test_operational_impact.py` | OIS weight computation and galley-type matching |
+| `test_action_applier.py` | `activate_sop`, verification queue, behavioral overrides |
+| `test_behavioral_syndromic.py` | `hide_symptoms`, belief-scaled sick-call |
 | `test_infection_counters.py` | Attack-rate counters, thresholds, `exempt_classes` |
 | `test_transmission_pathways.py` | Food/environmental pool initialization |
 | `test_dashboard.py` | LCARS dashboard imports, pathway aggregation |

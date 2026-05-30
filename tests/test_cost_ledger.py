@@ -18,6 +18,7 @@ from crusher_labs.cost_ledger import (
     CostLedger,
     build_ledger_from_config,
     load_resource_costs,
+    compute_operational_impact,
     CATEGORY_SURVEILLANCE,
     CATEGORY_INTERVENTION,
 )
@@ -54,6 +55,34 @@ class TestCostLedger:
         assert "starting_financial_budget_usd" in summary
         assert "total_expenditure_usd" in summary
         assert "remaining_balance_usd" in summary
+        assert "total_operational_impact_score" in summary
+
+    def test_operational_impact_accumulation(self) -> None:
+        ledger = CostLedger()
+        ledger.accumulate_operational_impact(
+            1, 2.5, breakdown={"passenger_quarantine": 2.5},
+        )
+        summary = ledger.get_epoch_summary(1)
+        assert summary["operational_impact_epoch"] == 2.5
+        assert summary["operational_impact_cumulative"] == 2.5
+        assert summary["operational_impact_breakdown"]["passenger_quarantine"] == 2.5
+
+    def test_compute_operational_impact_quarantine(self) -> None:
+        agents = [
+            {"agent_id": 1, "role": "passenger", "agent_class": "passenger_general"},
+            {"agent_id": 2, "role": "crew", "agent_class": "crew_medical"},
+        ]
+        total, breakdown = compute_operational_impact(
+            agents=agents,
+            quarantined_ids={1, 2},
+            isolated_ids=set(),
+            merged_modifiers={},
+            active_protocol_ids=[],
+            ois_weights={},
+        )
+        assert total == 4.0  # 1.0 passenger + 3.0 essential crew
+        assert breakdown["passenger_quarantine"] == 1.0
+        assert breakdown["essential_crew_quarantine"] == 3.0
 
 
 class TestBuildLedgerFromConfig:

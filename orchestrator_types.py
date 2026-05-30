@@ -83,6 +83,9 @@ class SimulationState:
     escalation_log: list[dict[str, Any]] = field(default_factory=list)
     compliance_log: list[dict[str, Any]] = field(default_factory=list)
     simulation_history: list[dict[str, Any]] = field(default_factory=list)
+    forced_protocol_ids: set[str] = field(default_factory=set)
+    verification_test_queue: list[dict[str, Any]] = field(default_factory=list)
+    agent_behavioral_overrides: dict[int, str] = field(default_factory=dict)
 
 
 # ── Observation engine bundle ────────────────────────────────────────────

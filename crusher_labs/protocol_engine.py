@@ -282,31 +282,46 @@ class ProtocolEngine:
         self,
         epoch: int,
         stoplights: dict[str, dict[str, str]],
+        forced_protocol_ids: set[str] | None = None,
+        authorized_sop_ids: list[str] | None = None,
     ) -> list[dict[str, Any]]:
         """Evaluate all protocols and return the list of active modifiers.
+
+        Protocols activate when stoplight-triggered or listed in
+        *forced_protocol_ids*. Costs debit only when authorized (if a CO
+        subset is set) or when explicitly forced via command action.
 
         Returns a list of dicts, each containing:
         - ``protocol_id``, ``name``, ``modifiers``
         - ``newly_activated`` (True if just turned on this epoch)
         """
         active_modifiers: list[dict[str, Any]] = []
+        forced = forced_protocol_ids or set()
+        authorized = set(authorized_sop_ids) if authorized_sop_ids is not None else None
 
         for protocol in self.protocols:
+            pid = protocol.protocol_id
             triggered = protocol.is_triggered(stoplights)
-            was_active = self._active[protocol.protocol_id]
+            forced_on = pid in forced
+            should_active = triggered or forced_on
+            was_active = self._active[pid]
 
-            if triggered:
+            if should_active:
                 newly_activated = not was_active
+                may_debit = (
+                    authorized is None
+                    or pid in authorized
+                    or forced_on
+                )
 
                 if newly_activated:
-                    self._active[protocol.protocol_id] = True
-                    self._activation_epoch[protocol.protocol_id] = epoch
+                    self._active[pid] = True
+                    self._activation_epoch[pid] = epoch
 
-                    # Debit activation costs
-                    if protocol.activation_costs:
+                    if may_debit and protocol.activation_costs:
                         self.ledger.debit_protocol(
                             epoch=epoch,
-                            protocol_id=protocol.protocol_id,
+                            protocol_id=pid,
                             protocol_name=protocol.name,
                             costs=protocol.activation_costs,
                             category=protocol.category,
@@ -315,17 +330,17 @@ class ProtocolEngine:
 
                     self.protocol_log.append({
                         "epoch": epoch,
-                        "protocol_id": protocol.protocol_id,
+                        "protocol_id": pid,
                         "name": protocol.name,
                         "event": "ACTIVATED",
                         "modifiers": protocol.modifiers,
+                        "forced": forced_on and not triggered,
                     })
 
-                # Debit per-epoch maintenance costs
-                if protocol.costs_per_epoch:
+                if may_debit and protocol.costs_per_epoch:
                     self.ledger.debit_protocol(
                         epoch=epoch,
-                        protocol_id=protocol.protocol_id,
+                        protocol_id=pid,
                         protocol_name=protocol.name,
                         costs=protocol.costs_per_epoch,
                         category=protocol.category,
@@ -333,19 +348,19 @@ class ProtocolEngine:
                     )
 
                 active_modifiers.append({
-                    "protocol_id": protocol.protocol_id,
+                    "protocol_id": pid,
                     "name": protocol.name,
                     "modifiers": protocol.modifiers,
                     "newly_activated": newly_activated,
-                    "active_since_epoch": self._activation_epoch[protocol.protocol_id],
+                    "active_since_epoch": self._activation_epoch[pid],
+                    "forced": forced_on and not triggered,
                 })
 
             elif was_active:
-                # Protocol was active but trigger no longer met — deactivate
-                self._active[protocol.protocol_id] = False
+                self._active[pid] = False
                 self.protocol_log.append({
                     "epoch": epoch,
-                    "protocol_id": protocol.protocol_id,
+                    "protocol_id": pid,
                     "name": protocol.name,
                     "event": "DEACTIVATED",
                 })

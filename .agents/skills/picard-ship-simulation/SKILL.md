@@ -40,7 +40,8 @@ ShipSimulation(spec).run()
 |------|------|
 | `picard_framework/run_spec.py` | Immutable `PicardRunSpec` |
 | `picard_framework/catalog/` | Platform/pathogen library index |
-| `picard_framework/simulation/ship_simulation.py` | `ShipSimulation.step()` / `run()` |
+| `picard_framework/simulation/ship_simulation.py` | `ShipSimulation.step()` / `run()` (split Stackelberg when `social` enabled) |
+| `picard_framework/simulation/action_applier.py` | Maps `ActionEnvelope` → `SimulationState` |
 | `picard_framework/runs/*.json` | Ship run specifications |
 | `data/` | Shared platform, pathogen, protocol libraries |
 
@@ -48,5 +49,8 @@ ShipSimulation(spec).run()
 
 ```bash
 python3 tools/sanity_checker.py --from-config
-python3 -m pytest tests/test_picard_framework.py tests/test_golden_orchestrator.py -v
+python3 -m pytest tests/test_picard_framework.py tests/test_golden_orchestrator.py \
+  tests/test_action_applier.py -v
 ```
+
+Epoch order: [docs/simulation_step_order.md](../../docs/simulation_step_order.md)

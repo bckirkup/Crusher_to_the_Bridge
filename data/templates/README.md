@@ -16,6 +16,24 @@ creating new simulation scenarios.
 - Mid-cruise pathogen introduction (SARS-CoV-2 at epoch 6)
 - Dual microflora disruption signatures (GI + respiratory)
 
+### `enterprise_constitution_tos.json`
+
+**USS Enterprise (Constitution class, TOS) — crew demographics and pathogens**
+
+- Platform: `data/platforms/enterprise_constitution_tos/` (13 zones including `Mess_Hall` for SOP compatibility)
+- Pathogens: `data/pathogens/enterprise_tos_profiles.json` — Rigelian fever, Psi-2000 polywater analog
+- Agent classes: command, helm/ops, security, engineering, sciences, medical, communications, services, general (all `crew`)
+- Recommended `num_agents`: 200 (full complement ~430)
+
+### `enterprise_galaxy_tng.json`
+
+**USS Enterprise-D (Galaxy class, TNG) — crew + civilian families**
+
+- Platform: `data/platforms/enterprise_galaxy_tng/` (17 zones)
+- Pathogens: `data/pathogens/enterprise_tng_profiles.json` — Barclay protomorphosis, shipboard influenza analog
+- Agent classes: Starfleet departments plus `passenger_family` / `passenger_civilian`
+- Recommended `num_agents`: 400
+
 ### `cruise_ship_x_layout.json`
 
 **22-zone cruise ship spatial/HVAC layout derived from GIS shapefiles**

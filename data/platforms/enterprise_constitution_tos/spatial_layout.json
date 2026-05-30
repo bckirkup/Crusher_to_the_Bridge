@@ -1,0 +1,167 @@
+{
+  "platform": "enterprise_constitution_tos",
+  "description": "Constitution-class heavy cruiser (NCC-1701 era). Fiction-adapted 12-zone layout for Crusher-to-the-Bridge demos; ~430 crew complement.",
+  "isolation_unit_capacity": 8,
+  "deck_dimensions": {
+    "length_m": 289,
+    "beam_m": 127
+  },
+  "zones": [
+    {
+      "id": "Bridge",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 220,
+      "deck": "saucer_primary",
+      "display": {
+        "x": 120,
+        "y": 8
+      },
+      "description": "Command and navigation"
+    },
+    {
+      "id": "Sickbay",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 180,
+      "deck": "saucer_primary",
+      "display": {
+        "x": 95,
+        "y": 18
+      },
+      "description": "Primary care and isolation"
+    },
+    {
+      "id": "Engineering",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 520,
+      "deck": "secondary_hull",
+      "display": {
+        "x": 55,
+        "y": 42
+      },
+      "description": "Warp core and engineering"
+    },
+    {
+      "id": "Transporter_Room",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 90,
+      "deck": "saucer_primary",
+      "display": {
+        "x": 78,
+        "y": 28
+      },
+      "description": "Personnel transporter"
+    },
+    {
+      "id": "Rec_Deck",
+      "type": "Dining",
+      "traffic": "high",
+      "volume_m3": 380,
+      "deck": "saucer_primary",
+      "display": {
+        "x": 65,
+        "y": 12
+      },
+      "description": "Recreation and crew mess"
+    },
+    {
+      "id": "Galley",
+      "type": "Dining",
+      "traffic": "medium",
+      "volume_m3": 140,
+      "deck": "saucer_primary",
+      "display": {
+        "x": 58,
+        "y": 16
+      },
+      "description": "Food preparation"
+    },
+    {
+      "id": "Science_Lab",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 200,
+      "deck": "saucer_primary",
+      "display": {
+        "x": 88,
+        "y": 32
+      },
+      "description": "Shipboard sciences"
+    },
+    {
+      "id": "Communications",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 110,
+      "deck": "saucer_primary",
+      "display": {
+        "x": 105,
+        "y": 22
+      },
+      "description": "Subspace communications"
+    },
+    {
+      "id": "Security_Station",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 95,
+      "deck": "saucer_primary",
+      "display": {
+        "x": 72,
+        "y": 35
+      },
+      "description": "Security and brig access"
+    },
+    {
+      "id": "Crew_Quarters",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 480,
+      "deck": "saucer_primary",
+      "display": {
+        "x": 42,
+        "y": 8
+      },
+      "description": "Enlisted berthing"
+    },
+    {
+      "id": "Officer_Quarters",
+      "type": "Room",
+      "traffic": "low",
+      "volume_m3": 320,
+      "deck": "saucer_primary",
+      "display": {
+        "x": 48,
+        "y": 22
+      },
+      "description": "Officer staterooms"
+    },
+    {
+      "id": "Library",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 150,
+      "deck": "saucer_primary",
+      "display": {
+        "x": 62,
+        "y": 38
+      },
+      "description": "Library and briefing"
+    },
+    {
+      "id": "Mess_Hall",
+      "type": "Dining",
+      "traffic": "high",
+      "volume_m3": 120,
+      "deck": "saucer_primary",
+      "display": {
+        "x": 60,
+        "y": 10
+      },
+      "description": "Primary crew mess (protocol-compatible zone id)"
+    }
+  ]
+}

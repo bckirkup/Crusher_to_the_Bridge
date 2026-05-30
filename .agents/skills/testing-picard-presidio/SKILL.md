@@ -15,7 +15,10 @@ PYTHONPATH=. python3 -m pytest \
   tests/test_presidio_runner.py \
   tests/test_golden_orchestrator.py \
   tests/test_stackelberg.py \
-  tests/test_law_compliance.py -v --tb=short
+  tests/test_law_compliance.py \
+  tests/test_operational_impact.py \
+  tests/test_action_applier.py \
+  tests/test_behavioral_syndromic.py -v --tb=short
 ```
 
 ## Presidio CLI smoke
@@ -58,7 +61,9 @@ PYTHONPATH=. python3 -c "
 from picard_framework import PicardRunSpec, ShipSimulation
 from presidio import PresidioRunSpec
 from decision_engine import DecisionRound, StackelbergRound, DecisionRuntime
+from decision_engine.policy import ThresholdBeliefPolicy, build_policies_from_config
 import presidio_runner
+assert hasattr(StackelbergRound, 'solve_population')
 print('OK')
 "
 ```

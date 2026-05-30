@@ -298,7 +298,7 @@ simulation state:
 | `multi_pathogen` | dict | Per-pathogen aggregate: infected, symptomatic, recovered, co_infected_count |
 | `contact_tracing` | dict | Four exposure matrices + transmission events |
 | `reactive_protocols` | dict | Active SOPs, merged modifiers, stoplight states |
-| `cost_accounting` | dict | Running financial balance, labor hours, material consumption |
+| `cost_accounting` | dict | Financial balance, labor hours, material consumption, **operational impact score** (`operational_impact_epoch`, `operational_impact_cumulative`, `operational_impact_breakdown`) |
 | `observation_engine` | dict | **Delivered** instrument results per zone/agent (after TAT queue). Keys: `air_sniffer`, `surface_swab`, `wastewater_sequencing`, `clinical_rdt`, `clinical_qpcr`, `clinical_microbiology`, `long_read_verification`. Entries may include `status` (`pending`/`complete`), `ordered_epoch`, `available_epoch`. |
 | `microflora_shifts` | dict | Per-zone CLR-space anomaly data |
 | `hvac` | dict | CONTAM transport state: filter type, efficiency, transport active |

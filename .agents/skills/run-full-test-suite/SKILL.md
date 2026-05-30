@@ -20,7 +20,7 @@ None — all tests run locally.
 ```bash
 python -m pytest tests/ -v --tb=short
 ```
-Expected: All tests pass (~310). Coverage includes data contracts, sanity checker, orchestrator, protocol engine, stoplight, cost ledger, long-read sequencing, instrument TAT, telemetry seams, schema module, law compliance, infection counters, transmission pathways (food/environmental), and dashboard helpers.
+Expected: All tests pass (~330). Coverage includes data contracts, sanity checker, orchestrator, protocol engine, stoplight, cost ledger, OIS, action applier, behavioral syndromic, long-read sequencing, instrument TAT, telemetry seams, schema module, law compliance, infection counters, transmission pathways (food/environmental), and dashboard helpers.
 
 ### Run individual test modules
 ```bash
@@ -48,8 +48,11 @@ python -m pytest tests/test_protocol_engine.py -v --tb=short
 # Stoplight logic
 python -m pytest tests/test_stoplight.py -v --tb=short
 
-# Cost ledger (budget, labor, materials)
-python -m pytest tests/test_cost_ledger.py -v --tb=short
+# Cost ledger (budget, labor, materials, OIS)
+python -m pytest tests/test_cost_ledger.py tests/test_operational_impact.py -v --tb=short
+
+# Action envelopes & behavioral syndromic (Picard / Stackelberg)
+python -m pytest tests/test_action_applier.py tests/test_behavioral_syndromic.py -v --tb=short
 
 # Law compliance (architectural invariants enforcement)
 python -m pytest tests/test_law_compliance.py -v --tb=short
@@ -80,16 +83,17 @@ import presidio_runner
 print('Picard/Presidio OK')
 " && \
 python presidio_runner.py --fleet-config presidio/data/config/smoke_fleet.json --cruises 1 && \
-python orchestrator.py
+python orchestrator.py && \
+python -c "import json; c=json.load(open('telemetry_buffer/simulation_history.json'))[-1]['cost_accounting']; assert 'operational_impact_cumulative' in c"
 ```
-Expected: 24-epoch run completes with no exceptions.
+Expected: 24-epoch run completes with no exceptions; final epoch includes OIS fields.
 
 ## CI Pipeline Equivalence
 
 The full CI pipeline (`.github/workflows/ci.yml`) runs these steps in order:
 1. `pip install -r requirements.txt`
 2. `python tools/sanity_checker.py --from-config` — config validation from `crusher_labs/config.yaml`
-3. `pytest tests/ -v --tb=short` — full test suite (~310 tests)
+3. `pytest tests/ -v --tb=short` — full test suite (~330 tests)
 4. Long-read / TAT targeted tests — `test_long_read_sequencing`, `test_instrument_turnaround`, observation init
 5. Import hygiene check — orchestrator split, stoplights, long-read/TAT imports
 6. Dashboard import check — LCARS dashboard and `aggregate_transmission_pathway_totals`
@@ -140,7 +144,10 @@ python orchestrator.py
 | `test_dashboard.py` | `dashboard.py` | LCARS dashboard imports, pathway aggregation |
 | `test_protocol_engine.py` | `crusher_labs/protocol_engine.py` | Stoplight triggers, SOP activation, modifiers |
 | `test_stoplight.py` | `crusher_labs/stoplight.py` | Ct-to-stoplight mapping, threshold logic |
-| `test_cost_ledger.py` | `crusher_labs/cost_ledger.py` | Budget tracking, material deductions |
+| `test_cost_ledger.py` | `crusher_labs/cost_ledger.py` | Budget tracking, material deductions, OIS |
+| `test_operational_impact.py` | `crusher_labs/cost_ledger.py` | OIS weight computation |
+| `test_action_applier.py` | `action_applier.py` | Executable action kinds |
+| `test_behavioral_syndromic.py` | `syndromic.py` | Layer-1 sick-call / compliance |
 | `test_law_compliance.py` | All modules | Architectural law invariants (Laws 1-6) |
 | `test_telemetry_seams.py` | `telemetry_buffer/schema.py` | Ground truth serialization round-trip |
 | `test_schema_module.py` | `telemetry_buffer/schema.py` | JSON schema output validation |

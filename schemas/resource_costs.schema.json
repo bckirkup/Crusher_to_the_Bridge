@@ -47,9 +47,31 @@
       "additionalProperties": {
         "$ref": "#/$defs/PerTestCost"
       }
+    },
+    "operational_impact_weights": {
+      "$ref": "#/$defs/OperationalImpactWeights"
     }
   },
   "$defs": {
+    "OperationalImpactWeights": {
+      "type": "object",
+      "description": "Per-unit OIS weights for confinement, zone closures, and fleet PPE (tracker only).",
+      "properties": {
+        "per_passenger_quarantined": {"type": "number", "minimum": 0},
+        "per_essential_crew_quarantined": {"type": "number", "minimum": 0},
+        "per_passenger_isolated": {"type": "number", "minimum": 0},
+        "per_closed_galley_zone": {"type": "number", "minimum": 0},
+        "per_fleet_ppe_active": {"type": "number", "minimum": 0},
+        "essential_crew_classes": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "galley_zone_types": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      }
+    },
     "MaterialItem": {
       "type": "object",
       "properties": {

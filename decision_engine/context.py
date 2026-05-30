@@ -14,6 +14,15 @@ class EpochDecisionContext:
     corporate_communication_stance: float = 0.0
     medical_announcements: list[str] = field(default_factory=list)
     sop_announcements: list[str] = field(default_factory=list)
+    sop_recommendations: list[str] = field(default_factory=list)
+
+    def reset_ephemeral(self) -> None:
+        """Clear per-epoch fields that must not accumulate across epochs."""
+        self.command_directives.clear()
+        self.medical_announcements.clear()
+        self.sop_announcements.clear()
+        self.sop_recommendations.clear()
+        self.corporate_communication_stance = 0.0
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -23,4 +32,5 @@ class EpochDecisionContext:
             "corporate_communication_stance": self.corporate_communication_stance,
             "medical_announcements": list(self.medical_announcements),
             "sop_announcements": list(self.sop_announcements),
+            "sop_recommendations": list(self.sop_recommendations),
         }
