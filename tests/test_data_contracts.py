@@ -219,3 +219,15 @@ class TestResourceCosts:
             assert data.get("starting_count", 0) >= 0, (
                 f"Material '{item}' has negative starting count"
             )
+
+    def test_operational_impact_weights_present(self, costs: dict) -> None:
+        ois = costs.get("operational_impact_weights", {})
+        assert ois, "operational_impact_weights block is required"
+        for key in (
+            "per_passenger_quarantined",
+            "per_essential_crew_quarantined",
+            "per_closed_galley_zone",
+        ):
+            assert ois.get(key, 0) >= 0, f"OIS weight {key} must be non-negative"
+        assert isinstance(ois.get("essential_crew_classes", []), list)
+        assert isinstance(ois.get("galley_zone_types", []), list)

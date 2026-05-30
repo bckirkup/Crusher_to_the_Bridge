@@ -11,7 +11,7 @@ definitions for all data contracts used in the Crusher-to-the-Bridge platform.
 | `spatial_layout.schema.json` | Room/zone node graph | `data/platforms/*/spatial_layout.json` |
 | `air_flow_paths.schema.json` | HVAC zones & airflow edges | `data/platforms/*/air_flow_paths.json` |
 | `protocols.schema.json` | Standing operating protocols | `data/config/protocols.json` |
-| `resource_costs.schema.json` | Budget, inventory, costs | `data/config/resource_costs.json` |
+| `resource_costs.schema.json` | Budget, inventory, costs, OIS weights | `data/config/resource_costs.json` |
 | `logging_profile.schema.json` | Fidelity tier configuration | `data/config/logging_profile.json` |
 
 
@@ -27,7 +27,7 @@ definitions for all data contracts used in the Crusher-to-the-Bridge platform.
 | `global_health_briefing.schema.json` | Epoch briefings | `presidio/data/intelligence/global_health_timeline.json` |
 | `agent_profile.schema.json` | Agent profile bundle | `picard_framework/data/agent_profiles/*.json` |
 | `utility_observation_bundle.schema.json` | Exported utility JSON | External optimizer input |
-| `decision_action.schema.json` | Action envelopes | External optimizer output |
+| `decision_action.schema.json` | Action envelopes (`activate_sop`, behavioral kinds, etc.) | External optimizer output / in-repo policies |
 
 ## Output Schemas
 
@@ -48,6 +48,9 @@ check-jsonschema --schemafile schemas/pathogen_profiles.schema.json data/pathoge
 
 # Validate spatial layout
 check-jsonschema --schemafile schemas/spatial_layout.schema.json data/platforms/destroyer_baseline/spatial_layout.json
+
+# Validate resource costs (including operational_impact_weights)
+check-jsonschema --schemafile schemas/resource_costs.schema.json data/config/resource_costs.json
 ```
 
 For pre-run validation with pydantic models and cross-file referential integrity

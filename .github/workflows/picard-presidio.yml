@@ -35,7 +35,8 @@ jobs:
         run: |
           pytest tests/test_picard_framework.py tests/test_decision_engine.py \
             tests/test_presidio_runner.py tests/test_golden_orchestrator.py tests/test_stackelberg.py \
-            tests/test_law_compliance.py -v --tb=short
+            tests/test_law_compliance.py tests/test_operational_impact.py \
+            tests/test_action_applier.py tests/test_behavioral_syndromic.py -v --tb=short
 
       - name: Import hygiene (Picard / Presidio / Stackelberg)
         env:
@@ -48,7 +49,11 @@ jobs:
               DecisionRound, ExperienceStore, StackelbergRound, DecisionRuntime,
           )
           from decision_engine.utility.io import export_utility_bundle, import_action_envelope
+          from decision_engine.policy import ThresholdBeliefPolicy, build_policies_from_config
+          from decision_engine.stackelberg.round import StackelbergRound
           import presidio_runner
+          assert hasattr(StackelbergRound, 'solve_population')
+          assert hasattr(StackelbergRound, 'solve_command_medical')
           print('Picard/Presidio/Stackelberg import hygiene OK')
           "
 
@@ -63,6 +68,8 @@ jobs:
             presidio/data/intelligence/global_health_timeline.json
           check-jsonschema --schemafile schemas/agent_profile.schema.json \
             picard_framework/data/agent_profiles/default_ship_population.json
+          check-jsonschema --schemafile schemas/resource_costs.schema.json \
+            data/config/resource_costs.json
 
       - name: Presidio smoke (1 cruise, 2 epochs)
         env:

@@ -56,4 +56,18 @@ check-jsonschema --schemafile schemas/class_interactions.schema.json \
 python3 -m pytest tests/test_stackelberg.py -v
 ```
 
-Related: `.agents/skills/stackelberg-utility-export/SKILL.md`
+## Decision policies (`crusher_labs/config.yaml`)
+
+```yaml
+decision_engine:
+  population_policy: threshold_belief  # or rule_based
+  command_policy: threshold
+  medical_policy: threshold
+```
+
+Wired via `DecisionRuntime` → `StackelbergRound` with `solve_population` / `solve_command_medical`.
+
+Related:
+
+- `.agents/skills/stackelberg-utility-export/SKILL.md`
+- `.agents/skills/operational-impact-behavioral-policies/SKILL.md`

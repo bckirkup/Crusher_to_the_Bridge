@@ -26,7 +26,7 @@ python orchestrator.py --epochs 250
 # Launch LCARS dashboard (after simulation)
 streamlit run dashboard.py
 
-# Run the test suite (~298 tests)
+# Run the test suite (~318 tests)
 pytest tests/ -v --tb=short
 
 # Fleet smoke (1 cruise × 2 epochs)
@@ -44,7 +44,7 @@ Output is written to `telemetry_buffer/simulation_history.json` and
 | **decision_engine** | `decision_engine/` | Multi-agent decisions, information diffusion, utility features |
 | **Presidio** | `presidio_runner.py`, `presidio/data/` | Fleet meta-simulation + experience store |
 
-Each epoch (when `social` is enabled on the Picard run spec): **command → medical → population** Stackelberg pass, then Crusher Labs stoplight-driven SOP physics. Utility **features** export to JSON; **optimization** stays external.
+Each epoch (when `social` is enabled): **population** (pre-syndromic behavioral actions) → instruments/stoplights → **command / medical** → stoplight-driven SOP physics. The cost ledger tracks **operational impact score (OIS)** alongside USD, labor, and materials. Utility **features** export to JSON; **optimization** stays external.
 
 ```bash
 python3 presidio_runner.py \
@@ -115,7 +115,7 @@ schemas/                     JSON Schema definitions for all data contracts
 telemetry_buffer/            Runtime output (simulation_history, lab_notebook)
 │   agent_axes.py            Orthogonal agent state (infection / presentation / compliance)
 dashboard.py                 LCARS Main Bridge Display (4 stations)
-tests/                       ~298 tests (ship, fleet, Stackelberg, contracts)
+tests/                       ~318 tests (ship, fleet, Stackelberg, OIS, behavioral)
 AGENTS.md                    Cursor Cloud / agent development notes
 ```
 
@@ -423,11 +423,17 @@ axes via `resolve_agent_axes()`.
 ## Cost Accounting
 
 Per-epoch `cost_accounting` in simulation history includes
-`materials_consumed` and `by_category` (surveillance vs. intervention).
-The ledger debits `resource_costs.json` **`per_test_costs`** for each
-environmental sample and sick-call clinical test, plus SOP activation and
-per-epoch protocol costs. Budget balances are tracked for reporting only —
-spending is never blocked when inventory is depleted.
+`materials_consumed`, `by_category` (surveillance vs. intervention), and
+**operational impact score (OIS)** fields:
+
+- `operational_impact_epoch` — degradation accumulated this epoch
+- `operational_impact_cumulative` — run total (tracker only, never blocks actions)
+- `operational_impact_breakdown` — components (quarantine, galley closures, fleet PPE)
+
+OIS weights live in `data/config/resource_costs.json` → `operational_impact_weights`.
+The ledger also debits **`per_test_costs`** for environmental and clinical tests, plus SOP
+activation and per-epoch protocol costs. Financial and labor balances are tracked for
+reporting only — spending is never blocked when inventory is depleted.
 
 ## Standing Operating Procedures (SOPs)
 
@@ -492,7 +498,7 @@ python tools/sanity_checker.py --config-dir data/config \
 ## Testing
 
 ```bash
-# Full suite (~298 tests)
+# Full suite (~318 tests)
 pytest tests/ -v --tb=short
 
 # Picard / Presidio / Stackelberg
@@ -506,6 +512,9 @@ pytest tests/test_agent_axes.py             # orthogonal infection/presentation/
 pytest tests/test_protocol_engine.py        # wearable + detection-escalation stoplights
 pytest tests/test_sequencing_config.py      # config.yaml read_depth wiring
 pytest tests/test_cost_accounting.py        # per-test debits and materials telemetry
+pytest tests/test_operational_impact.py     # OIS weight computation
+pytest tests/test_action_applier.py         # activate_sop, verification queue, behavioral kinds
+pytest tests/test_behavioral_syndromic.py   # hide_symptoms, belief-scaled sick-call
 pytest tests/test_transmission_pathways.py  # food/environmental pool init
 pytest tests/test_dashboard.py              # LCARS dashboard imports
 pytest tests/test_sanity_checker.py         # config validation
