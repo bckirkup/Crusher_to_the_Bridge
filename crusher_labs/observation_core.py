@@ -22,6 +22,7 @@ negative control runs that flag QC_FAILURE when contamination is detected.
 from __future__ import annotations
 
 import math
+import os
 from typing import Any
 
 import numpy as np
@@ -911,7 +912,16 @@ class LongReadVerificationSequencing:
     ) -> None:
         from crusher_labs.modalities.long_read_sequencing import LongReadNanoporeSequencing
 
-        self.modality = modality or LongReadNanoporeSequencing(enabled=True)
+        if modality is None:
+            repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            modality = LongReadNanoporeSequencing.from_params_path(
+                "data/config/long_read_sequencing_params.json",
+                "flongle_rapid",
+                enabled=True,
+                rng=rng if rng is not None else np.random.default_rng(),
+                repo_root=repo_root,
+            )
+        self.modality = modality
         self.rng = rng if rng is not None else np.random.default_rng()
         self.qc = InstrumentQC(cross_contamination_rate, control_intensity, self.rng)
 

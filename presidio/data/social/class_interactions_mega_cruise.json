@@ -17,137 +17,373 @@
   },
   "pairs": [
     {
-      "class_a": "passenger_general",
-      "class_b": "passenger_general",
+      "from_class": "passenger_general",
+      "to_class": "passenger_general",
       "weight": 0.28,
-      "context": "dining",
+      "context_zones": [
+        "Galley",
+        "Mess_Hall",
+        "Main_Dining",
+        "Dining_Room",
+        "Buffet_Area",
+        "Main_Galley_Aft",
+        "Buffet_Galley_Upper"
+      ],
       "notes": "Shared dining, pool, entertainment"
     },
     {
-      "class_a": "passenger_general",
-      "class_b": "passenger_elderly",
+      "from_class": "passenger_general",
+      "to_class": "passenger_elderly",
       "weight": 0.17,
-      "context": "dining",
+      "context_zones": [
+        "Galley",
+        "Mess_Hall",
+        "Main_Dining",
+        "Dining_Room",
+        "Buffet_Area",
+        "Main_Galley_Aft",
+        "Buffet_Galley_Upper"
+      ],
       "notes": "Mixed dining; elderly segregate to quieter venues on mega"
     },
     {
-      "class_a": "passenger_general",
-      "class_b": "passenger_family",
+      "from_class": "passenger_elderly",
+      "to_class": "passenger_general",
+      "weight": 0.17,
+      "context_zones": [
+        "Galley",
+        "Mess_Hall",
+        "Main_Dining",
+        "Dining_Room",
+        "Buffet_Area",
+        "Main_Galley_Aft",
+        "Buffet_Galley_Upper"
+      ],
+      "notes": "Mixed dining; elderly segregate to quieter venues on mega"
+    },
+    {
+      "from_class": "passenger_general",
+      "to_class": "passenger_family",
       "weight": 0.21,
-      "context": "recreation",
+      "context_zones": [
+        "Rec_Deck",
+        "Pool_Deck",
+        "Holodeck",
+        "Ten_Forward"
+      ],
       "notes": "Pool deck, shows"
     },
     {
-      "class_a": "passenger_elderly",
-      "class_b": "passenger_elderly",
+      "from_class": "passenger_family",
+      "to_class": "passenger_general",
+      "weight": 0.21,
+      "context_zones": [
+        "Rec_Deck",
+        "Pool_Deck",
+        "Holodeck",
+        "Ten_Forward"
+      ],
+      "notes": "Pool deck, shows"
+    },
+    {
+      "from_class": "passenger_elderly",
+      "to_class": "passenger_elderly",
       "weight": 0.35,
-      "context": "dining",
+      "context_zones": [
+        "Galley",
+        "Mess_Hall",
+        "Main_Dining",
+        "Dining_Room",
+        "Buffet_Area",
+        "Main_Galley_Aft",
+        "Buffet_Galley_Upper"
+      ],
       "notes": "Elderly cluster at same dining times/venues"
     },
     {
-      "class_a": "passenger_family",
-      "class_b": "passenger_family",
+      "from_class": "passenger_family",
+      "to_class": "passenger_family",
       "weight": 0.42,
-      "context": "recreation",
+      "context_zones": [
+        "Rec_Deck",
+        "Pool_Deck",
+        "Holodeck",
+        "Ten_Forward"
+      ],
       "notes": "Kids club proximity, family activities"
     },
     {
-      "class_a": "crew_general",
-      "class_b": "crew_general",
+      "from_class": "crew_general",
+      "to_class": "crew_general",
       "weight": 0.49,
-      "context": "crew_quarters",
+      "context_zones": [
+        "Berthing",
+        "Crew_Quarters",
+        "Officer_Quarters"
+      ],
       "notes": "Shared berthing, crew mess"
     },
     {
-      "class_a": "crew_general",
-      "class_b": "crew_galley",
+      "from_class": "crew_general",
+      "to_class": "crew_galley",
       "weight": 0.35,
-      "context": "crew_mess",
+      "context_zones": [
+        "Mess_Hall",
+        "Crew_Lounge"
+      ],
       "notes": "Crew dining together"
     },
     {
-      "class_a": "crew_general",
-      "class_b": "crew_engineering",
+      "from_class": "crew_galley",
+      "to_class": "crew_general",
+      "weight": 0.35,
+      "context_zones": [
+        "Mess_Hall",
+        "Crew_Lounge"
+      ],
+      "notes": "Crew dining together"
+    },
+    {
+      "from_class": "crew_general",
+      "to_class": "crew_engineering",
       "weight": 0.21,
-      "context": "crew_quarters",
+      "context_zones": [
+        "Berthing",
+        "Crew_Quarters",
+        "Officer_Quarters"
+      ],
       "notes": "Shared quarters, different duty zones"
     },
     {
-      "class_a": "crew_general",
-      "class_b": "crew_medical",
+      "from_class": "crew_engineering",
+      "to_class": "crew_general",
+      "weight": 0.21,
+      "context_zones": [
+        "Berthing",
+        "Crew_Quarters",
+        "Officer_Quarters"
+      ],
+      "notes": "Shared quarters, different duty zones"
+    },
+    {
+      "from_class": "crew_general",
+      "to_class": "crew_medical",
       "weight": 0.14,
-      "context": "crew_quarters",
+      "context_zones": [
+        "Berthing",
+        "Crew_Quarters",
+        "Officer_Quarters"
+      ],
       "notes": "Limited overlap except quarters"
     },
     {
-      "class_a": "crew_galley",
-      "class_b": "crew_galley",
+      "from_class": "crew_medical",
+      "to_class": "crew_general",
+      "weight": 0.14,
+      "context_zones": [
+        "Berthing",
+        "Crew_Quarters",
+        "Officer_Quarters"
+      ],
+      "notes": "Limited overlap except quarters"
+    },
+    {
+      "from_class": "crew_galley",
+      "to_class": "crew_galley",
       "weight": 0.63,
-      "context": "galley",
+      "context_zones": [
+        "Galley",
+        "Main_Galley_Aft",
+        "Buffet_Galley_Upper",
+        "Specialty_Galley_Block"
+      ],
       "notes": "Tight galley workspace, continuous contact"
     },
     {
-      "class_a": "crew_engineering",
-      "class_b": "crew_engineering",
+      "from_class": "crew_engineering",
+      "to_class": "crew_engineering",
       "weight": 0.56,
-      "context": "engine_room",
+      "context_zones": [
+        "Engine_Room"
+      ],
       "notes": "Shared watch stations"
     },
     {
-      "class_a": "crew_medical",
-      "class_b": "crew_medical",
+      "from_class": "crew_medical",
+      "to_class": "crew_medical",
       "weight": 0.42,
-      "context": "medical",
+      "context_zones": [
+        "MedBay",
+        "Sickbay"
+      ],
       "notes": "Small medical team"
     },
     {
-      "class_a": "crew_galley",
-      "class_b": "passenger_general",
+      "from_class": "crew_galley",
+      "to_class": "passenger_general",
       "weight": 0.42,
-      "context": "dining",
+      "context_zones": [
+        "Galley",
+        "Mess_Hall",
+        "Main_Dining",
+        "Dining_Room",
+        "Buffet_Area",
+        "Main_Galley_Aft",
+        "Buffet_Galley_Upper"
+      ],
       "notes": "Buffet/restaurant service \u2014 primary transmission interface"
     },
     {
-      "class_a": "crew_galley",
-      "class_b": "passenger_elderly",
+      "from_class": "passenger_general",
+      "to_class": "crew_galley",
+      "weight": 0.42,
+      "context_zones": [
+        "Galley",
+        "Mess_Hall",
+        "Main_Dining",
+        "Dining_Room",
+        "Buffet_Area",
+        "Main_Galley_Aft",
+        "Buffet_Galley_Upper"
+      ],
+      "notes": "Buffet/restaurant service \u2014 primary transmission interface"
+    },
+    {
+      "from_class": "crew_galley",
+      "to_class": "passenger_elderly",
       "weight": 0.39,
-      "context": "dining",
+      "context_zones": [
+        "Galley",
+        "Mess_Hall",
+        "Main_Dining",
+        "Dining_Room",
+        "Buffet_Area",
+        "Main_Galley_Aft",
+        "Buffet_Galley_Upper"
+      ],
       "notes": "Dining service; elderly may use room service more"
     },
     {
-      "class_a": "crew_galley",
-      "class_b": "passenger_family",
+      "from_class": "passenger_elderly",
+      "to_class": "crew_galley",
+      "weight": 0.39,
+      "context_zones": [
+        "Galley",
+        "Mess_Hall",
+        "Main_Dining",
+        "Dining_Room",
+        "Buffet_Area",
+        "Main_Galley_Aft",
+        "Buffet_Galley_Upper"
+      ],
+      "notes": "Dining service; elderly may use room service more"
+    },
+    {
+      "from_class": "crew_galley",
+      "to_class": "passenger_family",
       "weight": 0.45,
-      "context": "dining",
+      "context_zones": [
+        "Galley",
+        "Mess_Hall",
+        "Main_Dining",
+        "Dining_Room",
+        "Buffet_Area",
+        "Main_Galley_Aft",
+        "Buffet_Galley_Upper"
+      ],
       "notes": "Families eat frequently, kids touch everything"
     },
     {
-      "class_a": "crew_general",
-      "class_b": "passenger_general",
+      "from_class": "passenger_family",
+      "to_class": "crew_galley",
+      "weight": 0.45,
+      "context_zones": [
+        "Galley",
+        "Mess_Hall",
+        "Main_Dining",
+        "Dining_Room",
+        "Buffet_Area",
+        "Main_Galley_Aft",
+        "Buffet_Galley_Upper"
+      ],
+      "notes": "Families eat frequently, kids touch everything"
+    },
+    {
+      "from_class": "crew_general",
+      "to_class": "passenger_general",
       "weight": 0.21,
-      "context": "housekeeping",
+      "context_zones": [
+        "Berthing"
+      ],
       "notes": "Cabin stewards, pool attendants"
     },
     {
-      "class_a": "crew_general",
-      "class_b": "passenger_elderly",
+      "from_class": "passenger_general",
+      "to_class": "crew_general",
+      "weight": 0.21,
+      "context_zones": [
+        "Berthing"
+      ],
+      "notes": "Cabin stewards, pool attendants"
+    },
+    {
+      "from_class": "crew_general",
+      "to_class": "passenger_elderly",
       "weight": 0.24,
-      "context": "housekeeping",
+      "context_zones": [
+        "Berthing"
+      ],
       "notes": "More service contact with elderly passengers"
     },
     {
-      "class_a": "crew_medical",
-      "class_b": "passenger_general",
+      "from_class": "passenger_elderly",
+      "to_class": "crew_general",
+      "weight": 0.24,
+      "context_zones": [
+        "Berthing"
+      ],
+      "notes": "More service contact with elderly passengers"
+    },
+    {
+      "from_class": "crew_medical",
+      "to_class": "passenger_general",
       "weight": 0.03,
-      "context": "medical",
+      "context_zones": [
+        "MedBay",
+        "Sickbay"
+      ],
       "notes": "Baseline: only during sick-call. Spikes during outbreak."
     },
     {
-      "class_a": "crew_medical",
-      "class_b": "passenger_elderly",
+      "from_class": "passenger_general",
+      "to_class": "crew_medical",
+      "weight": 0.03,
+      "context_zones": [
+        "MedBay",
+        "Sickbay"
+      ],
+      "notes": "Baseline: only during sick-call. Spikes during outbreak."
+    },
+    {
+      "from_class": "crew_medical",
+      "to_class": "passenger_elderly",
       "weight": 0.06,
-      "context": "medical",
+      "context_zones": [
+        "MedBay",
+        "Sickbay"
+      ],
+      "notes": "Elderly more likely to visit medical center"
+    },
+    {
+      "from_class": "passenger_elderly",
+      "to_class": "crew_medical",
+      "weight": 0.06,
+      "context_zones": [
+        "MedBay",
+        "Sickbay"
+      ],
       "notes": "Elderly more likely to visit medical center"
     }
-  ]
+  ],
+  "schema_version": "1.0"
 }
