@@ -267,6 +267,42 @@ def _wastewater_record(
     return record
 
 
+def _long_read_verification_record(
+    epoch: int,
+    request_id: str,
+    data: dict[str, Any],
+    fidelity_name: str,
+    fidelity: FidelityProfile,
+) -> dict[str, Any]:
+    from crusher_labs.stoplight import stoplight_from_long_read_verification
+
+    anomaly = 0.5 if data.get("status") == "framework_stub" else 0.0
+    if data.get("mixed_infection_flag") or data.get("unexpected_pathogen_flag"):
+        anomaly = max(anomaly, 0.7)
+
+    record: dict[str, Any] = {
+        "sample_id": _sample_id(epoch, request_id, "LONG_READ"),
+        "timestamp_epoch": epoch,
+        "collection_point_type": data.get("specimen_source", "long_read_verification"),
+        "collection_zone": data.get("collection_key", "unknown"),
+        "assay_type": "oxford_nanopore_long_read",
+        "fidelity_tier": fidelity_name,
+        "purpose": data.get("purpose", "verification"),
+        "trigger_reasons": data.get("trigger_reasons", []),
+    }
+
+    if fidelity_name == FIDELITY_LOW:
+        record["stoplight"] = stoplight_from_long_read_verification(data)
+        record["inferred_anomaly_score"] = anomaly
+        return record
+
+    record["binary_result"] = "PENDING" if not data.get("consensus_ready") else "TYPED"
+    record["inferred_anomaly_score"] = anomaly
+    record["pathogen_calls"] = data.get("pathogen_calls", [])
+    record["upstream_instrument"] = data.get("upstream_instrument", "")
+    return record
+
+
 def _clinical_rdt_record(
     epoch: int,
     data: dict[str, Any],

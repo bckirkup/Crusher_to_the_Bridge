@@ -23,6 +23,7 @@ from crusher_labs.stoplight import (
     stoplight_from_anomaly,
     stoplight_from_rdt,
     stoplight_from_disruption,
+    stoplight_from_long_read_verification,
     stoplight_from_wearable_agent,
     stoplight_from_wearable_fleet_rates,
     stoplight_from_sick_call_count,
@@ -128,7 +129,12 @@ def compute_detection_escalation_stoplights(
     modes["environmental"] = aggregate_stoplight_max(env_levels)
 
     clinical_levels: list[str] = []
-    for instrument in ("clinical_rdt", "clinical_qpcr", "clinical_microbiology"):
+    for instrument in (
+        "clinical_rdt",
+        "clinical_qpcr",
+        "clinical_microbiology",
+        "long_read_verification_sequencing",
+    ):
         clinical_levels.extend(base_lights.get(instrument, {}).values())
     modes["clinical"] = aggregate_stoplight_max(clinical_levels)
 
@@ -144,6 +150,7 @@ def compute_stoplights(
     clin_microbio_results: dict[int, dict[str, Any]],
     wearable_result: dict[str, Any] | None = None,
     syndromic_result: dict[str, Any] | None = None,
+    long_read_results: dict[str, dict[str, Any]] | None = None,
     cfg: dict[str, Any] | None = None,
 ) -> dict[str, dict[str, str]]:
     """Derive per-zone and per-agent stoplight levels from raw instrument results.
@@ -197,6 +204,12 @@ def compute_stoplights(
         disruption = data.get("microflora_disruption_level", 0.0)
         microbio_lights[str(aid)] = stoplight_from_disruption(disruption)
     lights["clinical_microbiology"] = microbio_lights
+
+    lr_lights: dict[str, str] = {}
+    for req_id, data in (long_read_results or {}).items():
+        lr_lights[str(req_id)] = stoplight_from_long_read_verification(data)
+    if lr_lights:
+        lights["long_read_verification_sequencing"] = lr_lights
 
     agent_wearable, fleet_wearable = compute_wearable_stoplights(wearable_result, cfg)
     if agent_wearable:

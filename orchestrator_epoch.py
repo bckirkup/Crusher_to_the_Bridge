@@ -276,9 +276,26 @@ def run_observation_sampling(
     obs.notebook.log_clinical_microbiology(epoch, clin_microbio_results)
     obs.notebook.log_agent_summary(epoch, agents)
 
+    long_read_results: dict[str, dict[str, Any]] = {}
+    if obs.long_read is not None:
+        from crusher_labs.long_read_escalation import collect_long_read_escalation_requests
+
+        requests = collect_long_read_escalation_requests(
+            cfg,
+            ww_results=ww_results,
+            swab_results=swab_results,
+            clin_rdt_results=clin_rdt_results,
+            clin_qpcr_results=clin_qpcr_results,
+            clin_microbio_results=clin_microbio_results,
+        )
+        if requests:
+            long_read_results = obs.long_read.run_requests(requests)
+            obs.notebook.log_long_read_verification(epoch, long_read_results)
+
     return (
         air_results, swab_results, ww_results,
         clin_rdt_results, clin_qpcr_results, clin_microbio_results,
+        long_read_results,
     )
 
 
@@ -446,6 +463,20 @@ def step_cost_accounting(
     ledger.debit_per_test(epoch, "clinical_rdt", n_sick, per_test)
     ledger.debit_per_test(epoch, "clinical_qpcr", n_sick, per_test)
     ledger.debit_per_test(epoch, "clinical_microbiology", n_sick, per_test)
+
+
+def step_long_read_cost_accounting(
+    epoch: int,
+    proto_ctx: ProtocolContext,
+    long_read_results: dict[str, dict[str, Any]],
+) -> None:
+    """Debit long-read verification runs when escalation produced results."""
+    if not long_read_results:
+        return
+    per_test = proto_ctx.resource_costs_cfg.get("per_test_costs", {})
+    proto_ctx.cost_ledger.debit_per_test(
+        epoch, "long_read_verification", len(long_read_results), per_test,
+    )
 
 
 # ── Microflora disruption ───────────────────────────────────────────────

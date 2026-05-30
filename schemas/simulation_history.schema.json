@@ -92,7 +92,8 @@
             "wastewater_sequencing": {"type": "object"},
             "clinical_rdt": {"type": "object"},
             "clinical_qpcr": {"type": "object"},
-            "clinical_microbiology": {"type": "object"}
+            "clinical_microbiology": {"type": "object"},
+            "long_read_verification": {"type": "object"}
           }
         },
         "microflora_shifts": {

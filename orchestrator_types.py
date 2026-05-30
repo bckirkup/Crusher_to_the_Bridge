@@ -89,7 +89,7 @@ class SimulationState:
 
 @dataclass
 class ObservationEngine:
-    """Bundle of all six diagnostic instruments."""
+    """Bundle of diagnostic instruments (six routine + optional long-read)."""
 
     air_sniffer: ContinuousAirSniffer
     surface_swab: TargetedSurfaceSwab
@@ -100,6 +100,7 @@ class ObservationEngine:
     notebook: ArtificialLabNotebook
     fidelity_name: str
     lab_notebook_enabled: bool
+    long_read: LongReadVerificationSequencing | None = None
 
 
 # ── Protocol engine bundle ───────────────────────────────────────────────

@@ -242,6 +242,24 @@ wastewater_sequencing:
   dirichlet_concentration: 100.0      # Dirichlet prior strength (compositional noise)
   pseudocount: 1.0e-6                 # for CLR zero-handling
 
+# ── Long-read verification (Oxford Nanopore) ─────────────────
+# Escalation-only; invoked when routine modalities flag mixed/discordant signals.
+# Assay parameters (flow cell, basecalling, classifier) are out-of-repo.
+long_read_sequencing:
+  enabled: false
+  description: "Oxford Nanopore long-read verification and pathogen typing"
+  specimen_sources:
+    - wastewater_metagenomics
+    - clinical_specimen
+    - clinical_culture
+    - surveillance_swab
+  escalation_triggers:
+    mixed_infection_suspected: true
+    unexpected_pathogen: true
+    discordant_modalities: true
+    special_circumstance: false
+  special_circumstance_flag: false
+
 # ── Wearable Physiological Monitoring ────────────────────────
 # Extensible device registry.  Each device defines its sensor
 # channels, noise model, and infection-response profiles.
