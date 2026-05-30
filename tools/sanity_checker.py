@@ -817,6 +817,34 @@ def _check_long_read_sequencing(cfg: dict[str, Any], report: Report) -> None:
                     "config.yaml", "LONG_READ",
                     f"long_read_sequencing.specimen_sources[{i}] invalid: {src}",
                 )
+    params_path = lr.get("params_path")
+    if params_path:
+        _root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        full = params_path if os.path.isabs(params_path) else os.path.join(_root, params_path)
+        if not os.path.isfile(full):
+            report.error(
+                "config.yaml", "LONG_READ",
+                f"long_read_sequencing.params_path not found: {params_path}",
+            )
+        else:
+            try:
+                with open(full, "r", encoding="utf-8") as fh:
+                    params = json.load(fh)
+                profile = lr.get(
+                    "default_profile",
+                    params.get("simulation_parameters", {}).get("default_profile"),
+                )
+                profiles = params.get("deployment_profiles", {})
+                if profile and profile not in profiles:
+                    report.error(
+                        "config.yaml", "LONG_READ",
+                        f"long_read_sequencing.default_profile unknown: {profile}",
+                    )
+            except json.JSONDecodeError as exc:
+                report.error(
+                    params_path, "LONG_READ",
+                    f"long_read_sequencing.params_path invalid JSON: {exc}",
+                )
 
 
 def _check_agent_classes(

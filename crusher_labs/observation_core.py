@@ -918,11 +918,22 @@ class LongReadVerificationSequencing:
     def run_requests(
         self,
         requests: list[Any],
+        *,
+        epoch: int = 0,
+        spaces: dict[str, dict[str, Any]] | None = None,
+        agents: list[dict[str, Any]] | None = None,
+        pathogen_profiles: dict[str, dict[str, Any]] | None = None,
     ) -> dict[str, dict[str, Any]]:
         """Execute queued verification runs; keys are ``request_id``."""
         results: dict[str, dict[str, Any]] = {}
         for req in requests:
-            out = self.modality.verify(req)
+            out = self.modality.verify(
+                req,
+                epoch=epoch,
+                spaces=spaces,
+                agents=agents,
+                pathogen_profiles=pathogen_profiles,
+            )
             if self.qc.should_run_control():
                 out["qc_control"] = self.qc.run_negative_control()
             results[req.request_id] = out

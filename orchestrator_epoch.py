@@ -209,12 +209,36 @@ def run_observation_sampling(
     dict[int, dict[str, Any]],
     dict[int, dict[str, Any]],
     dict[int, dict[str, Any]],
+    dict[str, dict[str, Any]],
+    int,
 ]:
     """Run all six observation instruments for a single epoch.
 
     Returns (air_results, swab_results, ww_results,
-             clin_rdt_results, clin_qpcr_results, clin_microbio_results).
+             clin_rdt_results, clin_qpcr_results, clin_microbio_results,
+             long_read_results, long_read_ordered_count).
+    Delivered results respect instrument turnaround; stoplights use delivered only.
     """
+    from crusher_labs.instrument_turnaround import (
+        INSTRUMENT_AIR,
+        INSTRUMENT_LONG_READ,
+        INSTRUMENT_MICROBIO,
+        INSTRUMENT_QPCR,
+        INSTRUMENT_RDT,
+        INSTRUMENT_SWAB,
+        INSTRUMENT_WW,
+        merge_released_into_observation,
+    )
+
+    queue = obs.turnaround
+    if queue is None:
+        from crusher_labs.instrument_turnaround import (
+            InstrumentTurnaroundQueue,
+            InstrumentTurnaroundRegistry,
+        )
+
+        queue = InstrumentTurnaroundQueue(InstrumentTurnaroundRegistry({"instruments": {}}))
+
     mf_cfg = cfg.get("microflora", {})
     airborne_frac = mf_cfg.get("airborne_fraction", DEFAULT_AIRBORNE_FRACTION)
     surface_frac = mf_cfg.get("surface_fraction", DEFAULT_SURFACE_FRACTION)
@@ -268,16 +292,27 @@ def run_observation_sampling(
         clin_qpcr_results = obs.clin_qpcr.test_sick_call_agents(sick_call_agents)
         clin_microbio_results = obs.clin_microbio.test_sick_call_agents(sick_call_agents)
 
-    obs.notebook.log_air_sniffer(epoch, air_results)
-    obs.notebook.log_surface_swab(epoch, swab_results)
-    obs.notebook.log_wastewater_seq(epoch, ww_results)
-    obs.notebook.log_clinical_rdt(epoch, clin_rdt_results)
-    obs.notebook.log_clinical_qpcr(epoch, clin_qpcr_results)
-    obs.notebook.log_clinical_microbiology(epoch, clin_microbio_results)
-    obs.notebook.log_agent_summary(epoch, agents)
+    if queue is not None:
+        queue.submit_dict(INSTRUMENT_AIR, air_results, epoch)
+        queue.submit_dict(INSTRUMENT_SWAB, swab_results, epoch)
+        queue.submit_dict(INSTRUMENT_WW, ww_results, epoch)
+        queue.submit_dict(INSTRUMENT_RDT, clin_rdt_results, epoch)
+        queue.submit_dict(INSTRUMENT_QPCR, clin_qpcr_results, epoch)
+        queue.submit_dict(INSTRUMENT_MICROBIO, clin_microbio_results, epoch)
 
-    long_read_results: dict[str, dict[str, Any]] = {}
-    if obs.long_read is not None:
+    released = queue.release(epoch) if queue is not None else {}
+    (
+        air_results,
+        swab_results,
+        ww_results,
+        clin_rdt_results,
+        clin_qpcr_results,
+        clin_microbio_results,
+        long_read_results,
+    ) = merge_released_into_observation(released)
+
+    long_read_ordered_count = 0
+    if obs.long_read is not None and queue is not None:
         from crusher_labs.long_read_escalation import collect_long_read_escalation_requests
 
         requests = collect_long_read_escalation_requests(
@@ -289,13 +324,34 @@ def run_observation_sampling(
             clin_microbio_results=clin_microbio_results,
         )
         if requests:
-            long_read_results = obs.long_read.run_requests(requests)
-            obs.notebook.log_long_read_verification(epoch, long_read_results)
+            raw_lr = obs.long_read.run_requests(
+                requests,
+                epoch=epoch,
+                spaces=spaces,
+                agents=agents,
+                pathogen_profiles=pathogen_profiles,
+            )
+            for req_id, payload in raw_lr.items():
+                queue.submit(INSTRUMENT_LONG_READ, req_id, payload, epoch)
+                long_read_ordered_count += 1
+            released = queue.release(epoch)
+            long_read_results = released.get(INSTRUMENT_LONG_READ, {})
+
+    obs.notebook.log_air_sniffer(epoch, air_results)
+    obs.notebook.log_surface_swab(epoch, swab_results)
+    obs.notebook.log_wastewater_seq(epoch, ww_results)
+    obs.notebook.log_clinical_rdt(epoch, clin_rdt_results)
+    obs.notebook.log_clinical_qpcr(epoch, clin_qpcr_results)
+    obs.notebook.log_clinical_microbiology(epoch, clin_microbio_results)
+    obs.notebook.log_agent_summary(epoch, agents)
+    if long_read_results:
+        obs.notebook.log_long_read_verification(epoch, long_read_results)
 
     return (
         air_results, swab_results, ww_results,
         clin_rdt_results, clin_qpcr_results, clin_microbio_results,
         long_read_results,
+        long_read_ordered_count,
     )
 
 
@@ -468,14 +524,14 @@ def step_cost_accounting(
 def step_long_read_cost_accounting(
     epoch: int,
     proto_ctx: ProtocolContext,
-    long_read_results: dict[str, dict[str, Any]],
+    long_read_ordered_count: int,
 ) -> None:
-    """Debit long-read verification runs when escalation produced results."""
-    if not long_read_results:
+    """Debit long-read verification runs when escalation orders a run (submit epoch)."""
+    if long_read_ordered_count <= 0:
         return
     per_test = proto_ctx.resource_costs_cfg.get("per_test_costs", {})
     proto_ctx.cost_ledger.debit_per_test(
-        epoch, "long_read_verification", len(long_read_results), per_test,
+        epoch, "long_read_verification", long_read_ordered_count, per_test,
     )
 
 

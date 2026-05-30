@@ -2,18 +2,23 @@
 crusher_labs.modalities.long_read_sequencing
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Oxford Nanopore long-read verification / pathogen-typing modality (framework).
+Oxford Nanopore long-read verification / pathogen-typing modality.
 
-Intended for follow-on use when short-read or rapid assays suggest mixed
-infections, unexpected organisms, or discordant signals. Accepts upstream
-instrument snapshots; detailed basecalling and classification parameters
-are configured outside this stub.
+Loads assay parameters from ``data/config/long_read_sequencing_params.json``,
+samples compositional read counts from ground-truth pathogen mass, applies
+configured error injection, and returns pathogen classification calls.
 """
 
 from __future__ import annotations
 
+import json
+import os
 from dataclasses import dataclass, field
 from typing import Any
+
+import numpy as np
+
+from crusher_labs.modalities.sequencing import MULTI_KINGDOM_TAXA
 
 # Specimen channels this modality can consume
 SPECIMEN_WASTEWATER_METAGENOMICS = "wastewater_metagenomics"
@@ -31,6 +36,10 @@ ALL_SPECIMEN_SOURCES: tuple[str, ...] = (
 PURPOSE_VERIFICATION = "verification"
 PURPOSE_PATHOGEN_TYPING = "pathogen_typing"
 
+_HOST_SCALE_WW = 1000.0
+_HOST_SCALE_CLINICAL = 100.0
+_HOST_SCALE_SWAB = 500.0
+
 
 @dataclass(frozen=True)
 class LongReadVerificationRequest:
@@ -45,33 +54,316 @@ class LongReadVerificationRequest:
 
 
 class LongReadNanoporeSequencing:
-    """Framework modality — no fitted sequencing parameters in-repo."""
+    """Oxford Nanopore long-read verification with config-driven detection."""
 
     name = "long_read_nanopore"
 
-    def __init__(self, enabled: bool = False) -> None:
+    def __init__(
+        self,
+        params: dict[str, Any],
+        profile_name: str,
+        *,
+        enabled: bool = True,
+        rng: np.random.Generator | None = None,
+    ) -> None:
         self.enabled = enabled
+        self.params = params
+        self.profile_name = profile_name
+        self.rng = rng if rng is not None else np.random.default_rng()
 
-    def verify(self, request: LongReadVerificationRequest) -> dict[str, Any]:
-        """Run verification/typing pass (stub until parameters are supplied)."""
+        profiles = params.get("deployment_profiles", {})
+        if profile_name not in profiles:
+            raise ValueError(f"Unknown long-read profile: {profile_name}")
+        self.profile = profiles[profile_name]
+        self.sim_params = params.get("simulation_parameters", {})
+        self.detection_model = self.sim_params.get("detection_model", {})
+        self.specimen_processing = params.get("specimen_processing", {})
+
+    @classmethod
+    def from_params_path(
+        cls,
+        path: str,
+        profile_name: str | None = None,
+        *,
+        enabled: bool = True,
+        rng: np.random.Generator | None = None,
+        repo_root: str | None = None,
+    ) -> LongReadNanoporeSequencing:
+        if not os.path.isabs(path) and repo_root:
+            path = os.path.join(repo_root, path)
+        with open(path, "r", encoding="utf-8") as fh:
+            params = json.load(fh)
+        sim = params.get("simulation_parameters", {})
+        profile = profile_name or sim.get("default_profile", "flongle_rapid")
+        return cls(params, profile, enabled=enabled, rng=rng)
+
+    @property
+    def turnaround(self) -> dict[str, Any]:
+        return dict(self.profile.get("turnaround", {}))
+
+    def profile_turnaround_delay_epochs(self, hours_per_epoch: float = 24.0) -> int:
+        from crusher_labs.instrument_turnaround import TurnaroundSpec
+
+        return TurnaroundSpec.from_profile_turnaround(
+            self.turnaround,
+            hours_per_epoch=hours_per_epoch,
+        ).delay_epochs
+
+    def _background_taxa(self) -> tuple[list[str], np.ndarray]:
+        taxa: list[str] = []
+        abund: list[float] = []
+        for _kingdom, taxa_dict in MULTI_KINGDOM_TAXA.items():
+            for taxon, base in taxa_dict.items():
+                taxa.append(taxon)
+                abund.append(base)
+        arr = np.array(abund, dtype=np.float64)
+        arr /= arr.sum()
+        return taxa, arr
+
+    def _pathogen_fractions(
+        self,
+        request: LongReadVerificationRequest,
+        *,
+        spaces: dict[str, dict[str, Any]],
+        agents: list[dict[str, Any]],
+        pathogen_profiles: dict[str, dict[str, Any]],
+    ) -> tuple[list[str], np.ndarray]:
+        """Build taxon list and composition vector on the simplex."""
+        bg_taxa, bg_comp = self._background_taxa()
+        specimen = request.specimen_source
+        proc = self.specimen_processing.get(specimen, {})
+        extraction = float(proc.get("extraction_efficiency", 0.4))
+
+        pathogen_masses: dict[str, float] = {}
+        host_scale = _HOST_SCALE_WW
+
+        if specimen == SPECIMEN_WASTEWATER_METAGENOMICS:
+            zone = spaces.get(request.collection_key, {})
+            by_id = zone.get("pathogen_mass_by_id", {}) or {}
+            for pid, mass in by_id.items():
+                if mass > 0:
+                    pathogen_masses[str(pid)] = float(mass) * extraction
+            if not pathogen_masses:
+                pm = float(zone.get("pathogen_mass", 0.0))
+                if pm > 0:
+                    pathogen_masses["target"] = pm * extraction
+
+        elif specimen == SPECIMEN_SURVEILLANCE_SWAB:
+            host_scale = _HOST_SCALE_SWAB
+            zone = spaces.get(request.collection_key, {})
+            by_id = zone.get("pathogen_mass_by_id", {}) or {}
+            for pid, mass in by_id.items():
+                if mass > 0:
+                    pathogen_masses[str(pid)] = float(mass) * extraction
+            pm = float(zone.get("pathogen_mass", 0.0))
+            if pm > 0 and not pathogen_masses:
+                pathogen_masses["target"] = pm * extraction
+
+        elif specimen in (SPECIMEN_CLINICAL, SPECIMEN_CLINICAL_CULTURE):
+            host_scale = _HOST_SCALE_CLINICAL
+            try:
+                aid = int(request.collection_key)
+            except ValueError:
+                aid = None
+            agent_data: dict[str, Any] = {}
+            if aid is not None:
+                for ag in agents:
+                    if ag.get("agent_id") == aid:
+                        agent_data = ag
+                        break
+            shedding = float(agent_data.get("shedding_rate", 0.0))
+            infections = agent_data.get("pathogen_infections", {}) or {}
+            eff = extraction
+            if specimen == SPECIMEN_CLINICAL_CULTURE:
+                eff *= float(proc.get("extraction_efficiency", 0.7))
+            for pid, inf in infections.items():
+                status = inf.get("status", "") if isinstance(inf, dict) else ""
+                if status == "INFECTED" or pid in pathogen_profiles:
+                    pathogen_masses[str(pid)] = max(
+                        pathogen_masses.get(str(pid), 0.0),
+                        shedding * eff,
+                    )
+            if shedding > 0 and not pathogen_masses:
+                pathogen_masses["target"] = shedding * eff
+
+        total_pathogen = sum(pathogen_masses.values())
+        pathogen_frac = total_pathogen / (total_pathogen + host_scale)
+        env_frac = 1.0 - pathogen_frac
+
+        taxa = list(bg_taxa)
+        composition = bg_comp * env_frac
+
+        for pid, pmass in pathogen_masses.items():
+            taxon_name = f"Pathogen_{pid}"
+            pf = pmass / (total_pathogen + host_scale) if total_pathogen > 0 else 0.0
+            if pf <= 0:
+                continue
+            taxa.append(taxon_name)
+            composition = np.append(composition, pf)
+
+        composition = np.clip(composition, 1e-12, None)
+        composition /= composition.sum()
+        return taxa, composition
+
+    def _inject_errors(
+        self,
+        taxa: list[str],
+        reads: np.ndarray,
+    ) -> dict[str, int]:
+        err_cfg = self.detection_model.get("error_injection", {})
+        if not err_cfg.get("enabled", True):
+            return {t: int(c) for t, c in zip(taxa, reads) if c > 0}
+
+        sub = float(err_cfg.get("substitution_rate", 0.02))
+        ins = float(err_cfg.get("insertion_rate", 0.015))
+        dele = float(err_cfg.get("deletion_rate", 0.015))
+        homo = float(err_cfg.get("homopolymer_collapse_prob", 0.08))
+        misrate = min(0.5, sub + ins + dele + homo)
+
+        read_dict = {t: int(c) for t, c in zip(taxa, reads)}
+        total = int(reads.sum())
+        if total <= 0 or misrate <= 0:
+            return read_dict
+
+        n_taxa = len(taxa)
+        for i, taxon in enumerate(taxa):
+            count = read_dict.get(taxon, 0)
+            if count <= 0:
+                continue
+            for _ in range(count):
+                if self.rng.random() < misrate and n_taxa > 1:
+                    j = int(self.rng.integers(0, n_taxa))
+                    if j != i:
+                        read_dict[taxon] = read_dict.get(taxon, 0) - 1
+                        other = taxa[j]
+                        read_dict[other] = read_dict.get(other, 0) + 1
+
+        return {t: c for t, c in read_dict.items() if c > 0}
+
+    def _classify_calls(
+        self,
+        read_dict: dict[str, int],
+        total_reads: int,
+    ) -> list[dict[str, Any]]:
+        det = self.profile.get("detection", {})
+        min_frac = float(det.get("min_fraction_for_detection", 1e-4))
+        min_reads_call = int(
+            self.detection_model.get("classification", {}).get("min_reads_for_call", 5),
+        )
+        species_sens = float(
+            self.detection_model.get("classification", {}).get(
+                "species_sensitivity",
+                det.get("species_classification_accuracy", 0.96),
+            ),
+        )
+        reads_strain = int(det.get("reads_for_strain_typing", 10_000))
+
+        calls: list[dict[str, Any]] = []
+        for taxon, count in read_dict.items():
+            if not taxon.startswith("Pathogen_"):
+                continue
+            frac = count / max(total_reads, 1)
+            if frac < min_frac or count < min_reads_call:
+                continue
+            if self.rng.random() > species_sens:
+                continue
+            pid = taxon.replace("Pathogen_", "", 1)
+            prof = {}  # optional name lookup omitted; taxon_id sufficient
+            calls.append({
+                "taxon_id": pid,
+                "taxon_name": prof.get("name", pid) if prof else pid,
+                "rank": "species",
+                "classified_reads": count,
+                "fraction_total": round(frac, 8),
+                "confidence": round(min(0.99, species_sens * (1.0 + frac * 10)), 4),
+                "amr_genes_detected": [],
+            })
+
+        calls.sort(key=lambda c: c["classified_reads"], reverse=True)
+        max_org = int(
+            self.sim_params.get("verification_outputs", {})
+            .get("mixed_infection_report", {})
+            .get("max_organisms_reportable", 5),
+        )
+        return calls[:max_org]
+
+    def verify(
+        self,
+        request: LongReadVerificationRequest,
+        *,
+        epoch: int = 0,
+        spaces: dict[str, dict[str, Any]] | None = None,
+        agents: list[dict[str, Any]] | None = None,
+        pathogen_profiles: dict[str, dict[str, Any]] | None = None,
+    ) -> dict[str, Any]:
+        """Run verification/typing pass from ground-truth specimen composition."""
+        spaces = spaces or {}
+        agents = agents or []
+        pathogen_profiles = pathogen_profiles or {}
+
+        purpose = (
+            PURPOSE_PATHOGEN_TYPING
+            if "mixed_infection_suspected" in request.trigger_reasons
+            else PURPOSE_VERIFICATION
+        )
+
+        if not self.enabled:
+            return {
+                "modality": self.name,
+                "instrument": "long_read_verification",
+                "status": "disabled",
+                "request_id": request.request_id,
+                "specimen_source": request.specimen_source,
+                "collection_key": request.collection_key,
+                "purpose": purpose,
+                "pathogen_calls": [],
+                "consensus_ready": False,
+            }
+
+        throughput = self.profile.get("throughput", {})
+        read_depth = int(
+            throughput.get("total_reads")
+            or self.detection_model.get("read_depth", 500_000),
+        )
+
+        taxa, composition = self._pathogen_fractions(
+            request,
+            spaces=spaces,
+            agents=agents,
+            pathogen_profiles=pathogen_profiles,
+        )
+        reads = self.rng.multinomial(read_depth, composition)
+        read_dict = self._inject_errors(taxa, reads)
+        total_reads = sum(read_dict.values())
+        pathogen_calls = self._classify_calls(read_dict, total_reads)
+
+        det = self.profile.get("detection", {})
+        reads_strain = int(det.get("reads_for_strain_typing", 10_000))
+        top_reads = pathogen_calls[0]["classified_reads"] if pathogen_calls else 0
+        consensus_ready = top_reads >= reads_strain
+
         return {
             "modality": self.name,
             "instrument": "long_read_verification",
-            "status": "framework_stub",
+            "status": "complete",
+            "profile": self.profile_name,
+            "epoch": epoch,
             "request_id": request.request_id,
             "specimen_source": request.specimen_source,
             "collection_key": request.collection_key,
-            "purpose": (
-                PURPOSE_PATHOGEN_TYPING
-                if "mixed_infection_suspected" in request.trigger_reasons
-                else PURPOSE_VERIFICATION
-            ),
+            "purpose": purpose,
             "trigger_reasons": list(request.trigger_reasons),
             "upstream_instrument": request.upstream_instrument,
-            "pathogen_calls": [],
-            "consensus_ready": False,
-            "mixed_infection_flag": "mixed_infection_suspected" in request.trigger_reasons,
+            "read_depth": read_depth,
+            "total_classified_reads": total_reads,
+            "read_counts": read_dict,
+            "pathogen_calls": pathogen_calls,
+            "consensus_ready": consensus_ready,
+            "mixed_infection_flag": (
+                "mixed_infection_suspected" in request.trigger_reasons
+                or len(pathogen_calls) > 1
+            ),
             "unexpected_pathogen_flag": "unexpected_pathogen" in request.trigger_reasons,
             "discordant_modalities_flag": "discordant_modalities" in request.trigger_reasons,
-            "notes": "Awaiting external long-read parameterization and classifier.",
+            "notes": "",
         }

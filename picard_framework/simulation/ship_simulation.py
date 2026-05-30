@@ -318,7 +318,7 @@ class ShipSimulation:
 
         (air_results, swab_results, ww_results,
          clin_rdt_results, clin_qpcr_results, clin_microbio_results,
-         long_read_results) = (
+         long_read_results, long_read_ordered_count) = (
             run_observation_sampling(
                 epoch, self.obs, agents, spaces, self.zone_names, self.zone_volumes,
                 zone_microflora_shifts, state.trigger_status, self.high_traffic,
@@ -429,7 +429,7 @@ class ShipSimulation:
             air_results, swab_results, ww_results,
             clin_rdt_results, clin_qpcr_results, clin_microbio_results,
         )
-        step_long_read_cost_accounting(epoch, self.proto_ctx, long_read_results)
+        step_long_read_cost_accounting(epoch, self.proto_ctx, long_read_ordered_count)
         step_quarantine_confinement(
             epoch, agents, merged_mods, state.trigger_status, state, syndromic,
         )

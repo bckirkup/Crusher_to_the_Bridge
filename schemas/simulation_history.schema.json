@@ -85,6 +85,7 @@
         },
         "observation_engine": {
           "type": "object",
+          "description": "Instrument results may include status, ordered_epoch, and available_epoch when turnaround delays apply.",
           "properties": {
             "logging_fidelity": {"type": "string"},
             "air_sniffer": {"type": "object"},
