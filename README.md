@@ -26,51 +26,22 @@ python orchestrator.py --epochs 250
 # Launch LCARS dashboard (after simulation)
 streamlit run dashboard.py
 
-# Run the test suite (~298 tests)
+# Run the test suite
 pytest tests/ -v --tb=short
-
-# Fleet smoke (1 cruise × 2 epochs)
-python3 presidio_runner.py --fleet-config presidio/data/config/smoke_fleet.json --cruises 1
 ```
 
 Output is written to `telemetry_buffer/simulation_history.json` and
 `telemetry_buffer/artificial_lab_notebook.json` (gitignored runtime artifacts).
 
-## Picard, Presidio & Stackelberg
-
-| Component | Entry | Role |
-|-----------|-------|------|
-| **Picard_Framework** | `orchestrator.py`, `picard_framework/` | Steppable single-ship simulation |
-| **decision_engine** | `decision_engine/` | Multi-agent decisions, information diffusion, utility features |
-| **Presidio** | `presidio_runner.py`, `presidio/data/` | Fleet meta-simulation + experience store |
-
-Each epoch (when `social` is enabled on the Picard run spec): **command → medical → population** Stackelberg pass, then Crusher Labs stoplight-driven SOP physics. Utility **features** export to JSON; **optimization** stays external.
-
-```bash
-python3 presidio_runner.py \
-  --fleet-config presidio/data/config/smoke_fleet.json \
-  --cruises 1 \
-  --export-utility-dir presidio/data/experiences/utility_bundles
-```
-
-Manuals: [OPERATORS_MANUAL_SHIP.md](OPERATORS_MANUAL_SHIP.md) (ship), [OPERATORS_MANUAL_GAME_THEORY.md](OPERATORS_MANUAL_GAME_THEORY.md) (fleet / Stackelberg).
-
-
 ## Architecture
 
 ```
-orchestrator.py              Legacy CLI → picard_framework.ShipSimulation
+orchestrator.py              Thin coordinator: init → epoch loop → finalize
 ├── orchestrator_types.py    Dataclasses, constants, state container
 ├── orchestrator_init.py     Spatial/engine/observation/wearable setup
 ├── orchestrator_epoch.py    Per-epoch step functions
 ├── orchestrator_record.py   History recording and JSON export
 └── orchestrator_display.py  Terminal output helpers
-
-presidio_runner.py           Fleet loop over Picard cruises + experience store
-picard_framework/            PicardRunSpec, catalog, ShipSimulation.step()
-decision_engine/             StackelbergRound, diffusion, lived experience, utility I/O
-presidio/data/               Fleet catalog, economics, social, intelligence libraries
-picard_framework/data/       Agent profile bundles
 
 crusher_labs/                Dr. Crusher's Bio-Diagnostic Suite
 ├── __init__.py              Config loader, modality builder
@@ -115,11 +86,9 @@ schemas/                     JSON Schema definitions for all data contracts
 telemetry_buffer/            Runtime output (simulation_history, lab_notebook)
 │   agent_axes.py            Orthogonal agent state (infection / presentation / compliance)
 dashboard.py                 LCARS Main Bridge Display (4 stations)
-tests/                       ~298 tests (ship, fleet, Stackelberg, contracts)
+tests/                       278 tests across 15 modules
 AGENTS.md                    Cursor Cloud / agent development notes
 ```
-
-CI: `.github/workflows/ci.yml` (full suite + Presidio smoke) and `.github/workflows/picard-presidio.yml` (framework-focused + Stackelberg schema checks).
 
 ## Configuration Reference (`crusher_labs/config.yaml`)
 
@@ -373,17 +342,23 @@ grumb_seeding:
 
 ## Platforms
 
-Six ship platforms are included, each with spatial layout and HVAC
+Eight ship platforms are included, each with spatial layout and HVAC
 airflow definitions:
 
 | Platform | Description |
 |----------|-------------|
 | `destroyer_baseline` | Gleaves-class destroyer (default, 6 zones) |
+| `enterprise_constitution_tos` | Constitution-class cruiser (TOS fiction-adapted, 13 zones) |
+| `enterprise_galaxy_tng` | Galaxy-class explorer (TNG fiction-adapted, 17 zones) |
 | `expedition_cruise_300` | 300-passenger expedition cruise ship |
 | `fletcher_class_destroyer` | Fletcher-class WWII destroyer |
 | `legend_class_nsc` | USCG Legend-class National Security Cutter |
 | `mega_cruise_5000` | 5000-passenger mega cruise ship |
 | `san_antonio_class_lpd` | USN San Antonio-class LPD |
+
+Fiction-adapted Star Trek scenario bundles (platform paths, agent classes,
+pathogen profiles) live under `data/templates/enterprise_constitution_tos.json`
+and `data/templates/enterprise_galaxy_tng.json`.
 
 To switch platforms, update the `spatial_layout` and `air_flow_paths`
 paths in `config.yaml`, then validate:
@@ -492,12 +467,8 @@ python tools/sanity_checker.py --config-dir data/config \
 ## Testing
 
 ```bash
-# Full suite (~298 tests)
+# Full suite (278 tests)
 pytest tests/ -v --tb=short
-
-# Picard / Presidio / Stackelberg
-pytest tests/test_picard_framework.py tests/test_decision_engine.py \
-  tests/test_presidio_runner.py tests/test_stackelberg.py tests/test_golden_orchestrator.py -v
 
 # Specific modules
 pytest tests/test_orchestrator.py           # orchestrator, quarantine/SOP confinement

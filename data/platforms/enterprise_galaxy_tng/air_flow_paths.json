@@ -1,0 +1,165 @@
+{
+  "platform": "enterprise_galaxy_tng",
+  "description": "Galaxy-class multi-deck HVAC with saucer living ring and drive-section engineering plenum.",
+  "hvac_zones": [
+    {
+      "id": "zone_saucer_command",
+      "rooms": [
+        "Bridge",
+        "Stellar_Cartography",
+        "Security_Office"
+      ],
+      "ach": 9.0
+    },
+    {
+      "id": "zone_saucer_social",
+      "rooms": [
+        "Ten_Forward",
+        "Crew_Lounge",
+        "Holodeck",
+        "Galley",
+        "Mess_Hall"
+      ],
+      "ach": 8.0
+    },
+    {
+      "id": "zone_saucer_medical",
+      "rooms": [
+        "Sickbay",
+        "Science_Labs",
+        "Arboretum"
+      ],
+      "ach": 11.0
+    },
+    {
+      "id": "zone_saucer_habitation",
+      "rooms": [
+        "Crew_Quarters",
+        "Family_Quarters",
+        "Schoolroom"
+      ],
+      "ach": 6.5
+    },
+    {
+      "id": "zone_saucer_logistics",
+      "rooms": [
+        "Shuttlebay",
+        "Cargo_Bay"
+      ],
+      "ach": 12.0
+    },
+    {
+      "id": "zone_drive",
+      "rooms": [
+        "Main_Engineering"
+      ],
+      "ach": 16.0
+    }
+  ],
+  "cross_zone_links": [
+    {
+      "from": "zone_saucer_command",
+      "to": "zone_saucer_social",
+      "flow_rate_m3h": 200,
+      "path": "turbolift_forward",
+      "is_hvac_ducted": true
+    },
+    {
+      "from": "zone_saucer_social",
+      "to": "zone_saucer_medical",
+      "flow_rate_m3h": 160,
+      "path": "corridor_ring",
+      "is_hvac_ducted": false
+    },
+    {
+      "from": "zone_saucer_medical",
+      "to": "zone_saucer_habitation",
+      "flow_rate_m3h": 140,
+      "path": "habitation_trunk",
+      "is_hvac_ducted": true
+    },
+    {
+      "from": "zone_saucer_habitation",
+      "to": "zone_saucer_logistics",
+      "flow_rate_m3h": 100,
+      "path": "cargo_lift_shaft",
+      "is_hvac_ducted": false
+    },
+    {
+      "from": "zone_saucer_logistics",
+      "to": "zone_drive",
+      "flow_rate_m3h": 220,
+      "path": "engineering_connecting_spine",
+      "is_hvac_ducted": true
+    },
+    {
+      "from": "zone_saucer_command",
+      "to": "zone_drive",
+      "flow_rate_m3h": 60,
+      "path": "emergency_scrubber_loop",
+      "is_hvac_ducted": true
+    }
+  ],
+  "adjacency": [
+    {
+      "from": "Bridge",
+      "to": "Stellar_Cartography",
+      "type": "turbolift"
+    },
+    {
+      "from": "Ten_Forward",
+      "to": "Crew_Lounge",
+      "type": "passageway"
+    },
+    {
+      "from": "Galley",
+      "to": "Ten_Forward",
+      "type": "service_hatch"
+    },
+    {
+      "from": "Sickbay",
+      "to": "Science_Labs",
+      "type": "passageway"
+    },
+    {
+      "from": "Family_Quarters",
+      "to": "Schoolroom",
+      "type": "passageway"
+    },
+    {
+      "from": "Crew_Quarters",
+      "to": "Holodeck",
+      "type": "passageway"
+    },
+    {
+      "from": "Arboretum",
+      "to": "Science_Labs",
+      "type": "passageway"
+    },
+    {
+      "from": "Shuttlebay",
+      "to": "Cargo_Bay",
+      "type": "passageway"
+    },
+    {
+      "from": "Cargo_Bay",
+      "to": "Main_Engineering",
+      "type": "turbolift"
+    },
+    {
+      "from": "Main_Engineering",
+      "to": "Sickbay",
+      "type": "turbolift"
+    },
+    {
+      "from": "Security_Office",
+      "to": "Sickbay",
+      "type": "passageway"
+    },
+    {
+      "from": "Galley",
+      "to": "Mess_Hall",
+      "type": "service_hatch"
+    }
+  ]
+}

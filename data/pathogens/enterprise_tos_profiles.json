@@ -1,0 +1,163 @@
+{
+  "meta": {
+    "description": "TOS-inspired pathogen profiles (fiction-adapted, not clinical claims)",
+    "version": "1.0",
+    "notes": "rigelian_fever evokes Journey to Babel; psi_2000_polywater evokes The Naked Time shipwide behavioral outbreak."
+  },
+  "pathogens": [
+    {
+      "pathogen_id": "rigelian_fever",
+      "name": "Rigelian Fever (fiction-adapted)",
+      "category": "bacterial",
+      "transmission_routes": [
+        "direct_contact",
+        "droplet",
+        "fomite",
+        "hvac_airborne"
+      ],
+      "shedding_curve_log10": [
+        2.0,
+        4.0,
+        6.5,
+        8.0,
+        8.5,
+        8.0,
+        7.0,
+        6.0,
+        5.0,
+        4.0,
+        3.5,
+        3.0,
+        2.5,
+        2.0,
+        2.0
+      ],
+      "asymptomatic_shedding_log10": [
+        2.0,
+        3.0,
+        4.5,
+        5.5,
+        6.0,
+        5.5,
+        5.0,
+        4.5,
+        4.0,
+        3.5,
+        3.0,
+        2.5,
+        2.0,
+        2.0,
+        2.0
+      ],
+      "dose_adjustment": 2.5,
+      "dose_response": {
+        "model": "beta_poisson",
+        "alpha": 0.15,
+        "beta": 45.0
+      },
+      "illness_probability": {
+        "eta": 0.55,
+        "gamma": 0.1
+      },
+      "recovery_day": 9,
+      "surface_deposition_fraction": 0.08,
+      "base_susceptibility": 1.0,
+      "microflora_disruption": {
+        "causes_disruption": true,
+        "disruption_type": "systemic_fever",
+        "disruption_magnitude": 0.5,
+        "affected_kingdoms": {
+          "Bacteria": {
+            "Staphylococcus_epi": 2.5
+          },
+          "Virus": {
+            "Phage_community": 1.2
+          }
+        }
+      },
+      "food_contamination": {
+        "enabled": false
+      },
+      "introduction_epoch": 0,
+      "initial_infected": 1,
+      "initial_time_infected": 0
+    },
+    {
+      "pathogen_id": "psi_2000_polywater",
+      "name": "Psi-2000 Polywater Analog (fiction-adapted)",
+      "category": "respiratory_viral",
+      "transmission_routes": [
+        "hvac_airborne",
+        "droplet",
+        "direct_contact",
+        "fomite"
+      ],
+      "shedding_curve_log10": [
+        1.5,
+        3.5,
+        6.0,
+        7.5,
+        8.5,
+        9.0,
+        8.5,
+        7.5,
+        6.5,
+        5.5,
+        4.5,
+        3.5,
+        3.0,
+        2.5,
+        2.0
+      ],
+      "asymptomatic_shedding_log10": [
+        1.5,
+        3.0,
+        5.0,
+        6.5,
+        7.0,
+        6.5,
+        6.0,
+        5.5,
+        5.0,
+        4.5,
+        4.0,
+        3.5,
+        3.0,
+        2.5,
+        2.0
+      ],
+      "dose_adjustment": 1.8,
+      "dose_response": {
+        "model": "beta_poisson",
+        "alpha": 0.12,
+        "beta": 28.0
+      },
+      "illness_probability": {
+        "eta": 0.7,
+        "gamma": 0.08
+      },
+      "recovery_day": 5,
+      "surface_deposition_fraction": 0.02,
+      "base_susceptibility": 1.0,
+      "microflora_disruption": {
+        "causes_disruption": true,
+        "disruption_type": "respiratory",
+        "disruption_magnitude": 0.35,
+        "affected_kingdoms": {
+          "Bacteria": {
+            "Pseudoalteromonas": 1.8
+          },
+          "Fungi": {
+            "Aspergillus_spp": 1.5
+          }
+        }
+      },
+      "food_contamination": {
+        "enabled": false
+      },
+      "introduction_epoch": 3,
+      "initial_infected": 1,
+      "initial_time_infected": 0
+    }
+  ]
+}
