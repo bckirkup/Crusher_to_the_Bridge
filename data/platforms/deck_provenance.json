@@ -27,7 +27,8 @@
       },
       "assets": {
         "deck_graphics": "deck_graphics.geojson",
-        "deck_hull": "deck_hull.png"
+        "deck_hull": "deck_hull.png",
+        "deck_blueprint_bg": "deck_blueprint_bg.png"
       }
     },
     "fletcher_class_destroyer": {
@@ -70,7 +71,8 @@
       },
       "assets": {
         "deck_graphics": "deck_graphics.geojson",
-        "deck_hull": "deck_hull.png"
+        "deck_hull": "deck_hull.png",
+        "deck_blueprint_bg": "deck_blueprint_bg.png"
       }
     },
     "legend_class_nsc": {
@@ -111,7 +113,8 @@
       },
       "assets": {
         "deck_graphics": "deck_graphics.geojson",
-        "deck_hull": "deck_hull.png"
+        "deck_hull": "deck_hull.png",
+        "deck_blueprint_bg": "deck_blueprint_bg.png"
       }
     },
     "san_antonio_class_lpd": {
@@ -156,7 +159,8 @@
       },
       "assets": {
         "deck_graphics": "deck_graphics.geojson",
-        "deck_hull": "deck_hull.png"
+        "deck_hull": "deck_hull.png",
+        "deck_blueprint_bg": "deck_blueprint_bg.png"
       }
     },
     "expedition_cruise_300": {
@@ -204,7 +208,8 @@
       },
       "assets": {
         "deck_graphics": "deck_graphics.geojson",
-        "deck_hull": "deck_hull.png"
+        "deck_hull": "deck_hull.png",
+        "deck_blueprint_bg": "deck_blueprint_bg.png"
       }
     },
     "mega_cruise_5000": {
@@ -294,7 +299,8 @@
       },
       "assets": {
         "deck_graphics": "deck_graphics.geojson",
-        "deck_hull": "deck_hull.png"
+        "deck_hull": "deck_hull.png",
+        "deck_blueprint_bg": "deck_blueprint_bg.png"
       }
     },
     "enterprise_constitution_tos": {
@@ -330,7 +336,8 @@
       },
       "assets": {
         "deck_graphics": "deck_graphics.geojson",
-        "deck_hull": "deck_hull.png"
+        "deck_hull": "deck_hull.png",
+        "deck_blueprint_bg": "deck_blueprint_bg.png"
       }
     },
     "enterprise_galaxy_tng": {
@@ -370,7 +377,8 @@
       },
       "assets": {
         "deck_graphics": "deck_graphics.geojson",
-        "deck_hull": "deck_hull.png"
+        "deck_hull": "deck_hull.png",
+        "deck_blueprint_bg": "deck_blueprint_bg.png"
       }
     }
   }

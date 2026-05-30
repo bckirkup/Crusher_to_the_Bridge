@@ -139,5 +139,6 @@ def build_manifest(
         "assets": {
             "deck_graphics": "deck_graphics.geojson",
             "deck_hull": "deck_hull.png",
+            "deck_blueprint_bg": "deck_blueprint_bg.png",
         },
     }

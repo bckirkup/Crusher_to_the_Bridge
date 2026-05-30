@@ -27,6 +27,7 @@ class PlatformBundle:
     manifest: dict[str, Any]
     deck_graphics: dict[str, Any]
     hull_png_path: str | None
+    blueprint_bg_path: str | None
     zone_coords: dict[str, dict[str, Any]]
 
 
@@ -176,6 +177,7 @@ def load_platform_bundle(platform_id: str) -> PlatformBundle:
         }
     gfx = _load_json(os.path.join(pdir, "deck_graphics.geojson"))
     hull_path = os.path.join(pdir, "deck_hull.png")
+    bg_path = os.path.join(pdir, "deck_blueprint_bg.png")
     return PlatformBundle(
         platform_id=platform_id,
         layout=layout,
@@ -183,6 +185,7 @@ def load_platform_bundle(platform_id: str) -> PlatformBundle:
         manifest=manifest,
         deck_graphics=gfx,
         hull_png_path=hull_path if os.path.isfile(hull_path) else None,
+        blueprint_bg_path=bg_path if os.path.isfile(bg_path) else None,
         zone_coords=get_zone_coords(layout),
     )
 

@@ -93,6 +93,81 @@ def _render_hull_png(geojson: dict[str, Any], out_path: str) -> None:
     img.save(out_path, format="PNG")
 
 
+def _render_blueprint_background(
+    geojson: dict[str, Any],
+    out_path: str,
+    *,
+    title: str,
+    subtitle: str,
+    fiction: bool,
+) -> None:
+    """Blueprint-style class plate for Plotly underlay (historic / fiction-adapted)."""
+    from PIL import Image, ImageDraw, ImageFont
+
+    bounds = compute_view_bounds(geojson, padding=2.0)
+    xmin, xmax = bounds["xmin"], bounds["xmax"]
+    ymin, ymax = bounds["ymin"], bounds["ymax"]
+    w_m = max(xmax - xmin, 1.0)
+    h_m = max(ymax - ymin, 1.0)
+    img_w = 1000
+    img_h = max(320, int(1000 * h_m / w_m))
+
+    def to_px(x: float, y: float) -> tuple[int, int]:
+        px = int((x - xmin) / w_m * (img_w - 80) + 40)
+        py = int((ymax - y) / h_m * (img_h - 100) + 70)
+        return px, py
+
+    paper = "#0a1424"
+    grid_major = "#1a3358"
+    grid_minor = "#122a48"
+    hull_fill = "#1a4a7a"
+    hull_edge = "#c9e4ff"
+    bay_edge = "#6eb5e8"
+    gold = "#e8b060"
+
+    img = Image.new("RGB", (img_w, img_h), paper)
+    draw = ImageDraw.Draw(img)
+
+    for i in range(0, img_w, 25):
+        draw.line([(i, 0), (i, img_h)], fill=grid_minor, width=1)
+    for j in range(0, img_h, 25):
+        draw.line([(0, j), (img_w, j)], fill=grid_minor, width=1)
+    for i in range(0, img_w, 50):
+        draw.line([(i, 0), (i, img_h)], fill=grid_major, width=1)
+    for j in range(0, img_h, 50):
+        draw.line([(0, j), (img_w, j)], fill=grid_major, width=1)
+
+    for feat in geojson.get("features", []):
+        kind = feat.get("properties", {}).get("kind", "")
+        geom = feat.get("geometry", {})
+        if geom.get("type") != "Polygon" or not geom.get("coordinates"):
+            continue
+        pts = [to_px(p[0], p[1]) for p in geom["coordinates"][0]]
+        if kind == "hull_outline":
+            draw.polygon(pts, fill=hull_fill, outline=hull_edge, width=3)
+        elif kind == "hull_waterline":
+            draw.polygon(pts, outline="#88b8e8", width=1)
+        elif kind == "compartment":
+            draw.polygon(pts, fill="#143050", outline=bay_edge, width=1)
+
+    for feat in geojson.get("features", []):
+        if feat.get("properties", {}).get("kind") != "hvac_path":
+            continue
+        geom = feat.get("geometry", {})
+        if geom.get("type") == "LineString":
+            pts = [to_px(p[0], p[1]) for p in geom["coordinates"]]
+            if len(pts) >= 2:
+                draw.line(pts, fill="#3d7ab8", width=1)
+
+    banner = "FICTION-ADAPTED VESSEL — IMAGINARY LAYOUT" if fiction else "CLASS REPRESENTATIVE — DECK PLAN"
+    draw.rectangle([(0, 0), (img_w, 52)], fill="#061018")
+    draw.text((24, 10), title[:70], fill=gold)
+    draw.text((24, 30), subtitle[:90], fill=hull_edge)
+    draw.text((24, img_h - 28), banner, fill="#88aacc")
+
+    img.save(out_path, format="PNG")
+
+
 def _tier_for(platform_id: str) -> str:
     if platform_id in ENTERPRISE_IDS:
         return "fiction_adapted"
@@ -133,12 +208,24 @@ def precompute_platform(platform_id: str) -> None:
 
     bounds = compute_view_bounds(geojson)
     manifest = build_manifest(platform_id, layout, tier, bounds)
+    labels = manifest.get("ship_class_label", platform_id)
+    bg_path = os.path.join(pdir, "deck_blueprint_bg.png")
+    _render_blueprint_background(
+        geojson,
+        bg_path,
+        title=labels,
+        subtitle=manifest.get("representative_of", "")[:90],
+        fiction=tier == "fiction_adapted",
+    )
     manifest_path = os.path.join(pdir, "deck_manifest.json")
     with open(manifest_path, "w", encoding="utf-8") as fh:
         json.dump(manifest, fh, indent=2, ensure_ascii=False)
         fh.write("\n")
 
-    print(f"  OK {platform_id} ({tier}) -> deck_graphics.geojson, deck_hull.png, deck_manifest.json")
+    print(
+        f"  OK {platform_id} ({tier}) -> deck_graphics.geojson, "
+        f"deck_hull.png, deck_blueprint_bg.png, deck_manifest.json",
+    )
 
 
 def write_deck_provenance_catalog() -> None:

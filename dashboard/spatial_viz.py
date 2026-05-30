@@ -1,6 +1,8 @@
 """Tactical Sensor Grid — ship-local deck plan (Plotly default; optional pydeck)."""
 from __future__ import annotations
 
+import base64
+import os
 from typing import Any
 
 import plotly.graph_objects as go
@@ -42,6 +44,43 @@ def footprint_caption(manifest: dict[str, Any]) -> str:
     return f"*{label}*"
 
 
+def _image_uri(path: str) -> str | None:
+    if not path or not os.path.isfile(path):
+        return None
+    with open(path, "rb") as fh:
+        data = base64.b64encode(fh.read()).decode("ascii")
+    return f"data:image/png;base64,{data}"
+
+
+def _add_blueprint_underlay(
+    fig: go.Figure,
+    bundle: PlatformBundle,
+    xmin: float,
+    xmax: float,
+    ymin: float,
+    ymax: float,
+) -> None:
+    """Historic / fiction-adapted class plate behind vector overlay."""
+    bg = bundle.blueprint_bg_path or bundle.hull_png_path
+    uri = _image_uri(bg) if bg else None
+    if not uri:
+        return
+    fig.add_layout_image(
+        dict(
+            source=uri,
+            xref="x",
+            yref="y",
+            x=xmin,
+            y=ymin,
+            sizex=xmax - xmin,
+            sizey=ymax - ymin,
+            sizing="stretch",
+            opacity=0.92,
+            layer="below",
+        )
+    )
+
+
 def _plotly_rgba(fraction: float) -> str:
     if fraction <= 0.01:
         return "rgba(26,26,46,0.75)"
@@ -68,6 +107,8 @@ def _build_plotly_deck_map(
     metrics = collect_zone_metrics(record, bundle, color_mode, deck_filter)
     scale_max = color_scale_max(metrics)
 
+    _add_blueprint_underlay(fig, bundle, xmin, xmax, ymin, ymax)
+
     for kind, ring in iter_hull_rings(bundle):
         xs = [p[0] for p in ring] + [ring[0][0]]
         ys = [p[1] for p in ring] + [ring[0][1]]
@@ -79,21 +120,32 @@ def _build_plotly_deck_map(
                 showlegend=False,
             ))
             continue
-        fig.add_trace(go.Scatter(
-            x=xs, y=ys, mode="lines",
-            line={"color": LCARS_GOLD, "width": 4},
-            fill="toself",
-            fillcolor="rgba(0,0,0,0)",
-            hoverinfo="skip",
-            showlegend=False,
-            name="hull",
-        ))
-        fig.add_trace(go.Scatter(
-            x=xs, y=ys, mode="lines",
-            line={"color": "rgba(255,153,0,0.25)", "width": 8},
-            hoverinfo="skip",
-            showlegend=False,
-        ))
+        if bundle.blueprint_bg_path:
+            fig.add_trace(go.Scatter(
+                x=xs, y=ys, mode="lines",
+                line={"color": LCARS_GOLD, "width": 2.5},
+                fill="toself",
+                fillcolor="rgba(0,0,0,0)",
+                hoverinfo="skip",
+                showlegend=False,
+                name="hull",
+            ))
+        else:
+            fig.add_trace(go.Scatter(
+                x=xs, y=ys, mode="lines",
+                line={"color": LCARS_GOLD, "width": 4},
+                fill="toself",
+                fillcolor="rgba(0,0,0,0)",
+                hoverinfo="skip",
+                showlegend=False,
+                name="hull",
+            ))
+            fig.add_trace(go.Scatter(
+                x=xs, y=ys, mode="lines",
+                line={"color": "rgba(255,153,0,0.25)", "width": 8},
+                hoverinfo="skip",
+                showlegend=False,
+            ))
 
     for path in iter_hvac_paths(bundle, deck_filter):
         fig.add_trace(go.Scatter(
@@ -174,6 +226,12 @@ def render_tactical_grid(
         return
 
     st.caption(footprint_caption(bundle.manifest))
+    if not bundle.blueprint_bg_path:
+        st.warning(
+            "Class blueprint plate missing. Re-run "
+            "`python scripts/precompute_deck_assets.py` (also run automatically from "
+            "`run_dashboard.bat`)."
+        )
 
     decks = sorted({z.get("deck", "main") for z in bundle.layout.get("zones", [])})
     deck_options = ["All Decks"] + decks
@@ -196,15 +254,22 @@ def render_tactical_grid(
             key="deck_color",
         )
     with c3:
-        deck_filter = st.selectbox("Deck", deck_options, key="deck_filter")
-        renderer = st.radio(
-            "Tactical renderer",
-            ["plotly", "pydeck"],
-            index=0,
-            horizontal=True,
-            key="deck_renderer",
-            help="Plotly uses ship meters (recommended). Pydeck uses orthographic local coords.",
-        )
+        st.caption("Deck level (vessel class locked)")
+        if len(deck_options) <= 8:
+            deck_filter = st.radio(
+                "Deck level",
+                deck_options,
+                horizontal=True,
+                key="deck_filter",
+                label_visibility="collapsed",
+            )
+        else:
+            deck_filter = st.selectbox(
+                "Deck level",
+                deck_options,
+                key="deck_filter",
+                label_visibility="collapsed",
+            )
 
     record = history[selected_epoch]
     st.markdown(_lcars_alert_banner(record["trigger_status"]), unsafe_allow_html=True)
@@ -217,31 +282,16 @@ def render_tactical_grid(
         f"full hull stays readable."
     )
 
-    if bundle.hull_png_path:
-        st.image(
-            bundle.hull_png_path,
-            caption=f"{bundle.manifest.get('ship_class_label', '')} — class silhouette",
-            use_container_width=True,
-        )
-
     fig = _build_plotly_deck_map(record, bundle, color_mode, deck_filter)
+    st.plotly_chart(fig, use_container_width=True)
 
-    if renderer == "pydeck":
-        deck_obj = build_pydeck_deck(
-            bundle, record, bundle.manifest, color_mode, deck_filter,
-        )
-        if deck_obj is not None:
-            st.pydeck_chart(
-                deck_obj,
-                use_container_width=True,
-                height=520,
+    with st.expander("Advanced tactical display", expanded=False):
+        if st.checkbox("Use pydeck renderer (experimental)", value=False):
+            deck_obj = build_pydeck_deck(
+                bundle, record, bundle.manifest, color_mode, deck_filter,
             )
-            with st.expander("Plotly deck plan (same data)", expanded=False):
-                st.plotly_chart(fig, use_container_width=True)
-        else:
-            st.plotly_chart(fig, use_container_width=True)
-    else:
-        st.plotly_chart(fig, use_container_width=True)
+            if deck_obj is not None:
+                st.pydeck_chart(deck_obj, use_container_width=True, height=520)
 
     stoplights = record.get("reactive_protocols", {}).get("stoplights", {})
     if stoplights:

@@ -6,18 +6,28 @@ REM ─────────────────────────�
 
 cd /d "%~dp0"
 
-echo [1/2] Running orchestrator (24-epoch simulation)...
+echo [1/3] Preparing deck blueprint assets (class plates for tactical map)...
 set PYTHONIOENCODING=utf-8
-python orchestrator.py
+python scripts/precompute_deck_assets.py
 if %ERRORLEVEL% NEQ 0 (
-    echo ERROR: orchestrator.py failed. Make sure dependencies are installed:
-    echo   pip install pyyaml numpy streamlit plotly pandas
+    echo ERROR: precompute failed. Install dashboard dependencies:
+    echo   pip install -r requirements.txt
     pause
     exit /b 1
 )
 
 echo.
-echo [2/2] Launching Streamlit dashboard...
+echo [2/3] Running orchestrator (24-epoch simulation)...
+python orchestrator.py
+if %ERRORLEVEL% NEQ 0 (
+    echo ERROR: orchestrator.py failed. Make sure dependencies are installed:
+    echo   pip install -r requirements.txt
+    pause
+    exit /b 1
+)
+
+echo.
+echo [3/3] Launching Streamlit dashboard...
 echo Dashboard will open at http://localhost:8501
 echo Press Ctrl+C to stop.
 echo.

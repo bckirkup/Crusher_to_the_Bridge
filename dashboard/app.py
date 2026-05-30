@@ -14,7 +14,6 @@ from dashboard.charts import (
 from dashboard.fleet_viz import render_fleet_operations
 from dashboard.loaders import (
     default_telemetry_dir,
-    list_platform_ids,
     load_history_from,
     load_notebook_from,
     load_platform_bundle,
@@ -63,9 +62,17 @@ def _detection_label(method: str) -> str:
         "fingerprint": "matched telemetry zones",
         "config": "crusher_labs/config.yaml",
         "picard_spec": "Picard run spec",
-        "manual": "operator override",
+        "manual": "environment override",
         "default": "catalog default",
     }.get(method, method)
+
+
+def _locked_platform_id(history: list) -> tuple[str, str]:
+    """Single source of truth for vessel class — no UI picker."""
+    env_override = os.environ.get("CTTB_PLATFORM_OVERRIDE", "").strip()
+    if env_override:
+        return env_override, "manual"
+    return resolve_platform_id(history)
 
 
 def main() -> None:
@@ -80,8 +87,6 @@ def main() -> None:
     hist_path, nb_path = telemetry_paths(tel_dir)
     history = load_history_from(hist_path)
     notebook = load_notebook_from(nb_path)
-
-    platform_ids = list_platform_ids()
 
     with st.sidebar:
         st.markdown(
@@ -102,39 +107,26 @@ def main() -> None:
             notebook = load_notebook_from(nb_path)
             tel_dir = tel_dir_input
 
-        auto_pid, detect_method = resolve_platform_id(history)
-        auto_bundle = load_platform_bundle(auto_pid)
-        ship_label = auto_bundle.manifest.get("ship_class_label", auto_pid)
+        active_pid, detect_method = _locked_platform_id(history)
+        bundle = load_platform_bundle(active_pid)
+        ship_label = bundle.manifest.get("ship_class_label", active_pid)
 
         st.markdown(
-            _lcars_banner(
-                f"Vessel: {ship_label}",
-                LCARS_GOLD,
-            ),
+            _lcars_banner(f"LOCKED VESSEL CLASS<br>{ship_label}", LCARS_GOLD),
             unsafe_allow_html=True,
         )
         st.caption(
-            f"Auto-detected **{auto_pid}** ({_detection_label(detect_method)})."
+            f"**{active_pid}** — {_detection_label(detect_method)}. "
+            "Deck plan and tactical map follow this class automatically."
         )
 
-        with st.expander("Override vessel class", expanded=False):
-            override_pid = st.selectbox(
-                "Manual platform",
-                platform_ids,
-                index=platform_ids.index(auto_pid) if auto_pid in platform_ids else 0,
-                key="platform_override_select",
+        if bundle.blueprint_bg_path:
+            st.image(
+                bundle.blueprint_bg_path,
+                caption="Class blueprint plate",
+                use_container_width=True,
             )
-            use_override = st.checkbox(
-                "Use manual override",
-                value=False,
-                key="platform_use_override",
-            )
-        active_pid = override_pid if use_override else auto_pid
-        if use_override and override_pid != auto_pid:
-            st.warning(f"Showing **{override_pid}** (telemetry suggests **{auto_pid}**).")
-
-        bundle = load_platform_bundle(active_pid)
-        if bundle.hull_png_path:
+        elif bundle.hull_png_path:
             st.image(bundle.hull_png_path, use_container_width=True)
 
         if history:
@@ -161,7 +153,7 @@ def main() -> None:
 
     if not history:
         st.error(
-            "No sensor telemetry found. Run `python3 orchestrator.py` "
+            "No sensor telemetry found. Run `python orchestrator.py` "
             "or point Telemetry directory at a Presidio cruise folder."
         )
         return
@@ -180,7 +172,7 @@ def main() -> None:
     )
     st.markdown(
         f"<span style='color:{LCARS_PEACH};font-size:13px;'>"
-        f"Deck plan: **{bundle.platform_id}** — {desc}</span>",
+        f"Locked deck plan: **{bundle.platform_id}** — {desc}</span>",
         unsafe_allow_html=True,
     )
 
