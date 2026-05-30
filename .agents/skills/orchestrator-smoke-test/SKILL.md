@@ -18,7 +18,7 @@ None — the orchestrator runs locally against bundled config and data files.
 
 ### Run the default 24-epoch smoke test
 ```bash
-python orchestrator.py
+python3 orchestrator.py  # delegates to picard_framework.ShipSimulation
 ```
 Expected: Completes 24 epochs with no exceptions. Prints `CRUSHER TO THE BRIDGE` banner, per-epoch progress, infection counter readouts, and an executive summary at the end.
 
@@ -80,3 +80,6 @@ streamlit run dashboard.py
 - **ModuleNotFoundError**: Ensure `PYTHONPATH` includes the repo root, or run from the repo root.
 - **FileNotFoundError on spatial_layout.json**: Verify the platform path in `crusher_labs/config.yaml` points to a valid `data/platforms/<platform>/` directory.
 - **numpy/pydantic not found**: Run `pip install -r requirements.txt`.
+
+
+Picard programmatic equivalent: see `.agents/skills/picard-ship-simulation/SKILL.md`.

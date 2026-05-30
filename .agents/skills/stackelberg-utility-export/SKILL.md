@@ -59,3 +59,13 @@ python3 -m pytest tests/test_stackelberg.py -v
 ```
 
 Schema: `schemas/utility_observation_bundle.schema.json`
+
+## Presidio CLI shortcuts
+
+```bash
+python3 presidio_runner.py \
+  --fleet-config presidio/data/config/smoke_fleet.json \
+  --cruises 1 \
+  --export-utility-dir presidio/data/experiences/utility_bundles \
+  --import-actions-dir presidio/data/experiences/imported_actions
+```

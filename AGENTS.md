@@ -2,22 +2,57 @@
 
 ## Cursor Cloud specific instructions
 
-This is a pure-Python simulation project with no external services (no databases, Docker, or network APIs). Python 3.11+ is required.
+Pure-Python simulation (no databases, Docker, or external APIs). **Python 3.11+** required.
 
 ### Running services
 
 | Service | Command | Notes |
 |---------|---------|-------|
-| Orchestrator simulation | `python3 orchestrator.py` | Runs 24 epochs by default; override with `--epochs N` |
-| Streamlit dashboard | `python3 -m streamlit run dashboard.py --server.headless true` | Requires simulation output in `telemetry_buffer/` |
-| Sanity checker | `python3 tools/sanity_checker.py --from-config` | Validates all JSON configs + `crusher_labs/config.yaml` |
-| Test suite | `python3 -m pytest tests/ -v --tb=short` | 259 tests, runs in ~2s |
+| Ship simulation (legacy CLI) | `python3 orchestrator.py` | Delegates to Picard `ShipSimulation`; 24 epochs default |
+| Picard programmatic API | See `OPERATORS_MANUAL_SHIP.md` | `PicardRunSpec` + `ShipSimulation` |
+| Fleet meta-simulation | `python3 presidio_runner.py --fleet-config presidio/data/config/smoke_fleet.json --cruises 1` | Fast smoke; default fleet is slower |
+| Utility export (external optimizer) | `python3 presidio_runner.py --export-utility-dir presidio/data/experiences/utility_bundles` | Requires `social` block on run spec |
+| Action import (external optimizer) | `python3 presidio_runner.py --import-actions-dir <dir>` | Per-epoch `cruise_*_epoch_*_actions.json` |
+| Streamlit dashboard | `python3 -m streamlit run dashboard.py --server.headless true` | Run orchestrator first for telemetry |
+| Sanity checker | `python3 tools/sanity_checker.py --from-config` | Ship + fleet + Stackelberg social configs |
+| Full test suite | `python3 -m pytest tests/ -v --tb=short` | ~298 tests, ~3s |
+
+### Framework layout
+
+| Path | Role |
+|------|------|
+| `picard_framework/` | Ship run spec, catalog, `ShipSimulation` |
+| `decision_engine/` | Policies, Stackelberg round, diffusion, utility I/O |
+| `presidio/` + `presidio_runner.py` | Fleet cruises, experience store, economics |
+| `orchestrator*.py` | Legacy epoch helpers used by Picard |
+
+### Operator manuals
+
+- Ship / Picard: `OPERATORS_MANUAL_SHIP.md`
+- Fleet / Stackelberg: `OPERATORS_MANUAL_GAME_THEORY.md`
+- Full legacy reference: `OPERATORS_MANUAL.md`
+
+### CI (replicate locally)
+
+**Main** (`.github/workflows/ci.yml` on `main` PRs): sanity checker → full pytest → Picard/Presidio import hygiene → Presidio smoke → orchestrator import hygiene → dashboard import → 24-epoch `orchestrator.py`.
+
+**Picard/Presidio** (`.github/workflows/picard-presidio.yml`): focused framework tests + Stackelberg schema validation + Presidio smoke.
+
+### Agent skills
+
+| Skill | Use when |
+|-------|----------|
+| `picard-ship-simulation` | `picard_framework/`, `ShipSimulation` |
+| `presidio-fleet-run` | `presidio_runner.py`, fleet configs |
+| `stackelberg-utility-export` | Social config, utility bundles, action import |
+| `testing-picard-presidio` | Before PRs on framework code |
+| `configuring-stackelberg-social` | Adding/editing diffusion, class interactions, profiles |
+| `run-full-test-suite` | Any pre-PR validation |
 
 ### Important caveats
 
-- Use `python3` (not `python`) — the VM does not alias `python` to `python3`.
-- The dashboard reads from `telemetry_buffer/simulation_history.json` and `telemetry_buffer/artificial_lab_notebook.json`. Run the orchestrator first to generate these files.
-- All standard commands are documented in the README Quick Start section and `.github/workflows/ci.yml`.
-- The CI workflow validates: sanity checker → pytest → import hygiene → dashboard import → 24-epoch run. See also `.github/workflows/picard-presidio.yml`.
-- Picard ship docs: `OPERATORS_MANUAL_SHIP.md`. Presidio / game theory: `OPERATORS_MANUAL_GAME_THEORY.md`.
-- No linter (flake8/ruff/pylint) is configured in the repo; validation is done via `sanity_checker.py` and the test suite.
+- Use `python3` (not `python`) on Linux cloud VMs.
+- Dashboard reads `telemetry_buffer/simulation_history.json` and `telemetry_buffer/artificial_lab_notebook.json`.
+- **Law 1:** No hardcoded epoch SOP schedules; Stackelberg `authorize_sop_subset` only filters stoplight-eligible SOPs.
+- Utility **weights and optimization** are out-of-repo; only feature export and action apply are in-repo.
+- No flake8/ruff in repo; use `sanity_checker.py` and pytest.

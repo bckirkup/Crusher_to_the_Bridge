@@ -14,6 +14,21 @@ definitions for all data contracts used in the Crusher-to-the-Bridge platform.
 | `resource_costs.schema.json` | Budget, inventory, costs | `data/config/resource_costs.json` |
 | `logging_profile.schema.json` | Fidelity tier configuration | `data/config/logging_profile.json` |
 
+
+## Picard / Presidio / Stackelberg Schemas
+
+| File | Validates | Path |
+|------|-----------|------|
+| `picard_run_spec.schema.json` | Picard cruise run spec | `picard_framework/runs/*.json` |
+| `presidio_fleet_config.schema.json` | Presidio fleet config | `presidio/data/config/*.json` |
+| `presidio_fleet_economics.schema.json` | Fleet reward weights | `presidio/data/economics/fleet_economics.json` |
+| `information_diffusion.schema.json` | Belief propagation params | `presidio/data/social/information_diffusion_default.json` |
+| `class_interactions.schema.json` | Class-pair zone weights | `presidio/data/social/class_interactions_default.json` |
+| `global_health_briefing.schema.json` | Epoch briefings | `presidio/data/intelligence/global_health_timeline.json` |
+| `agent_profile.schema.json` | Agent profile bundle | `picard_framework/data/agent_profiles/*.json` |
+| `utility_observation_bundle.schema.json` | Exported utility JSON | External optimizer input |
+| `decision_action.schema.json` | Action envelopes | External optimizer output |
+
 ## Output Schemas
 
 | File | Validates | Path |
