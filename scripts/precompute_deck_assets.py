@@ -24,10 +24,6 @@ from deck_footprint_builder import (  # noqa: E402
     build_representative_geojson,
     compute_view_bounds,
 )
-from enterprise_deck_graphics import (  # noqa: E402
-    constitution_tos_geojson,
-    galaxy_tng_geojson,
-)
 
 PLATFORMS = [
     "destroyer_baseline",
@@ -85,6 +81,8 @@ def _render_hull_png(geojson: dict[str, Any], out_path: str) -> None:
             pts = [to_px(p[0], p[1]) for p in geom["coordinates"][0]]
             if kind == "hull_outline":
                 draw.polygon(pts, outline=gold, width=3)
+            elif kind == "hull_waterline":
+                draw.polygon(pts, outline="#9999FF", width=1)
             elif kind == "compartment":
                 draw.polygon(pts, fill=panel, outline=peach, width=1)
         elif geom.get("type") == "LineString" and kind == "hvac_path":
@@ -115,14 +113,14 @@ def precompute_platform(platform_id: str) -> None:
     airflow = _load_json(airflow_path) if os.path.isfile(airflow_path) else {}
     tier = _tier_for(platform_id)
 
-    if platform_id == "enterprise_galaxy_tng":
-        geojson = galaxy_tng_geojson()
-    elif platform_id == "enterprise_constitution_tos":
-        geojson = constitution_tos_geojson()
+    if platform_id in ENTERPRISE_IDS:
+        geojson = build_representative_geojson(platform_id, layout, airflow)
     elif tier == "gis_traced":
         from geojson_deck_emit import emit_from_geojson_file
 
-        geojson = emit_from_geojson_file(GIS_SOURCES[platform_id], platform_id)
+        geojson = emit_from_geojson_file(
+            GIS_SOURCES[platform_id], platform_id, layout,
+        )
     else:
         geojson = build_representative_geojson(platform_id, layout, airflow)
 

@@ -24,10 +24,10 @@
     "Mess_Hall"
   ],
   "view_bounds": {
-    "xmin": 3.0,
-    "xmax": 127.0,
-    "ymin": -2.0,
-    "ymax": 51.0
+    "xmin": 6.5600000000000005,
+    "xmax": 270.88,
+    "ymin": -1.3708260088912256,
+    "ymax": 112.95
   },
   "assets": {
     "deck_graphics": "deck_graphics.geojson",

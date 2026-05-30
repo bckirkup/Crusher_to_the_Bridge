@@ -30,9 +30,9 @@
   ],
   "view_bounds": {
     "xmin": 5.192,
-    "xmax": 126.03,
-    "ymin": -3.6799999999999997,
-    "ymax": 20.7
+    "xmax": 127.304,
+    "ymin": -3.3499999999999996,
+    "ymax": 20.64
   },
   "assets": {
     "deck_graphics": "deck_graphics.geojson",

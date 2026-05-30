@@ -90,45 +90,75 @@ def _platform_from_picard_spec(spec_path: str) -> str | None:
     return str(pid) if pid else None
 
 
-def _fingerprint_platform(space_keys: set[str]) -> str | None:
+def _zone_ids_for_platform(pid: str) -> set[str]:
+    mpath = os.path.join(platform_dir(pid), "deck_manifest.json")
+    manifest = _load_json(mpath)
+    zone_ids = set(manifest.get("zone_ids") or [])
+    if not zone_ids:
+        layout = _load_json(os.path.join(platform_dir(pid), "spatial_layout.json"))
+        zone_ids = {z["id"] for z in layout.get("zones", [])}
+    return zone_ids
+
+
+def fingerprint_platform(space_keys: set[str]) -> tuple[str | None, str]:
+    """Return (platform_id, method) — exact zone match preferred over Jaccard."""
+    if not space_keys:
+        return None, "none"
+
     best_id: str | None = None
-    best_score = -1
+    best_jaccard = -1.0
+
     for pid in list_platform_ids():
-        mpath = os.path.join(platform_dir(pid), "deck_manifest.json")
-        manifest = _load_json(mpath)
-        zone_ids = set(manifest.get("zone_ids") or [])
-        if not zone_ids:
-            layout = _load_json(os.path.join(platform_dir(pid), "spatial_layout.json"))
-            zone_ids = {z["id"] for z in layout.get("zones", [])}
+        zone_ids = _zone_ids_for_platform(pid)
         if not zone_ids:
             continue
-        overlap = len(space_keys & zone_ids)
-        if overlap > best_score:
-            best_score = overlap
+        if space_keys == zone_ids:
+            return pid, "exact"
+        if space_keys <= zone_ids and len(space_keys) >= max(3, len(zone_ids) // 2):
+            return pid, "subset"
+        union = len(space_keys | zone_ids)
+        if union == 0:
+            continue
+        jaccard = len(space_keys & zone_ids) / union
+        if jaccard > best_jaccard:
+            best_jaccard = jaccard
             best_id = pid
-    return best_id if best_score > 0 else None
+
+    if best_id and best_jaccard >= 0.45:
+        return best_id, "fingerprint"
+    return None, "none"
 
 
 def resolve_platform_id(
     history: list[dict[str, Any]],
     override: str | None = None,
     picard_spec_path: str | None = None,
-) -> str:
+) -> tuple[str, str]:
+    """Return (platform_id, detection_method)."""
     if override:
-        return override
+        return override, "manual"
     if history:
         spaces = history[-1].get("spaces", {})
-        fp = _fingerprint_platform(set(spaces.keys()))
-        if fp:
-            return fp
+        pid, method = fingerprint_platform(set(spaces.keys()))
+        if pid:
+            return pid, method
     cfg_pid = _platform_from_config()
     if cfg_pid:
-        return cfg_pid
+        return cfg_pid, "config"
     spec = picard_spec_path or os.environ.get("CTTB_PICARD_SPEC", DEFAULT_PICARD_SPEC)
     pic_pid = _platform_from_picard_spec(spec)
     if pic_pid:
-        return pic_pid
-    return "destroyer_baseline"
+        return pic_pid, "picard_spec"
+    return "destroyer_baseline", "default"
+
+
+def resolve_platform_id_simple(
+    history: list[dict[str, Any]],
+    override: str | None = None,
+    picard_spec_path: str | None = None,
+) -> str:
+    pid, _ = resolve_platform_id(history, override, picard_spec_path)
+    return pid
 
 
 def load_platform_bundle(platform_id: str) -> PlatformBundle:

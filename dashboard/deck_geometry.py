@@ -1,10 +1,16 @@
 """Ship-local deck geometry and contamination metrics (meters, not lat/lon)."""
 from __future__ import annotations
 
-import math
+import os
+import sys
 from typing import Any, Iterator
 
 from dashboard.loaders import PlatformBundle
+
+_SCRIPTS = os.path.join(os.path.dirname(os.path.dirname(__file__)), "scripts")
+if _SCRIPTS not in sys.path:
+    sys.path.insert(0, _SCRIPTS)
+from blueprint_shapes import blueprint_compartment  # noqa: E402
 
 
 def zone_metric(record: dict[str, Any], zone_id: str, color_mode: str) -> float:
@@ -61,36 +67,23 @@ def metric_fraction(value: float, scale_max: float) -> float:
     return min(1.0, max(0.0, value / scale_max))
 
 
-def _rect_ring(cx: float, cy: float, w: float, h: float) -> list[list[float]]:
-    hw, hh = w / 2, h / 2
-    return [
-        [cx - hw, cy - hh],
-        [cx + hw, cy - hh],
-        [cx + hw, cy + hh],
-        [cx - hw, cy + hh],
-    ]
-
-
 def _zone_ring(zinfo: dict[str, Any]) -> list[list[float]]:
-    vol = float(zinfo.get("volume_m3", 100))
-    ztype = zinfo.get("type", "Free")
-    side = max(3.0, math.sqrt(vol) * 0.35)
-    if ztype == "Dining":
-        w, h = side * 1.35, side * 0.9
-    elif ztype == "Room":
-        w, h = side * 1.1, side * 1.1
-    else:
-        w, h = side, side * 0.85
-    return _rect_ring(float(zinfo["x"]), float(zinfo["y"]), w, h)
+    return blueprint_compartment(
+        float(zinfo["x"]),
+        float(zinfo["y"]),
+        float(zinfo.get("volume_m3", 100)),
+        zinfo.get("type", "Free"),
+    )
 
 
-def iter_hull_rings(bundle: PlatformBundle) -> Iterator[list[list[float]]]:
+def iter_hull_rings(bundle: PlatformBundle) -> Iterator[tuple[str, list[list[float]]]]:
     for feat in bundle.deck_graphics.get("features", []):
-        if feat.get("properties", {}).get("kind") != "hull_outline":
+        kind = feat.get("properties", {}).get("kind", "")
+        if kind not in ("hull_outline", "hull_waterline"):
             continue
         geom = feat.get("geometry", {})
         if geom.get("type") == "Polygon" and geom.get("coordinates"):
-            yield geom["coordinates"][0]
+            yield kind, geom["coordinates"][0]
 
 
 def iter_compartment_rings(

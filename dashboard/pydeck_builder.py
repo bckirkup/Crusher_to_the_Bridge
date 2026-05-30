@@ -59,12 +59,20 @@ def build_pydeck_deck(
         return None
 
     hull_paths: list[dict[str, Any]] = []
-    for ring in iter_hull_rings(bundle):
-        hull_paths.append({
-            "path": ring + [ring[0]] if ring else ring,
-            "color": [255, 153, 0, 255],
-            "width": 8,
-        })
+    for kind, ring in iter_hull_rings(bundle):
+        closed = ring + [ring[0]] if ring and ring[0] != ring[-1] else ring
+        if kind == "hull_waterline":
+            hull_paths.append({
+                "path": closed,
+                "color": [153, 153, 255, 120],
+                "width": 2,
+            })
+        else:
+            hull_paths.append({
+                "path": closed,
+                "color": [255, 153, 0, 255],
+                "width": 6,
+            })
 
     hvac_paths: list[dict[str, Any]] = []
     for path in iter_hvac_paths(bundle, deck_filter):

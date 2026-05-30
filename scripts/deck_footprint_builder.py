@@ -3,139 +3,17 @@
 from __future__ import annotations
 
 import json
-import math
 import os
 from typing import Any
 
+from blueprint_shapes import (
+    HULL_FAMILY,
+    blueprint_compartment,
+    hull_feature,
+    hull_waterline_feature,
+)
+
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-HULL_FAMILY = {
-    "destroyer_baseline": "naval_surface_combatant",
-    "fletcher_class_destroyer": "naval_surface_combatant",
-    "legend_class_nsc": "coast_guard",
-    "san_antonio_class_lpd": "naval_amphib",
-    "expedition_cruise_300": "cruise_small",
-    "mega_cruise_5000": "cruise_large",
-    "enterprise_constitution_tos": "starship_constitution",
-    "enterprise_galaxy_tng": "starship_galaxy",
-}
-
-
-def _rect_polygon(cx: float, cy: float, w: float, h: float) -> list[list[float]]:
-    hw, hh = w / 2, h / 2
-    return [
-        [cx - hw, cy - hh],
-        [cx + hw, cy - hh],
-        [cx + hw, cy + hh],
-        [cx - hw, cy + hh],
-        [cx - hw, cy - hh],
-    ]
-
-
-def _zone_size(volume_m3: float, zone_type: str) -> tuple[float, float]:
-    side = max(4.0, math.sqrt(volume_m3) * 0.35)
-    if zone_type == "Dining":
-        return side * 1.4, side * 0.9
-    if zone_type == "Room":
-        return side * 1.1, side * 1.1
-    if zone_type == "Engineering" or zone_type == "Room":
-        return side * 1.2, side * 1.0
-    return side, side * 0.85
-
-
-def _hull_outline(family: str, length_m: float, beam_m: float) -> list[list[float]]:
-    L, B = length_m, beam_m
-    if family == "cruise_large":
-        return [
-            [L * 0.02, B * 0.35],
-            [L * 0.15, B * 0.08],
-            [L * 0.55, B * 0.05],
-            [L * 0.88, B * 0.12],
-            [L * 0.98, B * 0.35],
-            [L * 0.95, B * 0.65],
-            [L * 0.75, B * 0.92],
-            [L * 0.35, B * 0.95],
-            [L * 0.08, B * 0.85],
-            [L * 0.02, B * 0.35],
-        ]
-    if family == "cruise_small":
-        return [
-            [L * 0.05, B * 0.4],
-            [L * 0.2, B * 0.1],
-            [L * 0.75, B * 0.08],
-            [L * 0.95, B * 0.35],
-            [L * 0.9, B * 0.7],
-            [L * 0.5, B * 0.92],
-            [L * 0.1, B * 0.8],
-            [L * 0.05, B * 0.4],
-        ]
-    if family == "naval_amphib":
-        return [
-            [L * 0.05, B * 0.25],
-            [L * 0.35, B * 0.05],
-            [L * 0.75, B * 0.08],
-            [L * 0.95, B * 0.3],
-            [L * 0.92, B * 0.75],
-            [L * 0.55, B * 0.95],
-            [L * 0.15, B * 0.88],
-            [L * 0.05, B * 0.25],
-        ]
-    if family == "coast_guard":
-        return [
-            [L * 0.08, B * 0.3],
-            [L * 0.25, B * 0.08],
-            [L * 0.8, B * 0.1],
-            [L * 0.95, B * 0.4],
-            [L * 0.88, B * 0.78],
-            [L * 0.4, B * 0.92],
-            [L * 0.08, B * 0.3],
-        ]
-    if family == "starship_galaxy":
-        return [
-            [L * 0.35, B * 0.02],
-            [L * 0.75, B * 0.05],
-            [L * 0.95, B * 0.25],
-            [L * 0.92, B * 0.55],
-            [L * 0.7, B * 0.75],
-            [L * 0.45, B * 0.82],
-            [L * 0.15, B * 0.7],
-            [L * 0.05, B * 0.45],
-            [L * 0.08, B * 0.2],
-            [L * 0.2, B * 0.05],
-            [L * 0.35, B * 0.02],
-            [L * 0.12, B * 0.55],
-            [L * 0.08, B * 0.75],
-            [L * 0.02, B * 0.5],
-            [L * 0.05, B * 0.35],
-            [L * 0.35, B * 0.02],
-        ]
-    if family == "starship_constitution":
-        return [
-            [L * 0.4, B * 0.05],
-            [L * 0.85, B * 0.12],
-            [L * 0.95, B * 0.35],
-            [L * 0.88, B * 0.65],
-            [L * 0.55, B * 0.88],
-            [L * 0.2, B * 0.82],
-            [L * 0.05, B * 0.5],
-            [L * 0.15, B * 0.15],
-            [L * 0.4, B * 0.05],
-            [L * 0.25, B * 0.55],
-            [L * 0.08, B * 0.7],
-            [L * 0.02, B * 0.45],
-            [L * 0.4, B * 0.05],
-        ]
-    # naval_surface_combatant default
-    return [
-        [L * 0.05, B * 0.45],
-        [L * 0.2, B * 0.12],
-        [L * 0.75, B * 0.08],
-        [L * 0.95, B * 0.35],
-        [L * 0.92, B * 0.7],
-        [L * 0.6, B * 0.88],
-        [L * 0.2, B * 0.85],
-        [L * 0.05, B * 0.45],
-    ]
 
 
 def build_representative_geojson(
@@ -147,16 +25,11 @@ def build_representative_geojson(
     dims = layout.get("deck_dimensions", {}) or {}
     length_m = float(dims.get("length_m", 120))
     beam_m = float(dims.get("beam_m", 15))
-    family = HULL_FAMILY.get(platform_id, "naval_surface_combatant")
 
-    features: list[dict[str, Any]] = []
-
-    hull_ring = _hull_outline(family, length_m, beam_m)
-    features.append({
-        "type": "Feature",
-        "properties": {"kind": "hull_outline", "platform_id": platform_id},
-        "geometry": {"type": "Polygon", "coordinates": [hull_ring]},
-    })
+    features: list[dict[str, Any]] = [
+        hull_feature(platform_id, length_m, beam_m),
+        hull_waterline_feature(platform_id, length_m, beam_m),
+    ]
 
     for zone in layout.get("zones", []):
         zid = zone["id"]
@@ -165,8 +38,7 @@ def build_representative_geojson(
         cy = float(display.get("y", 0))
         vol = float(zone.get("volume_m3", 100))
         ztype = zone.get("type", "Free")
-        w, h = _zone_size(vol, ztype)
-        ring = _rect_polygon(cx, cy, w, h)
+        ring = blueprint_compartment(cx, cy, vol, ztype)
         features.append({
             "type": "Feature",
             "properties": {
@@ -178,9 +50,9 @@ def build_representative_geojson(
             "geometry": {"type": "Polygon", "coordinates": [ring]},
         })
 
+    zmap = {z["id"]: z for z in layout.get("zones", [])}
     for link in airflow.get("adjacency", []):
         fz, tz = link.get("from"), link.get("to")
-        zmap = {z["id"]: z for z in layout.get("zones", [])}
         if fz not in zmap or tz not in zmap:
             continue
         fxy = zmap[fz].get("display", {})

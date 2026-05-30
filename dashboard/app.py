@@ -23,7 +23,6 @@ from dashboard.loaders import (
     telemetry_paths,
 )
 from dashboard.paths import (
-    CONFIG_YAML,
     DEFAULT_FLEET_OUTPUT,
     PATHOGEN_PATH,
     PROTOCOLS_PATH,
@@ -35,7 +34,9 @@ from dashboard.theme import (
     LCARS_BG,
     LCARS_CSS,
     LCARS_GOLD,
+    LCARS_PEACH,
     _lcars_alert_banner,
+    _lcars_banner,
 )
 
 
@@ -55,6 +56,18 @@ def _load_protocols() -> dict:
         return json.load(fh)
 
 
+def _detection_label(method: str) -> str:
+    return {
+        "exact": "matched simulation zones",
+        "subset": "matched simulation zones",
+        "fingerprint": "matched telemetry zones",
+        "config": "crusher_labs/config.yaml",
+        "picard_spec": "Picard run spec",
+        "manual": "operator override",
+        "default": "catalog default",
+    }.get(method, method)
+
+
 def main() -> None:
     st.set_page_config(
         page_title="USS Crusher — Main Bridge Display",
@@ -69,9 +82,6 @@ def main() -> None:
     notebook = load_notebook_from(nb_path)
 
     platform_ids = list_platform_ids()
-    default_pid = resolve_platform_id(history) if history else (
-        platform_ids[0] if platform_ids else "destroyer_baseline"
-    )
 
     with st.sidebar:
         st.markdown(
@@ -92,25 +102,40 @@ def main() -> None:
             notebook = load_notebook_from(nb_path)
             tel_dir = tel_dir_input
 
-        fp_pid = resolve_platform_id(history) if history else default_pid
-        idx = platform_ids.index(fp_pid) if fp_pid in platform_ids else 0
-        selected_platform = st.selectbox(
-            "Vessel class (platform)",
-            platform_ids,
-            index=idx,
-            key="platform_select",
-        )
-        if history and selected_platform != fp_pid:
-            st.warning(
-                f"Telemetry fingerprint suggests **{fp_pid}**; "
-                f"viewing **{selected_platform}**."
-            )
+        auto_pid, detect_method = resolve_platform_id(history)
+        auto_bundle = load_platform_bundle(auto_pid)
+        ship_label = auto_bundle.manifest.get("ship_class_label", auto_pid)
 
-        bundle = load_platform_bundle(selected_platform)
+        st.markdown(
+            _lcars_banner(
+                f"Vessel: {ship_label}",
+                LCARS_GOLD,
+            ),
+            unsafe_allow_html=True,
+        )
+        st.caption(
+            f"Auto-detected **{auto_pid}** ({_detection_label(detect_method)})."
+        )
+
+        with st.expander("Override vessel class", expanded=False):
+            override_pid = st.selectbox(
+                "Manual platform",
+                platform_ids,
+                index=platform_ids.index(auto_pid) if auto_pid in platform_ids else 0,
+                key="platform_override_select",
+            )
+            use_override = st.checkbox(
+                "Use manual override",
+                value=False,
+                key="platform_use_override",
+            )
+        active_pid = override_pid if use_override else auto_pid
+        if use_override and override_pid != auto_pid:
+            st.warning(f"Showing **{override_pid}** (telemetry suggests **{auto_pid}**).")
+
+        bundle = load_platform_bundle(active_pid)
         if bundle.hull_png_path:
             st.image(bundle.hull_png_path, use_container_width=True)
-        st.caption(bundle.manifest.get("ship_class_label", selected_platform))
-        st.caption(bundle.manifest.get("disclaimer", ""))
 
         if history:
             last = history[-1]
@@ -141,9 +166,8 @@ def main() -> None:
         )
         return
 
-    bundle = load_platform_bundle(selected_platform)
     ship_label = bundle.manifest.get("ship_class_label", bundle.platform_id)
-    desc = (bundle.layout.get("description") or "")[:80]
+    desc = (bundle.layout.get("description") or "")[:120]
 
     st.markdown(
         f"<div style='background:linear-gradient(90deg,{LCARS_GOLD},{LCARS_AMBER});"
@@ -154,8 +178,11 @@ def main() -> None:
         f"{ship_label}</span></div>",
         unsafe_allow_html=True,
     )
-    if desc:
-        st.caption(desc)
+    st.markdown(
+        f"<span style='color:{LCARS_PEACH};font-size:13px;'>"
+        f"Deck plan: **{bundle.platform_id}** — {desc}</span>",
+        unsafe_allow_html=True,
+    )
 
     pathogen_data = _load_pathogen_profiles()
     protocol_data = _load_protocols()

@@ -68,12 +68,20 @@ def _build_plotly_deck_map(
     metrics = collect_zone_metrics(record, bundle, color_mode, deck_filter)
     scale_max = color_scale_max(metrics)
 
-    for ring in iter_hull_rings(bundle):
+    for kind, ring in iter_hull_rings(bundle):
         xs = [p[0] for p in ring] + [ring[0][0]]
         ys = [p[1] for p in ring] + [ring[0][1]]
+        if kind == "hull_waterline":
+            fig.add_trace(go.Scatter(
+                x=xs, y=ys, mode="lines",
+                line={"color": "rgba(153,153,255,0.45)", "width": 1, "dash": "dot"},
+                hoverinfo="skip",
+                showlegend=False,
+            ))
+            continue
         fig.add_trace(go.Scatter(
             x=xs, y=ys, mode="lines",
-            line={"color": LCARS_GOLD, "width": 5},
+            line={"color": LCARS_GOLD, "width": 4},
             fill="toself",
             fillcolor="rgba(0,0,0,0)",
             hoverinfo="skip",
@@ -82,7 +90,7 @@ def _build_plotly_deck_map(
         ))
         fig.add_trace(go.Scatter(
             x=xs, y=ys, mode="lines",
-            line={"color": "rgba(255,153,0,0.35)", "width": 10},
+            line={"color": "rgba(255,153,0,0.25)", "width": 8},
             hoverinfo="skip",
             showlegend=False,
         ))
