@@ -360,7 +360,8 @@ def confine_agents(
         is_shedding = include_shedding and agent.get("shedding_rate", 0.0) > 0.0
         if not (is_symptomatic or is_shedding):
             continue
-        if syndromic.check_quarantine_compliance(aid, 0):
+        override = state.agent_behavioral_overrides.get(aid)
+        if syndromic.check_quarantine_compliance(aid, 0, behavioral_override=override):
             state.quarantined_ids.add(aid)
             state.compliance_log.append({
                 "epoch": epoch, "agent_id": aid,
@@ -394,7 +395,8 @@ def confine_all_agents(
             continue
         if agent.get("agent_class", "") in _exempt:
             continue
-        if syndromic.check_quarantine_compliance(aid, 0):
+        override = state.agent_behavioral_overrides.get(aid)
+        if syndromic.check_quarantine_compliance(aid, 0, behavioral_override=override):
             state.quarantined_ids.add(aid)
             state.compliance_log.append({
                 "epoch": epoch, "agent_id": aid,
@@ -463,6 +465,37 @@ def step_cost_accounting(
     ledger.debit_per_test(epoch, "clinical_rdt", n_sick, per_test)
     ledger.debit_per_test(epoch, "clinical_qpcr", n_sick, per_test)
     ledger.debit_per_test(epoch, "clinical_microbiology", n_sick, per_test)
+
+
+def step_operational_impact_accounting(
+    epoch: int,
+    state: SimulationState,
+    agents: list[dict[str, Any]],
+    merged_modifiers: dict[str, Any],
+    proto_ctx: Any,
+    zone_type_by_id: dict[str, str] | None = None,
+) -> None:
+    """Accumulate operational impact score from confinement and active modifiers."""
+    from crusher_labs.cost_ledger import compute_operational_impact
+
+    ledger = proto_ctx.cost_ledger
+    active_ids = proto_ctx.protocol_engine.get_active_protocols()
+    ois_delta, breakdown = compute_operational_impact(
+        agents=agents,
+        quarantined_ids=state.quarantined_ids,
+        isolated_ids=state.isolated_ids,
+        merged_modifiers=merged_modifiers,
+        active_protocol_ids=active_ids,
+        ois_weights=ledger.ois_weights,
+        zone_type_by_id=zone_type_by_id,
+    )
+    if ois_delta > 0:
+        ledger.accumulate_operational_impact(
+            epoch,
+            ois_delta,
+            source="operational_state",
+            breakdown=breakdown,
+        )
 
 
 def step_long_read_cost_accounting(

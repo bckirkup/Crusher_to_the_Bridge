@@ -77,6 +77,7 @@ from orchestrator_epoch import (
     step_quarantine_confinement,
     step_cost_accounting,
     step_long_read_cost_accounting,
+    step_operational_impact_accounting,
     compute_zone_microflora_shifts,
     step_wearable_monitoring,
     apply_surface_decontamination,
@@ -283,7 +284,11 @@ def run() -> None:
             cfg=cfg,
         )
         reset_modifiers(contam_engine, tx_core, proto_ctx.original_filter_eff)
-        active_mods = proto_ctx.protocol_engine.evaluate_epoch(epoch, stoplights)
+        active_mods = proto_ctx.protocol_engine.evaluate_epoch(
+            epoch,
+            stoplights,
+            forced_protocol_ids=state.forced_protocol_ids,
+        )
         merged_mods = proto_ctx.protocol_engine.get_merged_modifiers(active_mods)
 
         if merged_mods:
@@ -317,6 +322,10 @@ def run() -> None:
         counter_results = compute_infection_counters(agents, counter_defs)
         step_counter_thresholds(
             epoch, agents, counter_results, counter_defs, state, syndromic,
+        )
+
+        step_operational_impact_accounting(
+            epoch, state, agents, merged_mods, proto_ctx, zone_type_by_id=zone_types,
         )
 
         epoch_cost = proto_ctx.cost_ledger.get_epoch_summary(epoch)

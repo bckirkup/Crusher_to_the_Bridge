@@ -21,6 +21,7 @@ from decision_engine.lived_experience import AgentLivedExperienceStore
 from decision_engine.social.class_interactions import ClassInteractionMatrix
 from decision_engine.social.contact_graph import ContactGraphBuilder
 from decision_engine.intelligence import default_timeline_path, load_global_health_timeline
+from decision_engine.policy import build_policies_from_config
 from decision_engine.stackelberg.round import StackelbergRound
 
 
@@ -126,13 +127,20 @@ class DecisionRuntime:
 
         export_dir = social.get("export_utility_dir")
         import_dir = social.get("import_actions_dir")
+        cmd_pol, med_pol, pop_pol = build_policies_from_config(
+            run_spec.legacy_cfg if hasattr(run_spec, "legacy_cfg") else {},
+        )
         rt.stackelberg = StackelbergRound(
+            command_policy=cmd_pol,
+            medical_policy=med_pol,
+            population_policy=pop_pol,
             export_utility_dir=export_dir,
             import_actions_dir=import_dir,
             cruise_id=str(social.get("cruise_id", "0")),
             incentives=incentives,
             economics_weights=economics_weights,
             all_protocol_ids=rt.all_protocol_ids,
+            agent_granularity=rt.agent_granularity,
         )
         return rt
 

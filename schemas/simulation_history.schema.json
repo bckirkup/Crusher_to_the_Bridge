@@ -80,7 +80,10 @@
             "total_labor_hours": {"type": "number"},
             "financial_balance_remaining": {"type": "number"},
             "labor_hours_remaining": {"type": "number"},
-            "entries_count": {"type": "integer"}
+            "entries_count": {"type": "integer"},
+            "operational_impact_epoch": {"type": "number"},
+            "operational_impact_cumulative": {"type": "number"},
+            "operational_impact_breakdown": {"type": "object"}
           }
         },
         "observation_engine": {
