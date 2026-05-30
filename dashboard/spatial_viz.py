@@ -182,30 +182,32 @@ def _build_plotly_deck_map(
     label = bundle.manifest.get("ship_class_label", bundle.platform_id)
     n_zones = len(metrics)
     fig.update_layout(
-        title=(
-            f"Tactical Deck Scan — {label} — Epoch {record['epoch']} "
-            f"({color_mode}, {n_zones} zones)"
-        ),
-        **LCARS_PLOTLY,
-        height=520,
-        xaxis={
-            "range": [xmin, xmax],
-            "showgrid": True,
-            "gridcolor": "rgba(255,153,0,0.08)",
-            "title": "Ship length (m)",
-            "scaleanchor": "y",
-            "scaleratio": 1,
-            "constrain": "domain",
-        },
-        yaxis={
-            "range": [ymin, ymax],
-            "showgrid": True,
-            "gridcolor": "rgba(255,153,0,0.08)",
-            "title": "Beam (m)",
-            "constrain": "domain",
-        },
-        margin={"t": 60, "b": 50, "l": 55, "r": 30},
-        plot_bgcolor="rgba(0,0,0,0.85)",
+        **{
+            **LCARS_PLOTLY,
+            "title": (
+                f"Tactical Deck Scan — {label} — Epoch {record['epoch']} "
+                f"({color_mode}, {n_zones} zones)"
+            ),
+            "plot_bgcolor": "rgba(0,0,0,0.85)",
+            "height": 520,
+            "xaxis": {
+                "range": [xmin, xmax],
+                "showgrid": True,
+                "gridcolor": "rgba(255,153,0,0.08)",
+                "title": "Ship length (m)",
+                "scaleanchor": "y",
+                "scaleratio": 1,
+                "constrain": "domain",
+            },
+            "yaxis": {
+                "range": [ymin, ymax],
+                "showgrid": True,
+                "gridcolor": "rgba(255,153,0,0.08)",
+                "title": "Beam (m)",
+                "constrain": "domain",
+            },
+            "margin": {"t": 60, "b": 50, "l": 55, "r": 30},
+        }
     )
     return fig
 
