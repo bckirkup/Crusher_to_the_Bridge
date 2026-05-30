@@ -1,7 +1,7 @@
 # Crusher-to-the-Bridge — Ship Operator's Manual (Picard)
 
 **Scope:** Single-ship biodefense simulation, diagnostics, protocols, and telemetry.  
-**Fleet / game-theory operations:** see [OPERATORS_MANUAL_GAME_THEORY.md](OPERATORS_MANUAL_GAME_THEORY.md).
+**Fleet / Stackelberg:** see [OPERATORS_MANUAL_GAME_THEORY.md](OPERATORS_MANUAL_GAME_THEORY.md).
 
 ---
 
@@ -33,9 +33,17 @@ The legacy `orchestrator.py` CLI delegates to **Picard_Framework** `ShipSimulati
     "pathogen_bundle_id": "active_profiles"
   },
   "run": { "random_seed": 42, "num_epochs": 24 },
-  "legacy_yaml": "crusher_labs/config.yaml"
+  "legacy_yaml": "crusher_labs/config.yaml",
+  "social": {
+    "agent_profile_bundle": "picard_framework/data/agent_profiles/default_ship_population.json",
+    "class_interactions": "presidio/data/social/class_interactions_default.json",
+    "information_diffusion": "presidio/data/social/information_diffusion_default.json",
+    "global_health_timeline": "presidio/data/intelligence/global_health_timeline.json"
+  }
 }
 ```
+
+The optional `social` block enables Stackelberg hooks (lived experience, diffusion, utility export). See `picard_framework/runs/destroyer_baseline_default.json`.
 
 Validate: `schemas/picard_run_spec.schema.json`
 
@@ -50,6 +58,8 @@ sim.run()
 sim.finalize(display=False)
 ```
 
+Smoke run spec (2 epochs): `picard_framework/runs/smoke_2epoch.json`
+
 ## Outputs
 
 | File | Description |
@@ -58,6 +68,21 @@ sim.finalize(display=False)
 | `telemetry_buffer/artificial_lab_notebook.json` | Instrument records |
 | `telemetry_buffer/ground_truth.json` | Per-epoch broker (Crusher Labs seam) |
 
+Optional telemetry when `social.telemetry.decision_detail: true`:
+
+- `simulation_history[].information_state` — belief diffusion summary
+- `simulation_history[].decisions` — role actions per epoch
+- `simulation_history[].wearable_agent_snapshot` — per-agent wearable slice
+
+## Validation
+
+```bash
+python3 tools/sanity_checker.py --from-config
+python3 -m pytest tests/test_picard_framework.py tests/test_golden_orchestrator.py -v
+```
+
+Skill: `.agents/skills/picard-ship-simulation/SKILL.md`
+
 ## Further reading
 
-The complete ship configuration reference (config.yaml, SOPs, instruments, GIS bridge, sanity checker, lab notebook fidelity) remains in the main manual sections. For the full table of contents and historical sections 1–11, open [OPERATORS_MANUAL.md](OPERATORS_MANUAL.md) — ship-specific content is authoritative here for Picard entry points and run specs.
+Full config.yaml, SOP, instrument, and GIS reference: [OPERATORS_MANUAL.md](OPERATORS_MANUAL.md). Fleet and external optimization: [OPERATORS_MANUAL_GAME_THEORY.md](OPERATORS_MANUAL_GAME_THEORY.md).

@@ -20,7 +20,7 @@ None — all tests run locally.
 ```bash
 python -m pytest tests/ -v --tb=short
 ```
-Expected: All tests pass (~250+). Coverage includes data contracts, sanity checker, orchestrator, protocol engine, stoplight, cost ledger, telemetry seams, schema module, law compliance, infection counters, transmission pathways (food/environmental), and dashboard helpers.
+Expected: All tests pass (~298). Coverage includes data contracts, sanity checker, orchestrator, protocol engine, stoplight, cost ledger, telemetry seams, schema module, law compliance, infection counters, transmission pathways (food/environmental), and dashboard helpers.
 
 ### Run individual test modules
 ```bash
@@ -54,6 +54,10 @@ python -m pytest tests/test_cost_ledger.py -v --tb=short
 # Law compliance (architectural invariants enforcement)
 python -m pytest tests/test_law_compliance.py -v --tb=short
 
+# Picard / Presidio / Stackelberg
+python -m pytest tests/test_picard_framework.py tests/test_decision_engine.py \
+  tests/test_presidio_runner.py tests/test_stackelberg.py tests/test_golden_orchestrator.py -v --tb=short
+
 # Telemetry seams (ground truth read/write)
 python -m pytest tests/test_telemetry_seams.py -v --tb=short
 
@@ -69,6 +73,13 @@ Expected: All checks pass with no ERROR findings.
 
 ### Run the orchestrator smoke test
 ```bash
+PYTHONPATH=. python -c "
+from picard_framework import PicardRunSpec, ShipSimulation
+from decision_engine import StackelbergRound, DecisionRuntime
+import presidio_runner
+print('Picard/Presidio OK')
+" && \
+python presidio_runner.py --fleet-config presidio/data/config/smoke_fleet.json --cruises 1 && \
 python orchestrator.py
 ```
 Expected: 24-epoch run completes with no exceptions.
@@ -81,7 +92,11 @@ The full CI pipeline (`.github/workflows/ci.yml`) runs these steps in order:
 3. `pytest tests/ -v --tb=short` — full test suite
 4. Import hygiene check — verifies orchestrator module split and stoplight deduplication
 5. Dashboard import check — verifies LCARS dashboard and `aggregate_transmission_pathway_totals`
-6. `python orchestrator.py` — 24-epoch smoke test
+6. Picard/Presidio/Stackelberg import hygiene
+7. Presidio smoke (`presidio_runner.py` smoke fleet)
+8. Orchestrator import hygiene
+9. Dashboard import
+10. `python orchestrator.py` — 24-epoch smoke test
 
 To replicate CI locally:
 ```bash
@@ -104,6 +119,13 @@ import dashboard
 from dashboard import aggregate_transmission_pathway_totals
 print('Dashboard import OK')
 " && \
+PYTHONPATH=. python -c "
+from picard_framework import PicardRunSpec, ShipSimulation
+from decision_engine import StackelbergRound, DecisionRuntime
+import presidio_runner
+print('Picard/Presidio OK')
+" && \
+python presidio_runner.py --fleet-config presidio/data/config/smoke_fleet.json --cruises 1 && \
 python orchestrator.py
 ```
 

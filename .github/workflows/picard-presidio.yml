@@ -37,17 +37,32 @@ jobs:
             tests/test_presidio_runner.py tests/test_golden_orchestrator.py tests/test_stackelberg.py \
             tests/test_law_compliance.py -v --tb=short
 
-      - name: Import hygiene (Picard / Presidio / decision_engine)
+      - name: Import hygiene (Picard / Presidio / Stackelberg)
         env:
           PYTHONPATH: .
         run: |
           python -c "
           from picard_framework import PicardRunSpec, ShipSimulation
           from presidio import PresidioRunSpec
-          from decision_engine import DecisionRound, ExperienceStore
+          from decision_engine import (
+              DecisionRound, ExperienceStore, StackelbergRound, DecisionRuntime,
+          )
+          from decision_engine.utility.io import export_utility_bundle, import_action_envelope
           import presidio_runner
-          print('Picard/Presidio import hygiene OK')
+          print('Picard/Presidio/Stackelberg import hygiene OK')
           "
+
+      - name: Validate Stackelberg JSON schemas
+        run: |
+          pip install check-jsonschema
+          check-jsonschema --schemafile schemas/information_diffusion.schema.json \
+            presidio/data/social/information_diffusion_default.json
+          check-jsonschema --schemafile schemas/class_interactions.schema.json \
+            presidio/data/social/class_interactions_default.json
+          check-jsonschema --schemafile schemas/global_health_briefing.schema.json \
+            presidio/data/intelligence/global_health_timeline.json
+          check-jsonschema --schemafile schemas/agent_profile.schema.json \
+            picard_framework/data/agent_profiles/default_ship_population.json
 
       - name: Presidio smoke (1 cruise, 2 epochs)
         env:

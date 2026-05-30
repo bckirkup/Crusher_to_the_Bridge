@@ -32,6 +32,28 @@ jobs:
       - name: Run test suite
         run: pytest tests/ -v --tb=short
 
+      - name: Import hygiene (Picard / Presidio / Stackelberg)
+        env:
+          PYTHONPATH: .
+        run: |
+          python -c "
+          from picard_framework import PicardRunSpec, ShipSimulation
+          from presidio import PresidioRunSpec
+          from decision_engine import (
+              DecisionRound, ExperienceStore, StackelbergRound, DecisionRuntime,
+          )
+          import presidio_runner
+          print('Picard/Presidio/Stackelberg import hygiene OK')
+          "
+
+      - name: Presidio smoke (1 cruise, 2 epochs)
+        env:
+          PYTHONPATH: .
+        run: |
+          python presidio_runner.py \
+            --fleet-config presidio/data/config/smoke_fleet.json \
+            --cruises 1
+
       - name: Verify import hygiene (stoplight deduplication)
         env:
           PYTHONPATH: .
@@ -45,7 +67,6 @@ jobs:
           from orchestrator_epoch import sync_vsp_isolation, step_fred_compliance, run_observation_sampling, confine_all_agents, apply_surface_decontamination, apply_zone_closures
           from orchestrator_record import record_epoch, finalize_simulation
           from orchestrator_display import print_executive_summary
-          from picard_framework import ShipSimulation, PicardRunSpec
           print('Import hygiene OK: modules split correctly, stoplight canonical')
           "
 

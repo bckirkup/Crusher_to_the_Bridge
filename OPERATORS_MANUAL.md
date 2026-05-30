@@ -1316,13 +1316,16 @@ python tools/sanity_checker.py --from-config
 pytest tests/ -v --tb=short
 ```
 
-The suite includes **278 tests** across data contracts, sanity checker,
+The suite includes **~298 tests** across data contracts, sanity checker,
 orchestrator/quarantine logic, infection counters, orthogonal agent axes,
 wearable/detection-escalation protocol engine, sequencing config wiring,
 per-test cost accounting, transmission pathways (food/environmental),
-dashboard helpers, law compliance, and telemetry seams.  CI runs the same
-checks plus a 24-epoch orchestrator smoke test (see `.github/workflows/ci.yml`
-and `AGENTS.md` for cloud agent commands).
+dashboard helpers, law compliance, telemetry seams, and **Picard / Presidio /
+Stackelberg** framework tests. CI (`.github/workflows/ci.yml`) runs sanity checks,
+full pytest, Picard/Presidio import hygiene, Presidio smoke, orchestrator import
+hygiene, dashboard import, and a 24-epoch orchestrator run. Framework-focused
+checks and Stackelberg JSON schema validation run in `.github/workflows/picard-presidio.yml`.
+See `AGENTS.md` for cloud agent commands.
 
 | Module | Focus |
 |--------|-------|
@@ -1334,6 +1337,11 @@ and `AGENTS.md` for cloud agent commands).
 | `test_transmission_pathways.py` | Food/environmental pool initialization |
 | `test_dashboard.py` | LCARS dashboard imports, pathway aggregation |
 | `test_orchestrator.py` | Epoch loop, quarantine confinement, SOP modifiers |
+| `test_picard_framework.py` | PicardRunSpec, ShipSimulation, golden reproducibility |
+| `test_decision_engine.py` | ObservationModel, DecisionRound, ExperienceStore |
+| `test_presidio_runner.py` | Fleet smoke, experience store |
+| `test_stackelberg.py` | Diffusion, contact graph, utility export/import |
+| `test_golden_orchestrator.py` | 24-epoch reproducibility via Picard |
 
 ---
 

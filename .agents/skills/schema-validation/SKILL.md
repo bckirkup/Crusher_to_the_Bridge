@@ -98,3 +98,18 @@ python -m pytest tests/test_data_contracts.py -v --tb=short
 - After generating output with the orchestrator
 - When adding new platforms or pathogens
 - As part of the CI-equivalent local validation
+
+## Picard / Presidio / Stackelberg schemas
+
+```bash
+check-jsonschema --schemafile schemas/picard_run_spec.schema.json \
+  picard_framework/runs/destroyer_baseline_default.json
+check-jsonschema --schemafile schemas/information_diffusion.schema.json \
+  presidio/data/social/information_diffusion_default.json
+check-jsonschema --schemafile schemas/class_interactions.schema.json \
+  presidio/data/social/class_interactions_default.json
+check-jsonschema --schemafile schemas/global_health_briefing.schema.json \
+  presidio/data/intelligence/global_health_timeline.json
+check-jsonschema --schemafile schemas/agent_profile.schema.json \
+  picard_framework/data/agent_profiles/default_ship_population.json
+```
