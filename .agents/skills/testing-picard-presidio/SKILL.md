@@ -18,7 +18,10 @@ PYTHONPATH=. python3 -m pytest \
   tests/test_law_compliance.py \
   tests/test_operational_impact.py \
   tests/test_action_applier.py \
-  tests/test_behavioral_syndromic.py -v --tb=short
+  tests/test_behavioral_syndromic.py \
+  tests/test_enterprise_platforms.py \
+  tests/test_agent_axes.py \
+  tests/test_sequencing_config.py -v --tb=short
 ```
 
 ## Presidio CLI smoke
@@ -51,8 +54,8 @@ check-jsonschema --schemafile schemas/utility_observation_bundle.schema.json \
 
 | Workflow | When |
 |----------|------|
-| `.github/workflows/ci.yml` | All `main` PRs — full pytest + Presidio smoke + import hygiene |
-| `.github/workflows/picard-presidio.yml` | `main` and `cursor/**` — framework slice + Stackelberg schema checks |
+| `.github/workflows/ci.yml` | All `main` PRs — full pytest (~337) + Presidio smoke + import hygiene + OIS verify |
+| `.github/workflows/picard-presidio.yml` | `main` and `cursor/**` — framework slice + Stackelberg/platform schema checks |
 
 Replicate main CI framework steps:
 

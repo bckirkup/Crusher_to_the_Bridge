@@ -120,6 +120,7 @@ The orchestrator picks up the new pathogen automatically and simulates multi-pat
 | `sars_cov2_resp` | beta_poisson | Respiratory SARS-CoV-2; HVAC airborne route |
 
 For the extended 10-pathogen set, see `data/pathogens/edison_10pathogen_profiles.json`.
+For fiction-adapted Enterprise scenarios, see `enterprise_tos_profiles.json` and `enterprise_tng_profiles.json` with templates under `data/templates/`.
 
 ## Common Mistakes
 

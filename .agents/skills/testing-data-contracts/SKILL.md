@@ -54,7 +54,7 @@ Expected: 22 tests pass in ~0.2s.
 | Pathogens (Edison) | `data/pathogens/edison_10pathogen_profiles.json` | Extended 10-pathogen profiles |
 | Spatial Layout | `data/platforms/<platform>/spatial_layout.json` | Zone definitions per platform |
 | Air Flow Paths | `data/platforms/<platform>/air_flow_paths.json` | HVAC zones, cross-zone links, adjacency |
-| Protocols | `data/config/protocols.json` | SOP definitions (SOP-001 through SOP-011) |
+| Protocols | `data/config/protocols.json` | SOP definitions (SOP-001 through SOP-016) |
 | Resource Costs | `data/config/resource_costs.json` | Budget, labor, material inventory |
 | Logging Profile | `data/config/logging_profile.json` | Observation engine logging config |
 | Instrument TAT | `data/config/instrument_turnaround.json` | Per-instrument delivery delay (epochs) |
@@ -64,11 +64,16 @@ Expected: 22 tests pass in ~0.2s.
 ### Available Platforms
 
 - `destroyer_baseline` — Default platform used by orchestrator
+- `enterprise_constitution_tos` — Constitution-class (fiction-adapted, 13 zones)
+- `enterprise_galaxy_tng` — Galaxy-class (fiction-adapted, 17 zones)
 - `expedition_cruise_300`
 - `fletcher_class_destroyer`
 - `legend_class_nsc`
 - `mega_cruise_5000`
 - `san_antonio_class_lpd`
+
+Enterprise scenario bundles: `data/templates/enterprise_constitution_tos.json`, `data/templates/enterprise_galaxy_tng.json`.
+Run `python3 -m pytest tests/test_enterprise_platforms.py -v` after editing Enterprise platforms or templates.
 
 ## Schema Files
 

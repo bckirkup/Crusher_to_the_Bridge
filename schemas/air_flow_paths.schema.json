@@ -79,7 +79,7 @@
         "to": {"type": "string"},
         "type": {
           "type": "string",
-          "enum": ["passageway", "service_hatch", "ladder_well", "hvac_duct"]
+          "description": "Adjacency link type (e.g. passageway, ladder_well, turbolift)"
         }
       }
     }
