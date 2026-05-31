@@ -14,7 +14,7 @@ package** — middleware that connects five independent simulation domains
 into a single orchestrated loop:
 
 1. **Korkin Lab infection-dynamics** (Java ABM) → agent state, dose-response
-2. **Four-pathway transmission core** (Python) → direct, droplet, HVAC airborne, fomite
+2. **Six-pathway transmission core** (Python) → direct, droplet, HVAC airborne, fomite, food, environmental
 3. **py-contam airflow transport** (CONTAM mass-balance) → inter-zone aerosol drift
 4. **GRUMB metagenomic surveillance** (Dirichlet-multinomial CLR) → 4-kingdom microbiome shift detection
 5. **Crusher Labs Observation Engine** (6 instruments + QC) → diagnostic telemetry with noise models

@@ -73,10 +73,10 @@ print('Pathways:', sorted(totals.keys()))
 | Tab | Purpose |
 |-----|---------|
 | Bridge Status Display | Ship status, biosensors, epidemic curves, infection counters |
-| Tactical Sensor Grid | Class-accurate deck map with hull photo plates and contamination overlays |
+| Tactical Sensor Grid | Spatial deck map with contamination overlays and class-reference plates |
 | Sickbay Diagnostic Console | Lab notebook at LOW/MID/HIGH fidelity |
 | Standing Orders & Threat Profiles | SOP cards with `exempt_classes`, pathogen dossiers |
-| Fleet Operations | Presidio cruise comparison when fleet telemetry is available |
+| Fleet Operations | Presidio multi-cruise comparison, per-cruise drill-down |
 
 ## Telemetry Fields the Dashboard Expects
 
