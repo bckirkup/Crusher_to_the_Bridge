@@ -14,7 +14,7 @@ package** — middleware that connects five independent simulation domains
 into a single orchestrated loop:
 
 1. **Korkin Lab infection-dynamics** (Java ABM) → agent state, dose-response
-2. **Four-pathway transmission core** (Python) → direct, droplet, HVAC airborne, fomite
+2. **Six-pathway transmission core** (Python) → direct, droplet, HVAC airborne, fomite, food, environmental
 3. **py-contam airflow transport** (CONTAM mass-balance) → inter-zone aerosol drift
 4. **GRUMB metagenomic surveillance** (Dirichlet-multinomial CLR) → 4-kingdom microbiome shift detection
 5. **Crusher Labs Observation Engine** (6 instruments + QC) → diagnostic telemetry with noise models
@@ -43,7 +43,7 @@ tools/
   gis_spatial_bridge.py            — GIS Shapefile/GeoJSON → JSON layout converter
 data/
   config/
-    protocols.json                 — 7 standing operating protocols (SOPs)
+    protocols.json                 — 16 standing operating protocols (SOPs)
     resource_costs.json            — Budgets, material inventory, per-test costs
     edison_resource_costs.json     — Expanded costs with sequencing + culture pricing
     logging_profile.json           — Fidelity tier selection + QC parameters
@@ -56,13 +56,15 @@ data/
     coastal_port_profile.json      — Near-shore 4-kingdom baseline (61 taxa)
     open_ocean_profile.json        — Off-shore oligotrophic baseline (52 taxa)
     zone_type_modifiers.json       — Per-zone-type microbiome modifiers
-  platforms/                       — 6 pre-built vessel platforms:
+  platforms/                       — 8 pre-built vessel platforms:
     destroyer_baseline/            — Default baseline destroyer (11 zones)
     fletcher_class_destroyer/      — WWII DD (20 zones, poor ventilation)
     legend_class_nsc/              — USCG cutter (18 zones, NBC filtration)
     san_antonio_class_lpd/         — Troop transport (22 zones, high density)
     expedition_cruise_300/         — Small cruise (25 zones)
     mega_cruise_5000/              — Mega cruise (67 zones, complex HVAC)
+    enterprise_constitution_tos/   — Constitution-class (TOS fiction-adapted, 13 zones)
+    enterprise_galaxy_tng/         — Galaxy-class explorer (TNG fiction-adapted, 17 zones)
   shp/
     test_destroyer_deck.geojson    — Test GIS data for gis_spatial_bridge.py
 telemetry_buffer/
@@ -73,7 +75,13 @@ docs/
   ai_handshake.md                  — Full AI context framework and architecture manifest
   pathogen_notes.md                — Literature justifications for pathogen dose-response params
   pricing_notes.md                 — ROM pricing sources for resource_costs configurations
-OPERATORS_MANUAL.md                — Human operator's manual
+OPERATORS_MANUAL.md                — Human operator's manual (legacy, full reference)
+OPERATORS_MANUAL_SHIP.md           — Picard single-ship operator's manual
+OPERATORS_MANUAL_GAME_THEORY.md    — Presidio fleet / Stackelberg game theory manual
+picard_framework/                  — Steppable single-ship simulation (PicardRunSpec, ShipSimulation)
+decision_engine/                   — Multi-agent decisions, Stackelberg, diffusion, utility I/O
+presidio/                          — Fleet meta-simulation + experience store
+presidio_runner.py                 — Fleet loop over Picard cruises
 ```
 
 ---
@@ -238,7 +246,7 @@ adjacency[]: {from, to, type}
 
 ### Protocol Keys (`data/config/protocols.json`)
 ```
-protocol_id: str                  # "SOP-001" .. "SOP-010"
+protocol_id: str                  # "SOP-001" .. "SOP-016"
 trigger: {instrument_class, stoplight_level, min_zones_affected | min_agents_affected}
 modifiers: dict                   # physics/behavior overrides (including confinement keys)
 costs_per_epoch: {financial_usd, materials: {item: count}, labor_person_hours}
