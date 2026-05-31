@@ -49,6 +49,7 @@
   "background_plate": "reference_photo_composite",
   "reference_photo": {
     "wikimedia_title": "File:Cruise ship side view.png",
+    "source_page": null,
     "license": "CC BY-SA 3.0",
     "credit": "Marcusroos / Wikimedia Commons — cruise ship side elevation (schematic)",
     "local_file": "reference_photo.jpg"
