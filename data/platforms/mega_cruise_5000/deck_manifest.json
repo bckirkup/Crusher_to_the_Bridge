@@ -91,6 +91,7 @@
   "background_plate": "reference_photo_composite",
   "reference_photo": {
     "wikimedia_title": "File:Icon of the Seas (kahunapulej).jpg",
+    "source_page": null,
     "license": "CC BY-SA 2.0",
     "credit": "Kahunapule Michael Johnson / Wikimedia Commons — Icon of the Seas (Royal Caribbean)",
     "local_file": "reference_photo.jpg"

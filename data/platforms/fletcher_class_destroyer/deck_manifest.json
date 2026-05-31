@@ -44,6 +44,7 @@
   "background_plate": "reference_photo_composite",
   "reference_photo": {
     "wikimedia_title": "File:Fletcher-class destroyer technical drawing 1954.jpg",
+    "source_page": null,
     "license": "Public domain (US Navy)",
     "credit": "US Navy All Hands magazine, 1954 — Fletcher-class technical drawing",
     "local_file": "reference_photo.jpg"

@@ -32,9 +32,10 @@
       },
       "background_plate": "reference_photo_composite",
       "reference_photo": {
-        "wikimedia_title": "File:USS Arleigh Burke (DDG 51) steams through the Mediterranean Sea.jpg",
+        "wikimedia_title": "File:USS Gleaves (DD-423) underway on 18 June 1941 (513043).jpg",
+        "source_page": null,
         "license": "Public domain (US Navy)",
-        "credit": "US Navy — USS Arleigh Burke (DDG-51), Mediterranean Sea",
+        "credit": "US Navy — USS Gleaves (DD-423), lead ship Gleaves-class, 18 June 1941",
         "local_file": "reference_photo.jpg"
       }
     },
@@ -84,6 +85,7 @@
       "background_plate": "reference_photo_composite",
       "reference_photo": {
         "wikimedia_title": "File:Fletcher-class destroyer technical drawing 1954.jpg",
+        "source_page": null,
         "license": "Public domain (US Navy)",
         "credit": "US Navy All Hands magazine, 1954 — Fletcher-class technical drawing",
         "local_file": "reference_photo.jpg"
@@ -132,9 +134,10 @@
       },
       "background_plate": "reference_photo_composite",
       "reference_photo": {
-        "wikimedia_title": "File:USCG National Security Cutter BERTHOLF (WMSL-750).jpeg",
+        "wikimedia_title": "File:USCGC Hamilton (WHEC-715).jpg",
+        "source_page": null,
         "license": "Public domain (US Coast Guard)",
-        "credit": "US Coast Guard — USCGC Bertholf (WMSL-750), sea trials, 2007",
+        "credit": "US Coast Guard — USCGC Hamilton (WHEC-715), Hamilton-class WHEC, decommissioned 2011",
         "local_file": "reference_photo.jpg"
       }
     },
@@ -185,9 +188,10 @@
       },
       "background_plate": "reference_photo_composite",
       "reference_photo": {
-        "wikimedia_title": "File:LPD-17 Class.jpg",
+        "wikimedia_title": "File:USS Austin (LPD-4) underway on 29 April 1965 (USN 1111157).jpg",
+        "source_page": null,
         "license": "Public domain (US Navy)",
-        "credit": "US Navy — USS San Antonio (LPD-17), San Antonio class",
+        "credit": "US Navy — USS Austin (LPD-4), Austin-class LPD, 29 April 1965; decommissioned 2006",
         "local_file": "reference_photo.jpg"
       }
     },
@@ -242,6 +246,7 @@
       "background_plate": "reference_photo_composite",
       "reference_photo": {
         "wikimedia_title": "File:Cruise ship side view.png",
+        "source_page": null,
         "license": "CC BY-SA 3.0",
         "credit": "Marcusroos / Wikimedia Commons — cruise ship side elevation (schematic)",
         "local_file": "reference_photo.jpg"
@@ -340,6 +345,7 @@
       "background_plate": "reference_photo_composite",
       "reference_photo": {
         "wikimedia_title": "File:Icon of the Seas (kahunapulej).jpg",
+        "source_page": null,
         "license": "CC BY-SA 2.0",
         "credit": "Kahunapule Michael Johnson / Wikimedia Commons — Icon of the Seas (Royal Caribbean)",
         "local_file": "reference_photo.jpg"
@@ -381,11 +387,10 @@
         "deck_hull": "deck_hull.png",
         "deck_blueprint_bg": "deck_blueprint_bg.png"
       },
-      "background_plate": "reference_photo_composite",
+      "background_plate": "fiction_schematic",
       "reference_photo": {
-        "wikimedia_title": "File:USS Enterprise (CVN-65) underway in the Atlantic Ocean on 14 June 2004 (040614-N-0119G-020).jpg",
-        "license": "Public domain (US Navy)",
-        "credit": "US Navy — USS Enterprise (CVN-65); fiction-adapted Constitution-era explorer silhouette",
+        "license": "Original work (programmatic LCARS schematic)",
+        "credit": "Crusher-to-the-Bridge — Constitution-class inspired schematic (original geometric composition)",
         "local_file": "reference_photo.jpg"
       }
     },
@@ -429,12 +434,10 @@
         "deck_hull": "deck_hull.png",
         "deck_blueprint_bg": "deck_blueprint_bg.png"
       },
-      "background_plate": "reference_photo_composite",
+      "background_plate": "fiction_schematic",
       "reference_photo": {
-        "wikimedia_title": null,
-        "source_page": "https://memory-beta.fandom.com/wiki/File:Galaxy_class_ortho.jpg",
-        "license": "Fan reference (Memory Beta; Star Trek © Paramount)",
-        "credit": "Memory Beta — Galaxy-class orthographic schematic (non-canon fan wiki)",
+        "license": "Original work (programmatic LCARS schematic)",
+        "credit": "Crusher-to-the-Bridge — Galaxy-class inspired schematic (original geometric composition)",
         "local_file": "reference_photo.jpg"
       }
     }

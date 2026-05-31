@@ -41,9 +41,10 @@
   },
   "background_plate": "reference_photo_composite",
   "reference_photo": {
-    "wikimedia_title": "File:USCG National Security Cutter BERTHOLF (WMSL-750).jpeg",
+    "wikimedia_title": "File:USCGC Hamilton (WHEC-715).jpg",
+    "source_page": null,
     "license": "Public domain (US Coast Guard)",
-    "credit": "US Coast Guard — USCGC Bertholf (WMSL-750), sea trials, 2007",
+    "credit": "US Coast Guard — USCGC Hamilton (WHEC-715), Hamilton-class WHEC, decommissioned 2011",
     "local_file": "reference_photo.jpg"
   }
 }

@@ -29,9 +29,10 @@
   },
   "background_plate": "reference_photo_composite",
   "reference_photo": {
-    "wikimedia_title": "File:USS Arleigh Burke (DDG 51) steams through the Mediterranean Sea.jpg",
+    "wikimedia_title": "File:USS Gleaves (DD-423) underway on 18 June 1941 (513043).jpg",
+    "source_page": null,
     "license": "Public domain (US Navy)",
-    "credit": "US Navy — USS Arleigh Burke (DDG-51), Mediterranean Sea",
+    "credit": "US Navy — USS Gleaves (DD-423), lead ship Gleaves-class, 18 June 1941",
     "local_file": "reference_photo.jpg"
   }
 }

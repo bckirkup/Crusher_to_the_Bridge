@@ -45,9 +45,10 @@
   },
   "background_plate": "reference_photo_composite",
   "reference_photo": {
-    "wikimedia_title": "File:LPD-17 Class.jpg",
+    "wikimedia_title": "File:USS Austin (LPD-4) underway on 29 April 1965 (USN 1111157).jpg",
+    "source_page": null,
     "license": "Public domain (US Navy)",
-    "credit": "US Navy — USS San Antonio (LPD-17), San Antonio class",
+    "credit": "US Navy — USS Austin (LPD-4), Austin-class LPD, 29 April 1965; decommissioned 2006",
     "local_file": "reference_photo.jpg"
   }
 }
