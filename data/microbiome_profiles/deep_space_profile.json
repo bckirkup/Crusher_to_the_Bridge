@@ -1,0 +1,86 @@
+{
+  "_meta": {
+    "name": "deep_space_profile",
+    "description": "Multi-kingdom relative abundance vector for a spacecraft environment during extended deep-space transit (months from resupply). Represents the 'bottleneck' microbiome after prolonged isolation: reduced diversity, stronger human skin/gut dominance, loss of transient environmental taxa introduced during resupply. Analogous to open_ocean_profile.json for maritime platforms, this serves as the drift endpoint in the GRUMB ecological drift model.",
+    "units": "relative_abundance",
+    "sum": 1.0,
+    "basis": "Derived from ISS longitudinal microbiome studies showing reduced diversity over time between resupply missions (Checinska Sielaff et al. 2019, Singh et al. 2018)",
+    "notes": "Key differences from iss_baseline_profile: (1) Loss of cargo-introduced transients (Pantoea, Bacillus), (2) Increased dominance of obligate human commensals (Staphylococcus, Corynebacterium), (3) Reduced fungal diversity, (4) Possible accumulation of biofilm-forming organisms on surfaces. The ecological drift from baseline\u2192deep_space represents the closed-system diversity decay that is a key feature of isolated habitat microbiome dynamics."
+  },
+  "Bacteria": {
+    "_kingdom_fraction": 0.86,
+    "taxa": {
+      "Staphylococcus": 0.185,
+      "Staphylococcus_aureus": 0.07,
+      "Staphylococcus_hominis": 0.035,
+      "Staphylococcus_haemolyticus": 0.025,
+      "Pantoea": 0.035,
+      "Enterobacter": 0.045,
+      "Enterobacter_bugandensis": 0.018,
+      "Klebsiella": 0.025,
+      "Escherichia-Shigella": 0.02,
+      "Enterobacteriaceae_unclassified": 0.025,
+      "Bacillus": 0.02,
+      "Bacillus_cereus_group": 0.008,
+      "Solibacillus_kalamii": 0.003,
+      "Corynebacterium": 0.05,
+      "Cutibacterium": 0.035,
+      "Streptococcus": 0.02,
+      "Micrococcus": 0.015,
+      "Moraxellaceae_unclassified": 0.022,
+      "Acinetobacter": 0.03,
+      "Sphingomonas": 0.028,
+      "Methylobacterium": 0.022,
+      "Burkholderia": 0.018,
+      "Pseudomonas": 0.025,
+      "Ralstonia": 0.012,
+      "Deinococcus": 0.008,
+      "Actinomycetaceae_unclassified": 0.018,
+      "Brevibacterium": 0.012,
+      "Rothia": 0.012,
+      "Lactobacillus": 0.006,
+      "Clostridium_sensu_stricto": 0.005,
+      "Bacteroides": 0.006,
+      "Bacteria_other": 0.002
+    }
+  },
+  "Archaea": {
+    "_kingdom_fraction": 0.01,
+    "taxa": {
+      "Methanobrevibacter": 0.005,
+      "Halococcus": 0.002,
+      "Nitrososphaeraceae_unclassified": 0.001,
+      "Archaea_other": 0.002
+    }
+  },
+  "Fungi": {
+    "_kingdom_fraction": 0.08,
+    "_note": "Reduced fungal diversity during extended isolation. Rhodotorula and Aspergillus persist; transient cargo fungi decline.",
+    "taxa": {
+      "Rhodotorula": 0.02,
+      "Rhodotorula_mucilaginosa": 0.01,
+      "Aspergillus": 0.015,
+      "Aspergillus_fumigatus": 0.006,
+      "Penicillium": 0.006,
+      "Cladosporium": 0.004,
+      "Cryptococcus": 0.003,
+      "Candida": 0.005,
+      "Malassezia": 0.005,
+      "Saccharomyces": 0.002,
+      "Fungi_other": 0.004
+    }
+  },
+  "Virus": {
+    "_kingdom_fraction": 0.05,
+    "taxa": {
+      "Siphoviridae_human_phage": 0.014,
+      "Myoviridae_human_phage": 0.01,
+      "Podoviridae_human_phage": 0.006,
+      "crAssphage": 0.007,
+      "Human_endogenous_retrovirus": 0.005,
+      "Caudovirales_unclassified": 0.003,
+      "Microviridae": 0.002,
+      "Virus_other": 0.003
+    }
+  }
+}

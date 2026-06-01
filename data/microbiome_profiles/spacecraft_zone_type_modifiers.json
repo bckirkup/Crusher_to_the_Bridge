@@ -1,0 +1,164 @@
+{
+  "_meta": {
+    "name": "spacecraft_zone_type_modifiers",
+    "description": "Zone-type modifiers for closed-loop spacecraft environments (ISS-analog, starship). Applied on top of iss_baseline_profile.json. Unlike maritime modifiers, there is no marine environmental input. All zones are fully enclosed with HEPA-filtered recirculated air. Microbial variation between zones is driven primarily by human activity patterns and equipment.",
+    "units": {
+      "kingdom_fraction_vector": "relative_abundance; each zone sums to 1.0",
+      "taxon_multipliers": "dimensionless multiplicative factors; neutral value is 1.0",
+      "marker_additions": "small relative-abundance priors before final renormalization"
+    },
+    "application_order": [
+      "start_with_iss_baseline_profile",
+      "multiply_matching_taxa_by_zone_taxon_multipliers",
+      "inject_marker_additions_for_missing_taxa",
+      "adjust_to_zone_kingdom_fraction_vector",
+      "renormalize_total_relative_abundance_to_1.0"
+    ],
+    "taxonomic_style": "GRUMB/metagenomic-compatible marker names"
+  },
+  "Dining": {
+    "description": "Shared dining/galley area: oral and skin carryover from crew, food preparation residue, elevated Streptococcus and Lactobacillus from oral microbiome.",
+    "kingdom_fraction_vector": {
+      "Bacteria": 0.8,
+      "Archaea": 0.01,
+      "Fungi": 0.14,
+      "Virus": 0.05
+    },
+    "taxon_multipliers": {
+      "Streptococcus": 3.0,
+      "Rothia": 2.5,
+      "Lactobacillus": 2.5,
+      "Staphylococcus": 1.8,
+      "Corynebacterium": 1.5,
+      "Enterobacteriaceae_unclassified": 1.8,
+      "Pantoea": 1.5,
+      "Saccharomyces": 3.0,
+      "Candida": 2.0,
+      "Aspergillus": 1.3,
+      "crAssphage": 1.4,
+      "Bacillus": 0.8,
+      "Deinococcus": 0.5
+    },
+    "marker_additions": {
+      "Bacteria": {
+        "Streptococcus": 0.02,
+        "Veillonella": 0.008,
+        "Lactobacillus": 0.01
+      },
+      "Fungi": {
+        "Saccharomyces": 0.008,
+        "Debaryomyces": 0.005
+      }
+    }
+  },
+  "Room": {
+    "description": "Crew quarters / berthing: dominated by skin commensals (Staphylococcus, Corynebacterium, Malassezia). Highest Staphylococcus abundance of any zone type. Closed sleeping environment concentrates shed skin cells.",
+    "kingdom_fraction_vector": {
+      "Bacteria": 0.78,
+      "Archaea": 0.01,
+      "Fungi": 0.16,
+      "Virus": 0.05
+    },
+    "taxon_multipliers": {
+      "Staphylococcus": 3.5,
+      "Staphylococcus_aureus": 2.5,
+      "Staphylococcus_hominis": 3.0,
+      "Corynebacterium": 3.0,
+      "Cutibacterium": 3.5,
+      "Micrococcus": 2.0,
+      "Malassezia": 4.0,
+      "Rhodotorula": 1.5,
+      "Aspergillus": 0.7,
+      "Pantoea": 0.6,
+      "Human_endogenous_retrovirus": 1.5,
+      "Siphoviridae_human_phage": 1.5
+    },
+    "marker_additions": {
+      "Bacteria": {
+        "Dermacoccus": 0.005,
+        "Brevibacterium": 0.008
+      },
+      "Fungi": {
+        "Malassezia": 0.01,
+        "Trichosporon": 0.003
+      }
+    }
+  },
+  "Free": {
+    "description": "General-purpose areas (bridge/command, labs, corridors, recreation). Mixed microbial sources. Closest to the baseline ISS profile. Moderate diversity from varied human activity.",
+    "kingdom_fraction_vector": {
+      "Bacteria": 0.83,
+      "Archaea": 0.01,
+      "Fungi": 0.11,
+      "Virus": 0.05
+    },
+    "taxon_multipliers": {
+      "Sphingomonas": 1.5,
+      "Methylobacterium": 1.5,
+      "Acinetobacter": 1.3,
+      "Burkholderia": 1.3,
+      "Deinococcus": 1.5,
+      "Bacillus": 1.2,
+      "Cladosporium": 1.3
+    },
+    "marker_additions": {}
+  },
+  "Engine_Room": {
+    "description": "Engineering / life support / environmental control. Elevated extremophile-tolerant organisms from equipment surfaces. Higher Methylobacterium, Ralstonia (water system associated), and Burkholderia. No thermophilic archaea (unlike maritime engine rooms) \u2014 spacecraft engineering sections are temperature-controlled.",
+    "kingdom_fraction_vector": {
+      "Bacteria": 0.87,
+      "Archaea": 0.01,
+      "Fungi": 0.08,
+      "Virus": 0.04
+    },
+    "taxon_multipliers": {
+      "Methylobacterium": 3.0,
+      "Ralstonia": 4.0,
+      "Burkholderia": 3.0,
+      "Sphingomonas": 2.5,
+      "Pseudomonas": 2.0,
+      "Bacillus": 1.8,
+      "Deinococcus": 2.5,
+      "Staphylococcus": 0.5,
+      "Corynebacterium": 0.4,
+      "Pantoea": 0.6,
+      "Rhodotorula": 0.5,
+      "Candida": 0.3
+    },
+    "marker_additions": {
+      "Bacteria": {
+        "Cupriavidus": 0.008,
+        "Ralstonia": 0.01,
+        "Variovorax": 0.005
+      }
+    }
+  },
+  "Medical": {
+    "description": "Sickbay / medical bay. Elevated antimicrobial-resistant organisms. Higher Enterobacter and Klebsiella from clinical specimens. Lower fungal diversity due to antifungal protocols. Elevated opportunistic pathogens.",
+    "kingdom_fraction_vector": {
+      "Bacteria": 0.85,
+      "Archaea": 0.01,
+      "Fungi": 0.08,
+      "Virus": 0.06
+    },
+    "taxon_multipliers": {
+      "Enterobacter": 2.5,
+      "Enterobacter_bugandensis": 3.0,
+      "Klebsiella": 2.5,
+      "Acinetobacter": 2.0,
+      "Pseudomonas": 2.0,
+      "Staphylococcus_aureus": 2.0,
+      "Bacillus": 1.5,
+      "Aspergillus": 0.5,
+      "Rhodotorula": 0.5,
+      "Penicillium": 0.5,
+      "Candida": 1.5
+    },
+    "marker_additions": {
+      "Bacteria": {
+        "Stenotrophomonas": 0.005,
+        "Elizabethkingia": 0.003
+      }
+    }
+  }
+}

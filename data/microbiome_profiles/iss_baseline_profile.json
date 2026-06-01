@@ -1,0 +1,96 @@
+{
+  "_meta": {
+    "name": "iss_baseline_profile",
+    "description": "Multi-kingdom relative abundance vector for built-environment surfaces aboard a closed-loop spacecraft (ISS-analog). Derived from published ISS surface microbiome studies: Checinska Sielaff et al. 2019 (Microbiome 7:50), Singh et al. 2018, Be et al. 2017 (Microbiome 5:81), and Urbaniak et al. 2022 (Microbiome 10:100). Dominated by human skin and gut commensals with low environmental diversity due to HEPA filtration and closed atmosphere.",
+    "units": "relative_abundance",
+    "sum": 1.0,
+    "basis": "Surface swab composite, 16S/ITS/shotgun metagenomic data from ISS Microbial Tracking studies (2015-2016)",
+    "notes": "Closed environment with HEPA-filtered recirculated air. No marine or terrestrial environmental input. Microbiome shaped almost entirely by crew (max 6 persons) and cargo resupply. Elevated Staphylococcaceae and Enterobacteriaceae relative to Earth built environments. Radiation-tolerant taxa (Deinococcus) present at low abundance. Fungal community dominated by Rhodotorula and Aspergillus.",
+    "references": [
+      "Checinska Sielaff A, et al. (2019) Characterization of the total and viable bacterial and fungal communities associated with the ISS surfaces. Microbiome 7:50. doi:10.1186/s40168-019-0666-x",
+      "Singh NK, et al. (2018) Succession and persistence of microbial communities and antimicrobial resistance genes associated with ISS environmental surfaces. Microbiome 6:204. doi:10.1186/s40168-018-0585-2",
+      "Be NA, et al. (2017) Whole metagenome profiles of particulates collected from the ISS. Microbiome 5:81. doi:10.1186/s40168-017-0292-4",
+      "Urbaniak C, et al. (2022) Microbial Tracking-2, a metagenomics analysis of bacteria and fungi onboard the ISS. Microbiome 10:100. doi:10.1186/s40168-022-01293-0"
+    ]
+  },
+  "Bacteria": {
+    "_kingdom_fraction": 0.82,
+    "taxa": {
+      "Staphylococcus": 0.145,
+      "Staphylococcus_aureus": 0.055,
+      "Staphylococcus_hominis": 0.025,
+      "Staphylococcus_haemolyticus": 0.015,
+      "Pantoea": 0.085,
+      "Pantoea_conspicua": 0.025,
+      "Enterobacter": 0.035,
+      "Enterobacter_bugandensis": 0.012,
+      "Klebsiella": 0.018,
+      "Escherichia-Shigella": 0.015,
+      "Enterobacteriaceae_unclassified": 0.02,
+      "Bacillus": 0.04,
+      "Bacillus_cereus_group": 0.015,
+      "Solibacillus_kalamii": 0.005,
+      "Corynebacterium": 0.035,
+      "Cutibacterium": 0.02,
+      "Streptococcus": 0.015,
+      "Micrococcus": 0.012,
+      "Moraxellaceae_unclassified": 0.018,
+      "Acinetobacter": 0.025,
+      "Sphingomonas": 0.02,
+      "Methylobacterium": 0.015,
+      "Burkholderia": 0.012,
+      "Pseudomonas": 0.02,
+      "Ralstonia": 0.008,
+      "Deinococcus": 0.006,
+      "Actinomycetaceae_unclassified": 0.015,
+      "Brevibacterium": 0.008,
+      "Rothia": 0.01,
+      "Lactobacillus": 0.008,
+      "Clostridium_sensu_stricto": 0.006,
+      "Bacteroides": 0.008,
+      "Bacteria_other": 0.049
+    }
+  },
+  "Archaea": {
+    "_kingdom_fraction": 0.01,
+    "_note": "Very low archaeal abundance in ISS environment. HEPA filtration removes most environmental archaea. Methanogenic archaea from human gut at trace levels.",
+    "taxa": {
+      "Methanobrevibacter": 0.004,
+      "Halococcus": 0.002,
+      "Nitrososphaeraceae_unclassified": 0.001,
+      "Archaea_other": 0.003
+    }
+  },
+  "Fungi": {
+    "_kingdom_fraction": 0.12,
+    "_note": "Fungal community dominated by Rhodotorula (Sporidiobolaceae) and Aspergillus. Penicillium and Cladosporium from cargo/air. Candida from human commensals.",
+    "taxa": {
+      "Rhodotorula": 0.03,
+      "Rhodotorula_mucilaginosa": 0.015,
+      "Aspergillus": 0.02,
+      "Aspergillus_fumigatus": 0.008,
+      "Penicillium": 0.012,
+      "Cladosporium": 0.008,
+      "Cryptococcus": 0.005,
+      "Candida": 0.006,
+      "Malassezia": 0.004,
+      "Saccharomyces": 0.003,
+      "Alternaria": 0.003,
+      "Fungi_other": 0.006
+    }
+  },
+  "Virus": {
+    "_kingdom_fraction": 0.05,
+    "_note": "Low viral fraction due to HEPA filtration and small crew population. Dominated by human-associated phages and endogenous retroviruses. No marine phages.",
+    "taxa": {
+      "Siphoviridae_human_phage": 0.012,
+      "Myoviridae_human_phage": 0.008,
+      "Podoviridae_human_phage": 0.005,
+      "crAssphage": 0.006,
+      "Human_endogenous_retrovirus": 0.005,
+      "Caudovirales_unclassified": 0.004,
+      "Microviridae": 0.003,
+      "Virus_other": 0.007
+    }
+  }
+}
