@@ -28,6 +28,18 @@ python3 orchestrator.py --epochs 10
 ```
 Expected: Completes 10 epochs. Useful for faster iteration during development.
 
+### Diagnostic cascade smoke (6 epochs, cascade enabled)
+```bash
+python3 -m pytest tests/test_smoke_diagnostic_cascade.py -v
+```
+Expected: Two parametrized runs complete using Picard run specs:
+- `picard_framework/runs/smoke_cascade_6epoch.json` — standard Tier 0–3 cascade
+- `picard_framework/runs/smoke_cascade_multiplex_6epoch.json` — multiplex Tier-1 panel
+
+Each epoch records a `diagnostic_cascade` block in telemetry with tier progression.
+These specs set `config_overrides.diagnostic_cascade.enabled: true` without changing
+the default `crusher_labs/config.yaml` (cascade remains off for golden regression).
+
 ### Validate config before running
 ```bash
 python3 tools/sanity_checker.py --from-config

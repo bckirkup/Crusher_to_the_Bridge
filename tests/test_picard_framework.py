@@ -33,3 +33,13 @@ def test_ship_simulation_two_epoch_smoke() -> None:
     result = sim.run(n_epochs=2)
     assert len(result.history) == 2
     assert result.history[-1]["epoch"] == 1
+
+
+def test_from_picard_json_applies_config_overrides() -> None:
+    spec_path = os.path.join(REPO_ROOT, "picard_framework/runs/smoke_cascade_6epoch.json")
+    spec = PicardRunSpec.from_picard_json(REPO_ROOT, spec_path)
+    assert spec.num_epochs == 6
+    assert spec.legacy_cfg["diagnostic_cascade"]["enabled"] is True
+    assert spec.legacy_cfg["diagnostic_cascade"]["config_path"] == (
+        "data/config/diagnostic_cascade.json"
+    )

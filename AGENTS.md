@@ -16,7 +16,8 @@ Pure-Python simulation (no databases, Docker, or external APIs). **Python 3.11+*
 | Streamlit dashboard | `python3 -m streamlit run dashboard.py --server.headless true` | Run orchestrator first for telemetry |
 | Deck asset precompute | `python3 scripts/precompute_deck_assets.py` | Writes `deck_graphics.geojson`, hull PNG, manifest per platform |
 | Sanity checker | `python3 tools/sanity_checker.py --from-config` | Ship + fleet + Stackelberg social configs |
-| Full test suite | `python3 -m pytest tests/ -v --tb=short` | ~574 tests, ~9s |
+| Full test suite | `python3 -m pytest tests/ -v --tb=short` | ~578 tests, ~9s |
+| Diagnostic cascade smoke | `python3 -m pytest tests/test_smoke_diagnostic_cascade.py -v` | 6-epoch runs with cascade enabled (standard + multiplex specs) |
 | Long-read / TAT tests | `python3 -m pytest tests/test_long_read_sequencing.py tests/test_instrument_turnaround.py -v` | Nanopore + turnaround queue |
 
 ### Framework layout
@@ -49,7 +50,8 @@ Pure-Python simulation (no databases, Docker, or external APIs). **Python 3.11+*
 6. Orchestrator import hygiene (stoplight deduplication)
 7. Dashboard import + `apply_lcars_layout` smoke
 8. `python orchestrator.py` — 24-epoch smoke
-9. OIS fields present in final `cost_accounting`
+9. `pytest tests/test_smoke_diagnostic_cascade.py` — 6-epoch cascade smoke (standard + multiplex)
+10. OIS fields present in final `cost_accounting`
 
 **Picard/Presidio** (`.github/workflows/picard-presidio.yml` on `main` and `cursor/**`):
 
