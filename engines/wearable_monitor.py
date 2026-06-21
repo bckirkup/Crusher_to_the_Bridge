@@ -483,7 +483,12 @@ class WearableMonitor:
                 else:
                     existing_z = merged[ch].get("z_score", 0.0) or 0.0
                     new_z = ch_data.get("z_score", 0.0) or 0.0
-                    if new_z > existing_z:
+                    existing_anomaly = merged[ch].get("anomaly", False)
+                    new_anomaly = ch_data.get("anomaly", False)
+                    # Prefer entries with anomaly=True; break ties by z_score
+                    if (new_anomaly and not existing_anomaly) or (
+                        new_anomaly == existing_anomaly and new_z > existing_z
+                    ):
                         merged[ch] = dict(ch_data)
         return merged
 

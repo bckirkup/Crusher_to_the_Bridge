@@ -83,14 +83,19 @@ class WearableDataStream:
             agent_results[aid] = observed
 
             # Determine visibility for this agent
+            # Missing visibility metadata defaults to staff-visible (backward compat)
             visibility_list = raw.get("visibility", [])
             if isinstance(visibility_list, str):
                 visibility_list = [visibility_list]
 
-            has_staff_visible = any(
-                v in ("medical_staff", "both") for v in visibility_list
-            )
-            is_wearer_only = all(v == "wearer_only" for v in visibility_list) if visibility_list else False
+            if not visibility_list:
+                has_staff_visible = True
+                is_wearer_only = False
+            else:
+                has_staff_visible = any(
+                    v in ("medical_staff", "both") for v in visibility_list
+                )
+                is_wearer_only = all(v == "wearer_only" for v in visibility_list)
 
             if has_staff_visible:
                 staff_visible_agents.append(aid)
