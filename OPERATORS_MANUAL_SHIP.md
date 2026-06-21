@@ -14,7 +14,8 @@ python3 orchestrator.py              # 24 epochs (config.yaml default)
 python3 orchestrator.py --epochs 250
 ```
 
-The legacy `orchestrator.py` CLI delegates to **Picard_Framework** `ShipSimulation`.
+The legacy `orchestrator.py` CLI runs its own epoch loop (see `orchestrator_epoch.py`).
+For the equivalent **Picard_Framework** programmatic API, use `ShipSimulation` below.
 
 ## Picard configuration layers
 

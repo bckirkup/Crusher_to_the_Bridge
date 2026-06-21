@@ -127,6 +127,13 @@ DISRUPTION_MARKERS: dict[str, dict[str, float]] = {
 
 
 # ── GRUMB compositional math helpers ─────────────────────────────────
+#
+# Pseudocount rationale (see MATHEMATICAL_FIDELITY_AUDIT.md §2.1):
+#   GRUMB R source uses pseudocount=1 because its inputs are TPM counts
+#   (integers ≫ 1).  Here inputs are relative abundances on [0, 1], so
+#   pseudocount=1e-6 avoids log(0) without distorting the simplex.
+#   Override via config.yaml → sequencing.pseudocount if count-scale
+#   inputs are introduced in a future fidelity pass.
 
 def _clr_transform(x: np.ndarray, pseudocount: float = 1e-6) -> np.ndarray:
     """Centered Log-Ratio transform (GRUMB Module 2 pattern)."""

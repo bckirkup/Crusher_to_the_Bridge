@@ -350,7 +350,7 @@ def _clr_transform(x, pseudocount=1e-6):
 | Aspect | Verdict | Detail |
 |--------|---------|--------|
 | Formula: log(x) − mean(log(x)) | **MATCH** | Identical to `compositions::clr()` |
-| Pseudocount value | **APPROXIMATION** | R: `+1`; Python: `+1e-6`. Different magnitude; both serve to avoid log(0). The Python value is more standard for compositional data analysis where input is already in relative abundance (values near 0–1), while the R value is appropriate for count data (TPM). |
+| Pseudocount value | **APPROXIMATION** | R: `+1`; Python: `+1e-6`. Different magnitude; both avoid log(0). Python's value is standard for compositional data where input is relative abundance (0–1); R's value suits count data (TPM). **Rationale documented in `sequencing.py`.** Override via `config.yaml → sequencing.pseudocount` if count-scale inputs are introduced. |
 
 ### 2.2 Inverse CLR
 

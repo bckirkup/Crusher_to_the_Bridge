@@ -383,5 +383,14 @@ def run() -> None:
 
 
 if __name__ == "__main__":
-    run()
+    try:
+        run()
+    except FileNotFoundError as exc:
+        print(f"\n[ERROR] Missing file: {exc}", file=sys.stderr)
+        print("  Hint: run 'python tools/sanity_checker.py --from-config' to validate paths.", file=sys.stderr)
+        sys.exit(1)
+    except (KeyError, ValueError) as exc:
+        print(f"\n[ERROR] Configuration problem: {exc}", file=sys.stderr)
+        print("  Hint: check crusher_labs/config.yaml and data/ JSON files.", file=sys.stderr)
+        sys.exit(1)
     sys.exit(0)

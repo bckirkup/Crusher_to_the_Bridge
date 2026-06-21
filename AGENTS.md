@@ -8,7 +8,7 @@ Pure-Python simulation (no databases, Docker, or external APIs). **Python 3.11+*
 
 | Service | Command | Notes |
 |---------|---------|-------|
-| Ship simulation (legacy CLI) | `python3 orchestrator.py` | Delegates to Picard `ShipSimulation`; 24 epochs default |
+| Ship simulation (legacy CLI) | `python3 orchestrator.py` | Standalone epoch loop; 24 epochs default |
 | Picard programmatic API | See `OPERATORS_MANUAL_SHIP.md` | `PicardRunSpec` + `ShipSimulation` |
 | Fleet meta-simulation | `python3 presidio_runner.py --fleet-config presidio/data/config/smoke_fleet.json --cruises 1` | Fast smoke; default fleet is slower |
 | Utility export (external optimizer) | `python3 presidio_runner.py --export-utility-dir presidio/data/experiences/utility_bundles` | Requires `social` block on run spec |
@@ -16,7 +16,7 @@ Pure-Python simulation (no databases, Docker, or external APIs). **Python 3.11+*
 | Streamlit dashboard | `python3 -m streamlit run dashboard.py --server.headless true` | Run orchestrator first for telemetry |
 | Deck asset precompute | `python3 scripts/precompute_deck_assets.py` | Writes `deck_graphics.geojson`, hull PNG, manifest per platform |
 | Sanity checker | `python3 tools/sanity_checker.py --from-config` | Ship + fleet + Stackelberg social configs |
-| Full test suite | `python3 -m pytest tests/ -v --tb=short` | ~337 tests, ~4s |
+| Full test suite | `python3 -m pytest tests/ -v --tb=short` | ~471 tests, ~7s |
 | Long-read / TAT tests | `python3 -m pytest tests/test_long_read_sequencing.py tests/test_instrument_turnaround.py -v` | Nanopore + turnaround queue |
 
 ### Framework layout

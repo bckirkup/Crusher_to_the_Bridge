@@ -53,8 +53,17 @@ check-jsonschema --schemafile schemas/spatial_layout.schema.json data/platforms/
 check-jsonschema --schemafile schemas/resource_costs.schema.json data/config/resource_costs.json
 ```
 
-For pre-run validation with pydantic models and cross-file referential integrity
-checking, use the sanity checker instead:
+## Naming Convention
+
+All schemas follow `<name>.schema.json`.  Previous alternate-named
+duplicates (`pathogen_profile_schema.json`, `protocol_playbook_schema.json`,
+`spatial_layout_schema.json`) have been consolidated into the canonical
+files above.
+
+## Pre-run Validation
+
+For pydantic models and cross-file referential integrity checking, use
+the sanity checker:
 
 ```bash
 python tools/sanity_checker.py

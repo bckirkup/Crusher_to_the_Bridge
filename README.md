@@ -26,7 +26,7 @@ python orchestrator.py --epochs 250
 # Launch LCARS dashboard (after simulation)
 streamlit run dashboard.py
 
-# Run the test suite (~337 tests)
+# Run the test suite (~471 tests)
 pytest tests/ -v --tb=short
 ```
 
@@ -55,7 +55,7 @@ Manuals: [OPERATORS_MANUAL_SHIP.md](OPERATORS_MANUAL_SHIP.md) (ship), [OPERATORS
 ## Architecture
 
 ```
-orchestrator.py              Legacy CLI → picard_framework.ShipSimulation
+orchestrator.py              Standalone epoch-loop CLI (see also ShipSimulation API)
 ├── orchestrator_types.py    Dataclasses, constants, state container
 ├── orchestrator_init.py     Spatial/engine/observation/wearable setup
 ├── orchestrator_epoch.py    Per-epoch step functions
@@ -118,7 +118,7 @@ dashboard/                   Modular command deck (theme, charts, spatial_viz, d
 scripts/                     Enterprise platform builder, deck graphics, asset precompute
 telemetry_buffer/
 │   agent_axes.py            Orthogonal agent state (infection / presentation / compliance)
-tests/                       ~337 tests (ship, fleet, Stackelberg, OIS, behavioral, long-read, TAT, enterprise)
+tests/                       ~471 tests (ship, fleet, Stackelberg, OIS, behavioral, long-read, TAT, enterprise, CONTAM, schemas)
 AGENTS.md                    Cursor Cloud / agent development notes
 ```
 
