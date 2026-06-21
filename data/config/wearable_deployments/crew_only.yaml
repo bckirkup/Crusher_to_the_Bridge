@@ -1,0 +1,19 @@
+  # ── Crew-Only Wearable Deployment ─────────────────────────────
+  # Mandatory crew wearables, no passenger monitoring.
+  # Crew receive employer-provided devices (standardized).
+  class_device_map:
+    - agent_class: "crew_medical"
+      devices:
+        - {device_id: "apple_watch_s10", coverage: 1.0, visibility: "both"}
+    - agent_class: "crew_engineering"
+      devices:
+        - {device_id: "garmin_venu3", coverage: 1.0, visibility: "medical_staff"}
+    - agent_class: "crew_galley"
+      devices:
+        - {device_id: "apple_watch_s10", coverage: 1.0, visibility: "both"}
+    - agent_class: "crew_general"
+      devices:
+        - {device_id: "garmin_venu3", coverage: 1.0, visibility: "medical_staff"}
+
+  chronic_disease_device_map:
+    - {disease_id: "type2_diabetes", device_id: "cgm_patch", coverage: 0.80, visibility: "both"}

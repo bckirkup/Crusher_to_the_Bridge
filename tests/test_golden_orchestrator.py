@@ -16,13 +16,13 @@ HISTORY_PATH = os.path.join(REPO_ROOT, "telemetry_buffer", "simulation_history.j
 
 EXPECTED_SUMMARY = {
     "susceptible": 5,
-    "infected": 2,
-    "symptomatic": 2,
-    "recovered": 9,
+    "infected": 0,
+    "symptomatic": 0,
+    "recovered": 11,
     "immune": 4,
 }
 EXPECTED_TRIGGER = "CONFIRMED"
-EXPECTED_COST_USD = 2679.0
+EXPECTED_COST_USD = 2035.0
 GOLDEN_LAST_EPOCH = 23
 
 

@@ -1,0 +1,143 @@
+{
+  "description": "Diagnostic cascade tier configuration with multiplexed rapid panel at Tier 1. Each tier specifies the diagnostic tests, accuracy, cost, turnaround, and regret level for sequential clinical evaluation.",
+  "tiers": [
+    {
+      "tier_id": 0,
+      "name": "Self-Report / Wearable Alert / Triage",
+      "tests": [],
+      "sensitivity": 0.7,
+      "specificity": 0.6,
+      "cost_per_agent": {
+        "financial_usd": 0,
+        "labor_person_hours": 0.25
+      },
+      "tat_epochs": 0,
+      "regret_level": "low",
+      "actions_on_positive": [
+        "advance_to_tier_1"
+      ],
+      "confinement_on_positive": false,
+      "sop_gate": null,
+      "notes": "Entry point from sick call, syndromic surveillance, or wearable RED alert. No tests \u2014 just triage assessment."
+    },
+    {
+      "tier_id": 1,
+      "name": "Rapid Multiplex Panel",
+      "tests": [
+        "clinical_rdt"
+      ],
+      "sensitivity": 0.85,
+      "specificity": 0.97,
+      "cost_per_agent": {
+        "financial_usd": 45.0,
+        "materials": {
+          "multiplex_panel_kits": 1
+        },
+        "labor_person_hours": 0.5
+      },
+      "tat_epochs": 0,
+      "regret_level": "low",
+      "actions_on_positive": [
+        "advance_to_tier_2",
+        "offer_wearable"
+      ],
+      "confinement_on_positive": false,
+      "sop_gate": [
+        "SOP-006",
+        "SOP-013"
+      ],
+      "notes": "BioFire FilmArray GI or equivalent. Tests noro + rota + adeno + astro + sapovirus + bacterial panel in one run. Provides pathogen ID at Tier 1 rather than waiting for Tier 2 qPCR. Cost higher than single RDT ($12) but eliminates need for multiple sequential tests."
+    },
+    {
+      "tier_id": 2,
+      "name": "Confirmatory Testing",
+      "tests": [
+        "clinical_qpcr",
+        "clinical_microbiology"
+      ],
+      "sensitivity": 0.95,
+      "specificity": 0.99,
+      "cost_per_agent": {
+        "financial_usd": 85.0,
+        "materials": {
+          "pcr_kits": 1,
+          "swab_kits": 1,
+          "culture_media_sets": 1
+        },
+        "labor_person_hours": 2.5
+      },
+      "tat_epochs": 0,
+      "regret_level": "medium",
+      "actions_on_positive": [
+        "advance_to_tier_3"
+      ],
+      "confinement_on_positive": true,
+      "sop_gate": [
+        "SOP-008",
+        "SOP-010",
+        "SOP-012"
+      ]
+    },
+    {
+      "tier_id": 3,
+      "name": "Full SOP Cascade",
+      "tests": [],
+      "sensitivity": 0.99,
+      "specificity": 0.999,
+      "cost_per_agent": {
+        "financial_usd": 0,
+        "labor_person_hours": 0
+      },
+      "tat_epochs": 0,
+      "regret_level": "high",
+      "actions_on_positive": [],
+      "confinement_on_positive": true,
+      "sop_gate": [
+        "SOP-002",
+        "SOP-005",
+        "SOP-007",
+        "SOP-009",
+        "SOP-015",
+        "SOP-016"
+      ]
+    }
+  ],
+  "fleet_escalation_rules": [
+    {
+      "rule_id": "fleet_tier2_threshold",
+      "description": "When 3+ agents reach Tier 2 simultaneously, unlock fleet-wide SOPs",
+      "tier_threshold": 2,
+      "agent_count": 3,
+      "category_filter": null,
+      "pathogen_filter": null,
+      "unlocked_sops": [
+        "SOP-004",
+        "SOP-005",
+        "SOP-009",
+        "SOP-014"
+      ]
+    },
+    {
+      "rule_id": "crew_tier2_threshold",
+      "description": "When 2+ crew reach Tier 2, unlock galley-specific SOPs",
+      "tier_threshold": 2,
+      "agent_count": 2,
+      "category_filter": "crew",
+      "pathogen_filter": null,
+      "unlocked_sops": [
+        "SOP-011"
+      ]
+    },
+    {
+      "rule_id": "crew_tier1_early_warning",
+      "description": "When 3+ crew reach Tier 1 (rapid panel positive), pre-position enhanced PPE",
+      "tier_threshold": 1,
+      "agent_count": 3,
+      "category_filter": "crew",
+      "pathogen_filter": null,
+      "unlocked_sops": [
+        "SOP-004"
+      ]
+    }
+  ]
+}

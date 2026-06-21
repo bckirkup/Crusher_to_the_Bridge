@@ -396,7 +396,7 @@ wearable_monitoring:
 
     # ── Sample Device 3: CGM Patch ──────────────────────────────
     # Continuous glucose monitor — glucose + body temp only.
-    # Not confounded by seasickness or alcohol.
+    # meal_glucose_spike confounder models post-prandial glucose spikes.
     - device_id: "cgm_patch"
       channels:
         - body_temp
@@ -407,15 +407,203 @@ wearable_monitoring:
         alert_latency_hours: 12
         fever_sensitivity: 0.75
         fever_specificity: 0.90
-      confounders: []
+      confounders:
+        - confounder_id: "meal_glucose_spike"
+          prevalence: 0.40
+          affected_channels:
+            glucose:        {bias: 30.0, noise_mult: 1.8}
+          susceptible_classes: []
       noise:
         - {channel: body_temp, sigma: 0.12, drift_rate: 0.015, dropout_prob: 0.005}
         - {channel: glucose,   sigma: 8.0,  drift_rate: 0.5,   dropout_prob: 0.01}
       channel_baselines:
         - {channel: glucose, mean: 95.0, std: 12.0}
 
+    # ── Extended device registry (generation-specific models) ─────
+    # See data/config/wearable_deployments/ for class_device_map presets.
+    - device_id: "oura_ring_3"
+      channels: [heart_rate, hrv, body_temp, spo2, sleep_score, respiratory_rate]
+      detection_profile:
+        sensitivity: 0.74
+        specificity: 0.88
+        alert_latency_hours: 8
+        fever_sensitivity: 0.80
+        fever_specificity: 0.91
+      confounders:
+        - confounder_id: "seasickness"
+          prevalence: 0.15
+          affected_channels:
+            heart_rate:     {bias: 8.0, noise_mult: 1.5}
+            hrv:            {bias: -12.0, noise_mult: 1.8}
+          susceptible_classes: ["passenger_general", "passenger_family", "passenger_elderly"]
+          susceptible_role_group: "passenger"
+        - confounder_id: "alcohol"
+          prevalence: 0.08
+          affected_channels:
+            hrv:            {bias: -10.0, noise_mult: 2.0}
+            heart_rate:     {bias: 6.0, noise_mult: 1.4}
+            sleep_score:    {bias: -8.0, noise_mult: 1.5}
+          susceptible_classes: ["passenger_general", "passenger_family"]
+        - confounder_id: "exercise"
+          prevalence: 0.20
+          affected_channels:
+            heart_rate:     {bias: 15.0, noise_mult: 1.2}
+          susceptible_classes: []
+      noise:
+        - {channel: heart_rate,       sigma: 3.0,  drift_rate: 0.12, dropout_prob: 0.015}
+        - {channel: hrv,              sigma: 7.0,  drift_rate: 0.6,  dropout_prob: 0.015}
+        - {channel: body_temp,        sigma: 0.12, drift_rate: 0.015, dropout_prob: 0.008}
+        - {channel: spo2,             sigma: 0.5,  drift_rate: 0.03, dropout_prob: 0.01}
+        - {channel: sleep_score,      sigma: 4.0,  drift_rate: 0.0,  dropout_prob: 0.0}
+        - {channel: respiratory_rate, sigma: 1.2,  drift_rate: 0.06, dropout_prob: 0.008}
+
+    - device_id: "oura_ring_4"
+      channels: [heart_rate, hrv, body_temp, spo2, sleep_score, respiratory_rate]
+      detection_profile:
+        sensitivity: 0.78
+        specificity: 0.92
+        alert_latency_hours: 6
+        fever_sensitivity: 0.85
+        fever_specificity: 0.94
+      confounders:
+        - confounder_id: "seasickness"
+          prevalence: 0.15
+          affected_channels:
+            heart_rate:     {bias: 8.0, noise_mult: 1.5}
+            hrv:            {bias: -12.0, noise_mult: 1.8}
+          susceptible_classes: ["passenger_general", "passenger_family", "passenger_elderly"]
+          susceptible_role_group: "passenger"
+        - confounder_id: "alcohol"
+          prevalence: 0.08
+          affected_channels:
+            hrv:            {bias: -10.0, noise_mult: 2.0}
+            heart_rate:     {bias: 6.0, noise_mult: 1.4}
+            sleep_score:    {bias: -8.0, noise_mult: 1.5}
+          susceptible_classes: ["passenger_general", "passenger_family"]
+        - confounder_id: "exercise"
+          prevalence: 0.20
+          affected_channels:
+            heart_rate:     {bias: 15.0, noise_mult: 1.2}
+          susceptible_classes: []
+      noise:
+        - {channel: heart_rate,       sigma: 2.5,  drift_rate: 0.10, dropout_prob: 0.01}
+        - {channel: hrv,              sigma: 6.0,  drift_rate: 0.5,  dropout_prob: 0.01}
+        - {channel: body_temp,        sigma: 0.10, drift_rate: 0.01, dropout_prob: 0.005}
+        - {channel: spo2,             sigma: 0.4,  drift_rate: 0.02, dropout_prob: 0.008}
+        - {channel: sleep_score,      sigma: 3.0,  drift_rate: 0.0,  dropout_prob: 0.0}
+        - {channel: respiratory_rate, sigma: 1.0,  drift_rate: 0.05, dropout_prob: 0.005}
+
+    - device_id: "oura_ring_5"
+      channels: [heart_rate, hrv, body_temp, spo2, sleep_score, respiratory_rate]
+      detection_profile:
+        sensitivity: 0.80
+        specificity: 0.93
+        alert_latency_hours: 5
+        fever_sensitivity: 0.87
+        fever_specificity: 0.95
+      confounders:
+        - confounder_id: "seasickness"
+          prevalence: 0.15
+          affected_channels:
+            heart_rate:     {bias: 8.0, noise_mult: 1.4}
+            hrv:            {bias: -12.0, noise_mult: 1.7}
+          susceptible_classes: ["passenger_general", "passenger_family", "passenger_elderly"]
+          susceptible_role_group: "passenger"
+        - confounder_id: "alcohol"
+          prevalence: 0.08
+          affected_channels:
+            hrv:            {bias: -10.0, noise_mult: 1.9}
+            heart_rate:     {bias: 6.0, noise_mult: 1.3}
+            sleep_score:    {bias: -8.0, noise_mult: 1.4}
+          susceptible_classes: ["passenger_general", "passenger_family"]
+        - confounder_id: "exercise"
+          prevalence: 0.20
+          affected_channels:
+            heart_rate:     {bias: 15.0, noise_mult: 1.2}
+          susceptible_classes: []
+      noise:
+        - {channel: heart_rate,       sigma: 2.2,  drift_rate: 0.08, dropout_prob: 0.008}
+        - {channel: hrv,              sigma: 5.5,  drift_rate: 0.45, dropout_prob: 0.008}
+        - {channel: body_temp,        sigma: 0.08, drift_rate: 0.008, dropout_prob: 0.004}
+        - {channel: spo2,             sigma: 0.35, drift_rate: 0.018, dropout_prob: 0.006}
+        - {channel: sleep_score,      sigma: 2.5,  drift_rate: 0.0,  dropout_prob: 0.0}
+        - {channel: respiratory_rate, sigma: 0.9,  drift_rate: 0.04, dropout_prob: 0.004}
+
+    - device_id: "apple_watch_s10"
+      channels: [heart_rate, hrv, body_temp, spo2, activity_score, respiratory_rate]
+      detection_profile:
+        sensitivity: 0.82
+        specificity: 0.88
+        alert_latency_hours: 4
+        fever_sensitivity: 0.83
+        fever_specificity: 0.90
+      confounders:
+        - confounder_id: "seasickness"
+          prevalence: 0.15
+          affected_channels:
+            heart_rate:     {bias: 10.0, noise_mult: 1.6}
+            hrv:            {bias: -14.0, noise_mult: 2.0}
+            activity_score: {bias: -10.0, noise_mult: 1.3}
+          susceptible_classes: ["passenger_general", "passenger_family", "passenger_elderly"]
+          susceptible_role_group: "passenger"
+        - confounder_id: "alcohol"
+          prevalence: 0.08
+          affected_channels:
+            hrv:            {bias: -10.0, noise_mult: 2.0}
+            heart_rate:     {bias: 6.0, noise_mult: 1.4}
+          susceptible_classes: ["passenger_general", "passenger_family"]
+        - confounder_id: "exercise"
+          prevalence: 0.25
+          affected_channels:
+            heart_rate:     {bias: 20.0, noise_mult: 1.5}
+            activity_score: {bias: 25.0, noise_mult: 1.0}
+          susceptible_classes: []
+        - confounder_id: "wrist_motion"
+          prevalence: 0.30
+          affected_channels:
+            heart_rate:     {bias: 3.0, noise_mult: 1.3}
+            spo2:           {bias: 0.0, noise_mult: 1.5}
+          susceptible_classes: []
+      noise:
+        - {channel: heart_rate,       sigma: 2.0,  drift_rate: 0.08, dropout_prob: 0.005}
+        - {channel: hrv,              sigma: 5.5,  drift_rate: 0.4,  dropout_prob: 0.008}
+        - {channel: body_temp,        sigma: 0.06, drift_rate: 0.005, dropout_prob: 0.003}
+        - {channel: spo2,             sigma: 0.6,  drift_rate: 0.04, dropout_prob: 0.01}
+        - {channel: activity_score,   sigma: 4.0,  drift_rate: 0.0,  dropout_prob: 0.0}
+        - {channel: respiratory_rate, sigma: 1.0,  drift_rate: 0.05, dropout_prob: 0.005}
+
+    - device_id: "garmin_venu3"
+      channels: [heart_rate, hrv, body_temp, spo2, activity_score, respiratory_rate]
+      detection_profile:
+        sensitivity: 0.80
+        specificity: 0.88
+        alert_latency_hours: 5
+        fever_sensitivity: 0.78
+        fever_specificity: 0.90
+      confounders:
+        - confounder_id: "exercise"
+          prevalence: 0.25
+          affected_channels:
+            heart_rate:     {bias: 15.0, noise_mult: 1.2}
+            activity_score: {bias: 20.0, noise_mult: 1.0}
+          susceptible_classes: []
+        - confounder_id: "wrist_motion"
+          prevalence: 0.30
+          affected_channels:
+            heart_rate:     {bias: 3.0, noise_mult: 1.3}
+            spo2:           {bias: 0.0, noise_mult: 1.5}
+          susceptible_classes: []
+      noise:
+        - {channel: heart_rate,       sigma: 2.2,  drift_rate: 0.10, dropout_prob: 0.005}
+        - {channel: hrv,              sigma: 5.5,  drift_rate: 0.45, dropout_prob: 0.01}
+        - {channel: body_temp,        sigma: 0.18, drift_rate: 0.025, dropout_prob: 0.015}
+        - {channel: spo2,             sigma: 0.6,  drift_rate: 0.04, dropout_prob: 0.008}
+        - {channel: activity_score,   sigma: 5.0,  drift_rate: 0.0,  dropout_prob: 0.0}
+        - {channel: respiratory_rate, sigma: 1.1,  drift_rate: 0.05, dropout_prob: 0.006}
+
   # ── Device Deployment Map ──────────────────────────────────────
   # Maps agent classes → device type.  "default" is the fallback.
+  # Alternate presets: data/config/wearable_deployments/*.yaml
   # Old single-device format is supported for backward compatibility.
   class_device_map:
     - {agent_class: "default",            device_id: "oura_ring"}
@@ -450,6 +638,7 @@ chronic_disease:
 # ── Diagnostic cascade (tiered clinical evaluation) ─────────────
 # When enabled, symptoms/wearable alerts trigger a sequential
 # diagnostic cascade (Tier 0 → 3) that gates SOP activation.
+# Multiplex Tier-1 variant: data/config/diagnostic_cascade_multiplex.json
 diagnostic_cascade:
   enabled: false
   config_path: "data/config/diagnostic_cascade.json"

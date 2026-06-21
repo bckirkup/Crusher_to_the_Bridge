@@ -85,6 +85,11 @@
       "starting_count": 3,
       "unit_cost_usd": 900.0,
       "description": "Sequencing flow cells. ROM covers ONT MinION R10.4.1 ($630-840/cell) or Illumina MiSeq v3 reagent kit (~$2,133/run for ~25M clusters). Blended ROM ~$900 for shipboard MinION/portable use."
+    },
+    "multiplex_panel_kits": {
+      "starting_count": 50,
+      "unit_cost_usd": 42.0,
+      "description": "Multiplex rapid diagnostic panel kits (e.g. BioFire FilmArray GI). ROM $35-50/test."
     }
   },
   "baseline_surveillance_costs_per_epoch": {
@@ -190,6 +195,9 @@
       "crew_galley",
       "crew_general"
     ],
-    "galley_zone_types": ["galley", "mess"]
+    "galley_zone_types": [
+      "galley",
+      "mess"
+    ]
   }
 }

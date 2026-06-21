@@ -33,7 +33,37 @@
           "susceptibility_multiplier": 1.3,
           "severity_multiplier": 1.4,
           "recovery_day_extension": 1,
-          "illness_probability_boost": 0.10
+          "illness_probability_boost": 0.1
+        },
+        "influenza_a": {
+          "susceptibility_multiplier": 1.3,
+          "severity_multiplier": 1.7,
+          "recovery_day_extension": 3,
+          "illness_probability_boost": 0.15
+        },
+        "legionella_pneumophila": {
+          "susceptibility_multiplier": 1.5,
+          "severity_multiplier": 1.8,
+          "recovery_day_extension": 3,
+          "illness_probability_boost": 0.2
+        },
+        "clostridioides_difficile": {
+          "susceptibility_multiplier": 1.3,
+          "severity_multiplier": 1.5,
+          "recovery_day_extension": 3,
+          "illness_probability_boost": 0.15
+        },
+        "vibrio_cholerae_parahaemolyticus": {
+          "susceptibility_multiplier": 1.2,
+          "severity_multiplier": 1.4,
+          "recovery_day_extension": 2,
+          "illness_probability_boost": 0.1
+        },
+        "campylobacter_jejuni": {
+          "susceptibility_multiplier": 1.2,
+          "severity_multiplier": 1.3,
+          "recovery_day_extension": 2,
+          "illness_probability_boost": 0.1
         }
       },
       "wearable_baseline_offsets": {
@@ -49,7 +79,11 @@
         "sick_call_probability_boost": 0.15,
         "quarantine_compliance_boost": 0.05
       },
-      "chronic_medications": ["metformin", "insulin_glargine"]
+      "chronic_medications": [
+        "metformin",
+        "insulin_glargine"
+      ],
+      "clinical_notes": "Diabetes increases susceptibility to most infections via impaired immune function (neutrophil chemotaxis, T-cell response). Legionella particularly dangerous due to pulmonary complications. C. diff risk elevated by frequent antibiotic use in diabetic populations."
     },
     {
       "disease_id": "hiv_controlled",
@@ -69,13 +103,37 @@
           "susceptibility_multiplier": 2.2,
           "severity_multiplier": 2.0,
           "recovery_day_extension": 5,
-          "illness_probability_boost": 0.30
+          "illness_probability_boost": 0.3
         },
         "default": {
           "susceptibility_multiplier": 2.0,
           "severity_multiplier": 1.8,
           "recovery_day_extension": 3,
-          "illness_probability_boost": 0.20
+          "illness_probability_boost": 0.2
+        },
+        "influenza_a": {
+          "susceptibility_multiplier": 1.8,
+          "severity_multiplier": 1.8,
+          "recovery_day_extension": 4,
+          "illness_probability_boost": 0.2
+        },
+        "legionella_pneumophila": {
+          "susceptibility_multiplier": 2.5,
+          "severity_multiplier": 2.5,
+          "recovery_day_extension": 5,
+          "illness_probability_boost": 0.3
+        },
+        "clostridioides_difficile": {
+          "susceptibility_multiplier": 2.0,
+          "severity_multiplier": 1.8,
+          "recovery_day_extension": 4,
+          "illness_probability_boost": 0.25
+        },
+        "campylobacter_jejuni": {
+          "susceptibility_multiplier": 1.8,
+          "severity_multiplier": 1.5,
+          "recovery_day_extension": 3,
+          "illness_probability_boost": 0.15
         }
       },
       "wearable_baseline_offsets": {
@@ -85,10 +143,14 @@
       },
       "wearable_infection_response_scale": 1.5,
       "behavioral_modifiers": {
-        "sick_call_probability_boost": 0.20,
-        "quarantine_compliance_boost": 0.10
+        "sick_call_probability_boost": 0.2,
+        "quarantine_compliance_boost": 0.1
       },
-      "chronic_medications": ["tenofovir_emtricitabine", "dolutegravir"]
+      "chronic_medications": [
+        "tenofovir_emtricitabine",
+        "dolutegravir"
+      ],
+      "clinical_notes": "Even controlled HIV with good CD4 counts has residual immune deficit. Legionella is an AIDS-defining opportunistic infection. C. diff risk elevated by frequent healthcare contact and antibiotic exposure."
     },
     {
       "disease_id": "chronic_kidney_disease",
@@ -105,6 +167,36 @@
           "severity_multiplier": 1.6,
           "recovery_day_extension": 2,
           "illness_probability_boost": 0.12
+        },
+        "norwalk_gi": {
+          "susceptibility_multiplier": 1.5,
+          "severity_multiplier": 1.8,
+          "recovery_day_extension": 3,
+          "illness_probability_boost": 0.15
+        },
+        "sars_cov2_resp": {
+          "susceptibility_multiplier": 2.0,
+          "severity_multiplier": 2.2,
+          "recovery_day_extension": 5,
+          "illness_probability_boost": 0.25
+        },
+        "influenza_a": {
+          "susceptibility_multiplier": 1.5,
+          "severity_multiplier": 1.8,
+          "recovery_day_extension": 3,
+          "illness_probability_boost": 0.18
+        },
+        "legionella_pneumophila": {
+          "susceptibility_multiplier": 1.8,
+          "severity_multiplier": 2.0,
+          "recovery_day_extension": 4,
+          "illness_probability_boost": 0.2
+        },
+        "vibrio_cholerae_parahaemolyticus": {
+          "susceptibility_multiplier": 1.5,
+          "severity_multiplier": 2.0,
+          "recovery_day_extension": 3,
+          "illness_probability_boost": 0.2
         }
       },
       "wearable_baseline_offsets": {
@@ -118,7 +210,11 @@
         "sick_call_probability_boost": 0.18,
         "quarantine_compliance_boost": 0.08
       },
-      "chronic_medications": ["lisinopril", "erythropoietin"]
+      "chronic_medications": [
+        "lisinopril",
+        "erythropoietin"
+      ],
+      "clinical_notes": "CKD impairs both innate and adaptive immunity (uremic immunodeficiency). Dehydration from GI pathogens is particularly dangerous — AKI on CKD risk. Vibrio severity elevated due to fluid/electrolyte vulnerability."
     },
     {
       "disease_id": "copd",
@@ -134,13 +230,31 @@
           "susceptibility_multiplier": 2.5,
           "severity_multiplier": 2.5,
           "recovery_day_extension": 5,
-          "illness_probability_boost": 0.30
+          "illness_probability_boost": 0.3
         },
         "default": {
           "susceptibility_multiplier": 1.4,
           "severity_multiplier": 1.5,
           "recovery_day_extension": 2,
           "illness_probability_boost": 0.12
+        },
+        "norwalk_gi": {
+          "susceptibility_multiplier": 1.1,
+          "severity_multiplier": 1.2,
+          "recovery_day_extension": 1,
+          "illness_probability_boost": 0.05
+        },
+        "influenza_a": {
+          "susceptibility_multiplier": 2.2,
+          "severity_multiplier": 2.3,
+          "recovery_day_extension": 5,
+          "illness_probability_boost": 0.25
+        },
+        "legionella_pneumophila": {
+          "susceptibility_multiplier": 2.8,
+          "severity_multiplier": 2.5,
+          "recovery_day_extension": 6,
+          "illness_probability_boost": 0.3
         }
       },
       "wearable_baseline_offsets": {
@@ -152,10 +266,14 @@
       },
       "wearable_infection_response_scale": 1.6,
       "behavioral_modifiers": {
-        "sick_call_probability_boost": 0.20,
+        "sick_call_probability_boost": 0.2,
         "quarantine_compliance_boost": 0.05
       },
-      "chronic_medications": ["tiotropium", "fluticasone_salmeterol"]
+      "chronic_medications": [
+        "tiotropium",
+        "fluticasone_salmeterol"
+      ],
+      "clinical_notes": "COPD is primarily a respiratory vulnerability. Legionella, influenza, and SARS-CoV-2 are the highest-risk pathogens. GI pathogens have minimal differential impact beyond baseline."
     }
   ]
 }
