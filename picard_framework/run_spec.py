@@ -12,6 +12,20 @@ from typing import Any
 from picard_framework.catalog.registry import CatalogRegistry
 
 
+def merge_config_overrides(
+    cfg: dict[str, Any],
+    overrides: dict[str, Any],
+) -> dict[str, Any]:
+    """Shallow-merge top-level override blocks into a loaded config dict."""
+    merged = dict(cfg)
+    for key, value in overrides.items():
+        if isinstance(value, dict) and isinstance(merged.get(key), dict):
+            merged[key] = {**merged[key], **value}
+        else:
+            merged[key] = value
+    return merged
+
+
 @dataclass(frozen=True)
 class TelemetryPaths:
     """Output paths for a single ship run."""
@@ -199,6 +213,10 @@ class PicardRunSpec:
             )
             mp = legacy_cfg.setdefault("multi_pathogen", {})
             mp["profiles_path"] = os.path.relpath(pathogen_path, repo_root)
+
+        overrides = raw.get("config_overrides", {})
+        if overrides:
+            legacy_cfg = merge_config_overrides(legacy_cfg, overrides)
 
         return cls(
             repo_root=repo_root,

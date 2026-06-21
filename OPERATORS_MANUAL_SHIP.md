@@ -61,6 +61,20 @@ sim.finalize(display=False)
 
 Smoke run spec (2 epochs): `picard_framework/runs/smoke_2epoch.json`
 
+Diagnostic cascade smoke (6 epochs, cascade enabled):
+
+| Spec | Cascade config |
+|------|----------------|
+| `picard_framework/runs/smoke_cascade_6epoch.json` | `data/config/diagnostic_cascade.json` |
+| `picard_framework/runs/smoke_cascade_multiplex_6epoch.json` | `data/config/diagnostic_cascade_multiplex.json` |
+
+```bash
+python3 -m pytest tests/test_smoke_diagnostic_cascade.py -v
+```
+
+Run specs use `config_overrides.diagnostic_cascade.enabled: true` so the default
+`crusher_labs/config.yaml` can keep cascade disabled for golden regression.
+
 ## Outputs
 
 | File | Description |

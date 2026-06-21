@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0.0",
+  "description": "6-epoch smoke run with multiplex diagnostic cascade (BioFire-style Tier 1 panel).",
+  "catalog": {
+    "platform_id": "destroyer_baseline",
+    "pathogen_bundle_id": "active_profiles"
+  },
+  "run": {
+    "random_seed": 42,
+    "num_epochs": 6,
+    "write_ground_truth": false
+  },
+  "legacy_yaml": "crusher_labs/config.yaml",
+  "config_overrides": {
+    "diagnostic_cascade": {
+      "enabled": true,
+      "config_path": "data/config/diagnostic_cascade_multiplex.json"
+    }
+  },
+  "actors": [],
+  "incentives": {}
+}

@@ -118,6 +118,11 @@ jobs:
       - name: Run orchestrator (24-epoch smoke test)
         run: python orchestrator.py
 
+      - name: Diagnostic cascade smoke (6-epoch, cascade enabled)
+        env:
+          PYTHONPATH: .
+        run: pytest tests/test_smoke_diagnostic_cascade.py -v --tb=short
+
       - name: Verify OIS in simulation telemetry
         run: |
           python -c "
