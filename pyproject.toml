@@ -1,4 +1,50 @@
-# Closes #89 — static analysis and coverage configuration.
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "crusher-to-the-bridge"
+version = "0.1.0"
+description = "Maritime biodefense digital twin — multi-pathogen outbreak simulation"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+dependencies = [
+    "numpy>=1.24",
+    "pyyaml>=6.0",
+    "pydantic>=2.0",
+]
+
+[project.optional-dependencies]
+dashboard = [
+    "streamlit>=1.28",
+    "plotly>=5.0",
+    "pandas>=2.0",
+    "pydeck>=0.8",
+    "Pillow>=10.0",
+]
+gis = [
+    "geopandas>=0.14",
+    "networkx>=3.0",
+]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "ruff>=0.4",
+]
+
+[project.scripts]
+crusher-orchestrator = "orchestrator:run"
+crusher-presidio = "presidio_runner:main"
+
+[tool.setuptools.packages.find]
+include = [
+    "engines*",
+    "crusher_labs*",
+    "picard_framework*",
+    "decision_engine*",
+    "presidio*",
+    "telemetry_buffer*",
+]
 
 [tool.ruff]
 target-version = "py311"

@@ -22,16 +22,45 @@ def _compute_rewards(
     history: list[dict],
     incentives: dict[str, float],
 ) -> dict[str, float]:
+    """Compute per-cruise reward signal for the Presidio experience store.
+
+    This is a reduced-order model (ROM) — a lightweight linear proxy of
+    the full multi-objective utility surface.  External optimizers should
+    consume the richer utility observation bundles exported via
+    ``--export-utility-dir`` rather than relying on this scalar alone.
+
+    Reward components:
+        biodefense   = -(infected + symptomatic)          [weighted by biodefense_weight]
+        budget       = -0.001 * total_financial_usd       [weighted by budget_weight]
+        recovery     = +recovered                         [weighted by recovery_weight]
+        ois_penalty  = -ois_cumulative                    [weighted by ois_weight]
+
+    Weights come from ``presidio/data/economics/fleet_economics.json``
+    via ``PresidioRunSpec.incentives``.  Defaults: biodefense=1.0,
+    budget=0.1, recovery=0.05, ois=0.02.
+    """
     if not history:
         return {"fleet": 0.0}
     last = history[-1]
     summary = last.get("summary", {})
     cost = last.get("cost_accounting", {})
+
     biodefense = -float(summary.get("infected", 0)) - float(summary.get("symptomatic", 0))
     budget_penalty = -0.001 * float(cost.get("total_financial_usd", 0.0))
+    recovery_bonus = float(summary.get("recovered", 0))
+    ois_penalty = -float(cost.get("operational_impact_cumulative", 0.0))
+
     w_bio = float(incentives.get("biodefense_weight", 1.0))
     w_cost = float(incentives.get("budget_weight", 0.1))
-    fleet_reward = w_bio * biodefense + w_cost * budget_penalty
+    w_recovery = float(incentives.get("recovery_weight", 0.05))
+    w_ois = float(incentives.get("ois_weight", 0.02))
+
+    fleet_reward = (
+        w_bio * biodefense
+        + w_cost * budget_penalty
+        + w_recovery * recovery_bonus
+        + w_ois * ois_penalty
+    )
     return {"fleet": fleet_reward, "commanding_officer": fleet_reward * 0.5}
 
 
@@ -167,5 +196,17 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except FileNotFoundError as exc:
+        print(f"\n[ERROR] Missing file: {exc}", file=sys.stderr)
+        print("  Hint: verify --fleet-config path and data/ directory contents.", file=sys.stderr)
+        sys.exit(1)
+    except (KeyError, ValueError) as exc:
+        print(f"\n[ERROR] Configuration problem: {exc}", file=sys.stderr)
+        print("  Hint: run 'python tools/sanity_checker.py --from-config' to validate.", file=sys.stderr)
+        sys.exit(1)
+    except json.JSONDecodeError as exc:
+        print(f"\n[ERROR] Invalid JSON: {exc}", file=sys.stderr)
+        sys.exit(1)
     sys.exit(0)

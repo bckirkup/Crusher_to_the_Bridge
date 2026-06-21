@@ -84,6 +84,37 @@ Command utility features include `operational_impact_epoch` and `operational_imp
 
 ---
 
+## Fleet reward economics (`_compute_rewards`)
+
+The Presidio experience store records a scalar reward after each cruise.
+This reward is a **reduced-order model (ROM)** — a lightweight linear
+proxy, not a full multi-objective optimization target.  External
+optimizers should consume the richer utility observation bundles exported
+via `--export-utility-dir`.
+
+**Reward formula:**
+
+```
+fleet_reward = w_bio  * (-(infected + symptomatic))
+             + w_cost * (-0.001 * total_financial_usd)
+             + w_rec  * recovered
+             + w_ois  * (-operational_impact_cumulative)
+```
+
+**Configurable weights** (`presidio/data/economics/fleet_economics.json` → `incentives`):
+
+| Weight | Key | Default | Signal |
+|--------|-----|---------|--------|
+| Biodefense | `biodefense_weight` | 1.0 | Penalizes active infections |
+| Budget | `budget_weight` | 0.1 | Penalizes total USD spending |
+| Recovery | `recovery_weight` | 0.05 | Rewards successful recoveries |
+| OIS | `ois_weight` | 0.02 | Penalizes operational disruption |
+
+The `commanding_officer` sub-reward is `fleet_reward * 0.5` (placeholder
+for future role-specific utility splits).
+
+---
+
 ## Presidio fleet runner
 
 ```bash

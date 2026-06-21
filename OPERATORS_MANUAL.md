@@ -1431,6 +1431,6 @@ Edison schemas with detailed field descriptions:
 
 | Schema | Purpose |
 |--------|---------|
-| `pathogen_profile_schema.json` | 4-way path weights, shedding curves, microflora disruption |
-| `protocol_playbook_schema.json` | Stoplight → modifier mapping, cost deduction rules |
-| `spatial_layout_schema.json` | Node graph, volumes, room-touch coefficients |
+| `pathogen_profiles.schema.json` | 4-way path weights, shedding curves, microflora disruption |
+| `protocols.schema.json` | Stoplight → modifier mapping, cost deduction rules |
+| `spatial_layout.schema.json` | Node graph, volumes, room-touch coefficients |

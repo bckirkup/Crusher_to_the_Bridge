@@ -50,11 +50,11 @@ Where `α` and `β` are pathogen-specific parameters from `active_profiles.json`
 - `IllnessStatus` / `InfectionStatus` — Enum states for SIR transitions
 - `infection_probability(dose, alpha, beta)` — Scalar dose-response function
 
-### 2.2 Four-Pathway Transmission Core
+### 2.2 Six-Pathway Transmission Core
 
 **Module:** `engines/transmission_core.py`
 
-Pathogens navigate the shipboard environment through four distinct,
+Pathogens navigate the shipboard environment through six distinct,
 independent transport pathways:
 
 | # | Pathway | Mechanism | Dose Source |
@@ -63,14 +63,17 @@ independent transport pathways:
 | 2 | **Short-Range Droplet** | Immediate room-level aerosolization | 5% of total shedding → room aerosol pool |
 | 3 | **Long-Range HVAC Airborne** | py-contam bridge distributes aerosol through ductwork | CONTAM mass-balance equation |
 | 4 | **Fomite Deposition** | Surface pool accumulation + stochastic pickup | 10% pickup probability × 1% transfer fraction |
+| 5 | **Food Contamination** | Pathogen mass deposited in dining zone food pools by infected food handlers | `food_contamination` profile block |
+| 6 | **Environmental Colonization** | Persistent pathogen mass in zone environmental reservoirs | `environmental_contamination` profile block |
 
 Each pathway produces:
 - A **dose contribution** to susceptible agents
 - A **contact-tracing record** for the surveillance inference hook
 
-Combined dose feeds the Korkin Lab dose-response function.  All four
+Combined dose feeds the Korkin Lab dose-response function.  All six
 pathways are independently toggleable via protocol modifier scalars
-(`direct_contact_scalar`, `droplet_scalar`, `hvac_airborne_scalar`).
+(`direct_contact_scalar`, `droplet_scalar`, `hvac_airborne_scalar`,
+`fomite_scalar`, `food_contamination_scalar`, `environmental_scalar`).
 
 ### 2.3 CONTAM-Style Airflow Transport (py-contam Bridge)
 
