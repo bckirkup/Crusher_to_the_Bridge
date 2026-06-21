@@ -717,10 +717,19 @@ class TestWearableMonitor:
     def test_monitor_from_config(self) -> None:
         cfg = load_config()
         rng = np.random.default_rng(42)
-        monitor = build_wearable_monitor_from_config(cfg, rng)
+        monitor = build_wearable_monitor_from_config(cfg, rng, repo_root=REPO_ROOT)
         assert monitor is not None
         assert "oura_ring" in monitor.devices
-        assert "garmin_watch" in monitor.devices
+        assert "apple_watch_s10" in monitor.devices
+
+    def test_deployment_profile_crew_plus_byod(self) -> None:
+        cfg = load_config()
+        rng = np.random.default_rng(42)
+        monitor = build_wearable_monitor_from_config(cfg, rng, repo_root=REPO_ROOT)
+        assert monitor is not None
+        crew_med = monitor.class_device_assignments.get("crew_medical", [])
+        assert crew_med
+        assert crew_med[0].device_id == "apple_watch_s10"
 
     def test_disabled_config(self) -> None:
         cfg = {"wearable_monitoring": {"enabled": False}}
@@ -732,17 +741,19 @@ class TestWearableMonitor:
     def test_initialize_agents(self) -> None:
         cfg = load_config()
         rng = np.random.default_rng(42)
-        monitor = build_wearable_monitor_from_config(cfg, rng)
+        monitor = build_wearable_monitor_from_config(cfg, rng, repo_root=REPO_ROOT)
         assert monitor is not None
         engine = _build_test_engine()
         for agent in engine.agents:
             monitor.initialize_agent(agent)
-        assert len(monitor.agent_states) == len(engine.agents)
+        # crew_plus_byod: crew always monitored; passengers use probabilistic BYOD
+        assert 0 < len(monitor.agent_states) < len(engine.agents)
+        assert len(monitor.agent_states) == 13
 
     def test_agent_baselines_vary_by_class(self) -> None:
         cfg = load_config()
         rng = np.random.default_rng(42)
-        monitor = build_wearable_monitor_from_config(cfg, rng)
+        monitor = build_wearable_monitor_from_config(cfg, rng, repo_root=REPO_ROOT)
         assert monitor is not None
         engine = _build_test_engine()
         for agent in engine.agents:
@@ -762,14 +773,14 @@ class TestWearableMonitor:
     def test_generate_epoch_data(self) -> None:
         cfg = load_config()
         rng = np.random.default_rng(42)
-        monitor = build_wearable_monitor_from_config(cfg, rng)
+        monitor = build_wearable_monitor_from_config(cfg, rng, repo_root=REPO_ROOT)
         assert monitor is not None
         engine = _build_test_engine()
         for agent in engine.agents:
             monitor.initialize_agent(agent)
 
         data = monitor.generate_epoch_data(engine.agents, {})
-        assert len(data) == len(engine.agents)
+        assert len(data) == len(monitor.agent_states)
         for aid, epoch_data in data.items():
             assert "hourly" in epoch_data
             assert "summary" in epoch_data
@@ -782,21 +793,20 @@ class TestWearableMonitor:
     def test_fleet_summary(self) -> None:
         cfg = load_config()
         rng = np.random.default_rng(42)
-        monitor = build_wearable_monitor_from_config(cfg, rng)
+        monitor = build_wearable_monitor_from_config(cfg, rng, repo_root=REPO_ROOT)
         assert monitor is not None
         engine = _build_test_engine()
         for agent in engine.agents:
             monitor.initialize_agent(agent)
 
         summary = monitor.get_fleet_summary()
-        assert summary["total_monitored"] == len(engine.agents)
-        assert "oura_ring" in summary["devices"]
-        assert "garmin_watch" in summary["devices"]
+        assert summary["total_monitored"] == len(monitor.agent_states)
+        assert "apple_watch_s10" in summary["devices"] or "garmin_venu3" in summary["devices"]
 
     def test_class_device_deployment(self) -> None:
         cfg = load_config()
         rng = np.random.default_rng(42)
-        monitor = build_wearable_monitor_from_config(cfg, rng)
+        monitor = build_wearable_monitor_from_config(cfg, rng, repo_root=REPO_ROOT)
         assert monitor is not None
         engine = _build_test_engine()
         for agent in engine.agents:
@@ -804,13 +814,21 @@ class TestWearableMonitor:
 
         for agent in engine.agents:
             states = monitor.agent_states.get(agent.agent_id)
-            assert states is not None
+            if states is None:
+                continue
             assert len(states) >= 1
             primary = states[0]
-            if agent.agent_class in ("crew_medical", "crew_engineering", "crew_galley"):
-                assert primary.device.device_id == "garmin_watch"
-            else:
-                assert primary.device.device_id == "oura_ring"
+            if agent.agent_class == "crew_medical":
+                assert primary.device.device_id == "apple_watch_s10"
+            elif agent.agent_class in ("crew_engineering", "crew_general"):
+                assert primary.device.device_id == "garmin_venu3"
+            elif agent.agent_class == "crew_galley":
+                assert primary.device.device_id == "apple_watch_s10"
+        assert any(
+            monitor.agent_states.get(a.agent_id) is not None
+            for a in engine.agents
+            if a.agent_class.startswith("crew_")
+        )
 
 
 class TestWearableDataStream:

@@ -626,6 +626,31 @@ def step_long_read_cost_accounting(
     )
 
 
+def step_cascade_cost_accounting(
+    epoch: int,
+    proto_ctx: ProtocolContext,
+    cascade_result: dict[str, Any] | None,
+) -> None:
+    """Debit cascade-ordered diagnostic tests via per_test_costs ledger entries."""
+    if not cascade_result:
+        return
+    per_test = proto_ctx.resource_costs_cfg.get("per_test_costs", {})
+    tests_ordered = cascade_result.get("tests_ordered", {})
+    if not isinstance(tests_ordered, dict):
+        return
+    test_counts: dict[str, int] = {}
+    for test_keys in tests_ordered.values():
+        if not isinstance(test_keys, list):
+            continue
+        for test_key in test_keys:
+            test_counts[test_key] = test_counts.get(str(test_key), 0) + 1
+    for test_key, count in test_counts.items():
+        if count > 0 and test_key in per_test:
+            proto_ctx.cost_ledger.debit_per_test(
+                epoch, test_key, count, per_test,
+            )
+
+
 # ── Microflora disruption ───────────────────────────────────────────────
 
 def compute_zone_microflora_shifts(

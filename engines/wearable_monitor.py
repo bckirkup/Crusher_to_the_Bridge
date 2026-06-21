@@ -23,9 +23,11 @@ summary data each epoch.
 from __future__ import annotations
 
 import math
+import os
 from typing import Any
 
 import numpy as np
+import yaml
 
 from engines.infection_dynamics_bridge import (
     KorkinAgent,
@@ -743,6 +745,55 @@ def _clamp_channel(channel: str, value: float) -> float:
 
 # ── Config-driven construction ───────────────────────────────────────────
 
+def load_wearable_deployment_profile(
+    wm_cfg: dict[str, Any],
+    repo_root: str,
+) -> dict[str, Any]:
+    """Merge class/chronic device maps from a named deployment preset YAML."""
+    profile = wm_cfg.get("deployment_profile")
+    if not profile:
+        return wm_cfg
+
+    profile_path = os.path.join(
+        repo_root,
+        "data",
+        "config",
+        "wearable_deployments",
+        f"{profile}.yaml",
+    )
+    if not os.path.isfile(profile_path):
+        return wm_cfg
+
+    with open(profile_path, encoding="utf-8") as fh:
+        fragment = yaml.safe_load(fh) or {}
+
+    merged = dict(wm_cfg)
+    if "class_device_map" in fragment:
+        merged["class_device_map"] = fragment["class_device_map"]
+    if "chronic_disease_device_map" in fragment:
+        merged["chronic_disease_device_map"] = fragment["chronic_disease_device_map"]
+    return merged
+
+
+def apply_detection_sensitivity_scale(
+    devices: dict[str, WearableDevice],
+    scale: float,
+    *,
+    scale_fever: bool = True,
+) -> None:
+    """Scale device detection sensitivity in [0, 1] for parametric sweeps."""
+    clamped = max(0.0, min(1.0, float(scale)))
+    for device in devices.values():
+        if not device.detection_profile:
+            continue
+        profile = device.detection_profile
+        base_sens = float(profile.get("sensitivity", 1.0))
+        profile["sensitivity"] = max(0.0, min(1.0, base_sens * clamped))
+        if scale_fever:
+            base_fever = float(profile.get("fever_sensitivity", 1.0))
+            profile["fever_sensitivity"] = max(0.0, min(1.0, base_fever * clamped))
+
+
 def build_wearable_device_from_config(
     device_cfg: dict[str, Any],
 ) -> WearableDevice:
@@ -811,6 +862,8 @@ def build_wearable_device_from_config(
 def build_wearable_monitor_from_config(
     cfg: dict[str, Any],
     rng: np.random.Generator | None = None,
+    *,
+    repo_root: str | None = None,
 ) -> WearableMonitor | None:
     """Build the full WearableMonitor fleet from config.
 
@@ -827,6 +880,9 @@ def build_wearable_monitor_from_config(
           - agent_class: "default"
             devices:
               - {device_id: "oura_ring", coverage: 1.0, visibility: "medical_staff"}
+
+    When ``deployment_profile`` is set (e.g. ``crew_plus_byod``), device
+    deployment maps are loaded from ``data/config/wearable_deployments/``.
     """
     wm_cfg = cfg.get("wearable_monitoring")
     if wm_cfg is None:
@@ -834,6 +890,8 @@ def build_wearable_monitor_from_config(
     if not wm_cfg.get("enabled", True):
         return None
 
+    root = repo_root or os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    wm_cfg = load_wearable_deployment_profile(wm_cfg, root)
     devices: dict[str, WearableDevice] = {}
     for dev_cfg in wm_cfg.get("devices", []):
         device = build_wearable_device_from_config(dev_cfg)
@@ -871,6 +929,14 @@ def build_wearable_monitor_from_config(
 
     if not devices:
         return None
+
+    scale = float(wm_cfg.get("detection_sensitivity_scale", 1.0))
+    if scale != 1.0:
+        apply_detection_sensitivity_scale(
+            devices,
+            scale,
+            scale_fever=bool(wm_cfg.get("scale_fever_sensitivity", True)),
+        )
 
     chronic_disease_device_map = wm_cfg.get("chronic_disease_device_map", [])
 

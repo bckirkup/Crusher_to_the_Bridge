@@ -24,8 +24,10 @@ from engines.wearable_monitor import (
     DeviceAssignment,
     WearableDevice,
     WearableMonitor,
+    apply_detection_sensitivity_scale,
     build_wearable_device_from_config,
     build_wearable_monitor_from_config,
+    load_wearable_deployment_profile,
     DEFAULT_CHANNEL_BASELINES,
 )
 from engines.infection_dynamics_bridge import (
@@ -823,7 +825,34 @@ class TestFromConfigIntegration:
 
     def test_chronic_disease_device_map_present(self) -> None:
         cfg = self._load_cfg()
-        monitor = build_wearable_monitor_from_config(cfg, np.random.default_rng(42))
+        monitor = build_wearable_monitor_from_config(
+            cfg, np.random.default_rng(42), repo_root=REPO_ROOT,
+        )
         assert monitor is not None
         assert len(monitor.chronic_disease_device_map) >= 1
         assert monitor.chronic_disease_device_map[0]["disease_id"] == "type2_diabetes"
+
+    def test_deployment_profile_crew_plus_byod(self) -> None:
+        cfg = self._load_cfg()
+        merged = load_wearable_deployment_profile(
+            cfg["wearable_monitoring"], REPO_ROOT,
+        )
+        assert merged.get("deployment_profile") == "crew_plus_byod"
+        assert any(
+            m.get("agent_class") == "passenger_general"
+            for m in merged.get("class_device_map", [])
+        )
+
+    def test_detection_sensitivity_scale_reduces_sensitivity(self) -> None:
+        cfg = self._load_cfg()
+        wm = dict(cfg["wearable_monitoring"])
+        wm["detection_sensitivity_scale"] = 0.5
+        scaled_cfg = dict(cfg)
+        scaled_cfg["wearable_monitoring"] = wm
+        monitor = build_wearable_monitor_from_config(
+            scaled_cfg, np.random.default_rng(42), repo_root=REPO_ROOT,
+        )
+        assert monitor is not None
+        device = monitor.devices["apple_watch_s10"]
+        assert device.detection_profile is not None
+        assert device.detection_profile["sensitivity"] < 0.82

@@ -24,7 +24,7 @@
       "tier_id": 1,
       "name": "Rapid Multiplex Panel",
       "tests": [
-        "clinical_rdt"
+        "clinical_multiplex_panel"
       ],
       "sensitivity": 0.85,
       "specificity": 0.97,
