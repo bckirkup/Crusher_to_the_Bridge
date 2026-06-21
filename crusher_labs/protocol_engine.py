@@ -238,9 +238,37 @@ class StandingProtocol:
         self.costs_per_epoch: dict[str, Any] = config.get("costs_per_epoch", {})
         self.activation_costs: dict[str, Any] = config.get("activation_costs", {})
         self.category: str = config.get("category", CATEGORY_INTERVENTION)
+        self.required_cascade_tier: int | None = config.get("required_cascade_tier")
 
-    def is_triggered(self, stoplights: dict[str, dict[str, str]]) -> bool:
-        """Check whether this protocol's trigger condition is met."""
+    def is_triggered(
+        self,
+        stoplights: dict[str, dict[str, str]],
+        cascade_context: dict[str, Any] | None = None,
+    ) -> bool:
+        """Check whether this protocol's trigger condition is met.
+
+        When a ``required_cascade_tier`` is set and *cascade_context* is
+        provided, the protocol only fires if enough agents have reached
+        that tier in the cascade (or the cascade has unlocked this SOP
+        via fleet escalation rules).
+        """
+        if self.required_cascade_tier is not None and cascade_context is not None:
+            tier_req = self.required_cascade_tier
+            unlocked_sops = set(cascade_context.get("unlocked_sops", []))
+            fleet_sops = set(cascade_context.get("fleet_sops_unlocked", []))
+            tier_distribution = cascade_context.get("tier_distribution", {})
+
+            if self.protocol_id in unlocked_sops or self.protocol_id in fleet_sops:
+                pass  # cascade explicitly unlocked this SOP
+            else:
+                agents_at_tier = sum(
+                    count for tid, count in tier_distribution.items()
+                    if int(tid) >= tier_req
+                )
+                min_agents = self.trigger.get("min_agents_affected", 1)
+                if agents_at_tier < max(min_agents, 1):
+                    return False
+
         instrument_class = self.trigger.get("instrument_class", "")
         required_level = self.trigger.get("stoplight_level", "RED")
         instrument_lights = stoplights.get(instrument_class, {})
@@ -284,12 +312,17 @@ class ProtocolEngine:
         stoplights: dict[str, dict[str, str]],
         forced_protocol_ids: set[str] | None = None,
         authorized_sop_ids: list[str] | None = None,
+        cascade_context: dict[str, Any] | None = None,
     ) -> list[dict[str, Any]]:
         """Evaluate all protocols and return the list of active modifiers.
 
         Protocols activate when stoplight-triggered or listed in
         *forced_protocol_ids*. Costs debit only when authorized (if a CO
         subset is set) or when explicitly forced via command action.
+
+        When *cascade_context* is provided, protocols with a
+        ``required_cascade_tier`` are gated by the cascade engine's
+        current state.
 
         Returns a list of dicts, each containing:
         - ``protocol_id``, ``name``, ``modifiers``
@@ -301,7 +334,7 @@ class ProtocolEngine:
 
         for protocol in self.protocols:
             pid = protocol.protocol_id
-            triggered = protocol.is_triggered(stoplights)
+            triggered = protocol.is_triggered(stoplights, cascade_context)
             forced_on = pid in forced
             should_active = triggered or forced_on
             was_active = self._active[pid]

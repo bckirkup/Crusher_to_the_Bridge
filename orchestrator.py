@@ -80,6 +80,8 @@ from orchestrator_epoch import (
     step_operational_impact_accounting,
     compute_zone_microflora_shifts,
     step_wearable_monitoring,
+    step_diagnostic_cascade,
+    build_cascade_context,
     apply_surface_decontamination,
     apply_zone_closures,
     compute_infection_counters,
@@ -176,8 +178,13 @@ def run() -> None:
     grumb_seeds = initialize_grumb_seeding(seq, ship["zones"])
     print_initialization(ship, grumb_seeds, cfg)
 
+    from crusher_labs.diagnostic_cascade import build_cascade_engine
+
+    cascade_engine = build_cascade_engine(cfg, repo_root=REPO_ROOT)
+
     state = SimulationState(
         isolation_unit_capacity=load_isolation_unit_capacity(cfg),
+        cascade_engine=cascade_engine,
     )
 
     graph_cfg = cfg.get("ship_graph", {})
@@ -233,6 +240,11 @@ def run() -> None:
 
         syn_result = syndromic.query_ground_truth(truth)
 
+        cascade_result = step_diagnostic_cascade(
+            epoch, state, agents, syn_result, wearable_result, obs,
+            wearable_monitor=wearable_monitor,
+        )
+
         sick_call_ids = syn_result["sick_call_agents"]
         rdt_result = rdt.query_ground_truth(truth, sick_call_ids=sick_call_ids)
 
@@ -284,10 +296,12 @@ def run() -> None:
             cfg=cfg,
         )
         reset_modifiers(contam_engine, tx_core, proto_ctx.original_filter_eff)
+        cascade_ctx = build_cascade_context(state, cascade_result)
         active_mods = proto_ctx.protocol_engine.evaluate_epoch(
             epoch,
             stoplights,
             forced_protocol_ids=state.forced_protocol_ids,
+            cascade_context=cascade_ctx,
         )
         merged_mods = proto_ctx.protocol_engine.get_merged_modifiers(active_mods)
 
@@ -360,6 +374,7 @@ def run() -> None:
             wearable_result=wearable_result,
             infection_counters=counter_results,
             long_read_results=long_read_results,
+            cascade_result=cascade_result,
         )
         state.simulation_history.append(epoch_record)
 

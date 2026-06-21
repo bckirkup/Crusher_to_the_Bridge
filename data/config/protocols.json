@@ -28,7 +28,8 @@
         },
         "labor_person_hours": 4.0
       },
-      "category": "intervention"
+      "category": "intervention",
+      "required_cascade_tier": null
     },
     {
       "protocol_id": "SOP-002",
@@ -57,7 +58,8 @@
         },
         "labor_person_hours": 8.0
       },
-      "category": "intervention"
+      "category": "intervention",
+      "required_cascade_tier": 3
     },
     {
       "protocol_id": "SOP-003",
@@ -88,7 +90,8 @@
         },
         "labor_person_hours": 1.0
       },
-      "category": "intervention"
+      "category": "intervention",
+      "required_cascade_tier": null
     },
     {
       "protocol_id": "SOP-004",
@@ -120,7 +123,8 @@
         },
         "labor_person_hours": 0.5
       },
-      "category": "intervention"
+      "category": "intervention",
+      "required_cascade_tier": null
     },
     {
       "protocol_id": "SOP-005",
@@ -155,7 +159,8 @@
         },
         "labor_person_hours": 1.0
       },
-      "category": "intervention"
+      "category": "intervention",
+      "required_cascade_tier": 3
     },
     {
       "protocol_id": "SOP-006",
@@ -187,7 +192,8 @@
         },
         "labor_person_hours": 1.0
       },
-      "category": "surveillance"
+      "category": "surveillance",
+      "required_cascade_tier": 1
     },
     {
       "protocol_id": "SOP-007",
@@ -218,7 +224,8 @@
         },
         "labor_person_hours": 4.0
       },
-      "category": "intervention"
+      "category": "intervention",
+      "required_cascade_tier": 3
     },
     {
       "protocol_id": "SOP-008",
@@ -249,7 +256,8 @@
         },
         "labor_person_hours": 2.0
       },
-      "category": "intervention"
+      "category": "intervention",
+      "required_cascade_tier": 2
     },
     {
       "protocol_id": "SOP-009",
@@ -286,7 +294,8 @@
         },
         "labor_person_hours": 8.0
       },
-      "category": "intervention"
+      "category": "intervention",
+      "required_cascade_tier": 3
     },
     {
       "protocol_id": "SOP-010",
@@ -320,7 +329,8 @@
         },
         "labor_person_hours": 6.0
       },
-      "category": "intervention"
+      "category": "intervention",
+      "required_cascade_tier": 2
     },
     {
       "protocol_id": "SOP-011",
@@ -352,7 +362,8 @@
         },
         "labor_person_hours": 2.0
       },
-      "category": "intervention"
+      "category": "intervention",
+      "required_cascade_tier": 2
     },
     {
       "protocol_id": "SOP-012",
@@ -382,7 +393,8 @@
         },
         "labor_person_hours": 1.0
       },
-      "category": "intervention"
+      "category": "intervention",
+      "required_cascade_tier": 2
     },
     {
       "protocol_id": "SOP-013",
@@ -412,7 +424,8 @@
         },
         "labor_person_hours": 0.5
       },
-      "category": "surveillance"
+      "category": "surveillance",
+      "required_cascade_tier": 1
     },
     {
       "protocol_id": "SOP-014",
@@ -444,7 +457,8 @@
         },
         "labor_person_hours": 1.0
       },
-      "category": "intervention"
+      "category": "intervention",
+      "required_cascade_tier": null
     },
     {
       "protocol_id": "SOP-015",
@@ -475,7 +489,8 @@
         },
         "labor_person_hours": 2.0
       },
-      "category": "surveillance"
+      "category": "surveillance",
+      "required_cascade_tier": 3
     },
     {
       "protocol_id": "SOP-016",
@@ -511,7 +526,8 @@
         },
         "labor_person_hours": 6.0
       },
-      "category": "intervention"
+      "category": "intervention",
+      "required_cascade_tier": 3
     }
   ]
 }
