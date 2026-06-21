@@ -1,0 +1,35 @@
+  # ── Crew Mandatory + Passenger BYOD Deployment ────────────────
+  # Crew receive standardized devices. Passengers bring own devices.
+  # BYOD coverage modeled at 43% (current smartwatch ownership)
+  # with heterogeneous device mix.
+  class_device_map:
+    - agent_class: "crew_medical"
+      devices:
+        - {device_id: "apple_watch_s10", coverage: 1.0, visibility: "both"}
+    - agent_class: "crew_engineering"
+      devices:
+        - {device_id: "garmin_venu3", coverage: 1.0, visibility: "medical_staff"}
+    - agent_class: "crew_galley"
+      devices:
+        - {device_id: "apple_watch_s10", coverage: 1.0, visibility: "both"}
+    - agent_class: "crew_general"
+      devices:
+        - {device_id: "garmin_venu3", coverage: 1.0, visibility: "medical_staff"}
+    - agent_class: "passenger_general"
+      devices:
+        - {device_id: "apple_watch_s10", coverage: 0.25, visibility: "medical_staff"}
+        - {device_id: "oura_ring_4", coverage: 0.08, visibility: "medical_staff"}
+        - {device_id: "oura_ring_5", coverage: 0.05, visibility: "medical_staff"}
+        - {device_id: "garmin_venu3", coverage: 0.05, visibility: "medical_staff"}
+    - agent_class: "passenger_elderly"
+      devices:
+        - {device_id: "apple_watch_s10", coverage: 0.20, visibility: "medical_staff"}
+        - {device_id: "oura_ring_4", coverage: 0.05, visibility: "medical_staff"}
+    - agent_class: "passenger_family"
+      devices:
+        - {device_id: "apple_watch_s10", coverage: 0.30, visibility: "medical_staff"}
+        - {device_id: "oura_ring_5", coverage: 0.05, visibility: "medical_staff"}
+        - {device_id: "garmin_venu3", coverage: 0.08, visibility: "medical_staff"}
+
+  chronic_disease_device_map:
+    - {disease_id: "type2_diabetes", device_id: "cgm_patch", coverage: 0.80, visibility: "both"}

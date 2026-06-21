@@ -77,9 +77,9 @@ def test_picard_golden_summary_and_trigger() -> None:
     assert len(picard_history) >= GOLDEN_LAST + 1
     fp = _fingerprint(picard_history, GOLDEN_LAST)
     assert fp["susceptible"] == 5
-    assert fp["infected"] == 2
-    assert fp["symptomatic"] == 2
-    assert fp["recovered"] == 9
+    assert fp["infected"] == 0
+    assert fp["symptomatic"] == 0
+    assert fp["recovered"] == 11
     assert fp["immune"] == 4
     assert fp["trigger_status"] == "CONFIRMED"
 
