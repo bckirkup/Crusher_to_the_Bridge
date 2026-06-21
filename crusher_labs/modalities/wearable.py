@@ -9,6 +9,10 @@ Consumes raw wearable monitor output (fine-grained + summary) from
 layer (simulating real-world Bluetooth sync lag, motion artefacts, etc.)
 before presenting the data to the surveillance pipeline.
 
+Supports multi-device agents and visibility routing — only devices with
+``medical_staff`` or ``both`` visibility contribute to fleet-level
+anomaly/fever counts in the stoplight system.
+
 Provides:
 - ``query_ground_truth()`` — per-epoch wearable telemetry with anomaly flags
 - Anomaly detection using per-channel z-scores (baseline-relative)
@@ -70,22 +74,40 @@ class WearableDataStream:
         total_fever = 0
         total_anomaly = 0
         channel_anomaly_counts: dict[str, int] = {}
+        staff_visible_agents: list[int] = []
+        wearer_only_agents: list[int] = []
+        total_staff_visible = 0
 
         for aid, raw in wearable_data.items():
             observed = self._apply_observation_noise(raw)
             agent_results[aid] = observed
 
-            if observed.get("fever", False):
-                total_fever += 1
-            anomaly_count = observed.get("anomaly_count", 0)
-            if anomaly_count > 0:
-                total_anomaly += 1
-            for ch in observed.get("anomaly_channels", []):
-                channel_anomaly_counts[ch] = channel_anomaly_counts.get(ch, 0) + 1
+            # Determine visibility for this agent
+            visibility_list = raw.get("visibility", [])
+            if isinstance(visibility_list, str):
+                visibility_list = [visibility_list]
+
+            has_staff_visible = any(
+                v in ("medical_staff", "both") for v in visibility_list
+            )
+            is_wearer_only = all(v == "wearer_only" for v in visibility_list) if visibility_list else False
+
+            if has_staff_visible:
+                staff_visible_agents.append(aid)
+                total_staff_visible += 1
+                if observed.get("fever", False):
+                    total_fever += 1
+                anomaly_count = observed.get("anomaly_count", 0)
+                if anomaly_count > 0:
+                    total_anomaly += 1
+                for ch in observed.get("anomaly_channels", []):
+                    channel_anomaly_counts[ch] = channel_anomaly_counts.get(ch, 0) + 1
+            elif is_wearer_only:
+                wearer_only_agents.append(aid)
 
         total_monitored = len(wearable_data)
-        fever_rate = total_fever / max(total_monitored, 1)
-        anomaly_rate = total_anomaly / max(total_monitored, 1)
+        fever_rate = total_fever / max(total_staff_visible, 1)
+        anomaly_rate = total_anomaly / max(total_staff_visible, 1)
 
         return {
             "modality": self.name,
@@ -93,12 +115,15 @@ class WearableDataStream:
             "agent_results": agent_results,
             "fleet_summary": {
                 "total_monitored": total_monitored,
+                "total_staff_visible": total_staff_visible,
                 "fever_count": total_fever,
                 "fever_rate": round(fever_rate, 4),
                 "anomaly_count": total_anomaly,
                 "anomaly_rate": round(anomaly_rate, 4),
                 "channel_anomaly_counts": channel_anomaly_counts,
             },
+            "staff_visible_agents": staff_visible_agents,
+            "wearer_only_agents": wearer_only_agents,
         }
 
     def _apply_observation_noise(

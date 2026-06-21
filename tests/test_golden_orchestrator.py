@@ -15,14 +15,14 @@ REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 HISTORY_PATH = os.path.join(REPO_ROOT, "telemetry_buffer", "simulation_history.json")
 
 EXPECTED_SUMMARY = {
-    "susceptible": 7,
-    "infected": 0,
-    "symptomatic": 0,
+    "susceptible": 5,
+    "infected": 2,
+    "symptomatic": 2,
     "recovered": 9,
     "immune": 4,
 }
 EXPECTED_TRIGGER = "CONFIRMED"
-EXPECTED_COST_USD = 2035.0
+EXPECTED_COST_USD = 2679.0
 GOLDEN_LAST_EPOCH = 23
 
 

@@ -126,12 +126,21 @@ def print_wearable_monitoring(
         print("  WEARABLE MONITORING  ·  physiological device fleet initialized")
         print(thin)
         print(f"\n  Monitored agents: {fleet['total_monitored']}")
+        total_instances = fleet.get("total_device_instances", fleet["total_monitored"])
+        print(f"  Total device instances: {total_instances}")
         for did, dev in fleet["devices"].items():
             channels = ", ".join(dev["channels"])
             print(f"  Device: {did:20s}  channels: {channels}")
-        print(f"  Class → device mapping:")
-        for cls, did in fleet["class_device_map"].items():
-            print(f"    {cls:25s} → {did}")
+        deployment = fleet.get("device_deployment_counts", {})
+        if deployment:
+            print(f"  Device deployment:")
+            for did, count in deployment.items():
+                print(f"    {did:25s}  × {count}")
+        vis = fleet.get("visibility_breakdown", {})
+        if vis:
+            parts = [f"{k}={v}" for k, v in vis.items() if v > 0]
+            if parts:
+                print(f"  Visibility: {', '.join(parts)}")
         print()
     else:
         print("  [INFO] Wearable monitoring: disabled (no wearable_monitoring config)")

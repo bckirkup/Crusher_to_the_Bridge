@@ -219,6 +219,7 @@ class ShipSimulation:
         self.wearable_monitor, self.wearable_modality = init_wearable_monitors(
             self.engine, cfg, self.seed,
             chronic_wearable_offsets=chronic_wearable_offsets,
+            chronic_assignments=self.chronic_assignments,
         )
         if self.display:
             from orchestrator_display import print_wearable_monitoring

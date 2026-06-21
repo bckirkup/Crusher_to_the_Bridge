@@ -771,17 +771,82 @@ class WearablePhaseBoundary(BaseModel):
         return v
 
 
+class WearableDetectionProfile(BaseModel):
+    sensitivity: float = 1.0
+    specificity: float = 1.0
+    alert_latency_hours: float = 0.0
+    fever_sensitivity: float = 1.0
+    fever_specificity: float = 1.0
+
+    @field_validator("sensitivity", "specificity", "fever_sensitivity", "fever_specificity")
+    @classmethod
+    def probability_bounded(cls, v: float) -> float:
+        if v < 0 or v > 1:
+            raise ValueError(f"probability must be in [0,1], got {v}")
+        return v
+
+    @field_validator("alert_latency_hours")
+    @classmethod
+    def latency_non_negative(cls, v: float) -> float:
+        if v < 0:
+            raise ValueError(f"alert_latency_hours must be non-negative, got {v}")
+        return v
+
+
 class WearableDeviceEntry(BaseModel):
+    model_config = {"extra": "allow"}
     device_id: str
     channels: list[str]
     noise: list[WearableNoiseEntry] = []
     infection_responses: list[WearableInfectionResponse] = []
     phase_boundaries: list[WearablePhaseBoundary] = []
+    detection_profile: WearableDetectionProfile | None = None
+    confounders: list[dict[str, Any]] = []
+    channel_baselines: list[dict[str, Any]] = []
+
+
+class ClassDeviceMapDeviceEntry(BaseModel):
+    device_id: str
+    coverage: float = 1.0
+    visibility: str = "medical_staff"
+
+    @field_validator("coverage")
+    @classmethod
+    def coverage_bounded(cls, v: float) -> float:
+        if v < 0 or v > 1:
+            raise ValueError(f"coverage must be in [0,1], got {v}")
+        return v
+
+    @field_validator("visibility")
+    @classmethod
+    def visibility_valid(cls, v: str) -> str:
+        valid = {"medical_staff", "wearer_only", "both"}
+        if v not in valid:
+            raise ValueError(f"visibility must be one of {valid}, got '{v}'")
+        return v
 
 
 class ClassDeviceMapEntry(BaseModel):
+    model_config = {"extra": "allow"}
     agent_class: str
+    device_id: str | None = None
+    devices: list[ClassDeviceMapDeviceEntry] | None = None
+    coverage: float = 1.0
+    visibility: str = "medical_staff"
+
+
+class ChronicDiseaseDeviceMapEntry(BaseModel):
+    disease_id: str
     device_id: str
+    coverage: float = 1.0
+    visibility: str = "medical_staff"
+
+    @field_validator("coverage")
+    @classmethod
+    def coverage_bounded(cls, v: float) -> float:
+        if v < 0 or v > 1:
+            raise ValueError(f"coverage must be in [0,1], got {v}")
+        return v
 
 
 class EmodPhase(BaseModel):
@@ -1104,6 +1169,17 @@ def _check_wearable_monitoring(cfg: dict[str, Any], report: Report) -> None:
                                  f"'{ir.pathogen_category}' references channel "
                                  f"'{cr.channel}' not in device channels: {ch_set}")
 
+        # Validate confounder channel references
+        for ci, conf in enumerate(dev.confounders):
+            affected = conf.get("affected_channels", {})
+            for conf_ch in affected:
+                if conf_ch not in ch_set:
+                    cid = conf.get("confounder_id", f"index {ci}")
+                    report.error("config.yaml", "GRAPH_REF",
+                                 f"Device '{dev.device_id}' confounder '{cid}' "
+                                 f"references channel '{conf_ch}' not in device "
+                                 f"channels: {ch_set}")
+
     cdm = wm.get("class_device_map", [])
     for entry_raw in cdm:
         try:
@@ -1112,10 +1188,31 @@ def _check_wearable_monitoring(cfg: dict[str, Any], report: Report) -> None:
             report.error("config.yaml", "SCHEMA",
                          f"wearable_monitoring.class_device_map: {e}")
             continue
-        if entry.device_id not in device_ids:
+        # Validate device references for both old and new formats
+        if entry.devices:
+            for dev_entry in entry.devices:
+                if dev_entry.device_id not in device_ids:
+                    report.error("config.yaml", "GRAPH_REF",
+                                 f"class_device_map assigns '{entry.agent_class}' → "
+                                 f"'{dev_entry.device_id}' which is not in devices: {device_ids}")
+        elif entry.device_id and entry.device_id not in device_ids:
             report.error("config.yaml", "GRAPH_REF",
                          f"class_device_map assigns '{entry.agent_class}' → "
                          f"'{entry.device_id}' which is not in devices: {device_ids}")
+
+    # Validate chronic disease device map
+    cddm = wm.get("chronic_disease_device_map", [])
+    for cd_entry_raw in cddm:
+        try:
+            cd_entry = ChronicDiseaseDeviceMapEntry.model_validate(cd_entry_raw)
+        except Exception as e:
+            report.error("config.yaml", "SCHEMA",
+                         f"wearable_monitoring.chronic_disease_device_map: {e}")
+            continue
+        if cd_entry.device_id not in device_ids:
+            report.error("config.yaml", "GRAPH_REF",
+                         f"chronic_disease_device_map assigns '{cd_entry.disease_id}' → "
+                         f"'{cd_entry.device_id}' which is not in devices: {device_ids}")
 
     obs_sigma = wm.get("observation_noise_sigma", 0.5)
     if isinstance(obs_sigma, (int, float)) and obs_sigma < 0:

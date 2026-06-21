@@ -284,6 +284,32 @@ wearable_monitoring:
         - spo2
         - sleep_score
         - respiratory_rate
+      detection_profile:
+        sensitivity: 0.78
+        specificity: 0.92
+        alert_latency_hours: 6
+        fever_sensitivity: 0.85
+        fever_specificity: 0.94
+      confounders:
+        - confounder_id: "seasickness"
+          prevalence: 0.15
+          affected_channels:
+            heart_rate:     {bias: 8.0, noise_mult: 1.5}
+            hrv:            {bias: -12.0, noise_mult: 1.8}
+          susceptible_classes: ["passenger_general", "passenger_family", "passenger_elderly"]
+          susceptible_role_group: "passenger"
+        - confounder_id: "alcohol"
+          prevalence: 0.08
+          affected_channels:
+            hrv:            {bias: -10.0, noise_mult: 2.0}
+            heart_rate:     {bias: 6.0, noise_mult: 1.4}
+            sleep_score:    {bias: -8.0, noise_mult: 1.5}
+          susceptible_classes: ["passenger_general", "passenger_family"]
+        - confounder_id: "exercise"
+          prevalence: 0.20
+          affected_channels:
+            heart_rate:     {bias: 15.0, noise_mult: 1.2}
+          susceptible_classes: []
       noise:
         - {channel: heart_rate,      sigma: 2.5,  drift_rate: 0.1,  dropout_prob: 0.01}
         - {channel: hrv,             sigma: 6.0,  drift_rate: 0.5,  dropout_prob: 0.01}
@@ -325,6 +351,19 @@ wearable_monitoring:
         - spo2
         - activity_score
         - respiratory_rate
+      detection_profile:
+        sensitivity: 0.82
+        specificity: 0.90
+        alert_latency_hours: 4
+        fever_sensitivity: 0.80
+        fever_specificity: 0.92
+      confounders:
+        - confounder_id: "exercise"
+          prevalence: 0.25
+          affected_channels:
+            heart_rate:     {bias: 15.0, noise_mult: 1.2}
+            activity_score: {bias: 20.0, noise_mult: 1.0}
+          susceptible_classes: []
       noise:
         - {channel: heart_rate,      sigma: 1.8,  drift_rate: 0.08, dropout_prob: 0.003}
         - {channel: hrv,             sigma: 5.0,  drift_rate: 0.4,  dropout_prob: 0.008}
@@ -355,14 +394,40 @@ wearable_monitoring:
         - {day: 8,  phase: "late"}
         - {day: 12, phase: "recovery"}
 
+    # ── Sample Device 3: CGM Patch ──────────────────────────────
+    # Continuous glucose monitor — glucose + body temp only.
+    # Not confounded by seasickness or alcohol.
+    - device_id: "cgm_patch"
+      channels:
+        - body_temp
+        - glucose
+      detection_profile:
+        sensitivity: 0.72
+        specificity: 0.88
+        alert_latency_hours: 12
+        fever_sensitivity: 0.75
+        fever_specificity: 0.90
+      confounders: []
+      noise:
+        - {channel: body_temp, sigma: 0.12, drift_rate: 0.015, dropout_prob: 0.005}
+        - {channel: glucose,   sigma: 8.0,  drift_rate: 0.5,   dropout_prob: 0.01}
+      channel_baselines:
+        - {channel: glucose, mean: 95.0, std: 12.0}
+
   # ── Device Deployment Map ──────────────────────────────────────
   # Maps agent classes → device type.  "default" is the fallback.
+  # Old single-device format is supported for backward compatibility.
   class_device_map:
     - {agent_class: "default",            device_id: "oura_ring"}
     - {agent_class: "crew_medical",       device_id: "garmin_watch"}
     - {agent_class: "crew_engineering",   device_id: "garmin_watch"}
     - {agent_class: "crew_galley",        device_id: "garmin_watch"}
     - {agent_class: "passenger_elderly",  device_id: "oura_ring"}
+
+  # ── Chronic Disease Device Assignments ─────────────────────────
+  # Devices appended based on agent chronic disease IDs (additive).
+  chronic_disease_device_map:
+    - {disease_id: "type2_diabetes", device_id: "cgm_patch", coverage: 0.80, visibility: "both"}
 
   # ── Observation layer noise (Crusher Labs) ─────────────────────
   observation_noise_sigma: 0.5
