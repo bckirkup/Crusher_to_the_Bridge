@@ -86,7 +86,7 @@ print('Pathways:', sorted(totals.keys()))
 | `summary.isolated` | Isolation Ward count |
 | `summary.quarantine_refusers` | FRED non-compliance |
 | `infection_counters` | Attack-rate time series, threshold indicators |
-| `wearable_monitoring` | Fever/anomaly rates |
+| `wearable_monitoring` | Fever/anomaly rates, visibility breakdown (staff_visible vs wearer_only), device deployment counts |
 | `contact_tracing.transmission_events[].pathway_breakdown` | Transmission vector pie chart |
 | `agents[].agent_class` | Crew Manifest by Division table |
 | `agents[].infection_state`, `symptom_presentation`, `compliance_status` | Orthogonal agent axes |

@@ -16,7 +16,7 @@ Pure-Python simulation (no databases, Docker, or external APIs). **Python 3.11+*
 | Streamlit dashboard | `python3 -m streamlit run dashboard.py --server.headless true` | Run orchestrator first for telemetry |
 | Deck asset precompute | `python3 scripts/precompute_deck_assets.py` | Writes `deck_graphics.geojson`, hull PNG, manifest per platform |
 | Sanity checker | `python3 tools/sanity_checker.py --from-config` | Ship + fleet + Stackelberg social configs |
-| Full test suite | `python3 -m pytest tests/ -v --tb=short` | ~471 tests, ~7s |
+| Full test suite | `python3 -m pytest tests/ -v --tb=short` | ~574 tests, ~9s |
 | Long-read / TAT tests | `python3 -m pytest tests/test_long_read_sequencing.py tests/test_instrument_turnaround.py -v` | Nanopore + turnaround queue |
 
 ### Framework layout
@@ -42,7 +42,7 @@ Pure-Python simulation (no databases, Docker, or external APIs). **Python 3.11+*
 **Main** (`.github/workflows/ci.yml` on `main` PRs):
 
 1. `python tools/sanity_checker.py --from-config`
-2. `pytest tests/ -v --tb=short` (~337 tests)
+2. `pytest tests/ -v --tb=short` (~574 tests)
 3. Picard/Presidio/Stackelberg import hygiene
 4. Presidio smoke (`smoke_fleet.json`, 1 cruise)
 5. Long-read / TAT targeted tests

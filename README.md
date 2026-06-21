@@ -299,9 +299,10 @@ microflora:
 
 ### Wearable Physiological Monitoring
 
-An extensible device registry that simulates Oura Ring / Garmin Watch
-style wearable sensors.  Each device defines its sensor channels, noise
-model, and per-pathogen infection-response profiles.
+An extensible device registry that simulates wearable sensors
+(Oura Ring, Garmin Watch, CGM Patch).  Each agent can wear **multiple
+devices** simultaneously, assigned by agent class (with coverage fraction
+and visibility tier) and optionally by chronic disease.
 
 ```yaml
 wearable_monitoring:
@@ -312,36 +313,57 @@ wearable_monitoring:
       channels: [heart_rate, hrv, body_temp, spo2, sleep_score, respiratory_rate]
       noise:
         - {channel: heart_rate,  sigma: 2.5, drift_rate: 0.1, dropout_prob: 0.01}
-        # ... per-channel noise parameters
       infection_responses:
         - pathogen_category: "enteric_viral"
           channel_responses:
             - {channel: heart_rate, early: 3.0, peak: 10.0, late: 5.0, recovery: 1.0}
-            # ... per-channel deltas for each EMOD phase
-        - pathogen_category: "respiratory_viral"
-          channel_responses: [...]
       phase_boundaries:
-        - {day: 0,  phase: "early"}
-        - {day: 3,  phase: "peak"}
-        - {day: 8,  phase: "late"}
+        - {day: 0, phase: "early"}
+        - {day: 3, phase: "peak"}
+        - {day: 8, phase: "late"}
         - {day: 12, phase: "recovery"}
+      detection_profile:                # imperfect sensing (optional)
+        sensitivity: 0.78
+        specificity: 0.92
+        alert_latency_hours: 6
+        fever_sensitivity: 0.85
+        fever_specificity: 0.95
+      confounders:                      # per-epoch noise sources (optional)
+        - confounder_id: "seasickness"
+          prevalence: 0.15
+          affected_channels:
+            heart_rate: {bias: 8.0, noise_mult: 1.5}
+            hrv: {bias: -12.0, noise_mult: 1.8}
+          susceptible_classes: [passenger_general, passenger_elderly]
 
     - device_id: "garmin_watch"
-      channels: [heart_rate, hrv, body_temp, spo2, activity_score, respiratory_rate]
-      # ... same structure
+      # ... same structure (with its own detection_profile + confounders)
 
-  class_device_map:
-    - {agent_class: "default",           device_id: "oura_ring"}
-    - {agent_class: "crew_medical",      device_id: "garmin_watch"}
-    - {agent_class: "crew_engineering",  device_id: "garmin_watch"}
-    - {agent_class: "crew_galley",       device_id: "garmin_watch"}
-    - {agent_class: "passenger_elderly", device_id: "oura_ring"}
+    - device_id: "cgm_patch"
+      channels: [body_temp, glucose]
+      channel_baselines:
+        - {channel: glucose, mean: 95.0, std: 12.0}
+      detection_profile: {sensitivity: 0.72, specificity: 0.88, alert_latency_hours: 4}
 
-  observation_noise_sigma: 0.5     # ≥ 0
-  sync_dropout_prob: 0.02          # [0,1]
-  anomaly_z_threshold: 2.0         # > 0 — z-score threshold for anomaly detection
+  class_device_map:                     # multi-device per agent
+    - agent_class: "default"
+      devices:
+        - {device_id: "oura_ring", coverage: 1.0, visibility: "medical_staff"}
+    - agent_class: "crew_medical"
+      devices:
+        - {device_id: "garmin_watch", coverage: 1.0, visibility: "both"}
+    # Old single-device format still supported:
+    # - {agent_class: "default", device_id: "oura_ring"}
 
-  fleet_thresholds:                # shipwide rates for wearable_fleet_monitor stoplights
+  chronic_disease_device_map:           # additive device by disease
+    - {disease_id: "type2_diabetes", device_id: "cgm_patch",
+       coverage: 0.80, visibility: "both"}
+
+  observation_noise_sigma: 0.5
+  sync_dropout_prob: 0.02
+  anomaly_z_threshold: 2.0
+
+  fleet_thresholds:
     fleet_fever_rate_amber: 0.03
     fleet_fever_rate_red: 0.08
     fleet_anomaly_rate_amber: 0.05
@@ -353,18 +375,27 @@ Wearable stoplights feed SOP-012..SOP-014; integrated **detection escalation**
 environmental, clinical) reach AMBER/RED together (`min_modes_affected` in
 `protocols.json`).
 
-**Adding a new device:** Add an entry to `devices` with a unique
-`device_id`, its channel list, noise parameters, and infection response
-profiles.  Then assign it to agent classes via `class_device_map`.
+**Multi-device per agent:** Each `class_device_map` entry lists `devices`
+with independent `coverage` (Bernoulli sampling) and `visibility` tier
+(`medical_staff`, `wearer_only`, `both`).  Only `medical_staff`/`both`
+data flows to fleet stoplights.
+
+**Confounders:** Per-device, per-epoch noise (seasickness, alcohol,
+exercise) with class-based susceptibility.  Each adds `bias` and
+multiplies noise `sigma` on affected channels.
+
+**Detection profiles:** Per-device `sensitivity`/`specificity` gate
+anomaly and fever flags probabilistically; `alert_latency_hours`
+suppresses early-infection alerts.
+
+**Chronic disease devices:** `chronic_disease_device_map` adds devices
+(e.g., CGM patch for diabetics) after class-based assignment.  Costs
+tracked in `resource_costs.json` → `wearable_device_costs`.
+
+**Adding a new device:** Add to `devices` with channels, noise,
+infection responses, optional `detection_profile` and `confounders`.
+Assign via `class_device_map` with `coverage` and `visibility`.
 No code changes required.
-
-**Noise model:** Each channel has independent Gaussian noise (`sigma`),
-sensor drift (`drift_rate` per epoch), and random dropout probability
-(`dropout_prob`).
-
-**Infection response:** Per-pathogen-category deltas are applied to each
-channel based on the agent's current EMOD phase (early → peak → late →
-recovery).  Phase boundaries are configurable per device.
 
 ### GRUMB Multi-Kingdom Seeding
 
@@ -494,7 +525,7 @@ python tools/sanity_checker.py --config-dir data/config \
 **config.yaml checks** (run with `--from-config`):
 - Agent class fractions sum to 1.0, valid role_groups, no duplicate class_ids
 - Gender distribution sums to 1.0, non-negative values
-- Wearable device uniqueness, channel consistency, noise/dropout bounds, class_device_map validity
+- Wearable device uniqueness, channel consistency, noise/dropout bounds, class_device_map validity, detection_profile probabilities, confounder channel refs, chronic_disease_device_map, coverage/visibility bounds
 - Modality probabilities in [0,1], non-negative cadences
 - HVAC filter_efficiency in [0,1], non-negative decay rate
 - EMOD phase/duration count match, positive durations, sensitivity caps in [0,1]
@@ -507,7 +538,7 @@ python tools/sanity_checker.py --config-dir data/config \
 ## Testing
 
 ```bash
-# Full suite (~337 tests)
+# Full suite (~574 tests)
 pytest tests/ -v --tb=short
 
 # Picard / Presidio / Stackelberg
@@ -520,6 +551,7 @@ pytest tests/test_infection_counters.py     # attack-rate counters, exempt_class
 pytest tests/test_enterprise_platforms.py # Enterprise platform referential integrity
 pytest tests/test_agent_axes.py           # orthogonal infection/presentation/compliance
 pytest tests/test_protocol_engine.py        # wearable + detection-escalation stoplights
+pytest tests/test_wearable_enhanced.py       # multi-device, confounders, detection profiles, visibility, chronic disease
 pytest tests/test_sequencing_config.py      # config.yaml read_depth wiring
 pytest tests/test_cost_accounting.py        # per-test debits and materials telemetry
 pytest tests/test_operational_impact.py     # OIS weight computation
