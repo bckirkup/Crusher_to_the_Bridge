@@ -15,7 +15,7 @@ When the Picard run spec includes a `social` block, each epoch follows this orde
 9. CONTAM `transport_step` (if enabled)
 10. Zone microflora shifts (dual-signal)
 11. Ground-truth schema export
-12. Wearable monitoring query
+12. Wearable monitoring query (multi-device epoch generation, confounder sampling, detection profile gating, visibility filtering)
 13. **Information diffusion** (belief update from contact graph)
 14. **Stackelberg population** (`solve_population`) → apply population actions (`hide_symptoms`, `report_sick_call`, `refuse_quarantine`)
 15. **Syndromic / RDT** (behavioral overrides + belief-scaled sick-call probability)
@@ -39,6 +39,6 @@ Finalization writes `simulation_history.json` and `artificial_lab_notebook.json`
 Same Crusher Labs physics and instruments as Picard, but **no** Stackelberg population/command passes. OIS is accumulated after confinement. Epoch order matches the pre–game-theory orchestrator (stoplight-only SOPs, flat syndromic `sick_call_probability` unless extended later).
 
 1. FRED compliance through ground-truth export
-2. Wearable → syndromic → RDT → PCR → sequencing → instruments
+2. Wearable (multi-device, confounders, detection profiles) → syndromic → RDT → PCR → sequencing → instruments
 3. Escalation → stoplights → protocol evaluation → modifiers
 4. Cost accounting → quarantine → infection counters → **OIS** → `record_epoch`

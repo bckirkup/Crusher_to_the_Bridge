@@ -20,7 +20,7 @@ None — all tests run locally.
 ```bash
 python3 -m pytest tests/ -v --tb=short
 ```
-Expected: ~471 tests pass in ~7s.
+Expected: ~574 tests pass in ~9s.
 
 ### Run with coverage reporting
 ```bash
@@ -131,7 +131,7 @@ The full CI pipeline (`.github/workflows/ci.yml`) runs these steps in order:
 2. `python3 tools/sanity_checker.py --from-config` — config validation
 3. `ruff check ...` — static analysis (advisory, `continue-on-error: true`)
 4. `pytest tests/test_json_schema_validation.py -v --tb=short` — JSON schema validation
-5. `pytest tests/ -v --tb=short --cov --cov-report=term-missing` — full suite with coverage (~471 tests)
+5. `pytest tests/ -v --tb=short --cov --cov-report=term-missing` — full suite with coverage (~574 tests)
 6. Picard/Presidio/Stackelberg import hygiene
 7. Presidio smoke (`presidio_runner.py` smoke fleet)
 8. Long-read / TAT targeted tests
@@ -184,6 +184,7 @@ python3 -c "import json; c=json.load(open('telemetry_buffer/simulation_history.j
 | `test_enterprise_platforms.py` | varies | `data/platforms/enterprise_*` | Enterprise HVAC referential integrity |
 | `test_sequencing_config.py` | varies | `crusher_labs/__init__.py` | Read-depth wiring from config.yaml |
 | `test_schema_module.py` | varies | `telemetry_buffer/schema.py` | JSON schema output validation |
+| `test_wearable_enhanced.py` | 38 | `engines/wearable_monitor.py`, `crusher_labs/modalities/wearable.py` | Multi-device, coverage, visibility, confounders, detection profiles, chronic disease devices, glucose channel, config parsing |
 
 ## Golden Test Values
 
@@ -191,10 +192,10 @@ These values are used by `test_golden_picard.py` to verify simulation determinis
 
 | Metric | Expected (epoch 23) |
 |--------|-------------------|
-| Susceptible | 6 |
-| Infected | 0 |
-| Symptomatic | 0 |
-| Recovered | 10 |
+| Susceptible | 5 |
+| Infected | 2 |
+| Symptomatic | 2 |
+| Recovered | 9 |
 | Immune | 4 |
-| Trigger status | BASELINE |
+| Trigger status | CONFIRMED |
 | OIS cumulative | ~273.3 |

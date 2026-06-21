@@ -151,18 +151,33 @@ system (`engines/wearable_monitor.py`) provides continuous physiological
 surveillance:
 
 1. **Device Registry** — Config-driven device definitions (Oura Ring,
-   Garmin Watch) with per-channel sensor specifications
-2. **Baseline Personalization** — Per-agent baselines adjusted by agent
-   class (e.g., elderly passengers have elevated resting heart rate)
-   and gender
-3. **Infection Response** — Pathogen-category-specific channel deltas
+   Garmin Watch, CGM Patch) with per-channel sensor specifications
+2. **Multi-device Assignment** — Each agent can wear 0+ devices;
+   class-based mapping with per-device coverage fraction (Bernoulli
+   sampling) and visibility tier
+3. **Chronic Disease Devices** — Agents with chronic conditions
+   (e.g., type 2 diabetes) receive additional devices via
+   `chronic_disease_device_map`
+4. **Baseline Personalization** — Per-agent baselines adjusted by agent
+   class (e.g., elderly passengers have elevated resting heart rate),
+   gender, and chronic disease offsets
+5. **Infection Response** — Pathogen-category-specific channel deltas
    modulated by EMOD shedding phase (early → peak → late → recovery)
-4. **Noise Injection** — Gaussian noise, sensor drift, and random
+6. **Confounder Injection** — Per-epoch Bernoulli sampling of confounders
+   (seasickness, alcohol, exercise) that add bias and multiply noise on
+   affected channels, filtered by susceptible agent classes
+7. **Noise Injection** — Gaussian noise, sensor drift, and random
    dropout simulate real-world wearable data quality
-5. **Anomaly Detection** — Z-score threshold flags physiological
+8. **Anomaly Detection** — Z-score threshold flags physiological
    deviations that may indicate pre-symptomatic infection
-6. **Protocol triggers** — RED per-agent alerts can activate SOP-012
-   (symptomatic confinement); fleet AMBER/RED rates activate SOP-013/014
+9. **Detection Profile Gating** — Per-device sensitivity/specificity
+   probabilistically suppress or inject anomaly/fever flags; alert
+   latency suppresses early-infection detections
+10. **Visibility Filtering** — `medical_staff` data flows to fleet
+    stoplights; `wearer_only` data influences agent behavior only;
+    `both` does both
+11. **Protocol triggers** — RED per-agent alerts can activate SOP-012
+    (symptomatic confinement); fleet AMBER/RED rates activate SOP-013/014
 
 ### Orthogonal Agent State Axes
 
@@ -447,7 +462,9 @@ be cross-referenced against `spatial_layout.json`.
 ### 3.11 Wearable Physiological Monitoring
 
 An extensible device registry that simulates wearable sensors
-(Oura Ring, Garmin Watch) for continuous physiological surveillance.
+(Oura Ring, Garmin Watch, CGM Patch) for continuous physiological
+surveillance.  Each agent can wear multiple devices simultaneously,
+assigned by agent class (with coverage fraction) and chronic disease.
 
 ```yaml
 wearable_monitoring:
@@ -471,17 +488,54 @@ wearable_monitoring:
         - {day: 3,  phase: "peak"}
         - {day: 8,  phase: "late"}
         - {day: 12, phase: "recovery"}
+      detection_profile:              # imperfect sensing (optional)
+        sensitivity: 0.78
+        specificity: 0.92
+        alert_latency_hours: 6
+        fever_sensitivity: 0.85
+        fever_specificity: 0.95
+      confounders:                    # per-epoch noise sources (optional)
+        - confounder_id: "seasickness"
+          prevalence: 0.15
+          affected_channels:
+            heart_rate: {bias: 8.0, noise_mult: 1.5}
+            hrv: {bias: -12.0, noise_mult: 1.8}
+          susceptible_classes: [passenger_general, passenger_elderly, passenger_family]
 
     - device_id: "garmin_watch"
       channels: [heart_rate, hrv, body_temp, spo2, activity_score, respiratory_rate]
-      # ... same structure
+      # ... same structure (with its own detection_profile + confounders)
 
-  class_device_map:
-    - {agent_class: "default",           device_id: "oura_ring"}
-    - {agent_class: "crew_medical",      device_id: "garmin_watch"}
-    - {agent_class: "crew_engineering",  device_id: "garmin_watch"}
-    - {agent_class: "crew_galley",       device_id: "garmin_watch"}
-    - {agent_class: "passenger_elderly", device_id: "oura_ring"}
+    - device_id: "cgm_patch"
+      channels: [body_temp, glucose]
+      channel_baselines:
+        - {channel: glucose, mean: 95.0, std: 12.0}
+      detection_profile:
+        sensitivity: 0.72
+        specificity: 0.88
+        alert_latency_hours: 4
+      # no confounders — glucose unaffected by seasickness/alcohol
+
+  class_device_map:                   # multi-device per agent
+    - agent_class: "default"
+      devices:
+        - {device_id: "oura_ring", coverage: 1.0, visibility: "medical_staff"}
+    - agent_class: "crew_medical"
+      devices:
+        - {device_id: "garmin_watch", coverage: 1.0, visibility: "both"}
+    - agent_class: "crew_engineering"
+      devices:
+        - {device_id: "garmin_watch", coverage: 1.0, visibility: "medical_staff"}
+    - agent_class: "passenger_elderly"
+      devices:
+        - {device_id: "oura_ring", coverage: 0.60, visibility: "medical_staff"}
+
+    # Old single-device format still supported (backward compatible):
+    # - {agent_class: "default", device_id: "oura_ring"}
+
+  chronic_disease_device_map:         # additive device assignment by disease
+    - {disease_id: "type2_diabetes", device_id: "cgm_patch",
+       coverage: 0.80, visibility: "both"}
 
   observation_noise_sigma: 0.5     # ≥ 0
   sync_dropout_prob: 0.02          # [0,1]
@@ -496,7 +550,8 @@ wearable_monitoring:
 
 Fleet thresholds drive `wearable_fleet_monitor` stoplights (SOP-013/014).
 Per-agent fever and multi-channel anomalies drive `wearable_physiological_monitor`
-(SOP-012).
+(SOP-012).  Only `medical_staff` and `both` visibility data enters fleet
+stoplights; `wearer_only` data influences agent sick-call behavior only.
 
 #### Built-In Devices
 
@@ -504,6 +559,7 @@ Per-agent fever and multi-channel anomalies drive `wearable_physiological_monito
 |--------|----------|-----------|
 | `oura_ring` | heart_rate, hrv, body_temp, spo2, sleep_score, respiratory_rate | Sleep quality tracking, low-profile form factor |
 | `garmin_watch` | heart_rate, hrv, body_temp, spo2, activity_score, respiratory_rate | Continuous HR, activity tracking |
+| `cgm_patch` | body_temp, glucose | Continuous glucose monitoring (Abbott FreeStyle Libre) |
 
 #### Sensor Channels
 
@@ -516,6 +572,71 @@ Per-agent fever and multi-channel anomalies drive `wearable_physiological_monito
 | `sleep_score` | score | 80 ± 5 | Composite sleep quality (Oura only) |
 | `activity_score` | score | 50 ± 10 | Daily activity level (Garmin only) |
 | `respiratory_rate` | breaths/min | 15 ± 1.5 | Breathing rate |
+| `glucose` | mg/dL | 95 ± 12 | Blood glucose (CGM Patch only) |
+
+#### Coverage Fraction & Visibility Tiers
+
+Each device assignment in `class_device_map` specifies:
+
+| Field | Description |
+|-------|-------------|
+| `coverage` | Bernoulli fraction [0.0–1.0]; each agent independently sampled at init |
+| `visibility` | `medical_staff` (default) — flows to fleet stoplights; `wearer_only` — boosts agent sick-call only; `both` — both |
+
+Agents can receive 0+ devices depending on coverage rolls.  When multiple
+devices monitor the same channel, the merged summary prefers anomaly-flagged
+readings over higher z-scores to avoid dropping legitimate detections.
+
+#### Confounders
+
+Per-device, per-epoch noise sources that bias specific channels:
+
+| Field | Description |
+|-------|-------------|
+| `confounder_id` | Identifier (e.g., `seasickness`, `alcohol`, `exercise`) |
+| `prevalence` | Bernoulli probability of being active each epoch |
+| `affected_channels` | Map of channel → `{bias, noise_mult}` |
+| `susceptible_classes` | Agent classes affected (empty = all) |
+
+When active, a confounder adds `bias` to the channel baseline and
+multiplies the noise `sigma` by `noise_mult` for that epoch.
+
+#### Detection Profile
+
+Per-device imperfect sensing parameters (all optional, default = perfect):
+
+| Field | Description |
+|-------|-------------|
+| `sensitivity` | P(detect anomaly \| truly infected) [0–1] |
+| `specificity` | P(no false alarm \| not infected) [0–1] |
+| `alert_latency_hours` | Suppress alerts if infection < N hours old |
+| `fever_sensitivity` | P(detect fever \| truly infected + febrile) |
+| `fever_specificity` | P(no false fever \| not infected) |
+
+#### Chronic Disease Device Map
+
+Agents with chronic conditions receive additional devices after class-based
+assignment:
+
+```yaml
+chronic_disease_device_map:
+  - {disease_id: "type2_diabetes", device_id: "cgm_patch",
+     coverage: 0.80, visibility: "both"}
+```
+
+The `disease_id` matches entries in `chronic_diseases.json`.  Duplicate
+devices (already assigned via class map) are skipped.
+
+#### Wearable Device Costs
+
+Per-device procurement and subscription costs are defined in
+`resource_costs.json` under `wearable_device_costs`:
+
+| Field | Description |
+|-------|-------------|
+| `unit_cost_usd` | One-time procurement cost per device |
+| `monthly_subscription_usd` | Recurring monthly subscription (0 if none) |
+| `replacement_days` | Replacement cycle in days (optional, e.g., 14 for CGM patches) |
 
 #### Noise Model
 
@@ -542,7 +663,8 @@ body temperature.
 | Recovery | +1 bpm | +0.1°C | 0 | −2 ms |
 
 *(Values shown for enteric_viral; respiratory_viral has stronger
-SpO2 and respiratory_rate effects.)*
+SpO2 and respiratory_rate effects.  Glucose response: early +5, peak +15,
+late +8, recovery +2 mg/dL.)*
 
 #### Class & Gender Baseline Offsets
 
@@ -552,12 +674,16 @@ Baselines are personalized per agent:
   −10 ms HRV; `crew_engineering` → +10 activity score
 - **Gender offsets:** Female → +2 bpm HR, +0.1°C body temp;
   Male → −1 bpm HR
+- **Chronic disease offsets:** `type2_diabetes` → +35 mg/dL glucose,
+  +4 bpm HR, −8 ms HRV, −0.5% SpO2
 
 #### Adding a New Device
 
 Add an entry to `devices` with a unique `device_id`, its channel list,
-noise parameters, and infection response profiles.  Then assign it to
-agent classes via `class_device_map`.  No code changes required.
+noise parameters, infection response profiles, and optionally a
+`detection_profile` and `confounders` list.  Then assign it to agent
+classes via `class_device_map` (with `coverage` and `visibility`).
+No code changes required.
 
 ### 3.12 GRUMB Multi-Kingdom Seeding
 
@@ -1001,7 +1127,7 @@ The checker uses pydantic models and performs four categories of validation:
 |-------|------|
 | Agent class fractions | Must sum to 1.0; valid role_groups; no duplicate class_ids |
 | Gender distribution | Must sum to 1.0; non-negative values |
-| Wearable device config | Unique device_ids; channel consistency; noise/dropout bounds; valid class_device_map |
+| Wearable device config | Unique device_ids; channel consistency; noise/dropout bounds; valid class_device_map; detection_profile probabilities in [0,1]; confounder channel refs match device channels; chronic_disease_device_map device refs; coverage in [0,1]; visibility in {medical_staff, wearer_only, both} |
 | Modality probabilities | Sensitivity, specificity, compliance rates ∈ [0.0, 1.0] |
 | HVAC parameters | `filter_efficiency` ∈ [0,1]; non-negative `natural_decay_rate` |
 | EMOD progression | Phase/duration count match; positive durations; sensitivity caps ∈ [0,1] |
@@ -1366,16 +1492,18 @@ python tools/sanity_checker.py --from-config
 pytest tests/ -v --tb=short
 ```
 
-The suite includes **~337 tests** across data contracts, sanity checker,
+The suite includes **~574 tests** across data contracts, sanity checker,
 orchestrator/quarantine logic, infection counters, orthogonal agent axes,
-wearable/detection-escalation protocol engine, sequencing config wiring,
-long-read Nanopore verification, instrument turnaround (TAT),
-per-test cost accounting, **operational impact (OIS)**, **action applier**,
-**behavioral syndromic**, transmission pathways (food/environmental),
-dashboard helpers, law compliance, telemetry seams, and **Picard / Presidio /
-Stackelberg** framework tests. CI (`.github/workflows/ci.yml`) runs sanity checks,
-full pytest (~337 tests), Picard/Presidio import hygiene, Presidio smoke, long-read/TAT
-targeted tests, orchestrator import hygiene, dashboard import (including LCARS theme),
+wearable/detection-escalation protocol engine, enhanced wearable model
+(multi-device, confounders, detection profiles, visibility, chronic disease
+assignments), sequencing config wiring, long-read Nanopore verification,
+instrument turnaround (TAT), per-test cost accounting, **operational impact
+(OIS)**, **action applier**, **behavioral syndromic**, transmission pathways
+(food/environmental), dashboard helpers, law compliance, telemetry seams, and
+**Picard / Presidio / Stackelberg** framework tests. CI
+(`.github/workflows/ci.yml`) runs sanity checks, full pytest (~574 tests),
+Picard/Presidio import hygiene, Presidio smoke, long-read/TAT targeted tests,
+orchestrator import hygiene, dashboard import (including LCARS theme),
 24-epoch orchestrator run, and OIS telemetry verification. Framework-focused checks,
 enterprise platform tests, and Stackelberg + platform JSON schema validation run in
 `.github/workflows/picard-presidio.yml`.
