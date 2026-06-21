@@ -375,6 +375,13 @@ wearable_monitoring:
     fleet_anomaly_rate_amber: 0.05
     fleet_anomaly_rate_red: 0.12
 
+# ── Chronic Disease Configuration ─────────────────────────────
+chronic_disease:
+  enabled: true
+  config_path: "data/config/chronic_diseases.json"
+  allow_comorbid: true                 # allow agents to have multiple chronic diseases
+  max_comorbid: 2                      # maximum concurrent chronic diseases per agent
+
 # ── Diagnostic cascade (tiered clinical evaluation) ─────────────
 # When enabled, symptoms/wearable alerts trigger a sequential
 # diagnostic cascade (Tier 0 → 3) that gates SOP activation.

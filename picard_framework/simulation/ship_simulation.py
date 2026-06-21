@@ -20,13 +20,23 @@ from crusher_labs.protocol_engine import (
 from decision_engine.actions import ActionEnvelope
 from engines.py_contam_bridge import build_transport_engine, load_air_flow_paths
 from engines.transmission_core import TransmissionCore, build_hvac_downstream_map
+from orchestrator_chronic import (
+    assign_chronic_diseases,
+    get_chronic_behavioral_modifiers,
+    get_chronic_wearable_offsets,
+    load_chronic_disease_config,
+    print_chronic_disease_summary,
+)
 from orchestrator_epoch import (
+    apply_chronic_severity_escalation,
     apply_surface_decontamination,
     apply_zone_closures,
+    build_cascade_context,
     compute_infection_counters,
     compute_zone_microflora_shifts,
     run_observation_sampling,
     step_cost_accounting,
+    step_diagnostic_cascade,
     step_long_read_cost_accounting,
     step_counter_thresholds,
     step_fred_compliance,
@@ -116,6 +126,10 @@ class ShipSimulation:
         self.graph_cfg: dict[str, Any] = {}
         self.decision_runtime: DecisionRuntime | None = None
         self.decision_experience = ExperienceStore("")
+        self.chronic_config: dict[str, dict[str, Any]] = {}
+        self.chronic_assignments: dict[int, list[str]] = {}
+        self.chronic_behavioral_mods: dict[int, dict[str, float]] = {}
+
 
     @property
     def epoch(self) -> int:
@@ -157,6 +171,22 @@ class ShipSimulation:
                 self.pathogen_profiles, set(), self.engine, imm_mult, self.enable_dual_signal,
             )
 
+        # Chronic disease assignment
+        self.chronic_config = load_chronic_disease_config(cfg, repo_root=self.repo_root)
+        self.chronic_assignments = assign_chronic_diseases(
+            self.engine, self.chronic_config, self.pathogen_profiles, cfg, self.rng,
+        )
+        chronic_wearable_offsets = get_chronic_wearable_offsets(
+            self.chronic_config, self.chronic_assignments,
+        )
+        self.chronic_behavioral_mods = get_chronic_behavioral_modifiers(
+            self.chronic_config, self.chronic_assignments,
+        )
+        if self.display:
+            print_chronic_disease_summary(
+                self.chronic_config, self.chronic_assignments, len(self.engine.agents),
+            )
+
         airflow_data = load_air_flow_paths(self.repo_root, cfg)
         self.zone_volumes = {
             z["name"]: z.get("volume_m3", 100.0) for z in ship.get("zones", [])
@@ -188,6 +218,7 @@ class ShipSimulation:
         )
         self.wearable_monitor, self.wearable_modality = init_wearable_monitors(
             self.engine, cfg, self.seed,
+            chronic_wearable_offsets=chronic_wearable_offsets,
         )
         if self.display:
             from orchestrator_display import print_wearable_monitoring
@@ -199,8 +230,14 @@ class ShipSimulation:
             from orchestrator_display import print_initialization
             print_initialization(ship, grumb_seeds, cfg)
 
+        from crusher_labs.diagnostic_cascade import build_cascade_engine
+
+        cascade_engine = build_cascade_engine(cfg, repo_root=self.repo_root)
         sim_state = SimulationState(
             isolation_unit_capacity=load_isolation_unit_capacity(cfg),
+            cascade_engine=cascade_engine,
+            chronic_assignments=self.chronic_assignments,
+            chronic_behavioral_mods=self.chronic_behavioral_mods,
         )
         self.state = sim_state
         self.world = WorldState(
@@ -290,6 +327,9 @@ class ShipSimulation:
             state.quarantine_refusers,
         )
 
+        if self.chronic_assignments:
+            apply_chronic_severity_escalation(agents, self.engine, self.rng)
+
         payload = make_ground_truth(epoch=epoch, agents=agents, spaces=spaces)
         gt_path = self.run_spec.telemetry.ground_truth if self.run_spec.telemetry else None
         if self.run_spec.write_ground_truth:
@@ -359,7 +399,14 @@ class ShipSimulation:
             truth,
             behavioral_overrides=state.agent_behavioral_overrides,
             information_beliefs=beliefs,
+            chronic_behavioral_mods=self.chronic_behavioral_mods,
         )
+
+        cascade_result = step_diagnostic_cascade(
+            epoch, state, agents, syn_result, wearable_result, self.obs,
+            wearable_monitor=self.wearable_monitor,
+        )
+
         sick_call_ids = syn_result["sick_call_agents"]
         rdt_result = rdt.query_ground_truth(truth, sick_call_ids=sick_call_ids)
 
@@ -488,12 +535,14 @@ class ShipSimulation:
         reset_modifiers(
             self.contam_engine, self.tx_core, self.proto_ctx.original_filter_eff,
         )
+        cascade_ctx = build_cascade_context(state, cascade_result)
         authorized = dr.decision_ctx.authorized_sop_ids if dr else None
         active_mods = self.proto_ctx.protocol_engine.evaluate_epoch(
             epoch,
             stoplights,
             forced_protocol_ids=state.forced_protocol_ids,
             authorized_sop_ids=authorized,
+            cascade_context=cascade_ctx,
         )
         if dr is not None and dr.decision_ctx.authorized_sop_ids is not None:
             active_mods = filter_active_modifiers(
@@ -566,6 +615,7 @@ class ShipSimulation:
             wearable_result=wearable_result,
             infection_counters=counter_results,
             long_read_results=long_read_results,
+            cascade_result=cascade_result,
         )
         if applied:
             epoch_record["decisions"] = applied

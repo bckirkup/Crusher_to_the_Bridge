@@ -338,11 +338,13 @@ class WearableMonitor:
 
             baseline = state.baselines.get(ch, 0.0)
 
-            # Infection perturbation
+            # Infection perturbation (scaled by chronic disease response factor)
             inf_delta = _compute_infection_delta(
                 ch, agent, pathogen_profiles,
                 device.infection_responses, device.phase_boundaries,
             )
+            if hasattr(agent, "chronic_wearable_response_scale"):
+                inf_delta *= agent.chronic_wearable_response_scale
 
             readings: list[float | None] = []
             for hour in range(24):

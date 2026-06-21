@@ -87,6 +87,8 @@ class SimulationState:
     verification_test_queue: list[dict[str, Any]] = field(default_factory=list)
     agent_behavioral_overrides: dict[int, str] = field(default_factory=dict)
     cascade_engine: Any = None  # DiagnosticCascadeEngine | None
+    chronic_assignments: dict[int, list[str]] = field(default_factory=dict)
+    chronic_behavioral_mods: dict[int, dict[str, float]] = field(default_factory=dict)
 
 
 # ── Observation engine bundle ────────────────────────────────────────────

@@ -83,7 +83,12 @@ def step_fred_compliance(
     """FRED compliance check for pending quarantine orders."""
     for aid in list(state.quarantine_refusers):
         epochs_since = epoch - state.quarantine_order_epoch.get(aid, epoch)
-        if syndromic.check_quarantine_compliance(aid, epochs_since):
+        chronic_boost = state.chronic_behavioral_mods.get(
+            aid, {},
+        ).get("quarantine_compliance_boost", 0.0)
+        if syndromic.check_quarantine_compliance(
+            aid, epochs_since, chronic_compliance_boost=chronic_boost,
+        ):
             state.quarantine_refusers.discard(aid)
             state.quarantined_ids.add(aid)
             state.compliance_log.append({
@@ -152,12 +157,17 @@ def step_infection_progression(
                 gamma_p = ill_params.get("gamma", 0.095)
                 dose = inf["acquired_particles"]
                 ill_prob = 1.0 - math.pow(1.0 + eta_p * dose, -gamma_p)
+                # Chronic disease illness probability boost
+                chronic_boost = agent.get_chronic_illness_boost(pid)
+                ill_prob = min(1.0, ill_prob + chronic_boost)
                 if engine.rng.random() < ill_prob:
                     inf["illness"] = IllnessStatus.SYMPTOMATIC
                     if agent.illness_status == IllnessStatus.NOT_ILL:
                         agent.illness_status = IllnessStatus.SYMPTOMATIC
 
-            recovery_day = prof.get("recovery_day", 3)
+            # Recovery day adjusted for chronic disease extensions
+            base_recovery_day = prof.get("recovery_day", 3)
+            recovery_day = agent.get_chronic_recovery_day(pid, base_recovery_day)
             if dpi >= recovery_day:
                 inf["status"] = InfectionStatus.RECOVERED
                 inf["illness"] = IllnessStatus.RECOVERED
@@ -184,6 +194,42 @@ def step_infection_progression(
                 if loc in masses:
                     masses[loc] += sv * dep_frac
         engine.set_pathogen_zone_mass(pid, masses)
+
+
+# ── Chronic disease severity escalation ──────────────────────────────────
+
+def apply_chronic_severity_escalation(
+    agents: list[dict[str, Any]],
+    engine: KorkinShipEngine,
+    rng: np.random.Generator,
+) -> None:
+    """Escalate symptomatic chronic-disease agents to SEVERE presentation.
+
+    For each symptomatic agent with chronic diseases, the severity
+    multiplier determines the probability of escalation:
+    ``P(severe) = clamp(severity_mult - 1.0, 0, 1)``.
+    """
+    from telemetry_buffer.agent_axes import (
+        PRESENTATION_SYMPTOMATIC,
+        PRESENTATION_SEVERE,
+    )
+    for agent_dict in agents:
+        pres = agent_dict.get("symptom_presentation", "")
+        if pres != PRESENTATION_SYMPTOMATIC:
+            continue
+        aid = agent_dict["agent_id"]
+        korkin_agent = None
+        if aid < len(engine.agents):
+            korkin_agent = engine.agents[aid]
+        if korkin_agent is None or not korkin_agent.has_chronic_disease:
+            continue
+        max_sev = 1.0
+        for pid in korkin_agent.active_pathogen_ids:
+            sev = korkin_agent.get_chronic_severity_multiplier(pid)
+            max_sev = max(max_sev, sev)
+        escalation_prob = min(1.0, max(0.0, max_sev - 1.0))
+        if escalation_prob > 0 and rng.random() < escalation_prob:
+            agent_dict["symptom_presentation"] = PRESENTATION_SEVERE
 
 
 # ── Observation sampling ─────────────────────────────────────────────────
@@ -417,7 +463,13 @@ def confine_agents(
         if not (is_symptomatic or is_shedding):
             continue
         override = state.agent_behavioral_overrides.get(aid)
-        if syndromic.check_quarantine_compliance(aid, 0, behavioral_override=override):
+        chronic_boost = state.chronic_behavioral_mods.get(
+            aid, {},
+        ).get("quarantine_compliance_boost", 0.0)
+        if syndromic.check_quarantine_compliance(
+            aid, 0, behavioral_override=override,
+            chronic_compliance_boost=chronic_boost,
+        ):
             state.quarantined_ids.add(aid)
             state.compliance_log.append({
                 "epoch": epoch, "agent_id": aid,
@@ -452,7 +504,13 @@ def confine_all_agents(
         if agent.get("agent_class", "") in _exempt:
             continue
         override = state.agent_behavioral_overrides.get(aid)
-        if syndromic.check_quarantine_compliance(aid, 0, behavioral_override=override):
+        chronic_boost = state.chronic_behavioral_mods.get(
+            aid, {},
+        ).get("quarantine_compliance_boost", 0.0)
+        if syndromic.check_quarantine_compliance(
+            aid, 0, behavioral_override=override,
+            chronic_compliance_boost=chronic_boost,
+        ):
             state.quarantined_ids.add(aid)
             state.compliance_log.append({
                 "epoch": epoch, "agent_id": aid,
