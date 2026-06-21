@@ -167,6 +167,8 @@ def record_epoch(
             agent_record["pathogen_infections"] = a.get("pathogen_infections", {})
             agent_record["susceptibility_multiplier"] = a.get("susceptibility_multiplier", {})
             agent_record["microflora_disruption"] = a.get("microflora_disruption", 0.0)
+        if "chronic_disease_ids" in a:
+            agent_record["chronic_disease_ids"] = a["chronic_disease_ids"]
         epoch_record["agents"].append(agent_record)
 
     for zname, zdata in spaces.items():

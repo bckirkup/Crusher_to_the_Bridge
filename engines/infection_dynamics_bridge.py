@@ -263,6 +263,9 @@ class KorkinAgent:
         # Multi-pathogen extensions
         "infections", "susceptibility_multiplier",
         "microflora_disruption_status",
+        # Chronic disease extensions
+        "chronic_disease_ids", "chronic_pathogen_mods",
+        "chronic_wearable_response_scale",
     )
 
     def __init__(
@@ -304,6 +307,15 @@ class KorkinAgent:
 
         # Microflora disruption scalar [0.0 = healthy, 1.0 = fully disrupted]
         self.microflora_disruption_status: float = 0.0
+
+        # Chronic disease state (static, assigned at initialization)
+        self.chronic_disease_ids: list[str] = []
+        # Resolved per-pathogen modifiers from chronic diseases:
+        # {pathogen_id: {"susceptibility_multiplier", "severity_multiplier",
+        #   "recovery_day_extension", "illness_probability_boost"}}
+        self.chronic_pathogen_mods: dict[str, dict[str, float]] = {}
+        # Aggregate wearable infection response scale from chronic diseases
+        self.chronic_wearable_response_scale: float = 1.0
 
     @property
     def days_post_infection(self) -> int:
@@ -435,6 +447,69 @@ class KorkinAgent:
             if inf["status"] == InfectionStatus.INFECTED
         ]
 
+    def apply_chronic_disease(
+        self,
+        disease_id: str,
+        pathogen_modifiers: dict[str, dict[str, float]],
+        wearable_response_scale: float = 1.0,
+    ) -> None:
+        """Register a chronic disease and merge its per-pathogen modifiers."""
+        if disease_id in self.chronic_disease_ids:
+            return
+        self.chronic_disease_ids.append(disease_id)
+        for pid, mods in pathogen_modifiers.items():
+            if pid not in self.chronic_pathogen_mods:
+                self.chronic_pathogen_mods[pid] = dict(mods)
+            else:
+                existing = self.chronic_pathogen_mods[pid]
+                existing["susceptibility_multiplier"] = (
+                    existing.get("susceptibility_multiplier", 1.0)
+                    * mods.get("susceptibility_multiplier", 1.0)
+                )
+                existing["severity_multiplier"] = max(
+                    existing.get("severity_multiplier", 1.0),
+                    mods.get("severity_multiplier", 1.0),
+                )
+                existing["recovery_day_extension"] = (
+                    existing.get("recovery_day_extension", 0)
+                    + mods.get("recovery_day_extension", 0)
+                )
+                existing["illness_probability_boost"] = min(
+                    0.5,
+                    existing.get("illness_probability_boost", 0.0)
+                    + mods.get("illness_probability_boost", 0.0),
+                )
+        self.chronic_wearable_response_scale = max(
+            self.chronic_wearable_response_scale, wearable_response_scale,
+        )
+
+    def get_chronic_recovery_day(
+        self, pathogen_id: str, base_recovery_day: int,
+    ) -> int:
+        """Return recovery day adjusted for chronic disease extensions."""
+        mods = self.chronic_pathogen_mods.get(
+            pathogen_id, self.chronic_pathogen_mods.get("default", {}),
+        )
+        return base_recovery_day + int(mods.get("recovery_day_extension", 0))
+
+    def get_chronic_illness_boost(self, pathogen_id: str) -> float:
+        """Return additive illness probability boost from chronic diseases."""
+        mods = self.chronic_pathogen_mods.get(
+            pathogen_id, self.chronic_pathogen_mods.get("default", {}),
+        )
+        return float(mods.get("illness_probability_boost", 0.0))
+
+    def get_chronic_severity_multiplier(self, pathogen_id: str) -> float:
+        """Return severity multiplier from chronic diseases."""
+        mods = self.chronic_pathogen_mods.get(
+            pathogen_id, self.chronic_pathogen_mods.get("default", {}),
+        )
+        return float(mods.get("severity_multiplier", 1.0))
+
+    @property
+    def has_chronic_disease(self) -> bool:
+        return len(self.chronic_disease_ids) > 0
+
     def to_schema_dict(self) -> dict[str, Any]:
         """Export agent state in telemetry_buffer.schema format."""
         from telemetry_buffer.agent_axes import (
@@ -473,7 +548,7 @@ class KorkinAgent:
                 "days_post_infection": inf["time_infected"],
             }
 
-        return {
+        result = {
             "agent_id": self.agent_id,
             "infection_state": infection_state,
             "symptom_presentation": symptom_presentation,
@@ -488,6 +563,9 @@ class KorkinAgent:
             "susceptibility_multiplier": dict(self.susceptibility_multiplier),
             "microflora_disruption": round(self.microflora_disruption_status, 4),
         }
+        if self.chronic_disease_ids:
+            result["chronic_disease_ids"] = list(self.chronic_disease_ids)
+        return result
 
 
 # ── Ship simulation engine ──────────────────────────────────────────────

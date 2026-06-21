@@ -254,6 +254,8 @@ def engine_payload_to_schema(
             agent_dict["susceptibility_multiplier"] = a["susceptibility_multiplier"]
         if "microflora_disruption" in a:
             agent_dict["microflora_disruption"] = a["microflora_disruption"]
+        if "chronic_disease_ids" in a:
+            agent_dict["chronic_disease_ids"] = a["chronic_disease_ids"]
 
         agents_out.append(agent_dict)
 
@@ -543,8 +545,12 @@ def init_wearable_monitors(
     engine: KorkinShipEngine,
     cfg: dict[str, Any],
     seed: int = 42,
+    chronic_wearable_offsets: dict[int, dict[str, float]] | None = None,
 ) -> tuple[WearableMonitor | None, WearableDataStream | None]:
     """Initialise wearable physiological monitors and the Crusher Labs modality.
+
+    When *chronic_wearable_offsets* is provided, chronic disease baseline
+    offsets are applied after class/gender offsets during initialization.
 
     Returns ``(None, None)`` when wearable monitoring is disabled or absent.
     """
@@ -555,6 +561,16 @@ def init_wearable_monitors(
 
     for agent in engine.agents:
         monitor.initialize_agent(agent)
+
+    # Apply chronic disease wearable baseline offsets
+    if chronic_wearable_offsets:
+        for agent_id, offsets in chronic_wearable_offsets.items():
+            state = monitor.agent_states.get(agent_id)
+            if state is None:
+                continue
+            for ch, offset in offsets.items():
+                if ch in state.baselines:
+                    state.baselines[ch] = round(state.baselines[ch] + offset, 2)
 
     wm_cfg = cfg.get("wearable_monitoring", {})
     modality = WearableDataStream(

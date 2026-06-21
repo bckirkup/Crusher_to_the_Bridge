@@ -18,6 +18,7 @@ class AgentLivedExperience:
     wearable_summary: dict[str, Any] = field(default_factory=dict)
     symptom_presentation: str = "asymptomatic"
     infection_state: str = "susceptible"
+    chronic_disease_ids: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -29,6 +30,7 @@ class AgentLivedExperience:
             "wearable_summary": dict(self.wearable_summary),
             "symptom_presentation": self.symptom_presentation,
             "infection_state": self.infection_state,
+            "chronic_disease_ids": list(self.chronic_disease_ids),
         }
 
 
@@ -69,6 +71,8 @@ class AgentLivedExperienceStore:
             exp = self.ensure_agent(aid)
             exp.symptom_presentation = ag.get("symptom_presentation", "asymptomatic")
             exp.infection_state = ag.get("infection_state", "susceptible")
+            if "chronic_disease_ids" in ag and not exp.chronic_disease_ids:
+                exp.chronic_disease_ids = list(ag["chronic_disease_ids"])
             if aid in sick_ids:
                 exp.sick_call_epochs.append(epoch)
             if aid in quarantined_ids or aid in isolated_ids:

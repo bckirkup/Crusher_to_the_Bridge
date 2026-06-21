@@ -822,6 +822,7 @@ def _check_config_yaml(
     _check_escalation_params(cfg, report)
     _check_fred_behavior(cfg, report)
     _check_multi_pathogen_params(cfg, report)
+    _check_chronic_disease(cfg, report)
     _check_microflora_params(cfg, report, zone_ids)
     _check_long_read_sequencing(cfg, report)
     _check_instrument_turnaround(cfg, report)
@@ -1260,6 +1261,88 @@ def _check_multi_pathogen_params(cfg: dict[str, Any], report: Report) -> None:
             report.error("config.yaml", "MATH_BOUND",
                          f"multi_pathogen.immunocompromised_multiplier = {imm_mult} "
                          f"is negative")
+
+
+def _check_chronic_disease(cfg: dict[str, Any], report: Report) -> None:
+    """Validate chronic disease config block and JSON file."""
+    cd = cfg.get("chronic_disease", {})
+    if not cd.get("enabled", False):
+        return
+
+    config_path = cd.get("config_path", "")
+    if not config_path:
+        report.warn("config.yaml", "CONFIG",
+                     "chronic_disease.enabled but no config_path specified")
+        return
+
+    repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    full_path = os.path.join(repo_root, config_path)
+    if not os.path.isfile(full_path):
+        report.error("config.yaml", "FILE",
+                      f"chronic_disease.config_path '{config_path}' not found")
+        return
+
+    try:
+        with open(full_path, "r", encoding="utf-8") as fh:
+            data = json.load(fh)
+    except (json.JSONDecodeError, OSError) as exc:
+        report.error(config_path, "FILE", f"Cannot parse: {exc}")
+        return
+
+    diseases = data.get("diseases", [])
+    if not diseases:
+        report.warn(config_path, "CONFIG", "No diseases defined")
+        return
+
+    for i, d in enumerate(diseases):
+        did = d.get("disease_id", "")
+        if not did:
+            report.error(config_path, "SCHEMA",
+                          f"diseases[{i}] missing disease_id")
+            continue
+
+        prev_map = d.get("prevalence_by_class", {})
+        for cls_name, prev in prev_map.items():
+            if isinstance(prev, (int, float)) and (prev < 0 or prev > 1):
+                report.error(config_path, "MATH_BOUND",
+                              f"{did}.prevalence_by_class.{cls_name} = {prev} "
+                              f"outside [0,1]")
+
+        pmods = d.get("pathogen_modifiers", {})
+        for pid, mods in pmods.items():
+            susc = mods.get("susceptibility_multiplier")
+            if susc is not None and isinstance(susc, (int, float)) and susc < 0:
+                report.error(config_path, "MATH_BOUND",
+                              f"{did}.pathogen_modifiers.{pid}."
+                              f"susceptibility_multiplier = {susc} is negative")
+            sev = mods.get("severity_multiplier")
+            if sev is not None and isinstance(sev, (int, float)) and sev < 0:
+                report.error(config_path, "MATH_BOUND",
+                              f"{did}.pathogen_modifiers.{pid}."
+                              f"severity_multiplier = {sev} is negative")
+            rec = mods.get("recovery_day_extension")
+            if rec is not None and isinstance(rec, (int, float)) and rec < 0:
+                report.error(config_path, "MATH_BOUND",
+                              f"{did}.pathogen_modifiers.{pid}."
+                              f"recovery_day_extension = {rec} is negative")
+            boost = mods.get("illness_probability_boost")
+            if boost is not None and isinstance(boost, (int, float)):
+                if boost < 0 or boost > 1:
+                    report.error(config_path, "MATH_BOUND",
+                                  f"{did}.pathogen_modifiers.{pid}."
+                                  f"illness_probability_boost = {boost} "
+                                  f"outside [0,1]")
+
+        wscale = d.get("wearable_infection_response_scale")
+        if wscale is not None and isinstance(wscale, (int, float)) and wscale < 0:
+            report.error(config_path, "MATH_BOUND",
+                          f"{did}.wearable_infection_response_scale = {wscale} "
+                          f"is negative")
+
+    max_comorbid = cd.get("max_comorbid")
+    if max_comorbid is not None and isinstance(max_comorbid, int) and max_comorbid < 1:
+        report.error("config.yaml", "MATH_BOUND",
+                      f"chronic_disease.max_comorbid = {max_comorbid} must be >= 1")
 
 
 def _check_microflora_params(

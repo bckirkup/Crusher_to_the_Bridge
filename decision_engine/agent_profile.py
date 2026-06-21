@@ -23,6 +23,7 @@ class AgentProfile:
     comorbidities: list[str] = field(default_factory=list)
     vaccinations: list[str] = field(default_factory=list)
     chronic_meds: list[str] = field(default_factory=list)
+    chronic_disease_ids: list[str] = field(default_factory=list)
     device_id: str = ""
     monitored_channels: list[str] = field(default_factory=list)
 
@@ -39,6 +40,7 @@ class AgentProfile:
             "comorbidities": list(self.comorbidities),
             "vaccinations": list(self.vaccinations),
             "chronic_meds": list(self.chronic_meds),
+            "chronic_disease_ids": list(self.chronic_disease_ids),
             "device_id": self.device_id,
             "monitored_channels": list(self.monitored_channels),
         }

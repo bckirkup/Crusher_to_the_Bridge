@@ -61,6 +61,7 @@ class SyndromicSurveillance:
         json_data: dict[str, Any],
         behavioral_overrides: dict[int, str] | None = None,
         information_beliefs: dict[int, dict[str, float]] | None = None,
+        chronic_behavioral_mods: dict[int, dict[str, float]] | None = None,
     ) -> dict[str, Any]:
         """Parse ground-truth agent states and return sick-call roster.
 
@@ -88,6 +89,7 @@ class SyndromicSurveillance:
 
         overrides = behavioral_overrides or {}
         beliefs = information_beliefs or {}
+        chronic_mods = chronic_behavioral_mods or {}
 
         for agent in agents:
             aid = agent["agent_id"]
@@ -115,6 +117,11 @@ class SyndromicSurveillance:
                     severity_belief=inf.get("severity_belief", 0.5),
                     trust_medical=inf.get("trust_medical", 0.75),
                 )
+                # Chronic disease sick-call probability boost
+                agent_chronic = chronic_mods.get(aid, {})
+                prob = min(1.0, prob + agent_chronic.get(
+                    "sick_call_probability_boost", 0.0,
+                ))
                 if self.rng.random() < prob:
                     sick_call_ids.append(aid)
                     true_positive_ids.append(aid)
@@ -152,18 +159,25 @@ class SyndromicSurveillance:
         agent_id: int,
         epochs_since_order: int,
         behavioral_override: str | None = None,
+        chronic_compliance_boost: float = 0.0,
     ) -> bool:
         """FRED-style quarantine compliance check.
 
         Returns ``True`` if the agent complies with isolation this epoch.
         Non-compliant agents eventually comply after a delay period
         (ref: FRED ``refuses_vaccines`` behavioral failure pattern).
+
+        *chronic_compliance_boost* is an additive increase from chronic
+        disease behavioral modifiers.
         """
         if behavioral_override == "refuse_quarantine":
             if epochs_since_order >= self.compliance_delay_epochs:
                 return True
             return False
-        if self.rng.random() < self.quarantine_compliance:
+        effective_compliance = min(
+            1.0, self.quarantine_compliance + chronic_compliance_boost,
+        )
+        if self.rng.random() < effective_compliance:
             return True
         if epochs_since_order >= self.compliance_delay_epochs:
             return True
