@@ -32,6 +32,13 @@ ORCHESTRATOR_MODULES = [
     "orchestrator_record.py",
 ]
 
+# Extended module directories for Law 1–4 scanning (closes #82)
+EXTENDED_DIRS = [
+    "picard_framework",
+    "crusher_labs",
+    "decision_engine",
+]
+
 
 def _read_orchestrator_sources() -> dict[str, str]:
     """Read all orchestrator module source files into a dict."""
@@ -40,6 +47,22 @@ def _read_orchestrator_sources() -> dict[str, str]:
         path = os.path.join(REPO_ROOT, mod)
         with open(path, encoding="utf-8") as f:
             sources[mod] = f.read()
+    return sources
+
+
+def _read_extended_sources() -> dict[str, str]:
+    """Read all Python sources under picard_framework/, crusher_labs/, decision_engine/."""
+    sources: dict[str, str] = {}
+    for dir_name in EXTENDED_DIRS:
+        dir_path = os.path.join(REPO_ROOT, dir_name)
+        for root, _dirs, files in os.walk(dir_path):
+            for fname in files:
+                if not fname.endswith(".py") or fname == "__init__.py":
+                    continue
+                full = os.path.join(root, fname)
+                rel = os.path.relpath(full, REPO_ROOT)
+                with open(full, encoding="utf-8") as f:
+                    sources[rel] = f.read()
     return sources
 
 
@@ -211,6 +234,73 @@ class TestLaw6NoSiblingRepoModification:
                 for pat in write_patterns:
                     assert not re.search(pat, src), (
                         f"Potential sibling repo modification in {mod}: {pat}"
+                    )
+
+
+# ── Extended law compliance for picard_framework/, crusher_labs/, decision_engine/ ──
+# Closes #82.
+
+class TestExtendedLaw1NoHardcodedEpochSchedules:
+    """Law 1 across extended modules."""
+
+    def test_no_epoch_intervention_lists_extended(self) -> None:
+        patterns = [
+            r"intervention_epochs\s*=\s*\[",
+            r"activate_at_epoch\s*=\s*\[",
+            r"sop_schedule\s*=\s*\{",
+        ]
+        for mod, src in _read_extended_sources().items():
+            for pat in patterns:
+                assert not re.search(pat, src), (
+                    f"Hardcoded epoch schedule in {mod}: {pat}"
+                )
+
+
+class TestExtendedLaw2NoHardcodedNames:
+    """Law 2 across extended modules."""
+
+    HARDCODED_PATHOGEN_PATTERNS = [
+        r'"norovirus"',
+        r'"sars_cov_2"',
+        r'"vibrio_cholerae"',
+    ]
+
+    def test_no_hardcoded_pathogen_names_in_extended(self) -> None:
+        for mod, src in _read_extended_sources().items():
+            logic_src = _strip_non_logic(src)
+            for pat in self.HARDCODED_PATHOGEN_PATTERNS:
+                matches = re.findall(pat, logic_src)
+                assert not matches, (
+                    f"Hardcoded pathogen name in {mod}: {pat}"
+                )
+
+
+class TestExtendedLaw4NoExternalBioinformaticsDeps:
+    """Law 4: no external bioinformatics tool imports."""
+
+    FORBIDDEN_IMPORTS = [
+        r"^import\s+(?:Bio|biopython|pysam|samtools|bcftools|blast)",
+        r"^from\s+(?:Bio|biopython|pysam)\s+import",
+    ]
+
+    def test_no_bioinformatics_imports_in_extended(self) -> None:
+        for mod, src in _read_extended_sources().items():
+            for pat in self.FORBIDDEN_IMPORTS:
+                assert not re.search(pat, src, re.MULTILINE), (
+                    f"External bioinformatics import in {mod}: {pat}"
+                )
+
+
+class TestExtendedNoGlobalKeyword:
+    """No 'global' keyword in extended module functions."""
+
+    def test_no_global_keyword_in_extended(self) -> None:
+        for mod, src in _read_extended_sources().items():
+            tree = ast.parse(src, filename=mod)
+            for node in ast.walk(tree):
+                if isinstance(node, ast.Global):
+                    pytest.fail(
+                        f"{mod} uses 'global' keyword at line {node.lineno}"
                     )
 
 

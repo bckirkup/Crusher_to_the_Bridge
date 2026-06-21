@@ -1,0 +1,43 @@
+# Closes #89 — static analysis and coverage configuration.
+
+[tool.ruff]
+target-version = "py311"
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
+ignore = [
+    "E501",   # line too long — handled by formatter
+    "E741",   # ambiguous variable name (physics code uses l, I, etc.)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["E402"]      # sys.path manipulation before imports
+"scripts/*" = ["E402"]
+"dashboard/*" = ["E402"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v --tb=short"
+
+[tool.coverage.run]
+source = [
+    "engines",
+    "crusher_labs",
+    "picard_framework",
+    "decision_engine",
+    "orchestrator_epoch",
+    "orchestrator_init",
+    "orchestrator_record",
+    "orchestrator_types",
+]
+omit = [
+    "dashboard/*",
+    "scripts/*",
+    "tools/*",
+]
+
+[tool.coverage.report]
+show_missing = true
+precision = 1
+fail_under = 0
