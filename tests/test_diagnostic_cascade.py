@@ -661,3 +661,37 @@ class TestDiagnosticCascadeJsonContract:
         tiers, _ = load_diagnostic_cascade(repo_root=REPO_ROOT)
         for tier in tiers:
             assert tier.tat_epochs >= 0
+
+
+class TestMultiplexCascadeConfig:
+    def test_multiplex_tier1_uses_clinical_multiplex_panel(self) -> None:
+        tiers, _ = load_diagnostic_cascade(
+            os.path.join(REPO_ROOT, "data/config/diagnostic_cascade_multiplex.json"),
+            repo_root=REPO_ROOT,
+        )
+        assert tiers[1].tests == ["clinical_multiplex_panel"]
+
+
+class TestCascadeCostAccounting:
+    def test_step_cascade_cost_accounting_debits_multiplex_panel(self) -> None:
+        from orchestrator_epoch import step_cascade_cost_accounting
+        from orchestrator_init import init_protocol_engine
+        from crusher_labs import load_config
+
+        cfg = load_config()
+        proto_ctx = init_protocol_engine(cfg, None)
+        cascade_result = {
+            "tests_ordered": {
+                1: ["clinical_multiplex_panel"],
+                2: ["clinical_multiplex_panel", "clinical_qpcr"],
+            },
+        }
+        step_cascade_cost_accounting(0, proto_ctx, cascade_result)
+        sources = [e.source for e in proto_ctx.cost_ledger.entries]
+        assert "test:clinical_multiplex_panel" in sources
+        assert "test:clinical_qpcr" in sources
+        multiplex_entry = next(
+            e for e in proto_ctx.cost_ledger.entries
+            if e.source == "test:clinical_multiplex_panel"
+        )
+        assert multiplex_entry.description == "2x clinical_multiplex_panel"

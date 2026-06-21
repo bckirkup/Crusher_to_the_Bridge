@@ -547,6 +547,7 @@ def init_wearable_monitors(
     seed: int = 42,
     chronic_wearable_offsets: dict[int, dict[str, float]] | None = None,
     chronic_assignments: dict[int, list[str]] | None = None,
+    repo_root: str | None = None,
 ) -> tuple[WearableMonitor | None, WearableDataStream | None]:
     """Initialise wearable physiological monitors and the Crusher Labs modality.
 
@@ -559,7 +560,8 @@ def init_wearable_monitors(
     Returns ``(None, None)`` when wearable monitoring is disabled or absent.
     """
     rng = np.random.default_rng(seed)
-    monitor = build_wearable_monitor_from_config(cfg, rng)
+    root = repo_root or os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    monitor = build_wearable_monitor_from_config(cfg, rng, repo_root=root)
     if monitor is None:
         return None, None
 

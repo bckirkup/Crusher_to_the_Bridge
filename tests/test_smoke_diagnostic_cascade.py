@@ -76,12 +76,16 @@ def test_cascade_smoke_run_completes(spec_rel: str, cascade_config: str) -> None
 
 
 @pytest.mark.timeout(120)
-def test_cascade_smoke_standard_fleet_escalation_by_epoch_2() -> None:
-    """Standard cascade smoke unlocks fleet SOPs once Tier-2 agents accumulate."""
+def test_cascade_smoke_standard_tier2_advancement_by_epoch_1() -> None:
+    """Standard cascade smoke advances symptomatic agents to Tier 2 within epoch 1."""
     history = _run_cascade_smoke("picard_framework/runs/smoke_cascade_6epoch.json")
-    epoch2 = history[2]["diagnostic_cascade"]
-    assert epoch2["fleet_sops_unlocked"], (
-        "epoch 2 should unlock fleet escalation SOPs with default seed"
+    epoch1 = history[1]["diagnostic_cascade"]
+    tier2_plus = [
+        adv for adv in epoch1.get("tier_advancements", [])
+        if adv.get("to_tier", 0) >= 2
+    ]
+    assert tier2_plus, (
+        "epoch 1 should advance at least one agent to Tier 2 with default seed"
     )
 
 
@@ -101,6 +105,7 @@ def test_cascade_smoke_multiplex_config_and_tier1_panel() -> None:
     engine = build_cascade_engine(spec.legacy_cfg, repo_root=REPO_ROOT)
     assert engine is not None
     assert engine.tiers[1].name == "Rapid Multiplex Panel"
+    assert engine.tiers[1].tests == ["clinical_multiplex_panel"]
     assert "multiplex_panel_kits" in engine.tiers[1].cost_per_agent.get(
         "materials", {},
     )

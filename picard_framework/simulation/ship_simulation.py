@@ -37,6 +37,7 @@ from orchestrator_epoch import (
     run_observation_sampling,
     step_cost_accounting,
     step_diagnostic_cascade,
+    step_cascade_cost_accounting,
     step_long_read_cost_accounting,
     step_counter_thresholds,
     step_fred_compliance,
@@ -220,6 +221,7 @@ class ShipSimulation:
             self.engine, cfg, self.seed,
             chronic_wearable_offsets=chronic_wearable_offsets,
             chronic_assignments=self.chronic_assignments,
+            repo_root=self.repo_root,
         )
         if self.display:
             from orchestrator_display import print_wearable_monitoring
@@ -407,6 +409,7 @@ class ShipSimulation:
             epoch, state, agents, syn_result, wearable_result, self.obs,
             wearable_monitor=self.wearable_monitor,
         )
+        step_cascade_cost_accounting(epoch, self.proto_ctx, cascade_result)
 
         sick_call_ids = syn_result["sick_call_agents"]
         rdt_result = rdt.query_ground_truth(truth, sick_call_ids=sick_call_ids)

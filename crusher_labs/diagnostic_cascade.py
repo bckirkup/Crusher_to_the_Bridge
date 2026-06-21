@@ -477,6 +477,20 @@ class _CascadeTestRunner:
                 )
                 results[test_key] = result
 
+            elif test_key == "clinical_multiplex_panel":
+                from telemetry_buffer.agent_axes import agent_is_infected
+
+                result = self.obs.clin_rdt.test_agent(
+                    agent_id,
+                    agent.get("shedding_rate", 0.0),
+                    agent_is_infected(agent),
+                    infection,
+                    presentation,
+                    compliance,
+                    agent.get("location", "unknown"),
+                )
+                results[test_key] = result
+
             elif test_key == "clinical_qpcr":
                 result = self.obs.clin_qpcr.test_agent(
                     agent_id,

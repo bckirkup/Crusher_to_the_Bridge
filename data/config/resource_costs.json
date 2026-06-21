@@ -111,6 +111,14 @@
       "labor_person_hours": 0.25,
       "description": "Point-of-care rapid diagnostic test (lateral flow antigen). ROM $5-15 per test."
     },
+    "clinical_multiplex_panel": {
+      "financial_usd": 45.0,
+      "materials": {
+        "multiplex_panel_kits": 1
+      },
+      "labor_person_hours": 0.5,
+      "description": "Multiplex rapid GI panel (e.g. BioFire FilmArray). ROM $35-50 per test."
+    },
     "clinical_qpcr": {
       "financial_usd": 50.0,
       "materials": {

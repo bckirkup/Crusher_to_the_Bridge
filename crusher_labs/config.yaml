@@ -601,21 +601,15 @@ wearable_monitoring:
         - {channel: activity_score,   sigma: 5.0,  drift_rate: 0.0,  dropout_prob: 0.0}
         - {channel: respiratory_rate, sigma: 1.1,  drift_rate: 0.05, dropout_prob: 0.006}
 
-  # ── Device Deployment Map ──────────────────────────────────────
-  # Maps agent classes → device type.  "default" is the fallback.
-  # Alternate presets: data/config/wearable_deployments/*.yaml
-  # Old single-device format is supported for backward compatibility.
-  class_device_map:
-    - {agent_class: "default",            device_id: "oura_ring"}
-    - {agent_class: "crew_medical",       device_id: "garmin_watch"}
-    - {agent_class: "crew_engineering",   device_id: "garmin_watch"}
-    - {agent_class: "crew_galley",        device_id: "garmin_watch"}
-    - {agent_class: "passenger_elderly",  device_id: "oura_ring"}
-
-  # ── Chronic Disease Device Assignments ─────────────────────────
-  # Devices appended based on agent chronic disease IDs (additive).
-  chronic_disease_device_map:
-    - {disease_id: "type2_diabetes", device_id: "cgm_patch", coverage: 0.80, visibility: "both"}
+  # ── Device Deployment ──────────────────────────────────────────
+  # Preset loaded from data/config/wearable_deployments/{profile}.yaml
+  deployment_profile: crew_plus_byod
+  detection_sensitivity_scale: 1.0
+  scale_fever_sensitivity: true
+  detection_sensitivity_sweep:
+    enabled: false
+    values: [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+    num_epochs: 6
 
   # ── Observation layer noise (Crusher Labs) ─────────────────────
   observation_noise_sigma: 0.5
@@ -640,8 +634,8 @@ chronic_disease:
 # diagnostic cascade (Tier 0 → 3) that gates SOP activation.
 # Multiplex Tier-1 variant: data/config/diagnostic_cascade_multiplex.json
 diagnostic_cascade:
-  enabled: false
-  config_path: "data/config/diagnostic_cascade.json"
+  enabled: true
+  config_path: "data/config/diagnostic_cascade_multiplex.json"
 
 # ── Decision engine (Stackelberg policies) ─────────────────────
 decision_engine:
