@@ -375,6 +375,13 @@ wearable_monitoring:
     fleet_anomaly_rate_amber: 0.05
     fleet_anomaly_rate_red: 0.12
 
+# ── Diagnostic cascade (tiered clinical evaluation) ─────────────
+# When enabled, symptoms/wearable alerts trigger a sequential
+# diagnostic cascade (Tier 0 → 3) that gates SOP activation.
+diagnostic_cascade:
+  enabled: false
+  config_path: "data/config/diagnostic_cascade.json"
+
 # ── Decision engine (Stackelberg policies) ─────────────────────
 decision_engine:
   population_policy: threshold_belief

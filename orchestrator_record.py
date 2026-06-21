@@ -68,6 +68,7 @@ def record_epoch(
     wearable_result: dict[str, Any] | None = None,
     infection_counters: dict[str, dict[str, Any]] | None = None,
     long_read_results: dict[str, dict[str, Any]] | None = None,
+    cascade_result: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Build a complete epoch record for simulation_history.
 
@@ -233,6 +234,9 @@ def record_epoch(
             "anomaly_rate": fleet.get("anomaly_rate", 0.0),
             "channel_anomaly_counts": fleet.get("channel_anomaly_counts", {}),
         }
+
+    if cascade_result is not None:
+        epoch_record["diagnostic_cascade"] = cascade_result
 
     epoch_record["reactive_protocols"] = {
         "active_protocols": [

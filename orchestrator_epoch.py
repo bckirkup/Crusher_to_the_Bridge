@@ -638,6 +638,90 @@ def step_wearable_monitoring(
     return result
 
 
+# ── Diagnostic cascade ───────────────────────────────────────────────────
+
+def step_diagnostic_cascade(
+    epoch: int,
+    state: SimulationState,
+    agents: list[dict[str, Any]],
+    syn_result: dict[str, Any],
+    wearable_result: dict[str, Any] | None,
+    obs: ObservationEngine,
+    wearable_monitor: Any | None = None,
+) -> dict[str, Any] | None:
+    """Run one epoch of the diagnostic cascade engine.
+
+    Feeds sick-call and wearable RED alerts into the cascade, which
+    manages per-agent tier progression and sequential test ordering.
+    Agents whose cascade reaches confinement tiers are added to the
+    quarantine set.  Returns the cascade epoch result dict, or None
+    if the cascade is disabled.
+    """
+    cascade = state.cascade_engine
+    if cascade is None:
+        return None
+
+    from crusher_labs.diagnostic_cascade import build_test_runner
+
+    sick_call_ids = list(syn_result.get("sick_call_agents", []))
+
+    wearable_red_ids: list[int] = []
+    if wearable_result:
+        for aid_str, data in wearable_result.get("agent_results", {}).items():
+            if data.get("fever") or data.get("anomaly_count", 0) >= 3:
+                try:
+                    wearable_red_ids.append(int(aid_str))
+                except (ValueError, TypeError):
+                    pass
+
+    monitored_ids: set[int] = set()
+    if wearable_monitor is not None and hasattr(wearable_monitor, "monitored_agents"):
+        monitored_ids = set(wearable_monitor.monitored_agents)
+    elif wearable_monitor is not None:
+        monitored_ids = set()
+
+    test_runner = build_test_runner(obs)
+
+    result = cascade.evaluate_epoch(
+        epoch=epoch,
+        sick_call_ids=sick_call_ids,
+        wearable_red_ids=wearable_red_ids,
+        agents=agents,
+        test_runner=test_runner,
+        monitored_agent_ids=monitored_ids,
+    )
+
+    for aid in result.confinements_ordered:
+        if aid not in state.quarantined_ids and aid not in state.isolated_ids:
+            state.quarantined_ids.add(aid)
+            state.compliance_log.append({
+                "epoch": epoch,
+                "agent_id": aid,
+                "action": "cascade_confinement",
+            })
+
+    return result.to_dict()
+
+
+def build_cascade_context(
+    state: SimulationState,
+    cascade_result: dict[str, Any] | None,
+) -> dict[str, Any] | None:
+    """Build cascade context dict for protocol engine gating."""
+    cascade = state.cascade_engine
+    if cascade is None:
+        return None
+
+    unlocked = cascade.get_all_unlocked_sops()
+    fleet_sops = cascade_result.get("fleet_sops_unlocked", []) if cascade_result else []
+
+    return {
+        "unlocked_sops": unlocked,
+        "fleet_sops_unlocked": fleet_sops,
+        "tier_distribution": cascade.tier_distribution(),
+    }
+
+
 # ── Infection counters ───────────────────────────────────────────────────
 
 VALID_COUNTER_METRICS = {
