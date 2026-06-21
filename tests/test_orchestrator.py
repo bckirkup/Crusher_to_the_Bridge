@@ -749,7 +749,8 @@ class TestWearableMonitor:
             monitor.initialize_agent(agent)
 
         baselines_by_class: dict[str, list[float]] = {}
-        for state in monitor.agent_states.values():
+        for states in monitor.agent_states.values():
+            state = states[0]  # primary device
             hr = state.baselines.get("heart_rate", 0.0)
             cls = next(
                 (a.agent_class for a in engine.agents if a.agent_id == state.agent_id),
@@ -802,12 +803,14 @@ class TestWearableMonitor:
             monitor.initialize_agent(agent)
 
         for agent in engine.agents:
-            state = monitor.agent_states.get(agent.agent_id)
-            assert state is not None
+            states = monitor.agent_states.get(agent.agent_id)
+            assert states is not None
+            assert len(states) >= 1
+            primary = states[0]
             if agent.agent_class in ("crew_medical", "crew_engineering", "crew_galley"):
-                assert state.device.device_id == "garmin_watch"
+                assert primary.device.device_id == "garmin_watch"
             else:
-                assert state.device.device_id == "oura_ring"
+                assert primary.device.device_id == "oura_ring"
 
 
 class TestWearableDataStream:

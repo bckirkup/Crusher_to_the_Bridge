@@ -41,7 +41,8 @@
         "hrv": -8.0,
         "body_temp": 0.0,
         "spo2": -0.5,
-        "activity_score": -5.0
+        "activity_score": -5.0,
+        "glucose": 35.0
       },
       "wearable_infection_response_scale": 1.3,
       "behavioral_modifiers": {

@@ -171,6 +171,24 @@
       "description": "16S rRNA amplicon sequencing per sample. ROM $45-100/sample."
     }
   },
+  "wearable_device_costs": {
+    "oura_ring": {
+      "unit_cost_usd": 299.00,
+      "monthly_subscription_usd": 5.99,
+      "description": "Oura Ring Gen3 with health monitoring subscription"
+    },
+    "garmin_watch": {
+      "unit_cost_usd": 349.00,
+      "monthly_subscription_usd": 0.00,
+      "description": "Garmin Venu 3 fitness watch, no subscription"
+    },
+    "cgm_patch": {
+      "unit_cost_usd": 75.00,
+      "monthly_subscription_usd": 0.00,
+      "replacement_days": 14,
+      "description": "Continuous glucose monitor patch (Abbott FreeStyle Libre)"
+    }
+  },
   "operational_impact_weights": {
     "per_passenger_quarantined": 1.0,
     "per_essential_crew_quarantined": 3.0,

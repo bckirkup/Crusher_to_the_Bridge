@@ -546,11 +546,15 @@ def init_wearable_monitors(
     cfg: dict[str, Any],
     seed: int = 42,
     chronic_wearable_offsets: dict[int, dict[str, float]] | None = None,
+    chronic_assignments: dict[int, list[str]] | None = None,
 ) -> tuple[WearableMonitor | None, WearableDataStream | None]:
     """Initialise wearable physiological monitors and the Crusher Labs modality.
 
     When *chronic_wearable_offsets* is provided, chronic disease baseline
     offsets are applied after class/gender offsets during initialization.
+
+    When *chronic_assignments* is provided, agents may receive additional
+    devices from the ``chronic_disease_device_map`` configuration.
 
     Returns ``(None, None)`` when wearable monitoring is disabled or absent.
     """
@@ -559,18 +563,21 @@ def init_wearable_monitors(
     if monitor is None:
         return None, None
 
+    chronic_assignments = chronic_assignments or {}
     for agent in engine.agents:
-        monitor.initialize_agent(agent)
+        disease_ids = chronic_assignments.get(agent.agent_id)
+        monitor.initialize_agent(agent, chronic_disease_ids=disease_ids)
 
     # Apply chronic disease wearable baseline offsets
     if chronic_wearable_offsets:
         for agent_id, offsets in chronic_wearable_offsets.items():
-            state = monitor.agent_states.get(agent_id)
-            if state is None:
+            states = monitor.agent_states.get(agent_id)
+            if not states:
                 continue
-            for ch, offset in offsets.items():
-                if ch in state.baselines:
-                    state.baselines[ch] = round(state.baselines[ch] + offset, 2)
+            for state in states:
+                for ch, offset in offsets.items():
+                    if ch in state.baselines:
+                        state.baselines[ch] = round(state.baselines[ch] + offset, 2)
 
     wm_cfg = cfg.get("wearable_monitoring", {})
     modality = WearableDataStream(
