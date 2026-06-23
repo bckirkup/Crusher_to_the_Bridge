@@ -1230,6 +1230,34 @@ def _check_wearable_monitoring(cfg: dict[str, Any], report: Report) -> None:
         report.error("config.yaml", "MATH_BOUND",
                      f"wearable_monitoring.anomaly_z_threshold = {z_thresh} must be positive")
 
+    ad_cfg = wm.get("anomaly_detection")
+    if ad_cfg and ad_cfg.get("enabled", True):
+        ad_z = ad_cfg.get("anomaly_z_threshold", z_thresh)
+        if isinstance(ad_z, (int, float)) and ad_z <= 0:
+            report.error("config.yaml", "MATH_BOUND",
+                         f"wearable_monitoring.anomaly_detection.anomaly_z_threshold "
+                         f"= {ad_z} must be positive")
+        for key in ("fleet_anomaly_floor", "fleet_anomaly_downweight",
+                    "confounder_match_threshold"):
+            val = ad_cfg.get(key)
+            if val is not None and isinstance(val, (int, float)):
+                if val < 0 or val > 1:
+                    report.error("config.yaml", "MATH_BOUND",
+                                 f"wearable_monitoring.anomaly_detection.{key} "
+                                 f"= {val} outside [0,1]")
+        inf_thresh = ad_cfg.get("infection_score_threshold", 1.5)
+        if isinstance(inf_thresh, (int, float)) and inf_thresh <= 0:
+            report.error("config.yaml", "MATH_BOUND",
+                         f"wearable_monitoring.anomaly_detection.infection_score_threshold "
+                         f"= {inf_thresh} must be positive")
+        weights = ad_cfg.get("channel_infection_weights", {})
+        if isinstance(weights, dict):
+            for ch, w in weights.items():
+                if isinstance(w, (int, float)) and (w < 0 or w > 1):
+                    report.error("config.yaml", "MATH_BOUND",
+                                 f"wearable_monitoring.anomaly_detection."
+                                 f"channel_infection_weights.{ch} = {w} outside [0,1]")
+
 
 def _check_modality_params(cfg: dict[str, Any], report: Report) -> None:
     """Validate probability/scalar parameters for syndromic, RDT, PCR, sequencing."""
