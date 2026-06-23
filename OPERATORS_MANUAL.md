@@ -168,15 +168,20 @@ surveillance:
    affected channels, filtered by susceptible agent classes
 7. **Noise Injection** — Gaussian noise, sensor drift, and random
    dropout simulate real-world wearable data quality
-8. **Anomaly Detection** — Z-score threshold flags physiological
-   deviations that may indicate pre-symptomatic infection
+8. **Anomaly Detection** — Per-channel signed z-scores flag physiological
+   deviations; a confounder-aware scorer (`engines/wearable_anomaly_scorer.py`)
+   computes weighted residual `infection_score` after template matching and
+   fleet-wide downweighting
 9. **Detection Profile Gating** — Per-device sensitivity/specificity
    probabilistically suppress or inject anomaly/fever flags; alert
    latency suppresses early-infection detections
-10. **Visibility Filtering** — `medical_staff` data flows to fleet
+10. **Cascade Entry** — Diagnostic cascade Tier-0 uses `infection_score`
+    (default > 1.5) or fever via `cascade_entry.wearable_alert_fusion`;
+    raw `anomaly_count` remains for fleet stoplights and per-agent RED/AMBER
+11. **Visibility Filtering** — `medical_staff` data flows to fleet
     stoplights; `wearer_only` data influences agent behavior only;
     `both` does both
-11. **Protocol triggers** — RED per-agent alerts can activate SOP-012
+12. **Protocol triggers** — RED per-agent alerts can activate SOP-012
     (symptomatic confinement); fleet AMBER/RED rates activate SOP-013/014
 
 ### Orthogonal Agent State Axes
@@ -539,7 +544,24 @@ wearable_monitoring:
 
   observation_noise_sigma: 0.5     # ≥ 0
   sync_dropout_prob: 0.02          # [0,1]
-  anomaly_z_threshold: 2.0         # > 0 — z-score threshold for anomaly detection
+  anomaly_z_threshold: 2.0         # > 0 — z-score threshold for per-channel anomaly flag
+
+  anomaly_detection:               # confounder-aware cascade entry scoring
+    enabled: true
+    anomaly_z_threshold: 2.0
+    infection_score_threshold: 1.5 # weighted residual threshold for Tier-0 entry
+    fleet_anomaly_floor: 0.15      # downweight channels above this fleet anomaly rate
+    fleet_anomaly_downweight: 0.1
+    confounder_match_threshold: 0.7
+    channel_infection_weights:     # higher = more infection-informative
+      heart_rate: 0.3
+      hrv: 0.3
+      body_temp: 1.0
+      spo2: 0.8
+      sleep_score: 0.2
+      activity_score: 0.4
+      respiratory_rate: 0.6
+      glucose: 1.0
 
   fleet_thresholds:
     fleet_fever_rate_amber: 0.03
@@ -549,9 +571,11 @@ wearable_monitoring:
 ```
 
 Fleet thresholds drive `wearable_fleet_monitor` stoplights (SOP-013/014).
-Per-agent fever and multi-channel anomalies drive `wearable_physiological_monitor`
-(SOP-012).  Only `medical_staff` and `both` visibility data enters fleet
-stoplights; `wearer_only` data influences agent sick-call behavior only.
+Per-agent fever and `infection_score` drive diagnostic cascade Tier-0 entry
+via `data/config/diagnostic_cascade*.json` → `cascade_entry.wearable_alert_fusion`.
+Per-agent RED stoplights (`wearable_physiological_monitor`, SOP-012) still use
+fever or `anomaly_count >= 2`. Only `medical_staff` and `both` visibility data
+enters fleet stoplights; `wearer_only` data influences agent sick-call behavior only.
 
 #### Built-In Devices
 
@@ -965,7 +989,7 @@ The trigger defines **when** the SOP activates:
 | `wastewater_sequencing_grid` | Wastewater grid |
 | `clinical_rdt`, `clinical_qpcr`, `clinical_microbiology` | Sickbay instruments |
 | `long_read_verification_sequencing` | Escalation Nanopore verification (per request id) |
-| `wearable_physiological_monitor` | Per-agent wearable RED (e.g. fever) |
+| `wearable_physiological_monitor` | Per-agent wearable RED (fever or `anomaly_count >= 2`) |
 | `wearable_fleet_monitor` | Shipwide fever/anomaly rates |
 | `detection_escalation` | Integrated syndromic + wearable + env + clinical modes |
 

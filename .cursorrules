@@ -41,8 +41,10 @@ engines/
   transmission_core.py             — Six-pathway dose model + ContactTracingMatrix
   py_contam_bridge.py              — CONTAM-style multi-zone HVAC aerosol transport
   wearable_monitor.py              — Wearable device registry & physiological model
+  wearable_anomaly_scorer.py       — Confounder-aware infection scoring for cascade entry
 crusher_labs/
   config.yaml                      — Master configuration file
+  cascade_entry.py                 — Cascade Tier-0/1 entry rules & wearable alert fusion
   observation_core.py              — 6 diagnostic instruments + optional long-read + InstrumentQC
   lab_notebook.py                  — Three-tier fidelity serializer
   protocol_engine.py               — Stoplight-triggered SOP evaluator

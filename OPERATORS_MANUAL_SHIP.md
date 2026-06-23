@@ -87,7 +87,7 @@ Optional telemetry when `social.telemetry.decision_detail: true`:
 
 - `simulation_history[].information_state` — belief diffusion summary
 - `simulation_history[].decisions` — role actions per epoch
-- `simulation_history[].wearable_agent_snapshot` — per-agent multi-device wearable slice (devices, visibility, confounders, detection profiles)
+- `simulation_history[].wearable_agent_snapshot` — per-agent multi-device wearable slice (devices, visibility, confounders, detection profiles, `infection_score`, `matched_confounders`)
 
 ## Validation
 

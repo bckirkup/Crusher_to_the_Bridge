@@ -185,6 +185,8 @@ python3 -c "import json; c=json.load(open('telemetry_buffer/simulation_history.j
 | `test_sequencing_config.py` | varies | `crusher_labs/__init__.py` | Read-depth wiring from config.yaml |
 | `test_schema_module.py` | varies | `telemetry_buffer/schema.py` | JSON schema output validation |
 | `test_wearable_enhanced.py` | 38 | `engines/wearable_monitor.py`, `crusher_labs/modalities/wearable.py` | Multi-device, coverage, visibility, confounders, detection profiles, chronic disease devices, glucose channel, config parsing |
+| `test_wearable_anomaly_scorer.py` | 8 | `engines/wearable_anomaly_scorer.py`, `crusher_labs/cascade_entry.py` | Confounder template matching, fleet downweighting, `infection_score`, cascade entry fusion |
+| `test_cascade_entry.py` | 6 | `crusher_labs/cascade_entry.py`, `crusher_labs/diagnostic_cascade.py` | Sick-call Tier 1 vs wearable Tier 0, `infection_score` alert rules, device fusion |
 
 ## Golden Test Values
 

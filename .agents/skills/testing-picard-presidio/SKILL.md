@@ -21,7 +21,9 @@ PYTHONPATH=. python3 -m pytest \
   tests/test_behavioral_syndromic.py \
   tests/test_enterprise_platforms.py \
   tests/test_agent_axes.py \
-  tests/test_sequencing_config.py -v --tb=short
+  tests/test_sequencing_config.py \
+  tests/test_wearable_anomaly_scorer.py \
+  tests/test_cascade_entry.py -v --tb=short
 ```
 
 ## Presidio CLI smoke

@@ -75,6 +75,12 @@ jobs:
           pytest tests/test_long_read_sequencing.py tests/test_instrument_turnaround.py \
             tests/test_sequencing_config.py::test_init_observation_engine_turnaround_and_long_read -v --tb=short
 
+      - name: Wearable anomaly scoring and cascade entry tests
+        env:
+          PYTHONPATH: .
+        run: |
+          pytest tests/test_wearable_anomaly_scorer.py tests/test_cascade_entry.py -v --tb=short
+
       - name: Verify import hygiene (stoplight deduplication)
         env:
           PYTHONPATH: .

@@ -90,7 +90,8 @@ engines/                     External simulation bridges
 ├── infection_dynamics_bridge.py   Korkin agent-based model (KorkinShipEngine)
 ├── py_contam_bridge.py            HVAC zone-to-zone airborne transport
 ├── transmission_core.py           Six-pathway pathogen transmission
-└── wearable_monitor.py            Wearable device registry & physiological model
+├── wearable_monitor.py            Wearable device registry & physiological model
+└── wearable_anomaly_scorer.py     Confounder-aware infection scoring for cascade entry
 
 tools/
 ├── sanity_checker.py        Pre-run config validation (pydantic + cross-refs)
@@ -118,7 +119,7 @@ dashboard/                   Modular command deck (theme, charts, spatial_viz, d
 scripts/                     Enterprise platform builder, deck graphics, asset precompute
 telemetry_buffer/
 │   agent_axes.py            Orthogonal agent state (infection / presentation / compliance)
-tests/                       ~471 tests (ship, fleet, Stackelberg, OIS, behavioral, long-read, TAT, enterprise, CONTAM, schemas)
+tests/                       ~617 tests (ship, fleet, Stackelberg, OIS, behavioral, long-read, TAT, enterprise, CONTAM, schemas, wearable scoring)
 AGENTS.md                    Cursor Cloud / agent development notes
 ```
 
@@ -363,6 +364,18 @@ wearable_monitoring:
   sync_dropout_prob: 0.02
   anomaly_z_threshold: 2.0
 
+  anomaly_detection:                  # confounder-aware cascade entry scoring
+    enabled: true
+    infection_score_threshold: 1.5
+    fleet_anomaly_floor: 0.15
+    fleet_anomaly_downweight: 0.1
+    confounder_match_threshold: 0.7
+    channel_infection_weights:
+      body_temp: 1.0
+      glucose: 1.0
+      heart_rate: 0.3
+      # ... see crusher_labs/config.yaml for full list
+
   fleet_thresholds:
     fleet_fever_rate_amber: 0.03
     fleet_fever_rate_red: 0.08
@@ -370,7 +383,9 @@ wearable_monitoring:
     fleet_anomaly_rate_red: 0.12
 ```
 
-Wearable stoplights feed SOP-012..SOP-014; integrated **detection escalation**
+Wearable stoplights feed SOP-012..SOP-014; cascade Tier-0 entry uses
+confounder-aware `infection_score` (see `anomaly_detection` block).
+Integrated **detection escalation**
 (SOP-015..SOP-016) fires when multiple detection modes (syndromic, wearable,
 environmental, clinical) reach AMBER/RED together (`min_modes_affected` in
 `protocols.json`).
