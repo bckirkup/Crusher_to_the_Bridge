@@ -334,9 +334,13 @@ def run_observation_sampling(
     clin_microbio_results: dict[int, dict[str, Any]] = {}
 
     if sick_call_agents:
-        clin_rdt_results = obs.clin_rdt.test_sick_call_agents(sick_call_agents)
-        clin_qpcr_results = obs.clin_qpcr.test_sick_call_agents(sick_call_agents)
-        clin_microbio_results = obs.clin_microbio.test_sick_call_agents(sick_call_agents)
+        from crusher_labs.clinical_correlation import run_correlated_clinical_panel
+
+        clin_rdt_results, clin_qpcr_results, clin_microbio_results = (
+            run_correlated_clinical_panel(
+                obs, sick_call_agents, obs.clinical_correlation,
+            )
+        )
 
     if queue is not None:
         queue.submit_dict(INSTRUMENT_AIR, air_results, epoch)

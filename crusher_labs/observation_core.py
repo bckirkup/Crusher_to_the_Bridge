@@ -570,6 +570,8 @@ class ClinicalRapidDiagnostic:
         symptom_presentation: str,
         compliance_status: str,
         location: str,
+        *,
+        uniform_draw: float | None = None,
     ) -> dict[str, Any]:
         """Run a rapid antigen test on a single agent."""
         # Shedding-dependent effective sensitivity (sigmoid)
@@ -582,10 +584,11 @@ class ClinicalRapidDiagnostic:
 
         _, carryover = self.qc.process_sample(shedding_rate * 0.001)
 
+        draw = self.rng.random() if uniform_draw is None else uniform_draw
         if is_infected:
-            positive = self.rng.random() < eff_sens
+            positive = draw < eff_sens
         else:
-            positive = self.rng.random() > self.specificity  # false positive
+            positive = draw > self.specificity  # false positive
 
         # Raw control line intensity (simulated)
         control_line = round(float(self.rng.normal(0.85, 0.05)), 3)
@@ -671,16 +674,31 @@ class ClinicalQPCR:
         symptom_presentation: str,
         compliance_status: str,
         location: str,
+        *,
+        uniform_draw: float | None = None,
     ) -> dict[str, Any]:
         """Run clinical qPCR on a patient specimen."""
         specimen_mass = shedding_rate * self.extraction_efficiency
-        noise_mult = self.rng.lognormal(0, 0.04)
+        if uniform_draw is None:
+            noise_mult = self.rng.lognormal(0, 0.04)
+        else:
+            from crusher_labs.clinical_correlation import _normal_ppf
+
+            noise_mult = math.exp(_normal_ppf(uniform_draw) * 0.04)
         specimen_mass *= noise_mult
 
         effective_mass, carryover = self.qc.process_sample(specimen_mass)
 
         ct = self._compute_ct(effective_mass)
-        detected = ct is not None and ct <= self.lod_ct
+        if uniform_draw is None:
+            detected = ct is not None and ct <= self.lod_ct
+        elif shedding_rate > 0:
+            eff_detect = RDT_SENSITIVITY * min(
+                1.0, shedding_rate / (shedding_rate + 1000.0),
+            )
+            detected = uniform_draw < eff_detect
+        else:
+            detected = False
 
         viral_load_copies_ml = round(effective_mass * 100, 2) if effective_mass > 0 else 0.0
 
@@ -807,11 +825,14 @@ class ClinicalMicrobiology:
         compliance_status: str,
         location: str,
         pathogen_infections: dict[str, Any] | None = None,
+        *,
+        uniform_draw: float | None = None,
     ) -> dict[str, Any]:
         """Run clinical microbiology on a patient specimen."""
         pathogen_infections = pathogen_infections or {}
 
         _, carryover = self.qc.process_sample(microflora_disruption * 10)
+        culture_draw = self.rng.random() if uniform_draw is None else uniform_draw
 
         # Determine disruption site from active infections
         disruption_site = "skin"  # default
@@ -838,8 +859,10 @@ class ClinicalMicrobiology:
 
             abnormal_list = ABNORMAL_MARKERS.get(disruption_site, [])
             for marker in abnormal_list:
-                if self.rng.random() < microflora_disruption * self.culture_sensitivity:
+                if culture_draw < microflora_disruption * self.culture_sensitivity:
                     culture_results[marker] = "detected"
+                if uniform_draw is None:
+                    culture_draw = self.rng.random()
 
             gram_stain = "abnormal_shift"
         else:

@@ -188,6 +188,20 @@ syndromic:
   background_noise_rate: 0.015        # P(healthy agent reports daily – seasickness etc.)
   cadence: 1
 
+# ── Clinical diagnostics (observation instruments) ───────────
+# Gaussian-copula autocorrelation between sick-call clinical tests.
+# Off-diagonal entries default to 0 (independent noise). Diagonal must be 1.0.
+clinical_diagnostics:
+  description: "Correlated measurement noise across clinical_rdt, clinical_qpcr, clinical_microbiology"
+  test_order:
+    - clinical_rdt
+    - clinical_qpcr
+    - clinical_microbiology
+  autocorrelation_matrix:
+    - [1.0, 0.0, 0.0]
+    - [0.0, 1.0, 0.0]
+    - [0.0, 0.0, 1.0]
+
 # ── Clinical RDT (Rapid Diagnostic Test) ─────────────────────
 clinical_rdt:
   description: "Rapid Diagnostic Test (antigen lateral-flow)"

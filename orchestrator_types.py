@@ -21,6 +21,7 @@ from crusher_labs.observation_core import (
     ClinicalQPCR,
     ClinicalMicrobiology,
 )
+from crusher_labs.clinical_correlation import ClinicalTestCorrelation
 from crusher_labs.lab_notebook import ArtificialLabNotebook
 from crusher_labs.protocol_engine import ProtocolEngine
 from crusher_labs.cost_ledger import CostLedger
@@ -103,6 +104,7 @@ class ObservationEngine:
     clin_rdt: ClinicalRapidDiagnostic
     clin_qpcr: ClinicalQPCR
     clin_microbio: ClinicalMicrobiology
+    clinical_correlation: ClinicalTestCorrelation
     notebook: ArtificialLabNotebook
     fidelity_name: str
     lab_notebook_enabled: bool

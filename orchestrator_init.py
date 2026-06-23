@@ -448,6 +448,9 @@ def init_observation_engine(
         control_intensity=ctrl_intensity,
         rng=np.random.default_rng(seed),
     )
+    from crusher_labs.clinical_correlation import ClinicalTestCorrelation
+
+    clinical_correlation = ClinicalTestCorrelation.from_config(cfg, seed=seed)
 
     notebook = build_notebook_from_config(obs_cfg_path)
 
@@ -500,6 +503,7 @@ def init_observation_engine(
         clin_rdt=clin_rdt,
         clin_qpcr=clin_qpcr,
         clin_microbio=clin_microbio,
+        clinical_correlation=clinical_correlation,
         notebook=notebook,
         fidelity_name=fidelity_name,
         lab_notebook_enabled=lab_notebook_enabled,

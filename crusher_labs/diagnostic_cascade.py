@@ -498,64 +498,11 @@ class _CascadeTestRunner:
         tier: DiagnosticTier,
     ) -> dict[str, Any]:
         """Run all tests defined for this tier on the given agent."""
-        from telemetry_buffer.agent_axes import resolve_agent_axes
-
-        results: dict[str, Any] = {}
-        infection, presentation, compliance = resolve_agent_axes(agent)
-
-        for test_key in tier.tests:
-            if test_key == "clinical_rdt":
-                from telemetry_buffer.agent_axes import agent_is_infected
-
-                result = self.obs.clin_rdt.test_agent(
-                    agent_id,
-                    agent.get("shedding_rate", 0.0),
-                    agent_is_infected(agent),
-                    infection,
-                    presentation,
-                    compliance,
-                    agent.get("location", "unknown"),
-                )
-                results[test_key] = result
-
-            elif test_key == "clinical_multiplex_panel":
-                from telemetry_buffer.agent_axes import agent_is_infected
-
-                result = self.obs.clin_rdt.test_agent(
-                    agent_id,
-                    agent.get("shedding_rate", 0.0),
-                    agent_is_infected(agent),
-                    infection,
-                    presentation,
-                    compliance,
-                    agent.get("location", "unknown"),
-                )
-                results[test_key] = result
-
-            elif test_key == "clinical_qpcr":
-                result = self.obs.clin_qpcr.test_agent(
-                    agent_id,
-                    agent.get("shedding_rate", 0.0),
-                    infection,
-                    presentation,
-                    compliance,
-                    agent.get("location", "unknown"),
-                )
-                results[test_key] = result
-
-            elif test_key == "clinical_microbiology":
-                result = self.obs.clin_microbio.test_agent(
-                    agent_id,
-                    agent.get("microflora_disruption", 0.0),
-                    infection,
-                    presentation,
-                    compliance,
-                    agent.get("location", "unknown"),
-                    agent.get("pathogen_infections"),
-                )
-                results[test_key] = result
-
-        return results
+        return self.obs.clinical_correlation.run_agent_tests(
+            self.obs,
+            agent,
+            test_keys=tuple(tier.tests),
+        )
 
 
 # ── Factory ──────────────────────────────────────────────────────────────

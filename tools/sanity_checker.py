@@ -882,6 +882,7 @@ def _check_config_yaml(
     _check_infection_counters(cfg, report)
     _check_wearable_monitoring(cfg, report)
     _check_modality_params(cfg, report)
+    _check_clinical_diagnostics(cfg, report)
     _check_hvac_params(cfg, report)
     _check_emod_progression(cfg, report)
     _check_escalation_params(cfg, report)
@@ -1262,6 +1263,43 @@ def _check_modality_params(cfg: dict[str, Any], report: Report) -> None:
             if val < 0:
                 report.error("config.yaml", "MATH_BOUND",
                              f"{section}.{key} = {val} is negative")
+
+
+def _check_clinical_diagnostics(cfg: dict[str, Any], report: Report) -> None:
+    """Validate clinical test autocorrelation matrix."""
+    block = cfg.get("clinical_diagnostics", {})
+    if not block:
+        return
+    raw = block.get("autocorrelation_matrix")
+    if raw is None:
+        return
+    try:
+        from crusher_labs.clinical_correlation import (
+            CLINICAL_TEST_KEYS,
+            parse_autocorrelation_matrix,
+            validate_autocorrelation_matrix,
+        )
+
+        matrix = parse_autocorrelation_matrix(raw, test_order=CLINICAL_TEST_KEYS)
+        validate_autocorrelation_matrix(matrix)
+        if matrix.shape[0] != len(CLINICAL_TEST_KEYS):
+            report.error(
+                "config.yaml",
+                "SCHEMA",
+                "clinical_diagnostics.autocorrelation_matrix size must match test_order",
+            )
+        for i in range(matrix.shape[0]):
+            for j in range(matrix.shape[1]):
+                val = float(matrix[i, j])
+                if val < -1.0 or val > 1.0:
+                    report.error(
+                        "config.yaml",
+                        "MATH_BOUND",
+                        f"clinical_diagnostics.autocorrelation_matrix[{i}][{j}] "
+                        f"= {val} outside [-1,1]",
+                    )
+    except ValueError as exc:
+        report.error("config.yaml", "SCHEMA", str(exc))
 
 
 def _check_hvac_params(cfg: dict[str, Any], report: Report) -> None:
