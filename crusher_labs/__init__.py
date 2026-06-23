@@ -28,6 +28,11 @@ from crusher_labs.long_read_escalation import (
     is_long_read_enabled,
     long_read_config,
 )
+from crusher_labs.clinical_correlation import (
+    CLINICAL_TEST_KEYS,
+    ClinicalTestCorrelation,
+    clinical_diagnostics_params,
+)
 from crusher_labs.observation_core import (
     ContinuousAirSniffer,
     TargetedSurfaceSwab,
@@ -170,6 +175,9 @@ __all__ = [
     "ClinicalRapidDiagnostic",
     "ClinicalQPCR",
     "ClinicalMicrobiology",
+    "ClinicalTestCorrelation",
+    "CLINICAL_TEST_KEYS",
+    "clinical_diagnostics_params",
     "InstrumentQC",
     "ArtificialLabNotebook",
     "ProtocolEngine",
