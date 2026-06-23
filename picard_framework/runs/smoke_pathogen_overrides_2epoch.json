@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0.0",
+  "description": "2-epoch smoke run with pathogen_overrides applied at PicardRunSpec construction.",
+  "catalog": {
+    "platform_id": "destroyer_baseline",
+    "pathogen_bundle_id": "active_profiles"
+  },
+  "run": {
+    "random_seed": 42,
+    "num_epochs": 2,
+    "write_ground_truth": false
+  },
+  "legacy_yaml": "crusher_labs/config.yaml",
+  "pathogen_overrides": {
+    "norwalk_gi": {
+      "initial_infected": 2
+    },
+    "remove": ["sars_cov2_resp"]
+  },
+  "actors": [],
+  "incentives": {}
+}

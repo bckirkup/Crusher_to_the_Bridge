@@ -305,8 +305,16 @@ def check_escalation(
 def load_pathogen_profiles(
     cfg: dict[str, Any],
 ) -> dict[str, dict[str, Any]]:
-    """Load multi-pathogen profiles from active_profiles.json."""
+    """Load multi-pathogen profiles from config.
+
+    Prefers ``multi_pathogen.resolved_profiles`` injected by PicardRunSpec
+    (after pathogen_overrides). Falls back to ``profiles_path`` on disk.
+    """
     mp_cfg = cfg.get("multi_pathogen", {})
+    resolved = mp_cfg.get("resolved_profiles")
+    if isinstance(resolved, dict) and resolved:
+        return {str(pid): dict(prof) for pid, prof in resolved.items()}
+
     profiles_path = mp_cfg.get("profiles_path", "data/pathogens/active_profiles.json")
     full_path = os.path.join(REPO_ROOT, profiles_path)
     if not os.path.isfile(full_path):
