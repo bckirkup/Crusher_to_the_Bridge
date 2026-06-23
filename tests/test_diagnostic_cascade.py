@@ -40,6 +40,7 @@ def _default_tiers() -> list[DiagnosticTier]:
             regret_level="low",
             actions_on_positive=["advance_to_tier_1"],
             confinement_on_positive=False, sop_gate=None,
+            implicit_positive=False,
         ),
         DiagnosticTier(
             tier_id=1, name="RDT Screen", tests=["clinical_rdt"],
@@ -556,8 +557,10 @@ class TestCascadeGatedProtocols:
 
 class TestCascadeConfigLoading:
     def test_load_diagnostic_cascade(self) -> None:
-        tiers, rules = load_diagnostic_cascade(repo_root=REPO_ROOT)
-        assert len(tiers) == 4
+        tiers, rules, entry = load_diagnostic_cascade(repo_root=REPO_ROOT)
+        assert len(tiers) >= 4
+        assert len(rules) >= 1
+        assert entry.sick_call_tier == 1
         assert tiers[0].tier_id == 0
         assert tiers[3].tier_id == 3
         assert len(rules) >= 1
@@ -625,7 +628,7 @@ class TestProtocolsJsonCascadeTier:
 
 class TestDiagnosticCascadeJsonContract:
     def test_tier_ids_sequential(self) -> None:
-        tiers, _ = load_diagnostic_cascade(repo_root=REPO_ROOT)
+        tiers, _, _ = load_diagnostic_cascade(repo_root=REPO_ROOT)
         ids = [t.tier_id for t in tiers]
         assert ids == list(range(len(ids)))
 
@@ -636,7 +639,7 @@ class TestDiagnosticCascadeJsonContract:
         with open(protocols_path) as fh:
             protocol_ids = {p["protocol_id"] for p in json.load(fh)["protocols"]}
 
-        tiers, rules = load_diagnostic_cascade(repo_root=REPO_ROOT)
+        tiers, rules, _ = load_diagnostic_cascade(repo_root=REPO_ROOT)
 
         for tier in tiers:
             if tier.sop_gate:
@@ -652,20 +655,20 @@ class TestDiagnosticCascadeJsonContract:
                 )
 
     def test_regret_levels_valid(self) -> None:
-        tiers, _ = load_diagnostic_cascade(repo_root=REPO_ROOT)
+        tiers, _, _ = load_diagnostic_cascade(repo_root=REPO_ROOT)
         valid = {"low", "medium", "high"}
         for tier in tiers:
             assert tier.regret_level in valid
 
     def test_tat_non_negative(self) -> None:
-        tiers, _ = load_diagnostic_cascade(repo_root=REPO_ROOT)
+        tiers, _, _ = load_diagnostic_cascade(repo_root=REPO_ROOT)
         for tier in tiers:
             assert tier.tat_epochs >= 0
 
 
 class TestMultiplexCascadeConfig:
     def test_multiplex_tier1_uses_clinical_multiplex_panel(self) -> None:
-        tiers, _ = load_diagnostic_cascade(
+        tiers, _, _ = load_diagnostic_cascade(
             os.path.join(REPO_ROOT, "data/config/diagnostic_cascade_multiplex.json"),
             repo_root=REPO_ROOT,
         )

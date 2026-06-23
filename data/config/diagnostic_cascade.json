@@ -3,8 +3,9 @@
   "tiers": [
     {
       "tier_id": 0,
-      "name": "Self-Report / Triage",
+      "name": "Wearable Clinical Triage",
       "tests": [],
+      "implicit_positive": false,
       "sensitivity": 0.70,
       "specificity": 0.60,
       "cost_per_agent": {
@@ -72,6 +73,21 @@
       "sop_gate": ["SOP-002", "SOP-005", "SOP-007", "SOP-009", "SOP-015", "SOP-016"]
     }
   ],
+  "cascade_entry": {
+    "sick_call_tier": 1,
+    "wearable_alert_tier": 0,
+    "wearable_device_fusion": {
+      "fever": "any",
+      "anomaly_channels": "union"
+    },
+    "wearable_alert_fusion": {
+      "operator": "or",
+      "rules": [
+        {"signal": "fever", "equals": true},
+        {"signal": "anomaly_count", "operator": ">=", "value": 2}
+      ]
+    }
+  },
   "fleet_escalation_rules": [
     {
       "rule_id": "fleet_tier2_threshold",

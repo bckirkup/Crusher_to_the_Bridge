@@ -25,6 +25,8 @@ import os
 from dataclasses import dataclass, field
 from typing import Any
 
+from crusher_labs.cascade_entry import CascadeEntryConfig
+
 
 # ── Tier dataclass ───────────────────────────────────────────────────────
 
@@ -43,13 +45,15 @@ class DiagnosticTier:
     actions_on_positive: list[str]
     confinement_on_positive: bool
     sop_gate: list[str] | None
+    implicit_positive: bool = True
 
     @classmethod
     def from_config(cls, d: dict[str, Any]) -> DiagnosticTier:
+        tests = list(d.get("tests", []))
         return cls(
             tier_id=int(d["tier_id"]),
             name=str(d.get("name", f"Tier {d['tier_id']}")),
-            tests=list(d.get("tests", [])),
+            tests=tests,
             sensitivity=float(d.get("sensitivity", 0.5)),
             specificity=float(d.get("specificity", 0.9)),
             cost_per_agent=dict(d.get("cost_per_agent", {})),
@@ -58,6 +62,9 @@ class DiagnosticTier:
             actions_on_positive=list(d.get("actions_on_positive", [])),
             confinement_on_positive=bool(d.get("confinement_on_positive", False)),
             sop_gate=d.get("sop_gate"),
+            implicit_positive=bool(
+                d.get("implicit_positive", len(tests) == 0),
+            ),
         )
 
 
@@ -121,6 +128,7 @@ class CascadeEpochResult:
     """Output of one epoch's cascade evaluation."""
 
     new_tier0_agents: list[int] = field(default_factory=list)
+    new_tier1_agents: list[int] = field(default_factory=list)
     tier_advancements: list[dict[str, Any]] = field(default_factory=list)
     tests_ordered: dict[int, list[str]] = field(default_factory=dict)
     confinements_ordered: list[int] = field(default_factory=list)
@@ -131,6 +139,7 @@ class CascadeEpochResult:
     def to_dict(self) -> dict[str, Any]:
         return {
             "new_tier0_agents": self.new_tier0_agents,
+            "new_tier1_agents": self.new_tier1_agents,
             "tier_advancements": self.tier_advancements,
             "tests_ordered": self.tests_ordered,
             "confinements_ordered": self.confinements_ordered,
@@ -148,10 +157,12 @@ class DiagnosticCascadeEngine:
         self,
         tiers: list[DiagnosticTier],
         fleet_rules: list[FleetEscalationRule] | None = None,
+        entry_config: CascadeEntryConfig | None = None,
     ) -> None:
         self.tiers = sorted(tiers, key=lambda t: t.tier_id)
         self.tier_map: dict[int, DiagnosticTier] = {t.tier_id: t for t in self.tiers}
         self.fleet_rules = fleet_rules or []
+        self.entry_config = entry_config or CascadeEntryConfig()
         self.agent_states: dict[int, AgentCascadeState] = {}
         self.cascade_log: list[dict[str, Any]] = []
 
@@ -167,25 +178,40 @@ class DiagnosticCascadeEngine:
             self.agent_states[agent_id] = AgentCascadeState(agent_id=agent_id)
         return self.agent_states[agent_id]
 
+    def enter_tier(
+        self,
+        agent_id: int,
+        tier_id: int,
+        epoch: int,
+        reason: str = "cascade_entry",
+    ) -> bool:
+        """Register an agent entering the cascade at *tier_id*.
+
+        Returns True when this call newly records the tier entry.
+        """
+        state = self._get_or_create_state(agent_id)
+        if tier_id in state.tier_entry_epoch:
+            return False
+        state.tier_entry_epoch[tier_id] = epoch
+        if state.current_tier < tier_id:
+            state.current_tier = tier_id
+        self.cascade_log.append({
+            "epoch": epoch,
+            "agent_id": agent_id,
+            "event": "TIER_ENTRY",
+            "tier": tier_id,
+            "reason": reason,
+        })
+        return True
+
     def enter_tier0(
         self,
         agent_id: int,
         epoch: int,
         reason: str = "sick_call",
     ) -> None:
-        """Register an agent entering the cascade at Tier 0."""
-        state = self._get_or_create_state(agent_id)
-        if 0 in state.tier_entry_epoch:
-            return
-        state.current_tier = 0
-        state.tier_entry_epoch[0] = epoch
-        self.cascade_log.append({
-            "epoch": epoch,
-            "agent_id": agent_id,
-            "event": "TIER_ENTRY",
-            "tier": 0,
-            "reason": reason,
-        })
+        """Register an agent entering the cascade at Tier 0 (legacy helper)."""
+        self.enter_tier(agent_id, 0, epoch, reason=reason)
 
     def _advance_agent(
         self,
@@ -219,7 +245,9 @@ class DiagnosticCascadeEngine:
         Checks instrument-specific result fields for any positive signal.
         """
         if not test_results:
-            return tier.tests == []
+            if not tier.tests:
+                return tier.implicit_positive
+            return False
 
         for test_key, result in test_results.items():
             if isinstance(result, dict):
@@ -244,25 +272,35 @@ class DiagnosticCascadeEngine:
     ) -> CascadeEpochResult:
         """Run one epoch of cascade evaluation.
 
-        1. Enter new agents at Tier 0 from sick-call and wearable alerts.
-        2. Resolve pending tiers whose TAT has completed.
-        3. For each agent at a tier, run tests and advance if positive.
-        4. Support intra-epoch multi-tier advancement (loop until stable).
-        5. Evaluate fleet escalation rules.
+        1. Enter sick-call agents at the configured sick-call tier (default 1).
+        2. Enter wearable-alert agents at Tier 0 when not already in testing.
+        3. Resolve pending tiers whose TAT has completed.
+        4. For each agent at a tier, run tests and advance if positive.
+        5. Support intra-epoch multi-tier advancement (loop until stable).
+        6. Evaluate fleet escalation rules.
         """
         result = CascadeEpochResult()
         monitored = monitored_agent_ids or set()
         agent_map = {a["agent_id"]: a for a in agents}
+        sick_tier = self.entry_config.sick_call_tier
+        wearable_tier = self.entry_config.wearable_alert_tier
 
         for aid in sick_call_ids:
-            if aid not in self.agent_states or 0 not in self.agent_states[aid].tier_entry_epoch:
-                self.enter_tier0(aid, epoch, reason="sick_call")
-                result.new_tier0_agents.append(aid)
+            if self.enter_tier(aid, sick_tier, epoch, reason="sick_call"):
+                if sick_tier == 0:
+                    result.new_tier0_agents.append(aid)
+                elif sick_tier == 1:
+                    result.new_tier1_agents.append(aid)
 
         for aid in wearable_red_ids:
-            if aid not in self.agent_states or 0 not in self.agent_states[aid].tier_entry_epoch:
-                self.enter_tier0(aid, epoch, reason="wearable_alert")
-                result.new_tier0_agents.append(aid)
+            state = self.agent_states.get(aid)
+            if state is not None and state.current_tier >= sick_tier:
+                continue
+            if self.enter_tier(aid, wearable_tier, epoch, reason="wearable_alert"):
+                if wearable_tier == 0:
+                    result.new_tier0_agents.append(aid)
+                elif wearable_tier == 1:
+                    result.new_tier1_agents.append(aid)
 
         for state in list(self.agent_states.values()):
             if state.pending_tier is not None and state.pending_available_epoch is not None:
@@ -344,7 +382,10 @@ class DiagnosticCascadeEngine:
                         a for a in current_tier.actions_on_positive
                         if a.startswith("advance_to_tier_")
                     ]
-                    if next_tier_actions or not current_tier.tests:
+                    should_advance = positive and (
+                        bool(next_tier_actions) or not current_tier.tests
+                    )
+                    if should_advance:
                         self._advance_agent(state, next_tier_id, epoch)
                         result.tier_advancements.append({
                             "agent_id": state.agent_id,
@@ -522,7 +563,7 @@ class _CascadeTestRunner:
 def load_diagnostic_cascade(
     config_path: str | None = None,
     repo_root: str | None = None,
-) -> tuple[list[DiagnosticTier], list[FleetEscalationRule]]:
+) -> tuple[list[DiagnosticTier], list[FleetEscalationRule], CascadeEntryConfig]:
     """Load tier definitions and fleet rules from JSON config."""
     if config_path is None:
         root = repo_root or os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -533,7 +574,8 @@ def load_diagnostic_cascade(
 
     tiers = [DiagnosticTier.from_config(t) for t in cfg.get("tiers", [])]
     rules = [FleetEscalationRule.from_config(r) for r in cfg.get("fleet_escalation_rules", [])]
-    return tiers, rules
+    entry_config = CascadeEntryConfig.from_config(cascade_json=cfg)
+    return tiers, rules, entry_config
 
 
 def build_cascade_engine(
@@ -552,8 +594,17 @@ def build_cascade_engine(
     if not os.path.isabs(config_path):
         config_path = os.path.join(root, config_path)
 
-    tiers, rules = load_diagnostic_cascade(config_path, repo_root=root)
-    return DiagnosticCascadeEngine(tiers, rules)
+    tiers, rules, _entry_config = load_diagnostic_cascade(config_path, repo_root=root)
+    entry_config = CascadeEntryConfig.from_config(
+        cascade_json=_load_cascade_json(config_path),
+        runtime_cfg=cascade_cfg,
+    )
+    return DiagnosticCascadeEngine(tiers, rules, entry_config=entry_config)
+
+
+def _load_cascade_json(config_path: str) -> dict[str, Any]:
+    with open(config_path, encoding="utf-8") as fh:
+        return json.load(fh)
 
 
 def build_test_runner(obs: Any) -> _CascadeTestRunner:

@@ -289,12 +289,17 @@ class WearableMonitor:
         chronic_disease_device_map: list[dict[str, Any]] | None = None,
         rng: np.random.Generator | None = None,
         anomaly_z_threshold: float = 2.0,
+        device_fusion: Any | None = None,
     ) -> None:
         self.devices = devices
         self.class_device_assignments = class_device_assignments
         self.chronic_disease_device_map = chronic_disease_device_map or []
         self.rng = rng if rng is not None else np.random.default_rng()
         self.anomaly_z_threshold = anomaly_z_threshold
+        if device_fusion is None:
+            from crusher_labs.cascade_entry import WearableDeviceFusionConfig
+            device_fusion = WearableDeviceFusionConfig()
+        self.device_fusion = device_fusion
         self._agent_states: dict[int, list[AgentWearableState]] = {}
 
     @property
@@ -438,9 +443,6 @@ class WearableMonitor:
     ) -> dict[str, Any]:
         """Generate epoch data across all devices for one agent, then aggregate."""
         device_results: list[dict[str, Any]] = []
-        agg_fever = False
-        agg_anomaly_channels: list[str] = []
-        visibility_list: list[str] = []
 
         for state in states:
             confounder_effects = self._sample_confounders(agent, state.device)
@@ -453,23 +455,11 @@ class WearableMonitor:
             result["visibility"] = state.visibility
             device_results.append(result)
 
-            if result.get("fever", False):
-                agg_fever = True
-            for ch in result.get("anomaly_channels", []):
-                if ch not in agg_anomaly_channels:
-                    agg_anomaly_channels.append(ch)
-            visibility_list.append(state.visibility)
+        from crusher_labs.cascade_entry import fuse_device_results
 
-        return {
-            "devices": device_results,
-            "device_id": device_results[0]["device_id"] if device_results else "none",
-            "fever": agg_fever,
-            "anomaly_channels": agg_anomaly_channels,
-            "anomaly_count": len(agg_anomaly_channels),
-            "visibility": visibility_list,
-            "summary": self._merge_summaries(device_results),
-            "hourly": device_results[0].get("hourly", {}) if device_results else {},
-        }
+        fused = fuse_device_results(device_results, self.device_fusion)
+        fused["devices"] = device_results
+        return fused
 
     def _merge_summaries(self, device_results: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
         """Merge summary dicts across multiple device results.
@@ -942,10 +932,19 @@ def build_wearable_monitor_from_config(
 
     anomaly_z_threshold = wm_cfg.get("anomaly_z_threshold", 2.0)
 
+    from crusher_labs.cascade_entry import WearableDeviceFusionConfig
+
+    cascade_entry = cfg.get("diagnostic_cascade", {}).get("entry", {})
+    device_fusion_raw = cascade_entry.get("wearable_device_fusion") or wm_cfg.get(
+        "device_fusion",
+    )
+    device_fusion = WearableDeviceFusionConfig.from_config(device_fusion_raw)
+
     return WearableMonitor(
         devices=devices,
         class_device_assignments=class_device_assignments,
         chronic_disease_device_map=chronic_disease_device_map,
         rng=rng,
         anomaly_z_threshold=anomaly_z_threshold,
+        device_fusion=device_fusion,
     )
