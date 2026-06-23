@@ -32,6 +32,7 @@ CASCADE_SMOKE_SPECS: list[tuple[str, str]] = [
 
 CASCADE_RESULT_KEYS = frozenset({
     "new_tier0_agents",
+    "new_tier1_agents",
     "tier_advancements",
     "tests_ordered",
     "confinements_ordered",
@@ -71,8 +72,9 @@ def test_cascade_smoke_run_completes(spec_rel: str, cascade_config: str) -> None
     assert any(
         rec["diagnostic_cascade"].get("tier_advancements")
         or rec["diagnostic_cascade"].get("new_tier0_agents")
+        or rec["diagnostic_cascade"].get("new_tier1_agents")
         for rec in history
-    ), "expected at least one tier-0 entry or tier advancement"
+    ), "expected at least one cascade entry or tier advancement"
 
 
 @pytest.mark.timeout(120)

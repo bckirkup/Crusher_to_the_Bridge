@@ -731,6 +731,7 @@ def step_diagnostic_cascade(
     wearable_result: dict[str, Any] | None,
     obs: ObservationEngine,
     wearable_monitor: Any | None = None,
+    cascade_entry_config: Any | None = None,
 ) -> dict[str, Any] | None:
     """Run one epoch of the diagnostic cascade engine.
 
@@ -744,14 +745,25 @@ def step_diagnostic_cascade(
     if cascade is None:
         return None
 
+    from crusher_labs.cascade_entry import (
+        CascadeEntryConfig,
+        evaluate_wearable_alert,
+    )
     from crusher_labs.diagnostic_cascade import build_test_runner
 
     sick_call_ids = list(syn_result.get("sick_call_agents", []))
 
+    entry_cfg = cascade_entry_config
+    if entry_cfg is None and cascade is not None:
+        entry_cfg = cascade.entry_config
+    if entry_cfg is None:
+        entry_cfg = CascadeEntryConfig()
+
     wearable_red_ids: list[int] = []
     if wearable_result:
+        alert_fusion = entry_cfg.wearable_alert_fusion
         for aid_str, data in wearable_result.get("agent_results", {}).items():
-            if data.get("fever") or data.get("anomaly_count", 0) >= 3:
+            if evaluate_wearable_alert(data, alert_fusion):
                 try:
                     wearable_red_ids.append(int(aid_str))
                 except (ValueError, TypeError):

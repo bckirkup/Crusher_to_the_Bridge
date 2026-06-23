@@ -636,6 +636,15 @@ chronic_disease:
 diagnostic_cascade:
   enabled: true
   config_path: "data/config/diagnostic_cascade_multiplex.json"
+  # Optional runtime overrides for cascade entry routing and wearable fusion.
+  # entry:
+  #   sick_call_tier: 1
+  #   wearable_alert_tier: 0
+  #   wearable_alert_fusion:
+  #     operator: or
+  #     rules:
+  #       - {signal: fever, equals: true}
+  #       - {signal: anomaly_count, operator: ">=", value: 2}
 
 # ── Decision engine (Stackelberg policies) ─────────────────────
 decision_engine:
