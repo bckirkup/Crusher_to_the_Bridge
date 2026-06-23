@@ -396,11 +396,24 @@ dist_matrix <- vegdist(species_clr, method = "euclidean")
 ```
 Euclidean distance on CLR-transformed data = Aitchison distance.
 
-**Target**: Not directly replicated in `sequencing.py`. The bridge performs
-point-wise CLR operations (blend, shift, anomaly scoring) rather than
-pairwise distance computation.
+**Target** — `sequencing.py`:
+```python
+def aitchison_distance(x, y, pseudocount=1e-6):
+    clr_x = _clr_transform(x, pseudocount)
+    clr_y = _clr_transform(y, pseudocount)
+    return float(np.linalg.norm(clr_x - clr_y))
 
-| Verdict | **NOVEL** | Different use case; no distance matrix computed. |
+def aitchison_distance_matrix(profiles, pseudocount=1e-6):
+    # pairwise Euclidean on CLR rows → symmetric beta-diversity matrix
+```
+
+Integrated into `MetagenomicSequencing.apply_microflora_disruption()` and
+`detect_microflora_anomaly()` (primary anomaly gate), and
+`WastewaterSequencingGrid.sample_zone()` telemetry
+(`aitchison_distance_to_baseline`). Kingdom-level CLR deltas remain as
+supplementary telemetry.
+
+| Verdict | **MATCH** | Same metric as GRUMB `vegdist(..., method="euclidean")` on CLR profiles. |
 
 ### 2.5 Ecological Drift (Port ↔ Ocean)
 
@@ -599,7 +612,7 @@ Discretised exponential decay: M(t+1) = M(t) · (1 − λ).
 | 2.1b | CLR pseudocount | `02_CLRtransformation_batch_correction.R:30` | `sequencing.py:131` | **APPROXIMATION** |
 | 2.2 | Inverse CLR (softmax) | `compositions::clrInv()` | `sequencing.py:139–142` | **MATCH** |
 | 2.3 | CLR-space linear blending | `simulation_blending_isme_perspectives.py:85` | `sequencing.py:145–159` | **MATCH** |
-| 2.4 | Aitchison beta diversity | `01_R_pipeline_Ecology_Including.R:173` | not implemented | **NOVEL** |
+| 2.4 | Aitchison beta diversity | `01_R_pipeline_Ecology_Including.R:173` | `sequencing.py:152–189` | **MATCH** |
 | 2.5 | Ecological drift (Port↔Ocean) | — | `sequencing.py:212–248` | **NOVEL** |
 | 2.6 | Microflora disruption shifts | — | `sequencing.py:291–336` | **NOVEL** |
 | 2.7 | Multi-kingdom zone seeding | — | `sequencing.py:164–207` | **NOVEL** |
@@ -625,10 +638,10 @@ Discretised exponential decay: M(t+1) = M(t) · (1 − λ).
 
 | Verdict | Count |
 |---------|-------|
-| **MATCH** | 24 |
+| **MATCH** | 25 |
 | **APPROXIMATION** | 10 |
 | **MISMATCH** | 3 |
-| **NOVEL** | 5 |
+| **NOVEL** | 4 |
 | **Total** | 42 |
 
 ### Critical Mismatches Requiring Attention

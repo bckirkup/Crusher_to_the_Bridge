@@ -64,6 +64,7 @@ def wastewater_sequencing_params(cfg: dict[str, Any] | None = None) -> dict[str,
         cfg = load_config()
     ww_cfg = cfg.get("wastewater_sequencing", {})
     grumb_cfg = cfg.get("grumb_seeding", {})
+    micro_cfg = cfg.get("microflora", {})
     return {
         "read_depth": int(ww_cfg.get("read_depth", DEFAULT_WW_READ_DEPTH)),
         "dirichlet_concentration": float(
@@ -71,6 +72,12 @@ def wastewater_sequencing_params(cfg: dict[str, Any] | None = None) -> dict[str,
         ),
         "pseudocount": float(
             ww_cfg.get("pseudocount", grumb_cfg.get("pseudocount", DEFAULT_WW_PSEUDOCOUNT)),
+        ),
+        "aitchison_anomaly_threshold": float(
+            ww_cfg.get(
+                "aitchison_anomaly_threshold",
+                micro_cfg.get("aitchison_anomaly_threshold", 0.08),
+            ),
         ),
     }
 
@@ -89,6 +96,12 @@ def metagenomic_sequencing_params(cfg: dict[str, Any] | None = None) -> dict[str
         ),
         "clr_shift_scale": float(
             seq_cfg.get("clr_shift_scale", micro_cfg.get("clr_shift_scale", 0.15)),
+        ),
+        "aitchison_anomaly_threshold": float(
+            seq_cfg.get(
+                "aitchison_anomaly_threshold",
+                micro_cfg.get("aitchison_anomaly_threshold", 0.08),
+            ),
         ),
     }
 
@@ -141,6 +154,7 @@ def build_modalities(
             read_depth=seq_params["read_depth"],
             pseudocount=seq_params["pseudocount"],
             clr_shift_scale=seq_params["clr_shift_scale"],
+            aitchison_anomaly_threshold=seq_params["aitchison_anomaly_threshold"],
             total_epochs=total_epochs,
             rng=rng,
         ),

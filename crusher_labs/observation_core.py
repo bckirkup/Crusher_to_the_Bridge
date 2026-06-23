@@ -406,11 +406,13 @@ class WastewaterSequencingGrid:
         pseudocount: float = WW_PSEUDOCOUNT,
         cross_contamination_rate: float = DEFAULT_CROSS_CONTAMINATION_RATE,
         control_intensity: str = DEFAULT_CONTROL_RUN_INTENSITY,
+        aitchison_anomaly_threshold: float = 0.08,
         rng: np.random.Generator | None = None,
     ) -> None:
         self.read_depth = read_depth
         self.dirichlet_concentration = dirichlet_concentration
         self.pseudocount = pseudocount
+        self.aitchison_anomaly_threshold = aitchison_anomaly_threshold
         self.rng = rng if rng is not None else np.random.default_rng()
         self.qc = InstrumentQC(cross_contamination_rate, control_intensity, self.rng)
 
@@ -435,13 +437,18 @@ class WastewaterSequencingGrid:
         microflora_shifts = microflora_shifts or {}
 
         composition = self._baseline_arr.copy()
+        pre_shift_composition = composition.copy()
 
         kingdom_clr_deltas: dict[str, float] = {}
+        aitchison_dist = 0.0
         if microflora_shifts:
             clr_vec = _clr_transform(composition, self.pseudocount)
             shift_vec = np.zeros_like(clr_vec)
 
-            from crusher_labs.modalities.sequencing import DISRUPTION_MARKERS
+            from crusher_labs.modalities.sequencing import (
+                DISRUPTION_MARKERS,
+                aitchison_distance,
+            )
 
             for d_type, magnitude in microflora_shifts.items():
                 markers = DISRUPTION_MARKERS.get(d_type, {})
@@ -452,6 +459,9 @@ class WastewaterSequencingGrid:
 
             shifted_clr = clr_vec + shift_vec
             composition = _inv_clr(shifted_clr)
+            aitchison_dist = aitchison_distance(
+                pre_shift_composition, composition, self.pseudocount,
+            )
 
             for kingdom in set(self._kingdoms):
                 indices = [i for i, k in enumerate(self._kingdoms) if k == kingdom]
@@ -492,7 +502,7 @@ class WastewaterSequencingGrid:
         for i, kingdom in enumerate(self._kingdoms):
             kingdom_reads[kingdom] = kingdom_reads.get(kingdom, 0) + int(reads[i])
 
-        anomaly_detected = any(abs(d) > 0.05 for d in kingdom_clr_deltas.values())
+        anomaly_detected = aitchison_dist > self.aitchison_anomaly_threshold
 
         result: dict[str, Any] = {
             "instrument": self.name,
@@ -503,6 +513,8 @@ class WastewaterSequencingGrid:
             "raw_read_counts_prenorm": raw_read_dict,
             "kingdom_reads": kingdom_reads,
             "kingdom_clr_deltas": kingdom_clr_deltas,
+            "aitchison_distance_to_baseline": round(aitchison_dist, 6),
+            "aitchison_anomaly_threshold": self.aitchison_anomaly_threshold,
             "anomaly_detected": anomaly_detected,
             "disruption_types": list(microflora_shifts.keys()),
             "pathogen_mass_input": round(pathogen_mass, 4),

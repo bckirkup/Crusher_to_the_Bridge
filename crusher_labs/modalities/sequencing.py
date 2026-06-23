@@ -149,6 +149,50 @@ def _inv_clr(clr_vec: np.ndarray) -> np.ndarray:
     return exp_vec / exp_vec.sum()
 
 
+def aitchison_distance(
+    x: np.ndarray,
+    y: np.ndarray,
+    pseudocount: float = 1e-6,
+) -> float:
+    """Aitchison distance between two compositions (GRUMB beta diversity).
+
+    Equivalent to Euclidean distance on CLR-transformed data, matching
+    ``vegan::vegdist(..., method = "euclidean")`` on CLR profiles in
+    GRUMB ``01_R_pipeline_Ecology_Including.R``.
+    """
+    clr_x = _clr_transform(x, pseudocount)
+    clr_y = _clr_transform(y, pseudocount)
+    return float(np.linalg.norm(clr_x - clr_y))
+
+
+def aitchison_distance_matrix(
+    profiles: np.ndarray,
+    pseudocount: float = 1e-6,
+) -> np.ndarray:
+    """Pairwise Aitchison distance matrix for compositional samples.
+
+    Parameters
+    ----------
+    profiles:
+        2-D array of shape ``(n_samples, n_taxa)`` on the simplex.
+
+    Returns
+    -------
+    np.ndarray
+        Symmetric ``(n_samples, n_samples)`` distance matrix with zeros on
+        the diagonal, matching GRUMB beta-diversity distance matrices.
+    """
+    profiles = np.asarray(profiles, dtype=np.float64)
+    if profiles.ndim != 2:
+        raise ValueError("profiles must be a 2-D array (n_samples, n_taxa)")
+    n_samples = profiles.shape[0]
+    clr_profiles = np.stack(
+        [_clr_transform(profiles[i], pseudocount) for i in range(n_samples)],
+    )
+    diff = clr_profiles[:, np.newaxis, :] - clr_profiles[np.newaxis, :, :]
+    return np.sqrt(np.sum(diff * diff, axis=2))
+
+
 def _blend_clr(
     profile_a: np.ndarray,
     profile_b: np.ndarray,
@@ -269,12 +313,14 @@ class MetagenomicSequencing:
         total_epochs: int = 24,
         rng: np.random.Generator | None = None,
         clr_shift_scale: float = 0.15,
+        aitchison_anomaly_threshold: float = 0.08,
     ) -> None:
         self.read_depth = read_depth
         self.pseudocount = pseudocount
         self.total_epochs = total_epochs
         self.rng = rng if rng is not None else np.random.default_rng()
         self.clr_shift_scale = clr_shift_scale
+        self.aitchison_anomaly_threshold = aitchison_anomaly_threshold
         self._zone_seeds: dict[str, dict[str, Any]] = {}
 
     def seed_zones(self, zone_configs: list[dict[str, str]]) -> dict[str, dict[str, Any]]:
@@ -308,11 +354,13 @@ class MetagenomicSequencing:
         signatures, the local community composition shifts.  This uses
         GRUMB CLR-space perturbation to modify the baseline profile.
 
-        Returns the shifted profile and a dict of kingdom-level CLR deltas.
+        Returns the shifted profile, kingdom-level CLR deltas, and the
+        Aitchison distance from the pre-shift baseline.
         """
         if total_disruption_magnitude <= 0 or not disruption_shifts:
-            return baseline, {}
+            return baseline, {}, 0.0
 
+        baseline_copy = baseline.copy()
         clr_baseline = _clr_transform(baseline, self.pseudocount)
         shift_vec = np.zeros(len(taxa), dtype=np.float64)
 
@@ -340,14 +388,25 @@ class MetagenomicSequencing:
                     shifted_kingdom_clr - baseline_kingdom_clr, 6,
                 )
 
-        return shifted_profile, kingdom_deltas
+        beta_distance = aitchison_distance(
+            baseline_copy, shifted_profile, self.pseudocount,
+        )
+        return shifted_profile, kingdom_deltas, beta_distance
 
     def detect_microflora_anomaly(
         self,
         kingdom_deltas: dict[str, float],
-        threshold: float = 0.05,
+        aitchison_distance_to_baseline: float = 0.0,
+        threshold: float | None = None,
     ) -> dict[str, Any]:
-        """Score kingdom-level CLR shifts for anomaly detection."""
+        """Score microflora shifts using GRUMB Aitchison beta diversity.
+
+        Primary anomaly signal: Aitchison distance between pre- and post-shift
+        compositions exceeds ``aitchison_anomaly_threshold``. Kingdom-level CLR
+        deltas are retained as supplementary telemetry.
+        """
+        if threshold is None:
+            threshold = self.aitchison_anomaly_threshold
         anomalies = {}
         overall_shift = 0.0
         for kingdom, delta in kingdom_deltas.items():
@@ -360,7 +419,11 @@ class MetagenomicSequencing:
                     "anomaly_detected": True,
                 }
         return {
-            "anomaly_detected": len(anomalies) > 0,
+            "anomaly_detected": aitchison_distance_to_baseline > threshold,
+            "aitchison_distance_to_baseline": round(
+                aitchison_distance_to_baseline, 6,
+            ),
+            "aitchison_anomaly_threshold": threshold,
             "overall_shift_magnitude": round(overall_shift, 6),
             "kingdom_anomalies": anomalies,
         }
@@ -397,17 +460,22 @@ class MetagenomicSequencing:
             mf_shifts = zone_microflora_shifts.get(zone_id, {})
             total_disruption = sum(mf_shifts.values()) if mf_shifts else 0.0
             kingdom_deltas: dict[str, float] = {}
+            aitchison_dist = 0.0
 
             if total_disruption > 0:
                 disruption_markers: dict[str, dict[str, float]] = {}
                 for d_type in mf_shifts:
                     if d_type in DISRUPTION_MARKERS:
                         disruption_markers[d_type] = DISRUPTION_MARKERS[d_type]
-                baseline, kingdom_deltas = self.apply_microflora_disruption(
-                    baseline, taxa, disruption_markers, total_disruption,
+                baseline, kingdom_deltas, aitchison_dist = (
+                    self.apply_microflora_disruption(
+                        baseline, taxa, disruption_markers, total_disruption,
+                    )
                 )
 
-            anomaly_report = self.detect_microflora_anomaly(kingdom_deltas)
+            anomaly_report = self.detect_microflora_anomaly(
+                kingdom_deltas, aitchison_distance_to_baseline=aitchison_dist,
+            )
 
             taxa_with_pathogen = taxa + [PATHOGEN_TAXON]
             pathogen_frac = pathogen_mass / (pathogen_mass + 100.0)
@@ -439,6 +507,12 @@ class MetagenomicSequencing:
                 "pathogen_mass_by_id": zone.get("pathogen_mass_by_id", {}),
                 "microflora_disruption": {
                     "kingdom_clr_deltas": kingdom_deltas,
+                    "beta_diversity": {
+                        "aitchison_distance_to_baseline": round(aitchison_dist, 6),
+                        "aitchison_anomaly_threshold": (
+                            self.aitchison_anomaly_threshold
+                        ),
+                    },
                     "anomaly_report": anomaly_report,
                     "disruption_types_present": list(mf_shifts.keys()),
                     "total_disruption_magnitude": round(total_disruption, 4),
