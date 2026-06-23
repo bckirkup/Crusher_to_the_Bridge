@@ -181,4 +181,6 @@ class WearableDataStream:
             "fever": raw.get("fever", False),
             "anomaly_channels": anomaly_channels,
             "anomaly_count": len(anomaly_channels),
+            "infection_score": raw.get("infection_score", 0.0),
+            "matched_confounders": raw.get("matched_confounders", []),
         }

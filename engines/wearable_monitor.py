@@ -290,6 +290,7 @@ class WearableMonitor:
         rng: np.random.Generator | None = None,
         anomaly_z_threshold: float = 2.0,
         device_fusion: Any | None = None,
+        anomaly_scorer: Any | None = None,
     ) -> None:
         self.devices = devices
         self.class_device_assignments = class_device_assignments
@@ -300,6 +301,7 @@ class WearableMonitor:
             from crusher_labs.cascade_entry import WearableDeviceFusionConfig
             device_fusion = WearableDeviceFusionConfig()
         self.device_fusion = device_fusion
+        self.anomaly_scorer = anomaly_scorer
         self._agent_states: dict[int, list[AgentWearableState]] = {}
 
     @property
@@ -403,6 +405,16 @@ class WearableMonitor:
             results[agent.agent_id] = self._generate_agent_epoch_multi(
                 agent, agent_states, pathogen_profiles,
             )
+
+        if self.anomaly_scorer is not None and results:
+            summaries = [r.get("summary", {}) for r in results.values()]
+            fleet_rates = self.anomaly_scorer.compute_fleet_anomaly_rates(summaries)
+            for aid, result in results.items():
+                score, matched = self.anomaly_scorer.score_agent(
+                    result.get("summary", {}), fleet_rates,
+                )
+                result["infection_score"] = score
+                result["matched_confounders"] = matched
         return results
 
     def _sample_confounders(
@@ -595,8 +607,10 @@ class WearableMonitor:
                 ch_base_cfg = device.get_channel_baseline(ch)
                 baseline_std = ch_base_cfg.get("std", 1.0)
                 if baseline_std > 0:
-                    z_score = abs(mean_val - baseline_val) / baseline_std
+                    signed_z = (mean_val - baseline_val) / baseline_std
+                    z_score = abs(signed_z)
                     ch_summary["z_score"] = round(z_score, 2)
+                    ch_summary["signed_z_score"] = round(signed_z, 2)
                     ch_summary["anomaly"] = z_score > self.anomaly_z_threshold
                 else:
                     ch_summary["z_score"] = 0.0
@@ -930,15 +944,20 @@ def build_wearable_monitor_from_config(
 
     chronic_disease_device_map = wm_cfg.get("chronic_disease_device_map", [])
 
-    anomaly_z_threshold = wm_cfg.get("anomaly_z_threshold", 2.0)
+    ad_cfg = wm_cfg.get("anomaly_detection", {})
+    anomaly_z_threshold = ad_cfg.get(
+        "anomaly_z_threshold", wm_cfg.get("anomaly_z_threshold", 2.0),
+    )
 
     from crusher_labs.cascade_entry import WearableDeviceFusionConfig
+    from engines.wearable_anomaly_scorer import build_wearable_anomaly_scorer_from_config
 
     cascade_entry = cfg.get("diagnostic_cascade", {}).get("entry", {})
     device_fusion_raw = cascade_entry.get("wearable_device_fusion") or wm_cfg.get(
         "device_fusion",
     )
     device_fusion = WearableDeviceFusionConfig.from_config(device_fusion_raw)
+    anomaly_scorer = build_wearable_anomaly_scorer_from_config(wm_cfg, devices)
 
     return WearableMonitor(
         devices=devices,
@@ -947,4 +966,5 @@ def build_wearable_monitor_from_config(
         rng=rng,
         anomaly_z_threshold=anomaly_z_threshold,
         device_fusion=device_fusion,
+        anomaly_scorer=anomaly_scorer,
     )

@@ -84,7 +84,7 @@
       "operator": "or",
       "rules": [
         {"signal": "fever", "equals": true},
-        {"signal": "anomaly_count", "operator": ">=", "value": 2}
+        {"signal": "infection_score", "operator": ">", "value": 1.5}
       ]
     }
   },

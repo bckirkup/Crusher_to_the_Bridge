@@ -103,9 +103,9 @@ def test_wearable_skipped_when_agent_already_at_sick_call_tier() -> None:
 
 def test_evaluate_wearable_alert_default_rules() -> None:
     fusion = WearableAlertFusionConfig()
-    assert evaluate_wearable_alert({"fever": True, "anomaly_count": 0}, fusion)
-    assert evaluate_wearable_alert({"fever": False, "anomaly_count": 2}, fusion)
-    assert not evaluate_wearable_alert({"fever": False, "anomaly_count": 1}, fusion)
+    assert evaluate_wearable_alert({"fever": True, "infection_score": 0.0}, fusion)
+    assert evaluate_wearable_alert({"fever": False, "infection_score": 2.0}, fusion)
+    assert not evaluate_wearable_alert({"fever": False, "infection_score": 1.0}, fusion)
 
 
 def test_evaluate_wearable_alert_and_operator() -> None:

@@ -15,7 +15,7 @@ from typing import Any
 
 DEFAULT_WEARABLE_ALERT_RULES: list[dict[str, Any]] = [
     {"signal": "fever", "equals": True},
-    {"signal": "anomaly_count", "operator": ">=", "value": 2},
+    {"signal": "infection_score", "operator": ">", "value": 1.5},
 ]
 
 
@@ -146,6 +146,25 @@ def _eval_fusion_rule(agent_data: dict[str, Any], rule: dict[str, Any]) -> bool:
         if op == "<":
             return actual < threshold
         raise ValueError(f"unsupported anomaly_count operator: {op}")
+
+    if signal == "infection_score":
+        actual = float(agent_data.get("infection_score", 0.0))
+        op = str(rule.get("operator", ">"))
+        expected = rule.get("value", 1.5)
+        if not isinstance(expected, (int, float)):
+            raise ValueError("infection_score rule value must be numeric")
+        threshold = float(expected)
+        if op == ">=":
+            return actual >= threshold
+        if op == ">":
+            return actual > threshold
+        if op == "==":
+            return actual == threshold
+        if op == "<=":
+            return actual <= threshold
+        if op == "<":
+            return actual < threshold
+        raise ValueError(f"unsupported infection_score operator: {op}")
 
     if signal == "anomaly_channels":
         channels = agent_data.get("anomaly_channels", [])
