@@ -16,7 +16,8 @@ Pure-Python simulation (no databases, Docker, or external APIs). **Python 3.11+*
 | Streamlit dashboard | `python3 -m streamlit run dashboard.py --server.headless true` | Run orchestrator first for telemetry |
 | Deck asset precompute | `python3 scripts/precompute_deck_assets.py` | Writes `deck_graphics.geojson`, hull PNG, manifest per platform |
 | Sanity checker | `python3 tools/sanity_checker.py --from-config` | Ship + fleet + Stackelberg social configs |
-| Full test suite | `python3 -m pytest tests/ -v --tb=short` | ~578 tests, ~9s |
+| Full test suite | `python3 -m pytest tests/ -v --tb=short` | ~617 tests, ~9s |
+| Wearable anomaly scoring | `python3 -m pytest tests/test_wearable_anomaly_scorer.py tests/test_cascade_entry.py -v` | Confounder-aware infection_score + cascade entry fusion |
 | Diagnostic cascade smoke | `python3 -m pytest tests/test_smoke_diagnostic_cascade.py -v` | 6-epoch runs with cascade enabled (standard + multiplex specs) |
 | Long-read / TAT tests | `python3 -m pytest tests/test_long_read_sequencing.py tests/test_instrument_turnaround.py -v` | Nanopore + turnaround queue |
 
@@ -43,7 +44,7 @@ Pure-Python simulation (no databases, Docker, or external APIs). **Python 3.11+*
 **Main** (`.github/workflows/ci.yml` on `main` PRs):
 
 1. `python tools/sanity_checker.py --from-config`
-2. `pytest tests/ -v --tb=short` (~574 tests)
+2. `pytest tests/ -v --tb=short` (~617 tests)
 3. Picard/Presidio/Stackelberg import hygiene
 4. Presidio smoke (`smoke_fleet.json`, 1 cruise)
 5. Long-read / TAT targeted tests
@@ -72,6 +73,7 @@ Pure-Python simulation (no databases, Docker, or external APIs). **Python 3.11+*
 | `run-full-test-suite` | Any pre-PR validation |
 | `long-read-sequencing` | Long-read params, TAT config, escalation, `LongReadNanoporeSequencing` |
 | `orchestrator-smoke-test` | After orchestrator, engine, or `config.yaml` changes |
+| `wearable-anomaly-scoring` | `wearable_anomaly_scorer.py`, `anomaly_detection` config, cascade entry `infection_score` rules |
 | `testing-dashboard` | After `dashboard/` or telemetry field changes |
 | `testing-data-contracts` | After JSON config or platform/pathogen edits |
 | `testing-agent-classes` | Agent class, gender, duty zone, exempt_classes changes |
@@ -89,4 +91,5 @@ Pure-Python simulation (no databases, Docker, or external APIs). **Python 3.11+*
 - **OIS:** Fourth ledger dimension in `cost_accounting`; configured via `operational_impact_weights` in `resource_costs.json`.
 - Utility **weights and optimization** are out-of-repo; only feature export and action apply are in-repo.
 - Eight ship platforms in `data/platforms/` (including fiction-adapted Enterprise bundles); see `README.md` Platforms table.
+- **Wearable cascade entry** uses confounder-aware `infection_score` (not raw `anomaly_count`) via `diagnostic_cascade.entry.wearable_alert_fusion` or defaults in `data/config/diagnostic_cascade*.json`. Fleet stoplight SOPs (SOP-013/014) still use shipwide `anomaly_rate`.
 - No flake8/ruff in repo; use `sanity_checker.py` and pytest.

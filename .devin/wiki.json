@@ -39,7 +39,7 @@
     },
     {
       "title": "Wearable Physiological Monitoring",
-      "purpose": "Document engines/wearable_monitor.py — the wearable device registry and physiological monitoring system. Cover the device model (Oura Ring, Garmin Watch), sensor channels, noise models (Gaussian, drift, dropout), infection response profiles, anomaly z-score detection, and class-to-device mapping.",
+      "purpose": "Document engines/wearable_monitor.py and engines/wearable_anomaly_scorer.py — the wearable device registry, physiological monitoring, and confounder-aware infection scoring. Cover device model (Oura Ring, Garmin Watch), sensor channels, noise models, infection response profiles, signed z-score anomaly detection, confounder template matching, infection_score for cascade Tier-0 entry, and class-to-device mapping.",
       "parent": "Architecture Overview"
     },
     {

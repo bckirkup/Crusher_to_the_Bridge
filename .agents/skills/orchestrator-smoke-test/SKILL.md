@@ -37,6 +37,9 @@ Expected: Two parametrized runs complete using Picard run specs:
 - `picard_framework/runs/smoke_cascade_multiplex_6epoch.json` — multiplex Tier-1 panel
 
 Each epoch records a `diagnostic_cascade` block in telemetry with tier progression.
+Wearable Tier-0 entry uses confounder-aware `infection_score` (default threshold
+1.5) rather than raw multi-channel `anomaly_count`. See
+`.agents/skills/wearable-anomaly-scoring/SKILL.md`.
 These specs set `config_overrides.diagnostic_cascade.enabled: true` without changing
 the default `crusher_labs/config.yaml` (cascade remains off for golden regression).
 
@@ -75,6 +78,7 @@ Expected: Prints success message with no ImportError.
 | Six pathways | Direct, droplet, HVAC airborne, fomite, food contamination, environmental |
 | Quarantine vs isolation | Quarters confinement vs rare isolation ward (no HVAC) |
 | Epoch Loop | Transmission core, observation sampling (with TAT delivery), protocol evaluation, cost accounting, **OIS** all execute |
+| Wearable scoring | Confounder-aware `infection_score` gates cascade Tier-0 entry; fleet stoplights still use `anomaly_rate` |
 | Instrument TAT | Delivered `observation_engine` results lag collection per `instrument_turnaround.json` |
 | Long-read (optional) | Enable `long_read_sequencing.enabled` for Nanopore escalation runs |
 | Finalization | `simulation_history.json` and `artificial_lab_notebook.json` written to `telemetry_buffer/` |

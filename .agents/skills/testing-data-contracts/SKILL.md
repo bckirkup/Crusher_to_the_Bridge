@@ -55,6 +55,7 @@ Expected: 22 tests pass in ~0.2s.
 | Spatial Layout | `data/platforms/<platform>/spatial_layout.json` | Zone definitions per platform |
 | Air Flow Paths | `data/platforms/<platform>/air_flow_paths.json` | HVAC zones, cross-zone links, adjacency |
 | Protocols | `data/config/protocols.json` | SOP definitions (SOP-001 through SOP-016) |
+| Diagnostic cascade | `data/config/diagnostic_cascade.json`, `diagnostic_cascade_multiplex.json` | Tier definitions, `cascade_entry` (sick-call Tier 1, wearable `infection_score` Tier 0) |
 | Resource Costs | `data/config/resource_costs.json` | Budget, labor, material inventory |
 | Logging Profile | `data/config/logging_profile.json` | Observation engine logging config |
 | Instrument TAT | `data/config/instrument_turnaround.json` | Per-instrument delivery delay (epochs) |
