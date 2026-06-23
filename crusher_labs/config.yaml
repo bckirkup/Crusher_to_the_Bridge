@@ -236,6 +236,7 @@ microflora:
   disrupted_shed_mass: 50.0           # baseline microbial mass units per shedding agent
   # GRUMB CLR shift magnitude scaling
   clr_shift_scale: 0.15              # scales the kingdom-level CLR perturbation
+  aitchison_anomaly_threshold: 0.08  # beta-diversity shift vs baseline (CLR Euclidean)
   # Graywater downstream zones (accumulate microbial signatures)
   graywater_zones: ["Engine_Room"]
 
@@ -246,6 +247,7 @@ sequencing:
   read_depth: 100000                  # total reads per zone per sequencing epoch
   pseudocount: 1.0e-6                 # for CLR zero-handling
   clr_shift_scale: 0.15               # microflora disruption CLR perturbation scale
+  aitchison_anomaly_threshold: 0.08   # GRUMB Aitchison beta-diversity anomaly gate
   cadence: 8                          # baseline; escalation may override
 
 # ── Wastewater Sequencing Grid (observation instrument) ──────
@@ -255,6 +257,7 @@ wastewater_sequencing:
   read_depth: 50000                   # total reads per zone sample
   dirichlet_concentration: 100.0      # Dirichlet prior strength (compositional noise)
   pseudocount: 1.0e-6                 # for CLR zero-handling
+  aitchison_anomaly_threshold: 0.08   # GRUMB Aitchison beta-diversity anomaly gate
 
 # ── Instrument turnaround (TAT) ───────────────────────────────
 instrument_turnaround:

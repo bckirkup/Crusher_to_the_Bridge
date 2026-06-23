@@ -429,6 +429,7 @@ def init_observation_engine(
         read_depth=ww_params["read_depth"],
         dirichlet_concentration=ww_params["dirichlet_concentration"],
         pseudocount=ww_params["pseudocount"],
+        aitchison_anomaly_threshold=ww_params["aitchison_anomaly_threshold"],
         cross_contamination_rate=xcontam_rate,
         control_intensity=ctrl_intensity,
         rng=np.random.default_rng(seed),

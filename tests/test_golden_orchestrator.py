@@ -15,10 +15,10 @@ REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 HISTORY_PATH = os.path.join(REPO_ROOT, "telemetry_buffer", "simulation_history.json")
 
 EXPECTED_SUMMARY = {
-    "susceptible": 5,
+    "susceptible": 6,
     "infected": 0,
     "symptomatic": 0,
-    "recovered": 11,
+    "recovered": 10,
     "immune": 4,
 }
 EXPECTED_TRIGGER = "CONFIRMED"

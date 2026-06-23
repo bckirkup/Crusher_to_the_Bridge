@@ -188,14 +188,20 @@ python3 -c "import json; c=json.load(open('telemetry_buffer/simulation_history.j
 
 ## Golden Test Values
 
-These values are used by `test_golden_picard.py` to verify simulation determinism:
+Seed-42 / 24-epoch destroyer baseline (epoch 23), current `main` lineage
+(cascade entry + clinical correlation + pathogen overrides):
 
 | Metric | Expected (epoch 23) |
 |--------|-------------------|
-| Susceptible | 5 |
-| Infected | 2 |
-| Symptomatic | 2 |
-| Recovered | 9 |
+| Susceptible | 6 |
+| Infected | 0 |
+| Symptomatic | 0 |
+| Recovered | 10 |
 | Immune | 4 |
 | Trigger status | CONFIRMED |
-| OIS cumulative | ~273.3 |
+| Total financial USD | 2035.0 |
+| OIS cumulative | ~313.4 |
+
+Golden totals can shift when observation, cascade, or pathogen wiring changes;
+update `tests/test_golden_orchestrator.py` and `tests/test_golden_picard.py`
+after intentional epidemiological changes.
