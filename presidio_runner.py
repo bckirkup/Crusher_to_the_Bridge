@@ -108,6 +108,7 @@ def run(fleet_spec: PresidioRunSpec, *, display: bool = False) -> None:
             air_flow_paths=base_spec.air_flow_paths,
             pathogen_bundle_id=base_spec.pathogen_bundle_id,
             pathogen_profiles_path=base_spec.pathogen_profiles_path,
+            pathogen_profiles=dict(base_spec.pathogen_profiles),
             protocols_path=base_spec.protocols_path,
             resource_costs_path=base_spec.resource_costs_path,
             logging_profile_path=base_spec.logging_profile_path,

@@ -10,6 +10,10 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from picard_framework.catalog.registry import CatalogRegistry
+from picard_framework.pathogen_overrides import (
+    apply_pathogen_overrides,
+    load_pathogen_bundle,
+)
 
 
 def merge_config_overrides(
@@ -74,6 +78,7 @@ class PicardRunSpec:
     air_flow_paths: str = ""
     pathogen_bundle_id: str = "active_profiles"
     pathogen_profiles_path: str = ""
+    pathogen_profiles: dict[str, dict[str, Any]] = field(default_factory=dict)
     protocols_path: str = ""
     resource_costs_path: str = ""
     logging_profile_path: str = ""
@@ -132,6 +137,9 @@ class PicardRunSpec:
 
         epochs = num_epochs if num_epochs is not None else cfg.get("num_epochs", 24)
         bundle_id = os.path.splitext(os.path.basename(profiles_rel))[0]
+        pathogen_profiles = load_pathogen_bundle(
+            os.path.join(repo_root, profiles_rel),
+        )
 
         return cls(
             repo_root=repo_root,
@@ -142,6 +150,7 @@ class PicardRunSpec:
             air_flow_paths=os.path.join(repo_root, airflow_rel),
             pathogen_bundle_id=bundle_id,
             pathogen_profiles_path=os.path.join(repo_root, profiles_rel),
+            pathogen_profiles=pathogen_profiles,
             protocols_path=reg.protocol_bundle,
             resource_costs_path=reg.resource_costs,
             logging_profile_path=reg.logging_profile,
@@ -218,6 +227,12 @@ class PicardRunSpec:
         if overrides:
             legacy_cfg = merge_config_overrides(legacy_cfg, overrides)
 
+        base_profiles = load_pathogen_bundle(pathogen_path)
+        pathogen_profiles = apply_pathogen_overrides(
+            base_profiles,
+            raw.get("pathogen_overrides"),
+        )
+
         return cls(
             repo_root=repo_root,
             random_seed=int(run.get("random_seed", 42)),
@@ -227,6 +242,7 @@ class PicardRunSpec:
             air_flow_paths=platform.air_flow_paths,
             pathogen_bundle_id=pathogen_id,
             pathogen_profiles_path=pathogen_path,
+            pathogen_profiles=pathogen_profiles,
             protocols_path=protocols_path,
             resource_costs_path=resource_path,
             logging_profile_path=logging_path,
@@ -254,6 +270,10 @@ class PicardRunSpec:
         mp["profiles_path"] = os.path.relpath(
             self.pathogen_profiles_path, self.repo_root,
         )
+        if self.pathogen_profiles:
+            mp["resolved_profiles"] = {
+                pid: dict(prof) for pid, prof in self.pathogen_profiles.items()
+            }
         cfg["multi_pathogen"] = mp
         cfg["random_seed"] = self.random_seed
         cfg["num_epochs"] = self.num_epochs
