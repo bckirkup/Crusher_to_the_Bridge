@@ -6,6 +6,7 @@ import sys
 from typing import Any, Iterator
 
 from dashboard.loaders import PlatformBundle
+from telemetry_buffer.agent_axes import agent_has_symptomatic_presentation
 
 _SCRIPTS = os.path.join(os.path.dirname(os.path.dirname(__file__)), "scripts")
 if _SCRIPTS not in sys.path:
@@ -22,12 +23,7 @@ def zone_metric(record: dict[str, Any], zone_id: str, color_mode: str) -> float:
         return float(obs.get("surface_swab", {}).get(zone_id, {}).get("surface_mass", 0.0))
     count = 0
     for agent in record.get("agents", []):
-        if agent.get("location") == zone_id and agent.get("status") in (
-            "symptomatic",
-            "infected",
-            "asymptomatic_shedding",
-            "non_compliant",
-        ):
+        if agent.get("location") == zone_id and agent_has_symptomatic_presentation(agent):
             count += 1
     return float(count)
 

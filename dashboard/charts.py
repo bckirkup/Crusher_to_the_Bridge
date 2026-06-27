@@ -10,6 +10,14 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
+from telemetry_buffer.agent_axes import (
+    COMPLIANCE_QUARANTINED,
+    INFECTION_RECOVERED,
+    agent_has_symptomatic_presentation,
+    agent_is_infected,
+    resolve_agent_axes,
+)
+
 from dashboard.paths import PATHOGEN_PATH, PROTOCOLS_PATH
 from dashboard.theme import (
     ALERT_COLORS,
@@ -73,6 +81,19 @@ def render_bridge_status(
     with col6:
         st.metric("Non-Compliant", summary.get("quarantine_refusers", 0))
 
+    sick_call = summary.get("sick_call_count")
+    microflora = summary.get("disrupted_microflora_count")
+    if sick_call is not None or microflora is not None:
+        sc1, sc2, sc3, sc4 = st.columns(4)
+        with sc1:
+            st.metric("Sick Call", sick_call if sick_call is not None else 0)
+        with sc2:
+            st.metric("Microflora Disrupted", microflora if microflora is not None else 0)
+        with sc3:
+            st.metric("Recovered", summary.get("recovered", 0))
+        with sc4:
+            st.metric("Immune", summary.get("immune", 0))
+
     # Alert condition banner
     status = last["trigger_status"]
     st.markdown(_lcars_alert_banner(status), unsafe_allow_html=True)
@@ -117,14 +138,23 @@ def render_bridge_status(
 
     # ── Multi-Pathogen Breakdown ──────────────────────────────────
     multi_path = last.get("multi_pathogen", {})
-    if multi_path and len(multi_path) > 1:
+    if multi_path:
         _render_pathogen_curves(history)
 
     # ── Wearable Physiological Monitoring ─────────────────────────
     _render_wearable_monitoring(history)
 
+    # ── Diagnostic Cascade ────────────────────────────────────────
+    _render_diagnostic_cascade(history)
+
     # ── Transmission Pathway Analysis ─────────────────────────────
     _render_transmission_pathways(history)
+
+    # ── Operational Impact Score ──────────────────────────────────
+    _render_operational_impact(history)
+
+    # ── Crusher Lab Operations ────────────────────────────────────
+    _render_crusher_ops(last)
 
     # ── Resource Allocation ───────────────────────────────────────
     st.subheader("Resource Allocation")
@@ -338,30 +368,36 @@ def _render_counter_time_series(history: list[dict[str, Any]]) -> None:
         st.plotly_chart(fig, use_container_width=True)
 
 
-def _render_class_breakdown(last: dict[str, Any]) -> None:
-    """Agent class breakdown showing infection distribution across classes."""
-    agents = last.get("agents", [])
-    if not agents:
-        return
-
+def aggregate_class_stats(agents: list[dict[str, Any]]) -> dict[str, dict[str, int]]:
+    """Infection distribution by agent class using orthogonal telemetry axes."""
     class_stats: dict[str, dict[str, int]] = {}
-    for a in agents:
-        cls = a.get("agent_class", "unknown")
+    for agent in agents:
+        cls = agent.get("agent_class", "unknown")
         if cls not in class_stats:
             class_stats[cls] = {
                 "total": 0, "infected": 0, "symptomatic": 0,
                 "recovered": 0, "quarantined": 0,
             }
         class_stats[cls]["total"] += 1
-        status = a.get("status", "")
-        if status in ("symptomatic", "non_compliant", "asymptomatic_shedding"):
+        infection_state, _, compliance_status = resolve_agent_axes(agent)
+        if agent_is_infected(agent):
             class_stats[cls]["infected"] += 1
-        if status == "symptomatic":
+        if agent_has_symptomatic_presentation(agent):
             class_stats[cls]["symptomatic"] += 1
-        if status == "recovered":
+        if infection_state == INFECTION_RECOVERED:
             class_stats[cls]["recovered"] += 1
-        if status == "quarantined":
+        if compliance_status == COMPLIANCE_QUARANTINED:
             class_stats[cls]["quarantined"] += 1
+    return class_stats
+
+
+def _render_class_breakdown(last: dict[str, Any]) -> None:
+    """Agent class breakdown showing infection distribution across classes."""
+    agents = last.get("agents", [])
+    if not agents:
+        return
+
+    class_stats = aggregate_class_stats(agents)
 
     if len(class_stats) <= 1:
         return
@@ -392,7 +428,7 @@ def _render_pathogen_curves(history: list[dict[str, Any]]) -> None:
     for rec in history:
         all_pids.update(rec.get("multi_pathogen", {}).keys())
 
-    if len(all_pids) < 2:
+    if len(all_pids) < 1:
         return
 
     colors = [LCARS_RED, LCARS_BLUE, LCARS_GOLD, LCARS_PURPLE, LCARS_GREEN,
@@ -433,15 +469,42 @@ def _render_wearable_monitoring(history: list[dict[str, Any]]) -> None:
 
     last = history[-1]
     wm = last.get("wearable_monitoring", {})
-    c1, c2, c3, c4 = st.columns(4)
+    c1, c2, c3, c4, c5 = st.columns(5)
     with c1:
         st.metric("Monitored Crew", wm.get("total_monitored", 0))
     with c2:
-        st.metric("Fever Detected", wm.get("fever_count", 0))
+        staff_vis = wm.get("total_staff_visible")
+        if staff_vis is not None:
+            st.metric("Staff-Visible", staff_vis)
+        else:
+            st.metric("Fever Detected", wm.get("fever_count", 0))
     with c3:
         st.metric("Fever Rate", f"{wm.get('fever_rate', 0):.1%}")
     with c4:
+        st.metric("Anomaly Rate", f"{wm.get('anomaly_rate', 0):.1%}")
+    with c5:
         st.metric("Anomalies", wm.get("anomaly_count", 0))
+
+    visibility = wm.get("visibility_breakdown", {})
+    if visibility:
+        vis_cols = st.columns(len(visibility))
+        for i, (tier, cnt) in enumerate(sorted(visibility.items())):
+            with vis_cols[i]:
+                st.metric(tier.replace("_", " ").title(), cnt)
+
+    wearer_only = wm.get("wearer_only_agents", [])
+    if wearer_only:
+        st.caption(
+            f"{len(wearer_only)} agent(s) with wearer-only device visibility "
+            "(alerts may not reach medical staff)."
+        )
+
+    device_counts = wm.get("device_deployment_counts", {})
+    if device_counts:
+        dev_cols = st.columns(min(len(device_counts), 4))
+        for i, (dev_id, cnt) in enumerate(sorted(device_counts.items())):
+            with dev_cols[i % len(dev_cols)]:
+                st.metric(dev_id.replace("_", " ").title(), cnt)
 
     # Channel anomaly breakdown
     channel_counts = wm.get("channel_anomaly_counts", {})
@@ -482,6 +545,167 @@ def _render_wearable_monitoring(history: list[dict[str, Any]]) -> None:
             legend={"orientation": "h", "y": -0.2, "x": 0.5, "xanchor": "center"},
         )
         st.plotly_chart(fig, use_container_width=True)
+
+
+def _render_diagnostic_cascade(history: list[dict[str, Any]]) -> None:
+    """Tier-0/1 cascade entries and advancement log."""
+    if not any(rec.get("diagnostic_cascade") for rec in history):
+        return
+
+    st.subheader("Diagnostic Cascade")
+
+    last_dc = history[-1].get("diagnostic_cascade", {})
+    c1, c2, c3, c4 = st.columns(4)
+    with c1:
+        st.metric("Tier-0 Entries (epoch)", len(last_dc.get("new_tier0_agents", [])))
+    with c2:
+        st.metric("Tier-1 Entries (epoch)", len(last_dc.get("new_tier1_agents", [])))
+    with c3:
+        st.metric("Confinements Ordered", len(last_dc.get("confinements_ordered", [])))
+    with c4:
+        st.metric("Wearable Offers", len(last_dc.get("wearable_offers", [])))
+
+    unlocked = last_dc.get("fleet_sops_unlocked", [])
+    if unlocked:
+        st.caption(f"Fleet SOPs unlocked this epoch: {', '.join(unlocked)}")
+
+    epochs: list[int] = []
+    tier0_counts: list[int] = []
+    tier1_counts: list[int] = []
+    for rec in history:
+        dc = rec.get("diagnostic_cascade", {})
+        if not dc:
+            continue
+        epochs.append(rec["epoch"])
+        tier0_counts.append(len(dc.get("new_tier0_agents", [])))
+        tier1_counts.append(len(dc.get("new_tier1_agents", [])))
+
+    if epochs:
+        fig = go.Figure()
+        fig.add_trace(go.Bar(
+            x=epochs, y=tier0_counts, name="Tier-0",
+            marker_color=LCARS_GOLD,
+        ))
+        fig.add_trace(go.Bar(
+            x=epochs, y=tier1_counts, name="Tier-1",
+            marker_color=LCARS_BLUE,
+        ))
+        apply_lcars_layout(
+            fig,
+            height=260,
+            barmode="group",
+            title="Cascade Entries by Epoch",
+            xaxis_title="Epoch", yaxis_title="New Agents",
+            margin={"t": 50, "b": 40, "l": 50, "r": 20},
+            legend={"orientation": "h", "y": -0.2, "x": 0.5, "xanchor": "center"},
+        )
+        st.plotly_chart(fig, use_container_width=True)
+
+    advancements: list[dict[str, Any]] = []
+    for rec in history:
+        dc = rec.get("diagnostic_cascade", {})
+        for adv in dc.get("tier_advancements", []):
+            row = dict(adv)
+            row["epoch"] = rec["epoch"]
+            advancements.append(row)
+    if advancements:
+        st.dataframe(
+            pd.DataFrame(advancements),
+            use_container_width=True,
+            hide_index=True,
+        )
+
+
+def _render_operational_impact(history: list[dict[str, Any]]) -> None:
+    """Operational Impact Score (fourth ledger dimension)."""
+    if not any(
+        rec.get("cost_accounting", {}).get("operational_impact_cumulative") is not None
+        for rec in history
+    ):
+        return
+
+    st.subheader("Operational Impact Score")
+
+    last_ca = history[-1].get("cost_accounting", {})
+    c1, c2, c3 = st.columns(3)
+    with c1:
+        st.metric("OIS (epoch)", f"{last_ca.get('operational_impact_epoch', 0):,.1f}")
+    with c2:
+        st.metric("OIS (cumulative)", f"{last_ca.get('operational_impact_cumulative', 0):,.1f}")
+    with c3:
+        st.metric("Credits Remaining", f"${last_ca.get('financial_balance_remaining', 0):,.0f}")
+
+    breakdown = last_ca.get("operational_impact_breakdown", {})
+    if breakdown:
+        bd_rows = [
+            {"Driver": key.replace("_", " ").title(), "Contribution": f"{val:,.2f}"}
+            for key, val in sorted(breakdown.items(), key=lambda item: -abs(item[1]))
+        ]
+        st.dataframe(pd.DataFrame(bd_rows), use_container_width=True, hide_index=True)
+
+    epochs: list[int] = []
+    epoch_ois: list[float] = []
+    cum_ois: list[float] = []
+    for rec in history:
+        ca = rec.get("cost_accounting", {})
+        if ca.get("operational_impact_cumulative") is None:
+            continue
+        epochs.append(rec["epoch"])
+        epoch_ois.append(float(ca.get("operational_impact_epoch", 0)))
+        cum_ois.append(float(ca.get("operational_impact_cumulative", 0)))
+
+    if epochs:
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(
+            x=epochs, y=cum_ois, mode="lines+markers",
+            name="Cumulative OIS", line={"color": LCARS_PURPLE, "width": 2},
+        ))
+        fig.add_trace(go.Bar(
+            x=epochs, y=epoch_ois, name="Epoch OIS",
+            marker_color=LCARS_AMBER, opacity=0.65,
+        ))
+        apply_lcars_layout(
+            fig,
+            height=280,
+            title="Operational Impact Over Time",
+            xaxis_title="Epoch", yaxis_title="OIS",
+            margin={"t": 50, "b": 40, "l": 50, "r": 20},
+            legend={"orientation": "h", "y": -0.2, "x": 0.5, "xanchor": "center"},
+        )
+        st.plotly_chart(fig, use_container_width=True)
+
+
+def _render_crusher_ops(record: dict[str, Any]) -> None:
+    """Shipboard lab ops: RDT/PCR summary from epoch telemetry."""
+    ops = record.get("crusher_ops", {})
+    if not ops:
+        return
+
+    rdt_tested = ops.get("rdt_tested_count", 0)
+    rdt_pos = ops.get("rdt_positive_count", 0)
+    pcr_zones = ops.get("pcr_results", {})
+    if rdt_tested == 0 and not pcr_zones:
+        return
+
+    st.subheader("Crusher Lab Operations")
+    c1, c2, c3 = st.columns(3)
+    with c1:
+        st.metric("RDT Tests", rdt_tested)
+    with c2:
+        st.metric("RDT Positive", rdt_pos)
+    with c3:
+        st.metric("Surface PCR Zones", len(pcr_zones))
+
+    if pcr_zones:
+        pcr_rows = [
+            {
+                "Zone": zone,
+                "Detected": data.get("detected", False),
+                "Ct": data.get("ct_value"),
+            }
+            for zone, data in sorted(pcr_zones.items())
+        ]
+        st.dataframe(pd.DataFrame(pcr_rows), use_container_width=True, hide_index=True)
 
 
 def aggregate_transmission_pathway_totals(
@@ -613,200 +837,6 @@ def _build_epidemic_curve(history: list[dict[str, Any]]) -> go.Figure:
         xaxis_title="Epoch (Stardate)", yaxis_title="Personnel Count",
         legend={"orientation": "h", "y": 1.08, "x": 0.5, "xanchor": "center"},
         margin={"t": 50, "b": 40, "l": 50, "r": 20},
-    )
-    return fig
-
-
-# ══════════════════════════════════════════════════════════════════════════
-# Station 2: Tactical Sensor Grid
-# ══════════════════════════════════════════════════════════════════════════
-
-def render_tactical_grid(
-    history: list[dict[str, Any]],
-    zone_coords: dict[str, dict[str, float]],
-    adjacency: list[dict[str, str]],
-) -> None:
-    """Spatial deck map with toggleable colour mode and epoch slider."""
-
-    if not history:
-        st.warning("Sensors offline. No telemetry data.")
-        return
-
-    num_epochs = len(history)
-
-    col_ctrl1, col_ctrl2 = st.columns([2, 3])
-    with col_ctrl1:
-        selected_epoch = st.slider(
-            "Epoch", min_value=0, max_value=num_epochs - 1,
-            value=0, key="deck_epoch",
-        )
-    with col_ctrl2:
-        color_mode = st.radio(
-            "Sensor Overlay",
-            ["Airborne Aerosol Mass", "Surface Fomite Contamination", "Symptomatic Agent Count"],
-            horizontal=True,
-            key="deck_color",
-        )
-
-    record = history[selected_epoch]
-    status = record["trigger_status"]
-
-    st.markdown(_lcars_alert_banner(status), unsafe_allow_html=True)
-
-    # Build the map
-    fig = _build_deck_map(record, zone_coords, adjacency, color_mode)
-    st.plotly_chart(fig, use_container_width=True)
-
-    # Stoplights row
-    stoplights = record.get("reactive_protocols", {}).get("stoplights", {})
-    if stoplights:
-        st.markdown(
-            _lcars_banner("Instrument Sensor Array", LCARS_BLUE),
-            unsafe_allow_html=True,
-        )
-        cols = st.columns(len(stoplights))
-        for i, (inst, level) in enumerate(stoplights.items()):
-            resolved = _worst_stoplight(level)
-            color = STOPLIGHT_COLORS.get(resolved, "gray")
-            short = inst.replace("_", " ").title()[:20]
-            with cols[i]:
-                st.markdown(
-                    f"<div style='background:{color}22; border:2px solid {color}; "
-                    f"padding:6px; border-radius:6px; text-align:center; "
-                    f"color:{color}; font-size:11px; font-weight:bold;'>"
-                    f"{short}<br>{resolved}</div>",
-                    unsafe_allow_html=True,
-                )
-
-    # Active protocols for this epoch
-    active = record.get("reactive_protocols", {}).get("active_protocols", [])
-    if active:
-        names = [p.get("name", p.get("protocol_id", "?")) for p in active]
-        st.markdown(
-            _lcars_banner(f"Active Standing Orders: {', '.join(names)}", LCARS_GOLD),
-            unsafe_allow_html=True,
-        )
-
-    # Agent location table
-    with st.expander(f"Crew Disposition — Epoch {selected_epoch}", expanded=False):
-        agents = record.get("agents", [])
-        if agents:
-            df = pd.DataFrame(agents).sort_values("agent_id")
-            st.dataframe(df, use_container_width=True, hide_index=True)
-
-
-def _build_deck_map(
-    record: dict[str, Any],
-    zone_coords: dict[str, dict[str, float]],
-    adjacency: list[dict[str, str]],
-    color_mode: str,
-) -> go.Figure:
-    fig = go.Figure()
-
-    # Adjacency edges
-    for link in adjacency:
-        fz = link.get("from", "")
-        tz = link.get("to", "")
-        if fz in zone_coords and tz in zone_coords:
-            fig.add_trace(go.Scatter(
-                x=[zone_coords[fz]["x"], zone_coords[tz]["x"]],
-                y=[zone_coords[fz]["y"], zone_coords[tz]["y"]],
-                mode="lines",
-                line={"color": "rgba(255,153,0,0.25)", "width": 1.5},
-                hoverinfo="skip", showlegend=False,
-            ))
-
-    # Agent locations
-    agent_locations: dict[str, int] = {}
-    symptomatic_per_zone: dict[str, int] = {}
-    quarantined_per_zone: dict[str, int] = {}
-    for agent in record.get("agents", []):
-        loc = agent.get("location", "unknown")
-        agent_locations[loc] = agent_locations.get(loc, 0) + 1
-        if agent.get("status") in ("symptomatic", "infected"):
-            symptomatic_per_zone[loc] = symptomatic_per_zone.get(loc, 0) + 1
-        if agent.get("status") == "quarantined":
-            quarantined_per_zone[loc] = quarantined_per_zone.get(loc, 0) + 1
-
-    spaces = record.get("spaces", {})
-    obs = record.get("observation_engine", {})
-
-    zone_names: list[str] = []
-    xs: list[float] = []
-    ys: list[float] = []
-    sizes: list[float] = []
-    colors: list[float] = []
-    hover_texts: list[str] = []
-
-    for zname, zinfo in zone_coords.items():
-        zone_names.append(zname)
-        xs.append(zinfo["x"])
-        ys.append(zinfo["y"])
-
-        occupants = agent_locations.get(zname, 0)
-        sizes.append(max(20, 15 + occupants * 8))
-
-        mass = spaces.get(zname, {}).get("pathogen_mass", 0.0)
-        surface_mass = obs.get("surface_swab", {}).get(zname, {}).get("surface_mass", 0.0)
-        symp_count = symptomatic_per_zone.get(zname, 0)
-        quar_count = quarantined_per_zone.get(zname, 0)
-
-        if color_mode == "Airborne Aerosol Mass":
-            colors.append(mass)
-        elif color_mode == "Surface Fomite Contamination":
-            colors.append(surface_mass)
-        else:
-            colors.append(float(symp_count))
-
-        hover_texts.append(
-            f"<b>{zname}</b><br>"
-            f"Type: {zinfo['type']}<br>"
-            f"Occupants: {occupants}<br>"
-            f"Aerosol mass: {mass:.2f}<br>"
-            f"Surface mass: {surface_mass:.2f}<br>"
-            f"Symptomatic: {symp_count}<br>"
-            f"Confined: {quar_count}"
-        )
-
-    max_val = max(colors) if colors and max(colors) > 0 else 1.0
-
-    colorbar_title = {
-        "Airborne Aerosol Mass": "Aerosol<br>Mass",
-        "Surface Fomite Contamination": "Surface<br>Mass",
-        "Symptomatic Agent Count": "Sympto-<br>matic",
-    }.get(color_mode, "Value")
-
-    fig.add_trace(go.Scatter(
-        x=xs, y=ys,
-        mode="markers+text",
-        text=zone_names,
-        textposition="top center",
-        textfont={"size": 11, "color": LCARS_PEACH},
-        marker={
-            "size": sizes,
-            "color": colors,
-            "colorscale": [
-                [0.0, LCARS_GREEN], [0.3, LCARS_GOLD],
-                [0.6, LCARS_AMBER], [1.0, LCARS_RED],
-            ],
-            "cmin": 0,
-            "cmax": max(max_val, 0.01),
-            "colorbar": {"title": colorbar_title, "thickness": 15, "len": 0.6},
-            "line": {"width": 2, "color": LCARS_PEACH},
-        },
-        hovertext=hover_texts, hoverinfo="text", showlegend=False,
-    ))
-
-    apply_lcars_layout(
-        fig,
-        title=f"Tactical Deck Scan — Epoch {record['epoch']} ({color_mode})",
-        height=420,
-        xaxis={"title": "Ship Length (m)", "range": [0, 120], "showgrid": False},
-        yaxis={
-            "title": "Beam (m)", "range": [0, 15], "showgrid": False,
-            "scaleanchor": "x", "scaleratio": 1,
-        },
-        margin={"t": 60, "b": 40, "l": 50, "r": 80},
     )
     return fig
 

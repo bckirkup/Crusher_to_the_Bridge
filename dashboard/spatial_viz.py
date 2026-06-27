@@ -337,8 +337,16 @@ def render_tactical_grid(
         agents = record.get("agents", [])
         if agents:
             import pandas as pd
+            df = pd.DataFrame(agents).sort_values("agent_id")
+            preferred = [
+                "agent_id", "agent_class", "location",
+                "infection_state", "symptom_presentation", "compliance_status",
+                "shedding_rate", "gender",
+            ]
+            cols = [c for c in preferred if c in df.columns]
+            extra = [c for c in df.columns if c not in cols]
             st.dataframe(
-                pd.DataFrame(agents).sort_values("agent_id"),
+                df[cols + extra],
                 use_container_width=True,
                 hide_index=True,
             )

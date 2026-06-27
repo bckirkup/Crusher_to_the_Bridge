@@ -46,13 +46,33 @@ class TestZoneMetric:
         record = {
             "spaces": {},
             "agents": [
-                {"location": "Z1", "status": "infected"},
-                {"location": "Z1", "status": "symptomatic"},
-                {"location": "Z1", "status": "susceptible"},
-                {"location": "Z2", "status": "infected"},
+                {
+                    "location": "Z1",
+                    "infection_state": "infected",
+                    "symptom_presentation": "symptomatic",
+                    "compliance_status": "compliant",
+                },
+                {
+                    "location": "Z1",
+                    "infection_state": "infected",
+                    "symptom_presentation": "mild",
+                    "compliance_status": "compliant",
+                },
+                {
+                    "location": "Z1",
+                    "infection_state": "susceptible",
+                    "symptom_presentation": "asymptomatic",
+                    "compliance_status": "compliant",
+                },
+                {
+                    "location": "Z2",
+                    "infection_state": "infected",
+                    "symptom_presentation": "asymptomatic",
+                    "compliance_status": "compliant",
+                },
             ],
         }
-        assert zone_metric(record, "Z1", "Infected Agents") == pytest.approx(2.0)
+        assert zone_metric(record, "Z1", "Symptomatic Agent Count") == pytest.approx(2.0)
 
     def test_missing_zone_returns_zero(self) -> None:
         from dashboard.deck_geometry import zone_metric
@@ -119,6 +139,37 @@ class TestLcarsRgba:
 
         rgba = _lcars_rgba(0.8)
         assert rgba[0] == 204  # red band
+
+
+class TestAggregateClassStats:
+    def test_orthogonal_axes(self) -> None:
+        from dashboard.charts import aggregate_class_stats
+
+        agents = [
+            {
+                "agent_class": "crew_medical",
+                "infection_state": "infected",
+                "symptom_presentation": "symptomatic",
+                "compliance_status": "quarantined",
+            },
+            {
+                "agent_class": "crew_medical",
+                "infection_state": "susceptible",
+                "symptom_presentation": "asymptomatic",
+                "compliance_status": "compliant",
+            },
+            {
+                "agent_class": "passenger_general",
+                "infection_state": "recovered",
+                "symptom_presentation": "asymptomatic",
+                "compliance_status": "compliant",
+            },
+        ]
+        stats = aggregate_class_stats(agents)
+        assert stats["crew_medical"]["infected"] == 1
+        assert stats["crew_medical"]["symptomatic"] == 1
+        assert stats["crew_medical"]["quarantined"] == 1
+        assert stats["passenger_general"]["recovered"] == 1
 
 
 # ── theme tests ──────────────────────────────────────────────────────────

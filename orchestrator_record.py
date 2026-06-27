@@ -231,11 +231,16 @@ def record_epoch(
         fleet = wearable_result.get("fleet_summary", {})
         epoch_record["wearable_monitoring"] = {
             "total_monitored": fleet.get("total_monitored", 0),
+            "total_staff_visible": fleet.get("total_staff_visible", 0),
             "fever_count": fleet.get("fever_count", 0),
             "fever_rate": fleet.get("fever_rate", 0.0),
             "anomaly_count": fleet.get("anomaly_count", 0),
             "anomaly_rate": fleet.get("anomaly_rate", 0.0),
             "channel_anomaly_counts": fleet.get("channel_anomaly_counts", {}),
+            "staff_visible_agents": wearable_result.get("staff_visible_agents", []),
+            "wearer_only_agents": wearable_result.get("wearer_only_agents", []),
+            "visibility_breakdown": fleet.get("visibility_breakdown", {}),
+            "device_deployment_counts": fleet.get("device_deployment_counts", {}),
         }
 
     if cascade_result is not None:

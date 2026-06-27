@@ -722,6 +722,11 @@ def step_wearable_monitoring(
 
     raw_data = monitor.generate_epoch_data(engine.agents, pathogen_profiles)
     result = modality.query_ground_truth(truth, raw_data)
+    fleet_cfg = monitor.get_fleet_summary()
+    result.setdefault("fleet_summary", {}).update({
+        "visibility_breakdown": fleet_cfg.get("visibility_breakdown", {}),
+        "device_deployment_counts": fleet_cfg.get("device_deployment_counts", {}),
+    })
     return result
 
 

@@ -571,7 +571,7 @@ def main() -> None:
         gfx_path = args.emit_deck_graphics
         if not gfx_path or not str(gfx_path).endswith(".geojson"):
             gfx_path = os.path.join(args.output, "deck_graphics.geojson")
-        emit_deck_graphics(args.input, gfx_path, platform_name=args.platform)
+        emit_deck_graphics(args.input, gfx_path, platform_id=args.platform)
         print(f"  Wrote deck graphics: {gfx_path}")
 
     print("=" * 70)
