@@ -91,7 +91,7 @@
         "labor_person_hours": 1.0
       },
       "category": "intervention",
-      "required_cascade_tier": null
+      "required_cascade_tier": 2
     },
     {
       "protocol_id": "SOP-004",
@@ -124,7 +124,7 @@
         "labor_person_hours": 0.5
       },
       "category": "intervention",
-      "required_cascade_tier": null
+      "required_cascade_tier": 1
     },
     {
       "protocol_id": "SOP-005",

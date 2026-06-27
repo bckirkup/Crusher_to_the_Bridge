@@ -248,7 +248,7 @@ sequencing:
   pseudocount: 1.0e-6                 # for CLR zero-handling
   clr_shift_scale: 0.15               # microflora disruption CLR perturbation scale
   aitchison_anomaly_threshold: 0.08   # GRUMB Aitchison beta-diversity anomaly gate
-  cadence: 8                          # baseline; escalation may override
+  cadence: 4                          # baseline; escalation may override
 
 # ── Wastewater Sequencing Grid (observation instrument) ──────
 # Pooled greywater metagenomics via WastewaterSequencingGrid (every epoch).
