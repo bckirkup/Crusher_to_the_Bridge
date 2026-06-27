@@ -16,7 +16,7 @@ Pure-Python simulation (no databases, Docker, or external APIs). **Python 3.11+*
 | Streamlit dashboard | `python3 -m streamlit run dashboard.py --server.headless true` | Run orchestrator first for telemetry |
 | Deck asset precompute | `python3 scripts/precompute_deck_assets.py` | Writes `deck_graphics.geojson`, hull PNG, manifest per platform |
 | Sanity checker | `python3 tools/sanity_checker.py --from-config` | Ship + fleet + Stackelberg social configs |
-| Full test suite | `python3 -m pytest tests/ -v --tb=short` | ~617 tests, ~9s |
+| Full test suite | `python3 -m pytest tests/ -v --tb=short` | ~629 tests, ~7s |
 | Wearable anomaly scoring | `python3 -m pytest tests/test_wearable_anomaly_scorer.py tests/test_cascade_entry.py -v` | Confounder-aware infection_score + cascade entry fusion |
 | Diagnostic cascade smoke | `python3 -m pytest tests/test_smoke_diagnostic_cascade.py -v` | 6-epoch runs with cascade enabled (standard + multiplex specs) |
 | Long-read / TAT tests | `python3 -m pytest tests/test_long_read_sequencing.py tests/test_instrument_turnaround.py -v` | Nanopore + turnaround queue |
@@ -43,20 +43,23 @@ Pure-Python simulation (no databases, Docker, or external APIs). **Python 3.11+*
 
 **Main** (`.github/workflows/ci.yml` on `main` PRs):
 
-1. `python tools/sanity_checker.py --from-config`
-2. `pytest tests/ -v --tb=short` (~617 tests)
-3. Picard/Presidio/Stackelberg import hygiene
-4. Presidio smoke (`smoke_fleet.json`, 1 cruise)
-5. Long-read / TAT targeted tests
-6. Orchestrator import hygiene (stoplight deduplication)
-7. Dashboard import + `apply_lcars_layout` smoke
-8. `python orchestrator.py` — 24-epoch smoke
-9. `pytest tests/test_smoke_diagnostic_cascade.py` — 6-epoch cascade smoke (standard + multiplex)
-10. OIS fields present in final `cost_accounting`
+1. `ruff check` — advisory lint (`continue-on-error: true`)
+2. `python tools/sanity_checker.py --from-config`
+3. `pytest tests/test_json_schema_validation.py -v --tb=short`
+4. `pytest tests/ -v --tb=short --cov --cov-report=term-missing` (~629 tests)
+5. Picard/Presidio/Stackelberg import hygiene
+6. Presidio smoke (`smoke_fleet.json`, 1 cruise)
+7. Long-read / TAT targeted tests (+ sequencing config wiring)
+8. Wearable anomaly scoring + cascade entry tests
+9. Orchestrator import hygiene (stoplight deduplication)
+10. Dashboard import + `apply_lcars_layout` smoke
+11. `python orchestrator.py` — 24-epoch smoke
+12. `pytest tests/test_smoke_diagnostic_cascade.py` — 6-epoch cascade smoke (standard + multiplex)
+13. OIS fields present in final `cost_accounting`
 
 **Picard/Presidio** (`.github/workflows/picard-presidio.yml` on `main` and `cursor/**`):
 
-- Framework-focused pytest slice (Picard, Presidio, Stackelberg, OIS, behavioral, long-read, enterprise platforms, agent axes, sequencing config)
+- Framework-focused pytest slice (~90 tests: Picard, Presidio, Stackelberg, OIS, behavioral, long-read, TAT, enterprise platforms, agent axes, sequencing config, wearable scoring, cascade entry)
 - Stackelberg + platform JSON schema validation (all `data/platforms/*/`)
 - Presidio smoke
 
@@ -92,4 +95,4 @@ Pure-Python simulation (no databases, Docker, or external APIs). **Python 3.11+*
 - Utility **weights and optimization** are out-of-repo; only feature export and action apply are in-repo.
 - Nine ship platforms in `data/platforms/` (including fiction-adapted Enterprise bundles and legacy `messy_cruise_500`); see `README.md` Platforms table.
 - **Wearable cascade entry** uses confounder-aware `infection_score` (not raw `anomaly_count`) via `diagnostic_cascade.entry.wearable_alert_fusion` or defaults in `data/config/diagnostic_cascade*.json`. Fleet stoplight SOPs (SOP-013/014) still use shipwide `anomaly_rate`.
-- No flake8/ruff in repo; use `sanity_checker.py` and pytest.
+- Ruff lint runs in CI as advisory only (`continue-on-error: true`); blocking gates are `sanity_checker.py` and pytest.

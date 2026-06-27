@@ -103,7 +103,7 @@ python -m pytest tests/test_data_contracts.py -v --tb=short
 - When adding new platforms or pathogens (including Enterprise fiction-adapted bundles)
 - As part of the CI-equivalent local validation
 
-CI: `.github/workflows/picard-presidio.yml` validates all eight platforms plus Stackelberg social schemas on `main` and `cursor/**` branches.
+CI: `.github/workflows/picard-presidio.yml` validates all nine platforms plus Stackelberg social schemas on `main` and `cursor/**` branches.
 
 ## Picard / Presidio / Stackelberg schemas
 

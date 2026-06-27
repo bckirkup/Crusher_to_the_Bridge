@@ -1524,20 +1524,23 @@ python tools/sanity_checker.py --from-config
 pytest tests/ -v --tb=short
 ```
 
-The suite includes **~574 tests** across data contracts, sanity checker,
+The suite includes **~629 tests** across data contracts, sanity checker,
 orchestrator/quarantine logic, infection counters, orthogonal agent axes,
 wearable/detection-escalation protocol engine, enhanced wearable model
 (multi-device, confounders, detection profiles, visibility, chronic disease
-assignments), sequencing config wiring, long-read Nanopore verification,
+assignments), confounder-aware infection scoring, diagnostic cascade tiers,
+sequencing config wiring, long-read Nanopore verification,
 instrument turnaround (TAT), per-test cost accounting, **operational impact
 (OIS)**, **action applier**, **behavioral syndromic**, transmission pathways
 (food/environmental), dashboard helpers, law compliance, telemetry seams, and
 **Picard / Presidio / Stackelberg** framework tests. CI
-(`.github/workflows/ci.yml`) runs sanity checks, full pytest (~574 tests),
-Picard/Presidio import hygiene, Presidio smoke, long-read/TAT targeted tests,
-orchestrator import hygiene, dashboard import (including LCARS theme),
-24-epoch orchestrator run, and OIS telemetry verification. Framework-focused checks,
-enterprise platform tests, and Stackelberg + platform JSON schema validation run in
+(`.github/workflows/ci.yml`) runs advisory ruff lint, sanity checks, JSON schema
+validation, full pytest with coverage (~629 tests), Picard/Presidio import
+hygiene, Presidio smoke, long-read/TAT targeted tests, wearable/cascade entry
+tests, orchestrator import hygiene, dashboard import (including LCARS theme),
+24-epoch orchestrator run, diagnostic cascade smoke, and OIS telemetry
+verification. Framework-focused checks (~90 tests), enterprise platform tests,
+and Stackelberg + platform JSON schema validation run in
 `.github/workflows/picard-presidio.yml`.
 See `AGENTS.md` for cloud agent commands.
 
@@ -1560,6 +1563,11 @@ See `AGENTS.md` for cloud agent commands.
 | `test_presidio_runner.py` | Fleet smoke, experience store |
 | `test_stackelberg.py` | Diffusion, contact graph, utility export/import |
 | `test_golden_orchestrator.py` | 24-epoch reproducibility via Picard |
+| `test_diagnostic_cascade.py` | Tier progression, multiplex panels, cascade telemetry |
+| `test_smoke_diagnostic_cascade.py` | 6-epoch cascade smoke (standard + multiplex specs) |
+| `test_wearable_anomaly_scorer.py` | Confounder-aware `infection_score` for cascade Tier-0 entry |
+| `test_cascade_entry.py` | Sick-call Tier 1 vs wearable Tier 0 fusion rules |
+| `test_wearable_enhanced.py` | Multi-device, confounders, detection profiles, visibility |
 
 ---
 
