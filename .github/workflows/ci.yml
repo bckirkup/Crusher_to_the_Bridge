@@ -34,6 +34,9 @@ jobs:
       - name: Run sanity checker
         run: python tools/sanity_checker.py --from-config
 
+      - name: Verify platform graywater zones and wastewater pooling
+        run: pytest tests/test_graywater_zones.py -v --tb=short
+
       - name: Validate JSON schemas (closes #83)
         env:
           PYTHONPATH: .

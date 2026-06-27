@@ -44,7 +44,7 @@
         "x": 100,
         "y": 6
       },
-      "description": "Officer staterooms. 2-person rooms, ~7.3 m\u00b3 per person. Includes CO/XO at-sea cabins."
+      "description": "Officer staterooms. 2-person rooms, ~7.3 m³ per person. Includes CO/XO at-sea cabins."
     },
     {
       "id": "CPO_Berthing",
@@ -70,7 +70,7 @@
         "x": 85,
         "y": 6
       },
-      "description": "Forward enlisted berthing. 3-high racks. ~4.0 m\u00b3 per person \u2014 significantly better than Navy destroyers."
+      "description": "Forward enlisted berthing. 3-high racks. ~4.0 m³ per person — significantly better than Navy destroyers."
     },
     {
       "id": "Enlisted_Berthing_Aft",
@@ -83,7 +83,7 @@
         "x": 50,
         "y": 6
       },
-      "description": "Aft enlisted berthing. 3-high racks. ~4.0 m\u00b3 per person. Adjacent to aviation berthing."
+      "description": "Aft enlisted berthing. 3-high racks. ~4.0 m³ per person. Adjacent to aviation berthing."
     },
     {
       "id": "Aviation_Det_Berthing",
@@ -241,5 +241,8 @@
       },
       "description": "Main deck central passageway. Primary fore-aft transit route."
     }
+  ],
+  "graywater_zones": [
+    "Engine_Room"
   ]
 }

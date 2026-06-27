@@ -124,6 +124,7 @@ def build_spatial_layout(legacy: dict[str, Any]) -> dict[str, Any]:
         "deck_dimensions": legacy.get("deck_dimensions", {"length_m": 362, "beam_m": 64}),
         "confinement_isolation_factor": 0.05,
         "corridor_direct_contact_factor": 0.15,
+        "graywater_zones": ["Engine_Room_Aft"],
         "zones": _public_zones(legacy) + _pax_corridor_zones() + _crew_corridor_zones(),
     }
 

@@ -44,7 +44,7 @@
         "x": 155,
         "y": 10
       },
-      "description": "Ship's company officer staterooms. 2-person rooms, ~8 m\u00b3 per person."
+      "description": "Ship's company officer staterooms. 2-person rooms, ~8 m³ per person."
     },
     {
       "id": "Ship_CPO_Quarters",
@@ -70,7 +70,7 @@
         "x": 140,
         "y": 10
       },
-      "description": "Ship's company enlisted berthing. 3-high bunks with personal storage. ~2.4 m\u00b3 per person."
+      "description": "Ship's company enlisted berthing. 3-high bunks with personal storage. ~2.4 m³ per person."
     },
     {
       "id": "Troop_Berthing_Fwd",
@@ -83,7 +83,7 @@
         "x": 120,
         "y": 10
       },
-      "description": "Forward Marine berthing. 3-high racks, extremely dense. ~2.9 m\u00b3 per person. Shared heads (latrines)."
+      "description": "Forward Marine berthing. 3-high racks, extremely dense. ~2.9 m³ per person. Shared heads (latrines)."
     },
     {
       "id": "Troop_Berthing_Mid",
@@ -96,7 +96,7 @@
         "x": 100,
         "y": 10
       },
-      "description": "Midships Marine berthing. 3-high racks, extremely dense. ~2.9 m\u00b3 per person."
+      "description": "Midships Marine berthing. 3-high racks, extremely dense. ~2.9 m³ per person."
     },
     {
       "id": "Troop_Berthing_Aft",
@@ -109,7 +109,7 @@
         "x": 80,
         "y": 10
       },
-      "description": "Aft Marine berthing. 3-high racks, extremely dense. Closest to well deck \u2014 first to embark."
+      "description": "Aft Marine berthing. 3-high racks, extremely dense. Closest to well deck — first to embark."
     },
     {
       "id": "Crew_Mess",
@@ -187,7 +187,7 @@
         "x": 90,
         "y": 16
       },
-      "description": "Vehicle storage deck. 2,322 m\u00b2 for AAVs, LAVs, HMMWVs. Connected to well deck via ramp. Marine staging area before embarkation."
+      "description": "Vehicle storage deck. 2,322 m² for AAVs, LAVs, HMMWVs. Connected to well deck via ramp. Marine staging area before embarkation."
     },
     {
       "id": "Well_Deck",
@@ -200,7 +200,7 @@
         "x": 50,
         "y": 16
       },
-      "description": "Well deck (64m \u00d7 15m). Floodable for LCAC operations. Two LCAC or one LCU capacity. Partially open to sea when flooded."
+      "description": "Well deck (64m × 15m). Floodable for LCAC operations. Two LCAC or one LCU capacity. Partially open to sea when flooded."
     },
     {
       "id": "Flight_Deck",
@@ -293,5 +293,8 @@
       },
       "description": "Main fore-aft passageway on 2nd deck. Primary transit corridor for 1,160 personnel."
     }
+  ],
+  "graywater_zones": [
+    "Engine_Room_Aft"
   ]
 }

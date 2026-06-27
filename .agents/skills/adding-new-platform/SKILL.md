@@ -33,6 +33,7 @@ cp data/platforms/destroyer_baseline/spatial_layout.json data/platforms/<platfor
 Required structure per zone (matches `schemas/spatial_layout.schema.json`):
 ```json
 {
+  "graywater_zones": ["Engine_Room"],
   "zones": [
     {
       "id": "unique_zone_name",
@@ -45,6 +46,10 @@ Required structure per zone (matches `schemas/spatial_layout.schema.json`):
   ]
 }
 ```
+
+`graywater_zones` lists downstream greywater/blackwater collection zone(s)
+for ship-wide wastewater sequencing (e.g. `Engine_Room_Aft` on large cruise
+platforms). Every entry must match a zone `id` in the same file.
 
 Zone `type` values include `Free`, `Dining`, `Room`, etc. **Dining** zones enable food-contamination pathway pools.
 

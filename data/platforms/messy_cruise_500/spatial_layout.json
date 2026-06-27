@@ -18,7 +18,7 @@
         "x": 340,
         "y": 5
       },
-      "description": "Navigation bridge and operations center. ~140 m\u00b2 \u00d7 3.0m."
+      "description": "Navigation bridge and operations center. ~140 m² × 3.0m."
     },
     {
       "id": "Solarium",
@@ -31,7 +31,7 @@
         "x": 300,
         "y": 12
       },
-      "description": "Forward adults-only solarium/glazed lounge. ~1,200 m\u00b2 \u00d7 3.5m effective volume."
+      "description": "Forward adults-only solarium/glazed lounge. ~1,200 m² × 3.5m effective volume."
     },
     {
       "id": "Main_Pool_Deck",
@@ -44,7 +44,7 @@
         "x": 210,
         "y": 18
       },
-      "description": "Main pool deck with several pools and sun-lounger zones. ~3,000 m\u00b2 semi-open \u00d7 3m effective."
+      "description": "Main pool deck with several pools and sun-lounger zones. ~3,000 m² semi-open × 3m effective."
     },
     {
       "id": "Sports_Court",
@@ -57,7 +57,7 @@
         "x": 125,
         "y": 18
       },
-      "description": "Sports court and outdoor recreation deck. ~600 m\u00b2 semi-open \u00d7 3m."
+      "description": "Sports court and outdoor recreation deck. ~600 m² semi-open × 3m."
     },
     {
       "id": "Waterpark",
@@ -70,7 +70,7 @@
         "x": 80,
         "y": 18
       },
-      "description": "Splash/waterpark complex. ~1,200 m\u00b2 semi-open \u00d7 3m effective aerosol volume."
+      "description": "Splash/waterpark complex. ~1,200 m² semi-open × 3m effective aerosol volume."
     },
     {
       "id": "Pool_Bar_Grill",
@@ -83,7 +83,7 @@
         "x": 170,
         "y": 18
       },
-      "description": "Pool bars and grill / casual service. ~400 m\u00b2 \u00d7 3.5m."
+      "description": "Pool bars and grill / casual service. ~400 m² × 3.5m."
     },
     {
       "id": "Spa_Fitness_Complex",
@@ -96,7 +96,7 @@
         "x": 310,
         "y": 25
       },
-      "description": "Large spa, salon, thermal suite, and fitness center. ~1,200 m\u00b2 \u00d7 3.5m."
+      "description": "Large spa, salon, thermal suite, and fitness center. ~1,200 m² × 3.5m."
     },
     {
       "id": "Kids_Club",
@@ -109,7 +109,7 @@
         "x": 240,
         "y": 25
       },
-      "description": "Children's club and activity rooms. ~600 m\u00b2 \u00d7 3.0m."
+      "description": "Children's club and activity rooms. ~600 m² × 3.0m."
     },
     {
       "id": "Teen_Zone",
@@ -122,7 +122,7 @@
         "x": 205,
         "y": 25
       },
-      "description": "Teen lounge and games space. ~400 m\u00b2 \u00d7 3.0m."
+      "description": "Teen lounge and games space. ~400 m² × 3.0m."
     },
     {
       "id": "Central_Park_Open_Atrium",
@@ -135,7 +135,7 @@
         "x": 180,
         "y": 42
       },
-      "description": "Open-air Central Park / atrium canyon spanning multiple decks. Effective mixing volume ~6,000 m\u00b2 \u00d7 6m."
+      "description": "Open-air Central Park / atrium canyon spanning multiple decks. Effective mixing volume ~6,000 m² × 6m."
     },
     {
       "id": "Royal_Promenade",
@@ -148,7 +148,7 @@
         "x": 190,
         "y": 55
       },
-      "description": "Indoor shopping promenade / central street, multi-deck void. ~7,000 m\u00b2 \u00d7 6m."
+      "description": "Indoor shopping promenade / central street, multi-deck void. ~7,000 m² × 6m."
     },
     {
       "id": "Shopping_Retail_Block",
@@ -161,7 +161,7 @@
         "x": 230,
         "y": 55
       },
-      "description": "Retail and duty-free shopping areas along promenade. ~1,800 m\u00b2 \u00d7 3.5m."
+      "description": "Retail and duty-free shopping areas along promenade. ~1,800 m² × 3.5m."
     },
     {
       "id": "Casino",
@@ -174,7 +174,7 @@
         "x": 150,
         "y": 62
       },
-      "description": "Large casino floor. ~1,500 m\u00b2 \u00d7 3.5m."
+      "description": "Large casino floor. ~1,500 m² × 3.5m."
     },
     {
       "id": "Library_Card_Room",
@@ -187,7 +187,7 @@
         "x": 270,
         "y": 50
       },
-      "description": "Library/card room/quiet lounge. ~120 m\u00b2 \u00d7 3.5m."
+      "description": "Library/card room/quiet lounge. ~120 m² × 3.5m."
     },
     {
       "id": "Main_Dining_Room_Lower",
@@ -200,7 +200,7 @@
         "x": 85,
         "y": 70
       },
-      "description": "Main dining room lower tier. ~3,000 m\u00b2 \u00d7 3.5m."
+      "description": "Main dining room lower tier. ~3,000 m² × 3.5m."
     },
     {
       "id": "Main_Dining_Room_Upper",
@@ -213,7 +213,7 @@
         "x": 85,
         "y": 62
       },
-      "description": "Main dining room upper tier/balcony. ~2,400 m\u00b2 \u00d7 3.5m."
+      "description": "Main dining room upper tier/balcony. ~2,400 m² × 3.5m."
     },
     {
       "id": "Windjammer_Buffet",
@@ -226,7 +226,7 @@
         "x": 120,
         "y": 8
       },
-      "description": "Large buffet/lido restaurant. ~3,000 m\u00b2 \u00d7 3.5m."
+      "description": "Large buffet/lido restaurant. ~3,000 m² × 3.5m."
     },
     {
       "id": "Specialty_Restaurant_Block_A",
@@ -239,7 +239,7 @@
         "x": 140,
         "y": 42
       },
-      "description": "Central Park specialty restaurants group. ~800 m\u00b2 \u00d7 3.5m."
+      "description": "Central Park specialty restaurants group. ~800 m² × 3.5m."
     },
     {
       "id": "Specialty_Restaurant_Block_B",
@@ -252,7 +252,7 @@
         "x": 215,
         "y": 50
       },
-      "description": "Promenade/Boardwalk specialty restaurants group. ~700 m\u00b2 \u00d7 3.5m."
+      "description": "Promenade/Boardwalk specialty restaurants group. ~700 m² × 3.5m."
     },
     {
       "id": "Cafe_Bakery_Block",
@@ -265,7 +265,7 @@
         "x": 260,
         "y": 55
       },
-      "description": "Cafes, bakery, and quick-service venues. ~360 m\u00b2 \u00d7 3.5m."
+      "description": "Cafes, bakery, and quick-service venues. ~360 m² × 3.5m."
     },
     {
       "id": "Crew_Mess_Main",
@@ -278,7 +278,7 @@
         "x": 130,
         "y": 82
       },
-      "description": "Primary crew mess for multiple sittings. ~600 m\u00b2 \u00d7 3.5m."
+      "description": "Primary crew mess for multiple sittings. ~600 m² × 3.5m."
     },
     {
       "id": "Crew_Mess_Forward",
@@ -291,7 +291,7 @@
         "x": 260,
         "y": 74
       },
-      "description": "Forward crew mess / staff cafeteria. ~300 m\u00b2 \u00d7 3.5m."
+      "description": "Forward crew mess / staff cafeteria. ~300 m² × 3.5m."
     },
     {
       "id": "Main_Theater",
@@ -304,7 +304,7 @@
         "x": 315,
         "y": 60
       },
-      "description": "Main theater spanning multiple decks. ~5,000 m\u00b2 \u00d7 6m effective height."
+      "description": "Main theater spanning multiple decks. ~5,000 m² × 6m effective height."
     },
     {
       "id": "Aqua_Theater",
@@ -317,7 +317,7 @@
         "x": 45,
         "y": 50
       },
-      "description": "Open-aft aqua theater and seating. ~3,000 m\u00b2 \u00d7 6m effective volume."
+      "description": "Open-aft aqua theater and seating. ~3,000 m² × 6m effective volume."
     },
     {
       "id": "Ice_Rink_Studio",
@@ -330,7 +330,7 @@
         "x": 200,
         "y": 72
       },
-      "description": "Ice rink / studio theater. ~2,100 m\u00b2 \u00d7 6m."
+      "description": "Ice rink / studio theater. ~2,100 m² × 6m."
     },
     {
       "id": "Comedy_Club_Lounge",
@@ -343,7 +343,7 @@
         "x": 245,
         "y": 64
       },
-      "description": "Comedy club, nightclub, and lounges. ~600 m\u00b2 \u00d7 3.5m."
+      "description": "Comedy club, nightclub, and lounges. ~600 m² × 3.5m."
     },
     {
       "id": "Medical_Center",
@@ -356,7 +356,7 @@
         "x": 310,
         "y": 82
       },
-      "description": "Ship medical center with treatment rooms, pharmacy, and sick bay. ~400 m\u00b2 \u00d7 3.0m."
+      "description": "Ship medical center with treatment rooms, pharmacy, and sick bay. ~400 m² × 3.0m."
     },
     {
       "id": "Isolation_Ward",
@@ -369,7 +369,7 @@
         "x": 335,
         "y": 82
       },
-      "description": "Dedicated isolation ward/negative-pressure cabins. ~150 m\u00b2 \u00d7 3.0m."
+      "description": "Dedicated isolation ward/negative-pressure cabins. ~150 m² × 3.0m."
     },
     {
       "id": "Main_Galley_Aft",
@@ -382,7 +382,7 @@
         "x": 80,
         "y": 78
       },
-      "description": "Main galley supporting main dining rooms. ~1,600 m\u00b2 \u00d7 3.5m."
+      "description": "Main galley supporting main dining rooms. ~1,600 m² × 3.5m."
     },
     {
       "id": "Buffet_Galley_Upper",
@@ -395,7 +395,7 @@
         "x": 110,
         "y": 16
       },
-      "description": "Upper galley serving Windjammer and pool deck. ~1,000 m\u00b2 \u00d7 3.5m."
+      "description": "Upper galley serving Windjammer and pool deck. ~1,000 m² × 3.5m."
     },
     {
       "id": "Specialty_Galley_Block",
@@ -408,7 +408,7 @@
         "x": 175,
         "y": 50
       },
-      "description": "Distributed specialty restaurant galleys. ~700 m\u00b2 \u00d7 3.5m."
+      "description": "Distributed specialty restaurant galleys. ~700 m² × 3.5m."
     },
     {
       "id": "Central_Stores",
@@ -421,7 +421,7 @@
         "x": 120,
         "y": 90
       },
-      "description": "Central dry/cold/freezer stores and provisioning area. ~3,000 m\u00b2 \u00d7 2.8m."
+      "description": "Central dry/cold/freezer stores and provisioning area. ~3,000 m² × 2.8m."
     },
     {
       "id": "Laundry_Main",
@@ -434,7 +434,7 @@
         "x": 190,
         "y": 90
       },
-      "description": "Main industrial laundry. ~1,500 m\u00b2 \u00d7 2.8m."
+      "description": "Main industrial laundry. ~1,500 m² × 2.8m."
     },
     {
       "id": "Waste_Treatment_Plant",
@@ -447,7 +447,7 @@
         "x": 250,
         "y": 96
       },
-      "description": "Advanced wastewater treatment plant and garbage processing. ~2,000 m\u00b2 \u00d7 2.8m."
+      "description": "Advanced wastewater treatment plant and garbage processing. ~2,000 m² × 2.8m."
     },
     {
       "id": "Engine_Room_Aft",
@@ -460,7 +460,7 @@
         "x": 65,
         "y": 96
       },
-      "description": "Main machinery space spanning lower decks. ~5,000 m\u00b2 footprint \u00d7 8.4m."
+      "description": "Main machinery space spanning lower decks. ~5,000 m² footprint × 8.4m."
     },
     {
       "id": "Engine_Control_Room",
@@ -473,7 +473,7 @@
         "x": 105,
         "y": 90
       },
-      "description": "Engine control room and engineering office. ~200 m\u00b2 \u00d7 3.0m."
+      "description": "Engine control room and engineering office. ~200 m² × 3.0m."
     },
     {
       "id": "Passenger_Cabins_D6_Port",
@@ -486,7 +486,7 @@
         "x": 320,
         "y": 50.0
       },
-      "description": "Passenger cabin block, Deck 6 port. Represents ~100 cabins \u00d7 19 m\u00b2 \u00d7 2.8m."
+      "description": "Passenger cabin block, Deck 6 port. Represents ~100 cabins × 19 m² × 2.8m."
     },
     {
       "id": "Passenger_Cabins_D6_Stbd",
@@ -499,7 +499,7 @@
         "x": 320,
         "y": 53.0
       },
-      "description": "Passenger cabin block, Deck 6 starboard. Represents ~100 cabins \u00d7 19 m\u00b2 \u00d7 2.8m."
+      "description": "Passenger cabin block, Deck 6 starboard. Represents ~100 cabins × 19 m² × 2.8m."
     },
     {
       "id": "Passenger_Cabins_D6_Central",
@@ -512,7 +512,7 @@
         "x": 270,
         "y": 51.5
       },
-      "description": "Passenger cabin block, Deck 6 central/inside-facing. Represents ~100 cabins \u00d7 19 m\u00b2 \u00d7 2.8m."
+      "description": "Passenger cabin block, Deck 6 central/inside-facing. Represents ~100 cabins × 19 m² × 2.8m."
     },
     {
       "id": "Passenger_Cabins_D7_Port",
@@ -525,7 +525,7 @@
         "x": 320,
         "y": 45.5
       },
-      "description": "Passenger cabin block, Deck 7 port. Represents ~100 cabins \u00d7 19 m\u00b2 \u00d7 2.8m."
+      "description": "Passenger cabin block, Deck 7 port. Represents ~100 cabins × 19 m² × 2.8m."
     },
     {
       "id": "Passenger_Cabins_D7_Stbd",
@@ -538,7 +538,7 @@
         "x": 320,
         "y": 48.5
       },
-      "description": "Passenger cabin block, Deck 7 starboard. Represents ~100 cabins \u00d7 19 m\u00b2 \u00d7 2.8m."
+      "description": "Passenger cabin block, Deck 7 starboard. Represents ~100 cabins × 19 m² × 2.8m."
     },
     {
       "id": "Passenger_Cabins_D7_Central",
@@ -551,7 +551,7 @@
         "x": 270,
         "y": 47.0
       },
-      "description": "Passenger cabin block, Deck 7 central/inside-facing. Represents ~100 cabins \u00d7 19 m\u00b2 \u00d7 2.8m."
+      "description": "Passenger cabin block, Deck 7 central/inside-facing. Represents ~100 cabins × 19 m² × 2.8m."
     },
     {
       "id": "Passenger_Cabins_D8_Port",
@@ -564,7 +564,7 @@
         "x": 320,
         "y": 41.0
       },
-      "description": "Passenger cabin block, Deck 8 port. Represents ~100 cabins \u00d7 19 m\u00b2 \u00d7 2.8m."
+      "description": "Passenger cabin block, Deck 8 port. Represents ~100 cabins × 19 m² × 2.8m."
     },
     {
       "id": "Passenger_Cabins_D8_Stbd",
@@ -577,7 +577,7 @@
         "x": 320,
         "y": 44.0
       },
-      "description": "Passenger cabin block, Deck 8 starboard. Represents ~100 cabins \u00d7 19 m\u00b2 \u00d7 2.8m."
+      "description": "Passenger cabin block, Deck 8 starboard. Represents ~100 cabins × 19 m² × 2.8m."
     },
     {
       "id": "Passenger_Cabins_D8_Central",
@@ -590,7 +590,7 @@
         "x": 270,
         "y": 42.5
       },
-      "description": "Passenger cabin block, Deck 8 central/inside-facing. Represents ~100 cabins \u00d7 19 m\u00b2 \u00d7 2.8m."
+      "description": "Passenger cabin block, Deck 8 central/inside-facing. Represents ~100 cabins × 19 m² × 2.8m."
     },
     {
       "id": "Passenger_Cabins_D9_Port",
@@ -603,7 +603,7 @@
         "x": 320,
         "y": 36.5
       },
-      "description": "Passenger cabin block, Deck 9 port. Represents ~100 cabins \u00d7 19 m\u00b2 \u00d7 2.8m."
+      "description": "Passenger cabin block, Deck 9 port. Represents ~100 cabins × 19 m² × 2.8m."
     },
     {
       "id": "Passenger_Cabins_D9_Stbd",
@@ -616,7 +616,7 @@
         "x": 320,
         "y": 39.5
       },
-      "description": "Passenger cabin block, Deck 9 starboard. Represents ~100 cabins \u00d7 19 m\u00b2 \u00d7 2.8m."
+      "description": "Passenger cabin block, Deck 9 starboard. Represents ~100 cabins × 19 m² × 2.8m."
     },
     {
       "id": "Passenger_Cabins_D9_Central",
@@ -629,7 +629,7 @@
         "x": 270,
         "y": 38.0
       },
-      "description": "Passenger cabin block, Deck 9 central/inside-facing. Represents ~100 cabins \u00d7 19 m\u00b2 \u00d7 2.8m."
+      "description": "Passenger cabin block, Deck 9 central/inside-facing. Represents ~100 cabins × 19 m² × 2.8m."
     },
     {
       "id": "Passenger_Cabins_D10_Port",
@@ -642,7 +642,7 @@
         "x": 320,
         "y": 32.0
       },
-      "description": "Passenger cabin block, Deck 10 port. Represents ~100 cabins \u00d7 19 m\u00b2 \u00d7 2.8m."
+      "description": "Passenger cabin block, Deck 10 port. Represents ~100 cabins × 19 m² × 2.8m."
     },
     {
       "id": "Passenger_Cabins_D10_Stbd",
@@ -655,7 +655,7 @@
         "x": 320,
         "y": 35.0
       },
-      "description": "Passenger cabin block, Deck 10 starboard. Represents ~100 cabins \u00d7 19 m\u00b2 \u00d7 2.8m."
+      "description": "Passenger cabin block, Deck 10 starboard. Represents ~100 cabins × 19 m² × 2.8m."
     },
     {
       "id": "Passenger_Cabins_D10_Central",
@@ -668,7 +668,7 @@
         "x": 270,
         "y": 33.5
       },
-      "description": "Passenger cabin block, Deck 10 central/inside-facing. Represents ~100 cabins \u00d7 19 m\u00b2 \u00d7 2.8m."
+      "description": "Passenger cabin block, Deck 10 central/inside-facing. Represents ~100 cabins × 19 m² × 2.8m."
     },
     {
       "id": "Passenger_Cabins_D11_Port",
@@ -681,7 +681,7 @@
         "x": 320,
         "y": 27.5
       },
-      "description": "Passenger cabin block, Deck 11 port. Represents ~100 cabins \u00d7 19 m\u00b2 \u00d7 2.8m."
+      "description": "Passenger cabin block, Deck 11 port. Represents ~100 cabins × 19 m² × 2.8m."
     },
     {
       "id": "Passenger_Cabins_D11_Stbd",
@@ -694,7 +694,7 @@
         "x": 320,
         "y": 30.5
       },
-      "description": "Passenger cabin block, Deck 11 starboard. Represents ~100 cabins \u00d7 19 m\u00b2 \u00d7 2.8m."
+      "description": "Passenger cabin block, Deck 11 starboard. Represents ~100 cabins × 19 m² × 2.8m."
     },
     {
       "id": "Passenger_Cabins_D11_Central",
@@ -707,7 +707,7 @@
         "x": 270,
         "y": 29.0
       },
-      "description": "Passenger cabin block, Deck 11 central/inside-facing. Represents ~100 cabins \u00d7 19 m\u00b2 \u00d7 2.8m."
+      "description": "Passenger cabin block, Deck 11 central/inside-facing. Represents ~100 cabins × 19 m² × 2.8m."
     },
     {
       "id": "Passenger_Cabins_D12_Port",
@@ -720,7 +720,7 @@
         "x": 320,
         "y": 23.0
       },
-      "description": "Passenger cabin block, Deck 12 port. Represents ~100 cabins \u00d7 19 m\u00b2 \u00d7 2.8m."
+      "description": "Passenger cabin block, Deck 12 port. Represents ~100 cabins × 19 m² × 2.8m."
     },
     {
       "id": "Passenger_Cabins_D12_Stbd",
@@ -733,7 +733,7 @@
         "x": 320,
         "y": 26.0
       },
-      "description": "Passenger cabin block, Deck 12 starboard. Represents ~100 cabins \u00d7 19 m\u00b2 \u00d7 2.8m."
+      "description": "Passenger cabin block, Deck 12 starboard. Represents ~100 cabins × 19 m² × 2.8m."
     },
     {
       "id": "Passenger_Cabins_D12_Central",
@@ -746,7 +746,7 @@
         "x": 270,
         "y": 24.5
       },
-      "description": "Passenger cabin block, Deck 12 central/inside-facing. Represents ~100 cabins \u00d7 19 m\u00b2 \u00d7 2.8m."
+      "description": "Passenger cabin block, Deck 12 central/inside-facing. Represents ~100 cabins × 19 m² × 2.8m."
     },
     {
       "id": "Passenger_Cabins_D13_Port",
@@ -759,7 +759,7 @@
         "x": 320,
         "y": 18.5
       },
-      "description": "Passenger cabin block, Deck 13 port. Represents ~100 cabins \u00d7 19 m\u00b2 \u00d7 2.8m."
+      "description": "Passenger cabin block, Deck 13 port. Represents ~100 cabins × 19 m² × 2.8m."
     },
     {
       "id": "Passenger_Cabins_D13_Stbd",
@@ -772,7 +772,7 @@
         "x": 320,
         "y": 21.5
       },
-      "description": "Passenger cabin block, Deck 13 starboard. Represents ~100 cabins \u00d7 19 m\u00b2 \u00d7 2.8m."
+      "description": "Passenger cabin block, Deck 13 starboard. Represents ~100 cabins × 19 m² × 2.8m."
     },
     {
       "id": "Passenger_Cabins_D13_Central",
@@ -785,7 +785,7 @@
         "x": 270,
         "y": 20.0
       },
-      "description": "Passenger cabin block, Deck 13 central/inside-facing. Represents ~100 cabins \u00d7 19 m\u00b2 \u00d7 2.8m."
+      "description": "Passenger cabin block, Deck 13 central/inside-facing. Represents ~100 cabins × 19 m² × 2.8m."
     },
     {
       "id": "Passenger_Cabins_D14_Port",
@@ -798,7 +798,7 @@
         "x": 320,
         "y": 14.0
       },
-      "description": "Passenger cabin block, Deck 14 port. Represents ~100 cabins \u00d7 19 m\u00b2 \u00d7 2.8m."
+      "description": "Passenger cabin block, Deck 14 port. Represents ~100 cabins × 19 m² × 2.8m."
     },
     {
       "id": "Passenger_Cabins_D14_Stbd",
@@ -811,7 +811,7 @@
         "x": 320,
         "y": 17.0
       },
-      "description": "Passenger cabin block, Deck 14 starboard. Represents ~100 cabins \u00d7 19 m\u00b2 \u00d7 2.8m."
+      "description": "Passenger cabin block, Deck 14 starboard. Represents ~100 cabins × 19 m² × 2.8m."
     },
     {
       "id": "Passenger_Cabins_D14_Central",
@@ -824,7 +824,7 @@
         "x": 270,
         "y": 15.5
       },
-      "description": "Passenger cabin block, Deck 14 central/inside-facing. Represents ~100 cabins \u00d7 19 m\u00b2 \u00d7 2.8m."
+      "description": "Passenger cabin block, Deck 14 central/inside-facing. Represents ~100 cabins × 19 m² × 2.8m."
     },
     {
       "id": "Crew_Quarters_D1",
@@ -837,7 +837,7 @@
         "x": 300,
         "y": 88
       },
-      "description": "Crew accommodation Deck 1. Represents ~500 crew in cabins/berths, ~5,600 m\u00b3."
+      "description": "Crew accommodation Deck 1. Represents ~500 crew in cabins/berths, ~5,600 m³."
     },
     {
       "id": "Crew_Quarters_D2",
@@ -850,7 +850,7 @@
         "x": 300,
         "y": 82
       },
-      "description": "Crew accommodation Deck 2. Represents ~500 crew in cabins/berths, ~5,600 m\u00b3."
+      "description": "Crew accommodation Deck 2. Represents ~500 crew in cabins/berths, ~5,600 m³."
     },
     {
       "id": "Crew_Quarters_D3",
@@ -863,7 +863,7 @@
         "x": 300,
         "y": 76
       },
-      "description": "Crew accommodation Deck 3. Represents ~500 crew in cabins/berths, ~5,600 m\u00b3."
+      "description": "Crew accommodation Deck 3. Represents ~500 crew in cabins/berths, ~5,600 m³."
     },
     {
       "id": "Crew_Quarters_D4",
@@ -876,11 +876,14 @@
         "x": 300,
         "y": 70
       },
-      "description": "Crew accommodation Deck 4. Represents ~500 crew in cabins/berths, ~5,600 m\u00b3."
+      "description": "Crew accommodation Deck 4. Represents ~500 crew in cabins/berths, ~5,600 m³."
     }
   ],
   "legacy": true,
   "supersedes": null,
   "superseded_by": "mega_cruise_5000",
-  "legacy_note": "Well-mixed berthing blocks frustrated quarantine: confining an agent to their cabin zone still exposes them to ~199 block-mates via direct contact plus thousands more via shared HVAC."
+  "legacy_note": "Well-mixed berthing blocks frustrated quarantine: confining an agent to their cabin zone still exposes them to ~199 block-mates via direct contact plus thousands more via shared HVAC.",
+  "graywater_zones": [
+    "Engine_Room_Aft"
+  ]
 }
