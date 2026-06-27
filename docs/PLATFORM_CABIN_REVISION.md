@@ -1,5 +1,9 @@
 # Mega Cruise Platform Revision: Cabin-Level Spatial Resolution
 
+**Status:** Implemented in `data/platforms/mega_cruise_5000/` (Feb 2026). Regenerate with
+`python3 scripts/generate_mega_cruise_cabin_layout.py`. Legacy well-mixed model:
+`data/platforms/messy_cruise_500/`.
+
 ## Problem
 
 The legacy `messy_cruise_500` platform (archived from the original `mega_cruise_5000`
