@@ -18,7 +18,6 @@ import json
 import math
 import os
 import sys
-import tempfile
 from typing import Any
 
 import numpy as np
@@ -113,8 +112,7 @@ class TestArtificialLabNotebook:
             pathogens=["p1"], zones=["Z1"],
         )
         nb.log_trigger_transition(0, "BASELINE", "SUSPECTED")
-        with tempfile.NamedTemporaryFile(suffix=".json", delete=False) as tmp:
-            path = tmp.name
+        path = os.path.join(REPO_ROOT, "telemetry_buffer", "test_lab_notebook_roundtrip.json")
         try:
             nb.serialize(path)
             with open(path, encoding="utf-8") as f:

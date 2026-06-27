@@ -23,6 +23,7 @@ from decision_engine.social.contact_graph import ContactGraphBuilder
 from decision_engine.intelligence import default_timeline_path, load_global_health_timeline
 from decision_engine.policy import build_policies_from_config
 from decision_engine.stackelberg.round import StackelbergRound
+from simulation_utils.paths import resolve_repo_path
 
 
 @dataclass
@@ -56,8 +57,7 @@ class DecisionRuntime:
         profile_path = social.get("agent_profile_bundle")
         if not profile_path:
             profile_path = default_bundle_path(repo)
-        elif not os.path.isabs(profile_path):
-            profile_path = os.path.join(repo, profile_path)
+        profile_path = resolve_repo_path(repo, profile_path)
 
         if os.path.isfile(profile_path):
             bundle = load_agent_profile_bundle(profile_path)
@@ -81,24 +81,21 @@ class DecisionRuntime:
         ci_path = social.get("class_interactions")
         if not ci_path:
             ci_path = ClassInteractionMatrix.default_path(repo)
-        elif not os.path.isabs(ci_path):
-            ci_path = os.path.join(repo, ci_path)
+        ci_path = resolve_repo_path(repo, ci_path)
         if os.path.isfile(ci_path):
             rt.class_matrix = ClassInteractionMatrix.from_json(ci_path)
 
         diff_path = social.get("information_diffusion")
         if not diff_path:
             diff_path = InformationDiffusionEngine.default_path(repo)
-        elif not os.path.isabs(diff_path):
-            diff_path = os.path.join(repo, diff_path)
+        diff_path = resolve_repo_path(repo, diff_path)
         if os.path.isfile(diff_path):
             rt.information_engine = InformationDiffusionEngine.from_config_path(diff_path)
 
         gh_path = social.get("global_health_timeline")
         if not gh_path:
             gh_path = default_timeline_path(repo)
-        elif not os.path.isabs(gh_path):
-            gh_path = os.path.join(repo, gh_path)
+        gh_path = resolve_repo_path(repo, gh_path)
         if os.path.isfile(gh_path):
             rt.global_health_timeline = load_global_health_timeline(gh_path)
 
@@ -120,7 +117,7 @@ class DecisionRuntime:
         econ_path = social.get("economics_weights_path")
         economics_weights: dict[str, Any] = {}
         if econ_path:
-            ep = econ_path if os.path.isabs(econ_path) else os.path.join(repo, econ_path)
+            ep = resolve_repo_path(repo, econ_path)
             if os.path.isfile(ep):
                 with open(ep, encoding="utf-8") as fh:
                     economics_weights = json.load(fh).get("reward_weights", {})

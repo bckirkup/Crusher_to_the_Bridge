@@ -21,6 +21,7 @@ from telemetry_buffer.agent_axes import (
     PRESENTATION_ASYMPTOMATIC,
     agent_axes_dict,
 )
+from simulation_utils.paths import is_path_under_base
 
 # ---------------------------------------------------------------------------
 # Schema helpers
@@ -29,7 +30,18 @@ from telemetry_buffer.agent_axes import (
 SCHEMA_VERSION = "0.3.0"
 
 BUFFER_DIR = os.path.dirname(os.path.abspath(__file__))
+REPO_ROOT = os.path.dirname(BUFFER_DIR)
 GROUND_TRUTH_PATH = os.path.join(BUFFER_DIR, "ground_truth.json")
+
+
+def _validated_ground_truth_path(path: str) -> str:
+    resolved = os.path.realpath(path)
+    allowed_roots = (BUFFER_DIR, REPO_ROOT)
+    if not any(is_path_under_base(root, resolved) for root in allowed_roots):
+        raise ValueError(
+            f"Ground-truth path must stay under repository or telemetry_buffer: {path!r}",
+        )
+    return resolved
 
 
 def make_agent(
@@ -117,11 +129,13 @@ def make_ground_truth(
 
 def write_ground_truth(payload: dict[str, Any], path: str = GROUND_TRUTH_PATH) -> None:
     """Serialise *payload* to the ground-truth JSON file."""
-    with open(path, "w", encoding="utf-8") as fh:
+    safe_path = _validated_ground_truth_path(path)
+    with open(safe_path, "w", encoding="utf-8") as fh:
         json.dump(payload, fh, indent=2)
 
 
 def read_ground_truth(path: str = GROUND_TRUTH_PATH) -> dict[str, Any]:
     """Deserialise and return the current ground-truth JSON file."""
-    with open(path, "r", encoding="utf-8") as fh:
+    safe_path = _validated_ground_truth_path(path)
+    with open(safe_path, "r", encoding="utf-8") as fh:
         return json.load(fh)

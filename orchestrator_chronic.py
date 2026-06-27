@@ -16,6 +16,7 @@ from typing import Any
 import numpy as np
 
 from engines.infection_dynamics_bridge import KorkinShipEngine
+from simulation_utils.paths import resolve_repo_path
 
 
 from simulation_utils.numeric import float_ne
@@ -33,7 +34,7 @@ def load_chronic_disease_config(
     if not cd_cfg.get("enabled", False):
         return {}
     config_path = cd_cfg.get("config_path", "data/config/chronic_diseases.json")
-    full_path = os.path.join(repo_root, config_path) if repo_root else config_path
+    full_path = resolve_repo_path(repo_root, config_path) if repo_root else config_path
     if not os.path.isfile(full_path):
         return {}
     with open(full_path, "r", encoding="utf-8") as fh:

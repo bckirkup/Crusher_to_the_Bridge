@@ -21,6 +21,7 @@ import numpy as np
 from crusher_labs.modalities.sequencing import MULTI_KINGDOM_TAXA
 
 from simulation_utils.numeric import default_simulation_rng
+from simulation_utils.paths import resolve_repo_path
 
 
 # Specimen channels this modality can consume
@@ -92,8 +93,8 @@ class LongReadNanoporeSequencing:
         rng: np.random.Generator | None = None,
         repo_root: str | None = None,
     ) -> LongReadNanoporeSequencing:
-        if not os.path.isabs(path) and repo_root:
-            path = os.path.join(repo_root, path)
+        if repo_root:
+            path = resolve_repo_path(repo_root, path)
         with open(path, "r", encoding="utf-8") as fh:
             params = json.load(fh)
         sim = params.get("simulation_parameters", {})

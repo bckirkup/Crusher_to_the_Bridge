@@ -69,13 +69,17 @@ class TestMakeGroundTruth:
 
 
 class TestIOHelpers:
-    def test_write_and_read_roundtrip(self, tmp_path: str) -> None:
-        path = os.path.join(str(tmp_path), "test_gt.json")
+    def test_write_and_read_roundtrip(self) -> None:
+        path = os.path.join(REPO_ROOT, "telemetry_buffer", "test_gt_roundtrip.json")
         payload = make_ground_truth(
             epoch=0,
             agents=[make_agent(0, symptom_status="symptomatic", shedding_rate=50.0)],
             spaces={"Galley": make_space(pathogen_mass=100.0)},
         )
-        write_ground_truth(payload, path)
-        loaded = read_ground_truth(path)
-        assert loaded == payload
+        try:
+            write_ground_truth(payload, path)
+            loaded = read_ground_truth(path)
+            assert loaded == payload
+        finally:
+            if os.path.isfile(path):
+                os.remove(path)

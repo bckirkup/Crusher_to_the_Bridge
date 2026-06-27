@@ -13,6 +13,7 @@ import json
 import os
 from typing import Any
 
+from simulation_utils.paths import prepare_output_directory, resolve_repo_path
 from engines.infection_dynamics_bridge import (
     KorkinShipEngine,
     InfectionStatus,
@@ -275,14 +276,17 @@ def finalize_simulation(
 ) -> None:
     """Save simulation history, lab notebook, and print executive summary."""
     if history_path is None:
-        history_path = os.path.join(
-            REPO_ROOT, "telemetry_buffer", "simulation_history.json",
+        history_path = resolve_repo_path(
+            REPO_ROOT, "telemetry_buffer/simulation_history.json",
         )
+    else:
+        history_path = resolve_repo_path(REPO_ROOT, history_path)
+    prepare_output_directory(os.path.dirname(history_path))
     with open(history_path, "w", encoding="utf-8") as fh:
         json.dump(state.simulation_history, fh, indent=2)
     print(f"\n  Simulation history saved to: {history_path}")
 
-    logging_config_path = os.path.join(REPO_ROOT, "data", "config", "logging_profile.json")
+    logging_config_path = resolve_repo_path(REPO_ROOT, "data/config/logging_profile.json")
     _, _, logging_config = load_logging_profile(logging_config_path)
 
     if obs.lab_notebook_enabled:
@@ -294,12 +298,12 @@ def finalize_simulation(
             trigger_timeline=state.escalation_log,
         )
         if lab_notebook_path:
-            nb_path = lab_notebook_path
+            nb_path = resolve_repo_path(REPO_ROOT, lab_notebook_path)
         else:
             nb_output = logging_config.get("lab_notebook", {}).get(
                 "output_path", "telemetry_buffer/artificial_lab_notebook.json",
             )
-            nb_path = os.path.join(REPO_ROOT, nb_output)
+            nb_path = resolve_repo_path(REPO_ROOT, nb_output)
         financial_audit = proto_ctx.cost_ledger.generate_financial_audit()
         protocol_summary = proto_ctx.protocol_engine.generate_protocol_summary()
         obs.notebook.serialize(
