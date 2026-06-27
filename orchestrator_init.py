@@ -87,6 +87,7 @@ def load_spatial_layout(cfg: dict[str, Any]) -> list[dict[str, Any]] | None:
             "volume_m3": z.get("volume_m3", 100),
             "display": z.get("display", {}),
             "deck": z.get("deck", "main"),
+            "cabin_ventilation_type": z.get("cabin_ventilation_type", ""),
         }
         for z in layout.get("zones", [])
     ]

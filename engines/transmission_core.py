@@ -134,6 +134,15 @@ class ContactTracingMatrix:
 
 # ── Four-pathway transmission engine ────────────────────────────────────
 
+# Balcony cabins: outdoor air dilution reduces aerosol exposure (PLATFORM_CABIN_REVISION)
+BALCONY_AEROSOL_REDUCTION = 0.5
+
+# Default confinement isolation for quarantined agents in cabin corridors
+DEFAULT_CONFINEMENT_ISOLATION_FACTOR = 0.05
+
+# Hallway encounter rate vs well-mixed ward (Cabin_Corridor zones)
+DEFAULT_CORRIDOR_DIRECT_CONTACT_FACTOR = 0.15
+
 # Fraction of shedding deposited into food pools in Dining-type zones
 FOOD_DEPOSITION_FRACTION = 1e-4
 
@@ -169,11 +178,18 @@ class TransmissionCore:
         zone_volumes: dict[str, float] | None = None,
         pathogen_profiles: dict[str, dict] | None = None,
         zone_types: dict[str, str] | None = None,
+        zone_ventilation: dict[str, str] | None = None,
+        confinement_isolation_factor: float = DEFAULT_CONFINEMENT_ISOLATION_FACTOR,
+        corridor_direct_contact_factor: float = DEFAULT_CORRIDOR_DIRECT_CONTACT_FACTOR,
     ) -> None:
         self.rng = rng
         self.zone_volumes = zone_volumes or {}
         self.pathogen_profiles = pathogen_profiles or {}
         self.zone_types = zone_types or {}
+        self.zone_ventilation = zone_ventilation or {}
+        self.confinement_isolation_factor = confinement_isolation_factor
+        self.corridor_direct_contact_factor = corridor_direct_contact_factor
+        self._quarantined_ids: set[int] = set()
 
         # Persistent state: surface fomite pools per zone per pathogen
         # {pathogen_id: {zone: mass}}
@@ -201,6 +217,32 @@ class TransmissionCore:
         self.direct_contact_scalar: float = 1.0
         self.droplet_scalar: float = 1.0
         self.hvac_airborne_scalar: float = 1.0
+
+    def _aerosol_ventilation_factor(self, zone_name: str) -> float:
+        """Outdoor-air dilution for balcony cabin corridors."""
+        vent = self.zone_ventilation.get(zone_name, "")
+        if vent == "balcony_partial":
+            return BALCONY_AEROSOL_REDUCTION
+        return 1.0
+
+    def _direct_contact_zone_factor(self, zone_name: str) -> float:
+        if self.zone_types.get(zone_name) == "Cabin_Corridor":
+            return self.corridor_direct_contact_factor
+        return 1.0
+
+    def _is_quarantined(self, agent: KorkinAgent) -> bool:
+        return agent.agent_id in self._quarantined_ids
+
+    def _cabin_confinement_active(self, agent: KorkinAgent) -> bool:
+        """Cabin-corridor confinement rules apply only in Cabin_Corridor zones."""
+        if agent.agent_id not in self._quarantined_ids:
+            return False
+        return self.zone_types.get(agent.current_location) == "Cabin_Corridor"
+
+    def _confinement_factor(self, agent: KorkinAgent) -> float:
+        if self._cabin_confinement_active(agent):
+            return self.confinement_isolation_factor
+        return 1.0
 
     def initialize_zones(self, zone_names: list[str]) -> None:
         """Set up pools for all zones."""
@@ -244,6 +286,7 @@ class TransmissionCore:
         zone_pathogen_mass: dict[str, float],
         hvac_downstream_zones: dict[str, list[str]] | None = None,
         multi_pathogen_mass: dict[str, dict[str, float]] | None = None,
+        quarantined_ids: set[int] | None = None,
     ) -> tuple[ContactTracingMatrix, list[TransmissionEvent]]:
         """Run all four transmission pathways for one epoch.
 
@@ -259,6 +302,9 @@ class TransmissionCore:
             Map of zone → list of downstream zones receiving its air.
         multi_pathogen_mass : dict, optional
             Per-pathogen mass pools: {pathogen_id: {zone: mass}}.
+        quarantined_ids : set[int], optional
+            Agents confined to quarters; receive reduced direct contact / droplet
+            and no fomite pickup in cabin-corridor platforms.
 
         Returns
         -------
@@ -267,6 +313,7 @@ class TransmissionCore:
         """
         matrix = ContactTracingMatrix(epoch=epoch)
         events: list[TransmissionEvent] = []
+        self._quarantined_ids = set(quarantined_ids or ())
 
         # Build zone occupancy maps
         zone_occupants: dict[str, list[KorkinAgent]] = {}
@@ -439,11 +486,17 @@ class TransmissionCore:
             total_shedding = sum(sv for _, sv in shedders)
             shedder_ids = [s.agent_id for s, _ in shedders]
             n_occupants = max(len(occupants), 1)
+            zone_dc_factor = self._direct_contact_zone_factor(zone_name)
 
             for target in susceptible:
                 r0_draw = int(self.rng.choice(AVG_R_POOL))
                 dose = total_shedding / n_occupants * r0_draw
                 dose *= self.direct_contact_scalar
+                dose *= zone_dc_factor
+                dose *= self._confinement_factor(target)
+                # Confined shedders in cabin corridors contribute less hallway contact
+                if any(self._cabin_confinement_active(s) for s, _ in shedders):
+                    dose *= self.confinement_isolation_factor
                 agent_doses[target.agent_id] = (
                     agent_doses.get(target.agent_id, 0.0) + dose
                 )
@@ -492,10 +545,13 @@ class TransmissionCore:
             volume = self.zone_volumes.get(zone_name, 100.0)
             concentration = total_aerosol / max(volume, 1.0)
             shedder_ids = [s.agent_id for s, _ in shedders]
+            vent_factor = self._aerosol_ventilation_factor(zone_name)
 
             for target in susceptible:
                 dose = concentration * volume * AEROSOL_INHALATION_FRACTION
                 dose *= self.droplet_scalar
+                dose *= vent_factor
+                dose *= self._confinement_factor(target)
                 agent_doses[target.agent_id] = (
                     agent_doses.get(target.agent_id, 0.0) + dose
                 )
@@ -558,6 +614,8 @@ class TransmissionCore:
                 for target in susceptible:
                     dose = concentration * AEROSOL_INHALATION_FRACTION * volume
                     dose *= self.hvac_airborne_scalar
+                    dose *= self._aerosol_ventilation_factor(target_zone)
+                    dose *= self._confinement_factor(target)
                     agent_doses[target.agent_id] = (
                         agent_doses.get(target.agent_id, 0.0) + dose
                     )
@@ -594,10 +652,12 @@ class TransmissionCore:
         if profile:
             dep_frac = profile.get("surface_deposition_fraction", dep_frac)
 
-        # a) Deposit new fomite mass from current shedders
+        # a) Deposit new fomite mass from current shedders (not confined to cabin)
         for zone_name, occupants in zone_occupants.items():
             shedders = self._get_shedders(occupants, pathogen_id, profile)
             for agent, sv in shedders:
+                if self._cabin_confinement_active(agent):
+                    continue
                 deposit = sv * dep_frac
                 self.surface_pools[zone_name] = (
                     self.surface_pools.get(zone_name, 0.0) + deposit
@@ -619,6 +679,8 @@ class TransmissionCore:
             prev_occupant_ids = self._prev_zone_occupants.get(zone_name, set())
 
             for target in susceptible:
+                if self._cabin_confinement_active(target):
+                    continue
                 # Stochastic surface touch
                 if self.rng.random() > FOMITE_PICKUP_PROBABILITY:
                     continue

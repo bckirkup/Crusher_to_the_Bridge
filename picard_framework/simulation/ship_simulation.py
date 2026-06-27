@@ -18,8 +18,17 @@ from crusher_labs.protocol_engine import (
     reset_modifiers,
 )
 from decision_engine.actions import ActionEnvelope
-from engines.py_contam_bridge import build_transport_engine, load_air_flow_paths
-from engines.transmission_core import TransmissionCore, build_hvac_downstream_map
+from engines.py_contam_bridge import (
+    build_transport_engine,
+    load_air_flow_paths,
+    load_spatial_layout as load_platform_layout,
+)
+from engines.transmission_core import (
+    TransmissionCore,
+    build_hvac_downstream_map,
+    DEFAULT_CONFINEMENT_ISOLATION_FACTOR,
+    DEFAULT_CORRIDOR_DIRECT_CONTACT_FACTOR,
+)
 from orchestrator_chronic import (
     assign_chronic_diseases,
     get_chronic_behavioral_modifiers,
@@ -189,10 +198,16 @@ class ShipSimulation:
             )
 
         airflow_data = load_air_flow_paths(self.repo_root, cfg)
+        platform_layout = load_platform_layout(self.repo_root, cfg) or {}
         self.zone_volumes = {
             z["name"]: z.get("volume_m3", 100.0) for z in ship.get("zones", [])
         }
         zone_types = {z["name"]: z.get("type", "") for z in ship.get("zones", [])}
+        zone_ventilation: dict[str, str] = {}
+        for z in platform_layout.get("zones", []):
+            vent = z.get("cabin_ventilation_type")
+            if vent:
+                zone_ventilation[z["id"]] = vent
         self.zone_types = zone_types
         self.hvac_downstream = (
             build_hvac_downstream_map(airflow_data) if airflow_data else {}
@@ -202,6 +217,19 @@ class ShipSimulation:
             zone_volumes=self.zone_volumes,
             pathogen_profiles=self.pathogen_profiles,
             zone_types=zone_types,
+            zone_ventilation=zone_ventilation,
+            confinement_isolation_factor=float(
+                platform_layout.get(
+                    "confinement_isolation_factor",
+                    DEFAULT_CONFINEMENT_ISOLATION_FACTOR,
+                )
+            ),
+            corridor_direct_contact_factor=float(
+                platform_layout.get(
+                    "corridor_direct_contact_factor",
+                    DEFAULT_CORRIDOR_DIRECT_CONTACT_FACTOR,
+                )
+            ),
         )
         self.tx_core.initialize_zones(self.zone_names)
         self.engine.enable_external_transmission()
@@ -310,6 +338,7 @@ class ShipSimulation:
             multi_pathogen_mass=(
                 self.engine.multi_pathogen_mass if self.pathogen_profiles else None
             ),
+            quarantined_ids=set(state.quarantined_ids),
         )
 
         if self.contam_engine is not None:

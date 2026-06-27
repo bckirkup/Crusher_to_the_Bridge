@@ -602,7 +602,10 @@ class KorkinShipEngine:
 
         self._dining_zones = [z["name"] for z in self.zones if z["type"] == "Dining"]
         self._free_zones = [z["name"] for z in self.zones if z["type"] == "Free"]
-        self._room_zones = [z["name"] for z in self.zones if z["type"] == "Room"]
+        self._room_zones = [
+            z["name"] for z in self.zones
+            if z["type"] in ("Room", "Cabin_Corridor")
+        ]
         self._all_zone_names = [z["name"] for z in self.zones]
 
         self.agents: list[KorkinAgent] = []
@@ -761,9 +764,11 @@ class KorkinShipEngine:
                     immune_remaining -= 1
             agents_left -= 1
 
-            home = self.rng.choice([z for z in self._room_zones if "Passenger" in z or "Berthing" in z]
-                                   if any("Passenger" in z for z in self._room_zones)
-                                   else self._room_zones)
+            home = self.rng.choice(
+                [z for z in self._room_zones if "Pax_" in z or "Passenger" in z or "Berthing" in z]
+                if any("Pax_" in z or "Passenger" in z for z in self._room_zones)
+                else self._room_zones
+            )
             dining = self.rng.choice(self._dining_zones)
             free = self.rng.choice(self._free_zones)
             work = self.rng.choice(self._free_zones)
@@ -798,9 +803,11 @@ class KorkinShipEngine:
                     immune_remaining -= 1
             agents_left -= 1
 
-            home = self.rng.choice([z for z in self._room_zones if "Crew" in z or "Berthing" in z]
-                                   if any("Crew" in z for z in self._room_zones)
-                                   else self._room_zones)
+            home = self.rng.choice(
+                [z for z in self._room_zones if "Crew_Corridor" in z or "Crew" in z or "Berthing" in z]
+                if any("Crew_Corridor" in z or "Crew" in z for z in self._room_zones)
+                else self._room_zones
+            )
             dining = self.rng.choice(self._dining_zones)
             free = self.rng.choice(self._free_zones)
             work = self.rng.choice(self._free_zones + self._dining_zones)
