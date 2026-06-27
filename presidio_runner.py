@@ -16,6 +16,7 @@ from decision_engine import DecisionRound, ExperienceStore, RuleBasedPolicy
 from picard_framework import PicardRunSpec, ShipSimulation
 from picard_framework.run_spec import TelemetryPaths
 from presidio.run_spec import PresidioRunSpec
+from simulation_utils.paths import prepare_output_directory, resolve_child_path, resolve_repo_path
 
 
 def _compute_rewards(
@@ -79,7 +80,10 @@ def run(fleet_spec: PresidioRunSpec, *, display: bool = False) -> None:
         },
     )
 
-    os.makedirs(fleet_spec.output_root, exist_ok=True)
+    prepare_output_directory(
+        fleet_spec.output_root,
+        allowed_roots=(fleet_spec.repo_root,),
+    )
 
     for cruise_id in range(fleet_spec.num_cruises):
         base_spec = PicardRunSpec.from_picard_json(
@@ -93,8 +97,14 @@ def run(fleet_spec: PresidioRunSpec, *, display: bool = False) -> None:
             base_spec.social_config = merged_social
         else:
             base_spec.social_config = merged_social
-        cruise_dir = os.path.join(fleet_spec.output_root, f"cruise_{cruise_id:03d}")
-        os.makedirs(cruise_dir, exist_ok=True)
+        cruise_dir = resolve_child_path(
+            fleet_spec.output_root,
+            f"cruise_{cruise_id:03d}",
+        )
+        prepare_output_directory(
+            cruise_dir,
+            allowed_roots=(fleet_spec.repo_root,),
+        )
 
         cruise_social = dict(merged_social)
         cruise_social["cruise_id"] = f"{cruise_id:03d}"
@@ -118,9 +128,9 @@ def run(fleet_spec: PresidioRunSpec, *, display: bool = False) -> None:
             social_config=cruise_social,
             telemetry=TelemetryPaths(
                 repo_root=fleet_spec.repo_root,
-                ground_truth=os.path.join(cruise_dir, "ground_truth.json"),
-                simulation_history=os.path.join(cruise_dir, "simulation_history.json"),
-                lab_notebook=os.path.join(cruise_dir, "artificial_lab_notebook.json"),
+                ground_truth=resolve_child_path(cruise_dir, "ground_truth.json"),
+                simulation_history=resolve_child_path(cruise_dir, "simulation_history.json"),
+                lab_notebook=resolve_child_path(cruise_dir, "artificial_lab_notebook.json"),
             ),
         )
 
@@ -155,7 +165,7 @@ def run(fleet_spec: PresidioRunSpec, *, display: bool = False) -> None:
             print(f"  Cruise {cruise_id} reward: {rewards}")
 
     experience.save()
-    summary_path = os.path.join(fleet_spec.output_root, "fleet_summary.json")
+    summary_path = resolve_child_path(fleet_spec.output_root, "fleet_summary.json")
     with open(summary_path, "w", encoding="utf-8") as fh:
         json.dump(
             {
@@ -180,7 +190,10 @@ def main() -> None:
 
     repo_root = os.path.dirname(os.path.abspath(__file__))
     if args.fleet_config:
-        fleet_spec = PresidioRunSpec.from_fleet_json(repo_root, args.fleet_config)
+        fleet_spec = PresidioRunSpec.from_fleet_json(
+            repo_root,
+            resolve_repo_path(repo_root, args.fleet_config),
+        )
     else:
         fleet_spec = PresidioRunSpec.default(repo_root)
     if args.cruises is not None:
@@ -188,9 +201,13 @@ def main() -> None:
 
     social_cli: dict = dict(getattr(fleet_spec, "social_config", {}) or {})
     if args.export_utility_dir:
-        social_cli["export_utility_dir"] = args.export_utility_dir
+        social_cli["export_utility_dir"] = resolve_repo_path(
+            repo_root, args.export_utility_dir,
+        )
     if args.import_actions_dir:
-        social_cli["import_actions_dir"] = args.import_actions_dir
+        social_cli["import_actions_dir"] = resolve_repo_path(
+            repo_root, args.import_actions_dir,
+        )
     if social_cli:
         fleet_spec.social_config = social_cli
     run(fleet_spec, display=args.display)

@@ -37,6 +37,8 @@ import json
 import os
 from typing import Any
 
+from simulation_utils.paths import resolve_repo_path
+
 import numpy as np
 
 
@@ -415,7 +417,7 @@ def load_air_flow_paths(repo_root: str, cfg: dict[str, Any]) -> dict[str, Any]:
         "air_flow_paths",
         "data/platforms/destroyer_baseline/air_flow_paths.json",
     )
-    full_path = os.path.join(repo_root, rel_path)
+    full_path = resolve_repo_path(repo_root, rel_path)
     if not os.path.isfile(full_path):
         return {}
     with open(full_path, "r", encoding="utf-8") as fh:
@@ -429,7 +431,7 @@ def load_spatial_layout(repo_root: str, cfg: dict[str, Any]) -> dict[str, Any]:
         "spatial_layout",
         "data/platforms/destroyer_baseline/spatial_layout.json",
     )
-    full_path = os.path.join(repo_root, rel_path)
+    full_path = resolve_repo_path(repo_root, rel_path)
     if not os.path.isfile(full_path):
         return {}
     with open(full_path, "r", encoding="utf-8") as fh:

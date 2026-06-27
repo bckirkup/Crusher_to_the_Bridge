@@ -9,6 +9,8 @@ import os
 from dataclasses import dataclass, field
 from typing import Any
 
+from simulation_utils.paths import resolve_repo_path
+
 
 @dataclass
 class PresidioRunSpec:
@@ -30,6 +32,7 @@ class PresidioRunSpec:
 
     @classmethod
     def from_fleet_json(cls, repo_root: str, fleet_config_path: str) -> PresidioRunSpec:
+        fleet_config_path = resolve_repo_path(repo_root, fleet_config_path)
         with open(fleet_config_path, encoding="utf-8") as fh:
             raw = json.load(fh)
         fleet = raw.get("fleet", {})
@@ -39,43 +42,28 @@ class PresidioRunSpec:
         economics_rel = catalog.get(
             "economics_id", "presidio/data/economics/fleet_economics.json",
         )
-        economics_path = (
-            economics_rel if os.path.isabs(economics_rel)
-            else os.path.join(repo_root, economics_rel)
-        )
+        economics_path = resolve_repo_path(repo_root, economics_rel)
 
         experience_rel = run.get(
             "experience_store",
             "presidio/data/experiences/fleet_experience.json",
         )
-        experience_path = (
-            experience_rel if os.path.isabs(experience_rel)
-            else os.path.join(repo_root, experience_rel)
-        )
+        experience_path = resolve_repo_path(repo_root, experience_rel)
 
         picard_spec_rel = catalog.get(
             "picard_run_spec",
             "picard_framework/runs/destroyer_baseline_default.json",
         )
-        picard_spec_path = (
-            picard_spec_rel if os.path.isabs(picard_spec_rel)
-            else os.path.join(repo_root, picard_spec_rel)
-        )
+        picard_spec_path = resolve_repo_path(repo_root, picard_spec_rel)
 
         output_rel = run.get("output_root", "presidio/data/experiences/runs")
-        output_root = (
-            output_rel if os.path.isabs(output_rel)
-            else os.path.join(repo_root, output_rel)
-        )
+        output_root = resolve_repo_path(repo_root, output_rel)
 
         catalog_index = catalog.get(
             "libraries_index",
             "presidio/data/catalog/libraries.json",
         )
-        catalog_index_path = (
-            catalog_index if os.path.isabs(catalog_index)
-            else os.path.join(repo_root, catalog_index)
-        )
+        catalog_index_path = resolve_repo_path(repo_root, catalog_index)
 
         return cls(
             repo_root=repo_root,
@@ -95,7 +83,7 @@ class PresidioRunSpec:
 
     @classmethod
     def default(cls, repo_root: str) -> PresidioRunSpec:
-        default_config = os.path.join(
-            repo_root, "presidio", "data", "config", "default_fleet.json",
+        default_config = resolve_repo_path(
+            repo_root, "presidio/data/config/default_fleet.json",
         )
         return cls.from_fleet_json(repo_root, default_config)

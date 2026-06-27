@@ -26,6 +26,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from crusher_labs.cascade_entry import CascadeEntryConfig
+from simulation_utils.paths import resolve_repo_path
 
 
 # ── Tier dataclass ───────────────────────────────────────────────────────
@@ -514,7 +515,10 @@ def load_diagnostic_cascade(
     """Load tier definitions and fleet rules from JSON config."""
     if config_path is None:
         root = repo_root or os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        config_path = os.path.join(root, "data", "config", "diagnostic_cascade.json")
+        config_path = resolve_repo_path(root, "data/config/diagnostic_cascade.json")
+    else:
+        root = repo_root or os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        config_path = resolve_repo_path(root, config_path)
 
     with open(config_path, "r", encoding="utf-8") as fh:
         cfg = json.load(fh)
@@ -538,8 +542,7 @@ def build_cascade_engine(
         "config_path", "data/config/diagnostic_cascade.json",
     )
     root = repo_root or os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    if not os.path.isabs(config_path):
-        config_path = os.path.join(root, config_path)
+    config_path = resolve_repo_path(root, config_path)
 
     tiers, rules, _entry_config = load_diagnostic_cascade(config_path, repo_root=root)
     entry_config = CascadeEntryConfig.from_config(

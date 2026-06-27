@@ -35,6 +35,7 @@ from engines.infection_dynamics_bridge import (
     IllnessStatus,
 )
 from simulation_utils.numeric import default_simulation_rng, float_ne
+from simulation_utils.paths import resolve_repo_path, validate_path_component
 
 
 # ── Channel baseline defaults ────────────────────────────────────────────
@@ -759,12 +760,14 @@ def load_wearable_deployment_profile(
     if not profile:
         return wm_cfg
 
-    profile_path = os.path.join(
+    profile_path = resolve_repo_path(
         repo_root,
-        "data",
-        "config",
-        "wearable_deployments",
-        f"{profile}.yaml",
+        os.path.join(
+            "data",
+            "config",
+            "wearable_deployments",
+            f"{validate_path_component(str(profile), label='deployment profile')}.yaml",
+        ),
     )
     if not os.path.isfile(profile_path):
         return wm_cfg

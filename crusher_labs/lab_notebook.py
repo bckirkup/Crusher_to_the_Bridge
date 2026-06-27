@@ -40,6 +40,7 @@ from crusher_labs.stoplight import (
     stoplight_from_disruption,
 )
 from telemetry_buffer.agent_axes import clinical_axes_for_notebook
+from simulation_utils.paths import prepare_output_directory, resolve_repo_path
 
 
 # ── Fidelity model ───────────────────────────────────────────────────────
@@ -68,7 +69,10 @@ def load_logging_profile(
     """Load the logging profile configuration."""
     if cfg_path is None:
         repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        cfg_path = os.path.join(repo_root, "data", "config", "logging_profile.json")
+        cfg_path = resolve_repo_path(repo_root, "data/config/logging_profile.json")
+    else:
+        repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        cfg_path = resolve_repo_path(repo_root, cfg_path)
 
     if not os.path.isfile(cfg_path):
         return FIDELITY_HIGH, FidelityProfile({
@@ -646,7 +650,9 @@ class ArtificialLabNotebook:
         if protocol_summary is not None:
             notebook["PROTOCOL_SUMMARY"] = protocol_summary
 
-        os.makedirs(os.path.dirname(os.path.abspath(output_path)), exist_ok=True)
+        repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        output_path = resolve_repo_path(repo_root, output_path)
+        prepare_output_directory(os.path.dirname(output_path))
         with open(output_path, "w", encoding="utf-8") as fh:
             json.dump(notebook, fh, indent=2, default=str)
 

@@ -17,6 +17,11 @@ from dashboard.paths import (
     PLATFORMS_DIR,
     REPO_ROOT,
 )
+from simulation_utils.paths import (
+    resolve_child_path,
+    resolve_repo_path,
+    validate_path_component,
+)
 
 
 @dataclass
@@ -50,7 +55,8 @@ def _load_json(path: str) -> dict[str, Any]:
 
 
 def platform_dir(platform_id: str) -> str:
-    return os.path.join(PLATFORMS_DIR, platform_id)
+    safe_id = validate_path_component(platform_id, label="platform_id")
+    return resolve_child_path(PLATFORMS_DIR, safe_id)
 
 
 def get_zone_coords(layout: dict[str, Any]) -> dict[str, dict[str, Any]]:
@@ -191,9 +197,10 @@ def load_platform_bundle(platform_id: str) -> PlatformBundle:
 
 
 def telemetry_paths(telemetry_dir: str) -> tuple[str, str]:
+    telemetry_dir = resolve_repo_path(REPO_ROOT, telemetry_dir)
     return (
-        os.path.join(telemetry_dir, "simulation_history.json"),
-        os.path.join(telemetry_dir, "artificial_lab_notebook.json"),
+        resolve_child_path(telemetry_dir, "simulation_history.json"),
+        resolve_child_path(telemetry_dir, "artificial_lab_notebook.json"),
     )
 
 
@@ -216,23 +223,28 @@ def load_notebook_from(path: str) -> dict[str, Any]:
 def default_telemetry_dir() -> str:
     env = os.environ.get("CTTB_TELEMETRY_DIR")
     if env:
-        return env
-    return os.path.join(REPO_ROOT, "telemetry_buffer")
+        return resolve_repo_path(REPO_ROOT, env)
+    return resolve_repo_path(REPO_ROOT, "telemetry_buffer")
 
 
 def parse_fleet_output_root(fleet_config_path: str) -> str:
+    fleet_config_path = resolve_repo_path(REPO_ROOT, fleet_config_path)
     if not os.path.isfile(fleet_config_path):
         return ""
     with open(fleet_config_path, encoding="utf-8") as fh:
         raw = json.load(fh)
-    return (raw.get("run") or {}).get("output_root", "")
+    output_root = (raw.get("run") or {}).get("output_root", "")
+    if not output_root:
+        return ""
+    return resolve_repo_path(REPO_ROOT, output_root)
 
 
 def list_cruise_dirs(fleet_root: str) -> list[str]:
+    fleet_root = resolve_repo_path(REPO_ROOT, fleet_root)
     if not os.path.isdir(fleet_root):
         return []
     cruises = []
     for name in sorted(os.listdir(fleet_root)):
         if re.match(r"cruise_\d+", name):
-            cruises.append(os.path.join(fleet_root, name))
+            cruises.append(resolve_child_path(fleet_root, name))
     return cruises

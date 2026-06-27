@@ -15,6 +15,8 @@ import os
 from dataclasses import dataclass, field
 from typing import Any
 
+from simulation_utils.paths import resolve_repo_path
+
 
 @dataclass(frozen=True)
 class TurnaroundSpec:
@@ -93,8 +95,8 @@ class InstrumentTurnaroundRegistry:
         repo_root: str | None = None,
         long_read_profile_turnaround: dict[str, Any] | None = None,
     ) -> InstrumentTurnaroundRegistry:
-        if not os.path.isabs(path) and repo_root:
-            path = os.path.join(repo_root, path)
+        if repo_root:
+            path = resolve_repo_path(repo_root, path)
         with open(path, "r", encoding="utf-8") as fh:
             data = json.load(fh)
         return cls(data, long_read_profile_turnaround=long_read_profile_turnaround)

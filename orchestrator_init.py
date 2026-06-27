@@ -59,6 +59,7 @@ from orchestrator_types import (
     ObservationEngine,
     ProtocolContext,
 )
+from simulation_utils.paths import resolve_repo_path
 from orchestrator_display import (
     print_observation_engine,
     print_protocol_engine,
@@ -73,7 +74,7 @@ def load_spatial_layout(cfg: dict[str, Any]) -> list[dict[str, Any]] | None:
     layout_path = graph_cfg.get("spatial_layout")
     if not layout_path:
         return None
-    full_path = os.path.join(REPO_ROOT, layout_path)
+    full_path = resolve_repo_path(REPO_ROOT, layout_path)
     if not os.path.isfile(full_path):
         return None
     with open(full_path, "r", encoding="utf-8") as fh:
@@ -97,7 +98,7 @@ def load_isolation_unit_capacity(cfg: dict[str, Any], default: int = 0) -> int:
     layout_path = graph_cfg.get("spatial_layout")
     if not layout_path:
         return default
-    full_path = os.path.join(REPO_ROOT, layout_path)
+    full_path = resolve_repo_path(REPO_ROOT, layout_path)
     if not os.path.isfile(full_path):
         return default
     with open(full_path, "r", encoding="utf-8") as fh:
@@ -316,7 +317,7 @@ def load_pathogen_profiles(
         return {str(pid): dict(prof) for pid, prof in resolved.items()}
 
     profiles_path = mp_cfg.get("profiles_path", "data/pathogens/active_profiles.json")
-    full_path = os.path.join(REPO_ROOT, profiles_path)
+    full_path = resolve_repo_path(REPO_ROOT, profiles_path)
     if not os.path.isfile(full_path):
         return {}
     with open(full_path, "r", encoding="utf-8") as fh:
@@ -404,7 +405,7 @@ def init_observation_engine(
     seed: int,
 ) -> ObservationEngine:
     """Initialise all six diagnostic instruments and the lab notebook."""
-    obs_cfg_path = os.path.join(REPO_ROOT, "data", "config", "logging_profile.json")
+    obs_cfg_path = resolve_repo_path(REPO_ROOT, "data/config/logging_profile.json")
     fidelity_name, fidelity, logging_config = load_logging_profile(obs_cfg_path)
     lab_notebook_enabled = logging_config.get("lab_notebook", {}).get("enabled", True)
 
@@ -524,11 +525,13 @@ def init_protocol_engine(
     logging_profile_path: str | None = None,
 ) -> ProtocolContext:
     """Initialise the reactive protocol engine and cost ledger."""
-    protocols_cfg_path = protocols_path or os.path.join(
-        REPO_ROOT, "data", "config", "protocols.json",
+    protocols_cfg_path = resolve_repo_path(
+        REPO_ROOT,
+        protocols_path or "data/config/protocols.json",
     )
-    resource_cfg_path = resource_costs_path or os.path.join(
-        REPO_ROOT, "data", "config", "resource_costs.json",
+    resource_cfg_path = resolve_repo_path(
+        REPO_ROOT,
+        resource_costs_path or "data/config/resource_costs.json",
     )
     _ = logging_profile_path  # reserved for future logging-profile overrides
 

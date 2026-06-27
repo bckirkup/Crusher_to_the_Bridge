@@ -8,6 +8,15 @@ from simulation_utils.numeric import (
     is_nonzero,
     is_zero,
 )
+from simulation_utils.paths import (
+    is_path_under_base,
+    is_publicly_writable,
+    prepare_output_directory,
+    resolve_child_path,
+    resolve_repo_path,
+    validate_path_component,
+    validated_open,
+)
 
 __all__ = [
     "DEFAULT_SIMULATION_SEED",
@@ -15,5 +24,12 @@ __all__ = [
     "float_eq",
     "float_ne",
     "is_nonzero",
+    "is_path_under_base",
+    "is_publicly_writable",
+    "prepare_output_directory",
     "is_zero",
+    "resolve_child_path",
+    "resolve_repo_path",
+    "validate_path_component",
+    "validated_open",
 ]

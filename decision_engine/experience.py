@@ -7,6 +7,8 @@ import os
 from dataclasses import dataclass, field
 from typing import Any
 
+from simulation_utils.paths import prepare_output_directory
+
 
 @dataclass
 class ExperienceStore:
@@ -27,7 +29,8 @@ class ExperienceStore:
     def save(self) -> None:
         if not self.store_path:
             return
-        os.makedirs(os.path.dirname(self.store_path) or ".", exist_ok=True)
+        parent_dir = os.path.dirname(os.path.realpath(self.store_path)) or "."
+        prepare_output_directory(parent_dir)
         with open(self.store_path, "w", encoding="utf-8") as fh:
             json.dump(
                 {"records": self.records, "policy_params": self.policy_params},

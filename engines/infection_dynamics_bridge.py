@@ -636,7 +636,7 @@ class KorkinShipEngine:
             return str(self.rng.choice(matches))
         if fallback_zones:
             return str(self.rng.choice(fallback_zones))
-        return fallback_zones[0] if fallback_zones else "unknown"
+        return "unknown"
 
     def _initialize_agents(self) -> None:
         """Create the full agent population.
