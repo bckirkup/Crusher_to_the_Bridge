@@ -108,6 +108,7 @@ class SpatialLayout(BaseModel):
     zones: list[SpatialZone]
     description: str | None = None
     deck_dimensions: dict[str, Any] | None = None
+    graywater_zones: list[str] | None = None
 
 
 class HVACZone(BaseModel):
@@ -414,6 +415,21 @@ def _check_graph_integrity(
         return
 
     valid_zones = {z.id for z in layout.zones}
+
+    if layout.graywater_zones:
+        for gz in layout.graywater_zones:
+            if gz not in valid_zones:
+                report.error(
+                    "spatial_layout.json",
+                    "GRAPH_REF",
+                    f"graywater_zones entry '{gz}' not found in spatial_layout zones",
+                )
+    else:
+        report.error(
+            "spatial_layout.json",
+            "GRAPH_REF",
+            "graywater_zones must list downstream wastewater collection zone(s)",
+        )
 
     if airflow:
         # Check HVAC zone room references
@@ -1525,11 +1541,13 @@ def _check_microflora_params(
                      f"microflora.clr_shift_scale = {scale} is negative")
 
     if zone_ids:
-        for gz in mf.get("graywater_zones", []):
-            if gz not in zone_ids:
-                report.warn("config.yaml", "GRAPH_REF",
-                            f"microflora.graywater_zones references '{gz}' "
-                            f"not found in spatial_layout zones")
+        explicit = mf.get("graywater_zones")
+        if explicit:
+            for gz in explicit:
+                if gz not in zone_ids:
+                    report.warn("config.yaml", "GRAPH_REF",
+                                f"microflora.graywater_zones override references '{gz}' "
+                                f"not found in spatial_layout zones")
 
 
 # ── Path resolution (orchestrator-aligned) ───────────────────────────────

@@ -27,6 +27,12 @@
       "maximum": 1,
       "description": "Base direct-contact multiplier for Cabin_Corridor zones (hallway vs ward)"
     },
+    "graywater_zones": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string"},
+      "description": "Downstream greywater/blackwater collection zones for ship-wide wastewater sequencing grid sampling"
+    },
     "zones": {
       "type": "array",
       "minItems": 1,

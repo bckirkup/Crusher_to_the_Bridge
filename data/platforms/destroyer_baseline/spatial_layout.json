@@ -13,7 +13,10 @@
       "traffic": "low",
       "volume_m3": 80,
       "deck": "upper",
-      "display": {"x": 100, "y": 12},
+      "display": {
+        "x": 100,
+        "y": 12
+      },
       "description": "Command and navigation center"
     },
     {
@@ -22,7 +25,10 @@
       "traffic": "low",
       "volume_m3": 45,
       "deck": "main",
-      "display": {"x": 75, "y": 5},
+      "display": {
+        "x": 75,
+        "y": 5
+      },
       "description": "Medical treatment facility (Dr. Crusher's domain)"
     },
     {
@@ -31,7 +37,10 @@
       "traffic": "high",
       "volume_m3": 120,
       "deck": "main",
-      "display": {"x": 55, "y": 8},
+      "display": {
+        "x": 55,
+        "y": 8
+      },
       "description": "Primary dining and crew assembly area"
     },
     {
@@ -40,7 +49,10 @@
       "traffic": "medium",
       "volume_m3": 200,
       "deck": "lower",
-      "display": {"x": 20, "y": 7},
+      "display": {
+        "x": 20,
+        "y": 7
+      },
       "description": "Main propulsion and engineering"
     },
     {
@@ -49,7 +61,10 @@
       "traffic": "high",
       "volume_m3": 60,
       "deck": "main",
-      "display": {"x": 50, "y": 12},
+      "display": {
+        "x": 50,
+        "y": 12
+      },
       "description": "Food preparation area adjacent to Mess Hall"
     },
     {
@@ -58,8 +73,14 @@
       "traffic": "medium",
       "volume_m3": 150,
       "deck": "lower",
-      "display": {"x": 35, "y": 3},
+      "display": {
+        "x": 35,
+        "y": 3
+      },
       "description": "Crew and passenger sleeping quarters"
     }
+  ],
+  "graywater_zones": [
+    "Engine_Room"
   ]
 }

@@ -163,5 +163,8 @@
       },
       "description": "Primary crew mess (protocol-compatible zone id)"
     }
+  ],
+  "graywater_zones": [
+    "Engineering"
   ]
 }

@@ -70,15 +70,9 @@ from orchestrator_display import (
 
 def load_spatial_layout(cfg: dict[str, Any]) -> list[dict[str, Any]] | None:
     """Load zones from the spatial layout JSON if configured."""
-    graph_cfg = cfg.get("ship_graph", {})
-    layout_path = graph_cfg.get("spatial_layout")
-    if not layout_path:
+    layout = load_platform_layout_doc(cfg)
+    if layout is None:
         return None
-    full_path = resolve_repo_path(REPO_ROOT, layout_path)
-    if not os.path.isfile(full_path):
-        return None
-    with open(full_path, "r", encoding="utf-8") as fh:
-        layout = json.load(fh)
     return [
         {
             "name": z["id"],
@@ -93,17 +87,49 @@ def load_spatial_layout(cfg: dict[str, Any]) -> list[dict[str, Any]] | None:
     ]
 
 
-def load_isolation_unit_capacity(cfg: dict[str, Any], default: int = 0) -> int:
-    """Read isolation_unit_capacity from the platform spatial layout."""
+def load_platform_layout_doc(cfg: dict[str, Any]) -> dict[str, Any] | None:
+    """Load the raw platform spatial_layout.json document."""
     graph_cfg = cfg.get("ship_graph", {})
     layout_path = graph_cfg.get("spatial_layout")
     if not layout_path:
-        return default
+        return None
     full_path = resolve_repo_path(REPO_ROOT, layout_path)
     if not os.path.isfile(full_path):
-        return default
+        return None
     with open(full_path, "r", encoding="utf-8") as fh:
-        layout = json.load(fh)
+        return json.load(fh)
+
+
+def resolve_graywater_zones(
+    cfg: dict[str, Any],
+    zone_names: list[str] | None = None,
+) -> list[str]:
+    """Resolve wastewater collection zones for ship-wide greywater sampling.
+
+    Priority:
+    1. ``microflora.graywater_zones`` in config (explicit override)
+    2. ``graywater_zones`` on the active platform ``spatial_layout.json``
+    3. All simulation zones (per-zone sampling fallback)
+    """
+    mf_cfg = cfg.get("microflora", {})
+    explicit = mf_cfg.get("graywater_zones")
+    if explicit:
+        return list(explicit)
+
+    layout = load_platform_layout_doc(cfg)
+    if layout:
+        platform_zones = layout.get("graywater_zones")
+        if platform_zones:
+            return list(platform_zones)
+
+    return list(zone_names) if zone_names else []
+
+
+def load_isolation_unit_capacity(cfg: dict[str, Any], default: int = 0) -> int:
+    """Read isolation_unit_capacity from the platform spatial layout."""
+    layout = load_platform_layout_doc(cfg)
+    if layout is None:
+        return default
     return int(layout.get("isolation_unit_capacity", default))
 
 

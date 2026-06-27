@@ -237,8 +237,7 @@ microflora:
   # GRUMB CLR shift magnitude scaling
   clr_shift_scale: 0.15              # scales the kingdom-level CLR perturbation
   aitchison_anomaly_threshold: 0.08  # beta-diversity shift vs baseline (CLR Euclidean)
-  # Graywater downstream zones (accumulate microbial signatures)
-  graywater_zones: ["Engine_Room"]
+  # graywater_zones: optional override; defaults to platform spatial_layout.json
 
 # ── Metagenomic Sequencing (orchestrator modality) ───────────
 # Shotgun metagenomics via MetagenomicSequencing.query_ground_truth().

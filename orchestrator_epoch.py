@@ -47,6 +47,43 @@ def _all_confined(state: SimulationState) -> set[int]:
     return state.isolated_ids | state.quarantined_ids
 
 
+def build_wastewater_pathogen_mass(
+    zone_names: list[str],
+    zone_surface: dict[str, float],
+    greywater_frac: float,
+    graywater_zones: list[str],
+) -> dict[str, float]:
+    """Pool greywater pathogen mass from all zones into collection points."""
+    per_zone = {
+        zname: zone_surface.get(zname, 0.0) * greywater_frac
+        for zname in zone_names
+    }
+    if not graywater_zones:
+        return per_zone
+
+    pooled = sum(per_zone.values())
+    return {gz: pooled for gz in graywater_zones}
+
+
+def build_wastewater_pathogen_mass_by_id(
+    zone_names: list[str],
+    pathogen_mass_by_id: dict[str, dict[str, float]] | None,
+    greywater_frac: float,
+    graywater_zones: list[str],
+) -> dict[str, dict[str, float]] | None:
+    """Pool per-pathogen greywater mass from all zones into collection points."""
+    if not pathogen_mass_by_id:
+        return None
+    if not graywater_zones:
+        return pathogen_mass_by_id
+
+    pooled_by_id: dict[str, dict[str, float]] = {}
+    for pid, masses in pathogen_mass_by_id.items():
+        pooled = sum(masses.get(zname, 0.0) * greywater_frac for zname in zone_names)
+        pooled_by_id[pid] = {gz: pooled for gz in graywater_zones}
+    return pooled_by_id
+
+
 # ── VSP state synchronization ────────────────────────────────────────────
 
 def sync_vsp_isolation(
@@ -307,9 +344,6 @@ def run_observation_sampling(
         zone_surface, fred_compliance, target_zones=swab_targets,
     )
 
-    ww_pathogen_mass: dict[str, float] = {}
-    for zname in zone_names:
-        ww_pathogen_mass[zname] = zone_surface.get(zname, 0.0) * greywater_frac
     ww_microflora: dict[str, dict[str, float]] = {}
     for zname, mf_data in zone_microflora_shifts.items():
         ww_microflora[zname] = mf_data
@@ -317,8 +351,15 @@ def run_observation_sampling(
         {pid: engine.get_pathogen_zone_mass(pid) for pid in pathogen_profiles}
         if pathogen_profiles else None
     )
-    graywater_zones = mf_cfg.get("graywater_zones", [])
-    ww_target_zones = graywater_zones if graywater_zones else zone_names
+    from orchestrator_init import resolve_graywater_zones
+
+    ww_target_zones = resolve_graywater_zones(cfg, zone_names)
+    ww_pathogen_mass = build_wastewater_pathogen_mass(
+        zone_names, zone_surface, greywater_frac, ww_target_zones,
+    )
+    ww_per_pathogen = build_wastewater_pathogen_mass_by_id(
+        zone_names, ww_per_pathogen, greywater_frac, ww_target_zones,
+    )
     ww_results = obs.wastewater_seq.sample_all_zones(
         ww_pathogen_mass, ww_microflora,
         pathogen_mass_by_id=ww_per_pathogen,
@@ -670,7 +711,9 @@ def compute_zone_microflora_shifts(
     """
     mf_cfg = cfg.get("microflora", {})
     shed_mass = mf_cfg.get("disrupted_shed_mass", 50.0)
-    graywater_zones = mf_cfg.get("graywater_zones", [])
+    from orchestrator_init import resolve_graywater_zones
+
+    graywater_zones = resolve_graywater_zones(cfg)
     gw_factor = mf_cfg.get(
         "graywater_propagation_factor", DEFAULT_GRAYWATER_PROPAGATION_FACTOR,
     )

@@ -452,7 +452,7 @@ microflora:
   enable_dual_signal: true
   disrupted_shed_mass: 50.0
   clr_shift_scale: 0.15
-  graywater_zones: ["Engine_Room"]
+  # graywater_zones: optional override; defaults to platform spatial_layout.json
 ```
 
 When a pathogen has `microflora_disruption.causes_disruption == true`,
@@ -461,8 +461,19 @@ particles.  The wastewater sequencing grid can detect these
 background kingdom-level CLR shifts even when pathogen mass is below
 direct detection limits.
 
-`graywater_zones` accumulate downstream microbial signatures and must
-be cross-referenced against `spatial_layout.json`.
+Each platform declares downstream greywater/blackwater collection
+zone(s) in `spatial_layout.json` as `graywater_zones` (for example
+`Engine_Room_Aft` on `mega_cruise_5000`).  The orchestrator:
+
+1. Pools greywater pathogen mass from **all** zones into those
+   collection points each epoch.
+2. Propagates microflora disruption from every infected agent's
+   location into the same collection points
+   (`graywater_propagation_factor`, default 0.3).
+
+Optional `microflora.graywater_zones` in `config.yaml` overrides the
+platform default.  Sanity checker validates that every `graywater_zones`
+entry exists in the active platform layout.
 
 ### 3.11 Wearable Physiological Monitoring
 
@@ -760,6 +771,11 @@ graph:
   spatial_layout: "data/platforms/mega_cruise_5000/spatial_layout.json"
   air_flow_paths: "data/platforms/mega_cruise_5000/air_flow_paths.json"
 ```
+
+Wastewater collection zones (`graywater_zones`) are read automatically
+from the platform `spatial_layout.json` (for mega cruise:
+`Engine_Room_Aft`).  No separate microflora override is required unless
+you want a non-default collection point.
 
 > **Note:** The default `protocols.json` contains zone-closure SOPs
 > (e.g., SOP-007 closing `Galley` and `Mess_Hall`) that reference zones
@@ -1166,7 +1182,7 @@ The checker uses pydantic models and performs four categories of validation:
 | Escalation thresholds | Non-negative values |
 | FRED compliance | Probability ∈ [0,1]; noise category probabilities valid |
 | Multi-pathogen config | Fraction/multiplier bounds |
-| Microflora config | `graywater_zones` cross-referenced against spatial layout |
+| Microflora config | Platform `graywater_zones` + optional config override cross-referenced against spatial layout |
 
 #### Category 1: Mathematical Bound Violations
 

@@ -295,8 +295,14 @@ microflora:
   enable_dual_signal: true
   disrupted_shed_mass: 50.0
   clr_shift_scale: 0.15
-  graywater_zones: ["Engine_Room"]   # cross-referenced against spatial layout
+  # graywater_zones: optional override; defaults to platform spatial_layout.json
 ```
+
+Each platform declares downstream wastewater collection zone(s) in
+`data/platforms/<platform_id>/spatial_layout.json` as `graywater_zones`
+(e.g. `Engine_Room_Aft` on `mega_cruise_5000`). The orchestrator pools
+greywater pathogen mass from all zones into those collection points and
+propagates microflora disruption signatures ship-wide.
 
 ### Wearable Physiological Monitoring
 
@@ -548,7 +554,7 @@ python tools/sanity_checker.py --config-dir data/config \
 - Escalation thresholds non-negative
 - FRED compliance probability in [0,1], noise category probabilities
 - Multi-pathogen fraction/multiplier bounds
-- Microflora graywater_zones cross-referenced against spatial layout
+- Platform `graywater_zones` in spatial layout + optional config override cross-referenced against zone IDs
 - Infection counter metrics, thresholds, and `exempt_classes` referential integrity
 
 ## Testing

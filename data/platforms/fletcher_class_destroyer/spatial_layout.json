@@ -57,7 +57,7 @@
         "x": 70,
         "y": 4
       },
-      "description": "Forward enlisted berthing. Stacked canvas racks 3-high, 18-inch spacing. Hot-bunking for ~120 men. Extremely cramped: ~1.5 m\u00b3 per person."
+      "description": "Forward enlisted berthing. Stacked canvas racks 3-high, 18-inch spacing. Hot-bunking for ~120 men. Extremely cramped: ~1.5 m³ per person."
     },
     {
       "id": "Enlisted_Berthing_Aft",
@@ -83,7 +83,7 @@
         "x": 55,
         "y": 8
       },
-      "description": "Chief Petty Officers quarters. Slightly less cramped than enlisted berthing. ~2.5 m\u00b3 per person."
+      "description": "Chief Petty Officers quarters. Slightly less cramped than enlisted berthing. ~2.5 m³ per person."
     },
     {
       "id": "Wardroom",
@@ -135,7 +135,7 @@
         "x": 55,
         "y": 6
       },
-      "description": "Forward boiler room. Babcock & Wilcox 600psi boiler #1 and #2. Extreme heat (~60\u00b0C ambient). Forced-draft ventilation via uptakes."
+      "description": "Forward boiler room. Babcock & Wilcox 600psi boiler #1 and #2. Extreme heat (~60°C ambient). Forced-draft ventilation via uptakes."
     },
     {
       "id": "Boiler_Room_2",
@@ -267,5 +267,8 @@
       },
       "description": "Main deck central passageway. Primary fore-aft transit route. Extremely narrow (~0.9m wide)."
     }
+  ],
+  "graywater_zones": [
+    "Engine_Room_Aft"
   ]
 }

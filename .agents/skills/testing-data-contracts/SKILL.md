@@ -83,7 +83,7 @@ JSON schemas live in `schemas/`:
 
 | Schema | Validates |
 |--------|-----------|
-| `spatial_layout.schema.json` | Zone structure, volumes, display coords |
+| `spatial_layout.schema.json` | Zone structure, volumes, display coords, `graywater_zones` |
 | `air_flow_paths.schema.json` | HVAC zones, cross-zone links, adjacency |
 | `protocols.schema.json` | SOP trigger/modifier/cost structure |
 | `resource_costs.schema.json` | Budget and material inventory |
