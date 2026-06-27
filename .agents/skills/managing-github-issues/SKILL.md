@@ -200,7 +200,7 @@ OPEN → (triage) → categorized → (branch + implement) → PR created
 - **Closing format**: Always reference the PR number: `Resolved in PR #N`
 - **Batch size**: 3-7 small issues per PR is the sweet spot. More than 10 becomes hard to review.
 - **Branch naming**: `devin/<timestamp>-<description>` (e.g., `devin/1782056631-small-issues-batch`)
-- **Tests required**: Run `python3 -m pytest tests/ -v --tb=short` before every PR. All ~471 tests must pass.
+- **Tests required**: Run `python3 -m pytest tests/ -v --tb=short` before every PR. All ~629 tests must pass.
 - **Ruff lint**: Run ruff after code changes. ~65 pre-existing findings are expected and non-blocking.
 
 ## Cross-References

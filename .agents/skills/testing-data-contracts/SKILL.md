@@ -26,7 +26,7 @@ Expected: 25+ tests pass. Validates pathogen profiles, spatial layout, air flow 
 ```bash
 python -m pytest tests/test_sanity_checker.py -v --tb=short
 ```
-Expected: 1 test passes. Runs the full sanity checker programmatically against default configs.
+Expected: 40 tests pass. Runs the full sanity checker programmatically against default configs.
 
 ### Run sanity checker directly (CLI)
 ```bash
@@ -44,7 +44,7 @@ Expected: All checks pass with no ERROR findings.
 ```bash
 python -m pytest tests/test_data_contracts.py tests/test_sanity_checker.py -v --tb=short
 ```
-Expected: 22 tests pass in ~0.2s.
+Expected: 67 tests pass in ~0.5s.
 
 ## Data File Locations
 

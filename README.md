@@ -26,7 +26,7 @@ python orchestrator.py --epochs 250
 # Launch LCARS dashboard (after simulation)
 streamlit run dashboard.py
 
-# Run the test suite (~471 tests)
+# Run the test suite (~629 tests)
 pytest tests/ -v --tb=short
 ```
 
@@ -119,7 +119,7 @@ dashboard/                   Modular command deck (theme, charts, spatial_viz, d
 scripts/                     Enterprise platform builder, deck graphics, asset precompute
 telemetry_buffer/
 │   agent_axes.py            Orthogonal agent state (infection / presentation / compliance)
-tests/                       ~617 tests (ship, fleet, Stackelberg, OIS, behavioral, long-read, TAT, enterprise, CONTAM, schemas, wearable scoring)
+tests/                       ~629 tests (ship, fleet, Stackelberg, OIS, behavioral, long-read, TAT, enterprise, CONTAM, schemas, wearable scoring, diagnostic cascade)
 AGENTS.md                    Cursor Cloud / agent development notes
 ```
 
@@ -560,7 +560,7 @@ python tools/sanity_checker.py --config-dir data/config \
 ## Testing
 
 ```bash
-# Full suite (~574 tests)
+# Full suite (~629 tests)
 pytest tests/ -v --tb=short
 
 # Picard / Presidio / Stackelberg
@@ -573,6 +573,8 @@ pytest tests/test_infection_counters.py     # attack-rate counters, exempt_class
 pytest tests/test_enterprise_platforms.py # Enterprise platform referential integrity
 pytest tests/test_agent_axes.py           # orthogonal infection/presentation/compliance
 pytest tests/test_protocol_engine.py        # wearable + detection-escalation stoplights
+pytest tests/test_wearable_anomaly_scorer.py tests/test_cascade_entry.py  # infection_score + cascade entry
+pytest tests/test_diagnostic_cascade.py tests/test_smoke_diagnostic_cascade.py  # cascade tiers + smoke
 pytest tests/test_wearable_enhanced.py       # multi-device, confounders, detection profiles, visibility, chronic disease
 pytest tests/test_sequencing_config.py      # config.yaml read_depth wiring
 pytest tests/test_cost_accounting.py        # per-test debits and materials telemetry
@@ -589,8 +591,11 @@ pytest tests/test_telemetry_seams.py        # cross-module data flow
 
 Cloud agents and CI environments: see `AGENTS.md` (`python3`, headless Streamlit).
 
-CI (`.github/workflows/ci.yml`) runs sanity checks, the full pytest suite,
-import hygiene checks, a dashboard import smoke test, and a 24-epoch orchestrator run.
+CI (`.github/workflows/ci.yml`) runs advisory ruff lint, sanity checks, JSON schema
+validation, the full pytest suite with coverage (~629 tests), Picard/Presidio import
+hygiene, Presidio smoke, long-read/TAT and wearable/cascade targeted tests, dashboard
+import smoke, a 24-epoch orchestrator run, diagnostic cascade smoke, and OIS telemetry
+verification. Framework-focused checks run in `.github/workflows/picard-presidio.yml`.
 
 ## Data Contracts
 

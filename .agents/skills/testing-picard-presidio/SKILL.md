@@ -19,6 +19,8 @@ PYTHONPATH=. python3 -m pytest \
   tests/test_operational_impact.py \
   tests/test_action_applier.py \
   tests/test_behavioral_syndromic.py \
+  tests/test_long_read_sequencing.py \
+  tests/test_instrument_turnaround.py \
   tests/test_enterprise_platforms.py \
   tests/test_agent_axes.py \
   tests/test_sequencing_config.py \
@@ -56,8 +58,8 @@ check-jsonschema --schemafile schemas/utility_observation_bundle.schema.json \
 
 | Workflow | When |
 |----------|------|
-| `.github/workflows/ci.yml` | All `main` PRs — full pytest (~337) + Presidio smoke + import hygiene + OIS verify |
-| `.github/workflows/picard-presidio.yml` | `main` and `cursor/**` — framework slice + Stackelberg/platform schema checks |
+| `.github/workflows/ci.yml` | All `main` PRs — full pytest (~629) + Presidio smoke + import hygiene + wearable/cascade + diagnostic cascade smoke + OIS verify |
+| `.github/workflows/picard-presidio.yml` | `main` and `cursor/**` — framework slice (~90 tests) + Stackelberg/platform schema checks + Presidio smoke |
 
 Replicate main CI framework steps:
 
