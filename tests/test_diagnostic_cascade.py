@@ -132,14 +132,14 @@ class TestDiagnosticTier:
         assert tier.tier_id == 1
         assert tier.name == "Test Tier"
         assert tier.tests == ["clinical_rdt"]
-        assert tier.sensitivity == 0.8
+        assert tier.sensitivity == pytest.approx(0.8)
         assert tier.sop_gate == ["SOP-006"]
 
     def test_from_config_defaults(self) -> None:
         tier = DiagnosticTier.from_config({"tier_id": 0})
         assert tier.name == "Tier 0"
         assert tier.tests == []
-        assert tier.sensitivity == 0.5
+        assert tier.sensitivity == pytest.approx(0.5)
         assert tier.sop_gate is None
 
 

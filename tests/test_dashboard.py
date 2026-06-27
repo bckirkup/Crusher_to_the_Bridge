@@ -52,8 +52,8 @@ class TestAggregateTransmissionPathways:
             },
         ]
         totals = aggregate_transmission_pathway_totals(history)
-        assert totals["food"] == 2.5
-        assert totals["hvac_airborne"] == 1.0
+        assert totals["food"] == pytest.approx(2.5)
+        assert totals["hvac_airborne"] == pytest.approx(1.0)
 
     def test_dominant_pathway_fallback(self) -> None:
         from dashboard import aggregate_transmission_pathway_totals
@@ -68,7 +68,7 @@ class TestAggregateTransmissionPathways:
             },
         ]
         totals = aggregate_transmission_pathway_totals(history)
-        assert totals["fomite"] == 3.0
+        assert totals["fomite"] == pytest.approx(3.0)
 
     def test_none_pathway_excluded(self) -> None:
         from dashboard import aggregate_transmission_pathway_totals

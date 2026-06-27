@@ -18,6 +18,9 @@ import numpy as np
 from engines.infection_dynamics_bridge import KorkinShipEngine
 
 
+from simulation_utils.numeric import float_ne
+
+
 def load_chronic_disease_config(
     cfg: dict[str, Any],
     repo_root: str = "",
@@ -108,7 +111,7 @@ def assign_chronic_diseases(
             for pid in pathogen_profiles:
                 pmods = pathogen_mods.get(pid, pathogen_mods.get("default", {}))
                 susc_mult = pmods.get("susceptibility_multiplier", 1.0)
-                if susc_mult != 1.0:
+                if float_ne(susc_mult, 1.0):
                     current = agent.susceptibility_multiplier.get(pid, 1.0)
                     agent.susceptibility_multiplier[pid] = current * susc_mult
 

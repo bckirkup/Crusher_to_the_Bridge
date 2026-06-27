@@ -34,7 +34,7 @@ class TestTransmissionPathwayPools:
         )
         core.initialize_zones(["Galley", "Bridge"])
         assert "test_pathogen" in core.food_pools
-        assert core.food_pools["test_pathogen"]["Galley"] == 0.0
+        assert core.food_pools["test_pathogen"]["Galley"] == pytest.approx(0.0)
 
     def test_environmental_load_initialized(self) -> None:
         profiles = {
@@ -50,7 +50,7 @@ class TestTransmissionPathwayPools:
             pathogen_profiles=profiles,
         )
         core.initialize_zones(["Bridge"])
-        assert core.environmental_load["legionella"] == 0.01
+        assert core.environmental_load["legionella"] == pytest.approx(0.01)
 
     def test_food_pools_skipped_when_disabled(self) -> None:
         profiles = {

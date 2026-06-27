@@ -215,7 +215,7 @@ class TestTargetedPCR:
 
         pcr = TargetedPCR()
         assert pcr.name == "targeted_pcr"
-        assert pcr.lod_ct_threshold == 38.0
+        assert pcr.lod_ct_threshold == pytest.approx(38.0)
 
     def test_compute_ct_with_mass(self) -> None:
         from crusher_labs.modalities.targeted_pcr import TargetedPCR

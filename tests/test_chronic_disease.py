@@ -136,7 +136,7 @@ class TestKorkinAgentChronicDisease:
 
     def test_wearable_response_scale(self) -> None:
         agent = _make_agent()
-        assert agent.chronic_wearable_response_scale == 1.0
+        assert agent.chronic_wearable_response_scale == pytest.approx(1.0)
         agent.apply_chronic_disease("type2_diabetes", SAMPLE_PATHOGEN_MODIFIERS, 1.3)
         assert agent.chronic_wearable_response_scale == pytest.approx(1.3)
 
@@ -144,8 +144,8 @@ class TestKorkinAgentChronicDisease:
         agent = _make_agent()
         assert agent.has_chronic_disease is False
         assert agent.get_chronic_recovery_day("any", 5) == 5
-        assert agent.get_chronic_illness_boost("any") == 0.0
-        assert agent.get_chronic_severity_multiplier("any") == 1.0
+        assert agent.get_chronic_illness_boost("any") == pytest.approx(0.0)
+        assert agent.get_chronic_severity_multiplier("any") == pytest.approx(1.0)
 
     def test_comorbid_merging(self) -> None:
         agent = _make_agent()
@@ -484,7 +484,7 @@ class TestSimulationStateChronicFields:
             chronic_behavioral_mods={0: {"sick_call_probability_boost": 0.15}},
         )
         assert state.chronic_assignments[0] == ["type2_diabetes"]
-        assert state.chronic_behavioral_mods[0]["sick_call_probability_boost"] == 0.15
+        assert state.chronic_behavioral_mods[0]["sick_call_probability_boost"] == pytest.approx(0.15)
 
 
 # ── Sanity checker validation ────────────────────────────────────────────

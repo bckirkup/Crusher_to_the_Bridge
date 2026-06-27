@@ -34,7 +34,7 @@ class TestMakeAgent:
         assert agent["infection_state"] == "susceptible"
         assert agent["symptom_presentation"] == "asymptomatic"
         assert agent["compliance_status"] == "compliant"
-        assert agent["shedding_rate"] == 0.0
+        assert agent["shedding_rate"] == pytest.approx(0.0)
 
     def test_agent_with_location(self) -> None:
         agent = make_agent(agent_id=5, location="Bridge")
@@ -48,12 +48,12 @@ class TestMakeAgent:
 class TestMakeSpace:
     def test_default_space(self) -> None:
         space = make_space()
-        assert space["pathogen_mass"] == 0.0
+        assert space["pathogen_mass"] == pytest.approx(0.0)
         assert space["microbiome_id"] == "baseline"
 
     def test_custom_space(self) -> None:
         space = make_space(pathogen_mass=42.5, microbiome_id="disrupted")
-        assert space["pathogen_mass"] == 42.5
+        assert space["pathogen_mass"] == pytest.approx(42.5)
         assert space["microbiome_id"] == "disrupted"
 
 

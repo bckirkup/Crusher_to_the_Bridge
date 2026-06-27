@@ -135,7 +135,7 @@ class TestEnginePayloadBoundary:
             "spaces": {},
         }
         agents, _ = engine_payload_to_schema(payload, {1}, set(), set())
-        assert agents[0]["shedding_rate"] == 0.0
+        assert agents[0]["shedding_rate"] == pytest.approx(0.0)
         assert agents[0]["location"] == LOCATION_ISOLATED
 
     def test_pathogen_mass_coerced_to_float(self) -> None:
@@ -157,8 +157,8 @@ class TestEnginePayloadBoundary:
             },
         }
         _, spaces = engine_payload_to_schema(payload, set(), set(), set())
-        assert spaces["Bridge"]["pathogen_mass_by_id"]["noro"] == 6.0
-        assert spaces["Bridge"]["pathogen_mass_by_id"]["sars"] == 4.0
+        assert spaces["Bridge"]["pathogen_mass_by_id"]["noro"] == pytest.approx(6.0)
+        assert spaces["Bridge"]["pathogen_mass_by_id"]["sars"] == pytest.approx(4.0)
 
     def test_non_compliant_preserves_shedding(self) -> None:
         payload = {
@@ -171,7 +171,7 @@ class TestEnginePayloadBoundary:
         agents, _ = engine_payload_to_schema(payload, set(), set(), {3})
         assert agents[0]["compliance_status"] == COMPLIANCE_NON_COMPLIANT
         assert agents[0]["infection_state"] == INFECTION_INFECTED
-        assert agents[0]["shedding_rate"] == 42.5
+        assert agents[0]["shedding_rate"] == pytest.approx(42.5)
 
     def test_microflora_disruption_field_preserved(self) -> None:
         payload = {
@@ -182,7 +182,7 @@ class TestEnginePayloadBoundary:
             "spaces": {},
         }
         agents, _ = engine_payload_to_schema(payload, set(), set(), set())
-        assert agents[0]["microflora_disruption"] == 0.75
+        assert agents[0]["microflora_disruption"] == pytest.approx(0.75)
 
 
 # ── record_epoch boundary guards ────────────────────────────────────────

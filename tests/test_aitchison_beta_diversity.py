@@ -66,7 +66,7 @@ def test_detect_microflora_anomaly_uses_aitchison_threshold() -> None:
     report_high = seq.detect_microflora_anomaly({}, aitchison_distance_to_baseline=0.12)
     assert report_low["anomaly_detected"] is False
     assert report_high["anomaly_detected"] is True
-    assert report_high["aitchison_distance_to_baseline"] == 0.12
+    assert report_high["aitchison_distance_to_baseline"] == pytest.approx(0.12)
 
 
 def test_wastewater_grid_uses_aitchison_anomaly_gate() -> None:
@@ -80,7 +80,7 @@ def test_wastewater_grid_uses_aitchison_anomaly_gate() -> None:
         pathogen_mass=0.0,
         microflora_shifts={"gastrointestinal": 1.0},
     )
-    assert clean["aitchison_distance_to_baseline"] == 0.0
+    assert clean["aitchison_distance_to_baseline"] == pytest.approx(0.0)
     assert clean["anomaly_detected"] is False
     assert shifted["aitchison_distance_to_baseline"] > 0.08
     assert shifted["anomaly_detected"] is True

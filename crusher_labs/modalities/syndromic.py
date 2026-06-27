@@ -19,6 +19,9 @@ from typing import Any
 import numpy as np
 
 
+from simulation_utils.numeric import default_simulation_rng
+
+
 class SyndromicSurveillance:
     """Symptom-based screening modality with FRED-style behavioral noise."""
 
@@ -37,7 +40,7 @@ class SyndromicSurveillance:
         self.background_noise_rate = background_noise_rate
         self.quarantine_compliance = quarantine_compliance
         self.compliance_delay_epochs = compliance_delay_epochs
-        self.rng = rng if rng is not None else np.random.default_rng()
+        self.rng = rng if rng is not None else default_simulation_rng()
 
         self.noise_categories = noise_categories or [
             {"reason": "seasickness",  "probability": 0.008},

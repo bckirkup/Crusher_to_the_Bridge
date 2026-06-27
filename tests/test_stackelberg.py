@@ -74,7 +74,7 @@ def test_utility_feature_extractor() -> None:
     }
     feats = ext.command_features(cmd_obs, rep, {"biodefense_weight": 1.0})
     assert "infected_rate" in feats
-    assert feats["budget_spent_usd"] == 1000.0
+    assert feats["budget_spent_usd"] == pytest.approx(1000.0)
 
 
 def test_stackelberg_round_produces_envelope() -> None:

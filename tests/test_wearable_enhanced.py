@@ -570,14 +570,14 @@ class TestGlucoseChannel:
 
     def test_glucose_in_defaults(self) -> None:
         assert "glucose" in DEFAULT_CHANNEL_BASELINES
-        assert DEFAULT_CHANNEL_BASELINES["glucose"]["mean"] == 95.0
+        assert DEFAULT_CHANNEL_BASELINES["glucose"]["mean"] == pytest.approx(95.0)
 
     def test_glucose_channel_on_device(self) -> None:
         cgm = _make_cgm_device()
         assert "glucose" in cgm.channels
         baseline = cgm.get_channel_baseline("glucose")
-        assert baseline["mean"] == 95.0
-        assert baseline["std"] == 12.0
+        assert baseline["mean"] == pytest.approx(95.0)
+        assert baseline["std"] == pytest.approx(12.0)
 
     def test_glucose_epoch_data_generated(self) -> None:
         cgm = _make_cgm_device()
@@ -648,7 +648,7 @@ class TestConfigParsing:
         assert monitor is not None
         assignments = monitor.class_device_assignments["default"]
         assert len(assignments) == 2
-        assert assignments[0].coverage == 0.8
+        assert assignments[0].coverage == pytest.approx(0.8)
         assert assignments[1].visibility == "both"
 
     def test_disabled_config_returns_none(self) -> None:
@@ -678,7 +678,7 @@ class TestConfigParsing:
         assert monitor is not None
         device = monitor.devices["oura_ring"]
         assert device.detection_profile is not None
-        assert device.detection_profile["sensitivity"] == 0.78
+        assert device.detection_profile["sensitivity"] == pytest.approx(0.78)
 
     def test_confounders_parsed(self) -> None:
         cfg = {
@@ -740,7 +740,7 @@ class TestConfigParsing:
         device = build_wearable_device_from_config(device_cfg)
         assert device.device_id == "cgm_patch"
         assert "glucose" in device.channel_baselines
-        assert device.channel_baselines["glucose"]["mean"] == 95.0
+        assert device.channel_baselines["glucose"]["mean"] == pytest.approx(95.0)
 
 
 # ── Fleet summary ────────────────────────────────────────────────────────

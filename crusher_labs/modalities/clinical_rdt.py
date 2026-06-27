@@ -29,6 +29,9 @@ import numpy as np
 
 # ── EMOD clinical phase resolution ──────────────────────────────────
 
+from simulation_utils.numeric import default_simulation_rng
+
+
 def _resolve_shedding_phase(
     shedding_rate: float,
     phases: list[dict[str, Any]],
@@ -88,7 +91,7 @@ class ClinicalRDT:
         self.sigmoid_midpoint = sigmoid_midpoint
         self.specificity = specificity
         self.shedding_phases = shedding_phases or self.DEFAULT_PHASES
-        self.rng = rng if rng is not None else np.random.default_rng()
+        self.rng = rng if rng is not None else default_simulation_rng()
 
     def query_ground_truth(
         self,

@@ -20,6 +20,9 @@ import numpy as np
 
 from crusher_labs.modalities.sequencing import MULTI_KINGDOM_TAXA
 
+from simulation_utils.numeric import default_simulation_rng
+
+
 # Specimen channels this modality can consume
 SPECIMEN_WASTEWATER_METAGENOMICS = "wastewater_metagenomics"
 SPECIMEN_CLINICAL = "clinical_specimen"
@@ -69,7 +72,7 @@ class LongReadNanoporeSequencing:
         self.enabled = enabled
         self.params = params
         self.profile_name = profile_name
-        self.rng = rng if rng is not None else np.random.default_rng()
+        self.rng = rng if rng is not None else default_simulation_rng()
 
         profiles = params.get("deployment_profiles", {})
         if profile_name not in profiles:

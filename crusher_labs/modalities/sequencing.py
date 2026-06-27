@@ -32,6 +32,8 @@ from typing import Any
 
 import numpy as np
 
+from simulation_utils.numeric import default_simulation_rng
+
 
 # ── Multi-Kingdom baseline profiles (GRUMB reference) ────────────────
 # Each kingdom contributes taxa to a unified relative-abundance vector.
@@ -318,7 +320,7 @@ class MetagenomicSequencing:
         self.read_depth = read_depth
         self.pseudocount = pseudocount
         self.total_epochs = total_epochs
-        self.rng = rng if rng is not None else np.random.default_rng()
+        self.rng = rng if rng is not None else default_simulation_rng()
         self.clr_shift_scale = clr_shift_scale
         self.aitchison_anomaly_threshold = aitchison_anomaly_threshold
         self._zone_seeds: dict[str, dict[str, Any]] = {}

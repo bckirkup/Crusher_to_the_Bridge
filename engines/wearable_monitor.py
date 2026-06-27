@@ -34,6 +34,7 @@ from engines.infection_dynamics_bridge import (
     InfectionStatus,
     IllnessStatus,
 )
+from simulation_utils.numeric import default_simulation_rng, float_ne
 
 
 # ── Channel baseline defaults ────────────────────────────────────────────
@@ -295,7 +296,7 @@ class WearableMonitor:
         self.devices = devices
         self.class_device_assignments = class_device_assignments
         self.chronic_disease_device_map = chronic_disease_device_map or []
-        self.rng = rng if rng is not None else np.random.default_rng()
+        self.rng = rng if rng is not None else default_simulation_rng()
         self.anomaly_z_threshold = anomaly_z_threshold
         if device_fusion is None:
             from crusher_labs.cascade_entry import WearableDeviceFusionConfig
@@ -935,7 +936,7 @@ def build_wearable_monitor_from_config(
         return None
 
     scale = float(wm_cfg.get("detection_sensitivity_scale", 1.0))
-    if scale != 1.0:
+    if float_ne(scale, 1.0):
         apply_detection_sensitivity_scale(
             devices,
             scale,

@@ -135,7 +135,7 @@ class TestProtocolEngine:
         stoplights = {"continuous_air_sampler": {"Bridge": "RED"}}
         active = engine.evaluate_epoch(0, stoplights)
         merged = engine.get_merged_modifiers(active)
-        assert merged["hvac_filter_efficiency_override"] == 0.95
+        assert merged["hvac_filter_efficiency_override"] == pytest.approx(0.95)
 
     def test_merged_modifiers_list_union(self) -> None:
         p1 = _make_protocol("SOP-1", modifiers={"close_zones": ["Bridge"]})
@@ -273,7 +273,7 @@ class TestModifierHelpers:
     def test_apply_hvac_modifiers(self) -> None:
         mock_engine = type("E", (), {"filter_efficiency": 0.50})()
         apply_hvac_modifiers(mock_engine, {"hvac_filter_efficiency_override": 0.95})
-        assert mock_engine.filter_efficiency == 0.95
+        assert mock_engine.filter_efficiency == pytest.approx(0.95)
 
     def test_apply_hvac_none_engine(self) -> None:
         apply_hvac_modifiers(None, {"hvac_filter_efficiency_override": 0.95})
@@ -287,9 +287,9 @@ class TestModifierHelpers:
         })()
         mods = {"direct_contact_scalar": 0.5, "fomite_scalar": 0.3}
         apply_transmission_modifiers(mock_core, mods)
-        assert mock_core.direct_contact_scalar == 0.5
-        assert mock_core.fomite_scalar == 0.3
-        assert mock_core.droplet_scalar == 1.0
+        assert mock_core.direct_contact_scalar == pytest.approx(0.5)
+        assert mock_core.fomite_scalar == pytest.approx(0.3)
+        assert mock_core.droplet_scalar == pytest.approx(1.0)
 
     def test_reset_modifiers(self) -> None:
         mock_engine = type("E", (), {"filter_efficiency": 0.95})()
@@ -300,9 +300,9 @@ class TestModifierHelpers:
             "fomite_scalar": 0.5,
         })()
         reset_modifiers(mock_engine, mock_core, 0.50)
-        assert mock_engine.filter_efficiency == 0.50
-        assert mock_core.direct_contact_scalar == 1.0
-        assert mock_core.fomite_scalar == 1.0
+        assert mock_engine.filter_efficiency == pytest.approx(0.50)
+        assert mock_core.direct_contact_scalar == pytest.approx(1.0)
+        assert mock_core.fomite_scalar == pytest.approx(1.0)
 
 
 class TestLoadProtocols:

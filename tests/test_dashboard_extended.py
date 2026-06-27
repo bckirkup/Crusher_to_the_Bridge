@@ -52,13 +52,13 @@ class TestZoneMetric:
                 {"location": "Z2", "status": "infected"},
             ],
         }
-        assert zone_metric(record, "Z1", "Infected Agents") == 2.0
+        assert zone_metric(record, "Z1", "Infected Agents") == pytest.approx(2.0)
 
     def test_missing_zone_returns_zero(self) -> None:
         from dashboard.deck_geometry import zone_metric
 
         record = {"spaces": {}}
-        assert zone_metric(record, "UNKNOWN", "Airborne Aerosol Mass") == 0.0
+        assert zone_metric(record, "UNKNOWN", "Airborne Aerosol Mass") == pytest.approx(0.0)
 
 
 class TestColorScaleMax:
@@ -89,7 +89,7 @@ class TestMetricFraction:
     def test_zero_max(self) -> None:
         from dashboard.deck_geometry import metric_fraction
 
-        assert metric_fraction(5.0, 0.0) == 0.0
+        assert metric_fraction(5.0, 0.0) == pytest.approx(0.0)
 
 
 # ── pydeck_builder tests ────────────────────────────────────────────────
