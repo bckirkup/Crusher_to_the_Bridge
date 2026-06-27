@@ -125,3 +125,40 @@ class TestCabinCorridorTransmission:
             epoch=1, agents=[shedder, target], zone_pathogen_mass={zone: 0.0},
         )
         assert m_bal.droplet_exposures[0]["dose"] < m_int.droplet_exposures[0]["dose"]
+
+    def test_quarantined_agent_hvac_dose_not_reduced_by_confinement(self) -> None:
+        source = "Pax_Corridor_D6_Port_Fwd"
+        target_zone = "Pax_Corridor_D6_Port_Mid"
+        volumes = {source: 1200.0, target_zone: 1200.0}
+        types = {source: "Cabin_Corridor", target_zone: "Cabin_Corridor"}
+        downstream = {source: [target_zone]}
+        mass = {target_zone: 5000.0}
+        core_free = TransmissionCore(
+            rng=np.random.default_rng(11),
+            zone_volumes=volumes,
+            zone_types=types,
+            confinement_isolation_factor=0.05,
+        )
+        core_confined = TransmissionCore(
+            rng=np.random.default_rng(11),
+            zone_volumes=volumes,
+            zone_types=types,
+            confinement_isolation_factor=0.05,
+        )
+        for c in (core_free, core_confined):
+            c.initialize_zones(list(volumes))
+        m_free, _ = core_free.execute_transmission(
+            epoch=1,
+            agents=[_agent(1, source, infected=True), _agent(2, target_zone)],
+            zone_pathogen_mass=mass,
+            hvac_downstream_zones=downstream,
+            quarantined_ids=set(),
+        )
+        m_conf, _ = core_confined.execute_transmission(
+            epoch=1,
+            agents=[_agent(1, source, infected=True), _agent(2, target_zone)],
+            zone_pathogen_mass=mass,
+            hvac_downstream_zones=downstream,
+            quarantined_ids={2},
+        )
+        assert m_free.hvac_downstream_exposures[0]["dose"] == m_conf.hvac_downstream_exposures[0]["dose"]
