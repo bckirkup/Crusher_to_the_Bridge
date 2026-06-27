@@ -615,7 +615,6 @@ class TransmissionCore:
                     dose = concentration * AEROSOL_INHALATION_FRACTION * volume
                     dose *= self.hvac_airborne_scalar
                     dose *= self._aerosol_ventilation_factor(target_zone)
-                    dose *= self._confinement_factor(target)
                     agent_doses[target.agent_id] = (
                         agent_doses.get(target.agent_id, 0.0) + dose
                     )
