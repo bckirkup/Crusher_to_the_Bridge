@@ -336,7 +336,7 @@ class ContamTransportEngine:
                 concentrations[zone_id] = 0.0
 
         # Accumulate mass transfers
-        delta: dict[str, float] = {z: 0.0 for z in zone_pathogen_mass}
+        delta: dict[str, float] = dict.fromkeys(zone_pathogen_mass, 0.0)
 
         for path in self.airflow_paths:
             src = path.from_zone

@@ -243,7 +243,7 @@ class AgentWearableState:
         self.agent_id = agent_id
         self.device = device
         self.baselines = dict(baselines)
-        self.drift: dict[str, float] = {ch: 0.0 for ch in device.channels}
+        self.drift: dict[str, float] = dict.fromkeys(device.channels, 0.0)
         self.visibility = visibility
 
     def to_dict(self) -> dict[str, Any]:
