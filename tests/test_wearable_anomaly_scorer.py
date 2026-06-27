@@ -181,7 +181,7 @@ class TestScorerIntegration:
         }
         scorer = build_wearable_anomaly_scorer_from_config(wm_cfg)
         assert scorer is not None
-        assert scorer.infection_score_threshold == 1.5
+        assert scorer.infection_score_threshold == pytest.approx(1.5)
 
     def test_build_monitor_from_config_has_scorer(self) -> None:
         import yaml

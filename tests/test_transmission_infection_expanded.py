@@ -48,7 +48,7 @@ from engines.transmission_core import TransmissionCore
 
 class TestDoseResponse:
     def test_infection_probability_zero_dose(self) -> None:
-        assert infection_probability(0.0) == 0.0
+        assert infection_probability(0.0) == pytest.approx(0.0)
 
     def test_infection_probability_large_dose(self) -> None:
         p = infection_probability(1e6)
@@ -66,7 +66,7 @@ class TestDoseResponse:
         assert infection_probability(dose) == pytest.approx(expected)
 
     def test_illness_probability_zero_dose(self) -> None:
-        assert illness_probability(0.0) == 0.0
+        assert illness_probability(0.0) == pytest.approx(0.0)
 
     def test_illness_probability_large_dose(self) -> None:
         p = illness_probability(1e6)
@@ -124,7 +124,7 @@ class TestKorkinAgent:
         assert agent.illness_status == IllnessStatus.NOT_ILL
         assert not agent.is_infected
         assert not agent.is_symptomatic
-        assert agent.current_shedding == 0.0
+        assert agent.current_shedding == pytest.approx(0.0)
 
     def test_initial_immune(self) -> None:
         agent = self._make_agent(immune=True)
@@ -143,7 +143,7 @@ class TestKorkinAgent:
         assert agent.is_infected
         assert "test_virus" in agent.infections
         assert agent.infections["test_virus"]["status"] == InfectionStatus.INFECTED
-        assert agent.infections["test_virus"]["acquired_particles"] == 100.0
+        assert agent.infections["test_virus"]["acquired_particles"] == pytest.approx(100.0)
         assert agent.infections["test_virus"]["infection_epoch"] == 3
 
     def test_infect_with_pathogen_negative_time_raises(self) -> None:
@@ -161,9 +161,9 @@ class TestKorkinAgent:
     def test_init_pathogen_susceptibility(self) -> None:
         agent = self._make_agent()
         agent.init_pathogen_susceptibility("test_p", 1.5)
-        assert agent.susceptibility_multiplier["test_p"] == 1.5
+        assert agent.susceptibility_multiplier["test_p"] == pytest.approx(1.5)
         agent.init_pathogen_susceptibility("test_p", 2.0)
-        assert agent.susceptibility_multiplier["test_p"] == 1.5  # not overwritten
+        assert agent.susceptibility_multiplier["test_p"] == pytest.approx(1.5)  # not overwritten
 
     def test_update_microflora_disruption(self) -> None:
         agent = self._make_agent()
@@ -262,9 +262,9 @@ class TestTransmissionCoreExpanded:
 
     def test_pathway_scalars_default(self) -> None:
         core = self._make_core()
-        assert core.direct_contact_scalar == 1.0
-        assert core.droplet_scalar == 1.0
-        assert core.hvac_airborne_scalar == 1.0
+        assert core.direct_contact_scalar == pytest.approx(1.0)
+        assert core.droplet_scalar == pytest.approx(1.0)
+        assert core.hvac_airborne_scalar == pytest.approx(1.0)
 
     def test_multi_pathogen_food_pool(self) -> None:
         profiles = {
@@ -278,7 +278,7 @@ class TestTransmissionCoreExpanded:
         core = self._make_core(profiles=profiles, zone_types={"Z2": "Dining"})
         core.initialize_zones(["Z1", "Z2", "Z3"])
         assert "noro" in core.food_pools
-        assert core.food_pools["noro"]["Z2"] == 0.0
+        assert core.food_pools["noro"]["Z2"] == pytest.approx(0.0)
 
     def test_environmental_load(self) -> None:
         profiles = {

@@ -56,7 +56,7 @@ class TestComputeInfectionCounters:
             },
         ]
         results = compute_infection_counters(agents, defs)
-        assert results["crew_attack_rate"]["value"] == 0.5
+        assert results["crew_attack_rate"]["value"] == pytest.approx(0.5)
         assert results["crew_attack_rate"]["population"] == 2
 
     def test_threshold_exceeded(self) -> None:
@@ -98,7 +98,7 @@ class TestComputeInfectionCounters:
         ]
         defs = [{"counter_id": "n_infected", "metric": "infected_count", "filter": {}}]
         results = compute_infection_counters(agents, defs)
-        assert results["n_infected"]["value"] == 1.0
+        assert results["n_infected"]["value"] == pytest.approx(1.0)
 
     def test_class_filter(self) -> None:
         agents = [
@@ -113,7 +113,7 @@ class TestComputeInfectionCounters:
             },
         ]
         results = compute_infection_counters(agents, defs)
-        assert results["medical_attack"]["value"] == 1.0
+        assert results["medical_attack"]["value"] == pytest.approx(1.0)
         assert results["medical_attack"]["population"] == 1
 
 

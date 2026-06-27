@@ -14,6 +14,9 @@ import math
 from typing import Any
 
 
+from simulation_utils.numeric import is_nonzero, is_zero
+
+
 DEFAULT_CHANNEL_INFECTION_WEIGHTS: dict[str, float] = {
     "heart_rate": 0.3,
     "hrv": 0.3,
@@ -72,7 +75,7 @@ def _cosine_similarity(
     dot = sum(vec_a.get(k, 0.0) * vec_b.get(k, 0.0) for k in keys)
     norm_a = math.sqrt(sum(vec_a.get(k, 0.0) ** 2 for k in keys))
     norm_b = math.sqrt(sum(vec_b.get(k, 0.0) ** 2 for k in keys))
-    if norm_a == 0.0 or norm_b == 0.0:
+    if is_zero(norm_a) or is_zero(norm_b):
         return 0.0
     return dot / (norm_a * norm_b)
 
@@ -134,7 +137,7 @@ class WearableAnomalyScorer:
             if similarity >= self.confounder_match_threshold:
                 matched_confounders.append(cid)
                 for ch, tz in template.items():
-                    if tz != 0.0 and ch in z_scores:
+                    if is_nonzero(tz) and ch in z_scores:
                         explained_channels.add(ch)
 
         infection_score = 0.0

@@ -86,7 +86,7 @@ class TestContamZoneNode:
 
     def test_concentration_zero_volume(self) -> None:
         node = ContamZoneNode("z2", volume_m3=0.0)
-        assert node.concentration(100.0) == 0.0
+        assert node.concentration(100.0) == pytest.approx(0.0)
 
     def test_defaults(self) -> None:
         node = ContamZoneNode("z3", volume_m3=200.0)

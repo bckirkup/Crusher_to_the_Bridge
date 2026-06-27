@@ -46,7 +46,7 @@ def test_observation_model_crew_information_state() -> None:
         },
     }
     obs = ObservationModel.build(snap, "1", "crew_agent")
-    assert obs.local["information_state"]["severity_belief"] == 0.2
+    assert obs.local["information_state"]["severity_belief"] == pytest.approx(0.2)
 
 
 def test_observation_model_command_ois() -> None:
@@ -58,7 +58,7 @@ def test_observation_model_command_ois() -> None:
         },
     }
     obs = ObservationModel.build(snap, "command", "commanding_officer")
-    assert obs.local["operational_impact_cumulative"] == 12.5
+    assert obs.local["operational_impact_cumulative"] == pytest.approx(12.5)
 
 
 def test_decision_round_noop_envelope() -> None:

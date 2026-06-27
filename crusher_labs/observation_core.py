@@ -27,6 +27,7 @@ from typing import Any
 
 import numpy as np
 
+from simulation_utils.numeric import default_simulation_rng
 from telemetry_buffer.agent_axes import (
     agent_axes_dict,
     agent_is_infected,
@@ -108,7 +109,7 @@ class InstrumentQC:
     ) -> None:
         self.cross_contamination_rate = cross_contamination_rate
         self.control_intensity = control_intensity
-        self.rng = rng if rng is not None else np.random.default_rng()
+        self.rng = rng if rng is not None else default_simulation_rng()
         self._carryover_mass: float = 0.0
         self._sample_count: int = 0
         self._last_sample_mass: float = 0.0
@@ -187,7 +188,7 @@ class ContinuousAirSniffer:
         self.ct_slope = ct_slope
         self.ct_intercept = ct_intercept
         self.lod_ct = lod_ct
-        self.rng = rng if rng is not None else np.random.default_rng()
+        self.rng = rng if rng is not None else default_simulation_rng()
         self.qc = InstrumentQC(cross_contamination_rate, control_intensity, self.rng)
 
     def sample(
@@ -295,7 +296,7 @@ class TargetedSurfaceSwab:
         self.ct_slope = ct_slope
         self.ct_intercept = ct_intercept
         self.lod_ct = lod_ct
-        self.rng = rng if rng is not None else np.random.default_rng()
+        self.rng = rng if rng is not None else default_simulation_rng()
         self.qc = InstrumentQC(cross_contamination_rate, control_intensity, self.rng)
 
     def swab(
@@ -413,7 +414,7 @@ class WastewaterSequencingGrid:
         self.dirichlet_concentration = dirichlet_concentration
         self.pseudocount = pseudocount
         self.aitchison_anomaly_threshold = aitchison_anomaly_threshold
-        self.rng = rng if rng is not None else np.random.default_rng()
+        self.rng = rng if rng is not None else default_simulation_rng()
         self.qc = InstrumentQC(cross_contamination_rate, control_intensity, self.rng)
 
         self._taxa: list[str] = []
@@ -570,7 +571,7 @@ class ClinicalRapidDiagnostic:
     ) -> None:
         self.sensitivity = sensitivity
         self.specificity = specificity
-        self.rng = rng if rng is not None else np.random.default_rng()
+        self.rng = rng if rng is not None else default_simulation_rng()
         self.qc = InstrumentQC(cross_contamination_rate, control_intensity, self.rng)
 
     def test_agent(
@@ -675,7 +676,7 @@ class ClinicalQPCR:
         self.ct_slope = ct_slope
         self.ct_intercept = ct_intercept
         self.lod_ct = lod_ct
-        self.rng = rng if rng is not None else np.random.default_rng()
+        self.rng = rng if rng is not None else default_simulation_rng()
         self.qc = InstrumentQC(cross_contamination_rate, control_intensity, self.rng)
 
     def test_agent(
@@ -825,7 +826,7 @@ class ClinicalMicrobiology:
         rng: np.random.Generator | None = None,
     ) -> None:
         self.culture_sensitivity = culture_sensitivity
-        self.rng = rng if rng is not None else np.random.default_rng()
+        self.rng = rng if rng is not None else default_simulation_rng()
         self.qc = InstrumentQC(cross_contamination_rate, control_intensity, self.rng)
 
     def test_agent(
@@ -953,11 +954,11 @@ class LongReadVerificationSequencing:
                 "data/config/long_read_sequencing_params.json",
                 "flongle_rapid",
                 enabled=True,
-                rng=rng if rng is not None else np.random.default_rng(),
+                rng=rng if rng is not None else default_simulation_rng(),
                 repo_root=repo_root,
             )
         self.modality = modality
-        self.rng = rng if rng is not None else np.random.default_rng()
+        self.rng = rng if rng is not None else default_simulation_rng()
         self.qc = InstrumentQC(cross_contamination_rate, control_intensity, self.rng)
 
     def run_requests(

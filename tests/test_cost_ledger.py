@@ -63,9 +63,9 @@ class TestCostLedger:
             1, 2.5, breakdown={"passenger_quarantine": 2.5},
         )
         summary = ledger.get_epoch_summary(1)
-        assert summary["operational_impact_epoch"] == 2.5
-        assert summary["operational_impact_cumulative"] == 2.5
-        assert summary["operational_impact_breakdown"]["passenger_quarantine"] == 2.5
+        assert summary["operational_impact_epoch"] == pytest.approx(2.5)
+        assert summary["operational_impact_cumulative"] == pytest.approx(2.5)
+        assert summary["operational_impact_breakdown"]["passenger_quarantine"] == pytest.approx(2.5)
 
     def test_compute_operational_impact_quarantine(self) -> None:
         agents = [
@@ -80,9 +80,9 @@ class TestCostLedger:
             active_protocol_ids=[],
             ois_weights={},
         )
-        assert total == 4.0  # 1.0 passenger + 3.0 essential crew
-        assert breakdown["passenger_quarantine"] == 1.0
-        assert breakdown["essential_crew_quarantine"] == 3.0
+        assert total == pytest.approx(4.0)  # 1.0 passenger + 3.0 essential crew
+        assert breakdown["passenger_quarantine"] == pytest.approx(1.0)
+        assert breakdown["essential_crew_quarantine"] == pytest.approx(3.0)
 
 
 class TestBuildLedgerFromConfig:

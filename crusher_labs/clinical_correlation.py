@@ -20,6 +20,9 @@ import numpy as np
 
 from telemetry_buffer.agent_axes import agent_is_infected, resolve_agent_axes
 
+from simulation_utils.numeric import default_simulation_rng
+
+
 CLINICAL_TEST_KEYS: tuple[str, ...] = (
     "clinical_rdt",
     "clinical_qpcr",
@@ -114,7 +117,7 @@ class ClinicalTestCorrelation:
         sym = 0.5 * (self.correlation_matrix + self.correlation_matrix.T)
         self._cholesky = np.linalg.cholesky(sym)
         if self.rng is None:
-            self.rng = np.random.default_rng()
+            self.rng = default_simulation_rng()
 
     @classmethod
     def from_config(

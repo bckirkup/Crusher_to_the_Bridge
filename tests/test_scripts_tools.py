@@ -111,7 +111,7 @@ class TestGroupHvacZones:
             {"id": "R2", "deck": "lower", "base_ach": 10.0},
         ]
         result = _group_hvac_zones(zones)
-        assert result[0]["ach"] == 10.0
+        assert result[0]["ach"] == pytest.approx(10.0)
 
 
 # ── Script import smoke tests ───────────────────────────────────────────

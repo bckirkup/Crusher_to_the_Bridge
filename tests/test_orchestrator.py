@@ -362,7 +362,7 @@ class TestEnginePayloadToSchema:
         assert agents[0]["infection_state"] == INFECTION_INFECTED
         assert agents[0]["symptom_presentation"] == PRESENTATION_SYMPTOMATIC
         assert agents[0]["location"] == LOCATION_ISOLATED
-        assert agents[0]["shedding_rate"] == 0.0
+        assert agents[0]["shedding_rate"] == pytest.approx(0.0)
 
     def test_non_compliant_agent(self) -> None:
         engine_payload = {
@@ -381,7 +381,7 @@ class TestEnginePayloadToSchema:
         agents, _ = _engine_payload_to_schema(engine_payload, set(), set(), {3})
         assert agents[0]["compliance_status"] == COMPLIANCE_NON_COMPLIANT
         assert agents[0]["infection_state"] == INFECTION_INFECTED
-        assert agents[0]["shedding_rate"] == 30.0
+        assert agents[0]["shedding_rate"] == pytest.approx(30.0)
 
     def test_pathogen_metadata_preserved(self) -> None:
         engine_payload = {
@@ -396,7 +396,7 @@ class TestEnginePayloadToSchema:
         agents, _ = _engine_payload_to_schema(engine_payload, set(), set(), set())
         assert "pathogen_infections" in agents[0]
         assert "susceptibility_multiplier" in agents[0]
-        assert agents[0]["microflora_disruption"] == 0.5
+        assert agents[0]["microflora_disruption"] == pytest.approx(0.5)
 
     def test_space_with_pathogen_mass_by_id(self) -> None:
         engine_payload = {
@@ -409,7 +409,7 @@ class TestEnginePayloadToSchema:
             },
         }
         _, spaces = _engine_payload_to_schema(engine_payload, set(), set(), set())
-        assert spaces["Bridge"]["pathogen_mass_by_id"]["norovirus"] == 8.0
+        assert spaces["Bridge"]["pathogen_mass_by_id"]["norovirus"] == pytest.approx(8.0)
 
 
 # ── Quarantine confinement tests ─────────────────────────────────────────
@@ -554,7 +554,7 @@ class TestSOP010Modifiers:
         engine = build_engine(cfg, seed=42)
         engine.zone_pathogen_mass["Bridge"] = 100.0
         apply_surface_decontamination(engine, 1.5)
-        assert engine.zone_pathogen_mass["Bridge"] == 0.0
+        assert engine.zone_pathogen_mass["Bridge"] == pytest.approx(0.0)
 
     def test_vsp_threshold_overridable(self) -> None:
         from engines.infection_dynamics_bridge import VSP_THRESHOLD_FRACTION
@@ -563,7 +563,7 @@ class TestSOP010Modifiers:
         engine = build_engine(cfg, seed=42)
         assert engine.vsp_threshold_fraction == VSP_THRESHOLD_FRACTION
         engine.vsp_threshold_fraction = 0.05
-        assert engine.vsp_threshold_fraction == 0.05
+        assert engine.vsp_threshold_fraction == pytest.approx(0.05)
 
 
 # ── Zone closure tests ──────────────────────────────────────────────────
@@ -691,7 +691,7 @@ class TestWearableDevice:
             channels=["heart_rate"],
             noise={"heart_rate": {"sigma": 99.0, "drift_rate": 0.0, "dropout_prob": 0.0}},
         )
-        assert dev.get_channel_noise("heart_rate")["sigma"] == 99.0
+        assert dev.get_channel_noise("heart_rate")["sigma"] == pytest.approx(99.0)
 
     def test_device_to_dict(self) -> None:
         dev = WearableDevice(device_id="ring", channels=["spo2", "hrv"])
@@ -709,7 +709,7 @@ class TestWearableDevice:
         }
         dev = build_wearable_device_from_config(cfg)
         assert dev.device_id == "test_watch"
-        assert dev.get_channel_noise("heart_rate")["sigma"] == 3.0
+        assert dev.get_channel_noise("heart_rate")["sigma"] == pytest.approx(3.0)
         assert dev.channels == ["heart_rate", "spo2"]
 
 
@@ -884,15 +884,15 @@ class TestWearableHelpers:
         assert _get_infection_phase(20, DEFAULT_PHASE_BOUNDARIES) == "recovery"
 
     def test_clamp_heart_rate(self) -> None:
-        assert _clamp_channel("heart_rate", 10.0) == 30.0
-        assert _clamp_channel("heart_rate", 300.0) == 200.0
-        assert _clamp_channel("heart_rate", 80.0) == 80.0
+        assert _clamp_channel("heart_rate", 10.0) == pytest.approx(30.0)
+        assert _clamp_channel("heart_rate", 300.0) == pytest.approx(200.0)
+        assert _clamp_channel("heart_rate", 80.0) == pytest.approx(80.0)
 
     def test_clamp_spo2(self) -> None:
-        assert _clamp_channel("spo2", 50.0) == 70.0
-        assert _clamp_channel("spo2", 105.0) == 100.0
-        assert _clamp_channel("spo2", 97.0) == 97.0
+        assert _clamp_channel("spo2", 50.0) == pytest.approx(70.0)
+        assert _clamp_channel("spo2", 105.0) == pytest.approx(100.0)
+        assert _clamp_channel("spo2", 97.0) == pytest.approx(97.0)
 
     def test_clamp_body_temp(self) -> None:
-        assert _clamp_channel("body_temp", 30.0) == 34.0
-        assert _clamp_channel("body_temp", 45.0) == 42.0
+        assert _clamp_channel("body_temp", 30.0) == pytest.approx(34.0)
+        assert _clamp_channel("body_temp", 45.0) == pytest.approx(42.0)

@@ -26,6 +26,9 @@ from typing import Any
 import numpy as np
 
 
+from simulation_utils.numeric import default_simulation_rng
+
+
 class WearableDataStream:
     """Crusher Labs modality that wraps raw wearable monitor data.
 
@@ -46,7 +49,7 @@ class WearableDataStream:
         self.observation_noise_sigma = observation_noise_sigma
         self.sync_dropout_prob = sync_dropout_prob
         self.anomaly_z_threshold = anomaly_z_threshold
-        self.rng = rng if rng is not None else np.random.default_rng()
+        self.rng = rng if rng is not None else default_simulation_rng()
 
     def query_ground_truth(
         self,
