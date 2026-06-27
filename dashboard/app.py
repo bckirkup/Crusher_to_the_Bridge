@@ -156,6 +156,11 @@ def main() -> None:
                 "Credits Remaining",
                 f"${ca.get('financial_balance_remaining', 0):,.0f}",
             )
+            if ca.get("operational_impact_cumulative") is not None:
+                st.metric(
+                    "Operational Impact",
+                    f"{ca.get('operational_impact_cumulative', 0):,.1f}",
+                )
 
     if not history:
         st.error(

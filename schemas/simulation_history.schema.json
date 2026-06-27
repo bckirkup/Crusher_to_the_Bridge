@@ -112,6 +112,7 @@
           "type": "object",
           "properties": {
             "total_monitored": {"type": "integer", "minimum": 0},
+            "total_staff_visible": {"type": "integer", "minimum": 0},
             "fever_count": {"type": "integer", "minimum": 0},
             "fever_rate": {"type": "number", "minimum": 0, "maximum": 1},
             "anomaly_count": {"type": "integer", "minimum": 0},
@@ -119,7 +120,35 @@
             "channel_anomaly_counts": {
               "type": "object",
               "additionalProperties": {"type": "integer"}
+            },
+            "staff_visible_agents": {
+              "type": "array",
+              "items": {"type": "integer"}
+            },
+            "wearer_only_agents": {
+              "type": "array",
+              "items": {"type": "integer"}
+            },
+            "visibility_breakdown": {
+              "type": "object",
+              "additionalProperties": {"type": "integer"}
+            },
+            "device_deployment_counts": {
+              "type": "object",
+              "additionalProperties": {"type": "integer"}
             }
+          }
+        },
+        "diagnostic_cascade": {
+          "type": "object",
+          "properties": {
+            "new_tier0_agents": {"type": "array", "items": {"type": "integer"}},
+            "new_tier1_agents": {"type": "array", "items": {"type": "integer"}},
+            "tier_advancements": {"type": "array", "items": {"type": "object"}},
+            "tests_ordered": {"type": "object"},
+            "confinements_ordered": {"type": "array", "items": {"type": "integer"}},
+            "wearable_offers": {"type": "array", "items": {"type": "integer"}},
+            "fleet_sops_unlocked": {"type": "array", "items": {"type": "string"}}
           }
         },
         "hvac": {"type": "object"},
