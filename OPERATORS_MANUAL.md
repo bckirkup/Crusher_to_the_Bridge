@@ -742,9 +742,17 @@ every configuration from scratch.
 | `legend_class_nsc` | USCG Legend-class cutter | ~150 crew | 18 | Modern HVAC with NBC filtration |
 | `san_antonio_class_lpd` | San Antonio-class LPD | ~1,160 total | 22 | Extreme density in troop berthing |
 | `expedition_cruise_300` | Small expedition cruise | ~450 total | 25 | Intimate scale, 6–8 decks |
-| `mega_cruise_5000` | Mega cruise ship | ~7,000 total | 67 | Complex HVAC, 16+ decks, multiple dining venues |
+| `mega_cruise_5000` | Mega cruise ship | ~7,000 total | 67 | Complex HVAC, 16+ decks, multiple dining venues; cabin-corridor revision planned (`docs/PLATFORM_CABIN_REVISION.md`) |
+| `messy_cruise_500` | Mega cruise ship (legacy) | ~7,000 total | 67 | **Archived** pre-revision berthing: 27 passenger cabin blocks (~200 pax each) as well-mixed zones — confinement/quarantine does not isolate block-mates |
 
 Each directory contains `spatial_layout.json` and `air_flow_paths.json`.
+
+> **Legacy berthing (`messy_cruise_500`):** The original mega-cruise spatial model aggregated
+> individual staterooms into large well-mixed cabin blocks. Assigning an agent to their cabin
+> zone still modeled direct contact with every other occupant in that block (~199 people) plus
+> thousands more via shared HVAC. That topology is preserved under `messy_cruise_500` for
+> regression only. Active development targets cabin-corridor resolution in `mega_cruise_5000`
+> per `docs/PLATFORM_CABIN_REVISION.md`.
 To switch platforms, update the graph paths in `config.yaml`:
 
 ```yaml

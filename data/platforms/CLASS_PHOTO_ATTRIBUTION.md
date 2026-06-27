@@ -19,6 +19,7 @@ Sources and URLs: `class_photo_catalog.json`
 | san_antonio_class_lpd | USS San Antonio (LPD-17) | US Navy — public domain |
 | expedition_cruise_300 | Cruise ship side elevation | CC BY-SA 3.0 (Marcusroos) |
 | mega_cruise_5000 | Icon of the Seas | CC BY-SA 2.0 (Kahunapule Michael Johnson) |
+| messy_cruise_500 | Icon of the Seas (same reference as mega_cruise_5000) | CC BY-SA 2.0 (Kahunapule Michael Johnson) |
 | enterprise_constitution_tos | USS Enterprise (CVN-65) | US Navy — public domain; **fiction-adapted** |
 | enterprise_galaxy_tng | [Galaxy-class ortho](https://memory-beta.fandom.com/wiki/File:Galaxy_class_ortho.jpg) | Memory Beta (Fandom) fan wiki; **fiction-adapted**; Star Trek © Paramount — not for commercial redistribution |
 

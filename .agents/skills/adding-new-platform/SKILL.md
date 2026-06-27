@@ -136,6 +136,7 @@ This writes `deck_graphics.geojson`, `deck_hull.png`, and `deck_manifest.json` u
 | Fletcher-class Destroyer | `data/platforms/fletcher_class_destroyer` |
 | Legend-class NSC | `data/platforms/legend_class_nsc` |
 | Mega Cruise 5000 | `data/platforms/mega_cruise_5000` |
+| Messy Cruise 500 (legacy) | `data/platforms/messy_cruise_500` |
 | San Antonio-class LPD | `data/platforms/san_antonio_class_lpd` |
 
 ## Common Mistakes

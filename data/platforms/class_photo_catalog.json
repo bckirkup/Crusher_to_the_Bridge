@@ -50,6 +50,14 @@
       "photo_style": "profile",
       "local_file": "reference_photo.jpg"
     },
+    "messy_cruise_500": {
+      "wikimedia_title": "File:Icon of the Seas (kahunapulej).jpg",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Icon_of_the_Seas_%28kahunapulej%29.jpg",
+      "license": "CC BY-SA 2.0",
+      "credit": "Kahunapule Michael Johnson / Wikimedia Commons — Icon of the Seas (Royal Caribbean); legacy platform archived from mega_cruise_5000",
+      "photo_style": "profile",
+      "local_file": "reference_photo.jpg"
+    },
     "enterprise_constitution_tos": {
       "generated": true,
       "license": "Original work (programmatic LCARS schematic)",

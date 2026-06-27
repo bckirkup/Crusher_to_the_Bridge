@@ -422,7 +422,7 @@ grumb_seeding:
 
 ## Platforms
 
-Eight ship platforms are included, each with spatial layout and HVAC
+Nine ship platforms are included, each with spatial layout and HVAC
 airflow definitions:
 
 | Platform | Description |
@@ -433,7 +433,8 @@ airflow definitions:
 | `expedition_cruise_300` | 300-passenger expedition cruise ship |
 | `fletcher_class_destroyer` | Fletcher-class WWII destroyer |
 | `legend_class_nsc` | USCG Legend-class National Security Cutter |
-| `mega_cruise_5000` | 5000-passenger mega cruise ship |
+| `mega_cruise_5000` | 5000-passenger mega cruise ship (Oasis-class scale; cabin revision in progress — see `docs/PLATFORM_CABIN_REVISION.md`) |
+| `messy_cruise_500` | **Legacy** archived berthing model (67 zones): 27 passenger blocks of ~200 pax each modeled as well-mixed spaces, which frustrated quarantine/confinement simulation |
 | `san_antonio_class_lpd` | USN San Antonio-class LPD |
 
 Fiction-adapted Star Trek scenario bundles (platform paths, agent classes,

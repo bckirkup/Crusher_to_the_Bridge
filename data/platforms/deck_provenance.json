@@ -35,7 +35,7 @@
         "wikimedia_title": "File:USS Gleaves (DD-423) underway on 18 June 1941 (513043).jpg",
         "source_page": null,
         "license": "Public domain (US Navy)",
-        "credit": "US Navy — USS Gleaves (DD-423), lead ship Gleaves-class, 18 June 1941",
+        "credit": "US Navy \u2014 USS Gleaves (DD-423), lead ship Gleaves-class, 18 June 1941",
         "local_file": "reference_photo.jpg"
       }
     },
@@ -87,7 +87,7 @@
         "wikimedia_title": "File:Fletcher-class destroyer technical drawing 1954.jpg",
         "source_page": null,
         "license": "Public domain (US Navy)",
-        "credit": "US Navy All Hands magazine, 1954 — Fletcher-class technical drawing",
+        "credit": "US Navy All Hands magazine, 1954 \u2014 Fletcher-class technical drawing",
         "local_file": "reference_photo.jpg"
       }
     },
@@ -137,7 +137,7 @@
         "wikimedia_title": "File:USCGC Hamilton (WHEC-715).jpg",
         "source_page": null,
         "license": "Public domain (US Coast Guard)",
-        "credit": "US Coast Guard — USCGC Hamilton (WHEC-715), Hamilton-class WHEC, decommissioned 2011",
+        "credit": "US Coast Guard \u2014 USCGC Hamilton (WHEC-715), Hamilton-class WHEC, decommissioned 2011",
         "local_file": "reference_photo.jpg"
       }
     },
@@ -191,7 +191,7 @@
         "wikimedia_title": "File:USS Austin (LPD-4) underway on 29 April 1965 (USN 1111157).jpg",
         "source_page": null,
         "license": "Public domain (US Navy)",
-        "credit": "US Navy — USS Austin (LPD-4), Austin-class LPD, 29 April 1965; decommissioned 2006",
+        "credit": "US Navy \u2014 USS Austin (LPD-4), Austin-class LPD, 29 April 1965; decommissioned 2006",
         "local_file": "reference_photo.jpg"
       }
     },
@@ -199,7 +199,7 @@
       "platform_id": "expedition_cruise_300",
       "ship_class_label": "Expedition cruise (representative)",
       "footprint_tier": "representative",
-      "representative_of": "Small expedition cruise ship (~300 passengers, ~150 crew). Based on Silver Cloud / Le Boréal class vessels: ~157m LOA × 21m beam, 7 passenger decks, ~17,000 GT. Volumes estimated from published deck p",
+      "representative_of": "Small expedition cruise ship (~300 passengers, ~150 crew). Based on Silver Cloud / Le Bor\u00e9al class vessels: ~157m LOA \u00d7 21m beam, 7 passenger decks, ~17,000 GT. Volumes estimated from published deck p",
       "provenance": [
         "spatial_layout.json description and deck_dimensions",
         "zone count: 25"
@@ -248,7 +248,7 @@
         "wikimedia_title": "File:Cruise ship side view.png",
         "source_page": null,
         "license": "CC BY-SA 3.0",
-        "credit": "Marcusroos / Wikimedia Commons — cruise ship side elevation (schematic)",
+        "credit": "Marcusroos / Wikimedia Commons \u2014 cruise ship side elevation (schematic)",
         "local_file": "reference_photo.jpg"
       }
     },
@@ -259,7 +259,7 @@
       "representative_of": "Mega cruise ship (~5,000 passengers, ~2,000 crew), Oasis-class scale. Based on published Oasis-class specifications (~360-362m LOA, ~64-66m maximum beam, 18 decks, ~226,000 GT, ~2,700-2,800 cabins). I",
       "provenance": [
         "spatial_layout.json description and deck_dimensions",
-        "zone count: 67"
+        "zone count: 67 (pre-cabin-revision; see docs/PLATFORM_CABIN_REVISION.md)"
       ],
       "disclaimer": "Footprints are class-representative for simulation zones, not a surveyed deck plan of one vessel.",
       "zone_ids": [
@@ -347,7 +347,7 @@
         "wikimedia_title": "File:Icon of the Seas (kahunapulej).jpg",
         "source_page": null,
         "license": "CC BY-SA 2.0",
-        "credit": "Kahunapule Michael Johnson / Wikimedia Commons — Icon of the Seas (Royal Caribbean)",
+        "credit": "Kahunapule Michael Johnson / Wikimedia Commons \u2014 Icon of the Seas (Royal Caribbean)",
         "local_file": "reference_photo.jpg"
       }
     },
@@ -390,7 +390,7 @@
       "background_plate": "fiction_schematic",
       "reference_photo": {
         "license": "Original work (programmatic LCARS schematic)",
-        "credit": "Crusher-to-the-Bridge — Constitution-class inspired schematic (original geometric composition)",
+        "credit": "Crusher-to-the-Bridge \u2014 Constitution-class inspired schematic (original geometric composition)",
         "local_file": "reference_photo.jpg"
       }
     },
@@ -437,7 +437,107 @@
       "background_plate": "fiction_schematic",
       "reference_photo": {
         "license": "Original work (programmatic LCARS schematic)",
-        "credit": "Crusher-to-the-Bridge — Galaxy-class inspired schematic (original geometric composition)",
+        "credit": "Crusher-to-the-Bridge \u2014 Galaxy-class inspired schematic (original geometric composition)",
+        "local_file": "reference_photo.jpg"
+      }
+    },
+    "messy_cruise_500": {
+      "platform_id": "messy_cruise_500",
+      "ship_class_label": "Mega cruise \u2014 legacy well-mixed berthing",
+      "footprint_tier": "representative",
+      "representative_of": "LEGACY archived berthing model (formerly mega_cruise_5000). 27 passenger cabin blocks (~200 pax each) and 4 crew blocks modeled as well-mixed zones; quarantine/confinement does not isolate agents from block-mates.",
+      "provenance": [
+        "archived from mega_cruise_5000 (Feb 2026)",
+        "spatial_layout.json description and deck_dimensions",
+        "zone count: 67"
+      ],
+      "disclaimer": "Legacy platform retained for regression only. Berthing blocks frustrate quarantine simulation; see docs/PLATFORM_CABIN_REVISION.md.",
+      "zone_ids": [
+        "Bridge",
+        "Solarium",
+        "Main_Pool_Deck",
+        "Sports_Court",
+        "Waterpark",
+        "Pool_Bar_Grill",
+        "Spa_Fitness_Complex",
+        "Kids_Club",
+        "Teen_Zone",
+        "Central_Park_Open_Atrium",
+        "Royal_Promenade",
+        "Shopping_Retail_Block",
+        "Casino",
+        "Library_Card_Room",
+        "Main_Dining_Room_Lower",
+        "Main_Dining_Room_Upper",
+        "Windjammer_Buffet",
+        "Specialty_Restaurant_Block_A",
+        "Specialty_Restaurant_Block_B",
+        "Cafe_Bakery_Block",
+        "Crew_Mess_Main",
+        "Crew_Mess_Forward",
+        "Main_Theater",
+        "Aqua_Theater",
+        "Ice_Rink_Studio",
+        "Comedy_Club_Lounge",
+        "Medical_Center",
+        "Isolation_Ward",
+        "Main_Galley_Aft",
+        "Buffet_Galley_Upper",
+        "Specialty_Galley_Block",
+        "Central_Stores",
+        "Laundry_Main",
+        "Waste_Treatment_Plant",
+        "Engine_Room_Aft",
+        "Engine_Control_Room",
+        "Passenger_Cabins_D6_Port",
+        "Passenger_Cabins_D6_Stbd",
+        "Passenger_Cabins_D6_Central",
+        "Passenger_Cabins_D7_Port",
+        "Passenger_Cabins_D7_Stbd",
+        "Passenger_Cabins_D7_Central",
+        "Passenger_Cabins_D8_Port",
+        "Passenger_Cabins_D8_Stbd",
+        "Passenger_Cabins_D8_Central",
+        "Passenger_Cabins_D9_Port",
+        "Passenger_Cabins_D9_Stbd",
+        "Passenger_Cabins_D9_Central",
+        "Passenger_Cabins_D10_Port",
+        "Passenger_Cabins_D10_Stbd",
+        "Passenger_Cabins_D10_Central",
+        "Passenger_Cabins_D11_Port",
+        "Passenger_Cabins_D11_Stbd",
+        "Passenger_Cabins_D11_Central",
+        "Passenger_Cabins_D12_Port",
+        "Passenger_Cabins_D12_Stbd",
+        "Passenger_Cabins_D12_Central",
+        "Passenger_Cabins_D13_Port",
+        "Passenger_Cabins_D13_Stbd",
+        "Passenger_Cabins_D13_Central",
+        "Passenger_Cabins_D14_Port",
+        "Passenger_Cabins_D14_Stbd",
+        "Passenger_Cabins_D14_Central",
+        "Crew_Quarters_D1",
+        "Crew_Quarters_D2",
+        "Crew_Quarters_D3",
+        "Crew_Quarters_D4"
+      ],
+      "view_bounds": {
+        "xmin": 2.24,
+        "xmax": 363.38,
+        "ymin": -14.132901680684451,
+        "ymax": 132.92949858673012
+      },
+      "assets": {
+        "deck_graphics": "deck_graphics.geojson",
+        "deck_hull": "deck_hull.png",
+        "deck_blueprint_bg": "deck_blueprint_bg.png"
+      },
+      "background_plate": "reference_photo_composite",
+      "reference_photo": {
+        "wikimedia_title": "File:Icon of the Seas (kahunapulej).jpg",
+        "source_page": null,
+        "license": "CC BY-SA 2.0",
+        "credit": "Kahunapule Michael Johnson / Wikimedia Commons \u2014 Icon of the Seas (Royal Caribbean)",
         "local_file": "reference_photo.jpg"
       }
     }

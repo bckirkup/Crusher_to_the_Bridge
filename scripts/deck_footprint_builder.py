@@ -108,6 +108,7 @@ def build_manifest(
         "enterprise_galaxy_tng": "Galaxy-class (fiction-adapted)",
         "enterprise_constitution_tos": "Constitution-class (fiction-adapted)",
         "mega_cruise_5000": "Mega cruise (representative)",
+        "messy_cruise_500": "Mega cruise — legacy well-mixed berthing",
         "expedition_cruise_300": "Expedition cruise (representative)",
         "fletcher_class_destroyer": "Fletcher-class DD (representative)",
         "legend_class_nsc": "Legend-class NSC (representative)",
