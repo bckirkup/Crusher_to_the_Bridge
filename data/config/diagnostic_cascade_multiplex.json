@@ -44,6 +44,7 @@
       ],
       "confinement_on_positive": false,
       "sop_gate": [
+        "SOP-004",
         "SOP-006",
         "SOP-013"
       ],
@@ -74,6 +75,7 @@
       ],
       "confinement_on_positive": true,
       "sop_gate": [
+        "SOP-003",
         "SOP-008",
         "SOP-010",
         "SOP-012"
@@ -120,17 +122,39 @@
   },
   "fleet_escalation_rules": [
     {
-      "rule_id": "fleet_tier2_threshold",
-      "description": "When 3+ agents reach Tier 2 simultaneously, unlock fleet-wide SOPs",
+      "rule_id": "fleet_tier2_decon",
+      "description": "3+ agents at Tier 2 triggers surface decontamination",
       "tier_threshold": 2,
       "agent_count": 3,
       "category_filter": null,
       "pathogen_filter": null,
       "unlocked_sops": [
-        "SOP-004",
-        "SOP-005",
-        "SOP-009",
-        "SOP-014"
+        "SOP-003",
+        "SOP-004"
+      ]
+    },
+    {
+      "rule_id": "fleet_tier2_ppe_escalation",
+      "description": "5+ at Tier 2 triggers HEPA + N95",
+      "tier_threshold": 2,
+      "agent_count": 5,
+      "category_filter": null,
+      "pathogen_filter": null,
+      "unlocked_sops": [
+        "SOP-002",
+        "SOP-005"
+      ]
+    },
+    {
+      "rule_id": "fleet_tier3_ppe_escalation",
+      "description": "2+ at Tier 3 triggers HEPA + N95",
+      "tier_threshold": 3,
+      "agent_count": 2,
+      "category_filter": null,
+      "pathogen_filter": null,
+      "unlocked_sops": [
+        "SOP-002",
+        "SOP-005"
       ]
     },
     {
