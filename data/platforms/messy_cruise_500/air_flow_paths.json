@@ -1,0 +1,609 @@
+{
+  "platform": "messy_cruise_500",
+  "description": "LEGACY HVAC topology for messy_cruise_500. Two coarse cabin AHU networks (port and stbd/central) serve all aggregated cabin blocks. Archived; see docs/PLATFORM_CABIN_REVISION.md for deck-level revision.",
+  "hvac_zones": [
+    {
+      "id": "AHU_Network_Forward_Public",
+      "rooms": [
+        "Bridge",
+        "Solarium",
+        "Spa_Fitness_Complex",
+        "Main_Theater"
+      ],
+      "ach": 8.0,
+      "description": "Forward public venues and theater complex. High ACH for large assembly."
+    },
+    {
+      "id": "AHU_Network_Midship_Atrium",
+      "rooms": [
+        "Central_Park_Open_Atrium",
+        "Royal_Promenade",
+        "Shopping_Retail_Block",
+        "Casino",
+        "Library_Card_Room",
+        "Comedy_Club_Lounge"
+      ],
+      "ach": 6.0,
+      "description": "Midship multi-deck atrium, promenade, and enclosed public spaces."
+    },
+    {
+      "id": "AHU_Network_Aft_Dining_Rec",
+      "rooms": [
+        "Main_Pool_Deck",
+        "Sports_Court",
+        "Waterpark",
+        "Pool_Bar_Grill",
+        "Kids_Club",
+        "Teen_Zone",
+        "Main_Dining_Room_Lower",
+        "Main_Dining_Room_Upper",
+        "Windjammer_Buffet",
+        "Specialty_Restaurant_Block_A",
+        "Specialty_Restaurant_Block_B",
+        "Cafe_Bakery_Block",
+        "Aqua_Theater",
+        "Ice_Rink_Studio"
+      ],
+      "ach": 10.0,
+      "description": "Aft dining, pool deck, buffet, and recreation venues."
+    },
+    {
+      "id": "AHU_Network_Cabins_Port",
+      "rooms": [
+        "Passenger_Cabins_D6_Port",
+        "Passenger_Cabins_D7_Port",
+        "Passenger_Cabins_D8_Port",
+        "Passenger_Cabins_D9_Port",
+        "Passenger_Cabins_D10_Port",
+        "Passenger_Cabins_D11_Port",
+        "Passenger_Cabins_D12_Port",
+        "Passenger_Cabins_D13_Port",
+        "Passenger_Cabins_D14_Port"
+      ],
+      "ach": 6.0,
+      "description": "Port-side passenger cabin fresh air supply. 25-30% fresh air fraction to individual fan-coils."
+    },
+    {
+      "id": "AHU_Network_Cabins_Stbd_Central",
+      "rooms": [
+        "Passenger_Cabins_D6_Stbd",
+        "Passenger_Cabins_D6_Central",
+        "Passenger_Cabins_D7_Stbd",
+        "Passenger_Cabins_D7_Central",
+        "Passenger_Cabins_D8_Stbd",
+        "Passenger_Cabins_D8_Central",
+        "Passenger_Cabins_D9_Stbd",
+        "Passenger_Cabins_D9_Central",
+        "Passenger_Cabins_D10_Stbd",
+        "Passenger_Cabins_D10_Central",
+        "Passenger_Cabins_D11_Stbd",
+        "Passenger_Cabins_D11_Central",
+        "Passenger_Cabins_D12_Stbd",
+        "Passenger_Cabins_D12_Central",
+        "Passenger_Cabins_D13_Stbd",
+        "Passenger_Cabins_D13_Central",
+        "Passenger_Cabins_D14_Stbd",
+        "Passenger_Cabins_D14_Central"
+      ],
+      "ach": 6.0,
+      "description": "Starboard and Central passenger cabin fresh air supply."
+    },
+    {
+      "id": "AHU_Network_Crew_Accommodation",
+      "rooms": [
+        "Crew_Mess_Main",
+        "Crew_Mess_Forward",
+        "Crew_Quarters_D1",
+        "Crew_Quarters_D2",
+        "Crew_Quarters_D3",
+        "Crew_Quarters_D4"
+      ],
+      "ach": 8.0,
+      "description": "Crew accommodation and messing areas."
+    },
+    {
+      "id": "AHU_Dedicated_Medical",
+      "rooms": [
+        "Medical_Center",
+        "Isolation_Ward"
+      ],
+      "ach": 12.0,
+      "description": "Dedicated medical exhaust. Medical Center at 10-12 ACH, Isolation Ward at 12 ACH (100% negative exhaust, HEPA filtered before overboard)."
+    },
+    {
+      "id": "AHU_Dedicated_Service_Exhaust",
+      "rooms": [
+        "Main_Galley_Aft",
+        "Buffet_Galley_Upper",
+        "Specialty_Galley_Block",
+        "Central_Stores",
+        "Laundry_Main",
+        "Waste_Treatment_Plant"
+      ],
+      "ach": 15.0,
+      "description": "High-volume service exhaust for galleys, laundry, and waste processing."
+    },
+    {
+      "id": "AHU_Dedicated_Engine",
+      "rooms": [
+        "Engine_Room_Aft",
+        "Engine_Control_Room"
+      ],
+      "ach": 20.0,
+      "description": "Engine room forced ventilation and combustion air supply. Massive airflow, non-recirculating to accommodation."
+    }
+  ],
+  "cross_zone_links": [
+    {
+      "from": "AHU_Network_Cabins_Port",
+      "to": "AHU_Network_Midship_Atrium",
+      "flow_rate_m3h": 8000.0,
+      "is_hvac_ducted": true,
+      "path": "Corridor_Relief_Exhaust",
+      "description": "Cabin exhaust partially relieved into public corridors/atrium to maintain positive cabin pressure."
+    },
+    {
+      "from": "AHU_Network_Cabins_Stbd_Central",
+      "to": "AHU_Network_Midship_Atrium",
+      "flow_rate_m3h": 12000.0,
+      "is_hvac_ducted": true,
+      "path": "Corridor_Relief_Exhaust_Stbd",
+      "description": "Cabin exhaust partially relieved into public corridors/atrium."
+    },
+    {
+      "from": "AHU_Network_Aft_Dining_Rec",
+      "to": "AHU_Dedicated_Service_Exhaust",
+      "flow_rate_m3h": 15000.0,
+      "is_hvac_ducted": true,
+      "path": "Dining_to_Galley_Transfer",
+      "description": "Airflow drawn from dining rooms into galleys to maintain negative pressure in galleys, exhausting odors overboard."
+    },
+    {
+      "from": "AHU_Network_Midship_Atrium",
+      "to": "AHU_Network_Forward_Public",
+      "flow_rate_m3h": 6000.0,
+      "is_hvac_ducted": false,
+      "path": "Promenade_Forward_Passageway",
+      "description": "Passive multi-deck mixing between Royal Promenade and forward theater/public spaces."
+    },
+    {
+      "from": "AHU_Network_Crew_Accommodation",
+      "to": "AHU_Dedicated_Engine",
+      "flow_rate_m3h": 4000.0,
+      "is_hvac_ducted": false,
+      "path": "Crew_to_Engine_Stairwell",
+      "description": "Negative pressure in engine room draws passive air from lower crew service corridors."
+    },
+    {
+      "from": "AHU_Dedicated_Medical",
+      "to": "AHU_Network_Crew_Accommodation",
+      "flow_rate_m3h": 100.0,
+      "is_hvac_ducted": false,
+      "path": "Medical_Door_Leakage",
+      "description": "Minimal passive leakage; Medical and Isolation Ward kept strictly negative relative to surrounding crew/public corridors."
+    }
+  ],
+  "adjacency": [
+    {
+      "from": "Central_Park_Open_Atrium",
+      "to": "Royal_Promenade",
+      "type": "multi_deck_void"
+    },
+    {
+      "from": "Royal_Promenade",
+      "to": "Shopping_Retail_Block",
+      "type": "open_front"
+    },
+    {
+      "from": "Royal_Promenade",
+      "to": "Cafe_Bakery_Block",
+      "type": "open_front"
+    },
+    {
+      "from": "Royal_Promenade",
+      "to": "Casino",
+      "type": "stairwell"
+    },
+    {
+      "from": "Casino",
+      "to": "Main_Theater",
+      "type": "passageway"
+    },
+    {
+      "from": "Main_Dining_Room_Lower",
+      "to": "Main_Dining_Room_Upper",
+      "type": "stairwell"
+    },
+    {
+      "from": "Main_Dining_Room_Lower",
+      "to": "Main_Galley_Aft",
+      "type": "service_hatch"
+    },
+    {
+      "from": "Main_Dining_Room_Upper",
+      "to": "Main_Galley_Aft",
+      "type": "service_hatch"
+    },
+    {
+      "from": "Windjammer_Buffet",
+      "to": "Buffet_Galley_Upper",
+      "type": "service_hatch"
+    },
+    {
+      "from": "Windjammer_Buffet",
+      "to": "Main_Pool_Deck",
+      "type": "doorway"
+    },
+    {
+      "from": "Main_Pool_Deck",
+      "to": "Pool_Bar_Grill",
+      "type": "open_deck"
+    },
+    {
+      "from": "Main_Pool_Deck",
+      "to": "Sports_Court",
+      "type": "open_deck"
+    },
+    {
+      "from": "Main_Pool_Deck",
+      "to": "Waterpark",
+      "type": "open_deck"
+    },
+    {
+      "from": "Spa_Fitness_Complex",
+      "to": "Solarium",
+      "type": "doorway"
+    },
+    {
+      "from": "Kids_Club",
+      "to": "Teen_Zone",
+      "type": "corridor"
+    },
+    {
+      "from": "Medical_Center",
+      "to": "Isolation_Ward",
+      "type": "doorway"
+    },
+    {
+      "from": "Medical_Center",
+      "to": "Crew_Quarters_D2",
+      "type": "corridor"
+    },
+    {
+      "from": "Crew_Mess_Main",
+      "to": "Crew_Quarters_D2",
+      "type": "corridor"
+    },
+    {
+      "from": "Crew_Quarters_D1",
+      "to": "Crew_Quarters_D2",
+      "type": "stairwell"
+    },
+    {
+      "from": "Crew_Quarters_D2",
+      "to": "Crew_Quarters_D3",
+      "type": "stairwell"
+    },
+    {
+      "from": "Crew_Quarters_D3",
+      "to": "Crew_Quarters_D4",
+      "type": "stairwell"
+    },
+    {
+      "from": "Central_Stores",
+      "to": "Main_Galley_Aft",
+      "type": "service_elevator"
+    },
+    {
+      "from": "Engine_Control_Room",
+      "to": "Engine_Room_Aft",
+      "type": "doorway"
+    },
+    {
+      "from": "Passenger_Cabins_D6_Port",
+      "to": "Passenger_Cabins_D6_Central",
+      "type": "corridor"
+    },
+    {
+      "from": "Passenger_Cabins_D6_Stbd",
+      "to": "Passenger_Cabins_D6_Central",
+      "type": "corridor"
+    },
+    {
+      "from": "Passenger_Cabins_D6_Central",
+      "to": "Passenger_Cabins_D7_Central",
+      "type": "elevator_bank"
+    },
+    {
+      "from": "Passenger_Cabins_D6_Central",
+      "to": "Royal_Promenade",
+      "type": "stairwell"
+    },
+    {
+      "from": "Passenger_Cabins_D6_Central",
+      "to": "Central_Park_Open_Atrium",
+      "type": "stairwell"
+    },
+    {
+      "from": "Passenger_Cabins_D7_Port",
+      "to": "Passenger_Cabins_D7_Central",
+      "type": "corridor"
+    },
+    {
+      "from": "Passenger_Cabins_D7_Stbd",
+      "to": "Passenger_Cabins_D7_Central",
+      "type": "corridor"
+    },
+    {
+      "from": "Passenger_Cabins_D7_Central",
+      "to": "Passenger_Cabins_D8_Central",
+      "type": "elevator_bank"
+    },
+    {
+      "from": "Passenger_Cabins_D7_Central",
+      "to": "Royal_Promenade",
+      "type": "stairwell"
+    },
+    {
+      "from": "Passenger_Cabins_D7_Central",
+      "to": "Central_Park_Open_Atrium",
+      "type": "stairwell"
+    },
+    {
+      "from": "Passenger_Cabins_D8_Port",
+      "to": "Passenger_Cabins_D8_Central",
+      "type": "corridor"
+    },
+    {
+      "from": "Passenger_Cabins_D8_Stbd",
+      "to": "Passenger_Cabins_D8_Central",
+      "type": "corridor"
+    },
+    {
+      "from": "Passenger_Cabins_D8_Central",
+      "to": "Passenger_Cabins_D9_Central",
+      "type": "elevator_bank"
+    },
+    {
+      "from": "Passenger_Cabins_D8_Central",
+      "to": "Royal_Promenade",
+      "type": "stairwell"
+    },
+    {
+      "from": "Passenger_Cabins_D8_Central",
+      "to": "Central_Park_Open_Atrium",
+      "type": "stairwell"
+    },
+    {
+      "from": "Passenger_Cabins_D9_Port",
+      "to": "Passenger_Cabins_D9_Central",
+      "type": "corridor"
+    },
+    {
+      "from": "Passenger_Cabins_D9_Stbd",
+      "to": "Passenger_Cabins_D9_Central",
+      "type": "corridor"
+    },
+    {
+      "from": "Passenger_Cabins_D9_Central",
+      "to": "Passenger_Cabins_D10_Central",
+      "type": "elevator_bank"
+    },
+    {
+      "from": "Passenger_Cabins_D10_Port",
+      "to": "Passenger_Cabins_D10_Central",
+      "type": "corridor"
+    },
+    {
+      "from": "Passenger_Cabins_D10_Stbd",
+      "to": "Passenger_Cabins_D10_Central",
+      "type": "corridor"
+    },
+    {
+      "from": "Passenger_Cabins_D10_Central",
+      "to": "Passenger_Cabins_D11_Central",
+      "type": "elevator_bank"
+    },
+    {
+      "from": "Passenger_Cabins_D11_Port",
+      "to": "Passenger_Cabins_D11_Central",
+      "type": "corridor"
+    },
+    {
+      "from": "Passenger_Cabins_D11_Stbd",
+      "to": "Passenger_Cabins_D11_Central",
+      "type": "corridor"
+    },
+    {
+      "from": "Passenger_Cabins_D11_Central",
+      "to": "Passenger_Cabins_D12_Central",
+      "type": "elevator_bank"
+    },
+    {
+      "from": "Passenger_Cabins_D12_Port",
+      "to": "Passenger_Cabins_D12_Central",
+      "type": "corridor"
+    },
+    {
+      "from": "Passenger_Cabins_D12_Stbd",
+      "to": "Passenger_Cabins_D12_Central",
+      "type": "corridor"
+    },
+    {
+      "from": "Passenger_Cabins_D12_Central",
+      "to": "Passenger_Cabins_D13_Central",
+      "type": "elevator_bank"
+    },
+    {
+      "from": "Passenger_Cabins_D13_Port",
+      "to": "Passenger_Cabins_D13_Central",
+      "type": "corridor"
+    },
+    {
+      "from": "Passenger_Cabins_D13_Stbd",
+      "to": "Passenger_Cabins_D13_Central",
+      "type": "corridor"
+    },
+    {
+      "from": "Passenger_Cabins_D13_Central",
+      "to": "Passenger_Cabins_D14_Central",
+      "type": "elevator_bank"
+    },
+    {
+      "from": "Passenger_Cabins_D14_Port",
+      "to": "Passenger_Cabins_D14_Central",
+      "type": "corridor"
+    },
+    {
+      "from": "Passenger_Cabins_D14_Stbd",
+      "to": "Passenger_Cabins_D14_Central",
+      "type": "corridor"
+    },
+    {
+      "from": "Main_Theater",
+      "to": "Royal_Promenade",
+      "type": "stairwell"
+    },
+    {
+      "from": "Solarium",
+      "to": "Windjammer_Buffet",
+      "type": "passageway"
+    },
+    {
+      "from": "Bridge",
+      "to": "Solarium",
+      "type": "passageway"
+    },
+    {
+      "from": "Main_Dining_Room_Upper",
+      "to": "Royal_Promenade",
+      "type": "stairwell"
+    },
+    {
+      "from": "Specialty_Restaurant_Block_A",
+      "to": "Central_Park_Open_Atrium",
+      "type": "doorway"
+    },
+    {
+      "from": "Specialty_Restaurant_Block_B",
+      "to": "Royal_Promenade",
+      "type": "doorway"
+    },
+    {
+      "from": "Main_Pool_Deck",
+      "to": "Windjammer_Buffet",
+      "type": "doorway"
+    },
+    {
+      "from": "Ice_Rink_Studio",
+      "to": "Royal_Promenade",
+      "type": "stairwell"
+    },
+    {
+      "from": "Aqua_Theater",
+      "to": "Central_Park_Open_Atrium",
+      "type": "passageway"
+    },
+    {
+      "from": "Comedy_Club_Lounge",
+      "to": "Casino",
+      "type": "passageway"
+    },
+    {
+      "from": "Library_Card_Room",
+      "to": "Royal_Promenade",
+      "type": "doorway"
+    },
+    {
+      "from": "Kids_Club",
+      "to": "Spa_Fitness_Complex",
+      "type": "corridor"
+    },
+    {
+      "from": "Cafe_Bakery_Block",
+      "to": "Royal_Promenade",
+      "type": "open_front"
+    },
+    {
+      "from": "Specialty_Galley_Block",
+      "to": "Specialty_Restaurant_Block_A",
+      "type": "service_hatch"
+    },
+    {
+      "from": "Specialty_Galley_Block",
+      "to": "Specialty_Restaurant_Block_B",
+      "type": "service_hatch"
+    },
+    {
+      "from": "Crew_Quarters_D1",
+      "to": "Engine_Room_Aft",
+      "type": "ladder_well"
+    },
+    {
+      "from": "Crew_Quarters_D1",
+      "to": "Engine_Control_Room",
+      "type": "ladder_well"
+    },
+    {
+      "from": "Crew_Quarters_D1",
+      "to": "Central_Stores",
+      "type": "service_corridor"
+    },
+    {
+      "from": "Crew_Quarters_D1",
+      "to": "Laundry_Main",
+      "type": "service_corridor"
+    },
+    {
+      "from": "Central_Stores",
+      "to": "Waste_Treatment_Plant",
+      "type": "service_corridor"
+    },
+    {
+      "from": "Crew_Quarters_D4",
+      "to": "Main_Dining_Room_Lower",
+      "type": "service_stairwell"
+    },
+    {
+      "from": "Crew_Mess_Main",
+      "to": "Crew_Quarters_D2",
+      "type": "corridor"
+    },
+    {
+      "from": "Crew_Mess_Forward",
+      "to": "Crew_Quarters_D3",
+      "type": "corridor"
+    },
+    {
+      "from": "Medical_Center",
+      "to": "Crew_Quarters_D2",
+      "type": "corridor"
+    },
+    {
+      "from": "Buffet_Galley_Upper",
+      "to": "Main_Pool_Deck",
+      "type": "service_corridor"
+    },
+    {
+      "from": "Spa_Fitness_Complex",
+      "to": "Passenger_Cabins_D14_Central",
+      "type": "elevator_bank"
+    },
+    {
+      "from": "Main_Pool_Deck",
+      "to": "Passenger_Cabins_D14_Central",
+      "type": "elevator_bank"
+    },
+    {
+      "from": "Windjammer_Buffet",
+      "to": "Passenger_Cabins_D10_Central",
+      "type": "elevator_bank"
+    },
+    {
+      "from": "Solarium",
+      "to": "Main_Theater",
+      "type": "stairwell"
+    }
+  ],
+  "legacy": true
+}

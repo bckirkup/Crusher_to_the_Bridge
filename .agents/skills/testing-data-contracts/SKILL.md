@@ -71,6 +71,7 @@ Expected: 22 tests pass in ~0.2s.
 - `fletcher_class_destroyer`
 - `legend_class_nsc`
 - `mega_cruise_5000`
+- `messy_cruise_500` (legacy archived berthing)
 - `san_antonio_class_lpd`
 
 Enterprise scenario bundles: `data/templates/enterprise_constitution_tos.json`, `data/templates/enterprise_galaxy_tng.json`.

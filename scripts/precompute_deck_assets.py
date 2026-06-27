@@ -38,6 +38,7 @@ PLATFORMS = [
     "san_antonio_class_lpd",
     "expedition_cruise_300",
     "mega_cruise_5000",
+    "messy_cruise_500",
     "enterprise_constitution_tos",
     "enterprise_galaxy_tng",
 ]

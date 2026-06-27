@@ -90,6 +90,6 @@ Pure-Python simulation (no databases, Docker, or external APIs). **Python 3.11+*
 - **Law 1:** No hardcoded epoch SOP schedules; Stackelberg `authorize_sop_subset` filters stoplight-eligible SOPs; `activate_sop` can force protocols via `forced_protocol_ids`.
 - **OIS:** Fourth ledger dimension in `cost_accounting`; configured via `operational_impact_weights` in `resource_costs.json`.
 - Utility **weights and optimization** are out-of-repo; only feature export and action apply are in-repo.
-- Eight ship platforms in `data/platforms/` (including fiction-adapted Enterprise bundles); see `README.md` Platforms table.
+- Nine ship platforms in `data/platforms/` (including fiction-adapted Enterprise bundles and legacy `messy_cruise_500`); see `README.md` Platforms table.
 - **Wearable cascade entry** uses confounder-aware `infection_score` (not raw `anomaly_count`) via `diagnostic_cascade.entry.wearable_alert_fusion` or defaults in `data/config/diagnostic_cascade*.json`. Fleet stoplight SOPs (SOP-013/014) still use shipwide `anomaly_rate`.
 - No flake8/ruff in repo; use `sanity_checker.py` and pytest.
