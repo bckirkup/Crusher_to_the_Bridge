@@ -34,7 +34,7 @@ from engines.infection_dynamics_bridge import (
     InfectionStatus,
     IllnessStatus,
 )
-from simulation_utils.numeric import default_simulation_rng
+from simulation_utils.numeric import default_simulation_rng, float_ne
 
 
 # ── Channel baseline defaults ────────────────────────────────────────────
