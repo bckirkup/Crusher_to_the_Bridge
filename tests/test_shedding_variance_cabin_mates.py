@@ -48,8 +48,8 @@ class TestSheddingVariance:
         agent = _agent(1, "Berthing")
         agent.infect_with_pathogen("norovirus_gii4", 100.0, 0, rng=rng, profile=profile)
         mult = agent.infections["norovirus_gii4"]["shedding_multiplier"]
-        assert mult > 0
-        assert mult != 1.0 or profile["shedding_variance_log10"] == 0.0
+        assert mult == pytest.approx(2.8646767258185335)
+        assert mult > 1.0
 
     def test_multiplier_scales_get_pathogen_shedding(self) -> None:
         agent = _agent(1, "Berthing", infected=True)

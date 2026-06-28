@@ -489,6 +489,36 @@ class TransmissionCore:
 
     # ── Pathway 1: Direct Contact ────────────────────────────────────
 
+    def _zone_has_cabin_confinement(
+        self,
+        zone_name: str,
+        shedders: list[tuple[KorkinAgent, float]],
+        susceptible: list[KorkinAgent],
+    ) -> bool:
+        if self.zone_types.get(zone_name) != "Cabin_Corridor":
+            return False
+        if any(self._cabin_confinement_active(s) for s, _ in shedders):
+            return True
+        return any(self._cabin_confinement_active(t) for t in susceptible)
+
+    def _direct_contact_dose(
+        self,
+        target: KorkinAgent,
+        shedders: list[tuple[KorkinAgent, float]],
+        total_shedding: float,
+        n_occupants: int,
+        r0_draw: int,
+        cabin_confinement: bool,
+    ) -> float:
+        if cabin_confinement:
+            dose = 0.0
+            for shedder, sv in shedders:
+                pair_factor = self._cabin_pair_contact_factor(shedder, target)
+                dose += sv * pair_factor / n_occupants * r0_draw
+            return dose
+        dose = total_shedding / n_occupants * r0_draw
+        return dose * self._confinement_factor(target)
+
     def _pathway_direct_contact(
         self,
         epoch: int,
@@ -511,22 +541,16 @@ class TransmissionCore:
             shedder_ids = [s.agent_id for s, _ in shedders]
             n_occupants = max(len(occupants), 1)
             zone_dc_factor = self._direct_contact_zone_factor(zone_name)
-            zone_is_cabin = self.zone_types.get(zone_name) == "Cabin_Corridor"
-            cabin_confinement = zone_is_cabin and (
-                any(self._cabin_confinement_active(s) for s, _ in shedders)
-                or any(self._cabin_confinement_active(t) for t in susceptible)
+            cabin_confinement = self._zone_has_cabin_confinement(
+                zone_name, shedders, susceptible,
             )
 
             for target in susceptible:
                 r0_draw = int(self.rng.choice(AVG_R_POOL))
-                if cabin_confinement:
-                    dose = 0.0
-                    for shedder, sv in shedders:
-                        pair_factor = self._cabin_pair_contact_factor(shedder, target)
-                        dose += sv * pair_factor / n_occupants * r0_draw
-                else:
-                    dose = total_shedding / n_occupants * r0_draw
-                    dose *= self._confinement_factor(target)
+                dose = self._direct_contact_dose(
+                    target, shedders, total_shedding, n_occupants, r0_draw,
+                    cabin_confinement,
+                )
                 dose *= self.direct_contact_scalar
                 dose *= zone_dc_factor
                 agent_doses[target.agent_id] = (
