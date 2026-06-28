@@ -12,6 +12,7 @@ from __future__ import annotations
 import json
 import math
 import os
+from collections import defaultdict
 from typing import Any
 
 import numpy as np
@@ -82,9 +83,51 @@ def load_spatial_layout(cfg: dict[str, Any]) -> list[dict[str, Any]] | None:
             "display": z.get("display", {}),
             "deck": z.get("deck", "main"),
             "cabin_ventilation_type": z.get("cabin_ventilation_type", ""),
+            "cabin_size": z.get("cabin_size"),
         }
         for z in layout.get("zones", [])
     ]
+
+
+def default_cabin_size(zone_name: str, zone_type: str, cabin_size: int | None) -> int | None:
+    """Resolve cabin occupancy for cabin-mate pairing."""
+    if cabin_size is not None:
+        return int(cabin_size)
+    if zone_type != "Cabin_Corridor":
+        return None
+    if zone_name.startswith("Crew_"):
+        return 3
+    return 2
+
+
+def assign_cabin_mates(
+    agents: list[Any],
+    zones: list[dict[str, Any]],
+) -> None:
+    """Pair agents into cabins within each corridor zone (mega_cruise_5000).
+
+    Sets ``cabin_mate_ids`` on each agent to the other occupants of the
+    same stateroom.  Non-cabin zones are skipped.
+    """
+    zone_meta = {z["name"]: z for z in zones}
+    agents_by_zone: dict[str, list[Any]] = defaultdict(list)
+    for agent in agents:
+        agents_by_zone[agent.home_zone].append(agent)
+
+    for zone_name, zone_agents in agents_by_zone.items():
+        meta = zone_meta.get(zone_name, {})
+        cabin_size = default_cabin_size(
+            zone_name,
+            meta.get("type", ""),
+            meta.get("cabin_size"),
+        )
+        if cabin_size is None or cabin_size < 1:
+            continue
+        for i in range(0, len(zone_agents), cabin_size):
+            cabin_group = zone_agents[i : i + cabin_size]
+            cabin_ids = {a.agent_id for a in cabin_group}
+            for agent in cabin_group:
+                agent.cabin_mate_ids = frozenset(cabin_ids - {agent.agent_id})
 
 
 def load_platform_layout_doc(cfg: dict[str, Any]) -> dict[str, Any] | None:
@@ -418,7 +461,9 @@ def init_multi_pathogen(
                 )
                 dpi = int(prof.get("initial_time_infected", 0))
                 for agent in chosen:
-                    agent.infect_with_pathogen(pid, 1e4, 0, time_infected=dpi)
+                    agent.infect_with_pathogen(
+                        pid, 1e4, 0, time_infected=dpi, rng=rng, profile=prof,
+                    )
                     print(f"  Seeded {pid} → agent {agent.agent_id}")
     print()
 

@@ -66,6 +66,7 @@ from orchestrator_init import (
     init_wearable_monitors,
     initialize_grumb_seeding,
     initialize_ship_graph,
+    assign_cabin_mates,
     load_isolation_unit_capacity,
     load_pathogen_profiles,
 )
@@ -160,6 +161,8 @@ class ShipSimulation:
         if self.display:
             from orchestrator_display import print_korkin_engine
             print_korkin_engine(self.engine)
+
+        assign_cabin_mates(self.engine.agents, ship["zones"])
 
         self.contam_engine = build_transport_engine(self.repo_root, cfg)
         if self.contam_engine is not None:

@@ -81,6 +81,7 @@ def _pax_corridor_zones() -> list[dict[str, Any]]:
                     "max_occupancy": 67,
                     "display": _pax_display(deck, section, sub),
                     "cabin_ventilation_type": vent,
+                    "cabin_size": 2,
                     "description": (
                         f"Passenger cabin corridor, Deck {deck} {section} {sub}. "
                         f"~10 cabins, ~67 pax, ventilation={vent}."
@@ -103,6 +104,7 @@ def _crew_corridor_zones() -> list[dict[str, Any]]:
                 "max_occupancy": 170,
                 "display": _crew_display(deck, section),
                 "cabin_ventilation_type": "interior_hvac",
+                "cabin_size": 3,
                 "description": (
                     f"Crew cabin corridor, Deck {deck} {section}. "
                     "~35 shared cabins, higher density, interior HVAC."

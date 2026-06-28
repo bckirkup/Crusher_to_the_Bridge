@@ -165,7 +165,9 @@ def step_mid_cruise_introductions(
                 )
                 dpi = int(prof.get("initial_time_infected", 0))
                 for agent in chosen:
-                    agent.infect_with_pathogen(pid, 1e4, epoch, time_infected=dpi)
+                    agent.infect_with_pathogen(
+                        pid, 1e4, epoch, time_infected=dpi, rng=rng, profile=prof,
+                    )
 
 
 # ── Infection progression ────────────────────────────────────────────────

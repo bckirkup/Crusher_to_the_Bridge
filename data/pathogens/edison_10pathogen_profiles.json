@@ -87,7 +87,8 @@
       },
       "introduction_epoch": 0,
       "initial_infected": 1,
-      "initial_time_infected": 0
+      "initial_time_infected": 0,
+      "shedding_variance_log10": 1.5
     },
     {
       "pathogen_id": "sars_cov2_resp",
@@ -169,7 +170,8 @@
       },
       "introduction_epoch": 6,
       "initial_infected": 1,
-      "initial_time_infected": 0
+      "initial_time_infected": 0,
+      "shedding_variance_log10": 1.2
     },
     {
       "pathogen_id": "influenza_a",
@@ -249,7 +251,8 @@
       },
       "introduction_epoch": 12,
       "initial_infected": 1,
-      "initial_time_infected": 0
+      "initial_time_infected": 0,
+      "shedding_variance_log10": 1.0
     },
     {
       "pathogen_id": "measles_virus",
@@ -325,7 +328,8 @@
       },
       "introduction_epoch": 20,
       "initial_infected": 1,
-      "initial_time_infected": 0
+      "initial_time_infected": 0,
+      "shedding_variance_log10": 0.8
     },
     {
       "pathogen_id": "legionella_pneumophila",
@@ -403,7 +407,8 @@
       },
       "introduction_epoch": 30,
       "initial_infected": 0,
-      "initial_time_infected": 0
+      "initial_time_infected": 0,
+      "shedding_variance_log10": 0.5
     },
     {
       "pathogen_id": "vibrio_cholerae_parahaemolyticus",
@@ -487,7 +492,8 @@
       },
       "introduction_epoch": 40,
       "initial_infected": 1,
-      "initial_time_infected": 0
+      "initial_time_infected": 0,
+      "shedding_variance_log10": 1.0
     },
     {
       "pathogen_id": "campylobacter_jejuni",
@@ -566,7 +572,8 @@
       },
       "introduction_epoch": 50,
       "initial_infected": 1,
-      "initial_time_infected": 0
+      "initial_time_infected": 0,
+      "shedding_variance_log10": 1.0
     },
     {
       "pathogen_id": "clostridioides_difficile",
@@ -646,7 +653,8 @@
       },
       "introduction_epoch": 60,
       "initial_infected": 1,
-      "initial_time_infected": 0
+      "initial_time_infected": 0,
+      "shedding_variance_log10": 1.5
     },
     {
       "pathogen_id": "andes_hantavirus",
@@ -722,7 +730,8 @@
       },
       "introduction_epoch": 70,
       "initial_infected": 1,
-      "initial_time_infected": 0
+      "initial_time_infected": 0,
+      "shedding_variance_log10": 1.0
     },
     {
       "pathogen_id": "ebola_virus",
@@ -802,7 +811,8 @@
       },
       "introduction_epoch": 80,
       "initial_infected": 1,
-      "initial_time_infected": 0
+      "initial_time_infected": 0,
+      "shedding_variance_log10": 1.5
     }
   ]
 }
