@@ -36,11 +36,12 @@ class TestCabinCorridorTransmission:
         shedder = _agent(1, zone, infected=True)
         free_target = _agent(2, zone)
         confined_target = _agent(3, zone)
+        # Non-cabin-mates: confined agent should get minimal hallway contact
+        confined_target.cabin_mate_ids = frozenset({99})
         core = TransmissionCore(
             rng=np.random.default_rng(42),
             zone_volumes={zone: 1200.0},
             zone_types={zone: "Cabin_Corridor"},
-            confinement_isolation_factor=0.05,
             corridor_direct_contact_factor=0.15,
         )
         core.initialize_zones([zone])

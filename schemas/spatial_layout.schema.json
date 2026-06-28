@@ -90,6 +90,11 @@
           "type": "string",
           "enum": ["interior_hvac", "balcony_partial", "atrium_view"],
           "description": "Cabin corridor ventilation class (balcony_partial reduces aerosol dose)"
+        },
+        "cabin_size": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Stateroom occupancy for cabin-mate pairing (default: 2 pax, 3 crew)"
         }
       }
     }

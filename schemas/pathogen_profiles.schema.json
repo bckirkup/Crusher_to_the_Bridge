@@ -58,6 +58,11 @@
           "minimum": 0,
           "description": "Dose-response scaling factor"
         },
+        "shedding_variance_log10": {
+          "type": "number",
+          "minimum": 0,
+          "description": "σ of log-normal host shedding multiplier (0 = no variance)"
+        },
         "dose_response": {
           "type": "object",
           "required": ["model"],

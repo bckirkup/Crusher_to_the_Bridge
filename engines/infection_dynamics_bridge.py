@@ -236,6 +236,21 @@ def shedding_value(day_post_infection: int, is_symptomatic: bool) -> float:
     return max(1.0, math.pow(10, curve[idx] - DOSE_ADJUSTMENT))
 
 
+def draw_shedding_multiplier(
+    rng: np.random.Generator,
+    profile: dict[str, Any],
+) -> float:
+    """Draw a persistent per-agent shedding multiplier from a log-normal.
+
+    ``shedding_variance_log10`` is the σ of the normal in log10 space; median
+    multiplier is 1.0.  σ=0 (or absent) yields exactly 1.0.
+    """
+    variance = float(profile.get("shedding_variance_log10", 0.0))
+    if variance <= 0:
+        return 1.0
+    return 10.0 ** float(rng.normal(0.0, variance))
+
+
 # ── Agent class ──────────────────────────────────────────────────────────
 
 class KorkinAgent:
@@ -266,6 +281,7 @@ class KorkinAgent:
         # Chronic disease extensions
         "chronic_disease_ids", "chronic_pathogen_mods",
         "chronic_wearable_response_scale",
+        "shedding_multiplier", "cabin_mate_ids",
     )
 
     def __init__(
@@ -317,6 +333,11 @@ class KorkinAgent:
         # Aggregate wearable infection response scale from chronic diseases
         self.chronic_wearable_response_scale: float = 1.0
 
+        # Legacy single-pathogen shedding host factor (also mirrored on first infection)
+        self.shedding_multiplier: float = 1.0
+        # Cabin-mate agent IDs sharing the same stateroom (mega_cruise_5000)
+        self.cabin_mate_ids: frozenset[int] = frozenset()
+
     @property
     def days_post_infection(self) -> int:
         """Days since infection (0-indexed).  -1 if not infected."""
@@ -344,7 +365,7 @@ class KorkinAgent:
         dpi = self.days_post_infection
         if dpi < 0:
             return 0.0
-        return shedding_value(dpi, self.is_symptomatic)
+        return shedding_value(dpi, self.is_symptomatic) * self.shedding_multiplier
 
     def get_location_for_hour(self, hour: int, randomness: float = 0.0) -> str:
         """Determine where this agent should be at the given hour.
@@ -377,21 +398,32 @@ class KorkinAgent:
         epoch: int,
         *,
         time_infected: int = 0,
+        rng: np.random.Generator | None = None,
+        profile: dict[str, Any] | None = None,
     ) -> None:
         """Record co-infection for a specific pathogen.
 
         ``time_infected`` is days post-infection at assignment (index into
         shedding curves). Seeded introductions read ``initial_time_infected``
         from the pathogen profile; transmission events use the default 0.
+
+        When ``rng`` and ``profile`` are supplied, draws a persistent
+        ``shedding_multiplier`` from ``profile['shedding_variance_log10']``.
         """
         if time_infected < 0:
             raise ValueError(f"time_infected must be non-negative, got {time_infected}")
+        shedding_mult = (
+            draw_shedding_multiplier(rng, profile or {})
+            if rng is not None
+            else 1.0
+        )
         self.infections[pathogen_id] = {
             "status": InfectionStatus.INFECTED,
             "illness": IllnessStatus.NOT_ILL,
             "time_infected": time_infected,
             "acquired_particles": dose,
             "infection_epoch": epoch,
+            "shedding_multiplier": shedding_mult,
         }
         # Set legacy fields to infected if this is the first infection
         if self.infection_status == InfectionStatus.SUSCEPTIBLE:
@@ -399,6 +431,7 @@ class KorkinAgent:
             self.illness_status = IllnessStatus.NOT_ILL
             self.time_infected = time_infected
             self.acquired_particles = dose
+            self.shedding_multiplier = shedding_mult
 
     def is_infected_with(self, pathogen_id: str) -> bool:
         """Check if agent is infected with a specific pathogen."""
@@ -424,7 +457,8 @@ class KorkinAgent:
             curve = profile.get("asymptomatic_shedding_log10", curve)
         adj = profile.get("dose_adjustment", DOSE_ADJUSTMENT)
         idx = min(dpi, len(curve) - 1)
-        return math.pow(10, curve[idx] - adj)
+        base = math.pow(10, curve[idx] - adj)
+        return base * inf.get("shedding_multiplier", 1.0)
 
     def update_microflora_disruption(self, pathogen_profiles: dict) -> None:
         """Recompute microflora_disruption_status from all active infections."""

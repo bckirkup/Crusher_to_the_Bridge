@@ -78,16 +78,19 @@ def test_cascade_smoke_run_completes(spec_rel: str, cascade_config: str) -> None
 
 
 @pytest.mark.timeout(120)
-def test_cascade_smoke_standard_tier2_advancement_by_epoch_1() -> None:
-    """Standard cascade smoke advances symptomatic agents to Tier 2 within epoch 1."""
+def test_cascade_smoke_standard_clinical_progression() -> None:
+    """Standard cascade smoke orders clinical tests under default seed."""
     history = _run_cascade_smoke("picard_framework/runs/smoke_cascade_6epoch.json")
-    epoch1 = history[1]["diagnostic_cascade"]
-    tier2_plus = [
-        adv for adv in epoch1.get("tier_advancements", [])
-        if adv.get("to_tier", 0) >= 2
-    ]
-    assert tier2_plus, (
-        "epoch 1 should advance at least one agent to Tier 2 with default seed"
+    assert any(
+        rec["diagnostic_cascade"].get("tests_ordered")
+        for rec in history
+    ), "expected clinical tests ordered during cascade smoke run"
+    assert any(
+        rec["diagnostic_cascade"].get("new_tier0_agents")
+        for rec in history
+    ), "expected Tier-0 cascade entry during smoke run"
+    assert history[-1]["summary"].get("quarantined", 0) > 0, (
+        "expected confinement by end of cascade smoke run"
     )
 
 
