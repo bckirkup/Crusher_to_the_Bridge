@@ -26,7 +26,7 @@ python orchestrator.py --epochs 250
 # Launch LCARS dashboard (after simulation)
 streamlit run dashboard.py
 
-# Run the test suite (~629 tests)
+# Run the test suite (~655 tests)
 pytest tests/ -v --tb=short
 ```
 
@@ -119,7 +119,7 @@ dashboard/                   Modular command deck (theme, charts, spatial_viz, d
 scripts/                     Enterprise platform builder, deck graphics, asset precompute
 telemetry_buffer/
 │   agent_axes.py            Orthogonal agent state (infection / presentation / compliance)
-tests/                       ~629 tests (ship, fleet, Stackelberg, OIS, behavioral, long-read, TAT, enterprise, CONTAM, schemas, wearable scoring, diagnostic cascade)
+tests/                       ~655 tests (ship, fleet, Stackelberg, OIS, behavioral, long-read, TAT, enterprise, CONTAM, schemas, wearable scoring, diagnostic cascade)
 AGENTS.md                    Cursor Cloud / agent development notes
 ```
 
@@ -439,7 +439,7 @@ airflow definitions:
 | `expedition_cruise_300` | 300-passenger expedition cruise ship |
 | `fletcher_class_destroyer` | Fletcher-class WWII destroyer |
 | `legend_class_nsc` | USCG Legend-class National Security Cutter |
-| `mega_cruise_5000` | 5000-passenger mega cruise ship (Oasis-class; 129 zones, cabin-corridor berthing — see `docs/PLATFORM_CABIN_REVISION.md`) |
+| `mega_cruise_5000` | 5000-passenger mega cruise ship (Oasis-class; 129 zones, cabin-corridor berthing + cabin-mate pairing — see `docs/PLATFORM_CABIN_REVISION.md`, `docs/SHEDDING_AND_CABINMATES.md`) |
 | `messy_cruise_500` | **Legacy** archived berthing model (67 zones): 27 passenger blocks of ~200 pax each modeled as well-mixed spaces, which frustrated quarantine/confinement simulation |
 | `san_antonio_class_lpd` | USN San Antonio-class LPD |
 
@@ -560,7 +560,7 @@ python tools/sanity_checker.py --config-dir data/config \
 ## Testing
 
 ```bash
-# Full suite (~629 tests)
+# Full suite (~655 tests)
 pytest tests/ -v --tb=short
 
 # Picard / Presidio / Stackelberg
@@ -592,7 +592,7 @@ pytest tests/test_telemetry_seams.py        # cross-module data flow
 Cloud agents and CI environments: see `AGENTS.md` (`python3`, headless Streamlit).
 
 CI (`.github/workflows/ci.yml`) runs advisory ruff lint, sanity checks, JSON schema
-validation, the full pytest suite with coverage (~629 tests), Picard/Presidio import
+validation, the full pytest suite with coverage (~655 tests), Picard/Presidio import
 hygiene, Presidio smoke, long-read/TAT and wearable/cascade targeted tests, dashboard
 import smoke, a 24-epoch orchestrator run, diagnostic cascade smoke, and OIS telemetry
 verification. Framework-focused checks run in `.github/workflows/picard-presidio.yml`.

@@ -51,7 +51,19 @@ Required structure per zone (matches `schemas/spatial_layout.schema.json`):
 for ship-wide wastewater sequencing (e.g. `Engine_Room_Aft` on large cruise
 platforms). Every entry must match a zone `id` in the same file.
 
-Zone `type` values include `Free`, `Dining`, `Room`, etc. **Dining** zones enable food-contamination pathway pools.
+Zone `type` values include `Free`, `Dining`, `Room`, **`Cabin_Corridor`**, etc.
+**Dining** zones enable food-contamination pathway pools.
+
+For mega-cruise cabin-corridor platforms (`mega_cruise_5000`), corridor zones may
+include:
+
+| Field | Purpose |
+|-------|---------|
+| `cabin_ventilation_type` | `interior_hvac`, `balcony_partial`, or `atrium_view` — affects aerosol dose |
+| `cabin_size` | Stateroom occupancy for cabin-mate pairing (default: 2 pax, 3 crew) |
+
+At ship init, `assign_cabin_mates()` groups agents by `home_zone` into staterooms.
+See `docs/SHEDDING_AND_CABINMATES.md` and `docs/PLATFORM_CABIN_REVISION.md`.
 
 **Law 3 constraints:**
 - `volume_m3` must be > 0
@@ -110,7 +122,8 @@ check-jsonschema --schemafile schemas/air_flow_paths.schema.json data/platforms/
 
 ### 6. Run data contract tests
 ```bash
-python -m pytest tests/test_data_contracts.py -v --tb=short
+python3 -m pytest tests/test_data_contracts.py tests/test_cabin_corridor_transmission.py \
+  tests/test_shedding_variance_cabin_mates.py -v --tb=short
 ```
 
 ### 7. Test with the orchestrator (optional)

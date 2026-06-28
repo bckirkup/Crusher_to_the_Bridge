@@ -1,8 +1,9 @@
 # Mega Cruise Platform Revision: Cabin-Level Spatial Resolution
 
-**Status:** Implemented in `data/platforms/mega_cruise_5000/` (Feb 2026). Regenerate with
-`python3 scripts/generate_mega_cruise_cabin_layout.py`. Legacy well-mixed model:
-`data/platforms/messy_cruise_500/`.
+**Status:** Implemented in `data/platforms/mega_cruise_5000/` (Feb 2026). Cabin-mate
+direct-contact pairing implemented June 2026 — see `docs/SHEDDING_AND_CABINMATES.md`.
+Regenerate layout: `python3 scripts/generate_mega_cruise_cabin_layout.py`. Legacy
+well-mixed model: `data/platforms/messy_cruise_500/`.
 
 ## Problem
 
@@ -16,8 +17,8 @@ to ~199 other people via direct contact, plus thousands more via shared HVAC.
 **Legacy platform:** `data/platforms/messy_cruise_500/` — retained for regression and
 comparison only. Do not use for quarantine or cabin-confinement studies.
 
-**Active revision target:** `data/platforms/mega_cruise_5000/` — to be updated per this
-document.
+**Active revision target:** `data/platforms/mega_cruise_5000/` — cabin-corridor zones
+with per-stateroom cabin-mate pairing at init.
 
 ## Oasis-Class Reference Data
 
@@ -44,9 +45,9 @@ For each of 9 passenger decks × 3 sections (port/starboard/central):
 - Volume: ~30 cabins × 40 m³/cabin = 1,200 m³ (cabin volumes only, not shared)
 - Max occupancy: 60–80
 
-Naming: `Pax_Corridor_D{deck}_{Port|Stbd|Central}`
+Naming: `Pax_Corridor_D{deck}_{Port|Stbd|Central}_{Fwd|Mid|Aft}`
 
-Example: `Pax_Corridor_D6_Port` (30 cabins, 60 pax, 1200 m³)
+Example: `Pax_Corridor_D6_Port_Fwd` (~10 cabins, ~67 pax, 1200 m³)
 
 ### Cabin Ventilation Type Flag
 
@@ -57,7 +58,8 @@ Each corridor section gets a ventilation type:
 - `atrium_view` — opens to Central Park or Royal Promenade (semi-outdoor)
 
 This affects the HVAC transmission model: balcony cabins should have reduced aerosol
-accumulation due to outdoor air dilution.
+accumulation due to outdoor air dilution (`BALCONY_AEROSOL_REDUCTION = 0.5` in
+`TransmissionCore`).
 
 ### Crew Cabins (replace 4 blocks with 12 sections)
 
@@ -80,42 +82,44 @@ Revised:
 
 ### Key Transmission Parameters for Cabin Corridors
 
-- **Direct contact:** should be much lower than the legacy model
-  - Within a cabin corridor, direct contact should model hallway encounters, not
-    room-sharing. A person confined to their cabin should have near-zero direct
-    contact with other cabins on their corridor.
-  - Need a `confinement_isolation_factor` that reduces direct contact dose by 90–95%
-    for confined agents (they only contact their cabin-mates)
-- **HVAC/aerosol:** the primary inter-cabin transmission route
-  - Depends on corridor section sharing an AHU branch
-  - Balcony cabins with doors open: 50% reduction in aerosol exposure
-- **Fomite:** corridor surfaces (handrails, door handles, elevator buttons)
-  - Relevant for norovirus, less so for respiratory
+- **Direct contact:** hallway encounter rate vs well-mixed ward
+  (`corridor_direct_contact_factor = 0.15` on platform layout)
+- **Confinement / cabin-mates:** when quarantined in a `Cabin_Corridor` zone,
+  direct contact is **pair-based** via `cabin_mate_ids`:
+  - Full dose to cabin-mates (shared stateroom)
+  - `0.01×` dose to non-mates (closed door / hallway)
+  - Implemented in `TransmissionCore._cabin_pair_contact_factor()`
+- **HVAC/aerosol:** primary inter-cabin transmission route; confinement does **not**
+  reduce HVAC dose
+- **Fomite:** corridor surfaces; confined agents skip fomite pickup
+- **Balcony ventilation:** `balcony_partial` zones reduce droplet/HVAC aerosol dose
 
-### Confinement Model Fix
+### Confinement Model
 
 When an agent is confined (quarantined/isolated):
 
 - Their `current_location` stays in their cabin corridor zone
-- Direct contact is restricted to cabin-mates only (2–4 people), not all 60
+- Direct contact is restricted to cabin-mates (2–3 people), not all ~67 corridor occupants
 - Fomite contribution is zeroed (they're not touching corridor surfaces)
-- HVAC/aerosol exposure continues at the corridor section level
+- HVAC/aerosol exposure continues at corridor section level
 - If balcony cabin: aerosol exposure reduced by balcony ventilation factor
 
-This requires a change in the transmission core: confined agents should have a
-modified contact multiplier, not just a location assignment.
+Initialization: `orchestrator_init.assign_cabin_mates()` groups agents by
+`home_zone` using `cabin_size` (default 2 pax / 3 crew per stateroom).
 
 ## Implementation Plan
 
-1. Generate new `spatial_layout.json` with ~93 cabin zones + existing 40 public zones ≈ 133 total
-2. Generate new `air_flow_paths.json` with deck-level HVAC sub-zones
-3. Add `confinement_isolation_factor` to TransmissionCore
-4. Add `cabin_ventilation_type` to zone metadata
-5. Recalibrate `dose_adjustment` at the new zone resolution
+1. ✅ Generate `spatial_layout.json` with ~93 cabin zones + existing public zones
+2. ✅ Generate `air_flow_paths.json` with deck-level HVAC sub-zones
+3. ✅ Add `confinement_isolation_factor` to TransmissionCore (legacy uniform factor;
+   superseded for direct contact by cabin-mate pairing)
+4. ✅ Add `cabin_ventilation_type` to zone metadata
+5. ✅ Add `cabin_size` to corridor zones (generator script)
+6. ✅ Cabin-mate pairing at init + pair-based direct contact under confinement
 
 ## Impact on Simulation Performance
 
-- Zone count: 67 → ~133 (2×)
+- Zone count: 67 → ~129 (2×)
 - But each zone has fewer occupants (~60 vs ~200)
 - Transmission calculations are O(n²) within zones
 - Net: fewer per-zone calculations, more zones = roughly similar total compute

@@ -753,7 +753,7 @@ every configuration from scratch.
 | `legend_class_nsc` | USCG Legend-class cutter | ~150 crew | 18 | Modern HVAC with NBC filtration |
 | `san_antonio_class_lpd` | San Antonio-class LPD | ~1,160 total | 22 | Extreme density in troop berthing |
 | `expedition_cruise_300` | Small expedition cruise | ~450 total | 25 | Intimate scale, 6–8 decks |
-| `mega_cruise_5000` | Mega cruise ship | ~7,000 total | 129 | Cabin-corridor berthing (81 pax + 12 crew sections), deck-level HVAC, confinement isolation |
+| `mega_cruise_5000` | Mega cruise ship | ~7,000 total | 129 | Cabin-corridor berthing, cabin-mate pairing, deck-level HVAC |
 | `messy_cruise_500` | Mega cruise ship (legacy) | ~7,000 total | 67 | **Archived** pre-revision berthing: 27 passenger cabin blocks (~200 pax each) as well-mixed zones — confinement/quarantine does not isolate block-mates |
 
 Each directory contains `spatial_layout.json` and `air_flow_paths.json`.
@@ -763,7 +763,7 @@ Each directory contains `spatial_layout.json` and `air_flow_paths.json`.
 > zone still modeled direct contact with every other occupant in that block (~199 people) plus
 > thousands more via shared HVAC. That topology is preserved under `messy_cruise_500` for
 > regression only. Active development targets cabin-corridor resolution in `mega_cruise_5000`
-> per `docs/PLATFORM_CABIN_REVISION.md`.
+> per `docs/PLATFORM_CABIN_REVISION.md` and `docs/SHEDDING_AND_CABINMATES.md` (cabin-mate pairing).
 To switch platforms, update the graph paths in `config.yaml`:
 
 ```yaml
@@ -852,6 +852,7 @@ pools per room.  Key properties:
 | `category` | string | `enteric_viral`, `respiratory_viral`, `bacterial`, `fungal` |
 | `transmission_routes` | array | Subset of: `direct_contact`, `fomite`, `droplet`, `hvac_airborne`, `food`, `water`, `water_aerosol`, `bodily_fluids` |
 | `shedding_curve_log10` | array | Day-by-day symptomatic shedding (log10 copies), typically 15 entries |
+| `shedding_variance_log10` | float | σ of log-normal host shedding multiplier (0 = no variance; see `docs/SHEDDING_AND_CABINMATES.md`) |
 | `dose_response` | object | `{model, alpha, beta}` — Korkin Lab dose-response parameters |
 | `recovery_day` | int | Day of infection → Recovered transition |
 | `surface_deposition_fraction` | float | Fraction [0,1] of shed mass deposited on surfaces |
@@ -1540,7 +1541,7 @@ python tools/sanity_checker.py --from-config
 pytest tests/ -v --tb=short
 ```
 
-The suite includes **~629 tests** across data contracts, sanity checker,
+The suite includes **~655 tests** across data contracts, sanity checker,
 orchestrator/quarantine logic, infection counters, orthogonal agent axes,
 wearable/detection-escalation protocol engine, enhanced wearable model
 (multi-device, confounders, detection profiles, visibility, chronic disease
@@ -1551,7 +1552,7 @@ instrument turnaround (TAT), per-test cost accounting, **operational impact
 (food/environmental), dashboard helpers, law compliance, telemetry seams, and
 **Picard / Presidio / Stackelberg** framework tests. CI
 (`.github/workflows/ci.yml`) runs advisory ruff lint, sanity checks, JSON schema
-validation, full pytest with coverage (~629 tests), Picard/Presidio import
+validation, full pytest with coverage (~655 tests), Picard/Presidio import
 hygiene, Presidio smoke, long-read/TAT targeted tests, wearable/cascade entry
 tests, orchestrator import hygiene, dashboard import (including LCARS theme),
 24-epoch orchestrator run, diagnostic cascade smoke, and OIS telemetry
@@ -1583,6 +1584,8 @@ See `AGENTS.md` for cloud agent commands.
 | `test_smoke_diagnostic_cascade.py` | 6-epoch cascade smoke (standard + multiplex specs) |
 | `test_wearable_anomaly_scorer.py` | Confounder-aware `infection_score` for cascade Tier-0 entry |
 | `test_cascade_entry.py` | Sick-call Tier 1 vs wearable Tier 0 fusion rules |
+| `test_cabin_corridor_transmission.py` | Cabin-corridor confinement, balcony ventilation, HVAC under quarantine |
+| `test_shedding_variance_cabin_mates.py` | Host shedding multiplier, cabin-mate assignment and direct contact |
 | `test_wearable_enhanced.py` | Multi-device, confounders, detection profiles, visibility |
 
 ---

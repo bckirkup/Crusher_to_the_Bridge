@@ -50,7 +50,7 @@ ShipSimulation(spec).run()
 ```bash
 python3 tools/sanity_checker.py --from-config
 python3 -m pytest tests/test_picard_framework.py tests/test_golden_orchestrator.py \
-  tests/test_action_applier.py -v
+  tests/test_shedding_variance_cabin_mates.py tests/test_action_applier.py -v
 ```
 
 Epoch order: [docs/simulation_step_order.md](../../docs/simulation_step_order.md)

@@ -7,8 +7,8 @@ definitions for all data contracts used in the Crusher-to-the-Bridge platform.
 
 | File | Validates | Path |
 |------|-----------|------|
-| `pathogen_profiles.schema.json` | Multi-pathogen definitions | `data/pathogens/active_profiles.json` |
-| `spatial_layout.schema.json` | Room/zone node graph | `data/platforms/*/spatial_layout.json` |
+| `pathogen_profiles.schema.json` | Multi-pathogen definitions (incl. `shedding_variance_log10`) | `data/pathogens/active_profiles.json` |
+| `spatial_layout.schema.json` | Room/zone node graph (incl. `cabin_size`, `cabin_ventilation_type`) | `data/platforms/*/spatial_layout.json` |
 | `air_flow_paths.schema.json` | HVAC zones & airflow edges | `data/platforms/*/air_flow_paths.json` |
 | `protocols.schema.json` | Standing operating protocols | `data/config/protocols.json` |
 | `resource_costs.schema.json` | Budget, inventory, costs, OIS weights | `data/config/resource_costs.json` |

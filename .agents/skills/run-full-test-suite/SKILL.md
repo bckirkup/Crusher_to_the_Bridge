@@ -20,7 +20,7 @@ None — all tests run locally.
 ```bash
 python3 -m pytest tests/ -v --tb=short
 ```
-Expected: ~629 tests pass in ~7s.
+Expected: ~655 tests pass in ~8s.
 
 ### Run with coverage reporting
 ```bash
@@ -54,6 +54,9 @@ python3 -m pytest tests/test_infection_counters.py -v --tb=short
 
 # CONTAM physics (HVAC mass-balance, ACH, filter efficiency, natural decay)
 python3 -m pytest tests/test_py_contam_bridge.py -v --tb=short
+
+# Shedding variance + cabin-mate transmission
+python3 -m pytest tests/test_shedding_variance_cabin_mates.py tests/test_cabin_corridor_transmission.py -v --tb=short
 
 # Golden Picard parity (ShipSimulation vs orchestrator SIR comparison)
 python3 -m pytest tests/test_golden_picard.py -v --tb=short
@@ -140,7 +143,7 @@ The full CI pipeline (`.github/workflows/ci.yml`) runs these steps in order:
 2. `ruff check ...` — static analysis (advisory, `continue-on-error: true`)
 3. `python3 tools/sanity_checker.py --from-config` — config validation
 4. `pytest tests/test_json_schema_validation.py -v --tb=short` — JSON schema validation
-5. `pytest tests/ -v --tb=short --cov --cov-report=term-missing` — full suite with coverage (~629 tests)
+5. `pytest tests/ -v --tb=short --cov --cov-report=term-missing` — full suite with coverage (~655 tests)
 6. Picard/Presidio/Stackelberg import hygiene
 7. Presidio smoke (`presidio_runner.py` smoke fleet)
 8. Long-read / TAT targeted tests (+ sequencing config wiring)
@@ -208,7 +211,8 @@ python3 -c "import json; c=json.load(open('telemetry_buffer/simulation_history.j
 | `test_enterprise_platforms.py` | 5 | `data/platforms/enterprise_*` | Enterprise HVAC referential integrity |
 | `test_smoke_diagnostic_cascade.py` | 4 | `picard_framework/` | 6-epoch cascade smoke (standard + multiplex specs) |
 | `test_picard_framework.py` | 4 | `picard_framework/` | PicardRunSpec, ShipSimulation, golden reproducibility |
-| `test_cabin_corridor_transmission.py` | 4 | `engines/transmission_core.py` | Cabin-corridor transmission physics |
+| `test_cabin_corridor_transmission.py` | 5 | `engines/transmission_core.py` | Cabin-corridor confinement, ventilation, HVAC |
+| `test_shedding_variance_cabin_mates.py` | 8 | `engines/infection_dynamics_bridge.py`, `orchestrator_init.py` | Host shedding multiplier, cabin-mate pairing |
 | `test_agent_axes.py` | 4 | `telemetry_buffer/agent_axes.py` | Orthogonal infection/presentation/compliance |
 | `test_transmission_pathways.py` | 3 | `engines/transmission_core.py` | Food/environmental pool initialization |
 | `test_golden_picard.py` | 3 | `picard_framework/`, `orchestrator.py` | Golden SIR parity, cost accounting, Picard vs orchestrator |
@@ -222,20 +226,20 @@ python3 -c "import json; c=json.load(open('telemetry_buffer/simulation_history.j
 
 ## Golden Test Values
 
-Seed-42 / 24-epoch destroyer baseline (epoch 23), current `main` lineage
-(cascade entry + clinical correlation + pathogen overrides):
+Seed-42 / 24-epoch destroyer baseline (epoch 23), with `shedding_variance_log10`
+on `active_profiles.json`:
 
 | Metric | Expected (epoch 23) |
 |--------|-------------------|
-| Susceptible | 6 |
+| Susceptible | 1 |
 | Infected | 0 |
 | Symptomatic | 0 |
-| Recovered | 10 |
+| Recovered | 15 |
 | Immune | 4 |
-| Trigger status | CONFIRMED |
-| Total financial USD | 2035.0 |
-| OIS cumulative | ~313.4 |
+| Trigger status | BASELINE |
+| Total financial USD | > 0 (exact value may differ slightly between Python 3.11 and 3.12) |
+| OIS cumulative | shifts with outbreak dynamics |
 
-Golden totals can shift when observation, cascade, or pathogen wiring changes;
-update `tests/test_golden_orchestrator.py` and `tests/test_golden_picard.py`
-after intentional epidemiological changes.
+Golden totals shift when observation, cascade, pathogen wiring, or shedding variance
+changes; update `tests/test_golden_orchestrator.py` and `tests/test_golden_picard.py`
+after intentional epidemiological changes. See `docs/SHEDDING_AND_CABINMATES.md`.

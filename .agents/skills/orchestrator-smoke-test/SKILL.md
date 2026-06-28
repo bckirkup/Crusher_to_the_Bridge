@@ -36,12 +36,16 @@ Expected: Two parametrized runs complete using Picard run specs:
 - `picard_framework/runs/smoke_cascade_6epoch.json` — standard Tier 0–3 cascade
 - `picard_framework/runs/smoke_cascade_multiplex_6epoch.json` — multiplex Tier-1 panel
 
-Each epoch records a `diagnostic_cascade` block in telemetry with tier progression.
+Each epoch records a `diagnostic_cascade` block in telemetry with tier progression
+and clinical test ordering. See `tests/test_smoke_diagnostic_cascade.py`.
 Wearable Tier-0 entry uses confounder-aware `infection_score` (default threshold
 1.5) rather than raw multi-channel `anomaly_count`. See
 `.agents/skills/wearable-anomaly-scoring/SKILL.md`.
 These specs set `config_overrides.diagnostic_cascade.enabled: true` without changing
 the default `crusher_labs/config.yaml` (cascade remains off for golden regression).
+
+Golden 24-epoch baseline (destroyer, seed 42): susceptible 1, recovered 15, trigger
+BASELINE — see `docs/SHEDDING_AND_CABINMATES.md`.
 
 ### Validate config before running
 ```bash
@@ -70,8 +74,9 @@ Expected: Prints success message with no ImportError.
 
 | Area | What It Checks |
 |------|----------------|
-| Initialization | Ship graph loads from platform JSON, engine builds from `crusher_labs/config.yaml`, pathogen profiles parsed |
+| Initialization | Ship graph loads from platform JSON, engine builds from `crusher_labs/config.yaml`, pathogen profiles parsed, **cabin-mate pairing** on `Cabin_Corridor` platforms |
 | Agent classes | Multi-class crew/passenger taxonomy with duty zones |
+| Shedding variance | Per-agent `shedding_multiplier` drawn at infection from `shedding_variance_log10` on pathogen profile |
 | Infection counters | Per-group attack rates and threshold confinement in telemetry |
 | CONTAM Bridge | `py_contam_bridge.build_transport_engine()` succeeds (or gracefully returns None) |
 | Multi-Pathogen | All pathogens in `active_profiles.json` initialize with valid dose-response params |

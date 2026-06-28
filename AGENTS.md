@@ -16,7 +16,7 @@ Pure-Python simulation (no databases, Docker, or external APIs). **Python 3.11+*
 | Streamlit dashboard | `python3 -m streamlit run dashboard.py --server.headless true` | Run orchestrator first for telemetry |
 | Deck asset precompute | `python3 scripts/precompute_deck_assets.py` | Writes `deck_graphics.geojson`, hull PNG, manifest per platform |
 | Sanity checker | `python3 tools/sanity_checker.py --from-config` | Ship + fleet + Stackelberg social configs |
-| Full test suite | `python3 -m pytest tests/ -v --tb=short` | ~629 tests, ~7s |
+| Full test suite | `python3 -m pytest tests/ -v --tb=short` | ~655 tests, ~8s |
 | Wearable anomaly scoring | `python3 -m pytest tests/test_wearable_anomaly_scorer.py tests/test_cascade_entry.py -v` | Confounder-aware infection_score + cascade entry fusion |
 | Diagnostic cascade smoke | `python3 -m pytest tests/test_smoke_diagnostic_cascade.py -v` | 6-epoch runs with cascade enabled (standard + multiplex specs) |
 | Long-read / TAT tests | `python3 -m pytest tests/test_long_read_sequencing.py tests/test_instrument_turnaround.py -v` | Nanopore + turnaround queue |
@@ -46,7 +46,7 @@ Pure-Python simulation (no databases, Docker, or external APIs). **Python 3.11+*
 1. `ruff check` — advisory lint (`continue-on-error: true`)
 2. `python tools/sanity_checker.py --from-config`
 3. `pytest tests/test_json_schema_validation.py -v --tb=short`
-4. `pytest tests/ -v --tb=short --cov --cov-report=term-missing` (~629 tests)
+4. `pytest tests/ -v --tb=short --cov --cov-report=term-missing` (~655 tests)
 5. Picard/Presidio/Stackelberg import hygiene
 6. Presidio smoke (`smoke_fleet.json`, 1 cruise)
 7. Long-read / TAT targeted tests (+ sequencing config wiring)
@@ -95,4 +95,6 @@ Pure-Python simulation (no databases, Docker, or external APIs). **Python 3.11+*
 - Utility **weights and optimization** are out-of-repo; only feature export and action apply are in-repo.
 - Nine ship platforms in `data/platforms/` (including fiction-adapted Enterprise bundles and legacy `messy_cruise_500`); see `README.md` Platforms table.
 - **Wearable cascade entry** uses confounder-aware `infection_score` (not raw `anomaly_count`) via `diagnostic_cascade.entry.wearable_alert_fusion` or defaults in `data/config/diagnostic_cascade*.json`. Fleet stoplight SOPs (SOP-013/014) still use shipwide `anomaly_rate`.
+- **Shedding variance:** `shedding_variance_log10` on pathogen profiles draws a persistent per-agent multiplier at infection (`docs/SHEDDING_AND_CABINMATES.md`).
+- **Cabin-mates:** `mega_cruise_5000` `Cabin_Corridor` zones pair agents into staterooms at init; confinement direct contact is cabin-mate-aware (`assign_cabin_mates` in `orchestrator_init.py`).
 - Ruff lint runs in CI as advisory only (`continue-on-error: true`); blocking gates are `sanity_checker.py` and pytest.

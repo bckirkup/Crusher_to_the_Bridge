@@ -75,6 +75,9 @@ python3 -m pytest tests/test_smoke_diagnostic_cascade.py -v
 Run specs use `config_overrides.diagnostic_cascade.enabled: true` so the default
 `crusher_labs/config.yaml` can keep cascade disabled for golden regression.
 
+Design references: `docs/SHEDDING_AND_CABINMATES.md` (host shedding variance +
+cabin-mate pairing), `docs/PLATFORM_CABIN_REVISION.md` (mega-cruise spatial model).
+
 ## Outputs
 
 | File | Description |
