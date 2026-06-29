@@ -105,7 +105,6 @@ def main() -> None:
             hist_path, nb_path = telemetry_paths(tel_dir_input)
             history = load_history_from(hist_path)
             notebook = load_notebook_from(nb_path)
-            tel_dir = tel_dir_input
 
         active_pid, detect_method = _locked_platform_id(history)
         bundle = load_platform_bundle(active_pid)

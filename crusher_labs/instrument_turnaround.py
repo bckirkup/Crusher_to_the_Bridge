@@ -240,7 +240,7 @@ def merge_released_into_observation(
 
     def _zone_dict(inst: str) -> dict[str, dict[str, Any]]:
         raw = released.get(inst, {})
-        return {k: v for k, v in raw.items()}
+        return dict(raw)
 
     def _agent_dict(inst: str) -> dict[int, dict[str, Any]]:
         raw = released.get(inst, {})

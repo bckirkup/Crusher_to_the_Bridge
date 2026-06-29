@@ -260,7 +260,6 @@ class LongReadNanoporeSequencing:
                 det.get("species_classification_accuracy", 0.96),
             ),
         )
-        reads_strain = int(det.get("reads_for_strain_typing", 10_000))
 
         calls: list[dict[str, Any]] = []
         for taxon, count in read_dict.items():

@@ -521,11 +521,11 @@ class TransmissionCore:
 
     def _pathway_direct_contact(
         self,
-        epoch: int,
+        _epoch: int,
         zone_occupants: dict[str, list[KorkinAgent]],
         agent_doses: dict[int, float],
         matrix: ContactTracingMatrix,
-        events: list[TransmissionEvent],
+        _events: list[TransmissionEvent],
         agent_pathway_doses: dict[int, dict[str, float]] | None = None,
         pathogen_id: str = "_default",
         profile: dict | None = None,
@@ -574,11 +574,11 @@ class TransmissionCore:
 
     def _pathway_droplet(
         self,
-        epoch: int,
+        _epoch: int,
         zone_occupants: dict[str, list[KorkinAgent]],
         agent_doses: dict[int, float],
         matrix: ContactTracingMatrix,
-        events: list[TransmissionEvent],
+        _events: list[TransmissionEvent],
         agent_pathway_doses: dict[int, dict[str, float]] | None = None,
         pathogen_id: str = "_default",
         profile: dict | None = None,
@@ -629,13 +629,13 @@ class TransmissionCore:
 
     def _pathway_hvac_airborne(
         self,
-        epoch: int,
+        _epoch: int,
         zone_occupants: dict[str, list[KorkinAgent]],
         zone_pathogen_mass: dict[str, float],
         hvac_downstream_zones: dict[str, list[str]],
         agent_doses: dict[int, float],
         matrix: ContactTracingMatrix,
-        events: list[TransmissionEvent],
+        _events: list[TransmissionEvent],
         agent_pathway_doses: dict[int, dict[str, float]] | None = None,
         pathogen_id: str = "_default",
     ) -> None:
@@ -697,7 +697,7 @@ class TransmissionCore:
         zone_occupants: dict[str, list[KorkinAgent]],
         agent_doses: dict[int, float],
         matrix: ContactTracingMatrix,
-        events: list[TransmissionEvent],
+        _events: list[TransmissionEvent],
         agent_pathway_doses: dict[int, dict[str, float]] | None = None,
         pathogen_id: str = "_default",
         profile: dict | None = None,
@@ -793,7 +793,7 @@ class TransmissionCore:
         growth = fc.get("growth_rate_per_epoch", 0.0)
         decay = fc.get("decay_rate_per_epoch", 0.1)
 
-        for zone_name in list(food_zones):
+        for zone_name in food_zones:
             occupants = zone_occupants.get(zone_name, [])
 
             # Deposit from shedders present in this food zone
@@ -929,10 +929,10 @@ class TransmissionCore:
     # ── State management ─────────────────────────────────────────────
 
     def _update_surface_pools(
-        self, zone_occupants: dict[str, list[KorkinAgent]],
+        self, _zone_occupants: dict[str, list[KorkinAgent]],
     ) -> None:
         """Apply surface decay after fomite interactions."""
-        for zone_name in list(self.surface_pools):
+        for zone_name in self.surface_pools:
             self.surface_pools[zone_name] *= (1.0 - SURFACE_DECAY_RATE)
 
     def _update_prev_occupancy(

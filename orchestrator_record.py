@@ -291,7 +291,10 @@ def finalize_simulation(
         json.dump(state.simulation_history, fh, indent=2)
     print(f"\n  Simulation history saved to: {history_path}")
 
-    logging_config_path = resolve_repo_path(REPO_ROOT, "data/config/logging_profile.json")
+    logging_config_path = resolve_repo_path(
+        REPO_ROOT,
+        logging_profile_path or "data/config/logging_profile.json",
+    )
     _, _, logging_config = load_logging_profile(logging_config_path)
 
     if obs.lab_notebook_enabled:
@@ -339,9 +342,6 @@ def finalize_simulation(
             isolated_count=len(state.isolated_ids),
             quarantined_count=len(state.quarantined_ids),
             refuser_count=len(state.quarantine_refusers),
-            contam_engine=contam_engine,
-            zone_pathogen_mass=engine.zone_pathogen_mass,
-            hvac_cfg=cfg.get("hvac", {}),
             pathogen_profiles=pathogen_profiles,
             infection_counters=final_counters,
         )

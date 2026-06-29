@@ -101,9 +101,8 @@ def iter_compartment_rings(
 
     for zid, zinfo in bundle.zone_coords.items():
         deck = zinfo.get("deck", "main")
-        if deck_filter and deck_filter != "All Decks":
-            if deck != deck_filter:
-                continue
+        if deck_filter and deck_filter != "All Decks" and deck != deck_filter:
+            continue
         ring = geo_by_zone.get(zid) or _zone_ring(zinfo)
         yield zid, ring, deck
 

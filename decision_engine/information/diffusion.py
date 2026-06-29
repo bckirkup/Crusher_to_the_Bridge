@@ -66,7 +66,7 @@ class InformationDiffusionEngine:
     def initialize_agents(
         self,
         agent_ids: list[int],
-        agent_classes: dict[int, str],
+        _agent_classes: dict[int, str],
         overrides: dict[str, Any] | None = None,
     ) -> None:
         ov = overrides or {}

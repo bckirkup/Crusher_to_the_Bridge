@@ -255,7 +255,7 @@ class TestTransmissionCoreExpanded:
         agents[0].illness_status = IllnessStatus.SYMPTOMATIC
         agents[0].time_infected = 3
         mass = {"Z1": 100.0, "Z2": 0.0, "Z3": 0.0}
-        matrix, events = core.execute_transmission(
+        matrix, _events = core.execute_transmission(
             epoch=1, agents=agents, zone_pathogen_mass=mass,
         )
         assert matrix.epoch == 1

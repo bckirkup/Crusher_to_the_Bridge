@@ -54,7 +54,7 @@ class AgentLivedExperienceStore:
         isolated_ids: set[int],
         contact_adjacency: dict[int, dict[int, float]],
         wearable_result: dict[str, Any] | None,
-        profiles: dict[int, AgentProfile] | None = None,
+        _profiles: dict[int, AgentProfile] | None = None,
     ) -> None:
         sick_ids = set(syn_result.get("sick_call_agents", [])) if syn_result else set()
         sop_ids = [p.get("protocol_id", "") for p in active_protocols if p.get("protocol_id")]

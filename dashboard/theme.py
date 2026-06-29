@@ -35,12 +35,12 @@ STOPLIGHT_COLORS = {"GREEN": LCARS_GREEN, "AMBER": LCARS_GOLD, "RED": LCARS_RED}
 _STOPLIGHT_SEVERITY = {"GREEN": 0, "AMBER": 1, "RED": 2}
 
 # Plotly template overrides for LCARS look
-LCARS_PLOTLY = dict(
-    template="plotly_dark",
-    paper_bgcolor="rgba(0,0,0,0)",
-    plot_bgcolor="rgba(26,26,46,0.6)",
-    font=dict(family="Helvetica Neue, Arial, sans-serif", color=LCARS_PEACH),
-)
+LCARS_PLOTLY = {
+    "template": "plotly_dark",
+    "paper_bgcolor": "rgba(0,0,0,0)",
+    "plot_bgcolor": "rgba(26,26,46,0.6)",
+    "font": {"family": "Helvetica Neue, Arial, sans-serif", "color": LCARS_PEACH},
+}
 
 
 def apply_lcars_layout(fig: go.Figure, **overrides: Any) -> None:
