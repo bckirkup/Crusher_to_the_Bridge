@@ -17,3 +17,6 @@ DEFAULT_PICARD_SPEC = os.path.join(
 
 HISTORY_PATH = os.path.join(REPO_ROOT, "telemetry_buffer", "simulation_history.json")
 NOTEBOOK_PATH = os.path.join(REPO_ROOT, "telemetry_buffer", "artificial_lab_notebook.json")
+
+SPATIAL_LAYOUT_JSON = "spatial_layout.json"
+ALL_DECKS_LABEL = "All Decks"

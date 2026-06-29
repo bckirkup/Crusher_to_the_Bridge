@@ -8,6 +8,7 @@ from typing import Any
 import plotly.graph_objects as go
 import streamlit as st
 
+from dashboard.paths import ALL_DECKS_LABEL
 from dashboard.deck_geometry import (
     collect_zone_metrics,
     color_scale_max,
@@ -218,6 +219,48 @@ def _build_plotly_deck_map(
     return fig
 
 
+def _render_deck_filter(deck_options: list[str]) -> str:
+    st.caption("Deck level (vessel class locked)")
+    if len(deck_options) <= 8:
+        return st.radio(
+            "Deck level",
+            deck_options,
+            horizontal=True,
+            key="deck_filter",
+            label_visibility="collapsed",
+        )
+    return st.selectbox(
+        "Deck level",
+        deck_options,
+        key="deck_filter",
+        label_visibility="collapsed",
+    )
+
+
+def _render_stoplight_panel(stoplights: dict[str, Any]) -> None:
+    st.markdown(
+        _lcars_banner("Instrument Sensor Array", "#9999FF"),
+        unsafe_allow_html=True,
+    )
+    cols = st.columns(len(stoplights))
+    for i, (inst, level) in enumerate(stoplights.items()):
+        resolved = _worst_stoplight(level)
+        color = STOPLIGHT_COLORS.get(resolved, "gray")
+        pulse = (
+            "box-shadow:0 0 12px " + color + ";"
+            if resolved == "RED" else ""
+        )
+        short = inst.replace("_", " ").title()[:20]
+        with cols[i]:
+            st.markdown(
+                f"<div style='background:{color}22; border:2px solid {color}; "
+                f"padding:6px; border-radius:6px; text-align:center; "
+                f"color:{color}; font-size:11px; font-weight:bold;{pulse}'>"
+                f"{short}<br>{resolved}</div>",
+                unsafe_allow_html=True,
+            )
+
+
 def render_tactical_grid(
     history: list[dict[str, Any]],
     bundle: PlatformBundle,
@@ -242,7 +285,7 @@ def render_tactical_grid(
         )
 
     decks = sorted({z.get("deck", "main") for z in bundle.layout.get("zones", [])})
-    deck_options = ["All Decks"] + decks
+    deck_options = [ALL_DECKS_LABEL] + decks
 
     num_epochs = len(history)
     c1, c2, c3 = st.columns([2, 3, 2])
@@ -262,22 +305,7 @@ def render_tactical_grid(
             key="deck_color",
         )
     with c3:
-        st.caption("Deck level (vessel class locked)")
-        if len(deck_options) <= 8:
-            deck_filter = st.radio(
-                "Deck level",
-                deck_options,
-                horizontal=True,
-                key="deck_filter",
-                label_visibility="collapsed",
-            )
-        else:
-            deck_filter = st.selectbox(
-                "Deck level",
-                deck_options,
-                key="deck_filter",
-                label_visibility="collapsed",
-            )
+        deck_filter = _render_deck_filter(deck_options)
 
     record = history[selected_epoch]
     st.markdown(_lcars_alert_banner(record["trigger_status"]), unsafe_allow_html=True)
@@ -303,27 +331,7 @@ def render_tactical_grid(
 
     stoplights = record.get("reactive_protocols", {}).get("stoplights", {})
     if stoplights:
-        st.markdown(
-            _lcars_banner("Instrument Sensor Array", "#9999FF"),
-            unsafe_allow_html=True,
-        )
-        cols = st.columns(len(stoplights))
-        for i, (inst, level) in enumerate(stoplights.items()):
-            resolved = _worst_stoplight(level)
-            color = STOPLIGHT_COLORS.get(resolved, "gray")
-            pulse = (
-                "box-shadow:0 0 12px " + color + ";"
-                if resolved == "RED" else ""
-            )
-            short = inst.replace("_", " ").title()[:20]
-            with cols[i]:
-                st.markdown(
-                    f"<div style='background:{color}22; border:2px solid {color}; "
-                    f"padding:6px; border-radius:6px; text-align:center; "
-                    f"color:{color}; font-size:11px; font-weight:bold;{pulse}'>"
-                    f"{short}<br>{resolved}</div>",
-                    unsafe_allow_html=True,
-                )
+        _render_stoplight_panel(stoplights)
 
     active_sops = record.get("reactive_protocols", {}).get("active_protocols", [])
     if active_sops:

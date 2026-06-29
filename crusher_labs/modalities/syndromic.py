@@ -59,6 +59,36 @@ class SyndromicSurveillance:
         trust = max(0.0, min(1.0, float(trust_medical)))
         return base_probability * sev * (0.5 + 0.5 * trust)
 
+    def _process_symptomatic_agent(
+        self,
+        aid: int,
+        overrides: dict[int, str],
+        beliefs: dict[int, dict[str, float]],
+        chronic_mods: dict[int, dict[str, float]],
+        sick_call_ids: list[int],
+        true_positive_ids: list[int],
+    ) -> None:
+        override = overrides.get(aid, "")
+        if override == "hide_symptoms":
+            return
+        if override == "report_sick_call":
+            sick_call_ids.append(aid)
+            true_positive_ids.append(aid)
+            return
+        inf = beliefs.get(aid, {})
+        prob = self.effective_sick_call_probability(
+            self.sick_call_probability,
+            severity_belief=inf.get("severity_belief", 0.5),
+            trust_medical=inf.get("trust_medical", 0.75),
+        )
+        agent_chronic = chronic_mods.get(aid, {})
+        prob = min(1.0, prob + agent_chronic.get(
+            "sick_call_probability_boost", 0.0,
+        ))
+        if self.rng.random() < prob:
+            sick_call_ids.append(aid)
+            true_positive_ids.append(aid)
+
     def query_ground_truth(
         self,
         json_data: dict[str, Any],
@@ -107,27 +137,10 @@ class SyndromicSurveillance:
                 continue
 
             if is_symptomatic:
-                override = overrides.get(aid, "")
-                if override == "hide_symptoms":
-                    continue
-                if override == "report_sick_call":
-                    sick_call_ids.append(aid)
-                    true_positive_ids.append(aid)
-                    continue
-                inf = beliefs.get(aid, {})
-                prob = self.effective_sick_call_probability(
-                    self.sick_call_probability,
-                    severity_belief=inf.get("severity_belief", 0.5),
-                    trust_medical=inf.get("trust_medical", 0.75),
+                self._process_symptomatic_agent(
+                    aid, overrides, beliefs, chronic_mods,
+                    sick_call_ids, true_positive_ids,
                 )
-                # Chronic disease sick-call probability boost
-                agent_chronic = chronic_mods.get(aid, {})
-                prob = min(1.0, prob + agent_chronic.get(
-                    "sick_call_probability_boost", 0.0,
-                ))
-                if self.rng.random() < prob:
-                    sick_call_ids.append(aid)
-                    true_positive_ids.append(aid)
             else:
                 reported, reason = self._check_background_noise(aid)
                 if reported:

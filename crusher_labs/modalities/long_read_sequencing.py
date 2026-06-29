@@ -124,6 +124,57 @@ class LongReadNanoporeSequencing:
         arr /= arr.sum()
         return taxa, arr
 
+    def _zone_pathogen_masses(
+        self,
+        zone: dict[str, Any],
+        extraction: float,
+    ) -> dict[str, float]:
+        pathogen_masses: dict[str, float] = {}
+        by_id = zone.get("pathogen_mass_by_id", {}) or {}
+        for pid, mass in by_id.items():
+            if mass > 0:
+                pathogen_masses[str(pid)] = float(mass) * extraction
+        if not pathogen_masses:
+            pm = float(zone.get("pathogen_mass", 0.0))
+            if pm > 0:
+                pathogen_masses["target"] = pm * extraction
+        return pathogen_masses
+
+    def _clinical_pathogen_masses(
+        self,
+        request: LongReadVerificationRequest,
+        agents: list[dict[str, Any]],
+        pathogen_profiles: dict[str, dict[str, Any]],
+        proc: dict[str, Any],
+        specimen: str,
+    ) -> dict[str, float]:
+        pathogen_masses: dict[str, float] = {}
+        try:
+            aid = int(request.collection_key)
+        except ValueError:
+            aid = None
+        agent_data: dict[str, Any] = {}
+        if aid is not None:
+            for ag in agents:
+                if ag.get("agent_id") == aid:
+                    agent_data = ag
+                    break
+        shedding = float(agent_data.get("shedding_rate", 0.0))
+        infections = agent_data.get("pathogen_infections", {}) or {}
+        eff = float(proc.get("extraction_efficiency", 0.4))
+        if specimen == SPECIMEN_CLINICAL_CULTURE:
+            eff *= float(proc.get("extraction_efficiency", 0.7))
+        for pid, inf in infections.items():
+            status = inf.get("status", "") if isinstance(inf, dict) else ""
+            if status == "INFECTED" or pid in pathogen_profiles:
+                pathogen_masses[str(pid)] = max(
+                    pathogen_masses.get(str(pid), 0.0),
+                    shedding * eff,
+                )
+        if shedding > 0 and not pathogen_masses:
+            pathogen_masses["target"] = shedding * eff
+        return pathogen_masses
+
     def _pathogen_fractions(
         self,
         request: LongReadVerificationRequest,
@@ -142,53 +193,21 @@ class LongReadNanoporeSequencing:
         host_scale = _HOST_SCALE_WW
 
         if specimen == SPECIMEN_WASTEWATER_METAGENOMICS:
-            zone = spaces.get(request.collection_key, {})
-            by_id = zone.get("pathogen_mass_by_id", {}) or {}
-            for pid, mass in by_id.items():
-                if mass > 0:
-                    pathogen_masses[str(pid)] = float(mass) * extraction
-            if not pathogen_masses:
-                pm = float(zone.get("pathogen_mass", 0.0))
-                if pm > 0:
-                    pathogen_masses["target"] = pm * extraction
+            pathogen_masses = self._zone_pathogen_masses(
+                spaces.get(request.collection_key, {}), extraction,
+            )
 
         elif specimen == SPECIMEN_SURVEILLANCE_SWAB:
             host_scale = _HOST_SCALE_SWAB
-            zone = spaces.get(request.collection_key, {})
-            by_id = zone.get("pathogen_mass_by_id", {}) or {}
-            for pid, mass in by_id.items():
-                if mass > 0:
-                    pathogen_masses[str(pid)] = float(mass) * extraction
-            pm = float(zone.get("pathogen_mass", 0.0))
-            if pm > 0 and not pathogen_masses:
-                pathogen_masses["target"] = pm * extraction
+            pathogen_masses = self._zone_pathogen_masses(
+                spaces.get(request.collection_key, {}), extraction,
+            )
 
         elif specimen in (SPECIMEN_CLINICAL, SPECIMEN_CLINICAL_CULTURE):
             host_scale = _HOST_SCALE_CLINICAL
-            try:
-                aid = int(request.collection_key)
-            except ValueError:
-                aid = None
-            agent_data: dict[str, Any] = {}
-            if aid is not None:
-                for ag in agents:
-                    if ag.get("agent_id") == aid:
-                        agent_data = ag
-                        break
-            shedding = float(agent_data.get("shedding_rate", 0.0))
-            infections = agent_data.get("pathogen_infections", {}) or {}
-            eff = extraction
-            if specimen == SPECIMEN_CLINICAL_CULTURE:
-                eff *= float(proc.get("extraction_efficiency", 0.7))
-            for pid, inf in infections.items():
-                status = inf.get("status", "") if isinstance(inf, dict) else ""
-                if status == "INFECTED" or pid in pathogen_profiles:
-                    pathogen_masses[str(pid)] = max(
-                        pathogen_masses.get(str(pid), 0.0),
-                        shedding * eff,
-                    )
-            if shedding > 0 and not pathogen_masses:
-                pathogen_masses["target"] = shedding * eff
+            pathogen_masses = self._clinical_pathogen_masses(
+                request, agents, pathogen_profiles, proc, specimen,
+            )
 
         total_pathogen = sum(pathogen_masses.values())
         pathogen_frac = total_pathogen / (total_pathogen + host_scale)
@@ -209,26 +228,19 @@ class LongReadNanoporeSequencing:
         composition /= composition.sum()
         return taxa, composition
 
-    def _inject_errors(
-        self,
-        taxa: list[str],
-        reads: np.ndarray,
-    ) -> dict[str, int]:
-        err_cfg = self.detection_model.get("error_injection", {})
-        if not err_cfg.get("enabled", True):
-            return {t: int(c) for t, c in zip(taxa, reads) if c > 0}
-
+    def _misallocation_rate(self, err_cfg: dict[str, Any]) -> float:
         sub = float(err_cfg.get("substitution_rate", 0.02))
         ins = float(err_cfg.get("insertion_rate", 0.015))
         dele = float(err_cfg.get("deletion_rate", 0.015))
         homo = float(err_cfg.get("homopolymer_collapse_prob", 0.08))
-        misrate = min(0.5, sub + ins + dele + homo)
+        return min(0.5, sub + ins + dele + homo)
 
-        read_dict = {t: int(c) for t, c in zip(taxa, reads)}
-        total = int(reads.sum())
-        if total <= 0 or misrate <= 0:
-            return read_dict
-
+    def _apply_read_misallocations(
+        self,
+        read_dict: dict[str, int],
+        taxa: list[str],
+        misrate: float,
+    ) -> None:
         n_taxa = len(taxa)
         for i, taxon in enumerate(taxa):
             count = read_dict.get(taxon, 0)
@@ -242,6 +254,22 @@ class LongReadNanoporeSequencing:
                         other = taxa[j]
                         read_dict[other] = read_dict.get(other, 0) + 1
 
+    def _inject_errors(
+        self,
+        taxa: list[str],
+        reads: np.ndarray,
+    ) -> dict[str, int]:
+        err_cfg = self.detection_model.get("error_injection", {})
+        if not err_cfg.get("enabled", True):
+            return {t: int(c) for t, c in zip(taxa, reads) if c > 0}
+
+        misrate = self._misallocation_rate(err_cfg)
+        read_dict = {t: int(c) for t, c in zip(taxa, reads)}
+        total = int(reads.sum())
+        if total <= 0 or misrate <= 0:
+            return read_dict
+
+        self._apply_read_misallocations(read_dict, taxa, misrate)
         return {t: c for t, c in read_dict.items() if c > 0}
 
     def _classify_calls(

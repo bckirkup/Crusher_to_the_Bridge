@@ -38,6 +38,43 @@ from telemetry_buffer.agent_axes import (
 )
 
 
+def _multi_pathogen_summary(
+    engine: KorkinShipEngine,
+    pathogen_profiles: dict[str, dict[str, Any]],
+) -> dict[str, dict[str, int]]:
+    summary: dict[str, dict[str, int]] = {}
+    if not pathogen_profiles:
+        return summary
+    for pid in pathogen_profiles:
+        mp_s = {"infected": 0, "symptomatic": 0, "recovered": 0}
+        for agent in engine.agents:
+            inf = agent.infections.get(pid)
+            if inf is None:
+                continue
+            if inf["status"] == InfectionStatus.INFECTED:
+                mp_s["infected"] += 1
+                if inf["illness"] == IllnessStatus.SYMPTOMATIC:
+                    mp_s["symptomatic"] += 1
+            elif inf["status"] == InfectionStatus.RECOVERED:
+                mp_s["recovered"] += 1
+        summary[pid] = mp_s
+    return summary
+
+
+def _update_summary_from_agent(summary: dict[str, Any], agent: dict[str, Any]) -> None:
+    infection_state, _, _ = resolve_agent_axes(agent)
+    if agent_is_infected(agent):
+        summary["infected"] += 1
+    elif infection_state == INFECTION_RECOVERED:
+        summary["recovered"] += 1
+    elif infection_state == INFECTION_IMMUNE:
+        summary["immune"] += 1
+    else:
+        summary["susceptible"] += 1
+    if agent_has_symptomatic_presentation(agent) and not agent_is_isolated(agent):
+        summary["symptomatic"] += 1
+
+
 def record_epoch(
     epoch: int,
     trigger_status: str,
@@ -83,21 +120,7 @@ def record_epoch(
     if not isinstance(stoplights, dict):
         raise TypeError(f"record_epoch: stoplights must be dict, got {type(stoplights).__name__}")
 
-    multi_pathogen_summary: dict[str, dict[str, int]] = {}
-    if pathogen_profiles:
-        for pid in pathogen_profiles:
-            mp_s = {"infected": 0, "symptomatic": 0, "recovered": 0}
-            for agent in engine.agents:
-                inf = agent.infections.get(pid)
-                if inf is None:
-                    continue
-                if inf["status"] == InfectionStatus.INFECTED:
-                    mp_s["infected"] += 1
-                    if inf["illness"] == IllnessStatus.SYMPTOMATIC:
-                        mp_s["symptomatic"] += 1
-                elif inf["status"] == InfectionStatus.RECOVERED:
-                    mp_s["recovered"] += 1
-            multi_pathogen_summary[pid] = mp_s
+    multi_pathogen_summary = _multi_pathogen_summary(engine, pathogen_profiles)
 
     disrupted_count = sum(
         1 for a in engine.agents if a.microflora_disruption_status > 0
@@ -140,19 +163,8 @@ def record_epoch(
     }
 
     for a in agents:
+        _update_summary_from_agent(epoch_record["summary"], a)
         infection_state, symptom_presentation, compliance_status = resolve_agent_axes(a)
-
-        if agent_is_infected(a):
-            epoch_record["summary"]["infected"] += 1
-        elif infection_state == INFECTION_RECOVERED:
-            epoch_record["summary"]["recovered"] += 1
-        elif infection_state == INFECTION_IMMUNE:
-            epoch_record["summary"]["immune"] += 1
-        else:
-            epoch_record["summary"]["susceptible"] += 1
-
-        if agent_has_symptomatic_presentation(a) and not agent_is_isolated(a):
-            epoch_record["summary"]["symptomatic"] += 1
 
         agent_record: dict[str, Any] = {
             "agent_id": a["agent_id"],
@@ -271,8 +283,6 @@ def finalize_simulation(
     zone_names: list[str],
     num_agents: int,
     num_epochs: int,
-    contam_engine: ContamTransportEngine | None,
-    cfg: dict[str, Any],
     *,
     history_path: str | None = None,
     lab_notebook_path: str | None = None,

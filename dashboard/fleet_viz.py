@@ -114,6 +114,14 @@ def render_fleet_operations(default_fleet_root: str) -> None:
         render_bridge_status(history, notebook)
 
 
+def _trigger_status_color(status: str) -> str:
+    if status == "CONFIRMED":
+        return LCARS_RED
+    if status == "SUSPECTED":
+        return LCARS_GOLD
+    return LCARS_GREEN
+
+
 def _render_fleet_comparison(cruise_dirs: list[str]) -> None:
     labels = []
     infected = []
@@ -134,11 +142,7 @@ def _render_fleet_comparison(cruise_dirs: list[str]) -> None:
         infected.append(summary.get("infected", 0))
         symptomatic.append(summary.get("symptomatic", 0))
         status = last.get("trigger_status", "BASELINE")
-        colors.append(
-            LCARS_RED if status == "CONFIRMED"
-            else LCARS_GOLD if status == "SUSPECTED"
-            else LCARS_GREEN
-        )
+        colors.append(_trigger_status_color(status))
 
     if not labels:
         return

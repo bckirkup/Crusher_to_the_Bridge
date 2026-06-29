@@ -38,28 +38,16 @@ from dashboard.theme import (
     _worst_stoplight,
 )
 
+PLOT_MODE_LINES_MARKERS = "lines+markers"
+
 # ══════════════════════════════════════════════════════════════════════════
 # Station 1: Bridge Status Display
 # ══════════════════════════════════════════════════════════════════════════
 
-def render_bridge_status(
-    history: list[dict[str, Any]],
-    notebook: dict[str, Any],
-) -> None:
-    """Ship status, biosensor telemetry, contagion progression, resource allocation."""
-
-    if not history:
-        st.warning("No telemetry data loaded. Awaiting sensor input.")
-        return
-
-    last = history[-1]
-    summary = last["summary"]
-
-    # ── Ship Status ───────────────────────────────────────────────
+def _render_bridge_ship_status(summary: dict[str, Any], trigger_status: str) -> None:
     st.subheader("Ship Status")
 
     col1, col2, col3, col4, col5, col6 = st.columns(6)
-
     total_pop = (
         summary.get("susceptible", 0)
         + summary.get("infected", 0)
@@ -93,41 +81,180 @@ def render_bridge_status(
         with sc4:
             st.metric("Immune", summary.get("immune", 0))
 
-    # Alert condition banner
-    status = last["trigger_status"]
-    st.markdown(_lcars_alert_banner(status), unsafe_allow_html=True)
+    st.markdown(_lcars_alert_banner(trigger_status), unsafe_allow_html=True)
 
-    # ── Biosensor Telemetry (Infection Counters) ──────────────────
-    counters = last.get("infection_counters", {})
-    if counters:
-        st.subheader("Biosensor Telemetry")
-        counter_cols = st.columns(min(len(counters), 5))
-        for idx, (cid, cdata) in enumerate(counters.items()):
-            col = counter_cols[idx % len(counter_cols)]
-            label = cdata.get("label", cid)
-            value = cdata.get("value", 0)
-            threshold = cdata.get("threshold")
-            exceeded = cdata.get("exceeded", False)
-            if "rate" in cid:
-                display_val = f"{value:.1%}"
+
+def _render_bridge_biosensor_telemetry(
+    history: list[dict[str, Any]],
+    counters: dict[str, Any],
+) -> None:
+    if not counters:
+        return
+    st.subheader("Biosensor Telemetry")
+    counter_cols = st.columns(min(len(counters), 5))
+    for idx, (cid, cdata) in enumerate(counters.items()):
+        col = counter_cols[idx % len(counter_cols)]
+        label = cdata.get("label", cid)
+        value = cdata.get("value", 0)
+        threshold = cdata.get("threshold")
+        exceeded = cdata.get("exceeded", False)
+        display_val = f"{value:.1%}" if "rate" in cid else f"{value:.0f}"
+        suffix = ""
+        if threshold is not None:
+            suffix = (
+                f" (thr: {threshold:.1%})" if "rate" in cid else f" (thr: {threshold})"
+            )
+        with col:
+            if exceeded:
+                st.metric(f"ALERT: {label}", display_val + suffix)
             else:
-                display_val = f"{value:.0f}"
-            suffix = ""
-            if threshold is not None:
-                if "rate" in cid:
-                    suffix = f" (thr: {threshold:.1%})"
-                else:
-                    suffix = f" (thr: {threshold})"
-            with col:
-                if exceeded:
-                    st.metric(f"ALERT: {label}", display_val + suffix)
-                else:
-                    st.metric(label, display_val + suffix)
+                st.metric(label, display_val + suffix)
+    _render_counter_time_series(history)
 
-        # Infection counter time series
-        _render_counter_time_series(history)
 
-    # ── Agent Class Breakdown ─────────────────────────────────────
+def _render_bridge_resource_allocation(notebook: dict[str, Any]) -> None:
+    st.subheader("Resource Allocation")
+    audit = notebook.get("FINANCIAL_AUDIT", {})
+    fin_summary = audit.get("summary", {})
+    if not fin_summary:
+        st.info("Awaiting financial audit data from the quartermaster.")
+        return
+
+    c1, c2, c3 = st.columns(3)
+    with c1:
+        st.metric(
+            "Starting Allocation",
+            f"${fin_summary.get('starting_financial_budget_usd', 0):,.0f}",
+        )
+        st.metric(
+            "Remaining Balance",
+            f"${fin_summary.get('remaining_balance_usd', 0):,.0f}",
+        )
+    with c2:
+        st.metric(
+            "Surveillance Expenditure",
+            f"${fin_summary.get('surveillance_cost_usd', 0):,.0f}",
+        )
+        st.metric(
+            "Surveillance Labour",
+            f"{fin_summary.get('surveillance_labor_hours', 0):.1f} hrs",
+        )
+    with c3:
+        st.metric(
+            "Intervention Expenditure",
+            f"${fin_summary.get('intervention_cost_usd', 0):,.0f}",
+        )
+        st.metric(
+            "Intervention Labour",
+            f"{fin_summary.get('intervention_labor_hours', 0):.1f} hrs",
+        )
+
+    cost_by_epoch = audit.get("cost_by_epoch", [])
+    if cost_by_epoch:
+        st.markdown(
+            _lcars_banner("Cumulative Expenditure by Epoch"),
+            unsafe_allow_html=True,
+        )
+        epochs_x = []
+        surv_cum: list[float] = []
+        intv_cum: list[float] = []
+        running_surv = 0.0
+        running_intv = 0.0
+        for entry in cost_by_epoch:
+            epochs_x.append(entry.get("epoch", 0))
+            running_surv += entry.get("surveillance_usd", 0)
+            running_intv += entry.get("intervention_usd", 0)
+            surv_cum.append(running_surv)
+            intv_cum.append(running_intv)
+
+        cost_fig = go.Figure()
+        cost_fig.add_trace(go.Scatter(
+            x=epochs_x, y=surv_cum, mode=PLOT_MODE_LINES_MARKERS,
+            name="Surveillance", fill="tozeroy",
+            line={"color": LCARS_BLUE},
+        ))
+        cost_fig.add_trace(go.Scatter(
+            x=epochs_x, y=intv_cum, mode=PLOT_MODE_LINES_MARKERS,
+            name="Intervention", fill="tozeroy",
+            line={"color": LCARS_RED},
+        ))
+        apply_lcars_layout(
+            cost_fig,
+            height=280,
+            xaxis_title="Epoch (Stardate)", yaxis_title="Cumulative Credits (USD)",
+            margin={"t": 30, "b": 40, "l": 50, "r": 20},
+            legend={"orientation": "h", "y": 1.1, "x": 0.5, "xanchor": "center"},
+        )
+        st.plotly_chart(cost_fig, use_container_width=True)
+
+    mat_inv = audit.get("material_inventory", {})
+    if mat_inv:
+        st.markdown(
+            _lcars_banner("Supply Manifest", LCARS_PEACH),
+            unsafe_allow_html=True,
+        )
+        mat_rows = []
+        for item, data in mat_inv.items():
+            remaining = data.get("remaining", 0)
+            starting = data.get("starting", 0)
+            consumed = data.get("consumed", 0)
+            pct = (remaining / starting * 100) if starting > 0 else 0
+            warn = " DEPLETED" if remaining == 0 and consumed > 0 else ""
+            mat_rows.append({
+                "Item": item,
+                "Starting": starting,
+                "Consumed": consumed,
+                "Remaining": remaining,
+                "% Left": f"{pct:.0f}%{warn}",
+                "Cost USD": f"${data.get('total_cost_usd', 0):,.2f}",
+            })
+        st.dataframe(pd.DataFrame(mat_rows), use_container_width=True, hide_index=True)
+
+
+def _render_bridge_sop_log(notebook: dict[str, Any]) -> None:
+    st.subheader("Standing Orders Log")
+    proto_summary = notebook.get("PROTOCOL_SUMMARY", {})
+    event_log = proto_summary.get("event_log", [])
+    if not event_log:
+        st.info("No protocol activation events recorded.")
+        return
+
+    sop_rows = []
+    for ev in event_log:
+        sop_rows.append({
+            "Epoch": ev.get("epoch", ""),
+            "Event": ev.get("event", ""),
+            "Protocol": ev.get("protocol_id", ""),
+            "Designation": ev.get("name", ""),
+        })
+    st.dataframe(pd.DataFrame(sop_rows), use_container_width=True, hide_index=True)
+
+    still_active = proto_summary.get("protocols_still_active", [])
+    if still_active:
+        st.markdown(
+            _lcars_banner(
+                f"Protocols still active: {', '.join(still_active)}",
+                LCARS_GOLD,
+            ),
+            unsafe_allow_html=True,
+        )
+
+
+def render_bridge_status(
+    history: list[dict[str, Any]],
+    notebook: dict[str, Any],
+) -> None:
+    """Ship status, biosensor telemetry, contagion progression, resource allocation."""
+
+    if not history:
+        st.warning("No telemetry data loaded. Awaiting sensor input.")
+        return
+
+    last = history[-1]
+    summary = last["summary"]
+
+    _render_bridge_ship_status(summary, last["trigger_status"])
+    _render_bridge_biosensor_telemetry(history, last.get("infection_counters", {}))
     _render_class_breakdown(last)
 
     # ── Contagion Progression ─────────────────────────────────────
@@ -155,138 +282,11 @@ def render_bridge_status(
     # ── Crusher Lab Operations ────────────────────────────────────
     _render_crusher_ops(last)
 
-    # ── Resource Allocation ───────────────────────────────────────
-    st.subheader("Resource Allocation")
-
-    audit = notebook.get("FINANCIAL_AUDIT", {})
-    fin_summary = audit.get("summary", {})
-
-    if fin_summary:
-        c1, c2, c3 = st.columns(3)
-        with c1:
-            st.metric(
-                "Starting Allocation",
-                f"${fin_summary.get('starting_financial_budget_usd', 0):,.0f}",
-            )
-            st.metric(
-                "Remaining Balance",
-                f"${fin_summary.get('remaining_balance_usd', 0):,.0f}",
-            )
-        with c2:
-            st.metric(
-                "Surveillance Expenditure",
-                f"${fin_summary.get('surveillance_cost_usd', 0):,.0f}",
-            )
-            st.metric(
-                "Surveillance Labour",
-                f"{fin_summary.get('surveillance_labor_hours', 0):.1f} hrs",
-            )
-        with c3:
-            st.metric(
-                "Intervention Expenditure",
-                f"${fin_summary.get('intervention_cost_usd', 0):,.0f}",
-            )
-            st.metric(
-                "Intervention Labour",
-                f"{fin_summary.get('intervention_labor_hours', 0):.1f} hrs",
-            )
-
-        # Expenditure over time
-        cost_by_epoch = audit.get("cost_by_epoch", [])
-        if cost_by_epoch:
-            st.markdown(
-                _lcars_banner("Cumulative Expenditure by Epoch"),
-                unsafe_allow_html=True,
-            )
-            epochs_x = []
-            surv_cum: list[float] = []
-            intv_cum: list[float] = []
-            running_surv = 0.0
-            running_intv = 0.0
-            for entry in cost_by_epoch:
-                epochs_x.append(entry.get("epoch", 0))
-                running_surv += entry.get("surveillance_usd", 0)
-                running_intv += entry.get("intervention_usd", 0)
-                surv_cum.append(running_surv)
-                intv_cum.append(running_intv)
-
-            cost_fig = go.Figure()
-            cost_fig.add_trace(go.Scatter(
-                x=epochs_x, y=surv_cum, mode="lines+markers",
-                name="Surveillance", fill="tozeroy",
-                line={"color": LCARS_BLUE},
-            ))
-            cost_fig.add_trace(go.Scatter(
-                x=epochs_x, y=intv_cum, mode="lines+markers",
-                name="Intervention", fill="tozeroy",
-                line={"color": LCARS_RED},
-            ))
-            apply_lcars_layout(
-                cost_fig,
-                height=280,
-                xaxis_title="Epoch (Stardate)", yaxis_title="Cumulative Credits (USD)",
-                margin={"t": 30, "b": 40, "l": 50, "r": 20},
-                legend={"orientation": "h", "y": 1.1, "x": 0.5, "xanchor": "center"},
-            )
-            st.plotly_chart(cost_fig, use_container_width=True)
-
-        # Material supply status
-        mat_inv = audit.get("material_inventory", {})
-        if mat_inv:
-            st.markdown(
-                _lcars_banner("Supply Manifest", LCARS_PEACH),
-                unsafe_allow_html=True,
-            )
-            mat_rows = []
-            for item, data in mat_inv.items():
-                remaining = data.get("remaining", 0)
-                starting = data.get("starting", 0)
-                consumed = data.get("consumed", 0)
-                pct = (remaining / starting * 100) if starting > 0 else 0
-                warn = " DEPLETED" if remaining == 0 and consumed > 0 else ""
-                mat_rows.append({
-                    "Item": item,
-                    "Starting": starting,
-                    "Consumed": consumed,
-                    "Remaining": remaining,
-                    "% Left": f"{pct:.0f}%{warn}",
-                    "Cost USD": f"${data.get('total_cost_usd', 0):,.2f}",
-                })
-            st.dataframe(pd.DataFrame(mat_rows), use_container_width=True, hide_index=True)
-    else:
-        st.info("Awaiting financial audit data from the quartermaster.")
-
-    # ── SOP Activation Log ────────────────────────────────────────
-    st.subheader("Standing Orders Log")
-
-    proto_summary = notebook.get("PROTOCOL_SUMMARY", {})
-    event_log = proto_summary.get("event_log", [])
-    if event_log:
-        sop_rows = []
-        for ev in event_log:
-            sop_rows.append({
-                "Epoch": ev.get("epoch", ""),
-                "Event": ev.get("event", ""),
-                "Protocol": ev.get("protocol_id", ""),
-                "Designation": ev.get("name", ""),
-            })
-        st.dataframe(pd.DataFrame(sop_rows), use_container_width=True, hide_index=True)
-
-        still_active = proto_summary.get("protocols_still_active", [])
-        if still_active:
-            st.markdown(
-                _lcars_banner(
-                    f"Protocols still active: {', '.join(still_active)}",
-                    LCARS_GOLD,
-                ),
-                unsafe_allow_html=True,
-            )
-    else:
-        st.info("No protocol activation events recorded.")
+    _render_bridge_resource_allocation(notebook)
+    _render_bridge_sop_log(notebook)
 
 
-def _render_counter_time_series(history: list[dict[str, Any]]) -> None:
-    """Line chart of infection counter values across all epochs."""
+def _collect_counter_ids(history: list[dict[str, Any]]) -> tuple[list[str], dict[str, str]]:
     all_cids: list[str] = []
     cid_labels: dict[str, str] = {}
     for rec in history:
@@ -294,77 +294,96 @@ def _render_counter_time_series(history: list[dict[str, Any]]) -> None:
             if cid not in cid_labels:
                 all_cids.append(cid)
                 cid_labels[cid] = cdata.get("label", cid)
+    return all_cids, cid_labels
 
+
+def _render_rate_counter_chart(
+    history: list[dict[str, Any]],
+    rate_cids: list[str],
+    cid_labels: dict[str, str],
+) -> None:
+    fig = go.Figure()
+    colors = [LCARS_GOLD, LCARS_BLUE, LCARS_PURPLE, LCARS_GREEN, LCARS_RED]
+    for i, cid in enumerate(rate_cids):
+        epochs = []
+        values = []
+        threshold = None
+        for rec in history:
+            cdata = rec.get("infection_counters", {}).get(cid, {})
+            epochs.append(rec["epoch"])
+            values.append(cdata.get("value", 0))
+            if threshold is None:
+                threshold = cdata.get("threshold")
+        fig.add_trace(go.Scatter(
+            x=epochs, y=values, mode=PLOT_MODE_LINES_MARKERS,
+            name=cid_labels.get(cid, cid),
+            line={"color": colors[i % len(colors)], "width": 2},
+        ))
+        if threshold is not None:
+            fig.add_hline(
+                y=threshold, line_dash="dash",
+                line_color=LCARS_RED,
+                annotation_text=f"Threshold ({threshold:.1%})",
+                annotation_position="top right",
+                annotation_font_color=LCARS_RED,
+            )
+
+    apply_lcars_layout(
+        fig,
+        height=300,
+        title="Attack Rate Tracking",
+        xaxis_title="Epoch", yaxis_title="Rate",
+        yaxis_tickformat=".1%",
+        margin={"t": 50, "b": 40, "l": 60, "r": 20},
+        legend={"orientation": "h", "y": -0.2, "x": 0.5, "xanchor": "center"},
+    )
+    st.plotly_chart(fig, use_container_width=True)
+
+
+def _render_count_counter_chart(
+    history: list[dict[str, Any]],
+    count_cids: list[str],
+    cid_labels: dict[str, str],
+) -> None:
+    fig = go.Figure()
+    colors = [LCARS_PEACH, LCARS_TAN, LCARS_AMBER, LCARS_PURPLE]
+    for i, cid in enumerate(count_cids):
+        epochs = []
+        values = []
+        for rec in history:
+            cdata = rec.get("infection_counters", {}).get(cid, {})
+            epochs.append(rec["epoch"])
+            values.append(cdata.get("value", 0))
+        fig.add_trace(go.Bar(
+            x=epochs, y=values,
+            name=cid_labels.get(cid, cid),
+            marker_color=colors[i % len(colors)],
+        ))
+    apply_lcars_layout(
+        fig,
+        height=280,
+        title="Infection Count Tracking",
+        xaxis_title="Epoch", yaxis_title="Count",
+        barmode="group",
+        margin={"t": 50, "b": 40, "l": 50, "r": 20},
+        legend={"orientation": "h", "y": -0.2, "x": 0.5, "xanchor": "center"},
+    )
+    st.plotly_chart(fig, use_container_width=True)
+
+
+def _render_counter_time_series(history: list[dict[str, Any]]) -> None:
+    """Line chart of infection counter values across all epochs."""
+    all_cids, cid_labels = _collect_counter_ids(history)
     if not all_cids:
         return
 
-    # Only chart rate-type counters (most useful over time)
     rate_cids = [c for c in all_cids if "rate" in c]
     count_cids = [c for c in all_cids if "rate" not in c]
 
     if rate_cids:
-        fig = go.Figure()
-        colors = [LCARS_GOLD, LCARS_BLUE, LCARS_PURPLE, LCARS_GREEN, LCARS_RED]
-        for i, cid in enumerate(rate_cids):
-            epochs = []
-            values = []
-            threshold = None
-            for rec in history:
-                cdata = rec.get("infection_counters", {}).get(cid, {})
-                epochs.append(rec["epoch"])
-                values.append(cdata.get("value", 0))
-                if threshold is None:
-                    threshold = cdata.get("threshold")
-            fig.add_trace(go.Scatter(
-                x=epochs, y=values, mode="lines+markers",
-                name=cid_labels.get(cid, cid),
-                line={"color": colors[i % len(colors)], "width": 2},
-            ))
-            if threshold is not None:
-                fig.add_hline(
-                    y=threshold, line_dash="dash",
-                    line_color=LCARS_RED,
-                    annotation_text=f"Threshold ({threshold:.1%})",
-                    annotation_position="top right",
-                    annotation_font_color=LCARS_RED,
-                )
-
-        apply_lcars_layout(
-            fig,
-            height=300,
-            title="Attack Rate Tracking",
-            xaxis_title="Epoch", yaxis_title="Rate",
-            yaxis_tickformat=".1%",
-            margin={"t": 50, "b": 40, "l": 60, "r": 20},
-            legend={"orientation": "h", "y": -0.2, "x": 0.5, "xanchor": "center"},
-        )
-        st.plotly_chart(fig, use_container_width=True)
-
+        _render_rate_counter_chart(history, rate_cids, cid_labels)
     if count_cids:
-        fig = go.Figure()
-        colors = [LCARS_PEACH, LCARS_TAN, LCARS_AMBER, LCARS_PURPLE]
-        for i, cid in enumerate(count_cids):
-            epochs = []
-            values = []
-            for rec in history:
-                cdata = rec.get("infection_counters", {}).get(cid, {})
-                epochs.append(rec["epoch"])
-                values.append(cdata.get("value", 0))
-            fig.add_trace(go.Bar(
-                x=epochs, y=values,
-                name=cid_labels.get(cid, cid),
-                marker_color=colors[i % len(colors)],
-            ))
-        apply_lcars_layout(
-            fig,
-            height=280,
-            title="Infection Count Tracking",
-            xaxis_title="Epoch", yaxis_title="Count",
-            barmode="group",
-            margin={"t": 50, "b": 40, "l": 50, "r": 20},
-            legend={"orientation": "h", "y": -0.2, "x": 0.5, "xanchor": "center"},
-        )
-        st.plotly_chart(fig, use_container_width=True)
+        _render_count_counter_chart(history, count_cids, cid_labels)
 
 
 def aggregate_class_stats(agents: list[dict[str, Any]]) -> dict[str, dict[str, int]]:
@@ -442,7 +461,7 @@ def _render_pathogen_curves(history: list[dict[str, Any]]) -> None:
             pdata = rec.get("multi_pathogen", {}).get(pid, {})
             infected.append(pdata.get("infected", 0) + pdata.get("symptomatic", 0))
         fig.add_trace(go.Scatter(
-            x=epochs, y=infected, mode="lines+markers",
+            x=epochs, y=infected, mode=PLOT_MODE_LINES_MARKERS,
             name=pid.replace("_", " ").title(),
             line={"color": colors[i % len(colors)], "width": 2},
         ))
@@ -458,16 +477,7 @@ def _render_pathogen_curves(history: list[dict[str, Any]]) -> None:
     st.plotly_chart(fig, use_container_width=True)
 
 
-def _render_wearable_monitoring(history: list[dict[str, Any]]) -> None:
-    """Wearable physiological monitoring readout."""
-    has_wearable = any(rec.get("wearable_monitoring") for rec in history)
-    if not has_wearable:
-        return
-
-    st.subheader("Physiological Monitoring Array")
-
-    last = history[-1]
-    wm = last.get("wearable_monitoring", {})
+def _render_wearable_summary_metrics(wm: dict[str, Any]) -> None:
     c1, c2, c3, c4, c5 = st.columns(5)
     with c1:
         st.metric("Monitored Crew", wm.get("total_monitored", 0))
@@ -484,6 +494,8 @@ def _render_wearable_monitoring(history: list[dict[str, Any]]) -> None:
     with c5:
         st.metric("Anomalies", wm.get("anomaly_count", 0))
 
+
+def _render_wearable_breakdown_metrics(wm: dict[str, Any]) -> None:
     visibility = wm.get("visibility_breakdown", {})
     if visibility:
         vis_cols = st.columns(len(visibility))
@@ -505,7 +517,6 @@ def _render_wearable_monitoring(history: list[dict[str, Any]]) -> None:
             with dev_cols[i % len(dev_cols)]:
                 st.metric(dev_id.replace("_", " ").title(), cnt)
 
-    # Channel anomaly breakdown
     channel_counts = wm.get("channel_anomaly_counts", {})
     if channel_counts:
         cols = st.columns(len(channel_counts))
@@ -513,7 +524,8 @@ def _render_wearable_monitoring(history: list[dict[str, Any]]) -> None:
             with cols[i]:
                 st.metric(ch.replace("_", " ").title(), cnt)
 
-    # Time series
+
+def _render_wearable_trends(history: list[dict[str, Any]]) -> None:
     epochs = []
     fever_rates = []
     anomaly_rates = []
@@ -524,26 +536,43 @@ def _render_wearable_monitoring(history: list[dict[str, Any]]) -> None:
             fever_rates.append(wm_rec.get("fever_rate", 0))
             anomaly_rates.append(wm_rec.get("anomaly_rate", 0))
 
-    if epochs:
-        fig = go.Figure()
-        fig.add_trace(go.Scatter(
-            x=epochs, y=fever_rates, mode="lines+markers",
-            name="Fever Rate", line={"color": LCARS_RED, "width": 2},
-        ))
-        fig.add_trace(go.Scatter(
-            x=epochs, y=anomaly_rates, mode="lines+markers",
-            name="Anomaly Rate", line={"color": LCARS_GOLD, "width": 2},
-        ))
-        apply_lcars_layout(
-            fig,
-            height=260,
-            title="Wearable Monitoring Trends",
-            xaxis_title="Epoch", yaxis_title="Rate",
-            yaxis_tickformat=".1%",
-            margin={"t": 50, "b": 40, "l": 60, "r": 20},
-            legend={"orientation": "h", "y": -0.2, "x": 0.5, "xanchor": "center"},
-        )
-        st.plotly_chart(fig, use_container_width=True)
+    if not epochs:
+        return
+
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(
+        x=epochs, y=fever_rates, mode=PLOT_MODE_LINES_MARKERS,
+        name="Fever Rate", line={"color": LCARS_RED, "width": 2},
+    ))
+    fig.add_trace(go.Scatter(
+        x=epochs, y=anomaly_rates, mode=PLOT_MODE_LINES_MARKERS,
+        name="Anomaly Rate", line={"color": LCARS_GOLD, "width": 2},
+    ))
+    apply_lcars_layout(
+        fig,
+        height=260,
+        title="Wearable Monitoring Trends",
+        xaxis_title="Epoch", yaxis_title="Rate",
+        yaxis_tickformat=".1%",
+        margin={"t": 50, "b": 40, "l": 60, "r": 20},
+        legend={"orientation": "h", "y": -0.2, "x": 0.5, "xanchor": "center"},
+    )
+    st.plotly_chart(fig, use_container_width=True)
+
+
+def _render_wearable_monitoring(history: list[dict[str, Any]]) -> None:
+    """Wearable physiological monitoring readout."""
+    has_wearable = any(rec.get("wearable_monitoring") for rec in history)
+    if not has_wearable:
+        return
+
+    st.subheader("Physiological Monitoring Array")
+
+    last = history[-1]
+    wm = last.get("wearable_monitoring", {})
+    _render_wearable_summary_metrics(wm)
+    _render_wearable_breakdown_metrics(wm)
+    _render_wearable_trends(history)
 
 
 def _render_diagnostic_cascade(history: list[dict[str, Any]]) -> None:
@@ -656,7 +685,7 @@ def _render_operational_impact(history: list[dict[str, Any]]) -> None:
     if epochs:
         fig = go.Figure()
         fig.add_trace(go.Scatter(
-            x=epochs, y=cum_ois, mode="lines+markers",
+            x=epochs, y=cum_ois, mode=PLOT_MODE_LINES_MARKERS,
             name="Cumulative OIS", line={"color": LCARS_PURPLE, "width": 2},
         ))
         fig.add_trace(go.Bar(
@@ -707,6 +736,20 @@ def _render_crusher_ops(record: dict[str, Any]) -> None:
         st.dataframe(pd.DataFrame(pcr_rows), use_container_width=True, hide_index=True)
 
 
+def _accumulate_event_pathways(
+    ev: dict[str, Any],
+    pathway_totals: dict[str, float],
+) -> None:
+    breakdown = ev.get("pathway_breakdown", {})
+    if breakdown:
+        for key, dose in breakdown.items():
+            pw = key.split(":")[0] if ":" in key else key
+            pathway_totals[pw] = pathway_totals.get(pw, 0) + dose
+    else:
+        pw = ev.get("dominant_pathway", ev.get("pathway", "unknown"))
+        pathway_totals[pw] = pathway_totals.get(pw, 0) + ev.get("total_dose", 1)
+
+
 def aggregate_transmission_pathway_totals(
     history: list[dict[str, Any]],
 ) -> dict[str, float]:
@@ -720,14 +763,7 @@ def aggregate_transmission_pathway_totals(
         ct = rec.get("contact_tracing", {})
         events = ct.get("transmission_events", [])
         for ev in events:
-            breakdown = ev.get("pathway_breakdown", {})
-            if breakdown:
-                for key, dose in breakdown.items():
-                    pw = key.split(":")[0] if ":" in key else key
-                    pathway_totals[pw] = pathway_totals.get(pw, 0) + dose
-            else:
-                pw = ev.get("dominant_pathway", ev.get("pathway", "unknown"))
-                pathway_totals[pw] = pathway_totals.get(pw, 0) + ev.get("total_dose", 1)
+            _accumulate_event_pathways(ev, pathway_totals)
     pathway_totals.pop("none", None)
     return pathway_totals
 
@@ -796,23 +832,23 @@ def _build_epidemic_curve(history: list[dict[str, Any]]) -> go.Figure:
 
     fig = go.Figure()
     fig.add_trace(go.Scatter(
-        x=epochs, y=susceptible, mode="lines+markers",
+        x=epochs, y=susceptible, mode=PLOT_MODE_LINES_MARKERS,
         name="Susceptible (S)", line={"color": LCARS_BLUE, "width": 2},
     ))
     fig.add_trace(go.Scatter(
-        x=epochs, y=infected, mode="lines+markers",
+        x=epochs, y=infected, mode=PLOT_MODE_LINES_MARKERS,
         name="Infected (I)", line={"color": LCARS_RED, "width": 2},
     ))
     fig.add_trace(go.Scatter(
-        x=epochs, y=quarantined, mode="lines+markers",
+        x=epochs, y=quarantined, mode=PLOT_MODE_LINES_MARKERS,
         name="Confined to Quarters (Q)", line={"color": LCARS_GOLD, "width": 2, "dash": "dash"},
     ))
     fig.add_trace(go.Scatter(
-        x=epochs, y=isolated, mode="lines+markers",
+        x=epochs, y=isolated, mode=PLOT_MODE_LINES_MARKERS,
         name="Isolation Ward", line={"color": LCARS_PURPLE, "width": 2, "dash": "dashdot"},
     ))
     fig.add_trace(go.Scatter(
-        x=epochs, y=recovered, mode="lines+markers",
+        x=epochs, y=recovered, mode=PLOT_MODE_LINES_MARKERS,
         name="Recovered (R)", line={"color": LCARS_GREEN, "width": 2, "dash": "dot"},
     ))
 
@@ -843,6 +879,19 @@ def _build_epidemic_curve(history: list[dict[str, Any]]) -> go.Figure:
 # ══════════════════════════════════════════════════════════════════════════
 # Station 3: Sickbay Diagnostic Console
 # ══════════════════════════════════════════════════════════════════════════
+
+def _render_sickbay_fidelity_view(
+    fidelity: str,
+    filtered: list[dict[str, Any]],
+    history: list[dict[str, Any]],
+) -> None:
+    if fidelity == "LOW_FIDELITY":
+        _render_low_fidelity(filtered, history)
+    elif fidelity == "MID_FIDELITY":
+        _render_mid_fidelity(filtered)
+    else:
+        _render_high_fidelity(filtered)
+
 
 def render_sickbay_console(
     history: list[dict[str, Any]],
@@ -892,12 +941,7 @@ def render_sickbay_console(
         st.info("No records match the current diagnostic filters.")
         return
 
-    if fidelity == "LOW_FIDELITY":
-        _render_low_fidelity(filtered, history)
-    elif fidelity == "MID_FIDELITY":
-        _render_mid_fidelity(filtered)
-    else:
-        _render_high_fidelity(filtered)
+    _render_sickbay_fidelity_view(fidelity, filtered, history)
 
 
 def _render_low_fidelity(
@@ -1036,6 +1080,29 @@ def _render_amplification_curves(records: list[dict[str, Any]]) -> None:
         st.plotly_chart(fig, use_container_width=True)
 
 
+def _render_kingdom_clr_deltas(ww_records: list[dict[str, Any]]) -> None:
+    clr_records = [r for r in ww_records if r.get("kingdom_clr_deltas")]
+    if not clr_records:
+        return
+    st.markdown(
+        _lcars_banner("CLR-Space Anomaly Deltas", LCARS_PURPLE),
+        unsafe_allow_html=True,
+    )
+    clr_rows = []
+    for r in clr_records:
+        deltas = r["kingdom_clr_deltas"]
+        clr_rows.append({
+            "Epoch": r.get("timestamp_epoch", ""),
+            "Compartment": r.get("collection_zone", ""),
+            "Bacteria": f"{deltas.get('Bacteria', 0):+.3f}",
+            "Archaea": f"{deltas.get('Archaea', 0):+.3f}",
+            "Fungi": f"{deltas.get('Fungi', 0):+.3f}",
+            "Virus": f"{deltas.get('Virus', 0):+.3f}",
+            "Anomaly": f"{r.get('inferred_anomaly_score', 0):.3f}",
+        })
+    st.dataframe(pd.DataFrame(clr_rows), use_container_width=True, hide_index=True)
+
+
 def _render_kingdom_charts(records: list[dict[str, Any]]) -> None:
     """Stacked bar charts for GRUMB multi-kingdom relative abundance reads."""
 
@@ -1080,26 +1147,7 @@ def _render_kingdom_charts(records: list[dict[str, Any]]) -> None:
         legend={"orientation": "h", "y": 1.08, "x": 0.5, "xanchor": "center"},
     )
     st.plotly_chart(fig, use_container_width=True)
-
-    clr_records = [r for r in ww_records if r.get("kingdom_clr_deltas")]
-    if clr_records:
-        st.markdown(
-            _lcars_banner("CLR-Space Anomaly Deltas", LCARS_PURPLE),
-            unsafe_allow_html=True,
-        )
-        clr_rows = []
-        for r in clr_records:
-            deltas = r["kingdom_clr_deltas"]
-            clr_rows.append({
-                "Epoch": r.get("timestamp_epoch", ""),
-                "Compartment": r.get("collection_zone", ""),
-                "Bacteria": f"{deltas.get('Bacteria', 0):+.3f}",
-                "Archaea": f"{deltas.get('Archaea', 0):+.3f}",
-                "Fungi": f"{deltas.get('Fungi', 0):+.3f}",
-                "Virus": f"{deltas.get('Virus', 0):+.3f}",
-                "Anomaly": f"{r.get('inferred_anomaly_score', 0):.3f}",
-            })
-        st.dataframe(pd.DataFrame(clr_rows), use_container_width=True, hide_index=True)
+    _render_kingdom_clr_deltas(ww_records)
 
 
 # ══════════════════════════════════════════════════════════════════════════

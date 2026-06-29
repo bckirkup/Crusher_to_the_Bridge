@@ -50,6 +50,22 @@ def _read_orchestrator_sources() -> dict[str, str]:
     return sources
 
 
+def _find_mutable_module_assignments(src: str, mod: str) -> str | None:
+    tree = ast.parse(src, filename=mod)
+    for node in ast.iter_child_nodes(tree):
+        if not isinstance(node, ast.Assign):
+            continue
+        for target in node.targets:
+            if isinstance(target, ast.Name):
+                name = target.id
+                if not name.startswith("_") and name != name.upper():
+                    return (
+                        f"{mod}:{node.lineno} has mutable module-level "
+                        f"variable '{name}' (not UPPER_CASE constant)"
+                    )
+    return None
+
+
 def _read_extended_sources() -> dict[str, str]:
     """Read all Python sources under picard_framework/, crusher_labs/, decision_engine/."""
     sources: dict[str, str] = {}
@@ -327,17 +343,9 @@ class TestPureStateIsolation:
         for mod, src in _read_orchestrator_sources().items():
             if mod in skip_modules:
                 continue
-            tree = ast.parse(src, filename=mod)
-            for node in ast.iter_child_nodes(tree):
-                if isinstance(node, ast.Assign):
-                    for target in node.targets:
-                        if isinstance(target, ast.Name):
-                            name = target.id
-                            if not name.startswith("_") and name != name.upper():
-                                pytest.fail(
-                                    f"{mod}:{node.lineno} has mutable module-level "
-                                    f"variable '{name}' (not UPPER_CASE constant)"
-                                )
+            violations = _find_mutable_module_assignments(src, mod)
+            if violations:
+                pytest.fail(violations)
 
     def test_step_functions_accept_state_as_parameter(self) -> None:
         """Step functions must receive SimulationState as a parameter, not access it globally."""

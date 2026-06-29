@@ -86,6 +86,28 @@ class InformationDiffusionEngine:
         for state in self.agent_states.values():
             state.rumor_exposure = min(1.0, state.rumor_exposure + bump)
 
+    def _neighbor_severity_signal(
+        self,
+        aid: int,
+        neighbors: dict[int, float],
+        agent_classes: dict[int, str],
+        homophily: float,
+        status_signal: float,
+    ) -> float:
+        if not neighbors:
+            return status_signal
+        total_w = sum(neighbors.values())
+        agg = 0.0
+        for nid, w in neighbors.items():
+            nstate = self.agent_states.get(nid)
+            if nstate is None:
+                continue
+            same_class = agent_classes.get(aid) == agent_classes.get(nid)
+            hw = w * (1.0 + homophily if same_class else 1.0)
+            agg += hw * nstate.severity_belief
+        agg = agg / max(total_w, 1e-6)
+        return 0.5 * agg + 0.5 * status_signal
+
     def step(
         self,
         adjacency: dict[int, dict[int, float]],
@@ -107,20 +129,9 @@ class InformationDiffusionEngine:
         new_states: dict[int, InformationState] = {}
         for aid, state in self.agent_states.items():
             neighbors = adjacency.get(aid, {})
-            if not neighbors:
-                agg = status_signal
-            else:
-                total_w = sum(neighbors.values())
-                agg = 0.0
-                for nid, w in neighbors.items():
-                    nstate = self.agent_states.get(nid)
-                    if nstate is None:
-                        continue
-                    same_class = agent_classes.get(aid) == agent_classes.get(nid)
-                    hw = w * (1.0 + homophily if same_class else 1.0)
-                    agg += hw * nstate.severity_belief
-                agg = agg / max(total_w, 1e-6)
-                agg = 0.5 * agg + 0.5 * status_signal
+            agg = self._neighbor_severity_signal(
+                aid, neighbors, agent_classes, homophily, status_signal,
+            )
 
             severity = (1.0 - alpha) * state.severity_belief + alpha * _sigmoid(agg * 4 - 2)
             rumor = max(0.0, state.rumor_exposure - decay)

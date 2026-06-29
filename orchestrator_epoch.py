@@ -172,6 +172,40 @@ def step_mid_cruise_introductions(
 
 # ── Infection progression ────────────────────────────────────────────────
 
+def _advance_agent_pathogen_infections(
+    agent: Any,
+    pathogen_profiles: dict[str, dict[str, Any]],
+    rng: np.random.Generator,
+) -> None:
+    for pid, inf in tuple(agent.infections.items()):
+        if inf["status"] != InfectionStatus.INFECTED:
+            continue
+        prof = pathogen_profiles.get(pid, {})
+
+        if inf["time_infected"] is not None:
+            inf["time_infected"] += 1
+
+        dpi = inf["time_infected"] or 0
+        if dpi >= 1 and inf["illness"] == IllnessStatus.NOT_ILL:
+            ill_params = prof.get("illness_probability", {})
+            eta_p = ill_params.get("eta", 0.508)
+            gamma_p = ill_params.get("gamma", 0.095)
+            dose = inf["acquired_particles"]
+            ill_prob = 1.0 - math.pow(1.0 + eta_p * dose, -gamma_p)
+            ill_prob = min(1.0, ill_prob + agent.get_chronic_illness_boost(pid))
+            if rng.random() < ill_prob:
+                inf["illness"] = IllnessStatus.SYMPTOMATIC
+                if agent.illness_status == IllnessStatus.NOT_ILL:
+                    agent.illness_status = IllnessStatus.SYMPTOMATIC
+
+        recovery_day = agent.get_chronic_recovery_day(
+            pid, prof.get("recovery_day", 3),
+        )
+        if dpi >= recovery_day:
+            inf["status"] = InfectionStatus.RECOVERED
+            inf["illness"] = IllnessStatus.RECOVERED
+
+
 def step_infection_progression(
     engine: KorkinShipEngine,
     pathogen_profiles: dict[str, dict[str, Any]],
@@ -181,35 +215,7 @@ def step_infection_progression(
         return
 
     for agent in engine.agents:
-        for pid, inf in tuple(agent.infections.items()):
-            if inf["status"] != InfectionStatus.INFECTED:
-                continue
-            prof = pathogen_profiles.get(pid, {})
-
-            if inf["time_infected"] is not None:
-                inf["time_infected"] += 1
-
-            dpi = inf["time_infected"] or 0
-            if dpi >= 1 and inf["illness"] == IllnessStatus.NOT_ILL:
-                ill_params = prof.get("illness_probability", {})
-                eta_p = ill_params.get("eta", 0.508)
-                gamma_p = ill_params.get("gamma", 0.095)
-                dose = inf["acquired_particles"]
-                ill_prob = 1.0 - math.pow(1.0 + eta_p * dose, -gamma_p)
-                # Chronic disease illness probability boost
-                chronic_boost = agent.get_chronic_illness_boost(pid)
-                ill_prob = min(1.0, ill_prob + chronic_boost)
-                if engine.rng.random() < ill_prob:
-                    inf["illness"] = IllnessStatus.SYMPTOMATIC
-                    if agent.illness_status == IllnessStatus.NOT_ILL:
-                        agent.illness_status = IllnessStatus.SYMPTOMATIC
-
-            # Recovery day adjusted for chronic disease extensions
-            base_recovery_day = prof.get("recovery_day", 3)
-            recovery_day = agent.get_chronic_recovery_day(pid, base_recovery_day)
-            if dpi >= recovery_day:
-                inf["status"] = InfectionStatus.RECOVERED
-                inf["illness"] = IllnessStatus.RECOVERED
+        _advance_agent_pathogen_infections(agent, pathogen_profiles, engine.rng)
 
         any_active = any(
             inf["status"] == InfectionStatus.INFECTED
@@ -273,6 +279,98 @@ def apply_chronic_severity_escalation(
 
 # ── Observation sampling ─────────────────────────────────────────────────
 
+def _run_clinical_panel(
+    obs: ObservationEngine,
+    sick_call_agents: list[dict[str, Any]],
+) -> tuple[
+    dict[int, dict[str, Any]],
+    dict[int, dict[str, Any]],
+    dict[int, dict[str, Any]],
+]:
+    if not sick_call_agents:
+        return {}, {}, {}
+    from crusher_labs.clinical_correlation import run_correlated_clinical_panel
+
+    return run_correlated_clinical_panel(
+        obs, sick_call_agents, obs.clinical_correlation,
+    )
+
+
+def _submit_observation_queue(
+    queue: Any,
+    epoch: int,
+    air_results: dict[str, dict[str, Any]],
+    swab_results: dict[str, dict[str, Any]],
+    ww_results: dict[str, dict[str, Any]],
+    clin_rdt_results: dict[int, dict[str, Any]],
+    clin_qpcr_results: dict[int, dict[str, Any]],
+    clin_microbio_results: dict[int, dict[str, Any]],
+) -> None:
+    from crusher_labs.instrument_turnaround import (
+        INSTRUMENT_AIR,
+        INSTRUMENT_MICROBIO,
+        INSTRUMENT_QPCR,
+        INSTRUMENT_RDT,
+        INSTRUMENT_SWAB,
+        INSTRUMENT_WW,
+    )
+
+    queue.submit_dict(INSTRUMENT_AIR, air_results, epoch)
+    queue.submit_dict(INSTRUMENT_SWAB, swab_results, epoch)
+    queue.submit_dict(INSTRUMENT_WW, ww_results, epoch)
+    queue.submit_dict(INSTRUMENT_RDT, clin_rdt_results, epoch)
+    queue.submit_dict(INSTRUMENT_QPCR, clin_qpcr_results, epoch)
+    queue.submit_dict(INSTRUMENT_MICROBIO, clin_microbio_results, epoch)
+
+
+def _run_long_read_escalation(
+    obs: ObservationEngine,
+    queue: Any,
+    cfg: dict[str, Any],
+    epoch: int,
+    spaces: dict[str, dict[str, Any]],
+    agents: list[dict[str, Any]],
+    pathogen_profiles: dict[str, dict[str, Any]],
+    ww_results: dict[str, dict[str, Any]],
+    swab_results: dict[str, dict[str, Any]],
+    clin_rdt_results: dict[int, dict[str, Any]],
+    clin_qpcr_results: dict[int, dict[str, Any]],
+    clin_microbio_results: dict[int, dict[str, Any]],
+) -> tuple[dict[str, dict[str, Any]], int]:
+    from crusher_labs.instrument_turnaround import INSTRUMENT_LONG_READ
+    from crusher_labs.long_read_escalation import collect_long_read_escalation_requests
+
+    long_read_results: dict[str, dict[str, Any]] = {}
+    long_read_ordered_count = 0
+    if obs.long_read is None:
+        return long_read_results, long_read_ordered_count
+
+    requests = collect_long_read_escalation_requests(
+        cfg,
+        ww_results=ww_results,
+        swab_results=swab_results,
+        clin_rdt_results=clin_rdt_results,
+        clin_qpcr_results=clin_qpcr_results,
+        clin_microbio_results=clin_microbio_results,
+    )
+    if not requests:
+        return long_read_results, long_read_ordered_count
+
+    raw_lr = obs.long_read.run_requests(
+        requests,
+        epoch=epoch,
+        spaces=spaces,
+        agents=agents,
+        pathogen_profiles=pathogen_profiles,
+    )
+    for req_id, payload in raw_lr.items():
+        queue.submit(INSTRUMENT_LONG_READ, req_id, payload, epoch)
+        long_read_ordered_count += 1
+    released = queue.release(epoch)
+    long_read_results = released.get(INSTRUMENT_LONG_READ, {})
+    return long_read_results, long_read_ordered_count
+
+
 def run_observation_sampling(
     epoch: int,
     obs: ObservationEngine,
@@ -305,13 +403,6 @@ def run_observation_sampling(
     Delivered results respect instrument turnaround; stoplights use delivered only.
     """
     from crusher_labs.instrument_turnaround import (
-        INSTRUMENT_AIR,
-        INSTRUMENT_LONG_READ,
-        INSTRUMENT_MICROBIO,
-        INSTRUMENT_QPCR,
-        INSTRUMENT_RDT,
-        INSTRUMENT_SWAB,
-        INSTRUMENT_WW,
         merge_released_into_observation,
     )
 
@@ -372,26 +463,15 @@ def run_observation_sampling(
         a for a in agents
         if a["agent_id"] in syn_result.get("sick_call_agents", [])
     ]
-    clin_rdt_results: dict[int, dict[str, Any]] = {}
-    clin_qpcr_results: dict[int, dict[str, Any]] = {}
-    clin_microbio_results: dict[int, dict[str, Any]] = {}
-
-    if sick_call_agents:
-        from crusher_labs.clinical_correlation import run_correlated_clinical_panel
-
-        clin_rdt_results, clin_qpcr_results, clin_microbio_results = (
-            run_correlated_clinical_panel(
-                obs, sick_call_agents, obs.clinical_correlation,
-            )
-        )
+    clin_rdt_results, clin_qpcr_results, clin_microbio_results = (
+        _run_clinical_panel(obs, sick_call_agents)
+    )
 
     if queue is not None:
-        queue.submit_dict(INSTRUMENT_AIR, air_results, epoch)
-        queue.submit_dict(INSTRUMENT_SWAB, swab_results, epoch)
-        queue.submit_dict(INSTRUMENT_WW, ww_results, epoch)
-        queue.submit_dict(INSTRUMENT_RDT, clin_rdt_results, epoch)
-        queue.submit_dict(INSTRUMENT_QPCR, clin_qpcr_results, epoch)
-        queue.submit_dict(INSTRUMENT_MICROBIO, clin_microbio_results, epoch)
+        _submit_observation_queue(
+            queue, epoch, air_results, swab_results, ww_results,
+            clin_rdt_results, clin_qpcr_results, clin_microbio_results,
+        )
 
     released = queue.release(epoch) if queue is not None else {}
     (
@@ -405,30 +485,12 @@ def run_observation_sampling(
     ) = merge_released_into_observation(released)
 
     long_read_ordered_count = 0
-    if obs.long_read is not None and queue is not None:
-        from crusher_labs.long_read_escalation import collect_long_read_escalation_requests
-
-        requests = collect_long_read_escalation_requests(
-            cfg,
-            ww_results=ww_results,
-            swab_results=swab_results,
-            clin_rdt_results=clin_rdt_results,
-            clin_qpcr_results=clin_qpcr_results,
-            clin_microbio_results=clin_microbio_results,
+    if queue is not None:
+        long_read_results, long_read_ordered_count = _run_long_read_escalation(
+            obs, queue, cfg, epoch, spaces, agents, pathogen_profiles,
+            ww_results, swab_results,
+            clin_rdt_results, clin_qpcr_results, clin_microbio_results,
         )
-        if requests:
-            raw_lr = obs.long_read.run_requests(
-                requests,
-                epoch=epoch,
-                spaces=spaces,
-                agents=agents,
-                pathogen_profiles=pathogen_profiles,
-            )
-            for req_id, payload in raw_lr.items():
-                queue.submit(INSTRUMENT_LONG_READ, req_id, payload, epoch)
-                long_read_ordered_count += 1
-            released = queue.release(epoch)
-            long_read_results = released.get(INSTRUMENT_LONG_READ, {})
 
     obs.notebook.log_air_sniffer(epoch, air_results)
     obs.notebook.log_surface_swab(epoch, swab_results)
@@ -776,6 +838,23 @@ def step_wearable_monitoring(
 
 # ── Diagnostic cascade ───────────────────────────────────────────────────
 
+def _collect_wearable_red_ids(
+    wearable_result: dict[str, Any],
+    entry_cfg: Any,
+) -> list[int]:
+    from crusher_labs.cascade_entry import evaluate_wearable_alert
+
+    wearable_red_ids: list[int] = []
+    alert_fusion = entry_cfg.wearable_alert_fusion
+    for aid_str, data in wearable_result.get("agent_results", {}).items():
+        if evaluate_wearable_alert(data, alert_fusion):
+            try:
+                wearable_red_ids.append(int(aid_str))
+            except (ValueError, TypeError):
+                pass
+    return wearable_red_ids
+
+
 def step_diagnostic_cascade(
     epoch: int,
     state: SimulationState,
@@ -800,7 +879,6 @@ def step_diagnostic_cascade(
 
     from crusher_labs.cascade_entry import (
         CascadeEntryConfig,
-        evaluate_wearable_alert,
     )
     from crusher_labs.diagnostic_cascade import build_test_runner
 
@@ -814,13 +892,7 @@ def step_diagnostic_cascade(
 
     wearable_red_ids: list[int] = []
     if wearable_result:
-        alert_fusion = entry_cfg.wearable_alert_fusion
-        for aid_str, data in wearable_result.get("agent_results", {}).items():
-            if evaluate_wearable_alert(data, alert_fusion):
-                try:
-                    wearable_red_ids.append(int(aid_str))
-                except (ValueError, TypeError):
-                    pass
+        wearable_red_ids = _collect_wearable_red_ids(wearable_result, entry_cfg)
 
     monitored_ids: set[int] = set()
     if wearable_monitor is not None and hasattr(wearable_monitor, "monitored_agents"):
@@ -899,6 +971,42 @@ def _agent_matches_filter(
     return True
 
 
+def _counter_metric_value(
+    metric: str,
+    group: list[dict[str, Any]],
+    pop: int,
+) -> float:
+    if metric == "attack_rate":
+        n_symptomatic = sum(
+            1 for a in group
+            if agent_has_symptomatic_presentation(a)
+        )
+        return (n_symptomatic / pop) if pop > 0 else 0.0
+    if metric == "infected_count":
+        return float(sum(1 for a in group if agent_is_infected(a)))
+    if metric == "symptomatic_count":
+        return float(sum(
+            1 for a in group
+            if agent_has_symptomatic_presentation(a)
+        ))
+    if metric == "recovered_count":
+        return float(sum(
+            1 for a in group
+            if a.get("infection_state") == INFECTION_RECOVERED
+            or a.get("symptom_status") == "recovered"
+        ))
+    if metric == "susceptible_count":
+        return float(sum(
+            1 for a in group
+            if a.get("infection_state") == INFECTION_SUSCEPTIBLE
+            or (
+                "infection_state" not in a
+                and a.get("symptom_status") == "asymptomatic"
+            )
+        ))
+    return 0.0
+
+
 def compute_infection_counters(
     agents: list[dict[str, Any]],
     counter_defs: list[dict[str, Any]],
@@ -919,37 +1027,7 @@ def compute_infection_counters(
 
         group = [a for a in agents if _agent_matches_filter(a, cfilter)]
         pop = len(group)
-
-        if metric == "attack_rate":
-            n_symptomatic = sum(
-                1 for a in group
-                if agent_has_symptomatic_presentation(a)
-            )
-            value = (n_symptomatic / pop) if pop > 0 else 0.0
-        elif metric == "infected_count":
-            value = float(sum(1 for a in group if agent_is_infected(a)))
-        elif metric == "symptomatic_count":
-            value = float(sum(
-                1 for a in group
-                if agent_has_symptomatic_presentation(a)
-            ))
-        elif metric == "recovered_count":
-            value = float(sum(
-                1 for a in group
-                if a.get("infection_state") == INFECTION_RECOVERED
-                or a.get("symptom_status") == "recovered"
-            ))
-        elif metric == "susceptible_count":
-            value = float(sum(
-                1 for a in group
-                if a.get("infection_state") == INFECTION_SUSCEPTIBLE
-                or (
-                    "infection_state" not in a
-                    and a.get("symptom_status") == "asymptomatic"
-                )
-            ))
-        else:
-            value = 0.0
+        value = _counter_metric_value(metric, group, pop)
 
         exceeded = threshold is not None and value >= threshold
         entry: dict[str, Any] = {
