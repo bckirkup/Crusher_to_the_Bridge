@@ -40,6 +40,12 @@ def test_prepare_output_directory_creates_private_dir(tmp_path) -> None:
     assert oct(os.stat(created).st_mode & 0o777) == oct(0o700)
 
 
-def test_is_path_under_base() -> None:
-    assert is_path_under_base("/tmp", "/tmp/child")
-    assert not is_path_under_base("/tmp/a", "/tmp/b")
+def test_is_path_under_base(tmp_path) -> None:
+    base = tmp_path / "base"
+    child = base / "child"
+    sibling = tmp_path / "other"
+    base.mkdir()
+    child.mkdir()
+    sibling.mkdir()
+    assert is_path_under_base(str(base), str(child))
+    assert not is_path_under_base(str(base), str(sibling))

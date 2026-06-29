@@ -360,7 +360,7 @@ class TestCascadeTATDelay:
         agents = [_make_agent(1, infected=True, shedding=500.0)]
 
         # Epoch 0: enters cascade, reaches Tier 2, but TAT pending
-        result0 = engine.evaluate_epoch(
+        engine.evaluate_epoch(
             epoch=0, sick_call_ids=[1], wearable_red_ids=[],
             agents=agents, test_runner=runner,
         )
@@ -370,14 +370,14 @@ class TestCascadeTATDelay:
         assert state.pending_available_epoch == 2
 
         # Epoch 1: still pending
-        result1 = engine.evaluate_epoch(
+        engine.evaluate_epoch(
             epoch=1, sick_call_ids=[], wearable_red_ids=[],
             agents=agents, test_runner=runner,
         )
         assert engine.agent_states[1].current_tier == 2
 
         # Epoch 2: TAT resolved, should advance to Tier 3
-        result2 = engine.evaluate_epoch(
+        engine.evaluate_epoch(
             epoch=2, sick_call_ids=[], wearable_red_ids=[],
             agents=agents, test_runner=runner,
         )

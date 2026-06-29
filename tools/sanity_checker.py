@@ -30,7 +30,12 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
 
+_REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, _REPO_ROOT)
+
 from pydantic import BaseModel, Field, field_validator, model_validator
+
+from simulation_utils.paths import validated_open
 
 # ── ANSI colour codes ────────────────────────────────────────────────────
 
@@ -689,7 +694,7 @@ def _check_logical_contradictions(
 def _load_json(path: str) -> dict[str, Any] | None:
     if not os.path.isfile(path):
         return None
-    with open(path, "r", encoding="utf-8") as fh:
+    with validated_open(path, allowed_roots=(_REPO_ROOT,), encoding="utf-8") as fh:
         return json.load(fh)
 
 
@@ -1730,8 +1735,6 @@ def print_report(report: Report) -> None:
 
 
 def main() -> None:
-    _REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
     parser = argparse.ArgumentParser(
         description="Validate Crusher Labs configuration files for structural "
                     "and logical correctness.",

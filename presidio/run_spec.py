@@ -9,7 +9,7 @@ import os
 from dataclasses import dataclass, field
 from typing import Any
 
-from simulation_utils.paths import resolve_repo_path
+from simulation_utils.paths import resolve_repo_path, validated_open
 
 
 @dataclass
@@ -33,7 +33,7 @@ class PresidioRunSpec:
     @classmethod
     def from_fleet_json(cls, repo_root: str, fleet_config_path: str) -> PresidioRunSpec:
         fleet_config_path = resolve_repo_path(repo_root, fleet_config_path)
-        with open(fleet_config_path, encoding="utf-8") as fh:
+        with validated_open(fleet_config_path, allowed_roots=(repo_root,), encoding="utf-8") as fh:
             raw = json.load(fh)
         fleet = raw.get("fleet", {})
         catalog = raw.get("catalog", {})

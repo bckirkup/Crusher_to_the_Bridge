@@ -128,7 +128,7 @@ class ClinicalTestCorrelation:
     ) -> ClinicalTestCorrelation:
         block = (cfg or {}).get("clinical_diagnostics", {})
         test_order = tuple(block.get("test_order", CLINICAL_TEST_KEYS))
-        if tuple(test_order) != CLINICAL_TEST_KEYS:
+        if test_order != CLINICAL_TEST_KEYS:
             raise ValueError(
                 f"clinical_diagnostics.test_order must be {list(CLINICAL_TEST_KEYS)}",
             )

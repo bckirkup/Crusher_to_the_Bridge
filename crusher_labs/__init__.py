@@ -17,6 +17,8 @@ from typing import Any
 import numpy as np
 import yaml
 
+from simulation_utils.paths import resolve_repo_path, validated_open
+
 from crusher_labs.modalities.syndromic import SyndromicSurveillance
 from crusher_labs.modalities.clinical_rdt import ClinicalRDT
 from crusher_labs.modalities.targeted_pcr import TargetedPCR
@@ -54,7 +56,9 @@ _CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.
 
 def load_config(path: str = _CONFIG_PATH) -> dict[str, Any]:
     """Load and return the Crusher Labs YAML configuration."""
-    with open(path, "r", encoding="utf-8") as fh:
+    repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    resolved = resolve_repo_path(repo_root, path)
+    with validated_open(resolved, allowed_roots=(repo_root,), encoding="utf-8") as fh:
         return yaml.safe_load(fh)
 
 

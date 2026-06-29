@@ -220,11 +220,11 @@ if __name__ == "__main__":
         print(f"\n[ERROR] Missing file: {exc}", file=sys.stderr)
         print("  Hint: verify --fleet-config path and data/ directory contents.", file=sys.stderr)
         sys.exit(1)
+    except json.JSONDecodeError as exc:
+        print(f"\n[ERROR] Invalid JSON: {exc}", file=sys.stderr)
+        sys.exit(1)
     except (KeyError, ValueError) as exc:
         print(f"\n[ERROR] Configuration problem: {exc}", file=sys.stderr)
         print("  Hint: run 'python tools/sanity_checker.py --from-config' to validate.", file=sys.stderr)
-        sys.exit(1)
-    except json.JSONDecodeError as exc:
-        print(f"\n[ERROR] Invalid JSON: {exc}", file=sys.stderr)
         sys.exit(1)
     sys.exit(0)
