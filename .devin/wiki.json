@@ -78,7 +78,7 @@
     },
     {
       "title": "Pathogen Profiles",
-      "purpose": "Document the pathogen profile data contract under data/pathogens/. Cover active_profiles.json and edison_10pathogen_profiles.json. Detail the profile schema: pathogen_id, category, transmission_routes, shedding_curve_log10, dose_response models (beta-Poisson alpha/beta, exponential k), illness_probability, recovery_day, surface_deposition_fraction, microflora_disruption, introduction_epoch, and initial_infected.",
+      "purpose": "Document the pathogen profile data contract under data/pathogens/. Cover active_profiles.json and edison_10pathogen_profiles.json. Detail the profile schema: pathogen_id, category, transmission_routes, shedding_curve_log10, shedding_variance_log10 (host heterogeneity), dose_response models (beta-Poisson alpha/beta, exponential k), illness_probability, recovery_day, surface_deposition_fraction, microflora_disruption, introduction_epoch, and initial_infected.",
       "parent": "Configuration Reference"
     },
     {

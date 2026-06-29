@@ -43,10 +43,21 @@ P(infection) = 1 − (1 + dose/β)^{−α}
 
 Where `α` and `β` are pathogen-specific parameters from `active_profiles.json`.
 
+**Host shedding variance** (optional, `shedding_variance_log10` on pathogen profile):
+
+```
+shedding = 10^(curve[dpi] − dose_adjustment) × shedding_multiplier
+shedding_multiplier = 10^(Normal(0, σ))   at infection time; persists for that infection
+```
+
+Default `σ = 0` → multiplier = 1.0. See `docs/SHEDDING_AND_CABINMATES.md`.
+
 **Key Classes:**
 - `KorkinAgent` — Python dataclass mirroring `Person.java` with
   `infection_status`, `illness_status`, `current_location`, `shedding_rate`,
-  `susceptibility_multiplier`, `microflora_disruption_status`
+  `shedding_multiplier` (per-pathogen host factor), `cabin_mate_ids` (stateroom
+  co-occupants on cabin-corridor platforms), `susceptibility_multiplier`,
+  `microflora_disruption_status`
 - `IllnessStatus` / `InfectionStatus` — Enum states for SIR transitions
 - `infection_probability(dose, alpha, beta)` — Scalar dose-response function
 
@@ -59,7 +70,7 @@ independent transport pathways:
 
 | # | Pathway | Mechanism | Dose Source |
 |---|---------|-----------|-------------|
-| 1 | **Direct Contact** | Zone-colocation with avgR scaling | Agent shedding × contact pool |
+| 1 | **Direct Contact** | Zone-colocation with avgR scaling; cabin-mate pairing under confinement on `Cabin_Corridor` zones | Agent shedding × contact pool × host multiplier |
 | 2 | **Short-Range Droplet** | Immediate room-level aerosolization | 5% of total shedding → room aerosol pool |
 | 3 | **Long-Range HVAC Airborne** | py-contam bridge distributes aerosol through ductwork | CONTAM mass-balance equation |
 | 4 | **Fomite Deposition** | Surface pool accumulation + stochastic pickup | 10% pickup probability × 1% transfer fraction |
@@ -250,7 +261,8 @@ orchestrator.py (epoch loop)
 
 ```
 active_profiles.json ──────────────────────────────────────────────────┐
-  (pathogen definitions: shedding, dose-response, microflora)         │
+  (pathogen definitions: shedding curves, shedding_variance_log10,      │
+   dose-response, microflora)                                          │
   Default: 2 pathogens (destroyer baseline)                           │
   Alt: edison_10pathogen_profiles.json (10 pathogens, QMRA-sourced)   │
                                                                        │

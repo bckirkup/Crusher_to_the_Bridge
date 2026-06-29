@@ -40,6 +40,7 @@ Profiles live in `data/pathogens/active_profiles.json`. Each pathogen entry requ
   "introduction_epoch": 0,
   "initial_infected": 1,
   "initial_time_infected": 0,
+  "shedding_variance_log10": 0.0,
   "microflora_disruption": {
     "causes_disruption": false,
     "disruption_type": "",
@@ -73,6 +74,7 @@ Edit `data/pathogens/active_profiles.json` and add a new object to the `pathogen
 - `dose_response.alpha` and `dose_response.beta` must be > 0 (for `beta_poisson` model)
 - For `exponential` model, `dose_response.k` must be > 0
 - `shedding_curve_log10` must be non-empty
+- `shedding_variance_log10` (optional, default 0.0) — σ of log-normal host shedding multiplier; 0.0 = no variance
 - `surface_deposition_fraction` must be in [0.0, 1.0]
 - `base_susceptibility` must be >= 0
 - `illness_probability.eta` and `gamma` must be in [0.0, 1.0]
@@ -85,6 +87,18 @@ Edit `data/pathogens/active_profiles.json` and add a new object to the `pathogen
 | `exponential` | `k` | P = 1 - exp(-k * dose) |
 
 Reference: `engines/infection_dynamics_bridge.py::infection_probability()`
+
+### 3b. Host shedding variance (optional)
+
+Per-agent shedding multipliers are drawn at infection time from a log-normal:
+
+```
+multiplier = 10^(normal(0, shedding_variance_log10))
+```
+
+Set `shedding_variance_log10` on the profile (literature values in
+`edison_10pathogen_profiles.json`). Default `0.0` yields multiplier = 1.0.
+See `docs/SHEDDING_AND_CABINMATES.md`.
 
 ### 4. Define transmission routes
 
@@ -103,6 +117,7 @@ Pathways 5–6 are enabled per-profile via `food_contamination` and `environment
 python tools/sanity_checker.py --from-config
 check-jsonschema --schemafile schemas/pathogen_profiles.schema.json data/pathogens/active_profiles.json
 python -m pytest tests/test_data_contracts.py::TestPathogenProfiles -v --tb=short
+python -m pytest tests/test_shedding_variance_cabin_mates.py -v --tb=short
 python -m pytest tests/test_transmission_pathways.py -v --tb=short
 ```
 
@@ -116,8 +131,8 @@ The orchestrator picks up the new pathogen automatically and simulates multi-pat
 
 | Pathogen ID | Model | Notes |
 |-------------|-------|-------|
-| `norwalk_gi` | beta_poisson | GI Norovirus; food contamination enabled |
-| `sars_cov2_resp` | beta_poisson | Respiratory SARS-CoV-2; HVAC airborne route |
+| `norwalk_gi` | beta_poisson | GI Norovirus; `shedding_variance_log10`: 1.5; food contamination enabled |
+| `sars_cov2_resp` | beta_poisson | Respiratory SARS-CoV-2; `shedding_variance_log10`: 1.2; HVAC airborne route |
 
 For the extended 10-pathogen set, see `data/pathogens/edison_10pathogen_profiles.json`.
 For fiction-adapted Enterprise scenarios, see `enterprise_tos_profiles.json` and `enterprise_tng_profiles.json` with templates under `data/templates/`.
