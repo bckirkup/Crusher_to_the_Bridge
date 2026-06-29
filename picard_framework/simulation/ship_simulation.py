@@ -293,7 +293,10 @@ class ShipSimulation:
         exp_path = self.run_spec.social_config.get("experience_store", "")
         if exp_path:
             ep = exp_path if os.path.isabs(exp_path) else os.path.join(self.repo_root, exp_path)
-            self.decision_experience = ExperienceStore(ep)
+            self.decision_experience = ExperienceStore(
+                ep,
+                allowed_roots=(self.repo_root,),
+            )
             self.decision_experience.load()
         self._initialized = True
         return self.world

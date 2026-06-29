@@ -15,6 +15,7 @@ class ExperienceStore:
     """Persist sufficient statistics and policy params between cruises."""
 
     store_path: str
+    allowed_roots: tuple[str, ...] = ()
     records: list[dict[str, Any]] = field(default_factory=list)
     policy_params: dict[str, Any] = field(default_factory=dict)
 
@@ -29,8 +30,10 @@ class ExperienceStore:
     def save(self) -> None:
         if not self.store_path:
             return
+        if not self.allowed_roots:
+            raise ValueError("ExperienceStore.allowed_roots is required to save")
         parent_dir = os.path.dirname(os.path.realpath(self.store_path)) or "."
-        prepare_output_directory(parent_dir)
+        prepare_output_directory(parent_dir, allowed_roots=self.allowed_roots)
         with open(self.store_path, "w", encoding="utf-8") as fh:
             json.dump(
                 {"records": self.records, "policy_params": self.policy_params},

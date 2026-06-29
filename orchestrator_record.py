@@ -296,7 +296,10 @@ def finalize_simulation(
         )
     else:
         history_path = resolve_repo_path(REPO_ROOT, history_path)
-    prepare_output_directory(os.path.dirname(history_path))
+    prepare_output_directory(
+        os.path.dirname(history_path),
+        allowed_roots=(REPO_ROOT,),
+    )
     with open(history_path, "w", encoding="utf-8") as fh:
         json.dump(state.simulation_history, fh, indent=2)
     print(f"\n  Simulation history saved to: {history_path}")

@@ -659,7 +659,10 @@ class ArtificialLabNotebook:
 
         repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         output_path = resolve_repo_path(repo_root, output_path)
-        prepare_output_directory(os.path.dirname(output_path))
+        prepare_output_directory(
+            os.path.dirname(output_path),
+            allowed_roots=(repo_root,),
+        )
         with open(output_path, "w", encoding="utf-8") as fh:
             json.dump(notebook, fh, indent=2, default=str)
 

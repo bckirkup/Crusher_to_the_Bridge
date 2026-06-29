@@ -66,7 +66,10 @@ def _compute_rewards(
 
 
 def run(fleet_spec: PresidioRunSpec, *, display: bool = False) -> None:
-    experience = ExperienceStore(fleet_spec.experience_store_path)
+    experience = ExperienceStore(
+        fleet_spec.experience_store_path,
+        allowed_roots=(fleet_spec.repo_root,),
+    )
     experience.load()
 
     decision_round = DecisionRound(
