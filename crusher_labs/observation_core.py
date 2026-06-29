@@ -428,6 +428,42 @@ class WastewaterSequencingGrid:
         self._baseline_arr = np.array(self._baseline, dtype=np.float64)
         self._baseline_arr /= self._baseline_arr.sum()
 
+    def _apply_microflora_shifts(
+        self,
+        composition: np.ndarray,
+        microflora_shifts: dict[str, float],
+    ) -> tuple[np.ndarray, float, dict[str, float]]:
+        from crusher_labs.modalities.sequencing import (
+            DISRUPTION_MARKERS,
+            aitchison_distance,
+        )
+
+        pre_shift_composition = composition.copy()
+        clr_vec = _clr_transform(composition, self.pseudocount)
+        shift_vec = np.zeros_like(clr_vec)
+
+        for d_type, magnitude in microflora_shifts.items():
+            markers = DISRUPTION_MARKERS.get(d_type, {})
+            for taxon, multiplier in markers.items():
+                if taxon in self._taxa:
+                    idx = self._taxa.index(taxon)
+                    shift_vec[idx] += np.log(multiplier) * magnitude * 0.15
+
+        shifted_clr = clr_vec + shift_vec
+        composition = _inv_clr(shifted_clr)
+        aitchison_dist = aitchison_distance(
+            pre_shift_composition, composition, self.pseudocount,
+        )
+
+        kingdom_clr_deltas: dict[str, float] = {}
+        for kingdom in set(self._kingdoms):
+            indices = [i for i, k in enumerate(self._kingdoms) if k == kingdom]
+            if indices:
+                orig_k = float(np.mean(clr_vec[indices]))
+                new_k = float(np.mean(shifted_clr[indices]))
+                kingdom_clr_deltas[kingdom] = round(new_k - orig_k, 6)
+        return composition, aitchison_dist, kingdom_clr_deltas
+
     def sample_zone(
         self,
         zone_name: str,
@@ -438,38 +474,12 @@ class WastewaterSequencingGrid:
         microflora_shifts = microflora_shifts or {}
 
         composition = self._baseline_arr.copy()
-        pre_shift_composition = composition.copy()
-
-        kingdom_clr_deltas: dict[str, float] = {}
         aitchison_dist = 0.0
+        kingdom_clr_deltas: dict[str, float] = {}
         if microflora_shifts:
-            clr_vec = _clr_transform(composition, self.pseudocount)
-            shift_vec = np.zeros_like(clr_vec)
-
-            from crusher_labs.modalities.sequencing import (
-                DISRUPTION_MARKERS,
-                aitchison_distance,
+            composition, aitchison_dist, kingdom_clr_deltas = (
+                self._apply_microflora_shifts(composition, microflora_shifts)
             )
-
-            for d_type, magnitude in microflora_shifts.items():
-                markers = DISRUPTION_MARKERS.get(d_type, {})
-                for taxon, multiplier in markers.items():
-                    if taxon in self._taxa:
-                        idx = self._taxa.index(taxon)
-                        shift_vec[idx] += np.log(multiplier) * magnitude * 0.15
-
-            shifted_clr = clr_vec + shift_vec
-            composition = _inv_clr(shifted_clr)
-            aitchison_dist = aitchison_distance(
-                pre_shift_composition, composition, self.pseudocount,
-            )
-
-            for kingdom in set(self._kingdoms):
-                indices = [i for i, k in enumerate(self._kingdoms) if k == kingdom]
-                if indices:
-                    orig_k = float(np.mean(clr_vec[indices]))
-                    new_k = float(np.mean(shifted_clr[indices]))
-                    kingdom_clr_deltas[kingdom] = round(new_k - orig_k, 6)
 
         pathogen_taxa = ["Pathogen_target"]
         pathogen_frac = pathogen_mass / (pathogen_mass + 1000.0)
@@ -829,6 +839,46 @@ class ClinicalMicrobiology:
         self.rng = rng if rng is not None else default_simulation_rng()
         self.qc = InstrumentQC(cross_contamination_rate, control_intensity, self.rng)
 
+    @staticmethod
+    def _disruption_site(pathogen_infections: dict[str, Any]) -> str:
+        for pid in pathogen_infections:
+            pid_lower = pid.lower()
+            if "gi" in pid_lower or "enteric" in pid_lower or "norwalk" in pid_lower:
+                return "gastrointestinal"
+            if "resp" in pid_lower or "cov" in pid_lower or "flu" in pid_lower:
+                return "respiratory"
+        return "skin"
+
+    def _culture_panel(
+        self,
+        disruption_site: str,
+        microflora_disruption: float,
+        *,
+        uniform_draw: float | None,
+    ) -> tuple[dict[str, str], str]:
+        normal_profile = NORMAL_FLORA.get(disruption_site, NORMAL_FLORA["skin"])
+        culture_results: dict[str, str] = {}
+        culture_draw = self.rng.random() if uniform_draw is None else uniform_draw
+
+        if microflora_disruption <= 0.3:
+            for organism in normal_profile:
+                culture_results[organism] = "normal"
+            return culture_results, "mixed_normal"
+
+        for organism in normal_profile:
+            culture_results[organism] = (
+                "reduced" if self.rng.random() < 0.7 else "normal"
+            )
+
+        abnormal_list = ABNORMAL_MARKERS.get(disruption_site, [])
+        for marker in abnormal_list:
+            if culture_draw < microflora_disruption * self.culture_sensitivity:
+                culture_results[marker] = "detected"
+            if uniform_draw is None:
+                culture_draw = self.rng.random()
+
+        return culture_results, "abnormal_shift"
+
     def test_agent(
         self,
         agent_id: int,
@@ -845,42 +895,11 @@ class ClinicalMicrobiology:
         pathogen_infections = pathogen_infections or {}
 
         _, carryover = self.qc.process_sample(microflora_disruption * 10)
-        culture_draw = self.rng.random() if uniform_draw is None else uniform_draw
 
-        # Determine disruption site from active infections
-        disruption_site = "skin"  # default
-        for pid, inf in pathogen_infections.items():
-            if "gi" in pid.lower() or "enteric" in pid.lower() or "norwalk" in pid.lower():
-                disruption_site = "gastrointestinal"
-                break
-            elif "resp" in pid.lower() or "cov" in pid.lower() or "flu" in pid.lower():
-                disruption_site = "respiratory"
-                break
-
-        # Simulate culture results
-        normal_profile = NORMAL_FLORA.get(disruption_site, NORMAL_FLORA["skin"])
-        culture_results: dict[str, str] = {}
-        gram_stain = "mixed_normal"
-
-        if microflora_disruption > 0.3:
-            # Disrupted flora: some commensals reduced, abnormal markers appear
-            for organism in normal_profile:
-                if self.rng.random() < 0.7:
-                    culture_results[organism] = "reduced"
-                else:
-                    culture_results[organism] = "normal"
-
-            abnormal_list = ABNORMAL_MARKERS.get(disruption_site, [])
-            for marker in abnormal_list:
-                if culture_draw < microflora_disruption * self.culture_sensitivity:
-                    culture_results[marker] = "detected"
-                if uniform_draw is None:
-                    culture_draw = self.rng.random()
-
-            gram_stain = "abnormal_shift"
-        else:
-            for organism in normal_profile:
-                culture_results[organism] = "normal"
+        disruption_site = self._disruption_site(pathogen_infections)
+        culture_results, gram_stain = self._culture_panel(
+            disruption_site, microflora_disruption, uniform_draw=uniform_draw,
+        )
 
         flora_shift_detected = microflora_disruption > 0.3
         secondary_infection = any(

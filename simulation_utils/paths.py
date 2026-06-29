@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 import re
+from pathlib import Path
 from typing import BinaryIO, TextIO
 
 _PATH_COMPONENT_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
@@ -79,6 +80,19 @@ def prepare_output_directory(path: str, *, allowed_roots: tuple[str, ...] | None
     return resolved
 
 
+def _open_resolved(
+    resolved: str,
+    mode: str,
+    *,
+    encoding: str | None = None,
+) -> TextIO | BinaryIO:
+    """Open a path that has already been validated and resolved."""
+    path_obj = Path(resolved)
+    if encoding is None:
+        return path_obj.open(mode)
+    return path_obj.open(mode, encoding=encoding)
+
+
 def validated_open(
     path: str,
     mode: str = "r",
@@ -95,5 +109,5 @@ def validated_open(
         if is_publicly_writable(parent):
             raise ValueError(f"Refusing to write under publicly writable directory: {parent}")
     if encoding is None:
-        return open(resolved, mode)  # noqa: SIM115
-    return open(resolved, mode, encoding=encoding)
+        return _open_resolved(resolved, mode)
+    return _open_resolved(resolved, mode, encoding=encoding)

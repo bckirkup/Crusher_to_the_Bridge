@@ -351,79 +351,12 @@ class TransmissionCore:
         active_pathogens = list(self.pathogen_profiles.keys()) if self.pathogen_profiles else ["_default"]
 
         for pathogen_id in active_pathogens:
-            profile = self.pathogen_profiles.get(pathogen_id, {})
-            p_mass = (multi_pathogen_mass or {}).get(pathogen_id, zone_pathogen_mass)
-
-            # Per-pathogen per-agent dose this pathogen
-            p_agent_doses: dict[int, float] = {}
-            p_agent_pw: dict[int, dict[str, float]] = {}
-
-            # Check if this pathogen spreads person-to-person
-            ec = profile.get("environmental_contamination", {})
-            person_to_person = ec.get("person_to_person", True)
-
-            # ── Pathway 1: Direct Contact ────────────────────────
-            if person_to_person:
-                self._pathway_direct_contact(
-                    epoch, zone_occupants, p_agent_doses, matrix, events,
-                    p_agent_pw, pathogen_id=pathogen_id, profile=profile,
-                )
-
-            # ── Pathway 2: Short-Range Droplet ───────────────────
-            if person_to_person:
-                self._pathway_droplet(
-                    epoch, zone_occupants, p_agent_doses, matrix, events,
-                    p_agent_pw, pathogen_id=pathogen_id, profile=profile,
-                )
-
-            # ── Pathway 3: Long-Range Airborne (HVAC Drift) ──────
-            self._pathway_hvac_airborne(
-                epoch, zone_occupants, p_mass,
-                hvac_downstream_zones or {},
-                p_agent_doses, matrix, events,
-                p_agent_pw, pathogen_id=pathogen_id,
+            self._execute_pathogen_pathways(
+                epoch, agents, zone_occupants, zone_pathogen_mass,
+                hvac_downstream_zones, multi_pathogen_mass,
+                pathogen_id, agent_doses, agent_pathway_doses, agent_pathogen_doses,
+                matrix, events,
             )
-
-            # ── Pathway 4: Fomite Deposition & Surface Touch ─────
-            if person_to_person:
-                self._pathway_fomite(
-                    epoch, zone_occupants, p_agent_doses, matrix, events,
-                    p_agent_pw, pathogen_id=pathogen_id, profile=profile,
-                )
-
-            # ── Pathway 5: Food Contamination ────────────────────
-            fc = profile.get("food_contamination", {})
-            if fc.get("enabled", False):
-                self._pathway_food_contamination(
-                    epoch, zone_occupants, p_agent_doses, matrix,
-                    p_agent_pw, pathogen_id=pathogen_id, profile=profile,
-                )
-
-            # ── Pathway 6: Environmental Source ──────────────────
-            if ec.get("enabled", False):
-                self._pathway_environmental(
-                    epoch, zone_occupants, p_agent_doses, matrix,
-                    p_agent_pw, pathogen_id=pathogen_id, profile=profile,
-                )
-
-            # Apply susceptibility multiplier per agent per pathogen
-            for aid, dose in p_agent_doses.items():
-                agent_obj = next((a for a in agents if a.agent_id == aid), None)
-                if agent_obj is not None:
-                    mult = agent_obj.susceptibility_multiplier.get(pathogen_id, 1.0)
-                    scaled_dose = dose * mult
-                else:
-                    scaled_dose = dose
-                agent_doses[aid] = agent_doses.get(aid, 0.0) + scaled_dose
-                apd = agent_pathogen_doses.setdefault(aid, {})
-                apd[pathogen_id] = apd.get(pathogen_id, 0.0) + scaled_dose
-
-            # Merge pathway breakdowns
-            for aid, pw in p_agent_pw.items():
-                merged = agent_pathway_doses.setdefault(aid, {})
-                for pw_name, pw_dose in pw.items():
-                    key = f"{pw_name}:{pathogen_id}" if pathogen_id != "_default" else pw_name
-                    merged[key] = merged.get(key, 0.0) + pw_dose
 
         # ── Apply combined dose-response per pathogen ───────────────
         for agent in agents:
@@ -486,6 +419,81 @@ class TransmissionCore:
         self._update_prev_occupancy(zone_occupants)
 
         return matrix, events
+
+    def _execute_pathogen_pathways(
+        self,
+        epoch: int,
+        agents: list[KorkinAgent],
+        zone_occupants: dict[str, list[KorkinAgent]],
+        zone_pathogen_mass: dict[str, float],
+        hvac_downstream_zones: dict[str, list[str]] | None,
+        multi_pathogen_mass: dict[str, dict[str, float]] | None,
+        pathogen_id: str,
+        agent_doses: dict[int, float],
+        agent_pathway_doses: dict[int, dict[str, float]],
+        agent_pathogen_doses: dict[int, dict[str, float]],
+        matrix: ContactTracingMatrix,
+        events: list[TransmissionEvent],
+    ) -> None:
+        profile = self.pathogen_profiles.get(pathogen_id, {})
+        p_mass = (multi_pathogen_mass or {}).get(pathogen_id, zone_pathogen_mass)
+        p_agent_doses: dict[int, float] = {}
+        p_agent_pw: dict[int, dict[str, float]] = {}
+        ec = profile.get("environmental_contamination", {})
+        person_to_person = ec.get("person_to_person", True)
+
+        if person_to_person:
+            self._pathway_direct_contact(
+                epoch, zone_occupants, p_agent_doses, matrix, events,
+                p_agent_pw, pathogen_id=pathogen_id, profile=profile,
+            )
+            self._pathway_droplet(
+                epoch, zone_occupants, p_agent_doses, matrix, events,
+                p_agent_pw, pathogen_id=pathogen_id, profile=profile,
+            )
+
+        self._pathway_hvac_airborne(
+            epoch, zone_occupants, p_mass,
+            hvac_downstream_zones or {},
+            p_agent_doses, matrix, events,
+            p_agent_pw, pathogen_id=pathogen_id,
+        )
+
+        if person_to_person:
+            self._pathway_fomite(
+                epoch, zone_occupants, p_agent_doses, matrix, events,
+                p_agent_pw, pathogen_id=pathogen_id, profile=profile,
+            )
+
+        fc = profile.get("food_contamination", {})
+        if fc.get("enabled", False):
+            self._pathway_food_contamination(
+                epoch, zone_occupants, p_agent_doses, matrix,
+                p_agent_pw, pathogen_id=pathogen_id, profile=profile,
+            )
+
+        if ec.get("enabled", False):
+            self._pathway_environmental(
+                epoch, zone_occupants, p_agent_doses, matrix,
+                p_agent_pw, pathogen_id=pathogen_id, profile=profile,
+            )
+
+        for aid, dose in p_agent_doses.items():
+            agent_obj = next((a for a in agents if a.agent_id == aid), None)
+            mult = (
+                agent_obj.susceptibility_multiplier.get(pathogen_id, 1.0)
+                if agent_obj is not None else 1.0
+            )
+            scaled_dose = dose * mult
+            agent_doses[aid] = agent_doses.get(aid, 0.0) + scaled_dose
+            apd = agent_pathogen_doses.setdefault(aid, {})
+            apd[pathogen_id] = apd.get(pathogen_id, 0.0) + scaled_dose
+
+        for aid, pw in p_agent_pw.items():
+            merged = agent_pathway_doses.setdefault(aid, {})
+            for pw_name, pw_dose in pw.items():
+                key = f"{pw_name}:{pathogen_id}" if pathogen_id != "_default" else pw_name
+                merged[key] = merged.get(key, 0.0) + pw_dose
 
     # ── Pathway 1: Direct Contact ────────────────────────────────────
 
@@ -627,6 +635,47 @@ class TransmissionCore:
 
     # ── Pathway 3: Long-Range Airborne (HVAC Drift) ──────────────────
 
+    def _apply_hvac_downstream_doses(
+        self,
+        target_zone: str,
+        source_zone: str,
+        shedder_ids: list[int],
+        mass_in_target: float,
+        zone_occupants: dict[str, list[KorkinAgent]],
+        agent_doses: dict[int, float],
+        matrix: ContactTracingMatrix,
+        agent_pathway_doses: dict[int, dict[str, float]] | None,
+        pathogen_id: str,
+    ) -> None:
+        volume = self.zone_volumes.get(target_zone, 100.0)
+        concentration = mass_in_target / max(volume, 1.0)
+        target_occupants = zone_occupants.get(target_zone, [])
+        susceptible = self._get_susceptible(target_occupants, pathogen_id)
+        if not susceptible:
+            return
+
+        for target in susceptible:
+            dose = concentration * AEROSOL_INHALATION_FRACTION * volume
+            dose *= self.hvac_airborne_scalar
+            dose *= self._aerosol_ventilation_factor(target_zone)
+            agent_doses[target.agent_id] = (
+                agent_doses.get(target.agent_id, 0.0) + dose
+            )
+            if agent_pathway_doses is not None:
+                pw = agent_pathway_doses.setdefault(target.agent_id, {})
+                pw["hvac_airborne"] = pw.get("hvac_airborne", 0.0) + dose
+
+            matrix.hvac_downstream_exposures.append({
+                "target_id": target.agent_id,
+                "target_zone": target_zone,
+                "source_zone": source_zone,
+                "source_agent_ids": shedder_ids,
+                "pathogen_id": pathogen_id,
+                "dose": round(dose, 4),
+                "airborne_mass": round(mass_in_target, 4),
+                "concentration_per_m3": round(concentration, 6),
+            })
+
     def _pathway_hvac_airborne(
         self,
         _epoch: int,
@@ -653,43 +702,57 @@ class TransmissionCore:
                 if target_zone == source_zone:
                     continue
 
-                # Pathogen mass in the target zone from CONTAM transport
                 mass_in_target = zone_pathogen_mass.get(target_zone, 0.0)
                 if mass_in_target <= 0:
                     continue
 
-                volume = self.zone_volumes.get(target_zone, 100.0)
-                concentration = mass_in_target / max(volume, 1.0)
-
-                # Susceptible agents in the downstream zone get exposed
-                target_occupants = zone_occupants.get(target_zone, [])
-                susceptible = self._get_susceptible(target_occupants, pathogen_id)
-                if not susceptible:
-                    continue
-
-                for target in susceptible:
-                    dose = concentration * AEROSOL_INHALATION_FRACTION * volume
-                    dose *= self.hvac_airborne_scalar
-                    dose *= self._aerosol_ventilation_factor(target_zone)
-                    agent_doses[target.agent_id] = (
-                        agent_doses.get(target.agent_id, 0.0) + dose
-                    )
-                    if agent_pathway_doses is not None:
-                        pw = agent_pathway_doses.setdefault(target.agent_id, {})
-                        pw["hvac_airborne"] = pw.get("hvac_airborne", 0.0) + dose
-
-                    matrix.hvac_downstream_exposures.append({
-                        "target_id": target.agent_id,
-                        "target_zone": target_zone,
-                        "source_zone": source_zone,
-                        "source_agent_ids": shedder_ids,
-                        "pathogen_id": pathogen_id,
-                        "dose": round(dose, 4),
-                        "airborne_mass": round(mass_in_target, 4),
-                        "concentration_per_m3": round(concentration, 6),
-                    })
+                self._apply_hvac_downstream_doses(
+                    target_zone, source_zone, shedder_ids, mass_in_target,
+                    zone_occupants, agent_doses, matrix,
+                    agent_pathway_doses, pathogen_id,
+                )
 
     # ── Pathway 4: Fomite Deposition & Surface Touch ─────────────────
+
+    def _apply_fomite_pickup(
+        self,
+        target: KorkinAgent,
+        zone_name: str,
+        surface_mass: float,
+        prev_occupant_ids: set[int],
+        prev_shedders: list[int],
+        agent_doses: dict[int, float],
+        matrix: ContactTracingMatrix,
+        agent_pathway_doses: dict[int, dict[str, float]] | None,
+        pathogen_id: str,
+    ) -> None:
+        if self._cabin_confinement_active(target):
+            return
+        if self.rng.random() > FOMITE_PICKUP_PROBABILITY:
+            return
+
+        dose = surface_mass * FOMITE_TRANSFER_FRACTION
+        agent_doses[target.agent_id] = (
+            agent_doses.get(target.agent_id, 0.0) + dose
+        )
+        if agent_pathway_doses is not None:
+            pw = agent_pathway_doses.setdefault(target.agent_id, {})
+            pw["fomite"] = pw.get("fomite", 0.0) + dose
+
+        is_trailing = (
+            target.agent_id not in prev_occupant_ids
+            and len(prev_shedders) > 0
+        )
+
+        matrix.fomite_trailing_exposures.append({
+            "target_id": target.agent_id,
+            "zone": zone_name,
+            "pathogen_id": pathogen_id,
+            "surface_mass": round(surface_mass, 4),
+            "dose": round(dose, 4),
+            "is_trailing": is_trailing,
+            "prev_shedder_ids": prev_shedders if is_trailing else [],
+        })
 
     def _pathway_fomite(
         self,
@@ -734,34 +797,11 @@ class TransmissionCore:
             prev_occupant_ids = self._prev_zone_occupants.get(zone_name, set())
 
             for target in susceptible:
-                if self._cabin_confinement_active(target):
-                    continue
-                # Stochastic surface touch
-                if self.rng.random() > FOMITE_PICKUP_PROBABILITY:
-                    continue
-
-                dose = surface_mass * FOMITE_TRANSFER_FRACTION
-                agent_doses[target.agent_id] = (
-                    agent_doses.get(target.agent_id, 0.0) + dose
+                self._apply_fomite_pickup(
+                    target, zone_name, surface_mass,
+                    prev_occupant_ids, prev_shedders,
+                    agent_doses, matrix, agent_pathway_doses, pathogen_id,
                 )
-                if agent_pathway_doses is not None:
-                    pw = agent_pathway_doses.setdefault(target.agent_id, {})
-                    pw["fomite"] = pw.get("fomite", 0.0) + dose
-
-                is_trailing = (
-                    target.agent_id not in prev_occupant_ids
-                    and len(prev_shedders) > 0
-                )
-
-                matrix.fomite_trailing_exposures.append({
-                    "target_id": target.agent_id,
-                    "zone": zone_name,
-                    "pathogen_id": pathogen_id,
-                    "surface_mass": round(surface_mass, 4),
-                    "dose": round(dose, 4),
-                    "is_trailing": is_trailing,
-                    "prev_shedder_ids": prev_shedders if is_trailing else [],
-                })
 
     # ── Pathway 5: Food Contamination ────────────────────────────────
 

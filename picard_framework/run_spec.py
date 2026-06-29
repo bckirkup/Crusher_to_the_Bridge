@@ -15,6 +15,18 @@ from picard_framework.pathogen_overrides import (
     load_pathogen_bundle,
 )
 
+_CRUSHER_CONFIG_REL = os.path.join("crusher_labs", "config.yaml")
+
+
+def _resolve_repo_path(
+    repo_root: str,
+    path_value: str | None,
+    default: str,
+) -> str:
+    if path_value:
+        return path_value if os.path.isabs(path_value) else os.path.join(repo_root, path_value)
+    return default
+
 
 def merge_config_overrides(
     cfg: dict[str, Any],
@@ -110,7 +122,7 @@ class PicardRunSpec:
         from crusher_labs import load_config
 
         if config_yaml is None:
-            config_yaml = os.path.join(repo_root, "crusher_labs", "config.yaml")
+            config_yaml = os.path.join(repo_root, _CRUSHER_CONFIG_REL)
         cfg = load_config(config_yaml)
         reg = catalog or CatalogRegistry.from_repo(repo_root)
 
@@ -173,31 +185,13 @@ class PicardRunSpec:
         pathogen_path = reg.resolve_pathogen_bundle(pathogen_id)
 
         protocols = catalog.get("protocols_path")
-        if protocols:
-            protocols_path = (
-                protocols if os.path.isabs(protocols)
-                else os.path.join(repo_root, protocols)
-            )
-        else:
-            protocols_path = reg.protocol_bundle
+        protocols_path = _resolve_repo_path(repo_root, protocols, reg.protocol_bundle)
 
         resource = catalog.get("resource_costs_path")
-        if resource:
-            resource_path = (
-                resource if os.path.isabs(resource)
-                else os.path.join(repo_root, resource)
-            )
-        else:
-            resource_path = reg.resource_costs
+        resource_path = _resolve_repo_path(repo_root, resource, reg.resource_costs)
 
         logging = catalog.get("logging_profile_path")
-        if logging:
-            logging_path = (
-                logging if os.path.isabs(logging)
-                else os.path.join(repo_root, logging)
-            )
-        else:
-            logging_path = reg.logging_profile
+        logging_path = _resolve_repo_path(repo_root, logging, reg.logging_profile)
 
         legacy_yaml = raw.get("legacy_yaml")
         legacy_cfg: dict[str, Any] = {}
@@ -208,10 +202,10 @@ class PicardRunSpec:
                 else os.path.join(repo_root, legacy_yaml)
             )
             legacy_cfg = load_config(yaml_path)
-        elif os.path.isfile(os.path.join(repo_root, "crusher_labs", "config.yaml")):
+        elif os.path.isfile(os.path.join(repo_root, _CRUSHER_CONFIG_REL)):
             from crusher_labs import load_config
             legacy_cfg = load_config(
-                os.path.join(repo_root, "crusher_labs", "config.yaml"),
+                os.path.join(repo_root, _CRUSHER_CONFIG_REL),
             )
             ship_graph = legacy_cfg.setdefault("ship_graph", {})
             ship_graph["spatial_layout"] = os.path.relpath(

@@ -44,6 +44,42 @@ class AgentLivedExperienceStore:
             self.experiences[agent_id] = AgentLivedExperience(agent_id=agent_id)
         return self.experiences[agent_id]
 
+    def _update_agent_experience(
+        self,
+        epoch: int,
+        ag: dict[str, Any],
+        sick_ids: set[int],
+        sop_ids: list[str],
+        quarantined_ids: set[int],
+        isolated_ids: set[int],
+        contact_adjacency: dict[int, dict[int, float]],
+        agent_wearable: dict[Any, dict[str, Any]],
+    ) -> None:
+        aid = int(ag["agent_id"])
+        exp = self.ensure_agent(aid)
+        exp.symptom_presentation = ag.get("symptom_presentation", "asymptomatic")
+        exp.infection_state = ag.get("infection_state", "susceptible")
+        if "chronic_disease_ids" in ag and not exp.chronic_disease_ids:
+            exp.chronic_disease_ids = list(ag["chronic_disease_ids"])
+        if aid in sick_ids:
+            exp.sick_call_epochs.append(epoch)
+        if aid in quarantined_ids or aid in isolated_ids:
+            exp.confinement_epochs.append(epoch)
+        for sop_id in sop_ids:
+            if sop_id and sop_id not in exp.perceived_sop_ids:
+                exp.perceived_sop_ids.append(sop_id)
+        nbrs = contact_adjacency.get(aid, {})
+        exp.close_contact_ids = sorted(int(x) for x in nbrs.keys())
+        wkey = str(aid)
+        if wkey in agent_wearable:
+            exp.wearable_summary = dict(agent_wearable[wkey].get("summary", {}))
+            exp.wearable_summary["fever"] = agent_wearable[wkey].get("fever", False)
+            exp.wearable_summary["anomaly_count"] = agent_wearable[wkey].get(
+                "anomaly_count", 0,
+            )
+        elif aid in agent_wearable:
+            exp.wearable_summary = dict(agent_wearable[aid].get("summary", {}))
+
     def update(
         self,
         epoch: int,
@@ -67,30 +103,11 @@ class AgentLivedExperienceStore:
         )
 
         for ag in agents:
-            aid = int(ag["agent_id"])
-            exp = self.ensure_agent(aid)
-            exp.symptom_presentation = ag.get("symptom_presentation", "asymptomatic")
-            exp.infection_state = ag.get("infection_state", "susceptible")
-            if "chronic_disease_ids" in ag and not exp.chronic_disease_ids:
-                exp.chronic_disease_ids = list(ag["chronic_disease_ids"])
-            if aid in sick_ids:
-                exp.sick_call_epochs.append(epoch)
-            if aid in quarantined_ids or aid in isolated_ids:
-                exp.confinement_epochs.append(epoch)
-            for sop_id in sop_ids:
-                if sop_id and sop_id not in exp.perceived_sop_ids:
-                    exp.perceived_sop_ids.append(sop_id)
-            nbrs = contact_adjacency.get(aid, {})
-            exp.close_contact_ids = sorted(int(x) for x in nbrs.keys())
-            wkey = str(aid)
-            if wkey in agent_wearable:
-                exp.wearable_summary = dict(agent_wearable[wkey].get("summary", {}))
-                exp.wearable_summary["fever"] = agent_wearable[wkey].get("fever", False)
-                exp.wearable_summary["anomaly_count"] = agent_wearable[wkey].get(
-                    "anomaly_count", 0,
-                )
-            elif aid in agent_wearable:
-                exp.wearable_summary = dict(agent_wearable[aid].get("summary", {}))
+            self._update_agent_experience(
+                epoch, ag, sick_ids, sop_ids,
+                quarantined_ids, isolated_ids,
+                contact_adjacency, agent_wearable,
+            )
 
     def to_dict(self) -> dict[str, Any]:
         return {

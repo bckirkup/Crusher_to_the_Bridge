@@ -173,6 +173,30 @@ def print_contam_engine(
         print()
 
 
+def _print_pathogen_profile(pid: str, prof: dict[str, Any]) -> None:
+    print(f"    {pid:20s}  {prof['name']}")
+    print(f"      Category: {prof.get('category', '?')}")
+    print(f"      Routes:   {', '.join(prof.get('transmission_routes', []))}")
+    intro = prof.get("introduction_epoch", 0)
+    print(f"      Intro:    epoch {intro}")
+    fc = prof.get("food_contamination", {})
+    if fc.get("enabled"):
+        gr = fc.get("growth_rate_per_epoch", 0)
+        dr = fc.get("decay_rate_per_epoch", 0)
+        print(f"      Food contam: growth={gr}/epoch  decay={dr}/epoch")
+    ec = prof.get("environmental_contamination", {})
+    if ec.get("enabled"):
+        src = ec.get("source_type", "?")
+        p2p = ec.get("person_to_person", True)
+        bl = ec.get("baseline_environmental_load", 0)
+        print(f"      Env contam:  source={src}  load={bl}  "
+              f"person-to-person={'yes' if p2p else 'no'}")
+    mf = prof.get("microflora_disruption", {})
+    if mf.get("causes_disruption"):
+        print(f"      Microflora disruption: {mf.get('disruption_type')} "
+              f"(mag={mf.get('disruption_magnitude', 0)})")
+
+
 def print_multi_pathogen(
     pathogen_profiles: dict[str, dict[str, Any]],
     immunocompromised_ids: set[int],
@@ -187,27 +211,7 @@ def print_multi_pathogen(
         print("  MULTI-PATHOGEN ENGINE  ·  active profiles loaded")
         print(thin)
         for pid, prof in pathogen_profiles.items():
-            print(f"    {pid:20s}  {prof['name']}")
-            print(f"      Category: {prof.get('category', '?')}")
-            print(f"      Routes:   {', '.join(prof.get('transmission_routes', []))}")
-            intro = prof.get("introduction_epoch", 0)
-            print(f"      Intro:    epoch {intro}")
-            fc = prof.get("food_contamination", {})
-            if fc.get("enabled"):
-                gr = fc.get("growth_rate_per_epoch", 0)
-                dr = fc.get("decay_rate_per_epoch", 0)
-                print(f"      Food contam: growth={gr}/epoch  decay={dr}/epoch")
-            ec = prof.get("environmental_contamination", {})
-            if ec.get("enabled"):
-                src = ec.get("source_type", "?")
-                p2p = ec.get("person_to_person", True)
-                bl = ec.get("baseline_environmental_load", 0)
-                print(f"      Env contam:  source={src}  load={bl}  "
-                      f"person-to-person={'yes' if p2p else 'no'}")
-            mf = prof.get("microflora_disruption", {})
-            if mf.get("causes_disruption"):
-                print(f"      Microflora disruption: {mf.get('disruption_type')} "
-                      f"(mag={mf.get('disruption_magnitude', 0)})")
+            _print_pathogen_profile(pid, prof)
         print()
         print(f"  Immunocompromised agents: {len(immunocompromised_ids)}/{len(engine.agents)} "
               f"(mult={imm_mult}x)")
@@ -323,6 +327,55 @@ def print_progress(
 
 # ── Executive summary ────────────────────────────────────────────────────
 
+def _executive_epidemiology_rows(
+    row: Any,
+    thin_div: str,
+    *,
+    num_agents: int,
+    engine_summary: dict[str, Any],
+    trigger_status: str,
+) -> list[str]:
+    return [
+        row("EPIDEMIOLOGICAL METRICS"),
+        thin_div,
+        row(f"Total crew:          {num_agents}"),
+        row(
+            f"Total infected:      "
+            f"{engine_summary['infected'] + engine_summary['recovered'] + engine_summary['isolated']}"
+        ),
+        row(f"  Currently infected: {engine_summary['infected']}"),
+        row(f"  Recovered:          {engine_summary['recovered']}"),
+        row(f"  Isolated:           {engine_summary.get('isolated', 0)}"),
+        row(f"  Quarantined:        {engine_summary.get('quarantined', 0)}"),
+        row(f"  Immune (neg sec):   {engine_summary['immune']}"),
+        row(f"  Symptomatic:        {engine_summary['symptomatic']}"),
+        row(f"Final status:        {trigger_status}"),
+    ]
+
+
+def _executive_counter_rows(
+    row: Any,
+    thin_div: str,
+    infection_counters: dict[str, dict[str, Any]],
+) -> list[str]:
+    lines = [row(), row("INFECTION COUNTERS"), thin_div]
+    for cid, cdata in infection_counters.items():
+        label = cdata.get("label", cid)
+        value = cdata.get("value", 0)
+        pop = cdata.get("population", 0)
+        threshold = cdata.get("threshold")
+        exceeded = cdata.get("exceeded", False)
+        val_str = f"{value:.1%}" if "rate" in cid else f"{value:.0f}"
+        thr_str = ""
+        if threshold is not None:
+            if "rate" in cid:
+                thr_str = f"  thr={threshold:.1%}  {'EXCEEDED' if exceeded else 'ok'}"
+            else:
+                thr_str = f"  thr={threshold}  {'EXCEEDED' if exceeded else 'ok'}"
+        lines.append(row(f"  {label:30s} {val_str:>8s}  (n={pop}){thr_str}"))
+    return lines
+
+
 def print_executive_summary(
     *,
     num_agents: int,
@@ -358,40 +411,14 @@ def print_executive_summary(
     lines.append(border)
     lines.append(row("CRUSHER TO THE BRIDGE  ─  EXECUTIVE SUMMARY"))
     lines.append(divider)
-
-    lines.append(row("EPIDEMIOLOGICAL METRICS"))
-    lines.append(thin_div)
-    lines.append(row(f"Total crew:          {num_agents}"))
-    lines.append(row(f"Total infected:      {engine_summary['infected'] + engine_summary['recovered'] + engine_summary['isolated']}"))
-    lines.append(row(f"  Currently infected: {engine_summary['infected']}"))
-    lines.append(row(f"  Recovered:          {engine_summary['recovered']}"))
-    lines.append(row(f"  Isolated:           {engine_summary.get('isolated', 0)}"))
-    lines.append(row(f"  Quarantined:        {engine_summary.get('quarantined', 0)}"))
-    lines.append(row(f"  Immune (neg sec):   {engine_summary['immune']}"))
-    lines.append(row(f"  Symptomatic:        {engine_summary['symptomatic']}"))
-    lines.append(row(f"Final status:        {trigger_status}"))
+    lines.extend(_executive_epidemiology_rows(
+        row, thin_div, num_agents=num_agents,
+        engine_summary=engine_summary, trigger_status=trigger_status,
+    ))
 
     if infection_counters:
-        lines.append(row())
-        lines.append(row("INFECTION COUNTERS"))
         lines.append(thin_div)
-        for cid, cdata in infection_counters.items():
-            label = cdata.get('label', cid)
-            value = cdata.get('value', 0)
-            pop = cdata.get('population', 0)
-            threshold = cdata.get('threshold')
-            exceeded = cdata.get('exceeded', False)
-            if 'rate' in cid:
-                val_str = f"{value:.1%}"
-            else:
-                val_str = f"{value:.0f}"
-            thr_str = ""
-            if threshold is not None:
-                if 'rate' in cid:
-                    thr_str = f"  thr={threshold:.1%}  {'EXCEEDED' if exceeded else 'ok'}"
-                else:
-                    thr_str = f"  thr={threshold}  {'EXCEEDED' if exceeded else 'ok'}"
-            lines.append(row(f"  {label:30s} {val_str:>8s}  (n={pop}){thr_str}"))
+        lines.extend(_executive_counter_rows(row, thin_div, infection_counters))
 
     if pathogen_profiles and len(pathogen_profiles) > 1:
         lines.append(row(f"Pathogen count:      {len(pathogen_profiles)}"))

@@ -47,6 +47,23 @@ def load_chronic_disease_config(
     return diseases
 
 
+def _apply_chronic_disease_to_agent(
+    agent: Any,
+    disease_id: str,
+    disease_profile: dict[str, Any],
+    pathogen_profiles: dict[str, dict[str, Any]],
+) -> None:
+    pathogen_mods = disease_profile.get("pathogen_modifiers", {})
+    wearable_scale = disease_profile.get("wearable_infection_response_scale", 1.0)
+    agent.apply_chronic_disease(disease_id, pathogen_mods, wearable_scale)
+    for pid in pathogen_profiles:
+        pmods = pathogen_mods.get(pid, pathogen_mods.get("default", {}))
+        susc_mult = pmods.get("susceptibility_multiplier", 1.0)
+        if float_ne(susc_mult, 1.0):
+            current = agent.susceptibility_multiplier.get(pid, 1.0)
+            agent.susceptibility_multiplier[pid] = current * susc_mult
+
+
 def assign_chronic_diseases(
     engine: KorkinShipEngine,
     chronic_config: dict[str, dict[str, Any]],
@@ -100,22 +117,9 @@ def assign_chronic_diseases(
             if rng.random() >= prevalence:
                 continue
 
-            pathogen_mods = disease_profile.get("pathogen_modifiers", {})
-            wearable_scale = disease_profile.get(
-                "wearable_infection_response_scale", 1.0,
+            _apply_chronic_disease_to_agent(
+                agent, disease_id, disease_profile, pathogen_profiles,
             )
-
-            agent.apply_chronic_disease(disease_id, pathogen_mods, wearable_scale)
-
-            # Apply susceptibility multipliers to existing per-pathogen
-            # susceptibility (multiplicative composition).
-            for pid in pathogen_profiles:
-                pmods = pathogen_mods.get(pid, pathogen_mods.get("default", {}))
-                susc_mult = pmods.get("susceptibility_multiplier", 1.0)
-                if float_ne(susc_mult, 1.0):
-                    current = agent.susceptibility_multiplier.get(pid, 1.0)
-                    agent.susceptibility_multiplier[pid] = current * susc_mult
-
             assigned.append(disease_id)
 
         if assigned:

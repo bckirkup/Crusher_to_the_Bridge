@@ -265,6 +265,48 @@ def build_engine(
     )
 
 
+def _agent_compliance_state(
+    aid: int,
+    a: dict[str, Any],
+    isolated_ids: set[int],
+    quarantined_ids: set[int],
+    quarantine_refusers: set[int],
+) -> tuple[str, float, str | None]:
+    if aid in isolated_ids:
+        return COMPLIANCE_ISOLATED, 0.0, LOCATION_ISOLATED
+    if aid in quarantined_ids:
+        return (
+            COMPLIANCE_QUARANTINED,
+            float(a.get("shedding_rate", 0.0)),
+            a.get("location", "unknown"),
+        )
+    if aid in quarantine_refusers:
+        return (
+            COMPLIANCE_NON_COMPLIANT,
+            float(a.get("shedding_rate", 0.0)),
+            a.get("location", "unknown"),
+        )
+    return (
+        COMPLIANCE_COMPLIANT,
+        float(a.get("shedding_rate", 0.0)),
+        a.get("location"),
+    )
+
+
+def _copy_optional_agent_fields(
+    agent_dict: dict[str, Any],
+    a: dict[str, Any],
+) -> None:
+    for key in (
+        "pathogen_infections",
+        "susceptibility_multiplier",
+        "microflora_disruption",
+        "chronic_disease_ids",
+    ):
+        if key in a:
+            agent_dict[key] = a[key]
+
+
 def engine_payload_to_schema(
     engine_payload: dict[str, Any],
     isolated_ids: set[int],
@@ -291,22 +333,9 @@ def engine_payload_to_schema(
         a_class = a.get("agent_class")
         a_gender = a.get("gender")
         infection_state, symptom_presentation, compliance_status = resolve_agent_axes(a)
-        if aid in isolated_ids:
-            compliance_status = COMPLIANCE_ISOLATED
-            shedding = 0.0
-            location = LOCATION_ISOLATED
-        elif aid in quarantined_ids:
-            compliance_status = COMPLIANCE_QUARANTINED
-            shedding = float(a.get("shedding_rate", 0.0))
-            location = a.get("location", "unknown")
-        elif aid in quarantine_refusers:
-            compliance_status = COMPLIANCE_NON_COMPLIANT
-            shedding = float(a.get("shedding_rate", 0.0))
-            location = a.get("location", "unknown")
-        else:
-            shedding = float(a.get("shedding_rate", 0.0))
-            location = a.get("location")
-            compliance_status = COMPLIANCE_COMPLIANT
+        compliance_status, shedding, location = _agent_compliance_state(
+            aid, a, isolated_ids, quarantined_ids, quarantine_refusers,
+        )
 
         agent_dict = make_agent(
             agent_id=aid,
@@ -319,14 +348,7 @@ def engine_payload_to_schema(
             gender=a_gender,
         )
 
-        if "pathogen_infections" in a:
-            agent_dict["pathogen_infections"] = a["pathogen_infections"]
-        if "susceptibility_multiplier" in a:
-            agent_dict["susceptibility_multiplier"] = a["susceptibility_multiplier"]
-        if "microflora_disruption" in a:
-            agent_dict["microflora_disruption"] = a["microflora_disruption"]
-        if "chronic_disease_ids" in a:
-            agent_dict["chronic_disease_ids"] = a["chronic_disease_ids"]
+        _copy_optional_agent_fields(agent_dict, a)
 
         agents_out.append(agent_dict)
 

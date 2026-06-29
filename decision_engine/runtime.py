@@ -45,58 +45,73 @@ class DecisionRuntime:
     agent_granularity: str = "per_agent"
     decision_detail_telemetry: bool = False
 
+    @staticmethod
+    def _resolve_social_config(run_spec: Any) -> dict[str, Any]:
+        social = getattr(run_spec, "social_config", None) or {}
+        if not social and hasattr(run_spec, "legacy_cfg"):
+            social = run_spec.legacy_cfg.get("social", {})
+        return social
+
+    @staticmethod
+    def _load_agent_profiles(
+        run_spec: Any,
+        engine: Any,
+        profile_path: str,
+    ) -> dict[int, AgentProfile]:
+        if not os.path.isfile(profile_path):
+            return {}
+        bundle = load_agent_profile_bundle(profile_path)
+        wm = run_spec.legacy_cfg.get("wearable_monitoring", {})
+        raw_map = wm.get("class_device_map", {})
+        device_map: dict[str, str] = {}
+        if isinstance(raw_map, dict):
+            device_map = raw_map
+        elif isinstance(raw_map, list):
+            for entry in raw_map:
+                if isinstance(entry, dict):
+                    device_map[str(entry.get("agent_class", ""))] = str(
+                        entry.get("device_id", ""),
+                    )
+        mp = run_spec.legacy_cfg.get("multi_pathogen", {})
+        imm_frac = float(mp.get("immunocompromised_fraction", 0.0))
+        return build_profiles_for_agents(
+            engine.agents, bundle, np.random.default_rng(run_spec.random_seed),
+            class_device_map=device_map,
+            immunocompromised_fraction=imm_frac,
+        )
+
+    @staticmethod
+    def _load_json_if_exists(repo: str, path_key: str, default_path_fn: Any) -> str | None:
+        resolved = resolve_repo_path(repo, path_key or default_path_fn(repo))
+        return resolved if os.path.isfile(resolved) else None
+
     @classmethod
     def from_run_spec(cls, run_spec: Any, engine: Any, proto_ctx: Any) -> DecisionRuntime:
         repo = run_spec.repo_root
-        social = getattr(run_spec, "social_config", None) or {}
-        if not social:
-            social = run_spec.legacy_cfg.get("social", {}) if hasattr(run_spec, "legacy_cfg") else {}
-
+        social = cls._resolve_social_config(run_spec)
         rt = cls(repo_root=repo, social_config=social)
 
-        profile_path = social.get("agent_profile_bundle")
-        if not profile_path:
-            profile_path = default_bundle_path(repo)
-        profile_path = resolve_repo_path(repo, profile_path)
+        profile_path = resolve_repo_path(
+            repo, social.get("agent_profile_bundle") or default_bundle_path(repo),
+        )
+        rt.profiles = cls._load_agent_profiles(run_spec, engine, profile_path)
 
-        if os.path.isfile(profile_path):
-            bundle = load_agent_profile_bundle(profile_path)
-            wm = run_spec.legacy_cfg.get("wearable_monitoring", {})
-            raw_map = wm.get("class_device_map", {})
-            device_map: dict[str, str] = {}
-            if isinstance(raw_map, dict):
-                device_map = raw_map
-            elif isinstance(raw_map, list):
-                for entry in raw_map:
-                    if isinstance(entry, dict):
-                        device_map[str(entry.get("agent_class", ""))] = str(entry.get("device_id", ""))
-            mp = run_spec.legacy_cfg.get("multi_pathogen", {})
-            imm_frac = float(mp.get("immunocompromised_fraction", 0.0))
-            rt.profiles = build_profiles_for_agents(
-                engine.agents, bundle, np.random.default_rng(run_spec.random_seed),
-                class_device_map=device_map,
-                immunocompromised_fraction=imm_frac,
-            )
-
-        ci_path = social.get("class_interactions")
-        if not ci_path:
-            ci_path = ClassInteractionMatrix.default_path(repo)
-        ci_path = resolve_repo_path(repo, ci_path)
-        if os.path.isfile(ci_path):
+        ci_path = cls._load_json_if_exists(
+            repo, social.get("class_interactions"), ClassInteractionMatrix.default_path,
+        )
+        if ci_path:
             rt.class_matrix = ClassInteractionMatrix.from_json(ci_path)
 
-        diff_path = social.get("information_diffusion")
-        if not diff_path:
-            diff_path = InformationDiffusionEngine.default_path(repo)
-        diff_path = resolve_repo_path(repo, diff_path)
-        if os.path.isfile(diff_path):
+        diff_path = cls._load_json_if_exists(
+            repo, social.get("information_diffusion"), InformationDiffusionEngine.default_path,
+        )
+        if diff_path:
             rt.information_engine = InformationDiffusionEngine.from_config_path(diff_path)
 
-        gh_path = social.get("global_health_timeline")
-        if not gh_path:
-            gh_path = default_timeline_path(repo)
-        gh_path = resolve_repo_path(repo, gh_path)
-        if os.path.isfile(gh_path):
+        gh_path = cls._load_json_if_exists(
+            repo, social.get("global_health_timeline"), default_timeline_path,
+        )
+        if gh_path:
             rt.global_health_timeline = load_global_health_timeline(gh_path)
 
         rt.all_protocol_ids = [

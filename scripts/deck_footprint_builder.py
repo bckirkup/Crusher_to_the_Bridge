@@ -96,6 +96,17 @@ def compute_view_bounds(geojson: dict[str, Any], padding: float = 5.0) -> dict[s
     }
 
 
+def _footprint_disclaimer(tier: str) -> str:
+    if tier == "representative":
+        return (
+            "Footprints are class-representative for simulation zones, "
+            "not a surveyed deck plan of one vessel."
+        )
+    if tier == "fiction_adapted":
+        return "Fiction-adapted layout for demonstration; not an official starship blueprint."
+    return "Derived from GIS-traced compartment polygons."
+
+
 def build_manifest(
     platform_id: str,
     layout: dict[str, Any],
@@ -116,15 +127,7 @@ def build_manifest(
         "destroyer_baseline": "Destroyer baseline",
     }
     tier = footprint_tier
-    disclaimer = (
-        "Footprints are class-representative for simulation zones, not a surveyed deck plan of one vessel."
-        if tier == "representative"
-        else (
-            "Fiction-adapted layout for demonstration; not an official starship blueprint."
-            if tier == "fiction_adapted"
-            else "Derived from GIS-traced compartment polygons."
-        )
-    )
+    disclaimer = _footprint_disclaimer(tier)
     return {
         "platform_id": platform_id,
         "ship_class_label": labels.get(platform_id, platform_id.replace("_", " ").title()),

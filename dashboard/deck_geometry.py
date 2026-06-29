@@ -5,6 +5,7 @@ import os
 import sys
 from typing import Any, Iterator
 
+from dashboard.paths import ALL_DECKS_LABEL
 from dashboard.loaders import PlatformBundle
 from telemetry_buffer.agent_axes import agent_has_symptomatic_presentation
 
@@ -36,7 +37,7 @@ def collect_zone_metrics(
 ) -> dict[str, float]:
     metrics: dict[str, float] = {}
     for zid, zinfo in bundle.zone_coords.items():
-        if deck_filter and deck_filter != "All Decks":
+        if deck_filter and deck_filter != ALL_DECKS_LABEL:
             if zinfo.get("deck") != deck_filter:
                 continue
         metrics[zid] = zone_metric(record, zid, color_mode)
@@ -101,7 +102,7 @@ def iter_compartment_rings(
 
     for zid, zinfo in bundle.zone_coords.items():
         deck = zinfo.get("deck", "main")
-        if deck_filter and deck_filter != "All Decks" and deck != deck_filter:
+        if deck_filter and deck_filter != ALL_DECKS_LABEL and deck != deck_filter:
             continue
         ring = geo_by_zone.get(zid) or _zone_ring(zinfo)
         yield zid, ring, deck
@@ -118,7 +119,7 @@ def iter_hvac_paths(
         geom = feat.get("geometry", {})
         if geom.get("type") == "LineString":
             yield geom["coordinates"]
-    if deck_filter and deck_filter != "All Decks":
+    if deck_filter and deck_filter != ALL_DECKS_LABEL:
         return
     for link in bundle.airflow.get("adjacency", []):
         fz, tz = link.get("from", ""), link.get("to", "")

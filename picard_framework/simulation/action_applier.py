@@ -17,6 +17,32 @@ def _protocol_id_from_action(action: dict[str, Any]) -> str:
     return str(action.get("protocol_id") or action.get("sop_id") or "")
 
 
+def _apply_surveillance_cadence(action: dict[str, Any], overrides: dict[str, Any]) -> None:
+    pcr = action.get("pcr_cadence")
+    seq = action.get("sequencing_cadence")
+    if pcr is not None:
+        overrides["pcr_cadence"] = int(pcr)
+    if seq is not None:
+        overrides["sequencing_cadence"] = int(seq)
+
+
+def _apply_surveillance_budget_emphasis(action: dict[str, Any], overrides: dict[str, Any]) -> None:
+    emphasis = action.get("emphasis", "")
+    if emphasis == "pcr":
+        overrides["pcr_cadence"] = 1
+    elif emphasis == "sequencing":
+        overrides["sequencing_cadence"] = 1
+
+
+def _apply_behavioral_override(
+    action: dict[str, Any],
+    state: SimulationState,
+) -> None:
+    aid = action.get("agent_id")
+    if aid is not None:
+        state.agent_behavioral_overrides[int(aid)] = action.get("kind", "")
+
+
 def apply_action_envelope(
     envelope: ActionEnvelope | None,
     state: SimulationState,
@@ -38,19 +64,10 @@ def apply_action_envelope(
         for action in actions:
             kind = action.get("kind", "")
             if kind == "set_surveillance_cadence":
-                pcr = action.get("pcr_cadence")
-                seq = action.get("sequencing_cadence")
-                if pcr is not None:
-                    overrides["pcr_cadence"] = int(pcr)
-                if seq is not None:
-                    overrides["sequencing_cadence"] = int(seq)
+                _apply_surveillance_cadence(action, overrides)
                 actor_log.append(kind)
             elif kind == "set_surveillance_budget_emphasis":
-                emphasis = action.get("emphasis", "")
-                if emphasis == "pcr":
-                    overrides["pcr_cadence"] = 1
-                elif emphasis == "sequencing":
-                    overrides["sequencing_cadence"] = 1
+                _apply_surveillance_budget_emphasis(action, overrides)
                 actor_log.append(kind)
             elif kind == "set_isolation_posture":
                 factor = action.get("threshold_scale", 1.0)
@@ -98,10 +115,8 @@ def apply_action_envelope(
                     ctx.sop_recommendations.append(pid)
                 actor_log.append(f"recommend:{pid}")
             elif kind in ("hide_symptoms", "report_sick_call", "refuse_quarantine"):
-                aid = action.get("agent_id")
-                if aid is not None:
-                    state.agent_behavioral_overrides[int(aid)] = kind
-                actor_log.append(f"{kind}:{aid}")
+                _apply_behavioral_override(action, state)
+                actor_log.append(f"{kind}:{action.get('agent_id')}")
         if actor_log:
             applied["by_actor"][str(actor_id)] = actor_log
 

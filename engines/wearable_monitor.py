@@ -333,6 +333,57 @@ class WearableMonitor:
             baselines[ch] = round(personal, 2)
         return baselines
 
+    def _assign_class_devices(
+        self,
+        agent: KorkinAgent,
+        assignments: list[Any],
+        class_offsets: dict[str, dict[str, float]] | None,
+        gender_offsets: dict[str, dict[str, float]] | None,
+    ) -> tuple[list[AgentWearableState], set[str]]:
+        states: list[AgentWearableState] = []
+        assigned_device_ids: set[str] = set()
+        for assignment in assignments:
+            if assignment.device_id not in self.devices:
+                continue
+            if self.rng.random() > assignment.coverage:
+                continue
+            device = self.devices[assignment.device_id]
+            baselines = self._compute_baselines(agent, device, class_offsets, gender_offsets)
+            state = AgentWearableState(
+                agent.agent_id, device, baselines, visibility=assignment.visibility,
+            )
+            states.append(state)
+            assigned_device_ids.add(assignment.device_id)
+        return states, assigned_device_ids
+
+    def _assign_chronic_devices(
+        self,
+        agent: KorkinAgent,
+        chronic_disease_ids: list[str] | None,
+        assigned_device_ids: set[str],
+        class_offsets: dict[str, dict[str, float]] | None,
+        gender_offsets: dict[str, dict[str, float]] | None,
+    ) -> list[AgentWearableState]:
+        states: list[AgentWearableState] = []
+        for cd_entry in self.chronic_disease_device_map:
+            disease_id = cd_entry.get("disease_id", "")
+            if not chronic_disease_ids or disease_id not in chronic_disease_ids:
+                continue
+            did = cd_entry.get("device_id", "")
+            if did not in self.devices or did in assigned_device_ids:
+                continue
+            cd_coverage = float(cd_entry.get("coverage", 1.0))
+            if self.rng.random() > cd_coverage:
+                continue
+            device = self.devices[did]
+            cd_visibility = cd_entry.get("visibility", "medical_staff")
+            baselines = self._compute_baselines(agent, device, class_offsets, gender_offsets)
+            states.append(AgentWearableState(
+                agent.agent_id, device, baselines, visibility=cd_visibility,
+            ))
+            assigned_device_ids.add(did)
+        return states
+
     def initialize_agent(
         self,
         agent: KorkinAgent,
@@ -349,41 +400,13 @@ class WearableMonitor:
         if assignments is None:
             assignments = self.class_device_assignments.get("default", [])
 
-        states: list[AgentWearableState] = []
-        assigned_device_ids: set[str] = set()
-
-        for assignment in assignments:
-            if assignment.device_id not in self.devices:
-                continue
-            if self.rng.random() > assignment.coverage:
-                continue
-            device = self.devices[assignment.device_id]
-            baselines = self._compute_baselines(agent, device, class_offsets, gender_offsets)
-            state = AgentWearableState(
-                agent.agent_id, device, baselines, visibility=assignment.visibility,
-            )
-            states.append(state)
-            assigned_device_ids.add(assignment.device_id)
-
-        # Chronic disease device assignments (additive)
-        for cd_entry in self.chronic_disease_device_map:
-            disease_id = cd_entry.get("disease_id", "")
-            if not chronic_disease_ids or disease_id not in chronic_disease_ids:
-                continue
-            did = cd_entry.get("device_id", "")
-            if did not in self.devices or did in assigned_device_ids:
-                continue
-            cd_coverage = float(cd_entry.get("coverage", 1.0))
-            if self.rng.random() > cd_coverage:
-                continue
-            device = self.devices[did]
-            cd_visibility = cd_entry.get("visibility", "medical_staff")
-            baselines = self._compute_baselines(agent, device, class_offsets, gender_offsets)
-            state = AgentWearableState(
-                agent.agent_id, device, baselines, visibility=cd_visibility,
-            )
-            states.append(state)
-            assigned_device_ids.add(did)
+        states, assigned_device_ids = self._assign_class_devices(
+            agent, assignments, class_offsets, gender_offsets,
+        )
+        states.extend(self._assign_chronic_devices(
+            agent, chronic_disease_ids, assigned_device_ids,
+            class_offsets, gender_offsets,
+        ))
 
         if states:
             self._agent_states[agent.agent_id] = states
@@ -475,6 +498,24 @@ class WearableMonitor:
         fused["devices"] = device_results
         return fused
 
+    @staticmethod
+    def _prefer_channel_reading(
+        merged: dict[str, dict[str, Any]],
+        ch: str,
+        ch_data: dict[str, Any],
+    ) -> None:
+        if ch not in merged:
+            merged[ch] = dict(ch_data)
+            return
+        existing_z = merged[ch].get("z_score", 0.0) or 0.0
+        new_z = ch_data.get("z_score", 0.0) or 0.0
+        existing_anomaly = merged[ch].get("anomaly", False)
+        new_anomaly = ch_data.get("anomaly", False)
+        if (new_anomaly and not existing_anomaly) or (
+            new_anomaly == existing_anomaly and new_z > existing_z
+        ):
+            merged[ch] = dict(ch_data)
+
     def _merge_summaries(self, device_results: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
         """Merge summary dicts across multiple device results.
 
@@ -484,19 +525,44 @@ class WearableMonitor:
         merged: dict[str, dict[str, Any]] = {}
         for dr in device_results:
             for ch, ch_data in dr.get("summary", {}).items():
-                if ch not in merged:
-                    merged[ch] = dict(ch_data)
-                else:
-                    existing_z = merged[ch].get("z_score", 0.0) or 0.0
-                    new_z = ch_data.get("z_score", 0.0) or 0.0
-                    existing_anomaly = merged[ch].get("anomaly", False)
-                    new_anomaly = ch_data.get("anomaly", False)
-                    # Prefer entries with anomaly=True; break ties by z_score
-                    if (new_anomaly and not existing_anomaly) or (
-                        new_anomaly == existing_anomaly and new_z > existing_z
-                    ):
-                        merged[ch] = dict(ch_data)
+                self._prefer_channel_reading(merged, ch, ch_data)
         return merged
+
+    def _channel_summary(
+        self,
+        ch: str,
+        readings: list[float | None],
+        state: AgentWearableState,
+        device: WearableDevice,
+    ) -> dict[str, Any]:
+        valid = [r for r in readings if r is not None]
+        if not valid:
+            return {
+                "mean": None, "min": None, "max": None,
+                "readings_count": 0, "dropout_count": 24,
+                "z_score": 0.0, "anomaly": False,
+            }
+        mean_val = sum(valid) / len(valid)
+        baseline_val = state.baselines.get(ch, mean_val)
+        ch_base_cfg = device.get_channel_baseline(ch)
+        baseline_std = ch_base_cfg.get("std", 1.0)
+        ch_summary: dict[str, Any] = {
+            "mean": round(mean_val, 2),
+            "min": round(min(valid), 2),
+            "max": round(max(valid), 2),
+            "readings_count": len(valid),
+            "dropout_count": readings.count(None),
+        }
+        if baseline_std > 0:
+            signed_z = (mean_val - baseline_val) / baseline_std
+            z_score = abs(signed_z)
+            ch_summary["z_score"] = round(z_score, 2)
+            ch_summary["signed_z_score"] = round(signed_z, 2)
+            ch_summary["anomaly"] = z_score > self.anomaly_z_threshold
+        else:
+            ch_summary["z_score"] = 0.0
+            ch_summary["anomaly"] = False
+        return ch_summary
 
     def _generate_single_device_epoch(
         self,
@@ -592,38 +658,7 @@ class WearableMonitor:
                 readings.append(round(value, 2))
 
             hourly[ch] = readings
-
-            # Compute summary statistics
-            valid = [r for r in readings if r is not None]
-            if valid:
-                ch_summary: dict[str, Any] = {
-                    "mean": round(sum(valid) / len(valid), 2),
-                    "min": round(min(valid), 2),
-                    "max": round(max(valid), 2),
-                    "readings_count": len(valid),
-                    "dropout_count": readings.count(None),
-                }
-                # Anomaly flag: deviation from baseline
-                mean_val = ch_summary["mean"]
-                baseline_val = state.baselines.get(ch, mean_val)
-                ch_base_cfg = device.get_channel_baseline(ch)
-                baseline_std = ch_base_cfg.get("std", 1.0)
-                if baseline_std > 0:
-                    signed_z = (mean_val - baseline_val) / baseline_std
-                    z_score = abs(signed_z)
-                    ch_summary["z_score"] = round(z_score, 2)
-                    ch_summary["signed_z_score"] = round(signed_z, 2)
-                    ch_summary["anomaly"] = z_score > self.anomaly_z_threshold
-                else:
-                    ch_summary["z_score"] = 0.0
-                    ch_summary["anomaly"] = False
-            else:
-                ch_summary = {
-                    "mean": None, "min": None, "max": None,
-                    "readings_count": 0, "dropout_count": 24,
-                    "z_score": 0.0, "anomaly": False,
-                }
-            summary[ch] = ch_summary
+            summary[ch] = self._channel_summary(ch, readings, state, device)
 
         # Fever flag (convenience)
         fever = False
@@ -802,6 +837,32 @@ def apply_detection_sensitivity_scale(
             profile["fever_sensitivity"] = max(0.0, min(1.0, base_fever * clamped))
 
 
+def _parse_channel_list_entries(
+    entries: list[dict[str, Any]],
+) -> dict[str, dict[str, float]]:
+    parsed: dict[str, dict[str, float]] = {}
+    for entry in entries:
+        ch_name = entry.get("channel", "")
+        if ch_name:
+            parsed[ch_name] = {
+                k: v for k, v in entry.items() if k != "channel"
+            }
+    return parsed
+
+
+def _parse_infection_responses(
+    ir_entries: list[dict[str, Any]],
+) -> dict[str, dict[str, dict[str, float]]]:
+    infection_responses: dict[str, dict[str, dict[str, float]]] = {}
+    for ir_cfg in ir_entries:
+        category = ir_cfg.get("pathogen_category", "")
+        if not category:
+            continue
+        channel_map = _parse_channel_list_entries(ir_cfg.get("channel_responses", []))
+        infection_responses[category] = channel_map
+    return infection_responses or dict(DEFAULT_INFECTION_RESPONSES)
+
+
 def build_wearable_device_from_config(
     device_cfg: dict[str, Any],
 ) -> WearableDevice:
@@ -809,30 +870,10 @@ def build_wearable_device_from_config(
     device_id = device_cfg["device_id"]
     channels = device_cfg.get("channels", list(DEFAULT_CHANNEL_BASELINES.keys()))
 
-    noise: dict[str, dict[str, float]] = {}
-    for ch_noise in device_cfg.get("noise", []):
-        ch_name = ch_noise.get("channel", "")
-        if ch_name:
-            noise[ch_name] = {
-                k: v for k, v in ch_noise.items() if k != "channel"
-            }
-
-    infection_responses: dict[str, dict[str, dict[str, float]]] = {}
-    for ir_cfg in device_cfg.get("infection_responses", []):
-        category = ir_cfg.get("pathogen_category", "")
-        if not category:
-            continue
-        channel_map: dict[str, dict[str, float]] = {}
-        for ch_resp in ir_cfg.get("channel_responses", []):
-            ch_name = ch_resp.get("channel", "")
-            if ch_name:
-                channel_map[ch_name] = {
-                    k: v for k, v in ch_resp.items() if k != "channel"
-                }
-        infection_responses[category] = channel_map
-
-    if not infection_responses:
-        infection_responses = dict(DEFAULT_INFECTION_RESPONSES)
+    noise = _parse_channel_list_entries(device_cfg.get("noise", []))
+    infection_responses = _parse_infection_responses(
+        device_cfg.get("infection_responses", []),
+    )
 
     phase_boundaries: list[tuple[int, str]] = []
     for pb in device_cfg.get("phase_boundaries", []):
@@ -840,13 +881,9 @@ def build_wearable_device_from_config(
     if not phase_boundaries:
         phase_boundaries = list(DEFAULT_PHASE_BOUNDARIES)
 
-    channel_baselines: dict[str, dict[str, float]] = {}
-    for cb in device_cfg.get("channel_baselines", []):
-        ch_name = cb.get("channel", "")
-        if ch_name:
-            channel_baselines[ch_name] = {
-                k: v for k, v in cb.items() if k != "channel"
-            }
+    channel_baselines = _parse_channel_list_entries(
+        device_cfg.get("channel_baselines", []),
+    )
 
     detection_profile: dict[str, float] | None = None
     dp_cfg = device_cfg.get("detection_profile")

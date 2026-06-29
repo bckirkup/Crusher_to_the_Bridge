@@ -139,29 +139,41 @@ def _crew_zones_on_deck(deck: int) -> list[str]:
     return [_crew_zone_id(deck, s) for s in CREW_SECTIONS]
 
 
+def _pax_section_adjacency(deck: int) -> list[dict[str, str]]:
+    adj: list[dict[str, str]] = []
+    for section in PAX_SECTIONS:
+        subs = [_pax_zone_id(deck, section, sub) for sub in PAX_SUBSECTIONS]
+        for a, b in zip(subs, subs[1:]):
+            adj.append({"from": a, "to": b, "type": "corridor"})
+        if section != "Central":
+            for sub in PAX_SUBSECTIONS:
+                adj.append({
+                    "from": _pax_zone_id(deck, section, sub),
+                    "to": _pax_zone_id(deck, "Central", sub),
+                    "type": "corridor",
+                })
+    return adj
+
+
+def _pax_vertical_links(deck: int) -> list[dict[str, str]]:
+    adj: list[dict[str, str]] = []
+    if deck + 1 in PAX_DECK_Y:
+        central_subs = [_pax_zone_id(deck, "Central", sub) for sub in PAX_SUBSECTIONS]
+        next_central = [_pax_zone_id(deck + 1, "Central", sub) for sub in PAX_SUBSECTIONS]
+        for a, b in zip(central_subs, next_central):
+            adj.append({"from": a, "to": b, "type": "elevator_bank"})
+    if deck in (6, 7, 8):
+        mid = _pax_zone_id(deck, "Central", "Mid")
+        adj.append({"from": mid, "to": "Royal_Promenade", "type": "stairwell"})
+        adj.append({"from": mid, "to": "Central_Park_Open_Atrium", "type": "stairwell"})
+    return adj
+
+
 def _pax_adjacency() -> list[dict[str, str]]:
     adj: list[dict[str, str]] = []
     for deck in PAX_DECKS:
-        for section in PAX_SECTIONS:
-            subs = [_pax_zone_id(deck, section, sub) for sub in PAX_SUBSECTIONS]
-            for a, b in zip(subs, subs[1:]):
-                adj.append({"from": a, "to": b, "type": "corridor"})
-            if section != "Central":
-                for sub in PAX_SUBSECTIONS:
-                    adj.append({
-                        "from": _pax_zone_id(deck, section, sub),
-                        "to": _pax_zone_id(deck, "Central", sub),
-                        "type": "corridor",
-                    })
-        if deck + 1 in PAX_DECK_Y:
-            central_subs = [_pax_zone_id(deck, "Central", sub) for sub in PAX_SUBSECTIONS]
-            next_central = [_pax_zone_id(deck + 1, "Central", sub) for sub in PAX_SUBSECTIONS]
-            for a, b in zip(central_subs, next_central):
-                adj.append({"from": a, "to": b, "type": "elevator_bank"})
-        if deck in (6, 7, 8):
-            mid = _pax_zone_id(deck, "Central", "Mid")
-            adj.append({"from": mid, "to": "Royal_Promenade", "type": "stairwell"})
-            adj.append({"from": mid, "to": "Central_Park_Open_Atrium", "type": "stairwell"})
+        adj.extend(_pax_section_adjacency(deck))
+        adj.extend(_pax_vertical_links(deck))
     return adj
 
 

@@ -306,6 +306,65 @@ class ProtocolEngine:
         self._activation_epoch: dict[str, int] = {}
         self.protocol_log: list[dict[str, Any]] = []
 
+    def _may_debit_protocol(
+        self,
+        authorized: set[str] | None,
+        pid: str,
+        forced_on: bool,
+    ) -> bool:
+        return authorized is None or pid in authorized or forced_on
+
+    def _activate_protocol(
+        self,
+        protocol: StandingProtocol,
+        *,
+        epoch: int,
+        forced_on: bool,
+        triggered: bool,
+        may_debit: bool,
+    ) -> dict[str, Any]:
+        pid = protocol.protocol_id
+        newly_activated = not self._active[pid]
+        if newly_activated:
+            self._active[pid] = True
+            self._activation_epoch[pid] = epoch
+            if may_debit and protocol.activation_costs:
+                self.ledger.debit_protocol(
+                    epoch=epoch,
+                    protocol_id=pid,
+                    protocol_name=protocol.name,
+                    costs=protocol.activation_costs,
+                    category=protocol.category,
+                    is_activation=True,
+                )
+            self.protocol_log.append({
+                "epoch": epoch,
+                "protocol_id": pid,
+                "name": protocol.name,
+                "event": "ACTIVATED",
+                "modifiers": protocol.modifiers,
+                "forced": forced_on and not triggered,
+            })
+
+        if may_debit and protocol.costs_per_epoch:
+            self.ledger.debit_protocol(
+                epoch=epoch,
+                protocol_id=pid,
+                protocol_name=protocol.name,
+                costs=protocol.costs_per_epoch,
+                category=protocol.category,
+                is_activation=False,
+            )
+
+        return {
+            "protocol_id": pid,
+            "name": protocol.name,
+            "modifiers": protocol.modifiers,
+            "newly_activated": newly_activated,
+            "active_since_epoch": self._activation_epoch[pid],
+            "forced": forced_on and not triggered,
+        }
+
     def evaluate_epoch(
         self,
         epoch: int,
@@ -340,55 +399,16 @@ class ProtocolEngine:
             was_active = self._active[pid]
 
             if should_active:
-                newly_activated = not was_active
-                may_debit = (
-                    authorized is None
-                    or pid in authorized
-                    or forced_on
-                )
-
-                if newly_activated:
-                    self._active[pid] = True
-                    self._activation_epoch[pid] = epoch
-
-                    if may_debit and protocol.activation_costs:
-                        self.ledger.debit_protocol(
-                            epoch=epoch,
-                            protocol_id=pid,
-                            protocol_name=protocol.name,
-                            costs=protocol.activation_costs,
-                            category=protocol.category,
-                            is_activation=True,
-                        )
-
-                    self.protocol_log.append({
-                        "epoch": epoch,
-                        "protocol_id": pid,
-                        "name": protocol.name,
-                        "event": "ACTIVATED",
-                        "modifiers": protocol.modifiers,
-                        "forced": forced_on and not triggered,
-                    })
-
-                if may_debit and protocol.costs_per_epoch:
-                    self.ledger.debit_protocol(
+                may_debit = self._may_debit_protocol(authorized, pid, forced_on)
+                active_modifiers.append(
+                    self._activate_protocol(
+                        protocol,
                         epoch=epoch,
-                        protocol_id=pid,
-                        protocol_name=protocol.name,
-                        costs=protocol.costs_per_epoch,
-                        category=protocol.category,
-                        is_activation=False,
-                    )
-
-                active_modifiers.append({
-                    "protocol_id": pid,
-                    "name": protocol.name,
-                    "modifiers": protocol.modifiers,
-                    "newly_activated": newly_activated,
-                    "active_since_epoch": self._activation_epoch[pid],
-                    "forced": forced_on and not triggered,
-                })
-
+                        forced_on=forced_on,
+                        triggered=triggered,
+                        may_debit=may_debit,
+                    ),
+                )
             elif was_active:
                 self._active[pid] = False
                 self.protocol_log.append({
@@ -403,6 +423,21 @@ class ProtocolEngine:
     def get_active_protocols(self) -> list[str]:
         """Return IDs of currently active protocols."""
         return [pid for pid, active in self._active.items() if active]
+
+    @staticmethod
+    def _merge_modifier_value(key: str, existing: Any, value: Any) -> Any:
+        if isinstance(value, list):
+            prev = existing if isinstance(existing, list) else [existing]
+            return list(set(prev + value))
+        if not isinstance(value, (int, float)):
+            return value
+        if "reduction" in key or "scalar" in key:
+            return min(existing, value)
+        if "override" in key or "multiplier" in key or "cap" in key:
+            if "cap" in key:
+                return min(existing, value)
+            return max(existing, value)
+        return max(existing, value)
 
     def get_merged_modifiers(
         self,
@@ -421,20 +456,8 @@ class ProtocolEngine:
             for key, value in mods.items():
                 if key not in merged:
                     merged[key] = value
-                elif isinstance(value, list):
-                    existing = merged[key] if isinstance(merged[key], list) else [merged[key]]
-                    merged[key] = list(set(existing + value))
-                elif isinstance(value, (int, float)):
-                    # For efficiency overrides, take the most aggressive
-                    if "reduction" in key or "scalar" in key:
-                        merged[key] = min(merged[key], value)
-                    elif "override" in key or "multiplier" in key or "cap" in key:
-                        if "cap" in key:
-                            merged[key] = min(merged[key], value)
-                        else:
-                            merged[key] = max(merged[key], value)
-                    else:
-                        merged[key] = max(merged[key], value)
+                else:
+                    merged[key] = self._merge_modifier_value(key, merged[key], value)
 
         return merged
 

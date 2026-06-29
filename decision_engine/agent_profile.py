@@ -51,6 +51,62 @@ def load_agent_profile_bundle(path: str) -> dict[str, Any]:
         return json.load(fh)
 
 
+def _build_device_map(
+    class_device_map: dict[str, str] | list | None,
+) -> dict[str, str]:
+    if isinstance(class_device_map, dict):
+        return class_device_map
+    device_map: dict[str, str] = {}
+    if isinstance(class_device_map, list):
+        for entry in class_device_map:
+            if isinstance(entry, dict) and "agent_class" in entry:
+                device_map[str(entry["agent_class"])] = str(entry.get("device_id", ""))
+    return device_map
+
+
+def _profile_for_agent(
+    agent: Any,
+    templates: dict[str, Any],
+    default_template: dict[str, Any],
+    device_map: dict[str, str],
+    rng: np.random.Generator,
+    immunocompromised_fraction: float,
+) -> AgentProfile:
+    aid = agent.agent_id
+    cls = getattr(agent, "agent_class", "") or "unknown"
+    role = getattr(agent, "role", "passenger")
+    gender = getattr(agent, "gender", "unknown")
+    tmpl = templates.get(cls, default_template)
+    age_bands = tmpl.get("age_bands", ["adult"])
+    age_band = str(rng.choice(age_bands))
+    immune = bool(getattr(agent, "immune", False))
+    immuno = False
+    if not immune and immunocompromised_fraction > 0:
+        immuno = rng.random() < immunocompromised_fraction
+    comorbidities = list(tmpl.get("comorbidities", []))
+    if immuno and "immunocompromised" not in comorbidities:
+        comorbidities.append("immunocompromised")
+    device_id = device_map.get(cls, tmpl.get("device_id", ""))
+    channels = list(tmpl.get("monitored_channels", [
+        "heart_rate", "body_temp", "spo2", "respiratory_rate",
+    ]))
+    return AgentProfile(
+        profile_id=f"{cls}_{aid}",
+        agent_id=aid,
+        agent_class=cls,
+        role_group=role,
+        gender=gender,
+        age_band=age_band,
+        immune=immune,
+        immunocompromised=immuno,
+        comorbidities=comorbidities,
+        vaccinations=list(tmpl.get("vaccinations", [])),
+        chronic_meds=list(tmpl.get("chronic_meds", [])),
+        device_id=device_id,
+        monitored_channels=channels,
+    )
+
+
 def build_profiles_for_agents(
     agents: list[Any],
     bundle: dict[str, Any],
@@ -62,47 +118,12 @@ def build_profiles_for_agents(
     templates = bundle.get("class_templates", {})
     default_template = bundle.get("default_template", {})
     profiles: dict[int, AgentProfile] = {}
-    device_map: dict[str, str] = {}
-    if isinstance(class_device_map, dict):
-        device_map = class_device_map
-    elif isinstance(class_device_map, list):
-        for entry in class_device_map:
-            if isinstance(entry, dict) and "agent_class" in entry:
-                device_map[str(entry["agent_class"])] = str(entry.get("device_id", ""))
+    device_map = _build_device_map(class_device_map)
 
     for agent in agents:
-        aid = agent.agent_id
-        cls = getattr(agent, "agent_class", "") or "unknown"
-        role = getattr(agent, "role", "passenger")
-        gender = getattr(agent, "gender", "unknown")
-        tmpl = templates.get(cls, default_template)
-        age_bands = tmpl.get("age_bands", ["adult"])
-        age_band = str(rng.choice(age_bands))
-        immune = bool(getattr(agent, "immune", False))
-        immuno = False
-        if not immune and immunocompromised_fraction > 0:
-            immuno = rng.random() < immunocompromised_fraction
-        comorbidities = list(tmpl.get("comorbidities", []))
-        if immuno and "immunocompromised" not in comorbidities:
-            comorbidities.append("immunocompromised")
-        device_id = device_map.get(cls, tmpl.get("device_id", ""))
-        channels = list(tmpl.get("monitored_channels", [
-            "heart_rate", "body_temp", "spo2", "respiratory_rate",
-        ]))
-        profiles[aid] = AgentProfile(
-            profile_id=f"{cls}_{aid}",
-            agent_id=aid,
-            agent_class=cls,
-            role_group=role,
-            gender=gender,
-            age_band=age_band,
-            immune=immune,
-            immunocompromised=immuno,
-            comorbidities=comorbidities,
-            vaccinations=list(tmpl.get("vaccinations", [])),
-            chronic_meds=list(tmpl.get("chronic_meds", [])),
-            device_id=device_id,
-            monitored_channels=channels,
+        profiles[agent.agent_id] = _profile_for_agent(
+            agent, templates, default_template, device_map, rng,
+            immunocompromised_fraction,
         )
     return profiles
 

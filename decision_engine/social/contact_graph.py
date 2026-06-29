@@ -15,19 +15,12 @@ class ContactGraphBuilder:
     agent_adjacency: dict[int, dict[int, float]] = field(default_factory=dict)
     zone_colocation: dict[str, list[int]] = field(default_factory=dict)
 
-    def update(
+    def _build_colocation_edges(
         self,
         agents: list[dict[str, Any]],
-        contact_tracing: dict[str, Any] | None,
-        class_matrix: ClassInteractionMatrix | None = None,
-        agent_classes: dict[int, str] | None = None,
-    ) -> dict[int, dict[int, float]]:
-        self.agent_adjacency = {}
-        self.zone_colocation = {}
-        classes = agent_classes or {
-            int(a["agent_id"]): a.get("agent_class", "unknown") for a in agents
-        }
-
+        class_matrix: ClassInteractionMatrix | None,
+        classes: dict[int, str],
+    ) -> None:
         for ag in agents:
             aid = int(ag["agent_id"])
             loc = ag.get("location") or ""
@@ -48,15 +41,36 @@ class ContactGraphBuilder:
                         )
                     self._add_edge(a_id, b_id, w)
 
+    def _apply_contact_tracing_edges(
+        self,
+        contact_tracing: dict[str, Any],
+    ) -> None:
+        for exp in contact_tracing.get("shared_room_exposures", []):
+            target = exp.get("target_agent_id") or exp.get("agent_id")
+            sources = exp.get("source_agent_ids", [])
+            if target is None:
+                continue
+            tid = int(target)
+            for sid in sources:
+                self._add_edge(tid, int(sid), 1.5)
+
+    def update(
+        self,
+        agents: list[dict[str, Any]],
+        contact_tracing: dict[str, Any] | None,
+        class_matrix: ClassInteractionMatrix | None = None,
+        agent_classes: dict[int, str] | None = None,
+    ) -> dict[int, dict[int, float]]:
+        self.agent_adjacency = {}
+        self.zone_colocation = {}
+        classes = agent_classes or {
+            int(a["agent_id"]): a.get("agent_class", "unknown") for a in agents
+        }
+
+        self._build_colocation_edges(agents, class_matrix, classes)
+
         if contact_tracing:
-            for exp in contact_tracing.get("shared_room_exposures", []):
-                target = exp.get("target_agent_id") or exp.get("agent_id")
-                sources = exp.get("source_agent_ids", [])
-                if target is None:
-                    continue
-                tid = int(target)
-                for sid in sources:
-                    self._add_edge(tid, int(sid), 1.5)
+            self._apply_contact_tracing_edges(contact_tracing)
 
         return self.agent_adjacency
 

@@ -42,12 +42,15 @@ from crusher_labs.stoplight import (
 from telemetry_buffer.agent_axes import clinical_axes_for_notebook
 from simulation_utils.paths import prepare_output_directory, resolve_repo_path
 
-
-# ── Fidelity model ───────────────────────────────────────────────────────
-
 FIDELITY_HIGH = "HIGH_FIDELITY"
 FIDELITY_MID = "MID_FIDELITY"
 FIDELITY_LOW = "LOW_FIDELITY"
+
+BINARY_DETECTED = "DETECTED"
+BINARY_NOT_DETECTED = "NOT DETECTED"
+
+
+# ── Fidelity model ───────────────────────────────────────────────────────
 
 
 class FidelityProfile:
@@ -108,6 +111,14 @@ _stoplight_from_rdt = stoplight_from_rdt
 _stoplight_from_disruption = stoplight_from_disruption
 
 
+def _microbio_binary_result(secondary: bool, flora_shift: bool) -> str:
+    if secondary:
+        return "SECONDARY_INFECTION"
+    if flora_shift:
+        return "FLORA_SHIFT"
+    return "NORMAL"
+
+
 # ── Record builders ──────────────────────────────────────────────────────
 
 def _air_sniffer_record(
@@ -140,7 +151,7 @@ def _air_sniffer_record(
         return record
 
     # MID_FIDELITY: CAP-certified clinical report
-    record["binary_result"] = "DETECTED" if detected else "NOT DETECTED"
+    record["binary_result"] = BINARY_DETECTED if detected else BINARY_NOT_DETECTED
     record["inferred_anomaly_score"] = anomaly
     record["ct_value"] = ct
     record["captured_mass"] = data.get("captured_mass")
@@ -193,7 +204,7 @@ def _surface_swab_record(
         record["inferred_anomaly_score"] = anomaly
         return record
 
-    record["binary_result"] = "DETECTED" if detected else "NOT DETECTED"
+    record["binary_result"] = BINARY_DETECTED if detected else BINARY_NOT_DETECTED
     record["inferred_anomaly_score"] = anomaly
     record["ct_value"] = ct
     record["recovered_mass"] = data.get("recovered_mass")
@@ -338,7 +349,7 @@ def _clinical_rdt_record(
         return record
 
     record["patient_id"] = agent_id
-    record["binary_result"] = "DETECTED" if positive else "NOT DETECTED"
+    record["binary_result"] = BINARY_DETECTED if positive else BINARY_NOT_DETECTED
     record["inferred_anomaly_score"] = anomaly
     record.update(clinical_axes_for_notebook(data))
 
@@ -389,7 +400,7 @@ def _clinical_qpcr_record(
         return record
 
     record["patient_id"] = agent_id
-    record["binary_result"] = "DETECTED" if detected else "NOT DETECTED"
+    record["binary_result"] = BINARY_DETECTED if detected else BINARY_NOT_DETECTED
     record["inferred_anomaly_score"] = anomaly
     record["ct_value"] = ct
     record["viral_load_copies_ml"] = data.get("viral_load_copies_ml")
@@ -438,11 +449,7 @@ def _clinical_microbio_record(
         return record
 
     record["patient_id"] = agent_id
-    record["binary_result"] = (
-        "SECONDARY_INFECTION" if secondary
-        else "FLORA_SHIFT" if flora_shift
-        else "NORMAL"
-    )
+    record["binary_result"] = _microbio_binary_result(secondary, flora_shift)
     record["inferred_anomaly_score"] = anomaly
     record["disruption_site"] = data.get("disruption_site")
     record["gram_stain_result"] = data.get("gram_stain_result")

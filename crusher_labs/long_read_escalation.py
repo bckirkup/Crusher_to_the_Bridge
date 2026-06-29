@@ -66,6 +66,84 @@ def _ww_pathogen_ids(ww_data: dict[str, Any]) -> list[str]:
     ]
 
 
+def _collect_mixed_infection_requests(
+    add: Any,
+    ww_results: dict[str, dict[str, Any]],
+) -> None:
+    for zone, data in ww_results.items():
+        if len(_ww_pathogen_ids(data)) > 1:
+            add(
+                SPECIMEN_WASTEWATER_METAGENOMICS,
+                zone,
+                ["mixed_infection_suspected"],
+                "wastewater_sequencing",
+                data,
+            )
+
+
+def _collect_unexpected_ww_requests(
+    add: Any,
+    ww_results: dict[str, dict[str, Any]],
+) -> None:
+    for zone, data in ww_results.items():
+        if data.get("anomaly_detected") and data.get("total_pathogen_reads", 0) == 0:
+            add(
+                SPECIMEN_WASTEWATER_METAGENOMICS,
+                zone,
+                ["unexpected_pathogen"],
+                "wastewater_sequencing",
+                data,
+            )
+
+
+def _collect_discordant_clinical_requests(
+    add: Any,
+    clin_rdt_results: dict[int, dict[str, Any]],
+    clin_qpcr_results: dict[int, dict[str, Any]],
+) -> None:
+    for aid in set(clin_rdt_results) | set(clin_qpcr_results):
+        rdt = clin_rdt_results.get(aid, {})
+        qpcr = clin_qpcr_results.get(aid, {})
+        if bool(rdt.get("positive", False)) != bool(qpcr.get("detected", False)):
+            add(
+                SPECIMEN_CLINICAL,
+                str(aid),
+                ["discordant_modalities"],
+                "clinical_rdt/clinical_qpcr",
+                {"rdt": rdt, "qpcr": qpcr},
+            )
+
+
+def _collect_microbio_discordance_requests(
+    add: Any,
+    clin_microbio_results: dict[int, dict[str, Any]],
+) -> None:
+    for aid, data in clin_microbio_results.items():
+        if data.get("secondary_infection_detected") or data.get("flora_shift_detected"):
+            add(
+                SPECIMEN_CLINICAL_CULTURE,
+                str(aid),
+                ["discordant_modalities"],
+                "clinical_microbiology",
+                data,
+            )
+
+
+def _collect_swab_unexpected_requests(
+    add: Any,
+    swab_results: dict[str, dict[str, Any]],
+) -> None:
+    for zone, data in swab_results.items():
+        if data.get("detected") and data.get("ct_value") is None:
+            add(
+                SPECIMEN_SURVEILLANCE_SWAB,
+                zone,
+                ["unexpected_pathogen"],
+                "targeted_surface_swab",
+                data,
+            )
+
+
 def collect_long_read_escalation_requests(
     cfg: dict[str, Any],
     *,
@@ -107,64 +185,21 @@ def collect_long_read_escalation_requests(
         )
 
     if triggers["mixed_infection_suspected"] and SPECIMEN_WASTEWATER_METAGENOMICS in sources:
-        for zone, data in ww_results.items():
-            pids = _ww_pathogen_ids(data)
-            if len(pids) > 1:
-                _add(
-                    SPECIMEN_WASTEWATER_METAGENOMICS,
-                    zone,
-                    ["mixed_infection_suspected"],
-                    "wastewater_sequencing",
-                    data,
-                )
+        _collect_mixed_infection_requests(_add, ww_results)
 
     if triggers["unexpected_pathogen"] and SPECIMEN_WASTEWATER_METAGENOMICS in sources:
-        for zone, data in ww_results.items():
-            if data.get("anomaly_detected") and data.get("total_pathogen_reads", 0) == 0:
-                _add(
-                    SPECIMEN_WASTEWATER_METAGENOMICS,
-                    zone,
-                    ["unexpected_pathogen"],
-                    "wastewater_sequencing",
-                    data,
-                )
+        _collect_unexpected_ww_requests(_add, ww_results)
 
     if triggers["discordant_modalities"]:
-        for aid in set(clin_rdt_results) | set(clin_qpcr_results):
-            rdt = clin_rdt_results.get(aid, {})
-            qpcr = clin_qpcr_results.get(aid, {})
-            rdt_pos = bool(rdt.get("positive", False))
-            qpcr_det = bool(qpcr.get("detected", False))
-            if rdt_pos != qpcr_det and SPECIMEN_CLINICAL in sources:
-                _add(
-                    SPECIMEN_CLINICAL,
-                    str(aid),
-                    ["discordant_modalities"],
-                    "clinical_rdt/clinical_qpcr",
-                    {"rdt": rdt, "qpcr": qpcr},
-                )
-
-    if triggers["discordant_modalities"] and SPECIMEN_CLINICAL_CULTURE in sources:
-        for aid, data in clin_microbio_results.items():
-            if data.get("secondary_infection_detected") or data.get("flora_shift_detected"):
-                _add(
-                    SPECIMEN_CLINICAL_CULTURE,
-                    str(aid),
-                    ["discordant_modalities"],
-                    "clinical_microbiology",
-                    data,
-                )
+        if SPECIMEN_CLINICAL in sources:
+            _collect_discordant_clinical_requests(
+                _add, clin_rdt_results, clin_qpcr_results,
+            )
+        if SPECIMEN_CLINICAL_CULTURE in sources:
+            _collect_microbio_discordance_requests(_add, clin_microbio_results)
 
     if triggers["unexpected_pathogen"] and SPECIMEN_SURVEILLANCE_SWAB in sources:
-        for zone, data in swab_results.items():
-            if data.get("detected") and data.get("ct_value") is None:
-                _add(
-                    SPECIMEN_SURVEILLANCE_SWAB,
-                    zone,
-                    ["unexpected_pathogen"],
-                    "targeted_surface_swab",
-                    data,
-                )
+        _collect_swab_unexpected_requests(_add, swab_results)
 
     if triggers["special_circumstance"]:
         flag = long_read_config(cfg).get("special_circumstance_flag", False)

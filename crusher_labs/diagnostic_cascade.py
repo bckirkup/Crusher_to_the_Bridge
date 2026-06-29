@@ -405,6 +405,23 @@ class DiagnosticCascadeEngine:
         }
         return result
 
+    def _agent_matches_fleet_rule(
+        self,
+        state: Any,
+        rule: Any,
+        agent: dict[str, Any],
+    ) -> bool:
+        if state.current_tier < rule.tier_threshold:
+            return False
+        if rule.category_filter:
+            agent_class = agent.get("agent_class", "")
+            if not agent_class.startswith(rule.category_filter):
+                return False
+        if rule.pathogen_filter and state.pathogen_id:
+            if rule.pathogen_filter not in (state.pathogen_id or ""):
+                return False
+        return True
+
     def _evaluate_fleet_rules(
         self,
         agents: list[dict[str, Any]],
@@ -414,23 +431,12 @@ class DiagnosticCascadeEngine:
         unlocked: list[str] = []
 
         for rule in self.fleet_rules:
-            matching = 0
-            for state in self.agent_states.values():
-                if state.current_tier < rule.tier_threshold:
-                    continue
-
-                agent = agent_map.get(state.agent_id, {})
-                if rule.category_filter:
-                    agent_class = agent.get("agent_class", "")
-                    if not agent_class.startswith(rule.category_filter):
-                        continue
-
-                if rule.pathogen_filter and state.pathogen_id:
-                    if rule.pathogen_filter not in (state.pathogen_id or ""):
-                        continue
-
-                matching += 1
-
+            matching = sum(
+                1 for state in self.agent_states.values()
+                if self._agent_matches_fleet_rule(
+                    state, rule, agent_map.get(state.agent_id, {}),
+                )
+            )
             if matching >= rule.agent_count:
                 unlocked.extend(rule.unlocked_sops)
 

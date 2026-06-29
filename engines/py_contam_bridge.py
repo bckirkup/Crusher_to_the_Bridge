@@ -179,39 +179,22 @@ class ContamTransportEngine:
                 volume_m3=volume,
             )
 
-    def _build_airflow_paths(self, airflow: dict[str, Any]) -> None:
-        """Build airflow paths from air_flow_paths.json.
-
-        Creates paths from three sources:
-        1. Intra-zone HVAC recirculation (within each HVAC zone)
-        2. Cross-zone links (between HVAC zones)
-        3. Room adjacency (passive exchange through doors/hatches)
-        """
-        # 1. Intra-zone HVAC recirculation
+    def _build_hvac_recirculation_paths(self, airflow: dict[str, Any]) -> None:
         for hvac_zone in airflow.get("hvac_zones", []):
             zone_id = hvac_zone["id"]
             rooms = hvac_zone.get("rooms", [])
-            ach = hvac_zone.get("ach", 6.0)
-
-            # Recirculation: air from each room passes through the HVAC
-            # unit and is redistributed to all rooms in the zone.
-            # Total zone volume determines the recirculation flow.
+            n_rooms = len(rooms)
+            if n_rooms < 2:
+                continue
             total_volume = sum(
                 self.zone_nodes[r].volume_m3
                 for r in rooms if r in self.zone_nodes
             )
-            # ACH × volume = total air exchange per hour for the zone
-            zone_flow = ach * total_volume  # m³/h total through HVAC
-
-            # Distribute flow proportionally among room pairs
-            n_rooms = len(rooms)
-            if n_rooms < 2:
-                continue
+            zone_flow = hvac_zone.get("ach", 6.0) * total_volume
             for i, room_from in enumerate(rooms):
                 for j, room_to in enumerate(rooms):
                     if i == j:
                         continue
-                    # Each room sends its proportional share of air
                     from_vol = self.zone_nodes.get(room_from)
                     if from_vol is None:
                         continue
@@ -226,26 +209,17 @@ class ContamTransportEngine:
                         is_hvac_ducted=True,
                     ))
 
-        # 2. Cross-zone links (ladder wells, ventilation shafts)
+    def _build_cross_zone_paths(self, airflow: dict[str, Any]) -> None:
         for link in airflow.get("cross_zone_links", []):
-            from_zone_id = link["from"]
-            to_zone_id = link["to"]
-            flow = link.get("flow_rate_m3h", 0)
-            path_name = link.get("path", f"{from_zone_id}_to_{to_zone_id}")
-            is_ducted = link.get("is_hvac_ducted", False)
-
-            # Cross-zone links connect HVAC zones, so we need to map
-            # zone IDs to representative rooms
-            from_rooms = self._get_zone_rooms(from_zone_id, airflow)
-            to_rooms = self._get_zone_rooms(to_zone_id, airflow)
-
+            from_rooms = self._get_zone_rooms(link["from"], airflow)
+            to_rooms = self._get_zone_rooms(link["to"], airflow)
             if not from_rooms or not to_rooms:
                 continue
-
-            # Distribute cross-zone flow evenly across room pairs
+            flow = link.get("flow_rate_m3h", 0)
+            path_name = link.get("path", f"{link['from']}_to_{link['to']}")
+            is_ducted = link.get("is_hvac_ducted", False)
             n_pairs = len(from_rooms) * len(to_rooms)
             pair_flow = flow / n_pairs if n_pairs > 0 else 0
-
             for fr in from_rooms:
                 for tr in to_rooms:
                     self.airflow_paths.append(ContamAirflowPath(
@@ -257,38 +231,39 @@ class ContamTransportEngine:
                         is_hvac_ducted=is_ducted,
                     ))
 
-        # 3. Adjacency paths (passive exchange through doors/hatches)
+    def _build_adjacency_paths(self, airflow: dict[str, Any]) -> None:
+        passive_rates = {
+            "passageway": 15.0,
+            "service_hatch": 8.0,
+            "ladder_well": 12.0,
+            "sealed_door": 2.0,
+        }
         for adj in airflow.get("adjacency", []):
             from_room = adj["from"]
             to_room = adj["to"]
             adj_type = adj.get("type", "passageway")
-
-            # Passive exchange rates by adjacency type [m³/h]
-            passive_rates = {
-                "passageway": 15.0,
-                "service_hatch": 8.0,
-                "ladder_well": 12.0,
-                "sealed_door": 2.0,
-            }
             rate = passive_rates.get(adj_type, 10.0)
+            for src, dst in ((from_room, to_room), (to_room, from_room)):
+                self.airflow_paths.append(ContamAirflowPath(
+                    path_id=f"adj_{src}_{dst}",
+                    from_zone=src,
+                    to_zone=dst,
+                    flow_rate_m3h=rate,
+                    path_type=f"adjacency_{adj_type}",
+                    is_hvac_ducted=False,
+                ))
 
-            # Bidirectional passive exchange
-            self.airflow_paths.append(ContamAirflowPath(
-                path_id=f"adj_{from_room}_{to_room}",
-                from_zone=from_room,
-                to_zone=to_room,
-                flow_rate_m3h=rate,
-                path_type=f"adjacency_{adj_type}",
-                is_hvac_ducted=False,
-            ))
-            self.airflow_paths.append(ContamAirflowPath(
-                path_id=f"adj_{to_room}_{from_room}",
-                from_zone=to_room,
-                to_zone=from_room,
-                flow_rate_m3h=rate,
-                path_type=f"adjacency_{adj_type}",
-                is_hvac_ducted=False,
-            ))
+    def _build_airflow_paths(self, airflow: dict[str, Any]) -> None:
+        """Build airflow paths from air_flow_paths.json.
+
+        Creates paths from three sources:
+        1. Intra-zone HVAC recirculation (within each HVAC zone)
+        2. Cross-zone links (between HVAC zones)
+        3. Room adjacency (passive exchange through doors/hatches)
+        """
+        self._build_hvac_recirculation_paths(airflow)
+        self._build_cross_zone_paths(airflow)
+        self._build_adjacency_paths(airflow)
 
     def _get_zone_rooms(
         self, zone_id: str, airflow: dict[str, Any],

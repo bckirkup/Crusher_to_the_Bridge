@@ -16,6 +16,7 @@ from dashboard.paths import (
     NOTEBOOK_PATH,
     PLATFORMS_DIR,
     REPO_ROOT,
+    SPATIAL_LAYOUT_JSON,
 )
 from simulation_utils.paths import (
     resolve_child_path,
@@ -42,7 +43,7 @@ def list_platform_ids() -> list[str]:
     ids = []
     for name in sorted(os.listdir(PLATFORMS_DIR)):
         pdir = os.path.join(PLATFORMS_DIR, name)
-        if os.path.isfile(os.path.join(pdir, "spatial_layout.json")):
+        if os.path.isfile(os.path.join(pdir, SPATIAL_LAYOUT_JSON)):
             ids.append(name)
     return ids
 
@@ -102,7 +103,7 @@ def _zone_ids_for_platform(pid: str) -> set[str]:
     manifest = _load_json(mpath)
     zone_ids = set(manifest.get("zone_ids") or [])
     if not zone_ids:
-        layout = _load_json(os.path.join(platform_dir(pid), "spatial_layout.json"))
+        layout = _load_json(os.path.join(platform_dir(pid), SPATIAL_LAYOUT_JSON))
         zone_ids = {z["id"] for z in layout.get("zones", [])}
     return zone_ids
 
@@ -170,7 +171,7 @@ def resolve_platform_id_simple(
 
 def load_platform_bundle(platform_id: str) -> PlatformBundle:
     pdir = platform_dir(platform_id)
-    layout = _load_json(os.path.join(pdir, "spatial_layout.json"))
+    layout = _load_json(os.path.join(pdir, SPATIAL_LAYOUT_JSON))
     airflow = _load_json(os.path.join(pdir, "air_flow_paths.json"))
     manifest = _load_json(os.path.join(pdir, "deck_manifest.json"))
     if not manifest:

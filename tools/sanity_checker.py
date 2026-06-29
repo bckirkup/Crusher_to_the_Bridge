@@ -46,6 +46,13 @@ _CYAN = "\033[96m"
 _BOLD = "\033[1m"
 _RESET = "\033[0m"
 
+_PROTOCOLS_JSON = "protocols.json"
+_ACTIVE_PROFILES_JSON = "active_profiles.json"
+_SPATIAL_LAYOUT_JSON = "spatial_layout.json"
+_AIR_FLOW_PATHS_JSON = "air_flow_paths.json"
+_RESOURCE_COSTS_JSON = "resource_costs.json"
+_CONFIG_YAML = "config.yaml"
+
 
 class Severity(str, Enum):
     ERROR = "ERROR"
@@ -389,7 +396,7 @@ def _check_mathematical_bounds(
                 if key in _PROBABILITY_MODIFIER_KEYS and isinstance(val, (int, float)):
                     if val < 0.0 or val > 1.0:
                         report.error(
-                            "protocols.json",
+                            _PROTOCOLS_JSON,
                             "MATH_BOUND",
                             f"{proto.protocol_id}.modifiers.{key} = {val} "
                             f"is outside [0.0, 1.0]",
@@ -401,7 +408,7 @@ def _check_mathematical_bounds(
             for key, val in illness.items():
                 if isinstance(val, (int, float)) and (val < 0 or val > 1):
                     report.error(
-                        "active_profiles.json",
+                        _ACTIVE_PROFILES_JSON,
                         "MATH_BOUND",
                         f"{p.pathogen_id}.illness_probability.{key} = {val} "
                         f"is outside [0.0, 1.0]",
@@ -425,13 +432,13 @@ def _check_graph_integrity(
         for gz in layout.graywater_zones:
             if gz not in valid_zones:
                 report.error(
-                    "spatial_layout.json",
+                    _SPATIAL_LAYOUT_JSON,
                     "GRAPH_REF",
                     f"graywater_zones entry '{gz}' not found in spatial_layout zones",
                 )
     else:
         report.error(
-            "spatial_layout.json",
+            _SPATIAL_LAYOUT_JSON,
             "GRAPH_REF",
             "graywater_zones must list downstream wastewater collection zone(s)",
         )
@@ -442,7 +449,7 @@ def _check_graph_integrity(
             for room in hz.rooms:
                 if room not in valid_zones:
                     report.error(
-                        "air_flow_paths.json",
+                        _AIR_FLOW_PATHS_JSON,
                         "GRAPH_REF",
                         f"HVAC zone '{hz.id}' references room '{room}' "
                         f"not found in spatial_layout.json zones: {valid_zones}",
@@ -454,7 +461,7 @@ def _check_graph_integrity(
             for endpoint_name, endpoint_val in [("from", link.from_zone), ("to", link.to_zone)]:
                 if endpoint_val not in valid_zones and endpoint_val not in hvac_zone_ids:
                     report.error(
-                        "air_flow_paths.json",
+                        _AIR_FLOW_PATHS_JSON,
                         "GRAPH_REF",
                         f"Cross-zone link '{link.from_zone}' -> '{link.to_zone}' "
                         f"has '{endpoint_name}' = '{endpoint_val}' not found in "
@@ -466,7 +473,7 @@ def _check_graph_integrity(
             for endpoint_name, endpoint_val in [("from", adj.from_zone), ("to", adj.to_zone)]:
                 if endpoint_val not in valid_zones:
                     report.error(
-                        "air_flow_paths.json",
+                        _AIR_FLOW_PATHS_JSON,
                         "GRAPH_REF",
                         f"Adjacency edge '{adj.from_zone}' -> '{adj.to_zone}' "
                         f"has '{endpoint_name}' = '{endpoint_val}' not found in "
@@ -480,7 +487,7 @@ def _check_graph_integrity(
                 for zone in close_zones:
                     if zone not in valid_zones:
                         report.error(
-                            "protocols.json",
+                            _PROTOCOLS_JSON,
                             "GRAPH_REF",
                             f"{proto.protocol_id}.modifiers.close_zones references "
                             f"'{zone}' not found in spatial_layout.json zones: "
@@ -506,7 +513,7 @@ def _check_logical_contradictions(
             for route in p.transmission_routes:
                 if route not in _VALID_TRANSMISSION_ROUTES:
                     report.warn(
-                        "active_profiles.json",
+                        _ACTIVE_PROFILES_JSON,
                         "LOGIC_ROUTE",
                         f"{p.pathogen_id} has unknown transmission route "
                         f"'{route}'. Valid routes: {_VALID_TRANSMISSION_ROUTES}",
@@ -517,7 +524,7 @@ def _check_logical_contradictions(
                 curve_len = len(p.shedding_curve_log10)
                 if curve_len < 2:
                     report.warn(
-                        "active_profiles.json",
+                        _ACTIVE_PROFILES_JSON,
                         "LOGIC_SHED",
                         f"{p.pathogen_id} shedding_curve_log10 has only "
                         f"{curve_len} entries (expected >= 2 for a time-series).",
@@ -525,7 +532,7 @@ def _check_logical_contradictions(
                 for i, val in enumerate(p.shedding_curve_log10):
                     if val < 0:
                         report.error(
-                            "active_profiles.json",
+                            _ACTIVE_PROFILES_JSON,
                             "MATH_BOUND",
                             f"{p.pathogen_id}.shedding_curve_log10[{i}] = {val} "
                             f"is negative (log10 shedding rate cannot be negative "
@@ -535,7 +542,7 @@ def _check_logical_contradictions(
             # Verify recovery_day is non-negative
             if p.recovery_day < 0:
                 report.error(
-                    "active_profiles.json",
+                    _ACTIVE_PROFILES_JSON,
                     "MATH_BOUND",
                     f"{p.pathogen_id}.recovery_day = {p.recovery_day} is negative.",
                 )
@@ -543,7 +550,7 @@ def _check_logical_contradictions(
             # Verify introduction_epoch is non-negative
             if p.introduction_epoch < 0:
                 report.error(
-                    "active_profiles.json",
+                    _ACTIVE_PROFILES_JSON,
                     "MATH_BOUND",
                     f"{p.pathogen_id}.introduction_epoch = {p.introduction_epoch} "
                     f"is negative.",
@@ -551,7 +558,7 @@ def _check_logical_contradictions(
 
             if p.initial_time_infected < 0:
                 report.error(
-                    "active_profiles.json",
+                    _ACTIVE_PROFILES_JSON,
                     "MATH_BOUND",
                     f"{p.pathogen_id}.initial_time_infected = "
                     f"{p.initial_time_infected} is negative.",
@@ -559,7 +566,7 @@ def _check_logical_contradictions(
             curve_len = len(p.shedding_curve_log10)
             if curve_len and p.initial_time_infected >= curve_len:
                 report.warn(
-                    "active_profiles.json",
+                    _ACTIVE_PROFILES_JSON,
                     "LOGIC",
                     f"{p.pathogen_id}.initial_time_infected = "
                     f"{p.initial_time_infected} is beyond shedding_curve_log10 "
@@ -573,21 +580,21 @@ def _check_logical_contradictions(
                 dr = fc.get("decay_rate_per_epoch", 0.0)
                 if gr < 0:
                     report.error(
-                        "active_profiles.json",
+                        _ACTIVE_PROFILES_JSON,
                         "MATH_BOUND",
                         f"{p.pathogen_id}.food_contamination."
                         f"growth_rate_per_epoch = {gr} is negative.",
                     )
                 if dr < 0 or dr > 1:
                     report.warn(
-                        "active_profiles.json",
+                        _ACTIVE_PROFILES_JSON,
                         "MATH_BOUND",
                         f"{p.pathogen_id}.food_contamination."
                         f"decay_rate_per_epoch = {dr} outside [0, 1].",
                     )
                 if "food" not in p.transmission_routes:
                     report.warn(
-                        "active_profiles.json",
+                        _ACTIVE_PROFILES_JSON,
                         "LOGIC_ROUTE",
                         f"{p.pathogen_id} has food_contamination enabled "
                         f"but 'food' not in transmission_routes.",
@@ -600,14 +607,14 @@ def _check_logical_contradictions(
                 cr = ecc.get("colonization_rate_per_epoch", 0.0)
                 if bl < 0:
                     report.error(
-                        "active_profiles.json",
+                        _ACTIVE_PROFILES_JSON,
                         "MATH_BOUND",
                         f"{p.pathogen_id}.environmental_contamination."
                         f"baseline_environmental_load = {bl} is negative.",
                     )
                 if cr < 0:
                     report.error(
-                        "active_profiles.json",
+                        _ACTIVE_PROFILES_JSON,
                         "MATH_BOUND",
                         f"{p.pathogen_id}.environmental_contamination."
                         f"colonization_rate_per_epoch = {cr} is negative.",
@@ -622,7 +629,7 @@ def _check_logical_contradictions(
                 for mat_name in cost_block.materials:
                     if mat_name not in known_materials:
                         report.warn(
-                            "protocols.json",
+                            _PROTOCOLS_JSON,
                             "LOGIC_MATERIAL",
                             f"{proto.protocol_id}.{cost_block_name} references "
                             f"material '{mat_name}' not found in "
@@ -636,7 +643,7 @@ def _check_logical_contradictions(
             ec = proto.modifiers.get("exempt_classes", [])
             if ec and not isinstance(ec, list):
                 report.error(
-                    "protocols.json",
+                    _PROTOCOLS_JSON,
                     "SCHEMA",
                     f"{proto.protocol_id}.modifiers.exempt_classes must be "
                     f"a list of agent class IDs, got {type(ec).__name__}",
@@ -648,7 +655,7 @@ def _check_logical_contradictions(
                 )
                 if not has_confinement:
                     report.warn(
-                        "protocols.json",
+                        _PROTOCOLS_JSON,
                         "LOGIC_EXEMPT",
                         f"{proto.protocol_id} has exempt_classes but no "
                         f"confinement modifier (confine_symptomatic_to_quarters "
@@ -664,7 +671,7 @@ def _check_logical_contradictions(
                 for mat_name in cost_data.get("materials", {}):
                     if mat_name not in known_materials:
                         report.warn(
-                            "resource_costs.json",
+                            _RESOURCE_COSTS_JSON,
                             "LOGIC_MATERIAL",
                             f"per_test_costs.{test_type} references "
                             f"material '{mat_name}' not found in "
@@ -683,7 +690,7 @@ def _check_logical_contradictions(
                 val = getattr(ois, field_name, 0.0)
                 if val < 0:
                     report.error(
-                        "resource_costs.json",
+                        _RESOURCE_COSTS_JSON,
                         "BOUNDS_OIS",
                         f"operational_impact_weights.{field_name} = {val} must be non-negative",
                     )
@@ -925,7 +932,7 @@ def _check_instrument_turnaround(cfg: dict[str, Any], report: Report) -> None:
     full = config_path if os.path.isabs(config_path) else os.path.join(_root, config_path)
     if not os.path.isfile(full):
         report.error(
-            "config.yaml", "TAT",
+            _CONFIG_YAML, "TAT",
             f"instrument_turnaround.config_path not found: {config_path}",
         )
         return
@@ -979,7 +986,7 @@ def _check_long_read_sequencing(cfg: dict[str, Any], report: Report) -> None:
         for i, src in enumerate(sources):
             if src not in valid_sources:
                 report.error(
-                    "config.yaml", "LONG_READ",
+                    _CONFIG_YAML, "LONG_READ",
                     f"long_read_sequencing.specimen_sources[{i}] invalid: {src}",
                 )
     params_path = lr.get("params_path")
@@ -988,7 +995,7 @@ def _check_long_read_sequencing(cfg: dict[str, Any], report: Report) -> None:
         full = params_path if os.path.isabs(params_path) else os.path.join(_root, params_path)
         if not os.path.isfile(full):
             report.error(
-                "config.yaml", "LONG_READ",
+                _CONFIG_YAML, "LONG_READ",
                 f"long_read_sequencing.params_path not found: {params_path}",
             )
         else:
@@ -1002,7 +1009,7 @@ def _check_long_read_sequencing(cfg: dict[str, Any], report: Report) -> None:
                 profiles = params.get("deployment_profiles", {})
                 if profile and profile not in profiles:
                     report.error(
-                        "config.yaml", "LONG_READ",
+                        _CONFIG_YAML, "LONG_READ",
                         f"long_read_sequencing.default_profile unknown: {profile}",
                     )
             except json.JSONDecodeError as exc:
@@ -1028,19 +1035,19 @@ def _check_agent_classes(
         try:
             parsed.append(AgentClassEntry.model_validate(entry))
         except Exception as e:
-            report.error("config.yaml", "SCHEMA",
+            report.error(_CONFIG_YAML, "SCHEMA",
                          f"agent_classes[{i}]: {e}")
 
     if parsed:
         total = sum(c.fraction for c in parsed)
         if abs(total - 1.0) > 0.01:
-            report.error("config.yaml", "MATH_BOUND",
+            report.error(_CONFIG_YAML, "MATH_BOUND",
                          f"agent_classes fractions sum to {total:.4f}, "
                          f"expected ~1.0 (tolerance 0.01)")
 
         ids = [c.class_id for c in parsed]
         if len(ids) != len(set(ids)):
-            report.error("config.yaml", "LOGIC_DUP",
+            report.error(_CONFIG_YAML, "LOGIC_DUP",
                          f"Duplicate class_id values in agent_classes: {ids}")
 
     if zone_ids and parsed:
@@ -1048,7 +1055,7 @@ def _check_agent_classes(
             for field_name in ("home_zone_preference", "free_zone_preference", "duty_zone"):
                 val = getattr(c, field_name)
                 if val and not any(val in zid for zid in zone_ids):
-                    report.warn("config.yaml", "GRAPH_REF",
+                    report.warn(_CONFIG_YAML, "GRAPH_REF",
                                 f"agent_classes.{c.class_id}.{field_name} = '{val}' "
                                 f"does not match any zone in spatial_layout")
 
@@ -1064,12 +1071,12 @@ def _check_gender_distribution(cfg: dict[str, Any], report: Report) -> None:
         if not isinstance(v, (int, float)):
             continue
         if v < 0:
-            report.error("config.yaml", "MATH_BOUND",
+            report.error(_CONFIG_YAML, "MATH_BOUND",
                          f"gender_distribution.{k} = {v} is negative")
 
     total = sum(v for v in gender.values() if isinstance(v, (int, float)))
     if abs(total - 1.0) > 0.01:
-        report.error("config.yaml", "MATH_BOUND",
+        report.error(_CONFIG_YAML, "MATH_BOUND",
                      f"gender_distribution values sum to {total:.4f}, "
                      f"expected ~1.0 (tolerance 0.01)")
 
@@ -1100,34 +1107,34 @@ def _check_infection_counters(cfg: dict[str, Any], report: Report) -> None:
     for i, cdef in enumerate(counters):
         cid = cdef.get("counter_id")
         if not cid:
-            report.error("config.yaml", "SCHEMA",
+            report.error(_CONFIG_YAML, "SCHEMA",
                          f"infection_counters[{i}] missing counter_id")
             continue
         counter_ids.append(cid)
 
         metric = cdef.get("metric")
         if metric not in _VALID_COUNTER_METRICS:
-            report.error("config.yaml", "SCHEMA",
+            report.error(_CONFIG_YAML, "SCHEMA",
                          f"infection_counters.{cid}.metric = '{metric}' "
                          f"not in {_VALID_COUNTER_METRICS}")
 
         on_exceed = cdef.get("on_exceed", "log_only")
         if on_exceed not in _VALID_ON_EXCEED:
-            report.error("config.yaml", "SCHEMA",
+            report.error(_CONFIG_YAML, "SCHEMA",
                          f"infection_counters.{cid}.on_exceed = '{on_exceed}' "
                          f"not in {_VALID_ON_EXCEED}")
 
         threshold = cdef.get("threshold")
         if threshold is not None:
             if not isinstance(threshold, (int, float)) or threshold < 0:
-                report.error("config.yaml", "MATH_BOUND",
+                report.error(_CONFIG_YAML, "MATH_BOUND",
                              f"infection_counters.{cid}.threshold = {threshold} "
                              f"must be a non-negative number")
 
         cfilter = cdef.get("filter", {})
         rg = cfilter.get("role_group")
         if rg and rg not in ("crew", "passenger"):
-            report.error("config.yaml", "SCHEMA",
+            report.error(_CONFIG_YAML, "SCHEMA",
                          f"infection_counters.{cid}.filter.role_group = '{rg}' "
                          f"must be 'crew' or 'passenger'")
 
@@ -1135,7 +1142,7 @@ def _check_infection_counters(cfg: dict[str, Any], report: Report) -> None:
         if class_ids and filter_classes:
             for fc in filter_classes:
                 if fc not in class_ids:
-                    report.warn("config.yaml", "GRAPH_REF",
+                    report.warn(_CONFIG_YAML, "GRAPH_REF",
                                 f"infection_counters.{cid}.filter.classes "
                                 f"references '{fc}' not in agent_classes")
 
@@ -1143,12 +1150,12 @@ def _check_infection_counters(cfg: dict[str, Any], report: Report) -> None:
         if class_ids and exempt:
             for ec in exempt:
                 if ec not in class_ids:
-                    report.warn("config.yaml", "GRAPH_REF",
+                    report.warn(_CONFIG_YAML, "GRAPH_REF",
                                 f"infection_counters.{cid}.exempt_classes "
                                 f"references '{ec}' not in agent_classes")
 
     if len(counter_ids) != len(set(counter_ids)):
-        report.error("config.yaml", "LOGIC_DUP",
+        report.error(_CONFIG_YAML, "LOGIC_DUP",
                      f"Duplicate counter_id values: {counter_ids}")
 
 
@@ -1166,12 +1173,12 @@ def _check_wearable_monitoring(cfg: dict[str, Any], report: Report) -> None:
         try:
             dev = WearableDeviceEntry.model_validate(dev_raw)
         except Exception as e:
-            report.error("config.yaml", "SCHEMA",
+            report.error(_CONFIG_YAML, "SCHEMA",
                          f"wearable_monitoring.devices[{i}]: {e}")
             continue
 
         if dev.device_id in device_ids:
-            report.error("config.yaml", "LOGIC_DUP",
+            report.error(_CONFIG_YAML, "LOGIC_DUP",
                          f"Duplicate device_id '{dev.device_id}' in wearable_monitoring.devices")
         device_ids.add(dev.device_id)
         device_channels[dev.device_id] = set(dev.channels)
@@ -1179,14 +1186,14 @@ def _check_wearable_monitoring(cfg: dict[str, Any], report: Report) -> None:
         ch_set = set(dev.channels)
         for noise in dev.noise:
             if noise.channel not in ch_set:
-                report.error("config.yaml", "GRAPH_REF",
+                report.error(_CONFIG_YAML, "GRAPH_REF",
                              f"Device '{dev.device_id}' noise references channel "
                              f"'{noise.channel}' not in device channels: {ch_set}")
 
         for ir in dev.infection_responses:
             for cr in ir.channel_responses:
                 if cr.channel not in ch_set:
-                    report.error("config.yaml", "GRAPH_REF",
+                    report.error(_CONFIG_YAML, "GRAPH_REF",
                                  f"Device '{dev.device_id}' infection_response for "
                                  f"'{ir.pathogen_category}' references channel "
                                  f"'{cr.channel}' not in device channels: {ch_set}")
@@ -1197,7 +1204,7 @@ def _check_wearable_monitoring(cfg: dict[str, Any], report: Report) -> None:
             for conf_ch in affected:
                 if conf_ch not in ch_set:
                     cid = conf.get("confounder_id", f"index {ci}")
-                    report.error("config.yaml", "GRAPH_REF",
+                    report.error(_CONFIG_YAML, "GRAPH_REF",
                                  f"Device '{dev.device_id}' confounder '{cid}' "
                                  f"references channel '{conf_ch}' not in device "
                                  f"channels: {ch_set}")
@@ -1207,18 +1214,18 @@ def _check_wearable_monitoring(cfg: dict[str, Any], report: Report) -> None:
         try:
             entry = ClassDeviceMapEntry.model_validate(entry_raw)
         except Exception as e:
-            report.error("config.yaml", "SCHEMA",
+            report.error(_CONFIG_YAML, "SCHEMA",
                          f"wearable_monitoring.class_device_map: {e}")
             continue
         # Validate device references for both old and new formats
         if entry.devices:
             for dev_entry in entry.devices:
                 if dev_entry.device_id not in device_ids:
-                    report.error("config.yaml", "GRAPH_REF",
+                    report.error(_CONFIG_YAML, "GRAPH_REF",
                                  f"class_device_map assigns '{entry.agent_class}' → "
                                  f"'{dev_entry.device_id}' which is not in devices: {device_ids}")
         elif entry.device_id and entry.device_id not in device_ids:
-            report.error("config.yaml", "GRAPH_REF",
+            report.error(_CONFIG_YAML, "GRAPH_REF",
                          f"class_device_map assigns '{entry.agent_class}' → "
                          f"'{entry.device_id}' which is not in devices: {device_ids}")
 
@@ -1228,34 +1235,34 @@ def _check_wearable_monitoring(cfg: dict[str, Any], report: Report) -> None:
         try:
             cd_entry = ChronicDiseaseDeviceMapEntry.model_validate(cd_entry_raw)
         except Exception as e:
-            report.error("config.yaml", "SCHEMA",
+            report.error(_CONFIG_YAML, "SCHEMA",
                          f"wearable_monitoring.chronic_disease_device_map: {e}")
             continue
         if cd_entry.device_id not in device_ids:
-            report.error("config.yaml", "GRAPH_REF",
+            report.error(_CONFIG_YAML, "GRAPH_REF",
                          f"chronic_disease_device_map assigns '{cd_entry.disease_id}' → "
                          f"'{cd_entry.device_id}' which is not in devices: {device_ids}")
 
     obs_sigma = wm.get("observation_noise_sigma", 0.5)
     if isinstance(obs_sigma, (int, float)) and obs_sigma < 0:
-        report.error("config.yaml", "MATH_BOUND",
+        report.error(_CONFIG_YAML, "MATH_BOUND",
                      f"wearable_monitoring.observation_noise_sigma = {obs_sigma} is negative")
 
     dropout = wm.get("sync_dropout_prob", 0.02)
     if isinstance(dropout, (int, float)) and (dropout < 0 or dropout > 1):
-        report.error("config.yaml", "MATH_BOUND",
+        report.error(_CONFIG_YAML, "MATH_BOUND",
                      f"wearable_monitoring.sync_dropout_prob = {dropout} outside [0,1]")
 
     z_thresh = wm.get("anomaly_z_threshold", 2.0)
     if isinstance(z_thresh, (int, float)) and z_thresh <= 0:
-        report.error("config.yaml", "MATH_BOUND",
+        report.error(_CONFIG_YAML, "MATH_BOUND",
                      f"wearable_monitoring.anomaly_z_threshold = {z_thresh} must be positive")
 
     ad_cfg = wm.get("anomaly_detection")
     if ad_cfg and ad_cfg.get("enabled", True):
         ad_z = ad_cfg.get("anomaly_z_threshold", z_thresh)
         if isinstance(ad_z, (int, float)) and ad_z <= 0:
-            report.error("config.yaml", "MATH_BOUND",
+            report.error(_CONFIG_YAML, "MATH_BOUND",
                          f"wearable_monitoring.anomaly_detection.anomaly_z_threshold "
                          f"= {ad_z} must be positive")
         for key in ("fleet_anomaly_floor", "fleet_anomaly_downweight",
@@ -1263,19 +1270,19 @@ def _check_wearable_monitoring(cfg: dict[str, Any], report: Report) -> None:
             val = ad_cfg.get(key)
             if val is not None and isinstance(val, (int, float)):
                 if val < 0 or val > 1:
-                    report.error("config.yaml", "MATH_BOUND",
+                    report.error(_CONFIG_YAML, "MATH_BOUND",
                                  f"wearable_monitoring.anomaly_detection.{key} "
                                  f"= {val} outside [0,1]")
         inf_thresh = ad_cfg.get("infection_score_threshold", 1.5)
         if isinstance(inf_thresh, (int, float)) and inf_thresh <= 0:
-            report.error("config.yaml", "MATH_BOUND",
+            report.error(_CONFIG_YAML, "MATH_BOUND",
                          f"wearable_monitoring.anomaly_detection.infection_score_threshold "
                          f"= {inf_thresh} must be positive")
         weights = ad_cfg.get("channel_infection_weights", {})
         if isinstance(weights, dict):
             for ch, w in weights.items():
                 if isinstance(w, (int, float)) and (w < 0 or w > 1):
-                    report.error("config.yaml", "MATH_BOUND",
+                    report.error(_CONFIG_YAML, "MATH_BOUND",
                                  f"wearable_monitoring.anomaly_detection."
                                  f"channel_infection_weights.{ch} = {w} outside [0,1]")
 
@@ -1292,7 +1299,7 @@ def _check_modality_params(cfg: dict[str, Any], report: Report) -> None:
         val = cfg.get(section, {}).get(key)
         if val is not None and isinstance(val, (int, float)):
             if val < 0 or val > 1:
-                report.error("config.yaml", "MATH_BOUND",
+                report.error(_CONFIG_YAML, "MATH_BOUND",
                              f"{section}.{key} = {val} outside [0,1]")
 
     _non_neg_fields = [
@@ -1309,7 +1316,7 @@ def _check_modality_params(cfg: dict[str, Any], report: Report) -> None:
     for section, key in _non_neg_fields:
         val = cfg.get(section, {}).get(key)
         if val is not None and isinstance(val, (int, float)) and val < 0:
-            report.error("config.yaml", "MATH_BOUND",
+            report.error(_CONFIG_YAML, "MATH_BOUND",
                          f"{section}.{key} = {val} is negative")
 
 
@@ -1332,7 +1339,7 @@ def _check_clinical_diagnostics(cfg: dict[str, Any], report: Report) -> None:
         validate_autocorrelation_matrix(matrix)
         if matrix.shape[0] != len(CLINICAL_TEST_KEYS):
             report.error(
-                "config.yaml",
+                _CONFIG_YAML,
                 "SCHEMA",
                 "clinical_diagnostics.autocorrelation_matrix size must match test_order",
             )
@@ -1341,13 +1348,13 @@ def _check_clinical_diagnostics(cfg: dict[str, Any], report: Report) -> None:
                 val = float(matrix[i, j])
                 if val < -1.0 or val > 1.0:
                     report.error(
-                        "config.yaml",
+                        _CONFIG_YAML,
                         "MATH_BOUND",
                         f"clinical_diagnostics.autocorrelation_matrix[{i}][{j}] "
                         f"= {val} outside [-1,1]",
                     )
     except ValueError as exc:
-        report.error("config.yaml", "SCHEMA", str(exc))
+        report.error(_CONFIG_YAML, "SCHEMA", str(exc))
 
 
 def _check_hvac_params(cfg: dict[str, Any], report: Report) -> None:
@@ -1355,11 +1362,11 @@ def _check_hvac_params(cfg: dict[str, Any], report: Report) -> None:
     hvac = cfg.get("hvac", {})
     eff = hvac.get("filter_efficiency")
     if eff is not None and isinstance(eff, (int, float)) and (eff < 0 or eff > 1):
-        report.error("config.yaml", "MATH_BOUND",
+        report.error(_CONFIG_YAML, "MATH_BOUND",
                      f"hvac.filter_efficiency = {eff} outside [0,1]")
     decay = hvac.get("natural_decay_rate")
     if decay is not None and isinstance(decay, (int, float)) and decay < 0:
-        report.error("config.yaml", "MATH_BOUND",
+        report.error(_CONFIG_YAML, "MATH_BOUND",
                      f"hvac.natural_decay_rate = {decay} is negative")
 
 
@@ -1368,7 +1375,7 @@ def _check_emod_progression(cfg: dict[str, Any], report: Report) -> None:
     emod = cfg.get("emod_progression", {})
     incub = emod.get("incubation_epochs")
     if incub is not None and isinstance(incub, (int, float)) and incub < 0:
-        report.error("config.yaml", "MATH_BOUND",
+        report.error(_CONFIG_YAML, "MATH_BOUND",
                      f"emod_progression.incubation_epochs = {incub} is negative")
 
     phases_raw = emod.get("shedding_phases", [])
@@ -1378,17 +1385,17 @@ def _check_emod_progression(cfg: dict[str, Any], report: Report) -> None:
         try:
             EmodPhase.model_validate(p)
         except Exception as e:
-            report.error("config.yaml", "SCHEMA",
+            report.error(_CONFIG_YAML, "SCHEMA",
                          f"emod_progression.shedding_phases[{i}]: {e}")
 
     if phases_raw and durations:
         if len(phases_raw) != len(durations):
-            report.error("config.yaml", "LOGIC_MISMATCH",
+            report.error(_CONFIG_YAML, "LOGIC_MISMATCH",
                          f"emod_progression has {len(phases_raw)} shedding_phases "
                          f"but {len(durations)} phase_durations — counts must match")
         for i, d in enumerate(durations):
             if isinstance(d, (int, float)) and d <= 0:
-                report.error("config.yaml", "MATH_BOUND",
+                report.error(_CONFIG_YAML, "MATH_BOUND",
                              f"emod_progression.phase_durations[{i}] = {d} must be positive")
 
 
@@ -1397,11 +1404,11 @@ def _check_escalation_params(cfg: dict[str, Any], report: Report) -> None:
     esc = cfg.get("escalation", {})
     sst = esc.get("syndromic_suspect_threshold")
     if sst is not None and isinstance(sst, (int, float)) and sst < 0:
-        report.error("config.yaml", "MATH_BOUND",
+        report.error(_CONFIG_YAML, "MATH_BOUND",
                      f"escalation.syndromic_suspect_threshold = {sst} is negative")
     pct = esc.get("pcr_confirm_ct_threshold")
     if pct is not None and isinstance(pct, (int, float)) and pct <= 0:
-        report.error("config.yaml", "MATH_BOUND",
+        report.error(_CONFIG_YAML, "MATH_BOUND",
                      f"escalation.pcr_confirm_ct_threshold = {pct} must be positive")
 
 
@@ -1410,18 +1417,18 @@ def _check_fred_behavior(cfg: dict[str, Any], report: Report) -> None:
     fred = cfg.get("fred_behavior", {})
     qc = fred.get("quarantine_compliance")
     if qc is not None and isinstance(qc, (int, float)) and (qc < 0 or qc > 1):
-        report.error("config.yaml", "MATH_BOUND",
+        report.error(_CONFIG_YAML, "MATH_BOUND",
                      f"fred_behavior.quarantine_compliance = {qc} outside [0,1]")
     delay = fred.get("compliance_delay_epochs")
     if delay is not None and isinstance(delay, (int, float)) and delay < 0:
-        report.error("config.yaml", "MATH_BOUND",
+        report.error(_CONFIG_YAML, "MATH_BOUND",
                      f"fred_behavior.compliance_delay_epochs = {delay} is negative")
 
     for i, cat in enumerate(fred.get("healthy_noise_categories", [])):
         prob = cat.get("probability")
         if prob is not None and isinstance(prob, (int, float)):
             if prob < 0 or prob > 1:
-                report.error("config.yaml", "MATH_BOUND",
+                report.error(_CONFIG_YAML, "MATH_BOUND",
                              f"fred_behavior.healthy_noise_categories[{i}].probability "
                              f"= {prob} outside [0,1]")
 
@@ -1432,13 +1439,13 @@ def _check_multi_pathogen_params(cfg: dict[str, Any], report: Report) -> None:
     imm_frac = mp.get("immunocompromised_fraction")
     if imm_frac is not None and isinstance(imm_frac, (int, float)):
         if imm_frac < 0 or imm_frac > 1:
-            report.error("config.yaml", "MATH_BOUND",
+            report.error(_CONFIG_YAML, "MATH_BOUND",
                          f"multi_pathogen.immunocompromised_fraction = {imm_frac} "
                          f"outside [0,1]")
     imm_mult = mp.get("immunocompromised_multiplier")
     if imm_mult is not None and isinstance(imm_mult, (int, float)):
         if imm_mult < 0:
-            report.error("config.yaml", "MATH_BOUND",
+            report.error(_CONFIG_YAML, "MATH_BOUND",
                          f"multi_pathogen.immunocompromised_multiplier = {imm_mult} "
                          f"is negative")
 
@@ -1451,14 +1458,14 @@ def _check_chronic_disease(cfg: dict[str, Any], report: Report) -> None:
 
     config_path = cd.get("config_path", "")
     if not config_path:
-        report.warn("config.yaml", "CONFIG",
+        report.warn(_CONFIG_YAML, "CONFIG",
                      "chronic_disease.enabled but no config_path specified")
         return
 
     repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     full_path = os.path.join(repo_root, config_path)
     if not os.path.isfile(full_path):
-        report.error("config.yaml", "FILE",
+        report.error(_CONFIG_YAML, "FILE",
                       f"chronic_disease.config_path '{config_path}' not found")
         return
 
@@ -1521,7 +1528,7 @@ def _check_chronic_disease(cfg: dict[str, Any], report: Report) -> None:
 
     max_comorbid = cd.get("max_comorbid")
     if max_comorbid is not None and isinstance(max_comorbid, int) and max_comorbid < 1:
-        report.error("config.yaml", "MATH_BOUND",
+        report.error(_CONFIG_YAML, "MATH_BOUND",
                       f"chronic_disease.max_comorbid = {max_comorbid} must be >= 1")
 
 
@@ -1534,11 +1541,11 @@ def _check_microflora_params(
     mf = cfg.get("microflora", {})
     shed = mf.get("disrupted_shed_mass")
     if shed is not None and isinstance(shed, (int, float)) and shed < 0:
-        report.error("config.yaml", "MATH_BOUND",
+        report.error(_CONFIG_YAML, "MATH_BOUND",
                      f"microflora.disrupted_shed_mass = {shed} is negative")
     scale = mf.get("clr_shift_scale")
     if scale is not None and isinstance(scale, (int, float)) and scale < 0:
-        report.error("config.yaml", "MATH_BOUND",
+        report.error(_CONFIG_YAML, "MATH_BOUND",
                      f"microflora.clr_shift_scale = {scale} is negative")
 
     if zone_ids:
@@ -1546,7 +1553,7 @@ def _check_microflora_params(
         if explicit:
             for gz in explicit:
                 if gz not in zone_ids:
-                    report.warn("config.yaml", "GRAPH_REF",
+                    report.warn(_CONFIG_YAML, "GRAPH_REF",
                                 f"microflora.graywater_zones override references '{gz}' "
                                 f"not found in spatial_layout zones")
 
@@ -1560,7 +1567,7 @@ def paths_from_run_config(repo_root: str, config_yaml: str | None = None) -> dic
     and ``cfg`` (the raw parsed config dict for downstream validation).
     """
     if config_yaml is None:
-        config_yaml = os.path.join(repo_root, "crusher_labs", "config.yaml")
+        config_yaml = os.path.join(repo_root, "crusher_labs", _CONFIG_YAML)
     sys.path.insert(0, repo_root)
     from crusher_labs import load_config
     cfg = load_config(config_yaml)
@@ -1594,7 +1601,7 @@ def run_checks(
     """
     if pathogen_file is None:
         base = pathogen_dir or os.path.join(config_dir, "..", "pathogens")
-        pathogen_file = os.path.join(base, "active_profiles.json")
+        pathogen_file = os.path.join(base, _ACTIVE_PROFILES_JSON)
     pathogen_label = os.path.basename(pathogen_file)
     report = Report()
 
@@ -1606,18 +1613,18 @@ def run_checks(
     print(f"  {'─' * 50}\n")
 
     # Load files
-    spatial_data = _load_json(os.path.join(platform_dir, "spatial_layout.json"))
-    airflow_data = _load_json(os.path.join(platform_dir, "air_flow_paths.json"))
-    protocols_data = _load_json(os.path.join(config_dir, "protocols.json"))
+    spatial_data = _load_json(os.path.join(platform_dir, _SPATIAL_LAYOUT_JSON))
+    airflow_data = _load_json(os.path.join(platform_dir, _AIR_FLOW_PATHS_JSON))
+    protocols_data = _load_json(os.path.join(config_dir, _PROTOCOLS_JSON))
     pathogen_data = _load_json(pathogen_file)
-    resource_data = _load_json(os.path.join(config_dir, "resource_costs.json"))
+    resource_data = _load_json(os.path.join(config_dir, _RESOURCE_COSTS_JSON))
 
     files_found = {
-        "spatial_layout.json": spatial_data is not None,
-        "air_flow_paths.json": airflow_data is not None,
-        "protocols.json": protocols_data is not None,
+        _SPATIAL_LAYOUT_JSON: spatial_data is not None,
+        _AIR_FLOW_PATHS_JSON: airflow_data is not None,
+        _PROTOCOLS_JSON: protocols_data is not None,
         pathogen_label: pathogen_data is not None,
-        "resource_costs.json": resource_data is not None,
+        _RESOURCE_COSTS_JSON: resource_data is not None,
     }
 
     for fname, found in files_found.items():
@@ -1631,11 +1638,11 @@ def run_checks(
 
     # Parse with pydantic
     print(f"  {_CYAN}Parsing schemas...{_RESET}")
-    layout = _parse_model(SpatialLayout, spatial_data, "spatial_layout.json", report)
-    airflow = _parse_model(AirFlowPaths, airflow_data, "air_flow_paths.json", report)
-    protocols = _parse_model(ProtocolsConfig, protocols_data, "protocols.json", report)
+    layout = _parse_model(SpatialLayout, spatial_data, _SPATIAL_LAYOUT_JSON, report)
+    airflow = _parse_model(AirFlowPaths, airflow_data, _AIR_FLOW_PATHS_JSON, report)
+    protocols = _parse_model(ProtocolsConfig, protocols_data, _PROTOCOLS_JSON, report)
     pathogens = _parse_model(PathogensFile, pathogen_data, pathogen_label, report)
-    resource_costs = _parse_model(ResourceCosts, resource_data, "resource_costs.json", report)
+    resource_costs = _parse_model(ResourceCosts, resource_data, _RESOURCE_COSTS_JSON, report)
 
     schema_errors = len(report.errors)
     if schema_errors:
@@ -1752,7 +1759,7 @@ def main() -> None:
     )
     parser.add_argument(
         "--config-yaml",
-        default=os.path.join(_REPO_ROOT, "crusher_labs", "config.yaml"),
+        default=os.path.join(_REPO_ROOT, "crusher_labs", _CONFIG_YAML),
     )
     parser.add_argument(
         "--pathogen-dir",
@@ -1773,7 +1780,7 @@ def main() -> None:
             pathogen_file=r["pathogen_file"], cfg=r["cfg"],
         )
     else:
-        pf = args.pathogen_file or os.path.join(args.pathogen_dir, "active_profiles.json")
+        pf = args.pathogen_file or os.path.join(args.pathogen_dir, _ACTIVE_PROFILES_JSON)
         report = run_checks(args.config_dir, args.platform_dir, pathogen_file=pf)
     print_report(report)
 

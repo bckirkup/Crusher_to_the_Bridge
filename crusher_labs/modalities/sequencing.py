@@ -430,6 +430,81 @@ class MetagenomicSequencing:
             "kingdom_anomalies": anomalies,
         }
 
+    def _process_sequencing_zone(
+        self,
+        epoch: int,
+        zone_id: str,
+        zone: dict[str, Any],
+        zone_microflora_shifts: dict[str, dict[str, float]],
+    ) -> dict[str, Any]:
+        pathogen_mass = zone.get("pathogen_mass", 0.0)
+
+        baseline, taxa = _get_drifted_baseline(
+            epoch, self.total_epochs, self.rng,
+        )
+
+        mf_shifts = zone_microflora_shifts.get(zone_id, {})
+        total_disruption = sum(mf_shifts.values()) if mf_shifts else 0.0
+        kingdom_deltas: dict[str, float] = {}
+        aitchison_dist = 0.0
+
+        if total_disruption > 0:
+            disruption_markers: dict[str, dict[str, float]] = {}
+            for d_type in mf_shifts:
+                if d_type in DISRUPTION_MARKERS:
+                    disruption_markers[d_type] = DISRUPTION_MARKERS[d_type]
+            baseline, kingdom_deltas, aitchison_dist = (
+                self.apply_microflora_disruption(
+                    baseline, taxa, disruption_markers, total_disruption,
+                )
+            )
+
+        anomaly_report = self.detect_microflora_anomaly(
+            kingdom_deltas, aitchison_distance_to_baseline=aitchison_dist,
+        )
+
+        taxa_with_pathogen = taxa + [PATHOGEN_TAXON]
+        pathogen_frac = pathogen_mass / (pathogen_mass + 100.0)
+        env_frac = 1.0 - pathogen_frac
+        full_profile = np.append(baseline * env_frac, pathogen_frac)
+        full_profile = full_profile / full_profile.sum()
+
+        reads = self.rng.multinomial(self.read_depth, full_profile)
+        read_dict = {
+            t: int(c) for t, c in zip(taxa_with_pathogen, reads) if c > 0
+        }
+
+        seed_info = self._zone_seeds.get(zone_id)
+
+        return {
+            "microbiome_id": zone.get("microbiome_id", "unknown"),
+            "drift_alpha": round(_drift_alpha(epoch, self.total_epochs), 4),
+            "regime": (
+                "open_ocean"
+                if _drift_alpha(epoch, self.total_epochs) > 0.5
+                else "coastal_port"
+            ),
+            "total_reads": self.read_depth,
+            "pathogen_reads": read_dict.get(PATHOGEN_TAXON, 0),
+            "read_counts": read_dict,
+            "seeded_kingdoms": (
+                seed_info["kingdom_fractions"] if seed_info else None
+            ),
+            "pathogen_mass_by_id": zone.get("pathogen_mass_by_id", {}),
+            "microflora_disruption": {
+                "kingdom_clr_deltas": kingdom_deltas,
+                "beta_diversity": {
+                    "aitchison_distance_to_baseline": round(aitchison_dist, 6),
+                    "aitchison_anomaly_threshold": (
+                        self.aitchison_anomaly_threshold
+                    ),
+                },
+                "anomaly_report": anomaly_report,
+                "disruption_types_present": list(mf_shifts.keys()),
+                "total_disruption_magnitude": round(total_disruption, 4),
+            },
+        }
+
     def query_ground_truth(
         self,
         json_data: dict[str, Any],
@@ -452,74 +527,9 @@ class MetagenomicSequencing:
         zone_results: dict[str, dict[str, Any]] = {}
 
         for zone_id, zone in spaces.items():
-            pathogen_mass = zone.get("pathogen_mass", 0.0)
-
-            baseline, taxa = _get_drifted_baseline(
-                epoch, self.total_epochs, self.rng
+            zone_results[zone_id] = self._process_sequencing_zone(
+                epoch, zone_id, zone, zone_microflora_shifts,
             )
-
-            # Apply microflora disruption shifts from dual-signal shedding
-            mf_shifts = zone_microflora_shifts.get(zone_id, {})
-            total_disruption = sum(mf_shifts.values()) if mf_shifts else 0.0
-            kingdom_deltas: dict[str, float] = {}
-            aitchison_dist = 0.0
-
-            if total_disruption > 0:
-                disruption_markers: dict[str, dict[str, float]] = {}
-                for d_type in mf_shifts:
-                    if d_type in DISRUPTION_MARKERS:
-                        disruption_markers[d_type] = DISRUPTION_MARKERS[d_type]
-                baseline, kingdom_deltas, aitchison_dist = (
-                    self.apply_microflora_disruption(
-                        baseline, taxa, disruption_markers, total_disruption,
-                    )
-                )
-
-            anomaly_report = self.detect_microflora_anomaly(
-                kingdom_deltas, aitchison_distance_to_baseline=aitchison_dist,
-            )
-
-            taxa_with_pathogen = taxa + [PATHOGEN_TAXON]
-            pathogen_frac = pathogen_mass / (pathogen_mass + 100.0)
-            env_frac = 1.0 - pathogen_frac
-            full_profile = np.append(baseline * env_frac, pathogen_frac)
-            full_profile = full_profile / full_profile.sum()
-
-            reads = self.rng.multinomial(self.read_depth, full_profile)
-            read_dict = {
-                t: int(c) for t, c in zip(taxa_with_pathogen, reads) if c > 0
-            }
-
-            seed_info = self._zone_seeds.get(zone_id)
-
-            zone_results[zone_id] = {
-                "microbiome_id": zone.get("microbiome_id", "unknown"),
-                "drift_alpha": round(_drift_alpha(epoch, self.total_epochs), 4),
-                "regime": (
-                    "open_ocean"
-                    if _drift_alpha(epoch, self.total_epochs) > 0.5
-                    else "coastal_port"
-                ),
-                "total_reads": self.read_depth,
-                "pathogen_reads": read_dict.get(PATHOGEN_TAXON, 0),
-                "read_counts": read_dict,
-                "seeded_kingdoms": (
-                    seed_info["kingdom_fractions"] if seed_info else None
-                ),
-                "pathogen_mass_by_id": zone.get("pathogen_mass_by_id", {}),
-                "microflora_disruption": {
-                    "kingdom_clr_deltas": kingdom_deltas,
-                    "beta_diversity": {
-                        "aitchison_distance_to_baseline": round(aitchison_dist, 6),
-                        "aitchison_anomaly_threshold": (
-                            self.aitchison_anomaly_threshold
-                        ),
-                    },
-                    "anomaly_report": anomaly_report,
-                    "disruption_types_present": list(mf_shifts.keys()),
-                    "total_disruption_magnitude": round(total_disruption, 4),
-                },
-            }
 
         return {
             "modality": self.name,

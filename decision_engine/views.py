@@ -22,6 +22,32 @@ class ObservationModel:
     """Build role-specific views from a host-provided public snapshot."""
 
     @staticmethod
+    def _agent_local_view(
+        agents: list[dict[str, Any]],
+        actor_id: str,
+        agent_info_map: dict[str, Any],
+    ) -> dict[str, Any]:
+        try:
+            aid = int(actor_id)
+        except ValueError:
+            return {}
+        for ag in agents:
+            if ag.get("agent_id") == aid:
+                local = {
+                    "location": ag.get("location"),
+                    "infection_state": ag.get("infection_state"),
+                    "symptom_presentation": ag.get("symptom_presentation"),
+                    "compliance_status": ag.get("compliance_status"),
+                    "role": ag.get("role"),
+                    "agent_class": ag.get("agent_class"),
+                }
+                inf = agent_info_map.get(str(aid), {})
+                if isinstance(inf, dict) and inf:
+                    local["information_state"] = inf
+                return local
+        return {}
+
+    @staticmethod
     def build(
         public_snapshot: dict[str, Any],
         actor_id: str,
@@ -40,25 +66,7 @@ class ObservationModel:
             else {}
         )
         if role in ("crew_agent", "passenger_agent"):
-            try:
-                aid = int(actor_id)
-            except ValueError:
-                aid = None
-            if aid is not None:
-                for ag in agents:
-                    if ag.get("agent_id") == aid:
-                        local = {
-                            "location": ag.get("location"),
-                            "infection_state": ag.get("infection_state"),
-                            "symptom_presentation": ag.get("symptom_presentation"),
-                            "compliance_status": ag.get("compliance_status"),
-                            "role": ag.get("role"),
-                            "agent_class": ag.get("agent_class"),
-                        }
-                        inf = agent_info_map.get(str(aid), {})
-                        if isinstance(inf, dict) and inf:
-                            local["information_state"] = inf
-                        break
+            local = ObservationModel._agent_local_view(agents, actor_id, agent_info_map)
         elif role == "medical_officer":
             local = {
                 "observation_engine": public_snapshot.get("observation_engine", {}),

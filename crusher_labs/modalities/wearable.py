@@ -29,6 +29,33 @@ import numpy as np
 from simulation_utils.numeric import default_simulation_rng
 
 
+def _wearable_visibility_flags(
+    visibility_list: list[str] | str,
+) -> tuple[bool, bool]:
+    if isinstance(visibility_list, str):
+        visibility_list = [visibility_list]
+    if not visibility_list:
+        return True, False
+    has_staff_visible = any(
+        v in ("medical_staff", "both") for v in visibility_list
+    )
+    is_wearer_only = all(v == "wearer_only" for v in visibility_list)
+    return has_staff_visible, is_wearer_only
+
+
+def _accumulate_staff_visible_stats(
+    observed: dict[str, Any],
+    channel_anomaly_counts: dict[str, int],
+) -> tuple[int, int]:
+    total_fever = 1 if observed.get("fever", False) else 0
+    total_anomaly = 0
+    if observed.get("anomaly_count", 0) > 0:
+        total_anomaly = 1
+    for ch in observed.get("anomaly_channels", []):
+        channel_anomaly_counts[ch] = channel_anomaly_counts.get(ch, 0) + 1
+    return total_fever, total_anomaly
+
+
 class WearableDataStream:
     """Crusher Labs modality that wraps raw wearable monitor data.
 
@@ -85,31 +112,19 @@ class WearableDataStream:
             observed = self._apply_observation_noise(raw)
             agent_results[aid] = observed
 
-            # Determine visibility for this agent
-            # Missing visibility metadata defaults to staff-visible (backward compat)
             visibility_list = raw.get("visibility", [])
-            if isinstance(visibility_list, str):
-                visibility_list = [visibility_list]
-
-            if not visibility_list:
-                has_staff_visible = True
-                is_wearer_only = False
-            else:
-                has_staff_visible = any(
-                    v in ("medical_staff", "both") for v in visibility_list
-                )
-                is_wearer_only = all(v == "wearer_only" for v in visibility_list)
+            has_staff_visible, is_wearer_only = _wearable_visibility_flags(
+                visibility_list,
+            )
 
             if has_staff_visible:
                 staff_visible_agents.append(aid)
                 total_staff_visible += 1
-                if observed.get("fever", False):
-                    total_fever += 1
-                anomaly_count = observed.get("anomaly_count", 0)
-                if anomaly_count > 0:
-                    total_anomaly += 1
-                for ch in observed.get("anomaly_channels", []):
-                    channel_anomaly_counts[ch] = channel_anomaly_counts.get(ch, 0) + 1
+                fever_inc, anomaly_inc = _accumulate_staff_visible_stats(
+                    observed, channel_anomaly_counts,
+                )
+                total_fever += fever_inc
+                total_anomaly += anomaly_inc
             elif is_wearer_only:
                 wearer_only_agents.append(aid)
 

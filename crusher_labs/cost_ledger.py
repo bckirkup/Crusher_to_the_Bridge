@@ -385,6 +385,32 @@ class CostLedger:
 
 # ── Operational impact computation ───────────────────────────────────────
 
+def _count_quarantine_isolation(
+    agents: list[dict[str, Any]],
+    quarantined_set: set[int],
+    isolated_set: set[int],
+    essential_classes: set[str],
+) -> tuple[int, int, int]:
+    passenger_q = 0
+    essential_q = 0
+    passenger_iso = 0
+    for agent in agents:
+        aid = agent["agent_id"]
+        agent_class = agent.get("agent_class", agent.get("role", ""))
+        is_passenger = (
+            agent.get("role") == "passenger"
+            or str(agent_class).startswith("passenger")
+        )
+        if aid in quarantined_set:
+            if agent_class in essential_classes:
+                essential_q += 1
+            elif is_passenger:
+                passenger_q += 1
+        if aid in isolated_set and is_passenger:
+            passenger_iso += 1
+    return passenger_q, essential_q, passenger_iso
+
+
 def compute_operational_impact(
     agents: list[dict[str, Any]],
     quarantined_ids: set[int],
@@ -401,23 +427,9 @@ def compute_operational_impact(
     zone_types = zone_type_by_id or {}
 
     breakdown: dict[str, float] = {}
-    quarantined_set = set(quarantined_ids)
-    isolated_set = set(isolated_ids)
-
-    passenger_q = 0
-    essential_q = 0
-    passenger_iso = 0
-    for agent in agents:
-        aid = agent["agent_id"]
-        agent_class = agent.get("agent_class", agent.get("role", ""))
-        if aid in quarantined_set:
-            if agent_class in essential_classes:
-                essential_q += 1
-            elif agent.get("role") == "passenger" or str(agent_class).startswith("passenger"):
-                passenger_q += 1
-        if aid in isolated_set:
-            if agent.get("role") == "passenger" or str(agent_class).startswith("passenger"):
-                passenger_iso += 1
+    passenger_q, essential_q, passenger_iso = _count_quarantine_isolation(
+        agents, set(quarantined_ids), set(isolated_ids), essential_classes,
+    )
 
     w_pq = float(weights.get("per_passenger_quarantined", 1.0))
     w_ec = float(weights.get("per_essential_crew_quarantined", 3.0))

@@ -119,6 +119,38 @@ class WearableAnomalyScorer:
         self.confounder_match_threshold = confounder_match_threshold
         self.confounder_templates = confounder_templates or {}
 
+    def _match_confounders(
+        self,
+        z_scores: dict[str, float],
+    ) -> tuple[set[str], list[str]]:
+        explained_channels: set[str] = set()
+        matched_confounders: list[str] = []
+        for cid, template in self.confounder_templates.items():
+            similarity = _cosine_similarity(z_scores, template)
+            if similarity >= self.confounder_match_threshold:
+                matched_confounders.append(cid)
+                for ch, tz in template.items():
+                    if is_nonzero(tz) and ch in z_scores:
+                        explained_channels.add(ch)
+        return explained_channels, matched_confounders
+
+    def _residual_infection_score(
+        self,
+        z_scores: dict[str, float],
+        explained_channels: set[str],
+        fleet_anomaly_rates: dict[str, float],
+    ) -> float:
+        infection_score = 0.0
+        for ch, z in z_scores.items():
+            if ch in explained_channels:
+                continue
+            weight = self.channel_weights.get(ch, 0.3)
+            fleet_rate = fleet_anomaly_rates.get(ch, 0.0)
+            if fleet_rate > self.fleet_anomaly_floor:
+                weight *= self.fleet_anomaly_downweight
+            infection_score += abs(z) * weight
+        return infection_score
+
     def score_agent(
         self,
         summary: dict[str, dict[str, Any]],
@@ -129,26 +161,10 @@ class WearableAnomalyScorer:
         if not z_scores:
             return 0.0, []
 
-        explained_channels: set[str] = set()
-        matched_confounders: list[str] = []
-
-        for cid, template in self.confounder_templates.items():
-            similarity = _cosine_similarity(z_scores, template)
-            if similarity >= self.confounder_match_threshold:
-                matched_confounders.append(cid)
-                for ch, tz in template.items():
-                    if is_nonzero(tz) and ch in z_scores:
-                        explained_channels.add(ch)
-
-        infection_score = 0.0
-        for ch, z in z_scores.items():
-            if ch in explained_channels:
-                continue
-            weight = self.channel_weights.get(ch, 0.3)
-            fleet_rate = fleet_anomaly_rates.get(ch, 0.0)
-            if fleet_rate > self.fleet_anomaly_floor:
-                weight *= self.fleet_anomaly_downweight
-            infection_score += abs(z) * weight
+        explained_channels, matched_confounders = self._match_confounders(z_scores)
+        infection_score = self._residual_infection_score(
+            z_scores, explained_channels, fleet_anomaly_rates,
+        )
 
         return round(infection_score, 3), matched_confounders
 
@@ -171,19 +187,10 @@ class WearableAnomalyScorer:
         }
 
 
-def build_wearable_anomaly_scorer_from_config(
-    wm_cfg: dict[str, Any],
-    devices: dict[str, Any] | None = None,
-) -> WearableAnomalyScorer | None:
-    """Build scorer from wearable_monitoring config; None if disabled."""
-    ad_cfg = wm_cfg.get("anomaly_detection")
-    if ad_cfg is not None and not ad_cfg.get("enabled", True):
-        return None
-
-    block = ad_cfg or wm_cfg
-    channel_weights = dict(
-        block.get("channel_infection_weights", DEFAULT_CHANNEL_INFECTION_WEIGHTS),
-    )
+def _load_confounder_templates(
+    block: dict[str, Any],
+    devices: dict[str, Any] | None,
+) -> dict[str, dict[str, float]]:
     templates: dict[str, dict[str, float]] = dict(DEFAULT_CONFOUNDER_TEMPLATES)
 
     global_templates = block.get("confounder_templates", {})
@@ -199,6 +206,24 @@ def build_wearable_anomaly_scorer_from_config(
                 tvec = conf.get("template_z_vector")
                 if cid and isinstance(tvec, dict):
                     templates[cid] = {k: float(v) for k, v in tvec.items()}
+
+    return templates
+
+
+def build_wearable_anomaly_scorer_from_config(
+    wm_cfg: dict[str, Any],
+    devices: dict[str, Any] | None = None,
+) -> WearableAnomalyScorer | None:
+    """Build scorer from wearable_monitoring config; None if disabled."""
+    ad_cfg = wm_cfg.get("anomaly_detection")
+    if ad_cfg is not None and not ad_cfg.get("enabled", True):
+        return None
+
+    block = ad_cfg or wm_cfg
+    channel_weights = dict(
+        block.get("channel_infection_weights", DEFAULT_CHANNEL_INFECTION_WEIGHTS),
+    )
+    templates = _load_confounder_templates(block, devices)
 
     return WearableAnomalyScorer(
         channel_weights=channel_weights,

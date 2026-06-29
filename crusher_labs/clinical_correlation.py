@@ -45,6 +45,37 @@ def _normal_ppf(u: float) -> float:
     return float(NormalDist().inv_cdf(clipped))
 
 
+def _parse_matrix_from_list(raw: list[Any], n: int) -> np.ndarray:
+    matrix = np.asarray(raw, dtype=np.float64)
+    if matrix.shape != (n, n):
+        raise ValueError(
+            f"autocorrelation_matrix must be {n}x{n}, got {matrix.shape}",
+        )
+    return matrix
+
+
+def _parse_matrix_from_dict(
+    raw: dict[str, Any],
+    test_order: tuple[str, ...],
+) -> np.ndarray:
+    n = len(test_order)
+    matrix = np.eye(n, dtype=np.float64)
+    key_to_idx = {key: idx for idx, key in enumerate(test_order)}
+    for row_key, row_vals in raw.items():
+        if row_key not in key_to_idx:
+            raise ValueError(f"unknown clinical test key: {row_key}")
+        i = key_to_idx[row_key]
+        if not isinstance(row_vals, dict):
+            raise ValueError(
+                f"autocorrelation_matrix row '{row_key}' must be a mapping",
+            )
+        for col_key, value in row_vals.items():
+            if col_key not in key_to_idx:
+                raise ValueError(f"unknown clinical test key: {col_key}")
+            matrix[i, key_to_idx[col_key]] = float(value)
+    return matrix
+
+
 def parse_autocorrelation_matrix(
     raw: Any,
     *,
@@ -56,30 +87,10 @@ def parse_autocorrelation_matrix(
         return np.eye(n, dtype=np.float64)
 
     if isinstance(raw, list) and raw and isinstance(raw[0], list):
-        matrix = np.asarray(raw, dtype=np.float64)
-        if matrix.shape != (n, n):
-            raise ValueError(
-                f"autocorrelation_matrix must be {n}x{n}, got {matrix.shape}",
-            )
-        return matrix
+        return _parse_matrix_from_list(raw, n)
 
     if isinstance(raw, dict):
-        matrix = np.eye(n, dtype=np.float64)
-        key_to_idx = {key: idx for idx, key in enumerate(test_order)}
-        for row_key, row_vals in raw.items():
-            if row_key not in key_to_idx:
-                raise ValueError(f"unknown clinical test key: {row_key}")
-            i = key_to_idx[row_key]
-            if isinstance(row_vals, dict):
-                for col_key, value in row_vals.items():
-                    if col_key not in key_to_idx:
-                        raise ValueError(f"unknown clinical test key: {col_key}")
-                    matrix[i, key_to_idx[col_key]] = float(value)
-            else:
-                raise ValueError(
-                    f"autocorrelation_matrix row '{row_key}' must be a mapping",
-                )
-        return matrix
+        return _parse_matrix_from_dict(raw, test_order)
 
     raise ValueError(
         "autocorrelation_matrix must be a square list-of-lists or nested mapping",

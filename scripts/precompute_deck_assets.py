@@ -190,6 +190,64 @@ def _tier_for(platform_id: str) -> str:
     return "representative"
 
 
+def _render_background_plate(
+    platform_id: str,
+    tier: str,
+    geojson: dict[str, Any],
+    bg_path: str,
+    manifest: dict[str, Any],
+    photo_entry: dict[str, Any] | None,
+    pdir: str,
+) -> tuple[bool, dict[str, Any]]:
+    labels = manifest.get("ship_class_label", platform_id)
+    plate_ok = False
+
+    if photo_entry and photo_entry.get("generated"):
+        plate_ok = render_fiction_schematic(
+            platform_id,
+            geojson,
+            bg_path,
+            title=labels,
+            subtitle=manifest.get("representative_of", "")[:90],
+            credit=photo_entry.get("credit", ""),
+            license_label=photo_entry.get("license", ""),
+        )
+        if plate_ok:
+            manifest["background_plate"] = "fiction_schematic"
+            manifest["reference_photo"] = {
+                "license": photo_entry.get("license"),
+                "credit": photo_entry.get("credit"),
+                "local_file": photo_entry.get("local_file", "reference_photo.jpg"),
+            }
+        return plate_ok, manifest
+
+    ref_path = fetch_reference_photo(platform_id, pdir)
+    if ref_path and photo_entry:
+        plate_ok = render_photo_plate(
+            geojson,
+            ref_path,
+            bg_path,
+            title=labels,
+            subtitle=manifest.get("representative_of", "")[:90],
+            credit=photo_entry.get("credit", ""),
+            license_label=photo_entry.get("license", ""),
+            fiction=tier == "fiction_adapted" or bool(photo_entry.get("fiction_adapted")),
+            photo_style=photo_entry.get("photo_style", "profile"),
+            auto_trim=bool(photo_entry.get("auto_trim")),
+            crop_fraction=photo_entry.get("crop_fraction"),
+        )
+        if plate_ok:
+            manifest["background_plate"] = "reference_photo_composite"
+            manifest["reference_photo"] = {
+                "wikimedia_title": photo_entry.get("wikimedia_title"),
+                "source_page": photo_entry.get("source_page"),
+                "license": photo_entry.get("license"),
+                "credit": photo_entry.get("credit"),
+                "local_file": photo_entry.get("local_file", "reference_photo.jpg"),
+            }
+    return plate_ok, manifest
+
+
 def precompute_platform(platform_id: str) -> None:
     safe_id = validate_path_component(platform_id, label="platform_id")
     pdir = resolve_child_path(os.path.join(REPO, "data", "platforms"), safe_id)
@@ -224,59 +282,16 @@ def precompute_platform(platform_id: str) -> None:
 
     bounds = compute_view_bounds(geojson)
     manifest = build_manifest(platform_id, layout, tier, bounds)
-    labels = manifest.get("ship_class_label", platform_id)
     bg_path = resolve_child_path(pdir, "deck_blueprint_bg.png")
     photo_entry = catalog_entry(platform_id)
-    plate_ok = False
-
-    # Fiction-adapted platforms: generate original LCARS schematic
-    if photo_entry and photo_entry.get("generated"):
-        plate_ok = render_fiction_schematic(
-            platform_id,
-            geojson,
-            bg_path,
-            title=labels,
-            subtitle=manifest.get("representative_of", "")[:90],
-            credit=photo_entry.get("credit", ""),
-            license_label=photo_entry.get("license", ""),
-        )
-        if plate_ok:
-            manifest["background_plate"] = "fiction_schematic"
-            manifest["reference_photo"] = {
-                "license": photo_entry.get("license"),
-                "credit": photo_entry.get("credit"),
-                "local_file": photo_entry.get("local_file", "reference_photo.jpg"),
-            }
-    else:
-        ref_path = fetch_reference_photo(platform_id, pdir)
-        if ref_path and photo_entry:
-            plate_ok = render_photo_plate(
-                geojson,
-                ref_path,
-                bg_path,
-                title=labels,
-                subtitle=manifest.get("representative_of", "")[:90],
-                credit=photo_entry.get("credit", ""),
-                license_label=photo_entry.get("license", ""),
-                fiction=tier == "fiction_adapted" or bool(photo_entry.get("fiction_adapted")),
-                photo_style=photo_entry.get("photo_style", "profile"),
-                auto_trim=bool(photo_entry.get("auto_trim")),
-                crop_fraction=photo_entry.get("crop_fraction"),
-            )
-            if plate_ok:
-                manifest["background_plate"] = "reference_photo_composite"
-                manifest["reference_photo"] = {
-                    "wikimedia_title": photo_entry.get("wikimedia_title"),
-                    "source_page": photo_entry.get("source_page"),
-                    "license": photo_entry.get("license"),
-                    "credit": photo_entry.get("credit"),
-                    "local_file": photo_entry.get("local_file", "reference_photo.jpg"),
-                }
+    plate_ok, manifest = _render_background_plate(
+        platform_id, tier, geojson, bg_path, manifest, photo_entry, pdir,
+    )
     if not plate_ok:
         _render_blueprint_background(
             geojson,
             bg_path,
-            title=labels,
+            title=manifest.get("ship_class_label", platform_id),
             subtitle=manifest.get("representative_of", "")[:90],
             fiction=tier == "fiction_adapted",
         )

@@ -46,6 +46,27 @@ class StackelbergRound:
         self.feature_extractor = UtilityFeatureExtractor()
         self.last_bundle: dict[str, Any] | None = None
 
+    def _population_actions_per_agent(
+        self,
+        agents: list[dict[str, Any]],
+        public: dict[str, Any],
+        experience: ExperienceStore,
+    ) -> list[Action]:
+        pop_actions: list[Action] = []
+        for ag in agents:
+            if not agent_has_symptomatic_presentation(ag):
+                continue
+            role = (
+                "passenger_agent"
+                if ag.get("role") == "passenger"
+                else "crew_agent"
+            )
+            view = ObservationModel.build(
+                public, str(ag["agent_id"]), role,
+            )
+            pop_actions.extend(self.population_policy.decide(view, experience))
+        return pop_actions
+
     def solve_population(
         self,
         epoch: int,
@@ -68,19 +89,9 @@ class StackelbergRound:
         }
 
         if self.agent_granularity == "per_agent":
-            pop_actions: list[Action] = []
-            for ag in agents:
-                if agent_has_symptomatic_presentation(ag):
-                    role = (
-                        "passenger_agent"
-                        if ag.get("role") == "passenger"
-                        else "crew_agent"
-                    )
-                    view = ObservationModel.build(
-                        public, str(ag["agent_id"]), role,
-                    )
-                    acts = self.population_policy.decide(view, experience)
-                    pop_actions.extend(acts)
+            pop_actions = self._population_actions_per_agent(
+                agents, public, experience,
+            )
             if pop_actions:
                 envelope.actions["population"] = pop_actions
         else:

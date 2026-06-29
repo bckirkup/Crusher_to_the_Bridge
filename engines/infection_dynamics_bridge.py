@@ -101,15 +101,20 @@ DEFAULT_ZONES = [
     {"name": "Recreation",        "type": "Free",    "capacity": "medium"},
 ]
 
+# Crew behavior schedule meal tokens (shared across class schedules)
+MEAL_BREAKFAST = "Meal:Breakfast"
+MEAL_LUNCH = "Meal:Lunch"
+MEAL_DINNER = "Meal:Dinner"
+
 # Passenger 24-hour behavior schedule (from Passenger.java)
 PASSENGER_SCHEDULE = [
     "Sleep", "Sleep", "Sleep", "Sleep", "Sleep", "Sleep",
     "Sleep", "Sleep", "Sleep",
-    "Meal:Breakfast", "Meal:Breakfast",
+    MEAL_BREAKFAST, MEAL_BREAKFAST,
     "Free",
-    "Meal:Lunch", "Meal:Lunch",
+    MEAL_LUNCH, MEAL_LUNCH,
     "Free", "Free", "Free", "Free",
-    "Meal:Dinner", "Meal:Dinner",
+    MEAL_DINNER, MEAL_DINNER,
     "Free", "Free", "Free", "Free",
 ]
 
@@ -117,11 +122,11 @@ PASSENGER_SCHEDULE = [
 CREW_SCHEDULE = [
     "Work", "Sleep", "Sleep", "Sleep", "Sleep", "Sleep",
     "Sleep", "Sleep",
-    "Meal:Breakfast",
+    MEAL_BREAKFAST,
     "Work", "Work", "Work", "Work",
-    "Meal:Lunch",
+    MEAL_LUNCH,
     "Work", "Work", "Work", "Work", "Work",
-    "Meal:Dinner",
+    MEAL_DINNER,
     "Work", "Work", "Work", "Work",
 ]
 
@@ -131,11 +136,11 @@ CREW_SCHEDULE = [
 MEDICAL_CREW_SCHEDULE = [
     "Work", "Work", "Sleep", "Sleep", "Sleep", "Sleep",
     "Sleep", "Sleep",
-    "Meal:Breakfast",
+    MEAL_BREAKFAST,
     "Work", "Work", "Work", "Work",
-    "Meal:Lunch",
+    MEAL_LUNCH,
     "Work", "Work", "Work", "Work", "Work",
-    "Meal:Dinner",
+    MEAL_DINNER,
     "Work", "Work", "Free", "Work",
 ]
 
@@ -143,11 +148,11 @@ MEDICAL_CREW_SCHEDULE = [
 ENGINEERING_CREW_SCHEDULE = [
     "Work", "Work", "Work", "Work", "Sleep", "Sleep",
     "Sleep", "Sleep",
-    "Meal:Breakfast",
+    MEAL_BREAKFAST,
     "Work", "Work", "Work", "Work",
-    "Meal:Lunch",
+    MEAL_LUNCH,
     "Work", "Work", "Work", "Free",
-    "Meal:Dinner",
+    MEAL_DINNER,
     "Work", "Work", "Sleep", "Sleep",
 ]
 
@@ -167,11 +172,11 @@ GALLEY_CREW_SCHEDULE = [
 PASSENGER_ELDERLY_SCHEDULE = [
     "Sleep", "Sleep", "Sleep", "Sleep", "Sleep", "Sleep",
     "Sleep", "Sleep", "Sleep",
-    "Meal:Breakfast", "Meal:Breakfast",
+    MEAL_BREAKFAST, MEAL_BREAKFAST,
     "Free",
-    "Meal:Lunch", "Meal:Lunch",
+    MEAL_LUNCH, MEAL_LUNCH,
     "Sleep", "Free", "Free", "Free",
-    "Meal:Dinner", "Meal:Dinner",
+    MEAL_DINNER, MEAL_DINNER,
     "Free", "Sleep", "Sleep", "Sleep",
 ]
 
@@ -179,11 +184,11 @@ PASSENGER_ELDERLY_SCHEDULE = [
 PASSENGER_FAMILY_SCHEDULE = [
     "Sleep", "Sleep", "Sleep", "Sleep", "Sleep", "Sleep",
     "Sleep", "Sleep", "Sleep",
-    "Meal:Breakfast", "Meal:Breakfast",
+    MEAL_BREAKFAST, MEAL_BREAKFAST,
     "Free",
-    "Meal:Lunch", "Meal:Lunch",
+    MEAL_LUNCH, MEAL_LUNCH,
     "Free", "Free", "Free", "Free",
-    "Meal:Dinner", "Meal:Dinner",
+    MEAL_DINNER, MEAL_DINNER,
     "Free", "Free", "Free", "Sleep",
 ]
 
@@ -722,61 +727,81 @@ class KorkinShipEngine:
         agents_left = sum(c for _, c in class_counts)
 
         for cls_cfg, count in class_counts:
-            class_id = cls_cfg.get("class_id", "crew_general")
-            role_group = cls_cfg.get("role_group", "crew")
-            schedule_template = CLASS_SCHEDULES.get(
-                class_id, CREW_SCHEDULE if role_group == "crew" else PASSENGER_SCHEDULE,
-            )
-            home_pref = cls_cfg.get("home_zone_preference", "Berthing")
-            duty_zone = cls_cfg.get("duty_zone", "")
-            free_pref = cls_cfg.get("free_zone_preference", "")
-
-            for _ in range(count):
-                immune = False
-                if immune_remaining > 0 and agents_left > 0:
-                    if self.rng.random() < immune_remaining / agents_left:
-                        immune = True
-                        immune_remaining -= 1
-                agents_left -= 1
-
-                home = self._resolve_zone(home_pref, self._room_zones)
-                dining = str(self.rng.choice(self._dining_zones))
-                if duty_zone:
-                    work = self._resolve_zone(duty_zone, self._free_zones + self._dining_zones)
-                elif role_group == "crew":
-                    work = str(self.rng.choice(self._free_zones + self._dining_zones))
-                else:
-                    work = str(self.rng.choice(self._free_zones))
-                if free_pref:
-                    free = self._resolve_zone(free_pref, self._free_zones)
-                else:
-                    free = str(self.rng.choice(self._free_zones))
-
-                gender = self._assign_gender()
-                schedule = list(schedule_template)
-
-                agent = KorkinAgent(
-                    agent_id=agent_id, role=role_group, immune=immune,
-                    home_zone=home, dining_zone=dining,
-                    work_zone=work, free_zone=free, schedule=schedule,
-                    agent_class=class_id, gender=gender,
+            agent_id, immune_remaining, infected_remaining, agents_left = (
+                self._spawn_class_agents(
+                    cls_cfg, count, agent_id,
+                    immune_remaining, infected_remaining, agents_left,
                 )
-
-                if not immune and infected_remaining > 0:
-                    agent.infection_status = InfectionStatus.INFECTED
-                    agent.time_infected = 1
-                    agent.acquired_particles = math.pow(
-                        10, SYMPTOMATIC_SHEDDING[1] - DOSE_ADJUSTMENT,
-                    )
-                    ill_prob = illness_probability(agent.acquired_particles)
-                    if self.rng.random() < ill_prob:
-                        agent.illness_status = IllnessStatus.SYMPTOMATIC
-                    infected_remaining -= 1
-
-                self.agents.append(agent)
-                agent_id += 1
+            )
 
         return agent_id
+
+    def _spawn_class_agents(
+        self,
+        cls_cfg: dict[str, Any],
+        count: int,
+        agent_id: int,
+        immune_remaining: int,
+        infected_remaining: int,
+        agents_left: int,
+    ) -> tuple[int, int, int, int]:
+        class_id = cls_cfg.get("class_id", "crew_general")
+        role_group = cls_cfg.get("role_group", "crew")
+        schedule_template = CLASS_SCHEDULES.get(
+            class_id, CREW_SCHEDULE if role_group == "crew" else PASSENGER_SCHEDULE,
+        )
+        home_pref = cls_cfg.get("home_zone_preference", "Berthing")
+        duty_zone = cls_cfg.get("duty_zone", "")
+        free_pref = cls_cfg.get("free_zone_preference", "")
+
+        for _ in range(count):
+            immune = False
+            if immune_remaining > 0 and agents_left > 0:
+                if self.rng.random() < immune_remaining / agents_left:
+                    immune = True
+                    immune_remaining -= 1
+            agents_left -= 1
+
+            home = self._resolve_zone(home_pref, self._room_zones)
+            dining = str(self.rng.choice(self._dining_zones))
+            if duty_zone:
+                work = self._resolve_zone(duty_zone, self._free_zones + self._dining_zones)
+            elif role_group == "crew":
+                work = str(self.rng.choice(self._free_zones + self._dining_zones))
+            else:
+                work = str(self.rng.choice(self._free_zones))
+            free = (
+                self._resolve_zone(free_pref, self._free_zones)
+                if free_pref else str(self.rng.choice(self._free_zones))
+            )
+
+            agent = KorkinAgent(
+                agent_id=agent_id, role=role_group, immune=immune,
+                home_zone=home, dining_zone=dining,
+                work_zone=work, free_zone=free,
+                schedule=list(schedule_template),
+                agent_class=class_id, gender=self._assign_gender(),
+            )
+
+            if not immune and infected_remaining > 0:
+                self._seed_initial_infection(agent, self.rng)
+                infected_remaining -= 1
+
+            self.agents.append(agent)
+            agent_id += 1
+
+        return agent_id, immune_remaining, infected_remaining, agents_left
+
+    @staticmethod
+    def _seed_initial_infection(agent: KorkinAgent, rng: np.random.Generator) -> None:
+        agent.infection_status = InfectionStatus.INFECTED
+        agent.time_infected = 1
+        agent.acquired_particles = math.pow(
+            10, SYMPTOMATIC_SHEDDING[1] - DOSE_ADJUSTMENT,
+        )
+        ill_prob = illness_probability(agent.acquired_particles)
+        if rng.random() < ill_prob:
+            agent.illness_status = IllnessStatus.SYMPTOMATIC
 
     def _initialize_agents_legacy(
         self,
