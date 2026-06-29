@@ -73,7 +73,7 @@ def _strip_non_logic(src: str) -> str:
         stripped = line.strip()
         if stripped.startswith("#"):
             continue
-        if stripped.startswith('"""') or stripped.startswith("'''"):
+        if stripped.startswith(("\"\"\"", "'''")):
             continue
         if "print(" in line:
             continue

@@ -46,7 +46,7 @@ def print_initialization(
     print(f"  Zones: {', '.join(ship['zone_names'])}")
     print(f"  High-traffic: {', '.join(ship['high_traffic_zones'])}")
 
-    print(f"\n  GRUMB multi-kingdom seeding (t=0):")
+    print("\n  GRUMB multi-kingdom seeding (t=0):")
     for zone_name, seed in seeds.items():
         kf = seed["kingdom_fractions"]
         kf_str = "  ".join(f"{k}={v:.3f}" for k, v in kf.items())
@@ -57,7 +57,7 @@ def print_initialization(
         print(f"\n  Infection counters: {len(counter_defs)} configured")
         for cdef in counter_defs:
             cid = cdef.get("counter_id", "?")
-            label = cdef.get("label", cid)
+            _label = cdef.get("label", cid)
             metric = cdef.get("metric", "?")
             threshold = cdef.get("threshold")
             on_exceed = cdef.get("on_exceed", "log_only")
@@ -65,7 +65,7 @@ def print_initialization(
             print(f"    {cid:30s} {metric:20s}{thr_str}")
 
     fred_cfg = cfg.get("fred_behavior", {})
-    print(f"\n  FRED behavioral params:")
+    print("\n  FRED behavioral params:")
     print(f"    Quarantine compliance:   {fred_cfg.get('quarantine_compliance', 0.85):.0%}")
     print(f"    Compliance delay:        {fred_cfg.get('compliance_delay_epochs', 1)} epoch(s)")
     cats = fred_cfg.get("healthy_noise_categories", [])
@@ -74,7 +74,7 @@ def print_initialization(
 
     emod_cfg = cfg.get("emod_progression", {})
     phases = emod_cfg.get("shedding_phases", [])
-    print(f"\n  EMOD clinical progression:")
+    print("\n  EMOD clinical progression:")
     print(f"    Incubation:  {emod_cfg.get('incubation_epochs', 2)} epochs")
     for ph in phases:
         print(f"    Phase {ph['name']:6s}  max_rate={ph['max_rate']:5.1f}  "
@@ -111,7 +111,7 @@ def print_korkin_engine(engine: KorkinShipEngine) -> None:
         # codeql[py/clear-text-logging-sensitive-data]
         print(f"  Gender: {g_str}")
     print(f"  Zones: {', '.join(z['name'] for z in engine.zones)}")
-    print(f"  VSP isolation: counter-driven (engine-internal disabled)")
+    print("  VSP isolation: counter-driven (engine-internal disabled)")
     print()
 
 
@@ -245,12 +245,12 @@ def print_observation_engine(
     print(thin)
     print("  OBSERVATION ENGINE  ·  instrument-level diagnostics initialized")
     print(thin)
-    print(f"    ENV 1. Continuous Air Sniffer   (aerosol Ct)")
-    print(f"    ENV 2. Targeted Surface Swab    (fomite PCR + compliance variance)")
-    print(f"    ENV 3. Wastewater Seq Grid      (Dirichlet-multinomial metagenomics)")
-    print(f"    CLN 4. Clinical RDT             (lateral-flow antigen, binary)")
-    print(f"    CLN 5. Clinical qPCR            (patient viral load Ct)")
-    print(f"    CLN 6. Clinical Microbiology    (culture/staining, flora shifts)")
+    print("    ENV 1. Continuous Air Sniffer   (aerosol Ct)")
+    print("    ENV 2. Targeted Surface Swab    (fomite PCR + compliance variance)")
+    print("    ENV 3. Wastewater Seq Grid      (Dirichlet-multinomial metagenomics)")
+    print("    CLN 4. Clinical RDT             (lateral-flow antigen, binary)")
+    print("    CLN 5. Clinical qPCR            (patient viral load Ct)")
+    print("    CLN 6. Clinical Microbiology    (culture/staining, flora shifts)")
     print(f"   Logging fidelity:   {fidelity_name}")
     print(f"   Cross-contamination: {xcontam_rate:.4%} carryover")
     print(f"   QC control intensity: {ctrl_intensity}")
@@ -336,9 +336,6 @@ def print_executive_summary(
     isolated_count: int,
     quarantined_count: int = 0,
     refuser_count: int = 0,
-    contam_engine: Any | None,
-    zone_pathogen_mass: dict[str, float],
-    hvac_cfg: dict[str, Any],
     pathogen_profiles: dict[str, Any] | None,
     infection_counters: dict[str, dict[str, Any]] | None = None,
 ) -> None:

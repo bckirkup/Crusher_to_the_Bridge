@@ -135,15 +135,14 @@ def collect_long_read_escalation_requests(
             qpcr = clin_qpcr_results.get(aid, {})
             rdt_pos = bool(rdt.get("positive", False))
             qpcr_det = bool(qpcr.get("detected", False))
-            if rdt_pos != qpcr_det:
-                if SPECIMEN_CLINICAL in sources:
-                    _add(
-                        SPECIMEN_CLINICAL,
-                        str(aid),
-                        ["discordant_modalities"],
-                        "clinical_rdt/clinical_qpcr",
-                        {"rdt": rdt, "qpcr": qpcr},
-                    )
+            if rdt_pos != qpcr_det and SPECIMEN_CLINICAL in sources:
+                _add(
+                    SPECIMEN_CLINICAL,
+                    str(aid),
+                    ["discordant_modalities"],
+                    "clinical_rdt/clinical_qpcr",
+                    {"rdt": rdt, "qpcr": qpcr},
+                )
 
     if triggers["discordant_modalities"] and SPECIMEN_CLINICAL_CULTURE in sources:
         for aid, data in clin_microbio_results.items():

@@ -132,7 +132,6 @@ class CostLedger:
         self,
         epoch: int,
         ois_delta: float,
-        source: str = "operational_state",
         breakdown: dict[str, float] | None = None,
     ) -> None:
         """Record operational degradation for an epoch (never blocks actions)."""
@@ -349,7 +348,7 @@ class CostLedger:
             }
 
         per_epoch: list[dict[str, Any]] = []
-        epoch_set = sorted(set(e.epoch for e in self.entries))
+        epoch_set = sorted({e.epoch for e in self.entries})
         running_balance = self.starting_financial_usd
         for ep in epoch_set:
             ep_entries = [e for e in self.entries if e.epoch == ep]

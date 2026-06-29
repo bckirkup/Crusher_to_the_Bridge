@@ -1308,10 +1308,9 @@ def _check_modality_params(cfg: dict[str, Any], report: Report) -> None:
     ]
     for section, key in _non_neg_fields:
         val = cfg.get(section, {}).get(key)
-        if val is not None and isinstance(val, (int, float)):
-            if val < 0:
-                report.error("config.yaml", "MATH_BOUND",
-                             f"{section}.{key} = {val} is negative")
+        if val is not None and isinstance(val, (int, float)) and val < 0:
+            report.error("config.yaml", "MATH_BOUND",
+                         f"{section}.{key} = {val} is negative")
 
 
 def _check_clinical_diagnostics(cfg: dict[str, Any], report: Report) -> None:
@@ -1355,15 +1354,13 @@ def _check_hvac_params(cfg: dict[str, Any], report: Report) -> None:
     """Validate HVAC filter efficiency and decay rate."""
     hvac = cfg.get("hvac", {})
     eff = hvac.get("filter_efficiency")
-    if eff is not None and isinstance(eff, (int, float)):
-        if eff < 0 or eff > 1:
-            report.error("config.yaml", "MATH_BOUND",
-                         f"hvac.filter_efficiency = {eff} outside [0,1]")
+    if eff is not None and isinstance(eff, (int, float)) and (eff < 0 or eff > 1):
+        report.error("config.yaml", "MATH_BOUND",
+                     f"hvac.filter_efficiency = {eff} outside [0,1]")
     decay = hvac.get("natural_decay_rate")
-    if decay is not None and isinstance(decay, (int, float)):
-        if decay < 0:
-            report.error("config.yaml", "MATH_BOUND",
-                         f"hvac.natural_decay_rate = {decay} is negative")
+    if decay is not None and isinstance(decay, (int, float)) and decay < 0:
+        report.error("config.yaml", "MATH_BOUND",
+                     f"hvac.natural_decay_rate = {decay} is negative")
 
 
 def _check_emod_progression(cfg: dict[str, Any], report: Report) -> None:
@@ -1412,10 +1409,9 @@ def _check_fred_behavior(cfg: dict[str, Any], report: Report) -> None:
     """Validate FRED behavioral compliance parameters."""
     fred = cfg.get("fred_behavior", {})
     qc = fred.get("quarantine_compliance")
-    if qc is not None and isinstance(qc, (int, float)):
-        if qc < 0 or qc > 1:
-            report.error("config.yaml", "MATH_BOUND",
-                         f"fred_behavior.quarantine_compliance = {qc} outside [0,1]")
+    if qc is not None and isinstance(qc, (int, float)) and (qc < 0 or qc > 1):
+        report.error("config.yaml", "MATH_BOUND",
+                     f"fred_behavior.quarantine_compliance = {qc} outside [0,1]")
     delay = fred.get("compliance_delay_epochs")
     if delay is not None and isinstance(delay, (int, float)) and delay < 0:
         report.error("config.yaml", "MATH_BOUND",

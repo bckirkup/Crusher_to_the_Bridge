@@ -146,7 +146,7 @@ class SyndromicSurveillance:
             "total_agents": len(agents),
         }
 
-    def _check_background_noise(self, aid: int) -> tuple[bool, str | None]:
+    def _check_background_noise(self, _aid: int) -> tuple[bool, str | None]:
         """FRED-style categorized background noise check.
 
         Each noise category has its own independent probability
@@ -159,7 +159,7 @@ class SyndromicSurveillance:
 
     def check_quarantine_compliance(
         self,
-        agent_id: int,
+        _agent_id: int,
         epochs_since_order: int,
         behavioral_override: str | None = None,
         chronic_compliance_boost: float = 0.0,

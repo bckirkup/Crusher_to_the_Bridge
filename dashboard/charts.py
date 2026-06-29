@@ -54,7 +54,6 @@ def render_bridge_status(
 
     last = history[-1]
     summary = last["summary"]
-    num_epochs = len(history)
 
     # ── Ship Status ───────────────────────────────────────────────
     st.subheader("Ship Status")
@@ -760,9 +759,9 @@ def _render_transmission_pathways(history: list[dict[str, Any]]) -> None:
 
     fig = go.Figure(data=[go.Pie(
         labels=labels, values=values,
-        marker=dict(colors=colors[:len(labels)]),
+        marker={"colors": colors[:len(labels)]},
         textinfo="label+percent",
-        textfont=dict(color="white"),
+        textfont={"color": "white"},
         hole=0.4,
     )])
     apply_lcars_layout(
@@ -1058,7 +1057,6 @@ def _render_kingdom_charts(records: list[dict[str, Any]]) -> None:
         "Virus": LCARS_RED,
     }
 
-    epochs = [r.get("timestamp_epoch", 0) for r in ww_records]
     labels = [
         f"E{r.get('timestamp_epoch', '?')}-{r.get('collection_zone', '?')[:6]}"
         for r in ww_records

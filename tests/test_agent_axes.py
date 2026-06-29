@@ -33,7 +33,7 @@ class TestLegacyMapping:
         )
 
     def test_isolated_preserves_infection(self) -> None:
-        inf, pres, comp = axes_from_legacy_symptom_status("isolated")
+        inf, _pres, comp = axes_from_legacy_symptom_status("isolated")
         assert inf == INFECTION_INFECTED
         assert comp == COMPLIANCE_ISOLATED
 

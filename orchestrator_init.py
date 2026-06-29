@@ -478,7 +478,7 @@ def init_observation_engine(
 ) -> ObservationEngine:
     """Initialise all six diagnostic instruments and the lab notebook."""
     obs_cfg_path = resolve_repo_path(REPO_ROOT, "data/config/logging_profile.json")
-    fidelity_name, fidelity, logging_config = load_logging_profile(obs_cfg_path)
+    fidelity_name, _fidelity, logging_config = load_logging_profile(obs_cfg_path)
     lab_notebook_enabled = logging_config.get("lab_notebook", {}).get("enabled", True)
 
     qc_cfg = logging_config.get("quality_control", {})
@@ -589,7 +589,7 @@ def init_observation_engine(
 # ── Protocol engine initialization ───────────────────────────────────────
 
 def init_protocol_engine(
-    cfg: dict[str, Any],
+    _cfg: dict[str, Any],
     contam_engine: ContamTransportEngine | None,
     *,
     protocols_path: str | None = None,

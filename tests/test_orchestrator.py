@@ -576,7 +576,6 @@ class TestZoneClosures:
         engine = build_engine(cfg, seed=42)
         galley_agents = [a for a in engine.agents if a.current_location == "Galley"]
         if galley_agents:
-            home = galley_agents[0].home_zone
             apply_zone_closures(engine, ["Galley"])
             for a in engine.agents:
                 assert a.current_location != "Galley"

@@ -120,7 +120,7 @@ def test_command_threshold_policy_authorize(tmp_path) -> None:
 
 
 def test_build_policies_from_config() -> None:
-    cmd, med, pop = build_policies_from_config({
+    cmd, _med, pop = build_policies_from_config({
         "decision_engine": {
             "population_policy": "threshold_belief",
             "command_policy": "rule_based",

@@ -74,18 +74,18 @@ def _add_blueprint_underlay(
     if not uri:
         return
     fig.add_layout_image(
-        dict(
-            source=uri,
-            xref="x",
-            yref="y",
-            x=xmin,
-            y=ymin,
-            sizex=xmax - xmin,
-            sizey=ymax - ymin,
-            sizing="stretch",
-            opacity=0.92,
-            layer="below",
-        )
+        {
+            "source": uri,
+            "xref": "x",
+            "yref": "y",
+            "x": xmin,
+            "y": ymin,
+            "sizex": xmax - xmin,
+            "sizey": ymax - ymin,
+            "sizing": "stretch",
+            "opacity": 0.92,
+            "layer": "below",
+        },
     )
 
 

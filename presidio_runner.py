@@ -93,10 +93,7 @@ def run(fleet_spec: PresidioRunSpec, *, display: bool = False) -> None:
         cfg = base_spec.inject_into_cfg()
         merged_social = dict(fleet_spec.picard_run_spec.get("social", {}))
         merged_social.update(fleet_spec.social_config if hasattr(fleet_spec, "social_config") else {})
-        if not hasattr(base_spec, "social_config"):
-            base_spec.social_config = merged_social
-        else:
-            base_spec.social_config = merged_social
+        base_spec.social_config = merged_social
         cruise_dir = resolve_child_path(
             fleet_spec.output_root,
             f"cruise_{cruise_id:03d}",

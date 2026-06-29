@@ -115,7 +115,7 @@ def _air_sniffer_record(
     zone: str,
     data: dict[str, Any],
     fidelity_name: str,
-    fidelity: FidelityProfile,
+    _fidelity: FidelityProfile,
 ) -> dict[str, Any]:
     detected = data.get("detected", False)
     ct = data.get("ct_value")
@@ -169,7 +169,7 @@ def _surface_swab_record(
     zone: str,
     data: dict[str, Any],
     fidelity_name: str,
-    fidelity: FidelityProfile,
+    _fidelity: FidelityProfile,
 ) -> dict[str, Any]:
     detected = data.get("detected", False)
     ct = data.get("ct_value")
@@ -222,7 +222,7 @@ def _wastewater_record(
     zone: str,
     data: dict[str, Any],
     fidelity_name: str,
-    fidelity: FidelityProfile,
+    _fidelity: FidelityProfile,
 ) -> dict[str, Any]:
     anomaly_detected = data.get("anomaly_detected", False)
     pathogen_reads = data.get("total_pathogen_reads", 0)
@@ -276,7 +276,7 @@ def _long_read_verification_record(
     request_id: str,
     data: dict[str, Any],
     fidelity_name: str,
-    fidelity: FidelityProfile,
+    _fidelity: FidelityProfile,
 ) -> dict[str, Any]:
     from crusher_labs.stoplight import stoplight_from_long_read_verification
 
@@ -317,7 +317,7 @@ def _clinical_rdt_record(
     epoch: int,
     data: dict[str, Any],
     fidelity_name: str,
-    fidelity: FidelityProfile,
+    _fidelity: FidelityProfile,
 ) -> dict[str, Any]:
     agent_id = data.get("agent_id", -1)
     positive = data.get("positive", False)
@@ -363,7 +363,7 @@ def _clinical_qpcr_record(
     epoch: int,
     data: dict[str, Any],
     fidelity_name: str,
-    fidelity: FidelityProfile,
+    _fidelity: FidelityProfile,
 ) -> dict[str, Any]:
     agent_id = data.get("agent_id", -1)
     detected = data.get("detected", False)
@@ -415,7 +415,7 @@ def _clinical_microbio_record(
     epoch: int,
     data: dict[str, Any],
     fidelity_name: str,
-    fidelity: FidelityProfile,
+    _fidelity: FidelityProfile,
 ) -> dict[str, Any]:
     agent_id = data.get("agent_id", -1)
     flora_shift = data.get("flora_shift_detected", False)
@@ -662,7 +662,7 @@ class ArtificialLabNotebook:
 def build_notebook_from_config(
     logging_profile_path: str | None = None,
 ) -> ArtificialLabNotebook:
-    fidelity_name, fidelity, config = load_logging_profile(logging_profile_path)
+    fidelity_name, fidelity, _ = load_logging_profile(logging_profile_path)
     return ArtificialLabNotebook(
         fidelity=fidelity,
         fidelity_name=fidelity_name,

@@ -118,7 +118,7 @@ def step_fred_compliance(
     syndromic: Any,
 ) -> None:
     """FRED compliance check for pending quarantine orders."""
-    for aid in list(state.quarantine_refusers):
+    for aid in tuple(state.quarantine_refusers):
         epochs_since = epoch - state.quarantine_order_epoch.get(aid, epoch)
         chronic_boost = state.chronic_behavioral_mods.get(
             aid, {},
@@ -181,7 +181,7 @@ def step_infection_progression(
         return
 
     for agent in engine.agents:
-        for pid, inf in list(agent.infections.items()):
+        for pid, inf in tuple(agent.infections.items()):
             if inf["status"] != InfectionStatus.INFECTED:
                 continue
             prof = pathogen_profiles.get(pid, {})
@@ -582,7 +582,7 @@ def apply_surface_decontamination(
     surface mass, retaining 40%).
     """
     retention = 1.0 - max(0.0, min(1.0, factor))
-    for zname in list(engine.zone_pathogen_mass):
+    for zname in engine.zone_pathogen_mass:
         engine.zone_pathogen_mass[zname] *= retention
 
 
@@ -606,8 +606,8 @@ def step_cost_accounting(
     swab_results: dict,
     ww_results: dict,
     clin_rdt_results: dict,
-    clin_qpcr_results: dict,
-    clin_microbio_results: dict,
+    _clin_qpcr_results: dict,
+    _clin_microbio_results: dict,
 ) -> None:
     """Debit baseline surveillance and per-test costs for one epoch."""
     ledger = proto_ctx.cost_ledger
@@ -654,7 +654,6 @@ def step_operational_impact_accounting(
         ledger.accumulate_operational_impact(
             epoch,
             ois_delta,
-            source="operational_state",
             breakdown=breakdown,
         )
 
@@ -750,7 +749,7 @@ def compute_zone_microflora_shifts(
 # ── Wearable monitoring ──────────────────────────────────────────────────
 
 def step_wearable_monitoring(
-    epoch: int,
+    _epoch: int,
     engine: KorkinShipEngine,
     monitor: WearableMonitor | None,
     modality: WearableDataStream | None,
