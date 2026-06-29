@@ -68,15 +68,31 @@ def is_publicly_writable(path: str) -> bool:
     return bool(os.stat(directory).st_mode & 0o002)
 
 
+def _ensure_safe_resolved_path(
+    resolved: str,
+    *,
+    allowed_roots: tuple[str, ...] | None = None,
+    for_write: bool = False,
+) -> str:
+    """Validate a realpath before filesystem access."""
+    if not os.path.isabs(resolved):
+        raise ValueError(f"Resolved path must be absolute: {resolved!r}")
+    if allowed_roots and not any(is_path_under_base(root, resolved) for root in allowed_roots):
+        raise ValueError(f"Path {resolved!r} is outside allowed roots")
+    target_dir = resolved if os.path.isdir(resolved) else os.path.dirname(resolved) or resolved
+    if for_write and is_publicly_writable(target_dir):
+        raise ValueError(f"Refusing to write under publicly writable directory: {target_dir}")
+    return resolved
+
+
 def prepare_output_directory(path: str, *, allowed_roots: tuple[str, ...] | None = None) -> str:
     """Create an output directory with restrictive permissions after validation."""
-    resolved = _real(path)
-    if allowed_roots and not any(is_path_under_base(root, resolved) for root in allowed_roots):
-        raise ValueError(f"Output path {path!r} is outside allowed roots")
-    parent = os.path.dirname(resolved) or resolved
-    if is_publicly_writable(parent):
-        raise ValueError(f"Refusing to write under publicly writable directory: {parent}")
-    os.makedirs(resolved, mode=0o700, exist_ok=True)
+    resolved = _ensure_safe_resolved_path(
+        _real(path),
+        allowed_roots=allowed_roots,
+        for_write=True,
+    )
+    Path(resolved).mkdir(mode=0o700, parents=True, exist_ok=True)
     return resolved
 
 
@@ -85,9 +101,15 @@ def _open_resolved(
     mode: str,
     *,
     encoding: str | None = None,
+    allowed_roots: tuple[str, ...] | None = None,
 ) -> TextIO | BinaryIO:
     """Open a path that has already been validated and resolved."""
-    path_obj = Path(resolved)
+    safe_path = _ensure_safe_resolved_path(
+        resolved,
+        allowed_roots=allowed_roots,
+        for_write=any(flag in mode for flag in ("w", "a", "+")),
+    )
+    path_obj = Path(safe_path)
     if encoding is None:
         return path_obj.open(mode)
     return path_obj.open(mode, encoding=encoding)
@@ -102,12 +124,6 @@ def validated_open(
 ) -> TextIO | BinaryIO:
     """Open a file after optional containment checks."""
     resolved = _real(path)
-    if allowed_roots and not any(is_path_under_base(root, resolved) for root in allowed_roots):
-        raise ValueError(f"Path {path!r} is outside allowed roots")
-    if "w" in mode or "a" in mode or "+" in mode:
-        parent = os.path.dirname(resolved) or resolved
-        if is_publicly_writable(parent):
-            raise ValueError(f"Refusing to write under publicly writable directory: {parent}")
     if encoding is None:
-        return _open_resolved(resolved, mode)
-    return _open_resolved(resolved, mode, encoding=encoding)
+        return _open_resolved(resolved, mode, allowed_roots=allowed_roots)
+    return _open_resolved(resolved, mode, encoding=encoding, allowed_roots=allowed_roots)

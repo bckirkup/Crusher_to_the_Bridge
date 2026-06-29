@@ -149,6 +149,29 @@ class CascadeEpochResult:
         }
 
 
+def _agent_active_pathogen_ids(agent: dict[str, Any]) -> list[str]:
+    """Return pathogen IDs with an active infection on *agent*."""
+    infections = agent.get("pathogen_infections") or {}
+    active: list[str] = []
+    for pid, info in infections.items():
+        if not isinstance(info, dict):
+            continue
+        if info.get("status") == "INFECTED":
+            active.append(str(pid))
+    return active
+
+
+def _agent_matches_pathogen_filter(pathogen_filter: str, agent: dict[str, Any]) -> bool:
+    """True when *agent* carries an active infection matching *pathogen_filter*."""
+    active_ids = _agent_active_pathogen_ids(agent)
+    if not active_ids:
+        return False
+    return any(
+        pid == pathogen_filter or pid.startswith(pathogen_filter)
+        for pid in active_ids
+    )
+
+
 # ── Main cascade engine ─────────────────────────────────────────────────
 
 class DiagnosticCascadeEngine:
@@ -417,9 +440,13 @@ class DiagnosticCascadeEngine:
             agent_class = agent.get("agent_class", "")
             if not agent_class.startswith(rule.category_filter):
                 return False
-        if rule.pathogen_filter and state.pathogen_id:
-            if rule.pathogen_filter not in (state.pathogen_id or ""):
-                return False
+        if rule.pathogen_filter and not _agent_matches_pathogen_filter(
+            rule.pathogen_filter, agent,
+        ):
+            return False
+        active_pathogens = _agent_active_pathogen_ids(agent)
+        if active_pathogens:
+            state.pathogen_id = active_pathogens[0]
         return True
 
     def _evaluate_fleet_rules(
