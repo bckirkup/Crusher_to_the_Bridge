@@ -62,7 +62,7 @@ def build_wastewater_pathogen_mass(
         return per_zone
 
     pooled = sum(per_zone.values())
-    return {gz: pooled for gz in graywater_zones}
+    return dict.fromkeys(graywater_zones, pooled)
 
 
 def build_wastewater_pathogen_mass_by_id(
@@ -80,7 +80,7 @@ def build_wastewater_pathogen_mass_by_id(
     pooled_by_id: dict[str, dict[str, float]] = {}
     for pid, masses in pathogen_mass_by_id.items():
         pooled = sum(masses.get(zname, 0.0) * greywater_frac for zname in zone_names)
-        pooled_by_id[pid] = {gz: pooled for gz in graywater_zones}
+        pooled_by_id[pid] = dict.fromkeys(graywater_zones, pooled)
     return pooled_by_id
 
 

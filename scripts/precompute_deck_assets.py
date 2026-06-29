@@ -30,6 +30,13 @@ from deck_photo_plate import (  # noqa: E402
     render_fiction_schematic,
     render_photo_plate,
 )
+from simulation_utils.paths import (  # noqa: E402
+    prepare_output_directory,
+    resolve_child_path,
+    resolve_repo_path,
+    validate_path_component,
+    validated_open,
+)
 
 PLATFORMS = [
     "destroyer_baseline",
@@ -54,7 +61,7 @@ GIS_SOURCES = {
 
 
 def _load_json(path: str) -> dict:
-    with open(path, encoding="utf-8") as fh:
+    with validated_open(path, allowed_roots=(REPO,), encoding="utf-8") as fh:
         return json.load(fh)
 
 
@@ -184,9 +191,10 @@ def _tier_for(platform_id: str) -> str:
 
 
 def precompute_platform(platform_id: str) -> None:
-    pdir = os.path.join(REPO, "data", "platforms", platform_id)
-    layout_path = os.path.join(pdir, "spatial_layout.json")
-    airflow_path = os.path.join(pdir, "air_flow_paths.json")
+    safe_id = validate_path_component(platform_id, label="platform_id")
+    pdir = resolve_child_path(os.path.join(REPO, "data", "platforms"), safe_id)
+    layout_path = resolve_child_path(pdir, "spatial_layout.json")
+    airflow_path = resolve_child_path(pdir, "air_flow_paths.json")
     if not os.path.isfile(layout_path):
         print(f"  SKIP {platform_id}: no spatial_layout.json")
         return
@@ -206,17 +214,18 @@ def precompute_platform(platform_id: str) -> None:
     else:
         geojson = build_representative_geojson(platform_id, layout, airflow)
 
-    gfx_path = os.path.join(pdir, "deck_graphics.geojson")
-    with open(gfx_path, "w", encoding="utf-8") as fh:
+    gfx_path = resolve_child_path(pdir, "deck_graphics.geojson")
+    prepare_output_directory(pdir, allowed_roots=(REPO,))
+    with validated_open(gfx_path, "w", allowed_roots=(REPO,), encoding="utf-8") as fh:
         json.dump(geojson, fh, indent=2, ensure_ascii=False)
 
-    png_path = os.path.join(pdir, "deck_hull.png")
+    png_path = resolve_child_path(pdir, "deck_hull.png")
     _render_hull_png(geojson, png_path)
 
     bounds = compute_view_bounds(geojson)
     manifest = build_manifest(platform_id, layout, tier, bounds)
     labels = manifest.get("ship_class_label", platform_id)
-    bg_path = os.path.join(pdir, "deck_blueprint_bg.png")
+    bg_path = resolve_child_path(pdir, "deck_blueprint_bg.png")
     photo_entry = catalog_entry(platform_id)
     plate_ok = False
 
@@ -272,8 +281,8 @@ def precompute_platform(platform_id: str) -> None:
             fiction=tier == "fiction_adapted",
         )
         manifest["background_plate"] = "synthetic_blueprint"
-    manifest_path = os.path.join(pdir, "deck_manifest.json")
-    with open(manifest_path, "w", encoding="utf-8") as fh:
+    manifest_path = resolve_child_path(pdir, "deck_manifest.json")
+    with validated_open(manifest_path, "w", allowed_roots=(REPO,), encoding="utf-8") as fh:
         json.dump(manifest, fh, indent=2, ensure_ascii=False)
         fh.write("\n")
 
@@ -289,8 +298,9 @@ def write_deck_provenance_catalog() -> None:
         mpath = os.path.join(REPO, "data", "platforms", pid, "deck_manifest.json")
         if os.path.isfile(mpath):
             catalog["platforms"][pid] = _load_json(mpath)
-    out = os.path.join(REPO, "data", "platforms", "deck_provenance.json")
-    with open(out, "w", encoding="utf-8") as fh:
+    out = resolve_child_path(os.path.join(REPO, "data", "platforms"), "deck_provenance.json")
+    prepare_output_directory(os.path.dirname(out), allowed_roots=(REPO,))
+    with validated_open(out, "w", allowed_roots=(REPO,), encoding="utf-8") as fh:
         json.dump(catalog, fh, indent=2, ensure_ascii=False)
         fh.write("\n")
     print(f"  Wrote {out}")
@@ -301,7 +311,7 @@ def main() -> None:
     parser.add_argument("--platform", help="Single platform_id")
     args = parser.parse_args()
 
-    targets = [args.platform] if args.platform else PLATFORMS
+    targets = [validate_path_component(args.platform, label="platform_id")] if args.platform else PLATFORMS
     print("Precomputing deck assets...")
     for pid in targets:
         precompute_platform(pid)

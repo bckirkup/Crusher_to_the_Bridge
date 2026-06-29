@@ -278,7 +278,7 @@ def build_air_flow_paths(legacy_airflow: dict[str, Any], zone_ids: set[str]) -> 
     }
 
 
-def main() -> int:
+def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
@@ -297,7 +297,7 @@ def main() -> int:
 
     print(f"zones: {len(spatial['zones'])}")
     if args.dry_run:
-        return 0
+        return
 
     os.makedirs(OUT_DIR, exist_ok=True)
     for name, data in (("spatial_layout.json", spatial), ("air_flow_paths.json", airflow)):
@@ -306,8 +306,7 @@ def main() -> int:
             json.dump(data, fh, indent=2)
             fh.write("\n")
         print(f"Wrote {path}")
-    return 0
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    main()

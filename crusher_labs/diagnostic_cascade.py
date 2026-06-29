@@ -237,7 +237,7 @@ class DiagnosticCascadeEngine:
 
     def _determine_test_outcome(
         self,
-        agent: dict[str, Any],
+        _agent: dict[str, Any],
         test_results: dict[str, Any],
         tier: DiagnosticTier,
     ) -> bool:
@@ -303,7 +303,7 @@ class DiagnosticCascadeEngine:
                 elif wearable_tier == 1:
                     result.new_tier1_agents.append(aid)
 
-        for state in list(self.agent_states.values()):
+        for state in self.agent_states.values():
             if state.pending_tier is not None and state.pending_available_epoch is not None:
                 if epoch >= state.pending_available_epoch:
                     pending_results = state.tier_results.get(state.pending_tier, {})
@@ -337,7 +337,7 @@ class DiagnosticCascadeEngine:
             changed = False
             iterations += 1
 
-            for state in list(self.agent_states.values()):
+            for state in self.agent_states.values():
                 if state.confirmed or state.pending_tier is not None:
                     continue
 
@@ -494,7 +494,7 @@ class _CascadeTestRunner:
 
     def run_tier_tests(
         self,
-        agent_id: int,
+        _agent_id: int,
         agent: dict[str, Any],
         tier: DiagnosticTier,
     ) -> dict[str, Any]:

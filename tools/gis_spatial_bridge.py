@@ -49,6 +49,14 @@ import geopandas as gpd
 import networkx as nx
 from shapely.geometry import LineString, MultiLineString, MultiPolygon, Polygon
 
+from simulation_utils.paths import (
+    prepare_output_directory,
+    resolve_repo_path,
+    validated_open,
+)
+
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 
 # ── Defaults & column name resolution ────────────────────────────────────
 
@@ -385,15 +393,16 @@ def convert(
     }
 
     # Write output
-    os.makedirs(output_dir, exist_ok=True)
+    output_dir = resolve_repo_path(REPO_ROOT, output_dir)
+    prepare_output_directory(output_dir, allowed_roots=(REPO_ROOT,))
     spatial_path = os.path.join(output_dir, "spatial_layout.json")
     airflow_path = os.path.join(output_dir, "air_flow_paths.json")
 
-    with open(spatial_path, "w", encoding="utf-8") as fh:
+    with validated_open(spatial_path, "w", allowed_roots=(REPO_ROOT,), encoding="utf-8") as fh:
         json.dump(spatial_layout, fh, indent=2, ensure_ascii=False)
     print(f"\n  Wrote: {spatial_path}")
 
-    with open(airflow_path, "w", encoding="utf-8") as fh:
+    with validated_open(airflow_path, "w", allowed_roots=(REPO_ROOT,), encoding="utf-8") as fh:
         json.dump(air_flow_paths, fh, indent=2, ensure_ascii=False)
     print(f"  Wrote: {airflow_path}")
 
@@ -500,8 +509,9 @@ def emit_deck_graphics(
         })
 
     collection = {"type": "FeatureCollection", "features": features}
-    os.makedirs(os.path.dirname(output_path) or ".", exist_ok=True)
-    with open(output_path, "w", encoding="utf-8") as fh:
+    output_path = resolve_repo_path(REPO_ROOT, output_path)
+    prepare_output_directory(os.path.dirname(output_path) or REPO_ROOT, allowed_roots=(REPO_ROOT,))
+    with validated_open(output_path, "w", allowed_roots=(REPO_ROOT,), encoding="utf-8") as fh:
         json.dump(collection, fh, indent=2, ensure_ascii=False)
     return output_path
 
@@ -550,14 +560,18 @@ def main() -> None:
 
     args = parser.parse_args()
 
+    input_path = resolve_repo_path(REPO_ROOT, args.input)
+    output_dir = resolve_repo_path(REPO_ROOT, args.output)
+    hvac_path = resolve_repo_path(REPO_ROOT, args.hvac) if args.hvac else None
+
     print("=" * 70)
     print("  GIS SPATIAL BRIDGE — Crusher Labs Layout Converter")
     print("=" * 70)
 
     convert(
-        input_path=args.input,
-        output_dir=args.output,
-        hvac_path=args.hvac,
+        input_path=input_path,
+        output_dir=output_dir,
+        hvac_path=hvac_path,
         platform_name=args.platform,
         col_id=args.col_id,
         col_type=args.col_type,
@@ -570,8 +584,10 @@ def main() -> None:
     if args.emit_deck_graphics is not None:
         gfx_path = args.emit_deck_graphics
         if not gfx_path or not str(gfx_path).endswith(".geojson"):
-            gfx_path = os.path.join(args.output, "deck_graphics.geojson")
-        emit_deck_graphics(args.input, gfx_path, platform_id=args.platform)
+            gfx_path = os.path.join(output_dir, "deck_graphics.geojson")
+        else:
+            gfx_path = resolve_repo_path(REPO_ROOT, gfx_path)
+        emit_deck_graphics(input_path, gfx_path, platform_id=args.platform)
         print(f"  Wrote deck graphics: {gfx_path}")
 
     print("=" * 70)

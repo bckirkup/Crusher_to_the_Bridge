@@ -22,8 +22,13 @@ import sys
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, REPO_ROOT)
 
-from crusher_labs import load_config
-from picard_framework import PicardRunSpec, ShipSimulation
+from simulation_utils.paths import (
+    prepare_output_directory,
+    resolve_child_path,
+    resolve_repo_path,
+    validate_path_component,
+    validated_open,
+)
 
 
 def _default_values(cfg: dict) -> list[float]:
@@ -116,8 +121,9 @@ def main() -> None:
 
     print(json.dumps(results, indent=2))
     if args.output:
-        out_path = args.output if os.path.isabs(args.output) else os.path.join(REPO_ROOT, args.output)
-        with open(out_path, "w", encoding="utf-8") as fh:
+        out_path = resolve_repo_path(REPO_ROOT, args.output)
+        prepare_output_directory(os.path.dirname(out_path), allowed_roots=(REPO_ROOT,))
+        with validated_open(out_path, "w", allowed_roots=(REPO_ROOT,), encoding="utf-8") as fh:
             json.dump(results, fh, indent=2)
             fh.write("\n")
         print(f"Wrote {out_path}", file=sys.stderr)

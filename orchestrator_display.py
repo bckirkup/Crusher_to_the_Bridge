@@ -133,7 +133,7 @@ def print_wearable_monitoring(
             print(f"  Device: {did:20s}  channels: {channels}")
         deployment = fleet.get("device_deployment_counts", {})
         if deployment:
-            print(f"  Device deployment:")
+            print("  Device deployment:")
             for did, count in deployment.items():
                 print(f"    {did:25s}  × {count}")
         vis = fleet.get("visibility_breakdown", {})
