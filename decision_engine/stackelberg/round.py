@@ -28,6 +28,7 @@ class StackelbergRound:
         export_utility_dir: str | None = None,
         import_actions_dir: str | None = None,
         cruise_id: str = "0",
+        repo_root: str | None = None,
         incentives: dict[str, float] | None = None,
         economics_weights: dict[str, float] | None = None,
         all_protocol_ids: list[str] | None = None,
@@ -39,6 +40,7 @@ class StackelbergRound:
         self.export_utility_dir = export_utility_dir
         self.import_actions_dir = import_actions_dir
         self.cruise_id = cruise_id
+        self.repo_root = repo_root
         self.incentives = incentives or {}
         self.economics_weights = economics_weights or {}
         self.all_protocol_ids = all_protocol_ids or []
@@ -151,6 +153,8 @@ class StackelbergRound:
             envelope.actions["medical"] = med_actions
 
         if self.export_utility_dir:
+            if not self.repo_root:
+                raise ValueError("repo_root is required when export_utility_dir is set")
             bundle = self.feature_extractor.build_bundle(
                 epoch=epoch,
                 cruise_id=self.cruise_id,
@@ -163,7 +167,13 @@ class StackelbergRound:
                 economics_weights=self.economics_weights,
             )
             self.last_bundle = bundle
-            export_utility_bundle(bundle, self.export_utility_dir, epoch, self.cruise_id)
+            export_utility_bundle(
+                bundle,
+                self.export_utility_dir,
+                epoch,
+                self.cruise_id,
+                allowed_roots=(self.repo_root,),
+            )
 
         if self.import_actions_dir:
             imported = import_action_envelope(

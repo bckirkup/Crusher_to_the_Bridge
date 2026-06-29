@@ -149,6 +149,7 @@ class DecisionRuntime:
             export_utility_dir=export_dir,
             import_actions_dir=import_dir,
             cruise_id=str(social.get("cruise_id", "0")),
+            repo_root=repo,
             incentives=incentives,
             economics_weights=economics_weights,
             all_protocol_ids=rt.all_protocol_ids,

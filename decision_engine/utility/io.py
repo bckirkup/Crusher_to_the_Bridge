@@ -15,8 +15,10 @@ def export_utility_bundle(
     export_dir: str,
     epoch: int,
     cruise_id: str = "0",
+    *,
+    allowed_roots: tuple[str, ...],
 ) -> str:
-    export_dir = prepare_output_directory(export_dir)
+    export_dir = prepare_output_directory(export_dir, allowed_roots=allowed_roots)
     path = resolve_child_path(
         export_dir,
         f"cruise_{cruise_id}_epoch_{epoch:04d}_utility.json",
