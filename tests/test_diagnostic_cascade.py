@@ -454,6 +454,40 @@ class TestFleetEscalationRules:
 
         assert "SOP-009" not in result.fleet_sops_unlocked
 
+    def test_fleet_rule_pathogen_filter(self) -> None:
+        rule = FleetEscalationRule(
+            rule_id="norovirus_rule",
+            tier_threshold=2,
+            agent_count=1,
+            category_filter=None,
+            pathogen_filter="norwalk_gi",
+            unlocked_sops=["SOP-020"],
+        )
+        engine = DiagnosticCascadeEngine(_default_tiers(), fleet_rules=[rule])
+        runner = _StubTestRunner(positive_agents={1, 2})
+        agents = [
+            {
+                **_make_agent(1, infected=True, shedding=500.0),
+                "pathogen_infections": {
+                    "norwalk_gi": {"status": "INFECTED", "illness": "SYMPTOMATIC"},
+                },
+            },
+            {
+                **_make_agent(2, infected=True, shedding=500.0),
+                "pathogen_infections": {
+                    "salmonella_typhi": {"status": "INFECTED", "illness": "SYMPTOMATIC"},
+                },
+            },
+        ]
+
+        result = engine.evaluate_epoch(
+            epoch=0, sick_call_ids=[1, 2], wearable_red_ids=[],
+            agents=agents, test_runner=runner,
+        )
+
+        assert "SOP-020" in result.fleet_sops_unlocked
+        assert engine.agent_states[1].pathogen_id == "norwalk_gi"
+
 
 # ── Cascade-gated protocol triggering ────────────────────────────────────
 
