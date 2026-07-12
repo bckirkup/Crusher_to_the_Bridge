@@ -18,15 +18,17 @@ from simulation_utils.paths import (
 def test_resolve_repo_path_rejects_traversal(tmp_path) -> None:
     base = tmp_path / "repo"
     base.mkdir()
+    base_str = str(base)
     with pytest.raises(ValueError, match="escapes repository root"):
-        resolve_repo_path(str(base), "../outside.txt")
+        resolve_repo_path(base_str, "../outside.txt")
 
 
 def test_resolve_child_path_rejects_nested_names(tmp_path) -> None:
     parent = tmp_path / "parent"
     parent.mkdir()
+    parent_str = str(parent)
     with pytest.raises(ValueError, match="Invalid child path"):
-        resolve_child_path(str(parent), "../escape")
+        resolve_child_path(parent_str, "../escape")
 
 
 def test_validate_path_component_accepts_platform_ids() -> None:
@@ -59,7 +61,7 @@ def test_is_publicly_writable_recursive(tmp_path) -> None:
     # Create a world-writable directory
     writable_dir = tmp_path / "writable"
     writable_dir.mkdir()
-    os.chmod(writable_dir, 0o777)
+    os.chmod(writable_dir, 0o777)  # NOSONAR
     
     # Check that a nonexistent subdirectory under it is detected as publicly writable
     nested_nonexistent = writable_dir / "sub1" / "sub2" / "file.txt"

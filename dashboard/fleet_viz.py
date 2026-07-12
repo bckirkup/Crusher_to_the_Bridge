@@ -108,7 +108,7 @@ def render_fleet_operations(default_fleet_root: str) -> None:
 
     st.divider()
     st.markdown(_lcars_banner(f"Cruise detail — {selected}", LCARS_BLUE), unsafe_allow_html=True)
-    render_tactical_grid(history, bundle)
+    render_tactical_grid(history, bundle, key_suffix="_fleet")
 
     with st.expander("Bridge metrics (this cruise)", expanded=False):
         render_bridge_status(history, notebook)

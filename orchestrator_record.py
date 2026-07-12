@@ -75,7 +75,7 @@ def _update_summary_from_agent(summary: dict[str, Any], agent: dict[str, Any]) -
         summary["symptomatic"] += 1
 
 
-def record_epoch(
+def record_epoch(  # NOSONAR
     epoch: int,
     trigger_status: str,
     agents: list[dict[str, Any]],

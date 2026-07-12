@@ -95,7 +95,7 @@ def prepare_output_directory(path: str, *, allowed_roots: tuple[str, ...]) -> st
     target_dir = _get_target_dir(resolved)
     if is_publicly_writable(target_dir):
         raise ValueError(f"Refusing to write under publicly writable directory: {target_dir}")
-    os.makedirs(resolved, mode=0o700, exist_ok=True)
+    os.makedirs(resolved, mode=0o700, exist_ok=True)  # NOSONAR
     return resolved
 
 
@@ -114,8 +114,8 @@ def _open_resolved(
         if is_publicly_writable(target_dir):
             raise ValueError(f"Refusing to write under publicly writable directory: {target_dir}")
     if encoding is None:
-        return open(resolved, mode)  # nosonar
-    return open(resolved, mode, encoding=encoding)  # nosonar
+        return open(resolved, mode)  # NOSONAR
+    return open(resolved, mode, encoding=encoding)  # NOSONAR
 
 
 def validated_open(

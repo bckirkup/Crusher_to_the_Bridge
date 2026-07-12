@@ -191,56 +191,103 @@ class TestRecordEpochBoundary:
     """Type guards in record_epoch reject malformed inputs."""
 
     def test_agents_must_be_list(self) -> None:
-        bad_agents: Any = "not_a_list"
+        kwargs: dict[str, Any] = {
+            "epoch": 0,
+            "trigger_status": STATUS_BASELINE,
+            "agents": "not_a_list",
+            "spaces": {},
+            "engine": MagicMock(),
+            "contam_engine": None,
+            "pathogen_profiles": {},
+            "zone_names": [],
+            "zone_microflora_shifts": {},
+            "syn_result": {"sick_call_count": 0},
+            "rdt_result": {"results": [], "tested_count": 0},
+            "pcr_result": None,
+            "seq_result": None,
+            "tracing_matrix": MagicMock(to_dict=lambda: {}),
+            "state": SimulationState(),
+            "obs": MagicMock(fidelity_name="HIGH"),
+            "active_mods": [],
+            "merged_mods": {},
+            "stoplights": {},
+            "epoch_cost": {},
+            "cfg": {},
+            "air_results": {},
+            "swab_results": {},
+            "ww_results": {},
+            "clin_rdt_results": {},
+            "clin_qpcr_results": {},
+            "clin_microbio_results": {},
+        }
         with pytest.raises(TypeError, match="agents must be list"):
-            record_epoch(
-                epoch=0, trigger_status=STATUS_BASELINE,
-                agents=bad_agents,
-                spaces={}, engine=MagicMock(), contam_engine=None,
-                pathogen_profiles={}, zone_names=[], zone_microflora_shifts={},
-                syn_result={"sick_call_count": 0}, rdt_result={"results": [], "tested_count": 0},
-                pcr_result=None, seq_result=None, tracing_matrix=MagicMock(to_dict=lambda: {}),
-                state=SimulationState(), obs=MagicMock(fidelity_name="HIGH"),
-                active_mods=[], merged_mods={}, stoplights={},
-                epoch_cost={}, cfg={},
-                air_results={}, swab_results={}, ww_results={},
-                clin_rdt_results={}, clin_qpcr_results={}, clin_microbio_results={},
-            )
+            record_epoch(**kwargs)
 
     def test_spaces_must_be_dict(self) -> None:
-        bad_spaces: Any = []
+        kwargs: dict[str, Any] = {
+            "epoch": 0,
+            "trigger_status": STATUS_BASELINE,
+            "agents": [],
+            "spaces": [],
+            "engine": MagicMock(),
+            "contam_engine": None,
+            "pathogen_profiles": {},
+            "zone_names": [],
+            "zone_microflora_shifts": {},
+            "syn_result": {"sick_call_count": 0},
+            "rdt_result": {"results": [], "tested_count": 0},
+            "pcr_result": None,
+            "seq_result": None,
+            "tracing_matrix": MagicMock(to_dict=lambda: {}),
+            "state": SimulationState(),
+            "obs": MagicMock(fidelity_name="HIGH"),
+            "active_mods": [],
+            "merged_mods": {},
+            "stoplights": {},
+            "epoch_cost": {},
+            "cfg": {},
+            "air_results": {},
+            "swab_results": {},
+            "ww_results": {},
+            "clin_rdt_results": {},
+            "clin_qpcr_results": {},
+            "clin_microbio_results": {},
+        }
         with pytest.raises(TypeError, match="spaces must be dict"):
-            record_epoch(
-                epoch=0, trigger_status=STATUS_BASELINE,
-                agents=[],
-                spaces=bad_spaces,
-                engine=MagicMock(), contam_engine=None,
-                pathogen_profiles={}, zone_names=[], zone_microflora_shifts={},
-                syn_result={"sick_call_count": 0}, rdt_result={"results": [], "tested_count": 0},
-                pcr_result=None, seq_result=None, tracing_matrix=MagicMock(to_dict=lambda: {}),
-                state=SimulationState(), obs=MagicMock(fidelity_name="HIGH"),
-                active_mods=[], merged_mods={}, stoplights={},
-                epoch_cost={}, cfg={},
-                air_results={}, swab_results={}, ww_results={},
-                clin_rdt_results={}, clin_qpcr_results={}, clin_microbio_results={},
-            )
+            record_epoch(**kwargs)
 
     def test_stoplights_must_be_dict(self) -> None:
-        bad_stoplights: Any = "not_a_dict"
+        kwargs: dict[str, Any] = {
+            "epoch": 0,
+            "trigger_status": STATUS_BASELINE,
+            "agents": [],
+            "spaces": {},
+            "engine": MagicMock(),
+            "contam_engine": None,
+            "pathogen_profiles": {},
+            "zone_names": [],
+            "zone_microflora_shifts": {},
+            "syn_result": {"sick_call_count": 0},
+            "rdt_result": {"results": [], "tested_count": 0},
+            "pcr_result": None,
+            "seq_result": None,
+            "tracing_matrix": MagicMock(to_dict=lambda: {}),
+            "state": SimulationState(),
+            "obs": MagicMock(fidelity_name="HIGH"),
+            "active_mods": [],
+            "merged_mods": {},
+            "stoplights": "not_a_dict",
+            "epoch_cost": {},
+            "cfg": {},
+            "air_results": {},
+            "swab_results": {},
+            "ww_results": {},
+            "clin_rdt_results": {},
+            "clin_qpcr_results": {},
+            "clin_microbio_results": {},
+        }
         with pytest.raises(TypeError, match="stoplights must be dict"):
-            record_epoch(
-                epoch=0, trigger_status=STATUS_BASELINE,
-                agents=[], spaces={}, engine=MagicMock(), contam_engine=None,
-                pathogen_profiles={}, zone_names=[], zone_microflora_shifts={},
-                syn_result={"sick_call_count": 0}, rdt_result={"results": [], "tested_count": 0},
-                pcr_result=None, seq_result=None, tracing_matrix=MagicMock(to_dict=lambda: {}),
-                state=SimulationState(), obs=MagicMock(fidelity_name="HIGH"),
-                active_mods=[], merged_mods={},
-                stoplights=bad_stoplights,
-                epoch_cost={}, cfg={},
-                air_results={}, swab_results={}, ww_results={},
-                clin_rdt_results={}, clin_qpcr_results={}, clin_microbio_results={},
-            )
+            record_epoch(**kwargs)
 
 
 # ── Cross-module data flow tests ────────────────────────────────────────

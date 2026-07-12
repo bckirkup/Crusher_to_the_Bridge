@@ -81,6 +81,7 @@ def _add_blueprint_underlay(
             "yref": "y",
             "x": xmin,
             "y": ymin,
+            "yanchor": "bottom",
             "sizex": xmax - xmin,
             "sizey": ymax - ymin,
             "sizing": "stretch",
@@ -219,20 +220,20 @@ def _build_plotly_deck_map(
     return fig
 
 
-def _render_deck_filter(deck_options: list[str]) -> str:
+def _render_deck_filter(deck_options: list[str], *, key_suffix: str = "") -> str:
     st.caption("Deck level (vessel class locked)")
     if len(deck_options) <= 8:
         return st.radio(
             "Deck level",
             deck_options,
             horizontal=True,
-            key="deck_filter",
+            key=f"deck_filter{key_suffix}",
             label_visibility="collapsed",
         )
     return st.selectbox(
         "Deck level",
         deck_options,
-        key="deck_filter",
+        key=f"deck_filter{key_suffix}",
         label_visibility="collapsed",
     )
 
@@ -264,6 +265,8 @@ def _render_stoplight_panel(stoplights: dict[str, Any]) -> None:
 def render_tactical_grid(
     history: list[dict[str, Any]],
     bundle: PlatformBundle,
+    *,
+    key_suffix: str = "",
 ) -> None:
     if not history:
         st.warning("Sensors offline. No telemetry data.")
@@ -291,7 +294,7 @@ def render_tactical_grid(
     c1, c2, c3 = st.columns([2, 3, 2])
     with c1:
         selected_epoch = st.slider(
-            "Epoch", 0, num_epochs - 1, 0, key="deck_epoch",
+            "Epoch", 0, num_epochs - 1, 0, key=f"deck_epoch{key_suffix}",
         )
     with c2:
         color_mode = st.radio(
@@ -302,10 +305,10 @@ def render_tactical_grid(
                 "Symptomatic Agent Count",
             ],
             horizontal=True,
-            key="deck_color",
+            key=f"deck_color{key_suffix}",
         )
     with c3:
-        deck_filter = _render_deck_filter(deck_options)
+        deck_filter = _render_deck_filter(deck_options, key_suffix=key_suffix)
 
     record = history[selected_epoch]
     st.markdown(_lcars_alert_banner(record["trigger_status"]), unsafe_allow_html=True)
@@ -322,7 +325,7 @@ def render_tactical_grid(
     st.plotly_chart(fig, use_container_width=True)
 
     with st.expander("Advanced tactical display", expanded=False):
-        if st.checkbox("Use pydeck renderer (experimental)", value=False):
+        if st.checkbox("Use pydeck renderer (experimental)", value=False, key=f"deck_pydeck{key_suffix}"):
             deck_obj = build_pydeck_deck(
                 bundle, record, bundle.manifest, color_mode, deck_filter,
             )
