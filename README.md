@@ -50,7 +50,7 @@ python3 presidio_runner.py \
   --export-utility-dir presidio/data/experiences/utility_bundles
 ```
 
-Manuals: [OPERATORS_MANUAL_SHIP.md](OPERATORS_MANUAL_SHIP.md) (ship), [OPERATORS_MANUAL_GAME_THEORY.md](OPERATORS_MANUAL_GAME_THEORY.md) (fleet / Stackelberg).
+Manuals: [OPERATORS_MANUAL_SHIP.md](docs/OPERATORS_MANUAL_SHIP.md) (ship), [OPERATORS_MANUAL_GAME_THEORY.md](docs/OPERATORS_MANUAL_GAME_THEORY.md) (fleet / Stackelberg).
 
 ## Architecture
 
@@ -120,7 +120,7 @@ scripts/                     Enterprise platform builder, deck graphics, asset p
 telemetry_buffer/
 │   agent_axes.py            Orthogonal agent state (infection / presentation / compliance)
 tests/                       ~655 tests (ship, fleet, Stackelberg, OIS, behavioral, long-read, TAT, enterprise, CONTAM, schemas, wearable scoring, diagnostic cascade)
-AGENTS.md                    Cursor Cloud / agent development notes
+docs/AGENTS.md               Cursor Cloud / agent development notes
 ```
 
 CI: `.github/workflows/ci.yml` (full suite + Presidio smoke) and `.github/workflows/picard-presidio.yml` (framework-focused + Stackelberg schema checks).
@@ -589,7 +589,7 @@ pytest tests/test_data_contracts.py         # JSON schema / referential integrit
 pytest tests/test_telemetry_seams.py        # cross-module data flow
 ```
 
-Cloud agents and CI environments: see `AGENTS.md` (`python3`, headless Streamlit).
+Cloud agents and CI environments: see `docs/AGENTS.md` (`python3`, headless Streamlit).
 
 CI (`.github/workflows/ci.yml`) runs advisory ruff lint, sanity checks, JSON schema
 validation, the full pytest suite with coverage (~655 tests), Picard/Presidio import
