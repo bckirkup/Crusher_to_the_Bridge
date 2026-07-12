@@ -50,3 +50,17 @@ def test_is_path_under_base(tmp_path) -> None:
     sibling.mkdir()
     assert is_path_under_base(str(base), str(child))
     assert not is_path_under_base(str(base), str(sibling))
+
+
+def test_is_publicly_writable_recursive(tmp_path) -> None:
+    from simulation_utils.paths import is_publicly_writable
+    if os.name == "nt":
+        return
+    # Create a world-writable directory
+    writable_dir = tmp_path / "writable"
+    writable_dir.mkdir()
+    os.chmod(writable_dir, 0o777)
+    
+    # Check that a nonexistent subdirectory under it is detected as publicly writable
+    nested_nonexistent = writable_dir / "sub1" / "sub2" / "file.txt"
+    assert is_publicly_writable(str(nested_nonexistent)) is True
