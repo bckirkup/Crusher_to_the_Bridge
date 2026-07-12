@@ -14,7 +14,7 @@ REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 @pytest.mark.timeout(180)
 def test_presidio_runner_two_cruises_two_epochs() -> None:
-    env = {**os.environ, "PYTHONPATH": REPO_ROOT}
+    env = {**os.environ, "PYTHONPATH": REPO_ROOT, "PYTHONUTF8": "1"}
     fleet_config = os.path.join(
         REPO_ROOT, "presidio", "data", "config", "smoke_fleet.json",
     )

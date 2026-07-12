@@ -28,7 +28,7 @@ GOLDEN_LAST = GOLDEN_EPOCHS - 1
 
 
 def _run_orchestrator() -> list[dict[str, Any]]:
-    env = {**os.environ, "PYTHONPATH": REPO_ROOT}
+    env = {**os.environ, "PYTHONPATH": REPO_ROOT, "PYTHONUTF8": "1"}
     result = subprocess.run(
         [sys.executable, "orchestrator.py", "--epochs", str(GOLDEN_EPOCHS)],
         cwd=REPO_ROOT,

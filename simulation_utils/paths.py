@@ -59,6 +59,8 @@ def resolve_child_path(parent_dir: str, child_name: str) -> str:
 
 def is_publicly_writable(path: str) -> bool:
     """Return True when an existing directory is world-writable."""
+    if os.name == "nt":
+        return False
     directory = path
     if not os.path.isdir(directory):
         directory = os.path.dirname(_real(directory)) or "."

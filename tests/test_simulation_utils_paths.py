@@ -37,7 +37,8 @@ def test_prepare_output_directory_creates_private_dir(tmp_path) -> None:
     out = tmp_path / "nested" / "output"
     created = prepare_output_directory(str(out), allowed_roots=(str(tmp_path),))
     assert os.path.isdir(created)
-    assert oct(os.stat(created).st_mode & 0o777) == oct(0o700)
+    if os.name != "nt":
+        assert oct(os.stat(created).st_mode & 0o777) == oct(0o700)
 
 
 def test_is_path_under_base(tmp_path) -> None:

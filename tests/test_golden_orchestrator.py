@@ -25,7 +25,7 @@ EXPECTED_TRIGGER = "BASELINE"
 
 
 def _run_orchestrator(epochs: int = 24) -> list[dict]:
-    env = {**os.environ, "PYTHONPATH": REPO_ROOT}
+    env = {**os.environ, "PYTHONPATH": REPO_ROOT, "PYTHONUTF8": "1"}
     result = subprocess.run(
         [sys.executable, "orchestrator.py", "--epochs", str(epochs)],
         cwd=REPO_ROOT,
