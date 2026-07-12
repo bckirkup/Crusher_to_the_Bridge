@@ -37,7 +37,7 @@ import json
 import os
 from typing import Any
 
-from simulation_utils.paths import resolve_repo_path
+from simulation_utils.paths import resolve_repo_path, validated_open
 
 import numpy as np
 
@@ -395,7 +395,7 @@ def load_air_flow_paths(repo_root: str, cfg: dict[str, Any]) -> dict[str, Any]:
     full_path = resolve_repo_path(repo_root, rel_path)
     if not os.path.isfile(full_path):
         return {}
-    with open(full_path, "r", encoding="utf-8") as fh:
+    with validated_open(full_path, "r", allowed_roots=(repo_root,), encoding="utf-8") as fh:
         return json.load(fh)
 
 
@@ -409,7 +409,7 @@ def load_spatial_layout(repo_root: str, cfg: dict[str, Any]) -> dict[str, Any]:
     full_path = resolve_repo_path(repo_root, rel_path)
     if not os.path.isfile(full_path):
         return {}
-    with open(full_path, "r", encoding="utf-8") as fh:
+    with validated_open(full_path, "r", allowed_roots=(repo_root,), encoding="utf-8") as fh:
         return json.load(fh)
 
 

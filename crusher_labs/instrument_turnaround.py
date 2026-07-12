@@ -15,7 +15,9 @@ import os
 from dataclasses import dataclass, field
 from typing import Any
 
-from simulation_utils.paths import resolve_repo_path
+from simulation_utils.paths import resolve_repo_path, validated_open
+
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 @dataclass(frozen=True)
@@ -95,9 +97,9 @@ class InstrumentTurnaroundRegistry:
         repo_root: str | None = None,
         long_read_profile_turnaround: dict[str, Any] | None = None,
     ) -> InstrumentTurnaroundRegistry:
-        if repo_root:
-            path = resolve_repo_path(repo_root, path)
-        with open(path, "r", encoding="utf-8") as fh:
+        root = repo_root or REPO_ROOT
+        path = resolve_repo_path(root, path)
+        with validated_open(path, "r", allowed_roots=(root,), encoding="utf-8") as fh:
             data = json.load(fh)
         return cls(data, long_read_profile_turnaround=long_read_profile_turnaround)
 

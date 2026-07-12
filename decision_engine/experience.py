@@ -7,7 +7,7 @@ import os
 from dataclasses import dataclass, field
 from typing import Any
 
-from simulation_utils.paths import prepare_output_directory
+from simulation_utils.paths import prepare_output_directory, validated_open
 
 
 @dataclass
@@ -22,7 +22,8 @@ class ExperienceStore:
     def load(self) -> None:
         if not self.store_path or not os.path.isfile(self.store_path):
             return
-        with open(self.store_path, encoding="utf-8") as fh:
+        roots = self.allowed_roots or (os.path.dirname(os.path.realpath(self.store_path)),)
+        with validated_open(self.store_path, allowed_roots=roots, encoding="utf-8") as fh:
             data = json.load(fh)
         self.records = data.get("records", [])
         self.policy_params = data.get("policy_params", {})
@@ -34,7 +35,7 @@ class ExperienceStore:
             raise ValueError("ExperienceStore.allowed_roots is required to save")
         parent_dir = os.path.dirname(os.path.realpath(self.store_path)) or "."
         prepare_output_directory(parent_dir, allowed_roots=self.allowed_roots)
-        with open(self.store_path, "w", encoding="utf-8") as fh:
+        with validated_open(self.store_path, "w", allowed_roots=self.allowed_roots, encoding="utf-8") as fh:
             json.dump(
                 {"records": self.records, "policy_params": self.policy_params},
                 fh,

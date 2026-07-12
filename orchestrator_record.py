@@ -13,7 +13,7 @@ import json
 import os
 from typing import Any
 
-from simulation_utils.paths import prepare_output_directory, resolve_repo_path
+from simulation_utils.paths import prepare_output_directory, resolve_repo_path, validated_open
 from engines.infection_dynamics_bridge import (
     KorkinShipEngine,
     InfectionStatus,
@@ -300,7 +300,7 @@ def finalize_simulation(
         os.path.dirname(history_path),
         allowed_roots=(REPO_ROOT,),
     )
-    with open(history_path, "w", encoding="utf-8") as fh:
+    with validated_open(history_path, "w", allowed_roots=(REPO_ROOT,), encoding="utf-8") as fh:
         json.dump(state.simulation_history, fh, indent=2)
     print(f"\n  Simulation history saved to: {history_path}")
 

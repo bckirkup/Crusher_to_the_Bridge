@@ -60,7 +60,7 @@ from orchestrator_types import (
     ObservationEngine,
     ProtocolContext,
 )
-from simulation_utils.paths import resolve_repo_path
+from simulation_utils.paths import resolve_repo_path, validated_open
 from orchestrator_display import (
     print_observation_engine,
     print_protocol_engine,
@@ -139,7 +139,7 @@ def load_platform_layout_doc(cfg: dict[str, Any]) -> dict[str, Any] | None:
     full_path = resolve_repo_path(REPO_ROOT, layout_path)
     if not os.path.isfile(full_path):
         return None
-    with open(full_path, "r", encoding="utf-8") as fh:
+    with validated_open(full_path, "r", allowed_roots=(REPO_ROOT,), encoding="utf-8") as fh:
         return json.load(fh)
 
 
@@ -412,7 +412,7 @@ def load_pathogen_profiles(
     full_path = resolve_repo_path(REPO_ROOT, profiles_path)
     if not os.path.isfile(full_path):
         return {}
-    with open(full_path, "r", encoding="utf-8") as fh:
+    with validated_open(full_path, "r", allowed_roots=(REPO_ROOT,), encoding="utf-8") as fh:
         data = json.load(fh)
     profiles: dict[str, dict[str, Any]] = {}
     for p in data.get("pathogens", []):

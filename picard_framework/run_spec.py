@@ -9,6 +9,10 @@ import os
 from dataclasses import dataclass, field
 from typing import Any
 
+from simulation_utils.paths import validated_open
+
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 from picard_framework.catalog.registry import CatalogRegistry
 from picard_framework.pathogen_overrides import (
     apply_pathogen_overrides,
@@ -173,7 +177,9 @@ class PicardRunSpec:
 
     @classmethod
     def from_picard_json(cls, repo_root: str, spec_path: str) -> PicardRunSpec:
-        with open(spec_path, encoding="utf-8") as fh:
+        root = repo_root or REPO_ROOT
+        spec_dir = os.path.dirname(os.path.abspath(spec_path))
+        with validated_open(spec_path, allowed_roots=(root, spec_dir), encoding="utf-8") as fh:
             raw = json.load(fh)
         reg = CatalogRegistry.from_repo(repo_root)
         catalog = raw.get("catalog", {})

@@ -24,6 +24,10 @@ import json
 import os
 from typing import Any
 
+from simulation_utils.paths import validated_open
+
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 
 # ── Ledger entry categories ──────────────────────────────────────────────
 CATEGORY_SURVEILLANCE = "surveillance"
@@ -464,7 +468,7 @@ def compute_operational_impact(
 
 def build_ledger_from_config(config_path: str) -> CostLedger:
     """Construct a CostLedger from ``resource_costs.json``."""
-    with open(config_path, "r", encoding="utf-8") as fh:
+    with validated_open(config_path, "r", allowed_roots=(REPO_ROOT,), encoding="utf-8") as fh:
         cfg = json.load(fh)
 
     budgets = cfg.get("budgets", {})
@@ -491,5 +495,5 @@ def build_ledger_from_config(config_path: str) -> CostLedger:
 
 def load_resource_costs(config_path: str) -> dict[str, Any]:
     """Load the raw resource costs config."""
-    with open(config_path, "r", encoding="utf-8") as fh:
+    with validated_open(config_path, "r", allowed_roots=(REPO_ROOT,), encoding="utf-8") as fh:
         return json.load(fh)

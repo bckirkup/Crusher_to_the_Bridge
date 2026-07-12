@@ -23,6 +23,10 @@ from __future__ import annotations
 import json
 import os
 from dataclasses import dataclass, field
+
+from simulation_utils.paths import validated_open
+
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 from typing import Any
 
 from crusher_labs.cascade_entry import CascadeEntryConfig
@@ -553,7 +557,7 @@ def load_diagnostic_cascade(
         root = repo_root or os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         config_path = resolve_repo_path(root, config_path)
 
-    with open(config_path, "r", encoding="utf-8") as fh:
+    with validated_open(config_path, "r", allowed_roots=(root,), encoding="utf-8") as fh:
         cfg = json.load(fh)
 
     tiers = [DiagnosticTier.from_config(t) for t in cfg.get("tiers", [])]
@@ -586,7 +590,7 @@ def build_cascade_engine(
 
 
 def _load_cascade_json(config_path: str) -> dict[str, Any]:
-    with open(config_path, encoding="utf-8") as fh:
+    with validated_open(config_path, allowed_roots=(REPO_ROOT,), encoding="utf-8") as fh:
         return json.load(fh)
 
 

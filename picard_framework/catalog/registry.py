@@ -9,6 +9,8 @@ import os
 from dataclasses import dataclass, field
 from typing import Any
 
+from simulation_utils.paths import validated_open
+
 
 @dataclass
 class PlatformEntry:
@@ -100,6 +102,6 @@ class CatalogRegistry:
             repo_root, "picard_framework", "data", "catalog", "libraries.json",
         )
         if os.path.isfile(index_path):
-            with open(index_path, encoding="utf-8") as fh:
+            with validated_open(index_path, allowed_roots=(repo_root,), encoding="utf-8") as fh:
                 return json.load(fh)
         return {}

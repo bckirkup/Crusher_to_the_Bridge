@@ -40,7 +40,9 @@ from crusher_labs.stoplight import (
     stoplight_from_disruption,
 )
 from telemetry_buffer.agent_axes import clinical_axes_for_notebook
-from simulation_utils.paths import prepare_output_directory, resolve_repo_path
+from simulation_utils.paths import prepare_output_directory, resolve_repo_path, validated_open
+
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 FIDELITY_HIGH = "HIGH_FIDELITY"
 FIDELITY_MID = "MID_FIDELITY"
@@ -88,7 +90,7 @@ def load_logging_profile(
             "log_qc_validation": True,
         }), {}
 
-    with open(cfg_path, "r", encoding="utf-8") as fh:
+    with validated_open(cfg_path, "r", allowed_roots=(REPO_ROOT,), encoding="utf-8") as fh:
         config = json.load(fh)
 
     fidelity_name = config.get("logging_fidelity", FIDELITY_HIGH)
@@ -663,7 +665,7 @@ class ArtificialLabNotebook:
             os.path.dirname(output_path),
             allowed_roots=(repo_root,),
         )
-        with open(output_path, "w", encoding="utf-8") as fh:
+        with validated_open(output_path, "w", allowed_roots=(repo_root,), encoding="utf-8") as fh:
             json.dump(notebook, fh, indent=2, default=str)
 
         return os.path.abspath(output_path)

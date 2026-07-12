@@ -23,7 +23,7 @@ from decision_engine.social.contact_graph import ContactGraphBuilder
 from decision_engine.intelligence import default_timeline_path, load_global_health_timeline
 from decision_engine.policy import build_policies_from_config
 from decision_engine.stackelberg.round import StackelbergRound
-from simulation_utils.paths import resolve_repo_path
+from simulation_utils.paths import resolve_repo_path, validated_open
 
 
 @dataclass
@@ -134,7 +134,7 @@ class DecisionRuntime:
         if econ_path:
             ep = resolve_repo_path(repo, econ_path)
             if os.path.isfile(ep):
-                with open(ep, encoding="utf-8") as fh:
+                with validated_open(ep, allowed_roots=(repo,), encoding="utf-8") as fh:
                     economics_weights = json.load(fh).get("reward_weights", {})
 
         export_dir = social.get("export_utility_dir")

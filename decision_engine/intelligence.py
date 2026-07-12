@@ -6,9 +6,13 @@ import json
 import os
 from typing import Any
 
+from simulation_utils.paths import validated_open
+
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 
 def load_global_health_timeline(path: str) -> dict[str, Any]:
-    with open(path, encoding="utf-8") as fh:
+    with validated_open(path, allowed_roots=(REPO_ROOT,), encoding="utf-8") as fh:
         return json.load(fh)
 
 

@@ -8,6 +8,9 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from decision_engine.information.reputation import ReputationTracker
+from simulation_utils.paths import validated_open
+
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
 @dataclass
@@ -47,7 +50,7 @@ class InformationDiffusionEngine:
 
     @classmethod
     def from_config_path(cls, path: str) -> InformationDiffusionEngine:
-        with open(path, encoding="utf-8") as fh:
+        with validated_open(path, allowed_roots=(REPO_ROOT,), encoding="utf-8") as fh:
             cfg = json.load(fh)
         eng = cls(config=cfg)
         eng.reputation.apply_config(cfg)

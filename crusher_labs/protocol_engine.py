@@ -15,9 +15,14 @@ of the configured fidelity tier.
 from __future__ import annotations
 
 import json
+import os
 from typing import Any
 
 from crusher_labs.cost_ledger import CostLedger, CATEGORY_INTERVENTION, CATEGORY_SURVEILLANCE
+
+from simulation_utils.paths import validated_open
+
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 from crusher_labs.stoplight import (
     stoplight_from_ct,
     stoplight_from_anomaly,
@@ -522,6 +527,6 @@ def reset_modifiers(
 
 def load_protocols(config_path: str) -> list[StandingProtocol]:
     """Load standing protocols from ``protocols.json``."""
-    with open(config_path, "r", encoding="utf-8") as fh:
+    with validated_open(config_path, "r", allowed_roots=(REPO_ROOT,), encoding="utf-8") as fh:
         cfg = json.load(fh)
     return [StandingProtocol(p) for p in cfg.get("protocols", [])]

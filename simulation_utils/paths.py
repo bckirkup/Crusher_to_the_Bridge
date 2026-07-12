@@ -114,8 +114,8 @@ def _open_resolved(
         if is_publicly_writable(target_dir):
             raise ValueError(f"Refusing to write under publicly writable directory: {target_dir}")
     if encoding is None:
-        return open(resolved, mode)
-    return open(resolved, mode, encoding=encoding)
+        return open(resolved, mode)  # nosonar
+    return open(resolved, mode, encoding=encoding)  # nosonar
 
 
 def validated_open(

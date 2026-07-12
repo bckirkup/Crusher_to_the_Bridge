@@ -35,7 +35,9 @@ from engines.infection_dynamics_bridge import (
     IllnessStatus,
 )
 from simulation_utils.numeric import default_simulation_rng, float_ne
-from simulation_utils.paths import resolve_repo_path, validate_path_component
+from simulation_utils.paths import resolve_repo_path, validate_path_component, validated_open
+
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 # ── Channel baseline defaults ────────────────────────────────────────────
@@ -807,7 +809,7 @@ def load_wearable_deployment_profile(
     if not os.path.isfile(profile_path):
         return wm_cfg
 
-    with open(profile_path, encoding="utf-8") as fh:
+    with validated_open(profile_path, allowed_roots=(repo_root,), encoding="utf-8") as fh:
         fragment = yaml.safe_load(fh) or {}
 
     merged = dict(wm_cfg)

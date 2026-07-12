@@ -12,11 +12,12 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from decision_engine import DecisionRound, ExperienceStore, RuleBasedPolicy
+from decision_engine import DecisionRound, RuleBasedPolicy
+from decision_engine.experience import ExperienceStore
 from picard_framework import PicardRunSpec, ShipSimulation
 from picard_framework.run_spec import TelemetryPaths
 from presidio.run_spec import PresidioRunSpec
-from simulation_utils.paths import prepare_output_directory, resolve_child_path, resolve_repo_path
+from simulation_utils.paths import prepare_output_directory, resolve_child_path, resolve_repo_path, validated_open
 
 
 def _compute_rewards(
@@ -166,7 +167,7 @@ def run(fleet_spec: PresidioRunSpec, *, display: bool = False) -> None:
 
     experience.save()
     summary_path = resolve_child_path(fleet_spec.output_root, "fleet_summary.json")
-    with open(summary_path, "w", encoding="utf-8") as fh:
+    with validated_open(summary_path, "w", allowed_roots=(fleet_spec.repo_root,), encoding="utf-8") as fh:
         json.dump(
             {
                 "num_cruises": fleet_spec.num_cruises,
