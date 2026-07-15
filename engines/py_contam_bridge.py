@@ -461,13 +461,34 @@ def load_spatial_layout(repo_root: str, cfg: dict[str, Any]) -> dict[str, Any]:
         return json.load(fh)
 
 
+def _build_native_engine(
+    spatial: dict[str, Any],
+    airflow: dict[str, Any],
+    hvac_cfg: dict[str, Any],
+) -> ContamTransportEngine:
+    return ContamTransportEngine(
+        spatial_layout=spatial,
+        air_flow_paths=airflow,
+        filter_efficiency=hvac_cfg.get("filter_efficiency", 0.50),
+        natural_decay_rate=hvac_cfg.get("natural_decay_rate", 0.10),
+    )
+
+
 def build_transport_engine(
     repo_root: str,
     cfg: dict[str, Any],
 ) -> ContamTransportEngine | None:
     """Build a CONTAM transport engine from config and layout files.
 
-    Returns None if layout files are not found.
+    The engine is selected by ``hvac.transport_engine``:
+
+    - ``"native"`` (default): the pure-Python ``ContamTransportEngine``.
+    - ``"contamx"``: require the real ContamX solver; fall back to native
+      with a warning if it is unavailable.
+    - ``"auto"``: use ContamX when a binary/valid project is available,
+      otherwise silently fall back to native.
+
+    Returns ``None`` if the platform layout files are not found.
     """
     spatial = load_spatial_layout(repo_root, cfg)
     airflow = load_air_flow_paths(repo_root, cfg)
@@ -475,12 +496,20 @@ def build_transport_engine(
         return None
 
     hvac_cfg = cfg.get("hvac", {})
-    filter_eff = hvac_cfg.get("filter_efficiency", 0.50)
-    decay_rate = hvac_cfg.get("natural_decay_rate", 0.10)
+    selection = str(hvac_cfg.get("transport_engine", "native")).lower()
 
-    return ContamTransportEngine(
-        spatial_layout=spatial,
-        air_flow_paths=airflow,
-        filter_efficiency=filter_eff,
-        natural_decay_rate=decay_rate,
-    )
+    if selection in ("contamx", "auto"):
+        # Imported lazily so the native path never depends on the ContamX seam.
+        from engines.contamx_runner import ContamXUnavailable
+        from engines.contamx_transport import build_contamx_engine
+        try:
+            return build_contamx_engine(repo_root, cfg)
+        except ContamXUnavailable as exc:
+            if selection == "contamx":
+                print(
+                    f"  [hvac] ContamX requested but unavailable "
+                    f"({exc}); using native transport engine."
+                )
+            # "auto" falls back silently.
+
+    return _build_native_engine(spatial, airflow, hvac_cfg)
