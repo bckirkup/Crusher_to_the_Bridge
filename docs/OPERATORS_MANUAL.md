@@ -894,9 +894,17 @@ Defines the room/zone node graph with display coordinates:
 | `id` | string | Zone name (no spaces — use underscores) |
 | `type` | string | `Free`, `Dining`, `Room`, `Medical`, `Engineering` |
 | `traffic` | string | `low`, `medium`, `high` — room-touch frequency |
-| `volume_m3` | float | Compartment volume (must be > 0) |
+| `volume_m3` | float | Compartment volume (must be > 0). When `floor_area_m2` and `ceiling_height_m` are both present, should equal their product |
+| `floor_area_m2` | float | *(optional)* CONTAM zone floor area (must be > 0) |
+| `ceiling_height_m` | float | *(optional)* CONTAM ceiling height (must be > 0); `volume_m3` is derived from `floor_area_m2 * ceiling_height_m` when `volume_m3` is absent |
+| `elevation_m` | float | *(optional)* Relative vertical position of the zone floor (CONTAM level elevation); may be negative |
 | `deck` | string | `upper`, `main`, `lower` — vertical position |
 | `display` | object | `{x, y}` — Plotly spatial deck map coordinates |
+
+The optional geometry fields (`floor_area_m2`, `ceiling_height_m`,
+`elevation_m`) map this project's zones onto NIST CONTAM zone geometry and
+enable the `.prj` import/export bridge — see
+[`docs/CONTAM_INTEROP.md`](CONTAM_INTEROP.md).
 
 ### 4.3 Airflow Paths (`data/platforms/*/air_flow_paths.json`)
 

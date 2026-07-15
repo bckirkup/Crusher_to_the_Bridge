@@ -61,7 +61,21 @@
         "volume_m3": {
           "type": "number",
           "exclusiveMinimum": 0,
-          "description": "Room volume in cubic meters"
+          "description": "Room volume in cubic meters (must be > 0, Law 3). When floor_area_m2 and ceiling_height_m are both present, volume_m3 should equal their product (floor_area_m2 * ceiling_height_m)."
+        },
+        "floor_area_m2": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "CONTAM zone floor area in square meters (must be > 0, Law 3). Optional; combined with ceiling_height_m to derive volume_m3."
+        },
+        "ceiling_height_m": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "CONTAM zone ceiling height in meters (must be > 0, Law 3). Optional; combined with floor_area_m2 to derive volume_m3."
+        },
+        "elevation_m": {
+          "type": "number",
+          "description": "Relative vertical position of the zone floor in meters (CONTAM level relative elevation). May be negative for decks below the reference datum."
         },
         "deck": {
           "type": "string",
