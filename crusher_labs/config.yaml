@@ -170,6 +170,15 @@ hvac:
   natural_decay_rate: 0.10          # fraction of airborne pathogen lost per
                                     # epoch to settling + viral inactivation
   filter_type: "MERV-13"           # human-readable label for console output
+  transport_engine: "native"        # airflow solver: native | contamx | auto
+                                    #   native  = pure-Python ContamTransportEngine (default)
+                                    #   contamx = real NIST ContamX solver (opt-in);
+                                    #             falls back to native + warning if unavailable
+                                    #   auto    = ContamX when available, else native (silent)
+  contamx:
+    binary_path: ""                 # path to the ContamX executable (or set
+                                    # CONTAMX_BINARY env var / leave on PATH).
+                                    # Not pip-installable; see docs/CONTAM_INTEROP.md §5.
 
 # ── Escalation thresholds ─────────────────────────────────────
 escalation:

@@ -141,11 +141,82 @@ The JSON → `.prj` → JSON round-trip preserves zone identity, geometry
 > automatically verified. If ContamW reports issues opening an exported file,
 > re-saving from within ContamW normalizes the project.
 
-## 4. Related components
+## 5. Real ContamX solver (opt-in parallel engine)
+
+By default, transport is solved by the pure-Python `ContamTransportEngine`
+(offline, deterministic, CI-validated). You can optionally swap in the **real
+NIST ContamX solver** to compute the inter-zone airflow field, with Crusher's
+own contaminant mass balance applied on top of it:
+
+```
+ContamX  →  per-path volumetric airflows (the "airflow field")
+Crusher  →  discrete-time pathogen mass balance on those flows
+```
+
+Because the contaminant math is identical to the native engine, the two are
+directly comparable (see the benchmark below).
+
+### Selecting the engine
+
+In `config.yaml` under `hvac:`:
+
+```yaml
+hvac:
+  transport_engine: "native"   # native | contamx | auto
+  contamx:
+    binary_path: ""            # path to the ContamX executable
+```
+
+- `native` (default) — pure-Python engine; no external dependency.
+- `contamx` — require ContamX; if the binary/project/OS is unavailable, it
+  logs a warning and falls back to native.
+- `auto` — use ContamX when available, otherwise silently fall back.
+
+The binary is located via `hvac.contamx.binary_path`, then the
+`CONTAMX_BINARY` environment variable, then known executable names on `PATH`.
+
+### Installing ContamX
+
+ContamX is a **NIST executable and is not pip-installable**. Download it from
+the CONTAM software page (<https://www.nist.gov/services-resources/software/contam>)
+and either add it to `PATH` or point `hvac.contamx.binary_path` /
+`CONTAMX_BINARY` at it. It is **not** present in CI or the offline build
+environment, so ContamX-dependent code paths fall back to native and
+integration tests skip cleanly there.
+
+### Benchmark: native vs ContamX
+
+`tools/contam_benchmark.py` runs a platform through both engines with an
+identical pathogen injection and reports per-epoch L1 / L∞ concentration
+divergence (and prints the native trajectory only when ContamX is
+unavailable):
+
+```bash
+python tools/contam_benchmark.py \
+    --platform data/platforms/destroyer_baseline \
+    --epochs 12 --inject Bridge:1e6
+```
+
+> **Current limitation.** Running ContamX end-to-end needs a `.prj` that
+> ContamX can parse. The exporter (§3) currently writes a *CONTAM-style
+> interchange* file, not a byte-faithful, ContamX-validated project.
+> Producing a fully ContamX-parseable `.prj` is tracked as follow-on work.
+> The solver seam here (capability detection, subprocess runner, `.SIM`
+> reader, engine selection, fallback) is complete and unit-tested with
+> crafted `.SIM` fixtures; it "lights up" once a valid project and the
+> binary are present.
+
+## 6. Related components
 
 - `engines/py_contam_bridge.py` — native-Python CONTAM mass-balance transport
   engine (`ContamZoneNode`, `ContamTransportEngine`).
+- `engines/contamx_runner.py` — ContamX capability detection, subprocess
+  runner, and native binary `.SIM` results reader.
+- `engines/contamx_transport.py` — `ContamXTransportEngine` (ContamX airflow
+  field + native mass balance).
+- `tools/contam_benchmark.py` — native vs ContamX divergence report.
 - `tools/gis_spatial_bridge.py` — GIS (Shapefile/GeoJSON) → platform JSON.
 - `docs/OPERATORS_MANUAL.md` §4.2 (spatial layout) and §11.3 (py-contam).
 - Sibling `py-contam` repository — CONTAM binary `.sim` results reader and
-  weather/species file writers (read-only, Law 6).
+  weather/species file writers (read-only, Law 6); its `.SIM` byte layout is
+  the reference for `engines/contamx_runner.SimResults`.
