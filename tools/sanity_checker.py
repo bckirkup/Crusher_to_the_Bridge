@@ -102,6 +102,9 @@ class SpatialZone(BaseModel):
     type: str
     traffic: str = "medium"
     volume_m3: float = 100.0
+    floor_area_m2: float | None = None
+    ceiling_height_m: float | None = None
+    elevation_m: float | None = None
     deck: str = "main"
     display: ZoneDisplay
     description: str | None = None
@@ -112,6 +115,20 @@ class SpatialZone(BaseModel):
     def volume_positive(cls, v: float) -> float:
         if v <= 0:
             raise ValueError(f"volume_m3 must be positive, got {v}")
+        return v
+
+    @field_validator("floor_area_m2")
+    @classmethod
+    def floor_area_positive(cls, v: float | None) -> float | None:
+        if v is not None and v <= 0:
+            raise ValueError(f"floor_area_m2 must be positive, got {v}")
+        return v
+
+    @field_validator("ceiling_height_m")
+    @classmethod
+    def ceiling_height_positive(cls, v: float | None) -> float | None:
+        if v is not None and v <= 0:
+            raise ValueError(f"ceiling_height_m must be positive, got {v}")
         return v
 
 
@@ -493,6 +510,43 @@ def _check_graph_integrity(
                             f"'{zone}' not found in spatial_layout.json zones: "
                             f"{valid_zones}",
                         )
+
+
+def _check_zone_geometry(
+    layout: SpatialLayout | None,
+    report: Report,
+    *,
+    rel_tolerance: float = 0.01,
+) -> None:
+    """Validate optional CONTAM geometry fields on spatial zones.
+
+    Warns when ``volume_m3`` disagrees with ``floor_area_m2 *
+    ceiling_height_m`` by more than ``rel_tolerance`` (default 1%).
+    ``floor_area_m2`` and ``ceiling_height_m`` positivity (Law 3) is
+    enforced by the pydantic model; this check covers the cross-field
+    consistency the schema documents.
+    """
+    if layout is None:
+        return
+
+    for zone in layout.zones:
+        area = zone.floor_area_m2
+        height = zone.ceiling_height_m
+        if area is None or height is None:
+            continue
+        derived = area * height
+        if derived <= 0:
+            continue
+        rel_err = abs(zone.volume_m3 - derived) / derived
+        if rel_err > rel_tolerance:
+            report.warn(
+                _SPATIAL_LAYOUT_JSON,
+                "GEOMETRY",
+                f"zone '{zone.id}': volume_m3 = {zone.volume_m3} disagrees "
+                f"with floor_area_m2 * ceiling_height_m = "
+                f"{area} * {height} = {derived:.4g} "
+                f"(relative error {rel_err:.1%} > {rel_tolerance:.0%}).",
+            )
 
 
 def _check_logical_contradictions(
@@ -1669,6 +1723,15 @@ def run_checks(
         print(f"  {_RED}Found {added} issue(s){_RESET}")
     else:
         print(f"  {_GREEN}All references resolved{_RESET}")
+
+    print(f"  {_CYAN}Running zone geometry checks...{_RESET}")
+    pre = len(report.findings)
+    _check_zone_geometry(layout, report)
+    added = len(report.findings) - pre
+    if added:
+        print(f"  {_YELLOW}Found {added} issue(s){_RESET}")
+    else:
+        print(f"  {_GREEN}All zone geometry consistent{_RESET}")
 
     print(f"  {_CYAN}Running logical contradiction checks...{_RESET}")
     pre = len(report.findings)

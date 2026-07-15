@@ -40,12 +40,24 @@ Required structure per zone (matches `schemas/spatial_layout.schema.json`):
       "type": "Free",
       "traffic": "low",
       "volume_m3": 150.0,
+      "floor_area_m2": 50.0,
+      "ceiling_height_m": 3.0,
+      "elevation_m": 0.0,
       "deck": "main",
       "display": {"x": 100, "y": 12}
     }
   ]
 }
 ```
+
+`floor_area_m2`, `ceiling_height_m`, and `elevation_m` are **optional**
+CONTAM-geometry fields (all must be > 0 except `elevation_m`, which may be
+negative). When both `floor_area_m2` and `ceiling_height_m` are present,
+`volume_m3` should equal their product (`50.0 * 3.0 = 150.0` above); the
+sanity checker warns if they disagree by more than 1%. Zones may still
+specify only `volume_m3` (backward compatible). These fields drive the
+CONTAM `.prj` import/export bridge (`tools/contam_prj_bridge.py`) — see
+`docs/CONTAM_INTEROP.md`.
 
 `graywater_zones` lists downstream greywater/blackwater collection zone(s)
 for ship-wide wastewater sequencing (e.g. `Engine_Room_Aft` on large cruise

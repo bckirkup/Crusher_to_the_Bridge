@@ -49,6 +49,29 @@ DEFAULT_AIR_TEMP = 293.15     # K (20°C)
 HOURS_PER_EPOCH = 1.0         # each epoch represents 1 hour
 
 
+def derive_volume_m3(
+    volume_m3: float | None,
+    floor_area_m2: float | None,
+    ceiling_height_m: float | None,
+    default: float = 100.0,
+) -> float:
+    """Resolve a zone volume from explicit volume or area × height.
+
+    CONTAM describes zones by floor area and ceiling height; this project
+    historically stored only ``volume_m3``.  Resolution order:
+
+    1. Use ``volume_m3`` when provided (preserves backward compatibility).
+    2. Otherwise derive ``floor_area_m2 * ceiling_height_m`` when both
+       geometry fields are present.
+    3. Otherwise fall back to ``default``.
+    """
+    if volume_m3 is not None:
+        return volume_m3
+    if floor_area_m2 is not None and ceiling_height_m is not None:
+        return floor_area_m2 * ceiling_height_m
+    return default
+
+
 class ContamZoneNode:
     """Represents a single airflow node in the CONTAM multi-zone model.
 
@@ -57,12 +80,15 @@ class ContamZoneNode:
     - P: reference pressure [Pa]
     - D: air density [kg/m³]
     - volume: zone volume [m³]
+    - floor_area_m2 / ceiling_height_m: CONTAM zone geometry [m², m]
+    - elevation_m: relative floor elevation (CONTAM level) [m]
     - pathogen_mass: absolute pathogen mass in zone [copies]
     """
 
     __slots__ = (
         "zone_id", "volume_m3", "temperature_k",
         "pressure_pa", "density_kg_m3",
+        "floor_area_m2", "ceiling_height_m", "elevation_m",
     )
 
     def __init__(
@@ -72,12 +98,18 @@ class ContamZoneNode:
         temperature_k: float = DEFAULT_AIR_TEMP,
         pressure_pa: float = 101325.0,
         density_kg_m3: float = DEFAULT_AIR_DENSITY,
+        floor_area_m2: float | None = None,
+        ceiling_height_m: float | None = None,
+        elevation_m: float | None = None,
     ) -> None:
         self.zone_id = zone_id
         self.volume_m3 = volume_m3
         self.temperature_k = temperature_k
         self.pressure_pa = pressure_pa
         self.density_kg_m3 = density_kg_m3
+        self.floor_area_m2 = floor_area_m2
+        self.ceiling_height_m = ceiling_height_m
+        self.elevation_m = elevation_m
 
     def concentration(self, pathogen_mass: float) -> float:
         """Pathogen concentration [copies/m³]."""
@@ -170,13 +202,29 @@ class ContamTransportEngine:
         self._build_airflow_paths(air_flow_paths)
 
     def _build_zone_nodes(self, layout: dict[str, Any]) -> None:
-        """Create zone nodes from spatial layout."""
+        """Create zone nodes from spatial layout.
+
+        Reads optional CONTAM geometry fields (``floor_area_m2``,
+        ``ceiling_height_m``, ``elevation_m``) when present.  ``volume_m3``
+        is used directly when specified; otherwise it is derived from
+        floor area × ceiling height, falling back to 100.0 m³ when neither
+        is available.  Platforms that only specify ``volume_m3`` are
+        unaffected.
+        """
         for zone in layout.get("zones", []):
             zone_id = zone["id"]
-            volume = zone.get("volume_m3", 100.0)
+            floor_area = zone.get("floor_area_m2")
+            ceiling_height = zone.get("ceiling_height_m")
+            elevation = zone.get("elevation_m")
+            volume = derive_volume_m3(
+                zone.get("volume_m3"), floor_area, ceiling_height,
+            )
             self.zone_nodes[zone_id] = ContamZoneNode(
                 zone_id=zone_id,
                 volume_m3=volume,
+                floor_area_m2=floor_area,
+                ceiling_height_m=ceiling_height,
+                elevation_m=elevation,
             )
 
     def _build_hvac_recirculation_paths(self, airflow: dict[str, Any]) -> None:
