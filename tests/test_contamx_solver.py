@@ -129,7 +129,7 @@ def test_find_contamx_none_by_default():
 def test_find_contamx_config_binary_path(tmp_path):
     fake = tmp_path / "contamx"
     fake.write_text("#!/bin/sh\n")
-    os.chmod(fake, 0o755)
+    os.chmod(fake, 0o700)
     cfg = {"hvac": {"contamx": {"binary_path": str(fake)}}}
     assert find_contamx(cfg) == str(fake.resolve())
 
@@ -137,7 +137,7 @@ def test_find_contamx_config_binary_path(tmp_path):
 def test_find_contamx_env_var(tmp_path, monkeypatch):
     fake = tmp_path / "contamx3"
     fake.write_text("#!/bin/sh\n")
-    os.chmod(fake, 0o755)
+    os.chmod(fake, 0o700)
     monkeypatch.setenv("CONTAMX_BINARY", str(fake))
     assert find_contamx({}) == str(fake.resolve())
 
@@ -145,8 +145,9 @@ def test_find_contamx_env_var(tmp_path, monkeypatch):
 def test_run_contamx_raises_without_binary(tmp_path):
     prj = tmp_path / "p.prj"
     prj.write_text("ContamW 3.1\n")
+    prj_path = str(prj)
     with pytest.raises(ContamXUnavailable):
-        run_contamx(str(prj), binary=None, config={})
+        run_contamx(prj_path, binary=None, config={})
 
 
 def test_build_transport_engine_contamx_falls_back_to_native():
@@ -209,8 +210,9 @@ def test_sim_reader_volumetric_flow_conversion(tmp_path):
 def test_sim_reader_rejects_truncated_file(tmp_path):
     bad = tmp_path / "bad.sim"
     bad.write_bytes(struct.pack("<3i", 24, 1, 1))  # too short for header
+    bad_path = str(bad)
     with pytest.raises(ValueError):
-        SimResults(str(bad))
+        SimResults(bad_path)
 
 
 # ── ContamXTransportEngine airflow-field behavior ────────────────────────
@@ -285,12 +287,11 @@ def test_path_map_from_airflow_order():
 def test_benchmark_native_only_runs(capsys):
     from tools.contam_benchmark import main
 
-    rc = main([
+    main([
         "--platform", "data/platforms/destroyer_baseline",
         "--epochs", "3",
         "--inject", "Bridge:1e6",
     ])
-    assert rc == 0
     out = capsys.readouterr().out
     assert "ContamX unavailable" in out
     assert "copies/m^3" in out

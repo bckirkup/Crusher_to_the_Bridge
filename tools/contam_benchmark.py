@@ -118,7 +118,7 @@ def _parse_injections(specs: list[str] | None) -> dict[str, float]:
     return injections
 
 
-def main(argv: list[str] | None = None) -> int:
+def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(
         description="Benchmark native vs ContamX transport for a platform.",
     )
@@ -175,7 +175,7 @@ def main(argv: list[str] | None = None) -> int:
         final = native_traj[-1] if native_traj else {}
         for zone_id in sorted(final):
             print(f"  {zone_id:>16}: {final[zone_id]:.4g} copies/m^3")
-        return 0
+        return
 
     contamx_traj = _run_trajectory(contamx, initial_mass, args.epochs)
     divergence = _divergence(native_traj, contamx_traj)
@@ -183,8 +183,7 @@ def main(argv: list[str] | None = None) -> int:
     print(f"{'epoch':>6} {'L1 divergence':>16} {'Linf divergence':>16}")
     for epoch, d in enumerate(divergence):
         print(f"{epoch:>6} {d['l1']:>16.4g} {d['linf']:>16.4g}")
-    return 0
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    main()

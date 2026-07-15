@@ -45,6 +45,9 @@ from engines.py_contam_bridge import (
     ContamTransportEngine,
 )
 
+# Flows with magnitude below this (m³/h) are treated as no airflow.
+_FLOW_EPSILON_M3H = 1e-9
+
 
 class ContamXTransportEngine(ContamTransportEngine):
     """Transport engine whose airflow field comes from the ContamX solver.
@@ -95,7 +98,7 @@ class ContamXTransportEngine(ContamTransportEngine):
         for idx, (from_zone, to_zone, is_ducted) in enumerate(path_map):
             path_nr = idx + 1
             flow = path_flows_m3h.get(path_nr, 0.0)
-            if flow == 0.0:
+            if abs(flow) < _FLOW_EPSILON_M3H:
                 continue
             src, dst = (from_zone, to_zone) if flow > 0 else (to_zone, from_zone)
             self.airflow_paths.append(ContamAirflowPath(
