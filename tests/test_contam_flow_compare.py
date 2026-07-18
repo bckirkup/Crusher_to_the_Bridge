@@ -9,6 +9,8 @@ import json
 import sys
 from pathlib import Path
 
+import pytest
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
@@ -129,7 +131,7 @@ def test_contamx_report_kept_links_use_flow_m3h() -> None:
     rev = next(l for l in cx["kept_links"] if l["path_nr"] == 22)
     assert rev["from_zone"] == "Engine_Room"
     assert rev["to_zone"] == "Bridge"
-    assert rev["flow_m3h"] == 10.0
+    assert rev["flow_m3h"] == pytest.approx(10.0)
     # Must not raise when building the full report with SIM flows present
     report = build_flow_compare_report(
         "destroyer_baseline",
