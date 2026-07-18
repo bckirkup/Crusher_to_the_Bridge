@@ -181,6 +181,27 @@ def contamx_flow_report(
         and not str(r["kind"]).startswith("ahs_")
         and r["kind"] != "envelope_leak"
     ]
+    # Directed Crusher-style edges (match ContamXTransportEngine): negative
+    # SIM Flow0 reverses from→to. Classification rows keep path_map orientation
+    # + ``sim_flow_m3h``; degree / kept_links use signed→directed ``flow_m3h``.
+    kept_links: list[dict[str, Any]] = []
+    for row in kept:
+        flow = float(row.get("sim_flow_m3h") or 0.0)
+        src, dst = (
+            (row["from_zone"], row["to_zone"])
+            if flow >= 0.0
+            else (row["to_zone"], row["from_zone"])
+        )
+        kept_links.append({
+            "path_nr": row["path_nr"],
+            "kind": row["kind"],
+            "from_zone": src,
+            "to_zone": dst,
+            "flow_m3h": abs(flow),
+            "sim_flow_m3h": flow,
+            "path_type": "contamx_path",
+            "is_hvac_ducted": bool(row.get("is_hvac_ducted")),
+        })
     synth: list[dict[str, Any]] = []
     if path_flows_m3h is not None:
         for p in synthesize_ahs_recirculation_paths(
@@ -197,20 +218,21 @@ def contamx_flow_report(
     degree: dict[str, dict[str, float]] = defaultdict(
         lambda: {"out_m3h": 0.0, "in_m3h": 0.0, "out_edges": 0, "in_edges": 0},
     )
-    for link in kept + synth:
-        degree[link["from_zone"]]["out_m3h"] += float(link["flow_m3h"])
+    for link in kept_links + synth:
+        flow = float(link["flow_m3h"])
+        degree[link["from_zone"]]["out_m3h"] += flow
         degree[link["from_zone"]]["out_edges"] += 1
-        degree[link["to_zone"]]["in_m3h"] += float(link["flow_m3h"])
+        degree[link["to_zone"]]["in_m3h"] += flow
         degree[link["to_zone"]]["in_edges"] += 1
     return {
         "n_path_map": len(path_map),
         "fate_counts": fate_counts,
-        "n_kept_real_paths": len(kept),
+        "n_kept_real_paths": len(kept_links),
         "n_synth_ahs_paths": len(synth),
-        "n_crusher_paths": len(kept) + len(synth),
+        "n_crusher_paths": len(kept_links) + len(synth),
         "n_zero_flow_real_candidates": len(zero_real),
         "classified_paths": classified,
-        "kept_links": kept,
+        "kept_links": kept_links,
         "synth_ahs_links": synth,
         "zero_flow_real_candidates": zero_real,
         "zone_degree": {z: dict(v) for z, v in sorted(degree.items())},
