@@ -2,7 +2,8 @@
 
 **Scope:** Stackelberg decisions, information diffusion, reputation, operational impact (OIS), and external utility optimization.
 
-Single-ship Picard operations: [OPERATORS_MANUAL_SHIP.md](OPERATORS_MANUAL_SHIP.md).
+Single-ship Picard operations: [OPERATORS_MANUAL_SHIP.md](OPERATORS_MANUAL_SHIP.md).  
+**Docs index:** [README.md](README.md).
 
 ---
 

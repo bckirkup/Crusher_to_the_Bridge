@@ -1,7 +1,8 @@
 # Crusher-to-the-Bridge — Ship Operator's Manual (Picard)
 
 **Scope:** Single-ship biodefense simulation, diagnostics, protocols, and telemetry.  
-**Fleet / Stackelberg:** see [OPERATORS_MANUAL_GAME_THEORY.md](OPERATORS_MANUAL_GAME_THEORY.md).
+**Fleet / Stackelberg:** see [OPERATORS_MANUAL_GAME_THEORY.md](OPERATORS_MANUAL_GAME_THEORY.md).  
+**Docs index:** [README.md](README.md).
 
 ---
 

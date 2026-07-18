@@ -14,7 +14,7 @@ Crusher-to-the-Bridge biodefense digital twin platform.
 | **Platform** | Crusher-to-the-Bridge |
 | **Domain** | Maritime biodefense — multi-pathogen outbreak simulation |
 | **Architecture** | Decoupled bridging package connecting 5 independent simulation domains |
-| **Language** | Python 3.10+ (orchestrator, instruments, transport) + Java 11 (upstream ABM) |
+| **Language** | Python 3.11+ (orchestrator, instruments, transport) + Java 11 (upstream ABM) |
 | **Output Contract** | JSON telemetry → Streamlit dashboard + CDC/fleet-ingestible lab notebook |
 | **License** | MIT |
 
@@ -197,7 +197,7 @@ zone names (e.g., "Bridge", "MedBay") or pathogen IDs exist.
 ### Law 3: Scalar Bounds Are Physical Laws
 Probabilities, compliance rates, and filtration efficiencies: `[0.0, 1.0]`.
 Volumes, budgets, ACH values, recovery days: `≥ 0`.
-Run `python tools/sanity_checker.py` to validate before committing.
+Run `python3 tools/sanity_checker.py` to validate before committing.
 
 ### Law 4: Referential Integrity Is Mandatory
 Every room reference in airflow paths, protocol zone closures, and

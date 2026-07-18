@@ -1,5 +1,8 @@
 # CTB Wearable Anomaly Detection Redesign: Confounder-Aware Scoring
 
+> **Status:** Implemented. Living operator notes live under wearable / cascade skills
+> (`.agents/skills/wearable-anomaly-scoring/`). This file is the design record.
+
 ## Problem
 
 The current anomaly detector fires a z-score threshold on each channel independently,

@@ -4,11 +4,12 @@
 **Platform:** Biodefense Digital Twin for Maritime Outbreak Simulation  
 **License:** MIT
 
-> **Manuals bifurcated (v2.3):**
-> - **Ship / Picard:** [OPERATORS_MANUAL_SHIP.md](OPERATORS_MANUAL_SHIP.md) — single-cruise simulation, config.yaml, instruments, SOPs
-> - **Fleet / game theory / Presidio:** [OPERATORS_MANUAL_GAME_THEORY.md](OPERATORS_MANUAL_GAME_THEORY.md) — multi-cruise decisions, experience, economics
+> **Status:** Historical reference. Prefer the living manuals:
+> - **Ship / Picard:** [OPERATORS_MANUAL_SHIP.md](OPERATORS_MANUAL_SHIP.md)
+> - **Fleet / game theory / Presidio:** [OPERATORS_MANUAL_GAME_THEORY.md](OPERATORS_MANUAL_GAME_THEORY.md)
+> - **Docs index:** [README.md](README.md)
 >
-> This file retains the full historical reference for the repository. GUI (dashboard) documentation is unchanged here but deferred for future LCARS updates.
+> GUI (dashboard) documentation here is deferred for future LCARS updates.
 
 ---
 
@@ -41,16 +42,16 @@ pip install -r requirements.txt
 
 ```bash
 # Step 1: Validate configuration files (including config.yaml)
-python tools/sanity_checker.py --from-config
+python3 tools/sanity_checker.py --from-config
 
 # Step 2: Execute the simulation (default 24 epochs from config.yaml)
-python orchestrator.py
+python3 orchestrator.py
 
 # Or override the epoch count via CLI:
-python orchestrator.py --epochs 250
+python3 orchestrator.py --epochs 250
 
 # Step 3: Launch the interactive dashboard
-streamlit run dashboard.py
+python3 -m streamlit run dashboard.py
 ```
 
 ### Windows Launcher (Any Directory)

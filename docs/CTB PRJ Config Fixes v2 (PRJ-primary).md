@@ -1,5 +1,8 @@
 # Devin Task: PRJ Configuration Fixes (v2 — PRJ as Source of Truth)
 
+> **Status:** Implemented (merged). Living Contam guidance:
+> [CONTAM_INTEROP.md](CONTAM_INTEROP.md) and [CONTAM_PRJ_AUDIT.md](CONTAM_PRJ_AUDIT.md).
+
 ## Direction of Truth
 
 ```

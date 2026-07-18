@@ -1,5 +1,8 @@
 # Devin Task: HVAC Recirculation Topology Fix (Star → Plenum)
 
+> **Status:** Implemented (merged). Native + ContamX AHS use AHU star topology;
+> see [CONTAM_INTEROP.md](CONTAM_INTEROP.md). This file is the design brief.
+
 ## Problem
 
 The native transport engine (`py_contam_bridge.py`) builds HVAC recirculation

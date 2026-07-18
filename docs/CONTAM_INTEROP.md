@@ -1,5 +1,7 @@
 # CONTAM Interoperability
 
+> **Status:** Living. Index: [README.md](README.md).
+
 Crusher treats a ContamW **3.4 `.prj` as the high-fidelity airflow source of
 truth**. The native Python engine is the *fast, lower-fidelity* twin.
 
