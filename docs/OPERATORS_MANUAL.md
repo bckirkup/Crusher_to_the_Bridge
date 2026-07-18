@@ -294,8 +294,11 @@ airflow field from a ContamW 3.4 `.prj` via the NIST ContamX binary. Prefer an
 authentic Contam project (`hvac.contamx.prj_path`); fiction ships may ship a
 bootstrap bundle under `data/platforms/<id>/contam/`. See
 [`docs/CONTAM_INTEROP.md`](CONTAM_INTEROP.md) for Path A (ContamX) vs Path B
-(simplify `.prj` → JSON), the fiction-only JSON→PRJ bootstrap, and outcome
-comparison tools.
+(simplify `.prj` → JSON), the fiction-only JSON→PRJ bootstrap, the `.SIM`
+reader contract (Flow0 keyed by embedded path `nr`), and outcome comparison
+tools (`tools/contam_engine_compare.py`, `tools/contam_flow_compare.py`).
+Drop the ContamX binary under `third_party/contamx/` (see that folder’s
+README) or set `CONTAMX_BINARY`.
 
 ```yaml
 hvac:

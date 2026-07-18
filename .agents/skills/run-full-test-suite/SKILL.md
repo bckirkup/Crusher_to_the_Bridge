@@ -55,6 +55,10 @@ python3 -m pytest tests/test_infection_counters.py -v --tb=short
 # CONTAM physics (HVAC mass-balance, ACH, filter efficiency, natural decay)
 python3 -m pytest tests/test_py_contam_bridge.py -v --tb=short
 
+# ContamX seam (SIM reader embedded path nr, AHS bridge, compare/flow tools)
+python3 -m pytest tests/test_contamx_solver.py tests/test_contamx_ahs_bridge.py \
+  tests/test_contam_flow_compare.py tests/test_contam_engine_compare.py -v --tb=short
+
 # Shedding variance + cabin-mate transmission
 python3 -m pytest tests/test_shedding_variance_cabin_mates.py tests/test_cabin_corridor_transmission.py -v --tb=short
 
@@ -191,6 +195,9 @@ python3 -c "import json; c=json.load(open('telemetry_buffer/simulation_history.j
 | `test_dashboard_extended.py` | 21 | `dashboard/` | zone_metric, color_scale, lcars_rgba, theme, fleet_viz, spatial_viz |
 | `test_law_compliance.py` | 20 | All modules | Laws 1-6, extended to picard_framework/, crusher_labs/, decision_engine/ |
 | `test_py_contam_bridge.py` | 19 | `engines/py_contam_bridge.py` | HVAC mass conservation, ACH, filter efficiency, decay, path construction |
+| `test_contamx_solver.py` | ~17 | `engines/contamx_runner.py`, `contamx_transport.py` | ContamX discovery, `.SIM` reader (embedded path `nr`), transport engine |
+| `test_contam_flow_compare.py` | ~6 | `tools/contam_flow_compare.py` | Native vs ContamX path fate / kept-link Flow0 diagnostics |
+| `test_contam_engine_compare.py` | ~8 | `tools/contam_engine_compare.py` | Compare suite jobs, path_inventory offline |
 | `test_crusher_labs_modalities.py` | 19 | `crusher_labs/modalities/` | Fidelity tiers, lab_notebook, RDT, sequencing CLR, PCR Ct |
 | `test_scripts_tools.py` | 14 | `scripts/`, `tools/gis_spatial_bridge.py` | Blueprint shapes, resolve_column, group_hvac_zones, imports |
 | `test_decision_engine.py` | 9 | `decision_engine/` | ObservationModel, DecisionRound, ExperienceStore |

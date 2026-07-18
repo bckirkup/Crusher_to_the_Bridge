@@ -44,6 +44,23 @@ set CONTAMX_BINARY=%CD%\third_party\contamx\ContamX3.exe
 python tools\contam_engine_compare.py --suite data\config\contam_compare\suite.json
 ```
 
+Per-path Flow0 diagnostic (after a compare, or standalone):
+
+```bat
+python tools\contam_flow_compare.py --platform destroyer_baseline --inject Bridge --run-contamx --output telemetry_buffer\contam_flow_destroyer.json
+```
+
+Healthy destroyer read (post SIM `nr` fix): ~17 kept + ~8 AHS synth; Fan_25/26/27
+≈ 16.7 / 13.3 / 10 m³/h. If all kept links share ~300 m³/h, the SIM reader is
+regressing — see `docs/CONTAM_INTEROP.md` (`.SIM` reader contract) and skill
+`contamx-interop`.
+
+Offline regression without ContamX:
+
+```bat
+python tools\contam_flow_compare.py --platform destroyer_baseline --inject Bridge --sim tests\fixtures\contam\destroyer_baseline.sim
+```
+
 ## Quick start (Linux / macOS)
 
 ```bash
@@ -53,4 +70,6 @@ python3 tools/contam_engine_compare.py --suite data/config/contam_compare/suite.
 ```
 
 Platform ContamW 3.4 projects live under `data/platforms/<id>/contam/` and
-**are** tracked in git (fiction-ship PRJs for dual-path runs).
+**are** tracked in git (fiction-ship PRJs for dual-path runs). Runtime `.sim`
+sidecars under platforms are gitignored; the destroyer Flow0 fixture lives at
+`tests/fixtures/contam/destroyer_baseline.sim`.

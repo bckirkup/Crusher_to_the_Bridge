@@ -24,7 +24,7 @@ schedules. Remaining gaps: passive cross-zone still `fan_cvf`, and
 | Named doors / passageways | Catalog areas **doorway 1.8 / passageway 2.0 / hatch 0.36 / ladder 0.6–0.8 / stairs–elevators 1.5–4 / open voids 5–10 m²**; `cabin_relief` 0.02 m² | **Sound** (realistic open areas) |
 | Opening schedules | `DoorTrafficW` (day ~0.95, night undercut 0.08), `HatchOccasionalW`, `ShaftOpenW` (~0.85–1.0); never zero | **Sound** (wired on adjacency paths) |
 | Cross-zone links | Always exported as `fan_cvf` (incl. native `is_hvac_ducted: false` “passive” ladder wells) | **Questionable** (matches native twin; not orifice physics) |
-| `fan_cvf` element syntax | Matches ContamW 3.4 fixture (`28 fan_cvf`, `Q_m3s u_F=3`) | **Likely sound** — confirm with SIM dump |
+| `fan_cvf` element syntax | Matches ContamW 3.4 fixture (`28 fan_cvf`, `Q_m3s u_F=3`) | **Sound** (SIM Fan_25/26/27 match design after reader fix) |
 | `OAFracW` schedule | Always `fo=0.2`; per-AHU `oa_fraction` overrides only rescale recirc Fahs | **Export bug** when override ≠ 0.2 |
 | `HvacDuty` | 0.5 / 1.0 / 0.5 on supply/return; sim window often hits night half-duty | Intentional hobbyist |
 | `NightSetbk` | Emitted but unwired to paths | Harmless bloat |
@@ -52,8 +52,8 @@ Orifice estimate: \(Q \approx C_d A \sqrt{2\Delta P/\rho}\) with \(C_d=0.6\),
 - Cross-zone: 11 `fan_cvf` paths; rates = native÷room×room (16.7 / 13.3 / 10 m³/h).
 - Bridge is **solo AHS** → no AHS room↔room synth; Bridge→ship coupling must come from fans + orifices.
 - Ducts only on `zone_main` / `zone_lower` (override) — OK.
-- Prior compare-suite ContamX `n_paths=6` (= AHS2 synth only) was consistent with crack-scale orifices dropping; **re-run** `contam_flow_compare --run-contamx` after this resize.
-- **Post-resize (2026-07-18T16:30Z suite):** ContamX still reports `n_paths=6`, but Bridge inject reaches Engine_Room (Mess/Berthing stay ≈0) — sparse residual coupling, not a restored ACH twin. See § ContamX→Crusher implications.
+- Prior compare-suite ContamX `n_paths=6` was a **SIM reader xref bug**, not orifice physics (see § ContamX→Crusher implications).
+- **Post-fix flow_compare (embedded path `nr`):** ~17 kept + 8 AHS synth; Fan_25/26/27 ≈ 16.7/13.3/10 m³/h; Bridge out ≈76 m³/h (native 97). Re-run full compare suite on Windows to refresh L1 numbers.
 
 ### `enterprise_constitution_tos` — **improved** (openings); OAFrac still buggy
 
@@ -82,47 +82,48 @@ Orifice estimate: \(Q \approx C_d A \sqrt{2\Delta P/\rho}\) with \(C_d=0.6\),
 |-----------|----------------|------------------------------|
 | Envelope orifice | Tiny intentional | Skipped (envelope) |
 | Adjacency orifice | Full-size doors + schedules | Should carry substantial Q when ΔP≠0 |
-| `fan_cvf` | Forced volume | Should be non-zero; if SIM≈0 → **export/solver/join bug** |
-| AHS Fahs | Forced design | Skipped as edges; feed AHS synth |
+| `fan_cvf` | Forced volume | Non-zero at design Q after healthy SIM read; if identical across fans → **reader bug** |
+| AHS Fahs | Forced design | Skipped as edges; feed AHS synth from supply/return/recirc Flow0 |
 | Duct spines | Contam-only | Invisible to Crusher Flow0 |
 
-### Post-resize compare suite (2026-07-18T16:30Z)
+### Post-resize compare suite (2026-07-18T16:30Z) — **superseded by SIM reader fix**
 
-Re-ran `contam_engine_compare` after realistic openings. **Orifice resize did
-not restore ContamX↔native transport agreement.**
+Pre-fix suite showed ContamX path collapse (`n_paths=6`, huge L1). That
+result was dominated by a Flow0 join bug (below), not orifice sizing.
 
-| Job | native paths | ContamX paths | final L1 | ContamX plume (inject) | note |
-|-----|--------------|---------------|----------|------------------------|------|
-| destroyer_transport | 31 | **6** | 2522 | Bridge+Engine_Room; Mess/Berthing≈0 | Still sparse; not shipwide |
-| enterprise_constitution_transport | 102 | 20 | 4986 | Bridge→0; Transporter/Engineering sinks | Sparse sinks |
-| enterprise_galaxy_transport | 114 | 22 | 2214 | Bridge→0; Science/Engineering/Ten-Forward | Sparse sinks |
-| mega_cruise_transport | 2619 | 695 | 1088 | Atrium inject stays local vs native Bridge bleed | Scale gap |
-| destroyer_fullsim / galaxy_fullsim | — | — | ΔAR=0 | attack_rate=1.0 both engines | Saturated; non-discriminating |
+### Live `contam_flow_compare` — before vs after SIM `nr` fix
 
-Native transport wall-clock remains ≫ ContamX (≈16–194× on these jobs);
-full-sim wall-clock is similar (Picard overhead dominates).
+| Signal | Broken xref join | Embedded path `nr` (fixed) |
+|--------|------------------|----------------------------|
+| crusher_paths | 6 kept + 0 AHS synth | **17 kept + 8 AHS synth** |
+| Fan_25 / 26 / 27 | all ≈300 m³/h | **≈16.8 / 13.4 / 10.1** (design) |
+| Bridge out | 600 m³/h | **≈76 m³/h** (native 97) |
+| zero-flow reals | 11 | **0** |
 
-`n_paths=6` on destroyer is **no longer safely read as “AHS2 synth only”**:
-ContamX finals put mass in Engine_Room from a Bridge inject, so at least one
-Bridge↔Engine edge (or equivalent) survives — but Mess_Hall/Berthing stay
-empty, so the ContamX Crusher graph is still a tiny fraction of the native ACH
-digraph. Next Windows step: re-run compare (now emits `path_inventory`) and
-`contam_flow_compare --run-contamx` to list the six survivors and confirm
-whether `fan_cvf` Flow0 is ~0 vs a path_nr join bug.
+**Root cause:** `SimResults.path_volumetric_flow_m3h` keyed flows by the header
+cross-reference `(typ, nr)` table. ContamX 3.x xref content does not reliably
+map slot→path_nr; the real `nr` lives in each path record
+(`nr(i4) dP Flow0 Flow1`). Broken mapping assigned AHS terminal mass (~0.1 kg/s)
+onto fan path numbers. **Fixed:** key by embedded `nr`; skip trailing
+same-`sim_time` summary frames with invalid node densities. Fixture:
+`tests/fixtures/contam/destroyer_baseline.sim`.
 
-Crack-scale openings are fixed. Forced fans *should* still couple Bridge on
-destroyer; confirm with SIM dump before calibrating native ACH to ContamX.
+Crack-scale openings remain fixed. ContamX→Crusher coupling on destroyer is
+now in the right order of magnitude; remaining fidelity work is OAFrac wiring,
+passive `fan_cvf`→orifice export, and mega duct/fan expansion — then re-run the
+compare suite for updated L1 baselines.
 
 ---
 
 ## Remaining fixes (priority)
 
-1. ~~**Resize orifice catalog**~~ — done (this change).
-2. **Windows:** re-run suite + `contam_flow_compare --run-contamx` on destroyer;
-   use new compare `path_inventory` / `contamx_injection_isolated` fields.
-3. **Wire per-AHU `oa_fraction` into Contam schedules** (or drop misleading overrides).
-4. **Export passive cross-zone links as orifices** (sized for native m³/h at a reference ΔP), keep `fan_cvf` only when `is_hvac_ducted: true`.
-5. **Mega:** restrict `duct_hvac_ids`; reconsider combinatorial fan expansion vs shaft orifices.
-6. If fans still SIM≈0 after (2): fix `fan_cvf` export / ContamX join before treating ContamX as calibration ground truth.
+1. ~~**Resize orifice catalog**~~ — done.
+2. ~~**SIM Flow0 path_nr join**~~ — done (embedded record `nr`; regression fixture).
+3. **Windows:** re-run `contam_engine_compare` suite + `contam_flow_compare --run-contamx`
+   after pulling the reader fix; expect destroyer kept≈17 + synth≈8 and fan design rates.
+4. **Wire per-AHU `oa_fraction` into Contam schedules** (or drop misleading overrides).
+5. **Export passive cross-zone links as orifices** (sized for native m³/h at a reference ΔP), keep `fan_cvf` only when `is_hvac_ducted: true`.
+6. **Mega:** restrict `duct_hvac_ids`; reconsider combinatorial fan expansion vs shaft orifices.
 
-The four PRJs remain fiction ACH twins, now with **physically plausible openings** — path collapse after ContamX→Crusher filtering is the open fidelity gap.
+The four PRJs remain fiction ACH twins with physically plausible openings; ContamX
+Flow0 join is trustworthy again for calibration comparisons.
