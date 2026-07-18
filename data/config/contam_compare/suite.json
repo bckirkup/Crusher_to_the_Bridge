@@ -1,0 +1,18 @@
+{
+  "description": "Native vs ContamX engine comparison suite (results + wall-clock).",
+  "output_dir": "telemetry_buffer/contam_compare",
+  "defaults": {
+    "seed": 42,
+    "repeats": 3,
+    "filter_efficiency": 0.50,
+    "natural_decay_rate": 0.10
+  },
+  "jobs": [
+    "jobs/destroyer_transport.json",
+    "jobs/destroyer_fullsim.json",
+    "jobs/enterprise_constitution_transport.json",
+    "jobs/enterprise_galaxy_transport.json",
+    "jobs/enterprise_galaxy_fullsim.json",
+    "jobs/mega_cruise_transport.json"
+  ]
+}

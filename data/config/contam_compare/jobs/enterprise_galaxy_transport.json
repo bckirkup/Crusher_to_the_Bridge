@@ -1,0 +1,9 @@
+{
+  "id": "enterprise_galaxy_transport",
+  "mode": "transport",
+  "platform": "enterprise_galaxy_tng",
+  "epochs": 12,
+  "inject": ["Bridge:1e6"],
+  "repeats": 3,
+  "description": "Enterprise Galaxy — transport divergence + timing"
+}

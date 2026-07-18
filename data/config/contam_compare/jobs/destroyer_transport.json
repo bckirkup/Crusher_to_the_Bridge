@@ -1,0 +1,9 @@
+{
+  "id": "destroyer_transport",
+  "mode": "transport",
+  "platform": "destroyer_baseline",
+  "epochs": 12,
+  "inject": ["Bridge:1e6"],
+  "repeats": 5,
+  "description": "Small ship — transport concentration divergence + timing"
+}
