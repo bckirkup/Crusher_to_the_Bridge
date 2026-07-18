@@ -1392,10 +1392,16 @@ assets live under `data/platforms/<platform_id>/`:
 python3 scripts/precompute_deck_assets.py   # all catalog platforms
 ```
 
-This writes `deck_graphics.geojson`, `deck_hull.png`, and `deck_manifest.json`
-(visual-only; simulation JSON unchanged). Regenerate after editing
-`spatial_layout.json` zones. GIS import: `python3 tools/gis_spatial_bridge.py
---input data/shp/....geojson --output data/platforms/<id>/ --emit-deck-graphics`.
+This writes `deck_graphics.geojson` (per-deck non-overlapping compartment packing),
+`deck_hull.png`, and `deck_manifest.json` (visual-only; simulation JSON unchanged).
+Regenerate after editing `spatial_layout.json` zones. GIS import:
+`python3 tools/gis_spatial_bridge.py --input data/shp/....geojson
+--output data/platforms/<id>/ --emit-deck-graphics`.
+
+Optional **user architectural plates** live under
+`data/platforms/<id>/graphics/` (`elevation.jpg`, `plan_overview.jpg`,
+`graphics.json`). The dashboard prefers these over legacy Wikimedia profile
+photos stretched into plan view. See `CLASS_PHOTO_ATTRIBUTION.md`.
 
 **USS Crusher — Main Bridge Display** with Condition Green / Yellow / Red Alert banners.
 
@@ -1407,8 +1413,10 @@ transmission vector analysis, epidemic curves, cost ledger.
 
 ### Station 2: Tactical Sensor Grid
 
-Class-accurate deck plan (pydeck or Plotly): hull silhouette, compartment footprints,
-deck filter, epoch slider; aerosol / fomite / symptomatic overlays.
+Architectural drawing layout (Plotly): **ship elevation** (profile, one band per
+deck) beside a **single-deck top-down plan** with contamination overlays. Decks
+are never stacked into one plan plane. Epoch slider; aerosol / fomite /
+symptomatic overlays; optional experimental pydeck plan renderer.
 
 ### Station 5: Fleet Operations
 

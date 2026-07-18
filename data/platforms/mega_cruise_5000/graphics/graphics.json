@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0",
+  "description": "User-supplied architectural underlays for the LCARS tactical map. Elevation is a side profile; plan_overview is a top-down hull plate used for each selected deck.",
+  "elevation": {
+    "file": "elevation.jpg",
+    "style": "ai_generated_notional",
+    "credit": "Crusher-to-the-Bridge — notional mega-cruise elevation (AI-generated schematic, original composition)",
+    "license": "Original work"
+  },
+  "plan": {
+    "file": "plan_overview.jpg",
+    "style": "ai_generated_notional",
+    "credit": "Crusher-to-the-Bridge — notional mega-cruise plan (AI-generated schematic, original composition)",
+    "license": "Original work"
+  },
+  "deck_plans": {}
+}

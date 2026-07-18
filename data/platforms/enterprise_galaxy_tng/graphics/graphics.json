@@ -1,0 +1,19 @@
+{
+  "schema_version": "1.0",
+  "description": "User-supplied architectural underlays. Fiction-adapted Galaxy-class silhouette — simplified geometry, not a reproduction of any televised Star Trek artwork.",
+  "elevation": {
+    "file": "elevation.jpg",
+    "style": "ai_generated_notional",
+    "credit": "Crusher-to-the-Bridge — fiction-adapted Galaxy-inspired elevation (AI-generated schematic, original composition)",
+    "license": "Original work",
+    "fiction_adapted": true
+  },
+  "plan": {
+    "file": "plan_overview.jpg",
+    "style": "ai_generated_notional",
+    "credit": "Crusher-to-the-Bridge — fiction-adapted Galaxy-inspired plan (AI-generated schematic, original composition)",
+    "license": "Original work",
+    "fiction_adapted": true
+  },
+  "deck_plans": {}
+}

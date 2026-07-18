@@ -4,14 +4,14 @@ from __future__ import annotations
 
 import json
 import os
+from collections import defaultdict
 from typing import Any
 
 from blueprint_shapes import (
-    HULL_FAMILY,
-    blueprint_compartment,
     hull_feature,
     hull_waterline_feature,
 )
+from compartment_packer import pack_deck_compartments
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -21,7 +21,12 @@ def build_representative_geojson(
     layout: dict[str, Any],
     airflow: dict[str, Any],
 ) -> dict[str, Any]:
-    """Build FeatureCollection for deck_graphics.geojson."""
+    """Build FeatureCollection for deck_graphics.geojson.
+
+    Compartments are packed **per deck** into the hull plan (length × beam)
+    so footprints on the same deck do not overwrite each other. Cross-deck
+    stacking is a dashboard concern (elevation + single-deck plan), not GeoJSON.
+    """
     dims = layout.get("deck_dimensions", {}) or {}
     length_m = float(dims.get("length_m", 120))
     beam_m = float(dims.get("beam_m", 15))
@@ -31,40 +36,52 @@ def build_representative_geojson(
         hull_waterline_feature(platform_id, length_m, beam_m),
     ]
 
+    by_deck: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for zone in layout.get("zones", []):
-        zid = zone["id"]
-        display = zone.get("display", {})
-        cx = float(display.get("x", 0))
-        cy = float(display.get("y", 0))
-        vol = float(zone.get("volume_m3", 100))
-        ztype = zone.get("type", "Free")
-        ring = blueprint_compartment(cx, cy, vol, ztype)
-        features.append({
-            "type": "Feature",
-            "properties": {
-                "kind": "compartment",
-                "zone_id": zid,
-                "deck": zone.get("deck", "main"),
-                "room_type": ztype,
-            },
-            "geometry": {"type": "Polygon", "coordinates": [ring]},
-        })
+        by_deck[str(zone.get("deck", "main"))].append(zone)
+
+    packed_centers: dict[str, tuple[float, float]] = {}
+    for deck, zones in by_deck.items():
+        rings = pack_deck_compartments(zones, length_m, beam_m)
+        for zone in zones:
+            zid = zone["id"]
+            ring = rings.get(zid)
+            if not ring:
+                continue
+            xs = [p[0] for p in ring[:-1]]
+            ys = [p[1] for p in ring[:-1]]
+            packed_centers[zid] = (sum(xs) / len(xs), sum(ys) / len(ys))
+            features.append({
+                "type": "Feature",
+                "properties": {
+                    "kind": "compartment",
+                    "zone_id": zid,
+                    "deck": deck,
+                    "room_type": zone.get("type", "Free"),
+                },
+                "geometry": {"type": "Polygon", "coordinates": [ring]},
+            })
 
     zmap = {z["id"]: z for z in layout.get("zones", [])}
     for link in airflow.get("adjacency", []):
         fz, tz = link.get("from"), link.get("to")
         if fz not in zmap or tz not in zmap:
             continue
-        fxy = zmap[fz].get("display", {})
-        txy = zmap[tz].get("display", {})
+        # Only draw HVAC links when both ends share a deck (plan-view readable).
+        if zmap[fz].get("deck", "main") != zmap[tz].get("deck", "main"):
+            continue
+        fxy = packed_centers.get(fz)
+        txy = packed_centers.get(tz)
+        if not fxy or not txy:
+            continue
         features.append({
             "type": "Feature",
             "properties": {"kind": "hvac_path", "from": fz, "to": tz},
             "geometry": {
                 "type": "LineString",
                 "coordinates": [
-                    [float(fxy.get("x", 0)), float(fxy.get("y", 0))],
-                    [float(txy.get("x", 0)), float(txy.get("y", 0))],
+                    [float(fxy[0]), float(fxy[1])],
+                    [float(txy[0]), float(txy[1])],
                 ],
             },
         })
@@ -128,6 +145,7 @@ def build_manifest(
     }
     tier = footprint_tier
     disclaimer = _footprint_disclaimer(tier)
+    decks = sorted({str(z.get("deck", "main")) for z in layout.get("zones", [])})
     return {
         "platform_id": platform_id,
         "ship_class_label": labels.get(platform_id, platform_id.replace("_", " ").title()),
@@ -136,13 +154,16 @@ def build_manifest(
         "provenance": [
             "spatial_layout.json description and deck_dimensions",
             f"zone count: {len(zone_ids)}",
+            "per-deck non-overlapping compartment packing",
         ],
         "disclaimer": disclaimer,
         "zone_ids": zone_ids,
+        "decks": decks,
         "view_bounds": view_bounds,
         "assets": {
             "deck_graphics": "deck_graphics.geojson",
             "deck_hull": "deck_hull.png",
             "deck_blueprint_bg": "deck_blueprint_bg.png",
+            "architectural_graphics": "graphics/graphics.json",
         },
     }

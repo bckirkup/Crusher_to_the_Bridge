@@ -10,6 +10,10 @@ from typing import Any
 import streamlit as st
 import yaml
 
+from dashboard.architectural_graphics import (
+    ArchitecturalGraphics,
+    load_architectural_graphics,
+)
 from dashboard.paths import (
     CONFIG_YAML,
     DEFAULT_PICARD_SPEC,
@@ -35,6 +39,7 @@ class PlatformBundle:
     hull_png_path: str | None
     blueprint_bg_path: str | None
     zone_coords: dict[str, dict[str, Any]]
+    architectural: ArchitecturalGraphics | None = None
 
 
 def list_platform_ids() -> list[str]:
@@ -185,6 +190,9 @@ def load_platform_bundle(platform_id: str) -> PlatformBundle:
     gfx = _load_json(os.path.join(pdir, "deck_graphics.geojson"))
     hull_path = os.path.join(pdir, "deck_hull.png")
     bg_path = os.path.join(pdir, "deck_blueprint_bg.png")
+    architectural = load_architectural_graphics(pdir)
+    # Prefer user-supplied plan plate over legacy photo-stretched blueprint underlay.
+    plan_path = architectural.plan_overview_path
     return PlatformBundle(
         platform_id=platform_id,
         layout=layout,
@@ -192,8 +200,13 @@ def load_platform_bundle(platform_id: str) -> PlatformBundle:
         manifest=manifest,
         deck_graphics=gfx,
         hull_png_path=hull_path if os.path.isfile(hull_path) else None,
-        blueprint_bg_path=bg_path if os.path.isfile(bg_path) else None,
+        blueprint_bg_path=(
+            plan_path
+            if plan_path
+            else (bg_path if os.path.isfile(bg_path) else None)
+        ),
         zone_coords=get_zone_coords(layout),
+        architectural=architectural,
     )
 
 

@@ -5,7 +5,8 @@
   "representative_of": "Mega cruise ship (~5,000 passengers, ~2,000 crew), Oasis-class scale. Cabin-corridor resolution: 81 passenger corridor sections (~67 pax each) and 12 crew corridor sections (~170 crew each) replace le",
   "provenance": [
     "spatial_layout.json description and deck_dimensions",
-    "zone count: 129"
+    "zone count: 129",
+    "per-deck non-overlapping compartment packing"
   ],
   "disclaimer": "Footprints are class-representative for simulation zones, not a surveyed deck plan of one vessel.",
   "zone_ids": [
@@ -139,23 +140,80 @@
     "Crew_Corridor_D4_Mid",
     "Crew_Corridor_D4_Aft"
   ],
+  "decks": [
+    "0_Engine",
+    "0_Technical",
+    "10_Cabins",
+    "11_Cabins",
+    "12_Cabins",
+    "13_Cabins",
+    "14_Cabins",
+    "14_Spa",
+    "14_Youth",
+    "15_Pool",
+    "15_Service",
+    "16_Bridge",
+    "16_Buffet",
+    "16_Solarium",
+    "1_Crew",
+    "1_Engine",
+    "1_Service",
+    "1_Stores",
+    "2_Crew",
+    "2_Medical",
+    "3_Crew",
+    "3_Dining",
+    "3_Entertainment",
+    "3_Service",
+    "4_Crew",
+    "4_Dining",
+    "4_Entertainment",
+    "4_Theater",
+    "5_Promenade",
+    "6_Aqua",
+    "6_Cabins",
+    "6_Public",
+    "6_Service",
+    "7_Cabins",
+    "8_Cabins",
+    "8_CentralPark",
+    "9_Cabins"
+  ],
   "view_bounds": {
-    "xmin": 2.24,
-    "xmax": 363.38,
-    "ymin": -14.132901680684451,
-    "ymax": 132.92949858673012
+    "xmin": -2.0,
+    "xmax": 364.0,
+    "ymin": -2.0,
+    "ymax": 66.0
   },
   "assets": {
     "deck_graphics": "deck_graphics.geojson",
     "deck_hull": "deck_hull.png",
-    "deck_blueprint_bg": "deck_blueprint_bg.png"
+    "deck_blueprint_bg": "deck_blueprint_bg.png",
+    "architectural_graphics": "graphics/graphics.json",
+    "plan_overview": "graphics/plan_overview.jpg",
+    "elevation": "graphics/elevation.jpg"
   },
-  "background_plate": "reference_photo_composite",
+  "background_plate": "architectural_plan",
   "reference_photo": {
-    "wikimedia_title": "File:Icon of the Seas (kahunapulej).jpg",
-    "source_page": null,
-    "license": "CC BY-SA 2.0",
-    "credit": "Kahunapule Michael Johnson / Wikimedia Commons — Icon of the Seas (Royal Caribbean)",
+    "license": "Original work (AI-generated notional schematic)",
+    "credit": "Crusher-to-the-Bridge — notional mega-cruise architectural plates (plan + elevation)",
     "local_file": "reference_photo.jpg"
+  },
+  "architectural_graphics": {
+    "schema_version": "1.0",
+    "description": "User-supplied architectural underlays for the LCARS tactical map. Elevation is a side profile; plan_overview is a top-down hull plate used for each selected deck.",
+    "elevation": {
+      "file": "elevation.jpg",
+      "style": "ai_generated_notional",
+      "credit": "Crusher-to-the-Bridge — notional mega-cruise elevation (AI-generated schematic, original composition)",
+      "license": "Original work"
+    },
+    "plan": {
+      "file": "plan_overview.jpg",
+      "style": "ai_generated_notional",
+      "credit": "Crusher-to-the-Bridge — notional mega-cruise plan (AI-generated schematic, original composition)",
+      "license": "Original work"
+    },
+    "deck_plans": {}
   }
 }

@@ -5,7 +5,8 @@
   "representative_of": "Galaxy-class explorer (NCC-1701-D era). Fiction-adapted 16-zone layout; mixed crew and civilian families.",
   "provenance": [
     "spatial_layout.json description and deck_dimensions",
-    "zone count: 17"
+    "zone count: 17",
+    "per-deck non-overlapping compartment packing"
   ],
   "disclaimer": "Fiction-adapted layout for demonstration; not an official starship blueprint.",
   "zone_ids": [
@@ -27,21 +28,60 @@
     "Schoolroom",
     "Mess_Hall"
   ],
+  "decks": [
+    "drive_section",
+    "saucer_1",
+    "saucer_10",
+    "saucer_11",
+    "saucer_12",
+    "saucer_15",
+    "saucer_16",
+    "saucer_17",
+    "saucer_23",
+    "saucer_24",
+    "saucer_25",
+    "saucer_4",
+    "saucer_6",
+    "saucer_8",
+    "saucer_9"
+  ],
   "view_bounds": {
-    "xmin": 23.445,
-    "xmax": 582.8000000000001,
-    "ymin": -0.4265803361368894,
-    "ymax": 366.14
+    "xmin": -2.0,
+    "xmax": 644.0,
+    "ymin": -2.0,
+    "ymax": 465.0
   },
   "assets": {
     "deck_graphics": "deck_graphics.geojson",
     "deck_hull": "deck_hull.png",
-    "deck_blueprint_bg": "deck_blueprint_bg.png"
+    "deck_blueprint_bg": "deck_blueprint_bg.png",
+    "architectural_graphics": "graphics/graphics.json",
+    "plan_overview": "graphics/plan_overview.jpg",
+    "elevation": "graphics/elevation.jpg"
   },
-  "background_plate": "fiction_schematic",
+  "background_plate": "architectural_plan",
   "reference_photo": {
-    "license": "Original work (programmatic LCARS schematic)",
-    "credit": "Crusher-to-the-Bridge — Galaxy-class inspired schematic (original geometric composition)",
+    "license": "Original work (AI-generated notional schematic)",
+    "credit": "Crusher-to-the-Bridge — fiction-adapted Galaxy-inspired architectural plates (simplified silhouette, not show artwork)",
     "local_file": "reference_photo.jpg"
+  },
+  "architectural_graphics": {
+    "schema_version": "1.0",
+    "description": "User-supplied architectural underlays. Fiction-adapted Galaxy-class silhouette — simplified geometry, not a reproduction of any televised Star Trek artwork.",
+    "elevation": {
+      "file": "elevation.jpg",
+      "style": "ai_generated_notional",
+      "credit": "Crusher-to-the-Bridge — fiction-adapted Galaxy-inspired elevation (AI-generated schematic, original composition)",
+      "license": "Original work",
+      "fiction_adapted": true
+    },
+    "plan": {
+      "file": "plan_overview.jpg",
+      "style": "ai_generated_notional",
+      "credit": "Crusher-to-the-Bridge — fiction-adapted Galaxy-inspired plan (AI-generated schematic, original composition)",
+      "license": "Original work",
+      "fiction_adapted": true
+    },
+    "deck_plans": {}
   }
 }

@@ -296,6 +296,41 @@ def precompute_platform(platform_id: str) -> None:
             fiction=tier == "fiction_adapted",
         )
         manifest["background_plate"] = "synthetic_blueprint"
+
+    # User-supplied architectural plates (elevation + plan) live under graphics/.
+    graphics_manifest = os.path.join(pdir, "graphics", "graphics.json")
+    if os.path.isfile(graphics_manifest):
+        with validated_open(
+            graphics_manifest, allowed_roots=(REPO,), encoding="utf-8",
+        ) as fh:
+            arch = json.load(fh)
+        manifest["architectural_graphics"] = arch
+        plan_rel = (arch.get("plan") or {}).get("file")
+        if plan_rel:
+            plan_abs = os.path.join(pdir, "graphics", plan_rel)
+            if os.path.isfile(plan_abs):
+                # Prefer plan plate as the Plotly/legacy underlay source of truth.
+                from shutil import copyfile
+
+                copyfile(plan_abs, bg_path)
+                manifest["background_plate"] = "architectural_plan"
+                manifest.setdefault("assets", {})["plan_overview"] = f"graphics/{plan_rel}"
+        elev_rel = (arch.get("elevation") or {}).get("file")
+        if elev_rel and os.path.isfile(os.path.join(pdir, "graphics", elev_rel)):
+            manifest.setdefault("assets", {})["elevation"] = f"graphics/{elev_rel}"
+
+    # Hull-native view bounds when packing into deck_dimensions (not GIS-traced).
+    if tier != "gis_traced" or os.path.isfile(graphics_manifest):
+        dims = layout.get("deck_dimensions", {}) or {}
+        length_m = float(dims.get("length_m", 120))
+        beam_m = float(dims.get("beam_m", 15))
+        manifest["view_bounds"] = {
+            "xmin": -2.0,
+            "xmax": length_m + 2.0,
+            "ymin": -2.0,
+            "ymax": beam_m + 2.0,
+        }
+
     manifest_path = resolve_child_path(pdir, "deck_manifest.json")
     with validated_open(manifest_path, "w", allowed_roots=(REPO,), encoding="utf-8") as fh:
         json.dump(manifest, fh, indent=2, ensure_ascii=False)
