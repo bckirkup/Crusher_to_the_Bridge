@@ -32,6 +32,7 @@ _SENTINEL = "-999"
 _DEFAULT_CEILING_HEIGHT_M = 3.0
 _DEFAULT_ZONE_TEMP_K = 293.15
 _DEFAULT_AIR_DENSITY = 1.2041
+_ZERO_CONC = "0.000e+00"
 # ContamW / ContamX symbolic names (zones, AHS, levels, elements) ≤ 15 chars.
 _CONTAM_NAME_MAX = 15
 # Outdoor-air fraction fo for simple AHS (Contam week-schedule on recirc path).
@@ -888,16 +889,9 @@ def _render_prj_text(
 
 
 def _append_prj_header(lines: list[str], ctx: dict[str, Any]) -> None:
-    net = ctx["net"]
     hobbyist = ctx["hobbyist"]
     platform = ctx["platform"]
-    used_names = ctx["used_names"]
-    levels = ctx["levels"]
     zone_records = ctx["zone_records"]
-    elements = ctx["elements"]
-    paths = ctx["paths"]
-    ahs_records = ctx["ahs_records"]
-    path_map = ctx["path_map"]
     n_zones = len(zone_records)
     rows = max(40, n_zones + 20)
     cols = max(40, n_zones + 20)
@@ -989,17 +983,6 @@ def _append_prj_header(lines: list[str], ctx: dict[str, Any]) -> None:
 
 def _append_species_section(lines: list[str], ctx: dict[str, Any]) -> None:
     net = ctx["net"]
-    hobbyist = ctx["hobbyist"]
-    platform = ctx["platform"]
-    used_names = ctx["used_names"]
-    levels = ctx["levels"]
-    zone_records = ctx["zone_records"]
-    elements = ctx["elements"]
-    paths = ctx["paths"]
-    ahs_records = ctx["ahs_records"]
-    path_map = ctx["path_map"]
-    rows = ctx.get("rows", 40)
-    cols = ctx.get("cols", 40)
     # Contaminants / species
     species = net.get("species") or []
     cidxs = net.get("contaminant_indices") or [1]
@@ -1031,20 +1014,14 @@ def _append_species_section(lines: list[str], ctx: dict[str, Any]) -> None:
     ctx["species"] = species
     ctx["cidxs"] = cidxs
     n_ctm = len(cidxs)
-    ctx["zeros"] = "  ".join("0.000e+00" for _ in range(n_ctm))
+    ctx["zeros"] = "  ".join(_ZERO_CONC for _ in range(n_ctm))
 
 
 def _append_levels_section(lines: list[str], ctx: dict[str, Any]) -> None:
-    net = ctx["net"]
     hobbyist = ctx["hobbyist"]
-    platform = ctx["platform"]
     used_names = ctx["used_names"]
     levels = ctx["levels"]
     zone_records = ctx["zone_records"]
-    elements = ctx["elements"]
-    paths = ctx["paths"]
-    ahs_records = ctx["ahs_records"]
-    path_map = ctx["path_map"]
     rows = ctx.get("rows", 40)
     cols = ctx.get("cols", 40)
     # Levels (+ optional zone icons for SketchPad)
@@ -1077,17 +1054,7 @@ def _append_levels_section(lines: list[str], ctx: dict[str, Any]) -> None:
 
 def _append_schedule_sections(lines: list[str], ctx: dict[str, Any]) -> None:
     net = ctx["net"]
-    hobbyist = ctx["hobbyist"]
-    platform = ctx["platform"]
     used_names = ctx["used_names"]
-    levels = ctx["levels"]
-    zone_records = ctx["zone_records"]
-    elements = ctx["elements"]
-    paths = ctx["paths"]
-    ahs_records = ctx["ahs_records"]
-    path_map = ctx["path_map"]
-    rows = ctx.get("rows", 40)
-    cols = ctx.get("cols", 40)
     # Day / week schedules
     day_schedules = list(net.get("day_schedules") or [])
     week_schedules = list(net.get("week_schedules") or [])
@@ -1137,19 +1104,7 @@ def _append_schedule_sections(lines: list[str], ctx: dict[str, Any]) -> None:
 def _append_wind_filter_sections(lines: list[str], ctx: dict[str, Any]) -> None:
     net = ctx["net"]
     species = ctx.get("species") or [{"name": "Air"}]
-    cidxs = ctx.get("cidxs") or [1]
-    zeros = ctx.get("zeros") or "0.000e+00"
-    hobbyist = ctx["hobbyist"]
-    platform = ctx["platform"]
     used_names = ctx["used_names"]
-    levels = ctx["levels"]
-    zone_records = ctx["zone_records"]
-    elements = ctx["elements"]
-    paths = ctx["paths"]
-    ahs_records = ctx["ahs_records"]
-    path_map = ctx["path_map"]
-    rows = ctx.get("rows", 40)
-    cols = ctx.get("cols", 40)
     # Wind profiles
     wind_profiles = net.get("wind_profiles") or []
     lines.append(f"{len(wind_profiles)} ! wind pressure profiles:")
@@ -1195,17 +1150,8 @@ def _append_wind_filter_sections(lines: list[str], ctx: dict[str, Any]) -> None:
 
 def _append_flow_and_duct_elements(lines: list[str], ctx: dict[str, Any]) -> None:
     net = ctx["net"]
-    hobbyist = ctx["hobbyist"]
-    platform = ctx["platform"]
     used_names = ctx["used_names"]
-    levels = ctx["levels"]
-    zone_records = ctx["zone_records"]
     elements = ctx["elements"]
-    paths = ctx["paths"]
-    ahs_records = ctx["ahs_records"]
-    path_map = ctx["path_map"]
-    rows = ctx.get("rows", 40)
-    cols = ctx.get("cols", 40)
     # Flow elements
     lines.append(f"{len(elements)} ! flow elements:")
     for el in elements:
@@ -1251,21 +1197,11 @@ def _append_flow_and_duct_elements(lines: list[str], ctx: dict[str, Any]) -> Non
 
 
 def _append_ahs_zones_and_paths(lines: list[str], ctx: dict[str, Any]) -> None:
-    net = ctx["net"]
     species = ctx.get("species") or [{"name": "Air"}]
     cidxs = ctx.get("cidxs") or [1]
-    zeros = ctx.get("zeros") or "0.000e+00"
-    hobbyist = ctx["hobbyist"]
-    platform = ctx["platform"]
-    used_names = ctx["used_names"]
-    levels = ctx["levels"]
     zone_records = ctx["zone_records"]
-    elements = ctx["elements"]
     paths = ctx["paths"]
     ahs_records = ctx["ahs_records"]
-    path_map = ctx["path_map"]
-    rows = ctx.get("rows", 40)
-    cols = ctx.get("cols", 40)
     # Simple AHS
     lines.append(f"{len(ahs_records)} ! simple AHS:")
     lines.append("! # zr# zs# pr# ps# px# name")
@@ -1296,7 +1232,7 @@ def _append_ahs_zones_and_paths(lines: list[str], ctx: dict[str, Any]) -> None:
     lines.append(f"{len(zone_records)} ! initial zone concentrations:")
     header_names = " ".join(sp["name"] for sp in species[:n_ctm])
     lines.append(f"! Z#       {header_names}")
-    zeros = "  ".join("0.000e+00" for _ in range(n_ctm))
+    zeros = "  ".join(_ZERO_CONC for _ in range(n_ctm))
     for z in zone_records:
         lines.append(f"   {z['nr']}  {zeros}")
     lines.append(_SENTINEL)
@@ -1324,23 +1260,12 @@ def _append_ahs_zones_and_paths(lines: list[str], ctx: dict[str, Any]) -> None:
 
 
 
-def _append_duct_network_and_footer(lines: list[str], ctx: dict[str, Any]) -> None:
-    net = ctx["net"]
-    species = ctx.get("species") or [{"name": "Air"}]
-    cidxs = ctx.get("cidxs") or [1]
-    zeros = ctx.get("zeros") or "0.000e+00"
-    hobbyist = ctx["hobbyist"]
-    platform = ctx["platform"]
-    used_names = ctx["used_names"]
-    levels = ctx["levels"]
-    zone_records = ctx["zone_records"]
-    elements = ctx["elements"]
-    paths = ctx["paths"]
-    ahs_records = ctx["ahs_records"]
-    path_map = ctx["path_map"]
-    rows = ctx.get("rows", 40)
-    cols = ctx.get("cols", 40)
-    # Duct junctions / segments
+def _append_duct_junctions_and_segments(
+    lines: list[str],
+    net: dict[str, Any],
+    zeros: str,
+) -> None:
+    """Emit duct junctions, junction concentrations, and duct segments."""
     duct_junctions = net.get("duct_junctions") or []
     duct_segments = net.get("duct_segments") or []
     lines.append(f"{len(duct_junctions)} ! duct junctions:")
@@ -1376,6 +1301,15 @@ def _append_duct_network_and_footer(lines: list[str], ctx: dict[str, Any]) -> No
             )
     lines.append(_SENTINEL)
 
+
+def _append_duct_network_and_footer(lines: list[str], ctx: dict[str, Any]) -> None:
+    net = ctx["net"]
+    zeros = ctx.get("zeros") or _ZERO_CONC
+    hobbyist = ctx["hobbyist"]
+    zone_records = ctx["zone_records"]
+    path_map = ctx["path_map"]
+    _append_duct_junctions_and_segments(lines, net, zeros)
+
     lines.append("0 ! source/sinks:")
     lines.append(_SENTINEL)
     lines.append("0 ! occupancy schedules:")
@@ -1391,14 +1325,15 @@ def _append_duct_network_and_footer(lines: list[str], ctx: dict[str, Any]) -> No
 
     lines.append("* end project file.")
     lines.append("")
+    n_real = sum(1 for z in zone_records if not z["is_phantom"])
+    n_phantom = sum(1 for z in zone_records if z["is_phantom"])
     lines.append(
         f"! CRUSHER_PATH_MAP_COUNT {len(path_map)} "
-        f"zones={sum(1 for z in zone_records if not z['is_phantom'])} "
-        f"phantoms={sum(1 for z in zone_records if z['is_phantom'])} "
+        f"zones={n_real} "
+        f"phantoms={n_phantom} "
         f"hobbyist={int(bool(hobbyist))}"
     )
 
-    return "\n".join(lines) + "\n", path_map
 
 
 

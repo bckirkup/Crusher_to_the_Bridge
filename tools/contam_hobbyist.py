@@ -14,7 +14,7 @@ import os
 from functools import lru_cache
 from typing import Any
 
-from simulation_utils.paths import is_path_under_base, resolve_repo_path
+from simulation_utils.paths import is_path_under_base, resolve_repo_path, validated_open
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DEFAULT_PACK_DIR = os.path.join(REPO_ROOT, "data", "contam_hobbyist")
@@ -37,7 +37,9 @@ def _safe_repo_path(path: str) -> str:
 
 def _read_json(path: str) -> dict[str, Any]:
     safe = _safe_repo_path(path)
-    with open(safe, encoding="utf-8") as fh:
+    with validated_open(
+        safe, "r", allowed_roots=(REPO_ROOT,), encoding="utf-8"
+    ) as fh:
         data = json.load(fh)
     if not isinstance(data, dict):
         raise ValueError(f"Expected object in {safe}")
