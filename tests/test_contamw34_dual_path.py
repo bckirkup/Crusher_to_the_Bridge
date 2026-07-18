@@ -296,6 +296,19 @@ def test_contamw34_export_contamx_invariants(platform: str) -> None:
             assert entry["from_zone"] in real_ids
             assert entry["to_zone"] in real_ids
 
+    # Every real zone must have an envelope leak to ambient (Jacobian ref)
+    leak_zones = {
+        e["from_zone"] for e in path_map if e.get("kind") == "envelope_leak"
+    }
+    assert leak_zones == real_ids
+    for entry in path_map:
+        if entry.get("kind") == "envelope_leak":
+            assert entry["to_zone"] == "ambient"
+            assert entry.get("crusher_transfer") is False
+            pnr = int(entry["path_nr"])
+            assert int(paths[pnr]["elem"]) == 2  # EnvLeak orifice
+            assert int(paths[pnr]["ahs"]) == 0
+
 
 def test_unique_contam_name_truncates_and_dedupes() -> None:
     from tools.contamw34_prj import _unique_contam_name

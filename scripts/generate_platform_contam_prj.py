@@ -26,6 +26,7 @@ if REPO_ROOT not in sys.path:
 from tools.contam_prj_bridge import export_platform_to_prj  # noqa: E402
 
 DEFAULT_PLATFORMS = (
+    "destroyer_baseline",
     "mega_cruise_5000",
     "enterprise_constitution_tos",
     "enterprise_galaxy_tng",

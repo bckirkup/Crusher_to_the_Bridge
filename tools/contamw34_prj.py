@@ -6,6 +6,7 @@ Emits ContamW **3.4**-grammar ``.prj`` text ContamX can parse, and
 simplifies authentic ContamW 3.4 projects back into Crusher platform JSON.
 
 Prescribed-flow approximation (fiction-ship plausible):
+  - ``plr_orfc`` envelope leaks zone→ambient (ContamX pressure reference)
   - ``plr_orfc`` openings for adjacency
   - ``fan_cvf`` constant-volume fans for cross-zone links
   - Simple AHS: Ret/Sup phantoms + system paths (recirc/OA/exhaust) and
@@ -47,8 +48,13 @@ _PATH_AHS_RECIRC = 16
 _PATH_AHS_OA = 32
 _PATH_AHS_EXHAUST = 64
 
-# Minimal orifice coefficients (plausible small opening)
+# Minimal orifice coefficients (plausible small opening / doorway)
 _ORIFICE_PARAMS = "2.70811e-05 0.00848528 0.5 0.01 0.112838 0.6 30 0 0"
+# Smaller envelope leak to ambient — pressure reference for ContamX Jacobian
+# (constant-flow fans / AHS Fahs alone yield FATAL Zero on the diagonal).
+_ENVELOPE_ORIFICE_PARAMS = (
+    "2.70811e-07 8.48528e-05 0.5 0.0001 0.0112838 0.6 30 0 0"
+)
 
 
 def _sanitize_name(name: str) -> str:
@@ -277,7 +283,7 @@ def _assemble_network(
             "ahs_name": ahs_name,
         })
 
-    # Flow elements: 1 = orifice, then one fan per distinct m3/s rate we need
+    # Flow elements: 1 = doorway orifice, 2 = envelope leak, then fans
     elements: list[dict[str, Any]] = [
         {
             "nr": 1,
@@ -285,6 +291,13 @@ def _assemble_network(
             "symbol": "plr_orfc",
             "name": "Opening",
             "params": _ORIFICE_PARAMS,
+        },
+        {
+            "nr": 2,
+            "type": _ELEM_ORIFICE,
+            "symbol": "plr_orfc",
+            "name": "EnvLeak",
+            "params": _ENVELOPE_ORIFICE_PARAMS,
         },
     ]
     fan_elem_by_m3s: dict[float, int] = {}
@@ -348,7 +361,23 @@ def _assemble_network(
         })
         return pnr
 
-    # 1) Adjacency openings (orifice)
+    # 1) Envelope leakage to ambient (pressure-dependent reference).
+    # Contam requires every zone be tied to ambient/known pressure via a
+    # path with non-zero dF/dP; fan_cvf + AHS Fahs alone are singular.
+    for z in zone_records:
+        if z["is_phantom"]:
+            continue
+        _add_path(
+            z["nr"], -1, 2,
+            from_name=z["orig_id"], to_name="ambient",
+            kind="envelope_leak",
+            is_hvac_ducted=False,
+            crusher_transfer=False,
+            flag=0,
+            level=int(z["level"]),
+        )
+
+    # 2) Adjacency openings (orifice)
     for adj in adjacency:
         a, b = adj["from"], adj["to"]
         if a not in zone_name_to_nr or b not in zone_name_to_nr:
@@ -362,7 +391,7 @@ def _assemble_network(
             flag=0,
         )
 
-    # 2) Cross-zone links as fans between representative rooms
+    # 3) Cross-zone links as fans between representative rooms
     hvac_by_id = {h["id"]: h for h in hvac_info}
 
     def _resolve_endpoint(token: str) -> str | None:
@@ -391,7 +420,7 @@ def _assemble_network(
             flag=0,
         )
 
-    # 3) Per-AHS: Contam simple-AHS semantics (match authentic ContamW 3.4)
+    # 4) Per-AHS: Contam simple-AHS semantics (match authentic ContamW 3.4)
     # System paths (recirc / OA / exhaust): a#=0, e#=0
     # Zone terminals (supply / return): a#=AHS, e#=0, Fahs=design kg/s
     # AHS record pr/ps/px = recirc / OA / exhaust path numbers

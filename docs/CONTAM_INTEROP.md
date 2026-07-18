@@ -56,8 +56,9 @@ Fiction platforms ship a plausible ContamW 3.4 bundle under
 | `platform.prj` | ContamW 3.4 project (ContamX-parseable grammar) |
 | `path_map.json` | ContamX path index → `(from_zone, to_zone, is_hvac_ducted)` |
 
-Bundled for: `mega_cruise_5000`, `enterprise_constitution_tos`,
-`enterprise_galaxy_tng`. Regenerate after JSON edits:
+Bundled for: `destroyer_baseline`, `mega_cruise_5000`,
+`enterprise_constitution_tos`, `enterprise_galaxy_tng`. Regenerate after
+JSON edits:
 
 ```bash
 python3 scripts/generate_platform_contam_prj.py
@@ -79,6 +80,7 @@ grammar. The fiction exporter (`tools/contamw34_prj.py`) enforces:
 | Supply/return terminals (flag 8) have `a#=<AHS>` and `e#=0`; flow in `Fahs` (kg/s) | Contam AHS design flow, not fan elements |
 | AHS record `pr#` / `ps#` / `px#` = recirculation / outdoor-air / exhaust path numbers | Matches ContamW 3.4 `3-Room-OffAt14days.prj` |
 | Phantom Ret/Sup zones named `ahsN(Ret)` / `ahsN(Sup)` | Short Contam-style names; path_map keeps full Crusher zone ids |
+| Every real zone has a small `plr_orfc` path to **ambient** | ContamX `FATAL Zero on the diagonal` when only fans/AHS (dF/dP=0) connect zones |
 
 ## 3. Explicit zone geometry (ceiling height)
 
