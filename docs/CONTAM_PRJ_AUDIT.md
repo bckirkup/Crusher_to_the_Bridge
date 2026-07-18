@@ -113,14 +113,17 @@ full-sim wall-clock is similar (Picard overhead dominates).
 
 **Revised reading of `n_paths=6`:** survivors are **real SIM edges**, not AHS2
 synth. AHS bookkeeping paths are present (`bridge_input=21`) but SIM Flow0 on
-supply/return/recirc is ~0 → synthesizer emits nothing. ContamX Bridge out-flow
-**600 m³/h** matches AHS2 room Fahs (≈600 m³/h), not fan_cvf design (16.7+10) —
-suspect Flow0 join/units or Contam over-driving the two Bridge out edges; check
-`kept_links[].flow_m3h` in the JSON.
+supply/return/recirc is ~0 → synthesizer emits nothing.
 
-Crack-scale openings are fixed. Forced fans partially couple Bridge, but most
-orifices still ΔP≈0 and AHS→Crusher bridging is dead until AHS Flow0 or Fahs
-fallback is fixed.
+**Kept-link dump (user):** all six share **exactly** `299.9999883335083` m³/h
+(= **0.1 kg/s** at ρ=1.2). Paths use different elements (Ladder orifice +
+Fan_25/26/27 with design 16.7/13.3/10 m³/h) so identical Flow0 is not physical
+CVF behavior. Path numbers alternate kept/zero for 12–23
+(`12,14,16,18,20,22` vs `13,15,17,19,21,23`) — fingerprint of SIM stride/join
+issues **or** Contam writing a constant on every other path. Next: SimRead3 LFR
+ground truth for p012/p014/p022 vs fan design; if LFR matches 0.1 kg/s, Contam
+is ignoring `fan_cvf`; if LFR shows design rates, fix `SimResults` path record
+layout.
 
 ---
 
