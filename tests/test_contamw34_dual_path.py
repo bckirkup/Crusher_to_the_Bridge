@@ -177,3 +177,132 @@ def test_path_map_not_adjacency_only() -> None:
     assert len(path_map) > len(airflow["adjacency"])
     kinds = {e["kind"] for e in path_map}
     assert "ahs_supply" in kinds or "ahs_oa" in kinds
+
+
+_AHS_SYSTEM_FLAGS = {16, 32, 64}
+_AHS_TERMINAL_FLAG = 8
+
+
+def _parse_flow_paths(text: str) -> dict[int, dict[str, float | int]]:
+    """Parse ContamW flow-path records: nr → flag/e#/a#/Fahs."""
+    paths: dict[int, dict[str, float | int]] = {}
+    in_section = False
+    for line in text.splitlines():
+        if "! flow paths:" in line:
+            in_section = True
+            continue
+        if not in_section:
+            continue
+        if line.strip() == "-999":
+            break
+        if line.strip().startswith("!"):
+            continue
+        toks = line.split()
+        if len(toks) < 19 or not toks[0].isdigit():
+            continue
+        paths[int(toks[0])] = {
+            "flag": int(toks[1]),
+            "elem": int(toks[4]),
+            "ahs": int(toks[7]),
+            "fahs": float(toks[18]),
+        }
+    return paths
+
+
+def _parse_ahs_system_paths(text: str) -> list[tuple[int, int, int, int]]:
+    """Return (ahs_nr, pr, ps, px) from the simple-AHS section."""
+    rows: list[tuple[int, int, int, int]] = []
+    in_section = False
+    for line in text.splitlines():
+        if "simple AHS:" in line:
+            in_section = True
+            continue
+        if not in_section:
+            continue
+        if line.strip() == "-999":
+            break
+        if line.strip().startswith("!"):
+            continue
+        toks = line.split()
+        if len(toks) >= 7 and toks[0].isdigit():
+            rows.append(
+                (int(toks[0]), int(toks[3]), int(toks[4]), int(toks[5]))
+            )
+    return rows
+
+
+def _zone_contam_names(text: str) -> list[str]:
+    names: list[str] = []
+    in_section = False
+    for line in text.splitlines():
+        if "! zones:" in line:
+            in_section = True
+            continue
+        if not in_section:
+            continue
+        if line.strip() == "-999":
+            break
+        if line.strip().startswith("!"):
+            continue
+        toks = line.split()
+        if len(toks) >= 11 and toks[0].isdigit():
+            names.append(toks[10])
+    return names
+
+
+@pytest.mark.parametrize(
+    "platform",
+    [
+        "destroyer_baseline",
+        "enterprise_constitution_tos",
+        "enterprise_galaxy_tng",
+        "mega_cruise_5000",
+    ],
+)
+def test_contamw34_export_contamx_invariants(platform: str) -> None:
+    """ContamX-critical grammar: ≤15-char names, AHS a#/e#/Fahs semantics."""
+    spatial, airflow = _load_platform(platform)
+    text, path_map = contam_prj_bridge.export_prj_with_path_map(spatial, airflow)
+
+    names = _zone_contam_names(text)
+    assert names
+    assert all(len(n) <= 15 for n in names), [
+        n for n in names if len(n) > 15
+    ]
+    assert len(names) == len(set(names))
+
+    paths = _parse_flow_paths(text)
+    assert paths
+    for nr, rec in paths.items():
+        flag = int(rec["flag"])
+        elem = int(rec["elem"])
+        ahs = int(rec["ahs"])
+        if flag in _AHS_SYSTEM_FLAGS:
+            assert ahs == 0, f"path {nr}: system path must have a#=0"
+            assert elem == 0, f"path {nr}: system path must have e#=0"
+        if flag == _AHS_TERMINAL_FLAG:
+            assert ahs > 0, f"path {nr}: terminal must reference an AHS"
+            assert elem == 0, f"path {nr}: terminal must have e#=0"
+            assert float(rec["fahs"]) > 0, f"path {nr}: terminal Fahs required"
+
+    for ahs_nr, pr, ps, px in _parse_ahs_system_paths(text):
+        assert int(paths[pr]["flag"]) == 16, f"ahs {ahs_nr} pr not recirc"
+        assert int(paths[ps]["flag"]) == 32, f"ahs {ahs_nr} ps not OA"
+        assert int(paths[px]["flag"]) == 64, f"ahs {ahs_nr} px not exhaust"
+
+    real_ids = {z["id"] for z in spatial["zones"]}
+    for entry in path_map:
+        if entry.get("crusher_transfer"):
+            assert entry["from_zone"] in real_ids
+            assert entry["to_zone"] in real_ids
+
+
+def test_unique_contam_name_truncates_and_dedupes() -> None:
+    from tools.contamw34_prj import _unique_contam_name
+
+    used: set[str] = set()
+    a = _unique_contam_name("zone_saucer_command_bridge", used)
+    b = _unique_contam_name("zone_saucer_command_bridge", used)
+    assert len(a) <= 15 and len(b) <= 15
+    assert a != b
+    assert a in used and b in used

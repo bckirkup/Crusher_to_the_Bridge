@@ -67,6 +67,19 @@ python3 scripts/generate_platform_contam_prj.py --platform destroyer_baseline
 These PRJs are **fiction-plausible** (derived from our JSON platforms), not
 as-built ship models.
 
+### ContamX-critical export invariants
+
+ContamX 3.4 rejects (or buffer-overflows on) PRJs that violate ContamW
+grammar. The fiction exporter (`tools/contamw34_prj.py`) enforces:
+
+| Rule | Why |
+|------|-----|
+| Symbolic names ≤ **15** characters (zones, AHS, levels, elements) | ContamX fatal `Buffer overflow: <truncated name>` |
+| Simple-AHS system paths (flags 16/32/64) have `a#=0` and `e#=0` | `ERROR Invalid AHS number, path N` if `a#` is set on OA/recirc/exhaust |
+| Supply/return terminals (flag 8) have `a#=<AHS>` and `e#=0`; flow in `Fahs` (kg/s) | Contam AHS design flow, not fan elements |
+| AHS record `pr#` / `ps#` / `px#` = recirculation / outdoor-air / exhaust path numbers | Matches ContamW 3.4 `3-Room-OffAt14days.prj` |
+| Phantom Ret/Sup zones named `ahsN(Ret)` / `ahsN(Sup)` | Short Contam-style names; path_map keeps full Crusher zone ids |
+
 ## 3. Explicit zone geometry (ceiling height)
 
 `schemas/spatial_layout.schema.json` `Zone` accepts optional
