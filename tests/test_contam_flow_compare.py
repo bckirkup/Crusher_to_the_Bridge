@@ -111,3 +111,30 @@ def test_kept_real_path_when_sim_nonzero() -> None:
         known,
     )
     assert row["fate"] == "kept"
+
+
+def test_contamx_report_kept_links_use_flow_m3h() -> None:
+    """Regression: degree loop must not KeyError on kept sim_flow_m3h rows."""
+    spatial, _airflow, path_map = _load_destroyer()
+    known = {z["id"] for z in spatial["zones"]}
+    flows = {int(e["path_nr"]): 0.0 for e in path_map}
+    # Non-zero real Bridge→MedBay passageway (path 7) + reverse-signed fan.
+    flows[7] = 15.0
+    flows[22] = -10.0  # Bridge→Engine_Room in path_map; negative → reverse
+    cx = contamx_flow_report(path_map, flows, known)
+    assert cx["n_kept_real_paths"] == 2
+    assert all("flow_m3h" in link for link in cx["kept_links"])
+    assert cx["zone_degree"]["Bridge"]["out_edges"] >= 1
+    # Negative Flow0 on path 22: Engine_Room → Bridge
+    rev = next(l for l in cx["kept_links"] if l["path_nr"] == 22)
+    assert rev["from_zone"] == "Engine_Room"
+    assert rev["to_zone"] == "Bridge"
+    assert rev["flow_m3h"] == 10.0
+    # Must not raise when building the full report with SIM flows present
+    report = build_flow_compare_report(
+        "destroyer_baseline",
+        path_flows_m3h=flows,
+        inject_zones=["Bridge"],
+    )
+    assert report["contamx"]["n_kept_real_paths"] == 2
+    assert report["connectivity_gap"][0]["contamx_out_edges"] >= 1
