@@ -249,6 +249,40 @@ Reports write to `telemetry_buffer/contam_compare/` (gitignored).
 When ContamX is unavailable the suite still runs native-only and records
 `contamx_error` per job.
 
+### Per-path flow diagnostic
+
+When concentrations diverge but ContamX loads, dump native ACH links vs
+ContamX SIM flows (joined on ``path_nr``) and AHS-synthesized edges:
+
+```bash
+# Offline topology (no ContamX) — shows Bridge isolation risk without SIM
+python3 tools/contam_flow_compare.py --platform destroyer_baseline --inject Bridge
+
+# Windows / ContamX installed — join live SIM Flow0 onto path_map
+python3 tools/contam_flow_compare.py --platform destroyer_baseline \
+    --inject Bridge --run-contamx \
+    --output telemetry_buffer/contam_flow_destroyer.json
+
+# Or reuse a .SIM from a prior ContamX run
+python3 tools/contam_flow_compare.py --platform destroyer_baseline \
+    --sim data/platforms/destroyer_baseline/contam/platform.sim \
+    --inject Bridge
+```
+
+**How to read the report**
+
+| Signal | Meaning |
+|--------|---------|
+| `native.n_paths` ≫ `contamx.n_crusher_paths` | ContamX dropped zero-SIM real↔real edges and/or only AHS synth survived |
+| `zero_flow_real_candidates` | Adjacency orifices / cross-zone fans solved ≈0 in ContamX (ΔP≈0) |
+| `connectivity_gap[].bridge_isolated` | Injection zone has native out-edges but zero ContamX Crusher out-edges |
+| `n_synth_ahs_paths == 6` on destroyer | Only AHS2 (MedBay/Mess_Hall/Galley) — matches compare-suite `n_paths=6` |
+
+Native builds a **prescribed ACH digraph** from JSON. ContamX builds a
+**pressure/AHS/fan field**, then Crusher keeps only non-zero real↔real SIM
+paths plus AHS room↔room synthesis. Hobbyist ducts/stack/filters can change
+ContamX SIM magnitudes further but are not themselves bridged into Crusher.
+
 ## 7. Related components
 
 - `engines/py_contam_bridge.py` — native prescribed-flow mass-balance engine
@@ -258,6 +292,7 @@ When ContamX is unavailable the suite still runs native-only and records
 - `tools/contamw34_prj.py` — ContamW 3.4 writer / simplify
 - `tools/contam_prj_bridge.py` — CLI export / simplify / import
 - `tools/contam_engine_compare.py` — results + speed suite runner
+- `tools/contam_flow_compare.py` — native ACH vs ContamX SIM per-path diagnostic
 - `scripts/generate_platform_contam_prj.py` — regenerate fiction-ship bundles
 - `third_party/contamx/` — local ContamX drop directory (gitignored binaries)
 - `tests/fixtures/contam/` — authentic ContamW 3.4 parse fixtures

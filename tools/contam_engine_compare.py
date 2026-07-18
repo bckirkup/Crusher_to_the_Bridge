@@ -24,6 +24,11 @@ Usage::
         --job data/config/contam_compare/jobs/destroyer_transport.json
 
     # Windows operators: run_contam_compare.bat
+
+For per-path SIM vs native ACH diagnosis (why concentrations diverge)::
+
+    python3 tools/contam_flow_compare.py --platform destroyer_baseline \\
+        --inject Bridge --run-contamx
 """
 
 from __future__ import annotations
