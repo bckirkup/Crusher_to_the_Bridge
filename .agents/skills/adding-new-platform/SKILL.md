@@ -67,7 +67,20 @@ data/platforms/<platform_name>/contam/
 ```
 
 Regenerate fiction bundles with `scripts/generate_platform_contam_prj.py`
-only when there is no authentic Contam model.
+only when there is no authentic Contam model. Prefer `--hobbyist` so openings
+use realistic catalog areas (see `docs/CONTAM_PRJ_AUDIT.md`).
+
+After adding Contam assets, validate offline:
+
+```bash
+python3 -m pytest tests/test_contam_hobbyist_destroyer.py tests/test_contamw34_dual_path.py -v --tb=short
+# If you have a ContamX .SIM for the new platform, also:
+python3 tools/contam_flow_compare.py --platform <platform_name> --inject <Zone> --sim path/to/platform.sim
+```
+
+With ContamX installed, add a job under `data/config/contam_compare/jobs/` and
+run the suite (skill `contamx-interop`). Confirm Flow0 is keyed by embedded
+path `nr` — identical ~300 m³/h on distinct fans means the SIM reader regressed.
 
 `graywater_zones` lists downstream greywater/blackwater collection zone(s)
 for ship-wide wastewater sequencing (e.g. `Engine_Room_Aft` on large cruise

@@ -257,10 +257,29 @@ injection zone with zero Crusher out-edges, the job also sets
 When ContamX is unavailable the suite still runs native-only and records
 `contamx_error` per job.
 
+### `.SIM` reader contract (critical)
+
+`engines/contamx_runner.SimResults` decodes ContamX binary results:
+
+| Record | Layout | Notes |
+|--------|--------|-------|
+| Path | `nr(i4) dP(f4) Flow0(f4) Flow1(f4)` | **Key flows by embedded `nr`**, not the header xref table |
+| Node | `nr(i4) T(f4) P(f4) D(f4)` | Density from `D`; skip trailing summary frames with `D≈0` |
+| Header xref | `(typ, nr) × nafpt` byte span | Occupies space before frames; ContamX 3.x content is **not** a reliable slot→path_nr map |
+
+**Bug fingerprint (fixed 2026-07-18):** keying Flow0 by xref assigned AHS terminal
+mass (~0.1 kg/s ≈ 300 m³/h at ρ=1.2) onto distinct fan path numbers — all
+“kept” links identical. Regression fixture:
+`tests/fixtures/contam/destroyer_baseline.sim` (expects Fan_25/26/27 ≈
+16.7 / 13.3 / 10 m³/h).
+
+`steady_state_frame()` returns the last frame with positive node densities
+(not a trailing same-`sim_time` summary row).
+
 ### Per-path flow diagnostic
 
 When concentrations diverge but ContamX loads, dump native ACH links vs
-ContamX SIM flows (joined on ``path_nr``) and AHS-synthesized edges:
+ContamX SIM flows (joined on embedded path ``nr``) and AHS-synthesized edges:
 
 ```bash
 # Offline topology (no ContamX) — shows Bridge isolation risk without SIM
@@ -271,9 +290,9 @@ python3 tools/contam_flow_compare.py --platform destroyer_baseline \
     --inject Bridge --run-contamx \
     --output telemetry_buffer/contam_flow_destroyer.json
 
-# Or reuse a .SIM from a prior ContamX run
+# Or reuse a .SIM from a prior ContamX run (repo-relative path)
 python3 tools/contam_flow_compare.py --platform destroyer_baseline \
-    --sim data/platforms/destroyer_baseline/contam/platform.sim \
+    --sim tests/fixtures/contam/destroyer_baseline.sim \
     --inject Bridge
 ```
 
@@ -281,10 +300,11 @@ python3 tools/contam_flow_compare.py --platform destroyer_baseline \
 
 | Signal | Meaning |
 |--------|---------|
-| `native.n_paths` ≫ `contamx.n_crusher_paths` | ContamX dropped zero-SIM real↔real edges and/or only AHS synth survived |
+| `native.n_paths` ≫ `contamx.n_crusher_paths` | ContamX dropped zero-SIM real↔real edges and/or AHS synth failed |
 | `zero_flow_real_candidates` | Adjacency orifices / cross-zone fans solved ≈0 in ContamX (ΔP≈0) |
 | `connectivity_gap[].bridge_isolated` | Injection zone has native out-edges but zero ContamX Crusher out-edges |
-| `n_synth_ahs_paths == 6` on destroyer | Only AHS2 (MedBay/Mess_Hall/Galley) — matches compare-suite `n_paths=6` |
+| `kept_links` all share one `flow_m3h` | **SIM join/reader bug** (see `.SIM` reader contract) — not Contam physics |
+| destroyer after healthy read | ~17 kept + ~8 AHS synth; Fan_25/26/27 match design m³/h |
 
 Native builds a **prescribed ACH digraph** from JSON. ContamX builds a
 **pressure/AHS/fan field**, then Crusher keeps only non-zero real↔real SIM
@@ -304,5 +324,5 @@ ContamX SIM magnitudes further but are not themselves bridged into Crusher.
 - `docs/CONTAM_PRJ_AUDIT.md` — fiction PRJ physical realism audit
 - `scripts/generate_platform_contam_prj.py` — regenerate fiction-ship bundles
 - `third_party/contamx/` — local ContamX drop directory (gitignored binaries)
-- `tests/fixtures/contam/` — authentic ContamW 3.4 parse fixtures
+- `tests/fixtures/contam/` — ContamW 3.4 parse fixtures **and** `destroyer_baseline.sim` Flow0 regression
 - Sibling `py-contam` — `.SIM` layout reference (Law 6, read-only)
