@@ -8,7 +8,7 @@
       "id": "zone_saucer_command",
       "rooms": [
         "Bridge",
-        "Stellar_Cartography",
+        "StellarCarto",
         "Security_Office"
       ],
       "ach": 9.0
@@ -53,7 +53,7 @@
     {
       "id": "zone_drive",
       "rooms": [
-        "Main_Engineering"
+        "MainEng"
       ],
       "ach": 16.0
     }
@@ -105,7 +105,7 @@
   "adjacency": [
     {
       "from": "Bridge",
-      "to": "Stellar_Cartography",
+      "to": "StellarCarto",
       "type": "turbolift"
     },
     {
@@ -145,11 +145,11 @@
     },
     {
       "from": "Cargo_Bay",
-      "to": "Main_Engineering",
+      "to": "MainEng",
       "type": "turbolift"
     },
     {
-      "from": "Main_Engineering",
+      "from": "MainEng",
       "to": "Sickbay",
       "type": "turbolift"
     },

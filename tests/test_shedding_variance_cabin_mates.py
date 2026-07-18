@@ -23,7 +23,7 @@ def _agent(aid: int, loc: str, infected: bool = False) -> KorkinAgent:
         role="passenger",
         immune=False,
         home_zone=loc,
-        dining_zone="Main_Dining_Room_Lower",
+        dining_zone="MainDining_L",
         work_zone="Main_Pool_Deck",
         free_zone="Main_Pool_Deck",
         schedule=["home"] * 24,
@@ -78,12 +78,12 @@ class TestSheddingVariance:
 
 class TestCabinMateAssignment:
     def test_default_cabin_size_by_zone_type(self) -> None:
-        assert default_cabin_size("Pax_Corridor_D6_Port_Fwd", "Cabin_Corridor", None) == 2
-        assert default_cabin_size("Crew_Corridor_D2_Mid", "Cabin_Corridor", None) == 3
+        assert default_cabin_size("PC_D6_P_F", "Cabin_Corridor", None) == 2
+        assert default_cabin_size("CC_D2_M", "Cabin_Corridor", None) == 3
         assert default_cabin_size("Bridge", "Free", None) is None
 
     def test_assign_cabin_mates_pairs_agents(self) -> None:
-        zone = "Pax_Corridor_D6_Port_Fwd"
+        zone = "PC_D6_P_F"
         agents = [_agent(i, zone) for i in range(4)]
         zones = [{"name": zone, "type": "Cabin_Corridor"}]
         assign_cabin_mates(agents, zones)
@@ -95,7 +95,7 @@ class TestCabinMateAssignment:
 
 class TestCabinMateTransmission:
     def test_confined_non_mate_receives_minimal_direct_contact(self) -> None:
-        zone = "Pax_Corridor_D6_Port_Fwd"
+        zone = "PC_D6_P_F"
         shedder = _agent(1, zone, infected=True)
         confined = _agent(2, zone)
         free_target = _agent(3, zone)
@@ -124,7 +124,7 @@ class TestCabinMateTransmission:
         )
 
     def test_confined_cabin_mate_receives_full_direct_contact(self) -> None:
-        zone = "Pax_Corridor_D6_Port_Fwd"
+        zone = "PC_D6_P_F"
         shedder = _agent(1, zone, infected=True)
         confined = _agent(2, zone)
         shedder.cabin_mate_ids = frozenset({2})

@@ -88,7 +88,7 @@
       "description": "Pool bars and grill / casual service. ~400 m² × 3.5m."
     },
     {
-      "id": "Spa_Fitness_Complex",
+      "id": "SpaFitness",
       "type": "Free",
       "traffic": "medium",
       "volume_m3": 4200,
@@ -127,7 +127,7 @@
       "description": "Teen lounge and games space. ~400 m² × 3.0m."
     },
     {
-      "id": "Central_Park_Open_Atrium",
+      "id": "CentralPark",
       "type": "Free",
       "traffic": "high",
       "volume_m3": 36000,
@@ -153,7 +153,7 @@
       "description": "Indoor shopping promenade / central street, multi-deck void. ~7,000 m² × 6m."
     },
     {
-      "id": "Shopping_Retail_Block",
+      "id": "ShopRetail",
       "type": "Free",
       "traffic": "high",
       "volume_m3": 6300,
@@ -179,7 +179,7 @@
       "description": "Large casino floor. ~1,500 m² × 3.5m."
     },
     {
-      "id": "Library_Card_Room",
+      "id": "LibraryCard",
       "type": "Free",
       "traffic": "low",
       "volume_m3": 420,
@@ -192,7 +192,7 @@
       "description": "Library/card room/quiet lounge. ~120 m² × 3.5m."
     },
     {
-      "id": "Main_Dining_Room_Lower",
+      "id": "MainDining_L",
       "type": "Dining",
       "traffic": "high",
       "volume_m3": 10500,
@@ -205,7 +205,7 @@
       "description": "Main dining room lower tier. ~3,000 m² × 3.5m."
     },
     {
-      "id": "Main_Dining_Room_Upper",
+      "id": "MainDining_U",
       "type": "Dining",
       "traffic": "high",
       "volume_m3": 8400,
@@ -218,7 +218,7 @@
       "description": "Main dining room upper tier/balcony. ~2,400 m² × 3.5m."
     },
     {
-      "id": "Windjammer_Buffet",
+      "id": "Windjammer",
       "type": "Dining",
       "traffic": "high",
       "volume_m3": 10500,
@@ -231,7 +231,7 @@
       "description": "Large buffet/lido restaurant. ~3,000 m² × 3.5m."
     },
     {
-      "id": "Specialty_Restaurant_Block_A",
+      "id": "SpecRest_A",
       "type": "Dining",
       "traffic": "high",
       "volume_m3": 2800,
@@ -244,7 +244,7 @@
       "description": "Central Park specialty restaurants group. ~800 m² × 3.5m."
     },
     {
-      "id": "Specialty_Restaurant_Block_B",
+      "id": "SpecRest_B",
       "type": "Dining",
       "traffic": "high",
       "volume_m3": 2450,
@@ -257,7 +257,7 @@
       "description": "Promenade/Boardwalk specialty restaurants group. ~700 m² × 3.5m."
     },
     {
-      "id": "Cafe_Bakery_Block",
+      "id": "CafeBakery",
       "type": "Dining",
       "traffic": "high",
       "volume_m3": 1260,
@@ -283,7 +283,7 @@
       "description": "Primary crew mess for multiple sittings. ~600 m² × 3.5m."
     },
     {
-      "id": "Crew_Mess_Forward",
+      "id": "CrewMess_Fwd",
       "type": "Dining",
       "traffic": "medium",
       "volume_m3": 1050,
@@ -335,7 +335,7 @@
       "description": "Ice rink / studio theater. ~2,100 m² × 6m."
     },
     {
-      "id": "Comedy_Club_Lounge",
+      "id": "ComedyClub",
       "type": "Dining",
       "traffic": "medium",
       "volume_m3": 2100,
@@ -387,7 +387,7 @@
       "description": "Main galley supporting main dining rooms. ~1,600 m² × 3.5m."
     },
     {
-      "id": "Buffet_Galley_Upper",
+      "id": "BuffetGal_U",
       "type": "Dining",
       "traffic": "high",
       "volume_m3": 3500,
@@ -400,7 +400,7 @@
       "description": "Upper galley serving Windjammer and pool deck. ~1,000 m² × 3.5m."
     },
     {
-      "id": "Specialty_Galley_Block",
+      "id": "SpecGalley",
       "type": "Dining",
       "traffic": "high",
       "volume_m3": 2450,
@@ -439,7 +439,7 @@
       "description": "Main industrial laundry. ~1,500 m² × 2.8m."
     },
     {
-      "id": "Waste_Treatment_Plant",
+      "id": "WasteTreat",
       "type": "Free",
       "traffic": "low",
       "volume_m3": 5600,
@@ -465,7 +465,7 @@
       "description": "Main machinery space spanning lower decks. ~5,000 m² footprint × 8.4m."
     },
     {
-      "id": "Engine_Control_Room",
+      "id": "EngControl",
       "type": "Free",
       "traffic": "low",
       "volume_m3": 600,
@@ -478,7 +478,7 @@
       "description": "Engine control room and engineering office. ~200 m² × 3.0m."
     },
     {
-      "id": "Pax_Corridor_D6_Port_Fwd",
+      "id": "PC_D6_P_F",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -492,7 +492,7 @@
       "description": "Passenger cabin corridor, Deck 6 Port Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
-      "id": "Pax_Corridor_D6_Port_Mid",
+      "id": "PC_D6_P_M",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -506,7 +506,7 @@
       "description": "Passenger cabin corridor, Deck 6 Port Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
-      "id": "Pax_Corridor_D6_Port_Aft",
+      "id": "PC_D6_P_A",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -520,7 +520,7 @@
       "description": "Passenger cabin corridor, Deck 6 Port Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
-      "id": "Pax_Corridor_D6_Stbd_Fwd",
+      "id": "PC_D6_S_F",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -534,7 +534,7 @@
       "description": "Passenger cabin corridor, Deck 6 Stbd Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
-      "id": "Pax_Corridor_D6_Stbd_Mid",
+      "id": "PC_D6_S_M",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -548,7 +548,7 @@
       "description": "Passenger cabin corridor, Deck 6 Stbd Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
-      "id": "Pax_Corridor_D6_Stbd_Aft",
+      "id": "PC_D6_S_A",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -562,7 +562,7 @@
       "description": "Passenger cabin corridor, Deck 6 Stbd Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
-      "id": "Pax_Corridor_D6_Central_Fwd",
+      "id": "PC_D6_C_F",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -576,7 +576,7 @@
       "description": "Passenger cabin corridor, Deck 6 Central Fwd. ~10 cabins, ~67 pax, ventilation=atrium_view."
     },
     {
-      "id": "Pax_Corridor_D6_Central_Mid",
+      "id": "PC_D6_C_M",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -590,7 +590,7 @@
       "description": "Passenger cabin corridor, Deck 6 Central Mid. ~10 cabins, ~67 pax, ventilation=atrium_view."
     },
     {
-      "id": "Pax_Corridor_D6_Central_Aft",
+      "id": "PC_D6_C_A",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -604,7 +604,7 @@
       "description": "Passenger cabin corridor, Deck 6 Central Aft. ~10 cabins, ~67 pax, ventilation=atrium_view."
     },
     {
-      "id": "Pax_Corridor_D7_Port_Fwd",
+      "id": "PC_D7_P_F",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -618,7 +618,7 @@
       "description": "Passenger cabin corridor, Deck 7 Port Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
-      "id": "Pax_Corridor_D7_Port_Mid",
+      "id": "PC_D7_P_M",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -632,7 +632,7 @@
       "description": "Passenger cabin corridor, Deck 7 Port Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
-      "id": "Pax_Corridor_D7_Port_Aft",
+      "id": "PC_D7_P_A",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -646,7 +646,7 @@
       "description": "Passenger cabin corridor, Deck 7 Port Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
-      "id": "Pax_Corridor_D7_Stbd_Fwd",
+      "id": "PC_D7_S_F",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -660,7 +660,7 @@
       "description": "Passenger cabin corridor, Deck 7 Stbd Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
-      "id": "Pax_Corridor_D7_Stbd_Mid",
+      "id": "PC_D7_S_M",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -674,7 +674,7 @@
       "description": "Passenger cabin corridor, Deck 7 Stbd Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
-      "id": "Pax_Corridor_D7_Stbd_Aft",
+      "id": "PC_D7_S_A",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -688,7 +688,7 @@
       "description": "Passenger cabin corridor, Deck 7 Stbd Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
-      "id": "Pax_Corridor_D7_Central_Fwd",
+      "id": "PC_D7_C_F",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -702,7 +702,7 @@
       "description": "Passenger cabin corridor, Deck 7 Central Fwd. ~10 cabins, ~67 pax, ventilation=atrium_view."
     },
     {
-      "id": "Pax_Corridor_D7_Central_Mid",
+      "id": "PC_D7_C_M",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -716,7 +716,7 @@
       "description": "Passenger cabin corridor, Deck 7 Central Mid. ~10 cabins, ~67 pax, ventilation=atrium_view."
     },
     {
-      "id": "Pax_Corridor_D7_Central_Aft",
+      "id": "PC_D7_C_A",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -730,7 +730,7 @@
       "description": "Passenger cabin corridor, Deck 7 Central Aft. ~10 cabins, ~67 pax, ventilation=atrium_view."
     },
     {
-      "id": "Pax_Corridor_D8_Port_Fwd",
+      "id": "PC_D8_P_F",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -744,7 +744,7 @@
       "description": "Passenger cabin corridor, Deck 8 Port Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
-      "id": "Pax_Corridor_D8_Port_Mid",
+      "id": "PC_D8_P_M",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -758,7 +758,7 @@
       "description": "Passenger cabin corridor, Deck 8 Port Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
-      "id": "Pax_Corridor_D8_Port_Aft",
+      "id": "PC_D8_P_A",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -772,7 +772,7 @@
       "description": "Passenger cabin corridor, Deck 8 Port Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
-      "id": "Pax_Corridor_D8_Stbd_Fwd",
+      "id": "PC_D8_S_F",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -786,7 +786,7 @@
       "description": "Passenger cabin corridor, Deck 8 Stbd Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
-      "id": "Pax_Corridor_D8_Stbd_Mid",
+      "id": "PC_D8_S_M",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -800,7 +800,7 @@
       "description": "Passenger cabin corridor, Deck 8 Stbd Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
-      "id": "Pax_Corridor_D8_Stbd_Aft",
+      "id": "PC_D8_S_A",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -814,7 +814,7 @@
       "description": "Passenger cabin corridor, Deck 8 Stbd Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
-      "id": "Pax_Corridor_D8_Central_Fwd",
+      "id": "PC_D8_C_F",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -828,7 +828,7 @@
       "description": "Passenger cabin corridor, Deck 8 Central Fwd. ~10 cabins, ~67 pax, ventilation=atrium_view."
     },
     {
-      "id": "Pax_Corridor_D8_Central_Mid",
+      "id": "PC_D8_C_M",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -842,7 +842,7 @@
       "description": "Passenger cabin corridor, Deck 8 Central Mid. ~10 cabins, ~67 pax, ventilation=atrium_view."
     },
     {
-      "id": "Pax_Corridor_D8_Central_Aft",
+      "id": "PC_D8_C_A",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -856,7 +856,7 @@
       "description": "Passenger cabin corridor, Deck 8 Central Aft. ~10 cabins, ~67 pax, ventilation=atrium_view."
     },
     {
-      "id": "Pax_Corridor_D9_Port_Fwd",
+      "id": "PC_D9_P_F",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -870,7 +870,7 @@
       "description": "Passenger cabin corridor, Deck 9 Port Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
-      "id": "Pax_Corridor_D9_Port_Mid",
+      "id": "PC_D9_P_M",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -884,7 +884,7 @@
       "description": "Passenger cabin corridor, Deck 9 Port Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
-      "id": "Pax_Corridor_D9_Port_Aft",
+      "id": "PC_D9_P_A",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -898,7 +898,7 @@
       "description": "Passenger cabin corridor, Deck 9 Port Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
-      "id": "Pax_Corridor_D9_Stbd_Fwd",
+      "id": "PC_D9_S_F",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -912,7 +912,7 @@
       "description": "Passenger cabin corridor, Deck 9 Stbd Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
-      "id": "Pax_Corridor_D9_Stbd_Mid",
+      "id": "PC_D9_S_M",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -926,7 +926,7 @@
       "description": "Passenger cabin corridor, Deck 9 Stbd Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
-      "id": "Pax_Corridor_D9_Stbd_Aft",
+      "id": "PC_D9_S_A",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -940,7 +940,7 @@
       "description": "Passenger cabin corridor, Deck 9 Stbd Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
-      "id": "Pax_Corridor_D9_Central_Fwd",
+      "id": "PC_D9_C_F",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -954,7 +954,7 @@
       "description": "Passenger cabin corridor, Deck 9 Central Fwd. ~10 cabins, ~67 pax, ventilation=interior_hvac."
     },
     {
-      "id": "Pax_Corridor_D9_Central_Mid",
+      "id": "PC_D9_C_M",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -968,7 +968,7 @@
       "description": "Passenger cabin corridor, Deck 9 Central Mid. ~10 cabins, ~67 pax, ventilation=interior_hvac."
     },
     {
-      "id": "Pax_Corridor_D9_Central_Aft",
+      "id": "PC_D9_C_A",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -982,7 +982,7 @@
       "description": "Passenger cabin corridor, Deck 9 Central Aft. ~10 cabins, ~67 pax, ventilation=interior_hvac."
     },
     {
-      "id": "Pax_Corridor_D10_Port_Fwd",
+      "id": "PC_D10_P_F",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -996,7 +996,7 @@
       "description": "Passenger cabin corridor, Deck 10 Port Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
-      "id": "Pax_Corridor_D10_Port_Mid",
+      "id": "PC_D10_P_M",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -1010,7 +1010,7 @@
       "description": "Passenger cabin corridor, Deck 10 Port Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
-      "id": "Pax_Corridor_D10_Port_Aft",
+      "id": "PC_D10_P_A",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -1024,7 +1024,7 @@
       "description": "Passenger cabin corridor, Deck 10 Port Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
-      "id": "Pax_Corridor_D10_Stbd_Fwd",
+      "id": "PC_D10_S_F",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -1038,7 +1038,7 @@
       "description": "Passenger cabin corridor, Deck 10 Stbd Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
-      "id": "Pax_Corridor_D10_Stbd_Mid",
+      "id": "PC_D10_S_M",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -1052,7 +1052,7 @@
       "description": "Passenger cabin corridor, Deck 10 Stbd Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
-      "id": "Pax_Corridor_D10_Stbd_Aft",
+      "id": "PC_D10_S_A",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -1066,7 +1066,7 @@
       "description": "Passenger cabin corridor, Deck 10 Stbd Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
-      "id": "Pax_Corridor_D10_Central_Fwd",
+      "id": "PC_D10_C_F",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -1080,7 +1080,7 @@
       "description": "Passenger cabin corridor, Deck 10 Central Fwd. ~10 cabins, ~67 pax, ventilation=interior_hvac."
     },
     {
-      "id": "Pax_Corridor_D10_Central_Mid",
+      "id": "PC_D10_C_M",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -1094,7 +1094,7 @@
       "description": "Passenger cabin corridor, Deck 10 Central Mid. ~10 cabins, ~67 pax, ventilation=interior_hvac."
     },
     {
-      "id": "Pax_Corridor_D10_Central_Aft",
+      "id": "PC_D10_C_A",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -1108,7 +1108,7 @@
       "description": "Passenger cabin corridor, Deck 10 Central Aft. ~10 cabins, ~67 pax, ventilation=interior_hvac."
     },
     {
-      "id": "Pax_Corridor_D11_Port_Fwd",
+      "id": "PC_D11_P_F",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -1122,7 +1122,7 @@
       "description": "Passenger cabin corridor, Deck 11 Port Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
-      "id": "Pax_Corridor_D11_Port_Mid",
+      "id": "PC_D11_P_M",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -1136,7 +1136,7 @@
       "description": "Passenger cabin corridor, Deck 11 Port Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
-      "id": "Pax_Corridor_D11_Port_Aft",
+      "id": "PC_D11_P_A",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -1150,7 +1150,7 @@
       "description": "Passenger cabin corridor, Deck 11 Port Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
-      "id": "Pax_Corridor_D11_Stbd_Fwd",
+      "id": "PC_D11_S_F",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -1164,7 +1164,7 @@
       "description": "Passenger cabin corridor, Deck 11 Stbd Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
-      "id": "Pax_Corridor_D11_Stbd_Mid",
+      "id": "PC_D11_S_M",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -1178,7 +1178,7 @@
       "description": "Passenger cabin corridor, Deck 11 Stbd Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
-      "id": "Pax_Corridor_D11_Stbd_Aft",
+      "id": "PC_D11_S_A",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -1192,7 +1192,7 @@
       "description": "Passenger cabin corridor, Deck 11 Stbd Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
-      "id": "Pax_Corridor_D11_Central_Fwd",
+      "id": "PC_D11_C_F",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -1206,7 +1206,7 @@
       "description": "Passenger cabin corridor, Deck 11 Central Fwd. ~10 cabins, ~67 pax, ventilation=interior_hvac."
     },
     {
-      "id": "Pax_Corridor_D11_Central_Mid",
+      "id": "PC_D11_C_M",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -1220,7 +1220,7 @@
       "description": "Passenger cabin corridor, Deck 11 Central Mid. ~10 cabins, ~67 pax, ventilation=interior_hvac."
     },
     {
-      "id": "Pax_Corridor_D11_Central_Aft",
+      "id": "PC_D11_C_A",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -1234,7 +1234,7 @@
       "description": "Passenger cabin corridor, Deck 11 Central Aft. ~10 cabins, ~67 pax, ventilation=interior_hvac."
     },
     {
-      "id": "Pax_Corridor_D12_Port_Fwd",
+      "id": "PC_D12_P_F",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -1248,7 +1248,7 @@
       "description": "Passenger cabin corridor, Deck 12 Port Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
-      "id": "Pax_Corridor_D12_Port_Mid",
+      "id": "PC_D12_P_M",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -1262,7 +1262,7 @@
       "description": "Passenger cabin corridor, Deck 12 Port Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
-      "id": "Pax_Corridor_D12_Port_Aft",
+      "id": "PC_D12_P_A",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -1276,7 +1276,7 @@
       "description": "Passenger cabin corridor, Deck 12 Port Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
-      "id": "Pax_Corridor_D12_Stbd_Fwd",
+      "id": "PC_D12_S_F",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -1290,7 +1290,7 @@
       "description": "Passenger cabin corridor, Deck 12 Stbd Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
-      "id": "Pax_Corridor_D12_Stbd_Mid",
+      "id": "PC_D12_S_M",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -1304,7 +1304,7 @@
       "description": "Passenger cabin corridor, Deck 12 Stbd Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
-      "id": "Pax_Corridor_D12_Stbd_Aft",
+      "id": "PC_D12_S_A",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -1318,7 +1318,7 @@
       "description": "Passenger cabin corridor, Deck 12 Stbd Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
-      "id": "Pax_Corridor_D12_Central_Fwd",
+      "id": "PC_D12_C_F",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -1332,7 +1332,7 @@
       "description": "Passenger cabin corridor, Deck 12 Central Fwd. ~10 cabins, ~67 pax, ventilation=interior_hvac."
     },
     {
-      "id": "Pax_Corridor_D12_Central_Mid",
+      "id": "PC_D12_C_M",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -1346,7 +1346,7 @@
       "description": "Passenger cabin corridor, Deck 12 Central Mid. ~10 cabins, ~67 pax, ventilation=interior_hvac."
     },
     {
-      "id": "Pax_Corridor_D12_Central_Aft",
+      "id": "PC_D12_C_A",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -1360,7 +1360,7 @@
       "description": "Passenger cabin corridor, Deck 12 Central Aft. ~10 cabins, ~67 pax, ventilation=interior_hvac."
     },
     {
-      "id": "Pax_Corridor_D13_Port_Fwd",
+      "id": "PC_D13_P_F",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -1374,7 +1374,7 @@
       "description": "Passenger cabin corridor, Deck 13 Port Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
-      "id": "Pax_Corridor_D13_Port_Mid",
+      "id": "PC_D13_P_M",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -1388,7 +1388,7 @@
       "description": "Passenger cabin corridor, Deck 13 Port Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
-      "id": "Pax_Corridor_D13_Port_Aft",
+      "id": "PC_D13_P_A",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -1402,7 +1402,7 @@
       "description": "Passenger cabin corridor, Deck 13 Port Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
-      "id": "Pax_Corridor_D13_Stbd_Fwd",
+      "id": "PC_D13_S_F",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -1416,7 +1416,7 @@
       "description": "Passenger cabin corridor, Deck 13 Stbd Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
-      "id": "Pax_Corridor_D13_Stbd_Mid",
+      "id": "PC_D13_S_M",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -1430,7 +1430,7 @@
       "description": "Passenger cabin corridor, Deck 13 Stbd Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
-      "id": "Pax_Corridor_D13_Stbd_Aft",
+      "id": "PC_D13_S_A",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -1444,7 +1444,7 @@
       "description": "Passenger cabin corridor, Deck 13 Stbd Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
-      "id": "Pax_Corridor_D13_Central_Fwd",
+      "id": "PC_D13_C_F",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -1458,7 +1458,7 @@
       "description": "Passenger cabin corridor, Deck 13 Central Fwd. ~10 cabins, ~67 pax, ventilation=interior_hvac."
     },
     {
-      "id": "Pax_Corridor_D13_Central_Mid",
+      "id": "PC_D13_C_M",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -1472,7 +1472,7 @@
       "description": "Passenger cabin corridor, Deck 13 Central Mid. ~10 cabins, ~67 pax, ventilation=interior_hvac."
     },
     {
-      "id": "Pax_Corridor_D13_Central_Aft",
+      "id": "PC_D13_C_A",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -1486,7 +1486,7 @@
       "description": "Passenger cabin corridor, Deck 13 Central Aft. ~10 cabins, ~67 pax, ventilation=interior_hvac."
     },
     {
-      "id": "Pax_Corridor_D14_Port_Fwd",
+      "id": "PC_D14_P_F",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -1500,7 +1500,7 @@
       "description": "Passenger cabin corridor, Deck 14 Port Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
-      "id": "Pax_Corridor_D14_Port_Mid",
+      "id": "PC_D14_P_M",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -1514,7 +1514,7 @@
       "description": "Passenger cabin corridor, Deck 14 Port Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
-      "id": "Pax_Corridor_D14_Port_Aft",
+      "id": "PC_D14_P_A",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -1528,7 +1528,7 @@
       "description": "Passenger cabin corridor, Deck 14 Port Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
-      "id": "Pax_Corridor_D14_Stbd_Fwd",
+      "id": "PC_D14_S_F",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -1542,7 +1542,7 @@
       "description": "Passenger cabin corridor, Deck 14 Stbd Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
-      "id": "Pax_Corridor_D14_Stbd_Mid",
+      "id": "PC_D14_S_M",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -1556,7 +1556,7 @@
       "description": "Passenger cabin corridor, Deck 14 Stbd Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
-      "id": "Pax_Corridor_D14_Stbd_Aft",
+      "id": "PC_D14_S_A",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -1570,7 +1570,7 @@
       "description": "Passenger cabin corridor, Deck 14 Stbd Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
-      "id": "Pax_Corridor_D14_Central_Fwd",
+      "id": "PC_D14_C_F",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -1584,7 +1584,7 @@
       "description": "Passenger cabin corridor, Deck 14 Central Fwd. ~10 cabins, ~67 pax, ventilation=interior_hvac."
     },
     {
-      "id": "Pax_Corridor_D14_Central_Mid",
+      "id": "PC_D14_C_M",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -1598,7 +1598,7 @@
       "description": "Passenger cabin corridor, Deck 14 Central Mid. ~10 cabins, ~67 pax, ventilation=interior_hvac."
     },
     {
-      "id": "Pax_Corridor_D14_Central_Aft",
+      "id": "PC_D14_C_A",
       "type": "Cabin_Corridor",
       "traffic": "low",
       "volume_m3": 1200,
@@ -1612,7 +1612,7 @@
       "description": "Passenger cabin corridor, Deck 14 Central Aft. ~10 cabins, ~67 pax, ventilation=interior_hvac."
     },
     {
-      "id": "Crew_Corridor_D1_Fwd",
+      "id": "CC_D1_F",
       "type": "Cabin_Corridor",
       "traffic": "medium",
       "volume_m3": 900,
@@ -1626,7 +1626,7 @@
       "description": "Crew cabin corridor, Deck 1 Fwd. ~35 shared cabins, higher density, interior HVAC."
     },
     {
-      "id": "Crew_Corridor_D1_Mid",
+      "id": "CC_D1_M",
       "type": "Cabin_Corridor",
       "traffic": "medium",
       "volume_m3": 900,
@@ -1640,7 +1640,7 @@
       "description": "Crew cabin corridor, Deck 1 Mid. ~35 shared cabins, higher density, interior HVAC."
     },
     {
-      "id": "Crew_Corridor_D1_Aft",
+      "id": "CC_D1_A",
       "type": "Cabin_Corridor",
       "traffic": "medium",
       "volume_m3": 900,
@@ -1654,7 +1654,7 @@
       "description": "Crew cabin corridor, Deck 1 Aft. ~35 shared cabins, higher density, interior HVAC."
     },
     {
-      "id": "Crew_Corridor_D2_Fwd",
+      "id": "CC_D2_F",
       "type": "Cabin_Corridor",
       "traffic": "medium",
       "volume_m3": 900,
@@ -1668,7 +1668,7 @@
       "description": "Crew cabin corridor, Deck 2 Fwd. ~35 shared cabins, higher density, interior HVAC."
     },
     {
-      "id": "Crew_Corridor_D2_Mid",
+      "id": "CC_D2_M",
       "type": "Cabin_Corridor",
       "traffic": "medium",
       "volume_m3": 900,
@@ -1682,7 +1682,7 @@
       "description": "Crew cabin corridor, Deck 2 Mid. ~35 shared cabins, higher density, interior HVAC."
     },
     {
-      "id": "Crew_Corridor_D2_Aft",
+      "id": "CC_D2_A",
       "type": "Cabin_Corridor",
       "traffic": "medium",
       "volume_m3": 900,
@@ -1696,7 +1696,7 @@
       "description": "Crew cabin corridor, Deck 2 Aft. ~35 shared cabins, higher density, interior HVAC."
     },
     {
-      "id": "Crew_Corridor_D3_Fwd",
+      "id": "CC_D3_F",
       "type": "Cabin_Corridor",
       "traffic": "medium",
       "volume_m3": 900,
@@ -1710,7 +1710,7 @@
       "description": "Crew cabin corridor, Deck 3 Fwd. ~35 shared cabins, higher density, interior HVAC."
     },
     {
-      "id": "Crew_Corridor_D3_Mid",
+      "id": "CC_D3_M",
       "type": "Cabin_Corridor",
       "traffic": "medium",
       "volume_m3": 900,
@@ -1724,7 +1724,7 @@
       "description": "Crew cabin corridor, Deck 3 Mid. ~35 shared cabins, higher density, interior HVAC."
     },
     {
-      "id": "Crew_Corridor_D3_Aft",
+      "id": "CC_D3_A",
       "type": "Cabin_Corridor",
       "traffic": "medium",
       "volume_m3": 900,
@@ -1738,7 +1738,7 @@
       "description": "Crew cabin corridor, Deck 3 Aft. ~35 shared cabins, higher density, interior HVAC."
     },
     {
-      "id": "Crew_Corridor_D4_Fwd",
+      "id": "CC_D4_F",
       "type": "Cabin_Corridor",
       "traffic": "medium",
       "volume_m3": 900,
@@ -1752,7 +1752,7 @@
       "description": "Crew cabin corridor, Deck 4 Fwd. ~35 shared cabins, higher density, interior HVAC."
     },
     {
-      "id": "Crew_Corridor_D4_Mid",
+      "id": "CC_D4_M",
       "type": "Cabin_Corridor",
       "traffic": "medium",
       "volume_m3": 900,
@@ -1766,7 +1766,7 @@
       "description": "Crew cabin corridor, Deck 4 Mid. ~35 shared cabins, higher density, interior HVAC."
     },
     {
-      "id": "Crew_Corridor_D4_Aft",
+      "id": "CC_D4_A",
       "type": "Cabin_Corridor",
       "traffic": "medium",
       "volume_m3": 900,

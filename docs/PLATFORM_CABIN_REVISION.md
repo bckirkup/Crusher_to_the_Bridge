@@ -47,7 +47,7 @@ For each of 9 passenger decks × 3 sections (port/starboard/central):
 
 Naming: `Pax_Corridor_D{deck}_{Port|Stbd|Central}_{Fwd|Mid|Aft}`
 
-Example: `Pax_Corridor_D6_Port_Fwd` (~10 cabins, ~67 pax, 1200 m³)
+Example: `PC_D6_P_F` (~10 cabins, ~67 pax, 1200 m³)
 
 ### Cabin Ventilation Type Flag
 

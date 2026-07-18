@@ -18,8 +18,8 @@
       "id": "zone_saucer_ops",
       "rooms": [
         "Sickbay",
-        "Security_Station",
-        "Transporter_Room",
+        "Security",
+        "Transporter",
         "Science_Lab"
       ],
       "ach": 10.0,
@@ -31,7 +31,7 @@
         "Rec_Deck",
         "Galley",
         "Crew_Quarters",
-        "Officer_Quarters",
+        "OfficerQtrs",
         "Mess_Hall"
       ],
       "ach": 7.0,
@@ -89,12 +89,12 @@
     },
     {
       "from": "Sickbay",
-      "to": "Transporter_Room",
+      "to": "Transporter",
       "type": "passageway"
     },
     {
       "from": "Sickbay",
-      "to": "Security_Station",
+      "to": "Security",
       "type": "passageway"
     },
     {
@@ -114,11 +114,11 @@
     },
     {
       "from": "Crew_Quarters",
-      "to": "Officer_Quarters",
+      "to": "OfficerQtrs",
       "type": "passageway"
     },
     {
-      "from": "Officer_Quarters",
+      "from": "OfficerQtrs",
       "to": "Engineering",
       "type": "turbolift"
     },

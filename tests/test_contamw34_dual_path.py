@@ -379,7 +379,7 @@ def test_contamw34_export_contamx_invariants(platform: str) -> None:
         if len(toks) >= 9 and toks[0].isdigit():
             sched_by_nr[int(toks[0])] = int(toks[8])
     for _ahs_nr, pr, _ps, _px in _parse_ahs_system_paths(text):
-        assert sched_by_nr.get(pr) == 1, f"recirc path {pr} missing OA schedule"
+        assert sched_by_nr.get(pr, 0) >= 1, f"recirc path {pr} missing OA schedule"
         assert int(flow_paths[pr]["flag"]) == 16
 
 

@@ -51,7 +51,7 @@
     "Royal_Promenade": "Promenade",
     "Medical_Center": "Medical Center",
     "Engine_Room_Aft": "Engine Room",
-    "Main_Dining_Room_Lower": "Main Dining"
+    "MainDining_L": "Main Dining"
   },
   "night_setback": true
 }

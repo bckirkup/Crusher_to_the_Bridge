@@ -169,8 +169,14 @@ def deck_temp_k(
     overrides: dict[str, Any],
     base_k: float = 293.15,
 ) -> float:
+    """Zone temperature from ``deck_temp_offset_K`` keyed by JSON ``zone.deck``.
+
+    Keys must match the spatial_layout deck string exactly (e.g. mega
+    ``0_Engine`` / ``1_Engine``, destroyer ``lower``).
+    """
     offsets = dict(overrides.get("deck_temp_offset_K") or {})
-    return float(base_k) + float(offsets.get(deck, 0.0))
+    deck_key = str(deck or "").strip()
+    return float(base_k) + float(offsets.get(deck_key, 0.0))
 
 
 def wall_azimuth_deg(

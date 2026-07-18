@@ -22,7 +22,7 @@
       "class_id": "crew_command",
       "role_group": "crew",
       "fraction": 0.08,
-      "home_zone_preference": "Officer_Quarters",
+      "home_zone_preference": "OfficerQtrs",
       "free_zone_preference": "Bridge",
       "duty_zone": "Bridge"
     },
@@ -40,7 +40,7 @@
       "fraction": 0.08,
       "home_zone_preference": "Crew_Quarters",
       "free_zone_preference": "Security",
-      "duty_zone": "Security_Station"
+      "duty_zone": "Security"
     },
     {
       "class_id": "crew_engineering",
@@ -54,7 +54,7 @@
       "class_id": "crew_sciences",
       "role_group": "crew",
       "fraction": 0.12,
-      "home_zone_preference": "Officer_Quarters",
+      "home_zone_preference": "OfficerQtrs",
       "free_zone_preference": "Science",
       "duty_zone": "Science_Lab"
     },
@@ -62,7 +62,7 @@
       "class_id": "crew_medical",
       "role_group": "crew",
       "fraction": 0.08,
-      "home_zone_preference": "Officer_Quarters",
+      "home_zone_preference": "OfficerQtrs",
       "free_zone_preference": "Sickbay",
       "duty_zone": "Sickbay"
     },

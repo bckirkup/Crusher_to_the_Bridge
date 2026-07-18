@@ -44,7 +44,7 @@
       "description": "Primary care"
     },
     {
-      "id": "Main_Engineering",
+      "id": "MainEng",
       "type": "Room",
       "traffic": "high",
       "volume_m3": 680,
@@ -176,7 +176,7 @@
       "description": "Hydroponics and arboretum"
     },
     {
-      "id": "Stellar_Cartography",
+      "id": "StellarCarto",
       "type": "Free",
       "traffic": "low",
       "volume_m3": 180,
@@ -213,6 +213,6 @@
     }
   ],
   "graywater_zones": [
-    "Main_Engineering"
+    "MainEng"
   ]
 }

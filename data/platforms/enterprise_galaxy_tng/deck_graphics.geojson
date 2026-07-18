@@ -369,7 +369,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Main_Engineering",
+        "zone_id": "MainEng",
         "deck": "drive_section",
         "room_type": "Room"
       },
@@ -941,7 +941,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Stellar_Cartography",
+        "zone_id": "StellarCarto",
         "deck": "saucer_16",
         "room_type": "Free"
       },

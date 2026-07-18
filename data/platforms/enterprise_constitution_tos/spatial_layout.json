@@ -44,7 +44,7 @@
       "description": "Warp core and engineering"
     },
     {
-      "id": "Transporter_Room",
+      "id": "Transporter",
       "type": "Free",
       "traffic": "low",
       "volume_m3": 90,
@@ -104,7 +104,7 @@
       "description": "Subspace communications"
     },
     {
-      "id": "Security_Station",
+      "id": "Security",
       "type": "Free",
       "traffic": "low",
       "volume_m3": 95,
@@ -128,7 +128,7 @@
       "description": "Enlisted berthing"
     },
     {
-      "id": "Officer_Quarters",
+      "id": "OfficerQtrs",
       "type": "Room",
       "traffic": "low",
       "volume_m3": 320,

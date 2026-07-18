@@ -98,3 +98,8 @@ hvac:
 2. If SIM layout or Flow0 join changed: confirm destroyer fixture fans still match design.
 3. With ContamX installed: re-run `contam_flow_compare --run-contamx` then the compare suite.
 4. Update `docs/CONTAM_PRJ_AUDIT.md` if destroyer kept/synth counts or L1 baselines change materially.
+5. Zone IDs on Contam fiction platforms must be ≤15 chars (mega `PC_*`/`CC_*`). Prefer editing
+   the PRJ as SoT after bootstrap; regenerate with `scripts/generate_platform_contam_prj.py`
+   only for fiction ships without an authentic Contam model.
+6. Passive cross-zone (`is_hvac_ducted: false`) exports as sized `plr_orfc`; ducted stays `fan_cvf`.
+   Per-AHU `oa_fraction` overrides emit dedicated `OAFr_{pct}` schedules on AHS recirc paths.

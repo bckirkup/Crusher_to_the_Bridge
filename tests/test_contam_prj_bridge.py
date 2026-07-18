@@ -176,14 +176,20 @@ class TestPrjRoundTrip:
         def _hvac_rooms(d):
             return {(h["id"], frozenset(h["rooms"]), h["ach"]) for h in d["hvac_zones"]}
 
-        assert _adj_pairs(r_airflow) == _adj_pairs(airflow)
+        # Original adjacency is preserved; passive cross-zone (is_hvac_ducted
+        # false) exports as plr_orfc and simplifies back into adjacency.
+        assert _adj_pairs(airflow) <= _adj_pairs(r_airflow)
         assert _hvac_rooms(r_airflow) == _hvac_rooms(airflow)
-        # Cross-zone fans are expanded room×room on export; simplify recovers
-        # those leaf edges. Total prescribed flow should match.
-        orig_flow = sum(float(e["flow_rate_m3h"]) for e in airflow["cross_zone_links"])
+        # Ducted cross-zone fans remain cross_zone_links; passive shaft flow
+        # is no longer in that list.
+        ducted_orig = sum(
+            float(e["flow_rate_m3h"])
+            for e in airflow["cross_zone_links"]
+            if e.get("is_hvac_ducted")
+        )
         got_flow = sum(float(e["flow_rate_m3h"]) for e in r_airflow["cross_zone_links"])
-        assert got_flow == pytest.approx(orig_flow, rel=1e-6)
-        assert len(r_airflow["cross_zone_links"]) >= len(airflow["cross_zone_links"])
+        assert got_flow == pytest.approx(ducted_orig, rel=1e-6)
+        assert len(r_airflow["cross_zone_links"]) >= 1
 
     def test_geometry_fields_round_trip(self) -> None:
         spatial = {
@@ -239,7 +245,8 @@ class TestPrjRoundTrip:
         text = prj_file.read_text(encoding="utf-8")
         r_spatial, r_airflow = contam_prj_bridge.import_prj(text)
         assert len(r_spatial["zones"]) == len(spatial["zones"])
-        assert len(r_airflow["adjacency"]) == len(airflow["adjacency"])
+        # Passive cross-zone orifices round-trip as adjacency, so count grows.
+        assert len(r_airflow["adjacency"]) >= len(airflow["adjacency"])
 
     def test_path_map_includes_cross_and_adjacency(self) -> None:
         spatial, airflow = _destroyer_layout()

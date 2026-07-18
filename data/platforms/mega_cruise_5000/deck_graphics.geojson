@@ -449,7 +449,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Spa_Fitness_Complex",
+        "zone_id": "SpaFitness",
         "deck": "14_Spa",
         "room_type": "Free"
       },
@@ -605,7 +605,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Central_Park_Open_Atrium",
+        "zone_id": "CentralPark",
         "deck": "8_CentralPark",
         "room_type": "Free"
       },
@@ -657,7 +657,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Specialty_Restaurant_Block_A",
+        "zone_id": "SpecRest_A",
         "deck": "8_CentralPark",
         "room_type": "Dining"
       },
@@ -761,7 +761,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Shopping_Retail_Block",
+        "zone_id": "ShopRetail",
         "deck": "5_Promenade",
         "room_type": "Free"
       },
@@ -813,7 +813,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Cafe_Bakery_Block",
+        "zone_id": "CafeBakery",
         "deck": "5_Promenade",
         "room_type": "Dining"
       },
@@ -917,7 +917,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Comedy_Club_Lounge",
+        "zone_id": "ComedyClub",
         "deck": "4_Entertainment",
         "room_type": "Dining"
       },
@@ -969,7 +969,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Library_Card_Room",
+        "zone_id": "LibraryCard",
         "deck": "6_Public",
         "room_type": "Free"
       },
@@ -1021,7 +1021,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Specialty_Restaurant_Block_B",
+        "zone_id": "SpecRest_B",
         "deck": "6_Public",
         "room_type": "Dining"
       },
@@ -1073,7 +1073,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Main_Dining_Room_Lower",
+        "zone_id": "MainDining_L",
         "deck": "3_Dining",
         "room_type": "Dining"
       },
@@ -1125,7 +1125,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Main_Dining_Room_Upper",
+        "zone_id": "MainDining_U",
         "deck": "4_Dining",
         "room_type": "Dining"
       },
@@ -1177,7 +1177,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Windjammer_Buffet",
+        "zone_id": "Windjammer",
         "deck": "16_Buffet",
         "room_type": "Dining"
       },
@@ -1281,7 +1281,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Crew_Corridor_D2_Fwd",
+        "zone_id": "CC_D2_F",
         "deck": "2_Crew",
         "room_type": "Cabin_Corridor"
       },
@@ -1333,7 +1333,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Crew_Corridor_D2_Mid",
+        "zone_id": "CC_D2_M",
         "deck": "2_Crew",
         "room_type": "Cabin_Corridor"
       },
@@ -1385,7 +1385,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Crew_Corridor_D2_Aft",
+        "zone_id": "CC_D2_A",
         "deck": "2_Crew",
         "room_type": "Cabin_Corridor"
       },
@@ -1437,7 +1437,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Crew_Mess_Forward",
+        "zone_id": "CrewMess_Fwd",
         "deck": "3_Crew",
         "room_type": "Dining"
       },
@@ -1489,7 +1489,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Crew_Corridor_D3_Fwd",
+        "zone_id": "CC_D3_F",
         "deck": "3_Crew",
         "room_type": "Cabin_Corridor"
       },
@@ -1541,7 +1541,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Crew_Corridor_D3_Mid",
+        "zone_id": "CC_D3_M",
         "deck": "3_Crew",
         "room_type": "Cabin_Corridor"
       },
@@ -1593,7 +1593,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Crew_Corridor_D3_Aft",
+        "zone_id": "CC_D3_A",
         "deck": "3_Crew",
         "room_type": "Cabin_Corridor"
       },
@@ -1957,7 +1957,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Buffet_Galley_Upper",
+        "zone_id": "BuffetGal_U",
         "deck": "15_Service",
         "room_type": "Dining"
       },
@@ -2009,7 +2009,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Specialty_Galley_Block",
+        "zone_id": "SpecGalley",
         "deck": "6_Service",
         "room_type": "Dining"
       },
@@ -2165,7 +2165,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Waste_Treatment_Plant",
+        "zone_id": "WasteTreat",
         "deck": "0_Technical",
         "room_type": "Free"
       },
@@ -2269,7 +2269,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Engine_Control_Room",
+        "zone_id": "EngControl",
         "deck": "1_Engine",
         "room_type": "Free"
       },
@@ -2321,7 +2321,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D6_Port_Fwd",
+        "zone_id": "PC_D6_P_F",
         "deck": "6_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -2373,7 +2373,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D6_Port_Mid",
+        "zone_id": "PC_D6_P_M",
         "deck": "6_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -2425,7 +2425,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D6_Port_Aft",
+        "zone_id": "PC_D6_P_A",
         "deck": "6_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -2477,7 +2477,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D6_Stbd_Fwd",
+        "zone_id": "PC_D6_S_F",
         "deck": "6_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -2529,7 +2529,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D6_Stbd_Mid",
+        "zone_id": "PC_D6_S_M",
         "deck": "6_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -2581,7 +2581,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D6_Stbd_Aft",
+        "zone_id": "PC_D6_S_A",
         "deck": "6_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -2633,7 +2633,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D6_Central_Fwd",
+        "zone_id": "PC_D6_C_F",
         "deck": "6_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -2685,7 +2685,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D6_Central_Mid",
+        "zone_id": "PC_D6_C_M",
         "deck": "6_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -2737,7 +2737,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D6_Central_Aft",
+        "zone_id": "PC_D6_C_A",
         "deck": "6_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -2789,7 +2789,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D7_Port_Fwd",
+        "zone_id": "PC_D7_P_F",
         "deck": "7_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -2841,7 +2841,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D7_Port_Mid",
+        "zone_id": "PC_D7_P_M",
         "deck": "7_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -2893,7 +2893,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D7_Port_Aft",
+        "zone_id": "PC_D7_P_A",
         "deck": "7_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -2945,7 +2945,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D7_Stbd_Fwd",
+        "zone_id": "PC_D7_S_F",
         "deck": "7_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -2997,7 +2997,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D7_Stbd_Mid",
+        "zone_id": "PC_D7_S_M",
         "deck": "7_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -3049,7 +3049,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D7_Stbd_Aft",
+        "zone_id": "PC_D7_S_A",
         "deck": "7_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -3101,7 +3101,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D7_Central_Fwd",
+        "zone_id": "PC_D7_C_F",
         "deck": "7_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -3153,7 +3153,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D7_Central_Mid",
+        "zone_id": "PC_D7_C_M",
         "deck": "7_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -3205,7 +3205,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D7_Central_Aft",
+        "zone_id": "PC_D7_C_A",
         "deck": "7_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -3257,7 +3257,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D8_Port_Fwd",
+        "zone_id": "PC_D8_P_F",
         "deck": "8_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -3309,7 +3309,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D8_Port_Mid",
+        "zone_id": "PC_D8_P_M",
         "deck": "8_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -3361,7 +3361,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D8_Port_Aft",
+        "zone_id": "PC_D8_P_A",
         "deck": "8_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -3413,7 +3413,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D8_Stbd_Fwd",
+        "zone_id": "PC_D8_S_F",
         "deck": "8_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -3465,7 +3465,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D8_Stbd_Mid",
+        "zone_id": "PC_D8_S_M",
         "deck": "8_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -3517,7 +3517,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D8_Stbd_Aft",
+        "zone_id": "PC_D8_S_A",
         "deck": "8_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -3569,7 +3569,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D8_Central_Fwd",
+        "zone_id": "PC_D8_C_F",
         "deck": "8_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -3621,7 +3621,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D8_Central_Mid",
+        "zone_id": "PC_D8_C_M",
         "deck": "8_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -3673,7 +3673,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D8_Central_Aft",
+        "zone_id": "PC_D8_C_A",
         "deck": "8_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -3725,7 +3725,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D9_Port_Fwd",
+        "zone_id": "PC_D9_P_F",
         "deck": "9_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -3777,7 +3777,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D9_Port_Mid",
+        "zone_id": "PC_D9_P_M",
         "deck": "9_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -3829,7 +3829,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D9_Port_Aft",
+        "zone_id": "PC_D9_P_A",
         "deck": "9_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -3881,7 +3881,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D9_Stbd_Fwd",
+        "zone_id": "PC_D9_S_F",
         "deck": "9_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -3933,7 +3933,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D9_Stbd_Mid",
+        "zone_id": "PC_D9_S_M",
         "deck": "9_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -3985,7 +3985,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D9_Stbd_Aft",
+        "zone_id": "PC_D9_S_A",
         "deck": "9_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -4037,7 +4037,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D9_Central_Fwd",
+        "zone_id": "PC_D9_C_F",
         "deck": "9_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -4089,7 +4089,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D9_Central_Mid",
+        "zone_id": "PC_D9_C_M",
         "deck": "9_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -4141,7 +4141,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D9_Central_Aft",
+        "zone_id": "PC_D9_C_A",
         "deck": "9_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -4193,7 +4193,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D10_Port_Fwd",
+        "zone_id": "PC_D10_P_F",
         "deck": "10_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -4245,7 +4245,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D10_Port_Mid",
+        "zone_id": "PC_D10_P_M",
         "deck": "10_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -4297,7 +4297,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D10_Port_Aft",
+        "zone_id": "PC_D10_P_A",
         "deck": "10_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -4349,7 +4349,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D10_Stbd_Fwd",
+        "zone_id": "PC_D10_S_F",
         "deck": "10_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -4401,7 +4401,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D10_Stbd_Mid",
+        "zone_id": "PC_D10_S_M",
         "deck": "10_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -4453,7 +4453,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D10_Stbd_Aft",
+        "zone_id": "PC_D10_S_A",
         "deck": "10_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -4505,7 +4505,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D10_Central_Fwd",
+        "zone_id": "PC_D10_C_F",
         "deck": "10_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -4557,7 +4557,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D10_Central_Mid",
+        "zone_id": "PC_D10_C_M",
         "deck": "10_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -4609,7 +4609,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D10_Central_Aft",
+        "zone_id": "PC_D10_C_A",
         "deck": "10_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -4661,7 +4661,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D11_Port_Fwd",
+        "zone_id": "PC_D11_P_F",
         "deck": "11_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -4713,7 +4713,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D11_Port_Mid",
+        "zone_id": "PC_D11_P_M",
         "deck": "11_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -4765,7 +4765,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D11_Port_Aft",
+        "zone_id": "PC_D11_P_A",
         "deck": "11_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -4817,7 +4817,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D11_Stbd_Fwd",
+        "zone_id": "PC_D11_S_F",
         "deck": "11_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -4869,7 +4869,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D11_Stbd_Mid",
+        "zone_id": "PC_D11_S_M",
         "deck": "11_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -4921,7 +4921,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D11_Stbd_Aft",
+        "zone_id": "PC_D11_S_A",
         "deck": "11_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -4973,7 +4973,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D11_Central_Fwd",
+        "zone_id": "PC_D11_C_F",
         "deck": "11_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -5025,7 +5025,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D11_Central_Mid",
+        "zone_id": "PC_D11_C_M",
         "deck": "11_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -5077,7 +5077,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D11_Central_Aft",
+        "zone_id": "PC_D11_C_A",
         "deck": "11_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -5129,7 +5129,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D12_Port_Fwd",
+        "zone_id": "PC_D12_P_F",
         "deck": "12_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -5181,7 +5181,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D12_Port_Mid",
+        "zone_id": "PC_D12_P_M",
         "deck": "12_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -5233,7 +5233,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D12_Port_Aft",
+        "zone_id": "PC_D12_P_A",
         "deck": "12_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -5285,7 +5285,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D12_Stbd_Fwd",
+        "zone_id": "PC_D12_S_F",
         "deck": "12_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -5337,7 +5337,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D12_Stbd_Mid",
+        "zone_id": "PC_D12_S_M",
         "deck": "12_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -5389,7 +5389,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D12_Stbd_Aft",
+        "zone_id": "PC_D12_S_A",
         "deck": "12_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -5441,7 +5441,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D12_Central_Fwd",
+        "zone_id": "PC_D12_C_F",
         "deck": "12_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -5493,7 +5493,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D12_Central_Mid",
+        "zone_id": "PC_D12_C_M",
         "deck": "12_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -5545,7 +5545,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D12_Central_Aft",
+        "zone_id": "PC_D12_C_A",
         "deck": "12_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -5597,7 +5597,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D13_Port_Fwd",
+        "zone_id": "PC_D13_P_F",
         "deck": "13_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -5649,7 +5649,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D13_Port_Mid",
+        "zone_id": "PC_D13_P_M",
         "deck": "13_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -5701,7 +5701,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D13_Port_Aft",
+        "zone_id": "PC_D13_P_A",
         "deck": "13_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -5753,7 +5753,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D13_Stbd_Fwd",
+        "zone_id": "PC_D13_S_F",
         "deck": "13_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -5805,7 +5805,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D13_Stbd_Mid",
+        "zone_id": "PC_D13_S_M",
         "deck": "13_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -5857,7 +5857,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D13_Stbd_Aft",
+        "zone_id": "PC_D13_S_A",
         "deck": "13_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -5909,7 +5909,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D13_Central_Fwd",
+        "zone_id": "PC_D13_C_F",
         "deck": "13_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -5961,7 +5961,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D13_Central_Mid",
+        "zone_id": "PC_D13_C_M",
         "deck": "13_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -6013,7 +6013,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D13_Central_Aft",
+        "zone_id": "PC_D13_C_A",
         "deck": "13_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -6065,7 +6065,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D14_Port_Fwd",
+        "zone_id": "PC_D14_P_F",
         "deck": "14_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -6117,7 +6117,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D14_Port_Mid",
+        "zone_id": "PC_D14_P_M",
         "deck": "14_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -6169,7 +6169,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D14_Port_Aft",
+        "zone_id": "PC_D14_P_A",
         "deck": "14_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -6221,7 +6221,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D14_Stbd_Fwd",
+        "zone_id": "PC_D14_S_F",
         "deck": "14_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -6273,7 +6273,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D14_Stbd_Mid",
+        "zone_id": "PC_D14_S_M",
         "deck": "14_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -6325,7 +6325,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D14_Stbd_Aft",
+        "zone_id": "PC_D14_S_A",
         "deck": "14_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -6377,7 +6377,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D14_Central_Fwd",
+        "zone_id": "PC_D14_C_F",
         "deck": "14_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -6429,7 +6429,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D14_Central_Mid",
+        "zone_id": "PC_D14_C_M",
         "deck": "14_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -6481,7 +6481,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Pax_Corridor_D14_Central_Aft",
+        "zone_id": "PC_D14_C_A",
         "deck": "14_Cabins",
         "room_type": "Cabin_Corridor"
       },
@@ -6533,7 +6533,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Crew_Corridor_D1_Fwd",
+        "zone_id": "CC_D1_F",
         "deck": "1_Crew",
         "room_type": "Cabin_Corridor"
       },
@@ -6585,7 +6585,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Crew_Corridor_D1_Mid",
+        "zone_id": "CC_D1_M",
         "deck": "1_Crew",
         "room_type": "Cabin_Corridor"
       },
@@ -6637,7 +6637,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Crew_Corridor_D1_Aft",
+        "zone_id": "CC_D1_A",
         "deck": "1_Crew",
         "room_type": "Cabin_Corridor"
       },
@@ -6689,7 +6689,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Crew_Corridor_D4_Fwd",
+        "zone_id": "CC_D4_F",
         "deck": "4_Crew",
         "room_type": "Cabin_Corridor"
       },
@@ -6741,7 +6741,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Crew_Corridor_D4_Mid",
+        "zone_id": "CC_D4_M",
         "deck": "4_Crew",
         "room_type": "Cabin_Corridor"
       },
@@ -6793,7 +6793,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Crew_Corridor_D4_Aft",
+        "zone_id": "CC_D4_A",
         "deck": "4_Crew",
         "room_type": "Cabin_Corridor"
       },
@@ -6846,7 +6846,7 @@
       "properties": {
         "kind": "hvac_path",
         "from": "Royal_Promenade",
-        "to": "Shopping_Retail_Block"
+        "to": "ShopRetail"
       },
       "geometry": {
         "type": "LineString",
@@ -6867,7 +6867,7 @@
       "properties": {
         "kind": "hvac_path",
         "from": "Royal_Promenade",
-        "to": "Cafe_Bakery_Block"
+        "to": "CafeBakery"
       },
       "geometry": {
         "type": "LineString",
@@ -6992,8 +6992,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Specialty_Restaurant_Block_A",
-        "to": "Central_Park_Open_Atrium"
+        "from": "SpecRest_A",
+        "to": "CentralPark"
       },
       "geometry": {
         "type": "LineString",
@@ -7013,7 +7013,7 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Comedy_Club_Lounge",
+        "from": "ComedyClub",
         "to": "Casino"
       },
       "geometry": {
@@ -7034,7 +7034,7 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Cafe_Bakery_Block",
+        "from": "CafeBakery",
         "to": "Royal_Promenade"
       },
       "geometry": {
@@ -7055,8 +7055,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Pax_Corridor_D6_Port_Fwd",
-        "to": "Pax_Corridor_D6_Port_Mid"
+        "from": "PC_D6_P_F",
+        "to": "PC_D6_P_M"
       },
       "geometry": {
         "type": "LineString",
@@ -7076,8 +7076,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Pax_Corridor_D6_Port_Mid",
-        "to": "Pax_Corridor_D6_Port_Aft"
+        "from": "PC_D6_P_M",
+        "to": "PC_D6_P_A"
       },
       "geometry": {
         "type": "LineString",
@@ -7097,8 +7097,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Pax_Corridor_D6_Port_Fwd",
-        "to": "Pax_Corridor_D6_Central_Fwd"
+        "from": "PC_D6_P_F",
+        "to": "PC_D6_C_F"
       },
       "geometry": {
         "type": "LineString",
@@ -7118,8 +7118,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Pax_Corridor_D6_Port_Mid",
-        "to": "Pax_Corridor_D6_Central_Mid"
+        "from": "PC_D6_P_M",
+        "to": "PC_D6_C_M"
       },
       "geometry": {
         "type": "LineString",
@@ -7139,8 +7139,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Pax_Corridor_D6_Port_Aft",
-        "to": "Pax_Corridor_D6_Central_Aft"
+        "from": "PC_D6_P_A",
+        "to": "PC_D6_C_A"
       },
       "geometry": {
         "type": "LineString",
@@ -7160,8 +7160,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Pax_Corridor_D6_Stbd_Fwd",
-        "to": "Pax_Corridor_D6_Stbd_Mid"
+        "from": "PC_D6_S_F",
+        "to": "PC_D6_S_M"
       },
       "geometry": {
         "type": "LineString",
@@ -7181,8 +7181,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Pax_Corridor_D6_Stbd_Mid",
-        "to": "Pax_Corridor_D6_Stbd_Aft"
+        "from": "PC_D6_S_M",
+        "to": "PC_D6_S_A"
       },
       "geometry": {
         "type": "LineString",
@@ -7202,8 +7202,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Pax_Corridor_D6_Stbd_Fwd",
-        "to": "Pax_Corridor_D6_Central_Fwd"
+        "from": "PC_D6_S_F",
+        "to": "PC_D6_C_F"
       },
       "geometry": {
         "type": "LineString",
@@ -7223,8 +7223,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Pax_Corridor_D6_Stbd_Mid",
-        "to": "Pax_Corridor_D6_Central_Mid"
+        "from": "PC_D6_S_M",
+        "to": "PC_D6_C_M"
       },
       "geometry": {
         "type": "LineString",
@@ -7244,8 +7244,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Pax_Corridor_D6_Stbd_Aft",
-        "to": "Pax_Corridor_D6_Central_Aft"
+        "from": "PC_D6_S_A",
+        "to": "PC_D6_C_A"
       },
       "geometry": {
         "type": "LineString",
@@ -7265,8 +7265,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Pax_Corridor_D6_Central_Fwd",
-        "to": "Pax_Corridor_D6_Central_Mid"
+        "from": "PC_D6_C_F",
+        "to": "PC_D6_C_M"
       },
       "geometry": {
         "type": "LineString",
@@ -7286,8 +7286,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Pax_Corridor_D6_Central_Mid",
-        "to": "Pax_Corridor_D6_Central_Aft"
+        "from": "PC_D6_C_M",
+        "to": "PC_D6_C_A"
       },
       "geometry": {
         "type": "LineString",
@@ -7307,260 +7307,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Pax_Corridor_D7_Port_Fwd",
-        "to": "Pax_Corridor_D7_Port_Mid"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            101.36000000000001,
-            14.079999999999998
-          ],
-          [
-            199.10000000000002,
-            14.079999999999998
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "kind": "hvac_path",
-        "from": "Pax_Corridor_D7_Port_Mid",
-        "to": "Pax_Corridor_D7_Port_Aft"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            199.10000000000002,
-            14.079999999999998
-          ],
-          [
-            296.84,
-            14.079999999999998
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "kind": "hvac_path",
-        "from": "Pax_Corridor_D7_Port_Fwd",
-        "to": "Pax_Corridor_D7_Central_Fwd"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            101.36000000000001,
-            14.079999999999998
-          ],
-          [
-            101.36000000000001,
-            32.0
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "kind": "hvac_path",
-        "from": "Pax_Corridor_D7_Port_Mid",
-        "to": "Pax_Corridor_D7_Central_Mid"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            199.10000000000002,
-            14.079999999999998
-          ],
-          [
-            199.10000000000002,
-            32.0
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "kind": "hvac_path",
-        "from": "Pax_Corridor_D7_Port_Aft",
-        "to": "Pax_Corridor_D7_Central_Aft"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            296.84,
-            14.079999999999998
-          ],
-          [
-            296.84,
-            32.0
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "kind": "hvac_path",
-        "from": "Pax_Corridor_D7_Stbd_Fwd",
-        "to": "Pax_Corridor_D7_Stbd_Mid"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            101.36000000000001,
-            49.92
-          ],
-          [
-            199.10000000000002,
-            49.92
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "kind": "hvac_path",
-        "from": "Pax_Corridor_D7_Stbd_Mid",
-        "to": "Pax_Corridor_D7_Stbd_Aft"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            199.10000000000002,
-            49.92
-          ],
-          [
-            296.84,
-            49.92
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "kind": "hvac_path",
-        "from": "Pax_Corridor_D7_Stbd_Fwd",
-        "to": "Pax_Corridor_D7_Central_Fwd"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            101.36000000000001,
-            49.92
-          ],
-          [
-            101.36000000000001,
-            32.0
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "kind": "hvac_path",
-        "from": "Pax_Corridor_D7_Stbd_Mid",
-        "to": "Pax_Corridor_D7_Central_Mid"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            199.10000000000002,
-            49.92
-          ],
-          [
-            199.10000000000002,
-            32.0
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "kind": "hvac_path",
-        "from": "Pax_Corridor_D7_Stbd_Aft",
-        "to": "Pax_Corridor_D7_Central_Aft"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            296.84,
-            49.92
-          ],
-          [
-            296.84,
-            32.0
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "kind": "hvac_path",
-        "from": "Pax_Corridor_D7_Central_Fwd",
-        "to": "Pax_Corridor_D7_Central_Mid"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            101.36000000000001,
-            32.0
-          ],
-          [
-            199.10000000000002,
-            32.0
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "kind": "hvac_path",
-        "from": "Pax_Corridor_D7_Central_Mid",
-        "to": "Pax_Corridor_D7_Central_Aft"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            199.10000000000002,
-            32.0
-          ],
-          [
-            296.84,
-            32.0
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "kind": "hvac_path",
-        "from": "Pax_Corridor_D8_Port_Fwd",
-        "to": "Pax_Corridor_D8_Port_Mid"
+        "from": "PC_D7_P_F",
+        "to": "PC_D7_P_M"
       },
       "geometry": {
         "type": "LineString",
@@ -7580,8 +7328,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Pax_Corridor_D8_Port_Mid",
-        "to": "Pax_Corridor_D8_Port_Aft"
+        "from": "PC_D7_P_M",
+        "to": "PC_D7_P_A"
       },
       "geometry": {
         "type": "LineString",
@@ -7601,8 +7349,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Pax_Corridor_D8_Port_Fwd",
-        "to": "Pax_Corridor_D8_Central_Fwd"
+        "from": "PC_D7_P_F",
+        "to": "PC_D7_C_F"
       },
       "geometry": {
         "type": "LineString",
@@ -7622,8 +7370,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Pax_Corridor_D8_Port_Mid",
-        "to": "Pax_Corridor_D8_Central_Mid"
+        "from": "PC_D7_P_M",
+        "to": "PC_D7_C_M"
       },
       "geometry": {
         "type": "LineString",
@@ -7643,8 +7391,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Pax_Corridor_D8_Port_Aft",
-        "to": "Pax_Corridor_D8_Central_Aft"
+        "from": "PC_D7_P_A",
+        "to": "PC_D7_C_A"
       },
       "geometry": {
         "type": "LineString",
@@ -7664,8 +7412,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Pax_Corridor_D8_Stbd_Fwd",
-        "to": "Pax_Corridor_D8_Stbd_Mid"
+        "from": "PC_D7_S_F",
+        "to": "PC_D7_S_M"
       },
       "geometry": {
         "type": "LineString",
@@ -7685,8 +7433,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Pax_Corridor_D8_Stbd_Mid",
-        "to": "Pax_Corridor_D8_Stbd_Aft"
+        "from": "PC_D7_S_M",
+        "to": "PC_D7_S_A"
       },
       "geometry": {
         "type": "LineString",
@@ -7706,8 +7454,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Pax_Corridor_D8_Stbd_Fwd",
-        "to": "Pax_Corridor_D8_Central_Fwd"
+        "from": "PC_D7_S_F",
+        "to": "PC_D7_C_F"
       },
       "geometry": {
         "type": "LineString",
@@ -7727,8 +7475,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Pax_Corridor_D8_Stbd_Mid",
-        "to": "Pax_Corridor_D8_Central_Mid"
+        "from": "PC_D7_S_M",
+        "to": "PC_D7_C_M"
       },
       "geometry": {
         "type": "LineString",
@@ -7748,8 +7496,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Pax_Corridor_D8_Stbd_Aft",
-        "to": "Pax_Corridor_D8_Central_Aft"
+        "from": "PC_D7_S_A",
+        "to": "PC_D7_C_A"
       },
       "geometry": {
         "type": "LineString",
@@ -7769,8 +7517,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Pax_Corridor_D8_Central_Fwd",
-        "to": "Pax_Corridor_D8_Central_Mid"
+        "from": "PC_D7_C_F",
+        "to": "PC_D7_C_M"
       },
       "geometry": {
         "type": "LineString",
@@ -7790,8 +7538,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Pax_Corridor_D8_Central_Mid",
-        "to": "Pax_Corridor_D8_Central_Aft"
+        "from": "PC_D7_C_M",
+        "to": "PC_D7_C_A"
       },
       "geometry": {
         "type": "LineString",
@@ -7811,260 +7559,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Pax_Corridor_D9_Port_Fwd",
-        "to": "Pax_Corridor_D9_Port_Mid"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            101.36000000000001,
-            14.079999999999998
-          ],
-          [
-            199.10000000000002,
-            14.079999999999998
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "kind": "hvac_path",
-        "from": "Pax_Corridor_D9_Port_Mid",
-        "to": "Pax_Corridor_D9_Port_Aft"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            199.10000000000002,
-            14.079999999999998
-          ],
-          [
-            296.84,
-            14.079999999999998
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "kind": "hvac_path",
-        "from": "Pax_Corridor_D9_Port_Fwd",
-        "to": "Pax_Corridor_D9_Central_Fwd"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            101.36000000000001,
-            14.079999999999998
-          ],
-          [
-            101.36000000000001,
-            32.0
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "kind": "hvac_path",
-        "from": "Pax_Corridor_D9_Port_Mid",
-        "to": "Pax_Corridor_D9_Central_Mid"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            199.10000000000002,
-            14.079999999999998
-          ],
-          [
-            199.10000000000002,
-            32.0
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "kind": "hvac_path",
-        "from": "Pax_Corridor_D9_Port_Aft",
-        "to": "Pax_Corridor_D9_Central_Aft"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            296.84,
-            14.079999999999998
-          ],
-          [
-            296.84,
-            32.0
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "kind": "hvac_path",
-        "from": "Pax_Corridor_D9_Stbd_Fwd",
-        "to": "Pax_Corridor_D9_Stbd_Mid"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            101.36000000000001,
-            49.92
-          ],
-          [
-            199.10000000000002,
-            49.92
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "kind": "hvac_path",
-        "from": "Pax_Corridor_D9_Stbd_Mid",
-        "to": "Pax_Corridor_D9_Stbd_Aft"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            199.10000000000002,
-            49.92
-          ],
-          [
-            296.84,
-            49.92
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "kind": "hvac_path",
-        "from": "Pax_Corridor_D9_Stbd_Fwd",
-        "to": "Pax_Corridor_D9_Central_Fwd"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            101.36000000000001,
-            49.92
-          ],
-          [
-            101.36000000000001,
-            32.0
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "kind": "hvac_path",
-        "from": "Pax_Corridor_D9_Stbd_Mid",
-        "to": "Pax_Corridor_D9_Central_Mid"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            199.10000000000002,
-            49.92
-          ],
-          [
-            199.10000000000002,
-            32.0
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "kind": "hvac_path",
-        "from": "Pax_Corridor_D9_Stbd_Aft",
-        "to": "Pax_Corridor_D9_Central_Aft"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            296.84,
-            49.92
-          ],
-          [
-            296.84,
-            32.0
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "kind": "hvac_path",
-        "from": "Pax_Corridor_D9_Central_Fwd",
-        "to": "Pax_Corridor_D9_Central_Mid"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            101.36000000000001,
-            32.0
-          ],
-          [
-            199.10000000000002,
-            32.0
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "kind": "hvac_path",
-        "from": "Pax_Corridor_D9_Central_Mid",
-        "to": "Pax_Corridor_D9_Central_Aft"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            199.10000000000002,
-            32.0
-          ],
-          [
-            296.84,
-            32.0
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "kind": "hvac_path",
-        "from": "Pax_Corridor_D10_Port_Fwd",
-        "to": "Pax_Corridor_D10_Port_Mid"
+        "from": "PC_D8_P_F",
+        "to": "PC_D8_P_M"
       },
       "geometry": {
         "type": "LineString",
@@ -8084,8 +7580,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Pax_Corridor_D10_Port_Mid",
-        "to": "Pax_Corridor_D10_Port_Aft"
+        "from": "PC_D8_P_M",
+        "to": "PC_D8_P_A"
       },
       "geometry": {
         "type": "LineString",
@@ -8105,8 +7601,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Pax_Corridor_D10_Port_Fwd",
-        "to": "Pax_Corridor_D10_Central_Fwd"
+        "from": "PC_D8_P_F",
+        "to": "PC_D8_C_F"
       },
       "geometry": {
         "type": "LineString",
@@ -8126,8 +7622,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Pax_Corridor_D10_Port_Mid",
-        "to": "Pax_Corridor_D10_Central_Mid"
+        "from": "PC_D8_P_M",
+        "to": "PC_D8_C_M"
       },
       "geometry": {
         "type": "LineString",
@@ -8147,8 +7643,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Pax_Corridor_D10_Port_Aft",
-        "to": "Pax_Corridor_D10_Central_Aft"
+        "from": "PC_D8_P_A",
+        "to": "PC_D8_C_A"
       },
       "geometry": {
         "type": "LineString",
@@ -8168,8 +7664,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Pax_Corridor_D10_Stbd_Fwd",
-        "to": "Pax_Corridor_D10_Stbd_Mid"
+        "from": "PC_D8_S_F",
+        "to": "PC_D8_S_M"
       },
       "geometry": {
         "type": "LineString",
@@ -8189,8 +7685,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Pax_Corridor_D10_Stbd_Mid",
-        "to": "Pax_Corridor_D10_Stbd_Aft"
+        "from": "PC_D8_S_M",
+        "to": "PC_D8_S_A"
       },
       "geometry": {
         "type": "LineString",
@@ -8210,8 +7706,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Pax_Corridor_D10_Stbd_Fwd",
-        "to": "Pax_Corridor_D10_Central_Fwd"
+        "from": "PC_D8_S_F",
+        "to": "PC_D8_C_F"
       },
       "geometry": {
         "type": "LineString",
@@ -8231,8 +7727,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Pax_Corridor_D10_Stbd_Mid",
-        "to": "Pax_Corridor_D10_Central_Mid"
+        "from": "PC_D8_S_M",
+        "to": "PC_D8_C_M"
       },
       "geometry": {
         "type": "LineString",
@@ -8252,8 +7748,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Pax_Corridor_D10_Stbd_Aft",
-        "to": "Pax_Corridor_D10_Central_Aft"
+        "from": "PC_D8_S_A",
+        "to": "PC_D8_C_A"
       },
       "geometry": {
         "type": "LineString",
@@ -8273,8 +7769,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Pax_Corridor_D10_Central_Fwd",
-        "to": "Pax_Corridor_D10_Central_Mid"
+        "from": "PC_D8_C_F",
+        "to": "PC_D8_C_M"
       },
       "geometry": {
         "type": "LineString",
@@ -8294,8 +7790,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Pax_Corridor_D10_Central_Mid",
-        "to": "Pax_Corridor_D10_Central_Aft"
+        "from": "PC_D8_C_M",
+        "to": "PC_D8_C_A"
       },
       "geometry": {
         "type": "LineString",
@@ -8315,260 +7811,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Pax_Corridor_D11_Port_Fwd",
-        "to": "Pax_Corridor_D11_Port_Mid"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            101.36000000000001,
-            14.079999999999998
-          ],
-          [
-            199.10000000000002,
-            14.079999999999998
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "kind": "hvac_path",
-        "from": "Pax_Corridor_D11_Port_Mid",
-        "to": "Pax_Corridor_D11_Port_Aft"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            199.10000000000002,
-            14.079999999999998
-          ],
-          [
-            296.84,
-            14.079999999999998
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "kind": "hvac_path",
-        "from": "Pax_Corridor_D11_Port_Fwd",
-        "to": "Pax_Corridor_D11_Central_Fwd"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            101.36000000000001,
-            14.079999999999998
-          ],
-          [
-            101.36000000000001,
-            32.0
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "kind": "hvac_path",
-        "from": "Pax_Corridor_D11_Port_Mid",
-        "to": "Pax_Corridor_D11_Central_Mid"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            199.10000000000002,
-            14.079999999999998
-          ],
-          [
-            199.10000000000002,
-            32.0
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "kind": "hvac_path",
-        "from": "Pax_Corridor_D11_Port_Aft",
-        "to": "Pax_Corridor_D11_Central_Aft"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            296.84,
-            14.079999999999998
-          ],
-          [
-            296.84,
-            32.0
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "kind": "hvac_path",
-        "from": "Pax_Corridor_D11_Stbd_Fwd",
-        "to": "Pax_Corridor_D11_Stbd_Mid"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            101.36000000000001,
-            49.92
-          ],
-          [
-            199.10000000000002,
-            49.92
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "kind": "hvac_path",
-        "from": "Pax_Corridor_D11_Stbd_Mid",
-        "to": "Pax_Corridor_D11_Stbd_Aft"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            199.10000000000002,
-            49.92
-          ],
-          [
-            296.84,
-            49.92
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "kind": "hvac_path",
-        "from": "Pax_Corridor_D11_Stbd_Fwd",
-        "to": "Pax_Corridor_D11_Central_Fwd"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            101.36000000000001,
-            49.92
-          ],
-          [
-            101.36000000000001,
-            32.0
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "kind": "hvac_path",
-        "from": "Pax_Corridor_D11_Stbd_Mid",
-        "to": "Pax_Corridor_D11_Central_Mid"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            199.10000000000002,
-            49.92
-          ],
-          [
-            199.10000000000002,
-            32.0
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "kind": "hvac_path",
-        "from": "Pax_Corridor_D11_Stbd_Aft",
-        "to": "Pax_Corridor_D11_Central_Aft"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            296.84,
-            49.92
-          ],
-          [
-            296.84,
-            32.0
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "kind": "hvac_path",
-        "from": "Pax_Corridor_D11_Central_Fwd",
-        "to": "Pax_Corridor_D11_Central_Mid"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            101.36000000000001,
-            32.0
-          ],
-          [
-            199.10000000000002,
-            32.0
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "kind": "hvac_path",
-        "from": "Pax_Corridor_D11_Central_Mid",
-        "to": "Pax_Corridor_D11_Central_Aft"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            199.10000000000002,
-            32.0
-          ],
-          [
-            296.84,
-            32.0
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "kind": "hvac_path",
-        "from": "Pax_Corridor_D12_Port_Fwd",
-        "to": "Pax_Corridor_D12_Port_Mid"
+        "from": "PC_D9_P_F",
+        "to": "PC_D9_P_M"
       },
       "geometry": {
         "type": "LineString",
@@ -8588,8 +7832,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Pax_Corridor_D12_Port_Mid",
-        "to": "Pax_Corridor_D12_Port_Aft"
+        "from": "PC_D9_P_M",
+        "to": "PC_D9_P_A"
       },
       "geometry": {
         "type": "LineString",
@@ -8609,8 +7853,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Pax_Corridor_D12_Port_Fwd",
-        "to": "Pax_Corridor_D12_Central_Fwd"
+        "from": "PC_D9_P_F",
+        "to": "PC_D9_C_F"
       },
       "geometry": {
         "type": "LineString",
@@ -8630,8 +7874,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Pax_Corridor_D12_Port_Mid",
-        "to": "Pax_Corridor_D12_Central_Mid"
+        "from": "PC_D9_P_M",
+        "to": "PC_D9_C_M"
       },
       "geometry": {
         "type": "LineString",
@@ -8651,8 +7895,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Pax_Corridor_D12_Port_Aft",
-        "to": "Pax_Corridor_D12_Central_Aft"
+        "from": "PC_D9_P_A",
+        "to": "PC_D9_C_A"
       },
       "geometry": {
         "type": "LineString",
@@ -8672,8 +7916,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Pax_Corridor_D12_Stbd_Fwd",
-        "to": "Pax_Corridor_D12_Stbd_Mid"
+        "from": "PC_D9_S_F",
+        "to": "PC_D9_S_M"
       },
       "geometry": {
         "type": "LineString",
@@ -8693,8 +7937,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Pax_Corridor_D12_Stbd_Mid",
-        "to": "Pax_Corridor_D12_Stbd_Aft"
+        "from": "PC_D9_S_M",
+        "to": "PC_D9_S_A"
       },
       "geometry": {
         "type": "LineString",
@@ -8714,8 +7958,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Pax_Corridor_D12_Stbd_Fwd",
-        "to": "Pax_Corridor_D12_Central_Fwd"
+        "from": "PC_D9_S_F",
+        "to": "PC_D9_C_F"
       },
       "geometry": {
         "type": "LineString",
@@ -8735,8 +7979,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Pax_Corridor_D12_Stbd_Mid",
-        "to": "Pax_Corridor_D12_Central_Mid"
+        "from": "PC_D9_S_M",
+        "to": "PC_D9_C_M"
       },
       "geometry": {
         "type": "LineString",
@@ -8756,8 +8000,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Pax_Corridor_D12_Stbd_Aft",
-        "to": "Pax_Corridor_D12_Central_Aft"
+        "from": "PC_D9_S_A",
+        "to": "PC_D9_C_A"
       },
       "geometry": {
         "type": "LineString",
@@ -8777,8 +8021,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Pax_Corridor_D12_Central_Fwd",
-        "to": "Pax_Corridor_D12_Central_Mid"
+        "from": "PC_D9_C_F",
+        "to": "PC_D9_C_M"
       },
       "geometry": {
         "type": "LineString",
@@ -8798,8 +8042,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Pax_Corridor_D12_Central_Mid",
-        "to": "Pax_Corridor_D12_Central_Aft"
+        "from": "PC_D9_C_M",
+        "to": "PC_D9_C_A"
       },
       "geometry": {
         "type": "LineString",
@@ -8819,260 +8063,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Pax_Corridor_D13_Port_Fwd",
-        "to": "Pax_Corridor_D13_Port_Mid"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            101.36000000000001,
-            14.079999999999998
-          ],
-          [
-            199.10000000000002,
-            14.079999999999998
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "kind": "hvac_path",
-        "from": "Pax_Corridor_D13_Port_Mid",
-        "to": "Pax_Corridor_D13_Port_Aft"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            199.10000000000002,
-            14.079999999999998
-          ],
-          [
-            296.84,
-            14.079999999999998
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "kind": "hvac_path",
-        "from": "Pax_Corridor_D13_Port_Fwd",
-        "to": "Pax_Corridor_D13_Central_Fwd"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            101.36000000000001,
-            14.079999999999998
-          ],
-          [
-            101.36000000000001,
-            32.0
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "kind": "hvac_path",
-        "from": "Pax_Corridor_D13_Port_Mid",
-        "to": "Pax_Corridor_D13_Central_Mid"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            199.10000000000002,
-            14.079999999999998
-          ],
-          [
-            199.10000000000002,
-            32.0
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "kind": "hvac_path",
-        "from": "Pax_Corridor_D13_Port_Aft",
-        "to": "Pax_Corridor_D13_Central_Aft"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            296.84,
-            14.079999999999998
-          ],
-          [
-            296.84,
-            32.0
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "kind": "hvac_path",
-        "from": "Pax_Corridor_D13_Stbd_Fwd",
-        "to": "Pax_Corridor_D13_Stbd_Mid"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            101.36000000000001,
-            49.92
-          ],
-          [
-            199.10000000000002,
-            49.92
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "kind": "hvac_path",
-        "from": "Pax_Corridor_D13_Stbd_Mid",
-        "to": "Pax_Corridor_D13_Stbd_Aft"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            199.10000000000002,
-            49.92
-          ],
-          [
-            296.84,
-            49.92
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "kind": "hvac_path",
-        "from": "Pax_Corridor_D13_Stbd_Fwd",
-        "to": "Pax_Corridor_D13_Central_Fwd"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            101.36000000000001,
-            49.92
-          ],
-          [
-            101.36000000000001,
-            32.0
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "kind": "hvac_path",
-        "from": "Pax_Corridor_D13_Stbd_Mid",
-        "to": "Pax_Corridor_D13_Central_Mid"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            199.10000000000002,
-            49.92
-          ],
-          [
-            199.10000000000002,
-            32.0
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "kind": "hvac_path",
-        "from": "Pax_Corridor_D13_Stbd_Aft",
-        "to": "Pax_Corridor_D13_Central_Aft"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            296.84,
-            49.92
-          ],
-          [
-            296.84,
-            32.0
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "kind": "hvac_path",
-        "from": "Pax_Corridor_D13_Central_Fwd",
-        "to": "Pax_Corridor_D13_Central_Mid"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            101.36000000000001,
-            32.0
-          ],
-          [
-            199.10000000000002,
-            32.0
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "kind": "hvac_path",
-        "from": "Pax_Corridor_D13_Central_Mid",
-        "to": "Pax_Corridor_D13_Central_Aft"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            199.10000000000002,
-            32.0
-          ],
-          [
-            296.84,
-            32.0
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "kind": "hvac_path",
-        "from": "Pax_Corridor_D14_Port_Fwd",
-        "to": "Pax_Corridor_D14_Port_Mid"
+        "from": "PC_D10_P_F",
+        "to": "PC_D10_P_M"
       },
       "geometry": {
         "type": "LineString",
@@ -9092,8 +8084,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Pax_Corridor_D14_Port_Mid",
-        "to": "Pax_Corridor_D14_Port_Aft"
+        "from": "PC_D10_P_M",
+        "to": "PC_D10_P_A"
       },
       "geometry": {
         "type": "LineString",
@@ -9113,8 +8105,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Pax_Corridor_D14_Port_Fwd",
-        "to": "Pax_Corridor_D14_Central_Fwd"
+        "from": "PC_D10_P_F",
+        "to": "PC_D10_C_F"
       },
       "geometry": {
         "type": "LineString",
@@ -9134,8 +8126,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Pax_Corridor_D14_Port_Mid",
-        "to": "Pax_Corridor_D14_Central_Mid"
+        "from": "PC_D10_P_M",
+        "to": "PC_D10_C_M"
       },
       "geometry": {
         "type": "LineString",
@@ -9155,8 +8147,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Pax_Corridor_D14_Port_Aft",
-        "to": "Pax_Corridor_D14_Central_Aft"
+        "from": "PC_D10_P_A",
+        "to": "PC_D10_C_A"
       },
       "geometry": {
         "type": "LineString",
@@ -9176,8 +8168,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Pax_Corridor_D14_Stbd_Fwd",
-        "to": "Pax_Corridor_D14_Stbd_Mid"
+        "from": "PC_D10_S_F",
+        "to": "PC_D10_S_M"
       },
       "geometry": {
         "type": "LineString",
@@ -9197,8 +8189,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Pax_Corridor_D14_Stbd_Mid",
-        "to": "Pax_Corridor_D14_Stbd_Aft"
+        "from": "PC_D10_S_M",
+        "to": "PC_D10_S_A"
       },
       "geometry": {
         "type": "LineString",
@@ -9218,8 +8210,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Pax_Corridor_D14_Stbd_Fwd",
-        "to": "Pax_Corridor_D14_Central_Fwd"
+        "from": "PC_D10_S_F",
+        "to": "PC_D10_C_F"
       },
       "geometry": {
         "type": "LineString",
@@ -9239,8 +8231,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Pax_Corridor_D14_Stbd_Mid",
-        "to": "Pax_Corridor_D14_Central_Mid"
+        "from": "PC_D10_S_M",
+        "to": "PC_D10_C_M"
       },
       "geometry": {
         "type": "LineString",
@@ -9260,8 +8252,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Pax_Corridor_D14_Stbd_Aft",
-        "to": "Pax_Corridor_D14_Central_Aft"
+        "from": "PC_D10_S_A",
+        "to": "PC_D10_C_A"
       },
       "geometry": {
         "type": "LineString",
@@ -9281,8 +8273,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Pax_Corridor_D14_Central_Fwd",
-        "to": "Pax_Corridor_D14_Central_Mid"
+        "from": "PC_D10_C_F",
+        "to": "PC_D10_C_M"
       },
       "geometry": {
         "type": "LineString",
@@ -9302,8 +8294,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Pax_Corridor_D14_Central_Mid",
-        "to": "Pax_Corridor_D14_Central_Aft"
+        "from": "PC_D10_C_M",
+        "to": "PC_D10_C_A"
       },
       "geometry": {
         "type": "LineString",
@@ -9323,8 +8315,218 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Crew_Corridor_D1_Fwd",
-        "to": "Crew_Corridor_D1_Mid"
+        "from": "PC_D11_P_F",
+        "to": "PC_D11_P_M"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            101.36000000000001,
+            14.079999999999998
+          ],
+          [
+            199.10000000000002,
+            14.079999999999998
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "PC_D11_P_M",
+        "to": "PC_D11_P_A"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            199.10000000000002,
+            14.079999999999998
+          ],
+          [
+            296.84,
+            14.079999999999998
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "PC_D11_P_F",
+        "to": "PC_D11_C_F"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            101.36000000000001,
+            14.079999999999998
+          ],
+          [
+            101.36000000000001,
+            32.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "PC_D11_P_M",
+        "to": "PC_D11_C_M"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            199.10000000000002,
+            14.079999999999998
+          ],
+          [
+            199.10000000000002,
+            32.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "PC_D11_P_A",
+        "to": "PC_D11_C_A"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            296.84,
+            14.079999999999998
+          ],
+          [
+            296.84,
+            32.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "PC_D11_S_F",
+        "to": "PC_D11_S_M"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            101.36000000000001,
+            49.92
+          ],
+          [
+            199.10000000000002,
+            49.92
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "PC_D11_S_M",
+        "to": "PC_D11_S_A"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            199.10000000000002,
+            49.92
+          ],
+          [
+            296.84,
+            49.92
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "PC_D11_S_F",
+        "to": "PC_D11_C_F"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            101.36000000000001,
+            49.92
+          ],
+          [
+            101.36000000000001,
+            32.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "PC_D11_S_M",
+        "to": "PC_D11_C_M"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            199.10000000000002,
+            49.92
+          ],
+          [
+            199.10000000000002,
+            32.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "PC_D11_S_A",
+        "to": "PC_D11_C_A"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            296.84,
+            49.92
+          ],
+          [
+            296.84,
+            32.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "PC_D11_C_F",
+        "to": "PC_D11_C_M"
       },
       "geometry": {
         "type": "LineString",
@@ -9344,8 +8546,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Crew_Corridor_D1_Mid",
-        "to": "Crew_Corridor_D1_Aft"
+        "from": "PC_D11_C_M",
+        "to": "PC_D11_C_A"
       },
       "geometry": {
         "type": "LineString",
@@ -9365,8 +8567,218 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Crew_Corridor_D2_Fwd",
-        "to": "Crew_Corridor_D2_Mid"
+        "from": "PC_D12_P_F",
+        "to": "PC_D12_P_M"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            101.36000000000001,
+            14.079999999999998
+          ],
+          [
+            199.10000000000002,
+            14.079999999999998
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "PC_D12_P_M",
+        "to": "PC_D12_P_A"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            199.10000000000002,
+            14.079999999999998
+          ],
+          [
+            296.84,
+            14.079999999999998
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "PC_D12_P_F",
+        "to": "PC_D12_C_F"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            101.36000000000001,
+            14.079999999999998
+          ],
+          [
+            101.36000000000001,
+            32.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "PC_D12_P_M",
+        "to": "PC_D12_C_M"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            199.10000000000002,
+            14.079999999999998
+          ],
+          [
+            199.10000000000002,
+            32.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "PC_D12_P_A",
+        "to": "PC_D12_C_A"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            296.84,
+            14.079999999999998
+          ],
+          [
+            296.84,
+            32.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "PC_D12_S_F",
+        "to": "PC_D12_S_M"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            101.36000000000001,
+            49.92
+          ],
+          [
+            199.10000000000002,
+            49.92
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "PC_D12_S_M",
+        "to": "PC_D12_S_A"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            199.10000000000002,
+            49.92
+          ],
+          [
+            296.84,
+            49.92
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "PC_D12_S_F",
+        "to": "PC_D12_C_F"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            101.36000000000001,
+            49.92
+          ],
+          [
+            101.36000000000001,
+            32.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "PC_D12_S_M",
+        "to": "PC_D12_C_M"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            199.10000000000002,
+            49.92
+          ],
+          [
+            199.10000000000002,
+            32.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "PC_D12_S_A",
+        "to": "PC_D12_C_A"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            296.84,
+            49.92
+          ],
+          [
+            296.84,
+            32.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "PC_D12_C_F",
+        "to": "PC_D12_C_M"
       },
       "geometry": {
         "type": "LineString",
@@ -9386,8 +8798,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Crew_Corridor_D2_Mid",
-        "to": "Crew_Corridor_D2_Aft"
+        "from": "PC_D12_C_M",
+        "to": "PC_D12_C_A"
       },
       "geometry": {
         "type": "LineString",
@@ -9407,8 +8819,596 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Crew_Corridor_D3_Fwd",
-        "to": "Crew_Corridor_D3_Mid"
+        "from": "PC_D13_P_F",
+        "to": "PC_D13_P_M"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            101.36000000000001,
+            14.079999999999998
+          ],
+          [
+            199.10000000000002,
+            14.079999999999998
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "PC_D13_P_M",
+        "to": "PC_D13_P_A"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            199.10000000000002,
+            14.079999999999998
+          ],
+          [
+            296.84,
+            14.079999999999998
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "PC_D13_P_F",
+        "to": "PC_D13_C_F"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            101.36000000000001,
+            14.079999999999998
+          ],
+          [
+            101.36000000000001,
+            32.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "PC_D13_P_M",
+        "to": "PC_D13_C_M"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            199.10000000000002,
+            14.079999999999998
+          ],
+          [
+            199.10000000000002,
+            32.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "PC_D13_P_A",
+        "to": "PC_D13_C_A"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            296.84,
+            14.079999999999998
+          ],
+          [
+            296.84,
+            32.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "PC_D13_S_F",
+        "to": "PC_D13_S_M"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            101.36000000000001,
+            49.92
+          ],
+          [
+            199.10000000000002,
+            49.92
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "PC_D13_S_M",
+        "to": "PC_D13_S_A"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            199.10000000000002,
+            49.92
+          ],
+          [
+            296.84,
+            49.92
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "PC_D13_S_F",
+        "to": "PC_D13_C_F"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            101.36000000000001,
+            49.92
+          ],
+          [
+            101.36000000000001,
+            32.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "PC_D13_S_M",
+        "to": "PC_D13_C_M"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            199.10000000000002,
+            49.92
+          ],
+          [
+            199.10000000000002,
+            32.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "PC_D13_S_A",
+        "to": "PC_D13_C_A"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            296.84,
+            49.92
+          ],
+          [
+            296.84,
+            32.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "PC_D13_C_F",
+        "to": "PC_D13_C_M"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            101.36000000000001,
+            32.0
+          ],
+          [
+            199.10000000000002,
+            32.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "PC_D13_C_M",
+        "to": "PC_D13_C_A"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            199.10000000000002,
+            32.0
+          ],
+          [
+            296.84,
+            32.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "PC_D14_P_F",
+        "to": "PC_D14_P_M"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            101.36000000000001,
+            14.079999999999998
+          ],
+          [
+            199.10000000000002,
+            14.079999999999998
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "PC_D14_P_M",
+        "to": "PC_D14_P_A"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            199.10000000000002,
+            14.079999999999998
+          ],
+          [
+            296.84,
+            14.079999999999998
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "PC_D14_P_F",
+        "to": "PC_D14_C_F"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            101.36000000000001,
+            14.079999999999998
+          ],
+          [
+            101.36000000000001,
+            32.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "PC_D14_P_M",
+        "to": "PC_D14_C_M"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            199.10000000000002,
+            14.079999999999998
+          ],
+          [
+            199.10000000000002,
+            32.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "PC_D14_P_A",
+        "to": "PC_D14_C_A"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            296.84,
+            14.079999999999998
+          ],
+          [
+            296.84,
+            32.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "PC_D14_S_F",
+        "to": "PC_D14_S_M"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            101.36000000000001,
+            49.92
+          ],
+          [
+            199.10000000000002,
+            49.92
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "PC_D14_S_M",
+        "to": "PC_D14_S_A"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            199.10000000000002,
+            49.92
+          ],
+          [
+            296.84,
+            49.92
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "PC_D14_S_F",
+        "to": "PC_D14_C_F"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            101.36000000000001,
+            49.92
+          ],
+          [
+            101.36000000000001,
+            32.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "PC_D14_S_M",
+        "to": "PC_D14_C_M"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            199.10000000000002,
+            49.92
+          ],
+          [
+            199.10000000000002,
+            32.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "PC_D14_S_A",
+        "to": "PC_D14_C_A"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            296.84,
+            49.92
+          ],
+          [
+            296.84,
+            32.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "PC_D14_C_F",
+        "to": "PC_D14_C_M"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            101.36000000000001,
+            32.0
+          ],
+          [
+            199.10000000000002,
+            32.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "PC_D14_C_M",
+        "to": "PC_D14_C_A"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            199.10000000000002,
+            32.0
+          ],
+          [
+            296.84,
+            32.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "CC_D1_F",
+        "to": "CC_D1_M"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            101.36000000000001,
+            32.0
+          ],
+          [
+            199.10000000000002,
+            32.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "CC_D1_M",
+        "to": "CC_D1_A"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            199.10000000000002,
+            32.0
+          ],
+          [
+            296.84,
+            32.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "CC_D2_F",
+        "to": "CC_D2_M"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            101.36000000000001,
+            32.0
+          ],
+          [
+            199.10000000000002,
+            32.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "CC_D2_M",
+        "to": "CC_D2_A"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            199.10000000000002,
+            32.0
+          ],
+          [
+            296.84,
+            32.0
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "hvac_path",
+        "from": "CC_D3_F",
+        "to": "CC_D3_M"
       },
       "geometry": {
         "type": "LineString",
@@ -9428,8 +9428,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Crew_Corridor_D3_Mid",
-        "to": "Crew_Corridor_D3_Aft"
+        "from": "CC_D3_M",
+        "to": "CC_D3_A"
       },
       "geometry": {
         "type": "LineString",
@@ -9449,8 +9449,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Crew_Corridor_D4_Fwd",
-        "to": "Crew_Corridor_D4_Mid"
+        "from": "CC_D4_F",
+        "to": "CC_D4_M"
       },
       "geometry": {
         "type": "LineString",
@@ -9470,8 +9470,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Crew_Corridor_D4_Mid",
-        "to": "Crew_Corridor_D4_Aft"
+        "from": "CC_D4_M",
+        "to": "CC_D4_A"
       },
       "geometry": {
         "type": "LineString",
@@ -9492,7 +9492,7 @@
       "properties": {
         "kind": "hvac_path",
         "from": "Crew_Mess_Main",
-        "to": "Crew_Corridor_D2_Mid"
+        "to": "CC_D2_M"
       },
       "geometry": {
         "type": "LineString",
@@ -9512,8 +9512,8 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "Crew_Mess_Forward",
-        "to": "Crew_Corridor_D3_Mid"
+        "from": "CrewMess_Fwd",
+        "to": "CC_D3_M"
       },
       "geometry": {
         "type": "LineString",

@@ -14,7 +14,7 @@
     "air_flow_paths": "data/platforms/enterprise_galaxy_tng/air_flow_paths.json",
     "pathogen_profiles": "data/pathogens/enterprise_tng_profiles.json",
     "graywater_zones": [
-      "Main_Engineering",
+      "MainEng",
       "Cargo_Bay"
     ]
   },
@@ -49,7 +49,7 @@
       "fraction": 0.14,
       "home_zone_preference": "Crew_Quarters",
       "free_zone_preference": "Engineering",
-      "duty_zone": "Main_Engineering"
+      "duty_zone": "MainEng"
     },
     {
       "class_id": "crew_sciences",
