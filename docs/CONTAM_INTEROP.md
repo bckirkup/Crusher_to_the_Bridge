@@ -110,7 +110,12 @@ grammar. The fiction exporter (`tools/contamw34_prj.py`) enforces:
 | Cross-zone `fan_cvf` expanded to all room×room pairs | Matches native cross-zone expansion; ContamX flows are Crusher-visible |
 | `path_map.ahs_nr` on AHS paths + ContamX AHS bridge | Synthesizes room↔room recirculation from Contam Ret/Sup/recirc SIM flows |
 | Initial zone/junction concentration headers = `n_items × n_ctm` | ContamX `Zones*contaminant count mis-match` if only `n_items` |
-| Duct terminals omit ContamW `"T:"` marker; emit terminal ints after `vf_type` | ContamX 3.4.0.3 reports `Bad integer: T:` if the marker is present |
+| Duct terminals: emit `vf_node_name` even when `vf_type=0`; **omit** ContamW `"T:"` | ContamX always reads the name string; `"T:"` → `Bad integer: T:`; omitting name shifts Ad onto `bal` → `Bad short integer: <Ad>` |
+
+> **Docs gap:** NIST TN 1887r1 Appendix A still documents ContamW 2.3 `"T:"` before
+> terminal fields. ContamX 3.4.0.3 rejects that marker and always consumes
+> `vf_node_name` on junctions. Fiction export follows ContamX behavior verified
+> by the Windows compare suite, not the appendix text alone.
 
 ### ContamX → Crusher airflow bridge
 
