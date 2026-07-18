@@ -505,25 +505,22 @@ else:
 
 ### 3.4 ACH-Based Intra-Zone Flow
 
-**Target** — `py_contam_bridge.py:197–202`:
+**Target** — `py_contam_bridge.py` `_build_hvac_recirculation_paths`:
 ```python
-total_volume = sum(node.volume_m3 for node in rooms)
-zone_flow = ach * total_volume   # m³/h
+supply_total = ach * total_volume * hvac_duty   # m³/h
+recirc = (1.0 - oa_fraction) * supply_total
 ```
 
-| Verdict | **MATCH** | Standard HVAC relation: Q = ACH × V. |
+| Verdict | **MATCH** | Contam simple-AHS: design supply Q = ACH × V; recirculation is (1−oa)·Q (OAFrac). Optional ``hvac_duty`` matches Contam terminal schedules. |
 
 ### 3.5 Flow Distribution Among Room Pairs
 
-**Target** — `py_contam_bridge.py:208–225`:
-Distributes intra-zone HVAC flow proportionally by room volume among
-all (n−1) destination rooms per source room:
+**Target** — same builder; Contam equal per-room Fahs allocation:
 ```python
-frac = from_vol.volume_m3 / total_volume
-pair_flow = zone_flow * frac / (n_rooms - 1)
+pair_flow = recirc / (n_rooms * n_rooms)   # Q_ij = R·(Rec/ΣR)·(S/ΣS)
 ```
 
-| Verdict | **APPROXIMATION** | CONTAM models HVAC as a central air handler with supply/return registers per room. The bridge distributes flow pairwise among rooms within the same HVAC zone as a simplification of the supply/return model. Total zone-level air exchange is preserved. |
+| Verdict | **MATCH** | Aligns native twin with ContamX AHS bridge synthesis (Contam is airflow SoT). Prior volume-weighted complete-mixing over-reported recirculation vs Contam. |
 
 ### 3.6 Cross-Zone Flow Distribution
 

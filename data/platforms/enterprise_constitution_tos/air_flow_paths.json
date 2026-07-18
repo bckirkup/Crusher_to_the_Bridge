@@ -1,6 +1,8 @@
 {
   "platform": "enterprise_constitution_tos",
   "description": "Constitution-class HVAC: saucer primary ring, engineering secondary hull, limited cross-hull ducting.",
+  "oa_fraction": 0.2,
+  "hvac_duty": 0.5,
   "hvac_zones": [
     {
       "id": "zone_saucer_command",

@@ -1,6 +1,8 @@
 {
   "platform": "destroyer_baseline",
   "description": "HVAC zone links and airflow network for CONTAM-style multi-zone aerosol transport modeling",
+  "oa_fraction": 0.2,
+  "hvac_duty": 0.5,
   "hvac_zones": [
     {
       "id": "zone_upper",

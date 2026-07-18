@@ -8,6 +8,17 @@
   "properties": {
     "platform": {"type": "string"},
     "description": {"type": "string"},
+    "oa_fraction": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Default outdoor-air fraction for Contam-aligned HVAC recirculation (native twin). Contam OAFrac default is 0.2."
+    },
+    "hvac_duty": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Default AHU duty multiplier on supply total (1.0 = design Fahs). Set 0.5 to match Contam hobbyist night/steady ContamX frames."
+    },
     "hvac_zones": {
       "type": "array",
       "items": {
@@ -42,6 +53,17 @@
           "type": "number",
           "minimum": 0,
           "description": "Air changes per hour for this HVAC zone"
+        },
+        "oa_fraction": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Outdoor-air fraction for Contam-aligned recirculation (overrides top-level)"
+        },
+        "hvac_duty": {
+          "type": "number",
+          "minimum": 0,
+          "description": "AHU duty multiplier on supply/return (1.0 = design; Contam hobbyist night ≈ 0.5)"
         },
         "description": {"type": "string"}
       }

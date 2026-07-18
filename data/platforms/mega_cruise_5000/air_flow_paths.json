@@ -1,6 +1,8 @@
 {
   "platform": "mega_cruise_5000",
   "description": "HVAC for mega_cruise_5000 cabin-corridor layout. Nine deck-level passenger AHU branches, four crew-deck branches, plus existing public/service networks. Cross-deck trunk links at reduced flow vs legacy two-zone cabin model.",
+  "oa_fraction": 0.2,
+  "hvac_duty": 0.5,
   "hvac_zones": [
     {
       "id": "AHU_Network_Forward_Public",

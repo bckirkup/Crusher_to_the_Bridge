@@ -306,10 +306,13 @@ python3 tools/contam_flow_compare.py --platform destroyer_baseline \
 | `kept_links` all share one `flow_m3h` | **SIM join/reader bug** (see `.SIM` reader contract) — not Contam physics |
 | destroyer after healthy read | ~17 kept + ~8 AHS synth; Fan_25/26/27 match design m³/h |
 
-Native builds a **prescribed ACH digraph** from JSON. ContamX builds a
+Native builds a **Contam-aligned prescribed ACH digraph** from JSON:
+`Q_ij = (1−oa)·ACH·ΣV·duty / n²` (equal per-room AHS share). Fiction Contam
+platforms set `oa_fraction: 0.2` and `hvac_duty: 0.5` so the native twin matches
+hobbyist ContamX steady frames (night half-duty). ContamX builds a
 **pressure/AHS/fan field**, then Crusher keeps only non-zero real↔real SIM
-paths plus AHS room↔room synthesis. Hobbyist ducts/stack/filters can change
-ContamX SIM magnitudes further but are not themselves bridged into Crusher.
+paths plus AHS room↔room synthesis (`Rec≈0` → `(1−oa)·min(ΣR,ΣS)`). Calibrate
+**native toward ContamX**, not the reverse — Contam/PRJ is airflow SoT.
 
 ## 7. Related components
 

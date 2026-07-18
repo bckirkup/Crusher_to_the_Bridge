@@ -67,11 +67,13 @@ class ContamXTransportEngine(ContamTransportEngine):
         natural_decay_rate: float = 0.10,
         *,
         path_map_entries: list[dict[str, Any]] | None = None,
+        oa_fraction: float = 0.2,
     ) -> None:
         self.filter_efficiency = filter_efficiency
         self.natural_decay_rate = natural_decay_rate
         self.zone_nodes = {}
         self.airflow_paths = []
+        self._oa_fraction = float(oa_fraction)
 
         self._build_zone_nodes(spatial_layout)
         entries = path_map_entries
@@ -131,6 +133,7 @@ class ContamXTransportEngine(ContamTransportEngine):
         self.airflow_paths.extend(
             synthesize_ahs_recirculation_paths(
                 ordered, path_flows_m3h, known,
+                oa_fraction=self._oa_fraction,
             )
         )
 
@@ -353,4 +356,5 @@ def build_contamx_engine(
         filter_efficiency=filter_eff,
         natural_decay_rate=decay_rate,
         path_map_entries=entries,
+        oa_fraction=float(airflow.get("oa_fraction", 0.2)),
     )
