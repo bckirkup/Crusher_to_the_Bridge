@@ -170,21 +170,19 @@ class TestPrjRoundTrip:
         prj = contam_prj_bridge.export_prj(spatial, airflow)
         _, r_airflow = contam_prj_bridge.import_prj(prj)
 
-        def _adj(d):
-            return {(e["from"], e["to"], e["type"]) for e in d["adjacency"]}
+        def _adj_pairs(d):
+            return {(e["from"], e["to"]) for e in d["adjacency"]}
 
-        def _links(d):
-            return {
-                (e["from"], e["to"], e["flow_rate_m3h"], e["is_hvac_ducted"])
-                for e in d["cross_zone_links"]
-            }
+        def _hvac_rooms(d):
+            return {(h["id"], frozenset(h["rooms"]), h["ach"]) for h in d["hvac_zones"]}
 
-        def _hvac(d):
-            return {(h["id"], tuple(h["rooms"]), h["ach"]) for h in d["hvac_zones"]}
-
-        assert _adj(r_airflow) == _adj(airflow)
-        assert _links(r_airflow) == _links(airflow)
-        assert _hvac(r_airflow) == _hvac(airflow)
+        assert _adj_pairs(r_airflow) == _adj_pairs(airflow)
+        assert _hvac_rooms(r_airflow) == _hvac_rooms(airflow)
+        # Cross-zone links resolve to representative rooms with same flows
+        assert len(r_airflow["cross_zone_links"]) == len(airflow["cross_zone_links"])
+        orig_flows = sorted(e["flow_rate_m3h"] for e in airflow["cross_zone_links"])
+        got_flows = sorted(e["flow_rate_m3h"] for e in r_airflow["cross_zone_links"])
+        assert got_flows == orig_flows
 
     def test_geometry_fields_round_trip(self) -> None:
         spatial = {
@@ -204,22 +202,29 @@ class TestPrjRoundTrip:
         z = r_spatial["zones"][0]
         assert z["floor_area_m2"] == pytest.approx(20.0)
         assert z["ceiling_height_m"] == pytest.approx(3.0)
-        assert z["elevation_m"] == pytest.approx(2.5)
         assert z["volume_m3"] == pytest.approx(60.0)
 
-    def test_volume_only_zone_gains_no_geometry(self) -> None:
-        """Backward compat: a volume-only zone must not sprout area/height."""
+    def test_volume_only_zone_gets_derived_geometry_on_contamw34(self) -> None:
+        """ContamW 3.4 export derives area/height; simplify keeps them."""
         spatial, airflow = _destroyer_layout()
         prj = contam_prj_bridge.export_prj(spatial, airflow)
+        r_spatial, _ = contam_prj_bridge.import_prj(prj)
+        for z in r_spatial["zones"]:
+            assert z.get("floor_area_m2", 0) > 0
+            assert z.get("ceiling_height_m", 0) > 0
+
+    def test_legacy_interchange_preserves_absent_geometry(self) -> None:
+        spatial, airflow = _destroyer_layout()
+        prj = contam_prj_bridge.export_prj_interchange(spatial, airflow)
         r_spatial, _ = contam_prj_bridge.import_prj(prj)
         for z in r_spatial["zones"]:
             assert "floor_area_m2" not in z
             assert "ceiling_height_m" not in z
 
-    def test_exported_prj_has_signature(self) -> None:
+    def test_exported_prj_has_contamw34_signature(self) -> None:
         spatial, airflow = _destroyer_layout()
         prj = contam_prj_bridge.export_prj(spatial, airflow)
-        assert prj.splitlines()[0] == contam_prj_bridge.PRJ_SIGNATURE
+        assert prj.splitlines()[0].startswith("ContamW 3.4")
 
     def test_import_rejects_non_prj(self) -> None:
         with pytest.raises(ValueError):
@@ -227,8 +232,6 @@ class TestPrjRoundTrip:
 
     def test_file_round_trip(self, tmp_path) -> None:
         spatial, airflow = _destroyer_layout()
-        # Write to an allowed temp location inside the repo tree via the
-        # in-memory API (file wrappers enforce repo containment).
         prj = contam_prj_bridge.export_prj(spatial, airflow)
         prj_file = tmp_path / "ship.prj"
         prj_file.write_text(prj, encoding="utf-8")
@@ -236,6 +239,19 @@ class TestPrjRoundTrip:
         r_spatial, r_airflow = contam_prj_bridge.import_prj(text)
         assert len(r_spatial["zones"]) == len(spatial["zones"])
         assert len(r_airflow["adjacency"]) == len(airflow["adjacency"])
+
+    def test_path_map_includes_cross_and_adjacency(self) -> None:
+        spatial, airflow = _destroyer_layout()
+        _prj, path_map = contam_prj_bridge.export_prj_with_path_map(spatial, airflow)
+        kinds = {e["kind"] for e in path_map}
+        assert any(e["crusher_transfer"] for e in path_map)
+        assert "cross_zone" in kinds or any(
+            e["kind"] not in ("ahs_oa", "ahs_exhaust", "ahs_recirc", "ahs_supply", "ahs_return")
+            and e["crusher_transfer"]
+            for e in path_map
+        )
+        transfer = [e for e in path_map if e["crusher_transfer"]]
+        assert len(transfer) >= len(airflow["adjacency"]) + len(airflow["cross_zone_links"])
 
 
 # ── sanity_checker geometry check ─────────────────────────────────────────

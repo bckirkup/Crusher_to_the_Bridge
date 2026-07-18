@@ -1,0 +1,384 @@
+ContamW 3.4.0.4 0
+
+! rows cols ud uf    T   uT     N     wH  u  Ao    a
+    58   66  0  2 293.150 2    0.00 10.00 0 0.600 0.280
+!  scale     us  orgRow  orgCol  invYaxis showGeom
+  2.000e-01   0      46      15     0        0
+! Ta       Pb      Ws    Wd    rh  day u..
+293.150 101325.0  0.000   0.0 0.000 1 2 0 0 1 ! steady simulation
+293.150 101325.0  1.000 270.0 0.000 1 2 0 0 1 ! wind pressure test
+null ! no weather file
+null ! no contaminant file
+null ! no continuous values file
+null ! no discrete values file
+null ! no WPC file
+null ! no EWC file
+WPC description
+!  Xref    Yref    Zref   angle u
+   0.000   0.000   0.000   0.00 0
+! epsP epsS  tShift  dStart dEnd wp mf wpctrig
+  0.01 0.01 00:00:00   1/1   1/1  0  0  0
+! latd  longtd   tznr  altd  Tgrnd u..
+ 40.00  -90.00  -6.00     0 283.15 2 0
+!sim_af afcalc afmaxi afrcnvg afacnvg afrelax uac Pbldg uPb
+     1      1     30   1e-05   1e-06    0.75   0 50.00   0
+!   slae rs aflmaxi aflcnvg aflinit Tadj
+      0   1    100   1e-06      1    0
+!sim_mf slae rs maxi   relcnvg   abscnvg relax gamma ucc
+    2             30  1.00e-04  1.00e-15 1.250         0 ! (cyclic)
+          0   1  100  1.00e-06  1.00e-15 1.100 1.000   0 ! (non-trace)
+          0   1  100  1.00e-06  1.00e-15 1.100 1.000   0 ! (trace)
+          0   1  100  1.00e-06  1.00e-15 1.100         0 ! (cvode)
+!mf_solver sim_1dz sim_1dd   celldx  sim_vjt udx
+     0        1       0     1.00e-01    0     0
+!cvode    rcnvg     acnvg    dtmax
+   0     1.00e-06  1.00e-13   0.00
+!tsdens relax tsmaxi cnvgSS densZP stackD dodMdt
+   0    0.75    20     1      0      0      0
+!date_st time_st  date_0 time_0   date_1 time_1    t_step   t_list   t_scrn
+  Jan01 00:00:00  Jan01 00:00:00  Jan01 06:00:00  00:00:10 00:00:10 01:00:00
+!restart  date  time
+    0    Jan01 00:00:00
+!list doDlg pfsave zfsave zcsave
+   1     1      1      1      1
+!vol ach -bw cbw exp -bw age -bw
+  0   0   0   0   0   0   0   0
+!rzf rzm rz1 csm srf log
+  0   0   0   1   1   1
+!bcx dcx pfq zfq zcq
+  0   0   0   0   0
+!dens   grav
+ 1.2041 9.8055
+! 0  1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 <- extra[]
+  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
+0 ! rvals:
+!valZ valD valC
+   0    0    0
+!cfd   cfdcnvg  var zref maxi dtcmo solv smooth   cnvgUVW     cnvgT
+   0  1.00e-02    0    0 1000     1    1      1  1.00e-03  1.00e-03
+-999
+1 ! contaminants:
+   1
+1 ! species:
+! # s t   molwt    mdiam       edens       decay         Dm         CCdef        Cp          Kuv     u[5]      name
+  1 1 0  44.0000  0.0000e+00  0.0000e+00  0.0000e+00  2.0000e-05  6.0776e-04  1.0000e+03  0.0000e+00 1 0 0 0 0 CO2
+
+-999
+1 ! levels plus icon data:
+! #  refHt   delHt  ni  u  name
+  1   0.000   2.400 59 0 0 <1>
+!icn col row  #
+  42   4   2   1
+  42   6   2   2
+ 185   4   3   1
+  42   6   3   3
+ 185   4   4   2
+  42   6   4   4
+ 186   6  21  26
+ 186   7  21  17
+ 186   8  21  23
+ 186  10  21   9
+ 171   6  22  26
+ 171   7  22  17
+ 171   8  22  23
+ 171  10  22   9
+ 179   6  23  26
+ 179   7  23  17
+ 179   8  23  23
+ 179  10  23   9
+ 185   6  24   3
+ 185   7  24   4
+ 185   8  24   5
+ 185  10  24   6
+ 185  25  35   7
+  14  15  36   0
+ 171  25  36   7
+  15  28  36   0
+ 179  25  37   7
+ 186  12  38  26
+ 186  19  38   1
+ 170  20  38   1
+ 178  21  38   1
+ 185  22  38   8
+ 170  23  38   8
+ 178  24  38   8
+ 185  25  38   9
+ 171  12  39  26
+ 177  22  39   2
+ 171  25  39   9
+ 179  12  40  26
+ 179  25  40   9
+ 187  12  41  10
+ 170  13  41  17
+ 178  14  41  17
+  28  15  41   1
+ 186  22  41   2
+ 133  25  41   1
+  23  28  41   2
+ 184  29  41  22
+ 178  30  41  22
+ 185  31  41  23
+   5  17  44   1
+ 184  18  44  24
+ 178  19  44  24
+ 185  20  44  25
+ 170  21  44  25
+ 178  22  44  25
+ 185  23  44  26
+  17  15  46   0
+  16  28  46   0
+-999
+4 ! day-schedules:
+! # npts shap utyp ucnv name
+  1    8    0    1    0 GenCO2
+
+ 00:00:00 0
+ 00:30:00 1
+ 02:00:00 0
+ 02:15:00 1
+ 03:45:00 0
+ 04:15:00 1
+ 05:45:00 0
+ 24:00:00 0
+  2    3    0    1    0 GenWSD
+
+ 00:00:00 0
+ 00:30:00 1
+ 24:00:00 1
+  3    3    0    1    0 Setpoint
+
+ 00:00:00 0.5
+ 00:30:00 1
+ 24:00:00 1
+  4    2    0    1    0 Zero
+
+ 00:00:00 0
+ 24:00:00 0
+-999
+3 ! week-schedules:
+! # utyp ucnv name
+  1    1    0 GenCO2
+
+ 1 4 4 4 4 4 4 4 4 4 4 4
+  2    1    0 GenWSD
+
+ 2 2 2 2 2 2 2 2 2 2 2 2
+  3    1    0 Setpoint
+
+ 3 4 4 4 4 4 4 4 4 4 4 4
+-999
+0 ! wind pressure profiles:
+-999
+0 ! kinetic reactions:
+-999
+0 ! filter elements:
+-999
+0 ! filters:
+-999
+2 ! source/sink elements:
+1 CO2 ccf CO2_1L/s
+
+ 0.00182952 0 9 0
+2 CO2 ccf CO2gen
+L/s-person
+ 8.63534e-06 0 9 0
+-999
+2 ! flow elements:
+1 23 plr_leak3 ExtWallLkg
+
+ 8.50718e-08 0.000605364 0.65 1 4 0 0 0.000527 2 2 2 0
+2 28 fan_cmf Fan1_sL/s
+
+ 0.0012041 2
+-999
+0 ! duct elements:
+-999
+1 ! control super elements:
+! #   f  in out  nn  ni name
+  1   3   1   7  11  32 SE_DCV
+CO2-based DCV
+11 ! sub-nodes:
+! # typ seq f n  c1  c2 name
+  1 mod   1 0 1   0   0 Input
+Zone Concentration [ppm]
+ 0 1
+  2 ulc   6 0 2   1   8 <none>
+Upper limit control
+
+  3 mul   7 0 2   2   9 <none>
+Multiply two inputs
+
+  4 add   8 0 2   3  10 <none>
+Add two inputs
+
+  5 max   9 0 3   0   0 <none>
+Maximum of all inputs
+ 0 
+  6 min  10 0 3   0   0 <none>
+Minimum of all inputs
+ 0 
+  7 pas  11 0 1   6   0 Output
+Split (or pass) input
+
+  8 sns   2 1 0   0   0 <none>
+CO2 sensor converted to [ppm]
+ 0 658150 0 0 0 1 0   0.000   0.000   0.000 0 CO2
+  9 set   3 0 0   0   0 <none>
+L/s-ppm (slope)
+ 0.037417
+ 10 set   4 0 0   0   0 <none>
+Voa_min [L/s]
+ 3.95
+ 11 set   5 0 0   0   0 <none>
+Voa_Max [L/s]
+ 26.4
+ 189  10  19   1
+ 170  11  19   1
+ 178  13  19   1
+ 185  14  19   2
+ 170  15  19   2
+ 178  17  19   2
+ 185  18  19   3
+ 170  19  19   3
+ 178  21  19   3
+ 185  22  19   4
+ 170  23  19   4
+ 178  25  19   4
+ 185  26  19   5
+ 170  27  19   5
+ 178  28  19   5
+ 185  29  19   6
+ 170  30  19   6
+ 178  31  19   6
+ 188  32  19   7
+ 177  14  20   8
+ 177  18  20   9
+ 177  22  20  10
+ 177  26  20  10
+ 177  29  20  11
+ 184  10  23   8
+ 170  11  23   8
+ 174  14  23   8
+ 185  18  23   9
+ 185  22  23  10
+ 170  23  23  10
+ 174  26  23  10
+ 185  29  23  11
+-999
+26 ! control nodes:
+! # typ seq f n  c1  c2 name
+  1 set   1 0 0   0   0 Npeople
+Constant: Number of people = 0.84, 1.96, 2.8 Pistochini Table 1.
+ 1.96
+  2 set   2 0 0   0   0 CO2pp
+Constant: CO2 per person = 0.00472 [L/s-person]
+ 0.00472
+  3 log  15 0 1  26   0 <none>
+Report: CO2box [ppm]
+ 0 1 0 CO2box ppm
+  4 log  26 0 1  17   0 <none>
+Report input
+ 0 1 0 VoaDcvSet L/s
+  5 log  16 0 1  23   0 <none>
+Report: Voa = Outdoor air intake rate [sL/s]
+ 0 1 0 Voa sL/s
+  6 log  17 0 1   9   0 <none>
+Report: Total CO2 Generation Rate [L/s]
+ 0 1 0 CO2GenRate L/s
+  7 sch   3 0 0   0   0 <none>
+Schedule: CO2 generation => Max set by CO2GenRate
+ 1
+  8 mul  10 0 2   1   2 <none>
+Multiply two inputs
+
+  9 mul  11 0 2   8   7 CO2GenRate
+Multiply: CO2 generation rate
+
+ 10 sup  18 0 1  26   0 VoaDcvSet
+Super node - Simple DCV controller
+ 0 1 11 17
+ 11 mod  19 0 1  26   0 <none>
+Zone Concentration [ppm]
+ 0 1
+ 12 ulc  20 0 2  11  18 <none>
+Upper limit control
+
+ 13 mul  21 0 2  12  19 <none>
+Multiply two inputs
+
+ 14 add  22 0 2  13  20 <none>
+Add two inputs
+
+ 15 max  23 0 3   0   0 <none>
+Maximum of all inputs
+ 2  14 20
+ 16 min  24 0 3   0   0 <none>
+Minimum of all inputs
+ 2  15 21
+ 17 pas  25 0 1  16   0 VoaDcvSet
+Split (or pass) input
+
+ 18 sns   4 1 0   0   0 <none>
+CO2 sensor converted to [ppm]
+ 0 658150 0 0 -1 1 0   0.000   0.000   0.000 0 CO2
+ 19 set   5 0 0   0   0 <none>
+L/s-ppm (slope)
+ 0.019115
+ 20 set   6 0 0   0   0 <none>
+Voa_min [L/s]
+ 3.95
+ 21 set   7 0 0   0   0 <none>
+Voa_Max [L/s]
+ 26.4
+ 22 sns   8 0 0   0   0 <none>
+path sensor
+ 0 1 0 0 2 2 2   0.000   0.000   0.000 0 none
+ 23 mod  12 1 1  22   0 Voa
+Modify: kg/s -> sL/s
+ 0 830.496
+ 24 sns   9 0 0   0   0 <none>
+zone sensor
+ 0 1 0 0 1 1 0   0.000   0.000   0.000 0 CO2
+ 25 mod  13 1 1  24   0 <none>
+Modify: convert kg/kg -> ppm CO2
+ 0 658150
+ 26 pas  14 0 1  25   0 CO2box
+Split (or pass) input
+
+-999
+0 ! simple AHS:
+-999
+1 ! zones:
+! Z#  f  s#  c#  k#  l#  relHt    Vol  T0  P0  name  clr uH uT uP uV axs cdvf <cdvfName> cfd <cfdName> <1dData:>
+   1  3   0   0   0   1   0.000 12.48 293.15 0 box -1 0 2 0 0 0 0 0
+-999
+1 ! initial zone concentrations:
+! Z#        CO2
+   1  6.078e-04
+-999
+2 ! flow paths:
+! P#    f  n#  m#  e#  f#  w#  a#  s#  c#  l#    X       Y      relHt  mult wPset wPmod wazm Fahs Xmax Xmin icn dir u[4] cdvf <cdvfName> cfd <cfdData[4]>
+   1    0  -1   1   2   0   0   0   0  17   1   0.000   0.000   1.200 1 0 0 270 0 0 0  28  2 -1 0 1 1 1 0 0
+   2    0   1  -1   1   0   0   0   0   0   1   0.000   0.000   1.200 22.08 0 0 270 0 0 0  23  2 -1 0 1 1 1 0 0
+-999
+0 ! duct junctions:
+-999
+0 ! initial junction concentrations:
+-999
+0 ! duct segments:
+-999
+1 ! source/sinks:
+! #  z#  e#  s#  c#  mult   CC0  (X, Y, H)min  (X, Y, H)max u[1] cdvf <cdvf name> cfd <cfd name>
+  1   1   1   0   9     1     0  0 0 0  0 0 0 -1 0 0 0
+-999
+0 ! occupancy schedules:
+-999
+0 ! exposures:
+-999
+4 ! annotations:
+1 6 INPUTS - occupant
+2 6 Kp=0.076 L/s-ppm
+3 6 TauI = 480 s (8 minutes)
+4 6 Dead band = 25 ppm
+-999
+* end project file.
