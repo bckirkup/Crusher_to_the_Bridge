@@ -297,7 +297,7 @@ Crusher HVAC zone_engineering ach=14.0
    20  10   0   0   0   1   0.000  0 293.15 0 ahs4(Ret) -1 0 2 0 0 0 0 0
    21  10   0   0   0   1   0.000  0 293.15 0 ahs4(Sup) -1 0 2 0 0 0 0 0
 -999
-21 ! initial zone concentrations:
+42 ! initial zone concentrations:
 ! Z#       Air Virus
    1  0.000e+00  0.000e+00
    2  0.000e+00  0.000e+00
@@ -442,7 +442,7 @@ Crusher HVAC zone_engineering ach=14.0
   11  0  1  11  0  0  0  0  1  48.000  22.000  0.000  293.15 0  21 -1 0 0 2 0 0 none T: 0 0 0 0 -1 0 0.0706858 0.0706858 0 0.5 0 0 3 3 1 1
   12  0  1  13  0  0  0  0  1  60.000  10.000  0.000  293.15 0  21 -1 0 0 2 0 0 none T: 0 0 0 0 -1 0 0.0706858 0.0706858 0 0.5 0 0 3 3 1 1
 -999
-12 ! initial junction concentrations:
+24 ! initial junction concentrations:
    1  0.000e+00  0.000e+00
    2  0.000e+00  0.000e+00
    3  0.000e+00  0.000e+00

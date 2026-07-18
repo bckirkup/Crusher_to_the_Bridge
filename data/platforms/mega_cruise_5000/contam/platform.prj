@@ -689,7 +689,7 @@ Crusher HVAC AHU_Crew_Deck_D4 ach=5.0
    168  10   0   0   0   1   0.000  0 293.15 0 ahs20(Ret) -1 0 2 0 0 0 0 0
    169  10   0   0   0   1   0.000  0 293.15 0 ahs20(Sup) -1 0 2 0 0 0 0 0
 -999
-169 ! initial zone concentrations:
+338 ! initial zone concentrations:
 ! Z#       Air Virus
    1  0.000e+00  0.000e+00
    2  0.000e+00  0.000e+00
@@ -2928,7 +2928,7 @@ Crusher HVAC AHU_Crew_Deck_D4 ach=5.0
   128  0  1  128  0  0  0  0  37  300.000  70.000  0.000  293.15 0  21 -1 0 0 2 0 0 none T: 0 0 0 0 -1 0 0.0706858 0.0706858 0 0.5 0 0 3 3 1 1
   129  0  1  129  0  0  0  0  37  320.000  70.000  0.000  293.15 0  21 -1 0 0 2 0 0 none T: 0 0 0 0 -1 0 0.0706858 0.0706858 0 0.5 0 0 3 3 1 1
 -999
-129 ! initial junction concentrations:
+258 ! initial junction concentrations:
    1  0.000e+00  0.000e+00
    2  0.000e+00  0.000e+00
    3  0.000e+00  0.000e+00

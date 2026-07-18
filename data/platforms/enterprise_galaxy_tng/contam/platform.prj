@@ -352,7 +352,7 @@ Crusher HVAC zone_drive ach=16.0
    28  10   0   0   0   1   0.000  0 293.15 0 ahs6(Ret) -1 0 2 0 0 0 0 0
    29  10   0   0   0   1   0.000  0 293.15 0 ahs6(Sup) -1 0 2 0 0 0 0 0
 -999
-29 ! initial zone concentrations:
+58 ! initial zone concentrations:
 ! Z#       Air Virus
    1  0.000e+00  0.000e+00
    2  0.000e+00  0.000e+00
@@ -537,7 +537,7 @@ Crusher HVAC zone_drive ach=16.0
   15  0  1  9  0  0  0  0  9  40.000  40.000  0.000  293.15 0  21 -1 0 0 2 0 0 none T: 0 0 0 0 -1 0 0.0706858 0.0706858 0 0.5 0 0 3 3 1 1
   16  0  1  10  0  0  0  0  10  35.000  38.000  0.000  293.65 0  21 -1 0 0 2 0 0 none T: 0 0 0 0 -1 0 0.0706858 0.0706858 0 0.5 0 0 3 3 1 1
 -999
-16 ! initial junction concentrations:
+32 ! initial junction concentrations:
    1  0.000e+00  0.000e+00
    2  0.000e+00  0.000e+00
    3  0.000e+00  0.000e+00

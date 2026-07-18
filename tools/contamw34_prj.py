@@ -1227,9 +1227,12 @@ def _append_ahs_zones_and_paths(lines: list[str], ctx: dict[str, Any]) -> None:
         )
     lines.append(_SENTINEL)
 
-    # Initial concentrations (one column per contaminant)
+    # Initial concentrations (one column per contaminant).
+    # ContamW/ContamX: section header nn must equal n_zones * n_ctm.
     n_ctm = len(cidxs)
-    lines.append(f"{len(zone_records)} ! initial zone concentrations:")
+    lines.append(
+        f"{len(zone_records) * n_ctm} ! initial zone concentrations:"
+    )
     header_names = " ".join(sp["name"] for sp in species[:n_ctm])
     lines.append(f"! Z#       {header_names}")
     zeros = "  ".join(_ZERO_CONC for _ in range(n_ctm))
@@ -1264,6 +1267,7 @@ def _append_duct_junctions_and_segments(
     lines: list[str],
     net: dict[str, Any],
     zeros: str,
+    n_ctm: int,
 ) -> None:
     """Emit duct junctions, junction concentrations, and duct segments."""
     duct_junctions = net.get("duct_junctions") or []
@@ -1285,7 +1289,8 @@ def _append_duct_junctions_and_segments(
     lines.append(_SENTINEL)
 
     n_jct = len(duct_junctions)
-    lines.append(f"{n_jct} ! initial junction concentrations:")
+    # ContamW/ContamX: section header nn must equal n_junctions * n_ctm.
+    lines.append(f"{n_jct * n_ctm} ! initial junction concentrations:")
     if n_jct:
         for j in duct_junctions:
             lines.append(f"   {j['nr']}  {zeros}")
@@ -1305,10 +1310,11 @@ def _append_duct_junctions_and_segments(
 def _append_duct_network_and_footer(lines: list[str], ctx: dict[str, Any]) -> None:
     net = ctx["net"]
     zeros = ctx.get("zeros") or _ZERO_CONC
+    n_ctm = len(ctx.get("cidxs") or [1])
     hobbyist = ctx["hobbyist"]
     zone_records = ctx["zone_records"]
     path_map = ctx["path_map"]
-    _append_duct_junctions_and_segments(lines, net, zeros)
+    _append_duct_junctions_and_segments(lines, net, zeros, n_ctm)
 
     lines.append("0 ! source/sinks:")
     lines.append(_SENTINEL)
