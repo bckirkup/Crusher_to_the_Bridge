@@ -74,6 +74,12 @@ def test_destroyer_hobbyist_export_section_counts() -> None:
     assert "Virus" in text
     assert "Bridge CIC" in text or "Eng Rm" in text
     assert _section_count(text, "flow paths") == len(path_map)
+    # ContamX: initial-concentration headers are n_items * n_contaminants
+    n_zones = _section_count(text, "zones")
+    n_ctm = _section_count(text, "contaminants")
+    assert _section_count(text, "initial zone concentrations") == n_zones * n_ctm
+    n_jct = _section_count(text, "duct junctions")
+    assert _section_count(text, "initial junction concentrations") == n_jct * n_ctm
     # Destroyer with room×room cross-zone expansion: 44 Contam paths
     # (6 envelope + 6 adjacency + 11 cross + 9 AHS system + 12 terminals)
     assert len(path_map) == 44

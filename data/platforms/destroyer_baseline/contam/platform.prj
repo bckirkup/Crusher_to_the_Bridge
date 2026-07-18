@@ -278,7 +278,7 @@ Crusher HVAC zone_lower ach=10.0
    11  10   0   0   0   1   0.000  0 293.15 0 ahs3(Ret) -1 0 2 0 0 0 0 0
    12  10   0   0   0   1   0.000  0 293.15 0 ahs3(Sup) -1 0 2 0 0 0 0 0
 -999
-12 ! initial zone concentrations:
+24 ! initial zone concentrations:
 ! Z#       Air Virus
    1  0.000e+00  0.000e+00
    2  0.000e+00  0.000e+00
@@ -348,7 +348,7 @@ Crusher HVAC zone_lower ach=10.0
   4  0  1  4  0  0  0  0  3  20.000  7.000  0.000  298.15 0  21 -1 0 0 2 0 0 none T: 0 0 0 0 -1 0 0.0706858 0.0706858 0 0.5 0 0 3 3 1 1
   5  0  1  6  0  0  0  0  3  35.000  3.000  0.000  298.15 0  21 -1 0 0 2 0 0 none T: 0 0 0 0 -1 0 0.0706858 0.0706858 0 0.5 0 0 3 3 1 1
 -999
-5 ! initial junction concentrations:
+10 ! initial junction concentrations:
    1  0.000e+00  0.000e+00
    2  0.000e+00  0.000e+00
    3  0.000e+00  0.000e+00
