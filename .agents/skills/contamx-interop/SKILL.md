@@ -66,9 +66,10 @@ python3 tools/contam_flow_compare.py --platform destroyer_baseline \
   --sim tests/fixtures/contam/destroyer_baseline.sim --inject Bridge
 ```
 
-Healthy destroyer read: ~17 kept + ~8 AHS synth; Bridge out ~76 m³/h;
-native recirculation on Contam platforms uses `oa_fraction=0.2` /
-`hvac_duty=0.5` (Contam-aligned; zone_lower pairs ~350 m³/h);
+Healthy destroyer read: ~17 kept + AHS star synth (ret+sup per room);
+Bridge out includes single-room AHS return; native HVAC on Contam platforms
+uses star topology with `oa_fraction=0.2` / `hvac_duty=0.5` (Contam-aligned;
+zone_lower Engine_Room return ~1000 m³/h, supply ~800 m³/h);
 `zero_flow_real_candidates` = 0. Console prints `kept_links` and flags identical
 Flow0 fingerprints in hypotheses.
 

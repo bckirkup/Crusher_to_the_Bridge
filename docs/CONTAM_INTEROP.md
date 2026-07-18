@@ -110,7 +110,7 @@ grammar. The fiction exporter (`tools/contamw34_prj.py`) enforces:
 | Every real zone has a small `plr_orfc` path to **ambient** | ContamX `FATAL Zero on the diagonal` when only fans/AHS (dF/dP=0) connect zones |
 | Week schedule `OAFracW` (`fo=0.2`) on AHS recirc paths | Without it Contam defaults to 100% OA → no HVAC recirculation |
 | Cross-zone `fan_cvf` expanded to all room×room pairs | Matches native cross-zone expansion; ContamX flows are Crusher-visible |
-| `path_map.ahs_nr` on AHS paths + ContamX AHS bridge | Synthesizes room↔room recirculation from Contam Ret/Sup/recirc SIM flows |
+| `path_map.ahs_nr` on AHS paths + ContamX AHS bridge | Synthesizes star HVAC (room↔plenum) from Contam Ret/Sup/recirc SIM flows |
 | Initial zone/junction concentration headers = `n_items × n_ctm` | ContamX `Zones*contaminant count mis-match` if only `n_items` |
 | Duct terminals: emit `vf_node_name` even when `vf_type=0`; **omit** ContamW `"T:"` | ContamX always reads the name string; `"T:"` → `Bad integer: T:`; omitting name shifts Ad onto `bal` → `Bad short integer: <Ad>` |
 
@@ -307,8 +307,11 @@ python3 tools/contam_flow_compare.py --platform destroyer_baseline \
 | destroyer after healthy read | ~17 kept + ~8 AHS synth; Fan_25/26/27 match design m³/h |
 
 Native builds a **Contam-aligned prescribed ACH digraph** from JSON:
-`Q_ij = (1−oa)·ACH·ΣV·duty / n²` (equal per-room AHS share). Fiction Contam
-platforms set `oa_fraction: 0.2` and `hvac_duty: 0.5` so the native twin matches
+Star topology through a virtual AHU plenum (not an N×N room digraph)::
+
+`room → plenum` at `ACH·V·duty`; `plenum → room` at that flow × `(1−oa)` (filtered).
+
+Fiction Contam platforms set `oa_fraction: 0.2` and `hvac_duty: 0.5` so the native twin matches
 hobbyist ContamX steady frames (night half-duty). ContamX builds a
 **pressure/AHS/fan field**, then Crusher keeps only non-zero real↔real SIM
 paths plus AHS room↔room synthesis (`Rec≈0` → `(1−oa)·min(ΣR,ΣS)`). Calibrate
@@ -319,7 +322,7 @@ paths plus AHS room↔room synthesis (`Rec≈0` → `(1−oa)·min(ΣR,ΣS)`). C
 - `engines/py_contam_bridge.py` — native prescribed-flow mass-balance engine
 - `engines/contamx_runner.py` — ContamX capability detection, subprocess, `.SIM` reader
 - `engines/contamx_transport.py` — ContamX airflow field + AHS→room bridge + native mass balance
-- `engines/contamx_ahs_bridge.py` — synthesize room↔room recirculation from Contam AHS SIM flows
+- `engines/contamx_ahs_bridge.py` — synthesize star HVAC (room↔plenum) from Contam AHS SIM flows
 - `tools/contamw34_prj.py` — ContamW 3.4 writer / simplify
 - `tools/contam_prj_bridge.py` — CLI export / simplify / import
 - `tools/contam_engine_compare.py` — results + speed suite runner
