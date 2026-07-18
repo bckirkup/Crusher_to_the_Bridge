@@ -31,6 +31,12 @@ from engines.contamx_runner import ContamXUnavailable, find_contamx  # noqa: E40
 from picard_framework.catalog.registry import CatalogRegistry  # noqa: E402
 from picard_framework.run_spec import PicardRunSpec  # noqa: E402
 from picard_framework.simulation.ship_simulation import ShipSimulation  # noqa: E402
+from simulation_utils.paths import (  # noqa: E402
+    prepare_output_directory,
+    resolve_repo_path,
+    validate_path_component,
+    validated_open,
+)
 
 
 def _build_spec(
@@ -41,18 +47,19 @@ def _build_spec(
     transport_engine: str,
     prj_path: str = "",
 ) -> PicardRunSpec:
+    safe_platform = validate_path_component(platform_id, label="platform id")
     reg = CatalogRegistry.from_repo(REPO_ROOT)
-    if platform_id not in reg.platforms:
+    if safe_platform not in reg.platforms:
         raise SystemExit(
-            f"Unknown platform '{platform_id}'. "
+            f"Unknown platform '{safe_platform}'. "
             f"Known: {sorted(reg.platforms)}"
         )
-    platform = reg.platforms[platform_id]
+    platform = reg.platforms[safe_platform]
 
     spec = PicardRunSpec.from_legacy_yaml(REPO_ROOT, num_epochs=epochs)
     spec.random_seed = seed
     spec.num_epochs = epochs
-    spec.platform_id = platform_id
+    spec.platform_id = safe_platform
     spec.spatial_layout = platform.spatial_layout
     spec.air_flow_paths = platform.air_flow_paths
 
@@ -63,13 +70,17 @@ def _build_spec(
     cfg["hvac"]["transport_engine"] = transport_engine
     cfg["hvac"].setdefault("contamx", {})
     if prj_path:
-        cfg["hvac"]["contamx"]["prj_path"] = prj_path
-    elif os.path.isfile(
-        os.path.join(REPO_ROOT, "data", "platforms", platform_id, "contam", "platform.prj")
-    ):
-        cfg["hvac"]["contamx"]["prj_path"] = os.path.join(
-            "data", "platforms", platform_id, "contam", "platform.prj",
+        # Containment-checked relative/absolute path under the repo root.
+        cfg["hvac"]["contamx"]["prj_path"] = os.path.relpath(
+            resolve_repo_path(REPO_ROOT, prj_path), REPO_ROOT,
         )
+    else:
+        bundled_rel = os.path.join(
+            "data", "platforms", safe_platform, "contam", "platform.prj",
+        )
+        bundled = resolve_repo_path(REPO_ROOT, bundled_rel)
+        if os.path.isfile(bundled):
+            cfg["hvac"]["contamx"]["prj_path"] = bundled_rel
     spec.legacy_cfg = cfg
     return spec
 
@@ -204,13 +215,14 @@ def main(argv: list[str] | None = None) -> int:
         report["contamx_error"] = str(exc)
 
     if args.json_out:
-        out = args.json_out
-        if not os.path.isabs(out):
-            out = os.path.join(REPO_ROOT, out)
+        # Sonar pythonsecurity:S8707 — constrain CLI output path to the repo.
+        out = resolve_repo_path(REPO_ROOT, args.json_out)
         parent = os.path.dirname(out)
         if parent:
-            os.makedirs(parent, exist_ok=True)
-        with open(out, "w", encoding="utf-8") as fh:
+            prepare_output_directory(parent, allowed_roots=(REPO_ROOT,))
+        with validated_open(
+            out, "w", allowed_roots=(REPO_ROOT,), encoding="utf-8",
+        ) as fh:
             json.dump(report, fh, indent=2, default=str)
             fh.write("\n")
         print(f"\nWrote {out}")

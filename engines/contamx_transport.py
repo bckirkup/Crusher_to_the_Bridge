@@ -41,6 +41,12 @@ from engines.py_contam_bridge import (
     ContamAirflowPath,
     ContamTransportEngine,
 )
+from simulation_utils.paths import (
+    is_path_under_base,
+    resolve_repo_path,
+    validate_path_component,
+    validated_open,
+)
 
 _FLOW_EPSILON_M3H = 1e-9
 _PATH_MAP_JSON = "path_map.json"
@@ -127,7 +133,11 @@ def _path_map_from_airflow(
 
 
 def _platform_id_from_spatial(spatial: dict[str, Any]) -> str:
-    return str(spatial.get("platform", "")).strip()
+    """Return a validated platform id path component (rejects traversal)."""
+    raw = str(spatial.get("platform", "")).strip()
+    if not raw:
+        return ""
+    return validate_path_component(raw, label="platform id")
 
 
 def resolve_contam_prj_path(
@@ -135,38 +145,57 @@ def resolve_contam_prj_path(
     cfg: dict[str, Any],
     spatial: dict[str, Any],
 ) -> str | None:
-    """Resolve a ContamW ``.prj`` path, or ``None`` if none is configured/bundled."""
+    """Resolve a ContamW ``.prj`` path, or ``None`` if none is configured/bundled.
+
+    All resolved paths are containment-checked under *repo_root* (Sonar
+    pythonsecurity:S6549 / S2083).
+    """
     contamx_cfg = cfg.get("hvac", {}).get("contamx", {}) or {}
     explicit = contamx_cfg.get("prj_path") or ""
     if explicit:
-        from simulation_utils.paths import resolve_repo_path
-
         full = resolve_repo_path(repo_root, explicit)
         if os.path.isfile(full):
             return full
         raise ContamXUnavailable(f"Configured ContamX prj_path not found: {explicit}")
 
-    platform = _platform_id_from_spatial(spatial)
-    if platform:
-        bundled = os.path.join(
-            repo_root, "data", "platforms", platform, "contam", _PLATFORM_PRJ,
-        )
-        if os.path.isfile(bundled):
-            return bundled
+    try:
+        platform = _platform_id_from_spatial(spatial)
+    except ValueError as exc:
+        raise ContamXUnavailable(f"Invalid platform id in spatial layout: {exc}") from exc
+    if not platform:
+        return None
+
+    # Constant relative segments only; platform already path-component validated.
+    rel = os.path.join("data", "platforms", platform, "contam", _PLATFORM_PRJ)
+    bundled = resolve_repo_path(repo_root, rel)
+    if os.path.isfile(bundled):
+        return bundled
     return None
 
 
-def _load_path_map_beside_prj(prj_path: str) -> list[tuple[str, str, bool]] | None:
-    directory = os.path.dirname(prj_path)
+def _load_path_map_beside_prj(
+    prj_path: str,
+    *,
+    allowed_roots: tuple[str, ...],
+) -> list[tuple[str, str, bool]] | None:
+    """Load ``path_map.json`` beside a ContamW PRJ with root containment checks."""
+    directory = os.path.dirname(os.path.realpath(prj_path))
+    if not any(is_path_under_base(root, directory) for root in allowed_roots):
+        return None
+
+    safe_map_name = validate_path_component(_PATH_MAP_JSON, label="path map file")
     candidates = [
-        os.path.join(directory, _PATH_MAP_JSON),
-        os.path.splitext(prj_path)[0] + ".path_map.json",
+        os.path.join(directory, safe_map_name),
+        os.path.splitext(os.path.realpath(prj_path))[0] + ".path_map.json",
     ]
     for cand in candidates:
-        if not os.path.isfile(cand):
+        try:
+            with validated_open(
+                cand, "r", allowed_roots=allowed_roots, encoding="utf-8",
+            ) as fh:
+                entries = json.load(fh)
+        except (OSError, ValueError, json.JSONDecodeError):
             continue
-        with open(cand, encoding="utf-8") as fh:
-            entries = json.load(fh)
         if isinstance(entries, list) and entries:
             return _path_map_from_entries(entries)
     return None
@@ -202,6 +231,7 @@ def build_contamx_engine(
     prj_path = resolve_contam_prj_path(repo_root, cfg, spatial)
     path_map: list[tuple[str, str, bool]] | None = None
     tmp_ctx = None
+    allowed_roots: tuple[str, ...] = (repo_root,)
 
     try:
         if prj_path is None:
@@ -209,15 +239,24 @@ def build_contamx_engine(
             prj_text, entries = export_prj_with_path_map(spatial, airflow)
             tmp_ctx = tempfile.TemporaryDirectory(prefix="crusher_contamx_")
             tmp_dir = tmp_ctx.__enter__()
-            prj_path = os.path.join(tmp_dir, _PLATFORM_PRJ)
-            with open(prj_path, "w", encoding="utf-8") as fh:
+            allowed_roots = (repo_root, tmp_dir)
+            safe_prj = validate_path_component(_PLATFORM_PRJ, label="prj file")
+            safe_map = validate_path_component(_PATH_MAP_JSON, label="path map file")
+            prj_path = os.path.join(tmp_dir, safe_prj)
+            map_path = os.path.join(tmp_dir, safe_map)
+            with validated_open(
+                prj_path, "w", allowed_roots=allowed_roots, encoding="utf-8",
+            ) as fh:
                 fh.write(prj_text)
-            map_path = os.path.join(tmp_dir, _PATH_MAP_JSON)
-            with open(map_path, "w", encoding="utf-8") as fh:
+            with validated_open(
+                map_path, "w", allowed_roots=allowed_roots, encoding="utf-8",
+            ) as fh:
                 json.dump(entries, fh, indent=2)
             path_map = _path_map_from_entries(entries)
         else:
-            path_map = _load_path_map_beside_prj(prj_path)
+            path_map = _load_path_map_beside_prj(
+                prj_path, allowed_roots=allowed_roots,
+            )
             if path_map is None:
                 path_map = _path_map_from_airflow(spatial, airflow)
 
