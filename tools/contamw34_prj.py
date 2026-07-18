@@ -1,22 +1,18 @@
 """
-contamw34_prj.py – ContamW 3.4 project export / simplify
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+contamw34_prj.py – ContamW 3.4 parse / simplify / fiction bootstrap
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Emits ContamW **3.4**-grammar ``.prj`` text ContamX can parse, and
-simplifies authentic ContamW 3.4 projects back into Crusher platform JSON.
+**Primary (PRJ → Crusher):**
+  - ``path_map_from_prj`` — ContamX path index alignment from an authentic PRJ
+  - ``simplify_contamw34`` — Path B: dumb a full PRJ down to platform JSON
 
-Prescribed-flow approximation (fiction-ship plausible, ContamX-detailed):
-  - ``plr_orfc`` envelope leaks zone→ambient (ContamX pressure reference)
-  - ``plr_orfc`` openings for adjacency (bidirectional Contam solve)
-  - ``fan_cvf`` constant-volume fans for cross-zone links (room×room expanded)
-  - Simple AHS: Ret/Sup phantoms + system paths + volume-weighted terminals;
-    outdoor-air fraction schedule ``fo=0.2`` on recirc so Contam recirculates
+**Fiction bootstrap only (JSON → PRJ):** ``export_contamw34`` synthesizes
+plausible ContamW 3.4 text for ships without an authentic Contam model
+(envelope leaks, OA schedule, volume-weighted AHS, expanded cross-zone fans).
 
 ContamW name fields are capped at **15 characters** (ContamX buffer).
 Crusher consumes ContamX flows via ``engines/contamx_ahs_bridge.py``.
-
-Native Crusher mass-balance is unchanged; ContamX only supplies the airflow
-field when selected. Blueprint→authentic Contam authoring is out of scope.
+Blueprint→authentic Contam authoring is out of scope.
 """
 
 from __future__ import annotations
