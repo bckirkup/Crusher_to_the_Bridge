@@ -5,26 +5,24 @@ contamw34_prj.py – ContamW 3.4 project export / simplify
 Emits ContamW **3.4**-grammar ``.prj`` text ContamX can parse, and
 simplifies authentic ContamW 3.4 projects back into Crusher platform JSON.
 
-Prescribed-flow approximation (fiction-ship plausible):
-  - ``plr_orfc`` envelope leaks zone→ambient (ContamX pressure reference)
-  - ``plr_orfc`` openings for adjacency
-  - ``fan_cvf`` constant-volume fans for cross-zone links
-  - Simple AHS: Ret/Sup phantoms + system paths (recirc/OA/exhaust) and
-    per-room supply/return terminals with design ``Fahs`` (kg/s), ``e#=0``
+Fiction bootstrap (JSON→PRJ) supports a **hobbyist-plus** mode driven by
+``data/contam_hobbyist/`` (+ optional platform ``hobbyist_overrides.json``):
+typed orifices, wind, AHS filters, schedules, duct leakage spines, light
+controls, annotations, SketchPad coords, Air+Virus species.
 
 ContamW name fields are capped at **15 characters** (ContamX buffer).
-
-Native Crusher mass-balance is unchanged; ContamX only supplies the airflow
-field when selected. Blueprint→authentic Contam authoring is out of scope.
+Blueprint→authentic Contam authoring is out of scope.
 """
 
 from __future__ import annotations
 
+import math
 import re
 import warnings
 from typing import Any
 
 from engines.py_contam_bridge import derive_volume_m3
+from tools import contam_hobbyist as _hobby
 
 PRJ_SIGNATURE_34 = "ContamW 3.4.0.0 0"
 _SENTINEL = "-999"
@@ -33,6 +31,8 @@ _DEFAULT_ZONE_TEMP_K = 293.15
 _DEFAULT_AIR_DENSITY = 1.2041
 # ContamW / ContamX symbolic names (zones, AHS, levels, elements) ≤ 15 chars.
 _CONTAM_NAME_MAX = 15
+# Outdoor-air fraction fo for simple AHS (Contam week-schedule on recirc path).
+_DEFAULT_OA_FRACTION = 0.2
 
 # Element type codes (CONTAM 3.4)
 _ELEM_ORIFICE = 23
@@ -174,25 +174,40 @@ def build_path_map(
 def _assemble_network(
     spatial_layout: dict[str, Any],
     air_flow_paths: dict[str, Any],
+    *,
+    hobbyist: bool = False,
+    overrides: dict[str, Any] | None = None,
+    pack: dict[str, Any] | None = None,
+    filter_efficiency: float | None = None,
 ) -> dict[str, Any]:
     """Shared builder for ContamW 3.4 zones, elements, paths, and AHS."""
     zones = list(spatial_layout.get("zones", []))
     hvac_zones = list(air_flow_paths.get("hvac_zones", []))
     cross_links = list(air_flow_paths.get("cross_zone_links", []))
     adjacency = list(air_flow_paths.get("adjacency", []))
+    overrides = dict(overrides or {})
+    pack = pack or (_hobby.load_hobbyist_pack() if hobbyist else {})
 
     levels = _build_levels(zones)
     level_index = {lvl["name"]: i + 1 for i, lvl in enumerate(levels)}
     deck_order = {lvl["name"]: i for i, lvl in enumerate(levels)}
+    deck_dims = spatial_layout.get("deck_dimensions") or {}
+    beam_m = float(deck_dims.get("beam_m", 15.0) or 15.0)
 
     used_contam_names: set[str] = set()
     zone_name_to_nr: dict[str, int] = {}
+    zone_by_id: dict[str, dict[str, Any]] = {z["id"]: z for z in zones}
     zone_records: list[dict[str, Any]] = []
     for i, zone in enumerate(zones, start=1):
         name = _unique_contam_name(zone["id"], used_contam_names)
         geo = _fill_zone_geometry(zone, deck_order)
         deck = str(zone.get("deck", "main"))
         display = zone.get("display", {}) or {}
+        temp = (
+            _hobby.deck_temp_k(deck, overrides, _DEFAULT_ZONE_TEMP_K)
+            if hobbyist
+            else _DEFAULT_ZONE_TEMP_K
+        )
         zone_name_to_nr[zone["id"]] = i
         zone_name_to_nr[name] = i
         zone_records.append({
@@ -204,7 +219,7 @@ def _assemble_network(
             "area": geo["floor_area_m2"],
             "height": geo["ceiling_height_m"],
             "elevation": geo["elevation_m"],
-            "temp": _DEFAULT_ZONE_TEMP_K,
+            "temp": temp,
             "name": name,
             "orig_id": zone["id"],
             "type": zone.get("type", "Free"),
@@ -283,7 +298,8 @@ def _assemble_network(
             "ahs_name": ahs_name,
         })
 
-    # Flow elements: 1 = doorway orifice, 2 = envelope leak, then fans
+    # Flow elements: 1 = Opening (legacy default), 2 = EnvLeak, then typed
+    # orifices (hobbyist) and fans.
     elements: list[dict[str, Any]] = [
         {
             "nr": 1,
@@ -300,11 +316,34 @@ def _assemble_network(
             "params": _ENVELOPE_ORIFICE_PARAMS,
         },
     ]
+    orifice_elem_by_key: dict[str, int] = {"envelope": 2}
+    if hobbyist:
+        env_area = float(
+            pack["orifice_catalog"]["envelope_leak"].get("area_m2", 0.0001)
+        )
+        elements[1]["params"] = _hobby.orifice_params_for_area(env_area)
+        name_to_elem: dict[str, int] = {}
+        for key, spec in pack["orifice_catalog"]["types"].items():
+            el_label = str(spec.get("name", key))[:15]
+            if el_label in name_to_elem:
+                orifice_elem_by_key[key] = name_to_elem[el_label]
+                continue
+            nr = len(elements) + 1
+            area = float(spec.get("area_m2", 0.01))
+            elements.append({
+                "nr": nr,
+                "type": _ELEM_ORIFICE,
+                "symbol": "plr_orfc",
+                "name": el_label,
+                "params": _hobby.orifice_params_for_area(area),
+            })
+            name_to_elem[el_label] = nr
+            orifice_elem_by_key[key] = nr
+
     fan_elem_by_m3s: dict[float, int] = {}
 
     def _fan_elem(flow_m3h: float) -> int:
         m3s = max(flow_m3h, 0.0) / 3600.0
-        # Quantize to avoid float-key explosion
         key = round(m3s, 12)
         if key in fan_elem_by_m3s:
             return fan_elem_by_m3s[key]
@@ -319,6 +358,116 @@ def _assemble_network(
         })
         fan_elem_by_m3s[key] = nr
         return nr
+
+    # Hobbyist schedules / wind / filters (indices are 1-based Contam refs)
+    sched_oa_week = 0
+    sched_duty_week = 0
+    wind_nr = 0
+    filter_nr_by_preset: dict[str, int] = {}
+    filter_elements: list[dict[str, Any]] = []
+    filters: list[dict[str, Any]] = []
+    day_schedules: list[dict[str, Any]] = []
+    week_schedules: list[dict[str, Any]] = []
+    wind_profiles: list[dict[str, Any]] = []
+    control_nodes: list[dict[str, Any]] = []
+    annotations: list[dict[str, Any]] = []
+    duct_elements: list[dict[str, Any]] = []
+    duct_junctions: list[dict[str, Any]] = []
+    duct_segments: list[dict[str, Any]] = []
+    species: list[dict[str, Any]] = []
+    contaminant_indices: list[int] = [1]
+
+    if hobbyist:
+        # Schedules
+        day_by_id: dict[str, int] = {}
+        for i, ds in enumerate(pack["schedule_templates"]["day_schedules"], 1):
+            day_schedules.append(ds)
+            day_by_id[ds["id"]] = i
+        for i, ws in enumerate(pack["schedule_templates"]["week_schedules"], 1):
+            week_schedules.append(ws)
+            if ws["id"] == pack["schedule_templates"]["defaults"]["oa_week"]:
+                sched_oa_week = i
+            if ws["id"] == pack["schedule_templates"]["defaults"]["duty_week"]:
+                sched_duty_week = i
+        if not overrides.get("night_setback", True):
+            # Drop night-setback week/day if disabled (keep OA + duty)
+            week_schedules = [
+                w for w in week_schedules if w["id"] != "NightSetbackW"
+            ]
+            day_schedules = [
+                d for d in day_schedules if d["id"] != "NightSetback"
+            ]
+            day_by_id = {d["id"]: i for i, d in enumerate(day_schedules, 1)}
+            week_schedules = list(week_schedules)
+            for i, ws in enumerate(week_schedules, 1):
+                if ws["id"] == pack["schedule_templates"]["defaults"]["oa_week"]:
+                    sched_oa_week = i
+                if ws["id"] == pack["schedule_templates"]["defaults"]["duty_week"]:
+                    sched_duty_week = i
+
+        # Wind
+        wkey = _hobby.resolve_wind_profile_key(pack, overrides)
+        wind_profiles.append(pack["wind_profiles"]["profiles"][wkey])
+        wind_nr = 1
+
+        # Species
+        species = list(pack["species_pack"]["species"])
+        contaminant_indices = list(range(1, len(species) + 1))
+
+        # Light controls (portfolio spice — not wired into AHS paths)
+        control_nodes = [
+            {
+                "nr": 1,
+                "typ": "set",
+                "seq": 1,
+                "f": 0,
+                "n": 0,
+                "c1": 0,
+                "c2": 0,
+                "name": "OAConst",
+                "desc": "Constant OA fraction report node",
+                "params": "0.2",
+            },
+            {
+                "nr": 2,
+                "typ": "pas",
+                "seq": 2,
+                "f": 0,
+                "n": 1,
+                "c1": 1,
+                "c2": 0,
+                "name": "OAPass",
+                "desc": "Passthrough of OA constant",
+                "params": "",
+            },
+            {
+                "nr": 3,
+                "typ": "set",
+                "seq": 3,
+                "f": 0,
+                "n": 0,
+                "c1": 0,
+                "c2": 0,
+                "name": "DutyConst",
+                "desc": "Constant AHU duty report node",
+                "params": "1.0",
+            },
+        ]
+
+        # Annotations from overrides + deck labels
+        ann_map = dict(overrides.get("zone_annotations") or {})
+        for zid, note in ann_map.items():
+            annotations.append({"color": -1, "note": str(note)[:60]})
+        for lvl in levels:
+            annotations.append({
+                "color": 2,
+                "note": f"Deck {lvl['name']}"[:60],
+            })
+        for info in hvac_info:
+            annotations.append({
+                "color": 2,
+                "note": f"HVAC {info['id']}"[:60],
+            })
 
     paths: list[dict[str, Any]] = []
     path_map: list[dict[str, Any]] = []
@@ -338,6 +487,12 @@ def _assemble_network(
         flag: int = 0,
         fahs: float = 0.0,
         wazm: float = -1.0,
+        filter_nr: int = 0,
+        wind_p: int = 0,
+        sched_nr: int = 0,
+        x: float = 0.0,
+        y: float = 0.0,
+        wPmod: float = 0.0,
     ) -> int:
         pnr = len(paths) + 1
         paths.append({
@@ -350,6 +505,12 @@ def _assemble_network(
             "level": level,
             "fahs": fahs,
             "wazm": wazm,
+            "filter_nr": filter_nr,
+            "wind_nr": wind_p,
+            "sched_nr": sched_nr,
+            "x": x,
+            "y": y,
+            "wPmod": wPmod,
         })
         path_map.append({
             "path_nr": pnr,
@@ -362,11 +523,19 @@ def _assemble_network(
         return pnr
 
     # 1) Envelope leakage to ambient (pressure-dependent reference).
-    # Contam requires every zone be tied to ambient/known pressure via a
-    # path with non-zero dF/dP; fan_cvf + AHS Fahs alone are singular.
     for z in zone_records:
         if z["is_phantom"]:
             continue
+        wazm = -1.0
+        w_nr = 0
+        wmod = 0.0
+        if hobbyist and wind_nr:
+            src = zone_by_id.get(z["orig_id"], {})
+            wazm = _hobby.wall_azimuth_deg(
+                z["orig_id"], src, overrides, beam_m=beam_m,
+            )
+            w_nr = wind_nr
+            wmod = 0.8
         _add_path(
             z["nr"], -1, 2,
             from_name=z["orig_id"], to_name="ambient",
@@ -375,31 +544,45 @@ def _assemble_network(
             crusher_transfer=False,
             flag=0,
             level=int(z["level"]),
+            wazm=wazm,
+            wind_p=w_nr,
+            wPmod=wmod,
+            x=float(z["x"]),
+            y=float(z["y"]),
         )
 
-    # 2) Adjacency openings (orifice)
+    # 2) Adjacency openings (typed orifices when hobbyist)
     for adj in adjacency:
         a, b = adj["from"], adj["to"]
         if a not in zone_name_to_nr or b not in zone_name_to_nr:
             continue
+        adj_type = str(adj.get("type", "passageway"))
+        elem = 1
+        if hobbyist:
+            okey = _hobby.resolve_orifice_type(adj_type, pack, overrides)
+            elem = orifice_elem_by_key.get(okey, 1)
+        za = zone_records[zone_name_to_nr[a] - 1]
+        zb = zone_records[zone_name_to_nr[b] - 1]
         _add_path(
-            zone_name_to_nr[a], zone_name_to_nr[b], 1,
+            zone_name_to_nr[a], zone_name_to_nr[b], elem,
             from_name=a, to_name=b,
-            kind=adj.get("type", "passageway"),
+            kind=adj_type,
             is_hvac_ducted=False,
             crusher_transfer=True,
             flag=0,
+            x=0.5 * (float(za["x"]) + float(zb["x"])),
+            y=0.5 * (float(za["y"]) + float(zb["y"])),
         )
 
     # 3) Cross-zone links as fans between representative rooms
     hvac_by_id = {h["id"]: h for h in hvac_info}
 
     def _resolve_endpoint(token: str) -> str | None:
-        if token in zone_name_to_nr and token in {z["orig_id"] for z in zone_records if not z["is_phantom"]}:
+        real_ids = {z["orig_id"] for z in zone_records if not z["is_phantom"]}
+        if token in zone_name_to_nr and token in real_ids:
             return token
         if token in hvac_by_id:
             return hvac_by_id[token]["rooms"][0]
-        # Might already be a room id
         if token in zone_name_to_nr:
             return token
         return None
@@ -420,11 +603,35 @@ def _assemble_network(
             flag=0,
         )
 
+    def _ensure_filter(preset: str) -> int:
+        if preset in filter_nr_by_preset:
+            return filter_nr_by_preset[preset]
+        presets = pack["filter_presets"]["presets"]
+        spec = presets[preset]
+        fe_nr = len(filter_elements) + 1
+        el_name = _unique_contam_name(str(spec["name"]), used_contam_names)
+        filter_elements.append({
+            "nr": fe_nr,
+            "name": el_name,
+            "description": str(spec.get("description", "")),
+            "efficiency": float(spec["efficiency"]),
+            "area": float(pack["filter_presets"].get("face_area_m2", 1.0)),
+            "depth": float(pack["filter_presets"].get("depth_m", 0.05)),
+            "dens": float(pack["filter_presets"].get("density_kg_m3", 100.0)),
+        })
+        f_nr = len(filters) + 1
+        filters.append({"nr": f_nr, "fe": fe_nr, "nsub": 1})
+        filter_nr_by_preset[preset] = f_nr
+        return f_nr
+
     # 4) Per-AHS: Contam simple-AHS semantics (match authentic ContamW 3.4)
-    # System paths (recirc / OA / exhaust): a#=0, e#=0
-    # Zone terminals (supply / return): a#=AHS, e#=0, Fahs=design kg/s
-    # AHS record pr/ps/px = recirc / OA / exhaust path numbers
     ahs_records: list[dict[str, Any]] = []
+    default_oa = float(
+        pack.get("schedule_templates", {})
+        .get("defaults", {})
+        .get("oa_fraction", _DEFAULT_OA_FRACTION)
+        if hobbyist else _DEFAULT_OA_FRACTION
+    )
     for ahs_i, info in enumerate(hvac_info, start=1):
         rooms = info["rooms"]
         ach = info["ach"]
@@ -433,60 +640,72 @@ def _assemble_network(
             for r in rooms
         )
         total_flow = ach * total_vol  # m³/h
-        # Split: 20% OA, 80% recirculation of total ACH flow (bookkeeping;
-        # Contam balances system paths from terminal Fahs + OA schedule).
-        oa_flow = 0.2 * total_flow
-        recirc_flow = 0.8 * total_flow
+        oa_frac = (
+            _hobby.oa_fraction_for_hvac(info["id"], overrides, default_oa)
+            if hobbyist else 0.2
+        )
+        oa_flow = oa_frac * total_flow
+        recirc_flow = (1.0 - oa_frac) * total_flow
         per_room_supply = total_flow / max(len(rooms), 1)
         per_room_fahs = _flow_m3h_to_fahs_kg_s(per_room_supply)
         recirc_fahs = _flow_m3h_to_fahs_kg_s(recirc_flow)
 
-        # OA ambient -> supply (from_nr = -1)
+        filt_nr = 0
+        if hobbyist:
+            preset = _hobby.resolve_filter_preset(
+                pack, overrides,
+                hvac_id=info["id"],
+                filter_efficiency=filter_efficiency,
+            )
+            filt_nr = _ensure_filter(preset)
+
         oa_path = _add_path(
             -1, info["sup_nr"], 0,
             from_name="ambient", to_name=info["sup_name"],
             kind="ahs_oa", is_hvac_ducted=True, crusher_transfer=False,
             ahs_nr=0, flag=_PATH_AHS_OA, fahs=0.0, wazm=-1.0,
         )
-        # Exhaust return -> ambient
         ex_path = _add_path(
             info["ret_nr"], -1, 0,
             from_name=info["ret_name"], to_name="ambient",
             kind="ahs_exhaust", is_hvac_ducted=True, crusher_transfer=False,
             ahs_nr=0, flag=_PATH_AHS_EXHAUST, fahs=0.0, wazm=-1.0,
         )
-        # Recirc return -> supply
         recirc_path = _add_path(
             info["ret_nr"], info["sup_nr"], 0,
             from_name=info["ret_name"], to_name=info["sup_name"],
             kind="ahs_recirc", is_hvac_ducted=True, crusher_transfer=False,
             ahs_nr=0, flag=_PATH_AHS_RECIRC, fahs=recirc_fahs, wazm=-1.0,
+            filter_nr=filt_nr,
+            sched_nr=sched_oa_week if hobbyist else 0,
         )
 
         for room in rooms:
             rnr = zone_name_to_nr[room]
-            # Supply: Sup -> room
+            zrec = next(z for z in zone_records if z["orig_id"] == room)
             _add_path(
                 info["sup_nr"], rnr, 0,
                 from_name=info["sup_name"], to_name=room,
                 kind="ahs_supply", is_hvac_ducted=True, crusher_transfer=False,
                 ahs_nr=ahs_i, flag=_PATH_AHS_TERMINAL,
                 fahs=per_room_fahs, wazm=0.0,
+                sched_nr=sched_duty_week if hobbyist else 0,
+                x=float(zrec["x"]), y=float(zrec["y"]),
             )
-            # Return: room -> Ret
             _add_path(
                 rnr, info["ret_nr"], 0,
                 from_name=room, to_name=info["ret_name"],
                 kind="ahs_return", is_hvac_ducted=True, crusher_transfer=False,
                 ahs_nr=ahs_i, flag=_PATH_AHS_TERMINAL,
                 fahs=per_room_fahs, wazm=0.0,
+                sched_nr=sched_duty_week if hobbyist else 0,
+                x=float(zrec["x"]), y=float(zrec["y"]),
             )
 
         ahs_records.append({
             "nr": ahs_i,
             "ret_nr": info["ret_nr"],
             "sup_nr": info["sup_nr"],
-            # ContamW header: pr# = recirculation, ps# = OA, px# = exhaust
             "pr": recirc_path,
             "ps": oa_path,
             "px": ex_path,
@@ -496,7 +715,76 @@ def _assemble_network(
             "ach": ach,
             "total_vol": total_vol,
             "oa_flow_m3h": oa_flow,
+            "filter_nr": filt_nr,
         })
+
+    # 5) Duct leakage spines (hobbyist): passive Darcy trunks between rooms
+    if hobbyist:
+        duct_cfg = pack["duct_defaults"]
+        min_rooms = int(duct_cfg.get("min_rooms_for_trunk", 2))
+        allow = overrides.get("duct_hvac_ids")
+        allow_set = set(allow) if isinstance(allow, list) else None
+        hdia = float(duct_cfg.get("hdia_m", 0.3))
+        rough = float(duct_cfg.get("roughness_m", 0.00015))
+        lam = float(duct_cfg.get("laminar_loss_per_m", 0.001))
+        seg_len = float(duct_cfg.get("segment_length_m", 5.0))
+        qr = float(duct_cfg.get("leakage_Ls_per_m2", 1.0))
+        pr = float(duct_cfg.get("leakage_Pr_Pa", 250.0))
+        ct = float(duct_cfg.get("terminal_loss_Ct", 0.5))
+        perim = math.pi * hdia
+        area = math.pi * (hdia / 2.0) ** 2
+
+        duct_elements.append({
+            "nr": 1,
+            "icon": 21,
+            "dtype": 23,
+            "symbol": "dct_dwc",
+            "name": str(duct_cfg.get("element_name", "TrunkDWC"))[:15],
+            "desc": "Hobbyist Darcy-Colebrook trunk",
+            "rough": rough,
+            "lam": lam,
+            "hdia": hdia,
+            "perim": perim,
+            "area": area,
+            "qr": qr,
+            "pr": pr,
+        })
+
+        for info in hvac_info:
+            rooms = info["rooms"]
+            if len(rooms) < min_rooms:
+                continue
+            if allow_set is not None and info["id"] not in allow_set:
+                continue
+            j_nrs: list[int] = []
+            for room in rooms:
+                z = next(zr for zr in zone_records if zr["orig_id"] == room)
+                jnr = len(duct_junctions) + 1
+                duct_junctions.append({
+                    "nr": jnr,
+                    "flags": 0,
+                    "jtype": 1,  # terminal
+                    "pzn": z["nr"],
+                    "level": int(z["level"]),
+                    "x": float(z["x"]),
+                    "y": float(z["y"]),
+                    "rel_ht": 0.0,
+                    "temp": float(z["temp"]),
+                    "Ad": area,
+                    "Af": area,
+                    "Ct": ct,
+                })
+                j_nrs.append(jnr)
+            for a_j, b_j in zip(j_nrs, j_nrs[1:]):
+                snr = len(duct_segments) + 1
+                duct_segments.append({
+                    "nr": snr,
+                    "flags": 0,
+                    "pjn": a_j,
+                    "pjm": b_j,
+                    "pe": 1,
+                    "length": seg_len,
+                })
 
     return {
         "levels": levels,
@@ -509,15 +797,45 @@ def _assemble_network(
         "platform": spatial_layout.get("platform", "crusher_platform"),
         "zone_name_to_nr": zone_name_to_nr,
         "used_contam_names": used_contam_names,
+        "hobbyist": hobbyist,
+        "day_schedules": day_schedules,
+        "week_schedules": week_schedules,
+        "wind_profiles": wind_profiles,
+        "filter_elements": filter_elements,
+        "filters": filters,
+        "control_nodes": control_nodes,
+        "annotations": annotations,
+        "duct_elements": duct_elements,
+        "duct_junctions": duct_junctions,
+        "duct_segments": duct_segments,
+        "species": species,
+        "contaminant_indices": contaminant_indices,
+        "day_by_id": (
+            {d["id"]: i for i, d in enumerate(day_schedules, 1)}
+            if hobbyist else {}
+        ),
     }
 
 
 def export_contamw34(
     spatial_layout: dict[str, Any],
     air_flow_paths: dict[str, Any],
+    *,
+    hobbyist: bool = False,
+    overrides: dict[str, Any] | None = None,
+    pack_dir: str | None = None,
+    filter_efficiency: float | None = None,
 ) -> tuple[str, list[dict[str, Any]]]:
     """Serialize platform JSON to ContamW 3.4 ``.prj`` text + path_map."""
-    net = _assemble_network(spatial_layout, air_flow_paths)
+    pack = _hobby.load_hobbyist_pack(pack_dir) if hobbyist else None
+    net = _assemble_network(
+        spatial_layout,
+        air_flow_paths,
+        hobbyist=hobbyist,
+        overrides=overrides,
+        pack=pack,
+        filter_efficiency=filter_efficiency,
+    )
     platform = _sanitize_name(net["platform"])[:_CONTAM_NAME_MAX]
     levels = net["levels"]
     zone_records = net["zone_records"]
@@ -528,7 +846,6 @@ def export_contamw34(
     used_names: set[str] = set(net.get("used_contam_names") or [])
 
     n_zones = len(zone_records)
-    # SketchPad grid sized generously for icon placement
     rows = max(40, n_zones + 20)
     cols = max(40, n_zones + 20)
 
@@ -557,7 +874,8 @@ def export_contamw34(
     lines.append("null ! no discrete values file")
     lines.append("null ! no WPC file")
     lines.append("null ! no EWC file")
-    lines.append(f"Crusher platform {platform}")
+    mode = "hobbyist" if hobbyist else "skeleton"
+    lines.append(f"Crusher platform {platform} ({mode})")
     lines.append("!  Xref    Yref    Zref   angle u")
     lines.append("   0.000   0.000   0.000   0.00 0")
     lines.append("! epsP epsS  tShift  dStart dEnd wp mf wpctrig")
@@ -586,7 +904,9 @@ def export_contamw34(
     lines.append("!cvode    rcnvg     acnvg    dtmax")
     lines.append("   0     1.00e-06  1.00e-13   0.00")
     lines.append("!tsdens relax tsmaxi cnvgSS densZP stackD dodMdt")
-    lines.append("   0    0.75    20     1      0      0      0")
+    # Enable stack effect when hobbyist deck temps differ
+    stack = 1 if hobbyist else 0
+    lines.append(f"   0    0.75    20     1      0      {stack}      0")
     lines.append("!date_st time_st  date_0 time_0   date_1 time_1    t_step   t_list   t_scrn")
     lines.append(
         "  Jan01 00:00:00  Jan01 00:00:00  Jan01 01:00:00  00:01:00 00:01:00 01:00:00"
@@ -612,44 +932,126 @@ def export_contamw34(
     lines.append("   0  1.00e-02    0    0 1000     1    1      1  1.00e-03  1.00e-03")
     lines.append(_SENTINEL)
 
-    # Contaminants / species (inert tracer — Crusher owns pathogen mass)
-    lines.append("1 ! contaminants:")
-    lines.append("   1")
-    lines.append("1 ! species:")
+    # Contaminants / species
+    species = net.get("species") or []
+    cidxs = net.get("contaminant_indices") or [1]
+    if not species:
+        species = [{
+            "name": "Air", "sflag": 1, "ntflag": 0, "molwt": 28.96,
+            "mdiam": 0.0, "edens": 0.0, "decay": 0.0, "Dm": 2.0e-5,
+            "CCdef": 0.0, "Cp": 1000.0, "Kuv": 0.0, "description": "default",
+        }]
+        cidxs = [1]
+    lines.append(f"{len(cidxs)} ! contaminants:")
+    lines.append("   " + " ".join(str(i) for i in cidxs))
+    lines.append(f"{len(species)} ! species:")
     lines.append(
         "! # s t   molwt    mdiam       edens       decay         Dm         "
         "CCdef        Cp          Kuv     u[5]      name"
     )
-    lines.append(
-        "  1 1 0  28.9600  0.0000e+00  0.0000e+00  0.0000e+00  2.0000e-05  "
-        "0.0000e+00  1.0000e+03  0.0000e+00 0 0 0 0 0 Air"
-    )
-    lines.append("default")
+    for i, sp in enumerate(species, start=1):
+        lines.append(
+            f"  {i} {int(sp['sflag'])} {int(sp['ntflag'])}  "
+            f"{float(sp['molwt']):.4f}  {float(sp['mdiam']):.4e}  "
+            f"{float(sp['edens']):.4e}  {float(sp['decay']):.4e}  "
+            f"{float(sp['Dm']):.4e}  {float(sp['CCdef']):.4e}  "
+            f"{float(sp['Cp']):.4e}  {float(sp['Kuv']):.4e} "
+            f"0 0 0 0 0 {sp['name']}"
+        )
+        lines.append(str(sp.get("description", "")))
     lines.append(_SENTINEL)
 
-    # Levels (+ empty icon data)
+    # Levels (+ optional zone icons for SketchPad)
+    real_zones = [z for z in zone_records if not z["is_phantom"]]
+    icons_by_level: dict[int, list[tuple[int, int, int, int]]] = {
+        i + 1: [] for i in range(len(levels))
+    }
+    if hobbyist:
+        for z in real_zones:
+            # icon 1 = zone; col/row from display coords
+            col = max(1, min(cols - 1, int(float(z["x"])) + 1))
+            row = max(1, min(rows - 1, int(float(z["y"])) + 1))
+            icons_by_level[int(z["level"])].append((1, col, row, int(z["nr"])))
+
     lines.append(f"{len(levels)} ! levels plus icon data:")
     lines.append("! #  refHt   delHt  ni  u  name")
     for i, lvl in enumerate(levels, start=1):
         lvl_name = _unique_contam_name(lvl["name"], used_names)
+        icons = icons_by_level.get(i, [])
         lines.append(
-            f"  {i} {lvl['refht']:.3f} {lvl['delht']:.3f} 0 0 0 {lvl_name}"
+            f"  {i} {lvl['refht']:.3f} {lvl['delht']:.3f} {len(icons)} 0 0 {lvl_name}"
         )
+        if icons:
+            lines.append("!icn col row  #")
+            for icn, col, row, nr in icons:
+                lines.append(f" {icn:3d} {col:3d} {row:3d} {nr:3d}")
     lines.append(_SENTINEL)
 
-    # Empty / minimal schedule stubs
-    lines.append("0 ! day-schedules:")
+    # Day / week schedules
+    day_schedules = net.get("day_schedules") or []
+    week_schedules = net.get("week_schedules") or []
+    day_by_id = net.get("day_by_id") or {}
+    lines.append(f"{len(day_schedules)} ! day-schedules:")
+    if day_schedules:
+        lines.append("! # npts shap utyp ucnv name")
+        for i, ds in enumerate(day_schedules, start=1):
+            pts = ds.get("points") or []
+            dname = _unique_contam_name(str(ds.get("name", f"D{i}")), used_names)
+            lines.append(f"  {i}    {len(pts)}    0    1    0 {dname}")
+            lines.append(str(ds.get("description", "")))
+            for t, v in pts:
+                lines.append(f" {t} {v}")
     lines.append(_SENTINEL)
-    lines.append("0 ! week-schedules:")
+
+    lines.append(f"{len(week_schedules)} ! week-schedules:")
+    if week_schedules:
+        lines.append("! # utyp ucnv name")
+        for i, ws in enumerate(week_schedules, start=1):
+            wname = _unique_contam_name(str(ws.get("name", f"W{i}")), used_names)
+            lines.append(f"  {i}    1    0 {wname}")
+            lines.append(str(ws.get("description", "")))
+            day_nr = int(day_by_id.get(ws.get("day_id"), 1))
+            lines.append(" " + " ".join(str(day_nr) for _ in range(12)))
     lines.append(_SENTINEL)
-    lines.append("0 ! wind pressure profiles:")
+
+    # Wind profiles
+    wind_profiles = net.get("wind_profiles") or []
+    lines.append(f"{len(wind_profiles)} ! wind pressure profiles:")
+    for i, wp in enumerate(wind_profiles, start=1):
+        pts = wp.get("points") or []
+        wname = _unique_contam_name(str(wp.get("name", f"WPF{i}")), used_names)
+        lines.append(f"{i} {len(pts)} {int(wp.get('type', 2))} {wname}")
+        lines.append(str(wp.get("description", "")))
+        for azm, coef in pts:
+            lines.append(f" {float(azm):6.1f}  {float(coef):6.2f}")
     lines.append(_SENTINEL)
+
     lines.append("0 ! kinetic reactions:")
     lines.append(_SENTINEL)
-    lines.append("0 ! filter elements:")
+
+    # Filters
+    filter_elements = net.get("filter_elements") or []
+    filters = net.get("filters") or []
+    lines.append(f"{len(filter_elements)} ! filter elements:")
+    for fe in filter_elements:
+        lines.append(
+            f"{fe['nr']} cef {fe['area']:.4g} {fe['depth']:.4g} "
+            f"{fe['dens']:.4g} 3 3 {fe['name']}"
+        )
+        lines.append(str(fe.get("description", "")))
+        # Efficiency applied to each contaminant species
+        n_sp = max(len(species), 1)
+        lines.append(f"{n_sp}")
+        for sp in species:
+            lines.append(f"{sp['name']} {float(fe['efficiency']):.6g}")
     lines.append(_SENTINEL)
-    lines.append("0 ! filters:")
+
+    lines.append(f"{len(filters)} ! filters:")
+    for flt in filters:
+        lines.append(f"{flt['nr']} {flt['fe']} {flt['nsub']}")
+        lines.append("0 0")
     lines.append(_SENTINEL)
+
     lines.append("0 ! source/sink elements:")
     lines.append(_SENTINEL)
 
@@ -662,14 +1064,40 @@ def export_contamw34(
         lines.append(f" {el['params']}")
     lines.append(_SENTINEL)
 
-    lines.append("0 ! duct elements:")
-    lines.append(_SENTINEL)
-    lines.append("0 ! control super elements:")
-    lines.append(_SENTINEL)
-    lines.append("0 ! control nodes:")
+    # Duct elements (nr icon dtype_symbol name)
+    duct_elements = net.get("duct_elements") or []
+    lines.append(f"{len(duct_elements)} ! duct elements:")
+    for de in duct_elements:
+        de_name = _unique_contam_name(de["name"], used_names)
+        lines.append(f"{de['nr']} {de['icon']} {de['symbol']} {de_name}")
+        lines.append(str(de.get("desc", "")))
+        lines.append(f" {de['rough']} {de['lam']} 3")
+        lines.append(
+            f" {de['hdia']} {de['perim']} {de['area']} 0 0 0 {de['qr']} {de['pr']}"
+        )
+        lines.append(" 0 3 3 3 3 3 4 0")
     lines.append(_SENTINEL)
 
-    # Simple AHS — pr/ps/px are system paths (recirc / OA / exhaust)
+    lines.append("0 ! control super elements:")
+    lines.append(_SENTINEL)
+
+    control_nodes = net.get("control_nodes") or []
+    lines.append(f"{len(control_nodes)} ! control nodes:")
+    if control_nodes:
+        lines.append("! # typ seq f n  c1  c2 name")
+        for cn in control_nodes:
+            cname = _unique_contam_name(str(cn["name"]), used_names)
+            lines.append(
+                f"  {cn['nr']} {cn['typ']}  {cn['seq']} {cn['f']} {cn['n']}   "
+                f"{cn['c1']}   {cn['c2']} {cname}"
+            )
+            lines.append(str(cn.get("desc", "")))
+            params = str(cn.get("params", "")).strip()
+            if params:
+                lines.append(f" {params}")
+    lines.append(_SENTINEL)
+
+    # Simple AHS
     lines.append(f"{len(ahs_records)} ! simple AHS:")
     lines.append("! # zr# zs# pr# ps# px# name")
     for ahs in ahs_records:
@@ -694,11 +1122,14 @@ def export_contamw34(
         )
     lines.append(_SENTINEL)
 
-    # Initial concentrations
+    # Initial concentrations (one column per contaminant)
+    n_ctm = len(cidxs)
     lines.append(f"{len(zone_records)} ! initial zone concentrations:")
-    lines.append("! Z#       Air")
+    header_names = " ".join(sp["name"] for sp in species[:n_ctm])
+    lines.append(f"! Z#       {header_names}")
+    zeros = "  ".join("0.000e+00" for _ in range(n_ctm))
     for z in zone_records:
-        lines.append(f"   {z['nr']}  0.000e+00")
+        lines.append(f"   {z['nr']}  {zeros}")
     lines.append(_SENTINEL)
 
     # Flow paths
@@ -713,38 +1144,153 @@ def export_contamw34(
         wazm_s = f"{wazm:g}" if wazm != -1.0 else "-1"
         lines.append(
             f"   {p['nr']}    {p['flag']}  {p['from_nr']}   {p['to_nr']}   "
-            f"{p['elem_nr']}   0   0   {p['ahs_nr']}   0   0   {p['level']}   "
-            f"0.000   0.000   0.000 1 0 0 {wazm_s} {p['fahs']:.8g} 0 0   0  1 "
-            f"-1 0 0 0 0 0 0"
+            f"{p['elem_nr']}   {int(p.get('filter_nr', 0))}   "
+            f"{int(p.get('wind_nr', 0))}   {p['ahs_nr']}   "
+            f"{int(p.get('sched_nr', 0))}   0   {p['level']}   "
+            f"{float(p.get('x', 0.0)):.3f}   {float(p.get('y', 0.0)):.3f}   "
+            f"0.000 1 0 {float(p.get('wPmod', 0.0)):g} {wazm_s} "
+            f"{p['fahs']:.8g} 0 0   0  1 -1 0 0 0 0 0 0"
         )
     lines.append(_SENTINEL)
 
-    lines.append("0 ! duct junctions:")
+    # Duct junctions / segments
+    duct_junctions = net.get("duct_junctions") or []
+    duct_segments = net.get("duct_segments") or []
+    lines.append(f"{len(duct_junctions)} ! duct junctions:")
+    if duct_junctions:
+        lines.append(
+            "! J#  f  t  z#  d#  k#  s#  c#  l#    X       Y      relHt  "
+            "T0  P0  icn clr u[4] ..."
+        )
+        for j in duct_junctions:
+            lines.append(
+                f"  {j['nr']}  {j['flags']}  {j['jtype']}  {j['pzn']}  0  "
+                f"0  0  0  {j['level']}  {j['x']:.3f}  {j['y']:.3f}  "
+                f"{j['rel_ht']:.3f}  {j['temp']:.2f} 0  21 -1 0 0 2 0 0 none "
+                f"T: 0 0 0 0 -1 0 {j['Ad']:.6g} {j['Af']:.6g} 0 "
+                f"{j['Ct']:.4g} 0 0 3 3 1 1"
+            )
     lines.append(_SENTINEL)
-    lines.append("0 ! initial junction concentrations:")
+
+    n_jct = len(duct_junctions)
+    lines.append(f"{n_jct} ! initial junction concentrations:")
+    if n_jct:
+        for j in duct_junctions:
+            lines.append(f"   {j['nr']}  {zeros}")
     lines.append(_SENTINEL)
-    lines.append("0 ! duct segments:")
+
+    lines.append(f"{len(duct_segments)} ! duct segments:")
+    if duct_segments:
+        lines.append("! D#  f  n#  m#  e#  f#  s#  c# dir length ...")
+        for seg in duct_segments:
+            lines.append(
+                f"  {seg['nr']}  {seg['flags']}  {seg['pjn']}  {seg['pjm']}  "
+                f"{seg['pe']}  0  0  0  1  {seg['length']:.4g} 0 0 0 -1 3 3 0 none"
+            )
     lines.append(_SENTINEL)
+
     lines.append("0 ! source/sinks:")
     lines.append(_SENTINEL)
     lines.append("0 ! occupancy schedules:")
     lines.append(_SENTINEL)
     lines.append("0 ! exposures:")
     lines.append(_SENTINEL)
-    lines.append("0 ! annotations:")
+
+    annotations = net.get("annotations") or []
+    lines.append(f"{len(annotations)} ! annotations:")
+    for i, ann in enumerate(annotations, start=1):
+        lines.append(f"{i} {int(ann.get('color', -1))} {ann['note']}")
     lines.append(_SENTINEL)
+
     lines.append("* end project file.")
     lines.append("")
-
-    # Crusher metadata comment trailer (ignored by ContamX if after end)
-    # Keep path_map in sidecar JSON; embed summary count here.
     lines.append(
         f"! CRUSHER_PATH_MAP_COUNT {len(path_map)} "
         f"zones={sum(1 for z in zone_records if not z['is_phantom'])} "
-        f"phantoms={sum(1 for z in zone_records if z['is_phantom'])}"
+        f"phantoms={sum(1 for z in zone_records if z['is_phantom'])} "
+        f"hobbyist={int(bool(hobbyist))}"
     )
 
     return "\n".join(lines) + "\n", path_map
+
+
+def path_map_from_prj(text: str) -> list[dict[str, Any]]:
+    """Build a path_map from ContamW 3.4 PRJ flow-path flags / AHS.
+
+    Duct segments are not Contam airflow paths and are omitted. Envelope
+    and AHS bookkeeping paths are included with ``crusher_transfer`` false.
+    """
+    sections = {name: body for name, body in _section_blocks(text)}
+    zone_nr_to_id: dict[int, str] = {}
+    phantom_nrs: set[int] = set()
+    for ln in sections.get("zones", []):
+        if ln.strip().startswith("!"):
+            continue
+        toks = ln.split()
+        if len(toks) < 11 or not toks[0].isdigit():
+            continue
+        nr = int(toks[0])
+        flag = int(toks[1])
+        name = toks[10]
+        zone_nr_to_id[nr] = name
+        if flag == _ZONE_AHS or "(Ret)" in name or "(Sup)" in name:
+            phantom_nrs.add(nr)
+
+    path_map: list[dict[str, Any]] = []
+    for ln in sections.get("flow paths", []):
+        if ln.strip().startswith("!"):
+            continue
+        toks = ln.split()
+        if len(toks) < 11 or not toks[0].isdigit():
+            continue
+        pnr = int(toks[0])
+        flag = int(toks[1])
+        from_nr = int(toks[2])
+        to_nr = int(toks[3])
+        ahs_nr = int(toks[7])
+
+        def _name(n: int) -> str:
+            if n < 0:
+                return "ambient"
+            return zone_nr_to_id.get(n, f"zone_{n}")
+
+        from_name = _name(from_nr)
+        to_name = _name(to_nr)
+        from_phantom = from_nr in phantom_nrs or from_nr < 0
+        to_phantom = to_nr in phantom_nrs or to_nr < 0
+
+        if flag == _PATH_AHS_OA:
+            kind = "ahs_oa"
+        elif flag == _PATH_AHS_EXHAUST:
+            kind = "ahs_exhaust"
+        elif flag == _PATH_AHS_RECIRC:
+            kind = "ahs_recirc"
+        elif flag == _PATH_AHS_TERMINAL:
+            kind = "ahs_supply" if from_phantom else "ahs_return"
+        elif from_nr < 0 or to_nr < 0:
+            kind = "envelope_leak"
+        else:
+            kind = "adjacency"
+
+        crusher = (
+            not from_phantom
+            and not to_phantom
+            and from_nr > 0
+            and to_nr > 0
+            and flag == 0
+        )
+        path_map.append({
+            "path_nr": pnr,
+            "from_zone": from_name,
+            "to_zone": to_name,
+            "is_hvac_ducted": ahs_nr > 0 or flag in (
+                _PATH_AHS_OA, _PATH_AHS_RECIRC, _PATH_AHS_EXHAUST,
+                _PATH_AHS_TERMINAL,
+            ),
+            "kind": kind,
+            "crusher_transfer": crusher,
+        })
+    return path_map
 
 
 def path_map_for_engine(
@@ -855,6 +1401,7 @@ def simplify_contamw34(
         "source/sinks",
         "occupancy schedules",
         "exposures",
+        "annotations",
     ):
         body = sections.get(dropped)
         if body is not None and any(ln.strip() for ln in body):

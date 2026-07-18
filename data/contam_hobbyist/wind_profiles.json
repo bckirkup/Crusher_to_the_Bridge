@@ -1,0 +1,46 @@
+{
+  "description": "Wind pressure Cp vs azimuth tables for Contam hobbyist envelope leaks.",
+  "default_profile": "ship_hull",
+  "profiles": {
+    "low_rise_wall": {
+      "name": "LowRiseWall",
+      "type": 2,
+      "description": "Swami&Chandra 1987: Walls of low rise buildings",
+      "points": [
+        [0.0, 0.6],
+        [30.0, 0.4],
+        [60.0, 0.1],
+        [90.0, -0.45],
+        [120.0, -0.5],
+        [150.0, -0.45],
+        [180.0, -0.35],
+        [210.0, -0.45],
+        [240.0, -0.5],
+        [270.0, -0.45],
+        [300.0, 0.1],
+        [330.0, 0.4],
+        [360.0, 0.6]
+      ]
+    },
+    "ship_hull": {
+      "name": "ShipHull",
+      "type": 2,
+      "description": "Fiction ship-hull Cp vs relative wind azimuth",
+      "points": [
+        [0.0, 0.7],
+        [30.0, 0.45],
+        [60.0, 0.05],
+        [90.0, -0.55],
+        [120.0, -0.6],
+        [150.0, -0.4],
+        [180.0, -0.25],
+        [210.0, -0.4],
+        [240.0, -0.6],
+        [270.0, -0.55],
+        [300.0, 0.05],
+        [330.0, 0.45],
+        [360.0, 0.7]
+      ]
+    }
+  }
+}

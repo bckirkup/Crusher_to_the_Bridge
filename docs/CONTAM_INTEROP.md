@@ -55,16 +55,18 @@ Fiction platforms ship a plausible ContamW 3.4 bundle under
 |------|------|
 | `platform.prj` | ContamW 3.4 project (ContamX-parseable grammar) |
 | `path_map.json` | ContamX path index → `(from_zone, to_zone, is_hvac_ducted)` |
+| `hobbyist_overrides.json` | Optional fiction-ship Contam portfolio overrides |
 
-Bundled for: `destroyer_baseline`, `mega_cruise_5000`,
+Bundled for: `destroyer_baseline` (hobbyist-plus), `mega_cruise_5000`,
 `enterprise_constitution_tos`, `enterprise_galaxy_tng`. Regenerate after
 JSON edits:
 
 ```bash
-python3 scripts/generate_platform_contam_prj.py
-python3 scripts/generate_platform_contam_prj.py --platform destroyer_baseline
+python3 scripts/generate_platform_contam_prj.py --hobbyist
+python3 scripts/generate_platform_contam_prj.py --hobbyist --platform destroyer_baseline
 ```
 
+Shared templates live in [`data/contam_hobbyist/`](../data/contam_hobbyist/).
 These PRJs are **fiction-plausible** (derived from our JSON platforms), not
 as-built ship models.
 
@@ -102,10 +104,11 @@ python3 tools/contam_prj_bridge.py --export \
     --output data/platforms/mega_cruise_5000/contam/platform.prj
 ```
 
-Writes ContamW **3.4** sections: header/sim params, species, levels,
-flow elements (`plr_orfc` + `fan_cvf`), simple AHS with Ret/Sup phantoms,
-zones, flow paths, empty stubs for schedules/ducts/controls, plus
-`path_map.json`.
+Writes ContamW **3.4** sections: header/sim params, species (Air+Virus in
+hobbyist mode), levels, typed `plr_orfc` / `fan_cvf` flow elements, simple
+AHS with Ret/Sup phantoms, zones, flow paths, plus hobbyist wind / filters /
+schedules / duct leakage spines / light controls / annotations when
+`--hobbyist` is set. Always writes `path_map.json`.
 
 ### Simplify (Path B: ContamW 3.4 → JSON)
 

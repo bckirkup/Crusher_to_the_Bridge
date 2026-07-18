@@ -1,0 +1,46 @@
+{
+  "description": "MERV/HEPA → Contam constant-efficiency (cef) filter element presets.",
+  "default_preset": "MERV13",
+  "face_area_m2": 1.0,
+  "depth_m": 0.05,
+  "density_kg_m3": 100.0,
+  "presets": {
+    "MERV8": {
+      "name": "MERV8",
+      "description": "MERV-8 particulate filter",
+      "efficiency": 0.35
+    },
+    "MERV11": {
+      "name": "MERV11",
+      "description": "MERV-11 particulate filter",
+      "efficiency": 0.65
+    },
+    "MERV13": {
+      "name": "MERV13",
+      "description": "MERV-13 particulate filter",
+      "efficiency": 0.85
+    },
+    "MERV14": {
+      "name": "MERV14",
+      "description": "Constitution-era MERV-14 fiction preset",
+      "efficiency": 0.90
+    },
+    "HEPA": {
+      "name": "HEPA",
+      "description": "HEPA / near-HEPA filter",
+      "efficiency": 0.999
+    },
+    "GalaxyACH": {
+      "name": "GalaxyACH",
+      "description": "Galaxy-class high-grade recirculation filter",
+      "efficiency": 0.95
+    }
+  },
+  "efficiency_to_preset": [
+    {"max_efficiency": 0.45, "preset": "MERV8"},
+    {"max_efficiency": 0.75, "preset": "MERV11"},
+    {"max_efficiency": 0.92, "preset": "MERV13"},
+    {"max_efficiency": 0.97, "preset": "GalaxyACH"},
+    {"max_efficiency": 1.01, "preset": "HEPA"}
+  ]
+}

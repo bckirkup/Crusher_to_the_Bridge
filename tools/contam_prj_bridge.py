@@ -54,6 +54,7 @@ from simulation_utils.paths import (  # noqa: E402
     resolve_repo_path,
     validated_open,
 )
+from tools.contam_hobbyist import load_hobbyist_overrides  # noqa: E402
 from tools.contamw34_prj import (  # noqa: E402
     PRJ_SIGNATURE_34,
     export_contamw34,
@@ -111,18 +112,38 @@ def _clean_float(value: float) -> float | int:
 def export_prj(
     spatial_layout: dict[str, Any],
     air_flow_paths: dict[str, Any],
+    *,
+    hobbyist: bool = False,
+    overrides: dict[str, Any] | None = None,
+    filter_efficiency: float | None = None,
 ) -> str:
     """Serialize platform JSON to ContamW 3.4 ``.prj`` text."""
-    text, _path_map = export_contamw34(spatial_layout, air_flow_paths)
+    text, _path_map = export_contamw34(
+        spatial_layout,
+        air_flow_paths,
+        hobbyist=hobbyist,
+        overrides=overrides,
+        filter_efficiency=filter_efficiency,
+    )
     return text
 
 
 def export_prj_with_path_map(
     spatial_layout: dict[str, Any],
     air_flow_paths: dict[str, Any],
+    *,
+    hobbyist: bool = False,
+    overrides: dict[str, Any] | None = None,
+    filter_efficiency: float | None = None,
 ) -> tuple[str, list[dict[str, Any]]]:
     """Serialize to ContamW 3.4 ``.prj`` text and path_map entries."""
-    return export_contamw34(spatial_layout, air_flow_paths)
+    return export_contamw34(
+        spatial_layout,
+        air_flow_paths,
+        hobbyist=hobbyist,
+        overrides=overrides,
+        filter_efficiency=filter_efficiency,
+    )
 
 
 # ── Legacy interchange export (tests / old tooling) ──────────────────────
@@ -396,6 +417,8 @@ def export_platform_to_prj(
     output_path: str,
     *,
     write_path_map: bool = True,
+    hobbyist: bool = False,
+    filter_efficiency: float | None = None,
 ) -> str:
     """Read a platform directory and write a ContamW 3.4 ``.prj`` (+ path_map)."""
     platform_dir = resolve_repo_path(REPO_ROOT, platform_dir)
@@ -411,7 +434,14 @@ def export_platform_to_prj(
     ) as fh:
         air_flow_paths = json.load(fh)
 
-    prj_text, path_map = export_prj_with_path_map(spatial_layout, air_flow_paths)
+    overrides = load_hobbyist_overrides(platform_dir) if hobbyist else {}
+    prj_text, path_map = export_prj_with_path_map(
+        spatial_layout,
+        air_flow_paths,
+        hobbyist=hobbyist,
+        overrides=overrides,
+        filter_efficiency=filter_efficiency,
+    )
 
     output_path = resolve_repo_path(REPO_ROOT, output_path)
     prepare_output_directory(

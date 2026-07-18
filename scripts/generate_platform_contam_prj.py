@@ -1,16 +1,25 @@
 #!/usr/bin/env python3
 """
-generate_platform_contam_prj.py – regenerate ContamW 3.4 bundles
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+generate_platform_contam_prj.py – FICTION BOOTSTRAP only
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Writes ``contam/platform.prj`` + ``contam/path_map.json`` for the fiction
-platforms used in Contam dual-path workflows (Mega Cruise + both
-Enterprises). Re-run after editing platform JSON.
+Synthesize ContamW 3.4 ``contam/platform.prj`` + ``path_map.json`` from
+platform JSON for **fiction ships that have no authentic Contam model**
+(Mega Cruise, Enterprises, destroyer demos).
+
+Default ``--hobbyist`` emits the ContamW portfolio-grade pack from
+``data/contam_hobbyist/`` (+ optional ``contam/hobbyist_overrides.json``).
+
+The primary Contam product loop is the opposite direction:
+
+    authentic .prj  ──Path A──► ContamX airflow ──► Crusher mass balance
+                └──Path B──► simplify → JSON (+ path_map) → native engine
 
 Usage::
 
     python3 scripts/generate_platform_contam_prj.py
-    python3 scripts/generate_platform_contam_prj.py --platform destroyer_baseline
+    python3 scripts/generate_platform_contam_prj.py --hobbyist --platform destroyer_baseline
+    python3 scripts/generate_platform_contam_prj.py --no-hobbyist --platform destroyer_baseline
 """
 
 from __future__ import annotations
@@ -35,7 +44,10 @@ DEFAULT_PLATFORMS = (
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        description="Regenerate ContamW 3.4 platform.prj + path_map.json bundles.",
+        description=(
+            "FICTION BOOTSTRAP: synthesize ContamW 3.4 platform.prj + "
+            "path_map.json from JSON (not the primary Contam workflow)."
+        ),
     )
     parser.add_argument(
         "--platform",
@@ -44,16 +56,33 @@ def main(argv: list[str] | None = None) -> int:
         help="Platform id under data/platforms/ (repeatable). "
              f"Default: {', '.join(DEFAULT_PLATFORMS)}",
     )
+    parser.add_argument(
+        "--hobbyist",
+        dest="hobbyist",
+        action="store_true",
+        default=True,
+        help="Emit hobbyist-plus Contam sections (default: on).",
+    )
+    parser.add_argument(
+        "--no-hobbyist",
+        dest="hobbyist",
+        action="store_false",
+        help="Emit skeleton ContamW 3.4 only (no wind/ducts/filters/…).",
+    )
     args = parser.parse_args(argv)
     platforms = args.platforms or list(DEFAULT_PLATFORMS)
 
+    mode = "hobbyist-plus" if args.hobbyist else "skeleton"
+    print(f"Fiction bootstrap (JSON→PRJ, {mode}). Prefer authentic .prj + --simplify.")
     for name in platforms:
         platform_dir = os.path.join(REPO_ROOT, "data", "platforms", name)
         out = os.path.join(platform_dir, "contam", "platform.prj")
         if not os.path.isdir(platform_dir):
             print(f"  SKIP missing platform: {name}")
             continue
-        written = export_platform_to_prj(platform_dir, out, write_path_map=True)
+        written = export_platform_to_prj(
+            platform_dir, out, write_path_map=True, hobbyist=args.hobbyist,
+        )
         print(f"  Wrote {written}")
         print(f"  Wrote {os.path.join(os.path.dirname(written), 'path_map.json')}")
     return 0

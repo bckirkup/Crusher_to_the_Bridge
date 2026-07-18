@@ -1,0 +1,61 @@
+{
+  "description": "Day/week schedule templates for OA fraction and HVAC duty (hobbyist export).",
+  "day_schedules": [
+    {
+      "id": "OAFrac",
+      "name": "OAFrac",
+      "description": "Outdoor-air fraction on AHS recirculation path",
+      "points": [
+        ["00:00:00", 0.2],
+        ["24:00:00", 0.2]
+      ]
+    },
+    {
+      "id": "HvacDuty",
+      "name": "HvacDuty",
+      "description": "AHU duty on supply/return terminals (never zero — ContamX Jacobian)",
+      "points": [
+        ["00:00:00", 0.5],
+        ["06:00:00", 1.0],
+        ["22:00:00", 0.5],
+        ["24:00:00", 0.5]
+      ]
+    },
+    {
+      "id": "NightSetback",
+      "name": "NightSetbk",
+      "description": "Optional night setback multiplier",
+      "points": [
+        ["00:00:00", 0.7],
+        ["06:00:00", 1.0],
+        ["22:00:00", 0.7],
+        ["24:00:00", 0.7]
+      ]
+    }
+  ],
+  "week_schedules": [
+    {
+      "id": "OAFracW",
+      "name": "OAFracW",
+      "description": "Week schedule for outdoor-air fraction",
+      "day_id": "OAFrac"
+    },
+    {
+      "id": "HvacDutyW",
+      "name": "HvacDutyW",
+      "description": "Week schedule for AHU duty",
+      "day_id": "HvacDuty"
+    },
+    {
+      "id": "NightSetbackW",
+      "name": "NightSetbkW",
+      "description": "Week schedule for night setback",
+      "day_id": "NightSetback"
+    }
+  ],
+  "defaults": {
+    "oa_week": "OAFracW",
+    "duty_week": "HvacDutyW",
+    "oa_fraction": 0.2
+  }
+}
