@@ -109,6 +109,8 @@ grammar. The fiction exporter (`tools/contamw34_prj.py`) enforces:
 | Week schedule `OAFracW` (`fo=0.2`) on AHS recirc paths | Without it Contam defaults to 100% OA → no HVAC recirculation |
 | Cross-zone `fan_cvf` expanded to all room×room pairs | Matches native cross-zone expansion; ContamX flows are Crusher-visible |
 | `path_map.ahs_nr` on AHS paths + ContamX AHS bridge | Synthesizes room↔room recirculation from Contam Ret/Sup/recirc SIM flows |
+| Initial zone/junction concentration headers = `n_items × n_ctm` | ContamX `Zones*contaminant count mis-match` if only `n_items` |
+| Duct terminals omit ContamW `"T:"` marker; emit terminal ints after `vf_type` | ContamX 3.4.0.3 reports `Bad integer: T:` if the marker is present |
 
 ### ContamX → Crusher airflow bridge
 
