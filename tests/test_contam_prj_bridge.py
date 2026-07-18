@@ -178,11 +178,12 @@ class TestPrjRoundTrip:
 
         assert _adj_pairs(r_airflow) == _adj_pairs(airflow)
         assert _hvac_rooms(r_airflow) == _hvac_rooms(airflow)
-        # Cross-zone links resolve to representative rooms with same flows
-        assert len(r_airflow["cross_zone_links"]) == len(airflow["cross_zone_links"])
-        orig_flows = sorted(e["flow_rate_m3h"] for e in airflow["cross_zone_links"])
-        got_flows = sorted(e["flow_rate_m3h"] for e in r_airflow["cross_zone_links"])
-        assert got_flows == orig_flows
+        # Cross-zone fans are expanded room×room on export; simplify recovers
+        # those leaf edges. Total prescribed flow should match.
+        orig_flow = sum(float(e["flow_rate_m3h"]) for e in airflow["cross_zone_links"])
+        got_flow = sum(float(e["flow_rate_m3h"]) for e in r_airflow["cross_zone_links"])
+        assert got_flow == pytest.approx(orig_flow, rel=1e-6)
+        assert len(r_airflow["cross_zone_links"]) >= len(airflow["cross_zone_links"])
 
     def test_geometry_fields_round_trip(self) -> None:
         spatial = {

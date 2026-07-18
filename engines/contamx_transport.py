@@ -9,6 +9,7 @@ contaminant mass-balance on top of it.
 Design (see ``docs/CONTAM_INTEROP.md``):
 
     ContamX  →  per-path volumetric airflows (the "airflow field")
+    Bridge   →  real↔real paths + AHS→room↔room synthesis
     Crusher  →  discrete-time pathogen mass balance on those flows
 
 ``ContamXTransportEngine`` exposes the same ``transport_step`` /
@@ -31,6 +32,7 @@ import os
 import tempfile
 from typing import Any
 
+from engines.contamx_ahs_bridge import synthesize_ahs_recirculation_paths
 from engines.contamx_runner import (
     ContamXUnavailable,
     SimResults,
@@ -59,10 +61,12 @@ class ContamXTransportEngine(ContamTransportEngine):
     def __init__(
         self,
         spatial_layout: dict[str, Any],
-        path_map: list[tuple[str, str, bool]],
+        path_map: list[tuple[str, str, bool]] | list[dict[str, Any]],
         path_flows_m3h: dict[int, float],
         filter_efficiency: float = 0.50,
         natural_decay_rate: float = 0.10,
+        *,
+        path_map_entries: list[dict[str, Any]] | None = None,
     ) -> None:
         self.filter_efficiency = filter_efficiency
         self.natural_decay_rate = natural_decay_rate
@@ -70,20 +74,45 @@ class ContamXTransportEngine(ContamTransportEngine):
         self.airflow_paths = []
 
         self._build_zone_nodes(spatial_layout)
-        self._build_airflow_paths_from_field(path_map, path_flows_m3h)
+        entries = path_map_entries
+        if entries is None and path_map and isinstance(path_map[0], dict):
+            entries = path_map  # type: ignore[assignment]
+        if entries is None:
+            entries = [
+                {
+                    "path_nr": i + 1,
+                    "from_zone": row[0],
+                    "to_zone": row[1],
+                    "is_hvac_ducted": bool(row[2]),
+                    "kind": "unknown",
+                    "ahs_nr": 0,
+                }
+                for i, row in enumerate(path_map)  # type: ignore[arg-type]
+            ]
+        self._build_airflow_paths_from_field(entries, path_flows_m3h)
 
     def _build_airflow_paths_from_field(
         self,
-        path_map: list[tuple[str, str, bool]],
+        path_map_entries: list[dict[str, Any]],
         path_flows_m3h: dict[int, float],
     ) -> None:
         """Build directed airflow paths from the ContamX flow field.
 
-        Skips ambient / AHS-phantom endpoints that are not Crusher zone nodes.
+        Includes:
+          - Real↔real Contam paths (adjacency, cross-zone fans) with SIM flow
+          - Synthesized AHS recirculation (room↔room) from supply/return/recirc
         """
         known = set(self.zone_nodes)
-        for idx, (from_zone, to_zone, is_ducted) in enumerate(path_map):
-            path_nr = idx + 1
+        ordered = sorted(path_map_entries, key=lambda e: int(e["path_nr"]))
+        for entry in ordered:
+            path_nr = int(entry["path_nr"])
+            from_zone = entry["from_zone"]
+            to_zone = entry["to_zone"]
+            is_ducted = bool(entry.get("is_hvac_ducted", False))
+            kind = str(entry.get("kind", ""))
+            # AHS phantom / ambient paths are bridged separately
+            if kind.startswith("ahs_") or kind == "envelope_leak":
+                continue
             flow = path_flows_m3h.get(path_nr, 0.0)
             if abs(flow) < _FLOW_EPSILON_M3H:
                 continue
@@ -99,13 +128,19 @@ class ContamXTransportEngine(ContamTransportEngine):
                 is_hvac_ducted=is_ducted,
             ))
 
+        self.airflow_paths.extend(
+            synthesize_ahs_recirculation_paths(
+                ordered, path_flows_m3h, known,
+            )
+        )
+
     @classmethod
     def from_flow_field(
         cls,
         spatial_layout: dict[str, Any],
-        path_map: list[tuple[str, str, bool]],
+        path_map: list[tuple[str, str, bool]] | list[dict[str, Any]],
         path_flows_m3h: dict[int, float],
-        **kwargs: float,
+        **kwargs: Any,
     ) -> ContamXTransportEngine:
         """Construct directly from a decoded airflow field (test/offline)."""
         return cls(spatial_layout, path_map, path_flows_m3h, **kwargs)
@@ -122,14 +157,35 @@ def _path_map_from_entries(
     ]
 
 
+def _normalize_path_map_entries(
+    entries: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Return path_map entries sorted by ContamX path number."""
+    return sorted(entries, key=lambda e: int(e["path_nr"]))
+
+
+def _path_map_entries_from_airflow(
+    spatial_layout: dict[str, Any],
+    air_flow_paths: dict[str, Any],
+) -> list[dict[str, Any]]:
+    """Build full ContamX path_map entries matching ContamW 3.4 export."""
+    from tools.contamw34_prj import build_path_map
+
+    return _normalize_path_map_entries(
+        build_path_map(spatial_layout, air_flow_paths)
+    )
+
+
 def _path_map_from_airflow(
     spatial_layout: dict[str, Any],
     air_flow_paths: dict[str, Any],
 ) -> list[tuple[str, str, bool]]:
     """Build full ContamX path order matching ContamW 3.4 export."""
-    from tools.contamw34_prj import build_path_map, path_map_full_order
+    from tools.contamw34_prj import path_map_full_order
 
-    return path_map_full_order(build_path_map(spatial_layout, air_flow_paths))
+    return path_map_full_order(
+        _path_map_entries_from_airflow(spatial_layout, air_flow_paths)
+    )
 
 
 def _platform_id_from_spatial(spatial: dict[str, Any]) -> str:
@@ -173,11 +229,11 @@ def resolve_contam_prj_path(
     return None
 
 
-def _load_path_map_beside_prj(
+def _load_path_map_entries_beside_prj(
     prj_path: str,
     *,
     allowed_roots: tuple[str, ...],
-) -> list[tuple[str, str, bool]] | None:
+) -> list[dict[str, Any]] | None:
     """Load ``path_map.json`` beside a ContamW PRJ with root containment checks."""
     directory = os.path.dirname(os.path.realpath(prj_path))
     if not any(is_path_under_base(root, directory) for root in allowed_roots):
@@ -197,8 +253,22 @@ def _load_path_map_beside_prj(
         except (OSError, ValueError, json.JSONDecodeError):
             continue
         if isinstance(entries, list) and entries:
-            return _path_map_from_entries(entries)
+            return _normalize_path_map_entries(entries)
     return None
+
+
+def _load_path_map_beside_prj(
+    prj_path: str,
+    *,
+    allowed_roots: tuple[str, ...],
+) -> list[tuple[str, str, bool]] | None:
+    """Load path_map tuples beside a ContamW PRJ (legacy helper)."""
+    entries = _load_path_map_entries_beside_prj(
+        prj_path, allowed_roots=allowed_roots,
+    )
+    if entries is None:
+        return None
+    return _path_map_from_entries(entries)
 
 
 def build_contamx_engine(
@@ -229,14 +299,14 @@ def build_contamx_engine(
     decay_rate = hvac_cfg.get("natural_decay_rate", 0.10)
 
     prj_path = resolve_contam_prj_path(repo_root, cfg, spatial)
-    path_map: list[tuple[str, str, bool]] | None = None
+    entries: list[dict[str, Any]] | None = None
     tmp_ctx = None
     allowed_roots: tuple[str, ...] = (repo_root,)
 
     try:
         if prj_path is None:
             # Last resort: export ContamW 3.4 to a temp dir
-            prj_text, entries = export_prj_with_path_map(spatial, airflow)
+            prj_text, exported = export_prj_with_path_map(spatial, airflow)
             tmp_ctx = tempfile.TemporaryDirectory(prefix="crusher_contamx_")
             tmp_dir = tmp_ctx.__enter__()
             allowed_roots = (repo_root, tmp_dir)
@@ -251,14 +321,14 @@ def build_contamx_engine(
             with validated_open(
                 map_path, "w", allowed_roots=allowed_roots, encoding="utf-8",
             ) as fh:
-                json.dump(entries, fh, indent=2)
-            path_map = _path_map_from_entries(entries)
+                json.dump(exported, fh, indent=2)
+            entries = _normalize_path_map_entries(exported)
         else:
-            path_map = _load_path_map_beside_prj(
+            entries = _load_path_map_entries_beside_prj(
                 prj_path, allowed_roots=allowed_roots,
             )
-            if path_map is None:
-                path_map = _path_map_from_airflow(spatial, airflow)
+            if entries is None:
+                entries = _path_map_entries_from_airflow(spatial, airflow)
 
         sim_path = run_contamx(prj_path, binary, config=cfg)
         sim = SimResults(sim_path)
@@ -269,8 +339,9 @@ def build_contamx_engine(
 
     return ContamXTransportEngine(
         spatial_layout=spatial,
-        path_map=path_map,
+        path_map=entries,
         path_flows_m3h=flows,
         filter_efficiency=filter_eff,
         natural_decay_rate=decay_rate,
+        path_map_entries=entries,
     )
