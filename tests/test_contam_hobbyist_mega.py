@@ -36,6 +36,24 @@ def _section_count(text: str, marker: str) -> int:
     return int(m.group(1))
 
 
+def _zone_names_from_prj(text: str) -> list[str]:
+    """Parse Contam zone name tokens from a `.prj` zones section."""
+    names: list[str] = []
+    in_zones = False
+    for line in text.splitlines():
+        if "! zones:" in line:
+            in_zones = True
+            continue
+        if in_zones and line.strip() == "-999":
+            break
+        if not in_zones or line.strip().startswith("!"):
+            continue
+        toks = line.split()
+        if toks and toks[0].isdigit() and len(toks) >= 11:
+            names.append(toks[10])
+    return names
+
+
 def test_mega_hobbyist_export_scale_safe() -> None:
     spatial, airflow = _load()
     overrides = load_hobbyist_overrides(str(_CONTAM.parent))
@@ -53,18 +71,7 @@ def test_mega_hobbyist_export_scale_safe() -> None:
     assert _section_count(text, "duct junctions") >= 10
     assert _section_count(text, "species") == 2
     # ContamX-critical: names ≤ 15
-    names = []
-    in_z = False
-    for line in text.splitlines():
-        if "! zones:" in line:
-            in_z = True
-            continue
-        if in_z and line.strip() == "-999":
-            break
-        if in_z and not line.strip().startswith("!") and line.split():
-            toks = line.split()
-            if toks[0].isdigit() and len(toks) >= 11:
-                names.append(toks[10])
+    names = _zone_names_from_prj(text)
     assert names and all(len(n) <= 15 for n in names)
 
 
