@@ -5,7 +5,8 @@
   "representative_of": "San Antonio-class amphibious transport dock (LPD-17). 208.5m LOA, 31.9m beam. ~360 ship's company + ~800 embarked Marines. Modern HVAC with NBC filtration capability. Well deck and flight deck for amp",
   "provenance": [
     "spatial_layout.json description and deck_dimensions",
-    "zone count: 22"
+    "zone count: 22",
+    "per-deck non-overlapping compartment packing"
   ],
   "disclaimer": "Footprints are class-representative for simulation zones, not a surveyed deck plan of one vessel.",
   "zone_ids": [
@@ -32,16 +33,27 @@
     "Marine_Planning",
     "Passageway_Main"
   ],
+  "decks": [
+    "01_level",
+    "02_level",
+    "03_level",
+    "07_level",
+    "1st_platform",
+    "2nd_deck",
+    "3rd_deck",
+    "weather_deck"
+  ],
   "view_bounds": {
-    "xmin": 7.51,
-    "xmax": 205.16,
-    "ymin": -3.6739999999999995,
-    "ymax": 34.986
+    "xmin": -2.0,
+    "xmax": 210.5,
+    "ymin": -2.0,
+    "ymax": 33.9
   },
   "assets": {
     "deck_graphics": "deck_graphics.geojson",
     "deck_hull": "deck_hull.png",
-    "deck_blueprint_bg": "deck_blueprint_bg.png"
+    "deck_blueprint_bg": "deck_blueprint_bg.png",
+    "architectural_graphics": "graphics/graphics.json"
   },
   "background_plate": "reference_photo_composite",
   "reference_photo": {

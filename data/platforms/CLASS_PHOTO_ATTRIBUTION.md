@@ -1,42 +1,55 @@
-# Class reference photos (dashboard deck plates)
+# Class reference photos & architectural plates
 
-Precompute (`python3 scripts/precompute_deck_assets.py`) downloads representative
-images from [Wikimedia Commons](https://commons.wikimedia.org/) (or other
-licenses noted in `class_photo_catalog.json`), composites them under the
-vector hull outline, and writes `deck_blueprint_bg.png` per platform.
+Precompute (`python3 scripts/precompute_deck_assets.py`) builds vector
+`deck_graphics.geojson`, optional Wikimedia class photos, and registers
+**user-supplied architectural plates** under each platform’s `graphics/` folder.
 
-## Catalog
+## Architectural graphics (preferred)
 
-Sources and URLs: `class_photo_catalog.json`
+Place plates when configuring a ship:
 
-## Licenses (summary)
+```
+data/platforms/<platform_id>/graphics/
+  graphics.json          # manifest
+  elevation.jpg          # side elevation of the whole ship
+  plan_overview.jpg      # top-down hull / class plan
+  decks/<deck>_plan.jpg  # optional per-deck plans
+```
+
+The dashboard **Tactical Sensor Grid** shows elevation and a single-deck plan
+side-by-side so drawings do not overwrite each other. Compartment polygons are
+packed per deck into the hull plan (non-overlapping).
+
+### Platforms with committed notional plates
+
+| Platform | Style | Notes |
+|----------|-------|-------|
+| mega_cruise_5000 | AI-generated notional schematic | Original composition (plan + elevation) |
+| enterprise_galaxy_tng | AI-generated fiction-adapted | Simplified Galaxy-inspired silhouette — **not** televised Star Trek artwork |
+| enterprise_constitution_tos | AI-generated fiction-adapted | Simplified Constitution-inspired silhouette — **not** televised Star Trek artwork |
+
+## Legacy Wikimedia catalog
+
+Sources and URLs for remaining platforms: `class_photo_catalog.json`
 
 | Platform | Image subject | License |
 |----------|---------------|---------|
-| destroyer_baseline | USS Arleigh Burke (DDG-51) | US Navy — public domain |
+| destroyer_baseline | USS Gleaves (DD-423) | US Navy — public domain |
 | fletcher_class_destroyer | Fletcher-class technical drawing, 1954 | US Navy — public domain |
-| legend_class_nsc | USCGC Bertholf (WMSL-750) | US Coast Guard — public domain |
-| san_antonio_class_lpd | USS San Antonio (LPD-17) | US Navy — public domain |
+| legend_class_nsc | USCGC Hamilton (WHEC-715) | US Coast Guard — public domain |
+| san_antonio_class_lpd | USS Austin (LPD-4) | US Navy — public domain |
 | expedition_cruise_300 | Cruise ship side elevation | CC BY-SA 3.0 (Marcusroos) |
-| mega_cruise_5000 | Icon of the Seas | CC BY-SA 2.0 (Kahunapule Michael Johnson) |
-| messy_cruise_500 | Icon of the Seas (same reference as mega_cruise_5000) | CC BY-SA 2.0 (Kahunapule Michael Johnson) |
-| enterprise_constitution_tos | USS Enterprise (CVN-65) | US Navy — public domain; **fiction-adapted** |
-| enterprise_galaxy_tng | [Galaxy-class ortho](https://memory-beta.fandom.com/wiki/File:Galaxy_class_ortho.jpg) | Memory Beta (Fandom) fan wiki; **fiction-adapted**; Star Trek © Paramount — not for commercial redistribution |
-
-Fiction-adapted platforms use real-world photos as **visual stand-ins** only;
-they are not official Star Trek blueprints.
+| messy_cruise_500 | Icon of the Seas (legacy archive) | CC BY-SA 2.0 |
 
 ## Offline / air-gapped runs
 
-If download fails, precompute falls back to the synthetic blueprint plate
-(grid + vector hull) with no network required.
+If download fails and no `graphics/` plates exist, precompute falls back to the
+synthetic blueprint plate (grid + vector hull) with no network required.
 
 ## Refreshing assets
 
 ```bash
 python3 scripts/precompute_deck_assets.py
 # or one platform:
-python3 scripts/precompute_deck_assets.py --platform fletcher_class_destroyer
+python3 scripts/precompute_deck_assets.py --platform mega_cruise_5000
 ```
-
-Cached files: `data/platforms/<platform_id>/reference_photo.jpg`

@@ -119,7 +119,20 @@ def main() -> None:
             "Deck plan and tactical map follow this class automatically."
         )
 
-        if bundle.blueprint_bg_path:
+        arch = bundle.architectural
+        if arch and arch.has_elevation:
+            st.image(
+                arch.elevation_path,
+                caption="Ship elevation (profile)",
+                use_container_width=True,
+            )
+        if arch and arch.has_plan:
+            st.image(
+                arch.plan_overview_path,
+                caption="Ship plan (top-down)",
+                use_container_width=True,
+            )
+        elif bundle.blueprint_bg_path:
             plate_kind = bundle.manifest.get("background_plate", "deck_plate")
             cap = (
                 "Class reference photo plate"

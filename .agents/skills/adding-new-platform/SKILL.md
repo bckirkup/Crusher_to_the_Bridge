@@ -145,15 +145,30 @@ Update `crusher_labs/config.yaml` to point to the new platform paths, then run:
 python orchestrator.py --epochs 10
 ```
 
-### 8. Precompute deck assets (optional, for LCARS tactical map)
+### 8. Architectural graphics + precompute deck assets
 
-After spatial layout is stable, generate visual-only deck assets:
+Add user-supplied architectural plates (recommended) under the platform:
+
+```
+data/platforms/<platform_name>/graphics/
+  graphics.json
+  elevation.jpg          # side elevation of the whole ship
+  plan_overview.jpg      # top-down hull plan
+  decks/<deck>_plan.jpg  # optional per-deck plans
+```
+
+See `data/platforms/mega_cruise_5000/graphics/graphics.json` for the schema.
+The dashboard shows elevation and a single-deck plan side-by-side (no stacking).
+
+Then generate vector overlays:
 
 ```bash
 python3 scripts/precompute_deck_assets.py --platform <platform_name>
 ```
 
-This writes `deck_graphics.geojson`, `deck_hull.png`, and `deck_manifest.json` under the platform directory. Add a class photo entry to `data/platforms/class_photo_catalog.json` if you want a reference photo plate behind the deck outline (see `CLASS_PHOTO_ATTRIBUTION.md`).
+This writes `deck_graphics.geojson` (per-deck non-overlapping compartments),
+`deck_hull.png`, and `deck_manifest.json`. Optional Wikimedia class photos remain
+in `class_photo_catalog.json` (see `CLASS_PHOTO_ATTRIBUTION.md`).
 
 ## Available Platforms for Reference
 

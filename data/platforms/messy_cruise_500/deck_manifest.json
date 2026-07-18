@@ -5,7 +5,8 @@
   "representative_of": "LEGACY platform (archived from mega_cruise_5000, Feb 2026). Berthing is represented as 27 large well-mixed passenger cabin blocks (~200 occupants each) and 4 crew-quarter blocks. Each block models dir",
   "provenance": [
     "spatial_layout.json description and deck_dimensions",
-    "zone count: 67"
+    "zone count: 67",
+    "per-deck non-overlapping compartment packing"
   ],
   "disclaimer": "Footprints are class-representative for simulation zones, not a surveyed deck plan of one vessel.",
   "zone_ids": [
@@ -77,16 +78,63 @@
     "Crew_Quarters_D3",
     "Crew_Quarters_D4"
   ],
+  "decks": [
+    "0_Engine",
+    "0_Technical",
+    "10_Cabins",
+    "11_Cabins",
+    "12_Cabins",
+    "13_Cabins",
+    "14_Cabins",
+    "14_Spa",
+    "14_Youth",
+    "15_Pool",
+    "15_Service",
+    "16_Bridge",
+    "16_Buffet",
+    "16_Solarium",
+    "1_Crew",
+    "1_Engine",
+    "1_Service",
+    "1_Stores",
+    "2_Crew",
+    "2_Medical",
+    "3_Crew",
+    "3_Dining",
+    "3_Entertainment",
+    "3_Service",
+    "4_Crew",
+    "4_Dining",
+    "4_Entertainment",
+    "4_Theater",
+    "5_Promenade",
+    "6_Aqua",
+    "6_Cabins",
+    "6_Public",
+    "6_Service",
+    "7_Cabins",
+    "8_Cabins",
+    "8_CentralPark",
+    "9_Cabins"
+  ],
   "view_bounds": {
-    "xmin": 2.24,
-    "xmax": 363.38,
-    "ymin": -14.132901680684451,
-    "ymax": 132.92949858673012
+    "xmin": -2.0,
+    "xmax": 364.0,
+    "ymin": -2.0,
+    "ymax": 66.0
   },
   "assets": {
     "deck_graphics": "deck_graphics.geojson",
     "deck_hull": "deck_hull.png",
-    "deck_blueprint_bg": "deck_blueprint_bg.png"
+    "deck_blueprint_bg": "deck_blueprint_bg.png",
+    "architectural_graphics": "graphics/graphics.json"
   },
-  "background_plate": "synthetic_blueprint"
+  "background_plate": "reference_photo_composite",
+  "reference_photo": {
+    "wikimedia_title": "File:Icon of the Seas (kahunapulej).jpg",
+    "source_page": null,
+    "license": "CC BY-SA 2.0",
+    "credit": "Kahunapule Michael Johnson / Wikimedia Commons — Icon of the Seas (Royal Caribbean); legacy platform archived from mega_cruise_5000",
+    "local_file": "reference_photo.jpg"
+  }
 }

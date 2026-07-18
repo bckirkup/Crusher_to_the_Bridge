@@ -23,7 +23,8 @@ None.
 | `dashboard/app.py` | Main command deck tabs and layout |
 | `dashboard/theme.py` | LCARS colors, CSS, `apply_lcars_layout()` |
 | `dashboard/charts.py` | Plotly charts, pathway aggregation |
-| `dashboard/spatial_viz.py` | Tactical deck map with class photo plates |
+| `dashboard/spatial_viz.py` | Architectural elevation + per-deck plan overlays |
+| `dashboard/architectural_graphics.py` | User-supplied `graphics/` elevation and plan JPGs |
 | `dashboard/deck_geometry.py` | Hull silhouettes and compartment footprints |
 | `dashboard/loaders.py` | Telemetry and notebook loaders |
 
@@ -73,7 +74,7 @@ print('Pathways:', sorted(totals.keys()))
 | Tab | Purpose |
 |-----|---------|
 | Bridge Status Display | Ship status, biosensors, epidemic curves, infection counters |
-| Tactical Sensor Grid | Spatial deck map with contamination overlays and class-reference plates |
+| Tactical Sensor Grid | Elevation + single-deck plan with contamination overlays (non-overlapping) |
 | Sickbay Diagnostic Console | Lab notebook at LOW/MID/HIGH fidelity |
 | Standing Orders & Threat Profiles | SOP cards with `exempt_classes`, pathogen dossiers |
 | Fleet Operations | Presidio multi-cruise comparison, per-cruise drill-down |

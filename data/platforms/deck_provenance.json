@@ -8,7 +8,8 @@
       "representative_of": "Baseline destroyer-class spatial layout for infection-dynamics simulation",
       "provenance": [
         "spatial_layout.json description and deck_dimensions",
-        "zone count: 6"
+        "zone count: 6",
+        "per-deck non-overlapping compartment packing"
       ],
       "disclaimer": "Derived from GIS-traced compartment polygons.",
       "zone_ids": [
@@ -19,6 +20,11 @@
         "Galley",
         "Berthing"
       ],
+      "decks": [
+        "lower",
+        "main",
+        "upper"
+      ],
       "view_bounds": {
         "xmin": -0.20000000000000018,
         "xmax": 122.6,
@@ -28,7 +34,8 @@
       "assets": {
         "deck_graphics": "deck_graphics.geojson",
         "deck_hull": "deck_hull.png",
-        "deck_blueprint_bg": "deck_blueprint_bg.png"
+        "deck_blueprint_bg": "deck_blueprint_bg.png",
+        "architectural_graphics": "graphics/graphics.json"
       },
       "background_plate": "reference_photo_composite",
       "reference_photo": {
@@ -46,7 +53,8 @@
       "representative_of": "WWII Fletcher-class destroyer (DD-445 class). 114.7m LOA, 12.0m beam, ~329 crew. Forced-draft ventilation, no HVAC filtration. Hot-bunking in enlisted berthing.",
       "provenance": [
         "spatial_layout.json description and deck_dimensions",
-        "zone count: 20"
+        "zone count: 20",
+        "per-deck non-overlapping compartment packing"
       ],
       "disclaimer": "Footprints are class-representative for simulation zones, not a surveyed deck plan of one vessel.",
       "zone_ids": [
@@ -71,16 +79,26 @@
         "Radio_Room",
         "Passageway_Main"
       ],
+      "decks": [
+        "01_level",
+        "02_level",
+        "03_level",
+        "hold",
+        "lower_deck",
+        "main_deck",
+        "second_deck"
+      ],
       "view_bounds": {
-        "xmin": -0.4119999999999999,
-        "xmax": 117.406,
-        "ymin": -4.04,
-        "ymax": 16.759999999999998
+        "xmin": -2.0,
+        "xmax": 116.7,
+        "ymin": -2.0,
+        "ymax": 14.0
       },
       "assets": {
         "deck_graphics": "deck_graphics.geojson",
         "deck_hull": "deck_hull.png",
-        "deck_blueprint_bg": "deck_blueprint_bg.png"
+        "deck_blueprint_bg": "deck_blueprint_bg.png",
+        "architectural_graphics": "graphics/graphics.json"
       },
       "background_plate": "reference_photo_composite",
       "reference_photo": {
@@ -98,7 +116,8 @@
       "representative_of": "Legend-class National Security Cutter (WMSL-750). 127.4m LOA, 16.5m beam. ~148 crew + aviation det. Modern HVAC with CBRN collective protection system. Helicopter and stern-launch boat capability.",
       "provenance": [
         "spatial_layout.json description and deck_dimensions",
-        "zone count: 18"
+        "zone count: 18",
+        "per-deck non-overlapping compartment packing"
       ],
       "disclaimer": "Footprints are class-representative for simulation zones, not a surveyed deck plan of one vessel.",
       "zone_ids": [
@@ -121,16 +140,26 @@
         "Boat_Deck",
         "Passageway_Main"
       ],
+      "decks": [
+        "01_level",
+        "02_level",
+        "04_level",
+        "2nd_deck",
+        "lower_deck",
+        "main_deck",
+        "weather_deck"
+      ],
       "view_bounds": {
-        "xmin": 5.192,
-        "xmax": 127.304,
-        "ymin": -3.3499999999999996,
-        "ymax": 20.64
+        "xmin": -2.0,
+        "xmax": 129.4,
+        "ymin": -2.0,
+        "ymax": 18.5
       },
       "assets": {
         "deck_graphics": "deck_graphics.geojson",
         "deck_hull": "deck_hull.png",
-        "deck_blueprint_bg": "deck_blueprint_bg.png"
+        "deck_blueprint_bg": "deck_blueprint_bg.png",
+        "architectural_graphics": "graphics/graphics.json"
       },
       "background_plate": "reference_photo_composite",
       "reference_photo": {
@@ -148,7 +177,8 @@
       "representative_of": "San Antonio-class amphibious transport dock (LPD-17). 208.5m LOA, 31.9m beam. ~360 ship's company + ~800 embarked Marines. Modern HVAC with NBC filtration capability. Well deck and flight deck for amp",
       "provenance": [
         "spatial_layout.json description and deck_dimensions",
-        "zone count: 22"
+        "zone count: 22",
+        "per-deck non-overlapping compartment packing"
       ],
       "disclaimer": "Footprints are class-representative for simulation zones, not a surveyed deck plan of one vessel.",
       "zone_ids": [
@@ -175,16 +205,27 @@
         "Marine_Planning",
         "Passageway_Main"
       ],
+      "decks": [
+        "01_level",
+        "02_level",
+        "03_level",
+        "07_level",
+        "1st_platform",
+        "2nd_deck",
+        "3rd_deck",
+        "weather_deck"
+      ],
       "view_bounds": {
-        "xmin": 7.51,
-        "xmax": 205.16,
-        "ymin": -3.6739999999999995,
-        "ymax": 34.986
+        "xmin": -2.0,
+        "xmax": 210.5,
+        "ymin": -2.0,
+        "ymax": 33.9
       },
       "assets": {
         "deck_graphics": "deck_graphics.geojson",
         "deck_hull": "deck_hull.png",
-        "deck_blueprint_bg": "deck_blueprint_bg.png"
+        "deck_blueprint_bg": "deck_blueprint_bg.png",
+        "architectural_graphics": "graphics/graphics.json"
       },
       "background_plate": "reference_photo_composite",
       "reference_photo": {
@@ -202,7 +243,8 @@
       "representative_of": "Small expedition cruise ship (~300 passengers, ~150 crew). Based on Silver Cloud / Le Boréal class vessels: ~157m LOA × 21m beam, 7 passenger decks, ~17,000 GT. Volumes estimated from published deck p",
       "provenance": [
         "spatial_layout.json description and deck_dimensions",
-        "zone count: 25"
+        "zone count: 25",
+        "per-deck non-overlapping compartment packing"
       ],
       "disclaimer": "Footprints are class-representative for simulation zones, not a surveyed deck plan of one vessel.",
       "zone_ids": [
@@ -232,16 +274,25 @@
         "Stores",
         "Engine_Room"
       ],
+      "decks": [
+        "2_Engine",
+        "3_Marina",
+        "4_Voyager",
+        "5_Panorama",
+        "6_Explorer",
+        "7_Sun"
+      ],
       "view_bounds": {
-        "xmin": 2.8500000000000005,
-        "xmax": 157.67657336906726,
-        "ymin": -3.74,
-        "ymax": 94.82109792804054
+        "xmin": -2.0,
+        "xmax": 159.0,
+        "ymin": -2.0,
+        "ymax": 23.0
       },
       "assets": {
         "deck_graphics": "deck_graphics.geojson",
         "deck_hull": "deck_hull.png",
-        "deck_blueprint_bg": "deck_blueprint_bg.png"
+        "deck_blueprint_bg": "deck_blueprint_bg.png",
+        "architectural_graphics": "graphics/graphics.json"
       },
       "background_plate": "reference_photo_composite",
       "reference_photo": {
@@ -259,7 +310,8 @@
       "representative_of": "Mega cruise ship (~5,000 passengers, ~2,000 crew), Oasis-class scale. Cabin-corridor resolution: 81 passenger corridor sections (~67 pax each) and 12 crew corridor sections (~170 crew each) replace le",
       "provenance": [
         "spatial_layout.json description and deck_dimensions",
-        "zone count: 129"
+        "zone count: 129",
+        "per-deck non-overlapping compartment packing"
       ],
       "disclaimer": "Footprints are class-representative for simulation zones, not a surveyed deck plan of one vessel.",
       "zone_ids": [
@@ -393,24 +445,81 @@
         "Crew_Corridor_D4_Mid",
         "Crew_Corridor_D4_Aft"
       ],
+      "decks": [
+        "0_Engine",
+        "0_Technical",
+        "10_Cabins",
+        "11_Cabins",
+        "12_Cabins",
+        "13_Cabins",
+        "14_Cabins",
+        "14_Spa",
+        "14_Youth",
+        "15_Pool",
+        "15_Service",
+        "16_Bridge",
+        "16_Buffet",
+        "16_Solarium",
+        "1_Crew",
+        "1_Engine",
+        "1_Service",
+        "1_Stores",
+        "2_Crew",
+        "2_Medical",
+        "3_Crew",
+        "3_Dining",
+        "3_Entertainment",
+        "3_Service",
+        "4_Crew",
+        "4_Dining",
+        "4_Entertainment",
+        "4_Theater",
+        "5_Promenade",
+        "6_Aqua",
+        "6_Cabins",
+        "6_Public",
+        "6_Service",
+        "7_Cabins",
+        "8_Cabins",
+        "8_CentralPark",
+        "9_Cabins"
+      ],
       "view_bounds": {
-        "xmin": 2.24,
-        "xmax": 363.38,
-        "ymin": -14.132901680684451,
-        "ymax": 132.92949858673012
+        "xmin": -2.0,
+        "xmax": 364.0,
+        "ymin": -2.0,
+        "ymax": 66.0
       },
       "assets": {
         "deck_graphics": "deck_graphics.geojson",
         "deck_hull": "deck_hull.png",
-        "deck_blueprint_bg": "deck_blueprint_bg.png"
+        "deck_blueprint_bg": "deck_blueprint_bg.png",
+        "architectural_graphics": "graphics/graphics.json",
+        "plan_overview": "graphics/plan_overview.jpg",
+        "elevation": "graphics/elevation.jpg"
       },
-      "background_plate": "reference_photo_composite",
+      "background_plate": "architectural_plan",
       "reference_photo": {
-        "wikimedia_title": "File:Icon of the Seas (kahunapulej).jpg",
-        "source_page": null,
-        "license": "CC BY-SA 2.0",
-        "credit": "Kahunapule Michael Johnson / Wikimedia Commons — Icon of the Seas (Royal Caribbean)",
+        "license": "Original work (AI-generated notional schematic)",
+        "credit": "Crusher-to-the-Bridge — notional mega-cruise architectural plates (plan + elevation)",
         "local_file": "reference_photo.jpg"
+      },
+      "architectural_graphics": {
+        "schema_version": "1.0",
+        "description": "User-supplied architectural underlays for the LCARS tactical map. Elevation is a side profile; plan_overview is a top-down hull plate used for each selected deck.",
+        "elevation": {
+          "file": "elevation.jpg",
+          "style": "ai_generated_notional",
+          "credit": "Crusher-to-the-Bridge — notional mega-cruise elevation (AI-generated schematic, original composition)",
+          "license": "Original work"
+        },
+        "plan": {
+          "file": "plan_overview.jpg",
+          "style": "ai_generated_notional",
+          "credit": "Crusher-to-the-Bridge — notional mega-cruise plan (AI-generated schematic, original composition)",
+          "license": "Original work"
+        },
+        "deck_plans": {}
       }
     },
     "messy_cruise_500": {
@@ -420,7 +529,8 @@
       "representative_of": "LEGACY platform (archived from mega_cruise_5000, Feb 2026). Berthing is represented as 27 large well-mixed passenger cabin blocks (~200 occupants each) and 4 crew-quarter blocks. Each block models dir",
       "provenance": [
         "spatial_layout.json description and deck_dimensions",
-        "zone count: 67"
+        "zone count: 67",
+        "per-deck non-overlapping compartment packing"
       ],
       "disclaimer": "Footprints are class-representative for simulation zones, not a surveyed deck plan of one vessel.",
       "zone_ids": [
@@ -492,18 +602,65 @@
         "Crew_Quarters_D3",
         "Crew_Quarters_D4"
       ],
+      "decks": [
+        "0_Engine",
+        "0_Technical",
+        "10_Cabins",
+        "11_Cabins",
+        "12_Cabins",
+        "13_Cabins",
+        "14_Cabins",
+        "14_Spa",
+        "14_Youth",
+        "15_Pool",
+        "15_Service",
+        "16_Bridge",
+        "16_Buffet",
+        "16_Solarium",
+        "1_Crew",
+        "1_Engine",
+        "1_Service",
+        "1_Stores",
+        "2_Crew",
+        "2_Medical",
+        "3_Crew",
+        "3_Dining",
+        "3_Entertainment",
+        "3_Service",
+        "4_Crew",
+        "4_Dining",
+        "4_Entertainment",
+        "4_Theater",
+        "5_Promenade",
+        "6_Aqua",
+        "6_Cabins",
+        "6_Public",
+        "6_Service",
+        "7_Cabins",
+        "8_Cabins",
+        "8_CentralPark",
+        "9_Cabins"
+      ],
       "view_bounds": {
-        "xmin": 2.24,
-        "xmax": 363.38,
-        "ymin": -14.132901680684451,
-        "ymax": 132.92949858673012
+        "xmin": -2.0,
+        "xmax": 364.0,
+        "ymin": -2.0,
+        "ymax": 66.0
       },
       "assets": {
         "deck_graphics": "deck_graphics.geojson",
         "deck_hull": "deck_hull.png",
-        "deck_blueprint_bg": "deck_blueprint_bg.png"
+        "deck_blueprint_bg": "deck_blueprint_bg.png",
+        "architectural_graphics": "graphics/graphics.json"
       },
-      "background_plate": "synthetic_blueprint"
+      "background_plate": "reference_photo_composite",
+      "reference_photo": {
+        "wikimedia_title": "File:Icon of the Seas (kahunapulej).jpg",
+        "source_page": null,
+        "license": "CC BY-SA 2.0",
+        "credit": "Kahunapule Michael Johnson / Wikimedia Commons — Icon of the Seas (Royal Caribbean); legacy platform archived from mega_cruise_5000",
+        "local_file": "reference_photo.jpg"
+      }
     },
     "enterprise_constitution_tos": {
       "platform_id": "enterprise_constitution_tos",
@@ -512,7 +669,8 @@
       "representative_of": "Constitution-class heavy cruiser (NCC-1701 era). Fiction-adapted 12-zone layout for Crusher-to-the-Bridge demos; ~430 crew complement.",
       "provenance": [
         "spatial_layout.json description and deck_dimensions",
-        "zone count: 13"
+        "zone count: 13",
+        "per-deck non-overlapping compartment packing"
       ],
       "disclaimer": "Fiction-adapted layout for demonstration; not an official starship blueprint.",
       "zone_ids": [
@@ -530,22 +688,48 @@
         "Library",
         "Mess_Hall"
       ],
+      "decks": [
+        "saucer_primary",
+        "secondary_hull"
+      ],
       "view_bounds": {
-        "xmin": 6.5600000000000005,
-        "xmax": 270.88,
-        "ymin": -1.3708260088912256,
-        "ymax": 112.95
+        "xmin": -2.0,
+        "xmax": 291.0,
+        "ymin": -2.0,
+        "ymax": 129.0
       },
       "assets": {
         "deck_graphics": "deck_graphics.geojson",
         "deck_hull": "deck_hull.png",
-        "deck_blueprint_bg": "deck_blueprint_bg.png"
+        "deck_blueprint_bg": "deck_blueprint_bg.png",
+        "architectural_graphics": "graphics/graphics.json",
+        "plan_overview": "graphics/plan_overview.jpg",
+        "elevation": "graphics/elevation.jpg"
       },
-      "background_plate": "fiction_schematic",
+      "background_plate": "architectural_plan",
       "reference_photo": {
-        "license": "Original work (programmatic LCARS schematic)",
-        "credit": "Crusher-to-the-Bridge — Constitution-class inspired schematic (original geometric composition)",
+        "license": "Original work (AI-generated notional schematic)",
+        "credit": "Crusher-to-the-Bridge — fiction-adapted Constitution-inspired architectural plates (simplified silhouette, not show artwork)",
         "local_file": "reference_photo.jpg"
+      },
+      "architectural_graphics": {
+        "schema_version": "1.0",
+        "description": "User-supplied architectural underlays. Fiction-adapted Constitution-class silhouette — simplified geometry, not a reproduction of any televised Star Trek artwork.",
+        "elevation": {
+          "file": "elevation.jpg",
+          "style": "ai_generated_notional",
+          "credit": "Crusher-to-the-Bridge — fiction-adapted Constitution-inspired elevation (AI-generated schematic, original composition)",
+          "license": "Original work",
+          "fiction_adapted": true
+        },
+        "plan": {
+          "file": "plan_overview.jpg",
+          "style": "ai_generated_notional",
+          "credit": "Crusher-to-the-Bridge — fiction-adapted Constitution-inspired plan (AI-generated schematic, original composition)",
+          "license": "Original work",
+          "fiction_adapted": true
+        },
+        "deck_plans": {}
       }
     },
     "enterprise_galaxy_tng": {
@@ -555,7 +739,8 @@
       "representative_of": "Galaxy-class explorer (NCC-1701-D era). Fiction-adapted 16-zone layout; mixed crew and civilian families.",
       "provenance": [
         "spatial_layout.json description and deck_dimensions",
-        "zone count: 17"
+        "zone count: 17",
+        "per-deck non-overlapping compartment packing"
       ],
       "disclaimer": "Fiction-adapted layout for demonstration; not an official starship blueprint.",
       "zone_ids": [
@@ -577,22 +762,61 @@
         "Schoolroom",
         "Mess_Hall"
       ],
+      "decks": [
+        "drive_section",
+        "saucer_1",
+        "saucer_10",
+        "saucer_11",
+        "saucer_12",
+        "saucer_15",
+        "saucer_16",
+        "saucer_17",
+        "saucer_23",
+        "saucer_24",
+        "saucer_25",
+        "saucer_4",
+        "saucer_6",
+        "saucer_8",
+        "saucer_9"
+      ],
       "view_bounds": {
-        "xmin": 23.445,
-        "xmax": 582.8000000000001,
-        "ymin": -0.4265803361368894,
-        "ymax": 366.14
+        "xmin": -2.0,
+        "xmax": 644.0,
+        "ymin": -2.0,
+        "ymax": 465.0
       },
       "assets": {
         "deck_graphics": "deck_graphics.geojson",
         "deck_hull": "deck_hull.png",
-        "deck_blueprint_bg": "deck_blueprint_bg.png"
+        "deck_blueprint_bg": "deck_blueprint_bg.png",
+        "architectural_graphics": "graphics/graphics.json",
+        "plan_overview": "graphics/plan_overview.jpg",
+        "elevation": "graphics/elevation.jpg"
       },
-      "background_plate": "fiction_schematic",
+      "background_plate": "architectural_plan",
       "reference_photo": {
-        "license": "Original work (programmatic LCARS schematic)",
-        "credit": "Crusher-to-the-Bridge — Galaxy-class inspired schematic (original geometric composition)",
+        "license": "Original work (AI-generated notional schematic)",
+        "credit": "Crusher-to-the-Bridge — fiction-adapted Galaxy-inspired architectural plates (simplified silhouette, not show artwork)",
         "local_file": "reference_photo.jpg"
+      },
+      "architectural_graphics": {
+        "schema_version": "1.0",
+        "description": "User-supplied architectural underlays. Fiction-adapted Galaxy-class silhouette — simplified geometry, not a reproduction of any televised Star Trek artwork.",
+        "elevation": {
+          "file": "elevation.jpg",
+          "style": "ai_generated_notional",
+          "credit": "Crusher-to-the-Bridge — fiction-adapted Galaxy-inspired elevation (AI-generated schematic, original composition)",
+          "license": "Original work",
+          "fiction_adapted": true
+        },
+        "plan": {
+          "file": "plan_overview.jpg",
+          "style": "ai_generated_notional",
+          "credit": "Crusher-to-the-Bridge — fiction-adapted Galaxy-inspired plan (AI-generated schematic, original composition)",
+          "license": "Original work",
+          "fiction_adapted": true
+        },
+        "deck_plans": {}
       }
     }
   }

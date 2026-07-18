@@ -5,7 +5,8 @@
   "representative_of": "Small expedition cruise ship (~300 passengers, ~150 crew). Based on Silver Cloud / Le Boréal class vessels: ~157m LOA × 21m beam, 7 passenger decks, ~17,000 GT. Volumes estimated from published deck p",
   "provenance": [
     "spatial_layout.json description and deck_dimensions",
-    "zone count: 25"
+    "zone count: 25",
+    "per-deck non-overlapping compartment packing"
   ],
   "disclaimer": "Footprints are class-representative for simulation zones, not a surveyed deck plan of one vessel.",
   "zone_ids": [
@@ -35,16 +36,25 @@
     "Stores",
     "Engine_Room"
   ],
+  "decks": [
+    "2_Engine",
+    "3_Marina",
+    "4_Voyager",
+    "5_Panorama",
+    "6_Explorer",
+    "7_Sun"
+  ],
   "view_bounds": {
-    "xmin": 2.8500000000000005,
-    "xmax": 157.67657336906726,
-    "ymin": -3.74,
-    "ymax": 94.82109792804054
+    "xmin": -2.0,
+    "xmax": 159.0,
+    "ymin": -2.0,
+    "ymax": 23.0
   },
   "assets": {
     "deck_graphics": "deck_graphics.geojson",
     "deck_hull": "deck_hull.png",
-    "deck_blueprint_bg": "deck_blueprint_bg.png"
+    "deck_blueprint_bg": "deck_blueprint_bg.png",
+    "architectural_graphics": "graphics/graphics.json"
   },
   "background_plate": "reference_photo_composite",
   "reference_photo": {

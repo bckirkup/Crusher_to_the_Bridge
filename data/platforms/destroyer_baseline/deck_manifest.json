@@ -5,7 +5,8 @@
   "representative_of": "Baseline destroyer-class spatial layout for infection-dynamics simulation",
   "provenance": [
     "spatial_layout.json description and deck_dimensions",
-    "zone count: 6"
+    "zone count: 6",
+    "per-deck non-overlapping compartment packing"
   ],
   "disclaimer": "Derived from GIS-traced compartment polygons.",
   "zone_ids": [
@@ -16,6 +17,11 @@
     "Galley",
     "Berthing"
   ],
+  "decks": [
+    "lower",
+    "main",
+    "upper"
+  ],
   "view_bounds": {
     "xmin": -0.20000000000000018,
     "xmax": 122.6,
@@ -25,7 +31,8 @@
   "assets": {
     "deck_graphics": "deck_graphics.geojson",
     "deck_hull": "deck_hull.png",
-    "deck_blueprint_bg": "deck_blueprint_bg.png"
+    "deck_blueprint_bg": "deck_blueprint_bg.png",
+    "architectural_graphics": "graphics/graphics.json"
   },
   "background_plate": "reference_photo_composite",
   "reference_photo": {

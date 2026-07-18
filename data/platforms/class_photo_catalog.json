@@ -43,12 +43,12 @@
       "local_file": "reference_photo.jpg"
     },
     "mega_cruise_5000": {
-      "wikimedia_title": "File:Icon of the Seas (kahunapulej).jpg",
-      "download_url": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Icon_of_the_Seas_%28kahunapulej%29.jpg",
-      "license": "CC BY-SA 2.0",
-      "credit": "Kahunapule Michael Johnson / Wikimedia Commons — Icon of the Seas (Royal Caribbean)",
-      "photo_style": "profile",
-      "local_file": "reference_photo.jpg"
+      "generated": true,
+      "license": "Original work (AI-generated notional schematic)",
+      "credit": "Crusher-to-the-Bridge — notional mega-cruise architectural plates (plan + elevation)",
+      "photo_style": "schematic",
+      "local_file": "reference_photo.jpg",
+      "architectural_graphics": "graphics/graphics.json"
     },
     "messy_cruise_500": {
       "wikimedia_title": "File:Icon of the Seas (kahunapulej).jpg",
@@ -60,19 +60,21 @@
     },
     "enterprise_constitution_tos": {
       "generated": true,
-      "license": "Original work (programmatic LCARS schematic)",
-      "credit": "Crusher-to-the-Bridge — Constitution-class inspired schematic (original geometric composition)",
+      "license": "Original work (AI-generated notional schematic)",
+      "credit": "Crusher-to-the-Bridge — fiction-adapted Constitution-inspired architectural plates (simplified silhouette, not show artwork)",
       "photo_style": "schematic",
       "local_file": "reference_photo.jpg",
-      "fiction_adapted": true
+      "fiction_adapted": true,
+      "architectural_graphics": "graphics/graphics.json"
     },
     "enterprise_galaxy_tng": {
       "generated": true,
-      "license": "Original work (programmatic LCARS schematic)",
-      "credit": "Crusher-to-the-Bridge — Galaxy-class inspired schematic (original geometric composition)",
+      "license": "Original work (AI-generated notional schematic)",
+      "credit": "Crusher-to-the-Bridge — fiction-adapted Galaxy-inspired architectural plates (simplified silhouette, not show artwork)",
       "photo_style": "schematic",
       "local_file": "reference_photo.jpg",
-      "fiction_adapted": true
+      "fiction_adapted": true,
+      "architectural_graphics": "graphics/graphics.json"
     }
   }
 }

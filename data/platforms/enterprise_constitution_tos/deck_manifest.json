@@ -5,7 +5,8 @@
   "representative_of": "Constitution-class heavy cruiser (NCC-1701 era). Fiction-adapted 12-zone layout for Crusher-to-the-Bridge demos; ~430 crew complement.",
   "provenance": [
     "spatial_layout.json description and deck_dimensions",
-    "zone count: 13"
+    "zone count: 13",
+    "per-deck non-overlapping compartment packing"
   ],
   "disclaimer": "Fiction-adapted layout for demonstration; not an official starship blueprint.",
   "zone_ids": [
@@ -23,21 +24,47 @@
     "Library",
     "Mess_Hall"
   ],
+  "decks": [
+    "saucer_primary",
+    "secondary_hull"
+  ],
   "view_bounds": {
-    "xmin": 6.5600000000000005,
-    "xmax": 270.88,
-    "ymin": -1.3708260088912256,
-    "ymax": 112.95
+    "xmin": -2.0,
+    "xmax": 291.0,
+    "ymin": -2.0,
+    "ymax": 129.0
   },
   "assets": {
     "deck_graphics": "deck_graphics.geojson",
     "deck_hull": "deck_hull.png",
-    "deck_blueprint_bg": "deck_blueprint_bg.png"
+    "deck_blueprint_bg": "deck_blueprint_bg.png",
+    "architectural_graphics": "graphics/graphics.json",
+    "plan_overview": "graphics/plan_overview.jpg",
+    "elevation": "graphics/elevation.jpg"
   },
-  "background_plate": "fiction_schematic",
+  "background_plate": "architectural_plan",
   "reference_photo": {
-    "license": "Original work (programmatic LCARS schematic)",
-    "credit": "Crusher-to-the-Bridge — Constitution-class inspired schematic (original geometric composition)",
+    "license": "Original work (AI-generated notional schematic)",
+    "credit": "Crusher-to-the-Bridge — fiction-adapted Constitution-inspired architectural plates (simplified silhouette, not show artwork)",
     "local_file": "reference_photo.jpg"
+  },
+  "architectural_graphics": {
+    "schema_version": "1.0",
+    "description": "User-supplied architectural underlays. Fiction-adapted Constitution-class silhouette — simplified geometry, not a reproduction of any televised Star Trek artwork.",
+    "elevation": {
+      "file": "elevation.jpg",
+      "style": "ai_generated_notional",
+      "credit": "Crusher-to-the-Bridge — fiction-adapted Constitution-inspired elevation (AI-generated schematic, original composition)",
+      "license": "Original work",
+      "fiction_adapted": true
+    },
+    "plan": {
+      "file": "plan_overview.jpg",
+      "style": "ai_generated_notional",
+      "credit": "Crusher-to-the-Bridge — fiction-adapted Constitution-inspired plan (AI-generated schematic, original composition)",
+      "license": "Original work",
+      "fiction_adapted": true
+    },
+    "deck_plans": {}
   }
 }
