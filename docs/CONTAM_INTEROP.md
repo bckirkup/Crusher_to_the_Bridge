@@ -59,7 +59,8 @@ Fiction platforms ship a plausible ContamW 3.4 bundle under
 
 Bundled for: `destroyer_baseline` (hobbyist-plus),
 `enterprise_constitution_tos` (hobbyist-plus),
-`enterprise_galaxy_tng` (hobbyist-plus), `mega_cruise_5000`. Regenerate after
+`enterprise_galaxy_tng` (hobbyist-plus),
+`mega_cruise_5000` (hobbyist-plus). Regenerate after
 JSON edits:
 
 ```bash

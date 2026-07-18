@@ -1,0 +1,57 @@
+{
+  "description": "Hobbyist-plus Contam overrides for mega_cruise_5000 (adjacency map + cabin HVAC only).",
+  "orifice_type_map": {
+    "corridor": "cabin_relief",
+    "doorway": "doorway",
+    "passageway": "passageway",
+    "elevator_bank": "elevator_bank",
+    "stairwell": "stairwell",
+    "service_stairwell": "service_stairwell",
+    "service_elevator": "service_elevator",
+    "service_hatch": "hatch",
+    "service_corridor": "service_corridor",
+    "open_deck": "promenade",
+    "open_front": "open_front",
+    "ladder_well": "ladder",
+    "multi_deck_void": "multi_deck_void"
+  },
+  "wind_profile": "ship_hull",
+  "filter_preset": "MERV11",
+  "hvac_filter": {
+    "AHU_Pax_Deck_D6": "MERV8",
+    "AHU_Pax_Deck_D7": "MERV8",
+    "AHU_Pax_Deck_D8": "MERV8",
+    "AHU_Pax_Deck_D9": "MERV8",
+    "AHU_Pax_Deck_D10": "MERV8",
+    "AHU_Pax_Deck_D11": "MERV8",
+    "AHU_Pax_Deck_D12": "MERV8",
+    "AHU_Pax_Deck_D13": "MERV8",
+    "AHU_Pax_Deck_D14": "MERV8",
+    "AHU_Dedicated_Medical": "HEPA",
+    "AHU_Dedicated_Engine": "MERV13"
+  },
+  "oa_fraction": {
+    "_default": 0.2,
+    "AHU_Pax_Deck_D6": 0.15,
+    "AHU_Pax_Deck_D7": 0.15,
+    "AHU_Pax_Deck_D8": 0.15,
+    "AHU_Pax_Deck_D9": 0.15,
+    "AHU_Pax_Deck_D10": 0.15,
+    "AHU_Pax_Deck_D11": 0.15,
+    "AHU_Pax_Deck_D12": 0.15,
+    "AHU_Pax_Deck_D13": 0.15,
+    "AHU_Pax_Deck_D14": 0.15,
+    "AHU_Dedicated_Medical": 0.4
+  },
+  "deck_temp_offset_K": {
+    "0_Engine": 5.0,
+    "1_Engine": 4.0
+  },
+  "zone_annotations": {
+    "Royal_Promenade": "Promenade",
+    "Medical_Center": "Medical Center",
+    "Engine_Room_Aft": "Engine Room",
+    "Main_Dining_Room_Lower": "Main Dining"
+  },
+  "night_setback": true
+}
