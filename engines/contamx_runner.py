@@ -208,6 +208,7 @@ class SimFrame:
 
     sim_time_s: int
     ambient: np.ndarray          # [Tambt, P, Ws, Wd, CC...]
+    path_nr: np.ndarray          # Contam path number per slot (from record nr)
     path_flow_kg_s: np.ndarray   # Flow0 per airflow path [kg/s]
     node_density: np.ndarray     # air density per airflow node [kg/m³]
     node_concentration: np.ndarray  # (n_contaminant_nodes, nctm) mass fraction
@@ -225,7 +226,12 @@ class SimResults:
     Every output frame (time step *and* the interleaved daily-summary
     record, which is byte-identical in size) is decoded into a
     :class:`SimFrame`. ``steady_state_frame`` returns the last decoded
-    time-step frame, which is what the airflow-field engine consumes.
+    *time-step* frame with valid node densities (trailing summary rows that
+    repeat ``sim_time`` with a broken node block are skipped).
+
+    Path flows are keyed by the ``nr`` embedded in each path record
+    (``nr(i4) dP(f4) Flow0(f4) Flow1(f4)``), not by the header cross-reference
+    table — ContamX 3.x xref ``(typ, nr)`` pairs are unreliable for mapping.
     """
 
     _HEADER_FIELDS = (
@@ -250,11 +256,10 @@ class SimResults:
         nafnd = self.header["nafnd"]
         nafpt = self.header["nafpt"]
 
-        # Airflow-node cross reference (typ, nr) x nafnd
+        # Cross-reference tables occupy a fixed byte span before the first
+        # frame; content is retained for diagnostics but not used to key flows.
         self.airflow_node_xref = self._take_i4(2 * nafnd).reshape(nafnd, 2)
-        # Contaminant-node cross reference (typ, nr) x nafnd
         self.contaminant_node_xref = self._take_i4(2 * nafnd).reshape(nafnd, 2)
-        # Airflow-path cross reference (typ, nr) x nafpt
         self.airflow_path_xref = self._take_i4(2 * nafpt).reshape(nafpt, 2)
 
         self._data_start = self._offset
@@ -276,8 +281,10 @@ class SimResults:
         nafpt = self.header["nafpt"]
         nccnd = self.header["nccnd"]
         ambient = (2 * 2) + (5 * 4) + nctm * 4
-        path = 4 * 4 * nafpt
-        node = 4 * 4 * (nafnd - 1)
+        # Path record: nr(i4) + dP(f4) + Flow0(f4) + Flow1(f4) = 16 bytes
+        path = 16 * nafpt
+        # Node record: nr(i4) + T(f4) + P(f4) + D(f4) = 16 bytes (ambient omitted)
+        node = 16 * (nafnd - 1)
         contaminant = ((1 * 4) + nctm * 4) * (nccnd - 1)
         return ambient, path, node, contaminant
 
@@ -307,16 +314,24 @@ class SimResults:
             ).astype(np.float64)
             p_off = off + ambient_sz
 
-            paths = np.frombuffer(
-                self._buf, dtype="<f4", count=4 * nafpt, offset=p_off,
-            ).reshape(nafpt, 4)
-            flow0 = paths[:, 2].astype(np.float64)
+            path_nr = np.empty(nafpt, dtype=np.int64)
+            flow0 = np.empty(nafpt, dtype=np.float64)
+            for i in range(nafpt):
+                base = p_off + 16 * i
+                path_nr[i] = int(np.frombuffer(
+                    self._buf, dtype="<i4", count=1, offset=base,
+                )[0])
+                flow0[i] = float(np.frombuffer(
+                    self._buf, dtype="<f4", count=1, offset=base + 8,
+                )[0])
             n_off = p_off + path_sz
 
-            nodes = np.frombuffer(
-                self._buf, dtype="<f4", count=4 * (nafnd - 1), offset=n_off,
-            ).reshape(nafnd - 1, 4)
-            density = nodes[:, 3].astype(np.float64)
+            density = np.empty(nafnd - 1, dtype=np.float64)
+            for i in range(nafnd - 1):
+                base = n_off + 16 * i
+                density[i] = float(np.frombuffer(
+                    self._buf, dtype="<f4", count=1, offset=base + 12,
+                )[0])
             c_off = n_off + node_sz
 
             ctm = np.frombuffer(
@@ -328,6 +343,7 @@ class SimResults:
             frames.append(SimFrame(
                 sim_time_s=sim_time,
                 ambient=ambient,
+                path_nr=path_nr,
                 path_flow_kg_s=flow0,
                 node_density=density,
                 node_concentration=concentration,
@@ -338,9 +354,14 @@ class SimResults:
     # ── public helpers ───────────────────────────────────────────────────
 
     def steady_state_frame(self) -> SimFrame:
-        """Return the last decoded frame (steady-state / final time step)."""
+        """Return the last usable time-step frame (not a trailing summary)."""
         if not self.frames:
             raise ValueError("No frames decoded from .SIM file")
+        # ContamX may append a same-sim_time summary whose node block does not
+        # match the time-step layout; prefer the last frame with real densities.
+        for frame in reversed(self.frames):
+            if frame.node_density.size and np.any(frame.node_density > 0.1):
+                return frame
         return self.frames[-1]
 
     def path_volumetric_flow_m3h(
@@ -349,8 +370,8 @@ class SimResults:
         """Map CONTAM airflow-path number → volumetric flow [m³/h].
 
         Converts the primary mass flow ``Flow0`` [kg/s] to volumetric flow
-        using the ambient air density, keyed by the path ``nr`` from the
-        airflow-path cross-reference table.
+        using mean positive node density (fallback ``_DEFAULT_AIR_DENSITY``),
+        keyed by the path ``nr`` embedded in each path record.
         """
         frame = frame or self.steady_state_frame()
         density = _DEFAULT_AIR_DENSITY
@@ -360,7 +381,8 @@ class SimResults:
                 density = float(positive.mean())
 
         flows: dict[int, float] = {}
-        for idx, path_nr in enumerate(self.airflow_path_xref[:, 1]):
-            mass_flow = float(frame.path_flow_kg_s[idx])
-            flows[int(path_nr)] = mass_flow / density * _SECONDS_PER_HOUR
+        for path_nr, mass_flow in zip(
+            frame.path_nr, frame.path_flow_kg_s, strict=True,
+        ):
+            flows[int(path_nr)] = float(mass_flow) / density * _SECONDS_PER_HOUR
         return flows

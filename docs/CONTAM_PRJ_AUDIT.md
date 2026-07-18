@@ -115,15 +115,15 @@ full-sim wall-clock is similar (Picard overhead dominates).
 synth. AHS bookkeeping paths are present (`bridge_input=21`) but SIM Flow0 on
 supply/return/recirc is ~0 → synthesizer emits nothing.
 
-**Kept-link dump (user):** all six share **exactly** `299.9999883335083` m³/h
-(= **0.1 kg/s** at ρ=1.2). Paths use different elements (Ladder orifice +
-Fan_25/26/27 with design 16.7/13.3/10 m³/h) so identical Flow0 is not physical
-CVF behavior. Path numbers alternate kept/zero for 12–23
-(`12,14,16,18,20,22` vs `13,15,17,19,21,23`) — fingerprint of SIM stride/join
-issues **or** Contam writing a constant on every other path. Next: SimRead3 LFR
-ground truth for p012/p014/p022 vs fan design; if LFR matches 0.1 kg/s, Contam
-is ignoring `fan_cvf`; if LFR shows design rates, fix `SimResults` path record
-layout.
+**Root cause (platform.sim dump):** `SimResults.path_volumetric_flow_m3h` keyed
+flows by the header cross-reference ``(typ, nr)`` table. ContamX 3.x xref
+content does not reliably map slot→path_nr; the real ``nr`` lives in each
+path record (``nr(i4) dP Flow0 Flow1``). Broken mapping assigned AHS terminal
+mass (~0.1 kg/s) onto fan path numbers → identical 300 m³/h kept links.
+**Fix:** key by embedded path-record ``nr``; skip trailing same-``sim_time``
+summary frames with invalid node densities. After fix, destroyer SIM yields
+fan design rates (~16.7/13.3/10), 17 kept + 8 AHS synth Crusher paths, Bridge
+out ≈76 m³/h (native 97). Re-run Windows compare suite with the patched reader.
 
 ---
 

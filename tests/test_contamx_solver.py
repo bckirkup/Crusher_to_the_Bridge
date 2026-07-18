@@ -207,6 +207,30 @@ def test_sim_reader_volumetric_flow_conversion(tmp_path):
     assert flows[1] == pytest.approx(3600.0, rel=1e-4)
 
 
+def test_sim_reader_uses_embedded_path_nr_not_xref():
+    """Regression: ContamX destroyer.sim fans must map by record nr.
+
+    Broken xref→index mapping previously assigned AHS 0.1 kg/s onto fan
+    path numbers (all kept links ≈300 m³/h). Embedded nr recovers design
+    fan_cvf rates (~16.7 / 13.3 / 10 m³/h).
+    """
+    sim_path = REPO_ROOT / "tests" / "fixtures" / "contam" / "destroyer_baseline.sim"
+    assert sim_path.is_file()
+    results = SimResults(str(sim_path))
+    frame = results.steady_state_frame()
+    assert frame.sim_time_s == 3600
+    assert float(frame.node_density[frame.node_density > 0].mean()) == pytest.approx(
+        1.2, rel=0.01,
+    )
+    flows = results.path_volumetric_flow_m3h()
+    assert flows[14] == pytest.approx(16.67, rel=0.02)   # Fan_25
+    assert flows[16] == pytest.approx(13.33, rel=0.02)   # Fan_26
+    assert flows[22] == pytest.approx(10.0, rel=0.02)    # Fan_27
+    # Must not collapse to the old identical 300 m³/h fingerprint
+    assert flows[14] != pytest.approx(300.0, rel=0.05)
+    assert flows[12] != pytest.approx(flows[14], rel=0.01)
+
+
 def test_sim_reader_rejects_truncated_file(tmp_path):
     bad = tmp_path / "bad.sim"
     bad.write_bytes(struct.pack("<3i", 24, 1, 1))  # too short for header
