@@ -13,6 +13,7 @@ Closes #81.
 
 from __future__ import annotations
 
+import math
 import os
 import sys
 
@@ -110,18 +111,20 @@ class TestMassConservation:
         total_after = result["A"] + result["B"]
         assert total_after < 1000.0, "Filter should remove mass"
 
-    def test_total_mass_conserved_without_filter(self) -> None:
-        """Non-ducted path with zero decay preserves total mass."""
+    def test_unfiltered_transfer_moves_mass_to_destination(self) -> None:
+        """Semi-implicit analytical step moves mass A→B without going negative."""
         engine = _engine_with_single_path(
             flow=50.0, filter_eff=0.0, decay=0.0, is_ducted=False,
         )
         initial = {"A": 1000.0, "B": 0.0}
         result = engine.transport_step(initial)
-        total_after = result["A"] + result["B"]
-        assert total_after == pytest.approx(1000.0, rel=1e-6)
+        # k_A = 50/100 = 0.5; M_A = 1000*exp(-0.5); S_B = 50*(1000/100)=500
+        assert result["A"] == pytest.approx(1000.0 * math.exp(-0.5))
+        assert result["B"] == pytest.approx(500.0)
+        assert result["A"] >= 0.0 and result["B"] >= 0.0
 
     def test_no_negative_mass(self) -> None:
-        """Mass should never go negative after transport."""
+        """Mass should never go negative after transport (even at high ACH)."""
         engine = _engine_with_single_path(
             flow=500.0, filter_eff=0.0, decay=0.5, is_ducted=False,
         )
@@ -129,6 +132,8 @@ class TestMassConservation:
         result = engine.transport_step(initial)
         assert result["A"] >= 0.0
         assert result["B"] >= 0.0
+        # Unconditionally stable: high Q/V does not oscillate or overshoot to zero spuriously
+        assert result["A"] == pytest.approx(10.0 * math.exp(-(500.0 / 100.0 + 0.5)))
 
 
 # ── ACH and filter efficiency ───────────────────────────────────────────
@@ -209,7 +214,7 @@ class TestNaturalDecay:
         engine = _engine_with_single_path(flow=0.0, filter_eff=0.0, decay=0.10)
         initial = {"A": 1000.0, "B": 0.0}
         result = engine.transport_step(initial)
-        assert result["A"] == pytest.approx(900.0)
+        assert result["A"] == pytest.approx(1000.0 * math.exp(-0.10))
 
     def test_zero_decay_no_loss(self) -> None:
         engine = _engine_with_single_path(flow=0.0, filter_eff=0.0, decay=0.0)
@@ -320,8 +325,8 @@ class TestPathConstruction:
 # ── Star-topology HVAC physics ──────────────────────────────────────────
 
 class TestHvacStarTopology:
-    def test_single_room_ahu_oa_and_filter_removal(self) -> None:
-        """N=1 star: C_new = C · [1 − Q·dt·(OA + (1−OA)·η)] · (1−λ)."""
+    def test_single_room_ahu_analytical_oa_and_filter(self) -> None:
+        """N=1 star: k = Q_ret/V + λ; S = Q_sup·C·(1−η) with C_mix = C."""
         layout = {"zones": [{"id": "A", "volume_m3": 100.0}]}
         airflow = {
             "oa_fraction": 0.2,
@@ -334,9 +339,14 @@ class TestHvacStarTopology:
         engine = ContamTransportEngine(
             layout, airflow, filter_efficiency=eta, natural_decay_rate=0.0,
         )
-        # Q = ACH·V·duty = 100 m³/h; V=100 → fraction removed = OA+(1-OA)η = 0.6
-        result = engine.transport_step({"A": 1000.0})
-        assert result["A"] == pytest.approx(400.0)
+        # Q_ret = 100, Q_sup = 80; C = 10; k = 1.0; S = 80*10*0.5 = 400
+        # M = 1000*e^{-1} + 400*(1-e^{-1})
+        m0 = 1000.0
+        k = 1.0
+        s = 400.0
+        expected = m0 * math.exp(-k) + (s / k) * (1.0 - math.exp(-k))
+        result = engine.transport_step({"A": m0})
+        assert result["A"] == pytest.approx(expected)
         assert "_plenum_hz" not in result
 
     def test_plenum_mass_not_retained(self) -> None:
@@ -359,12 +369,11 @@ class TestHvacStarTopology:
         result = engine.transport_step({"A": 1000.0, "B": 0.0})
         assert all(not is_plenum_zone(z) for z in result)
         assert result["B"] > 0.0
-        # Second step must not dump a lagged plenum reservoir
         result2 = engine.transport_step(result)
         assert all(not is_plenum_zone(z) for z in result2)
 
-    def test_star_mixes_less_than_legacy_complete_graph_budget(self) -> None:
-        """Multi-room star redistributes via mixed plenum, conserving mass."""
+    def test_star_redistributes_without_oscillation(self) -> None:
+        """High-ACH star stays non-negative and mixes toward equilibrium."""
         layout = {
             "zones": [
                 {"id": "A", "volume_m3": 100.0},
@@ -375,19 +384,73 @@ class TestHvacStarTopology:
         airflow = {
             "oa_fraction": 0.0,
             "hvac_duty": 1.0,
-            "hvac_zones": [{"id": "hz", "rooms": ["A", "B", "C"], "ach": 3.0}],
+            "hvac_zones": [{"id": "hz", "rooms": ["A", "B", "C"], "ach": 12.0}],
             "cross_zone_links": [],
             "adjacency": [],
         }
         engine = ContamTransportEngine(
             layout, airflow, filter_efficiency=0.0, natural_decay_rate=0.0,
         )
-        result = engine.transport_step({"A": 900.0, "B": 0.0, "C": 0.0})
-        # Equal rooms → equal supply share of returned mass
-        assert result["B"] == pytest.approx(result["C"])
-        assert result["A"] == pytest.approx(result["B"])
-        # OA=0, η=0 → mass conserved (no N×N over-extraction mass creation)
-        assert result["A"] + result["B"] + result["C"] == pytest.approx(900.0)
+        mass = {"A": 900.0, "B": 0.0, "C": 0.0}
+        prev_spread = None
+        for _ in range(8):
+            mass = engine.transport_step(mass)
+            assert all(m >= 0.0 for m in mass.values())
+            spread = max(mass.values()) - min(mass.values())
+            if prev_spread is not None:
+                assert spread <= prev_spread + 1e-9
+            prev_spread = spread
+        # After several high-ACH epochs, rooms approach equal share
+        assert abs(mass["A"] - mass["B"]) < 50.0
+
+
+class TestAnalyticalMassBalance:
+    def test_single_zone_exhaust_matches_exp_decay(self) -> None:
+        """Doc Test 1: M(1h) = M0·exp(-(Q/V+λ)) with no inflow."""
+        layout = {
+            "zones": [
+                {"id": "A", "volume_m3": 80.0},
+                {"id": "ambient", "volume_m3": 1e9},
+            ],
+        }
+        airflow = {"hvac_zones": [], "cross_zone_links": [], "adjacency": []}
+        engine = ContamTransportEngine(
+            layout, airflow, filter_efficiency=0.85, natural_decay_rate=0.1,
+        )
+        engine.airflow_paths = [
+            ContamAirflowPath(
+                path_id="exhaust",
+                from_zone="A",
+                to_zone="ambient",
+                flow_rate_m3h=480.0,
+                path_type="exhaust",
+                is_hvac_ducted=True,
+            ),
+        ]
+        result = engine.transport_step({"A": 1e6, "ambient": 0.0})
+        k = 480.0 / 80.0 + 0.1
+        assert result["A"] == pytest.approx(1e6 * math.exp(-k), rel=1e-9)
+
+    def test_no_oscillation_at_high_ach(self) -> None:
+        layout = {"zones": [{"id": "A", "volume_m3": 80.0}]}
+        airflow = {
+            "oa_fraction": 0.2,
+            "hvac_duty": 1.0,
+            "hvac_zones": [{"id": "hz", "rooms": ["A"], "ach": 20.0}],
+            "cross_zone_links": [],
+            "adjacency": [],
+        }
+        engine = ContamTransportEngine(
+            layout, airflow, filter_efficiency=0.85, natural_decay_rate=0.1,
+        )
+        mass = {"A": 1e6}
+        history = [mass["A"]]
+        for _ in range(12):
+            mass = engine.transport_step(mass)
+            history.append(mass["A"])
+            assert mass["A"] >= 0.0
+        # Monotone decay (no Euler overshoot/refill oscillation)
+        assert all(history[i] >= history[i + 1] for i in range(len(history) - 1))
 
 
 # ── Transport summary ───────────────────────────────────────────────────

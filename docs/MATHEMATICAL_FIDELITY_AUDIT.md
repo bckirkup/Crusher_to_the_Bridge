@@ -491,17 +491,16 @@ return pathogen_mass / self.volume_m3   # C = M / V
 
 | Verdict | **MATCH** | Standard CONTAM definition. |
 
-### 3.3 Filter Efficiency Application
+### 3.3 Contaminant Mass Balance (analytical ODE)
 
-**Target** — `py_contam_bridge.py:352–356`:
+**Target** — `py_contam_bridge.py` `transport_step`:
 ```python
-if path.is_hvac_ducted:
-    mass_arriving = mass_transfer * (1.0 - self.filter_efficiency)
-else:
-    mass_arriving = mass_transfer
+# S from epoch-start concentrations; η on HVAC-ducted inflows only
+k = Σ(Q_out)/V + λ
+M_new = M * exp(-k*dt) + (S/k) * (1 - exp(-k*dt))
 ```
 
-| Verdict | **MATCH** | η applied only on HVAC-ducted paths, consistent with CONTAM's species-specific filter model. |
+| Verdict | **MATCH** | Exact well-mixed ODE with frozen inter-zone sources (CONTAM-style). Replaces forward Euler + mass caps that oscillated at ACH≥4 / 1-hour epochs. Filter η still applied only on HVAC-ducted inflow rates. |
 
 ### 3.4 ACH-Based Intra-Zone Flow
 

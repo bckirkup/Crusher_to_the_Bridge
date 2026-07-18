@@ -311,6 +311,9 @@ Star topology through a virtual AHU plenum (not an N×N room digraph)::
 
 `room → plenum` at `ACH·V·duty`; `plenum → room` at that flow × `(1−oa)` (filtered).
 
+Native contaminant transport uses the analytical well-mixed ODE
+`M(t+Δt)=M e^{-kΔt}+(S/k)(1−e^{-kΔt})` (unconditionally stable at 1-hour epochs).
+
 Fiction Contam platforms set `oa_fraction: 0.2` and `hvac_duty: 0.5` so the native twin matches
 hobbyist ContamX steady frames (night half-duty). ContamX builds a
 **pressure/AHS/fan field**, then Crusher keeps only non-zero real↔real SIM
