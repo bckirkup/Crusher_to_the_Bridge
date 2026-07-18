@@ -7,6 +7,8 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+import pytest
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
@@ -34,8 +36,8 @@ def test_synthesize_ahs_two_room_mixing() -> None:
     assert len(paths) == 2  # A→B and B→A
     by_pair = {(p.from_zone, p.to_zone): p.flow_rate_m3h for p in paths}
     # Q_AB = 100 * (160/200) * (100/200) = 40
-    assert by_pair[("A", "B")] == 40.0
-    assert by_pair[("B", "A")] == 40.0
+    assert by_pair[("A", "B")] == pytest.approx(40.0)
+    assert by_pair[("B", "A")] == pytest.approx(40.0)
     assert all(p.is_hvac_ducted for p in paths)
     assert all(p.path_type == "hvac_recirculation" for p in paths)
 
@@ -74,8 +76,8 @@ def test_synthesize_rec_zero_applies_oa_fraction() -> None:
     )
     by_pair = {(p.from_zone, p.to_zone): p.flow_rate_m3h for p in paths}
     # Rec = 0.8 * 200 = 160 → Q_ij = 100 * (160/200) * (100/200) = 40
-    assert by_pair[("A", "B")] == 40.0
-    assert by_pair[("B", "A")] == 40.0
+    assert by_pair[("A", "B")] == pytest.approx(40.0)
+    assert by_pair[("B", "A")] == pytest.approx(40.0)
 
 
 def test_contamx_engine_includes_synthesized_ahs() -> None:
