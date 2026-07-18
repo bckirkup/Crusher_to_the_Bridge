@@ -102,16 +102,25 @@ not restore ContamX↔native transport agreement.**
 Native transport wall-clock remains ≫ ContamX (≈16–194× on these jobs);
 full-sim wall-clock is similar (Picard overhead dominates).
 
-`n_paths=6` on destroyer is **no longer safely read as “AHS2 synth only”**:
-ContamX finals put mass in Engine_Room from a Bridge inject, so at least one
-Bridge↔Engine edge (or equivalent) survives — but Mess_Hall/Berthing stay
-empty, so the ContamX Crusher graph is still a tiny fraction of the native ACH
-digraph. Next Windows step: re-run compare (now emits `path_inventory`) and
-`contam_flow_compare --run-contamx` to list the six survivors and confirm
-whether `fan_cvf` Flow0 is ~0 vs a path_nr join bug.
+### Live `contam_flow_compare --run-contamx` (destroyer, post-KeyError fix)
 
-Crack-scale openings are fixed. Forced fans *should* still couple Bridge on
-destroyer; confirm with SIM dump before calibrating native ACH to ContamX.
+| Signal | Value |
+|--------|-------|
+| crusher_paths | **6 kept + 0 AHS synth** |
+| Bridge | native_out=7 (97 m³/h); ContamX_out=2 (**600 m³/h**); not isolated |
+| zero-flow real | 11 (all passageways/hatch + many ladder_well_* / Bridge→Berthing fan) |
+| Inferred kept | p012 Engine→Bridge; p014 Bridge→Mess; p016/18/20 *→Engine; p022 Bridge→Engine |
+
+**Revised reading of `n_paths=6`:** survivors are **real SIM edges**, not AHS2
+synth. AHS bookkeeping paths are present (`bridge_input=21`) but SIM Flow0 on
+supply/return/recirc is ~0 → synthesizer emits nothing. ContamX Bridge out-flow
+**600 m³/h** matches AHS2 room Fahs (≈600 m³/h), not fan_cvf design (16.7+10) —
+suspect Flow0 join/units or Contam over-driving the two Bridge out edges; check
+`kept_links[].flow_m3h` in the JSON.
+
+Crack-scale openings are fixed. Forced fans partially couple Bridge, but most
+orifices still ΔP≈0 and AHS→Crusher bridging is dead until AHS Flow0 or Fahs
+fallback is fixed.
 
 ---
 
