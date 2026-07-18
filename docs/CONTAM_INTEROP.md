@@ -248,6 +248,12 @@ run_contam_compare.bat
 
 Reports write to `telemetry_buffer/contam_compare/` (gitignored).
 
+Transport reports include `path_inventory` (path-type histogram, injection
+out-degree, capped edge sample) for both engines so a ContamX `n_paths`
+collapse is diagnosable without a separate flow dump. When ContamX leaves an
+injection zone with zero Crusher out-edges, the job also sets
+`contamx_injection_isolated: true`.
+
 When ContamX is unavailable the suite still runs native-only and records
 `contamx_error` per job.
 

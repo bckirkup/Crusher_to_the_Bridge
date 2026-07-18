@@ -39,6 +39,7 @@ import os
 import statistics
 import sys
 import time
+from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from typing import Any
 
@@ -147,6 +148,55 @@ def _divergence(
     }
 
 
+def _path_inventory(
+    engine: ContamTransportEngine,
+    injections: dict[str, float],
+    *,
+    max_edges: int = 24,
+) -> dict[str, Any]:
+    """Summarize Crusher airflow edges so sparse ContamX graphs are visible.
+
+    When ContamX drops zero-SIM real↔real paths, ``n_paths`` alone is
+    ambiguous (AHS synth vs residual fans). This inventory lists path types,
+    injection-zone out-degree, and a capped edge sample.
+    """
+    by_type = Counter(p.path_type for p in engine.airflow_paths)
+    out_m3h: dict[str, float] = defaultdict(float)
+    out_degree: dict[str, int] = defaultdict(int)
+    edges: list[dict[str, Any]] = []
+    for path in engine.airflow_paths:
+        out_degree[path.from_zone] += 1
+        out_m3h[path.from_zone] += float(path.flow_rate_m3h)
+        edges.append({
+            "path_id": path.path_id,
+            "from": path.from_zone,
+            "to": path.to_zone,
+            "m3h": round(float(path.flow_rate_m3h), 6),
+            "type": path.path_type,
+            "ducted": bool(path.is_hvac_ducted),
+        })
+    edges.sort(key=lambda e: (-e["m3h"], e["from"], e["to"], e["path_id"]))
+
+    inject_zones = sorted(injections)
+    connectivity: list[dict[str, Any]] = []
+    for zone in inject_zones:
+        degree = int(out_degree.get(zone, 0))
+        connectivity.append({
+            "zone": zone,
+            "out_degree": degree,
+            "out_m3h": round(float(out_m3h.get(zone, 0.0)), 6),
+            "isolated": degree == 0,
+        })
+
+    return {
+        "n_paths": len(engine.airflow_paths),
+        "by_type": dict(sorted(by_type.items())),
+        "injection_connectivity": connectivity,
+        "edges_sample": edges[:max_edges],
+        "edges_truncated": max(0, len(edges) - max_edges),
+    }
+
+
 def _time_calls(fn, repeats: int) -> dict[str, float]:
     samples: list[float] = []
     result: Any = None
@@ -229,6 +279,7 @@ def run_transport_job(job: dict[str, Any]) -> dict[str, Any]:
         natural_decay_rate=hvac["natural_decay_rate"],
     )
     report["native"]["n_paths"] = len(native_eng.airflow_paths)
+    report["native"]["path_inventory"] = _path_inventory(native_eng, injections)
 
     cfg = {
         "ship_graph": {
@@ -250,12 +301,18 @@ def run_transport_job(job: dict[str, Any]) -> dict[str, Any]:
             "timing": cx_timing,
             "final_concentrations": contamx_traj[-1] if contamx_traj else {},
             "n_paths": len(eng.airflow_paths),
+            "path_inventory": _path_inventory(eng, injections),
             "binary": find_contamx(cfg),
         }
         report["divergence"] = _divergence(native_traj, contamx_traj)
         nt = native_timing["seconds_mean"]
         ct = cx_timing["seconds_mean"]
         report["speedup_native_over_contamx"] = (ct / nt) if nt > 0 else None
+        # Highlight ContamX injection isolation (common after zero-SIM drops).
+        cx_conn = report["contamx"]["path_inventory"]["injection_connectivity"]
+        report["contamx_injection_isolated"] = any(
+            c.get("isolated") for c in cx_conn
+        )
     except ContamXUnavailable as exc:
         report["contamx_error"] = str(exc)
 
@@ -414,10 +471,26 @@ def _print_job_summary(report: dict[str, Any]) -> None:
             div = report["divergence"]
             print(f"  final L1={div['final_l1']:.4g}  L∞={div['final_linf']:.4g}  "
                   f"mean L1={div['mean_l1']:.4g}")
+            n_paths = (native.get("n_paths"),
+                       (report.get("contamx") or {}).get("n_paths"))
+            print(f"  n_paths native/contamx: {n_paths[0]}/{n_paths[1]}")
+            inv = (report.get("contamx") or {}).get("path_inventory") or {}
+            if inv.get("by_type"):
+                print(f"  ContamX path types: {inv['by_type']}")
+            for conn in inv.get("injection_connectivity") or []:
+                flag = " ISOLATED" if conn.get("isolated") else ""
+                print(
+                    f"  ContamX inject {conn['zone']}: "
+                    f"out_degree={conn['out_degree']} "
+                    f"out_m3h={conn['out_m3h']}{flag}"
+                )
         if report.get("delta"):
             print(f"  outcome delta (contamx-native): {report['delta']}")
     else:
         print(f"  ContamX skipped: {report.get('contamx_error', 'unavailable')}")
+        inv = (native.get("path_inventory") or {})
+        if inv.get("by_type"):
+            print(f"  native path types: {inv['by_type']}")
 
 
 def main(argv: list[str] | None = None) -> int:

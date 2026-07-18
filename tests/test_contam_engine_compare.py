@@ -71,14 +71,43 @@ def test_transport_job_native_only_offline() -> None:
     assert report["mode"] == "transport"
     assert report["native"]["timing"]["seconds_mean"] >= 0.0
     assert report["native"]["final_concentrations"]
+    inv = report["native"]["path_inventory"]
+    assert inv["n_paths"] == report["native"]["n_paths"]
+    assert inv["by_type"]
+    assert inv["injection_connectivity"]
+    assert inv["injection_connectivity"][0]["zone"] == "Bridge"
+    assert inv["injection_connectivity"][0]["out_degree"] > 0
     # ContamX may or may not be present; structure must always be valid
     assert "contamx_available" in report
     if report["contamx_available"]:
         assert report["divergence"] is not None
         assert "final_l1" in report["divergence"]
         assert report["contamx"]["timing"]["seconds_mean"] >= 0.0
+        assert "path_inventory" in report["contamx"]
+        assert "contamx_injection_isolated" in report
     else:
         assert report.get("contamx_error")
+
+
+def test_path_inventory_marks_isolated_injection() -> None:
+    spatial = json.loads(
+        (REPO_ROOT / "data/platforms/destroyer_baseline/spatial_layout.json")
+        .read_text(encoding="utf-8")
+    )
+    airflow = json.loads(
+        (REPO_ROOT / "data/platforms/destroyer_baseline/air_flow_paths.json")
+        .read_text(encoding="utf-8")
+    )
+    eng = cec.ContamTransportEngine(
+        spatial_layout=spatial,
+        air_flow_paths=airflow,
+    )
+    # Empty path list → every inject zone is ContamX-isolated style
+    eng.airflow_paths = []
+    inv = cec._path_inventory(eng, {"Bridge": 1.0e6})
+    assert inv["n_paths"] == 0
+    assert inv["injection_connectivity"][0]["isolated"] is True
+    assert inv["edges_sample"] == []
 
 
 def test_full_sim_job_native_offline() -> None:
