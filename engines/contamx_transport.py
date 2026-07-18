@@ -305,7 +305,8 @@ def build_contamx_engine(
 
     try:
         if prj_path is None:
-            # Last resort: export ContamW 3.4 to a temp dir
+            # Fiction bootstrap last resort: synthesize ContamW 3.4 from JSON
+            # when no authentic/bundled .prj is available.
             prj_text, exported = export_prj_with_path_map(spatial, airflow)
             tmp_ctx = tempfile.TemporaryDirectory(prefix="crusher_contamx_")
             tmp_dir = tmp_ctx.__enter__()
@@ -328,7 +329,15 @@ def build_contamx_engine(
                 prj_path, allowed_roots=allowed_roots,
             )
             if entries is None:
-                entries = _path_map_entries_from_airflow(spatial, airflow)
+                # Primary Path A contract: derive path_map from the PRJ itself
+                # (never rebuild export order from JSON — that only matches
+                # fiction bootstrap bundles).
+                from tools.contamw34_prj import path_map_from_prj
+
+                with validated_open(
+                    prj_path, "r", allowed_roots=allowed_roots, encoding="utf-8",
+                ) as fh:
+                    entries = path_map_from_prj(fh.read())
 
         sim_path = run_contamx(prj_path, binary, config=cfg)
         sim = SimResults(sim_path)

@@ -1,39 +1,35 @@
 #!/usr/bin/env python3
 """
-contam_prj_bridge.py – CONTAM ``.prj`` import/export bridge
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+contam_prj_bridge.py – CONTAM ``.prj`` ↔ JSON bridge
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Translates between this project's native JSON contracts
-(``spatial_layout.json`` + ``air_flow_paths.json``) and NIST CONTAM
-``.prj`` project files.
+**Primary product loop (PRJ is the high-fidelity source of truth):**
 
-**Export (default)** writes ContamW **3.4** grammar that ContamX can parse,
-plus a ``path_map.json`` sidecar aligning ContamX path indices to Crusher
-zone pairs. See ``tools/contamw34_prj.py``.
+1. **Path A** — ContamX runs a ContamW 3.4 ``.prj`` for the airflow field;
+   Crusher keeps pathogen mass balance (see ``engines/contamx_transport``).
+2. **Path B** — ``--simplify`` dumbs a full ``.prj`` down to
+   ``spatial_layout.json`` + ``air_flow_paths.json`` (+ ``path_map.json``)
+   for the fast native prescribed-flow engine.
 
-**Simplify** reads authentic ContamW 3.4 projects into simplified platform
-JSON (Path B — native solver). Controls, schedules, wind, ducts, and
-sources are dropped.
-
-**Import** still accepts the legacy Crusher interchange dialect
-(``!------`` section headers) for older files.
+**Fiction bootstrap only (JSON → PRJ):** ``--export`` / 
+``scripts/generate_platform_contam_prj.py`` synthesize plausible ContamW 3.4
+projects for Mega Cruise / Enterprise demos that have no authentic Contam
+model. Do not treat this as the normal Contam authoring path.
 
 CONTAM docs: NIST TN 1887r1 —
 https://nvlpubs.nist.gov/nistpubs/TechnicalNotes/NIST.TN.1887r1.pdf
 
 Usage::
 
-    python tools/contam_prj_bridge.py --export \\
-        --platform data/platforms/mega_cruise_5000 \\
-        --output data/platforms/mega_cruise_5000/contam/platform.prj
-
-    python tools/contam_prj_bridge.py --simplify \\
+    # Path B — authentic PRJ → simplified JSON + path_map
+    python3 tools/contam_prj_bridge.py --simplify \\
         --input path/to/full.prj \\
         --output data/platforms/imported_from_contam/
 
-    python tools/contam_prj_bridge.py --import \\
-        --input legacy_interchange.prj \\
-        --output data/platforms/imported_legacy/
+    # Fiction bootstrap only
+    python3 tools/contam_prj_bridge.py --export \\
+        --platform data/platforms/mega_cruise_5000 \\
+        --output data/platforms/mega_cruise_5000/contam/platform.prj
 """
 
 from __future__ import annotations
@@ -57,6 +53,7 @@ from simulation_utils.paths import (  # noqa: E402
 from tools.contamw34_prj import (  # noqa: E402
     PRJ_SIGNATURE_34,
     export_contamw34,
+    path_map_from_prj,
     simplify_contamw34,
 )
 
@@ -449,8 +446,11 @@ def import_prj_to_platform(input_path: str, output_dir: str) -> tuple[str, str]:
     return _write_platform_json(spatial_layout, air_flow_paths, output_dir)
 
 
-def simplify_prj_to_platform(input_path: str, output_dir: str) -> tuple[str, str]:
-    """Force ContamW 3.4 simplify path (Path B)."""
+def simplify_prj_to_platform(
+    input_path: str,
+    output_dir: str,
+) -> tuple[str, str, str]:
+    """Path B: ContamW 3.4 ``.prj`` → platform JSON + ``path_map.json``."""
     input_path = resolve_repo_path(REPO_ROOT, input_path)
     with validated_open(
         input_path, "r", allowed_roots=(REPO_ROOT,), encoding="utf-8",
@@ -460,7 +460,27 @@ def simplify_prj_to_platform(input_path: str, output_dir: str) -> tuple[str, str
     spatial_layout, air_flow_paths = simplify_contamw34(text, warnings_out=warn)
     for w in warn:
         print(f"  warning: {w}")
-    return _write_platform_json(spatial_layout, air_flow_paths, output_dir)
+    path_map = path_map_from_prj(text)
+    spatial_path, airflow_path = _write_platform_json(
+        spatial_layout, air_flow_paths, output_dir,
+    )
+    map_path = _write_path_map_json(path_map, output_dir)
+    return spatial_path, airflow_path, map_path
+
+
+def _write_path_map_json(
+    path_map: list[dict[str, Any]],
+    output_dir: str,
+) -> str:
+    output_dir = resolve_repo_path(REPO_ROOT, output_dir)
+    prepare_output_directory(output_dir, allowed_roots=(REPO_ROOT,))
+    map_path = os.path.join(output_dir, _PATH_MAP_JSON)
+    with validated_open(
+        map_path, "w", allowed_roots=(REPO_ROOT,), encoding="utf-8",
+    ) as fh:
+        json.dump(path_map, fh, indent=2)
+        fh.write("\n")
+    return map_path
 
 
 def _write_platform_json(
@@ -490,33 +510,35 @@ def _write_platform_json(
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        description="Import/export between Crusher-to-the-Bridge platform JSON "
-                    "and ContamW 3.4 / legacy CONTAM .prj files.",
+        description=(
+            "CONTAM bridge: Path B --simplify (PRJ→JSON+path_map) is primary; "
+            "--export is fiction-ship bootstrap only (JSON→PRJ)."
+        ),
     )
     mode = parser.add_mutually_exclusive_group(required=True)
     mode.add_argument(
-        "--export", action="store_true",
-        help="Export a platform directory to a ContamW 3.4 .prj (+ path_map)",
+        "--simplify", action="store_true",
+        help="Path B: simplify ContamW 3.4 .prj → platform JSON + path_map.json",
     )
     mode.add_argument(
         "--import", dest="do_import", action="store_true",
         help="Import a .prj (auto-detect ContamW 3.4 vs legacy interchange)",
     )
     mode.add_argument(
-        "--simplify", action="store_true",
-        help="Simplify an authentic ContamW 3.4 .prj into platform JSON",
+        "--export", action="store_true",
+        help="FICTION BOOTSTRAP ONLY: synthesize ContamW 3.4 .prj from JSON",
     )
     parser.add_argument(
         "--platform", "-p",
-        help="Platform directory to export (with --export)",
+        help="Platform directory to export (with --export bootstrap)",
     )
     parser.add_argument(
         "--input", "-i",
-        help="Input CONTAM .prj file (--import / --simplify)",
+        help="Input CONTAM .prj file (--simplify / --import)",
     )
     parser.add_argument(
         "--output", "-o", required=True,
-        help="Output .prj (--export) or output directory (--import/--simplify)",
+        help="Output directory (--simplify/--import) or .prj path (--export)",
     )
     args = parser.parse_args(argv)
 
@@ -524,20 +546,25 @@ def main(argv: list[str] | None = None) -> int:
         if not args.platform:
             parser.error("--export requires --platform")
         out = export_platform_to_prj(args.platform, args.output)
-        print(f"  Wrote ContamW 3.4 project file: {out}")
+        print(f"  Wrote fiction-bootstrap ContamW 3.4 project: {out}")
+        print("  (JSON→PRJ is for demos without an authentic Contam model)")
         return 0
 
     if not args.input:
-        parser.error("--import/--simplify requires --input")
+        parser.error("--simplify/--import requires --input")
 
     if args.simplify:
-        spatial_path, airflow_path = simplify_prj_to_platform(
+        spatial_path, airflow_path, map_path = simplify_prj_to_platform(
             args.input, args.output,
         )
-    else:
-        spatial_path, airflow_path = import_prj_to_platform(
-            args.input, args.output,
-        )
+        print(f"  Wrote: {spatial_path}")
+        print(f"  Wrote: {airflow_path}")
+        print(f"  Wrote: {map_path}")
+        return 0
+
+    spatial_path, airflow_path = import_prj_to_platform(
+        args.input, args.output,
+    )
     print(f"  Wrote: {spatial_path}")
     print(f"  Wrote: {airflow_path}")
     return 0

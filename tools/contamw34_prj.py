@@ -813,6 +813,131 @@ def path_map_full_order(
     ]
 
 
+def path_map_from_prj(text: str) -> list[dict[str, Any]]:
+    """Build ContamX ``path_map`` entries directly from a ContamW 3.4 ``.prj``.
+
+    This is the Path A / Path B primary contract: authentic PRJs carry their
+    own path numbering. Fiction JSON→PRJ export is bootstrap-only.
+    """
+    if not text.lstrip().startswith("ContamW"):
+        raise ValueError(
+            "Not a recognized CONTAM .prj file (missing 'ContamW' signature)"
+        )
+    sections = {name: body for name, body in _section_blocks(text)}
+
+    zone_nr_to_id: dict[int, str] = {}
+    phantom_nrs: set[int] = set()
+    real_nrs: set[int] = set()
+    for ln in sections.get("zones", []):
+        if ln.strip().startswith("!"):
+            continue
+        toks = ln.split()
+        if len(toks) < 11 or not toks[0].isdigit():
+            continue
+        nr = int(toks[0])
+        flag = int(toks[1])
+        name = toks[10]
+        zone_nr_to_id[nr] = name
+        if (
+            flag == _ZONE_AHS
+            or "(Ret)" in name
+            or "(Sup)" in name
+            or name.endswith("_Ret")
+            or name.endswith("_Sup")
+        ):
+            phantom_nrs.add(nr)
+        else:
+            real_nrs.add(nr)
+
+    # AHS system-path numbers (pr/ps/px) → ahs group
+    ahs_path_group: dict[int, int] = {}
+    for ln in sections.get("simple AHS", []):
+        if ln.strip().startswith("!"):
+            continue
+        toks = ln.split()
+        if len(toks) >= 6 and toks[0].isdigit():
+            ahs_nr = int(toks[0])
+            for pnr in (int(toks[3]), int(toks[4]), int(toks[5])):
+                ahs_path_group[pnr] = ahs_nr
+
+    elem_is_fan: dict[int, bool] = {}
+    body = sections.get("flow elements", [])
+    i = 0
+    while i < len(body):
+        toks = body[i].split()
+        if len(toks) >= 4 and toks[0].isdigit():
+            elem_is_fan[int(toks[0])] = "fan" in toks[2].lower()
+            j = i + 1
+            while j < len(body) and not body[j].strip():
+                j += 1
+            i = j + 1
+            continue
+        i += 1
+
+    def _endpoint_name(nr: int) -> str:
+        if nr < 0:
+            return "ambient"
+        return zone_nr_to_id.get(nr, f"zone_{nr}")
+
+    path_map: list[dict[str, Any]] = []
+    for ln in sections.get("flow paths", []):
+        if ln.strip().startswith("!"):
+            continue
+        toks = ln.split()
+        if len(toks) < 11 or not toks[0].isdigit():
+            continue
+        try:
+            pnr = int(toks[0])
+            flag = int(toks[1])
+            from_nr = int(toks[2])
+            to_nr = int(toks[3])
+            elem_nr = int(toks[4])
+            ahs_field = int(toks[7])
+        except ValueError:
+            continue
+
+        from_name = _endpoint_name(from_nr)
+        to_name = _endpoint_name(to_nr)
+        from_ph = from_nr in phantom_nrs or from_nr < 0
+        to_ph = to_nr in phantom_nrs or to_nr < 0
+        both_real = (from_nr in real_nrs) and (to_nr in real_nrs)
+
+        ahs_nr = ahs_field if ahs_field > 0 else ahs_path_group.get(pnr, 0)
+        if flag == _PATH_AHS_OA:
+            kind = "ahs_oa"
+        elif flag == _PATH_AHS_EXHAUST:
+            kind = "ahs_exhaust"
+        elif flag == _PATH_AHS_RECIRC:
+            kind = "ahs_recirc"
+        elif flag == _PATH_AHS_TERMINAL:
+            if from_ph and not to_ph:
+                kind = "ahs_supply"
+            elif to_ph and not from_ph:
+                kind = "ahs_return"
+            else:
+                kind = "ahs_terminal"
+        elif from_nr < 0 or to_nr < 0:
+            kind = "envelope_leak"
+        elif both_real and elem_is_fan.get(elem_nr, False):
+            kind = "cross_zone"
+        elif both_real:
+            kind = "passageway"
+        else:
+            kind = "other"
+
+        path_map.append({
+            "path_nr": pnr,
+            "from_zone": from_name,
+            "to_zone": to_name,
+            "is_hvac_ducted": kind.startswith("ahs_") or kind == "cross_zone",
+            "kind": kind,
+            "crusher_transfer": both_real,
+            "ahs_nr": ahs_nr,
+        })
+
+    return sorted(path_map, key=lambda e: int(e["path_nr"]))
+
+
 # ── ContamW 3.4 simplify (authentic PRJ → JSON) ───────────────────────────
 
 def _is_contamw34(text: str) -> bool:
@@ -989,12 +1114,14 @@ def simplify_contamw34(
             ahs_nr = int(toks[0])
             name = toks[-1]
             ach = 6.0
+            ach_from_desc = False
             # Description is typically the next non-empty line
             if ai + 1 < len(ahs_body):
                 desc = ahs_body[ai + 1].strip()
                 m_ach = re.search(r"ach=([0-9.]+)", desc)
                 if m_ach:
                     ach = float(m_ach.group(1))
+                    ach_from_desc = True
                 m_id = re.search(r"Crusher HVAC\s+(\S+)", desc)
                 if m_id:
                     name = m_id.group(1)
@@ -1006,6 +1133,7 @@ def simplify_contamw34(
                 "_ahs_nr": ahs_nr,
                 "_ret": int(toks[1]),
                 "_sup": int(toks[2]),
+                "_ach_from_desc": ach_from_desc,
             })
         ai += 1
 
@@ -1013,6 +1141,7 @@ def simplify_contamw34(
     adjacency: list[dict[str, str]] = []
     cross_zone_links: list[dict[str, Any]] = []
     room_ahs: dict[str, int] = {}
+    ahs_supply_fahs_kg_s: dict[int, float] = {}
 
     for ln in sections.get("flow paths", []):
         if ln.strip().startswith("!"):
@@ -1025,6 +1154,7 @@ def simplify_contamw34(
             to_nr = int(toks[3])
             elem_nr = int(toks[4])
             ahs_nr = int(toks[7])
+            fahs = float(toks[18]) if len(toks) > 18 else 0.0
         except ValueError:
             continue
 
@@ -1041,6 +1171,10 @@ def simplify_contamw34(
             if from_phantom and not to_phantom and to_id:
                 room_ahs[to_id] = ahs_nr
                 ahs_zone_set.setdefault(ahs_nr, set()).add(to_id)
+                # Supply terminal Fahs → recover ACH when description lacks ach=
+                ahs_supply_fahs_kg_s[ahs_nr] = (
+                    ahs_supply_fahs_kg_s.get(ahs_nr, 0.0) + max(fahs, 0.0)
+                )
 
         if from_phantom or to_phantom or from_nr < 0 or to_nr < 0:
             continue
@@ -1063,15 +1197,21 @@ def simplify_contamw34(
                 "type": "passageway",
             })
 
-    # Fill HVAC rooms from supply/return path membership
+    # Fill HVAC rooms; recover ACH from Contam Fahs when not in description
     vol_by_id = {z["id"]: float(z["volume_m3"]) for z in zones}
     for hz in hvac_zones:
         ahs_nr = hz.pop("_ahs_nr")
         hz.pop("_ret", None)
         hz.pop("_sup", None)
+        ach_from_desc = bool(hz.pop("_ach_from_desc", False))
         rooms = sorted(ahs_zone_set.get(ahs_nr, set()))
         hz["rooms"] = rooms
-        _ = vol_by_id  # volumes available for future ACH inference
+        total_vol = sum(vol_by_id.get(r, 0.0) for r in rooms)
+        supply_m3h = (
+            ahs_supply_fahs_kg_s.get(ahs_nr, 0.0) / _DEFAULT_AIR_DENSITY * 3600.0
+        )
+        if not ach_from_desc and total_vol > 0 and supply_m3h > 0:
+            hz["ach"] = round(supply_m3h / total_vol, 6)
 
     # If no AHS recovered, create a single default HVAC zone
     if not hvac_zones and zones:
