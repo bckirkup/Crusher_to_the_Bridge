@@ -124,7 +124,7 @@ Contam rates to match old native ACH complete-mixing.
 
 1. ~~**Resize orifice catalog**~~ — done.
 2. ~~**SIM Flow0 path_nr join**~~ — done (embedded record `nr`; regression fixture).
-3. ~~**Zone IDs ≤15 chars**~~ — done (mega `PC_*`/`CC_*`, Enterprises abbreviated; `_abbreviate_for_contam` fallback).
+3. ~~**Zone IDs ≤15 chars**~~ — done (mega `PC_*`/`CC_*`, Enterprises abbreviated; `_abbreviate_for_contam` fallback). One-shot rename applied in-tree; do not reintroduce unconstrained path writes for migrations — use `simulation_utils.paths` helpers if a script is needed again.
 4. ~~**Per-AHU OA schedules**~~ — done (`OAFr_{pct}` day/week wired on AHS recirc).
 5. ~~**Mega deck temps**~~ — verified (`0_Engine`/`1_Engine` exact key match → 298.15 / 297.15 K).
 6. ~~**Passive cross-zone → plr_orfc**~~ — done (sized for design Q @ 1 Pa; keep `fan_cvf` only when ducted).

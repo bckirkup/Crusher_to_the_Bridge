@@ -13,6 +13,11 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
+from simulation_utils.paths import (  # noqa: E402
+    resolve_repo_path,
+    validate_path_component,
+    validated_open,
+)
 from tools.contam_hobbyist import deck_temp_k  # noqa: E402
 from tools.contamw34_prj import (  # noqa: E402
     _abbreviate_for_contam,
@@ -27,17 +32,66 @@ _CONTAM_PLATFORMS = (
     "enterprise_galaxy_tng",
     "mega_cruise_5000",
 )
+_REPO = str(REPO_ROOT)
+
+
+def _read_json_under_repo(rel_path: str) -> dict | list:
+    """Load JSON via Sonar-safe containment-checked open."""
+    full = resolve_repo_path(_REPO, rel_path)
+    with validated_open(full, "r", allowed_roots=(_REPO,), encoding="utf-8") as fh:
+        return json.load(fh)
 
 
 def _load_platform(platform: str) -> tuple[dict, dict, dict]:
-    base = REPO_ROOT / "data" / "platforms" / platform
-    spatial = json.loads((base / "spatial_layout.json").read_text())
-    airflow = json.loads((base / "air_flow_paths.json").read_text())
-    overrides_path = base / "contam" / "hobbyist_overrides.json"
+    plat = validate_path_component(platform, label="platform id")
+    base = f"data/platforms/{plat}"
+    spatial = _read_json_under_repo(f"{base}/spatial_layout.json")
+    airflow = _read_json_under_repo(f"{base}/air_flow_paths.json")
+    overrides_rel = f"{base}/contam/hobbyist_overrides.json"
+    overrides_path = Path(resolve_repo_path(_REPO, overrides_rel))
     overrides = (
-        json.loads(overrides_path.read_text()) if overrides_path.is_file() else {}
+        _read_json_under_repo(overrides_rel) if overrides_path.is_file() else {}
     )
-    return spatial, airflow, overrides
+    return spatial, airflow, overrides  # type: ignore[return-value]
+
+
+def _parse_elem_symbols(prj_text: str) -> dict[int, str]:
+    """Map Contam element nr → plr_orfc | fan_cvf."""
+    symbols: dict[int, str] = {}
+    in_el = False
+    for line in prj_text.splitlines():
+        if "! flow elements:" in line:
+            in_el = True
+            continue
+        if not in_el:
+            continue
+        if line.strip() == "-999":
+            break
+        if "plr_orfc" in line:
+            symbols[int(line.split()[0])] = "plr_orfc"
+        elif "fan_cvf" in line:
+            symbols[int(line.split()[0])] = "fan_cvf"
+    return symbols
+
+
+def _parse_path_elements(prj_text: str) -> dict[int, int]:
+    """Map Contam path nr → element nr (field index 4)."""
+    path_elem: dict[int, int] = {}
+    in_paths = False
+    for line in prj_text.splitlines():
+        if "! flow paths:" in line:
+            in_paths = True
+            continue
+        if not in_paths:
+            continue
+        if line.strip() == "-999":
+            break
+        if line.strip().startswith("!"):
+            continue
+        toks = line.split()
+        if len(toks) >= 5 and toks[0].isdigit():
+            path_elem[int(toks[0])] = int(toks[4])
+    return path_elem
 
 
 @pytest.mark.parametrize("platform", _CONTAM_PLATFORMS)
@@ -65,7 +119,6 @@ def test_mega_engine_deck_temps_match_overrides() -> None:
     text, _ = export_contamw34(
         spatial, airflow, hobbyist=True, overrides=overrides,
     )
-    # Contam zone lines embed temperature before the Contam name
     assert "298.15 0 Engine_Room_Aft" in text
     assert "297.15 0 EngControl" in text
 
@@ -85,66 +138,27 @@ def test_passive_cross_zone_uses_orifice_not_fan() -> None:
     text, path_map = export_contamw34(
         spatial, airflow, hobbyist=True, overrides=overrides,
     )
-    elem_symbol: dict[int, str] = {}
-    in_el = False
-    for line in text.splitlines():
-        if "! flow elements:" in line:
-            in_el = True
-            continue
-        if not in_el:
-            continue
-        if line.strip() == "-999":
-            break
-        if "plr_orfc" in line or "fan_cvf" in line:
-            toks = line.split()
-            elem_symbol[int(toks[0])] = (
-                "plr_orfc" if "plr_orfc" in line else "fan_cvf"
-            )
+    elem_symbol = _parse_elem_symbols(text)
+    path_elem = _parse_path_elements(text)
 
-    path_elem: dict[int, int] = {}
-    in_paths = False
-    for line in text.splitlines():
-        if "! flow paths:" in line:
-            in_paths = True
-            continue
-        if not in_paths:
-            continue
-        if line.strip() == "-999":
-            break
-        if line.strip().startswith("!"):
-            continue
-        toks = line.split()
-        # Contam path: nr flags from to elem ...
-        if len(toks) >= 5 and toks[0].isdigit():
-            path_elem[int(toks[0])] = int(toks[4])
-
-    # Cross-zone ladder wells (not adjacency kind=ladder_well)
     ladder_entries = [
         e for e in path_map
         if str(e.get("kind", "")).startswith("ladder_well_")
     ]
     assert ladder_entries
     for entry in ladder_entries:
-        pnr = int(entry["path_nr"])
-        enr = path_elem[pnr]
-        assert elem_symbol[enr] == "plr_orfc", entry
+        assert elem_symbol[path_elem[int(entry["path_nr"])]] == "plr_orfc"
 
-    ducted = [
-        e for e in path_map if e.get("kind") == "ventilation_shaft_aft"
-    ]
+    ducted = [e for e in path_map if e.get("kind") == "ventilation_shaft_aft"]
     assert ducted
     for entry in ducted:
-        pnr = int(entry["path_nr"])
-        enr = path_elem[pnr]
-        assert elem_symbol[enr] == "fan_cvf", entry
+        assert elem_symbol[path_elem[int(entry["path_nr"])]] == "fan_cvf"
 
 
 def test_orifice_area_scales_with_design_flow() -> None:
     a20 = _orifice_area_m2_for_flow_m3h(20.0)
     a80 = _orifice_area_m2_for_flow_m3h(80.0)
     assert a80 == pytest.approx(4.0 * a20, rel=1e-9)
-    # Q=50 m³/h, Cd=0.6, ρ=1.2, ΔP=1 → A ≈ 0.0179 m²
-    # (≈2784 m³/h per m²; Edison table 0.0058 was understated)
     a50 = _orifice_area_m2_for_flow_m3h(50.0, density=1.2)
     assert a50 == pytest.approx(0.01793, rel=0.02)
     assert math.isfinite(a50)

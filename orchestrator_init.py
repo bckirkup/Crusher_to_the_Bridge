@@ -96,7 +96,7 @@ def default_cabin_size(zone_name: str, zone_type: str, cabin_size: int | None) -
     if zone_type != "Cabin_Corridor":
         return None
     # Contam-safe mega IDs use CC_* for crew corridors; legacy Crew_* still works.
-    if zone_name.startswith("Crew_") or zone_name.startswith("CC_"):
+    if zone_name.startswith(("Crew_", "CC_")):
         return 3
     return 2
 
