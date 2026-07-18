@@ -1,0 +1,61 @@
+{
+  "description": "Hobbyist-plus Contam overrides for Galaxy-class (TNG) fiction ship.",
+  "orifice_type_map": {
+    "turbolift": "turbolift_forward",
+    "passageway": "habitation_trunk",
+    "service_hatch": "cargo_lift"
+  },
+  "wind_profile": "ship_hull",
+  "deck_temp_offset_K": {
+    "saucer_1": -0.5,
+    "saucer_4": 0.0,
+    "saucer_6": 0.5,
+    "saucer_8": 0.0,
+    "saucer_9": 0.0,
+    "saucer_10": 0.0,
+    "saucer_11": 0.0,
+    "saucer_12": 0.5,
+    "saucer_15": 0.0,
+    "saucer_16": 0.0,
+    "saucer_17": 1.0,
+    "saucer_23": 0.0,
+    "saucer_24": 0.0,
+    "saucer_25": 0.0,
+    "drive_section": 6.0
+  },
+  "zone_annotations": {
+    "Bridge": "Bridge",
+    "Ten_Forward": "Ten Forward",
+    "Main_Engineering": "Main Engineering",
+    "Arboretum": "Arboretum",
+    "Sickbay": "Sickbay"
+  },
+  "filter_preset": "GalaxyACH",
+  "hvac_filter": {
+    "zone_saucer_medical": "HEPA",
+    "zone_drive": "GalaxyACH",
+    "zone_saucer_social": "MERV13"
+  },
+  "oa_fraction": {
+    "_default": 0.22,
+    "zone_saucer_medical": 0.4,
+    "zone_saucer_social": 0.25
+  },
+  "wall_azimuth_deg": {
+    "Bridge": 0,
+    "Ten_Forward": 270,
+    "Main_Engineering": 180,
+    "Arboretum": 90,
+    "Shuttlebay": 0,
+    "Cargo_Bay": 180,
+    "Sickbay": 90
+  },
+  "duct_hvac_ids": [
+    "zone_saucer_command",
+    "zone_saucer_social",
+    "zone_saucer_medical",
+    "zone_saucer_habitation",
+    "zone_saucer_logistics"
+  ],
+  "night_setback": true
+}

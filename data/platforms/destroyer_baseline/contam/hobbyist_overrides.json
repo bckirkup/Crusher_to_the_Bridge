@@ -1,0 +1,32 @@
+{
+  "description": "Hobbyist-plus Contam overrides for destroyer_baseline (Bridge CIC / Eng Rm).",
+  "orifice_type_map": {
+    "ladder_well": "ladder",
+    "passageway": "passageway",
+    "service_hatch": "hatch"
+  },
+  "wind_profile": "ship_hull",
+  "deck_temp_offset_K": {
+    "upper": -0.5,
+    "main": 0.0,
+    "lower": 5.0
+  },
+  "zone_annotations": {
+    "Bridge": "Bridge CIC",
+    "Engine_Room": "Eng Rm"
+  },
+  "filter_preset": "MERV13",
+  "hvac_filter": {
+    "zone_lower": "HEPA"
+  },
+  "duct_hvac_ids": ["zone_main", "zone_lower"],
+  "wall_azimuth_deg": {
+    "Bridge": 0,
+    "MedBay": 90,
+    "Mess_Hall": 90,
+    "Galley": 270,
+    "Berthing": 270,
+    "Engine_Room": 180
+  },
+  "night_setback": true
+}

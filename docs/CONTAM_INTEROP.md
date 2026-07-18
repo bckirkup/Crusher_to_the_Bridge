@@ -81,11 +81,14 @@ Set `hvac.transport_engine: contamx` (or `auto`) and point
 ### Fiction bootstrap only (JSON → PRJ)
 
 Bundled under `data/platforms/<id>/contam/` for destroyer / Mega / Enterprises
-so ContamX demos work without an authentic Contam model. Regenerate after
-fiction JSON edits:
+so ContamX demos work without an authentic Contam model. Default regen uses
+**hobbyist-plus** templates from [`data/contam_hobbyist/`](../data/contam_hobbyist/)
+(+ optional `contam/hobbyist_overrides.json`): typed orifices, wind, filters,
+schedules, duct leakage spines, annotations, Air+Virus species.
 
 ```bash
-python3 scripts/generate_platform_contam_prj.py
+python3 scripts/generate_platform_contam_prj.py --hobbyist
+python3 scripts/generate_platform_contam_prj.py --hobbyist --platform destroyer_baseline
 ```
 
 These PRJs are **fiction-plausible**, not as-built ship models.
