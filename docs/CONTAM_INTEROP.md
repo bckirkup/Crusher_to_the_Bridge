@@ -1,13 +1,18 @@
 # CONTAM Interoperability
 
-This document maps Crusher-to-the-Bridge's native JSON contracts onto NIST
-**CONTAM** concepts and documents the ContamW 3.4 dual-path workflow:
+Crusher treats a ContamW **3.4 `.prj` as the high-fidelity airflow source of
+truth**. The native Python engine is the *fast, lower-fidelity* twin.
 
-1. **Path A (ContamX):** run an authentic ContamW 3.4 `.prj` through ContamX
-   for the airflow field; Crusher keeps pathogen mass balance.
-2. **Path B (native simplify):** simplify a full `.prj` into
-   `spatial_layout.json` + `air_flow_paths.json` and use the pure-Python
-   prescribed-flow solver.
+1. **Path A (ContamX):** run the `.prj` through ContamX → airflow field →
+   Crusher pathogen mass balance (`ContamXTransportEngine` + AHS bridge).
+2. **Path B (simplify):** dumb the `.prj` down to
+   `spatial_layout.json` + `air_flow_paths.json` + `path_map.json` →
+   native prescribed-flow solver.
+
+**Fiction bootstrap (reverse, temporary):** for Mega Cruise / Enterprise /
+destroyer demos that have *no* authentic Contam model, JSON→PRJ export can
+synthesize a plausible `.prj`. That is **not** the normal Contam authoring
+path — prefer bringing a real ContamW project and simplifying it.
 
 > **CONTAM** (NIST multizone airflow and contaminant transport) is documented
 > in **NIST Technical Note 1887r1**, *CONTAM User Guide and Program
@@ -34,41 +39,58 @@ This document maps Crusher-to-the-Bridge's native JSON contracts onto NIST
 | `zone.display.{x,y}` | SketchPad **icon** coordinates | Dashboard / layout aid. |
 | `air_flow_paths.adjacency` edge | CONTAM **airflow path** (orifice) | Doors / hatches / passageways. |
 | `air_flow_paths.hvac_zones` | Simple **air-handling system (AHS)** | Rooms sharing ACH + Ret/Sup phantoms. |
-| `hvac_zones.ach` | **Air change rate** | Encoded as balanced OA + recirculation fans. |
+| `hvac_zones.ach` | **Air change rate** | Recovered from AHS `Fahs` on simplify when possible. |
 | `air_flow_paths.cross_zone_links` | Inter-zone **fan_cvf** path | Prescribed volumetric flow. |
 | HVAC `filter_efficiency` (config) | Filter applied in Crusher mass balance | Not a Contam filter element (yet). |
 | `natural_decay_rate` (config) | 1st-order sink / **removal** | Settling + viral inactivation per epoch. |
+| `path_map.json` | ContamX path index alignment | **Derived from the `.prj`** (`path_map_from_prj`). |
 
-## 2. Dual-path architecture
+## 2. Dual-path architecture (PRJ primary)
 
 ```
-ContamW_3.4.prj
-    ├─ Path A ContamX ──► airflow field ──► ContamXTransportEngine
-    └─ Path B simplify ──► spatial + air_flow JSON ──► ContamTransportEngine
+ContamW_3.4.prj   ←── primary high-fidelity input
+    ├─ Path A ContamX ──► airflow field ──► AHS bridge ──► Crusher mass balance
+    └─ Path B simplify ──► spatial + air_flow + path_map JSON ──► native engine
          └── matched Picard / orchestrator runs ──► outcome comparison
+
+Fiction JSON platforms (no Contam model yet)
+    └─ bootstrap only ──► synthesize contam/platform.prj + path_map.json
 ```
 
-Fiction platforms ship a plausible ContamW 3.4 bundle under
-`data/platforms/<id>/contam/`:
+### Path B — simplify (preferred for native)
 
-| File | Role |
-|------|------|
-| `platform.prj` | ContamW 3.4 project (ContamX-parseable grammar) |
-| `path_map.json` | ContamX path index → `(from_zone, to_zone, is_hvac_ducted)` |
+```bash
+python3 tools/contam_prj_bridge.py --simplify \
+    --input path/to/full.prj \
+    --output data/platforms/imported_from_contam/
+```
 
-Bundled for: `destroyer_baseline`, `mega_cruise_5000`,
-`enterprise_constitution_tos`, `enterprise_galaxy_tng`. Regenerate after
-JSON edits:
+Writes `spatial_layout.json`, `air_flow_paths.json`, and **`path_map.json`**
+(ContamX index order from the PRJ itself). Controls / schedules / wind /
+ducts / sources are dropped (with warnings).
+
+### Path A — ContamX on a real `.prj`
+
+Set `hvac.transport_engine: contamx` (or `auto`) and point
+`hvac.contamx.prj_path` at the project (or place it at
+`data/platforms/<id>/contam/platform.prj`). Path map resolution:
+
+1. Sidecar `path_map.json` beside the PRJ (from `--simplify` or fiction bootstrap)
+2. Else **`path_map_from_prj`** parses the PRJ (never rebuilds fiction export order)
+
+### Fiction bootstrap only (JSON → PRJ)
+
+Bundled under `data/platforms/<id>/contam/` for destroyer / Mega / Enterprises
+so ContamX demos work without an authentic Contam model. Regenerate after
+fiction JSON edits:
 
 ```bash
 python3 scripts/generate_platform_contam_prj.py
-python3 scripts/generate_platform_contam_prj.py --platform destroyer_baseline
 ```
 
-These PRJs are **fiction-plausible** (derived from our JSON platforms), not
-as-built ship models.
+These PRJs are **fiction-plausible**, not as-built ship models.
 
-### ContamX-critical export invariants
+### ContamX-critical fiction-export invariants
 
 ContamX 3.4 rejects (or buffer-overflows on) PRJs that violate ContamW
 grammar. The fiction exporter (`tools/contamw34_prj.py`) enforces:
@@ -107,25 +129,11 @@ edges). Envelope leaks and AHS OA/exhaust stay Contam-only.
 `floor_area_m2=volume/3`, deck-stacked elevation) without rewriting platform
 JSON.
 
-## 4. `.prj` export / simplify / import
+## 4. `.prj` simplify / import / fiction bootstrap
 
 `tools/contam_prj_bridge.py` (+ `tools/contamw34_prj.py`):
 
-### Export (JSON → ContamW 3.4)
-
-```bash
-python3 tools/contam_prj_bridge.py --export \
-    --platform data/platforms/mega_cruise_5000 \
-    --output data/platforms/mega_cruise_5000/contam/platform.prj
-```
-
-Writes ContamW **3.4** sections: header/sim params, species, levels,
-OA-fraction day/week schedules, flow elements (`plr_orfc` + `fan_cvf`),
-simple AHS with Ret/Sup phantoms (volume-weighted terminals, `fo` schedule
-on recirc), envelope leaks, expanded cross-zone fans, zones, flow paths,
-empty stubs for ducts/controls, plus `path_map.json`.
-
-### Simplify (Path B: ContamW 3.4 → JSON)
+### Simplify (Path B: ContamW 3.4 → JSON + path_map) — primary
 
 ```bash
 python3 tools/contam_prj_bridge.py --simplify \
@@ -133,9 +141,11 @@ python3 tools/contam_prj_bridge.py --simplify \
     --output data/platforms/imported_from_contam/
 ```
 
-Maps zones / AHS / fan paths / orifices into platform JSON. Drops (with
-warnings): control networks, schedules, wind profiles, kinetic reactions,
-source/sinks, ducts, exposures.
+Maps zones / AHS / fan paths / orifices into platform JSON and emits
+`path_map.json` via `path_map_from_prj` (ContamX index order from the PRJ).
+Drops (with warnings): control networks, schedules, wind profiles, kinetic
+reactions, source/sinks, ducts, exposures. Recovers `hvac_zones.ach` from
+AHS supply `Fahs` when the AHS description lacks `ach=`.
 
 ### Import (auto-detect)
 
@@ -150,6 +160,17 @@ Accepts ContamW 3.4 **or** the legacy Crusher `!------` interchange dialect.
 ```bash
 python3 tools/sanity_checker.py --platform-dir data/platforms/imported_from_contam
 ```
+
+### Fiction bootstrap (JSON → ContamW 3.4) — temporary only
+
+```bash
+python3 tools/contam_prj_bridge.py --export \
+    --platform data/platforms/mega_cruise_5000 \
+    --output data/platforms/mega_cruise_5000/contam/platform.prj
+```
+
+Synthesizes ContamW **3.4** for fiction ships without an authentic Contam
+model. Prefer Path B on a real `.prj` whenever one exists.
 
 ## 5. Path A — ContamX solver (opt-in)
 
@@ -168,7 +189,9 @@ Drop NIST ContamX into `third_party/contamx/` (gitignored except the README).
 See [`third_party/contamx/README.md`](../third_party/contamx/README.md).
 
 **PRJ resolution:** `hvac.contamx.prj_path` →
-`data/platforms/<id>/contam/platform.prj` → temp ContamW 3.4 export from JSON.
+`data/platforms/<id>/contam/platform.prj` → fiction-bootstrap temp export
+from JSON (last resort). Path map: sidecar beside PRJ, else
+`path_map_from_prj` on the PRJ text.
 
 ContamX computes the airflow field; Crusher applies pathogen mass balance.
 ContamX is **not** in CI; paths fall back to native.

@@ -55,15 +55,19 @@ CONTAM-geometry fields (all must be > 0 except `elevation_m`, which may be
 negative). When both `floor_area_m2` and `ceiling_height_m` are present,
 `volume_m3` should equal their product (`50.0 * 3.0 = 150.0` above); the
 sanity checker warns if they disagree by more than 1%. Zones may still
-specify only `volume_m3` (backward compatible). These fields drive the
-CONTAM `.prj` import/export bridge (`tools/contam_prj_bridge.py`) — see
-`docs/CONTAM_INTEROP.md`. Optional ContamW 3.4 bundle for ContamX Path A:
+specify only `volume_m3` (backward compatible). These fields map onto NIST CONTAM zone geometry — see
+`docs/CONTAM_INTEROP.md`. Prefer bringing an authentic ContamW 3.4 `.prj`
+and Path B `--simplify` (writes JSON + `path_map.json`). Fiction ships may
+bootstrap a temporary Contam bundle:
 
 ```
 data/platforms/<platform_name>/contam/
-  platform.prj      # ContamW 3.4 (regenerate via scripts/generate_platform_contam_prj.py)
-  path_map.json     # ContamX path index → Crusher zone pairs
+  platform.prj      # fiction bootstrap only (JSON→PRJ)
+  path_map.json     # ContamX path index (also emitted by --simplify)
 ```
+
+Regenerate fiction bundles with `scripts/generate_platform_contam_prj.py`
+only when there is no authentic Contam model.
 
 `graywater_zones` lists downstream greywater/blackwater collection zone(s)
 for ship-wide wastewater sequencing (e.g. `Engine_Room_Aft` on large cruise

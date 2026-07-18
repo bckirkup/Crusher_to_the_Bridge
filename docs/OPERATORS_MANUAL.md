@@ -290,11 +290,12 @@ Airborne pathogen transport uses a CONTAM-style multi-zone mass balance
 prescribed ACH / cross-zone flows from `air_flow_paths.json`.
 
 Optionally set `hvac.transport_engine` to `contamx` or `auto` to drive the
-airflow field from a ContamW 3.4 `.prj` via the NIST ContamX binary (bundled
-under `data/platforms/<id>/contam/` for Mega Cruise and both Enterprise
-platforms). See [`docs/CONTAM_INTEROP.md`](CONTAM_INTEROP.md) for Path A
-(ContamX) vs Path B (simplify `.prj` → JSON), regeneration scripts, and
-outcome comparison tools.
+airflow field from a ContamW 3.4 `.prj` via the NIST ContamX binary. Prefer an
+authentic Contam project (`hvac.contamx.prj_path`); fiction ships may ship a
+bootstrap bundle under `data/platforms/<id>/contam/`. See
+[`docs/CONTAM_INTEROP.md`](CONTAM_INTEROP.md) for Path A (ContamX) vs Path B
+(simplify `.prj` → JSON), the fiction-only JSON→PRJ bootstrap, and outcome
+comparison tools.
 
 ```yaml
 hvac:

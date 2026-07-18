@@ -1,11 +1,19 @@
 #!/usr/bin/env python3
 """
-generate_platform_contam_prj.py – regenerate ContamW 3.4 bundles
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+generate_platform_contam_prj.py – FICTION BOOTSTRAP only
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Writes ``contam/platform.prj`` + ``contam/path_map.json`` for the fiction
-platforms used in Contam dual-path workflows (Mega Cruise + both
-Enterprises). Re-run after editing platform JSON.
+Synthesize ContamW 3.4 ``contam/platform.prj`` + ``path_map.json`` from
+platform JSON for **fiction ships that have no authentic Contam model**
+(Mega Cruise, Enterprises, destroyer demos).
+
+The primary Contam product loop is the opposite direction:
+
+    authentic .prj  ──Path A──► ContamX airflow ──► Crusher mass balance
+                └──Path B──► simplify → JSON (+ path_map) → native engine
+
+Re-run this script only after editing fiction platform JSON, or when
+ ContamW export grammar changes.
 
 Usage::
 
@@ -35,7 +43,10 @@ DEFAULT_PLATFORMS = (
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        description="Regenerate ContamW 3.4 platform.prj + path_map.json bundles.",
+        description=(
+            "FICTION BOOTSTRAP: synthesize ContamW 3.4 platform.prj + "
+            "path_map.json from JSON (not the primary Contam workflow)."
+        ),
     )
     parser.add_argument(
         "--platform",
@@ -47,6 +58,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     platforms = args.platforms or list(DEFAULT_PLATFORMS)
 
+    print("Fiction bootstrap (JSON→PRJ). Prefer authentic .prj + --simplify.")
     for name in platforms:
         platform_dir = os.path.join(REPO_ROOT, "data", "platforms", name)
         out = os.path.join(platform_dir, "contam", "platform.prj")

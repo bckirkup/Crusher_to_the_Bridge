@@ -118,6 +118,51 @@ def test_simplify_authentic_fixtures(fixture: str) -> None:
     assert all(isinstance(z.get("volume_m3"), (int, float)) for z in spatial["zones"])
 
 
+@pytest.mark.parametrize(
+    "fixture",
+    ["3-Room-OffAt14days.prj", "dcvSimple.prj"],
+)
+def test_path_map_from_prj_authentic_fixtures(fixture: str) -> None:
+    """Path A contract: path_map comes from the PRJ, not JSON export order."""
+    from tools.contamw34_prj import path_map_from_prj
+
+    text = (_FIXTURES / fixture).read_text(encoding="utf-8")
+    entries = path_map_from_prj(text)
+    assert entries
+    assert [e["path_nr"] for e in entries] == list(range(1, len(entries) + 1))
+    kinds = {e["kind"] for e in entries}
+    if fixture.startswith("3-Room"):
+        assert "ahs_supply" in kinds or "ahs_return" in kinds
+        assert any(int(e.get("ahs_nr") or 0) > 0 for e in entries)
+    # Every entry has ContamX bridge fields
+    for e in entries:
+        assert "from_zone" in e and "to_zone" in e
+        assert "crusher_transfer" in e
+
+
+def test_simplify_cli_writes_path_map(tmp_path) -> None:
+    src = _FIXTURES / "3-Room-OffAt14days.prj"
+    # Output must stay under the repo root (path containment policy)
+    out = REPO_ROOT / "telemetry_buffer" / "_test_contam_simplify"
+    if out.exists():
+        import shutil
+        shutil.rmtree(out)
+    try:
+        spatial, airflow, pmap = contam_prj_bridge.simplify_prj_to_platform(
+            str(src), str(out),
+        )
+        assert Path(spatial).is_file()
+        assert Path(airflow).is_file()
+        assert Path(pmap).is_file()
+        entries = json.loads(Path(pmap).read_text(encoding="utf-8"))
+        assert isinstance(entries, list) and entries
+        assert any(e.get("kind", "").startswith("ahs_") for e in entries)
+    finally:
+        import shutil
+        if out.exists():
+            shutil.rmtree(out)
+
+
 def test_resolve_contam_prj_path_bundled() -> None:
     spatial = {"platform": "enterprise_galaxy_tng"}
     cfg: dict = {"hvac": {"contamx": {}}}
