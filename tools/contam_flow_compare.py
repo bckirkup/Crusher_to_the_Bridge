@@ -368,6 +368,16 @@ def _print_summary(report: dict[str, Any]) -> None:
                 f"{z['from_zone']}->{z['to_zone']}  "
                 f"flow={z['sim_flow_m3h']:.4g}"
             )
+        if cx["kept_links"]:
+            print("kept real↔real links (ContamX→Crusher):")
+            for k in sorted(
+                cx["kept_links"], key=lambda r: (-r["flow_m3h"], r["path_nr"]),
+            ):
+                print(
+                    f"  p{k['path_nr']:03d} {str(k.get('kind', '')):22s} "
+                    f"{k['from_zone']}->{k['to_zone']}  "
+                    f"{k['flow_m3h']:.4g} m3/h"
+                )
         if cx["synth_ahs_links"]:
             print("AHS synth links (top):")
             for s in sorted(
@@ -378,6 +388,12 @@ def _print_summary(report: dict[str, Any]) -> None:
                     f"{s['from_zone']}->{s['to_zone']}  "
                     f"{s['flow_m3h']:.2f} m3/h"
                 )
+        else:
+            print(
+                "AHS synth links: none "
+                "(AHS supply/return/recirc SIM Flow0 all ~0 — "
+                "no room↔room HVAC bridge)"
+            )
     print("connectivity gap:")
     for g in report["connectivity_gap"]:
         print(
