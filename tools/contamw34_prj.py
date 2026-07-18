@@ -382,6 +382,7 @@ def _assemble_network(
     species: list[dict[str, Any]] = []
     contaminant_indices: list[int] = [1]
     day_by_id: dict[str, int] = {}
+    week_by_id: dict[str, int] = {}
 
     if hobbyist:
         # Schedules
@@ -390,12 +391,13 @@ def _assemble_network(
             day_by_id[ds["id"]] = i
         for i, ws in enumerate(pack["schedule_templates"]["week_schedules"], 1):
             week_schedules.append(ws)
+            week_by_id[ws["id"]] = i
             if ws["id"] == pack["schedule_templates"]["defaults"]["oa_week"]:
                 sched_oa_week = i
             if ws["id"] == pack["schedule_templates"]["defaults"]["duty_week"]:
                 sched_duty_week = i
         if not overrides.get("night_setback", True):
-            # Drop night-setback week/day if disabled (keep OA + duty)
+            # Drop night-setback week/day if disabled (keep OA + duty + openings)
             week_schedules = [
                 w for w in week_schedules if w["id"] != "NightSetbackW"
             ]
@@ -406,13 +408,16 @@ def _assemble_network(
             day_by_id.update(
                 {d["id"]: i for i, d in enumerate(day_schedules, 1)}
             )
-            sched_oa_week = 0
-            sched_duty_week = 0
-            for i, ws in enumerate(week_schedules, 1):
-                if ws["id"] == pack["schedule_templates"]["defaults"]["oa_week"]:
-                    sched_oa_week = i
-                if ws["id"] == pack["schedule_templates"]["defaults"]["duty_week"]:
-                    sched_duty_week = i
+            week_by_id.clear()
+            week_by_id.update(
+                {w["id"]: i for i, w in enumerate(week_schedules, 1)}
+            )
+            sched_oa_week = week_by_id.get(
+                pack["schedule_templates"]["defaults"]["oa_week"], 0
+            )
+            sched_duty_week = week_by_id.get(
+                pack["schedule_templates"]["defaults"]["duty_week"], 0
+            )
 
         # Wind
         wkey = _hobby.resolve_wind_profile_key(pack, overrides)
@@ -569,9 +574,15 @@ def _assemble_network(
             continue
         adj_type = str(adj.get("type", "passageway"))
         elem = 1
+        adj_sched = 0
         if hobbyist:
             okey = _hobby.resolve_orifice_type(adj_type, pack, overrides)
             elem = orifice_elem_by_key.get(okey, 1)
+            sched_id = _hobby.resolve_opening_schedule(
+                adj_type, pack, overrides,
+            )
+            if sched_id:
+                adj_sched = int(week_by_id.get(sched_id, 0))
         za = zone_records[zone_name_to_nr[a] - 1]
         zb = zone_records[zone_name_to_nr[b] - 1]
         _add_path(
@@ -581,6 +592,7 @@ def _assemble_network(
             is_hvac_ducted=False,
             crusher_transfer=True,
             flag=0,
+            sched_nr=adj_sched,
             x=0.5 * (float(za["x"]) + float(zb["x"])),
             y=0.5 * (float(za["y"]) + float(zb["y"])),
         )

@@ -1,5 +1,5 @@
 {
-  "description": "Day/week schedule templates for OA fraction and HVAC duty (hobbyist export).",
+  "description": "Day/week schedule templates for OA fraction, HVAC duty, and opening open/closed state (hobbyist export). Opening multipliers never hit zero (undercut residual for ContamX Jacobian).",
   "day_schedules": [
     {
       "id": "OAFrac",
@@ -31,6 +31,47 @@
         ["22:00:00", 0.7],
         ["24:00:00", 0.7]
       ]
+    },
+    {
+      "id": "DoorTraffic",
+      "name": "DoorTraff",
+      "description": "Door/passageway: day mostly open, night mostly closed with undercut residual",
+      "points": [
+        ["00:00:00", 0.08],
+        ["06:00:00", 0.08],
+        ["07:00:00", 0.55],
+        ["08:00:00", 0.95],
+        ["18:00:00", 0.95],
+        ["20:00:00", 0.65],
+        ["22:00:00", 0.08],
+        ["24:00:00", 0.08]
+      ]
+    },
+    {
+      "id": "HatchOccasional",
+      "name": "HatchOcc",
+      "description": "Service hatch: mostly closed with brief open windows; undercut residual",
+      "points": [
+        ["00:00:00", 0.1],
+        ["09:00:00", 0.1],
+        ["09:30:00", 0.7],
+        ["11:00:00", 0.1],
+        ["14:00:00", 0.1],
+        ["14:30:00", 0.6],
+        ["16:00:00", 0.1],
+        ["24:00:00", 0.1]
+      ]
+    },
+    {
+      "id": "ShaftOpen",
+      "name": "ShaftOpen",
+      "description": "Stairs/elevators/shafts/open voids: largely open always",
+      "points": [
+        ["00:00:00", 0.85],
+        ["06:00:00", 1.0],
+        ["22:00:00", 0.9],
+        ["24:00:00", 0.85]
+      ]
     }
   ],
   "week_schedules": [
@@ -51,11 +92,54 @@
       "name": "NightSetbkW",
       "description": "Week schedule for night setback",
       "day_id": "NightSetback"
+    },
+    {
+      "id": "DoorTrafficW",
+      "name": "DoorTraffW",
+      "description": "Week schedule for door/passageway traffic",
+      "day_id": "DoorTraffic"
+    },
+    {
+      "id": "HatchOccasionalW",
+      "name": "HatchOccW",
+      "description": "Week schedule for occasional hatch use",
+      "day_id": "HatchOccasional"
+    },
+    {
+      "id": "ShaftOpenW",
+      "name": "ShaftOpenW",
+      "description": "Week schedule for shafts and open voids",
+      "day_id": "ShaftOpen"
     }
   ],
   "defaults": {
     "oa_week": "OAFracW",
     "duty_week": "HvacDutyW",
     "oa_fraction": 0.2
+  },
+  "opening_schedule_by_type": {
+    "passageway": "DoorTrafficW",
+    "doorway": "DoorTrafficW",
+    "hatch": "HatchOccasionalW",
+    "service_hatch": "HatchOccasionalW",
+    "ladder": "ShaftOpenW",
+    "ladder_well": "ShaftOpenW",
+    "corridor": "ShaftOpenW",
+    "elevator": "ShaftOpenW",
+    "elevator_bank": "ShaftOpenW",
+    "service_elevator": "ShaftOpenW",
+    "stairwell": "ShaftOpenW",
+    "service_stairwell": "ShaftOpenW",
+    "turbolift": "ShaftOpenW",
+    "open_deck": "ShaftOpenW",
+    "open_front": "ShaftOpenW",
+    "multi_deck_void": "ShaftOpenW",
+    "service_corridor": "ShaftOpenW",
+    "cabin_relief": null,
+    "promenade": "ShaftOpenW",
+    "connecting_tube": "ShaftOpenW",
+    "habitation_trunk": "ShaftOpenW",
+    "cargo_lift": "ShaftOpenW",
+    "turbolift_forward": "ShaftOpenW"
   }
 }

@@ -98,6 +98,35 @@ def resolve_orifice_type(
     return default if default in catalog else next(iter(catalog))
 
 
+def resolve_opening_schedule(
+    adj_type: str,
+    pack: dict[str, Any],
+    overrides: dict[str, Any],
+) -> str | None:
+    """Map adjacency ``type`` → week-schedule id for open/closed multiplier.
+
+    Returns ``None`` when the opening should stay fully open (no schedule),
+    e.g. cabin undercuts. Override with ``opening_schedule_map`` keyed by
+    adjacency type or resolved orifice catalog key; empty / ``none`` disables.
+    """
+    okey = resolve_orifice_type(adj_type, pack, overrides)
+    type_map = dict(overrides.get("opening_schedule_map") or {})
+    for candidate in (adj_type, okey):
+        if candidate not in type_map:
+            continue
+        raw = type_map[candidate]
+        if raw in (None, "", "none"):
+            return None
+        return str(raw)
+    defaults = pack.get("schedule_templates", {}).get(
+        "opening_schedule_by_type"
+    ) or {}
+    raw = defaults.get(okey, defaults.get(adj_type))
+    if raw in (None, "", "none"):
+        return None
+    return str(raw)
+
+
 def resolve_filter_preset(
     pack: dict[str, Any],
     overrides: dict[str, Any],

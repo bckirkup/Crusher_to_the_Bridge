@@ -1,120 +1,120 @@
 {
-  "description": "Adjacency type → Contam plr_orfc orifice templates (hobbyist fiction export).",
+  "description": "Adjacency type → Contam plr_orfc orifice templates (hobbyist fiction export). Areas are physically plausible open areas (m²); path schedules modulate open/closed state.",
   "default_type": "passageway",
   "types": {
     "passageway": {
       "name": "Passage",
-      "area_m2": 0.01,
-      "description": "Standard interior passageway / doorway"
+      "area_m2": 2.0,
+      "description": "Interior passageway (~1.0 m × 2.0 m clear opening)"
     },
     "doorway": {
       "name": "Doorway",
-      "area_m2": 0.012,
-      "description": "Open doorway leaf"
+      "area_m2": 1.8,
+      "description": "Standard single-leaf doorway (~0.9 m × 2.0 m)"
     },
     "hatch": {
       "name": "Hatch",
-      "area_m2": 0.004,
-      "description": "Service / deck hatch"
+      "area_m2": 0.36,
+      "description": "Service / deck hatch (~0.6 m × 0.6 m)"
     },
     "service_hatch": {
       "name": "SvcHatch",
-      "area_m2": 0.004,
+      "area_m2": 0.36,
       "description": "Alias for hatch"
     },
     "ladder": {
       "name": "Ladder",
-      "area_m2": 0.006,
+      "area_m2": 0.6,
       "description": "Ladder-well shaft opening"
     },
     "ladder_well": {
       "name": "Ladder",
-      "area_m2": 0.006,
-      "description": "Alias for ladder"
+      "area_m2": 0.8,
+      "description": "Ladder well / vertical trunk"
     },
     "corridor": {
       "name": "Corridor",
-      "area_m2": 0.02,
+      "area_m2": 3.0,
       "description": "Wide corridor connection"
     },
     "elevator": {
       "name": "Elevator",
-      "area_m2": 0.008,
+      "area_m2": 2.0,
       "description": "Elevator / lift shaft relief"
     },
     "elevator_bank": {
       "name": "ElevBank",
-      "area_m2": 0.015,
+      "area_m2": 4.0,
       "description": "Multi-car elevator bank"
     },
     "service_elevator": {
       "name": "SvcElev",
-      "area_m2": 0.007,
+      "area_m2": 1.5,
       "description": "Service elevator shaft"
     },
     "stairwell": {
       "name": "Stairwell",
-      "area_m2": 0.018,
+      "area_m2": 3.0,
       "description": "Stairwell shaft"
     },
     "service_stairwell": {
       "name": "SvcStair",
-      "area_m2": 0.012,
+      "area_m2": 2.0,
       "description": "Service stairwell"
     },
     "turbolift": {
       "name": "Turbolift",
-      "area_m2": 0.01,
+      "area_m2": 2.0,
       "description": "Turbolift / connecting tube"
     },
     "open_deck": {
       "name": "OpenDeck",
-      "area_m2": 0.05,
+      "area_m2": 8.0,
       "description": "Open deck / promenade void"
     },
     "open_front": {
       "name": "OpenFront",
-      "area_m2": 0.04,
+      "area_m2": 6.0,
       "description": "Open atrium / front void"
     },
     "multi_deck_void": {
       "name": "DeckVoid",
-      "area_m2": 0.03,
+      "area_m2": 5.0,
       "description": "Multi-deck void"
     },
     "service_corridor": {
       "name": "SvcCorr",
-      "area_m2": 0.015,
+      "area_m2": 2.5,
       "description": "Service corridor"
     },
     "cabin_relief": {
       "name": "CabinRel",
-      "area_m2": 0.002,
-      "description": "Cabin undercut / relief grill"
+      "area_m2": 0.02,
+      "description": "Cabin undercut / transfer grill (always-open residual)"
     },
     "promenade": {
       "name": "Promenade",
-      "area_m2": 0.06,
+      "area_m2": 10.0,
       "description": "Promenade open volume"
     },
     "connecting_tube": {
       "name": "ConnTube",
-      "area_m2": 0.009,
+      "area_m2": 1.5,
       "description": "Connecting tube between hulls"
     },
     "habitation_trunk": {
       "name": "HabTrunk",
-      "area_m2": 0.014,
+      "area_m2": 2.5,
       "description": "Habitation trunk shaft"
     },
     "cargo_lift": {
       "name": "CargoLift",
-      "area_m2": 0.02,
+      "area_m2": 3.0,
       "description": "Cargo lift shaft"
     },
     "turbolift_forward": {
       "name": "TurboFwd",
-      "area_m2": 0.011,
+      "area_m2": 2.2,
       "description": "Forward turbolift bank"
     }
   },

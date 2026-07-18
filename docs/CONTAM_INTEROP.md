@@ -83,8 +83,10 @@ Set `hvac.transport_engine: contamx` (or `auto`) and point
 Bundled under `data/platforms/<id>/contam/` for destroyer / Mega / Enterprises
 so ContamX demos work without an authentic Contam model. Default regen uses
 **hobbyist-plus** templates from [`data/contam_hobbyist/`](../data/contam_hobbyist/)
-(+ optional `contam/hobbyist_overrides.json`): typed orifices, wind, filters,
-schedules, duct leakage spines, annotations, Air+Virus species.
+(+ optional `contam/hobbyist_overrides.json`): typed orifices with
+**physically sized** doors/hatches/shafts and open–closed week schedules,
+wind, filters, OA/HVAC schedules, duct leakage spines, annotations,
+Air+Virus species.
 
 ```bash
 python3 scripts/generate_platform_contam_prj.py --hobbyist
