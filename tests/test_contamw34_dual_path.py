@@ -309,6 +309,34 @@ def test_contamw34_export_contamx_invariants(platform: str) -> None:
             assert int(paths[pnr]["elem"]) == 2  # EnvLeak orifice
             assert int(paths[pnr]["ahs"]) == 0
 
+    # OA fraction schedule present; AHS path_map carries ahs_nr for bridging
+    assert "OAFracW" in text or "OAFrac" in text
+    ahs_entries = [e for e in path_map if str(e.get("kind", "")).startswith("ahs_")]
+    assert ahs_entries
+    assert all(int(e.get("ahs_nr") or 0) > 0 for e in ahs_entries)
+
+    # Recirc paths reference week schedule 1 (fo)
+    flow_paths = _parse_flow_paths(text)
+    # Also parse schedule field from raw path lines
+    sched_by_nr: dict[int, int] = {}
+    in_paths = False
+    for line in text.splitlines():
+        if "! flow paths:" in line:
+            in_paths = True
+            continue
+        if not in_paths:
+            continue
+        if line.strip() == "-999":
+            break
+        if line.strip().startswith("!"):
+            continue
+        toks = line.split()
+        if len(toks) >= 9 and toks[0].isdigit():
+            sched_by_nr[int(toks[0])] = int(toks[8])
+    for _ahs_nr, pr, _ps, _px in _parse_ahs_system_paths(text):
+        assert sched_by_nr.get(pr) == 1, f"recirc path {pr} missing OA schedule"
+        assert int(flow_paths[pr]["flag"]) == 16
+
 
 def test_unique_contam_name_truncates_and_dedupes() -> None:
     from tools.contamw34_prj import _unique_contam_name

@@ -81,6 +81,23 @@ grammar. The fiction exporter (`tools/contamw34_prj.py`) enforces:
 | AHS record `pr#` / `ps#` / `px#` = recirculation / outdoor-air / exhaust path numbers | Matches ContamW 3.4 `3-Room-OffAt14days.prj` |
 | Phantom Ret/Sup zones named `ahsN(Ret)` / `ahsN(Sup)` | Short Contam-style names; path_map keeps full Crusher zone ids |
 | Every real zone has a small `plr_orfc` path to **ambient** | ContamX `FATAL Zero on the diagonal` when only fans/AHS (dF/dP=0) connect zones |
+| Week schedule `OAFracW` (`fo=0.2`) on AHS recirc paths | Without it Contam defaults to 100% OA → no HVAC recirculation |
+| Cross-zone `fan_cvf` expanded to all room×room pairs | Matches native cross-zone expansion; ContamX flows are Crusher-visible |
+| `path_map.ahs_nr` on AHS paths + ContamX AHS bridge | Synthesizes room↔room recirculation from Contam Ret/Sup/recirc SIM flows |
+
+### ContamX → Crusher airflow bridge
+
+Contam simple-AHS keeps Ret/Sup **phantoms**. ContamX solves those paths;
+Crusher mass balance only accepts **real zone ↔ real zone**. The bridge
+(`engines/contamx_ahs_bridge.py`) collapses each AHS group:
+
+```
+Q_ij = R_i · (Rec / ΣR) · (S_j / ΣS)   (i ≠ j)
+```
+
+so ContamX remains the detailed airflow model and Crusher stays the simple
+pathogen mass-balance consumer (with HVAC filter η on synthesized ducted
+edges). Envelope leaks and AHS OA/exhaust stay Contam-only.
 
 ## 3. Explicit zone geometry (ceiling height)
 
@@ -103,9 +120,10 @@ python3 tools/contam_prj_bridge.py --export \
 ```
 
 Writes ContamW **3.4** sections: header/sim params, species, levels,
-flow elements (`plr_orfc` + `fan_cvf`), simple AHS with Ret/Sup phantoms,
-zones, flow paths, empty stubs for schedules/ducts/controls, plus
-`path_map.json`.
+OA-fraction day/week schedules, flow elements (`plr_orfc` + `fan_cvf`),
+simple AHS with Ret/Sup phantoms (volume-weighted terminals, `fo` schedule
+on recirc), envelope leaks, expanded cross-zone fans, zones, flow paths,
+empty stubs for ducts/controls, plus `path_map.json`.
 
 ### Simplify (Path B: ContamW 3.4 → JSON)
 
@@ -202,7 +220,8 @@ When ContamX is unavailable the suite still runs native-only and records
 
 - `engines/py_contam_bridge.py` — native prescribed-flow mass-balance engine
 - `engines/contamx_runner.py` — ContamX capability detection, subprocess, `.SIM` reader
-- `engines/contamx_transport.py` — ContamX airflow field + native mass balance
+- `engines/contamx_transport.py` — ContamX airflow field + AHS→room bridge + native mass balance
+- `engines/contamx_ahs_bridge.py` — synthesize room↔room recirculation from Contam AHS SIM flows
 - `tools/contamw34_prj.py` — ContamW 3.4 writer / simplify
 - `tools/contam_prj_bridge.py` — CLI export / simplify / import
 - `tools/contam_engine_compare.py` — results + speed suite runner

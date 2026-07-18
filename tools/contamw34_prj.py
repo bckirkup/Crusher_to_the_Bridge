@@ -5,14 +5,15 @@ contamw34_prj.py – ContamW 3.4 project export / simplify
 Emits ContamW **3.4**-grammar ``.prj`` text ContamX can parse, and
 simplifies authentic ContamW 3.4 projects back into Crusher platform JSON.
 
-Prescribed-flow approximation (fiction-ship plausible):
+Prescribed-flow approximation (fiction-ship plausible, ContamX-detailed):
   - ``plr_orfc`` envelope leaks zone→ambient (ContamX pressure reference)
-  - ``plr_orfc`` openings for adjacency
-  - ``fan_cvf`` constant-volume fans for cross-zone links
-  - Simple AHS: Ret/Sup phantoms + system paths (recirc/OA/exhaust) and
-    per-room supply/return terminals with design ``Fahs`` (kg/s), ``e#=0``
+  - ``plr_orfc`` openings for adjacency (bidirectional Contam solve)
+  - ``fan_cvf`` constant-volume fans for cross-zone links (room×room expanded)
+  - Simple AHS: Ret/Sup phantoms + system paths + volume-weighted terminals;
+    outdoor-air fraction schedule ``fo=0.2`` on recirc so Contam recirculates
 
 ContamW name fields are capped at **15 characters** (ContamX buffer).
+Crusher consumes ContamX flows via ``engines/contamx_ahs_bridge.py``.
 
 Native Crusher mass-balance is unchanged; ContamX only supplies the airflow
 field when selected. Blueprint→authentic Contam authoring is out of scope.
@@ -33,6 +34,10 @@ _DEFAULT_ZONE_TEMP_K = 293.15
 _DEFAULT_AIR_DENSITY = 1.2041
 # ContamW / ContamX symbolic names (zones, AHS, levels, elements) ≤ 15 chars.
 _CONTAM_NAME_MAX = 15
+# Outdoor-air fraction fo for simple AHS (Contam week-schedule on recirc path).
+# Contam defaults to fo=1.0 (100% OA, no recirculation) without a schedule.
+_DEFAULT_OA_FRACTION = 0.2
+_OA_SCHEDULE_NR = 1  # week-schedule index written into the PRJ
 
 # Element type codes (CONTAM 3.4)
 _ELEM_ORIFICE = 23
@@ -334,10 +339,12 @@ def _assemble_network(
         is_hvac_ducted: bool,
         crusher_transfer: bool,
         ahs_nr: int = 0,
+        ahs_group: int = 0,
         level: int = 1,
         flag: int = 0,
         fahs: float = 0.0,
         wazm: float = -1.0,
+        schedule_nr: int = 0,
     ) -> int:
         pnr = len(paths) + 1
         paths.append({
@@ -350,6 +357,7 @@ def _assemble_network(
             "level": level,
             "fahs": fahs,
             "wazm": wazm,
+            "schedule_nr": schedule_nr,
         })
         path_map.append({
             "path_nr": pnr,
@@ -358,6 +366,7 @@ def _assemble_network(
             "is_hvac_ducted": is_hvac_ducted,
             "kind": kind,
             "crusher_transfer": crusher_transfer,
+            "ahs_nr": ahs_group or ahs_nr,
         })
         return pnr
 
@@ -377,7 +386,7 @@ def _assemble_network(
             level=int(z["level"]),
         )
 
-    # 2) Adjacency openings (orifice)
+    # 2) Adjacency openings (orifice) — Contam solves bidirectional flow
     for adj in adjacency:
         a, b = adj["from"], adj["to"]
         if a not in zone_name_to_nr or b not in zone_name_to_nr:
@@ -391,102 +400,111 @@ def _assemble_network(
             flag=0,
         )
 
-    # 3) Cross-zone links as fans between representative rooms
+    # 3) Cross-zone links as fan_cvf, expanded to all room×room pairs
+    # (matches native ContamTransportEngine._build_cross_zone_paths).
     hvac_by_id = {h["id"]: h for h in hvac_info}
+    real_room_ids = {z["orig_id"] for z in zone_records if not z["is_phantom"]}
 
-    def _resolve_endpoint(token: str) -> str | None:
-        if token in zone_name_to_nr and token in {z["orig_id"] for z in zone_records if not z["is_phantom"]}:
-            return token
+    def _endpoint_rooms(token: str) -> list[str]:
         if token in hvac_by_id:
-            return hvac_by_id[token]["rooms"][0]
-        # Might already be a room id
+            return list(hvac_by_id[token]["rooms"])
+        if token in real_room_ids:
+            return [token]
         if token in zone_name_to_nr:
-            return token
-        return None
+            return [token]
+        return []
 
     for link in cross_links:
-        src = _resolve_endpoint(link["from"])
-        dst = _resolve_endpoint(link["to"])
-        if src is None or dst is None:
+        from_rooms = _endpoint_rooms(link["from"])
+        to_rooms = _endpoint_rooms(link["to"])
+        if not from_rooms or not to_rooms:
             continue
         flow = float(link.get("flow_rate_m3h", 50.0))
-        elem = _fan_elem(flow)
-        _add_path(
-            zone_name_to_nr[src], zone_name_to_nr[dst], elem,
-            from_name=src, to_name=dst,
-            kind=link.get("path", "cross_zone"),
-            is_hvac_ducted=bool(link.get("is_hvac_ducted", False)),
-            crusher_transfer=True,
-            flag=0,
-        )
+        n_pairs = len(from_rooms) * len(to_rooms)
+        pair_flow = flow / n_pairs if n_pairs > 0 else 0.0
+        if pair_flow <= 0.0:
+            continue
+        elem = _fan_elem(pair_flow)
+        kind = link.get("path", "cross_zone")
+        ducted = bool(link.get("is_hvac_ducted", False))
+        for fr in from_rooms:
+            for tr in to_rooms:
+                _add_path(
+                    zone_name_to_nr[fr], zone_name_to_nr[tr], elem,
+                    from_name=fr, to_name=tr,
+                    kind=kind,
+                    is_hvac_ducted=ducted,
+                    crusher_transfer=True,
+                    flag=0,
+                )
 
-    # 4) Per-AHS: Contam simple-AHS semantics (match authentic ContamW 3.4)
-    # System paths (recirc / OA / exhaust): a#=0, e#=0
-    # Zone terminals (supply / return): a#=AHS, e#=0, Fahs=design kg/s
-    # AHS record pr/ps/px = recirc / OA / exhaust path numbers
+    # 4) Per-AHS: Contam simple-AHS (Ret/Sup + system paths + terminals).
+    # OA fraction schedule on the recirc path enables recirculation (without
+    # it Contam defaults to fo=1.0 → no room↔room HVAC mixing).
     ahs_records: list[dict[str, Any]] = []
     for ahs_i, info in enumerate(hvac_info, start=1):
         rooms = info["rooms"]
         ach = info["ach"]
-        total_vol = sum(
-            next(z["volume"] for z in zone_records if z["orig_id"] == r)
+        room_vols = {
+            r: next(z["volume"] for z in zone_records if z["orig_id"] == r)
             for r in rooms
-        )
+        }
+        total_vol = sum(room_vols.values())
         total_flow = ach * total_vol  # m³/h
-        # Split: 20% OA, 80% recirculation of total ACH flow (bookkeeping;
-        # Contam balances system paths from terminal Fahs + OA schedule).
-        oa_flow = 0.2 * total_flow
-        recirc_flow = 0.8 * total_flow
-        per_room_supply = total_flow / max(len(rooms), 1)
-        per_room_fahs = _flow_m3h_to_fahs_kg_s(per_room_supply)
+        oa_frac = _DEFAULT_OA_FRACTION
+        recirc_flow = (1.0 - oa_frac) * total_flow
+        oa_flow = oa_frac * total_flow
         recirc_fahs = _flow_m3h_to_fahs_kg_s(recirc_flow)
 
-        # OA ambient -> supply (from_nr = -1)
+        # OA ambient -> supply (from_nr = -1); Contam a# must stay 0
         oa_path = _add_path(
             -1, info["sup_nr"], 0,
             from_name="ambient", to_name=info["sup_name"],
             kind="ahs_oa", is_hvac_ducted=True, crusher_transfer=False,
-            ahs_nr=0, flag=_PATH_AHS_OA, fahs=0.0, wazm=-1.0,
+            ahs_nr=0, ahs_group=ahs_i, flag=_PATH_AHS_OA, fahs=0.0, wazm=-1.0,
         )
         # Exhaust return -> ambient
         ex_path = _add_path(
             info["ret_nr"], -1, 0,
             from_name=info["ret_name"], to_name="ambient",
             kind="ahs_exhaust", is_hvac_ducted=True, crusher_transfer=False,
-            ahs_nr=0, flag=_PATH_AHS_EXHAUST, fahs=0.0, wazm=-1.0,
+            ahs_nr=0, ahs_group=ahs_i, flag=_PATH_AHS_EXHAUST, fahs=0.0, wazm=-1.0,
         )
-        # Recirc return -> supply
+        # Recirc return -> supply (week schedule = outdoor-air fraction fo)
         recirc_path = _add_path(
             info["ret_nr"], info["sup_nr"], 0,
             from_name=info["ret_name"], to_name=info["sup_name"],
             kind="ahs_recirc", is_hvac_ducted=True, crusher_transfer=False,
-            ahs_nr=0, flag=_PATH_AHS_RECIRC, fahs=recirc_fahs, wazm=-1.0,
+            ahs_nr=0, ahs_group=ahs_i, flag=_PATH_AHS_RECIRC, fahs=recirc_fahs,
+            wazm=-1.0, schedule_nr=_OA_SCHEDULE_NR,
         )
 
         for room in rooms:
             rnr = zone_name_to_nr[room]
-            # Supply: Sup -> room
+            # Volume-weighted terminal design flows (native ACH weighting)
+            room_flow = (
+                total_flow * (room_vols[room] / total_vol) if total_vol > 0 else 0.0
+            )
+            room_fahs = _flow_m3h_to_fahs_kg_s(room_flow)
             _add_path(
                 info["sup_nr"], rnr, 0,
                 from_name=info["sup_name"], to_name=room,
                 kind="ahs_supply", is_hvac_ducted=True, crusher_transfer=False,
-                ahs_nr=ahs_i, flag=_PATH_AHS_TERMINAL,
-                fahs=per_room_fahs, wazm=0.0,
+                ahs_nr=ahs_i, ahs_group=ahs_i, flag=_PATH_AHS_TERMINAL,
+                fahs=room_fahs, wazm=0.0,
             )
-            # Return: room -> Ret
             _add_path(
                 rnr, info["ret_nr"], 0,
                 from_name=room, to_name=info["ret_name"],
                 kind="ahs_return", is_hvac_ducted=True, crusher_transfer=False,
-                ahs_nr=ahs_i, flag=_PATH_AHS_TERMINAL,
-                fahs=per_room_fahs, wazm=0.0,
+                ahs_nr=ahs_i, ahs_group=ahs_i, flag=_PATH_AHS_TERMINAL,
+                fahs=room_fahs, wazm=0.0,
             )
 
         ahs_records.append({
             "nr": ahs_i,
             "ret_nr": info["ret_nr"],
             "sup_nr": info["sup_nr"],
-            # ContamW header: pr# = recirculation, ps# = OA, px# = exhaust
             "pr": recirc_path,
             "ps": oa_path,
             "px": ex_path,
@@ -496,6 +514,7 @@ def _assemble_network(
             "ach": ach,
             "total_vol": total_vol,
             "oa_flow_m3h": oa_flow,
+            "oa_fraction": oa_frac,
         })
 
     return {
@@ -509,6 +528,7 @@ def _assemble_network(
         "platform": spatial_layout.get("platform", "crusher_platform"),
         "zone_name_to_nr": zone_name_to_nr,
         "used_contam_names": used_contam_names,
+        "oa_fraction": _DEFAULT_OA_FRACTION,
     }
 
 
@@ -638,9 +658,25 @@ def export_contamw34(
     lines.append(_SENTINEL)
 
     # Empty / minimal schedule stubs
-    lines.append("0 ! day-schedules:")
+    # Outdoor-air fraction schedule for simple AHS (Contam fo on recirc path)
+    oa_frac = float(net.get("oa_fraction", _DEFAULT_OA_FRACTION))
+    lines.append("1 ! day-schedules:")
+    lines.append("! # npts shap utyp ucnv name")
+    lines.append(f"  {_OA_SCHEDULE_NR}    2    0    1    0 OAFrac")
+    lines.append(f"Crusher AHS outdoor-air fraction fo={oa_frac:g}")
+    lines.append(f" 00:00:00 {oa_frac:g}")
+    lines.append(f" 24:00:00 {oa_frac:g}")
     lines.append(_SENTINEL)
-    lines.append("0 ! week-schedules:")
+    lines.append("1 ! week-schedules:")
+    lines.append("! # utyp ucnv name")
+    lines.append(f"  {_OA_SCHEDULE_NR}    1    0 OAFracW")
+    lines.append(f"Crusher AHS outdoor-air fraction fo={oa_frac:g}")
+    lines.append(
+        f" {_OA_SCHEDULE_NR} {_OA_SCHEDULE_NR} {_OA_SCHEDULE_NR} "
+        f"{_OA_SCHEDULE_NR} {_OA_SCHEDULE_NR} {_OA_SCHEDULE_NR} "
+        f"{_OA_SCHEDULE_NR} {_OA_SCHEDULE_NR} {_OA_SCHEDULE_NR} "
+        f"{_OA_SCHEDULE_NR} {_OA_SCHEDULE_NR} {_OA_SCHEDULE_NR}"
+    )
     lines.append(_SENTINEL)
     lines.append("0 ! wind pressure profiles:")
     lines.append(_SENTINEL)
@@ -677,7 +713,7 @@ def export_contamw34(
             f"  {ahs['nr']}   {ahs['ret_nr']}   {ahs['sup_nr']}   "
             f"{ahs['pr']}   {ahs['ps']}   {ahs['px']} -1 {ahs['name']}"
         )
-        lines.append(f"Crusher HVAC {ahs['hvac_id']} ach={ahs['ach']}")
+        lines.append(f"Crusher HVAC {ahs['hvac_id']} ach={ahs['ach']} fo={ahs.get('oa_fraction', _DEFAULT_OA_FRACTION)}")
     lines.append(_SENTINEL)
 
     # Zones
@@ -711,9 +747,10 @@ def export_contamw34(
     for p in paths:
         wazm = p.get("wazm", -1.0)
         wazm_s = f"{wazm:g}" if wazm != -1.0 else "-1"
+        sched = int(p.get("schedule_nr", 0))
         lines.append(
             f"   {p['nr']}    {p['flag']}  {p['from_nr']}   {p['to_nr']}   "
-            f"{p['elem_nr']}   0   0   {p['ahs_nr']}   0   0   {p['level']}   "
+            f"{p['elem_nr']}   0   0   {p['ahs_nr']}   {sched}   0   {p['level']}   "
             f"0.000   0.000   0.000 1 0 0 {wazm_s} {p['fahs']:.8g} 0 0   0  1 "
             f"-1 0 0 0 0 0 0"
         )
