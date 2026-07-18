@@ -1,0 +1,9 @@
+{
+  "id": "mega_cruise_transport",
+  "mode": "transport",
+  "platform": "mega_cruise_5000",
+  "epochs": 8,
+  "inject": ["Central_Park_Open_Atrium:1e6"],
+  "repeats": 2,
+  "description": "Mega cruise — large-network transport divergence + timing"
+}

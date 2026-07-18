@@ -47,7 +47,11 @@ _CONTAMX_BINARY_NAMES = (
     "ContamX3.exe",
     "contamx3.4.exe",
     "ContamX.exe",
+    "ContamX3",
 )
+
+# Default in-repo drop directory for NIST binaries (gitignored contents).
+_THIRD_PARTY_CONTAMX_REL = os.path.join("third_party", "contamx")
 
 # Standard air density [kg/m³] used to convert ContamX mass flows (kg/s)
 # back to volumetric flows (m³/h) when a node density is unavailable.
@@ -59,6 +63,42 @@ class ContamXUnavailable(RuntimeError):
     """Raised when the ContamX solver cannot be located or executed."""
 
 
+def _repo_root() -> str:
+    return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+def _is_runnable_binary(path: str) -> bool:
+    """Return True when *path* looks like an executable ContamX binary."""
+    if not os.path.isfile(path):
+        return False
+    if os.name == "nt":
+        lower = path.lower()
+        if lower.endswith((".exe", ".bat", ".cmd")):
+            return True
+    return os.access(path, os.X_OK)
+
+
+def _search_dir_for_contamx(directory: str) -> str | None:
+    """Return the first known ContamX executable under *directory*."""
+    if not directory or not os.path.isdir(directory):
+        return None
+    for name in _CONTAMX_BINARY_NAMES:
+        candidate = os.path.join(directory, name)
+        if _is_runnable_binary(candidate):
+            return os.path.abspath(candidate)
+    # Fall back: any ContamX*.exe in the folder (Windows install dumps)
+    try:
+        for entry in sorted(os.listdir(directory)):
+            lower = entry.lower()
+            if lower.startswith("contamx") and lower.endswith(".exe"):
+                candidate = os.path.join(directory, entry)
+                if _is_runnable_binary(candidate):
+                    return os.path.abspath(candidate)
+    except OSError:
+        return None
+    return None
+
+
 def find_contamx(config: dict[str, Any] | None = None) -> str | None:
     """Locate a runnable ContamX executable.
 
@@ -66,7 +106,9 @@ def find_contamx(config: dict[str, Any] | None = None) -> str | None:
 
     1. ``config['hvac']['contamx']['binary_path']`` (explicit config).
     2. ``CONTAMX_BINARY`` environment variable.
-    3. A known ContamX executable name on ``PATH``.
+    3. ``CONTAMX_HOME`` directory (searched for known executable names).
+    4. Repo ``third_party/contamx/`` drop directory.
+    5. A known ContamX executable name on ``PATH``.
 
     Returns the resolved absolute path, or ``None`` when no usable binary is
     found (the caller should then fall back to the native engine).
@@ -88,8 +130,19 @@ def find_contamx(config: dict[str, Any] | None = None) -> str | None:
 
     for explicit in candidates:
         expanded = os.path.expanduser(explicit)
-        if os.path.isfile(expanded) and os.access(expanded, os.X_OK):
+        if _is_runnable_binary(expanded):
             return os.path.abspath(expanded)
+
+    search_dirs: list[str] = []
+    env_home = os.environ.get("CONTAMX_HOME")
+    if env_home:
+        search_dirs.append(os.path.expanduser(env_home))
+    search_dirs.append(os.path.join(_repo_root(), _THIRD_PARTY_CONTAMX_REL))
+
+    for directory in search_dirs:
+        found = _search_dir_for_contamx(directory)
+        if found:
+            return found
 
     for name in _CONTAMX_BINARY_NAMES:
         found = shutil.which(name)

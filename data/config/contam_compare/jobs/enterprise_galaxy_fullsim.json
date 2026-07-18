@@ -1,0 +1,9 @@
+{
+  "id": "enterprise_galaxy_fullsim",
+  "mode": "full_sim",
+  "platform": "enterprise_galaxy_tng",
+  "epochs": 8,
+  "seed": 42,
+  "repeats": 2,
+  "description": "Enterprise Galaxy — short full Picard outcomes + timing"
+}

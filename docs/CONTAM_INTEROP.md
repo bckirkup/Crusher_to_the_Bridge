@@ -124,20 +124,27 @@ python3 tools/sanity_checker.py --platform-dir data/platforms/imported_from_cont
 hvac:
   transport_engine: "native"   # native | contamx | auto
   contamx:
-    binary_path: ""            # ContamX executable
+    binary_path: ""            # ContamX executable (optional)
     prj_path: ""               # optional override
 ```
+
+**Binary resolution:** `hvac.contamx.binary_path` → `CONTAMX_BINARY` →
+`CONTAMX_HOME` → repo **`third_party/contamx/`** → `PATH`.
+
+Drop NIST ContamX into `third_party/contamx/` (gitignored except the README).
+See [`third_party/contamx/README.md`](../third_party/contamx/README.md).
 
 **PRJ resolution:** `hvac.contamx.prj_path` →
 `data/platforms/<id>/contam/platform.prj` → temp ContamW 3.4 export from JSON.
 
 ContamX computes the airflow field; Crusher applies pathogen mass balance.
-Binary discovery: config → `CONTAMX_BINARY` → PATH. ContamX is **not** in CI;
-paths fall back to native.
+ContamX is **not** in CI; paths fall back to native.
 
 ### Install ContamX
 
-Download from <https://www.nist.gov/services-resources/software/contam>.
+Download from <https://www.nist.gov/services-resources/software/contam>
+and place the executable under `third_party/contamx/` (or set
+`CONTAMX_BINARY`).
 
 Smoke (operators with ContamX installed):
 
@@ -147,19 +154,34 @@ python3 tools/contam_benchmark.py \
     --epochs 12 --inject Bridge:1e6
 ```
 
-## 6. Comparing outcomes
+## 6. Comparing outcomes (results + speed)
+
+Job configs live under [`data/config/contam_compare/`](../data/config/contam_compare/):
+
+| Artifact | Role |
+|----------|------|
+| `suite.json` | Default suite listing all jobs |
+| `jobs/*.json` | Per-platform transport and/or full Picard jobs |
 
 | Tool | What it compares |
 |------|------------------|
-| `tools/contam_benchmark.py` | Transport concentrations (L1 / L∞); prefers bundled PRJ |
-| `tools/contam_outcome_compare.py` | Full Picard runs: attack rate, infected count, HVAC exposure events, OIS |
+| `tools/contam_engine_compare.py` | **Primary** — results (L1/L∞ or attack-rate deltas) **and** wall-clock timing with repeats |
+| `tools/contam_benchmark.py` | Transport concentrations only |
+| `tools/contam_outcome_compare.py` | Full Picard outcomes only |
+| `run_contam_compare.bat` | Windows one-click runner for the suite |
 
 ```bash
-python3 tools/contam_outcome_compare.py \
-    --platform destroyer_baseline --epochs 6 --seed 42
+# Full suite (native always; ContamX when binary present)
+python3 tools/contam_engine_compare.py --suite data/config/contam_compare/suite.json
+
+# Windows
+run_contam_compare.bat
 ```
 
-When ContamX is unavailable both tools print native-only results.
+Reports write to `telemetry_buffer/contam_compare/` (gitignored).
+
+When ContamX is unavailable the suite still runs native-only and records
+`contamx_error` per job.
 
 ## 7. Related components
 
@@ -168,6 +190,8 @@ When ContamX is unavailable both tools print native-only results.
 - `engines/contamx_transport.py` — ContamX airflow field + native mass balance
 - `tools/contamw34_prj.py` — ContamW 3.4 writer / simplify
 - `tools/contam_prj_bridge.py` — CLI export / simplify / import
+- `tools/contam_engine_compare.py` — results + speed suite runner
 - `scripts/generate_platform_contam_prj.py` — regenerate fiction-ship bundles
+- `third_party/contamx/` — local ContamX drop directory (gitignored binaries)
 - `tests/fixtures/contam/` — authentic ContamW 3.4 parse fixtures
 - Sibling `py-contam` — `.SIM` layout reference (Law 6, read-only)

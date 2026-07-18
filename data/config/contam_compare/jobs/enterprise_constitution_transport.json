@@ -1,0 +1,9 @@
+{
+  "id": "enterprise_constitution_transport",
+  "mode": "transport",
+  "platform": "enterprise_constitution_tos",
+  "epochs": 12,
+  "inject": ["Bridge:1e6"],
+  "repeats": 3,
+  "description": "Enterprise Constitution — transport divergence + timing"
+}

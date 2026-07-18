@@ -1,0 +1,9 @@
+{
+  "id": "destroyer_fullsim",
+  "mode": "full_sim",
+  "platform": "destroyer_baseline",
+  "epochs": 12,
+  "seed": 42,
+  "repeats": 3,
+  "description": "Small ship — full Picard outcomes + timing"
+}
