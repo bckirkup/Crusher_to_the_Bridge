@@ -126,6 +126,15 @@ def test_resolve_contam_prj_path_bundled() -> None:
     assert resolved.endswith("enterprise_galaxy_tng/contam/platform.prj")
 
 
+def test_resolve_contam_prj_path_rejects_traversal_platform() -> None:
+    from engines.contamx_runner import ContamXUnavailable
+
+    spatial = {"platform": "../etc"}
+    cfg: dict = {"hvac": {"contamx": {}}}
+    with pytest.raises(ContamXUnavailable):
+        resolve_contam_prj_path(str(REPO_ROOT), cfg, spatial)
+
+
 def test_resolve_contam_prj_path_explicit_override(tmp_path) -> None:
     # Use an in-repo bundled file as the explicit override target
     bundled = (
