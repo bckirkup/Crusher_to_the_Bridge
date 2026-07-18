@@ -22,6 +22,7 @@ Pure-Python simulation (no databases, Docker, or external APIs). **Python 3.11+*
 | Wearable anomaly scoring | `python3 -m pytest tests/test_wearable_anomaly_scorer.py tests/test_cascade_entry.py -v` | Confounder-aware infection_score + cascade entry fusion |
 | Diagnostic cascade smoke | `python3 -m pytest tests/test_smoke_diagnostic_cascade.py -v` | 6-epoch runs with cascade enabled (standard + multiplex specs) |
 | Long-read / TAT tests | `python3 -m pytest tests/test_long_read_sequencing.py tests/test_instrument_turnaround.py -v` | Nanopore + turnaround queue |
+| Mega cruise campaign | `./run_campaign.sh --smoke` or `run_campaign.bat --smoke` | Full matrix: `picard_framework/runs/mega_cruise_campaign/` |
 
 ### Framework layout
 
