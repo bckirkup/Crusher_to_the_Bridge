@@ -17,7 +17,7 @@ def _agent(aid: int, loc: str, infected: bool = False) -> KorkinAgent:
         role="passenger",
         immune=False,
         home_zone=loc,
-        dining_zone="Main_Dining_Room_Lower",
+        dining_zone="MainDining_L",
         work_zone="Main_Pool_Deck",
         free_zone="Main_Pool_Deck",
         schedule=["home"] * 24,
@@ -32,7 +32,7 @@ def _agent(aid: int, loc: str, infected: bool = False) -> KorkinAgent:
 
 class TestCabinCorridorTransmission:
     def test_quarantined_agent_receives_reduced_direct_contact(self) -> None:
-        zone = "Pax_Corridor_D6_Port_Fwd"
+        zone = "PC_D6_P_F"
         shedder = _agent(1, zone, infected=True)
         free_target = _agent(2, zone)
         confined_target = _agent(3, zone)
@@ -81,7 +81,7 @@ class TestCabinCorridorTransmission:
         assert matrix.shared_room_exposures[0]["dose"] > 0
 
     def test_quarantined_agent_skips_fomite_pickup(self) -> None:
-        zone = "Pax_Corridor_D6_Port_Mid"
+        zone = "PC_D6_P_M"
         shedder = _agent(1, zone, infected=True)
         confined = _agent(2, zone)
         core = TransmissionCore(
@@ -102,7 +102,7 @@ class TestCabinCorridorTransmission:
         assert matrix.fomite_trailing_exposures == []
 
     def test_balcony_ventilation_reduces_droplet_dose(self) -> None:
-        zone = "Pax_Corridor_D7_Stbd_Aft"
+        zone = "PC_D7_S_A"
         shedder = _agent(1, zone, infected=True)
         target = _agent(2, zone)
         core_interior = TransmissionCore(
@@ -128,8 +128,8 @@ class TestCabinCorridorTransmission:
         assert m_bal.droplet_exposures[0]["dose"] < m_int.droplet_exposures[0]["dose"]
 
     def test_quarantined_agent_hvac_dose_not_reduced_by_confinement(self) -> None:
-        source = "Pax_Corridor_D6_Port_Fwd"
-        target_zone = "Pax_Corridor_D6_Port_Mid"
+        source = "PC_D6_P_F"
+        target_zone = "PC_D6_P_M"
         volumes = {source: 1200.0, target_zone: 1200.0}
         types = {source: "Cabin_Corridor", target_zone: "Cabin_Corridor"}
         downstream = {source: [target_zone]}

@@ -95,7 +95,7 @@ if self._cabin_confinement_active(shedder):
 ### Cabin size configuration
 Add to zone metadata in spatial_layout.json:
 ```json
-{"id": "Pax_Corridor_D6_Port_Fwd", "cabin_size": 2, ...}
+{"id": "PC_D6_P_F", "cabin_size": 2, ...}
 ```
 Or derive from zone type:
 - Pax_Corridor zones: cabin_size = 2

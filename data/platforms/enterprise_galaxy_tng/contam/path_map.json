@@ -28,7 +28,7 @@
   },
   {
     "path_nr": 4,
-    "from_zone": "Main_Engineering",
+    "from_zone": "MainEng",
     "to_zone": "ambient",
     "is_hvac_ducted": false,
     "kind": "envelope_leak",
@@ -127,7 +127,7 @@
   },
   {
     "path_nr": 15,
-    "from_zone": "Stellar_Cartography",
+    "from_zone": "StellarCarto",
     "to_zone": "ambient",
     "is_hvac_ducted": false,
     "kind": "envelope_leak",
@@ -155,7 +155,7 @@
   {
     "path_nr": 18,
     "from_zone": "Bridge",
-    "to_zone": "Stellar_Cartography",
+    "to_zone": "StellarCarto",
     "is_hvac_ducted": false,
     "kind": "turbolift",
     "crusher_transfer": true,
@@ -227,7 +227,7 @@
   {
     "path_nr": 26,
     "from_zone": "Cargo_Bay",
-    "to_zone": "Main_Engineering",
+    "to_zone": "MainEng",
     "is_hvac_ducted": false,
     "kind": "turbolift",
     "crusher_transfer": true,
@@ -235,7 +235,7 @@
   },
   {
     "path_nr": 27,
-    "from_zone": "Main_Engineering",
+    "from_zone": "MainEng",
     "to_zone": "Sickbay",
     "is_hvac_ducted": false,
     "kind": "turbolift",
@@ -307,7 +307,7 @@
   },
   {
     "path_nr": 35,
-    "from_zone": "Stellar_Cartography",
+    "from_zone": "StellarCarto",
     "to_zone": "Ten_Forward",
     "is_hvac_ducted": true,
     "kind": "turbolift_forward",
@@ -316,7 +316,7 @@
   },
   {
     "path_nr": 36,
-    "from_zone": "Stellar_Cartography",
+    "from_zone": "StellarCarto",
     "to_zone": "Crew_Lounge",
     "is_hvac_ducted": true,
     "kind": "turbolift_forward",
@@ -325,7 +325,7 @@
   },
   {
     "path_nr": 37,
-    "from_zone": "Stellar_Cartography",
+    "from_zone": "StellarCarto",
     "to_zone": "Holodeck",
     "is_hvac_ducted": true,
     "kind": "turbolift_forward",
@@ -334,7 +334,7 @@
   },
   {
     "path_nr": 38,
-    "from_zone": "Stellar_Cartography",
+    "from_zone": "StellarCarto",
     "to_zone": "Galley",
     "is_hvac_ducted": true,
     "kind": "turbolift_forward",
@@ -343,7 +343,7 @@
   },
   {
     "path_nr": 39,
-    "from_zone": "Stellar_Cartography",
+    "from_zone": "StellarCarto",
     "to_zone": "Mess_Hall",
     "is_hvac_ducted": true,
     "kind": "turbolift_forward",
@@ -668,7 +668,7 @@
   {
     "path_nr": 75,
     "from_zone": "Shuttlebay",
-    "to_zone": "Main_Engineering",
+    "to_zone": "MainEng",
     "is_hvac_ducted": true,
     "kind": "engineering_connecting_spine",
     "crusher_transfer": true,
@@ -677,7 +677,7 @@
   {
     "path_nr": 76,
     "from_zone": "Cargo_Bay",
-    "to_zone": "Main_Engineering",
+    "to_zone": "MainEng",
     "is_hvac_ducted": true,
     "kind": "engineering_connecting_spine",
     "crusher_transfer": true,
@@ -686,7 +686,7 @@
   {
     "path_nr": 77,
     "from_zone": "Bridge",
-    "to_zone": "Main_Engineering",
+    "to_zone": "MainEng",
     "is_hvac_ducted": true,
     "kind": "emergency_scrubber_loop",
     "crusher_transfer": true,
@@ -694,8 +694,8 @@
   },
   {
     "path_nr": 78,
-    "from_zone": "Stellar_Cartography",
-    "to_zone": "Main_Engineering",
+    "from_zone": "StellarCarto",
+    "to_zone": "MainEng",
     "is_hvac_ducted": true,
     "kind": "emergency_scrubber_loop",
     "crusher_transfer": true,
@@ -704,7 +704,7 @@
   {
     "path_nr": 79,
     "from_zone": "Security_Office",
-    "to_zone": "Main_Engineering",
+    "to_zone": "MainEng",
     "is_hvac_ducted": true,
     "kind": "emergency_scrubber_loop",
     "crusher_transfer": true,
@@ -758,7 +758,7 @@
   {
     "path_nr": 85,
     "from_zone": "ahs1(Sup)",
-    "to_zone": "Stellar_Cartography",
+    "to_zone": "StellarCarto",
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
@@ -766,7 +766,7 @@
   },
   {
     "path_nr": 86,
-    "from_zone": "Stellar_Cartography",
+    "from_zone": "StellarCarto",
     "to_zone": "ahs1(Ret)",
     "is_hvac_ducted": true,
     "kind": "ahs_return",
@@ -1163,7 +1163,7 @@
   {
     "path_nr": 130,
     "from_zone": "ahs6(Sup)",
-    "to_zone": "Main_Engineering",
+    "to_zone": "MainEng",
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
@@ -1171,7 +1171,7 @@
   },
   {
     "path_nr": 131,
-    "from_zone": "Main_Engineering",
+    "from_zone": "MainEng",
     "to_zone": "ahs6(Ret)",
     "is_hvac_ducted": true,
     "kind": "ahs_return",

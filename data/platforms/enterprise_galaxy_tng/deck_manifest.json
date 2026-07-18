@@ -13,7 +13,7 @@
     "Bridge",
     "Ten_Forward",
     "Sickbay",
-    "Main_Engineering",
+    "MainEng",
     "Holodeck",
     "Crew_Quarters",
     "Family_Quarters",
@@ -24,7 +24,7 @@
     "Crew_Lounge",
     "Security_Office",
     "Arboretum",
-    "Stellar_Cartography",
+    "StellarCarto",
     "Schoolroom",
     "Mess_Hall"
   ],

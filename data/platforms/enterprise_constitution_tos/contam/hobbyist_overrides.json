@@ -33,12 +33,12 @@
     "Science_Lab": 120,
     "Engineering": 180,
     "Crew_Quarters": 270,
-    "Officer_Quarters": 240,
+    "OfficerQtrs": 240,
     "Rec_Deck": 300,
     "Galley": 310,
     "Mess_Hall": 320,
-    "Transporter_Room": 100,
-    "Security_Station": 150
+    "Transporter": 100,
+    "Security": 150
   },
   "duct_hvac_ids": [
     "zone_saucer_command",

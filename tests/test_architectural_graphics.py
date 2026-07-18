@@ -18,19 +18,19 @@ class TestCompartmentPacker:
 
         zones = [
             {
-                "id": "Pax_Corridor_D10_Port_Fwd",
+                "id": "PC_D10_P_F",
                 "type": "Cabin_Corridor",
                 "volume_m3": 400,
                 "display": {"x": 295, "y": 32},
             },
             {
-                "id": "Pax_Corridor_D10_Stbd_Fwd",
+                "id": "PC_D10_S_F",
                 "type": "Cabin_Corridor",
                 "volume_m3": 400,
                 "display": {"x": 295, "y": 35},
             },
             {
-                "id": "Pax_Corridor_D10_Central_Fwd",
+                "id": "PC_D10_C_F",
                 "type": "Cabin_Corridor",
                 "volume_m3": 400,
                 "display": {"x": 295, "y": 33.5},
@@ -45,8 +45,8 @@ class TestCompartmentPacker:
             )
             for zid, ring in rings.items()
         }
-        assert centers["Pax_Corridor_D10_Port_Fwd"][1] < centers["Pax_Corridor_D10_Central_Fwd"][1]
-        assert centers["Pax_Corridor_D10_Central_Fwd"][1] < centers["Pax_Corridor_D10_Stbd_Fwd"][1]
+        assert centers["PC_D10_P_F"][1] < centers["PC_D10_C_F"][1]
+        assert centers["PC_D10_C_F"][1] < centers["PC_D10_S_F"][1]
 
     def test_same_deck_pack_has_zero_overlaps_mega_cabin_deck(self) -> None:
         from compartment_packer import count_aabb_overlaps, pack_deck_compartments

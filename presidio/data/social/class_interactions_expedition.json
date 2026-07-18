@@ -119,7 +119,7 @@
       "context_zones": [
         "Berthing",
         "Crew_Quarters",
-        "Officer_Quarters"
+        "OfficerQtrs"
       ],
       "notes": "Shared berthing, crew mess"
     },
@@ -150,7 +150,7 @@
       "context_zones": [
         "Berthing",
         "Crew_Quarters",
-        "Officer_Quarters"
+        "OfficerQtrs"
       ],
       "notes": "Shared quarters, different duty zones"
     },
@@ -161,7 +161,7 @@
       "context_zones": [
         "Berthing",
         "Crew_Quarters",
-        "Officer_Quarters"
+        "OfficerQtrs"
       ],
       "notes": "Shared quarters, different duty zones"
     },
@@ -172,7 +172,7 @@
       "context_zones": [
         "Berthing",
         "Crew_Quarters",
-        "Officer_Quarters"
+        "OfficerQtrs"
       ],
       "notes": "Limited overlap except quarters"
     },
@@ -183,7 +183,7 @@
       "context_zones": [
         "Berthing",
         "Crew_Quarters",
-        "Officer_Quarters"
+        "OfficerQtrs"
       ],
       "notes": "Limited overlap except quarters"
     },

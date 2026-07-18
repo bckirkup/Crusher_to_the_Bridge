@@ -26,7 +26,7 @@
   "zone_annotations": {
     "Bridge": "Bridge",
     "Ten_Forward": "Ten Forward",
-    "Main_Engineering": "Main Engineering",
+    "MainEng": "Main Engineering",
     "Arboretum": "Arboretum",
     "Sickbay": "Sickbay"
   },
@@ -44,7 +44,7 @@
   "wall_azimuth_deg": {
     "Bridge": 0,
     "Ten_Forward": 270,
-    "Main_Engineering": 180,
+    "MainEng": 180,
     "Arboretum": 90,
     "Shuttlebay": 0,
     "Cargo_Bay": 180,

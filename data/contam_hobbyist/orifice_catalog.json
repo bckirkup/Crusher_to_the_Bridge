@@ -116,6 +116,11 @@
       "name": "TurboFwd",
       "area_m2": 2.2,
       "description": "Forward turbolift bank"
+    },
+    "vertical_shaft": {
+      "name": "VertShaft",
+      "area_m2": 0.01,
+      "description": "Passive vertical shaft / ladder-well orifice (sized at export for design Q @ 1 Pa)"
     }
   },
   "envelope_leak": {

@@ -36,7 +36,7 @@ def _cfg_for_platform(platform_id: str) -> dict:
     [
         ("destroyer_baseline", ["Engine_Room"]),
         ("mega_cruise_5000", ["Engine_Room_Aft"]),
-        ("enterprise_galaxy_tng", ["Main_Engineering"]),
+        ("enterprise_galaxy_tng", ["MainEng"]),
     ],
 )
 def test_resolve_graywater_zones_from_platform(platform_id: str, expected: list[str]) -> None:
@@ -49,9 +49,9 @@ def test_resolve_graywater_zones_from_platform(platform_id: str, expected: list[
 
 def test_resolve_graywater_zones_config_override() -> None:
     cfg = _cfg_for_platform("mega_cruise_5000")
-    cfg["microflora"]["graywater_zones"] = ["Waste_Treatment_Plant"]
-    zone_names = ["Bridge", "Waste_Treatment_Plant"]
-    assert resolve_graywater_zones(cfg, zone_names) == ["Waste_Treatment_Plant"]
+    cfg["microflora"]["graywater_zones"] = ["WasteTreat"]
+    zone_names = ["Bridge", "WasteTreat"]
+    assert resolve_graywater_zones(cfg, zone_names) == ["WasteTreat"]
 
 
 def test_resolve_graywater_zones_fallback_to_all_zones() -> None:

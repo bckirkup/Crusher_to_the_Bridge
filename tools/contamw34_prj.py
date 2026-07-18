@@ -66,6 +66,35 @@ def _sanitize_name(name: str) -> str:
     return re.sub(r"\s+", "_", str(name).strip()) or "unnamed"
 
 
+_WORD_ABBREVS = {
+    "Corridor": "Cor",
+    "Restaurant": "Rest",
+    "Engineering": "Eng",
+    "Accommodation": "Accom",
+    "Entertainment": "Ent",
+    "Cartography": "Carto",
+    "Treatment": "Treat",
+    "Quarters": "Qtrs",
+    "Control": "Ctrl",
+    "Complex": "Cx",
+    "Block": "Blk",
+}
+
+
+def _abbreviate_for_contam(name: str, max_len: int = _CONTAM_NAME_MAX) -> str:
+    """Prefer word abbreviations before hard truncation (Contam ≤15 chars)."""
+    name = _sanitize_name(name)
+    if len(name) <= max_len:
+        return name
+    for long, short in _WORD_ABBREVS.items():
+        if len(name) <= max_len:
+            break
+        name = name.replace(long, short)
+    if len(name) > max_len:
+        name = "".join(name.split("_"))
+    return name[:max_len] or "z"
+
+
 def _unique_contam_name(
     raw: str,
     used: set[str],
@@ -73,7 +102,7 @@ def _unique_contam_name(
     max_len: int = _CONTAM_NAME_MAX,
 ) -> str:
     """Return a Contam-safe unique name ≤ *max_len* characters."""
-    base = _sanitize_name(raw)[:max_len] or "z"
+    base = _abbreviate_for_contam(raw, max_len=max_len) or "z"
     candidate = base
     n = 0
     while candidate in used:
@@ -87,6 +116,20 @@ def _unique_contam_name(
             candidate = base[:keep] + suffix
     used.add(candidate)
     return candidate
+
+
+def _orifice_area_m2_for_flow_m3h(
+    flow_m3h: float,
+    *,
+    cd: float = 0.6,
+    density: float = _DEFAULT_AIR_DENSITY,
+    dp_pa: float = 1.0,
+) -> float:
+    """Orifice area for design volumetric flow at a reference ΔP (Contam plr_orfc)."""
+    q_m3s = max(float(flow_m3h), 0.0) / 3600.0
+    if q_m3s <= 0.0 or cd <= 0.0 or density <= 0.0 or dp_pa <= 0.0:
+        return 1e-6
+    return q_m3s / (cd * math.sqrt(2.0 * dp_pa / density))
 
 
 def _flow_m3h_to_fahs_kg_s(flow_m3h: float) -> float:
@@ -364,6 +407,28 @@ def _assemble_network(
         fan_elem_by_m3s[key] = nr
         return nr
 
+    orifice_elem_by_area: dict[float, int] = {}
+
+    def _orifice_elem_for_flow(flow_m3h: float) -> int:
+        """Sized plr_orfc for passive cross-zone design flow at 1 Pa."""
+        area = _orifice_area_m2_for_flow_m3h(flow_m3h)
+        key = round(area, 10)
+        if key in orifice_elem_by_area:
+            return orifice_elem_by_area[key]
+        nr = len(elements) + 1
+        el_name = _unique_contam_name(f"XZOrf_{nr}", used_contam_names)
+        elements.append({
+            "nr": nr,
+            "type": _ELEM_ORIFICE,
+            "symbol": "plr_orfc",
+            "name": el_name,
+            "params": _hobby.orifice_params_for_area(area),
+            "area_m2": area,
+            "flow_m3h": flow_m3h,
+        })
+        orifice_elem_by_area[key] = nr
+        return nr
+
     # Hobbyist schedules / wind / filters (indices are 1-based Contam refs)
     sched_oa_week = 0
     sched_duty_week = 0
@@ -597,8 +662,8 @@ def _assemble_network(
             y=0.5 * (float(za["y"]) + float(zb["y"])),
         )
 
-    # 3) Cross-zone links as fan_cvf, expanded to all room×room pairs
-    # (matches native ContamTransportEngine._build_cross_zone_paths).
+    # 3) Cross-zone links: fan_cvf when HVAC-ducted; sized plr_orfc when passive.
+    # Expansion to room×room pairs matches native ContamTransportEngine.
     hvac_by_id = {h["id"]: h for h in hvac_info}
     real_room_ids = {z["orig_id"] for z in zone_records if not z["is_phantom"]}
 
@@ -611,6 +676,18 @@ def _assemble_network(
             return [token]
         return []
 
+    def _passive_cross_zone_schedule(path_name: str) -> int:
+        """Week-schedule nr for passive shafts/hatches (0 = always open)."""
+        if not hobbyist or not week_by_id:
+            return 0
+        low = str(path_name).lower()
+        if "hatch" in low:
+            sched_id = "HatchOccasionalW"
+        else:
+            # ladder wells, shafts, stairwells, corridors
+            sched_id = "ShaftOpenW"
+        return int(week_by_id.get(sched_id, 0))
+
     for link in cross_links:
         from_rooms = _endpoint_rooms(link["from"])
         to_rooms = _endpoint_rooms(link["to"])
@@ -621,9 +698,14 @@ def _assemble_network(
         pair_flow = flow / n_pairs if n_pairs > 0 else 0.0
         if pair_flow <= 0.0:
             continue
-        elem = _fan_elem(pair_flow)
         kind = link.get("path", "cross_zone")
         ducted = bool(link.get("is_hvac_ducted", False))
+        if ducted:
+            elem = _fan_elem(pair_flow)
+            sched_nr = 0
+        else:
+            elem = _orifice_elem_for_flow(pair_flow)
+            sched_nr = _passive_cross_zone_schedule(str(kind))
         for fr in from_rooms:
             for tr in to_rooms:
                 _add_path(
@@ -633,6 +715,7 @@ def _assemble_network(
                     is_hvac_ducted=ducted,
                     crusher_transfer=True,
                     flag=0,
+                    sched_nr=sched_nr,
                 )
 
     def _ensure_filter(preset: str) -> int:
@@ -664,6 +747,44 @@ def _assemble_network(
         .get("oa_fraction", _DEFAULT_OA_FRACTION)
         if hobbyist else _DEFAULT_OA_FRACTION
     )
+    oa_week_by_frac: dict[float, int] = {}
+
+    def _oa_week_schedule_nr(oa_frac: float) -> int:
+        """Return Contam week-schedule nr for this outdoor-air fraction.
+
+        Default OAFracW covers fo≈0.2. Non-default per-AHU overrides get a
+        dedicated day/week pair wired onto that AHS recirculation path.
+        """
+        if not hobbyist:
+            return _OA_SCHEDULE_NR
+        key = round(float(oa_frac), 6)
+        if abs(key - round(default_oa, 6)) < 1e-9:
+            return sched_oa_week or _OA_SCHEDULE_NR
+        if key in oa_week_by_frac:
+            return oa_week_by_frac[key]
+        pct = int(round(key * 100))
+        day_id = f"OAFr_{pct}"
+        day_name = f"OAFr_{pct}"[:15]
+        week_id = f"OAFr_{pct}W"
+        week_name = f"OAFr{pct}W"[:15]
+        day_schedules.append({
+            "id": day_id,
+            "name": day_name,
+            "description": f"Outdoor-air fraction {key:.3f}",
+            "points": [["00:00:00", key], ["24:00:00", key]],
+        })
+        day_by_id[day_id] = len(day_schedules)
+        week_schedules.append({
+            "id": week_id,
+            "name": week_name,
+            "description": f"Week schedule for OA fraction {key:.3f}",
+            "day_id": day_id,
+        })
+        week_nr = len(week_schedules)
+        week_by_id[week_id] = week_nr
+        oa_week_by_frac[key] = week_nr
+        return week_nr
+
     for ahs_i, info in enumerate(hvac_info, start=1):
         rooms = info["rooms"]
         ach = info["ach"]
@@ -681,6 +802,7 @@ def _assemble_network(
         per_room_supply = total_flow / max(len(rooms), 1)
         per_room_fahs = _flow_m3h_to_fahs_kg_s(per_room_supply)
         recirc_fahs = _flow_m3h_to_fahs_kg_s(recirc_flow)
+        oa_sched = _oa_week_schedule_nr(oa_frac)
 
         filt_nr = 0
         if hobbyist:
@@ -709,7 +831,7 @@ def _assemble_network(
             kind="ahs_recirc", is_hvac_ducted=True, crusher_transfer=False,
             ahs_nr=0, ahs_group=ahs_i, flag=_PATH_AHS_RECIRC, fahs=recirc_fahs, wazm=-1.0,
             filter_nr=filt_nr,
-            sched_nr=sched_oa_week if hobbyist else _OA_SCHEDULE_NR,
+            sched_nr=oa_sched if hobbyist else _OA_SCHEDULE_NR,
         )
 
         for room in rooms:

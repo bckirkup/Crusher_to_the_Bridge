@@ -110,9 +110,9 @@ same-`sim_time` summary frames with invalid node densities. Fixture:
 `tests/fixtures/contam/destroyer_baseline.sim`.
 
 Crack-scale openings remain fixed. ContamX→Crusher coupling on destroyer is
-now in the right order of magnitude; remaining fidelity work is OAFrac wiring,
-passive `fan_cvf`→orifice export, and mega duct/fan expansion — then re-run the
-compare suite for updated L1 baselines.
+now in the right order of magnitude. PRJ config fixes v2 (zone ≤15, per-AHU
+OA schedules, passive orifices) landed; re-run the compare suite on Windows
+for refreshed L1 baselines.
 
 **Native over-mix (addressed):** Native recirculation now uses Contam AHS
 semantics (OA + duty + equal share) so Contam/PRJ remains SoT; do not raise
@@ -124,11 +124,14 @@ Contam rates to match old native ACH complete-mixing.
 
 1. ~~**Resize orifice catalog**~~ — done.
 2. ~~**SIM Flow0 path_nr join**~~ — done (embedded record `nr`; regression fixture).
-3. **Windows:** re-run `contam_engine_compare` suite + `contam_flow_compare --run-contamx`
-   after pulling the reader fix; expect destroyer kept≈17 + synth≈8 and fan design rates.
-4. **Wire per-AHU `oa_fraction` into Contam schedules** (or drop misleading overrides).
-5. **Export passive cross-zone links as orifices** (sized for native m³/h at a reference ΔP), keep `fan_cvf` only when `is_hvac_ducted: true`.
-6. **Mega:** restrict `duct_hvac_ids`; reconsider combinatorial fan expansion vs shaft orifices.
+3. ~~**Zone IDs ≤15 chars**~~ — done (mega `PC_*`/`CC_*`, Enterprises abbreviated; `_abbreviate_for_contam` fallback).
+4. ~~**Per-AHU OA schedules**~~ — done (`OAFr_{pct}` day/week wired on AHS recirc).
+5. ~~**Mega deck temps**~~ — verified (`0_Engine`/`1_Engine` exact key match → 298.15 / 297.15 K).
+6. ~~**Passive cross-zone → plr_orfc**~~ — done (sized for design Q @ 1 Pa; keep `fan_cvf` only when ducted).
+7. **Windows:** re-run `contam_engine_compare` suite + `contam_flow_compare --run-contamx`
+   after pulling PRJ config fixes; expect destroyer passive ladders as Contam orifices.
+8. **Mega:** restrict `duct_hvac_ids`; reconsider combinatorial fan expansion vs shaft orifices.
 
-The four PRJs remain fiction ACH twins with physically plausible openings; ContamX
-Flow0 join is trustworthy again for calibration comparisons.
+Fiction PRJs are the preferred airflow SoT after this bootstrap regeneration;
+JSON platforms remain the human-readable agent-facing IDs (≤15 chars) bridged by
+`path_map.json`.

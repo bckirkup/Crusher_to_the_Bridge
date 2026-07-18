@@ -32,12 +32,18 @@ CREW_DECK_Y = {1: 88, 2: 82, 3: 76, 4: 70}
 SECTION_X = {"Port": 320, "Stbd": 320, "Central": 270}
 
 
+_SIDE = {"Port": "P", "Stbd": "S", "Central": "C"}
+_POS = {"Fwd": "F", "Mid": "M", "Aft": "A"}
+
+
 def _pax_zone_id(deck: int, section: str, sub: str) -> str:
-    return f"Pax_Corridor_D{deck}_{section}_{sub}"
+    """Contam-safe ≤15-char pax corridor id (PC_D{n}_{P|S|C}_{F|M|A})."""
+    return f"PC_D{deck}_{_SIDE[section]}_{_POS[sub]}"
 
 
 def _crew_zone_id(deck: int, section: str) -> str:
-    return f"Crew_Corridor_D{deck}_{section}"
+    """Contam-safe ≤15-char crew corridor id (CC_D{n}_{F|M|A})."""
+    return f"CC_D{deck}_{_POS[section]}"
 
 
 def _pax_ventilation(deck: int, section: str) -> str:
@@ -165,7 +171,7 @@ def _pax_vertical_links(deck: int) -> list[dict[str, str]]:
     if deck in (6, 7, 8):
         mid = _pax_zone_id(deck, "Central", "Mid")
         adj.append({"from": mid, "to": "Royal_Promenade", "type": "stairwell"})
-        adj.append({"from": mid, "to": "Central_Park_Open_Atrium", "type": "stairwell"})
+        adj.append({"from": mid, "to": "CentralPark", "type": "stairwell"})
     return adj
 
 
@@ -188,14 +194,14 @@ def _crew_adjacency() -> list[dict[str, str]]:
             for a, b in zip(sections, next_sections):
                 adj.append({"from": a, "to": b, "type": "stairwell"})
     adj.extend([
-        {"from": "Crew_Mess_Main", "to": "Crew_Corridor_D2_Mid", "type": "corridor"},
-        {"from": "Crew_Mess_Forward", "to": "Crew_Corridor_D3_Mid", "type": "corridor"},
-        {"from": "Medical_Center", "to": "Crew_Corridor_D2_Mid", "type": "corridor"},
-        {"from": "Crew_Corridor_D1_Fwd", "to": "Engine_Room_Aft", "type": "ladder_well"},
-        {"from": "Crew_Corridor_D1_Fwd", "to": "Engine_Control_Room", "type": "ladder_well"},
-        {"from": "Crew_Corridor_D1_Mid", "to": "Central_Stores", "type": "service_corridor"},
-        {"from": "Crew_Corridor_D1_Aft", "to": "Laundry_Main", "type": "service_corridor"},
-        {"from": "Crew_Corridor_D4_Mid", "to": "Main_Dining_Room_Lower", "type": "service_stairwell"},
+        {"from": "Crew_Mess_Main", "to": "CC_D2_M", "type": "corridor"},
+        {"from": "CrewMess_Fwd", "to": "CC_D3_M", "type": "corridor"},
+        {"from": "Medical_Center", "to": "CC_D2_M", "type": "corridor"},
+        {"from": "CC_D1_F", "to": "Engine_Room_Aft", "type": "ladder_well"},
+        {"from": "CC_D1_F", "to": "EngControl", "type": "ladder_well"},
+        {"from": "CC_D1_M", "to": "Central_Stores", "type": "service_corridor"},
+        {"from": "CC_D1_A", "to": "Laundry_Main", "type": "service_corridor"},
+        {"from": "CC_D4_M", "to": "MainDining_L", "type": "service_stairwell"},
     ])
     return adj
 
@@ -207,9 +213,9 @@ def _public_adjacency(legacy_airflow: dict[str, Any]) -> list[dict[str, str]]:
         if not any(link["from"].startswith(p) or link["to"].startswith(p) for p in skip)
     ]
     out.extend([
-        {"from": "Spa_Fitness_Complex", "to": "Pax_Corridor_D14_Central_Mid", "type": "elevator_bank"},
-        {"from": "Main_Pool_Deck", "to": "Pax_Corridor_D14_Central_Mid", "type": "elevator_bank"},
-        {"from": "Windjammer_Buffet", "to": "Pax_Corridor_D10_Central_Mid", "type": "elevator_bank"},
+        {"from": "SpaFitness", "to": "PC_D14_C_M", "type": "elevator_bank"},
+        {"from": "Main_Pool_Deck", "to": "PC_D14_C_M", "type": "elevator_bank"},
+        {"from": "Windjammer", "to": "PC_D10_C_M", "type": "elevator_bank"},
     ])
     return out
 

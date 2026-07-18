@@ -257,7 +257,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Transporter_Room",
+        "zone_id": "Transporter",
         "deck": "saucer_primary",
         "room_type": "Free"
       },
@@ -517,7 +517,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Security_Station",
+        "zone_id": "Security",
         "deck": "saucer_primary",
         "room_type": "Free"
       },
@@ -621,7 +621,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "Officer_Quarters",
+        "zone_id": "OfficerQtrs",
         "deck": "saucer_primary",
         "room_type": "Room"
       },
@@ -872,7 +872,7 @@
       "properties": {
         "kind": "hvac_path",
         "from": "Sickbay",
-        "to": "Transporter_Room"
+        "to": "Transporter"
       },
       "geometry": {
         "type": "LineString",
@@ -893,7 +893,7 @@
       "properties": {
         "kind": "hvac_path",
         "from": "Sickbay",
-        "to": "Security_Station"
+        "to": "Security"
       },
       "geometry": {
         "type": "LineString",
@@ -977,7 +977,7 @@
       "properties": {
         "kind": "hvac_path",
         "from": "Crew_Quarters",
-        "to": "Officer_Quarters"
+        "to": "OfficerQtrs"
       },
       "geometry": {
         "type": "LineString",
