@@ -14,17 +14,19 @@ from ``py-contam/python/contam_output.py``:
   converted to mass flow via air density ρ.
 - **Airflow nodes**: Zone pressure P [Pa], temperature T [K],
   air density D [kg/m³].
-- **Contaminant transport**: Mass-balance per zone per time-step:
+- **Contaminant transport**: Analytical well-mixed zone ODE per epoch
+  (CONTAM-style; unconditionally stable at 1-hour steps)::
 
-  dM_i/dt = Σ_j Q_ji·C_j·(1-η) - Q_out_i·C_i + S_i - λ·M_i
+  dM_i/dt = S_i - k_i · M_i
+  M_i(t+Δt) = M_i · e^{-kΔt} + (S_i/k_i) · (1 - e^{-kΔt})
 
   where:
     M_i   = pathogen mass in zone i [copies]
     C_j   = M_j / V_j  concentration in source zone j [copies/m³]
-    Q_ji  = volumetric airflow from zone j → i [m³/h]
+    S_i   = Σ_j Q_ji·C_j·(1-η)   inflow source rate [copies/h]
+    k_i   = Σ_j Q_ij / V_i + λ   removal rate [1/h]
     η     = HVAC filter efficiency (0 = no filter, 0.999 = HEPA)
-    S_i   = source term (shedding deposits) [copies/epoch]
-    λ     = natural decay rate (settling + viral inactivation)
+    λ     = natural decay rate (settling + viral inactivation) [1/h]
 
 The bridge reads ``air_flow_paths.json`` to build the airflow network
 and applies transport at each epoch, replacing the flat 50% decay
@@ -34,6 +36,7 @@ previously used in ``infection_dynamics_bridge.py``.
 from __future__ import annotations
 
 import json
+import math
 import os
 from typing import Any
 
@@ -167,16 +170,18 @@ class ContamAirflowPath:
 class ContamTransportEngine:
     """CONTAM-style multi-zone aerosol mass transport engine.
 
-    Implements the NIST CONTAM contaminant transport equation as a
-    discrete-time mass balance solved per epoch. The engine:
+    Implements the NIST CONTAM contaminant transport equation via the
+    analytical well-mixed zone ODE per epoch (unconditionally stable).
+    The engine:
 
     1. Reads the airflow network from ``air_flow_paths.json``
     2. Builds zone nodes with volumes from ``spatial_layout.json``
-    3. At each epoch, computes inter-zone mass transfer via:
-       - HVAC recirculation within zones (with filter efficiency)
+    3. At each epoch, aggregates inter-zone source/removal rates via:
+       - HVAC star recirculation through virtual AHU plenums (filter η)
        - Cross-zone airflow through ladder wells, ventilation shafts
        - Passive adjacency exchange through passageways and hatches
-    4. Applies natural aerosol decay (settling + viral inactivation)
+    4. Solves ``M(t+Δt) = M e^{-kΔt} + (S/k)(1 − e^{-kΔt})`` with
+       ``k = ΣQ_out/V + λ`` (decay folded into the exponent)
 
     Parameters
     ----------
@@ -191,9 +196,9 @@ class ContamTransportEngine:
         - MERV-16: 0.95  (hospital grade)
         - HEPA:    0.999 (clean room / biocontainment)
     natural_decay_rate : float
-        Fraction of pathogen mass lost per epoch to settling and
-        viral inactivation (replaces the old flat 50% daily rate).
-        Default 0.10 per epoch (≈ 10% hourly loss).
+        Continuous natural decay rate λ [1/h] for settling and
+        viral inactivation (folded into removal rate ``k``).
+        Default 0.10 /h.
     """
 
     def __init__(
@@ -380,55 +385,44 @@ class ContamTransportEngine:
                 return [r for r in hz.get("rooms", []) if r in self.zone_nodes]
         return []
 
-    def _apply_path_transfer(
+    def _accumulate_path_rates(
         self,
         path: ContamAirflowPath,
         concentrations: dict[str, float],
-        zone_pathogen_mass: dict[str, float],
-        delta: dict[str, float],
-        dt: float,
+        source_rate: dict[str, float],
+        outflow_rate: dict[str, float],
     ) -> None:
-        """Accumulate one discrete path transfer into ``delta``."""
+        """Add one non-star path into aggregate source and removal rates."""
         src = path.from_zone
         dst = path.to_zone
-        if src not in concentrations or dst not in delta:
+        if src not in concentrations or dst not in source_rate:
             return
 
-        c_src = concentrations[src]
-        if c_src <= 0:
-            return
-
-        mass_transfer = path.flow_rate_m3h * c_src * dt
+        q = path.flow_rate_m3h
+        c_src = concentrations.get(src, 0.0)
+        arriving = q * c_src
         if path.is_hvac_ducted:
-            mass_arriving = mass_transfer * (1.0 - self.filter_efficiency)
-        else:
-            mass_arriving = mass_transfer
+            arriving *= (1.0 - self.filter_efficiency)
+        source_rate[dst] += arriving
 
-        available = max(0.0, zone_pathogen_mass.get(src, 0.0) + delta.get(src, 0.0))
-        if mass_transfer > available:
-            scale = available / mass_transfer if mass_transfer > 0 else 0.0
-            mass_transfer *= scale
-            mass_arriving *= scale
+        node = self.zone_nodes.get(src)
+        if node is not None and node.volume_m3 > 0:
+            outflow_rate[src] = outflow_rate.get(src, 0.0) + q / node.volume_m3
 
-        delta[src] -= mass_transfer
-        delta[dst] += mass_arriving
-
-    def _apply_ahs_star_mixing(
+    def _accumulate_ahs_star_rates(
         self,
         concentrations: dict[str, float],
-        zone_pathogen_mass: dict[str, float],
-        delta: dict[str, float],
-        dt: float,
+        source_rate: dict[str, float],
+        outflow_rate: dict[str, float],
     ) -> None:
-        """Mix returns in each AHU plenum and redistribute filtered supply.
+        """Fold AHU star return/supply into zone source and removal rates.
 
-        Near-zero plenum volume cannot use lagged Euler (mass would spike and
-        the first supply edge would monopolize extraction). Instead, each
-        plenum is an analytical mixing junction within the epoch::
+        Plenum concentration is the flow-weighted mix of return rooms at
+        epoch-start concentrations (semi-implicit; same freeze as Contam)::
 
             C_mix = Σ(Q_ret,i · C_i) / Σ(Q_ret,i)
-            mass_out_i = Q_ret,i · C_i · Δt
-            mass_supply_total = C_mix · Σ(Q_sup) · Δt · (1 − η)
+            k_i  += Q_ret,i / V_i
+            S_j  += Q_sup,j · C_mix · (1 − η)
         """
         returns_by_plenum: dict[str, list[ContamAirflowPath]] = {}
         supplies_by_plenum: dict[str, list[ContamAirflowPath]] = {}
@@ -444,35 +438,26 @@ class ContamTransportEngine:
             if sum_q_ret <= 0:
                 continue
 
-            # Extract returns first; plenum mixture uses *actual* mass so
-            # discrete mass-caps cannot create pathogen on the supply leg.
-            total_returned = 0.0
+            weighted = 0.0
             for path in returns:
                 src = path.from_zone
-                c_src = concentrations.get(src, 0.0)
-                if c_src <= 0:
-                    continue
-                mass_out = path.flow_rate_m3h * c_src * dt
-                available = max(
-                    0.0,
-                    zone_pathogen_mass.get(src, 0.0) + delta.get(src, 0.0),
-                )
-                if mass_out > available:
-                    mass_out = available
-                delta[src] = delta.get(src, 0.0) - mass_out
-                total_returned += mass_out
+                weighted += path.flow_rate_m3h * concentrations.get(src, 0.0)
+                node = self.zone_nodes.get(src)
+                if node is not None and node.volume_m3 > 0:
+                    outflow_rate[src] = (
+                        outflow_rate.get(src, 0.0)
+                        + path.flow_rate_m3h / node.volume_m3
+                    )
+            c_mix = weighted / sum_q_ret
 
-            sum_q_sup = sum(p.flow_rate_m3h for p in supplies)
-            if sum_q_sup <= 0 or total_returned <= 0:
-                continue
-
-            # OA dilution: only the recirculated volume fraction carries mass.
-            mass_recirc = total_returned * (sum_q_sup / sum_q_ret)
-            mass_after_filter = mass_recirc * (1.0 - self.filter_efficiency)
             for path in supplies:
-                frac = path.flow_rate_m3h / sum_q_sup
                 dst = path.to_zone
-                delta[dst] = delta.get(dst, 0.0) + mass_after_filter * frac
+                if dst not in source_rate:
+                    continue
+                arriving = path.flow_rate_m3h * c_mix
+                if path.is_hvac_ducted:
+                    arriving *= (1.0 - self.filter_efficiency)
+                source_rate[dst] += arriving
 
     def transport_step(
         self,
@@ -480,16 +465,15 @@ class ContamTransportEngine:
     ) -> dict[str, float]:
         """Execute one epoch of CONTAM-style aerosol mass transport.
 
-        Implements the discrete-time contaminant mass balance:
+        Solves the well-mixed zone ODE analytically with epoch-start
+        concentrations frozen for inter-zone sources (semi-implicit)::
 
-            M_i(t+1) = M_i(t)
-                       + Σ_j [Q_ji · C_j(t) · (1-η_j) · Δt]   (inflow)
-                       - Σ_j [Q_ij · C_i(t) · Δt]              (outflow)
-                       - λ · M_i(t)                             (decay)
+            dM_i/dt = S_i − k_i · M_i
+            M_i(t+Δt) = M_i e^{-kΔt} + (S_i/k_i)(1 − e^{-kΔt})
 
-        where η_j is applied only to HVAC-ducted paths. HVAC return/supply
-        star legs are mixed analytically through virtual plenums (not as
-        independent complete-graph edges).
+        where ``S_i`` aggregates filtered inflows [copies/h] and
+        ``k_i = Σ Q_out/V_i + λ`` [1/h]. HVAC return/supply stars are
+        folded into these rates via plenum mixing (not Euler path deltas).
 
         Parameters
         ----------
@@ -504,8 +488,6 @@ class ContamTransportEngine:
         """
         dt = HOURS_PER_EPOCH
 
-        # Working mass includes plenums at zero so path endpoints resolve.
-        # Caller keys (minus any stray plenum ids) are preserved in the result.
         real_input = {
             zid: mass
             for zid, mass in zone_pathogen_mass.items()
@@ -526,21 +508,31 @@ class ContamTransportEngine:
             else:
                 concentrations[zone_id] = 0.0
 
-        delta: dict[str, float] = dict.fromkeys(working, 0.0)
+        source_rate: dict[str, float] = {
+            zid: 0.0 for zid in working if not is_plenum_zone(zid)
+        }
+        outflow_rate: dict[str, float] = dict.fromkeys(source_rate, 0.0)
 
         for path in self.airflow_paths:
             if path.path_type in (PATH_TYPE_HVAC_RETURN, PATH_TYPE_HVAC_SUPPLY):
                 continue
-            self._apply_path_transfer(
-                path, concentrations, working, delta, dt,
+            self._accumulate_path_rates(
+                path, concentrations, source_rate, outflow_rate,
             )
 
-        self._apply_ahs_star_mixing(concentrations, working, delta, dt)
+        self._accumulate_ahs_star_rates(
+            concentrations, source_rate, outflow_rate,
+        )
 
         result: dict[str, float] = {}
         for zone_id, current_mass in real_input.items():
-            new_mass = current_mass + delta.get(zone_id, 0.0)
-            new_mass *= (1.0 - self.natural_decay_rate)
+            s = source_rate.get(zone_id, 0.0)
+            k = outflow_rate.get(zone_id, 0.0) + self.natural_decay_rate
+            if k > 0.0:
+                exp_term = math.exp(-k * dt)
+                new_mass = current_mass * exp_term + (s / k) * (1.0 - exp_term)
+            else:
+                new_mass = current_mass + s * dt
             result[zone_id] = max(0.0, new_mass)
 
         return result

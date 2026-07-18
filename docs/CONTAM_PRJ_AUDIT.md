@@ -55,6 +55,7 @@ Orifice estimate: \(Q \approx C_d A \sqrt{2\Delta P/\rho}\) with \(C_d=0.6\),
 - Prior compare-suite ContamX `n_paths=6` was a **SIM reader xref bug**, not orifice physics (see § ContamX→Crusher implications).
 - **Post-fix flow_compare (embedded path `nr`):** ~17 kept + 8 AHS synth; Fan_25/26/27 ≈ 16.7/13.3/10 m³/h; Bridge out ≈76 m³/h (native 97).
 - **Native HVAC star topology (2026-07-18):** Contam-aligned AHU plenum star (`room→plenum` return at `ACH·V·duty`, `plenum→room` supply × `(1−oa)`) with `oa_fraction=0.2`, `hvac_duty=0.5` on Contam fiction platforms. Replaces the former N×N complete-graph recirculation that over-mixed by ~(N−1)×. ContamX AHS bridge synthesizes the same star shape.
+- **Analytical mass balance (2026-07-18):** Native `transport_step` solves `M'=S−kM` exactly per epoch (no Euler mass caps / oscillations at ship ACH).
 
 ### `enterprise_constitution_tos` — **improved** (openings); OAFrac still buggy
 

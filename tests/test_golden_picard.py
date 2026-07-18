@@ -76,11 +76,11 @@ def test_picard_golden_summary_and_trigger() -> None:
     picard_history = _run_picard()
     assert len(picard_history) >= GOLDEN_LAST + 1
     fp = _fingerprint(picard_history, GOLDEN_LAST)
-    # Updated 2026-07-18 with native HVAC star topology (matches orchestrator golden).
-    assert fp["susceptible"] == 0
-    assert fp["infected"] == 1
-    assert fp["symptomatic"] == 1
-    assert fp["recovered"] == 15
+    # Updated 2026-07-18: analytical mass balance + HVAC star (matches orchestrator golden).
+    assert fp["susceptible"] == 2
+    assert fp["infected"] == 0
+    assert fp["symptomatic"] == 0
+    assert fp["recovered"] == 14
     assert fp["immune"] == 4
     assert fp["trigger_status"] == "BASELINE"
 
