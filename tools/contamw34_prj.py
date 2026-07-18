@@ -1279,10 +1279,15 @@ def _append_duct_junctions_and_segments(
             "T0  P0  icn clr u[4] ..."
         )
         for j in duct_junctions:
+            # ContamW 3.4 junction line: after vf_type/vf_node_name ContamX
+            # expects a CFD flag (0/1) before the terminal marker "T:" —
+            # same trailing shape as zones/paths (NIST TN 1887r1). Omitting
+            # that integer makes ContamX report "Bad integer: T:".
             lines.append(
                 f"  {j['nr']}  {j['flags']}  {j['jtype']}  {j['pzn']}  0  "
                 f"0  0  0  {j['level']}  {j['x']:.3f}  {j['y']:.3f}  "
-                f"{j['rel_ht']:.3f}  {j['temp']:.2f} 0  21 -1 0 0 2 0 0 none "
+                f"{j['rel_ht']:.3f}  {j['temp']:.2f} 0  21 -1 0 0 2 0 "
+                f"0 none 0 "
                 f"T: 0 0 0 0 -1 0 {j['Ad']:.6g} {j['Af']:.6g} 0 "
                 f"{j['Ct']:.4g} 0 0 3 3 1 1"
             )
@@ -1300,9 +1305,10 @@ def _append_duct_junctions_and_segments(
     if duct_segments:
         lines.append("! D#  f  n#  m#  e#  f#  s#  c# dir length ...")
         for seg in duct_segments:
+            # vf_type=0 → ContamW omits vf_node_name (see path fixtures).
             lines.append(
                 f"  {seg['nr']}  {seg['flags']}  {seg['pjn']}  {seg['pjm']}  "
-                f"{seg['pe']}  0  0  0  1  {seg['length']:.4g} 0 0 0 -1 3 3 0 none"
+                f"{seg['pe']}  0  0  0  1  {seg['length']:.4g} 0 0 0 -1 3 3 0"
             )
     lines.append(_SENTINEL)
 

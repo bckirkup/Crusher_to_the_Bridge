@@ -80,6 +80,8 @@ def test_destroyer_hobbyist_export_section_counts() -> None:
     assert _section_count(text, "initial zone concentrations") == n_zones * n_ctm
     n_jct = _section_count(text, "duct junctions")
     assert _section_count(text, "initial junction concentrations") == n_jct * n_ctm
+    # ContamX duct terminals: CFD flag must precede the "T:" marker
+    assert re.search(r"\bnone 0 T:", text)
     # Destroyer with room×room cross-zone expansion: 44 Contam paths
     # (6 envelope + 6 adjacency + 11 cross + 9 AHS system + 12 terminals)
     assert len(path_map) == 44
