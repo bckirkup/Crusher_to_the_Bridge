@@ -105,3 +105,7 @@ Skill: `.agents/skills/picard-ship-simulation/SKILL.md`
 ## Further reading
 
 Full config.yaml, SOP, instrument, and GIS reference: [OPERATORS_MANUAL.md](OPERATORS_MANUAL.md). Fleet and external optimization: [OPERATORS_MANUAL_GAME_THEORY.md](OPERATORS_MANUAL_GAME_THEORY.md).
+
+Mega-cruise factorial campaign (~9k Picard runs):
+[`picard_framework/runs/mega_cruise_campaign/README.md`](../picard_framework/runs/mega_cruise_campaign/README.md)
+(`run_campaign.bat` / `run_campaign.sh` from the repo root).

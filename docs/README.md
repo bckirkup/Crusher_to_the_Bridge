@@ -27,6 +27,7 @@ python3 presidio_runner.py \
 | [OPERATORS_MANUAL_SHIP.md](OPERATORS_MANUAL_SHIP.md) | Operators / Picard | Living ship manual: run specs, API, outputs |
 | [OPERATORS_MANUAL_GAME_THEORY.md](OPERATORS_MANUAL_GAME_THEORY.md) | Operators / Presidio | Fleet, Stackelberg, OIS, utility export/import |
 | [simulation_step_order.md](simulation_step_order.md) | Developers | Epoch phase order (population → instruments → command/medical) |
+| [../picard_framework/runs/mega_cruise_campaign/README.md](../picard_framework/runs/mega_cruise_campaign/README.md) | Operators | ~9k-run mega cruise campaign (`run_campaign.bat` / `.sh`) |
 | [OPERATORS_MANUAL.md](OPERATORS_MANUAL.md) | Reference | **Historical** full monolith; prefer the ship/fleet manuals above |
 
 ## Configure & extend
