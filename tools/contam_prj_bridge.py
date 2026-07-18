@@ -4,55 +4,36 @@ contam_prj_bridge.py – CONTAM ``.prj`` import/export bridge
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Translates between this project's native JSON contracts
-(``spatial_layout.json`` + ``air_flow_paths.json``) and the NIST CONTAM
-multizone ``.prj`` project-file format so that a Crusher-to-the-Bridge
-platform can be opened as a CONTAM floor plan in ContamW, and a CONTAM
-project can be re-imported as a platform.
+(``spatial_layout.json`` + ``air_flow_paths.json``) and NIST CONTAM
+``.prj`` project files.
 
-CONTAM (NIST multizone airflow / contaminant transport) is documented in
-NIST Technical Note 1887r1 ("CONTAM User Guide and Program Documentation
-Version 3.4"): https://nvlpubs.nist.gov/nistpubs/TechnicalNotes/NIST.TN.1887r1.pdf
+**Export (default)** writes ContamW **3.4** grammar that ContamX can parse,
+plus a ``path_map.json`` sidecar aligning ContamX path indices to Crusher
+zone pairs. See ``tools/contamw34_prj.py``.
 
-Concept crosswalk (see ``docs/CONTAM_INTEROP.md`` for the full table):
+**Simplify** reads authentic ContamW 3.4 projects into simplified platform
+JSON (Path B — native solver). Controls, schedules, wind, ducts, and
+sources are dropped.
 
-    Crusher JSON term                CONTAM concept
-    ------------------------------   -----------------------------------
-    zone (spatial_layout)            CONTAM zone (airflow node)
-    volume_m3                        zone volume (area x ceiling height)
-    floor_area_m2 / ceiling_height_m CONTAM zone floor area / level height
-    elevation_m                      relative level elevation
-    adjacency (air_flow_paths)       CONTAM airflow path (opening element)
-    hvac_zones                       CONTAM simple air-handling system (AHS)
-    ach                              air change rate
-    cross_zone_links                 inter-AHS ducted/passive links
-    filter_efficiency                CONTAM filter element
+**Import** still accepts the legacy Crusher interchange dialect
+(``!------`` section headers) for older files.
 
-Why a hand-written serializer:
-    The sibling ``py-contam`` repository (see the docstring of
-    ``engines/py_contam_bridge.py`` and ``docs/OPERATORS_MANUAL.md`` 11.3)
-    only ships a *binary* ``.sim`` results reader (``contam_output.py``) and
-    weather/species file writers (``contam_input.py``) — it contains no
-    ``.prj`` reader or writer to reuse.  Sibling repositories are read-only
-    (Law 6), so this module implements a self-contained CONTAM ``.prj``
-    ASCII serializer / parser here.
-
-The emitted file follows the documented CONTAM 3.x project-file layout
-(a ``ContamW`` signature line followed by ``!``-delimited sections closed
-by ``-999`` sentinels).  The importer parses the same sections, so the
-JSON -> .prj -> JSON round-trip preserves zone identity, geometry, and the
-full airflow graph (hvac_zones, cross_zone_links, adjacency).
+CONTAM docs: NIST TN 1887r1 —
+https://nvlpubs.nist.gov/nistpubs/TechnicalNotes/NIST.TN.1887r1.pdf
 
 Usage::
 
-    # Export a platform directory to a CONTAM .prj
     python tools/contam_prj_bridge.py --export \\
-        --platform data/platforms/destroyer_baseline \\
-        --output out/destroyer_baseline.prj
+        --platform data/platforms/mega_cruise_5000 \\
+        --output data/platforms/mega_cruise_5000/contam/platform.prj
 
-    # Import a CONTAM .prj back into spatial_layout.json + air_flow_paths.json
-    python tools/contam_prj_bridge.py --import \\
-        --input out/destroyer_baseline.prj \\
+    python tools/contam_prj_bridge.py --simplify \\
+        --input path/to/full.prj \\
         --output data/platforms/imported_from_contam/
+
+    python tools/contam_prj_bridge.py --import \\
+        --input legacy_interchange.prj \\
+        --output data/platforms/imported_legacy/
 """
 
 from __future__ import annotations
@@ -73,21 +54,30 @@ from simulation_utils.paths import (  # noqa: E402
     resolve_repo_path,
     validated_open,
 )
+from tools.contamw34_prj import (  # noqa: E402
+    PRJ_SIGNATURE_34,
+    export_contamw34,
+    simplify_contamw34,
+)
 
+# Legacy interchange signature (still parsed by import_prj)
 PRJ_SIGNATURE = "ContamW 3.1"
+# ContamW 3.4 export signature
+PRJ_SIGNATURE_CONTAMW34 = PRJ_SIGNATURE_34
+
 _SENTINEL = "-999"
-_NONE_TOKEN = "*"  # marks an absent optional numeric field
+_NONE_TOKEN = "*"
 _DEFAULT_CEILING_HEIGHT_M = 3.0
 _DEFAULT_ZONE_TEMP_K = 293.15
 
 _SPATIAL_LAYOUT_JSON = "spatial_layout.json"
 _AIR_FLOW_PATHS_JSON = "air_flow_paths.json"
+_PATH_MAP_JSON = "path_map.json"
 
 
 # ── token helpers ────────────────────────────────────────────────────────
 
 def _tok(value: Any) -> str:
-    """Serialize a single whitespace-free token (``*`` marks ``None``)."""
     if value is None:
         return _NONE_TOKEN
     if isinstance(value, bool):
@@ -99,7 +89,6 @@ def _tok(value: Any) -> str:
 
 
 def _num(token: str) -> float | None:
-    """Parse an optional float token (``*`` -> ``None``)."""
     if token == _NONE_TOKEN:
         return None
     return float(token)
@@ -112,22 +101,33 @@ def _int_or_zero(token: str) -> int:
 
 
 def _clean_float(value: float) -> float | int:
-    """Render whole numbers without a trailing ``.0`` for JSON tidiness."""
     if isinstance(value, float) and value.is_integer():
         return int(value)
     return value
 
 
-# ── section writers ──────────────────────────────────────────────────────
+# ── ContamW 3.4 export (primary) ─────────────────────────────────────────
+
+def export_prj(
+    spatial_layout: dict[str, Any],
+    air_flow_paths: dict[str, Any],
+) -> str:
+    """Serialize platform JSON to ContamW 3.4 ``.prj`` text."""
+    text, _path_map = export_contamw34(spatial_layout, air_flow_paths)
+    return text
+
+
+def export_prj_with_path_map(
+    spatial_layout: dict[str, Any],
+    air_flow_paths: dict[str, Any],
+) -> tuple[str, list[dict[str, Any]]]:
+    """Serialize to ContamW 3.4 ``.prj`` text and path_map entries."""
+    return export_contamw34(spatial_layout, air_flow_paths)
+
+
+# ── Legacy interchange export (tests / old tooling) ──────────────────────
 
 def _build_levels(zones: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Group zones into CONTAM levels by deck.
-
-    Each distinct ``deck`` becomes a CONTAM level whose reference elevation
-    is the minimum ``elevation_m`` among its zones (0.0 when none specify
-    one) and whose height is the maximum ``ceiling_height_m`` among its
-    zones (falling back to the default ceiling height).
-    """
     order: list[str] = []
     members: dict[str, list[dict[str, Any]]] = {}
     for zone in zones:
@@ -153,8 +153,10 @@ def _build_levels(zones: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return levels
 
 
-def export_prj(spatial_layout: dict[str, Any], air_flow_paths: dict[str, Any]) -> str:
-    """Serialize a platform's JSON contracts into CONTAM ``.prj`` text."""
+def export_prj_interchange(
+    spatial_layout: dict[str, Any], air_flow_paths: dict[str, Any],
+) -> str:
+    """Legacy Crusher ``!------`` interchange dialect (not ContamX-parseable)."""
     zones = spatial_layout.get("zones", [])
     platform = spatial_layout.get("platform", "crusher_platform")
 
@@ -167,7 +169,6 @@ def export_prj(spatial_layout: dict[str, Any], air_flow_paths: dict[str, Any]) -
     lines.append("! Crusher-to-the-Bridge <-> CONTAM interchange")
     lines.append("! Generated by tools/contam_prj_bridge.py")
 
-    # ── levels ────────────────────────────────────────────────────────────
     lines.append("!------ levels ------")
     lines.append(str(len(levels)))
     lines.append("! nr  refht[m]  delht[m]  name")
@@ -177,7 +178,6 @@ def export_prj(spatial_layout: dict[str, Any], air_flow_paths: dict[str, Any]) -
         )
     lines.append(_SENTINEL)
 
-    # ── zones ─────────────────────────────────────────────────────────────
     lines.append("!------ zones ------")
     lines.append(str(len(zones)))
     lines.append(
@@ -204,7 +204,6 @@ def export_prj(spatial_layout: dict[str, Any], air_flow_paths: dict[str, Any]) -
         )
     lines.append(_SENTINEL)
 
-    # ── airflow paths (from adjacency edges) ───────────────────────────────
     adjacency = air_flow_paths.get("adjacency", [])
     lines.append("!------ flow paths (adjacency openings) ------")
     lines.append(str(len(adjacency)))
@@ -216,7 +215,6 @@ def export_prj(spatial_layout: dict[str, Any], air_flow_paths: dict[str, Any]) -
         )
     lines.append(_SENTINEL)
 
-    # ── air-handling systems (from hvac_zones) ─────────────────────────────
     hvac_zones = air_flow_paths.get("hvac_zones", [])
     lines.append("!------ air-handling systems (hvac_zones) ------")
     lines.append(str(len(hvac_zones)))
@@ -228,7 +226,6 @@ def export_prj(spatial_layout: dict[str, Any], air_flow_paths: dict[str, Any]) -
         )
     lines.append(_SENTINEL)
 
-    # ── inter-system links (from cross_zone_links) ─────────────────────────
     cross_links = air_flow_paths.get("cross_zone_links", [])
     lines.append("!------ inter-system links (cross_zone_links) ------")
     lines.append(str(len(cross_links)))
@@ -245,14 +242,9 @@ def export_prj(spatial_layout: dict[str, Any], air_flow_paths: dict[str, Any]) -
     return "\n".join(lines) + "\n"
 
 
-# ── parsing ────────────────────────────────────────────────────────────────
+# ── parsing (legacy interchange) ─────────────────────────────────────────
 
 def _iter_records(lines: list[str], start: int) -> tuple[list[list[str]], int]:
-    """Collect token rows from *start* until the ``-999`` sentinel.
-
-    Skips comment (``!``) and blank lines.  Returns (rows, index_after
-    sentinel).
-    """
     rows: list[list[str]] = []
     i = start
     while i < len(lines):
@@ -267,7 +259,16 @@ def _iter_records(lines: list[str], start: int) -> tuple[list[list[str]], int]:
 
 
 def import_prj(text: str) -> tuple[dict[str, Any], dict[str, Any]]:
-    """Parse CONTAM ``.prj`` text into (spatial_layout, air_flow_paths)."""
+    """Parse CONTAM ``.prj`` text into (spatial_layout, air_flow_paths).
+
+    Auto-detects ContamW 3.4 grammar vs legacy Crusher interchange.
+    """
+    if "!------ levels" in text or "!------ zones" in text:
+        return _import_interchange(text)
+    return simplify_contamw34(text)
+
+
+def _import_interchange(text: str) -> tuple[dict[str, Any], dict[str, Any]]:
     lines = text.splitlines()
     if not lines or not lines[0].strip().startswith("ContamW"):
         raise ValueError(
@@ -281,7 +282,6 @@ def import_prj(text: str) -> tuple[dict[str, Any], dict[str, Any]]:
     cross_zone_links: list[dict[str, Any]] = []
     levels: dict[int, str] = {}
 
-    # project description is the first non-comment line after the signature
     for raw in lines[1:]:
         stripped = raw.strip()
         if not stripped or stripped.startswith("!"):
@@ -297,7 +297,7 @@ def import_prj(text: str) -> tuple[dict[str, Any], dict[str, Any]]:
             continue
 
         if header.startswith("!------ levels"):
-            rows, i = _iter_records(lines, i + 1)  # +1 skips the count line
+            rows, i = _iter_records(lines, i + 1)
             for row in rows:
                 if len(row) >= 4:
                     levels[int(row[0])] = row[3]
@@ -319,7 +319,11 @@ def import_prj(text: str) -> tuple[dict[str, Any], dict[str, Any]]:
                     rooms_tok = row[3] if len(row) >= 4 else _NONE_TOKEN
                     rooms = [] if rooms_tok == _NONE_TOKEN else rooms_tok.split(",")
                     hvac_zones.append(
-                        {"id": row[1], "rooms": rooms, "ach": _clean_float(float(row[2]))}
+                        {
+                            "id": row[1],
+                            "rooms": rooms,
+                            "ach": _clean_float(float(row[2])),
+                        }
                     )
         elif header.startswith("!------ inter-system links"):
             rows, i = _iter_records(lines, i + 1)
@@ -355,11 +359,6 @@ def import_prj(text: str) -> tuple[dict[str, Any], dict[str, Any]]:
 
 
 def _parse_zone_row(row: list[str], levels: dict[int, str]) -> dict[str, Any]:
-    """Parse a single zone record row into a spatial_layout zone dict.
-
-    Column order matches the exporter:
-    ``nr lev vol area ht elev T0 x y type traffic deck name``
-    """
     lev = _int_or_zero(row[1])
     volume = _num(row[2])
     floor_area = _num(row[3])
@@ -392,45 +391,98 @@ def _parse_zone_row(row: list[str], levels: dict[int, str]) -> dict[str, Any]:
 
 # ── file-level convenience wrappers ────────────────────────────────────────
 
-def export_platform_to_prj(platform_dir: str, output_path: str) -> str:
-    """Read a platform directory and write a CONTAM ``.prj`` file."""
+def export_platform_to_prj(
+    platform_dir: str,
+    output_path: str,
+    *,
+    write_path_map: bool = True,
+) -> str:
+    """Read a platform directory and write a ContamW 3.4 ``.prj`` (+ path_map)."""
     platform_dir = resolve_repo_path(REPO_ROOT, platform_dir)
     spatial_path = os.path.join(platform_dir, _SPATIAL_LAYOUT_JSON)
     airflow_path = os.path.join(platform_dir, _AIR_FLOW_PATHS_JSON)
 
-    with validated_open(spatial_path, "r", allowed_roots=(REPO_ROOT,), encoding="utf-8") as fh:
+    with validated_open(
+        spatial_path, "r", allowed_roots=(REPO_ROOT,), encoding="utf-8",
+    ) as fh:
         spatial_layout = json.load(fh)
-    with validated_open(airflow_path, "r", allowed_roots=(REPO_ROOT,), encoding="utf-8") as fh:
+    with validated_open(
+        airflow_path, "r", allowed_roots=(REPO_ROOT,), encoding="utf-8",
+    ) as fh:
         air_flow_paths = json.load(fh)
 
-    prj_text = export_prj(spatial_layout, air_flow_paths)
+    prj_text, path_map = export_prj_with_path_map(spatial_layout, air_flow_paths)
 
     output_path = resolve_repo_path(REPO_ROOT, output_path)
     prepare_output_directory(
         os.path.dirname(output_path) or REPO_ROOT, allowed_roots=(REPO_ROOT,),
     )
-    with validated_open(output_path, "w", allowed_roots=(REPO_ROOT,), encoding="utf-8") as fh:
+    with validated_open(
+        output_path, "w", allowed_roots=(REPO_ROOT,), encoding="utf-8",
+    ) as fh:
         fh.write(prj_text)
+
+    if write_path_map:
+        map_path = os.path.join(os.path.dirname(output_path), _PATH_MAP_JSON)
+        # If output is explicitly named, keep path_map beside it
+        if os.path.basename(output_path) != "platform.prj":
+            stem = os.path.splitext(output_path)[0]
+            map_path = stem + ".path_map.json"
+        with validated_open(
+            map_path, "w", allowed_roots=(REPO_ROOT,), encoding="utf-8",
+        ) as fh:
+            json.dump(path_map, fh, indent=2, ensure_ascii=False)
+            fh.write("\n")
+
     return output_path
 
 
 def import_prj_to_platform(input_path: str, output_dir: str) -> tuple[str, str]:
-    """Read a CONTAM ``.prj`` file and write the two platform JSON files."""
+    """Read a CONTAM ``.prj`` and write platform JSON (auto-detect dialect)."""
     input_path = resolve_repo_path(REPO_ROOT, input_path)
-    with validated_open(input_path, "r", allowed_roots=(REPO_ROOT,), encoding="utf-8") as fh:
+    with validated_open(
+        input_path, "r", allowed_roots=(REPO_ROOT,), encoding="utf-8",
+    ) as fh:
         text = fh.read()
 
     spatial_layout, air_flow_paths = import_prj(text)
+    return _write_platform_json(spatial_layout, air_flow_paths, output_dir)
 
+
+def simplify_prj_to_platform(input_path: str, output_dir: str) -> tuple[str, str]:
+    """Force ContamW 3.4 simplify path (Path B)."""
+    input_path = resolve_repo_path(REPO_ROOT, input_path)
+    with validated_open(
+        input_path, "r", allowed_roots=(REPO_ROOT,), encoding="utf-8",
+    ) as fh:
+        text = fh.read()
+    warn: list[str] = []
+    spatial_layout, air_flow_paths = simplify_contamw34(text, warnings_out=warn)
+    for w in warn:
+        print(f"  warning: {w}")
+    return _write_platform_json(spatial_layout, air_flow_paths, output_dir)
+
+
+def _write_platform_json(
+    spatial_layout: dict[str, Any],
+    air_flow_paths: dict[str, Any],
+    output_dir: str,
+) -> tuple[str, str]:
     output_dir = resolve_repo_path(REPO_ROOT, output_dir)
     prepare_output_directory(output_dir, allowed_roots=(REPO_ROOT,))
     spatial_path = os.path.join(output_dir, _SPATIAL_LAYOUT_JSON)
     airflow_path = os.path.join(output_dir, _AIR_FLOW_PATHS_JSON)
 
-    with validated_open(spatial_path, "w", allowed_roots=(REPO_ROOT,), encoding="utf-8") as fh:
+    with validated_open(
+        spatial_path, "w", allowed_roots=(REPO_ROOT,), encoding="utf-8",
+    ) as fh:
         json.dump(spatial_layout, fh, indent=2, ensure_ascii=False)
-    with validated_open(airflow_path, "w", allowed_roots=(REPO_ROOT,), encoding="utf-8") as fh:
+        fh.write("\n")
+    with validated_open(
+        airflow_path, "w", allowed_roots=(REPO_ROOT,), encoding="utf-8",
+    ) as fh:
         json.dump(air_flow_paths, fh, indent=2, ensure_ascii=False)
+        fh.write("\n")
     return spatial_path, airflow_path
 
 
@@ -439,16 +491,20 @@ def import_prj_to_platform(input_path: str, output_dir: str) -> tuple[str, str]:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description="Import/export between Crusher-to-the-Bridge platform JSON "
-                    "and CONTAM .prj project files.",
+                    "and ContamW 3.4 / legacy CONTAM .prj files.",
     )
     mode = parser.add_mutually_exclusive_group(required=True)
     mode.add_argument(
         "--export", action="store_true",
-        help="Export a platform directory to a CONTAM .prj file",
+        help="Export a platform directory to a ContamW 3.4 .prj (+ path_map)",
     )
     mode.add_argument(
         "--import", dest="do_import", action="store_true",
-        help="Import a CONTAM .prj file into platform JSON files",
+        help="Import a .prj (auto-detect ContamW 3.4 vs legacy interchange)",
+    )
+    mode.add_argument(
+        "--simplify", action="store_true",
+        help="Simplify an authentic ContamW 3.4 .prj into platform JSON",
     )
     parser.add_argument(
         "--platform", "-p",
@@ -456,11 +512,11 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument(
         "--input", "-i",
-        help="Input CONTAM .prj file to import (with --import)",
+        help="Input CONTAM .prj file (--import / --simplify)",
     )
     parser.add_argument(
         "--output", "-o", required=True,
-        help="Output .prj file (--export) or output directory (--import)",
+        help="Output .prj (--export) or output directory (--import/--simplify)",
     )
     args = parser.parse_args(argv)
 
@@ -468,13 +524,22 @@ def main(argv: list[str] | None = None) -> int:
         if not args.platform:
             parser.error("--export requires --platform")
         out = export_platform_to_prj(args.platform, args.output)
-        print(f"  Wrote CONTAM project file: {out}")
+        print(f"  Wrote ContamW 3.4 project file: {out}")
+        return 0
+
+    if not args.input:
+        parser.error("--import/--simplify requires --input")
+
+    if args.simplify:
+        spatial_path, airflow_path = simplify_prj_to_platform(
+            args.input, args.output,
+        )
     else:
-        if not args.input:
-            parser.error("--import requires --input")
-        spatial_path, airflow_path = import_prj_to_platform(args.input, args.output)
-        print(f"  Wrote: {spatial_path}")
-        print(f"  Wrote: {airflow_path}")
+        spatial_path, airflow_path = import_prj_to_platform(
+            args.input, args.output,
+        )
+    print(f"  Wrote: {spatial_path}")
+    print(f"  Wrote: {airflow_path}")
     return 0
 
 

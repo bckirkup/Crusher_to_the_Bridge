@@ -43,7 +43,9 @@ jobs:
             tests/test_long_read_sequencing.py tests/test_instrument_turnaround.py \
             tests/test_enterprise_platforms.py tests/test_agent_axes.py \
             tests/test_sequencing_config.py tests/test_wearable_anomaly_scorer.py \
-            tests/test_cascade_entry.py -v --tb=short
+            tests/test_cascade_entry.py \
+            tests/test_contam_prj_bridge.py tests/test_contamw34_dual_path.py \
+            tests/test_contamx_solver.py tests/test_py_contam_bridge.py -v --tb=short
 
       - name: Import hygiene (Picard / Presidio / Stackelberg)
         env:

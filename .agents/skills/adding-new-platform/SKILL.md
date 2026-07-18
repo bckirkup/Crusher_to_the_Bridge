@@ -57,7 +57,13 @@ negative). When both `floor_area_m2` and `ceiling_height_m` are present,
 sanity checker warns if they disagree by more than 1%. Zones may still
 specify only `volume_m3` (backward compatible). These fields drive the
 CONTAM `.prj` import/export bridge (`tools/contam_prj_bridge.py`) — see
-`docs/CONTAM_INTEROP.md`.
+`docs/CONTAM_INTEROP.md`. Optional ContamW 3.4 bundle for ContamX Path A:
+
+```
+data/platforms/<platform_name>/contam/
+  platform.prj      # ContamW 3.4 (regenerate via scripts/generate_platform_contam_prj.py)
+  path_map.json     # ContamX path index → Crusher zone pairs
+```
 
 `graywater_zones` lists downstream greywater/blackwater collection zone(s)
 for ship-wide wastewater sequencing (e.g. `Engine_Room_Aft` on large cruise

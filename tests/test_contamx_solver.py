@@ -269,17 +269,28 @@ def test_contamx_engine_matches_native_interface():
     assert set(summary["zone_concentrations"]) == {"A", "B"}
 
 
-def test_path_map_from_airflow_order():
+def test_path_map_from_airflow_includes_adjacency_and_more():
+    spatial = {
+        "platform": "t",
+        "zones": [
+            {"id": "A", "volume_m3": 50, "deck": "main", "display": {"x": 0, "y": 0}},
+            {"id": "B", "volume_m3": 50, "deck": "main", "display": {"x": 1, "y": 0}},
+            {"id": "C", "volume_m3": 50, "deck": "main", "display": {"x": 2, "y": 0}},
+        ],
+    }
     airflow = {
         "adjacency": [
             {"from": "A", "to": "B"},
             {"from": "B", "to": "C"},
-        ]
+        ],
+        "hvac_zones": [{"id": "hz", "rooms": ["A", "B", "C"], "ach": 6.0}],
+        "cross_zone_links": [],
     }
-    assert _path_map_from_airflow(airflow) == [
-        ("A", "B", False),
-        ("B", "C", False),
-    ]
+    path_map = _path_map_from_airflow(spatial, airflow)
+    # ContamW 3.4 full order: adjacency first, then AHS bookkeeping paths
+    assert path_map[0][:2] == ("A", "B")
+    assert path_map[1][:2] == ("B", "C")
+    assert len(path_map) > 2
 
 
 # ── benchmark harness (native-only path) ─────────────────────────────────

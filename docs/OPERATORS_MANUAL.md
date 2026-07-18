@@ -285,11 +285,26 @@ heart rate offset) but does not influence transmission dynamics.
 
 ### 3.4 HVAC / CONTAM Transport
 
+Airborne pathogen transport uses a CONTAM-style multi-zone mass balance
+(`engines/py_contam_bridge.py`). The default **native** engine applies
+prescribed ACH / cross-zone flows from `air_flow_paths.json`.
+
+Optionally set `hvac.transport_engine` to `contamx` or `auto` to drive the
+airflow field from a ContamW 3.4 `.prj` via the NIST ContamX binary (bundled
+under `data/platforms/<id>/contam/` for Mega Cruise and both Enterprise
+platforms). See [`docs/CONTAM_INTEROP.md`](CONTAM_INTEROP.md) for Path A
+(ContamX) vs Path B (simplify `.prj` → JSON), regeneration scripts, and
+outcome comparison tools.
+
 ```yaml
 hvac:
   filter_efficiency: 0.50      # [0,1] — MERV-8=0.20, MERV-13=0.50, HEPA=0.999
   natural_decay_rate: 0.10     # fraction lost per epoch to settling/inactivation
   filter_type: "MERV-13"       # human-readable label
+  transport_engine: "native"   # native | contamx | auto
+  contamx:
+    binary_path: ""
+    prj_path: ""               # else platforms/<id>/contam/platform.prj
 ```
 
 The filter efficiency (`η`) feeds into the CONTAM mass-balance equation:

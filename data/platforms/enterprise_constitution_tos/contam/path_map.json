@@ -1,0 +1,434 @@
+[
+  {
+    "path_nr": 1,
+    "from_zone": "Bridge",
+    "to_zone": "Communications",
+    "is_hvac_ducted": false,
+    "kind": "turbolift",
+    "crusher_transfer": true
+  },
+  {
+    "path_nr": 2,
+    "from_zone": "Bridge",
+    "to_zone": "Library",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true
+  },
+  {
+    "path_nr": 3,
+    "from_zone": "Sickbay",
+    "to_zone": "Transporter_Room",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true
+  },
+  {
+    "path_nr": 4,
+    "from_zone": "Sickbay",
+    "to_zone": "Security_Station",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true
+  },
+  {
+    "path_nr": 5,
+    "from_zone": "Science_Lab",
+    "to_zone": "Library",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true
+  },
+  {
+    "path_nr": 6,
+    "from_zone": "Rec_Deck",
+    "to_zone": "Galley",
+    "is_hvac_ducted": false,
+    "kind": "service_hatch",
+    "crusher_transfer": true
+  },
+  {
+    "path_nr": 7,
+    "from_zone": "Galley",
+    "to_zone": "Crew_Quarters",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true
+  },
+  {
+    "path_nr": 8,
+    "from_zone": "Crew_Quarters",
+    "to_zone": "Officer_Quarters",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true
+  },
+  {
+    "path_nr": 9,
+    "from_zone": "Officer_Quarters",
+    "to_zone": "Engineering",
+    "is_hvac_ducted": false,
+    "kind": "turbolift",
+    "crusher_transfer": true
+  },
+  {
+    "path_nr": 10,
+    "from_zone": "Engineering",
+    "to_zone": "Sickbay",
+    "is_hvac_ducted": false,
+    "kind": "turbolift",
+    "crusher_transfer": true
+  },
+  {
+    "path_nr": 11,
+    "from_zone": "Rec_Deck",
+    "to_zone": "Bridge",
+    "is_hvac_ducted": false,
+    "kind": "turbolift",
+    "crusher_transfer": true
+  },
+  {
+    "path_nr": 12,
+    "from_zone": "Galley",
+    "to_zone": "Mess_Hall",
+    "is_hvac_ducted": false,
+    "kind": "service_hatch",
+    "crusher_transfer": true
+  },
+  {
+    "path_nr": 13,
+    "from_zone": "Bridge",
+    "to_zone": "Sickbay",
+    "is_hvac_ducted": true,
+    "kind": "turbolift_shaft_fore",
+    "crusher_transfer": true
+  },
+  {
+    "path_nr": 14,
+    "from_zone": "Sickbay",
+    "to_zone": "Rec_Deck",
+    "is_hvac_ducted": false,
+    "kind": "corridor_ring_mid",
+    "crusher_transfer": true
+  },
+  {
+    "path_nr": 15,
+    "from_zone": "Rec_Deck",
+    "to_zone": "Engineering",
+    "is_hvac_ducted": true,
+    "kind": "connecting_tube_aft",
+    "crusher_transfer": true
+  },
+  {
+    "path_nr": 16,
+    "from_zone": "Bridge",
+    "to_zone": "Engineering",
+    "is_hvac_ducted": false,
+    "kind": "emergency_vent_shaft",
+    "crusher_transfer": true
+  },
+  {
+    "path_nr": 17,
+    "from_zone": "ambient",
+    "to_zone": "zone_saucer_command_Sup",
+    "is_hvac_ducted": true,
+    "kind": "ahs_oa",
+    "crusher_transfer": false
+  },
+  {
+    "path_nr": 18,
+    "from_zone": "zone_saucer_command_Ret",
+    "to_zone": "ambient",
+    "is_hvac_ducted": true,
+    "kind": "ahs_exhaust",
+    "crusher_transfer": false
+  },
+  {
+    "path_nr": 19,
+    "from_zone": "zone_saucer_command_Ret",
+    "to_zone": "zone_saucer_command_Sup",
+    "is_hvac_ducted": true,
+    "kind": "ahs_recirc",
+    "crusher_transfer": false
+  },
+  {
+    "path_nr": 20,
+    "from_zone": "zone_saucer_command_Sup",
+    "to_zone": "Bridge",
+    "is_hvac_ducted": true,
+    "kind": "ahs_supply",
+    "crusher_transfer": false
+  },
+  {
+    "path_nr": 21,
+    "from_zone": "Bridge",
+    "to_zone": "zone_saucer_command_Ret",
+    "is_hvac_ducted": true,
+    "kind": "ahs_return",
+    "crusher_transfer": false
+  },
+  {
+    "path_nr": 22,
+    "from_zone": "zone_saucer_command_Sup",
+    "to_zone": "Communications",
+    "is_hvac_ducted": true,
+    "kind": "ahs_supply",
+    "crusher_transfer": false
+  },
+  {
+    "path_nr": 23,
+    "from_zone": "Communications",
+    "to_zone": "zone_saucer_command_Ret",
+    "is_hvac_ducted": true,
+    "kind": "ahs_return",
+    "crusher_transfer": false
+  },
+  {
+    "path_nr": 24,
+    "from_zone": "zone_saucer_command_Sup",
+    "to_zone": "Library",
+    "is_hvac_ducted": true,
+    "kind": "ahs_supply",
+    "crusher_transfer": false
+  },
+  {
+    "path_nr": 25,
+    "from_zone": "Library",
+    "to_zone": "zone_saucer_command_Ret",
+    "is_hvac_ducted": true,
+    "kind": "ahs_return",
+    "crusher_transfer": false
+  },
+  {
+    "path_nr": 26,
+    "from_zone": "ambient",
+    "to_zone": "zone_saucer_ops_Sup",
+    "is_hvac_ducted": true,
+    "kind": "ahs_oa",
+    "crusher_transfer": false
+  },
+  {
+    "path_nr": 27,
+    "from_zone": "zone_saucer_ops_Ret",
+    "to_zone": "ambient",
+    "is_hvac_ducted": true,
+    "kind": "ahs_exhaust",
+    "crusher_transfer": false
+  },
+  {
+    "path_nr": 28,
+    "from_zone": "zone_saucer_ops_Ret",
+    "to_zone": "zone_saucer_ops_Sup",
+    "is_hvac_ducted": true,
+    "kind": "ahs_recirc",
+    "crusher_transfer": false
+  },
+  {
+    "path_nr": 29,
+    "from_zone": "zone_saucer_ops_Sup",
+    "to_zone": "Sickbay",
+    "is_hvac_ducted": true,
+    "kind": "ahs_supply",
+    "crusher_transfer": false
+  },
+  {
+    "path_nr": 30,
+    "from_zone": "Sickbay",
+    "to_zone": "zone_saucer_ops_Ret",
+    "is_hvac_ducted": true,
+    "kind": "ahs_return",
+    "crusher_transfer": false
+  },
+  {
+    "path_nr": 31,
+    "from_zone": "zone_saucer_ops_Sup",
+    "to_zone": "Security_Station",
+    "is_hvac_ducted": true,
+    "kind": "ahs_supply",
+    "crusher_transfer": false
+  },
+  {
+    "path_nr": 32,
+    "from_zone": "Security_Station",
+    "to_zone": "zone_saucer_ops_Ret",
+    "is_hvac_ducted": true,
+    "kind": "ahs_return",
+    "crusher_transfer": false
+  },
+  {
+    "path_nr": 33,
+    "from_zone": "zone_saucer_ops_Sup",
+    "to_zone": "Transporter_Room",
+    "is_hvac_ducted": true,
+    "kind": "ahs_supply",
+    "crusher_transfer": false
+  },
+  {
+    "path_nr": 34,
+    "from_zone": "Transporter_Room",
+    "to_zone": "zone_saucer_ops_Ret",
+    "is_hvac_ducted": true,
+    "kind": "ahs_return",
+    "crusher_transfer": false
+  },
+  {
+    "path_nr": 35,
+    "from_zone": "zone_saucer_ops_Sup",
+    "to_zone": "Science_Lab",
+    "is_hvac_ducted": true,
+    "kind": "ahs_supply",
+    "crusher_transfer": false
+  },
+  {
+    "path_nr": 36,
+    "from_zone": "Science_Lab",
+    "to_zone": "zone_saucer_ops_Ret",
+    "is_hvac_ducted": true,
+    "kind": "ahs_return",
+    "crusher_transfer": false
+  },
+  {
+    "path_nr": 37,
+    "from_zone": "ambient",
+    "to_zone": "zone_saucer_living_Sup",
+    "is_hvac_ducted": true,
+    "kind": "ahs_oa",
+    "crusher_transfer": false
+  },
+  {
+    "path_nr": 38,
+    "from_zone": "zone_saucer_living_Ret",
+    "to_zone": "ambient",
+    "is_hvac_ducted": true,
+    "kind": "ahs_exhaust",
+    "crusher_transfer": false
+  },
+  {
+    "path_nr": 39,
+    "from_zone": "zone_saucer_living_Ret",
+    "to_zone": "zone_saucer_living_Sup",
+    "is_hvac_ducted": true,
+    "kind": "ahs_recirc",
+    "crusher_transfer": false
+  },
+  {
+    "path_nr": 40,
+    "from_zone": "zone_saucer_living_Sup",
+    "to_zone": "Rec_Deck",
+    "is_hvac_ducted": true,
+    "kind": "ahs_supply",
+    "crusher_transfer": false
+  },
+  {
+    "path_nr": 41,
+    "from_zone": "Rec_Deck",
+    "to_zone": "zone_saucer_living_Ret",
+    "is_hvac_ducted": true,
+    "kind": "ahs_return",
+    "crusher_transfer": false
+  },
+  {
+    "path_nr": 42,
+    "from_zone": "zone_saucer_living_Sup",
+    "to_zone": "Galley",
+    "is_hvac_ducted": true,
+    "kind": "ahs_supply",
+    "crusher_transfer": false
+  },
+  {
+    "path_nr": 43,
+    "from_zone": "Galley",
+    "to_zone": "zone_saucer_living_Ret",
+    "is_hvac_ducted": true,
+    "kind": "ahs_return",
+    "crusher_transfer": false
+  },
+  {
+    "path_nr": 44,
+    "from_zone": "zone_saucer_living_Sup",
+    "to_zone": "Crew_Quarters",
+    "is_hvac_ducted": true,
+    "kind": "ahs_supply",
+    "crusher_transfer": false
+  },
+  {
+    "path_nr": 45,
+    "from_zone": "Crew_Quarters",
+    "to_zone": "zone_saucer_living_Ret",
+    "is_hvac_ducted": true,
+    "kind": "ahs_return",
+    "crusher_transfer": false
+  },
+  {
+    "path_nr": 46,
+    "from_zone": "zone_saucer_living_Sup",
+    "to_zone": "Officer_Quarters",
+    "is_hvac_ducted": true,
+    "kind": "ahs_supply",
+    "crusher_transfer": false
+  },
+  {
+    "path_nr": 47,
+    "from_zone": "Officer_Quarters",
+    "to_zone": "zone_saucer_living_Ret",
+    "is_hvac_ducted": true,
+    "kind": "ahs_return",
+    "crusher_transfer": false
+  },
+  {
+    "path_nr": 48,
+    "from_zone": "zone_saucer_living_Sup",
+    "to_zone": "Mess_Hall",
+    "is_hvac_ducted": true,
+    "kind": "ahs_supply",
+    "crusher_transfer": false
+  },
+  {
+    "path_nr": 49,
+    "from_zone": "Mess_Hall",
+    "to_zone": "zone_saucer_living_Ret",
+    "is_hvac_ducted": true,
+    "kind": "ahs_return",
+    "crusher_transfer": false
+  },
+  {
+    "path_nr": 50,
+    "from_zone": "ambient",
+    "to_zone": "zone_engineering_Sup",
+    "is_hvac_ducted": true,
+    "kind": "ahs_oa",
+    "crusher_transfer": false
+  },
+  {
+    "path_nr": 51,
+    "from_zone": "zone_engineering_Ret",
+    "to_zone": "ambient",
+    "is_hvac_ducted": true,
+    "kind": "ahs_exhaust",
+    "crusher_transfer": false
+  },
+  {
+    "path_nr": 52,
+    "from_zone": "zone_engineering_Ret",
+    "to_zone": "zone_engineering_Sup",
+    "is_hvac_ducted": true,
+    "kind": "ahs_recirc",
+    "crusher_transfer": false
+  },
+  {
+    "path_nr": 53,
+    "from_zone": "zone_engineering_Sup",
+    "to_zone": "Engineering",
+    "is_hvac_ducted": true,
+    "kind": "ahs_supply",
+    "crusher_transfer": false
+  },
+  {
+    "path_nr": 54,
+    "from_zone": "Engineering",
+    "to_zone": "zone_engineering_Ret",
+    "is_hvac_ducted": true,
+    "kind": "ahs_return",
+    "crusher_transfer": false
+  }
+]

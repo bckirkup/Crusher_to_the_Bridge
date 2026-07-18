@@ -178,7 +178,10 @@ hvac:
   contamx:
     binary_path: ""                 # path to the ContamX executable (or set
                                     # CONTAMX_BINARY env var / leave on PATH).
-                                    # Not pip-installable; see docs/CONTAM_INTEROP.md §5.
+                                    # Not pip-installable; see docs/CONTAM_INTEROP.md.
+    prj_path: ""                    # optional ContamW 3.4 .prj override; else
+                                    # data/platforms/<id>/contam/platform.prj,
+                                    # else temp export from JSON.
 
 # ── Escalation thresholds ─────────────────────────────────────
 escalation:

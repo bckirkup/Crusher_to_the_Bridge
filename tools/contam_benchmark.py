@@ -41,6 +41,7 @@ from simulation_utils.paths import (  # noqa: E402
     resolve_repo_path,
     validated_open,
 )
+# resolve_repo_path used for bundled ContamW PRJ discovery
 
 _SPATIAL_LAYOUT_JSON = "spatial_layout.json"
 _AIR_FLOW_PATHS_JSON = "air_flow_paths.json"
@@ -152,18 +153,28 @@ def main(argv: list[str] | None = None) -> None:
     )
     native_traj = _run_trajectory(native, initial_mass, args.epochs)
 
+    # Prefer bundled ContamW 3.4 PRJ beside the platform when present.
+    platform_dir = resolve_repo_path(REPO_ROOT, args.platform)
+    bundled_prj = os.path.join(platform_dir, "contam", "platform.prj")
+    hvac_cfg: dict[str, Any] = {
+        "filter_efficiency": args.filter_efficiency,
+        "natural_decay_rate": args.natural_decay_rate,
+        "contamx": {},
+    }
+    if os.path.isfile(bundled_prj):
+        hvac_cfg["contamx"]["prj_path"] = os.path.relpath(bundled_prj, REPO_ROOT)
+
     cfg = {
         "ship_graph": {
             "spatial_layout": os.path.join(args.platform, _SPATIAL_LAYOUT_JSON),
             "air_flow_paths": os.path.join(args.platform, _AIR_FLOW_PATHS_JSON),
         },
-        "hvac": {
-            "filter_efficiency": args.filter_efficiency,
-            "natural_decay_rate": args.natural_decay_rate,
-        },
+        "hvac": hvac_cfg,
     }
 
     print(f"Platform: {args.platform}")
+    if hvac_cfg["contamx"].get("prj_path"):
+        print(f"ContamX PRJ: {hvac_cfg['contamx']['prj_path']}")
     print(f"Injections: {injections}")
     print(f"Epochs: {args.epochs}\n")
 
