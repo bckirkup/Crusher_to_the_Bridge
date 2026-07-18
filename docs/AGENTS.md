@@ -83,6 +83,7 @@ Pure-Python simulation (no databases, Docker, or external APIs). **Python 3.11+*
 | `schema-validation` | Before committing JSON in `data/` or `telemetry_buffer/` |
 | `adding-new-platform` | New vessel spatial layout + HVAC |
 | `adding-new-pathogen` | New pathogen profile entries |
+| `contamx-interop` | ContamX SIM reader, AHS bridge, compare suite, flow diagnostics |
 
 ### Important caveats
 
