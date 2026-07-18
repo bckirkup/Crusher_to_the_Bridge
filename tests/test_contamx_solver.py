@@ -287,10 +287,12 @@ def test_path_map_from_airflow_includes_adjacency_and_more():
         "cross_zone_links": [],
     }
     path_map = _path_map_from_airflow(spatial, airflow)
-    # ContamW 3.4 full order: adjacency first, then AHS bookkeeping paths
-    assert path_map[0][:2] == ("A", "B")
-    assert path_map[1][:2] == ("B", "C")
-    assert len(path_map) > 2
+    # ContamW 3.4 full order: envelope leaks, adjacency, then AHS bookkeeping
+    assert ("A", "ambient") in {p[:2] for p in path_map}
+    assert ("A", "B") in {p[:2] for p in path_map}
+    assert ("B", "C") in {p[:2] for p in path_map}
+    assert path_map[0][:2] == ("A", "ambient")  # envelope leaks first
+    assert len(path_map) > 5  # 3 leaks + 2 adjacency + AHS paths
 
 
 # ── benchmark harness (native-only path) ─────────────────────────────────
