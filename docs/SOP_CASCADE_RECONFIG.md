@@ -1,5 +1,10 @@
 # SOP Cascade-Gating Reconfiguration
 
+> **Status:** Design note — cascade-gated SOP wiring may be partially landed in
+> `data/config/protocols.json` / diagnostic cascade configs. Prefer those configs
+> and [OPERATORS_MANUAL_SHIP.md](OPERATORS_MANUAL_SHIP.md) for current behavior.
+> Index: [docs/README.md](README.md).
+
 ## Problem
 
 The current SOP triggers depend on environmental instruments (air sniffer, wastewater, surface swab)

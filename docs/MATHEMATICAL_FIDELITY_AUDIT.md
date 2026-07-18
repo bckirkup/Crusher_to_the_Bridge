@@ -1,5 +1,8 @@
 # Mathematical Fidelity Audit
 
+> **Status:** Living audit. Contam transport notes also in [CONTAM_INTEROP.md](CONTAM_INTEROP.md).
+> Index: [README.md](README.md).
+
 Line-by-line comparison of Python implementations in **Crusher_to_the_Bridge**
 against their original Java and R sources in **infection-dynamics** and
 **genome-resolved-urban-microbiome-biosurveillance** (GRUMB).

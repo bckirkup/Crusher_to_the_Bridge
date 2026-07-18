@@ -1,5 +1,7 @@
 # Fiction Contam PRJ Physical Realism Audit
 
+> **Status:** Living audit. Companion: [CONTAM_INTEROP.md](CONTAM_INTEROP.md).
+
 Date: 2026-07-18 (updated: realistic openings)  
 Scope: hobbyist-plus `data/platforms/*/contam/platform.prj` for
 `destroyer_baseline`, `enterprise_constitution_tos`, `enterprise_galaxy_tng`,

@@ -1,5 +1,10 @@
 # Issue 111 — Enhanced Wearables Model: Implementation Plan
 
+> **Status:** Plan / partially superseded. Confounder-aware cascade scoring landed in
+> [WEARABLE_ANOMALY_REDESIGN.md](WEARABLE_ANOMALY_REDESIGN.md) and
+> `engines/wearable_anomaly_scorer.py`. Treat remaining sections as a backlog, not
+> current operator guidance. See [docs/README.md](README.md).
+
 ## Summary
 
 Replace the current binary "every agent in a class gets the same device" wearable system

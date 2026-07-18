@@ -1,5 +1,8 @@
 # Shedding Variance and Cabin-Mate Parameterization
 
+> **Status:** Implemented. Living summary also in [AGENTS.md](AGENTS.md) caveats.
+> Platform cabin layout notes: [PLATFORM_CABIN_REVISION.md](PLATFORM_CABIN_REVISION.md).
+
 ## 1. Per-Agent Shedding Variance
 
 ### Mechanism

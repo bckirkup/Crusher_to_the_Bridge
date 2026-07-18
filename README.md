@@ -11,27 +11,29 @@ maritime disease outbreaks.
 ## Quick Start
 
 ```bash
-# Install dependencies
+# Install dependencies (Python 3.11+)
 pip install -r requirements.txt
 
 # Validate configuration (JSON + crusher_labs/config.yaml)
-python tools/sanity_checker.py --from-config
+python3 tools/sanity_checker.py --from-config
 
 # Run a 24-epoch simulation (default)
-python orchestrator.py
+python3 orchestrator.py
 
 # Override epoch count
-python orchestrator.py --epochs 250
+python3 orchestrator.py --epochs 250
 
 # Launch LCARS dashboard (after simulation)
-streamlit run dashboard.py
+python3 -m streamlit run dashboard.py
 
 # Run the test suite (~655 tests)
-pytest tests/ -v --tb=short
+python3 -m pytest tests/ -v --tb=short
 ```
 
 Output is written to `telemetry_buffer/simulation_history.json` and
 `telemetry_buffer/artificial_lab_notebook.json` (gitignored runtime artifacts).
+
+Documentation map: [docs/README.md](docs/README.md).
 
 ## Picard, Presidio & Stackelberg
 

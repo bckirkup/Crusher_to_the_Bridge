@@ -1,5 +1,7 @@
 # Crusher-to-the-Bridge — Agent Instructions
 
+> See also the human docs map: [README.md](README.md).
+
 ## Cursor Cloud specific instructions
 
 Pure-Python simulation (no databases, Docker, or external APIs). **Python 3.11+** required.
