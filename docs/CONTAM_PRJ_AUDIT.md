@@ -53,7 +53,8 @@ Orifice estimate: \(Q \approx C_d A \sqrt{2\Delta P/\rho}\) with \(C_d=0.6\),
 - Bridge is **solo AHS** → no AHS room↔room synth; Bridge→ship coupling must come from fans + orifices.
 - Ducts only on `zone_main` / `zone_lower` (override) — OK.
 - Prior compare-suite ContamX `n_paths=6` was a **SIM reader xref bug**, not orifice physics (see § ContamX→Crusher implications).
-- **Post-fix flow_compare (embedded path `nr`):** ~17 kept + 8 AHS synth; Fan_25/26/27 ≈ 16.7/13.3/10 m³/h; Bridge out ≈76 m³/h (native 97). Re-run full compare suite on Windows to refresh L1 numbers.
+- **Post-fix flow_compare (embedded path `nr`):** ~17 kept + 8 AHS synth; Fan_25/26/27 ≈ 16.7/13.3/10 m³/h; Bridge out ≈76 m³/h (native 97).
+- **Native HVAC calibration (2026-07-18):** Contam-aligned `Q_ij=(1−oa)·ACH·ΣV·duty/n²` with `oa_fraction=0.2`, `hvac_duty=0.5` on Contam fiction platforms. Destroyer zone_lower pairs ≈350 m³/h (was 1500/2000); zone_main ≈80 (was 180–480). Matches ContamX AHS synth after Rec=0 OA fallback.
 
 ### `enterprise_constitution_tos` — **improved** (openings); OAFrac still buggy
 
@@ -112,6 +113,10 @@ Crack-scale openings remain fixed. ContamX→Crusher coupling on destroyer is
 now in the right order of magnitude; remaining fidelity work is OAFrac wiring,
 passive `fan_cvf`→orifice export, and mega duct/fan expansion — then re-run the
 compare suite for updated L1 baselines.
+
+**Native over-mix (addressed):** Native recirculation now uses Contam AHS
+semantics (OA + duty + equal share) so Contam/PRJ remains SoT; do not raise
+Contam rates to match old native ACH complete-mixing.
 
 ---
 

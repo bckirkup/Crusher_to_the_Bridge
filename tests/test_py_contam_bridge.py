@@ -154,6 +154,28 @@ class TestACHAndFilterEfficiency:
         # verify A lost more mass under higher ACH (more transferred out).
         assert result_high["A"] <= result_low["A"], "Higher ACH should drain source faster"
 
+    def test_contam_aligned_recirculation_equal_share(self) -> None:
+        """Native HVAC matches Contam AHS: Q_ij = (1-oa)·ACH·ΣV·duty / n²."""
+        layout = {
+            "zones": [
+                {"id": "A", "volume_m3": 100.0},
+                {"id": "B", "volume_m3": 100.0},
+                {"id": "C", "volume_m3": 100.0},
+            ],
+        }
+        airflow = {
+            "oa_fraction": 0.2,
+            "hvac_duty": 0.5,
+            "hvac_zones": [{"id": "hz", "rooms": ["A", "B", "C"], "ach": 6.0}],
+            "cross_zone_links": [],
+            "adjacency": [],
+        }
+        engine = ContamTransportEngine(layout, airflow)
+        recirc = [p for p in engine.airflow_paths if p.path_type == "hvac_recirculation"]
+        assert len(recirc) == 6  # 3×2 directed pairs
+        # supply = 6*300*0.5 = 900; Rec = 0.8*900 = 720; Q_ij = 720/9 = 80
+        assert all(p.flow_rate_m3h == pytest.approx(80.0) for p in recirc)
+
     def test_hepa_removes_nearly_all(self) -> None:
         engine = _engine_with_single_path(
             flow=100.0, filter_eff=0.999, decay=0.0, is_ducted=True,

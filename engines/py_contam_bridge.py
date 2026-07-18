@@ -228,26 +228,50 @@ class ContamTransportEngine:
             )
 
     def _build_hvac_recirculation_paths(self, airflow: dict[str, Any]) -> None:
+        """Build room↔room HVAC edges using Contam simple-AHS semantics.
+
+        Contam (and ContamX Path A) is the airflow source of truth. Native
+        recirculation therefore mirrors Contam export + AHS bridge::
+
+            Q_supply = ach · ΣV · hvac_duty
+            Rec      = (1 − oa_fraction) · Q_supply
+            Q_ij     = (Q_supply / n) · (Rec / Q_supply) · (1 / n)
+                     = Rec / n²
+
+        (equal per-room supply/return, matching Contam Fahs allocation).
+
+        Optional ``oa_fraction`` / ``hvac_duty`` may be set per HVAC zone or
+        at the air_flow_paths top level. Defaults: OA 0.2 (Contam OAFrac),
+        duty 1.0 (design). Fiction Contam twins that freeze ContamX at the
+        hobbyist night half-duty set ``hvac_duty: 0.5``.
+        """
+        default_oa = float(airflow.get("oa_fraction", 0.2))
+        default_duty = float(airflow.get("hvac_duty", 1.0))
         for hvac_zone in airflow.get("hvac_zones", []):
             zone_id = hvac_zone["id"]
-            rooms = hvac_zone.get("rooms", [])
+            rooms = [
+                r for r in hvac_zone.get("rooms", [])
+                if r in self.zone_nodes
+            ]
             n_rooms = len(rooms)
             if n_rooms < 2:
                 continue
-            total_volume = sum(
-                self.zone_nodes[r].volume_m3
-                for r in rooms if r in self.zone_nodes
-            )
-            zone_flow = hvac_zone.get("ach", 6.0) * total_volume
-            for i, room_from in enumerate(rooms):
-                for j, room_to in enumerate(rooms):
-                    if i == j:
+            total_volume = sum(self.zone_nodes[r].volume_m3 for r in rooms)
+            if total_volume <= 0:
+                continue
+            oa = float(hvac_zone.get("oa_fraction", default_oa))
+            duty = float(hvac_zone.get("hvac_duty", default_duty))
+            oa = min(max(oa, 0.0), 1.0)
+            duty = max(duty, 0.0)
+            supply_total = hvac_zone.get("ach", 6.0) * total_volume * duty
+            recirc = (1.0 - oa) * supply_total
+            if recirc <= 0:
+                continue
+            pair_flow = recirc / (n_rooms * n_rooms)
+            for room_from in rooms:
+                for room_to in rooms:
+                    if room_from == room_to:
                         continue
-                    from_vol = self.zone_nodes.get(room_from)
-                    if from_vol is None:
-                        continue
-                    frac = from_vol.volume_m3 / total_volume if total_volume > 0 else 0
-                    pair_flow = zone_flow * frac / (n_rooms - 1)
                     self.airflow_paths.append(ContamAirflowPath(
                         path_id=f"hvac_{zone_id}_{room_from}_{room_to}",
                         from_zone=room_from,

@@ -1,6 +1,8 @@
 {
   "platform": "enterprise_galaxy_tng",
   "description": "Galaxy-class multi-deck HVAC with saucer living ring and drive-section engineering plenum.",
+  "oa_fraction": 0.2,
+  "hvac_duty": 0.5,
   "hvac_zones": [
     {
       "id": "zone_saucer_command",

@@ -53,6 +53,31 @@ def test_synthesize_skips_single_room_ahs() -> None:
     assert synthesize_ahs_recirculation_paths(entries, flows, {"A"}) == []
 
 
+def test_synthesize_rec_zero_applies_oa_fraction() -> None:
+    """When ContamX reports Rec Flow0=0, recover Rec=(1-oa)·min(ΣR,ΣS)."""
+    entries = [
+        {"path_nr": 1, "from_zone": "A", "to_zone": "ahs1(Ret)", "kind": "ahs_return",
+         "ahs_nr": 1},
+        {"path_nr": 2, "from_zone": "B", "to_zone": "ahs1(Ret)", "kind": "ahs_return",
+         "ahs_nr": 1},
+        {"path_nr": 3, "from_zone": "ahs1(Sup)", "to_zone": "A", "kind": "ahs_supply",
+         "ahs_nr": 1},
+        {"path_nr": 4, "from_zone": "ahs1(Sup)", "to_zone": "B", "kind": "ahs_supply",
+         "ahs_nr": 1},
+        {"path_nr": 5, "from_zone": "ahs1(Ret)", "to_zone": "ahs1(Sup)", "kind": "ahs_recirc",
+         "ahs_nr": 1},
+    ]
+    # Duty-scaled terminals; Rec path absent/zero (destroyer ContamX SIM pattern)
+    flows = {1: 100.0, 2: 100.0, 3: 100.0, 4: 100.0, 5: 0.0}
+    paths = synthesize_ahs_recirculation_paths(
+        entries, flows, {"A", "B"}, oa_fraction=0.2,
+    )
+    by_pair = {(p.from_zone, p.to_zone): p.flow_rate_m3h for p in paths}
+    # Rec = 0.8 * 200 = 160 → Q_ij = 100 * (160/200) * (100/200) = 40
+    assert by_pair[("A", "B")] == 40.0
+    assert by_pair[("B", "A")] == 40.0
+
+
 def test_contamx_engine_includes_synthesized_ahs() -> None:
     spatial = {
         "platform": "t",

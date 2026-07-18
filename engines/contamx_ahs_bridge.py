@@ -18,12 +18,16 @@ from typing import Any
 from engines.py_contam_bridge import ContamAirflowPath
 
 _FLOW_EPS = 1e-9
+# Contam fiction export / OAFracW default when Rec Flow0 is absent.
+_DEFAULT_OA_FRACTION = 0.2
 
 
 def synthesize_ahs_recirculation_paths(
     path_map_entries: list[dict[str, Any]],
     path_flows_m3h: dict[int, float],
     known_zones: set[str],
+    *,
+    oa_fraction: float = _DEFAULT_OA_FRACTION,
 ) -> list[ContamAirflowPath]:
     """Synthesize ducted room↔room paths from Contam AHS supply/return/recirc.
 
@@ -33,6 +37,11 @@ def synthesize_ahs_recirculation_paths(
 
     where ``R_i`` is return flow room→Ret, ``S_j`` is supply Sup→room, and
     ``Rec`` is the recirculation path Ret→Sup (all ContamX volumetric flows).
+
+    When ContamX reports Rec≈0 (common for simple-AHS SIM frames that only
+    expose terminal flows), fall back to PRJ outdoor-air intent::
+
+        Rec ≈ (1 − oa_fraction) · min(ΣR, ΣS)
 
     Single-room AHUs yield no recirculation edges (matches native).
     """
@@ -75,10 +84,14 @@ def synthesize_ahs_recirculation_paths(
 
         sum_r = sum(returns.values())
         sum_s = sum(supplies.values())
-        if recirc < _FLOW_EPS or sum_r < _FLOW_EPS or sum_s < _FLOW_EPS:
-            # Contam may not populate recirc path flow when fo≈1; fall back to
-            # design-like mixing from terminal magnitudes: Rec ≈ min(ΣR, ΣS).
-            recirc = min(sum_r, sum_s)
+        if sum_r < _FLOW_EPS or sum_s < _FLOW_EPS:
+            continue
+        if recirc < _FLOW_EPS:
+            # ContamX often reports Rec/OA/exhaust Flow0 as 0 for simple AHS
+            # while terminals carry the scheduled duty flow. Recover PRJ
+            # recirculation: Rec = (1 − oa) · min(ΣR, ΣS).
+            oa = min(max(float(oa_fraction), 0.0), 1.0)
+            recirc = (1.0 - oa) * min(sum_r, sum_s)
         if recirc < _FLOW_EPS:
             continue
 
