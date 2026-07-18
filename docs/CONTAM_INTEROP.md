@@ -57,8 +57,9 @@ Fiction platforms ship a plausible ContamW 3.4 bundle under
 | `path_map.json` | ContamX path index → `(from_zone, to_zone, is_hvac_ducted)` |
 | `hobbyist_overrides.json` | Optional fiction-ship Contam portfolio overrides |
 
-Bundled for: `destroyer_baseline` (hobbyist-plus), `mega_cruise_5000`,
-`enterprise_constitution_tos`, `enterprise_galaxy_tng`. Regenerate after
+Bundled for: `destroyer_baseline` (hobbyist-plus),
+`enterprise_constitution_tos` (hobbyist-plus), `mega_cruise_5000`,
+`enterprise_galaxy_tng`. Regenerate after
 JSON edits:
 
 ```bash
