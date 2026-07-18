@@ -293,6 +293,7 @@ ContamX SIM magnitudes further but are not themselves bridged into Crusher.
 - `tools/contam_prj_bridge.py` — CLI export / simplify / import
 - `tools/contam_engine_compare.py` — results + speed suite runner
 - `tools/contam_flow_compare.py` — native ACH vs ContamX SIM per-path diagnostic
+- `docs/CONTAM_PRJ_AUDIT.md` — fiction PRJ physical realism audit
 - `scripts/generate_platform_contam_prj.py` — regenerate fiction-ship bundles
 - `third_party/contamx/` — local ContamX drop directory (gitignored binaries)
 - `tests/fixtures/contam/` — authentic ContamW 3.4 parse fixtures
