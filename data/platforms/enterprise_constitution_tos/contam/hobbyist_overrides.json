@@ -1,0 +1,49 @@
+{
+  "description": "Hobbyist-plus Contam overrides for Constitution-class (TOS) fiction ship.",
+  "orifice_type_map": {
+    "turbolift": "turbolift",
+    "passageway": "passageway",
+    "service_hatch": "hatch",
+    "connecting_tube": "connecting_tube"
+  },
+  "wind_profile": "ship_hull",
+  "deck_temp_offset_K": {
+    "saucer_primary": 0.0,
+    "secondary_hull": 4.0
+  },
+  "zone_annotations": {
+    "Bridge": "Bridge",
+    "Sickbay": "Sickbay",
+    "Engineering": "Main Eng"
+  },
+  "filter_preset": "MERV14",
+  "hvac_filter": {
+    "zone_saucer_ops": "HEPA",
+    "zone_engineering": "MERV14"
+  },
+  "oa_fraction": {
+    "_default": 0.2,
+    "zone_saucer_ops": 0.35
+  },
+  "wall_azimuth_deg": {
+    "Bridge": 0,
+    "Communications": 15,
+    "Library": 45,
+    "Sickbay": 90,
+    "Science_Lab": 120,
+    "Engineering": 180,
+    "Crew_Quarters": 270,
+    "Officer_Quarters": 240,
+    "Rec_Deck": 300,
+    "Galley": 310,
+    "Mess_Hall": 320,
+    "Transporter_Room": 100,
+    "Security_Station": 150
+  },
+  "duct_hvac_ids": [
+    "zone_saucer_command",
+    "zone_saucer_ops",
+    "zone_saucer_living"
+  ],
+  "night_setback": true
+}

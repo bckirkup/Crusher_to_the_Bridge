@@ -1,0 +1,34 @@
+{
+  "description": "Air + Virus tracer species for Contam hobbyist fiction PRJs. Crusher still owns epidemic mass balance.",
+  "contaminants": ["Air", "Virus"],
+  "species": [
+    {
+      "name": "Air",
+      "sflag": 1,
+      "ntflag": 0,
+      "molwt": 28.96,
+      "mdiam": 0.0,
+      "edens": 0.0,
+      "decay": 0.0,
+      "Dm": 2.0e-5,
+      "CCdef": 0.0,
+      "Cp": 1000.0,
+      "Kuv": 0.0,
+      "description": "default"
+    },
+    {
+      "name": "Virus",
+      "sflag": 1,
+      "ntflag": 0,
+      "molwt": 100.0,
+      "mdiam": 1.0e-7,
+      "edens": 1000.0,
+      "decay": 0.0,
+      "Dm": 1.0e-10,
+      "CCdef": 0.0,
+      "Cp": 1000.0,
+      "Kuv": 0.0,
+      "description": "inert pathogen tracer (Contam tracks; Crusher owns epidemic)"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "description": "Darcy-Colebrook trunk defaults for hobbyist duct leakage spines.",
+  "element_name": "TrunkDWC",
+  "roughness_m": 0.00015,
+  "laminar_loss_per_m": 0.001,
+  "hdia_m": 0.30,
+  "segment_length_m": 5.0,
+  "leakage_Ls_per_m2": 1.0,
+  "leakage_Pr_Pa": 250.0,
+  "min_rooms_for_trunk": 2,
+  "terminal_loss_Ct": 0.5
+}
