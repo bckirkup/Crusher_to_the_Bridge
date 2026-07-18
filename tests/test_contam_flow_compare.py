@@ -33,13 +33,15 @@ def _load_destroyer() -> tuple[dict, dict, list]:
     return spatial, airflow, path_map
 
 
-def test_native_destroyer_has_31_prescribed_links() -> None:
+def test_native_destroyer_has_star_hvac_links() -> None:
     spatial, airflow, _ = _load_destroyer()
     native = native_links_report(spatial, airflow)
-    assert native["n_paths"] == 31
-    assert native["by_path_type"]["hvac_recirculation"] == 8
+    # 12 HVAC star (6 rooms × ret+sup) + 11 cross-zone + 12 adjacency = 35
+    assert native["n_paths"] == 35
+    assert native["by_path_type"]["hvac_return"] == 6
+    assert native["by_path_type"]["hvac_supply"] == 6
     assert native["by_path_type"]["cross_zone"] == 11
-    # Bridge couples via adjacency + cross-zone only (single-room AHS1)
+    # Bridge now has single-room AHS return as well as adjacency/cross-zone
     assert native["zone_degree"]["Bridge"]["out_edges"] >= 4
     assert native["zone_degree"]["Bridge"]["out_m3h"] > 0
 
@@ -73,7 +75,7 @@ def test_zero_sim_flows_isolate_bridge_like_compare_suite() -> None:
     spatial, airflow, path_map = _load_destroyer()
     known = {z["id"] for z in spatial["zones"]}
     # Zero all Contam paths; synth falls back only when terminals have flow.
-    # Give AHS2 terminals non-zero flows (paths 32-37) so 6 synth edges appear.
+    # Give AHS2 terminals non-zero flows (paths 32-37) so 6 star edges appear.
     flows = {int(e["path_nr"]): 0.0 for e in path_map}
     for e in path_map:
         if int(e.get("ahs_nr") or 0) == 2 and e["kind"] in (
@@ -82,7 +84,7 @@ def test_zero_sim_flows_isolate_bridge_like_compare_suite() -> None:
             flows[int(e["path_nr"])] = 200.0
     cx = contamx_flow_report(path_map, flows, known)
     assert cx["n_kept_real_paths"] == 0
-    assert cx["n_synth_ahs_paths"] == 6  # 3 rooms × 2 directions
+    assert cx["n_synth_ahs_paths"] == 6  # 3 rooms × (return + supply)
     assert cx["n_crusher_paths"] == 6
     # Bridge not in AHS2 → isolated on ContamX Crusher graph
     assert cx["zone_degree"].get("Bridge", {}).get("out_edges", 0) == 0
@@ -95,7 +97,7 @@ def test_build_report_offline_without_sim() -> None:
         path_flows_m3h=None,
         inject_zones=["Bridge"],
     )
-    assert report["native"]["n_paths"] == 31
+    assert report["native"]["n_paths"] == 35
     assert report["contamx"]["sim_flows_loaded"] is False
     assert report["connectivity_gap"][0]["zone"] == "Bridge"
     assert any("SIM flows not loaded" in h for h in report["hypotheses"])

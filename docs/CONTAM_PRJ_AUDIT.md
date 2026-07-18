@@ -54,7 +54,7 @@ Orifice estimate: \(Q \approx C_d A \sqrt{2\Delta P/\rho}\) with \(C_d=0.6\),
 - Ducts only on `zone_main` / `zone_lower` (override) — OK.
 - Prior compare-suite ContamX `n_paths=6` was a **SIM reader xref bug**, not orifice physics (see § ContamX→Crusher implications).
 - **Post-fix flow_compare (embedded path `nr`):** ~17 kept + 8 AHS synth; Fan_25/26/27 ≈ 16.7/13.3/10 m³/h; Bridge out ≈76 m³/h (native 97).
-- **Native HVAC calibration (2026-07-18):** Contam-aligned `Q_ij=(1−oa)·ACH·ΣV·duty/n²` with `oa_fraction=0.2`, `hvac_duty=0.5` on Contam fiction platforms. Destroyer zone_lower pairs ≈350 m³/h (was 1500/2000); zone_main ≈80 (was 180–480). Matches ContamX AHS synth after Rec=0 OA fallback.
+- **Native HVAC star topology (2026-07-18):** Contam-aligned AHU plenum star (`room→plenum` return at `ACH·V·duty`, `plenum→room` supply × `(1−oa)`) with `oa_fraction=0.2`, `hvac_duty=0.5` on Contam fiction platforms. Replaces the former N×N complete-graph recirculation that over-mixed by ~(N−1)×. ContamX AHS bridge synthesizes the same star shape.
 
 ### `enterprise_constitution_tos` — **improved** (openings); OAFrac still buggy
 
@@ -114,7 +114,7 @@ now in the right order of magnitude. PRJ config fixes v2 (zone ≤15, per-AHU
 OA schedules, passive orifices) landed; re-run the compare suite on Windows
 for refreshed L1 baselines.
 
-**Native over-mix (addressed):** Native recirculation now uses Contam AHS
+**Native over-mix (addressed):** Native HVAC now uses Contam AHS star
 semantics (OA + duty + equal share) so Contam/PRJ remains SoT; do not raise
 Contam rates to match old native ACH complete-mixing.
 

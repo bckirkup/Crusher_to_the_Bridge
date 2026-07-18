@@ -14,10 +14,12 @@ import pytest
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 HISTORY_PATH = os.path.join(REPO_ROOT, "telemetry_buffer", "simulation_history.json")
 
+# Updated 2026-07-18: native HVAC star topology (AHU plenum) replaces N×N
+# complete-graph recirculation — localized airborne dose shifts final SIR counts.
 EXPECTED_SUMMARY = {
-    "susceptible": 1,
-    "infected": 0,
-    "symptomatic": 0,
+    "susceptible": 0,
+    "infected": 1,
+    "symptomatic": 1,
     "recovered": 15,
     "immune": 4,
 }

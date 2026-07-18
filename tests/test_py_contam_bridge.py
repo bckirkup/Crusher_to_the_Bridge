@@ -22,9 +22,12 @@ REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, REPO_ROOT)
 
 from engines.py_contam_bridge import (
+    PATH_TYPE_HVAC_RETURN,
+    PATH_TYPE_HVAC_SUPPLY,
     ContamAirflowPath,
     ContamTransportEngine,
     ContamZoneNode,
+    is_plenum_zone,
 )
 
 
@@ -154,8 +157,8 @@ class TestACHAndFilterEfficiency:
         # verify A lost more mass under higher ACH (more transferred out).
         assert result_high["A"] <= result_low["A"], "Higher ACH should drain source faster"
 
-    def test_contam_aligned_recirculation_equal_share(self) -> None:
-        """Native HVAC matches Contam AHS: Q_ij = (1-oa)·ACH·ΣV·duty / n²."""
+    def test_contam_aligned_star_topology_equal_rooms(self) -> None:
+        """Native HVAC is a star: return ACH·V·duty, supply ·(1−OA)."""
         layout = {
             "zones": [
                 {"id": "A", "volume_m3": 100.0},
@@ -171,10 +174,16 @@ class TestACHAndFilterEfficiency:
             "adjacency": [],
         }
         engine = ContamTransportEngine(layout, airflow)
-        recirc = [p for p in engine.airflow_paths if p.path_type == "hvac_recirculation"]
-        assert len(recirc) == 6  # 3×2 directed pairs
-        # supply = 6*300*0.5 = 900; Rec = 0.8*900 = 720; Q_ij = 720/9 = 80
-        assert all(p.flow_rate_m3h == pytest.approx(80.0) for p in recirc)
+        returns = [p for p in engine.airflow_paths if p.path_type == PATH_TYPE_HVAC_RETURN]
+        supplies = [p for p in engine.airflow_paths if p.path_type == PATH_TYPE_HVAC_SUPPLY]
+        assert len(returns) == 3
+        assert len(supplies) == 3
+        # room_flow = 6*100*0.5 = 300; supply = 0.8*300 = 240
+        assert all(p.flow_rate_m3h == pytest.approx(300.0) for p in returns)
+        assert all(p.flow_rate_m3h == pytest.approx(240.0) for p in supplies)
+        assert all(not p.is_hvac_ducted for p in returns)
+        assert all(p.is_hvac_ducted for p in supplies)
+        assert any(is_plenum_zone(zid) for zid in engine.zone_nodes)
 
     def test_hepa_removes_nearly_all(self) -> None:
         engine = _engine_with_single_path(
@@ -308,6 +317,79 @@ class TestPathConstruction:
         assert result["R2"] > 0.0
 
 
+# ── Star-topology HVAC physics ──────────────────────────────────────────
+
+class TestHvacStarTopology:
+    def test_single_room_ahu_oa_and_filter_removal(self) -> None:
+        """N=1 star: C_new = C · [1 − Q·dt·(OA + (1−OA)·η)] · (1−λ)."""
+        layout = {"zones": [{"id": "A", "volume_m3": 100.0}]}
+        airflow = {
+            "oa_fraction": 0.2,
+            "hvac_duty": 1.0,
+            "hvac_zones": [{"id": "hz", "rooms": ["A"], "ach": 1.0}],
+            "cross_zone_links": [],
+            "adjacency": [],
+        }
+        eta = 0.5
+        engine = ContamTransportEngine(
+            layout, airflow, filter_efficiency=eta, natural_decay_rate=0.0,
+        )
+        # Q = ACH·V·duty = 100 m³/h; V=100 → fraction removed = OA+(1-OA)η = 0.6
+        result = engine.transport_step({"A": 1000.0})
+        assert result["A"] == pytest.approx(400.0)
+        assert "_plenum_hz" not in result
+
+    def test_plenum_mass_not_retained(self) -> None:
+        layout = {
+            "zones": [
+                {"id": "A", "volume_m3": 100.0},
+                {"id": "B", "volume_m3": 100.0},
+            ],
+        }
+        airflow = {
+            "oa_fraction": 0.0,
+            "hvac_duty": 1.0,
+            "hvac_zones": [{"id": "hz", "rooms": ["A", "B"], "ach": 2.0}],
+            "cross_zone_links": [],
+            "adjacency": [],
+        }
+        engine = ContamTransportEngine(
+            layout, airflow, filter_efficiency=0.0, natural_decay_rate=0.0,
+        )
+        result = engine.transport_step({"A": 1000.0, "B": 0.0})
+        assert all(not is_plenum_zone(z) for z in result)
+        assert result["B"] > 0.0
+        # Second step must not dump a lagged plenum reservoir
+        result2 = engine.transport_step(result)
+        assert all(not is_plenum_zone(z) for z in result2)
+
+    def test_star_mixes_less_than_legacy_complete_graph_budget(self) -> None:
+        """Multi-room star redistributes via mixed plenum, conserving mass."""
+        layout = {
+            "zones": [
+                {"id": "A", "volume_m3": 100.0},
+                {"id": "B", "volume_m3": 100.0},
+                {"id": "C", "volume_m3": 100.0},
+            ],
+        }
+        airflow = {
+            "oa_fraction": 0.0,
+            "hvac_duty": 1.0,
+            "hvac_zones": [{"id": "hz", "rooms": ["A", "B", "C"], "ach": 3.0}],
+            "cross_zone_links": [],
+            "adjacency": [],
+        }
+        engine = ContamTransportEngine(
+            layout, airflow, filter_efficiency=0.0, natural_decay_rate=0.0,
+        )
+        result = engine.transport_step({"A": 900.0, "B": 0.0, "C": 0.0})
+        # Equal rooms → equal supply share of returned mass
+        assert result["B"] == pytest.approx(result["C"])
+        assert result["A"] == pytest.approx(result["B"])
+        # OA=0, η=0 → mass conserved (no N×N over-extraction mass creation)
+        assert result["A"] + result["B"] + result["C"] == pytest.approx(900.0)
+
+
 # ── Transport summary ───────────────────────────────────────────────────
 
 class TestTransportSummary:
@@ -321,3 +403,21 @@ class TestTransportSummary:
         assert "total_passive_paths" in summary
         assert "zone_concentrations" in summary
         assert "A" in summary["zone_concentrations"]
+
+    def test_summary_excludes_plenums(self) -> None:
+        layout = {
+            "zones": [
+                {"id": "A", "volume_m3": 100.0},
+                {"id": "B", "volume_m3": 100.0},
+            ],
+        }
+        airflow = {
+            "hvac_zones": [{"id": "hz", "rooms": ["A", "B"], "ach": 6.0}],
+            "cross_zone_links": [],
+            "adjacency": [],
+        }
+        engine = ContamTransportEngine(layout, airflow)
+        summary = engine.get_transport_summary({"A": 10.0, "B": 0.0})
+        assert summary["hvac_return_paths"] == 2
+        assert summary["hvac_supply_paths"] == 2
+        assert all(not is_plenum_zone(z) for z in summary["zone_concentrations"])

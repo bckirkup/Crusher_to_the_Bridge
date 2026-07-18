@@ -513,14 +513,16 @@ recirc = (1.0 - oa_fraction) * supply_total
 
 | Verdict | **MATCH** | Contam simple-AHS: design supply Q = ACH × V; recirculation is (1−oa)·Q (OAFrac). Optional ``hvac_duty`` matches Contam terminal schedules. |
 
-### 3.5 Flow Distribution Among Room Pairs
+### 3.5 Flow Distribution — AHU Star Topology
 
-**Target** — same builder; Contam equal per-room Fahs allocation:
+**Target** — same builder; Contam simple-AHS star through a mixing plenum:
 ```python
-pair_flow = recirc / (n_rooms * n_rooms)   # Q_ij = R·(Rec/ΣR)·(S/ΣS)
+room_flow = ach * V_room * duty
+# return: room → plenum at room_flow (unfiltered)
+# supply: plenum → room at room_flow * (1 - oa) (filtered)
 ```
 
-| Verdict | **MATCH** | Aligns native twin with ContamX AHS bridge synthesis (Contam is airflow SoT). Prior volume-weighted complete-mixing over-reported recirculation vs Contam. |
+| Verdict | **MATCH** | Star topology matches Contam AHS Ret/Sup phantoms. Prior N×N `Rec/n²` complete graph over-mixed by ~(N−1)× and could create mass under discrete capping. |
 
 ### 3.6 Cross-Zone Flow Distribution
 

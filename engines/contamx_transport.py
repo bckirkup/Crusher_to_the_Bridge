@@ -42,6 +42,7 @@ from engines.contamx_runner import (
 from engines.py_contam_bridge import (
     ContamAirflowPath,
     ContamTransportEngine,
+    is_plenum_zone,
 )
 from simulation_utils.paths import (
     is_path_under_base,
@@ -130,12 +131,15 @@ class ContamXTransportEngine(ContamTransportEngine):
                 is_hvac_ducted=is_ducted,
             ))
 
-        self.airflow_paths.extend(
-            synthesize_ahs_recirculation_paths(
-                ordered, path_flows_m3h, known,
-                oa_fraction=self._oa_fraction,
-            )
+        ahs_paths = synthesize_ahs_recirculation_paths(
+            ordered, path_flows_m3h, known,
+            oa_fraction=self._oa_fraction,
         )
+        for path in ahs_paths:
+            for zid in (path.from_zone, path.to_zone):
+                if is_plenum_zone(zid):
+                    self._ensure_plenum_node(zid)
+        self.airflow_paths.extend(ahs_paths)
 
     @classmethod
     def from_flow_field(
