@@ -36,8 +36,8 @@ def test_synthesize_ahs_two_room_mixing() -> None:
     assert len(paths) == 2  # A→B and B→A
     by_pair = {(p.from_zone, p.to_zone): p.flow_rate_m3h for p in paths}
     # Q_AB = 100 * (160/200) * (100/200) = 40
-    assert by_pair[("A", "B")] == 40.0
-    assert by_pair[("B", "A")] == 40.0
+    assert by_pair[("A", "B")] == pytest.approx(40.0)
+    assert by_pair[("B", "A")] == pytest.approx(40.0)
     assert all(p.is_hvac_ducted for p in paths)
     assert all(p.path_type == "hvac_recirculation" for p in paths)
 
