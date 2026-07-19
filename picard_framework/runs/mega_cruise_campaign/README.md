@@ -85,6 +85,10 @@ Progress for `--resume` is appended to:
 
 `telemetry_buffer/mega_cruise_campaign/completed_runs.txt`
 
+Failed run_ids are appended to `failed_runs.txt`. Use `--retry-failed` to
+re-run only those ids (clears leftover workdirs / stderr first; still skips
+completed runs).
+
 ## Sharding & S3 (AWS Batch / distributed runs)
 
 The runner can split the run list into disjoint shards and upload results to S3,
@@ -96,8 +100,9 @@ ECR + Batch workflow.
 |------|---------|
 | `--shard-count N` | Total number of shards. A run executes only when `global_index % N == shard_index`, where `global_index` is its position in the full flattened, ordered run list across the selected tiers. |
 | `--shard-index i` | This shard's index in `[0, N)`. Defaults to the `AWS_BATCH_JOB_ARRAY_INDEX` env var when present (so Batch array child *i* runs shard *i*). |
-| `--s3-prefix s3://bucket/path` | After each run's zip is written to `telemetry_buffer/mega_cruise_campaign/<run_id>.zip`, upload it to `<s3-prefix>/<run_id>.zip`. The shard's `completed_runs.txt` is uploaded periodically to `<s3-prefix>/_resume/` (and at the end) so an interrupted Spot container resumes correctly on retry. Requires `boto3`. |
+| `--s3-prefix s3://bucket/path` | After each run's zip is written to `telemetry_buffer/mega_cruise_campaign/<run_id>.zip`, upload it to `<s3-prefix>/<run_id>.zip`. With `--resume`, the shard's `completed_runs.txt` is **downloaded** from `<s3-prefix>/_resume/` at start, then re-uploaded periodically. Requires `boto3`. |
 | `--s3-log-every K` | Upload `completed_runs.txt` every `K` successful runs (default 25). |
+| `--retry-failed` | Re-run only ids in `failed_runs.txt` (clears their leftover artifacts first). |
 
 ```bash
 # Shard 3 of 200, uploading to S3, resumable:
@@ -116,10 +121,10 @@ shard is stable regardless of which shard is running.
 
 ## Estimated time
 
-At ~3 min/run for the full mega cruise, the campaign is ~450 hours wall-clock
-serially. Parallelize by launching different `--tier` values on different machines,
-or run one AWS Batch array job of N Fargate Spot children with
-`--shard-count N` (~450/N hours wall-clock; e.g. N=200 ≈ 2.3 hours).
+At ~3 min/run for the full mega cruise, the campaign is ~890 hours wall-clock
+serially (~17,780 runs). Parallelize by launching different `--tier` values on
+different machines, or run one AWS Batch array job of N Fargate Spot children
+with `--shard-count N` (~890/N hours wall-clock; e.g. N=200 ≈ 4.5 hours).
 Tier 1 alone: ~15 hours (300 × 3 min).
 
 ## Files

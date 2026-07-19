@@ -1,14 +1,16 @@
 ---
 name: aws-batch-campaign
-description: Deploy and run the ~9080-run mega cruise campaign as an AWS Batch Fargate Spot array job using role-based (no-root) access; build/push the ECR image, register the job definition, create the compute environment + queue, submit, monitor, and sync results back locally. Use when running large Crusher simulation batches on AWS.
+description: Deploy and run the ~17780-run mega cruise campaign as an AWS Batch Fargate Spot array job using role-based (no-root) access; build/push the ECR image, register the job definition, create the compute environment + queue, submit, monitor, and sync results back locally. Use when running large Crusher simulation batches on AWS.
 ---
 
 # AWS Batch mega cruise campaign
 
-Deploy the ~9080-run mega cruise campaign
+Deploy the ~17,780-run mega cruise campaign
 (`picard_framework/runs/mega_cruise_campaign/campaign_runner.py`) as a single
 **AWS Batch array job** on **Fargate Spot**. Each array child runs a disjoint
 shard and uploads per-run `<run_id>.zip` results to one shared S3 prefix.
+Each simulation runs in a **subprocess** by default (OS reclaim of RSS); 16 GB
+Fargate memory covers **single-run peak**, not cumulative leak.
 
 **`deploy/aws/README.md` is the canonical command reference** — the exact
 `aws` invocations, the file table, and the IAM grammar note live there. This
@@ -159,12 +161,12 @@ re-registering:
   ]
   ```
 
-- **Fargate resource sizing.** 1 vCPU / 4096 MB **OOM-kills** the 7000-agent /
-  240-epoch mega cruise config (exit code **137**,
-  `OutOfMemoryError: container killed due to memory usage`). Use **2 vCPU /
-  16384 MB** (a valid Fargate combo; 16384 is the max memory at 2 vCPU).
-  Fallback **4 vCPU / 30720 MB** if 16 GB still OOMs. See README "Container
-  sizing" for the Fargate vCPU↔memory constraint table.
+- **Fargate resource sizing.** Two layers: (1) **subprocess-per-run** stops
+  cumulative RSS growth across a shard; (2) **2 vCPU / 16384 MB** covers
+  single-run peak for 7000-agent / 240-epoch mega cruises (1 vCPU / 4096 MB
+  exits **137**). Fallback **4 vCPU / 30720 MB** only if a *single* child still
+  OOMs. Do not drop below 16 GB without measuring child peak RSS. See README
+  "Container sizing".
 
 - **Revision pinning.** `submit-job --job-definition picard-campaign` uses the
   **latest ACTIVE revision at submit time**. So **register the new revision
@@ -232,9 +234,13 @@ aws logs create-log-group --log-group-name /aws/batch/picard-campaign --region u
   `s3://<bucket>/campaign/_resume/`, a retried child **skips runs already
   completed** in its shard, so retries are cheap.
 - **`SUCCEEDED` stays 0 for a while.** A child is `SUCCEEDED` only when its
-  **entire shard** finishes (~46 runs at ~3 min each ≈ **2.3 h**). Individual
-  `<run_id>.zip` files land in S3 **continuously** well before any child flips
-  to SUCCEEDED — watch S3, not just `statusSummary`, for early progress.
+  **entire shard** finishes (~89 runs at ~3 min each ≈ **4.5 h** at 200 shards
+  over ~17,780 runs). Individual `<run_id>.zip` files land in S3
+  **continuously** well before any child flips to SUCCEEDED — watch S3, not
+  just `statusSummary`, for early progress.
+- **Resume must download.** On `--resume` with `--s3-prefix`, the runner pulls
+  `_resume/completed_runs.shard-<i>.txt` from S3 before skipping — uploads alone
+  do not seed a fresh Spot container.
 - Inspect a failed child:
 
   ```bash
@@ -255,7 +261,9 @@ python3 deploy/aws/aggregate_results.py ./results/ --out-csv campaign_summary.cs
 ```
 
 `aggregate_results.py` unzips every `<run_id>.zip`, reads its `summary.json`,
-and flattens `summary` / `cost_accounting` into one row per run.
+and flattens `summary` / `cost_accounting` / `derived` into one row per run.
+For stacked epidemic curves / OA–immunity frontiers use
+`deploy/aws/analyze_campaign_curves.py`.
 
 ## Illustrative campaign parameters
 
@@ -265,7 +273,7 @@ Use placeholders (or env vars) only — examples of the *shape*:
 - region `<REGION>` (e.g. `us-east-1`)
 - bucket `<BUCKET>`
 - account `<ACCOUNT_ID>`
-- `--shard-count 200` over ~9080 runs (~46 runs / shard)
+- `--shard-count 200` over ~17780 runs (~89 runs / shard)
 
 ## Troubleshooting
 
@@ -276,7 +284,8 @@ Use placeholders (or env vars) only — examples of the *shape*:
 | `https://api.ecr..amazonaws.com` (double dot) at ECR login | `$REGION` empty — in PowerShell use `$env:REGION`, not bash `$REGION`. |
 | `"docker build" requires exactly 1 argument` | Missing trailing `.` (build context) in `docker build -t picard-campaign .`. |
 | `ClientException: Evaluate on exit condition contains restricted characters` | Uppercase `RETRY`/`EXIT` or a leading-asterisk pattern in `evaluateOnExit`. Use lowercase actions and no leading `*`. |
-| Array children exit **137** / `OutOfMemoryError: container killed due to memory usage` | Under-sized Fargate memory. Raise to 2 vCPU / 16384 MB (or 4 vCPU / 30720 MB). Re-register a new revision, then resubmit. |
+| Array children exit **137** / `OutOfMemoryError: container killed due to memory usage` | Confirm subprocess isolation (no `--in-process`). If single-run peak still OOMs, raise to 2 vCPU / 16384 MB (or 4 vCPU / 30720 MB). Re-register a new revision, then resubmit. |
+| Spot retry re-runs already-finished sims | Resume log not downloaded. Ensure `--resume --s3-prefix …` and that `_resume/completed_runs.shard-*.txt` uploads succeeded. |
 | Every child fails startup: `ResourceInitializationError ... ResourceNotFoundException: The specified log group does not exist` | `/aws/batch/picard-campaign` missing. `aws logs create-log-group --log-group-name /aws/batch/picard-campaign` once before submit. |
 | `create-job-queue` → "Compute Environment ... is not valid" | Environment still `CREATING`. Poll `describe-compute-environments` until `VALID`/`ENABLED`. |
 | `create-compute-environment` complains about a missing service-linked role | `aws iam create-service-linked-role --aws-service-name batch.amazonaws.com` once. |

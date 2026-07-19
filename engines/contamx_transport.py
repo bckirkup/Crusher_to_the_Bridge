@@ -302,6 +302,11 @@ def build_contamx_engine(
         raise ContamXUnavailable("Platform layout files not found.")
 
     hvac_cfg = cfg.get("hvac", {})
+    # ContamX reloads airflow from disk; re-apply the campaign override here so
+    # hvac.oa_fraction is not silently dropped (native path mutates its copy in
+    # build_transport_engine before _build_native_engine).
+    if "oa_fraction" in hvac_cfg:
+        airflow = {**airflow, "oa_fraction": float(hvac_cfg["oa_fraction"])}
     filter_eff = hvac_cfg.get("filter_efficiency", 0.50)
     decay_rate = hvac_cfg.get("natural_decay_rate", 0.10)
 
