@@ -50,7 +50,7 @@ Two credential contexts, both short-lived:
 |------|------|--------------|
 | `bootstrap_user_policy.json` | Permission policy for the long-lived `devin-bootstrap` IAM user. Its **only** permission is `sts:AssumeRole` on `picard-deploy-role`; all ECR/Batch/S3 access comes from the assumed role's short-lived credentials, never from this user. | `<ACCOUNT_ID>` |
 | `deploy_role_trust_policy.json` | Trust policy for `picard-deploy-role`. Only the `devin-bootstrap` user may assume it, and only when it supplies the shared-secret `sts:ExternalId`. Pair with `MaxSessionDuration=3600` (set on the role via `create-role`, not in this document) so issued credentials are short-lived. | `<ACCOUNT_ID>`, `<EXTERNAL_ID>` |
-| `deploy_role_permissions_policy.json` | Permission policy attached to `picard-deploy-role` — the role Devin assumes (with an `ExternalId`) to build/push the `picard-campaign` image and run it as an AWS Batch array job. Least-privilege ECR + S3 + Batch + Logs + `iam:PassRole`. | `<REGION>`, `<ACCOUNT_ID>`, `<BUCKET>` |
+| `deploy_role_permissions_policy.json` | Permission policy attached to `picard-deploy-role` — the role Devin assumes (with an `ExternalId`) to build/push the `picard-campaign` image and run it as an AWS Batch array job. Least-privilege ECR + S3 + Batch + Logs + read-only EC2 subnet/SG/VPC discovery + `iam:PassRole`. | `<REGION>`, `<ACCOUNT_ID>`, `<BUCKET>` |
 | `batch_execution_role_trust.json` | Trust policy for `picard-campaign-execution-role`. Assumed by the ECS/Fargate agent so it can pull the ECR image and write logs on behalf of the task. | *(none)* |
 | `batch_execution_role_permissions.json` | Permission policy for the execution role (the Fargate agent): pull the `picard-campaign` image from ECR and write container logs. Equivalent to the AWS-managed `AmazonECSTaskExecutionRolePolicy`, scoped to this repo/log group. | `<REGION>`, `<ACCOUNT_ID>` |
 | `batch_job_role_trust.json` | Trust policy for `picard-campaign-job-role` — the running container's own identity (used by boto3's ambient credential chain to upload results to S3). Assumed by the ECS/Fargate task. | *(none)* |
@@ -251,6 +251,45 @@ aws --profile picard batch create-job-queue \
   --state ENABLED --priority 1 \
   --compute-environment-order order=1,computeEnvironment=picard-campaign-spot \
   --region "$REGION"
+```
+
+**`create-compute-environment` returns immediately, but the environment sits in
+`status: CREATING`** — `create-job-queue` fails with *"Compute Environment ... is
+not valid"* until it reaches `VALID`. Poll before creating the queue:
+
+```bash
+aws --profile picard batch describe-compute-environments \
+  --compute-environments picard-campaign-spot --region "$REGION" \
+  --query 'computeEnvironments[0].[status,state]'
+```
+
+If `create-compute-environment` reports a missing service-linked role, create it
+once (needs `iam:CreateServiceLinkedRole`):
+
+```bash
+aws iam create-service-linked-role --aws-service-name batch.amazonaws.com
+```
+
+Subnet / security-group discovery needs `ec2:DescribeSubnets` /
+`ec2:DescribeSecurityGroups`. `deploy_role_permissions_policy.json` grants these
+(`Ec2Discovery`), or run discovery in **CloudShell** (admin). `--query` must
+precede the JMESPath expression, else the CLI parses it as another `--filters`:
+
+```bash
+aws ec2 describe-subnets --filters Name=vpc-id,Values=vpc-xxxx --query 'Subnets[].SubnetId' --output text
+aws ec2 describe-security-groups --filters Name=vpc-id,Values=vpc-xxxx --query 'SecurityGroups[].GroupId' --output text
+```
+
+### Create the CloudWatch log group (before step 6)
+
+The execution role can create log **streams** and put events but **cannot create
+the log group**. If `/aws/batch/picard-campaign` does not exist, every array
+child fails at startup with `ResourceInitializationError ...
+ResourceNotFoundException: The specified log group does not exist` (exit status
+1). Create it once:
+
+```bash
+aws logs create-log-group --log-group-name /aws/batch/picard-campaign --region "$REGION"
 ```
 
 ## 6. Submit the array job
