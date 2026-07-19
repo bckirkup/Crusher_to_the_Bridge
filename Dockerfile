@@ -22,4 +22,8 @@ RUN pip install --no-cache-dir -r requirements.txt boto3
 # Copy the rest of the repo (see .dockerignore for exclusions).
 COPY . .
 
+# Run as a non-root user; it owns /app so the runner can write telemetry.
+RUN useradd --create-home --uid 10001 campaign && chown -R campaign:campaign /app
+USER campaign
+
 ENTRYPOINT ["python3", "picard_framework/runs/mega_cruise_campaign/campaign_runner.py"]

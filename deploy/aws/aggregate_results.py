@@ -21,10 +21,25 @@ import argparse
 import csv
 import io
 import json
+import os
 import sys
 import zipfile
 from pathlib import Path
 from typing import Any
+
+
+def safe_path(path: Path | str) -> Path:
+    """Resolve ``path`` and confine it to the current working directory.
+
+    Prevents a caller (e.g. an automated agent passing crafted CLI arguments)
+    from reading or writing files outside the directory the tool was invoked
+    from. Follows canonicalize-then-validate order.
+    """
+    resolved = os.path.realpath(path)
+    base_dir = os.path.realpath(os.getcwd())
+    if resolved != base_dir and not resolved.startswith(base_dir + os.sep):
+        raise SystemExit(f"path {str(path)!r} is outside the allowed directory")
+    return Path(resolved)
 
 
 def flatten(obj: Any, prefix: str = "") -> dict[str, Any]:
@@ -68,11 +83,16 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--out-json", type=Path, default=Path("campaign_summary.json"))
     args = parser.parse_args(argv)
 
-    if not args.results_dir.is_dir():
-        raise SystemExit(f"Not a directory: {args.results_dir}")
+    # Canonicalize + confine all CLI-derived paths to the invocation directory.
+    results_dir = safe_path(args.results_dir)
+    out_csv = safe_path(args.out_csv)
+    out_json = safe_path(args.out_json)
 
-    zips = sorted(args.results_dir.rglob("*.zip"))
-    print(f"Found {len(zips)} zip(s) under {args.results_dir}")
+    if not results_dir.is_dir():
+        raise SystemExit(f"Not a directory: {results_dir}")
+
+    zips = sorted(results_dir.rglob("*.zip"))
+    print(f"Found {len(zips)} zip(s) under {results_dir}")
 
     rows: list[dict[str, Any]] = []
     for zp in zips:
@@ -91,15 +111,15 @@ def main(argv: list[str] | None = None) -> int:
             if key not in columns:
                 columns.append(key)
 
-    args.out_json.write_text(json.dumps(rows, indent=2), encoding="utf-8")
+    out_json.write_text(json.dumps(rows, indent=2), encoding="utf-8")
 
     buf = io.StringIO()
     writer = csv.DictWriter(buf, fieldnames=columns, extrasaction="ignore")
     writer.writeheader()
     writer.writerows(rows)
-    args.out_csv.write_text(buf.getvalue(), encoding="utf-8")
+    out_csv.write_text(buf.getvalue(), encoding="utf-8")
 
-    print(f"Wrote {len(rows)} rows -> {args.out_csv} and {args.out_json}")
+    print(f"Wrote {len(rows)} rows -> {out_csv} and {out_json}")
     return 0
 
 

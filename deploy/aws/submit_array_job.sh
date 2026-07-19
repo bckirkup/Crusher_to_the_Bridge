@@ -21,7 +21,7 @@ JOB_QUEUE="${3:-picard-campaign-queue}"
 JOB_DEFINITION="${4:-picard-campaign}"
 JOB_NAME="${JOB_NAME:-picard-campaign-$(date +%Y%m%d-%H%M%S)}"
 
-if [ "$ARRAY_SIZE" -lt 2 ] || [ "$ARRAY_SIZE" -gt 10000 ]; then
+if [[ "$ARRAY_SIZE" -lt 2 || "$ARRAY_SIZE" -gt 10000 ]]; then
   echo "ERROR: AWS Batch array size must be between 2 and 10000 (got $ARRAY_SIZE)." >&2
   exit 1
 fi
