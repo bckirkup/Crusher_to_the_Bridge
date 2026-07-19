@@ -90,6 +90,7 @@ Pure-Python simulation (no databases or external APIs for local dev). **Python 3
 | `adding-new-platform` | New vessel spatial layout + HVAC |
 | `adding-new-pathogen` | New pathogen profile entries |
 | `contamx-interop` | ContamX SIM reader, AHS bridge, compare suite, flow diagnostics |
+| `aws-batch-campaign` | Running large Crusher simulation batches on AWS Batch / Fargate Spot |
 
 ### Important caveats
 

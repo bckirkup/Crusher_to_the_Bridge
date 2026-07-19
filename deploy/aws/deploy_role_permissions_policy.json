@@ -67,6 +67,16 @@
       "Resource": "arn:aws:logs:<REGION>:<ACCOUNT_ID>:log-group:/aws/batch/picard-campaign:*"
     },
     {
+      "Sid": "Ec2Discovery",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:DescribeSubnets",
+        "ec2:DescribeSecurityGroups",
+        "ec2:DescribeVpcs"
+      ],
+      "Resource": "*"
+    },
+    {
       "Sid": "PassBatchRoles",
       "Effect": "Allow",
       "Action": "iam:PassRole",
