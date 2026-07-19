@@ -19,6 +19,7 @@ import argparse
 import json
 import os
 import shutil
+import subprocess
 import sys
 import time
 import traceback
@@ -135,6 +136,22 @@ def merge_cfg(*parts: dict[str, Any] | None) -> dict[str, Any] | None:
     return merged or None
 
 
+def _immunity_override(
+    imm_frac: float | None,
+) -> tuple[dict[str, Any] | None, str]:
+    """Return (config_override, run_id_tag) for a pre-immunity fraction.
+
+    ``None`` means "leave the engine default" (no override, no id tag), so
+    tiers without a ``pre_immunity_fractions`` sweep keep their old run ids.
+    """
+    if imm_frac is None:
+        return None, ""
+    return (
+        {"ship_graph": {"immune_fraction": float(imm_frac)}},
+        f"_imm{int(round(imm_frac * 100))}",
+    )
+
+
 def make_picard_spec(
     run_id: str,
     *,
@@ -208,22 +225,25 @@ def generate_tier_runs(
                 )
 
     elif short == "t2":
+        oa_fractions = tier.get("oa_fractions") or {"oa20": 0.20}
         for pathogen in tier["pathogens"]:
             bundle, _pid, overrides = get_pathogen_config(manifest, pathogen)
             for fname, fval in tier["filter_efficiencies"].items():
-                for dname, dval in tier["decay_rates"].items():
-                    hvac = {"hvac": {
-                        "filter_efficiency": fval,
-                        "natural_decay_rate": dval,
-                    }}
-                    for seed in tier["seeds"]:
-                        rid = f"{short}_{pathogen}_{fname}_{dname}_s{seed}"
-                        yield rid, make_picard_spec(
-                            rid, platform=platform, bundle=bundle,
-                            pathogen_overrides=overrides,
-                            config_overrides=hvac,
-                            seed=seed, epochs=default_epochs, num_agents=default_agents,
-                        )
+                for oaname, oaval in oa_fractions.items():
+                    for dname, dval in tier["decay_rates"].items():
+                        hvac = {"hvac": {
+                            "filter_efficiency": fval,
+                            "natural_decay_rate": dval,
+                            "oa_fraction": oaval,
+                        }}
+                        for seed in tier["seeds"]:
+                            rid = f"{short}_{pathogen}_{fname}_{oaname}_{dname}_s{seed}"
+                            yield rid, make_picard_spec(
+                                rid, platform=platform, bundle=bundle,
+                                pathogen_overrides=overrides,
+                                config_overrides=hvac,
+                                seed=seed, epochs=default_epochs, num_agents=default_agents,
+                            )
 
     elif short == "t3":
         hvac = {"hvac": tier["hvac"]} if tier.get("hvac") else None
@@ -273,6 +293,7 @@ def generate_tier_runs(
                     )
 
     elif short == "t6":
+        immunities = tier.get("pre_immunity_fractions", [None])
         for pathogen in tier["pathogens"]:
             bundle, pathogen_id, overrides = get_pathogen_config(manifest, pathogen)
             for n_init in tier["initial_infected"]:
@@ -281,16 +302,19 @@ def generate_tier_runs(
                     **(path_over.get(pathogen_id) or {}),
                     "initial_infected": int(n_init),
                 }
-                for seed in tier["seeds"]:
-                    rid = f"{short}_{pathogen}_init{n_init}_s{seed}"
-                    yield rid, make_picard_spec(
-                        rid, platform=platform, bundle=bundle,
-                        pathogen_overrides=path_over,
-                        config_overrides=None,
-                        seed=seed, epochs=default_epochs, num_agents=default_agents,
-                    )
+                for imm_frac in immunities:
+                    cfg_over, imm_tag = _immunity_override(imm_frac)
+                    for seed in tier["seeds"]:
+                        rid = f"{short}_{pathogen}_init{n_init}{imm_tag}_s{seed}"
+                        yield rid, make_picard_spec(
+                            rid, platform=platform, bundle=bundle,
+                            pathogen_overrides=path_over,
+                            config_overrides=cfg_over,
+                            seed=seed, epochs=default_epochs, num_agents=default_agents,
+                        )
 
     elif short == "t7":
+        immunities = tier.get("pre_immunity_fractions", [None])
         for pathogen in tier["pathogens"]:
             bundle, _pid, overrides = get_pathogen_config(manifest, pathogen)
             for sname in tier["surveillance_strategies"]:
@@ -298,14 +322,22 @@ def generate_tier_runs(
                     behavior = {
                         "fred_behavior": {"quarantine_compliance": float(comp)},
                     }
-                    for seed in tier["seeds"]:
-                        rid = f"{short}_{pathogen}_{sname}_comp{int(comp * 100)}_s{seed}"
-                        yield rid, make_picard_spec(
-                            rid, platform=platform, bundle=bundle,
-                            pathogen_overrides=overrides,
-                            config_overrides=merge_cfg(surv_cfgs.get(sname), behavior),
-                            seed=seed, epochs=default_epochs, num_agents=default_agents,
+                    for imm_frac in immunities:
+                        imm_over, imm_tag = _immunity_override(imm_frac)
+                        cfg_over = merge_cfg(
+                            merge_cfg(surv_cfgs.get(sname), behavior), imm_over,
                         )
+                        for seed in tier["seeds"]:
+                            rid = (
+                                f"{short}_{pathogen}_{sname}"
+                                f"_comp{int(comp * 100)}{imm_tag}_s{seed}"
+                            )
+                            yield rid, make_picard_spec(
+                                rid, platform=platform, bundle=bundle,
+                                pathogen_overrides=overrides,
+                                config_overrides=cfg_over,
+                                seed=seed, epochs=default_epochs, num_agents=default_agents,
+                            )
 
     elif short == "t8":
         for pathogen in tier["pathogens"]:
@@ -352,15 +384,139 @@ def generate_tier_runs(
         raise ValueError(f"No generator for tier {tier_id}")
 
 
+def extract_timeseries(history: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Extract a compact per-epoch epidemic/contamination series from history.
+
+    Keeps only the scalar fields needed for epidemic curves, detection lag,
+    contamination spread and cost-effectiveness analysis — not the full
+    per-agent / per-zone records — so it stays ~50 KB per run.
+    """
+    series: list[dict[str, Any]] = []
+    prev_recovered = 0
+    for epoch_idx, rec in enumerate(history):
+        s = rec.get("summary", {})
+        cost = rec.get("cost_accounting", {})
+        spaces = rec.get("spaces", {})
+
+        recovered = s.get("recovered", 0)
+        new_infections = max(0, recovered - prev_recovered + s.get("infected", 0))
+        prev_recovered = recovered
+
+        n_contaminated = 0
+        max_conc = 0.0
+        max_conc_zone = ""
+        total_mass = 0.0
+        for zname, zdata in spaces.items():
+            conc = zdata.get("concentration_per_m3", 0.0)
+            mass = zdata.get("pathogen_mass", 0.0)
+            if isinstance(mass, dict):
+                mass = sum(mass.values())
+            total_mass += mass
+            if conc > 1.0:
+                n_contaminated += 1
+            if conc > max_conc:
+                max_conc = conc
+                max_conc_zone = zname
+
+        series.append({
+            "epoch": epoch_idx,
+            "susceptible": s.get("susceptible", 0),
+            "infected": s.get("infected", 0),
+            "symptomatic": s.get("symptomatic", 0),
+            "recovered": s.get("recovered", 0),
+            "immune": s.get("immune", 0),
+            "quarantined": s.get("quarantined", 0),
+            "isolated": s.get("isolated", 0),
+            "new_infections": new_infections,
+            "total_pathogen_mass": round(total_mass, 2),
+            "n_zones_contaminated": n_contaminated,
+            "max_concentration": round(max_conc, 4),
+            "max_conc_zone": max_conc_zone,
+            "cumulative_cost_usd": cost.get("total_financial_usd", 0),
+            "cumulative_ois": cost.get("operational_impact_cumulative", 0),
+            "trigger_status": rec.get(
+                "trigger_status",
+                rec.get("reactive_protocols", {}).get("trigger_status", "none"),
+            ),
+        })
+    return series
+
+
+def compute_derived_metrics(ts: list[dict[str, Any]], num_agents: int) -> dict[str, Any]:
+    """Compute publication-ready scalar metrics from an epoch time series."""
+    if not ts:
+        return {}
+
+    infected_by_epoch = [e["infected"] for e in ts]
+    peak_infected = max(infected_by_epoch)
+    peak_epoch = infected_by_epoch.index(peak_infected)
+
+    final = ts[-1]
+    recovered = final.get("recovered", 0)
+    attack_rate = recovered / num_agents if num_agents > 0 else 0
+
+    # Outbreak threshold: more secondary cases than the initial index cases.
+    outbreak_occurred = recovered > 2
+
+    detection_epoch = None
+    confirmation_epoch = None
+    for e in ts:
+        status = e.get("trigger_status", "none")
+        if status in ("SUSPECTED", "CONFIRMED") and detection_epoch is None:
+            detection_epoch = e["epoch"]
+        if status == "CONFIRMED" and confirmation_epoch is None:
+            confirmation_epoch = e["epoch"]
+
+    total_quarantine_epochs = sum(e.get("quarantined", 0) for e in ts)
+
+    # Crude R_effective at peak: new infections at peak / prevalence just before.
+    r_eff_at_peak = None
+    if peak_epoch > 0 and infected_by_epoch[peak_epoch - 1] > 0:
+        new_at_peak = ts[peak_epoch].get("new_infections", 0)
+        r_eff_at_peak = new_at_peak / infected_by_epoch[peak_epoch - 1]
+
+    return {
+        "attack_rate": round(attack_rate, 4),
+        "peak_prevalence": peak_infected,
+        "peak_epoch": peak_epoch,
+        "outbreak_occurred": outbreak_occurred,
+        "detection_epoch": detection_epoch,
+        "confirmation_epoch": confirmation_epoch,
+        "detection_lag": (
+            peak_epoch - detection_epoch if detection_epoch is not None else None
+        ),
+        "total_quarantine_person_epochs": total_quarantine_epochs,
+        "r_effective_at_peak": (
+            round(r_eff_at_peak, 3) if r_eff_at_peak is not None else None
+        ),
+        "final_susceptible_fraction": round(
+            final.get("susceptible", 0) / max(num_agents, 1), 4,
+        ),
+    }
+
+
+def _spec_num_agents(spec: dict[str, Any]) -> int:
+    """Best-effort resolve the ship population size from a run spec."""
+    cfg = spec.get("config_overrides") or {}
+    return int(cfg.get("ship_graph", {}).get("num_agents", 7000))
+
+
 def run_simulation(
     run_id: str,
     spec: dict[str, Any],
     *,
     full_telemetry: bool = False,
     keep_workdir: bool = False,
+    output_root: Path | None = None,
 ) -> bool:
-    """Run one simulation, write summary zip, return success."""
-    run_dir = OUTPUT_ROOT / run_id
+    """Run one simulation, write summary zip, return success.
+
+    ``output_root`` overrides where the run dir / zip are written (used by the
+    subprocess child so it targets the parent's output directory); it defaults
+    to the module-level ``OUTPUT_ROOT``.
+    """
+    root = output_root if output_root is not None else OUTPUT_ROOT
+    run_dir = root / run_id
     if run_dir.exists():
         shutil.rmtree(run_dir)
     run_dir.mkdir(parents=True, exist_ok=True)
@@ -388,17 +544,22 @@ def run_simulation(
             sim.finalize(display=False)
 
         last = result.history[-1] if result.history else {}
+        ts = extract_timeseries(result.history)
+        with open(run_dir / "timeseries.json", "w", encoding="utf-8") as fh:
+            json.dump(ts, fh)
+
         summary = {
             "run_id": run_id,
             "num_epochs": result.num_epochs,
             "trigger_status": result.final_trigger_status,
             "summary": last.get("summary", {}),
             "cost_accounting": last.get("cost_accounting", {}),
+            "derived": compute_derived_metrics(ts, _spec_num_agents(spec)),
         }
         with open(run_dir / "summary.json", "w", encoding="utf-8") as fh:
             json.dump(summary, fh, indent=2)
 
-        zip_path = OUTPUT_ROOT / f"{run_id}.zip"
+        zip_path = root / f"{run_id}.zip"
         with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
             for fpath in run_dir.rglob("*"):
                 if fpath.is_file():
@@ -412,6 +573,87 @@ def run_simulation(
             fh.write(f"{type(exc).__name__}: {exc}\n")
             fh.write(traceback.format_exc())
         return False
+
+
+def run_simulation_subprocess(
+    run_id: str,
+    spec: dict[str, Any],
+    *,
+    full_telemetry: bool = False,
+    keep_workdir: bool = False,
+    timeout: int = 600,
+) -> bool:
+    """Run one simulation in a fresh child process, then reclaim its memory.
+
+    Repeated 7000-agent simulations leak RSS when run in a single process;
+    isolating each run in a short-lived subprocess lets the OS reclaim all
+    memory on exit, keeping the campaign under Fargate's memory limit.
+    """
+    spec_path = OUTPUT_ROOT / f"{run_id}.run_spec.json"
+    OUTPUT_ROOT.mkdir(parents=True, exist_ok=True)
+    with open(spec_path, "w", encoding="utf-8") as fh:
+        json.dump(spec, fh)
+
+    cmd = [
+        sys.executable,
+        str(CAMPAIGN_DIR / "campaign_runner.py"),
+        "--single", str(spec_path), str(OUTPUT_ROOT),
+    ]
+    if full_telemetry:
+        cmd.append("--full-telemetry")
+    if keep_workdir:
+        cmd.append("--keep-workdir")
+
+    try:
+        proc = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+            cwd=str(REPO_ROOT),
+            env={**os.environ, "PYTHONPATH": str(REPO_ROOT)},
+        )
+        ok = proc.returncode == 0 and (OUTPUT_ROOT / f"{run_id}.zip").is_file()
+        if not ok:
+            err_path = OUTPUT_ROOT / f"{run_id}.subprocess_stderr.txt"
+            with open(err_path, "w", encoding="utf-8") as fh:
+                fh.write(f"returncode={proc.returncode}\n\n")
+                fh.write("--- stdout ---\n")
+                fh.write(proc.stdout or "")
+                fh.write("\n--- stderr ---\n")
+                fh.write(proc.stderr or "")
+    except subprocess.TimeoutExpired:
+        err_path = OUTPUT_ROOT / f"{run_id}.subprocess_stderr.txt"
+        with open(err_path, "w", encoding="utf-8") as fh:
+            fh.write(f"TimeoutExpired after {timeout}s\n")
+        ok = False
+    finally:
+        if not keep_workdir:
+            spec_path.unlink(missing_ok=True)
+
+    return ok
+
+
+def _run_single(
+    spec_path: str,
+    outdir: str,
+    *,
+    full_telemetry: bool = False,
+    keep_workdir: bool = False,
+) -> int:
+    """Child-process entry: run exactly one simulation into ``outdir``."""
+    out = Path(outdir)
+    with open(spec_path, encoding="utf-8") as fh:
+        spec = json.load(fh)
+    run_id = spec.get("description")
+    if not run_id:
+        raise SystemExit(f"--single spec {spec_path} missing 'description' run id")
+    ok = run_simulation(
+        run_id, spec,
+        full_telemetry=full_telemetry, keep_workdir=keep_workdir,
+        output_root=out,
+    )
+    return 0 if ok else 1
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -469,7 +711,34 @@ def main(argv: list[str] | None = None) -> int:
         default=25,
         help="Upload completed_runs.txt to S3 every N successful runs (default 25).",
     )
+    parser.add_argument(
+        "--single",
+        nargs=2,
+        metavar=("SPEC", "OUTDIR"),
+        default=None,
+        help="Child mode: run one simulation from SPEC (a run_spec.json) into OUTDIR.",
+    )
+    parser.add_argument(
+        "--in-process",
+        action="store_true",
+        help="Run each simulation in-process instead of an isolated subprocess "
+        "(faster for debugging; leaks memory across many large runs).",
+    )
+    parser.add_argument(
+        "--timeout",
+        type=int,
+        default=600,
+        help="Per-run subprocess timeout in seconds (default 600).",
+    )
     args = parser.parse_args(argv)
+
+    if args.single:
+        spec_path, outdir = args.single
+        return _run_single(
+            spec_path, outdir,
+            full_telemetry=args.full_telemetry,
+            keep_workdir=args.keep_workdir,
+        )
 
     if args.smoke:
         args.tier = args.tier or "t1"
@@ -567,12 +836,21 @@ def main(argv: list[str] | None = None) -> int:
             flush=True,
         )
 
-        ok = run_simulation(
-            run_id,
-            spec,
-            full_telemetry=args.full_telemetry,
-            keep_workdir=args.keep_workdir,
-        )
+        if args.in_process:
+            ok = run_simulation(
+                run_id,
+                spec,
+                full_telemetry=args.full_telemetry,
+                keep_workdir=args.keep_workdir,
+            )
+        else:
+            ok = run_simulation_subprocess(
+                run_id,
+                spec,
+                full_telemetry=args.full_telemetry,
+                keep_workdir=args.keep_workdir,
+                timeout=args.timeout,
+            )
         executed += 1
         if ok:
             succeeded += 1
