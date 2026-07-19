@@ -1,6 +1,5 @@
 {
   "Version": "2012-10-17",
-  "Comment": "Only permission granted to the long-lived devin-bootstrap IAM user: assume picard-deploy-role. All ECR/Batch/S3 permissions come from the assumed role's short-lived credentials, never from this user. Replace <ACCOUNT_ID>.",
   "Statement": [
     {
       "Sid": "AssumeDeployRoleOnly",
