@@ -25,6 +25,7 @@ Pure-Python simulation (no databases or external APIs for local dev). **Python 3
 | Mega cruise campaign | `./run_campaign.sh --smoke` or `run_campaign.bat --smoke` | Full matrix: `picard_framework/runs/mega_cruise_campaign/` |
 | Campaign (sharded) | `campaign_runner.py --shard-count N --shard-index i --s3-prefix s3://bucket/campaign/ --resume` | `--shard-index` defaults to `AWS_BATCH_JOB_ARRAY_INDEX`; uploads each `<run_id>.zip` + `completed_runs.txt` to S3 (needs `boto3`) |
 | Campaign Docker image | `docker build -t picard-campaign . && docker run --rm picard-campaign --smoke` | Root `Dockerfile`; ECR + AWS Batch array-job flow in `deploy/aws/README.md` |
+| Campaign deploy (AWS) | `AWS_PROFILE=picard ./deploy/aws/submit_array_job.sh N s3://<bucket>/campaign/` | **Role-assumption creds**: a minimal `devin-bootstrap` user only `sts:AssumeRole`s `picard-deploy-role` (ExternalId, 1h sessions) via a `~/.aws/config` profile; containers use Batch execution/job roles. IAM JSON + full flow in `deploy/aws/README.md` |
 
 ### Framework layout
 

@@ -1,0 +1,21 @@
+{
+  "Version": "2012-10-17",
+  "Comment": "Permission policy for picard-campaign-job-role (the container's own identity). boto3 in campaign_runner.py picks this up from the ambient credential chain to upload each <run_id>.zip and completed_runs.txt to the shared results prefix. Replace <BUCKET>.",
+  "Statement": [
+    {
+      "Sid": "S3ResultsBucket",
+      "Effect": "Allow",
+      "Action": ["s3:ListBucket", "s3:GetBucketLocation"],
+      "Resource": "arn:aws:s3:::<BUCKET>",
+      "Condition": {
+        "StringLike": { "s3:prefix": ["campaign/*"] }
+      }
+    },
+    {
+      "Sid": "S3ResultsObjects",
+      "Effect": "Allow",
+      "Action": ["s3:PutObject", "s3:GetObject", "s3:ListMultipartUploadParts", "s3:AbortMultipartUpload"],
+      "Resource": "arn:aws:s3:::<BUCKET>/campaign/*"
+    }
+  ]
+}

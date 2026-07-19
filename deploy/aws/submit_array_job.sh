@@ -7,11 +7,16 @@
 #  campaign runner uses it as --shard-index, so we only pass --shard-count
 #  (equal to the array size) and the shared --s3-prefix.
 #
+#  Credentials: uses the ambient AWS credential chain. Set AWS_PROFILE=picard
+#  (the named profile in ~/.aws/config that auto-assumes picard-deploy-role with
+#  its ExternalId — see README.md) so the CLI submits with short-lived
+#  credentials rather than long-lived keys.
+#
 #  Usage:
-#    ./submit_array_job.sh <N> <s3://bucket/campaign/> [job-queue] [job-definition]
+#    AWS_PROFILE=picard ./submit_array_job.sh <N> <s3://bucket/campaign/> [job-queue] [job-definition]
 #
 #  Example:
-#    ./submit_array_job.sh 200 s3://my-bucket/campaign/ picard-campaign-queue picard-campaign
+#    AWS_PROFILE=picard ./submit_array_job.sh 200 s3://my-bucket/campaign/ picard-campaign-queue picard-campaign
 # ============================================================================
 set -euo pipefail
 
@@ -20,6 +25,11 @@ S3_PREFIX="${2:?usage: submit_array_job.sh <N> <s3-prefix> [queue] [job-def]}"
 JOB_QUEUE="${3:-picard-campaign-queue}"
 JOB_DEFINITION="${4:-picard-campaign}"
 JOB_NAME="${JOB_NAME:-picard-campaign-$(date +%Y%m%d-%H%M%S)}"
+# Optional named profile that assumes picard-deploy-role (see README.md §2).
+AWS_PROFILE_ARG=()
+if [[ -n "${AWS_PROFILE:-}" ]]; then
+  AWS_PROFILE_ARG=(--profile "$AWS_PROFILE")
+fi
 
 if [[ "$ARRAY_SIZE" -lt 2 || "$ARRAY_SIZE" -gt 10000 ]]; then
   echo "ERROR: AWS Batch array size must be between 2 and 10000 (got $ARRAY_SIZE)." >&2
@@ -33,7 +43,7 @@ echo "  definition  : $JOB_DEFINITION"
 echo "  array size  : $ARRAY_SIZE"
 echo "  s3 prefix   : $S3_PREFIX"
 
-aws batch submit-job \
+aws "${AWS_PROFILE_ARG[@]}" batch submit-job \
   --job-name "$JOB_NAME" \
   --job-queue "$JOB_QUEUE" \
   --job-definition "$JOB_DEFINITION" \

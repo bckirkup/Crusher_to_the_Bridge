@@ -118,4 +118,4 @@ Tier 1 alone: ~15 hours (300 × 3 min).
 | `campaign_manifest.json` | Tier matrix, pathogen/combo/surveillance configs |
 | `campaign_runner.py` | Spec generator + Picard executor (sharding + S3 upload) |
 | `README.md` | This file |
-| [`deploy/aws/`](../../../deploy/aws/README.md) | Dockerfile is at repo root; ECR + AWS Batch array-job deployment |
+| [`deploy/aws/`](../../../deploy/aws/README.md) | Dockerfile is at repo root; ECR + AWS Batch array-job deployment using IAM **role assumption** (short-lived creds) — bootstrap user → `picard-deploy-role`; containers use Batch execution/job roles |
