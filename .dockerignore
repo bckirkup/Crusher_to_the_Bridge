@@ -1,0 +1,50 @@
+# Version control / CI
+.git/
+.github/
+.gitignore
+
+# Python caches / build artifacts
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+dist/
+build/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Runtime telemetry artifacts (regenerated inside each container).
+# NOTE: telemetry_buffer/ is also a Python package (agent_axes.py); keep its
+# source and only drop generated output.
+telemetry_buffer/ground_truth.json
+telemetry_buffer/simulation_history.json
+telemetry_buffer/artificial_lab_notebook.json
+telemetry_buffer/contam_compare/
+telemetry_buffer/mega_cruise_campaign/
+
+# Dashboard / GIS-only assets not needed by the headless campaign runner
+dashboard/
+data/platforms/*/reference_photo.jpg
+data/platforms/*/deck_graphics.geojson
+data/platforms/*/*.png
+data/platforms/*/contam/*.sim
+data/platforms/*/contam/*.csm
+data/platforms/*/contam/*.rst
+data/platforms/*/contam/*.xlog
+data/platforms/*/contam/*.log
+
+# Non-redistributable ContamX binaries
+third_party/contamx/**
+
+# Local dev cruft
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Docs / editor helpers (image only needs runtime code)
+.devin/

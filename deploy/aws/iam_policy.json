@@ -1,0 +1,83 @@
+{
+  "Version": "2012-10-17",
+  "Comment": "Least-privilege policy for building/pushing the picard-campaign image and running it as an AWS Batch array job. Replace <REGION>, <ACCOUNT_ID>, and <BUCKET>.",
+  "Statement": [
+    {
+      "Sid": "EcrAuthToken",
+      "Effect": "Allow",
+      "Action": "ecr:GetAuthorizationToken",
+      "Resource": "*"
+    },
+    {
+      "Sid": "EcrPushPull",
+      "Effect": "Allow",
+      "Action": [
+        "ecr:BatchCheckLayerAvailability",
+        "ecr:BatchGetImage",
+        "ecr:GetDownloadUrlForLayer",
+        "ecr:PutImage",
+        "ecr:InitiateLayerUpload",
+        "ecr:UploadLayerPart",
+        "ecr:CompleteLayerUpload",
+        "ecr:DescribeRepositories",
+        "ecr:CreateRepository"
+      ],
+      "Resource": "arn:aws:ecr:<REGION>:<ACCOUNT_ID>:repository/picard-campaign"
+    },
+    {
+      "Sid": "S3ResultsBucket",
+      "Effect": "Allow",
+      "Action": ["s3:ListBucket", "s3:GetBucketLocation"],
+      "Resource": "arn:aws:s3:::<BUCKET>"
+    },
+    {
+      "Sid": "S3ResultsObjects",
+      "Effect": "Allow",
+      "Action": ["s3:PutObject", "s3:GetObject", "s3:ListMultipartUploadParts", "s3:AbortMultipartUpload"],
+      "Resource": "arn:aws:s3:::<BUCKET>/campaign/*"
+    },
+    {
+      "Sid": "BatchSubmitAndDescribe",
+      "Effect": "Allow",
+      "Action": [
+        "batch:SubmitJob",
+        "batch:DescribeJobs",
+        "batch:ListJobs",
+        "batch:TerminateJob",
+        "batch:RegisterJobDefinition",
+        "batch:DescribeJobDefinitions",
+        "batch:DescribeJobQueues",
+        "batch:DescribeComputeEnvironments",
+        "batch:CreateComputeEnvironment",
+        "batch:CreateJobQueue",
+        "batch:UpdateComputeEnvironment",
+        "batch:UpdateJobQueue"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "CloudWatchLogs",
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents",
+        "logs:GetLogEvents",
+        "logs:DescribeLogStreams"
+      ],
+      "Resource": "arn:aws:logs:<REGION>:<ACCOUNT_ID>:log-group:/aws/batch/picard-campaign:*"
+    },
+    {
+      "Sid": "PassBatchRoles",
+      "Effect": "Allow",
+      "Action": "iam:PassRole",
+      "Resource": [
+        "arn:aws:iam::<ACCOUNT_ID>:role/picard-campaign-job-role",
+        "arn:aws:iam::<ACCOUNT_ID>:role/picard-campaign-execution-role"
+      ],
+      "Condition": {
+        "StringEquals": { "iam:PassedToService": "ecs-tasks.amazonaws.com" }
+      }
+    }
+  ]
+}

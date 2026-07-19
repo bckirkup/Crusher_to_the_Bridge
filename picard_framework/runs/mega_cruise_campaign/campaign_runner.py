@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import shutil
 import sys
 import time
@@ -24,6 +25,7 @@ import traceback
 import zipfile
 from pathlib import Path
 from typing import Any, Iterator
+from urllib.parse import urlparse
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT))
@@ -49,6 +51,39 @@ def mark_completed(run_id: str) -> None:
     OUTPUT_ROOT.mkdir(parents=True, exist_ok=True)
     with open(COMPLETED_LOG, "a", encoding="utf-8") as fh:
         fh.write(run_id + "\n")
+
+
+def parse_s3_prefix(s3_prefix: str) -> tuple[str, str]:
+    """Split ``s3://bucket/path`` into ``(bucket, key_prefix)``."""
+    parsed = urlparse(s3_prefix)
+    if parsed.scheme != "s3" or not parsed.netloc:
+        raise SystemExit(
+            f"--s3-prefix must look like s3://bucket/path, got {s3_prefix!r}",
+        )
+    return parsed.netloc, parsed.path.lstrip("/")
+
+
+class S3Uploader:
+    """Thin boto3 wrapper. Imported lazily so non-S3 runs need no boto3."""
+
+    def __init__(self, s3_prefix: str) -> None:
+        self.bucket, self.key_prefix = parse_s3_prefix(s3_prefix)
+        try:
+            import boto3  # noqa: PLC0415
+        except ImportError as exc:  # pragma: no cover - depends on env
+            raise SystemExit(
+                "boto3 is required for --s3-prefix uploads "
+                "(pip install boto3).",
+            ) from exc
+        self._client = boto3.client("s3")
+
+    def _key(self, name: str) -> str:
+        return f"{self.key_prefix.rstrip('/')}/{name}" if self.key_prefix else name
+
+    def upload_file(self, local_path: Path, name: str) -> str:
+        key = self._key(name)
+        self._client.upload_file(str(local_path), self.bucket, key)
+        return f"s3://{self.bucket}/{key}"
 
 
 def resolve_tier_ids(manifest: dict[str, Any], tier_arg: str | None) -> list[str]:
@@ -409,6 +444,31 @@ def main(argv: list[str] | None = None) -> int:
         default=MANIFEST_PATH,
         help="Path to campaign_manifest.json",
     )
+    parser.add_argument(
+        "--shard-count",
+        type=int,
+        default=None,
+        help="Total number of shards (e.g. AWS Batch array size). "
+        "A run executes only when global_index %% shard_count == shard_index.",
+    )
+    parser.add_argument(
+        "--shard-index",
+        type=int,
+        default=None,
+        help="This shard's index in [0, shard_count). Defaults to env "
+        "AWS_BATCH_JOB_ARRAY_INDEX when present.",
+    )
+    parser.add_argument(
+        "--s3-prefix",
+        default=None,
+        help="s3://bucket/path to upload each <run_id>.zip and completed_runs.txt.",
+    )
+    parser.add_argument(
+        "--s3-log-every",
+        type=int,
+        default=25,
+        help="Upload completed_runs.txt to S3 every N successful runs (default 25).",
+    )
     args = parser.parse_args(argv)
 
     if args.smoke:
@@ -418,17 +478,32 @@ def main(argv: list[str] | None = None) -> int:
         args.num_agents = args.num_agents if args.num_agents is not None else 20
         args.limit = args.limit if args.limit is not None else 1
 
+    # Default shard index from the AWS Batch array job index when present.
+    if args.shard_index is None:
+        env_idx = os.environ.get("AWS_BATCH_JOB_ARRAY_INDEX")
+        if env_idx is not None:
+            args.shard_index = int(env_idx)
+
+    shard_count = args.shard_count
+    shard_index = args.shard_index if args.shard_index is not None else 0
+    if shard_count is not None:
+        if shard_count < 1:
+            raise SystemExit("--shard-count must be >= 1")
+        if not 0 <= shard_index < shard_count:
+            raise SystemExit(
+                f"--shard-index {shard_index} out of range for "
+                f"--shard-count {shard_count}",
+            )
+
+    uploader = S3Uploader(args.s3_prefix) if args.s3_prefix else None
+
     manifest = load_manifest(args.manifest)
     done = completed_runs() if args.resume else set()
     tiers = resolve_tier_ids(manifest, args.tier)
 
-    total = 0
-    succeeded = 0
-    failed = 0
-    skipped = 0
-    executed = 0
-    t0 = time.time()
-
+    # Build the full flattened, ordered run list across selected tiers so the
+    # global index is stable and independent of which shard is executing.
+    all_runs: list[tuple[str, str, dict[str, Any]]] = []
     for tier_id in tiers:
         runs = list(generate_tier_runs(
             manifest,
@@ -437,61 +512,114 @@ def main(argv: list[str] | None = None) -> int:
             epochs_override=args.epochs,
             num_agents_override=args.num_agents,
         ))
+        for run_id, spec in runs:
+            all_runs.append((tier_id, run_id, spec))
         print(f"\n{'=' * 60}")
         print(f"  {tier_id}: {len(runs)} runs")
         print(f"{'=' * 60}")
 
-        if args.dry_run:
-            total += len(runs)
+    def in_shard(global_index: int) -> bool:
+        return shard_count is None or global_index % shard_count == shard_index
+
+    shard_total = sum(1 for gi in range(len(all_runs)) if in_shard(gi))
+    if shard_count is not None:
+        print(
+            f"\n  Shard {shard_index}/{shard_count}: "
+            f"{shard_total} of {len(all_runs)} runs assigned to this shard",
+        )
+
+    total = 0
+    succeeded = 0
+    failed = 0
+    skipped = 0
+    executed = 0
+    t0 = time.time()
+
+    if args.dry_run:
+        elapsed = time.time() - t0
+        print(f"\n{'=' * 60}")
+        print(f"  DRY RUN — {len(all_runs)} runs total across {len(tiers)} tier(s)")
+        if shard_count is not None:
+            print(f"  DRY RUN — {shard_total} runs would run on shard {shard_index}")
+        print(f"  Output: {OUTPUT_ROOT}")
+        print(f"{'=' * 60}")
+        return 0
+
+    for global_index, (_tier_id, run_id, spec) in enumerate(all_runs):
+        if not in_shard(global_index):
             continue
-
-        for i, (run_id, spec) in enumerate(runs):
-            if args.limit is not None and executed >= args.limit:
-                break
-            total += 1
-            if run_id in done:
-                skipped += 1
-                continue
-
-            elapsed = time.time() - t0
-            rate = max(executed, 1) / max(elapsed, 1e-6)
-            remaining_n = max(len(runs) - i - 1, 0)
-            eta_min = remaining_n / max(rate, 1e-6) / 60.0
-            print(
-                f"  [{i + 1}/{len(runs)}] {run_id}  "
-                f"({succeeded}ok {failed}err {skipped}skip  "
-                f"~{eta_min:.0f}min left)",
-                end="",
-                flush=True,
-            )
-
-            ok = run_simulation(
-                run_id,
-                spec,
-                full_telemetry=args.full_telemetry,
-                keep_workdir=args.keep_workdir,
-            )
-            executed += 1
-            if ok:
-                succeeded += 1
-                mark_completed(run_id)
-                print(" OK")
-            else:
-                failed += 1
-                print(" FAIL")
-
         if args.limit is not None and executed >= args.limit:
             break
+        total += 1
+        if run_id in done:
+            skipped += 1
+            continue
+
+        elapsed = time.time() - t0
+        rate = max(executed, 1) / max(elapsed, 1e-6)
+        remaining_n = max(shard_total - total, 0)
+        eta_min = remaining_n / max(rate, 1e-6) / 60.0
+        print(
+            f"  [g{global_index + 1}/{len(all_runs)}] {run_id}  "
+            f"({succeeded}ok {failed}err {skipped}skip  "
+            f"~{eta_min:.0f}min left)",
+            end="",
+            flush=True,
+        )
+
+        ok = run_simulation(
+            run_id,
+            spec,
+            full_telemetry=args.full_telemetry,
+            keep_workdir=args.keep_workdir,
+        )
+        executed += 1
+        if ok:
+            succeeded += 1
+            mark_completed(run_id)
+            if uploader is not None:
+                zip_path = OUTPUT_ROOT / f"{run_id}.zip"
+                try:
+                    uploader.upload_file(zip_path, f"{run_id}.zip")
+                    print(" OK+s3")
+                except Exception as exc:  # noqa: BLE001
+                    print(f" OK (s3 upload failed: {exc})")
+                if args.s3_log_every > 0 and succeeded % args.s3_log_every == 0:
+                    _upload_completed_log(uploader, shard_index, shard_count)
+            else:
+                print(" OK")
+        else:
+            failed += 1
+            print(" FAIL")
+
+    # Final upload of this shard's resume log so retries skip finished runs.
+    if uploader is not None:
+        _upload_completed_log(uploader, shard_index, shard_count)
 
     elapsed = time.time() - t0
     print(f"\n{'=' * 60}")
     print(f"  Campaign: {total} listed, {succeeded} ok, {failed} err, {skipped} skip")
     print(f"  Time: {elapsed / 3600:.2f}h ({elapsed / max(executed, 1):.1f}s/run)")
-    if args.dry_run:
-        print(f"  DRY RUN — {total} runs would be generated")
     print(f"  Output: {OUTPUT_ROOT}")
     print(f"{'=' * 60}")
     return 1 if failed else 0
+
+
+def _upload_completed_log(
+    uploader: S3Uploader,
+    shard_index: int,
+    shard_count: int | None,
+) -> None:
+    """Upload this shard's completed_runs.txt under a shard-scoped key."""
+    if not COMPLETED_LOG.exists():
+        return
+    suffix = f"shard-{shard_index}" if shard_count is not None else "single"
+    try:
+        uploader.upload_file(
+            COMPLETED_LOG, f"_resume/completed_runs.{suffix}.txt",
+        )
+    except Exception as exc:  # noqa: BLE001
+        print(f"  (completed_runs.txt upload failed: {exc})")
 
 
 if __name__ == "__main__":

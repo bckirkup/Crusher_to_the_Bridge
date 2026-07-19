@@ -1,0 +1,54 @@
+{
+  "jobDefinitionName": "picard-campaign",
+  "type": "container",
+  "platformCapabilities": ["FARGATE"],
+  "containerProperties": {
+    "image": "<ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/picard-campaign:latest",
+    "command": [
+      "--shard-count", "Ref::shard_count",
+      "--s3-prefix", "Ref::s3_prefix",
+      "--resume"
+    ],
+    "jobRoleArn": "arn:aws:iam::<ACCOUNT_ID>:role/picard-campaign-job-role",
+    "executionRoleArn": "arn:aws:iam::<ACCOUNT_ID>:role/picard-campaign-execution-role",
+    "resourceRequirements": [
+      { "type": "VCPU", "value": "1" },
+      { "type": "MEMORY", "value": "4096" }
+    ],
+    "fargatePlatformConfiguration": {
+      "platformVersion": "LATEST"
+    },
+    "networkConfiguration": {
+      "assignPublicIp": "ENABLED"
+    },
+    "environment": [
+      { "name": "PYTHONUTF8", "value": "1" },
+      { "name": "PYTHONPATH", "value": "/app" }
+    ],
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "/aws/batch/picard-campaign",
+        "awslogs-region": "<REGION>",
+        "awslogs-stream-prefix": "picard-campaign"
+      }
+    }
+  },
+  "parameters": {
+    "shard_count": "200",
+    "s3_prefix": "s3://<BUCKET>/campaign/"
+  },
+  "retryStrategy": {
+    "attempts": 5,
+    "evaluateOnExit": [
+      { "onStatusReason": "Host EC2*", "action": "RETRY" },
+      { "onReason": "*Spot*", "action": "RETRY" },
+      { "onExitCode": "0", "action": "EXIT" },
+      { "onReason": "*", "action": "EXIT" }
+    ]
+  },
+  "propagateTags": true,
+  "timeout": {
+    "attemptDurationSeconds": 86400
+  }
+}
