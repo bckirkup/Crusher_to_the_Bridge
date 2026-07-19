@@ -25,6 +25,23 @@ build/
 *.swp
 *.swo
 
+# Secrets / credentials (never commit)
+.env
+.env.*
+!.env.example
+*.pem
+*.p12
+*.pfx
+id_rsa
+id_rsa.*
+id_ed25519
+id_ed25519.*
+**/credentials
+**/credentials.json
+.aws/
+*.secret
+secrets/
+
 # OS
 .DS_Store
 Thumbs.db
