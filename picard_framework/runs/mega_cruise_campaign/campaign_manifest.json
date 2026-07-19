@@ -27,19 +27,8 @@
       "seeds": [42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71]
     },
     "t2_hvac_sweep": {
-      "description": "All pathogens × filter × decay",
-      "pathogens": [
-        "norovirus",
-        "sarscov2",
-        "influenza",
-        "measles",
-        "legionella",
-        "vibrio",
-        "campylobacter",
-        "cdiff",
-        "hantavirus",
-        "ebola"
-      ],
+      "description": "Key pathogens × filter × outdoor-air fraction × decay",
+      "pathogens": ["norovirus", "sarscov2", "influenza", "cdiff"],
       "filter_efficiencies": {
         "merv8": 0.35,
         "merv11": 0.65,
@@ -47,14 +36,20 @@
         "merv14": 0.9,
         "hepa": 0.999
       },
+      "oa_fractions": {
+        "oa10": 0.10,
+        "oa15": 0.15,
+        "oa20": 0.20,
+        "oa30": 0.30,
+        "oa40": 0.40
+      },
       "decay_rates": {
         "low": 0.01,
         "med": 0.1,
-        "high": 0.3,
-        "vhigh": 0.5
+        "high": 0.3
       },
       "surveillance": "none",
-      "seeds": [42, 43, 44, 45, 46, 47, 48, 49, 50, 51]
+      "seeds": [42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56]
     },
     "t3_surveillance_sweep": {
       "description": "All pathogens × 4 surveillance strategies",
@@ -106,16 +101,18 @@
       "seeds": [42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61]
     },
     "t6_dose_response": {
-      "description": "Vary initial infected count",
+      "description": "Vary initial infected count × pre-existing immunity",
       "pathogens": ["norovirus", "sarscov2", "influenza", "cdiff"],
-      "initial_infected": [1, 2, 5, 10, 20],
+      "initial_infected": [1, 2, 5, 10, 20, 50],
+      "pre_immunity_fractions": [0.0, 0.1, 0.2, 0.4, 0.6],
       "seeds": [42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71]
     },
     "t7_compliance": {
-      "description": "Behavioral quarantine compliance levels",
+      "description": "Behavioral quarantine compliance × pre-existing immunity",
       "pathogens": ["norovirus", "sarscov2", "influenza", "cdiff"],
       "surveillance_strategies": ["none", "syndromic", "cascade", "cascade_mpx"],
       "compliance_levels": [1.0, 0.8, 0.6, 0.4, 0.2],
+      "pre_immunity_fractions": [0.0, 0.1, 0.2, 0.4, 0.6],
       "seeds": [42, 43, 44, 45, 46, 47, 48, 49, 50, 51]
     },
     "t8_wearables": {

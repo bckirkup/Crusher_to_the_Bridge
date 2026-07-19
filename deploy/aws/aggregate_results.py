@@ -57,13 +57,26 @@ def flatten(obj: Any, prefix: str = "") -> dict[str, Any]:
 
 
 def summary_from_zip(zip_path: Path) -> dict[str, Any] | None:
-    """Read and flatten summary.json from a run zip, or None if absent."""
+    """Read and flatten summary.json from a run zip, or None if absent.
+
+    Older zips carry only ``summary`` / ``cost_accounting``; newer ones also
+    carry ``derived`` scalar metrics plus a separate ``timeseries.json``. All
+    are handled; missing sections just leave those columns blank.
+    """
     try:
         with zipfile.ZipFile(zip_path) as zf:
             names = [n for n in zf.namelist() if n.endswith("summary.json")]
             if not names:
                 return None
             raw = zf.read(names[0]).decode("utf-8")
+            ts_names = [n for n in zf.namelist() if n.endswith("timeseries.json")]
+            n_ts_epochs: int | None = None
+            if ts_names:
+                try:
+                    ts = json.loads(zf.read(ts_names[0]).decode("utf-8"))
+                    n_ts_epochs = len(ts) if isinstance(ts, list) else None
+                except (json.JSONDecodeError, ValueError):
+                    n_ts_epochs = None
     except zipfile.BadZipFile:
         print(f"  WARN: {zip_path.name} is not a valid zip; skipping", file=sys.stderr)
         return None
@@ -73,6 +86,9 @@ def summary_from_zip(zip_path: Path) -> dict[str, Any] | None:
     row["trigger_status"] = data.get("trigger_status")
     row.update(flatten(data.get("summary", {}), "summary"))
     row.update(flatten(data.get("cost_accounting", {}), "cost"))
+    row.update(flatten(data.get("derived", {}), "derived"))
+    row["timeseries.present"] = n_ts_epochs is not None
+    row["timeseries.n_epochs"] = n_ts_epochs
     return row
 
 

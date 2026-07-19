@@ -1,6 +1,6 @@
-# Mega Cruise 9K Campaign
+# Mega Cruise Campaign
 
-~9000 Picard runs on `mega_cruise_5000` (default 7000 agents, 240 epochs)
+~17,780 Picard runs on `mega_cruise_5000` (default 7000 agents, 240 epochs)
 after the HVAC star-topology + analytical mass-balance fixes.
 
 ## Tiers
@@ -8,16 +8,16 @@ after the HVAC star-topology + analytical mass-balance fixes.
 | Tier | What | Dimensions | Runs |
 |------|------|-----------|------|
 | t1 | Pathogen baselines | 10 pathogens × 30 seeds | 300 |
-| t2 | HVAC parameter sweep | 10 × 5 filters × 4 decay × 10 seeds | 2000 |
+| t2 | HVAC parameter sweep | 4 × 5 filters × 5 OA × 3 decay × 15 seeds | 4500 |
 | t3 | Surveillance strategies | 10 × 4 strategies × 30 seeds | 1200 |
 | t4 | Full factorial | 4 × 3 filters × 3 decay × 4 surv × 20 seeds | 2880 |
 | t5 | Multi-pathogen | 5 combos × 4 surv × 20 seeds | 400 |
-| t6 | Dose-response | 4 × 5 doses × 30 seeds | 600 |
-| t7 | Compliance | 4 × 4 surv × 5 compliance × 10 seeds | 800 |
+| t6 | Dose-response | 4 × 6 doses × 5 immunity × 30 seeds | 3600 |
+| t7 | Compliance | 4 × 4 surv × 5 compliance × 5 immunity × 10 seeds | 4000 |
 | t8 | Wearables | 4 × 3 configs × 4 surv × 10 seeds | 480 |
 | t9 | Slow pathogens (21d) | 4 × 4 surv × 20 seeds | 320 |
 | t10 | Population size | 2 × 5 sizes × 10 seeds | 100 |
-| **Total** | | | **~9080** |
+| **Total** | | | **~17780** |
 
 ## Running
 
@@ -65,10 +65,21 @@ Each successful run writes:
 
 `telemetry_buffer/mega_cruise_campaign/<run_id>.zip`
 
-containing at least `run_spec.json` and `summary.json` (final SIR + costs + trigger).
+containing `run_spec.json`, `summary.json` (final SIR + costs + trigger +
+`derived` metrics: attack rate, peak prevalence/epoch, detection/confirmation
+lag, quarantine person-epochs, R_eff at peak, …), and `timeseries.json` (a
+compact per-epoch epidemic / contamination / trigger / cost series, ~50 KB).
 
 Use `--full-telemetry` to also pack history / lab notebook / ground truth
 (much larger and slower).
+
+### Memory isolation
+
+By default each run executes in a fresh subprocess so the OS reclaims all RSS
+on exit — repeated 7000-agent runs otherwise leak memory and exceed Fargate's
+limit after ~20–40 runs. Pass `--in-process` to run in the parent process
+(faster for debugging, leaks across many large runs), and `--timeout SECONDS`
+to bound each subprocess (default 600).
 
 Progress for `--resume` is appended to:
 

@@ -252,6 +252,12 @@ def build_engine(
     agent_classes = graph_cfg.get("agent_classes")
     gender_distribution = graph_cfg.get("gender_distribution")
 
+    # An explicit ship_graph.immune_fraction sweeps pre-existing immunity;
+    # when unset the engine keeps its default immune_ratio.
+    engine_kwargs: dict[str, Any] = {}
+    if "immune_fraction" in graph_cfg:
+        engine_kwargs["immune_ratio"] = float(graph_cfg["immune_fraction"])
+
     # VSP threshold confinement is now handled by configurable infection
     # counters in the orchestrator, not by the engine's internal check.
     return KorkinShipEngine(
@@ -263,6 +269,7 @@ def build_engine(
         vsp_isolation=False,
         agent_classes=agent_classes,
         gender_distribution=gender_distribution,
+        **engine_kwargs,
     )
 
 
