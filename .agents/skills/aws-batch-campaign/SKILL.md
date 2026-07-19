@@ -257,13 +257,14 @@ python3 deploy/aws/aggregate_results.py ./results/ --out-csv campaign_summary.cs
 `aggregate_results.py` unzips every `<run_id>.zip`, reads its `summary.json`,
 and flattens `summary` / `cost_accounting` into one row per run.
 
-## Illustrative campaign parameters (this session)
+## Illustrative campaign parameters
 
-Do **not** hardcode secrets; these are examples of the shape of the values:
+Do **not** commit real account IDs, bucket names, ExternalIds, or access keys.
+Use placeholders (or env vars) only — examples of the *shape*:
 
-- region `us-east-1`
-- bucket `crusherbucket-994254241749-us-east-1-an`
-- account `994254241749`
+- region `<REGION>` (e.g. `us-east-1`)
+- bucket `<BUCKET>`
+- account `<ACCOUNT_ID>`
 - `--shard-count 200` over ~9080 runs (~46 runs / shard)
 
 ## Troubleshooting
