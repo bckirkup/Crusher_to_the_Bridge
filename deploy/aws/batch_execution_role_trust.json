@@ -1,0 +1,12 @@
+{
+  "Version": "2012-10-17",
+  "Comment": "Trust policy for picard-campaign-execution-role. Assumed by the ECS/Fargate agent so it can pull the ECR image and write logs on behalf of the task.",
+  "Statement": [
+    {
+      "Sid": "EcsTasksAssume",
+      "Effect": "Allow",
+      "Principal": { "Service": "ecs-tasks.amazonaws.com" },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
