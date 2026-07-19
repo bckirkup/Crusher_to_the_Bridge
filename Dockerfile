@@ -19,8 +19,19 @@ ENV PYTHONPATH=/app \
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt boto3
 
-# Copy the rest of the repo (see .dockerignore for exclusions).
-COPY . .
+# Copy only the code and data the headless campaign runner needs (explicit
+# paths rather than `COPY . .` so nothing outside these is ever added).
+COPY picard_framework/ ./picard_framework/
+COPY crusher_labs/ ./crusher_labs/
+COPY engines/ ./engines/
+COPY decision_engine/ ./decision_engine/
+COPY simulation_utils/ ./simulation_utils/
+COPY telemetry_buffer/ ./telemetry_buffer/
+COPY data/ ./data/
+COPY schemas/ ./schemas/
+COPY orchestrator.py ./
+COPY orchestrator_chronic.py orchestrator_display.py orchestrator_epoch.py ./
+COPY orchestrator_init.py orchestrator_record.py orchestrator_types.py ./
 
 # Run as a non-root user; it owns /app so the runner can write telemetry.
 RUN useradd --create-home --uid 10001 campaign && chown -R campaign:campaign /app
