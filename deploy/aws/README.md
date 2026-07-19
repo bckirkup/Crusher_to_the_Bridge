@@ -55,7 +55,7 @@ Two credential contexts, both short-lived:
 | `batch_execution_role_permissions.json` | Permission policy for the execution role (the Fargate agent): pull the `picard-campaign` image from ECR and write container logs. Equivalent to the AWS-managed `AmazonECSTaskExecutionRolePolicy`, scoped to this repo/log group. | `<REGION>`, `<ACCOUNT_ID>` |
 | `batch_job_role_trust.json` | Trust policy for `picard-campaign-job-role` — the running container's own identity (used by boto3's ambient credential chain to upload results to S3). Assumed by the ECS/Fargate task. | *(none)* |
 | `batch_job_role_permissions.json` | Permission policy for `picard-campaign-job-role` (the container's own identity). boto3 in `campaign_runner.py` picks this up from the ambient credential chain to upload each `<run_id>.zip` and `completed_runs.txt` to the shared results prefix. S3 write to `campaign/*`. | `<BUCKET>` |
-| `batch_job_definition.json` | Fargate Spot Batch job definition (ECR image, both role ARNs, vCPU/mem, shard/s3 command). **Not an IAM document** — it is a Batch `register-job-definition` input and may carry extra keys. | `<ACCOUNT_ID>`, `<REGION>`, `<BUCKET>` |
+| `batch_job_definition.json` | Fargate Spot Batch job definition (ECR image, both role ARNs, vCPU/mem, shard/s3 command). Sized at **2 vCPU / 16384 MB (16 GB)** so a full mega-cruise run (7000 agents, 240 epochs) that peaks above 4 GB has ample headroom. **Not an IAM document** — it is a Batch `register-job-definition` input and may carry extra keys. | `<ACCOUNT_ID>`, `<REGION>`, `<BUCKET>` |
 | `submit_array_job.sh` | Wrapper around `aws batch submit-job --array-properties size=<N>` (honors `AWS_PROFILE`) | — |
 | `aggregate_results.py` | Unzip `<run_id>.zip` under `./results/`, merge `summary.json` into one CSV/JSON | — |
 
@@ -218,6 +218,20 @@ The command is `--shard-count <N> --s3-prefix s3://<bucket>/campaign/ --resume`.
 `--shard-index` is **not** passed — the runner reads `AWS_BATCH_JOB_ARRAY_INDEX`,
 which Batch injects into every array child, so child *i* runs shard *i*.
 
+### Container sizing (vCPU / memory)
+
+The job definition requests **2 vCPU / 16384 MB (16 GB)**. A full mega-cruise
+run (7000 agents, 240 epochs) peaks above 4 GB, so the previous 1 vCPU / 4096 MB
+sizing OOM-killed array children (exit code 137). 16 GB gives ample headroom
+over that peak and the extra vCPU speeds each shard.
+
+On **Fargate, memory is constrained by vCPU** — you can only pick a `MEMORY`
+value from the valid set for the chosen `VCPU`. At **2 vCPU** the allowed range
+is **4096–16384 MB** (in 1024 MB increments), so 16384 is the maximum for 2 vCPU.
+If 16 GB still OOMs, step up to **4 vCPU / 30720 MB** (4 vCPU allows 8192–30720 MB),
+which requires bumping `VCPU` to `4` alongside `MEMORY`. See the AWS docs for the
+full [Fargate task CPU/memory combinations](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html#task_size).
+
 ## 5. Compute environment + job queue (one-time)
 
 Create a Fargate **Spot** compute environment and a queue pointing at it
@@ -289,3 +303,26 @@ and flattens the `summary` / `cost_accounting` blocks into one row per run.
   problem.
 - Containers never see the deploy credentials at all; they carry only the
   narrowly-scoped job role (S3 write to `campaign/*`).
+
+## Troubleshooting
+
+- **Array child exits with code 137 / `OutOfMemoryError: container killed due to
+  memory usage`.** The container exceeded its `MEMORY` allocation and was killed.
+  Raise `MEMORY` (and, if already at the max for the current `VCPU`, raise
+  `VCPU` too) in `batch_job_definition.json`, then re-register a new revision:
+
+  ```bash
+  sed -e "s/<ACCOUNT_ID>/$ACCOUNT_ID/g" \
+      -e "s/<REGION>/$REGION/g" \
+      -e "s#<BUCKET>#$BUCKET#g" \
+      batch_job_definition.json > /tmp/picard-campaign-jobdef.json
+
+  aws --profile picard batch register-job-definition \
+    --cli-input-json file:///tmp/picard-campaign-jobdef.json \
+    --region "$REGION"
+  ```
+
+  Remember Fargate's vCPU/memory constraint: at 2 vCPU the max is 16384 MB. If
+  16 GB still OOMs, go to **4 vCPU / 30720 MB** (set both `VCPU` to `4` and
+  `MEMORY` to `30720`). Resubmit against the new revision — `--resume` skips
+  shards already completed, so retries are cheap.

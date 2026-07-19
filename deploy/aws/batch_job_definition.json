@@ -12,8 +12,8 @@
     "jobRoleArn": "arn:aws:iam::<ACCOUNT_ID>:role/picard-campaign-job-role",
     "executionRoleArn": "arn:aws:iam::<ACCOUNT_ID>:role/picard-campaign-execution-role",
     "resourceRequirements": [
-      { "type": "VCPU", "value": "1" },
-      { "type": "MEMORY", "value": "4096" }
+      { "type": "VCPU", "value": "2" },
+      { "type": "MEMORY", "value": "16384" }
     ],
     "fargatePlatformConfiguration": {
       "platformVersion": "LATEST"
