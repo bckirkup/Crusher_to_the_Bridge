@@ -46,21 +46,32 @@ Two credential contexts, both short-lived:
 
 ## Files in this directory
 
-| File | Role |
-|------|------|
-| `bootstrap_user_policy.json` | Policy for the `devin-bootstrap` IAM user — allows **only** `sts:AssumeRole` on the deploy role |
-| `deploy_role_trust_policy.json` | Trust policy for `picard-deploy-role` — bootstrap user principal + `sts:ExternalId` condition |
-| `deploy_role_permissions_policy.json` | Least-privilege ECR + S3 + Batch + Logs + `iam:PassRole` policy attached to `picard-deploy-role` |
-| `batch_execution_role_trust.json` | Trust policy for the Batch **execution** role (`ecs-tasks.amazonaws.com`) |
-| `batch_execution_role_permissions.json` | ECR pull + logs for the execution role |
-| `batch_job_role_trust.json` | Trust policy for the Batch **job** role (`ecs-tasks.amazonaws.com`) |
-| `batch_job_role_permissions.json` | S3 write to `campaign/*` for the job role (container identity) |
-| `batch_job_definition.json` | Fargate Spot Batch job definition (ECR image, both role ARNs, vCPU/mem, shard/s3 command) |
-| `submit_array_job.sh` | Wrapper around `aws batch submit-job --array-properties size=<N>` (honors `AWS_PROFILE`) |
-| `aggregate_results.py` | Unzip `<run_id>.zip` under `./results/`, merge `summary.json` into one CSV/JSON |
+| File | Role | Placeholders |
+|------|------|--------------|
+| `bootstrap_user_policy.json` | Permission policy for the long-lived `devin-bootstrap` IAM user. Its **only** permission is `sts:AssumeRole` on `picard-deploy-role`; all ECR/Batch/S3 access comes from the assumed role's short-lived credentials, never from this user. | `<ACCOUNT_ID>` |
+| `deploy_role_trust_policy.json` | Trust policy for `picard-deploy-role`. Only the `devin-bootstrap` user may assume it, and only when it supplies the shared-secret `sts:ExternalId`. Pair with `MaxSessionDuration=3600` (set on the role via `create-role`, not in this document) so issued credentials are short-lived. | `<ACCOUNT_ID>`, `<EXTERNAL_ID>` |
+| `deploy_role_permissions_policy.json` | Permission policy attached to `picard-deploy-role` — the role Devin assumes (with an `ExternalId`) to build/push the `picard-campaign` image and run it as an AWS Batch array job. Least-privilege ECR + S3 + Batch + Logs + `iam:PassRole`. | `<REGION>`, `<ACCOUNT_ID>`, `<BUCKET>` |
+| `batch_execution_role_trust.json` | Trust policy for `picard-campaign-execution-role`. Assumed by the ECS/Fargate agent so it can pull the ECR image and write logs on behalf of the task. | *(none)* |
+| `batch_execution_role_permissions.json` | Permission policy for the execution role (the Fargate agent): pull the `picard-campaign` image from ECR and write container logs. Equivalent to the AWS-managed `AmazonECSTaskExecutionRolePolicy`, scoped to this repo/log group. | `<REGION>`, `<ACCOUNT_ID>` |
+| `batch_job_role_trust.json` | Trust policy for `picard-campaign-job-role` — the running container's own identity (used by boto3's ambient credential chain to upload results to S3). Assumed by the ECS/Fargate task. | *(none)* |
+| `batch_job_role_permissions.json` | Permission policy for `picard-campaign-job-role` (the container's own identity). boto3 in `campaign_runner.py` picks this up from the ambient credential chain to upload each `<run_id>.zip` and `completed_runs.txt` to the shared results prefix. S3 write to `campaign/*`. | `<BUCKET>` |
+| `batch_job_definition.json` | Fargate Spot Batch job definition (ECR image, both role ARNs, vCPU/mem, shard/s3 command). **Not an IAM document** — it is a Batch `register-job-definition` input and may carry extra keys. | `<ACCOUNT_ID>`, `<REGION>`, `<BUCKET>` |
+| `submit_array_job.sh` | Wrapper around `aws batch submit-job --array-properties size=<N>` (honors `AWS_PROFILE`) | — |
+| `aggregate_results.py` | Unzip `<run_id>.zip` under `./results/`, merge `summary.json` into one CSV/JSON | — |
 
 Replace `<ACCOUNT_ID>`, `<REGION>`, `<BUCKET>`, and `<EXTERNAL_ID>` placeholders
 throughout.
+
+> **IAM policy grammar.** Every `*.json` above except `batch_job_definition.json`
+> is an IAM policy or trust document. AWS IAM's policy grammar permits **only**
+> the top-level keys `Version`, `Id`, and `Statement`; any other top-level key
+> (e.g. a `Comment` annotation) makes `aws iam put-user-policy` /
+> `put-role-policy` / `create-role --assume-role-policy-document` fail with
+> `MalformedPolicyDocument` ("Syntax errors in policy"). These files therefore
+> carry no top-level annotations — the per-file explanations live in the table
+> above. Keep them that way; the `render`/`sed` pipeline only substitutes
+> placeholder values and does not add or strip any keys. `batch_job_definition.json`
+> is exempt because it is a Batch job definition, not an IAM document.
 
 ## 0. Prerequisites
 

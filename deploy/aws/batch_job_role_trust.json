@@ -1,6 +1,5 @@
 {
   "Version": "2012-10-17",
-  "Comment": "Trust policy for picard-campaign-job-role. This is the running container's own identity (used by boto3's ambient credential chain to upload results to S3). Assumed by the ECS/Fargate task.",
   "Statement": [
     {
       "Sid": "EcsTasksAssume",

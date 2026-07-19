@@ -1,6 +1,5 @@
 {
   "Version": "2012-10-17",
-  "Comment": "Trust policy for picard-deploy-role. Only the devin-bootstrap user may assume it, and only when it supplies the shared secret ExternalId. Pair with MaxSessionDuration=3600 (set on the role, not here) so issued credentials are short-lived. Replace <ACCOUNT_ID> and <EXTERNAL_ID>.",
   "Statement": [
     {
       "Sid": "BootstrapUserAssumeWithExternalId",

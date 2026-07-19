@@ -1,6 +1,5 @@
 {
   "Version": "2012-10-17",
-  "Comment": "Permission policy for picard-campaign-execution-role (the Fargate agent). Lets it pull the picard-campaign image from ECR and write container logs. Equivalent to the AWS-managed AmazonECSTaskExecutionRolePolicy, scoped to this repo/log group. Replace <REGION> and <ACCOUNT_ID>.",
   "Statement": [
     {
       "Sid": "EcrAuthToken",

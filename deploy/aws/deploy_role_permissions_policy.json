@@ -1,6 +1,5 @@
 {
   "Version": "2012-10-17",
-  "Comment": "Permission policy attached to picard-deploy-role — the role Devin assumes (with an ExternalId) to build/push the picard-campaign image and run it as an AWS Batch array job. Least-privilege ECR + S3 + Batch + Logs + PassRole. Replace <REGION>, <ACCOUNT_ID>, and <BUCKET>.",
   "Statement": [
     {
       "Sid": "EcrAuthToken",
