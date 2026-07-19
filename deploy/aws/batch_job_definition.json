@@ -41,10 +41,9 @@
   "retryStrategy": {
     "attempts": 5,
     "evaluateOnExit": [
-      { "onStatusReason": "Host EC2*", "action": "RETRY" },
-      { "onReason": "*Spot*", "action": "RETRY" },
-      { "onExitCode": "0", "action": "EXIT" },
-      { "onReason": "*", "action": "EXIT" }
+      { "onStatusReason": "Host EC2*", "action": "retry" },
+      { "onExitCode": "0", "action": "exit" },
+      { "onReason": "*", "action": "retry" }
     ]
   },
   "propagateTags": true,
