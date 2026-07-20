@@ -23,8 +23,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          python -m pip install --only-binary=:all: --require-hashes -r requirements.lock.txt
 
       - name: Sanity checker (ship + fleet libraries)
         run: python tools/sanity_checker.py --from-config
@@ -69,7 +68,6 @@ jobs:
 
       - name: Validate Stackelberg JSON schemas
         run: |
-          pip install check-jsonschema
           check-jsonschema --schemafile schemas/information_diffusion.schema.json \
             presidio/data/social/information_diffusion_default.json
           check-jsonschema --schemafile schemas/class_interactions.schema.json \
