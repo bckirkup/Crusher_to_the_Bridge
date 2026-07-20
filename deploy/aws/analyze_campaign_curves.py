@@ -28,6 +28,10 @@ import zipfile
 from pathlib import Path
 from typing import Any, Iterator
 
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(_REPO_ROOT))
+
+from simulation_utils.paths import confine_to_base  # noqa: E402
 
 _TAG_PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
     ("oa", re.compile(r"(oa\d+)")),
@@ -41,16 +45,15 @@ _TAG_PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
 
 def safe_path(path: Path | str) -> Path:
     """Resolve ``path`` and confine it to the current working directory."""
-    resolved = os.path.realpath(path)
-    base_dir = os.path.realpath(os.getcwd())
-    if resolved != base_dir and not resolved.startswith(base_dir + os.sep):
-        raise SystemExit(f"path {str(path)!r} is outside the allowed directory")
-    return Path(resolved)
+    try:
+        return Path(confine_to_base(os.getcwd(), str(path)))
+    except ValueError as exc:
+        raise SystemExit(str(exc)) from exc
 
 
 def parse_run_tags(run_id: str) -> dict[str, str | None]:
     """Extract common campaign sweep tags from a run_id."""
-    tags: dict[str, str | None] = {name: None for name, _ in _TAG_PATTERNS}
+    tags: dict[str, str | None] = dict.fromkeys(name for name, _ in _TAG_PATTERNS)
     for name, pat in _TAG_PATTERNS:
         m = pat.search(run_id)
         if m:

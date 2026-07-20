@@ -27,19 +27,23 @@ import zipfile
 from pathlib import Path
 from typing import Any
 
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(_REPO_ROOT))
+
+from simulation_utils.paths import confine_to_base  # noqa: E402
+
 
 def safe_path(path: Path | str) -> Path:
     """Resolve ``path`` and confine it to the current working directory.
 
     Prevents a caller (e.g. an automated agent passing crafted CLI arguments)
     from reading or writing files outside the directory the tool was invoked
-    from. Follows canonicalize-then-validate order.
+    from. Follows canonicalize-then-validate order (Sonar S8707).
     """
-    resolved = os.path.realpath(path)
-    base_dir = os.path.realpath(os.getcwd())
-    if resolved != base_dir and not resolved.startswith(base_dir + os.sep):
-        raise SystemExit(f"path {str(path)!r} is outside the allowed directory")
-    return Path(resolved)
+    try:
+        return Path(confine_to_base(os.getcwd(), str(path)))
+    except ValueError as exc:
+        raise SystemExit(str(exc)) from exc
 
 
 def flatten(obj: Any, prefix: str = "") -> dict[str, Any]:
@@ -75,7 +79,7 @@ def summary_from_zip(zip_path: Path) -> dict[str, Any] | None:
                 try:
                     ts = json.loads(zf.read(ts_names[0]).decode("utf-8"))
                     n_ts_epochs = len(ts) if isinstance(ts, list) else None
-                except (json.JSONDecodeError, ValueError):
+                except json.JSONDecodeError:
                     n_ts_epochs = None
     except zipfile.BadZipFile:
         print(f"  WARN: {zip_path.name} is not a valid zip; skipping", file=sys.stderr)

@@ -31,26 +31,86 @@ from urllib.parse import urlparse
 REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT))
 
+from simulation_utils.paths import (  # noqa: E402
+    is_path_under_base,
+    prepare_output_directory,
+    resolve_child_path,
+    validate_path_component,
+    validated_open,
+)
+
 CAMPAIGN_DIR = Path(__file__).resolve().parent
 MANIFEST_PATH = CAMPAIGN_DIR / "campaign_manifest.json"
 OUTPUT_ROOT = REPO_ROOT / "telemetry_buffer" / "mega_cruise_campaign"
 COMPLETED_LOG = OUTPUT_ROOT / "completed_runs.txt"
 FAILED_LOG = OUTPUT_ROOT / "failed_runs.txt"
 
+_REPO_ROOT_STR = str(REPO_ROOT)
+
+
+def _output_root_str() -> str:
+    return str(OUTPUT_ROOT)
+
+
+def _allowed_roots(*extra: str) -> tuple[str, ...]:
+    """Repo root plus redirected output root(s) (pytest / --single outdir)."""
+    roots = [_REPO_ROOT_STR]
+    candidates = [_output_root_str(), *extra]
+    for candidate in candidates:
+        out = os.path.realpath(candidate)
+        if out and not is_path_under_base(_REPO_ROOT_STR, out):
+            if out not in roots:
+                roots.append(out)
+    return tuple(roots)
+
+
+def _safe_run_id(run_id: str) -> str:
+    """Validate a campaign run_id as a single path component (no traversal)."""
+    return validate_path_component(run_id, label="run_id")
+
+
+def _ensure_output_root(*extra_roots: str) -> str:
+    roots = _allowed_roots(*extra_roots)
+    return prepare_output_directory(_output_root_str(), allowed_roots=roots)
+
+
+def _output_artifact(filename: str) -> str:
+    """Resolve a single validated filename under the campaign output root."""
+    root = _ensure_output_root()
+    safe_name = validate_path_component(filename, label="output artifact")
+    return resolve_child_path(root, safe_name)
+
+
+def _run_workdir(run_id: str, *, output_root: str | None = None) -> str:
+    root = output_root if output_root is not None else _ensure_output_root()
+    roots = _allowed_roots(root)
+    prepare_output_directory(root, allowed_roots=roots)
+    return resolve_child_path(root, _safe_run_id(run_id))
+
+
+def _confine_campaign_path(path: str | Path, *extra_roots: str) -> str:
+    """Confine a path to the repo or the (possibly redirected) output root."""
+    text = str(path)
+    roots = _allowed_roots(*extra_roots)
+    resolved = os.path.realpath(text if os.path.isabs(text) else os.path.join(roots[0], text))
+    for root in roots:
+        if is_path_under_base(root, resolved):
+            return resolved
+    raise ValueError(f"Path {text!r} escapes allowed campaign roots")
+
 
 def load_manifest(path: Path = MANIFEST_PATH) -> dict[str, Any]:
-    with open(path, encoding="utf-8") as fh:
+    safe_path = _confine_campaign_path(path)
+    with validated_open(safe_path, allowed_roots=_allowed_roots(), encoding="utf-8") as fh:
         return json.load(fh)
 
 
 def _read_run_id_log(path: Path) -> set[str]:
-    if not path.exists():
+    safe_path = _confine_campaign_path(path)
+    if not os.path.isfile(safe_path):
         return set()
-    return {
-        line.strip()
-        for line in path.read_text(encoding="utf-8").splitlines()
-        if line.strip()
-    }
+    with validated_open(safe_path, allowed_roots=_allowed_roots(), encoding="utf-8") as fh:
+        return {line.strip() for line in fh.read().splitlines() if line.strip()}
 
 
 def completed_runs() -> set[str]:
@@ -62,38 +122,45 @@ def failed_runs() -> set[str]:
 
 
 def mark_completed(run_id: str) -> None:
-    OUTPUT_ROOT.mkdir(parents=True, exist_ok=True)
-    with open(COMPLETED_LOG, "a", encoding="utf-8") as fh:
-        fh.write(run_id + "\n")
+    safe_id = _safe_run_id(run_id)
+    log_path = _output_artifact("completed_runs.txt")
+    with validated_open(log_path, "a", allowed_roots=_allowed_roots(), encoding="utf-8") as fh:
+        fh.write(safe_id + "\n")
     # A later success clears a prior failure entry for the same run_id.
-    _remove_from_log(FAILED_LOG, run_id)
+    _remove_from_log(FAILED_LOG, safe_id)
 
 
 def mark_failed(run_id: str) -> None:
-    OUTPUT_ROOT.mkdir(parents=True, exist_ok=True)
-    with open(FAILED_LOG, "a", encoding="utf-8") as fh:
-        fh.write(run_id + "\n")
+    safe_id = _safe_run_id(run_id)
+    log_path = _output_artifact("failed_runs.txt")
+    with validated_open(log_path, "a", allowed_roots=_allowed_roots(), encoding="utf-8") as fh:
+        fh.write(safe_id + "\n")
 
 
 def _remove_from_log(path: Path, run_id: str) -> None:
-    if not path.exists():
+    safe_id = _safe_run_id(run_id)
+    safe_path = _confine_campaign_path(path)
+    if not os.path.isfile(safe_path):
         return
-    kept = [line for line in path.read_text(encoding="utf-8").splitlines() if line.strip() != run_id]
+    with validated_open(safe_path, allowed_roots=_allowed_roots(), encoding="utf-8") as fh:
+        kept = [line for line in fh.read().splitlines() if line.strip() != safe_id]
     if kept:
-        path.write_text("\n".join(kept) + "\n", encoding="utf-8")
+        with validated_open(safe_path, "w", allowed_roots=_allowed_roots(), encoding="utf-8") as fh:
+            fh.write("\n".join(kept) + "\n")
     else:
-        path.unlink(missing_ok=True)
+        os.remove(safe_path)
 
 
 def clear_failed_artifacts(run_id: str) -> None:
     """Remove leftover workdir / stderr from a prior failure before retry."""
-    run_dir = OUTPUT_ROOT / run_id
-    if run_dir.exists():
+    safe_id = _safe_run_id(run_id)
+    run_dir = _run_workdir(safe_id)
+    if os.path.isdir(run_dir):
         shutil.rmtree(run_dir)
-    stderr_path = OUTPUT_ROOT / f"{run_id}.subprocess_stderr.txt"
-    stderr_path.unlink(missing_ok=True)
-    spec_path = OUTPUT_ROOT / f"{run_id}.run_spec.json"
-    spec_path.unlink(missing_ok=True)
+    for name in (f"{safe_id}.subprocess_stderr.txt", f"{safe_id}.run_spec.json"):
+        artifact = _output_artifact(name)
+        if os.path.isfile(artifact):
+            os.remove(artifact)
 
 
 def parse_s3_prefix(s3_prefix: str) -> tuple[str, str]:
@@ -136,14 +203,14 @@ class S3Uploader:
         """
         key = self._key(name)
         try:
-            from botocore.exceptions import ClientError  # noqa: PLC0415
+            from botocore.exceptions import ClientError as client_error  # noqa: PLC0415
         except ImportError:  # pragma: no cover
-            ClientError = Exception  # type: ignore[misc, assignment]
+            client_error = Exception  # type: ignore[misc, assignment]
         local_path.parent.mkdir(parents=True, exist_ok=True)
         try:
             self._client.download_file(self.bucket, key, str(local_path))
             return True
-        except ClientError as exc:
+        except client_error as exc:
             code = str(exc.response.get("Error", {}).get("Code", ""))
             if code in {"404", "NoSuchKey", "NotFound"}:
                 return False
@@ -601,29 +668,36 @@ def run_simulation(
     subprocess child so it targets the parent's output directory); it defaults
     to the module-level ``OUTPUT_ROOT``.
     """
-    root = output_root if output_root is not None else OUTPUT_ROOT
-    run_dir = root / run_id
-    if run_dir.exists():
+    safe_id = _safe_run_id(run_id)
+    root_str = (
+        os.path.realpath(str(output_root))
+        if output_root is not None
+        else _ensure_output_root()
+    )
+    roots = _allowed_roots(root_str)
+    prepare_output_directory(root_str, allowed_roots=roots)
+    run_dir = _run_workdir(safe_id, output_root=root_str)
+    if os.path.isdir(run_dir):
         shutil.rmtree(run_dir)
-    run_dir.mkdir(parents=True, exist_ok=True)
+    prepare_output_directory(run_dir, allowed_roots=roots)
 
     if full_telemetry:
         spec = dict(spec)
         spec["run"] = dict(spec["run"])
         spec["run"]["write_ground_truth"] = True
-        spec["run"]["simulation_history"] = str(run_dir / "simulation_history.json")
-        spec["run"]["lab_notebook"] = str(run_dir / "artificial_lab_notebook.json")
-        spec["run"]["ground_truth"] = str(run_dir / "ground_truth.json")
+        spec["run"]["simulation_history"] = os.path.join(run_dir, "simulation_history.json")
+        spec["run"]["lab_notebook"] = os.path.join(run_dir, "artificial_lab_notebook.json")
+        spec["run"]["ground_truth"] = os.path.join(run_dir, "ground_truth.json")
 
-    spec_path = run_dir / "run_spec.json"
-    with open(spec_path, "w", encoding="utf-8") as fh:
+    spec_path = resolve_child_path(run_dir, "run_spec.json")
+    with validated_open(spec_path, "w", allowed_roots=roots, encoding="utf-8") as fh:
         json.dump(spec, fh, indent=2)
 
     try:
         from picard_framework.run_spec import PicardRunSpec
         from picard_framework.simulation.ship_simulation import ShipSimulation
 
-        picard_spec = PicardRunSpec.from_picard_json(str(REPO_ROOT), str(spec_path))
+        picard_spec = PicardRunSpec.from_picard_json(_REPO_ROOT_STR, spec_path)
         sim = ShipSimulation(picard_spec, display=False)
         result = sim.run()
         if full_telemetry:
@@ -631,31 +705,36 @@ def run_simulation(
 
         last = result.history[-1] if result.history else {}
         ts = extract_timeseries(result.history)
-        with open(run_dir / "timeseries.json", "w", encoding="utf-8") as fh:
+        ts_path = resolve_child_path(run_dir, "timeseries.json")
+        with validated_open(ts_path, "w", allowed_roots=roots, encoding="utf-8") as fh:
             json.dump(ts, fh)
 
         summary = {
-            "run_id": run_id,
+            "run_id": safe_id,
             "num_epochs": result.num_epochs,
             "trigger_status": result.final_trigger_status,
             "summary": last.get("summary", {}),
             "cost_accounting": last.get("cost_accounting", {}),
             "derived": compute_derived_metrics(ts, _spec_num_agents(spec)),
         }
-        with open(run_dir / "summary.json", "w", encoding="utf-8") as fh:
+        summary_path = resolve_child_path(run_dir, "summary.json")
+        with validated_open(summary_path, "w", allowed_roots=roots, encoding="utf-8") as fh:
             json.dump(summary, fh, indent=2)
 
-        zip_path = root / f"{run_id}.zip"
+        zip_name = validate_path_component(f"{safe_id}.zip", label="zip artifact")
+        zip_path = resolve_child_path(root_str, zip_name)
         with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
-            for fpath in run_dir.rglob("*"):
-                if fpath.is_file():
-                    zf.write(fpath, fpath.relative_to(run_dir))
+            for dirpath, _dirnames, filenames in os.walk(run_dir):
+                for fname in filenames:
+                    fpath = os.path.join(dirpath, fname)
+                    zf.write(fpath, os.path.relpath(fpath, run_dir))
         if not keep_workdir:
             shutil.rmtree(run_dir)
         return True
 
     except Exception as exc:
-        with open(run_dir / "error.txt", "w", encoding="utf-8") as fh:
+        err_path = resolve_child_path(run_dir, "error.txt")
+        with validated_open(err_path, "w", allowed_roots=roots, encoding="utf-8") as fh:
             fh.write(f"{type(exc).__name__}: {exc}\n")
             fh.write(traceback.format_exc())
         return False
@@ -675,15 +754,17 @@ def run_simulation_subprocess(
     isolating each run in a short-lived subprocess lets the OS reclaim all
     memory on exit, keeping the campaign under Fargate's memory limit.
     """
-    spec_path = OUTPUT_ROOT / f"{run_id}.run_spec.json"
-    OUTPUT_ROOT.mkdir(parents=True, exist_ok=True)
-    with open(spec_path, "w", encoding="utf-8") as fh:
+    safe_id = _safe_run_id(run_id)
+    roots = _allowed_roots()
+    spec_name = validate_path_component(f"{safe_id}.run_spec.json", label="spec artifact")
+    spec_path = _output_artifact(spec_name)
+    with validated_open(spec_path, "w", allowed_roots=roots, encoding="utf-8") as fh:
         json.dump(spec, fh)
 
     cmd = [
         sys.executable,
         str(CAMPAIGN_DIR / "campaign_runner.py"),
-        "--single", str(spec_path), str(OUTPUT_ROOT),
+        "--single", spec_path, _output_root_str(),
     ]
     if full_telemetry:
         cmd.append("--full-telemetry")
@@ -696,26 +777,27 @@ def run_simulation_subprocess(
             capture_output=True,
             text=True,
             timeout=timeout,
-            cwd=str(REPO_ROOT),
-            env={**os.environ, "PYTHONPATH": str(REPO_ROOT)},
+            cwd=_REPO_ROOT_STR,
+            env={**os.environ, "PYTHONPATH": _REPO_ROOT_STR},
         )
-        ok = proc.returncode == 0 and (OUTPUT_ROOT / f"{run_id}.zip").is_file()
+        zip_path = _output_artifact(f"{safe_id}.zip")
+        ok = proc.returncode == 0 and os.path.isfile(zip_path)
         if not ok:
-            err_path = OUTPUT_ROOT / f"{run_id}.subprocess_stderr.txt"
-            with open(err_path, "w", encoding="utf-8") as fh:
+            err_path = _output_artifact(f"{safe_id}.subprocess_stderr.txt")
+            with validated_open(err_path, "w", allowed_roots=roots, encoding="utf-8") as fh:
                 fh.write(f"returncode={proc.returncode}\n\n")
                 fh.write("--- stdout ---\n")
                 fh.write(proc.stdout or "")
                 fh.write("\n--- stderr ---\n")
                 fh.write(proc.stderr or "")
     except subprocess.TimeoutExpired:
-        err_path = OUTPUT_ROOT / f"{run_id}.subprocess_stderr.txt"
-        with open(err_path, "w", encoding="utf-8") as fh:
+        err_path = _output_artifact(f"{safe_id}.subprocess_stderr.txt")
+        with validated_open(err_path, "w", allowed_roots=roots, encoding="utf-8") as fh:
             fh.write(f"TimeoutExpired after {timeout}s\n")
         ok = False
     finally:
-        if not keep_workdir:
-            spec_path.unlink(missing_ok=True)
+        if not keep_workdir and os.path.isfile(spec_path):
+            os.remove(spec_path)
 
     return ok
 
@@ -728,16 +810,20 @@ def _run_single(
     keep_workdir: bool = False,
 ) -> int:
     """Child-process entry: run exactly one simulation into ``outdir``."""
-    out = Path(outdir)
-    with open(spec_path, encoding="utf-8") as fh:
+    out_base = os.path.realpath(outdir)
+    roots = _allowed_roots(out_base)
+    safe_spec = _confine_campaign_path(spec_path, out_base)
+    prepare_output_directory(out_base, allowed_roots=roots)
+    with validated_open(safe_spec, allowed_roots=roots, encoding="utf-8") as fh:
         spec = json.load(fh)
     run_id = spec.get("description")
     if not run_id:
-        raise SystemExit(f"--single spec {spec_path} missing 'description' run id")
+        raise SystemExit(f"--single spec {safe_spec} missing 'description' run id")
+    safe_id = _safe_run_id(str(run_id))
     ok = run_simulation(
-        run_id, spec,
+        safe_id, spec,
         full_telemetry=full_telemetry, keep_workdir=keep_workdir,
-        output_root=out,
+        output_root=Path(out_base),
     )
     return 0 if ok else 1
 
@@ -974,7 +1060,7 @@ def main(argv: list[str] | None = None) -> int:
             succeeded += 1
             mark_completed(run_id)
             if uploader is not None:
-                zip_path = OUTPUT_ROOT / f"{run_id}.zip"
+                zip_path = Path(_output_artifact(f"{run_id}.zip"))
                 try:
                     uploader.upload_file(zip_path, f"{run_id}.zip")
                     print(" OK+s3")
@@ -1013,11 +1099,12 @@ def _upload_completed_log(
     shard_count: int | None,
 ) -> None:
     """Upload this shard's completed_runs.txt under a shard-scoped key."""
-    if not COMPLETED_LOG.exists():
+    log_path = _output_artifact("completed_runs.txt")
+    if not os.path.isfile(log_path):
         return
     try:
         uploader.upload_file(
-            COMPLETED_LOG, _resume_log_key(shard_index, shard_count),
+            Path(log_path), _resume_log_key(shard_index, shard_count),
         )
     except Exception as exc:  # noqa: BLE001
         print(f"  (completed_runs.txt upload failed: {exc})")
@@ -1030,8 +1117,9 @@ def _download_completed_log(
 ) -> None:
     """Seed local completed_runs.txt from S3 so Spot retries skip finished runs."""
     key = _resume_log_key(shard_index, shard_count)
+    log_path = Path(_output_artifact("completed_runs.txt"))
     try:
-        ok = uploader.download_file(key, COMPLETED_LOG)
+        ok = uploader.download_file(key, log_path)
     except Exception as exc:  # noqa: BLE001
         print(f"  (completed_runs.txt download failed: {exc})")
         return

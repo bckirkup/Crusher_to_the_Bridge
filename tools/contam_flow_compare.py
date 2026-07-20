@@ -265,7 +265,7 @@ def connectivity_gap(
 
 def load_sim_flows(sim_path: str) -> dict[int, float]:
     full = resolve_repo_path(REPO_ROOT, sim_path)
-    return SimResults(full).path_volumetric_flow_m3h()
+    return SimResults(full, allowed_roots=(REPO_ROOT,)).path_volumetric_flow_m3h()
 
 
 def run_contamx_for_flows(platform_id: str) -> dict[int, float]:
@@ -278,7 +278,7 @@ def run_contamx_for_flows(platform_id: str) -> dict[int, float]:
     if not os.path.isfile(prj):
         raise ContamXUnavailable(f"Missing PRJ: {files['prj']}")
     sim_path = run_contamx(prj, binary, config={})
-    return SimResults(sim_path).path_volumetric_flow_m3h()
+    return SimResults(sim_path, allowed_roots=(REPO_ROOT,)).path_volumetric_flow_m3h()
 
 
 def build_flow_compare_report(

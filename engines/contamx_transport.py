@@ -352,7 +352,7 @@ def build_contamx_engine(
                     entries = path_map_from_prj(fh.read())
 
         sim_path = run_contamx(prj_path, binary, config=cfg)
-        sim = SimResults(sim_path)
+        sim = SimResults(sim_path, allowed_roots=allowed_roots)
         flows = sim.path_volumetric_flow_m3h()
     finally:
         if tmp_ctx is not None:

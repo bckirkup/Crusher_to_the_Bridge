@@ -538,7 +538,7 @@ def _write_platform_json(
 
 # ── CLI ────────────────────────────────────────────────────────────────────
 
-def main(argv: list[str] | None = None) -> int:
+def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(
         description=(
             "CONTAM bridge: Path B --simplify (PRJ→JSON+path_map) is primary; "
@@ -578,7 +578,7 @@ def main(argv: list[str] | None = None) -> int:
         out = export_platform_to_prj(args.platform, args.output)
         print(f"  Wrote fiction-bootstrap ContamW 3.4 project: {out}")
         print("  (JSON→PRJ is for demos without an authentic Contam model)")
-        return 0
+        return
 
     if not args.input:
         parser.error("--simplify/--import requires --input")
@@ -590,15 +590,14 @@ def main(argv: list[str] | None = None) -> int:
         print(f"  Wrote: {spatial_path}")
         print(f"  Wrote: {airflow_path}")
         print(f"  Wrote: {map_path}")
-        return 0
+        return
 
     spatial_path, airflow_path = import_prj_to_platform(
         args.input, args.output,
     )
     print(f"  Wrote: {spatial_path}")
     print(f"  Wrote: {airflow_path}")
-    return 0
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    main()

@@ -54,6 +54,27 @@ def test_is_path_under_base(tmp_path) -> None:
     assert not is_path_under_base(str(base), str(sibling))
 
 
+def test_confine_to_base_rejects_escape(tmp_path) -> None:
+    from simulation_utils.paths import confine_to_base
+
+    base = tmp_path / "base"
+    base.mkdir()
+    outside = tmp_path / "outside.txt"
+    outside.write_text("x", encoding="utf-8")
+    with pytest.raises(ValueError, match="escapes allowed base"):
+        confine_to_base(str(base), str(outside))
+
+
+def test_confine_to_base_accepts_child(tmp_path) -> None:
+    from simulation_utils.paths import confine_to_base
+
+    base = tmp_path / "base"
+    child = base / "child.txt"
+    base.mkdir()
+    child.write_text("ok", encoding="utf-8")
+    assert confine_to_base(str(base), str(child)) == os.path.realpath(child)
+
+
 def test_is_publicly_writable_recursive(tmp_path) -> None:
     from simulation_utils.paths import is_publicly_writable
     if os.name == "nt":
