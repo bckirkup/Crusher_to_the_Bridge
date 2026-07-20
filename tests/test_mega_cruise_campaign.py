@@ -149,7 +149,9 @@ def test_t8_sets_wearable_deployment_profile() -> None:
     assert sample["config_overrides"]["wearable_monitoring"]["deployment_profile"] == "crew_only"
 
 
-def test_make_picard_spec_optional_telemetry_paths() -> None:
+def test_make_picard_spec_optional_telemetry_paths(tmp_path) -> None:
+    telemetry = tmp_path / "ctb_run"
+    telemetry.mkdir()
     spec = make_picard_spec(
         "x",
         platform="destroyer_baseline",
@@ -159,7 +161,7 @@ def test_make_picard_spec_optional_telemetry_paths() -> None:
         seed=42,
         epochs=2,
         num_agents=20,
-        telemetry_dir=Path("/tmp/ctb_run"),
+        telemetry_dir=telemetry,
     )
     assert spec["run"]["simulation_history"].endswith("simulation_history.json")
 
@@ -489,7 +491,7 @@ def test_contamx_build_applies_hvac_oa_fraction(monkeypatch: pytest.MonkeyPatch)
 
     monkeypatch.setattr(cx, "find_contamx", lambda cfg: "/fake/contamx")
     monkeypatch.setattr(cx, "run_contamx", lambda *a, **k: "/fake/model.sim")
-    monkeypatch.setattr(cx, "SimResults", lambda path: FakeSim())
+    monkeypatch.setattr(cx, "SimResults", lambda path, allowed_roots=None: FakeSim())
     monkeypatch.setattr(
         cx, "resolve_contam_prj_path",
         lambda *a, **k: str(REPO_ROOT / "data/platforms/destroyer_baseline/contam/model.prj"),
@@ -539,7 +541,9 @@ def test_immune_fraction_changes_init_immune_count() -> None:
     assert n_high > n_default
 
 
-def test_analyze_campaign_curves_long_form(tmp_path: Path) -> None:
+def test_analyze_campaign_curves_long_form(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
     """Curve analyzer stacks timeseries.json into a long-form CSV."""
     import importlib.util
     import zipfile
@@ -576,7 +580,8 @@ def test_analyze_campaign_curves_long_form(tmp_path: Path) -> None:
 
     out_csv = tmp_path / "curves.csv"
     frontiers = tmp_path / "frontiers.csv"
-    n = mod.write_outputs(tmp_path, out_csv, frontiers)
+    monkeypatch.chdir(tmp_path)
+    n = mod.write_outputs(tmp_path, str(out_csv), str(frontiers))
     assert n == 2
     assert out_csv.is_file()
     assert frontiers.is_file()

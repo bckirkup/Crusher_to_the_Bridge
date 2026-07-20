@@ -1,4 +1,20 @@
-"""Filesystem path validation helpers for Sonar-safe I/O."""
+"""Filesystem path validation helpers for Sonar-safe I/O.
+
+Inviolate rule for agents and CLI tools
+---------------------------------------
+Never pass attacker-/LLM-controlled path strings to ``open``, ``Path.open``,
+``Path.read_text``, ``Path.write_text``, or ``os.remove`` directly.
+
+Always canonicalize then contain via one of:
+
+* :func:`validated_open` — preferred for all file reads/writes
+* :func:`confine_to_base` / :func:`resolve_repo_path` — before other FS ops
+* :func:`validate_path_component` / :func:`resolve_child_path` — for single
+  path segments joined under a known parent (run ids, filenames)
+
+Sonar rules ``pythonsecurity:S8707`` and ``pythonsecurity:S2083`` specifically
+flag agent-supplied CLI paths that skip these helpers.
+"""
 
 from __future__ import annotations
 
@@ -33,6 +49,22 @@ def validate_path_component(name: str, *, label: str = "path component") -> str:
     if not _PATH_COMPONENT_RE.fullmatch(name):
         raise ValueError(f"Invalid {label}: {name!r}")
     return name
+
+
+def confine_to_base(base_dir: str, path: str) -> str:
+    """Resolve *path* (cwd-relative or absolute) and require it under *base_dir*.
+
+    Use for CLI/agent arguments before any filesystem access (S8707/S2083).
+    Relative paths resolve against the process cwd, then must still fall
+    inside *base_dir*.
+    """
+    if not base_dir:
+        raise ValueError("base_dir is required")
+    base = _real(base_dir)
+    resolved = _real(path)
+    if not is_path_under_base(base, resolved):
+        raise ValueError(f"Path {path!r} escapes allowed base {base_dir!r}")
+    return resolved
 
 
 def resolve_repo_path(repo_root: str, path: str) -> str:

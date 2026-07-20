@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import io
 import json
 import os
 import re
@@ -28,6 +29,10 @@ import zipfile
 from pathlib import Path
 from typing import Any, Iterator
 
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(_REPO_ROOT))
+
+from simulation_utils.paths import confine_to_base, validated_open  # noqa: E402
 
 _TAG_PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
     ("oa", re.compile(r"(oa\d+)")),
@@ -39,18 +44,21 @@ _TAG_PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
 )
 
 
-def safe_path(path: Path | str) -> Path:
+def _cwd_root() -> str:
+    return os.path.realpath(os.getcwd())
+
+
+def safe_path(path: Path | str) -> str:
     """Resolve ``path`` and confine it to the current working directory."""
-    resolved = os.path.realpath(path)
-    base_dir = os.path.realpath(os.getcwd())
-    if resolved != base_dir and not resolved.startswith(base_dir + os.sep):
-        raise SystemExit(f"path {str(path)!r} is outside the allowed directory")
-    return Path(resolved)
+    try:
+        return confine_to_base(_cwd_root(), str(path))
+    except ValueError as exc:
+        raise SystemExit(str(exc)) from exc
 
 
 def parse_run_tags(run_id: str) -> dict[str, str | None]:
     """Extract common campaign sweep tags from a run_id."""
-    tags: dict[str, str | None] = {name: None for name, _ in _TAG_PATTERNS}
+    tags: dict[str, str | None] = dict.fromkeys(name for name, _ in _TAG_PATTERNS)
     for name, pat in _TAG_PATTERNS:
         m = pat.search(run_id)
         if m:
@@ -141,25 +149,30 @@ def frontier_rows(curve_rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return list(by_run.values())
 
 
-def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
+def _write_csv(path: str, rows: list[dict[str, Any]]) -> None:
+    roots = (_cwd_root(),)
+    safe = confine_to_base(roots[0], path)
     if not rows:
-        path.write_text("", encoding="utf-8")
+        with validated_open(safe, "w", allowed_roots=roots, encoding="utf-8") as fh:
+            fh.write("")
         return
     columns: list[str] = []
     for row in rows:
         for key in row:
             if key not in columns:
                 columns.append(key)
-    with path.open("w", encoding="utf-8", newline="") as fh:
-        writer = csv.DictWriter(fh, fieldnames=columns, extrasaction="ignore")
-        writer.writeheader()
-        writer.writerows(rows)
+    buf = io.StringIO()
+    writer = csv.DictWriter(buf, fieldnames=columns, extrasaction="ignore")
+    writer.writeheader()
+    writer.writerows(rows)
+    with validated_open(safe, "w", allowed_roots=roots, encoding="utf-8") as fh:
+        fh.write(buf.getvalue())
 
 
 def write_outputs(
     results_dir: Path,
-    out_csv: Path,
-    out_frontiers: Path,
+    out_csv: str,
+    out_frontiers: str,
 ) -> int:
     rows = list(iter_curve_rows(results_dir))
     _write_csv(out_csv, rows)
@@ -182,7 +195,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
-    results_dir = safe_path(args.results_dir)
+    results_dir = Path(safe_path(args.results_dir))
     out_csv = safe_path(args.out_csv)
     out_frontiers = safe_path(args.out_frontiers)
     if not results_dir.is_dir():

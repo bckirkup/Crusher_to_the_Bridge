@@ -9,6 +9,7 @@ from simulation_utils.numeric import (
     is_zero,
 )
 from simulation_utils.paths import (
+    confine_to_base,
     is_path_under_base,
     is_publicly_writable,
     prepare_output_directory,
@@ -20,6 +21,7 @@ from simulation_utils.paths import (
 
 __all__ = [
     "DEFAULT_SIMULATION_SEED",
+    "confine_to_base",
     "default_simulation_rng",
     "float_eq",
     "float_ne",

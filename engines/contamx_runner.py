@@ -35,10 +35,13 @@ from __future__ import annotations
 import os
 import shutil
 import subprocess
+import tempfile
 from dataclasses import dataclass
 from typing import Any
 
 import numpy as np
+
+from simulation_utils.paths import is_path_under_base, validated_open
 
 # Candidate executable names for the ContamX solver, most-specific first.
 _CONTAMX_BINARY_NAMES = (
@@ -240,9 +243,23 @@ class SimResults:
         "pfsave", "zfsave", "zcsave", "nafnd", "nccnd", "nafpt",
     )
 
-    def __init__(self, filename: str) -> None:
+    def __init__(
+        self,
+        filename: str,
+        *,
+        allowed_roots: tuple[str, ...] | None = None,
+    ) -> None:
         self.filename = filename
-        with open(filename, "rb") as fp:
+        resolved = os.path.realpath(filename)
+        roots = allowed_roots
+        if roots is None:
+            # Default: repository root plus system temp (pytest / TemporaryDirectory).
+            roots_list: list[str] = [_repo_root()]
+            tmp_root = os.path.realpath(tempfile.gettempdir())
+            if is_path_under_base(tmp_root, resolved):
+                roots_list.append(tmp_root)
+            roots = tuple(roots_list)
+        with validated_open(resolved, "rb", allowed_roots=roots) as fp:
             raw = fp.read()
         self._buf = raw
         self._offset = 0
