@@ -30,9 +30,9 @@ _HARDENED_MODULES = (
     "deploy/aws/analyze_campaign_curves.py",
 )
 
-# Path.write_text / read_text / unlink are also sinks for S2083 when the Path
-# was built from user data — ban them in campaign_runner specifically.
-_BAN_PATH_IO_METHODS = frozenset({"read_text", "write_text", "unlink"})
+# Path.write_text / read_text / unlink / open are also sinks for S2083/S8707
+# when the Path was built from user data — ban them in hardened modules.
+_BAN_PATH_IO_METHODS = frozenset({"read_text", "write_text", "unlink", "open"})
 
 
 def _module_source(rel: str) -> str:
@@ -75,13 +75,13 @@ def test_hardened_modules_forbid_bare_open(rel: str) -> None:
     )
 
 
-def test_campaign_runner_forbids_path_text_io() -> None:
-    rel = "picard_framework/runs/mega_cruise_campaign/campaign_runner.py"
+@pytest.mark.parametrize("rel", _HARDENED_MODULES)
+def test_hardened_modules_forbid_path_text_io(rel: str) -> None:
     tree = ast.parse(_module_source(rel), filename=rel)
     hits = _path_io_method_calls(tree)
     assert hits == [], (
-        f"{rel} must not use Path.read_text/write_text/unlink; "
-        f"use validated_open / os.remove after confinement (found {hits})."
+        f"{rel} must not use Path.read_text/write_text/unlink/open; "
+        f"use validated_open after confinement (found {hits})."
     )
 
 

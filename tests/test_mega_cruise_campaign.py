@@ -541,7 +541,9 @@ def test_immune_fraction_changes_init_immune_count() -> None:
     assert n_high > n_default
 
 
-def test_analyze_campaign_curves_long_form(tmp_path: Path) -> None:
+def test_analyze_campaign_curves_long_form(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
     """Curve analyzer stacks timeseries.json into a long-form CSV."""
     import importlib.util
     import zipfile
@@ -578,7 +580,8 @@ def test_analyze_campaign_curves_long_form(tmp_path: Path) -> None:
 
     out_csv = tmp_path / "curves.csv"
     frontiers = tmp_path / "frontiers.csv"
-    n = mod.write_outputs(tmp_path, out_csv, frontiers)
+    monkeypatch.chdir(tmp_path)
+    n = mod.write_outputs(tmp_path, str(out_csv), str(frontiers))
     assert n == 2
     assert out_csv.is_file()
     assert frontiers.is_file()

@@ -30,10 +30,14 @@ from typing import Any
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(_REPO_ROOT))
 
-from simulation_utils.paths import confine_to_base  # noqa: E402
+from simulation_utils.paths import confine_to_base, validated_open  # noqa: E402
 
 
-def safe_path(path: Path | str) -> Path:
+def _cwd_root() -> str:
+    return os.path.realpath(os.getcwd())
+
+
+def safe_path(path: Path | str) -> str:
     """Resolve ``path`` and confine it to the current working directory.
 
     Prevents a caller (e.g. an automated agent passing crafted CLI arguments)
@@ -41,7 +45,7 @@ def safe_path(path: Path | str) -> Path:
     from. Follows canonicalize-then-validate order (Sonar S8707).
     """
     try:
-        return Path(confine_to_base(os.getcwd(), str(path)))
+        return confine_to_base(_cwd_root(), str(path))
     except ValueError as exc:
         raise SystemExit(str(exc)) from exc
 
@@ -104,7 +108,9 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     # Canonicalize + confine all CLI-derived paths to the invocation directory.
-    results_dir = safe_path(args.results_dir)
+    cwd = _cwd_root()
+    roots = (cwd,)
+    results_dir = Path(safe_path(args.results_dir))
     out_csv = safe_path(args.out_csv)
     out_json = safe_path(args.out_json)
 
@@ -131,13 +137,15 @@ def main(argv: list[str] | None = None) -> int:
             if key not in columns:
                 columns.append(key)
 
-    out_json.write_text(json.dumps(rows, indent=2), encoding="utf-8")
+    with validated_open(out_json, "w", allowed_roots=roots, encoding="utf-8") as fh:
+        json.dump(rows, fh, indent=2)
 
     buf = io.StringIO()
     writer = csv.DictWriter(buf, fieldnames=columns, extrasaction="ignore")
     writer.writeheader()
     writer.writerows(rows)
-    out_csv.write_text(buf.getvalue(), encoding="utf-8")
+    with validated_open(out_csv, "w", allowed_roots=roots, encoding="utf-8") as fh:
+        fh.write(buf.getvalue())
 
     print(f"Wrote {len(rows)} rows -> {out_csv} and {out_json}")
     return 0
