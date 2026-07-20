@@ -1,11 +1,12 @@
 # AWS Batch (Fargate Spot) deployment — mega cruise campaign
 
-Package the ~9080-run mega cruise campaign
+Package the ~17,780-run mega cruise campaign
 (`picard_framework/runs/mega_cruise_campaign/campaign_runner.py`) as a Docker
 image in Amazon ECR and run it as a single **AWS Batch array job** across many
 short-lived **Fargate Spot** containers. Each array child executes a disjoint
 shard of the run list and uploads every per-run result zip to one shared S3
-prefix. Interrupted Spot containers resume from `completed_runs.txt` on retry.
+prefix. Interrupted Spot containers resume from `completed_runs.txt` on retry
+(the runner downloads the shard resume log from S3 at start).
 
 This deployment uses **IAM role assumption (short-lived credentials)** — there
 are **no long-lived access keys** in the deploy path beyond a single minimal
@@ -220,17 +221,26 @@ which Batch injects into every array child, so child *i* runs shard *i*.
 
 ### Container sizing (vCPU / memory)
 
-The job definition requests **2 vCPU / 16384 MB (16 GB)**. A full mega-cruise
-run (7000 agents, 240 epochs) peaks above 4 GB, so the previous 1 vCPU / 4096 MB
-sizing OOM-killed array children (exit code 137). 16 GB gives ample headroom
-over that peak and the extra vCPU speeds each shard.
+Two separate memory problems, two fixes:
+
+1. **Cumulative RSS across many runs** — CPython/`pymalloc` does not return
+   pages between in-process simulations. The campaign runner defaults to
+   **subprocess-per-run** so the OS reclaims each child's ~2 GB on exit and the
+   parent stays small.
+2. **Single-run peak** — one 7000-agent / 240-epoch mega-cruise can still peak
+   above 4 GB. The job definition therefore requests **2 vCPU / 16384 MB
+   (16 GB)** so a child has headroom; the previous 1 vCPU / 4096 MB sizing
+   OOM-killed array children (exit code 137).
 
 On **Fargate, memory is constrained by vCPU** — you can only pick a `MEMORY`
 value from the valid set for the chosen `VCPU`. At **2 vCPU** the allowed range
 is **4096–16384 MB** (in 1024 MB increments), so 16384 is the maximum for 2 vCPU.
-If 16 GB still OOMs, step up to **4 vCPU / 30720 MB** (4 vCPU allows 8192–30720 MB),
-which requires bumping `VCPU` to `4` alongside `MEMORY`. See the AWS docs for the
-full [Fargate task CPU/memory combinations](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html#task_size).
+If 16 GB still OOMs on a *single* run peak, step up to **4 vCPU / 30720 MB**
+(4 vCPU allows 8192–30720 MB), which requires bumping `VCPU` to `4` alongside
+`MEMORY`. See the AWS docs for the full
+[Fargate task CPU/memory combinations](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html#task_size).
+Do **not** drop below 16 GB without measuring child peak RSS after subprocess
+isolation.
 
 ## 5. Compute environment + job queue (one-time)
 
@@ -306,10 +316,11 @@ campaign_runner.py --shard-count 200 \
     --s3-prefix s3://<bucket>/campaign/ --resume
 ```
 
-so the ~9080 runs are split into 200 disjoint shards (~46 runs each). On Spot
-interruption Batch retries the child; `--resume` skips run_ids already in the
-shard's `completed_runs.txt` (uploaded periodically to
-`s3://<bucket>/campaign/_resume/`). Inside the container, boto3 uses the
+so the ~17,780 runs are split into 200 disjoint shards (~89 runs each). On Spot
+interruption Batch retries the child; `--resume` **downloads** the shard's
+`completed_runs.txt` from `s3://<bucket>/campaign/_resume/` at start, then
+skips those run_ids (and any `<run_id>.zip` already present under the prefix).
+The log is also re-uploaded periodically. Inside the container, boto3 uses the
 **picard-campaign-job-role** automatically — no keys in the image.
 
 Monitor:
@@ -328,7 +339,9 @@ python3 aggregate_results.py ./results/ \
 ```
 
 `aggregate_results.py` unzips every `<run_id>.zip`, reads its `summary.json`,
-and flattens the `summary` / `cost_accounting` blocks into one row per run.
+and flattens the `summary` / `cost_accounting` / `derived` blocks into one row
+per run (plus `timeseries.present` / `timeseries.n_epochs`). For stacked
+epidemic curves see `deploy/aws/analyze_campaign_curves.py`.
 
 ## Why role assumption (vs. static keys)
 
@@ -346,9 +359,11 @@ and flattens the `summary` / `cost_accounting` blocks into one row per run.
 ## Troubleshooting
 
 - **Array child exits with code 137 / `OutOfMemoryError: container killed due to
-  memory usage`.** The container exceeded its `MEMORY` allocation and was killed.
-  Raise `MEMORY` (and, if already at the max for the current `VCPU`, raise
-  `VCPU` too) in `batch_job_definition.json`, then re-register a new revision:
+  memory usage`.** Confirm the image uses subprocess-per-run (default; do not
+  pass `--in-process` in Batch). If a *single* child still peaks over the
+  allocation, raise `MEMORY` (and, if already at the max for the current
+  `VCPU`, raise `VCPU` too) in `batch_job_definition.json`, then re-register a
+  new revision:
 
   ```bash
   sed -e "s/<ACCOUNT_ID>/$ACCOUNT_ID/g" \

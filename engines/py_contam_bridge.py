@@ -645,9 +645,9 @@ def build_transport_engine(
         return None
 
     hvac_cfg = cfg.get("hvac", {})
-    # A configured hvac.oa_fraction becomes the default outdoor-air fraction
-    # for every AHU (native and ContamX both read airflow["oa_fraction"]);
-    # per-AHU oa_fraction entries still win.
+    # Native path: apply hvac.oa_fraction to the in-memory airflow dict passed
+    # to _build_native_engine. ContamX reloads airflow from disk inside
+    # build_contamx_engine and re-applies the same override there.
     if "oa_fraction" in hvac_cfg:
         airflow = {**airflow, "oa_fraction": float(hvac_cfg["oa_fraction"])}
 

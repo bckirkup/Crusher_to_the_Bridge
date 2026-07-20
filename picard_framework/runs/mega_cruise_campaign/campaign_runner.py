@@ -35,6 +35,7 @@ CAMPAIGN_DIR = Path(__file__).resolve().parent
 MANIFEST_PATH = CAMPAIGN_DIR / "campaign_manifest.json"
 OUTPUT_ROOT = REPO_ROOT / "telemetry_buffer" / "mega_cruise_campaign"
 COMPLETED_LOG = OUTPUT_ROOT / "completed_runs.txt"
+FAILED_LOG = OUTPUT_ROOT / "failed_runs.txt"
 
 
 def load_manifest(path: Path = MANIFEST_PATH) -> dict[str, Any]:
@@ -42,16 +43,57 @@ def load_manifest(path: Path = MANIFEST_PATH) -> dict[str, Any]:
         return json.load(fh)
 
 
+def _read_run_id_log(path: Path) -> set[str]:
+    if not path.exists():
+        return set()
+    return {
+        line.strip()
+        for line in path.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    }
+
+
 def completed_runs() -> set[str]:
-    if COMPLETED_LOG.exists():
-        return {line.strip() for line in COMPLETED_LOG.read_text(encoding="utf-8").splitlines() if line.strip()}
-    return set()
+    return _read_run_id_log(COMPLETED_LOG)
+
+
+def failed_runs() -> set[str]:
+    return _read_run_id_log(FAILED_LOG)
 
 
 def mark_completed(run_id: str) -> None:
     OUTPUT_ROOT.mkdir(parents=True, exist_ok=True)
     with open(COMPLETED_LOG, "a", encoding="utf-8") as fh:
         fh.write(run_id + "\n")
+    # A later success clears a prior failure entry for the same run_id.
+    _remove_from_log(FAILED_LOG, run_id)
+
+
+def mark_failed(run_id: str) -> None:
+    OUTPUT_ROOT.mkdir(parents=True, exist_ok=True)
+    with open(FAILED_LOG, "a", encoding="utf-8") as fh:
+        fh.write(run_id + "\n")
+
+
+def _remove_from_log(path: Path, run_id: str) -> None:
+    if not path.exists():
+        return
+    kept = [line for line in path.read_text(encoding="utf-8").splitlines() if line.strip() != run_id]
+    if kept:
+        path.write_text("\n".join(kept) + "\n", encoding="utf-8")
+    else:
+        path.unlink(missing_ok=True)
+
+
+def clear_failed_artifacts(run_id: str) -> None:
+    """Remove leftover workdir / stderr from a prior failure before retry."""
+    run_dir = OUTPUT_ROOT / run_id
+    if run_dir.exists():
+        shutil.rmtree(run_dir)
+    stderr_path = OUTPUT_ROOT / f"{run_id}.subprocess_stderr.txt"
+    stderr_path.unlink(missing_ok=True)
+    spec_path = OUTPUT_ROOT / f"{run_id}.run_spec.json"
+    spec_path.unlink(missing_ok=True)
 
 
 def parse_s3_prefix(s3_prefix: str) -> tuple[str, str]:
@@ -85,6 +127,42 @@ class S3Uploader:
         key = self._key(name)
         self._client.upload_file(str(local_path), self.bucket, key)
         return f"s3://{self.bucket}/{key}"
+
+    def download_file(self, name: str, local_path: Path) -> bool:
+        """Download ``name`` under the prefix to ``local_path``.
+
+        Returns True on success, False if the object is missing. Other S3
+        errors propagate so credential/network failures are visible.
+        """
+        key = self._key(name)
+        try:
+            from botocore.exceptions import ClientError  # noqa: PLC0415
+        except ImportError:  # pragma: no cover
+            ClientError = Exception  # type: ignore[misc, assignment]
+        local_path.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            self._client.download_file(self.bucket, key, str(local_path))
+            return True
+        except ClientError as exc:
+            code = str(exc.response.get("Error", {}).get("Code", ""))
+            if code in {"404", "NoSuchKey", "NotFound"}:
+                return False
+            raise
+        except Exception as exc:  # noqa: BLE001
+            # boto3 may raise different missing-key flavors depending on version.
+            msg = str(exc).lower()
+            if "nosuchkey" in msg or "not found" in msg or "404" in msg:
+                return False
+            raise
+
+    def object_exists(self, name: str) -> bool:
+        """Return True if ``name`` exists under the S3 prefix."""
+        key = self._key(name)
+        try:
+            self._client.head_object(Bucket=self.bucket, Key=key)
+            return True
+        except Exception:  # noqa: BLE001
+            return False
 
 
 def resolve_tier_ids(manifest: dict[str, Any], tier_arg: str | None) -> list[str]:
@@ -390,17 +468,22 @@ def extract_timeseries(history: list[dict[str, Any]]) -> list[dict[str, Any]]:
     Keeps only the scalar fields needed for epidemic curves, detection lag,
     contamination spread and cost-effectiveness analysis — not the full
     per-agent / per-zone records — so it stays ~50 KB per run.
+
+    ``new_infections`` is the per-epoch incidence estimator
+    ``max(0, (I+R)_t − (I+R)_{t−1})``.
     """
     series: list[dict[str, Any]] = []
-    prev_recovered = 0
+    prev_ever_infected = 0
     for epoch_idx, rec in enumerate(history):
         s = rec.get("summary", {})
         cost = rec.get("cost_accounting", {})
         spaces = rec.get("spaces", {})
 
-        recovered = s.get("recovered", 0)
-        new_infections = max(0, recovered - prev_recovered + s.get("infected", 0))
-        prev_recovered = recovered
+        infected = int(s.get("infected", 0) or 0)
+        recovered = int(s.get("recovered", 0) or 0)
+        ever_infected = infected + recovered
+        new_infections = max(0, ever_infected - prev_ever_infected)
+        prev_ever_infected = ever_infected
 
         n_contaminated = 0
         max_conc = 0.0
@@ -452,11 +535,14 @@ def compute_derived_metrics(ts: list[dict[str, Any]], num_agents: int) -> dict[s
     peak_epoch = infected_by_epoch.index(peak_infected)
 
     final = ts[-1]
-    recovered = final.get("recovered", 0)
-    attack_rate = recovered / num_agents if num_agents > 0 else 0
+    recovered = int(final.get("recovered", 0) or 0)
+    infected_final = int(final.get("infected", 0) or 0)
+    # Cumulative attack: still-infectious + recovered (not recovered alone).
+    ever_infected = infected_final + recovered
+    attack_rate = ever_infected / num_agents if num_agents > 0 else 0
 
     # Outbreak threshold: more secondary cases than the initial index cases.
-    outbreak_occurred = recovered > 2
+    outbreak_occurred = ever_infected > 2
 
     detection_epoch = None
     confirmation_epoch = None
@@ -661,6 +747,12 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--tier", default=None, help="Tier id or short prefix (t1…t10)")
     parser.add_argument("--dry-run", action="store_true", help="Count runs without executing")
     parser.add_argument("--resume", action="store_true", help="Skip completed run_ids")
+    parser.add_argument(
+        "--retry-failed",
+        action="store_true",
+        help="Only re-run run_ids listed in failed_runs.txt (clears their leftovers first). "
+        "Implies skipping completed runs.",
+    )
     parser.add_argument("--limit", type=int, default=None, help="Max runs to execute")
     parser.add_argument("--epochs", type=int, default=None, help="Override epochs for all runs")
     parser.add_argument("--platform", default=None, help="Override platform_id")
@@ -766,8 +858,17 @@ def main(argv: list[str] | None = None) -> int:
 
     uploader = S3Uploader(args.s3_prefix) if args.s3_prefix else None
 
+    # Spot/Batch retries start with an empty local disk — pull this shard's
+    # resume log from S3 before deciding what to skip.
+    if uploader is not None and (args.resume or args.retry_failed):
+        _download_completed_log(uploader, shard_index, shard_count)
+
     manifest = load_manifest(args.manifest)
-    done = completed_runs() if args.resume else set()
+    done = completed_runs() if (args.resume or args.retry_failed) else set()
+    retry_only = failed_runs() if args.retry_failed else None
+    if args.retry_failed and not retry_only:
+        print("  --retry-failed: failed_runs.txt is empty; nothing to retry.")
+        return 0
     tiers = resolve_tier_ids(manifest, args.tier)
 
     # Build the full flattened, ordered run list across selected tiers so the
@@ -823,6 +924,23 @@ def main(argv: list[str] | None = None) -> int:
         if run_id in done:
             skipped += 1
             continue
+        if retry_only is not None and run_id not in retry_only:
+            skipped += 1
+            continue
+        # Belt-and-suspenders on resume: if the zip already landed in S3, treat
+        # as done even when the resume log was truncated mid-upload.
+        if (
+            (args.resume or args.retry_failed)
+            and uploader is not None
+            and uploader.object_exists(f"{run_id}.zip")
+        ):
+            mark_completed(run_id)
+            done.add(run_id)
+            skipped += 1
+            continue
+
+        if args.retry_failed:
+            clear_failed_artifacts(run_id)
 
         elapsed = time.time() - t0
         rate = max(executed, 1) / max(elapsed, 1e-6)
@@ -868,6 +986,7 @@ def main(argv: list[str] | None = None) -> int:
                 print(" OK")
         else:
             failed += 1
+            mark_failed(run_id)
             print(" FAIL")
 
     # Final upload of this shard's resume log so retries skip finished runs.
@@ -883,6 +1002,11 @@ def main(argv: list[str] | None = None) -> int:
     return 1 if failed else 0
 
 
+def _resume_log_key(shard_index: int, shard_count: int | None) -> str:
+    suffix = f"shard-{shard_index}" if shard_count is not None else "single"
+    return f"_resume/completed_runs.{suffix}.txt"
+
+
 def _upload_completed_log(
     uploader: S3Uploader,
     shard_index: int,
@@ -891,13 +1015,31 @@ def _upload_completed_log(
     """Upload this shard's completed_runs.txt under a shard-scoped key."""
     if not COMPLETED_LOG.exists():
         return
-    suffix = f"shard-{shard_index}" if shard_count is not None else "single"
     try:
         uploader.upload_file(
-            COMPLETED_LOG, f"_resume/completed_runs.{suffix}.txt",
+            COMPLETED_LOG, _resume_log_key(shard_index, shard_count),
         )
     except Exception as exc:  # noqa: BLE001
         print(f"  (completed_runs.txt upload failed: {exc})")
+
+
+def _download_completed_log(
+    uploader: S3Uploader,
+    shard_index: int,
+    shard_count: int | None,
+) -> None:
+    """Seed local completed_runs.txt from S3 so Spot retries skip finished runs."""
+    key = _resume_log_key(shard_index, shard_count)
+    try:
+        ok = uploader.download_file(key, COMPLETED_LOG)
+    except Exception as exc:  # noqa: BLE001
+        print(f"  (completed_runs.txt download failed: {exc})")
+        return
+    if ok:
+        n = len(completed_runs())
+        print(f"  Resumed from s3://…/{key} ({n} completed run_ids)")
+    else:
+        print(f"  No prior resume log at s3://…/{key}")
 
 
 if __name__ == "__main__":
