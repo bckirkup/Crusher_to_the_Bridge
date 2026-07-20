@@ -16,8 +16,9 @@ ENV PYTHONPATH=/app \
     PIP_NO_CACHE_DIR=1
 
 # Install dependencies first for better layer caching.
-COPY requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt boto3
+# Hash-pinned lock + wheels-only (Sonar docker:S8541 / S8544).
+COPY requirements.lock.txt ./
+RUN pip install --no-cache-dir --only-binary=:all: --require-hashes -r requirements.lock.txt
 
 # Copy only the code and data the headless campaign runner needs (explicit
 # paths rather than `COPY . .` so nothing outside these is ever added).
