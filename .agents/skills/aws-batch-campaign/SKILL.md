@@ -162,11 +162,12 @@ re-registering:
   ```
 
 - **Fargate resource sizing.** Two layers: (1) **subprocess-per-run** stops
-  cumulative RSS growth across a shard; (2) **2 vCPU / 16384 MB** covers
-  single-run peak for 7000-agent / 240-epoch mega cruises (1 vCPU / 4096 MB
-  exits **137**). Fallback **4 vCPU / 30720 MB** only if a *single* child still
-  OOMs. Do not drop below 16 GB without measuring child peak RSS. See README
-  "Container sizing".
+  cumulative RSS growth across a shard; (2) **campaign compact history**
+  (`run.history_retention=compact`) stops within-run telemetry from growing
+  linearly with epochs; (3) **2 vCPU / 16384 MB** still covers single-run peak
+  with headroom (1 vCPU / 4096 MB exits **137**). Fallback **4 vCPU / 30720 MB**
+  only if a *single* child still OOMs after compact retention. Do not drop
+  below 16 GB without measuring child peak RSS. See README "Container sizing".
 
 - **Revision pinning.** `submit-job --job-definition picard-campaign` uses the
   **latest ACTIVE revision at submit time**. So **register the new revision

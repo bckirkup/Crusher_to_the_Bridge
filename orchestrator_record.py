@@ -75,6 +75,59 @@ def _update_summary_from_agent(summary: dict[str, Any], agent: dict[str, Any]) -
         summary["symptomatic"] += 1
 
 
+def _space_entries(
+    spaces: dict[str, dict[str, Any]],
+    contam_engine: ContamTransportEngine | None,
+    pathogen_profiles: dict[str, dict[str, Any]],
+    *,
+    compact: bool,
+) -> dict[str, dict[str, Any]]:
+    """Per-zone mass / concentration for history (compact omits by-id maps)."""
+    out: dict[str, dict[str, Any]] = {}
+    for zname, zdata in spaces.items():
+        zone_entry: dict[str, Any] = {
+            "pathogen_mass": zdata.get("pathogen_mass", 0.0),
+        }
+        if pathogen_profiles and not compact:
+            zone_entry["pathogen_mass_by_id"] = zdata.get("pathogen_mass_by_id", {})
+        if contam_engine is not None:
+            node = contam_engine.zone_nodes.get(zname)
+            if node is not None:
+                zone_entry["concentration_per_m3"] = round(
+                    node.concentration(zdata.get("pathogen_mass", 0.0)), 3,
+                )
+                if not compact:
+                    zone_entry["volume_m3"] = node.volume_m3
+        out[zname] = zone_entry
+    return out
+
+
+def _summary_counts(
+    agents: list[dict[str, Any]],
+    engine: KorkinShipEngine,
+    state: SimulationState,
+    syn_result: dict[str, Any],
+) -> dict[str, Any]:
+    disrupted_count = sum(
+        1 for a in engine.agents if a.microflora_disruption_status > 0
+    )
+    summary: dict[str, Any] = {
+        "susceptible": 0,
+        "infected": 0,
+        "symptomatic": 0,
+        "recovered": 0,
+        "immune": 0,
+        "isolated": len(state.isolated_ids),
+        "quarantined": len(state.quarantined_ids),
+        "quarantine_refusers": len(state.quarantine_refusers),
+        "sick_call_count": syn_result["sick_call_count"],
+        "disrupted_microflora_count": disrupted_count,
+    }
+    for a in agents:
+        _update_summary_from_agent(summary, a)
+    return summary
+
+
 def record_epoch(  # NOSONAR
     epoch: int,
     trigger_status: str,
@@ -107,11 +160,12 @@ def record_epoch(  # NOSONAR
     infection_counters: dict[str, dict[str, Any]] | None = None,
     long_read_results: dict[str, dict[str, Any]] | None = None,
     cascade_result: dict[str, Any] | None = None,
+    history_retention: str = "full",
 ) -> dict[str, Any]:
-    """Build a complete epoch record for simulation_history.
+    """Build an epoch record for simulation_history.
 
-    Validates that key data structures have the expected shape before
-    recording, to catch seam corruption between modules early.
+    ``history_retention="compact"`` keeps only scalars needed for campaign
+    timeseries / summary (no per-agent, contact-tracing, or raw assay blobs).
     """
     if not isinstance(agents, list):
         raise TypeError(f"record_epoch: agents must be list, got {type(agents).__name__}")
@@ -120,29 +174,47 @@ def record_epoch(  # NOSONAR
     if not isinstance(stoplights, dict):
         raise TypeError(f"record_epoch: stoplights must be dict, got {type(stoplights).__name__}")
 
-    multi_pathogen_summary = _multi_pathogen_summary(engine, pathogen_profiles)
-
-    disrupted_count = sum(
-        1 for a in engine.agents if a.microflora_disruption_status > 0
+    compact = str(history_retention).strip().lower() == "compact"
+    summary = _summary_counts(agents, engine, state, syn_result)
+    space_map = _space_entries(
+        spaces, contam_engine, pathogen_profiles, compact=compact,
     )
+
+    if compact:
+        return {
+            "epoch": epoch,
+            "trigger_status": trigger_status,
+            "summary": summary,
+            "spaces": space_map,
+            "multi_pathogen": _multi_pathogen_summary(engine, pathogen_profiles),
+            "infection_counters": infection_counters or {},
+            "hvac": {
+                "filter_type": cfg.get("hvac", {}).get("filter_type", "none"),
+                "filter_efficiency": (
+                    contam_engine.filter_efficiency if contam_engine else 0.0
+                ),
+                "transport_active": contam_engine is not None,
+            },
+            "reactive_protocols": {
+                "active_protocols": [
+                    {"protocol_id": m["protocol_id"], "name": m["name"],
+                     "newly_activated": m["newly_activated"]}
+                    for m in active_mods
+                ],
+                "stoplights": stoplights,
+                "trigger_status": trigger_status,
+            },
+            "cost_accounting": epoch_cost,
+        }
+
+    multi_pathogen_summary = _multi_pathogen_summary(engine, pathogen_profiles)
 
     epoch_record: dict[str, Any] = {
         "epoch": epoch,
         "trigger_status": trigger_status,
         "agents": [],
-        "spaces": {},
-        "summary": {
-            "susceptible": 0,
-            "infected": 0,
-            "symptomatic": 0,
-            "recovered": 0,
-            "immune": 0,
-            "isolated": len(state.isolated_ids),
-            "quarantined": len(state.quarantined_ids),
-            "quarantine_refusers": len(state.quarantine_refusers),
-            "sick_call_count": syn_result["sick_call_count"],
-            "disrupted_microflora_count": disrupted_count,
-        },
+        "spaces": space_map,
+        "summary": summary,
         "multi_pathogen": multi_pathogen_summary,
         "microflora_shifts": {},
         "hvac": {
@@ -163,7 +235,6 @@ def record_epoch(  # NOSONAR
     }
 
     for a in agents:
-        _update_summary_from_agent(epoch_record["summary"], a)
         infection_state, symptom_presentation, compliance_status = resolve_agent_axes(a)
 
         agent_record: dict[str, Any] = {
@@ -183,21 +254,6 @@ def record_epoch(  # NOSONAR
         if "chronic_disease_ids" in a:
             agent_record["chronic_disease_ids"] = a["chronic_disease_ids"]
         epoch_record["agents"].append(agent_record)
-
-    for zname, zdata in spaces.items():
-        zone_entry: dict[str, Any] = {
-            "pathogen_mass": zdata.get("pathogen_mass", 0.0),
-        }
-        if pathogen_profiles:
-            zone_entry["pathogen_mass_by_id"] = zdata.get("pathogen_mass_by_id", {})
-        if contam_engine is not None:
-            node = contam_engine.zone_nodes.get(zname)
-            if node is not None:
-                zone_entry["concentration_per_m3"] = round(
-                    node.concentration(zdata.get("pathogen_mass", 0.0)), 3,
-                )
-                zone_entry["volume_m3"] = node.volume_m3
-        epoch_record["spaces"][zname] = zone_entry
 
     for zname in zone_names:
         mf_shift = zone_microflora_shifts.get(zname, {})

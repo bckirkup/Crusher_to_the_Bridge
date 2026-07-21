@@ -289,6 +289,66 @@ class TestRecordEpochBoundary:
         with pytest.raises(TypeError, match="stoplights must be dict"):
             record_epoch(**kwargs)
 
+    def test_compact_omits_heavy_keys(self) -> None:
+        engine = MagicMock()
+        engine.agents = []
+        kwargs: dict[str, Any] = {
+            "epoch": 0,
+            "trigger_status": STATUS_BASELINE,
+            "agents": [
+                {
+                    "agent_id": 1,
+                    "infection_state": "susceptible",
+                    "symptom_presentation": "none",
+                    "compliance_status": "compliant",
+                    "shedding_rate": 0.0,
+                    "location": "Bridge",
+                    "agent_class": "crew",
+                    "gender": "female",
+                },
+            ],
+            "spaces": {"Bridge": {"pathogen_mass": 1.5}},
+            "engine": engine,
+            "contam_engine": None,
+            "pathogen_profiles": {},
+            "zone_names": ["Bridge"],
+            "zone_microflora_shifts": {},
+            "syn_result": {"sick_call_count": 0},
+            "rdt_result": {"results": [], "tested_count": 0},
+            "pcr_result": None,
+            "seq_result": None,
+            "tracing_matrix": MagicMock(to_dict=lambda: {"shared_room_exposures": [{"x": 1}]}),
+            "state": SimulationState(),
+            "obs": MagicMock(fidelity_name="HIGH"),
+            "active_mods": [],
+            "merged_mods": {"foo": 1},
+            "stoplights": {"air": {"Bridge": "GREEN"}},
+            "epoch_cost": {"total_financial_usd": 0.0},
+            "cfg": {},
+            "air_results": {"Bridge": {"ct": 40}},
+            "swab_results": {},
+            "ww_results": {},
+            "clin_rdt_results": {},
+            "clin_qpcr_results": {},
+            "clin_microbio_results": {},
+            "history_retention": "compact",
+        }
+        rec = record_epoch(**kwargs)
+        assert "agents" not in rec
+        assert "contact_tracing" not in rec
+        assert "observation_engine" not in rec
+        assert "summary" in rec
+        assert "spaces" in rec
+        assert "cost_accounting" in rec
+        assert rec["spaces"]["Bridge"]["pathogen_mass"] == 1.5
+        # Compact still supports campaign timeseries extraction.
+        from picard_framework.runs.mega_cruise_campaign.campaign_runner import (
+            extract_timeseries,
+        )
+        ts = extract_timeseries([rec])
+        assert len(ts) == 1
+        assert ts[0]["infected"] == rec["summary"]["infected"]
+
 
 # ── Cross-module data flow tests ────────────────────────────────────────
 

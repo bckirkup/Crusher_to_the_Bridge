@@ -66,20 +66,38 @@ Each successful run writes:
 `telemetry_buffer/mega_cruise_campaign/<run_id>.zip`
 
 containing `run_spec.json`, `summary.json` (final SIR + costs + trigger +
-`derived` metrics: attack rate, peak prevalence/epoch, detection/confirmation
-lag, quarantine person-epochs, R_eff at peak, …), and `timeseries.json` (a
-compact per-epoch epidemic / contamination / trigger / cost series, ~50 KB).
+`parameters` factor block + `derived` metrics: attack rate, peak
+prevalence/epoch, detection/confirmation lag, quarantine person-epochs,
+R_eff at peak, …), and `timeseries.json` (a compact per-epoch epidemic /
+contamination / trigger / cost series, ~50 KB).
 
-Use `--full-telemetry` to also pack history / lab notebook / ground truth
-(much larger and slower).
+`summary.json` is the bookkeeping unit: structured `parameters` (tier,
+pathogen, seed, HVAC/OA/decay/surveillance/compliance/… labels and resolved
+numerics) sit next to outcomes so results are self-describing without parsing
+`run_id` or reloading the manifest. `deploy/aws/aggregate_results.py`
+flattens `parameters.*` into CSV columns alongside `derived.*`.
+
+Use `--full-telemetry` to force `history_retention=full` and also pack history
+/ lab notebook / ground truth (much larger and slower).
 
 ### Memory isolation
 
-By default each run executes in a fresh subprocess so the OS reclaims all RSS
-on exit — repeated 7000-agent runs otherwise leak memory and exceed Fargate's
-limit after ~20–40 runs. Pass `--in-process` to run in the parent process
-(faster for debugging, leaks across many large runs), and `--timeout SECONDS`
-to bound each subprocess (default 600).
+Two layers:
+
+1. **Within a run** — campaign specs default to `run.history_retention=compact`,
+   so epoch history keeps only summary / spaces / cost scalars (no per-agent
+   snapshots, contact-tracing matrices, or raw assay payloads). That stops
+   RSS from growing roughly linearly with epochs. Full telemetry is opt-in via
+   `--full-telemetry`.
+2. **Across runs** — each run executes in a fresh subprocess so the OS
+   reclaims all RSS on exit. Repeated 7000-agent runs otherwise leak via
+   CPython/`pymalloc` and exceed Fargate after ~20–40 in-process runs. Pass
+   `--in-process` to run in the parent (faster for debugging; leaks across
+   many large runs), and `--timeout SECONDS` to bound each subprocess
+   (default 600).
+
+Do not drop Fargate below 16 GB without measuring child peak RSS under
+compact retention.
 
 Progress for `--resume` is appended to:
 

@@ -68,8 +68,9 @@ def summary_from_zip(zip_path: Path) -> dict[str, Any] | None:
     """Read and flatten summary.json from a run zip, or None if absent.
 
     Older zips carry only ``summary`` / ``cost_accounting``; newer ones also
-    carry ``derived`` scalar metrics plus a separate ``timeseries.json``. All
-    are handled; missing sections just leave those columns blank.
+    carry ``derived`` scalar metrics, a ``parameters`` factor block, plus a
+    separate ``timeseries.json``. All are handled; missing sections just leave
+    those columns blank.
     """
     try:
         with zipfile.ZipFile(zip_path) as zf:
@@ -92,6 +93,7 @@ def summary_from_zip(zip_path: Path) -> dict[str, Any] | None:
     row: dict[str, Any] = {"run_id": data.get("run_id", zip_path.stem)}
     row["num_epochs"] = data.get("num_epochs")
     row["trigger_status"] = data.get("trigger_status")
+    row.update(flatten(data.get("parameters", {}), "parameters"))
     row.update(flatten(data.get("summary", {}), "summary"))
     row.update(flatten(data.get("cost_accounting", {}), "cost"))
     row.update(flatten(data.get("derived", {}), "derived"))

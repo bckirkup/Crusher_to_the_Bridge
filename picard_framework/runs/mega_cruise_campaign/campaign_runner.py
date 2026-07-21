@@ -309,11 +309,16 @@ def make_picard_spec(
     num_agents: int,
     telemetry_dir: Path | None = None,
     write_ground_truth: bool = False,
+    history_retention: str = "compact",
+    parameters: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     cfg = merge_cfg(
         {"ship_graph": {"num_agents": num_agents}},
         config_overrides,
     )
+    retention = str(history_retention or "compact").strip().lower()
+    if retention not in ("full", "compact"):
+        retention = "compact"
     spec: dict[str, Any] = {
         "schema_version": "1.0.0",
         "description": run_id,
@@ -322,6 +327,7 @@ def make_picard_spec(
             "random_seed": seed,
             "num_epochs": epochs,
             "write_ground_truth": write_ground_truth,
+            "history_retention": retention,
         },
         "legacy_yaml": "crusher_labs/config.yaml",
         "actors": [],
@@ -331,12 +337,117 @@ def make_picard_spec(
         spec["pathogen_overrides"] = pathogen_overrides
     if cfg:
         spec["config_overrides"] = cfg
+    if parameters:
+        spec["campaign_parameters"] = dict(parameters)
+    elif parameters is None:
+        # Always attach a minimal parameters block for bookkeeping.
+        spec["campaign_parameters"] = {
+            "run_id": run_id,
+            "platform_id": platform,
+            "pathogen_bundle_id": bundle,
+            "seed": int(seed),
+            "num_epochs": int(epochs),
+            "num_agents": int(num_agents),
+            "history_retention": retention,
+        }
     if telemetry_dir is not None:
         # Absolute paths so finalize does not clobber shared telemetry_buffer/.
         spec["run"]["simulation_history"] = str(telemetry_dir / "simulation_history.json")
         spec["run"]["lab_notebook"] = str(telemetry_dir / "artificial_lab_notebook.json")
         spec["run"]["ground_truth"] = str(telemetry_dir / "ground_truth.json")
     return spec
+
+
+def _campaign_parameters(
+    *,
+    tier_id: str,
+    run_id: str,
+    platform: str,
+    bundle: str,
+    seed: int,
+    epochs: int,
+    num_agents: int,
+    pathogen: str | None = None,
+    config_overrides: dict[str, Any] | None = None,
+    history_retention: str = "compact",
+    **factors: Any,
+) -> dict[str, Any]:
+    """Build analysis-friendly factor labels for summary.json / aggregate CSV."""
+    params: dict[str, Any] = {
+        "tier_id": tier_id,
+        "run_id": run_id,
+        "platform_id": platform,
+        "pathogen_bundle_id": bundle,
+        "seed": int(seed),
+        "num_epochs": int(epochs),
+        "num_agents": int(num_agents),
+        "history_retention": history_retention,
+    }
+    if pathogen is not None:
+        params["pathogen"] = pathogen
+    for key, value in factors.items():
+        if value is not None:
+            params[key] = value
+    cfg = config_overrides or {}
+    hvac = cfg.get("hvac") or {}
+    if "filter_efficiency" in hvac:
+        params["filter_efficiency"] = hvac["filter_efficiency"]
+    if "oa_fraction" in hvac:
+        params["outdoor_air_fraction"] = hvac["oa_fraction"]
+    if "natural_decay_rate" in hvac:
+        params["decay_rate"] = hvac["natural_decay_rate"]
+    ship = cfg.get("ship_graph") or {}
+    if "immune_fraction" in ship:
+        params["immune_fraction"] = ship["immune_fraction"]
+    fred = cfg.get("fred_behavior") or {}
+    if "quarantine_compliance" in fred:
+        params["quarantine_compliance"] = fred["quarantine_compliance"]
+    wear = cfg.get("wearable_monitoring") or {}
+    if "deployment_profile" in wear and "wearables" not in params:
+        params["wearables"] = wear["deployment_profile"]
+    return params
+
+
+def parameters_from_spec(spec: dict[str, Any]) -> dict[str, Any]:
+    """Resolve the parameters block embedded in summary.json.
+
+    Prefers explicit ``campaign_parameters``; otherwise derives a minimal set
+    from the Picard spec so ad-hoc ``--single`` runs stay self-describing.
+    """
+    attached = spec.get("campaign_parameters")
+    if isinstance(attached, dict) and attached:
+        return dict(attached)
+
+    catalog = spec.get("catalog") or {}
+    run = spec.get("run") or {}
+    cfg = spec.get("config_overrides") or {}
+    ship = cfg.get("ship_graph") or {}
+    params: dict[str, Any] = {
+        "run_id": spec.get("description", ""),
+        "platform_id": catalog.get("platform_id", ""),
+        "pathogen_bundle_id": catalog.get("pathogen_bundle_id", ""),
+        "seed": run.get("random_seed"),
+        "num_epochs": run.get("num_epochs"),
+        "num_agents": ship.get("num_agents"),
+        "history_retention": run.get("history_retention", "full"),
+    }
+    hvac = cfg.get("hvac") or {}
+    if "filter_efficiency" in hvac:
+        params["filter_efficiency"] = hvac["filter_efficiency"]
+    if "oa_fraction" in hvac:
+        params["outdoor_air_fraction"] = hvac["oa_fraction"]
+    if "natural_decay_rate" in hvac:
+        params["decay_rate"] = hvac["natural_decay_rate"]
+    if "immune_fraction" in ship:
+        params["immune_fraction"] = ship["immune_fraction"]
+    fred = cfg.get("fred_behavior") or {}
+    if "quarantine_compliance" in fred:
+        params["quarantine_compliance"] = fred["quarantine_compliance"]
+    wear = cfg.get("wearable_monitoring") or {}
+    if "deployment_profile" in wear:
+        params["wearables"] = wear["deployment_profile"]
+    # Drop empty / None so aggregate columns stay sparse.
+    return {k: v for k, v in params.items() if v is not None and v != ""}
 
 
 def generate_tier_runs(
@@ -355,18 +466,58 @@ def generate_tier_runs(
     surv_cfgs = manifest["surveillance_configs"]
     short = tier_id.split("_", 1)[0]
 
+    def _yield(
+        rid: str,
+        *,
+        bundle: str,
+        pathogen_overrides: dict[str, Any] | None,
+        config_overrides: dict[str, Any] | None,
+        seed: int,
+        num_agents: int | None = None,
+        pathogen: str | None = None,
+        **factors: Any,
+    ) -> tuple[str, dict[str, Any]]:
+        n_agents = default_agents if num_agents is None else int(num_agents)
+        params = _campaign_parameters(
+            tier_id=tier_id,
+            run_id=rid,
+            platform=platform,
+            bundle=bundle,
+            seed=seed,
+            epochs=default_epochs,
+            num_agents=n_agents,
+            pathogen=pathogen,
+            config_overrides=config_overrides,
+            **factors,
+        )
+        return rid, make_picard_spec(
+            rid,
+            platform=platform,
+            bundle=bundle,
+            pathogen_overrides=pathogen_overrides,
+            config_overrides=config_overrides,
+            seed=seed,
+            epochs=default_epochs,
+            num_agents=n_agents,
+            parameters=params,
+        )
+
     if short == "t1":
         hvac = {"hvac": tier["hvac"]} if tier.get("hvac") else None
-        surv = surv_cfgs.get(tier.get("surveillance", "none"))
+        sname = tier.get("surveillance", "none")
+        surv = surv_cfgs.get(sname)
         for pathogen in tier["pathogens"]:
             bundle, _pid, overrides = get_pathogen_config(manifest, pathogen)
             for seed in tier["seeds"]:
                 rid = f"{short}_{pathogen}_s{seed}"
-                yield rid, make_picard_spec(
-                    rid, platform=platform, bundle=bundle,
+                yield _yield(
+                    rid,
+                    bundle=bundle,
                     pathogen_overrides=overrides,
                     config_overrides=merge_cfg(hvac, surv),
-                    seed=seed, epochs=default_epochs, num_agents=default_agents,
+                    seed=seed,
+                    pathogen=pathogen,
+                    surveillance=sname,
                 )
 
     elif short == "t2":
@@ -383,11 +534,16 @@ def generate_tier_runs(
                         }}
                         for seed in tier["seeds"]:
                             rid = f"{short}_{pathogen}_{fname}_{oaname}_{dname}_s{seed}"
-                            yield rid, make_picard_spec(
-                                rid, platform=platform, bundle=bundle,
+                            yield _yield(
+                                rid,
+                                bundle=bundle,
                                 pathogen_overrides=overrides,
                                 config_overrides=hvac,
-                                seed=seed, epochs=default_epochs, num_agents=default_agents,
+                                seed=seed,
+                                pathogen=pathogen,
+                                filter=fname,
+                                oa=oaname,
+                                decay=dname,
                             )
 
     elif short == "t3":
@@ -397,11 +553,14 @@ def generate_tier_runs(
             for sname in tier["surveillance_strategies"]:
                 for seed in tier["seeds"]:
                     rid = f"{short}_{pathogen}_{sname}_s{seed}"
-                    yield rid, make_picard_spec(
-                        rid, platform=platform, bundle=bundle,
+                    yield _yield(
+                        rid,
+                        bundle=bundle,
                         pathogen_overrides=overrides,
                         config_overrides=merge_cfg(hvac, surv_cfgs.get(sname)),
-                        seed=seed, epochs=default_epochs, num_agents=default_agents,
+                        seed=seed,
+                        pathogen=pathogen,
+                        surveillance=sname,
                     )
 
     elif short == "t4":
@@ -416,11 +575,16 @@ def generate_tier_runs(
                         }}
                         for seed in tier["seeds"]:
                             rid = f"{short}_{pathogen}_{fname}_{dname}_{sname}_s{seed}"
-                            yield rid, make_picard_spec(
-                                rid, platform=platform, bundle=bundle,
+                            yield _yield(
+                                rid,
+                                bundle=bundle,
                                 pathogen_overrides=overrides,
                                 config_overrides=merge_cfg(hvac, surv_cfgs.get(sname)),
-                                seed=seed, epochs=default_epochs, num_agents=default_agents,
+                                seed=seed,
+                                pathogen=pathogen,
+                                filter=fname,
+                                decay=dname,
+                                surveillance=sname,
                             )
 
     elif short == "t5":
@@ -430,11 +594,14 @@ def generate_tier_runs(
             for sname in tier["surveillance_strategies"]:
                 for seed in tier["seeds"]:
                     rid = f"{short}_{safe}_{sname}_s{seed}"
-                    yield rid, make_picard_spec(
-                        rid, platform=platform, bundle=bundle,
+                    yield _yield(
+                        rid,
+                        bundle=bundle,
                         pathogen_overrides=overrides,
                         config_overrides=surv_cfgs.get(sname),
-                        seed=seed, epochs=default_epochs, num_agents=default_agents,
+                        seed=seed,
+                        combo=combo,
+                        surveillance=sname,
                     )
 
     elif short == "t6":
@@ -451,11 +618,15 @@ def generate_tier_runs(
                     cfg_over, imm_tag = _immunity_override(imm_frac)
                     for seed in tier["seeds"]:
                         rid = f"{short}_{pathogen}_init{n_init}{imm_tag}_s{seed}"
-                        yield rid, make_picard_spec(
-                            rid, platform=platform, bundle=bundle,
+                        yield _yield(
+                            rid,
+                            bundle=bundle,
                             pathogen_overrides=path_over,
                             config_overrides=cfg_over,
-                            seed=seed, epochs=default_epochs, num_agents=default_agents,
+                            seed=seed,
+                            pathogen=pathogen,
+                            n_init=int(n_init),
+                            immunity=imm_frac,
                         )
 
     elif short == "t7":
@@ -477,11 +648,16 @@ def generate_tier_runs(
                                 f"{short}_{pathogen}_{sname}"
                                 f"_comp{int(comp * 100)}{imm_tag}_s{seed}"
                             )
-                            yield rid, make_picard_spec(
-                                rid, platform=platform, bundle=bundle,
+                            yield _yield(
+                                rid,
+                                bundle=bundle,
                                 pathogen_overrides=overrides,
                                 config_overrides=cfg_over,
-                                seed=seed, epochs=default_epochs, num_agents=default_agents,
+                                seed=seed,
+                                pathogen=pathogen,
+                                surveillance=sname,
+                                compliance=float(comp),
+                                immunity=imm_frac,
                             )
 
     elif short == "t8":
@@ -492,11 +668,15 @@ def generate_tier_runs(
                 for sname in tier["surveillance_strategies"]:
                     for seed in tier["seeds"]:
                         rid = f"{short}_{pathogen}_{wname}_{sname}_s{seed}"
-                        yield rid, make_picard_spec(
-                            rid, platform=platform, bundle=bundle,
+                        yield _yield(
+                            rid,
+                            bundle=bundle,
                             pathogen_overrides=overrides,
                             config_overrides=merge_cfg(surv_cfgs.get(sname), wear),
-                            seed=seed, epochs=default_epochs, num_agents=default_agents,
+                            seed=seed,
+                            pathogen=pathogen,
+                            wearables=wname,
+                            surveillance=sname,
                         )
 
     elif short == "t9":
@@ -505,11 +685,14 @@ def generate_tier_runs(
             for sname in tier["surveillance_strategies"]:
                 for seed in tier["seeds"]:
                     rid = f"{short}_{pathogen}_{sname}_s{seed}"
-                    yield rid, make_picard_spec(
-                        rid, platform=platform, bundle=bundle,
+                    yield _yield(
+                        rid,
+                        bundle=bundle,
                         pathogen_overrides=overrides,
                         config_overrides=surv_cfgs.get(sname),
-                        seed=seed, epochs=default_epochs, num_agents=default_agents,
+                        seed=seed,
+                        pathogen=pathogen,
+                        surveillance=sname,
                     )
 
     elif short == "t10":
@@ -518,11 +701,14 @@ def generate_tier_runs(
             for n_agents in tier["population_sizes"]:
                 for seed in tier["seeds"]:
                     rid = f"{short}_{pathogen}_n{n_agents}_s{seed}"
-                    yield rid, make_picard_spec(
-                        rid, platform=platform, bundle=bundle,
+                    yield _yield(
+                        rid,
+                        bundle=bundle,
                         pathogen_overrides=overrides,
                         config_overrides=None,
-                        seed=seed, epochs=default_epochs, num_agents=int(n_agents),
+                        seed=seed,
+                        num_agents=int(n_agents),
+                        pathogen=pathogen,
                     )
 
     else:
@@ -681,13 +867,22 @@ def run_simulation(
         shutil.rmtree(run_dir)
     prepare_output_directory(run_dir, allowed_roots=roots)
 
+    # Always copy so we can set retention / telemetry paths without mutating caller.
+    spec = dict(spec)
+    spec["run"] = dict(spec.get("run") or {})
     if full_telemetry:
-        spec = dict(spec)
-        spec["run"] = dict(spec["run"])
         spec["run"]["write_ground_truth"] = True
+        spec["run"]["history_retention"] = "full"
         spec["run"]["simulation_history"] = os.path.join(run_dir, "simulation_history.json")
         spec["run"]["lab_notebook"] = os.path.join(run_dir, "artificial_lab_notebook.json")
         spec["run"]["ground_truth"] = os.path.join(run_dir, "ground_truth.json")
+        if isinstance(spec.get("campaign_parameters"), dict):
+            spec["campaign_parameters"] = dict(spec["campaign_parameters"])
+            spec["campaign_parameters"]["history_retention"] = "full"
+    else:
+        # Campaign default: compact in-RAM history (summary / spaces / cost only).
+        spec["run"].setdefault("history_retention", "compact")
+        spec["run"].setdefault("write_ground_truth", False)
 
     spec_path = resolve_child_path(run_dir, "run_spec.json")
     with validated_open(spec_path, "w", allowed_roots=roots, encoding="utf-8") as fh:
@@ -711,6 +906,7 @@ def run_simulation(
 
         summary = {
             "run_id": safe_id,
+            "parameters": parameters_from_spec(spec),
             "num_epochs": result.num_epochs,
             "trigger_status": result.final_trigger_status,
             "summary": last.get("summary", {}),

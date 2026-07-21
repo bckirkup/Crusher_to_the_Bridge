@@ -7,7 +7,7 @@ from __future__ import annotations
 import json
 import os
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, Literal
 
 from simulation_utils.paths import validated_open
 
@@ -20,6 +20,17 @@ from picard_framework.pathogen_overrides import (
 )
 
 _CRUSHER_CONFIG_REL = os.path.join("crusher_labs", "config.yaml")
+
+HistoryRetention = Literal["full", "compact"]
+_VALID_HISTORY_RETENTION = frozenset({"full", "compact"})
+
+
+def _parse_history_retention(value: Any) -> HistoryRetention:
+    """Normalize run.history_retention; unknown values fall back to full."""
+    text = str(value or "full").strip().lower()
+    if text not in _VALID_HISTORY_RETENTION:
+        return "full"
+    return text  # type: ignore[return-value]
 
 
 def _resolve_repo_path(
@@ -105,6 +116,7 @@ class PicardRunSpec:
     social_config: dict[str, Any] = field(default_factory=dict)
     telemetry: TelemetryPaths | None = None
     write_ground_truth: bool = True
+    history_retention: HistoryRetention = "full"
 
     @property
     def cfg(self) -> dict[str, Any]:
@@ -257,6 +269,9 @@ class PicardRunSpec:
                 lab_notebook=run.get("lab_notebook", ""),
             ),
             write_ground_truth=bool(run.get("write_ground_truth", True)),
+            history_retention=_parse_history_retention(
+                run.get("history_retention", "full"),
+            ),
         )
 
     def inject_into_cfg(self) -> dict[str, Any]:

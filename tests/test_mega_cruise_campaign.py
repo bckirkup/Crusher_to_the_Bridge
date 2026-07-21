@@ -23,6 +23,7 @@ from picard_framework.runs.mega_cruise_campaign.campaign_runner import (  # noqa
     main,
     make_picard_spec,
     mark_failed,
+    parameters_from_spec,
     resolve_tier_ids,
     run_simulation_subprocess,
 )
@@ -164,6 +165,42 @@ def test_make_picard_spec_optional_telemetry_paths(tmp_path) -> None:
         telemetry_dir=telemetry,
     )
     assert spec["run"]["simulation_history"].endswith("simulation_history.json")
+    assert spec["run"]["history_retention"] == "compact"
+    assert spec["campaign_parameters"]["seed"] == 42
+    assert spec["campaign_parameters"]["num_agents"] == 20
+
+
+def test_tier_specs_carry_compact_retention_and_parameters() -> None:
+    manifest = load_manifest()
+    rid, spec = next(generate_tier_runs(manifest, "t1_pathogen_baselines"))
+    assert spec["run"]["history_retention"] == "compact"
+    params = spec["campaign_parameters"]
+    assert params["run_id"] == rid
+    assert params["tier_id"] == "t1_pathogen_baselines"
+    assert params["pathogen"]
+    assert params["seed"] == spec["run"]["random_seed"]
+    assert params["num_agents"] == spec["config_overrides"]["ship_graph"]["num_agents"]
+
+    _rid2, spec2 = next(generate_tier_runs(manifest, "t2_hvac_sweep"))
+    p2 = spec2["campaign_parameters"]
+    assert "filter" in p2 and "oa" in p2 and "decay" in p2
+    assert "filter_efficiency" in p2
+    assert "outdoor_air_fraction" in p2
+
+
+def test_parameters_from_spec_fallback_without_campaign_block() -> None:
+    spec = {
+        "description": "ad_hoc",
+        "catalog": {"platform_id": "destroyer_baseline", "pathogen_bundle_id": "active_profiles"},
+        "run": {"random_seed": 7, "num_epochs": 4, "history_retention": "full"},
+        "config_overrides": {"ship_graph": {"num_agents": 50}, "hvac": {"filter_efficiency": 0.9}},
+    }
+    params = parameters_from_spec(spec)
+    assert params["run_id"] == "ad_hoc"
+    assert params["seed"] == 7
+    assert params["num_agents"] == 50
+    assert params["filter_efficiency"] == pytest.approx(0.9)
+    assert params["history_retention"] == "full"
 
 
 def _sample_history() -> list[dict]:
@@ -251,6 +288,9 @@ def test_smoke_cli_one_run(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> N
     summary = json.loads((work / "summary.json").read_text(encoding="utf-8"))
     assert "summary" in summary
     assert "derived" in summary
+    assert "parameters" in summary
+    assert summary["parameters"]["seed"] is not None
+    assert summary["parameters"].get("history_retention") == "compact"
     # timeseries.json is written and packed into the zip.
     assert (work / "timeseries.json").is_file()
     with zipfile.ZipFile(zips[0]) as zf:
@@ -305,6 +345,7 @@ def test_aggregate_flattens_derived_and_timeseries_metadata(tmp_path: Path) -> N
             "run_id": "run_a",
             "num_epochs": 3,
             "trigger_status": "CONFIRMED",
+            "parameters": {"pathogen": "norovirus", "seed": 42, "filter": "hepa"},
             "summary": {"infected": 1, "recovered": 4},
             "cost_accounting": {"total_financial_usd": 12.0},
             "derived": {"attack_rate": 0.004, "peak_prevalence": 3},
@@ -317,6 +358,9 @@ def test_aggregate_flattens_derived_and_timeseries_metadata(tmp_path: Path) -> N
     assert row["derived.peak_prevalence"] == 3
     assert row["summary.recovered"] == 4
     assert row["cost.total_financial_usd"] == pytest.approx(12.0)
+    assert row["parameters.pathogen"] == "norovirus"
+    assert row["parameters.seed"] == 42
+    assert row["parameters.filter"] == "hepa"
     assert row["timeseries.present"] is True
     assert row["timeseries.n_epochs"] == 3
 
@@ -341,6 +385,7 @@ def test_aggregate_backward_compatible_without_derived(tmp_path: Path) -> None:
     assert row["timeseries.present"] is False
     assert row["timeseries.n_epochs"] is None
     assert not any(k.startswith("derived.") for k in row)
+    assert not any(k.startswith("parameters.") for k in row)
 
 
 def test_subprocess_timeout_writes_stderr(
