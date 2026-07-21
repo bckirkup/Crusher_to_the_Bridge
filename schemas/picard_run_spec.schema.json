@@ -23,13 +23,23 @@
       "properties": {
         "random_seed": { "type": "integer" },
         "num_epochs": { "type": "integer", "minimum": 1 },
-        "write_ground_truth": { "type": "boolean" }
+        "write_ground_truth": { "type": "boolean" },
+        "history_retention": {
+          "type": "string",
+          "enum": ["full", "compact"],
+          "description": "full keeps per-agent/contact/assay history; compact keeps summary scalars for campaign timeseries."
+        }
       },
       "additionalProperties": true
     },
     "legacy_yaml": { "type": "string" },
     "actors": { "type": "array" },
-    "incentives": { "type": "object" }
+    "incentives": { "type": "object" },
+    "campaign_parameters": {
+      "type": "object",
+      "description": "Optional campaign-owned factor labels copied into summary.json parameters.",
+      "additionalProperties": true
+    }
   },
   "additionalProperties": true
 }

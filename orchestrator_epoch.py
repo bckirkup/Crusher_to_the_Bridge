@@ -492,15 +492,16 @@ def run_observation_sampling(
             clin_rdt_results, clin_qpcr_results, clin_microbio_results,
         )
 
-    obs.notebook.log_air_sniffer(epoch, air_results)
-    obs.notebook.log_surface_swab(epoch, swab_results)
-    obs.notebook.log_wastewater_seq(epoch, ww_results)
-    obs.notebook.log_clinical_rdt(epoch, clin_rdt_results)
-    obs.notebook.log_clinical_qpcr(epoch, clin_qpcr_results)
-    obs.notebook.log_clinical_microbiology(epoch, clin_microbio_results)
-    obs.notebook.log_agent_summary(epoch, agents)
-    if long_read_results:
-        obs.notebook.log_long_read_verification(epoch, long_read_results)
+    if obs.lab_notebook_enabled:
+        obs.notebook.log_air_sniffer(epoch, air_results)
+        obs.notebook.log_surface_swab(epoch, swab_results)
+        obs.notebook.log_wastewater_seq(epoch, ww_results)
+        obs.notebook.log_clinical_rdt(epoch, clin_rdt_results)
+        obs.notebook.log_clinical_qpcr(epoch, clin_qpcr_results)
+        obs.notebook.log_clinical_microbiology(epoch, clin_microbio_results)
+        obs.notebook.log_agent_summary(epoch, agents)
+        if long_read_results:
+            obs.notebook.log_long_read_verification(epoch, long_read_results)
 
     return (
         air_results, swab_results, ww_results,

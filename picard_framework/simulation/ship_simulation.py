@@ -249,6 +249,9 @@ class ShipSimulation:
         self._init_transmission_core(ship, airflow_data, platform_layout)
 
         self.obs = init_observation_engine(cfg, self.seed)
+        # Compact retention skips lab-notebook accumulation (campaign never finalizes it).
+        if self.run_spec.history_retention == "compact":
+            self.obs.lab_notebook_enabled = False
         self.proto_ctx = init_protocol_engine(
             cfg,
             self.contam_engine,
@@ -521,9 +524,10 @@ class ShipSimulation:
             state.escalation_log.append({
                 "epoch": epoch, "from": prev_status, "to": state.trigger_status,
             })
-            self.obs.notebook.log_trigger_transition(
-                epoch, prev_status, state.trigger_status,
-            )
+            if self.obs.lab_notebook_enabled:
+                self.obs.notebook.log_trigger_transition(
+                    epoch, prev_status, state.trigger_status,
+                )
 
         stoplights = compute_stoplights(
             air_results, swab_results, ww_results,
@@ -663,10 +667,11 @@ class ShipSimulation:
             infection_counters=counter_results,
             long_read_results=long_read_results,
             cascade_result=cascade_result,
+            history_retention=self.run_spec.history_retention,
         )
-        if applied:
+        if applied and self.run_spec.history_retention != "compact":
             epoch_record["decisions"] = applied
-        if dr is not None:
+        if dr is not None and self.run_spec.history_retention != "compact":
             dr.capture_sop_events(self.proto_ctx.protocol_engine, epoch)
             epoch_record.setdefault("reactive_protocols", {})["sop_events"] = dr.sop_events_buffer
             epoch_record["information_state"] = information_state
@@ -679,6 +684,9 @@ class ShipSimulation:
             epoch_record.setdefault("contact_tracing", {})["agent_adjacency"] = (
                 dr.contact_graph.to_dict().get("agent_adjacency", {})
             )
+        elif dr is not None:
+            # Still capture SOP events for runtime, but do not retain in history.
+            dr.capture_sop_events(self.proto_ctx.protocol_engine, epoch)
         state.simulation_history.append(epoch_record)
         self._epoch = epoch
 

@@ -56,7 +56,7 @@ Two credential contexts, both short-lived:
 | `batch_execution_role_permissions.json` | Permission policy for the execution role (the Fargate agent): pull the `picard-campaign` image from ECR and write container logs. Equivalent to the AWS-managed `AmazonECSTaskExecutionRolePolicy`, scoped to this repo/log group. | `<REGION>`, `<ACCOUNT_ID>` |
 | `batch_job_role_trust.json` | Trust policy for `picard-campaign-job-role` — the running container's own identity (used by boto3's ambient credential chain to upload results to S3). Assumed by the ECS/Fargate task. | *(none)* |
 | `batch_job_role_permissions.json` | Permission policy for `picard-campaign-job-role` (the container's own identity). boto3 in `campaign_runner.py` picks this up from the ambient credential chain to upload each `<run_id>.zip` and `completed_runs.txt` to the shared results prefix. S3 write to `campaign/*`. | `<BUCKET>` |
-| `batch_job_definition.json` | Fargate Spot Batch job definition (ECR image, both role ARNs, vCPU/mem, shard/s3 command). Sized at **2 vCPU / 16384 MB (16 GB)** so a full mega-cruise run (7000 agents, 240 epochs) that peaks above 4 GB has ample headroom. **Not an IAM document** — it is a Batch `register-job-definition` input and may carry extra keys. | `<ACCOUNT_ID>`, `<REGION>`, `<BUCKET>` |
+| `batch_job_definition.json` | Fargate Spot Batch job definition (ECR image, both role ARNs, vCPU/mem, shard/s3 command). Sized at **2 vCPU / 16384 MB (16 GB)** for single-run peak headroom after subprocess isolation. Campaign runs default to **compact history retention** (summary/spaces/cost only), so peak RSS tracks live O(N) state rather than unbounded per-epoch telemetry; measure before lowering below 16 GB. **Not an IAM document** — it is a Batch `register-job-definition` input and may carry extra keys. | `<ACCOUNT_ID>`, `<REGION>`, `<BUCKET>` |
 | `submit_array_job.sh` | Wrapper around `aws batch submit-job --array-properties size=<N>` (honors `AWS_PROFILE`) | — |
 | `aggregate_results.py` | Unzip `<run_id>.zip` under `./results/`, merge `summary.json` into one CSV/JSON | — |
 
@@ -225,12 +225,18 @@ Two separate memory problems, two fixes:
 
 1. **Cumulative RSS across many runs** — CPython/`pymalloc` does not return
    pages between in-process simulations. The campaign runner defaults to
-   **subprocess-per-run** so the OS reclaims each child's ~2 GB on exit and the
+   **subprocess-per-run** so the OS reclaims each child's RSS on exit and the
    parent stays small.
-2. **Single-run peak** — one 7000-agent / 240-epoch mega-cruise can still peak
-   above 4 GB. The job definition therefore requests **2 vCPU / 16384 MB
-   (16 GB)** so a child has headroom; the previous 1 vCPU / 4096 MB sizing
-   OOM-killed array children (exit code 137).
+2. **Single-run peak** — without compact retention, full per-epoch telemetry
+   (agents + contact tracing + raw assays + lab notebook) grew roughly
+   linearly with epochs and could approach or exceed 16 GB on long outbreak
+   runs. Campaign specs now default to
+   `run.history_retention=compact` (summary / spaces / cost only; lab
+   notebook logging skipped). Peak RSS should then track live O(N) physics
+   state. The job definition still requests **2 vCPU / 16384 MB (16 GB)**
+   for headroom; the previous 1 vCPU / 4096 MB sizing OOM-killed array
+   children (exit code 137). Measure child peak RSS before dropping below
+   16 GB. Use `--full-telemetry` only when you need the full history dump.
 
 On **Fargate, memory is constrained by vCPU** — you can only pick a `MEMORY`
 value from the valid set for the chosen `VCPU`. At **2 vCPU** the allowed range
@@ -240,7 +246,14 @@ If 16 GB still OOMs on a *single* run peak, step up to **4 vCPU / 30720 MB**
 `MEMORY`. See the AWS docs for the full
 [Fargate task CPU/memory combinations](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html#task_size).
 Do **not** drop below 16 GB without measuring child peak RSS after subprocess
-isolation.
+isolation **and** compact retention.
+
+### Result bookkeeping
+
+Each `<run_id>.zip` packs `summary.json` with a structured `parameters` block
+(tier, pathogen, seed, HVAC/OA/decay/surveillance/… factors) next to outcomes.
+`aggregate_results.py` flattens `parameters.*` into CSV columns so you do not
+need to parse opaque run_ids or reopen `run_spec.json` / the manifest.
 
 ## 5. Compute environment + job queue (one-time)
 
