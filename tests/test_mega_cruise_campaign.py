@@ -415,7 +415,7 @@ def test_aggregate_backward_compatible_without_derived(tmp_path: Path) -> None:
 def test_subprocess_timeout_writes_stderr(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """TimeoutExpired must leave a stderr artifact and return False."""
+    """Child timeout must leave stderr + failure sidecars and return False."""
     import subprocess as sp
 
     out = tmp_path / "mega_cruise_campaign"
@@ -424,18 +424,83 @@ def test_subprocess_timeout_writes_stderr(
         out,
     )
 
-    def _raise_timeout(*_a, **_k):
-        raise sp.TimeoutExpired(cmd=["x"], timeout=1)
+    class _FakeProc:
+        pid = 4242
+        returncode = -9
+
+        def poll(self):
+            return None
+
+        def kill(self):
+            return None
+
+        def communicate(self, timeout=None):  # noqa: ARG002
+            return ("", "")
 
     monkeypatch.setattr(
-        "picard_framework.runs.mega_cruise_campaign.campaign_runner.subprocess.run",
-        _raise_timeout,
+        "picard_framework.runs.mega_cruise_campaign.campaign_runner.subprocess.Popen",
+        lambda *_a, **_k: _FakeProc(),
     )
-    ok = run_simulation_subprocess("timeout_run", {"description": "timeout_run"}, timeout=1)
+    monkeypatch.setattr(
+        "picard_framework.runs.mega_cruise_campaign.campaign_runner.time.monotonic",
+        lambda: 1_000_000.0,
+    )
+    monkeypatch.setattr(
+        "picard_framework.runs.mega_cruise_campaign.campaign_runner._read_vmhwm_kb",
+        lambda _pid: 1234,
+    )
+    ok = run_simulation_subprocess("timeout_run", {"description": "timeout_run"}, timeout=0)
     assert ok is False
     err = out / "timeout_run.subprocess_stderr.txt"
     assert err.is_file()
     assert "TimeoutExpired" in err.read_text(encoding="utf-8")
+    failure = json.loads((out / "timeout_run.failure.json").read_text(encoding="utf-8"))
+    assert failure["timed_out"] is True
+    assert failure["failure_class"] == "timeout"
+    assert failure["peak_rss_kb"] == 1234
+    resource = json.loads((out / "timeout_run.resource.json").read_text(encoding="utf-8"))
+    assert resource["ok"] is False
+    # silence unused import if type checkers complain
+    assert sp.TimeoutExpired is not None
+
+
+def test_looks_like_oom_and_classify_helpers() -> None:
+    import importlib.util
+
+    from picard_framework.runs.mega_cruise_campaign.campaign_runner import (
+        _looks_like_oom,
+    )
+
+    clf_path = REPO_ROOT / "deploy" / "aws" / "classify_batch_failures.py"
+    spec = importlib.util.spec_from_file_location("classify_batch_failures", clf_path)
+    assert spec is not None and spec.loader is not None
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    classify_attempt = mod.classify_attempt
+
+    assert _looks_like_oom(137) is True
+    assert _looks_like_oom(-9) is True
+    assert _looks_like_oom(1) is False
+    assert classify_attempt(
+        status_reason="Host EC2 terminated",
+        exit_code=1,
+        container_reason=None,
+    ) == "spot_reclaim"
+    assert classify_attempt(
+        status_reason=None,
+        exit_code=137,
+        container_reason="OutOfMemoryError: container killed due to memory usage",
+    ) == "oom"
+    assert classify_attempt(
+        status_reason="Essential container in task exited",
+        exit_code=1,
+        container_reason="TimeoutExpired after 3600s",
+    ) == "timeout"
+    assert classify_attempt(
+        status_reason=None,
+        exit_code=0,
+        container_reason=None,
+    ) == "ok"
 
 
 def test_failed_ledger_and_clear_artifacts(
@@ -454,12 +519,16 @@ def test_failed_ledger_and_clear_artifacts(
     run_dir.mkdir(parents=True)
     (run_dir / "error.txt").write_text("boom", encoding="utf-8")
     (out / "bad_run.subprocess_stderr.txt").write_text("err", encoding="utf-8")
+    (out / "bad_run.failure.json").write_text("{}", encoding="utf-8")
+    (out / "bad_run.resource.json").write_text("{}", encoding="utf-8")
 
     mark_failed("bad_run")
     assert "bad_run" in failed_runs()
     clear_failed_artifacts("bad_run")
     assert not run_dir.exists()
     assert not (out / "bad_run.subprocess_stderr.txt").exists()
+    assert not (out / "bad_run.failure.json").exists()
+    assert not (out / "bad_run.resource.json").exists()
 
 
 def test_resume_downloads_s3_completed_log(

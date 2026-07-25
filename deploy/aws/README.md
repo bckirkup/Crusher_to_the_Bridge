@@ -56,8 +56,10 @@ Two credential contexts, both short-lived:
 | `batch_execution_role_permissions.json` | Permission policy for the execution role (the Fargate agent): pull the `picard-campaign` image from ECR and write container logs. Equivalent to the AWS-managed `AmazonECSTaskExecutionRolePolicy`, scoped to this repo/log group. | `<REGION>`, `<ACCOUNT_ID>` |
 | `batch_job_role_trust.json` | Trust policy for `picard-campaign-job-role` — the running container's own identity (used by boto3's ambient credential chain to upload results to S3). Assumed by the ECS/Fargate task. | *(none)* |
 | `batch_job_role_permissions.json` | Permission policy for `picard-campaign-job-role` (the container's own identity). boto3 in `campaign_runner.py` picks this up from the ambient credential chain to upload each `<run_id>.zip` and `completed_runs.txt` to the shared results prefix. S3 write to `campaign/*`. | `<BUCKET>` |
-| `batch_job_definition.json` | Fargate Spot Batch job definition (ECR image, both role ARNs, vCPU/mem, shard/s3 command). Sized at **2 vCPU / 16384 MB (16 GB)** for single-run peak headroom after subprocess isolation. Campaign runs default to **compact history retention** (summary/spaces/cost only), so peak RSS tracks live O(N) state rather than unbounded per-epoch telemetry; measure before lowering below 16 GB. **Not an IAM document** — it is a Batch `register-job-definition` input and may carry extra keys. | `<ACCOUNT_ID>`, `<REGION>`, `<BUCKET>` |
+| `batch_job_definition.json` | Fargate Spot Batch job definition (ECR image, both role ARNs, vCPU/mem, shard/s3 command). Sized at **1 vCPU / 2048 MB (2 GB)** after compact history + subprocess isolation. Per-run `--timeout 3600` covers ~30 min 7000-agent sims. OOM (exit 137 / `OutOfMemoryError*`) **exits without retry** so memory kills are countable; Spot `Host EC2*` still retries. Escalate 1/4 → 1/8 → 2/16 GB if `classify_batch_failures.py` shows non-zero OOM. **Not an IAM document.** | `<ACCOUNT_ID>`, `<REGION>`, `<BUCKET>` |
 | `submit_array_job.sh` | Wrapper around `aws batch submit-job --array-properties size=<N>` (honors `AWS_PROFILE`) | — |
+| `classify_batch_failures.py` | Classify array-child attempts: Spot reclaim vs OOM vs timeout vs other. Write JSON/CSV; optional upload to `s3://…/campaign/_ops/`. | — |
+| `ensure_campaign_infra.sh` | Recreate missing queue/log group and register the current job definition (`AWS_PROFILE=picard`). Optional `--smoke-submit N`. | `ACCOUNT_ID`, `REGION`, `BUCKET` |
 | `aggregate_results.py` | Unzip `<run_id>.zip` under `./results/`, merge `summary.json` into one CSV/JSON | — |
 
 Replace `<ACCOUNT_ID>`, `<REGION>`, `<BUCKET>`, and `<EXTERNAL_ID>` placeholders
@@ -215,7 +217,7 @@ aws --profile picard batch register-job-definition \
   --region "$REGION"
 ```
 
-The command is `--shard-count <N> --s3-prefix s3://<bucket>/campaign/ --resume`.
+The command is `--shard-count <N> --s3-prefix s3://<bucket>/campaign/ --resume --timeout 3600`.
 `--shard-index` is **not** passed — the runner reads `AWS_BATCH_JOB_ARRAY_INDEX`,
 which Batch injects into every array child, so child *i* runs shard *i*.
 
@@ -229,24 +231,42 @@ Two separate memory problems, two fixes:
    parent stays small.
 2. **Single-run peak** — without compact retention, full per-epoch telemetry
    (agents + contact tracing + raw assays + lab notebook) grew roughly
-   linearly with epochs and could approach or exceed 16 GB on long outbreak
-   runs. Campaign specs now default to
+   linearly with epochs. Campaign specs now default to
    `run.history_retention=compact` (summary / spaces / cost only; lab
    notebook logging skipped). Peak RSS should then track live O(N) physics
-   state. The job definition still requests **2 vCPU / 16384 MB (16 GB)**
-   for headroom; the previous 1 vCPU / 4096 MB sizing OOM-killed array
-   children (exit code 137). Measure child peak RSS before dropping below
-   16 GB. Use `--full-telemetry` only when you need the full history dump.
+   state. The job definition requests **1 vCPU / 2048 MB (2 GB)**. Earlier
+   revisions used 1/4 GB (OOM) and 2/16 GB (safe but expensive). The runner
+   records per-run `peak_rss_kb` (Linux `VmHWM`) into
+   `{run_id}.resource.json` / CloudWatch `RESOURCE …` lines, and writes
+   `{run_id}.failure.json` on failure. Use `--full-telemetry` only when you
+   need the full history dump.
 
 On **Fargate, memory is constrained by vCPU** — you can only pick a `MEMORY`
-value from the valid set for the chosen `VCPU`. At **2 vCPU** the allowed range
-is **4096–16384 MB** (in 1024 MB increments), so 16384 is the maximum for 2 vCPU.
-If 16 GB still OOMs on a *single* run peak, step up to **4 vCPU / 30720 MB**
-(4 vCPU allows 8192–30720 MB), which requires bumping `VCPU` to `4` alongside
-`MEMORY`. See the AWS docs for the full
+value from the valid set for the chosen `VCPU`. At **1 vCPU** the allowed range
+is **2048–8192 MB** (in 1024 MB increments). Escalation if
+`classify_batch_failures.py` reports OOM:
+
+| Step | VCPU | MEMORY |
+|------|------|--------|
+| default | 1 | 2048 |
+| +1 | 1 | 4096 |
+| +2 | 1 | 8192 |
+| +3 | 2 | 16384 |
+| last resort | 4 | 30720 |
+
+See the AWS docs for the full
 [Fargate task CPU/memory combinations](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html#task_size).
-Do **not** drop below 16 GB without measuring child peak RSS after subprocess
-isolation **and** compact retention.
+
+### Account inventory notes (us-east-1)
+
+As of the 1 vCPU / 2 GB resize work:
+
+| Resource | Status |
+|----------|--------|
+| `picard-campaign-spot` compute env | Present: `VALID` / `ENABLED`, `FARGATE_SPOT`, `maxvCpus: 256` |
+| `picard-campaign-queue` | May be missing — recreate (step 5) before submit |
+| `picard-campaign` job definition | Register a new revision from this JSON after each sizing/timeout change |
+| Deploy identity | Use `--profile picard` (assumes `picard-deploy-role`). The `devin-bootstrap` user alone cannot call ECR/S3/Logs. |
 
 ### Result bookkeeping
 
@@ -315,6 +335,21 @@ ResourceNotFoundException: The specified log group does not exist` (exit status
 aws logs create-log-group --log-group-name /aws/batch/picard-campaign --region "$REGION"
 ```
 
+
+### One-shot ensure (queue + log group + register)
+
+If the Spot compute environment already exists but the queue was deleted, or
+after changing `batch_job_definition.json` sizing/timeout:
+
+```bash
+export AWS_PROFILE=picard REGION=us-east-1 ACCOUNT_ID=994254241749 BUCKET=<bucket>
+./ensure_campaign_infra.sh
+# optional smoke array (size must be >= 2):
+./ensure_campaign_infra.sh --smoke-submit 2
+```
+
+Then classify Spot vs OOM with `classify_batch_failures.py --recent 1`.
+
 ## 6. Submit the array job
 
 ```bash
@@ -326,7 +361,7 @@ This submits one array job of 200 children. Each child runs:
 ```
 campaign_runner.py --shard-count 200 \
     --shard-index $AWS_BATCH_JOB_ARRAY_INDEX \
-    --s3-prefix s3://<bucket>/campaign/ --resume
+    --s3-prefix s3://<bucket>/campaign/ --resume --timeout 3600
 ```
 
 so the ~17,780 runs are split into 200 disjoint shards (~89 runs each). On Spot
@@ -336,13 +371,26 @@ skips those run_ids (and any `<run_id>.zip` already present under the prefix).
 The log is also re-uploaded periodically. Inside the container, boto3 uses the
 **picard-campaign-job-role** automatically — no keys in the image.
 
-Monitor:
+Monitor progress:
 
 ```bash
 aws --profile picard batch describe-jobs --jobs <jobId> --region "$REGION" \
   --query 'jobs[0].arrayProperties.statusSummary'
 ```
 
+Classify Spot reclaim vs OOM vs timeout (during or after the run):
+
+```bash
+AWS_PROFILE=picard python3 classify_batch_failures.py \
+  --job-id <jobId> --region "$REGION" \
+  --out-json failure_report.json --out-csv failure_attempts.csv \
+  --s3-uri "s3://$BUCKET/campaign/_ops/failure_report_<jobId>.json"
+```
+
+`RUNNING`↔`RUNNABLE` bounce on Fargate Spot is normal reclaim + retry. Use the
+classifier's `jobs_with_spot_reclaim` vs `jobs_with_oom` counts to separate
+reclaim noise from real memory pressure. OOM attempts **do not retry** (job def
+`evaluateOnExit` exits on 137 / `OutOfMemoryError*`) so they stay visible.
 ## 7. Collect + aggregate results
 
 ```bash
@@ -373,10 +421,10 @@ epidemic curves see `deploy/aws/analyze_campaign_curves.py`.
 
 - **Array child exits with code 137 / `OutOfMemoryError: container killed due to
   memory usage`.** Confirm the image uses subprocess-per-run (default; do not
-  pass `--in-process` in Batch). If a *single* child still peaks over the
-  allocation, raise `MEMORY` (and, if already at the max for the current
-  `VCPU`, raise `VCPU` too) in `batch_job_definition.json`, then re-register a
-  new revision:
+  pass `--in-process` in Batch). Run `classify_batch_failures.py` — OOM attempts
+  exit without retry so they appear as `FAILED` children. Raise `MEMORY` (and,
+  if already at the max for the current `VCPU`, raise `VCPU` too) in
+  `batch_job_definition.json`, then re-register a new revision:
 
   ```bash
   sed -e "s/<ACCOUNT_ID>/$ACCOUNT_ID/g" \
@@ -389,7 +437,8 @@ epidemic curves see `deploy/aws/analyze_campaign_curves.py`.
     --region "$REGION"
   ```
 
-  Remember Fargate's vCPU/memory constraint: at 2 vCPU the max is 16384 MB. If
-  16 GB still OOMs, go to **4 vCPU / 30720 MB** (set both `VCPU` to `4` and
-  `MEMORY` to `30720`). Resubmit against the new revision — `--resume` skips
-  shards already completed, so retries are cheap.
+  Escalation ladder from the default **1 vCPU / 2048 MB**: 1/4096 → 1/8192 →
+  2/16384 → 4/30720. Check CloudWatch `RESOURCE peak_rss_kb=…` lines and
+  `{run_id}.resource.json` sidecars before jumping more than one step.
+  Resubmit against the new revision — `--resume` skips shards already
+  completed, so retries are cheap.

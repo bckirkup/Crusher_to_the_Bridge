@@ -94,10 +94,12 @@ Two layers:
    CPython/`pymalloc` and exceed Fargate after ~20–40 in-process runs. Pass
    `--in-process` to run in the parent (faster for debugging; leaks across
    many large runs), and `--timeout SECONDS` to bound each subprocess
-   (default 600).
+   (default **3600**; ~30 min 7000-agent runs need more than the old 600s cap).
+   Failed/successful runs write `{run_id}.resource.json` (peak RSS via
+   Linux `VmHWM`); failures also write `{run_id}.failure.json`.
 
-Do not drop Fargate below 16 GB without measuring child peak RSS under
-compact retention.
+Default Fargate sizing is **1 vCPU / 2048 MB** (see `deploy/aws/`). Escalate
+via `classify_batch_failures.py` if OOM (exit 137) appears.
 
 Progress for `--resume` is appended to:
 
