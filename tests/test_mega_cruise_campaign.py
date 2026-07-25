@@ -51,6 +51,30 @@ def test_manifest_loads_and_has_ten_tiers() -> None:
     assert manifest["pathogen_configs"]["norovirus"]["pathogen_id"] == "norwalk_gi"
 
 
+def test_none_and_syndromic_surveillance_configs_diverge() -> None:
+    """Campaign 'none' must disable sick-call surveillance; 'syndromic' must not."""
+    manifest = load_manifest()
+    none_cfg = manifest["surveillance_configs"]["none"]
+    syn_cfg = manifest["surveillance_configs"]["syndromic"]
+    assert none_cfg != syn_cfg
+    assert none_cfg["diagnostic_cascade"]["enabled"] is False
+    assert syn_cfg["diagnostic_cascade"]["enabled"] is False
+    assert none_cfg["syndromic"]["sick_call_probability"] == 0.0
+    assert none_cfg["syndromic"]["background_noise_rate"] == 0.0
+    assert none_cfg["fred_behavior"]["healthy_noise_categories"] == []
+    assert "syndromic" not in syn_cfg
+
+    runs = list(generate_tier_runs(manifest, "t3_surveillance_sweep"))
+    none_spec = next(s for rid, s in runs if "_none_" in rid)
+    syn_spec = next(s for rid, s in runs if "_syndromic_" in rid)
+    none_over = none_spec["config_overrides"]
+    syn_over = syn_spec["config_overrides"]
+    assert none_over["syndromic"]["sick_call_probability"] == 0.0
+    assert none_over["fred_behavior"]["healthy_noise_categories"] == []
+    assert "sick_call_probability" not in syn_over.get("syndromic", {})
+    assert none_over != syn_over
+
+
 def test_resolve_tier_short_prefix() -> None:
     manifest = load_manifest()
     assert resolve_tier_ids(manifest, "t1") == ["t1_pathogen_baselines"]

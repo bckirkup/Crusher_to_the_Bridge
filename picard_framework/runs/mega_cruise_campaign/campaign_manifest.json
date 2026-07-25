@@ -320,7 +320,14 @@
   ],
   "surveillance_configs": {
     "none": {
-      "diagnostic_cascade": {"enabled": false}
+      "diagnostic_cascade": {"enabled": false},
+      "syndromic": {
+        "sick_call_probability": 0.0,
+        "background_noise_rate": 0.0
+      },
+      "fred_behavior": {
+        "healthy_noise_categories": []
+      }
     },
     "syndromic": {
       "diagnostic_cascade": {"enabled": false}
