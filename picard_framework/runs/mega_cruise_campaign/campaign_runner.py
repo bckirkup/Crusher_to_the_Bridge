@@ -157,10 +157,79 @@ def clear_failed_artifacts(run_id: str) -> None:
     run_dir = _run_workdir(safe_id)
     if os.path.isdir(run_dir):
         shutil.rmtree(run_dir)
-    for name in (f"{safe_id}.subprocess_stderr.txt", f"{safe_id}.run_spec.json"):
+    for name in (
+        f"{safe_id}.subprocess_stderr.txt",
+        f"{safe_id}.run_spec.json",
+        f"{safe_id}.failure.json",
+        f"{safe_id}.resource.json",
+    ):
         artifact = _output_artifact(name)
         if os.path.isfile(artifact):
             os.remove(artifact)
+
+
+def _read_vmhwm_kb(pid: int) -> int | None:
+    """Return peak RSS (VmHWM) in KiB from ``/proc/<pid>/status``, if available."""
+    try:
+        with open(f"/proc/{pid}/status", encoding="utf-8") as fh:
+            for line in fh:
+                if line.startswith("VmHWM:"):
+                    return int(line.split()[1])
+    except (FileNotFoundError, ProcessLookupError, PermissionError, ValueError, OSError):
+        return None
+    return None
+
+
+def _looks_like_oom(returncode: int | None) -> bool:
+    """True when the child exit code matches a typical OOM kill (SIGKILL / 137)."""
+    if returncode is None:
+        return False
+    return returncode in (-9, 137)
+
+
+def _write_run_sidecars(
+    safe_id: str,
+    *,
+    returncode: int | None,
+    timeout: int,
+    timed_out: bool,
+    peak_rss_kb: int | None,
+    ok: bool,
+) -> None:
+    """Write resource.json always; failure.json only when the run did not succeed."""
+    roots = _allowed_roots()
+    resource = {
+        "run_id": safe_id,
+        "returncode": returncode,
+        "timeout_s": timeout,
+        "timed_out": timed_out,
+        "peak_rss_kb": peak_rss_kb,
+        "looks_like_oom": _looks_like_oom(returncode),
+        "ok": ok,
+    }
+    resource_path = _output_artifact(f"{safe_id}.resource.json")
+    with validated_open(resource_path, "w", allowed_roots=roots, encoding="utf-8") as fh:
+        json.dump(resource, fh, indent=2)
+        fh.write("\n")
+    print(
+        f"RESOURCE run_id={safe_id} peak_rss_kb={peak_rss_kb} "
+        f"returncode={returncode} timed_out={timed_out} ok={ok}",
+        flush=True,
+    )
+    if ok:
+        return
+    failure = {
+        **resource,
+        "failure_class": (
+            "timeout" if timed_out
+            else "oom" if _looks_like_oom(returncode)
+            else "other"
+        ),
+    }
+    failure_path = _output_artifact(f"{safe_id}.failure.json")
+    with validated_open(failure_path, "w", allowed_roots=roots, encoding="utf-8") as fh:
+        json.dump(failure, fh, indent=2)
+        fh.write("\n")
 
 
 def parse_s3_prefix(s3_prefix: str) -> tuple[str, str]:
@@ -942,13 +1011,16 @@ def run_simulation_subprocess(
     *,
     full_telemetry: bool = False,
     keep_workdir: bool = False,
-    timeout: int = 600,
+    timeout: int = 3600,
 ) -> bool:
     """Run one simulation in a fresh child process, then reclaim its memory.
 
     Repeated 7000-agent simulations leak RSS when run in a single process;
     isolating each run in a short-lived subprocess lets the OS reclaim all
     memory on exit, keeping the campaign under Fargate's memory limit.
+
+    Polls ``/proc/<pid>/status`` ``VmHWM`` while the child runs so peak RSS
+    is recorded for 2 GB Fargate sizing evidence (CloudWatch + sidecars).
     """
     safe_id = _safe_run_id(run_id)
     roots = _allowed_roots()
@@ -967,34 +1039,74 @@ def run_simulation_subprocess(
     if keep_workdir:
         cmd.append("--keep-workdir")
 
+    returncode: int | None = None
+    timed_out = False
+    peak_rss_kb: int | None = None
+    stdout = ""
+    stderr = ""
     try:
-        proc = subprocess.run(
+        proc = subprocess.Popen(
             cmd,
-            capture_output=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
             text=True,
-            timeout=timeout,
             cwd=_REPO_ROOT_STR,
             env={**os.environ, "PYTHONPATH": _REPO_ROOT_STR},
         )
+        deadline = time.monotonic() + timeout
+        while True:
+            hwm = _read_vmhwm_kb(proc.pid)
+            if hwm is not None:
+                peak_rss_kb = hwm if peak_rss_kb is None else max(peak_rss_kb, hwm)
+            if proc.poll() is not None:
+                break
+            if time.monotonic() >= deadline:
+                proc.kill()
+                timed_out = True
+                break
+            time.sleep(0.5)
+        try:
+            out_err = proc.communicate(timeout=30)
+        except subprocess.TimeoutExpired:
+            proc.kill()
+            out_err = proc.communicate()
+            timed_out = True
+        stdout, stderr = out_err[0] or "", out_err[1] or ""
+        returncode = proc.returncode
         zip_path = _output_artifact(f"{safe_id}.zip")
-        ok = proc.returncode == 0 and os.path.isfile(zip_path)
-        if not ok:
+        ok = (not timed_out) and returncode == 0 and os.path.isfile(zip_path)
+        if timed_out:
             err_path = _output_artifact(f"{safe_id}.subprocess_stderr.txt")
             with validated_open(err_path, "w", allowed_roots=roots, encoding="utf-8") as fh:
-                fh.write(f"returncode={proc.returncode}\n\n")
+                fh.write(f"TimeoutExpired after {timeout}s\n")
+                if stdout or stderr:
+                    fh.write("\n--- stdout ---\n")
+                    fh.write(stdout)
+                    fh.write("\n--- stderr ---\n")
+                    fh.write(stderr)
+        elif not ok:
+            err_path = _output_artifact(f"{safe_id}.subprocess_stderr.txt")
+            with validated_open(err_path, "w", allowed_roots=roots, encoding="utf-8") as fh:
+                fh.write(f"returncode={returncode}\n\n")
                 fh.write("--- stdout ---\n")
-                fh.write(proc.stdout or "")
+                fh.write(stdout)
                 fh.write("\n--- stderr ---\n")
-                fh.write(proc.stderr or "")
-    except subprocess.TimeoutExpired:
-        err_path = _output_artifact(f"{safe_id}.subprocess_stderr.txt")
-        with validated_open(err_path, "w", allowed_roots=roots, encoding="utf-8") as fh:
-            fh.write(f"TimeoutExpired after {timeout}s\n")
+                fh.write(stderr)
+    except Exception:
         ok = False
+        raise
     finally:
         if not keep_workdir and os.path.isfile(spec_path):
             os.remove(spec_path)
 
+    _write_run_sidecars(
+        safe_id,
+        returncode=returncode,
+        timeout=timeout,
+        timed_out=timed_out,
+        peak_rss_kb=peak_rss_kb,
+        ok=ok,
+    )
     return ok
 
 
@@ -1101,8 +1213,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--timeout",
         type=int,
-        default=600,
-        help="Per-run subprocess timeout in seconds (default 600).",
+        default=3600,
+        help="Per-run subprocess timeout in seconds (default 3600; "
+        "~30 min 7000-agent runs need headroom beyond the old 600s cap).",
     )
     args = parser.parse_args(argv)
 

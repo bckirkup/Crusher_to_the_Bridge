@@ -5,12 +5,13 @@ description: Deploy and run the ~17780-run mega cruise campaign as an AWS Batch 
 
 # AWS Batch mega cruise campaign
 
-Deploy the ~17,780-run mega cruise campaign
+Deploy and run the ~17,780-run mega cruise campaign
 (`picard_framework/runs/mega_cruise_campaign/campaign_runner.py`) as a single
 **AWS Batch array job** on **Fargate Spot**. Each array child runs a disjoint
 shard and uploads per-run `<run_id>.zip` results to one shared S3 prefix.
-Each simulation runs in a **subprocess** by default (OS reclaim of RSS); 16 GB
-Fargate memory covers **single-run peak**, not cumulative leak.
+Each simulation runs in a **subprocess** by default (OS reclaim of RSS); the
+job definition defaults to **1 vCPU / 2048 MB** after compact history retention.
+Escalate memory if `classify_batch_failures.py` reports OOM.
 
 **`deploy/aws/README.md` is the canonical command reference** — the exact
 `aws` invocations, the file table, and the IAM grammar note live there. This
@@ -164,10 +165,13 @@ re-registering:
 - **Fargate resource sizing.** Two layers: (1) **subprocess-per-run** stops
   cumulative RSS growth across a shard; (2) **campaign compact history**
   (`run.history_retention=compact`) stops within-run telemetry from growing
-  linearly with epochs; (3) **2 vCPU / 16384 MB** still covers single-run peak
-  with headroom (1 vCPU / 4096 MB exits **137**). Fallback **4 vCPU / 30720 MB**
-  only if a *single* child still OOMs after compact retention. Do not drop
-  below 16 GB without measuring child peak RSS. See README "Container sizing".
+  linearly with epochs; (3) default **1 vCPU / 2048 MB** with per-run
+  `--timeout 3600` (old 600s cap was too short for ~30 min 7000-agent runs).
+  The runner logs `RESOURCE peak_rss_kb=…` and writes `{run_id}.resource.json`
+  / `{run_id}.failure.json`. OOM (exit 137 / `OutOfMemoryError*`) **exits
+  without retry** so memory kills are countable via
+  `deploy/aws/classify_batch_failures.py`. Escalate 1/4096 → 1/8192 → 2/16384
+  → 4/30720 if OOM rate is non-zero. See README "Container sizing".
 
 - **Revision pinning.** `submit-job --job-definition picard-campaign` uses the
   **latest ACTIVE revision at submit time**. So **register the new revision
@@ -180,6 +184,9 @@ re-registering:
   aws --profile picard batch describe-job-definitions --job-definition-name picard-campaign --status ACTIVE --region us-east-1 --query "jobDefinitions[-1].[revision,containerProperties.resourceRequirements]"
   ```
 
+- **Job queue may be missing.** Inventory has seen `picard-campaign-spot` CE
+  VALID while `picard-campaign-queue` was absent. Recreate the queue (README
+  §5) before submit.
 ## CloudWatch log group (must exist BEFORE submit)
 
 The **execution role** can create log *streams* and put events but **cannot
@@ -234,9 +241,18 @@ aws logs create-log-group --log-group-name /aws/batch/picard-campaign --region u
   followed by Batch retry. Because of `--resume` + `completed_runs.txt` under
   `s3://<bucket>/campaign/_resume/`, a retried child **skips runs already
   completed** in its shard, so retries are cheap.
+- **Distinguish reclaim from OOM.** After or during a campaign:
+
+  ```bash
+  AWS_PROFILE=picard python3 deploy/aws/classify_batch_failures.py \
+    --job-id <jobId> --region us-east-1 \
+    --out-json failure_report.json
+  ```
+
+  Compare `jobs_with_spot_reclaim` vs `jobs_with_oom`. OOM attempts exit
+  without retry (job def `evaluateOnExit`), so they stay visible as FAILED.
 - **`SUCCEEDED` stays 0 for a while.** A child is `SUCCEEDED` only when its
-  **entire shard** finishes (~89 runs at ~3 min each ≈ **4.5 h** at 200 shards
-  over ~17,780 runs). Individual `<run_id>.zip` files land in S3
+  **entire shard** finishes. Individual `<run_id>.zip` files land in S3
   **continuously** well before any child flips to SUCCEEDED — watch S3, not
   just `statusSummary`, for early progress.
 - **Resume must download.** On `--resume` with `--s3-prefix`, the runner pulls
@@ -250,7 +266,6 @@ aws logs create-log-group --log-group-name /aws/batch/picard-campaign --region u
   # then pull its logs (log stream name is in the child's container.logStreamName)
   aws logs get-log-events --log-group-name /aws/batch/picard-campaign --log-stream-name <stream> --region us-east-1
   ```
-
 ## Results back to local → edison
 
 Run from the **LOCAL** machine under `--profile picard` — that is where the
@@ -285,7 +300,7 @@ Use placeholders (or env vars) only — examples of the *shape*:
 | `https://api.ecr..amazonaws.com` (double dot) at ECR login | `$REGION` empty — in PowerShell use `$env:REGION`, not bash `$REGION`. |
 | `"docker build" requires exactly 1 argument` | Missing trailing `.` (build context) in `docker build -t picard-campaign .`. |
 | `ClientException: Evaluate on exit condition contains restricted characters` | Uppercase `RETRY`/`EXIT` or a leading-asterisk pattern in `evaluateOnExit`. Use lowercase actions and no leading `*`. |
-| Array children exit **137** / `OutOfMemoryError: container killed due to memory usage` | Confirm subprocess isolation (no `--in-process`). If single-run peak still OOMs, raise to 2 vCPU / 16384 MB (or 4 vCPU / 30720 MB). Re-register a new revision, then resubmit. |
+| Array children exit **137** / `OutOfMemoryError: container killed due to memory usage` | Confirm subprocess isolation (no `--in-process`). Run `classify_batch_failures.py`. Escalate from 1/2048 → 1/4096 → 1/8192 → 2/16384. Re-register a new revision, then resubmit. |
 | Spot retry re-runs already-finished sims | Resume log not downloaded. Ensure `--resume --s3-prefix …` and that `_resume/completed_runs.shard-*.txt` uploads succeeded. |
 | Every child fails startup: `ResourceInitializationError ... ResourceNotFoundException: The specified log group does not exist` | `/aws/batch/picard-campaign` missing. `aws logs create-log-group --log-group-name /aws/batch/picard-campaign` once before submit. |
 | `create-job-queue` → "Compute Environment ... is not valid" | Environment still `CREATING`. Poll `describe-compute-environments` until `VALID`/`ENABLED`. |
@@ -297,5 +312,8 @@ Use placeholders (or env vars) only — examples of the *shape*:
 ## See also
 
 - `deploy/aws/README.md` — canonical commands, file table, IAM grammar note.
+- `deploy/aws/ensure_campaign_infra.sh` — recreate missing queue/log group +
+  register current job def; optional `--smoke-submit N`.
+- `deploy/aws/classify_batch_failures.py` — Spot reclaim vs OOM vs timeout.
 - `.agents/skills/orchestrator-smoke-test/SKILL.md` — local smoke of the sim loop.
 - `.agents/skills/adding-new-platform/SKILL.md` — platform data (`mega_cruise_5000`).

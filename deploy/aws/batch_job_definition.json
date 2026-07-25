@@ -7,13 +7,14 @@
     "command": [
       "--shard-count", "Ref::shard_count",
       "--s3-prefix", "Ref::s3_prefix",
-      "--resume"
+      "--resume",
+      "--timeout", "3600"
     ],
     "jobRoleArn": "arn:aws:iam::<ACCOUNT_ID>:role/picard-campaign-job-role",
     "executionRoleArn": "arn:aws:iam::<ACCOUNT_ID>:role/picard-campaign-execution-role",
     "resourceRequirements": [
-      { "type": "VCPU", "value": "2" },
-      { "type": "MEMORY", "value": "16384" }
+      { "type": "VCPU", "value": "1" },
+      { "type": "MEMORY", "value": "2048" }
     ],
     "fargatePlatformConfiguration": {
       "platformVersion": "LATEST"
@@ -42,6 +43,8 @@
     "attempts": 5,
     "evaluateOnExit": [
       { "onStatusReason": "Host EC2*", "action": "retry" },
+      { "onExitCode": "137", "action": "exit" },
+      { "onReason": "OutOfMemoryError*", "action": "exit" },
       { "onExitCode": "0", "action": "exit" },
       { "onReason": "*", "action": "retry" }
     ]
