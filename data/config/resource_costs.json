@@ -119,6 +119,12 @@
       "labor_person_hours": 0.5,
       "description": "Multiplex rapid GI panel (e.g. BioFire FilmArray). ROM $35-50 per test."
     },
+    "clinical_impression": {
+      "financial_usd": 0.0,
+      "materials": {},
+      "labor_person_hours": 0.25,
+      "description": "Bedside clinical impression / NP evaluation without laboratory confirmation."
+    },
     "clinical_qpcr": {
       "financial_usd": 50.0,
       "materials": {

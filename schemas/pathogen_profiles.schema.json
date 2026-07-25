@@ -119,6 +119,61 @@
           "type": "integer",
           "minimum": 0,
           "description": "Days post-infection when seeding initial_infected agents at introduction_epoch. Transmission-acquired infections always start at 0."
+        },
+        "clinical_presentation": {
+          "type": "object",
+          "description": "Bedside syndrome and time-dependent feature phases for diagnostic routing.",
+          "properties": {
+            "syndromes": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "gastrointestinal",
+                  "respiratory",
+                  "systemic_febrile",
+                  "rash",
+                  "wound_soft_tissue",
+                  "neurologic"
+                ]
+              },
+              "minItems": 1
+            },
+            "sample_types": {
+              "type": "array",
+              "items": {"type": "string"}
+            },
+            "phases": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["name", "dpi_min", "features"],
+                "properties": {
+                  "name": {"type": "string"},
+                  "dpi_min": {"type": "integer", "minimum": 0},
+                  "dpi_max": {"type": ["integer", "null"], "minimum": 0},
+                  "features": {
+                    "type": "array",
+                    "items": {"type": "string"}
+                  },
+                  "syndromes": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "gastrointestinal",
+                        "respiratory",
+                        "systemic_febrile",
+                        "rash",
+                        "wound_soft_tissue",
+                        "neurologic"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
       }
     }

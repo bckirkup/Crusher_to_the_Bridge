@@ -88,7 +88,35 @@
       "introduction_epoch": 0,
       "initial_infected": 1,
       "initial_time_infected": 0,
-      "shedding_variance_log10": 1.5
+      "shedding_variance_log10": 1.5,
+      "clinical_presentation": {
+        "syndromes": [
+          "gastrointestinal"
+        ],
+        "sample_types": [
+          "stool"
+        ],
+        "phases": [
+          {
+            "name": "acute",
+            "dpi_min": 0,
+            "dpi_max": 2,
+            "features": [
+              "vomiting",
+              "watery_diarrhea",
+              "cramps"
+            ]
+          },
+          {
+            "name": "resolving",
+            "dpi_min": 3,
+            "dpi_max": null,
+            "features": [
+              "watery_diarrhea"
+            ]
+          }
+        ]
+      }
     },
     {
       "pathogen_id": "sars_cov2_resp",
@@ -170,7 +198,45 @@
       "introduction_epoch": 6,
       "initial_infected": 1,
       "initial_time_infected": 0,
-      "shedding_variance_log10": 1.2
+      "shedding_variance_log10": 1.2,
+      "clinical_presentation": {
+        "syndromes": [
+          "respiratory"
+        ],
+        "sample_types": [
+          "np_swab"
+        ],
+        "phases": [
+          {
+            "name": "early",
+            "dpi_min": 0,
+            "dpi_max": 2,
+            "features": [
+              "fever",
+              "cough",
+              "fatigue"
+            ]
+          },
+          {
+            "name": "peak",
+            "dpi_min": 3,
+            "dpi_max": 7,
+            "features": [
+              "fever",
+              "cough",
+              "dyspnea"
+            ]
+          },
+          {
+            "name": "late",
+            "dpi_min": 8,
+            "dpi_max": null,
+            "features": [
+              "cough"
+            ]
+          }
+        ]
+      }
     }
   ]
 }

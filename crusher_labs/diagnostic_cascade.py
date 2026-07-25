@@ -271,6 +271,8 @@ class DiagnosticCascadeEngine:
         """Determine whether test results at this tier are positive.
 
         Checks instrument-specific result fields for any positive signal.
+        Uninformative results (wrong panel / no coverage) never count as
+        positive and never as pathogen-clearance evidence.
         """
         if not test_results:
             if not tier.tests:
@@ -278,14 +280,17 @@ class DiagnosticCascadeEngine:
             return False
 
         for test_key, result in test_results.items():
-            if isinstance(result, dict):
-                if result.get("positive"):
-                    return True
-                if result.get("detected"):
-                    return True
-                disruption = result.get("microflora_disruption_level", 0.0)
-                if disruption >= 0.6:
-                    return True
+            if not isinstance(result, dict):
+                continue
+            if result.get("informative") is False:
+                continue
+            if result.get("positive"):
+                return True
+            if result.get("detected"):
+                return True
+            disruption = result.get("microflora_disruption_level", 0.0)
+            if disruption >= 0.6 and result.get("informative", True):
+                return True
 
         return False
 
@@ -380,8 +385,9 @@ class DiagnosticCascadeEngine:
                             state.agent_id, agent, current_tier,
                         )
                         state.tier_results[state.current_tier] = test_results
+                        ordered_keys = list(test_results.keys()) or list(current_tier.tests)
                         result.tests_ordered.setdefault(state.agent_id, []).extend(
-                            current_tier.tests,
+                            ordered_keys,
                         )
 
                         if current_tier.tat_epochs > 0:
@@ -536,10 +542,22 @@ class _CascadeTestRunner:
         tier: DiagnosticTier,
     ) -> dict[str, Any]:
         """Run all tests defined for this tier on the given agent."""
+        from crusher_labs.clinical_instrument_params import expand_tier_tests_for_agent
+
+        params = getattr(self.obs, "clinical_instrument_params", None) or {}
+        prefer_multiplex = "clinical_multiplex_panel" in (tier.tests or [])
+        expanded = expand_tier_tests_for_agent(
+            params,
+            list(tier.tests or []),
+            agent,
+            prefer_multiplex=prefer_multiplex,
+        )
+        if prefer_multiplex and not expanded:
+            expanded = ["clinical_impression"]
         return self.obs.clinical_correlation.run_agent_tests(
             self.obs,
             agent,
-            test_keys=tuple(tier.tests),
+            test_keys=tuple(expanded),
         )
 
 

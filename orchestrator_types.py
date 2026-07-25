@@ -96,7 +96,7 @@ class SimulationState:
 
 @dataclass
 class ObservationEngine:
-    """Bundle of diagnostic instruments (six routine + optional long-read)."""
+    """Bundle of diagnostic instruments (routine clinical + optional long-read)."""
 
     air_sniffer: ContinuousAirSniffer
     surface_swab: TargetedSurfaceSwab
@@ -108,8 +108,13 @@ class ObservationEngine:
     notebook: ArtificialLabNotebook
     fidelity_name: str
     lab_notebook_enabled: bool
+    clin_multiplex: Any = None  # ClinicalMultiplexPanel
+    clin_impression: Any = None  # ClinicalImpression
     turnaround: Any = None  # InstrumentTurnaroundQueue
     long_read: LongReadVerificationSequencing | None = None
+    clinical_instrument_params: dict | None = None
+    pathogen_profiles: dict | None = None
+    outbreak_aware: bool = False
 
 
 # ── Protocol engine bundle ───────────────────────────────────────────────

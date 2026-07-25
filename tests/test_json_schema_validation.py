@@ -38,6 +38,9 @@ SCHEMA_DATA_MAP: dict[str, list[str]] = {
     "logging_profile.schema.json": [
         "data/config/logging_profile.json",
     ],
+    "clinical_instrument_params.schema.json": [
+        "data/config/clinical_instrument_params.json",
+    ],
     "spatial_layout.schema.json": [],
     "air_flow_paths.schema.json": [],
 }

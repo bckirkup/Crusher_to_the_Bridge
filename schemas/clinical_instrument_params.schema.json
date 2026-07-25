@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "clinical_instrument_params.schema.json",
+  "title": "Clinical Instrument Parameters",
+  "description": "Pathogen- and syndrome-aware clinical assay parameterization.",
+  "type": "object",
+  "required": ["instruments"],
+  "properties": {
+    "meta": {"type": "object"},
+    "syndrome_routing": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "multiplex_panels": {
+            "type": "array",
+            "items": {"type": "string"}
+          },
+          "prefer_rdt_pathogens": {
+            "type": "array",
+            "items": {"type": "string"}
+          },
+          "clinical_impression_pathogens": {
+            "type": "array",
+            "items": {"type": "string"}
+          }
+        }
+      }
+    },
+    "panels": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["instrument_key", "pathogens"],
+        "properties": {
+          "instrument_key": {"type": "string"},
+          "display_name": {"type": "string"},
+          "pathogens": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "sensitivity": {"type": "number", "minimum": 0, "maximum": 1},
+                "specificity": {"type": "number", "minimum": 0, "maximum": 1}
+              }
+            }
+          }
+        }
+      }
+    },
+    "instruments": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "default": {"type": "object"},
+          "by_pathogen": {
+            "type": "object",
+            "additionalProperties": {"type": "object"}
+          }
+        }
+      }
+    }
+  }
+}
