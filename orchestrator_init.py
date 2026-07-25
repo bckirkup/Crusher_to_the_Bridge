@@ -501,7 +501,7 @@ def init_multi_pathogen(
                     agent.infect_with_pathogen(
                         pid, 1e4, 0, time_infected=dpi, rng=rng, profile=prof,
                     )
-                    print(f"  Seeded {pid} → agent {agent.agent_id}")
+                    print(f"  Seeded {pid} -> agent {agent.agent_id}")
     print()
 
     return immunocompromised_ids
