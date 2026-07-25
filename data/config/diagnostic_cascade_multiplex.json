@@ -48,7 +48,7 @@
         "SOP-006",
         "SOP-013"
       ],
-      "notes": "BioFire FilmArray GI or equivalent. Tests noro + rota + adeno + astro + sapovirus + bacterial panel in one run. Provides pathogen ID at Tier 1 rather than waiting for Tier 2 qPCR. Cost higher than single RDT ($12) but eliminates need for multiple sequential tests."
+      "notes": "BioFire FilmArray GI/RP/pneumonia panel selected by observed syndromes via clinical_instrument_params.json. Pathogen sens/spec and off-panel uninformative outcomes come from that JSON, not from this display sensitivity field. Cost higher than single RDT ($12)."
     },
     {
       "tier_id": 2,

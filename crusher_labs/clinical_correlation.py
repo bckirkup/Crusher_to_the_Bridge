@@ -185,7 +185,7 @@ class ClinicalTestCorrelation:
         results: dict[str, dict[str, Any]] = {}
 
         for key in keys:
-            if key in ("clinical_rdt", "clinical_multiplex_panel"):
+            if key == "clinical_rdt":
                 results[key] = obs.clin_rdt.test_agent(
                     aid,
                     agent.get("shedding_rate", 0.0),
@@ -195,7 +195,63 @@ class ClinicalTestCorrelation:
                     compliance,
                     location,
                     uniform_draw=uniforms["clinical_rdt"],
+                    pathogen_infections=agent.get("pathogen_infections"),
                 )
+            elif key == "clinical_multiplex_panel":
+                multiplex = getattr(obs, "clin_multiplex", None)
+                if multiplex is None:
+                    results[key] = {
+                        "instrument": "clinical_multiplex_panel",
+                        "agent_id": aid,
+                        "positive": False,
+                        "informative": False,
+                    }
+                else:
+                    results[key] = multiplex.test_agent(
+                        aid,
+                        agent.get("shedding_rate", 0.0),
+                        agent_is_infected(agent),
+                        infection,
+                        presentation,
+                        compliance,
+                        location,
+                        uniform_draw=None,
+                        pathogen_infections=agent.get("pathogen_infections"),
+                        observed_syndromes=agent.get("observed_syndromes"),
+                    )
+            elif key == "clinical_impression":
+                impression = getattr(obs, "clin_impression", None)
+                if impression is None:
+                    results[key] = {
+                        "instrument": "clinical_impression",
+                        "agent_id": aid,
+                        "positive": False,
+                        "informative": False,
+                    }
+                else:
+                    from crusher_labs.clinical_instrument_params import (
+                        impression_pathogens_for_syndromes,
+                    )
+                    params = getattr(obs, "clinical_instrument_params", None) or {}
+                    candidates = impression_pathogens_for_syndromes(
+                        params, list(agent.get("observed_syndromes") or []),
+                    )
+                    results[key] = impression.test_agent(
+                        aid,
+                        agent.get("shedding_rate", 0.0),
+                        agent_is_infected(agent),
+                        infection,
+                        presentation,
+                        compliance,
+                        location,
+                        uniform_draw=None,
+                        pathogen_infections=agent.get("pathogen_infections"),
+                        days_since_symptom_onset=int(
+                            agent.get("days_since_symptom_onset") or 0,
+                        ),
+                        outbreak_aware=bool(getattr(obs, "outbreak_aware", False)),
+                        candidate_pathogens=candidates,
+                    )
             elif key == "clinical_qpcr":
                 results[key] = obs.clin_qpcr.test_agent(
                     aid,
@@ -205,6 +261,8 @@ class ClinicalTestCorrelation:
                     compliance,
                     location,
                     uniform_draw=uniforms["clinical_qpcr"],
+                    pathogen_infections=agent.get("pathogen_infections"),
+                    is_infected=agent_is_infected(agent),
                 )
             elif key == "clinical_microbiology":
                 results[key] = obs.clin_microbio.test_agent(
@@ -216,6 +274,7 @@ class ClinicalTestCorrelation:
                     location,
                     agent.get("pathogen_infections"),
                     uniform_draw=uniforms["clinical_microbiology"],
+                    is_infected=agent_is_infected(agent),
                 )
         return results
 

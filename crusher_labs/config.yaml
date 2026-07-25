@@ -147,9 +147,9 @@ fred_behavior:
   quarantine_compliance: 0.85         # P(agent complies with isolation order)
   compliance_delay_epochs: 1          # epochs before non-compliant agent eventually isolates
   healthy_noise_categories:           # background sick-call reasons for healthy agents
-    - {reason: "seasickness",  probability: 0.008}
-    - {reason: "fatigue",      probability: 0.005}
-    - {reason: "minor_injury", probability: 0.002}
+    - {reason: "seasickness",  probability: 0.008, syndrome: "gastrointestinal"}
+    - {reason: "fatigue",      probability: 0.005, syndrome: "systemic_febrile"}
+    - {reason: "minor_injury", probability: 0.002, syndrome: "wound_soft_tissue"}
 
 # ── EMOD-Style Clinical Progression ──────────────────────────
 emod_progression:
@@ -683,6 +683,7 @@ chronic_disease:
 # When enabled, symptoms/wearable alerts trigger a sequential
 # diagnostic cascade (Tier 0 → 3) that gates SOP activation.
 # Multiplex Tier-1 variant: data/config/diagnostic_cascade_multiplex.json
+# Assay sens/spec and syndrome routing live in clinical_instrument_params.json
 diagnostic_cascade:
   enabled: true
   config_path: "data/config/diagnostic_cascade_multiplex.json"
@@ -695,6 +696,12 @@ diagnostic_cascade:
   #     rules:
   #       - {signal: fever, equals: true}
   #       - {signal: infection_score, operator: ">", value: 1.5}
+
+# Pathogen-/syndrome-aware clinical assay parameters (RDT, multiplex panels,
+# qPCR, culture, bedside clinical impression).
+clinical_instruments:
+  config_path: "data/config/clinical_instrument_params.json"
+  outbreak_aware: false
 
 # ── Decision engine (Stackelberg policies) ─────────────────────
 decision_engine:

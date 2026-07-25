@@ -19,6 +19,12 @@
     "clinical_rdt": {
       "delay_epochs": 0
     },
+    "clinical_multiplex_panel": {
+      "delay_epochs": 0
+    },
+    "clinical_impression": {
+      "delay_epochs": 0
+    },
     "clinical_qpcr": {
       "delay_epochs": 0
     },

@@ -88,7 +88,35 @@
       "introduction_epoch": 0,
       "initial_infected": 1,
       "initial_time_infected": 0,
-      "shedding_variance_log10": 1.5
+      "shedding_variance_log10": 1.5,
+      "clinical_presentation": {
+        "syndromes": [
+          "gastrointestinal"
+        ],
+        "sample_types": [
+          "stool"
+        ],
+        "phases": [
+          {
+            "name": "acute",
+            "dpi_min": 0,
+            "dpi_max": 2,
+            "features": [
+              "vomiting",
+              "watery_diarrhea",
+              "cramps"
+            ]
+          },
+          {
+            "name": "resolving",
+            "dpi_min": 3,
+            "dpi_max": null,
+            "features": [
+              "watery_diarrhea"
+            ]
+          }
+        ]
+      }
     },
     {
       "pathogen_id": "sars_cov2_resp",
@@ -171,7 +199,45 @@
       "introduction_epoch": 6,
       "initial_infected": 1,
       "initial_time_infected": 0,
-      "shedding_variance_log10": 1.2
+      "shedding_variance_log10": 1.2,
+      "clinical_presentation": {
+        "syndromes": [
+          "respiratory"
+        ],
+        "sample_types": [
+          "np_swab"
+        ],
+        "phases": [
+          {
+            "name": "early",
+            "dpi_min": 0,
+            "dpi_max": 2,
+            "features": [
+              "fever",
+              "cough",
+              "fatigue"
+            ]
+          },
+          {
+            "name": "peak",
+            "dpi_min": 3,
+            "dpi_max": 7,
+            "features": [
+              "fever",
+              "cough",
+              "dyspnea"
+            ]
+          },
+          {
+            "name": "late",
+            "dpi_min": 8,
+            "dpi_max": null,
+            "features": [
+              "cough"
+            ]
+          }
+        ]
+      }
     },
     {
       "pathogen_id": "influenza_a",
@@ -252,7 +318,37 @@
       "introduction_epoch": 12,
       "initial_infected": 1,
       "initial_time_infected": 0,
-      "shedding_variance_log10": 1.0
+      "shedding_variance_log10": 1.0,
+      "clinical_presentation": {
+        "syndromes": [
+          "respiratory"
+        ],
+        "sample_types": [
+          "np_swab"
+        ],
+        "phases": [
+          {
+            "name": "acute",
+            "dpi_min": 0,
+            "dpi_max": 3,
+            "features": [
+              "fever",
+              "cough",
+              "myalgia",
+              "sore_throat"
+            ]
+          },
+          {
+            "name": "resolving",
+            "dpi_min": 4,
+            "dpi_max": null,
+            "features": [
+              "cough",
+              "fatigue"
+            ]
+          }
+        ]
+      }
     },
     {
       "pathogen_id": "measles_virus",
@@ -329,7 +425,73 @@
       "introduction_epoch": 20,
       "initial_infected": 1,
       "initial_time_infected": 0,
-      "shedding_variance_log10": 0.8
+      "shedding_variance_log10": 0.8,
+      "clinical_presentation": {
+        "syndromes": [
+          "rash",
+          "respiratory"
+        ],
+        "sample_types": [
+          "blood",
+          "np_swab"
+        ],
+        "phases": [
+          {
+            "name": "prodrome",
+            "dpi_min": 0,
+            "dpi_max": 2,
+            "features": [
+              "fever",
+              "cough",
+              "coryza",
+              "conjunctivitis"
+            ],
+            "syndromes": [
+              "respiratory"
+            ]
+          },
+          {
+            "name": "koplik",
+            "dpi_min": 2,
+            "dpi_max": 3,
+            "features": [
+              "fever",
+              "cough",
+              "coryza",
+              "koplik_spots"
+            ],
+            "syndromes": [
+              "respiratory",
+              "rash"
+            ]
+          },
+          {
+            "name": "classic",
+            "dpi_min": 3,
+            "dpi_max": 5,
+            "features": [
+              "fever",
+              "maculopapular_rash",
+              "cough"
+            ],
+            "syndromes": [
+              "rash",
+              "respiratory"
+            ]
+          },
+          {
+            "name": "late",
+            "dpi_min": 6,
+            "dpi_max": null,
+            "features": [
+              "fading_rash"
+            ],
+            "syndromes": [
+              "rash"
+            ]
+          }
+        ]
+      }
     },
     {
       "pathogen_id": "legionella_pneumophila",
@@ -408,7 +570,51 @@
       "introduction_epoch": 30,
       "initial_infected": 0,
       "initial_time_infected": 0,
-      "shedding_variance_log10": 0.5
+      "shedding_variance_log10": 0.5,
+      "clinical_presentation": {
+        "syndromes": [
+          "respiratory"
+        ],
+        "sample_types": [
+          "urine",
+          "respiratory_specimen"
+        ],
+        "phases": [
+          {
+            "name": "early",
+            "dpi_min": 0,
+            "dpi_max": 2,
+            "features": [
+              "fever",
+              "cough",
+              "myalgia"
+            ]
+          },
+          {
+            "name": "pneumonia",
+            "dpi_min": 3,
+            "dpi_max": 5,
+            "features": [
+              "fever",
+              "cough",
+              "dyspnea",
+              "diarrhea",
+              "confusion"
+            ]
+          },
+          {
+            "name": "severe",
+            "dpi_min": 6,
+            "dpi_max": null,
+            "features": [
+              "fever",
+              "dyspnea",
+              "confusion",
+              "hyponatremia"
+            ]
+          }
+        ]
+      }
     },
     {
       "pathogen_id": "vibrio_cholerae_parahaemolyticus",
@@ -493,7 +699,46 @@
       "introduction_epoch": 40,
       "initial_infected": 1,
       "initial_time_infected": 0,
-      "shedding_variance_log10": 1.0
+      "shedding_variance_log10": 1.0,
+      "clinical_presentation": {
+        "syndromes": [
+          "gastrointestinal",
+          "wound_soft_tissue"
+        ],
+        "sample_types": [
+          "stool",
+          "wound_swab"
+        ],
+        "phases": [
+          {
+            "name": "gastroenteritis",
+            "dpi_min": 0,
+            "dpi_max": 3,
+            "features": [
+              "watery_diarrhea",
+              "cramps",
+              "nausea",
+              "fever"
+            ],
+            "syndromes": [
+              "gastrointestinal"
+            ]
+          },
+          {
+            "name": "wound",
+            "dpi_min": 0,
+            "dpi_max": null,
+            "features": [
+              "wound_pain",
+              "edema",
+              "erythema"
+            ],
+            "syndromes": [
+              "wound_soft_tissue"
+            ]
+          }
+        ]
+      }
     },
     {
       "pathogen_id": "campylobacter_jejuni",
@@ -573,7 +818,46 @@
       "introduction_epoch": 50,
       "initial_infected": 1,
       "initial_time_infected": 0,
-      "shedding_variance_log10": 1.0
+      "shedding_variance_log10": 1.0,
+      "clinical_presentation": {
+        "syndromes": [
+          "gastrointestinal"
+        ],
+        "sample_types": [
+          "stool"
+        ],
+        "phases": [
+          {
+            "name": "prodrome",
+            "dpi_min": 0,
+            "dpi_max": 1,
+            "features": [
+              "fever",
+              "myalgia",
+              "headache"
+            ]
+          },
+          {
+            "name": "diarrheal",
+            "dpi_min": 2,
+            "dpi_max": 4,
+            "features": [
+              "diarrhea",
+              "cramps",
+              "fever"
+            ]
+          },
+          {
+            "name": "invasive",
+            "dpi_min": 5,
+            "dpi_max": null,
+            "features": [
+              "bloody_diarrhea",
+              "cramps"
+            ]
+          }
+        ]
+      }
     },
     {
       "pathogen_id": "clostridioides_difficile",
@@ -654,7 +938,38 @@
       "introduction_epoch": 60,
       "initial_infected": 1,
       "initial_time_infected": 0,
-      "shedding_variance_log10": 1.5
+      "shedding_variance_log10": 1.5,
+      "clinical_presentation": {
+        "syndromes": [
+          "gastrointestinal"
+        ],
+        "sample_types": [
+          "stool"
+        ],
+        "phases": [
+          {
+            "name": "diarrhea",
+            "dpi_min": 0,
+            "dpi_max": 3,
+            "features": [
+              "diarrhea",
+              "cramps",
+              "fever"
+            ]
+          },
+          {
+            "name": "severe",
+            "dpi_min": 4,
+            "dpi_max": null,
+            "features": [
+              "diarrhea",
+              "cramps",
+              "fever",
+              "leukocytosis"
+            ]
+          }
+        ]
+      }
     },
     {
       "pathogen_id": "andes_hantavirus",
@@ -731,7 +1046,49 @@
       "introduction_epoch": 70,
       "initial_infected": 1,
       "initial_time_infected": 0,
-      "shedding_variance_log10": 1.0
+      "shedding_variance_log10": 1.0,
+      "clinical_presentation": {
+        "syndromes": [
+          "systemic_febrile",
+          "respiratory"
+        ],
+        "sample_types": [
+          "blood",
+          "respiratory_specimen"
+        ],
+        "phases": [
+          {
+            "name": "prodrome",
+            "dpi_min": 0,
+            "dpi_max": 4,
+            "features": [
+              "fever",
+              "myalgia",
+              "headache",
+              "nausea"
+            ],
+            "syndromes": [
+              "systemic_febrile",
+              "gastrointestinal"
+            ]
+          },
+          {
+            "name": "cardiopulmonary",
+            "dpi_min": 5,
+            "dpi_max": null,
+            "features": [
+              "cough",
+              "dyspnea",
+              "hypoxemia",
+              "shock"
+            ],
+            "syndromes": [
+              "respiratory",
+              "systemic_febrile"
+            ]
+          }
+        ]
+      }
     },
     {
       "pathogen_id": "ebola_virus",
@@ -812,7 +1169,55 @@
       "introduction_epoch": 80,
       "initial_infected": 1,
       "initial_time_infected": 0,
-      "shedding_variance_log10": 1.5
+      "shedding_variance_log10": 1.5,
+      "clinical_presentation": {
+        "syndromes": [
+          "systemic_febrile"
+        ],
+        "sample_types": [
+          "blood"
+        ],
+        "phases": [
+          {
+            "name": "early",
+            "dpi_min": 0,
+            "dpi_max": 2,
+            "features": [
+              "fever",
+              "fatigue",
+              "headache",
+              "myalgia",
+              "sore_throat"
+            ]
+          },
+          {
+            "name": "gi",
+            "dpi_min": 3,
+            "dpi_max": 5,
+            "features": [
+              "fever",
+              "vomiting",
+              "diarrhea",
+              "conjunctivitis"
+            ],
+            "syndromes": [
+              "systemic_febrile",
+              "gastrointestinal"
+            ]
+          },
+          {
+            "name": "late",
+            "dpi_min": 6,
+            "dpi_max": null,
+            "features": [
+              "fever",
+              "diarrhea",
+              "hemorrhage",
+              "shock"
+            ]
+          }
+        ]
+      }
     }
   ]
 }

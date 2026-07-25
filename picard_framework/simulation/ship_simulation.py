@@ -248,7 +248,9 @@ class ShipSimulation:
         platform_layout = load_platform_layout(self.repo_root, cfg) or {}
         self._init_transmission_core(ship, airflow_data, platform_layout)
 
-        self.obs = init_observation_engine(cfg, self.seed)
+        self.obs = init_observation_engine(
+            cfg, self.seed, pathogen_profiles=self.pathogen_profiles,
+        )
         # Compact retention skips lab-notebook accumulation (campaign never finalizes it).
         if self.run_spec.history_retention == "compact":
             self.obs.lab_notebook_enabled = False
@@ -374,6 +376,7 @@ class ShipSimulation:
             state.isolated_ids,
             state.quarantined_ids,
             state.quarantine_refusers,
+            pathogen_profiles=self.pathogen_profiles,
         )
 
         if self.chronic_assignments:
@@ -449,6 +452,13 @@ class ShipSimulation:
             behavioral_overrides=state.agent_behavioral_overrides,
             information_beliefs=beliefs,
             chronic_behavioral_mods=self.chronic_behavioral_mods,
+        )
+        from crusher_labs.clinical_presentation import apply_noise_syndromes_to_agents
+
+        apply_noise_syndromes_to_agents(
+            agents,
+            syn_result,
+            cfg.get("fred_behavior", {}).get("healthy_noise_categories"),
         )
 
         cascade_result = step_diagnostic_cascade(

@@ -1,0 +1,242 @@
+{
+  "meta": {
+    "description": "Pathogen- and syndrome-aware clinical instrument parameters for Crusher-to-the-Bridge",
+    "version": "1.0",
+    "source": "docs/instrument_parameterization_v2.md and docs/clinical_dx_review.md",
+    "notes": [
+      "covers_pathogen=false means uninformative (not a true negative).",
+      "Multiplex coverage is panel membership under panels.*.pathogens.",
+      "Clinical impression is bedside suspicion only — not laboratory confirmation."
+    ]
+  },
+  "syndrome_routing": {
+    "gastrointestinal": {
+      "multiplex_panels": ["gi"],
+      "prefer_rdt_pathogens": ["norovirus_gii4", "norwalk_gi", "clostridioides_difficile"],
+      "clinical_impression_pathogens": ["campylobacter_jejuni", "vibrio_cholerae_parahaemolyticus"]
+    },
+    "respiratory": {
+      "multiplex_panels": ["rp", "pneumonia"],
+      "prefer_rdt_pathogens": ["sars_cov2_resp", "influenza_a", "legionella_pneumophila"],
+      "clinical_impression_pathogens": ["legionella_pneumophila"]
+    },
+    "rash": {
+      "multiplex_panels": [],
+      "prefer_rdt_pathogens": [],
+      "clinical_impression_pathogens": ["measles_virus"]
+    },
+    "systemic_febrile": {
+      "multiplex_panels": [],
+      "prefer_rdt_pathogens": [],
+      "clinical_impression_pathogens": ["ebola_virus", "andes_hantavirus"]
+    },
+    "wound_soft_tissue": {
+      "multiplex_panels": [],
+      "prefer_rdt_pathogens": [],
+      "clinical_impression_pathogens": ["vibrio_cholerae_parahaemolyticus"]
+    },
+    "neurologic": {
+      "multiplex_panels": [],
+      "prefer_rdt_pathogens": [],
+      "clinical_impression_pathogens": []
+    }
+  },
+  "panels": {
+    "gi": {
+      "instrument_key": "clinical_multiplex_panel",
+      "display_name": "BioFire GI / equivalent",
+      "pathogens": {
+        "norovirus_gii4": {"sensitivity": 0.95, "specificity": 0.99},
+        "norwalk_gi": {"sensitivity": 0.95, "specificity": 0.99},
+        "campylobacter_jejuni": {"sensitivity": 0.95, "specificity": 0.97},
+        "clostridioides_difficile": {"sensitivity": 0.96, "specificity": 0.98},
+        "vibrio_cholerae_parahaemolyticus": {"sensitivity": 0.93, "specificity": 0.98}
+      }
+    },
+    "rp": {
+      "instrument_key": "clinical_multiplex_panel",
+      "display_name": "BioFire RP2.1 / equivalent",
+      "pathogens": {
+        "sars_cov2_resp": {"sensitivity": 0.98, "specificity": 0.99},
+        "influenza_a": {"sensitivity": 0.98, "specificity": 0.99}
+      }
+    },
+    "pneumonia": {
+      "instrument_key": "clinical_multiplex_panel",
+      "display_name": "Lower-respiratory pneumonia panel",
+      "pathogens": {
+        "legionella_pneumophila": {"sensitivity": 0.95, "specificity": 0.99}
+      }
+    }
+  },
+  "instruments": {
+    "clinical_rdt": {
+      "default": {
+        "covers_pathogen": true,
+        "sensitivity_peak": 0.8,
+        "sensitivity_early": 0.5,
+        "sensitivity_late": 0.4,
+        "specificity": 0.97
+      },
+      "by_pathogen": {
+        "norovirus_gii4": {
+          "covers_pathogen": true,
+          "sensitivity_peak": 0.78,
+          "sensitivity_early": 0.5,
+          "sensitivity_late": 0.4,
+          "specificity": 0.98
+        },
+        "norwalk_gi": {
+          "covers_pathogen": true,
+          "sensitivity_peak": 0.78,
+          "sensitivity_early": 0.5,
+          "sensitivity_late": 0.4,
+          "specificity": 0.98
+        },
+        "sars_cov2_resp": {
+          "covers_pathogen": true,
+          "sensitivity_peak": 0.82,
+          "sensitivity_early": 0.52,
+          "sensitivity_late": 0.52,
+          "specificity": 0.99
+        },
+        "influenza_a": {
+          "covers_pathogen": true,
+          "sensitivity_peak": 0.68,
+          "sensitivity_early": 0.4,
+          "sensitivity_late": 0.35,
+          "specificity": 0.99
+        },
+        "measles_virus": {
+          "covers_pathogen": true,
+          "sensitivity_peak": 0.4,
+          "sensitivity_early": 0.3,
+          "sensitivity_late": 0.4,
+          "specificity": 0.95
+        },
+        "legionella_pneumophila": {
+          "covers_pathogen": true,
+          "sensitivity_peak": 0.86,
+          "sensitivity_early": 0.6,
+          "sensitivity_late": 0.8,
+          "specificity": 0.98
+        },
+        "vibrio_cholerae_parahaemolyticus": {
+          "covers_pathogen": true,
+          "sensitivity_peak": 0.5,
+          "sensitivity_early": 0.3,
+          "sensitivity_late": 0.4,
+          "specificity": 0.9
+        },
+        "campylobacter_jejuni": {
+          "covers_pathogen": true,
+          "sensitivity_peak": 0.55,
+          "sensitivity_early": 0.35,
+          "sensitivity_late": 0.4,
+          "specificity": 0.92
+        },
+        "clostridioides_difficile": {
+          "covers_pathogen": true,
+          "sensitivity_peak": 0.7,
+          "sensitivity_early": 0.5,
+          "sensitivity_late": 0.6,
+          "specificity": 0.97
+        },
+        "andes_hantavirus": {"covers_pathogen": false},
+        "ebola_virus": {
+          "covers_pathogen": true,
+          "sensitivity_peak": 0.86,
+          "sensitivity_early": 0.6,
+          "sensitivity_late": 0.7,
+          "specificity": 0.95
+        }
+      }
+    },
+    "clinical_qpcr": {
+      "default": {
+        "covers_pathogen": true,
+        "sensitivity": 0.97,
+        "specificity": 0.99
+      },
+      "by_pathogen": {
+        "norovirus_gii4": {"covers_pathogen": true, "sensitivity": 0.98, "specificity": 0.99},
+        "norwalk_gi": {"covers_pathogen": true, "sensitivity": 0.98, "specificity": 0.99},
+        "sars_cov2_resp": {"covers_pathogen": true, "sensitivity": 0.98, "specificity": 0.99},
+        "influenza_a": {"covers_pathogen": true, "sensitivity": 0.97, "specificity": 0.99},
+        "measles_virus": {"covers_pathogen": true, "sensitivity": 0.98, "specificity": 0.99},
+        "legionella_pneumophila": {"covers_pathogen": true, "sensitivity": 0.95, "specificity": 0.99},
+        "vibrio_cholerae_parahaemolyticus": {"covers_pathogen": true, "sensitivity": 0.97, "specificity": 0.99},
+        "campylobacter_jejuni": {"covers_pathogen": true, "sensitivity": 0.97, "specificity": 0.99},
+        "clostridioides_difficile": {"covers_pathogen": true, "sensitivity": 0.95, "specificity": 0.98},
+        "andes_hantavirus": {"covers_pathogen": true, "sensitivity": 0.95, "specificity": 0.99},
+        "ebola_virus": {"covers_pathogen": true, "sensitivity": 0.97, "specificity": 0.99}
+      }
+    },
+    "clinical_microbiology": {
+      "default": {
+        "covers_pathogen": true,
+        "sensitivity": 0.7,
+        "specificity": 0.99
+      },
+      "by_pathogen": {
+        "norovirus_gii4": {"covers_pathogen": false},
+        "norwalk_gi": {"covers_pathogen": false},
+        "sars_cov2_resp": {"covers_pathogen": false},
+        "influenza_a": {"covers_pathogen": true, "sensitivity": 0.7, "specificity": 0.99},
+        "measles_virus": {"covers_pathogen": true, "sensitivity": 0.5, "specificity": 0.99},
+        "legionella_pneumophila": {"covers_pathogen": true, "sensitivity": 0.5, "specificity": 0.99},
+        "vibrio_cholerae_parahaemolyticus": {"covers_pathogen": true, "sensitivity": 0.9, "specificity": 0.99},
+        "campylobacter_jejuni": {"covers_pathogen": true, "sensitivity": 0.85, "specificity": 0.99},
+        "clostridioides_difficile": {"covers_pathogen": true, "sensitivity": 0.8, "specificity": 0.99},
+        "andes_hantavirus": {"covers_pathogen": false},
+        "ebola_virus": {"covers_pathogen": false}
+      }
+    },
+    "clinical_impression": {
+      "default": {
+        "covers_pathogen": false,
+        "sensitivity_by_day": {"1": 0.1, "3": 0.2, "5": 0.3},
+        "specificity": 0.4,
+        "outbreak_awareness_sensitivity_bonus": 0.25
+      },
+      "by_pathogen": {
+        "measles_virus": {
+          "covers_pathogen": true,
+          "sensitivity_by_day": {"1": 0.2, "3": 0.5, "5": 0.8},
+          "specificity": 0.7,
+          "outbreak_awareness_sensitivity_bonus": 0.25
+        },
+        "ebola_virus": {
+          "covers_pathogen": true,
+          "sensitivity_by_day": {"1": 0.15, "3": 0.3, "5": 0.6},
+          "specificity": 0.4,
+          "outbreak_awareness_sensitivity_bonus": 0.25
+        },
+        "andes_hantavirus": {
+          "covers_pathogen": true,
+          "sensitivity_by_day": {"1": 0.1, "3": 0.25, "5": 0.7},
+          "specificity": 0.5,
+          "outbreak_awareness_sensitivity_bonus": 0.25
+        },
+        "campylobacter_jejuni": {
+          "covers_pathogen": true,
+          "sensitivity_by_day": {"1": 0.15, "3": 0.2, "5": 0.25},
+          "specificity": 0.3,
+          "outbreak_awareness_sensitivity_bonus": 0.2
+        },
+        "legionella_pneumophila": {
+          "covers_pathogen": true,
+          "sensitivity_by_day": {"1": 0.3, "3": 0.4, "5": 0.5},
+          "specificity": 0.5,
+          "outbreak_awareness_sensitivity_bonus": 0.25
+        },
+        "vibrio_cholerae_parahaemolyticus": {
+          "covers_pathogen": true,
+          "sensitivity_by_day": {"1": 0.25, "3": 0.35, "5": 0.4},
+          "specificity": 0.5,
+          "outbreak_awareness_sensitivity_bonus": 0.2
+        }
+      }
+    }
+  }
+}

@@ -310,6 +310,9 @@ def _copy_optional_agent_fields(
         "susceptibility_multiplier",
         "microflora_disruption",
         "chronic_disease_ids",
+        "observed_syndromes",
+        "clinical_features",
+        "days_since_symptom_onset",
     ):
         if key in a:
             agent_dict[key] = a[key]
@@ -320,6 +323,7 @@ def engine_payload_to_schema(
     isolated_ids: set[int],
     quarantined_ids: set[int],
     quarantine_refusers: set[int],
+    pathogen_profiles: dict[str, dict[str, Any]] | None = None,
 ) -> tuple[list[dict[str, Any]], dict[str, dict[str, Any]]]:
     """Convert Korkin engine output to telemetry_buffer schema format.
 
@@ -328,6 +332,8 @@ def engine_payload_to_schema(
     zero shedding; quarantined agents (confined to quarters) retain
     their actual shedding rate and home-zone location.
     """
+    from crusher_labs.clinical_presentation import annotate_agent_clinical_presentation
+
     raw_agents = engine_payload.get("agents")
     if raw_agents is None:
         raise ValueError("engine_payload missing 'agents' key")
@@ -357,6 +363,7 @@ def engine_payload_to_schema(
         )
 
         _copy_optional_agent_fields(agent_dict, a)
+        annotate_agent_clinical_presentation(agent_dict, pathogen_profiles)
 
         agents_out.append(agent_dict)
 
@@ -505,8 +512,19 @@ def init_multi_pathogen(
 def init_observation_engine(
     cfg: dict[str, Any],
     seed: int,
+    *,
+    pathogen_profiles: dict[str, dict[str, Any]] | None = None,
 ) -> ObservationEngine:
-    """Initialise all six diagnostic instruments and the lab notebook."""
+    """Initialise diagnostic instruments and the lab notebook."""
+    from crusher_labs.clinical_instrument_params import (
+        clinical_instruments_config_path,
+        load_clinical_instrument_params,
+    )
+    from crusher_labs.observation_core import (
+        ClinicalImpression,
+        ClinicalMultiplexPanel,
+    )
+
     obs_cfg_path = resolve_repo_path(REPO_ROOT, "data/config/logging_profile.json")
     fidelity_name, _fidelity, logging_config = load_logging_profile(obs_cfg_path)
     lab_notebook_enabled = logging_config.get("lab_notebook", {}).get("enabled", True)
@@ -514,6 +532,11 @@ def init_observation_engine(
     qc_cfg = logging_config.get("quality_control", {})
     xcontam_rate = qc_cfg.get("cross_contamination_rate", 0.0001)
     ctrl_intensity = qc_cfg.get("control_run_intensity", "medium")
+
+    clin_params = load_clinical_instrument_params(
+        clinical_instruments_config_path(cfg),
+        repo_root=REPO_ROOT,
+    )
 
     air_sniffer = ContinuousAirSniffer(
         cross_contamination_rate=xcontam_rate,
@@ -541,16 +564,30 @@ def init_observation_engine(
         cross_contamination_rate=xcontam_rate,
         control_intensity=ctrl_intensity,
         rng=np.random.default_rng(seed),
+        instrument_params=clin_params,
+    )
+    clin_multiplex = ClinicalMultiplexPanel(
+        instrument_params=clin_params,
+        cross_contamination_rate=xcontam_rate,
+        control_intensity=ctrl_intensity,
+        rng=np.random.default_rng(seed + 3),
+    )
+    clin_impression = ClinicalImpression(
+        instrument_params=clin_params,
+        rng=np.random.default_rng(seed + 4),
     )
     clin_qpcr = ClinicalQPCR(
         cross_contamination_rate=xcontam_rate,
         control_intensity=ctrl_intensity,
         rng=np.random.default_rng(seed),
+        instrument_params=clin_params,
     )
     clin_microbio = ClinicalMicrobiology(
         cross_contamination_rate=xcontam_rate,
         control_intensity=ctrl_intensity,
         rng=np.random.default_rng(seed),
+        instrument_params=clin_params,
+        pathogen_profiles=pathogen_profiles,
     )
     from crusher_labs.clinical_correlation import ClinicalTestCorrelation
 
@@ -605,6 +642,8 @@ def init_observation_engine(
         surface_swab=surface_swab,
         wastewater_seq=wastewater_seq,
         clin_rdt=clin_rdt,
+        clin_multiplex=clin_multiplex,
+        clin_impression=clin_impression,
         clin_qpcr=clin_qpcr,
         clin_microbio=clin_microbio,
         clinical_correlation=clinical_correlation,
@@ -613,6 +652,9 @@ def init_observation_engine(
         lab_notebook_enabled=lab_notebook_enabled,
         turnaround=turnaround,
         long_read=long_read_inst,
+        clinical_instrument_params=clin_params,
+        pathogen_profiles=pathogen_profiles,
+        outbreak_aware=bool(cfg.get("clinical_instruments", {}).get("outbreak_aware", False)),
     )
 
 

@@ -24,6 +24,7 @@
       "tests": ["clinical_rdt"],
       "sensitivity": 0.80,
       "specificity": 0.97,
+      "notes": "Tier-1 physics use per-pathogen params in clinical_instrument_params.json; sensitivity/specificity here are display defaults. Syndrome routing may add clinical_impression when no RDT covers the pathogen.",
       "cost_per_agent": {
         "financial_usd": 12.00,
         "materials": {"rdt_kits": 1},

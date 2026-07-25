@@ -560,6 +560,33 @@ class WastewaterSequencingGrid:
         return results
 
 
+def _uninformative_base_result(
+    instrument: str,
+    agent_id: int,
+    location: str,
+    infection_state: str,
+    symptom_presentation: str,
+    compliance_status: str,
+    *,
+    pathogen_id: str | None = None,
+    panel_id: str | None = None,
+) -> dict[str, Any]:
+    """Assay ran but cannot speak to the agent's pathogen (not a true negative)."""
+    result: dict[str, Any] = {
+        "instrument": instrument,
+        "agent_id": agent_id,
+        "location": location,
+        **agent_axes_dict(infection_state, symptom_presentation, compliance_status),
+        "positive": False,
+        "detected": False,
+        "informative": False,
+        "pathogen_id": pathogen_id,
+    }
+    if panel_id is not None:
+        result["panel_id"] = panel_id
+    return result
+
+
 # ── Instrument 4: Clinical Rapid Diagnostic Test (Lateral Flow) ──────────
 
 class ClinicalRapidDiagnostic:
@@ -578,9 +605,11 @@ class ClinicalRapidDiagnostic:
         cross_contamination_rate: float = DEFAULT_CROSS_CONTAMINATION_RATE,
         control_intensity: str = DEFAULT_CONTROL_RUN_INTENSITY,
         rng: np.random.Generator | None = None,
+        instrument_params: dict[str, Any] | None = None,
     ) -> None:
         self.sensitivity = sensitivity
         self.specificity = specificity
+        self.instrument_params = instrument_params
         self.rng = rng if rng is not None else default_simulation_rng()
         self.qc = InstrumentQC(cross_contamination_rate, control_intensity, self.rng)
 
@@ -595,13 +624,43 @@ class ClinicalRapidDiagnostic:
         location: str,
         *,
         uniform_draw: float | None = None,
+        pathogen_id: str | None = None,
+        pathogen_infections: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """Run a rapid antigen test on a single agent."""
-        # Shedding-dependent effective sensitivity (sigmoid)
-        if shedding_rate > 0:
-            eff_sens = self.sensitivity * min(
-                1.0, shedding_rate / (shedding_rate + 1000.0),
+        from crusher_labs.clinical_instrument_params import (
+            active_pathogen_ids,
+            resolve_instrument_params,
+            rdt_phase_sensitivity,
+        )
+
+        if pathogen_id is None and pathogen_infections:
+            ids = active_pathogen_ids({"pathogen_infections": pathogen_infections})
+            pathogen_id = ids[0] if ids else None
+
+        sens = self.sensitivity
+        spec = self.specificity
+        covers = True
+        if self.instrument_params is not None and pathogen_id:
+            resolved = resolve_instrument_params(
+                self.instrument_params, self.name, pathogen_id,
             )
+            covers = resolved.covers_pathogen
+            if covers:
+                sens = rdt_phase_sensitivity(resolved, shedding_rate)
+                spec = resolved.specificity or spec
+        elif self.instrument_params is not None and is_infected and not pathogen_id:
+            covers = True
+
+        if is_infected and pathogen_id and not covers:
+            return _uninformative_base_result(
+                self.name, agent_id, location,
+                infection_state, symptom_presentation, compliance_status,
+                pathogen_id=pathogen_id,
+            )
+
+        if shedding_rate > 0:
+            eff_sens = sens * min(1.0, shedding_rate / (shedding_rate + 1000.0))
         else:
             eff_sens = 0.0
 
@@ -611,9 +670,8 @@ class ClinicalRapidDiagnostic:
         if is_infected:
             positive = draw < eff_sens
         else:
-            positive = draw > self.specificity  # false positive
+            positive = draw > spec
 
-        # Raw control line intensity (simulated)
         control_line = round(float(self.rng.normal(0.85, 0.05)), 3)
         test_line = 0.0
         if positive:
@@ -627,6 +685,8 @@ class ClinicalRapidDiagnostic:
             "location": location,
             **agent_axes_dict(infection_state, symptom_presentation, compliance_status),
             "positive": positive,
+            "informative": True,
+            "pathogen_id": pathogen_id,
             "effective_sensitivity": round(eff_sens, 4),
             "shedding_rate": round(shedding_rate, 2),
             "control_line_intensity": control_line,
@@ -658,8 +718,236 @@ class ClinicalRapidDiagnostic:
                 presentation,
                 compliance,
                 ag.get("location", "unknown"),
+                pathogen_infections=ag.get("pathogen_infections"),
             )
         return results
+
+
+# ── Instrument 4b: Clinical Multiplex PCR Panel ─────────────────────────
+
+class ClinicalMultiplexPanel:
+    """Syndrome-selected multiplex PCR panel (GI / RP / pneumonia)."""
+
+    name = "clinical_multiplex_panel"
+
+    def __init__(
+        self,
+        instrument_params: dict[str, Any] | None = None,
+        cross_contamination_rate: float = DEFAULT_CROSS_CONTAMINATION_RATE,
+        control_intensity: str = DEFAULT_CONTROL_RUN_INTENSITY,
+        rng: np.random.Generator | None = None,
+    ) -> None:
+        self.instrument_params = instrument_params or {}
+        self.rng = rng if rng is not None else default_simulation_rng()
+        self.qc = InstrumentQC(cross_contamination_rate, control_intensity, self.rng)
+
+    def test_agent(
+        self,
+        agent_id: int,
+        shedding_rate: float,
+        is_infected: bool,
+        infection_state: str,
+        symptom_presentation: str,
+        compliance_status: str,
+        location: str,
+        *,
+        uniform_draw: float | None = None,
+        pathogen_infections: dict[str, Any] | None = None,
+        observed_syndromes: list[str] | None = None,
+        panel_id: str | None = None,
+    ) -> dict[str, Any]:
+        from crusher_labs.clinical_instrument_params import (
+            active_pathogen_ids,
+            panels_for_syndromes,
+            resolve_panel_params,
+        )
+
+        syndromes = list(observed_syndromes or [])
+        panel_ids = [panel_id] if panel_id else panels_for_syndromes(
+            self.instrument_params, syndromes,
+        )
+        active = active_pathogen_ids({"pathogen_infections": pathogen_infections or {}})
+
+        if not panel_ids:
+            return _uninformative_base_result(
+                self.name, agent_id, location,
+                infection_state, symptom_presentation, compliance_status,
+                pathogen_id=active[0] if active else None,
+            )
+
+        _, carryover = self.qc.process_sample(shedding_rate * 0.001)
+        draw = self.rng.random() if uniform_draw is None else uniform_draw
+
+        target_results: dict[str, Any] = {}
+        identified: str | None = None
+        any_informative = False
+        overall_positive = False
+
+        for pid_panel in panel_ids:
+            panel_cfg = (self.instrument_params.get("panels") or {}).get(pid_panel) or {}
+            panel_pathogens = panel_cfg.get("pathogens") or {}
+            for target_pid in panel_pathogens:
+                resolved = resolve_panel_params(
+                    self.instrument_params, pid_panel, target_pid,
+                )
+                if resolved is None:
+                    continue
+                any_informative = True
+                infected_with_target = target_pid in active
+                if shedding_rate > 0 and infected_with_target:
+                    eff_sens = resolved.sensitivity * min(
+                        1.0, shedding_rate / (shedding_rate + 1000.0),
+                    )
+                else:
+                    eff_sens = 0.0
+                if infected_with_target:
+                    hit = draw < eff_sens
+                else:
+                    hit = draw > resolved.specificity
+                target_results[target_pid] = {
+                    "panel_id": pid_panel,
+                    "positive": hit,
+                    "effective_sensitivity": round(eff_sens, 4),
+                }
+                if hit:
+                    overall_positive = True
+                    if infected_with_target and identified is None:
+                        identified = target_pid
+
+        # Active pathogens not on any ordered panel → uninformative for them
+        covered = set(target_results)
+        uncovered_active = [p for p in active if p not in covered]
+        informative = any_informative and (
+            not active or any(p in covered for p in active)
+        )
+        # If agent is infected only with off-panel pathogens, entire result is
+        # uninformative even though on-panel targets are negative.
+        if active and not any(p in covered for p in active):
+            informative = False
+            overall_positive = False
+            identified = None
+
+        result: dict[str, Any] = {
+            "instrument": self.name,
+            "agent_id": agent_id,
+            "location": location,
+            **agent_axes_dict(infection_state, symptom_presentation, compliance_status),
+            "positive": overall_positive if informative else False,
+            "informative": informative,
+            "panel_ids": panel_ids,
+            "target_results": target_results,
+            "identified_pathogen": identified if informative and overall_positive else None,
+            "uncovered_active_pathogens": uncovered_active,
+            "shedding_rate": round(shedding_rate, 2),
+            "cross_contamination_carryover": carryover,
+        }
+        if self.qc.should_run_control():
+            result["qc_control"] = self.qc.run_negative_control()
+        return result
+
+
+# ── Instrument 4c: Clinical Impression (bedside, no lab) ────────────────
+
+class ClinicalImpression:
+    """Time-dependent bedside clinical suspicion (not laboratory confirmation)."""
+
+    name = "clinical_impression"
+
+    def __init__(
+        self,
+        instrument_params: dict[str, Any] | None = None,
+        rng: np.random.Generator | None = None,
+    ) -> None:
+        self.instrument_params = instrument_params or {}
+        self.rng = rng if rng is not None else default_simulation_rng()
+
+    def test_agent(
+        self,
+        agent_id: int,
+        shedding_rate: float,
+        is_infected: bool,
+        infection_state: str,
+        symptom_presentation: str,
+        compliance_status: str,
+        location: str,
+        *,
+        uniform_draw: float | None = None,
+        pathogen_id: str | None = None,
+        pathogen_infections: dict[str, Any] | None = None,
+        days_since_symptom_onset: int = 0,
+        outbreak_aware: bool = False,
+        candidate_pathogens: list[str] | None = None,
+    ) -> dict[str, Any]:
+        from crusher_labs.clinical_instrument_params import (
+            active_pathogen_ids,
+            impression_sensitivity_for_day,
+            resolve_instrument_params,
+        )
+
+        active = active_pathogen_ids({"pathogen_infections": pathogen_infections or {}})
+        candidates = list(candidate_pathogens or [])
+        if not candidates and pathogen_id:
+            candidates = [pathogen_id]
+        if not candidates:
+            # Fall back to active pathogens with impression coverage
+            for pid in active:
+                resolved = resolve_instrument_params(
+                    self.instrument_params, self.name, pid,
+                )
+                if resolved.covers_pathogen:
+                    candidates.append(pid)
+
+        if not candidates:
+            return _uninformative_base_result(
+                self.name, agent_id, location,
+                infection_state, symptom_presentation, compliance_status,
+                pathogen_id=active[0] if active else None,
+            )
+
+        draw = self.rng.random() if uniform_draw is None else uniform_draw
+        suspected: str | None = None
+        informative = False
+        for pid in candidates:
+            resolved = resolve_instrument_params(
+                self.instrument_params, self.name, pid,
+            )
+            if not resolved.covers_pathogen:
+                continue
+            informative = True
+            sens = impression_sensitivity_for_day(
+                resolved,
+                days_since_symptom_onset,
+                outbreak_aware=outbreak_aware,
+            )
+            spec = resolved.specificity
+            infected_with = pid in active
+            if infected_with:
+                hit = draw < sens
+            else:
+                hit = draw > spec
+            if hit and suspected is None:
+                suspected = pid
+
+        if not informative:
+            return _uninformative_base_result(
+                self.name, agent_id, location,
+                infection_state, symptom_presentation, compliance_status,
+                pathogen_id=active[0] if active else None,
+            )
+
+        return {
+            "instrument": self.name,
+            "agent_id": agent_id,
+            "location": location,
+            **agent_axes_dict(infection_state, symptom_presentation, compliance_status),
+            "positive": suspected is not None,
+            "informative": True,
+            "suspected_pathogen": suspected,
+            "days_since_symptom_onset": int(days_since_symptom_onset),
+            "outbreak_aware": bool(outbreak_aware),
+            "confirmation": False,
+            "shedding_rate": round(shedding_rate, 2),
+        }
 
 
 # ── Instrument 5: Clinical qPCR (Patient Viral Load) ────────────────────
@@ -681,11 +969,13 @@ class ClinicalQPCR:
         cross_contamination_rate: float = DEFAULT_CROSS_CONTAMINATION_RATE,
         control_intensity: str = DEFAULT_CONTROL_RUN_INTENSITY,
         rng: np.random.Generator | None = None,
+        instrument_params: dict[str, Any] | None = None,
     ) -> None:
         self.extraction_efficiency = extraction_efficiency
         self.ct_slope = ct_slope
         self.ct_intercept = ct_intercept
         self.lod_ct = lod_ct
+        self.instrument_params = instrument_params
         self.rng = rng if rng is not None else default_simulation_rng()
         self.qc = InstrumentQC(cross_contamination_rate, control_intensity, self.rng)
 
@@ -699,8 +989,39 @@ class ClinicalQPCR:
         location: str,
         *,
         uniform_draw: float | None = None,
+        pathogen_id: str | None = None,
+        pathogen_infections: dict[str, Any] | None = None,
+        is_infected: bool | None = None,
     ) -> dict[str, Any]:
         """Run clinical qPCR on a patient specimen."""
+        from crusher_labs.clinical_instrument_params import (
+            active_pathogen_ids,
+            resolve_instrument_params,
+        )
+
+        if pathogen_id is None and pathogen_infections:
+            ids = active_pathogen_ids({"pathogen_infections": pathogen_infections})
+            pathogen_id = ids[0] if ids else None
+        if is_infected is None:
+            is_infected = bool(pathogen_id) or shedding_rate > 0
+
+        detect_sens = RDT_SENSITIVITY
+        covers = True
+        if self.instrument_params is not None and pathogen_id:
+            resolved = resolve_instrument_params(
+                self.instrument_params, self.name, pathogen_id,
+            )
+            covers = resolved.covers_pathogen
+            if covers:
+                detect_sens = resolved.sensitivity or detect_sens
+
+        if is_infected and pathogen_id and not covers:
+            return _uninformative_base_result(
+                self.name, agent_id, location,
+                infection_state, symptom_presentation, compliance_status,
+                pathogen_id=pathogen_id,
+            )
+
         specimen_mass = shedding_rate * self.extraction_efficiency
         if uniform_draw is None:
             noise_mult = self.rng.lognormal(0, 0.04)
@@ -716,7 +1037,7 @@ class ClinicalQPCR:
         if uniform_draw is None:
             detected = ct is not None and ct <= self.lod_ct
         elif shedding_rate > 0:
-            eff_detect = RDT_SENSITIVITY * min(
+            eff_detect = detect_sens * min(
                 1.0, shedding_rate / (shedding_rate + 1000.0),
             )
             detected = uniform_draw < eff_detect
@@ -734,6 +1055,9 @@ class ClinicalQPCR:
             **agent_axes_dict(infection_state, symptom_presentation, compliance_status),
             "ct_value": ct,
             "detected": detected,
+            "positive": detected,
+            "informative": True,
+            "pathogen_id": pathogen_id,
             "viral_load_copies_ml": viral_load_copies_ml,
             "specimen_mass": round(effective_mass, 6),
             "cross_contamination_carryover": carryover,
@@ -762,6 +1086,8 @@ class ClinicalQPCR:
                 presentation,
                 compliance,
                 ag.get("location", "unknown"),
+                pathogen_infections=ag.get("pathogen_infections"),
+                is_infected=agent_is_infected(ag),
             )
         return results
 
@@ -834,13 +1160,38 @@ class ClinicalMicrobiology:
         cross_contamination_rate: float = DEFAULT_CROSS_CONTAMINATION_RATE,
         control_intensity: str = DEFAULT_CONTROL_RUN_INTENSITY,
         rng: np.random.Generator | None = None,
+        instrument_params: dict[str, Any] | None = None,
+        pathogen_profiles: dict[str, dict[str, Any]] | None = None,
     ) -> None:
         self.culture_sensitivity = culture_sensitivity
+        self.instrument_params = instrument_params
+        self.pathogen_profiles = pathogen_profiles or {}
         self.rng = rng if rng is not None else default_simulation_rng()
         self.qc = InstrumentQC(cross_contamination_rate, control_intensity, self.rng)
 
-    @staticmethod
-    def _disruption_site(pathogen_infections: dict[str, Any]) -> str:
+    def _disruption_site(self, pathogen_infections: dict[str, Any]) -> str:
+        from crusher_labs.clinical_instrument_params import active_pathogen_ids
+        from crusher_labs.clinical_presentation import presentation_for_pathogen
+
+        for pid in active_pathogen_ids({"pathogen_infections": pathogen_infections}):
+            presentation = presentation_for_pathogen(pid, self.pathogen_profiles)
+            syndromes = presentation.get("syndromes") or []
+            if "gastrointestinal" in syndromes:
+                return "gastrointestinal"
+            if "respiratory" in syndromes:
+                return "respiratory"
+            sample_types = presentation.get("sample_types") or []
+            if "stool" in sample_types:
+                return "gastrointestinal"
+            if "np_swab" in sample_types or "respiratory_specimen" in sample_types:
+                return "respiratory"
+            profile = self.pathogen_profiles.get(pid) or {}
+            dtype = (profile.get("microflora_disruption") or {}).get("disruption_type", "")
+            if "gastro" in str(dtype):
+                return "gastrointestinal"
+            if "resp" in str(dtype):
+                return "respiratory"
+        # Legacy substring fallback
         for pid in pathogen_infections:
             pid_lower = pid.lower()
             if "gi" in pid_lower or "enteric" in pid_lower or "norwalk" in pid_lower:
@@ -855,7 +1206,13 @@ class ClinicalMicrobiology:
         microflora_disruption: float,
         *,
         uniform_draw: float | None,
+        culture_sensitivity: float | None = None,
     ) -> tuple[dict[str, str], str]:
+        sens = (
+            self.culture_sensitivity
+            if culture_sensitivity is None
+            else culture_sensitivity
+        )
         normal_profile = NORMAL_FLORA.get(disruption_site, NORMAL_FLORA["skin"])
         culture_results: dict[str, str] = {}
         culture_draw = self.rng.random() if uniform_draw is None else uniform_draw
@@ -872,7 +1229,7 @@ class ClinicalMicrobiology:
 
         abnormal_list = ABNORMAL_MARKERS.get(disruption_site, [])
         for marker in abnormal_list:
-            if culture_draw < microflora_disruption * self.culture_sensitivity:
+            if culture_draw < microflora_disruption * sens:
                 culture_results[marker] = "detected"
             if uniform_draw is None:
                 culture_draw = self.rng.random()
@@ -890,15 +1247,51 @@ class ClinicalMicrobiology:
         pathogen_infections: dict[str, Any] | None = None,
         *,
         uniform_draw: float | None = None,
+        pathogen_id: str | None = None,
+        is_infected: bool | None = None,
     ) -> dict[str, Any]:
         """Run clinical microbiology on a patient specimen."""
+        from crusher_labs.clinical_instrument_params import (
+            active_pathogen_ids,
+            resolve_instrument_params,
+        )
+
         pathogen_infections = pathogen_infections or {}
+        if pathogen_id is None:
+            ids = active_pathogen_ids({"pathogen_infections": pathogen_infections})
+            pathogen_id = ids[0] if ids else None
+        if is_infected is None:
+            is_infected = pathogen_id is not None
+
+        culture_sens = self.culture_sensitivity
+        covers = True
+        if self.instrument_params is not None and pathogen_id:
+            resolved = resolve_instrument_params(
+                self.instrument_params, self.name, pathogen_id,
+            )
+            covers = resolved.covers_pathogen
+            if covers:
+                culture_sens = resolved.sensitivity or culture_sens
+
+        if is_infected and pathogen_id and not covers:
+            result = _uninformative_base_result(
+                self.name, agent_id, location,
+                infection_state, symptom_presentation, compliance_status,
+                pathogen_id=pathogen_id,
+            )
+            result["microflora_disruption_level"] = round(microflora_disruption, 4)
+            result["flora_shift_detected"] = False
+            result["secondary_infection_detected"] = False
+            return result
 
         _, carryover = self.qc.process_sample(microflora_disruption * 10)
 
         disruption_site = self._disruption_site(pathogen_infections)
         culture_results, gram_stain = self._culture_panel(
-            disruption_site, microflora_disruption, uniform_draw=uniform_draw,
+            disruption_site,
+            microflora_disruption,
+            uniform_draw=uniform_draw,
+            culture_sensitivity=culture_sens,
         )
 
         flora_shift_detected = microflora_disruption > 0.3
@@ -917,6 +1310,9 @@ class ClinicalMicrobiology:
             "culture_results": culture_results,
             "flora_shift_detected": flora_shift_detected,
             "secondary_infection_detected": secondary_infection,
+            "positive": secondary_infection or flora_shift_detected,
+            "informative": True,
+            "pathogen_id": pathogen_id,
             "cross_contamination_carryover": carryover,
         }
 
@@ -942,6 +1338,7 @@ class ClinicalMicrobiology:
                 compliance,
                 ag.get("location", "unknown"),
                 ag.get("pathogen_infections"),
+                is_infected=agent_is_infected(ag),
             )
         return results
 
