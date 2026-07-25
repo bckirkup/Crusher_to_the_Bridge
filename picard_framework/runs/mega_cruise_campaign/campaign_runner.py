@@ -171,7 +171,11 @@ def clear_failed_artifacts(run_id: str) -> None:
 def _read_vmhwm_kb(pid: int) -> int | None:
     """Return peak RSS (VmHWM) in KiB from ``/proc/<pid>/status``, if available."""
     try:
-        with open(f"/proc/{pid}/status", encoding="utf-8") as fh:
+        with validated_open(
+            f"/proc/{int(pid)}/status",
+            allowed_roots=("/proc",),
+            encoding="utf-8",
+        ) as fh:
             for line in fh:
                 if line.startswith("VmHWM:"):
                     return int(line.split()[1])
