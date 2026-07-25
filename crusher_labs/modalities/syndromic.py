@@ -42,11 +42,15 @@ class SyndromicSurveillance:
         self.compliance_delay_epochs = compliance_delay_epochs
         self.rng = rng if rng is not None else default_simulation_rng()
 
-        self.noise_categories = noise_categories or [
-            {"reason": "seasickness",  "probability": 0.008},
-            {"reason": "fatigue",      "probability": 0.005},
-            {"reason": "minor_injury", "probability": 0.002},
-        ]
+        # None → built-in defaults; explicit [] disables background noise categories.
+        if noise_categories is None:
+            self.noise_categories = [
+                {"reason": "seasickness",  "probability": 0.008},
+                {"reason": "fatigue",      "probability": 0.005},
+                {"reason": "minor_injury", "probability": 0.002},
+            ]
+        else:
+            self.noise_categories = list(noise_categories)
 
     @staticmethod
     def effective_sick_call_probability(
@@ -162,9 +166,12 @@ class SyndromicSurveillance:
     def _check_background_noise(self, _aid: int) -> tuple[bool, str | None]:
         """FRED-style categorized background noise check.
 
-        Each noise category has its own independent probability
+        ``background_noise_rate <= 0`` disables all background sick-call noise.
+        Otherwise each noise category has its own independent probability
         (ref: FRED ``Household.vaccination_probability`` pattern).
         """
+        if self.background_noise_rate <= 0.0:
+            return False, None
         for cat in self.noise_categories:
             if self.rng.random() < cat["probability"]:
                 return True, cat["reason"]
