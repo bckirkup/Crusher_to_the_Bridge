@@ -1,7 +1,7 @@
 {
-  "campaign": "mega_cruise_9k",
+  "campaign": "mega_cruise_17780",
   "platform": "mega_cruise_5000",
-  "description": "9000+ run campaign: 10 pathogens × HVAC × surveillance × compliance × wearables",
+  "description": "~17780-run campaign: 10 pathogens × HVAC × surveillance × compliance × wearables (formerly mega_cruise_9k)",
   "default_epochs": 240,
   "default_num_agents": 7000,
   "tiers": {
@@ -328,6 +328,30 @@
       "fred_behavior": {
         "healthy_noise_categories": []
       }
+    },
+    "none_env": {
+      "diagnostic_cascade": {"enabled": false},
+      "syndromic": {
+        "sick_call_probability": 0.0,
+        "background_noise_rate": 0.0
+      },
+      "fred_behavior": {
+        "healthy_noise_categories": []
+      },
+      "observation": {"enabled": false}
+    },
+    "none_true": {
+      "diagnostic_cascade": {"enabled": false},
+      "syndromic": {
+        "sick_call_probability": 0.0,
+        "background_noise_rate": 0.0
+      },
+      "fred_behavior": {
+        "healthy_noise_categories": []
+      },
+      "observation": {"enabled": false},
+      "wearable_monitoring": {"enabled": false},
+      "ship_graph": {"counter_confinement_enabled": false}
     },
     "syndromic": {
       "diagnostic_cascade": {"enabled": false}

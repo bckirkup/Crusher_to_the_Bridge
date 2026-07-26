@@ -436,7 +436,6 @@ def run_job(job: dict[str, Any], defaults: dict[str, Any] | None = None) -> dict
 def load_suite(suite_path: str) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     suite = _load_json(suite_path)
     suite_dir = os.path.dirname(resolve_repo_path(REPO_ROOT, suite_path))
-    defaults = dict(suite.get("defaults") or {})
     jobs: list[dict[str, Any]] = []
     for entry in suite.get("jobs", []):
         if isinstance(entry, str):

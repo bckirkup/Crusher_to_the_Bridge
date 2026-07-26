@@ -15,32 +15,33 @@ from typing import Any
 
 import numpy as np
 
+from crusher_labs.modalities.wearable import WearableDataStream
 from engines.infection_dynamics_bridge import (
-    KorkinShipEngine,
-    InfectionStatus,
     IllnessStatus,
+    InfectionStatus,
+    KorkinShipEngine,
 )
 from engines.wearable_monitor import WearableMonitor
-from crusher_labs.modalities.wearable import WearableDataStream
-from telemetry_buffer.agent_axes import (
-    agent_requires_confinement,
-    agent_is_infected,
-    agent_has_symptomatic_presentation,
-    INFECTION_RECOVERED,
-    INFECTION_SUSCEPTIBLE,
-)
 from orchestrator_types import (
-    STATUS_SUSPECTED,
-    STATUS_CONFIRMED,
-    LOCATION_ISOLATED,
     DEFAULT_AIRBORNE_FRACTION,
-    DEFAULT_SURFACE_FRACTION,
-    DEFAULT_GREYWATER_FRACTION,
     DEFAULT_GRAYWATER_PROPAGATION_FACTOR,
-    SimulationState,
+    DEFAULT_GREYWATER_FRACTION,
+    DEFAULT_SURFACE_FRACTION,
+    LOCATION_ISOLATED,
+    STATUS_CONFIRMED,
+    STATUS_SUSPECTED,
     ObservationEngine,
     ProtocolContext,
+    SimulationState,
 )
+from telemetry_buffer.agent_axes import (
+    INFECTION_RECOVERED,
+    INFECTION_SUSCEPTIBLE,
+    agent_has_symptomatic_presentation,
+    agent_is_infected,
+    agent_requires_confinement,
+)
+
 
 # All confined IDs (quarantined + isolated) helper
 def _all_confined(state: SimulationState) -> set[int]:
@@ -84,12 +85,55 @@ def build_wastewater_pathogen_mass_by_id(
     return pooled_by_id
 
 
+# ── Quarantine admission (shared compliance gate) ────────────────────────
+
+def try_admit_to_quarantine(
+    epoch: int,
+    aid: int,
+    state: SimulationState,
+    syndromic: Any,
+    *,
+    action_ok: str,
+    action_refuse: str,
+    epochs_since_order: int = 0,
+) -> bool:
+    """Admit *aid* to quarantine if FRED compliance check passes.
+
+    Returns ``True`` when the agent is added to ``quarantined_ids``,
+    ``False`` when they refuse (tracked in ``quarantine_refusers``) or
+    are already confined / already refusing.
+    """
+    if aid in _all_confined(state) or aid in state.quarantine_refusers:
+        return False
+    override = state.agent_behavioral_overrides.get(aid)
+    chronic_boost = state.chronic_behavioral_mods.get(
+        aid, {},
+    ).get("quarantine_compliance_boost", 0.0)
+    if syndromic.check_quarantine_compliance(
+        aid, epochs_since_order,
+        behavioral_override=override,
+        chronic_compliance_boost=chronic_boost,
+    ):
+        state.quarantined_ids.add(aid)
+        state.compliance_log.append({
+            "epoch": epoch, "agent_id": aid, "action": action_ok,
+        })
+        return True
+    state.quarantine_refusers.add(aid)
+    state.quarantine_order_epoch[aid] = epoch
+    state.compliance_log.append({
+        "epoch": epoch, "agent_id": aid, "action": action_refuse,
+    })
+    return False
+
+
 # ── VSP state synchronization ────────────────────────────────────────────
 
 def sync_vsp_isolation(
     epoch: int,
     engine: KorkinShipEngine,
     state: SimulationState,
+    syndromic: Any,
 ) -> None:
     """Sync VSP-triggered quarantine from the engine back to SimulationState.
 
@@ -98,16 +142,20 @@ def sync_vsp_isolation(
     downstream functions (telemetry, confinement, recording) see a consistent
     set.  VSP confinement is quarantine (confined to quarters, still
     HVAC-connected), not true isolation.
+
+    Compliance is checked before admission; agents who refuse stay out of
+    ``state.quarantined_ids`` and are removed from ``engine.quarantined_ids``
+    so the two sets stay aligned.
     """
     vsp_new = engine.quarantined_ids - _all_confined(state)
-    if vsp_new:
-        state.quarantined_ids.update(vsp_new)
-        for aid in sorted(vsp_new):
-            state.compliance_log.append({
-                "epoch": epoch,
-                "agent_id": aid,
-                "action": "vsp_quarantine",
-            })
+    for aid in sorted(vsp_new):
+        admitted = try_admit_to_quarantine(
+            epoch, aid, state, syndromic,
+            action_ok="vsp_quarantine",
+            action_refuse="refused_vsp_quarantine",
+        )
+        if not admitted and aid not in state.quarantined_ids:
+            engine.quarantined_ids.discard(aid)
 
 
 # ── FRED compliance ──────────────────────────────────────────────────────
@@ -255,8 +303,8 @@ def apply_chronic_severity_escalation(
     ``P(severe) = clamp(severity_mult - 1.0, 0, 1)``.
     """
     from telemetry_buffer.agent_axes import (
-        PRESENTATION_SYMPTOMATIC,
         PRESENTATION_SEVERE,
+        PRESENTATION_SYMPTOMATIC,
     )
     for agent_dict in agents:
         pres = agent_dict.get("symptom_presentation", "")
@@ -402,6 +450,9 @@ def run_observation_sampling(
              long_read_results, long_read_ordered_count).
     Delivered results respect instrument turnaround; stoplights use delivered only.
     """
+    if not cfg.get("observation", {}).get("enabled", True):
+        return ({}, {}, {}, {}, {}, {}, {}, 0)
+
     from crusher_labs.instrument_turnaround import (
         merge_released_into_observation,
     )
@@ -560,38 +611,20 @@ def confine_agents(
 
     Agents whose ``agent_class`` is in *exempt_classes* are skipped.
     """
-    confined = _all_confined(state)
     _exempt = exempt_classes or set()
     for agent in agents:
         aid = agent["agent_id"]
-        if aid in confined or aid in state.quarantine_refusers:
-            continue
         if agent.get("agent_class", "") in _exempt:
             continue
         is_symptomatic = agent_requires_confinement(agent)
         is_shedding = include_shedding and agent.get("shedding_rate", 0.0) > 0.0
         if not (is_symptomatic or is_shedding):
             continue
-        override = state.agent_behavioral_overrides.get(aid)
-        chronic_boost = state.chronic_behavioral_mods.get(
-            aid, {},
-        ).get("quarantine_compliance_boost", 0.0)
-        if syndromic.check_quarantine_compliance(
-            aid, 0, behavioral_override=override,
-            chronic_compliance_boost=chronic_boost,
-        ):
-            state.quarantined_ids.add(aid)
-            state.compliance_log.append({
-                "epoch": epoch, "agent_id": aid,
-                "action": "immediate_compliance",
-            })
-        else:
-            state.quarantine_refusers.add(aid)
-            state.quarantine_order_epoch[aid] = epoch
-            state.compliance_log.append({
-                "epoch": epoch, "agent_id": aid,
-                "action": "refused_quarantine",
-            })
+        try_admit_to_quarantine(
+            epoch, aid, state, syndromic,
+            action_ok="immediate_compliance",
+            action_refuse="refused_quarantine",
+        )
 
 
 def confine_all_agents(
@@ -605,34 +638,16 @@ def confine_all_agents(
 
     Agents whose ``agent_class`` is in *exempt_classes* are skipped.
     """
-    confined = _all_confined(state)
     _exempt = exempt_classes or set()
     for agent in agents:
         aid = agent["agent_id"]
-        if aid in confined or aid in state.quarantine_refusers:
-            continue
         if agent.get("agent_class", "") in _exempt:
             continue
-        override = state.agent_behavioral_overrides.get(aid)
-        chronic_boost = state.chronic_behavioral_mods.get(
-            aid, {},
-        ).get("quarantine_compliance_boost", 0.0)
-        if syndromic.check_quarantine_compliance(
-            aid, 0, behavioral_override=override,
-            chronic_compliance_boost=chronic_boost,
-        ):
-            state.quarantined_ids.add(aid)
-            state.compliance_log.append({
-                "epoch": epoch, "agent_id": aid,
-                "action": "general_confinement",
-            })
-        else:
-            state.quarantine_refusers.add(aid)
-            state.quarantine_order_epoch[aid] = epoch
-            state.compliance_log.append({
-                "epoch": epoch, "agent_id": aid,
-                "action": "refused_general_confinement",
-            })
+        try_admit_to_quarantine(
+            epoch, aid, state, syndromic,
+            action_ok="general_confinement",
+            action_refuse="refused_general_confinement",
+        )
 
 
 def apply_surface_decontamination(
@@ -920,6 +935,7 @@ def step_diagnostic_cascade(
     obs: ObservationEngine,
     wearable_monitor: Any | None = None,
     cascade_entry_config: Any | None = None,
+    syndromic: Any | None = None,
     *,
     cfg: dict[str, Any] | None = None,
 ) -> dict[str, Any] | None:
@@ -927,9 +943,10 @@ def step_diagnostic_cascade(
 
     Feeds sick-call and wearable RED alerts into the cascade, which
     manages per-agent tier progression and sequential test ordering.
-    Agents whose cascade reaches confinement tiers are added to the
-    quarantine set.  Returns the cascade epoch result dict, or None
-    if the cascade is disabled or still inside an activation delay.
+    Agents whose cascade reaches confinement tiers are admitted via the
+    shared quarantine compliance gate.  Returns the cascade epoch result
+    dict, or None if the cascade is disabled or still inside an
+    activation delay.
     """
     cascade = state.cascade_engine
     if cascade is None:
@@ -972,13 +989,15 @@ def step_diagnostic_cascade(
     )
 
     for aid in result.confinements_ordered:
-        if aid not in state.quarantined_ids and aid not in state.isolated_ids:
-            state.quarantined_ids.add(aid)
-            state.compliance_log.append({
-                "epoch": epoch,
-                "agent_id": aid,
-                "action": "cascade_confinement",
-            })
+        if syndromic is None:
+            raise ValueError(
+                "syndromic is required to apply cascade quarantine compliance",
+            )
+        try_admit_to_quarantine(
+            epoch, aid, state, syndromic,
+            action_ok="cascade_confinement",
+            action_refuse="refused_cascade_confinement",
+        )
 
     return result.to_dict()
 
@@ -1110,12 +1129,19 @@ def step_counter_thresholds(
     counter_defs: list[dict[str, Any]],
     state: SimulationState,
     syndromic: Any,
+    *,
+    confinement_enabled: bool = True,
 ) -> None:
     """Apply confinement actions for counters that exceed their thresholds.
 
     Replaces the legacy engine-internal VSP whole-population check with
     configurable, per-group counter thresholds.
+
+    When *confinement_enabled* is false (``ship_graph.counter_confinement_enabled``),
+    counters may still be logged by the caller but no confine actions run.
     """
+    if not confinement_enabled:
+        return
     for cdef in counter_defs:
         cid = cdef.get("counter_id", "")
         on_exceed = cdef.get("on_exceed", "log_only")

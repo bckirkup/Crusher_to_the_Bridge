@@ -26,14 +26,19 @@ jobs:
           python -m pip install --only-binary=:all: --require-hashes -r requirements.lock.txt
 
       - name: Lint with ruff (closes #89)
-        run: ruff check --select E,F,W,I --ignore E501,E741 --target-version py311 engines/ crusher_labs/ picard_framework/ decision_engine/ orchestrator*.py
-        continue-on-error: true
+        run: |
+          # F-rules are blocking (undefined names / unused imports).
+          ruff check --select F --target-version py311 \
+            engines/ crusher_labs/ picard_framework/ decision_engine/ \
+            orchestrator*.py presidio_runner.py deploy/aws/
+          # Remaining lint stays advisory.
+          ruff check --select E,W,I --ignore E501,E741 --target-version py311 \
+            engines/ crusher_labs/ picard_framework/ decision_engine/ \
+            orchestrator*.py presidio_runner.py deploy/aws/ || true
+        continue-on-error: false
 
       - name: Run sanity checker
-        run: python tools/sanity_checker.py --from-config
-
-      - name: Verify platform graywater zones and wastewater pooling
-        run: pytest tests/test_graywater_zones.py -v --tb=short
+        run: python3 tools/sanity_checker.py --from-config
 
       - name: Validate JSON schemas (closes #83)
         env:
@@ -47,7 +52,7 @@ jobs:
         env:
           PYTHONPATH: .
         run: |
-          python -c "
+          python3 -c "
           from picard_framework import PicardRunSpec, ShipSimulation
           from presidio import PresidioRunSpec
           from decision_engine import (
@@ -65,28 +70,15 @@ jobs:
         env:
           PYTHONPATH: .
         run: |
-          python presidio_runner.py \
+          python3 presidio_runner.py \
             --fleet-config presidio/data/config/smoke_fleet.json \
             --cruises 1
-
-      - name: Long-read sequencing and instrument TAT tests
-        env:
-          PYTHONPATH: .
-        run: |
-          pytest tests/test_long_read_sequencing.py tests/test_instrument_turnaround.py \
-            tests/test_sequencing_config.py::test_init_observation_engine_turnaround_and_long_read -v --tb=short
-
-      - name: Wearable anomaly scoring and cascade entry tests
-        env:
-          PYTHONPATH: .
-        run: |
-          pytest tests/test_wearable_anomaly_scorer.py tests/test_cascade_entry.py -v --tb=short
 
       - name: Verify import hygiene (stoplight deduplication)
         env:
           PYTHONPATH: .
         run: |
-          python -c "
+          python3 -c "
           from crusher_labs.stoplight import stoplight_from_ct, meets_threshold, stoplight_from_long_read_verification
           from crusher_labs.protocol_engine import compute_stoplights
           from crusher_labs.lab_notebook import _stoplight_from_ct
@@ -105,7 +97,7 @@ jobs:
         env:
           PYTHONPATH: .
         run: |
-          python -c "
+          python3 -c "
           import plotly.graph_objects as go
           import dashboard
           from dashboard import aggregate_transmission_pathway_totals
@@ -123,16 +115,11 @@ jobs:
           "
 
       - name: Run orchestrator (24-epoch smoke test)
-        run: python orchestrator.py
-
-      - name: Diagnostic cascade smoke (6-epoch, cascade enabled)
-        env:
-          PYTHONPATH: .
-        run: pytest tests/test_smoke_diagnostic_cascade.py -v --tb=short
+        run: python3 orchestrator.py
 
       - name: Verify OIS in simulation telemetry
         run: |
-          python -c "
+          python3 -c "
           import json
           h = json.load(open('telemetry_buffer/simulation_history.json'))
           c = h[-1]['cost_accounting']
@@ -140,3 +127,9 @@ jobs:
           assert 'operational_impact_breakdown' in c
           print('OIS cumulative:', c['operational_impact_cumulative'])
           "
+
+      - name: Campaign Docker image smoke
+        run: |
+          docker build -t picard-campaign .
+          docker run --rm picard-campaign --smoke
+

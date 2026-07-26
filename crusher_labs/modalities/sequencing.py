@@ -34,7 +34,6 @@ import numpy as np
 
 from simulation_utils.numeric import default_simulation_rng
 
-
 # ── Multi-Kingdom baseline profiles (GRUMB reference) ────────────────
 # Each kingdom contributes taxa to a unified relative-abundance vector.
 # Zone-specific modifiers adjust the balance (e.g. Galley has more Fungi

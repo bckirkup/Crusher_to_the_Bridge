@@ -30,9 +30,8 @@ import numpy as np
 import yaml
 
 from engines.infection_dynamics_bridge import (
-    KorkinAgent,
     InfectionStatus,
-    IllnessStatus,
+    KorkinAgent,
 )
 from simulation_utils.numeric import default_simulation_rng, float_ne
 from simulation_utils.paths import resolve_repo_path, validate_path_component, validated_open

@@ -22,7 +22,6 @@ import argparse
 import csv
 import io
 import json
-import os
 import re
 import sys
 import zipfile
@@ -32,6 +31,7 @@ from typing import Any, Iterator
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(_REPO_ROOT))
 
+from deploy.aws.path_safety import cwd_root, safe_path  # noqa: E402
 from simulation_utils.paths import confine_to_base, validated_open  # noqa: E402
 
 _TAG_PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
@@ -42,18 +42,6 @@ _TAG_PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
     ("filter", re.compile(r"_(merv\d+|hepa)_")),
     ("decay", re.compile(r"_(low|med|high|vhigh)_")),
 )
-
-
-def _cwd_root() -> str:
-    return os.path.realpath(os.getcwd())
-
-
-def safe_path(path: Path | str) -> str:
-    """Resolve ``path`` and confine it to the current working directory."""
-    try:
-        return confine_to_base(_cwd_root(), str(path))
-    except ValueError as exc:
-        raise SystemExit(str(exc)) from exc
 
 
 def parse_run_tags(run_id: str) -> dict[str, str | None]:
@@ -150,7 +138,7 @@ def frontier_rows(curve_rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
 
 
 def _write_csv(path: str, rows: list[dict[str, Any]]) -> None:
-    roots = (_cwd_root(),)
+    roots = (cwd_root(),)
     safe = confine_to_base(roots[0], path)
     if not rows:
         with validated_open(safe, "w", allowed_roots=roots, encoding="utf-8") as fh:

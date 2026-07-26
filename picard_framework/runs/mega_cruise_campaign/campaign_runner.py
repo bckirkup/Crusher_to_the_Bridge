@@ -123,7 +123,7 @@ def failed_runs() -> set[str]:
 
 def mark_completed(run_id: str) -> None:
     safe_id = _safe_run_id(run_id)
-    log_path = _output_artifact("completed_runs.txt")
+    log_path = _output_artifact(COMPLETED_LOG.name)
     with validated_open(log_path, "a", allowed_roots=_allowed_roots(), encoding="utf-8") as fh:
         fh.write(safe_id + "\n")
     # A later success clears a prior failure entry for the same run_id.
@@ -179,7 +179,7 @@ def _read_vmhwm_kb(pid: int) -> int | None:
             for line in fh:
                 if line.startswith("VmHWM:"):
                     return int(line.split()[1])
-    except (FileNotFoundError, ProcessLookupError, PermissionError, ValueError, OSError):
+    except (OSError, ValueError):
         return None
     return None
 
@@ -222,13 +222,15 @@ def _write_run_sidecars(
     )
     if ok:
         return
+    if timed_out:
+        failure_class = "timeout"
+    elif _looks_like_oom(returncode):
+        failure_class = "oom"
+    else:
+        failure_class = "other"
     failure = {
         **resource,
-        "failure_class": (
-            "timeout" if timed_out
-            else "oom" if _looks_like_oom(returncode)
-            else "other"
-        ),
+        "failure_class": failure_class,
     }
     failure_path = _output_artifact(f"{safe_id}.failure.json")
     with validated_open(failure_path, "w", allowed_roots=roots, encoding="utf-8") as fh:
@@ -1304,13 +1306,13 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--s3-prefix",
         default=None,
-        help="s3://bucket/path to upload each <run_id>.zip and completed_runs.txt.",
+        help=f"s3://bucket/path to upload each <run_id>.zip and {COMPLETED_LOG.name}.",
     )
     parser.add_argument(
         "--s3-log-every",
         type=int,
         default=25,
-        help="Upload completed_runs.txt to S3 every N successful runs (default 25).",
+        help=f"Upload {COMPLETED_LOG.name} to S3 every N successful runs (default 25).",
     )
     parser.add_argument(
         "--single",
@@ -1523,7 +1525,7 @@ def _upload_completed_log(
     shard_count: int | None,
 ) -> None:
     """Upload this shard's completed_runs.txt under a shard-scoped key."""
-    log_path = _output_artifact("completed_runs.txt")
+    log_path = _output_artifact(COMPLETED_LOG.name)
     if not os.path.isfile(log_path):
         return
     try:
@@ -1541,7 +1543,7 @@ def _download_completed_log(
 ) -> None:
     """Seed local completed_runs.txt from S3 so Spot retries skip finished runs."""
     key = _resume_log_key(shard_index, shard_count)
-    log_path = Path(_output_artifact("completed_runs.txt"))
+    log_path = Path(_output_artifact(COMPLETED_LOG.name))
     try:
         ok = uploader.download_file(key, log_path)
     except Exception as exc:  # noqa: BLE001

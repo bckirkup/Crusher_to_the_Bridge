@@ -99,7 +99,17 @@
             "causes_disruption": {"type": "boolean"},
             "disruption_type": {
               "type": "string",
-              "enum": ["gastrointestinal", "respiratory", "dermal", "immune_memory_and_respiratory", "gastrointestinal_spore_antibiotic_associated", "systemic_respiratory", "systemic_gastrointestinal"]
+              "enum": [
+                "gastrointestinal",
+                "respiratory",
+                "dermal",
+                "immune_memory_and_respiratory",
+                "gastrointestinal_spore_antibiotic_associated",
+                "systemic",
+                "systemic_fever",
+                "systemic_respiratory",
+                "systemic_gastrointestinal"
+              ]
             },
             "disruption_magnitude": {"type": "number", "minimum": 0, "maximum": 1},
             "affected_kingdoms": {

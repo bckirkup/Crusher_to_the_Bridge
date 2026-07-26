@@ -45,7 +45,7 @@ STANDARD_TIERS = [
 
 def test_manifest_loads_and_has_ten_tiers() -> None:
     manifest = load_manifest(CAMPAIGN / "campaign_manifest.json")
-    assert manifest["campaign"] == "mega_cruise_9k"
+    assert manifest["campaign"] == "mega_cruise_17780"
     assert len(manifest["tiers"]) == 10
     assert "norovirus" in manifest["pathogen_configs"]
     assert manifest["pathogen_configs"]["norovirus"]["pathogen_id"] == "norwalk_gi"
@@ -62,6 +62,10 @@ def test_none_and_syndromic_surveillance_configs_diverge() -> None:
     assert none_cfg["syndromic"]["sick_call_probability"] == 0.0
     assert none_cfg["syndromic"]["background_noise_rate"] == 0.0
     assert none_cfg["fred_behavior"]["healthy_noise_categories"] == []
+    # Soft none keeps observation / wearables / VSP confinement on (defaults).
+    assert none_cfg.get("observation", {}).get("enabled", True) is True
+    assert "wearable_monitoring" not in none_cfg
+    assert "counter_confinement_enabled" not in none_cfg.get("ship_graph", {})
     assert "syndromic" not in syn_cfg
 
     runs = list(generate_tier_runs(manifest, "t3_surveillance_sweep"))
@@ -73,6 +77,30 @@ def test_none_and_syndromic_surveillance_configs_diverge() -> None:
     assert none_over["fred_behavior"]["healthy_noise_categories"] == []
     assert "sick_call_probability" not in syn_over.get("syndromic", {})
     assert none_over != syn_over
+
+
+def test_none_preset_ladder_diverges() -> None:
+    """none / none_env / none_true must differ on observation and confinement switches."""
+    manifest = load_manifest()
+    configs = manifest["surveillance_configs"]
+    none = configs["none"]
+    none_env = configs["none_env"]
+    none_true = configs["none_true"]
+
+    assert none != none_env != none_true
+    assert none_env["observation"]["enabled"] is False
+    assert none_env.get("wearable_monitoring", {}).get("enabled", True) is True
+    assert none_env.get("ship_graph", {}).get("counter_confinement_enabled", True) is True
+
+    assert none_true["observation"]["enabled"] is False
+    assert none_true["wearable_monitoring"]["enabled"] is False
+    assert none_true["ship_graph"]["counter_confinement_enabled"] is False
+
+    # Soft none still only silences sick-call / cascade (legacy campaign shape).
+    assert "observation" not in none or none["observation"].get("enabled", True) is True
+    assert none["syndromic"]["sick_call_probability"] == 0.0
+    assert none_env["syndromic"]["sick_call_probability"] == 0.0
+    assert none_true["syndromic"]["sick_call_probability"] == 0.0
 
 
 def test_resolve_tier_short_prefix() -> None:
@@ -823,3 +851,184 @@ def test_analyze_campaign_curves_long_form(
     frontier_text = frontiers.read_text(encoding="utf-8")
     assert "oa20" in frontier_text
     assert "attack_rate" in frontier_text
+
+
+def test_shard_partitions_are_complete_and_disjoint() -> None:
+    """shard-count/index must partition the flattened run list without gaps or overlap."""
+    manifest = load_manifest()
+    all_runs = list(generate_tier_runs(manifest, "t1_pathogen_baselines"))
+    n = len(all_runs)
+    assert n == 300
+
+    shard_count = 7
+    claimed: dict[int, int] = {}
+    for shard_index in range(shard_count):
+        for global_index in range(n):
+            if global_index % shard_count == shard_index:
+                assert global_index not in claimed
+                claimed[global_index] = shard_index
+
+    assert len(claimed) == n
+    assert set(claimed) == set(range(n))
+    # Each shard gets floor(n/k) or ceil(n/k) runs.
+    sizes = [sum(1 for v in claimed.values() if v == i) for i in range(shard_count)]
+    assert sum(sizes) == n
+    assert max(sizes) - min(sizes) <= 1
+
+
+def test_dry_run_shard_counts_sum_to_total(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str],
+) -> None:
+    """Dry-run with shards reports disjoint shard sizes that sum to the tier total."""
+    out = tmp_path / "mega_cruise_campaign"
+    monkeypatch.setattr(
+        "picard_framework.runs.mega_cruise_campaign.campaign_runner.OUTPUT_ROOT",
+        out,
+    )
+    shard_count = 4
+    reported: list[int] = []
+    for shard_index in range(shard_count):
+        rc = main([
+            "--dry-run", "--tier", "t1",
+            "--shard-count", str(shard_count),
+            "--shard-index", str(shard_index),
+        ])
+        assert rc == 0
+        text = capsys.readouterr().out
+        # "DRY RUN — N runs would run on shard i"
+        match_line = next(
+            line for line in text.splitlines()
+            if "would run on shard" in line
+        )
+        count = int(match_line.split("—")[1].strip().split()[0])
+        reported.append(count)
+    assert sum(reported) == 300
+    assert max(reported) - min(reported) <= 1
+
+
+def test_smoke_s3_upload_failure_still_succeeds(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str],
+) -> None:
+    """A failed zip upload must not flip a successful smoke run into failure."""
+    out = tmp_path / "mega_cruise_campaign"
+    monkeypatch.setattr(
+        "picard_framework.runs.mega_cruise_campaign.campaign_runner.OUTPUT_ROOT",
+        out,
+    )
+    monkeypatch.setattr(
+        "picard_framework.runs.mega_cruise_campaign.campaign_runner.COMPLETED_LOG",
+        out / "completed_runs.txt",
+    )
+    monkeypatch.setattr(
+        "picard_framework.runs.mega_cruise_campaign.campaign_runner.FAILED_LOG",
+        out / "failed_runs.txt",
+    )
+
+    class FailingUploader:
+        def __init__(self, _prefix: str) -> None:
+            self.uploads: list[str] = []
+
+        def download_file(self, name: str, local_path: Path) -> bool:
+            return False
+
+        def object_exists(self, name: str) -> bool:
+            return False
+
+        def upload_file(self, local_path: Path, name: str) -> str:
+            self.uploads.append(name)
+            raise RuntimeError("simulated S3 outage")
+
+    def fake_run(run_id: str, spec: dict, **kwargs: Any) -> bool:
+        zip_path = out / f"{run_id}.zip"
+        zip_path.parent.mkdir(parents=True, exist_ok=True)
+        zip_path.write_bytes(b"PK\x05\x06" + b"\x00" * 18)
+        return True
+
+    monkeypatch.setattr(
+        "picard_framework.runs.mega_cruise_campaign.campaign_runner.S3Uploader",
+        FailingUploader,
+    )
+    monkeypatch.setattr(
+        "picard_framework.runs.mega_cruise_campaign.campaign_runner.run_simulation_subprocess",
+        fake_run,
+    )
+    monkeypatch.setattr(
+        "picard_framework.runs.mega_cruise_campaign.campaign_runner.run_simulation",
+        fake_run,
+    )
+    rc = main([
+        "--smoke", "--in-process",
+        "--s3-prefix", "s3://fake-bucket/campaign/",
+    ])
+    assert rc == 0
+    out_text = capsys.readouterr().out
+    assert "s3 upload failed" in out_text or "completed_runs.txt upload failed" in out_text
+    zips = list(out.glob("*.zip"))
+    assert len(zips) == 1
+    assert (out / "completed_runs.txt").is_file()
+
+
+def test_resume_skips_when_s3_zip_already_exists(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """On --resume, an existing S3 zip should mark the run completed and skip it."""
+    out = tmp_path / "mega_cruise_campaign"
+    out.mkdir(parents=True)
+    monkeypatch.setattr(
+        "picard_framework.runs.mega_cruise_campaign.campaign_runner.OUTPUT_ROOT",
+        out,
+    )
+    monkeypatch.setattr(
+        "picard_framework.runs.mega_cruise_campaign.campaign_runner.COMPLETED_LOG",
+        out / "completed_runs.txt",
+    )
+    monkeypatch.setattr(
+        "picard_framework.runs.mega_cruise_campaign.campaign_runner.FAILED_LOG",
+        out / "failed_runs.txt",
+    )
+
+    class ExistingZipUploader:
+        def __init__(self, _prefix: str) -> None:
+            pass
+
+        def download_file(self, name: str, local_path: Path) -> bool:
+            return False
+
+        def object_exists(self, name: str) -> bool:
+            # Pretend every run zip already landed in S3.
+            return name.endswith(".zip")
+
+        def upload_file(self, local_path: Path, name: str) -> str:
+            return f"s3://fake/{name}"
+
+    called: list[str] = []
+
+    def fake_run(run_id: str, spec: dict, **kwargs: Any) -> bool:
+        called.append(run_id)
+        return True
+
+    monkeypatch.setattr(
+        "picard_framework.runs.mega_cruise_campaign.campaign_runner.S3Uploader",
+        ExistingZipUploader,
+    )
+    monkeypatch.setattr(
+        "picard_framework.runs.mega_cruise_campaign.campaign_runner.run_simulation_subprocess",
+        fake_run,
+    )
+    monkeypatch.setattr(
+        "picard_framework.runs.mega_cruise_campaign.campaign_runner.run_simulation",
+        fake_run,
+    )
+
+    # Smoke selects t1/limit 1; with all zips present in S3 the first candidate
+    # is skipped and marked completed without invoking the simulator.
+    rc = main([
+        "--smoke", "--resume",
+        "--s3-prefix", "s3://fake-bucket/campaign/",
+        "--in-process",
+    ])
+    assert rc == 0
+    assert called == []
+    completed = (out / "completed_runs.txt").read_text(encoding="utf-8").strip()
+    assert completed  # at least the first smoke candidate was marked done
+    assert not list(out.glob("*.zip"))  # no local zip written when skipped

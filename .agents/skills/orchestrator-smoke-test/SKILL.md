@@ -7,8 +7,8 @@ description: Run the Crusher-to-the-Bridge orchestrator for a quick 24-epoch smo
 
 ## Prerequisites
 
-- Python 3.11+ with dependencies from `requirements.txt` installed
-- Working directory: repo root (`Crusher_to_the_Bridge/`)
+- Python 3.11+ with dependencies from `requirements.lock.txt` (or `requirements.txt`)
+- Working directory: **repo root**
 
 ## Devin Secrets Needed
 
@@ -44,8 +44,8 @@ Wearable Tier-0 entry uses confounder-aware `infection_score` (default threshold
 These specs set `config_overrides.diagnostic_cascade.enabled: true` without changing
 the default `crusher_labs/config.yaml` (cascade remains off for golden regression).
 
-Golden 24-epoch baseline (destroyer, seed 42): susceptible 1, recovered 15, trigger
-BASELINE — see `docs/SHEDDING_AND_CABINMATES.md`.
+Golden 24-epoch baseline (destroyer, seed 42): susceptible 2, recovered 14, trigger
+BASELINE — see `docs/SHEDDING_AND_CABINMATES.md` and `tests/test_golden_orchestrator.py`.
 
 ### Validate config before running
 ```bash
@@ -119,7 +119,7 @@ python3 scripts/precompute_deck_assets.py
 
 - **ModuleNotFoundError**: Ensure `PYTHONPATH` includes the repo root, or run from the repo root.
 - **FileNotFoundError on spatial_layout.json**: Verify the platform path in `crusher_labs/config.yaml` points to a valid `data/platforms/<platform>/` directory.
-- **numpy/pydantic not found**: Run `pip install -r requirements.txt`.
+- **numpy/pydantic not found**: Run `pip install --only-binary=:all: --require-hashes -r requirements.lock.txt`.
 
 
 Picard programmatic equivalent: see `.agents/skills/picard-ship-simulation/SKILL.md`.

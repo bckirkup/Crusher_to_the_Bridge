@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ============================================================================
-#  run_campaign.sh — Mega Cruise 9K Picard campaign (Linux / macOS)
+#  run_campaign.sh — Mega Cruise ~17780 Picard campaign (Linux / macOS)
 #
 #  From the repo root:
 #    ./run_campaign.sh --smoke

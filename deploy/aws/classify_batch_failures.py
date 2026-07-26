@@ -35,22 +35,12 @@ from urllib.parse import urlparse
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(_REPO_ROOT))
 
-from simulation_utils.paths import confine_to_base, validated_open  # noqa: E402
+from deploy.aws.path_safety import cwd_root, safe_path  # noqa: E402
+from simulation_utils.paths import validated_open  # noqa: E402
 
 SPOT_RE = re.compile(r"Host EC2|Spot|TASK FAILED TO START.*spot", re.IGNORECASE)
 OOM_REASON_RE = re.compile(r"OutOfMemoryError", re.IGNORECASE)
 TIMEOUT_RE = re.compile(r"timeout|TimeoutExpired|Attempt duration", re.IGNORECASE)
-
-
-def _cwd_root() -> str:
-    return os.path.realpath(os.getcwd())
-
-
-def safe_path(path: Path | str) -> str:
-    try:
-        return confine_to_base(_cwd_root(), str(path))
-    except ValueError as exc:
-        raise SystemExit(str(exc)) from exc
 
 
 def classify_attempt(
@@ -312,7 +302,7 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.out_json:
         path = safe_path(args.out_json)
-        with validated_open(path, "w", allowed_roots=[_cwd_root()], encoding="utf-8") as fh:
+        with validated_open(path, "w", allowed_roots=(cwd_root(),), encoding="utf-8") as fh:
             json.dump(report, fh, indent=2)
             fh.write("\n")
         print(f"Wrote {path}", file=sys.stderr)
@@ -334,7 +324,9 @@ def main(argv: list[str] | None = None) -> int:
             "started_at",
             "stopped_at",
         ]
-        with validated_open(path, "w", allowed_roots=[_cwd_root()], encoding="utf-8", newline="") as fh:
+        with validated_open(
+            path, "w", allowed_roots=(cwd_root(),), encoding="utf-8", newline="",
+        ) as fh:
             writer = csv.DictWriter(fh, fieldnames=fieldnames, extrasaction="ignore")
             writer.writeheader()
             for row in all_rows:
