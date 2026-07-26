@@ -7,8 +7,8 @@ description: Run the complete Crusher-to-the-Bridge pytest suite including data 
 
 ## Prerequisites
 
-- Python 3.11+ with dependencies from `requirements.txt` installed
-- Working directory: repo root (`Crusher_to_the_Bridge/`)
+- Python 3.11+ with dependencies from `requirements.lock.txt` (or `requirements.txt`)
+- Working directory: **repo root**
 
 ## Devin Secrets Needed
 
@@ -20,7 +20,7 @@ None — all tests run locally.
 ```bash
 python3 -m pytest tests/ -v --tb=short
 ```
-Expected: ~655 tests pass in ~8s.
+Expected: ~875 tests pass in ~8s.
 
 ### Run with coverage reporting
 ```bash
@@ -123,6 +123,14 @@ python3 -m pytest tests/test_wearable_anomaly_scorer.py tests/test_cascade_entry
 # Enhanced wearable model (multi-device, confounders, chronic disease)
 python3 -m pytest tests/test_wearable_enhanced.py tests/test_chronic_disease.py -v --tb=short
 
+# Mega cruise campaign (dry-run, smoke zip, shards, aggregators)
+python3 -m pytest tests/test_mega_cruise_campaign.py -v --tb=short
+
+# Contam hobbyist PRJ exports + path I/O inviolate
+python3 -m pytest tests/test_contam_hobbyist_constitution.py tests/test_contam_hobbyist_destroyer.py \
+  tests/test_contam_hobbyist_galaxy.py tests/test_contam_hobbyist_mega.py \
+  tests/test_path_io_inviolate.py -v --tb=short
+
 # Schema module (JSON schema validation)
 python3 -m pytest tests/test_schema_module.py -v --tb=short
 ```
@@ -143,37 +151,32 @@ Expected: 24-epoch run completes; final epoch includes OIS fields.
 ## CI Pipeline Equivalence
 
 The full CI pipeline (`.github/workflows/ci.yml`) runs these steps in order:
-1. `pip install -r requirements.txt` (+ `ruff`, `pytest-cov`)
+1. `pip install --only-binary=:all: --require-hashes -r requirements.lock.txt`
 2. `ruff check ...` — static analysis (advisory, `continue-on-error: true`)
 3. `python3 tools/sanity_checker.py --from-config` — config validation
 4. `pytest tests/test_json_schema_validation.py -v --tb=short` — JSON schema validation
-5. `pytest tests/ -v --tb=short --cov --cov-report=term-missing` — full suite with coverage (~655 tests)
+5. `pytest tests/ -v --tb=short --cov --cov-report=term-missing` — full suite with coverage (~875 tests)
 6. Picard/Presidio/Stackelberg import hygiene
 7. Presidio smoke (`presidio_runner.py` smoke fleet)
-8. Long-read / TAT targeted tests (+ sequencing config wiring)
-9. Wearable anomaly scoring + cascade entry tests
-10. Orchestrator import hygiene (split modules, stoplights, long-read/TAT)
-11. Dashboard import check (LCARS package, `apply_lcars_layout`)
-12. `python3 orchestrator.py` — 24-epoch smoke test
-13. `pytest tests/test_smoke_diagnostic_cascade.py` — diagnostic cascade smoke
-14. OIS fields present in final `cost_accounting`
+8. Orchestrator import hygiene (split modules, stoplights, long-read/TAT)
+9. Dashboard import check (LCARS package, `apply_lcars_layout`)
+10. `python3 orchestrator.py` — 24-epoch smoke test
+11. OIS fields present in final `cost_accounting`
+12. Campaign Docker image smoke (`docker build` + `docker run … --smoke`) when Docker is available
 
-Framework-focused CI (`.github/workflows/picard-presidio.yml`) additionally runs a ~90-test pytest slice, Stackelberg schema checks, all-platform JSON schema validation, and Presidio smoke.
+Framework-focused CI (`.github/workflows/picard-presidio.yml`) runs a ~190+ test pytest slice (Picard/Presidio/Stackelberg/Contam/campaign/cabin/shedding), Stackelberg schema checks, all-platform JSON schema validation, and Presidio smoke.
 
 To replicate main CI locally:
 ```bash
-pip install -r requirements.txt ruff pytest-cov && \
+pip install --only-binary=:all: --require-hashes -r requirements.lock.txt && \
 python3 tools/sanity_checker.py --from-config && \
 ruff check --select E,F,W,I --ignore E501,E741 --target-version py311 \
-  engines/ crusher_labs/ picard_framework/ decision_engine/ orchestrator*.py || true && \
+  engines/ crusher_labs/ picard_framework/ decision_engine/ orchestrator*.py \
+  presidio_runner.py || true && \
 python3 -m pytest tests/test_json_schema_validation.py -v --tb=short && \
 python3 -m pytest tests/ -v --tb=short --cov --cov-report=term-missing && \
 PYTHONPATH=. python3 presidio_runner.py --fleet-config presidio/data/config/smoke_fleet.json --cruises 1 && \
-python3 -m pytest tests/test_long_read_sequencing.py tests/test_instrument_turnaround.py \
-  tests/test_sequencing_config.py::test_init_observation_engine_turnaround_and_long_read \
-  tests/test_wearable_anomaly_scorer.py tests/test_cascade_entry.py -v --tb=short && \
 python3 orchestrator.py && \
-python3 -m pytest tests/test_smoke_diagnostic_cascade.py -v --tb=short && \
 python3 -c "import json; c=json.load(open('telemetry_buffer/simulation_history.json'))[-1]['cost_accounting']; assert 'operational_impact_cumulative' in c"
 ```
 
@@ -185,6 +188,7 @@ python3 -c "import json; c=json.load(open('telemetry_buffer/simulation_history.j
 | `test_wearable_enhanced.py` | 40 | `engines/wearable_monitor.py`, `crusher_labs/modalities/wearable.py` | Multi-device, coverage, visibility, confounders, detection profiles, chronic disease devices, glucose channel, config parsing |
 | `test_sanity_checker.py` | 40 | `tools/sanity_checker.py` | Pydantic validation, referential integrity, config sections |
 | `test_stoplight.py` | 39 | `crusher_labs/stoplight.py` | Ct-to-stoplight mapping, threshold logic |
+| `test_mega_cruise_campaign.py` | 30+ | `picard_framework/runs/mega_cruise_campaign/` | Dry-run counts, smoke zip, shards, S3 resume, aggregators |
 | `test_diagnostic_cascade.py` | 36 | `crusher_labs/diagnostic_cascade.py` | Tier progression, multiplex panels, cascade telemetry |
 | `test_chronic_disease.py` | 31 | `engines/wearable_monitor.py` | Chronic disease device assignments and glucose channel |
 | `test_json_schema_validation.py` | 30 | `schemas/*.schema.json` | All platform, social, fleet JSON files validated against schemas |
@@ -238,10 +242,10 @@ on `active_profiles.json`:
 
 | Metric | Expected (epoch 23) |
 |--------|-------------------|
-| Susceptible | 1 |
+| Susceptible | 2 |
 | Infected | 0 |
 | Symptomatic | 0 |
-| Recovered | 15 |
+| Recovered | 14 |
 | Immune | 4 |
 | Trigger status | BASELINE |
 | Total financial USD | > 0 (exact value may differ slightly between Python 3.11 and 3.12) |

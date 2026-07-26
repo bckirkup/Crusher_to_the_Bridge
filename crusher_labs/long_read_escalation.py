@@ -16,11 +16,11 @@ from __future__ import annotations
 from typing import Any
 
 from crusher_labs.modalities.long_read_sequencing import (
-    LongReadVerificationRequest,
     SPECIMEN_CLINICAL,
     SPECIMEN_CLINICAL_CULTURE,
     SPECIMEN_SURVEILLANCE_SWAB,
     SPECIMEN_WASTEWATER_METAGENOMICS,
+    LongReadVerificationRequest,
 )
 
 _VALID_SOURCES = frozenset({

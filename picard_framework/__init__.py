@@ -7,7 +7,7 @@ Presidio fleet runners, and tests.
 """
 
 from picard_framework.run_spec import PicardRunSpec, TelemetryPaths
-from picard_framework.simulation.ship_simulation import ShipSimulation, RunResult, StepResult
+from picard_framework.simulation.ship_simulation import RunResult, ShipSimulation, StepResult
 
 __all__ = [
     "PicardRunSpec",

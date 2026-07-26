@@ -32,6 +32,7 @@ deploy = [
 dev = [
     "pytest>=7.0",
     "pytest-cov>=4.0",
+    "pytest-timeout>=2.3",
     "ruff>=0.4",
     "check-jsonschema>=0.28",
 ]
@@ -69,6 +70,10 @@ ignore = [
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-v --tb=short"
+timeout = 0
+markers = [
+    "timeout: mark test with a timeout (seconds)",
+]
 
 [tool.coverage.run]
 source = [

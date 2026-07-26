@@ -8,7 +8,7 @@ description: Run and develop Picard_Framework ship-level steppable simulations. 
 ## Prerequisites
 
 - Python 3.11+, repo root on `PYTHONPATH`
-- `pip install -r requirements.txt`
+- `pip install --only-binary=:all: --require-hashes -r requirements.lock.txt` (or `requirements.txt` for editable local work)
 
 ## Quick commands
 
@@ -53,4 +53,4 @@ python3 -m pytest tests/test_picard_framework.py tests/test_golden_orchestrator.
   tests/test_shedding_variance_cabin_mates.py tests/test_action_applier.py -v
 ```
 
-Epoch order: [docs/simulation_step_order.md](../../docs/simulation_step_order.md)
+Epoch order: [docs/simulation_step_order.md](../../../docs/simulation_step_order.md)

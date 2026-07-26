@@ -18,22 +18,21 @@ import json
 import os
 from typing import Any
 
-from crusher_labs.cost_ledger import CostLedger, CATEGORY_INTERVENTION, CATEGORY_SURVEILLANCE
-
+from crusher_labs.cost_ledger import CATEGORY_INTERVENTION, CostLedger
 from simulation_utils.paths import validated_open
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 from crusher_labs.stoplight import (
-    stoplight_from_ct,
-    stoplight_from_anomaly,
-    stoplight_from_rdt,
-    stoplight_from_disruption,
-    stoplight_from_long_read_verification,
-    stoplight_from_wearable_agent,
-    stoplight_from_wearable_fleet_rates,
-    stoplight_from_sick_call_count,
     aggregate_stoplight_max,
     meets_threshold,
+    stoplight_from_anomaly,
+    stoplight_from_ct,
+    stoplight_from_disruption,
+    stoplight_from_long_read_verification,
+    stoplight_from_rdt,
+    stoplight_from_sick_call_count,
+    stoplight_from_wearable_agent,
+    stoplight_from_wearable_fleet_rates,
 )
 
 WEARABLE_AGENT_INSTRUMENT = "wearable_physiological_monitor"

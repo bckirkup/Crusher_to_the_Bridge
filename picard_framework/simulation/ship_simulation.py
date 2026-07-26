@@ -18,16 +18,21 @@ from crusher_labs.protocol_engine import (
     reset_modifiers,
 )
 from decision_engine.actions import ActionEnvelope
+from decision_engine.experience import ExperienceStore
+from decision_engine.protocol_filter import eligible_protocol_ids, filter_active_modifiers
+from decision_engine.runtime import DecisionRuntime
 from engines.py_contam_bridge import (
     build_transport_engine,
     load_air_flow_paths,
+)
+from engines.py_contam_bridge import (
     load_spatial_layout as load_platform_layout,
 )
 from engines.transmission_core import (
-    TransmissionCore,
-    build_hvac_downstream_map,
     DEFAULT_CONFINEMENT_ISOLATION_FACTOR,
     DEFAULT_CORRIDOR_DIRECT_CONTACT_FACTOR,
+    TransmissionCore,
+    build_hvac_downstream_map,
 )
 from orchestrator_chronic import (
     assign_chronic_diseases,
@@ -44,19 +49,20 @@ from orchestrator_epoch import (
     compute_infection_counters,
     compute_zone_microflora_shifts,
     run_observation_sampling,
-    step_cost_accounting,
-    step_diagnostic_cascade,
     step_cascade_cost_accounting,
-    step_long_read_cost_accounting,
+    step_cost_accounting,
     step_counter_thresholds,
+    step_diagnostic_cascade,
     step_fred_compliance,
     step_infection_progression,
+    step_long_read_cost_accounting,
     step_mid_cruise_introductions,
-    step_quarantine_confinement,
     step_operational_impact_accounting,
+    step_quarantine_confinement,
     step_wearable_monitoring,
 )
 from orchestrator_init import (
+    assign_cabin_mates,
     build_engine,
     check_escalation,
     engine_payload_to_schema,
@@ -66,7 +72,6 @@ from orchestrator_init import (
     init_wearable_monitors,
     initialize_grumb_seeding,
     initialize_ship_graph,
-    assign_cabin_mates,
     load_isolation_unit_capacity,
     load_pathogen_profiles,
 )
@@ -79,9 +84,6 @@ from orchestrator_types import (
 )
 from picard_framework.run_spec import PicardRunSpec
 from picard_framework.simulation.action_applier import apply_action_envelope
-from decision_engine.runtime import DecisionRuntime
-from decision_engine.protocol_filter import eligible_protocol_ids, filter_active_modifiers
-from decision_engine.experience import ExperienceStore
 from picard_framework.simulation.step_result import StepResult
 from picard_framework.world_state import WorldState
 from telemetry_buffer.schema import make_ground_truth, read_ground_truth, write_ground_truth

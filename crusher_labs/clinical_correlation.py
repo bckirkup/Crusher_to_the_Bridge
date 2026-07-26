@@ -12,16 +12,14 @@ independent and behavior matches the legacy uncorrelated path.
 from __future__ import annotations
 
 import math
-from statistics import NormalDist
 from dataclasses import dataclass
+from statistics import NormalDist
 from typing import Any
 
 import numpy as np
 
-from telemetry_buffer.agent_axes import agent_is_infected, resolve_agent_axes
-
 from simulation_utils.numeric import default_simulation_rng
-
+from telemetry_buffer.agent_axes import agent_is_infected, resolve_agent_axes
 
 CLINICAL_TEST_KEYS: tuple[str, ...] = (
     "clinical_rdt",

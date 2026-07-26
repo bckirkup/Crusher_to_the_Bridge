@@ -36,7 +36,8 @@ jobs:
           PYTHONPATH: .
         run: |
           pytest tests/test_picard_framework.py tests/test_decision_engine.py \
-            tests/test_presidio_runner.py tests/test_golden_orchestrator.py tests/test_stackelberg.py \
+            tests/test_presidio_runner.py tests/test_golden_orchestrator.py \
+            tests/test_golden_picard.py tests/test_stackelberg.py \
             tests/test_law_compliance.py tests/test_operational_impact.py \
             tests/test_action_applier.py tests/test_behavioral_syndromic.py \
             tests/test_long_read_sequencing.py tests/test_instrument_turnaround.py \
@@ -45,7 +46,11 @@ jobs:
             tests/test_cascade_entry.py \
             tests/test_contam_prj_bridge.py tests/test_contamw34_dual_path.py \
             tests/test_contamx_solver.py tests/test_py_contam_bridge.py \
-            tests/test_contam_engine_compare.py -v --tb=short
+            tests/test_contam_engine_compare.py \
+            tests/test_mega_cruise_campaign.py \
+            tests/test_pathogen_overrides.py \
+            tests/test_cabin_corridor_transmission.py \
+            tests/test_shedding_variance_cabin_mates.py -v --tb=short
 
       - name: Import hygiene (Picard / Presidio / Stackelberg)
         env:

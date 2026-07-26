@@ -13,9 +13,7 @@ from __future__ import annotations
 import math
 from typing import Any
 
-
 from simulation_utils.numeric import is_nonzero, is_zero
-
 
 DEFAULT_CHANNEL_INFECTION_WEIGHTS: dict[str, float] = {
     "heart_rate": 0.3,

@@ -1,7 +1,7 @@
 {
-  "campaign": "mega_cruise_9k",
+  "campaign": "mega_cruise_17780",
   "platform": "mega_cruise_5000",
-  "description": "9000+ run campaign: 10 pathogens × HVAC × surveillance × compliance × wearables",
+  "description": "~17780-run campaign: 10 pathogens × HVAC × surveillance × compliance × wearables (formerly mega_cruise_9k)",
   "default_epochs": 240,
   "default_num_agents": 7000,
   "tiers": {

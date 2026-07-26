@@ -19,7 +19,6 @@ from typing import Any
 import numpy as np
 
 from crusher_labs.modalities.sequencing import MULTI_KINGDOM_TAXA
-
 from simulation_utils.numeric import default_simulation_rng
 from simulation_utils.paths import resolve_repo_path, validated_open
 

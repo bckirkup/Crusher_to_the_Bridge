@@ -10,62 +10,59 @@ initialization, observation engine, and protocol engine setup.
 from __future__ import annotations
 
 import json
-import math
 import os
 from collections import defaultdict
 from typing import Any
 
 import numpy as np
 
-from telemetry_buffer.agent_axes import resolve_agent_axes
-from telemetry_buffer.schema import make_agent, make_space
-from engines.infection_dynamics_bridge import (
-    KorkinShipEngine,
-    InfectionStatus,
-    IllnessStatus,
-)
-from engines.wearable_monitor import (
-    WearableMonitor,
-    build_wearable_monitor_from_config,
-)
-from crusher_labs.modalities.wearable import WearableDataStream
-from engines.py_contam_bridge import ContamTransportEngine
-from crusher_labs.observation_core import (
-    ContinuousAirSniffer,
-    TargetedSurfaceSwab,
-    WastewaterSequencingGrid,
-    ClinicalRapidDiagnostic,
-    ClinicalQPCR,
-    ClinicalMicrobiology,
+from crusher_labs.cost_ledger import (
+    build_ledger_from_config,
+    load_resource_costs,
 )
 from crusher_labs.lab_notebook import (
     build_notebook_from_config,
     load_logging_profile,
 )
+from crusher_labs.modalities.wearable import WearableDataStream
+from crusher_labs.observation_core import (
+    ClinicalMicrobiology,
+    ClinicalQPCR,
+    ClinicalRapidDiagnostic,
+    ContinuousAirSniffer,
+    TargetedSurfaceSwab,
+    WastewaterSequencingGrid,
+)
 from crusher_labs.protocol_engine import (
     ProtocolEngine,
     load_protocols,
 )
-from crusher_labs.cost_ledger import (
-    build_ledger_from_config,
-    load_resource_costs,
+from engines.infection_dynamics_bridge import (
+    InfectionStatus,
+    KorkinShipEngine,
 )
-from orchestrator_types import (
-    REPO_ROOT,
-    COMPLIANCE_ISOLATED,
-    COMPLIANCE_QUARANTINED,
-    COMPLIANCE_NON_COMPLIANT,
-    COMPLIANCE_COMPLIANT,
-    LOCATION_ISOLATED,
-    ObservationEngine,
-    ProtocolContext,
+from engines.py_contam_bridge import ContamTransportEngine
+from engines.wearable_monitor import (
+    WearableMonitor,
+    build_wearable_monitor_from_config,
 )
-from simulation_utils.paths import resolve_repo_path, validated_open
 from orchestrator_display import (
     print_observation_engine,
     print_protocol_engine,
 )
-
+from orchestrator_types import (
+    COMPLIANCE_COMPLIANT,
+    COMPLIANCE_ISOLATED,
+    COMPLIANCE_NON_COMPLIANT,
+    COMPLIANCE_QUARANTINED,
+    LOCATION_ISOLATED,
+    REPO_ROOT,
+    ObservationEngine,
+    ProtocolContext,
+)
+from simulation_utils.paths import resolve_repo_path, validated_open
+from telemetry_buffer.agent_axes import resolve_agent_axes
+from telemetry_buffer.schema import make_agent, make_space
 
 # ── Spatial layout & ship graph ──────────────────────────────────────────
 
@@ -389,7 +386,7 @@ def check_escalation(
     cfg: dict[str, Any],
 ) -> str:
     """Evaluate trigger thresholds and return the (possibly updated) status."""
-    from orchestrator_types import STATUS_BASELINE, STATUS_SUSPECTED, STATUS_CONFIRMED
+    from orchestrator_types import STATUS_BASELINE, STATUS_CONFIRMED, STATUS_SUSPECTED
 
     esc_cfg = cfg.get("escalation", {})
     suspect_threshold = esc_cfg.get("syndromic_suspect_threshold", 3)

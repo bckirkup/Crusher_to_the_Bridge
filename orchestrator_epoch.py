@@ -15,32 +15,33 @@ from typing import Any
 
 import numpy as np
 
+from crusher_labs.modalities.wearable import WearableDataStream
 from engines.infection_dynamics_bridge import (
-    KorkinShipEngine,
-    InfectionStatus,
     IllnessStatus,
+    InfectionStatus,
+    KorkinShipEngine,
 )
 from engines.wearable_monitor import WearableMonitor
-from crusher_labs.modalities.wearable import WearableDataStream
-from telemetry_buffer.agent_axes import (
-    agent_requires_confinement,
-    agent_is_infected,
-    agent_has_symptomatic_presentation,
-    INFECTION_RECOVERED,
-    INFECTION_SUSCEPTIBLE,
-)
 from orchestrator_types import (
-    STATUS_SUSPECTED,
-    STATUS_CONFIRMED,
-    LOCATION_ISOLATED,
     DEFAULT_AIRBORNE_FRACTION,
-    DEFAULT_SURFACE_FRACTION,
-    DEFAULT_GREYWATER_FRACTION,
     DEFAULT_GRAYWATER_PROPAGATION_FACTOR,
-    SimulationState,
+    DEFAULT_GREYWATER_FRACTION,
+    DEFAULT_SURFACE_FRACTION,
+    LOCATION_ISOLATED,
+    STATUS_CONFIRMED,
+    STATUS_SUSPECTED,
     ObservationEngine,
     ProtocolContext,
+    SimulationState,
 )
+from telemetry_buffer.agent_axes import (
+    INFECTION_RECOVERED,
+    INFECTION_SUSCEPTIBLE,
+    agent_has_symptomatic_presentation,
+    agent_is_infected,
+    agent_requires_confinement,
+)
+
 
 # All confined IDs (quarantined + isolated) helper
 def _all_confined(state: SimulationState) -> set[int]:
@@ -302,8 +303,8 @@ def apply_chronic_severity_escalation(
     ``P(severe) = clamp(severity_mult - 1.0, 0, 1)``.
     """
     from telemetry_buffer.agent_axes import (
-        PRESENTATION_SYMPTOMATIC,
         PRESENTATION_SEVERE,
+        PRESENTATION_SYMPTOMATIC,
     )
     for agent_dict in agents:
         pres = agent_dict.get("symptom_presentation", "")
