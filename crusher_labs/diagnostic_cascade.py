@@ -32,7 +32,6 @@ from typing import Any
 from crusher_labs.cascade_entry import CascadeEntryConfig
 from simulation_utils.paths import resolve_repo_path
 
-
 # ── Tier dataclass ───────────────────────────────────────────────────────
 
 @dataclass(frozen=True)

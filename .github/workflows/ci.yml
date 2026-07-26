@@ -26,8 +26,16 @@ jobs:
           python -m pip install --only-binary=:all: --require-hashes -r requirements.lock.txt
 
       - name: Lint with ruff (closes #89)
-        run: ruff check --select E,F,W,I --ignore E501,E741 --target-version py311 engines/ crusher_labs/ picard_framework/ decision_engine/ orchestrator*.py presidio_runner.py deploy/aws/
-        continue-on-error: true
+        run: |
+          # F-rules are blocking (undefined names / unused imports).
+          ruff check --select F --target-version py311 \
+            engines/ crusher_labs/ picard_framework/ decision_engine/ \
+            orchestrator*.py presidio_runner.py deploy/aws/
+          # Remaining lint stays advisory.
+          ruff check --select E,W,I --ignore E501,E741 --target-version py311 \
+            engines/ crusher_labs/ picard_framework/ decision_engine/ \
+            orchestrator*.py presidio_runner.py deploy/aws/ || true
+        continue-on-error: false
 
       - name: Run sanity checker
         run: python3 tools/sanity_checker.py --from-config

@@ -12,7 +12,7 @@ from __future__ import annotations
 import json
 import math
 import os
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any
 
 from simulation_utils.paths import resolve_repo_path, validated_open

@@ -13,18 +13,19 @@ import os
 from dataclasses import dataclass, field
 from typing import Any
 
+from crusher_labs.clinical_correlation import ClinicalTestCorrelation
+from crusher_labs.cost_ledger import CostLedger
+from crusher_labs.lab_notebook import ArtificialLabNotebook
 from crusher_labs.observation_core import (
+    ClinicalMicrobiology,
+    ClinicalQPCR,
+    ClinicalRapidDiagnostic,
     ContinuousAirSniffer,
+    LongReadVerificationSequencing,
     TargetedSurfaceSwab,
     WastewaterSequencingGrid,
-    ClinicalRapidDiagnostic,
-    ClinicalQPCR,
-    ClinicalMicrobiology,
 )
-from crusher_labs.clinical_correlation import ClinicalTestCorrelation
-from crusher_labs.lab_notebook import ArtificialLabNotebook
 from crusher_labs.protocol_engine import ProtocolEngine
-from crusher_labs.cost_ledger import CostLedger
 
 # ── Trigger status constants ─────────────────────────────────────────────
 STATUS_BASELINE = "BASELINE"
@@ -32,7 +33,7 @@ STATUS_SUSPECTED = "SUSPECTED"
 STATUS_CONFIRMED = "CONFIRMED"
 
 # ── Agent orthogonal status axes (telemetry_buffer.agent_axes) ───────────
-from telemetry_buffer.agent_axes import (  # noqa: E402
+from telemetry_buffer.agent_axes import (  # noqa: E402,F401
     INFECTION_SUSCEPTIBLE,
     INFECTION_INFECTED,
     INFECTION_RECOVERED,

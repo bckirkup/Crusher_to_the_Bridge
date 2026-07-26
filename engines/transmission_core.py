@@ -46,12 +46,9 @@ from engines.infection_dynamics_bridge import (
     ALPHA,
     BETA,
     SURFACE_DEPOSITION_FRACTION,
-    IllnessStatus,
     InfectionStatus,
     KorkinAgent,
-    infection_probability,
 )
-
 
 # ── Pathway-specific parameters ──────────────────────────────────────────
 

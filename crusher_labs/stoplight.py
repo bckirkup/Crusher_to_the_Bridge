@@ -13,6 +13,7 @@ Stoplight levels:
 
 from __future__ import annotations
 
+from typing import Any
 
 STOPLIGHT_ORDER: dict[str, int] = {"GREEN": 0, "AMBER": 1, "RED": 2}
 

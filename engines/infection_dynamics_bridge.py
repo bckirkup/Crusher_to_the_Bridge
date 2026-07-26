@@ -32,7 +32,6 @@ from typing import Any
 
 import numpy as np
 
-
 # ── Korkin Lab parameters (from Person.java) ─────────────────────────────
 
 # RT-PCR shedding values: log10(copies/g), indexed by day post-infection.

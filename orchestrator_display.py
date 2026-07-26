@@ -11,10 +11,9 @@ from __future__ import annotations
 import sys
 from typing import Any
 
+from crusher_labs.cost_ledger import CostLedger
 from engines.infection_dynamics_bridge import KorkinShipEngine
 from engines.py_contam_bridge import ContamTransportEngine
-from crusher_labs.cost_ledger import CostLedger
-
 
 # ── Initialization banners ───────────────────────────────────────────────
 

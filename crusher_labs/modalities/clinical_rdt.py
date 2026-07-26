@@ -26,9 +26,7 @@ from typing import Any
 
 import numpy as np
 
-
 # ── EMOD clinical phase resolution ──────────────────────────────────
-
 from simulation_utils.numeric import default_simulation_rng
 
 

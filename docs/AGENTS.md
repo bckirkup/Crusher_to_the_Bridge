@@ -51,7 +51,7 @@ Install from the hash-pinned lockfile: `pip install --only-binary=:all: --requir
 
 **Main** (`.github/workflows/ci.yml` on `main` PRs):
 
-1. `ruff check` — advisory lint (`continue-on-error: true`); F-rules should be clean locally
+1. `ruff check` — **F-rules blocking**; E/W/I advisory
 2. `python3 tools/sanity_checker.py --from-config`
 3. `pytest tests/test_json_schema_validation.py -v --tb=short`
 4. `pytest tests/ -v --tb=short --cov --cov-report=term-missing` (~858 tests)
@@ -111,5 +111,5 @@ Install from the hash-pinned lockfile: `pip install --only-binary=:all: --requir
 - **Wearable cascade entry** uses confounder-aware `infection_score` (not raw `anomaly_count`) via `diagnostic_cascade.entry.wearable_alert_fusion` or defaults in `data/config/diagnostic_cascade*.json`. Fleet stoplight SOPs (SOP-013/014) still use shipwide `anomaly_rate`.
 - **Shedding variance:** `shedding_variance_log10` on pathogen profiles draws a persistent per-agent multiplier at infection (`docs/SHEDDING_AND_CABINMATES.md`).
 - **Cabin-mates:** `mega_cruise_5000` `Cabin_Corridor` zones pair agents into staterooms at init; confinement direct contact is cabin-mate-aware (`assign_cabin_mates` in `orchestrator_init.py`).
-- Ruff lint runs in CI as advisory only (`continue-on-error: true`); blocking gates are `sanity_checker.py` and pytest. Keep F-rules (undefined names, unused imports) clean before campaigns.
+- Ruff lint: **F-rules are blocking** in main CI; E/W/I remain advisory (`continue-on-error` / `|| true`). Keep unused-import and undefined-name findings clean before campaigns.
 - **SonarCloud** quality gates are GitHub-app / UI-gated (no in-repo `sonar-project.properties`). Agents rely on ruff, `tests/test_path_io_inviolate.py`, and pytest — do not block on live Sonar MCP/CLI unless explicitly integrating.
