@@ -78,7 +78,7 @@ Expected: `ok -- validation done`
 ```bash
 python -m pytest tests/ -v --tb=short
 ```
-Expected: All tests pass (~858). Agent-class behavior is covered in `test_orchestrator.py`, `test_infection_counters.py`, and `test_agent_axes.py`.
+Expected: All tests pass (~875). Agent-class behavior is covered in `test_orchestrator.py`, `test_infection_counters.py`, and `test_agent_axes.py`.
 
 ## Key Implementation Details
 

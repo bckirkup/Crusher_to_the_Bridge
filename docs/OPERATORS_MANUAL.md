@@ -1577,7 +1577,7 @@ python tools/sanity_checker.py --from-config
 pytest tests/ -v --tb=short
 ```
 
-The suite includes **~858 tests** across data contracts, sanity checker,
+The suite includes **~875 tests** across data contracts, sanity checker,
 orchestrator/quarantine logic, infection counters, orthogonal agent axes,
 wearable/detection-escalation protocol engine, enhanced wearable model
 (multi-device, confounders, detection profiles, visibility, chronic disease
@@ -1588,7 +1588,7 @@ instrument turnaround (TAT), per-test cost accounting, **operational impact
 (food/environmental), dashboard helpers, law compliance, telemetry seams, and
 **Picard / Presidio / Stackelberg** framework tests. CI
 (`.github/workflows/ci.yml`) runs advisory ruff lint, sanity checks, JSON schema
-validation, full pytest with coverage (~858 tests), Picard/Presidio import
+validation, full pytest with coverage (~875 tests), Picard/Presidio import
 hygiene, Presidio smoke, long-read/TAT targeted tests, wearable/cascade entry
 tests, orchestrator import hygiene, dashboard import (including LCARS theme),
 24-epoch orchestrator run, diagnostic cascade smoke, and OIS telemetry

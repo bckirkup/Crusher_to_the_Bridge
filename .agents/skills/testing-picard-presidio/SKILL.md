@@ -72,7 +72,7 @@ check-jsonschema --schemafile schemas/utility_observation_bundle.schema.json \
 
 | Workflow | When |
 |----------|------|
-| `.github/workflows/ci.yml` | All `main` PRs — full pytest (~858) + Presidio smoke + import hygiene + OIS verify + Docker campaign smoke |
+| `.github/workflows/ci.yml` | All `main` PRs — full pytest (~875) + Presidio smoke + import hygiene + OIS verify + Docker campaign smoke |
 | `.github/workflows/picard-presidio.yml` | `main` and `cursor/**` — framework slice (~190+ tests) + Stackelberg/platform schema checks + Presidio smoke |
 
 Replicate main CI framework steps:

@@ -20,7 +20,7 @@ None — all tests run locally.
 ```bash
 python3 -m pytest tests/ -v --tb=short
 ```
-Expected: ~858 tests pass in ~8s.
+Expected: ~875 tests pass in ~8s.
 
 ### Run with coverage reporting
 ```bash
@@ -155,7 +155,7 @@ The full CI pipeline (`.github/workflows/ci.yml`) runs these steps in order:
 2. `ruff check ...` — static analysis (advisory, `continue-on-error: true`)
 3. `python3 tools/sanity_checker.py --from-config` — config validation
 4. `pytest tests/test_json_schema_validation.py -v --tb=short` — JSON schema validation
-5. `pytest tests/ -v --tb=short --cov --cov-report=term-missing` — full suite with coverage (~858 tests)
+5. `pytest tests/ -v --tb=short --cov --cov-report=term-missing` — full suite with coverage (~875 tests)
 6. Picard/Presidio/Stackelberg import hygiene
 7. Presidio smoke (`presidio_runner.py` smoke fleet)
 8. Orchestrator import hygiene (split modules, stoplights, long-read/TAT)

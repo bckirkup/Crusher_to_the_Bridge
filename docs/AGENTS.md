@@ -18,7 +18,7 @@ Pure-Python simulation (no databases or external APIs for local dev). **Python 3
 | Streamlit dashboard | `python3 -m streamlit run dashboard.py --server.headless true` | Run orchestrator first for telemetry |
 | Deck asset precompute | `python3 scripts/precompute_deck_assets.py` | Writes `deck_graphics.geojson`, hull PNG, manifest per platform |
 | Sanity checker | `python3 tools/sanity_checker.py --from-config` | Ship + fleet + Stackelberg social configs |
-| Full test suite | `python3 -m pytest tests/ -v --tb=short` | ~858 tests, ~8s |
+| Full test suite | `python3 -m pytest tests/ -v --tb=short` | ~875 tests, ~8s |
 | Wearable anomaly scoring | `python3 -m pytest tests/test_wearable_anomaly_scorer.py tests/test_cascade_entry.py -v` | Confounder-aware infection_score + cascade entry fusion |
 | Diagnostic cascade smoke | `python3 -m pytest tests/test_smoke_diagnostic_cascade.py -v` | 6-epoch runs with cascade enabled (standard + multiplex specs) |
 | Long-read / TAT tests | `python3 -m pytest tests/test_long_read_sequencing.py tests/test_instrument_turnaround.py -v` | Nanopore + turnaround queue |
@@ -54,7 +54,7 @@ Install from the hash-pinned lockfile: `pip install --only-binary=:all: --requir
 1. `ruff check` — **F-rules blocking**; E/W/I advisory
 2. `python3 tools/sanity_checker.py --from-config`
 3. `pytest tests/test_json_schema_validation.py -v --tb=short`
-4. `pytest tests/ -v --tb=short --cov --cov-report=term-missing` (~858 tests)
+4. `pytest tests/ -v --tb=short --cov --cov-report=term-missing` (~875 tests)
 5. Picard/Presidio/Stackelberg import hygiene
 6. Presidio smoke (`smoke_fleet.json`, 1 cruise)
 7. Orchestrator import hygiene (stoplight deduplication)

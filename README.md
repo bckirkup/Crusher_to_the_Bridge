@@ -26,7 +26,7 @@ python3 orchestrator.py --epochs 250
 # Launch LCARS dashboard (after simulation)
 python3 -m streamlit run dashboard.py
 
-# Run the test suite (~858 tests)
+# Run the test suite (~875 tests)
 python3 -m pytest tests/ -v --tb=short
 ```
 
@@ -123,7 +123,7 @@ dashboard/                   Modular command deck (theme, charts, spatial_viz, d
 scripts/                     Enterprise platform builder, deck graphics, asset precompute
 telemetry_buffer/
 │   agent_axes.py            Orthogonal agent state (infection / presentation / compliance)
-tests/                       ~858 tests (ship, fleet, Stackelberg, OIS, behavioral, long-read, TAT, enterprise, CONTAM, schemas, wearable scoring, diagnostic cascade)
+tests/                       ~875 tests (ship, fleet, Stackelberg, OIS, behavioral, long-read, TAT, enterprise, CONTAM, schemas, wearable scoring, diagnostic cascade)
 docs/AGENTS.md               Cursor Cloud / agent development notes
 ```
 
@@ -564,7 +564,7 @@ python tools/sanity_checker.py --config-dir data/config \
 ## Testing
 
 ```bash
-# Full suite (~858 tests)
+# Full suite (~875 tests)
 pytest tests/ -v --tb=short
 
 # Picard / Presidio / Stackelberg
@@ -596,7 +596,7 @@ pytest tests/test_telemetry_seams.py        # cross-module data flow
 Cloud agents and CI environments: see `docs/AGENTS.md` (`python3`, headless Streamlit).
 
 CI (`.github/workflows/ci.yml`) runs advisory ruff lint, sanity checks, JSON schema
-validation, the full pytest suite with coverage (~858 tests), Picard/Presidio import
+validation, the full pytest suite with coverage (~875 tests), Picard/Presidio import
 hygiene, Presidio smoke, long-read/TAT and wearable/cascade targeted tests, dashboard
 import smoke, a 24-epoch orchestrator run, diagnostic cascade smoke, and OIS telemetry
 verification. Framework-focused checks run in `.github/workflows/picard-presidio.yml`.
