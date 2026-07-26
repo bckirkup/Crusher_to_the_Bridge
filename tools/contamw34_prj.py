@@ -1528,7 +1528,7 @@ def path_map_from_prj(text: str) -> list[dict[str, Any]]:
         raise ValueError(
             "Not a recognized CONTAM .prj file (missing 'ContamW' signature)"
         )
-    sections = {name: body for name, body in _section_blocks(text)}
+    sections = dict(_section_blocks(text))
 
     zone_nr_to_id: dict[int, str] = {}
     phantom_nrs: set[int] = set()
@@ -1666,7 +1666,8 @@ def _section_blocks(text: str) -> list[tuple[str, list[str]]]:
     while i < len(lines):
         raw = lines[i]
         stripped = raw.strip()
-        m = re.match(r"^(-?\d+)\s+!\s*(.+?):\s*$", stripped)
+        # Use [^:]+ (not .+?) to avoid super-linear backtracking (python:S8786).
+        m = re.match(r"^(-?\d+)\s+!\s*([^:]+):\s*$", stripped)
         if m and header_done:
             count = int(m.group(1))
             name = m.group(2).strip()
@@ -1705,7 +1706,7 @@ def simplify_contamw34(
             "Not a recognized CONTAM .prj file (missing 'ContamW' signature)"
         )
 
-    sections = {name: body for name, body in _section_blocks(text)}
+    sections = dict(_section_blocks(text))
 
     for dropped in (
         "day-schedules",

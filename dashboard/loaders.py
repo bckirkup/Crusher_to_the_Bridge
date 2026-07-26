@@ -174,6 +174,15 @@ def resolve_platform_id_simple(
     return pid
 
 
+def _blueprint_bg_path(plan_path: str | None, bg_path: str) -> str | None:
+    """Prefer plan overview plate; fall back to legacy blueprint underlay."""
+    if plan_path:
+        return plan_path
+    if os.path.isfile(bg_path):
+        return bg_path
+    return None
+
+
 def load_platform_bundle(platform_id: str) -> PlatformBundle:
     pdir = platform_dir(platform_id)
     layout = _load_json(os.path.join(pdir, SPATIAL_LAYOUT_JSON))
@@ -200,11 +209,7 @@ def load_platform_bundle(platform_id: str) -> PlatformBundle:
         manifest=manifest,
         deck_graphics=gfx,
         hull_png_path=hull_path if os.path.isfile(hull_path) else None,
-        blueprint_bg_path=(
-            plan_path
-            if plan_path
-            else (bg_path if os.path.isfile(bg_path) else None)
-        ),
+        blueprint_bg_path=_blueprint_bg_path(plan_path, bg_path),
         zone_coords=get_zone_coords(layout),
         architectural=architectural,
     )
