@@ -589,21 +589,31 @@ def generate_tier_runs(
 
     if short == "t1":
         hvac = {"hvac": tier["hvac"]} if tier.get("hvac") else None
-        sname = tier.get("surveillance", "none")
-        surv = surv_cfgs.get(sname)
+        # v4 uses surveillance_strategies; legacy manifests use a single
+        # ``surveillance`` string (default "none"). Keep old run ids when
+        # there is no strategy sweep so existing dry-run counts stay stable.
+        strategies = list(tier.get("surveillance_strategies") or [])
+        if not strategies:
+            strategies = [tier.get("surveillance", "none")]
+        multi_surv = "surveillance_strategies" in tier
         for pathogen in tier["pathogens"]:
             bundle, _pid, overrides = get_pathogen_config(manifest, pathogen)
-            for seed in tier["seeds"]:
-                rid = f"{short}_{pathogen}_s{seed}"
-                yield _yield(
-                    rid,
-                    bundle=bundle,
-                    pathogen_overrides=overrides,
-                    config_overrides=merge_cfg(hvac, surv),
-                    seed=seed,
-                    pathogen=pathogen,
-                    surveillance=sname,
-                )
+            for sname in strategies:
+                for seed in tier["seeds"]:
+                    rid = (
+                        f"{short}_{pathogen}_{sname}_s{seed}"
+                        if multi_surv
+                        else f"{short}_{pathogen}_s{seed}"
+                    )
+                    yield _yield(
+                        rid,
+                        bundle=bundle,
+                        pathogen_overrides=overrides,
+                        config_overrides=merge_cfg(hvac, surv_cfgs.get(sname)),
+                        seed=seed,
+                        pathogen=pathogen,
+                        surveillance=sname,
+                    )
 
     elif short == "t2":
         oa_fractions = tier.get("oa_fractions") or {"oa20": 0.20}
@@ -781,20 +791,33 @@ def generate_tier_runs(
                     )
 
     elif short == "t10":
+        strategies = list(tier.get("surveillance_strategies") or [])
+        multi_surv = bool(strategies)
+        if not strategies:
+            strategies = [None]  # legacy: no surveillance override / tag
         for pathogen in tier["pathogens"]:
             bundle, _pid, overrides = get_pathogen_config(manifest, pathogen)
             for n_agents in tier["population_sizes"]:
-                for seed in tier["seeds"]:
-                    rid = f"{short}_{pathogen}_n{n_agents}_s{seed}"
-                    yield _yield(
-                        rid,
-                        bundle=bundle,
-                        pathogen_overrides=overrides,
-                        config_overrides=None,
-                        seed=seed,
-                        num_agents=int(n_agents),
-                        pathogen=pathogen,
-                    )
+                for sname in strategies:
+                    surv = surv_cfgs.get(sname) if sname is not None else None
+                    for seed in tier["seeds"]:
+                        if multi_surv:
+                            rid = (
+                                f"{short}_{pathogen}_{sname}"
+                                f"_n{n_agents}_s{seed}"
+                            )
+                        else:
+                            rid = f"{short}_{pathogen}_n{n_agents}_s{seed}"
+                        yield _yield(
+                            rid,
+                            bundle=bundle,
+                            pathogen_overrides=overrides,
+                            config_overrides=surv,
+                            seed=seed,
+                            num_agents=int(n_agents),
+                            pathogen=pathogen,
+                            surveillance=sname,
+                        )
 
     elif short == "t11":
         # Emit activation_delay_epochs on syndromic + cascade; ShipSimulation

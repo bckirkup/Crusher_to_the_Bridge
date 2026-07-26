@@ -288,6 +288,65 @@ def test_t14_sweeps_pre_immunity_with_syndromic() -> None:
     assert sample["campaign_parameters"]["surveillance"] == "syndromic"
 
 
+def test_t1_honors_surveillance_strategies_when_present() -> None:
+    """v4 t1 sweeps none_true vs syndromic; legacy single-surveillance ids stay unchanged."""
+    legacy = load_manifest()
+    legacy_runs = list(generate_tier_runs(legacy, "t1_pathogen_baselines"))
+    assert all("_none_" not in rid and "_syndromic_" not in rid for rid, _ in legacy_runs)
+    assert legacy_runs[0][0].startswith("t1_")
+    assert legacy_runs[0][1]["campaign_parameters"]["surveillance"] == "none"
+
+    manifest = _v4_manifest_or_stub()
+    if "surveillance_strategies" not in manifest["tiers"]["t1_pathogen_baselines"]:
+        manifest["tiers"]["t1_pathogen_baselines"]["surveillance_strategies"] = [
+            "none_true", "syndromic",
+        ]
+        manifest["tiers"]["t1_pathogen_baselines"].pop("surveillance", None)
+    runs = list(generate_tier_runs(manifest, "t1_pathogen_baselines"))
+    none_true = next(s for rid, s in runs if "_none_true_" in rid)
+    syn = next(s for rid, s in runs if "_syndromic_" in rid)
+    assert none_true["config_overrides"]["syndromic"]["sick_call_probability"] == 0.0
+    assert none_true["config_overrides"]["wearable_monitoring"]["enabled"] is False
+    assert "sick_call_probability" not in syn["config_overrides"].get("syndromic", {})
+    tier = manifest["tiers"]["t1_pathogen_baselines"]
+    assert len(runs) == (
+        len(tier["pathogens"])
+        * len(tier["surveillance_strategies"])
+        * len(tier["seeds"])
+    )
+
+
+def test_t10_honors_surveillance_strategies_when_present() -> None:
+    """v4 t10 crosses population × surveillance; legacy omits surv tags/overrides."""
+    legacy = load_manifest()
+    legacy_runs = list(generate_tier_runs(legacy, "t10_population_size"))
+    assert all(
+        "_none_true_" not in rid and "_syndromic_" not in rid and "_cascade_" not in rid
+        for rid, _ in legacy_runs
+    )
+    assert "surveillance" not in legacy_runs[0][1]["campaign_parameters"]
+
+    manifest = _v4_manifest_or_stub()
+    tier = manifest["tiers"].setdefault("t10_population_size", {
+        "pathogens": ["norovirus"],
+        "population_sizes": [1000, 2000],
+        "surveillance_strategies": ["none_true", "cascade"],
+        "seeds": [200],
+    })
+    if "surveillance_strategies" not in tier:
+        tier["surveillance_strategies"] = ["none_true", "cascade"]
+    runs = list(generate_tier_runs(manifest, "t10_population_size"))
+    sample = next(s for rid, s in runs if "_cascade_" in rid and "_n" in rid)
+    assert sample["config_overrides"]["diagnostic_cascade"]["enabled"] is True
+    assert sample["campaign_parameters"]["surveillance"] == "cascade"
+    assert len(runs) == (
+        len(tier["pathogens"])
+        * len(tier["population_sizes"])
+        * len(tier["surveillance_strategies"])
+        * len(tier["seeds"])
+    )
+
+
 def test_make_picard_spec_optional_telemetry_paths(tmp_path) -> None:
     telemetry = tmp_path / "ctb_run"
     telemetry.mkdir()
