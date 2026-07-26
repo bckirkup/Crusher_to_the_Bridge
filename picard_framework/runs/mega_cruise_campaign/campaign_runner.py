@@ -179,7 +179,7 @@ def _read_vmhwm_kb(pid: int) -> int | None:
             for line in fh:
                 if line.startswith("VmHWM:"):
                     return int(line.split()[1])
-    except (FileNotFoundError, ProcessLookupError, PermissionError, ValueError, OSError):
+    except (OSError, ValueError):
         return None
     return None
 
@@ -189,6 +189,14 @@ def _looks_like_oom(returncode: int | None) -> bool:
     if returncode is None:
         return False
     return returncode in (-9, 137)
+
+
+def _failure_class(*, timed_out: bool, returncode: int | None) -> str:
+    if timed_out:
+        return "timeout"
+    if _looks_like_oom(returncode):
+        return "oom"
+    return "other"
 
 
 def _write_run_sidecars(
@@ -224,11 +232,7 @@ def _write_run_sidecars(
         return
     failure = {
         **resource,
-        "failure_class": (
-            "timeout" if timed_out
-            else "oom" if _looks_like_oom(returncode)
-            else "other"
-        ),
+        "failure_class": _failure_class(timed_out=timed_out, returncode=returncode),
     }
     failure_path = _output_artifact(f"{safe_id}.failure.json")
     with validated_open(failure_path, "w", allowed_roots=roots, encoding="utf-8") as fh:

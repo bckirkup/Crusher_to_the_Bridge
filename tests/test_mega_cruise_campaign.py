@@ -416,8 +416,6 @@ def test_subprocess_timeout_writes_stderr(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """Child timeout must leave stderr + failure sidecars and return False."""
-    import subprocess as sp
-
     out = tmp_path / "mega_cruise_campaign"
     monkeypatch.setattr(
         "picard_framework.runs.mega_cruise_campaign.campaign_runner.OUTPUT_ROOT",
@@ -460,8 +458,6 @@ def test_subprocess_timeout_writes_stderr(
     assert failure["peak_rss_kb"] == 1234
     resource = json.loads((out / "timeout_run.resource.json").read_text(encoding="utf-8"))
     assert resource["ok"] is False
-    # silence unused import if type checkers complain
-    assert sp.TimeoutExpired is not None
 
 
 def test_looks_like_oom_and_classify_helpers() -> None:

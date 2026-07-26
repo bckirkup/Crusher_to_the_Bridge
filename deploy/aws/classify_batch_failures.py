@@ -310,7 +310,7 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.out_json:
         path = safe_path(args.out_json)
-        with validated_open(path, "w", allowed_roots=[_cwd_root()], encoding="utf-8") as fh:
+        with validated_open(path, "w", allowed_roots=(_cwd_root(),), encoding="utf-8") as fh:
             json.dump(report, fh, indent=2)
             fh.write("\n")
         print(f"Wrote {path}", file=sys.stderr)
@@ -332,7 +332,7 @@ def main(argv: list[str] | None = None) -> int:
             "started_at",
             "stopped_at",
         ]
-        with validated_open(path, "w", allowed_roots=[_cwd_root()], encoding="utf-8", newline="") as fh:
+        with validated_open(path, "w", allowed_roots=(_cwd_root(),), encoding="utf-8") as fh:
             writer = csv.DictWriter(fh, fieldnames=fieldnames, extrasaction="ignore")
             writer.writeheader()
             for row in all_rows:

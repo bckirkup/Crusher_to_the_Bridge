@@ -157,11 +157,15 @@ re-registering:
   ```json
   "evaluateOnExit": [
     { "onStatusReason": "Host EC2*", "action": "retry" },
-    { "onExitCode": "0",            "action": "exit"  },
-    { "onReason": "*",              "action": "retry" }
+    { "onExitCode": "137", "action": "exit" },
+    { "onReason": "OutOfMemoryError*", "action": "exit" },
+    { "onExitCode": "0", "action": "exit" },
+    { "onReason": "*", "action": "retry" }
   ]
   ```
 
+  Keep OOM (`137` / `OutOfMemoryError*`) on **exit** so memory kills stay
+  countable via `classify_batch_failures.py`; Spot host loss still retries.
 - **Fargate resource sizing.** Two layers: (1) **subprocess-per-run** stops
   cumulative RSS growth across a shard; (2) **campaign compact history**
   (`run.history_retention=compact`) stops within-run telemetry from growing

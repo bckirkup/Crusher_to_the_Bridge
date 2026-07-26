@@ -9,7 +9,7 @@
 #    ACCOUNT_ID, REGION, BUCKET env vars set (or pass as args)
 #
 #  Usage:
-#    export AWS_PROFILE=picard REGION=us-east-1 ACCOUNT_ID=994254241749 BUCKET=<bucket>
+#    export AWS_PROFILE=picard REGION=us-east-1 ACCOUNT_ID=<ACCOUNT_ID> BUCKET=<bucket>
 #    ./ensure_campaign_infra.sh
 #    ./ensure_campaign_infra.sh --register-only
 #    ./ensure_campaign_infra.sh --smoke-submit 2   # array size 2 after ensure
@@ -118,6 +118,7 @@ fi
 
 # Register job definition from repo JSON (1 vCPU / 2048 MB, timeout 3600).
 tmp="$(mktemp)"
+trap 'rm -f "$tmp"' EXIT
 sed -e "s/<ACCOUNT_ID>/$ACCOUNT_ID/g" \
     -e "s/<REGION>/$REGION/g" \
     -e "s#<BUCKET>#$BUCKET#g" \
@@ -126,6 +127,7 @@ sed -e "s/<ACCOUNT_ID>/$ACCOUNT_ID/g" \
 reg_out="$(aws "${AWS_PROFILE_ARG[@]}" batch register-job-definition \
   --cli-input-json "file://$tmp" --region "$REGION")"
 rm -f "$tmp"
+trap - EXIT
 revision="$(echo "$reg_out" | python3 -c 'import json,sys; print(json.load(sys.stdin)["revision"])')"
 echo "  job def    : $JOB_DEF_NAME:$revision registered"
 
