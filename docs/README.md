@@ -27,7 +27,7 @@ python3 presidio_runner.py \
 | [OPERATORS_MANUAL_SHIP.md](OPERATORS_MANUAL_SHIP.md) | Operators / Picard | Living ship manual: run specs, API, outputs |
 | [OPERATORS_MANUAL_GAME_THEORY.md](OPERATORS_MANUAL_GAME_THEORY.md) | Operators / Presidio | Fleet, Stackelberg, OIS, utility export/import |
 | [simulation_step_order.md](simulation_step_order.md) | Developers | Epoch phase order (population → instruments → command/medical) |
-| [../picard_framework/runs/mega_cruise_campaign/README.md](../picard_framework/runs/mega_cruise_campaign/README.md) | Operators | ~9k-run mega cruise campaign (`run_campaign.bat` / `.sh`) |
+| [../picard_framework/runs/mega_cruise_campaign/README.md](../picard_framework/runs/mega_cruise_campaign/README.md) | Operators | ~17,780-run mega cruise campaign (`run_campaign.bat` / `.sh`) |
 | [OPERATORS_MANUAL.md](OPERATORS_MANUAL.md) | Reference | **Historical** full monolith; prefer the ship/fleet manuals above |
 
 ## Configure & extend
@@ -37,7 +37,7 @@ python3 presidio_runner.py \
 | [SHEDDING_AND_CABINMATES.md](SHEDDING_AND_CABINMATES.md) | Host shedding variance + cabin-mate pairing |
 | [pathogen_notes.md](pathogen_notes.md) | Pathogen profile notes |
 | [pricing_notes.md](pricing_notes.md) | Assay / labor cost assumptions |
-| [SOP_CASCADE_RECONFIG.md](SOP_CASCADE_RECONFIG.md) | Cascade-gated SOP escalation design |
+| [SOP_CASCADE_RECONFIG.md](SOP_CASCADE_RECONFIG.md) | Design note (partially landed) — prefer `data/config/diagnostic_cascade*.json` |
 | `../schemas/README.md` | JSON Schema ↔ config/output contracts |
 | `../.agents/skills/` | Task skills (platform, pathogen, ContamX, wearables, …) |
 
@@ -66,7 +66,8 @@ These are **not** day-to-day operator manuals. Prefer living manuals above unles
 | [MATHEMATICAL_FIDELITY_AUDIT.md](MATHEMATICAL_FIDELITY_AUDIT.md) | Living audit |
 | [PLATFORM_CABIN_REVISION.md](PLATFORM_CABIN_REVISION.md) | Implemented (mega-cruise cabin corridors) |
 | [WEARABLE_ANOMALY_REDESIGN.md](WEARABLE_ANOMALY_REDESIGN.md) | Implemented (confounder-aware infection_score) |
-| [issue_111_enhanced_wearables_plan.md](issue_111_enhanced_wearables_plan.md) | Plan / partially superseded by anomaly redesign |
+| [issue_111_enhanced_wearables_plan.md](issue_111_enhanced_wearables_plan.md) | Historical plan / partially superseded — see WEARABLE_ANOMALY_REDESIGN |
+| [SOP_CASCADE_RECONFIG.md](SOP_CASCADE_RECONFIG.md) | Historical design note (also listed under Configure) |
 | [OPERATORS_MANUAL.md](OPERATORS_MANUAL.md) | Historical reference (dashboard LCARS docs still deferred here) |
 
 ## Where to edit docs

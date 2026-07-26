@@ -45,7 +45,7 @@ STANDARD_TIERS = [
 
 def test_manifest_loads_and_has_ten_tiers() -> None:
     manifest = load_manifest(CAMPAIGN / "campaign_manifest.json")
-    assert manifest["campaign"] == "mega_cruise_9k"
+    assert manifest["campaign"] == "mega_cruise_17780"
     assert len(manifest["tiers"]) == 10
     assert "norovirus" in manifest["pathogen_configs"]
     assert manifest["pathogen_configs"]["norovirus"]["pathogen_id"] == "norwalk_gi"

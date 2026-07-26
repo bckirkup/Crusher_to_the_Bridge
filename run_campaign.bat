@@ -1,7 +1,7 @@
 @echo off
 setlocal EnableExtensions
 REM ============================================================================
-REM  run_campaign.bat — Mega Cruise 9K Picard campaign (Windows)
+REM  run_campaign.bat — Mega Cruise ~17780 Picard campaign (Windows)
 REM
 REM  Prerequisites:
 REM    - Python 3.11+ on PATH as "python" or "python3"
