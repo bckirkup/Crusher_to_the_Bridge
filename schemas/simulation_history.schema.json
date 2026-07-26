@@ -244,9 +244,51 @@
           "type": "array",
           "items": {"type": "object"}
         },
+        "food_contamination_exposures": {
+          "type": "array",
+          "items": {"type": "object"}
+        },
+        "environmental_exposures": {
+          "type": "array",
+          "items": {"type": "object"}
+        },
         "transmission_events": {
           "type": "array",
           "items": {"type": "object"}
+        },
+        "zone_contact_summary": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "zone",
+              "occupant_count",
+              "shedder_count",
+              "infection_count"
+            ],
+            "properties": {
+              "zone": {"type": "string"},
+              "occupant_count": {"type": "integer", "minimum": 0},
+              "occupant_ids": {
+                "type": "array",
+                "items": {"type": "integer"}
+              },
+              "shedder_count": {"type": "integer", "minimum": 0},
+              "shedder_ids": {
+                "type": "array",
+                "items": {"type": "integer"}
+              },
+              "shared_room_exposure_count": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "droplet_exposure_count": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "infection_count": {"type": "integer", "minimum": 0}
+            }
+          }
         }
       }
     },
