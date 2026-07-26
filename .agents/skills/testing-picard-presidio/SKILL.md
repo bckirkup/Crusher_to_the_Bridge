@@ -7,14 +7,17 @@ description: Test Picard_Framework, decision_engine, Presidio fleet runner, and 
 
 ## Full framework test slice
 
+Mirrors `.github/workflows/picard-presidio.yml` (runs on `main` and `cursor/**`):
+
 ```bash
 python3 tools/sanity_checker.py --from-config
 PYTHONPATH=. python3 -m pytest \
+  tests/test_graywater_zones.py \
   tests/test_picard_framework.py \
   tests/test_decision_engine.py \
   tests/test_presidio_runner.py \
   tests/test_golden_orchestrator.py \
-  tests/test_shedding_variance_cabin_mates.py \
+  tests/test_golden_picard.py \
   tests/test_stackelberg.py \
   tests/test_law_compliance.py \
   tests/test_operational_impact.py \
@@ -26,7 +29,17 @@ PYTHONPATH=. python3 -m pytest \
   tests/test_agent_axes.py \
   tests/test_sequencing_config.py \
   tests/test_wearable_anomaly_scorer.py \
-  tests/test_cascade_entry.py -v --tb=short
+  tests/test_cascade_entry.py \
+  tests/test_contam_prj_bridge.py \
+  tests/test_contamw34_dual_path.py \
+  tests/test_contamx_solver.py \
+  tests/test_py_contam_bridge.py \
+  tests/test_contam_engine_compare.py \
+  tests/test_mega_cruise_campaign.py \
+  tests/test_pathogen_overrides.py \
+  tests/test_cabin_corridor_transmission.py \
+  tests/test_shedding_variance_cabin_mates.py \
+  -v --tb=short
 ```
 
 ## Presidio CLI smoke
@@ -59,8 +72,8 @@ check-jsonschema --schemafile schemas/utility_observation_bundle.schema.json \
 
 | Workflow | When |
 |----------|------|
-| `.github/workflows/ci.yml` | All `main` PRs — full pytest (~655) + Presidio smoke + import hygiene + wearable/cascade + diagnostic cascade smoke + OIS verify |
-| `.github/workflows/picard-presidio.yml` | `main` and `cursor/**` — framework slice (~90 tests) + Stackelberg/platform schema checks + Presidio smoke |
+| `.github/workflows/ci.yml` | All `main` PRs — full pytest (~858) + Presidio smoke + import hygiene + OIS verify + Docker campaign smoke |
+| `.github/workflows/picard-presidio.yml` | `main` and `cursor/**` — framework slice (~190+ tests) + Stackelberg/platform schema checks + Presidio smoke |
 
 Replicate main CI framework steps:
 
