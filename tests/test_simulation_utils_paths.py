@@ -75,6 +75,29 @@ def test_confine_to_base_accepts_child(tmp_path) -> None:
     assert confine_to_base(str(base), str(child)) == os.path.realpath(child)
 
 
+def test_validated_open_accepts_newline_for_csv(tmp_path) -> None:
+    """python:S930 — CSV writers need newline='' on validated_open."""
+    import csv
+
+    from simulation_utils.paths import validated_open
+
+    base = tmp_path / "out"
+    base.mkdir()
+    path = base / "rows.csv"
+    with validated_open(
+        str(path),
+        "w",
+        allowed_roots=(str(tmp_path),),
+        encoding="utf-8",
+        newline="",
+    ) as fh:
+        writer = csv.DictWriter(fh, fieldnames=["a", "b"])
+        writer.writeheader()
+        writer.writerow({"a": "1", "b": "2"})
+    text = path.read_text(encoding="utf-8")
+    assert text.splitlines() == ["a,b", "1,2"]
+
+
 def test_is_publicly_writable_recursive(tmp_path) -> None:
     from simulation_utils.paths import is_publicly_writable
     if os.name == "nt":

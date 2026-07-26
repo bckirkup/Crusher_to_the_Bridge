@@ -1528,7 +1528,7 @@ def path_map_from_prj(text: str) -> list[dict[str, Any]]:
         raise ValueError(
             "Not a recognized CONTAM .prj file (missing 'ContamW' signature)"
         )
-    sections = {name: body for name, body in _section_blocks(text)}
+    sections = dict(_section_blocks(text))
 
     zone_nr_to_id: dict[int, str] = {}
     phantom_nrs: set[int] = set()
@@ -1656,6 +1656,21 @@ def _is_contamw34(text: str) -> bool:
     return " ! zones:" in text or "! zones:" in text
 
 
+def _parse_section_header(stripped: str) -> tuple[int, str] | None:
+    """Parse ``N ! name:`` ContamW section headers without regex backtracking."""
+    if "!" not in stripped or not stripped.endswith(":"):
+        return None
+    left, _, right = stripped.partition("!")
+    name = right.strip().rstrip(":").strip()
+    count_s = left.strip()
+    if not count_s or not name:
+        return None
+    try:
+        return int(count_s), name
+    except ValueError:
+        return None
+
+
 def _section_blocks(text: str) -> list[tuple[str, list[str]]]:
     """Split ContamW PRJ into (section_name, body_lines) by ``N ! name:``."""
     lines = text.splitlines()
@@ -1666,10 +1681,9 @@ def _section_blocks(text: str) -> list[tuple[str, list[str]]]:
     while i < len(lines):
         raw = lines[i]
         stripped = raw.strip()
-        m = re.match(r"^(-?\d+)\s+!\s*(.+?):\s*$", stripped)
-        if m and header_done:
-            count = int(m.group(1))
-            name = m.group(2).strip()
+        header = _parse_section_header(stripped)
+        if header is not None and header_done:
+            count, name = header
             i += 1
             body: list[str] = []
             # Collect until -999 (not counting nested -999 in weird cases)
@@ -1705,7 +1719,7 @@ def simplify_contamw34(
             "Not a recognized CONTAM .prj file (missing 'ContamW' signature)"
         )
 
-    sections = {name: body for name, body in _section_blocks(text)}
+    sections = dict(_section_blocks(text))
 
     for dropped in (
         "day-schedules",
