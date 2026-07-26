@@ -34,6 +34,10 @@ When the Picard run spec includes a `social` block, each epoch follows this orde
 
 Finalization writes `simulation_history.json` and `artificial_lab_notebook.json`.
 
+### Sick-call vs zone contacts
+
+Syndromic sick-call is a **reporting roster only** (`sick_call_agents` IDs for clinical assays, cascade entry, and stoplights). It never relocates agents into a Medical / MedBay zone. Infection contacts come from schedule and quarantine/isolation colocation during step 8 (`TransmissionCore`). Campaign surveillance strategy `"none"` zeros sick-call probability and disables cascade — agents stay on normal schedule dispersion; it does not create a shared medical gathering point. Use `contact_tracing.zone_contact_summary` (epoch × zone occupant/shedder/exposure/infection counts and IDs) to inspect per-zone mixing and confirm Medical zones are not concentrating sick-call reporters.
+
 ## Legacy `orchestrator.py` loop
 
 Same Crusher Labs physics and instruments as Picard, but **no** Stackelberg population/command passes. OIS is accumulated after confinement. Epoch order matches the pre–game-theory orchestrator (stoplight-only SOPs, flat syndromic `sick_call_probability` unless extended later).
