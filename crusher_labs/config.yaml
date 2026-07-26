@@ -210,6 +210,9 @@ syndromic:
   sick_call_probability: 0.70         # P(symptomatic agent reports to sick-call)
   background_noise_rate: 0.015        # P(healthy agent reports daily – seasickness etc.)
   cadence: 1
+  # Optional campaign T11 knob: suppress sick-calls for the first N epochs
+  # (0-based). Surveillance begins at epoch N. Default 0 = always active.
+  # activation_delay_epochs: 0
 
 # ── Clinical diagnostics (observation instruments) ───────────
 # Gaussian-copula autocorrelation between sick-call clinical tests.
@@ -696,6 +699,9 @@ chronic_disease:
 diagnostic_cascade:
   enabled: true
   config_path: "data/config/diagnostic_cascade_multiplex.json"
+  # Optional campaign T11 knob (paired with syndromic.activation_delay_epochs):
+  # skip cascade evaluate_epoch until epoch >= N (0-based). Default 0 = always active.
+  # activation_delay_epochs: 0
   # Optional runtime overrides for cascade entry routing and wearable fusion.
   # entry:
   #   sick_call_tier: 1

@@ -480,6 +480,16 @@ def _campaign_parameters(
     wear = cfg.get("wearable_monitoring") or {}
     if "deployment_profile" in wear and "wearables" not in params:
         params["wearables"] = wear["deployment_profile"]
+    if "detection_sensitivity_scale" in wear and "wearable_sensitivity" not in params:
+        params["wearable_sensitivity"] = wear["detection_sensitivity_scale"]
+    syn = cfg.get("syndromic") or {}
+    if "sick_call_probability" in syn and "sick_call_probability" not in params:
+        params["sick_call_probability"] = syn["sick_call_probability"]
+    if (
+        "activation_delay_epochs" in syn
+        and "surveillance_delay_epochs" not in params
+    ):
+        params["surveillance_delay_epochs"] = syn["activation_delay_epochs"]
     return params
 
 
@@ -784,6 +794,107 @@ def generate_tier_runs(
                         seed=seed,
                         num_agents=int(n_agents),
                         pathogen=pathogen,
+                    )
+
+    elif short == "t11":
+        # Emit activation_delay_epochs on syndromic + cascade; ShipSimulation
+        # suppresses sick-calls/cascade while epoch < delay (0-based epochs).
+        for pathogen in tier["pathogens"]:
+            bundle, _pid, overrides = get_pathogen_config(manifest, pathogen)
+            for delay in tier["surveillance_delay_epochs"]:
+                delay_over = {
+                    "syndromic": {"activation_delay_epochs": int(delay)},
+                    "diagnostic_cascade": {"activation_delay_epochs": int(delay)},
+                }
+                for sname in tier["surveillance_strategies"]:
+                    for seed in tier["seeds"]:
+                        rid = f"{short}_{pathogen}_{sname}_delay{int(delay)}_s{seed}"
+                        yield _yield(
+                            rid,
+                            bundle=bundle,
+                            pathogen_overrides=overrides,
+                            config_overrides=merge_cfg(
+                                surv_cfgs.get(sname), delay_over,
+                            ),
+                            seed=seed,
+                            pathogen=pathogen,
+                            surveillance=sname,
+                            surveillance_delay_epochs=int(delay),
+                        )
+
+    elif short == "t12":
+        for pathogen in tier["pathogens"]:
+            bundle, _pid, overrides = get_pathogen_config(manifest, pathogen)
+            for scp in tier["sick_call_probabilities"]:
+                sick_over = {"syndromic": {"sick_call_probability": float(scp)}}
+                for sname in tier["surveillance_strategies"]:
+                    for seed in tier["seeds"]:
+                        rid = (
+                            f"{short}_{pathogen}_{sname}"
+                            f"_scp{int(round(float(scp) * 100))}_s{seed}"
+                        )
+                        yield _yield(
+                            rid,
+                            bundle=bundle,
+                            pathogen_overrides=overrides,
+                            config_overrides=merge_cfg(
+                                surv_cfgs.get(sname), sick_over,
+                            ),
+                            seed=seed,
+                            pathogen=pathogen,
+                            surveillance=sname,
+                            sick_call_probability=float(scp),
+                        )
+
+    elif short == "t13":
+        wname = tier.get("wearable_config", "crew_only")
+        for pathogen in tier["pathogens"]:
+            bundle, _pid, overrides = get_pathogen_config(manifest, pathogen)
+            for sens in tier["wearable_sensitivities"]:
+                wear = {
+                    "wearable_monitoring": {
+                        "deployment_profile": wname,
+                        "detection_sensitivity_scale": float(sens),
+                    },
+                }
+                for sname in tier["surveillance_strategies"]:
+                    for seed in tier["seeds"]:
+                        rid = (
+                            f"{short}_{pathogen}_{wname}_{sname}"
+                            f"_wsens{int(round(float(sens) * 100))}_s{seed}"
+                        )
+                        yield _yield(
+                            rid,
+                            bundle=bundle,
+                            pathogen_overrides=overrides,
+                            config_overrides=merge_cfg(
+                                surv_cfgs.get(sname), wear,
+                            ),
+                            seed=seed,
+                            pathogen=pathogen,
+                            wearables=wname,
+                            surveillance=sname,
+                            wearable_sensitivity=float(sens),
+                        )
+
+    elif short == "t14":
+        sname = tier.get("surveillance", "syndromic")
+        surv = surv_cfgs.get(sname)
+        for pathogen in tier["pathogens"]:
+            bundle, _pid, overrides = get_pathogen_config(manifest, pathogen)
+            for imm_frac in tier["pre_immunity_fractions"]:
+                imm_over, imm_tag = _immunity_override(imm_frac)
+                for seed in tier["seeds"]:
+                    rid = f"{short}_{pathogen}{imm_tag}_s{seed}"
+                    yield _yield(
+                        rid,
+                        bundle=bundle,
+                        pathogen_overrides=overrides,
+                        config_overrides=merge_cfg(surv, imm_over),
+                        seed=seed,
+                        pathogen=pathogen,
+                        surveillance=sname,
+                        immunity=imm_frac,
                     )
 
     else:

@@ -61,10 +61,12 @@ def classify_attempt(
         if not status or status.upper() in {"NONE", "SUCCESS", "SUCCEEDED"}:
             return "ok"
 
-    if exit_code == 137 or OOM_REASON_RE.search(combined):
-        return "oom"
+    # Fargate Spot reclaim often SIGKILLs with exit 137 and
+    # statusReason "Your Spot Task was interrupted." — check Spot BEFORE OOM.
     if SPOT_RE.search(combined):
         return "spot_reclaim"
+    if OOM_REASON_RE.search(combined) or exit_code == 137:
+        return "oom"
     if TIMEOUT_RE.search(combined):
         return "timeout"
     if exit_code == 0:

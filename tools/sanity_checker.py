@@ -1358,6 +1358,8 @@ def _check_modality_params(cfg: dict[str, Any], report: Report) -> None:
 
     _non_neg_fields = [
         ("syndromic", "cadence"),
+        ("syndromic", "activation_delay_epochs"),
+        ("diagnostic_cascade", "activation_delay_epochs"),
         ("clinical_rdt", "cadence"),
         ("targeted_pcr", "cadence"),
         ("targeted_pcr", "extraction_efficiency"),

@@ -40,11 +40,11 @@
     "s3_prefix": "s3://<BUCKET>/campaign/"
   },
   "retryStrategy": {
-    "attempts": 5,
+    "attempts": 10,
     "evaluateOnExit": [
-      { "onStatusReason": "Host EC2*", "action": "retry" },
-      { "onExitCode": "137", "action": "exit" },
+      { "onStatusReason": "Your Spot Task was interrupted*", "action": "retry" },
       { "onReason": "OutOfMemoryError*", "action": "exit" },
+      { "onExitCode": "137", "action": "exit" },
       { "onExitCode": "0", "action": "exit" },
       { "onReason": "*", "action": "retry" }
     ]
