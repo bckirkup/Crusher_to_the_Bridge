@@ -51,6 +51,8 @@ from orchestrator_epoch import (
     confine_agents as _confine_agents,
     confine_all_agents as _confine_all_agents,
     step_cost_accounting as _step_cost_accounting,
+    step_diagnostic_cascade as _step_diagnostic_cascade,
+    try_admit_to_quarantine as _try_admit_to_quarantine,
 )
 from crusher_labs import load_config
 from telemetry_buffer.schema import make_agent
@@ -895,3 +897,168 @@ class TestWearableHelpers:
     def test_clamp_body_temp(self) -> None:
         assert _clamp_channel("body_temp", 30.0) == pytest.approx(34.0)
         assert _clamp_channel("body_temp", 45.0) == pytest.approx(42.0)
+
+
+# ── Cascade / shared quarantine compliance gate ──────────────────────────
+
+class TestCascadeQuarantineCompliance:
+    def _make_syndromic_mock(self, compliance: bool = True) -> MagicMock:
+        mock = MagicMock()
+        mock.check_quarantine_compliance.return_value = compliance
+        return mock
+
+    def _run_cascade_with_confinement(
+        self, *, compliance: bool, agent_id: int = 42,
+    ) -> SimulationState:
+        state = SimulationState()
+        cascade = MagicMock()
+        cascade.entry_config = None
+        result = MagicMock()
+        result.confinements_ordered = [agent_id]
+        result.to_dict.return_value = {"confinements_ordered": [agent_id]}
+        cascade.evaluate_epoch.return_value = result
+        state.cascade_engine = cascade
+        obs = MagicMock()
+        syndromic = self._make_syndromic_mock(compliance=compliance)
+        with patch(
+            "crusher_labs.diagnostic_cascade.build_test_runner",
+            return_value=MagicMock(),
+        ):
+            _step_diagnostic_cascade(
+                epoch=3,
+                state=state,
+                agents=[{"agent_id": agent_id}],
+                syn_result={"sick_call_agents": []},
+                wearable_result=None,
+                obs=obs,
+                syndromic=syndromic,
+            )
+        return state
+
+    def test_cascade_compliance_true_admits(self) -> None:
+        state = self._run_cascade_with_confinement(compliance=True)
+        assert 42 in state.quarantined_ids
+        assert 42 not in state.quarantine_refusers
+        actions = [c["action"] for c in state.compliance_log]
+        assert "cascade_confinement" in actions
+
+    def test_cascade_compliance_false_refuses(self) -> None:
+        state = self._run_cascade_with_confinement(compliance=False)
+        assert 42 not in state.quarantined_ids
+        assert 42 in state.quarantine_refusers
+        assert state.quarantine_order_epoch[42] == 3
+        actions = [c["action"] for c in state.compliance_log]
+        assert "refused_cascade_confinement" in actions
+
+    def test_try_admit_sensitivity_compliance_rate(self) -> None:
+        """Config sensitivity: quarantine_compliance 0 vs 1 changes admissions."""
+        from crusher_labs.modalities.syndromic import SyndromicSurveillance
+
+        agents = list(range(40))
+        refused_zero = 0
+        admitted_one = 0
+        for aid in agents:
+            state0 = SimulationState()
+            syn0 = SyndromicSurveillance(
+                quarantine_compliance=0.0,
+                compliance_delay_epochs=99,
+                rng=np.random.default_rng(aid),
+            )
+            if not _try_admit_to_quarantine(
+                1, aid, state0, syn0,
+                action_ok="ok", action_refuse="refuse",
+            ):
+                refused_zero += 1
+            state1 = SimulationState()
+            syn1 = SyndromicSurveillance(
+                quarantine_compliance=1.0,
+                compliance_delay_epochs=99,
+                rng=np.random.default_rng(aid),
+            )
+            if _try_admit_to_quarantine(
+                1, aid, state1, syn1,
+                action_ok="ok", action_refuse="refuse",
+            ):
+                admitted_one += 1
+        assert refused_zero == len(agents)
+        assert admitted_one == len(agents)
+
+
+class TestObservationEnabledGate:
+    def test_disabled_returns_empty_results(self) -> None:
+        """Golden: observation.enabled=false yields empty instrument payloads."""
+        from orchestrator_epoch import run_observation_sampling
+
+        engine = MagicMock()
+        obs = MagicMock()
+        air, swab, ww, rdt, qpcr, micro, lr, lr_count = run_observation_sampling(
+            epoch=1,
+            obs=obs,
+            agents=[],
+            spaces={},
+            zone_names=["Bridge"],
+            zone_volumes={"Bridge": 100.0},
+            zone_microflora_shifts={},
+            trigger_status=STATUS_BASELINE,
+            high_traffic=["Bridge"],
+            syn_result={"sick_call_agents": []},
+            engine=engine,
+            pathogen_profiles={},
+            cfg={"observation": {"enabled": False}},
+        )
+        assert air == {}
+        assert swab == {}
+        assert ww == {}
+        assert rdt == {}
+        assert qpcr == {}
+        assert micro == {}
+        assert lr == {}
+        assert lr_count == 0
+        obs.air_sniffer.sample_all_zones.assert_not_called()
+
+    def test_enabled_sensitivity_invokes_air_sniffer(self) -> None:
+        """Config sensitivity: enabled=true samples; false does not."""
+        from orchestrator_epoch import run_observation_sampling
+
+        engine = MagicMock()
+        engine.get_pathogen_zone_mass.return_value = {}
+
+        def _make_obs() -> MagicMock:
+            obs = MagicMock()
+            obs.turnaround = None
+            obs.lab_notebook_enabled = False
+            obs.air_sniffer.sample_all_zones.return_value = {"Bridge": {"status": "ok"}}
+            obs.surface_swab.swab_zones.return_value = {}
+            obs.wastewater_seq.sample_all_zones.return_value = {}
+            obs.clinical_rdt = MagicMock()
+            obs.clinical_qpcr = MagicMock()
+            obs.clinical_microbiology = MagicMock()
+            return obs
+
+        spaces = {"Bridge": {"pathogen_mass": 1.0}}
+        common = dict(
+            epoch=1,
+            agents=[],
+            spaces=spaces,
+            zone_names=["Bridge"],
+            zone_volumes={"Bridge": 100.0},
+            zone_microflora_shifts={},
+            trigger_status=STATUS_BASELINE,
+            high_traffic=["Bridge"],
+            syn_result={"sick_call_agents": []},
+            engine=engine,
+            pathogen_profiles={},
+        )
+        obs_on = _make_obs()
+        air_on, *_ = run_observation_sampling(
+            obs=obs_on, cfg={"observation": {"enabled": True}}, **common,
+        )
+        obs_off = _make_obs()
+        air_off, *_ = run_observation_sampling(
+            obs=obs_off, cfg={"observation": {"enabled": False}}, **common,
+        )
+        assert air_on != air_off
+        assert "Bridge" in air_on
+        assert air_off == {}
+        obs_on.air_sniffer.sample_all_zones.assert_called_once()
+        obs_off.air_sniffer.sample_all_zones.assert_not_called()

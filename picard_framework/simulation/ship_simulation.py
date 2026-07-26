@@ -464,6 +464,7 @@ class ShipSimulation:
         cascade_result = step_diagnostic_cascade(
             epoch, state, agents, syn_result, wearable_result, self.obs,
             wearable_monitor=self.wearable_monitor,
+            syndromic=syndromic,
         )
         step_cascade_cost_accounting(epoch, self.proto_ctx, cascade_result)
 
@@ -496,25 +497,27 @@ class ShipSimulation:
         ]
 
         pcr_result = None
-        if state.trigger_status == STATUS_SUSPECTED:
-            wipe = list(dict.fromkeys(self.high_traffic + verify_zones))
-            pcr_result = pcr.query_ground_truth(truth, surface_wipe_zones=wipe)
-        elif state.trigger_status == STATUS_CONFIRMED:
-            wipe = list(dict.fromkeys(self.zone_names + verify_zones))
-            pcr_result = pcr.query_ground_truth(truth, surface_wipe_zones=wipe)
-        elif epoch % int(pcr_cadence) == 0:
-            if verify_zones:
-                pcr_result = pcr.query_ground_truth(
-                    truth, surface_wipe_zones=verify_zones,
-                )
-            else:
-                pcr_result = pcr.query_ground_truth(truth)
-
         seq_result = None
-        if epoch % int(seq_cadence) == 0:
-            seq_result = seq.query_ground_truth(
-                truth, zone_microflora_shifts=zone_microflora_shifts,
-            )
+        observation_enabled = cfg.get("observation", {}).get("enabled", True)
+        if observation_enabled:
+            if state.trigger_status == STATUS_SUSPECTED:
+                wipe = list(dict.fromkeys(self.high_traffic + verify_zones))
+                pcr_result = pcr.query_ground_truth(truth, surface_wipe_zones=wipe)
+            elif state.trigger_status == STATUS_CONFIRMED:
+                wipe = list(dict.fromkeys(self.zone_names + verify_zones))
+                pcr_result = pcr.query_ground_truth(truth, surface_wipe_zones=wipe)
+            elif epoch % int(pcr_cadence) == 0:
+                if verify_zones:
+                    pcr_result = pcr.query_ground_truth(
+                        truth, surface_wipe_zones=verify_zones,
+                    )
+                else:
+                    pcr_result = pcr.query_ground_truth(truth)
+
+            if epoch % int(seq_cadence) == 0:
+                seq_result = seq.query_ground_truth(
+                    truth, zone_microflora_shifts=zone_microflora_shifts,
+                )
 
         (air_results, swab_results, ww_results,
          clin_rdt_results, clin_qpcr_results, clin_microbio_results,
@@ -635,6 +638,9 @@ class ShipSimulation:
         counter_results = compute_infection_counters(agents, counter_defs)
         step_counter_thresholds(
             epoch, agents, counter_results, counter_defs, state, syndromic,
+            confinement_enabled=self.graph_cfg.get(
+                "counter_confinement_enabled", True,
+            ),
         )
 
         step_operational_impact_accounting(

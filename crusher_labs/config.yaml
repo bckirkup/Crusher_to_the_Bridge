@@ -87,6 +87,8 @@ ship_graph:
   #                    "confine_symptomatic" triggers quarantine of symptomatic agents
   #                    "log_only" (default) records the breach in telemetry
   #   exempt_classes  – agent classes exempt from confinement (same as SOP exempt_classes)
+  # When false, infection counters are still computed/logged but confine actions are skipped.
+  counter_confinement_enabled: true
   infection_counters:
     - counter_id: "crew_attack_rate"
       label: "Crew Attack Rate"
@@ -194,6 +196,13 @@ escalation:
     syndromic:
       amber_sick_call_count: 2
       red_sick_call_count: 5
+
+# ── Observation pipeline master switch ────────────────────────
+# When false, air/swab/wastewater/clinical sampling and Picard PCR/seq
+# cadence queries are skipped (empty results). Wearables and counter
+# confinement are controlled separately.
+observation:
+  enabled: true
 
 # ── Syndromic Surveillance ────────────────────────────────────
 syndromic:

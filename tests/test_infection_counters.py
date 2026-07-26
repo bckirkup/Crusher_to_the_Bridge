@@ -14,7 +14,7 @@ import pytest
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, REPO_ROOT)
 
-from orchestrator_epoch import compute_infection_counters, confine_agents
+from orchestrator_epoch import compute_infection_counters, confine_agents, step_counter_thresholds
 from orchestrator_types import (
     SimulationState,
     SYMPTOM_ASYMPTOMATIC,
@@ -133,3 +133,50 @@ class TestExemptClassesConfinement:
         )
         assert 0 not in state.quarantined_ids
         assert 1 in state.quarantined_ids
+
+
+class TestCounterConfinementEnabled:
+    def test_step_counter_thresholds_confines_when_exceeded(self) -> None:
+        state = SimulationState()
+        agents = [
+            _agent(0, SYMPTOM_SYMPTOMATIC),
+            _agent(1, SYMPTOM_SYMPTOMATIC),
+        ]
+        defs = [{
+            "counter_id": "all_attack_rate",
+            "metric": "attack_rate",
+            "filter": {},
+            "threshold": 0.03,
+            "on_exceed": "confine_symptomatic",
+        }]
+        results = compute_infection_counters(agents, defs)
+        assert results["all_attack_rate"]["exceeded"] is True
+        syndromic = MagicMock()
+        syndromic.check_quarantine_compliance.return_value = True
+        step_counter_thresholds(1, agents, results, defs, state, syndromic)
+        assert 0 in state.quarantined_ids
+        assert 1 in state.quarantined_ids
+
+    def test_counter_confinement_disabled_leaves_agents_free(self) -> None:
+        """Config sensitivity: confinement_enabled=False skips confine actions."""
+        state = SimulationState()
+        agents = [
+            _agent(0, SYMPTOM_SYMPTOMATIC),
+            _agent(1, SYMPTOM_SYMPTOMATIC),
+        ]
+        defs = [{
+            "counter_id": "all_attack_rate",
+            "metric": "attack_rate",
+            "filter": {},
+            "threshold": 0.03,
+            "on_exceed": "confine_symptomatic",
+        }]
+        results = compute_infection_counters(agents, defs)
+        syndromic = MagicMock()
+        syndromic.check_quarantine_compliance.return_value = True
+        step_counter_thresholds(
+            1, agents, results, defs, state, syndromic,
+            confinement_enabled=False,
+        )
+        assert state.quarantined_ids == set()
+        assert results["all_attack_rate"]["exceeded"] is True

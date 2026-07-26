@@ -19,6 +19,30 @@ after the HVAC star-topology + analytical mass-balance fixes.
 | t10 | Population size | 2 × 5 sizes × 10 seeds | 100 |
 | **Total** | | | **~17780** |
 
+## Surveillance presets
+
+Named overrides live under `surveillance_configs` in `campaign_manifest.json`.
+Existing tiers keep using soft `"none"` (sick-call / cascade off only). New
+campaigns can select the stronger presets or compose the switches directly via
+`config_overrides`:
+
+| Preset | Sick-call / cascade | Env observation (air/swab/WW/PCR/seq) | Wearables | VSP counter confinement |
+|--------|---------------------|--------------------------------------|-----------|-------------------------|
+| `none` | off | on | on | on |
+| `none_env` | off | off (`observation.enabled: false`) | on | on |
+| `none_true` | off | off | off | off (`counter_confinement_enabled: false`) |
+| `syndromic` | cascade off; sick-call default | on | on | on |
+| `cascade` / `cascade_mpx` | cascade on | on | on | on |
+
+Composable switches (defaults preserve current behavior):
+
+- `observation.enabled` — master gate for environmental + clinical sampling and Picard PCR/seq cadence
+- `ship_graph.counter_confinement_enabled` — when false, infection counters still log but do not confine
+- `wearable_monitoring.enabled` — existing wearable off switch
+
+Example for a true-off baseline tier: `"surveillance": "none_true"` or
+`"surveillance_strategies": ["none_true", "syndromic", "cascade"]`.
+
 ## Running
 
 From the **repo root**:
