@@ -62,6 +62,10 @@ def test_none_and_syndromic_surveillance_configs_diverge() -> None:
     assert none_cfg["syndromic"]["sick_call_probability"] == 0.0
     assert none_cfg["syndromic"]["background_noise_rate"] == 0.0
     assert none_cfg["fred_behavior"]["healthy_noise_categories"] == []
+    # Soft none keeps observation / wearables / VSP confinement on (defaults).
+    assert none_cfg.get("observation", {}).get("enabled", True) is True
+    assert "wearable_monitoring" not in none_cfg
+    assert "counter_confinement_enabled" not in none_cfg.get("ship_graph", {})
     assert "syndromic" not in syn_cfg
 
     runs = list(generate_tier_runs(manifest, "t3_surveillance_sweep"))
@@ -73,6 +77,30 @@ def test_none_and_syndromic_surveillance_configs_diverge() -> None:
     assert none_over["fred_behavior"]["healthy_noise_categories"] == []
     assert "sick_call_probability" not in syn_over.get("syndromic", {})
     assert none_over != syn_over
+
+
+def test_none_preset_ladder_diverges() -> None:
+    """none / none_env / none_true must differ on observation and confinement switches."""
+    manifest = load_manifest()
+    configs = manifest["surveillance_configs"]
+    none = configs["none"]
+    none_env = configs["none_env"]
+    none_true = configs["none_true"]
+
+    assert none != none_env != none_true
+    assert none_env["observation"]["enabled"] is False
+    assert none_env.get("wearable_monitoring", {}).get("enabled", True) is True
+    assert none_env.get("ship_graph", {}).get("counter_confinement_enabled", True) is True
+
+    assert none_true["observation"]["enabled"] is False
+    assert none_true["wearable_monitoring"]["enabled"] is False
+    assert none_true["ship_graph"]["counter_confinement_enabled"] is False
+
+    # Soft none still only silences sick-call / cascade (legacy campaign shape).
+    assert "observation" not in none or none["observation"].get("enabled", True) is True
+    assert none["syndromic"]["sick_call_probability"] == 0.0
+    assert none_env["syndromic"]["sick_call_probability"] == 0.0
+    assert none_true["syndromic"]["sick_call_probability"] == 0.0
 
 
 def test_resolve_tier_short_prefix() -> None:

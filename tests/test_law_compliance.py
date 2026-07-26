@@ -418,8 +418,10 @@ class TestPureStateIsolation:
         # agent dict was NOT mutated
         assert agents[0]["symptom_presentation"] == "symptomatic"
 
-    def test_sync_vsp_isolation_only_mutates_state(self) -> None:
-        """sync_vsp_isolation must only mutate state, not engine."""
+    def test_sync_vsp_isolation_only_mutates_state_when_compliant(self) -> None:
+        """sync_vsp_isolation must not mutate engine when agents comply."""
+        from unittest.mock import MagicMock
+
         from orchestrator_types import SimulationState
         from orchestrator_epoch import sync_vsp_isolation
         from orchestrator_init import build_engine
@@ -429,11 +431,13 @@ class TestPureStateIsolation:
         engine = build_engine(cfg, seed=42)
         state = SimulationState()
         engine.quarantined_ids = {5, 10}
+        syndromic = MagicMock()
+        syndromic.check_quarantine_compliance.return_value = True
 
         original_engine_ids = set(engine.quarantined_ids)
-        sync_vsp_isolation(1, engine, state)
+        sync_vsp_isolation(1, engine, state, syndromic)
 
         # state was mutated (expected)
         assert state.quarantined_ids == {5, 10}
-        # engine.quarantined_ids was NOT mutated by sync
+        # engine.quarantined_ids was NOT mutated when agents comply
         assert engine.quarantined_ids == original_engine_ids
