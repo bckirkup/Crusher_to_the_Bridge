@@ -41,6 +41,19 @@ SCHEMA_DATA_MAP: dict[str, list[str]] = {
     "clinical_instrument_params.schema.json": [
         "data/config/clinical_instrument_params.json",
     ],
+    "picard_run_spec.schema.json": [
+        "picard_framework/runs/destroyer_baseline_default.json",
+        "picard_framework/runs/smoke_2epoch.json",
+        "picard_framework/runs/smoke_cascade_6epoch.json",
+        "picard_framework/runs/smoke_cascade_multiplex_6epoch.json",
+        "picard_framework/runs/smoke_pathogen_overrides_2epoch.json",
+    ],
+    "pathogen_profiles.schema.json": [
+        "data/pathogens/active_profiles.json",
+        "data/pathogens/edison_10pathogen_profiles.json",
+        "data/pathogens/enterprise_tng_profiles.json",
+        "data/pathogens/enterprise_tos_profiles.json",
+    ],
     "spatial_layout.schema.json": [],
     "air_flow_paths.schema.json": [],
 }
