@@ -43,6 +43,7 @@ from orchestrator_epoch import (
     build_cascade_context,
     compute_infection_counters,
     compute_zone_microflora_shifts,
+    inactive_syndromic_result,
     run_observation_sampling,
     step_cost_accounting,
     step_diagnostic_cascade,
@@ -53,6 +54,7 @@ from orchestrator_epoch import (
     step_infection_progression,
     step_mid_cruise_introductions,
     step_quarantine_confinement,
+    surveillance_is_active,
     step_operational_impact_accounting,
     step_wearable_monitoring,
 )
@@ -447,12 +449,21 @@ class ShipSimulation:
                 except (TypeError, ValueError):
                     continue
 
-        syn_result = syndromic.query_ground_truth(
-            truth,
-            behavioral_overrides=state.agent_behavioral_overrides,
-            information_beliefs=beliefs,
-            chronic_behavioral_mods=self.chronic_behavioral_mods,
-        )
+        if surveillance_is_active(epoch, cfg):
+            syn_result = syndromic.query_ground_truth(
+                truth,
+                behavioral_overrides=state.agent_behavioral_overrides,
+                information_beliefs=beliefs,
+                chronic_behavioral_mods=self.chronic_behavioral_mods,
+            )
+            cascade_result = step_diagnostic_cascade(
+                epoch, state, agents, syn_result, wearable_result, self.obs,
+                wearable_monitor=self.wearable_monitor,
+                cfg=cfg,
+            )
+        else:
+            syn_result = inactive_syndromic_result(epoch, n_agents=len(agents))
+            cascade_result = None
         from crusher_labs.clinical_presentation import apply_noise_syndromes_to_agents
 
         apply_noise_syndromes_to_agents(
@@ -461,10 +472,6 @@ class ShipSimulation:
             cfg.get("fred_behavior", {}).get("healthy_noise_categories"),
         )
 
-        cascade_result = step_diagnostic_cascade(
-            epoch, state, agents, syn_result, wearable_result, self.obs,
-            wearable_monitor=self.wearable_monitor,
-        )
         step_cascade_cost_accounting(epoch, self.proto_ctx, cascade_result)
 
         sick_call_ids = syn_result["sick_call_agents"]

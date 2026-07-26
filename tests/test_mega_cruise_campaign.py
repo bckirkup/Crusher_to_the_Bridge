@@ -174,6 +174,92 @@ def test_t8_sets_wearable_deployment_profile() -> None:
     assert sample["config_overrides"]["wearable_monitoring"]["deployment_profile"] == "crew_only"
 
 
+def _v4_manifest_or_stub() -> dict[str, Any]:
+    """Prefer the Downloads v4 manifest; fall back to a minimal stub for CI."""
+    v4 = Path.home() / "Downloads" / "campaign_manifest_v4.json"
+    if v4.is_file():
+        # Outside campaign roots — load directly for local generator checks.
+        with open(v4, encoding="utf-8") as fh:
+            return json.load(fh)
+    base = load_manifest()
+    base["tiers"] = {
+        **base.get("tiers", {}),
+        "t11_intervention_timing": {
+            "pathogens": ["norovirus"],
+            "surveillance_delay_epochs": [0, 24],
+            "surveillance_strategies": ["syndromic", "cascade"],
+            "seeds": [200],
+        },
+        "t12_surveillance_sensitivity": {
+            "pathogens": ["norovirus"],
+            "sick_call_probabilities": [0.1, 0.7],
+            "surveillance_strategies": ["syndromic"],
+            "seeds": [200],
+        },
+        "t13_wearable_sensitivity": {
+            "pathogens": ["norovirus"],
+            "wearable_sensitivities": [0.3, 0.95],
+            "surveillance_strategies": ["cascade"],
+            "wearable_config": "crew_only",
+            "seeds": [200],
+        },
+        "t14_immunity_threshold": {
+            "pathogens": ["norovirus", "measles"],
+            "pre_immunity_fractions": [0.0, 0.5],
+            "surveillance": "syndromic",
+            "seeds": [200],
+        },
+    }
+    return base
+
+
+def test_t11_sweeps_surveillance_activation_delay() -> None:
+    manifest = _v4_manifest_or_stub()
+    runs = list(generate_tier_runs(manifest, "t11_intervention_timing"))
+    sample_rid, sample = next(
+        (rid, s) for rid, s in runs if "delay24" in rid and "syndromic" in rid
+    )
+    assert "delay24" in sample_rid
+    assert sample["config_overrides"]["syndromic"]["activation_delay_epochs"] == 24
+    assert sample["config_overrides"]["diagnostic_cascade"]["activation_delay_epochs"] == 24
+    assert sample["campaign_parameters"]["surveillance_delay_epochs"] == 24
+    expected = (
+        len(manifest["tiers"]["t11_intervention_timing"]["pathogens"])
+        * len(manifest["tiers"]["t11_intervention_timing"]["surveillance_delay_epochs"])
+        * len(manifest["tiers"]["t11_intervention_timing"]["surveillance_strategies"])
+        * len(manifest["tiers"]["t11_intervention_timing"]["seeds"])
+    )
+    assert len(runs) == expected
+
+
+def test_t12_sweeps_sick_call_probability() -> None:
+    manifest = _v4_manifest_or_stub()
+    runs = list(generate_tier_runs(manifest, "t12_surveillance_sensitivity"))
+    sample = next(s for rid, s in runs if "scp10" in rid)
+    assert sample["config_overrides"]["syndromic"]["sick_call_probability"] == pytest.approx(0.1)
+    assert sample["campaign_parameters"]["sick_call_probability"] == pytest.approx(0.1)
+
+
+def test_t13_sweeps_wearable_detection_sensitivity() -> None:
+    manifest = _v4_manifest_or_stub()
+    runs = list(generate_tier_runs(manifest, "t13_wearable_sensitivity"))
+    sample = next(s for rid, s in runs if "wsens30" in rid)
+    wear = sample["config_overrides"]["wearable_monitoring"]
+    assert wear["deployment_profile"] == "crew_only"
+    assert wear["detection_sensitivity_scale"] == pytest.approx(0.3)
+    assert sample["campaign_parameters"]["wearable_sensitivity"] == pytest.approx(0.3)
+
+
+def test_t14_sweeps_pre_immunity_with_syndromic() -> None:
+    manifest = _v4_manifest_or_stub()
+    runs = list(generate_tier_runs(manifest, "t14_immunity_threshold"))
+    sample = next(s for rid, s in runs if "imm50" in rid and "norovirus" in rid)
+    assert sample["config_overrides"]["ship_graph"]["immune_fraction"] == pytest.approx(0.5)
+    assert sample["config_overrides"]["diagnostic_cascade"]["enabled"] is False
+    assert sample["campaign_parameters"]["immunity"] == pytest.approx(0.5)
+    assert sample["campaign_parameters"]["surveillance"] == "syndromic"
+
+
 def test_make_picard_spec_optional_telemetry_paths(tmp_path) -> None:
     telemetry = tmp_path / "ctb_run"
     telemetry.mkdir()
@@ -486,10 +572,21 @@ def test_looks_like_oom_and_classify_helpers() -> None:
         exit_code=1,
         container_reason=None,
     ) == "spot_reclaim"
+    # Fargate Spot reclaim uses exit 137 + Spot statusReason — not OOM.
+    assert classify_attempt(
+        status_reason="Your Spot Task was interrupted.",
+        exit_code=137,
+        container_reason=None,
+    ) == "spot_reclaim"
     assert classify_attempt(
         status_reason=None,
         exit_code=137,
         container_reason="OutOfMemoryError: container killed due to memory usage",
+    ) == "oom"
+    assert classify_attempt(
+        status_reason=None,
+        exit_code=137,
+        container_reason=None,
     ) == "oom"
     assert classify_attempt(
         status_reason="Essential container in task exited",

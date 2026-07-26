@@ -837,6 +837,61 @@ def step_wearable_monitoring(
     return result
 
 
+# ── Surveillance activation delay (campaign T11) ─────────────────────────
+
+def surveillance_activation_delay_epochs(cfg: dict[str, Any] | None) -> int:
+    """Return epochs to suppress syndromic + cascade before activation.
+
+    Reads ``activation_delay_epochs`` from ``syndromic`` and/or
+    ``diagnostic_cascade`` (campaign T11 sets both to the same value).
+    Takes the max so a single-sided override still works. Negative values
+    clamp to 0.
+    """
+    if not cfg:
+        return 0
+    syn = cfg.get("syndromic") or {}
+    casc = cfg.get("diagnostic_cascade") or {}
+    raw = [
+        syn.get("activation_delay_epochs", 0),
+        casc.get("activation_delay_epochs", 0),
+    ]
+    delay = 0
+    for value in raw:
+        try:
+            delay = max(delay, int(value or 0))
+        except (TypeError, ValueError):
+            continue
+    return max(0, delay)
+
+
+def surveillance_is_active(epoch: int, cfg: dict[str, Any] | None) -> bool:
+    """True once the 0-based simulation epoch has cleared the activation delay.
+
+    With ``activation_delay_epochs=N``, epochs ``0..N-1`` are silent and
+    surveillance begins at epoch ``N``. ``N=0`` means always active.
+    """
+    return int(epoch) >= surveillance_activation_delay_epochs(cfg)
+
+
+def inactive_syndromic_result(
+    epoch: int,
+    *,
+    n_agents: int = 0,
+) -> dict[str, Any]:
+    """Empty sick-call roster used while surveillance activation is delayed."""
+    return {
+        "modality": "syndromic",
+        "epoch": int(epoch),
+        "sick_call_agents": [],
+        "true_positive_ids": [],
+        "noise_ids": [],
+        "noise_reasons": [],
+        "sick_call_count": 0,
+        "total_agents": int(n_agents),
+        "activation_delayed": True,
+    }
+
+
 # ── Diagnostic cascade ───────────────────────────────────────────────────
 
 def _collect_wearable_red_ids(
@@ -865,6 +920,8 @@ def step_diagnostic_cascade(
     obs: ObservationEngine,
     wearable_monitor: Any | None = None,
     cascade_entry_config: Any | None = None,
+    *,
+    cfg: dict[str, Any] | None = None,
 ) -> dict[str, Any] | None:
     """Run one epoch of the diagnostic cascade engine.
 
@@ -872,10 +929,12 @@ def step_diagnostic_cascade(
     manages per-agent tier progression and sequential test ordering.
     Agents whose cascade reaches confinement tiers are added to the
     quarantine set.  Returns the cascade epoch result dict, or None
-    if the cascade is disabled.
+    if the cascade is disabled or still inside an activation delay.
     """
     cascade = state.cascade_engine
     if cascade is None:
+        return None
+    if not surveillance_is_active(epoch, cfg):
         return None
 
     from crusher_labs.cascade_entry import (

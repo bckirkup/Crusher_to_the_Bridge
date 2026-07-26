@@ -63,3 +63,18 @@ data/platforms/*/contam/*.csm
 data/platforms/*/contam/*.rst
 data/platforms/*/contam/*.xlog
 data/platforms/*/contam/*.log
+
+# AWS Batch campaign local sync / ops artifacts (never commit run data or
+# account-specific rendered job defs / failure dumps)
+results/
+results_*/
+campaign_results/
+campaign_summary.csv
+campaign_summary.json
+failure_report*.json
+failure_attempts*.csv
+**/_ops/
+deploy/aws/*.rendered.json
+deploy/aws/tmp/
+*.resource.json
+*.failure.json
