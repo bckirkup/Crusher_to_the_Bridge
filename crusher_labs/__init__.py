@@ -137,6 +137,9 @@ def build_modalities(
             noise_categories=fred_cfg.get("healthy_noise_categories"),
             quarantine_compliance=fred_cfg.get("quarantine_compliance", 0.85),
             compliance_delay_epochs=fred_cfg.get("compliance_delay_epochs", 1),
+            reluctant_fraction=fred_cfg.get("reluctant_fraction", 0.75),
+            reluctant_delay_epochs=fred_cfg.get("reluctant_delay_epochs", 48),
+            compliance_by_class=fred_cfg.get("compliance_by_class"),
             rng=rng,
         ),
         "clinical_rdt": ClinicalRDT(

@@ -28,7 +28,10 @@ from orchestrator_types import (
     DEFAULT_GREYWATER_FRACTION,
     DEFAULT_SURFACE_FRACTION,
     LOCATION_ISOLATED,
+    STATUS_ALERT,
     STATUS_CONFIRMED,
+    STATUS_LOCKDOWN,
+    STATUS_RANK,
     STATUS_SUSPECTED,
     ObservationEngine,
     ProtocolContext,
@@ -96,6 +99,8 @@ def try_admit_to_quarantine(
     action_ok: str,
     action_refuse: str,
     epochs_since_order: int = 0,
+    agent_class: str | None = None,
+    is_symptomatic: bool = False,
 ) -> bool:
     """Admit *aid* to quarantine if FRED compliance check passes.
 
@@ -113,16 +118,27 @@ def try_admit_to_quarantine(
         aid, epochs_since_order,
         behavioral_override=override,
         chronic_compliance_boost=chronic_boost,
+        agent_class=agent_class,
+        is_symptomatic=is_symptomatic,
     ):
+        # Mirror sticky class onto SimulationState for telemetry
+        cls = getattr(syndromic, "_compliance_class", {}).get(aid)
+        if cls is not None:
+            state.compliance_class_by_agent[aid] = cls
         state.quarantined_ids.add(aid)
         state.compliance_log.append({
             "epoch": epoch, "agent_id": aid, "action": action_ok,
+            "compliance_class": cls,
         })
         return True
+    cls = getattr(syndromic, "_compliance_class", {}).get(aid)
+    if cls is not None:
+        state.compliance_class_by_agent[aid] = cls
     state.quarantine_refusers.add(aid)
     state.quarantine_order_epoch[aid] = epoch
     state.compliance_log.append({
         "epoch": epoch, "agent_id": aid, "action": action_refuse,
+        "compliance_class": cls,
     })
     return False
 
@@ -164,22 +180,34 @@ def step_fred_compliance(
     epoch: int,
     state: SimulationState,
     syndromic: Any,
+    agents: list[dict[str, Any]] | None = None,
 ) -> None:
-    """FRED compliance check for pending quarantine orders."""
+    """Re-check reluctant/defiant agents for delayed quarantine compliance."""
+    agent_by_id = {
+        int(a["agent_id"]): a for a in (agents or [])
+    }
     for aid in tuple(state.quarantine_refusers):
         epochs_since = epoch - state.quarantine_order_epoch.get(aid, epoch)
         chronic_boost = state.chronic_behavioral_mods.get(
             aid, {},
         ).get("quarantine_compliance_boost", 0.0)
+        agent = agent_by_id.get(aid, {})
         if syndromic.check_quarantine_compliance(
-            aid, epochs_since, chronic_compliance_boost=chronic_boost,
+            aid, epochs_since,
+            chronic_compliance_boost=chronic_boost,
+            agent_class=agent.get("agent_class"),
+            is_symptomatic=agent_requires_confinement(agent) if agent else False,
         ):
             state.quarantine_refusers.discard(aid)
             state.quarantined_ids.add(aid)
+            cls = getattr(syndromic, "_compliance_class", {}).get(aid)
+            if cls is not None:
+                state.compliance_class_by_agent[aid] = cls
             state.compliance_log.append({
                 "epoch": epoch, "agent_id": aid,
                 "action": "delayed_compliance",
                 "delay": epochs_since,
+                "compliance_class": cls,
             })
 
 
@@ -482,8 +510,12 @@ def run_observation_sampling(
 
     fred_compliance = cfg.get("fred_behavior", {}).get("quarantine_compliance", 0.85)
     swab_targets = None
-    if trigger_status in (STATUS_SUSPECTED, STATUS_CONFIRMED):
-        swab_targets = high_traffic if trigger_status == STATUS_SUSPECTED else zone_names
+    # ALERT/SUSPECTED → high-traffic swabs; CONFIRMED/LOCKDOWN → all zones
+    rank = STATUS_RANK.get(trigger_status, 0)
+    if rank >= STATUS_RANK[STATUS_CONFIRMED]:
+        swab_targets = zone_names
+    elif rank >= STATUS_RANK[STATUS_ALERT]:
+        swab_targets = high_traffic
     swab_results = obs.surface_swab.swab_zones(
         zone_surface, fred_compliance, target_zones=swab_targets,
     )
@@ -572,31 +604,45 @@ def step_quarantine_confinement(
     state: SimulationState,
     syndromic: Any,
 ) -> None:
-    """Apply quarantine confinement from protocol modifiers or legacy CONFIRMED fallback.
+    """Apply quarantine confinement from escalation level and/or SOP modifiers.
 
-    Handles three confinement modes:
-    - SOP-009 ``confine_all_to_quarters``: full-ship lockdown of ALL agents
-    - SOP-008/010 ``confine_symptomatic_to_quarters``: symptomatic only
-    - Legacy fallback: confine symptomatic + shedding when CONFIRMED
+    Escalation-level scope (outbreak response architecture):
+    - ALERT: symptomatic individuals
+    - SUSPECTED: symptomatic + clinically confirmed cases
+    - CONFIRMED: symptomatic + confirmed + cabin-mate contacts
+    - LOCKDOWN: all non-exempt agents
+
+    SOP modifiers still apply and may widen scope (e.g. ``confine_all_to_quarters``).
     """
     exempt_classes: set[str] = set(merged_mods.get("exempt_classes", []))
 
-    # SOP-009: full-ship lockdown — confine every agent
-    if merged_mods.get("confine_all_to_quarters", False):
+    # SOP-009 / LOCKDOWN: full-ship lockdown — confine every agent
+    if (
+        merged_mods.get("confine_all_to_quarters", False)
+        or trigger_status == STATUS_LOCKDOWN
+    ):
         confine_all_agents(epoch, agents, state, syndromic, exempt_classes)
         return
 
-    # SOP-008/010: symptomatic-only confinement
-    if merged_mods.get("confine_symptomatic_to_quarters", False):
+    # SOP-008/010 or ALERT+: symptomatic confinement
+    if (
+        merged_mods.get("confine_symptomatic_to_quarters", False)
+        or STATUS_RANK.get(trigger_status, 0) >= STATUS_RANK[STATUS_ALERT]
+    ):
+        include_confirmed = STATUS_RANK.get(trigger_status, 0) >= STATUS_RANK[
+            STATUS_SUSPECTED
+        ]
+        include_contacts = trigger_status == STATUS_CONFIRMED
         confine_agents(
             epoch, agents, state, syndromic,
-            include_shedding=False, exempt_classes=exempt_classes,
+            include_shedding=False,
+            exempt_classes=exempt_classes,
+            confirmed_ids=(
+                state.cumulative_confirmed_case_ids if include_confirmed else None
+            ),
+            include_cabin_contacts=include_contacts,
         )
         return
-
-    # Legacy fallback when CONFIRMED but no protocol modifier active
-    if trigger_status == STATUS_CONFIRMED:
-        confine_agents(epoch, agents, state, syndromic, include_shedding=True)
 
 
 def confine_agents(
@@ -606,24 +652,39 @@ def confine_agents(
     syndromic: Any,
     include_shedding: bool,
     exempt_classes: set[str] | None = None,
+    confirmed_ids: set[int] | None = None,
+    include_cabin_contacts: bool = False,
 ) -> None:
-    """Confine symptomatic (and optionally shedding) agents to quarters (quarantine).
+    """Confine symptomatic (and optionally confirmed/contact) agents to quarters.
 
     Agents whose ``agent_class`` is in *exempt_classes* are skipped.
     """
     _exempt = exempt_classes or set()
+    _confirmed = confirmed_ids or set()
+    contact_ids: set[int] = set()
+    if include_cabin_contacts:
+        for agent in agents:
+            aid = int(agent["agent_id"])
+            if aid in _confirmed or agent_requires_confinement(agent):
+                mates = agent.get("cabin_mate_ids") or ()
+                contact_ids.update(int(m) for m in mates)
+
     for agent in agents:
         aid = agent["agent_id"]
         if agent.get("agent_class", "") in _exempt:
             continue
         is_symptomatic = agent_requires_confinement(agent)
         is_shedding = include_shedding and agent.get("shedding_rate", 0.0) > 0.0
-        if not (is_symptomatic or is_shedding):
+        is_confirmed = int(aid) in _confirmed
+        is_contact = int(aid) in contact_ids
+        if not (is_symptomatic or is_shedding or is_confirmed or is_contact):
             continue
         try_admit_to_quarantine(
             epoch, aid, state, syndromic,
             action_ok="immediate_compliance",
             action_refuse="refused_quarantine",
+            agent_class=agent.get("agent_class"),
+            is_symptomatic=is_symptomatic,
         )
 
 
@@ -647,6 +708,8 @@ def confine_all_agents(
             epoch, aid, state, syndromic,
             action_ok="general_confinement",
             action_refuse="refused_general_confinement",
+            agent_class=agent.get("agent_class"),
+            is_symptomatic=agent_requires_confinement(agent),
         )
 
 

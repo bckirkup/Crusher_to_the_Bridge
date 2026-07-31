@@ -5,11 +5,15 @@ from __future__ import annotations
 from typing import Any
 
 
-def eligible_protocol_ids(standing_protocols: list[Any], stoplights: dict) -> list[str]:
+def eligible_protocol_ids(
+    standing_protocols: list[Any],
+    stoplights: dict,
+    trigger_status: str | None = None,
+) -> list[str]:
     return [
         p.protocol_id
         for p in standing_protocols
-        if p.is_triggered(stoplights)
+        if p.is_triggered(stoplights, trigger_status=trigger_status)
     ]
 
 

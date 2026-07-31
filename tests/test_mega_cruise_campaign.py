@@ -43,10 +43,13 @@ STANDARD_TIERS = [
 ]
 
 
-def test_manifest_loads_and_has_ten_tiers() -> None:
+def test_manifest_loads_and_has_expected_tiers() -> None:
     manifest = load_manifest(CAMPAIGN / "campaign_manifest.json")
     assert manifest["campaign"] == "mega_cruise_17780"
-    assert len(manifest["tiers"]) == 10
+    # t1–t11 + t15/t16 (outbreak-response architecture sweeps); t12–t14 optional
+    assert len(manifest["tiers"]) >= 13
+    assert "t15_sop_threshold_sweep" in manifest["tiers"]
+    assert "t16_reluctant_fraction_sweep" in manifest["tiers"]
     assert "norovirus" in manifest["pathogen_configs"]
     assert manifest["pathogen_configs"]["norovirus"]["pathogen_id"] == "norwalk_gi"
 

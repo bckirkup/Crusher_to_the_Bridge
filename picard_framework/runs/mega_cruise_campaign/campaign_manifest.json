@@ -134,6 +134,29 @@
       "pathogens": ["norovirus", "sarscov2"],
       "population_sizes": [1000, 2000, 3000, 4000, 5000],
       "seeds": [42, 43, 44, 45, 46, 47, 48, 49, 50, 51]
+    },
+    "t11_intervention_timing": {
+      "description": "Decision latency (organizational delay from signal to SOP effect)",
+      "pathogens": ["norovirus", "sarscov2", "influenza", "cdiff"],
+      "decision_latency_levels": [0, 6, 12, 24, 48],
+      "surveillance_strategies": ["syndromic", "cascade"],
+      "compliance_levels": [0.6, 1.0],
+      "seeds": [42, 43, 44, 45, 46]
+    },
+    "t15_sop_threshold_sweep": {
+      "description": "Escalation attack-rate thresholds (suspect × lockdown)",
+      "pathogens": ["norovirus", "sarscov2", "influenza", "cdiff"],
+      "suspect_attack_rates": [0.01, 0.02, 0.03, 0.05],
+      "lockdown_attack_rates": [0.03, 0.05, 0.10, "never"],
+      "seeds": [42, 43, 44, 45, 46]
+    },
+    "t16_reluctant_fraction_sweep": {
+      "description": "Bimodal compliance: reluctant fraction × delay",
+      "pathogens": ["norovirus", "sarscov2", "influenza", "cdiff"],
+      "reluctant_fractions": [0.5, 0.75, 1.0],
+      "reluctant_delay_epochs": [24, 48, 72, 168],
+      "quarantine_compliance": 0.6,
+      "seeds": [42, 43, 44, 45, 46]
     }
   },
   "pathogen_configs": {

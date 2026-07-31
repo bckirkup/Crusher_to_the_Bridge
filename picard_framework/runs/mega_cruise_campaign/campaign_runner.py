@@ -490,6 +490,24 @@ def _campaign_parameters(
         and "surveillance_delay_epochs" not in params
     ):
         params["surveillance_delay_epochs"] = syn["activation_delay_epochs"]
+    esc = cfg.get("escalation") or {}
+    latency = esc.get("decision_latency") or {}
+    if (
+        "confirmed_delay_epochs" in latency
+        and "decision_latency_epochs" not in params
+    ):
+        params["decision_latency_epochs"] = latency["confirmed_delay_epochs"]
+    if "suspect_attack_rate" in esc and "suspect_attack_rate" not in params:
+        params["suspect_attack_rate"] = esc["suspect_attack_rate"]
+    if "lockdown_attack_rate" in esc and "lockdown_attack_rate" not in params:
+        params["lockdown_attack_rate"] = esc["lockdown_attack_rate"]
+    if "reluctant_fraction" in fred and "reluctant_fraction" not in params:
+        params["reluctant_fraction"] = fred["reluctant_fraction"]
+    if (
+        "reluctant_delay_epochs" in fred
+        and "reluctant_delay_epochs" not in params
+    ):
+        params["reluctant_delay_epochs"] = fred["reluctant_delay_epochs"]
     return params
 
 
@@ -535,6 +553,17 @@ def parameters_from_spec(spec: dict[str, Any]) -> dict[str, Any]:
     return {k: v for k, v in params.items() if v is not None and v != ""}
 
 
+# Mega-cruise defaults: enable LOCKDOWN AR threshold (config.yaml uses
+# "never" so 20-agent smokes do not lockdown on a single case).
+_CAMPAIGN_ESCALATION_DEFAULTS = {
+    "escalation": {
+        "lockdown_attack_rate": 0.05,
+        "suspect_attack_rate": 0.02,
+        "confirm_attack_rate": 0.03,
+    },
+}
+
+
 def generate_tier_runs(
     manifest: dict[str, Any],
     tier_id: str,
@@ -563,6 +592,7 @@ def generate_tier_runs(
         **factors: Any,
     ) -> tuple[str, dict[str, Any]]:
         n_agents = default_agents if num_agents is None else int(num_agents)
+        cfg = merge_cfg(_CAMPAIGN_ESCALATION_DEFAULTS, config_overrides)
         params = _campaign_parameters(
             tier_id=tier_id,
             run_id=rid,
@@ -572,7 +602,7 @@ def generate_tier_runs(
             epochs=default_epochs,
             num_agents=n_agents,
             pathogen=pathogen,
-            config_overrides=config_overrides,
+            config_overrides=cfg,
             **factors,
         )
         return rid, make_picard_spec(
@@ -580,7 +610,7 @@ def generate_tier_runs(
             platform=platform,
             bundle=bundle,
             pathogen_overrides=pathogen_overrides,
-            config_overrides=config_overrides,
+            config_overrides=cfg,
             seed=seed,
             epochs=default_epochs,
             num_agents=n_agents,
@@ -820,30 +850,91 @@ def generate_tier_runs(
                         )
 
     elif short == "t11":
-        # Emit activation_delay_epochs on syndromic + cascade; ShipSimulation
-        # suppresses sick-calls/cascade while epoch < delay (0-based epochs).
-        for pathogen in tier["pathogens"]:
-            bundle, _pid, overrides = get_pathogen_config(manifest, pathogen)
-            for delay in tier["surveillance_delay_epochs"]:
-                delay_over = {
-                    "syndromic": {"activation_delay_epochs": int(delay)},
-                    "diagnostic_cascade": {"activation_delay_epochs": int(delay)},
-                }
-                for sname in tier["surveillance_strategies"]:
-                    for seed in tier["seeds"]:
-                        rid = f"{short}_{pathogen}_{sname}_delay{int(delay)}_s{seed}"
-                        yield _yield(
-                            rid,
-                            bundle=bundle,
-                            pathogen_overrides=overrides,
-                            config_overrides=merge_cfg(
-                                surv_cfgs.get(sname), delay_over,
-                            ),
-                            seed=seed,
-                            pathogen=pathogen,
-                            surveillance=sname,
-                            surveillance_delay_epochs=int(delay),
-                        )
+        # Campaign v5: decision-latency sweep (escalation.decision_latency).
+        # Legacy: surveillance_delay_epochs still supported for v4 manifests.
+        if "decision_latency_levels" in tier:
+            for pathogen in tier["pathogens"]:
+                bundle, _pid, overrides = get_pathogen_config(manifest, pathogen)
+                for level in tier["decision_latency_levels"]:
+                    # level may be int (confirmed delay) or dict of delays
+                    if isinstance(level, dict):
+                        lat = {
+                            "alert_delay_epochs": int(level.get("alert", 0)),
+                            "suspected_delay_epochs": int(level.get("suspected", 0)),
+                            "confirmed_delay_epochs": int(level.get("confirmed", 0)),
+                            "lockdown_delay_epochs": int(level.get("lockdown", 0)),
+                        }
+                        delay_tag = int(level.get("confirmed", 0))
+                    else:
+                        delay_tag = int(level)
+                        lat = {
+                            "alert_delay_epochs": min(delay_tag, 6),
+                            "suspected_delay_epochs": delay_tag,
+                            "confirmed_delay_epochs": delay_tag,
+                            "lockdown_delay_epochs": max(delay_tag, 24),
+                        }
+                    lat_over = {"escalation": {"decision_latency": lat}}
+                    for sname in tier["surveillance_strategies"]:
+                        for comp in tier.get("compliance_levels", [None]):
+                            behavior = None
+                            if comp is not None:
+                                behavior = {
+                                    "fred_behavior": {
+                                        "quarantine_compliance": float(comp),
+                                    },
+                                }
+                            for seed in tier["seeds"]:
+                                comp_tag = (
+                                    f"_comp{int(float(comp) * 100)}"
+                                    if comp is not None else ""
+                                )
+                                rid = (
+                                    f"{short}_{pathogen}_{sname}"
+                                    f"_lat{delay_tag}{comp_tag}_s{seed}"
+                                )
+                                yield _yield(
+                                    rid,
+                                    bundle=bundle,
+                                    pathogen_overrides=overrides,
+                                    config_overrides=merge_cfg(
+                                        merge_cfg(surv_cfgs.get(sname), lat_over),
+                                        behavior,
+                                    ),
+                                    seed=seed,
+                                    pathogen=pathogen,
+                                    surveillance=sname,
+                                    decision_latency_epochs=delay_tag,
+                                    compliance=(
+                                        float(comp) if comp is not None else None
+                                    ),
+                                )
+        else:
+            # Legacy: Emit activation_delay_epochs on syndromic + cascade
+            for pathogen in tier["pathogens"]:
+                bundle, _pid, overrides = get_pathogen_config(manifest, pathogen)
+                for delay in tier["surveillance_delay_epochs"]:
+                    delay_over = {
+                        "syndromic": {"activation_delay_epochs": int(delay)},
+                        "diagnostic_cascade": {"activation_delay_epochs": int(delay)},
+                    }
+                    for sname in tier["surveillance_strategies"]:
+                        for seed in tier["seeds"]:
+                            rid = (
+                                f"{short}_{pathogen}_{sname}"
+                                f"_delay{int(delay)}_s{seed}"
+                            )
+                            yield _yield(
+                                rid,
+                                bundle=bundle,
+                                pathogen_overrides=overrides,
+                                config_overrides=merge_cfg(
+                                    surv_cfgs.get(sname), delay_over,
+                                ),
+                                seed=seed,
+                                pathogen=pathogen,
+                                surveillance=sname,
+                                surveillance_delay_epochs=int(delay),
+                            )
 
     elif short == "t12":
         for pathogen in tier["pathogens"]:
@@ -919,6 +1010,76 @@ def generate_tier_runs(
                         surveillance=sname,
                         immunity=imm_frac,
                     )
+
+    elif short == "t15":
+        # SOP threshold sweep: suspect_attack_rate × lockdown_attack_rate
+        for pathogen in tier["pathogens"]:
+            bundle, _pid, overrides = get_pathogen_config(manifest, pathogen)
+            for suspect_ar in tier["suspect_attack_rates"]:
+                for lockdown_ar in tier["lockdown_attack_rates"]:
+                    lockdown_val = (
+                        None if lockdown_ar in (None, "never") else float(lockdown_ar)
+                    )
+                    lockdown_tag = (
+                        "never" if lockdown_val is None
+                        else f"{int(round(float(lockdown_ar) * 100))}"
+                    )
+                    esc_over = {
+                        "escalation": {
+                            "suspect_attack_rate": float(suspect_ar),
+                            "lockdown_attack_rate": lockdown_val,
+                        },
+                    }
+                    for seed in tier["seeds"]:
+                        rid = (
+                            f"{short}_{pathogen}"
+                            f"_sar{int(round(float(suspect_ar) * 100))}"
+                            f"_lar{lockdown_tag}_s{seed}"
+                        )
+                        yield _yield(
+                            rid,
+                            bundle=bundle,
+                            pathogen_overrides=overrides,
+                            config_overrides=esc_over,
+                            seed=seed,
+                            pathogen=pathogen,
+                            suspect_attack_rate=float(suspect_ar),
+                            lockdown_attack_rate=(
+                                "never" if lockdown_val is None else float(lockdown_ar)
+                            ),
+                        )
+
+    elif short == "t16":
+        # Reluctant fraction × reluctant delay sweep
+        for pathogen in tier["pathogens"]:
+            bundle, _pid, overrides = get_pathogen_config(manifest, pathogen)
+            for rfrac in tier["reluctant_fractions"]:
+                for rdelay in tier["reluctant_delay_epochs"]:
+                    behavior = {
+                        "fred_behavior": {
+                            "reluctant_fraction": float(rfrac),
+                            "reluctant_delay_epochs": int(rdelay),
+                            "quarantine_compliance": float(
+                                tier.get("quarantine_compliance", 0.6),
+                            ),
+                        },
+                    }
+                    for seed in tier["seeds"]:
+                        rid = (
+                            f"{short}_{pathogen}"
+                            f"_rf{int(round(float(rfrac) * 100))}"
+                            f"_rd{int(rdelay)}_s{seed}"
+                        )
+                        yield _yield(
+                            rid,
+                            bundle=bundle,
+                            pathogen_overrides=overrides,
+                            config_overrides=behavior,
+                            seed=seed,
+                            pathogen=pathogen,
+                            reluctant_fraction=float(rfrac),
+                            reluctant_delay_epochs=int(rdelay),
+                        )
 
     else:
         raise ValueError(f"No generator for tier {tier_id}")

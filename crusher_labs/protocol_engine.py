@@ -243,11 +243,28 @@ class StandingProtocol:
         self.activation_costs: dict[str, Any] = config.get("activation_costs", {})
         self.category: str = config.get("category", CATEGORY_INTERVENTION)
         self.required_cascade_tier: int | None = config.get("required_cascade_tier")
+        # Organizational decision latency after stoplight trigger (epochs)
+        self.activation_delay_epochs: int = int(config.get("activation_delay_epochs", 0))
+        # Minimum ship escalation status required (ALERT/SUSPECTED/CONFIRMED/LOCKDOWN)
+        self.min_escalation_status: str | None = config.get("min_escalation_status")
+
+    def escalation_gate_open(self, trigger_status: str | None) -> bool:
+        """True when ship escalation level meets this SOP's minimum."""
+        if not self.min_escalation_status:
+            return True
+        if trigger_status is None:
+            return False
+        from orchestrator_types import STATUS_RANK
+
+        return STATUS_RANK.get(trigger_status, 0) >= STATUS_RANK.get(
+            self.min_escalation_status, 0,
+        )
 
     def is_triggered(
         self,
         stoplights: dict[str, dict[str, str]],
         cascade_context: dict[str, Any] | None = None,
+        trigger_status: str | None = None,
     ) -> bool:
         """Check whether this protocol's trigger condition is met.
 
@@ -255,7 +272,13 @@ class StandingProtocol:
         provided, the protocol only fires if enough agents have reached
         that tier in the cascade (or the cascade has unlocked this SOP
         via fleet escalation rules).
+
+        When ``min_escalation_status`` is set, the ship must have reached
+        that escalation level (post decision-latency) before the SOP can fire.
         """
+        if not self.escalation_gate_open(trigger_status):
+            return False
+
         if self.required_cascade_tier is not None and cascade_context is not None:
             tier_req = self.required_cascade_tier
             unlocked_sops = set(cascade_context.get("unlocked_sops", []))
@@ -308,6 +331,10 @@ class ProtocolEngine:
         self.ledger = ledger
         self._active: dict[str, bool] = {p.protocol_id: False for p in protocols}
         self._activation_epoch: dict[str, int] = {}
+        # Epoch when stoplight/force first became true (for activation_delay_epochs)
+        self._trigger_first_seen_epoch: dict[str, int | None] = {
+            p.protocol_id: None for p in protocols
+        }
         self.protocol_log: list[dict[str, Any]] = []
 
     def _may_debit_protocol(
@@ -376,6 +403,7 @@ class ProtocolEngine:
         forced_protocol_ids: set[str] | None = None,
         authorized_sop_ids: list[str] | None = None,
         cascade_context: dict[str, Any] | None = None,
+        trigger_status: str | None = None,
     ) -> list[dict[str, Any]]:
         """Evaluate all protocols and return the list of active modifiers.
 
@@ -387,6 +415,10 @@ class ProtocolEngine:
         ``required_cascade_tier`` are gated by the cascade engine's
         current state.
 
+        ``activation_delay_epochs`` defers modifier application after the
+        first epoch the SOP becomes eligible (stoplight + escalation gate).
+        Forced activations bypass the per-SOP delay.
+
         Returns a list of dicts, each containing:
         - ``protocol_id``, ``name``, ``modifiers``
         - ``newly_activated`` (True if just turned on this epoch)
@@ -397,10 +429,24 @@ class ProtocolEngine:
 
         for protocol in self.protocols:
             pid = protocol.protocol_id
-            triggered = protocol.is_triggered(stoplights, cascade_context)
+            triggered = protocol.is_triggered(
+                stoplights, cascade_context, trigger_status=trigger_status,
+            )
             forced_on = pid in forced
-            should_active = triggered or forced_on
+            eligible = triggered or forced_on
             was_active = self._active[pid]
+
+            if eligible and not forced_on:
+                if self._trigger_first_seen_epoch[pid] is None:
+                    self._trigger_first_seen_epoch[pid] = epoch
+                first_seen = self._trigger_first_seen_epoch[pid]
+                delay = max(0, int(protocol.activation_delay_epochs))
+                should_active = epoch >= int(first_seen) + delay
+            elif forced_on:
+                should_active = True
+            else:
+                self._trigger_first_seen_epoch[pid] = None
+                should_active = False
 
             if should_active:
                 may_debit = self._may_debit_protocol(authorized, pid, forced_on)

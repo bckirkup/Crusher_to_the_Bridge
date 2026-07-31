@@ -115,9 +115,9 @@ def render_fleet_operations(default_fleet_root: str) -> None:
 
 
 def _trigger_status_color(status: str) -> str:
-    if status == "CONFIRMED":
+    if status in ("CONFIRMED", "LOCKDOWN"):
         return LCARS_RED
-    if status == "SUSPECTED":
+    if status in ("SUSPECTED", "ALERT"):
         return LCARS_GOLD
     return LCARS_GREEN
 

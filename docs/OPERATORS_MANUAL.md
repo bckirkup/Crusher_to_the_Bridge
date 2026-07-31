@@ -347,39 +347,53 @@ These phases also drive the wearable infection response profiles
 
 ### 3.6 FRED-Style Behavioral Compliance
 
-Models human behavior and quarantine compliance based on the FRED
-(Framework for Reconstructing Epidemiological Dynamics) approach.
+Models human behavior and quarantine compliance as a **bimodal mixture**
+of agent types (see `docs/tiered_escalation_spec.md`).
 
 ```yaml
 fred_behavior:
-  quarantine_compliance: 0.85   # [0,1] — P(agent complies with isolation)
-  compliance_delay_epochs: 1
+  quarantine_compliance: 0.85   # [0,1] — fraction in Compliant class
+  reluctant_fraction: 0.75      # of non-compliers that are Reluctant
+  reluctant_delay_epochs: 48    # epochs before Reluctant agents may comply
+  compliance_by_class:
+    crew: 0.85
+    passenger_elderly: 0.70
+    passenger_young: 0.45
   healthy_noise_categories:
     - {reason: "seasickness",  probability: 0.008}
     - {reason: "fatigue",      probability: 0.005}
     - {reason: "minor_injury", probability: 0.002}
 ```
 
-- `quarantine_compliance` — Probability that an infected agent will
-  comply with an isolation order.  Non-compliant agents remain in the
-  general population, continuing to shed and transmit.
-- `compliance_delay_epochs` — Delay before a non-compliant agent
-  eventually isolates.
+- `quarantine_compliance` — Fraction of agents drawn into the **Compliant**
+  class at first quarantine order (sticky for the cruise).
+- `reluctant_fraction` — Of the remainder, fraction that are **Reluctant**
+  (vs **Defiant**). Reluctant agents comply after `reluctant_delay_epochs`
+  or when they become symptomatic; Defiant agents never comply.
+- `compliance_by_class` — Optional per-class / role-group overrides.
 - `healthy_noise_categories` — Background sick-call reasons for healthy
-  agents (seasickness, fatigue, minor injury).  These generate false
-  positive syndromic signals that the observation engine must
-  distinguish from true infections.
+  agents (seasickness, fatigue, minor injury).
 
 ### 3.7 Escalation Thresholds
 
 ```yaml
 escalation:
-  syndromic_suspect_threshold: 3    # daily sick-call count → SUSPECTED
-  pcr_confirm_ct_threshold: 35.0    # Ct ≤ this → CONFIRMED
+  alert_sick_call_threshold: 3      # sick calls → ALERT
+  suspect_attack_rate: 0.02         # cumulative AR → SUSPECTED (CDC VSP 2%)
+  confirm_attack_rate: 0.03         # cumulative AR → CONFIRMED (CDC VSP 3%)
+  lockdown_attack_rate: 0.05        # cumulative AR → LOCKDOWN (null/"never" disables)
+  decision_latency:
+    alert_delay_epochs: 0
+    suspected_delay_epochs: 0
+    confirmed_delay_epochs: 0
+    lockdown_delay_epochs: 0
 ```
 
-The trigger status transitions through three phases:
-`BASELINE → SUSPECTED → CONFIRMED`
+Trigger status transitions through five levels:
+`BASELINE → ALERT → SUSPECTED → CONFIRMED → LOCKDOWN`
+
+SOP-009 (ship-wide confinement) requires `LOCKDOWN`. Organizational
+decision latency queues pending level changes before they take effect.
 
 ### 3.8 Diagnostic Modality Parameters
 

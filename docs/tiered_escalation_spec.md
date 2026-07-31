@@ -1,6 +1,15 @@
 # Outbreak Response Architecture: SOPs, Decision Latency, and Compliance
 ## Specification for Crusher to the Bridge
 
+> **Status (2026-07):** Implemented in-tree. Escalation levels
+> `BASELINE → ALERT → SUSPECTED → CONFIRMED → LOCKDOWN` use cumulative
+> attack-rate thresholds; `escalation.decision_latency` queues pending
+> transitions; FRED compliance is a sticky bimodal mixture
+> (compliant / reluctant / defiant). SOP-009 requires `LOCKDOWN`.
+> Campaign tiers T11 (decision latency), T15 (SOP thresholds), and T16
+> (reluctant fraction) sweep the new knobs. See
+> `tests/test_outbreak_response_architecture.py`.
+
 ### Motivation
 
 Campaign v4 (4,156 runs) revealed that three distinct systems are currently 
