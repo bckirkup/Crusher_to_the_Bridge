@@ -42,9 +42,6 @@ from typing import Any
 
 from simulation_utils.paths import resolve_repo_path, validated_open
 
-import numpy as np
-
-
 # ── Constants ────────────────────────────────────────────────────────────
 
 DEFAULT_AIR_DENSITY = 1.2041  # kg/m³ at 20°C, 101.325 kPa (STP)

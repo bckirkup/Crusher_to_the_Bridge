@@ -9,7 +9,7 @@ Single-ship Picard operations: [OPERATORS_MANUAL_SHIP.md](OPERATORS_MANUAL_SHIP.
 
 ## Stackelberg move order (Picard `ShipSimulation`)
 
-Picard splits decisions across the epoch so population behavior affects the same epoch's syndromic sick-call roster. See [docs/simulation_step_order.md](docs/simulation_step_order.md).
+Picard splits decisions across the epoch so population behavior affects the same epoch's syndromic sick-call roster. See [simulation_step_order.md](simulation_step_order.md).
 
 ### Phase A — After ground truth, before syndromic
 

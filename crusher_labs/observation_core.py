@@ -34,7 +34,6 @@ from telemetry_buffer.agent_axes import (
     resolve_agent_axes,
 )
 
-
 # ── Constants ────────────────────────────────────────────────────────────
 
 DEFAULT_CT_SLOPE = -3.322
@@ -630,8 +629,8 @@ class ClinicalRapidDiagnostic:
         """Run a rapid antigen test on a single agent."""
         from crusher_labs.clinical_instrument_params import (
             active_pathogen_ids,
-            resolve_instrument_params,
             rdt_phase_sensitivity,
+            resolve_instrument_params,
         )
 
         if pathogen_id is None and pathogen_infections:

@@ -151,21 +151,26 @@ re-registering:
 - **`evaluateOnExit` restricted characters.** A leading-asterisk pattern like
   `"*Spot*"` and uppercase actions `RETRY`/`EXIT` cause
   `ClientException: Evaluate on exit condition contains restricted characters`.
-  Use **lowercase** `retry`/`exit` and **no leading asterisks**. The corrected
-  block is:
+  Use **lowercase** `retry`/`exit` and **no leading asterisks**. Fargate Spot
+  reclaim arrives as exit **137** with
+  `statusReason: "Your Spot Task was interrupted."` — match Spot **before**
+  the bare exit-137 OOM rule:
 
   ```json
   "evaluateOnExit": [
-    { "onStatusReason": "Host EC2*", "action": "retry" },
-    { "onExitCode": "137", "action": "exit" },
+    { "onStatusReason": "Your Spot Task was interrupted*", "action": "retry" },
     { "onReason": "OutOfMemoryError*", "action": "exit" },
+    { "onExitCode": "137", "action": "exit" },
     { "onExitCode": "0", "action": "exit" },
     { "onReason": "*", "action": "retry" }
   ]
   ```
 
+  (Max **five** rules. This stack is Fargate Spot only, so omit `Host EC2*`.)
   Keep OOM (`137` / `OutOfMemoryError*`) on **exit** so memory kills stay
-  countable via `classify_batch_failures.py`; Spot host loss still retries.
+  countable via `classify_batch_failures.py`; Spot interrupt still retries.
+
+
 - **Fargate resource sizing.** Two layers: (1) **subprocess-per-run** stops
   cumulative RSS growth across a shard; (2) **campaign compact history**
   (`run.history_retention=compact`) stops within-run telemetry from growing

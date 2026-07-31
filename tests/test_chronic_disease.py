@@ -407,17 +407,24 @@ class TestSyndromicChronicMods:
     def test_quarantine_compliance_boost(self) -> None:
         from crusher_labs.modalities.syndromic import SyndromicSurveillance
         rng = np.random.default_rng(42)
-        syn = SyndromicSurveillance(quarantine_compliance=0.0, rng=rng)
+        syn = SyndromicSurveillance(
+            quarantine_compliance=0.0,
+            reluctant_fraction=1.0,
+            reluctant_delay_epochs=99,
+            rng=rng,
+        )
 
-        # Without boost: compliance=0.0, should always fail (epoch 0)
+        # Without boost: compliance=0.0 → reluctant/defiant, fail at epoch 0
         results_no_boost = []
-        for _ in range(50):
-            results_no_boost.append(syn.check_quarantine_compliance(0, 0))
+        for aid in range(50):
+            results_no_boost.append(syn.check_quarantine_compliance(aid, 0))
+        assert all(r is False for r in results_no_boost)
 
-        # With boost=1.0: effective compliance=1.0, should always pass
+        # Fresh agent with boost=1.0: effective compliance=1.0 → compliant
         assert syn.check_quarantine_compliance(
-            0, 0, chronic_compliance_boost=1.0,
+            999, 0, chronic_compliance_boost=1.0,
         ) is True
+        assert syn._compliance_class[999] == "compliant"
 
 
 # ── Severity escalation ─────────────────────────────────────────────────

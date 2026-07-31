@@ -1358,6 +1358,8 @@ def _check_modality_params(cfg: dict[str, Any], report: Report) -> None:
 
     _non_neg_fields = [
         ("syndromic", "cadence"),
+        ("syndromic", "activation_delay_epochs"),
+        ("diagnostic_cascade", "activation_delay_epochs"),
         ("clinical_rdt", "cadence"),
         ("targeted_pcr", "cadence"),
         ("targeted_pcr", "extraction_efficiency"),
@@ -1454,16 +1456,52 @@ def _check_emod_progression(cfg: dict[str, Any], report: Report) -> None:
 
 
 def _check_escalation_params(cfg: dict[str, Any], report: Report) -> None:
-    """Validate escalation thresholds."""
+    """Validate escalation thresholds and decision latency."""
     esc = cfg.get("escalation", {})
-    sst = esc.get("syndromic_suspect_threshold")
-    if sst is not None and isinstance(sst, (int, float)) and sst < 0:
-        report.error(_CONFIG_YAML, "MATH_BOUND",
-                     f"escalation.syndromic_suspect_threshold = {sst} is negative")
+    for key in (
+        "syndromic_suspect_threshold",
+        "alert_sick_call_threshold",
+    ):
+        val = esc.get(key)
+        if val is not None and isinstance(val, (int, float)) and val < 0:
+            report.error(_CONFIG_YAML, "MATH_BOUND",
+                         f"escalation.{key} = {val} is negative")
+    for key in ("suspect_attack_rate", "confirm_attack_rate"):
+        val = esc.get(key)
+        if val is not None and isinstance(val, (int, float)) and (val < 0 or val > 1):
+            report.error(_CONFIG_YAML, "MATH_BOUND",
+                         f"escalation.{key} = {val} outside [0,1]")
+    lockdown = esc.get("lockdown_attack_rate")
+    if lockdown is not None and lockdown != "never":
+        if isinstance(lockdown, (int, float)) and (lockdown < 0 or lockdown > 1):
+            report.error(_CONFIG_YAML, "MATH_BOUND",
+                         f"escalation.lockdown_attack_rate = {lockdown} outside [0,1]")
     pct = esc.get("pcr_confirm_ct_threshold")
     if pct is not None and isinstance(pct, (int, float)) and pct <= 0:
         report.error(_CONFIG_YAML, "MATH_BOUND",
                      f"escalation.pcr_confirm_ct_threshold = {pct} must be positive")
+    latency = esc.get("decision_latency") or {}
+    for key in (
+        "alert_delay_epochs",
+        "suspected_delay_epochs",
+        "confirmed_delay_epochs",
+        "lockdown_delay_epochs",
+    ):
+        val = latency.get(key)
+        if val is not None and isinstance(val, (int, float)) and val < 0:
+            report.error(_CONFIG_YAML, "MATH_BOUND",
+                         f"escalation.decision_latency.{key} = {val} is negative")
+    resp = esc.get("respiratory_overrides") or {}
+    ac = resp.get("alert_confirmed_cases")
+    if ac is not None and isinstance(ac, (int, float)) and ac < 0:
+        report.error(_CONFIG_YAML, "MATH_BOUND",
+                     f"escalation.respiratory_overrides.alert_confirmed_cases "
+                     f"= {ac} is negative")
+    sar = resp.get("suspect_attack_rate")
+    if sar is not None and isinstance(sar, (int, float)) and (sar < 0 or sar > 1):
+        report.error(_CONFIG_YAML, "MATH_BOUND",
+                     f"escalation.respiratory_overrides.suspect_attack_rate "
+                     f"= {sar} outside [0,1]")
 
 
 def _check_fred_behavior(cfg: dict[str, Any], report: Report) -> None:
@@ -1477,6 +1515,19 @@ def _check_fred_behavior(cfg: dict[str, Any], report: Report) -> None:
     if delay is not None and isinstance(delay, (int, float)) and delay < 0:
         report.error(_CONFIG_YAML, "MATH_BOUND",
                      f"fred_behavior.compliance_delay_epochs = {delay} is negative")
+    rf = fred.get("reluctant_fraction")
+    if rf is not None and isinstance(rf, (int, float)) and (rf < 0 or rf > 1):
+        report.error(_CONFIG_YAML, "MATH_BOUND",
+                     f"fred_behavior.reluctant_fraction = {rf} outside [0,1]")
+    rd = fred.get("reluctant_delay_epochs")
+    if rd is not None and isinstance(rd, (int, float)) and rd < 0:
+        report.error(_CONFIG_YAML, "MATH_BOUND",
+                     f"fred_behavior.reluctant_delay_epochs = {rd} is negative")
+    for key, val in (fred.get("compliance_by_class") or {}).items():
+        if isinstance(val, (int, float)) and (val < 0 or val > 1):
+            report.error(_CONFIG_YAML, "MATH_BOUND",
+                         f"fred_behavior.compliance_by_class[{key}] = {val} "
+                         f"outside [0,1]")
 
     for i, cat in enumerate(fred.get("healthy_noise_categories", [])):
         prob = cat.get("probability")

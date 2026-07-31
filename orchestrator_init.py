@@ -10,62 +10,59 @@ initialization, observation engine, and protocol engine setup.
 from __future__ import annotations
 
 import json
-import math
 import os
 from collections import defaultdict
 from typing import Any
 
 import numpy as np
 
-from telemetry_buffer.agent_axes import resolve_agent_axes
-from telemetry_buffer.schema import make_agent, make_space
-from engines.infection_dynamics_bridge import (
-    KorkinShipEngine,
-    InfectionStatus,
-    IllnessStatus,
-)
-from engines.wearable_monitor import (
-    WearableMonitor,
-    build_wearable_monitor_from_config,
-)
-from crusher_labs.modalities.wearable import WearableDataStream
-from engines.py_contam_bridge import ContamTransportEngine
-from crusher_labs.observation_core import (
-    ContinuousAirSniffer,
-    TargetedSurfaceSwab,
-    WastewaterSequencingGrid,
-    ClinicalRapidDiagnostic,
-    ClinicalQPCR,
-    ClinicalMicrobiology,
+from crusher_labs.cost_ledger import (
+    build_ledger_from_config,
+    load_resource_costs,
 )
 from crusher_labs.lab_notebook import (
     build_notebook_from_config,
     load_logging_profile,
 )
+from crusher_labs.modalities.wearable import WearableDataStream
+from crusher_labs.observation_core import (
+    ClinicalMicrobiology,
+    ClinicalQPCR,
+    ClinicalRapidDiagnostic,
+    ContinuousAirSniffer,
+    TargetedSurfaceSwab,
+    WastewaterSequencingGrid,
+)
 from crusher_labs.protocol_engine import (
     ProtocolEngine,
     load_protocols,
 )
-from crusher_labs.cost_ledger import (
-    build_ledger_from_config,
-    load_resource_costs,
+from engines.infection_dynamics_bridge import (
+    InfectionStatus,
+    KorkinShipEngine,
 )
-from orchestrator_types import (
-    REPO_ROOT,
-    COMPLIANCE_ISOLATED,
-    COMPLIANCE_QUARANTINED,
-    COMPLIANCE_NON_COMPLIANT,
-    COMPLIANCE_COMPLIANT,
-    LOCATION_ISOLATED,
-    ObservationEngine,
-    ProtocolContext,
+from engines.py_contam_bridge import ContamTransportEngine
+from engines.wearable_monitor import (
+    WearableMonitor,
+    build_wearable_monitor_from_config,
 )
-from simulation_utils.paths import resolve_repo_path, validated_open
 from orchestrator_display import (
     print_observation_engine,
     print_protocol_engine,
 )
-
+from orchestrator_types import (
+    COMPLIANCE_COMPLIANT,
+    COMPLIANCE_ISOLATED,
+    COMPLIANCE_NON_COMPLIANT,
+    COMPLIANCE_QUARANTINED,
+    LOCATION_ISOLATED,
+    REPO_ROOT,
+    ObservationEngine,
+    ProtocolContext,
+)
+from simulation_utils.paths import resolve_repo_path, validated_open
+from telemetry_buffer.agent_axes import resolve_agent_axes
+from telemetry_buffer.schema import make_agent, make_space
 
 # ── Spatial layout & ship graph ──────────────────────────────────────────
 
@@ -313,6 +310,8 @@ def _copy_optional_agent_fields(
         "observed_syndromes",
         "clinical_features",
         "days_since_symptom_onset",
+        "cabin_mate_ids",
+        "role",
     ):
         if key in a:
             agent_dict[key] = a[key]
@@ -382,30 +381,290 @@ def engine_payload_to_schema(
 
 # ── Escalation logic ────────────────────────────────────────────────────
 
+def pathogen_profiles_are_respiratory(
+    pathogen_profiles: dict[str, dict[str, Any]] | None,
+) -> bool:
+    """True when any active pathogen lists a respiratory clinical syndrome."""
+    if not pathogen_profiles:
+        return False
+    for prof in pathogen_profiles.values():
+        syndromes = (
+            (prof.get("clinical_presentation") or {}).get("syndromes") or []
+        )
+        for syn in syndromes:
+            if "respirat" in str(syn).lower():
+                return True
+    return False
+
+
+def _role_group_for_agent(agent: dict[str, Any]) -> str:
+    role = str(agent.get("role") or "").lower()
+    if role in ("crew", "passenger"):
+        return role
+    a_class = str(agent.get("agent_class") or "").lower()
+    if a_class.startswith("crew"):
+        return "crew"
+    return "passenger"
+
+
+def update_ever_ill_ids(
+    agents: list[dict[str, Any]],
+    ever_ill_ids: set[int],
+) -> None:
+    """Accumulate agents who have shown symptomatic presentation."""
+    from telemetry_buffer.agent_axes import agent_has_symptomatic_presentation
+
+    for agent in agents:
+        if agent_has_symptomatic_presentation(agent):
+            ever_ill_ids.add(int(agent["agent_id"]))
+
+
+def compute_group_attack_rates(
+    agents: list[dict[str, Any]],
+    ever_ill_ids: set[int],
+) -> dict[str, float]:
+    """Cumulative attack rates (ever-ill / population) overall and by role group."""
+    if not agents:
+        return {"overall": 0.0, "passenger": 0.0, "crew": 0.0, "max_group": 0.0}
+
+    groups: dict[str, list[int]] = {"passenger": [], "crew": []}
+    for agent in agents:
+        aid = int(agent["agent_id"])
+        groups[_role_group_for_agent(agent)].append(aid)
+
+    def _rate(ids: list[int]) -> float:
+        if not ids:
+            return 0.0
+        return sum(1 for i in ids if i in ever_ill_ids) / len(ids)
+
+    passenger_ar = _rate(groups["passenger"])
+    crew_ar = _rate(groups["crew"])
+    overall = len(ever_ill_ids) / len(agents)
+    return {
+        "overall": overall,
+        "passenger": passenger_ar,
+        "crew": crew_ar,
+        "max_group": max(passenger_ar, crew_ar),
+    }
+
+
+def update_cumulative_confirmed_cases(
+    clin_qpcr_results: dict[Any, dict[str, Any]] | None,
+    clin_rdt_results: dict[Any, dict[str, Any]] | None,
+    cumulative_confirmed_case_ids: set[int],
+) -> int:
+    """Add clinically confirmed agents (qPCR detect or RDT positive)."""
+    for aid, data in (clin_qpcr_results or {}).items():
+        if data.get("detected") or (
+            data.get("ct_value") is not None and float(data["ct_value"]) <= 35.0
+        ):
+            cumulative_confirmed_case_ids.add(int(aid))
+    for aid, data in (clin_rdt_results or {}).items():
+        if data.get("positive"):
+            cumulative_confirmed_case_ids.add(int(aid))
+    return len(cumulative_confirmed_case_ids)
+
+
+def _escalation_delay_epochs(esc_cfg: dict[str, Any], target_status: str) -> int:
+    from orchestrator_types import (
+        STATUS_ALERT,
+        STATUS_CONFIRMED,
+        STATUS_LOCKDOWN,
+        STATUS_SUSPECTED,
+    )
+
+    latency = esc_cfg.get("decision_latency") or {}
+    key_by_status = {
+        STATUS_ALERT: "alert_delay_epochs",
+        STATUS_SUSPECTED: "suspected_delay_epochs",
+        STATUS_CONFIRMED: "confirmed_delay_epochs",
+        STATUS_LOCKDOWN: "lockdown_delay_epochs",
+    }
+    key = key_by_status.get(target_status)
+    if key is None:
+        return 0
+    return max(0, int(latency.get(key, 0)))
+
+
+def _lockdown_threshold(esc_cfg: dict[str, Any]) -> float | None:
+    """Return lockdown attack-rate threshold, or None if lockdown disabled."""
+    raw = esc_cfg.get("lockdown_attack_rate", 0.05)
+    if raw is None or raw == "never":
+        return None
+    return float(raw)
+
+
+def propose_escalation_level(
+    trigger_status: str,
+    syndromic_result: dict[str, Any],
+    cfg: dict[str, Any],
+    *,
+    attack_rate: float = 0.0,
+    cumulative_confirmed_cases: int = 0,
+    respiratory_mode: bool = False,
+) -> str:
+    """Propose the highest escalation level justified by current signals.
+
+    Does not apply decision latency — callers queue the transition separately.
+    """
+    from orchestrator_types import (
+        STATUS_ALERT,
+        STATUS_CONFIRMED,
+        STATUS_LOCKDOWN,
+        STATUS_RANK,
+        STATUS_SUSPECTED,
+    )
+
+    esc_cfg = cfg.get("escalation", {})
+    # Backward-compatible alias: syndromic_suspect_threshold → alert_sick_call_threshold
+    alert_threshold = int(
+        esc_cfg.get(
+            "alert_sick_call_threshold",
+            esc_cfg.get("syndromic_suspect_threshold", 3),
+        ),
+    )
+    resp = esc_cfg.get("respiratory_overrides") or {}
+    if respiratory_mode:
+        suspect_ar = float(resp.get(
+            "suspect_attack_rate",
+            esc_cfg.get("suspect_attack_rate", 0.01),
+        ))
+        confirm_ar = float(esc_cfg.get("confirm_attack_rate", 0.03))
+        alert_confirmed = int(resp.get("alert_confirmed_cases", 1))
+    else:
+        suspect_ar = float(esc_cfg.get("suspect_attack_rate", 0.02))
+        confirm_ar = float(esc_cfg.get("confirm_attack_rate", 0.03))
+        alert_confirmed = None
+
+    lockdown_ar = _lockdown_threshold(esc_cfg)
+
+    sick_calls = int(syndromic_result.get("sick_call_count", 0))
+    current_rank = STATUS_RANK.get(trigger_status, 0)
+
+    # Advance at most one level per evaluation (organizational stair-step).
+    # Latency then applies to that single step.
+    if current_rank < STATUS_RANK[STATUS_ALERT]:
+        if sick_calls >= alert_threshold:
+            return STATUS_ALERT
+        if (
+            respiratory_mode
+            and alert_confirmed is not None
+            and cumulative_confirmed_cases >= alert_confirmed
+        ):
+            return STATUS_ALERT
+        return trigger_status
+
+    if current_rank < STATUS_RANK[STATUS_SUSPECTED]:
+        if attack_rate >= suspect_ar:
+            return STATUS_SUSPECTED
+        return trigger_status
+
+    if current_rank < STATUS_RANK[STATUS_CONFIRMED]:
+        if attack_rate >= confirm_ar:
+            return STATUS_CONFIRMED
+        return trigger_status
+
+    if current_rank < STATUS_RANK[STATUS_LOCKDOWN]:
+        if lockdown_ar is not None and attack_rate >= lockdown_ar:
+            return STATUS_LOCKDOWN
+        return trigger_status
+
+    return trigger_status
+
+
+def apply_escalation_latency(
+    current_status: str,
+    proposed_status: str,
+    epoch: int,
+    pending: dict[str, Any] | None,
+    cfg: dict[str, Any],
+) -> tuple[str, dict[str, Any] | None]:
+    """Queue escalation transitions and release them after decision latency.
+
+    Returns ``(effective_status, updated_pending)``.
+    """
+    from orchestrator_types import STATUS_RANK
+
+    esc_cfg = cfg.get("escalation", {})
+    effective = current_status
+    updated_pending = dict(pending) if pending else None
+
+    # Release a matured pending transition first.
+    if updated_pending is not None:
+        target = str(updated_pending.get("to", current_status))
+        triggered_at = int(updated_pending.get("epoch_triggered", epoch))
+        delay = _escalation_delay_epochs(esc_cfg, target)
+        if epoch >= triggered_at + delay:
+            if STATUS_RANK.get(target, 0) > STATUS_RANK.get(effective, 0):
+                effective = target
+            updated_pending = None
+
+    # Queue a new higher target if signals justify it.
+    if STATUS_RANK.get(proposed_status, 0) > STATUS_RANK.get(effective, 0):
+        pending_target = (
+            str(updated_pending["to"]) if updated_pending else effective
+        )
+        if STATUS_RANK.get(proposed_status, 0) > STATUS_RANK.get(pending_target, 0):
+            delay = _escalation_delay_epochs(esc_cfg, proposed_status)
+            if delay <= 0:
+                effective = proposed_status
+                updated_pending = None
+            else:
+                updated_pending = {
+                    "to": proposed_status,
+                    "epoch_triggered": epoch,
+                }
+
+    return effective, updated_pending
+
+
 def check_escalation(
     trigger_status: str,
     syndromic_result: dict[str, Any],
     pcr_result: dict[str, Any] | None,
     cfg: dict[str, Any],
-) -> str:
-    """Evaluate trigger thresholds and return the (possibly updated) status."""
-    from orchestrator_types import STATUS_BASELINE, STATUS_SUSPECTED, STATUS_CONFIRMED
+    *,
+    agents: list[dict[str, Any]] | None = None,
+    ever_ill_ids: set[int] | None = None,
+    cumulative_confirmed_cases: int = 0,
+    epoch: int = 0,
+    escalation_pending: dict[str, Any] | None = None,
+    respiratory_mode: bool = False,
+) -> tuple[str, dict[str, Any] | None, dict[str, float]]:
+    """Evaluate escalation thresholds with optional decision latency.
 
-    esc_cfg = cfg.get("escalation", {})
-    suspect_threshold = esc_cfg.get("syndromic_suspect_threshold", 3)
-    confirm_ct = esc_cfg.get("pcr_confirm_ct_threshold", 35.0)
+    Returns ``(effective_status, updated_pending, attack_rates)``.
 
-    if trigger_status == STATUS_BASELINE:
-        if syndromic_result["sick_call_count"] >= suspect_threshold:
-            return STATUS_SUSPECTED
+    Attack-rate thresholds (CDC VSP-aligned) drive SUSPECTED / CONFIRMED /
+    LOCKDOWN. BASELINE → ALERT uses sick-call count (or respiratory confirmed
+    cases). Organizational decision latency is applied via *escalation_pending*.
 
-    if trigger_status == STATUS_SUSPECTED and pcr_result is not None:
-        for zone_data in pcr_result.get("zone_results", {}).values():
-            ct = zone_data.get("ct_value")
-            if ct is not None and ct <= confirm_ct:
-                return STATUS_CONFIRMED
+    *pcr_result* is retained for API compatibility; surface PCR no longer
+    alone promotes to CONFIRMED once attack-rate keys are in use.
+    """
+    del pcr_result  # API compat; AR + clinical confirms replace surface PCR gate
 
-    return trigger_status
+    ill_ids = ever_ill_ids if ever_ill_ids is not None else set()
+    if agents is not None:
+        update_ever_ill_ids(agents, ill_ids)
+        rates = compute_group_attack_rates(agents, ill_ids)
+        attack_rate = float(rates["max_group"])
+    else:
+        rates = {"overall": 0.0, "passenger": 0.0, "crew": 0.0, "max_group": 0.0}
+        attack_rate = 0.0
+
+    proposed = propose_escalation_level(
+        trigger_status,
+        syndromic_result,
+        cfg,
+        attack_rate=attack_rate,
+        cumulative_confirmed_cases=cumulative_confirmed_cases,
+        respiratory_mode=respiratory_mode,
+    )
+    effective, pending = apply_escalation_latency(
+        trigger_status, proposed, epoch, escalation_pending, cfg,
+    )
+    return effective, pending, rates
 
 
 # ── Pathogen loading & initialization ────────────────────────────────────

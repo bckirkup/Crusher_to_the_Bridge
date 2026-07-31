@@ -136,6 +136,7 @@ def _open_resolved(
     mode: str,
     *,
     encoding: str | None = None,
+    newline: str | None = None,
     allowed_roots: tuple[str, ...],
 ) -> TextIO | BinaryIO:
     """Open a path that has already been validated and resolved."""
@@ -145,9 +146,12 @@ def _open_resolved(
         target_dir = _get_target_dir(resolved)
         if is_publicly_writable(target_dir):
             raise ValueError(f"Refusing to write under publicly writable directory: {target_dir}")
-    if encoding is None:
-        return open(resolved, mode)  # NOSONAR
-    return open(resolved, mode, encoding=encoding)  # NOSONAR
+    open_kwargs: dict[str, str | None] = {}
+    if encoding is not None:
+        open_kwargs["encoding"] = encoding
+    if newline is not None:
+        open_kwargs["newline"] = newline
+    return open(resolved, mode, **open_kwargs)  # NOSONAR
 
 
 def validated_open(
@@ -156,9 +160,18 @@ def validated_open(
     *,
     allowed_roots: tuple[str, ...],
     encoding: str | None = None,
+    newline: str | None = None,
 ) -> TextIO | BinaryIO:
-    """Open a file after containment checks."""
+    """Open a file after containment checks.
+
+    ``newline`` mirrors :func:`open` (needed for CSV writers that pass
+    ``newline=""``). Binary modes must omit ``encoding`` / ``newline``.
+    """
     resolved = _real(path)
-    if encoding is None:
-        return _open_resolved(resolved, mode, allowed_roots=allowed_roots)
-    return _open_resolved(resolved, mode, encoding=encoding, allowed_roots=allowed_roots)
+    return _open_resolved(
+        resolved,
+        mode,
+        encoding=encoding,
+        newline=newline,
+        allowed_roots=allowed_roots,
+    )

@@ -13,26 +13,44 @@ import os
 from dataclasses import dataclass, field
 from typing import Any
 
+from crusher_labs.clinical_correlation import ClinicalTestCorrelation
+from crusher_labs.cost_ledger import CostLedger
+from crusher_labs.lab_notebook import ArtificialLabNotebook
 from crusher_labs.observation_core import (
+    ClinicalMicrobiology,
+    ClinicalQPCR,
+    ClinicalRapidDiagnostic,
     ContinuousAirSniffer,
+    LongReadVerificationSequencing,
     TargetedSurfaceSwab,
     WastewaterSequencingGrid,
-    ClinicalRapidDiagnostic,
-    ClinicalQPCR,
-    ClinicalMicrobiology,
 )
-from crusher_labs.clinical_correlation import ClinicalTestCorrelation
-from crusher_labs.lab_notebook import ArtificialLabNotebook
 from crusher_labs.protocol_engine import ProtocolEngine
-from crusher_labs.cost_ledger import CostLedger
 
 # ── Trigger status constants ─────────────────────────────────────────────
+# Five-level escalation (Campaign v5 / outbreak response architecture):
+#   0 BASELINE → 1 ALERT → 2 SUSPECTED → 3 CONFIRMED → 4 LOCKDOWN
 STATUS_BASELINE = "BASELINE"
+STATUS_ALERT = "ALERT"
 STATUS_SUSPECTED = "SUSPECTED"
 STATUS_CONFIRMED = "CONFIRMED"
+STATUS_LOCKDOWN = "LOCKDOWN"
+
+STATUS_RANK: dict[str, int] = {
+    STATUS_BASELINE: 0,
+    STATUS_ALERT: 1,
+    STATUS_SUSPECTED: 2,
+    STATUS_CONFIRMED: 3,
+    STATUS_LOCKDOWN: 4,
+}
+
+# Compliance class labels (bimodal mixture; assigned at first quarantine order)
+COMPLIANCE_CLASS_COMPLIANT = "compliant"
+COMPLIANCE_CLASS_RELUCTANT = "reluctant"
+COMPLIANCE_CLASS_DEFIANT = "defiant"
 
 # ── Agent orthogonal status axes (telemetry_buffer.agent_axes) ───────────
-from telemetry_buffer.agent_axes import (  # noqa: E402
+from telemetry_buffer.agent_axes import (  # noqa: E402,F401
     INFECTION_SUSCEPTIBLE,
     INFECTION_INFECTED,
     INFECTION_RECOVERED,
@@ -90,6 +108,13 @@ class SimulationState:
     cascade_engine: Any = None  # DiagnosticCascadeEngine | None
     chronic_assignments: dict[int, list[str]] = field(default_factory=dict)
     chronic_behavioral_mods: dict[int, dict[str, float]] = field(default_factory=dict)
+    # Outbreak-response architecture (escalation + compliance)
+    cumulative_confirmed_case_ids: set[int] = field(default_factory=set)
+    ever_ill_ids: set[int] = field(default_factory=set)
+    # Pending escalation: {"to": status, "epoch_triggered": int} or None
+    escalation_pending: dict[str, Any] | None = None
+    # agent_id → compliant | reluctant | defiant (sticky for the cruise)
+    compliance_class_by_agent: dict[int, str] = field(default_factory=dict)
 
 
 # ── Observation engine bundle ────────────────────────────────────────────

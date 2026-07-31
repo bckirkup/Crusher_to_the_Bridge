@@ -87,6 +87,8 @@ ship_graph:
   #                    "confine_symptomatic" triggers quarantine of symptomatic agents
   #                    "log_only" (default) records the breach in telemetry
   #   exempt_classes  – agent classes exempt from confinement (same as SOP exempt_classes)
+  # When false, infection counters are still computed/logged but confine actions are skipped.
+  counter_confinement_enabled: true
   infection_counters:
     - counter_id: "crew_attack_rate"
       label: "Crew Attack Rate"
@@ -144,8 +146,19 @@ grumb_seeding:
 
 # ── FRED-Style Behavioral Compliance ─────────────────────────
 fred_behavior:
-  quarantine_compliance: 0.85         # P(agent complies with isolation order)
-  compliance_delay_epochs: 1          # epochs before non-compliant agent eventually isolates
+  # Fraction of agents in the Compliant class (remainder split reluctant/defiant)
+  quarantine_compliance: 0.85
+  # Of non-compliers, fraction that are Reluctant (vs Defiant). 1.0 = no defiants.
+  reluctant_fraction: 0.75
+  # Epochs before a Reluctant agent may comply (also complies if they become symptomatic)
+  reluctant_delay_epochs: 48
+  # Optional per-class overrides (class_id, role_group prefix, or passenger_young)
+  compliance_by_class:
+    crew: 0.85
+    passenger_elderly: 0.70
+    passenger_young: 0.45
+  # Deprecated: forced post-delay compliance removed (ignored if present)
+  # compliance_delay_epochs: 1
   healthy_noise_categories:           # background sick-call reasons for healthy agents
     - {reason: "seasickness",  probability: 0.008, syndrome: "gastrointestinal"}
     - {reason: "fatigue",      probability: 0.005, syndrome: "systemic_febrile"}
@@ -187,13 +200,42 @@ hvac:
 
 # ── Escalation thresholds ─────────────────────────────────────
 escalation:
-  syndromic_suspect_threshold: 3      # daily sick-call count to trigger SUSPECTED
-  pcr_confirm_ct_threshold: 35.0      # Ct ≤ this value triggers CONFIRMED
+  # Level 0 → 1 ALERT: first signal of possible outbreak
+  alert_sick_call_threshold: 3        # ≥N sick calls → ALERT
+  syndromic_suspect_threshold: 3      # deprecated alias for alert_sick_call_threshold
+  # Level 1 → 2 SUSPECTED: CDC VSP 2% reporting threshold (cumulative AR)
+  suspect_attack_rate: 0.02
+  # Level 2 → 3 CONFIRMED: CDC VSP 3% outbreak threshold
+  confirm_attack_rate: 0.03
+  # Level 3 → 4 LOCKDOWN: ship-wide confinement.
+  # Default "never" for small smoke ships (n=20 → 1 case = 5% AR).
+  # Campaign / mega-cruise configs should set 0.05 (CDC-style extreme).
+  lockdown_attack_rate: never
+  # Legacy surface-PCR Ct gate (retained for compat; AR thresholds are authoritative)
+  pcr_confirm_ct_threshold: 35.0
+  # Respiratory pathogens: lower thresholds (CDC/IHR-aligned)
+  respiratory_overrides:
+    alert_confirmed_cases: 1          # 1 confirmed case → ALERT
+    suspect_attack_rate: 0.01         # 1% → SUSPECTED
+  # Organizational decision latency (epochs between signal and status taking effect)
+  # Default 0 for short smoke runs; campaign T11 sweeps non-zero values.
+  decision_latency:
+    alert_delay_epochs: 0
+    suspected_delay_epochs: 0
+    confirmed_delay_epochs: 0
+    lockdown_delay_epochs: 0
   # Integrated detection-mode stoplights (SOP-015 / SOP-016)
   detection_modes:
     syndromic:
       amber_sick_call_count: 2
       red_sick_call_count: 5
+
+# ── Observation pipeline master switch ────────────────────────
+# When false, air/swab/wastewater/clinical sampling and Picard PCR/seq
+# cadence queries are skipped (empty results). Wearables and counter
+# confinement are controlled separately.
+observation:
+  enabled: true
 
 # ── Syndromic Surveillance ────────────────────────────────────
 syndromic:
@@ -201,6 +243,9 @@ syndromic:
   sick_call_probability: 0.70         # P(symptomatic agent reports to sick-call)
   background_noise_rate: 0.015        # P(healthy agent reports daily – seasickness etc.)
   cadence: 1
+  # Optional campaign T11 knob: suppress sick-calls for the first N epochs
+  # (0-based). Surveillance begins at epoch N. Default 0 = always active.
+  # activation_delay_epochs: 0
 
 # ── Clinical diagnostics (observation instruments) ───────────
 # Gaussian-copula autocorrelation between sick-call clinical tests.
@@ -687,6 +732,9 @@ chronic_disease:
 diagnostic_cascade:
   enabled: true
   config_path: "data/config/diagnostic_cascade_multiplex.json"
+  # Optional campaign T11 knob (paired with syndromic.activation_delay_epochs):
+  # skip cascade evaluate_epoch until epoch >= N (0-based). Default 0 = always active.
+  # activation_delay_epochs: 0
   # Optional runtime overrides for cascade entry routing and wearable fusion.
   # entry:
   #   sick_call_tier: 1

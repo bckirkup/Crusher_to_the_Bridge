@@ -59,6 +59,12 @@ from crusher_labs import load_config
 class TestSyncVspIsolation:
     """Verify the engine → SimulationState VSP isolation sync."""
 
+    @staticmethod
+    def _complying_syndromic() -> MagicMock:
+        mock = MagicMock()
+        mock.check_quarantine_compliance.return_value = True
+        return mock
+
     def _build_engine_with_vsp(self) -> KorkinShipEngine:
         cfg = load_config()
         engine = build_engine(cfg, seed=42)
@@ -68,7 +74,10 @@ class TestSyncVspIsolation:
         engine = self._build_engine_with_vsp()
         state = SimulationState()
         engine.quarantined_ids = {3, 7}
-        sync_vsp_isolation(epoch=5, engine=engine, state=state)
+        sync_vsp_isolation(
+            epoch=5, engine=engine, state=state,
+            syndromic=self._complying_syndromic(),
+        )
         assert 3 in state.quarantined_ids
         assert 7 in state.quarantined_ids
 
@@ -77,7 +86,10 @@ class TestSyncVspIsolation:
         state = SimulationState()
         state.quarantined_ids = {3}
         engine.quarantined_ids = {3, 7}
-        sync_vsp_isolation(epoch=5, engine=engine, state=state)
+        sync_vsp_isolation(
+            epoch=5, engine=engine, state=state,
+            syndromic=self._complying_syndromic(),
+        )
         assert state.quarantined_ids == {3, 7}
         vsp_entries = [c for c in state.compliance_log if c["action"] == "vsp_quarantine"]
         assert len(vsp_entries) == 1
@@ -88,17 +100,38 @@ class TestSyncVspIsolation:
         state = SimulationState()
         state.quarantined_ids = {3, 7}
         engine.quarantined_ids = {3, 7}
-        sync_vsp_isolation(epoch=5, engine=engine, state=state)
+        sync_vsp_isolation(
+            epoch=5, engine=engine, state=state,
+            syndromic=self._complying_syndromic(),
+        )
         assert len(state.compliance_log) == 0
 
     def test_compliance_log_records_epoch(self) -> None:
         engine = self._build_engine_with_vsp()
         state = SimulationState()
         engine.quarantined_ids = {2}
-        sync_vsp_isolation(epoch=10, engine=engine, state=state)
+        sync_vsp_isolation(
+            epoch=10, engine=engine, state=state,
+            syndromic=self._complying_syndromic(),
+        )
         assert state.compliance_log[0]["epoch"] == 10
         assert state.compliance_log[0]["action"] == "vsp_quarantine"
         assert state.compliance_log[0]["agent_id"] == 2
+
+    def test_refusal_keeps_agent_out_of_state_and_engine(self) -> None:
+        engine = self._build_engine_with_vsp()
+        state = SimulationState()
+        engine.quarantined_ids = {3, 7}
+        refusing = MagicMock()
+        refusing.check_quarantine_compliance.return_value = False
+        sync_vsp_isolation(epoch=5, engine=engine, state=state, syndromic=refusing)
+        assert 3 not in state.quarantined_ids
+        assert 7 not in state.quarantined_ids
+        assert 3 in state.quarantine_refusers
+        assert 7 in state.quarantine_refusers
+        assert engine.quarantined_ids == set()
+        refused = [c for c in state.compliance_log if c["action"] == "refused_vsp_quarantine"]
+        assert len(refused) == 2
 
 
 # ── engine_payload_to_schema boundary tests ──────────────────────────────
@@ -404,14 +437,18 @@ class TestCrossModuleDataFlow:
         for status in (STATUS_BASELINE, STATUS_SUSPECTED, STATUS_CONFIRMED):
             assert isinstance(status, str)
 
-        result = check_escalation(
+        result, pending, rates = check_escalation(
             STATUS_BASELINE,
             {"sick_call_count": 10},
             None,
             cfg,
         )
         assert isinstance(result, str)
-        assert result in (STATUS_BASELINE, STATUS_SUSPECTED, STATUS_CONFIRMED)
+        assert result in (
+            STATUS_BASELINE, STATUS_SUSPECTED, STATUS_CONFIRMED, "ALERT", "LOCKDOWN",
+        )
+        assert pending is None or isinstance(pending, dict)
+        assert isinstance(rates, dict)
 
 
 # ── Microflora disruption boundary tests ────────────────────────────────

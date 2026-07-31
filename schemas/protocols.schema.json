@@ -79,6 +79,22 @@
         "category": {
           "type": "string",
           "enum": ["intervention", "surveillance"]
+        },
+        "activation_delay_epochs": {
+          "type": "integer",
+          "minimum": 0,
+          "default": 0,
+          "description": "Epochs to wait after stoplight eligibility before modifiers apply (organizational latency)."
+        },
+        "min_escalation_status": {
+          "type": "string",
+          "enum": ["BASELINE", "ALERT", "SUSPECTED", "CONFIRMED", "LOCKDOWN"],
+          "description": "Minimum ship escalation status required before this SOP may activate."
+        },
+        "required_cascade_tier": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "description": "Minimum diagnostic-cascade tier that must be reached by enough agents."
         }
       }
     },

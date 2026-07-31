@@ -27,20 +27,19 @@ Each record follows the biosurveillance-ingestible schema:
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
-import hashlib
 from typing import Any
 
-from crusher_labs.observation_core import DEFAULT_WW_READ_DEPTH
 from crusher_labs.stoplight import (
-    stoplight_from_ct,
     stoplight_from_anomaly,
-    stoplight_from_rdt,
+    stoplight_from_ct,
     stoplight_from_disruption,
+    stoplight_from_rdt,
 )
-from telemetry_buffer.agent_axes import clinical_axes_for_notebook
 from simulation_utils.paths import prepare_output_directory, resolve_repo_path, validated_open
+from telemetry_buffer.agent_axes import clinical_axes_for_notebook
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 

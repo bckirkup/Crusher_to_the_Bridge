@@ -21,7 +21,6 @@ import argparse
 import csv
 import io
 import json
-import os
 import sys
 import zipfile
 from pathlib import Path
@@ -30,24 +29,8 @@ from typing import Any
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(_REPO_ROOT))
 
-from simulation_utils.paths import confine_to_base, validated_open  # noqa: E402
-
-
-def _cwd_root() -> str:
-    return os.path.realpath(os.getcwd())
-
-
-def safe_path(path: Path | str) -> str:
-    """Resolve ``path`` and confine it to the current working directory.
-
-    Prevents a caller (e.g. an automated agent passing crafted CLI arguments)
-    from reading or writing files outside the directory the tool was invoked
-    from. Follows canonicalize-then-validate order (Sonar S8707).
-    """
-    try:
-        return confine_to_base(_cwd_root(), str(path))
-    except ValueError as exc:
-        raise SystemExit(str(exc)) from exc
+from deploy.aws.path_safety import cwd_root, safe_path  # noqa: E402
+from simulation_utils.paths import validated_open  # noqa: E402
 
 
 def flatten(obj: Any, prefix: str = "") -> dict[str, Any]:
@@ -110,7 +93,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     # Canonicalize + confine all CLI-derived paths to the invocation directory.
-    cwd = _cwd_root()
+    cwd = cwd_root()
     roots = (cwd,)
     results_dir = Path(safe_path(args.results_dir))
     out_csv = safe_path(args.out_csv)

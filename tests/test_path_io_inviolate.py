@@ -28,6 +28,8 @@ _HARDENED_MODULES = (
     "engines/contamx_runner.py",
     "deploy/aws/aggregate_results.py",
     "deploy/aws/analyze_campaign_curves.py",
+    "deploy/aws/classify_batch_failures.py",
+    "deploy/aws/path_safety.py",
 )
 
 # Path.write_text / read_text / unlink / open are also sinks for S2083/S8707

@@ -25,7 +25,6 @@ from typing import Any
 
 import numpy as np
 
-
 from simulation_utils.numeric import default_simulation_rng
 
 

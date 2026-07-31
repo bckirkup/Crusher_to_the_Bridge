@@ -12,7 +12,6 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
-
 DEFAULT_WEARABLE_ALERT_RULES: list[dict[str, Any]] = [
     {"signal": "fever", "equals": True},
     {"signal": "infection_score", "operator": ">", "value": 1.5},

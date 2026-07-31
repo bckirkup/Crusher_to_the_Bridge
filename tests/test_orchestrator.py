@@ -21,8 +21,10 @@ sys.path.insert(0, REPO_ROOT)
 
 from orchestrator_types import (
     STATUS_BASELINE,
+    STATUS_ALERT,
     STATUS_SUSPECTED,
     STATUS_CONFIRMED,
+    STATUS_LOCKDOWN,
     INFECTION_SUSCEPTIBLE,
     INFECTION_INFECTED,
     PRESENTATION_ASYMPTOMATIC,
@@ -51,6 +53,8 @@ from orchestrator_epoch import (
     confine_agents as _confine_agents,
     confine_all_agents as _confine_all_agents,
     step_cost_accounting as _step_cost_accounting,
+    step_diagnostic_cascade as _step_diagnostic_cascade,
+    try_admit_to_quarantine as _try_admit_to_quarantine,
 )
 from crusher_labs import load_config
 from telemetry_buffer.schema import make_agent
@@ -266,43 +270,131 @@ class TestAgentClassEngine:
 
 # ── Escalation tests ────────────────────────────────────────────────────
 
+def _esc_status(*args, **kwargs) -> str:
+    """Unwrap check_escalation tuple → effective status."""
+    status, _pending, _rates = _check_escalation(*args, **kwargs)
+    return status
+
+
 class TestCheckEscalation:
     def test_baseline_stays_baseline(self) -> None:
-        cfg = {"escalation": {"syndromic_suspect_threshold": 3}}
+        cfg = {"escalation": {"alert_sick_call_threshold": 3}}
         syn_result = {"sick_call_count": 1}
-        assert _check_escalation(STATUS_BASELINE, syn_result, None, cfg) == STATUS_BASELINE
+        assert _esc_status(STATUS_BASELINE, syn_result, None, cfg) == STATUS_BASELINE
 
-    def test_baseline_to_suspected(self) -> None:
+    def test_baseline_to_alert(self) -> None:
+        cfg = {"escalation": {"alert_sick_call_threshold": 3}}
+        syn_result = {"sick_call_count": 5}
+        assert _esc_status(STATUS_BASELINE, syn_result, None, cfg) == STATUS_ALERT
+
+    def test_legacy_alias_syndromic_suspect_threshold(self) -> None:
         cfg = {"escalation": {"syndromic_suspect_threshold": 3}}
         syn_result = {"sick_call_count": 5}
-        assert _check_escalation(STATUS_BASELINE, syn_result, None, cfg) == STATUS_SUSPECTED
+        assert _esc_status(STATUS_BASELINE, syn_result, None, cfg) == STATUS_ALERT
 
-    def test_suspected_stays_suspected_no_pcr(self) -> None:
-        cfg = {"escalation": {"pcr_confirm_ct_threshold": 35.0}}
+    def test_alert_to_suspected_via_attack_rate(self) -> None:
+        cfg = {"escalation": {"suspect_attack_rate": 0.02}}
+        agents = [
+            {
+                "agent_id": i, "role": "passenger",
+                "infection_state": "infected" if i < 2 else "susceptible",
+                "symptom_presentation": "symptomatic" if i < 2 else "asymptomatic",
+            }
+            for i in range(50)  # 2/50 = 4% > 2%
+        ]
         syn_result = {"sick_call_count": 5}
-        assert _check_escalation(STATUS_SUSPECTED, syn_result, None, cfg) == STATUS_SUSPECTED
+        assert _esc_status(
+            STATUS_ALERT, syn_result, None, cfg, agents=agents,
+        ) == STATUS_SUSPECTED
 
-    def test_suspected_to_confirmed(self) -> None:
-        cfg = {"escalation": {"pcr_confirm_ct_threshold": 35.0}}
+    def test_suspected_to_confirmed_via_attack_rate(self) -> None:
+        cfg = {"escalation": {"confirm_attack_rate": 0.03}}
+        agents = [
+            {
+                "agent_id": i, "role": "passenger",
+                "infection_state": "infected" if i < 3 else "susceptible",
+                "symptom_presentation": "symptomatic" if i < 3 else "asymptomatic",
+            }
+            for i in range(50)  # 6%
+        ]
         syn_result = {"sick_call_count": 5}
-        pcr_result = {"zone_results": {"MedBay": {"ct_value": 30.0}}}
-        assert _check_escalation(STATUS_SUSPECTED, syn_result, pcr_result, cfg) == STATUS_CONFIRMED
+        assert _esc_status(
+            STATUS_SUSPECTED, syn_result, None, cfg, agents=agents,
+        ) == STATUS_CONFIRMED
 
-    def test_suspected_stays_if_ct_too_high(self) -> None:
-        cfg = {"escalation": {"pcr_confirm_ct_threshold": 35.0}}
+    def test_confirmed_to_lockdown(self) -> None:
+        cfg = {"escalation": {"lockdown_attack_rate": 0.05}}
+        agents = [
+            {
+                "agent_id": i, "role": "passenger",
+                "infection_state": "infected" if i < 5 else "susceptible",
+                "symptom_presentation": "symptomatic" if i < 5 else "asymptomatic",
+            }
+            for i in range(50)  # 10%
+        ]
         syn_result = {"sick_call_count": 5}
-        pcr_result = {"zone_results": {"MedBay": {"ct_value": 38.0}}}
-        assert _check_escalation(STATUS_SUSPECTED, syn_result, pcr_result, cfg) == STATUS_SUSPECTED
+        assert _esc_status(
+            STATUS_CONFIRMED, syn_result, None, cfg, agents=agents,
+        ) == STATUS_LOCKDOWN
+
+    def test_lockdown_never(self) -> None:
+        cfg = {"escalation": {"lockdown_attack_rate": "never"}}
+        agents = [
+            {
+                "agent_id": i, "role": "passenger",
+                "infection_state": "infected",
+                "symptom_presentation": "symptomatic",
+            }
+            for i in range(50)
+        ]
+        syn_result = {"sick_call_count": 5}
+        assert _esc_status(
+            STATUS_CONFIRMED, syn_result, None, cfg, agents=agents,
+        ) == STATUS_CONFIRMED
+
+    def test_decision_latency_queues_pending(self) -> None:
+        cfg = {
+            "escalation": {
+                "alert_sick_call_threshold": 3,
+                "decision_latency": {"alert_delay_epochs": 2},
+            },
+        }
+        syn_result = {"sick_call_count": 5}
+        status, pending, _rates = _check_escalation(
+            STATUS_BASELINE, syn_result, None, cfg, epoch=5,
+        )
+        assert status == STATUS_BASELINE
+        assert pending == {"to": STATUS_ALERT, "epoch_triggered": 5}
+        status2, pending2, _ = _check_escalation(
+            STATUS_BASELINE, syn_result, None, cfg, epoch=7,
+            escalation_pending=pending,
+        )
+        assert status2 == STATUS_ALERT
+        assert pending2 is None
 
     def test_confirmed_stays_confirmed(self) -> None:
         cfg = {"escalation": {}}
         syn_result = {"sick_call_count": 0}
-        assert _check_escalation(STATUS_CONFIRMED, syn_result, None, cfg) == STATUS_CONFIRMED
+        assert _esc_status(STATUS_CONFIRMED, syn_result, None, cfg) == STATUS_CONFIRMED
 
     def test_default_thresholds(self) -> None:
         cfg = {}
         syn_result = {"sick_call_count": 3}
-        assert _check_escalation(STATUS_BASELINE, syn_result, None, cfg) == STATUS_SUSPECTED
+        assert _esc_status(STATUS_BASELINE, syn_result, None, cfg) == STATUS_ALERT
+
+    def test_lockdown_confinement_scope(self) -> None:
+        state = SimulationState()
+        agents = [
+            {"agent_id": 0, "symptom_status": SYMPTOM_ASYMPTOMATIC},
+            {"agent_id": 1, "symptom_status": SYMPTOM_SYMPTOMATIC},
+        ]
+        mock = MagicMock()
+        mock.check_quarantine_compliance.return_value = True
+        _step_quarantine_confinement(
+            5, agents, {}, STATUS_LOCKDOWN, state, mock,
+        )
+        assert 0 in state.quarantined_ids
+        assert 1 in state.quarantined_ids
 
 
 # ── Pathogen profile loading tests ────────────────────────────────────────
@@ -895,3 +987,207 @@ class TestWearableHelpers:
     def test_clamp_body_temp(self) -> None:
         assert _clamp_channel("body_temp", 30.0) == pytest.approx(34.0)
         assert _clamp_channel("body_temp", 45.0) == pytest.approx(42.0)
+
+
+# ── Cascade / shared quarantine compliance gate ──────────────────────────
+
+class TestCascadeQuarantineCompliance:
+    def _make_syndromic_mock(self, compliance: bool = True) -> MagicMock:
+        mock = MagicMock()
+        mock.check_quarantine_compliance.return_value = compliance
+        return mock
+
+    def _run_cascade_with_confinement(
+        self, *, compliance: bool, agent_id: int = 42,
+    ) -> SimulationState:
+        state = SimulationState()
+        cascade = MagicMock()
+        cascade.entry_config = None
+        result = MagicMock()
+        result.confinements_ordered = [agent_id]
+        result.to_dict.return_value = {"confinements_ordered": [agent_id]}
+        cascade.evaluate_epoch.return_value = result
+        state.cascade_engine = cascade
+        obs = MagicMock()
+        syndromic = self._make_syndromic_mock(compliance=compliance)
+        with patch(
+            "crusher_labs.diagnostic_cascade.build_test_runner",
+            return_value=MagicMock(),
+        ):
+            _step_diagnostic_cascade(
+                epoch=3,
+                state=state,
+                agents=[{"agent_id": agent_id}],
+                syn_result={"sick_call_agents": []},
+                wearable_result=None,
+                obs=obs,
+                syndromic=syndromic,
+            )
+        return state
+
+    def test_cascade_compliance_true_admits(self) -> None:
+        state = self._run_cascade_with_confinement(compliance=True)
+        assert 42 in state.quarantined_ids
+        assert 42 not in state.quarantine_refusers
+        actions = [c["action"] for c in state.compliance_log]
+        assert "cascade_confinement" in actions
+
+    def test_cascade_compliance_false_refuses(self) -> None:
+        state = self._run_cascade_with_confinement(compliance=False)
+        assert 42 not in state.quarantined_ids
+        assert 42 in state.quarantine_refusers
+        assert state.quarantine_order_epoch[42] == 3
+        actions = [c["action"] for c in state.compliance_log]
+        assert "refused_cascade_confinement" in actions
+
+    def test_try_admit_sensitivity_compliance_rate(self) -> None:
+        """Config sensitivity: quarantine_compliance 0 vs 1 changes admissions."""
+        from crusher_labs.modalities.syndromic import SyndromicSurveillance
+
+        agents = list(range(40))
+        refused_zero = 0
+        admitted_one = 0
+        for aid in agents:
+            state0 = SimulationState()
+            syn0 = SyndromicSurveillance(
+                quarantine_compliance=0.0,
+                reluctant_fraction=1.0,
+                reluctant_delay_epochs=99,
+                rng=np.random.default_rng(aid),
+            )
+            if not _try_admit_to_quarantine(
+                1, aid, state0, syn0,
+                action_ok="ok", action_refuse="refuse",
+            ):
+                refused_zero += 1
+            state1 = SimulationState()
+            syn1 = SyndromicSurveillance(
+                quarantine_compliance=1.0,
+                rng=np.random.default_rng(aid),
+            )
+            if _try_admit_to_quarantine(
+                1, aid, state1, syn1,
+                action_ok="ok", action_refuse="refuse",
+            ):
+                admitted_one += 1
+        assert refused_zero == len(agents)
+        assert admitted_one == len(agents)
+
+    def test_defiant_never_complies_after_delay(self) -> None:
+        """Golden: defiant agents remain non-compliant past reluctant delay."""
+        from crusher_labs.modalities.syndromic import SyndromicSurveillance
+
+        syn = SyndromicSurveillance(
+            quarantine_compliance=0.0,
+            reluctant_fraction=0.0,  # all non-compliers are defiant
+            reluctant_delay_epochs=1,
+            rng=np.random.default_rng(0),
+        )
+        assert syn.check_quarantine_compliance(7, 0) is False
+        assert syn.check_quarantine_compliance(7, 100) is False
+        assert syn._compliance_class[7] == "defiant"
+
+    def test_reluctant_complies_after_delay(self) -> None:
+        from crusher_labs.modalities.syndromic import SyndromicSurveillance
+
+        syn = SyndromicSurveillance(
+            quarantine_compliance=0.0,
+            reluctant_fraction=1.0,
+            reluctant_delay_epochs=5,
+            rng=np.random.default_rng(1),
+        )
+        assert syn.check_quarantine_compliance(3, 0) is False
+        assert syn.check_quarantine_compliance(3, 5) is True
+        assert syn._compliance_class[3] == "reluctant"
+
+    def test_reluctant_complies_when_symptomatic(self) -> None:
+        from crusher_labs.modalities.syndromic import SyndromicSurveillance
+
+        syn = SyndromicSurveillance(
+            quarantine_compliance=0.0,
+            reluctant_fraction=1.0,
+            reluctant_delay_epochs=99,
+            rng=np.random.default_rng(2),
+        )
+        assert syn.check_quarantine_compliance(4, 0) is False
+        assert syn.check_quarantine_compliance(4, 0, is_symptomatic=True) is True
+
+
+class TestObservationEnabledGate:
+    def test_disabled_returns_empty_results(self) -> None:
+        """Golden: observation.enabled=false yields empty instrument payloads."""
+        from orchestrator_epoch import run_observation_sampling
+
+        engine = MagicMock()
+        obs = MagicMock()
+        air, swab, ww, rdt, qpcr, micro, lr, lr_count = run_observation_sampling(
+            epoch=1,
+            obs=obs,
+            agents=[],
+            spaces={},
+            zone_names=["Bridge"],
+            zone_volumes={"Bridge": 100.0},
+            zone_microflora_shifts={},
+            trigger_status=STATUS_BASELINE,
+            high_traffic=["Bridge"],
+            syn_result={"sick_call_agents": []},
+            engine=engine,
+            pathogen_profiles={},
+            cfg={"observation": {"enabled": False}},
+        )
+        assert air == {}
+        assert swab == {}
+        assert ww == {}
+        assert rdt == {}
+        assert qpcr == {}
+        assert micro == {}
+        assert lr == {}
+        assert lr_count == 0
+        obs.air_sniffer.sample_all_zones.assert_not_called()
+
+    def test_enabled_sensitivity_invokes_air_sniffer(self) -> None:
+        """Config sensitivity: enabled=true samples; false does not."""
+        from orchestrator_epoch import run_observation_sampling
+
+        engine = MagicMock()
+        engine.get_pathogen_zone_mass.return_value = {}
+
+        def _make_obs() -> MagicMock:
+            obs = MagicMock()
+            obs.turnaround = None
+            obs.lab_notebook_enabled = False
+            obs.air_sniffer.sample_all_zones.return_value = {"Bridge": {"status": "ok"}}
+            obs.surface_swab.swab_zones.return_value = {}
+            obs.wastewater_seq.sample_all_zones.return_value = {}
+            obs.clinical_rdt = MagicMock()
+            obs.clinical_qpcr = MagicMock()
+            obs.clinical_microbiology = MagicMock()
+            return obs
+
+        spaces = {"Bridge": {"pathogen_mass": 1.0}}
+        common = dict(
+            epoch=1,
+            agents=[],
+            spaces=spaces,
+            zone_names=["Bridge"],
+            zone_volumes={"Bridge": 100.0},
+            zone_microflora_shifts={},
+            trigger_status=STATUS_BASELINE,
+            high_traffic=["Bridge"],
+            syn_result={"sick_call_agents": []},
+            engine=engine,
+            pathogen_profiles={},
+        )
+        obs_on = _make_obs()
+        air_on, *_ = run_observation_sampling(
+            obs=obs_on, cfg={"observation": {"enabled": True}}, **common,
+        )
+        obs_off = _make_obs()
+        air_off, *_ = run_observation_sampling(
+            obs=obs_off, cfg={"observation": {"enabled": False}}, **common,
+        )
+        assert air_on != air_off
+        assert "Bridge" in air_on
+        assert air_off == {}
+        obs_on.air_sniffer.sample_all_zones.assert_called_once()
+        obs_off.air_sniffer.sample_all_zones.assert_not_called()

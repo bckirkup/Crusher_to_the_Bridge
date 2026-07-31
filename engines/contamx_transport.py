@@ -257,7 +257,7 @@ def _load_path_map_entries_beside_prj(
                 cand, "r", allowed_roots=allowed_roots, encoding="utf-8",
             ) as fh:
                 entries = json.load(fh)
-        except (OSError, ValueError, json.JSONDecodeError):
+        except (OSError, ValueError):
             continue
         if isinstance(entries, list) and entries:
             return _normalize_path_map_entries(entries)

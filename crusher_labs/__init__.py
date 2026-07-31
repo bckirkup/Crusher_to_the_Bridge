@@ -17,39 +17,38 @@ from typing import Any
 import numpy as np
 import yaml
 
-from simulation_utils.paths import resolve_repo_path, validated_open
-
-from crusher_labs.modalities.syndromic import SyndromicSurveillance
-from crusher_labs.modalities.clinical_rdt import ClinicalRDT
-from crusher_labs.modalities.targeted_pcr import TargetedPCR
-from crusher_labs.modalities.sequencing import MetagenomicSequencing
-from crusher_labs.modalities.long_read_sequencing import LongReadNanoporeSequencing
-from crusher_labs.modalities.wearable import WearableDataStream
-from crusher_labs.long_read_escalation import (
-    collect_long_read_escalation_requests,
-    is_long_read_enabled,
-    long_read_config,
-)
 from crusher_labs.clinical_correlation import (
     CLINICAL_TEST_KEYS,
     ClinicalTestCorrelation,
     clinical_diagnostics_params,
 )
+from crusher_labs.cost_ledger import CostLedger
+from crusher_labs.lab_notebook import ArtificialLabNotebook
+from crusher_labs.long_read_escalation import (
+    collect_long_read_escalation_requests,
+    is_long_read_enabled,
+    long_read_config,
+)
+from crusher_labs.modalities.clinical_rdt import ClinicalRDT
+from crusher_labs.modalities.long_read_sequencing import LongReadNanoporeSequencing
+from crusher_labs.modalities.sequencing import MetagenomicSequencing
+from crusher_labs.modalities.syndromic import SyndromicSurveillance
+from crusher_labs.modalities.targeted_pcr import TargetedPCR
+from crusher_labs.modalities.wearable import WearableDataStream
 from crusher_labs.observation_core import (
-    ContinuousAirSniffer,
-    TargetedSurfaceSwab,
-    WastewaterSequencingGrid,
-    ClinicalRapidDiagnostic,
-    ClinicalQPCR,
-    ClinicalMicrobiology,
-    InstrumentQC,
     DEFAULT_WW_DIRICHLET_CONCENTRATION,
     DEFAULT_WW_PSEUDOCOUNT,
     DEFAULT_WW_READ_DEPTH,
+    ClinicalMicrobiology,
+    ClinicalQPCR,
+    ClinicalRapidDiagnostic,
+    ContinuousAirSniffer,
+    InstrumentQC,
+    TargetedSurfaceSwab,
+    WastewaterSequencingGrid,
 )
-from crusher_labs.lab_notebook import ArtificialLabNotebook
 from crusher_labs.protocol_engine import ProtocolEngine
-from crusher_labs.cost_ledger import CostLedger
+from simulation_utils.paths import resolve_repo_path, validated_open
 
 _CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.yaml")
 
@@ -138,6 +137,9 @@ def build_modalities(
             noise_categories=fred_cfg.get("healthy_noise_categories"),
             quarantine_compliance=fred_cfg.get("quarantine_compliance", 0.85),
             compliance_delay_epochs=fred_cfg.get("compliance_delay_epochs", 1),
+            reluctant_fraction=fred_cfg.get("reluctant_fraction", 0.75),
+            reluctant_delay_epochs=fred_cfg.get("reluctant_delay_epochs", 48),
+            compliance_by_class=fred_cfg.get("compliance_by_class"),
             rng=rng,
         ),
         "clinical_rdt": ClinicalRDT(
@@ -187,6 +189,7 @@ __all__ = [
     "ClinicalRDT",
     "TargetedPCR",
     "MetagenomicSequencing",
+    "LongReadNanoporeSequencing",
     "ContinuousAirSniffer",
     "TargetedSurfaceSwab",
     "WastewaterSequencingGrid",
@@ -207,6 +210,9 @@ __all__ = [
     "load_config",
     "wastewater_sequencing_params",
     "metagenomic_sequencing_params",
+    "collect_long_read_escalation_requests",
+    "is_long_read_enabled",
+    "long_read_config",
     "DEFAULT_WW_READ_DEPTH",
     "DEFAULT_WW_DIRICHLET_CONCENTRATION",
     "DEFAULT_WW_PSEUDOCOUNT",

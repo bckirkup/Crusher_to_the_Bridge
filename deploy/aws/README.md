@@ -59,6 +59,7 @@ Two credential contexts, both short-lived:
 | `batch_job_definition.json` | Fargate Spot Batch job definition (ECR image, both role ARNs, vCPU/mem, shard/s3 command). Sized at **1 vCPU / 2048 MB (2 GB)** after compact history + subprocess isolation. Per-run `--timeout 3600` covers ~30 min 7000-agent sims. OOM (exit 137 / `OutOfMemoryError*`) **exits without retry** so memory kills are countable; Spot `Host EC2*` still retries. Escalate 1/4 → 1/8 → 2/16 GB if `classify_batch_failures.py` shows non-zero OOM. **Not an IAM document.** | `<ACCOUNT_ID>`, `<REGION>`, `<BUCKET>` |
 | `submit_array_job.sh` | Wrapper around `aws batch submit-job --array-properties size=<N>` (honors `AWS_PROFILE`) | — |
 | `classify_batch_failures.py` | Classify array-child attempts: Spot reclaim vs OOM vs timeout vs other. Write JSON/CSV; optional upload to `s3://…/campaign/_ops/`. | — |
+| `monitor_campaign.ps1` | Windows-friendly poller: Batch `statusSummary` + S3 `*.zip` count (optional `-Watch` / `-Classify`). | — |
 | `ensure_campaign_infra.sh` | Recreate missing queue/log group and register the current job definition (`AWS_PROFILE=picard`). Optional `--smoke-submit N`. | `ACCOUNT_ID`, `REGION`, `BUCKET` |
 | `aggregate_results.py` | Unzip `<run_id>.zip` under `./results/`, merge `summary.json` into one CSV/JSON | — |
 
@@ -221,6 +222,26 @@ The command is `--shard-count <N> --s3-prefix s3://<bucket>/campaign/ --resume -
 `--shard-index` is **not** passed — the runner reads `AWS_BATCH_JOB_ARRAY_INDEX`,
 which Batch injects into every array child, so child *i* runs shard *i*.
 
+### Spot reclaim vs OOM (`evaluateOnExit`)
+
+Fargate Spot interruptions often arrive as exit code **137** with
+`statusReason: "Your Spot Task was interrupted."` — the same exit code as an
+OOM kill. The job definition **must** match Spot status reasons **before** the
+exit-137 / `OutOfMemoryError*` exit rules, or Batch will treat reclaim as a
+permanent OOM and stop retrying. Current order:
+
+1. `Your Spot Task was interrupted*` → `retry` (must precede exit-137)
+2. `OutOfMemoryError*` → `exit` (countable, no retry)
+3. exit `137` → `exit` (bare memory kill without reason text)
+4. exit `0` → `exit`
+5. `*` → `retry`
+
+(AWS Batch allows at most **five** `evaluateOnExit` rules. This CE is
+`FARGATE_SPOT` only, so the EC2-style `Host EC2*` rule is omitted.)
+
+`attempts` is **10** so a shard can survive repeated Spot reclaim. `--resume`
+still skips completed runs after each restart.
+
 ### Container sizing (vCPU / memory)
 
 Two separate memory problems, two fixes:
@@ -342,7 +363,7 @@ If the Spot compute environment already exists but the queue was deleted, or
 after changing `batch_job_definition.json` sizing/timeout:
 
 ```bash
-export AWS_PROFILE=picard REGION=us-east-1 ACCOUNT_ID=994254241749 BUCKET=<bucket>
+export AWS_PROFILE=picard REGION=us-east-1 ACCOUNT_ID=<ACCOUNT_ID> BUCKET=<bucket>
 ./ensure_campaign_infra.sh
 # optional smoke array (size must be >= 2):
 ./ensure_campaign_infra.sh --smoke-submit 2
@@ -371,12 +392,29 @@ skips those run_ids (and any `<run_id>.zip` already present under the prefix).
 The log is also re-uploaded periodically. Inside the container, boto3 uses the
 **picard-campaign-job-role** automatically — no keys in the image.
 
-Monitor progress:
+Monitor progress (PowerShell-friendly wrapper — prefer this on Windows):
+
+```powershell
+# Status + S3 zip count every 60s (Ctrl+C to stop)
+$env:AWS_PROFILE = 'picard'   # or your SSO PowerUser profile
+$env:CAMPAIGN_BUCKET = '<BUCKET>'
+.\deploy\aws\monitor_campaign.ps1 -JobId <jobId> -Watch -IntervalSec 60
+```
+
+One-shot Batch status only:
 
 ```bash
 aws --profile picard batch describe-jobs --jobs <jobId> --region "$REGION" \
   --query 'jobs[0].arrayProperties.statusSummary'
 ```
+
+**What to watch (three signals, not one):**
+
+| Signal | Why |
+|--------|-----|
+| `statusSummary` (RUNNING / RUNNABLE / SUCCEEDED / FAILED) | Shard-level only — a child is SUCCEEDED only when its **entire** shard finishes. Early progress looks like RUNNABLE↔RUNNING bounce with SUCCEEDED=0. |
+| S3 `campaign/*.zip` object count | True throughput — zips land continuously while shards are still RUNNING. |
+| `classify_batch_failures.py` | Separates Spot reclaim from real OOM / timeout. |
 
 Classify Spot reclaim vs OOM vs timeout (during or after the run):
 
@@ -389,8 +427,16 @@ AWS_PROFILE=picard python3 classify_batch_failures.py \
 
 `RUNNING`↔`RUNNABLE` bounce on Fargate Spot is normal reclaim + retry. Use the
 classifier's `jobs_with_spot_reclaim` vs `jobs_with_oom` counts to separate
-reclaim noise from real memory pressure. OOM attempts **do not retry** (job def
-`evaluateOnExit` exits on 137 / `OutOfMemoryError*`) so they stay visible.
+reclaim noise from real memory pressure. True OOM attempts **do not retry**
+(job def exits on `OutOfMemoryError*` / bare exit 137 after Spot rules) so they
+stay visible as FAILED children.
+
+**Profiles:** day-to-day submit/monitor can use `--profile picard`
+(`picard-deploy-role`). Use your SSO **PowerUser** (or admin) profile when you
+need broader read/ops (S3 listing, Logs describe, recreating a deleted queue,
+ECR create). Containers still run as `picard-campaign-job-role` either way.
+Never commit real account IDs, bucket names, ExternalIds, or access keys —
+keep them in env vars / `~/.aws/` only.
 ## 7. Collect + aggregate results
 
 ```bash

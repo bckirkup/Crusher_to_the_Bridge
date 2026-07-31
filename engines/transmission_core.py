@@ -46,12 +46,9 @@ from engines.infection_dynamics_bridge import (
     ALPHA,
     BETA,
     SURFACE_DEPOSITION_FRACTION,
-    IllnessStatus,
     InfectionStatus,
     KorkinAgent,
-    infection_probability,
 )
-
 
 # ── Pathway-specific parameters ──────────────────────────────────────────
 
@@ -118,6 +115,8 @@ class ContactTracingMatrix:
     environmental_exposures: list[dict[str, Any]] = field(default_factory=list)
     # Actual infection events across all pathways
     transmission_events: list[dict[str, Any]] = field(default_factory=list)
+    # Epoch x zone occupancy / contact summary (surfaces zone_occupants map)
+    zone_contact_summary: list[dict[str, Any]] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -129,6 +128,7 @@ class ContactTracingMatrix:
             "food_contamination_exposures": self.food_contamination_exposures,
             "environmental_exposures": self.environmental_exposures,
             "transmission_events": self.transmission_events,
+            "zone_contact_summary": self.zone_contact_summary,
         }
 
 
@@ -413,6 +413,11 @@ class TransmissionCore:
                             if pathogen_id in k or pathogen_id == "_default"
                         },
                     })
+
+        # ── Per-zone contact summary (occupancy map used for doses) ──
+        matrix.zone_contact_summary = self._build_zone_contact_summary(
+            zone_occupants, matrix, active_pathogens,
+        )
 
         # ── Update persistent state for next epoch ───────────────────
         self._update_surface_pools(zone_occupants)
@@ -965,6 +970,61 @@ class TransmissionCore:
                 if not a.is_infected_with(pathogen_id):
                     result.append(a)
         return result
+
+    # ── Per-zone contact summary ─────────────────────────────────────
+
+    def _build_zone_contact_summary(
+        self,
+        zone_occupants: dict[str, list[KorkinAgent]],
+        matrix: ContactTracingMatrix,
+        active_pathogens: list[str],
+    ) -> list[dict[str, Any]]:
+        """Summarize epoch occupancy and contact intensity per zone.
+
+        Surfaces the same ``zone_occupants`` map used for transmission so
+        analysis can verify mixing (e.g. Medical zones are not a sick-call
+        gathering point — sick-call is roster-only).
+        """
+        shared_by_zone: dict[str, int] = {}
+        for row in matrix.shared_room_exposures:
+            z = row.get("zone", "")
+            shared_by_zone[z] = shared_by_zone.get(z, 0) + 1
+
+        droplet_by_zone: dict[str, int] = {}
+        for row in matrix.droplet_exposures:
+            z = row.get("zone", "")
+            droplet_by_zone[z] = droplet_by_zone.get(z, 0) + 1
+
+        infection_by_zone: dict[str, int] = {}
+        for row in matrix.transmission_events:
+            z = row.get("zone", "")
+            infection_by_zone[z] = infection_by_zone.get(z, 0) + 1
+
+        summary: list[dict[str, Any]] = []
+        for zone_name in sorted(zone_occupants.keys()):
+            occupants = zone_occupants[zone_name]
+            if not occupants:
+                continue
+            occupant_ids = sorted(a.agent_id for a in occupants)
+            shedder_ids: set[int] = set()
+            for pathogen_id in active_pathogens:
+                profile = self.pathogen_profiles.get(pathogen_id, {})
+                for agent, _sv in self._get_shedders(
+                    occupants, pathogen_id, profile or None,
+                ):
+                    shedder_ids.add(agent.agent_id)
+            sorted_shedders = sorted(shedder_ids)
+            summary.append({
+                "zone": zone_name,
+                "occupant_count": len(occupant_ids),
+                "occupant_ids": occupant_ids,
+                "shedder_count": len(sorted_shedders),
+                "shedder_ids": sorted_shedders,
+                "shared_room_exposure_count": shared_by_zone.get(zone_name, 0),
+                "droplet_exposure_count": droplet_by_zone.get(zone_name, 0),
+                "infection_count": infection_by_zone.get(zone_name, 0),
+            })
+        return summary
 
     # ── State management ─────────────────────────────────────────────
 

@@ -13,27 +13,27 @@ import json
 import os
 from typing import Any
 
-from simulation_utils.paths import prepare_output_directory, resolve_repo_path, validated_open
+from crusher_labs.lab_notebook import load_logging_profile
 from engines.infection_dynamics_bridge import (
-    KorkinShipEngine,
-    InfectionStatus,
     IllnessStatus,
+    InfectionStatus,
+    KorkinShipEngine,
 )
 from engines.py_contam_bridge import ContamTransportEngine
-from crusher_labs.lab_notebook import load_logging_profile
+from orchestrator_display import print_executive_summary
 from orchestrator_types import (
     REPO_ROOT,
-    SimulationState,
     ObservationEngine,
     ProtocolContext,
+    SimulationState,
 )
-from orchestrator_display import print_executive_summary
+from simulation_utils.paths import prepare_output_directory, resolve_repo_path, validated_open
 from telemetry_buffer.agent_axes import (
+    INFECTION_IMMUNE,
+    INFECTION_RECOVERED,
     agent_has_symptomatic_presentation,
     agent_is_infected,
     agent_is_isolated,
-    INFECTION_RECOVERED,
-    INFECTION_IMMUNE,
     resolve_agent_axes,
 )
 

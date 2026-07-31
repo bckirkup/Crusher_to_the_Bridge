@@ -18,16 +18,21 @@ from crusher_labs.protocol_engine import (
     reset_modifiers,
 )
 from decision_engine.actions import ActionEnvelope
+from decision_engine.experience import ExperienceStore
+from decision_engine.protocol_filter import eligible_protocol_ids, filter_active_modifiers
+from decision_engine.runtime import DecisionRuntime
 from engines.py_contam_bridge import (
     build_transport_engine,
     load_air_flow_paths,
+)
+from engines.py_contam_bridge import (
     load_spatial_layout as load_platform_layout,
 )
 from engines.transmission_core import (
-    TransmissionCore,
-    build_hvac_downstream_map,
     DEFAULT_CONFINEMENT_ISOLATION_FACTOR,
     DEFAULT_CORRIDOR_DIRECT_CONTACT_FACTOR,
+    TransmissionCore,
+    build_hvac_downstream_map,
 )
 from orchestrator_chronic import (
     assign_chronic_diseases,
@@ -43,20 +48,23 @@ from orchestrator_epoch import (
     build_cascade_context,
     compute_infection_counters,
     compute_zone_microflora_shifts,
+    inactive_syndromic_result,
     run_observation_sampling,
-    step_cost_accounting,
-    step_diagnostic_cascade,
     step_cascade_cost_accounting,
-    step_long_read_cost_accounting,
+    step_cost_accounting,
     step_counter_thresholds,
+    step_diagnostic_cascade,
     step_fred_compliance,
     step_infection_progression,
+    step_long_read_cost_accounting,
     step_mid_cruise_introductions,
-    step_quarantine_confinement,
     step_operational_impact_accounting,
+    step_quarantine_confinement,
     step_wearable_monitoring,
+    surveillance_is_active,
 )
 from orchestrator_init import (
+    assign_cabin_mates,
     build_engine,
     check_escalation,
     engine_payload_to_schema,
@@ -66,22 +74,21 @@ from orchestrator_init import (
     init_wearable_monitors,
     initialize_grumb_seeding,
     initialize_ship_graph,
-    assign_cabin_mates,
     load_isolation_unit_capacity,
     load_pathogen_profiles,
+    pathogen_profiles_are_respiratory,
+    update_cumulative_confirmed_cases,
 )
 from orchestrator_record import finalize_simulation, record_epoch
 from orchestrator_types import (
     REPO_ROOT,
+    STATUS_ALERT,
     STATUS_CONFIRMED,
-    STATUS_SUSPECTED,
+    STATUS_RANK,
     SimulationState,
 )
 from picard_framework.run_spec import PicardRunSpec
 from picard_framework.simulation.action_applier import apply_action_envelope
-from decision_engine.runtime import DecisionRuntime
-from decision_engine.protocol_filter import eligible_protocol_ids, filter_active_modifiers
-from decision_engine.experience import ExperienceStore
 from picard_framework.simulation.step_result import StepResult
 from picard_framework.world_state import WorldState
 from telemetry_buffer.schema import make_ground_truth, read_ground_truth, write_ground_truth
@@ -340,7 +347,18 @@ class ShipSimulation:
             valid_zones=set(self.zone_names),
         )
 
-        step_fred_compliance(epoch, state, syndromic)
+        # Lightweight agent view for reluctant→symptomatic re-checks (pre-step)
+        _fred_agents = [
+            {
+                "agent_id": a.agent_id,
+                "agent_class": a.agent_class,
+                "symptom_presentation": (
+                    "symptomatic" if a.is_symptomatic else "asymptomatic"
+                ),
+            }
+            for a in self.engine.agents
+        ]
+        step_fred_compliance(epoch, state, syndromic, agents=_fred_agents)
         step_mid_cruise_introductions(epoch, self.engine, self.pathogen_profiles, self.rng)
 
         self.engine.isolated_ids = set(state.isolated_ids)
@@ -447,12 +465,22 @@ class ShipSimulation:
                 except (TypeError, ValueError):
                     continue
 
-        syn_result = syndromic.query_ground_truth(
-            truth,
-            behavioral_overrides=state.agent_behavioral_overrides,
-            information_beliefs=beliefs,
-            chronic_behavioral_mods=self.chronic_behavioral_mods,
-        )
+        if surveillance_is_active(epoch, cfg):
+            syn_result = syndromic.query_ground_truth(
+                truth,
+                behavioral_overrides=state.agent_behavioral_overrides,
+                information_beliefs=beliefs,
+                chronic_behavioral_mods=self.chronic_behavioral_mods,
+            )
+            cascade_result = step_diagnostic_cascade(
+                epoch, state, agents, syn_result, wearable_result, self.obs,
+                wearable_monitor=self.wearable_monitor,
+                syndromic=syndromic,
+                cfg=cfg,
+            )
+        else:
+            syn_result = inactive_syndromic_result(epoch, n_agents=len(agents))
+            cascade_result = None
         from crusher_labs.clinical_presentation import apply_noise_syndromes_to_agents
 
         apply_noise_syndromes_to_agents(
@@ -461,10 +489,6 @@ class ShipSimulation:
             cfg.get("fred_behavior", {}).get("healthy_noise_categories"),
         )
 
-        cascade_result = step_diagnostic_cascade(
-            epoch, state, agents, syn_result, wearable_result, self.obs,
-            wearable_monitor=self.wearable_monitor,
-        )
         step_cascade_cost_accounting(epoch, self.proto_ctx, cascade_result)
 
         sick_call_ids = syn_result["sick_call_agents"]
@@ -496,25 +520,28 @@ class ShipSimulation:
         ]
 
         pcr_result = None
-        if state.trigger_status == STATUS_SUSPECTED:
-            wipe = list(dict.fromkeys(self.high_traffic + verify_zones))
-            pcr_result = pcr.query_ground_truth(truth, surface_wipe_zones=wipe)
-        elif state.trigger_status == STATUS_CONFIRMED:
-            wipe = list(dict.fromkeys(self.zone_names + verify_zones))
-            pcr_result = pcr.query_ground_truth(truth, surface_wipe_zones=wipe)
-        elif epoch % int(pcr_cadence) == 0:
-            if verify_zones:
-                pcr_result = pcr.query_ground_truth(
-                    truth, surface_wipe_zones=verify_zones,
-                )
-            else:
-                pcr_result = pcr.query_ground_truth(truth)
-
         seq_result = None
-        if epoch % int(seq_cadence) == 0:
-            seq_result = seq.query_ground_truth(
-                truth, zone_microflora_shifts=zone_microflora_shifts,
-            )
+        observation_enabled = cfg.get("observation", {}).get("enabled", True)
+        status_rank = STATUS_RANK.get(state.trigger_status, 0)
+        if observation_enabled:
+            if status_rank >= STATUS_RANK[STATUS_CONFIRMED]:
+                wipe = list(dict.fromkeys(self.zone_names + verify_zones))
+                pcr_result = pcr.query_ground_truth(truth, surface_wipe_zones=wipe)
+            elif status_rank >= STATUS_RANK[STATUS_ALERT]:
+                wipe = list(dict.fromkeys(self.high_traffic + verify_zones))
+                pcr_result = pcr.query_ground_truth(truth, surface_wipe_zones=wipe)
+            elif epoch % int(pcr_cadence) == 0:
+                if verify_zones:
+                    pcr_result = pcr.query_ground_truth(
+                        truth, surface_wipe_zones=verify_zones,
+                    )
+                else:
+                    pcr_result = pcr.query_ground_truth(truth)
+
+            if epoch % int(seq_cadence) == 0:
+                seq_result = seq.query_ground_truth(
+                    truth, zone_microflora_shifts=zone_microflora_shifts,
+                )
 
         (air_results, swab_results, ww_results,
          clin_rdt_results, clin_qpcr_results, clin_microbio_results,
@@ -526,10 +553,22 @@ class ShipSimulation:
             )
         )
 
-        prev_status = state.trigger_status
-        state.trigger_status = check_escalation(
-            state.trigger_status, syn_result, pcr_result, cfg,
+        n_confirmed = update_cumulative_confirmed_cases(
+            clin_qpcr_results, clin_rdt_results,
+            state.cumulative_confirmed_case_ids,
         )
+        prev_status = state.trigger_status
+        new_status, new_pending, _rates = check_escalation(
+            state.trigger_status, syn_result, pcr_result, cfg,
+            agents=agents,
+            ever_ill_ids=state.ever_ill_ids,
+            cumulative_confirmed_cases=n_confirmed,
+            epoch=epoch,
+            escalation_pending=state.escalation_pending,
+            respiratory_mode=pathogen_profiles_are_respiratory(self.pathogen_profiles),
+        )
+        state.escalation_pending = new_pending
+        state.trigger_status = new_status
         if state.trigger_status != prev_status:
             state.escalation_log.append({
                 "epoch": epoch, "from": prev_status, "to": state.trigger_status,
@@ -538,6 +577,25 @@ class ShipSimulation:
                 self.obs.notebook.log_trigger_transition(
                     epoch, prev_status, state.trigger_status,
                 )
+        elif new_pending is not None and (
+            prev_status == state.trigger_status
+        ):
+            # Log queued (not-yet-effective) transitions once
+            pending_to = new_pending.get("to")
+            already = any(
+                e.get("pending_to") == pending_to
+                and e.get("epoch_triggered") == new_pending.get("epoch_triggered")
+                for e in state.escalation_log
+            )
+            if not already:
+                state.escalation_log.append({
+                    "epoch": epoch,
+                    "from": state.trigger_status,
+                    "to": pending_to,
+                    "pending": True,
+                    "pending_to": pending_to,
+                    "epoch_triggered": new_pending.get("epoch_triggered"),
+                })
 
         stoplights = compute_stoplights(
             air_results, swab_results, ww_results,
@@ -557,6 +615,7 @@ class ShipSimulation:
             )
             eligible = eligible_protocol_ids(
                 self.proto_ctx.standing_protocols, stoplights,
+                trigger_status=state.trigger_status,
             )
             epoch_snapshot = {
                 "epoch": epoch,
@@ -604,6 +663,7 @@ class ShipSimulation:
             forced_protocol_ids=state.forced_protocol_ids,
             authorized_sop_ids=authorized,
             cascade_context=cascade_ctx,
+            trigger_status=state.trigger_status,
         )
         if dr is not None and dr.decision_ctx.authorized_sop_ids is not None:
             active_mods = filter_active_modifiers(
@@ -635,6 +695,9 @@ class ShipSimulation:
         counter_results = compute_infection_counters(agents, counter_defs)
         step_counter_thresholds(
             epoch, agents, counter_results, counter_defs, state, syndromic,
+            confinement_enabled=self.graph_cfg.get(
+                "counter_confinement_enabled", True,
+            ),
         )
 
         step_operational_impact_accounting(
