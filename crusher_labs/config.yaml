@@ -207,8 +207,10 @@ escalation:
   suspect_attack_rate: 0.02
   # Level 2 → 3 CONFIRMED: CDC VSP 3% outbreak threshold
   confirm_attack_rate: 0.03
-  # Level 3 → 4 LOCKDOWN: ship-wide confinement (null / "never" disables)
-  lockdown_attack_rate: 0.05
+  # Level 3 → 4 LOCKDOWN: ship-wide confinement.
+  # Default "never" for small smoke ships (n=20 → 1 case = 5% AR).
+  # Campaign / mega-cruise configs should set 0.05 (CDC-style extreme).
+  lockdown_attack_rate: never
   # Legacy surface-PCR Ct gate (retained for compat; AR thresholds are authoritative)
   pcr_confirm_ct_threshold: 35.0
   # Respiratory pathogens: lower thresholds (CDC/IHR-aligned)

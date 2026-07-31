@@ -14,8 +14,8 @@ import pytest
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 HISTORY_PATH = os.path.join(REPO_ROOT, "telemetry_buffer", "simulation_history.json")
 
-# Updated 2026-07-18: analytical well-mixed ODE (replaces forward Euler) on
-# AHU star topology — slower, stable airborne clearance shifts final SIR counts.
+# Updated 2026-07-31: outbreak-response architecture reaches CONFIRMED via
+# cumulative attack rate (CDC VSP 3%); SIR counts match prior golden.
 EXPECTED_SUMMARY = {
     "susceptible": 2,
     "infected": 0,
@@ -23,7 +23,7 @@ EXPECTED_SUMMARY = {
     "recovered": 14,
     "immune": 4,
 }
-EXPECTED_TRIGGER = "BASELINE"
+EXPECTED_TRIGGER = "CONFIRMED"
 
 
 def _run_orchestrator(epochs: int = 24) -> list[dict]:

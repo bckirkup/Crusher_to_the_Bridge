@@ -76,13 +76,13 @@ def test_picard_golden_summary_and_trigger() -> None:
     picard_history = _run_picard()
     assert len(picard_history) >= GOLDEN_LAST + 1
     fp = _fingerprint(picard_history, GOLDEN_LAST)
-    # Updated 2026-07-18: analytical mass balance + HVAC star (matches orchestrator golden).
+    # Updated 2026-07-31: matches orchestrator golden after outbreak-response arch.
     assert fp["susceptible"] == 2
     assert fp["infected"] == 0
     assert fp["symptomatic"] == 0
     assert fp["recovered"] == 14
     assert fp["immune"] == 4
-    assert fp["trigger_status"] == "BASELINE"
+    assert fp["trigger_status"] == "CONFIRMED"
 
 
 @pytest.mark.timeout(240)

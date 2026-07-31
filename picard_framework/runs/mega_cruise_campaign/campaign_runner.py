@@ -553,6 +553,17 @@ def parameters_from_spec(spec: dict[str, Any]) -> dict[str, Any]:
     return {k: v for k, v in params.items() if v is not None and v != ""}
 
 
+# Mega-cruise defaults: enable LOCKDOWN AR threshold (config.yaml uses
+# "never" so 20-agent smokes do not lockdown on a single case).
+_CAMPAIGN_ESCALATION_DEFAULTS = {
+    "escalation": {
+        "lockdown_attack_rate": 0.05,
+        "suspect_attack_rate": 0.02,
+        "confirm_attack_rate": 0.03,
+    },
+}
+
+
 def generate_tier_runs(
     manifest: dict[str, Any],
     tier_id: str,
@@ -581,6 +592,7 @@ def generate_tier_runs(
         **factors: Any,
     ) -> tuple[str, dict[str, Any]]:
         n_agents = default_agents if num_agents is None else int(num_agents)
+        cfg = merge_cfg(_CAMPAIGN_ESCALATION_DEFAULTS, config_overrides)
         params = _campaign_parameters(
             tier_id=tier_id,
             run_id=rid,
@@ -590,7 +602,7 @@ def generate_tier_runs(
             epochs=default_epochs,
             num_agents=n_agents,
             pathogen=pathogen,
-            config_overrides=config_overrides,
+            config_overrides=cfg,
             **factors,
         )
         return rid, make_picard_spec(
@@ -598,7 +610,7 @@ def generate_tier_runs(
             platform=platform,
             bundle=bundle,
             pathogen_overrides=pathogen_overrides,
-            config_overrides=config_overrides,
+            config_overrides=cfg,
             seed=seed,
             epochs=default_epochs,
             num_agents=n_agents,
