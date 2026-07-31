@@ -26,7 +26,7 @@ python3 orchestrator.py --epochs 250
 # Launch LCARS dashboard (after simulation)
 python3 -m streamlit run dashboard.py
 
-# Run the test suite (~875 tests)
+# Run the test suite (~900 tests)
 python3 -m pytest tests/ -v --tb=short
 ```
 
@@ -34,6 +34,8 @@ Output is written to `telemetry_buffer/simulation_history.json` and
 `telemetry_buffer/artificial_lab_notebook.json` (gitignored runtime artifacts).
 
 Documentation map: [docs/README.md](docs/README.md).
+Outbreak response (SOPs / decision latency / compliance):
+[docs/tiered_escalation_spec.md](docs/tiered_escalation_spec.md).
 
 ## Picard, Presidio & Stackelberg
 
@@ -220,10 +222,18 @@ emod_progression:
 
 ### FRED-Style Behavioral Compliance
 
+Bimodal sticky classes (compliant / reluctant / defiant). See
+`docs/tiered_escalation_spec.md`.
+
 ```yaml
 fred_behavior:
-  quarantine_compliance: 0.85   # [0,1] — P(agent complies with isolation)
-  compliance_delay_epochs: 1
+  quarantine_compliance: 0.85   # [0,1] — fraction in Compliant class
+  reluctant_fraction: 0.75      # of non-compliers that are Reluctant
+  reluctant_delay_epochs: 48
+  compliance_by_class:
+    crew: 0.85
+    passenger_elderly: 0.70
+    passenger_young: 0.45
   healthy_noise_categories:
     - {reason: "seasickness",  probability: 0.008}
     - {reason: "fatigue",      probability: 0.005}
@@ -232,11 +242,23 @@ fred_behavior:
 
 ### Escalation Thresholds
 
+Five levels: `BASELINE → ALERT → SUSPECTED → CONFIRMED → LOCKDOWN`.
+
 ```yaml
 escalation:
-  syndromic_suspect_threshold: 3    # daily sick-call count → SUSPECTED
-  pcr_confirm_ct_threshold: 35.0    # Ct ≤ this → CONFIRMED
+  alert_sick_call_threshold: 3      # sick calls → ALERT
+  suspect_attack_rate: 0.02         # cumulative AR → SUSPECTED (CDC VSP 2%)
+  confirm_attack_rate: 0.03         # cumulative AR → CONFIRMED (CDC VSP 3%)
+  lockdown_attack_rate: never       # ship-wide; campaign sets 0.05
+  decision_latency:
+    alert_delay_epochs: 0
+    suspected_delay_epochs: 0
+    confirmed_delay_epochs: 0
+    lockdown_delay_epochs: 0
 ```
+
+SOP-009 (general confinement) requires escalation status `LOCKDOWN` via
+`min_escalation_status` in `protocols.json`.
 
 ### Diagnostic Modalities
 
@@ -504,24 +526,26 @@ reporting only — spending is never blocked when inventory is depleted.
 ## Standing Operating Procedures (SOPs)
 
 Protocols in `data/config/protocols.json` (SOP-001..SOP-016), activated from
-stoplights (no hardcoded epoch schedules).
+stoplights **and** (where set) `min_escalation_status` gates. Optional
+`activation_delay_epochs` defers modifiers after eligibility. No hardcoded
+epoch schedules (Law 1).
 
-| SOP | Name | Trigger instrument | Key modifiers |
-|-----|------|-------------------|---------------|
-| SOP-001–002 | Ventilation upgrades | Air sniffer | HVAC filters |
-| SOP-003 | Surface Decontamination | Surface swab | `surface_decontamination_factor` |
-| SOP-004–005 | PPE | Wastewater | Transmission scalars |
-| SOP-006 | Diagnostics | Clinical RDT | `diagnostic_cadence_multiplier` |
-| SOP-007 | Galley Closure | Clinical micro | `close_zones` |
-| SOP-008 | Symptomatic Confinement | Clinical RDT | `confine_symptomatic_to_quarters` |
-| SOP-009 | General Confinement | Clinical qPCR | `confine_all_to_quarters`, `exempt_classes` |
-| SOP-010 | VSP Threshold | Clinical RDT | Confinement + surface decon |
-| SOP-011 | Passenger-only Confinement | Clinical RDT | Crew `exempt_classes` |
-| SOP-012 | Wearable Individual Triage | `wearable_physiological_monitor` | Symptomatic confinement |
-| SOP-013 | Wearable Fleet Surveillance | `wearable_fleet_monitor` | 1.5× diagnostic cadence |
-| SOP-014 | Wearable Fleet Outbreak | `wearable_fleet_monitor` | PPE + contact/droplet scalars |
-| SOP-015 | Integrated Escalation (Elevated) | `detection_escalation` | 2× diagnostic cadence |
-| SOP-016 | Integrated Escalation (Critical) | `detection_escalation` | Confinement + PPE + surface decon |
+| SOP | Name | Trigger instrument | Min escalation | Key modifiers |
+|-----|------|-------------------|----------------|---------------|
+| SOP-001–002 | Ventilation upgrades | Air sniffer | SUSPECTED / CONFIRMED | HVAC filters |
+| SOP-003 | Surface Decontamination | Surface swab | SUSPECTED | `surface_decontamination_factor` |
+| SOP-004–005 | PPE | Wastewater | ALERT / CONFIRMED | Transmission scalars |
+| SOP-006 | Diagnostics | Clinical RDT | ALERT | `diagnostic_cadence_multiplier` |
+| SOP-007 | Galley Closure | Clinical micro | SUSPECTED | `close_zones` |
+| SOP-008 | Symptomatic Confinement | Clinical RDT | ALERT | `confine_symptomatic_to_quarters` |
+| SOP-009 | General Confinement | Clinical qPCR | **LOCKDOWN** | `confine_all_to_quarters`, `exempt_classes` |
+| SOP-010 | VSP Threshold | Clinical RDT | SUSPECTED | Confinement + surface decon |
+| SOP-011 | Passenger-only Confinement | Clinical RDT | CONFIRMED | Crew `exempt_classes` |
+| SOP-012 | Wearable Individual Triage | `wearable_physiological_monitor` | — | Symptomatic confinement |
+| SOP-013 | Wearable Fleet Surveillance | `wearable_fleet_monitor` | — | 1.5× diagnostic cadence |
+| SOP-014 | Wearable Fleet Outbreak | `wearable_fleet_monitor` | — | PPE + contact/droplet scalars |
+| SOP-015 | Integrated Escalation (Elevated) | `detection_escalation` | — | 2× diagnostic cadence |
+| SOP-016 | Integrated Escalation (Critical) | `detection_escalation` | — | Confinement + PPE + surface decon |
 
 **Detection escalation** SOPs use `min_modes_affected` (default 2) instead of
 zone counts — the protocol engine aggregates syndromic, wearable, environmental,

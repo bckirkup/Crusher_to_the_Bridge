@@ -5,7 +5,10 @@ after the HVAC star-topology + analytical mass-balance fixes.
 
 ## Tiers
 
-| Tier | What | Dimensions | Runs |
+Legacy v4 matrix (~17,780) is t1–t10. Campaign v5 adds outbreak-response
+sweeps (see `docs/tiered_escalation_spec.md`):
+
+| Tier | What | Dimensions | Runs (approx) |
 |------|------|-----------|------|
 | t1 | Pathogen baselines | 10 pathogens × 30 seeds | 300 |
 | t2 | HVAC parameter sweep | 4 × 5 filters × 5 OA × 3 decay × 15 seeds | 4500 |
@@ -17,7 +20,14 @@ after the HVAC star-topology + analytical mass-balance fixes.
 | t8 | Wearables | 4 × 3 configs × 4 surv × 10 seeds | 480 |
 | t9 | Slow pathogens (21d) | 4 × 4 surv × 20 seeds | 320 |
 | t10 | Population size | 2 × 5 sizes × 10 seeds | 100 |
-| **Total** | | | **~17780** |
+| t11 | Decision latency | 4 pathogens × 5 latency × 2 surv × 2 compliance × 5 seeds | 400 |
+| t15 | SOP AR thresholds | 4 × 4 suspect_AR × 4 lockdown_AR × 5 seeds | 320 |
+| t16 | Reluctant fraction | 4 × 3 reluctant_frac × 4 delay × 5 seeds | 240 |
+
+Mega-cruise runs inject `escalation.lockdown_attack_rate: 0.05` (default
+`config.yaml` uses `never` for small smokes). T11 with
+`decision_latency_levels` sweeps organizational delay; legacy manifests that
+only set `surveillance_delay_epochs` still use the surveillance start-delay path.
 
 ## Surveillance presets
 

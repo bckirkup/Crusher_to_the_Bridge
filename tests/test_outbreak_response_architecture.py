@@ -191,3 +191,108 @@ def test_check_escalation_attack_rate_sensitivity() -> None:
     s_high, _, _ = check_escalation(STATUS_ALERT, syn, None, high, agents=agents)
     assert s_low == STATUS_SUSPECTED
     assert s_high == STATUS_ALERT
+
+
+def test_refuse_quarantine_forces_defiant_forever() -> None:
+    syn = SyndromicSurveillance(
+        quarantine_compliance=1.0,
+        reluctant_delay_epochs=1,
+        rng=np.random.default_rng(0),
+    )
+    assert syn.check_quarantine_compliance(
+        11, 0, behavioral_override="refuse_quarantine",
+    ) is False
+    assert syn.check_quarantine_compliance(
+        11, 100, behavioral_override="refuse_quarantine",
+    ) is False
+    assert syn._compliance_class[11] == "defiant"
+
+
+def test_confinement_scope_alert_symptomatic_only() -> None:
+    from unittest.mock import MagicMock
+
+    from orchestrator_epoch import step_quarantine_confinement
+    from orchestrator_types import (
+        SYMPTOM_ASYMPTOMATIC,
+        SYMPTOM_SYMPTOMATIC,
+        SimulationState,
+    )
+
+    state = SimulationState()
+    agents = [
+        {"agent_id": 0, "symptom_status": SYMPTOM_ASYMPTOMATIC},
+        {"agent_id": 1, "symptom_status": SYMPTOM_SYMPTOMATIC},
+    ]
+    mock = MagicMock()
+    mock.check_quarantine_compliance.return_value = True
+    step_quarantine_confinement(3, agents, {}, STATUS_ALERT, state, mock)
+    assert 1 in state.quarantined_ids
+    assert 0 not in state.quarantined_ids
+
+
+def test_confinement_scope_confirmed_includes_cabin_contacts() -> None:
+    from unittest.mock import MagicMock
+
+    from orchestrator_epoch import step_quarantine_confinement
+    from orchestrator_types import (
+        SYMPTOM_ASYMPTOMATIC,
+        SYMPTOM_SYMPTOMATIC,
+        SimulationState,
+    )
+
+    state = SimulationState()
+    state.cumulative_confirmed_case_ids.add(1)
+    agents = [
+        {
+            "agent_id": 0, "symptom_status": SYMPTOM_ASYMPTOMATIC,
+            "cabin_mate_ids": [1],
+        },
+        {
+            "agent_id": 1, "symptom_status": SYMPTOM_SYMPTOMATIC,
+            "cabin_mate_ids": [0],
+        },
+        {"agent_id": 2, "symptom_status": SYMPTOM_ASYMPTOMATIC},
+    ]
+    mock = MagicMock()
+    mock.check_quarantine_compliance.return_value = True
+    step_quarantine_confinement(3, agents, {}, STATUS_CONFIRMED, state, mock)
+    assert 0 in state.quarantined_ids  # cabin contact of confirmed
+    assert 1 in state.quarantined_ids
+    assert 2 not in state.quarantined_ids
+
+
+def test_campaign_injects_lockdown_attack_rate_default() -> None:
+    manifest = load_manifest()
+    _rid, sample = next(generate_tier_runs(manifest, "t1_pathogen_baselines"))
+    esc = sample["config_overrides"]["escalation"]
+    assert esc["lockdown_attack_rate"] == pytest.approx(0.05)
+    assert esc["suspect_attack_rate"] == pytest.approx(0.02)
+
+
+def test_sop009_blocked_until_lockdown_in_engine() -> None:
+    """Config sensitivity: SOP-009 absent at CONFIRMED, present at LOCKDOWN."""
+    proto = StandingProtocol({
+        "protocol_id": "SOP-009",
+        "name": "Lockdown",
+        "trigger": {
+            "instrument_class": "clinical_qpcr",
+            "stoplight_level": "RED",
+            "min_agents_affected": 1,
+        },
+        "modifiers": {"confine_all_to_quarters": True},
+        "min_escalation_status": "LOCKDOWN",
+    })
+    ledger = CostLedger()
+    engine = ProtocolEngine([proto], ledger)
+    lights = {"clinical_qpcr": {"1": "RED", "2": "RED", "3": "RED"}}
+
+    mods_confirmed = engine.evaluate_epoch(
+        0, lights, trigger_status=STATUS_CONFIRMED,
+    )
+    assert mods_confirmed == []
+
+    mods_lockdown = engine.evaluate_epoch(
+        1, lights, trigger_status=STATUS_LOCKDOWN,
+    )
+    assert len(mods_lockdown) == 1
+    assert mods_lockdown[0]["modifiers"]["confine_all_to_quarters"] is True

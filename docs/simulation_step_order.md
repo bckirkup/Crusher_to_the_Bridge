@@ -21,13 +21,16 @@ When the Picard run spec includes a `social` block, each epoch follows this orde
 15. **Syndromic / RDT** (behavioral overrides + belief-scaled sick-call probability)
 16. PCR / sequencing (verification-test queue zones merged into surface wipes)
 17. Six-instrument observation sampling
-18. Escalation matrix update
+18. Escalation matrix update (`check_escalation`: attack-rate thresholds +
+    optional `decision_latency` pending queue; respiratory overrides)
 19. Stoplight computation
 20. **Stackelberg command / medical** (`solve_command_medical`) → apply command/medical actions
-21. Protocol engine evaluation (`forced_protocol_ids` + stoplight triggers; authorized debits)
+21. Protocol engine evaluation (`forced_protocol_ids` + stoplight triggers +
+    `min_escalation_status` + SOP `activation_delay_epochs`; authorized debits)
 22. Apply merged SOP modifiers (HVAC, transmission, zone closure, surfaces)
 23. Cost accounting (financial / labor / materials)
-24. Quarantine confinement
+24. Quarantine confinement (scope from escalation level and/or SOP modifiers;
+    bimodal FRED compliance)
 25. Infection counter thresholds
 26. **Operational impact score (OIS)** accounting
 27. `record_epoch` → append to `simulation_history`

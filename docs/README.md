@@ -35,11 +35,12 @@ python3 presidio_runner.py \
 | Doc | Role |
 |-----|------|
 | [SHEDDING_AND_CABINMATES.md](SHEDDING_AND_CABINMATES.md) | Host shedding variance + cabin-mate pairing |
+| [tiered_escalation_spec.md](tiered_escalation_spec.md) | Outbreak response: SOP policy, decision latency, bimodal compliance (Campaign v5) |
 | [pathogen_notes.md](pathogen_notes.md) | Pathogen profile notes |
 | [pricing_notes.md](pricing_notes.md) | Assay / labor cost assumptions |
 | [SOP_CASCADE_RECONFIG.md](SOP_CASCADE_RECONFIG.md) | Design note (partially landed) — prefer `data/config/diagnostic_cascade*.json` |
 | `../schemas/README.md` | JSON Schema ↔ config/output contracts |
-| `../.agents/skills/` | Task skills (platform, pathogen, ContamX, wearables, …) |
+| `../.agents/skills/` | Task skills (platform, pathogen, ContamX, wearables, outbreak-response, …) |
 
 ## Contam / HVAC
 
@@ -65,6 +66,7 @@ These are **not** day-to-day operator manuals. Prefer living manuals above unles
 |-----|--------|
 | [MATHEMATICAL_FIDELITY_AUDIT.md](MATHEMATICAL_FIDELITY_AUDIT.md) | Living audit |
 | [PLATFORM_CABIN_REVISION.md](PLATFORM_CABIN_REVISION.md) | Implemented (mega-cruise cabin corridors) |
+| [tiered_escalation_spec.md](tiered_escalation_spec.md) | Implemented (outbreak response architecture / Campaign v5) |
 | [WEARABLE_ANOMALY_REDESIGN.md](WEARABLE_ANOMALY_REDESIGN.md) | Implemented (confounder-aware infection_score) |
 | [issue_111_enhanced_wearables_plan.md](issue_111_enhanced_wearables_plan.md) | Historical plan / partially superseded — see WEARABLE_ANOMALY_REDESIGN |
 | [SOP_CASCADE_RECONFIG.md](SOP_CASCADE_RECONFIG.md) | Historical design note (also listed under Configure) |

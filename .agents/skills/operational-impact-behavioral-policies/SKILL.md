@@ -54,9 +54,13 @@ Schema: [`schemas/decision_action.schema.json`](schemas/decision_action.schema.j
 | `order_verification_test` | Queue zone for PCR surface wipe |
 | `hide_symptoms` | Suppress sick-call for agent this epoch |
 | `report_sick_call` | Force sick-call if symptomatic |
-| `refuse_quarantine` | Bias quarantine compliance toward refusal |
+| `refuse_quarantine` | Force **Defiant** compliance class (never complies) |
 
 Applier: [`picard_framework/simulation/action_applier.py`](picard_framework/simulation/action_applier.py)
+
+Quarantine compliance is a sticky bimodal mixture (compliant / reluctant /
+defiant) configured under `fred_behavior` — see skill
+`outbreak-response-architecture` and `docs/tiered_escalation_spec.md`.
 
 ## Behavioral policies (Picard only)
 
@@ -78,7 +82,8 @@ Population decisions run **before** syndromic via `StackelbergRound.solve_popula
 ```bash
 python3 -m pytest tests/test_operational_impact.py tests/test_action_applier.py \
   tests/test_behavioral_syndromic.py tests/test_cost_ledger.py \
-  tests/test_decision_engine.py -v --tb=short
+  tests/test_decision_engine.py tests/test_outbreak_response_architecture.py -v --tb=short
 ```
 
-Related skills: `configuring-stackelberg-social`, `testing-picard-presidio`, `stackelberg-utility-export`
+Related skills: `outbreak-response-architecture`, `configuring-stackelberg-social`,
+`testing-picard-presidio`, `stackelberg-utility-export`

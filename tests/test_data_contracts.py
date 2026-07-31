@@ -191,6 +191,31 @@ class TestProtocols:
                 f"Protocol '{p['protocol_id']}' has invalid stoplight: '{level}'"
             )
 
+    def test_min_escalation_status_valid(self, protocols: dict) -> None:
+        valid = {"BASELINE", "ALERT", "SUSPECTED", "CONFIRMED", "LOCKDOWN"}
+        for p in protocols["protocols"]:
+            status = p.get("min_escalation_status")
+            if status is None:
+                continue
+            assert status in valid, (
+                f"Protocol '{p['protocol_id']}' has invalid "
+                f"min_escalation_status: '{status}'"
+            )
+
+    def test_sop009_requires_lockdown(self, protocols: dict) -> None:
+        sop009 = next(
+            p for p in protocols["protocols"] if p["protocol_id"] == "SOP-009"
+        )
+        assert sop009.get("min_escalation_status") == "LOCKDOWN"
+
+    def test_activation_delay_non_negative(self, protocols: dict) -> None:
+        for p in protocols["protocols"]:
+            delay = p.get("activation_delay_epochs", 0)
+            assert isinstance(delay, int) and delay >= 0, (
+                f"Protocol '{p['protocol_id']}' has invalid "
+                f"activation_delay_epochs: {delay}"
+            )
+
 
 class TestResourceCosts:
     """Validate data/config/resource_costs.json."""

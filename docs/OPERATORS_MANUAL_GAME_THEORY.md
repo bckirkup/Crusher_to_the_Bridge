@@ -60,7 +60,7 @@ Classes: `decision_engine.policy.ThresholdBeliefPolicy`, `CommandThresholdPolicy
 | `order_verification_test` | medical | Queue zone for PCR surface wipe |
 | `hide_symptoms` | population | No sick-call this epoch |
 | `report_sick_call` | population | Force sick-call if symptomatic |
-| `refuse_quarantine` | population | Compliance bias toward refusal |
+| `refuse_quarantine` | population | Force Defiant compliance class (never complies) |
 | `set_surveillance_cadence` | medical | `pcr_cadence`, `sequencing_cadence` overrides |
 | `set_isolation_posture` | medical | Isolation threshold scale |
 | `corporate_communication_stance` | command | Reputation / trust signal |

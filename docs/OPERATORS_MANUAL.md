@@ -1092,24 +1092,27 @@ cost ledger flags a `DEPLETED` warning in the executive summary.
 
 ### 5.5 Existing SOPs (Destroyer Baseline)
 
-| SOP | Name | Trigger | Modifier |
-|-----|------|---------|----------|
-| SOP-001 | Enhanced Ventilation | Air sniffer AMBER | MERV-16 filter (80%) |
-| SOP-002 | HEPA Lockdown Ventilation | Air sniffer RED | HEPA filter (99.9%) |
-| SOP-003 | Surface Decontamination | Surface swab AMBER | 50% surface removal |
-| SOP-004 | PPE — Standard | Wastewater AMBER | Surgical masks, 40% reduction |
-| SOP-005 | PPE — Full N95 | Wastewater RED | N95 respirators, 80% reduction |
-| SOP-006 | Increased Diagnostics | Clinical RDT AMBER | 2× testing frequency |
-| SOP-007 | Galley Closure | Clinical micro RED | `close_zones` |
-| SOP-008 | Symptomatic Confinement | Clinical RDT RED (≥2) | `confine_symptomatic_to_quarters` |
-| SOP-009 | General Confinement | Clinical qPCR RED (≥3) | `confine_all_to_quarters`, `exempt_classes` |
-| SOP-010 | VSP-Threshold Isolation | Clinical RDT RED | Confinement + surface decon |
-| SOP-011 | Selective Passenger Confinement | Clinical RDT RED (≥2) | Crew `exempt_classes` |
-| SOP-012 | Wearable Individual Health Triage | Wearable agent RED (≥1) | `confine_symptomatic_to_quarters` |
-| SOP-013 | Wearable Fleet Surveillance Escalation | Wearable fleet AMBER | 1.5× `diagnostic_cadence_multiplier` |
-| SOP-014 | Wearable Fleet Outbreak Response | Wearable fleet RED | PPE + contact/droplet scalars |
-| SOP-015 | Integrated Detection — Elevated | Detection escalation AMBER (≥2 modes) | 2× diagnostic cadence |
-| SOP-016 | Integrated Detection — Critical | Detection escalation RED (≥2 modes) | Confinement + PPE + surface decon |
+| SOP | Name | Trigger | Min escalation | Modifier |
+|-----|------|---------|----------------|----------|
+| SOP-001 | Enhanced Ventilation | Air sniffer AMBER | SUSPECTED | MERV-16 filter (80%) |
+| SOP-002 | HEPA Lockdown Ventilation | Air sniffer RED | CONFIRMED | HEPA filter (99.9%) |
+| SOP-003 | Surface Decontamination | Surface swab AMBER | SUSPECTED | 50% surface removal |
+| SOP-004 | PPE — Standard | Wastewater AMBER | ALERT | Surgical masks, 40% reduction |
+| SOP-005 | PPE — Full N95 | Wastewater RED | CONFIRMED | N95 respirators, 80% reduction |
+| SOP-006 | Increased Diagnostics | Clinical RDT AMBER | ALERT | 2× testing frequency |
+| SOP-007 | Galley Closure | Clinical micro RED | SUSPECTED | `close_zones` |
+| SOP-008 | Symptomatic Confinement | Clinical RDT RED (≥2) | ALERT | `confine_symptomatic_to_quarters` |
+| SOP-009 | General Confinement | Clinical qPCR RED (≥3) | **LOCKDOWN** | `confine_all_to_quarters`, `exempt_classes` |
+| SOP-010 | VSP-Threshold Isolation | Clinical RDT RED | SUSPECTED | Confinement + surface decon |
+| SOP-011 | Selective Passenger Confinement | Clinical RDT RED (≥2) | CONFIRMED | Crew `exempt_classes` |
+| SOP-012 | Wearable Individual Health Triage | Wearable agent RED (≥1) | — | `confine_symptomatic_to_quarters` |
+| SOP-013 | Wearable Fleet Surveillance Escalation | Wearable fleet AMBER | — | 1.5× `diagnostic_cadence_multiplier` |
+| SOP-014 | Wearable Fleet Outbreak Response | Wearable fleet RED | — | PPE + contact/droplet scalars |
+| SOP-015 | Integrated Detection — Elevated | Detection escalation AMBER (≥2 modes) | — | 2× diagnostic cadence |
+| SOP-016 | Integrated Detection — Critical | Detection escalation RED (≥2 modes) | — | Confinement + PPE + surface decon |
+
+Escalation levels and decision latency: `docs/tiered_escalation_spec.md`.
+SOP-009 cannot fire until ship status is `LOCKDOWN` (cumulative AR threshold).
 
 ---
 
@@ -1624,7 +1627,8 @@ See `AGENTS.md` for cloud agent commands.
 | `test_infection_counters.py` | Attack-rate counters, thresholds, `exempt_classes` |
 | `test_transmission_pathways.py` | Food/environmental pool initialization |
 | `test_dashboard.py` | LCARS dashboard imports, pathway aggregation |
-| `test_orchestrator.py` | Epoch loop, quarantine confinement, SOP modifiers |
+| `test_orchestrator.py` | Epoch loop, quarantine confinement, SOP modifiers, attack-rate escalation |
+| `test_outbreak_response_architecture.py` | Escalation latency, SOP gates, bimodal compliance, T11/T15/T16 |
 | `test_picard_framework.py` | PicardRunSpec, ShipSimulation, golden reproducibility |
 | `test_decision_engine.py` | ObservationModel, DecisionRound, ExperienceStore |
 | `test_presidio_runner.py` | Fleet smoke, experience store |

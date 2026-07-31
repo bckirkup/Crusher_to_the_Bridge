@@ -1,6 +1,5 @@
 """test_sanity_checker.py – sanity checker vs orchestrator config paths."""
 from __future__ import annotations
-import copy
 import os, sys
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, REPO_ROOT)
@@ -311,6 +310,24 @@ class TestFredBehavior:
         _check_fred_behavior(cfg, report)
         assert not report.passed
 
+    def test_reluctant_fraction_out_of_range(self) -> None:
+        cfg = {"fred_behavior": {"reluctant_fraction": 1.5}}
+        report = Report()
+        _check_fred_behavior(cfg, report)
+        assert not report.passed
+
+    def test_reluctant_delay_negative(self) -> None:
+        cfg = {"fred_behavior": {"reluctant_delay_epochs": -1}}
+        report = Report()
+        _check_fred_behavior(cfg, report)
+        assert not report.passed
+
+    def test_compliance_by_class_out_of_range(self) -> None:
+        cfg = {"fred_behavior": {"compliance_by_class": {"crew": -0.1}}}
+        report = Report()
+        _check_fred_behavior(cfg, report)
+        assert not report.passed
+
     def test_noise_probability_out_of_range(self) -> None:
         cfg = {"fred_behavior": {"healthy_noise_categories": [
             {"reason": "test", "probability": 2.0},
@@ -318,6 +335,26 @@ class TestFredBehavior:
         report = Report()
         _check_fred_behavior(cfg, report)
         assert not report.passed
+
+
+class TestEscalationParamsExtended:
+    def test_attack_rate_out_of_range(self) -> None:
+        cfg = {"escalation": {"suspect_attack_rate": 1.5}}
+        report = Report()
+        _check_escalation_params(cfg, report)
+        assert not report.passed
+
+    def test_decision_latency_negative(self) -> None:
+        cfg = {"escalation": {"decision_latency": {"confirmed_delay_epochs": -2}}}
+        report = Report()
+        _check_escalation_params(cfg, report)
+        assert not report.passed
+
+    def test_lockdown_never_ok(self) -> None:
+        cfg = {"escalation": {"lockdown_attack_rate": "never"}}
+        report = Report()
+        _check_escalation_params(cfg, report)
+        assert report.passed
 
 
 # ── Multi-pathogen checks ────────────────────────────────────────────────

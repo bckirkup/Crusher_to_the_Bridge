@@ -306,7 +306,7 @@ simulation state:
 | Key | Type | Description |
 |-----|------|-------------|
 | `epoch` | int | Epoch index (0-based) |
-| `trigger_status` | str | `BASELINE` / `SUSPECTED` / `CONFIRMED` |
+| `trigger_status` | str | `BASELINE` / `ALERT` / `SUSPECTED` / `CONFIRMED` / `LOCKDOWN` |
 | `summary` | dict | Aggregate epi metrics (susceptible, infected, isolated, recovered, immune, symptomatic, sick_call_count, disrupted_microflora_count) |
 | `spaces` | dict | Per-zone state: `pathogen_mass`, `pathogen_mass_by_id`, `concentration_per_m3`, `volume_m3` |
 | `agents` | list | Per-agent state: agent_id, status, location, shedding_rate, susceptibility_multiplier |

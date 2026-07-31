@@ -28,7 +28,7 @@ check-jsonschema --schemafile schemas/spatial_layout.schema.json data/platforms/
 # Air flow paths (per platform)
 check-jsonschema --schemafile schemas/air_flow_paths.schema.json data/platforms/destroyer_baseline/air_flow_paths.json
 
-# Protocols
+# Protocols (min_escalation_status, activation_delay_epochs)
 check-jsonschema --schemafile schemas/protocols.schema.json data/config/protocols.json
 
 # Resource costs
@@ -36,6 +36,13 @@ check-jsonschema --schemafile schemas/resource_costs.schema.json data/config/res
 
 # Logging profile
 check-jsonschema --schemafile schemas/logging_profile.schema.json data/config/logging_profile.json
+```
+
+After editing outbreak-response protocol gates (`min_escalation_status`):
+
+```bash
+python3 -m pytest tests/test_data_contracts.py::TestProtocols \
+  tests/test_outbreak_response_architecture.py -v --tb=short
 ```
 
 ### Validate all platforms in a loop
