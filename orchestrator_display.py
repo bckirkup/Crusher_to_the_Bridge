@@ -66,7 +66,8 @@ def print_initialization(
     fred_cfg = cfg.get("fred_behavior", {})
     print("\n  FRED behavioral params:")
     print(f"    Quarantine compliance:   {fred_cfg.get('quarantine_compliance', 0.85):.0%}")
-    print(f"    Compliance delay:        {fred_cfg.get('compliance_delay_epochs', 1)} epoch(s)")
+    print(f"    Reluctant fraction:      {fred_cfg.get('reluctant_fraction', 0.75):.0%}")
+    print(f"    Reluctant delay:         {fred_cfg.get('reluctant_delay_epochs', 48)} epoch(s)")
     cats = fred_cfg.get("healthy_noise_categories", [])
     for cat in cats:
         print(f"    Noise: {cat['reason']:15s}  P={cat['probability']:.3f}")
@@ -300,9 +301,13 @@ def print_progress(
     filled = int(bar_width * (epoch + 1) / num_epochs)
     bar = "█" * filled + "░" * (bar_width - filled)
 
-    status_icon = {"BASELINE": "●", "SUSPECTED": "▲", "CONFIRMED": "■"}.get(
-        trigger_status, "?"
-    )
+    status_icon = {
+        "BASELINE": "●",
+        "ALERT": "◆",
+        "SUSPECTED": "▲",
+        "CONFIRMED": "■",
+        "LOCKDOWN": "✖",
+    }.get(trigger_status, "?")
 
     transition = ""
     if trigger_status != prev_status:

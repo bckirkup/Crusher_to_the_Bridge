@@ -21,8 +21,10 @@ sys.path.insert(0, REPO_ROOT)
 
 from orchestrator_types import (
     STATUS_BASELINE,
+    STATUS_ALERT,
     STATUS_SUSPECTED,
     STATUS_CONFIRMED,
+    STATUS_LOCKDOWN,
     INFECTION_SUSCEPTIBLE,
     INFECTION_INFECTED,
     PRESENTATION_ASYMPTOMATIC,
@@ -268,43 +270,131 @@ class TestAgentClassEngine:
 
 # ── Escalation tests ────────────────────────────────────────────────────
 
+def _esc_status(*args, **kwargs) -> str:
+    """Unwrap check_escalation tuple → effective status."""
+    status, _pending, _rates = _check_escalation(*args, **kwargs)
+    return status
+
+
 class TestCheckEscalation:
     def test_baseline_stays_baseline(self) -> None:
-        cfg = {"escalation": {"syndromic_suspect_threshold": 3}}
+        cfg = {"escalation": {"alert_sick_call_threshold": 3}}
         syn_result = {"sick_call_count": 1}
-        assert _check_escalation(STATUS_BASELINE, syn_result, None, cfg) == STATUS_BASELINE
+        assert _esc_status(STATUS_BASELINE, syn_result, None, cfg) == STATUS_BASELINE
 
-    def test_baseline_to_suspected(self) -> None:
+    def test_baseline_to_alert(self) -> None:
+        cfg = {"escalation": {"alert_sick_call_threshold": 3}}
+        syn_result = {"sick_call_count": 5}
+        assert _esc_status(STATUS_BASELINE, syn_result, None, cfg) == STATUS_ALERT
+
+    def test_legacy_alias_syndromic_suspect_threshold(self) -> None:
         cfg = {"escalation": {"syndromic_suspect_threshold": 3}}
         syn_result = {"sick_call_count": 5}
-        assert _check_escalation(STATUS_BASELINE, syn_result, None, cfg) == STATUS_SUSPECTED
+        assert _esc_status(STATUS_BASELINE, syn_result, None, cfg) == STATUS_ALERT
 
-    def test_suspected_stays_suspected_no_pcr(self) -> None:
-        cfg = {"escalation": {"pcr_confirm_ct_threshold": 35.0}}
+    def test_alert_to_suspected_via_attack_rate(self) -> None:
+        cfg = {"escalation": {"suspect_attack_rate": 0.02}}
+        agents = [
+            {
+                "agent_id": i, "role": "passenger",
+                "infection_state": "infected" if i < 2 else "susceptible",
+                "symptom_presentation": "symptomatic" if i < 2 else "asymptomatic",
+            }
+            for i in range(50)  # 2/50 = 4% > 2%
+        ]
         syn_result = {"sick_call_count": 5}
-        assert _check_escalation(STATUS_SUSPECTED, syn_result, None, cfg) == STATUS_SUSPECTED
+        assert _esc_status(
+            STATUS_ALERT, syn_result, None, cfg, agents=agents,
+        ) == STATUS_SUSPECTED
 
-    def test_suspected_to_confirmed(self) -> None:
-        cfg = {"escalation": {"pcr_confirm_ct_threshold": 35.0}}
+    def test_suspected_to_confirmed_via_attack_rate(self) -> None:
+        cfg = {"escalation": {"confirm_attack_rate": 0.03}}
+        agents = [
+            {
+                "agent_id": i, "role": "passenger",
+                "infection_state": "infected" if i < 3 else "susceptible",
+                "symptom_presentation": "symptomatic" if i < 3 else "asymptomatic",
+            }
+            for i in range(50)  # 6%
+        ]
         syn_result = {"sick_call_count": 5}
-        pcr_result = {"zone_results": {"MedBay": {"ct_value": 30.0}}}
-        assert _check_escalation(STATUS_SUSPECTED, syn_result, pcr_result, cfg) == STATUS_CONFIRMED
+        assert _esc_status(
+            STATUS_SUSPECTED, syn_result, None, cfg, agents=agents,
+        ) == STATUS_CONFIRMED
 
-    def test_suspected_stays_if_ct_too_high(self) -> None:
-        cfg = {"escalation": {"pcr_confirm_ct_threshold": 35.0}}
+    def test_confirmed_to_lockdown(self) -> None:
+        cfg = {"escalation": {"lockdown_attack_rate": 0.05}}
+        agents = [
+            {
+                "agent_id": i, "role": "passenger",
+                "infection_state": "infected" if i < 5 else "susceptible",
+                "symptom_presentation": "symptomatic" if i < 5 else "asymptomatic",
+            }
+            for i in range(50)  # 10%
+        ]
         syn_result = {"sick_call_count": 5}
-        pcr_result = {"zone_results": {"MedBay": {"ct_value": 38.0}}}
-        assert _check_escalation(STATUS_SUSPECTED, syn_result, pcr_result, cfg) == STATUS_SUSPECTED
+        assert _esc_status(
+            STATUS_CONFIRMED, syn_result, None, cfg, agents=agents,
+        ) == STATUS_LOCKDOWN
+
+    def test_lockdown_never(self) -> None:
+        cfg = {"escalation": {"lockdown_attack_rate": "never"}}
+        agents = [
+            {
+                "agent_id": i, "role": "passenger",
+                "infection_state": "infected",
+                "symptom_presentation": "symptomatic",
+            }
+            for i in range(50)
+        ]
+        syn_result = {"sick_call_count": 5}
+        assert _esc_status(
+            STATUS_CONFIRMED, syn_result, None, cfg, agents=agents,
+        ) == STATUS_CONFIRMED
+
+    def test_decision_latency_queues_pending(self) -> None:
+        cfg = {
+            "escalation": {
+                "alert_sick_call_threshold": 3,
+                "decision_latency": {"alert_delay_epochs": 2},
+            },
+        }
+        syn_result = {"sick_call_count": 5}
+        status, pending, _rates = _check_escalation(
+            STATUS_BASELINE, syn_result, None, cfg, epoch=5,
+        )
+        assert status == STATUS_BASELINE
+        assert pending == {"to": STATUS_ALERT, "epoch_triggered": 5}
+        status2, pending2, _ = _check_escalation(
+            STATUS_BASELINE, syn_result, None, cfg, epoch=7,
+            escalation_pending=pending,
+        )
+        assert status2 == STATUS_ALERT
+        assert pending2 is None
 
     def test_confirmed_stays_confirmed(self) -> None:
         cfg = {"escalation": {}}
         syn_result = {"sick_call_count": 0}
-        assert _check_escalation(STATUS_CONFIRMED, syn_result, None, cfg) == STATUS_CONFIRMED
+        assert _esc_status(STATUS_CONFIRMED, syn_result, None, cfg) == STATUS_CONFIRMED
 
     def test_default_thresholds(self) -> None:
         cfg = {}
         syn_result = {"sick_call_count": 3}
-        assert _check_escalation(STATUS_BASELINE, syn_result, None, cfg) == STATUS_SUSPECTED
+        assert _esc_status(STATUS_BASELINE, syn_result, None, cfg) == STATUS_ALERT
+
+    def test_lockdown_confinement_scope(self) -> None:
+        state = SimulationState()
+        agents = [
+            {"agent_id": 0, "symptom_status": SYMPTOM_ASYMPTOMATIC},
+            {"agent_id": 1, "symptom_status": SYMPTOM_SYMPTOMATIC},
+        ]
+        mock = MagicMock()
+        mock.check_quarantine_compliance.return_value = True
+        _step_quarantine_confinement(
+            5, agents, {}, STATUS_LOCKDOWN, state, mock,
+        )
+        assert 0 in state.quarantined_ids
+        assert 1 in state.quarantined_ids
 
 
 # ── Pathogen profile loading tests ────────────────────────────────────────
@@ -961,7 +1051,8 @@ class TestCascadeQuarantineCompliance:
             state0 = SimulationState()
             syn0 = SyndromicSurveillance(
                 quarantine_compliance=0.0,
-                compliance_delay_epochs=99,
+                reluctant_fraction=1.0,
+                reluctant_delay_epochs=99,
                 rng=np.random.default_rng(aid),
             )
             if not _try_admit_to_quarantine(
@@ -972,7 +1063,6 @@ class TestCascadeQuarantineCompliance:
             state1 = SimulationState()
             syn1 = SyndromicSurveillance(
                 quarantine_compliance=1.0,
-                compliance_delay_epochs=99,
                 rng=np.random.default_rng(aid),
             )
             if _try_admit_to_quarantine(
@@ -982,6 +1072,45 @@ class TestCascadeQuarantineCompliance:
                 admitted_one += 1
         assert refused_zero == len(agents)
         assert admitted_one == len(agents)
+
+    def test_defiant_never_complies_after_delay(self) -> None:
+        """Golden: defiant agents remain non-compliant past reluctant delay."""
+        from crusher_labs.modalities.syndromic import SyndromicSurveillance
+
+        syn = SyndromicSurveillance(
+            quarantine_compliance=0.0,
+            reluctant_fraction=0.0,  # all non-compliers are defiant
+            reluctant_delay_epochs=1,
+            rng=np.random.default_rng(0),
+        )
+        assert syn.check_quarantine_compliance(7, 0) is False
+        assert syn.check_quarantine_compliance(7, 100) is False
+        assert syn._compliance_class[7] == "defiant"
+
+    def test_reluctant_complies_after_delay(self) -> None:
+        from crusher_labs.modalities.syndromic import SyndromicSurveillance
+
+        syn = SyndromicSurveillance(
+            quarantine_compliance=0.0,
+            reluctant_fraction=1.0,
+            reluctant_delay_epochs=5,
+            rng=np.random.default_rng(1),
+        )
+        assert syn.check_quarantine_compliance(3, 0) is False
+        assert syn.check_quarantine_compliance(3, 5) is True
+        assert syn._compliance_class[3] == "reluctant"
+
+    def test_reluctant_complies_when_symptomatic(self) -> None:
+        from crusher_labs.modalities.syndromic import SyndromicSurveillance
+
+        syn = SyndromicSurveillance(
+            quarantine_compliance=0.0,
+            reluctant_fraction=1.0,
+            reluctant_delay_epochs=99,
+            rng=np.random.default_rng(2),
+        )
+        assert syn.check_quarantine_compliance(4, 0) is False
+        assert syn.check_quarantine_compliance(4, 0, is_symptomatic=True) is True
 
 
 class TestObservationEnabledGate:

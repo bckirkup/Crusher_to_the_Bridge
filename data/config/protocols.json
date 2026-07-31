@@ -11,25 +11,26 @@
         "min_zones_affected": 1
       },
       "modifiers": {
-        "hvac_filter_efficiency_override": 0.80,
+        "hvac_filter_efficiency_override": 0.8,
         "hvac_filter_type_label": "MERV-16"
       },
       "costs_per_epoch": {
-        "financial_usd": 150.00,
+        "financial_usd": 150.0,
         "materials": {
           "hvac_filters": 0
         },
         "labor_person_hours": 1.0
       },
       "activation_costs": {
-        "financial_usd": 500.00,
+        "financial_usd": 500.0,
         "materials": {
           "hvac_filters": 2
         },
         "labor_person_hours": 4.0
       },
       "category": "intervention",
-      "required_cascade_tier": null
+      "required_cascade_tier": null,
+      "min_escalation_status": "SUSPECTED"
     },
     {
       "protocol_id": "SOP-002",
@@ -45,21 +46,22 @@
         "hvac_filter_type_label": "HEPA"
       },
       "costs_per_epoch": {
-        "financial_usd": 350.00,
+        "financial_usd": 350.0,
         "materials": {
           "hvac_filters": 0
         },
         "labor_person_hours": 2.0
       },
       "activation_costs": {
-        "financial_usd": 2000.00,
+        "financial_usd": 2000.0,
         "materials": {
           "hvac_filters": 6
         },
         "labor_person_hours": 8.0
       },
       "category": "intervention",
-      "required_cascade_tier": 3
+      "required_cascade_tier": 3,
+      "min_escalation_status": "CONFIRMED"
     },
     {
       "protocol_id": "SOP-003",
@@ -71,11 +73,11 @@
         "min_zones_affected": 1
       },
       "modifiers": {
-        "surface_decontamination_factor": 0.50,
-        "surface_decay_rate_override": 0.30
+        "surface_decontamination_factor": 0.5,
+        "surface_decay_rate_override": 0.3
       },
       "costs_per_epoch": {
-        "financial_usd": 200.00,
+        "financial_usd": 200.0,
         "materials": {
           "sanitizer_units": 5,
           "gloves_pairs": 10
@@ -83,7 +85,7 @@
         "labor_person_hours": 6.0
       },
       "activation_costs": {
-        "financial_usd": 100.00,
+        "financial_usd": 100.0,
         "materials": {
           "sanitizer_units": 2,
           "gloves_pairs": 5
@@ -91,11 +93,12 @@
         "labor_person_hours": 1.0
       },
       "category": "intervention",
-      "required_cascade_tier": 2
+      "required_cascade_tier": 2,
+      "min_escalation_status": "SUSPECTED"
     },
     {
       "protocol_id": "SOP-004",
-      "name": "PPE Deployment — Standard",
+      "name": "PPE Deployment \u2014 Standard",
       "description": "Issue surgical masks and gloves when wastewater flags AMBER.",
       "trigger": {
         "instrument_class": "wastewater_sequencing_grid",
@@ -103,12 +106,12 @@
         "min_zones_affected": 1
       },
       "modifiers": {
-        "ppe_transmission_reduction": 0.40,
-        "direct_contact_scalar": 0.60,
-        "droplet_scalar": 0.60
+        "ppe_transmission_reduction": 0.4,
+        "direct_contact_scalar": 0.6,
+        "droplet_scalar": 0.6
       },
       "costs_per_epoch": {
-        "financial_usd": 100.00,
+        "financial_usd": 100.0,
         "materials": {
           "surgical_masks": 20,
           "gloves_pairs": 20
@@ -116,7 +119,7 @@
         "labor_person_hours": 0.5
       },
       "activation_costs": {
-        "financial_usd": 50.00,
+        "financial_usd": 50.0,
         "materials": {
           "surgical_masks": 5,
           "gloves_pairs": 5
@@ -124,11 +127,12 @@
         "labor_person_hours": 0.5
       },
       "category": "intervention",
-      "required_cascade_tier": 1
+      "required_cascade_tier": 1,
+      "min_escalation_status": "ALERT"
     },
     {
       "protocol_id": "SOP-005",
-      "name": "PPE Deployment — Full N95",
+      "name": "PPE Deployment \u2014 Full N95",
       "description": "Issue N95 respirators and face shields on RED wastewater or RED air alert.",
       "trigger": {
         "instrument_class": "wastewater_sequencing_grid",
@@ -136,13 +140,13 @@
         "min_zones_affected": 1
       },
       "modifiers": {
-        "ppe_transmission_reduction": 0.80,
-        "direct_contact_scalar": 0.30,
-        "droplet_scalar": 0.20,
-        "hvac_airborne_scalar": 0.50
+        "ppe_transmission_reduction": 0.8,
+        "direct_contact_scalar": 0.3,
+        "droplet_scalar": 0.2,
+        "hvac_airborne_scalar": 0.5
       },
       "costs_per_epoch": {
-        "financial_usd": 400.00,
+        "financial_usd": 400.0,
         "materials": {
           "n95_respirators": 20,
           "face_shields": 10,
@@ -151,7 +155,7 @@
         "labor_person_hours": 1.0
       },
       "activation_costs": {
-        "financial_usd": 200.00,
+        "financial_usd": 200.0,
         "materials": {
           "n95_respirators": 5,
           "face_shields": 5,
@@ -160,7 +164,8 @@
         "labor_person_hours": 1.0
       },
       "category": "intervention",
-      "required_cascade_tier": 3
+      "required_cascade_tier": 3,
+      "min_escalation_status": "CONFIRMED"
     },
     {
       "protocol_id": "SOP-006",
@@ -175,7 +180,7 @@
         "diagnostic_cadence_multiplier": 2.0
       },
       "costs_per_epoch": {
-        "financial_usd": 300.00,
+        "financial_usd": 300.0,
         "materials": {
           "rdt_kits": 10,
           "pcr_kits": 5,
@@ -184,7 +189,7 @@
         "labor_person_hours": 4.0
       },
       "activation_costs": {
-        "financial_usd": 100.00,
+        "financial_usd": 100.0,
         "materials": {
           "rdt_kits": 5,
           "pcr_kits": 2,
@@ -193,7 +198,8 @@
         "labor_person_hours": 1.0
       },
       "category": "surveillance",
-      "required_cascade_tier": 1
+      "required_cascade_tier": 1,
+      "min_escalation_status": "ALERT"
     },
     {
       "protocol_id": "SOP-007",
@@ -205,11 +211,14 @@
         "min_agents_affected": 1
       },
       "modifiers": {
-        "close_zones": ["Galley", "Mess_Hall"],
+        "close_zones": [
+          "Galley",
+          "Mess_Hall"
+        ],
         "zone_occupancy_cap": 2
       },
       "costs_per_epoch": {
-        "financial_usd": 500.00,
+        "financial_usd": 500.0,
         "materials": {
           "meal_trays": 20,
           "sanitizer_units": 3
@@ -217,7 +226,7 @@
         "labor_person_hours": 8.0
       },
       "activation_costs": {
-        "financial_usd": 200.00,
+        "financial_usd": 200.0,
         "materials": {
           "meal_trays": 40,
           "sanitizer_units": 5
@@ -225,7 +234,8 @@
         "labor_person_hours": 4.0
       },
       "category": "intervention",
-      "required_cascade_tier": 3
+      "required_cascade_tier": 3,
+      "min_escalation_status": "SUSPECTED"
     },
     {
       "protocol_id": "SOP-008",
@@ -240,7 +250,7 @@
         "confine_symptomatic_to_quarters": true
       },
       "costs_per_epoch": {
-        "financial_usd": 250.00,
+        "financial_usd": 250.0,
         "materials": {
           "meal_trays": 10,
           "surgical_masks": 10,
@@ -249,7 +259,7 @@
         "labor_person_hours": 4.0
       },
       "activation_costs": {
-        "financial_usd": 100.00,
+        "financial_usd": 100.0,
         "materials": {
           "meal_trays": 20,
           "gloves_pairs": 5
@@ -257,12 +267,14 @@
         "labor_person_hours": 2.0
       },
       "category": "intervention",
-      "required_cascade_tier": 2
+      "required_cascade_tier": 2,
+      "min_escalation_status": "ALERT",
+      "activation_delay_epochs": 2
     },
     {
       "protocol_id": "SOP-009",
       "name": "General Confinement to Quarters",
-      "description": "Full ship-wide quarantine to quarters (lockdown). All non-essential personnel confined to home zones; only watchstanders and medical crew exempt. Quarantined agents remain HVAC-connected. Severe reduction in direct contact, droplet, and fomite transmission.",
+      "description": "Full ship-wide quarantine to quarters (lockdown). Requires LOCKDOWN escalation (cumulative attack rate threshold), not stoplight alone. All non-essential personnel confined to home zones; only watchstanders and medical crew exempt. Quarantined agents remain HVAC-connected. Severe reduction in direct contact, droplet, and fomite transmission.",
       "trigger": {
         "instrument_class": "clinical_qpcr",
         "stoplight_level": "RED",
@@ -270,15 +282,21 @@
       },
       "modifiers": {
         "confine_all_to_quarters": true,
-        "exempt_classes": ["crew_medical", "crew_engineering"],
-        "direct_contact_scalar": 0.10,
-        "droplet_scalar": 0.10,
-        "fomite_scalar": 0.20,
-        "hvac_airborne_scalar": 0.70,
-        "close_zones": ["Galley", "Mess_Hall"]
+        "exempt_classes": [
+          "crew_medical",
+          "crew_engineering"
+        ],
+        "direct_contact_scalar": 0.1,
+        "droplet_scalar": 0.1,
+        "fomite_scalar": 0.2,
+        "hvac_airborne_scalar": 0.7,
+        "close_zones": [
+          "Galley",
+          "Mess_Hall"
+        ]
       },
       "costs_per_epoch": {
-        "financial_usd": 800.00,
+        "financial_usd": 800.0,
         "materials": {
           "meal_trays": 50,
           "surgical_masks": 30,
@@ -287,7 +305,7 @@
         "labor_person_hours": 16.0
       },
       "activation_costs": {
-        "financial_usd": 500.00,
+        "financial_usd": 500.0,
         "materials": {
           "meal_trays": 100,
           "sanitizer_units": 20
@@ -295,7 +313,9 @@
         "labor_person_hours": 8.0
       },
       "category": "intervention",
-      "required_cascade_tier": 3
+      "required_cascade_tier": 3,
+      "min_escalation_status": "LOCKDOWN",
+      "activation_delay_epochs": 0
     },
     {
       "protocol_id": "SOP-010",
@@ -308,10 +328,10 @@
       },
       "modifiers": {
         "confine_symptomatic_to_quarters": true,
-        "surface_decontamination_factor": 0.60
+        "surface_decontamination_factor": 0.6
       },
       "costs_per_epoch": {
-        "financial_usd": 600.00,
+        "financial_usd": 600.0,
         "materials": {
           "meal_trays": 30,
           "surgical_masks": 20,
@@ -321,7 +341,7 @@
         "labor_person_hours": 10.0
       },
       "activation_costs": {
-        "financial_usd": 300.00,
+        "financial_usd": 300.0,
         "materials": {
           "meal_trays": 60,
           "surgical_masks": 10,
@@ -330,7 +350,9 @@
         "labor_person_hours": 6.0
       },
       "category": "intervention",
-      "required_cascade_tier": 2
+      "required_cascade_tier": 2,
+      "min_escalation_status": "SUSPECTED",
+      "activation_delay_epochs": 2
     },
     {
       "protocol_id": "SOP-011",
@@ -343,10 +365,15 @@
       },
       "modifiers": {
         "confine_symptomatic_to_quarters": true,
-        "exempt_classes": ["crew_general", "crew_medical", "crew_engineering", "crew_galley"]
+        "exempt_classes": [
+          "crew_general",
+          "crew_medical",
+          "crew_engineering",
+          "crew_galley"
+        ]
       },
       "costs_per_epoch": {
-        "financial_usd": 200.00,
+        "financial_usd": 200.0,
         "materials": {
           "meal_trays": 10,
           "surgical_masks": 5,
@@ -355,7 +382,7 @@
         "labor_person_hours": 3.0
       },
       "activation_costs": {
-        "financial_usd": 100.00,
+        "financial_usd": 100.0,
         "materials": {
           "meal_trays": 20,
           "gloves_pairs": 5
@@ -363,7 +390,9 @@
         "labor_person_hours": 2.0
       },
       "category": "intervention",
-      "required_cascade_tier": 2
+      "required_cascade_tier": 2,
+      "min_escalation_status": "CONFIRMED",
+      "activation_delay_epochs": 4
     },
     {
       "protocol_id": "SOP-012",
@@ -378,7 +407,7 @@
         "confine_symptomatic_to_quarters": true
       },
       "costs_per_epoch": {
-        "financial_usd": 150.00,
+        "financial_usd": 150.0,
         "materials": {
           "meal_trays": 5,
           "surgical_masks": 5
@@ -386,7 +415,7 @@
         "labor_person_hours": 2.0
       },
       "activation_costs": {
-        "financial_usd": 75.00,
+        "financial_usd": 75.0,
         "materials": {
           "meal_trays": 10,
           "gloves_pairs": 5
@@ -409,7 +438,7 @@
         "diagnostic_cadence_multiplier": 1.5
       },
       "costs_per_epoch": {
-        "financial_usd": 200.00,
+        "financial_usd": 200.0,
         "materials": {
           "rdt_kits": 5,
           "swab_kits": 5
@@ -417,7 +446,7 @@
         "labor_person_hours": 3.0
       },
       "activation_costs": {
-        "financial_usd": 50.00,
+        "financial_usd": 50.0,
         "materials": {
           "rdt_kits": 3,
           "swab_kits": 3
@@ -437,12 +466,12 @@
         "min_zones_affected": 1
       },
       "modifiers": {
-        "ppe_transmission_reduction": 0.50,
-        "direct_contact_scalar": 0.50,
-        "droplet_scalar": 0.50
+        "ppe_transmission_reduction": 0.5,
+        "direct_contact_scalar": 0.5,
+        "droplet_scalar": 0.5
       },
       "costs_per_epoch": {
-        "financial_usd": 250.00,
+        "financial_usd": 250.0,
         "materials": {
           "surgical_masks": 30,
           "gloves_pairs": 30
@@ -450,7 +479,7 @@
         "labor_person_hours": 2.0
       },
       "activation_costs": {
-        "financial_usd": 100.00,
+        "financial_usd": 100.0,
         "materials": {
           "surgical_masks": 10,
           "gloves_pairs": 10
@@ -462,7 +491,7 @@
     },
     {
       "protocol_id": "SOP-015",
-      "name": "Integrated Detection Escalation — Elevated",
+      "name": "Integrated Detection Escalation \u2014 Elevated",
       "description": "Escalation SOP integrating syndromic, wearable, environmental, and clinical detection modes. Activates when at least two modes simultaneously reach AMBER or worse.",
       "trigger": {
         "instrument_class": "detection_escalation",
@@ -473,7 +502,7 @@
         "diagnostic_cadence_multiplier": 2.0
       },
       "costs_per_epoch": {
-        "financial_usd": 350.00,
+        "financial_usd": 350.0,
         "materials": {
           "rdt_kits": 10,
           "pcr_kits": 5,
@@ -482,7 +511,7 @@
         "labor_person_hours": 5.0
       },
       "activation_costs": {
-        "financial_usd": 150.00,
+        "financial_usd": 150.0,
         "materials": {
           "rdt_kits": 5,
           "pcr_kits": 2
@@ -494,7 +523,7 @@
     },
     {
       "protocol_id": "SOP-016",
-      "name": "Integrated Detection Escalation — Critical",
+      "name": "Integrated Detection Escalation \u2014 Critical",
       "description": "Critical escalation when at least two integrated detection modes reach RED simultaneously. Combines symptomatic confinement with standard PPE and surface decontamination.",
       "trigger": {
         "instrument_class": "detection_escalation",
@@ -503,13 +532,13 @@
       },
       "modifiers": {
         "confine_symptomatic_to_quarters": true,
-        "ppe_transmission_reduction": 0.60,
-        "direct_contact_scalar": 0.40,
-        "droplet_scalar": 0.40,
-        "surface_decontamination_factor": 0.40
+        "ppe_transmission_reduction": 0.6,
+        "direct_contact_scalar": 0.4,
+        "droplet_scalar": 0.4,
+        "surface_decontamination_factor": 0.4
       },
       "costs_per_epoch": {
-        "financial_usd": 700.00,
+        "financial_usd": 700.0,
         "materials": {
           "meal_trays": 25,
           "surgical_masks": 25,
@@ -519,7 +548,7 @@
         "labor_person_hours": 12.0
       },
       "activation_costs": {
-        "financial_usd": 400.00,
+        "financial_usd": 400.0,
         "materials": {
           "meal_trays": 50,
           "sanitizer_units": 10

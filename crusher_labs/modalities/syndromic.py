@@ -33,13 +33,22 @@ class SyndromicSurveillance:
         noise_categories: list[dict[str, Any]] | None = None,
         quarantine_compliance: float = 0.85,
         compliance_delay_epochs: int = 1,
+        reluctant_fraction: float = 0.75,
+        reluctant_delay_epochs: int = 48,
+        compliance_by_class: dict[str, float] | None = None,
         rng: np.random.Generator | None = None,
     ) -> None:
         self.sick_call_probability = sick_call_probability
         self.background_noise_rate = background_noise_rate
         self.quarantine_compliance = quarantine_compliance
+        # Deprecated: forced post-delay compliance removed. Kept for config compat.
         self.compliance_delay_epochs = compliance_delay_epochs
+        self.reluctant_fraction = float(reluctant_fraction)
+        self.reluctant_delay_epochs = int(reluctant_delay_epochs)
+        self.compliance_by_class = dict(compliance_by_class or {})
         self.rng = rng if rng is not None else default_simulation_rng()
+        # Sticky per-agent compliance class for the cruise (compliant/reluctant/defiant)
+        self._compliance_class: dict[int, str] = {}
 
         # None → built-in defaults; explicit [] disables background noise categories.
         if noise_categories is None:
@@ -176,31 +185,93 @@ class SyndromicSurveillance:
                 return True, cat["reason"]
         return False, None
 
+    def _resolve_base_compliance(
+        self,
+        agent_class: str | None,
+        chronic_compliance_boost: float,
+    ) -> float:
+        """Population (or class-specific) compliance fraction, chronic-boosted."""
+        base = self.quarantine_compliance
+        if agent_class and self.compliance_by_class:
+            a_class = str(agent_class)
+            if a_class in self.compliance_by_class:
+                base = float(self.compliance_by_class[a_class])
+            else:
+                # role_group keys: "crew" / "passenger" match class_id prefixes
+                for key, val in self.compliance_by_class.items():
+                    if a_class.startswith(f"{key}_") or a_class == key:
+                        base = float(val)
+                        break
+                else:
+                    # passenger_young → non-elderly passenger classes
+                    if "passenger_young" in self.compliance_by_class and (
+                        a_class.startswith("passenger_")
+                        and a_class != "passenger_elderly"
+                    ):
+                        base = float(self.compliance_by_class["passenger_young"])
+        return min(1.0, max(0.0, base + chronic_compliance_boost))
+
+    def assign_compliance_class(
+        self,
+        agent_id: int,
+        *,
+        agent_class: str | None = None,
+        chronic_compliance_boost: float = 0.0,
+        behavioral_override: str | None = None,
+    ) -> str:
+        """Assign sticky compliance class at first quarantine order (idempotent)."""
+        if agent_id in self._compliance_class:
+            return self._compliance_class[agent_id]
+
+        if behavioral_override == "refuse_quarantine":
+            cls = "defiant"
+        else:
+            effective = self._resolve_base_compliance(
+                agent_class, chronic_compliance_boost,
+            )
+            draw = float(self.rng.random())
+            if draw < effective:
+                cls = "compliant"
+            elif draw < effective + (1.0 - effective) * self.reluctant_fraction:
+                cls = "reluctant"
+            else:
+                cls = "defiant"
+        self._compliance_class[agent_id] = cls
+        return cls
+
     def check_quarantine_compliance(
         self,
-        _agent_id: int,
+        agent_id: int,
         epochs_since_order: int,
         behavioral_override: str | None = None,
         chronic_compliance_boost: float = 0.0,
+        agent_class: str | None = None,
+        is_symptomatic: bool = False,
     ) -> bool:
-        """FRED-style quarantine compliance check.
+        """Bimodal quarantine compliance (compliant / reluctant / defiant).
 
-        Returns ``True`` if the agent complies with isolation this epoch.
-        Non-compliant agents eventually comply after a delay period
-        (ref: FRED ``refuses_vaccines`` behavioral failure pattern).
+        Compliance class is drawn once per agent at first order and sticky.
+        - compliant: follows immediately
+        - reluctant: complies after ``reluctant_delay_epochs`` or if symptomatic
+        - defiant: never complies (unless override cleared)
 
-        *chronic_compliance_boost* is an additive increase from chronic
-        disease behavioral modifiers.
+        The legacy ``compliance_delay_epochs`` forced-compliance path is removed.
         """
         if behavioral_override == "refuse_quarantine":
-            if epochs_since_order >= self.compliance_delay_epochs:
-                return True
+            self._compliance_class[agent_id] = "defiant"
             return False
-        effective_compliance = min(
-            1.0, self.quarantine_compliance + chronic_compliance_boost,
+
+        cls = self.assign_compliance_class(
+            agent_id,
+            agent_class=agent_class,
+            chronic_compliance_boost=chronic_compliance_boost,
+            behavioral_override=behavioral_override,
         )
-        if self.rng.random() < effective_compliance:
+        if cls == "compliant":
             return True
-        if epochs_since_order >= self.compliance_delay_epochs:
+        if cls == "defiant":
+            return False
+        # reluctant
+        if is_symptomatic:
             return True
-        return False
+        return epochs_since_order >= self.reluctant_delay_epochs

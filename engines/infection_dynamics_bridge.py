@@ -603,6 +603,8 @@ class KorkinAgent:
         }
         if self.chronic_disease_ids:
             result["chronic_disease_ids"] = list(self.chronic_disease_ids)
+        if self.cabin_mate_ids:
+            result["cabin_mate_ids"] = sorted(self.cabin_mate_ids)
         return result
 
 

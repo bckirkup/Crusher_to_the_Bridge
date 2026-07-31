@@ -437,14 +437,18 @@ class TestCrossModuleDataFlow:
         for status in (STATUS_BASELINE, STATUS_SUSPECTED, STATUS_CONFIRMED):
             assert isinstance(status, str)
 
-        result = check_escalation(
+        result, pending, rates = check_escalation(
             STATUS_BASELINE,
             {"sick_call_count": 10},
             None,
             cfg,
         )
         assert isinstance(result, str)
-        assert result in (STATUS_BASELINE, STATUS_SUSPECTED, STATUS_CONFIRMED)
+        assert result in (
+            STATUS_BASELINE, STATUS_SUSPECTED, STATUS_CONFIRMED, "ALERT", "LOCKDOWN",
+        )
+        assert pending is None or isinstance(pending, dict)
+        assert isinstance(rates, dict)
 
 
 # ── Microflora disruption boundary tests ────────────────────────────────
