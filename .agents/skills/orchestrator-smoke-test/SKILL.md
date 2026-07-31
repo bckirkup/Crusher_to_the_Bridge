@@ -82,7 +82,8 @@ Expected: Prints success message with no ImportError.
 | Multi-Pathogen | All pathogens in `active_profiles.json` initialize with valid dose-response params |
 | Six pathways | Direct, droplet, HVAC airborne, fomite, food contamination, environmental |
 | Quarantine vs isolation | Quarters confinement vs rare isolation ward (no HVAC) |
-| Epoch Loop | Transmission core, observation sampling (with TAT delivery), protocol evaluation, cost accounting, **OIS** all execute |
+| Epoch Loop | Transmission core, observation sampling (with TAT delivery), **attack-rate escalation** (with optional decision latency), protocol evaluation (`min_escalation_status` + SOP delay), cost accounting, **OIS** all execute |
+| Quarantine compliance | Bimodal sticky classes (compliant / reluctant / defiant); no forced `compliance_delay_epochs` |
 | Wearable scoring | Confounder-aware `infection_score` gates cascade Tier-0 entry; fleet stoplights still use `anomaly_rate` |
 | Instrument TAT | Delivered `observation_engine` results lag collection per `instrument_turnaround.json` |
 | Long-read (optional) | Enable `long_read_sequencing.enabled` for Nanopore escalation runs |

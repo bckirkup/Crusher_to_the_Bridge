@@ -36,6 +36,7 @@ PYTHONPATH=. python3 -m pytest \
   tests/test_py_contam_bridge.py \
   tests/test_contam_engine_compare.py \
   tests/test_mega_cruise_campaign.py \
+  tests/test_outbreak_response_architecture.py \
   tests/test_pathogen_overrides.py \
   tests/test_cabin_corridor_transmission.py \
   tests/test_shedding_variance_cabin_mates.py \

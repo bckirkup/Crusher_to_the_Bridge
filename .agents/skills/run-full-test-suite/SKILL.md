@@ -123,8 +123,9 @@ python3 -m pytest tests/test_wearable_anomaly_scorer.py tests/test_cascade_entry
 # Enhanced wearable model (multi-device, confounders, chronic disease)
 python3 -m pytest tests/test_wearable_enhanced.py tests/test_chronic_disease.py -v --tb=short
 
-# Mega cruise campaign (dry-run, smoke zip, shards, aggregators)
-python3 -m pytest tests/test_mega_cruise_campaign.py -v --tb=short
+# Mega cruise campaign (dry-run, smoke zip, shards, aggregators, T11/T15/T16)
+python3 -m pytest tests/test_mega_cruise_campaign.py \
+  tests/test_outbreak_response_architecture.py -v --tb=short
 
 # Contam hobbyist PRJ exports + path I/O inviolate
 python3 -m pytest tests/test_contam_hobbyist_constitution.py tests/test_contam_hobbyist_destroyer.py \
@@ -188,7 +189,8 @@ python3 -c "import json; c=json.load(open('telemetry_buffer/simulation_history.j
 | `test_wearable_enhanced.py` | 40 | `engines/wearable_monitor.py`, `crusher_labs/modalities/wearable.py` | Multi-device, coverage, visibility, confounders, detection profiles, chronic disease devices, glucose channel, config parsing |
 | `test_sanity_checker.py` | 40 | `tools/sanity_checker.py` | Pydantic validation, referential integrity, config sections |
 | `test_stoplight.py` | 39 | `crusher_labs/stoplight.py` | Ct-to-stoplight mapping, threshold logic |
-| `test_mega_cruise_campaign.py` | 30+ | `picard_framework/runs/mega_cruise_campaign/` | Dry-run counts, smoke zip, shards, S3 resume, aggregators |
+| `test_mega_cruise_campaign.py` | 30+ | `picard_framework/runs/mega_cruise_campaign/` | Dry-run counts, smoke zip, shards, S3 resume, aggregators, T11/T15/T16 |
+| `test_outbreak_response_architecture.py` | 10+ | `orchestrator_init.py`, `syndromic.py`, `protocol_engine.py`, campaign | Attack-rate escalation, decision latency, bimodal compliance, SOP gates |
 | `test_diagnostic_cascade.py` | 36 | `crusher_labs/diagnostic_cascade.py` | Tier progression, multiplex panels, cascade telemetry |
 | `test_chronic_disease.py` | 31 | `engines/wearable_monitor.py` | Chronic disease device assignments and glucose channel |
 | `test_json_schema_validation.py` | 30 | `schemas/*.schema.json` | All platform, social, fleet JSON files validated against schemas |
@@ -247,10 +249,12 @@ on `active_profiles.json`:
 | Symptomatic | 0 |
 | Recovered | 14 |
 | Immune | 4 |
-| Trigger status | BASELINE |
+| Trigger status | CONFIRMED |
 | Total financial USD | > 0 (exact value may differ slightly between Python 3.11 and 3.12) |
 | OIS cumulative | shifts with outbreak dynamics |
 
-Golden totals shift when observation, cascade, pathogen wiring, or shedding variance
-changes; update `tests/test_golden_orchestrator.py` and `tests/test_golden_picard.py`
-after intentional epidemiological changes. See `docs/SHEDDING_AND_CABINMATES.md`.
+Golden totals shift when observation, cascade, pathogen wiring, shedding variance,
+or outbreak-response (escalation / compliance) wiring changes; update
+`tests/test_golden_orchestrator.py` and `tests/test_golden_picard.py`
+after intentional epidemiological changes. See `docs/SHEDDING_AND_CABINMATES.md`
+and `docs/tiered_escalation_spec.md`.

@@ -58,8 +58,16 @@ python3 -m pytest tests/test_mega_cruise_campaign.py -v --tb=short
 ```
 
 Covers dry-run counts, surveillance ladder divergence, OA/compliance/immunity
-sweeps, smoke zip layout, S3 resume mocks, HVAC OA sensitivity, and shard
-partitioning.
+sweeps, smoke zip layout, S3 resume mocks, HVAC OA sensitivity, shard
+partitioning, and Campaign v5 T11/T15/T16 generators
+(decision latency, SOP AR thresholds, reluctant fraction).
+
+Outbreak-response knobs: skill `outbreak-response-architecture` +
+`docs/tiered_escalation_spec.md`. Also run:
+
+```bash
+python3 -m pytest tests/test_outbreak_response_architecture.py -v --tb=short
+```
 
 ## Pre-AWS checklist
 

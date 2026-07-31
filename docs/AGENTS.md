@@ -79,6 +79,7 @@ Install from the hash-pinned lockfile: `pip install --only-binary=:all: --requir
 | `testing-picard-presidio` | Before PRs on framework code |
 | `configuring-stackelberg-social` | Adding/editing diffusion, class interactions, profiles |
 | `operational-impact-behavioral-policies` | OIS weights, action kinds, ThresholdBeliefPolicy |
+| `outbreak-response-architecture` | Escalation levels, decision latency, bimodal compliance, T11/T15/T16 |
 | `run-full-test-suite` | Any pre-PR validation |
 | `ci-test-design` | Designing golden-value + config-sensitivity tests |
 | `long-read-sequencing` | Long-read params, TAT config, escalation, `LongReadNanoporeSequencing` |
@@ -109,6 +110,7 @@ Install from the hash-pinned lockfile: `pip install --only-binary=:all: --requir
 - Utility **weights and optimization** are out-of-repo; only feature export and action apply are in-repo.
 - Nine ship platforms in `data/platforms/` (including fiction-adapted Enterprise bundles and legacy `messy_cruise_500`); see `README.md` Platforms table.
 - **Wearable cascade entry** uses confounder-aware `infection_score` (not raw `anomaly_count`) via `diagnostic_cascade.entry.wearable_alert_fusion` or defaults in `data/config/diagnostic_cascade*.json`. Fleet stoplight SOPs (SOP-013/014) still use shipwide `anomaly_rate`.
+- **Outbreak response architecture:** SOP policy (attack-rate escalation + `min_escalation_status`), organizational decision latency (`escalation.decision_latency` / SOP `activation_delay_epochs`), and bimodal compliance (compliant/reluctant/defiant) are separate systems — see `docs/tiered_escalation_spec.md` and skill `outbreak-response-architecture`. Default `lockdown_attack_rate: never` for n=20 smokes; mega-cruise campaign injects `0.05`.
 - **Shedding variance:** `shedding_variance_log10` on pathogen profiles draws a persistent per-agent multiplier at infection (`docs/SHEDDING_AND_CABINMATES.md`).
 - **Cabin-mates:** `mega_cruise_5000` `Cabin_Corridor` zones pair agents into staterooms at init; confinement direct contact is cabin-mate-aware (`assign_cabin_mates` in `orchestrator_init.py`).
 - Ruff lint: **F-rules are blocking** in main CI; E/W/I remain advisory (`continue-on-error` / `|| true`). Keep unused-import and undefined-name findings clean before campaigns.
