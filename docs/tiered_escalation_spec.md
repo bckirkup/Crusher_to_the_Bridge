@@ -1,208 +1,284 @@
-# Tiered Escalation Implementation Spec
-## For: Crusher to the Bridge — PR for Devin
+# Outbreak Response Architecture: SOPs, Decision Latency, and Compliance
+## Specification for Crusher to the Bridge
 
-### Overview
-Replace the current 2-level escalation (BASELINE → SUSPECTED → CONFIRMED) with a 
-5-level system based on CDC VSP, WHO IHR, and Navy outbreak response protocols.
-The current system fires full-ship lockdown within 1-3 epochs, making compliance, 
-wearable sensitivity, and surveillance sensitivity parameters irrelevant.
+### Motivation
 
-### Current Architecture (to replace)
+Campaign v4 (4,156 runs) revealed that three distinct systems are currently 
+collapsed into one, producing unrealistic behavior:
 
-`orchestrator_init.py::check_escalation()` (line 382):
-- BASELINE → SUSPECTED: sick_call_count ≥ 3
-- SUSPECTED → CONFIRMED: any zone PCR Ct ≤ 35
+1. **SOP invocation** (policy): which response actions fire at which information state
+2. **Decision latency** (organizational): how long between signal and action
+3. **Compliance** (behavioral): whether individuals follow quarantine orders
 
-`orchestrator_epoch.py::step_quarantine_confinement()` (line 567):
-- SOP-009 confine_all_to_quarters: confines ALL agents (no compliance check)
-- SOP-008/010: confines symptomatic only
-- Legacy fallback: CONFIRMED → confine symptomatic + shedding
+Currently: 3 sick calls → 1 PCR → confine ALL in 1-3 epochs, with forced 
+compliance after 1 epoch. This makes compliance, wearable sensitivity, 
+sick-call detection rate, and intervention timing all irrelevant.
 
-### New Architecture
+This spec separates the three systems so each can be independently parameterized 
+and studied.
 
-#### 1. New trigger levels in `orchestrator_types.py`
+---
 
-```python
-STATUS_BASELINE = "BASELINE"
-STATUS_ALERT = "ALERT"           # NEW
-STATUS_SUSPECTED = "SUSPECTED"
-STATUS_CONFIRMED = "CONFIRMED"
-STATUS_LOCKDOWN = "LOCKDOWN"     # NEW
-```
+## System 1: SOP Invocation (Policy Layer)
 
-#### 2. New `check_escalation()` in `orchestrator_init.py`
+### What it is
+The decision rules that determine which Standing Operating Procedures activate 
+at which information state. This is a *policy choice* — different ships, 
+navies, or cruise lines may choose different rules.
 
-Replace the existing function. The new version needs access to cumulative case 
-counts, not just current-epoch sick calls.
+### Current problem
+SOP-009 (confine_all_to_quarters) fires on a single qPCR RED stoplight, 
+which triggers within 1-3 epochs. The thresholds are too sensitive.
 
-```python
-def check_escalation(
-    trigger_status: str,
-    syndromic_result: dict[str, Any],
-    pcr_result: dict[str, Any] | None,
-    cfg: dict[str, Any],
-    state: SimulationState,  # NEW — needs cumulative tracking
-) -> str:
-    esc_cfg = cfg.get("escalation", {})
-    num_agents = cfg.get("ship_graph", {}).get("num_agents", 7000)
+### Design
 
-    # Pathogen syndrome type affects thresholds
-    # Default to GI thresholds; respiratory overrides from pathogen profile
-    is_respiratory = esc_cfg.get("respiratory_mode", False)
+SOPs already exist in `protocols.json` with stoplight-level triggers. 
+The fix is in the **stoplight thresholds**, not the SOP structure.
 
-    # Track cumulative confirmed cases in state
-    cumulative_cases = state.cumulative_confirmed_cases  # NEW field
-    attack_rate = cumulative_cases / num_agents
+#### Escalation levels (in `config.yaml escalation:`)
 
-    # BASELINE → ALERT
-    if trigger_status == STATUS_BASELINE:
-        alert_threshold = esc_cfg.get("alert_sick_call_threshold", 3)
-        if is_respiratory:
-            # 1 confirmed case for respiratory
-            if cumulative_cases >= esc_cfg.get("respiratory_alert_cases", 1):
-                return STATUS_ALERT
-        if syndromic_result["sick_call_count"] >= alert_threshold:
-            return STATUS_ALERT
-
-    # ALERT → SUSPECTED
-    if trigger_status == STATUS_ALERT:
-        suspect_pct = esc_cfg.get("suspect_attack_rate", 0.02)  # 2%
-        if is_respiratory:
-            suspect_cases = esc_cfg.get("respiratory_suspect_cases", 3)
-            if cumulative_cases >= suspect_cases and pcr_result_positive(pcr_result):
-                return STATUS_SUSPECTED
-        if attack_rate >= suspect_pct:
-            return STATUS_SUSPECTED
-
-    # SUSPECTED → CONFIRMED
-    if trigger_status == STATUS_SUSPECTED:
-        confirm_pct = esc_cfg.get("confirm_attack_rate", 0.03)  # 3%
-        if attack_rate >= confirm_pct:
-            return STATUS_CONFIRMED
-
-    # CONFIRMED → LOCKDOWN
-    if trigger_status == STATUS_CONFIRMED:
-        lockdown_pct = esc_cfg.get("lockdown_attack_rate", 0.05)  # 5%
-        if attack_rate >= lockdown_pct:
-            return STATUS_LOCKDOWN
-
-    return trigger_status
-```
-
-#### 3. New `step_quarantine_confinement()` in `orchestrator_epoch.py`
-
-Replace the existing function. Confinement actions depend on trigger level:
-
-```python
-def step_quarantine_confinement(
-    epoch, agents, merged_mods, trigger_status, state, syndromic,
-):
-    exempt_classes = set(merged_mods.get("exempt_classes", []))
-
-    if trigger_status == STATUS_LOCKDOWN:
-        # Level 4: Full lockdown — mandatory, no compliance check
-        confine_all_agents(epoch, agents, state, syndromic, exempt_classes)
-        return
-
-    if trigger_status == STATUS_CONFIRMED:
-        # Level 3: Symptomatic + close contacts, compliance-gated
-        confine_agents(epoch, agents, state, syndromic,
-                      include_shedding=True, exempt_classes=exempt_classes)
-        # Also confine traced contacts (compliance-gated)
-        confine_contacts(epoch, agents, state, syndromic, exempt_classes)
-        return
-
-    if trigger_status == STATUS_SUSPECTED:
-        # Level 2: Confirmed/suspected cases mandatory, contacts compliance-gated
-        confine_agents(epoch, agents, state, syndromic,
-                      include_shedding=True, exempt_classes=exempt_classes)
-        return
-
-    if trigger_status == STATUS_ALERT:
-        # Level 1: Symptomatic individuals only, compliance-gated
-        confine_agents(epoch, agents, state, syndromic,
-                      include_shedding=False, exempt_classes=exempt_classes)
-        return
-
-    # BASELINE: no confinement
-```
-
-#### 4. State changes in `SimulationState`
-
-Add to `orchestrator_types.py`:
-```python
-cumulative_confirmed_cases: int = 0
-escalation_log: list[dict] = field(default_factory=list)
-```
-
-Update cumulative case tracking each epoch in the simulation loop:
-```python
-# In ship_simulation.py epoch loop, after syndromic results:
-state.cumulative_confirmed_cases = sum(
-    1 for a in agents 
-    if a.get("infection_state") in ("symptomatic", "recovered")
-)
-```
-
-#### 5. Config changes
-
-Update `crusher_labs/config.yaml`:
 ```yaml
 escalation:
-  alert_sick_call_threshold: 3
-  respiratory_alert_cases: 1
-  suspect_attack_rate: 0.02        # 2% — CDC VSP reporting threshold
-  confirm_attack_rate: 0.03        # 3% — CDC VSP outbreak threshold
-  lockdown_attack_rate: 0.05       # 5% — extreme measure
-  respiratory_mode: false          # set per-pathogen via overrides
-  pcr_confirm_ct_threshold: 35.0
+  # Level 0 → Level 1 (ALERT): first signal of possible outbreak
+  alert_sick_call_threshold: 3          # ≥3 sick calls in 24h (keep existing)
+
+  # Level 1 → Level 2 (SUSPECTED): CDC VSP 2% reporting threshold
+  suspect_attack_rate: 0.02             # 2% cumulative AR among passengers or crew
+
+  # Level 2 → Level 3 (CONFIRMED): CDC VSP 3% outbreak threshold  
+  confirm_attack_rate: 0.03             # 3% cumulative AR
+
+  # Level 3 → Level 4 (LOCKDOWN): extreme measure, rarely used
+  lockdown_attack_rate: 0.05            # 5% cumulative AR
+
+  # Respiratory pathogen overrides (lower thresholds, per CDC/IHR)
+  respiratory_overrides:
+    alert_confirmed_cases: 1            # 1 confirmed case → ALERT
+    suspect_attack_rate: 0.01           # 1% → SUSPECTED
 ```
 
-#### 6. Campaign manifest surveillance config additions
+#### SOP activation by level
 
-Add pathogen-type escalation overrides:
+| Level | Status | SOPs that activate | Confinement scope |
+|-------|--------|-------------------|-------------------|
+| 0 | BASELINE | None | None |
+| 1 | ALERT | SOP-004 (PPE), SOP-006 (diagnostic cadence), SOP-008 (individual symptomatic confinement) | Symptomatic individuals only |
+| 2 | SUSPECTED | + SOP-001 (enhanced ventilation), SOP-003 (surface decon), SOP-007 (galley closure), SOP-010 (VSP mass isolation of symptomatic) | Symptomatic + confirmed cases |
+| 3 | CONFIRMED | + SOP-005 (N95), SOP-002 (HEPA), SOP-011 (Diamond Princess-style contact confinement) | Symptomatic + contacts |
+| 4 | LOCKDOWN | + SOP-009 (confine all to quarters) | All passengers, non-essential crew |
+
+#### Implementation
+
+Modify `check_escalation()` to:
+- Track cumulative confirmed cases in `SimulationState.cumulative_confirmed_cases`
+- Use attack rate thresholds (not single PCR results) for SUSPECTED→CONFIRMED→LOCKDOWN
+- Keep the existing BASELINE→ALERT transition (sick call count) as-is
+- Add `respiratory_mode` flag read from pathogen profile's `clinical_presentation.syndromes`
+
+Modify `step_quarantine_confinement()` to select confinement scope based on 
+trigger level, mapping to the SOP table above.
+
+### Parameters for campaign sweep
+
+```
+escalation.suspect_attack_rate: [0.01, 0.02, 0.03, 0.05]
+escalation.lockdown_attack_rate: [0.03, 0.05, 0.10, never]
+```
+
+---
+
+## System 2: Decision Latency (Organizational Layer)
+
+### What it is
+The delay between an instrument signaling a threshold breach and the 
+corresponding SOP actually activating. This represents organizational 
+decision-making time: meetings, risk assessment, communication up the 
+chain of command, logistics of deploying the response.
+
+### Current problem
+Zero latency — SOPs activate in the same epoch as the signal. In reality, 
+the Diamond Princess took days from first case to quarantine order. 
+USS Theodore Roosevelt took weeks for full response.
+
+### Design
+
+Add `activation_delay_epochs` to each SOP in `protocols.json`:
+
 ```json
-"escalation_overrides": {
-  "respiratory": {
-    "escalation": {
-      "respiratory_mode": true,
-      "respiratory_alert_cases": 1,
-      "suspect_attack_rate": 0.01
-    }
-  }
+{
+  "protocol_id": "SOP-008",
+  "name": "Individual Symptomatic Confinement",
+  "activation_delay_epochs": 2,
+  ...
 }
 ```
 
-#### 7. Ship simulation loop changes
+And an escalation-level delay in `config.yaml`:
 
-`picard_framework/simulation/ship_simulation.py`:
-- Pass `state` to `check_escalation()` (currently only passes cfg)
-- Update `state.cumulative_confirmed_cases` each epoch
-- PCR sampling cadence should vary by level:
-  - BASELINE: cadence 4
-  - ALERT: cadence 2  
-  - SUSPECTED+: cadence 1
+```yaml
+escalation:
+  decision_latency:
+    alert_delay_epochs: 1              # 1 hour to start isolating individuals
+    suspected_delay_epochs: 6          # 6 hours for enhanced response
+    confirmed_delay_epochs: 24         # 1 day for outbreak-level response
+    lockdown_delay_epochs: 48          # 2 days for ship-wide lockdown decision
+```
 
-#### 8. Tests needed
+#### Implementation
 
-- `test_escalation_levels.py`:
-  - BASELINE → ALERT at 3 sick calls
-  - ALERT → SUSPECTED at 2% AR  
-  - SUSPECTED → CONFIRMED at 3%
-  - CONFIRMED → LOCKDOWN at 5%
-  - Respiratory mode: ALERT at 1 confirmed case
-  - No backward transitions
-  - Full lockdown only at LOCKDOWN level (not CONFIRMED)
+When `check_escalation()` determines a new level is reached, record 
+`state.escalation_pending = (new_level, epoch_triggered)`. The level 
+doesn't take effect until `epoch >= epoch_triggered + delay`. During 
+the delay, the previous level's SOPs remain active.
 
-- Update `test_orchestrator.py`:
-  - Compliance gate applies at ALERT, SUSPECTED, CONFIRMED
-  - Compliance gate does NOT apply at LOCKDOWN
-  - confine_all only fires at LOCKDOWN
+This is simple to implement: a pending-transition queue in SimulationState.
 
-- Verify T7 compliance now produces refusers at ALERT/SUSPECTED/CONFIRMED levels
+### Parameters for campaign sweep
 
-#### 9. Backward compatibility
+```
+decision_latency.alert_delay_epochs: [0, 1, 2, 6]
+decision_latency.confirmed_delay_epochs: [6, 12, 24, 48, 72]
+decision_latency.lockdown_delay_epochs: [24, 48, 72, 168]
+```
 
-- Old manifests with 2-level escalation should still work
-- If config has no `suspect_attack_rate` etc., fall back to old behavior
-- `SUSPECTED` and `CONFIRMED` status strings preserved for telemetry compatibility
+---
+
+## System 3: Compliance (Behavioral Layer)
+
+### What it is
+Whether individual agents follow quarantine/isolation orders. This is 
+human behavior, determined by psychology, sociology, and circumstance — 
+not by policy.
+
+### Current problem
+`compliance_delay_epochs: 1` forces all agents to comply after 1 epoch 
+regardless of their compliance parameter. This eliminates compliance as 
+a meaningful variable.
+
+### Design
+
+#### Agent compliance classes
+
+Based on the literature (Webster et al. pre-COVID review, UK NHS app study, 
+influenza ABM parameterizations), compliance is best modeled as a 
+**bimodal mixture of agent types**, not a continuous distribution:
+
+| Agent class | Fraction | Behavior | Basis |
+|-------------|----------|----------|-------|
+| **Compliant** | `compliance` param (e.g., 0.6) | Immediately follows quarantine orders. Stays quarantined for full duration. | ~45-75% in real outbreaks |
+| **Reluctant** | `(1 - compliance) × reluctant_fraction` (e.g., 0.3) | Initially refuses. May comply after `reluctant_delay_epochs` (e.g., 48-72 hours) if they develop symptoms or see others getting sick. | Intention-behavior gap population |
+| **Defiant** | `(1 - compliance) × (1 - reluctant_fraction)` (e.g., 0.1) | Refuses quarantine for the duration. Does not comply regardless of delay or social pressure. | ~5-15% persistent non-compliers |
+
+The `compliance` parameter (0.0 to 1.0) sets the fraction in the Compliant 
+class. The remainder splits between Reluctant and Defiant.
+
+#### Agent class modifiers
+
+Different agent classes (crew vs. passenger) may have different baseline 
+compliance. In `config.yaml`:
+
+```yaml
+fred_behavior:
+  quarantine_compliance: 0.60          # population default
+  reluctant_fraction: 0.75             # of non-compliers, 75% are reluctant (vs defiant)
+  reluctant_delay_epochs: 48           # reluctant agents may comply after 48 hours
+  compliance_by_class:
+    crew: 0.85                         # crew more compliant (military/employment)
+    passenger_elderly: 0.70            # higher perceived risk → more compliant
+    passenger_young: 0.45              # lower perceived risk → less compliant
+```
+
+#### Implementation
+
+Modify `check_quarantine_compliance()`:
+
+```python
+def check_quarantine_compliance(self, agent_id, epochs_since_order, ...):
+    # Determine agent's compliance class (assigned at first quarantine order)
+    if agent_id not in self._compliance_class:
+        draw = self.rng.random()
+        effective = min(1.0, self.quarantine_compliance + chronic_boost)
+        if draw < effective:
+            self._compliance_class[agent_id] = "compliant"
+        elif draw < effective + (1 - effective) * self.reluctant_fraction:
+            self._compliance_class[agent_id] = "reluctant"
+        else:
+            self._compliance_class[agent_id] = "defiant"
+
+    cls = self._compliance_class[agent_id]
+
+    if cls == "compliant":
+        return True
+    elif cls == "defiant":
+        return False
+    elif cls == "reluctant":
+        # May comply after delay, OR if they become symptomatic
+        if epochs_since_order >= self.reluctant_delay_epochs:
+            return True
+        return False
+```
+
+Remove the old `compliance_delay_epochs` forced-compliance behavior entirely.
+
+#### Structural non-compliance (physics, not behavior)
+
+Even compliant agents in shared cabins are not fully isolated. This is 
+already handled by the transmission engine's confinement isolation factor 
+(`DEFAULT_CONFINEMENT_ISOLATION_FACTOR = 0.05` and 
+`NON_MATE_CONFINEMENT_CONTACT_FACTOR = 0.01`). No change needed — the 
+distinction between behavioral compliance (do you stay in your cabin?) 
+and structural effectiveness (does staying in your cabin actually prevent 
+exposure?) is already architecturally separated.
+
+### Parameters for campaign sweep
+
+```
+quarantine_compliance: [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]
+reluctant_fraction: [0.5, 0.75, 1.0]  # 1.0 = no defiants
+reluctant_delay_epochs: [24, 48, 72, 168]
+```
+
+---
+
+## Interactions Between Systems
+
+The three systems interact but are independently parameterizable:
+
+1. **SOP thresholds** determine *when* quarantine is ordered
+2. **Decision latency** determines *how fast* the order reaches agents
+3. **Compliance** determines *whether* agents follow the order
+
+A sweep that varies all three reveals which is the binding constraint:
+- If raising SOP thresholds barely changes outcomes → the outbreak overwhelms 
+  any reasonable response (norovirus)
+- If decision latency dominates → early detection is the key investment
+- If compliance dominates → behavioral interventions (communication, 
+  compensation, enforcement) matter more than surveillance technology
+
+---
+
+## Campaign v5 Tier Design (after implementation)
+
+| Tier | Runs | Question |
+|------|------|----------|
+| T1 Baselines | 200 | 10 pathogens × (none_true, syndromic) × 10 seeds |
+| T3 Surveillance | 400 | 10 pathogens × 4 surveillance × 10 seeds |
+| T7 Compliance | 1440 | 4 pathogens × 4 surveillance × 6 compliance × 3 immunity × 5 seeds |
+| T9 Slow pathogens | 80 | 4 pathogens × 4 surveillance × 5 seeds (504 epochs) |
+| T11 Timing (decision latency) | 400 | 4 pathogens × 5 latency levels × 2 surveillance × 2 compliance × 5 seeds |
+| T12 Surveillance sensitivity | 200 | 4 pathogens × 5 sick-call probs × 2 surveillance × 5 seeds |
+| T14 Immunity threshold | 800 | 10 pathogens × 8 immunity × 10 seeds |
+| T15 SOP threshold sweep (NEW) | 320 | 4 pathogens × 4 suspect_AR × 4 lockdown_AR × 5 seeds |
+| T16 Reluctant fraction sweep (NEW) | 240 | 4 pathogens × 3 reluctant_frac × 4 delay × 5 seeds |
+| **Total** | **~4,100** | |
+
+---
+
+## Source Literature
+
+- CDC VSP 2%/3% thresholds: [task:e8da2eaa-e847-4bec-85db-5df53cb2dec5]
+- Quarantine compliance rates and behavioral models: [task:9a937b48-de80-4365-8c77-78b971034a33]
+- Diamond Princess, USS Theodore Roosevelt response timelines: both tasks above
+- Influenza ABM compliance parameterization (25/50/75/100%): compliance review
+- UK NHS app study (45% actual vs 71% intended compliance): compliance review
+- Webster et al. pre-COVID meta-review (0-93% adherence): compliance review
