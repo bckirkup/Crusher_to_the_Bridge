@@ -191,6 +191,14 @@ def _looks_like_oom(returncode: int | None) -> bool:
     return returncode in (-9, 137)
 
 
+def _failure_class(*, timed_out: bool, returncode: int | None) -> str:
+    if timed_out:
+        return "timeout"
+    if _looks_like_oom(returncode):
+        return "oom"
+    return "other"
+
+
 def _write_run_sidecars(
     safe_id: str,
     *,
@@ -222,15 +230,9 @@ def _write_run_sidecars(
     )
     if ok:
         return
-    if timed_out:
-        failure_class = "timeout"
-    elif _looks_like_oom(returncode):
-        failure_class = "oom"
-    else:
-        failure_class = "other"
     failure = {
         **resource,
-        "failure_class": failure_class,
+        "failure_class": _failure_class(timed_out=timed_out, returncode=returncode),
     }
     failure_path = _output_artifact(f"{safe_id}.failure.json")
     with validated_open(failure_path, "w", allowed_roots=roots, encoding="utf-8") as fh:

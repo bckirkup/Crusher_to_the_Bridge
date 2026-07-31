@@ -118,6 +118,7 @@ fi
 
 # Register job definition from repo JSON (1 vCPU / 2048 MB, timeout 3600).
 tmp="$(mktemp)"
+trap 'rm -f "$tmp"' EXIT
 sed -e "s/<ACCOUNT_ID>/$ACCOUNT_ID/g" \
     -e "s/<REGION>/$REGION/g" \
     -e "s#<BUCKET>#$BUCKET#g" \
@@ -126,6 +127,7 @@ sed -e "s/<ACCOUNT_ID>/$ACCOUNT_ID/g" \
 reg_out="$(aws "${AWS_PROFILE_ARG[@]}" batch register-job-definition \
   --cli-input-json "file://$tmp" --region "$REGION")"
 rm -f "$tmp"
+trap - EXIT
 revision="$(echo "$reg_out" | python3 -c 'import json,sys; print(json.load(sys.stdin)["revision"])')"
 echo "  job def    : $JOB_DEF_NAME:$revision registered"
 

@@ -167,6 +167,9 @@ re-registering:
   ```
 
   (Max **five** rules. This stack is Fargate Spot only, so omit `Host EC2*`.)
+  Keep OOM (`137` / `OutOfMemoryError*`) on **exit** so memory kills stay
+  countable via `classify_batch_failures.py`; Spot interrupt still retries.
+
 
 - **Fargate resource sizing.** Two layers: (1) **subprocess-per-run** stops
   cumulative RSS growth across a shard; (2) **campaign compact history**
