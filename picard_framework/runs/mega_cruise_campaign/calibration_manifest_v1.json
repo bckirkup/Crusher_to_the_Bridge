@@ -165,6 +165,7 @@
     },
     "c2_immunity_sweep": {
       "description": "Norovirus immunity sweep across platforms (FUT2 non-secretor modeling)",
+      "deferred": true,
       "platforms": [
         "expedition_cruise_450",
         "classic_cruise_1900",
@@ -196,7 +197,7 @@
         508,
         509
       ],
-      "note": "Run at best dose_adjustment from C1. Requires manual config after C1 analysis."
+      "note": "Wave-2 only. Pin dose_adjustment (or dose_adjustments) from C1 analysis, then run with --tier c2 or --include-deferred. Excluded from --tier all until then."
     },
     "c3_sarscov2_calibration": {
       "description": "SARS-CoV-2 dose_adjustment sweep \u2014 Diamond Princess cross-validation",

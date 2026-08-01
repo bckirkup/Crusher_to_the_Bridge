@@ -309,11 +309,28 @@ class S3Uploader:
             return False
 
 
-def resolve_tier_ids(manifest: dict[str, Any], tier_arg: str | None) -> list[str]:
-    """Accept full keys (t1_pathogen_baselines) or short prefixes (t1)."""
+def _tier_is_deferred(tier: dict[str, Any]) -> bool:
+    return bool(tier.get("deferred"))
+
+
+def resolve_tier_ids(
+    manifest: dict[str, Any],
+    tier_arg: str | None,
+    *,
+    include_deferred: bool = False,
+) -> list[str]:
+    """Accept full keys (t1_pathogen_baselines) or short prefixes (t1).
+
+    Tiers with ``\"deferred\": true`` are omitted from ``all`` / ``*`` /
+    omitted-arg selection unless ``include_deferred`` is set. An explicit
+    tier id or short prefix (e.g. ``--tier c2``) always includes them so
+    wave-2 calibration can be launched after pinning ``dose_adjustment``.
+    """
     keys = sorted(manifest["tiers"].keys())
     if not tier_arg or tier_arg in ("all", "*"):
-        return keys
+        if include_deferred:
+            return keys
+        return [k for k in keys if not _tier_is_deferred(manifest["tiers"][k])]
     if tier_arg in manifest["tiers"]:
         return [tier_arg]
     matches = [k for k in keys if k == tier_arg or k.startswith(f"{tier_arg}_")]
@@ -1645,7 +1662,13 @@ def main(argv: list[str] | None = None) -> int:
         "--manifest",
         type=Path,
         default=MANIFEST_PATH,
-        help="Path to campaign_manifest.json",
+        help="Path to campaign_manifest.json (or calibration_manifest_v1.json)",
+    )
+    parser.add_argument(
+        "--include-deferred",
+        action="store_true",
+        help="Include tiers marked deferred:true when selecting --tier all "
+        "(explicit --tier c2 still works without this flag).",
     )
     parser.add_argument(
         "--shard-count",
@@ -1739,7 +1762,18 @@ def main(argv: list[str] | None = None) -> int:
     if args.retry_failed and not retry_only:
         print("  --retry-failed: failed_runs.txt is empty; nothing to retry.")
         return 0
-    tiers = resolve_tier_ids(manifest, args.tier)
+    tiers = resolve_tier_ids(
+        manifest, args.tier, include_deferred=args.include_deferred,
+    )
+    deferred_skipped = [
+        tid for tid, t in sorted(manifest["tiers"].items())
+        if _tier_is_deferred(t) and tid not in tiers
+    ]
+    if deferred_skipped and (not args.tier or args.tier in ("all", "*")):
+        print(
+            "  Skipping deferred tiers (pin dose then --tier <id> "
+            f"or --include-deferred): {', '.join(deferred_skipped)}",
+        )
 
     # Build the full flattened, ordered run list across selected tiers so the
     # global index is stable and independent of which shard is executing.

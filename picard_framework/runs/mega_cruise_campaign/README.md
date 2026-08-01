@@ -24,6 +24,36 @@ sweeps (see `docs/tiered_escalation_spec.md`):
 | t15 | SOP AR thresholds | 4 × 4 suspect_AR × 4 lockdown_AR × 5 seeds | 320 |
 | t16 | Reluctant fraction | 4 × 3 reluctant_frac × 4 delay × 5 seeds | 240 |
 
+## Multi-platform calibration (`calibration_manifest_v1.json`)
+
+Separate campaign (~2,760 runs if all tiers; **wave-1 default ~2,360**
+without deferred C2). CDC VSP AGE rate matching via `dose_adjustment`
+sweeps across `expedition_cruise_450` / `classic_cruise_1900` /
+`spirit_cruise_3000` / `mega_cruise_5000`. Agent counts come from the
+runner’s platform table (450 / 1910 / 3000 / 7000), not
+`default_num_agents`.
+
+| Tier | What | Runs |
+|------|------|------|
+| c1_* (4) | Norovirus dose × init infected × surveillance | 1820 |
+| c2 | Immunity × platforms — **deferred** until C1 pins `dose_adjustment` | 400 |
+| c3 | SARS-CoV-2 dose × platforms (Diamond Princess cross-check) | 360 |
+| c4 | Voyage duration (72/168/336 epochs) × dose | 180 |
+
+```bash
+MANIFEST=picard_framework/runs/mega_cruise_campaign/calibration_manifest_v1.json
+RUNNER=picard_framework/runs/mega_cruise_campaign/campaign_runner.py
+
+# Wave 1 (skips deferred c2)
+python3 "$RUNNER" --manifest "$MANIFEST" --dry-run
+python3 "$RUNNER" --manifest "$MANIFEST" --tier c1 --limit 1 --epochs 6 --num-agents 50
+
+# After C1 analysis: edit c2 with dose_adjustment, then
+python3 "$RUNNER" --manifest "$MANIFEST" --tier c2 --dry-run
+```
+
+Use a distinct S3 prefix for Batch (e.g. `s3://…/campaign/calibration_v1/`).
+
 Mega-cruise runs inject `escalation.lockdown_attack_rate: 0.05` (default
 `config.yaml` uses `never` for small smokes).
 
@@ -196,7 +226,8 @@ Tier 1 alone: ~15 hours (300 × 3 min).
 
 | File | Role |
 |------|------|
-| `campaign_manifest.json` | Tier matrix, pathogen/combo/surveillance configs |
+| `campaign_manifest.json` | Mega-cruise tier matrix (~17,780) |
+| `calibration_manifest_v1.json` | Multi-platform calibration matrix (c1–c4) |
 | `campaign_runner.py` | Spec generator + Picard executor (sharding + S3 upload) |
 | `README.md` | This file |
 | [`deploy/aws/`](../../../deploy/aws/README.md) | Dockerfile is at repo root; ECR + AWS Batch array-job deployment using IAM **role assumption** (short-lived creds) — bootstrap user → `picard-deploy-role`; containers use Batch execution/job roles |
