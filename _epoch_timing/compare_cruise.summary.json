@@ -1,0 +1,48 @@
+{
+  "mode": "compare_cruise",
+  "epochs_requested": 8,
+  "budget_seconds_per_platform": 120.0,
+  "rows": [
+    {
+      "label": "expedition_n450",
+      "platform_id": "expedition_cruise_450",
+      "num_agents": 450,
+      "epochs_done": 7,
+      "init_seconds": 0.085,
+      "mean_seconds_per_epoch": 0.1502,
+      "loop_seconds": 1.051,
+      "projected_240_epoch_hours": 0.01
+    },
+    {
+      "label": "classic_n1910",
+      "platform_id": "classic_cruise_1900",
+      "num_agents": 1910,
+      "epochs_done": 7,
+      "init_seconds": 0.14,
+      "mean_seconds_per_epoch": 0.8139,
+      "loop_seconds": 5.697,
+      "projected_240_epoch_hours": 0.054
+    },
+    {
+      "label": "spirit_n3000",
+      "platform_id": "spirit_cruise_3000",
+      "num_agents": 3000,
+      "epochs_done": 7,
+      "init_seconds": 0.207,
+      "mean_seconds_per_epoch": 1.3543,
+      "loop_seconds": 9.48,
+      "projected_240_epoch_hours": 0.09
+    },
+    {
+      "label": "mega_n5000",
+      "platform_id": "mega_cruise_5000",
+      "num_agents": 5000,
+      "epochs_done": 7,
+      "init_seconds": 0.342,
+      "mean_seconds_per_epoch": 2.6907,
+      "loop_seconds": 18.835,
+      "projected_240_epoch_hours": 0.179
+    }
+  ],
+  "mean_of_means": 1.2523
+}

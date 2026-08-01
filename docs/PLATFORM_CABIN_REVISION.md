@@ -19,6 +19,9 @@ generator `scripts/generate_cruise_platform_layout.py` + recipes in
 Future calibration targets (AGE per 100K traveler-days; **not yet enforced in-repo**):
 expedition 9.06, classic 21.4, spirit 22.1, mega 24.4.
 
+Wall-clock cost of the cabin-corridor fleet can be characterised with
+`python3 _epoch_timing/time_epochs.py --compare-cruise` (see `_epoch_timing/README.md`).
+
 ## Problem
 
 The legacy `messy_cruise_500` platform (archived from the original `mega_cruise_5000`

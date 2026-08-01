@@ -1,0 +1,48 @@
+{
+  "label": "mega_n5000",
+  "run_id": "compare_mega_cruise_5000",
+  "platform_id": "mega_cruise_5000",
+  "num_agents": 5000,
+  "epochs_requested": 8,
+  "epochs_done": 7,
+  "init_seconds": 0.342,
+  "loop_seconds": 18.835,
+  "mean_seconds_per_epoch": 2.6907,
+  "per_epoch": [
+    {
+      "epoch": 1,
+      "seconds": 2.6769,
+      "infected": 38
+    },
+    {
+      "epoch": 2,
+      "seconds": 2.7687,
+      "infected": 549
+    },
+    {
+      "epoch": 3,
+      "seconds": 3.0715,
+      "infected": 2443
+    },
+    {
+      "epoch": 4,
+      "seconds": 3.152,
+      "infected": 3649
+    },
+    {
+      "epoch": 5,
+      "seconds": 2.5953,
+      "infected": 3399
+    },
+    {
+      "epoch": 6,
+      "seconds": 2.3562,
+      "infected": 1540
+    },
+    {
+      "epoch": 7,
+      "seconds": 2.2137,
+      "infected": 311
+    }
+  ]
+}
