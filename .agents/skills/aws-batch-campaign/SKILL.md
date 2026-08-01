@@ -240,6 +240,9 @@ aws logs create-log-group --log-group-name /aws/batch/picard-campaign --region u
 
 ## Monitoring
 
+- Prefer `deploy/aws/monitor_campaign.ps1 -JobId … -Prefix campaign/<name>/ -Watch`
+  on Windows. It requires `-Bucket` / `CAMPAIGN_BUCKET`, or a local
+  `deploy/aws/.env` copied from `.env.example` (auto-loaded; never commit it).
 - Single-line status poll with a UTC timestamp prefix and trailing newline:
 
   ```bash

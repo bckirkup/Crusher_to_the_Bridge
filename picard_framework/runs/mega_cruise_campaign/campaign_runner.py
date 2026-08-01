@@ -911,7 +911,8 @@ def generate_tier_runs(
                                     ),
                                 )
         else:
-            # Legacy: Emit activation_delay_epochs on syndromic + cascade
+            # Legacy: activation_delay_epochs on syndromic + cascade.
+            # Optional compliance_levels (v6) crossed with delay × surveillance.
             for pathogen in tier["pathogens"]:
                 bundle, _pid, overrides = get_pathogen_config(manifest, pathogen)
                 for delay in tier["surveillance_delay_epochs"]:
@@ -920,23 +921,39 @@ def generate_tier_runs(
                         "diagnostic_cascade": {"activation_delay_epochs": int(delay)},
                     }
                     for sname in tier["surveillance_strategies"]:
-                        for seed in tier["seeds"]:
-                            rid = (
-                                f"{short}_{pathogen}_{sname}"
-                                f"_delay{int(delay)}_s{seed}"
-                            )
-                            yield _yield(
-                                rid,
-                                bundle=bundle,
-                                pathogen_overrides=overrides,
-                                config_overrides=merge_cfg(
-                                    surv_cfgs.get(sname), delay_over,
-                                ),
-                                seed=seed,
-                                pathogen=pathogen,
-                                surveillance=sname,
-                                surveillance_delay_epochs=int(delay),
-                            )
+                        for comp in tier.get("compliance_levels", [None]):
+                            behavior = None
+                            if comp is not None:
+                                behavior = {
+                                    "fred_behavior": {
+                                        "quarantine_compliance": float(comp),
+                                    },
+                                }
+                            for seed in tier["seeds"]:
+                                comp_tag = (
+                                    f"_comp{int(float(comp) * 100)}"
+                                    if comp is not None else ""
+                                )
+                                rid = (
+                                    f"{short}_{pathogen}_{sname}"
+                                    f"_delay{int(delay)}{comp_tag}_s{seed}"
+                                )
+                                yield _yield(
+                                    rid,
+                                    bundle=bundle,
+                                    pathogen_overrides=overrides,
+                                    config_overrides=merge_cfg(
+                                        merge_cfg(surv_cfgs.get(sname), delay_over),
+                                        behavior,
+                                    ),
+                                    seed=seed,
+                                    pathogen=pathogen,
+                                    surveillance=sname,
+                                    surveillance_delay_epochs=int(delay),
+                                    compliance=(
+                                        float(comp) if comp is not None else None
+                                    ),
+                                )
 
     elif short == "t12":
         for pathogen in tier["pathogens"]:

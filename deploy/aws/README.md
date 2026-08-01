@@ -398,7 +398,11 @@ Monitor progress (PowerShell-friendly wrapper — prefer this on Windows):
 # Status + S3 zip count every 60s (Ctrl+C to stop)
 $env:AWS_PROFILE = 'picard'   # or your SSO PowerUser profile
 $env:CAMPAIGN_BUCKET = '<BUCKET>'
-.\deploy\aws\monitor_campaign.ps1 -JobId <jobId> -Watch -IntervalSec 60
+.\deploy\aws\monitor_campaign.ps1 -JobId <jobId> `
+  -Prefix campaign/<campaign_prefix>/ -Watch -IntervalSec 60
+
+# Or copy deploy/aws/.env.example → deploy/aws/.env (gitignored);
+# monitor_campaign.ps1 loads CAMPAIGN_BUCKET / AWS_PROFILE / AWS_REGION from it.
 ```
 
 One-shot Batch status only:

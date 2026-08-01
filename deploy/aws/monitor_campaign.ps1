@@ -9,13 +9,18 @@
   until their entire shard finishes, so SUCCEEDED can stay 0 for a long time.
 
   Set AWS_PROFILE (e.g. picard or your SSO PowerUser profile) and pass
-  -Bucket (or set CAMPAIGN_BUCKET). Never commit real account IDs / bucket
-  names into the repo.
+  -Bucket (or set CAMPAIGN_BUCKET). Optionally copy deploy/aws/.env.example
+  to deploy/aws/.env (gitignored); this script loads it automatically.
+  Never commit real account IDs / bucket names into the repo.
 
 .EXAMPLE
   $env:AWS_PROFILE = 'picard'
   $env:CAMPAIGN_BUCKET = 'my-campaign-bucket'
   .\deploy\aws\monitor_campaign.ps1 -JobId <jobId> -Watch -IntervalSec 60
+
+.EXAMPLE
+  .\deploy\aws\monitor_campaign.ps1 -JobId <jobId> -Bucket my-campaign-bucket `
+    -Prefix campaign/mega_cruise_v4_bold/ -Watch
 #>
 param(
   [Parameter(Mandatory = $true)]
@@ -32,8 +37,29 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+# Load deploy/aws/.env (KEY=VALUE) into process env if present; do not override
+# values already set in the shell or passed as parameters.
+$envFile = Join-Path $PSScriptRoot ".env"
+if (Test-Path -LiteralPath $envFile) {
+  Get-Content -LiteralPath $envFile | ForEach-Object {
+    $line = $_.Trim()
+    if (-not $line -or $line.StartsWith("#")) { return }
+    $eq = $line.IndexOf("=")
+    if ($eq -lt 1) { return }
+    $k = $line.Substring(0, $eq).Trim()
+    $v = $line.Substring($eq + 1).Trim().Trim('"').Trim("'")
+    if (-not [string]::IsNullOrWhiteSpace($k) -and -not [Environment]::GetEnvironmentVariable($k, "Process")) {
+      [Environment]::SetEnvironmentVariable($k, $v, "Process")
+    }
+  }
+  if (-not $Bucket) { $Bucket = $env:CAMPAIGN_BUCKET }
+  if (-not $Profile) { $Profile = $env:AWS_PROFILE }
+  if ($Region -eq "us-east-1" -and $env:AWS_REGION) { $Region = $env:AWS_REGION }
+  elseif ($Region -eq "us-east-1" -and $env:AWS_DEFAULT_REGION) { $Region = $env:AWS_DEFAULT_REGION }
+}
+
 if (-not $Bucket) {
-  throw "Set -Bucket or env CAMPAIGN_BUCKET (do not hardcode account-specific names in the repo)."
+  throw "Set -Bucket or env CAMPAIGN_BUCKET (or create deploy/aws/.env from .env.example)."
 }
 
 function AwsArgs {

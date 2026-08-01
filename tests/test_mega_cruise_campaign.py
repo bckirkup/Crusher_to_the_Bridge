@@ -258,7 +258,31 @@ def test_t11_sweeps_surveillance_activation_delay() -> None:
         len(manifest["tiers"]["t11_intervention_timing"]["pathogens"])
         * len(manifest["tiers"]["t11_intervention_timing"]["surveillance_delay_epochs"])
         * len(manifest["tiers"]["t11_intervention_timing"]["surveillance_strategies"])
+        * len(manifest["tiers"]["t11_intervention_timing"].get("compliance_levels") or [None])
         * len(manifest["tiers"]["t11_intervention_timing"]["seeds"])
+    )
+    assert len(runs) == expected
+
+
+def test_t11_legacy_crosses_compliance_when_present() -> None:
+    """v6-style T11: surveillance_delay_epochs × compliance_levels."""
+    manifest = _v4_manifest_or_stub()
+    tier = dict(manifest["tiers"]["t11_intervention_timing"])
+    tier["compliance_levels"] = [0.2, 1.0]
+    manifest = {**manifest, "tiers": {**manifest["tiers"], "t11_intervention_timing": tier}}
+    runs = list(generate_tier_runs(manifest, "t11_intervention_timing"))
+    sample_rid, sample = next(
+        (rid, s) for rid, s in runs if "comp20" in rid and "delay24" in rid
+    )
+    assert "comp20" in sample_rid
+    assert sample["config_overrides"]["fred_behavior"]["quarantine_compliance"] == pytest.approx(0.2)
+    assert sample["campaign_parameters"]["compliance"] == pytest.approx(0.2)
+    expected = (
+        len(tier["pathogens"])
+        * len(tier["surveillance_delay_epochs"])
+        * len(tier["surveillance_strategies"])
+        * len(tier["compliance_levels"])
+        * len(tier["seeds"])
     )
     assert len(runs) == expected
 
