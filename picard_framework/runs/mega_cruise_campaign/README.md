@@ -25,9 +25,20 @@ sweeps (see `docs/tiered_escalation_spec.md`):
 | t16 | Reluctant fraction | 4 × 3 reluctant_frac × 4 delay × 5 seeds | 240 |
 
 Mega-cruise runs inject `escalation.lockdown_attack_rate: 0.05` (default
-`config.yaml` uses `never` for small smokes). T11 with
-`decision_latency_levels` sweeps organizational delay; legacy manifests that
-only set `surveillance_delay_epochs` still use the surveillance start-delay path.
+`config.yaml` uses `never` for small smokes).
+
+### T11 intervention timing
+
+Two generator modes (pick one key in the tier):
+
+| Manifest key | What it sweeps | Optional cross |
+|--------------|----------------|----------------|
+| `decision_latency_levels` | Organizational SOP delay (`escalation.decision_latency`) | `compliance_levels` → run ids `…_lat{N}_comp{pct}_s{seed}` |
+| `surveillance_delay_epochs` | Surveillance activation delay (`activation_delay_epochs` on syndromic + cascade) | `compliance_levels` → run ids `…_delay{N}_comp{pct}_s{seed}` |
+
+If `compliance_levels` is omitted, both modes keep the previous single-compliance
+run-id shape (no `_comp` tag). Campaign v6 controllable manifests use the
+legacy delay key with an explicit compliance grid.
 
 ## Surveillance presets
 
