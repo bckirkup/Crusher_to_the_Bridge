@@ -1,0 +1,48 @@
+{
+  "description": "Hobbyist-plus Contam overrides for expedition_cruise_450 (adjacency map + cabin HVAC).",
+  "orifice_type_map": {
+    "corridor": "cabin_relief",
+    "doorway": "doorway",
+    "passageway": "passageway",
+    "elevator_bank": "elevator_bank",
+    "stairwell": "stairwell",
+    "service_stairwell": "service_stairwell",
+    "service_elevator": "service_elevator",
+    "service_hatch": "hatch",
+    "service_corridor": "service_corridor",
+    "open_deck": "promenade",
+    "open_front": "open_front",
+    "ladder_well": "ladder",
+    "multi_deck_void": "multi_deck_void"
+  },
+  "wind_profile": "ship_hull",
+  "filter_preset": "MERV11",
+  "hvac_filter": {
+    "AHU_Pax_D4": "MERV8",
+    "AHU_Pax_D5": "MERV8",
+    "AHU_Pax_D6": "MERV8",
+    "AHU_Crew": "MERV8",
+    "AHU_Medical": "HEPA",
+    "AHU_Service": "MERV11",
+    "AHU_Public_Fwd": "MERV11",
+    "AHU_Public_Aft": "MERV11",
+    "AHU_Dining": "MERV11"
+  },
+  "oa_fraction": {
+    "_default": 0.25,
+    "AHU_Pax_D4": 0.2,
+    "AHU_Pax_D5": 0.2,
+    "AHU_Pax_D6": 0.2,
+    "AHU_Medical": 0.4
+  },
+  "deck_temp_offset_K": {
+    "2_Crew": 4.0
+  },
+  "zone_annotations": {
+    "MainDining": "Main Dining",
+    "MedBay": "Medical Bay",
+    "Engine_Room": "Engine Room",
+    "ExpedLounge": "Expedition Lounge"
+  },
+  "night_setback": true
+}

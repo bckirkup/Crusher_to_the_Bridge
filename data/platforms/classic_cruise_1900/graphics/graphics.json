@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0",
+  "description": "Architectural underlays for LCARS tactical map.",
+  "elevation": {
+    "file": "elevation.jpg",
+    "style": "ai_generated_notional",
+    "credit": "Crusher-to-the-Bridge \u2014 notional classic-cruise elevation (original schematic)",
+    "license": "Original work"
+  },
+  "plan": {
+    "file": "plan_overview.jpg",
+    "style": "ai_generated_notional",
+    "credit": "Crusher-to-the-Bridge \u2014 notional classic-cruise plan (original schematic)",
+    "license": "Original work"
+  },
+  "deck_plans": {}
+}

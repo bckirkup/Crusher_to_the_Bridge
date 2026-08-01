@@ -1,0 +1,371 @@
+{
+  "platform": "expedition_cruise_450",
+  "description": "HVAC for expedition_cruise_450 cabin-corridor layout. Population ~450.",
+  "oa_fraction": 0.2,
+  "hvac_duty": 0.5,
+  "hvac_zones": [
+    {
+      "id": "AHU_Pax_D4",
+      "rooms": [
+        "PC_D4_P_F",
+        "PC_D4_P_A",
+        "PC_D4_S_F",
+        "PC_D4_S_A"
+      ],
+      "ach": 6.0,
+      "description": "Deck 4 passenger cabin fan-coil branch."
+    },
+    {
+      "id": "AHU_Pax_D5",
+      "rooms": [
+        "PC_D5_P_F",
+        "PC_D5_P_A",
+        "PC_D5_S_F",
+        "PC_D5_S_A"
+      ],
+      "ach": 6.0,
+      "description": "Deck 5 passenger cabin fan-coil branch."
+    },
+    {
+      "id": "AHU_Pax_D6",
+      "rooms": [
+        "PC_D6_P_F",
+        "PC_D6_P_A",
+        "PC_D6_S_F",
+        "PC_D6_S_A"
+      ],
+      "ach": 6.0,
+      "description": "Deck 6 passenger cabin fan-coil branch."
+    },
+    {
+      "id": "AHU_Public_Fwd",
+      "rooms": [
+        "ObsLounge",
+        "TheaterLng",
+        "Casino",
+        "Library",
+        "Reception",
+        "ExpedLounge"
+      ],
+      "ach": 8.0,
+      "description": "Forward/mid public venues."
+    },
+    {
+      "id": "AHU_Public_Aft",
+      "rooms": [
+        "PoolDeck",
+        "BuffetLido",
+        "Gym",
+        "Spa"
+      ],
+      "ach": 8.0,
+      "description": "Aft public venues."
+    },
+    {
+      "id": "AHU_Medical",
+      "rooms": [
+        "MedBay"
+      ],
+      "ach": 12.0,
+      "description": "Dedicated medical AHU (HEPA via Contam overrides)."
+    },
+    {
+      "id": "AHU_Service",
+      "rooms": [
+        "MainGalley",
+        "Laundry",
+        "Stores",
+        "Engine_Room"
+      ],
+      "ach": 15.0,
+      "description": "Service / galley / engine."
+    },
+    {
+      "id": "AHU_Dining",
+      "rooms": [
+        "MainDining"
+      ],
+      "ach": 8.0,
+      "description": "Main dining room."
+    },
+    {
+      "id": "AHU_Crew",
+      "rooms": [
+        "CC_D2_F",
+        "CC_D2_A",
+        "CC_D3_F",
+        "CC_D3_A",
+        "CrewMess"
+      ],
+      "ach": 6.0,
+      "description": "Crew corridors and mess."
+    }
+  ],
+  "cross_zone_links": [
+    {
+      "from": "MainDining",
+      "to": "MainGalley",
+      "flow_rate_m3h": 8000.0,
+      "is_hvac_ducted": false,
+      "path": "Dining_Galley_Exhaust"
+    },
+    {
+      "from": "AHU_Medical",
+      "to": "AHU_Public_Fwd",
+      "flow_rate_m3h": 100.0,
+      "is_hvac_ducted": false,
+      "path": "MedBay_Door_Leakage"
+    },
+    {
+      "from": "AHU_Pax_D4",
+      "to": "AHU_Public_Fwd",
+      "flow_rate_m3h": 400.0,
+      "is_hvac_ducted": true,
+      "path": "Single_Vertical_Riser"
+    },
+    {
+      "from": "BuffetLido",
+      "to": "PoolDeck",
+      "flow_rate_m3h": 400.0,
+      "is_hvac_ducted": false,
+      "path": "Lido_Open_Doorway"
+    }
+  ],
+  "adjacency": [
+    {
+      "from": "ObsLounge",
+      "to": "PoolDeck",
+      "type": "open_deck"
+    },
+    {
+      "from": "BuffetLido",
+      "to": "PoolDeck",
+      "type": "doorway"
+    },
+    {
+      "from": "Gym",
+      "to": "Spa",
+      "type": "doorway"
+    },
+    {
+      "from": "Spa",
+      "to": "ExpedLounge",
+      "type": "passageway"
+    },
+    {
+      "from": "MainDining",
+      "to": "TheaterLng",
+      "type": "passageway"
+    },
+    {
+      "from": "TheaterLng",
+      "to": "Casino",
+      "type": "doorway"
+    },
+    {
+      "from": "Casino",
+      "to": "Library",
+      "type": "passageway"
+    },
+    {
+      "from": "MedBay",
+      "to": "Reception",
+      "type": "doorway"
+    },
+    {
+      "from": "MainGalley",
+      "to": "MainDining",
+      "type": "service_hatch"
+    },
+    {
+      "from": "MainGalley",
+      "to": "CrewMess",
+      "type": "service_stairwell"
+    },
+    {
+      "from": "Laundry",
+      "to": "Stores",
+      "type": "service_corridor"
+    },
+    {
+      "from": "Stores",
+      "to": "Engine_Room",
+      "type": "service_corridor"
+    },
+    {
+      "from": "CrewMess",
+      "to": "Engine_Room",
+      "type": "corridor"
+    },
+    {
+      "from": "Reception",
+      "to": "TheaterLng",
+      "type": "stairwell"
+    },
+    {
+      "from": "BuffetLido",
+      "to": "MainDining",
+      "type": "stairwell"
+    },
+    {
+      "from": "ExpedLounge",
+      "to": "Reception",
+      "type": "stairwell"
+    },
+    {
+      "from": "PC_D6_P_F",
+      "to": "Gym",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D6_S_F",
+      "to": "Spa",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D6_P_A",
+      "to": "ExpedLounge",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D5_P_F",
+      "to": "TheaterLng",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D5_S_A",
+      "to": "MainDining",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D4_P_F",
+      "to": "Reception",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D4_S_A",
+      "to": "Reception",
+      "type": "corridor"
+    },
+    {
+      "from": "CC_D3_F",
+      "to": "Laundry",
+      "type": "corridor"
+    },
+    {
+      "from": "CC_D3_A",
+      "to": "Stores",
+      "type": "corridor"
+    },
+    {
+      "from": "CC_D2_F",
+      "to": "CrewMess",
+      "type": "corridor"
+    },
+    {
+      "from": "CC_D2_A",
+      "to": "Engine_Room",
+      "type": "ladder_well"
+    },
+    {
+      "from": "PC_D4_P_F",
+      "to": "PC_D5_P_F",
+      "type": "stairwell"
+    },
+    {
+      "from": "PC_D5_P_F",
+      "to": "PC_D6_P_F",
+      "type": "stairwell"
+    },
+    {
+      "from": "PC_D4_S_A",
+      "to": "PC_D5_S_A",
+      "type": "elevator_bank"
+    },
+    {
+      "from": "PC_D5_S_A",
+      "to": "PC_D6_S_A",
+      "type": "elevator_bank"
+    },
+    {
+      "from": "CC_D2_F",
+      "to": "CC_D3_F",
+      "type": "stairwell"
+    },
+    {
+      "from": "CC_D2_A",
+      "to": "CC_D3_A",
+      "type": "stairwell"
+    },
+    {
+      "from": "PC_D4_P_F",
+      "to": "PC_D4_P_A",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D4_S_F",
+      "to": "PC_D4_S_A",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D4_P_F",
+      "to": "PC_D4_S_F",
+      "type": "passageway"
+    },
+    {
+      "from": "PC_D4_P_A",
+      "to": "PC_D4_S_A",
+      "type": "passageway"
+    },
+    {
+      "from": "PC_D5_P_F",
+      "to": "PC_D5_P_A",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D5_S_F",
+      "to": "PC_D5_S_A",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D5_P_F",
+      "to": "PC_D5_S_F",
+      "type": "passageway"
+    },
+    {
+      "from": "PC_D5_P_A",
+      "to": "PC_D5_S_A",
+      "type": "passageway"
+    },
+    {
+      "from": "PC_D6_P_F",
+      "to": "PC_D6_P_A",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D6_S_F",
+      "to": "PC_D6_S_A",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D6_P_F",
+      "to": "PC_D6_S_F",
+      "type": "passageway"
+    },
+    {
+      "from": "PC_D6_P_A",
+      "to": "PC_D6_S_A",
+      "type": "passageway"
+    },
+    {
+      "from": "CC_D2_F",
+      "to": "CC_D2_A",
+      "type": "corridor"
+    },
+    {
+      "from": "CC_D3_F",
+      "to": "CC_D3_A",
+      "type": "corridor"
+    }
+  ]
+}

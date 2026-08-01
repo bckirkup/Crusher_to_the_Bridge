@@ -1,6 +1,6 @@
 {
   "platform": "expedition_cruise_300",
-  "description": "Small expedition cruise ship (~300 passengers, ~150 crew). Based on Silver Cloud / Le Boréal class vessels: ~157m LOA × 21m beam, 7 passenger decks, ~17,000 GT. Volumes estimated from published deck plans and standard cruise ship deck heights (2.8m cabins, 3.0-3.5m public, 5.0m theater).",
+  "description": "LEGACY platform (archived Aug 2026). Small expedition cruise with well-mixed Room berthing blocks (~50 pax per cabin block) and a single Crew_Quarters zone. Retained for regression and comparison only; use expedition_cruise_450 for cabin-corridor resolution (see docs/PLATFORM_CABIN_REVISION.md).",
   "isolation_unit_capacity": 0,
   "deck_dimensions": {
     "length_m": 157,
@@ -18,7 +18,7 @@
         "x": 150,
         "y": 10
       },
-      "description": "Navigation bridge and chart room. Forward Deck 7. ~60 m² × 3.0m."
+      "description": "Navigation bridge and chart room. Forward Deck 7. ~60 m\u00b2 \u00d7 3.0m."
     },
     {
       "id": "Pool_Deck",
@@ -31,7 +31,7 @@
         "x": 80,
         "y": 10
       },
-      "description": "Pool deck with jacuzzis, sun loungers. Midship Deck 7. ~350 m² semi-open."
+      "description": "Pool deck with jacuzzis, sun loungers. Midship Deck 7. ~350 m\u00b2 semi-open."
     },
     {
       "id": "Observation_Lounge",
@@ -44,7 +44,7 @@
         "x": 40,
         "y": 10
       },
-      "description": "Forward observation lounge with panoramic windows. Deck 7. ~150 m² × 3.5m."
+      "description": "Forward observation lounge with panoramic windows. Deck 7. ~150 m\u00b2 \u00d7 3.5m."
     },
     {
       "id": "Gym",
@@ -57,7 +57,7 @@
         "x": 140,
         "y": 25
       },
-      "description": "Fitness center with cardio and weights. Forward Deck 6. ~90 m² × 3.0m."
+      "description": "Fitness center with cardio and weights. Forward Deck 6. ~90 m\u00b2 \u00d7 3.0m."
     },
     {
       "id": "Spa",
@@ -70,7 +70,7 @@
         "x": 130,
         "y": 25
       },
-      "description": "Spa with treatment rooms, sauna, steam room. Deck 6. ~80 m² × 3.0m."
+      "description": "Spa with treatment rooms, sauna, steam room. Deck 6. ~80 m\u00b2 \u00d7 3.0m."
     },
     {
       "id": "Buffet_Lido",
@@ -83,7 +83,7 @@
         "x": 60,
         "y": 25
       },
-      "description": "Lido buffet restaurant (casual dining). Midship Deck 6. ~180 m² × 3.5m."
+      "description": "Lido buffet restaurant (casual dining). Midship Deck 6. ~180 m\u00b2 \u00d7 3.5m."
     },
     {
       "id": "Expedition_Lounge",
@@ -96,7 +96,7 @@
         "x": 30,
         "y": 25
       },
-      "description": "Expedition briefing lounge and lecture hall. Aft Deck 6. ~120 m² × 3.5m."
+      "description": "Expedition briefing lounge and lecture hall. Aft Deck 6. ~120 m\u00b2 \u00d7 3.5m."
     },
     {
       "id": "Cabin_Deck6_Port",
@@ -109,7 +109,7 @@
         "x": 100,
         "y": 30
       },
-      "description": "Balcony suites, port side Deck 6. ~25 cabins × 20 m² × 2.8m."
+      "description": "Balcony suites, port side Deck 6. ~25 cabins \u00d7 20 m\u00b2 \u00d7 2.8m."
     },
     {
       "id": "Cabin_Deck6_Stbd",
@@ -122,7 +122,7 @@
         "x": 100,
         "y": 20
       },
-      "description": "Balcony suites, starboard side Deck 6. ~25 cabins × 20 m² × 2.8m."
+      "description": "Balcony suites, starboard side Deck 6. ~25 cabins \u00d7 20 m\u00b2 \u00d7 2.8m."
     },
     {
       "id": "Main_Dining_Room",
@@ -135,7 +135,7 @@
         "x": 35,
         "y": 40
       },
-      "description": "Main dining room (single seating). Aft Deck 5. ~300 m² × 3.5m."
+      "description": "Main dining room (single seating). Aft Deck 5. ~300 m\u00b2 \u00d7 3.5m."
     },
     {
       "id": "Theater_Lounge",
@@ -148,7 +148,7 @@
         "x": 70,
         "y": 40
       },
-      "description": "Show lounge / theater (double-height). Midship Deck 5-6. ~250 m² × 5.0m."
+      "description": "Show lounge / theater (double-height). Midship Deck 5-6. ~250 m\u00b2 \u00d7 5.0m."
     },
     {
       "id": "Casino",
@@ -161,7 +161,7 @@
         "x": 100,
         "y": 40
       },
-      "description": "Small casino. Deck 5. ~60 m² × 3.5m."
+      "description": "Small casino. Deck 5. ~60 m\u00b2 \u00d7 3.5m."
     },
     {
       "id": "Library",
@@ -174,7 +174,7 @@
         "x": 120,
         "y": 40
       },
-      "description": "Library and card room. Deck 5. ~30 m² × 3.5m."
+      "description": "Library and card room. Deck 5. ~30 m\u00b2 \u00d7 3.5m."
     },
     {
       "id": "Cabin_Deck5_Port",
@@ -187,7 +187,7 @@
         "x": 100,
         "y": 48
       },
-      "description": "Outside cabins, port side Deck 5. ~25 cabins × 20 m² × 2.8m."
+      "description": "Outside cabins, port side Deck 5. ~25 cabins \u00d7 20 m\u00b2 \u00d7 2.8m."
     },
     {
       "id": "Cabin_Deck5_Stbd",
@@ -200,7 +200,7 @@
         "x": 100,
         "y": 32
       },
-      "description": "Outside cabins, starboard side Deck 5. ~25 cabins × 20 m² × 2.8m."
+      "description": "Outside cabins, starboard side Deck 5. ~25 cabins \u00d7 20 m\u00b2 \u00d7 2.8m."
     },
     {
       "id": "MedBay",
@@ -213,7 +213,7 @@
         "x": 80,
         "y": 55
       },
-      "description": "Medical center with examination room and small ward. Deck 4. ~35 m² × 3.0m."
+      "description": "Medical center with examination room and small ward. Deck 4. ~35 m\u00b2 \u00d7 3.0m."
     },
     {
       "id": "Reception_Lobby",
@@ -226,7 +226,7 @@
         "x": 70,
         "y": 55
       },
-      "description": "Main reception and lobby atrium. Deck 4. ~100 m² × 3.5m."
+      "description": "Main reception and lobby atrium. Deck 4. ~100 m\u00b2 \u00d7 3.5m."
     },
     {
       "id": "Cabin_Deck4_Port",
@@ -239,7 +239,7 @@
         "x": 100,
         "y": 60
       },
-      "description": "Outside cabins, port side Deck 4. ~25 cabins × 20 m² × 2.8m."
+      "description": "Outside cabins, port side Deck 4. ~25 cabins \u00d7 20 m\u00b2 \u00d7 2.8m."
     },
     {
       "id": "Cabin_Deck4_Stbd",
@@ -252,7 +252,7 @@
         "x": 100,
         "y": 50
       },
-      "description": "Outside cabins, starboard side Deck 4. ~25 cabins × 20 m² × 2.8m."
+      "description": "Outside cabins, starboard side Deck 4. ~25 cabins \u00d7 20 m\u00b2 \u00d7 2.8m."
     },
     {
       "id": "Galley",
@@ -265,7 +265,7 @@
         "x": 45,
         "y": 68
       },
-      "description": "Main galley (food production). Deck 3. ~150 m² × 3.5m."
+      "description": "Main galley (food production). Deck 3. ~150 m\u00b2 \u00d7 3.5m."
     },
     {
       "id": "Crew_Mess",
@@ -278,7 +278,7 @@
         "x": 60,
         "y": 68
       },
-      "description": "Crew mess and recreation area. Deck 3. ~60 m² × 3.5m."
+      "description": "Crew mess and recreation area. Deck 3. ~60 m\u00b2 \u00d7 3.5m."
     },
     {
       "id": "Laundry",
@@ -291,7 +291,7 @@
         "x": 100,
         "y": 68
       },
-      "description": "Industrial laundry. Deck 3. ~60 m² × 2.8m."
+      "description": "Industrial laundry. Deck 3. ~60 m\u00b2 \u00d7 2.8m."
     },
     {
       "id": "Crew_Quarters",
@@ -304,7 +304,7 @@
         "x": 80,
         "y": 72
       },
-      "description": "Crew accommodation. Deck 3. ~75 cabins × 8 m² × 2.8m."
+      "description": "Crew accommodation. Deck 3. ~75 cabins \u00d7 8 m\u00b2 \u00d7 2.8m."
     },
     {
       "id": "Stores",
@@ -317,7 +317,7 @@
         "x": 120,
         "y": 68
       },
-      "description": "Provision stores, dry and cold storage. Deck 3. ~150 m² × 2.8m."
+      "description": "Provision stores, dry and cold storage. Deck 3. ~150 m\u00b2 \u00d7 2.8m."
     },
     {
       "id": "Engine_Room",
@@ -330,10 +330,11 @@
         "x": 60,
         "y": 82
       },
-      "description": "Main engine room spanning Decks 1-2. ~300 m² footprint × 8.4m effective height."
+      "description": "Main engine room spanning Decks 1-2. ~300 m\u00b2 footprint \u00d7 8.4m effective height."
     }
   ],
   "graywater_zones": [
     "Engine_Room"
-  ]
+  ],
+  "superseded_by": "expedition_cruise_450"
 }

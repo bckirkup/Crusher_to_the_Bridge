@@ -5,6 +5,20 @@ direct-contact pairing implemented June 2026 — see `docs/SHEDDING_AND_CABINMAT
 Regenerate layout: `python3 scripts/generate_mega_cruise_cabin_layout.py`. Legacy
 well-mixed model: `data/platforms/messy_cruise_500/`.
 
+**Fleet extension (Aug 2026):** Additional CDC size-class platforms use the shared
+generator `scripts/generate_cruise_platform_layout.py` + recipes in
+`scripts/cruise_platform_recipes.py`:
+
+| Platform | CDC category | Notes |
+|----------|--------------|-------|
+| `expedition_cruise_450` | Small/Medium | Replaces `expedition_cruise_300` (archived) |
+| `classic_cruise_1900` | Large | Cabin-corridor + buffet / promenade / atrium |
+| `spirit_cruise_3000` | Extra-Large | Multi-specialty dining, teen/sports, isolation ward |
+| `mega_cruise_5000` | Super-Mega | Reference standard |
+
+Future calibration targets (AGE per 100K traveler-days; **not yet enforced in-repo**):
+expedition 9.06, classic 21.4, spirit 22.1, mega 24.4.
+
 ## Problem
 
 The legacy `messy_cruise_500` platform (archived from the original `mega_cruise_5000`
@@ -18,7 +32,8 @@ to ~199 other people via direct contact, plus thousands more via shared HVAC.
 comparison only. Do not use for quarantine or cabin-confinement studies.
 
 **Active revision target:** `data/platforms/mega_cruise_5000/` — cabin-corridor zones
-with per-stateroom cabin-mate pairing at init.
+with per-stateroom cabin-mate pairing at init. Smaller cruise classes follow the same
+`Cabin_Corridor` schema via the shared recipe generator.
 
 ## Oasis-Class Reference Data
 

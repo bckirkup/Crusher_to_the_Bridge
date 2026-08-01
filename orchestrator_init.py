@@ -102,10 +102,11 @@ def assign_cabin_mates(
     agents: list[Any],
     zones: list[dict[str, Any]],
 ) -> None:
-    """Pair agents into cabins within each corridor zone (mega_cruise_5000).
+    """Pair agents into cabins within each ``Cabin_Corridor`` zone.
 
-    Sets ``cabin_mate_ids`` on each agent to the other occupants of the
-    same stateroom.  Non-cabin zones are skipped.
+    Applies to cabin-corridor platforms (mega_cruise_5000, expedition_cruise_450,
+    and other recipe-generated cruise classes). Sets ``cabin_mate_ids`` on each
+    agent to the other occupants of the same stateroom. Non-cabin zones are skipped.
     """
     zone_meta = {z["name"]: z for z in zones}
     agents_by_zone: dict[str, list[Any]] = defaultdict(list)

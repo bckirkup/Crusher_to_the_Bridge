@@ -25,6 +25,9 @@ packed per deck into the hull plan (non-overlapping).
 | Platform | Style | Notes |
 |----------|-------|-------|
 | mega_cruise_5000 | AI-generated notional schematic | Original composition (plan + elevation) |
+| expedition_cruise_450 | Notional schematic | Original composition (plan + elevation); cabin-corridor |
+| classic_cruise_1900 | Notional schematic | Original composition (plan + elevation); cabin-corridor |
+| spirit_cruise_3000 | Notional schematic | Original composition (plan + elevation); cabin-corridor |
 | enterprise_galaxy_tng | AI-generated fiction-adapted | Simplified Galaxy-inspired silhouette — **not** televised Star Trek artwork |
 | enterprise_constitution_tos | AI-generated fiction-adapted | Simplified Constitution-inspired silhouette — **not** televised Star Trek artwork |
 
@@ -38,7 +41,7 @@ Sources and URLs for remaining platforms: `class_photo_catalog.json`
 | fletcher_class_destroyer | Fletcher-class technical drawing, 1954 | US Navy — public domain |
 | legend_class_nsc | USCGC Hamilton (WHEC-715) | US Coast Guard — public domain |
 | san_antonio_class_lpd | USS Austin (LPD-4) | US Navy — public domain |
-| expedition_cruise_300 | Cruise ship side elevation | CC BY-SA 3.0 (Marcusroos) |
+| expedition_cruise_300 | Cruise ship side elevation (legacy archive) | CC BY-SA 3.0 (Marcusroos) |
 | messy_cruise_500 | Icon of the Seas (legacy archive) | CC BY-SA 2.0 |
 
 ## Offline / air-gapped runs

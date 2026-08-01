@@ -108,7 +108,10 @@ data/
 ├── pathogens/               Pathogen profiles (dose-response, shedding curves)
 ├── platforms/               Ship spatial layouts and HVAC definitions
 │   ├── destroyer_baseline/
-│   ├── expedition_cruise_300/
+│   ├── expedition_cruise_300/   (legacy — superseded by expedition_cruise_450)
+│   ├── expedition_cruise_450/
+│   ├── classic_cruise_1900/
+│   ├── spirit_cruise_3000/
 │   ├── fletcher_class_destroyer/
 │   ├── legend_class_nsc/
 │   ├── mega_cruise_5000/
@@ -462,7 +465,10 @@ airflow definitions:
 | `destroyer_baseline` | Gleaves-class destroyer (default, 6 zones) |
 | `enterprise_constitution_tos` | Constitution-class cruiser (TOS fiction-adapted, 13 zones) |
 | `enterprise_galaxy_tng` | Galaxy-class explorer (TNG fiction-adapted, 17 zones) |
-| `expedition_cruise_300` | 300-passenger expedition cruise ship |
+| `expedition_cruise_300` | **Legacy** well-mixed expedition berthing (25 zones); superseded by `expedition_cruise_450` |
+| `expedition_cruise_450` | Small/medium expedition cruise (~300 pax + 150 crew; cabin-corridor berthing, ~33 zones) |
+| `classic_cruise_1900` | Large classic cruise (~1,350 pax + 560 crew; cabin-corridor, buffet + promenade + atrium, ~61 zones) |
+| `spirit_cruise_3000` | Extra-large Spirit-class cruise (~2,100 pax + 900 crew; multi-specialty dining, teen/sports, ~86 zones) |
 | `fletcher_class_destroyer` | Fletcher-class WWII destroyer |
 | `legend_class_nsc` | USCG Legend-class National Security Cutter |
 | `mega_cruise_5000` | 5000-passenger mega cruise ship (Oasis-class; 129 zones, cabin-corridor berthing + cabin-mate pairing — see `docs/PLATFORM_CABIN_REVISION.md`, `docs/SHEDDING_AND_CABINMATES.md`) |

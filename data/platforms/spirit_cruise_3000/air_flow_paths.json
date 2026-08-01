@@ -1,0 +1,867 @@
+{
+  "platform": "spirit_cruise_3000",
+  "description": "HVAC for spirit_cruise_3000 cabin-corridor layout. Population ~3000.",
+  "oa_fraction": 0.2,
+  "hvac_duty": 0.5,
+  "hvac_zones": [
+    {
+      "id": "AHU_Pax_D4",
+      "rooms": [
+        "PC_D4_P_F",
+        "PC_D4_P_M",
+        "PC_D4_P_A",
+        "PC_D4_S_F",
+        "PC_D4_S_M",
+        "PC_D4_S_A"
+      ],
+      "ach": 6.0,
+      "description": "Deck 4 passenger cabin fan-coil branch."
+    },
+    {
+      "id": "AHU_Pax_D5",
+      "rooms": [
+        "PC_D5_P_F",
+        "PC_D5_P_M",
+        "PC_D5_P_A",
+        "PC_D5_S_F",
+        "PC_D5_S_M",
+        "PC_D5_S_A"
+      ],
+      "ach": 6.0,
+      "description": "Deck 5 passenger cabin fan-coil branch."
+    },
+    {
+      "id": "AHU_Pax_D6",
+      "rooms": [
+        "PC_D6_P_F",
+        "PC_D6_P_M",
+        "PC_D6_P_A",
+        "PC_D6_S_F",
+        "PC_D6_S_M",
+        "PC_D6_S_A"
+      ],
+      "ach": 6.0,
+      "description": "Deck 6 passenger cabin fan-coil branch."
+    },
+    {
+      "id": "AHU_Pax_D7",
+      "rooms": [
+        "PC_D7_P_F",
+        "PC_D7_P_M",
+        "PC_D7_P_A",
+        "PC_D7_S_F",
+        "PC_D7_S_M",
+        "PC_D7_S_A"
+      ],
+      "ach": 6.0,
+      "description": "Deck 7 passenger cabin fan-coil branch."
+    },
+    {
+      "id": "AHU_Pax_D8",
+      "rooms": [
+        "PC_D8_P_F",
+        "PC_D8_P_M",
+        "PC_D8_P_A",
+        "PC_D8_S_F",
+        "PC_D8_S_M",
+        "PC_D8_S_A"
+      ],
+      "ach": 6.0,
+      "description": "Deck 8 passenger cabin fan-coil branch."
+    },
+    {
+      "id": "AHU_Pax_D9",
+      "rooms": [
+        "PC_D9_P_F",
+        "PC_D9_P_M",
+        "PC_D9_P_A",
+        "PC_D9_S_F",
+        "PC_D9_S_M",
+        "PC_D9_S_A"
+      ],
+      "ach": 6.0,
+      "description": "Deck 9 passenger cabin fan-coil branch."
+    },
+    {
+      "id": "AHU_Pax_D10",
+      "rooms": [
+        "PC_D10_P_F",
+        "PC_D10_P_M",
+        "PC_D10_P_A",
+        "PC_D10_S_F",
+        "PC_D10_S_M",
+        "PC_D10_S_A"
+      ],
+      "ach": 6.0,
+      "description": "Deck 10 passenger cabin fan-coil branch."
+    },
+    {
+      "id": "AHU_Pax_D11",
+      "rooms": [
+        "PC_D11_P_F",
+        "PC_D11_P_M",
+        "PC_D11_P_A",
+        "PC_D11_S_F",
+        "PC_D11_S_M",
+        "PC_D11_S_A"
+      ],
+      "ach": 6.0,
+      "description": "Deck 11 passenger cabin fan-coil branch."
+    },
+    {
+      "id": "AHU_Public_Fwd",
+      "rooms": [
+        "MainTheater",
+        "Casino",
+        "Nightclub"
+      ],
+      "ach": 8.0,
+      "description": "Forward / entertainment."
+    },
+    {
+      "id": "AHU_Public_Mid",
+      "rooms": [
+        "Promenade",
+        "Reception",
+        "PhotoShops",
+        "Library",
+        "SmallLounge",
+        "ArtGallery"
+      ],
+      "ach": 8.0,
+      "description": "Midship promenade / atrium."
+    },
+    {
+      "id": "AHU_Public_Aft",
+      "rooms": [
+        "MainPool",
+        "AftPool",
+        "LidoBuffet",
+        "PizzaGrill",
+        "SpaFit",
+        "KidsClub",
+        "TeenZone",
+        "SpecialtyC",
+        "SportsDeck"
+      ],
+      "ach": 10.0,
+      "description": "Aft pools / buffet / spa / sports."
+    },
+    {
+      "id": "AHU_Dining",
+      "rooms": [
+        "MainDining_L",
+        "MainDining_U",
+        "SpecialtyA",
+        "SpecialtyB",
+        "CrewMessMain",
+        "CrewMessOff"
+      ],
+      "ach": 8.0,
+      "description": "Dining venues including crew messes."
+    },
+    {
+      "id": "AHU_Medical",
+      "rooms": [
+        "MedCenter",
+        "IsolWard"
+      ],
+      "ach": 12.0,
+      "description": "Medical + isolation ward."
+    },
+    {
+      "id": "AHU_Service",
+      "rooms": [
+        "MainGalley",
+        "Laundry",
+        "Engine_Room"
+      ],
+      "ach": 15.0,
+      "description": "Service / galley / engine."
+    },
+    {
+      "id": "AHU_Crew_D1",
+      "rooms": [
+        "CC_D1_F",
+        "CC_D1_M",
+        "CC_D1_A"
+      ],
+      "ach": 6.0,
+      "description": "Deck 1 crew accommodation branch."
+    },
+    {
+      "id": "AHU_Crew_D2",
+      "rooms": [
+        "CC_D2_F",
+        "CC_D2_M",
+        "CC_D2_A"
+      ],
+      "ach": 6.0,
+      "description": "Deck 2 crew accommodation branch."
+    },
+    {
+      "id": "AHU_Crew_D3",
+      "rooms": [
+        "CC_D3_F",
+        "CC_D3_M",
+        "CC_D3_A"
+      ],
+      "ach": 6.0,
+      "description": "Deck 3 crew accommodation branch."
+    }
+  ],
+  "cross_zone_links": [
+    {
+      "from": "MainDining_L",
+      "to": "MainGalley",
+      "flow_rate_m3h": 15000.0,
+      "is_hvac_ducted": false,
+      "path": "Dining_Galley_Exhaust"
+    },
+    {
+      "from": "AHU_Medical",
+      "to": "AHU_Public_Mid",
+      "flow_rate_m3h": 100.0,
+      "is_hvac_ducted": false,
+      "path": "Medical_Door_Leakage"
+    },
+    {
+      "from": "LidoBuffet",
+      "to": "MainPool",
+      "flow_rate_m3h": 800.0,
+      "is_hvac_ducted": false,
+      "path": "Lido_Open_Doorway"
+    },
+    {
+      "from": "AHU_Pax_D4",
+      "to": "AHU_Pax_D5",
+      "flow_rate_m3h": 1200.0,
+      "is_hvac_ducted": true,
+      "path": "Pax_Trunk_D4_D5"
+    },
+    {
+      "from": "AHU_Pax_D5",
+      "to": "AHU_Pax_D6",
+      "flow_rate_m3h": 1200.0,
+      "is_hvac_ducted": true,
+      "path": "Pax_Trunk_D5_D6"
+    },
+    {
+      "from": "AHU_Pax_D6",
+      "to": "AHU_Pax_D7",
+      "flow_rate_m3h": 1200.0,
+      "is_hvac_ducted": true,
+      "path": "Pax_Trunk_D6_D7"
+    },
+    {
+      "from": "AHU_Pax_D7",
+      "to": "AHU_Pax_D8",
+      "flow_rate_m3h": 1200.0,
+      "is_hvac_ducted": true,
+      "path": "Pax_Trunk_D7_D8"
+    },
+    {
+      "from": "AHU_Pax_D8",
+      "to": "AHU_Pax_D9",
+      "flow_rate_m3h": 1200.0,
+      "is_hvac_ducted": true,
+      "path": "Pax_Trunk_D8_D9"
+    },
+    {
+      "from": "AHU_Pax_D9",
+      "to": "AHU_Pax_D10",
+      "flow_rate_m3h": 1200.0,
+      "is_hvac_ducted": true,
+      "path": "Pax_Trunk_D9_D10"
+    },
+    {
+      "from": "AHU_Pax_D10",
+      "to": "AHU_Pax_D11",
+      "flow_rate_m3h": 1200.0,
+      "is_hvac_ducted": true,
+      "path": "Pax_Trunk_D10_D11"
+    },
+    {
+      "from": "AHU_Crew_D1",
+      "to": "AHU_Crew_D2",
+      "flow_rate_m3h": 800.0,
+      "is_hvac_ducted": true,
+      "path": "Crew_Trunk_D1_D2"
+    },
+    {
+      "from": "AHU_Crew_D2",
+      "to": "AHU_Crew_D3",
+      "flow_rate_m3h": 800.0,
+      "is_hvac_ducted": true,
+      "path": "Crew_Trunk_D2_D3"
+    },
+    {
+      "from": "AHU_Pax_D4",
+      "to": "AHU_Public_Mid",
+      "flow_rate_m3h": 1500.0,
+      "is_hvac_ducted": true,
+      "path": "Cabin_Relief_D4"
+    },
+    {
+      "from": "AHU_Pax_D5",
+      "to": "AHU_Public_Mid",
+      "flow_rate_m3h": 1500.0,
+      "is_hvac_ducted": true,
+      "path": "Cabin_Relief_D5"
+    },
+    {
+      "from": "AHU_Pax_D6",
+      "to": "AHU_Public_Mid",
+      "flow_rate_m3h": 1500.0,
+      "is_hvac_ducted": true,
+      "path": "Cabin_Relief_D6"
+    },
+    {
+      "from": "AHU_Pax_D7",
+      "to": "AHU_Public_Mid",
+      "flow_rate_m3h": 1500.0,
+      "is_hvac_ducted": true,
+      "path": "Cabin_Relief_D7"
+    },
+    {
+      "from": "AHU_Pax_D8",
+      "to": "AHU_Public_Mid",
+      "flow_rate_m3h": 1500.0,
+      "is_hvac_ducted": true,
+      "path": "Cabin_Relief_D8"
+    },
+    {
+      "from": "AHU_Pax_D9",
+      "to": "AHU_Public_Mid",
+      "flow_rate_m3h": 1500.0,
+      "is_hvac_ducted": true,
+      "path": "Cabin_Relief_D9"
+    },
+    {
+      "from": "AHU_Pax_D10",
+      "to": "AHU_Public_Mid",
+      "flow_rate_m3h": 1500.0,
+      "is_hvac_ducted": true,
+      "path": "Cabin_Relief_D10"
+    },
+    {
+      "from": "AHU_Pax_D11",
+      "to": "AHU_Public_Mid",
+      "flow_rate_m3h": 1500.0,
+      "is_hvac_ducted": true,
+      "path": "Cabin_Relief_D11"
+    }
+  ],
+  "adjacency": [
+    {
+      "from": "MainDining_L",
+      "to": "MainDining_U",
+      "type": "stairwell"
+    },
+    {
+      "from": "MainDining_L",
+      "to": "MainGalley",
+      "type": "service_hatch"
+    },
+    {
+      "from": "MainDining_U",
+      "to": "SpecialtyA",
+      "type": "passageway"
+    },
+    {
+      "from": "SpecialtyA",
+      "to": "SpecialtyB",
+      "type": "doorway"
+    },
+    {
+      "from": "Reception",
+      "to": "Promenade",
+      "type": "multi_deck_void"
+    },
+    {
+      "from": "Promenade",
+      "to": "Casino",
+      "type": "open_front"
+    },
+    {
+      "from": "Promenade",
+      "to": "PhotoShops",
+      "type": "open_front"
+    },
+    {
+      "from": "MainTheater",
+      "to": "Reception",
+      "type": "passageway"
+    },
+    {
+      "from": "LidoBuffet",
+      "to": "MainPool",
+      "type": "doorway"
+    },
+    {
+      "from": "LidoBuffet",
+      "to": "PizzaGrill",
+      "type": "passageway"
+    },
+    {
+      "from": "MainPool",
+      "to": "AftPool",
+      "type": "open_deck"
+    },
+    {
+      "from": "SpaFit",
+      "to": "KidsClub",
+      "type": "passageway"
+    },
+    {
+      "from": "KidsClub",
+      "to": "TeenZone",
+      "type": "doorway"
+    },
+    {
+      "from": "SpecialtyC",
+      "to": "SpaFit",
+      "type": "corridor"
+    },
+    {
+      "from": "MedCenter",
+      "to": "IsolWard",
+      "type": "doorway"
+    },
+    {
+      "from": "CrewMessMain",
+      "to": "Laundry",
+      "type": "corridor"
+    },
+    {
+      "from": "Laundry",
+      "to": "Engine_Room",
+      "type": "ladder_well"
+    },
+    {
+      "from": "CrewMessOff",
+      "to": "MedCenter",
+      "type": "corridor"
+    },
+    {
+      "from": "Nightclub",
+      "to": "CC_D3_A",
+      "type": "corridor"
+    },
+    {
+      "from": "ArtGallery",
+      "to": "SmallLounge",
+      "type": "passageway"
+    },
+    {
+      "from": "SportsDeck",
+      "to": "SpaFit",
+      "type": "stairwell"
+    },
+    {
+      "from": "MainGalley",
+      "to": "CrewMessMain",
+      "type": "service_stairwell"
+    },
+    {
+      "from": "PC_D4_P_M",
+      "to": "Reception",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D5_P_M",
+      "to": "Promenade",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D5_S_M",
+      "to": "Casino",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D4_S_F",
+      "to": "MainTheater",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D10_P_A",
+      "to": "MainPool",
+      "type": "elevator_bank"
+    },
+    {
+      "from": "PC_D10_S_A",
+      "to": "LidoBuffet",
+      "type": "elevator_bank"
+    },
+    {
+      "from": "PC_D11_P_F",
+      "to": "KidsClub",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D9_S_A",
+      "to": "AftPool",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D6_P_F",
+      "to": "SmallLounge",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D7_S_F",
+      "to": "Library",
+      "type": "corridor"
+    },
+    {
+      "from": "CC_D1_F",
+      "to": "CrewMessMain",
+      "type": "corridor"
+    },
+    {
+      "from": "CC_D1_A",
+      "to": "Laundry",
+      "type": "corridor"
+    },
+    {
+      "from": "CC_D2_M",
+      "to": "MedCenter",
+      "type": "corridor"
+    },
+    {
+      "from": "CC_D2_F",
+      "to": "CrewMessOff",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D4_P_F",
+      "to": "PC_D4_P_M",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D4_P_M",
+      "to": "PC_D4_P_A",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D4_S_F",
+      "to": "PC_D4_S_M",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D4_S_M",
+      "to": "PC_D4_S_A",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D4_P_M",
+      "to": "PC_D4_S_M",
+      "type": "passageway"
+    },
+    {
+      "from": "PC_D4_P_M",
+      "to": "PC_D5_P_M",
+      "type": "elevator_bank"
+    },
+    {
+      "from": "PC_D4_S_M",
+      "to": "PC_D5_S_M",
+      "type": "stairwell"
+    },
+    {
+      "from": "PC_D5_P_F",
+      "to": "PC_D5_P_M",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D5_P_M",
+      "to": "PC_D5_P_A",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D5_S_F",
+      "to": "PC_D5_S_M",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D5_S_M",
+      "to": "PC_D5_S_A",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D5_P_M",
+      "to": "PC_D5_S_M",
+      "type": "passageway"
+    },
+    {
+      "from": "PC_D5_P_M",
+      "to": "PC_D6_P_M",
+      "type": "elevator_bank"
+    },
+    {
+      "from": "PC_D5_S_M",
+      "to": "PC_D6_S_M",
+      "type": "stairwell"
+    },
+    {
+      "from": "PC_D6_P_F",
+      "to": "PC_D6_P_M",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D6_P_M",
+      "to": "PC_D6_P_A",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D6_S_F",
+      "to": "PC_D6_S_M",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D6_S_M",
+      "to": "PC_D6_S_A",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D6_P_M",
+      "to": "PC_D6_S_M",
+      "type": "passageway"
+    },
+    {
+      "from": "PC_D6_P_M",
+      "to": "PC_D7_P_M",
+      "type": "elevator_bank"
+    },
+    {
+      "from": "PC_D6_S_M",
+      "to": "PC_D7_S_M",
+      "type": "stairwell"
+    },
+    {
+      "from": "PC_D7_P_F",
+      "to": "PC_D7_P_M",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D7_P_M",
+      "to": "PC_D7_P_A",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D7_S_F",
+      "to": "PC_D7_S_M",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D7_S_M",
+      "to": "PC_D7_S_A",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D7_P_M",
+      "to": "PC_D7_S_M",
+      "type": "passageway"
+    },
+    {
+      "from": "PC_D7_P_M",
+      "to": "PC_D8_P_M",
+      "type": "elevator_bank"
+    },
+    {
+      "from": "PC_D7_S_M",
+      "to": "PC_D8_S_M",
+      "type": "stairwell"
+    },
+    {
+      "from": "PC_D8_P_F",
+      "to": "PC_D8_P_M",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D8_P_M",
+      "to": "PC_D8_P_A",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D8_S_F",
+      "to": "PC_D8_S_M",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D8_S_M",
+      "to": "PC_D8_S_A",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D8_P_M",
+      "to": "PC_D8_S_M",
+      "type": "passageway"
+    },
+    {
+      "from": "PC_D8_P_M",
+      "to": "PC_D9_P_M",
+      "type": "elevator_bank"
+    },
+    {
+      "from": "PC_D8_S_M",
+      "to": "PC_D9_S_M",
+      "type": "stairwell"
+    },
+    {
+      "from": "PC_D9_P_F",
+      "to": "PC_D9_P_M",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D9_P_M",
+      "to": "PC_D9_P_A",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D9_S_F",
+      "to": "PC_D9_S_M",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D9_S_M",
+      "to": "PC_D9_S_A",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D9_P_M",
+      "to": "PC_D9_S_M",
+      "type": "passageway"
+    },
+    {
+      "from": "PC_D9_P_M",
+      "to": "PC_D10_P_M",
+      "type": "elevator_bank"
+    },
+    {
+      "from": "PC_D9_S_M",
+      "to": "PC_D10_S_M",
+      "type": "stairwell"
+    },
+    {
+      "from": "PC_D10_P_F",
+      "to": "PC_D10_P_M",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D10_P_M",
+      "to": "PC_D10_P_A",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D10_S_F",
+      "to": "PC_D10_S_M",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D10_S_M",
+      "to": "PC_D10_S_A",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D10_P_M",
+      "to": "PC_D10_S_M",
+      "type": "passageway"
+    },
+    {
+      "from": "PC_D10_P_M",
+      "to": "PC_D11_P_M",
+      "type": "elevator_bank"
+    },
+    {
+      "from": "PC_D10_S_M",
+      "to": "PC_D11_S_M",
+      "type": "stairwell"
+    },
+    {
+      "from": "PC_D11_P_F",
+      "to": "PC_D11_P_M",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D11_P_M",
+      "to": "PC_D11_P_A",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D11_S_F",
+      "to": "PC_D11_S_M",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D11_S_M",
+      "to": "PC_D11_S_A",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D11_P_M",
+      "to": "PC_D11_S_M",
+      "type": "passageway"
+    },
+    {
+      "from": "CC_D1_F",
+      "to": "CC_D1_M",
+      "type": "corridor"
+    },
+    {
+      "from": "CC_D1_M",
+      "to": "CC_D1_A",
+      "type": "corridor"
+    },
+    {
+      "from": "CC_D1_F",
+      "to": "CC_D2_F",
+      "type": "stairwell"
+    },
+    {
+      "from": "CC_D1_M",
+      "to": "CC_D2_M",
+      "type": "stairwell"
+    },
+    {
+      "from": "CC_D1_A",
+      "to": "CC_D2_A",
+      "type": "stairwell"
+    },
+    {
+      "from": "CC_D2_F",
+      "to": "CC_D2_M",
+      "type": "corridor"
+    },
+    {
+      "from": "CC_D2_M",
+      "to": "CC_D2_A",
+      "type": "corridor"
+    },
+    {
+      "from": "CC_D2_F",
+      "to": "CC_D3_F",
+      "type": "stairwell"
+    },
+    {
+      "from": "CC_D2_M",
+      "to": "CC_D3_M",
+      "type": "stairwell"
+    },
+    {
+      "from": "CC_D2_A",
+      "to": "CC_D3_A",
+      "type": "stairwell"
+    },
+    {
+      "from": "CC_D3_F",
+      "to": "CC_D3_M",
+      "type": "corridor"
+    },
+    {
+      "from": "CC_D3_M",
+      "to": "CC_D3_A",
+      "type": "corridor"
+    }
+  ]
+}

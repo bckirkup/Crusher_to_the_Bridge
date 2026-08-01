@@ -1,0 +1,61 @@
+{
+  "description": "Hobbyist-plus Contam overrides for spirit_cruise_3000.",
+  "orifice_type_map": {
+    "corridor": "cabin_relief",
+    "doorway": "doorway",
+    "passageway": "passageway",
+    "elevator_bank": "elevator_bank",
+    "stairwell": "stairwell",
+    "service_stairwell": "service_stairwell",
+    "service_elevator": "service_elevator",
+    "service_hatch": "hatch",
+    "service_corridor": "service_corridor",
+    "open_deck": "promenade",
+    "open_front": "open_front",
+    "ladder_well": "ladder",
+    "multi_deck_void": "multi_deck_void"
+  },
+  "wind_profile": "ship_hull",
+  "filter_preset": "MERV11",
+  "hvac_filter": {
+    "AHU_Pax_D4": "MERV8",
+    "AHU_Pax_D5": "MERV8",
+    "AHU_Pax_D6": "MERV8",
+    "AHU_Pax_D7": "MERV8",
+    "AHU_Pax_D8": "MERV8",
+    "AHU_Pax_D9": "MERV8",
+    "AHU_Pax_D10": "MERV8",
+    "AHU_Pax_D11": "MERV8",
+    "AHU_Crew_D1": "MERV8",
+    "AHU_Crew_D2": "MERV8",
+    "AHU_Crew_D3": "MERV8",
+    "AHU_Medical": "HEPA",
+    "AHU_Service": "MERV11",
+    "AHU_Public_Fwd": "MERV11",
+    "AHU_Public_Mid": "MERV11",
+    "AHU_Public_Aft": "MERV11",
+    "AHU_Dining": "MERV11"
+  },
+  "oa_fraction": {
+    "_default": 0.2,
+    "AHU_Medical": 0.4,
+    "AHU_Pax_D4": 0.15,
+    "AHU_Pax_D5": 0.15,
+    "AHU_Pax_D6": 0.15,
+    "AHU_Pax_D7": 0.15,
+    "AHU_Pax_D8": 0.15,
+    "AHU_Pax_D9": 0.15,
+    "AHU_Pax_D10": 0.15,
+    "AHU_Pax_D11": 0.15
+  },
+  "deck_temp_offset_K": {
+    "0_Engine": 5.0
+  },
+  "zone_annotations": {
+    "MainDining_L": "Main Dining",
+    "MedCenter": "Medical Center",
+    "Engine_Room": "Engine Room",
+    "Reception": "Reception Atrium"
+  },
+  "night_setback": true
+}

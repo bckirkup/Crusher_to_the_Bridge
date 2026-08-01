@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0.0",
+  "catalog": {
+    "platform_id": "classic_cruise_1900",
+    "pathogen_bundle_id": "active_profiles"
+  },
+  "run": {
+    "random_seed": 42,
+    "num_epochs": 2,
+    "write_ground_truth": false
+  },
+  "legacy_yaml": "crusher_labs/config.yaml",
+  "config_overrides": {
+    "ship_graph": {
+      "num_agents": 1910
+    }
+  },
+  "actors": [],
+  "incentives": {}
+}
