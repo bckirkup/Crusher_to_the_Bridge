@@ -44,6 +44,7 @@ PLATFORMS = [
     "legend_class_nsc",
     "san_antonio_class_lpd",
     "expedition_cruise_300",
+    "expedition_cruise_450",
     "mega_cruise_5000",
     "messy_cruise_500",
     "enterprise_constitution_tos",

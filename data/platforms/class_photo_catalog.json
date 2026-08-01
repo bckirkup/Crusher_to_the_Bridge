@@ -38,9 +38,17 @@
       "wikimedia_title": "File:Cruise ship side view.png",
       "download_url": "https://upload.wikimedia.org/wikipedia/commons/e/e6/Cruise_ship_side_view.png",
       "license": "CC BY-SA 3.0",
-      "credit": "Marcusroos / Wikimedia Commons — cruise ship side elevation (schematic)",
+      "credit": "Marcusroos / Wikimedia Commons — cruise ship side elevation (schematic); LEGACY platform superseded by expedition_cruise_450",
       "photo_style": "profile",
       "local_file": "reference_photo.jpg"
+    },
+    "expedition_cruise_450": {
+      "generated": true,
+      "license": "Original work (AI-generated notional schematic)",
+      "credit": "Crusher-to-the-Bridge — notional expedition-cruise architectural plates (plan + elevation)",
+      "photo_style": "schematic",
+      "local_file": "reference_photo.jpg",
+      "architectural_graphics": "graphics/graphics.json"
     },
     "mega_cruise_5000": {
       "generated": true,

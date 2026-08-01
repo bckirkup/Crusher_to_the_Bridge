@@ -1,0 +1,95 @@
+{
+  "platform_id": "expedition_cruise_450",
+  "ship_class_label": "Expedition Cruise 450",
+  "footprint_tier": "representative",
+  "representative_of": "Small/medium expedition cruise (~300 passengers + ~150 crew = 450). Silver Cloud / Le Boréal / Viking Star class archetype: ~160m LOA × 21m beam, ~17,000 GT. Cabin-corridor resolution (12 pax + 4 crew",
+  "provenance": [
+    "spatial_layout.json description and deck_dimensions",
+    "zone count: 33",
+    "per-deck non-overlapping compartment packing"
+  ],
+  "disclaimer": "Footprints are class-representative for simulation zones, not a surveyed deck plan of one vessel.",
+  "zone_ids": [
+    "MainDining",
+    "BuffetLido",
+    "CrewMess",
+    "MainGalley",
+    "PoolDeck",
+    "ObsLounge",
+    "TheaterLng",
+    "Casino",
+    "Library",
+    "Gym",
+    "Spa",
+    "ExpedLounge",
+    "Reception",
+    "Laundry",
+    "Stores",
+    "Engine_Room",
+    "MedBay",
+    "PC_D4_P_F",
+    "PC_D4_P_A",
+    "PC_D4_S_F",
+    "PC_D4_S_A",
+    "PC_D5_P_F",
+    "PC_D5_P_A",
+    "PC_D5_S_F",
+    "PC_D5_S_A",
+    "PC_D6_P_F",
+    "PC_D6_P_A",
+    "PC_D6_S_F",
+    "PC_D6_S_A",
+    "CC_D2_F",
+    "CC_D2_A",
+    "CC_D3_F",
+    "CC_D3_A"
+  ],
+  "decks": [
+    "2_Crew",
+    "3_Crew",
+    "4_Cabins",
+    "4_Voyager",
+    "5_Cabins",
+    "5_Panorama",
+    "6_Cabins",
+    "6_Explorer",
+    "7_Sun"
+  ],
+  "view_bounds": {
+    "xmin": -2.0,
+    "xmax": 162.0,
+    "ymin": -2.0,
+    "ymax": 23.0
+  },
+  "assets": {
+    "deck_graphics": "deck_graphics.geojson",
+    "deck_hull": "deck_hull.png",
+    "deck_blueprint_bg": "deck_blueprint_bg.png",
+    "architectural_graphics": "graphics/graphics.json",
+    "plan_overview": "graphics/plan_overview.jpg",
+    "elevation": "graphics/elevation.jpg"
+  },
+  "background_plate": "architectural_plan",
+  "reference_photo": {
+    "license": "Original work (AI-generated notional schematic)",
+    "credit": "Crusher-to-the-Bridge — notional expedition-cruise architectural plates (plan + elevation)",
+    "local_file": "reference_photo.jpg"
+  },
+  "architectural_graphics": {
+    "schema_version": "1.0",
+    "description": "User-supplied architectural underlays for the LCARS tactical map. Elevation is a side profile; plan_overview is a top-down hull plate.",
+    "elevation": {
+      "file": "elevation.jpg",
+      "style": "ai_generated_notional",
+      "credit": "Crusher-to-the-Bridge — notional expedition-cruise elevation (original schematic)",
+      "license": "Original work"
+    },
+    "plan": {
+      "file": "plan_overview.jpg",
+      "style": "ai_generated_notional",
+      "credit": "Crusher-to-the-Bridge — notional expedition-cruise plan (original schematic)",
+      "license": "Original work"
+    },
+    "deck_plans": {}
+  }
+}

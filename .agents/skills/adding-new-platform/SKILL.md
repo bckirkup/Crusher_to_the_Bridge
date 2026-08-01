@@ -200,12 +200,17 @@ in `class_photo_catalog.json` (see `CLASS_PHOTO_ATTRIBUTION.md`).
 | Destroyer Baseline | `data/platforms/destroyer_baseline` |
 | Enterprise Constitution (TOS) | `data/platforms/enterprise_constitution_tos` |
 | Enterprise Galaxy (TNG) | `data/platforms/enterprise_galaxy_tng` |
-| Expedition Cruise 300 | `data/platforms/expedition_cruise_300` |
+| Expedition Cruise 300 (legacy) | `data/platforms/expedition_cruise_300` |
+| Expedition Cruise 450 | `data/platforms/expedition_cruise_450` |
 | Fletcher-class Destroyer | `data/platforms/fletcher_class_destroyer` |
 | Legend-class NSC | `data/platforms/legend_class_nsc` |
 | Mega Cruise 5000 | `data/platforms/mega_cruise_5000` |
 | Messy Cruise 500 (legacy) | `data/platforms/messy_cruise_500` |
 | San Antonio-class LPD | `data/platforms/san_antonio_class_lpd` |
+
+Regenerate cabin-corridor cruise layouts with
+`python3 scripts/generate_cruise_platform_layout.py --platform <id>`
+(see `scripts/cruise_platform_recipes.py`).
 
 ## Common Mistakes
 
