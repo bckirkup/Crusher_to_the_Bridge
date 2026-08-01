@@ -218,9 +218,13 @@ aws --profile picard batch register-job-definition \
   --region "$REGION"
 ```
 
-The command is `--shard-count <N> --s3-prefix s3://<bucket>/campaign/ --resume --timeout 3600`.
+The command is `--manifest <path> --shard-count <N> --s3-prefix s3://<bucket>/campaign/ --resume --timeout 3600`.
 `--shard-index` is **not** passed — the runner reads `AWS_BATCH_JOB_ARRAY_INDEX`,
 which Batch injects into every array child, so child *i* runs shard *i*.
+`Ref::manifest` defaults to `campaign_manifest.json` (mega-cruise); pass
+`calibration_manifest_v1.json` for the CDC calibration wave-1 matrix
+(~2360 runs; deferred `c2` skipped). On Windows:
+`.\deploy\aws\submit_calibration.ps1 -ShardCount 80`.
 
 ### Spot reclaim vs OOM (`evaluateOnExit`)
 
