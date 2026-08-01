@@ -70,6 +70,7 @@ Expected: 67 tests pass in ~0.5s.
 - `expedition_cruise_300` (legacy)
 - `expedition_cruise_450`
 - `classic_cruise_1900`
+- `spirit_cruise_3000`
 - `mega_cruise_5000`
 - `fletcher_class_destroyer`
 - `legend_class_nsc`

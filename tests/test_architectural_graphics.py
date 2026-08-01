@@ -93,6 +93,7 @@ class TestArchitecturalGraphicsLoader:
             "enterprise_constitution_tos",
             "expedition_cruise_450",
             "classic_cruise_1900",
+            "spirit_cruise_3000",
         ],
     )
     def test_committed_plates_exist(self, platform_id: str) -> None:

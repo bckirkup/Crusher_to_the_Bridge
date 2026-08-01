@@ -58,6 +58,14 @@
       "local_file": "reference_photo.jpg",
       "architectural_graphics": "graphics/graphics.json"
     },
+    "spirit_cruise_3000": {
+      "generated": true,
+      "license": "Original work (AI-generated notional schematic)",
+      "credit": "Crusher-to-the-Bridge — notional spirit-cruise architectural plates (plan + elevation)",
+      "photo_style": "schematic",
+      "local_file": "reference_photo.jpg",
+      "architectural_graphics": "graphics/graphics.json"
+    },
     "mega_cruise_5000": {
       "generated": true,
       "license": "Original work (AI-generated notional schematic)",

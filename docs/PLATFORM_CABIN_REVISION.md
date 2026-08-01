@@ -12,8 +12,8 @@ generator `scripts/generate_cruise_platform_layout.py` + recipes in
 | Platform | CDC category | Notes |
 |----------|--------------|-------|
 | `expedition_cruise_450` | Small/Medium | Replaces `expedition_cruise_300` (archived) |
-| `classic_cruise_1900` | Large | Stacked follow-up |
-| `spirit_cruise_3000` | Extra-Large | Stacked follow-up |
+| `classic_cruise_1900` | Large | Cabin-corridor + buffet / promenade / atrium |
+| `spirit_cruise_3000` | Extra-Large | Multi-specialty dining, teen/sports, isolation ward |
 | `mega_cruise_5000` | Super-Mega | Reference standard |
 
 Future calibration targets (AGE per 100K traveler-days; **not yet enforced in-repo**):

@@ -203,6 +203,7 @@ in `class_photo_catalog.json` (see `CLASS_PHOTO_ATTRIBUTION.md`).
 | Expedition Cruise 300 (legacy) | `data/platforms/expedition_cruise_300` |
 | Expedition Cruise 450 | `data/platforms/expedition_cruise_450` |
 | Classic Cruise 1900 | `data/platforms/classic_cruise_1900` |
+| Spirit Cruise 3000 | `data/platforms/spirit_cruise_3000` |
 | Fletcher-class Destroyer | `data/platforms/fletcher_class_destroyer` |
 | Legend-class NSC | `data/platforms/legend_class_nsc` |
 | Mega Cruise 5000 | `data/platforms/mega_cruise_5000` |

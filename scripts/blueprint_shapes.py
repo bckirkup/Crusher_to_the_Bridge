@@ -13,6 +13,7 @@ HULL_FAMILY: dict[str, str] = {
     "expedition_cruise_300": "cruise_small",
     "expedition_cruise_450": "cruise_small",
     "classic_cruise_1900": "cruise_large",
+    "spirit_cruise_3000": "cruise_large",
     "mega_cruise_5000": "cruise_large",
     "messy_cruise_500": "cruise_large",
     "enterprise_constitution_tos": "starship_constitution",

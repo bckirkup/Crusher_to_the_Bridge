@@ -24,6 +24,59 @@ def _load_platform(platform_id: str) -> tuple[dict, dict]:
     )
 
 
+def test_spirit_3000_corridor_topology() -> None:
+    spatial, airflow = _load_platform("spirit_cruise_3000")
+    zones = spatial["zones"]
+    corridors = [z for z in zones if z["type"] == "Cabin_Corridor"]
+    pax = [z for z in corridors if z["id"].startswith("PC_")]
+    crew = [z for z in corridors if z["id"].startswith("CC_")]
+    assert len(pax) == 48
+    assert len(crew) == 9
+    assert len(zones) == 86
+    vents = {z["cabin_ventilation_type"] for z in corridors}
+    assert vents == {"balcony_partial", "interior_hvac", "atrium_view"}
+    assert all(len(z["id"]) <= 15 for z in zones)
+    covered = {r for hz in airflow["hvac_zones"] for r in hz["rooms"]}
+    assert covered == {z["id"] for z in zones}
+    assert spatial["deck_dimensions"] == {"length_m": 290.0, "beam_m": 36.0}
+    crew_ahus = [hz for hz in airflow["hvac_zones"] if hz["id"].startswith("AHU_Crew_D")]
+    assert len(crew_ahus) == 3
+    trunks = [
+        cl for cl in airflow["cross_zone_links"]
+        if str(cl.get("path", "")).startswith("Pax_Trunk_")
+    ]
+    assert len(trunks) == 7
+    assert any(a["type"] == "multi_deck_void" for a in airflow["adjacency"])
+    zone_ids = {z["id"] for z in zones}
+    assert {"SpecialtyA", "SpecialtyB", "SpecialtyC", "TeenZone", "SportsDeck"} <= zone_ids
+
+
+def test_spirit_3000_generator_roundtrip() -> None:
+    from cruise_platform_recipes import RECIPES
+    from generate_cruise_platform_layout import (
+        build_air_flow_paths,
+        build_spatial_layout,
+    )
+
+    recipe = RECIPES["spirit_cruise_3000"]
+    spatial = build_spatial_layout(recipe)
+    airflow = build_air_flow_paths(recipe, {z["id"] for z in spatial["zones"]})
+    committed_s, committed_a = _load_platform("spirit_cruise_3000")
+    assert {z["id"] for z in spatial["zones"]} == {z["id"] for z in committed_s["zones"]}
+    assert {hz["id"] for hz in airflow["hvac_zones"]} == {
+        hz["id"] for hz in committed_a["hvac_zones"]
+    }
+
+
+def test_spirit_3000_graphics_and_contam_present() -> None:
+    base = PLATFORMS / "spirit_cruise_3000"
+    assert (base / "graphics" / "elevation.jpg").is_file()
+    assert (base / "graphics" / "plan_overview.jpg").is_file()
+    assert (base / "deck_graphics.geojson").is_file()
+    paths = json.loads((base / "contam" / "path_map.json").read_text(encoding="utf-8"))
+    assert len(paths) >= 400
+
+
 def test_classic_1900_corridor_topology() -> None:
     spatial, airflow = _load_platform("classic_cruise_1900")
     zones = spatial["zones"]
