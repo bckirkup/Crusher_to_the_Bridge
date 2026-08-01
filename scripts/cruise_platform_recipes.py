@@ -389,6 +389,316 @@ EXPEDITION_CRUISE_450 = CruisePlatformRecipe(
 )
 
 
+def _classic_vent(deck: int, side: str, section: str) -> str:
+    # ~50% balcony / ~30% interior / ~20% atrium_view
+    if section == "Mid" and deck in (4, 5, 6):
+        return "atrium_view"
+    if section in ("Fwd", "Aft") and deck >= 5:
+        return "balcony_partial"
+    if section == "Mid" and deck >= 7:
+        return "balcony_partial"
+    return "interior_hvac"
+
+
+def _classic_public_zones() -> tuple[PublicZoneRecipe, ...]:
+    return (
+        PublicZoneRecipe(
+            "MainDining_L", "Dining", "high", 1400.0, "4_Main", 400,
+            {"x": 50, "y": 55},
+            "Main dining room lower level. Deck 4. ~400 seats.",
+        ),
+        PublicZoneRecipe(
+            "MainDining_U", "Dining", "high", 1400.0, "5_Lounge", 400,
+            {"x": 50, "y": 42},
+            "Main dining room upper level. Deck 5. ~400 seats.",
+        ),
+        PublicZoneRecipe(
+            "LidoBuffet", "Dining", "high", 1225.0, "9_Lido", 350,
+            {"x": 80, "y": 12},
+            "Open Lido buffet. Deck 9. ~350 seats.",
+        ),
+        PublicZoneRecipe(
+            "Specialty", "Dining", "medium", 280.0, "5_Lounge", 80,
+            {"x": 110, "y": 42},
+            "Specialty restaurant. Deck 5. ~80 seats.",
+        ),
+        PublicZoneRecipe(
+            "CrewMess", "Dining", "high", 700.0, "1_Crew", 200,
+            {"x": 60, "y": 92},
+            "Crew mess. Deck 1. ~200 seats.",
+        ),
+        PublicZoneRecipe(
+            "MainGalley", "Dining", "high", 900.0, "4_Main", 60,
+            {"x": 30, "y": 55},
+            "Main galley (crew-only). Deck 4.",
+        ),
+        PublicZoneRecipe(
+            "PoolDeck", "Free", "high", 2100.0, "9_Lido", 400,
+            {"x": 120, "y": 12},
+            "Pool deck. Deck 9.",
+        ),
+        PublicZoneRecipe(
+            "Promenade", "Free", "high", 1800.0, "5_Lounge", 300,
+            {"x": 90, "y": 42},
+            "Indoor promenade. Deck 5.",
+        ),
+        PublicZoneRecipe(
+            "MainTheater", "Free", "high", 4000.0, "4_Main", 800,
+            {"x": 150, "y": 50},
+            "Main theater (~800 seats). Decks 4-5.",
+        ),
+        PublicZoneRecipe(
+            "Casino", "Free", "high", 900.0, "5_Lounge", 200,
+            {"x": 130, "y": 42},
+            "Casino. Deck 5.",
+        ),
+        PublicZoneRecipe(
+            "Library", "Free", "low", 210.0, "7_Cabins", 30,
+            {"x": 40, "y": 28},
+            "Library. Deck 7.",
+        ),
+        PublicZoneRecipe(
+            "SpaFit", "Free", "medium", 900.0, "9_Lido", 120,
+            {"x": 40, "y": 12},
+            "Spa and fitness. Deck 9.",
+        ),
+        PublicZoneRecipe(
+            "KidsClub", "Free", "medium", 420.0, "8_Cabins", 60,
+            {"x": 40, "y": 20},
+            "Kids club. Deck 8.",
+        ),
+        PublicZoneRecipe(
+            "PhotoShops", "Free", "medium", 525.0, "5_Lounge", 80,
+            {"x": 160, "y": 42},
+            "Photo gallery and shops. Deck 5.",
+        ),
+        PublicZoneRecipe(
+            "Reception", "Free", "high", 1050.0, "4_Main", 150,
+            {"x": 90, "y": 55},
+            "Reception atrium (2-3 deck void). Deck 4.",
+        ),
+        PublicZoneRecipe(
+            "Laundry", "Free", "medium", 280.0, "1_Crew", 15,
+            {"x": 100, "y": 92},
+            "Laundry. Deck 1.",
+        ),
+        PublicZoneRecipe(
+            "Engine_Room", "Free", "low", 4200.0, "0_Engine", 20,
+            {"x": 70, "y": 105},
+            "Engine room. Deck 0.",
+        ),
+        PublicZoneRecipe(
+            "MedCenter", "Medical", "medium", 350.0, "2_Crew", 20,
+            {"x": 80, "y": 80},
+            "Medical center. Deck 2.",
+        ),
+        PublicZoneRecipe(
+            "IsolRoom", "Medical", "low", 70.0, "2_Crew", 2,
+            {"x": 95, "y": 80},
+            "Isolation room (~2 beds). Deck 2.",
+        ),
+    )
+
+
+def _classic_adjacency() -> tuple[dict[str, str], ...]:
+    links: list[dict[str, str]] = [
+        {"from": "MainDining_L", "to": "MainDining_U", "type": "stairwell"},
+        {"from": "MainDining_L", "to": "MainGalley", "type": "service_hatch"},
+        {"from": "MainDining_U", "to": "Specialty", "type": "passageway"},
+        {"from": "MainTheater", "to": "Reception", "type": "passageway"},
+        {"from": "Reception", "to": "Promenade", "type": "multi_deck_void"},
+        {"from": "Promenade", "to": "Casino", "type": "open_front"},
+        {"from": "Promenade", "to": "PhotoShops", "type": "open_front"},
+        {"from": "Casino", "to": "Specialty", "type": "doorway"},
+        {"from": "LidoBuffet", "to": "PoolDeck", "type": "doorway"},
+        {"from": "PoolDeck", "to": "SpaFit", "type": "passageway"},
+        {"from": "MedCenter", "to": "IsolRoom", "type": "doorway"},
+        {"from": "CrewMess", "to": "Laundry", "type": "corridor"},
+        {"from": "Laundry", "to": "Engine_Room", "type": "ladder_well"},
+        {"from": "KidsClub", "to": "Library", "type": "stairwell"},
+        {"from": "Reception", "to": "MainDining_L", "type": "passageway"},
+        {"from": "MainGalley", "to": "CrewMess", "type": "service_stairwell"},
+        # Public to corridors
+        {"from": "PC_D4_P_M", "to": "Reception", "type": "corridor"},
+        {"from": "PC_D5_P_M", "to": "Promenade", "type": "corridor"},
+        {"from": "PC_D5_S_M", "to": "Casino", "type": "corridor"},
+        {"from": "PC_D4_S_F", "to": "MainTheater", "type": "corridor"},
+        {"from": "PC_D9_P_A", "to": "PoolDeck", "type": "elevator_bank"},
+        {"from": "PC_D9_S_A", "to": "LidoBuffet", "type": "elevator_bank"},
+        {"from": "PC_D8_P_F", "to": "KidsClub", "type": "corridor"},
+        {"from": "PC_D7_S_F", "to": "Library", "type": "corridor"},
+        {"from": "CC_D2_F", "to": "MedCenter", "type": "corridor"},
+        {"from": "CC_D1_F", "to": "CrewMess", "type": "corridor"},
+        {"from": "CC_D1_A", "to": "Laundry", "type": "corridor"},
+        {"from": "CC_D3_F", "to": "CC_D2_F", "type": "stairwell"},
+        {"from": "CC_D2_F", "to": "CC_D1_F", "type": "stairwell"},
+        {"from": "CC_D3_A", "to": "CC_D2_A", "type": "stairwell"},
+        {"from": "CC_D2_A", "to": "CC_D1_A", "type": "stairwell"},
+    ]
+    for deck in range(4, 10):
+        for side in ("Port", "Stbd"):
+            links.append({
+                "from": pax_zone_id(deck, side, "Fwd"),
+                "to": pax_zone_id(deck, side, "Mid"),
+                "type": "corridor",
+            })
+            links.append({
+                "from": pax_zone_id(deck, side, "Mid"),
+                "to": pax_zone_id(deck, side, "Aft"),
+                "type": "corridor",
+            })
+        links.append({
+            "from": pax_zone_id(deck, "Port", "Mid"),
+            "to": pax_zone_id(deck, "Stbd", "Mid"),
+            "type": "passageway",
+        })
+        if deck < 9:
+            links.append({
+                "from": pax_zone_id(deck, "Port", "Mid"),
+                "to": pax_zone_id(deck + 1, "Port", "Mid"),
+                "type": "elevator_bank",
+            })
+            links.append({
+                "from": pax_zone_id(deck, "Stbd", "Mid"),
+                "to": pax_zone_id(deck + 1, "Stbd", "Mid"),
+                "type": "stairwell",
+            })
+    for deck in (1, 2, 3):
+        links.append({
+            "from": crew_zone_id(deck, "Fwd"),
+            "to": crew_zone_id(deck, "Aft"),
+            "type": "corridor",
+        })
+    return tuple(links)
+
+
+CLASSIC_CRUISE_1900 = CruisePlatformRecipe(
+    platform_id="classic_cruise_1900",
+    description=(
+        "Large classic cruise (~1,350 passengers + ~560 crew = 1,910). "
+        "Holland America Veendam / Celebrity Century archetype: ~238m LOA × 32m beam, "
+        "~57,000 GT. Cabin-corridor resolution (36 pax + 6 crew corridors). "
+        "Key venues: Lido buffet, promenade, multi-deck atrium, kids club, isolation room. "
+        "CDC Large AGE target 21.4/100K TD (calibration deferred)."
+    ),
+    length_m=238.0,
+    beam_m=32.0,
+    population=1910,
+    graywater_zones=("Engine_Room",),
+    pax_corridors=CorridorRecipe(
+        decks=(4, 5, 6, 7, 8, 9),
+        sides=("Port", "Stbd"),
+        sections=("Fwd", "Mid", "Aft"),
+        max_occupancy=37,
+        volume_m3=800.0,
+        cabin_size=2,
+        traffic="low",
+        deck_label="{deck}_Cabins",
+        ventilation=_classic_vent,
+        description_template=(
+            "Passenger cabin corridor, Deck {deck} {side} {section}. "
+            "~10 cabins, ~37 pax, ventilation={vent}."
+        ),
+    ),
+    crew_corridors=CorridorRecipe(
+        decks=(1, 2, 3),
+        sides=(),
+        sections=("Fwd", "Aft"),
+        max_occupancy=95,
+        volume_m3=700.0,
+        cabin_size=3,
+        traffic="medium",
+        deck_label="{deck}_Crew",
+        ventilation=lambda d, s, sec: "interior_hvac",
+        description_template=(
+            "Crew cabin corridor, Deck {deck} {section}. "
+            "~95 crew, interior HVAC."
+        ),
+    ),
+    public_zones=_classic_public_zones(),
+    public_hvac=(
+        HvacGroupRecipe(
+            "AHU_Public_Fwd",
+            ("MainTheater", "Casino"),
+            8.0,
+            "Forward public venues.",
+        ),
+        HvacGroupRecipe(
+            "AHU_Public_Mid",
+            ("Promenade", "Reception", "PhotoShops", "Library", "KidsClub"),
+            8.0,
+            "Midship promenade / atrium / shops.",
+        ),
+        HvacGroupRecipe(
+            "AHU_Public_Aft",
+            ("PoolDeck", "LidoBuffet", "SpaFit"),
+            10.0,
+            "Aft pool / buffet / spa.",
+        ),
+        HvacGroupRecipe(
+            "AHU_Dining",
+            ("MainDining_L", "MainDining_U", "Specialty"),
+            8.0,
+            "Main and specialty dining.",
+        ),
+        HvacGroupRecipe(
+            "AHU_Medical",
+            ("MedCenter", "IsolRoom"),
+            12.0,
+            "Medical + isolation.",
+        ),
+        HvacGroupRecipe(
+            "AHU_Service",
+            ("MainGalley", "Laundry", "Engine_Room"),
+            15.0,
+            "Service / galley / engine.",
+        ),
+        HvacGroupRecipe(
+            "AHU_Crew",
+            (),
+            6.0,
+            "Crew corridors and mess.",
+        ),
+    ),
+    auto_pax_ahu=True,
+    auto_crew_ahu=False,
+    crew_ahu_merged=True,
+    pax_trunk_m3h=1200.0,
+    crew_trunk_m3h=0.0,
+    cabin_relief_m3h=1500.0,
+    cabin_relief_target_ahu="AHU_Public_Mid",
+    cross_zone_links=(
+        {
+            "from": "MainDining_L",
+            "to": "MainGalley",
+            "flow_rate_m3h": 12000.0,
+            "is_hvac_ducted": False,
+            "path": "Dining_Galley_Exhaust",
+        },
+        {
+            "from": "AHU_Medical",
+            "to": "AHU_Public_Mid",
+            "flow_rate_m3h": 100.0,
+            "is_hvac_ducted": False,
+            "path": "Medical_Door_Leakage",
+        },
+        {
+            "from": "LidoBuffet",
+            "to": "PoolDeck",
+            "flow_rate_m3h": 600.0,
+            "is_hvac_ducted": False,
+            "path": "Lido_Open_Doorway",
+        },
+    ),
+    adjacency=_classic_adjacency(),
+    pax_deck_y={4: 55.0, 5: 45.0, 6: 36.0, 7: 28.0, 8: 20.0, 9: 12.0},
+    crew_deck_y={1: 92.0, 2: 80.0, 3: 68.0},
+    side_x={"Port": 170.0, "Stbd": 170.0},
+)
+
+
 RECIPES: dict[str, CruisePlatformRecipe] = {
     EXPEDITION_CRUISE_450.platform_id: EXPEDITION_CRUISE_450,
+    CLASSIC_CRUISE_1900.platform_id: CLASSIC_CRUISE_1900,
 }
+

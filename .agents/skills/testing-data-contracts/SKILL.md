@@ -69,6 +69,7 @@ Expected: 67 tests pass in ~0.5s.
 - `enterprise_galaxy_tng` — Galaxy-class (fiction-adapted, 17 zones)
 - `expedition_cruise_300` (legacy)
 - `expedition_cruise_450`
+- `classic_cruise_1900`
 - `mega_cruise_5000`
 - `fletcher_class_destroyer`
 - `legend_class_nsc`

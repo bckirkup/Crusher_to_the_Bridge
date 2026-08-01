@@ -26,6 +26,7 @@ packed per deck into the hull plan (non-overlapping).
 |----------|-------|-------|
 | mega_cruise_5000 | AI-generated notional schematic | Original composition (plan + elevation) |
 | expedition_cruise_450 | Notional schematic | Original composition (plan + elevation); cabin-corridor |
+| classic_cruise_1900 | Notional schematic | Original composition (plan + elevation); cabin-corridor |
 | enterprise_galaxy_tng | AI-generated fiction-adapted | Simplified Galaxy-inspired silhouette — **not** televised Star Trek artwork |
 | enterprise_constitution_tos | AI-generated fiction-adapted | Simplified Constitution-inspired silhouette — **not** televised Star Trek artwork |
 

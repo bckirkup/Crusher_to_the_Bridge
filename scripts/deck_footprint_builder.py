@@ -139,6 +139,7 @@ def build_manifest(
         "messy_cruise_500": "Mega cruise — legacy well-mixed berthing",
         "expedition_cruise_300": "Expedition cruise — legacy well-mixed berthing",
         "expedition_cruise_450": "Expedition cruise (cabin-corridor)",
+        "classic_cruise_1900": "Classic cruise (cabin-corridor)",
         "fletcher_class_destroyer": "Fletcher-class DD (representative)",
         "legend_class_nsc": "Legend-class NSC (representative)",
         "san_antonio_class_lpd": "San Antonio-class LPD (representative)",
