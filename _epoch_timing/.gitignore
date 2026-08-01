@@ -1,0 +1,3 @@
+# Epoch timing harness outputs (generated locally / CI ad-hoc).
+# Keep the harness script; commit comparative summaries when useful.
+*.spec.json
