@@ -1295,3 +1295,26 @@ def test_calibration_num_agents_override() -> None:
         ),
     )
     assert spec["config_overrides"]["ship_graph"]["num_agents"] == 50
+
+
+def test_c2_is_deferred_from_all_selection() -> None:
+    manifest = _calibration_manifest()
+    assert manifest["tiers"]["c2_immunity_sweep"].get("deferred") is True
+    all_tiers = resolve_tier_ids(manifest, "all")
+    assert "c2_immunity_sweep" not in all_tiers
+    assert "c1_mega_cruise_5000" in all_tiers
+    assert "c3_sarscov2_calibration" in all_tiers
+    assert "c4_voyage_duration" in all_tiers
+    with_deferred = resolve_tier_ids(manifest, "all", include_deferred=True)
+    assert "c2_immunity_sweep" in with_deferred
+    # Explicit prefix still selects deferred wave-2 tier.
+    assert resolve_tier_ids(manifest, "c2") == ["c2_immunity_sweep"]
+
+
+def test_calibration_wave1_dry_run_excludes_c2() -> None:
+    """Wave-1 Batch submit uses --tier all → 2360 runs (no deferred c2)."""
+    manifest = _calibration_manifest()
+    total = 0
+    for tier_id in resolve_tier_ids(manifest, "all"):
+        total += len(list(generate_tier_runs(manifest, tier_id)))
+    assert total == 2360
