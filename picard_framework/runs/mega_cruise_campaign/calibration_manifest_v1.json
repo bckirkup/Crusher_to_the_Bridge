@@ -1,0 +1,549 @@
+{
+  "campaign": "multi_platform_calibration_v1",
+  "platform": "mega_cruise_5000",
+  "description": "Multi-platform calibration campaign. Sweep dose_adjustment across 4 ship classes to match CDC VSP AGE rates. 7-day voyages (168 epochs). Norovirus primary, SARS-CoV-2 cross-validation. Seeds 500+.",
+  "default_epochs": 168,
+  "default_num_agents": 7000,
+  "tiers": {
+    "c1_expedition_cruise_450": {
+      "description": "Norovirus dose_adjustment sweep on expedition_cruise_450",
+      "platform": "expedition_cruise_450",
+      "pathogen": "norovirus",
+      "dose_adjustments": [
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        10.0,
+        15.0,
+        20.0
+      ],
+      "initial_infected_values": [
+        1,
+        5
+      ],
+      "surveillance_strategies": [
+        "none_true",
+        "syndromic"
+      ],
+      "epochs": 168,
+      "seeds": [
+        500,
+        501,
+        502,
+        503,
+        504,
+        505,
+        506,
+        507,
+        508,
+        509,
+        510,
+        511,
+        512,
+        513,
+        514,
+        515,
+        516,
+        517,
+        518,
+        519
+      ]
+    },
+    "c1_classic_cruise_1900": {
+      "description": "Norovirus dose_adjustment sweep on classic_cruise_1900",
+      "platform": "classic_cruise_1900",
+      "pathogen": "norovirus",
+      "dose_adjustments": [
+        1.0,
+        3.0,
+        5.0,
+        7.0,
+        10.0,
+        15.0,
+        20.0
+      ],
+      "initial_infected_values": [
+        1,
+        5
+      ],
+      "surveillance_strategies": [
+        "none_true",
+        "syndromic"
+      ],
+      "epochs": 168,
+      "seeds": [
+        500,
+        501,
+        502,
+        503,
+        504,
+        505,
+        506,
+        507,
+        508,
+        509,
+        510,
+        511,
+        512,
+        513,
+        514
+      ]
+    },
+    "c1_spirit_cruise_3000": {
+      "description": "Norovirus dose_adjustment sweep on spirit_cruise_3000",
+      "platform": "spirit_cruise_3000",
+      "pathogen": "norovirus",
+      "dose_adjustments": [
+        1.0,
+        3.0,
+        5.0,
+        7.0,
+        10.0,
+        15.0,
+        20.0
+      ],
+      "initial_infected_values": [
+        1,
+        5
+      ],
+      "surveillance_strategies": [
+        "none_true",
+        "syndromic"
+      ],
+      "epochs": 168,
+      "seeds": [
+        500,
+        501,
+        502,
+        503,
+        504,
+        505,
+        506,
+        507,
+        508,
+        509
+      ]
+    },
+    "c1_mega_cruise_5000": {
+      "description": "Norovirus dose_adjustment sweep on mega_cruise_5000",
+      "platform": "mega_cruise_5000",
+      "pathogen": "norovirus",
+      "dose_adjustments": [
+        1.0,
+        3.0,
+        5.0,
+        7.0,
+        10.0,
+        15.0
+      ],
+      "initial_infected_values": [
+        1,
+        5
+      ],
+      "surveillance_strategies": [
+        "none_true",
+        "syndromic"
+      ],
+      "epochs": 168,
+      "seeds": [
+        500,
+        501,
+        502,
+        503,
+        504,
+        505,
+        506,
+        507,
+        508,
+        509
+      ]
+    },
+    "c2_immunity_sweep": {
+      "description": "Norovirus immunity sweep across platforms (FUT2 non-secretor modeling)",
+      "platforms": [
+        "expedition_cruise_450",
+        "classic_cruise_1900",
+        "spirit_cruise_3000",
+        "mega_cruise_5000"
+      ],
+      "pathogen": "norovirus",
+      "pre_immunity_fractions": [
+        0.0,
+        0.1,
+        0.2,
+        0.3,
+        0.5
+      ],
+      "surveillance_strategies": [
+        "none_true",
+        "syndromic"
+      ],
+      "epochs": 168,
+      "seeds": [
+        500,
+        501,
+        502,
+        503,
+        504,
+        505,
+        506,
+        507,
+        508,
+        509
+      ],
+      "note": "Run at best dose_adjustment from C1. Requires manual config after C1 analysis."
+    },
+    "c3_sarscov2_calibration": {
+      "description": "SARS-CoV-2 dose_adjustment sweep \u2014 Diamond Princess cross-validation",
+      "platforms": [
+        "mega_cruise_5000",
+        "expedition_cruise_450"
+      ],
+      "pathogen": "sarscov2",
+      "dose_adjustments": [
+        1.0,
+        3.0,
+        5.0,
+        7.0,
+        10.0,
+        15.0
+      ],
+      "initial_infected_values": [
+        1
+      ],
+      "surveillance_strategies": [
+        "none_true",
+        "syndromic"
+      ],
+      "epochs": 168,
+      "seeds": [
+        500,
+        501,
+        502,
+        503,
+        504,
+        505,
+        506,
+        507,
+        508,
+        509,
+        510,
+        511,
+        512,
+        513,
+        514
+      ],
+      "calibration_target": "Diamond Princess 19.2% AR at ~3700 population"
+    },
+    "c4_voyage_duration": {
+      "description": "Voyage duration sweep \u2014 3/7/14 day cruises",
+      "platform": "mega_cruise_5000",
+      "pathogen": "norovirus",
+      "epoch_durations": [
+        72,
+        168,
+        336
+      ],
+      "dose_adjustments": [
+        3.0,
+        7.0,
+        15.0
+      ],
+      "surveillance_strategies": [
+        "none_true",
+        "syndromic"
+      ],
+      "seeds": [
+        500,
+        501,
+        502,
+        503,
+        504,
+        505,
+        506,
+        507,
+        508,
+        509
+      ],
+      "calibration_target": "CDC: AR increases with voyage length (2.94% <7d, 6.05% 7-10d, 7.86% \u226511d)"
+    }
+  },
+  "pathogen_configs": {
+    "norovirus": {
+      "bundle": "active_profiles",
+      "pathogen_id": "norwalk_gi",
+      "overrides": {
+        "remove": [
+          "sars_cov2_resp"
+        ]
+      }
+    },
+    "sarscov2": {
+      "bundle": "active_profiles",
+      "pathogen_id": "sars_cov2_resp",
+      "overrides": {
+        "remove": [
+          "norwalk_gi"
+        ]
+      }
+    },
+    "influenza": {
+      "bundle": "edison_10pathogen_profiles",
+      "pathogen_id": "influenza_a",
+      "overrides": {
+        "remove": [
+          "norovirus_gii4",
+          "sars_cov2_resp",
+          "measles_virus",
+          "legionella_pneumophila",
+          "vibrio_cholerae_parahaemolyticus",
+          "campylobacter_jejuni",
+          "clostridioides_difficile",
+          "andes_hantavirus",
+          "ebola_virus"
+        ]
+      }
+    },
+    "measles": {
+      "bundle": "edison_10pathogen_profiles",
+      "pathogen_id": "measles_virus",
+      "overrides": {
+        "remove": [
+          "norovirus_gii4",
+          "sars_cov2_resp",
+          "influenza_a",
+          "legionella_pneumophila",
+          "vibrio_cholerae_parahaemolyticus",
+          "campylobacter_jejuni",
+          "clostridioides_difficile",
+          "andes_hantavirus",
+          "ebola_virus"
+        ]
+      }
+    },
+    "legionella": {
+      "bundle": "edison_10pathogen_profiles",
+      "pathogen_id": "legionella_pneumophila",
+      "overrides": {
+        "remove": [
+          "norovirus_gii4",
+          "sars_cov2_resp",
+          "influenza_a",
+          "measles_virus",
+          "vibrio_cholerae_parahaemolyticus",
+          "campylobacter_jejuni",
+          "clostridioides_difficile",
+          "andes_hantavirus",
+          "ebola_virus"
+        ]
+      }
+    },
+    "vibrio": {
+      "bundle": "edison_10pathogen_profiles",
+      "pathogen_id": "vibrio_cholerae_parahaemolyticus",
+      "overrides": {
+        "remove": [
+          "norovirus_gii4",
+          "sars_cov2_resp",
+          "influenza_a",
+          "measles_virus",
+          "legionella_pneumophila",
+          "campylobacter_jejuni",
+          "clostridioides_difficile",
+          "andes_hantavirus",
+          "ebola_virus"
+        ]
+      }
+    },
+    "campylobacter": {
+      "bundle": "edison_10pathogen_profiles",
+      "pathogen_id": "campylobacter_jejuni",
+      "overrides": {
+        "remove": [
+          "norovirus_gii4",
+          "sars_cov2_resp",
+          "influenza_a",
+          "measles_virus",
+          "legionella_pneumophila",
+          "vibrio_cholerae_parahaemolyticus",
+          "clostridioides_difficile",
+          "andes_hantavirus",
+          "ebola_virus"
+        ]
+      }
+    },
+    "cdiff": {
+      "bundle": "edison_10pathogen_profiles",
+      "pathogen_id": "clostridioides_difficile",
+      "overrides": {
+        "remove": [
+          "norovirus_gii4",
+          "sars_cov2_resp",
+          "influenza_a",
+          "measles_virus",
+          "legionella_pneumophila",
+          "vibrio_cholerae_parahaemolyticus",
+          "campylobacter_jejuni",
+          "andes_hantavirus",
+          "ebola_virus"
+        ]
+      }
+    },
+    "hantavirus": {
+      "bundle": "edison_10pathogen_profiles",
+      "pathogen_id": "andes_hantavirus",
+      "overrides": {
+        "remove": [
+          "norovirus_gii4",
+          "sars_cov2_resp",
+          "influenza_a",
+          "measles_virus",
+          "legionella_pneumophila",
+          "vibrio_cholerae_parahaemolyticus",
+          "campylobacter_jejuni",
+          "clostridioides_difficile",
+          "ebola_virus"
+        ]
+      }
+    },
+    "ebola": {
+      "bundle": "edison_10pathogen_profiles",
+      "pathogen_id": "ebola_virus",
+      "overrides": {
+        "remove": [
+          "norovirus_gii4",
+          "sars_cov2_resp",
+          "influenza_a",
+          "measles_virus",
+          "legionella_pneumophila",
+          "vibrio_cholerae_parahaemolyticus",
+          "campylobacter_jejuni",
+          "clostridioides_difficile",
+          "andes_hantavirus"
+        ]
+      }
+    }
+  },
+  "combo_configs": {
+    "noro+sarscov2": {
+      "bundle": "edison_10pathogen_profiles",
+      "keep": [
+        "norovirus_gii4",
+        "sars_cov2_resp"
+      ]
+    },
+    "noro+influenza": {
+      "bundle": "edison_10pathogen_profiles",
+      "keep": [
+        "norovirus_gii4",
+        "influenza_a"
+      ]
+    },
+    "noro+cdiff": {
+      "bundle": "edison_10pathogen_profiles",
+      "keep": [
+        "norovirus_gii4",
+        "clostridioides_difficile"
+      ]
+    },
+    "sarscov2+influenza": {
+      "bundle": "edison_10pathogen_profiles",
+      "keep": [
+        "sars_cov2_resp",
+        "influenza_a"
+      ]
+    },
+    "sarscov2+influenza+measles": {
+      "bundle": "edison_10pathogen_profiles",
+      "keep": [
+        "sars_cov2_resp",
+        "influenza_a",
+        "measles_virus"
+      ]
+    }
+  },
+  "edison_all_pathogen_ids": [
+    "norovirus_gii4",
+    "sars_cov2_resp",
+    "influenza_a",
+    "measles_virus",
+    "legionella_pneumophila",
+    "vibrio_cholerae_parahaemolyticus",
+    "campylobacter_jejuni",
+    "clostridioides_difficile",
+    "andes_hantavirus",
+    "ebola_virus"
+  ],
+  "surveillance_configs": {
+    "none": {
+      "diagnostic_cascade": {
+        "enabled": false
+      },
+      "syndromic": {
+        "sick_call_probability": 0.0,
+        "background_noise_rate": 0.0
+      },
+      "fred_behavior": {
+        "healthy_noise_categories": []
+      }
+    },
+    "none_env": {
+      "diagnostic_cascade": {
+        "enabled": false
+      },
+      "syndromic": {
+        "sick_call_probability": 0.0,
+        "background_noise_rate": 0.0
+      },
+      "fred_behavior": {
+        "healthy_noise_categories": []
+      },
+      "observation": {
+        "enabled": false
+      }
+    },
+    "none_true": {
+      "diagnostic_cascade": {
+        "enabled": false
+      },
+      "syndromic": {
+        "sick_call_probability": 0.0,
+        "background_noise_rate": 0.0
+      },
+      "fred_behavior": {
+        "healthy_noise_categories": []
+      },
+      "observation": {
+        "enabled": false
+      },
+      "wearable_monitoring": {
+        "enabled": false
+      },
+      "ship_graph": {
+        "counter_confinement_enabled": false
+      }
+    },
+    "syndromic": {
+      "diagnostic_cascade": {
+        "enabled": false
+      }
+    },
+    "cascade": {
+      "diagnostic_cascade": {
+        "enabled": true,
+        "config_path": "data/config/diagnostic_cascade.json"
+      }
+    },
+    "cascade_mpx": {
+      "diagnostic_cascade": {
+        "enabled": true,
+        "config_path": "data/config/diagnostic_cascade_multiplex.json"
+      }
+    }
+  }
+}
