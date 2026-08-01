@@ -374,6 +374,76 @@ def _immunity_override(
     )
 
 
+# Canonical ship-class populations for multi-platform calibration (c1–c4).
+# classic_cruise_1900 is named for CDC "Large" ~1900 but ships 1910 agents.
+_PLATFORM_DEFAULT_AGENTS: dict[str, int] = {
+    "expedition_cruise_450": 450,
+    "classic_cruise_1900": 1910,
+    "spirit_cruise_3000": 3000,
+    "mega_cruise_5000": 7000,
+}
+
+
+def _dose_tag(dose: float) -> str:
+    """Compact run-id fragment for a dose_adjustment value."""
+    d = float(dose)
+    if d == int(d):
+        return f"dose{int(d)}"
+    return f"dose{str(d).replace('.', 'p')}"
+
+
+def _resolve_tier_platforms(
+    tier: dict[str, Any],
+    *,
+    fallback_platform: str,
+    platform_override: str | None = None,
+) -> list[str]:
+    """Resolve platform list for a tier (singular ``platform`` or ``platforms``)."""
+    if platform_override:
+        return [platform_override]
+    if "platforms" in tier:
+        return [str(p) for p in tier["platforms"]]
+    if "platform" in tier:
+        return [str(tier["platform"])]
+    return [fallback_platform]
+
+
+def _platform_num_agents(
+    platform_id: str,
+    *,
+    num_agents_override: int | None = None,
+    tier: dict[str, Any] | None = None,
+    default_agents: int = 7000,
+) -> int:
+    """Agent count from CLI override, tier override, or platform size table."""
+    if num_agents_override is not None:
+        return int(num_agents_override)
+    if tier is not None and "num_agents" in tier:
+        return int(tier["num_agents"])
+    return int(_PLATFORM_DEFAULT_AGENTS.get(platform_id, default_agents))
+
+
+def _calibration_dose_values(tier: dict[str, Any]) -> list[float | None]:
+    """Dose sweep values; ``[None]`` means leave bundle dose_adjustment alone."""
+    if "dose_adjustments" in tier:
+        return [float(d) for d in tier["dose_adjustments"]]
+    if "dose_adjustment" in tier:
+        return [float(tier["dose_adjustment"])]
+    return [None]
+
+
+def _calibration_init_values(tier: dict[str, Any]) -> list[int | None]:
+    """Initial-infected sweep; accepts ``initial_infected_values`` or ``initial_infected``."""
+    if "initial_infected_values" in tier:
+        return [int(n) for n in tier["initial_infected_values"]]
+    if "initial_infected" in tier:
+        raw = tier["initial_infected"]
+        if isinstance(raw, list):
+            return [int(n) for n in raw]
+        return [int(raw)]
+    return [None]
+
+
 def make_picard_spec(
     run_id: str,
     *,
@@ -576,7 +646,8 @@ def generate_tier_runs(
 ) -> Iterator[tuple[str, dict[str, Any]]]:
     """Yield (run_id, picard_spec_dict) for a tier."""
     tier = manifest["tiers"][tier_id]
-    platform = platform or manifest["platform"]
+    platform_override = platform  # CLI / caller override (None = use tier/manifest)
+    platform = platform_override or manifest["platform"]
     default_epochs = epochs_override or tier.get("epochs", manifest["default_epochs"])
     default_agents = num_agents_override or manifest.get("default_num_agents", 7000)
     surv_cfgs = manifest["surveillance_configs"]
@@ -591,17 +662,21 @@ def generate_tier_runs(
         seed: int,
         num_agents: int | None = None,
         pathogen: str | None = None,
+        platform_id: str | None = None,
+        epochs: int | None = None,
         **factors: Any,
     ) -> tuple[str, dict[str, Any]]:
         n_agents = default_agents if num_agents is None else int(num_agents)
+        plat = platform if platform_id is None else str(platform_id)
+        n_epochs = default_epochs if epochs is None else int(epochs)
         cfg = merge_cfg(_CAMPAIGN_ESCALATION_DEFAULTS, config_overrides)
         params = _campaign_parameters(
             tier_id=tier_id,
             run_id=rid,
-            platform=platform,
+            platform=plat,
             bundle=bundle,
             seed=seed,
-            epochs=default_epochs,
+            epochs=n_epochs,
             num_agents=n_agents,
             pathogen=pathogen,
             config_overrides=cfg,
@@ -609,12 +684,12 @@ def generate_tier_runs(
         )
         return rid, make_picard_spec(
             rid,
-            platform=platform,
+            platform=plat,
             bundle=bundle,
             pathogen_overrides=pathogen_overrides,
             config_overrides=cfg,
             seed=seed,
-            epochs=default_epochs,
+            epochs=n_epochs,
             num_agents=n_agents,
             parameters=params,
         )
@@ -1100,6 +1175,86 @@ def generate_tier_runs(
                             reluctant_delay_epochs=int(rdelay),
                         )
 
+    elif short in ("c1", "c2", "c3", "c4"):
+        # Multi-platform calibration (data-driven): keys off tier fields.
+        # c1: dose × init × platform; c2: immunity × platforms;
+        # c3: SARS-CoV-2 dose × platforms; c4: epoch_durations × dose.
+        pathogen = tier["pathogen"]  # singular (not pathogens[])
+        bundle, pathogen_id, base_overrides = get_pathogen_config(manifest, pathogen)
+        platforms = _resolve_tier_platforms(
+            tier,
+            fallback_platform=manifest["platform"],
+            platform_override=platform_override,
+        )
+        doses = _calibration_dose_values(tier)
+        inits = _calibration_init_values(tier)
+        immunities = tier.get("pre_immunity_fractions", [None])
+        if epochs_override is not None:
+            epoch_list = [int(epochs_override)]
+        elif "epoch_durations" in tier:
+            epoch_list = [int(e) for e in tier["epoch_durations"]]
+        else:
+            epoch_list = [int(default_epochs)]
+        sweep_epochs = "epoch_durations" in tier and epochs_override is None
+        strategies = list(tier.get("surveillance_strategies") or [])
+        if not strategies:
+            strategies = [tier.get("surveillance", "none")]
+
+        for plat in platforms:
+            n_agents = _platform_num_agents(
+                plat,
+                num_agents_override=num_agents_override,
+                tier=tier,
+                default_agents=int(manifest.get("default_num_agents", 7000)),
+            )
+            for dose in doses:
+                for n_init in inits:
+                    path_over = dict(base_overrides or {})
+                    patch: dict[str, Any] = {}
+                    if dose is not None:
+                        patch["dose_adjustment"] = float(dose)
+                    if n_init is not None:
+                        patch["initial_infected"] = int(n_init)
+                    if patch:
+                        path_over[pathogen_id] = {
+                            **(path_over.get(pathogen_id) or {}),
+                            **patch,
+                        }
+                    for imm_frac in immunities:
+                        imm_over, imm_tag = _immunity_override(imm_frac)
+                        for n_epochs in epoch_list:
+                            for sname in strategies:
+                                for seed in tier["seeds"]:
+                                    rid_parts = [short, pathogen, plat]
+                                    if dose is not None:
+                                        rid_parts.append(_dose_tag(dose))
+                                    if n_init is not None:
+                                        rid_parts.append(f"init{int(n_init)}")
+                                    if sweep_epochs:
+                                        rid_parts.append(f"ep{int(n_epochs)}")
+                                    if imm_tag:
+                                        rid_parts.append(imm_tag.lstrip("_"))
+                                    rid_parts.append(sname)
+                                    rid_parts.append(f"s{seed}")
+                                    rid = "_".join(rid_parts)
+                                    yield _yield(
+                                        rid,
+                                        bundle=bundle,
+                                        pathogen_overrides=path_over,
+                                        config_overrides=merge_cfg(
+                                            surv_cfgs.get(sname), imm_over,
+                                        ),
+                                        seed=seed,
+                                        num_agents=n_agents,
+                                        pathogen=pathogen,
+                                        platform_id=plat,
+                                        epochs=int(n_epochs),
+                                        surveillance=sname,
+                                        dose_adjustment=dose,
+                                        n_init=n_init,
+                                        immunity=imm_frac,
+                                    )
+
     else:
         raise ValueError(f"No generator for tier {tier_id}")
 
@@ -1458,7 +1613,7 @@ def _run_single(
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Mega cruise campaign runner")
-    parser.add_argument("--tier", default=None, help="Tier id or short prefix (t1…t10)")
+    parser.add_argument("--tier", default=None, help="Tier id or short prefix (t1…t16, c1…c4)")
     parser.add_argument("--dry-run", action="store_true", help="Count runs without executing")
     parser.add_argument("--resume", action="store_true", help="Skip completed run_ids")
     parser.add_argument(

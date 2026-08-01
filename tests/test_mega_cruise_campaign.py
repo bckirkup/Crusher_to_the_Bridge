@@ -29,6 +29,7 @@ from picard_framework.runs.mega_cruise_campaign.campaign_runner import (  # noqa
 )
 
 CAMPAIGN = REPO_ROOT / "picard_framework" / "runs" / "mega_cruise_campaign"
+CALIBRATION_MANIFEST = CAMPAIGN / "calibration_manifest_v1.json"
 
 STANDARD_TIERS = [
     "t1_pathogen_baselines",
@@ -1114,3 +1115,183 @@ def test_resume_skips_when_s3_zip_already_exists(
     completed = (out / "completed_runs.txt").read_text(encoding="utf-8").strip()
     assert completed  # at least the first smoke candidate was marked done
     assert not list(out.glob("*.zip"))  # no local zip written when skipped
+
+
+# ---------------------------------------------------------------------------
+# Multi-platform calibration (c1–c4) — calibration_manifest_v1.json
+# ---------------------------------------------------------------------------
+
+PLATFORM_AGENT_COUNTS = {
+    "expedition_cruise_450": 450,
+    "classic_cruise_1900": 1910,
+    "spirit_cruise_3000": 3000,
+    "mega_cruise_5000": 7000,
+}
+
+
+def _calibration_manifest() -> dict[str, Any]:
+    return load_manifest(CALIBRATION_MANIFEST)
+
+
+def test_calibration_manifest_loads() -> None:
+    manifest = _calibration_manifest()
+    assert manifest["campaign"] == "multi_platform_calibration_v1"
+    assert "c1_expedition_cruise_450" in manifest["tiers"]
+    assert "c2_immunity_sweep" in manifest["tiers"]
+    assert "c3_sarscov2_calibration" in manifest["tiers"]
+    assert "c4_voyage_duration" in manifest["tiers"]
+    assert "none_true" in manifest["surveillance_configs"]
+
+
+def test_resolve_calibration_tier_prefixes() -> None:
+    manifest = _calibration_manifest()
+    c1 = resolve_tier_ids(manifest, "c1")
+    assert len(c1) == 4
+    assert all(t.startswith("c1_") for t in c1)
+    assert resolve_tier_ids(manifest, "c2") == ["c2_immunity_sweep"]
+    assert resolve_tier_ids(manifest, "c4") == ["c4_voyage_duration"]
+
+
+def test_calibration_dry_run_counts() -> None:
+    """Golden run counts from calibration_manifest_v1 factorials."""
+    manifest = _calibration_manifest()
+    expected = {
+        # 11 doses × 2 init × 2 surv × 20 seeds
+        "c1_expedition_cruise_450": 880,
+        # 7 × 2 × 2 × 15
+        "c1_classic_cruise_1900": 420,
+        # 7 × 2 × 2 × 10
+        "c1_spirit_cruise_3000": 280,
+        # 6 × 2 × 2 × 10
+        "c1_mega_cruise_5000": 240,
+        # 4 platforms × 5 immunity × 2 surv × 10 seeds
+        "c2_immunity_sweep": 400,
+        # 2 platforms × 6 doses × 1 init × 2 surv × 15 seeds
+        "c3_sarscov2_calibration": 360,
+        # 3 epochs × 3 doses × 2 surv × 10 seeds
+        "c4_voyage_duration": 180,
+    }
+    total = 0
+    for tier_id, n_exp in expected.items():
+        runs = list(generate_tier_runs(manifest, tier_id))
+        assert len(runs) == n_exp, f"{tier_id}: {len(runs)} != {n_exp}"
+        total += len(runs)
+    assert total == 2760
+
+
+def test_c1_sets_platform_agents_dose_and_init() -> None:
+    manifest = _calibration_manifest()
+    runs = list(generate_tier_runs(manifest, "c1_expedition_cruise_450"))
+    rid, spec = next(
+        (r, s) for r, s in runs
+        if "dose5" in r and "init1" in r and "none_true" in r
+    )
+    assert "expedition_cruise_450" in rid
+    assert spec["catalog"]["platform_id"] == "expedition_cruise_450"
+    assert spec["config_overrides"]["ship_graph"]["num_agents"] == 450
+    assert spec["pathogen_overrides"]["norwalk_gi"]["dose_adjustment"] == pytest.approx(5.0)
+    assert spec["pathogen_overrides"]["norwalk_gi"]["initial_infected"] == 1
+    assert spec["pathogen_overrides"]["remove"] == ["sars_cov2_resp"]
+    assert spec["run"]["num_epochs"] == 168
+    assert spec["campaign_parameters"]["dose_adjustment"] == pytest.approx(5.0)
+    assert spec["campaign_parameters"]["n_init"] == 1
+
+
+def test_c1_platforms_use_canonical_agent_counts() -> None:
+    manifest = _calibration_manifest()
+    for tier_id, platform_id, n_agents in (
+        ("c1_expedition_cruise_450", "expedition_cruise_450", 450),
+        ("c1_classic_cruise_1900", "classic_cruise_1900", 1910),
+        ("c1_spirit_cruise_3000", "spirit_cruise_3000", 3000),
+        ("c1_mega_cruise_5000", "mega_cruise_5000", 7000),
+    ):
+        _rid, spec = next(generate_tier_runs(manifest, tier_id))
+        assert spec["catalog"]["platform_id"] == platform_id
+        assert spec["config_overrides"]["ship_graph"]["num_agents"] == n_agents
+
+
+def test_c1_dose_adjustment_sensitivity() -> None:
+    """Changing dose_adjustment in the sweep changes the pathogen override."""
+    manifest = _calibration_manifest()
+    runs = list(generate_tier_runs(manifest, "c1_mega_cruise_5000"))
+    dose1 = next(s for r, s in runs if "dose1_" in r and "init1_" in r)
+    dose15 = next(s for r, s in runs if "dose15_" in r and "init1_" in r)
+    assert dose1["pathogen_overrides"]["norwalk_gi"]["dose_adjustment"] == pytest.approx(1.0)
+    assert dose15["pathogen_overrides"]["norwalk_gi"]["dose_adjustment"] == pytest.approx(15.0)
+    assert (
+        dose1["pathogen_overrides"]["norwalk_gi"]["dose_adjustment"]
+        != dose15["pathogen_overrides"]["norwalk_gi"]["dose_adjustment"]
+    )
+
+
+def test_c2_sweeps_immunity_across_platforms() -> None:
+    manifest = _calibration_manifest()
+    runs = list(generate_tier_runs(manifest, "c2_immunity_sweep"))
+    platforms = {s["catalog"]["platform_id"] for _, s in runs}
+    assert platforms == set(PLATFORM_AGENT_COUNTS)
+    sample = next(s for r, s in runs if "imm20" in r and "classic_cruise_1900" in r)
+    assert sample["config_overrides"]["ship_graph"]["immune_fraction"] == pytest.approx(0.2)
+    assert sample["config_overrides"]["ship_graph"]["num_agents"] == 1910
+    # No dose/init patch when tier omits those fields.
+    assert "norwalk_gi" not in sample.get("pathogen_overrides", {})
+    assert sample["pathogen_overrides"]["remove"] == ["sars_cov2_resp"]
+
+
+def test_c2_accepts_singular_dose_adjustment_after_c1() -> None:
+    """c2 note: pin best dose from C1 via singular dose_adjustment."""
+    manifest = _calibration_manifest()
+    tier = manifest["tiers"]["c2_immunity_sweep"]
+    tier["dose_adjustment"] = 7.0
+    runs = list(generate_tier_runs(manifest, "c2_immunity_sweep"))
+    rid, spec = next(
+        (r, s) for r, s in runs
+        if "dose7" in r and "imm0_" in r and "mega_cruise_5000" in r
+    )
+    assert "dose7" in rid
+    assert spec["pathogen_overrides"]["norwalk_gi"]["dose_adjustment"] == pytest.approx(7.0)
+
+
+def test_c3_sarscov2_multi_platform_dose_sweep() -> None:
+    manifest = _calibration_manifest()
+    runs = list(generate_tier_runs(manifest, "c3_sarscov2_calibration"))
+    platforms = {s["catalog"]["platform_id"] for _, s in runs}
+    assert platforms == {"mega_cruise_5000", "expedition_cruise_450"}
+    sample = next(
+        s for r, s in runs
+        if "dose10" in r and "expedition_cruise_450" in r and "init1" in r
+    )
+    assert sample["catalog"]["platform_id"] == "expedition_cruise_450"
+    assert sample["config_overrides"]["ship_graph"]["num_agents"] == 450
+    assert sample["pathogen_overrides"]["sars_cov2_resp"]["dose_adjustment"] == pytest.approx(10.0)
+    assert sample["pathogen_overrides"]["sars_cov2_resp"]["initial_infected"] == 1
+    assert sample["pathogen_overrides"]["remove"] == ["norwalk_gi"]
+    assert sample["catalog"]["pathogen_bundle_id"] == "active_profiles"
+
+
+def test_c4_varies_num_epochs_from_epoch_durations() -> None:
+    manifest = _calibration_manifest()
+    runs = list(generate_tier_runs(manifest, "c4_voyage_duration"))
+    by_ep = {}
+    for rid, spec in runs:
+        if "dose7" in rid and "none_true" in rid and rid.endswith("_s500"):
+            by_ep[spec["run"]["num_epochs"]] = rid
+    assert set(by_ep) == {72, 168, 336}
+    assert "ep72" in by_ep[72]
+    assert "ep168" in by_ep[168]
+    assert "ep336" in by_ep[336]
+    # Platform + dose tagged; mega uses 7000 agents.
+    sample = next(s for r, s in runs if "ep168" in r and "dose15" in r)
+    assert sample["catalog"]["platform_id"] == "mega_cruise_5000"
+    assert sample["config_overrides"]["ship_graph"]["num_agents"] == 7000
+    assert sample["pathogen_overrides"]["norwalk_gi"]["dose_adjustment"] == pytest.approx(15.0)
+    assert sample["campaign_parameters"]["num_epochs"] == 168
+
+
+def test_calibration_num_agents_override() -> None:
+    manifest = _calibration_manifest()
+    _rid, spec = next(
+        generate_tier_runs(
+            manifest, "c1_expedition_cruise_450", num_agents_override=50,
+        ),
+    )
+    assert spec["config_overrides"]["ship_graph"]["num_agents"] == 50
