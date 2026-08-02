@@ -48,7 +48,7 @@ Target: **~50–55 zones** (expedition/classic class resolution).
 | Ops / command | 4 | Bridge, BriefRoom, Comms, Library |
 | Medical | 3 | Sickbay + 2 isolation bays |
 | Science / security | 5 | Science×2, Transporter×2, Security, Brig (−1 if merged) |
-| Living / food | 5 | RecDeck, Gym, Galley, MessHall, Heads |
+| Living / food | 5 | RecDeck, Gym, Galley, Mess_Hall, Heads |
 | Logistics | 3 | StoresDry, StoresCold, Armory |
 | Engineering | 4 | EngMain, WarpCore, EPSDist, Jefferies |
 | Pressure / access | 2 | NeckHub (saucer↔secondary), Airlock |

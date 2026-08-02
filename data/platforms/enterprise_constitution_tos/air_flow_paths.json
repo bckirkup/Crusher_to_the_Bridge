@@ -67,7 +67,7 @@
       "rooms": [
         "RecDeck",
         "Gym",
-        "MessHall",
+        "Mess_Hall",
         "HeadsMain"
       ],
       "ach": 8.0,
@@ -144,7 +144,7 @@
     },
     {
       "from": "Galley",
-      "to": "MessHall",
+      "to": "Mess_Hall",
       "flow_rate_m3h": 5000.0,
       "is_hvac_ducted": false,
       "path": "Galley_Service_Exhaust"
@@ -250,16 +250,16 @@
     },
     {
       "from": "RecDeck",
-      "to": "MessHall",
+      "to": "Mess_Hall",
       "type": "pocket_door"
     },
     {
       "from": "Galley",
-      "to": "MessHall",
+      "to": "Mess_Hall",
       "type": "service_hatch"
     },
     {
-      "from": "MessHall",
+      "from": "Mess_Hall",
       "to": "HeadsMain",
       "type": "pocket_door"
     },
@@ -324,7 +324,7 @@
       "type": "pocket_door"
     },
     {
-      "from": "MessHall",
+      "from": "Mess_Hall",
       "to": "EC_D6_S_F",
       "type": "pocket_door"
     },

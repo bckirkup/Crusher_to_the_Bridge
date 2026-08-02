@@ -7,8 +7,6 @@ Informed guesses at cruise-class (or denser) resolution — see
 
 from __future__ import annotations
 
-from typing import Any
-
 from cruise_platform_recipes import (
     CorridorRecipe,
     CruisePlatformRecipe,
@@ -50,7 +48,7 @@ def _tos_public() -> tuple[PublicZoneRecipe, ...]:
         PublicZoneRecipe("RecDeck", "Dining", "high", 380, "saucer_6", 80, {"x": 100, "y": 20}, "Recreation / crew lounge."),
         PublicZoneRecipe("Gym", "Free", "medium", 160, "saucer_6", 30, {"x": 115, "y": 22}, "Physical training."),
         PublicZoneRecipe("Galley", "Dining", "high", 160, "saucer_6", 25, {"x": 90, "y": 24}, "Ship's galley (high exhaust)."),
-        PublicZoneRecipe("MessHall", "Dining", "high", 280, "saucer_6", 100, {"x": 80, "y": 26}, "Crew mess."),
+        PublicZoneRecipe("Mess_Hall", "Dining", "high", 280, "saucer_6", 100, {"x": 80, "y": 26}, "Crew mess."),
         PublicZoneRecipe("HeadsMain", "Free", "medium", 90, "saucer_5", 20, {"x": 110, "y": 36}, "Public heads near living ring."),
         PublicZoneRecipe("StoresDry", "Free", "low", 220, "saucer_7", 8, {"x": 70, "y": 44}, "Dry stores."),
         PublicZoneRecipe("StoresCold", "Free", "low", 140, "saucer_7", 4, {"x": 85, "y": 46}, "Cold stores."),
@@ -77,9 +75,9 @@ def _tos_adjacency() -> tuple[dict[str, str], ...]:
         {"from": "Transprt1", "to": "Transprt2", "type": "turbolift"},
         {"from": "Security", "to": "Brig", "type": "pocket_door"},
         {"from": "RecDeck", "to": "Gym", "type": "pocket_door"},
-        {"from": "RecDeck", "to": "MessHall", "type": "pocket_door"},
-        {"from": "Galley", "to": "MessHall", "type": "service_hatch"},
-        {"from": "MessHall", "to": "HeadsMain", "type": "pocket_door"},
+        {"from": "RecDeck", "to": "Mess_Hall", "type": "pocket_door"},
+        {"from": "Galley", "to": "Mess_Hall", "type": "service_hatch"},
+        {"from": "Mess_Hall", "to": "HeadsMain", "type": "pocket_door"},
         {"from": "StoresDry", "to": "StoresCold", "type": "pocket_door"},
         {"from": "StoresDry", "to": "Galley", "type": "service_corridor"},
         {"from": "Armory", "to": "Security", "type": "turbolift"},
@@ -92,7 +90,7 @@ def _tos_adjacency() -> tuple[dict[str, str], ...]:
         {"from": "Bridge", "to": "NeckHub", "type": "turbolift"},
         {"from": "Sickbay", "to": "EC_D4_P_F", "type": "pocket_door"},
         {"from": "RecDeck", "to": "EC_D6_P_F", "type": "pocket_door"},
-        {"from": "MessHall", "to": "EC_D6_S_F", "type": "pocket_door"},
+        {"from": "Mess_Hall", "to": "EC_D6_S_F", "type": "pocket_door"},
         {"from": "HeadsMain", "to": "EC_D5_P_A", "type": "pocket_door"},
         {"from": "OC_D5_F", "to": "Bridge", "type": "turbolift"},
         {"from": "OC_D6_M", "to": "Library", "type": "pocket_door"},
@@ -181,7 +179,7 @@ CONSTITUTION_TOS = CruisePlatformRecipe(
     public_hvac=(
         HvacGroupRecipe("AHU_Command", ("Bridge", "BriefRoom", "Comms", "Library"), 10.0, "Command spaces."),
         HvacGroupRecipe("AHU_Ops", ("Science1", "Science2", "Transprt1", "Transprt2", "Security", "Brig", "NeckHub"), 9.0, "Ops / transporters / security."),
-        HvacGroupRecipe("AHU_Living", ("RecDeck", "Gym", "MessHall", "HeadsMain"), 8.0, "Living / recreation."),
+        HvacGroupRecipe("AHU_Living", ("RecDeck", "Gym", "Mess_Hall", "HeadsMain"), 8.0, "Living / recreation."),
         HvacGroupRecipe("AHU_Medical", ("Sickbay", "IsolBay1", "IsolBay2"), 12.0, "Sickbay HEPA island."),
         HvacGroupRecipe("AHU_Service", ("Galley", "StoresDry", "StoresCold", "Armory"), 15.0, "Galley exhaust + stores."),
         HvacGroupRecipe("AHU_Engineering", ("EngMain", "WarpCore", "EPSDist", "Jefferies", "Airlock"), 16.0, "Secondary-hull engineering."),
@@ -222,7 +220,7 @@ CONSTITUTION_TOS = CruisePlatformRecipe(
         },
         {
             "from": "Galley",
-            "to": "MessHall",
+            "to": "Mess_Hall",
             "flow_rate_m3h": 5000.0,
             "is_hvac_ducted": False,
             "path": "Galley_Service_Exhaust",
@@ -286,7 +284,7 @@ def _tng_public() -> tuple[PublicZoneRecipe, ...]:
         PublicZoneRecipe("Security", "Free", "low", 120, "saucer_7", 14, {"x": 170, "y": 40}, "Security."),
         PublicZoneRecipe("Brig", "Room", "low", 90, "saucer_7", 8, {"x": 180, "y": 42}, "Brig."),
         PublicZoneRecipe("Galley", "Dining", "high", 220, "saucer_8", 40, {"x": 120, "y": 34}, "Main galley."),
-        PublicZoneRecipe("MessHall", "Dining", "high", 360, "saucer_8", 140, {"x": 100, "y": 36}, "Crew mess."),
+        PublicZoneRecipe("Mess_Hall", "Dining", "high", 360, "saucer_8", 140, {"x": 100, "y": 36}, "Crew mess."),
         PublicZoneRecipe("HeadsMain", "Free", "medium", 110, "saucer_8", 30, {"x": 135, "y": 38}, "Public heads."),
         PublicZoneRecipe("Gym", "Free", "medium", 200, "saucer_9", 40, {"x": 115, "y": 16}, "Gym."),
         PublicZoneRecipe("StoresDry", "Free", "low", 280, "saucer_17", 10, {"x": 80, "y": 48}, "Dry stores."),
@@ -320,8 +318,8 @@ def _tng_adjacency() -> tuple[dict[str, str], ...]:
         {"from": "Science1", "to": "Science2", "type": "pocket_door"},
         {"from": "Transprt1", "to": "Transprt2", "type": "pocket_door"},
         {"from": "Security", "to": "Brig", "type": "pocket_door"},
-        {"from": "Galley", "to": "MessHall", "type": "service_hatch"},
-        {"from": "MessHall", "to": "HeadsMain", "type": "pocket_door"},
+        {"from": "Galley", "to": "Mess_Hall", "type": "service_hatch"},
+        {"from": "Mess_Hall", "to": "HeadsMain", "type": "pocket_door"},
         {"from": "StoresDry", "to": "StoresCold", "type": "pocket_door"},
         {"from": "StoresDry", "to": "Galley", "type": "service_corridor"},
         {"from": "NeckHub", "to": "MainEng", "type": "connecting_tube"},
@@ -336,7 +334,7 @@ def _tng_adjacency() -> tuple[dict[str, str], ...]:
         {"from": "TenFwd", "to": "EC_D10_P_F", "type": "pocket_door"},
         {"from": "Arboretum", "to": "FC_D24_P_F", "type": "pocket_door"},
         {"from": "Sickbay", "to": "EC_D12_S_M", "type": "pocket_door"},
-        {"from": "MessHall", "to": "EC_D8_P_A", "type": "pocket_door"},
+        {"from": "Mess_Hall", "to": "EC_D8_P_A", "type": "pocket_door"},
         {"from": "OC_D8_F", "to": "Bridge", "type": "turbolift"},
         {"from": "EC_D7_S_A", "to": "NeckHub", "type": "turbolift"},
         {"from": "FC_D25_S_A", "to": "School", "type": "pocket_door"},
@@ -470,7 +468,7 @@ GALAXY_TNG = CruisePlatformRecipe(
             9.0,
         ),
         HvacGroupRecipe("AHU_Medical", ("Sickbay", "IsolBay1", "IsolBay2", "IsolBay3"), 12.0),
-        HvacGroupRecipe("AHU_Service", ("Galley", "MessHall", "HeadsMain", "StoresDry", "StoresCold", "Armory"), 14.0),
+        HvacGroupRecipe("AHU_Service", ("Galley", "Mess_Hall", "HeadsMain", "StoresDry", "StoresCold", "Armory"), 14.0),
         HvacGroupRecipe(
             "AHU_Engineering",
             ("MainEng", "WarpCore", "EPSDist", "Jefferies", "Deflector"),
@@ -521,7 +519,7 @@ GALAXY_TNG = CruisePlatformRecipe(
         },
         {
             "from": "Galley",
-            "to": "MessHall",
+            "to": "Mess_Hall",
             "flow_rate_m3h": 8000.0,
             "is_hvac_ducted": False,
             "path": "Galley_Service_Exhaust",

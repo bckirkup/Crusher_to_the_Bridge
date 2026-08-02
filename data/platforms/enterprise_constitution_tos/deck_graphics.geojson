@@ -1609,7 +1609,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "MessHall",
+        "zone_id": "Mess_Hall",
         "deck": "saucer_6",
         "room_type": "Dining"
       },
@@ -2641,7 +2641,7 @@
       "properties": {
         "kind": "hvac_path",
         "from": "RecDeck",
-        "to": "MessHall"
+        "to": "Mess_Hall"
       },
       "geometry": {
         "type": "LineString",
@@ -2662,7 +2662,7 @@
       "properties": {
         "kind": "hvac_path",
         "from": "Galley",
-        "to": "MessHall"
+        "to": "Mess_Hall"
       },
       "geometry": {
         "type": "LineString",
@@ -2787,7 +2787,7 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "MessHall",
+        "from": "Mess_Hall",
         "to": "EC_D6_S_F"
       },
       "geometry": {

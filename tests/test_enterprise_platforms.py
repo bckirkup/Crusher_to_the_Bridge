@@ -96,12 +96,12 @@ def test_all_zone_ids_contam_safe(platform_id):
 @pytest.mark.parametrize(
     "platform_id,expected",
     [
-        (CONSTITUTION, {"Bridge", "MessHall", "Sickbay", "EngMain", "Brig", "NeckHub"}),
+        (CONSTITUTION, {"Bridge", "Mess_Hall", "Sickbay", "EngMain", "Brig", "NeckHub"}),
         (
             GALAXY,
             {
                 "Bridge",
-                "MessHall",
+                "Mess_Hall",
                 "TenFwd",
                 "Sickbay",
                 "MainEng",

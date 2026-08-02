@@ -221,7 +221,7 @@
       "description": "Ship's galley (high exhaust)."
     },
     {
-      "id": "MessHall",
+      "id": "Mess_Hall",
       "type": "Dining",
       "traffic": "high",
       "volume_m3": 280,

@@ -169,7 +169,7 @@
       "id": "AHU_Service",
       "rooms": [
         "Galley",
-        "MessHall",
+        "Mess_Hall",
         "HeadsMain",
         "StoresDry",
         "StoresCold",
@@ -246,7 +246,7 @@
     },
     {
       "from": "Galley",
-      "to": "MessHall",
+      "to": "Mess_Hall",
       "flow_rate_m3h": 8000.0,
       "is_hvac_ducted": false,
       "path": "Galley_Service_Exhaust"
@@ -397,11 +397,11 @@
     },
     {
       "from": "Galley",
-      "to": "MessHall",
+      "to": "Mess_Hall",
       "type": "service_hatch"
     },
     {
-      "from": "MessHall",
+      "from": "Mess_Hall",
       "to": "HeadsMain",
       "type": "pocket_door"
     },
@@ -476,7 +476,7 @@
       "type": "pocket_door"
     },
     {
-      "from": "MessHall",
+      "from": "Mess_Hall",
       "to": "EC_D8_P_A",
       "type": "pocket_door"
     },

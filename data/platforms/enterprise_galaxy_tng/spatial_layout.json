@@ -286,7 +286,7 @@
       "description": "Main galley."
     },
     {
-      "id": "MessHall",
+      "id": "Mess_Hall",
       "type": "Dining",
       "traffic": "high",
       "volume_m3": 360,

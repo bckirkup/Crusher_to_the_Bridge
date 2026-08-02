@@ -103,8 +103,8 @@
       "role_group": "crew",
       "fraction": 0.15,
       "home_zone_preference": "EC_D9_P_M",
-      "free_zone_preference": "MessHall",
-      "duty_zone": "MessHall"
+      "free_zone_preference": "Mess_Hall",
+      "duty_zone": "Mess_Hall"
     }
   ],
   "gender_distribution": {

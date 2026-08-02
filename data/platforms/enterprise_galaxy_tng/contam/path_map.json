@@ -190,7 +190,7 @@
   },
   {
     "path_nr": 22,
-    "from_zone": "MessHall",
+    "from_zone": "Mess_Hall",
     "to_zone": "ambient",
     "is_hvac_ducted": false,
     "kind": "envelope_leak",
@@ -938,7 +938,7 @@
   {
     "path_nr": 105,
     "from_zone": "Galley",
-    "to_zone": "MessHall",
+    "to_zone": "Mess_Hall",
     "is_hvac_ducted": false,
     "kind": "service_hatch",
     "crusher_transfer": true,
@@ -946,7 +946,7 @@
   },
   {
     "path_nr": 106,
-    "from_zone": "MessHall",
+    "from_zone": "Mess_Hall",
     "to_zone": "HeadsMain",
     "is_hvac_ducted": false,
     "kind": "pocket_door",
@@ -1081,7 +1081,7 @@
   },
   {
     "path_nr": 121,
-    "from_zone": "MessHall",
+    "from_zone": "Mess_Hall",
     "to_zone": "EC_D8_P_A",
     "is_hvac_ducted": false,
     "kind": "pocket_door",
@@ -2558,7 +2558,7 @@
   {
     "path_nr": 285,
     "from_zone": "Galley",
-    "to_zone": "MessHall",
+    "to_zone": "Mess_Hall",
     "is_hvac_ducted": false,
     "kind": "Galley_Service_Exhaust",
     "crusher_transfer": true,
@@ -8435,7 +8435,7 @@
   {
     "path_nr": 938,
     "from_zone": "ahs14(Sup)",
-    "to_zone": "MessHall",
+    "to_zone": "Mess_Hall",
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
@@ -8443,7 +8443,7 @@
   },
   {
     "path_nr": 939,
-    "from_zone": "MessHall",
+    "from_zone": "Mess_Hall",
     "to_zone": "ahs14(Ret)",
     "is_hvac_ducted": true,
     "kind": "ahs_return",
