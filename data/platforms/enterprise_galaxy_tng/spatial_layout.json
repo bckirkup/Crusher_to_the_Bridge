@@ -1,11 +1,16 @@
 {
   "platform": "enterprise_galaxy_tng",
-  "description": "Galaxy-class explorer (NCC-1701-D era). Fiction-adapted 16-zone layout; mixed crew and civilian families.",
+  "description": "Galaxy-class explorer (NCC-1701-D era), cabin-corridor resolution. Informed fiction ECLSS: enlisted + officer + family suite corridors, pocket doors, saucer/drive pressure domains, civic voids, medical HEPA, shuttlebay sealed to space. See docs/ENTERPRISE_CABIN_REVISION.md.",
   "isolation_unit_capacity": 24,
   "deck_dimensions": {
-    "length_m": 642,
-    "beam_m": 463
+    "length_m": 642.0,
+    "beam_m": 463.0
   },
+  "confinement_isolation_factor": 0.05,
+  "corridor_direct_contact_factor": 0.15,
+  "graywater_zones": [
+    "MainEng"
+  ],
   "zones": [
     {
       "id": "Bridge",
@@ -13,206 +18,1290 @@
       "traffic": "low",
       "volume_m3": 280,
       "deck": "saucer_1",
+      "max_occupancy": 16,
       "display": {
-        "x": 130,
-        "y": 10
+        "x": 280,
+        "y": 6
       },
-      "description": "Command center"
+      "description": "Main bridge."
     },
     {
-      "id": "Ten_Forward",
+      "id": "BriefRoom",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 140,
+      "deck": "saucer_1",
+      "max_occupancy": 20,
+      "display": {
+        "x": 265,
+        "y": 8
+      },
+      "description": "Ready room / briefing."
+    },
+    {
+      "id": "Comms",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 120,
+      "deck": "saucer_2",
+      "max_occupancy": 12,
+      "display": {
+        "x": 270,
+        "y": 12
+      },
+      "description": "Communications."
+    },
+    {
+      "id": "TenFwd",
       "type": "Dining",
       "traffic": "high",
       "volume_m3": 420,
       "deck": "saucer_10",
-      "display": {
-        "x": 70,
-        "y": 8
-      },
-      "description": "Forward lounge and observation"
-    },
-    {
-      "id": "Sickbay",
-      "type": "Free",
-      "traffic": "low",
-      "volume_m3": 350,
-      "deck": "saucer_12",
+      "max_occupancy": 120,
       "display": {
         "x": 90,
-        "y": 20
+        "y": 8
       },
-      "description": "Primary care"
-    },
-    {
-      "id": "MainEng",
-      "type": "Room",
-      "traffic": "high",
-      "volume_m3": 680,
-      "deck": "drive_section",
-      "display": {
-        "x": 50,
-        "y": 45
-      },
-      "description": "Warp core and EPS"
-    },
-    {
-      "id": "Holodeck",
-      "type": "Free",
-      "traffic": "medium",
-      "volume_m3": 260,
-      "deck": "saucer_9",
-      "display": {
-        "x": 75,
-        "y": 28
-      },
-      "description": "Holodeck complex"
-    },
-    {
-      "id": "Crew_Quarters",
-      "type": "Room",
-      "traffic": "medium",
-      "volume_m3": 620,
-      "deck": "saucer_25",
-      "display": {
-        "x": 45,
-        "y": 12
-      },
-      "description": "Enlisted berthing"
-    },
-    {
-      "id": "Family_Quarters",
-      "type": "Room",
-      "traffic": "medium",
-      "volume_m3": 540,
-      "deck": "saucer_24",
-      "display": {
-        "x": 55,
-        "y": 18
-      },
-      "description": "Family staterooms"
-    },
-    {
-      "id": "Science_Labs",
-      "type": "Free",
-      "traffic": "low",
-      "volume_m3": 400,
-      "deck": "saucer_15",
-      "display": {
-        "x": 85,
-        "y": 32
-      },
-      "description": "Research laboratories"
-    },
-    {
-      "id": "Shuttlebay",
-      "type": "Free",
-      "traffic": "low",
-      "volume_m3": 1200,
-      "deck": "saucer_4",
-      "display": {
-        "x": 40,
-        "y": 40
-      },
-      "description": "Shuttlecraft bay"
-    },
-    {
-      "id": "Cargo_Bay",
-      "type": "Room",
-      "traffic": "low",
-      "volume_m3": 900,
-      "deck": "saucer_6",
-      "display": {
-        "x": 35,
-        "y": 38
-      },
-      "description": "Cargo and stores"
-    },
-    {
-      "id": "Galley",
-      "type": "Dining",
-      "traffic": "medium",
-      "volume_m3": 200,
-      "deck": "saucer_8",
-      "display": {
-        "x": 60,
-        "y": 22
-      },
-      "description": "Food preparation"
-    },
-    {
-      "id": "Crew_Lounge",
-      "type": "Dining",
-      "traffic": "high",
-      "volume_m3": 380,
-      "deck": "saucer_10",
-      "display": {
-        "x": 65,
-        "y": 14
-      },
-      "description": "Off-duty crew lounge"
-    },
-    {
-      "id": "Security_Office",
-      "type": "Free",
-      "traffic": "low",
-      "volume_m3": 120,
-      "deck": "saucer_11",
-      "display": {
-        "x": 78,
-        "y": 35
-      },
-      "description": "Security and brig"
+      "description": "Ten Forward lounge."
     },
     {
       "id": "Arboretum",
       "type": "Free",
       "traffic": "medium",
-      "volume_m3": 480,
-      "deck": "saucer_17",
+      "volume_m3": 500,
+      "deck": "saucer_14",
+      "max_occupancy": 80,
       "display": {
-        "x": 95,
-        "y": 42
+        "x": 110,
+        "y": 22
       },
-      "description": "Hydroponics and arboretum"
+      "description": "Arboretum multi-deck void."
     },
     {
-      "id": "StellarCarto",
+      "id": "Holodeck1",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 260,
+      "deck": "saucer_9",
+      "max_occupancy": 40,
+      "display": {
+        "x": 130,
+        "y": 18
+      },
+      "description": "Holodeck complex A."
+    },
+    {
+      "id": "Holodeck2",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 260,
+      "deck": "saucer_11",
+      "max_occupancy": 40,
+      "display": {
+        "x": 140,
+        "y": 20
+      },
+      "description": "Holodeck complex B."
+    },
+    {
+      "id": "School",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 200,
+      "deck": "saucer_16",
+      "max_occupancy": 40,
+      "display": {
+        "x": 150,
+        "y": 28
+      },
+      "description": "Schoolroom."
+    },
+    {
+      "id": "CrewLounge",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 240,
+      "deck": "saucer_15",
+      "max_occupancy": 60,
+      "display": {
+        "x": 160,
+        "y": 24
+      },
+      "description": "Crew lounge."
+    },
+    {
+      "id": "StellarCart",
       "type": "Free",
       "traffic": "low",
       "volume_m3": 180,
-      "deck": "saucer_16",
+      "deck": "saucer_15",
+      "max_occupancy": 16,
       "display": {
-        "x": 100,
-        "y": 38
+        "x": 175,
+        "y": 26
       },
-      "description": "Stellar cartography"
+      "description": "Stellar cartography."
     },
     {
-      "id": "Schoolroom",
+      "id": "Sickbay",
+      "type": "Medical",
+      "traffic": "medium",
+      "volume_m3": 320,
+      "deck": "saucer_12",
+      "max_occupancy": 30,
+      "display": {
+        "x": 200,
+        "y": 20
+      },
+      "description": "Sickbay ward."
+    },
+    {
+      "id": "IsolBay1",
+      "type": "Medical",
+      "traffic": "low",
+      "volume_m3": 70,
+      "deck": "saucer_12",
+      "max_occupancy": 2,
+      "display": {
+        "x": 210,
+        "y": 22
+      },
+      "description": "Isolation 1."
+    },
+    {
+      "id": "IsolBay2",
+      "type": "Medical",
+      "traffic": "low",
+      "volume_m3": 70,
+      "deck": "saucer_12",
+      "max_occupancy": 2,
+      "display": {
+        "x": 215,
+        "y": 22
+      },
+      "description": "Isolation 2."
+    },
+    {
+      "id": "IsolBay3",
+      "type": "Medical",
+      "traffic": "low",
+      "volume_m3": 70,
+      "deck": "saucer_12",
+      "max_occupancy": 2,
+      "display": {
+        "x": 220,
+        "y": 22
+      },
+      "description": "Isolation 3."
+    },
+    {
+      "id": "Science1",
       "type": "Free",
       "traffic": "low",
-      "volume_m3": 160,
-      "deck": "saucer_23",
+      "volume_m3": 220,
+      "deck": "saucer_13",
+      "max_occupancy": 24,
       "display": {
-        "x": 52,
-        "y": 25
+        "x": 190,
+        "y": 30
       },
-      "description": "Shipboard school"
+      "description": "Science labs A."
+    },
+    {
+      "id": "Science2",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 200,
+      "deck": "saucer_13",
+      "max_occupancy": 20,
+      "display": {
+        "x": 205,
+        "y": 32
+      },
+      "description": "Science labs B."
+    },
+    {
+      "id": "Transprt1",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 100,
+      "deck": "saucer_6",
+      "max_occupancy": 10,
+      "display": {
+        "x": 180,
+        "y": 36
+      },
+      "description": "Transporter 1."
+    },
+    {
+      "id": "Transprt2",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 100,
+      "deck": "saucer_6",
+      "max_occupancy": 10,
+      "display": {
+        "x": 190,
+        "y": 38
+      },
+      "description": "Transporter 2."
+    },
+    {
+      "id": "Security",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 120,
+      "deck": "saucer_7",
+      "max_occupancy": 14,
+      "display": {
+        "x": 170,
+        "y": 40
+      },
+      "description": "Security."
+    },
+    {
+      "id": "Brig",
+      "type": "Room",
+      "traffic": "low",
+      "volume_m3": 90,
+      "deck": "saucer_7",
+      "max_occupancy": 8,
+      "display": {
+        "x": 180,
+        "y": 42
+      },
+      "description": "Brig."
+    },
+    {
+      "id": "Galley",
+      "type": "Dining",
+      "traffic": "high",
+      "volume_m3": 220,
+      "deck": "saucer_8",
+      "max_occupancy": 40,
+      "display": {
+        "x": 120,
+        "y": 34
+      },
+      "description": "Main galley."
     },
     {
       "id": "Mess_Hall",
       "type": "Dining",
       "traffic": "high",
-      "volume_m3": 120,
+      "volume_m3": 360,
       "deck": "saucer_8",
+      "max_occupancy": 140,
       "display": {
-        "x": 62,
-        "y": 20
+        "x": 100,
+        "y": 36
       },
-      "description": "Primary crew mess (protocol-compatible zone id)"
+      "description": "Crew mess."
+    },
+    {
+      "id": "HeadsMain",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 110,
+      "deck": "saucer_8",
+      "max_occupancy": 30,
+      "display": {
+        "x": 135,
+        "y": 38
+      },
+      "description": "Public heads."
+    },
+    {
+      "id": "Gym",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 200,
+      "deck": "saucer_9",
+      "max_occupancy": 40,
+      "display": {
+        "x": 115,
+        "y": 16
+      },
+      "description": "Gym."
+    },
+    {
+      "id": "StoresDry",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 280,
+      "deck": "saucer_17",
+      "max_occupancy": 10,
+      "display": {
+        "x": 80,
+        "y": 48
+      },
+      "description": "Dry stores."
+    },
+    {
+      "id": "StoresCold",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 180,
+      "deck": "saucer_17",
+      "max_occupancy": 6,
+      "display": {
+        "x": 95,
+        "y": 50
+      },
+      "description": "Cold stores."
+    },
+    {
+      "id": "Armory",
+      "type": "Room",
+      "traffic": "low",
+      "volume_m3": 120,
+      "deck": "saucer_17",
+      "max_occupancy": 8,
+      "display": {
+        "x": 105,
+        "y": 52
+      },
+      "description": "Armory."
+    },
+    {
+      "id": "NeckHub",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 240,
+      "deck": "neck",
+      "max_occupancy": 30,
+      "display": {
+        "x": 70,
+        "y": 58
+      },
+      "description": "Saucer\u2194drive neck hub."
+    },
+    {
+      "id": "MainEng",
+      "type": "Engineering",
+      "traffic": "high",
+      "volume_m3": 520,
+      "deck": "drive_1",
+      "max_occupancy": 50,
+      "display": {
+        "x": 50,
+        "y": 68
+      },
+      "description": "Main engineering."
+    },
+    {
+      "id": "WarpCore",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 400,
+      "deck": "drive_1",
+      "max_occupancy": 16,
+      "display": {
+        "x": 40,
+        "y": 70
+      },
+      "description": "Warp core."
+    },
+    {
+      "id": "EPSDist",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 240,
+      "deck": "drive_2",
+      "max_occupancy": 18,
+      "display": {
+        "x": 55,
+        "y": 74
+      },
+      "description": "EPS distribution."
+    },
+    {
+      "id": "Jefferies",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 140,
+      "deck": "drive_2",
+      "max_occupancy": 10,
+      "display": {
+        "x": 60,
+        "y": 76
+      },
+      "description": "Jefferies nexus."
+    },
+    {
+      "id": "Deflector",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 300,
+      "deck": "drive_3",
+      "max_occupancy": 12,
+      "display": {
+        "x": 45,
+        "y": 80
+      },
+      "description": "Main deflector control."
+    },
+    {
+      "id": "ShuttleBay",
+      "type": "Free",
+      "traffic": "high",
+      "volume_m3": 800,
+      "deck": "drive_3",
+      "max_occupancy": 60,
+      "display": {
+        "x": 30,
+        "y": 78
+      },
+      "description": "Shuttlebay (sealed to space)."
+    },
+    {
+      "id": "CargoMain",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 450,
+      "deck": "drive_4",
+      "max_occupancy": 20,
+      "display": {
+        "x": 55,
+        "y": 84
+      },
+      "description": "Main cargo."
+    },
+    {
+      "id": "CargoAux",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 300,
+      "deck": "drive_4",
+      "max_occupancy": 12,
+      "display": {
+        "x": 65,
+        "y": 86
+      },
+      "description": "Aux cargo."
+    },
+    {
+      "id": "Airlock",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 80,
+      "deck": "drive_4",
+      "max_occupancy": 4,
+      "display": {
+        "x": 35,
+        "y": 88
+      },
+      "description": "EVA airlock."
+    },
+    {
+      "id": "EC_D7_P_F",
+      "type": "Cabin_Corridor",
+      "traffic": "medium",
+      "volume_m3": 520.0,
+      "deck": "saucer_7",
+      "max_occupancy": 28,
+      "display": {
+        "x": 200.0,
+        "y": 40.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 2,
+      "description": "Enlisted cabin corridor, saucer deck 7 Port Fwd. ventilation=interior_hvac."
+    },
+    {
+      "id": "EC_D7_P_M",
+      "type": "Cabin_Corridor",
+      "traffic": "medium",
+      "volume_m3": 520.0,
+      "deck": "saucer_7",
+      "max_occupancy": 28,
+      "display": {
+        "x": 220.0,
+        "y": 40.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 2,
+      "description": "Enlisted cabin corridor, saucer deck 7 Port Mid. ventilation=interior_hvac."
+    },
+    {
+      "id": "EC_D7_P_A",
+      "type": "Cabin_Corridor",
+      "traffic": "medium",
+      "volume_m3": 520.0,
+      "deck": "saucer_7",
+      "max_occupancy": 28,
+      "display": {
+        "x": 240.0,
+        "y": 40.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 2,
+      "description": "Enlisted cabin corridor, saucer deck 7 Port Aft. ventilation=interior_hvac."
+    },
+    {
+      "id": "EC_D7_S_F",
+      "type": "Cabin_Corridor",
+      "traffic": "medium",
+      "volume_m3": 520.0,
+      "deck": "saucer_7",
+      "max_occupancy": 28,
+      "display": {
+        "x": 200.0,
+        "y": 44.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 2,
+      "description": "Enlisted cabin corridor, saucer deck 7 Stbd Fwd. ventilation=interior_hvac."
+    },
+    {
+      "id": "EC_D7_S_M",
+      "type": "Cabin_Corridor",
+      "traffic": "medium",
+      "volume_m3": 520.0,
+      "deck": "saucer_7",
+      "max_occupancy": 28,
+      "display": {
+        "x": 220.0,
+        "y": 44.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 2,
+      "description": "Enlisted cabin corridor, saucer deck 7 Stbd Mid. ventilation=interior_hvac."
+    },
+    {
+      "id": "EC_D7_S_A",
+      "type": "Cabin_Corridor",
+      "traffic": "medium",
+      "volume_m3": 520.0,
+      "deck": "saucer_7",
+      "max_occupancy": 28,
+      "display": {
+        "x": 240.0,
+        "y": 44.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 2,
+      "description": "Enlisted cabin corridor, saucer deck 7 Stbd Aft. ventilation=interior_hvac."
+    },
+    {
+      "id": "EC_D8_P_F",
+      "type": "Cabin_Corridor",
+      "traffic": "medium",
+      "volume_m3": 520.0,
+      "deck": "saucer_8",
+      "max_occupancy": 28,
+      "display": {
+        "x": 200.0,
+        "y": 34.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 2,
+      "description": "Enlisted cabin corridor, saucer deck 8 Port Fwd. ventilation=interior_hvac."
+    },
+    {
+      "id": "EC_D8_P_M",
+      "type": "Cabin_Corridor",
+      "traffic": "medium",
+      "volume_m3": 520.0,
+      "deck": "saucer_8",
+      "max_occupancy": 28,
+      "display": {
+        "x": 220.0,
+        "y": 34.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 2,
+      "description": "Enlisted cabin corridor, saucer deck 8 Port Mid. ventilation=interior_hvac."
+    },
+    {
+      "id": "EC_D8_P_A",
+      "type": "Cabin_Corridor",
+      "traffic": "medium",
+      "volume_m3": 520.0,
+      "deck": "saucer_8",
+      "max_occupancy": 28,
+      "display": {
+        "x": 240.0,
+        "y": 34.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 2,
+      "description": "Enlisted cabin corridor, saucer deck 8 Port Aft. ventilation=interior_hvac."
+    },
+    {
+      "id": "EC_D8_S_F",
+      "type": "Cabin_Corridor",
+      "traffic": "medium",
+      "volume_m3": 520.0,
+      "deck": "saucer_8",
+      "max_occupancy": 28,
+      "display": {
+        "x": 200.0,
+        "y": 38.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 2,
+      "description": "Enlisted cabin corridor, saucer deck 8 Stbd Fwd. ventilation=interior_hvac."
+    },
+    {
+      "id": "EC_D8_S_M",
+      "type": "Cabin_Corridor",
+      "traffic": "medium",
+      "volume_m3": 520.0,
+      "deck": "saucer_8",
+      "max_occupancy": 28,
+      "display": {
+        "x": 220.0,
+        "y": 38.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 2,
+      "description": "Enlisted cabin corridor, saucer deck 8 Stbd Mid. ventilation=interior_hvac."
+    },
+    {
+      "id": "EC_D8_S_A",
+      "type": "Cabin_Corridor",
+      "traffic": "medium",
+      "volume_m3": 520.0,
+      "deck": "saucer_8",
+      "max_occupancy": 28,
+      "display": {
+        "x": 240.0,
+        "y": 38.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 2,
+      "description": "Enlisted cabin corridor, saucer deck 8 Stbd Aft. ventilation=interior_hvac."
+    },
+    {
+      "id": "EC_D9_P_F",
+      "type": "Cabin_Corridor",
+      "traffic": "medium",
+      "volume_m3": 520.0,
+      "deck": "saucer_9",
+      "max_occupancy": 28,
+      "display": {
+        "x": 200.0,
+        "y": 28.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 2,
+      "description": "Enlisted cabin corridor, saucer deck 9 Port Fwd. ventilation=interior_hvac."
+    },
+    {
+      "id": "EC_D9_P_M",
+      "type": "Cabin_Corridor",
+      "traffic": "medium",
+      "volume_m3": 520.0,
+      "deck": "saucer_9",
+      "max_occupancy": 28,
+      "display": {
+        "x": 220.0,
+        "y": 28.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 2,
+      "description": "Enlisted cabin corridor, saucer deck 9 Port Mid. ventilation=interior_hvac."
+    },
+    {
+      "id": "EC_D9_P_A",
+      "type": "Cabin_Corridor",
+      "traffic": "medium",
+      "volume_m3": 520.0,
+      "deck": "saucer_9",
+      "max_occupancy": 28,
+      "display": {
+        "x": 240.0,
+        "y": 28.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 2,
+      "description": "Enlisted cabin corridor, saucer deck 9 Port Aft. ventilation=interior_hvac."
+    },
+    {
+      "id": "EC_D9_S_F",
+      "type": "Cabin_Corridor",
+      "traffic": "medium",
+      "volume_m3": 520.0,
+      "deck": "saucer_9",
+      "max_occupancy": 28,
+      "display": {
+        "x": 200.0,
+        "y": 32.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 2,
+      "description": "Enlisted cabin corridor, saucer deck 9 Stbd Fwd. ventilation=interior_hvac."
+    },
+    {
+      "id": "EC_D9_S_M",
+      "type": "Cabin_Corridor",
+      "traffic": "medium",
+      "volume_m3": 520.0,
+      "deck": "saucer_9",
+      "max_occupancy": 28,
+      "display": {
+        "x": 220.0,
+        "y": 32.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 2,
+      "description": "Enlisted cabin corridor, saucer deck 9 Stbd Mid. ventilation=interior_hvac."
+    },
+    {
+      "id": "EC_D9_S_A",
+      "type": "Cabin_Corridor",
+      "traffic": "medium",
+      "volume_m3": 520.0,
+      "deck": "saucer_9",
+      "max_occupancy": 28,
+      "display": {
+        "x": 240.0,
+        "y": 32.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 2,
+      "description": "Enlisted cabin corridor, saucer deck 9 Stbd Aft. ventilation=interior_hvac."
+    },
+    {
+      "id": "EC_D10_P_F",
+      "type": "Cabin_Corridor",
+      "traffic": "medium",
+      "volume_m3": 520.0,
+      "deck": "saucer_10",
+      "max_occupancy": 28,
+      "display": {
+        "x": 200.0,
+        "y": 22.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 2,
+      "description": "Enlisted cabin corridor, saucer deck 10 Port Fwd. ventilation=interior_hvac."
+    },
+    {
+      "id": "EC_D10_P_M",
+      "type": "Cabin_Corridor",
+      "traffic": "medium",
+      "volume_m3": 520.0,
+      "deck": "saucer_10",
+      "max_occupancy": 28,
+      "display": {
+        "x": 220.0,
+        "y": 22.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 2,
+      "description": "Enlisted cabin corridor, saucer deck 10 Port Mid. ventilation=interior_hvac."
+    },
+    {
+      "id": "EC_D10_P_A",
+      "type": "Cabin_Corridor",
+      "traffic": "medium",
+      "volume_m3": 520.0,
+      "deck": "saucer_10",
+      "max_occupancy": 28,
+      "display": {
+        "x": 240.0,
+        "y": 22.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 2,
+      "description": "Enlisted cabin corridor, saucer deck 10 Port Aft. ventilation=interior_hvac."
+    },
+    {
+      "id": "EC_D10_S_F",
+      "type": "Cabin_Corridor",
+      "traffic": "medium",
+      "volume_m3": 520.0,
+      "deck": "saucer_10",
+      "max_occupancy": 28,
+      "display": {
+        "x": 200.0,
+        "y": 26.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 2,
+      "description": "Enlisted cabin corridor, saucer deck 10 Stbd Fwd. ventilation=interior_hvac."
+    },
+    {
+      "id": "EC_D10_S_M",
+      "type": "Cabin_Corridor",
+      "traffic": "medium",
+      "volume_m3": 520.0,
+      "deck": "saucer_10",
+      "max_occupancy": 28,
+      "display": {
+        "x": 220.0,
+        "y": 26.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 2,
+      "description": "Enlisted cabin corridor, saucer deck 10 Stbd Mid. ventilation=interior_hvac."
+    },
+    {
+      "id": "EC_D10_S_A",
+      "type": "Cabin_Corridor",
+      "traffic": "medium",
+      "volume_m3": 520.0,
+      "deck": "saucer_10",
+      "max_occupancy": 28,
+      "display": {
+        "x": 240.0,
+        "y": 26.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 2,
+      "description": "Enlisted cabin corridor, saucer deck 10 Stbd Aft. ventilation=interior_hvac."
+    },
+    {
+      "id": "EC_D11_P_F",
+      "type": "Cabin_Corridor",
+      "traffic": "medium",
+      "volume_m3": 520.0,
+      "deck": "saucer_11",
+      "max_occupancy": 28,
+      "display": {
+        "x": 200.0,
+        "y": 16.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 2,
+      "description": "Enlisted cabin corridor, saucer deck 11 Port Fwd. ventilation=interior_hvac."
+    },
+    {
+      "id": "EC_D11_P_M",
+      "type": "Cabin_Corridor",
+      "traffic": "medium",
+      "volume_m3": 520.0,
+      "deck": "saucer_11",
+      "max_occupancy": 28,
+      "display": {
+        "x": 220.0,
+        "y": 16.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 2,
+      "description": "Enlisted cabin corridor, saucer deck 11 Port Mid. ventilation=interior_hvac."
+    },
+    {
+      "id": "EC_D11_P_A",
+      "type": "Cabin_Corridor",
+      "traffic": "medium",
+      "volume_m3": 520.0,
+      "deck": "saucer_11",
+      "max_occupancy": 28,
+      "display": {
+        "x": 240.0,
+        "y": 16.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 2,
+      "description": "Enlisted cabin corridor, saucer deck 11 Port Aft. ventilation=interior_hvac."
+    },
+    {
+      "id": "EC_D11_S_F",
+      "type": "Cabin_Corridor",
+      "traffic": "medium",
+      "volume_m3": 520.0,
+      "deck": "saucer_11",
+      "max_occupancy": 28,
+      "display": {
+        "x": 200.0,
+        "y": 20.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 2,
+      "description": "Enlisted cabin corridor, saucer deck 11 Stbd Fwd. ventilation=interior_hvac."
+    },
+    {
+      "id": "EC_D11_S_M",
+      "type": "Cabin_Corridor",
+      "traffic": "medium",
+      "volume_m3": 520.0,
+      "deck": "saucer_11",
+      "max_occupancy": 28,
+      "display": {
+        "x": 220.0,
+        "y": 20.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 2,
+      "description": "Enlisted cabin corridor, saucer deck 11 Stbd Mid. ventilation=interior_hvac."
+    },
+    {
+      "id": "EC_D11_S_A",
+      "type": "Cabin_Corridor",
+      "traffic": "medium",
+      "volume_m3": 520.0,
+      "deck": "saucer_11",
+      "max_occupancy": 28,
+      "display": {
+        "x": 240.0,
+        "y": 20.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 2,
+      "description": "Enlisted cabin corridor, saucer deck 11 Stbd Aft. ventilation=interior_hvac."
+    },
+    {
+      "id": "EC_D12_P_F",
+      "type": "Cabin_Corridor",
+      "traffic": "medium",
+      "volume_m3": 520.0,
+      "deck": "saucer_12",
+      "max_occupancy": 28,
+      "display": {
+        "x": 200.0,
+        "y": 12.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 2,
+      "description": "Enlisted cabin corridor, saucer deck 12 Port Fwd. ventilation=interior_hvac."
+    },
+    {
+      "id": "EC_D12_P_M",
+      "type": "Cabin_Corridor",
+      "traffic": "medium",
+      "volume_m3": 520.0,
+      "deck": "saucer_12",
+      "max_occupancy": 28,
+      "display": {
+        "x": 220.0,
+        "y": 12.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 2,
+      "description": "Enlisted cabin corridor, saucer deck 12 Port Mid. ventilation=interior_hvac."
+    },
+    {
+      "id": "EC_D12_P_A",
+      "type": "Cabin_Corridor",
+      "traffic": "medium",
+      "volume_m3": 520.0,
+      "deck": "saucer_12",
+      "max_occupancy": 28,
+      "display": {
+        "x": 240.0,
+        "y": 12.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 2,
+      "description": "Enlisted cabin corridor, saucer deck 12 Port Aft. ventilation=interior_hvac."
+    },
+    {
+      "id": "EC_D12_S_F",
+      "type": "Cabin_Corridor",
+      "traffic": "medium",
+      "volume_m3": 520.0,
+      "deck": "saucer_12",
+      "max_occupancy": 28,
+      "display": {
+        "x": 200.0,
+        "y": 16.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 2,
+      "description": "Enlisted cabin corridor, saucer deck 12 Stbd Fwd. ventilation=interior_hvac."
+    },
+    {
+      "id": "EC_D12_S_M",
+      "type": "Cabin_Corridor",
+      "traffic": "medium",
+      "volume_m3": 520.0,
+      "deck": "saucer_12",
+      "max_occupancy": 28,
+      "display": {
+        "x": 220.0,
+        "y": 16.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 2,
+      "description": "Enlisted cabin corridor, saucer deck 12 Stbd Mid. ventilation=interior_hvac."
+    },
+    {
+      "id": "EC_D12_S_A",
+      "type": "Cabin_Corridor",
+      "traffic": "medium",
+      "volume_m3": 520.0,
+      "deck": "saucer_12",
+      "max_occupancy": 28,
+      "display": {
+        "x": 240.0,
+        "y": 16.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 2,
+      "description": "Enlisted cabin corridor, saucer deck 12 Stbd Aft. ventilation=interior_hvac."
+    },
+    {
+      "id": "OC_D8_F",
+      "type": "Cabin_Corridor",
+      "traffic": "low",
+      "volume_m3": 260.0,
+      "deck": "saucer_8",
+      "max_occupancy": 12,
+      "display": {
+        "x": 338.1,
+        "y": 34.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 1,
+      "description": "Officer stateroom corridor, saucer deck 8 Fwd. ventilation=interior_hvac."
+    },
+    {
+      "id": "OC_D8_M",
+      "type": "Cabin_Corridor",
+      "traffic": "low",
+      "volume_m3": 260.0,
+      "deck": "saucer_8",
+      "max_occupancy": 12,
+      "display": {
+        "x": 353.1,
+        "y": 34.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 1,
+      "description": "Officer stateroom corridor, saucer deck 8 Mid. ventilation=interior_hvac."
+    },
+    {
+      "id": "OC_D8_A",
+      "type": "Cabin_Corridor",
+      "traffic": "low",
+      "volume_m3": 260.0,
+      "deck": "saucer_8",
+      "max_occupancy": 12,
+      "display": {
+        "x": 368.1,
+        "y": 34.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 1,
+      "description": "Officer stateroom corridor, saucer deck 8 Aft. ventilation=interior_hvac."
+    },
+    {
+      "id": "OC_D9_F",
+      "type": "Cabin_Corridor",
+      "traffic": "low",
+      "volume_m3": 260.0,
+      "deck": "saucer_9",
+      "max_occupancy": 12,
+      "display": {
+        "x": 338.1,
+        "y": 28.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 1,
+      "description": "Officer stateroom corridor, saucer deck 9 Fwd. ventilation=interior_hvac."
+    },
+    {
+      "id": "OC_D9_M",
+      "type": "Cabin_Corridor",
+      "traffic": "low",
+      "volume_m3": 260.0,
+      "deck": "saucer_9",
+      "max_occupancy": 12,
+      "display": {
+        "x": 353.1,
+        "y": 28.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 1,
+      "description": "Officer stateroom corridor, saucer deck 9 Mid. ventilation=interior_hvac."
+    },
+    {
+      "id": "OC_D9_A",
+      "type": "Cabin_Corridor",
+      "traffic": "low",
+      "volume_m3": 260.0,
+      "deck": "saucer_9",
+      "max_occupancy": 12,
+      "display": {
+        "x": 368.1,
+        "y": 28.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 1,
+      "description": "Officer stateroom corridor, saucer deck 9 Aft. ventilation=interior_hvac."
+    },
+    {
+      "id": "FC_D23_P_F",
+      "type": "Cabin_Corridor",
+      "traffic": "medium",
+      "volume_m3": 600.0,
+      "deck": "saucer_23",
+      "max_occupancy": 36,
+      "display": {
+        "x": 200.0,
+        "y": 48.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 4,
+      "description": "Family suite corridor, saucer deck 23 Port Fwd. cabin_size=4, ventilation=interior_hvac."
+    },
+    {
+      "id": "FC_D23_P_A",
+      "type": "Cabin_Corridor",
+      "traffic": "medium",
+      "volume_m3": 600.0,
+      "deck": "saucer_23",
+      "max_occupancy": 36,
+      "display": {
+        "x": 240.0,
+        "y": 48.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 4,
+      "description": "Family suite corridor, saucer deck 23 Port Aft. cabin_size=4, ventilation=interior_hvac."
+    },
+    {
+      "id": "FC_D23_S_F",
+      "type": "Cabin_Corridor",
+      "traffic": "medium",
+      "volume_m3": 600.0,
+      "deck": "saucer_23",
+      "max_occupancy": 36,
+      "display": {
+        "x": 200.0,
+        "y": 52.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 4,
+      "description": "Family suite corridor, saucer deck 23 Stbd Fwd. cabin_size=4, ventilation=interior_hvac."
+    },
+    {
+      "id": "FC_D23_S_A",
+      "type": "Cabin_Corridor",
+      "traffic": "medium",
+      "volume_m3": 600.0,
+      "deck": "saucer_23",
+      "max_occupancy": 36,
+      "display": {
+        "x": 240.0,
+        "y": 52.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 4,
+      "description": "Family suite corridor, saucer deck 23 Stbd Aft. cabin_size=4, ventilation=interior_hvac."
+    },
+    {
+      "id": "FC_D24_P_F",
+      "type": "Cabin_Corridor",
+      "traffic": "medium",
+      "volume_m3": 600.0,
+      "deck": "saucer_24",
+      "max_occupancy": 36,
+      "display": {
+        "x": 200.0,
+        "y": 44.0
+      },
+      "cabin_ventilation_type": "atrium_view",
+      "cabin_size": 4,
+      "description": "Family suite corridor, saucer deck 24 Port Fwd. cabin_size=4, ventilation=atrium_view."
+    },
+    {
+      "id": "FC_D24_P_A",
+      "type": "Cabin_Corridor",
+      "traffic": "medium",
+      "volume_m3": 600.0,
+      "deck": "saucer_24",
+      "max_occupancy": 36,
+      "display": {
+        "x": 240.0,
+        "y": 44.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 4,
+      "description": "Family suite corridor, saucer deck 24 Port Aft. cabin_size=4, ventilation=interior_hvac."
+    },
+    {
+      "id": "FC_D24_S_F",
+      "type": "Cabin_Corridor",
+      "traffic": "medium",
+      "volume_m3": 600.0,
+      "deck": "saucer_24",
+      "max_occupancy": 36,
+      "display": {
+        "x": 200.0,
+        "y": 48.0
+      },
+      "cabin_ventilation_type": "atrium_view",
+      "cabin_size": 4,
+      "description": "Family suite corridor, saucer deck 24 Stbd Fwd. cabin_size=4, ventilation=atrium_view."
+    },
+    {
+      "id": "FC_D24_S_A",
+      "type": "Cabin_Corridor",
+      "traffic": "medium",
+      "volume_m3": 600.0,
+      "deck": "saucer_24",
+      "max_occupancy": 36,
+      "display": {
+        "x": 240.0,
+        "y": 48.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 4,
+      "description": "Family suite corridor, saucer deck 24 Stbd Aft. cabin_size=4, ventilation=interior_hvac."
+    },
+    {
+      "id": "FC_D25_P_F",
+      "type": "Cabin_Corridor",
+      "traffic": "medium",
+      "volume_m3": 600.0,
+      "deck": "saucer_25",
+      "max_occupancy": 36,
+      "display": {
+        "x": 200.0,
+        "y": 40.0
+      },
+      "cabin_ventilation_type": "atrium_view",
+      "cabin_size": 4,
+      "description": "Family suite corridor, saucer deck 25 Port Fwd. cabin_size=4, ventilation=atrium_view."
+    },
+    {
+      "id": "FC_D25_P_A",
+      "type": "Cabin_Corridor",
+      "traffic": "medium",
+      "volume_m3": 600.0,
+      "deck": "saucer_25",
+      "max_occupancy": 36,
+      "display": {
+        "x": 240.0,
+        "y": 40.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 4,
+      "description": "Family suite corridor, saucer deck 25 Port Aft. cabin_size=4, ventilation=interior_hvac."
+    },
+    {
+      "id": "FC_D25_S_F",
+      "type": "Cabin_Corridor",
+      "traffic": "medium",
+      "volume_m3": 600.0,
+      "deck": "saucer_25",
+      "max_occupancy": 36,
+      "display": {
+        "x": 200.0,
+        "y": 44.0
+      },
+      "cabin_ventilation_type": "atrium_view",
+      "cabin_size": 4,
+      "description": "Family suite corridor, saucer deck 25 Stbd Fwd. cabin_size=4, ventilation=atrium_view."
+    },
+    {
+      "id": "FC_D25_S_A",
+      "type": "Cabin_Corridor",
+      "traffic": "medium",
+      "volume_m3": 600.0,
+      "deck": "saucer_25",
+      "max_occupancy": 36,
+      "display": {
+        "x": 240.0,
+        "y": 44.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 4,
+      "description": "Family suite corridor, saucer deck 25 Stbd Aft. cabin_size=4, ventilation=interior_hvac."
     }
-  ],
-  "graywater_zones": [
-    "MainEng"
   ]
 }

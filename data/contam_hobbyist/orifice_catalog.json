@@ -12,6 +12,16 @@
       "area_m2": 1.8,
       "description": "Standard single-leaf doorway (~0.9 m × 2.0 m)"
     },
+    "pocket_door": {
+      "name": "PocketDoor",
+      "area_m2": 1.4,
+      "description": "Sliding pocket door (~0.7 m × 2.0 m); schedule-modulated open/closed (starship default)"
+    },
+    "pressure_bulkhead": {
+      "name": "PressBlk",
+      "area_m2": 0.002,
+      "description": "Sealed pressure bulkhead / emergency forcefield residual leak"
+    },
     "hatch": {
       "name": "Hatch",
       "area_m2": 0.36,

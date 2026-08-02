@@ -1,49 +1,44 @@
 {
-  "description": "Hobbyist-plus Contam overrides for Constitution-class (TOS) fiction ship.",
+  "description": "Hobbyist-plus Contam overrides for enterprise_constitution_tos cabin-corridor revision.",
   "orifice_type_map": {
-    "turbolift": "turbolift",
+    "corridor": "cabin_relief",
+    "doorway": "doorway",
+    "pocket_door": "pocket_door",
+    "pressure_bulkhead": "pressure_bulkhead",
     "passageway": "passageway",
+    "elevator_bank": "elevator_bank",
+    "stairwell": "stairwell",
+    "turbolift": "turbolift",
+    "service_stairwell": "service_stairwell",
     "service_hatch": "hatch",
-    "connecting_tube": "connecting_tube"
+    "service_corridor": "service_corridor",
+    "open_deck": "promenade",
+    "open_front": "open_front",
+    "ladder_well": "ladder",
+    "multi_deck_void": "multi_deck_void",
+    "connecting_tube": "connecting_tube",
+    "hatch": "hatch"
   },
   "wind_profile": "ship_hull",
-  "deck_temp_offset_K": {
-    "saucer_primary": 0.0,
-    "secondary_hull": 4.0
-  },
-  "zone_annotations": {
-    "Bridge": "Bridge",
-    "Sickbay": "Sickbay",
-    "Engineering": "Main Eng"
-  },
-  "filter_preset": "MERV14",
+  "filter_preset": "MERV11",
   "hvac_filter": {
-    "zone_saucer_ops": "HEPA",
-    "zone_engineering": "MERV14"
+    "AHU_EC_D4": "MERV8",
+    "AHU_EC_D5": "MERV8",
+    "AHU_EC_D6": "MERV8",
+    "AHU_Command": "MERV11",
+    "AHU_Ops": "MERV11",
+    "AHU_Living": "MERV11",
+    "AHU_Medical": "HEPA",
+    "AHU_Service": "MERV11",
+    "AHU_Engineering": "MERV13",
+    "AHU_Crew": "MERV8"
   },
   "oa_fraction": {
-    "_default": 0.2,
-    "zone_saucer_ops": 0.35
+    "_default": 0.15,
+    "AHU_Medical": 0.4,
+    "AHU_EC_D4": 0.12,
+    "AHU_EC_D5": 0.12,
+    "AHU_EC_D6": 0.12
   },
-  "wall_azimuth_deg": {
-    "Bridge": 0,
-    "Communications": 15,
-    "Library": 45,
-    "Sickbay": 90,
-    "Science_Lab": 120,
-    "Engineering": 180,
-    "Crew_Quarters": 270,
-    "OfficerQtrs": 240,
-    "Rec_Deck": 300,
-    "Galley": 310,
-    "Mess_Hall": 320,
-    "Transporter": 100,
-    "Security": 150
-  },
-  "duct_hvac_ids": [
-    "zone_saucer_command",
-    "zone_saucer_ops",
-    "zone_saucer_living"
-  ],
   "night_setback": true
 }

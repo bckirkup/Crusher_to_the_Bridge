@@ -5,7 +5,7 @@
     "fiction_note": "Human crew only; no android or alien-specific agent classes."
   },
   "recommended_ship_graph": {
-    "num_agents": 200,
+    "num_agents": 430,
     "agent_roles": {
       "passenger_fraction": 0.0,
       "crew_fraction": 1.0
@@ -14,7 +14,7 @@
     "air_flow_paths": "data/platforms/enterprise_constitution_tos/air_flow_paths.json",
     "pathogen_profiles": "data/pathogens/enterprise_tos_profiles.json",
     "graywater_zones": [
-      "Engineering"
+      "EngMain"
     ]
   },
   "agent_classes": [
@@ -22,7 +22,7 @@
       "class_id": "crew_command",
       "role_group": "crew",
       "fraction": 0.08,
-      "home_zone_preference": "OfficerQtrs",
+      "home_zone_preference": "OC_D5_F",
       "free_zone_preference": "Bridge",
       "duty_zone": "Bridge"
     },
@@ -30,7 +30,7 @@
       "class_id": "crew_helm_ops",
       "role_group": "crew",
       "fraction": 0.1,
-      "home_zone_preference": "Crew_Quarters",
+      "home_zone_preference": "EC_D5_P_F",
       "free_zone_preference": "Bridge",
       "duty_zone": "Bridge"
     },
@@ -38,7 +38,7 @@
       "class_id": "crew_security",
       "role_group": "crew",
       "fraction": 0.08,
-      "home_zone_preference": "Crew_Quarters",
+      "home_zone_preference": "EC_D5_P_F",
       "free_zone_preference": "Security",
       "duty_zone": "Security"
     },
@@ -46,23 +46,23 @@
       "class_id": "crew_engineering",
       "role_group": "crew",
       "fraction": 0.18,
-      "home_zone_preference": "Crew_Quarters",
-      "free_zone_preference": "Engineering",
-      "duty_zone": "Engineering"
+      "home_zone_preference": "EC_D5_P_F",
+      "free_zone_preference": "EngMain",
+      "duty_zone": "EngMain"
     },
     {
       "class_id": "crew_sciences",
       "role_group": "crew",
       "fraction": 0.12,
-      "home_zone_preference": "OfficerQtrs",
-      "free_zone_preference": "Science",
-      "duty_zone": "Science_Lab"
+      "home_zone_preference": "OC_D5_F",
+      "free_zone_preference": "Science1",
+      "duty_zone": "Science1"
     },
     {
       "class_id": "crew_medical",
       "role_group": "crew",
       "fraction": 0.08,
-      "home_zone_preference": "OfficerQtrs",
+      "home_zone_preference": "OC_D5_F",
       "free_zone_preference": "Sickbay",
       "duty_zone": "Sickbay"
     },
@@ -70,15 +70,15 @@
       "class_id": "crew_communications",
       "role_group": "crew",
       "fraction": 0.06,
-      "home_zone_preference": "Crew_Quarters",
-      "free_zone_preference": "Communications",
-      "duty_zone": "Communications"
+      "home_zone_preference": "EC_D5_P_F",
+      "free_zone_preference": "Comms",
+      "duty_zone": "Comms"
     },
     {
       "class_id": "crew_services",
       "role_group": "crew",
       "fraction": 0.1,
-      "home_zone_preference": "Crew_Quarters",
+      "home_zone_preference": "EC_D5_P_F",
       "free_zone_preference": "Galley",
       "duty_zone": "Galley"
     },
@@ -86,8 +86,8 @@
       "class_id": "crew_general",
       "role_group": "crew",
       "fraction": 0.2,
-      "home_zone_preference": "Crew_Quarters",
-      "free_zone_preference": "Mess",
+      "home_zone_preference": "EC_D5_P_F",
+      "free_zone_preference": "Mess_Hall",
       "duty_zone": "Mess_Hall"
     }
   ],

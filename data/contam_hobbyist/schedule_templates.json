@@ -120,6 +120,8 @@
   "opening_schedule_by_type": {
     "passageway": "DoorTrafficW",
     "doorway": "DoorTrafficW",
+    "pocket_door": "DoorTrafficW",
+    "pressure_bulkhead": null,
     "hatch": "HatchOccasionalW",
     "service_hatch": "HatchOccasionalW",
     "ladder": "ShaftOpenW",

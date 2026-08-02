@@ -45,9 +45,11 @@ def test_constitution_hobbyist_export() -> None:
     assert "Turbolift" in text or "Turbo" in text
     assert "MERV14" in text or "HEPA" in text
     assert "Virus" in text
+    assert "PocketDoor" in text or "PressBlk" in text
     assert _section_count(text, "wind pressure profiles") == 1
     assert _section_count(text, "duct junctions") >= 3
     assert _section_count(text, "flow paths") == len(path_map)
+    assert len(path_map) >= 300
     assert _section_count(text, "annotations") >= 2
 
 
@@ -56,4 +58,5 @@ def test_constitution_bundled_hobbyist_prj() -> None:
     entries = json.loads((_CONTAM / "path_map.json").read_text(encoding="utf-8"))
     assert "(hobbyist)" in text
     assert _section_count(text, "flow paths") == len(entries)
-    assert "Sickbay" in text or "Main Eng" in text
+    assert len(entries) >= 300
+    assert "Sickbay" in text or "EngMain" in text

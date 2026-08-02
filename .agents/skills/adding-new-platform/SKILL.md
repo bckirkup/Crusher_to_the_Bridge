@@ -212,7 +212,10 @@ in `class_photo_catalog.json` (see `CLASS_PHOTO_ATTRIBUTION.md`).
 
 Regenerate cabin-corridor cruise layouts with
 `python3 scripts/generate_cruise_platform_layout.py --platform <id>`
-(see `scripts/cruise_platform_recipes.py`).
+(see `scripts/cruise_platform_recipes.py`). Fiction Enterprise platforms use
+`python3 scripts/generate_enterprise_platform_layout.py --platform <id>`
+(see `scripts/enterprise_platform_recipes.py` and
+`docs/ENTERPRISE_CABIN_REVISION.md`).
 
 ## Common Mistakes
 

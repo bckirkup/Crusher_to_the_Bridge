@@ -1,167 +1,754 @@
 {
   "platform": "enterprise_galaxy_tng",
-  "description": "Galaxy-class multi-deck HVAC with saucer living ring and drive-section engineering plenum.",
-  "oa_fraction": 0.2,
+  "description": "HVAC for enterprise_galaxy_tng cabin-corridor layout. Population ~1000.",
+  "oa_fraction": 0.15,
   "hvac_duty": 0.5,
   "hvac_zones": [
     {
-      "id": "zone_saucer_command",
+      "id": "AHU_EC_D7",
+      "rooms": [
+        "EC_D7_P_F",
+        "EC_D7_P_M",
+        "EC_D7_P_A",
+        "EC_D7_S_F",
+        "EC_D7_S_M",
+        "EC_D7_S_A"
+      ],
+      "ach": 7.0,
+      "description": "Deck 7 cabin fan-coil branch."
+    },
+    {
+      "id": "AHU_EC_D8",
+      "rooms": [
+        "EC_D8_P_F",
+        "EC_D8_P_M",
+        "EC_D8_P_A",
+        "EC_D8_S_F",
+        "EC_D8_S_M",
+        "EC_D8_S_A"
+      ],
+      "ach": 7.0,
+      "description": "Deck 8 cabin fan-coil branch."
+    },
+    {
+      "id": "AHU_EC_D9",
+      "rooms": [
+        "EC_D9_P_F",
+        "EC_D9_P_M",
+        "EC_D9_P_A",
+        "EC_D9_S_F",
+        "EC_D9_S_M",
+        "EC_D9_S_A"
+      ],
+      "ach": 7.0,
+      "description": "Deck 9 cabin fan-coil branch."
+    },
+    {
+      "id": "AHU_EC_D10",
+      "rooms": [
+        "EC_D10_P_F",
+        "EC_D10_P_M",
+        "EC_D10_P_A",
+        "EC_D10_S_F",
+        "EC_D10_S_M",
+        "EC_D10_S_A"
+      ],
+      "ach": 7.0,
+      "description": "Deck 10 cabin fan-coil branch."
+    },
+    {
+      "id": "AHU_EC_D11",
+      "rooms": [
+        "EC_D11_P_F",
+        "EC_D11_P_M",
+        "EC_D11_P_A",
+        "EC_D11_S_F",
+        "EC_D11_S_M",
+        "EC_D11_S_A"
+      ],
+      "ach": 7.0,
+      "description": "Deck 11 cabin fan-coil branch."
+    },
+    {
+      "id": "AHU_EC_D12",
+      "rooms": [
+        "EC_D12_P_F",
+        "EC_D12_P_M",
+        "EC_D12_P_A",
+        "EC_D12_S_F",
+        "EC_D12_S_M",
+        "EC_D12_S_A"
+      ],
+      "ach": 7.0,
+      "description": "Deck 12 cabin fan-coil branch."
+    },
+    {
+      "id": "AHU_FC_D23",
+      "rooms": [
+        "FC_D23_P_F",
+        "FC_D23_P_A",
+        "FC_D23_S_F",
+        "FC_D23_S_A"
+      ],
+      "ach": 7.0,
+      "description": "Deck 23 FC cabin branch."
+    },
+    {
+      "id": "AHU_FC_D24",
+      "rooms": [
+        "FC_D24_P_F",
+        "FC_D24_P_A",
+        "FC_D24_S_F",
+        "FC_D24_S_A"
+      ],
+      "ach": 7.0,
+      "description": "Deck 24 FC cabin branch."
+    },
+    {
+      "id": "AHU_FC_D25",
+      "rooms": [
+        "FC_D25_P_F",
+        "FC_D25_P_A",
+        "FC_D25_S_F",
+        "FC_D25_S_A"
+      ],
+      "ach": 7.0,
+      "description": "Deck 25 FC cabin branch."
+    },
+    {
+      "id": "AHU_Command",
       "rooms": [
         "Bridge",
-        "StellarCarto",
-        "Security_Office"
+        "BriefRoom",
+        "Comms"
       ],
-      "ach": 9.0
+      "ach": 10.0,
+      "description": ""
     },
     {
-      "id": "zone_saucer_social",
+      "id": "AHU_Public",
       "rooms": [
-        "Ten_Forward",
-        "Crew_Lounge",
-        "Holodeck",
-        "Galley",
-        "Mess_Hall"
+        "TenFwd",
+        "Arboretum",
+        "Holodeck1",
+        "Holodeck2",
+        "School",
+        "CrewLounge",
+        "StellarCart",
+        "Gym"
       ],
-      "ach": 8.0
+      "ach": 9.0,
+      "description": ""
     },
     {
-      "id": "zone_saucer_medical",
+      "id": "AHU_Ops",
+      "rooms": [
+        "Science1",
+        "Science2",
+        "Transprt1",
+        "Transprt2",
+        "Security",
+        "Brig",
+        "NeckHub"
+      ],
+      "ach": 9.0,
+      "description": ""
+    },
+    {
+      "id": "AHU_Medical",
       "rooms": [
         "Sickbay",
-        "Science_Labs",
-        "Arboretum"
+        "IsolBay1",
+        "IsolBay2",
+        "IsolBay3"
       ],
-      "ach": 11.0
+      "ach": 12.0,
+      "description": ""
     },
     {
-      "id": "zone_saucer_habitation",
+      "id": "AHU_Service",
       "rooms": [
-        "Crew_Quarters",
-        "Family_Quarters",
-        "Schoolroom"
+        "Galley",
+        "Mess_Hall",
+        "HeadsMain",
+        "StoresDry",
+        "StoresCold",
+        "Armory"
       ],
-      "ach": 6.5
+      "ach": 14.0,
+      "description": ""
     },
     {
-      "id": "zone_saucer_logistics",
+      "id": "AHU_Engineering",
       "rooms": [
-        "Shuttlebay",
-        "Cargo_Bay"
+        "MainEng",
+        "WarpCore",
+        "EPSDist",
+        "Jefferies",
+        "Deflector"
       ],
-      "ach": 12.0
+      "ach": 16.0,
+      "description": ""
     },
     {
-      "id": "zone_drive",
+      "id": "AHU_Flight",
       "rooms": [
-        "MainEng"
+        "ShuttleBay",
+        "CargoMain",
+        "CargoAux",
+        "Airlock"
       ],
-      "ach": 16.0
+      "ach": 12.0,
+      "description": ""
+    },
+    {
+      "id": "AHU_Crew",
+      "rooms": [
+        "OC_D8_F",
+        "OC_D8_M",
+        "OC_D8_A",
+        "OC_D9_F",
+        "OC_D9_M",
+        "OC_D9_A"
+      ],
+      "ach": 7.0,
+      "description": "Officer corridors."
     }
   ],
   "cross_zone_links": [
     {
-      "from": "zone_saucer_command",
-      "to": "zone_saucer_social",
-      "flow_rate_m3h": 200,
-      "path": "turbolift_forward",
-      "is_hvac_ducted": true
+      "from": "AHU_Command",
+      "to": "AHU_Ops",
+      "flow_rate_m3h": 250.0,
+      "is_hvac_ducted": true,
+      "path": "Saucer_Cmd_Ops_Trunk"
     },
     {
-      "from": "zone_saucer_social",
-      "to": "zone_saucer_medical",
-      "flow_rate_m3h": 160,
-      "path": "corridor_ring",
-      "is_hvac_ducted": false
+      "from": "AHU_Public",
+      "to": "AHU_Engineering",
+      "flow_rate_m3h": 150.0,
+      "is_hvac_ducted": true,
+      "path": "Neck_Trunk_Throttled"
     },
     {
-      "from": "zone_saucer_medical",
-      "to": "zone_saucer_habitation",
-      "flow_rate_m3h": 140,
-      "path": "habitation_trunk",
-      "is_hvac_ducted": true
+      "from": "AHU_Medical",
+      "to": "AHU_Ops",
+      "flow_rate_m3h": 100.0,
+      "is_hvac_ducted": false,
+      "path": "Sickbay_Door_Leakage"
     },
     {
-      "from": "zone_saucer_habitation",
-      "to": "zone_saucer_logistics",
-      "flow_rate_m3h": 100,
-      "path": "cargo_lift_shaft",
-      "is_hvac_ducted": false
+      "from": "AHU_Flight",
+      "to": "AHU_Engineering",
+      "flow_rate_m3h": 200.0,
+      "is_hvac_ducted": true,
+      "path": "Drive_Flight_Trunk"
     },
     {
-      "from": "zone_saucer_logistics",
-      "to": "zone_drive",
-      "flow_rate_m3h": 220,
-      "path": "engineering_connecting_spine",
-      "is_hvac_ducted": true
+      "from": "Galley",
+      "to": "Mess_Hall",
+      "flow_rate_m3h": 8000.0,
+      "is_hvac_ducted": false,
+      "path": "Galley_Service_Exhaust"
     },
     {
-      "from": "zone_saucer_command",
-      "to": "zone_drive",
-      "flow_rate_m3h": 60,
-      "path": "emergency_scrubber_loop",
-      "is_hvac_ducted": true
+      "from": "AHU_EC_D7",
+      "to": "AHU_EC_D8",
+      "flow_rate_m3h": 900.0,
+      "is_hvac_ducted": true,
+      "path": "Pax_Trunk_D7_D8"
+    },
+    {
+      "from": "AHU_EC_D8",
+      "to": "AHU_EC_D9",
+      "flow_rate_m3h": 900.0,
+      "is_hvac_ducted": true,
+      "path": "Pax_Trunk_D8_D9"
+    },
+    {
+      "from": "AHU_EC_D9",
+      "to": "AHU_EC_D10",
+      "flow_rate_m3h": 900.0,
+      "is_hvac_ducted": true,
+      "path": "Pax_Trunk_D9_D10"
+    },
+    {
+      "from": "AHU_EC_D10",
+      "to": "AHU_EC_D11",
+      "flow_rate_m3h": 900.0,
+      "is_hvac_ducted": true,
+      "path": "Pax_Trunk_D10_D11"
+    },
+    {
+      "from": "AHU_EC_D11",
+      "to": "AHU_EC_D12",
+      "flow_rate_m3h": 900.0,
+      "is_hvac_ducted": true,
+      "path": "Pax_Trunk_D11_D12"
+    },
+    {
+      "from": "AHU_EC_D7",
+      "to": "AHU_Public",
+      "flow_rate_m3h": 500.0,
+      "is_hvac_ducted": true,
+      "path": "Cabin_Relief_D7"
+    },
+    {
+      "from": "AHU_EC_D8",
+      "to": "AHU_Public",
+      "flow_rate_m3h": 500.0,
+      "is_hvac_ducted": true,
+      "path": "Cabin_Relief_D8"
+    },
+    {
+      "from": "AHU_EC_D9",
+      "to": "AHU_Public",
+      "flow_rate_m3h": 500.0,
+      "is_hvac_ducted": true,
+      "path": "Cabin_Relief_D9"
+    },
+    {
+      "from": "AHU_EC_D10",
+      "to": "AHU_Public",
+      "flow_rate_m3h": 500.0,
+      "is_hvac_ducted": true,
+      "path": "Cabin_Relief_D10"
+    },
+    {
+      "from": "AHU_EC_D11",
+      "to": "AHU_Public",
+      "flow_rate_m3h": 500.0,
+      "is_hvac_ducted": true,
+      "path": "Cabin_Relief_D11"
+    },
+    {
+      "from": "AHU_EC_D12",
+      "to": "AHU_Public",
+      "flow_rate_m3h": 500.0,
+      "is_hvac_ducted": true,
+      "path": "Cabin_Relief_D12"
     }
   ],
   "adjacency": [
     {
       "from": "Bridge",
-      "to": "StellarCarto",
+      "to": "BriefRoom",
+      "type": "pocket_door"
+    },
+    {
+      "from": "Bridge",
+      "to": "Comms",
       "type": "turbolift"
     },
     {
-      "from": "Ten_Forward",
-      "to": "Crew_Lounge",
-      "type": "passageway"
+      "from": "TenFwd",
+      "to": "Arboretum",
+      "type": "multi_deck_void"
     },
     {
-      "from": "Galley",
-      "to": "Ten_Forward",
-      "type": "service_hatch"
+      "from": "Holodeck1",
+      "to": "Gym",
+      "type": "pocket_door"
+    },
+    {
+      "from": "Holodeck2",
+      "to": "CrewLounge",
+      "type": "pocket_door"
+    },
+    {
+      "from": "CrewLounge",
+      "to": "School",
+      "type": "pocket_door"
+    },
+    {
+      "from": "CrewLounge",
+      "to": "StellarCart",
+      "type": "pocket_door"
     },
     {
       "from": "Sickbay",
-      "to": "Science_Labs",
-      "type": "passageway"
+      "to": "IsolBay1",
+      "type": "pocket_door"
     },
     {
-      "from": "Family_Quarters",
-      "to": "Schoolroom",
-      "type": "passageway"
+      "from": "Sickbay",
+      "to": "IsolBay2",
+      "type": "pocket_door"
     },
     {
-      "from": "Crew_Quarters",
-      "to": "Holodeck",
-      "type": "passageway"
+      "from": "Sickbay",
+      "to": "IsolBay3",
+      "type": "pocket_door"
     },
     {
-      "from": "Arboretum",
-      "to": "Science_Labs",
-      "type": "passageway"
+      "from": "Science1",
+      "to": "Science2",
+      "type": "pocket_door"
     },
     {
-      "from": "Shuttlebay",
-      "to": "Cargo_Bay",
-      "type": "passageway"
+      "from": "Transprt1",
+      "to": "Transprt2",
+      "type": "pocket_door"
     },
     {
-      "from": "Cargo_Bay",
-      "to": "MainEng",
-      "type": "turbolift"
-    },
-    {
-      "from": "MainEng",
-      "to": "Sickbay",
-      "type": "turbolift"
-    },
-    {
-      "from": "Security_Office",
-      "to": "Sickbay",
-      "type": "passageway"
+      "from": "Security",
+      "to": "Brig",
+      "type": "pocket_door"
     },
     {
       "from": "Galley",
       "to": "Mess_Hall",
       "type": "service_hatch"
+    },
+    {
+      "from": "Mess_Hall",
+      "to": "HeadsMain",
+      "type": "pocket_door"
+    },
+    {
+      "from": "StoresDry",
+      "to": "StoresCold",
+      "type": "pocket_door"
+    },
+    {
+      "from": "StoresDry",
+      "to": "Galley",
+      "type": "service_corridor"
+    },
+    {
+      "from": "NeckHub",
+      "to": "MainEng",
+      "type": "connecting_tube"
+    },
+    {
+      "from": "NeckHub",
+      "to": "StoresDry",
+      "type": "pressure_bulkhead"
+    },
+    {
+      "from": "MainEng",
+      "to": "WarpCore",
+      "type": "pressure_bulkhead"
+    },
+    {
+      "from": "MainEng",
+      "to": "EPSDist",
+      "type": "pocket_door"
+    },
+    {
+      "from": "EPSDist",
+      "to": "Jefferies",
+      "type": "service_corridor"
+    },
+    {
+      "from": "Jefferies",
+      "to": "Deflector",
+      "type": "service_corridor"
+    },
+    {
+      "from": "ShuttleBay",
+      "to": "Airlock",
+      "type": "hatch"
+    },
+    {
+      "from": "ShuttleBay",
+      "to": "CargoMain",
+      "type": "pressure_bulkhead"
+    },
+    {
+      "from": "CargoMain",
+      "to": "CargoAux",
+      "type": "pocket_door"
+    },
+    {
+      "from": "TenFwd",
+      "to": "EC_D10_P_F",
+      "type": "pocket_door"
+    },
+    {
+      "from": "Arboretum",
+      "to": "FC_D24_P_F",
+      "type": "pocket_door"
+    },
+    {
+      "from": "Sickbay",
+      "to": "EC_D12_S_M",
+      "type": "pocket_door"
+    },
+    {
+      "from": "Mess_Hall",
+      "to": "EC_D8_P_A",
+      "type": "pocket_door"
+    },
+    {
+      "from": "OC_D8_F",
+      "to": "Bridge",
+      "type": "turbolift"
+    },
+    {
+      "from": "EC_D7_S_A",
+      "to": "NeckHub",
+      "type": "turbolift"
+    },
+    {
+      "from": "FC_D25_S_A",
+      "to": "School",
+      "type": "pocket_door"
+    },
+    {
+      "from": "EC_D7_P_F",
+      "to": "EC_D7_P_M",
+      "type": "corridor"
+    },
+    {
+      "from": "EC_D7_P_M",
+      "to": "EC_D7_P_A",
+      "type": "corridor"
+    },
+    {
+      "from": "EC_D7_S_F",
+      "to": "EC_D7_S_M",
+      "type": "corridor"
+    },
+    {
+      "from": "EC_D7_S_M",
+      "to": "EC_D7_S_A",
+      "type": "corridor"
+    },
+    {
+      "from": "EC_D7_P_M",
+      "to": "EC_D7_S_M",
+      "type": "pocket_door"
+    },
+    {
+      "from": "EC_D7_P_M",
+      "to": "EC_D8_P_M",
+      "type": "turbolift"
+    },
+    {
+      "from": "EC_D8_P_F",
+      "to": "EC_D8_P_M",
+      "type": "corridor"
+    },
+    {
+      "from": "EC_D8_P_M",
+      "to": "EC_D8_P_A",
+      "type": "corridor"
+    },
+    {
+      "from": "EC_D8_S_F",
+      "to": "EC_D8_S_M",
+      "type": "corridor"
+    },
+    {
+      "from": "EC_D8_S_M",
+      "to": "EC_D8_S_A",
+      "type": "corridor"
+    },
+    {
+      "from": "EC_D8_P_M",
+      "to": "EC_D8_S_M",
+      "type": "pocket_door"
+    },
+    {
+      "from": "EC_D8_P_M",
+      "to": "EC_D9_P_M",
+      "type": "turbolift"
+    },
+    {
+      "from": "EC_D9_P_F",
+      "to": "EC_D9_P_M",
+      "type": "corridor"
+    },
+    {
+      "from": "EC_D9_P_M",
+      "to": "EC_D9_P_A",
+      "type": "corridor"
+    },
+    {
+      "from": "EC_D9_S_F",
+      "to": "EC_D9_S_M",
+      "type": "corridor"
+    },
+    {
+      "from": "EC_D9_S_M",
+      "to": "EC_D9_S_A",
+      "type": "corridor"
+    },
+    {
+      "from": "EC_D9_P_M",
+      "to": "EC_D9_S_M",
+      "type": "pocket_door"
+    },
+    {
+      "from": "EC_D9_P_M",
+      "to": "EC_D10_P_M",
+      "type": "turbolift"
+    },
+    {
+      "from": "EC_D10_P_F",
+      "to": "EC_D10_P_M",
+      "type": "corridor"
+    },
+    {
+      "from": "EC_D10_P_M",
+      "to": "EC_D10_P_A",
+      "type": "corridor"
+    },
+    {
+      "from": "EC_D10_S_F",
+      "to": "EC_D10_S_M",
+      "type": "corridor"
+    },
+    {
+      "from": "EC_D10_S_M",
+      "to": "EC_D10_S_A",
+      "type": "corridor"
+    },
+    {
+      "from": "EC_D10_P_M",
+      "to": "EC_D10_S_M",
+      "type": "pocket_door"
+    },
+    {
+      "from": "EC_D10_P_M",
+      "to": "EC_D11_P_M",
+      "type": "turbolift"
+    },
+    {
+      "from": "EC_D11_P_F",
+      "to": "EC_D11_P_M",
+      "type": "corridor"
+    },
+    {
+      "from": "EC_D11_P_M",
+      "to": "EC_D11_P_A",
+      "type": "corridor"
+    },
+    {
+      "from": "EC_D11_S_F",
+      "to": "EC_D11_S_M",
+      "type": "corridor"
+    },
+    {
+      "from": "EC_D11_S_M",
+      "to": "EC_D11_S_A",
+      "type": "corridor"
+    },
+    {
+      "from": "EC_D11_P_M",
+      "to": "EC_D11_S_M",
+      "type": "pocket_door"
+    },
+    {
+      "from": "EC_D11_P_M",
+      "to": "EC_D12_P_M",
+      "type": "turbolift"
+    },
+    {
+      "from": "EC_D12_P_F",
+      "to": "EC_D12_P_M",
+      "type": "corridor"
+    },
+    {
+      "from": "EC_D12_P_M",
+      "to": "EC_D12_P_A",
+      "type": "corridor"
+    },
+    {
+      "from": "EC_D12_S_F",
+      "to": "EC_D12_S_M",
+      "type": "corridor"
+    },
+    {
+      "from": "EC_D12_S_M",
+      "to": "EC_D12_S_A",
+      "type": "corridor"
+    },
+    {
+      "from": "EC_D12_P_M",
+      "to": "EC_D12_S_M",
+      "type": "pocket_door"
+    },
+    {
+      "from": "FC_D23_P_F",
+      "to": "FC_D23_P_A",
+      "type": "corridor"
+    },
+    {
+      "from": "FC_D23_S_F",
+      "to": "FC_D23_S_A",
+      "type": "corridor"
+    },
+    {
+      "from": "FC_D23_P_F",
+      "to": "FC_D23_S_F",
+      "type": "pocket_door"
+    },
+    {
+      "from": "FC_D23_P_F",
+      "to": "FC_D24_P_F",
+      "type": "turbolift"
+    },
+    {
+      "from": "FC_D24_P_F",
+      "to": "FC_D24_P_A",
+      "type": "corridor"
+    },
+    {
+      "from": "FC_D24_S_F",
+      "to": "FC_D24_S_A",
+      "type": "corridor"
+    },
+    {
+      "from": "FC_D24_P_F",
+      "to": "FC_D24_S_F",
+      "type": "pocket_door"
+    },
+    {
+      "from": "FC_D24_P_F",
+      "to": "FC_D25_P_F",
+      "type": "turbolift"
+    },
+    {
+      "from": "FC_D25_P_F",
+      "to": "FC_D25_P_A",
+      "type": "corridor"
+    },
+    {
+      "from": "FC_D25_S_F",
+      "to": "FC_D25_S_A",
+      "type": "corridor"
+    },
+    {
+      "from": "FC_D25_P_F",
+      "to": "FC_D25_S_F",
+      "type": "pocket_door"
+    },
+    {
+      "from": "OC_D8_F",
+      "to": "OC_D8_M",
+      "type": "pocket_door"
+    },
+    {
+      "from": "OC_D8_M",
+      "to": "OC_D8_A",
+      "type": "pocket_door"
+    },
+    {
+      "from": "OC_D9_F",
+      "to": "OC_D9_M",
+      "type": "pocket_door"
+    },
+    {
+      "from": "OC_D9_M",
+      "to": "OC_D9_A",
+      "type": "pocket_door"
+    },
+    {
+      "from": "OC_D8_M",
+      "to": "OC_D9_M",
+      "type": "turbolift"
     }
   ]
 }

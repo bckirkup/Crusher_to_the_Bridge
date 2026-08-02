@@ -46,14 +46,16 @@ def _crew_display(
     return {"x": recipe.length_m * 0.55 + x_off, "y": base_y}
 
 
-def _build_pax_corridors(recipe: CruisePlatformRecipe) -> list[dict[str, Any]]:
-    corr = recipe.pax_corridors
+def _build_grid_corridors(
+    recipe: CruisePlatformRecipe, corr: CorridorRecipe,
+) -> list[dict[str, Any]]:
     zones: list[dict[str, Any]] = []
+    prefix = corr.id_prefix
     for deck in corr.decks:
         for side in corr.sides:
             for section in corr.sections:
                 vent = corr.ventilation(deck, side, section)
-                zid = pax_zone_id(deck, side, section)
+                zid = pax_zone_id(deck, side, section, prefix=prefix)
                 zones.append({
                     "id": zid,
                     "type": "Cabin_Corridor",
@@ -71,13 +73,15 @@ def _build_pax_corridors(recipe: CruisePlatformRecipe) -> list[dict[str, Any]]:
     return zones
 
 
-def _build_crew_corridors(recipe: CruisePlatformRecipe) -> list[dict[str, Any]]:
-    corr = recipe.crew_corridors
+def _build_linear_corridors(
+    recipe: CruisePlatformRecipe, corr: CorridorRecipe,
+) -> list[dict[str, Any]]:
     zones: list[dict[str, Any]] = []
+    prefix = corr.id_prefix
     for deck in corr.decks:
         for section in corr.sections:
             vent = corr.ventilation(deck, "", section)
-            zid = crew_zone_id(deck, section)
+            zid = crew_zone_id(deck, section, prefix=prefix)
             zones.append({
                 "id": zid,
                 "type": "Cabin_Corridor",
@@ -93,6 +97,22 @@ def _build_crew_corridors(recipe: CruisePlatformRecipe) -> list[dict[str, Any]]:
                 ).replace("  ", " "),
             })
     return zones
+
+
+def _build_corridor_bank(
+    recipe: CruisePlatformRecipe, corr: CorridorRecipe,
+) -> list[dict[str, Any]]:
+    if corr.sides:
+        return _build_grid_corridors(recipe, corr)
+    return _build_linear_corridors(recipe, corr)
+
+
+def _build_pax_corridors(recipe: CruisePlatformRecipe) -> list[dict[str, Any]]:
+    return _build_corridor_bank(recipe, recipe.pax_corridors)
+
+
+def _build_crew_corridors(recipe: CruisePlatformRecipe) -> list[dict[str, Any]]:
+    return _build_corridor_bank(recipe, recipe.crew_corridors)
 
 
 def _public_zone_dicts(recipe: CruisePlatformRecipe) -> list[dict[str, Any]]:
@@ -113,10 +133,14 @@ def _public_zone_dicts(recipe: CruisePlatformRecipe) -> list[dict[str, Any]]:
 
 
 def build_spatial_layout(recipe: CruisePlatformRecipe) -> dict[str, Any]:
+    extra: list[dict[str, Any]] = []
+    for bank in recipe.extra_corridors:
+        extra.extend(_build_corridor_bank(recipe, bank))
     zones = (
         _public_zone_dicts(recipe)
         + _build_pax_corridors(recipe)
         + _build_crew_corridors(recipe)
+        + extra
     )
     for z in zones:
         assert len(z["id"]) <= 15, f"Contam zone id too long: {z['id']!r}"
@@ -136,32 +160,40 @@ def build_spatial_layout(recipe: CruisePlatformRecipe) -> dict[str, Any]:
 
 
 def _pax_corridor_ids(corr: CorridorRecipe) -> list[str]:
+    prefix = corr.id_prefix
+    if corr.sides:
+        return [
+            pax_zone_id(deck, side, section, prefix=prefix)
+            for deck in corr.decks
+            for side in corr.sides
+            for section in corr.sections
+        ]
     return [
-        pax_zone_id(deck, side, section)
+        crew_zone_id(deck, section, prefix=prefix)
         for deck in corr.decks
-        for side in corr.sides
         for section in corr.sections
     ]
 
 
 def _crew_corridor_ids(corr: CorridorRecipe) -> list[str]:
-    return [
-        crew_zone_id(deck, section)
-        for deck in corr.decks
-        for section in corr.sections
-    ]
+    return _pax_corridor_ids(corr)
 
 
 def _pax_ids_on_deck(corr: CorridorRecipe, deck: int) -> list[str]:
+    prefix = corr.id_prefix
+    if corr.sides:
+        return [
+            pax_zone_id(deck, side, section, prefix=prefix)
+            for side in corr.sides
+            for section in corr.sections
+        ]
     return [
-        pax_zone_id(deck, side, section)
-        for side in corr.sides
-        for section in corr.sections
+        crew_zone_id(deck, section, prefix=prefix) for section in corr.sections
     ]
 
 
 def _crew_ids_on_deck(corr: CorridorRecipe, deck: int) -> list[str]:
-    return [crew_zone_id(deck, section) for section in corr.sections]
+    return _pax_ids_on_deck(corr, deck)
 
 
 def build_air_flow_paths(
@@ -173,10 +205,19 @@ def build_air_flow_paths(
     if recipe.auto_pax_ahu:
         for deck in recipe.pax_corridors.decks:
             hvac.append({
-                "id": f"AHU_Pax_D{deck}",
+                "id": f"{recipe.pax_ahu_prefix}{deck}",
                 "rooms": _pax_ids_on_deck(recipe.pax_corridors, deck),
                 "ach": recipe.pax_ahu_ach,
-                "description": f"Deck {deck} passenger cabin fan-coil branch.",
+                "description": f"Deck {deck} cabin fan-coil branch.",
+            })
+    for bank in recipe.extra_corridors:
+        # One AHU per extra bank deck: AHU_{prefix}_D{n}
+        for deck in bank.decks:
+            hvac.append({
+                "id": f"AHU_{bank.id_prefix}_D{deck}",
+                "rooms": _pax_ids_on_deck(bank, deck),
+                "ach": recipe.pax_ahu_ach,
+                "description": f"Deck {deck} {bank.id_prefix} cabin branch.",
             })
 
     crew_ids = _crew_corridor_ids(recipe.crew_corridors)
@@ -200,7 +241,7 @@ def build_air_flow_paths(
     if recipe.auto_crew_ahu and not recipe.crew_ahu_merged:
         for deck in recipe.crew_corridors.decks:
             hvac.append({
-                "id": f"AHU_Crew_D{deck}",
+                "id": f"{recipe.crew_ahu_prefix}{deck}",
                 "rooms": _crew_ids_on_deck(recipe.crew_corridors, deck),
                 "ach": recipe.crew_ahu_ach,
                 "description": f"Deck {deck} crew accommodation branch.",
@@ -227,8 +268,8 @@ def build_air_flow_paths(
         for i, deck in enumerate(pax_decks[:-1]):
             nxt = pax_decks[i + 1]
             cross.append({
-                "from": f"AHU_Pax_D{deck}",
-                "to": f"AHU_Pax_D{nxt}",
+                "from": f"{recipe.pax_ahu_prefix}{deck}",
+                "to": f"{recipe.pax_ahu_prefix}{nxt}",
                 "flow_rate_m3h": recipe.pax_trunk_m3h,
                 "is_hvac_ducted": True,
                 "path": f"Pax_Trunk_D{deck}_D{nxt}",
@@ -238,8 +279,8 @@ def build_air_flow_paths(
         for i, deck in enumerate(crew_decks[:-1]):
             nxt = crew_decks[i + 1]
             cross.append({
-                "from": f"AHU_Crew_D{deck}",
-                "to": f"AHU_Crew_D{nxt}",
+                "from": f"{recipe.crew_ahu_prefix}{deck}",
+                "to": f"{recipe.crew_ahu_prefix}{nxt}",
                 "flow_rate_m3h": recipe.crew_trunk_m3h,
                 "is_hvac_ducted": True,
                 "path": f"Crew_Trunk_D{deck}_D{nxt}",
@@ -247,7 +288,7 @@ def build_air_flow_paths(
     if recipe.cabin_relief_m3h > 0 and recipe.cabin_relief_target_ahu:
         for deck in pax_decks:
             cross.append({
-                "from": f"AHU_Pax_D{deck}",
+                "from": f"{recipe.pax_ahu_prefix}{deck}",
                 "to": recipe.cabin_relief_target_ahu,
                 "flow_rate_m3h": recipe.cabin_relief_m3h,
                 "is_hvac_ducted": True,
