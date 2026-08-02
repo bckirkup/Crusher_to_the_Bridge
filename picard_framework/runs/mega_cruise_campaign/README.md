@@ -26,7 +26,7 @@ sweeps (see `docs/tiered_escalation_spec.md`):
 
 ## Multi-platform calibration (`calibration_manifest_v1.json`)
 
-Separate campaign (~2,760 runs if all tiers; **wave-1 default ~2,360**
+Separate campaign (~6,360 runs if all tiers; **wave-1 default ~5,960**
 without deferred C2). CDC VSP AGE rate matching via `dose_adjustment`
 sweeps across `expedition_cruise_450` / `classic_cruise_1900` /
 `spirit_cruise_3000` / `mega_cruise_5000`. Agent counts come from the
@@ -39,6 +39,7 @@ runner’s platform table (450 / 1910 / 3000 / 7000), not
 | c2 | Immunity × platforms — **deferred** until C1 pins `dose_adjustment` | 400 |
 | c3 | SARS-CoV-2 dose × platforms (Diamond Princess cross-check) | 360 |
 | c4 | Voyage duration (72/168/336 epochs) × dose | 180 |
+| c5 | Density-dependent contact α × dose × platforms × immunity × surv | 3600 |
 
 ```bash
 MANIFEST=picard_framework/runs/mega_cruise_campaign/calibration_manifest_v1.json

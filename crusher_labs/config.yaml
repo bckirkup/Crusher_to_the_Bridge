@@ -173,6 +173,18 @@ emod_progression:
     - {name: "late",   max_rate: 40.0, sensitivity_cap: 0.80}
   phase_durations: [3, 5, 4]          # epochs per phase
 
+# ── Transmission contact model ─────────────────────────────────
+# Direct-contact r0_draw: density_dependent (default) scales contacts
+# with zone occupancy; legacy uses fixed AVG_R_POOL (frequency-dependent).
+transmission:
+  contact_mode: "density_dependent"   # "legacy" | "density_dependent"
+  density_dependent:
+    reference_occupancy: 50           # occupancy at which contacts = base_contacts
+    base_contacts: 1.33               # mean contacts at reference_occupancy
+    max_contacts: 20                  # cap on contacts per agent per zone per epoch
+    exponent: 0.5                     # α: contacts = base * (n/ref)^α
+    crew_contact_multiplier: 2.0      # crew in Dining/Galley service zones
+
 # ── HVAC / CONTAM Transport ────────────────────────────────────
 hvac:
   filter_efficiency: 0.50           # η – HVAC filter removal efficiency

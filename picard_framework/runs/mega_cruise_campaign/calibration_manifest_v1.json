@@ -272,6 +272,57 @@
         509
       ],
       "calibration_target": "CDC: AR increases with voyage length (2.94% <7d, 6.05% 7-10d, 7.86% \u226511d)"
+    },
+    "c5_density_calibration": {
+      "description": "Density-dependent contact model calibration",
+      "platforms": [
+        "expedition_cruise_450",
+        "classic_cruise_1900",
+        "spirit_cruise_3000",
+        "mega_cruise_5000"
+      ],
+      "pathogen": "norovirus",
+      "dose_adjustments": [
+        12,
+        15,
+        18
+      ],
+      "density_exponents": [
+        0.0,
+        0.25,
+        0.5,
+        0.75,
+        1.0
+      ],
+      "pre_immunity_fractions": [
+        0.0,
+        0.2
+      ],
+      "surveillance_strategies": [
+        "none_true",
+        "syndromic"
+      ],
+      "initial_infected_values": [
+        1
+      ],
+      "epochs": 168,
+      "seeds": [
+        700,
+        701,
+        702,
+        703,
+        704,
+        705,
+        706,
+        707,
+        708,
+        709,
+        710,
+        711,
+        712,
+        713,
+        714
+      ]
     }
   },
   "pathogen_configs": {

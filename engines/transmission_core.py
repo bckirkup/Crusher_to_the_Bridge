@@ -65,8 +65,18 @@ FOMITE_TRANSFER_FRACTION = 0.01
 # Surface decay rate per epoch (distinct from airborne CONTAM decay)
 SURFACE_DECAY_RATE = 0.05
 
-# R0-calibrated contact pool (from Person.java avgR array)
+# R0-calibrated contact pool (from Person.java avgR array) — legacy contact_mode
 AVG_R_POOL = [1, 2, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2]
+
+# Defaults for density_dependent contact_mode (partial overrides merge onto these)
+DEFAULT_DENSITY_CFG: dict[str, float] = {
+    "reference_occupancy": 50.0,
+    "base_contacts": 1.33,
+    "max_contacts": 20.0,
+    "exponent": 0.5,
+    "crew_contact_multiplier": 2.0,
+}
+DEFAULT_CONTACT_MODE = "density_dependent"
 
 
 # ── Data structures ─────────────────────────────────────────────────────
@@ -184,6 +194,7 @@ class TransmissionCore:
         zone_ventilation: dict[str, str] | None = None,
         confinement_isolation_factor: float = DEFAULT_CONFINEMENT_ISOLATION_FACTOR,
         corridor_direct_contact_factor: float = DEFAULT_CORRIDOR_DIRECT_CONTACT_FACTOR,
+        cfg: dict[str, Any] | None = None,
     ) -> None:
         self.rng = rng
         self.zone_volumes = zone_volumes or {}
@@ -193,6 +204,25 @@ class TransmissionCore:
         self.confinement_isolation_factor = confinement_isolation_factor
         self.corridor_direct_contact_factor = corridor_direct_contact_factor
         self._quarantined_ids: set[int] = set()
+
+        tx = (cfg or {}).get("transmission", {}) or {}
+        mode = str(tx.get("contact_mode", DEFAULT_CONTACT_MODE))
+        if mode not in ("legacy", "density_dependent"):
+            mode = DEFAULT_CONTACT_MODE
+        self.contact_mode = mode
+        provided = tx.get("density_dependent") or {}
+        if not isinstance(provided, dict):
+            provided = {}
+        self.density_cfg: dict[str, float] = {
+            **DEFAULT_DENSITY_CFG,
+            **{k: float(v) for k, v in provided.items() if k in DEFAULT_DENSITY_CFG},
+        }
+        # Dining-type zones or Galley IDs: crew contact multiplier applies here
+        self._service_zones: set[str] = {
+            z
+            for z, t in self.zone_types.items()
+            if t == "Dining" or "Galley" in z
+        }
 
         # Persistent state: surface fomite pools per zone per pathogen
         # {pathogen_id: {zone: mass}}
@@ -532,6 +562,39 @@ class TransmissionCore:
         dose = total_shedding / n_occupants * r0_draw
         return dose * self._confinement_factor(target)
 
+    def _effective_contacts(self, n_occupants: int, agent: KorkinAgent) -> int:
+        """Occupancy-scaled contact draw for density_dependent contact_mode.
+
+        contacts ≈ base * (n / ref)^α, optionally multiplied for crew in
+        Dining/Galley service zones, capped, then Poisson-sampled.
+        """
+        cfg = self.density_cfg
+        ref = max(float(cfg["reference_occupancy"]), 1e-9)
+        base = float(cfg["base_contacts"])
+        alpha = float(cfg["exponent"])
+        max_c = float(cfg["max_contacts"])
+
+        raw = base * (max(n_occupants, 0) / ref) ** alpha
+        loc = getattr(agent, "current_location", None) or ""
+        if getattr(agent, "role", "") == "crew" and loc in self._service_zones:
+            raw *= float(cfg.get("crew_contact_multiplier", 1.0))
+
+        mean_contacts = min(raw, max_c)
+        if mean_contacts <= 0.0:
+            return 0
+        # Cap again after the Poisson draw so max_contacts is a hard limit.
+        return min(int(max_c), max(0, int(self.rng.poisson(mean_contacts))))
+
+    def _draw_contact_multiplier(
+        self,
+        n_occupants: int,
+        target: KorkinAgent,
+    ) -> int:
+        """Return r0_draw for direct contact under the active contact_mode."""
+        if self.contact_mode == "density_dependent":
+            return self._effective_contacts(n_occupants, target)
+        return int(self.rng.choice(AVG_R_POOL))
+
     def _pathway_direct_contact(
         self,
         _epoch: int,
@@ -559,7 +622,7 @@ class TransmissionCore:
             )
 
             for target in susceptible:
-                r0_draw = int(self.rng.choice(AVG_R_POOL))
+                r0_draw = self._draw_contact_multiplier(n_occupants, target)
                 dose = self._direct_contact_dose(
                     target, shedders, total_shedding, n_occupants, r0_draw,
                     cabin_confinement,
