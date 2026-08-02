@@ -90,3 +90,7 @@ picard_framework/runs/mega_cruise_campaign/calibration_*_part_*.json
 picard_framework/runs/mega_cruise_campaign/campaign_manifest_v*_bake.json
 picard_framework/runs/mega_cruise_campaign/c5_density_manifest*.json
 picard_framework/runs/mega_cruise_campaign/sensitivity_*_manifest*.json
+picard_framework/runs/mega_cruise_campaign/recal_*_manifest*.json
+picard_framework/runs/mega_cruise_campaign/c8_*_manifest*.json
+picard_framework/runs/mega_cruise_campaign/c9_*_manifest*.json
+picard_framework/runs/mega_cruise_campaign/c10_*_manifest*.json
