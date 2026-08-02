@@ -1,141 +1,432 @@
 {
   "platform": "enterprise_constitution_tos",
-  "description": "Constitution-class HVAC: saucer primary ring, engineering secondary hull, limited cross-hull ducting.",
-  "oa_fraction": 0.2,
+  "description": "HVAC for enterprise_constitution_tos cabin-corridor layout. Population ~430.",
+  "oa_fraction": 0.15,
   "hvac_duty": 0.5,
   "hvac_zones": [
     {
-      "id": "zone_saucer_command",
+      "id": "AHU_EC_D4",
       "rooms": [
-        "Bridge",
-        "Communications",
-        "Library"
-      ],
-      "ach": 8.0,
-      "description": "Forward saucer command spaces"
-    },
-    {
-      "id": "zone_saucer_ops",
-      "rooms": [
-        "Sickbay",
-        "Security",
-        "Transporter",
-        "Science_Lab"
-      ],
-      "ach": 10.0,
-      "description": "Mid-saucer operational deck"
-    },
-    {
-      "id": "zone_saucer_living",
-      "rooms": [
-        "Rec_Deck",
-        "Galley",
-        "Crew_Quarters",
-        "OfficerQtrs",
-        "Mess_Hall"
+        "EC_D4_P_F",
+        "EC_D4_P_A",
+        "EC_D4_S_F",
+        "EC_D4_S_A"
       ],
       "ach": 7.0,
-      "description": "Crew living and dining ring"
+      "description": "Deck 4 cabin fan-coil branch."
     },
     {
-      "id": "zone_engineering",
+      "id": "AHU_EC_D5",
       "rooms": [
-        "Engineering"
+        "EC_D5_P_F",
+        "EC_D5_P_A",
+        "EC_D5_S_F",
+        "EC_D5_S_A"
       ],
-      "ach": 14.0,
-      "description": "Secondary hull high-exchange engineering"
+      "ach": 7.0,
+      "description": "Deck 5 cabin fan-coil branch."
+    },
+    {
+      "id": "AHU_EC_D6",
+      "rooms": [
+        "EC_D6_P_F",
+        "EC_D6_P_A",
+        "EC_D6_S_F",
+        "EC_D6_S_A"
+      ],
+      "ach": 7.0,
+      "description": "Deck 6 cabin fan-coil branch."
+    },
+    {
+      "id": "AHU_Command",
+      "rooms": [
+        "Bridge",
+        "BriefRoom",
+        "Comms",
+        "Library"
+      ],
+      "ach": 10.0,
+      "description": "Command spaces."
+    },
+    {
+      "id": "AHU_Ops",
+      "rooms": [
+        "Science1",
+        "Science2",
+        "Transprt1",
+        "Transprt2",
+        "Security",
+        "Brig",
+        "NeckHub"
+      ],
+      "ach": 9.0,
+      "description": "Ops / transporters / security."
+    },
+    {
+      "id": "AHU_Living",
+      "rooms": [
+        "RecDeck",
+        "Gym",
+        "MessHall",
+        "HeadsMain"
+      ],
+      "ach": 8.0,
+      "description": "Living / recreation."
+    },
+    {
+      "id": "AHU_Medical",
+      "rooms": [
+        "Sickbay",
+        "IsolBay1",
+        "IsolBay2"
+      ],
+      "ach": 12.0,
+      "description": "Sickbay HEPA island."
+    },
+    {
+      "id": "AHU_Service",
+      "rooms": [
+        "Galley",
+        "StoresDry",
+        "StoresCold",
+        "Armory"
+      ],
+      "ach": 15.0,
+      "description": "Galley exhaust + stores."
+    },
+    {
+      "id": "AHU_Engineering",
+      "rooms": [
+        "EngMain",
+        "WarpCore",
+        "EPSDist",
+        "Jefferies",
+        "Airlock"
+      ],
+      "ach": 16.0,
+      "description": "Secondary-hull engineering."
+    },
+    {
+      "id": "AHU_Crew",
+      "rooms": [
+        "OC_D5_F",
+        "OC_D5_M",
+        "OC_D5_A",
+        "OC_D6_F",
+        "OC_D6_M",
+        "OC_D6_A"
+      ],
+      "ach": 7.0,
+      "description": "Officer corridors."
     }
   ],
   "cross_zone_links": [
     {
-      "from": "zone_saucer_command",
-      "to": "zone_saucer_ops",
-      "flow_rate_m3h": 120,
-      "path": "turbolift_shaft_fore",
-      "is_hvac_ducted": true
+      "from": "AHU_Command",
+      "to": "AHU_Ops",
+      "flow_rate_m3h": 200.0,
+      "is_hvac_ducted": true,
+      "path": "Saucer_Cmd_Ops_Trunk"
     },
     {
-      "from": "zone_saucer_ops",
-      "to": "zone_saucer_living",
-      "flow_rate_m3h": 180,
-      "path": "corridor_ring_mid",
-      "is_hvac_ducted": false
+      "from": "AHU_Living",
+      "to": "AHU_Engineering",
+      "flow_rate_m3h": 120.0,
+      "is_hvac_ducted": true,
+      "path": "Neck_Trunk_Throttled"
     },
     {
-      "from": "zone_saucer_living",
-      "to": "zone_engineering",
-      "flow_rate_m3h": 90,
-      "path": "connecting_tube_aft",
-      "is_hvac_ducted": true
+      "from": "AHU_Medical",
+      "to": "AHU_Ops",
+      "flow_rate_m3h": 80.0,
+      "is_hvac_ducted": false,
+      "path": "Sickbay_Door_Leakage"
     },
     {
-      "from": "zone_saucer_command",
-      "to": "zone_engineering",
-      "flow_rate_m3h": 40,
-      "path": "emergency_vent_shaft",
-      "is_hvac_ducted": false
+      "from": "Galley",
+      "to": "MessHall",
+      "flow_rate_m3h": 5000.0,
+      "is_hvac_ducted": false,
+      "path": "Galley_Service_Exhaust"
+    },
+    {
+      "from": "AHU_Engineering",
+      "to": "AHU_Service",
+      "flow_rate_m3h": 150.0,
+      "is_hvac_ducted": true,
+      "path": "Eng_to_Stores_Service"
+    },
+    {
+      "from": "AHU_EC_D4",
+      "to": "AHU_EC_D5",
+      "flow_rate_m3h": 600.0,
+      "is_hvac_ducted": true,
+      "path": "Pax_Trunk_D4_D5"
+    },
+    {
+      "from": "AHU_EC_D5",
+      "to": "AHU_EC_D6",
+      "flow_rate_m3h": 600.0,
+      "is_hvac_ducted": true,
+      "path": "Pax_Trunk_D5_D6"
+    },
+    {
+      "from": "AHU_EC_D4",
+      "to": "AHU_Living",
+      "flow_rate_m3h": 400.0,
+      "is_hvac_ducted": true,
+      "path": "Cabin_Relief_D4"
+    },
+    {
+      "from": "AHU_EC_D5",
+      "to": "AHU_Living",
+      "flow_rate_m3h": 400.0,
+      "is_hvac_ducted": true,
+      "path": "Cabin_Relief_D5"
+    },
+    {
+      "from": "AHU_EC_D6",
+      "to": "AHU_Living",
+      "flow_rate_m3h": 400.0,
+      "is_hvac_ducted": true,
+      "path": "Cabin_Relief_D6"
     }
   ],
   "adjacency": [
     {
       "from": "Bridge",
-      "to": "Communications",
-      "type": "turbolift"
+      "to": "BriefRoom",
+      "type": "pocket_door"
     },
     {
       "from": "Bridge",
+      "to": "Comms",
+      "type": "turbolift"
+    },
+    {
+      "from": "BriefRoom",
       "to": "Library",
-      "type": "passageway"
+      "type": "pocket_door"
     },
     {
       "from": "Sickbay",
-      "to": "Transporter",
-      "type": "passageway"
+      "to": "IsolBay1",
+      "type": "pocket_door"
+    },
+    {
+      "from": "Sickbay",
+      "to": "IsolBay2",
+      "type": "pocket_door"
     },
     {
       "from": "Sickbay",
       "to": "Security",
-      "type": "passageway"
+      "type": "pocket_door"
     },
     {
-      "from": "Science_Lab",
-      "to": "Library",
-      "type": "passageway"
+      "from": "Science1",
+      "to": "Science2",
+      "type": "pocket_door"
     },
     {
-      "from": "Rec_Deck",
-      "to": "Galley",
-      "type": "service_hatch"
+      "from": "Science1",
+      "to": "Transprt1",
+      "type": "pocket_door"
+    },
+    {
+      "from": "Transprt1",
+      "to": "Transprt2",
+      "type": "turbolift"
+    },
+    {
+      "from": "Security",
+      "to": "Brig",
+      "type": "pocket_door"
+    },
+    {
+      "from": "RecDeck",
+      "to": "Gym",
+      "type": "pocket_door"
+    },
+    {
+      "from": "RecDeck",
+      "to": "MessHall",
+      "type": "pocket_door"
     },
     {
       "from": "Galley",
-      "to": "Crew_Quarters",
-      "type": "passageway"
+      "to": "MessHall",
+      "type": "service_hatch"
     },
     {
-      "from": "Crew_Quarters",
-      "to": "OfficerQtrs",
-      "type": "passageway"
+      "from": "MessHall",
+      "to": "HeadsMain",
+      "type": "pocket_door"
     },
     {
-      "from": "OfficerQtrs",
-      "to": "Engineering",
+      "from": "StoresDry",
+      "to": "StoresCold",
+      "type": "pocket_door"
+    },
+    {
+      "from": "StoresDry",
+      "to": "Galley",
+      "type": "service_corridor"
+    },
+    {
+      "from": "Armory",
+      "to": "Security",
       "type": "turbolift"
     },
     {
-      "from": "Engineering",
-      "to": "Sickbay",
+      "from": "NeckHub",
+      "to": "EngMain",
+      "type": "connecting_tube"
+    },
+    {
+      "from": "NeckHub",
+      "to": "StoresDry",
+      "type": "pressure_bulkhead"
+    },
+    {
+      "from": "EngMain",
+      "to": "WarpCore",
+      "type": "pressure_bulkhead"
+    },
+    {
+      "from": "EngMain",
+      "to": "EPSDist",
+      "type": "pocket_door"
+    },
+    {
+      "from": "EPSDist",
+      "to": "Jefferies",
+      "type": "service_corridor"
+    },
+    {
+      "from": "Jefferies",
+      "to": "Airlock",
+      "type": "hatch"
+    },
+    {
+      "from": "Bridge",
+      "to": "NeckHub",
       "type": "turbolift"
     },
     {
-      "from": "Rec_Deck",
+      "from": "Sickbay",
+      "to": "EC_D4_P_F",
+      "type": "pocket_door"
+    },
+    {
+      "from": "RecDeck",
+      "to": "EC_D6_P_F",
+      "type": "pocket_door"
+    },
+    {
+      "from": "MessHall",
+      "to": "EC_D6_S_F",
+      "type": "pocket_door"
+    },
+    {
+      "from": "HeadsMain",
+      "to": "EC_D5_P_A",
+      "type": "pocket_door"
+    },
+    {
+      "from": "OC_D5_F",
       "to": "Bridge",
       "type": "turbolift"
     },
     {
-      "from": "Galley",
-      "to": "Mess_Hall",
-      "type": "service_hatch"
+      "from": "OC_D6_M",
+      "to": "Library",
+      "type": "pocket_door"
+    },
+    {
+      "from": "EC_D4_S_A",
+      "to": "NeckHub",
+      "type": "turbolift"
+    },
+    {
+      "from": "EC_D4_P_F",
+      "to": "EC_D4_P_A",
+      "type": "corridor"
+    },
+    {
+      "from": "EC_D4_S_F",
+      "to": "EC_D4_S_A",
+      "type": "corridor"
+    },
+    {
+      "from": "EC_D4_P_F",
+      "to": "EC_D4_S_F",
+      "type": "pocket_door"
+    },
+    {
+      "from": "EC_D4_P_F",
+      "to": "EC_D5_P_F",
+      "type": "turbolift"
+    },
+    {
+      "from": "EC_D5_P_F",
+      "to": "EC_D5_P_A",
+      "type": "corridor"
+    },
+    {
+      "from": "EC_D5_S_F",
+      "to": "EC_D5_S_A",
+      "type": "corridor"
+    },
+    {
+      "from": "EC_D5_P_F",
+      "to": "EC_D5_S_F",
+      "type": "pocket_door"
+    },
+    {
+      "from": "EC_D5_P_F",
+      "to": "EC_D6_P_F",
+      "type": "turbolift"
+    },
+    {
+      "from": "EC_D6_P_F",
+      "to": "EC_D6_P_A",
+      "type": "corridor"
+    },
+    {
+      "from": "EC_D6_S_F",
+      "to": "EC_D6_S_A",
+      "type": "corridor"
+    },
+    {
+      "from": "EC_D6_P_F",
+      "to": "EC_D6_S_F",
+      "type": "pocket_door"
+    },
+    {
+      "from": "OC_D5_F",
+      "to": "OC_D5_M",
+      "type": "pocket_door"
+    },
+    {
+      "from": "OC_D5_M",
+      "to": "OC_D5_A",
+      "type": "pocket_door"
+    },
+    {
+      "from": "OC_D6_F",
+      "to": "OC_D6_M",
+      "type": "pocket_door"
+    },
+    {
+      "from": "OC_D6_M",
+      "to": "OC_D6_A",
+      "type": "pocket_door"
+    },
+    {
+      "from": "OC_D5_M",
+      "to": "OC_D6_M",
+      "type": "turbolift"
     }
   ]
 }

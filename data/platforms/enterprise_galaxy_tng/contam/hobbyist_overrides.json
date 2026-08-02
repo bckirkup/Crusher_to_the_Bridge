@@ -1,61 +1,57 @@
 {
-  "description": "Hobbyist-plus Contam overrides for Galaxy-class (TNG) fiction ship.",
+  "description": "Hobbyist-plus Contam overrides for enterprise_galaxy_tng cabin-corridor revision.",
   "orifice_type_map": {
-    "turbolift": "turbolift_forward",
-    "passageway": "habitation_trunk",
-    "service_hatch": "cargo_lift"
+    "corridor": "cabin_relief",
+    "doorway": "doorway",
+    "pocket_door": "pocket_door",
+    "pressure_bulkhead": "pressure_bulkhead",
+    "passageway": "passageway",
+    "elevator_bank": "elevator_bank",
+    "stairwell": "stairwell",
+    "turbolift": "turbolift",
+    "service_stairwell": "service_stairwell",
+    "service_hatch": "hatch",
+    "service_corridor": "service_corridor",
+    "open_deck": "promenade",
+    "open_front": "open_front",
+    "ladder_well": "ladder",
+    "multi_deck_void": "multi_deck_void",
+    "connecting_tube": "connecting_tube",
+    "hatch": "hatch"
   },
   "wind_profile": "ship_hull",
-  "deck_temp_offset_K": {
-    "saucer_1": -0.5,
-    "saucer_4": 0.0,
-    "saucer_6": 0.5,
-    "saucer_8": 0.0,
-    "saucer_9": 0.0,
-    "saucer_10": 0.0,
-    "saucer_11": 0.0,
-    "saucer_12": 0.5,
-    "saucer_15": 0.0,
-    "saucer_16": 0.0,
-    "saucer_17": 1.0,
-    "saucer_23": 0.0,
-    "saucer_24": 0.0,
-    "saucer_25": 0.0,
-    "drive_section": 6.0
-  },
-  "zone_annotations": {
-    "Bridge": "Bridge",
-    "Ten_Forward": "Ten Forward",
-    "MainEng": "Main Engineering",
-    "Arboretum": "Arboretum",
-    "Sickbay": "Sickbay"
-  },
-  "filter_preset": "GalaxyACH",
+  "filter_preset": "MERV11",
   "hvac_filter": {
-    "zone_saucer_medical": "HEPA",
-    "zone_drive": "GalaxyACH",
-    "zone_saucer_social": "MERV13"
+    "AHU_EC_D7": "MERV8",
+    "AHU_EC_D8": "MERV8",
+    "AHU_EC_D9": "MERV8",
+    "AHU_EC_D10": "MERV8",
+    "AHU_EC_D11": "MERV8",
+    "AHU_EC_D12": "MERV8",
+    "AHU_FC_D23": "MERV8",
+    "AHU_FC_D24": "MERV8",
+    "AHU_FC_D25": "MERV8",
+    "AHU_Command": "MERV11",
+    "AHU_Public": "MERV11",
+    "AHU_Ops": "MERV11",
+    "AHU_Medical": "HEPA",
+    "AHU_Service": "MERV11",
+    "AHU_Engineering": "MERV13",
+    "AHU_Flight": "MERV13",
+    "AHU_Crew": "MERV8"
   },
   "oa_fraction": {
-    "_default": 0.22,
-    "zone_saucer_medical": 0.4,
-    "zone_saucer_social": 0.25
+    "_default": 0.15,
+    "AHU_Medical": 0.4,
+    "AHU_EC_D7": 0.12,
+    "AHU_EC_D8": 0.12,
+    "AHU_EC_D9": 0.12,
+    "AHU_EC_D10": 0.12,
+    "AHU_EC_D11": 0.12,
+    "AHU_EC_D12": 0.12,
+    "AHU_FC_D23": 0.12,
+    "AHU_FC_D24": 0.12,
+    "AHU_FC_D25": 0.12
   },
-  "wall_azimuth_deg": {
-    "Bridge": 0,
-    "Ten_Forward": 270,
-    "MainEng": 180,
-    "Arboretum": 90,
-    "Shuttlebay": 0,
-    "Cargo_Bay": 180,
-    "Sickbay": 90
-  },
-  "duct_hvac_ids": [
-    "zone_saucer_command",
-    "zone_saucer_social",
-    "zone_saucer_medical",
-    "zone_saucer_habitation",
-    "zone_saucer_logistics"
-  ],
   "night_setback": true
 }

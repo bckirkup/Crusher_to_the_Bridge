@@ -463,8 +463,8 @@ airflow definitions:
 | Platform | Description |
 |----------|-------------|
 | `destroyer_baseline` | Gleaves-class destroyer (default, 6 zones) |
-| `enterprise_constitution_tos` | Constitution-class cruiser (TOS fiction-adapted, 13 zones) |
-| `enterprise_galaxy_tng` | Galaxy-class explorer (TNG fiction-adapted, 17 zones) |
+| `enterprise_constitution_tos` | Constitution-class cruiser (TOS fiction-adapted; cabin-corridor berthing, ~45 zones, ~430 crew — see `docs/ENTERPRISE_CABIN_REVISION.md`) |
+| `enterprise_galaxy_tng` | Galaxy-class explorer (TNG fiction-adapted; enlisted/officer/family corridors, ~91 zones, ~1000 agents — see `docs/ENTERPRISE_CABIN_REVISION.md`) |
 | `expedition_cruise_300` | **Legacy** well-mixed expedition berthing (25 zones); superseded by `expedition_cruise_450` |
 | `expedition_cruise_450` | Small/medium expedition cruise (~300 pax + 150 crew; cabin-corridor berthing, ~33 zones) |
 | `classic_cruise_1900` | Large classic cruise (~1,350 pax + 560 crew; cabin-corridor, buffet + promenade + atrium, ~61 zones) |

@@ -16,6 +16,11 @@ generator `scripts/generate_cruise_platform_layout.py` + recipes in
 | `spirit_cruise_3000` | Extra-Large | Multi-specialty dining, teen/sports, isolation ward |
 | `mega_cruise_5000` | Super-Mega | Reference standard |
 
+Fiction starship platforms reuse the same cabin-corridor generator extensions
+(`id_prefix`, `extra_corridors`, Contam-safe IDs) via
+`scripts/generate_enterprise_platform_layout.py` — see
+`docs/ENTERPRISE_CABIN_REVISION.md` for Constitution / Galaxy inventories.
+
 Future calibration targets (AGE per 100K traveler-days; **not yet enforced in-repo**):
 expedition 9.06, classic 21.4, spirit 22.1, mega 24.4.
 

@@ -39,6 +39,7 @@ def _cfg_for_platform(platform_id: str) -> dict:
         ("expedition_cruise_450", ["Engine_Room"]),
         ("classic_cruise_1900", ["Engine_Room"]),
         ("spirit_cruise_3000", ["Engine_Room"]),
+        ("enterprise_constitution_tos", ["EngMain"]),
         ("enterprise_galaxy_tng", ["MainEng"]),
     ],
 )

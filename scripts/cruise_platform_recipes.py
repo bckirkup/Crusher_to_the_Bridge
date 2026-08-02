@@ -14,14 +14,18 @@ _SIDE = {"Port": "P", "Stbd": "S", "Central": "C"}
 _POS = {"Fwd": "F", "Mid": "M", "Aft": "A"}
 
 
-def pax_zone_id(deck: int, side: str, section: str) -> str:
-    """Contam-safe ≤15-char passenger corridor id."""
-    return f"PC_D{deck}_{_SIDE[side]}_{_POS[section]}"
+def pax_zone_id(deck: int, side: str, section: str, *, prefix: str = "PC") -> str:
+    """Contam-safe ≤15-char grid corridor id (deck × side × section)."""
+    zid = f"{prefix}_D{deck}_{_SIDE[side]}_{_POS[section]}"
+    assert len(zid) <= 15, zid
+    return zid
 
 
-def crew_zone_id(deck: int, section: str) -> str:
-    """Contam-safe ≤15-char crew corridor id."""
-    return f"CC_D{deck}_{_POS[section]}"
+def crew_zone_id(deck: int, section: str, *, prefix: str = "CC") -> str:
+    """Contam-safe ≤15-char linear corridor id (deck × section)."""
+    zid = f"{prefix}_D{deck}_{_POS[section]}"
+    assert len(zid) <= 15, zid
+    return zid
 
 
 VentFn = Callable[[int, str, str], str]
@@ -39,6 +43,7 @@ class CorridorRecipe:
     deck_label: str  # e.g. "{deck}_Cabins" or "{deck}_Crew"
     ventilation: VentFn
     description_template: str
+    id_prefix: str = "PC"  # PC/CC cruise; EC/OC/FC starship
 
 
 @dataclass(frozen=True)
@@ -76,6 +81,8 @@ class CruisePlatformRecipe:
     # Rooms that are cabin corridors are filled by the generator for
     # AHU_Pax_D* / AHU_Crew* ids listed in auto_* below.
     public_hvac: tuple[HvacGroupRecipe, ...]
+    # Optional additional cabin-corridor banks (e.g. Galaxy family suites).
+    extra_corridors: tuple[CorridorRecipe, ...] = ()
     auto_pax_ahu: bool = True
     auto_crew_ahu: bool = True
     # If True, one AHU_Crew covering all crew corridors (expedition).
@@ -83,6 +90,9 @@ class CruisePlatformRecipe:
     crew_ahu_merged: bool = False
     crew_ahu_ach: float = 6.0
     pax_ahu_ach: float = 6.0
+    # AHU id prefix for auto pax/crew branches (starships may use AHU_EC_D*).
+    pax_ahu_prefix: str = "AHU_Pax_D"
+    crew_ahu_prefix: str = "AHU_Crew_D"
     cross_zone_links: tuple[dict[str, Any], ...] = ()
     adjacency: tuple[dict[str, str], ...] = ()
     confinement_isolation_factor: float = 0.05
@@ -290,6 +300,7 @@ EXPEDITION_CRUISE_450 = CruisePlatformRecipe(
             "Passenger cabin corridor, Deck {deck} {side} {section}. "
             "~12 cabins, ~25 pax, ventilation={vent}."
         ),
+        id_prefix="PC",
     ),
     crew_corridors=CorridorRecipe(
         decks=(2, 3),
@@ -305,6 +316,7 @@ EXPEDITION_CRUISE_450 = CruisePlatformRecipe(
             "Crew cabin corridor, Deck {deck} {section}. "
             "~20 crew, interior HVAC."
         ),
+        id_prefix="CC",
     ),
     public_zones=_expedition_public_zones(),
     public_hvac=(
@@ -599,6 +611,7 @@ CLASSIC_CRUISE_1900 = CruisePlatformRecipe(
             "Passenger cabin corridor, Deck {deck} {side} {section}. "
             "~10 cabins, ~37 pax, ventilation={vent}."
         ),
+        id_prefix="PC",
     ),
     crew_corridors=CorridorRecipe(
         decks=(1, 2, 3),
@@ -614,6 +627,7 @@ CLASSIC_CRUISE_1900 = CruisePlatformRecipe(
             "Crew cabin corridor, Deck {deck} {section}. "
             "~95 crew, interior HVAC."
         ),
+        id_prefix="CC",
     ),
     public_zones=_classic_public_zones(),
     public_hvac=(
@@ -943,6 +957,7 @@ SPIRIT_CRUISE_3000 = CruisePlatformRecipe(
             "Passenger cabin corridor, Deck {deck} {side} {section}. "
             "~10 cabins, ~44 pax, ventilation={vent}."
         ),
+        id_prefix="PC",
     ),
     crew_corridors=CorridorRecipe(
         decks=(1, 2, 3),
@@ -958,6 +973,7 @@ SPIRIT_CRUISE_3000 = CruisePlatformRecipe(
             "Crew cabin corridor, Deck {deck} {section}. "
             "~100 crew, interior HVAC."
         ),
+        id_prefix="CC",
     ),
     public_zones=_spirit_public_zones(),
     public_hvac=(
