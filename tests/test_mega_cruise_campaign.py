@@ -1140,6 +1140,7 @@ def test_calibration_manifest_loads() -> None:
     assert "c2_immunity_sweep" in manifest["tiers"]
     assert "c3_sarscov2_calibration" in manifest["tiers"]
     assert "c4_voyage_duration" in manifest["tiers"]
+    assert "c5_density_calibration" in manifest["tiers"]
     assert "none_true" in manifest["surveillance_configs"]
 
 
@@ -1150,6 +1151,7 @@ def test_resolve_calibration_tier_prefixes() -> None:
     assert all(t.startswith("c1_") for t in c1)
     assert resolve_tier_ids(manifest, "c2") == ["c2_immunity_sweep"]
     assert resolve_tier_ids(manifest, "c4") == ["c4_voyage_duration"]
+    assert resolve_tier_ids(manifest, "c5") == ["c5_density_calibration"]
 
 
 def test_calibration_dry_run_counts() -> None:
@@ -1170,13 +1172,51 @@ def test_calibration_dry_run_counts() -> None:
         "c3_sarscov2_calibration": 360,
         # 3 epochs × 3 doses × 2 surv × 10 seeds
         "c4_voyage_duration": 180,
+        # 4 plat × 3 dose × 5 α × 2 imm × 2 surv × 15 seeds
+        "c5_density_calibration": 3600,
     }
     total = 0
     for tier_id, n_exp in expected.items():
         runs = list(generate_tier_runs(manifest, tier_id))
         assert len(runs) == n_exp, f"{tier_id}: {len(runs)} != {n_exp}"
         total += len(runs)
-    assert total == 2760
+    assert total == 6360
+
+
+def test_campaign_generator_c5() -> None:
+    """c5 dry-run count and density exponent wiring."""
+    manifest = _calibration_manifest()
+    runs = list(generate_tier_runs(manifest, "c5_density_calibration"))
+    assert len(runs) == 3600
+    rid, spec = next(
+        (r, s) for r, s in runs
+        if "a050" in r and "dose15" in r and "mega_cruise_5000" in r
+    )
+    assert "imm0" in rid or "imm20" in rid
+    tx = spec["config_overrides"]["transmission"]
+    assert tx["contact_mode"] == "density_dependent"
+    assert tx["density_dependent"]["exponent"] == pytest.approx(0.5)
+    assert spec["campaign_parameters"]["density_exponent"] == pytest.approx(0.5)
+    assert spec["pathogen_overrides"]["norwalk_gi"]["dose_adjustment"] == pytest.approx(15.0)
+    assert spec["pathogen_overrides"]["norwalk_gi"]["initial_infected"] == 1
+
+
+def test_c5_exponent_sensitivity_in_overrides() -> None:
+    """Changing density exponent in the c5 sweep changes the config override."""
+    manifest = _calibration_manifest()
+    runs = list(generate_tier_runs(manifest, "c5_density_calibration"))
+    a0 = next(s for r, s in runs if "_a000_" in r)
+    a1 = next(s for r, s in runs if "_a100_" in r)
+    assert a0["config_overrides"]["transmission"]["density_dependent"]["exponent"] == (
+        pytest.approx(0.0)
+    )
+    assert a1["config_overrides"]["transmission"]["density_dependent"]["exponent"] == (
+        pytest.approx(1.0)
+    )
+    assert (
+        a0["config_overrides"]["transmission"]["density_dependent"]["exponent"]
+        != a1["config_overrides"]["transmission"]["density_dependent"]["exponent"]
+    )
 
 
 def test_c1_sets_platform_agents_dose_and_init() -> None:
@@ -1305,6 +1345,7 @@ def test_c2_is_deferred_from_all_selection() -> None:
     assert "c1_mega_cruise_5000" in all_tiers
     assert "c3_sarscov2_calibration" in all_tiers
     assert "c4_voyage_duration" in all_tiers
+    assert "c5_density_calibration" in all_tiers
     with_deferred = resolve_tier_ids(manifest, "all", include_deferred=True)
     assert "c2_immunity_sweep" in with_deferred
     # Explicit prefix still selects deferred wave-2 tier.
@@ -1312,9 +1353,9 @@ def test_c2_is_deferred_from_all_selection() -> None:
 
 
 def test_calibration_wave1_dry_run_excludes_c2() -> None:
-    """Wave-1 Batch submit uses --tier all → 2360 runs (no deferred c2)."""
+    """Wave-1 Batch submit uses --tier all → 5960 runs (no deferred c2)."""
     manifest = _calibration_manifest()
     total = 0
     for tier_id in resolve_tier_ids(manifest, "all"):
         total += len(list(generate_tier_runs(manifest, tier_id)))
-    assert total == 2360
+    assert total == 5960

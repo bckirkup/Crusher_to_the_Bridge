@@ -14,13 +14,12 @@ import pytest
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 HISTORY_PATH = os.path.join(REPO_ROOT, "telemetry_buffer", "simulation_history.json")
 
-# Updated 2026-07-31: outbreak-response architecture reaches CONFIRMED via
-# cumulative attack rate (CDC VSP 3%); SIR counts match prior golden.
+# Updated 2026-08-02: density_dependent contact_mode default (α=0.5).
 EXPECTED_SUMMARY = {
-    "susceptible": 2,
+    "susceptible": 0,
     "infected": 0,
     "symptomatic": 0,
-    "recovered": 14,
+    "recovered": 16,
     "immune": 4,
 }
 EXPECTED_TRIGGER = "CONFIRMED"

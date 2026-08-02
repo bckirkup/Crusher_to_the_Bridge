@@ -70,6 +70,8 @@ class TestCabinCorridorTransmission:
             zone_volumes={zone: 200.0},
             zone_types={zone: "Room"},
             confinement_isolation_factor=0.05,
+            # Legacy AVG_R_POOL always draws ≥1; density Poisson can be 0 at n=2.
+            cfg={"transmission": {"contact_mode": "legacy"}},
         )
         core.initialize_zones([zone])
         matrix, _ = core.execute_transmission(

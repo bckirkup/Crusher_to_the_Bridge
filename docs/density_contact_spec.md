@@ -96,15 +96,17 @@ At α=1: dose ∝ total_shedding (pure density-dependent, dose independent of oc
 
 In `engines/transmission_core.py` `__init__`:
 ```python
-self.contact_mode = cfg.get("transmission", {}).get("contact_mode", "legacy")
-self.density_cfg = cfg.get("transmission", {}).get("density_dependent", {
+DEFAULT_DENSITY_CFG = {
     "reference_occupancy": 50,
     "base_contacts": 1.33,
     "max_contacts": 20,
     "exponent": 0.5,
     "crew_contact_multiplier": 2.0,
-})
-self._service_zones = set()  # populated from spatial layout dining/galley zones
+}
+tx = (cfg or {}).get("transmission", {})
+self.contact_mode = tx.get("contact_mode", "density_dependent")
+self.density_cfg = {**DEFAULT_DENSITY_CFG, **(tx.get("density_dependent") or {})}
+# Service zones: type == "Dining" or "Galley" in zone id (from zone_types)
 ```
 
 #### Service zone identification
@@ -170,6 +172,7 @@ Runs: 4 platforms × 3 dose_adj × 5 α × 2 immunity × 2 surveillance × 15 se
 
 ### Backward compatibility
 
-- Default contact_mode is "legacy" — all existing configs work unchanged
-- The density_dependent config block is optional
-- Campaign manifests can override contact_mode per-tier via config_overrides
+- Default contact_mode is **density_dependent** (new model); set
+  `contact_mode: legacy` to restore fixed AVG_R_POOL draws
+- The density_dependent config block is optional; missing keys fall back to defaults
+- Campaign manifests can override contact_mode / exponent per-tier via config_overrides

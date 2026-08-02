@@ -190,6 +190,7 @@ class ShipSimulation:
                     DEFAULT_CORRIDOR_DIRECT_CONTACT_FACTOR,
                 )
             ),
+            cfg=self.cfg,
         )
         self.tx_core.initialize_zones(self.zone_names)
         self.engine.enable_external_transmission()
