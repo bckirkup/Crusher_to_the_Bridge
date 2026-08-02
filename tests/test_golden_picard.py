@@ -76,11 +76,11 @@ def test_picard_golden_summary_and_trigger() -> None:
     picard_history = _run_picard()
     assert len(picard_history) >= GOLDEN_LAST + 1
     fp = _fingerprint(picard_history, GOLDEN_LAST)
-    # Updated 2026-07-31: matches orchestrator golden after outbreak-response arch.
-    assert fp["susceptible"] == 2
+    # Updated 2026-08-02: density_dependent contact_mode default (α=0.5).
+    assert fp["susceptible"] == 0
     assert fp["infected"] == 0
     assert fp["symptomatic"] == 0
-    assert fp["recovered"] == 14
+    assert fp["recovered"] == 16
     assert fp["immune"] == 4
     assert fp["trigger_status"] == "CONFIRMED"
 
