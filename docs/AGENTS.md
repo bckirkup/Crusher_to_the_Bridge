@@ -65,7 +65,7 @@ Install from the hash-pinned lockfile: `pip install --only-binary=:all: --requir
 
 **Picard/Presidio** (`.github/workflows/picard-presidio.yml` on `main` and `cursor/**`):
 
-- Framework-focused pytest slice (~190+ tests: Picard, Presidio, Stackelberg, OIS, behavioral, long-read, TAT, enterprise platforms, agent axes, sequencing config, wearable scoring, cascade entry, ContamX subset, mega-cruise campaign, golden Picard, cabin/shedding, pathogen overrides)
+- Framework-focused pytest slice (~190+ tests: Picard, Presidio, Stackelberg, OIS, behavioral, long-read, TAT, enterprise platforms, agent axes, sequencing config, wearable scoring, cascade entry, ContamX subset, mega-cruise campaign, outbreak response, golden Picard, cabin/shedding, pathogen overrides, density contact, multi-pathogen Phase A/B)
 - Stackelberg + platform JSON schema validation (all `data/platforms/*/`)
 - Presidio smoke
 
@@ -113,5 +113,7 @@ Install from the hash-pinned lockfile: `pip install --only-binary=:all: --requir
 - **Outbreak response architecture:** SOP policy (attack-rate escalation + `min_escalation_status`), organizational decision latency (`escalation.decision_latency` / SOP `activation_delay_epochs`), and bimodal compliance (compliant/reluctant/defiant) are separate systems — see `docs/tiered_escalation_spec.md` and skill `outbreak-response-architecture`. Default `lockdown_attack_rate: never` for n=20 smokes; mega-cruise campaign injects `0.05`.
 - **Shedding variance:** `shedding_variance_log10` on pathogen profiles draws a persistent per-agent multiplier at infection (`docs/SHEDDING_AND_CABINMATES.md`).
 - **Cabin-mates:** `mega_cruise_5000` `Cabin_Corridor` zones pair agents into staterooms at init; confinement direct contact is cabin-mate-aware (`assign_cabin_mates` in `orchestrator_init.py`).
+- **Contact mode:** default `transmission.contact_mode: density_dependent` (`docs/density_contact_spec.md`); `legacy` and opt-in `heterogeneous_zone_dose` available.
+- **Multi-pathogen calibration knobs:** `transmission_route_weights`, log10 `dose_adjustment`, `innate_nonsusceptible_fraction`, `agent_behavior` dining/free rotation (default off), Dining `food_contamination_multiplier` / `dining_service_type`, env `source_zones` — see `docs/multi_pathogen_model_changes_spec.md`.
 - Ruff lint: **F-rules are blocking** in main CI; E/W/I remain advisory (`continue-on-error` / `|| true`). Keep unused-import and undefined-name findings clean before campaigns.
 - **SonarCloud** quality gates are GitHub-app / UI-gated (no in-repo `sonar-project.properties`). Agents rely on ruff, `tests/test_path_io_inviolate.py`, and pytest — do not block on live Sonar MCP/CLI unless explicitly integrating.

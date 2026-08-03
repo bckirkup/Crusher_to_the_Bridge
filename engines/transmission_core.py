@@ -36,6 +36,7 @@ The combined dose from all pathways feeds the dose-response function:
 
 from __future__ import annotations
 
+import fnmatch
 import math
 from dataclasses import dataclass, field
 from typing import Any
@@ -233,6 +234,7 @@ class TransmissionCore:
         confinement_isolation_factor: float = DEFAULT_CONFINEMENT_ISOLATION_FACTOR,
         corridor_direct_contact_factor: float = DEFAULT_CORRIDOR_DIRECT_CONTACT_FACTOR,
         cfg: dict[str, Any] | None = None,
+        food_zone_multipliers: dict[str, float] | None = None,
     ) -> None:
         self.rng = rng
         self.zone_volumes = zone_volumes or {}
@@ -241,6 +243,7 @@ class TransmissionCore:
         self.zone_ventilation = zone_ventilation or {}
         self.confinement_isolation_factor = confinement_isolation_factor
         self.corridor_direct_contact_factor = corridor_direct_contact_factor
+        self.food_zone_multipliers = food_zone_multipliers or {}
         self._quarantined_ids: set[int] = set()
 
         tx = (cfg or {}).get("transmission", {}) or {}
@@ -297,6 +300,8 @@ class TransmissionCore:
 
         # Pathway 6: environmental contamination load per pathogen
         self.environmental_load: dict[str, float] = {}
+        # Zone-scoped environmental reservoirs {pid: {zone: mass}}
+        self.env_contamination: dict[str, dict[str, float]] = {}
 
         # Previous epoch's zone occupancy (for fomite trailing detection)
         self._prev_zone_occupants: dict[str, set[int]] = {}
@@ -381,9 +386,14 @@ class TransmissionCore:
             # Initialize environmental contamination load
             ec = profile.get("environmental_contamination", {})
             if ec.get("enabled", False):
-                self.environmental_load[pid] = ec.get(
-                    "baseline_environmental_load", 0.0
-                )
+                baseline = float(ec.get("baseline_environmental_load", 0.0))
+                self.environmental_load[pid] = baseline
+                source_zones = ec.get("source_zones")
+                if source_zones:
+                    self.env_contamination.setdefault(pid, {})
+                    for z in zone_names:
+                        if self._zone_matches(z, source_zones):
+                            self.env_contamination[pid].setdefault(z, baseline)
 
     def execute_transmission(
         self,
@@ -1048,8 +1058,9 @@ class TransmissionCore:
 
             # Dose to susceptible agents eating here
             susceptible = self._get_susceptible(occupants, pathogen_id)
+            zone_mult = self._food_zone_multiplier(zone_name)
             for target in susceptible:
-                dose = food_zones[zone_name] * FOOD_INGESTION_FRACTION
+                dose = food_zones[zone_name] * FOOD_INGESTION_FRACTION * zone_mult
                 agent_doses[target.agent_id] = (
                     agent_doses.get(target.agent_id, 0.0) + dose
                 )
@@ -1062,10 +1073,25 @@ class TransmissionCore:
                     "zone": zone_name,
                     "pathogen_id": pathogen_id,
                     "food_pool_mass": round(food_zones[zone_name], 4),
+                    "food_zone_multiplier": zone_mult,
                     "dose": round(dose, 4),
                 })
 
     # ── Pathway 6: Environmental Source ─────────────────────────────
+
+    def _zone_matches(self, zone_name: str, patterns: list[str]) -> bool:
+        """True if zone_name matches any exact or fnmatch-style pattern."""
+        for pat in patterns:
+            if zone_name == pat or fnmatch.fnmatch(zone_name, pat):
+                return True
+        return False
+
+    def _food_zone_multiplier(self, zone_name: str) -> float:
+        """Food contamination dose multiplier for a Dining zone."""
+        if zone_name in self.food_zone_multipliers:
+            return float(self.food_zone_multipliers[zone_name])
+        # Infer from dining_service_type if catalogued via zone name heuristics
+        return 1.0
 
     def _pathway_environmental(
         self,
@@ -1077,15 +1103,22 @@ class TransmissionCore:
         pathogen_id: str = "_default",
         profile: dict | None = None,
     ) -> None:
-        """Environmental source pathway for HVAC-colonised pathogens.
+        """Environmental source pathway (HVAC-systemic or zone-scoped).
 
-        The HVAC system itself harbours the pathogen (e.g. Legionella
-        biofilm).  Each epoch the environmental load grows at the
-        colonisation rate and delivers a fraction of its mass to every
-        HVAC-connected zone.  Agents inhale the delivered dose.
+        Legacy mode (no ``source_zones``): ship-wide HVAC biofilm load
+        delivers to every zone. Zone-scoped mode: per-zone reservoirs in
+        matching source zones with probabilistic exposure.
         """
         ec = (profile or {}).get("environmental_contamination", {})
         if not ec.get("enabled", False):
+            return
+
+        source_zones = ec.get("source_zones")
+        if source_zones:
+            self._pathway_environmental_zone_scoped(
+                zone_occupants, agent_doses, matrix, agent_pathway_doses,
+                pathogen_id=pathogen_id, profile=profile or {},
+            )
             return
 
         load = self.environmental_load.get(pathogen_id, 0.0)
@@ -1122,6 +1155,62 @@ class TransmissionCore:
                     "environmental_load": round(load, 4),
                     "delivered_mass": round(delivered, 4),
                     "dose": round(dose, 4),
+                })
+
+    def _pathway_environmental_zone_scoped(
+        self,
+        zone_occupants: dict[str, list[KorkinAgent]],
+        agent_doses: dict[int, float],
+        matrix: ContactTracingMatrix,
+        agent_pathway_doses: dict[int, dict[str, float]] | None,
+        *,
+        pathogen_id: str,
+        profile: dict[str, Any],
+    ) -> None:
+        """Per-zone environmental reservoirs (Legionella spa / C.diff spores)."""
+        ec = profile.get("environmental_contamination", {})
+        source_zones = list(ec.get("source_zones") or [])
+        emission = float(ec.get("base_emission_rate", 0.001))
+        p_expose = float(ec.get("exposure_probability_per_epoch", 0.1))
+        spore_decay = float(ec.get("spore_decay_rate_per_epoch", 0.0))
+        col_rate = float(ec.get("colonization_rate_per_epoch", 0.0))
+        reservoirs = self.env_contamination.setdefault(pathogen_id, {})
+
+        # Grow / decay matching zones; ensure keys exist for occupied matches
+        for zone_name in list(zone_occupants.keys()):
+            if not self._zone_matches(zone_name, source_zones):
+                continue
+            level = float(reservoirs.get(zone_name, 0.0))
+            if level <= 0.0 and zone_name not in reservoirs:
+                level = float(ec.get("baseline_environmental_load", 0.0))
+            level *= (1.0 + col_rate)
+            level *= max(0.0, 1.0 - spore_decay)
+            reservoirs[zone_name] = max(level, 0.0)
+
+        for zone_name, occupants in zone_occupants.items():
+            if not self._zone_matches(zone_name, source_zones):
+                continue
+            contamination = float(reservoirs.get(zone_name, 0.0))
+            if contamination <= 0.0:
+                continue
+            susceptible = self._get_susceptible(occupants, pathogen_id)
+            for target in susceptible:
+                if self.rng.random() >= p_expose:
+                    continue
+                dose = contamination * emission
+                agent_doses[target.agent_id] = (
+                    agent_doses.get(target.agent_id, 0.0) + dose
+                )
+                if agent_pathway_doses is not None:
+                    pw = agent_pathway_doses.setdefault(target.agent_id, {})
+                    pw["environmental"] = pw.get("environmental", 0.0) + dose
+                matrix.environmental_exposures.append({
+                    "target_id": target.agent_id,
+                    "zone": zone_name,
+                    "pathogen_id": pathogen_id,
+                    "environmental_load": round(contamination, 4),
+                    "dose": round(dose, 4),
+                    "zone_scoped": True,
                 })
 
     # ── Multi-pathogen shedder/susceptible helpers ─────────────────────

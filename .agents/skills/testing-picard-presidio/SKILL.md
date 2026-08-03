@@ -40,6 +40,9 @@ PYTHONPATH=. python3 -m pytest \
   tests/test_pathogen_overrides.py \
   tests/test_cabin_corridor_transmission.py \
   tests/test_shedding_variance_cabin_mates.py \
+  tests/test_density_contact.py \
+  tests/test_multi_pathogen_model_phase_a.py \
+  tests/test_multi_pathogen_model_phase_b.py \
   -v --tb=short
 ```
 
@@ -74,7 +77,7 @@ check-jsonschema --schemafile schemas/utility_observation_bundle.schema.json \
 | Workflow | When |
 |----------|------|
 | `.github/workflows/ci.yml` | All `main` PRs — full pytest (~875) + Presidio smoke + import hygiene + OIS verify + Docker campaign smoke |
-| `.github/workflows/picard-presidio.yml` | `main` and `cursor/**` — framework slice (~190+ tests) + Stackelberg/platform schema checks + Presidio smoke |
+| `.github/workflows/picard-presidio.yml` | `main` and `cursor/**` — framework slice (~190+ tests, incl. density contact + multi-pathogen Phase A/B + outbreak response) + Stackelberg/platform schema checks + Presidio smoke |
 
 Replicate main CI framework steps:
 

@@ -100,6 +100,16 @@
           "minimum": 1,
           "description": "Nominal max occupants for the zone (simulation / display)"
         },
+        "dining_service_type": {
+          "type": "string",
+          "enum": ["buffet", "mdr", "specialty", "crew_mess", "galley"],
+          "description": "Dining venue class for meal rotation weights and food risk"
+        },
+        "food_contamination_multiplier": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Scales food_contamination pathway dose in this Dining zone (buffet > plated)"
+        },
         "cabin_ventilation_type": {
           "type": "string",
           "enum": ["interior_hvac", "balcony_partial", "atrium_view"],

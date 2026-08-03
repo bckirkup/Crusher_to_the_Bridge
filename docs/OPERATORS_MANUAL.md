@@ -135,6 +135,15 @@ Pathways 1–4: direct, droplet, HVAC airborne, fomite. Pathways 5–6: food
 contamination and environmental colonization (per-pathogen profile blocks).
 Dashboard uses `pathway_breakdown` in contact-tracing events.
 
+Direct-contact intensity follows `transmission.contact_mode` in
+`crusher_labs/config.yaml` (default `density_dependent`; see
+`docs/density_contact_spec.md`). Pathway doses may be scaled by profile
+`transmission_route_weights`. Food pathway doses honor Dining-zone
+`food_contamination_multiplier`. Environmental colonization may be limited
+to `environmental_contamination.source_zones` when that list is present.
+Dining/free venue rotation is under `agent_behavior` (default off).
+Details: `docs/multi_pathogen_model_changes_spec.md`.
+
 ### Quarantine vs. Isolation
 
 | Mode | Field | HVAC |
@@ -890,6 +899,7 @@ pools per room.  Key properties:
 | `shedding_variance_log10` | float | σ of log-normal host shedding multiplier (0 = no variance; see `docs/SHEDDING_AND_CABINMATES.md`) |
 | `transmission_route_weights` | object | Relative pathway dose multipliers (sum ≈ 1.0); absent → identity (all 1.0) |
 | `innate_nonsusceptible_fraction` | float | Per-pathogen zero-susceptibility draw (e.g. FUT2); orthogonal to `immune_fraction` |
+| `environmental_contamination` | object | Optional; `source_zones` scopes colonization (absent → ship-wide legacy) |
 | `dose_response` | object | `{model, alpha, beta}` — Korkin Lab dose-response parameters |
 | `recovery_day` | int | Day of infection → Recovered transition |
 | `surface_deposition_fraction` | float | Fraction [0,1] of shed mass deposited on surfaces |

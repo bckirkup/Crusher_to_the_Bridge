@@ -173,6 +173,26 @@ emod_progression:
     - {name: "late",   max_rate: 40.0, sensitivity_cap: 0.80}
   phase_durations: [3, 5, 4]          # epochs per phase
 
+# ── Agent dining / free-zone rotation ──────────────────────────
+# Probabilistic venue selection (0 = fixed assigned zones; goldens stable).
+# Campaigns may raise dining_rotation_probability to increase large-ship mixing.
+agent_behavior:
+  dining_rotation_probability: 0.0
+  free_zone_rotation_probability: 0.0
+  dining_meal_weights:
+    breakfast:
+      buffet: 0.6
+      mdr: 0.3
+      specialty: 0.1
+    lunch:
+      buffet: 0.5
+      mdr: 0.3
+      specialty: 0.2
+    dinner:
+      buffet: 0.2
+      mdr: 0.5
+      specialty: 0.3
+
 # ── Transmission contact model ─────────────────────────────────
 # Direct-contact r0_draw: density_dependent (default) scales contacts
 # with zone occupancy; legacy uses fixed AVG_R_POOL (frequency-dependent).

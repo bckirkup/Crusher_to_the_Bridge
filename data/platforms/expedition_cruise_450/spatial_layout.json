@@ -23,7 +23,9 @@
         "x": 40,
         "y": 40
       },
-      "description": "Main dining room with assigned seating. Deck 5. ~300 seats."
+      "description": "Main dining room with assigned seating. Deck 5. ~300 seats.",
+      "dining_service_type": "mdr",
+      "food_contamination_multiplier": 1.0
     },
     {
       "id": "BuffetLido",
@@ -36,7 +38,9 @@
         "x": 70,
         "y": 10
       },
-      "description": "Lido buffet (casual). Deck 7. ~150 seats."
+      "description": "Lido buffet (casual). Deck 7. ~150 seats.",
+      "dining_service_type": "buffet",
+      "food_contamination_multiplier": 3.0
     },
     {
       "id": "CrewMess",
@@ -49,7 +53,9 @@
         "x": 55,
         "y": 82
       },
-      "description": "Crew mess. Deck 2. ~60 seats."
+      "description": "Crew mess. Deck 2. ~60 seats.",
+      "dining_service_type": "crew_mess",
+      "food_contamination_multiplier": 1.0
     },
     {
       "id": "MainGalley",
@@ -62,7 +68,9 @@
         "x": 35,
         "y": 55
       },
-      "description": "Main galley (crew-only service). Deck 4."
+      "description": "Main galley (crew-only service). Deck 4.",
+      "dining_service_type": "galley",
+      "food_contamination_multiplier": 0.5
     },
     {
       "id": "PoolDeck",

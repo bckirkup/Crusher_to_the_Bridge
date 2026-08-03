@@ -605,7 +605,19 @@
         "source_type": "hvac",
         "colonization_rate_per_epoch": 0.02,
         "baseline_environmental_load": 100.0,
-        "person_to_person": false
+        "person_to_person": false,
+        "source_zones": [
+          "*Spa*",
+          "*Pool*",
+          "Cabin_Corridor_*",
+          "PC_*",
+          "CC_*",
+          "OC_*",
+          "FC_*",
+          "EC_*"
+        ],
+        "base_emission_rate": 0.001,
+        "exposure_probability_per_epoch": 0.1
       },
       "introduction_epoch": 30,
       "initial_infected": 0,
@@ -1049,7 +1061,28 @@
         "environmental_source": 0.3
       },
       "innate_nonsusceptible_fraction": 0.0,
-      "nonsusceptible_mechanism": "none"
+      "nonsusceptible_mechanism": "none",
+      "environmental_contamination": {
+        "enabled": true,
+        "source_type": "spore_reservoir",
+        "source_zones": [
+          "*Medical*",
+          "*MedBay*",
+          "Cabin_Corridor_*",
+          "PC_*",
+          "CC_*",
+          "OC_*",
+          "FC_*",
+          "EC_*"
+        ],
+        "base_emission_rate": 0.0001,
+        "exposure_probability_per_epoch": 0.1,
+        "amplification_by_antibiotic_use": 5.0,
+        "spore_decay_rate_per_epoch": 0.001,
+        "colonization_rate_per_epoch": 0.0,
+        "baseline_environmental_load": 50.0,
+        "person_to_person": true
+      }
     },
     {
       "pathogen_id": "andes_hantavirus",

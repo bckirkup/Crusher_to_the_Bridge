@@ -69,6 +69,26 @@ Outbreak-response knobs: skill `outbreak-response-architecture` +
 python3 -m pytest tests/test_outbreak_response_architecture.py -v --tb=short
 ```
 
+## Calibration tiers (density + multi-pathogen)
+
+Manifest: `picard_framework/runs/mega_cruise_campaign/calibration_manifest_v1.json`.
+
+| Tier | Focus |
+|------|--------|
+| `c5_density_calibration` | Density-dependent α × dose × platforms (~3600 runs) |
+| `c6_heterogeneous_sensitivity` | Density vs `heterogeneous_zone_dose` — **deferred** until needed |
+
+Dining/free rotation stays off in default `config.yaml` (`dining_rotation_probability: 0.0`).
+Raise via campaign `config_overrides` when testing venue mixing vs platform
+`dose_adjustment` gaps. Specs: `docs/density_contact_spec.md`,
+`docs/multi_pathogen_model_changes_spec.md`.
+
+```bash
+python3 -m pytest tests/test_density_contact.py \
+  tests/test_multi_pathogen_model_phase_a.py \
+  tests/test_multi_pathogen_model_phase_b.py -v --tb=short
+```
+
 ## Pre-AWS checklist
 
 1. `--dry-run` count matches README (~17,780) for the current manifest.

@@ -36,6 +36,9 @@ Output is written to `telemetry_buffer/simulation_history.json` and
 Documentation map: [docs/README.md](docs/README.md).
 Outbreak response (SOPs / decision latency / compliance):
 [docs/tiered_escalation_spec.md](docs/tiered_escalation_spec.md).
+Contact modes: [docs/density_contact_spec.md](docs/density_contact_spec.md).
+Multi-pathogen calibration knobs:
+[docs/multi_pathogen_model_changes_spec.md](docs/multi_pathogen_model_changes_spec.md).
 
 ## Picard, Presidio & Stackelberg
 
