@@ -45,12 +45,25 @@ ShipSimulation(spec).run()
 | `picard_framework/runs/*.json` | Ship run specifications |
 | `data/` | Shared platform, pathogen, protocol libraries |
 
+## Transmission / behavior knobs (`crusher_labs/config.yaml`)
+
+| Block | Role |
+|-------|------|
+| `transmission.contact_mode` | `density_dependent` (default), `legacy`, or opt-in `heterogeneous_zone_dose` — see `docs/density_contact_spec.md` |
+| `agent_behavior` | Dining/free rotation probabilities (default `0.0` for golden stability) — see `docs/multi_pathogen_model_changes_spec.md` |
+
+Pathogen profiles may include `transmission_route_weights`, formal `dose_adjustment`
+(log10 shedding offset), `innate_nonsusceptible_fraction`, and zone-scoped
+`environmental_contamination.source_zones`.
+
 ## Validation
 
 ```bash
 python3 tools/sanity_checker.py --from-config
 python3 -m pytest tests/test_picard_framework.py tests/test_golden_orchestrator.py \
-  tests/test_shedding_variance_cabin_mates.py tests/test_action_applier.py -v
+  tests/test_shedding_variance_cabin_mates.py tests/test_action_applier.py \
+  tests/test_density_contact.py tests/test_multi_pathogen_model_phase_a.py \
+  tests/test_multi_pathogen_model_phase_b.py -v
 ```
 
 Epoch order: [docs/simulation_step_order.md](../../../docs/simulation_step_order.md)

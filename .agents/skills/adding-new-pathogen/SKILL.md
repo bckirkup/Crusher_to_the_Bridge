@@ -83,9 +83,14 @@ Optional blocks for extended transmission pathways (PR #43):
 "environmental_contamination": {
   "enabled": true,
   "baseline_environmental_load": 0.01,
-  "growth_rate_per_epoch": 0.05
+  "colonization_rate_per_epoch": 0.05,
+  "source_zones": ["Spa", "Pool_*"]
 }
 ```
+
+**`source_zones`** (optional): when present, environmental load is updated
+only in matching zones (exact id or `*` prefix/suffix glob). Absent → legacy
+ship-wide environmental pool. See `docs/multi_pathogen_model_changes_spec.md`.
 
 ### 2. Add the pathogen entry
 
@@ -142,6 +147,8 @@ check-jsonschema --schemafile schemas/pathogen_profiles.schema.json data/pathoge
 python -m pytest tests/test_data_contracts.py::TestPathogenProfiles -v --tb=short
 python -m pytest tests/test_shedding_variance_cabin_mates.py -v --tb=short
 python -m pytest tests/test_transmission_pathways.py -v --tb=short
+python -m pytest tests/test_multi_pathogen_model_phase_a.py \
+  tests/test_multi_pathogen_model_phase_b.py -v --tb=short
 ```
 
 ### 6. Run the orchestrator smoke test

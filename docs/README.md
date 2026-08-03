@@ -35,6 +35,8 @@ python3 presidio_runner.py \
 | Doc | Role |
 |-----|------|
 | [SHEDDING_AND_CABINMATES.md](SHEDDING_AND_CABINMATES.md) | Host shedding variance + cabin-mate pairing |
+| [density_contact_spec.md](density_contact_spec.md) | Density-dependent / heterogeneous zone contact modes |
+| [multi_pathogen_model_changes_spec.md](multi_pathogen_model_changes_spec.md) | Route weights, FUT2 nonsusceptibility, dining rotation, food multipliers, scoped env load |
 | [tiered_escalation_spec.md](tiered_escalation_spec.md) | Outbreak response: SOP policy, decision latency, bimodal compliance (Campaign v5) |
 | [pathogen_notes.md](pathogen_notes.md) | Pathogen profile notes |
 | [pricing_notes.md](pricing_notes.md) | Assay / labor cost assumptions |
@@ -66,6 +68,8 @@ These are **not** day-to-day operator manuals. Prefer living manuals above unles
 |-----|--------|
 | [MATHEMATICAL_FIDELITY_AUDIT.md](MATHEMATICAL_FIDELITY_AUDIT.md) | Living audit |
 | [PLATFORM_CABIN_REVISION.md](PLATFORM_CABIN_REVISION.md) | Implemented (mega-cruise cabin corridors) |
+| [density_contact_spec.md](density_contact_spec.md) | Implemented (default `density_dependent`; het dose opt-in) |
+| [multi_pathogen_model_changes_spec.md](multi_pathogen_model_changes_spec.md) | Implemented (Phase A route weights / dose_adj / FUT2; Phase B dining + food + source_zones) |
 | [tiered_escalation_spec.md](tiered_escalation_spec.md) | Implemented (outbreak response architecture / Campaign v5) |
 | [WEARABLE_ANOMALY_REDESIGN.md](WEARABLE_ANOMALY_REDESIGN.md) | Implemented (confounder-aware infection_score) |
 | [issue_111_enhanced_wearables_plan.md](issue_111_enhanced_wearables_plan.md) | Historical plan / partially superseded — see WEARABLE_ANOMALY_REDESIGN |

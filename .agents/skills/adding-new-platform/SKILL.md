@@ -89,6 +89,19 @@ platforms). Every entry must match a zone `id` in the same file.
 Zone `type` values include `Free`, `Dining`, `Room`, **`Cabin_Corridor`**, etc.
 **Dining** zones enable food-contamination pathway pools.
 
+Optional Dining / Free fields (multi-pathogen calibration; see
+`docs/multi_pathogen_model_changes_spec.md` and `schemas/spatial_layout.schema.json`):
+
+| Field | Purpose |
+|-------|---------|
+| `dining_service_type` | `buffet`, `mdr`, `specialty`, `crew_mess`, `galley` — weights venue draws when `agent_behavior.dining_rotation_probability` > 0 |
+| `food_contamination_multiplier` | Scales food-pathway dose in that Dining zone (buffet ≈ 3.0, mdr ≈ 1.0, specialty ≈ 0.5) |
+| `max_occupancy` | Capacity hint for capacity-weighted dining/free rotation draws |
+
+Calibration cruise platforms (`mega_cruise_5000`, `spirit_class_3000`,
+`expedition_450`, `messy_cruise_500`) carry these on Dining zones. Smaller
+naval platforms may omit them (defaults: no service-type bias; multiplier 1.0).
+
 For mega-cruise cabin-corridor platforms (`mega_cruise_5000`), corridor zones may
 include:
 

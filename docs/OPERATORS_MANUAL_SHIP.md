@@ -77,7 +77,24 @@ Run specs use `config_overrides.diagnostic_cascade.enabled: true` so the default
 `crusher_labs/config.yaml` can keep cascade disabled for golden regression.
 
 Design references: `docs/SHEDDING_AND_CABINMATES.md` (host shedding variance +
-cabin-mate pairing), `docs/PLATFORM_CABIN_REVISION.md` (mega-cruise spatial model).
+cabin-mate pairing), `docs/PLATFORM_CABIN_REVISION.md` (mega-cruise spatial model),
+`docs/density_contact_spec.md` (contact modes), `docs/multi_pathogen_model_changes_spec.md`
+(route weights, dining rotation, zone food multipliers, scoped environmental load).
+
+## Transmission and agent behavior
+
+Key knobs in `crusher_labs/config.yaml` (overridable via Picard `config_overrides`):
+
+| Knob | Default | Notes |
+|------|---------|-------|
+| `transmission.contact_mode` | `density_dependent` | Also `legacy` or opt-in `heterogeneous_zone_dose` |
+| `agent_behavior.dining_rotation_probability` | `0.0` | Keep 0 for golden stability; raise in campaigns for venue mixing |
+| `agent_behavior.free_zone_rotation_probability` | `0.0` | Same pattern for Free zones |
+
+Pathogen profiles (`data/pathogens/`): `dose_adjustment` (log10 shedding offset),
+`transmission_route_weights`, `innate_nonsusceptible_fraction`, and optional
+`environmental_contamination.source_zones`. Dining zones may set
+`dining_service_type` and `food_contamination_multiplier` in `spatial_layout.json`.
 
 ## Outputs
 
@@ -97,7 +114,9 @@ Optional telemetry when `social.telemetry.decision_detail: true`:
 
 ```bash
 python3 tools/sanity_checker.py --from-config
-python3 -m pytest tests/test_picard_framework.py tests/test_golden_orchestrator.py -v
+python3 -m pytest tests/test_picard_framework.py tests/test_golden_orchestrator.py \
+  tests/test_density_contact.py tests/test_multi_pathogen_model_phase_a.py \
+  tests/test_multi_pathogen_model_phase_b.py -v
 ```
 
 Skill: `.agents/skills/picard-ship-simulation/SKILL.md`

@@ -94,8 +94,8 @@ python -m pytest tests/test_data_contracts.py -v --tb=short
 
 | Schema | Validates | Data Path |
 |--------|-----------|-----------|
-| `pathogen_profiles.schema.json` | Pathogen definitions | `data/pathogens/active_profiles.json` |
-| `spatial_layout.schema.json` | Zone/room structure | `data/platforms/*/spatial_layout.json` |
+| `pathogen_profiles.schema.json` | Pathogen definitions (route weights, dose_adjustment, nonsusceptibility, env source_zones) | `data/pathogens/active_profiles.json` |
+| `spatial_layout.schema.json` | Zone/room structure (dining_service_type, food_contamination_multiplier, max_occupancy, cabin fields) | `data/platforms/*/spatial_layout.json` |
 | `air_flow_paths.schema.json` | HVAC zones, links, adjacency | `data/platforms/*/air_flow_paths.json` |
 | `protocols.schema.json` | SOP definitions | `data/config/protocols.json` |
 | `resource_costs.schema.json` | Budget and inventory | `data/config/resource_costs.json` |
