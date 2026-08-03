@@ -78,6 +78,25 @@ DEFAULT_DENSITY_CFG: dict[str, float] = {
 }
 DEFAULT_CONTACT_MODE = "density_dependent"
 
+# Log-sigma defaults for heterogeneous_zone_dose (mean-1 lognormal).
+# Low in cabins (near-uniform stateroom mixing); high in dining/service;
+# medium-high in free/common areas. Not the default contact_mode.
+DEFAULT_HETEROGENEOUS_SIGMA_BY_ZONE_TYPE: dict[str, float] = {
+    "Cabin_Corridor": 0.25,  # low
+    "Dining": 1.0,           # high
+    "Free": 0.75,            # medium-high
+    "Room": 0.5,
+    "Medical": 0.5,
+    "Engineering": 0.5,
+}
+DEFAULT_HETEROGENEOUS_SIGMA_SERVICE = 1.0  # Galley / service (high)
+DEFAULT_HETEROGENEOUS_SIGMA_DEFAULT = 0.75
+CONTACT_MODES = frozenset({
+    "legacy",
+    "density_dependent",
+    "heterogeneous_zone_dose",
+})
+
 
 # ── Data structures ─────────────────────────────────────────────────────
 
@@ -207,7 +226,7 @@ class TransmissionCore:
 
         tx = (cfg or {}).get("transmission", {}) or {}
         mode = str(tx.get("contact_mode", DEFAULT_CONTACT_MODE))
-        if mode not in ("legacy", "density_dependent"):
+        if mode not in CONTACT_MODES:
             mode = DEFAULT_CONTACT_MODE
         self.contact_mode = mode
         provided = tx.get("density_dependent") or {}
@@ -223,6 +242,27 @@ class TransmissionCore:
             for z, t in self.zone_types.items()
             if t == "Dining" or "Galley" in z
         }
+        het_raw = tx.get("heterogeneous_zone_dose") or {}
+        if not isinstance(het_raw, dict):
+            het_raw = {}
+        sigma_map = dict(DEFAULT_HETEROGENEOUS_SIGMA_BY_ZONE_TYPE)
+        provided_sigma = het_raw.get("sigma_by_zone_type") or {}
+        if isinstance(provided_sigma, dict):
+            for k, v in provided_sigma.items():
+                sigma_map[str(k)] = float(v)
+        self.heterogeneous_sigma_by_zone_type = sigma_map
+        self.heterogeneous_sigma_service = float(
+            het_raw.get(
+                "sigma_service",
+                DEFAULT_HETEROGENEOUS_SIGMA_SERVICE,
+            ),
+        )
+        self.heterogeneous_sigma_default = float(
+            het_raw.get(
+                "default_sigma",
+                DEFAULT_HETEROGENEOUS_SIGMA_DEFAULT,
+            ),
+        )
 
         # Persistent state: surface fomite pools per zone per pathogen
         # {pathogen_id: {zone: mass}}
@@ -591,9 +631,37 @@ class TransmissionCore:
         target: KorkinAgent,
     ) -> int:
         """Return r0_draw for direct contact under the active contact_mode."""
-        if self.contact_mode == "density_dependent":
+        if self.contact_mode in ("density_dependent", "heterogeneous_zone_dose"):
             return self._effective_contacts(n_occupants, target)
         return int(self.rng.choice(AVG_R_POOL))
+
+    def _zone_exposure_sigma(self, zone_name: str) -> float:
+        """Log-sigma for within-zone exposure heterogeneity."""
+        # Galley / service names: high heterogeneity (plume / sequential contact).
+        if "Galley" in zone_name:
+            return max(0.0, self.heterogeneous_sigma_service)
+        ztype = self.zone_types.get(zone_name, "")
+        return max(
+            0.0,
+            float(
+                self.heterogeneous_sigma_by_zone_type.get(
+                    ztype,
+                    self.heterogeneous_sigma_default,
+                ),
+            ),
+        )
+
+    def _zone_exposure_factor(self, zone_name: str) -> float:
+        """Mean-1 lognormal within-zone exposure multiplier.
+
+        Draws ``exp(N(-σ²/2, σ))`` so ``E[factor] = 1`` and the density-
+        dependent mean dose is preserved in expectation.
+        """
+        sigma = self._zone_exposure_sigma(zone_name)
+        if sigma <= 0.0:
+            return 1.0
+        mu = -0.5 * sigma * sigma
+        return float(math.exp(self.rng.normal(mu, sigma)))
 
     def _pathway_direct_contact(
         self,
@@ -607,6 +675,7 @@ class TransmissionCore:
         profile: dict | None = None,
     ) -> None:
         """Person-to-person transmission via close contact in shared rooms."""
+        use_het = self.contact_mode == "heterogeneous_zone_dose"
         for zone_name, occupants in zone_occupants.items():
             shedders = self._get_shedders(occupants, pathogen_id, profile)
             susceptible = self._get_susceptible(occupants, pathogen_id)
@@ -629,6 +698,10 @@ class TransmissionCore:
                 )
                 dose *= self.direct_contact_scalar
                 dose *= zone_dc_factor
+                exposure_factor = 1.0
+                if use_het:
+                    exposure_factor = self._zone_exposure_factor(zone_name)
+                    dose *= exposure_factor
                 agent_doses[target.agent_id] = (
                     agent_doses.get(target.agent_id, 0.0) + dose
                 )
@@ -636,7 +709,7 @@ class TransmissionCore:
                     pw = agent_pathway_doses.setdefault(target.agent_id, {})
                     pw["direct_contact"] = pw.get("direct_contact", 0.0) + dose
 
-                matrix.shared_room_exposures.append({
+                rec: dict[str, Any] = {
                     "target_id": target.agent_id,
                     "zone": zone_name,
                     "source_ids": shedder_ids,
@@ -644,7 +717,10 @@ class TransmissionCore:
                     "dose": round(dose, 4),
                     "occupant_count": len(occupants),
                     "r0_draw": r0_draw,
-                })
+                }
+                if use_het:
+                    rec["zone_exposure_factor"] = round(exposure_factor, 6)
+                matrix.shared_room_exposures.append(rec)
 
     # ── Pathway 2: Short-Range Droplet ───────────────────────────────
 
