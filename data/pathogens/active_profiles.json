@@ -116,7 +116,17 @@
             ]
           }
         ]
-      }
+      },
+      "transmission_route_weights": {
+        "direct_contact": 0.35,
+        "droplet": 0.1,
+        "hvac_airborne": 0.05,
+        "fomite": 0.3,
+        "food_contamination": 0.2,
+        "environmental_source": 0.0
+      },
+      "innate_nonsusceptible_fraction": 0.0,
+      "nonsusceptible_mechanism": "none"
     },
     {
       "pathogen_id": "sars_cov2_resp",
@@ -236,7 +246,17 @@
             ]
           }
         ]
-      }
+      },
+      "transmission_route_weights": {
+        "direct_contact": 0.25,
+        "droplet": 0.3,
+        "hvac_airborne": 0.3,
+        "fomite": 0.1,
+        "food_contamination": 0.0,
+        "environmental_source": 0.05
+      },
+      "innate_nonsusceptible_fraction": 0.0,
+      "nonsusceptible_mechanism": "none"
     }
   ]
 }

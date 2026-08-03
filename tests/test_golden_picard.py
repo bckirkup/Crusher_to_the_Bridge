@@ -76,11 +76,11 @@ def test_picard_golden_summary_and_trigger() -> None:
     picard_history = _run_picard()
     assert len(picard_history) >= GOLDEN_LAST + 1
     fp = _fingerprint(picard_history, GOLDEN_LAST)
-    # Updated 2026-08-02: density_dependent contact_mode default (α=0.5).
-    assert fp["susceptible"] == 0
+    # Updated 2026-08-03: multi-pathogen route weights on active_profiles.
+    assert fp["susceptible"] == 5
     assert fp["infected"] == 0
     assert fp["symptomatic"] == 0
-    assert fp["recovered"] == 16
+    assert fp["recovered"] == 11
     assert fp["immune"] == 4
     assert fp["trigger_status"] == "CONFIRMED"
 

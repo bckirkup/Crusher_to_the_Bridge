@@ -725,6 +725,9 @@ def init_multi_pathogen(
         for pid, prof in pathogen_profiles.items():
             base_susc = prof.get("base_susceptibility", 1.0)
             agent.init_pathogen_susceptibility(pid, base_susc)
+            nonsus_frac = float(prof.get("innate_nonsusceptible_fraction", 0.0) or 0.0)
+            if nonsus_frac > 0.0 and rng.random() < nonsus_frac:
+                agent.susceptibility_multiplier[pid] = 0.0
 
     candidate_ids = [
         a.agent_id for a in engine.agents
@@ -740,7 +743,9 @@ def init_multi_pathogen(
             immunocompromised_ids.add(int(aid))
             agent = engine.agents[int(aid)]
             for pid in pathogen_profiles:
-                agent.susceptibility_multiplier[pid] = imm_mult
+                # Preserve innate nonsusceptibility (multiplier 0).
+                if agent.susceptibility_multiplier.get(pid, 1.0) > 0.0:
+                    agent.susceptibility_multiplier[pid] = imm_mult
 
     for pid, prof in pathogen_profiles.items():
         intro_epoch = prof.get("introduction_epoch", 0)

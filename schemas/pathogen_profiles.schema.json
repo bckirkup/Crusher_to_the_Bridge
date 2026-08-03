@@ -56,12 +56,35 @@
         "dose_adjustment": {
           "type": "number",
           "minimum": 0,
-          "description": "Dose-response scaling factor"
+          "description": "Log10 shedding offset: shedding = 10^(curve[dpi] - dose_adjustment) * shedding_multiplier. Campaigns calibrate infectivity via pathogen_overrides; not a dose-response α/β scaler."
         },
         "shedding_variance_log10": {
           "type": "number",
           "minimum": 0,
           "description": "σ of log-normal host shedding multiplier (0 = no variance)"
+        },
+        "transmission_route_weights": {
+          "type": "object",
+          "description": "Relative pathway dose multipliers (typically sum to 1.0). Absent → all 1.0 (identity). Keys map to TransmissionCore pathways.",
+          "properties": {
+            "direct_contact": {"type": "number", "minimum": 0},
+            "droplet": {"type": "number", "minimum": 0},
+            "hvac_airborne": {"type": "number", "minimum": 0},
+            "fomite": {"type": "number", "minimum": 0},
+            "food_contamination": {"type": "number", "minimum": 0},
+            "environmental_source": {"type": "number", "minimum": 0}
+          },
+          "additionalProperties": false
+        },
+        "innate_nonsusceptible_fraction": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Fraction of agents with zero susceptibility to this pathogen (e.g. FUT2 non-secretors for norovirus). Orthogonal to ship_graph.immune_fraction."
+        },
+        "nonsusceptible_mechanism": {
+          "type": "string",
+          "description": "Label for innate nonsusceptibility biology (e.g. FUT2_nonsecretor, none)."
         },
         "dose_response": {
           "type": "object",

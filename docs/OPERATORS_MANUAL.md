@@ -886,7 +886,10 @@ pools per room.  Key properties:
 | `category` | string | `enteric_viral`, `respiratory_viral`, `bacterial`, `fungal` |
 | `transmission_routes` | array | Subset of: `direct_contact`, `fomite`, `droplet`, `hvac_airborne`, `food`, `water`, `water_aerosol`, `bodily_fluids` |
 | `shedding_curve_log10` | array | Day-by-day symptomatic shedding (log10 copies), typically 15 entries |
+| `dose_adjustment` | float | Log10 shedding offset: `10^(curve − dose_adjustment)`; campaigns calibrate via `pathogen_overrides` |
 | `shedding_variance_log10` | float | σ of log-normal host shedding multiplier (0 = no variance; see `docs/SHEDDING_AND_CABINMATES.md`) |
+| `transmission_route_weights` | object | Relative pathway dose multipliers (sum ≈ 1.0); absent → identity (all 1.0) |
+| `innate_nonsusceptible_fraction` | float | Per-pathogen zero-susceptibility draw (e.g. FUT2); orthogonal to `immune_fraction` |
 | `dose_response` | object | `{model, alpha, beta}` — Korkin Lab dose-response parameters |
 | `recovery_day` | int | Day of infection → Recovered transition |
 | `surface_deposition_fraction` | float | Fraction [0,1] of shed mass deposited on surfaces |

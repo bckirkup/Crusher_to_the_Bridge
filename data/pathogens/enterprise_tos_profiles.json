@@ -80,7 +80,17 @@
       },
       "introduction_epoch": 0,
       "initial_infected": 1,
-      "initial_time_infected": 0
+      "initial_time_infected": 0,
+      "transmission_route_weights": {
+        "direct_contact": 0.25,
+        "droplet": 0.25,
+        "hvac_airborne": 0.25,
+        "fomite": 0.25,
+        "food_contamination": 0.0,
+        "environmental_source": 0.0
+      },
+      "innate_nonsusceptible_fraction": 0.0,
+      "nonsusceptible_mechanism": "none"
     },
     {
       "pathogen_id": "psi_2000_polywater",
@@ -157,7 +167,17 @@
       },
       "introduction_epoch": 3,
       "initial_infected": 1,
-      "initial_time_infected": 0
+      "initial_time_infected": 0,
+      "transmission_route_weights": {
+        "direct_contact": 0.25,
+        "droplet": 0.25,
+        "hvac_airborne": 0.25,
+        "fomite": 0.25,
+        "food_contamination": 0.0,
+        "environmental_source": 0.0
+      },
+      "innate_nonsusceptible_fraction": 0.0,
+      "nonsusceptible_mechanism": "none"
     }
   ]
 }
