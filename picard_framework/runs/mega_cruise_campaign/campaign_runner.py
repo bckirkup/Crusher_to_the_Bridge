@@ -391,7 +391,7 @@ def _immunity_override(
     )
 
 
-# Canonical ship-class populations for multi-platform calibration (c1–c5, a2).
+# Canonical ship-class populations for multi-platform calibration (c1–c6, a2).
 # classic_cruise_1900 is named for CDC "Large" ~1900 but ships 1910 agents.
 _PLATFORM_DEFAULT_AGENTS: dict[str, int] = {
     "expedition_cruise_450": 450,
@@ -414,6 +414,16 @@ def _alpha_tag(alpha: float) -> str:
     return f"a{int(round(float(alpha) * 100)):03d}"
 
 
+def _contact_mode_tag(mode: str) -> str:
+    """Compact run-id fragment for contact_mode."""
+    aliases = {
+        "legacy": "legacy",
+        "density_dependent": "dd",
+        "heterogeneous_zone_dose": "het",
+    }
+    return aliases.get(mode, mode.replace("_", "")[:8])
+
+
 def _density_exponent_values(tier: dict[str, Any]) -> list[float | None]:
     """Density-exponent sweep; ``[None]`` means leave transmission config alone."""
     if "density_exponents" in tier:
@@ -421,16 +431,29 @@ def _density_exponent_values(tier: dict[str, Any]) -> list[float | None]:
     return [None]
 
 
-def _density_contact_override(alpha: float | None) -> dict[str, Any] | None:
-    """Config override that pins density_dependent contact_mode + exponent."""
-    if alpha is None:
+def _contact_mode_values(tier: dict[str, Any]) -> list[str | None]:
+    """Contact-mode sweep; ``[None]`` means leave transmission.contact_mode alone."""
+    if "contact_modes" in tier:
+        return [str(m) for m in tier["contact_modes"]]
+    return [None]
+
+
+def _density_contact_override(
+    alpha: float | None,
+    contact_mode: str | None = None,
+) -> dict[str, Any] | None:
+    """Config override for density exponent and/or contact_mode."""
+    if alpha is None and contact_mode is None:
         return None
-    return {
-        "transmission": {
-            "contact_mode": "density_dependent",
-            "density_dependent": {"exponent": float(alpha)},
-        },
-    }
+    tx: dict[str, Any] = {}
+    if contact_mode is not None:
+        tx["contact_mode"] = str(contact_mode)
+    elif alpha is not None:
+        # Exponent sweeps imply density-family modes unless mode is explicit.
+        tx["contact_mode"] = "density_dependent"
+    if alpha is not None:
+        tx["density_dependent"] = {"exponent": float(alpha)}
+    return {"transmission": tx}
 
 
 def _resolve_tier_platforms(
@@ -1216,11 +1239,12 @@ def generate_tier_runs(
                             reluctant_delay_epochs=int(rdelay),
                         )
 
-    elif short in ("c1", "c2", "c3", "c4", "c5", "a2"):
+    elif short in ("c1", "c2", "c3", "c4", "c5", "c6", "a2"):
         # Multi-platform calibration / sensitivity (data-driven): keys off
         # tier fields. c1: dose × init × platform; c2: immunity × platforms;
         # c3: SARS-CoV-2 dose × platforms; c4: epoch_durations × dose;
         # c5: density_exponents × dose × platforms;
+        # c6: contact_modes (density vs heterogeneous) sensitivity;
         # a2: fine dose × FUT2 immunity at a pinned density exponent.
         pathogen = tier["pathogen"]  # singular (not pathogens[])
         bundle, pathogen_id, base_overrides = get_pathogen_config(manifest, pathogen)
@@ -1232,6 +1256,7 @@ def generate_tier_runs(
         doses = _calibration_dose_values(tier)
         inits = _calibration_init_values(tier)
         alphas = _density_exponent_values(tier)
+        contact_modes = _contact_mode_values(tier)
         immunities = tier.get("pre_immunity_fractions", [None])
         if epochs_override is not None:
             epoch_list = [int(epochs_override)]
@@ -1265,46 +1290,60 @@ def generate_tier_runs(
                             **patch,
                         }
                     for alpha in alphas:
-                        dens_over = _density_contact_override(alpha)
-                        for imm_frac in immunities:
-                            imm_over, imm_tag = _immunity_override(imm_frac)
-                            for n_epochs in epoch_list:
-                                for sname in strategies:
-                                    for seed in tier["seeds"]:
-                                        rid_parts = [short, pathogen, plat]
-                                        if dose is not None:
-                                            rid_parts.append(_dose_tag(dose))
-                                        if n_init is not None:
-                                            rid_parts.append(f"init{int(n_init)}")
-                                        if alpha is not None:
-                                            rid_parts.append(_alpha_tag(alpha))
-                                        if sweep_epochs:
-                                            rid_parts.append(f"ep{int(n_epochs)}")
-                                        if imm_tag:
-                                            rid_parts.append(imm_tag.lstrip("_"))
-                                        rid_parts.append(sname)
-                                        rid_parts.append(f"s{seed}")
-                                        rid = "_".join(rid_parts)
-                                        yield _yield(
-                                            rid,
-                                            bundle=bundle,
-                                            pathogen_overrides=path_over,
-                                            config_overrides=merge_cfg(
-                                                surv_cfgs.get(sname),
-                                                imm_over,
-                                                dens_over,
-                                            ),
-                                            seed=seed,
-                                            num_agents=n_agents,
-                                            pathogen=pathogen,
-                                            platform_id=plat,
-                                            epochs=int(n_epochs),
-                                            surveillance=sname,
-                                            dose_adjustment=dose,
-                                            n_init=n_init,
-                                            immunity=imm_frac,
-                                            density_exponent=alpha,
-                                        )
+                        for cmode in contact_modes:
+                            dens_over = _density_contact_override(
+                                alpha, contact_mode=cmode,
+                            )
+                            for imm_frac in immunities:
+                                imm_over, imm_tag = _immunity_override(imm_frac)
+                                for n_epochs in epoch_list:
+                                    for sname in strategies:
+                                        for seed in tier["seeds"]:
+                                            rid_parts = [short, pathogen, plat]
+                                            if dose is not None:
+                                                rid_parts.append(_dose_tag(dose))
+                                            if n_init is not None:
+                                                rid_parts.append(
+                                                    f"init{int(n_init)}",
+                                                )
+                                            if alpha is not None:
+                                                rid_parts.append(_alpha_tag(alpha))
+                                            if cmode is not None:
+                                                rid_parts.append(
+                                                    _contact_mode_tag(cmode),
+                                                )
+                                            if sweep_epochs:
+                                                rid_parts.append(
+                                                    f"ep{int(n_epochs)}",
+                                                )
+                                            if imm_tag:
+                                                rid_parts.append(
+                                                    imm_tag.lstrip("_"),
+                                                )
+                                            rid_parts.append(sname)
+                                            rid_parts.append(f"s{seed}")
+                                            rid = "_".join(rid_parts)
+                                            yield _yield(
+                                                rid,
+                                                bundle=bundle,
+                                                pathogen_overrides=path_over,
+                                                config_overrides=merge_cfg(
+                                                    surv_cfgs.get(sname),
+                                                    imm_over,
+                                                    dens_over,
+                                                ),
+                                                seed=seed,
+                                                num_agents=n_agents,
+                                                pathogen=pathogen,
+                                                platform_id=plat,
+                                                epochs=int(n_epochs),
+                                                surveillance=sname,
+                                                dose_adjustment=dose,
+                                                n_init=n_init,
+                                                immunity=imm_frac,
+                                                density_exponent=alpha,
+                                                contact_mode=cmode,
+                                            )
 
     else:
         raise ValueError(f"No generator for tier {tier_id}")
@@ -1664,7 +1703,7 @@ def _run_single(
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Mega cruise campaign runner")
-    parser.add_argument("--tier", default=None, help="Tier id or short prefix (t1…t16, c1…c5, a2)")
+    parser.add_argument("--tier", default=None, help="Tier id or short prefix (t1…t16, c1…c6, a2)")
     parser.add_argument("--dry-run", action="store_true", help="Count runs without executing")
     parser.add_argument("--resume", action="store_true", help="Skip completed run_ids")
     parser.add_argument(

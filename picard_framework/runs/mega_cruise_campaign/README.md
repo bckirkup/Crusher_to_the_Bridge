@@ -40,6 +40,7 @@ runner’s platform table (450 / 1910 / 3000 / 7000), not
 | c3 | SARS-CoV-2 dose × platforms (Diamond Princess cross-check) | 360 |
 | c4 | Voyage duration (72/168/336 epochs) × dose | 180 |
 | c5 | Density-dependent contact α × dose × platforms × immunity × surv | 3600 |
+| c6 | Density vs heterogeneous_zone_dose sensitivity (pinned α/dose) — **deferred** | 160 |
 
 Follow-on sensitivity waves reuse the same multi-platform generator under
 short prefix `a2` (e.g. Downloads `sensitivity_a2_phase1_manifest.json`:
