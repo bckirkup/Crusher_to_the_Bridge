@@ -176,14 +176,29 @@ emod_progression:
 # ── Transmission contact model ─────────────────────────────────
 # Direct-contact r0_draw: density_dependent (default) scales contacts
 # with zone occupancy; legacy uses fixed AVG_R_POOL (frequency-dependent).
+# heterogeneous_zone_dose: density mean + optional mean-1 lognormal
+# within-zone exposure factor (second-stage sensitivity; not default).
 transmission:
-  contact_mode: "density_dependent"   # "legacy" | "density_dependent"
+  contact_mode: "density_dependent"   # "legacy" | "density_dependent" | "heterogeneous_zone_dose"
   density_dependent:
     reference_occupancy: 50           # occupancy at which contacts = base_contacts
     base_contacts: 1.33               # mean contacts at reference_occupancy
     max_contacts: 20                  # cap on contacts per agent per zone per epoch
     exponent: 0.5                     # α: contacts = base * (n/ref)^α
     crew_contact_multiplier: 2.0      # crew in Dining/Galley service zones
+  # Opt-in only — leave contact_mode as density_dependent until sensitivity
+  # campaigns show whether within-zone stochasticity changes conclusions.
+  heterogeneous_zone_dose:
+    # Log-sigma of mean-1 lognormal (μ = -σ²/2 so E[factor]=1)
+    sigma_by_zone_type:
+      Cabin_Corridor: 0.25            # low — stateroom mixing relatively uniform
+      Dining: 1.0                     # high
+      Free: 0.75                      # medium-high (common areas)
+      Room: 0.5
+      Medical: 0.5
+      Engineering: 0.5
+    sigma_service: 1.0                # Galley / service zone IDs (high)
+    default_sigma: 0.75               # unknown zone types
 
 # ── HVAC / CONTAM Transport ────────────────────────────────────
 hvac:

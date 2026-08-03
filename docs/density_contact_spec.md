@@ -176,3 +176,42 @@ Runs: 4 platforms × 3 dose_adj × 5 α × 2 immunity × 2 surveillance × 15 se
   `contact_mode: legacy` to restore fixed AVG_R_POOL draws
 - The density_dependent config block is optional; missing keys fall back to defaults
 - Campaign manifests can override contact_mode / exponent per-tier via config_overrides
+
+---
+
+## Optional second stage: `heterogeneous_zone_dose`
+
+Lasso-style optional layer (not default). Keeps the density-dependent mean
+dose, then multiplies each susceptible’s direct-contact dose by a **mean-1
+lognormal** within-zone exposure factor. Captures “roll of the dice” inside a
+space without pretending to know plume geometry.
+
+```yaml
+transmission:
+  contact_mode: "heterogeneous_zone_dose"   # opt-in; default remains density_dependent
+  heterogeneous_zone_dose:
+    sigma_by_zone_type:
+      Cabin_Corridor: 0.25   # low — high within-stateroom mixing uniformity
+      Dining: 1.0            # high
+      Free: 0.75             # medium-high
+    sigma_service: 1.0       # Galley / service IDs (high)
+    default_sigma: 0.75
+```
+
+Factor: `exp(N(-σ²/2, σ))` so `E[factor] = 1`. Density mean is preserved in
+expectation; only the within-zone variance changes.
+
+Zone-type intent:
+
+| Space | Heterogeneity | σ default |
+|-------|---------------|-----------|
+| Cabin_Corridor | low | 0.25 |
+| Dining | high | 1.0 |
+| Free / common | medium-high | 0.75 |
+| Galley / service | high | 1.0 (`sigma_service`) |
+
+Use for sensitivity only: compare conclusions under `density_dependent` vs
+`heterogeneous_zone_dose` at a pinned α / dose_adj (see campaign tier
+`c6_heterogeneous_sensitivity`). Empirically: reject inherited Korkin kernel →
+test density-dependent across platforms → test whether within-zone stochasticity
+materially changes conclusions (realism vs overfitting).

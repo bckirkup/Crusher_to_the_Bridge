@@ -213,3 +213,144 @@ class TestDensityContactMode:
         assert core.density_cfg["base_contacts"] == pytest.approx(1.33)
         assert core.density_cfg["max_contacts"] == pytest.approx(20.0)
         assert core.density_cfg["crew_contact_multiplier"] == pytest.approx(2.0)
+
+
+class TestHeterogeneousZoneDose:
+    """Optional second-stage contact_mode (not the default)."""
+
+    def test_default_mode_remains_density_dependent(self) -> None:
+        core = TransmissionCore(rng=np.random.default_rng(0))
+        assert core.contact_mode == "density_dependent"
+
+    def test_config_yaml_default_is_density_dependent(self) -> None:
+        from crusher_labs import load_config
+
+        cfg = load_config()
+        assert cfg["transmission"]["contact_mode"] == "density_dependent"
+
+    def test_zone_sigma_ordering(self) -> None:
+        core = _core(
+            contact_mode="heterogeneous_zone_dose",
+            zone_types={
+                "CabinA": "Cabin_Corridor",
+                "Lounge": "Free",
+                "MainDining": "Dining",
+                "Main_Galley_Aft": "Dining",
+            },
+        )
+        assert core._zone_exposure_sigma("CabinA") < core._zone_exposure_sigma("Lounge")
+        assert core._zone_exposure_sigma("Lounge") < core._zone_exposure_sigma("MainDining")
+        assert core._zone_exposure_sigma("MainDining") == pytest.approx(1.0)
+        assert core._zone_exposure_sigma("Main_Galley_Aft") == pytest.approx(1.0)
+
+    def test_exposure_factor_mean_near_one(self) -> None:
+        """Mean-1 lognormal: E[factor] ≈ 1 for each zone class."""
+        core = _core(
+            contact_mode="heterogeneous_zone_dose",
+            zone_types={
+                "CabinA": "Cabin_Corridor",
+                "Lounge": "Free",
+                "MainDining": "Dining",
+            },
+            seed=42,
+        )
+        n = 12_000
+        for zone in ("CabinA", "Lounge", "MainDining"):
+            draws = [core._zone_exposure_factor(zone) for _ in range(n)]
+            assert sum(draws) / n == pytest.approx(1.0, abs=0.05)
+
+    def test_heterogeneous_records_exposure_factor(self) -> None:
+        zone = "MainDining"
+        shedder = _agent(1, zone, infected=True)
+        targets = [_agent(i, zone) for i in range(2, 8)]
+        dens = {
+            "reference_occupancy": 50,
+            "base_contacts": 5.0,
+            "max_contacts": 50,
+            "exponent": 0.0,
+            "crew_contact_multiplier": 1.0,
+        }
+        core = _core(
+            contact_mode="heterogeneous_zone_dose",
+            density=dens,
+            zone_types={zone: "Dining"},
+            seed=7,
+        )
+        core.initialize_zones([zone])
+        matrix, _ = core.execute_transmission(
+            epoch=1,
+            agents=[shedder, *targets],
+            zone_pathogen_mass={zone: 0.0},
+        )
+        assert matrix.shared_room_exposures
+        for rec in matrix.shared_room_exposures:
+            assert "zone_exposure_factor" in rec
+            assert rec["zone_exposure_factor"] > 0.0
+
+    def test_density_mode_omits_exposure_factor(self) -> None:
+        zone = "Lounge"
+        shedder = _agent(1, zone, infected=True)
+        target = _agent(2, zone)
+        core = _core(contact_mode="density_dependent", seed=3)
+        core.initialize_zones([zone])
+        matrix, _ = core.execute_transmission(
+            epoch=1,
+            agents=[shedder, target],
+            zone_pathogen_mass={zone: 0.0},
+        )
+        if matrix.shared_room_exposures:
+            assert "zone_exposure_factor" not in matrix.shared_room_exposures[0]
+
+    def test_heterogeneous_changes_doses_vs_density(self) -> None:
+        """Sensitivity: heterogeneous_zone_dose changes recorded doses vs density."""
+        zone = "MainDining"
+        shedder = _agent(1, zone, infected=True)
+        targets = [_agent(i, zone) for i in range(2, 22)]
+        agents = [shedder, *targets]
+        dens = {
+            "reference_occupancy": 50,
+            "base_contacts": 4.0,
+            "max_contacts": 50,
+            "exponent": 0.0,
+            "crew_contact_multiplier": 1.0,
+        }
+
+        def _doses(mode: str) -> list[float]:
+            core = _core(
+                contact_mode=mode,
+                density=dens,
+                zone_types={zone: "Dining"},
+                seed=99,
+            )
+            core.initialize_zones([zone])
+            matrix, _ = core.execute_transmission(
+                epoch=1,
+                agents=agents,
+                zone_pathogen_mass={zone: 0.0},
+            )
+            return [e["dose"] for e in matrix.shared_room_exposures]
+
+        assert _doses("density_dependent") != _doses("heterogeneous_zone_dose")
+
+    def test_sigma_override_sensitivity(self) -> None:
+        """Changing Dining sigma changes exposure-factor variance (config wiring)."""
+        zt = {"MainDining": "Dining"}
+
+        def _var(sigma: float) -> float:
+            core = TransmissionCore(
+                rng=np.random.default_rng(0),
+                zone_types=zt,
+                cfg={
+                    "transmission": {
+                        "contact_mode": "heterogeneous_zone_dose",
+                        "heterogeneous_zone_dose": {
+                            "sigma_by_zone_type": {"Dining": sigma},
+                        },
+                    },
+                },
+            )
+            draws = [core._zone_exposure_factor("MainDining") for _ in range(4000)]
+            mean = sum(draws) / len(draws)
+            return sum((x - mean) ** 2 for x in draws) / len(draws)
+
+        assert _var(1.0) > _var(0.2) * 2.0

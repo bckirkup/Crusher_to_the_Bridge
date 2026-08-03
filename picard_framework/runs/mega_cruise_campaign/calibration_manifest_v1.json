@@ -323,6 +323,50 @@
         713,
         714
       ]
+    },
+    "c6_heterogeneous_sensitivity": {
+      "description": "Second-stage sensitivity: density_dependent vs heterogeneous_zone_dose at pinned \u03b1=0.5 and dose_adj=15. Deferred until c5 pins \u03b1; not default.",
+      "deferred": true,
+      "platforms": [
+        "expedition_cruise_450",
+        "classic_cruise_1900",
+        "spirit_cruise_3000",
+        "mega_cruise_5000"
+      ],
+      "pathogen": "norovirus",
+      "dose_adjustments": [
+        15
+      ],
+      "density_exponents": [
+        0.5
+      ],
+      "contact_modes": [
+        "density_dependent",
+        "heterogeneous_zone_dose"
+      ],
+      "pre_immunity_fractions": [
+        0.0
+      ],
+      "surveillance_strategies": [
+        "none_true",
+        "syndromic"
+      ],
+      "initial_infected_values": [
+        1
+      ],
+      "epochs": 168,
+      "seeds": [
+        700,
+        701,
+        702,
+        703,
+        704,
+        705,
+        706,
+        707,
+        708,
+        709
+      ]
     }
   },
   "pathogen_configs": {
