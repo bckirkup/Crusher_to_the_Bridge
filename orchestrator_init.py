@@ -81,6 +81,9 @@ def load_spatial_layout(cfg: dict[str, Any]) -> list[dict[str, Any]] | None:
             "deck": z.get("deck", "main"),
             "cabin_ventilation_type": z.get("cabin_ventilation_type", ""),
             "cabin_size": z.get("cabin_size"),
+            "max_occupancy": z.get("max_occupancy"),
+            "dining_service_type": z.get("dining_service_type", ""),
+            "food_contamination_multiplier": z.get("food_contamination_multiplier"),
         }
         for z in layout.get("zones", [])
     ]
@@ -245,7 +248,14 @@ def build_engine(
     zones = spatial_zones if spatial_zones else graph_cfg.get("zones", [])
 
     engine_zones = [
-        {"name": z["name"], "type": z["type"], "capacity": z.get("traffic", "medium")}
+        {
+            "name": z["name"],
+            "type": z["type"],
+            "capacity": z.get("traffic", "medium"),
+            "max_occupancy": z.get("max_occupancy"),
+            "dining_service_type": z.get("dining_service_type", ""),
+            "food_contamination_multiplier": z.get("food_contamination_multiplier"),
+        }
         for z in zones
     ]
 
@@ -269,6 +279,7 @@ def build_engine(
         vsp_isolation=False,
         agent_classes=agent_classes,
         gender_distribution=gender_distribution,
+        agent_behavior=cfg.get("agent_behavior"),
         **engine_kwargs,
     )
 

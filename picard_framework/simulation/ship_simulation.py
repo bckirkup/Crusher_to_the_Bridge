@@ -164,10 +164,21 @@ class ShipSimulation:
         }
         zone_types = {z["name"]: z.get("type", "") for z in ship.get("zones", [])}
         zone_ventilation: dict[str, str] = {}
+        food_zone_multipliers: dict[str, float] = {}
         for z in platform_layout.get("zones", []):
+            zid = z["id"]
             vent = z.get("cabin_ventilation_type")
             if vent:
-                zone_ventilation[z["id"]] = vent
+                zone_ventilation[zid] = vent
+            if z.get("type") == "Dining":
+                mult = z.get("food_contamination_multiplier")
+                if mult is None:
+                    stype = str(z.get("dining_service_type") or "")
+                    from engines.infection_dynamics_bridge import (
+                        DEFAULT_FOOD_CONTAMINATION_MULTIPLIER,
+                    )
+                    mult = DEFAULT_FOOD_CONTAMINATION_MULTIPLIER.get(stype, 1.0)
+                food_zone_multipliers[zid] = float(mult)
         self.zone_types = zone_types
         self.hvac_downstream = (
             build_hvac_downstream_map(airflow_data) if airflow_data else {}
@@ -191,6 +202,7 @@ class ShipSimulation:
                 )
             ),
             cfg=self.cfg,
+            food_zone_multipliers=food_zone_multipliers,
         )
         self.tx_core.initialize_zones(self.zone_names)
         self.engine.enable_external_transmission()

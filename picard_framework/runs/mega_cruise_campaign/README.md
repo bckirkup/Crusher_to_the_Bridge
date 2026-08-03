@@ -42,6 +42,11 @@ runner’s platform table (450 / 1910 / 3000 / 7000), not
 | c5 | Density-dependent contact α × dose × platforms × immunity × surv | 3600 |
 | c6 | Density vs heterogeneous_zone_dose sensitivity (pinned α/dose) — **deferred** | 160 |
 
+Dining / free-zone rotation (`agent_behavior.dining_rotation_probability`) is
+off by default in `crusher_labs/config.yaml`. Raise it in campaign
+`config_overrides` when testing whether venue mixing shrinks platform
+`dose_adjustment` gaps (see `docs/multi_pathogen_model_changes_spec.md`).
+
 Follow-on sensitivity waves reuse the same multi-platform generator under
 short prefix `a2` (e.g. Downloads `sensitivity_a2_phase1_manifest.json`:
 fine `dose_adjustments` × FUT2 `pre_immunity_fractions` at a pinned

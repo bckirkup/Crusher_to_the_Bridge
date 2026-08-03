@@ -100,6 +100,24 @@ DEFAULT_ZONES = [
     {"name": "Recreation",        "type": "Free",    "capacity": "medium"},
 ]
 
+DEFAULT_FOOD_CONTAMINATION_MULTIPLIER: dict[str, float] = {
+    "buffet": 3.0,
+    "mdr": 1.0,
+    "specialty": 0.5,
+    "crew_mess": 1.0,
+    "galley": 0.5,
+}
+
+DEFAULT_AGENT_BEHAVIOR: dict[str, Any] = {
+    "dining_rotation_probability": 0.0,
+    "free_zone_rotation_probability": 0.0,
+    "dining_meal_weights": {
+        "breakfast": {"buffet": 0.6, "mdr": 0.3, "specialty": 0.1},
+        "lunch": {"buffet": 0.5, "mdr": 0.3, "specialty": 0.2},
+        "dinner": {"buffet": 0.2, "mdr": 0.5, "specialty": 0.3},
+    },
+}
+
 # Crew behavior schedule meal tokens (shared across class schedules)
 MEAL_BREAKFAST = "Meal:Breakfast"
 MEAL_LUNCH = "Meal:Lunch"
@@ -371,22 +389,124 @@ class KorkinAgent:
             return 0.0
         return shedding_value(dpi, self.is_symptomatic) * self.shedding_multiplier
 
-    def get_location_for_hour(self, hour: int, randomness: float = 0.0) -> str:
+    def get_location_for_hour(
+        self,
+        hour: int,
+        randomness: float = 0.0,
+        *,
+        rng: np.random.Generator | None = None,
+        dining_catalog: list[dict[str, Any]] | None = None,
+        free_zones: list[str] | None = None,
+        agent_behavior: dict[str, Any] | None = None,
+    ) -> str:
         """Determine where this agent should be at the given hour.
 
         Mirrors Agent.getProjectedDestination() in the Java source.
+        Optional dining/free rotation uses engine RNG + zone catalog.
         """
         adjusted_hour = int((hour + randomness + 24.0) % 24.0)
         activity = self.schedule[adjusted_hour]
         if activity == "Sleep":
             return self.home_zone
         if activity.startswith("Meal"):
-            return self.dining_zone
+            return self._resolve_dining_location(
+                activity,
+                rng=rng,
+                dining_catalog=dining_catalog,
+                agent_behavior=agent_behavior,
+            )
         if activity == "Free":
-            return self.free_zone
+            return self._resolve_free_location(
+                rng=rng,
+                free_zones=free_zones,
+                agent_behavior=agent_behavior,
+            )
         if activity == "Work":
             return self.work_zone
         return self.home_zone
+
+    def _meal_type_for_activity(self, activity: str) -> str:
+        if "Breakfast" in activity:
+            return "breakfast"
+        if "Lunch" in activity:
+            return "lunch"
+        if "Dinner" in activity:
+            return "dinner"
+        return "lunch"
+
+    def _resolve_dining_location(
+        self,
+        activity: str,
+        *,
+        rng: np.random.Generator | None,
+        dining_catalog: list[dict[str, Any]] | None,
+        agent_behavior: dict[str, Any] | None,
+    ) -> str:
+        behavior = agent_behavior or {}
+        p_rotate = float(behavior.get("dining_rotation_probability", 0.0) or 0.0)
+        if (
+            rng is None
+            or not dining_catalog
+            or p_rotate <= 0.0
+            or rng.random() >= p_rotate
+        ):
+            return self.dining_zone
+
+        meal = self._meal_type_for_activity(activity)
+        meal_weights = (behavior.get("dining_meal_weights") or {}).get(meal) or {}
+        # Crew prefer crew_mess venues when rotating.
+        if self.role == "crew" and not meal_weights:
+            meal_weights = {"crew_mess": 1.0}
+        elif self.role == "crew":
+            meal_weights = {**meal_weights, "crew_mess": max(
+                float(meal_weights.get("crew_mess", 0.0)), 0.5,
+            )}
+
+        candidates: list[str] = []
+        weights: list[float] = []
+        for entry in dining_catalog:
+            name = str(entry["name"])
+            stype = str(entry.get("service_type") or "mdr")
+            # Skip galleys for passenger dining rotation.
+            if self.role != "crew" and stype == "galley":
+                continue
+            cap = entry.get("max_occupancy")
+            try:
+                capacity = float(cap) if cap is not None else 100.0
+            except (TypeError, ValueError):
+                capacity = 100.0
+            type_w = float(meal_weights.get(stype, 0.0))
+            if type_w <= 0.0 and stype not in meal_weights:
+                # Unknown service types: small residual weight so rotation works
+                type_w = 0.05
+            if type_w <= 0.0:
+                continue
+            candidates.append(name)
+            weights.append(max(capacity, 1.0) * type_w)
+
+        if not candidates:
+            return self.dining_zone
+        total = sum(weights)
+        probs = [w / total for w in weights]
+        return str(rng.choice(candidates, p=probs))
+
+    def _resolve_free_location(
+        self,
+        *,
+        rng: np.random.Generator | None,
+        free_zones: list[str] | None,
+        agent_behavior: dict[str, Any] | None,
+    ) -> str:
+        behavior = agent_behavior or {}
+        p_rotate = float(behavior.get("free_zone_rotation_probability", 0.0) or 0.0)
+        if (
+            rng is None
+            or not free_zones
+            or p_rotate <= 0.0
+            or rng.random() >= p_rotate
+        ):
+            return self.free_zone
+        return str(rng.choice(free_zones))
 
     def init_pathogen_susceptibility(
         self, pathogen_id: str, base_susceptibility: float = 1.0,
@@ -628,6 +748,7 @@ class KorkinShipEngine:
         seed: int = 42,
         agent_classes: list[dict[str, Any]] | None = None,
         gender_distribution: dict[str, float] | None = None,
+        agent_behavior: dict[str, Any] | None = None,
     ) -> None:
         self.rng = np.random.default_rng(seed)
         self.zones = zones or DEFAULT_ZONES
@@ -639,6 +760,21 @@ class KorkinShipEngine:
         self._agent_classes = agent_classes
         self._gender_distribution = gender_distribution or DEFAULT_GENDER_DISTRIBUTION
         self.vsp_threshold_fraction: float = VSP_THRESHOLD_FRACTION
+        behavior = dict(DEFAULT_AGENT_BEHAVIOR)
+        if agent_behavior:
+            behavior.update({
+                k: v for k, v in agent_behavior.items()
+                if k != "dining_meal_weights"
+            })
+            if "dining_meal_weights" in agent_behavior:
+                merged_meals = dict(DEFAULT_AGENT_BEHAVIOR["dining_meal_weights"])
+                for meal, weights in (agent_behavior["dining_meal_weights"] or {}).items():
+                    merged_meals[meal] = {
+                        **(merged_meals.get(meal) or {}),
+                        **(weights or {}),
+                    }
+                behavior["dining_meal_weights"] = merged_meals
+        self.agent_behavior = behavior
 
         self._dining_zones = [z["name"] for z in self.zones if z["type"] == "Dining"]
         self._free_zones = [z["name"] for z in self.zones if z["type"] == "Free"]
@@ -647,6 +783,31 @@ class KorkinShipEngine:
             if z["type"] in ("Room", "Cabin_Corridor")
         ]
         self._all_zone_names = [z["name"] for z in self.zones]
+        self._dining_catalog: list[dict[str, Any]] = []
+        for z in self.zones:
+            if z.get("type") != "Dining":
+                continue
+            stype = str(z.get("dining_service_type") or "")
+            if not stype:
+                name = str(z["name"]).lower()
+                if "galley" in name:
+                    stype = "galley"
+                elif "mess" in name:
+                    stype = "crew_mess"
+                elif any(x in name for x in ("buffet", "lido", "windjammer", "grill", "cafe")):
+                    stype = "buffet"
+                elif "spec" in name:
+                    stype = "specialty"
+                else:
+                    stype = "mdr"
+            self._dining_catalog.append({
+                "name": z["name"],
+                "service_type": stype,
+                "max_occupancy": z.get("max_occupancy"),
+                "food_contamination_multiplier": z.get(
+                    "food_contamination_multiplier",
+                ),
+            })
 
         self.agents: list[KorkinAgent] = []
         self.epoch: int = 0
@@ -923,7 +1084,14 @@ class KorkinShipEngine:
                 agent.current_location = agent.home_zone
                 continue
             randomness = self.rng.uniform(-1.0, 1.0)
-            agent.current_location = agent.get_location_for_hour(hour, randomness)
+            agent.current_location = agent.get_location_for_hour(
+                hour,
+                randomness,
+                rng=self.rng,
+                dining_catalog=self._dining_catalog,
+                free_zones=self._free_zones,
+                agent_behavior=self.agent_behavior,
+            )
 
         # 2. Infection transmission
         # When TransmissionCore is active (_external_transmission=True),
