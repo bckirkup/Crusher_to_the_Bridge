@@ -116,7 +116,17 @@
             ]
           }
         ]
-      }
+      },
+      "transmission_route_weights": {
+        "direct_contact": 0.35,
+        "droplet": 0.1,
+        "hvac_airborne": 0.05,
+        "fomite": 0.3,
+        "food_contamination": 0.2,
+        "environmental_source": 0.0
+      },
+      "innate_nonsusceptible_fraction": 0.2,
+      "nonsusceptible_mechanism": "FUT2_nonsecretor"
     },
     {
       "pathogen_id": "sars_cov2_resp",
@@ -237,7 +247,17 @@
             ]
           }
         ]
-      }
+      },
+      "transmission_route_weights": {
+        "direct_contact": 0.25,
+        "droplet": 0.3,
+        "hvac_airborne": 0.3,
+        "fomite": 0.1,
+        "food_contamination": 0.0,
+        "environmental_source": 0.05
+      },
+      "innate_nonsusceptible_fraction": 0.0,
+      "nonsusceptible_mechanism": "none"
     },
     {
       "pathogen_id": "influenza_a",
@@ -348,7 +368,17 @@
             ]
           }
         ]
-      }
+      },
+      "transmission_route_weights": {
+        "direct_contact": 0.2,
+        "droplet": 0.35,
+        "hvac_airborne": 0.3,
+        "fomite": 0.15,
+        "food_contamination": 0.0,
+        "environmental_source": 0.0
+      },
+      "innate_nonsusceptible_fraction": 0.0,
+      "nonsusceptible_mechanism": "none"
     },
     {
       "pathogen_id": "measles_virus",
@@ -491,7 +521,17 @@
             ]
           }
         ]
-      }
+      },
+      "transmission_route_weights": {
+        "direct_contact": 0.1,
+        "droplet": 0.35,
+        "hvac_airborne": 0.5,
+        "fomite": 0.05,
+        "food_contamination": 0.0,
+        "environmental_source": 0.0
+      },
+      "innate_nonsusceptible_fraction": 0.0,
+      "nonsusceptible_mechanism": "none"
     },
     {
       "pathogen_id": "legionella_pneumophila",
@@ -614,7 +654,17 @@
             ]
           }
         ]
-      }
+      },
+      "transmission_route_weights": {
+        "direct_contact": 0.0,
+        "droplet": 0.0,
+        "hvac_airborne": 0.0,
+        "fomite": 0.0,
+        "food_contamination": 0.0,
+        "environmental_source": 1.0
+      },
+      "innate_nonsusceptible_fraction": 0.0,
+      "nonsusceptible_mechanism": "none"
     },
     {
       "pathogen_id": "vibrio_cholerae_parahaemolyticus",
@@ -738,7 +788,17 @@
             ]
           }
         ]
-      }
+      },
+      "transmission_route_weights": {
+        "direct_contact": 0.1,
+        "droplet": 0.0,
+        "hvac_airborne": 0.0,
+        "fomite": 0.15,
+        "food_contamination": 0.7,
+        "environmental_source": 0.05
+      },
+      "innate_nonsusceptible_fraction": 0.0,
+      "nonsusceptible_mechanism": "none"
     },
     {
       "pathogen_id": "campylobacter_jejuni",
@@ -857,7 +917,17 @@
             ]
           }
         ]
-      }
+      },
+      "transmission_route_weights": {
+        "direct_contact": 0.15,
+        "droplet": 0.0,
+        "hvac_airborne": 0.0,
+        "fomite": 0.2,
+        "food_contamination": 0.6,
+        "environmental_source": 0.05
+      },
+      "innate_nonsusceptible_fraction": 0.0,
+      "nonsusceptible_mechanism": "none"
     },
     {
       "pathogen_id": "clostridioides_difficile",
@@ -969,7 +1039,17 @@
             ]
           }
         ]
-      }
+      },
+      "transmission_route_weights": {
+        "direct_contact": 0.25,
+        "droplet": 0.0,
+        "hvac_airborne": 0.0,
+        "fomite": 0.45,
+        "food_contamination": 0.0,
+        "environmental_source": 0.3
+      },
+      "innate_nonsusceptible_fraction": 0.0,
+      "nonsusceptible_mechanism": "none"
     },
     {
       "pathogen_id": "andes_hantavirus",
@@ -1088,7 +1168,17 @@
             ]
           }
         ]
-      }
+      },
+      "transmission_route_weights": {
+        "direct_contact": 0.15,
+        "droplet": 0.25,
+        "hvac_airborne": 0.45,
+        "fomite": 0.1,
+        "food_contamination": 0.0,
+        "environmental_source": 0.05
+      },
+      "innate_nonsusceptible_fraction": 0.0,
+      "nonsusceptible_mechanism": "none"
     },
     {
       "pathogen_id": "ebola_virus",
@@ -1217,7 +1307,17 @@
             ]
           }
         ]
-      }
+      },
+      "transmission_route_weights": {
+        "direct_contact": 0.55,
+        "droplet": 0.2,
+        "hvac_airborne": 0.05,
+        "fomite": 0.2,
+        "food_contamination": 0.0,
+        "environmental_source": 0.0
+      },
+      "innate_nonsusceptible_fraction": 0.0,
+      "nonsusceptible_mechanism": "none"
     }
   ]
 }

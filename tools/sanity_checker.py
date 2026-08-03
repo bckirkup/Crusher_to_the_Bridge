@@ -283,6 +283,9 @@ class PathogenProfile(BaseModel):
     microflora_disruption: dict[str, Any] = {}
     food_contamination: dict[str, Any] = {}
     environmental_contamination: dict[str, Any] = {}
+    transmission_route_weights: dict[str, float] = {}
+    innate_nonsusceptible_fraction: float = 0.0
+    nonsusceptible_mechanism: str = "none"
     introduction_epoch: int = 0
     initial_infected: int = 1
     initial_time_infected: int = 0
@@ -293,6 +296,25 @@ class PathogenProfile(BaseModel):
     def initial_time_non_negative(cls, v: int) -> int:
         if v < 0:
             raise ValueError(f"initial_time_infected must be non-negative, got {v}")
+        return v
+
+    @field_validator("innate_nonsusceptible_fraction")
+    @classmethod
+    def nonsus_frac_bounded(cls, v: float) -> float:
+        if v < 0 or v > 1:
+            raise ValueError(
+                f"innate_nonsusceptible_fraction must be in [0,1], got {v}"
+            )
+        return v
+
+    @field_validator("transmission_route_weights")
+    @classmethod
+    def route_weights_non_negative(cls, v: dict[str, float]) -> dict[str, float]:
+        for k, val in v.items():
+            if float(val) < 0:
+                raise ValueError(
+                    f"transmission_route_weights[{k}] must be non-negative, got {val}"
+                )
         return v
 
     @field_validator("surface_deposition_fraction")
@@ -571,6 +593,29 @@ def _check_logical_contradictions(
                         "LOGIC_ROUTE",
                         f"{p.pathogen_id} has unknown transmission route "
                         f"'{route}'. Valid routes: {_VALID_TRANSMISSION_ROUTES}",
+                    )
+
+            weights = p.transmission_route_weights or {}
+            if weights:
+                allowed = {
+                    "direct_contact", "droplet", "hvac_airborne",
+                    "fomite", "food_contamination", "environmental_source",
+                }
+                unknown = set(weights) - allowed
+                if unknown:
+                    report.warn(
+                        _ACTIVE_PROFILES_JSON,
+                        "LOGIC_ROUTE",
+                        f"{p.pathogen_id} transmission_route_weights has "
+                        f"unknown keys {sorted(unknown)}",
+                    )
+                wsum = sum(float(v) for v in weights.values())
+                if abs(wsum - 1.0) > 0.01:
+                    report.warn(
+                        _ACTIVE_PROFILES_JSON,
+                        "LOGIC_ROUTE",
+                        f"{p.pathogen_id} transmission_route_weights sum to "
+                        f"{wsum:.4f} (expected ≈ 1.0)",
                     )
 
             # Check that shedding curves have reasonable lengths

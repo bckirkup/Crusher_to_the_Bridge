@@ -78,6 +78,25 @@ DEFAULT_DENSITY_CFG: dict[str, float] = {
 }
 DEFAULT_CONTACT_MODE = "density_dependent"
 
+# Per-pathogen route weights (identity default → no change when absent)
+DEFAULT_ROUTE_WEIGHTS: dict[str, float] = {
+    "direct_contact": 1.0,
+    "droplet": 1.0,
+    "hvac_airborne": 1.0,
+    "fomite": 1.0,
+    "food_contamination": 1.0,
+    "environmental_source": 1.0,
+}
+# Internal pathway dose keys → transmission_route_weights keys
+PATHWAY_WEIGHT_KEYS: dict[str, str] = {
+    "direct_contact": "direct_contact",
+    "droplet": "droplet",
+    "hvac_airborne": "hvac_airborne",
+    "fomite": "fomite",
+    "food": "food_contamination",
+    "environmental": "environmental_source",
+}
+
 # Log-sigma defaults for heterogeneous_zone_dose (mean-1 lognormal).
 # Low in cabins (near-uniform stateroom mixing); high in dining/service;
 # medium-high in free/common areas. Not the default contact_mode.
@@ -553,6 +572,8 @@ class TransmissionCore:
                 p_agent_pw, pathogen_id=pathogen_id, profile=profile,
             )
 
+        self._apply_route_weights(profile, p_agent_doses, p_agent_pw)
+
         for aid, dose in p_agent_doses.items():
             agent_obj = next((a for a in agents if a.agent_id == aid), None)
             mult = (
@@ -569,6 +590,37 @@ class TransmissionCore:
             for pw_name, pw_dose in pw.items():
                 key = f"{pw_name}:{pathogen_id}" if pathogen_id != "_default" else pw_name
                 merged[key] = merged.get(key, 0.0) + pw_dose
+
+    def _route_weights(self, profile: dict[str, Any] | None) -> dict[str, float]:
+        """Resolve transmission_route_weights (identity default)."""
+        raw = (profile or {}).get("transmission_route_weights")
+        if not isinstance(raw, dict) or not raw:
+            return dict(DEFAULT_ROUTE_WEIGHTS)
+        weights = dict(DEFAULT_ROUTE_WEIGHTS)
+        for key in DEFAULT_ROUTE_WEIGHTS:
+            if key in raw:
+                weights[key] = float(raw[key])
+        return weights
+
+    def _apply_route_weights(
+        self,
+        profile: dict[str, Any] | None,
+        agent_doses: dict[int, float],
+        agent_pathway_doses: dict[int, dict[str, float]],
+    ) -> None:
+        """Scale each pathway's dose contribution by pathogen route weights."""
+        weights = self._route_weights(profile)
+        if all(abs(weights[k] - 1.0) < 1e-15 for k in DEFAULT_ROUTE_WEIGHTS):
+            return
+        for aid, pw in agent_pathway_doses.items():
+            total = 0.0
+            for pw_name, pw_dose in list(pw.items()):
+                wkey = PATHWAY_WEIGHT_KEYS.get(pw_name, pw_name)
+                w = float(weights.get(wkey, 1.0))
+                scaled = pw_dose * w
+                pw[pw_name] = scaled
+                total += scaled
+            agent_doses[aid] = total
 
     # ── Pathway 1: Direct Contact ────────────────────────────────────
 

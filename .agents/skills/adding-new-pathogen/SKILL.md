@@ -28,6 +28,7 @@ Profiles live in `data/pathogens/active_profiles.json`. Each pathogen entry requ
   "transmission_routes": ["direct_contact", "fomite", "food"],
   "shedding_curve_log10": [2.0, 3.5, 4.0],
   "asymptomatic_shedding_log10": [1.0, 2.0, 2.5],
+  "dose_adjustment": 4.0,
   "dose_response": {
     "model": "beta_poisson",
     "alpha": 0.04,
@@ -41,6 +42,16 @@ Profiles live in `data/pathogens/active_profiles.json`. Each pathogen entry requ
   "initial_infected": 1,
   "initial_time_infected": 0,
   "shedding_variance_log10": 0.0,
+  "transmission_route_weights": {
+    "direct_contact": 0.4,
+    "droplet": 0.1,
+    "hvac_airborne": 0.0,
+    "fomite": 0.3,
+    "food_contamination": 0.2,
+    "environmental_source": 0.0
+  },
+  "innate_nonsusceptible_fraction": 0.0,
+  "nonsusceptible_mechanism": "none",
   "microflora_disruption": {
     "causes_disruption": false,
     "disruption_type": "",
@@ -49,6 +60,18 @@ Profiles live in `data/pathogens/active_profiles.json`. Each pathogen entry requ
   }
 }
 ```
+
+**`dose_adjustment`** is a **log10 shedding offset**
+(`shedding = 10^(curve[dpi] − dose_adjustment) * shedding_multiplier`),
+not a dose-response α/β scaler. Campaigns calibrate infectivity via
+`pathogen_overrides.<id>.dose_adjustment`.
+
+**`transmission_route_weights`** (optional; default all 1.0) scale each
+pathway's dose contribution. Prefer weights that sum to ≈1.0.
+
+**`innate_nonsusceptible_fraction`** draws per-agent zero susceptibility for
+this pathogen only (e.g. FUT2 for norovirus). Orthogonal to
+`ship_graph.immune_fraction`.
 
 Optional blocks for extended transmission pathways (PR #43):
 
