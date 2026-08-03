@@ -42,6 +42,11 @@ runner’s platform table (450 / 1910 / 3000 / 7000), not
 | c5 | Density-dependent contact α × dose × platforms × immunity × surv | 3600 |
 | c6 | Density vs heterogeneous_zone_dose sensitivity (pinned α/dose) — **deferred** | 160 |
 
+Follow-on sensitivity waves reuse the same multi-platform generator under
+short prefix `a2` (e.g. Downloads `sensitivity_a2_phase1_manifest.json`:
+fine `dose_adjustments` × FUT2 `pre_immunity_fractions` at a pinned
+`density_exponents` value). `--tier a2` selects all `a2_*` tiers.
+
 ```bash
 MANIFEST=picard_framework/runs/mega_cruise_campaign/calibration_manifest_v1.json
 RUNNER=picard_framework/runs/mega_cruise_campaign/campaign_runner.py

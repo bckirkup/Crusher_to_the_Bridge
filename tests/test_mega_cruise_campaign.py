@@ -1221,6 +1221,34 @@ def test_c5_exponent_sensitivity_in_overrides() -> None:
     )
 
 
+def test_a2_reuses_calibration_generator_with_density_and_immunity() -> None:
+    """sensitivity_a2_phase1 tiers share the c1–c6 generator (pinned alpha)."""
+    a2 = Path.home() / "Downloads" / "sensitivity_a2_phase1_manifest.json"
+    if not a2.is_file():
+        pytest.skip("Downloads/sensitivity_a2_phase1_manifest.json not present")
+    with open(a2, encoding="utf-8") as fh:
+        manifest = json.load(fh)
+    runs = list(generate_tier_runs(manifest, "a2_expedition_cruise_450"))
+    # 9 doses × 1 alpha × 11 immunity × 1 init × 2 surv × 30 seeds
+    assert len(runs) == 9 * 1 * 11 * 1 * 2 * 30
+    rid, spec = next(
+        (r, s) for r, s in runs
+        if "dose15" in r and "a075" in r and "imm20" in r and "syndromic" in r
+    )
+    assert rid.startswith("a2_norovirus_expedition_cruise_450_")
+    tx = spec["config_overrides"]["transmission"]
+    assert tx["contact_mode"] == "density_dependent"
+    assert tx["density_dependent"]["exponent"] == pytest.approx(0.75)
+    assert spec["campaign_parameters"]["density_exponent"] == pytest.approx(0.75)
+    assert spec["pathogen_overrides"]["norwalk_gi"]["dose_adjustment"] == pytest.approx(15.0)
+    assert resolve_tier_ids(manifest, "a2") == [
+        "a2_classic_cruise_1900",
+        "a2_expedition_cruise_450",
+        "a2_mega_cruise_5000",
+        "a2_spirit_cruise_3000",
+    ]
+
+
 def test_campaign_generator_c6() -> None:
     """c6 dry-run: density vs heterogeneous contact_mode at pinned α/dose."""
     manifest = _calibration_manifest()
