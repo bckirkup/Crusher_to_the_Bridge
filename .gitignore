@@ -71,6 +71,8 @@ results_*/
 campaign_results/
 campaign_summary.csv
 campaign_summary.json
+campaign_*_summary.csv
+campaign_*_summary.json
 failure_report*.json
 failure_attempts*.csv
 **/_ops/
@@ -78,3 +80,10 @@ deploy/aws/*.rendered.json
 deploy/aws/tmp/
 *.resource.json
 *.failure.json
+
+# Ephemeral Docker-bake splits of Downloads manifests (source of truth stays
+# outside the repo; regenerate when launching a multi-wave Batch campaign)
+picard_framework/runs/mega_cruise_campaign/calibration_*_part_*.json
+picard_framework/runs/mega_cruise_campaign/campaign_manifest_v*_bake.json
+picard_framework/runs/mega_cruise_campaign/c5_density_manifest*.json
+picard_framework/runs/mega_cruise_campaign/sensitivity_*_manifest*.json
