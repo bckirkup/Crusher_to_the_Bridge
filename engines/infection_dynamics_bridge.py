@@ -303,7 +303,7 @@ class KorkinAgent:
         # Chronic disease extensions
         "chronic_disease_ids", "chronic_pathogen_mods",
         "chronic_wearable_response_scale",
-        "shedding_multiplier", "cabin_mate_ids",
+        "shedding_multiplier", "cabin_mate_ids", "ashore",
     )
 
     def __init__(
@@ -359,6 +359,8 @@ class KorkinAgent:
         self.shedding_multiplier: float = 1.0
         # Cabin-mate agent IDs sharing the same stateroom (mega_cruise_5000)
         self.cabin_mate_ids: frozenset[int] = frozenset()
+        # Voyage layer: passenger ashore during port/disembark windows
+        self.ashore: bool = False
 
     @property
     def days_post_infection(self) -> int:
@@ -444,6 +446,13 @@ class KorkinAgent:
     ) -> str:
         behavior = agent_behavior or {}
         p_rotate = float(behavior.get("dining_rotation_probability", 0.0) or 0.0)
+        # Voyage dining-demand multiplier scales rotation propensity (port lunch drop).
+        dining_demand = behavior.get("_voyage_dining_multiplier") or {}
+        meal_preview = self._meal_type_for_activity(activity)
+        if isinstance(dining_demand, dict) and meal_preview in dining_demand:
+            p_rotate *= float(dining_demand[meal_preview])
+        elif isinstance(dining_demand, (int, float)):
+            p_rotate *= float(dining_demand)
         if (
             rng is None
             or not dining_catalog
@@ -452,7 +461,7 @@ class KorkinAgent:
         ):
             return self.dining_zone
 
-        meal = self._meal_type_for_activity(activity)
+        meal = meal_preview
         meal_weights = (behavior.get("dining_meal_weights") or {}).get(meal) or {}
         # Crew prefer crew_mess venues when rotating.
         if self.role == "crew" and not meal_weights:
@@ -775,6 +784,8 @@ class KorkinShipEngine:
                     }
                 behavior["dining_meal_weights"] = merged_meals
         self.agent_behavior = behavior
+        # Per-epoch voyage EpochState (set by orchestrator when effects active)
+        self.voyage_epoch_state: Any = None
 
         self._dining_zones = [z["name"] for z in self.zones if z["type"] == "Dining"]
         self._free_zones = [z["name"] for z in self.zones if z["type"] == "Free"]
@@ -1075,8 +1086,35 @@ class KorkinShipEngine:
         # Representative hour for this epoch (midday activity peak)
         hour = 12
 
+        from engines.voyage_itinerary import (
+            LOCATION_ASHORE,
+            apply_ashore_and_embarkation,
+            apply_embarkation_surge_locations,
+        )
+
+        voyage_state = self.voyage_epoch_state
+        if voyage_state is not None:
+            apply_ashore_and_embarkation(
+                self.agents,
+                voyage_state,
+                rng=self.rng,
+                dining_catalog=self._dining_catalog,
+            )
+            behavior = dict(self.agent_behavior)
+            if getattr(voyage_state, "effects_active", False):
+                behavior["_voyage_dining_multiplier"] = dict(
+                    voyage_state.dining_multiplier or {},
+                )
+            else:
+                behavior.pop("_voyage_dining_multiplier", None)
+        else:
+            behavior = self.agent_behavior
+
         # 1. Update agent locations
         for agent in self.agents:
+            if getattr(agent, "ashore", False):
+                agent.current_location = LOCATION_ASHORE
+                continue
             if agent.agent_id in self.isolated_ids:
                 agent.current_location = "Isolated_In_Quarters"
                 continue
@@ -1090,7 +1128,15 @@ class KorkinShipEngine:
                 rng=self.rng,
                 dining_catalog=self._dining_catalog,
                 free_zones=self._free_zones,
-                agent_behavior=self.agent_behavior,
+                agent_behavior=behavior,
+            )
+
+        if voyage_state is not None:
+            apply_embarkation_surge_locations(
+                self.agents,
+                voyage_state,
+                rng=self.rng,
+                dining_catalog=self._dining_catalog,
             )
 
         # 2. Infection transmission
@@ -1100,13 +1146,14 @@ class KorkinShipEngine:
         if not self._external_transmission:
             zone_occupants: dict[str, list[KorkinAgent]] = {z: [] for z in self._all_zone_names}
             zone_occupants["Isolated_In_Quarters"] = []
+            zone_occupants[LOCATION_ASHORE] = []
             for agent in self.agents:
                 loc = agent.current_location
                 if loc in zone_occupants:
                     zone_occupants[loc].append(agent)
 
             for zone_name, occupants in zone_occupants.items():
-                if zone_name == "Isolated_In_Quarters":
+                if zone_name in ("Isolated_In_Quarters", LOCATION_ASHORE):
                     continue
 
                 shedders = [a for a in occupants if a.is_infected and a.current_shedding > 0]

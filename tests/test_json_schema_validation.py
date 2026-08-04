@@ -72,6 +72,9 @@ def _discover_platform_files() -> list[tuple[str, str]]:
             pairs.append(("spatial_layout.schema.json", str(spatial.relative_to(REPO_ROOT))))
         if airflow.is_file():
             pairs.append(("air_flow_paths.schema.json", str(airflow.relative_to(REPO_ROOT))))
+        voyage = platform_dir / "voyage_config.json"
+        if voyage.is_file():
+            pairs.append(("voyage_config.schema.json", str(voyage.relative_to(REPO_ROOT))))
     return pairs
 
 

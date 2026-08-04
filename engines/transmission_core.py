@@ -245,6 +245,8 @@ class TransmissionCore:
         self.corridor_direct_contact_factor = corridor_direct_contact_factor
         self.food_zone_multipliers = food_zone_multipliers or {}
         self._quarantined_ids: set[int] = set()
+        # Voyage layer contact scale (1.0 when effects disabled)
+        self.voyage_contact_multiplier: float = 1.0
 
         tx = (cfg or {}).get("transmission", {}) or {}
         mode = str(tx.get("contact_mode", DEFAULT_CONTACT_MODE))
@@ -435,7 +437,9 @@ class TransmissionCore:
         zone_occupants: dict[str, list[KorkinAgent]] = {}
         for agent in agents:
             loc = agent.current_location
-            if loc == "Isolated_In_Quarters":
+            if loc in ("Isolated_In_Quarters", "Ashore"):
+                continue
+            if getattr(agent, "ashore", False):
                 continue
             zone_occupants.setdefault(loc, []).append(agent)
 
@@ -680,6 +684,7 @@ class TransmissionCore:
         loc = getattr(agent, "current_location", None) or ""
         if getattr(agent, "role", "") == "crew" and loc in self._service_zones:
             raw *= float(cfg.get("crew_contact_multiplier", 1.0))
+        raw *= float(self.voyage_contact_multiplier)
 
         mean_contacts = min(raw, max_c)
         if mean_contacts <= 0.0:
@@ -695,7 +700,10 @@ class TransmissionCore:
         """Return r0_draw for direct contact under the active contact_mode."""
         if self.contact_mode in ("density_dependent", "heterogeneous_zone_dose"):
             return self._effective_contacts(n_occupants, target)
-        return int(self.rng.choice(AVG_R_POOL))
+        base = int(self.rng.choice(AVG_R_POOL))
+        # Legacy mode: still scale by voyage contact multiplier when active
+        scaled = int(round(base * float(self.voyage_contact_multiplier)))
+        return max(0, scaled)
 
     def _zone_exposure_sigma(self, zone_name: str) -> float:
         """Log-sigma for within-zone exposure heterogeneity."""

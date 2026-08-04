@@ -64,6 +64,7 @@ from orchestrator_epoch import (
     surveillance_is_active,
 )
 from orchestrator_init import (
+    apply_voyage_dining_meal_weights,
     assign_cabin_mates,
     build_engine,
     check_escalation,
@@ -74,6 +75,7 @@ from orchestrator_init import (
     init_wearable_monitors,
     initialize_grumb_seeding,
     initialize_ship_graph,
+    load_and_merge_voyage_config,
     load_isolation_unit_capacity,
     load_pathogen_profiles,
     pathogen_profiles_are_respiratory,
@@ -215,6 +217,15 @@ class ShipSimulation:
             return self.world  # type: ignore[return-value]
 
         cfg = self.cfg
+        voyage_cfg = load_and_merge_voyage_config(
+            cfg,
+            repo_root=self.repo_root,
+            platform_id=self.run_spec.platform_id,
+        )
+        cfg = apply_voyage_dining_meal_weights(cfg, voyage_cfg)
+        # Keep local cfg and run_spec in sync for downstream helpers
+        self.cfg = cfg
+        self.run_spec.legacy_cfg = cfg
         self.modalities = build_modalities(cfg, self.rng, total_epochs=self.num_epochs)
         ship = initialize_ship_graph(cfg)
         self.zone_names = ship["zone_names"]
@@ -305,6 +316,7 @@ class ShipSimulation:
             cascade_engine=cascade_engine,
             chronic_assignments=self.chronic_assignments,
             chronic_behavioral_mods=self.chronic_behavioral_mods,
+            voyage_config=voyage_cfg,
         )
         self.state = sim_state
         self.world = WorldState(
@@ -373,6 +385,17 @@ class ShipSimulation:
         ]
         step_fred_compliance(epoch, state, syndromic, agents=_fred_agents)
         step_mid_cruise_introductions(epoch, self.engine, self.pathogen_profiles, self.rng)
+
+        from engines.voyage_itinerary import resolve_epoch_state
+
+        epoch_voyage = resolve_epoch_state(state.voyage_config, epoch)
+        state.epoch_voyage = epoch_voyage
+        self.engine.voyage_epoch_state = epoch_voyage
+        self.tx_core.voyage_contact_multiplier = (
+            float(epoch_voyage.contact_multiplier)
+            if epoch_voyage.effects_active
+            else 1.0
+        )
 
         self.engine.isolated_ids = set(state.isolated_ids)
         self.engine.quarantined_ids = set(state.quarantined_ids)
@@ -757,6 +780,8 @@ class ShipSimulation:
         )
         if applied and self.run_spec.history_retention != "compact":
             epoch_record["decisions"] = applied
+        if state.epoch_voyage is not None:
+            epoch_record["voyage_epoch"] = state.epoch_voyage.to_telemetry()
         if dr is not None and self.run_spec.history_retention != "compact":
             dr.capture_sop_events(self.proto_ctx.protocol_engine, epoch)
             epoch_record.setdefault("reactive_protocols", {})["sop_events"] = dr.sop_events_buffer

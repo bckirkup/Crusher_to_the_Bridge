@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://crusher-to-the-bridge/schemas/voyage_config.schema.json",
+  "title": "VoyageConfig",
+  "description": "Cruise voyage itinerary and platform dining meal weights (ship operations layer).",
+  "type": "object",
+  "additionalProperties": true,
+  "properties": {
+    "schema_version": { "type": "string" },
+    "platform_class": {
+      "type": "string",
+      "enum": ["expedition", "classic", "spirit", "mega"]
+    },
+    "description": { "type": "string" },
+    "voyage": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "effects_enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "When false (default), EpochState is identity sea-day; ashore/contact/dining/embarkation effects are not applied."
+        },
+        "total_epochs": { "type": "integer", "minimum": 1 },
+        "epoch_duration_hours": { "type": "number", "exclusiveMinimum": 0 },
+        "itinerary": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/itinerary_day" }
+        },
+        "defaults": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "sea_day": { "$ref": "#/$defs/day_defaults" },
+            "port_day": { "$ref": "#/$defs/day_defaults" },
+            "embarkation": { "$ref": "#/$defs/day_defaults" },
+            "disembarkation": { "$ref": "#/$defs/day_defaults" }
+          }
+        }
+      }
+    },
+    "dining_meal_weights": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "breakfast": { "$ref": "#/$defs/meal_weights" },
+        "lunch": { "$ref": "#/$defs/meal_weights" },
+        "dinner": { "$ref": "#/$defs/meal_weights" }
+      }
+    }
+  },
+  "$defs": {
+    "meal_weights": {
+      "type": "object",
+      "additionalProperties": { "type": "number", "minimum": 0 },
+      "properties": {
+        "buffet": { "type": "number", "minimum": 0 },
+        "mdr": { "type": "number", "minimum": 0 },
+        "specialty": { "type": "number", "minimum": 0 },
+        "crew_mess": { "type": "number", "minimum": 0 },
+        "galley": { "type": "number", "minimum": 0 }
+      }
+    },
+    "day_defaults": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "onboard_passenger_fraction": { "type": "number", "minimum": 0, "maximum": 1 },
+        "contact_rate_multiplier": { "type": "number", "minimum": 0 },
+        "dining_demand_multiplier": {
+          "oneOf": [
+            { "type": "number", "minimum": 0 },
+            {
+              "type": "object",
+              "additionalProperties": { "type": "number", "minimum": 0 },
+              "properties": {
+                "breakfast": { "type": "number", "minimum": 0 },
+                "lunch": { "type": "number", "minimum": 0 },
+                "dinner": { "type": "number", "minimum": 0 }
+              }
+            }
+          ]
+        },
+        "embarkation_buffet_surge": { "type": "boolean" },
+        "notes": { "type": "string" }
+      }
+    },
+    "itinerary_day": {
+      "type": "object",
+      "required": ["day", "type"],
+      "additionalProperties": true,
+      "properties": {
+        "day": { "type": "integer", "minimum": 1 },
+        "type": {
+          "type": "string",
+          "enum": ["sea_day", "port_day", "embarkation", "disembarkation"]
+        },
+        "port": { "type": "string" },
+        "embarkation_window_epochs": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": { "type": "integer", "minimum": 0 }
+        },
+        "stateroom_available_epoch": { "type": "integer", "minimum": 0 },
+        "buffet_surge_fraction": { "type": "number", "minimum": 0, "maximum": 1 },
+        "disembark_fraction": { "type": "number", "minimum": 0, "maximum": 1 },
+        "disembark_window_epochs": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": { "type": "integer", "minimum": 0 }
+        },
+        "reembark_window_epochs": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": { "type": "integer", "minimum": 0 }
+        },
+        "shore_infection_probability": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Config-only in v1; never introduces pathogens."
+        },
+        "notes": { "type": "string" }
+      }
+    }
+  }
+}
