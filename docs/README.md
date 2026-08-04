@@ -50,6 +50,7 @@ python3 presidio_runner.py \
 |-----|--------|------|
 | [CONTAM_INTEROP.md](CONTAM_INTEROP.md) | Living | Path A ContamX interop, SIM reader, compare tools |
 | [CONTAM_PRJ_AUDIT.md](CONTAM_PRJ_AUDIT.md) | Living audit | Fiction PRJ realism notes |
+| [SHIP_BLUEPRINT_IMPORT.md](SHIP_BLUEPRINT_IMPORT.md) | Living | Naval GA PDF/image → platform JSON (SVG overlay) |
 | [CTB HVAC Star Topology Fix.md](CTB%20HVAC%20Star%20Topology%20Fix.md) | Implemented | Native AHU star vs N×N over-mixing |
 | [CTB PRJ Config Fixes v2 (PRJ-primary).md](CTB%20PRJ%20Config%20Fixes%20v2%20(PRJ-primary).md) | Implemented | PRJ-primary Contam config fixes |
 

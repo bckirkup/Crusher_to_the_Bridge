@@ -1,0 +1,127 @@
+{
+  "platform_id": "toy_destroyer",
+  "class_name": "Toy Destroyer (fixture)",
+  "description": "Minimal naval fixture for offline blueprint-import tests",
+  "length_m": 100.0,
+  "beam_m": 12.0,
+  "crew_estimate": 80,
+  "ceiling_height_m": 2.8,
+  "isolation_unit_capacity": 0,
+  "decks": [
+    {"id": "main_deck", "page": 1, "role": "operations"},
+    {"id": "lower_deck", "page": 1, "role": "berthing_engineering"}
+  ],
+  "zones": [
+    {
+      "id": "Bridge",
+      "type": "Free",
+      "deck": "main_deck",
+      "page": 1,
+      "polygon_norm": [[0.70, 0.20], [0.95, 0.20], [0.95, 0.45], [0.70, 0.45]],
+      "max_occupancy": 10,
+      "volume_m3_est": 60,
+      "traffic": "low",
+      "notes": "Pilothouse"
+    },
+    {
+      "id": "Mess_Hall",
+      "type": "Dining",
+      "deck": "main_deck",
+      "page": 1,
+      "polygon_norm": [[0.40, 0.25], [0.65, 0.25], [0.65, 0.55], [0.40, 0.55]],
+      "max_occupancy": 40,
+      "volume_m3_est": 120,
+      "traffic": "high",
+      "notes": "Crew mess"
+    },
+    {
+      "id": "MedBay",
+      "type": "Medical",
+      "deck": "main_deck",
+      "page": 1,
+      "polygon_norm": [[0.40, 0.60], [0.65, 0.60], [0.65, 0.85], [0.40, 0.85]],
+      "max_occupancy": 8,
+      "volume_m3_est": 50,
+      "traffic": "low",
+      "notes": "Sickbay"
+    },
+    {
+      "id": "Berthing",
+      "type": "Room",
+      "deck": "lower_deck",
+      "page": 1,
+      "polygon_norm": [[0.10, 0.25], [0.35, 0.25], [0.35, 0.70], [0.10, 0.70]],
+      "max_occupancy": 60,
+      "volume_m3_est": 150,
+      "traffic": "high",
+      "notes": "Enlisted berthing"
+    },
+    {
+      "id": "Engine_Room",
+      "type": "Engineering",
+      "deck": "lower_deck",
+      "page": 1,
+      "polygon_norm": [[0.05, 0.55], [0.30, 0.55], [0.30, 0.90], [0.05, 0.90]],
+      "max_occupancy": 12,
+      "volume_m3_est": 200,
+      "traffic": "medium",
+      "notes": "Main machinery"
+    },
+    {
+      "id": "Galley",
+      "type": "Dining",
+      "deck": "main_deck",
+      "page": 1,
+      "polygon_norm": [[0.45, 0.10], [0.65, 0.10], [0.65, 0.24], [0.45, 0.24]],
+      "max_occupancy": 6,
+      "volume_m3_est": 40,
+      "traffic": "medium",
+      "notes": "Galley"
+    }
+  ],
+  "hvac_hints": [
+    {
+      "id": "zone_upper",
+      "rooms": ["Bridge"],
+      "ach": 6.0,
+      "description": "Upper deck"
+    },
+    {
+      "id": "zone_main",
+      "rooms": ["Mess_Hall", "MedBay", "Galley"],
+      "ach": 8.0,
+      "description": "Main deck shared"
+    },
+    {
+      "id": "zone_lower",
+      "rooms": ["Berthing", "Engine_Room"],
+      "ach": 10.0,
+      "description": "Lower deck"
+    }
+  ],
+  "adjacency_hints": [
+    {"from": "Bridge", "to": "Mess_Hall", "type": "passageway"},
+    {"from": "Mess_Hall", "to": "Galley", "type": "service_hatch"},
+    {"from": "Mess_Hall", "to": "MedBay", "type": "passageway"},
+    {"from": "Berthing", "to": "Engine_Room", "type": "passageway"},
+    {"from": "Berthing", "to": "Mess_Hall", "type": "ladder_well"}
+  ],
+  "cross_zone_hints": [
+    {
+      "from": "zone_upper",
+      "to": "zone_main",
+      "flow_rate_m3h": 40,
+      "path": "ladder_well_fore",
+      "is_hvac_ducted": false
+    },
+    {
+      "from": "zone_main",
+      "to": "zone_lower",
+      "flow_rate_m3h": 60,
+      "path": "ladder_well_mid",
+      "is_hvac_ducted": false
+    }
+  ],
+  "graywater_zones": ["Engine_Room"],
+  "uncertainties": ["Fixture digest — not derived from a real drawing"]
+}

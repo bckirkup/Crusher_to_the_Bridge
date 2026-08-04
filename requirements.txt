@@ -23,6 +23,9 @@ Pillow>=10.0
 geopandas>=0.14
 networkx>=3.0
 
+# Naval blueprint import (optional PDF raster; images need Pillow above)
+# pypdfium2>=4.0
+
 # AWS campaign deploy / Batch helpers
 boto3>=1.34
 
