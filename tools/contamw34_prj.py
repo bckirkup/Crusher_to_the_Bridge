@@ -873,7 +873,9 @@ def _assemble_network(
         })
 
     # 5) Duct leakage spines (hobbyist): passive Darcy trunks between rooms
-    if hobbyist:
+    # Naval GA Target B sets skip_duct_spines / empty duct_hvac_ids so engineers
+    # author real ducts in ContamW (ducts are not on general arrangements).
+    if hobbyist and not overrides.get("skip_duct_spines"):
         duct_cfg = pack["duct_defaults"]
         min_rooms = int(duct_cfg.get("min_rooms_for_trunk", 2))
         allow = overrides.get("duct_hvac_ids")

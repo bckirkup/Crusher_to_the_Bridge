@@ -82,6 +82,56 @@ def cmd_synthesize(args: argparse.Namespace) -> int:
         f"  {result['spatial_layout']}\n"
         f"  {result['air_flow_paths']}"
     )
+    if args.author_contam:
+        from tools.ship_blueprint_import.author_contam import author_contam
+
+        cre = author_contam(
+            platform_dir=output,
+            workdir=workdir,
+            allowed_roots=_roots(),
+            hobbyist=True,
+            run_offline_gate=True,
+        )
+        print(
+            f"Contam starter: {cre['prj_path']} "
+            f"({cre['openings_count']} openings)\n"
+            f"  handoff: {cre['handoff']}"
+        )
+    return 0
+
+
+def cmd_author_contam(args: argparse.Namespace) -> int:
+    from tools.ship_blueprint_import.author_contam import author_contam
+
+    platform_dir = _resolve(args.platform_dir)
+    workdir = _resolve(args.workdir) if args.workdir else None
+    result = author_contam(
+        platform_dir=platform_dir,
+        workdir=workdir,
+        allowed_roots=_roots(),
+        hobbyist=not args.no_hobbyist,
+        run_offline_gate=not args.skip_gate,
+    )
+    print(
+        f"ContamW starter for {result['platform_id']}\n"
+        f"  prj:      {result['prj_path']}\n"
+        f"  path_map: {result['path_map']}\n"
+        f"  openings: {result['openings_draft']} "
+        f"({result['openings_count']} drafts)\n"
+        f"  handoff:  {result['handoff']}"
+    )
+    gate = result.get("offline_gate") or {}
+    if gate:
+        status = "PASS" if gate.get("ok") else "FAIL"
+        print(
+            f"  offline gate: {status} "
+            f"(zones={gate.get('zone_count')}, "
+            f"path_map={gate.get('path_map_entries')})"
+        )
+        if not gate.get("ok"):
+            return 1
+    if result.get("contamx"):
+        print(f"  ContamX: {result['contamx'].get('note')}")
     return 0
 
 
@@ -93,6 +143,8 @@ def cmd_validate(args: argparse.Namespace) -> int:
         platform_dir,
         allowed_roots=_roots(),
         contam_bootstrap=bool(args.contam_bootstrap),
+        contam_gate=bool(args.contam_gate),
+        workdir=_resolve(args.workdir) if args.workdir else None,
     )
     if result["schema_errors"]:
         print("Schema errors:")
@@ -100,8 +152,10 @@ def cmd_validate(args: argparse.Namespace) -> int:
             print(f"  - {err}")
     print("Sanity checker:")
     print(result["sanity_report"] or "  (no findings)")
-    if result["contam_bootstrap"]:
+    if result.get("contam_bootstrap"):
         print(result["contam_bootstrap"])
+    if result.get("contam_gate"):
+        print(f"Contam gate: {result['contam_gate']}")
     if result["ok"]:
         print("VALIDATION PASSED")
         return 0
@@ -114,7 +168,7 @@ def build_parser() -> argparse.ArgumentParser:
         prog="python -m tools.ship_blueprint_import",
         description=(
             "Import naval general-arrangement drawings into Crusher ship classes "
-            "(ingest → digest → SVG edit → synthesize → validate)."
+            "(ingest → digest → SVG edit → synthesize → author_contam → validate)."
         ),
     )
     sub = parser.add_subparsers(dest="command", required=True)
@@ -163,14 +217,53 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Do not copy plan overview into graphics/",
     )
+    p_sy.add_argument(
+        "--author-contam",
+        action="store_true",
+        help="Also emit ContamW starter PRJ (Target B) after synthesize",
+    )
     p_sy.set_defaults(func=cmd_synthesize)
+
+    p_ac = sub.add_parser(
+        "author_contam",
+        help="ContamW 3.4 starter PRJ + openings checklist for Path A / engineer handoff",
+    )
+    p_ac.add_argument("--platform-dir", "-p", required=True)
+    p_ac.add_argument(
+        "--workdir",
+        "-w",
+        default=None,
+        help="Optional import workdir (reads ship_digest.json Contam/opening hints)",
+    )
+    p_ac.add_argument(
+        "--no-hobbyist",
+        action="store_true",
+        help="Export without hobbyist-plus orifice/schedule pack",
+    )
+    p_ac.add_argument(
+        "--skip-gate",
+        action="store_true",
+        help="Skip offline PRJ parse/simplify gate",
+    )
+    p_ac.set_defaults(func=cmd_author_contam)
 
     p_va = sub.add_parser("validate", help="Schema + sanity_checker gate")
     p_va.add_argument("--platform-dir", "-p", required=True)
     p_va.add_argument(
+        "--workdir",
+        "-w",
+        default=None,
+        help="Optional workdir when --contam-bootstrap runs author_contam",
+    )
+    p_va.add_argument(
         "--contam-bootstrap",
         action="store_true",
-        help="After pass, fiction-bootstrap Contam PRJ via generate_platform_contam_prj.py",
+        help="After pass, run author_contam (Target B ContamW starter)",
+    )
+    p_va.add_argument(
+        "--contam-gate",
+        action="store_true",
+        help="Require existing contam/platform.prj to pass offline parse gate",
     )
     p_va.set_defaults(func=cmd_validate)
 

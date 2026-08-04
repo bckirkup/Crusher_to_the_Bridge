@@ -122,6 +122,34 @@
       "is_hvac_ducted": false
     }
   ],
+  "opening_hints": [
+    {
+      "from": "Bridge",
+      "to": "Mess_Hall",
+      "type": "passageway",
+      "area_m2": 2.0,
+      "status": "draft",
+      "notes": "Main deck passageway"
+    },
+    {
+      "from": "Berthing",
+      "to": "Engine_Room",
+      "type": "hatch",
+      "area_m2": 0.36,
+      "status": "engineer_review",
+      "notes": "Confirm WT hatch clear area"
+    }
+  ],
+  "contam_hints": {
+    "filter_preset": "MERV13",
+    "wind_profile": "ship_hull",
+    "oa_fraction": 0.2,
+    "hvac_duty": 0.5,
+    "skip_duct_spines": true,
+    "handoff_notes": [
+      "Toy fixture — ducts intentionally omitted for ContamW handwork demo"
+    ]
+  },
   "graywater_zones": ["Engine_Room"],
   "uncertainties": ["Fixture digest — not derived from a real drawing"]
 }

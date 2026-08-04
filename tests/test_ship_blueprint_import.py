@@ -390,3 +390,160 @@ class TestCliSmoke:
         )
         assert args.command == "digest"
         assert args.provider == "mock"
+
+    def test_cli_author_contam_parser(self) -> None:
+        from tools.ship_blueprint_import.cli import build_parser
+
+        parser = build_parser()
+        args = parser.parse_args(
+            [
+                "author_contam",
+                "--platform-dir",
+                "data/platforms/toy_destroyer",
+                "--workdir",
+                "work/blueprints/x",
+            ]
+        )
+        assert args.command == "author_contam"
+        assert args.platform_dir.endswith("toy_destroyer")
+
+
+class TestAuthorContam:
+    def _synth_platform(
+        self, tmp_path: Path, roots: tuple[str, ...], name: str
+    ) -> tuple[Path, Path]:
+        from tools.ship_blueprint_import.digest import draft_svgs_from_digest
+        from tools.ship_blueprint_import.models import ShipDigest
+        from tools.ship_blueprint_import.synthesize import synthesize
+
+        workdir = tmp_path / f"wd_{name}"
+        _seed_workdir(workdir)
+        digest = ShipDigest.model_validate(
+            json.loads((workdir / "ship_digest.json").read_text(encoding="utf-8"))
+        )
+        manifest = json.loads(
+            (workdir / "pages_manifest.json").read_text(encoding="utf-8")
+        )
+        draft_svgs_from_digest(
+            digest,
+            manifest,
+            str(workdir / "overlays"),
+            allowed_roots=roots,
+            suffix="approved",
+        )
+        out = REPO_ROOT / "work" / "blueprints" / name
+        if out.exists():
+            shutil.rmtree(out)
+        synthesize(
+            workdir=str(workdir),
+            output_dir=str(out),
+            allowed_roots=(str(REPO_ROOT), str(tmp_path)),
+            require_approved=True,
+            copy_graphics=False,
+        )
+        return out, workdir
+
+    def test_author_contam_emits_prj_and_openings(
+        self, tmp_path: Path, roots: tuple[str, ...]
+    ) -> None:
+        from tools.ship_blueprint_import.author_contam import author_contam
+
+        out, workdir = self._synth_platform(
+            tmp_path, roots, "_pytest_contam_toy"
+        )
+        try:
+            result = author_contam(
+                platform_dir=str(out),
+                workdir=str(workdir),
+                allowed_roots=(str(REPO_ROOT), str(tmp_path)),
+                hobbyist=True,
+                run_offline_gate=True,
+            )
+            assert Path(result["prj_path"]).is_file()
+            assert Path(result["path_map"]).is_file()
+            openings = json.loads(
+                Path(result["openings_draft"]).read_text(encoding="utf-8")
+            )
+            assert openings["openings"], "expected opening checklist entries"
+            assert any(o["type"] for o in openings["openings"])
+            # Opening hint area from toy digest should appear
+            hatch = next(
+                (
+                    o
+                    for o in openings["openings"]
+                    if {o["from"], o["to"]} == {"Berthing", "Engine_Room"}
+                ),
+                None,
+            )
+            assert hatch is not None
+            assert hatch["area_m2"] == pytest.approx(0.36, rel=0.01)
+            handoff = Path(result["handoff"]).read_text(encoding="utf-8")
+            assert "Target B" in handoff or "handwork" in handoff.lower()
+            overrides = json.loads(
+                (out / "contam" / "hobbyist_overrides.json").read_text(encoding="utf-8")
+            )
+            assert overrides.get("skip_duct_spines") is True
+            assert overrides.get("duct_hvac_ids") == []
+            gate = result["offline_gate"]
+            assert gate and gate["ok"], gate
+            assert gate["zone_count"] >= 6
+            assert gate["path_map_entries"] >= 1
+            # Zones gained Contam geometry
+            spatial = json.loads((out / "spatial_layout.json").read_text(encoding="utf-8"))
+            assert all("elevation_m" in z for z in spatial["zones"])
+            assert all("floor_area_m2" in z for z in spatial["zones"])
+            prj = Path(result["prj_path"]).read_text(encoding="utf-8")
+            assert "plr_orfc" in prj or "orfc" in prj.lower()
+        finally:
+            if out.exists():
+                shutil.rmtree(out)
+
+    def test_skip_duct_spines_config_sensitivity(self) -> None:
+        """Changing skip_duct_spines changes hobbyist override payload."""
+        from tools.ship_blueprint_import.author_contam import (
+            build_naval_hobbyist_overrides,
+        )
+        from tools.ship_blueprint_import.models import ContamHints, ShipDigest
+
+        spatial = {
+            "platform": "x",
+            "deck_dimensions": {"length_m": 100, "beam_m": 12},
+            "zones": [
+                {"id": "Bridge", "type": "Free", "deck": "main", "display": {"x": 80, "y": 6}},
+                {"id": "Berthing", "type": "Room", "deck": "lower", "display": {"x": 20, "y": 6}},
+            ],
+        }
+        airflow = {"hvac_zones": [{"id": "zone_main", "rooms": ["Bridge", "Berthing"], "ach": 6}]}
+        base = ShipDigest.model_validate(
+            {
+                "platform_id": "x",
+                "zones": [
+                    {
+                        "id": "Bridge",
+                        "type": "Free",
+                        "deck": "main",
+                        "page": 1,
+                        "polygon_norm": [[0, 0], [1, 0], [1, 1]],
+                    },
+                    {
+                        "id": "Berthing",
+                        "type": "Room",
+                        "deck": "lower",
+                        "page": 1,
+                        "polygon_norm": [[0, 0], [1, 0], [1, 1]],
+                    },
+                ],
+                "contam_hints": {"skip_duct_spines": True, "duct_hvac_ids": ["zone_main"]},
+            }
+        )
+        o_skip = build_naval_hobbyist_overrides(
+            platform_id="x", spatial=spatial, airflow=airflow, digest=base
+        )
+        base.contam_hints = ContamHints(skip_duct_spines=False, duct_hvac_ids=["zone_main"])
+        o_ducts = build_naval_hobbyist_overrides(
+            platform_id="x", spatial=spatial, airflow=airflow, digest=base
+        )
+        assert o_skip["skip_duct_spines"] is True
+        assert o_skip["duct_hvac_ids"] == []
+        assert o_ducts["skip_duct_spines"] is False
+        assert o_ducts["duct_hvac_ids"] == ["zone_main"]

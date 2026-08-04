@@ -26,9 +26,12 @@ python3 -m tools.ship_blueprint_import ingest --input path/to/ga.pdf --workdir w
 python3 -m tools.ship_blueprint_import digest --workdir work/blueprints/<id> --provider mock  # or gemini/…
 # edit overlays → page_NN_approved.svg
 python3 -m tools.ship_blueprint_import synthesize --workdir work/blueprints/<id> \
-  --platform-id <id> --output data/platforms/<id> --require-approved
-python3 -m tools.ship_blueprint_import validate --platform-dir data/platforms/<id>
+  --platform-id <id> --output data/platforms/<id> --require-approved --author-contam
+python3 -m tools.ship_blueprint_import validate --platform-dir data/platforms/<id> --contam-gate
 ```
+
+`author_contam` writes a ContamW 3.4 starter under `contam/` (Path A ready) plus
+`openings_draft.json` / `CONTAM_HANDOFF.md` for engineer duct/leakage handwork.
 
 Then continue from step 4 below (sanity already covered by `validate`).
 

@@ -36,7 +36,6 @@ def validate_against_schemas(
     try:
         import jsonschema
     except ImportError:
-        # Fall back to check-jsonschema CLI when library missing
         for data_name, schema_name in pairs:
             data_path = resolve_child_path(platform_dir, data_name)
             schema_path = resolve_child_path(schemas_dir, schema_name)
@@ -90,38 +89,61 @@ def validate_platform(
     *,
     allowed_roots: tuple[str, ...],
     contam_bootstrap: bool = False,
+    contam_gate: bool = False,
+    workdir: str | None = None,
 ) -> dict[str, Any]:
-    """Full validation gate; optionally fiction-bootstrap Contam PRJ."""
+    """Full validation gate; optionally author Contam starter / gate PRJ parse."""
     schema_errors = validate_against_schemas(
         platform_dir, allowed_roots=allowed_roots
     )
     sanity_ok, sanity_text = run_sanity_checker(platform_dir)
     contam_msg = None
-    if contam_bootstrap and not schema_errors and sanity_ok:
-        contam_msg = _contam_bootstrap(platform_dir)
+    contam_gate_result: dict[str, Any] | str | None = None
 
     ok = (not schema_errors) and sanity_ok
+
+    if contam_bootstrap and ok:
+        from tools.ship_blueprint_import.author_contam import author_contam
+
+        try:
+            result = author_contam(
+                platform_dir=platform_dir,
+                workdir=workdir,
+                allowed_roots=allowed_roots,
+                hobbyist=True,
+                run_offline_gate=True,
+            )
+            gate = result.get("offline_gate") or {}
+            contam_msg = (
+                f"author_contam ok: {result['prj_path']} "
+                f"({result['openings_count']} openings); "
+                f"offline_gate={'PASS' if gate.get('ok') else 'FAIL'}"
+            )
+            if not gate.get("ok", True):
+                ok = False
+                contam_gate_result = gate
+        except Exception as exc:  # noqa: BLE001
+            contam_msg = f"author_contam FAILED: {exc}"
+            ok = False
+
+    if contam_gate:
+        from tools.ship_blueprint_import.author_contam import validate_prj_offline
+
+        prj = os.path.join(platform_dir, "contam", "platform.prj")
+        if not os.path.isfile(prj):
+            contam_gate_result = "missing contam/platform.prj"
+            ok = False
+        else:
+            gate = validate_prj_offline(prj, allowed_roots=allowed_roots)
+            contam_gate_result = gate
+            if not gate.get("ok"):
+                ok = False
+
     return {
         "ok": ok,
         "schema_errors": schema_errors,
         "sanity_ok": sanity_ok,
         "sanity_report": sanity_text,
         "contam_bootstrap": contam_msg,
+        "contam_gate": contam_gate_result,
     }
-
-
-def _contam_bootstrap(platform_dir: str) -> str:
-    """Call fiction Contam PRJ generator for this platform id."""
-    platform_id = os.path.basename(os.path.realpath(platform_dir))
-    script = os.path.join(_REPO_ROOT, "scripts", "generate_platform_contam_prj.py")
-    cmd = [
-        sys.executable,
-        script,
-        "--hobbyist",
-        "--platform",
-        platform_id,
-    ]
-    proc = subprocess.run(cmd, cwd=_REPO_ROOT, capture_output=True, text=True)
-    if proc.returncode != 0:
-        return f"contam bootstrap FAILED: {proc.stderr or proc.stdout}"
-    return f"contam bootstrap ok for {platform_id}"
