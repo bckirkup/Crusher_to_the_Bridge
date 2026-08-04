@@ -126,9 +126,9 @@ def _expedition_public_zones() -> tuple[PublicZoneRecipe, ...]:
             "Main dining room with assigned seating. Deck 5. ~300 seats.",
         ),
         PublicZoneRecipe(
-            "BuffetLido", "Dining", "high", 525.0, "7_Sun", 150,
+            "CasualDining", "Dining", "high", 525.0, "7_Sun", 150,
             {"x": 70, "y": 10},
-            "Lido buffet (casual). Deck 7. ~150 seats.",
+            "Casual dining (table service / MDR). Deck 7. ~150 seats.",
         ),
         PublicZoneRecipe(
             "CrewMess", "Dining", "high", 210.0, "2_Crew", 60,
@@ -211,7 +211,7 @@ def _expedition_public_zones() -> tuple[PublicZoneRecipe, ...]:
 def _expedition_adjacency() -> tuple[dict[str, str], ...]:
     links: list[dict[str, str]] = [
         {"from": "ObsLounge", "to": "PoolDeck", "type": "open_deck"},
-        {"from": "BuffetLido", "to": "PoolDeck", "type": "doorway"},
+        {"from": "CasualDining", "to": "PoolDeck", "type": "doorway"},
         {"from": "Gym", "to": "Spa", "type": "doorway"},
         {"from": "Spa", "to": "ExpedLounge", "type": "passageway"},
         {"from": "MainDining", "to": "TheaterLng", "type": "passageway"},
@@ -224,7 +224,7 @@ def _expedition_adjacency() -> tuple[dict[str, str], ...]:
         {"from": "Stores", "to": "Engine_Room", "type": "service_corridor"},
         {"from": "CrewMess", "to": "Engine_Room", "type": "corridor"},
         {"from": "Reception", "to": "TheaterLng", "type": "stairwell"},
-        {"from": "BuffetLido", "to": "MainDining", "type": "stairwell"},
+        {"from": "CasualDining", "to": "MainDining", "type": "stairwell"},
         {"from": "ExpedLounge", "to": "Reception", "type": "stairwell"},
         # Corridor-to-public links (one elevator shaft, two stairwells)
         {"from": "PC_D6_P_F", "to": "Gym", "type": "corridor"},
@@ -328,7 +328,7 @@ EXPEDITION_CRUISE_450 = CruisePlatformRecipe(
         ),
         HvacGroupRecipe(
             "AHU_Public_Aft",
-            ("PoolDeck", "BuffetLido", "Gym", "Spa"),
+            ("PoolDeck", "CasualDining", "Gym", "Spa"),
             8.0,
             "Aft public venues.",
         ),
@@ -387,11 +387,11 @@ EXPEDITION_CRUISE_450 = CruisePlatformRecipe(
             "path": "Single_Vertical_Riser",
         },
         {
-            "from": "BuffetLido",
+            "from": "CasualDining",
             "to": "PoolDeck",
             "flow_rate_m3h": 400.0,
             "is_hvac_ducted": False,
-            "path": "Lido_Open_Doorway",
+            "path": "CasualDining_Open_Doorway",
         },
     ),
     adjacency=_expedition_adjacency(),

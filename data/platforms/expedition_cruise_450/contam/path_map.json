@@ -10,7 +10,7 @@
   },
   {
     "path_nr": 2,
-    "from_zone": "BuffetLido",
+    "from_zone": "CasualDining",
     "to_zone": "ambient",
     "is_hvac_ducted": false,
     "kind": "envelope_leak",
@@ -307,7 +307,7 @@
   },
   {
     "path_nr": 35,
-    "from_zone": "BuffetLido",
+    "from_zone": "CasualDining",
     "to_zone": "PoolDeck",
     "is_hvac_ducted": false,
     "kind": "doorway",
@@ -424,7 +424,7 @@
   },
   {
     "path_nr": 48,
-    "from_zone": "BuffetLido",
+    "from_zone": "CasualDining",
     "to_zone": "MainDining",
     "is_hvac_ducted": false,
     "kind": "stairwell",
@@ -1000,10 +1000,10 @@
   },
   {
     "path_nr": 112,
-    "from_zone": "BuffetLido",
+    "from_zone": "CasualDining",
     "to_zone": "PoolDeck",
     "is_hvac_ducted": false,
-    "kind": "Lido_Open_Doorway",
+    "kind": "CasualDining_Open_Doorway",
     "crusher_transfer": true,
     "ahs_nr": 0
   },
@@ -1487,7 +1487,7 @@
   {
     "path_nr": 166,
     "from_zone": "ahs5(Sup)",
-    "to_zone": "BuffetLido",
+    "to_zone": "CasualDining",
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
@@ -1495,7 +1495,7 @@
   },
   {
     "path_nr": 167,
-    "from_zone": "BuffetLido",
+    "from_zone": "CasualDining",
     "to_zone": "ahs5(Ret)",
     "is_hvac_ducted": true,
     "kind": "ahs_return",

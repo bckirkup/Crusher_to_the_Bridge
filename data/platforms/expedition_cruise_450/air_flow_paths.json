@@ -54,7 +54,7 @@
       "id": "AHU_Public_Aft",
       "rooms": [
         "PoolDeck",
-        "BuffetLido",
+        "CasualDining",
         "Gym",
         "Spa"
       ],
@@ -124,11 +124,11 @@
       "path": "Single_Vertical_Riser"
     },
     {
-      "from": "BuffetLido",
+      "from": "CasualDining",
       "to": "PoolDeck",
       "flow_rate_m3h": 400.0,
       "is_hvac_ducted": false,
-      "path": "Lido_Open_Doorway"
+      "path": "CasualDining_Open_Doorway"
     }
   ],
   "adjacency": [
@@ -138,7 +138,7 @@
       "type": "open_deck"
     },
     {
-      "from": "BuffetLido",
+      "from": "CasualDining",
       "to": "PoolDeck",
       "type": "doorway"
     },
@@ -203,7 +203,7 @@
       "type": "stairwell"
     },
     {
-      "from": "BuffetLido",
+      "from": "CasualDining",
       "to": "MainDining",
       "type": "stairwell"
     },

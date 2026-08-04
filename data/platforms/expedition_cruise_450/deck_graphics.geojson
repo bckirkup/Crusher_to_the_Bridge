@@ -329,7 +329,7 @@
       "type": "Feature",
       "properties": {
         "kind": "compartment",
-        "zone_id": "BuffetLido",
+        "zone_id": "CasualDining",
         "deck": "7_Sun",
         "room_type": "Dining"
       },
@@ -1858,7 +1858,7 @@
       "type": "Feature",
       "properties": {
         "kind": "hvac_path",
-        "from": "BuffetLido",
+        "from": "CasualDining",
         "to": "PoolDeck"
       },
       "geometry": {

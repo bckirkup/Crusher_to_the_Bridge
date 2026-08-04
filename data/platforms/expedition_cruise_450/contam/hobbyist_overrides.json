@@ -42,7 +42,8 @@
     "MainDining": "Main Dining",
     "MedBay": "Medical Bay",
     "Engine_Room": "Engine Room",
-    "ExpedLounge": "Expedition Lounge"
+    "ExpedLounge": "Expedition Lounge",
+    "CasualDining": "Casual Dining"
   },
   "night_setback": true
 }
