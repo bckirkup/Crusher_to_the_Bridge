@@ -90,11 +90,23 @@ Key knobs in `crusher_labs/config.yaml` (overridable via Picard `config_override
 | `transmission.contact_mode` | `density_dependent` | Also `legacy` or opt-in `heterogeneous_zone_dose` |
 | `agent_behavior.dining_rotation_probability` | `0.0` | Keep 0 for golden stability; raise in campaigns for venue mixing |
 | `agent_behavior.free_zone_rotation_probability` | `0.0` | Same pattern for Free zones |
+| `voyage.effects_enabled` | `false` | Flag-gated port/embarkation effects; see [ship_operations_spec.md](ship_operations_spec.md) |
 
 Pathogen profiles (`data/pathogens/`): `dose_adjustment` (log10 shedding offset),
 `transmission_route_weights`, `innate_nonsusceptible_fraction`, and optional
 `environmental_contamination.source_zones`. Dining zones may set
 `dining_service_type` and `food_contamination_multiplier` in `spatial_layout.json`.
+
+### Voyage itinerary (ship operations)
+
+Cruise platforms ship `data/platforms/<id>/voyage_config.json` with
+`voyage.effects_enabled: false` (identity sea-day) and class-specific
+`dining_meal_weights`. Enable effects only via Picard
+`config_overrides.voyage` when intentionally testing port/embarkation density
+changes. **Shore infection is not implemented** — `shore_infection_probability`
+is config-only and never introduces pathogens. Enabling effects changes
+onboard mixing (ashore exclusion, contact/dining multipliers, embarkation
+surge) but does not model off-ship exposure.
 
 ## Outputs
 
@@ -109,6 +121,7 @@ Optional telemetry when `social.telemetry.decision_detail: true`:
 - `simulation_history[].information_state` — belief diffusion summary
 - `simulation_history[].decisions` — role actions per epoch
 - `simulation_history[].wearable_agent_snapshot` — per-agent multi-device wearable slice (devices, visibility, confounders, detection profiles, `infection_score`, `matched_confounders`)
+- `simulation_history[].voyage_epoch` — day_type, onboard_fraction, contact/dining multipliers, `effects_active` (always present when voyage config is loaded)
 
 ## Validation
 

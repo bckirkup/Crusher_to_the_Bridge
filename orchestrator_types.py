@@ -77,6 +77,7 @@ SYMPTOM_ASYMPTOMATIC_SHEDDING = "asymptomatic_shedding"
 # ── Synthetic locations for confined agents ──────────────────────────────
 LOCATION_ISOLATED = "Isolated_In_Quarters"
 LOCATION_QUARANTINED = "Quarantined_In_Quarters"
+LOCATION_ASHORE = "Ashore"
 
 # ── Defaults for configurable fractions (Law 1: no hardcoded ops) ────────
 DEFAULT_AIRBORNE_FRACTION = 0.6
@@ -115,6 +116,9 @@ class SimulationState:
     escalation_pending: dict[str, Any] | None = None
     # agent_id → compliant | reluctant | defiant (sticky for the cruise)
     compliance_class_by_agent: dict[int, str] = field(default_factory=dict)
+    # Voyage itinerary layer (ship operations)
+    voyage_config: dict[str, Any] = field(default_factory=dict)
+    epoch_voyage: Any = None  # EpochState | None from engines.voyage_itinerary
 
 
 # ── Observation engine bundle ────────────────────────────────────────────

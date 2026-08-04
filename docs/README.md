@@ -37,6 +37,7 @@ python3 presidio_runner.py \
 | [SHEDDING_AND_CABINMATES.md](SHEDDING_AND_CABINMATES.md) | Host shedding variance + cabin-mate pairing |
 | [density_contact_spec.md](density_contact_spec.md) | Density-dependent / heterogeneous zone contact modes |
 | [multi_pathogen_model_changes_spec.md](multi_pathogen_model_changes_spec.md) | Route weights, FUT2 nonsusceptibility, dining rotation, food multipliers, scoped env load |
+| [ship_operations_spec.md](ship_operations_spec.md) | Voyage itinerary / port-visit layer (`effects_enabled` flag-gated) |
 | [tiered_escalation_spec.md](tiered_escalation_spec.md) | Outbreak response: SOP policy, decision latency, bimodal compliance (Campaign v5) |
 | [pathogen_notes.md](pathogen_notes.md) | Pathogen profile notes |
 | [pricing_notes.md](pricing_notes.md) | Assay / labor cost assumptions |

@@ -228,6 +228,83 @@ def initialize_grumb_seeding(
 
 # ── Korkin Lab engine helpers ────────────────────────────────────────────
 
+def resolve_platform_id_from_cfg(cfg: dict[str, Any], repo_root: str = REPO_ROOT) -> str:
+    """Best-effort platform_id from ship_graph.spatial_layout path."""
+    layout = (cfg.get("ship_graph") or {}).get("spatial_layout", "")
+    if not layout:
+        return ""
+    norm = os.path.normpath(layout)
+    parts = norm.replace("\\", "/").split("/")
+    if "platforms" in parts:
+        idx = parts.index("platforms")
+        if idx + 1 < len(parts):
+            return parts[idx + 1]
+    return ""
+
+
+def load_and_merge_voyage_config(
+    cfg: dict[str, Any],
+    *,
+    repo_root: str = REPO_ROOT,
+    platform_id: str | None = None,
+) -> dict[str, Any]:
+    """Load platform voyage_config.json and deep-merge config_overrides.voyage."""
+    from engines.voyage_itinerary import (
+        load_voyage_config,
+        merge_voyage_overrides,
+        voyage_config_path_for_platform,
+    )
+
+    pid = platform_id or resolve_platform_id_from_cfg(cfg, repo_root)
+    path = voyage_config_path_for_platform(repo_root, pid) if pid else None
+    base = load_voyage_config(path)
+    overrides = cfg.get("voyage")
+    if isinstance(overrides, dict):
+        return merge_voyage_overrides(base, overrides)
+    return base
+
+
+def apply_voyage_dining_meal_weights(
+    cfg: dict[str, Any],
+    voyage_cfg: dict[str, Any],
+) -> dict[str, Any]:
+    """Apply platform dining_meal_weights into agent_behavior.
+
+    Platform class tables replace the stock ``DEFAULT_AGENT_BEHAVIOR`` /
+    ``config.yaml`` meal weights (so expedition keeps buffet=0). Explicit
+    non-default ``agent_behavior.dining_meal_weights`` (Picard overrides)
+    still overlay the platform table per meal.
+    """
+    from engines.infection_dynamics_bridge import DEFAULT_AGENT_BEHAVIOR
+    from engines.voyage_itinerary import dining_meal_weights_from_config
+
+    platform_weights = dining_meal_weights_from_config(voyage_cfg)
+    if not platform_weights:
+        return cfg
+    behavior = dict(cfg.get("agent_behavior") or {})
+    cfg_meals = dict(behavior.get("dining_meal_weights") or {})
+    default_meals = DEFAULT_AGENT_BEHAVIOR.get("dining_meal_weights") or {}
+    using_stock_defaults = (not cfg_meals) or cfg_meals == default_meals
+    if using_stock_defaults:
+        behavior["dining_meal_weights"] = {
+            meal: dict(weights)
+            for meal, weights in platform_weights.items()
+        }
+    else:
+        merged_meals: dict[str, Any] = {}
+        for meal in ("breakfast", "lunch", "dinner"):
+            base = dict(platform_weights.get(meal) or {})
+            overlay = dict(cfg_meals.get(meal) or {})
+            merged_meals[meal] = {**base, **overlay} if (base or overlay) else {}
+        for meal, weights in cfg_meals.items():
+            if meal not in merged_meals:
+                merged_meals[meal] = weights
+        behavior["dining_meal_weights"] = merged_meals
+    cfg = dict(cfg)
+    cfg["agent_behavior"] = behavior
+    return cfg
+
+
 def build_engine(
     cfg: dict[str, Any],
     seed: int = 42,

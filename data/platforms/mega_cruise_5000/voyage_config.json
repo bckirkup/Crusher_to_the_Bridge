@@ -1,0 +1,46 @@
+{
+  "schema_version": "1.0",
+  "platform_class": "mega",
+  "description": "Mega / iconic cruise voyage defaults. effects_enabled=false keeps campaigns identical to pre-voyage baseline.",
+  "voyage": {
+    "effects_enabled": false,
+    "total_epochs": 168,
+    "epoch_duration_hours": 1,
+    "itinerary": [],
+    "defaults": {
+      "sea_day": {
+        "onboard_passenger_fraction": 1.0,
+        "contact_rate_multiplier": 1.0,
+        "dining_demand_multiplier": 1.0
+      },
+      "port_day": {
+        "onboard_passenger_fraction": 0.30,
+        "contact_rate_multiplier": 0.40,
+        "dining_demand_multiplier": {
+          "breakfast": 0.80,
+          "lunch": 0.30,
+          "dinner": 0.90
+        }
+      },
+      "embarkation": {
+        "onboard_passenger_fraction": 1.0,
+        "embarkation_buffet_surge": true,
+        "contact_rate_multiplier": 1.2
+      },
+      "disembarkation": {
+        "onboard_passenger_fraction": 0.0,
+        "contact_rate_multiplier": 0.2,
+        "dining_demand_multiplier": {
+          "breakfast": 0.5,
+          "lunch": 0.1,
+          "dinner": 0.1
+        }
+      }
+    }
+  },
+  "dining_meal_weights": {
+    "breakfast": {"buffet": 0.70, "mdr": 0.15, "specialty": 0.15},
+    "lunch": {"buffet": 0.50, "mdr": 0.20, "specialty": 0.30},
+    "dinner": {"buffet": 0.20, "mdr": 0.45, "specialty": 0.35}
+  }
+}
