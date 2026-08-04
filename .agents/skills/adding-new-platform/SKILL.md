@@ -15,6 +15,23 @@ description: Add a new ship/vessel platform to Crusher-to-the-Bridge. Covers cre
 
 None.
 
+## Naval general arrangements (blueprints)
+
+To **import** a naval GA PDF/image set (scanned, hand-marked drawings) into a
+new platform via vision digest + GIMP/Krita SVG overlays, use skill
+`importing-naval-blueprint` and `docs/SHIP_BLUEPRINT_IMPORT.md`:
+
+```bash
+python3 -m tools.ship_blueprint_import ingest --input path/to/ga.pdf --workdir work/blueprints/<id>
+python3 -m tools.ship_blueprint_import digest --workdir work/blueprints/<id> --provider mock  # or gemini/…
+# edit overlays → page_NN_approved.svg
+python3 -m tools.ship_blueprint_import synthesize --workdir work/blueprints/<id> \
+  --platform-id <id> --output data/platforms/<id> --require-approved
+python3 -m tools.ship_blueprint_import validate --platform-dir data/platforms/<id>
+```
+
+Then continue from step 4 below (sanity already covered by `validate`).
+
 ## Steps
 
 ### 1. Create the platform directory

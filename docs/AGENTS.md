@@ -91,6 +91,7 @@ Install from the hash-pinned lockfile: `pip install --only-binary=:all: --requir
 | `testing-agent-classes` | Agent class, gender, duty zone, exempt_classes changes |
 | `schema-validation` | Before committing JSON in `data/` or `telemetry_buffer/` |
 | `adding-new-platform` | New vessel spatial layout + HVAC |
+| `importing-naval-blueprint` | GA PDF/image → ShipDigest + SVG overlay → platform JSON |
 | `adding-new-pathogen` | New pathogen profile entries |
 | `contamx-interop` | ContamX SIM reader, AHS bridge, compare suite, flow diagnostics |
 | `mega-cruise-campaign-local` | Local `--smoke` / `--dry-run` / `--tier` / `--resume` / shard hygiene before AWS |

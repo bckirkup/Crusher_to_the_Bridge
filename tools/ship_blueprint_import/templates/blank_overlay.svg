@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="200" viewBox="0 0 800 200">
+  <title>Blank naval overlay template</title>
+  <desc>Replace placeholder paths with named zone polygons. Path id = zone id.</desc>
+  <rect id="_page_bounds" x="0" y="0" width="800" height="200" fill="none" stroke="#888" stroke-dasharray="4 4"/>
+  <path id="Bridge" d="M 600 40 L 760 40 L 760 90 L 600 90 Z" fill="#e41a1c" fill-opacity="0.25" stroke="#e41a1c" stroke-width="2"/>
+  <path id="Berthing" d="M 40 50 L 280 50 L 280 150 L 40 150 Z" fill="#377eb8" fill-opacity="0.25" stroke="#377eb8" stroke-width="2"/>
+  <path id="Engine_Room" d="M 40 130 L 240 130 L 240 190 L 40 190 Z" fill="#4daf4a" fill-opacity="0.25" stroke="#4daf4a" stroke-width="2"/>
+</svg>

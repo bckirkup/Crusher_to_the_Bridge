@@ -26,6 +26,10 @@ gis = [
     "geopandas>=0.14",
     "networkx>=3.0",
 ]
+blueprint = [
+    "Pillow>=10.0",
+    "pypdfium2>=4.0",
+]
 deploy = [
     "boto3>=1.34",
 ]

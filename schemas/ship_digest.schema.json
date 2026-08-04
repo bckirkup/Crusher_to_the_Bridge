@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ship_digest.schema.json",
+  "title": "ShipDigest",
+  "description": "Intermediate naval general-arrangement digest for Crusher platform synthesis. Coarse simulation-scale zones only.",
+  "type": "object",
+  "required": ["platform_id", "zones"],
+  "properties": {
+    "platform_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "description": "snake_case platform directory id"
+    },
+    "class_name": {"type": "string"},
+    "description": {"type": "string"},
+    "length_m": {"type": "number", "exclusiveMinimum": 0},
+    "beam_m": {"type": "number", "exclusiveMinimum": 0},
+    "crew_estimate": {"type": "integer", "minimum": 1},
+    "ceiling_height_m": {"type": "number", "exclusiveMinimum": 0},
+    "isolation_unit_capacity": {"type": "integer", "minimum": 0},
+    "decks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "page"],
+        "properties": {
+          "id": {"type": "string"},
+          "page": {"type": "integer", "minimum": 1},
+          "role": {"type": "string"}
+        }
+      }
+    },
+    "zones": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/ZoneDigest"}
+    },
+    "hvac_hints": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "rooms"],
+        "properties": {
+          "id": {"type": "string"},
+          "rooms": {"type": "array", "items": {"type": "string"}},
+          "ach": {"type": "number", "minimum": 0},
+          "description": {"type": "string"}
+        }
+      }
+    },
+    "adjacency_hints": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["from", "to"],
+        "properties": {
+          "from": {"type": "string"},
+          "to": {"type": "string"},
+          "type": {"type": "string"}
+        }
+      }
+    },
+    "cross_zone_hints": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["from", "to", "flow_rate_m3h"],
+        "properties": {
+          "from": {"type": "string"},
+          "to": {"type": "string"},
+          "flow_rate_m3h": {"type": "number", "minimum": 0},
+          "path": {"type": "string"},
+          "is_hvac_ducted": {"type": "boolean"},
+          "description": {"type": "string"}
+        }
+      }
+    },
+    "graywater_zones": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "uncertainties": {
+      "type": "array",
+      "items": {"type": "string"}
+    }
+  },
+  "$defs": {
+    "ZoneDigest": {
+      "type": "object",
+      "required": ["id", "type", "deck", "page"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "type": {
+          "type": "string",
+          "enum": ["Free", "Dining", "Room", "Medical", "Engineering"]
+        },
+        "deck": {"type": "string"},
+        "page": {"type": "integer", "minimum": 1},
+        "polygon_norm": {
+          "type": "array",
+          "minItems": 3,
+          "items": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {"type": "number"}
+          }
+        },
+        "max_occupancy": {"type": "integer", "minimum": 1},
+        "volume_m3_est": {"type": "number", "exclusiveMinimum": 0},
+        "traffic": {"type": "string", "enum": ["low", "medium", "high"]},
+        "notes": {"type": "string"}
+      }
+    }
+  }
+}
