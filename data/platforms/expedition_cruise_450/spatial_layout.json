@@ -28,7 +28,7 @@
       "food_contamination_multiplier": 1.0
     },
     {
-      "id": "BuffetLido",
+      "id": "CasualDining",
       "type": "Dining",
       "traffic": "high",
       "volume_m3": 525.0,
@@ -38,9 +38,9 @@
         "x": 70,
         "y": 10
       },
-      "description": "Lido buffet (casual). Deck 7. ~150 seats.",
-      "dining_service_type": "buffet",
-      "food_contamination_multiplier": 3.0
+      "description": "Casual dining (table service / MDR). Deck 7. ~150 seats.",
+      "dining_service_type": "mdr",
+      "food_contamination_multiplier": 1.0
     },
     {
       "id": "CrewMess",

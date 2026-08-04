@@ -203,6 +203,31 @@ def test_expedition_450_cabin_mates_pair() -> None:
     assert agents[2].cabin_mate_ids == frozenset({"a3"})
 
 
+def test_expedition_450_casual_dining_is_table_service() -> None:
+    """Expedition Deck-7 dining is casual MDR table service, not buffet."""
+    spatial, airflow = _load_platform("expedition_cruise_450")
+    dining = {z["id"]: z for z in spatial["zones"] if z["type"] == "Dining"}
+    assert "CasualDining" in dining
+    assert "BuffetLido" not in dining
+    casual = dining["CasualDining"]
+    assert casual["dining_service_type"] == "mdr"
+    assert casual["food_contamination_multiplier"] == 1.0
+    # Recipe / airflow / Contam referential integrity for the rename
+    covered = {r for hz in airflow["hvac_zones"] for r in hz["rooms"]}
+    assert "CasualDining" in covered
+    assert "BuffetLido" not in covered
+    zone_ids = {z["id"] for z in spatial["zones"]}
+    for link in airflow.get("adjacency", []):
+        assert link["from"] in zone_ids
+        assert link["to"] in zone_ids
+    from cruise_platform_recipes import RECIPES
+
+    recipe = RECIPES["expedition_cruise_450"]
+    recipe_ids = {z.id for z in recipe.public_zones}
+    assert "CasualDining" in recipe_ids
+    assert "BuffetLido" not in recipe_ids
+
+
 def test_expedition_450_graphics_and_contam_present() -> None:
     base = PLATFORMS / "expedition_cruise_450"
     assert (base / "graphics" / "elevation.jpg").is_file()
