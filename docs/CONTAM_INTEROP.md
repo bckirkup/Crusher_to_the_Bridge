@@ -23,7 +23,12 @@ path — prefer bringing a real ContamW project and simplifying it.
 
 **Non-goals**
 
-- Blueprint / as-built drawings → Contam authoring is a **separate project**.
+- Blueprint / as-built **duct and leakage** digitization from drawings remains
+  engineer ContamW handwork (Target C).
+- **Target B** naval GA → ContamW *starter* PRJ (zones, openings, AHS, path_map)
+  is supported via `python3 -m tools.ship_blueprint_import author_contam` — see
+  [SHIP_BLUEPRINT_IMPORT.md](SHIP_BLUEPRINT_IMPORT.md). That starter is meant to
+  run ContamX Path A and be refined in ContamW; it is not an as-built HVAC model.
 - Do **not** grow the native solver’s pressure-network physics until a proper
   `.prj` + ContamX vs simplified twin shows that airflow fidelity moves
   epidemic outcomes enough to matter.

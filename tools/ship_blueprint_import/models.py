@@ -8,12 +8,17 @@ from pydantic import BaseModel, Field, field_validator
 
 ZoneType = Literal["Free", "Dining", "Room", "Medical", "Engineering"]
 TrafficLevel = Literal["low", "medium", "high"]
+OpeningStatus = Literal["draft", "confirmed", "engineer_review"]
 
 
 class DeckInfo(BaseModel):
     id: str
     page: int = Field(ge=1)
     role: str = ""
+    elevation_m: float | None = Field(
+        default=None,
+        description="Relative Contam level elevation (m); auto-stacked if omitted",
+    )
 
 
 class ZoneDigest(BaseModel):
@@ -27,6 +32,8 @@ class ZoneDigest(BaseModel):
     )
     max_occupancy: int | None = Field(default=None, ge=1)
     volume_m3_est: float | None = Field(default=None, gt=0)
+    floor_area_m2_est: float | None = Field(default=None, gt=0)
+    elevation_m: float | None = None
     traffic: TrafficLevel = "medium"
     notes: str = ""
 
@@ -58,6 +65,8 @@ class HvacHint(BaseModel):
     id: str
     rooms: list[str]
     ach: float = Field(default=6.0, ge=0)
+    oa_fraction: float | None = Field(default=None, ge=0, le=1)
+    filter_preset: str | None = None
     description: str = ""
 
 
@@ -69,6 +78,23 @@ class AdjacencyHint(BaseModel):
     type: str = "passageway"
 
 
+class OpeningHint(BaseModel):
+    """Contam orifice between two spatial zones (engineer-editable draft)."""
+
+    model_config = {"populate_by_name": True}
+
+    from_: str = Field(alias="from")
+    to: str
+    type: str = "passageway"
+    area_m2: float | None = Field(default=None, gt=0)
+    schedule: str | None = Field(
+        default=None,
+        description="Hobbyist schedule key hint (DoorTrafficW / HatchOccasionalW / …)",
+    )
+    status: OpeningStatus = "draft"
+    notes: str = ""
+
+
 class CrossZoneHint(BaseModel):
     model_config = {"populate_by_name": True}
 
@@ -78,6 +104,33 @@ class CrossZoneHint(BaseModel):
     path: str = "ladder_well"
     is_hvac_ducted: bool = False
     description: str = ""
+
+
+class ContamHints(BaseModel):
+    """Starter ContamW authoring hints for Path A side-chain (Target B)."""
+
+    filter_preset: str = "MERV13"
+    wind_profile: str = "ship_hull"
+    oa_fraction: float = Field(default=0.2, ge=0, le=1)
+    hvac_duty: float = Field(default=0.5, ge=0)
+    envelope_leak_m2: float = Field(default=0.0001, gt=0)
+    duct_hvac_ids: list[str] = Field(
+        default_factory=list,
+        description=(
+            "AHU ids that get fiction Darcy duct spines "
+            "(placeholder until engineer replaces)"
+        ),
+    )
+    deck_temp_offset_K: dict[str, float] = Field(default_factory=dict)
+    orifice_type_map: dict[str, str] = Field(default_factory=dict)
+    handoff_notes: list[str] = Field(default_factory=list)
+    skip_duct_spines: bool = Field(
+        default=True,
+        description=(
+            "Naval GA default: omit fiction ducts; "
+            "engineer authors real ducts in ContamW"
+        ),
+    )
 
 
 class ShipDigest(BaseModel):
@@ -94,7 +147,9 @@ class ShipDigest(BaseModel):
     zones: list[ZoneDigest] = Field(min_length=1)
     hvac_hints: list[HvacHint] = Field(default_factory=list)
     adjacency_hints: list[AdjacencyHint] = Field(default_factory=list)
+    opening_hints: list[OpeningHint] = Field(default_factory=list)
     cross_zone_hints: list[CrossZoneHint] = Field(default_factory=list)
+    contam_hints: ContamHints = Field(default_factory=ContamHints)
     graywater_zones: list[str] = Field(default_factory=list)
     uncertainties: list[str] = Field(default_factory=list)
     isolation_unit_capacity: int = Field(default=0, ge=0)

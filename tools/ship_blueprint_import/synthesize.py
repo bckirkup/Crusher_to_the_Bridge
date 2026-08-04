@@ -303,6 +303,15 @@ def synthesize(
             "(type Room or id containing Berth/Quarter)"
         )
 
+    # Contam level elevations: digest decks or stable stack by first-seen deck
+    deck_elev: dict[str, float] = {}
+    for i, deck_info in enumerate(digest.decks):
+        if deck_info.elevation_m is not None:
+            deck_elev[deck_info.id] = float(deck_info.elevation_m)
+        else:
+            deck_elev[deck_info.id] = float(i) * float(digest.ceiling_height_m)
+    deck_order: list[str] = []
+
     zones_out: list[dict[str, Any]] = []
     for poly in ordered:
         meta = zone_meta.get(poly.zone_id)
@@ -313,6 +322,14 @@ def synthesize(
         ztype = meta.type if meta else "Free"
         traffic = meta.traffic if meta else "medium"
         deck = meta.deck if meta else f"page_{poly.page or 1}"
+        if deck not in deck_order:
+            deck_order.append(deck)
+            deck_elev.setdefault(
+                deck, float(len(deck_order) - 1) * float(digest.ceiling_height_m)
+            )
+        elev = float(deck_elev.get(deck, 0.0))
+        if meta and meta.elevation_m is not None:
+            elev = float(meta.elevation_m)
         entry: dict[str, Any] = {
             "id": poly.zone_id,
             "type": ztype,
@@ -320,6 +337,7 @@ def synthesize(
             "volume_m3": geom["volume_m3"],
             "floor_area_m2": geom["floor_area_m2"],
             "ceiling_height_m": geom["ceiling_height_m"],
+            "elevation_m": elev,
             "deck": deck,
             "display": geom["display"],
         }

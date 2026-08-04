@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "ship_digest.schema.json",
   "title": "ShipDigest",
-  "description": "Intermediate naval general-arrangement digest for Crusher platform synthesis. Coarse simulation-scale zones only.",
+  "description": "Intermediate naval general-arrangement digest for Crusher platform synthesis and ContamW starter authoring. Coarse simulation-scale zones only.",
   "type": "object",
   "required": ["platform_id", "zones"],
   "properties": {
@@ -26,7 +26,8 @@
         "properties": {
           "id": {"type": "string"},
           "page": {"type": "integer", "minimum": 1},
-          "role": {"type": "string"}
+          "role": {"type": "string"},
+          "elevation_m": {"type": "number"}
         }
       }
     },
@@ -44,6 +45,8 @@
           "id": {"type": "string"},
           "rooms": {"type": "array", "items": {"type": "string"}},
           "ach": {"type": "number", "minimum": 0},
+          "oa_fraction": {"type": "number", "minimum": 0, "maximum": 1},
+          "filter_preset": {"type": "string"},
           "description": {"type": "string"}
         }
       }
@@ -60,6 +63,11 @@
         }
       }
     },
+    "opening_hints": {
+      "type": "array",
+      "description": "Contam orifice drafts between spatial zones (engineer-editable)",
+      "items": {"$ref": "#/$defs/OpeningHint"}
+    },
     "cross_zone_hints": {
       "type": "array",
       "items": {
@@ -75,6 +83,7 @@
         }
       }
     },
+    "contam_hints": {"$ref": "#/$defs/ContamHints"},
     "graywater_zones": {
       "type": "array",
       "items": {"type": "string"}
@@ -108,8 +117,47 @@
         },
         "max_occupancy": {"type": "integer", "minimum": 1},
         "volume_m3_est": {"type": "number", "exclusiveMinimum": 0},
+        "floor_area_m2_est": {"type": "number", "exclusiveMinimum": 0},
+        "elevation_m": {"type": "number"},
         "traffic": {"type": "string", "enum": ["low", "medium", "high"]},
         "notes": {"type": "string"}
+      }
+    },
+    "OpeningHint": {
+      "type": "object",
+      "required": ["from", "to"],
+      "properties": {
+        "from": {"type": "string"},
+        "to": {"type": "string"},
+        "type": {"type": "string"},
+        "area_m2": {"type": "number", "exclusiveMinimum": 0},
+        "schedule": {"type": "string"},
+        "status": {
+          "type": "string",
+          "enum": ["draft", "confirmed", "engineer_review"]
+        },
+        "notes": {"type": "string"}
+      }
+    },
+    "ContamHints": {
+      "type": "object",
+      "properties": {
+        "filter_preset": {"type": "string"},
+        "wind_profile": {"type": "string"},
+        "oa_fraction": {"type": "number", "minimum": 0, "maximum": 1},
+        "hvac_duty": {"type": "number", "minimum": 0},
+        "envelope_leak_m2": {"type": "number", "exclusiveMinimum": 0},
+        "duct_hvac_ids": {"type": "array", "items": {"type": "string"}},
+        "deck_temp_offset_K": {
+          "type": "object",
+          "additionalProperties": {"type": "number"}
+        },
+        "orifice_type_map": {
+          "type": "object",
+          "additionalProperties": {"type": "string"}
+        },
+        "handoff_notes": {"type": "array", "items": {"type": "string"}},
+        "skip_duct_spines": {"type": "boolean"}
       }
     }
   }
