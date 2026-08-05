@@ -140,6 +140,10 @@ def build_modalities(
             reluctant_fraction=fred_cfg.get("reluctant_fraction", 0.75),
             reluctant_delay_epochs=fred_cfg.get("reluctant_delay_epochs", 48),
             compliance_by_class=fred_cfg.get("compliance_by_class"),
+            detection_delay_epochs=syn_cfg.get("detection_delay_epochs", 0),
+            crew_screening_interval_epochs=syn_cfg.get(
+                "crew_screening_interval_epochs",
+            ),
             rng=rng,
         ),
         "clinical_rdt": ClinicalRDT(

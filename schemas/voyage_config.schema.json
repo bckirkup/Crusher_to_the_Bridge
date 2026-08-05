@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://crusher-to-the-bridge/schemas/voyage_config.schema.json",
   "title": "VoyageConfig",
-  "description": "Cruise voyage itinerary and platform dining meal weights (ship operations layer).",
+  "description": "Cruise voyage itinerary, platform dining meal weights, and medical response knobs (ship operations layer).",
   "type": "object",
   "additionalProperties": true,
   "properties": {
@@ -47,9 +47,42 @@
         "lunch": { "$ref": "#/$defs/meal_weights" },
         "dinner": { "$ref": "#/$defs/meal_weights" }
       }
-    }
+    },
+    "medical_response": { "$ref": "#/$defs/medical_response" }
   },
   "$defs": {
+    "medical_response": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Per-platform medical attentiveness knobs. isolation_compliance seeds fred_behavior.quarantine_compliance (FRED bimodal compliance unchanged).",
+      "properties": {
+        "sick_call_probability": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Seeds syndromic.sick_call_probability when still at stock default."
+        },
+        "isolation_compliance": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Seeds fred_behavior.quarantine_compliance when still at stock default."
+        },
+        "detection_delay_epochs": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Minimum epochs after symptom onset before sick-call Bernoulli is allowed. 0 = current behavior."
+        },
+        "crew_screening_interval_epochs": {
+          "description": "If set to a positive int, crew are proactively screened every N epochs. null = off.",
+          "oneOf": [
+            { "type": "null" },
+            { "type": "integer", "minimum": 1 }
+          ]
+        },
+        "notes": { "type": "string" }
+      }
+    },
     "meal_weights": {
       "type": "object",
       "additionalProperties": { "type": "number", "minimum": 0 },

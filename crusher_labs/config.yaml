@@ -290,6 +290,12 @@ syndromic:
   sick_call_probability: 0.70         # P(symptomatic agent reports to sick-call)
   background_noise_rate: 0.015        # P(healthy agent reports daily – seasickness etc.)
   cadence: 1
+  # Epochs after symptom onset before sick-call Bernoulli is allowed (0 = immediate).
+  # Platform voyage_config medical_response may seed this when still at stock.
+  detection_delay_epochs: 0
+  # Proactive crew screening every N epochs (null/omit = off). Non-isolated crew
+  # enter the sick-call roster on interval epochs.
+  # crew_screening_interval_epochs: null
   # Optional campaign T11 knob: suppress sick-calls for the first N epochs
   # (0-based). Surveillance begins at epoch N. Default 0 = always active.
   # activation_delay_epochs: 0

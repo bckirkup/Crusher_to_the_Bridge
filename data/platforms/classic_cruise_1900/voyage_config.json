@@ -42,5 +42,12 @@
     "breakfast": {"buffet": 0.75, "mdr": 0.20, "specialty": 0.05},
     "lunch": {"buffet": 0.60, "mdr": 0.25, "specialty": 0.15},
     "dinner": {"buffet": 0.20, "mdr": 0.60, "specialty": 0.20}
+  },
+  "medical_response": {
+    "sick_call_probability": 0.70,
+    "isolation_compliance": 0.85,
+    "detection_delay_epochs": 0,
+    "crew_screening_interval_epochs": null,
+    "notes": "Stock defaults (= current global behavior). Class gradient available via campaign overrides."
   }
 }

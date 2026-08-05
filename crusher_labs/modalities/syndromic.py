@@ -4,6 +4,8 @@ crusher_labs.modalities.syndromic
 
 Syndromic surveillance – models sick-call reporting with:
 - A parameterizable probability that truly symptomatic agents report.
+- Optional detection_delay_epochs gate after symptom onset.
+- Optional proactive crew screening on a fixed interval.
 - FRED-style categorized background noise (seasickness, fatigue,
   minor injury) so healthy agents generate realistic false-signal
   clutter with specific complaint reasons.
@@ -21,6 +23,16 @@ import numpy as np
 from simulation_utils.numeric import default_simulation_rng
 
 
+def _agent_is_crew(agent: dict[str, Any]) -> bool:
+    role = str(agent.get("role") or "").lower()
+    if role == "crew":
+        return True
+    if role == "passenger":
+        return False
+    a_class = str(agent.get("agent_class") or "").lower()
+    return a_class.startswith("crew")
+
+
 class SyndromicSurveillance:
     """Symptom-based screening modality with FRED-style behavioral noise."""
 
@@ -36,6 +48,8 @@ class SyndromicSurveillance:
         reluctant_fraction: float = 0.75,
         reluctant_delay_epochs: int = 48,
         compliance_by_class: dict[str, float] | None = None,
+        detection_delay_epochs: int = 0,
+        crew_screening_interval_epochs: int | None = None,
         rng: np.random.Generator | None = None,
     ) -> None:
         self.sick_call_probability = sick_call_probability
@@ -46,9 +60,17 @@ class SyndromicSurveillance:
         self.reluctant_fraction = float(reluctant_fraction)
         self.reluctant_delay_epochs = int(reluctant_delay_epochs)
         self.compliance_by_class = dict(compliance_by_class or {})
+        self.detection_delay_epochs = max(0, int(detection_delay_epochs))
+        if crew_screening_interval_epochs is None:
+            self.crew_screening_interval_epochs: int | None = None
+        else:
+            interval = int(crew_screening_interval_epochs)
+            self.crew_screening_interval_epochs = interval if interval > 0 else None
         self.rng = rng if rng is not None else default_simulation_rng()
         # Sticky per-agent compliance class for the cruise (compliant/reluctant/defiant)
         self._compliance_class: dict[int, str] = {}
+        # First epoch agent observed symptomatic (for detection_delay_epochs)
+        self._symptom_onset_epoch: dict[int, int] = {}
 
         # None → built-in defaults; explicit [] disables background noise categories.
         if noise_categories is None:
@@ -74,18 +96,24 @@ class SyndromicSurveillance:
     def _process_symptomatic_agent(
         self,
         aid: int,
+        epoch: int,
         overrides: dict[int, str],
         beliefs: dict[int, dict[str, float]],
         chronic_mods: dict[int, dict[str, float]],
         sick_call_ids: list[int],
         true_positive_ids: list[int],
     ) -> None:
+        if aid not in self._symptom_onset_epoch:
+            self._symptom_onset_epoch[aid] = int(epoch)
         override = overrides.get(aid, "")
         if override == "hide_symptoms":
             return
         if override == "report_sick_call":
             sick_call_ids.append(aid)
             true_positive_ids.append(aid)
+            return
+        onset = self._symptom_onset_epoch[aid]
+        if (int(epoch) - onset) < self.detection_delay_epochs:
             return
         inf = beliefs.get(aid, {})
         prob = self.effective_sick_call_probability(
@@ -101,6 +129,33 @@ class SyndromicSurveillance:
             sick_call_ids.append(aid)
             true_positive_ids.append(aid)
 
+    def _apply_crew_screening(
+        self,
+        agents: list[dict[str, Any]],
+        epoch: int,
+        sick_call_ids: list[int],
+        crew_screening_ids: list[int],
+    ) -> None:
+        interval = self.crew_screening_interval_epochs
+        if interval is None or interval <= 0:
+            return
+        if int(epoch) % interval != 0:
+            return
+        from telemetry_buffer.agent_axes import agent_is_isolated
+
+        already = set(sick_call_ids)
+        for agent in agents:
+            aid = int(agent["agent_id"])
+            if aid in already:
+                continue
+            if agent_is_isolated(agent):
+                continue
+            if not _agent_is_crew(agent):
+                continue
+            sick_call_ids.append(aid)
+            crew_screening_ids.append(aid)
+            already.add(aid)
+
     def query_ground_truth(
         self,
         json_data: dict[str, Any],
@@ -115,6 +170,7 @@ class SyndromicSurveillance:
         - ``true_positive_ids``: subset that are genuinely symptomatic.
         - ``noise_ids``: subset that are healthy but reported (background).
         - ``noise_reasons``: complaint reasons for noise reporters.
+        - ``crew_screening_ids``: crew added via proactive screening.
         - ``total_agents``: total agent count.
         """
         agents = json_data.get("agents", [])
@@ -124,6 +180,7 @@ class SyndromicSurveillance:
         true_positive_ids: list[int] = []
         noise_ids: list[int] = []
         noise_reasons: list[dict[str, Any]] = []
+        crew_screening_ids: list[int] = []
 
         from telemetry_buffer.agent_axes import (
             COMPLIANCE_NON_COMPLIANT,
@@ -150,7 +207,7 @@ class SyndromicSurveillance:
 
             if is_symptomatic:
                 self._process_symptomatic_agent(
-                    aid, overrides, beliefs, chronic_mods,
+                    aid, epoch, overrides, beliefs, chronic_mods,
                     sick_call_ids, true_positive_ids,
                 )
             else:
@@ -160,6 +217,10 @@ class SyndromicSurveillance:
                     noise_ids.append(aid)
                     noise_reasons.append({"agent_id": aid, "reason": reason})
 
+        self._apply_crew_screening(
+            agents, epoch, sick_call_ids, crew_screening_ids,
+        )
+
         return {
             "modality": self.name,
             "epoch": epoch,
@@ -167,6 +228,7 @@ class SyndromicSurveillance:
             "true_positive_ids": true_positive_ids,
             "noise_ids": noise_ids,
             "noise_reasons": noise_reasons,
+            "crew_screening_ids": crew_screening_ids,
             "sick_call_count": len(sick_call_ids),
             "total_agents": len(agents),
         }

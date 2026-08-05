@@ -65,6 +65,7 @@ from orchestrator_epoch import (
 )
 from orchestrator_init import (
     apply_voyage_dining_meal_weights,
+    apply_voyage_medical_response,
     assign_cabin_mates,
     build_engine,
     check_escalation,
@@ -223,6 +224,7 @@ class ShipSimulation:
             platform_id=self.run_spec.platform_id,
         )
         cfg = apply_voyage_dining_meal_weights(cfg, voyage_cfg)
+        cfg = apply_voyage_medical_response(cfg, voyage_cfg)
         # Keep local cfg and run_spec in sync for downstream helpers
         self.cfg = cfg
         self.run_spec.legacy_cfg = cfg

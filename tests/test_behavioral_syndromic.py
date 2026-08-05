@@ -175,3 +175,135 @@ class TestBehavioralSyndromic:
         assert none_result["sick_call_count"] == 0
         assert syn_result["sick_call_count"] > 0
         assert none_result["sick_call_agents"] != syn_result["sick_call_agents"]
+
+
+class TestMedicalResponseSyndromicKnobs:
+    def test_detection_delay_blocks_early_reports(self) -> None:
+        """Config sensitivity: detection_delay_epochs gates Bernoulli until delay."""
+        syn = SyndromicSurveillance(
+            sick_call_probability=1.0,
+            background_noise_rate=0.0,
+            noise_categories=[],
+            detection_delay_epochs=2,
+            rng=np.random.default_rng(0),
+        )
+        agent = {
+            "agent_id": 1,
+            "infection_state": INFECTION_INFECTED,
+            "symptom_presentation": PRESENTATION_SYMPTOMATIC,
+            "compliance_status": COMPLIANCE_COMPLIANT,
+        }
+        beliefs = {1: {"severity_belief": 1.0, "trust_medical": 1.0}}
+        early = syn.query_ground_truth(
+            {"epoch": 0, "agents": [agent]}, information_beliefs=beliefs,
+        )
+        mid = syn.query_ground_truth(
+            {"epoch": 1, "agents": [agent]}, information_beliefs=beliefs,
+        )
+        ready = syn.query_ground_truth(
+            {"epoch": 2, "agents": [agent]}, information_beliefs=beliefs,
+        )
+        assert early["sick_call_agents"] == []
+        assert mid["sick_call_agents"] == []
+        assert 1 in ready["sick_call_agents"]
+
+    def test_detection_delay_zero_matches_immediate(self) -> None:
+        """Golden: delay=0 reports on first symptomatic epoch (stock behavior)."""
+        syn = SyndromicSurveillance(
+            sick_call_probability=1.0,
+            background_noise_rate=0.0,
+            noise_categories=[],
+            detection_delay_epochs=0,
+            rng=np.random.default_rng(0),
+        )
+        truth = {
+            "epoch": 0,
+            "agents": [{
+                "agent_id": 3,
+                "infection_state": INFECTION_INFECTED,
+                "symptom_presentation": PRESENTATION_SYMPTOMATIC,
+                "compliance_status": COMPLIANCE_COMPLIANT,
+            }],
+        }
+        result = syn.query_ground_truth(
+            truth,
+            information_beliefs={3: {"severity_belief": 1.0, "trust_medical": 1.0}},
+        )
+        assert 3 in result["sick_call_agents"]
+
+    def test_report_sick_call_bypasses_detection_delay(self) -> None:
+        syn = SyndromicSurveillance(
+            sick_call_probability=0.0,
+            detection_delay_epochs=10,
+            rng=np.random.default_rng(0),
+        )
+        truth = {
+            "epoch": 0,
+            "agents": [{
+                "agent_id": 4,
+                "infection_state": INFECTION_INFECTED,
+                "symptom_presentation": PRESENTATION_SYMPTOMATIC,
+                "compliance_status": COMPLIANCE_COMPLIANT,
+            }],
+        }
+        result = syn.query_ground_truth(
+            truth, behavioral_overrides={4: "report_sick_call"},
+        )
+        assert 4 in result["sick_call_agents"]
+
+    def test_crew_screening_interval_adds_healthy_crew(self) -> None:
+        """Config sensitivity: non-null interval adds crew on interval epochs."""
+        from telemetry_buffer.agent_axes import (
+            INFECTION_SUSCEPTIBLE,
+            PRESENTATION_ASYMPTOMATIC,
+        )
+
+        syn = SyndromicSurveillance(
+            sick_call_probability=0.0,
+            background_noise_rate=0.0,
+            noise_categories=[],
+            crew_screening_interval_epochs=2,
+            rng=np.random.default_rng(0),
+        )
+        agents = [
+            {
+                "agent_id": 10,
+                "agent_class": "crew_services",
+                "infection_state": INFECTION_SUSCEPTIBLE,
+                "symptom_presentation": PRESENTATION_ASYMPTOMATIC,
+                "compliance_status": COMPLIANCE_COMPLIANT,
+            },
+            {
+                "agent_id": 11,
+                "agent_class": "passenger_adult",
+                "infection_state": INFECTION_SUSCEPTIBLE,
+                "symptom_presentation": PRESENTATION_ASYMPTOMATIC,
+                "compliance_status": COMPLIANCE_COMPLIANT,
+            },
+        ]
+        on = syn.query_ground_truth({"epoch": 0, "agents": agents})
+        off = syn.query_ground_truth({"epoch": 1, "agents": agents})
+        on2 = syn.query_ground_truth({"epoch": 2, "agents": agents})
+        assert 10 in on["sick_call_agents"]
+        assert 10 in on["crew_screening_ids"]
+        assert 11 not in on["sick_call_agents"]
+        assert off["crew_screening_ids"] == []
+        assert 10 not in off["sick_call_agents"]
+        assert 10 in on2["crew_screening_ids"]
+
+    def test_build_modalities_reads_new_syndromic_keys(self) -> None:
+        from crusher_labs import build_modalities
+
+        cfg = {
+            "syndromic": {
+                "sick_call_probability": 0.55,
+                "detection_delay_epochs": 4,
+                "crew_screening_interval_epochs": 12,
+            },
+            "fred_behavior": {"quarantine_compliance": 0.91},
+        }
+        syn = build_modalities(cfg, rng=np.random.default_rng(1))["syndromic"]
+        assert syn.sick_call_probability == 0.55
+        assert syn.detection_delay_epochs == 4
+        assert syn.crew_screening_interval_epochs == 12
+        assert syn.quarantine_compliance == 0.91
