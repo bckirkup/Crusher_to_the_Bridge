@@ -448,8 +448,9 @@ def _density_contact_override(
     tx: dict[str, Any] = {}
     if contact_mode is not None:
         tx["contact_mode"] = str(contact_mode)
-    elif alpha is not None:
+    else:
         # Exponent sweeps imply density-family modes unless mode is explicit.
+        # (After the early return, contact_mode is None ⇒ alpha is not None.)
         tx["contact_mode"] = "density_dependent"
     if alpha is not None:
         tx["density_dependent"] = {"exponent": float(alpha)}

@@ -642,7 +642,6 @@ def step_quarantine_confinement(
             ),
             include_cabin_contacts=include_contacts,
         )
-        return
 
 
 def confine_agents(

@@ -29,7 +29,8 @@ param(
   [string]$Bucket = $env:CAMPAIGN_BUCKET,
   [string]$Prefix = "campaign/",
   [string]$Region = $(if ($env:AWS_REGION) { $env:AWS_REGION } elseif ($env:AWS_DEFAULT_REGION) { $env:AWS_DEFAULT_REGION } else { "us-east-1" }),
-  [string]$Profile = $env:AWS_PROFILE,
+  [Alias('Profile')]
+  [string]$AwsProfile = $env:AWS_PROFILE,
   [switch]$Watch,
   [int]$IntervalSec = 60,
   [switch]$Classify
@@ -53,7 +54,7 @@ if (Test-Path -LiteralPath $envFile) {
     }
   }
   if (-not $Bucket) { $Bucket = $env:CAMPAIGN_BUCKET }
-  if (-not $Profile) { $Profile = $env:AWS_PROFILE }
+  if (-not $AwsProfile) { $AwsProfile = $env:AWS_PROFILE }
   if ($Region -eq "us-east-1" -and $env:AWS_REGION) { $Region = $env:AWS_REGION }
   elseif ($Region -eq "us-east-1" -and $env:AWS_DEFAULT_REGION) { $Region = $env:AWS_DEFAULT_REGION }
 }
@@ -64,7 +65,7 @@ if (-not $Bucket) {
 
 function AwsArgs {
   $a = @("--region", $Region)
-  if ($Profile) { $a = @("--profile", $Profile) + $a }
+  if ($AwsProfile) { $a = @("--profile", $AwsProfile) + $a }
   return $a
 }
 
@@ -104,7 +105,7 @@ function Show-Snapshot {
   return $info
 }
 
-Write-Host "Monitoring Batch array job $JobId (profile=$Profile region=$Region)"
+Write-Host "Monitoring Batch array job $JobId (profile=$AwsProfile region=$Region)"
 do {
   $info = Show-Snapshot
   if ($Classify) {
@@ -112,7 +113,7 @@ do {
     if (-not $root) { $root = (Get-Location).Path }
     $clf = Join-Path $PSScriptRoot "classify_batch_failures.py"
     Write-Host "--- classify_batch_failures ---"
-    $env:AWS_PROFILE = $Profile
+    $env:AWS_PROFILE = $AwsProfile
     python $clf --job-id $JobId --region $Region --queue picard-campaign-queue
   }
   if (-not $Watch) { break }

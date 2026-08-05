@@ -258,7 +258,11 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.platform:
         if args.num_agents is None:
-            raise SystemExit("--num-agents is required with --platform")
+            print(
+                "--num-agents is required with --platform",
+                file=sys.stderr,
+            )
+            return 2
         spec = _build_platform_spec(
             args.platform, epochs=args.epochs, num_agents=args.num_agents,
         )

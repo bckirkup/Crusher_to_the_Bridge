@@ -199,7 +199,7 @@ def _normalize_dining_multiplier(raw: Any) -> dict[str, float]:
     if raw is None:
         return dict(IDENTITY_DINING)
     scalar = float(raw)
-    return {k: scalar for k in IDENTITY_DINING}
+    return dict.fromkeys(IDENTITY_DINING, scalar)
 
 
 def _in_window(epoch_of_day: int, window: list[int] | tuple[int, ...] | None) -> bool:
