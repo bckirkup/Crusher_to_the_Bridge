@@ -322,6 +322,61 @@ def _is_stock_probability(value: Any, stock: float) -> bool:
         return False
 
 
+def _is_stock_int(value: Any, stock: int) -> bool:
+    if value is None:
+        return True
+    try:
+        return int(value) == int(stock)
+    except (TypeError, ValueError):
+        return False
+
+
+def _seed_float_if_stock(
+    dest: dict[str, Any],
+    dest_key: str,
+    med: dict[str, Any],
+    med_key: str,
+    stock: float,
+) -> bool:
+    """Copy med[med_key] → dest[dest_key] when dest is still at stock. Returns True if seeded."""
+    if med_key not in med:
+        return False
+    current = dest.get(dest_key, stock)
+    if not _is_stock_probability(current, stock):
+        return False
+    dest[dest_key] = float(med[med_key])
+    return True
+
+
+def _seed_detection_delay_if_stock(
+    syndromic: dict[str, Any],
+    med: dict[str, Any],
+) -> bool:
+    if "detection_delay_epochs" not in med:
+        return False
+    current = syndromic.get("detection_delay_epochs", _STOCK_DETECTION_DELAY_EPOCHS)
+    if not _is_stock_int(current, _STOCK_DETECTION_DELAY_EPOCHS):
+        return False
+    syndromic["detection_delay_epochs"] = int(med["detection_delay_epochs"])
+    return True
+
+
+def _seed_crew_screening_if_stock(
+    syndromic: dict[str, Any],
+    med: dict[str, Any],
+) -> bool:
+    if "crew_screening_interval_epochs" not in med:
+        return False
+    current = syndromic.get(
+        "crew_screening_interval_epochs", _STOCK_CREW_SCREENING_INTERVAL,
+    )
+    if current is not None and current != _STOCK_CREW_SCREENING_INTERVAL:
+        return False
+    raw = med["crew_screening_interval_epochs"]
+    syndromic["crew_screening_interval_epochs"] = None if raw is None else int(raw)
+    return True
+
+
 def apply_voyage_medical_response(
     cfg: dict[str, Any],
     voyage_cfg: dict[str, Any],
@@ -341,38 +396,16 @@ def apply_voyage_medical_response(
     syndromic = dict(cfg.get("syndromic") or {})
     fred = dict(cfg.get("fred_behavior") or {})
     changed = False
-
-    if "sick_call_probability" in med:
-        current = syndromic.get("sick_call_probability", _STOCK_SICK_CALL_PROBABILITY)
-        if _is_stock_probability(current, _STOCK_SICK_CALL_PROBABILITY):
-            syndromic["sick_call_probability"] = float(med["sick_call_probability"])
-            changed = True
-
-    if "isolation_compliance" in med:
-        current = fred.get("quarantine_compliance", _STOCK_QUARANTINE_COMPLIANCE)
-        if _is_stock_probability(current, _STOCK_QUARANTINE_COMPLIANCE):
-            fred["quarantine_compliance"] = float(med["isolation_compliance"])
-            changed = True
-
-    if "detection_delay_epochs" in med:
-        current = syndromic.get(
-            "detection_delay_epochs", _STOCK_DETECTION_DELAY_EPOCHS,
-        )
-        if current is None or int(current) == _STOCK_DETECTION_DELAY_EPOCHS:
-            syndromic["detection_delay_epochs"] = int(med["detection_delay_epochs"])
-            changed = True
-
-    if "crew_screening_interval_epochs" in med:
-        current = syndromic.get(
-            "crew_screening_interval_epochs", _STOCK_CREW_SCREENING_INTERVAL,
-        )
-        if current is None or current == _STOCK_CREW_SCREENING_INTERVAL:
-            raw = med["crew_screening_interval_epochs"]
-            syndromic["crew_screening_interval_epochs"] = (
-                None if raw is None else int(raw)
-            )
-            changed = True
-
+    changed |= _seed_float_if_stock(
+        syndromic, "sick_call_probability", med, "sick_call_probability",
+        _STOCK_SICK_CALL_PROBABILITY,
+    )
+    changed |= _seed_float_if_stock(
+        fred, "quarantine_compliance", med, "isolation_compliance",
+        _STOCK_QUARANTINE_COMPLIANCE,
+    )
+    changed |= _seed_detection_delay_if_stock(syndromic, med)
+    changed |= _seed_crew_screening_if_stock(syndromic, med)
     if not changed:
         return cfg
     cfg = dict(cfg)

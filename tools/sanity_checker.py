@@ -1386,6 +1386,19 @@ def _check_wearable_monitoring(cfg: dict[str, Any], report: Report) -> None:
                                  f"channel_infection_weights.{ch} = {w} outside [0,1]")
 
 
+def _check_crew_screening_interval(cfg: dict[str, Any], report: Report) -> None:
+    crew_screen = cfg.get("syndromic", {}).get("crew_screening_interval_epochs")
+    if crew_screen is None or not isinstance(crew_screen, (int, float)):
+        return
+    if crew_screen >= 1:
+        return
+    report.error(
+        _CONFIG_YAML, "MATH_BOUND",
+        f"syndromic.crew_screening_interval_epochs = {crew_screen} "
+        f"must be null or >= 1",
+    )
+
+
 def _check_modality_params(cfg: dict[str, Any], report: Report) -> None:
     """Validate probability/scalar parameters for syndromic, RDT, PCR, sequencing."""
     _prob_fields = [
@@ -1421,14 +1434,7 @@ def _check_modality_params(cfg: dict[str, Any], report: Report) -> None:
             report.error(_CONFIG_YAML, "MATH_BOUND",
                          f"{section}.{key} = {val} is negative")
 
-    crew_screen = cfg.get("syndromic", {}).get("crew_screening_interval_epochs")
-    if crew_screen is not None and isinstance(crew_screen, (int, float)):
-        if crew_screen < 1:
-            report.error(
-                _CONFIG_YAML, "MATH_BOUND",
-                f"syndromic.crew_screening_interval_epochs = {crew_screen} "
-                f"must be null or >= 1",
-            )
+    _check_crew_screening_interval(cfg, report)
 
 
 def _check_clinical_diagnostics(cfg: dict[str, Any], report: Report) -> None:
