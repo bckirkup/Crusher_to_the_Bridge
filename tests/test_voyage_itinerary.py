@@ -22,6 +22,7 @@ from engines.voyage_itinerary import (  # noqa: E402
 )
 from orchestrator_init import (  # noqa: E402
     apply_voyage_dining_meal_weights,
+    apply_voyage_medical_response,
     load_and_merge_voyage_config,
 )
 
@@ -110,6 +111,112 @@ def test_platform_dining_meal_weights_golden(platform_id: str, klass: str) -> No
     cfg = load_voyage_config(path)
     assert cfg["platform_class"] == klass
     assert cfg["dining_meal_weights"] == GOLDEN_MEAL_WEIGHTS[klass]
+
+
+STOCK_MEDICAL_RESPONSE = {
+    "sick_call_probability": 0.70,
+    "isolation_compliance": 0.85,
+    "detection_delay_epochs": 0,
+    "crew_screening_interval_epochs": None,
+}
+
+
+@pytest.mark.parametrize("platform_id", PLATFORMS)
+def test_platform_medical_response_stock_golden(platform_id: str) -> None:
+    """Shipping platforms keep medical_response at current global defaults."""
+    path = voyage_config_path_for_platform(str(REPO_ROOT), platform_id)
+    cfg = load_voyage_config(path)
+    med = cfg["medical_response"]
+    for key, expected in STOCK_MEDICAL_RESPONSE.items():
+        assert med[key] == expected, f"{platform_id}.{key}"
+
+
+def test_apply_voyage_medical_response_noop_at_stock() -> None:
+    voyage = {
+        "medical_response": {
+            "sick_call_probability": 0.70,
+            "isolation_compliance": 0.85,
+            "detection_delay_epochs": 0,
+            "crew_screening_interval_epochs": None,
+        },
+    }
+    cfg = {
+        "syndromic": {"sick_call_probability": 0.70, "background_noise_rate": 0.015},
+        "fred_behavior": {"quarantine_compliance": 0.85},
+    }
+    merged = apply_voyage_medical_response(cfg, voyage)
+    assert merged["syndromic"]["sick_call_probability"] == 0.70
+    assert merged["fred_behavior"]["quarantine_compliance"] == 0.85
+    assert merged["syndromic"].get("detection_delay_epochs", 0) == 0
+    assert merged["syndromic"].get("crew_screening_interval_epochs") is None
+
+
+def test_apply_voyage_medical_response_seeds_when_stock() -> None:
+    voyage = {
+        "medical_response": {
+            "sick_call_probability": 0.40,
+            "isolation_compliance": 0.80,
+            "detection_delay_epochs": 3,
+            "crew_screening_interval_epochs": 24,
+        },
+    }
+    cfg = {
+        "syndromic": {"sick_call_probability": 0.70},
+        "fred_behavior": {"quarantine_compliance": 0.85},
+    }
+    merged = apply_voyage_medical_response(cfg, voyage)
+    assert merged["syndromic"]["sick_call_probability"] == 0.40
+    assert merged["fred_behavior"]["quarantine_compliance"] == 0.80
+    assert merged["syndromic"]["detection_delay_epochs"] == 3
+    assert merged["syndromic"]["crew_screening_interval_epochs"] == 24
+
+
+def test_apply_voyage_medical_response_respects_none_true_override() -> None:
+    """Campaign none_true sick_call=0 must not be overwritten by platform stock."""
+    voyage = {
+        "medical_response": {
+            "sick_call_probability": 0.70,
+            "isolation_compliance": 0.85,
+            "detection_delay_epochs": 0,
+            "crew_screening_interval_epochs": None,
+        },
+    }
+    cfg = {
+        "syndromic": {
+            "sick_call_probability": 0.0,
+            "background_noise_rate": 0.0,
+        },
+        "fred_behavior": {"quarantine_compliance": 0.85},
+    }
+    merged = apply_voyage_medical_response(cfg, voyage)
+    assert merged["syndromic"]["sick_call_probability"] == 0.0
+
+
+def test_apply_voyage_medical_response_respects_compliance_override() -> None:
+    voyage = {
+        "medical_response": {
+            "isolation_compliance": 0.95,
+        },
+    }
+    cfg = {
+        "syndromic": {},
+        "fred_behavior": {"quarantine_compliance": 0.50},
+    }
+    merged = apply_voyage_medical_response(cfg, voyage)
+    assert merged["fred_behavior"]["quarantine_compliance"] == 0.50
+
+
+def test_merge_voyage_overrides_recognizes_medical_response() -> None:
+    base = load_voyage_config(
+        voyage_config_path_for_platform(str(REPO_ROOT), "mega_cruise_5000"),
+    )
+    merged = merge_voyage_overrides(
+        base,
+        {"medical_response": {"sick_call_probability": 0.4}},
+    )
+    assert merged["medical_response"]["sick_call_probability"] == 0.4
+    # Other medical_response keys deep-merged from platform
+    assert merged["medical_response"]["isolation_compliance"] == 0.85
 
 
 def test_expedition_meal_weights_replace_yaml_buffet_defaults() -> None:

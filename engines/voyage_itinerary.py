@@ -181,7 +181,11 @@ def merge_voyage_overrides(
     if not overrides:
         return platform_cfg
     # Allow either {effects_enabled, itinerary, ...} or full {voyage: {...}, dining...}
-    if "voyage" in overrides or "dining_meal_weights" in overrides:
+    if (
+        "voyage" in overrides
+        or "dining_meal_weights" in overrides
+        or "medical_response" in overrides
+    ):
         return deep_merge_dict(platform_cfg, overrides)
     return deep_merge_dict(platform_cfg, {"voyage": overrides})
 
@@ -319,6 +323,14 @@ def dining_meal_weights_from_config(config: dict[str, Any] | None) -> dict[str, 
         return None
     weights = config.get("dining_meal_weights")
     return weights if isinstance(weights, dict) else None
+
+
+def medical_response_from_config(config: dict[str, Any] | None) -> dict[str, Any] | None:
+    """Return medical_response block if present."""
+    if not config:
+        return None
+    med = config.get("medical_response")
+    return med if isinstance(med, dict) else None
 
 
 def epoch_state_as_dict(state: EpochState) -> dict[str, Any]:

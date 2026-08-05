@@ -100,8 +100,9 @@ Pathogen profiles (`data/pathogens/`): `dose_adjustment` (log10 shedding offset)
 ### Voyage itinerary (ship operations)
 
 Cruise platforms ship `data/platforms/<id>/voyage_config.json` with
-`voyage.effects_enabled: false` (identity sea-day) and class-specific
-`dining_meal_weights`. Enable effects only via Picard
+`voyage.effects_enabled: false` (identity sea-day), class-specific
+`dining_meal_weights`, and stock-equivalent `medical_response` knobs
+(see [`medical_response_spec.md`](medical_response_spec.md)). Enable effects only via Picard
 `config_overrides.voyage` when intentionally testing port/embarkation density
 changes. **Shore infection is not implemented** — `shore_infection_probability`
 is config-only and never introduces pathogens. Enabling effects changes

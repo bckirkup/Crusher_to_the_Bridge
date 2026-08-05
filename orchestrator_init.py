@@ -305,6 +305,82 @@ def apply_voyage_dining_meal_weights(
     return cfg
 
 
+# Stock modality / FRED defaults (config.yaml). Voyage medical_response seeds
+# only when the target key is still at these values so campaign overrides win.
+_STOCK_SICK_CALL_PROBABILITY = 0.70
+_STOCK_QUARANTINE_COMPLIANCE = 0.85
+_STOCK_DETECTION_DELAY_EPOCHS = 0
+_STOCK_CREW_SCREENING_INTERVAL: int | None = None
+
+
+def _is_stock_probability(value: Any, stock: float) -> bool:
+    if value is None:
+        return True
+    try:
+        return abs(float(value) - float(stock)) < 1e-12
+    except (TypeError, ValueError):
+        return False
+
+
+def apply_voyage_medical_response(
+    cfg: dict[str, Any],
+    voyage_cfg: dict[str, Any],
+) -> dict[str, Any]:
+    """Apply platform medical_response into syndromic / fred_behavior.
+
+    Seeds only when the destination key is still at stock defaults so explicit
+    Picard/campaign ``config_overrides`` (e.g. none_true sick_call=0) win.
+    ``isolation_compliance`` seeds ``fred_behavior.quarantine_compliance``.
+    """
+    from engines.voyage_itinerary import medical_response_from_config
+
+    med = medical_response_from_config(voyage_cfg)
+    if not med:
+        return cfg
+
+    syndromic = dict(cfg.get("syndromic") or {})
+    fred = dict(cfg.get("fred_behavior") or {})
+    changed = False
+
+    if "sick_call_probability" in med:
+        current = syndromic.get("sick_call_probability", _STOCK_SICK_CALL_PROBABILITY)
+        if _is_stock_probability(current, _STOCK_SICK_CALL_PROBABILITY):
+            syndromic["sick_call_probability"] = float(med["sick_call_probability"])
+            changed = True
+
+    if "isolation_compliance" in med:
+        current = fred.get("quarantine_compliance", _STOCK_QUARANTINE_COMPLIANCE)
+        if _is_stock_probability(current, _STOCK_QUARANTINE_COMPLIANCE):
+            fred["quarantine_compliance"] = float(med["isolation_compliance"])
+            changed = True
+
+    if "detection_delay_epochs" in med:
+        current = syndromic.get(
+            "detection_delay_epochs", _STOCK_DETECTION_DELAY_EPOCHS,
+        )
+        if current is None or int(current) == _STOCK_DETECTION_DELAY_EPOCHS:
+            syndromic["detection_delay_epochs"] = int(med["detection_delay_epochs"])
+            changed = True
+
+    if "crew_screening_interval_epochs" in med:
+        current = syndromic.get(
+            "crew_screening_interval_epochs", _STOCK_CREW_SCREENING_INTERVAL,
+        )
+        if current is None or current == _STOCK_CREW_SCREENING_INTERVAL:
+            raw = med["crew_screening_interval_epochs"]
+            syndromic["crew_screening_interval_epochs"] = (
+                None if raw is None else int(raw)
+            )
+            changed = True
+
+    if not changed:
+        return cfg
+    cfg = dict(cfg)
+    cfg["syndromic"] = syndromic
+    cfg["fred_behavior"] = fred
+    return cfg
+
+
 def build_engine(
     cfg: dict[str, Any],
     seed: int = 42,

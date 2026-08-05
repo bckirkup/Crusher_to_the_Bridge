@@ -1404,6 +1404,7 @@ def _check_modality_params(cfg: dict[str, Any], report: Report) -> None:
     _non_neg_fields = [
         ("syndromic", "cadence"),
         ("syndromic", "activation_delay_epochs"),
+        ("syndromic", "detection_delay_epochs"),
         ("diagnostic_cascade", "activation_delay_epochs"),
         ("clinical_rdt", "cadence"),
         ("targeted_pcr", "cadence"),
@@ -1419,6 +1420,15 @@ def _check_modality_params(cfg: dict[str, Any], report: Report) -> None:
         if val is not None and isinstance(val, (int, float)) and val < 0:
             report.error(_CONFIG_YAML, "MATH_BOUND",
                          f"{section}.{key} = {val} is negative")
+
+    crew_screen = cfg.get("syndromic", {}).get("crew_screening_interval_epochs")
+    if crew_screen is not None and isinstance(crew_screen, (int, float)):
+        if crew_screen < 1:
+            report.error(
+                _CONFIG_YAML, "MATH_BOUND",
+                f"syndromic.crew_screening_interval_epochs = {crew_screen} "
+                f"must be null or >= 1",
+            )
 
 
 def _check_clinical_diagnostics(cfg: dict[str, Any], report: Report) -> None:
