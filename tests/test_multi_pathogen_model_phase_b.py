@@ -201,7 +201,6 @@ class TestZoneScopedEnvironmental:
 
         matrix = ContactTracingMatrix(epoch=1)
         core._pathway_environmental(
-            1,
             {"Spa": [spa], "Bridge": [bridge]},
             doses,
             matrix,

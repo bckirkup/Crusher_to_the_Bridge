@@ -278,9 +278,7 @@ def build_naval_hobbyist_overrides(
             for z in spatial.get("zones", [])
             if z["id"] in rooms
         }
-        if any(t == "Medical" for t in room_types.values()):
-            hvac_filter[hid] = "HEPA"
-        elif any(t == "Engineering" for t in room_types.values()):
+        if any(t in ("Medical", "Engineering") for t in room_types.values()):
             hvac_filter[hid] = "HEPA"
 
     if digest:
@@ -386,10 +384,6 @@ def validate_prj_offline(prj_path: str, *, allowed_roots: tuple[str, ...]) -> di
     """Parse PRJ + build path_map; optionally simplify — no ContamX binary."""
     with validated_open(prj_path, "r", allowed_roots=allowed_roots, encoding="utf-8") as fh:
         text = fh.read()
-    if "ContamW 3.4" not in text and "CONTAMW" not in text.upper():
-        # ContamW 3.4 projects still vary; require non-empty zones section markers
-        if "zones:" not in text.lower() and "!zones" not in text.lower():
-            pass
     path_map = path_map_from_prj(text)
     warn: list[str] = []
     spatial, airflow = simplify_contamw34(text, warnings_out=warn)

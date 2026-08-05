@@ -24,7 +24,8 @@ param(
   [string]$JobQueue = 'picard-campaign-queue',
   [string]$JobDefinition = 'picard-campaign',
   [string]$Region = $(if ($env:AWS_REGION) { $env:AWS_REGION } else { 'us-east-1' }),
-  [string]$Profile = $(if ($env:AWS_PROFILE) { $env:AWS_PROFILE } else { 'picard' }),
+  [Alias('Profile')]
+  [string]$AwsProfile = $(if ($env:AWS_PROFILE) { $env:AWS_PROFILE } else { 'picard' }),
   [string]$Manifest = 'picard_framework/runs/mega_cruise_campaign/calibration_manifest_v1.json',
   [string]$JobName = ''
 )
@@ -39,7 +40,7 @@ if ((-not $Bucket) -and (Test-Path $envFile)) {
     $k, $v = $_ -split '=', 2
     $k = $k.Trim(); $v = $v.Trim().Trim('"').Trim("'")
     if ($k -eq 'CAMPAIGN_BUCKET' -or $k -eq 'BUCKET') { $Bucket = $v }
-    if ($k -eq 'AWS_PROFILE' -and -not $env:AWS_PROFILE) { $Profile = $v }
+    if ($k -eq 'AWS_PROFILE' -and -not $env:AWS_PROFILE) { $AwsProfile = $v }
     if ($k -eq 'AWS_REGION' -and -not $env:AWS_REGION) { $Region = $v }
   }
 }
@@ -63,10 +64,10 @@ Write-Host "  definition  : $JobDefinition"
 Write-Host "  array size  : $ShardCount"
 Write-Host "  s3 prefix   : $s3Prefix"
 Write-Host "  manifest    : $Manifest"
-Write-Host "  profile     : $Profile"
+Write-Host "  profile     : $AwsProfile"
 
 $params = "shard_count=$ShardCount,s3_prefix=$s3Prefix,manifest=$Manifest"
-$jobId = aws --profile $Profile batch submit-job `
+$jobId = aws --profile $AwsProfile batch submit-job `
   --job-name $JobName `
   --job-queue $JobQueue `
   --job-definition $JobDefinition `

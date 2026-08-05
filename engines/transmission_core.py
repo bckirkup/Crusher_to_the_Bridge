@@ -582,7 +582,7 @@ class TransmissionCore:
 
         if ec.get("enabled", False):
             self._pathway_environmental(
-                epoch, zone_occupants, p_agent_doses, matrix,
+                zone_occupants, p_agent_doses, matrix,
                 p_agent_pw, pathogen_id=pathogen_id, profile=profile,
             )
 
@@ -628,7 +628,7 @@ class TransmissionCore:
             return
         for aid, pw in agent_pathway_doses.items():
             total = 0.0
-            for pw_name, pw_dose in list(pw.items()):
+            for pw_name, pw_dose in pw.items():
                 wkey = PATHWAY_WEIGHT_KEYS.get(pw_name, pw_name)
                 w = float(weights.get(wkey, 1.0))
                 scaled = pw_dose * w
@@ -1103,7 +1103,6 @@ class TransmissionCore:
 
     def _pathway_environmental(
         self,
-        epoch: int,
         zone_occupants: dict[str, list[KorkinAgent]],
         agent_doses: dict[int, float],
         matrix: ContactTracingMatrix,
@@ -1185,7 +1184,7 @@ class TransmissionCore:
         reservoirs = self.env_contamination.setdefault(pathogen_id, {})
 
         # Grow / decay matching zones; ensure keys exist for occupied matches
-        for zone_name in list(zone_occupants.keys()):
+        for zone_name in zone_occupants:
             if not self._zone_matches(zone_name, source_zones):
                 continue
             level = float(reservoirs.get(zone_name, 0.0))

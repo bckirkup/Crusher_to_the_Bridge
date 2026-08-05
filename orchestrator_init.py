@@ -228,7 +228,7 @@ def initialize_grumb_seeding(
 
 # ── Korkin Lab engine helpers ────────────────────────────────────────────
 
-def resolve_platform_id_from_cfg(cfg: dict[str, Any], repo_root: str = REPO_ROOT) -> str:
+def resolve_platform_id_from_cfg(cfg: dict[str, Any]) -> str:
     """Best-effort platform_id from ship_graph.spatial_layout path."""
     layout = (cfg.get("ship_graph") or {}).get("spatial_layout", "")
     if not layout:
@@ -255,7 +255,7 @@ def load_and_merge_voyage_config(
         voyage_config_path_for_platform,
     )
 
-    pid = platform_id or resolve_platform_id_from_cfg(cfg, repo_root)
+    pid = platform_id or resolve_platform_id_from_cfg(cfg)
     path = voyage_config_path_for_platform(repo_root, pid) if pid else None
     base = load_voyage_config(path)
     overrides = cfg.get("voyage")
