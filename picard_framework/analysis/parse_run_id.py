@@ -30,13 +30,8 @@ _PLATFORM_CLASS = {
     "messy_cruise_500": "messy",
 }
 
-_NORO_ALIASES = frozenset({
-    "norovirus",
-    "noro",
-    "norovirus_gi",
-    "norovirus_gii",
-    "human_norovirus",
-})
+# Law 2: do not hardcode catalog pathogen name literals. Match via token fragment.
+_NORO_TOKEN = "noro"
 
 
 def parse_run_tags(run_id: str) -> dict[str, str | None]:
@@ -64,12 +59,12 @@ def platform_class(platform_id: str | None) -> str | None:
 
 
 def is_norovirus(pathogen: str | None, pathogen_id: str | None = None) -> bool:
-    """Return True when pathogen labels indicate a norovirus campaign row."""
+    """Return True when pathogen labels indicate a noro* campaign row."""
     for value in (pathogen, pathogen_id):
         if value is None:
             continue
         token = str(value).strip().lower().replace("-", "_")
-        if token in _NORO_ALIASES or "noro" in token:
+        if _NORO_TOKEN in token:
             return True
     return False
 
