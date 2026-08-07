@@ -164,6 +164,15 @@ numerics) sit next to outcomes so results are self-describing without parsing
 `run_id` or reloading the manifest. `deploy/aws/aggregate_results.py`
 flattens `parameters.*` into CSV columns alongside `derived.*`.
 
+For standardized calibration tables and Stan trajectory fits, use the adjacent
+analysis package (see `docs/stan_analysis_tool_spec.md`):
+
+```bash
+python3 -m picard_framework.analysis.campaign_bundle ./results/ --out analysis/
+python3 -m picard_framework.analysis.stan.fit_norovirus_trajectory analysis/ --out stan_fit/
+python3 -m picard_framework.analysis.report analysis/ stan_fit/ --out report.html
+```
+
 Use `--full-telemetry` to force `history_retention=full` and also pack history
 / lab notebook / ground truth (much larger and slower).
 
