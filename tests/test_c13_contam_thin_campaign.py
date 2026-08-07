@@ -32,7 +32,8 @@ def _load_builder() -> Any:
     spec = importlib.util.spec_from_file_location(
         "build_c13_contam_thin_manifest", _BUILDER,
     )
-    assert spec is not None and spec.loader is not None
+    assert spec is not None
+    assert spec.loader is not None
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
     return mod
@@ -120,7 +121,8 @@ def test_c13b_airborne_small_manifest_count_and_ids() -> None:
     spec = importlib.util.spec_from_file_location(
         "build_c13b_contam_airborne_small_manifest", builder_path,
     )
-    assert spec is not None and spec.loader is not None
+    assert spec is not None
+    assert spec.loader is not None
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
     source = json.loads(c12.read_text(encoding="utf-8"))

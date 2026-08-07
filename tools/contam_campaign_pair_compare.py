@@ -33,6 +33,8 @@ from simulation_utils.paths import (  # noqa: E402
     validated_open,
 )
 
+_REPO_ROOT_STR = str(REPO_ROOT)
+
 DERIVED_KEYS = (
     "attack_rate",
     "peak_prevalence",
@@ -98,6 +100,54 @@ def _param(summary: dict[str, Any], key: str) -> Any:
     return params.get(key)
 
 
+def _delta(n_val: Any, c_val: Any) -> float | None:
+    if isinstance(n_val, (int, float)) and isinstance(c_val, (int, float)):
+        return float(c_val) - float(n_val)
+    return None
+
+
+def _build_pair_row(
+    run_id: str,
+    n_sum: dict[str, Any],
+    c_sum: dict[str, Any],
+) -> dict[str, Any]:
+    row: dict[str, Any] = {"run_id": run_id}
+    for key in PARAM_KEYS:
+        # Prefer Contam params (includes transport_engine); fill from native
+        val = _param(c_sum, key)
+        if val is None:
+            val = _param(n_sum, key)
+        row[key] = val
+    row["native_transport"] = _param(n_sum, "transport_engine") or "native"
+    row["contam_transport"] = _param(c_sum, "transport_engine") or "contamx"
+    for key in DERIVED_KEYS:
+        n_val = _metric(n_sum, key)
+        c_val = _metric(c_sum, key)
+        row[f"native_{key}"] = n_val
+        row[f"contam_{key}"] = c_val
+        row[f"delta_{key}"] = _delta(n_val, c_val)
+    return row
+
+
+def _attack_rate_aggregate(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    ar_deltas = [
+        r["delta_attack_rate"]
+        for r in rows
+        if isinstance(r.get("delta_attack_rate"), (int, float))
+    ]
+    if not ar_deltas:
+        return {}
+    return {
+        "delta_attack_rate_mean": statistics.mean(ar_deltas),
+        "delta_attack_rate_median": statistics.median(ar_deltas),
+        "delta_attack_rate_stdev": (
+            statistics.stdev(ar_deltas) if len(ar_deltas) > 1 else 0.0
+        ),
+        "delta_attack_rate_min": min(ar_deltas),
+        "delta_attack_rate_max": max(ar_deltas),
+    }
+
+
 def pair_rows(
     native_dir: Path,
     contam_dir: Path,
@@ -114,31 +164,8 @@ def pair_rows(
         c_sum = _load_summary(contam_zips[run_id])
         if n_sum is None or c_sum is None:
             continue
-        row: dict[str, Any] = {"run_id": run_id}
-        for key in PARAM_KEYS:
-            # Prefer Contam params (includes transport_engine); fill from native
-            val = _param(c_sum, key)
-            if val is None:
-                val = _param(n_sum, key)
-            row[key] = val
-        row["native_transport"] = _param(n_sum, "transport_engine") or "native"
-        row["contam_transport"] = _param(c_sum, "transport_engine") or "contamx"
-        for key in DERIVED_KEYS:
-            n_val = _metric(n_sum, key)
-            c_val = _metric(c_sum, key)
-            row[f"native_{key}"] = n_val
-            row[f"contam_{key}"] = c_val
-            if isinstance(n_val, (int, float)) and isinstance(c_val, (int, float)):
-                row[f"delta_{key}"] = float(c_val) - float(n_val)
-            else:
-                row[f"delta_{key}"] = None
-        rows.append(row)
+        rows.append(_build_pair_row(run_id, n_sum, c_sum))
 
-    ar_deltas = [
-        r["delta_attack_rate"]
-        for r in rows
-        if isinstance(r.get("delta_attack_rate"), (int, float))
-    ]
     aggregate: dict[str, Any] = {
         "n_native_zips": len(native_zips),
         "n_contam_zips": len(contam_zips),
@@ -148,15 +175,76 @@ def pair_rows(
         "native_only_sample": native_only[:10],
         "contam_only_sample": contam_only[:10],
     }
-    if ar_deltas:
-        aggregate["delta_attack_rate_mean"] = statistics.mean(ar_deltas)
-        aggregate["delta_attack_rate_median"] = statistics.median(ar_deltas)
-        aggregate["delta_attack_rate_stdev"] = (
-            statistics.stdev(ar_deltas) if len(ar_deltas) > 1 else 0.0
-        )
-        aggregate["delta_attack_rate_min"] = min(ar_deltas)
-        aggregate["delta_attack_rate_max"] = max(ar_deltas)
+    aggregate.update(_attack_rate_aggregate(rows))
     return rows, aggregate
+
+
+def _resolve_cli_dir(path: Path) -> Path:
+    if path.is_absolute():
+        return path
+    return Path(resolve_repo_path(_REPO_ROOT_STR, str(path)))
+
+
+def _resolve_cli_out(path: Path) -> Path:
+    if path.is_absolute():
+        return path
+    return Path(resolve_repo_path(_REPO_ROOT_STR, str(path)))
+
+
+def _csv_fieldnames(rows: list[dict[str, Any]]) -> list[str]:
+    if not rows:
+        return ["run_id"]
+    fieldnames = list(rows[0].keys())
+    for row in rows[1:]:
+        for key in row:
+            if key not in fieldnames:
+                fieldnames.append(key)
+    return fieldnames
+
+
+def _write_pair_csv(out_csv: Path, rows: list[dict[str, Any]]) -> None:
+    prepare_output_directory(
+        str(out_csv.parent),
+        allowed_roots=(_REPO_ROOT_STR,),
+    )
+    fieldnames = _csv_fieldnames(rows)
+    with validated_open(
+        str(out_csv),
+        "w",
+        allowed_roots=(_REPO_ROOT_STR,),
+        encoding="utf-8",
+        newline="",
+    ) as fh:
+        writer = csv.DictWriter(fh, fieldnames=fieldnames)
+        writer.writeheader()
+        for row in rows:
+            writer.writerow(row)
+
+
+def _write_pair_json(
+    out_json: Path,
+    aggregate: dict[str, Any],
+    rows: list[dict[str, Any]],
+) -> None:
+    prepare_output_directory(
+        str(out_json.parent),
+        allowed_roots=(_REPO_ROOT_STR,),
+    )
+    payload = {"aggregate": aggregate, "rows": rows}
+    with validated_open(
+        str(out_json), "w", allowed_roots=(_REPO_ROOT_STR,), encoding="utf-8",
+    ) as fh:
+        json.dump(payload, fh, indent=2, default=str)
+        fh.write("\n")
+
+
+def _exit_code(rows: list[dict[str, Any]], aggregate: dict[str, Any]) -> int:
+    """0 when pairs exist or Contam side is empty; 1 when Contam zips are unpaired."""
+    if rows:
+        return 0
+    if aggregate["n_contam_zips"] == 0:
+        return 0
+    return 1
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -189,16 +277,8 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
-    native_dir = Path(
-        resolve_repo_path(str(REPO_ROOT), str(args.native_dir))
-        if not args.native_dir.is_absolute()
-        else args.native_dir,
-    )
-    contam_dir = Path(
-        resolve_repo_path(str(REPO_ROOT), str(args.contam_dir))
-        if not args.contam_dir.is_absolute()
-        else args.contam_dir,
-    )
+    native_dir = _resolve_cli_dir(args.native_dir)
+    contam_dir = _resolve_cli_dir(args.contam_dir)
 
     rows, aggregate = pair_rows(native_dir, contam_dir)
     print(json.dumps(aggregate, indent=2, default=str))
@@ -213,47 +293,16 @@ def main(argv: list[str] | None = None) -> int:
     out_csv = args.out_csv
     if out_csv is None:
         out_csv = REPO_ROOT / "results" / "c13_contam_thin_pair_summary.csv"
-    if not out_csv.is_absolute():
-        out_csv = Path(resolve_repo_path(str(REPO_ROOT), str(out_csv)))
-
-    prepare_output_directory(
-        str(out_csv.parent),
-        allowed_roots=(str(REPO_ROOT),),
-    )
-    fieldnames: list[str] = []
-    if rows:
-        fieldnames = list(rows[0].keys())
-        # Stable column order for sparse later rows
-        for row in rows[1:]:
-            for key in row:
-                if key not in fieldnames:
-                    fieldnames.append(key)
-    with validated_open(
-        str(out_csv), "w", allowed_roots=(str(REPO_ROOT),), encoding="utf-8", newline="",
-    ) as fh:
-        writer = csv.DictWriter(fh, fieldnames=fieldnames or ["run_id"])
-        writer.writeheader()
-        for row in rows:
-            writer.writerow(row)
+    out_csv = _resolve_cli_out(out_csv)
+    _write_pair_csv(out_csv, rows)
     print(f"  wrote {out_csv}")
 
     if args.out_json is not None:
-        out_json = args.out_json
-        if not out_json.is_absolute():
-            out_json = Path(resolve_repo_path(str(REPO_ROOT), str(out_json)))
-        prepare_output_directory(
-            str(out_json.parent),
-            allowed_roots=(str(REPO_ROOT),),
-        )
-        payload = {"aggregate": aggregate, "rows": rows}
-        with validated_open(
-            str(out_json), "w", allowed_roots=(str(REPO_ROOT),), encoding="utf-8",
-        ) as fh:
-            json.dump(payload, fh, indent=2, default=str)
-            fh.write("\n")
+        out_json = _resolve_cli_out(args.out_json)
+        _write_pair_json(out_json, aggregate, rows)
         print(f"  wrote {out_json}")
 
-    return 0 if rows or aggregate["n_contam_zips"] == 0 else 0
+    return _exit_code(rows, aggregate)
 
 
 if __name__ == "__main__":

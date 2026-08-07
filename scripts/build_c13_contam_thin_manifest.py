@@ -18,6 +18,10 @@ from pathlib import Path
 from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+_REPO_ROOT_STR = str(REPO_ROOT)
+if _REPO_ROOT_STR not in sys.path:
+    sys.path.insert(0, _REPO_ROOT_STR)
+
 CAMPAIGN_DIR = REPO_ROOT / "picard_framework" / "runs" / "mega_cruise_campaign"
 DEFAULT_SOURCE = CAMPAIGN_DIR / "c12c_fine_calibration_manifest.json"
 DEFAULT_OUT = CAMPAIGN_DIR / "c13_contam_thin_manifest.json"
@@ -84,6 +88,40 @@ def build_manifest(
     }
 
 
+def _resolve_repo_cli_path(path: Path) -> str:
+    """Confine a CLI path under the repository root (Sonar S8707)."""
+    from simulation_utils.paths import resolve_repo_path
+
+    return resolve_repo_path(_REPO_ROOT_STR, str(path))
+
+
+def _load_source_manifest(source_arg: Path) -> dict[str, Any]:
+    from simulation_utils.paths import validated_open
+
+    source_path = _resolve_repo_cli_path(source_arg)
+    with validated_open(
+        source_path, allowed_roots=(_REPO_ROOT_STR,), encoding="utf-8",
+    ) as fh:
+        return json.load(fh)
+
+
+def _write_manifest(out_arg: Path, manifest: dict[str, Any]) -> str:
+    import os
+
+    from simulation_utils.paths import prepare_output_directory, validated_open
+
+    out_path = _resolve_repo_cli_path(out_arg)
+    prepare_output_directory(
+        os.path.dirname(out_path), allowed_roots=(_REPO_ROOT_STR,),
+    )
+    with validated_open(
+        out_path, "w", allowed_roots=(_REPO_ROOT_STR,), encoding="utf-8",
+    ) as fh:
+        json.dump(manifest, fh, indent=2, ensure_ascii=False)
+        fh.write("\n")
+    return out_path
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description="Build C13 Contam thin manifest from C12c finecal.",
@@ -120,15 +158,18 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
-    if not args.source.is_file():
+    try:
+        source_path = _resolve_repo_cli_path(args.source)
+    except ValueError as exc:
+        raise SystemExit(str(exc)) from exc
+    if not Path(source_path).is_file():
         raise SystemExit(f"Source manifest not found: {args.source}")
 
-    source = json.loads(args.source.read_text(encoding="utf-8"))
+    source = _load_source_manifest(args.source)
     manifest = build_manifest(
         source, doses=list(args.doses), seed_count=int(args.seed_count),
     )
 
-    sys.path.insert(0, str(REPO_ROOT))
     from picard_framework.runs.mega_cruise_campaign.campaign_runner import (
         generate_tier_runs,
     )
@@ -144,15 +185,18 @@ def main(argv: list[str] | None = None) -> int:
     print(f"  transport_engine={hvac.get('transport_engine')!r}")
     print(f"  sample_run_id={runs[0][0] if runs else None}")
 
+    if len(runs) != expected:
+        print(f"  ERROR: run count mismatch ({len(runs)} != {expected})")
+        return 1
+
     if args.dry_run:
         return 0
 
-    args.out.parent.mkdir(parents=True, exist_ok=True)
-    args.out.write_text(
-        json.dumps(manifest, indent=2, ensure_ascii=False) + "\n",
-        encoding="utf-8",
-    )
-    print(f"  wrote {args.out}")
+    try:
+        written = _write_manifest(args.out, manifest)
+    except ValueError as exc:
+        raise SystemExit(str(exc)) from exc
+    print(f"  wrote {written}")
     return 0
 
 
