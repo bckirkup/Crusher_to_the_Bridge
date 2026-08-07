@@ -48,6 +48,24 @@ FAILED_LOG = OUTPUT_ROOT / "failed_runs.txt"
 _REPO_ROOT_STR = str(REPO_ROOT)
 
 
+def set_output_root(path: Path | str) -> Path:
+    """Redirect campaign zips / resume logs (e.g. Contam thin arm).
+
+    Updates module-level ``OUTPUT_ROOT``, ``COMPLETED_LOG``, and ``FAILED_LOG``
+    so ``--output-dir`` and tests stay consistent.
+    """
+    global OUTPUT_ROOT, COMPLETED_LOG, FAILED_LOG
+    root = Path(path)
+    if not root.is_absolute():
+        root = (REPO_ROOT / root).resolve()
+    else:
+        root = root.resolve()
+    OUTPUT_ROOT = root
+    COMPLETED_LOG = OUTPUT_ROOT / "completed_runs.txt"
+    FAILED_LOG = OUTPUT_ROOT / "failed_runs.txt"
+    return OUTPUT_ROOT
+
+
 def _output_root_str() -> str:
     return str(OUTPUT_ROOT)
 
@@ -602,6 +620,8 @@ def _campaign_parameters(
             params[key] = value
     cfg = config_overrides or {}
     hvac = cfg.get("hvac") or {}
+    if "transport_engine" in hvac and "transport_engine" not in params:
+        params["transport_engine"] = hvac["transport_engine"]
     if "filter_efficiency" in hvac:
         params["filter_efficiency"] = hvac["filter_efficiency"]
     if "oa_fraction" in hvac:
@@ -672,6 +692,8 @@ def parameters_from_spec(spec: dict[str, Any]) -> dict[str, Any]:
         "history_retention": run.get("history_retention", "full"),
     }
     hvac = cfg.get("hvac") or {}
+    if "transport_engine" in hvac:
+        params["transport_engine"] = hvac["transport_engine"]
     if "filter_efficiency" in hvac:
         params["filter_efficiency"] = hvac["filter_efficiency"]
     if "oa_fraction" in hvac:
@@ -1259,6 +1281,7 @@ def generate_tier_runs(
         alphas = _density_exponent_values(tier)
         contact_modes = _contact_mode_values(tier)
         immunities = tier.get("pre_immunity_fractions", [None])
+        hvac = {"hvac": tier["hvac"]} if tier.get("hvac") else None
         if epochs_override is not None:
             epoch_list = [int(epochs_override)]
         elif "epoch_durations" in tier:
@@ -1332,6 +1355,7 @@ def generate_tier_runs(
                                                     surv_cfgs.get(sname),
                                                     imm_over,
                                                     dens_over,
+                                                    hvac,
                                                 ),
                                                 seed=seed,
                                                 num_agents=n_agents,
@@ -1617,7 +1641,13 @@ def run_simulation_subprocess(
             stderr=subprocess.PIPE,
             text=True,
             cwd=_REPO_ROOT_STR,
-            env={**os.environ, "PYTHONPATH": _REPO_ROOT_STR},
+            env={
+                **os.environ,
+                "PYTHONPATH": _REPO_ROOT_STR,
+                # Windows consoles default to cp1252; LCARS banners use U+2500.
+                "PYTHONIOENCODING": os.environ.get("PYTHONIOENCODING", "utf-8"),
+                "PYTHONUTF8": os.environ.get("PYTHONUTF8", "1"),
+            },
         )
         deadline = time.monotonic() + timeout
         while True:
@@ -1739,6 +1769,13 @@ def main(argv: list[str] | None = None) -> int:
         help="Path to campaign_manifest.json (or calibration_manifest_v1.json)",
     )
     parser.add_argument(
+        "--output-dir",
+        type=Path,
+        default=None,
+        help="Redirect zips and resume logs (default: telemetry_buffer/"
+        "mega_cruise_campaign). Use a separate tree for Contam matched arms.",
+    )
+    parser.add_argument(
         "--include-deferred",
         action="store_true",
         help="Include tiers marked deferred:true when selecting --tier all "
@@ -1798,6 +1835,9 @@ def main(argv: list[str] | None = None) -> int:
             full_telemetry=args.full_telemetry,
             keep_workdir=args.keep_workdir,
         )
+
+    if args.output_dir is not None:
+        set_output_root(args.output_dir)
 
     if args.smoke:
         args.tier = args.tier or "t1"
