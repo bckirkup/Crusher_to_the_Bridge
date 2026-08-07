@@ -179,13 +179,7 @@ def pair_rows(
     return rows, aggregate
 
 
-def _resolve_cli_dir(path: Path) -> Path:
-    if path.is_absolute():
-        return path
-    return Path(resolve_repo_path(_REPO_ROOT_STR, str(path)))
-
-
-def _resolve_cli_out(path: Path) -> Path:
+def _resolve_cli_path(path: Path) -> Path:
     if path.is_absolute():
         return path
     return Path(resolve_repo_path(_REPO_ROOT_STR, str(path)))
@@ -277,8 +271,8 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
-    native_dir = _resolve_cli_dir(args.native_dir)
-    contam_dir = _resolve_cli_dir(args.contam_dir)
+    native_dir = _resolve_cli_path(args.native_dir)
+    contam_dir = _resolve_cli_path(args.contam_dir)
 
     rows, aggregate = pair_rows(native_dir, contam_dir)
     print(json.dumps(aggregate, indent=2, default=str))
@@ -293,12 +287,12 @@ def main(argv: list[str] | None = None) -> int:
     out_csv = args.out_csv
     if out_csv is None:
         out_csv = REPO_ROOT / "results" / "c13_contam_thin_pair_summary.csv"
-    out_csv = _resolve_cli_out(out_csv)
+    out_csv = _resolve_cli_path(out_csv)
     _write_pair_csv(out_csv, rows)
     print(f"  wrote {out_csv}")
 
     if args.out_json is not None:
-        out_json = _resolve_cli_out(args.out_json)
+        out_json = _resolve_cli_path(args.out_json)
         _write_pair_json(out_json, aggregate, rows)
         print(f"  wrote {out_json}")
 

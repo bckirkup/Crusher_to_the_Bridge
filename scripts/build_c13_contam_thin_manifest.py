@@ -12,15 +12,23 @@ Usage (repo root)::
 from __future__ import annotations
 
 import argparse
-import json
 import sys
 from pathlib import Path
 from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 _REPO_ROOT_STR = str(REPO_ROOT)
+_SCRIPTS_DIR = str(REPO_ROOT / "scripts")
 if _REPO_ROOT_STR not in sys.path:
     sys.path.insert(0, _REPO_ROOT_STR)
+if _SCRIPTS_DIR not in sys.path:
+    sys.path.insert(0, _SCRIPTS_DIR)
+
+from contam_manifest_io import (  # noqa: E402
+    load_source_manifest,
+    require_repo_file,
+    write_manifest,
+)
 
 CAMPAIGN_DIR = REPO_ROOT / "picard_framework" / "runs" / "mega_cruise_campaign"
 DEFAULT_SOURCE = CAMPAIGN_DIR / "c12c_fine_calibration_manifest.json"
@@ -88,40 +96,6 @@ def build_manifest(
     }
 
 
-def _resolve_repo_cli_path(path: Path) -> str:
-    """Confine a CLI path under the repository root (Sonar S8707)."""
-    from simulation_utils.paths import resolve_repo_path
-
-    return resolve_repo_path(_REPO_ROOT_STR, str(path))
-
-
-def _load_source_manifest(source_arg: Path) -> dict[str, Any]:
-    from simulation_utils.paths import validated_open
-
-    source_path = _resolve_repo_cli_path(source_arg)
-    with validated_open(
-        source_path, allowed_roots=(_REPO_ROOT_STR,), encoding="utf-8",
-    ) as fh:
-        return json.load(fh)
-
-
-def _write_manifest(out_arg: Path, manifest: dict[str, Any]) -> str:
-    import os
-
-    from simulation_utils.paths import prepare_output_directory, validated_open
-
-    out_path = _resolve_repo_cli_path(out_arg)
-    prepare_output_directory(
-        os.path.dirname(out_path), allowed_roots=(_REPO_ROOT_STR,),
-    )
-    with validated_open(
-        out_path, "w", allowed_roots=(_REPO_ROOT_STR,), encoding="utf-8",
-    ) as fh:
-        json.dump(manifest, fh, indent=2, ensure_ascii=False)
-        fh.write("\n")
-    return out_path
-
-
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description="Build C13 Contam thin manifest from C12c finecal.",
@@ -159,13 +133,11 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     try:
-        source_path = _resolve_repo_cli_path(args.source)
+        require_repo_file(_REPO_ROOT_STR, args.source)
     except ValueError as exc:
         raise SystemExit(str(exc)) from exc
-    if not Path(source_path).is_file():
-        raise SystemExit(f"Source manifest not found: {args.source}")
 
-    source = _load_source_manifest(args.source)
+    source = load_source_manifest(_REPO_ROOT_STR, args.source)
     manifest = build_manifest(
         source, doses=list(args.doses), seed_count=int(args.seed_count),
     )
@@ -193,7 +165,7 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     try:
-        written = _write_manifest(args.out, manifest)
+        written = write_manifest(_REPO_ROOT_STR, args.out, manifest)
     except ValueError as exc:
         raise SystemExit(str(exc)) from exc
     print(f"  wrote {written}")
