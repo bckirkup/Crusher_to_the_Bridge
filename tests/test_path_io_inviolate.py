@@ -30,6 +30,12 @@ _HARDENED_MODULES = (
     "deploy/aws/analyze_campaign_curves.py",
     "deploy/aws/classify_batch_failures.py",
     "deploy/aws/path_safety.py",
+    "picard_framework/analysis/_io.py",
+    "picard_framework/analysis/campaign_bundle.py",
+    "picard_framework/analysis/report.py",
+    "picard_framework/analysis/figures.py",
+    "picard_framework/analysis/stan/fit_norovirus_trajectory.py",
+    "picard_framework/analysis/stan/posterior_summaries.py",
 )
 
 # Path.write_text / read_text / unlink / open are also sinks for S2083/S8707

@@ -95,7 +95,7 @@ Install from the hash-pinned lockfile: `pip install --only-binary=:all: --requir
 | `adding-new-pathogen` | New pathogen profile entries |
 | `contamx-interop` | ContamX SIM reader, AHS bridge, compare suite, flow diagnostics |
 | `mega-cruise-campaign-local` | Local `--smoke` / `--dry-run` / `--tier` / `--resume` / shard hygiene before AWS |
-| `campaign-results-analysis` | Aggregate summaries, epidemic curves, Batch failure classification after sync |
+| `campaign-results-analysis` | Analysis bundle + Stan calibration, aggregate summaries, epidemic curves, Batch failure classification after sync |
 | `aws-batch-campaign` | Running large Crusher simulation batches on AWS Batch / Fargate Spot |
 | `managing-github-issues` | Issue triage, batching, PR lifecycle |
 | `download-deepwiki` | Offline DeepWiki export for a public GitHub repo |
