@@ -1,0 +1,185 @@
+{
+  "campaign": "c13b_contam_airborne_small_matched",
+  "description": "Local ContamX paired campaign on smaller vessels with airborne pathogens (sarscov2 / influenza / measles) vs C12 recalibration native controls. Only hvac.transport_engine differs.",
+  "platform": "mega_cruise_5000",
+  "default_epochs": 168,
+  "default_num_agents": 7000,
+  "pathogen_configs": {
+    "sarscov2": {
+      "bundle": "active_profiles",
+      "pathogen_id": "sars_cov2_resp",
+      "overrides": {
+        "remove": [
+          "norwalk_gi"
+        ]
+      }
+    },
+    "influenza": {
+      "bundle": "edison_10pathogen_profiles",
+      "pathogen_id": "influenza_a",
+      "overrides": {
+        "remove": [
+          "norovirus_gii4",
+          "sars_cov2_resp",
+          "measles_virus",
+          "legionella_pneumophila",
+          "vibrio_cholerae_parahaemolyticus",
+          "campylobacter_jejuni",
+          "clostridioides_difficile",
+          "andes_hantavirus",
+          "ebola_virus"
+        ]
+      }
+    },
+    "measles": {
+      "bundle": "edison_10pathogen_profiles",
+      "pathogen_id": "measles_virus",
+      "overrides": {
+        "remove": [
+          "norovirus_gii4",
+          "sars_cov2_resp",
+          "influenza_a",
+          "legionella_pneumophila",
+          "vibrio_cholerae_parahaemolyticus",
+          "campylobacter_jejuni",
+          "clostridioides_difficile",
+          "andes_hantavirus",
+          "ebola_virus"
+        ]
+      }
+    }
+  },
+  "surveillance_configs": {
+    "none_true": {
+      "diagnostic_cascade": {
+        "enabled": false
+      },
+      "syndromic": {
+        "sick_call_probability": 0.0,
+        "background_noise_rate": 0.0
+      },
+      "fred_behavior": {
+        "healthy_noise_categories": []
+      },
+      "observation": {
+        "enabled": false
+      },
+      "wearable_monitoring": {
+        "enabled": false
+      },
+      "ship_graph": {
+        "counter_confinement_enabled": false
+      }
+    }
+  },
+  "tiers": {
+    "a2_sarscov2_contam_small": {
+      "description": "C13b Contam small-vessel arm for sarscov2: matched to C12 a2_sarscov2_recal native controls (platforms ['expedition_cruise_450', 'classic_cruise_1900'], doses [6.0, 6.5], none_true, imm0, 10 seeds).",
+      "pathogen": "sarscov2",
+      "platforms": [
+        "expedition_cruise_450",
+        "classic_cruise_1900"
+      ],
+      "dose_adjustments": [
+        6.0,
+        6.5
+      ],
+      "density_exponents": [
+        0.75
+      ],
+      "pre_immunity_fractions": [
+        0.0
+      ],
+      "surveillance_strategies": [
+        "none_true"
+      ],
+      "seeds": [
+        900,
+        901,
+        902,
+        903,
+        904,
+        905,
+        906,
+        907,
+        908,
+        909
+      ],
+      "hvac": {
+        "transport_engine": "contamx"
+      }
+    },
+    "a2_influenza_contam_small": {
+      "description": "C13b Contam small-vessel arm for influenza: matched to C12 a2_influenza_recal native controls (platforms ['expedition_cruise_450', 'classic_cruise_1900'], doses [5.0, 5.5], none_true, imm0, 10 seeds).",
+      "pathogen": "influenza",
+      "platforms": [
+        "expedition_cruise_450",
+        "classic_cruise_1900"
+      ],
+      "dose_adjustments": [
+        5.0,
+        5.5
+      ],
+      "density_exponents": [
+        0.75
+      ],
+      "pre_immunity_fractions": [
+        0.0
+      ],
+      "surveillance_strategies": [
+        "none_true"
+      ],
+      "seeds": [
+        900,
+        901,
+        902,
+        903,
+        904,
+        905,
+        906,
+        907,
+        908,
+        909
+      ],
+      "hvac": {
+        "transport_engine": "contamx"
+      }
+    },
+    "a2_measles_contam_small": {
+      "description": "C13b Contam small-vessel arm for measles: matched to C12 a2_measles_recal native controls (platforms ['expedition_cruise_450', 'classic_cruise_1900'], doses [4.5, 5.0], none_true, imm0, 10 seeds).",
+      "pathogen": "measles",
+      "platforms": [
+        "expedition_cruise_450",
+        "classic_cruise_1900"
+      ],
+      "dose_adjustments": [
+        4.5,
+        5.0
+      ],
+      "density_exponents": [
+        0.75
+      ],
+      "pre_immunity_fractions": [
+        0.0
+      ],
+      "surveillance_strategies": [
+        "none_true"
+      ],
+      "seeds": [
+        900,
+        901,
+        902,
+        903,
+        904,
+        905,
+        906,
+        907,
+        908,
+        909
+      ],
+      "hvac": {
+        "transport_engine": "contamx"
+      }
+    }
+  }
+}

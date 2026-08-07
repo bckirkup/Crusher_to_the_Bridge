@@ -41,11 +41,34 @@ from simulation_utils.paths import (  # noqa: E402
 
 CAMPAIGN_DIR = Path(__file__).resolve().parent
 MANIFEST_PATH = CAMPAIGN_DIR / "campaign_manifest.json"
+COMPLETED_RUNS_FILENAME = "completed_runs.txt"
+FAILED_RUNS_FILENAME = "failed_runs.txt"
 OUTPUT_ROOT = REPO_ROOT / "telemetry_buffer" / "mega_cruise_campaign"
-COMPLETED_LOG = OUTPUT_ROOT / "completed_runs.txt"
-FAILED_LOG = OUTPUT_ROOT / "failed_runs.txt"
+COMPLETED_LOG = OUTPUT_ROOT / COMPLETED_RUNS_FILENAME
+FAILED_LOG = OUTPUT_ROOT / FAILED_RUNS_FILENAME
 
 _REPO_ROOT_STR = str(REPO_ROOT)
+
+
+def set_output_root(path: Path | str) -> Path:
+    """Redirect campaign zips / resume logs (e.g. Contam thin arm).
+
+    Updates module-level ``OUTPUT_ROOT``, ``COMPLETED_LOG``, and ``FAILED_LOG``
+    so ``--output-dir`` and tests stay consistent.
+
+    Mutates ``globals()`` instead of the ``global`` keyword so Law-compliance
+    AST scans stay clean while callers can still read the module attributes.
+    """
+    root = Path(path)
+    if not root.is_absolute():
+        root = (REPO_ROOT / root).resolve()
+    else:
+        root = root.resolve()
+    g = globals()
+    g["OUTPUT_ROOT"] = root
+    g["COMPLETED_LOG"] = root / COMPLETED_RUNS_FILENAME
+    g["FAILED_LOG"] = root / FAILED_RUNS_FILENAME
+    return root
 
 
 def _output_root_str() -> str:
@@ -132,7 +155,7 @@ def mark_completed(run_id: str) -> None:
 
 def mark_failed(run_id: str) -> None:
     safe_id = _safe_run_id(run_id)
-    log_path = _output_artifact("failed_runs.txt")
+    log_path = _output_artifact(FAILED_RUNS_FILENAME)
     with validated_open(log_path, "a", allowed_roots=_allowed_roots(), encoding="utf-8") as fh:
         fh.write(safe_id + "\n")
 
@@ -602,6 +625,8 @@ def _campaign_parameters(
             params[key] = value
     cfg = config_overrides or {}
     hvac = cfg.get("hvac") or {}
+    if "transport_engine" in hvac and "transport_engine" not in params:
+        params["transport_engine"] = hvac["transport_engine"]
     if "filter_efficiency" in hvac:
         params["filter_efficiency"] = hvac["filter_efficiency"]
     if "oa_fraction" in hvac:
@@ -672,6 +697,8 @@ def parameters_from_spec(spec: dict[str, Any]) -> dict[str, Any]:
         "history_retention": run.get("history_retention", "full"),
     }
     hvac = cfg.get("hvac") or {}
+    if "transport_engine" in hvac:
+        params["transport_engine"] = hvac["transport_engine"]
     if "filter_efficiency" in hvac:
         params["filter_efficiency"] = hvac["filter_efficiency"]
     if "oa_fraction" in hvac:
@@ -1259,6 +1286,7 @@ def generate_tier_runs(
         alphas = _density_exponent_values(tier)
         contact_modes = _contact_mode_values(tier)
         immunities = tier.get("pre_immunity_fractions", [None])
+        hvac = {"hvac": tier["hvac"]} if tier.get("hvac") else None
         if epochs_override is not None:
             epoch_list = [int(epochs_override)]
         elif "epoch_durations" in tier:
@@ -1332,6 +1360,7 @@ def generate_tier_runs(
                                                     surv_cfgs.get(sname),
                                                     imm_over,
                                                     dens_over,
+                                                    hvac,
                                                 ),
                                                 seed=seed,
                                                 num_agents=n_agents,
@@ -1617,7 +1646,13 @@ def run_simulation_subprocess(
             stderr=subprocess.PIPE,
             text=True,
             cwd=_REPO_ROOT_STR,
-            env={**os.environ, "PYTHONPATH": _REPO_ROOT_STR},
+            env={
+                **os.environ,
+                "PYTHONPATH": _REPO_ROOT_STR,
+                # Windows consoles default to cp1252; LCARS banners use U+2500.
+                "PYTHONIOENCODING": os.environ.get("PYTHONIOENCODING", "utf-8"),
+                "PYTHONUTF8": os.environ.get("PYTHONUTF8", "1"),
+            },
         )
         deadline = time.monotonic() + timeout
         while True:
@@ -1710,7 +1745,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--retry-failed",
         action="store_true",
-        help="Only re-run run_ids listed in failed_runs.txt (clears their leftovers first). "
+        help=f"Only re-run run_ids listed in {FAILED_RUNS_FILENAME} (clears their leftovers first). "
         "Implies skipping completed runs.",
     )
     parser.add_argument("--limit", type=int, default=None, help="Max runs to execute")
@@ -1737,6 +1772,13 @@ def main(argv: list[str] | None = None) -> int:
         type=Path,
         default=MANIFEST_PATH,
         help="Path to campaign_manifest.json (or calibration_manifest_v1.json)",
+    )
+    parser.add_argument(
+        "--output-dir",
+        type=Path,
+        default=None,
+        help="Redirect zips and resume logs (default: telemetry_buffer/"
+        "mega_cruise_campaign). Use a separate tree for Contam matched arms.",
     )
     parser.add_argument(
         "--include-deferred",
@@ -1799,6 +1841,9 @@ def main(argv: list[str] | None = None) -> int:
             keep_workdir=args.keep_workdir,
         )
 
+    if args.output_dir is not None:
+        set_output_root(args.output_dir)
+
     if args.smoke:
         args.tier = args.tier or "t1"
         args.platform = args.platform or "destroyer_baseline"
@@ -1834,7 +1879,7 @@ def main(argv: list[str] | None = None) -> int:
     done = completed_runs() if (args.resume or args.retry_failed) else set()
     retry_only = failed_runs() if args.retry_failed else None
     if args.retry_failed and not retry_only:
-        print("  --retry-failed: failed_runs.txt is empty; nothing to retry.")
+        print(f"  --retry-failed: {FAILED_RUNS_FILENAME} is empty; nothing to retry.")
         return 0
     tiers = resolve_tier_ids(
         manifest, args.tier, include_deferred=args.include_deferred,

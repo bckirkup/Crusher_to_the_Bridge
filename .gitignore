@@ -94,3 +94,13 @@ picard_framework/runs/mega_cruise_campaign/recal_*_manifest*.json
 picard_framework/runs/mega_cruise_campaign/c8_*_manifest*.json
 picard_framework/runs/mega_cruise_campaign/c9_*_manifest*.json
 picard_framework/runs/mega_cruise_campaign/c10_*_manifest*.json
+picard_framework/runs/mega_cruise_campaign/c12_*_manifest*.json
+picard_framework/runs/mega_cruise_campaign/c12b_*_manifest*.json
+
+picard_framework/runs/mega_cruise_campaign/c12c_*_manifest*.json
+picard_framework/runs/mega_cruise_campaign/c13_*_manifest*.json
+
+# Local Contam matched-campaign zips / resume logs
+telemetry_buffer/c13_contam_thin/
+telemetry_buffer/c13b_contam_airborne_small/
+
