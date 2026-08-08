@@ -31,7 +31,8 @@ from picard_framework.analysis.parse_run_id import is_norovirus
 ROOT = os.getcwd()
 SOURCES = (
     ("c12c_fine_calibration", os.path.join(ROOT, "analysis", "c12c_fine_calibration")),
-    ("c14_c14b_combined", os.path.join(ROOT, "analysis", "c14_c14b_combined")),
+    ("c14", os.path.join(ROOT, "analysis", "c14")),
+    ("c14b", os.path.join(ROOT, "analysis", "c14b")),
 )
 OUT = os.path.join(ROOT, "analysis", "analysis_stan_norovirus")
 MAX_STAN_RUNS = 800

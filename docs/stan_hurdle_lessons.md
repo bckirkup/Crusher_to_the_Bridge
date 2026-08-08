@@ -86,7 +86,7 @@ labels from zip `summary.json`. Recompute takeoff from timeseries + triggers:
 python -u -m picard_framework.analysis.campaign_bundle results\c12c_fine_calibration --out analysis\c12c_fine_calibration
 python -u -m picard_framework.analysis.campaign_bundle results\results_c14 --out analysis\c14
 python -u -m picard_framework.analysis.campaign_bundle results\results_c14b --out analysis\c14b
-# Then rebuild the Step-2 merge
+# Then rebuild the Step-2 merge (c12c + c14 + c14b)
 python -u scripts\build_stan_step2_bundle.py
 ```
 
