@@ -70,6 +70,10 @@ or default pytest.
 **Note:** `aggregate_metrics.outbreak_rate` uses `coerce_bool` so CSV-reloaded
 `"False"` strings are not treated as truthy.
 
+**Field lessons:** first full-scale Stage A fits diverged heavily; Stage B at
+full outbreak N is multi-day. See `docs/stan_hurdle_lessons.md` before burning
+a long Stage B run.
+
 ## Aggregate scalar summaries (ops)
 
 ```bash

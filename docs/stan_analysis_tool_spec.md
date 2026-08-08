@@ -224,7 +224,7 @@ pairwise_deltas.csv
 
 ## Stan Calibration Layer
 
-### Phase 1b hurdle (recommended)
+### Phase 1b hurdle (engineering default; see lessons)
 
 Zero-heavy campaign outputs motivate a two-stage model:
 
@@ -236,6 +236,12 @@ Zero-heavy campaign outputs motivate a two-stage model:
    `pred_attack_rate` + `ppc_new_inf_mean` only).
 
 Orchestrator: `python -m picard_framework.analysis.stan.fit_norovirus_hurdle`.
+
+**Field note:** first full-scale Stage A fits on the C12c+C14/C14b Step‑2 bundle
+showed severe divergences; Stage B at 5151×168 was multi-day and aborted.
+The binary `ever_infected > 2` label is a convenient cutoff, not a proven
+latent dichotomy — see [`docs/stan_hurdle_lessons.md`](stan_hurdle_lessons.md)
+before treating hurdle posteriors as monograph-grade.
 
 ### Core model: `norovirus_trajectory.stan` (Stage B)
 

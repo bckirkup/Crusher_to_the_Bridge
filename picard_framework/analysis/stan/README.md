@@ -43,6 +43,15 @@ Stage B defaults to `--outbreaks-only` (hurdle). Use `--no-outbreaks-only` for t
 - Stage B: observed triggers; `reduce_sum` + `threads_per_chain` for multi-core
 - Outputs under each stage `posterior/`: dose, platform, surveillance, VSP, PPC tables
 
-## What Stan does not do
+## Field lessons (Step-2)
 
-Stan does not call the ABM, simulate agents, or replace `campaign_runner.py`.
+First full-scale hurdle attempts on the merged C12c + C14/C14b bundle:
+
+- Stage A (~10 min) completed but with **high divergences** — do not treat as
+  monograph-grade without model changes.
+- Stage B (5151 outbreaks × 168 epochs, 4×1000/1000) was still near 0–5% after
+  ~5 h and was aborted.
+- The binary `outbreak_occurred` (`ever_infected > 2`) may be too sharp a
+  dichotomy for a clean Bernoulli stage.
+
+Full write-up: [`docs/stan_hurdle_lessons.md`](../../../docs/stan_hurdle_lessons.md).
