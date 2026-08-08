@@ -229,8 +229,9 @@ pairwise_deltas.csv
 Zero-heavy campaign outputs motivate a two-stage model:
 
 1. **Stage A** (`norovirus_outbreak.stan`) — Bernoulli-logit on
-   **takeoff vs fizzle** (`outbreak_occurred` =
-   `ever_infected >= max(5, ceil(0.01 * N))`, not `ever_infected > 2`).
+   **takeoff vs fizzle** (`outbreak_occurred`: VSP fires while incidence is
+   still accelerating — `Δ²incidence >= 0` at first SUSPECTED/CONFIRMED;
+   otherwise fizzle, including late VSP on a decelerating curve).
 2. **Stage B** (`norovirus_trajectory.stan`) — NegBin2 incidence
    **conditional on outbreak**, with `reduce_sum` (no `N×T` transformed
    `log_lambda`) and slim generated quantities (no `y_rep[N,T]`;
@@ -239,8 +240,9 @@ Zero-heavy campaign outputs motivate a two-stage model:
 Orchestrator: `python -m picard_framework.analysis.stan.fit_norovirus_hurdle`.
 
 **Field note:** first full-scale Stage A fits used the legacy `ever_infected > 2`
-label and diverged heavily. The label is now **takeoff vs fizzle** (see
-`simulation_utils.epidemic_labels`). Re-bundle before re-fitting Stage A.
+label and diverged heavily. The label is now **VSP + curvature takeoff vs
+fizzle** (see `simulation_utils.epidemic_labels`). Re-bundle before re-fitting
+Stage A.
 Full narrative: [`docs/stan_hurdle_lessons.md`](stan_hurdle_lessons.md).
 
 ### Core model: `norovirus_trajectory.stan` (Stage B)

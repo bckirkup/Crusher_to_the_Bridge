@@ -1459,8 +1459,8 @@ def compute_derived_metrics(ts: list[dict[str, Any]], num_agents: int) -> dict[s
     ever_infected = infected_final + recovered
     attack_rate = ever_infected / num_agents if num_agents > 0 else 0
 
-    # Outbreak = epidemic took off (vs fizzled), not merely ever_infected > 2.
-    outbreak_occurred = epidemic_took_off(ever_infected, num_agents)
+    # Outbreak = takeoff (VSP while still accelerating) vs fizzle.
+    outbreak_occurred = epidemic_took_off(ts)
 
     detection_epoch = None
     confirmation_epoch = None

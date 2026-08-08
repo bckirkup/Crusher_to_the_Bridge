@@ -1,6 +1,6 @@
 // Phase-1b norovirus takeoff probability (Stage A / hurdle).
 // Bernoulli-logit on run-level takeoff vs fizzle
-// (outbreak_occurred := ever_infected >= max(5, ceil(0.01*N))).
+// (outbreak_occurred := VSP onset while Δ²incidence >= 0; see epidemic_labels).
 
 data {
   int<lower=1> N_runs;

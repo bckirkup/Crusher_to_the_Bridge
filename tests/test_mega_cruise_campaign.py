@@ -476,7 +476,7 @@ def test_compute_derived_metrics() -> None:
     derived = compute_derived_metrics(ts, num_agents=1000)
     assert derived["peak_prevalence"] == 3
     assert derived["peak_epoch"] == 1
-    # 5/1000 = 0.5% attack → fizzle under 1% takeoff rule (not ever>2).
+    # VSP at epoch 1 (too early for Δ²incidence) → fizzle under curvature rule.
     assert derived["outbreak_occurred"] is False
     assert derived["detection_epoch"] == 1
     assert derived["confirmation_epoch"] == 2

@@ -128,8 +128,8 @@ def compute_derived_metrics(
     infected_final = int(final.get("infected", 0) or 0)
     ever_infected = infected_final + recovered
     attack_rate = ever_infected / num_agents if num_agents > 0 else 0.0
-    # Takeoff vs fizzle (Stan Stage A) — not the legacy ever_infected > 2 cut.
-    outbreak_occurred = epidemic_took_off(ever_infected, num_agents)
+    # Takeoff vs fizzle: VSP onset while incidence still accelerating.
+    outbreak_occurred = epidemic_took_off(timeseries)
     seeded = seed_established(ever_infected)
 
     detection_epoch = None
@@ -199,8 +199,8 @@ def build_run_summary_row(payload: dict[str, Any]) -> dict[str, Any]:
         summary=summary if isinstance(summary, dict) else {},
     )
     num_agents = int(factors.get("num_agents") or 0)
-    # Timeseries is authoritative so re-bundles pick up takeoff vs fizzle even
-    # when summary.json still carries the legacy ever_infected>2 label.
+    # Timeseries is authoritative so re-bundles pick up VSP+curvature takeoff
+    # even when summary.json still carries a legacy outbreak label.
     if timeseries and num_agents > 0:
         derived = compute_derived_metrics(timeseries, num_agents)
     elif not derived:

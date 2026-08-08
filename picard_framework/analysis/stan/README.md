@@ -52,7 +52,8 @@ First full-scale hurdle attempts on the merged C12c + C14/C14b bundle:
   monograph-grade without model changes.
 - Stage B (5151 outbreaks × 168 epochs, 4×1000/1000) was still near 0–5% after
   ~5 h and was aborted.
-- The legacy binary `ever_infected > 2` was too sharp; label is now takeoff vs
-  fizzle (`>= max(5, ceil(0.01*N))`). Re-bundle before the next Stage A.
+- Labels evolved from `ever_infected > 2` → size cut → **VSP + incidence
+  curvature** (takeoff only if VSP fires while still accelerating). Re-bundle
+  before the next Stage A.
 
 Full write-up: [`docs/stan_hurdle_lessons.md`](../../../docs/stan_hurdle_lessons.md).

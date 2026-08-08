@@ -234,29 +234,46 @@ def test_build_aggregate_metrics_outbreak_rate_from_csv_strings() -> None:
 def test_compute_derived_metrics_matches_expected() -> None:
     ts = _curve()
     m = compute_derived_metrics(ts, 100)
-    # final infected=1 recovered=12 → ever=13 → AR=0.13 → takeoff (>= max(5,1))
+    # final infected=1 recovered=12 → ever=13 → AR=0.13
+    # VSP at epoch 3 with incidence 0,3,5,2 → Δ²=2-10+3 < 0 → fizzle
     assert m["attack_rate"] == 0.13
     assert m["peak_prevalence"] == 8
     assert m["peak_epoch"] == 2
     assert m["detection_epoch"] == 3
     assert m["confirmation_epoch"] == 4
-    assert m["outbreak_occurred"] is True
+    assert m["outbreak_occurred"] is False
     assert m["seed_established"] is True
     assert m["total_quarantine_person_epochs"] == 3  # epochs 3,4,5
+
+
+def _takeoff_curve() -> list[dict]:
+    """Accelerating incidence into VSP at epoch 3 → takeoff."""
+    return [
+        _ts_point(0, s=99, i=1, r=0, new=1),
+        _ts_point(1, s=97, i=3, r=0, new=2),
+        _ts_point(2, s=93, i=7, r=0, new=4),
+        _ts_point(3, s=85, i=15, r=0, new=8, trigger="SUSPECTED"),
+        _ts_point(4, s=79, i=12, r=9, new=6, trigger="CONFIRMED"),
+        _ts_point(5, s=76, i=6, r=18, new=3, trigger="CONFIRMED"),
+    ]
 
 
 def test_epidemic_takeoff_vs_fizzle() -> None:
     from simulation_utils.epidemic_labels import (
         epidemic_took_off,
-        min_takeoff_cases,
+        incidence_second_difference,
         seed_established,
     )
 
-    assert min_takeoff_cases(5000) == 50  # 1% of mega
-    assert min_takeoff_cases(450) == 5  # max(5, ceil(4.5))
-    assert epidemic_took_off(40, 5000) is False  # 0.8% fizzle
-    assert epidemic_took_off(50, 5000) is True
-    assert epidemic_took_off(5, 1000) is False  # 0.5%
+    # Default _curve: VSP after incidence already decelerating → fizzle
+    assert epidemic_took_off(_curve()) is False
+    # No VSP → fizzle
+    assert epidemic_took_off(_curve(trigger_at=None)) is False
+    # Accelerating into VSP: Δ² at t=3 is 8 - 2*4 + 2 = 2 ≥ 0 → takeoff
+    takeoff_ts = _takeoff_curve()
+    assert incidence_second_difference([1, 2, 4, 8, 6, 3], 3) == 2
+    assert epidemic_took_off(takeoff_ts) is True
+    assert compute_derived_metrics(takeoff_ts, 100)["outbreak_occurred"] is True
     assert seed_established(5) is True
     assert seed_established(2) is False
 

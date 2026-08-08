@@ -23,11 +23,13 @@ Artifacts worth keeping locally (not in git):
 Not primarily a CmdStan install issue. Geometry / design issues:
 
 1. **Hard dichotomy on a soft continuous outcome (legacy).**  
-   Early fits used `outbreak_occurred = ever_infected > 2`. That only means a
-   few secondary cases, not takeoff. **Current definition** (re-bundle to
-   apply): takeoff if `ever_infected >= max(5, ceil(0.01 * N))` — see
-   `simulation_utils.epidemic_labels`. Seed-only signal is `seed_established`
-   (`ever_infected > 2`).
+   Early fits used `outbreak_occurred = ever_infected > 2`, then a 1% size cut.
+   **Current definition** (re-bundle to apply): **takeoff** if VSP
+   (SUSPECTED/CONFIRMED) fires while incidence is still accelerating
+   (`Δ²incidence >= 0` at onset); **fizzle** if no VSP or VSP arrives only
+   after the curve is already bending down (`Δ² < 0`) — see
+   `simulation_utils.epidemic_labels`. Seed-only signal remains
+   `seed_established` (`ever_infected > 2`).
 
 2. **Mixture of campaigns in one logit.**  
    C12c is a fine dose/medical calibration surface (high noro N, different
@@ -76,8 +78,8 @@ one-chain-per-job with S3 upload of finished chain CSVs.
 
 ## Re-bundle before the next Stage A
 
-Existing `run_summary.csv` files may still carry the legacy `ever_infected > 2`
-label from zip `summary.json`. Recompute takeoff from timeseries:
+Existing `run_summary.csv` files may still carry legacy size / `ever_infected > 2`
+labels from zip `summary.json`. Recompute takeoff from timeseries + triggers:
 
 ```powershell
 # Per-campaign (examples)
@@ -96,7 +98,7 @@ present, so re-bundling applies takeoff vs fizzle without re-running the ABM.
 3. **Do not** run full-scale Stage B until Stage A converges (or until Stage B
    is justified as a standalone “size | outbreak” analysis with a fixed label).
 4. **Next Stage A iterations** should:
-   - **re-bundle** so `outbreak_occurred` uses takeoff vs fizzle,
+   - **re-bundle** so `outbreak_occurred` uses VSP + curvature takeoff vs fizzle,
    - add hierarchical `delta_surveillance`,
    - use `adapt_delta=0.95`, longer warmup if needed,
    - consider fitting C12c and C14(+b) separately for diagnosis.
