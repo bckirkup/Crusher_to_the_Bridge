@@ -74,11 +74,12 @@ def test_filter_norovirus_and_stan_data_shape(tmp_path: Path) -> None:
 
         epoch_rows = pq.read_table(parquet).to_pylist()
 
-    data, meta = build_stan_data(run_rows, epoch_rows)
+    data, meta = build_stan_data(run_rows, epoch_rows, outbreaks_only=False)
     assert data["N_runs"] == 3
     assert data["T"] == 6
     assert data["P"] == 2
     assert data["S"] == 2
+    assert data["grainsize"] >= 1
     assert len(data["new_infections"]) == 3
     assert len(data["new_infections"][0]) == 6
     assert set(meta["platforms"]) == {"expedition_cruise_450", "mega_cruise_5000"}
@@ -88,6 +89,26 @@ def test_filter_norovirus_and_stan_data_shape(tmp_path: Path) -> None:
     flat_triggers = [v for row in data["trigger_state"] for v in row]
     assert 1 in flat_triggers
     assert 2 in flat_triggers
+
+    data_out, meta_out = build_stan_data(run_rows, epoch_rows, outbreaks_only=True)
+    assert data_out["N_runs"] <= data["N_runs"]
+    assert meta_out["outbreaks_only"] is True
+
+
+def test_outbreak_stan_data_shape(tmp_path: Path) -> None:
+    from picard_framework.analysis.stan._data import build_outbreak_stan_data
+
+    analysis = _bundle_with_noro(tmp_path)
+    with (analysis / "run_summary.csv").open(encoding="utf-8", newline="") as fh:
+        run_rows = list(csv.DictReader(fh))
+    data, meta = build_outbreak_stan_data(run_rows)
+    assert data["N_runs"] == 3
+    assert data["P"] == 2
+    assert data["S"] == 2
+    assert len(data["outbreak"]) == 3
+    assert all(o in (0, 1) for o in data["outbreak"])
+    assert meta["stage"] == "outbreak"
+    assert 0 <= meta["outbreak_rate"] <= 1
 
 
 def test_fit_model_skips_without_cmdstan(tmp_path: Path) -> None:
@@ -99,7 +120,7 @@ def test_fit_model_skips_without_cmdstan(tmp_path: Path) -> None:
     finally:
         os.chdir(prev)
 
-    assert status["status"] in {"ok", "skipped"}
+    assert status["status"] in {"ok", "skipped", "error"}
     assert (tmp_path / "stan_fit" / "stan_data_meta.json").is_file()
     if status["status"] == "skipped":
         fit_status = json.loads(

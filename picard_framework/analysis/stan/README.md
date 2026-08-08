@@ -1,10 +1,13 @@
-# Stan calibration layer (Phase 1)
+# Stan calibration layer (Phase 1b — hurdle)
 
-Bayesian trajectory model for **norovirus** campaign outputs. The ABM remains
-the mechanistic simulator; Stan consumes bundle tables
-(`run_summary.csv` + `epoch_timeseries.*`) and estimates posterior uncertainty
-over dose response, platform effects, surveillance suppression, and VSP
-compression.
+Two-stage Bayesian layer for **norovirus** campaign outputs:
+
+1. **Stage A** — `norovirus_outbreak.stan`: Bernoulli-logit **P(outbreak)**
+2. **Stage B** — `norovirus_trajectory.stan`: NegBin2 **trajectory | outbreak**
+   with `reduce_sum` (no `N×T` transformed `log_lambda`) and slim GQ
+   (no `y_rep[N,T]`; summaries only)
+
+The ABM remains the mechanistic simulator.
 
 ## Install
 
@@ -13,38 +16,32 @@ pip install -e '.[analysis]'
 python3 -c 'import cmdstanpy; cmdstanpy.install_cmdstan()'
 ```
 
-CmdStan is **not** required for the campaign bundle CLI or for default pytest.
-Fit tests skip when CmdStan is absent.
-
-## Fit
+## Fit (recommended)
 
 ```bash
-# 1) Build the analysis bundle from campaign zips
-python3 -m picard_framework.analysis.campaign_bundle ./results/c12c/ --out analysis/
-
-# 2) Fit norovirus trajectory model
-python3 -m picard_framework.analysis.stan.fit_norovirus_trajectory analysis/ --out stan_fit/
-
-# 3) Report
-python3 -m picard_framework.analysis.report analysis/ stan_fit/ --out report.html
+# Combined C12c + C14/C14b bundle (or any analysis/ dir with run_summary + epochs)
+python3 -m picard_framework.analysis.stan.fit_norovirus_hurdle analysis/analysis_stan_norovirus \
+  --out-dir analysis/analysis_stan_norovirus/hurdle_fit \
+  --chains-outbreak 4 --chains-trajectory 4 \
+  --iter-warmup 1000 --iter-sampling 1000 \
+  --seed 1701 --d0 10.6 --vsp-ref 0.03 \
+  --threads-per-chain 4 --show-progress
 ```
 
-Recommended first datasets (local, not in-repo): C12c and C14 campaign zip
-directories. Point `campaign_bundle` at each results dir separately or a parent
-folder that contains both.
+Or stages separately:
+
+```bash
+python3 -m picard_framework.analysis.stan.fit_norovirus_outbreak analysis/ --out stan_fit_outbreak/
+python3 -m picard_framework.analysis.stan.fit_norovirus_trajectory analysis/ --out stan_fit_trajectory/
+```
+
+Stage B defaults to `--outbreaks-only` (hurdle). Use `--no-outbreaks-only` for the legacy all-runs trajectory.
 
 ## Model notes
 
-- Likelihood: NegBin2 on per-epoch `new_infections`
-- Triggers treated as **observed** (`trigger_state`); no latent hazard in v1
-- Priors: weakly informative; `beta_d`, `eta_vsp`, `delta_surveillance` ≥ 0
-- Outputs under `stan_fit/posterior/`:
-  - `dose_adj_calibration.csv`
-  - `platform_effects.csv` (includes expedition/mega risk ratio when both present)
-  - `surveillance_effects.csv`
-  - `vsp_threshold_effect.csv`
-  - `posterior_predictive_ar.csv`
-  - `ppc_curves.*` / `vsp_threshold_ppc_sweep.csv`
+- Stage A: run-level `outbreak_occurred`; VSP feature = threshold enabled (`< 1`)
+- Stage B: observed triggers; `reduce_sum` + `threads_per_chain` for multi-core
+- Outputs under each stage `posterior/`: dose, platform, surveillance, VSP, PPC tables
 
 ## What Stan does not do
 

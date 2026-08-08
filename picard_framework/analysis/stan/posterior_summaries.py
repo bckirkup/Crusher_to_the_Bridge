@@ -313,18 +313,14 @@ def summarize_fit(
     artifacts["posterior_predictive_ar"] = "posterior/posterior_predictive_ar.csv"
 
     # --- PPC curves under alternative VSP thresholds (summary table) ---
-    # Without re-fitting, approximate compression by scaling predicted AR with
-    # posterior eta draws relative to the reference threshold.
     ppc_curve_rows: list[dict[str, Any]] = []
     if ppc_ar_rows and eta:
         base_mean = _mean([float(r["pred_mean"]) for r in ppc_ar_rows if r.get("pred_mean") is not None])
         for thr in VSP_SWEEP:
             label = "off" if thr is None else str(thr)
             if thr is None:
-                # Remove VSP compression ≈ multiply by compression factor
                 factors = [math.exp(e) for e in eta]
             else:
-                # Tighter threshold → stronger compression
                 ref = float(meta.get("vsp_ref", 0.05))
                 strength = max(0.0, (ref - thr) / ref) if ref > 0 else 0.0
                 factors = [math.exp(-e * (1 + strength)) for e in eta]
@@ -338,43 +334,62 @@ def summarize_fit(
                     "pred_ar_q95": round(_quantile(adj, 0.95), 6),
                 }
             )
-    # Also emit per-epoch y_rep means when available
-    y_rep = draws.get("y_rep")
+
+    # Slim epoch PPC from ppc_new_inf_mean (preferred) or legacy y_rep
     epoch_ppc: list[dict[str, Any]] = []
-    if y_rep is not None:
+    ppc_mean = draws.get("ppc_new_inf_mean")
+    if ppc_mean is not None:
         import numpy as np
 
-        yr = np.asarray(y_rep)
-        # expected (draws, N_runs, T) or (N_runs, T)
-        if yr.ndim == 2:
-            yr = yr.reshape(1, yr.shape[0], yr.shape[1])
-        if yr.ndim == 3:
-            n_draws, n_runs, t_len = yr.shape
-            for r in range(min(n_runs, 20)):
-                for t in range(t_len):
-                    col = [float(x) for x in yr[:, r, t]]
-                    epoch_ppc.append(
-                        {
-                            "run_index": r + 1,
-                            "epoch": t,
-                            "y_rep_mean": round(_mean(col), 6),
-                            "y_rep_q05": round(_quantile(col, 0.05), 6),
-                            "y_rep_q95": round(_quantile(col, 0.95), 6),
-                        }
-                    )
+        pm = np.asarray(ppc_mean)
+        if pm.ndim == 1:
+            pm = pm.reshape(1, -1)
+        t_len = pm.shape[1]
+        for t in range(t_len):
+            col = [float(x) for x in pm[:, t]]
+            epoch_ppc.append(
+                {
+                    "run_index": 0,
+                    "epoch": t,
+                    "y_rep_mean": round(_mean(col), 6),
+                    "y_rep_q05": round(_quantile(col, 0.05), 6),
+                    "y_rep_q95": round(_quantile(col, 0.95), 6),
+                }
+            )
+    else:
+        y_rep = draws.get("y_rep")
+        if y_rep is not None:
+            import numpy as np
+
+            yr = np.asarray(y_rep)
+            if yr.ndim == 2:
+                yr = yr.reshape(1, yr.shape[0], yr.shape[1])
+            if yr.ndim == 3:
+                _n_draws, n_runs, t_len = yr.shape
+                for r in range(min(n_runs, 20)):
+                    for t in range(t_len):
+                        col = [float(x) for x in yr[:, r, t]]
+                        epoch_ppc.append(
+                            {
+                                "run_index": r + 1,
+                                "epoch": t,
+                                "y_rep_mean": round(_mean(col), 6),
+                                "y_rep_q05": round(_quantile(col, 0.05), 6),
+                                "y_rep_q95": round(_quantile(col, 0.95), 6),
+                            }
+                        )
 
     if epoch_ppc:
         name = write_timeseries_table(post, epoch_ppc, [
             "run_index", "epoch", "y_rep_mean", "y_rep_q05", "y_rep_q95",
         ])
-        # rename conceptually
         src = os.path.join(post, name)
         dest = os.path.join(post, name.replace("epoch_timeseries", "ppc_curves"))
         if src != dest and os.path.isfile(src):
             with validated_open(src, "rb", allowed_roots=allowed_roots()) as rf:
-                data = rf.read()
+                blob = rf.read()
             with validated_open(dest, "wb", allowed_roots=allowed_roots()) as wf:
-                wf.write(data)
+                wf.write(blob)
             artifacts["ppc_curves"] = f"posterior/{os.path.basename(dest)}"
         else:
             artifacts["ppc_curves"] = f"posterior/{name}"
@@ -386,13 +401,227 @@ def summarize_fit(
         )
         artifacts["ppc_curves"] = "posterior/ppc_curves.csv"
 
-    # Always write VSP sweep summary alongside curves
     write_csv(
         os.path.join(post, "vsp_threshold_ppc_sweep.csv"),
         ppc_curve_rows,
         ["vsp_threshold", "pred_ar_mean", "pred_ar_q05", "pred_ar_q50", "pred_ar_q95"],
     )
 
+    return artifacts
+
+
+def summarize_outbreak_fit(
+    *,
+    fit: Any,
+    meta: dict[str, Any],
+    out_dir: str,
+    run_summary_rows: list[dict[str, Any]] | None = None,
+) -> dict[str, str]:
+    """Write Stage-A outbreak posterior tables under ``out_dir/posterior``."""
+    out = ensure_out_dir(out_dir)
+    post = ensure_out_dir(os.path.join(out, "posterior"))
+    artifacts: dict[str, str] = {}
+
+    try:
+        draws = fit.stan_variables()
+    except Exception:
+        draws = {}
+
+    platforms: list[str] = list(meta.get("platforms") or [])
+    surveillances: list[str] = list(meta.get("surveillances") or [])
+    d0 = float(meta.get("d0", 10.6))
+
+    beta = _col(draws, "beta_d")
+    dose_rows = []
+    if beta:
+        dose_rows.append(
+            {
+                "parameter": "beta_d",
+                "mean": round(_mean(beta), 6),
+                "q05": round(_quantile(beta, 0.05), 6),
+                "q50": round(_quantile(beta, 0.50), 6),
+                "q95": round(_quantile(beta, 0.95), 6),
+                "d0": d0,
+                "p_dose_in_10.4_10.8": "",
+                "note": "Stage A logit slope on (d0 - dose_adj); P(outbreak)",
+            }
+        )
+    write_csv(
+        os.path.join(post, "dose_adj_calibration.csv"),
+        dose_rows,
+        [
+            "parameter",
+            "mean",
+            "q05",
+            "q50",
+            "q95",
+            "d0",
+            "p_dose_in_10.4_10.8",
+            "note",
+        ],
+    )
+    artifacts["dose_adj_calibration"] = "posterior/dose_adj_calibration.csv"
+
+    alpha = draws.get("alpha_platform")
+    risk = draws.get("platform_risk")
+    plat_rows: list[dict[str, Any]] = []
+    if alpha is not None:
+        import numpy as np
+
+        a = np.asarray(alpha)
+        if a.ndim == 1:
+            a = a.reshape(1, -1)
+        r = np.asarray(risk) if risk is not None else 1.0 / (1.0 + np.exp(-a))
+        if r.ndim == 1:
+            r = r.reshape(1, -1)
+        for i, name in enumerate(platforms):
+            if i >= a.shape[1]:
+                break
+            col_a = [float(x) for x in a[:, i]]
+            col_r = [float(x) for x in r[:, i]]
+            plat_rows.append(
+                {
+                    "platform": name,
+                    "alpha_mean": round(_mean(col_a), 6),
+                    "alpha_q05": round(_quantile(col_a, 0.05), 6),
+                    "alpha_q95": round(_quantile(col_a, 0.95), 6),
+                    "risk_mean": round(_mean(col_r), 6),
+                    "risk_q05": round(_quantile(col_r, 0.05), 6),
+                    "risk_q95": round(_quantile(col_r, 0.95), 6),
+                }
+            )
+    write_csv(
+        os.path.join(post, "platform_effects.csv"),
+        plat_rows,
+        [
+            "platform",
+            "alpha_mean",
+            "alpha_q05",
+            "alpha_q95",
+            "risk_mean",
+            "risk_q05",
+            "risk_q95",
+        ],
+    )
+    artifacts["platform_effects"] = "posterior/platform_effects.csv"
+
+    delta = draws.get("delta_surveillance")
+    surv_rows: list[dict[str, Any]] = []
+    if delta is not None:
+        import numpy as np
+
+        d = np.asarray(delta)
+        if d.ndim == 1:
+            d = d.reshape(1, -1)
+        for i, name in enumerate(surveillances):
+            if i >= d.shape[1]:
+                break
+            col = [float(x) for x in d[:, i]]
+            surv_rows.append(
+                {
+                    "surveillance": name,
+                    "delta_mean": round(_mean(col), 6),
+                    "delta_q05": round(_quantile(col, 0.05), 6),
+                    "delta_q50": round(_quantile(col, 0.50), 6),
+                    "delta_q95": round(_quantile(col, 0.95), 6),
+                }
+            )
+    write_csv(
+        os.path.join(post, "surveillance_effects.csv"),
+        surv_rows,
+        ["surveillance", "delta_mean", "delta_q05", "delta_q50", "delta_q95"],
+    )
+    artifacts["surveillance_effects"] = "posterior/surveillance_effects.csv"
+
+    eta = _col(draws, "eta_vsp")
+    comp = _col(draws, "vsp_compression")
+    vsp_rows = []
+    if eta:
+        vsp_rows.append(
+            {
+                "parameter": "eta_vsp",
+                "mean": round(_mean(eta), 6),
+                "q05": round(_quantile(eta, 0.05), 6),
+                "q50": round(_quantile(eta, 0.50), 6),
+                "q95": round(_quantile(eta, 0.95), 6),
+                "compression_mean": round(_mean(comp), 6) if comp else "",
+                "compression_q05": round(_quantile(comp, 0.05), 6) if comp else "",
+                "compression_q95": round(_quantile(comp, 0.95), 6) if comp else "",
+            }
+        )
+    write_csv(
+        os.path.join(post, "vsp_threshold_effect.csv"),
+        vsp_rows,
+        [
+            "parameter",
+            "mean",
+            "q05",
+            "q50",
+            "q95",
+            "compression_mean",
+            "compression_q05",
+            "compression_q95",
+        ],
+    )
+    artifacts["vsp_threshold_effect"] = "posterior/vsp_threshold_effect.csv"
+
+    pred = draws.get("pred_outbreak_prob")
+    ppc_rows: list[dict[str, Any]] = []
+    if pred is not None:
+        import numpy as np
+
+        pa = np.asarray(pred)
+        if pa.ndim == 1:
+            pa = pa.reshape(1, -1)
+        for r in range(pa.shape[1]):
+            col = [float(x) for x in pa[:, r]]
+            obs = None
+            rid = ""
+            if run_summary_rows and r < len(run_summary_rows):
+                obs = run_summary_rows[r].get("outbreak_occurred")
+                rid = str(run_summary_rows[r].get("run_id") or "")
+            ppc_rows.append(
+                {
+                    "run_index": r + 1,
+                    "run_id": rid,
+                    "obs_outbreak": obs,
+                    "pred_mean": round(_mean(col), 6),
+                    "pred_q05": round(_quantile(col, 0.05), 6),
+                    "pred_q50": round(_quantile(col, 0.50), 6),
+                    "pred_q95": round(_quantile(col, 0.95), 6),
+                }
+            )
+    write_csv(
+        os.path.join(post, "posterior_predictive_outbreak.csv"),
+        ppc_rows,
+        [
+            "run_index",
+            "run_id",
+            "obs_outbreak",
+            "pred_mean",
+            "pred_q05",
+            "pred_q50",
+            "pred_q95",
+        ],
+    )
+    artifacts["posterior_predictive_outbreak"] = (
+        "posterior/posterior_predictive_outbreak.csv"
+    )
+
+    write_csv(
+        os.path.join(post, "stage_note.csv"),
+        [
+            {
+                "stage": "outbreak",
+                "n_runs": meta.get("N_runs"),
+                "n_outbreaks": meta.get("n_outbreaks"),
+                "outbreak_rate": meta.get("outbreak_rate"),
+                "note": "Bernoulli-logit P(outbreak); trajectory is Stage B",
+            }
+        ],
+        ["stage", "n_runs", "n_outbreaks", "outbreak_rate", "note"],
+    )
+    artifacts["stage_note"] = "posterior/stage_note.csv"
     return artifacts
 
 

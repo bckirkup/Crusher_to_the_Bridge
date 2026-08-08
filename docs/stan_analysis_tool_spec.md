@@ -39,13 +39,17 @@ picard_framework/analysis/
   __init__.py
   campaign_bundle.py          # creates standardized analysis bundle
   parse_run_id.py             # factor parser for run IDs + campaign params
-  metrics.py                  # derived scalar metrics
+  metrics.py                  # derived scalar metrics (incl. coerce_bool)
   pairwise.py                 # native vs CONTAM / baseline vs intervention deltas
   figures.py                  # standard plots
   report.py                   # HTML/Markdown report generation
   stan/
-    norovirus_trajectory.stan
+    _data.py                  # shared outbreak/trajectory data builders
+    norovirus_outbreak.stan   # Stage A: P(outbreak)
+    norovirus_trajectory.stan # Stage B: trajectory | outbreak (reduce_sum)
+    fit_norovirus_outbreak.py
     fit_norovirus_trajectory.py
+    fit_norovirus_hurdle.py   # runs Stage A then Stage B
     posterior_summaries.py
     README.md
 ```
@@ -54,8 +58,11 @@ CLI entry points:
 
 ```text
 python -m picard_framework.analysis.campaign_bundle RESULTS_DIR --out analysis/
-python -m picard_framework.analysis.stan.fit_norovirus_trajectory analysis/ --out stan_fit/
-python -m picard_framework.analysis.report analysis/ stan_fit/ --out report.html
+python -m picard_framework.analysis.stan.fit_norovirus_hurdle analysis/ --out-dir hurdle_fit/
+python -m picard_framework.analysis.stan.fit_norovirus_outbreak analysis/ --out stan_fit_outbreak/
+python -m picard_framework.analysis.stan.fit_norovirus_trajectory analysis/ --out stan_fit_trajectory/
+python -m picard_framework.analysis.report analysis/ stan_fit_trajectory/ --out report.html
+python scripts/build_stan_step2_bundle.py   # merge C12c + C14/C14b bundles
 ```
 
 ## Campaign Analysis Bundle
@@ -217,9 +224,23 @@ pairwise_deltas.csv
 
 ## Stan Calibration Layer
 
-### Core model: `norovirus_trajectory.stan`
+### Phase 1b hurdle (recommended)
 
-Consumes `epoch_timeseries` and `run_summary` rows for norovirus campaigns.
+Zero-heavy campaign outputs motivate a two-stage model:
+
+1. **Stage A** (`norovirus_outbreak.stan`) — Bernoulli-logit on
+   `outbreak_occurred` (all norovirus runs).
+2. **Stage B** (`norovirus_trajectory.stan`) — NegBin2 incidence
+   **conditional on outbreak**, with `reduce_sum` (no `N×T` transformed
+   `log_lambda`) and slim generated quantities (no `y_rep[N,T]`;
+   `pred_attack_rate` + `ppc_new_inf_mean` only).
+
+Orchestrator: `python -m picard_framework.analysis.stan.fit_norovirus_hurdle`.
+
+### Core model: `norovirus_trajectory.stan` (Stage B)
+
+Consumes `epoch_timeseries` and `run_summary` rows for norovirus campaigns
+(default: `outbreaks_only=True`).
 
 #### Data
 
@@ -372,12 +393,16 @@ Stan should:
 
 ## Minimal Definition of Done
 
-A successful Phase 1 PR should:
+A successful Phase 1 / 1b PR should:
 
 1. Parse an arbitrary campaign zip directory into `run_summary.csv` and
    `epoch_timeseries.parquet/csv.gz`.
-2. Reproduce current C12c/C14 summary metrics from the bundle.
-3. Fit `norovirus_trajectory.stan` on the resulting time series.
-4. Generate posterior predictive curves showing observed vs fitted trajectories.
+2. Reproduce current C12c/C14 summary metrics from the bundle
+   (`outbreak_rate` must survive CSV round-trip via `coerce_bool`).
+3. Fit Stage A (`norovirus_outbreak.stan`) and Stage B
+   (`norovirus_trajectory.stan`, outbreaks-only by default) via the hurdle CLI.
+4. Generate compact posterior predictive summaries (AR / outbreak prob;
+   no full `y_rep[N,T]` dumps).
 5. Report posterior platform risk ratios and VSP compression factors.
-6. Include unit tests for parser, factor extraction, and metric definitions.
+6. Include unit tests for parser, factor extraction, metric definitions, and
+   Stan data builders (CmdStan smoke remains opt-in).

@@ -28,21 +28,47 @@ Path I/O is confined to the process CWD via `simulation_utils.paths`
 AWS_PROFILE=picard aws s3 sync s3://<bucket>/campaign/ ./results/
 ```
 
-## Analysis bundle + Stan (Phase 1)
+## Analysis bundle + Stan hurdle (Phase 1b)
 
 Converts zips into `run_summary.csv` + `epoch_timeseries.parquet` (or
-`.csv.gz`), pairwise deltas, figures, then optional norovirus Stan fit.
+`.csv.gz`), then fits a **two-stage** norovirus model:
+
+1. **Stage A** — `P(outbreak)` (`norovirus_outbreak.stan`)
+2. **Stage B** — trajectory | outbreak (`norovirus_trajectory.stan` with
+   `reduce_sum`, slim GQ)
 
 ```bash
-# Point at local C12c / C14 (or any) zip directory:
-python3 -m picard_framework.analysis.campaign_bundle ./results/c12c/ --out analysis/
-python3 -m picard_framework.analysis.stan.fit_norovirus_trajectory analysis/ --out stan_fit/
-python3 -m picard_framework.analysis.report analysis/ stan_fit/ --out report.html
+# Per-campaign bundle
+python3 -m picard_framework.analysis.campaign_bundle ./results/c12c_fine_calibration/ \
+  --out analysis/c12c_fine_calibration/
+
+# Optional: merge C12c + C14/C14b for Step-2 monograph fit
+python3 -u scripts/build_stan_step2_bundle.py
+
+# Two-stage hurdle (recommended)
+python3 -m picard_framework.analysis.stan.fit_norovirus_hurdle \
+  analysis/analysis_stan_norovirus \
+  --out-dir analysis/analysis_stan_norovirus/hurdle_fit \
+  --chains-outbreak 4 --chains-trajectory 4 \
+  --iter-warmup 1000 --iter-sampling 1000 \
+  --seed 1701 --d0 10.6 --vsp-ref 0.03 \
+  --threads-per-chain 4 --show-progress
+
+# Report (bundle + optional stage dirs)
+python3 -m picard_framework.analysis.report \
+  analysis/analysis_stan_norovirus \
+  analysis/analysis_stan_norovirus/hurdle_fit/trajectory \
+  --out analysis/analysis_stan_norovirus/report.html
 ```
 
+Stages can also be fit separately via
+`fit_norovirus_outbreak` / `fit_norovirus_trajectory`.
 See `picard_framework/analysis/stan/README.md` and
 `docs/stan_analysis_tool_spec.md`. CmdStan is not required for the bundle CLI
 or default pytest.
+
+**Note:** `aggregate_metrics.outbreak_rate` uses `coerce_bool` so CSV-reloaded
+`"False"` strings are not treated as truthy.
 
 ## Aggregate scalar summaries (ops)
 
