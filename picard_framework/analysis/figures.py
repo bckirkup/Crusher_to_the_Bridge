@@ -173,7 +173,11 @@ def write_standard_figures(
     if len(engines) >= 2:
         fig, ax = plt.subplots(figsize=(6, 4))
         labels = sorted(engines)
-        ax.boxplot([engines[k] for k in labels], labels=labels)
+        try:
+            ax.boxplot([engines[k] for k in labels], tick_labels=labels)
+        except TypeError:
+            # Matplotlib < 3.9 used labels=
+            ax.boxplot([engines[k] for k in labels], labels=labels)
         ax.set_ylabel("attack_rate")
         ax.set_title("Attack rate by transport engine")
         path = os.path.join(fig_dir, "pairwise_exact_match.png")

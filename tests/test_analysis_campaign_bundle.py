@@ -12,6 +12,8 @@ import pytest
 from picard_framework.analysis.campaign_bundle import build_bundle
 from picard_framework.analysis.metrics import (
     RUN_SUMMARY_COLUMNS,
+    build_aggregate_metrics,
+    coerce_bool,
     compute_derived_metrics,
     encode_trigger_status,
     epoch_table_columns,
@@ -201,6 +203,32 @@ def test_encode_trigger_status() -> None:
     assert encode_trigger_status("SUSPECTED") == 1
     assert encode_trigger_status("CONFIRMED") == 2
     assert encode_trigger_status("LOCKDOWN") == 2
+
+
+def test_coerce_bool_csv_roundtrip() -> None:
+    assert coerce_bool(True) is True
+    assert coerce_bool(False) is False
+    assert coerce_bool("True") is True
+    assert coerce_bool("False") is False
+    assert coerce_bool("false") is False
+    assert coerce_bool("0") is False
+    assert coerce_bool("1") is True
+    assert coerce_bool("") is False
+    assert coerce_bool(None) is False
+
+
+def test_build_aggregate_metrics_outbreak_rate_from_csv_strings() -> None:
+    """CSV DictReader yields string booleans; both are truthy under plain bool()."""
+    rows = [
+        {"outbreak_occurred": "True", "attack_rate": "0.2", "platform_id": "a", "pathogen": "norovirus", "surveillance_strategy": "none"},
+        {"outbreak_occurred": "False", "attack_rate": "0.0", "platform_id": "a", "pathogen": "norovirus", "surveillance_strategy": "none"},
+        {"outbreak_occurred": "False", "attack_rate": "", "platform_id": "b", "pathogen": "norovirus", "surveillance_strategy": "syndromic"},
+        {"outbreak_occurred": False, "attack_rate": "0.1", "platform_id": "b", "pathogen": "influenza", "surveillance_strategy": "syndromic"},
+    ]
+    agg = build_aggregate_metrics(rows)
+    assert agg["n_runs"] == 4
+    assert agg["outbreak_rate"] == 0.25
+    assert agg["mean_attack_rate"] == pytest.approx(0.1)
 
 
 def test_compute_derived_metrics_matches_expected() -> None:

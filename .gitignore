@@ -104,3 +104,8 @@ picard_framework/runs/mega_cruise_campaign/c13_*_manifest*.json
 telemetry_buffer/c13_contam_thin/
 telemetry_buffer/c13b_contam_airborne_small/
 
+# Campaign analysis bundle / Stan fit outputs (local regenerable)
+analysis/
+picard_framework/analysis/stan/*.exe
+picard_framework/analysis/stan/*.hpp
+

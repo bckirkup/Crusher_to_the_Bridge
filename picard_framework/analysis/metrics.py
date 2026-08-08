@@ -286,13 +286,42 @@ def build_factor_dictionary(run_rows: list[dict[str, Any]]) -> dict[str, Any]:
     return out
 
 
+def coerce_bool(value: Any) -> bool:
+    """Parse bool-ish values from in-memory rows or CSV round-trips.
+
+    CSV DictReader yields ``\"True\"`` / ``\"False\"`` strings; both are truthy
+    under plain ``bool()`` / ``if value``, which previously inflated
+    ``outbreak_rate`` to 1.0 after reloading ``run_summary.csv``.
+    """
+    if isinstance(value, bool):
+        return value
+    if value is None:
+        return False
+    if isinstance(value, (int, float)):
+        return value != 0
+    token = str(value).strip().lower()
+    if token in {"", "0", "false", "f", "no", "n", "none", "null"}:
+        return False
+    if token in {"1", "true", "t", "yes", "y"}:
+        return True
+    return False
+
+
 def build_aggregate_metrics(run_rows: list[dict[str, Any]]) -> dict[str, Any]:
     """Compute bundle-level aggregate scalars for the report header."""
     if not run_rows:
         return {"n_runs": 0}
 
     def _mean(key: str) -> float | None:
-        vals = [float(r[key]) for r in run_rows if r.get(key) is not None]
+        vals: list[float] = []
+        for r in run_rows:
+            raw = r.get(key)
+            if raw is None or raw == "":
+                continue
+            try:
+                vals.append(float(raw))
+            except (TypeError, ValueError):
+                continue
         if not vals:
             return None
         return round(sum(vals) / len(vals), 6)
@@ -306,7 +335,8 @@ def build_aggregate_metrics(run_rows: list[dict[str, Any]]) -> dict[str, Any]:
         "mean_peak_prevalence": _mean("peak_prevalence"),
         "mean_detection_epoch": _mean("detection_epoch"),
         "outbreak_rate": round(
-            sum(1 for r in run_rows if r.get("outbreak_occurred")) / len(run_rows),
+            sum(1 for r in run_rows if coerce_bool(r.get("outbreak_occurred")))
+            / len(run_rows),
             4,
         ),
         "platforms": dict(platforms),
