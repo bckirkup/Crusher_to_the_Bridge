@@ -39,7 +39,8 @@ Stage B defaults to `--outbreaks-only` (hurdle). Use `--no-outbreaks-only` for t
 
 ## Model notes
 
-- Stage A: run-level `outbreak_occurred`; VSP feature = threshold enabled (`< 1`)
+- Stage A: run-level **takeoff vs fizzle** (`outbreak_occurred`; see
+  `simulation_utils.epidemic_labels`); VSP feature = threshold enabled (`< 1`)
 - Stage B: observed triggers; `reduce_sum` + `threads_per_chain` for multi-core
 - Outputs under each stage `posterior/`: dose, platform, surveillance, VSP, PPC tables
 
@@ -51,7 +52,7 @@ First full-scale hurdle attempts on the merged C12c + C14/C14b bundle:
   monograph-grade without model changes.
 - Stage B (5151 outbreaks × 168 epochs, 4×1000/1000) was still near 0–5% after
   ~5 h and was aborted.
-- The binary `outbreak_occurred` (`ever_infected > 2`) may be too sharp a
-  dichotomy for a clean Bernoulli stage.
+- The legacy binary `ever_infected > 2` was too sharp; label is now takeoff vs
+  fizzle (`>= max(5, ceil(0.01*N))`). Re-bundle before the next Stage A.
 
 Full write-up: [`docs/stan_hurdle_lessons.md`](../../../docs/stan_hurdle_lessons.md).

@@ -119,7 +119,7 @@ seed
 num_agents
 num_epochs
 attack_rate
-outbreak_occurred
+outbreak_occurred              # takeoff vs fizzle (see epidemic_labels)
 peak_prevalence
 peak_epoch
 detection_epoch
@@ -229,7 +229,8 @@ pairwise_deltas.csv
 Zero-heavy campaign outputs motivate a two-stage model:
 
 1. **Stage A** (`norovirus_outbreak.stan`) — Bernoulli-logit on
-   `outbreak_occurred` (all norovirus runs).
+   **takeoff vs fizzle** (`outbreak_occurred` =
+   `ever_infected >= max(5, ceil(0.01 * N))`, not `ever_infected > 2`).
 2. **Stage B** (`norovirus_trajectory.stan`) — NegBin2 incidence
    **conditional on outbreak**, with `reduce_sum` (no `N×T` transformed
    `log_lambda`) and slim generated quantities (no `y_rep[N,T]`;
@@ -237,11 +238,10 @@ Zero-heavy campaign outputs motivate a two-stage model:
 
 Orchestrator: `python -m picard_framework.analysis.stan.fit_norovirus_hurdle`.
 
-**Field note:** first full-scale Stage A fits on the C12c+C14/C14b Step‑2 bundle
-showed severe divergences; Stage B at 5151×168 was multi-day and aborted.
-The binary `ever_infected > 2` label is a convenient cutoff, not a proven
-latent dichotomy — see [`docs/stan_hurdle_lessons.md`](stan_hurdle_lessons.md)
-before treating hurdle posteriors as monograph-grade.
+**Field note:** first full-scale Stage A fits used the legacy `ever_infected > 2`
+label and diverged heavily. The label is now **takeoff vs fizzle** (see
+`simulation_utils.epidemic_labels`). Re-bundle before re-fitting Stage A.
+Full narrative: [`docs/stan_hurdle_lessons.md`](stan_hurdle_lessons.md).
 
 ### Core model: `norovirus_trajectory.stan` (Stage B)
 

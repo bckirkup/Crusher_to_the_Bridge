@@ -6,6 +6,7 @@ from collections import Counter
 from typing import Any
 
 from picard_framework.analysis.parse_run_id import extract_factors
+from simulation_utils.epidemic_labels import epidemic_took_off, seed_established
 
 TRIGGER_NONE = 0
 TRIGGER_SUSPECTED = 1
@@ -127,7 +128,9 @@ def compute_derived_metrics(
     infected_final = int(final.get("infected", 0) or 0)
     ever_infected = infected_final + recovered
     attack_rate = ever_infected / num_agents if num_agents > 0 else 0.0
-    outbreak_occurred = ever_infected > 2
+    # Takeoff vs fizzle (Stan Stage A) — not the legacy ever_infected > 2 cut.
+    outbreak_occurred = epidemic_took_off(ever_infected, num_agents)
+    seeded = seed_established(ever_infected)
 
     detection_epoch = None
     confirmation_epoch = None
@@ -150,6 +153,7 @@ def compute_derived_metrics(
         "peak_prevalence": peak_infected,
         "peak_epoch": peak_epoch,
         "outbreak_occurred": outbreak_occurred,
+        "seed_established": seeded,
         "detection_epoch": detection_epoch,
         "confirmation_epoch": confirmation_epoch,
         "detection_lag": (
@@ -195,8 +199,12 @@ def build_run_summary_row(payload: dict[str, Any]) -> dict[str, Any]:
         summary=summary if isinstance(summary, dict) else {},
     )
     num_agents = int(factors.get("num_agents") or 0)
-    if not derived and timeseries and num_agents > 0:
+    # Timeseries is authoritative so re-bundles pick up takeoff vs fizzle even
+    # when summary.json still carries the legacy ever_infected>2 label.
+    if timeseries and num_agents > 0:
         derived = compute_derived_metrics(timeseries, num_agents)
+    elif not derived:
+        derived = {}
 
     usd, ois = _cost_fields(summary, timeseries)
     row = {c: factors.get(c) for c in RUN_SUMMARY_COLUMNS}

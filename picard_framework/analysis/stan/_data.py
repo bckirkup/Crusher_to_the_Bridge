@@ -82,6 +82,7 @@ def filter_norovirus_runs(run_rows: list[dict[str, Any]]) -> list[dict[str, Any]
 
 
 def filter_outbreak_runs(run_rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Keep runs where the epidemic took off (not merely seeded / fizzled)."""
     return [r for r in run_rows if coerce_bool(r.get("outbreak_occurred"))]
 
 
@@ -110,7 +111,12 @@ def build_outbreak_stan_data(
     d0: float = DEFAULT_D0,
     vsp_ref: float = DEFAULT_VSP_REF,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
-    """Stage A: run-level Bernoulli outbreak data (norovirus only)."""
+    """Stage A: run-level Bernoulli takeoff data (norovirus only).
+
+    ``outbreak`` is the takeoff vs fizzle label (see
+    ``simulation_utils.epidemic_labels.epidemic_took_off``), exposed on
+    ``run_summary.outbreak_occurred`` after re-bundle.
+    """
     noro = filter_norovirus_runs(run_rows)
     if not noro:
         raise ValueError("No norovirus runs found in run_summary")

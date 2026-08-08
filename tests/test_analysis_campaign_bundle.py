@@ -234,14 +234,31 @@ def test_build_aggregate_metrics_outbreak_rate_from_csv_strings() -> None:
 def test_compute_derived_metrics_matches_expected() -> None:
     ts = _curve()
     m = compute_derived_metrics(ts, 100)
-    # final infected=1 recovered=12 → ever=13 → AR=0.13
+    # final infected=1 recovered=12 → ever=13 → AR=0.13 → takeoff (>= max(5,1))
     assert m["attack_rate"] == 0.13
     assert m["peak_prevalence"] == 8
     assert m["peak_epoch"] == 2
     assert m["detection_epoch"] == 3
     assert m["confirmation_epoch"] == 4
     assert m["outbreak_occurred"] is True
+    assert m["seed_established"] is True
     assert m["total_quarantine_person_epochs"] == 3  # epochs 3,4,5
+
+
+def test_epidemic_takeoff_vs_fizzle() -> None:
+    from simulation_utils.epidemic_labels import (
+        epidemic_took_off,
+        min_takeoff_cases,
+        seed_established,
+    )
+
+    assert min_takeoff_cases(5000) == 50  # 1% of mega
+    assert min_takeoff_cases(450) == 5  # max(5, ceil(4.5))
+    assert epidemic_took_off(40, 5000) is False  # 0.8% fizzle
+    assert epidemic_took_off(50, 5000) is True
+    assert epidemic_took_off(5, 1000) is False  # 0.5%
+    assert seed_established(5) is True
+    assert seed_established(2) is False
 
 
 def test_build_bundle_writes_required_artifacts(results_dir: Path, tmp_path: Path) -> None:

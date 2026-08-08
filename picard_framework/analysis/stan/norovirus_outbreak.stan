@@ -1,5 +1,6 @@
-// Phase-1b norovirus outbreak probability (Stage A / hurdle).
-// Bernoulli-logit on run-level outbreak_occurred.
+// Phase-1b norovirus takeoff probability (Stage A / hurdle).
+// Bernoulli-logit on run-level takeoff vs fizzle
+// (outbreak_occurred := ever_infected >= max(5, ceil(0.01*N))).
 
 data {
   int<lower=1> N_runs;

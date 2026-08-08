@@ -38,6 +38,7 @@ from simulation_utils.paths import (  # noqa: E402
     validate_path_component,
     validated_open,
 )
+from simulation_utils.epidemic_labels import epidemic_took_off  # noqa: E402
 
 CAMPAIGN_DIR = Path(__file__).resolve().parent
 MANIFEST_PATH = CAMPAIGN_DIR / "campaign_manifest.json"
@@ -1458,8 +1459,8 @@ def compute_derived_metrics(ts: list[dict[str, Any]], num_agents: int) -> dict[s
     ever_infected = infected_final + recovered
     attack_rate = ever_infected / num_agents if num_agents > 0 else 0
 
-    # Outbreak threshold: more secondary cases than the initial index cases.
-    outbreak_occurred = ever_infected > 2
+    # Outbreak = epidemic took off (vs fizzled), not merely ever_infected > 2.
+    outbreak_occurred = epidemic_took_off(ever_infected, num_agents)
 
     detection_epoch = None
     confirmation_epoch = None

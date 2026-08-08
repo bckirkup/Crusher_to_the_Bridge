@@ -22,11 +22,12 @@ Artifacts worth keeping locally (not in git):
 
 Not primarily a CmdStan install issue. Geometry / design issues:
 
-1. **Hard dichotomy on a soft continuous outcome.**  
-   `outbreak_occurred` is `ever_infected > 2` (see `metrics.compute_derived_metrics`).
-   That is a convenient label, not a latent “sparked vs dead” state. Many runs sit
-   near the cut (tiny clusters vs clear epidemics). A Bernoulli likelihood forces
-   a knife-edge classification that the ABM trajectories do not support.
+1. **Hard dichotomy on a soft continuous outcome (legacy).**  
+   Early fits used `outbreak_occurred = ever_infected > 2`. That only means a
+   few secondary cases, not takeoff. **Current definition** (re-bundle to
+   apply): takeoff if `ever_infected >= max(5, ceil(0.01 * N))` — see
+   `simulation_utils.epidemic_labels`. Seed-only signal is `seed_established`
+   (`ever_infected > 2`).
 
 2. **Mixture of campaigns in one logit.**  
    C12c is a fine dose/medical calibration surface (high noro N, different
@@ -73,16 +74,31 @@ Even with `reduce_sum` and slim GQ (no `y_rep[N,T]`):
 Spot instances will **not** resume mid-chain; treat Stage B as On-Demand or
 one-chain-per-job with S3 upload of finished chain CSVs.
 
-## Practical playbook
+## Re-bundle before the next Stage A
+
+Existing `run_summary.csv` files may still carry the legacy `ever_infected > 2`
+label from zip `summary.json`. Recompute takeoff from timeseries:
+
+```powershell
+# Per-campaign (examples)
+python -u -m picard_framework.analysis.campaign_bundle results\c12c_fine_calibration --out analysis\c12c_fine_calibration
+python -u -m picard_framework.analysis.campaign_bundle results\results_c14 --out analysis\c14
+python -u -m picard_framework.analysis.campaign_bundle results\results_c14b --out analysis\c14b
+# Then rebuild the Step-2 merge
+python -u scripts\build_stan_step2_bundle.py
+```
+
+`build_run_summary_row` now prefers timeseries-derived metrics when epochs are
+present, so re-bundling applies takeoff vs fizzle without re-running the ABM.
 
 1. **Keep** merged analysis bundles; they are fine.
 2. **Treat** current Stage A posteriors as exploratory only (divergences).
 3. **Do not** run full-scale Stage B until Stage A converges (or until Stage B
    is justified as a standalone “size | outbreak” analysis with a fixed label).
-4. **Next Stage A iterations** should change the *model*, not only the seed:
-   - hierarchical `delta_surveillance`,
-   - optional softer outbreak definition or AR-based likelihood,
-   - `adapt_delta=0.95`, longer warmup if needed,
+4. **Next Stage A iterations** should:
+   - **re-bundle** so `outbreak_occurred` uses takeoff vs fizzle,
+   - add hierarchical `delta_surveillance`,
+   - use `adapt_delta=0.95`, longer warmup if needed,
    - consider fitting C12c and C14(+b) separately for diagnosis.
 5. Stage A alone remains cheap (~10 min at 4×1000 on this dataset) — iterate
    locally; reserve AWS for Stage B.
