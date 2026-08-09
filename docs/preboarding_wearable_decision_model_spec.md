@@ -367,6 +367,15 @@ python3 -m picard_framework.analysis.boundary.run_decision_model \
 
 Stan fit directories should provide `outbreak_surface.json` or
 `outbreak_surface.csv` (also accepted under `posterior/` or `boundary/`).
+Export empirically from campaign zips:
+
+```bash
+python3 -m picard_framework.analysis.boundary.export_outbreak_surface \
+  results/c12c_fine_calibration results/results_c14 \
+  --pathogen norovirus \
+  --out path/to/stan_fit/outbreak_surface.csv
+```
+
 Without that export, `--lookup auto` falls back to the packaged fixture.
 
 Ship-sim handoff (`K_board` → embarkation seeding) is deferred to a later PR.

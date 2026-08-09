@@ -17,9 +17,14 @@ python3 -m picard_framework.analysis.boundary.run_decision_model --smoke
 python3 -m picard_framework.analysis.boundary.run_decision_model \
   --lookup fixture --n-mc 2000 --seed 1701 --out boundary_analysis/
 
-# Real Stan-adjacent surface (export outbreak_surface.csv under the fit dir)
+# Export empirical k-surface from campaign zips, then run with Stan lookup
+python3 -m picard_framework.analysis.boundary.export_outbreak_surface \
+  results/c12c_fine_calibration results/results_c14 results/results_c14b \
+  --pathogen norovirus \
+  --out analysis/analysis_stan_norovirus/hurdle_fit_takeoff/trajectory/outbreak_surface.csv
+
 python3 -m picard_framework.analysis.boundary.run_decision_model \
-  --stan-fit analysis/analysis_stan_norovirus/hurdle_fit \
+  --stan-fit analysis/analysis_stan_norovirus/hurdle_fit_takeoff/trajectory \
   --lookup auto --out boundary_analysis/
 ```
 
@@ -40,6 +45,9 @@ Place one of these under `--stan-fit`:
   `platform_class,pathogen,baseline_response,k,P_trigger,E_AR,P_accel,E_cost_onboard[,E_peak_epoch]`
 - or the same filenames under `posterior/` or `boundary/`
 
+Build the CSV from campaign zips with
+`python -m picard_framework.analysis.boundary.export_outbreak_surface` (aggregates
+by introductions `k` from parameters / `initN` tags / epoch-0 infected).
 `--lookup auto` uses Stan when present, otherwise the packaged fixture.
 
 ## Ship-sim handoff (future)

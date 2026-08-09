@@ -44,6 +44,58 @@ def parse_run_tags(run_id: str) -> dict[str, str | None]:
     return tags
 
 
+_INIT_TAG = re.compile(r"(?:^|_)init(\d+)(?:_|$)", re.IGNORECASE)
+
+
+def resolve_initial_infected(
+    *,
+    parameters: dict[str, Any] | None = None,
+    run_spec: dict[str, Any] | None = None,
+    run_id: str = "",
+    timeseries: Any = None,
+) -> int | None:
+    """Best-effort infectious introductions ``k`` for one campaign run.
+
+    Order: parameters → pathogen_overrides → ``initN`` run_id tag →
+    epoch-0 ``infected`` / ``new_infections``.
+    """
+    params = parameters or {}
+    for key in ("initial_infected", "n_initial_infected", "n_index"):
+        if params.get(key) is not None and params.get(key) != "":
+            try:
+                return max(0, int(params[key]))
+            except (TypeError, ValueError):
+                pass
+
+    spec = run_spec or {}
+    overrides = spec.get("pathogen_overrides") or {}
+    if isinstance(overrides, dict):
+        for value in overrides.values():
+            if not isinstance(value, dict):
+                continue
+            if value.get("initial_infected") is None:
+                continue
+            try:
+                return max(0, int(value["initial_infected"]))
+            except (TypeError, ValueError):
+                continue
+
+    m = _INIT_TAG.search(str(run_id or ""))
+    if m:
+        return int(m.group(1))
+
+    if timeseries and isinstance(timeseries, (list, tuple)) and timeseries:
+        first = timeseries[0] if isinstance(timeseries[0], dict) else {}
+        for key in ("infected", "new_infections"):
+            if first.get(key) is None:
+                continue
+            try:
+                return max(0, int(first.get(key) or 0))
+            except (TypeError, ValueError):
+                continue
+    return None
+
+
 def platform_class(platform_id: str | None) -> str | None:
     """Map a platform_id to a coarse platform class label."""
     if not platform_id:
@@ -177,6 +229,12 @@ def extract_factors(
         (summary or {}).get("num_epochs"),
     )
 
+    initial_infected = resolve_initial_infected(
+        parameters=params,
+        run_spec=spec,
+        run_id=run_id,
+    )
+
     campaign = _first(
         params.get("campaign"),
         params.get("tier_id"),
@@ -196,6 +254,7 @@ def extract_factors(
         "surveillance_strategy": surveillance,
         "transport_engine": transport,
         "seed": _coerce_int(seed),
+        "initial_infected": _coerce_int(initial_infected),
         "num_agents": _coerce_int(num_agents),
         "num_epochs": _coerce_int(num_epochs),
         # Optional columns

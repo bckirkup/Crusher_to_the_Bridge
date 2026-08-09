@@ -432,3 +432,176 @@ def test_p1_matches_p0_economics():
     )
     assert p1["expected_K_board"] == pytest.approx(p0["expected_K_board"])
     assert p1["expected_total_cost"] == pytest.approx(p0["expected_total_cost"])
+
+
+def test_resolve_initial_infected_sources():
+    from picard_framework.analysis.parse_run_id import resolve_initial_infected
+
+    assert (
+        resolve_initial_infected(parameters={"initial_infected": 5}, run_id="x") == 5
+    )
+    assert (
+        resolve_initial_infected(
+            run_spec={"pathogen_overrides": {"norwalk_gi": {"initial_infected": 3}}},
+            run_id="x",
+        )
+        == 3
+    )
+    assert resolve_initial_infected(run_id="tier_init10_s1") == 10
+    assert (
+        resolve_initial_infected(
+            run_id="no_init",
+            timeseries=[{"infected": 2, "new_infections": 2}],
+        )
+        == 2
+    )
+
+
+def test_aggregate_outbreak_surface_and_export(tmp_path):
+    from picard_framework.analysis.boundary.export_outbreak_surface import (
+        aggregate_outbreak_surface,
+        export_outbreak_surface,
+        normalize_pathogen,
+    )
+    from picard_framework.analysis.boundary.posterior_lookup import load_stan_surface
+
+    assert normalize_pathogen("sarscov2") == "SARS-CoV-2"
+    rows = [
+        {
+            "platform_class": "mega",
+            "pathogen": "norovirus",
+            "baseline_response": "vsp",
+            "k": 2,
+            "triggered": True,
+            "attack_rate": 0.1,
+            "took_off": True,
+            "peak_epoch": 20.0,
+            "cumulative_cost_usd": 1000.0,
+            "num_agents": 5000,
+        },
+        {
+            "platform_class": "mega",
+            "pathogen": "norovirus",
+            "baseline_response": "vsp",
+            "k": 2,
+            "triggered": False,
+            "attack_rate": 0.0,
+            "took_off": False,
+            "peak_epoch": 10.0,
+            "cumulative_cost_usd": 0.0,
+            "num_agents": 5000,
+        },
+        {
+            "platform_class": "mega",
+            "pathogen": "norovirus",
+            "baseline_response": "vsp",
+            "k": 5,
+            "triggered": True,
+            "attack_rate": 0.2,
+            "took_off": True,
+            "peak_epoch": 15.0,
+            "cumulative_cost_usd": 2000.0,
+            "num_agents": 5000,
+        },
+    ]
+    surface_rows = aggregate_outbreak_surface(rows)
+    by_k = {int(r["k"]): r for r in surface_rows}
+    assert 0 in by_k
+    assert by_k[2]["P_trigger"] == pytest.approx(0.5)
+    assert by_k[2]["E_AR"] == pytest.approx(0.05)
+    assert by_k[2]["P_accel"] == pytest.approx(0.5)
+    assert by_k[5]["P_trigger"] == pytest.approx(1.0)
+
+    # End-to-end zip export under CWD confinement
+    prev = os.getcwd()
+    os.chdir(tmp_path)
+    try:
+        results = Path("results_tiny")
+        results.mkdir()
+        # minimal zip via helper patterns from campaign bundle tests
+        import zipfile
+
+        ts = [
+            {
+                "epoch": 0,
+                "susceptible": 98,
+                "infected": 2,
+                "symptomatic": 1,
+                "recovered": 0,
+                "immune": 0,
+                "quarantined": 0,
+                "isolated": 0,
+                "new_infections": 2,
+                "total_pathogen_mass": 0,
+                "n_zones_contaminated": 0,
+                "max_concentration": 0,
+                "max_conc_zone": "",
+                "cumulative_cost_usd": 0,
+                "cumulative_ois": 0,
+                "trigger_status": "none",
+            },
+            {
+                "epoch": 1,
+                "susceptible": 90,
+                "infected": 8,
+                "symptomatic": 5,
+                "recovered": 2,
+                "immune": 0,
+                "quarantined": 1,
+                "isolated": 0,
+                "new_infections": 8,
+                "total_pathogen_mass": 1,
+                "n_zones_contaminated": 1,
+                "max_concentration": 1,
+                "max_conc_zone": "A",
+                "cumulative_cost_usd": 100,
+                "cumulative_ois": 0.1,
+                "trigger_status": "SUSPECTED",
+            },
+        ]
+        summary = {
+            "run_id": "t_mega_norovirus_s1",
+            "parameters": {
+                "platform_id": "mega_cruise_5000",
+                "pathogen": "norovirus",
+                "num_agents": 100,
+                "seed": 1,
+                "lockdown_attack_rate": 0.05,
+                "suspect_attack_rate": 0.02,
+            },
+            "num_epochs": 2,
+            "trigger_status": "SUSPECTED",
+            "summary": {"infected": 8, "recovered": 2, "susceptible": 90},
+            "cost_accounting": {"total_financial_usd": 100},
+            "derived": {},
+        }
+        run_spec = {
+            "catalog": {"platform_id": "mega_cruise_5000"},
+            "run": {"random_seed": 1, "num_epochs": 2},
+            "config_overrides": {"ship_graph": {"num_agents": 100}},
+        }
+        with zipfile.ZipFile(results / "run1.zip", "w") as zf:
+            zf.writestr("summary.json", json.dumps(summary))
+            zf.writestr("timeseries.json", json.dumps(ts))
+            zf.writestr("run_spec.json", json.dumps(run_spec))
+
+        out = Path("stan_fit") / "outbreak_surface.csv"
+        out.parent.mkdir()
+        manifest = export_outbreak_surface(
+            ["results_tiny"],
+            str(out),
+            pathogens=["norovirus"],
+        )
+        assert manifest["n_runs_used"] == 1
+        assert out.is_file()
+        assert out.with_suffix(".json").is_file()
+        surface = load_stan_surface("stan_fit")
+        pt = surface.lookup(
+            platform_class="mega",
+            pathogen="norovirus",
+            baseline_response="vsp",
+            k=2,
+        )
+        assert pt.P_trigger == pytest.approx(1.0)
+    finally:
+        os.chdir(prev)

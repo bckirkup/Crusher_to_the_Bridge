@@ -24,9 +24,15 @@ python3 -m picard_framework.analysis.boundary.run_decision_model --smoke
 python3 -m picard_framework.analysis.boundary.run_decision_model \
   --lookup fixture --n-mc 2000 --out boundary_analysis/
 
-# Stan surface when outbreak_surface.{json,csv} exists under the fit dir
+# Export empirical outbreak_surface from campaign zips (k = introductions)
+python3 -m picard_framework.analysis.boundary.export_outbreak_surface \
+  results/c12c_fine_calibration results/results_c14 results/results_c14b \
+  --pathogen norovirus \
+  --out analysis/analysis_stan_norovirus/hurdle_fit_takeoff/trajectory/outbreak_surface.csv
+
+# Stan/empirical surface when outbreak_surface.{json,csv} exists under the fit dir
 python3 -m picard_framework.analysis.boundary.run_decision_model \
-  --stan-fit analysis/analysis_stan_norovirus/hurdle_fit \
+  --stan-fit analysis/analysis_stan_norovirus/hurdle_fit_takeoff/trajectory \
   --lookup auto --out boundary_analysis/ --resume
 ```
 

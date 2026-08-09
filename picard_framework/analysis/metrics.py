@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections import Counter
 from typing import Any
 
-from picard_framework.analysis.parse_run_id import extract_factors
+from picard_framework.analysis.parse_run_id import extract_factors, resolve_initial_infected
 from simulation_utils.epidemic_labels import epidemic_took_off, seed_established
 
 TRIGGER_NONE = 0
@@ -25,6 +25,7 @@ RUN_SUMMARY_COLUMNS: tuple[str, ...] = (
     "surveillance_strategy",
     "transport_engine",
     "seed",
+    "initial_infected",
     "num_agents",
     "num_epochs",
     "attack_rate",
@@ -227,6 +228,16 @@ def build_run_summary_row(payload: dict[str, Any]) -> dict[str, Any]:
         }
     )
     row["run_id"] = factors["run_id"]
+    # Fill introductions k from epoch-0 prevalence when not in parameters.
+    if row.get("initial_infected") in (None, ""):
+        row["initial_infected"] = resolve_initial_infected(
+            parameters=params if isinstance(params, dict) else {},
+            run_spec=payload.get("run_spec")
+            if isinstance(payload.get("run_spec"), dict)
+            else {},
+            run_id=str(row.get("run_id") or ""),
+            timeseries=timeseries,
+        )
     return row
 
 
