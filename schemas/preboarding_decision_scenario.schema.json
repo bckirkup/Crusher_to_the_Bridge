@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://crusher-to-the-bridge/schemas/preboarding_decision_scenario.schema.json",
+  "title": "PreboardingDecisionScenario",
+  "description": "Voyage-level inputs for the pre-boarding wearable data-sharing decision model.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["scenario_id", "policy", "N_pax", "platform_class", "pathogen", "pi_inf"],
+  "properties": {
+    "schema_version": { "type": "string" },
+    "scenario_id": { "type": "string", "minLength": 1 },
+    "policy": {
+      "type": "string",
+      "enum": ["P0", "P1", "P2", "P3", "P4", "P5"]
+    },
+    "N_pax": { "type": "integer", "minimum": 1 },
+    "N_crew": { "type": "integer", "minimum": 0 },
+    "platform_class": {
+      "type": "string",
+      "enum": ["expedition", "classic", "spirit", "mega"]
+    },
+    "platform_id": { "type": "string" },
+    "pathogen": { "type": "string", "minLength": 1 },
+    "season": { "type": "string" },
+    "voyage_length_days": { "type": "number", "exclusiveMinimum": 0 },
+    "baseline_response": { "type": "string", "default": "vsp" },
+    "pi_inf": { "type": "number", "minimum": 0, "maximum": 1 },
+    "pi_sym": { "type": "number", "minimum": 0, "maximum": 1 },
+    "pi_asym": { "type": "number", "minimum": 0, "maximum": 1 },
+    "rho_cluster": { "type": "number", "minimum": 0 },
+    "prevalence_mode": {
+      "type": "string",
+      "enum": ["bernoulli", "beta_binomial"],
+      "default": "bernoulli"
+    },
+    "alpha_pi": { "type": "number", "exclusiveMinimum": 0 },
+    "beta_pi": { "type": "number", "exclusiveMinimum": 0 },
+    "adoption_pax": { "type": "number", "minimum": 0, "maximum": 1 },
+    "adoption_crew": { "type": "number", "minimum": 0, "maximum": 1 },
+    "Se_w": { "type": "number", "minimum": 0, "maximum": 1 },
+    "Sp_w": { "type": "number", "minimum": 0, "maximum": 1 },
+    "Se_confirm": { "type": "number", "minimum": 0, "maximum": 1 },
+    "Sp_confirm": { "type": "number", "minimum": 0, "maximum": 1 },
+    "tau_window_hours": { "type": "integer", "enum": [24, 48, 72] },
+    "cost_scenario": { "type": "string" },
+    "costs": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "C_screen": { "type": "number", "minimum": 0 },
+        "C_secondary": { "type": "number", "minimum": 0 },
+        "C_false_positive": { "type": "number", "minimum": 0 },
+        "C_true_positive": { "type": "number", "minimum": 0 },
+        "C_case": { "type": "number", "minimum": 0 },
+        "C_outbreak": { "type": "number", "minimum": 0 },
+        "C_vsp": { "type": "number", "minimum": 0 },
+        "C_reputation": { "type": "number", "minimum": 0 },
+        "C_missed": { "type": "number", "minimum": 0 }
+      }
+    }
+  }
+}

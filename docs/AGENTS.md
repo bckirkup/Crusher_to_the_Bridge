@@ -96,6 +96,8 @@ Install from the hash-pinned lockfile: `pip install --only-binary=:all: --requir
 | `contamx-interop` | ContamX SIM reader, AHS bridge, compare suite, flow diagnostics |
 | `mega-cruise-campaign-local` | Local `--smoke` / `--dry-run` / `--tier` / `--resume` / shard hygiene before AWS |
 | `campaign-results-analysis` | Analysis bundle + two-stage Stan hurdle (outbreak + trajectory); see `docs/stan_hurdle_lessons.md` for Step-2 field notes |
+| `preboarding-wearable-decision` | Pre-boarding wearable ROI / policy Monte Carlo (`picard_framework/analysis/boundary/`); fixture or Stan `outbreak_surface` lookup |
+| `preboarding-wearable-decision` | Pre-boarding wearable ROI / policy Monte Carlo (`picard_framework/analysis/boundary/`); fixture or Stan `outbreak_surface` lookup |
 | `aws-batch-campaign` | Running large Crusher simulation batches on AWS Batch / Fargate Spot |
 | `managing-github-issues` | Issue triage, batching, PR lifecycle |
 | `download-deepwiki` | Offline DeepWiki export for a public GitHub repo |

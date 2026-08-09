@@ -74,6 +74,8 @@ These are **not** day-to-day operator manuals. Prefer living manuals above unles
 | [multi_pathogen_model_changes_spec.md](multi_pathogen_model_changes_spec.md) | Implemented (Phase A route weights / dose_adj / FUT2; Phase B dining + food + source_zones) |
 | [tiered_escalation_spec.md](tiered_escalation_spec.md) | Implemented (outbreak response architecture / Campaign v5) |
 | [WEARABLE_ANOMALY_REDESIGN.md](WEARABLE_ANOMALY_REDESIGN.md) | Implemented (confounder-aware infection_score) |
+| [preboarding_wearable_decision_model_spec.md](preboarding_wearable_decision_model_spec.md) | Implemented Phase 1 — boundary analysis package (`picard_framework/analysis/boundary/`) |
+| [stan_analysis_tool_spec.md](stan_analysis_tool_spec.md) | Campaign → Stan hurdle calibration; boundary model consumes k-surfaces |
 | [issue_111_enhanced_wearables_plan.md](issue_111_enhanced_wearables_plan.md) | Historical plan / partially superseded — see WEARABLE_ANOMALY_REDESIGN |
 | [SOP_CASCADE_RECONFIG.md](SOP_CASCADE_RECONFIG.md) | Historical design note (also listed under Configure) |
 | [OPERATORS_MANUAL.md](OPERATORS_MANUAL.md) | Historical reference (dashboard LCARS docs still deferred here) |

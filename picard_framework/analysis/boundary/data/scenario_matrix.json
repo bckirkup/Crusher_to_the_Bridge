@@ -1,0 +1,21 @@
+{
+  "schema_version": "1.0",
+  "description": "Default high-volume pre-boarding decision matrix.",
+  "defaults": {
+    "pathogen": "norovirus",
+    "season": "moderate",
+    "baseline_response": "vsp",
+    "prevalence_mode": "bernoulli",
+    "Se_confirm": 0.90,
+    "Sp_confirm": 0.98,
+    "tau_window_hours": 48,
+    "cost_scenario": "mid",
+    "rho_cluster": 1.0
+  },
+  "axes": {
+    "platform_class": ["expedition", "classic", "spirit", "mega"],
+    "pi_inf": [0.0005, 0.002, 0.005, 0.01],
+    "policy": ["P0", "P1", "P2", "P3", "P4", "P5"],
+    "cost_scenario": ["mid"]
+  }
+}

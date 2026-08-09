@@ -54,7 +54,8 @@ jobs:
             tests/test_shedding_variance_cabin_mates.py \
             tests/test_density_contact.py \
             tests/test_multi_pathogen_model_phase_a.py \
-            tests/test_multi_pathogen_model_phase_b.py -v --tb=short
+            tests/test_multi_pathogen_model_phase_b.py \
+            tests/test_boundary_decision_model.py -v --tb=short
 
       - name: Import hygiene (Picard / Presidio / Stackelberg)
         env:

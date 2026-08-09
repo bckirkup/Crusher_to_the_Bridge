@@ -1,0 +1,27 @@
+{
+  "schema_version": "1.0",
+  "description": "Tiny matrix for CI smoke.",
+  "defaults": {
+    "pathogen": "norovirus",
+    "season": "moderate",
+    "baseline_response": "vsp",
+    "prevalence_mode": "bernoulli",
+    "N_pax": 500,
+    "N_crew": 100,
+    "Se_w": 0.65,
+    "Sp_w": 0.85,
+    "Se_confirm": 0.90,
+    "Sp_confirm": 0.98,
+    "tau_window_hours": 48,
+    "cost_scenario": "mid",
+    "rho_cluster": 1.0,
+    "adoption_pax": 0.43,
+    "adoption_crew": 1.0
+  },
+  "axes": {
+    "platform_class": ["mega"],
+    "pi_inf": [0.002, 0.005],
+    "policy": ["P0", "P2"],
+    "cost_scenario": ["mid"]
+  }
+}
