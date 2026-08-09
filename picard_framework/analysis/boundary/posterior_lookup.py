@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import csv
 import json
+import math
 import os
 from dataclasses import dataclass
 from importlib import resources
@@ -12,14 +13,39 @@ from typing import Any, Iterable
 from picard_framework.analysis._io import allowed_roots, read_json, safe_path
 from simulation_utils.paths import validated_open
 
+SURFACE_JSON = "outbreak_surface.json"
+SURFACE_CSV = "outbreak_surface.csv"
+_SURFACE_SUBDIRS = ("", "posterior", "boundary")
+
 
 @dataclass(frozen=True)
 class SurfacePoint:
-    P_trigger: float
-    E_AR: float
-    P_accel: float
-    E_cost_onboard: float
-    E_peak_epoch: float | None = None
+    p_trigger: float
+    e_ar: float
+    p_accel: float
+    e_cost_onboard: float
+    e_peak_epoch: float | None = None
+
+    # Spec aliases kept for callers expecting Stan-style names.
+    @property
+    def P_trigger(self) -> float:
+        return self.p_trigger
+
+    @property
+    def E_AR(self) -> float:
+        return self.e_ar
+
+    @property
+    def P_accel(self) -> float:
+        return self.p_accel
+
+    @property
+    def E_cost_onboard(self) -> float:
+        return self.e_cost_onboard
+
+    @property
+    def E_peak_epoch(self) -> float | None:
+        return self.e_peak_epoch
 
 
 @dataclass
@@ -40,7 +66,6 @@ class OutbreakSurface:
         key = (platform_class, pathogen, baseline_response)
         curve = self.curves.get(key)
         if curve is None:
-            # Fall back: same platform/response any pathogen, then any pathogen mega.
             curve = self._fallback_curve(platform_class, pathogen, baseline_response)
         return _interpolate_curve(curve, float(k))
 
@@ -50,17 +75,31 @@ class OutbreakSurface:
         pathogen: str,
         baseline_response: str,
     ) -> dict[str, list[float]]:
-        for cand in (
-            (platform_class, pathogen, baseline_response),
-            (platform_class, "norovirus", baseline_response),
-            ("mega", pathogen, baseline_response),
-            ("mega", "norovirus", "vsp"),
-        ):
-            if cand in self.curves:
-                return self.curves[cand]
+        """Pathogen-agnostic fallback: prefer platform+response, then platform, then any."""
+        exact = (platform_class, pathogen, baseline_response)
+        if exact in self.curves:
+            return self.curves[exact]
+
+        for key, curve in self.curves.items():
+            if key[0] == platform_class and key[2] == baseline_response:
+                return curve
+        for key, curve in self.curves.items():
+            if key[0] == platform_class:
+                return curve
         if not self.curves:
             raise KeyError("OutbreakSurface has no curves")
         return next(iter(self.curves.values()))
+
+
+def _point_at_index(curve: dict[str, list[float]], i: int) -> SurfacePoint:
+    peak = curve.get("E_peak_epoch")
+    return SurfacePoint(
+        p_trigger=curve["P_trigger"][i],
+        e_ar=curve["E_AR"][i],
+        p_accel=curve["P_accel"][i],
+        e_cost_onboard=curve["E_cost_onboard"][i],
+        e_peak_epoch=peak[i] if peak else None,
+    )
 
 
 def _interpolate_curve(curve: dict[str, list[float]], k: float) -> SurfacePoint:
@@ -68,58 +107,30 @@ def _interpolate_curve(curve: dict[str, list[float]], k: float) -> SurfacePoint:
     if not ks:
         raise ValueError("empty outbreak curve")
     if k <= ks[0]:
-        i = 0
-        return SurfacePoint(
-            P_trigger=curve["P_trigger"][i],
-            E_AR=curve["E_AR"][i],
-            P_accel=curve["P_accel"][i],
-            E_cost_onboard=curve["E_cost_onboard"][i],
-            E_peak_epoch=(curve.get("E_peak_epoch") or [None])[i]
-            if curve.get("E_peak_epoch")
-            else None,
-        )
+        return _point_at_index(curve, 0)
     if k >= ks[-1]:
-        i = -1
-        peak = curve.get("E_peak_epoch")
-        return SurfacePoint(
-            P_trigger=curve["P_trigger"][i],
-            E_AR=curve["E_AR"][i],
-            P_accel=curve["P_accel"][i],
-            E_cost_onboard=curve["E_cost_onboard"][i],
-            E_peak_epoch=peak[i] if peak else None,
-        )
+        return _point_at_index(curve, -1)
 
-    # Linear interpolate between bracketing k.
     for i in range(len(ks) - 1):
         k0, k1 = ks[i], ks[i + 1]
-        if k0 <= k <= k1:
-            if k1 == k0:
-                t = 0.0
-            else:
-                t = (k - k0) / (k1 - k0)
+        if not (k0 <= k <= k1):
+            continue
+        t = 0.0 if k1 == k0 else (k - k0) / (k1 - k0)
 
-            def lerp(a: list[float]) -> float:
-                return float(a[i]) * (1.0 - t) + float(a[i + 1]) * t
+        def lerp(a: list[float]) -> float:
+            return float(a[i]) * (1.0 - t) + float(a[i + 1]) * t
 
-            peak_list = curve.get("E_peak_epoch")
-            peak_val = lerp(peak_list) if peak_list else None
-            return SurfacePoint(
-                P_trigger=lerp(curve["P_trigger"]),
-                E_AR=lerp(curve["E_AR"]),
-                P_accel=lerp(curve["P_accel"]),
-                E_cost_onboard=lerp(curve["E_cost_onboard"]),
-                E_peak_epoch=peak_val,
-            )
-    # Nearest
-    nearest = min(range(len(ks)), key=lambda i: abs(ks[i] - k))
-    peak = curve.get("E_peak_epoch")
-    return SurfacePoint(
-        P_trigger=curve["P_trigger"][nearest],
-        E_AR=curve["E_AR"][nearest],
-        P_accel=curve["P_accel"][nearest],
-        E_cost_onboard=curve["E_cost_onboard"][nearest],
-        E_peak_epoch=peak[nearest] if peak else None,
-    )
+        peak_list = curve.get("E_peak_epoch")
+        return SurfacePoint(
+            p_trigger=lerp(curve["P_trigger"]),
+            e_ar=lerp(curve["E_AR"]),
+            p_accel=lerp(curve["P_accel"]),
+            e_cost_onboard=lerp(curve["E_cost_onboard"]),
+            e_peak_epoch=lerp(peak_list) if peak_list else None,
+        )
+
+    nearest = min(range(len(ks)), key=lambda idx: abs(ks[idx] - k))
+    return _point_at_index(curve, nearest)
 
 
 def _curve_from_row_lists(
@@ -165,7 +176,7 @@ def _parse_surface_payload(payload: dict[str, Any]) -> dict[tuple[str, str, str]
 
 def _load_default_fixture_payload() -> dict[str, Any]:
     root = resources.files("picard_framework.analysis.boundary")
-    text = (root / "fixtures" / "outbreak_surface.json").read_text(encoding="utf-8")
+    text = (root / "fixtures" / SURFACE_JSON).read_text(encoding="utf-8")
     return json.loads(text)
 
 
@@ -184,6 +195,21 @@ def load_fixture_surface(path: str | None = None) -> OutbreakSurface:
     )
 
 
+def _empty_curve_bucket() -> dict[str, list[float]]:
+    return {
+        "k": [],
+        "P_trigger": [],
+        "E_AR": [],
+        "P_accel": [],
+        "E_cost_onboard": [],
+        "E_peak_epoch": [],
+    }
+
+
+def _all_peaks_missing(peak: list[float]) -> bool:
+    return all(math.isnan(x) for x in peak)
+
+
 def _load_surface_csv(path: str) -> dict[tuple[str, str, str], dict[str, list[float]]]:
     grouped: dict[tuple[str, str, str], dict[str, list[float]]] = {}
     with validated_open(path, allowed_roots=allowed_roots(), encoding="utf-8") as fh:
@@ -194,17 +220,7 @@ def _load_surface_csv(path: str) -> dict[tuple[str, str, str], dict[str, list[fl
                 str(row["pathogen"]),
                 str(row.get("baseline_response") or "vsp"),
             )
-            bucket = grouped.setdefault(
-                key,
-                {
-                    "k": [],
-                    "P_trigger": [],
-                    "E_AR": [],
-                    "P_accel": [],
-                    "E_cost_onboard": [],
-                    "E_peak_epoch": [],
-                },
-            )
+            bucket = grouped.setdefault(key, _empty_curve_bucket())
             bucket["k"].append(float(row["k"]))
             bucket["P_trigger"].append(float(row["P_trigger"]))
             bucket["E_AR"].append(float(row["E_AR"]))
@@ -218,7 +234,7 @@ def _load_surface_csv(path: str) -> dict[tuple[str, str, str], dict[str, list[fl
     curves: dict[tuple[str, str, str], dict[str, list[float]]] = {}
     for key, raw in grouped.items():
         peak = raw["E_peak_epoch"]
-        peak_out = None if all(x != x for x in peak) else peak  # all NaN
+        peak_out = None if _all_peaks_missing(peak) else peak
         curves[key] = _curve_from_row_lists(
             raw["k"],
             raw["P_trigger"],
@@ -233,14 +249,12 @@ def _load_surface_csv(path: str) -> dict[tuple[str, str, str], dict[str, list[fl
 def _find_stan_surface_files(stan_fit_dir: str) -> list[str]:
     """Candidate outbreak surface files under a Stan fit directory."""
     root = safe_path(stan_fit_dir)
-    candidates = [
-        os.path.join(root, "outbreak_surface.json"),
-        os.path.join(root, "outbreak_surface.csv"),
-        os.path.join(root, "posterior", "outbreak_surface.json"),
-        os.path.join(root, "posterior", "outbreak_surface.csv"),
-        os.path.join(root, "boundary", "outbreak_surface.json"),
-        os.path.join(root, "boundary", "outbreak_surface.csv"),
-    ]
+    names = (SURFACE_JSON, SURFACE_CSV)
+    candidates: list[str] = []
+    for sub in _SURFACE_SUBDIRS:
+        base = root if not sub else os.path.join(root, sub)
+        for name in names:
+            candidates.append(os.path.join(base, name))
     return [p for p in candidates if os.path.isfile(p)]
 
 
@@ -254,7 +268,7 @@ def load_stan_surface(stan_fit_dir: str) -> OutbreakSurface:
     files = _find_stan_surface_files(stan_fit_dir)
     if not files:
         raise FileNotFoundError(
-            f"No outbreak_surface.{{json,csv}} under {stan_fit_dir}; "
+            f"No {SURFACE_JSON} or {SURFACE_CSV} under {stan_fit_dir}; "
             "export a k-indexed surface or use --lookup fixture"
         )
     path = files[0]

@@ -57,6 +57,78 @@ def _policy_adoption(
     return a_pax, a_crew
 
 
+def _resolve_pathogen(base: dict[str, Any], defaults_doc: dict[str, Any]) -> str:
+    """Pathogen id from scenario defaults or packaged platform defaults JSON."""
+    if base.get("pathogen"):
+        return str(base["pathogen"])
+    if defaults_doc.get("default_pathogen"):
+        return str(defaults_doc["default_pathogen"])
+    wearable = defaults_doc.get("wearable_defaults") or {}
+    for key in wearable:
+        if key != "default":
+            return str(key)
+    return "default"
+
+
+def _fill_platform_sizes(
+    merged: dict[str, Any], plat: dict[str, Any]
+) -> None:
+    if "N_pax" not in merged:
+        merged["N_pax"] = int(plat.get("N_pax", 500))
+    if "N_crew" not in merged:
+        merged["N_crew"] = int(plat.get("N_crew", 0))
+    if "voyage_length_days" not in merged and plat.get("voyage_length_days"):
+        merged["voyage_length_days"] = plat["voyage_length_days"]
+
+
+def _one_scenario(
+    *,
+    base: dict[str, Any],
+    platform_class: str,
+    pi_inf: float,
+    policy: str,
+    cost_name: str,
+    defaults_doc: dict[str, Any],
+) -> dict[str, Any]:
+    platforms = defaults_doc.get("platforms", {})
+    wearable = defaults_doc.get("wearable_defaults", {})
+    confirm = defaults_doc.get("confirm_defaults", {})
+    cost_scenarios = defaults_doc.get("cost_scenarios", {})
+    plat = platforms.get(platform_class, {})
+    pathogen = _resolve_pathogen(base, defaults_doc)
+    wdef = wearable.get(pathogen) or wearable.get("default") or {
+        "Se_w": 0.65,
+        "Sp_w": 0.85,
+    }
+    merged = dict(base)
+    merged.update(
+        {
+            "platform_class": platform_class,
+            "platform_id": plat.get("platform_id"),
+            "pathogen": pathogen,
+            "pi_inf": float(pi_inf),
+            "policy": policy,
+            "cost_scenario": cost_name,
+        }
+    )
+    _fill_platform_sizes(merged, plat)
+    merged.setdefault("Se_w", wdef.get("Se_w", 0.65))
+    merged.setdefault("Sp_w", wdef.get("Sp_w", 0.85))
+    merged.setdefault("Se_confirm", confirm.get("Se_confirm", 0.90))
+    merged.setdefault("Sp_confirm", confirm.get("Sp_confirm", 0.98))
+    a_pax, a_crew = _policy_adoption(policy, defaults_doc, merged)
+    merged["adoption_pax"] = a_pax
+    merged["adoption_crew"] = a_crew
+    cost_map = cost_scenarios.get(cost_name) or cost_scenarios.get("mid") or {}
+    if "costs" not in merged:
+        merged["costs"] = cost_params_from_mapping(cost_map).to_dict()
+    pi_tag = f"{float(pi_inf):.4f}".replace(".", "p")
+    merged["scenario_id"] = (
+        f"{platform_class}_{pathogen}_{policy}_pi{pi_tag}_{cost_name}"
+    )
+    return merged
+
+
 def expand_scenarios(matrix: dict[str, Any], defaults_doc: dict[str, Any] | None = None) -> list[dict[str, Any]]:
     """Cartesian product of matrix axes into concrete scenario dicts."""
     defaults_doc = defaults_doc or load_platform_defaults()
@@ -67,57 +139,19 @@ def expand_scenarios(matrix: dict[str, Any], defaults_doc: dict[str, Any] | None
     policy_axis = list(axes.get("policy") or ["P0"])
     cost_axis = list(axes.get("cost_scenario") or [base.get("cost_scenario", "mid")])
 
-    platforms = defaults_doc.get("platforms", {})
-    wearable = defaults_doc.get("wearable_defaults", {})
-    confirm = defaults_doc.get("confirm_defaults", {})
-    cost_scenarios = defaults_doc.get("cost_scenarios", {})
-
-    scenarios: list[dict[str, Any]] = []
-    for platform_class, pi_inf, policy, cost_name in product(
-        platform_axis, pi_axis, policy_axis, cost_axis
-    ):
-        plat = platforms.get(platform_class, {})
-        pathogen = str(base.get("pathogen", "norovirus"))
-        wdef = wearable.get(pathogen) or wearable.get("default") or {
-            "Se_w": 0.65,
-            "Sp_w": 0.85,
-        }
-        merged = dict(base)
-        merged.update(
-            {
-                "platform_class": platform_class,
-                "platform_id": plat.get("platform_id"),
-                "pi_inf": float(pi_inf),
-                "policy": policy,
-                "cost_scenario": cost_name,
-            }
+    return [
+        _one_scenario(
+            base=base,
+            platform_class=platform_class,
+            pi_inf=float(pi_inf),
+            policy=policy,
+            cost_name=cost_name,
+            defaults_doc=defaults_doc,
         )
-        if "N_pax" not in merged:
-            merged["N_pax"] = int(plat.get("N_pax", 500))
-        if "N_crew" not in merged:
-            merged["N_crew"] = int(plat.get("N_crew", 0))
-        if "voyage_length_days" not in merged and plat.get("voyage_length_days"):
-            merged["voyage_length_days"] = plat["voyage_length_days"]
-
-        merged.setdefault("Se_w", wdef.get("Se_w", 0.65))
-        merged.setdefault("Sp_w", wdef.get("Sp_w", 0.85))
-        merged.setdefault("Se_confirm", confirm.get("Se_confirm", 0.90))
-        merged.setdefault("Sp_confirm", confirm.get("Sp_confirm", 0.98))
-
-        a_pax, a_crew = _policy_adoption(policy, defaults_doc, merged)
-        merged["adoption_pax"] = a_pax
-        merged["adoption_crew"] = a_crew
-
-        cost_map = cost_scenarios.get(cost_name) or cost_scenarios.get("mid") or {}
-        if "costs" not in merged:
-            merged["costs"] = cost_params_from_mapping(cost_map).to_dict()
-
-        pi_tag = f"{float(pi_inf):.4f}".replace(".", "p")
-        merged["scenario_id"] = (
-            f"{platform_class}_{pathogen}_{policy}_pi{pi_tag}_{cost_name}"
+        for platform_class, pi_inf, policy, cost_name in product(
+            platform_axis, pi_axis, policy_axis, cost_axis
         )
-        scenarios.append(merged)
-    return scenarios
+    ]
 
 
 def _completed_path(out_dir: str) -> str:

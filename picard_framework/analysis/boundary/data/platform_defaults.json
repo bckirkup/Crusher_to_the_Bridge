@@ -1,5 +1,6 @@
 {
   "schema_version": "1.0",
+  "default_pathogen": "norovirus",
   "platforms": {
     "expedition": {
       "platform_id": "expedition_cruise_200",
