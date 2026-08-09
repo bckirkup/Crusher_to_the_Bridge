@@ -1414,3 +1414,52 @@ def test_calibration_wave1_dry_run_excludes_c2() -> None:
     for tier_id in resolve_tier_ids(manifest, "all"):
         total += len(list(generate_tier_runs(manifest, tier_id)))
     assert total == 5960
+
+
+BOUNDARY_MANIFEST = CAMPAIGN / "boundary_surface_v1_manifest.json"
+
+
+def test_boundary_surface_manifest_cartesian_counts() -> None:
+    """Light arithmetic check — do not expand Picard specs for all 17.6k."""
+    from picard_framework.runs.mega_cruise_campaign.count_manifest_cartesian import (
+        summarize,
+        tier_cartesian,
+    )
+
+    manifest = load_manifest(BOUNDARY_MANIFEST)
+    assert manifest["campaign"] == "boundary_surface_v1"
+    assert "syndromic" in manifest["surveillance_configs"]
+    assert all(k in manifest["pathogen_configs"] for k in (
+        "norovirus", "sarscov2", "influenza", "measles",
+    ))
+    assert tier_cartesian(manifest, manifest["tiers"]["b1_norovirus"]) == 2400
+    assert tier_cartesian(manifest, manifest["tiers"]["b1_measles"]) == 2800
+    assert manifest["tiers"]["b2_sarscov2_sensitivity"].get("deferred") is True
+    wave1, wave2 = summarize(manifest)
+    assert wave1 == 10000
+    assert wave2 == 7600
+
+
+def test_boundary_b1_generator_smoke_one_run() -> None:
+    """Single next() — proves b1 hits the c1/a2 generator without full expand."""
+    manifest = load_manifest(BOUNDARY_MANIFEST)
+    rid, spec = next(generate_tier_runs(manifest, "b1_norovirus"))
+    assert rid.startswith("b1_norovirus_")
+    assert "init" in rid
+    assert spec["catalog"]["platform_id"] in {
+        "expedition_cruise_450",
+        "classic_cruise_1900",
+        "spirit_cruise_3000",
+        "mega_cruise_5000",
+    }
+    noro = spec["pathogen_overrides"]["norwalk_gi"]
+    assert noro["dose_adjustment"] == pytest.approx(10.6)
+    wave1 = resolve_tier_ids(manifest, "all")
+    assert set(wave1) == {
+        "b1_norovirus",
+        "b1_sarscov2",
+        "b1_influenza",
+        "b1_measles",
+    }
+    deferred = resolve_tier_ids(manifest, "all", include_deferred=True)
+    assert "b2_measles_sensitivity" in deferred

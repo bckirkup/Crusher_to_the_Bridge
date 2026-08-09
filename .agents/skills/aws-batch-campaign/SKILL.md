@@ -326,6 +326,10 @@ Use placeholders (or env vars) only — examples of the *shape*:
 - `deploy/aws/README.md` — canonical commands, file table, IAM grammar note.
 - `deploy/aws/ensure_campaign_infra.sh` — recreate missing queue/log group +
   register current job def; optional `--smoke-submit N`.
+- `deploy/aws/submit_boundary_surface.ps1` — boundary_surface_v1 Spot array.
+- `deploy/aws/ensure_analysis_infra.ps1` / `submit_boundary_analysis.ps1` —
+  On-Demand surface/Stan/MC (see `.agents/skills/boundary-aws-pipeline`).
 - `deploy/aws/classify_batch_failures.py` — Spot reclaim vs OOM vs timeout.
 - `.agents/skills/orchestrator-smoke-test/SKILL.md` — local smoke of the sim loop.
 - `.agents/skills/adding-new-platform/SKILL.md` — platform data (`mega_cruise_5000`).
+- `docs/boundary_aws_pipeline_lessons.md` — light validation, Spot vs On-Demand.

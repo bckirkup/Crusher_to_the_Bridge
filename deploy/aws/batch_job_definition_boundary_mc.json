@@ -1,0 +1,60 @@
+{
+  "jobDefinitionName": "picard-boundary-mc",
+  "type": "container",
+  "platformCapabilities": ["FARGATE"],
+  "containerProperties": {
+    "image": "<ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/picard-boundary-analysis:latest",
+    "command": [
+      "--phase", "mc",
+      "--pathogen", "Ref::pathogen",
+      "--s3-campaign", "Ref::s3_campaign",
+      "--s3-analysis", "Ref::s3_analysis",
+      "--n-mc", "Ref::n_mc",
+      "--seed", "Ref::seed"
+    ],
+    "jobRoleArn": "arn:aws:iam::<ACCOUNT_ID>:role/picard-campaign-job-role",
+    "executionRoleArn": "arn:aws:iam::<ACCOUNT_ID>:role/picard-campaign-execution-role",
+    "resourceRequirements": [
+      { "type": "VCPU", "value": "4" },
+      { "type": "MEMORY", "value": "8192" }
+    ],
+    "fargatePlatformConfiguration": {
+      "platformVersion": "LATEST"
+    },
+    "networkConfiguration": {
+      "assignPublicIp": "ENABLED"
+    },
+    "environment": [
+      { "name": "PYTHONUTF8", "value": "1" },
+      { "name": "PYTHONPATH", "value": "/app" }
+    ],
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "/aws/batch/picard-boundary-analysis",
+        "awslogs-region": "<REGION>",
+        "awslogs-stream-prefix": "boundary-mc"
+      }
+    }
+  },
+  "parameters": {
+    "pathogen": "norovirus",
+    "s3_campaign": "s3://<BUCKET>/campaign/boundary_surface_v1/",
+    "s3_analysis": "s3://<BUCKET>/campaign/boundary_surface_v1/analysis/",
+    "n_mc": "2000",
+    "seed": "1701"
+  },
+  "retryStrategy": {
+    "attempts": 3,
+    "evaluateOnExit": [
+      { "onReason": "OutOfMemoryError*", "action": "exit" },
+      { "onExitCode": "137", "action": "exit" },
+      { "onExitCode": "0", "action": "exit" },
+      { "onReason": "*", "action": "retry" }
+    ]
+  },
+  "propagateTags": true,
+  "timeout": {
+    "attemptDurationSeconds": 21600
+  }
+}

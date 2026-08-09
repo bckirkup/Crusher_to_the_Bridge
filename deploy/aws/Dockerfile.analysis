@@ -1,0 +1,42 @@
+# Boundary surface analysis image (CmdStan + analysis extras).
+# Build from repo root:
+#   docker build -f deploy/aws/Dockerfile.analysis -t picard-boundary-analysis .
+#
+# NOT for ABM Spot shards — use root Dockerfile / picard-campaign for Phase 1.
+
+FROM python:3.11-slim-bookworm
+
+WORKDIR /app
+
+ENV PYTHONPATH=/app \
+    PYTHONUTF8=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1 \
+    CMDSTAN=/opt/cmdstan
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        build-essential \
+        g++ \
+        make \
+        git \
+        curl \
+        ca-certificates \
+        awscli \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY pyproject.toml README.md ./
+COPY picard_framework/ ./picard_framework/
+COPY simulation_utils/ ./simulation_utils/
+COPY schemas/ ./schemas/
+COPY data/ ./data/
+COPY scripts/ ./scripts/
+COPY deploy/aws/boundary_analysis_entrypoint.py ./deploy/aws/boundary_analysis_entrypoint.py
+
+RUN pip install --no-cache-dir -e '.[analysis,deploy]' \
+    && python -c "import cmdstanpy; cmdstanpy.install_cmdstan(dir='/opt/cmdstan')"
+
+RUN useradd --create-home --uid 10001 analysis \
+    && chown -R analysis:analysis /app /opt/cmdstan
+USER analysis
+
+ENTRYPOINT ["python3", "deploy/aws/boundary_analysis_entrypoint.py"]

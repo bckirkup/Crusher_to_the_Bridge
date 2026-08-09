@@ -1268,13 +1268,14 @@ def generate_tier_runs(
                             reluctant_delay_epochs=int(rdelay),
                         )
 
-    elif short in ("c1", "c2", "c3", "c4", "c5", "c6", "a2"):
+    elif short in ("c1", "c2", "c3", "c4", "c5", "c6", "a2", "b1", "b2"):
         # Multi-platform calibration / sensitivity (data-driven): keys off
         # tier fields. c1: dose × init × platform; c2: immunity × platforms;
         # c3: SARS-CoV-2 dose × platforms; c4: epoch_durations × dose;
         # c5: density_exponents × dose × platforms;
         # c6: contact_modes (density vs heterogeneous) sensitivity;
         # a2: fine dose × FUT2 immunity at a pinned density exponent.
+        # b1/b2: boundary_surface_v1 k-sweep (core + dose_adj sensitivity).
         pathogen = tier["pathogen"]  # singular (not pathogens[])
         bundle, pathogen_id, base_overrides = get_pathogen_config(manifest, pathogen)
         platforms = _resolve_tier_platforms(

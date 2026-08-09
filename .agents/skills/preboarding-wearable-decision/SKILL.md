@@ -62,6 +62,12 @@ python3 -m picard_framework.analysis.boundary.run_decision_model \
 python3 -m pytest tests/test_boundary_decision_model.py -v --tb=short
 ```
 
+## AWS pipeline
+
+For the multi-pathogen `boundary_surface_v1` Spot + On-Demand Stan/MC path see
+`.agents/skills/boundary-aws-pipeline/SKILL.md` and
+`docs/boundary_aws_pipeline_lessons.md`.
+
 ## Non-goals (Phase 1)
 
 - Do not call `ShipSimulation` or wire `init_multi_pathogen`
