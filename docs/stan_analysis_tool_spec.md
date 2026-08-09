@@ -381,6 +381,11 @@ Recommended first analysis dataset:
 4. Add approximate Bayesian computation (ABC) option for raw ABM outputs.
 5. Add global sensitivity screening (Morris/Sobol) upstream of Stan.
 6. Add boundary-condition model for embarkation and turnaround interventions.
+   **Status:** Phase 1 pre-boarding wearable decision model implemented as
+   `picard_framework/analysis/boundary/` (see
+   [preboarding_wearable_decision_model_spec.md](preboarding_wearable_decision_model_spec.md)).
+   Consumes k-indexed outbreak surfaces; does not call the ABM. Turnaround
+   re-embark wiring remains future work.
 
 ## Notes on What Stan Should Not Do
 

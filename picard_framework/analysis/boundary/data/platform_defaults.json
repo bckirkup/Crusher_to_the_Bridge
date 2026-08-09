@@ -1,0 +1,81 @@
+{
+  "schema_version": "1.0",
+  "default_pathogen": "norovirus",
+  "platforms": {
+    "expedition": {
+      "platform_id": "expedition_cruise_200",
+      "N_pax": 160,
+      "N_crew": 40,
+      "voyage_length_days": 14
+    },
+    "classic": {
+      "platform_id": "classic_cruise_2000",
+      "N_pax": 1600,
+      "N_crew": 400,
+      "voyage_length_days": 7
+    },
+    "spirit": {
+      "platform_id": "spirit_class_3000",
+      "N_pax": 2400,
+      "N_crew": 600,
+      "voyage_length_days": 7
+    },
+    "mega": {
+      "platform_id": "mega_cruise_5000",
+      "N_pax": 4000,
+      "N_crew": 1000,
+      "voyage_length_days": 7
+    }
+  },
+  "adoption": {
+    "byod": 0.43,
+    "incentivized": 0.70,
+    "crew_mandatory": 1.0
+  },
+  "wearable_defaults": {
+    "norovirus": { "Se_w": 0.55, "Sp_w": 0.85 },
+    "influenza": { "Se_w": 0.65, "Sp_w": 0.85 },
+    "SARS-CoV-2": { "Se_w": 0.70, "Sp_w": 0.85 },
+    "measles": { "Se_w": 0.75, "Sp_w": 0.88 },
+    "default": { "Se_w": 0.65, "Sp_w": 0.85 }
+  },
+  "confirm_defaults": {
+    "Se_confirm": 0.90,
+    "Sp_confirm": 0.98
+  },
+  "cost_scenarios": {
+    "mid": {
+      "C_screen": 1.0,
+      "C_secondary": 75.0,
+      "C_false_positive": 2000.0,
+      "C_true_positive": 2000.0,
+      "C_case": 400.0,
+      "C_outbreak": 500000.0,
+      "C_vsp": 2000000.0,
+      "C_reputation": 2000000.0,
+      "C_missed": 0.0
+    },
+    "low": {
+      "C_screen": 0.1,
+      "C_secondary": 25.0,
+      "C_false_positive": 500.0,
+      "C_true_positive": 500.0,
+      "C_case": 100.0,
+      "C_outbreak": 100000.0,
+      "C_vsp": 500000.0,
+      "C_reputation": 500000.0,
+      "C_missed": 0.0
+    },
+    "high": {
+      "C_screen": 2.0,
+      "C_secondary": 150.0,
+      "C_false_positive": 5000.0,
+      "C_true_positive": 5000.0,
+      "C_case": 1000.0,
+      "C_outbreak": 2000000.0,
+      "C_vsp": 5000000.0,
+      "C_reputation": 20000000.0,
+      "C_missed": 0.0
+    }
+  }
+}

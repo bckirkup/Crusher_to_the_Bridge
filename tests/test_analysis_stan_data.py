@@ -17,13 +17,14 @@ from picard_framework.analysis.stan.fit_norovirus_trajectory import (
     fit_model,
 )
 from picard_framework.analysis.stan.posterior_summaries import summarize_fit
-from tests.test_analysis_campaign_bundle import _curve, _make_run_zip
+from tests.test_analysis_campaign_bundle import _curve, _make_run_zip, _takeoff_curve
 
 
 def _bundle_with_noro(tmp_path: Path) -> Path:
     results = tmp_path / "results"
     results.mkdir()
-    curve = _curve()
+    # Takeoff curve so Stage-B outbreaks_only filter retains norovirus runs.
+    curve = _takeoff_curve()
     for eng, surv, seed, plat, dose in (
         ("native", "none_true", 1, "mega_cruise_5000", 10.6),
         ("native", "syndromic", 1, "mega_cruise_5000", 10.6),

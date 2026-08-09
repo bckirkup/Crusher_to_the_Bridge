@@ -56,6 +56,12 @@ SCHEMA_DATA_MAP: dict[str, list[str]] = {
     ],
     "spatial_layout.schema.json": [],
     "air_flow_paths.schema.json": [],
+    "preboarding_decision_scenario.schema.json": [
+        "picard_framework/analysis/boundary/data/example_scenario.json",
+    ],
+    "preboarding_decision_summary.schema.json": [
+        "picard_framework/analysis/boundary/data/example_summary.json",
+    ],
 }
 
 
