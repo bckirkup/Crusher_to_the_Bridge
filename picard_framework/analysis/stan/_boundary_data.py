@@ -102,9 +102,9 @@ def build_boundary_outbreak_stan_data(
         raise ValueError(f"No runs found for pathogen={pathogen!r}")
 
     platforms, surveillances, plat_idx, surv_idx = _factor_indices(rows)
-    N_runs = len(rows)
+    n_runs = len(rows)
     data = {
-        "N_runs": N_runs,
+        "N_runs": n_runs,
         "P": len(platforms),
         "S": len(surveillances),
         "outbreak": [1 if coerce_bool(r.get("outbreak_occurred")) else 0 for r in rows],
@@ -123,9 +123,9 @@ def build_boundary_outbreak_stan_data(
         "surveillances": surveillances,
         "run_ids": [str(r["run_id"]) for r in rows],
         "d0": float(d0),
-        "N_runs": N_runs,
+        "N_runs": n_runs,
         "n_outbreaks": int(sum(data["outbreak"])),
-        "outbreak_rate": round(sum(data["outbreak"]) / N_runs, 4),
+        "outbreak_rate": round(sum(data["outbreak"]) / n_runs, 4),
     }
     return data, meta
 
@@ -147,9 +147,9 @@ def build_boundary_ar_stan_data(
     platforms, surveillances, plat_idx, surv_idx = _factor_indices(rows)
     ar_raw = [as_float(r.get("attack_rate"), 0.0) for r in rows]
     ar = [min(1.0 - eps, max(eps, a)) for a in ar_raw]
-    N_runs = len(rows)
+    n_runs = len(rows)
     data = {
-        "N_runs": N_runs,
+        "N_runs": n_runs,
         "P": len(platforms),
         "S": len(surveillances),
         "ar": ar,
@@ -168,7 +168,7 @@ def build_boundary_ar_stan_data(
         "surveillances": surveillances,
         "run_ids": [str(r["run_id"]) for r in rows],
         "d0": float(d0),
-        "N_runs": N_runs,
-        "mean_ar": round(sum(ar) / N_runs, 6),
+        "N_runs": n_runs,
+        "mean_ar": round(sum(ar) / n_runs, 6),
     }
     return data, meta
