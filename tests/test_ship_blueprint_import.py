@@ -333,6 +333,14 @@ class TestProviders:
         data = extract_json_object(text)
         assert data["platform_id"] == "x"
 
+    def test_extract_json_object_embedded_and_nested(self) -> None:
+        from tools.ship_blueprint_import.providers import extract_json_object
+
+        text = 'prefix {"platform_id": "y", "meta": {"a": 1}} trailing'
+        data = extract_json_object(text)
+        assert data["platform_id"] == "y"
+        assert data["meta"]["a"] == 1
+
 
 class TestValidate:
     def test_validate_synthesized_platform(

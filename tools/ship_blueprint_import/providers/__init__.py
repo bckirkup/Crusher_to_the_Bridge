@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import abc
 import json
-import re
 from typing import Any
 
 from tools.ship_blueprint_import.models import ShipDigest
@@ -28,22 +27,62 @@ class DigestProvider(abc.ABC):
         """
 
 
+def _strip_markdown_fence(text: str) -> str:
+    """Remove a leading/trailing ``` or ```json fence without regex backtracking."""
+    if not text.startswith("```"):
+        return text
+    body = text[3:]
+    if body.lower().startswith("json"):
+        body = body[4:]
+    body = body.lstrip("\r\n")
+    if body.rstrip().endswith("```"):
+        body = body.rstrip()
+        body = body[: -3].rstrip()
+    return body
+
+
+def _first_json_object_span(text: str) -> str | None:
+    """Return the first top-level ``{...}`` slice via brace counting (no ReDoS)."""
+    start = text.find("{")
+    if start < 0:
+        return None
+    depth = 0
+    in_string = False
+    escape = False
+    for idx in range(start, len(text)):
+        ch = text[idx]
+        if in_string:
+            if escape:
+                escape = False
+            elif ch == "\\":
+                escape = True
+            elif ch == '"':
+                in_string = False
+            continue
+        if ch == '"':
+            in_string = True
+        elif ch == "{":
+            depth += 1
+        elif ch == "}":
+            depth -= 1
+            if depth == 0:
+                return text[start : idx + 1]
+    return None
+
+
 def extract_json_object(text: str) -> dict[str, Any]:
     """Pull the first JSON object from a model response."""
-    text = text.strip()
-    if text.startswith("```"):
-        text = re.sub(r"^```(?:json)?\s*", "", text)
-        text = re.sub(r"\s*```$", "", text)
+    text = _strip_markdown_fence(text.strip())
     try:
         data = json.loads(text)
         if isinstance(data, dict):
             return data
     except json.JSONDecodeError:
         pass
-    match = re.search(r"\{.*\}", text, flags=re.DOTALL)
-    if not match:
+    payload = _first_json_object_span(text)
+    if payload is None:
         raise ValueError("model response did not contain a JSON object")
-    data = json.loads(match.group(0))
+    data = json.loads(payload)
     if not isinstance(data, dict):
         raise ValueError("JSON payload is not an object")
     return data
