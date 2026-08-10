@@ -5,8 +5,10 @@ from __future__ import annotations
 import pytest
 
 from deploy.aws.boundary_analysis_entrypoint import (
+    _excluded,
     _require_pathogen,
     _require_s3_uri,
+    _safe_key_parts,
 )
 
 
@@ -28,3 +30,15 @@ def test_require_pathogen_allowlist() -> None:
         _require_pathogen("../etc/passwd", required=True)
     with pytest.raises(SystemExit):
         _require_pathogen("", required=True)
+
+
+def test_safe_key_parts_rejects_traversal() -> None:
+    assert _safe_key_parts("pref/a/b.csv", "pref/") == ["a", "b.csv"]
+    assert _safe_key_parts("pref/", "pref/") is None
+    with pytest.raises(ValueError):
+        _safe_key_parts("pref/../etc/passwd", "pref/")
+
+
+def test_excluded_globs() -> None:
+    assert _excluded("campaign/analysis/x.zip", "campaign/", ("analysis/*",))
+    assert not _excluded("campaign/b1_run.zip", "campaign/", ("analysis/*", "b2_*"))

@@ -101,12 +101,14 @@ def _safe_key_parts(key: str, prefix: str) -> list[str] | None:
     if key.endswith("/"):
         return None
     rel = key[len(prefix) :] if prefix and key.startswith(prefix) else key
-    parts = [p for p in rel.split("/") if p and p not in {".", ".."}]
-    if not parts:
+    raw_parts = [p for p in rel.split("/") if p]
+    if not raw_parts:
         return None
-    for part in parts:
+    if any(p in {".", ".."} for p in raw_parts):
+        raise ValueError(f"Invalid s3 object path segment in {key!r}")
+    for part in raw_parts:
         validate_path_component(part, label="s3 object path segment")
-    return parts
+    return raw_parts
 
 
 def _download_object(client: Any, bucket: str, key: str, dest_dir: Path, prefix: str) -> None:
