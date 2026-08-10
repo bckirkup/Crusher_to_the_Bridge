@@ -57,7 +57,8 @@ def stratified_sample(rows: list[dict], k: int, seed: int) -> list[dict]:
         )
         buckets[key].append(r)
     for key in buckets:
-        rng.shuffle(buckets[key])
+        # Seeded stratified subsample for Stan — not crypto/auth (python:S2245).
+        rng.shuffle(buckets[key])  # NOSONAR
     keys = sorted(buckets.keys())
     chosen: list[dict] = []
     while len(chosen) < k and keys:
