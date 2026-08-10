@@ -65,8 +65,7 @@
         "logs:CreateLogStream",
         "logs:PutLogEvents",
         "logs:GetLogEvents",
-        "logs:DescribeLogStreams",
-        "logs:DescribeLogGroups"
+        "logs:DescribeLogStreams"
       ],
       "Resource": [
         "arn:aws:logs:<REGION>:<ACCOUNT_ID>:log-group:/aws/batch/picard-campaign",
@@ -75,6 +74,13 @@
         "arn:aws:logs:<REGION>:<ACCOUNT_ID>:log-group:/aws/batch/picard-boundary-analysis:*"
       ]
     },
+    {
+      "Sid": "CloudWatchDescribeLogGroups",
+      "Effect": "Allow",
+      "Action": ["logs:DescribeLogGroups"],
+      "Resource": "*"
+    },
+    {
       "Sid": "Ec2Discovery",
       "Effect": "Allow",
       "Action": [

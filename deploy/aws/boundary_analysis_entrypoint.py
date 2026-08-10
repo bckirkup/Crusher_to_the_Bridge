@@ -183,7 +183,7 @@ def main(argv: list[str] | None = None) -> int:
         _s3_sync(
             args.s3_campaign.rstrip("/") + "/",
             str(results) + "/",
-            exclude=("analysis/*", "_resume/*", "_ops/*"),
+            exclude=("analysis/*", "_resume/*", "_ops/*", "b2_*"),
         )
         out = analysis / "bundles" / "all"
         run_bundle(work=work, results=results, out=out)
@@ -195,7 +195,7 @@ def main(argv: list[str] | None = None) -> int:
         _s3_sync(
             args.s3_campaign.rstrip("/") + "/",
             str(results) + "/",
-            exclude=("analysis/*", "_resume/*", "_ops/*"),
+            exclude=("analysis/*", "_resume/*", "_ops/*", "b2_*"),
         )
         out = analysis / "surfaces"
         run_surface(

@@ -106,6 +106,7 @@ telemetry_buffer/c13b_contam_airborne_small/
 
 # Campaign analysis bundle / Stan fit outputs (local regenerable)
 /analysis/
+boundary_analysis/
 picard_framework/analysis/stan/*.exe
 picard_framework/analysis/stan/*.hpp
 

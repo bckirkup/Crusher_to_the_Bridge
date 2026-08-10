@@ -26,6 +26,7 @@ param(
   [string]$AwsProfile = $(if ($env:AWS_PROFILE) { $env:AWS_PROFILE } else { 'picard' }),
   [string]$Manifest = 'picard_framework/runs/mega_cruise_campaign/boundary_surface_v1_manifest.json',
   [string]$JobName = '',
+  [string]$Tier = '',
   [switch]$IncludeDeferred
 )
 
@@ -63,18 +64,46 @@ Write-Host "  array size  : $ShardCount"
 Write-Host "  s3 prefix   : $s3Prefix"
 Write-Host "  manifest    : $Manifest"
 Write-Host "  profile     : $AwsProfile"
-Write-Host "  deferred    : included=$IncludeDeferred (default wave-1 = b1 only)"
+Write-Host "  deferred    : included=$IncludeDeferred tier=$Tier"
 
 $params = "shard_count=$ShardCount,s3_prefix=$s3Prefix,manifest=$Manifest"
-$jobId = aws --profile $AwsProfile batch submit-job `
-  --job-name $JobName `
-  --job-queue $JobQueue `
-  --job-definition $JobDefinition `
-  --array-properties "size=$ShardCount" `
-  --parameters $params `
-  --region $Region `
-  --query 'jobId' `
-  --output text
+
+# Job def command has no --tier / --include-deferred; override when needed.
+$needOverride = $IncludeDeferred -or $Tier
+if ($needOverride) {
+  $cmd = @(
+    '--manifest', $Manifest,
+    '--shard-count', "$ShardCount",
+    '--s3-prefix', $s3Prefix,
+    '--resume',
+    '--timeout', '3600'
+  )
+  if ($Tier) { $cmd += @('--tier', $Tier) }
+  if ($IncludeDeferred) { $cmd += '--include-deferred' }
+  $cmdJson = ($cmd | ForEach-Object { '"' + ($_ -replace '\\','\\' -replace '"','\"') + '"' }) -join ','
+  $overFile = Join-Path $env:TEMP 'boundary-spot-overrides.json'
+  ('{"command":[' + $cmdJson + ']}') | Set-Content -NoNewline $overFile
+  $jobId = aws --profile $AwsProfile batch submit-job `
+    --job-name $JobName `
+    --job-queue $JobQueue `
+    --job-definition $JobDefinition `
+    --array-properties "size=$ShardCount" `
+    --parameters $params `
+    --container-overrides "file://$overFile" `
+    --region $Region `
+    --query 'jobId' `
+    --output text
+} else {
+  $jobId = aws --profile $AwsProfile batch submit-job `
+    --job-name $JobName `
+    --job-queue $JobQueue `
+    --job-definition $JobDefinition `
+    --array-properties "size=$ShardCount" `
+    --parameters $params `
+    --region $Region `
+    --query 'jobId' `
+    --output text
+}
 
 if ($LASTEXITCODE -ne 0 -or -not $jobId) {
   throw 'submit-job failed'
@@ -83,6 +112,3 @@ if ($LASTEXITCODE -ne 0 -or -not $jobId) {
 Write-Host "jobId=$jobId"
 Write-Host "Monitor:"
 Write-Host "  .\deploy\aws\monitor_campaign.ps1 -JobId $jobId -Bucket $Bucket -Prefix $Prefix -Watch"
-if ($IncludeDeferred) {
-  Write-Host "NOTE: -IncludeDeferred is informational; submit a dedicated deferred wave with containerOverrides --include-deferred if needed."
-}

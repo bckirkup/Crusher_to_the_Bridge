@@ -29,7 +29,7 @@
     "environment": [
       { "name": "PYTHONUTF8", "value": "1" },
       { "name": "PYTHONPATH", "value": "/app" },
-      { "name": "CMDSTAN", "value": "/opt/cmdstan" }
+      { "name": "CMDSTAN", "value": "/opt/cmdstan/cmdstan-2.39.0" }
     ],
     "logConfiguration": {
       "logDriver": "awslogs",

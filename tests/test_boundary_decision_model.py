@@ -413,7 +413,33 @@ def test_break_even_helper():
         cost_baseline_by_pi=[100.0, 200.0, 400.0],
         cost_policy_by_pi=[150.0, 180.0, 300.0],
     )
-    assert be == pytest.approx(0.002)
+    # Crosses between 0.001 (Δ=+50) and 0.002 (Δ=-20) → interpolate.
+    assert be == pytest.approx(0.001 + 50 / 70 * 0.001)
+
+    already = break_even_prevalence(
+        pi_grid=[0.001, 0.002],
+        cost_baseline_by_pi=[100.0, 200.0],
+        cost_policy_by_pi=[90.0, 150.0],
+    )
+    assert already == pytest.approx(0.001)
+
+    never = break_even_prevalence(
+        pi_grid=[0.001, 0.002],
+        cost_baseline_by_pi=[100.0, 200.0],
+        cost_policy_by_pi=[150.0, 250.0],
+    )
+    assert never is None
+
+
+def test_default_scenario_matrix_log_prevalence_grid():
+    matrix = load_scenario_matrix(None, smoke=False)
+    pis = [float(x) for x in matrix["axes"]["pi_inf"]]
+    assert len(pis) >= 20
+    assert pis[0] == pytest.approx(1e-4)
+    assert pis[-1] == pytest.approx(0.02)
+    # Approximately log-spaced: successive ratios near-constant.
+    ratios = [pis[i + 1] / pis[i] for i in range(len(pis) - 1)]
+    assert max(ratios) / min(ratios) < 1.05
 
 
 def test_p1_matches_p0_economics():
