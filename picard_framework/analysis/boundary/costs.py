@@ -131,13 +131,35 @@ def break_even_prevalence(
     cost_baseline_by_pi: list[float],
     cost_policy_by_pi: list[float],
 ) -> float | None:
-    """Smallest prevalence where policy expected cost <= baseline.
+    """Prevalence where policy expected cost crosses below baseline.
 
-    Returns None if never breaks even on the supplied grid.
+    Walks the sorted grid and **linearly interpolates** the first sign change
+    in ``(cost_policy - cost_baseline)``. Falls back to the first grid point
+    with ``cost_policy <= cost_baseline`` when the crossing is at the edge.
+    Returns None if the policy never breaks even on the supplied grid.
     """
     if len(pi_grid) != len(cost_baseline_by_pi) or len(pi_grid) != len(cost_policy_by_pi):
         raise ValueError("break_even_prevalence grid length mismatch")
-    for pi, c0, c1 in zip(pi_grid, cost_baseline_by_pi, cost_policy_by_pi):
-        if c1 <= c0:
-            return float(pi)
+    if not pi_grid:
+        return None
+
+    order = sorted(range(len(pi_grid)), key=lambda i: float(pi_grid[i]))
+    pis = [float(pi_grid[i]) for i in order]
+    dcost = [
+        float(cost_policy_by_pi[i]) - float(cost_baseline_by_pi[i]) for i in order
+    ]
+
+    if dcost[0] <= 0:
+        return pis[0]
+
+    for i in range(1, len(pis)):
+        prev, cur = dcost[i - 1], dcost[i]
+        if prev > 0 >= cur:
+            # Linear interpolate zero crossing of delta cost.
+            if prev == cur:
+                return pis[i]
+            t = prev / (prev - cur)
+            return float(pis[i - 1] + t * (pis[i] - pis[i - 1]))
+        if cur <= 0:
+            return pis[i]
     return None

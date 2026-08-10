@@ -7,6 +7,7 @@ from collections import defaultdict
 from typing import Any, Callable
 
 from picard_framework.analysis._io import allowed_roots, ensure_out_dir
+from picard_framework.analysis.boundary.costs import break_even_prevalence
 from simulation_utils.paths import prepare_output_directory, validated_open
 
 LABEL_EXPECTED_TOTAL_COST = "Expected total cost"
@@ -79,14 +80,17 @@ def _plot_line_series(
     xlabel: str = LABEL_PI_INF,
     hline: float | None = None,
     figsize: tuple[float, float] = (7, 4.5),
+    log_x: bool = True,
 ) -> str:
     import matplotlib.pyplot as plt
 
     fig, ax = plt.subplots(figsize=figsize)
     for label, pts in series:
-        ax.plot([p[0] for p in pts], [p[1] for p in pts], marker="o", label=label)
+        ax.plot([p[0] for p in pts], [p[1] for p in pts], marker="o", markersize=3, label=label)
     if hline is not None:
         ax.axhline(hline, color="gray", lw=0.8)
+    if log_x:
+        ax.set_xscale("log")
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
     ax.set_title(title)
@@ -114,7 +118,14 @@ def _breakeven_by_platform(rows: list[dict[str, Any]]) -> tuple[list[str], list[
             for r in rows
             if r.get("platform_class") == platform and r.get("policy") == "P2"
         }
-        be = next((pi for pi in sorted(set(p0) & set(p2)) if p2[pi] <= p0[pi]), None)
+        shared = sorted(set(p0) & set(p2))
+        if not shared:
+            continue
+        be = break_even_prevalence(
+            pi_grid=shared,
+            cost_baseline_by_pi=[p0[pi] for pi in shared],
+            cost_policy_by_pi=[p2[pi] for pi in shared],
+        )
         if be is not None:
             labels.append(str(platform))
             values.append(be)

@@ -14,6 +14,7 @@ avoid costly onboard outbreaks / VSP escalations under policies P0–P5.
 python3 -m picard_framework.analysis.boundary.run_decision_model --smoke
 
 # Full default matrix with fixture lookup
+# (4 platforms × 25 log-spaced π_inf × 6 policies = 600 scenarios)
 python3 -m picard_framework.analysis.boundary.run_decision_model \
   --lookup fixture --n-mc 2000 --seed 1701 --out boundary_analysis/
 

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "description": "Default high-volume pre-boarding decision matrix.",
+  "description": "Default high-volume pre-boarding decision matrix (25 log-spaced π_inf).",
   "defaults": {
     "pathogen": "norovirus",
     "season": "moderate",
@@ -14,7 +14,33 @@
   },
   "axes": {
     "platform_class": ["expedition", "classic", "spirit", "mega"],
-    "pi_inf": [0.0005, 0.002, 0.005, 0.01],
+    "pi_inf": [
+      0.0001,
+      0.000124703,
+      0.000155508,
+      0.000193923,
+      0.000241827,
+      0.000301565,
+      0.00037606,
+      0.000468958,
+      0.000584804,
+      0.000729266,
+      0.000909416,
+      0.00113407,
+      0.00141421,
+      0.00176356,
+      0.00219921,
+      0.00274248,
+      0.00341995,
+      0.00426478,
+      0.0053183,
+      0.00663206,
+      0.00827037,
+      0.0103134,
+      0.0128611,
+      0.0160381,
+      0.02
+    ],
     "policy": ["P0", "P1", "P2", "P3", "P4", "P5"],
     "cost_scenario": ["mid"]
   }

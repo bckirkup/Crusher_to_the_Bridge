@@ -21,7 +21,10 @@
         "ecr:DescribeRepositories",
         "ecr:CreateRepository"
       ],
-      "Resource": "arn:aws:ecr:<REGION>:<ACCOUNT_ID>:repository/picard-campaign"
+      "Resource": [
+        "arn:aws:ecr:<REGION>:<ACCOUNT_ID>:repository/picard-campaign",
+        "arn:aws:ecr:<REGION>:<ACCOUNT_ID>:repository/picard-boundary-analysis"
+      ]
     },
     {
       "Sid": "S3ResultsBucket",
@@ -64,7 +67,18 @@
         "logs:GetLogEvents",
         "logs:DescribeLogStreams"
       ],
-      "Resource": "arn:aws:logs:<REGION>:<ACCOUNT_ID>:log-group:/aws/batch/picard-campaign:*"
+      "Resource": [
+        "arn:aws:logs:<REGION>:<ACCOUNT_ID>:log-group:/aws/batch/picard-campaign",
+        "arn:aws:logs:<REGION>:<ACCOUNT_ID>:log-group:/aws/batch/picard-campaign:*",
+        "arn:aws:logs:<REGION>:<ACCOUNT_ID>:log-group:/aws/batch/picard-boundary-analysis",
+        "arn:aws:logs:<REGION>:<ACCOUNT_ID>:log-group:/aws/batch/picard-boundary-analysis:*"
+      ]
+    },
+    {
+      "Sid": "CloudWatchDescribeLogGroups",
+      "Effect": "Allow",
+      "Action": ["logs:DescribeLogGroups"],
+      "Resource": "*"
     },
     {
       "Sid": "Ec2Discovery",

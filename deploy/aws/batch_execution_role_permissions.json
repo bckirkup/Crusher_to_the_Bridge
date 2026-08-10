@@ -15,7 +15,10 @@
         "ecr:BatchGetImage",
         "ecr:GetDownloadUrlForLayer"
       ],
-      "Resource": "arn:aws:ecr:<REGION>:<ACCOUNT_ID>:repository/picard-campaign"
+      "Resource": [
+        "arn:aws:ecr:<REGION>:<ACCOUNT_ID>:repository/picard-campaign",
+        "arn:aws:ecr:<REGION>:<ACCOUNT_ID>:repository/picard-boundary-analysis"
+      ]
     },
     {
       "Sid": "CloudWatchLogs",
@@ -24,7 +27,10 @@
         "logs:CreateLogStream",
         "logs:PutLogEvents"
       ],
-      "Resource": "arn:aws:logs:<REGION>:<ACCOUNT_ID>:log-group:/aws/batch/picard-campaign:*"
+      "Resource": [
+        "arn:aws:logs:<REGION>:<ACCOUNT_ID>:log-group:/aws/batch/picard-campaign:*",
+        "arn:aws:logs:<REGION>:<ACCOUNT_ID>:log-group:/aws/batch/picard-boundary-analysis:*"
+      ]
     }
   ]
 }

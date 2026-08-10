@@ -61,6 +61,12 @@ Two credential contexts, both short-lived:
 | `classify_batch_failures.py` | Classify array-child attempts: Spot reclaim vs OOM vs timeout vs other. Write JSON/CSV; optional upload to `s3://…/campaign/_ops/`. | — |
 | `monitor_campaign.ps1` | Windows-friendly poller: Batch `statusSummary` + S3 `*.zip` count (optional `-Watch` / `-Classify`). | — |
 | `ensure_campaign_infra.sh` | Recreate missing queue/log group and register the current job definition (`AWS_PROFILE=picard`). Optional `--smoke-submit N`. | `ACCOUNT_ID`, `REGION`, `BUCKET` |
+| `submit_boundary_surface.ps1` | Submit `boundary_surface_v1` Spot array (`-Tier b2` / `-IncludeDeferred` via containerOverrides). | — |
+| `Dockerfile.analysis` | CmdStan analysis image for surface / Stan / MC (not Spot ABM). Must COPY crusher_labs + orchestrator deps; pin `CMDSTAN` to versioned install dir. | — |
+| `boundary_analysis_entrypoint.py` | Analysis container entrypoint (`--phase surface\|stan\|mc\|report`). | — |
+| `batch_job_definition_boundary_*.json` | On-Demand Fargate job defs for surface / Stan / MC. | `<ACCOUNT_ID>`, `<REGION>`, `<BUCKET>` |
+| `ensure_analysis_infra.ps1` | On-Demand CE `picard-analysis-ondemand` + queue + register analysis job defs. | — |
+| `submit_boundary_analysis.ps1` | Submit one analysis phase job. | — |
 | `aggregate_results.py` | Unzip `<run_id>.zip` under `./results/`, merge `summary.json` into one CSV/JSON | — |
 
 Replace `<ACCOUNT_ID>`, `<REGION>`, `<BUCKET>`, and `<EXTERNAL_ID>` placeholders
@@ -457,6 +463,49 @@ python3 aggregate_results.py ./results/ \
 and flattens the `summary` / `cost_accounting` / `derived` blocks into one row
 per run (plus `timeseries.present` / `timeseries.n_epochs`). For stacked
 epidemic curves see `deploy/aws/analyze_campaign_curves.py`.
+
+## Boundary surface campaign (`boundary_surface_v1`)
+
+Multi-pathogen k-sweep for pre-boarding decision surfaces (10,000 Tier-1 runs;
+7,600 deferred Tier-2). Full notes:
+[`docs/boundary_aws_pipeline_lessons.md`](../docs/boundary_aws_pipeline_lessons.md).
+
+**Light validation only** (do not full-matrix dry-run):
+
+```bash
+python -m picard_framework.runs.mega_cruise_campaign.count_manifest_cartesian \
+  picard_framework/runs/mega_cruise_campaign/boundary_surface_v1_manifest.json
+# expect wave1=10000 wave2=7600
+python picard_framework/runs/mega_cruise_campaign/campaign_runner.py --smoke
+```
+
+**Phase 1 Spot** (rebuild image after manifest changes):
+
+```powershell
+docker build -t picard-campaign .
+# ECR login/tag/push as in §3
+# Re-register batch_job_definition.json if ACTIVE rev pins a stale tag (not :latest)
+.\deploy\aws\submit_boundary_surface.ps1 -ShardCount 200
+# Tier-2 deferred (same prefix; resume):
+.\deploy\aws\submit_boundary_surface.ps1 -Tier b2 -ShardCount 200
+```
+
+**Phases 2–5 On-Demand** (separate CmdStan image — never on Spot ABM workers):
+
+```powershell
+docker build -f deploy/aws/Dockerfile.analysis -t picard-boundary-analysis .
+# create ECR repo picard-boundary-analysis; push; re-apply execution-role policy
+.\deploy\aws\ensure_analysis_infra.ps1   # needs SUBNET_IDS + SECURITY_GROUP_IDS in .env if CE missing
+.\deploy\aws\submit_boundary_analysis.ps1 -Phase surface
+.\deploy\aws\submit_boundary_analysis.ps1 -Phase bundle
+.\deploy\aws\submit_boundary_analysis.ps1 -Phase stan -Pathogen norovirus
+.\deploy\aws\submit_boundary_analysis.ps1 -Phase mc -Pathogen norovirus
+```
+
+Re-apply `batch_execution_role_permissions.json` so the execution role can pull
+`picard-boundary-analysis` and write `/aws/batch/picard-boundary-analysis`.
+Lived gotchas (stale job-def tags, `CMDSTAN` versioned path, analysis COPY
+deps, `DescribeLogGroups` on `*`): `docs/boundary_aws_pipeline_lessons.md`.
 
 ## Why role assumption (vs. static keys)
 

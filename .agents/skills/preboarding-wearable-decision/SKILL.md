@@ -20,7 +20,7 @@ import): **same repo, not the ship epoch loop**.
 # Smoke (fixture surface; no CmdStan)
 python3 -m picard_framework.analysis.boundary.run_decision_model --smoke
 
-# Default matrix
+# Default matrix (4×25×6 = 600 scenarios; break-even interpolates on log grid)
 python3 -m picard_framework.analysis.boundary.run_decision_model \
   --lookup fixture --n-mc 2000 --out boundary_analysis/
 
@@ -42,7 +42,7 @@ python3 -m picard_framework.analysis.boundary.run_decision_model \
 |------|------|
 | `picard_framework/analysis/boundary/` | Package (prevalence, screening, costs, lookup, CLI) |
 | `fixtures/outbreak_surface.json` | CI/smoke response surfaces |
-| `data/scenario_matrix.json` | Full campaign axes |
+| `data/scenario_matrix.json` | Full campaign axes (4 platforms × **25 log-spaced** `π_inf` × P0–P5) |
 | `schemas/preboarding_decision_*.schema.json` | Scenario + summary contracts |
 | `docs/preboarding_wearable_decision_model_spec.md` | Full spec |
 | `tests/test_boundary_decision_model.py` | Golden + sensitivity + CLI smoke |
@@ -61,6 +61,12 @@ python3 -m picard_framework.analysis.boundary.run_decision_model \
 ```bash
 python3 -m pytest tests/test_boundary_decision_model.py -v --tb=short
 ```
+
+## AWS pipeline
+
+For the multi-pathogen `boundary_surface_v1` Spot + On-Demand Stan/MC path see
+`.agents/skills/boundary-aws-pipeline/SKILL.md` and
+`docs/boundary_aws_pipeline_lessons.md`.
 
 ## Non-goals (Phase 1)
 

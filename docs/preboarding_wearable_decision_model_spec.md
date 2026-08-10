@@ -288,7 +288,11 @@ Crew mandatory:     a = 1.00 for crew
 ```
 
 ### Embarkation prevalence
-Use scenario priors rather than a single estimate:
+Default decision matrix uses a **25-point log-spaced** sweep
+`π_inf ∈ [0.0001, 0.02]` (not four coarse strata) so VoI peaks, break-even
+crossings, and cost rollover are resolvable. Smoke/CI keeps a 2-point grid.
+
+Named strata for narrative scenarios:
 
 ```text
 low:       0.05% infectious
