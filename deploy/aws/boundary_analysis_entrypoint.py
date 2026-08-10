@@ -96,6 +96,43 @@ def _excluded(key: str, prefix: str, patterns: Sequence[str]) -> bool:
     return any(fnmatch.fnmatch(rel, pat) for pat in patterns)
 
 
+def _safe_key_parts(key: str, prefix: str) -> list[str] | None:
+    """Return validated relative path segments for an S3 object key, or None."""
+    if key.endswith("/"):
+        return None
+    rel = key[len(prefix) :] if prefix and key.startswith(prefix) else key
+    parts = [p for p in rel.split("/") if p and p not in {".", ".."}]
+    if not parts:
+        return None
+    for part in parts:
+        validate_path_component(part, label="s3 object path segment")
+    return parts
+
+
+def _download_object(client: Any, bucket: str, key: str, dest_dir: Path, prefix: str) -> None:
+    parts = _safe_key_parts(key, prefix)
+    if parts is None:
+        return
+    local = dest_dir.joinpath(*parts)
+    local.parent.mkdir(parents=True, exist_ok=True)
+    print(f"+ {_S3_SCHEME}{bucket}/{key} -> {local}", flush=True)
+    client.download_file(bucket, key, str(local))
+
+
+def _iter_s3_keys(client: Any, bucket: str, prefix: str) -> Any:
+    token: str | None = None
+    while True:
+        kwargs: dict[str, Any] = {"Bucket": bucket, "Prefix": prefix}
+        if token:
+            kwargs["ContinuationToken"] = token
+        page = client.list_objects_v2(**kwargs)
+        for obj in page.get("Contents") or ():
+            yield str(obj["Key"])
+        if not page.get("IsTruncated"):
+            return
+        token = page.get("NextContinuationToken")
+
+
 def _s3_download_prefix(
     uri: str,
     dest_dir: Path,
@@ -110,32 +147,10 @@ def _s3_download_prefix(
         prefix = prefix + "/"
     dest_dir.mkdir(parents=True, exist_ok=True)
     client = _s3_client()
-    token: str | None = None
-    while True:
-        kwargs: dict[str, Any] = {"Bucket": bucket, "Prefix": prefix}
-        if token:
-            kwargs["ContinuationToken"] = token
-        page = client.list_objects_v2(**kwargs)
-        for obj in page.get("Contents") or ():
-            key = str(obj["Key"])
-            if key.endswith("/"):
-                continue
-            if exclude and _excluded(key, prefix, exclude):
-                continue
-            rel = key[len(prefix) :] if prefix and key.startswith(prefix) else key
-            # Reject traversal in object keys.
-            parts = [p for p in rel.split("/") if p and p not in {".", ".."}]
-            if not parts:
-                continue
-            for part in parts:
-                validate_path_component(part, label="s3 object path segment")
-            local = dest_dir.joinpath(*parts)
-            local.parent.mkdir(parents=True, exist_ok=True)
-            print(f"+ s3://{bucket}/{key} -> {local}", flush=True)
-            client.download_file(bucket, key, str(local))
-        if not page.get("IsTruncated"):
-            break
-        token = page.get("NextContinuationToken")
+    for key in _iter_s3_keys(client, bucket, prefix):
+        if exclude and _excluded(key, prefix, exclude):
+            continue
+        _download_object(client, bucket, key, dest_dir, prefix)
 
 
 def _s3_upload_tree(src_dir: Path, uri: str) -> None:
@@ -152,7 +167,7 @@ def _s3_upload_tree(src_dir: Path, uri: str) -> None:
         for part in rel.split("/"):
             validate_path_component(part, label="upload path segment")
         key = f"{prefix}/{rel}" if prefix else rel
-        print(f"+ {path} -> s3://{bucket}/{key}", flush=True)
+        print(f"+ {path} -> {_S3_SCHEME}{bucket}/{key}", flush=True)
         client.upload_file(str(path), bucket, key)
 
 
