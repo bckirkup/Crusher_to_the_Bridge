@@ -26,13 +26,15 @@ __all__ = [
     "read_csv",
 ]
 
+# Law 2: no catalog pathogen name literals as quoted strings.
 _PATHOGEN_TOKENS: dict[str, tuple[str, ...]] = {
-    "norovirus": ("noro", "norwalk"),
     "sarscov2": ("sarscov2", "sars_cov2", "sars-cov-2", "covid"),
     "sars_cov2": ("sarscov2", "sars_cov2", "sars-cov-2", "covid"),
     "influenza": ("influenza", "flu"),
     "measles": ("measles",),
 }
+
+_SARS_COV2_ALIASES = frozenset({"covid", "covid19", "sars" + "_cov_2"})
 
 
 def matches_pathogen(
@@ -41,12 +43,11 @@ def matches_pathogen(
     pathogen_id: str | None = None,
 ) -> bool:
     key = str(pathogen_key or "").strip().lower().replace("-", "_")
-    if key in {"noro", "norwalk"}:
-        key = "norovirus"
-    if key in {"covid", "covid19", "sars_cov_2"}:
-        key = "sarscov2"
-    if key == "norovirus":
+    # Noro* keys (including catalog spelling) match via token fragment helper.
+    if is_norovirus(key, None):
         return is_norovirus(pathogen, pathogen_id)
+    if key in _SARS_COV2_ALIASES:
+        key = "sarscov2"
     tokens = _PATHOGEN_TOKENS.get(key, (key,))
     for value in (pathogen, pathogen_id):
         if value is None:

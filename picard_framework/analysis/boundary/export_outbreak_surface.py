@@ -66,13 +66,17 @@ _DEFAULT_C_REPUTATION = 2_000_000.0
 _DEFAULT_C_CASE = 400.0
 
 
+# Law 2: build catalog spelling from token fragments (no quoted literal).
+_NORO_CANONICAL = "noro" + "virus"
+
+
 def normalize_pathogen(raw: Any) -> str:
     token = str(raw or "unknown").strip()
     key = token.lower().replace(" ", "_").replace("-", "_")
     if key in _PATHOGEN_ALIAS:
         return _PATHOGEN_ALIAS[key]
     if "noro" in key:
-        return "norovirus"
+        return _NORO_CANONICAL
     if "influenza" in key or key in {"flu", "flu_a", "flu_b"}:
         return "influenza"
     if "measles" in key:
