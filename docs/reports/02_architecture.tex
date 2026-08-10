@@ -1,0 +1,280 @@
+\chapter{Model Architecture}
+
+\section{Prior confined-environment ABMs}
+CTB is designed to model a regulated, instrumented confined environment rather than an unobserved epidemic curve. Prior confined-environment models provide parts of this capability, but they
+usually emphasize one layer at a time: individual contacts, spatial movement, route attribution, airflow, or a small intervention set. The distinction matters for cruise ships because the
+empirical endpoint is already altered by case recognition, isolation, cleaning, food-service changes, and regulatory reporting. CTB therefore treats infection generation, observation, and
+response as one coupled system.
+
+Table~\ref{tab:confined-abm-comparison} summarizes the comparison used to position the model. The table includes agent-based models and closely related mechanistic ship or indoor-air models
+because cruise-ship transmission lies at the intersection of individual mobility and multizone environmental transport. Kerkmann 2024 and Kou 2021 were not cited because the literature audit
+could not verify those items as requested. The defensible novelty claim is narrow: among the accessible comparators reviewed here, none was found to combine individual route-weighted dose
+response, CONTAM-style multizone HVAC coupling, multiple pathogens, VSP-style escalation, wearable biosurveillance, and operational decision logic in one cruise-ship framework.
+
+{\small\setlength{\tabcolsep}{3pt}\begin{longtable}{p{0.14\textwidth}p{0.15\textwidth}p{0.22\textwidth}p{0.23\textwidth}p{0.16\textwidth}}
+\caption{Prior confined-environment transmission models and their relationship to CTB.}\label{tab:confined-abm-comparison}\\
+\toprule
+Study & Environment and type & Transmission representation & Calibration or validation & Limitation relative to CTB \\
+\midrule
+\endfirsthead
+\toprule
+Study & Environment and type & Transmission representation & Calibration or validation & Limitation relative to CTB \\
+\midrule
+\endhead
+\citet{Hunter2018OpenDataABM} & Open-data ABM for Irish towns & NetLogo spatial SEIR with co-location contacts, census and land-use driven agents, and stochastic disease periods & Tested against the 2012 Schull measles outbreak and transferred to multiple towns & No ship geometry, HVAC transport, route-specific dose accumulation, or regulatory response layer \\
+\citet{Pan2026HealthyCruiseShip} & Reported cruise-ship ABM for healthy ship design & Spatial and operational interventions are indicated by metadata, but detailed mechanics were not available in the reviewed text & Not recoverable from accessible full text in the literature review & Potentially adjacent to CTB, but feature-level comparison could not be verified \\
+\citet{Rankin2022DiamondPrincessABM} & NetLogo3D Diamond Princess ABM & Stochastic SEIR agents with passenger and crew movement, proximity contacts, and quarantine-restricted movement & Compared with the observed Diamond Princess attack fraction and a previous SEIR estimate & No explicit aerosol concentration, fomite route, dose-response, or dynamic instrument-driven response \\
+\citet{Azimi2021DiamondPrincess} & Mechanistic Diamond Princess pathway model, not a conventional ABM & Markov-chain environmental states separating short-range, long-range, fomite, aerosol, and large-droplet pathways & Large scenario sweep accepted by epidemic-curve fit criteria & Aggregated population states rather than autonomous ship agents and operational protocols \\
+\citet{Xia2023CONTAMCruiseShip} & CONTAM plus Wells--Riley risk on a passenger ship & Multizone airflow and airborne-virus risk under prescribed occupant assumptions & Applied to an operating-vessel case without outbreak-curve validation in the retrieved evidence & Strong air-transport layer, but not an individual outbreak model with clinical observation and SOP response \\
+\citet{DOrazio2020RestartPublicBuildings} & Public-building ABM calibrated using Diamond Princess & Occupant movement, close-contact duration, masks, density reduction, and infectious-entry restrictions & Transmission coefficient tuned to the Diamond Princess epidemic segment and used for building scenarios & No ship operating model, multizone HVAC solver, or multi-pathogen dose framework \\
+\citet{Zheng2016CruiseShipInterventions} & Cruise-ship individual contact network and SEIR-like model & Cabins, restaurants, shared spaces, air-change rate, HEPA, UVGI, masks, and quarantine & Validated against a previous cruise-ship influenza outbreak & Ship-specific intervention comparison without the surveillance cascade, multiple pathogens, or CTB's route-weighted dose ledger \\
+\bottomrule
+\end{longtable}}
+
+This comparison motivates the architectural choice. The model must represent where people are, what route-specific dose they receive, which instrument would observe the event, and what
+response would be triggered. A pure contact ABM cannot answer airflow questions. A pure CONTAM or Wells--Riley calculation cannot answer quarantine-compliance or diagnostic-delay questions.
+A static intervention sweep cannot represent an escalation system in which the intervention exists only after the ship generates sufficient evidence.
+
+\section{CTB architecture overview}
+CTB is implemented in the public repository \url{https://github.com/bckirkup/Crusher_to_the_Bridge} and documented in code-grounded DeepWiki pages for the architecture overview, transmission
+core, and reactive protocol engine.\footnote{DeepWiki pages used here are the indexed \url{https://deepwiki.com/bckirkup/Crusher_to_the_Bridge/1-architecture-overview},
+\url{https://deepwiki.com/bckirkup/Crusher_to_the_Bridge/1.2-four-pathway-transmission-core}, and \url{https://deepwiki.com/bckirkup/Crusher_to_the_Bridge/1.6-reactive-protocol-engine}.} The
+codebase uses a decoupled architecture: a central orchestrator owns the epoch loop and passes state among engines for mobility, infection biology, transport, observation, protocols, cost,
+and telemetry. The design is intentionally modular because shipboard outbreaks couple processes with different natural units: individuals, zones, airflows, samples, SOPs, and resource
+ledgers.
+
+Each simulation is a discrete-time voyage. The present implementation uses hourly epochs, matching the transport bridge constant \texttt{HOURS\_PER\_EPOCH = 1.0} and the per-epoch
+orchestrator design. Let $t=0,1,\ldots,T$ index epochs. At each epoch, CTB advances the following state vector:
+\begin{equation}
+\mathcal{S}(t)=\{X_i(t), L_i(t), B_i(t), C_i(t), M_{z,p}(t), F_{z,p}(t), A_{z,p}(t), R(t)\},
+\end{equation}
+where $X_i$ is the disease state of agent $i$, $L_i$ is location, $B_i$ is behavioral or compliance state, $C_i$ is cabin or class assignment, $M_{z,p}$ is airborne pathogen mass for
+pathogen $p$ in zone $z$, $F_{z,p}$ is surface or food-associated mass, $A_{z,p}$ is the set of instrument observations available for zone or agent targets, and $R(t)$ is the regulatory or
+SOP response state.
+
+The epoch loop is ordered to avoid circular interpretation of a response. First, the Korkin-derived ship engine updates agent movement and disease progression. Second, pathogen shedding and
+route-specific exposure are calculated from current locations and persistent environmental pools. Third, aerosol mass is transported natively or through the CONTAM branch. Fourth,
+observation instruments sample agents, surfaces, air, wastewater, wearable streams, or clinical specimens. Fifth, stoplight logic converts raw instrument results into GREEN, AMBER, or RED
+signals. Sixth, the protocol engine evaluates SOP triggers, applies modifiers to the next epoch, and debits activation or recurring costs. Finally, telemetry is serialized as simulation
+history, artificial-lab-notebook records, contact tracing matrices, and resource ledgers.
+
+Agents are initialized by \texttt{orchestrator\_init.py} from the platform spatial layout, role fractions, pathogen profiles, and voyage configuration. The initialization layer assigns
+passenger or crew roles, home zones, cabin-mate sets, graywater collection zones, isolation-unit capacity, and pathogen seeding. Cabin grouping is explicit: agents assigned to a
+\texttt{Cabin\_Corridor} are grouped into stateroom-size cohorts, and those cabin-mate IDs are later used to distinguish household-like exposure from non-mate corridor exposure during
+confinement. This is a material distinction for ship simulations because quarantine does not remove a person from the ship air system and does not eliminate cabin-mate exposure.
+
+The spatial model is a graph of zones rather than a continuous geometry. Zones carry attributes such as type, traffic class, deck, volume, cabin ventilation type, cabin size, maximum
+occupancy, dining service type, and food-contamination multiplier. This representation is detailed enough to support cabin corridors, dining venues, galleys, medical spaces, public rooms,
+engineering spaces, graywater collection, and HVAC nodes while still allowing large campaign sweeps. Campaign scale for the monograph is 69,750 simulation runs across 12 campaigns, 4
+pathogens, and 4 vessel platforms, with 285 CDC VSP empirical outbreak records used as the calibration reference set.
+
+\section{Agent state and pathogen seeding}
+For pathogen $p$, agent $i$ has a disease state
+\begin{equation}
+X_{i,p}(t)\in\{S,E,I_{a},I_{s},R,Q\},
+\end{equation}
+where $S$ is susceptible, $E$ exposed, $I_a$ asymptomatic infectious, $I_s$ symptomatic infectious, $R$ recovered or no longer infectious, and $Q$ confined, quarantined, or isolated. The
+implementation stores these states through the infection-dynamics bridge and pathogen-aware agent methods rather than a single global SIR label. Multiple concurrent pathogens are therefore
+represented as pathogen-specific infection histories.
+
+Pathogen seeding can occur at initialization or during the voyage. The initialization layer loads active pathogen profiles and infects configured initial agents or introduces pathogen mass
+into environmental reservoirs. Mid-cruise introductions are handled as epoch events so that port visits, embarkation layers, or late infectious arrivals can be represented without changing
+the core transmission equations. Let $I_{p}^{0}$ be the set of initially infected agents for pathogen $p$ and $J_p(t)$ be any introduction process during the voyage. Then the infected set
+evolves by
+\begin{equation}
+\mathcal{I}_{p}(t+1)=\mathcal{I}_{p}(t)\cup \mathcal{N}_{p}(t)\cup J_p(t),
+\end{equation}
+where $\mathcal{N}_{p}(t)$ is the set of new infections produced by the dose-response step. This separation keeps imported cases distinct from secondary transmission, which is necessary for
+estimating offspring distributions and fade-out probability.
+
+Shedding is profile-specific. The common implementation form is a log-scale shedding curve adjusted by a fitted dose parameter:
+\begin{equation}
+V_{i,p}(t)=10^{s_p(\tau_{i,p}(t))-\doseadj_p},
+\end{equation}
+where $s_p(\tau)$ is the pathogen-specific log shedding trajectory at time since infection or symptom onset $\tau$, and $\doseadj_p$ maps biological shedding units to effective simulation
+dose. This equation is the interface between pathogenesis and transmission. It allows norovirus, SARS-CoV-2, measles, Legionella, or other configured pathogens to share the same route ledger
+while retaining different shedding timing, dose-response parameters, route weights, and environmental persistence.
+
+\section{Four-pathway transmission core}
+The transmission engine is called \texttt{TransmissionCore} in \texttt{engines/}\allowbreak\texttt{transmission\_core.py}. It began as a four-pathway engine with direct contact, short-range droplet, long-range
+airborne transport, and fomite deposition. The current implementation retains those four primary pathways and extends them with food contamination and environmental-source pathways for
+enteric and colonized-environment pathogens. For formal notation, define
+\begin{equation}
+\mathcal{R}=\{\mathrm{contact},\mathrm{droplet},\mathrm{airborne},\mathrm{fomite},\mathrm{food},
+\mathrm{environmental}\}.
+\end{equation}
+When a pathogen profile does not enable food or environmental-source transmission, the corresponding dose terms are zero.
+
+The route-weighted dose received by agent $i$ for pathogen $p$ in epoch $t$ is
+\begin{equation}
+D_{i,p}^{\mathrm{total}}(t)=\sum_{r\in\{\mathrm{contact},\mathrm{droplet},\mathrm{airborne},\mathrm{fomite},\mathrm{food}\}}
+w_{p,r}\,D_{i,p,r}(t),
+\label{eq:route-weighted-dose}
+\end{equation}
+with an additional environmental term when enabled. Here $w_{p,r}$ is the pathogen-specific transmission-route weight and $D_{i,p,r}$ is the raw route dose delivered by the pathway module.
+The code resolves absent route weights to identity values, so a profile can opt into route weighting without changing the default behavior. The per-agent dose accumulator then applies
+susceptibility multipliers before infection sampling.
+
+The default infection probability uses the beta-Poisson form specified in the pathogen profile:
+\begin{equation}
+P_{i,p}(\mathrm{infection}\mid D)=1-\left(1+\frac{D_{i,p}^{\mathrm{total}}}{\beta_p}\right)^{-\alpha_p}.
+\label{eq:beta-poisson}
+\end{equation}
+An exponential dose-response option is also implemented for pathogens or calibration settings that use a single rate constant:
+\begin{equation}
+P_{i,p}(\mathrm{infection}\mid D)=1-\exp(-\kappa_p D_{i,p}^{\mathrm{total}}).
+\end{equation}
+Only susceptible, non-immune agents are sampled. If infection occurs, the event is recorded with the dominant pathway, total dose, pathogen ID, zone, and pathway breakdown.
+
+Direct contact is calculated inside each occupied zone. In density-dependent mode, the effective number of contacts for target agent $i$ in a zone with $N_z(t)$ occupants is sampled around
+\begin{equation}
+\bar{C}_{i,z}(t)=c_0\left(\frac{N_z(t)}{N_{\mathrm{ref}}}\right)^{\alpha_c}m_i(t),
+\end{equation}
+where $c_0$ is the base contact rate, $N_{\mathrm{ref}}$ is reference occupancy, $\alpha_c$ is the contact-density exponent, and $m_i(t)$ includes voyage contact scaling and crew service
+multipliers in dining or galley zones. A hard maximum caps the draw. In legacy mode, contacts are drawn from the original average-contact pool. In heterogeneous-zone-dose mode, a mean-one
+lognormal exposure factor
+\begin{equation}
+H_z\sim\exp\{\mathcal{N}(-\sigma_z^2/2,\sigma_z^2)\}
+\end{equation}
+multiplies within-zone dose so that expected mean exposure is preserved while crowded or service venues can generate stronger tails.
+
+Short-range droplet exposure converts a fraction of shedding to same-room aerosol mass. The implementation uses a droplet aerosolization fraction and an inhalation fraction per epoch. For
+target $i$ in zone $z$,
+\begin{equation}
+D_{i,p,\mathrm{droplet}}(t)=\phi_{\mathrm{drop}}\,\psi_{\mathrm{inh}}\,
+\sum_{j\in\mathcal{I}_{p,z}(t)}V_{j,p}(t)\,q_i(t)\,b_z,
+\end{equation}
+where $\phi_{\mathrm{drop}}$ is the droplet aerosol fraction, $\psi_{\mathrm{inh}}$ is the inhaled fraction, $q_i(t)$ is the confinement factor, and $b_z$ is the balcony or zone ventilation
+factor. The same shedding mass is also added to the zone aerosol pool for later transport.
+
+Long-range airborne exposure uses the mass present in a target zone after native or CONTAM transport. If $M_{z,p}(t)$ is aerosol mass and $V_z$ is zone volume, then
+\begin{equation}
+D_{i,p,\mathrm{airborne}}(t)=\psi_{\mathrm{inh}}\,\frac{M_{z,p}(t)}{V_z}\,V_z\,a_{\mathrm{HVAC}}(t)b_z,
+\end{equation}
+where $a_{\mathrm{HVAC}}$ is the active HVAC-airborne scalar injected by protocols. The algebra cancels $V_z$ in this implementation because inhalation is represented as a fraction of room
+mass rather than as an explicit breathing-flow term. That simplification is adequate for campaign comparisons but should be refined for absolute inhaled-dose validation.
+
+Fomite exposure is persistent across epochs. Surface pools receive deposited mass from shedders, decay each epoch, and are picked up by later agents with a pickup probability and transfer
+fraction. Quarantined agents in cabin corridors skip public fomite pickup, while cabin-mate exposure remains possible. Food contamination is a separate pool for dining-type zones. A small
+fraction of shedding deposits into food pools and a configured fraction of that pool is ingested by agents in enabled food zones. Environmental-source transmission supports pathogens such as
+Legionella by delivering dose from a zone-scoped or global environmental reservoir even in the absence of infected human shedders.
+
+\section{CONTAM HVAC coupling}
+The CONTAM branch is implemented by \texttt{engines/py\_contam\_bridge.py} as a native Python bridge to multizone airflow and contaminant transport. It reads \texttt{air\_flow\_paths.json},
+builds zone nodes from the platform spatial layout, and constructs airflow paths from three sources: HVAC recirculation, cross-zone links, and passive adjacency. The star-topology HVAC
+representation sends room return air to a virtual AHU plenum and then supplies filtered recirculated air back to rooms. Outdoor-air fraction removes a fraction of return pathogen mass before
+supply, and filter efficiency applies to ducted supply paths.
+
+For zone $z$, the bridge solves a well-mixed contaminant ODE analytically at each epoch:
+\begin{equation}
+\frac{dM_{z,p}}{dt}=S_{z,p}(t)-k_z M_{z,p}(t),
+\end{equation}
+\begin{equation}
+M_{z,p}(t+\Delta t)=M_{z,p}(t)e^{-k_z\Delta t}+\frac{S_{z,p}(t)}{k_z}
+\left(1-e^{-k_z\Delta t}\right),
+\label{eq:contam-ode}
+\end{equation}
+where $S_{z,p}$ is the filtered inflow source rate and
+\begin{equation}
+k_z=\sum_{z'}\frac{Q_{z\rightarrow z'}}{V_z}+\lambda_p.
+\end{equation}
+The terms $Q_{z\rightarrow z'}$, $V_z$, and $\lambda_p$ are volumetric flow, zone volume, and natural decay or settling rate. This branch is used when airborne route attribution or
+native-versus-CONTAM validation is part of the experiment. For campaign-scale runs where HVAC is not the tested mechanism, the native transport branch preserves tractable runtime.
+
+\section{Observation engine and diagnostic cascade}
+CTB separates infection from observation. The observation engine samples the simulated ship through instruments rather than assuming that all infections are immediately known. The instrument
+set includes continuous air sampling, targeted surface swabs, wastewater sequencing grids, clinical rapid diagnostics, clinical qPCR, clinical microbiology, long-read verification, wearable
+physiological monitoring, and fleet-level wearable summaries. Each instrument produces raw observations such as Ct values, detection booleans, anomaly scores, clinical positives, or
+microbiome disruption values. Those raw observations are then converted to stoplight states.
+
+A generic observation model for modality $m$ can be written as
+\begin{equation}
+Y_m(t)=g_m\{\mathcal{S}(t-\delta_m),\theta_m\}+\epsilon_m(t),
+\end{equation}
+where $\delta_m$ is reporting delay, $\theta_m$ contains sensitivity, specificity, coverage, and threshold parameters, and $\epsilon_m$ is instrument noise. The stoplight function is
+\begin{equation}
+Z_m(t)=h_m(Y_m(t))\in\{\mathrm{GREEN},\mathrm{AMBER},\mathrm{RED}\}.
+\end{equation}
+For Ct-based instruments, low Ct values map to stronger stoplights when detection is positive. For wastewater and microbiome disruption, anomaly scores map to stoplights. For clinical RDTs,
+positives map directly to RED. For syndromic surveillance, the sick-call count is compared with configured AMBER and RED thresholds.
+
+The diagnostic cascade uses those stoplights to represent escalation across information sources. A virtual \texttt{detection\_escalation} instrument aggregates syndromic, wearable,
+environmental, and clinical modes. For a set of modes $\mathcal{M}$, the integrated level can be represented as
+\begin{equation}
+L(t)=\max_{m\in\mathcal{M}} Z_m(t),
+\end{equation}
+with the ordering GREEN $<$ AMBER $<$ RED. Protocols can require multiple affected modes, zones, or agents before firing. This design permits onboard response to depend on concordant signals
+rather than on a single perfect observer.
+
+\section{Reactive protocol engine}
+The reactive protocol engine is implemented in \texttt{crusher\_labs/protocol\_engine.py} and configured through protocol JSON files validated by schema contracts. At the end of each epoch,
+it recomputes stoplights from raw results, checks SOP trigger conditions, applies escalation gates, observes activation delays, activates or deactivates SOPs, merges modifiers, and debits
+costs through the cost ledger. This makes response a function of evidence generated by the simulated ship. The model rule is no hardcoded epoch schedules for outbreak response; interventions
+fire because instrument or attack-rate conditions are met.
+
+A protocol $s$ is eligible when its trigger condition is satisfied:
+\begin{equation}
+\mathbb{1}_{s}^{\mathrm{trigger}}(t)=
+\mathbf{1}\left\{\sum_{u\in U_s}\mathbf{1}\left[Z_{m_s,u}(t)\ge z_s\right]\ge n_s\right\},
+\end{equation}
+where $m_s$ is the instrument class, $U_s$ is the set of zones, agents, or modes evaluated by the trigger, $z_s$ is the required stoplight level, and $n_s$ is the minimum affected count. If
+the SOP has an escalation gate, ship status must also exceed the required rank. If it has an activation delay $\ell_s$, modifiers apply only after the trigger has persisted long enough:
+\begin{equation}
+A_s(t)=\mathbf{1}\{\mathbb{1}_{s}^{\mathrm{trigger}}(t-\ell_s)=1,\;E(t)\ge E_s^{\min}\}.
+\end{equation}
+
+SOP modifiers are ordinary model parameters exposed through the protocol layer. Examples include \texttt{direct\_contact\_scalar},\\ \texttt{droplet\_scalar},
+\texttt{hvac\_filter\_efficiency\_override}, \texttt{close\_zones}, diagnostic cadence changes, and PPE or cleaning effects. Scalar reductions use the most restrictive value when several
+protocols are active; list-based closures are unioned. The cost ledger records both one-time activation costs and recurring per-epoch costs. This cost accounting is important because
+surveillance is evaluated not only by attack-rate reduction but also by the decision quality of when expensive escalation occurs.
+
+VSP-style escalation is represented as a threshold rule on observed illness rather than on true infection. Let $\mathrm{AR}_{\mathrm{cum}}(t)$ be cumulative reportable acute-gastroenteritis
+attack rate. The VSP trigger is
+\begin{equation}
+\mathrm{escalate}(t)=\mathbf{1}\{\mathrm{AR}_{\mathrm{cum}}(t)>\theta_{\mathrm{VSP}}\}.
+\label{eq:vsp-trigger}
+\end{equation}
+The baseline calibration uses the VSP reporting threshold as a response backstop. Because the trigger is tied to observed illness, the same biological parameterization can produce a high
+uncontrolled attack rate and a much lower public record after response.
+
+\section{Overdispersion and superspreading}
+Superspreading is represented as an emergent distribution of secondary cases rather than as a fixed label attached to a subset of agents. The conventional summary is the negative-binomial
+offspring distribution
+\begin{equation}
+Z_i\sim\operatorname{NegBin}(R,k),\qquad
+\operatorname{Var}(Z_i)=R+\frac{R^2}{k},
+\end{equation}
+where small $k$ indicates strong overdispersion \citep{LloydSmith2005,Endo2020Overdispersion}. For SARS-CoV-2, early cluster analyses estimated strong overdispersion, and reviews emphasize
+that large events arise from the concurrence of infectiousness, behavior, environment, and opportunity \citep{Althouse2020Superspreading}. At the same time, a fitted negative-binomial $k$
+can conflate network structure, observation bias, temporal infectiousness, intervention timing, and setting mixtures \citep{Zhao2022NegativeBinomial}.
+
+ABMs capture overdispersion naturally when their contact and environment layers are sufficiently heterogeneous. In CTB, large offspring counts can arise when an infectious agent has high
+shedding near peak infectiousness, works as crew in a dining or galley zone, attends a crowded venue, shares a cabin, contaminates a food or surface pool, or occupies a poorly ventilated
+zone that feeds downstream airflow. The heterogeneous-zone-dose mode adds residual within-zone variability while preserving the mean dose. The preferred calibration workflow is therefore
+mechanism first and offspring-distribution check second. If the simulated zero-transmitter fraction, upper-tail secondary-case counts, largest event size, and extinction probability already
+match data, adding an independent superspreader multiplier would double count heterogeneity.
+
+This point is especially relevant for cruise ships. A deterministic or homogeneous compartmental model can reproduce a mean epidemic curve while missing fade-outs and rare large outbreaks. A
+stratified model can separate passengers, crew, and decks, but it still averages within strata. CTB records exposure matrices and transmission events by pathway, zone, and pathogen, allowing
+the model to report distributions of secondary cases and route attributions rather than only final attack rates. Those outputs are the appropriate validation targets when line lists, cabin
+maps, venue records, or sequence data become available.
+
+\section{Multi-pathogen support}
+Multi-pathogen support is implemented through pathogen profiles, route weights, dose-response parameters, environmental settings, food-contamination settings, and pathogen-specific infection
+state. The schema layer defines contracts for profiles, protocol files, run specifications, instrument parameters, decision actions, and voyage configurations. These contracts are part of
+the architecture: they prevent a campaign from silently changing the meaning of a field across pathogens or platforms.
+
+For pathogen $p$, the profile defines a parameter set
+\begin{equation}
+\Theta_p=\{\alpha_p,\beta_p,\kappa_p,\doseadj_p,w_{p,r},\lambda_p,\phi_{p,r},\chi_p\},
+\end{equation}
+where $\alpha_p$ and $\beta_p$ parameterize beta-Poisson dose response, $\kappa_p$ parameterizes exponential response when used, $w_{p,r}$ are route weights, $\lambda_p$ is environmental
+decay, $\phi_{p,r}$ are route-specific deposition or delivery fractions, and $\chi_p$ contains pathogen-specific clinical and environmental options. Norovirus uses contact, fomite, food, and
+wastewater-relevant observation. SARS-CoV-2 and measles emphasize droplet and airborne pathways, diagnostic timing, and respiratory presentation. Legionella emphasizes environmental-source
+and HVAC-linked exposure rather than person-to-person spread.
+
+The monograph campaigns use this architecture across 4 pathogens and 4 vessel platforms. The same epoch loop, observation engine, protocol engine, and telemetry contracts are reused, but the
+biological parameters and route weights change. This is what makes CTB a platform for comparing surveillance and response logic rather than a single-pathogen curve-fitting exercise. The
+architecture also makes explicit where uncertainty remains: route-specific dose conversion, environmental signal calibration, individual compliance, and the mapping from simulated pathogen
+mass to measured Ct or sequencing counts. Those uncertainties are carried into later chapters as calibration and validation problems rather than hidden inside a single effective transmission
+rate.

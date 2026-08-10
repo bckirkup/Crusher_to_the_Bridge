@@ -1,0 +1,250 @@
+\chapter{Detection, Intervention, and Pre-Boarding Screening}
+\section{Scientific claim}
+Mid-voyage response saturates early, while pre-boarding screening has a larger decision value
+because it acts before infectious passengers or crew enter the shipboard contact network.
+In C14 and C14b, syndromic or cascade response reduced final attack rates for all modeled
+pathogens, and wearables, wastewater, and multiplex testing added less than one percentage point
+for most controlled comparisons.
+The boundary decision model changes the question from ``which signal detects an outbreak first''
+to ``which pre-boarding policy reduces the expected cost of a voyage.''
+On that criterion, incentivized wearable adoption followed by confirmatory testing is the preferred
+active policy across most prevalence, pathogen, and platform cells.
+
+\section{Mid-voyage surveillance results: response saturation}
+The active-outbreak campaigns compared \nonetrue{} against syndromic response, cascade response,
+cascade plus multiplex testing, wearable variants, and wastewater surveillance.
+Table~\ref{tab:ch7-intervention-comparison} consolidates the cross-pathogen result.
+The uncontrolled attack rate is the mean attack rate under \nonetrue{}.
+The controlled range reports the span across syndromic and advanced response strategies in the
+C14/C14b intervention summaries.
+
+\begin{table}[htbp]
+\centering
+\caption{Cross-pathogen intervention comparison for active mid-voyage response. Attack rates are percentages. The advanced marginal gain is the best advanced strategy relative to syndromic response; negative values indicate that syndromic response was already the lowest mean in the supplied summary.}
+\label{tab:ch7-intervention-comparison}
+\scriptsize
+\begin{tabular}{p{1.8cm}rrrrp{2.8cm}}
+\toprule
+Pathogen & Uncontrolled AR & Syndromic AR & Controlled range & Best advanced gain & Interpretation \\
+\midrule
+Norovirus & 17.21 & 5.87 & 5.23--5.87 & 0.64 & Advanced signals add $<1$ pp \\
+SARS-CoV-2 & 20.72 & 0.38 & 0.38--0.86 & 0.00 & Response almost eliminates onboard spread \\
+Measles & 37.91 & 1.32 & 1.15--2.17 & 0.17 & High immunity leaves little preventable residual \\
+Influenza & 66.08 & 1.89 & 1.20--2.14 & 0.69 & Fast control after first trigger \\
+\emph{C. difficile} & 12.03 & 0.18 & 0.18--0.55 & 0.00 & Clinical response dominates tested add-ons \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Norovirus is the limiting enteric case.
+The uncontrolled mean was 17.21\%, syndromic response reduced it to 5.87\%, and the best advanced
+mean in the supplied comparison was 5.23\%.
+That 0.64 percentage-point difference is small compared with the 11.34 percentage-point reduction
+obtained by activating response at all.
+For SARS-CoV-2, the analogous contrast is 20.72\% to 0.38\% under syndromic response, with advanced
+strategies spanning 0.49--0.86\% in this summary.
+Influenza begins at a much higher uncontrolled attack rate, 66.08\%, but falls to 1.20--2.14\%
+after response.
+
+This saturation result should be interpreted operationally rather than as a negative result for
+wearable or wastewater instruments.
+Once the voyage has entered an active response state, intensified isolation, sanitation, and case
+management remove much of the remaining preventable transmission.
+Additional signals then compete for a small residual benefit.
+That pattern is consistent with the cruise-ship norovirus literature, where the timing of reporting
+and response is a major determinant of outbreak size \citep{Jenkins2021,Mouchtouri2024,CDC_VSP2025}.
+It is also consistent with respiratory cruise outbreaks, where late detection after shipboard
+amplification can leave few low-cost options \citep{Yamagishi2020,Willebrand2022}.
+
+\section{Why boundary surveillance matters more than mid-voyage surveillance}
+Boundary surveillance acts on introductions rather than on transmission that has already occurred.
+In a mid-voyage setting, a wearable flag, wastewater signal, or multiplex result can only change the
+course of an outbreak after at least one infectious person has boarded, generated contacts, and
+possibly triggered secondary cases.
+At pre-boarding, the same signal can reduce the number of infectious people who board.
+The relevant state variable is therefore $K_{\mathrm{board}}$, the number of infectious passengers
+and crew after screening, rather than the time of the first onboard alert.
+
+The economic objective also changes at the boundary.
+For a cruise operator, the value of screening is not only the number of cases prevented.
+It includes avoidance of Vessel Sanitation Program escalation, voyage disruption, regulatory
+reporting, cleaning surges, denied-boarding compensation, and reputational loss.
+The decision model scores a policy by expected voyage cost, then reports the value of information per passenger as
+\begin{equation}
+\mathrm{VoI}_{\mathrm{pax}} = \frac{E[C_{P0}] - E[C_{p}]}{N_{\mathrm{pax}}},
+\end{equation}
+where $P0$ is no screening, $p$ is the screening policy, and $N_{\mathrm{pax}}$ is the passenger
+capacity for the platform.
+Positive values mean the policy reduces expected cost relative to no screening.
+
+\section{Pre-boarding decision model}
+The Monte Carlo decision model combines four inputs: pre-boarding prevalence, wearable adoption and
+accuracy, confirmatory testing, and a posterior outbreak surface indexed by the number of infectious
+individuals who board.
+Each scenario draws infectious status for passengers and crew, applies the screening policy, looks
+up the corresponding outbreak outcome at $K_{\mathrm{board}}$, and computes expected cost.
+The corrected analysis contains 528 scenarios per pathogen: four platform classes, twenty-two
+prevalence grid entries, and six policies.
+Each scenario uses 2,000 Monte Carlo voyages.
+
+The six policies are:
+\begin{description}
+\item[P0] No pre-boarding screening.
+\item[P1] Advisory-only screening. In the implemented model, this has no operational screening
+charge and does not change boarding, so it is a same-path baseline for P0.
+\item[P2] Bring-your-own-device wearable adoption with confirmatory testing; boarding is denied only
+after a positive confirmatory test.
+\item[P3] Wearable flag alone; boarding is denied after an anomaly without confirmatory testing.
+\item[P4] Incentivized wearable adoption, with at least 70\% passenger adoption, followed by
+confirmatory testing.
+\item[P5] Crew-mandatory adoption with the same confirmatory-test boarding rule as P2.
+\end{description}
+
+Wearable sensitivity and specificity are pathogen-specific.
+The decision runs used sensitivity/specificity of 0.55/0.85 for norovirus, 0.65/0.85 for influenza,
+0.70/0.85 for SARS-CoV-2, and 0.75/0.88 for measles.
+Confirmatory testing used sensitivity 0.90 and specificity 0.98.
+The mid-cost scenario assigned \$1 per wearable screen, \$75 per confirmatory test, \$2,000 per
+false-positive or true-positive denied boarding, \$400 per onboard case, \$500,000 per outbreak,
+\$2 million for VSP escalation, and \$2 million for reputational cost.
+These values are deliberately separable parameters rather than fixed biological assumptions.
+
+\section{Outbreak surfaces from the $k$-sweep campaign}
+The boundary model uses $k$-indexed outbreak surfaces generated from 17,600 simulation runs.
+Each surface is keyed by platform class, pathogen, baseline response, and the number of infectious
+individuals who board.
+For each $k$, the surface stores the probability of VSP triggering, expected attack rate, probability
+of acceleration, expected onboard cost, expected peak epoch, and run count.
+The decision model interpolates these curves when the Monte Carlo draw produces a non-integer lookup
+point, although the implemented screening pipeline returns integer $K_{\mathrm{board}}$.
+
+The surfaces explain why screening value rolls over.
+When $K_{\mathrm{board}}$ is low, intercepting one infectious individual can move a voyage from a
+high-risk point on the surface to a low-risk point.
+When prevalence is high, the no-screening voyage is already near the high-risk plateau, and screening
+cannot intercept enough infectious people to move the operating point out of saturation.
+False positives and screening costs then continue to rise while marginal VSP avoidance falls.
+This produces the large-ship rollover in value of information.
+
+Surface shape differs by pathogen.
+Influenza reaches VSP-trigger probabilities above 0.5 at $k=1$ and above 0.9 at $k=2$ on all four
+platforms in the supplied surface.
+Norovirus reaches 0.5 at $k=2$ and 0.9 at $k=4$ or $k=5$ depending on platform.
+Measles reaches 0.5 at $k=3$ on expedition ships and $k=5$ on the other classes, with the 0.9
+threshold occurring only at higher $k$ for several large-ship curves.
+SARS-CoV-2 is flatter on the large-ship surfaces in this response setting; among the supplied curves,
+only the expedition surface crosses 0.5.
+
+\section{Cross-pathogen value of information}
+Figure~\ref{fig:ch7-cross-pathogen-voi} shows the corrected cross-pathogen decision surfaces.
+The most consistent result is the platform gradient.
+Expedition ships have the highest value of information, and the value does not become negative over
+the tested prevalence grid for P4.
+The peak P4 value is \$4,914 per passenger for norovirus, \$6,072 for influenza, \$10,411 for
+SARS-CoV-2, and \$10,066 for measles on expedition ships.
+These peaks occur at higher prevalence on expedition ships than on larger platforms because a small
+absolute number of introductions can move the whole voyage across a high-cost response threshold.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.92\textwidth]{figures/fig_ch7_definitive_cross_pathogen.png}
+\caption{Corrected cross-pathogen value-of-information analysis for pre-boarding screening. Values compare screening policies against P0 no screening under the mid-cost scenario. P4, incentivized wearable adoption plus confirmatory testing, has the highest peak value and is the preferred active policy across most decision cells; large ships show rollover when outbreak probability saturates.}
+\label{fig:ch7-cross-pathogen-voi}
+\end{figure}
+
+SARS-CoV-2 has the highest peak screening value despite lower VSP-trigger probability on large
+platforms.
+The reason is that the expedition curve remains highly sensitive to introductions across the tested
+prevalence range, while the cost bundle attached to a triggered voyage is large.
+Influenza has the narrowest screening window on large ships.
+Its outbreak surfaces saturate at very low $k$, so screening is valuable at low prevalence but loses
+value rapidly once multiple infectious people are likely to board.
+Measles has a wider screening window than influenza because the modeled population has high
+non-susceptibility, here 92\%, so introductions do not saturate the response surface as quickly.
+Norovirus is intermediate: it produces positive P4 values across the full expedition grid, but the
+large-ship positive window closes by approximately 0.27--0.57\% prevalence depending on class.
+
+\begin{table}[htbp]
+\centering
+\caption{P4 value-of-information peaks under the mid-cost scenario. Prevalence is the pre-boarding infectious prevalence at the peak. Values are dollars per passenger relative to P0 no screening.}
+\label{tab:ch7-p4-voi}
+\scriptsize
+\begin{tabular}{lrrrrrrrr}
+\toprule
+& \multicolumn{2}{c}{Expedition} & \multicolumn{2}{c}{Classic} & \multicolumn{2}{c}{Spirit} & \multicolumn{2}{c}{Mega} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6-7}\cmidrule(lr){8-9}
+Pathogen & Peak VoI & Prev. & Peak VoI & Prev. & Peak VoI & Prev. & Peak VoI & Prev. \\
+\midrule
+Norovirus & 4914 & 1.207\% & 512 & 0.125\% & 298 & 0.097\% & 185 & 0.045\% \\
+SARS-CoV-2 & 10411 & 2.000\% & 284 & 0.342\% & 232 & 0.206\% & 148 & 0.125\% \\
+Influenza & 6072 & 0.567\% & 679 & 0.058\% & 469 & 0.045\% & 297 & 0.027\% \\
+Measles & 10066 & 2.000\% & 729 & 0.440\% & 479 & 0.266\% & 330 & 0.160\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+P4 is not uniformly best in every row of the corrected grid.
+It is the top active policy in 258 of 320 pathogen--platform--prevalence cells.
+The remaining 62 cells are mostly high-prevalence large-ship endpoints where all active policies have
+negative value and the less intensive P2 policy loses less money.
+This is not a recommendation to use P2 at high prevalence.
+It means that once the rollover region is reached, the better decision may be to forgo screening or
+change the voyage-level action rather than operate a screening programme with poor marginal return.
+
+\section{Policy recommendations by platform class}
+Expedition ships should treat pre-boarding screening as a default risk-management tool for all four
+pathogens evaluated here.
+Their P4 value remains positive across the tested prevalence grid, and the maximum value is measured
+in thousands of dollars per passenger.
+Small absolute changes in $K_{\mathrm{board}}$ have large consequences because the voyage has less
+capacity to absorb introductions before crossing a response threshold.
+
+Classic and spirit-class ships should use P4 selectively when pre-boarding prevalence is in the
+positive window.
+For norovirus, the positive P4 window extends to about 0.57\% on classic ships and 0.44\% on spirit
+ships.
+For influenza, the window is narrower, ending near 0.44\% on classic ships and 0.27\% on spirit
+ships.
+For measles and SARS-CoV-2, the window is wider than influenza because the surfaces roll over later.
+
+Mega ships require the most conservative screening trigger.
+The peak P4 value is positive for all four pathogens, but the positive window closes earliest:
+approximately 0.27\% for norovirus, 0.34\% for SARS-CoV-2, 0.16\% for influenza, and 0.57\% for
+measles.
+At higher prevalence, the relevant operational choice may shift from individual screening to voyage
+modification, targeted cancellation, pre-boarding delay, or a pre-departure testing mandate with a
+different cost structure.
+
+\section{Sensitivity to wearable accuracy and cost assumptions}
+The corrected Monte Carlo outputs use the mid-cost scenario and pathogen-specific wearable accuracy.
+They do not include a stored low-cost, high-cost, or full sensitivity grid.
+The model code defines those parameters, so the direction of sensitivity is transparent even where
+additional runs are still needed.
+Higher wearable sensitivity reduces $K_{\mathrm{board}}$ and should increase value when the outbreak
+surface is steep.
+Higher specificity reduces false-positive denied boarding and is most important for low-prevalence
+voyages, where most flagged people are not infectious.
+This specificity dependence is visible in the policy comparison: P3, which denies boarding on the
+wearable flag alone, is penalized by false positives, while P2 and P4 use confirmatory testing to
+control that cost.
+
+Cost sensitivity is also asymmetric.
+Raising VSP, outbreak, and reputational costs increases the value of preventing a trigger.
+Raising screening, secondary-testing, and denied-boarding costs narrows the positive prevalence
+window.
+The current cost scenario sets the VSP-related bundle at \$4.5 million per triggered voyage when
+outbreak, VSP, and reputation terms are combined.
+Under that assumption, boundary screening is most attractive where one or two intercepted
+introductions can change the trigger probability.
+Future sensitivity runs should report the break-even prevalence under the low, mid, and high cost
+scenarios already present in the model configuration.
+
+\section{Implication for intervention design}
+The intervention programme should be split into two layers.
+Mid-voyage surveillance should be retained as a response-quality and situational-awareness layer,
+with expectations calibrated to the saturation result in Table~\ref{tab:ch7-intervention-comparison}.
+Pre-boarding screening should be treated as the higher-value decision layer because it moves the
+voyage along the $K_{\mathrm{board}}$ outbreak surface before amplification begins.
+For the tested parameterization, P4 is the preferred operational starting point: broad incentivized
+adoption, confirmatory testing before denied boarding, and platform-specific prevalence thresholds
+that prevent screening from operating after value has rolled over.

@@ -1,0 +1,223 @@
+\chapter{Calibration and the VSP Shadow}
+
+\section{Scientific claim}
+Cruise-ship outbreak records are post-intervention measurements, not direct samples from an uncontrolled epidemic
+process. For norovirus, the Vessel Sanitation Program (VSP) threshold defines both when an outbreak enters the
+observed data stream and when the operating response changes the epidemic trajectory. Calibration must therefore
+target a coupled system of infection, reporting, and response. At \doseadj=10.6, CTB reproduces a narrow observed
+norovirus attack-rate band while retaining a larger uncontrolled platform gradient; this is possible because the
+VSP response compresses final sizes after detection rather than because vessel architecture is epidemiologically
+irrelevant.
+
+\section{Why intervention-shadowed calibration is hard}
+Calibration is usually posed as an inverse problem: choose a parameter vector \(\theta\) such that model summaries
+\(m(\theta)\) match empirical summaries \(y\). That framing is incomplete when the empirical data are generated
+after an adaptive response. For VSP acute gastroenteritis records, illness accumulation, sick-call behavior,
+sanitation, case restriction, food-service changes, and reporting thresholds are part of the observation system
+\citep{CDC_VSP2025,Cramer2004,Cramer2006,Freeland2016,Jenkins2021,Mouchtouri2024}.
+The correct comparison is therefore not
+\begin{equation}
+  y_{\mathrm{VSP}} \approx A_{\mathrm{uncontrolled}}(\theta),
+\end{equation}
+but
+\begin{equation}
+  y_{\mathrm{VSP}} \approx A_{\mathrm{post}}(\theta,\rho,\tau),
+\end{equation}
+where \(A_{\mathrm{post}}\) is the post-response final attack rate, \(\rho\) denotes the reporting and care-seeking
+process, and \(\tau\) denotes the thresholded response rule. The difference is not semantic. A model forced to
+match VSP records as uncontrolled final sizes will understate biological or contact-mediated transmission on
+vessels where the response would have truncated spread.
+
+The CTB implementation used here is the open-source model in the
+\href{https://github.com/bckirkup/Crusher_to_the_Bridge}{Crusher to the Bridge repository}. The chapter treats
+the simulations as a calibrated observation model for outbreak data rather than as a claim that any single vessel
+class has a fixed intrinsic attack rate.
+
+\section{Norovirus dose response and shedding model}
+Norovirus is a useful calibration anchor because its biological uncertainties are explicit. Infection can occur
+after a small oral dose; clinical illness is usually short, but fecal viral RNA can remain detectable well beyond
+symptom resolution \citep{Karst2010Pathogenesis,Teunis2014}. Symptoms, shedding, and infectiousness should
+therefore be modeled as related but separable states. For a host \(i\), CTB represents an ingested effective dose
+\(d_i(t)\) accumulated from route-specific contacts and environmental reservoirs. The Teunis dose-response model
+gives infection probability
+\begin{equation}
+  P_{\mathrm{inf}}(d_i)=1-{}_1F_1\left(\alpha,\alpha+\beta,-d_i\right),
+  \label{eq:teunis-dose}
+\end{equation}
+with susceptible-host estimates near \(\alpha=0.04\) and \(\beta=0.055\) in the Norwalk challenge analysis
+\citep{Teunis2008DoseResponse}. Equation~\ref{eq:teunis-dose} is used as a biological prior on shape, not as a
+direct conversion from RT-qPCR genome copies to infectious particles. The fitted \doseadj{} parameter absorbs that
+effective-dose conversion plus residual route-scale uncertainty.
+
+The shedding kernel separates acute contamination from longer post-symptomatic detectability. A convenient
+rise-and-decay form is
+\begin{equation}
+  C_i(a)=C_{0i}e^{-\alpha_s a}\left(1-e^{-(\beta_s-\alpha_s)a}\right),
+  \qquad \beta_s>\alpha_s,
+  \label{eq:shedding-kernel}
+\end{equation}
+where \(a\) is time since infection and \(C_i(a)\) is fecal shedding intensity. Empirical longitudinal analyses
+report peak concentrations spanning roughly \(10^5\)--\(10^9\) genome copies per gram and detectable shedding
+durations from about 8 to 60 days in GII.4 outbreaks
+\citep{Teunis2014}.
+Those values do not imply that all PCR-detectable material is equally infectious. They justify a model in which
+vomiting and acute fecal shedding generate high-amplitude deposition, while late shedding contributes a lower and
+more uncertain environmental source.
+
+Route-weighted force of infection is represented as
+\begin{equation}
+  \lambda_i(t)=s_i\sum_{r\in\mathcal{R}} w_{p,r}\,
+  \left[\sum_{j\ne i} \kappa_{ijr}(t)\,g_j(t)+\eta_{ir}(t)W_r(t)\right],
+  \label{eq:route-foi}
+\end{equation}
+where \(s_i\) is host susceptibility, \(w_{p,r}\) is the pathogen-specific route weight for route
+\(r\), \(\kappa_{ijr}\) is effective person-to-person contact, \(g_j(t)\) is infectious shedding,
+\(W_r(t)\) is environmental contamination, and \(\eta_{ir}\) is route-specific exposure to that
+reservoir. For norovirus, the important point is that \(w_{p,r}\), \(s_i\), contact opportunity, and dose scale can
+compensate in aggregate outcomes unless some of them are externally fixed.
+
+\section{The VSP threshold as observation rule and intervention trigger}
+The VSP threshold operates on reported acute-gastroenteritis burden. Let \(G_P(t)\) be cumulative passenger cases
+meeting the reporting definition and \(N_P\) the passenger population. A thresholded response is triggered when
+\begin{equation}
+  \frac{G_P(t)}{N_P}\ge \theta_{\mathrm{VSP}}.
+  \label{eq:vsp-trigger}
+\end{equation}
+Equation~\ref{eq:vsp-trigger} is simultaneously a measurement rule and an intervention rule. Before the threshold,
+mild infections, non-reporting passengers, and preclinical spread can remain partly hidden. After the threshold,
+sanitation, isolation, communication, and operational restrictions change the transmission process that generates
+the final attack rate.
+
+The threshold sweep shows progressive compression. Without response, platform mean attack rates span 10.6--23.4\%.
+Sick call without the regulatory backstop reduces the range to 7.3--13.2\%. VSP thresholds at 5\%, 3\%, and 1\%
+reduce the corresponding ranges to 5.8--7.9\%, 5.1--7.0\%, and 4.3--6.0\%. The same biological setting can
+therefore look like a high-gradient epidemic process before response and a narrow empirical distribution after
+response.
+
+Medical response parameters did not materially change final norovirus attack rates once the VSP backstop activated.
+In the tested range, sick-call probability, detection delay, and compliance were absorbed by the thresholded
+escalation process. This does not imply that care-seeking or compliance never matter. It means that final attack
+rate, under a strong VSP backstop, is a poor endpoint for identifying those upstream parameters. Time to detection,
+cabin restriction burden, sanitation cost, and passenger disruption may remain more sensitive endpoints.
+
+\section{Multi-platform norovirus calibration}
+At \doseadj=10.6, the no-response condition produces a physical platform gap: 23.4\% attack rate on expedition,
+22.6\% on classic, 12.2\% on spirit, and 10.6\% on mega. Under syndromic detection with VSP-like response, the same
+setting compresses to 6.7\%, 7.1\%, 4.6\%, and 5.5\%, respectively. The calibrated parameter is therefore not a
+claim that the uncontrolled epidemic is flat across ships. It is a claim that the observed VSP-scale endpoint is
+flat after the VSP-like response has acted.
+
+The boundary Stan fits support this interpretation. For norovirus, Stage A contained 2,400 runs and 902 outbreak
+events, an outbreak fraction of 37.6\%. Fitted platform outbreak probabilities were 0.32--0.43 across the four
+platforms on the logit-scale intercept summary, with expedition at 0.32, mega at 0.39, spirit at 0.41, and classic
+at 0.43. Stage B was fit on the 902 outbreak runs and estimated lower attack-rate intercepts for the larger spirit
+and mega platforms than for expedition and classic. The two-stage structure matters: outbreak occurrence and
+conditional final size are different summaries, and VSP-like response acts most directly on the latter.
+
+\section{Multi-pathogen boundary surfaces}
+The new boundary campaign generalizes the calibration argument beyond norovirus. For each pathogen and platform,
+the outbreak surface reports \(P_{\mathrm{trigger}}(k)\), the probability that a threshold response is triggered at
+introduction size \(k\), and \(E[A(k)]\), the expected final attack rate. Each nonzero \(k\) point used 200 runs
+for SARS-CoV-2, influenza, and measles, and 100 runs for the norovirus surface. The surfaces are monotone except
+for one trivial SARS-CoV-2 fluctuation on the classic platform, where
+\(P_{\mathrm{trigger}}\) and \(E[A]\) at \(k=4\) are slightly below \(k=3\).
+
+\begin{table}[htbp]
+\centering
+\caption{Boundary-surface endpoints at the largest tested introduction size. Values are means across replicated runs.}
+\label{tab:boundary-surface-endpoints}
+\begin{tabularx}{\textwidth}{lXrrrr}
+\toprule
+Pathogen & Platform pattern at largest \(k\) & \(k_{\max}\) & \(P_{\mathrm{trigger}}\) & \(E[A]\) & \(P_{\mathrm{accel}}\) \\
+\midrule
+Norovirus & all platforms trigger with moderate final sizes & 7 & 0.99--1.00 & 0.145--0.179 & 0.15--0.51 \\
+SARS-CoV-2 & expedition triggers almost always; large ships less often & 7 & 0.31--1.00 & 0.079--0.259 & 0.09--0.99 \\
+Influenza & all platforms trigger and reach high final size & 10 & 1.00 & 0.650--0.651 & 0.86--1.00 \\
+Measles & all platforms usually trigger, with low mean final size under response & 15 & 0.945--1.00 & 0.061--0.080 & 0.34--1.00 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+The Stage A Stan summaries separate three regimes. Norovirus is a thresholded enteric process: 902 outbreaks in
+2,400 runs, with platform differences in outbreak probability but substantial compression of conditional final
+sizes. SARS-CoV-2 is boundary-sensitive: 853 outbreaks in 4,800 runs, with fitted outbreak probability near
+0.7--1.1\% on the large ships but 23\% on expedition. Influenza is supercritical under the tested conditions: 4,126
+outbreaks in 4,800 runs, and the surface reaches \(P_{\mathrm{trigger}}=1\) with \(E[A]\approx0.65\) on every
+platform by \(k=10\). Measles is dominated by introduction and immunity geometry: 1,848 outbreaks in 5,600 runs,
+with the expedition platform having the highest fitted outbreak probability at about 50\%.
+
+These surfaces show why a single attack-rate target is insufficient. A response threshold can suppress conditional
+final size for norovirus and measles while leaving influenza near saturation. For SARS-CoV-2, the same endpoint can
+reverse apparent platform ordering depending on whether the analysis conditions on triggering, acceleration, or
+final attack rate. Calibration should therefore fit outbreak probability and conditional attack rate jointly, and
+should report how conclusions change across \(k\), platform, and response threshold.
+
+\section{Parameter identifiability}
+The identifiability problem must be stated formally. Let
+\begin{equation}
+  \theta=(R_0,k,s,n_{\mathrm{eff}}), \qquad
+  m(\theta)=\left(A(\theta),P_{\mathrm{out}}(\theta)\right),
+\end{equation}
+where \(A\) is final attack rate and \(P_{\mathrm{out}}\) is outbreak probability. If all four components of
+\(\theta\) are free and calibration uses only these two scalar summaries, then the local sensitivity matrix
+\begin{equation}
+  J(\theta)=\frac{\partial m}{\partial\theta}
+\end{equation}
+is \(2\times4\), so \(\mathrm{rank}(J)\le2<4\). Four interacting parameters cannot be uniquely identified from two
+aggregate constraints. This is the structural limitation emphasized in epidemic-model calibration guidance:
+goodness of fit is not the same as parameter identifiability, and uncertainty must be propagated into forecasts and
+policy comparisons \citep{Chowell2017Fitting}.
+
+The practical defense is not that the inverse problem becomes identified by simulation volume. Repeated runs reduce
+Monte Carlo error around the same summaries; they do not create independent information directions. The defense is
+that two of the apparent free dimensions are strongly externally informed. The dose-response shape is fixed from
+challenge-study evidence through Equation~\ref{eq:teunis-dose}, and genotype- or population-level
+non-susceptibility is informed by FUT2 secretor status and seroprevalence rather than estimated solely from
+ship-level final size. With those constraints, the remaining calibration behaves more like a two-dimensional
+problem: an effective transmission scale and a dispersion or introduction-boundary parameter. Even then, the result
+should be reported as a compatible region, not as a unique mechanistic estimate.
+
+The sensitivity interpretation follows from the same rank argument. Attack rate mainly constrains an effective
+transmission scale. Outbreak probability adds information about stochastic emergence and offspring heterogeneity,
+often represented by \(k\) \citep{LloydSmith2005,LloydSmith2007}. Separate susceptibility, contact number, route
+weights, and dose conversion remain confounded because they enter the force of infection multiplicatively in
+Equation~\ref{eq:route-foi}. The reported \doseadj=10.6 value is therefore a calibrated effective-dose scale
+conditional on the chosen biology and response model, not an independently identified physical virion-to-infection
+conversion factor.
+
+\section{Genotype-specific severity and susceptibility}
+Norovirus genotype matters for severity, host susceptibility, and possibly response-trigger timing. FUT2 controls
+expression of secretor-associated histo-blood-group antigens, and a practical cruise population prior is that
+roughly 20\% of passengers are nonsecretors. Nonsecretors are strongly protected against many GI.1 and GII.4
+infections, but protection is not absolute and is not uniform across genotypes \citep{Karst2010Pathogenesis}. A
+model that treats 20\% of passengers as universally immune to all norovirus genotypes would confuse host
+susceptibility with genotype-specific binding and pre-existing immunity.
+
+GII.4 has been associated with more severe outcomes than pooled non-GII.4 outbreaks in several settings, but
+severity ratios are not transmission ratios. A higher hospitalization or symptom-duration burden can increase
+reporting probability and operational response even if the infection attack rate is unchanged. The directly
+relevant cruise-ship comparison is Preston et al.'s GII.4-versus-GII.17 outbreak analysis for September 2020
+through March 2025 \citep{Preston2026Genotypes}. The available bibliographic summary does not provide enough
+numerical detail to assign a defensible GII.17 multiplier in this chapter. The correct model use is to estimate
+genotype-specific symptom, reporting, duration, and attack-rate multipliers from those outbreak data once the full
+table is available.
+
+This genotype layer reinforces the VSP-shadow argument. A genotype with greater vomiting, longer illness, or higher
+medical presentation can cross the VSP threshold earlier and receive stronger response at a lower true infection
+burden. The observed final attack rate may therefore decrease, remain flat, or increase depending on how biological
+severity changes the detection and response process. For CTB calibration, genotype-specific severity should enter
+both the natural-history model and the observation model. It should not be folded silently into \doseadj{}.
+
+\section{Implications for CTB calibration}
+The calibration target for cruise outbreaks is a joint distribution over outbreak occurrence, threshold triggering,
+conditional attack rate, timing, and response burden. Norovirus at \doseadj=10.6 satisfies the central calibration
+requirement because it reproduces the post-response VSP-scale band while preserving uncontrolled platform
+heterogeneity. The multi-pathogen boundary surfaces show that this reconciliation is pathogen-specific: influenza
+saturates the response system, SARS-CoV-2 is introduction- and platform-sensitive, measles is shaped by immunity
+and introduction geometry, and norovirus is strongly compressed by thresholded sanitation response.
+
+The practical rule for the rest of the monograph is therefore simple. Do not calibrate CTB to VSP records as if
+they were uncontrolled final sizes. Calibrate to the mechanism that produced the records: exposure, infection,
+symptoms, reporting, threshold-triggered intervention, and post-response final size. That framing is more
+restrictive than a free fit to attack rate alone, and it makes explicit which parameters are biologically fixed,
+which are externally informed, and which remain weakly identifiable from aggregate outbreak data.
