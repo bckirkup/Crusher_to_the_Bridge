@@ -13,46 +13,54 @@ S3 layout (default)::
   s3://<bucket>/campaign/boundary_surface_v1/analysis/       # Phase 2–5 outs
 
 Environment / flags supply bucket + prefixes. Uses ambient job-role creds.
+
+Security notes (Sonar S8705 / S8707 / S5443)
+-------------------------------------------
+* S3 I/O uses boto3 (no ``aws`` CLI subprocess).
+* Analysis stages call in-process APIs (no ``python -m`` subprocess).
+* Work tree is always a private ``tempfile.mkdtemp`` directory.
+* Pathogen ids and S3 URIs are allowlist-validated before use.
 """
 from __future__ import annotations
 
 import argparse
+import fnmatch
 import os
 import re
-import subprocess
 import sys
 import tempfile
 from pathlib import Path
-from typing import Sequence
+from typing import Any, Sequence
 from urllib.parse import urlparse
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
-from deploy.aws.path_safety import safe_path  # noqa: E402
-from simulation_utils.paths import validate_path_component  # noqa: E402
+from simulation_utils.paths import (  # noqa: E402
+    confine_to_base,
+    validate_path_component,
+)
 
+_S3_SCHEME = "s3://"
 _SURFACES_SUFFIX = "/surfaces/"
 _BUNDLES_ALL_SUFFIX = "/bundles/all/"
 _DEFAULT_EXCLUDE = ("analysis/*", "_resume/*", "_ops/*", "b2_*")
 
-# Allowlist validators for LLM-/CLI-supplied strings before OS commands (S8705).
 _BUCKET_RE = re.compile(r"^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$")
 _S3_KEY_RE = re.compile(r"^[A-Za-z0-9._/-]*$")
 _PATHOGEN_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 
 
 def _parse_s3(uri: str) -> tuple[str, str]:
-    p = urlparse(uri if "://" in uri else f"s3://{uri}")
+    p = urlparse(uri if "://" in uri else f"{_S3_SCHEME}{uri}")
     if p.scheme != "s3" or not p.netloc:
         raise SystemExit(f"Expected s3://bucket/prefix, got {uri!r}")
-    key = p.path.lstrip("/")
-    return p.netloc, key
+    return p.netloc, p.path.lstrip("/")
 
 
 def _require_s3_uri(uri: str, *, label: str) -> str:
-    """Canonicalize and allowlist an ``s3://`` URI before aws CLI use."""
+    """Canonicalize and allowlist an ``s3://`` URI."""
     raw = str(uri or "").strip()
     if not raw:
         raise SystemExit(f"{label} is required")
@@ -61,7 +69,7 @@ def _require_s3_uri(uri: str, *, label: str) -> str:
         raise SystemExit(f"Invalid S3 bucket in {label}: {bucket!r}")
     if key and not _S3_KEY_RE.fullmatch(key):
         raise SystemExit(f"Invalid S3 key prefix in {label}: {key!r}")
-    return f"s3://{bucket}/{key}" if key else f"s3://{bucket}"
+    return f"{_S3_SCHEME}{bucket}/{key}" if key else f"{_S3_SCHEME}{bucket}"
 
 
 def _require_pathogen(raw: str | None, *, required: bool) -> str | None:
@@ -75,76 +83,102 @@ def _require_pathogen(raw: str | None, *, required: bool) -> str | None:
     return validate_path_component(token, label="pathogen")
 
 
-def _local_dir(path: Path) -> str:
-    """Confine a local path to the work tree / cwd before FS or subprocess use."""
-    return safe_path(path)
+def _s3_client() -> Any:
+    try:
+        import boto3  # noqa: PLC0415
+    except ImportError as exc:  # pragma: no cover
+        raise SystemExit("boto3 is required (pip install boto3).") from exc
+    return boto3.client("s3")
 
 
-def _run_cmd(cmd: Sequence[str], *, cwd: str | None = None) -> None:
-    """Run argv list after rejecting NUL bytes (no shell)."""
-    argv = [str(part) for part in cmd]
-    if any("\x00" in part for part in argv):
-        raise SystemExit("NUL byte in command argument")
-    if cwd is not None:
-        cwd = _local_dir(Path(cwd))
-    print("+", " ".join(argv), flush=True)
-    subprocess.check_call(argv, cwd=cwd)
+def _excluded(key: str, prefix: str, patterns: Sequence[str]) -> bool:
+    rel = key[len(prefix) :].lstrip("/") if key.startswith(prefix) else key
+    return any(fnmatch.fnmatch(rel, pat) for pat in patterns)
 
 
-def _s3_sync(src: str, dst: str, *, exclude: Sequence[str] | None = None) -> None:
-    src_uri = _require_s3_uri(src, label="s3 sync source") if src.startswith("s3://") else _local_dir(Path(src))
-    dst_uri = _require_s3_uri(dst, label="s3 sync dest") if dst.startswith("s3://") else _local_dir(Path(dst))
-    cmd = ["aws", "s3", "sync", src_uri, dst_uri]
-    for pat in exclude or ():
-        if "\x00" in pat or len(pat) > 256:
-            raise SystemExit(f"Invalid --exclude pattern: {pat!r}")
-        cmd.extend(["--exclude", pat])
-    _run_cmd(cmd)
+def _s3_download_prefix(
+    uri: str,
+    dest_dir: Path,
+    *,
+    exclude: Sequence[str] = (),
+) -> None:
+    """Download all objects under an S3 prefix into ``dest_dir`` via boto3."""
+    safe_uri = _require_s3_uri(uri, label="s3 download")
+    bucket, prefix = _parse_s3(safe_uri)
+    prefix = prefix.rstrip("/")
+    if prefix:
+        prefix = prefix + "/"
+    dest_dir.mkdir(parents=True, exist_ok=True)
+    client = _s3_client()
+    token: str | None = None
+    while True:
+        kwargs: dict[str, Any] = {"Bucket": bucket, "Prefix": prefix}
+        if token:
+            kwargs["ContinuationToken"] = token
+        page = client.list_objects_v2(**kwargs)
+        for obj in page.get("Contents") or ():
+            key = str(obj["Key"])
+            if key.endswith("/"):
+                continue
+            if exclude and _excluded(key, prefix, exclude):
+                continue
+            rel = key[len(prefix) :] if prefix and key.startswith(prefix) else key
+            # Reject traversal in object keys.
+            parts = [p for p in rel.split("/") if p and p not in {".", ".."}]
+            if not parts:
+                continue
+            for part in parts:
+                validate_path_component(part, label="s3 object path segment")
+            local = dest_dir.joinpath(*parts)
+            local.parent.mkdir(parents=True, exist_ok=True)
+            print(f"+ s3://{bucket}/{key} -> {local}", flush=True)
+            client.download_file(bucket, key, str(local))
+        if not page.get("IsTruncated"):
+            break
+        token = page.get("NextContinuationToken")
 
 
-def _s3_cp_recursive(src: str, dst: str) -> None:
-    src_uri = _require_s3_uri(src, label="s3 cp source") if src.startswith("s3://") else _local_dir(Path(src))
-    dst_uri = _require_s3_uri(dst, label="s3 cp dest") if dst.startswith("s3://") else _local_dir(Path(dst))
-    _run_cmd(["aws", "s3", "cp", src_uri, dst_uri, "--recursive"])
+def _s3_upload_tree(src_dir: Path, uri: str) -> None:
+    """Upload files under ``src_dir`` to an S3 prefix via boto3."""
+    safe_uri = _require_s3_uri(uri, label="s3 upload")
+    bucket, prefix = _parse_s3(safe_uri)
+    prefix = prefix.rstrip("/")
+    client = _s3_client()
+    base = src_dir.resolve()
+    for path in sorted(base.rglob("*")):
+        if not path.is_file():
+            continue
+        rel = path.relative_to(base).as_posix()
+        for part in rel.split("/"):
+            validate_path_component(part, label="upload path segment")
+        key = f"{prefix}/{rel}" if prefix else rel
+        print(f"+ {path} -> s3://{bucket}/{key}", flush=True)
+        client.upload_file(str(path), bucket, key)
 
 
-def run_bundle(*, work: Path, results: Path, out: Path) -> None:
-    out_s = _local_dir(out)
-    Path(out_s).mkdir(parents=True, exist_ok=True)
-    _run_cmd(
-        [
-            sys.executable,
-            "-m",
-            "picard_framework.analysis.campaign_bundle",
-            _local_dir(results),
-            "--out",
-            out_s,
-        ],
-        cwd=_local_dir(work),
+def run_bundle(*, results: Path, out: Path) -> None:
+    from picard_framework.analysis.campaign_bundle import build_bundle
+
+    out.mkdir(parents=True, exist_ok=True)
+    build_bundle(str(results), str(out))
+
+
+def run_surface(*, results: Path, out: Path, pathogen: str | None) -> None:
+    from picard_framework.analysis.boundary.export_outbreak_surface import (
+        export_outbreak_surface,
     )
 
-
-def run_surface(
-    *, work: Path, results: Path, out: Path, pathogen: str | None
-) -> None:
-    out_s = _local_dir(out)
-    Path(out_s).mkdir(parents=True, exist_ok=True)
-    cmd = [
-        sys.executable,
-        "-m",
-        "picard_framework.analysis.boundary.export_outbreak_surface",
-        _local_dir(results),
-        "--out",
-        str(Path(out_s) / "outbreak_surface.csv"),
-    ]
-    if pathogen:
-        cmd.extend(["--pathogen", _require_pathogen(pathogen, required=True) or pathogen])
-    _run_cmd(cmd, cwd=_local_dir(work))
+    out.mkdir(parents=True, exist_ok=True)
+    pathogens = [pathogen] if pathogen else None
+    export_outbreak_surface(
+        [str(results)],
+        str(out / "outbreak_surface.csv"),
+        pathogens=pathogens,
+    )
 
 
 def run_stan(
     *,
-    work: Path,
     analysis_dir: Path,
     out: Path,
     pathogen: str,
@@ -153,42 +187,29 @@ def run_stan(
     sampling: int,
     seed: int,
 ) -> None:
+    from picard_framework.analysis.stan.fit_boundary_hurdle import fit_boundary_hurdle
+
     safe_pathogen = _require_pathogen(pathogen, required=True) or pathogen
-    out_s = _local_dir(out)
-    Path(out_s).mkdir(parents=True, exist_ok=True)
-    _run_cmd(
-        [
-            sys.executable,
-            "-m",
-            "picard_framework.analysis.stan.fit_boundary_hurdle",
-            _local_dir(analysis_dir),
-            "--out",
-            out_s,
-            "--pathogen",
-            safe_pathogen,
-            "--chains",
-            str(int(chains)),
-            "--iter-warmup",
-            str(int(warmup)),
-            "--iter-sampling",
-            str(int(sampling)),
-            "--seed",
-            str(int(seed)),
-        ],
-        cwd=_local_dir(work),
+    out.mkdir(parents=True, exist_ok=True)
+    fit_boundary_hurdle(
+        str(analysis_dir),
+        str(out),
+        pathogen=safe_pathogen,
+        chains=int(chains),
+        iter_warmup=int(warmup),
+        iter_sampling=int(sampling),
+        seed=int(seed),
     )
 
 
-def run_mc(*, work: Path, stan_fit: Path, out: Path, n_mc: int, seed: int) -> None:
-    out_s = _local_dir(out)
-    Path(out_s).mkdir(parents=True, exist_ok=True)
-    _run_cmd(
+def run_mc(*, stan_fit: Path, out: Path, n_mc: int, seed: int) -> None:
+    from picard_framework.analysis.boundary.run_decision_model import main as mc_main
+
+    out.mkdir(parents=True, exist_ok=True)
+    rc = mc_main(
         [
-            sys.executable,
-            "-m",
-            "picard_framework.analysis.boundary.run_decision_model",
             "--stan-fit",
-            _local_dir(stan_fit),
+            str(stan_fit),
             "--lookup",
             "auto",
             "--n-mc",
@@ -196,61 +217,43 @@ def run_mc(*, work: Path, stan_fit: Path, out: Path, n_mc: int, seed: int) -> No
             "--seed",
             str(int(seed)),
             "--out",
-            out_s,
+            str(out),
             "--resume",
-        ],
-        cwd=_local_dir(work),
+        ]
     )
+    if rc not in (0, None):
+        raise SystemExit(rc or 1)
 
 
 def run_report(*, mc_out: Path) -> None:
-    # Decision model already writes report.md; no-op if present.
-    report = Path(_local_dir(mc_out)) / "report.md"
+    report = mc_out / "report.md"
     if report.is_file():
         print(f"report already present: {report}", flush=True)
         return
     print("No report.md; re-run mc phase to regenerate.", flush=True)
 
 
-def _resolve_workdir(requested: str) -> Path:
-    """Private work tree — never a world-writable shared /tmp path (S5443)."""
-    if requested.strip():
-        return Path(_local_dir(Path(requested.strip())))
-    # mkdtemp creates a 0o700 directory under the process temp root.
-    return Path(tempfile.mkdtemp(prefix="boundary_work_"))
-
-
-def _phase_bundle(work: Path, results: Path, analysis: Path, s3_campaign: str, s3_analysis: str) -> None:
-    _s3_sync(
-        s3_campaign.rstrip("/") + "/",
-        str(results) + "/",
-        exclude=_DEFAULT_EXCLUDE,
-    )
+def _phase_bundle(results: Path, analysis: Path, s3_campaign: str, s3_analysis: str) -> None:
+    _s3_download_prefix(s3_campaign, results, exclude=_DEFAULT_EXCLUDE)
     out = analysis / "bundles" / "all"
-    run_bundle(work=work, results=results, out=out)
-    _s3_cp_recursive(str(out) + "/", s3_analysis.rstrip("/") + _BUNDLES_ALL_SUFFIX)
+    run_bundle(results=results, out=out)
+    _s3_upload_tree(out, s3_analysis.rstrip("/") + _BUNDLES_ALL_SUFFIX)
 
 
 def _phase_surface(
-    work: Path,
     results: Path,
     analysis: Path,
     s3_campaign: str,
     s3_analysis: str,
     pathogen: str | None,
 ) -> None:
-    _s3_sync(
-        s3_campaign.rstrip("/") + "/",
-        str(results) + "/",
-        exclude=_DEFAULT_EXCLUDE,
-    )
+    _s3_download_prefix(s3_campaign, results, exclude=_DEFAULT_EXCLUDE)
     out = analysis / "surfaces"
-    run_surface(work=work, results=results, out=out, pathogen=pathogen)
-    _s3_cp_recursive(str(out) + "/", s3_analysis.rstrip("/") + _SURFACES_SUFFIX)
+    run_surface(results=results, out=out, pathogen=pathogen)
+    _s3_upload_tree(out, s3_analysis.rstrip("/") + _SURFACES_SUFFIX)
 
 
 def _phase_stan(
-    work: Path,
     analysis: Path,
     s3_analysis: str,
     pathogen: str,
@@ -260,20 +263,16 @@ def _phase_stan(
     seed: int,
 ) -> None:
     safe_pathogen = _require_pathogen(pathogen, required=True) or pathogen
-    _s3_sync(
-        s3_analysis.rstrip("/") + _BUNDLES_ALL_SUFFIX,
-        str(analysis / "all") + "/",
-    )
     bundle_dir = analysis / "all"
+    _s3_download_prefix(s3_analysis.rstrip("/") + _BUNDLES_ALL_SUFFIX, bundle_dir)
     if not (bundle_dir / "run_summary.csv").is_file():
-        _s3_sync(
-            s3_analysis.rstrip("/") + f"/bundles/{safe_pathogen}/",
-            str(analysis / safe_pathogen) + "/",
-        )
         bundle_dir = analysis / safe_pathogen
+        _s3_download_prefix(
+            s3_analysis.rstrip("/") + f"/bundles/{safe_pathogen}/",
+            bundle_dir,
+        )
     out = analysis / "stan" / safe_pathogen
     run_stan(
-        work=work,
         analysis_dir=bundle_dir,
         out=out,
         pathogen=safe_pathogen,
@@ -282,16 +281,11 @@ def _phase_stan(
         sampling=sampling,
         seed=seed,
     )
-    surf_src = s3_analysis.rstrip("/") + _SURFACES_SUFFIX
-    _s3_sync(surf_src, str(out) + "/")
-    _s3_cp_recursive(
-        str(out) + "/",
-        s3_analysis.rstrip("/") + f"/stan/{safe_pathogen}/",
-    )
+    _s3_download_prefix(s3_analysis.rstrip("/") + _SURFACES_SUFFIX, out)
+    _s3_upload_tree(out, s3_analysis.rstrip("/") + f"/stan/{safe_pathogen}/")
 
 
 def _phase_mc(
-    work: Path,
     analysis: Path,
     s3_analysis: str,
     pathogen: str,
@@ -299,34 +293,29 @@ def _phase_mc(
     seed: int,
 ) -> None:
     safe_pathogen = _require_pathogen(pathogen, required=True) or pathogen
-    fit_uri = s3_analysis.rstrip("/") + f"/stan/{safe_pathogen}/"
     local_fit = analysis / "stan" / safe_pathogen
-    _s3_sync(fit_uri, str(local_fit) + "/")
+    _s3_download_prefix(
+        s3_analysis.rstrip("/") + f"/stan/{safe_pathogen}/",
+        local_fit,
+    )
     if not (local_fit / "outbreak_surface.json").is_file() and not (
         local_fit / "outbreak_surface.csv"
     ).is_file():
-        _s3_sync(
-            s3_analysis.rstrip("/") + _SURFACES_SUFFIX,
-            str(local_fit) + "/",
-        )
+        _s3_download_prefix(s3_analysis.rstrip("/") + _SURFACES_SUFFIX, local_fit)
     out = analysis / "mc" / safe_pathogen
-    run_mc(work=work, stan_fit=local_fit, out=out, n_mc=n_mc, seed=seed)
-    _s3_cp_recursive(
-        str(out) + "/",
-        s3_analysis.rstrip("/") + f"/mc/{safe_pathogen}/",
-    )
+    run_mc(stan_fit=local_fit, out=out, n_mc=n_mc, seed=seed)
+    _s3_upload_tree(out, s3_analysis.rstrip("/") + f"/mc/{safe_pathogen}/")
 
 
 def _phase_report(analysis: Path, s3_analysis: str, pathogen: str) -> None:
     safe_pathogen = _require_pathogen(pathogen, required=True) or pathogen
-    mc_uri = s3_analysis.rstrip("/") + f"/mc/{safe_pathogen}/"
     local_mc = analysis / "mc" / safe_pathogen
-    _s3_sync(mc_uri, str(local_mc) + "/")
-    run_report(mc_out=local_mc)
-    _s3_cp_recursive(
-        str(local_mc) + "/",
+    _s3_download_prefix(
         s3_analysis.rstrip("/") + f"/mc/{safe_pathogen}/",
+        local_mc,
     )
+    run_report(mc_out=local_mc)
+    _s3_upload_tree(local_mc, s3_analysis.rstrip("/") + f"/mc/{safe_pathogen}/")
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -347,11 +336,6 @@ def main(argv: list[str] | None = None) -> int:
         help="s3://bucket/campaign/boundary_surface_v1/analysis/",
     )
     p.add_argument("--pathogen", default=os.environ.get("BOUNDARY_PATHOGEN", ""))
-    p.add_argument(
-        "--workdir",
-        default="",
-        help="Optional private work directory (default: tempfile.mkdtemp)",
-    )
     p.add_argument("--chains", type=int, default=4)
     p.add_argument("--iter-warmup", type=int, default=1000)
     p.add_argument("--iter-sampling", type=int, default=1000)
@@ -363,23 +347,22 @@ def main(argv: list[str] | None = None) -> int:
     s3_analysis = _require_s3_uri(args.s3_analysis, label="--s3-analysis")
     pathogen_opt = _require_pathogen(args.pathogen, required=False)
 
-    work = _resolve_workdir(args.workdir)
-    # Anchor path confinement to the resolved work tree for this process.
-    os.chdir(work)
-    results = work / "results"
-    analysis = work / "analysis"
+    # Private 0o700 work tree — never CLI-controlled / world-writable (S5443/S8707).
+    work = Path(tempfile.mkdtemp(prefix="boundary_work_"))
+    work_s = confine_to_base(str(work), str(work))
+    os.chdir(work_s)
+    results = Path(work_s) / "results"
+    analysis = Path(work_s) / "analysis"
     results.mkdir(exist_ok=True)
     analysis.mkdir(exist_ok=True)
 
+    default_pathogen = "noro" + "virus"
     if args.phase == "bundle":
-        _phase_bundle(work, results, analysis, s3_campaign, s3_analysis)
+        _phase_bundle(results, analysis, s3_campaign, s3_analysis)
     elif args.phase == "surface":
-        _phase_surface(
-            work, results, analysis, s3_campaign, s3_analysis, pathogen_opt
-        )
+        _phase_surface(results, analysis, s3_campaign, s3_analysis, pathogen_opt)
     elif args.phase == "stan":
         _phase_stan(
-            work,
             analysis,
             s3_analysis,
             pathogen_opt or "",
@@ -389,9 +372,7 @@ def main(argv: list[str] | None = None) -> int:
             args.seed,
         )
     elif args.phase == "mc":
-        default_pathogen = "noro" + "virus"
         _phase_mc(
-            work,
             analysis,
             s3_analysis,
             pathogen_opt or default_pathogen,
@@ -399,10 +380,9 @@ def main(argv: list[str] | None = None) -> int:
             args.seed,
         )
     else:
-        default_pathogen = "noro" + "virus"
         _phase_report(analysis, s3_analysis, pathogen_opt or default_pathogen)
 
-    print(f"phase={args.phase} done", flush=True)
+    print(f"phase={args.phase} done work={work_s}", flush=True)
     return 0
 
 
