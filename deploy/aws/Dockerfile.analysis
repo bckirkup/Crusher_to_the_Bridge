@@ -3,6 +3,8 @@
 #   docker build -f deploy/aws/Dockerfile.analysis -t picard-boundary-analysis .
 #
 # NOT for ABM Spot shards — use root Dockerfile / picard-campaign for Phase 1.
+#
+# Hash-pinned lock + wheels-only (Sonar docker:S8541 / S8544), matching root Dockerfile.
 
 FROM python:3.11-slim-bookworm
 
@@ -15,16 +17,22 @@ ENV PYTHONPATH=/app \
     CMDSTAN=/opt/cmdstan/cmdstan-2.39.0
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        build-essential \
-        g++ \
-        make \
-        git \
-        curl \
-        ca-certificates \
         awscli \
+        build-essential \
+        ca-certificates \
+        curl \
+        g++ \
+        git \
+        make \
     && rm -rf /var/lib/apt/lists/*
 
-COPY pyproject.toml README.md ./
+# Install dependencies first for better layer caching.
+COPY requirements.lock.txt ./
+RUN pip install --no-cache-dir --only-binary=:all: --require-hashes -r requirements.lock.txt \
+    && python -c "import cmdstanpy; cmdstanpy.install_cmdstan(dir='/opt/cmdstan')" \
+    && useradd --create-home --uid 10001 analysis \
+    && chown -R analysis:analysis /app /opt/cmdstan
+
 COPY picard_framework/ ./picard_framework/
 COPY crusher_labs/ ./crusher_labs/
 COPY engines/ ./engines/
@@ -35,15 +43,12 @@ COPY schemas/ ./schemas/
 COPY data/ ./data/
 COPY scripts/ ./scripts/
 COPY deploy/aws/boundary_analysis_entrypoint.py ./deploy/aws/boundary_analysis_entrypoint.py
+COPY deploy/aws/path_safety.py ./deploy/aws/path_safety.py
 COPY orchestrator.py ./
 COPY orchestrator_chronic.py orchestrator_display.py orchestrator_epoch.py ./
 COPY orchestrator_init.py orchestrator_record.py orchestrator_types.py ./
 
-RUN pip install --no-cache-dir -e '.[analysis,deploy]' \
-    && python -c "import cmdstanpy; cmdstanpy.install_cmdstan(dir='/opt/cmdstan')"
-
-RUN useradd --create-home --uid 10001 analysis \
-    && chown -R analysis:analysis /app /opt/cmdstan
+RUN chown -R analysis:analysis /app
 USER analysis
 
 ENTRYPOINT ["python3", "deploy/aws/boundary_analysis_entrypoint.py"]

@@ -28,6 +28,7 @@ _HARDENED_MODULES = (
     "engines/contamx_runner.py",
     "deploy/aws/aggregate_results.py",
     "deploy/aws/analyze_campaign_curves.py",
+    "deploy/aws/boundary_analysis_entrypoint.py",
     "deploy/aws/classify_batch_failures.py",
     "deploy/aws/path_safety.py",
     "picard_framework/analysis/_io.py",

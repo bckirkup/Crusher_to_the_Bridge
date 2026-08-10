@@ -29,6 +29,8 @@ from picard_framework.analysis.stan._boundary_data import (
 )
 from simulation_utils.paths import validated_open
 
+_FIT_STATUS_JSON = "fit_status.json"
+
 
 def _write_draws(fit: Any, path: str) -> None:
     try:
@@ -91,7 +93,7 @@ def _fit_stage(
             "reason": "cmdstanpy/CmdStan not installed",
             "meta": meta,
         }
-        write_json(os.path.join(stage_out, "fit_status.json"), status)
+        write_json(os.path.join(stage_out, _FIT_STATUS_JSON), status)
         return status
 
     from cmdstanpy import CmdStanModel
@@ -114,7 +116,7 @@ def _fit_stage(
         )
     except Exception as exc:
         status = {"status": "error", "reason": str(exc), "meta": meta}
-        write_json(os.path.join(stage_out, "fit_status.json"), status)
+        write_json(os.path.join(stage_out, _FIT_STATUS_JSON), status)
         print(f"[{stage_name}] fit failed: {exc}", file=sys.stderr)
         return status
 
@@ -123,7 +125,7 @@ def _fit_stage(
         fit, meta, os.path.join(stage_out, "platform_effects.csv"),
     )
     status = {"status": "ok", "meta": meta}
-    write_json(os.path.join(stage_out, "fit_status.json"), status)
+    write_json(os.path.join(stage_out, _FIT_STATUS_JSON), status)
     return status
 
 
@@ -184,7 +186,7 @@ def fit_boundary_hurdle(
         "outbreak": a_status,
         "ar": b_status,
     }
-    write_json(os.path.join(out, "fit_status.json"), summary)
+    write_json(os.path.join(out, _FIT_STATUS_JSON), summary)
     return summary
 
 
