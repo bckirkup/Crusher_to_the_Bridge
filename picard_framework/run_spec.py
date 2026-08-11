@@ -193,6 +193,11 @@ class PicardRunSpec:
         spec_dir = os.path.dirname(os.path.abspath(spec_path))
         with validated_open(spec_path, allowed_roots=(root, spec_dir), encoding="utf-8") as fh:
             raw = json.load(fh)
+        return cls.from_picard_dict(repo_root, raw)
+
+    @classmethod
+    def from_picard_dict(cls, repo_root: str, raw: dict[str, Any]) -> PicardRunSpec:
+        """Build a run spec from an in-memory Picard JSON mapping."""
         reg = CatalogRegistry.from_repo(repo_root)
         catalog = raw.get("catalog", {})
         run = raw.get("run", {})

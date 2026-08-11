@@ -62,6 +62,7 @@ Two credential contexts, both short-lived:
 | `monitor_campaign.ps1` | Windows-friendly poller: Batch `statusSummary` + S3 `*.zip` count (optional `-Watch` / `-Classify`). | — |
 | `ensure_campaign_infra.sh` | Recreate missing queue/log group and register the current job definition (`AWS_PROFILE=picard`). Optional `--smoke-submit N`. | `ACCOUNT_ID`, `REGION`, `BUCKET` |
 | `submit_boundary_surface.ps1` | Submit `boundary_surface_v1` Spot array (`-Tier b2` / `-IncludeDeferred` via containerOverrides). | — |
+| `submit_campaign_manifest.ps1` | Submit any mega-cruise manifest Spot array (synthetic recovery, VSP degradation, …). | — |
 | `Dockerfile.analysis` | CmdStan analysis image for surface / Stan / MC (not Spot ABM). Must COPY crusher_labs + orchestrator deps; pin `CMDSTAN` to versioned install dir. | — |
 | `boundary_analysis_entrypoint.py` | Analysis container entrypoint (`--phase surface\|stan\|mc\|report`). | — |
 | `batch_job_definition_boundary_*.json` | On-Demand Fargate job defs for surface / Stan / MC. | `<ACCOUNT_ID>`, `<REGION>`, `<BUCKET>` |

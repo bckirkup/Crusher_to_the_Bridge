@@ -1,0 +1,166 @@
+{
+  "campaign": "vsp_degradation_v1",
+  "description": "VSP shadow stress-test: factor-at-a-time + interaction panels at dose=10.6, alpha_c=0.75. Design: vsp_degradation_sweep_v1_design.json.",
+  "platform": "mega_cruise_5000",
+  "default_epochs": 168,
+  "default_num_agents": 7000,
+  "pathogen_configs": {
+    "norovirus": {
+      "bundle": "active_profiles",
+      "pathogen_id": "norwalk_gi",
+      "overrides": {
+        "remove": ["sars_cov2_resp"]
+      }
+    }
+  },
+  "surveillance_configs": {
+    "syndromic": {
+      "diagnostic_cascade": {
+        "enabled": false
+      }
+    }
+  },
+  "defaults": {
+    "dose_adjustment": 10.6,
+    "density_exponent": 0.75,
+    "initial_infected": 3,
+    "nominal_values": {
+      "vsp_threshold": 0.05,
+      "detection_delay": 1,
+      "isolation_compliance": 0.9,
+      "sick_call_probability": 0.9
+    }
+  },
+  "tiers": {
+    "vd1_vsp_threshold": {
+      "description": "FAT: VSP lockdown AR threshold",
+      "pathogen": "norovirus",
+      "platforms": [
+        "expedition_cruise_450",
+        "classic_cruise_1900",
+        "spirit_cruise_3000",
+        "mega_cruise_5000"
+      ],
+      "surveillance_strategies": ["syndromic"],
+      "factor": "vsp_threshold",
+      "values": [0.01, 0.03, 0.05, 0.1, 0.15, 0.2, 0.3],
+      "seeds": [
+        200, 201, 202, 203, 204, 205, 206, 207, 208, 209,
+        210, 211, 212, 213, 214, 215, 216, 217, 218, 219,
+        220, 221, 222, 223, 224, 225, 226, 227, 228, 229
+      ]
+    },
+    "vd1_detection_delay": {
+      "description": "FAT: detection_delay_epochs",
+      "pathogen": "norovirus",
+      "platforms": [
+        "expedition_cruise_450",
+        "classic_cruise_1900",
+        "spirit_cruise_3000",
+        "mega_cruise_5000"
+      ],
+      "surveillance_strategies": ["syndromic"],
+      "factor": "detection_delay",
+      "values": [0, 1, 2, 4, 8, 12],
+      "seeds": [
+        200, 201, 202, 203, 204, 205, 206, 207, 208, 209,
+        210, 211, 212, 213, 214, 215, 216, 217, 218, 219,
+        220, 221, 222, 223, 224, 225, 226, 227, 228, 229
+      ]
+    },
+    "vd1_isolation_compliance": {
+      "description": "FAT: isolation_compliance",
+      "pathogen": "norovirus",
+      "platforms": [
+        "expedition_cruise_450",
+        "classic_cruise_1900",
+        "spirit_cruise_3000",
+        "mega_cruise_5000"
+      ],
+      "surveillance_strategies": ["syndromic"],
+      "factor": "isolation_compliance",
+      "values": [1.0, 0.8, 0.5, 0.3, 0.1],
+      "seeds": [
+        200, 201, 202, 203, 204, 205, 206, 207, 208, 209,
+        210, 211, 212, 213, 214, 215, 216, 217, 218, 219,
+        220, 221, 222, 223, 224, 225, 226, 227, 228, 229
+      ]
+    },
+    "vd1_sick_call_probability": {
+      "description": "FAT: sick_call_probability",
+      "pathogen": "norovirus",
+      "platforms": [
+        "expedition_cruise_450",
+        "classic_cruise_1900",
+        "spirit_cruise_3000",
+        "mega_cruise_5000"
+      ],
+      "surveillance_strategies": ["syndromic"],
+      "factor": "sick_call_probability",
+      "values": [0.9, 0.7, 0.5, 0.3, 0.1],
+      "seeds": [
+        200, 201, 202, 203, 204, 205, 206, 207, 208, 209,
+        210, 211, 212, 213, 214, 215, 216, 217, 218, 219,
+        220, 221, 222, 223, 224, 225, 226, 227, 228, 229
+      ]
+    },
+    "vd2_threshold_x_compliance": {
+      "description": "Interaction: vsp_threshold x isolation_compliance",
+      "pathogen": "norovirus",
+      "platforms": [
+        "expedition_cruise_450",
+        "classic_cruise_1900",
+        "spirit_cruise_3000",
+        "mega_cruise_5000"
+      ],
+      "surveillance_strategies": ["syndromic"],
+      "factors": {
+        "vsp_threshold": [0.05, 0.1, 0.2],
+        "isolation_compliance": [0.9, 0.5, 0.1]
+      },
+      "seeds": [
+        200, 201, 202, 203, 204, 205, 206, 207, 208, 209,
+        210, 211, 212, 213, 214, 215, 216, 217, 218, 219
+      ]
+    },
+    "vd2_delay_x_reporting": {
+      "description": "Interaction: detection_delay x sick_call_probability",
+      "pathogen": "norovirus",
+      "platforms": [
+        "expedition_cruise_450",
+        "classic_cruise_1900",
+        "spirit_cruise_3000",
+        "mega_cruise_5000"
+      ],
+      "surveillance_strategies": ["syndromic"],
+      "factors": {
+        "detection_delay": [1, 4, 12],
+        "sick_call_probability": [0.9, 0.5, 0.1]
+      },
+      "seeds": [
+        200, 201, 202, 203, 204, 205, 206, 207, 208, 209,
+        210, 211, 212, 213, 214, 215, 216, 217, 218, 219
+      ]
+    },
+    "vd2_worst_case_gradient": {
+      "description": "Worst-case 3-factor degradation panel",
+      "pathogen": "norovirus",
+      "platforms": [
+        "expedition_cruise_450",
+        "classic_cruise_1900",
+        "spirit_cruise_3000",
+        "mega_cruise_5000"
+      ],
+      "surveillance_strategies": ["syndromic"],
+      "factors": {
+        "vsp_threshold": [0.1, 0.2, 0.3],
+        "detection_delay": [4, 8, 12],
+        "isolation_compliance": [0.5, 0.3, 0.1]
+      },
+      "seeds": [
+        200, 201, 202, 203, 204, 205, 206, 207, 208, 209,
+        210, 211, 212, 213, 214, 215, 216, 217, 218, 219
+      ]
+    }
+  }
+}

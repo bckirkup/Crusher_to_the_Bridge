@@ -1,0 +1,68 @@
+{
+  "campaign": "synthetic_recovery_v1",
+  "description": "Synthetic data recovery experiment for parameter identifiability. 6 known parameter vectors on the suspected dose_adj \u00d7 alpha_c ridge. Run sim with known params, then fit Stan to check recovery.",
+  "platform": "mega_cruise_5000",
+  "default_epochs": 168,
+  "pathogen": "norovirus",
+  "parameter_vectors": [
+    {
+      "id": "ridge_1",
+      "dose_adj": 9.5,
+      "alpha_c": 1.0,
+      "non_susceptible": 0.0,
+      "note": "Low dose, high contact density"
+    },
+    {
+      "id": "ridge_2",
+      "dose_adj": 10.0,
+      "alpha_c": 0.85,
+      "non_susceptible": 0.0,
+      "note": "Moderate dose, moderate-high contact"
+    },
+    {
+      "id": "ridge_3",
+      "dose_adj": 10.6,
+      "alpha_c": 0.75,
+      "non_susceptible": 0.0,
+      "note": "Calibrated point"
+    },
+    {
+      "id": "ridge_4",
+      "dose_adj": 11.0,
+      "alpha_c": 0.65,
+      "non_susceptible": 0.0,
+      "note": "High dose, lower contact"
+    },
+    {
+      "id": "ridge_5",
+      "dose_adj": 11.5,
+      "alpha_c": 0.55,
+      "non_susceptible": 0.0,
+      "note": "Very high dose, low contact"
+    },
+    {
+      "id": "off_ridge",
+      "dose_adj": 10.6,
+      "alpha_c": 1.0,
+      "non_susceptible": 0.0,
+      "note": "Calibrated dose but different alpha \u2014 should be distinguishable"
+    }
+  ],
+  "platforms": [
+    "expedition_cruise_450",
+    "classic_cruise_1900",
+    "spirit_cruise_3000",
+    "mega_cruise_5000"
+  ],
+  "seeds_per_cell": 50,
+  "surveillance": "syndromic",
+  "total_runs": 1200,
+  "run_time_estimate": "~2-3 hours on 200 instances",
+  "post_processing": {
+    "step_1": "Aggregate per-vector: compute outbreak rate, mean AR, by platform",
+    "step_2": "Fit Stan hurdle model to each synthetic dataset (6 fits \u00d7 4 chains)",
+    "step_3": "Compare posterior mode to true parameters",
+    "step_4": "Report: which parameters are recovered, which show ridges",
+    "step_5": "Plot joint posterior contours for dose_adj \u00d7 alpha_c"
+  }
+}

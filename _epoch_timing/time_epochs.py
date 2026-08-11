@@ -114,9 +114,6 @@ def time_spec(
     spec["run"].setdefault("write_ground_truth", False)
     spec["run"]["num_epochs"] = epochs
 
-    spec_path = HERE / f"{label}.spec.json"
-    spec_path.write_text(json.dumps(spec, indent=2), encoding="utf-8")
-
     agents_hint = (
         (spec.get("config_overrides") or {}).get("ship_graph", {}).get("num_agents")
     )
@@ -125,7 +122,7 @@ def time_spec(
         flush=True,
     )
     t0 = time.perf_counter()
-    picard_spec = PicardRunSpec.from_picard_json(str(REPO_ROOT), str(spec_path))
+    picard_spec = PicardRunSpec.from_picard_dict(str(REPO_ROOT), spec)
     sim = ShipSimulation(picard_spec, display=False)
     sim.initialize()
     init_s = time.perf_counter() - t0
@@ -170,7 +167,8 @@ def time_spec(
         "per_epoch": rows,
     }
     out_path = HERE / f"{label}.timing.json"
-    out_path.write_text(json.dumps(out, indent=2), encoding="utf-8")
+    # Synthetic epidemic counters only (not real-world PII).
+    out_path.write_text(json.dumps(out, indent=2), encoding="utf-8")  # codeql[py/clear-text-storage-sensitive-data]
     print(
         f"[{label}] DONE epochs={epoch} loop={total:.1f}s "
         f"mean={mean_s:.3f}s/epoch -> {out_path.name}",
@@ -222,7 +220,8 @@ def compare_cruise(*, epochs: int, budget: float) -> dict[str, Any]:
         means = [row["mean_seconds_per_epoch"] for row in summary_rows]
         summary["mean_of_means"] = round(statistics.fmean(means), 4)
     path = HERE / "compare_cruise.summary.json"
-    path.write_text(json.dumps(summary, indent=2), encoding="utf-8")
+    # Aggregate wall-time metrics only (not real-world PII).
+    path.write_text(json.dumps(summary, indent=2), encoding="utf-8")  # codeql[py/clear-text-storage-sensitive-data]
     print("\n=== cruise compare summary ===", flush=True)
     for row in summary_rows:
         print(

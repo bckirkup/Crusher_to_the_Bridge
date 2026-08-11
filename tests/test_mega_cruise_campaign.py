@@ -1463,3 +1463,70 @@ def test_boundary_b1_generator_smoke_one_run() -> None:
     }
     deferred = resolve_tier_ids(manifest, "all", include_deferred=True)
     assert "b2_measles_sensitivity" in deferred
+
+
+SR_MANIFEST = CAMPAIGN / "synthetic_recovery_v1_manifest.json"
+VD_MANIFEST = CAMPAIGN / "vsp_degradation_v1_manifest.json"
+
+
+def test_synthetic_recovery_cartesian_and_generator() -> None:
+    from picard_framework.runs.mega_cruise_campaign.count_manifest_cartesian import (
+        summarize,
+        tier_cartesian,
+    )
+
+    manifest = load_manifest(SR_MANIFEST)
+    assert manifest["campaign"] == "synthetic_recovery_v1"
+    assert tier_cartesian(manifest, manifest["tiers"]["sr1_ridge"]) == 1200
+    wave1, wave2 = summarize(manifest)
+    assert wave1 == 1200 and wave2 == 0
+
+    rid, spec = next(generate_tier_runs(manifest, "sr1_ridge"))
+    assert rid.startswith("sr_norovirus_")
+    assert "ridge_" in rid or "off_ridge" in rid
+    noro = spec["pathogen_overrides"]["norwalk_gi"]
+    assert "dose_adjustment" in noro
+    assert noro["initial_infected"] == 3
+    assert "innate_nonsusceptible_fraction" in noro
+    tx = spec["config_overrides"]["transmission"]
+    assert tx["contact_mode"] == "density_dependent"
+    assert "exponent" in tx["density_dependent"]
+
+
+def test_vsp_degradation_cartesian_and_generator() -> None:
+    from picard_framework.runs.mega_cruise_campaign.count_manifest_cartesian import (
+        summarize,
+        tier_cartesian,
+    )
+
+    manifest = load_manifest(VD_MANIFEST)
+    assert manifest["campaign"] == "vsp_degradation_v1"
+    assert tier_cartesian(manifest, manifest["tiers"]["vd1_vsp_threshold"]) == 840
+    assert tier_cartesian(manifest, manifest["tiers"]["vd1_detection_delay"]) == 720
+    assert (
+        tier_cartesian(manifest, manifest["tiers"]["vd1_isolation_compliance"]) == 600
+    )
+    assert (
+        tier_cartesian(manifest, manifest["tiers"]["vd1_sick_call_probability"]) == 600
+    )
+    assert (
+        tier_cartesian(manifest, manifest["tiers"]["vd2_threshold_x_compliance"])
+        == 720
+    )
+    assert tier_cartesian(manifest, manifest["tiers"]["vd2_delay_x_reporting"]) == 720
+    assert (
+        tier_cartesian(manifest, manifest["tiers"]["vd2_worst_case_gradient"]) == 2160
+    )
+    wave1, wave2 = summarize(manifest)
+    assert wave1 == 6360 and wave2 == 0
+
+    rid, spec = next(generate_tier_runs(manifest, "vd1_vsp_threshold"))
+    assert rid.startswith("vd_norovirus_")
+    assert "vsp" in rid
+    cfg = spec["config_overrides"]
+    assert "lockdown_attack_rate" in cfg["escalation"]
+    assert "detection_delay_epochs" in cfg["medical_response"]
+    assert "isolation_compliance" in cfg["medical_response"]
+    params = spec["campaign_parameters"]
+    assert params["dose_adjustment"] == pytest.approx(10.6)
+    assert params["density_exponent"] == pytest.approx(0.75)
