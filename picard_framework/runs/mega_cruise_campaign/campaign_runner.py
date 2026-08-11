@@ -551,6 +551,175 @@ def _iter_vsp_knob_combos(
     raise ValueError("VSP degradation tier needs 'factor'+'values' or 'factors'")
 
 
+def _iter_synthetic_recovery_runs(
+    *,
+    manifest: dict[str, Any],
+    tier: dict[str, Any],
+    surv_cfgs: dict[str, Any],
+    platform_override: str | None,
+    num_agents_override: int | None,
+    yield_run,
+) -> Iterator[tuple[str, dict[str, Any]]]:
+    """Yield Picard specs for synthetic_recovery (sr*) tiers."""
+    pathogen = tier["pathogen"]
+    bundle, pathogen_id, base_overrides = get_pathogen_config(manifest, pathogen)
+    platforms = _resolve_tier_platforms(
+        tier,
+        fallback_platform=manifest["platform"],
+        platform_override=platform_override,
+    )
+    n_init = int(tier.get("initial_infected", 3))
+    strategies = list(tier.get("surveillance_strategies") or ["syndromic"])
+    vectors = list(tier["parameter_vectors"])
+    default_agents = int(manifest.get("default_num_agents", 7000))
+    for plat in platforms:
+        n_agents = _platform_num_agents(
+            plat,
+            num_agents_override=num_agents_override,
+            tier=tier,
+            default_agents=default_agents,
+        )
+        for vec in vectors:
+            dose = float(vec["dose_adj"])
+            alpha = float(vec["alpha_c"])
+            nonsus = float(vec.get("non_susceptible", 0.0))
+            vec_id = str(vec.get("id", "vec"))
+            path_over = dict(base_overrides or {})
+            path_over[pathogen_id] = {
+                **(path_over.get(pathogen_id) or {}),
+                "dose_adjustment": dose,
+                "initial_infected": n_init,
+                "innate_nonsusceptible_fraction": nonsus,
+            }
+            dens_over = _density_contact_override(alpha)
+            for sname in strategies:
+                for seed in tier["seeds"]:
+                    rid = "_".join(
+                        [
+                            "sr",
+                            pathogen,
+                            plat,
+                            vec_id,
+                            _dose_tag(dose),
+                            _alpha_tag(alpha),
+                            f"init{n_init}",
+                            sname,
+                            f"s{seed}",
+                        ]
+                    )
+                    yield yield_run(
+                        rid,
+                        bundle=bundle,
+                        pathogen_overrides=path_over,
+                        config_overrides=merge_cfg(
+                            surv_cfgs.get(sname), dens_over,
+                        ),
+                        seed=seed,
+                        num_agents=n_agents,
+                        pathogen=pathogen,
+                        platform_id=plat,
+                        surveillance=sname,
+                        dose_adjustment=dose,
+                        density_exponent=alpha,
+                        n_init=n_init,
+                        non_susceptible=nonsus,
+                        parameter_vector=vec_id,
+                    )
+
+
+def _vd_active_knob_tags(tier: dict[str, Any], knobs: dict[str, Any]) -> list[str]:
+    """Run-id fragments for knobs that this tier actually sweeps."""
+    return [
+        _vsp_knob_tag(n, knobs[n])
+        for n in _VSP_KNOB_KEYS
+        if (
+            ("factor" in tier and n == tier["factor"])
+            or ("factors" in tier and n in tier["factors"])
+        )
+    ]
+
+
+def _iter_vsp_degradation_runs(
+    *,
+    manifest: dict[str, Any],
+    tier: dict[str, Any],
+    surv_cfgs: dict[str, Any],
+    platform_override: str | None,
+    num_agents_override: int | None,
+    yield_run,
+) -> Iterator[tuple[str, dict[str, Any]]]:
+    """Yield Picard specs for vsp_degradation (vd*) tiers."""
+    pathogen = tier["pathogen"]
+    bundle, pathogen_id, base_overrides = get_pathogen_config(manifest, pathogen)
+    platforms = _resolve_tier_platforms(
+        tier,
+        fallback_platform=manifest["platform"],
+        platform_override=platform_override,
+    )
+    defaults = manifest.get("defaults") or {}
+    nominal = dict(defaults.get("nominal_values") or {})
+    for k in _VSP_KNOB_KEYS:
+        if k not in nominal:
+            raise ValueError(f"manifest defaults.nominal_values missing {k}")
+    dose = float(tier.get("dose_adjustment", defaults.get("dose_adjustment", 10.6)))
+    alpha = float(tier.get("density_exponent", defaults.get("density_exponent", 0.75)))
+    n_init = int(tier.get("initial_infected", defaults.get("initial_infected", 3)))
+    strategies = list(tier.get("surveillance_strategies") or ["syndromic"])
+    dens_over = _density_contact_override(alpha)
+    knobs_list = _iter_vsp_knob_combos(tier, nominal)
+    default_agents = int(manifest.get("default_num_agents", 7000))
+    for plat in platforms:
+        n_agents = _platform_num_agents(
+            plat,
+            num_agents_override=num_agents_override,
+            tier=tier,
+            default_agents=default_agents,
+        )
+        path_over = dict(base_overrides or {})
+        path_over[pathogen_id] = {
+            **(path_over.get(pathogen_id) or {}),
+            "dose_adjustment": dose,
+            "initial_infected": n_init,
+        }
+        for knobs in knobs_list:
+            deg_over = _vsp_degradation_overrides(knobs)
+            tags = _vd_active_knob_tags(tier, knobs)
+            for sname in strategies:
+                for seed in tier["seeds"]:
+                    rid = "_".join(
+                        [
+                            "vd",
+                            pathogen,
+                            plat,
+                            *tags,
+                            _dose_tag(dose),
+                            _alpha_tag(alpha),
+                            f"init{n_init}",
+                            sname,
+                            f"s{seed}",
+                        ]
+                    )
+                    yield yield_run(
+                        rid,
+                        bundle=bundle,
+                        pathogen_overrides=path_over,
+                        config_overrides=merge_cfg(
+                            surv_cfgs.get(sname), dens_over, deg_over,
+                        ),
+                        seed=seed,
+                        num_agents=n_agents,
+                        pathogen=pathogen,
+                        platform_id=plat,
+                        surveillance=sname,
+                        dose_adjustment=dose,
+                        density_exponent=alpha,
+                        n_init=n_init,
+                        vsp_threshold=float(knobs["vsp_threshold"]),
+                        detection_delay_epochs=int(knobs["detection_delay"]),
+                        isolation_compliance=float(knobs["isolation_compliance"]),
+                        sick_call_probability=float(knobs["sick_call_probability"]),
+                    )
+
 
 def _resolve_tier_platforms(
     tier: dict[str, Any],
@@ -1456,156 +1625,24 @@ def generate_tier_runs(
                                             )
 
     elif short.startswith("sr"):
-        # Synthetic recovery: known (dose_adj, alpha_c, non_susceptible) vectors.
-        pathogen = tier["pathogen"]
-        bundle, pathogen_id, base_overrides = get_pathogen_config(manifest, pathogen)
-        platforms = _resolve_tier_platforms(
-            tier,
-            fallback_platform=manifest["platform"],
+        yield from _iter_synthetic_recovery_runs(
+            manifest=manifest,
+            tier=tier,
+            surv_cfgs=surv_cfgs,
             platform_override=platform_override,
+            num_agents_override=num_agents_override,
+            yield_run=_yield,
         )
-        n_init = int(tier.get("initial_infected", 3))
-        strategies = list(tier.get("surveillance_strategies") or ["syndromic"])
-        vectors = list(tier["parameter_vectors"])
-        for plat in platforms:
-            n_agents = _platform_num_agents(
-                plat,
-                num_agents_override=num_agents_override,
-                tier=tier,
-                default_agents=int(manifest.get("default_num_agents", 7000)),
-            )
-            for vec in vectors:
-                dose = float(vec["dose_adj"])
-                alpha = float(vec["alpha_c"])
-                nonsus = float(vec.get("non_susceptible", 0.0))
-                vec_id = str(vec.get("id", "vec"))
-                path_over = dict(base_overrides or {})
-                path_over[pathogen_id] = {
-                    **(path_over.get(pathogen_id) or {}),
-                    "dose_adjustment": dose,
-                    "initial_infected": n_init,
-                    "innate_nonsusceptible_fraction": nonsus,
-                }
-                dens_over = _density_contact_override(alpha)
-                for sname in strategies:
-                    for seed in tier["seeds"]:
-                        rid = "_".join(
-                            [
-                                "sr",
-                                pathogen,
-                                plat,
-                                vec_id,
-                                _dose_tag(dose),
-                                _alpha_tag(alpha),
-                                f"init{n_init}",
-                                sname,
-                                f"s{seed}",
-                            ]
-                        )
-                        yield _yield(
-                            rid,
-                            bundle=bundle,
-                            pathogen_overrides=path_over,
-                            config_overrides=merge_cfg(
-                                surv_cfgs.get(sname), dens_over,
-                            ),
-                            seed=seed,
-                            num_agents=n_agents,
-                            pathogen=pathogen,
-                            platform_id=plat,
-                            surveillance=sname,
-                            dose_adjustment=dose,
-                            density_exponent=alpha,
-                            n_init=n_init,
-                            non_susceptible=nonsus,
-                            parameter_vector=vec_id,
-                        )
 
     elif short.startswith("vd"):
-        # VSP degradation: FAT (factor+values) or interaction (factors product).
-        pathogen = tier["pathogen"]
-        bundle, pathogen_id, base_overrides = get_pathogen_config(manifest, pathogen)
-        platforms = _resolve_tier_platforms(
-            tier,
-            fallback_platform=manifest["platform"],
+        yield from _iter_vsp_degradation_runs(
+            manifest=manifest,
+            tier=tier,
+            surv_cfgs=surv_cfgs,
             platform_override=platform_override,
+            num_agents_override=num_agents_override,
+            yield_run=_yield,
         )
-        defaults = manifest.get("defaults") or {}
-        nominal = dict(defaults.get("nominal_values") or {})
-        for k in _VSP_KNOB_KEYS:
-            if k not in nominal:
-                raise ValueError(f"manifest defaults.nominal_values missing {k}")
-        dose = float(
-            tier.get("dose_adjustment", defaults.get("dose_adjustment", 10.6))
-        )
-        alpha = float(
-            tier.get("density_exponent", defaults.get("density_exponent", 0.75))
-        )
-        n_init = int(tier.get("initial_infected", defaults.get("initial_infected", 3)))
-        strategies = list(tier.get("surveillance_strategies") or ["syndromic"])
-        dens_over = _density_contact_override(alpha)
-        knobs_list = _iter_vsp_knob_combos(tier, nominal)
-        for plat in platforms:
-            n_agents = _platform_num_agents(
-                plat,
-                num_agents_override=num_agents_override,
-                tier=tier,
-                default_agents=int(manifest.get("default_num_agents", 7000)),
-            )
-            path_over = dict(base_overrides or {})
-            path_over[pathogen_id] = {
-                **(path_over.get(pathogen_id) or {}),
-                "dose_adjustment": dose,
-                "initial_infected": n_init,
-            }
-            for knobs in knobs_list:
-                deg_over = _vsp_degradation_overrides(knobs)
-                tags = [
-                    _vsp_knob_tag(n, knobs[n])
-                    for n in _VSP_KNOB_KEYS
-                    if (
-                        ("factor" in tier and n == tier["factor"])
-                        or ("factors" in tier and n in tier["factors"])
-                    )
-                ]
-                for sname in strategies:
-                    for seed in tier["seeds"]:
-                        rid_parts = [
-                            "vd",
-                            pathogen,
-                            plat,
-                            *tags,
-                            _dose_tag(dose),
-                            _alpha_tag(alpha),
-                            f"init{n_init}",
-                            sname,
-                            f"s{seed}",
-                        ]
-                        rid = "_".join(rid_parts)
-                        yield _yield(
-                            rid,
-                            bundle=bundle,
-                            pathogen_overrides=path_over,
-                            config_overrides=merge_cfg(
-                                surv_cfgs.get(sname), dens_over, deg_over,
-                            ),
-                            seed=seed,
-                            num_agents=n_agents,
-                            pathogen=pathogen,
-                            platform_id=plat,
-                            surveillance=sname,
-                            dose_adjustment=dose,
-                            density_exponent=alpha,
-                            n_init=n_init,
-                            vsp_threshold=float(knobs["vsp_threshold"]),
-                            detection_delay_epochs=int(knobs["detection_delay"]),
-                            isolation_compliance=float(
-                                knobs["isolation_compliance"]
-                            ),
-                            sick_call_probability=float(
-                                knobs["sick_call_probability"]
-                            ),
-                        )
 
     else:
         raise ValueError(f"No generator for tier {tier_id}")

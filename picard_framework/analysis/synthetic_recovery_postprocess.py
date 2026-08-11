@@ -8,7 +8,6 @@ Usage::
 from __future__ import annotations
 
 import argparse
-import csv
 import json
 import math
 import os
@@ -88,7 +87,7 @@ def _row_from_summary_zip(zip_path: str) -> dict[str, Any] | None:
         "run_id": run_id,
         "parameter_vector": _parameter_vector(run_id, params),
         "platform_id": factors.get("platform_id"),
-        "pathogen": factors.get("pathogen") or "norovirus",
+        "pathogen": factors.get("pathogen") or "",
         "pathogen_id": factors.get("pathogen_id"),
         "dose_adjustment": as_float(
             factors.get("dose_adjustment"),
@@ -740,9 +739,6 @@ def _write_figures(
     names.append(os.path.basename(p1))
 
     fig, ax = plt.subplots(figsize=(7, 6))
-    for r in agg:
-        # one point per vector (mean across platforms) — plot unique vectors
-        pass
     seen = set()
     for r in agg:
         v = r["parameter_vector"]

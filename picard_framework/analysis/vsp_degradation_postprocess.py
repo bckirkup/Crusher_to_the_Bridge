@@ -74,7 +74,7 @@ def _summary_from_zip_bytes(data: bytes, name: str) -> dict[str, Any] | None:
         "run_id": run_id,
         "tier_id": str(params.get("tier_id") or ""),
         "platform_id": str(params.get("platform_id") or ""),
-        "pathogen": str(params.get("pathogen") or "norovirus"),
+        "pathogen": str(params.get("pathogen") or ""),
         "seed": as_int(params.get("seed"), 0),
         "dose_adjustment": as_float(params.get("dose_adjustment"), 10.6),
         "density_exponent": as_float(params.get("density_exponent"), 0.75),
@@ -222,26 +222,21 @@ def platform_gap_table(
     return out
 
 
-def _write_figures(
-    fat_curves: dict[str, list[dict[str, Any]]],
-    thr_comp_gaps: list[dict[str, Any]],
-    delay_rep_gaps: list[dict[str, Any]],
-    worst_gaps: list[dict[str, Any]],
-    fig_dir: str,
-) -> list[str]:
-    ensure_out_dir(fig_dir)
-    names: list[str] = []
+def _matplotlib_or_none():
     try:
         import matplotlib
 
         matplotlib.use("Agg")
         import matplotlib.pyplot as plt
         import numpy as np
+
+        return plt, np
     except ImportError:
         print("warn: matplotlib missing; skipping figures", file=sys.stderr)
-        return names
+        return None, None
 
-    # 1) FAT curves: mean AR vs factor level by platform
+
+def _plot_fat_curves(plt, fat_curves: dict[str, list[dict[str, Any]]], fig_dir: str) -> str:
     factor_axis = {
         "fat_vsp_threshold": ("vsp_threshold", "VSP threshold (higher = weaker)"),
         "fat_detection_delay": ("detection_delay", "Detection delay (epochs)"),
@@ -278,128 +273,194 @@ def _write_figures(
         fig.legend(handles, labels, loc="upper center", ncol=4, fontsize=7)
     fig.suptitle("VSP degradation: factor-at-a-time mean AR by platform")
     fig.tight_layout(rect=(0, 0, 1, 0.93))
-    p1 = os.path.join(fig_dir, "01_fat_ar_curves.png")
-    fig.savefig(p1, dpi=120)
+    path = os.path.join(fig_dir, "01_fat_ar_curves.png")
+    fig.savefig(path, dpi=120)
     plt.close(fig)
-    names.append(os.path.basename(p1))
+    return os.path.basename(path)
 
-    def _heatmap(gaps: list[dict[str, Any]], xkey: str, ykey: str, title: str, fname: str) -> None:
-        if not gaps:
-            return
-        xs = sorted({float(r[xkey]) for r in gaps})
-        ys = sorted({float(r[ykey]) for r in gaps})
-        z = np.full((len(ys), len(xs)), np.nan)
-        broken = np.zeros_like(z, dtype=bool)
-        for r in gaps:
-            i = ys.index(float(r[ykey]))
-            j = xs.index(float(r[xkey]))
-            val = r.get("abs_gap")
-            if val is not None:
-                z[i, j] = float(val)
-            broken[i, j] = bool(r.get("shadow_broken"))
-        fig, ax = plt.subplots(figsize=(7, 5))
-        im = ax.imshow(z, origin="lower", aspect="auto", cmap="YlOrRd")
-        ax.set_xticks(range(len(xs)))
-        ax.set_xticklabels([str(v) for v in xs])
-        ax.set_yticks(range(len(ys)))
-        ax.set_yticklabels([str(v) for v in ys])
-        ax.set_xlabel(xkey)
-        ax.set_ylabel(ykey)
-        ax.set_title(title)
-        for i in range(len(ys)):
-            for j in range(len(xs)):
-                if np.isnan(z[i, j]):
-                    continue
-                mark = "*" if broken[i, j] else ""
-                ax.text(
-                    j,
-                    i,
-                    f"{100 * z[i, j]:.1f}pp{mark}",
-                    ha="center",
-                    va="center",
-                    fontsize=8,
-                    color="black",
-                )
-        fig.colorbar(im, ax=ax, label="|AR_expedition − AR_mega|")
-        fig.tight_layout()
-        path = os.path.join(fig_dir, fname)
-        fig.savefig(path, dpi=120)
-        plt.close(fig)
-        names.append(os.path.basename(path))
 
-    _heatmap(
+def _plot_gap_heatmap(
+    plt,
+    np,
+    gaps: list[dict[str, Any]],
+    *,
+    xkey: str,
+    ykey: str,
+    title: str,
+    fname: str,
+    fig_dir: str,
+) -> str | None:
+    if not gaps:
+        return None
+    xs = sorted({float(r[xkey]) for r in gaps})
+    ys = sorted({float(r[ykey]) for r in gaps})
+    z = np.full((len(ys), len(xs)), np.nan)
+    broken = np.zeros_like(z, dtype=bool)
+    for r in gaps:
+        i = ys.index(float(r[ykey]))
+        j = xs.index(float(r[xkey]))
+        val = r.get("abs_gap")
+        if val is not None:
+            z[i, j] = float(val)
+        broken[i, j] = bool(r.get("shadow_broken"))
+    fig, ax = plt.subplots(figsize=(7, 5))
+    im = ax.imshow(z, origin="lower", aspect="auto", cmap="YlOrRd")
+    ax.set_xticks(range(len(xs)))
+    ax.set_xticklabels([str(v) for v in xs])
+    ax.set_yticks(range(len(ys)))
+    ax.set_yticklabels([str(v) for v in ys])
+    ax.set_xlabel(xkey)
+    ax.set_ylabel(ykey)
+    ax.set_title(title)
+    for i in range(len(ys)):
+        for j in range(len(xs)):
+            if np.isnan(z[i, j]):
+                continue
+            mark = "*" if broken[i, j] else ""
+            ax.text(
+                j,
+                i,
+                f"{100 * z[i, j]:.1f}pp{mark}",
+                ha="center",
+                va="center",
+                fontsize=8,
+                color="black",
+            )
+    fig.colorbar(im, ax=ax, label="|AR_expedition − AR_mega|")
+    fig.tight_layout()
+    path = os.path.join(fig_dir, fname)
+    fig.savefig(path, dpi=120)
+    plt.close(fig)
+    return os.path.basename(path)
+
+
+def _plot_worst_case_scatter(plt, worst_gaps: list[dict[str, Any]], fig_dir: str) -> str | None:
+    if not worst_gaps:
+        return None
+    fig, ax = plt.subplots(figsize=(8, 5))
+    for r in worst_gaps:
+        score = (
+            float(r["vsp_threshold"])
+            + 0.01 * float(r["detection_delay"])
+            + (1.0 - float(r["isolation_compliance"]))
+        )
+        ax.scatter(
+            score,
+            float(r["abs_gap"] or 0),
+            c="crimson" if r.get("shadow_broken") else "steelblue",
+            s=40,
+            alpha=0.8,
+        )
+    ax.axhline(SHADOW_BREAK_PP, color="gray", ls="--", label="5pp threshold")
+    ax.set_xlabel("Degradation score (vsp + 0.01·delay + (1−compliance))")
+    ax.set_ylabel("|AR_expedition − AR_mega|")
+    ax.set_title("Worst-case panel: shadow gap vs degradation score")
+    ax.legend(fontsize=8)
+    ax.grid(True, alpha=0.3)
+    fig.tight_layout()
+    path = os.path.join(fig_dir, "04_worst_case_gap_vs_score.png")
+    fig.savefig(path, dpi=120)
+    plt.close(fig)
+    return os.path.basename(path)
+
+
+def _plot_signed_gap_bars(plt, thr_comp_gaps: list[dict[str, Any]], fig_dir: str) -> str | None:
+    if not thr_comp_gaps:
+        return None
+    fig, ax = plt.subplots(figsize=(9, 4))
+    labels, vals, colors = [], [], []
+    for r in sorted(
         thr_comp_gaps,
-        "vsp_threshold",
-        "isolation_compliance",
-        "|AR_exp − AR_mega| vs threshold × compliance\n(* = shadow broken, >5pp)",
-        "02_heatmap_threshold_x_compliance.png",
-    )
-    _heatmap(
-        delay_rep_gaps,
-        "detection_delay",
-        "sick_call_probability",
-        "|AR_exp − AR_mega| vs delay × sick-call\n(* = shadow broken, >5pp)",
-        "03_heatmap_delay_x_reporting.png",
-    )
+        key=lambda z: (float(z["vsp_threshold"]), -float(z["isolation_compliance"])),
+    ):
+        labels.append(f"vsp={r['vsp_threshold']}\niso={r['isolation_compliance']}")
+        g = float(r["gap_expedition_minus_mega"] or 0)
+        vals.append(g)
+        colors.append("crimson" if abs(g) > SHADOW_BREAK_PP else "steelblue")
+    ax.bar(range(len(vals)), vals, color=colors)
+    ax.axhline(SHADOW_BREAK_PP, color="gray", ls="--", lw=0.8)
+    ax.axhline(-SHADOW_BREAK_PP, color="gray", ls="--", lw=0.8)
+    ax.axhline(0, color="black", lw=0.6)
+    ax.set_xticks(range(len(labels)))
+    ax.set_xticklabels(labels, fontsize=7)
+    ax.set_ylabel("AR_expedition − AR_mega")
+    ax.set_title("Signed platform gap (threshold × compliance)")
+    fig.tight_layout()
+    path = os.path.join(fig_dir, "05_signed_gap_threshold_compliance.png")
+    fig.savefig(path, dpi=120)
+    plt.close(fig)
+    return os.path.basename(path)
 
-    # Worst-case: show abs gap vs vsp_threshold facets for delay/compliance
-    if worst_gaps:
-        fig, ax = plt.subplots(figsize=(8, 5))
-        # plot abs_gap vs an ordered degradation score
-        for r in worst_gaps:
-            score = (
-                float(r["vsp_threshold"])
-                + 0.01 * float(r["detection_delay"])
-                + (1.0 - float(r["isolation_compliance"]))
-            )
-            ax.scatter(
-                score,
-                float(r["abs_gap"] or 0),
-                c="crimson" if r.get("shadow_broken") else "steelblue",
-                s=40,
-                alpha=0.8,
-            )
-        ax.axhline(SHADOW_BREAK_PP, color="gray", ls="--", label="5pp threshold")
-        ax.set_xlabel("Degradation score (vsp + 0.01·delay + (1−compliance))")
-        ax.set_ylabel("|AR_expedition − AR_mega|")
-        ax.set_title("Worst-case panel: shadow gap vs degradation score")
-        ax.legend(fontsize=8)
-        ax.grid(True, alpha=0.3)
-        fig.tight_layout()
-        p4 = os.path.join(fig_dir, "04_worst_case_gap_vs_score.png")
-        fig.savefig(p4, dpi=120)
-        plt.close(fig)
-        names.append(os.path.basename(p4))
 
-    # Signed gap bar for nominal-ish cells in threshold×compliance
-    if thr_comp_gaps:
-        fig, ax = plt.subplots(figsize=(9, 4))
-        labels, vals, colors = [], [], []
-        for r in sorted(
+def _write_figures(
+    fat_curves: dict[str, list[dict[str, Any]]],
+    thr_comp_gaps: list[dict[str, Any]],
+    delay_rep_gaps: list[dict[str, Any]],
+    worst_gaps: list[dict[str, Any]],
+    fig_dir: str,
+) -> list[str]:
+    ensure_out_dir(fig_dir)
+    plt, np = _matplotlib_or_none()
+    if plt is None:
+        return []
+    names: list[str] = [_plot_fat_curves(plt, fat_curves, fig_dir)]
+    for gaps, xkey, ykey, title, fname in (
+        (
             thr_comp_gaps,
-            key=lambda z: (float(z["vsp_threshold"]), -float(z["isolation_compliance"])),
-        ):
-            labels.append(
-                f"vsp={r['vsp_threshold']}\niso={r['isolation_compliance']}"
-            )
-            g = float(r["gap_expedition_minus_mega"] or 0)
-            vals.append(g)
-            colors.append("crimson" if abs(g) > SHADOW_BREAK_PP else "steelblue")
-        ax.bar(range(len(vals)), vals, color=colors)
-        ax.axhline(SHADOW_BREAK_PP, color="gray", ls="--", lw=0.8)
-        ax.axhline(-SHADOW_BREAK_PP, color="gray", ls="--", lw=0.8)
-        ax.axhline(0, color="black", lw=0.6)
-        ax.set_xticks(range(len(labels)))
-        ax.set_xticklabels(labels, fontsize=7)
-        ax.set_ylabel("AR_expedition − AR_mega")
-        ax.set_title("Signed platform gap (threshold × compliance)")
-        fig.tight_layout()
-        p5 = os.path.join(fig_dir, "05_signed_gap_threshold_compliance.png")
-        fig.savefig(p5, dpi=120)
-        plt.close(fig)
-        names.append(os.path.basename(p5))
-
+            "vsp_threshold",
+            "isolation_compliance",
+            "|AR_exp − AR_mega| vs threshold × compliance\n(* = shadow broken, >5pp)",
+            "02_heatmap_threshold_x_compliance.png",
+        ),
+        (
+            delay_rep_gaps,
+            "detection_delay",
+            "sick_call_probability",
+            "|AR_exp − AR_mega| vs delay × sick-call\n(* = shadow broken, >5pp)",
+            "03_heatmap_delay_x_reporting.png",
+        ),
+    ):
+        name = _plot_gap_heatmap(
+            plt, np, gaps, xkey=xkey, ykey=ykey, title=title, fname=fname, fig_dir=fig_dir
+        )
+        if name:
+            names.append(name)
+    for name in (
+        _plot_worst_case_scatter(plt, worst_gaps, fig_dir),
+        _plot_signed_gap_bars(plt, thr_comp_gaps, fig_dir),
+    ):
+        if name:
+            names.append(name)
     return names
+
+
+def _fat_factor_key(rows: list[dict[str, Any]]) -> str | None:
+    for cand in (
+        "vsp_threshold",
+        "detection_delay",
+        "isolation_compliance",
+        "sick_call_probability",
+    ):
+        if cand in rows[0]:
+            return cand
+    return None
+
+
+def _fat_max_abs_gap(
+    rows: list[dict[str, Any]], fkey: str
+) -> tuple[float, Any]:
+    by_level: dict[Any, dict[str, float]] = defaultdict(dict)
+    for r in rows:
+        by_level[r[fkey]][r["platform_id"]] = float(r["mean_attack_rate"])
+    max_abs = 0.0
+    max_level: Any = None
+    for level, plat_ar in by_level.items():
+        if EXPEDITION in plat_ar and MEGA in plat_ar:
+            g = abs(plat_ar[EXPEDITION] - plat_ar[MEGA])
+            if g > max_abs:
+                max_abs = g
+                max_level = level
+    return max_abs, max_level
 
 
 def write_report(
@@ -429,31 +490,10 @@ def write_report(
     for panel, rows in sorted(fat_curves.items()):
         if not rows:
             continue
-        # max |exp-mega| along the factor
-        by_level: dict[Any, dict[str, float]] = defaultdict(dict)
-        # infer factor key
-        fkey = None
-        for cand in (
-            "vsp_threshold",
-            "detection_delay",
-            "isolation_compliance",
-            "sick_call_probability",
-        ):
-            if cand in rows[0]:
-                fkey = cand
-                break
+        fkey = _fat_factor_key(rows)
         if not fkey:
             continue
-        for r in rows:
-            by_level[r[fkey]][r["platform_id"]] = float(r["mean_attack_rate"])
-        max_abs = 0.0
-        max_level = None
-        for level, plat_ar in by_level.items():
-            if EXPEDITION in plat_ar and MEGA in plat_ar:
-                g = abs(plat_ar[EXPEDITION] - plat_ar[MEGA])
-                if g > max_abs:
-                    max_abs = g
-                    max_level = level
+        max_abs, max_level = _fat_max_abs_gap(rows, fkey)
         lines.append(
             f"- `{panel}`: max |exp−mega| = **{100 * max_abs:.1f} pp** "
             f"at {fkey}={max_level}"
@@ -519,30 +559,46 @@ def write_report(
                     float(r["vsp_threshold"]),
                     float(r["detection_delay"]),
                     -float(r["isolation_compliance"]),
+                    -float(r["sick_call_probability"]),
                 ),
             )
             lines.append(
-                "Mildest broken worst-case cell: "
+                "Mildest broken cell (lowest threshold / delay, highest compliance): "
                 f"vsp={mild['vsp_threshold']}, delay={mild['detection_delay']}, "
-                f"iso={mild['isolation_compliance']}, "
-                f"|gap|={100 * float(mild['abs_gap']):.1f} pp."
+                f"iso={mild['isolation_compliance']}, scp={mild['sick_call_probability']}, "
+                f"gap={100 * float(mild['abs_gap'] or 0):.1f}pp."
             )
-        else:
-            lines.append(
-                "No worst-case cell exceeds the 5 pp shadow-break threshold "
-                "(response still compresses the platform gradient)."
-            )
+            lines.append("")
 
-    lines.extend(["", "## Figures", ""])
-    for n in fig_names:
-        lines.append(f"- `figures/{n}`")
-    lines.append("")
+    if fig_names:
+        lines.extend(["## Figures", ""])
+        for n in fig_names:
+            lines.append(f"- `figures/{n}`")
+        lines.append("")
 
     parent = os.path.dirname(path)
     if parent:
         ensure_out_dir(parent)
     with validated_open(path, "w", allowed_roots=allowed_roots(), encoding="utf-8") as fh:
         fh.write("\n".join(lines))
+
+
+def _gap_panel_or_fallback(
+    rows: list[dict[str, Any]],
+    panel: str,
+    keys: tuple[str, ...],
+    predicate,
+) -> list[dict[str, Any]]:
+    """Aggregate platform gaps for a named panel, with optional grid fallback."""
+    subset = [r for r in rows if r["panel"] == panel]
+    gaps = platform_gap_table(aggregate_cells(subset, (*keys, "platform_id")), keys)
+    if gaps:
+        return gaps
+    grid = [r for r in rows if predicate(r)]
+    inter = [r for r in grid if str(r.get("tier_id", "")).startswith("vd2")]
+    use = inter or grid
+    cells = aggregate_cells(use, (*keys, "platform_id"))
+    return platform_gap_table(cells, keys)
 
 
 def run(source: str, out_dir: str) -> int:
@@ -576,7 +632,6 @@ def run(source: str, out_dir: str) -> int:
     write_csv(os.path.join(out, "run_summary.csv"), rows, cols)
     print(f"Bundled {len(rows)} runs", flush=True)
 
-    # Panel-specific aggregates
     fat_panels = {
         "fat_vsp_threshold": "vsp_threshold",
         "fat_detection_delay": "detection_delay",
@@ -593,87 +648,43 @@ def run(source: str, out_dir: str) -> int:
             [fkey, "platform_id", "n_runs", "outbreak_rate", "mean_attack_rate"],
         )
 
-    def _gaps(panel: str, keys: tuple[str, ...]) -> list[dict[str, Any]]:
-        subset = [r for r in rows if r["panel"] == panel]
-        cells = aggregate_cells(subset, (*keys, "platform_id"))
-        return platform_gap_table(cells, keys)
-
-    # If tier_id mapping missed interactions, fall back to multi-tag inference
     tier_counts: dict[str, int] = defaultdict(int)
     for r in rows:
         tier_counts[r["panel"]] += 1
     print("panel counts:", dict(tier_counts), flush=True)
 
-    thr_comp = _gaps(
-        "threshold_x_compliance", ("vsp_threshold", "isolation_compliance")
-    )
-    # Fallback: build from any rows matching the 3×3 grid if panel empty
-    if not thr_comp:
-        grid = [
-            r
-            for r in rows
-            if float(r["vsp_threshold"]) in (0.05, 0.1, 0.2)
+    thr_comp = _gap_panel_or_fallback(
+        rows,
+        "threshold_x_compliance",
+        ("vsp_threshold", "isolation_compliance"),
+        lambda r: (
+            float(r["vsp_threshold"]) in (0.05, 0.1, 0.2)
             and float(r["isolation_compliance"]) in (0.9, 0.5, 0.1)
             and int(r["detection_delay"]) == 1
             and abs(float(r["sick_call_probability"]) - 0.9) < 1e-6
-        ]
-        # Prefer interaction tiers if present
-        inter = [r for r in grid if str(r.get("tier_id", "")).startswith("vd2")]
-        use = inter or grid
-        cells = aggregate_cells(
-            use, ("vsp_threshold", "isolation_compliance", "platform_id")
-        )
-        thr_comp = platform_gap_table(
-            cells, ("vsp_threshold", "isolation_compliance")
-        )
-
-    delay_rep = _gaps(
-        "delay_x_reporting", ("detection_delay", "sick_call_probability")
+        ),
     )
-    if not delay_rep:
-        grid = [
-            r
-            for r in rows
-            if int(r["detection_delay"]) in (1, 4, 12)
+    delay_rep = _gap_panel_or_fallback(
+        rows,
+        "delay_x_reporting",
+        ("detection_delay", "sick_call_probability"),
+        lambda r: (
+            int(r["detection_delay"]) in (1, 4, 12)
             and float(r["sick_call_probability"]) in (0.9, 0.5, 0.1)
             and abs(float(r["vsp_threshold"]) - 0.05) < 1e-9
             and abs(float(r["isolation_compliance"]) - 0.9) < 1e-9
-        ]
-        inter = [r for r in grid if str(r.get("tier_id", "")).startswith("vd2")]
-        use = inter or grid
-        cells = aggregate_cells(
-            use, ("detection_delay", "sick_call_probability", "platform_id")
-        )
-        delay_rep = platform_gap_table(
-            cells, ("detection_delay", "sick_call_probability")
-        )
-
-    worst = _gaps(
+        ),
+    )
+    worst = _gap_panel_or_fallback(
+        rows,
         "worst_case_gradient",
         ("vsp_threshold", "detection_delay", "isolation_compliance"),
-    )
-    if not worst:
-        grid = [
-            r
-            for r in rows
-            if float(r["vsp_threshold"]) in (0.1, 0.2, 0.3)
+        lambda r: (
+            float(r["vsp_threshold"]) in (0.1, 0.2, 0.3)
             and int(r["detection_delay"]) in (4, 8, 12)
             and float(r["isolation_compliance"]) in (0.5, 0.3, 0.1)
-        ]
-        inter = [r for r in grid if str(r.get("tier_id", "")).startswith("vd2")]
-        use = inter or grid
-        cells = aggregate_cells(
-            use,
-            (
-                "vsp_threshold",
-                "detection_delay",
-                "isolation_compliance",
-                "platform_id",
-            ),
-        )
-        worst = platform_gap_table(
-            cells, ("vsp_threshold", "detection_delay", "isolation_compliance")
-        )
+        ),
+    )
 
     gap_cols_tc = [
         "vsp_threshold",
@@ -710,7 +721,9 @@ def run(source: str, out_dir: str) -> int:
         ],
     )
 
-    fig_names = _write_figures(fat_curves, thr_comp, delay_rep, worst, os.path.join(out, "figures"))
+    fig_names = _write_figures(
+        fat_curves, thr_comp, delay_rep, worst, os.path.join(out, "figures")
+    )
     write_report(
         os.path.join(out, "report.md"),
         n_runs=len(rows),
@@ -750,4 +763,4 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    sys.exit(main())

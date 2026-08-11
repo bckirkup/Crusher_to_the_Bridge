@@ -115,6 +115,8 @@ def time_spec(
     spec["run"]["num_epochs"] = epochs
 
     spec_path = HERE / f"{label}.spec.json"
+    # Simulation run-spec JSON only (no credentials); retained for harness replay.
+    # codeql[py/clear-text-storage-sensitive-data]
     spec_path.write_text(json.dumps(spec, indent=2), encoding="utf-8")
 
     agents_hint = (

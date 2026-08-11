@@ -28,6 +28,9 @@ from pathlib import Path
 import boto3
 from botocore.config import Config
 
+from deploy.aws.path_safety import safe_path
+from simulation_utils.paths import validate_path_component
+
 
 def _client(profile: str, region: str):
     session = boto3.Session(profile_name=profile) if profile else boto3.Session()
@@ -58,6 +61,48 @@ def _fetch(s3, bucket: str, key: str) -> bytes:
     return s3.get_object(Bucket=bucket, Key=key)["Body"].read()
 
 
+def _safe_key_parts(key: str, prefix: str) -> list[str] | None:
+    """Return validated relative path segments for an S3 object key, or None."""
+    if key.endswith("/"):
+        return None
+    rel = key[len(prefix) :] if prefix and key.startswith(prefix) else key
+    raw_parts = [p for p in rel.split("/") if p]
+    if not raw_parts:
+        return None
+    if any(p in {".", ".."} for p in raw_parts):
+        raise ValueError(f"Invalid s3 object path segment in {key!r}")
+    for part in raw_parts:
+        validate_path_component(part, label="s3 object path segment")
+    return raw_parts
+
+
+def _is_run_zip_key(key: str) -> bool:
+    return (
+        key.endswith(".zip")
+        and "/analysis/" not in key
+        and "/_resume/" not in key
+        and "/_ops/" not in key
+    )
+
+
+def _partition_run_zips(zips: list[dict]) -> list[tuple[str, list[dict]]]:
+    """Group zip objects into tar output names (boundary b1/b2 or single tar)."""
+    b1 = [o for o in zips if Path(o["Key"]).name.startswith("b1_")]
+    b2 = [o for o in zips if Path(o["Key"]).name.startswith("b2_")]
+    other = [
+        o
+        for o in zips
+        if not Path(o["Key"]).name.startswith(("b1_", "b2_"))
+    ]
+    if b1 or b2:
+        return [
+            ("b1_run_zips.tar", b1),
+            ("b2_run_zips.tar", b2),
+            ("other_run_zips.tar", other),
+        ]
+    return [("run_zips.tar", zips)]
+
+
 def pack_zips_to_tar(
     *,
     s3,
@@ -85,6 +130,7 @@ def pack_zips_to_tar(
                 item = futures[fut]
                 data = fut.result()
                 name = Path(item["Key"]).name
+                validate_path_component(name, label="s3 object basename")
                 info = tarfile.TarInfo(name=name)
                 info.size = len(data)
                 info.mtime = int(time.time())
@@ -102,6 +148,24 @@ def pack_zips_to_tar(
     return n, total_bytes
 
 
+def _download_one_analysis_object(
+    *,
+    s3,
+    bucket: str,
+    item: dict,
+    analysis_prefix: str,
+    out_dir: Path,
+) -> int:
+    key = item["Key"]
+    parts = _safe_key_parts(key, analysis_prefix)
+    if parts is None:
+        return 0
+    dest = out_dir.joinpath(*parts)
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    dest.write_bytes(_fetch(s3, bucket, key))
+    return int(item["Size"])
+
+
 def download_analysis(*, s3, bucket: str, prefix: str, out_dir: Path, workers: int) -> int:
     """Download every object under analysis/ preserving relative paths."""
     analysis_prefix = prefix.rstrip("/") + "/analysis/"
@@ -109,20 +173,20 @@ def download_analysis(*, s3, bucket: str, prefix: str, out_dir: Path, workers: i
     out_dir.mkdir(parents=True, exist_ok=True)
     print(f"Downloading analysis/ ({len(objs)} objects) -> {out_dir}", flush=True)
 
-    def _one(item: dict) -> int:
-        key = item["Key"]
-        rel = key[len(analysis_prefix) :]
-        if not rel or key.endswith("/"):
-            return 0
-        dest = out_dir / rel
-        dest.parent.mkdir(parents=True, exist_ok=True)
-        dest.write_bytes(_fetch(s3, bucket, key))
-        return item["Size"]
-
     written = 0
     t0 = time.time()
     with ThreadPoolExecutor(max_workers=workers) as pool:
-        futures = [pool.submit(_one, item) for item in objs]
+        futures = [
+            pool.submit(
+                _download_one_analysis_object,
+                s3=s3,
+                bucket=bucket,
+                item=item,
+                analysis_prefix=analysis_prefix,
+                out_dir=out_dir,
+            )
+            for item in objs
+        ]
         for i, fut in enumerate(as_completed(futures), 1):
             written += fut.result()
             if i % 100 == 0 or i == len(futures):
@@ -132,6 +196,37 @@ def download_analysis(*, s3, bucket: str, prefix: str, out_dir: Path, workers: i
                 )
     print(f"  analysis done in {time.time() - t0:.1f}s", flush=True)
     return len(objs)
+
+
+def _pack_zip_groups(*, s3, bucket: str, prefix: str, out: Path, workers: int) -> None:
+    print(f"Listing objects under s3://{bucket}/{prefix} ...", flush=True)
+    all_objs = _list_keys(s3, bucket, prefix)
+    zips = [o for o in all_objs if _is_run_zip_key(o["Key"])]
+    groups = _partition_run_zips(zips)
+    b1_n = next((len(g) for name, g in groups if name.startswith("b1_")), 0)
+    b2_n = next((len(g) for name, g in groups if name.startswith("b2_")), 0)
+    other_n = next((len(g) for name, g in groups if "other" in name or name == "run_zips.tar"), 0)
+    print(
+        f"Found {len(zips)} run zips "
+        f"(b1={b1_n}, b2={b2_n}, other={other_n})",
+        flush=True,
+    )
+    for name, group in groups:
+        if not group:
+            continue
+        tar_path = out / name
+        print(f"Packing {tar_path} ({len(group)} zips)...", flush=True)
+        n, nbytes = pack_zips_to_tar(
+            s3=s3,
+            bucket=bucket,
+            keys=group,
+            tar_path=tar_path,
+            workers=workers,
+        )
+        print(
+            f"  wrote {tar_path} ({n} members, {nbytes / 1e6:.1f} MB)",
+            flush=True,
+        )
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -148,53 +243,17 @@ def main(argv: list[str] | None = None) -> int:
 
     s3 = _client(args.profile, args.region)
     prefix = args.prefix if args.prefix.endswith("/") else args.prefix + "/"
-    out: Path = args.out
+    out = Path(safe_path(args.out))
     out.mkdir(parents=True, exist_ok=True)
 
     if not args.skip_zips:
-        print(f"Listing objects under s3://{args.bucket}/{prefix} ...", flush=True)
-        all_objs = _list_keys(s3, args.bucket, prefix)
-        zips = [
-            o
-            for o in all_objs
-            if o["Key"].endswith(".zip")
-            and "/analysis/" not in o["Key"]
-            and "/_resume/" not in o["Key"]
-            and "/_ops/" not in o["Key"]
-        ]
-        b1 = [o for o in zips if Path(o["Key"]).name.startswith("b1_")]
-        b2 = [o for o in zips if Path(o["Key"]).name.startswith("b2_")]
-        other = [
-            o
-            for o in zips
-            if not Path(o["Key"]).name.startswith(("b1_", "b2_"))
-        ]
-        print(
-            f"Found {len(zips)} run zips "
-            f"(b1={len(b1)}, b2={len(b2)}, other={len(other)})",
-            flush=True,
+        _pack_zip_groups(
+            s3=s3,
+            bucket=args.bucket,
+            prefix=prefix,
+            out=out,
+            workers=args.workers,
         )
-        # Boundary campaigns keep b1/b2 split; others (sr_/vd_/…) → one tar.
-        if b1 or b2:
-            groups = (("b1_run_zips.tar", b1), ("b2_run_zips.tar", b2), ("other_run_zips.tar", other))
-        else:
-            groups = (("run_zips.tar", zips),)
-        for name, group in groups:
-            if not group:
-                continue
-            tar_path = out / name
-            print(f"Packing {tar_path} ({len(group)} zips)...", flush=True)
-            n, nbytes = pack_zips_to_tar(
-                s3=s3,
-                bucket=args.bucket,
-                keys=group,
-                tar_path=tar_path,
-                workers=args.workers,
-            )
-            print(
-                f"  wrote {tar_path} ({n} members, {nbytes / 1e6:.1f} MB)",
-                flush=True,
-            )
 
     if not args.skip_analysis:
         download_analysis(

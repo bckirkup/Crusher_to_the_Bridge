@@ -21,7 +21,6 @@ def tier_cartesian(manifest: dict[str, Any], tier: dict[str, Any]) -> int:
         if v is tier:
             tid_hint = k
             break
-    short = tid_hint.split("_", 1)[0] if tid_hint else ""
 
     plats = tier.get("platforms") or (
         [tier["platform"]] if "platform" in tier else [manifest["platform"]]
