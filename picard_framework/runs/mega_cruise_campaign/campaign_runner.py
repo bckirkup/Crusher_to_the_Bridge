@@ -504,7 +504,13 @@ def _vsp_knob_tag(name: str, value: float | int) -> str:
 
 
 def _vsp_degradation_overrides(knobs: dict[str, Any]) -> dict[str, Any]:
-    """Map design knobs → escalation + medical_response + syndromic overrides."""
+    """Map design knobs → escalation + medical_response + syndromic overrides.
+
+    ``isolation_compliance`` is applied as ``fred_behavior.quarantine_compliance``.
+    Stock ``compliance_by_class`` (crew / passenger_*) would otherwise **replace**
+    that global rate for nearly every agent, so VSP sweeps clear the class table
+    and use the swept scalar as the sole base compliance.
+    """
     thr = float(knobs["vsp_threshold"])
     delay = int(knobs["detection_delay"])
     iso = float(knobs["isolation_compliance"])
@@ -520,7 +526,11 @@ def _vsp_degradation_overrides(knobs: dict[str, Any]) -> dict[str, Any]:
             "detection_delay_epochs": delay,
             "sick_call_probability": scp,
         },
-        "fred_behavior": {"quarantine_compliance": iso},
+        "fred_behavior": {
+            "quarantine_compliance": iso,
+            # Empty dict replaces stock class table on shallow merge.
+            "compliance_by_class": {},
+        },
     }
 
 

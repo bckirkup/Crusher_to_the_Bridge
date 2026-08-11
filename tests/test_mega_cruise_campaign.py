@@ -1530,3 +1530,72 @@ def test_vsp_degradation_cartesian_and_generator() -> None:
     params = spec["campaign_parameters"]
     assert params["dose_adjustment"] == pytest.approx(10.6)
     assert params["density_exponent"] == pytest.approx(0.75)
+
+
+def test_vsp_degradation_compliance_fix_manifest_count() -> None:
+    from picard_framework.runs.mega_cruise_campaign.count_manifest_cartesian import (
+        summarize,
+        tier_cartesian,
+    )
+
+    manifest = load_manifest(
+        CAMPAIGN / "vsp_degradation_compliance_fix_v1_manifest.json"
+    )
+    assert (
+        tier_cartesian(manifest, manifest["tiers"]["vd1_isolation_compliance"])
+        == 600
+    )
+    assert (
+        tier_cartesian(manifest, manifest["tiers"]["vd2_threshold_x_compliance"])
+        == 720
+    )
+    assert (
+        tier_cartesian(manifest, manifest["tiers"]["vd2_worst_case_gradient"])
+        == 2160
+    )
+    wave1, wave2 = summarize(manifest)
+    assert wave1 == 3480 and wave2 == 0
+
+    """Stock compliance_by_class must not mask the swept quarantine_compliance."""
+    import numpy as np
+
+    from crusher_labs import build_modalities
+    from orchestrator_init import (
+        apply_voyage_dining_meal_weights,
+        apply_voyage_medical_response,
+        load_and_merge_voyage_config,
+    )
+    from picard_framework.run_spec import PicardRunSpec
+
+    manifest = load_manifest(CAMPAIGN / "vsp_degradation_v1_manifest.json")
+    _rid, spec = next(
+        s
+        for s in generate_tier_runs(manifest, "vd1_isolation_compliance")
+        if "iso10_" in s[0] and "expedition" in s[0]
+    )
+    assert spec["config_overrides"]["fred_behavior"]["quarantine_compliance"] == pytest.approx(
+        0.1
+    )
+    assert spec["config_overrides"]["fred_behavior"]["compliance_by_class"] == {}
+
+    import os
+    import tempfile
+
+    with tempfile.TemporaryDirectory() as td:
+        path = os.path.join(td, "spec.json")
+        with open(path, "w", encoding="utf-8") as fh:
+            json.dump(spec, fh)
+        ps = PicardRunSpec.from_picard_json(str(REPO_ROOT), path)
+        cfg = dict(ps.legacy_cfg)
+        voyage_cfg = load_and_merge_voyage_config(
+            cfg, repo_root=str(REPO_ROOT), platform_id=ps.platform_id,
+        )
+        cfg = apply_voyage_dining_meal_weights(cfg, voyage_cfg)
+        cfg = apply_voyage_medical_response(cfg, voyage_cfg)
+        mods = build_modalities(cfg, np.random.default_rng(0), total_epochs=3)
+    syn = mods["syndromic"]
+    assert syn.quarantine_compliance == pytest.approx(0.1)
+    assert not syn.compliance_by_class
+    # Class lookup must fall through to the swept scalar.
+    assert syn._resolve_base_compliance("passenger_young", 0.0) == pytest.approx(0.1)
+    assert syn._resolve_base_compliance("crew_galley", 0.0) == pytest.approx(0.1)

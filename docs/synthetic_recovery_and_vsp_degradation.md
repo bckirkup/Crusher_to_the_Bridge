@@ -47,7 +47,7 @@ uses `:latest`, then:
 | `non_susceptible` | `innate_nonsusceptible_fraction` |
 | `vsp_threshold` | `escalation.lockdown_attack_rate` |
 | `detection_delay` | `medical_response.detection_delay_epochs` |
-| `isolation_compliance` | `medical_response.isolation_compliance` + `fred_behavior.quarantine_compliance` |
+| `isolation_compliance` | medical + `fred_behavior.quarantine_compliance`, and **clears** stock `compliance_by_class` so the scalar is not masked by crew/passenger class rates |
 | `sick_call_probability` | medical + syndromic |
 
 Synthetic recovery pins `initial_infected=3`. VSP degradation pins
@@ -77,6 +77,24 @@ python -m picard_framework.analysis.vsp_degradation_postprocess `
 
 Writes aggregates, `|AR_expedition − AR_mega|` heatmaps, FAT AR curves, shadow-break
 thesis summary (`>5 pp`), and `report.md`.
+
+### Reinterpreting `vsp_degradation_v1` (pre-fix) zips
+
+Stock `fred_behavior.compliance_by_class` **masked** swept
+`isolation_compliance` / `quarantine_compliance`. Treat those runs as:
+
+| Axis | Trust? |
+|------|--------|
+| `vsp_threshold` | yes |
+| `detection_delay` | yes (weak effect) |
+| `sick_call_probability` | yes |
+| `isolation_compliance` | **no** — class table dominated; iso labels are bookkeeping only |
+
+Compliance-affected tiers were re-run under
+`campaign/vsp_degradation_compliance_fix_v1/` (manifest
+`vsp_degradation_compliance_fix_v1_manifest.json`: FAT iso +
+threshold×compliance + worst-case = **3480** runs) after clearing
+`compliance_by_class` in `_vsp_degradation_overrides`.
 
 Design checklist (covered by the script):
 
