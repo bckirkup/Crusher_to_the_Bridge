@@ -692,30 +692,31 @@ def fit_latent_per_vector(
     return recovery_rows
 
 
-def _write_figures(
-    agg: list[dict[str, Any]],
-    recovery: list[dict[str, Any]],
-    pooled_draws: Any | None,
-    fig_dir: str,
-    pooled_ar_draws: Any | None = None,
-) -> list[str]:
-    ensure_out_dir(fig_dir)
-    names: list[str] = []
+def _matplotlib_or_none():
     try:
         import matplotlib
 
         matplotlib.use("Agg")
         import matplotlib.pyplot as plt
+        import numpy as np
+
+        return plt, np
     except ImportError:
         print("warn: matplotlib missing; skipping figures", file=sys.stderr)
-        return names
+        return None, None
 
-    # Outbreak rate heatmap-like grouped bars
+
+def _save_fig(plt, fig, fig_dir: str, fname: str) -> str:
+    path = os.path.join(fig_dir, fname)
+    fig.savefig(path, dpi=120)
+    plt.close(fig)
+    return os.path.basename(path)
+
+
+def _fig_outbreak_rate_bars(plt, np, agg: list[dict[str, Any]], fig_dir: str) -> str:
     vecs = sorted({r["parameter_vector"] for r in agg})
     plats = sorted({r["platform_id"] for r in agg})
     fig, ax = plt.subplots(figsize=(10, 5))
-    import numpy as np
-
     x = np.arange(len(vecs))
     width = 0.18
     for i, plat in enumerate(plats):
@@ -733,13 +734,14 @@ def _write_figures(
     ax.set_title("Synthetic recovery: outbreak rate by vector × platform")
     ax.legend(fontsize=7, loc="best")
     fig.tight_layout()
-    p1 = os.path.join(fig_dir, "01_outbreak_rate_by_vector_platform.png")
-    fig.savefig(p1, dpi=120)
-    plt.close(fig)
-    names.append(os.path.basename(p1))
+    return _save_fig(plt, fig, fig_dir, "01_outbreak_rate_by_vector_platform.png")
 
-    fig, ax = plt.subplots(figsize=(7, 6))
-    seen = set()
+
+def _unique_vector_means(
+    agg: list[dict[str, Any]], metric: str
+) -> list[tuple[str, dict[str, float], float]]:
+    seen: set[str] = set()
+    out: list[tuple[str, dict[str, float], float]] = []
     for r in agg:
         v = r["parameter_vector"]
         if v in seen:
@@ -749,7 +751,14 @@ def _write_figures(
         if not truth:
             continue
         sub = [x for x in agg if x["parameter_vector"] == v]
-        mean_or = sum(x["outbreak_rate"] for x in sub) / len(sub)
+        mean_m = sum(x[metric] for x in sub) / len(sub)
+        out.append((v, truth, mean_m))
+    return out
+
+
+def _fig_ridge_outbreak(plt, agg: list[dict[str, Any]], fig_dir: str) -> str:
+    fig, ax = plt.subplots(figsize=(7, 6))
+    for v, truth, mean_or in _unique_vector_means(agg, "outbreak_rate"):
         ax.scatter(
             truth["dose_adj"],
             truth["alpha_c"],
@@ -757,158 +766,179 @@ def _write_figures(
             alpha=0.85,
             label=f"{v} (OR={mean_or:.2f})",
         )
-        ax.annotate(v, (truth["dose_adj"], truth["alpha_c"]), textcoords="offset points", xytext=(5, 5), fontsize=8)
+        ax.annotate(
+            v,
+            (truth["dose_adj"], truth["alpha_c"]),
+            textcoords="offset points",
+            xytext=(5, 5),
+            fontsize=8,
+        )
     ax.set_xlabel("true dose_adj")
     ax.set_ylabel("true alpha_c")
     ax.set_title("Parameter vectors on dose × alpha ridge\n(marker size ∝ mean outbreak rate)")
     ax.grid(True, alpha=0.3)
     fig.tight_layout()
-    p2 = os.path.join(fig_dir, "02_ridge_map_empirical.png")
-    fig.savefig(p2, dpi=120)
-    plt.close(fig)
-    names.append(os.path.basename(p2))
+    return _save_fig(plt, fig, fig_dir, "02_ridge_map_empirical.png")
 
-    if recovery:
-        fig, axes = plt.subplots(1, 2, figsize=(10, 4))
-        for ax, key, title in (
-            (axes[0], "dose_adj", "dose_adj recovery"),
-            (axes[1], "alpha_c", "alpha_c recovery"),
-        ):
-            xs, trues, lo, mid, hi = [], [], [], [], []
-            for r in recovery:
-                if r.get(f"post_{key}_q50") is None:
-                    continue
-                xs.append(r["parameter_vector"])
-                trues.append(r.get(f"true_{key}"))
-                lo.append(r[f"post_{key}_q05"])
-                mid.append(r[f"post_{key}_q50"])
-                hi.append(r[f"post_{key}_q95"])
-            idx = list(range(len(xs)))
-            ax.errorbar(
-                idx,
-                mid,
-                yerr=[[m - l for m, l in zip(mid, lo)], [h - m for h, m in zip(hi, mid)]],
-                fmt="o",
-                label="posterior median ± 90% CI",
-            )
-            ax.scatter(idx, trues, marker="x", color="crimson", s=60, label="truth", zorder=5)
-            ax.set_xticks(idx)
-            ax.set_xticklabels(xs, rotation=30, ha="right")
-            ax.set_title(title)
-            ax.legend(fontsize=7)
-        fig.tight_layout()
-        p3 = os.path.join(fig_dir, "03_latent_recovery.png")
-        fig.savefig(p3, dpi=120)
-        plt.close(fig)
-        names.append(os.path.basename(p3))
 
-    if pooled_draws is not None and "beta_d" in pooled_draws.columns and "beta_alpha" in pooled_draws.columns:
-        fig, ax = plt.subplots(figsize=(6, 5))
-        ax.scatter(
-            pooled_draws["beta_d"],
-            pooled_draws["beta_alpha"],
-            s=3,
-            alpha=0.15,
-            c="steelblue",
-        )
-        ax.axhline(0, color="gray", lw=0.8)
-        ax.axvline(0, color="gray", lw=0.8)
-        ax.set_xlabel("beta_d (dose slope)")
-        ax.set_ylabel("beta_alpha (alpha_c slope)")
-        ax.set_title("Pooled hurdle: joint posterior of covariate slopes")
-        fig.tight_layout()
-        p4 = os.path.join(fig_dir, "04_pooled_beta_joint.png")
-        fig.savefig(p4, dpi=120)
-        plt.close(fig)
-        names.append(os.path.basename(p4))
-
-        # Approximate dose×alpha contour via linear predictor compatibility
-        # for a reference platform: score each grid point by pooled mean betas.
-        fig, ax = plt.subplots(figsize=(6, 5))
-        bd = float(pooled_draws["beta_d"].mean())
-        ba = float(pooled_draws["beta_alpha"].mean())
-        doses = [TRUE_VECTORS[v]["dose_adj"] for v in TRUE_VECTORS]
-        alphas = [TRUE_VECTORS[v]["alpha_c"] for v in TRUE_VECTORS]
-        d_grid = np.linspace(min(doses) - 0.3, max(doses) + 0.3, 80)
-        a_grid = np.linspace(min(alphas) - 0.1, max(alphas) + 0.1, 80)
-        D, A = np.meshgrid(d_grid, a_grid)
-        # Relative logit vs calibrated point (10.6, 0.75)
-        Z = bd * (DEFAULT_D0 - D) + ba * (A - DEFAULT_A0)
-        cs = ax.contour(D, A, Z, levels=12, cmap="coolwarm")
-        ax.clabel(cs, inline=True, fontsize=7)
-        for v, t in TRUE_VECTORS.items():
-            ax.scatter(t["dose_adj"], t["alpha_c"], c="k", s=40)
-            ax.annotate(v, (t["dose_adj"], t["alpha_c"]), fontsize=7, xytext=(4, 4), textcoords="offset points")
-        ax.set_xlabel("dose_adj")
-        ax.set_ylabel("alpha_c")
-        ax.set_title("Implied dose×alpha iso-logits from pooled β̂\n(ridge = level sets)")
-        fig.tight_layout()
-        p5 = os.path.join(fig_dir, "05_dose_alpha_isolines.png")
-        fig.savefig(p5, dpi=120)
-        plt.close(fig)
-        names.append(os.path.basename(p5))
-
-    if (
-        pooled_ar_draws is not None
-        and "beta_d" in pooled_ar_draws.columns
-        and "beta_alpha" in pooled_ar_draws.columns
+def _fig_latent_recovery(plt, recovery: list[dict[str, Any]], fig_dir: str) -> str | None:
+    if not recovery:
+        return None
+    fig, axes = plt.subplots(1, 2, figsize=(10, 4))
+    for ax, key, title in (
+        (axes[0], "dose_adj", "dose_adj recovery"),
+        (axes[1], "alpha_c", "alpha_c recovery"),
     ):
-        fig, ax = plt.subplots(figsize=(6, 5))
-        ax.scatter(
-            pooled_ar_draws["beta_d"],
-            pooled_ar_draws["beta_alpha"],
-            s=3,
-            alpha=0.15,
-            c="darkorange",
+        xs, trues, lo, mid, hi = [], [], [], [], []
+        for r in recovery:
+            if r.get(f"post_{key}_q50") is None:
+                continue
+            xs.append(r["parameter_vector"])
+            trues.append(r.get(f"true_{key}"))
+            lo.append(r[f"post_{key}_q05"])
+            mid.append(r[f"post_{key}_q50"])
+            hi.append(r[f"post_{key}_q95"])
+        idx = list(range(len(xs)))
+        ax.errorbar(
+            idx,
+            mid,
+            yerr=[[m - l for m, l in zip(mid, lo)], [h - m for h, m in zip(hi, mid)]],
+            fmt="o",
+            label="posterior median ± 90% CI",
         )
-        ax.axhline(0, color="gray", lw=0.8)
-        ax.axvline(0, color="gray", lw=0.8)
-        ax.set_xlabel("beta_d (dose slope on logit AR)")
-        ax.set_ylabel("beta_alpha (alpha_c slope on logit AR)")
-        ax.set_title("Stage B Beta-AR: joint posterior of covariate slopes")
-        fig.tight_layout()
-        p6 = os.path.join(fig_dir, "06_pooled_ar_beta_joint.png")
-        fig.savefig(p6, dpi=120)
-        plt.close(fig)
-        names.append(os.path.basename(p6))
-
-        # Mean AR by vector on dose×alpha plane
-        fig, ax = plt.subplots(figsize=(7, 6))
-        seen = set()
-        for r in agg:
-            v = r["parameter_vector"]
-            if v in seen:
-                continue
-            seen.add(v)
-            truth = TRUE_VECTORS.get(v)
-            if not truth:
-                continue
-            sub = [x for x in agg if x["parameter_vector"] == v]
-            mean_ar = sum(x["mean_attack_rate"] for x in sub) / len(sub)
-            ax.scatter(
-                truth["dose_adj"],
-                truth["alpha_c"],
-                s=60 + 1200 * mean_ar,
-                alpha=0.85,
-            )
-            ax.annotate(
-                f"{v}\nAR={mean_ar:.3f}",
-                (truth["dose_adj"], truth["alpha_c"]),
-                textcoords="offset points",
-                xytext=(5, 5),
-                fontsize=7,
-            )
-        ax.set_xlabel("true dose_adj")
-        ax.set_ylabel("true alpha_c")
-        ax.set_title("Ridge map with mean attack rate (marker size)")
+        ax.scatter(idx, trues, marker="x", color="crimson", s=60, label="truth", zorder=5)
+        ax.set_xticks(idx)
+        ax.set_xticklabels(xs, rotation=30, ha="right", fontsize=7)
+        ax.set_title(title)
+        ax.legend(fontsize=7)
         ax.grid(True, alpha=0.3)
-        fig.tight_layout()
-        p7 = os.path.join(fig_dir, "07_ridge_map_mean_ar.png")
-        fig.savefig(p7, dpi=120)
-        plt.close(fig)
-        names.append(os.path.basename(p7))
+    fig.tight_layout()
+    return _save_fig(plt, fig, fig_dir, "03_latent_recovery.png")
 
+
+def _fig_beta_joint(
+    plt,
+    draws: Any,
+    *,
+    color: str,
+    xlabel: str,
+    ylabel: str,
+    title: str,
+    fname: str,
+    fig_dir: str,
+) -> str | None:
+    if draws is None or "beta_d" not in draws.columns or "beta_alpha" not in draws.columns:
+        return None
+    fig, ax = plt.subplots(figsize=(6, 5))
+    ax.scatter(draws["beta_d"], draws["beta_alpha"], s=3, alpha=0.15, c=color)
+    ax.axhline(0, color="gray", lw=0.8)
+    ax.axvline(0, color="gray", lw=0.8)
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+    ax.set_title(title)
+    fig.tight_layout()
+    return _save_fig(plt, fig, fig_dir, fname)
+
+
+def _fig_dose_alpha_isolines(plt, np, pooled_draws: Any, fig_dir: str) -> str | None:
+    if pooled_draws is None or "beta_d" not in pooled_draws.columns or "beta_alpha" not in pooled_draws.columns:
+        return None
+    fig, ax = plt.subplots(figsize=(6, 5))
+    bd = float(pooled_draws["beta_d"].mean())
+    ba = float(pooled_draws["beta_alpha"].mean())
+    doses = [TRUE_VECTORS[v]["dose_adj"] for v in TRUE_VECTORS]
+    alphas = [TRUE_VECTORS[v]["alpha_c"] for v in TRUE_VECTORS]
+    d_grid = np.linspace(min(doses) - 0.3, max(doses) + 0.3, 80)
+    a_grid = np.linspace(min(alphas) - 0.1, max(alphas) + 0.1, 80)
+    D, A = np.meshgrid(d_grid, a_grid)
+    Z = bd * (DEFAULT_D0 - D) + ba * (A - DEFAULT_A0)
+    cs = ax.contour(D, A, Z, levels=12, cmap="coolwarm")
+    ax.clabel(cs, inline=True, fontsize=7)
+    for v, t in TRUE_VECTORS.items():
+        ax.scatter(t["dose_adj"], t["alpha_c"], c="k", s=40)
+        ax.annotate(
+            v,
+            (t["dose_adj"], t["alpha_c"]),
+            fontsize=7,
+            xytext=(4, 4),
+            textcoords="offset points",
+        )
+    ax.set_xlabel("dose_adj")
+    ax.set_ylabel("alpha_c")
+    ax.set_title("Implied dose×alpha iso-logits from pooled β̂\n(ridge = level sets)")
+    fig.tight_layout()
+    return _save_fig(plt, fig, fig_dir, "05_dose_alpha_isolines.png")
+
+
+def _fig_ridge_mean_ar(plt, agg: list[dict[str, Any]], fig_dir: str) -> str:
+    fig, ax = plt.subplots(figsize=(7, 6))
+    for v, truth, mean_ar in _unique_vector_means(agg, "mean_attack_rate"):
+        ax.scatter(
+            truth["dose_adj"],
+            truth["alpha_c"],
+            s=60 + 1200 * mean_ar,
+            alpha=0.85,
+        )
+        ax.annotate(
+            f"{v}\nAR={mean_ar:.3f}",
+            (truth["dose_adj"], truth["alpha_c"]),
+            textcoords="offset points",
+            xytext=(5, 5),
+            fontsize=7,
+        )
+    ax.set_xlabel("true dose_adj")
+    ax.set_ylabel("true alpha_c")
+    ax.set_title("Ridge map with mean attack rate (marker size)")
+    ax.grid(True, alpha=0.3)
+    fig.tight_layout()
+    return _save_fig(plt, fig, fig_dir, "07_ridge_map_mean_ar.png")
+
+
+def _write_figures(
+    agg: list[dict[str, Any]],
+    recovery: list[dict[str, Any]],
+    pooled_draws: Any | None,
+    fig_dir: str,
+    pooled_ar_draws: Any | None = None,
+) -> list[str]:
+    ensure_out_dir(fig_dir)
+    plt, np = _matplotlib_or_none()
+    if plt is None:
+        return []
+    names: list[str] = [
+        _fig_outbreak_rate_bars(plt, np, agg, fig_dir),
+        _fig_ridge_outbreak(plt, agg, fig_dir),
+    ]
+    for name in (
+        _fig_latent_recovery(plt, recovery, fig_dir),
+        _fig_beta_joint(
+            plt,
+            pooled_draws,
+            color="steelblue",
+            xlabel="beta_d (dose slope)",
+            ylabel="beta_alpha (alpha_c slope)",
+            title="Pooled hurdle: joint posterior of covariate slopes",
+            fname="04_pooled_beta_joint.png",
+            fig_dir=fig_dir,
+        ),
+        _fig_dose_alpha_isolines(plt, np, pooled_draws, fig_dir),
+        _fig_beta_joint(
+            plt,
+            pooled_ar_draws,
+            color="darkorange",
+            xlabel="beta_d (dose slope on logit AR)",
+            ylabel="beta_alpha (alpha_c slope on logit AR)",
+            title="Stage B Beta-AR: joint posterior of covariate slopes",
+            fname="06_pooled_ar_beta_joint.png",
+            fig_dir=fig_dir,
+        ),
+    ):
+        if name:
+            names.append(name)
+    if pooled_ar_draws is not None:
+        names.append(_fig_ridge_mean_ar(plt, agg, fig_dir))
     return names
+
 
 
 def write_report(
