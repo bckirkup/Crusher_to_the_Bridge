@@ -94,7 +94,7 @@ Install from the hash-pinned lockfile: `pip install --only-binary=:all: --requir
 | `importing-naval-blueprint` | GA PDF/image → ShipDigest + SVG overlay → platform JSON |
 | `adding-new-pathogen` | New pathogen profile entries |
 | `contamx-interop` | ContamX SIM reader, AHS bridge, compare suite, flow diagnostics |
-| `mega-cruise-campaign-local` | Local `--smoke` / `--dry-run` / `--tier` / `--resume` / shard hygiene before AWS |
+| `mega-cruise-campaign-local` | Local `--smoke` / `--dry-run` / shard hygiene; synthetic recovery + VSP degradation (`docs/synthetic_recovery_and_vsp_degradation.md`) |
 | `campaign-results-analysis` | Analysis bundle + two-stage Stan hurdle (outbreak + trajectory); see `docs/stan_hurdle_lessons.md` for Step-2 field notes |
 | `preboarding-wearable-decision` | Pre-boarding wearable ROI / policy Monte Carlo (`picard_framework/analysis/boundary/`); fixture or Stan `outbreak_surface` lookup |
 | `boundary-aws-pipeline` | `boundary_surface_v1` Spot campaign + On-Demand surface/Stan/MC (`deploy/aws/`, Bernoulli+Beta-AR) |

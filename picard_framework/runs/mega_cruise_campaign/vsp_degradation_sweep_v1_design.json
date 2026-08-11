@@ -1,0 +1,148 @@
+{
+  "campaign": "vsp_degradation_sweep_v1",
+  "description": "Stress-test the VSP shadow. Sweep medical compliance and reporting delays to find where the physical platform gradient re-emerges through the response.",
+  "platform": "mega_cruise_5000",
+  "default_epochs": 168,
+  "pathogen": "norovirus",
+  "dose_adj": 10.6,
+  "alpha_c": 0.75,
+  "platforms": [
+    "expedition_cruise_450",
+    "classic_cruise_1900",
+    "spirit_cruise_3000",
+    "mega_cruise_5000"
+  ],
+  "sweeps": {
+    "factor_at_a_time": {
+      "description": "Sweep each factor independently, others at nominal",
+      "nominal_values": {
+        "vsp_threshold": 0.05,
+        "detection_delay": 1,
+        "isolation_compliance": 0.9,
+        "sick_call_probability": 0.9
+      },
+      "factors": {
+        "vsp_threshold": {
+          "values": [
+            0.01,
+            0.03,
+            0.05,
+            0.1,
+            0.15,
+            0.2,
+            0.3
+          ],
+          "description": "AR threshold for VSP escalation (higher = weaker response)",
+          "seeds": 30
+        },
+        "detection_delay": {
+          "values": [
+            0,
+            1,
+            2,
+            4,
+            8,
+            12
+          ],
+          "description": "Epochs from symptom onset to case recognition",
+          "seeds": 30
+        },
+        "isolation_compliance": {
+          "values": [
+            1.0,
+            0.8,
+            0.5,
+            0.3,
+            0.1
+          ],
+          "description": "Fraction of identified cases who actually isolate",
+          "seeds": 30
+        },
+        "sick_call_probability": {
+          "values": [
+            0.9,
+            0.7,
+            0.5,
+            0.3,
+            0.1
+          ],
+          "description": "Fraction of symptomatic who report to medical",
+          "seeds": 30
+        }
+      },
+      "runs_per_factor": "levels \u00d7 4 platforms \u00d7 30 seeds",
+      "total_runs": 2760
+    },
+    "interaction_panels": {
+      "description": "2-factor interactions for key degradation combos",
+      "panels": [
+        {
+          "name": "threshold_x_compliance",
+          "factors": {
+            "vsp_threshold": [
+              0.05,
+              0.1,
+              0.2
+            ],
+            "isolation_compliance": [
+              0.9,
+              0.5,
+              0.1
+            ]
+          },
+          "seeds": 20,
+          "runs": 720
+        },
+        {
+          "name": "delay_x_reporting",
+          "factors": {
+            "detection_delay": [
+              1,
+              4,
+              12
+            ],
+            "sick_call_probability": [
+              0.9,
+              0.5,
+              0.1
+            ]
+          },
+          "seeds": 20,
+          "runs": 720
+        },
+        {
+          "name": "worst_case_gradient",
+          "description": "Extreme degradation to find the shadow-breaking boundary",
+          "factors": {
+            "vsp_threshold": [
+              0.1,
+              0.2,
+              0.3
+            ],
+            "detection_delay": [
+              4,
+              8,
+              12
+            ],
+            "isolation_compliance": [
+              0.5,
+              0.3,
+              0.1
+            ]
+          },
+          "seeds": 20,
+          "runs": 2160
+        }
+      ],
+      "total_runs": 3600
+    }
+  },
+  "total_runs": 6360,
+  "run_time_estimate": "~5-6 hours on 200 instances",
+  "key_outputs": {
+    "primary": "Heatmap: |AR_expedition - AR_mega| as function of (threshold, compliance)",
+    "secondary": "Shadow-breaking boundary curve in degradation parameter space",
+    "tertiary": "Per-platform AR curves under progressive degradation",
+    "thesis_test": "At what degradation level does the 23% vs 11% uncontrolled gap become visible (>5pp difference) despite active response?"
+  }
+}

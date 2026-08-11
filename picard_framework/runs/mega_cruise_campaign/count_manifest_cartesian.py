@@ -8,18 +8,42 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import sys
 from pathlib import Path
 from typing import Any
 
 
 def tier_cartesian(manifest: dict[str, Any], tier: dict[str, Any]) -> int:
+    """Arithmetic run count for one tier (generator-aware for sr/vd)."""
+    tid_hint = ""
+    for k, v in (manifest.get("tiers") or {}).items():
+        if v is tier:
+            tid_hint = k
+            break
+    short = tid_hint.split("_", 1)[0] if tid_hint else ""
+
     plats = tier.get("platforms") or (
         [tier["platform"]] if "platform" in tier else [manifest["platform"]]
     )
+    surv = tier.get("surveillance_strategies") or [tier.get("surveillance", "none")]
+    seeds = tier["seeds"]
+
+    if tid_hint.startswith("sr") or "parameter_vectors" in tier:
+        n_vec = len(tier["parameter_vectors"])
+        return len(plats) * n_vec * len(surv) * len(seeds)
+
+    if tid_hint.startswith("vd") or "factor" in tier or "factors" in tier:
+        if "factor" in tier and "values" in tier:
+            n_knobs = len(tier["values"])
+        elif "factors" in tier:
+            n_knobs = math.prod(len(v) for v in tier["factors"].values())
+        else:
+            n_knobs = 1
+        return len(plats) * n_knobs * len(surv) * len(seeds)
+
     doses = tier.get("dose_adjustments") or [tier.get("dose_adjustment")]
     inits = tier.get("initial_infected_values") or [tier.get("initial_infected")]
-    surv = tier.get("surveillance_strategies") or [tier.get("surveillance", "none")]
     imm = tier.get("pre_immunity_fractions") or [None]
     dens = tier.get("density_exponents") or [None]
     cmodes = tier.get("contact_modes") or [None]
@@ -33,7 +57,7 @@ def tier_cartesian(manifest: dict[str, Any], tier: dict[str, Any]) -> int:
         * len(imm)
         * len(epochs)
         * len(surv)
-        * len(tier["seeds"])
+        * len(seeds)
     )
 
 

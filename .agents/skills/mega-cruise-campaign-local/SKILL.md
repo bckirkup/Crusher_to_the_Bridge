@@ -102,3 +102,15 @@ docker run --rm picard-campaign --smoke
 ```
 
 5. Then follow `aws-batch-campaign` for ECR push + array submit.
+
+## Synthetic recovery + VSP degradation
+
+Design specs + runnable manifests for Ridge recovery (1200) and VSP shadow
+stress (6360). Ops: `docs/synthetic_recovery_and_vsp_degradation.md`.
+
+```bash
+python3 -m picard_framework.runs.mega_cruise_campaign.count_manifest_cartesian \
+  picard_framework/runs/mega_cruise_campaign/synthetic_recovery_v1_manifest.json
+python3 -m picard_framework.runs.mega_cruise_campaign.count_manifest_cartesian \
+  picard_framework/runs/mega_cruise_campaign/vsp_degradation_v1_manifest.json
+```
