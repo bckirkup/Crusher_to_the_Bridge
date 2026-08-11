@@ -1556,8 +1556,12 @@ def test_vsp_degradation_compliance_fix_manifest_count() -> None:
     wave1, wave2 = summarize(manifest)
     assert wave1 == 3480 and wave2 == 0
 
+
+def test_vd_isolation_compliance_clears_class_table() -> None:
     """Stock compliance_by_class must not mask the swept quarantine_compliance."""
     import numpy as np
+    import os
+    import tempfile
 
     from crusher_labs import build_modalities
     from orchestrator_init import (
@@ -1577,9 +1581,6 @@ def test_vsp_degradation_compliance_fix_manifest_count() -> None:
         0.1
     )
     assert spec["config_overrides"]["fred_behavior"]["compliance_by_class"] == {}
-
-    import os
-    import tempfile
 
     with tempfile.TemporaryDirectory() as td:
         path = os.path.join(td, "spec.json")
