@@ -30,6 +30,7 @@ _HARDENED_MODULES = (
     "deploy/aws/analyze_campaign_curves.py",
     "deploy/aws/boundary_analysis_entrypoint.py",
     "deploy/aws/classify_batch_failures.py",
+    "deploy/aws/download_boundary_results.py",
     "deploy/aws/path_safety.py",
     "picard_framework/analysis/_io.py",
     "picard_framework/analysis/campaign_bundle.py",
