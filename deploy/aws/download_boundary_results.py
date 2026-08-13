@@ -13,6 +13,12 @@ Example::
       --prefix campaign/boundary_surface_v1/ \\
       --out results/boundary_surface_v1/ \\
       --profile picard
+
+Security notes (Sonar S8707 / S2083)
+------------------------------------
+* ``--out`` is confined to the process cwd via :func:`safe_path`.
+* S3 object keys are split into validated path components before any local write.
+* All file writes use :func:`validated_open` / :func:`prepare_output_directory`.
 """
 
 from __future__ import annotations
@@ -28,8 +34,30 @@ from pathlib import Path
 import boto3
 from botocore.config import Config
 
-from deploy.aws.path_safety import safe_path
-from simulation_utils.paths import validate_path_component
+from deploy.aws.path_safety import cwd_root, safe_path
+from simulation_utils.paths import (
+    prepare_output_directory,
+    resolve_child_path,
+    validate_path_component,
+    validated_open,
+)
+
+
+def _allowed_roots() -> tuple[str, ...]:
+    return (cwd_root(),)
+
+
+def _resolve_parts(base: str, parts: list[str]) -> str:
+    """Join validated path components under *base* (Sonar-safe nested write)."""
+    current = base
+    for part in parts:
+        current = resolve_child_path(current, part)
+    return current
+
+
+def _write_bytes(path: str, data: bytes) -> None:
+    with validated_open(path, "wb", allowed_roots=_allowed_roots()) as fh:
+        fh.write(data)
 
 
 def _client(profile: str, region: str):
@@ -108,43 +136,44 @@ def pack_zips_to_tar(
     s3,
     bucket: str,
     keys: list[dict],
-    tar_path: Path,
+    tar_path: str,
     workers: int,
 ) -> tuple[int, int]:
     """Download zip objects concurrently and write a single uncompressed tar."""
-    tar_path.parent.mkdir(parents=True, exist_ok=True)
-    if tar_path.exists():
-        tar_path.unlink()
+    prepare_output_directory(tar_path, allowed_roots=_allowed_roots())
 
     # Prefetch in flight, write tar sequentially (tarfile is not thread-safe).
     total_bytes = 0
     n = 0
     t0 = time.time()
-    with tarfile.open(tar_path, mode="w") as tar:
-        with ThreadPoolExecutor(max_workers=workers) as pool:
-            futures = {
-                pool.submit(_fetch, s3, bucket, item["Key"]): item for item in keys
-            }
-            done = 0
-            for fut in as_completed(futures):
-                item = futures[fut]
-                data = fut.result()
-                name = Path(item["Key"]).name
-                validate_path_component(name, label="s3 object basename")
-                info = tarfile.TarInfo(name=name)
-                info.size = len(data)
-                info.mtime = int(time.time())
-                tar.addfile(info, io.BytesIO(data))
-                total_bytes += len(data)
-                n += 1
-                done += 1
-                if done % 500 == 0 or done == len(keys):
-                    elapsed = max(time.time() - t0, 1e-6)
-                    print(
-                        f"  {tar_path.name}: {done}/{len(keys)} "
-                        f"({total_bytes / 1e6:.1f} MB, {done / elapsed:.0f} obj/s)",
-                        flush=True,
+    with validated_open(tar_path, "wb", allowed_roots=_allowed_roots()) as tar_fh:
+        with tarfile.TarFile(fileobj=tar_fh, mode="w") as tar:
+            with ThreadPoolExecutor(max_workers=workers) as pool:
+                futures = {
+                    pool.submit(_fetch, s3, bucket, item["Key"]): item for item in keys
+                }
+                done = 0
+                for fut in as_completed(futures):
+                    item = futures[fut]
+                    data = fut.result()
+                    name = validate_path_component(
+                        Path(item["Key"]).name,
+                        label="s3 object basename",
                     )
+                    info = tarfile.TarInfo(name=name)
+                    info.size = len(data)
+                    info.mtime = int(time.time())
+                    tar.addfile(info, io.BytesIO(data))
+                    total_bytes += len(data)
+                    n += 1
+                    done += 1
+                    if done % 500 == 0 or done == len(keys):
+                        elapsed = max(time.time() - t0, 1e-6)
+                        print(
+                            f"  {Path(tar_path).name}: {done}/{len(keys)} "
+                            f"({total_bytes / 1e6:.1f} MB, {done / elapsed:.0f} obj/s)",
+                            flush=True,
+                        )
     return n, total_bytes
 
 
@@ -154,24 +183,31 @@ def _download_one_analysis_object(
     bucket: str,
     item: dict,
     analysis_prefix: str,
-    out_dir: Path,
+    out_root: str,
 ) -> int:
     key = item["Key"]
     parts = _safe_key_parts(key, analysis_prefix)
     if parts is None:
         return 0
-    dest = out_dir.joinpath(*parts)
-    dest.parent.mkdir(parents=True, exist_ok=True)
-    dest.write_bytes(_fetch(s3, bucket, key))
+    dest = _resolve_parts(out_root, parts)
+    prepare_output_directory(dest, allowed_roots=_allowed_roots())
+    _write_bytes(dest, _fetch(s3, bucket, key))
     return int(item["Size"])
 
 
-def download_analysis(*, s3, bucket: str, prefix: str, out_dir: Path, workers: int) -> int:
+def download_analysis(
+    *,
+    s3,
+    bucket: str,
+    prefix: str,
+    out_root: str,
+    workers: int,
+) -> int:
     """Download every object under analysis/ preserving relative paths."""
     analysis_prefix = prefix.rstrip("/") + "/analysis/"
     objs = _list_keys(s3, bucket, analysis_prefix)
-    out_dir.mkdir(parents=True, exist_ok=True)
-    print(f"Downloading analysis/ ({len(objs)} objects) -> {out_dir}", flush=True)
+    prepare_output_directory(out_root, allowed_roots=_allowed_roots())
+    print(f"Downloading analysis/ ({len(objs)} objects) -> {out_root}", flush=True)
 
     written = 0
     t0 = time.time()
@@ -183,7 +219,7 @@ def download_analysis(*, s3, bucket: str, prefix: str, out_dir: Path, workers: i
                 bucket=bucket,
                 item=item,
                 analysis_prefix=analysis_prefix,
-                out_dir=out_dir,
+                out_root=out_root,
             )
             for item in objs
         ]
@@ -198,14 +234,17 @@ def download_analysis(*, s3, bucket: str, prefix: str, out_dir: Path, workers: i
     return len(objs)
 
 
-def _pack_zip_groups(*, s3, bucket: str, prefix: str, out: Path, workers: int) -> None:
+def _pack_zip_groups(*, s3, bucket: str, prefix: str, out_root: str, workers: int) -> None:
     print(f"Listing objects under s3://{bucket}/{prefix} ...", flush=True)
     all_objs = _list_keys(s3, bucket, prefix)
     zips = [o for o in all_objs if _is_run_zip_key(o["Key"])]
     groups = _partition_run_zips(zips)
     b1_n = next((len(g) for name, g in groups if name.startswith("b1_")), 0)
     b2_n = next((len(g) for name, g in groups if name.startswith("b2_")), 0)
-    other_n = next((len(g) for name, g in groups if "other" in name or name == "run_zips.tar"), 0)
+    other_n = next(
+        (len(g) for name, g in groups if "other" in name or name == "run_zips.tar"),
+        0,
+    )
     print(
         f"Found {len(zips)} run zips "
         f"(b1={b1_n}, b2={b2_n}, other={other_n})",
@@ -214,7 +253,10 @@ def _pack_zip_groups(*, s3, bucket: str, prefix: str, out: Path, workers: int) -
     for name, group in groups:
         if not group:
             continue
-        tar_path = out / name
+        tar_path = resolve_child_path(
+            out_root,
+            validate_path_component(name, label="tar output"),
+        )
         print(f"Packing {tar_path} ({len(group)} zips)...", flush=True)
         n, nbytes = pack_zips_to_tar(
             s3=s3,
@@ -243,28 +285,31 @@ def main(argv: list[str] | None = None) -> int:
 
     s3 = _client(args.profile, args.region)
     prefix = args.prefix if args.prefix.endswith("/") else args.prefix + "/"
-    out = Path(safe_path(args.out))
-    out.mkdir(parents=True, exist_ok=True)
+    out_root = prepare_output_directory(safe_path(args.out), allowed_roots=_allowed_roots())
 
     if not args.skip_zips:
         _pack_zip_groups(
             s3=s3,
             bucket=args.bucket,
             prefix=prefix,
-            out=out,
+            out_root=out_root,
             workers=args.workers,
         )
 
     if not args.skip_analysis:
+        analysis_root = resolve_child_path(
+            out_root,
+            validate_path_component("analysis", label="analysis output dir"),
+        )
         download_analysis(
             s3=s3,
             bucket=args.bucket,
             prefix=prefix,
-            out_dir=out / "analysis",
+            out_root=analysis_root,
             workers=args.workers,
         )
 
-    print(f"Done. Output under {out.resolve()}", flush=True)
+    print(f"Done. Output under {out_root}", flush=True)
     return 0
 
 
