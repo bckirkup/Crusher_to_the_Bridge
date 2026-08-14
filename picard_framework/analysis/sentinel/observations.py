@@ -72,6 +72,7 @@ class ObservationBundle:
     n_crew: int
     observation_end_epoch: int | None
     platform_class: str | None
+    exposure_totals: Mapping[str, Mapping[str, float]] = MappingProxyType({})
 
 
 def _case_from_dict(raw: dict[str, Any]) -> ClinicalCase:
@@ -123,6 +124,25 @@ def _sample_from_dict(raw: dict[str, Any]) -> WastewaterSample:
     )
 
 
+def _exposure_totals_from_dict(raw: object) -> Mapping[str, Mapping[str, float]]:
+    if raw is None:
+        return MappingProxyType({})
+    if not isinstance(raw, dict):
+        raise ValueError("exposure_totals must be an object keyed by port_id")
+    totals: dict[str, Mapping[str, float]] = {}
+    for port_id, cell in raw.items():
+        if not isinstance(cell, dict):
+            raise ValueError(f"exposure_totals[{port_id!r}] must be an object")
+        values = {str(k): float(v) for k, v in cell.items()}
+        negative = sorted(k for k, v in values.items() if v < 0.0)
+        if negative:
+            raise ValueError(
+                f"exposure_totals[{port_id!r}] has negative values: {negative}",
+            )
+        totals[str(port_id)] = MappingProxyType(values)
+    return MappingProxyType(totals)
+
+
 def bundle_from_dict(payload: dict[str, Any]) -> ObservationBundle:
     """Build an ``ObservationBundle`` from a decoded observation document."""
     cases = [_case_from_dict(c) for c in payload.get("clinical_cases") or []]
@@ -148,6 +168,7 @@ def bundle_from_dict(payload: dict[str, Any]) -> ObservationBundle:
             None if payload.get("platform_class") is None
             else str(payload["platform_class"])
         ),
+        exposure_totals=_exposure_totals_from_dict(payload.get("exposure_totals")),
     )
 
 

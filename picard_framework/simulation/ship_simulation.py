@@ -90,6 +90,7 @@ from orchestrator_types import (
     STATUS_RANK,
     SimulationState,
 )
+from picard_framework.analysis.sentinel.line_list import SentinelLedger
 from picard_framework.run_spec import PicardRunSpec
 from picard_framework.simulation.action_applier import apply_action_envelope
 from picard_framework.simulation.step_result import StepResult
@@ -150,6 +151,8 @@ class ShipSimulation:
         self.chronic_config: dict[str, dict[str, Any]] = {}
         self.chronic_assignments: dict[int, list[str]] = {}
         self.chronic_behavioral_mods: dict[int, dict[str, float]] = {}
+        self.sentinel_ledger: SentinelLedger | None = None
+        self._sentinel_port_ids: dict[str, str] = {}
 
 
     @property
@@ -321,6 +324,7 @@ class ShipSimulation:
             voyage_config=voyage_cfg,
         )
         self.state = sim_state
+        self._init_sentinel_ledger(voyage_cfg)
         self.world = WorldState(
             simulation=sim_state,
             observation=self.obs,
@@ -339,6 +343,96 @@ class ShipSimulation:
             self.decision_experience.load()
         self._initialized = True
         return self.world
+
+    def _init_sentinel_ledger(self, voyage_cfg: dict[str, Any] | None) -> None:
+        """Arm the sentinel ledger when a line-list output path is configured.
+
+        Off by default: per-person onset and ashore hours are only collected
+        when someone asked for them, so ``compact`` runs stay compact.
+        """
+        paths = self.run_spec.telemetry
+        if paths is None or not paths.sentinel_line_list:
+            return
+        from picard_framework.analysis.sentinel.export_line_list import port_id_lookup
+
+        voyage = (voyage_cfg or {}).get("voyage") or {}
+        self.sentinel_ledger = SentinelLedger(
+            epoch_duration_hours=float(voyage.get("epoch_duration_hours", 1) or 1),
+        )
+        self._sentinel_port_ids = port_id_lookup(voyage_cfg)
+
+    def _observe_sentinel(
+        self,
+        epoch: int,
+        agents: list[dict[str, Any]],
+        syn_result: dict[str, Any] | None,
+        cascade_result: dict[str, Any] | None,
+        wearable_result: dict[str, Any] | None,
+    ) -> None:
+        """Fold this epoch's per-person state into the sentinel ledger."""
+        ledger = self.sentinel_ledger
+        if ledger is None or self.engine is None:
+            return
+        from picard_framework.analysis.sentinel.itinerary import slugify_port
+
+        epoch_voyage = self.state.epoch_voyage if self.state else None
+        port_name = str(epoch_voyage.port or "") if epoch_voyage else ""
+        port_id = self._sentinel_port_ids.get(port_name) or (
+            slugify_port(port_name) if port_name else ""
+        )
+        ashore = [a.agent_id for a in self.engine.agents if a.ashore]
+
+        detections: dict[str, list[int]] = {}
+        syn = syn_result or {}
+        screening = [int(a) for a in syn.get("crew_screening_ids") or []]
+        sick_call = [
+            int(a)
+            for a in syn.get("sick_call_agents") or []
+            if int(a) not in set(screening)
+        ]
+        if sick_call:
+            detections["sick_call"] = sick_call
+        if screening:
+            detections["screening"] = screening
+        cascade = cascade_result or {}
+        tiers = [
+            int(a)
+            for key in ("new_tier0_agents", "new_tier1_agents")
+            for a in cascade.get(key) or []
+        ]
+        if tiers:
+            detections["cascade"] = tiers
+        visible = [int(a) for a in (wearable_result or {}).get("staff_visible_agents") or []]
+        if visible:
+            detections["wearable"] = visible
+
+        ledger.observe_epoch(
+            epoch,
+            agents,
+            port_id=port_id,
+            ashore_ids=ashore,
+            detections=detections,
+        )
+
+    def _write_sentinel_line_list(self) -> None:
+        """Write the sentinel observation bundle, if one was collected."""
+        ledger = self.sentinel_ledger
+        paths = self.run_spec.telemetry
+        if ledger is None or paths is None or not paths.sentinel_line_list:
+            return
+        from picard_framework.analysis._io import safe_path, write_json
+
+        agents = self.engine.agents if self.engine else []
+        n_crew = sum(1 for a in agents if a.role == "crew")
+        payload = ledger.to_payload(
+            voyage_id=str(self.cfg.get("voyage_id") or f"seed{self.seed}"),
+            ship_id=self.run_spec.platform_id,
+            n_passengers=len(agents) - n_crew,
+            n_crew=n_crew,
+            platform_class=self.run_spec.platform_id,
+            observation_end_epoch=max(self._epoch, 1),
+        )
+        write_json(safe_path(paths.sentinel_line_list), payload)
 
     def step(self, actions: ActionEnvelope | None = None) -> StepResult:
         if not self._initialized:
@@ -801,6 +895,9 @@ class ShipSimulation:
             # Still capture SOP events for runtime, but do not retain in history.
             dr.capture_sop_events(self.proto_ctx.protocol_engine, epoch)
         state.simulation_history.append(epoch_record)
+        self._observe_sentinel(
+            epoch, agents, syn_result, cascade_result, wearable_result,
+        )
         self._epoch = epoch
 
         if self.display:
@@ -887,3 +984,4 @@ class ShipSimulation:
             logging_profile_path=logging_path,
             display=show,
         )
+        self._write_sentinel_line_list()

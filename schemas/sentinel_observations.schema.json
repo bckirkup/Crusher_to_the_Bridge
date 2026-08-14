@@ -27,9 +27,25 @@
       "type": "array",
       "items": { "$ref": "#/$defs/wastewater_sample" }
     },
+    "exposure_totals": {
+      "type": "object",
+      "description": "Person-hours ashore per port_id — the hazard denominator. Observed from the run rather than inferred from itinerary fractions.",
+      "additionalProperties": { "$ref": "#/$defs/exposure_total" }
+    },
     "notes": { "type": "string" }
   },
   "$defs": {
+    "exposure_total": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["person_hours_passenger", "person_hours_crew"],
+      "properties": {
+        "person_hours_passenger": { "type": "number", "minimum": 0 },
+        "person_hours_crew": { "type": "number", "minimum": 0 },
+        "n_passengers_ashore": { "type": "integer", "minimum": 0 },
+        "n_crew_ashore": { "type": "integer", "minimum": 0 }
+      }
+    },
     "clinical_case": {
       "type": "object",
       "additionalProperties": false,
