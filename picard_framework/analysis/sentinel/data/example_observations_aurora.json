@@ -1,0 +1,59 @@
+{
+  "schema_version": "1.0.0",
+  "voyage_id": "VOY-2026-01-10-AURORA",
+  "ship_id": "AURORA",
+  "platform_class": "mega",
+  "n_passengers": 4000,
+  "n_crew": 1500,
+  "epoch_duration_hours": 1,
+  "observation_end_epoch": 168,
+  "notes": "Sister ship sailing the same week as example_observations.json, so the MXCZM visit pools across two ships. Fixture only.",
+  "clinical_cases": [
+    {
+      "person_id": "P-0221",
+      "onset_epoch": 98,
+      "crew": false,
+      "pathogen": "norovirus",
+      "genotype": null,
+      "hours_ashore": {
+        "MXCZM": 8.5
+      },
+      "reported_via": "sick_call"
+    },
+    {
+      "person_id": "P-0388",
+      "onset_epoch": 101,
+      "crew": false,
+      "pathogen": "norovirus",
+      "genotype": null,
+      "hours_ashore": {
+        "MXCZM": 7.0
+      },
+      "reported_via": "sick_call"
+    },
+    {
+      "person_id": "P-0904",
+      "onset_epoch": 126,
+      "crew": false,
+      "pathogen": "norovirus",
+      "genotype": null,
+      "hours_ashore": {
+        "MXCZM": 6.5,
+        "KYGEC": 5.0
+      },
+      "reported_via": "cascade"
+    },
+    {
+      "person_id": "C-0142",
+      "onset_epoch": 121,
+      "crew": true,
+      "pathogen": "norovirus",
+      "genotype": null,
+      "hours_ashore": {
+        "MXCZM": 5.0
+      },
+      "reported_via": "screening"
+    }
+  ],
+  "wastewater_samples": []
+}

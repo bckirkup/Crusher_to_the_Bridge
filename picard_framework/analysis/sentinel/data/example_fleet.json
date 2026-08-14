@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0.0",
+  "description": "Sentinel fleet example: two ships in one calendar week plus a second sailing of one of them the week after. That gives pooled ports, a two-week fleet-time index, and repeat crew calls. Fixture only.",
+  "voyages": [
+    {
+      "itinerary": "example_itinerary.json",
+      "observations": "example_observations.json"
+    },
+    {
+      "itinerary": "example_itinerary.json",
+      "observations": "example_observations_aurora.json"
+    },
+    {
+      "itinerary": "example_itinerary_week2.json",
+      "observations": "example_observations_week2.json"
+    }
+  ]
+}

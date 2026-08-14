@@ -1,0 +1,520 @@
+"""Stan data assembly for the fleet sentinel model (many voyages, shared ports).
+
+The single-ship builder (``_sentinel_data``) keeps its conventions here — raw
+rather than censoring-discounted hours, strata collapsed to person groups, the
+onset convolution truncated at the horizon — and this module adds the three
+grouping levels the hierarchy needs:
+
+- **port visit.** ``port_id`` x ISO calendar week, the public-health unit (spec
+  2). Two ships calling at the same port the same week share a visit; the same
+  port a month later is a different visit. Visits are the level a port hazard
+  actually varies at, so pooling voyages without this level would average a
+  cluster week into a quiet one.
+- **calendar week.** The fleet-time effect index. A port that every ship calls at
+  in one week is confounded with a fleet-wide shock, and the model needs the
+  shock in it for that to surface as a wide interval instead of a confident
+  number (spec 3).
+- **ship.** Onboard baseline and ``R_onboard`` partially pool across ships, so a
+  ship with an outbreak cannot push its onboard cases onto the ports it called
+  at, and a voyage with three cases is not asked to estimate its own R.
+
+Crew repeat exposure is a *covariate*, not a level: ``crew_repeat[v, p]`` counts
+the earlier calls that ship made at that port inside the supplied fleet, and its
+coefficient is the only within-person contrast available (spec 3).
+
+Voyages are padded to the longest horizon; every Stan loop stops at ``T[v]`` so
+padded epochs never enter the likelihood.
+"""
+
+from __future__ import annotations
+
+import math
+from dataclasses import dataclass
+from datetime import date
+from typing import Any, Mapping, Sequence
+
+import numpy as np
+
+from picard_framework.analysis.sentinel.exposure import (
+    ExposureDesign,
+    min_inter_port_hours,
+)
+from picard_framework.analysis.sentinel.incubation import (
+    DelayDistribution,
+    port_resolution_adequate,
+)
+from picard_framework.analysis.sentinel.itinerary import Voyage
+from picard_framework.analysis.sentinel.observations import ObservationBundle
+from picard_framework.analysis.stan._sentinel_data import (
+    CREW,
+    DEFAULT_BASELINE_PRIOR_MEDIAN,
+    DEFAULT_HAZARD_PRIOR_MEDIAN,
+    DEFAULT_PORT_SD_PRIOR_SCALE,
+    DEFAULT_PRIOR_LOG_SD,
+    GROUPS,
+    aboard_hours_by_epoch,
+    ashore_hours_by_epoch,
+    attribution_ports,
+    group_onsets,
+)
+
+# Half-normal scales for the hierarchy. All are on the log-hazard scale, where
+# 0.5 is a factor of ~1.6: ports are allowed to differ more than repeat visits
+# to one port, and the fleet-time shock is given as much room as the between-port
+# spread on purpose — shrinking it would quietly resolve the confounding in
+# favour of the ports (spec 3).
+DEFAULT_VISIT_SD_PRIOR_SCALE = 0.5
+DEFAULT_TIME_SD_PRIOR_SCALE = 0.75
+DEFAULT_SHIP_SD_PRIOR_SCALE = 0.5
+DEFAULT_R_SD_PRIOR_SCALE = 0.4
+# R_onboard is lognormal at the fleet level here (it is a positive multiplier
+# pooled across ships), unlike the single-ship model's normal prior on R itself.
+DEFAULT_R_LOG_PRIOR_MEDIAN = 0.6
+DEFAULT_R_LOG_PRIOR_SD = 0.6
+DEFAULT_CREW_RATIO_PRIOR_SD = 0.5
+DEFAULT_REPEAT_PRIOR_SD = 0.3
+
+
+@dataclass(frozen=True)
+class FleetVoyage:
+    """One voyage's exposure design with the itinerary and observations it came from."""
+
+    design: ExposureDesign
+    voyage: Voyage
+    bundle: ObservationBundle
+
+    @property
+    def ship_id(self) -> str:
+        """Ship the voyage was sailed by."""
+        return self.design.ship_id
+
+    @property
+    def voyage_id(self) -> str:
+        """Voyage identifier."""
+        return self.design.voyage_id
+
+
+def fleet_visit_key(port_id: str, voyage: Voyage, port_call_day: int) -> str:
+    """``port_id@ISO-week`` when dated, else ``port_id@voyage/day``.
+
+    The week is the unit a port hazard is reported at, so two ships calling in
+    the same week must land on the same key. An undated itinerary cannot be
+    aligned to another ship's calendar at all, so it falls back to a key unique
+    to that voyage — pooling it with anyone else would be an invented
+    coincidence.
+    """
+    call = next(
+        (c for c in voyage.port_calls if c.port_id == port_id and c.voyage_day == port_call_day),
+        None,
+    )
+    if call is not None and call.calendar_date is not None:
+        iso = call.calendar_date.isocalendar()
+        return f"{port_id}@{iso.year}-W{iso.week:02d}"
+    return f"{port_id}@{voyage.voyage_id}/d{port_call_day}"
+
+
+def _first_call_day(voyage: Voyage, port_id: str) -> int:
+    call = voyage.port_call(port_id)
+    return call.voyage_day if call is not None else 1
+
+
+def _week_key(voyage: Voyage, port_id: str) -> str:
+    """Calendar week the visit falls in — the fleet-time index."""
+    call = voyage.port_call(port_id)
+    if call is not None and call.calendar_date is not None:
+        iso = call.calendar_date.isocalendar()
+        return f"{iso.year}-W{iso.week:02d}"
+    return f"{voyage.voyage_id}/unscheduled"
+
+
+def _visit_layout(
+    voyages: Sequence[FleetVoyage],
+    ports: Sequence[str],
+) -> tuple[list[str], list[str], dict[str, int], dict[str, int]]:
+    """``(visit_keys, week_keys, visit_index, week_index)`` in stable order."""
+    visit_keys: list[str] = []
+    week_keys: list[str] = []
+    for fv in voyages:
+        for port_id in attribution_ports(fv.design):
+            if port_id not in ports:
+                continue
+            key = fleet_visit_key(port_id, fv.voyage, _first_call_day(fv.voyage, port_id))
+            if key not in visit_keys:
+                visit_keys.append(key)
+            week = _week_key(fv.voyage, port_id)
+            if week not in week_keys:
+                week_keys.append(week)
+    visit_keys.sort()
+    week_keys.sort()
+    return (
+        visit_keys,
+        week_keys,
+        {k: i + 1 for i, k in enumerate(visit_keys)},
+        {k: i + 1 for i, k in enumerate(week_keys)},
+    )
+
+
+def _crew_repeat_counts(
+    voyages: Sequence[FleetVoyage],
+    ports: Sequence[str],
+) -> np.ndarray:
+    """``(voyage, port)`` count of earlier calls by the same ship at that port.
+
+    Ordered by embarkation date where known, else by the order supplied. Only
+    calls inside this fleet are counted: a crew member's exposure history before
+    the first voyage in the data is unobserved, so the covariate is a lower bound
+    and ``beta_repeat`` is the effect of the repeats we can see.
+    """
+    counts = np.zeros((len(voyages), len(ports)), dtype=float)
+    order = sorted(
+        range(len(voyages)),
+        key=lambda i: (
+            voyages[i].voyage.embarkation_date or date.min,
+            voyages[i].voyage_id,
+        ),
+    )
+    seen: dict[tuple[str, str], int] = {}
+    for i in order:
+        fv = voyages[i]
+        for p, port_id in enumerate(ports):
+            if port_id not in attribution_ports(fv.design):
+                continue
+            key = (fv.ship_id, port_id)
+            counts[i, p] = float(seen.get(key, 0))
+            seen[key] = seen.get(key, 0) + 1
+    return counts
+
+
+def build_sentinel_fleet_data(
+    voyages: Sequence[FleetVoyage],
+    incubation: DelayDistribution,
+    generation: DelayDistribution,
+    *,
+    hazard_prior_median: float = DEFAULT_HAZARD_PRIOR_MEDIAN,
+    baseline_prior_median: float = DEFAULT_BASELINE_PRIOR_MEDIAN,
+    prior_log_sd: float = DEFAULT_PRIOR_LOG_SD,
+    port_sd_prior_scale: float = DEFAULT_PORT_SD_PRIOR_SCALE,
+    visit_sd_prior_scale: float = DEFAULT_VISIT_SD_PRIOR_SCALE,
+    time_sd_prior_scale: float = DEFAULT_TIME_SD_PRIOR_SCALE,
+    ship_sd_prior_scale: float = DEFAULT_SHIP_SD_PRIOR_SCALE,
+    r_sd_prior_scale: float = DEFAULT_R_SD_PRIOR_SCALE,
+    r_prior_median: float = DEFAULT_R_LOG_PRIOR_MEDIAN,
+    r_prior_log_sd: float = DEFAULT_R_LOG_PRIOR_SD,
+    crew_ratio_prior_sd: float = DEFAULT_CREW_RATIO_PRIOR_SD,
+    repeat_prior_sd: float = DEFAULT_REPEAT_PRIOR_SD,
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """``(stan_data, meta)`` for a fleet of voyages sharing an epoch grid.
+
+    ``meta`` carries the port, visit, week, and ship orders the posterior indices
+    refer to — a fleet posterior is unreadable without them — plus the per-voyage
+    port-resolution verdicts (spec 1.8).
+    """
+    if not voyages:
+        raise ValueError("a fleet model needs at least one voyage")
+    if hazard_prior_median <= 0.0 or baseline_prior_median <= 0.0 or r_prior_median <= 0.0:
+        raise ValueError("prior medians must be positive")
+    epoch_hours = {round(float(fv.voyage.epoch_duration_hours), 6) for fv in voyages}
+    if len(epoch_hours) > 1:
+        raise ValueError(
+            "voyages must share an epoch duration; the delay pmfs are on that "
+            f"grid: {sorted(epoch_hours)}",
+        )
+    ports = sorted({p for fv in voyages for p in attribution_ports(fv.design)})
+    if not ports:
+        raise ValueError("no voyage has a port with positive ashore exposure")
+
+    visit_keys, week_keys, visit_index, week_index = _visit_layout(voyages, ports)
+    crew_repeat = _crew_repeat_counts(voyages, ports)
+    ships = sorted({fv.ship_id for fv in voyages})
+    horizons = [int(fv.design.observation_end_epoch) for fv in voyages]
+    t_max = max(horizons)
+
+    onsets: list[list[list[int]]] = []
+    ashore_all: list[list[list[list[float]]]] = []
+    aboard_all: list[list[list[float]]] = []
+    shares: list[list[float]] = []
+    visit_idx: list[list[int]] = []
+    visit_port: list[int] = [0] * len(visit_keys)
+    visit_week: list[int] = [0] * len(visit_keys)
+    hours_by_visit: dict[str, float] = {k: 0.0 for k in visit_keys}
+
+    for i, fv in enumerate(voyages):
+        ashore = ashore_hours_by_epoch(fv.design, fv.voyage, ports)
+        aboard = aboard_hours_by_epoch(fv.voyage, fv.bundle, ashore)
+        counts = group_onsets(fv.bundle, fv.design.observation_end_epoch)
+        # (epoch, port) per group, which is Stan's matrix[Tmax, P].
+        ashore_all.append(
+            [_pad_rows(ashore[g], t_max) for g in range(len(GROUPS))],
+        )
+        aboard_all.append(_pad_cols(aboard, t_max))
+        onsets.append(_pad_cols(counts, t_max, dtype=int))
+        share = aboard.sum(axis=1)
+        if share.sum() <= 0.0:
+            share = np.ones(len(GROUPS), dtype=float)
+        shares.append([float(x) for x in share])
+
+        row = [0] * len(ports)
+        voyage_ports = attribution_ports(fv.design)
+        for p, port_id in enumerate(ports):
+            if port_id not in voyage_ports:
+                continue
+            key = fleet_visit_key(
+                port_id, fv.voyage, _first_call_day(fv.voyage, port_id),
+            )
+            idx = visit_index[key]
+            row[p] = idx
+            visit_port[idx - 1] = p + 1
+            visit_week[idx - 1] = week_index[_week_key(fv.voyage, port_id)]
+            hours_by_visit[key] += float(ashore[:, :, p].sum())
+        visit_idx.append(row)
+
+    lagged = generation.strictly_lagged().weights[1:]
+    data = {
+        "V": len(voyages),
+        "S": len(ships),
+        "P": len(ports),
+        "G": len(GROUPS),
+        "NV": len(visit_keys),
+        "W": len(week_keys),
+        "Tmax": int(t_max),
+        "T": horizons,
+        "ship": [ships.index(fv.ship_id) + 1 for fv in voyages],
+        "is_crew": [1 if g == CREW else 0 for g in GROUPS],
+        "visit_idx": visit_idx,
+        "visit_port": visit_port,
+        "visit_week": visit_week,
+        "crew_repeat": crew_repeat.tolist(),
+        "L_inc": int(incubation.weights.size),
+        "L_gen": int(lagged.size),
+        "f_inc_raw": incubation.weights.tolist(),
+        "w_gen_raw": lagged.tolist(),
+        "onsets": onsets,
+        "ashore_hours": ashore_all,
+        "aboard_hours": aboard_all,
+        "secondary_share_raw": shares,
+        "ascertainment": [float(fv.design.ascertainment) for fv in voyages],
+        "hazard_log_prior_mean": math.log(float(hazard_prior_median)),
+        "hazard_log_prior_sd": float(prior_log_sd),
+        "baseline_log_prior_mean": math.log(float(baseline_prior_median)),
+        "baseline_log_prior_sd": float(prior_log_sd),
+        "r_log_prior_mean": math.log(float(r_prior_median)),
+        "r_log_prior_sd": float(r_prior_log_sd),
+        "port_sd_prior_scale": float(port_sd_prior_scale),
+        "visit_sd_prior_scale": float(visit_sd_prior_scale),
+        "time_sd_prior_scale": float(time_sd_prior_scale),
+        "ship_sd_prior_scale": float(ship_sd_prior_scale),
+        "r_sd_prior_scale": float(r_sd_prior_scale),
+        "crew_ratio_prior_sd": float(crew_ratio_prior_sd),
+        "repeat_prior_sd": float(repeat_prior_sd),
+    }
+    meta = _fleet_meta(
+        voyages,
+        ports=ports,
+        visit_keys=visit_keys,
+        week_keys=week_keys,
+        ships=ships,
+        visit_port=visit_port,
+        visit_week=visit_week,
+        hours_by_visit=hours_by_visit,
+        crew_repeat=crew_repeat,
+        incubation=incubation,
+    )
+    return data, meta
+
+
+def _fleet_meta(
+    voyages: Sequence[FleetVoyage],
+    *,
+    ports: Sequence[str],
+    visit_keys: Sequence[str],
+    week_keys: Sequence[str],
+    ships: Sequence[str],
+    visit_port: Sequence[int],
+    visit_week: Sequence[int],
+    hours_by_visit: Mapping[str, float],
+    crew_repeat: np.ndarray,
+    incubation: DelayDistribution,
+) -> dict[str, Any]:
+    resolutions = {
+        fv.voyage_id: port_resolution_adequate(
+            incubation, min_inter_port_hours(fv.voyage),
+        )
+        for fv in voyages
+    }
+    return {
+        "model": "sentinel_fleet",
+        "ports": list(ports),
+        "visits": [
+            {
+                "visit_key": key,
+                "port_id": ports[visit_port[i] - 1],
+                "week": week_keys[visit_week[i] - 1],
+                "person_hours_ashore": round(float(hours_by_visit[key]), 6),
+            }
+            for i, key in enumerate(visit_keys)
+        ],
+        "weeks": list(week_keys),
+        "ships": list(ships),
+        "groups": list(GROUPS),
+        "voyages": [
+            {
+                "voyage_id": fv.voyage_id,
+                "ship_id": fv.ship_id,
+                "observation_end_epoch": int(fv.design.observation_end_epoch),
+                "ports": list(attribution_ports(fv.design)),
+                "n_cases": len(fv.bundle.clinical_cases),
+                "ascertainment": float(fv.design.ascertainment),
+                "crew_repeat": {
+                    port_id: float(crew_repeat[i, p])
+                    for p, port_id in enumerate(ports)
+                    if crew_repeat[i, p] > 0.0
+                },
+                "port_resolution_adequate": resolutions[fv.voyage_id],
+            }
+            for i, fv in enumerate(voyages)
+        ],
+        "epoch_duration_hours": float(voyages[0].voyage.epoch_duration_hours),
+        "person_hours_ashore": {
+            key: round(float(hours), 6) for key, hours in hours_by_visit.items()
+        },
+        "censoring_corrected": any(
+            c.censoring_corrected for fv in voyages for c in fv.design.port_cells
+        ),
+        "incubation_iqr_hours": round(incubation.iqr_hours, 3),
+        "port_resolution_adequate": all(resolutions.values()),
+        "n_cases": sum(len(fv.bundle.clinical_cases) for fv in voyages),
+    }
+
+
+@dataclass(frozen=True)
+class FleetRates:
+    """The rates the fleet forward model needs, already off the hierarchy.
+
+    Separating this from the hierarchy is what lets the validation suites simulate
+    from *known* per-visit hazards without also having to invent the z-scores that
+    would produce them.
+    """
+
+    lambda_visit: Sequence[float]     # per port visit
+    lambda_aboard: Sequence[float]    # per ship
+    r_onboard: Sequence[float]        # per ship
+    crew_ratio: float = 1.0
+    beta_repeat: float = 0.0
+
+
+def fleet_forward_incidence(
+    data: Mapping[str, Any],
+    rates: FleetRates,
+) -> tuple[list[np.ndarray], list[np.ndarray]]:
+    """``(incidence, mu_onset)`` per voyage, mirroring ``sentinel_fleet.stan``.
+
+    Same recursion, same truncation, same crew multiplier. A divergence between
+    this and the Stan model is a bug in one of them, not a modelling choice —
+    which is the only reason the numpy reference sampler is allowed to stand in
+    for Stan in CI.
+    """
+    f_inc = np.asarray(data["f_inc_raw"], dtype=float)
+    f_inc = f_inc / f_inc.sum()
+    w_gen = np.asarray(data["w_gen_raw"], dtype=float)
+    w_gen = w_gen / w_gen.sum()
+    lambda_visit = np.asarray(list(rates.lambda_visit), dtype=float)
+    lambda_aboard = np.asarray(list(rates.lambda_aboard), dtype=float)
+    r_onboard = np.asarray(list(rates.r_onboard), dtype=float)
+    is_crew = np.asarray(data["is_crew"], dtype=float)
+    crew_repeat = np.asarray(data["crew_repeat"], dtype=float)
+    visit_idx = np.asarray(data["visit_idx"], dtype=int)
+    ascertainment = list(data["ascertainment"])
+
+    incidences: list[np.ndarray] = []
+    onset_means: list[np.ndarray] = []
+    for v in range(int(data["V"])):
+        horizon = int(data["T"][v])
+        ashore = np.asarray(data["ashore_hours"][v], dtype=float)[:, :horizon, :]
+        aboard = np.asarray(data["aboard_hours"][v], dtype=float)[:, :horizon]
+        share = np.asarray(data["secondary_share_raw"][v], dtype=float)
+        share = share / share.sum()
+        s = int(data["ship"][v]) - 1
+
+        # (group, port) rate: crew carry the ratio and the repeat slope.
+        crew_mult = float(rates.crew_ratio) * np.exp(
+            rates.beta_repeat * crew_repeat[v],
+        )
+        rate = np.where(
+            is_crew[:, None] > 0.0, crew_mult[None, :], 1.0,
+        ) * np.where(
+            visit_idx[v][None, :] > 0,
+            lambda_visit[np.clip(visit_idx[v] - 1, 0, None)][None, :],
+            0.0,
+        )
+
+        # Everything but the renewal term is a function of the epoch alone, so
+        # only the secondary lag sum has to stay in a python loop.
+        primary = (
+            np.einsum("gtp,gp->gt", ashore, rate) + float(lambda_aboard[s]) * aboard
+        )
+        primary_total = primary.sum(axis=0)
+        incidence = primary.copy()
+        total = np.zeros(horizon, dtype=float)
+        for t in range(horizon):
+            lags = min(t, w_gen.size)
+            secondary = 0.0
+            if lags:
+                secondary = float(r_onboard[s]) * float(
+                    w_gen[:lags] @ total[t - lags : t][::-1],
+                )
+            if secondary:
+                incidence[:, t] += secondary * share
+            total[t] = primary_total[t] + secondary
+
+        mu = np.zeros_like(incidence)
+        for g in range(len(GROUPS)):
+            mu[g] = np.convolve(incidence[g], f_inc)[:horizon]
+        incidences.append(incidence)
+        onset_means.append(float(ascertainment[v]) * mu)
+    return incidences, onset_means
+
+
+def expected_onsets_fleet(
+    data: Mapping[str, Any],
+    rates: FleetRates,
+) -> list[np.ndarray]:
+    """``mu_onset`` per voyage: onsets expected inside each voyage's window."""
+    _, mu = fleet_forward_incidence(data, rates)
+    return mu
+
+
+def visit_hours(data: Mapping[str, Any]) -> np.ndarray:
+    """Person-hours ashore per port visit — the hazard denominators."""
+    hours = np.zeros(int(data["NV"]), dtype=float)
+    visit_idx = np.asarray(data["visit_idx"], dtype=int)
+    for v in range(int(data["V"])):
+        horizon = int(data["T"][v])
+        ashore = np.asarray(data["ashore_hours"][v], dtype=float)[:, :horizon, :]
+        for p, idx in enumerate(visit_idx[v]):
+            if idx > 0:
+                hours[idx - 1] += float(ashore[:, :, p].sum())
+    return hours
+
+
+def aboard_hours_by_ship(data: Mapping[str, Any]) -> np.ndarray:
+    """Person-hours aboard per ship, summed over that ship's voyages."""
+    hours = np.zeros(int(data["S"]), dtype=float)
+    for v in range(int(data["V"])):
+        horizon = int(data["T"][v])
+        aboard = np.asarray(data["aboard_hours"][v], dtype=float)[:, :horizon]
+        hours[int(data["ship"][v]) - 1] += float(aboard.sum())
+    return hours
+
+
+def _pad_cols(array: np.ndarray, width: int, *, dtype: type = float) -> list[list[Any]]:
+    """Pad a ``(group, epoch)`` array out to ``width`` epochs with zeros."""
+    padded = np.zeros((array.shape[0], width), dtype=dtype)
+    padded[:, : array.shape[1]] = array
+    return padded.tolist()
+
+
+def _pad_rows(array: np.ndarray, height: int) -> list[list[float]]:
+    """Pad an ``(epoch, port)`` array out to ``height`` epochs with zeros."""
+    padded = np.zeros((height, array.shape[1]), dtype=float)
+    padded[: array.shape[0], :] = array
+    return padded.tolist()

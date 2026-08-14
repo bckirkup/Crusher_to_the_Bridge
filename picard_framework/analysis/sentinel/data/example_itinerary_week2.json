@@ -1,0 +1,96 @@
+{
+  "schema_version": "1.0.0",
+  "platform_class": "mega",
+  "description": "Sentinel fleet example: the week-2 sailing of the same western Caribbean itinerary, so each port is called at twice by the same ship. Fixture only.",
+  "voyage": {
+    "effects_enabled": true,
+    "total_epochs": 168,
+    "epoch_duration_hours": 1,
+    "embarkation_date": "2026-01-17",
+    "itinerary": [
+      {
+        "day": 1,
+        "type": "embarkation",
+        "port": "Miami",
+        "port_id": "USMIA",
+        "region": "AMR",
+        "embarkation_window_epochs": [
+          10,
+          16
+        ],
+        "stateroom_available_epoch": 13,
+        "buffet_surge_fraction": 0.8
+      },
+      {
+        "day": 2,
+        "type": "sea_day"
+      },
+      {
+        "day": 3,
+        "type": "port_day",
+        "port": "Cozumel",
+        "port_id": "MXCZM",
+        "region": "AMR",
+        "disembark_fraction": 0.72,
+        "crew_shore_leave_fraction": 0.15,
+        "disembark_window_epochs": [
+          2,
+          5
+        ],
+        "reembark_window_epochs": [
+          12,
+          15
+        ]
+      },
+      {
+        "day": 4,
+        "type": "port_day",
+        "port": "Costa Maya",
+        "port_id": "MXCTM",
+        "region": "AMR",
+        "disembark_fraction": 0.55,
+        "crew_shore_leave_fraction": 0.1,
+        "disembark_window_epochs": [
+          3,
+          6
+        ],
+        "reembark_window_epochs": [
+          13,
+          16
+        ]
+      },
+      {
+        "day": 5,
+        "type": "sea_day"
+      },
+      {
+        "day": 6,
+        "type": "port_day",
+        "port": "George Town",
+        "port_id": "KYGEC",
+        "region": "AMR",
+        "disembark_fraction": 0.6,
+        "crew_shore_leave_fraction": 0.08,
+        "disembark_window_epochs": [
+          3,
+          5
+        ],
+        "reembark_window_epochs": [
+          11,
+          14
+        ]
+      },
+      {
+        "day": 7,
+        "type": "disembarkation",
+        "port": "Miami",
+        "port_id": "USMIA",
+        "region": "AMR",
+        "disembark_window_epochs": [
+          6,
+          12
+        ]
+      }
+    ]
+  }
+}

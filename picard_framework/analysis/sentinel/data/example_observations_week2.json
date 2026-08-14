@@ -1,0 +1,56 @@
+{
+  "schema_version": "1.0.0",
+  "voyage_id": "VOY-2026-01-17-ENDEAVOR",
+  "ship_id": "ENDEAVOR",
+  "platform_class": "mega",
+  "n_passengers": 4000,
+  "n_crew": 1500,
+  "epoch_duration_hours": 1,
+  "observation_end_epoch": 168,
+  "notes": "Second sailing of the same ship a week later: the repeat calls this adds are what identifies the crew repeat-exposure slope. Fixture only.",
+  "clinical_cases": [
+    {
+      "person_id": "P-1502",
+      "onset_epoch": 94,
+      "crew": false,
+      "pathogen": "norovirus",
+      "genotype": null,
+      "hours_ashore": {
+        "MXCZM": 9.0
+      },
+      "reported_via": "sick_call"
+    },
+    {
+      "person_id": "P-1744",
+      "onset_epoch": 110,
+      "crew": false,
+      "pathogen": "norovirus",
+      "genotype": null,
+      "hours_ashore": {
+        "MXCTM": 6.0
+      },
+      "reported_via": "sick_call"
+    },
+    {
+      "person_id": "P-1980",
+      "onset_epoch": 139,
+      "crew": false,
+      "pathogen": "norovirus",
+      "genotype": null,
+      "hours_ashore": {},
+      "reported_via": "cascade"
+    },
+    {
+      "person_id": "C-0207",
+      "onset_epoch": 130,
+      "crew": true,
+      "pathogen": "norovirus",
+      "genotype": null,
+      "hours_ashore": {
+        "KYGEC": 4.5
+      },
+      "reported_via": "screening"
+    }
+  ],
+  "wastewater_samples": []
+}
