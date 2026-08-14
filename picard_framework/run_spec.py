@@ -65,6 +65,8 @@ class TelemetryPaths:
     ground_truth: str = ""
     simulation_history: str = ""
     lab_notebook: str = ""
+    # Empty means no sentinel line list is collected (default off).
+    sentinel_line_list: str = ""
 
     def __post_init__(self) -> None:
         if not self.ground_truth:
@@ -272,6 +274,7 @@ class PicardRunSpec:
                 ground_truth=run.get("ground_truth", ""),
                 simulation_history=run.get("simulation_history", ""),
                 lab_notebook=run.get("lab_notebook", ""),
+                sentinel_line_list=run.get("sentinel_line_list", ""),
             ),
             write_ground_truth=bool(run.get("write_ground_truth", True)),
             history_retention=_parse_history_retention(

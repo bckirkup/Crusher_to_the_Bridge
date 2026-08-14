@@ -41,6 +41,7 @@ _HARDENED_MODULES = (
     "picard_framework/analysis/boundary/run_decision_model.py",
     "picard_framework/analysis/boundary/figures.py",
     "picard_framework/analysis/boundary/report.py",
+    "picard_framework/analysis/sentinel/export_line_list.py",
     "picard_framework/analysis/sentinel/itinerary.py",
     "picard_framework/analysis/sentinel/observations.py",
 )
