@@ -60,6 +60,7 @@ from orchestrator_epoch import (
     step_mid_cruise_introductions,
     step_operational_impact_accounting,
     step_quarantine_confinement,
+    step_shore_introductions,
     step_wearable_monitoring,
     surveillance_is_active,
 )
@@ -361,6 +362,30 @@ class ShipSimulation:
         )
         self._sentinel_port_ids = port_id_lookup(voyage_cfg)
 
+    def _sentinel_port_id(self, port_name: str) -> str:
+        """Configured ``port_id`` for a port name, or a slug of it."""
+        from picard_framework.analysis.sentinel.itinerary import slugify_port
+
+        if not port_name:
+            return ""
+        return self._sentinel_port_ids.get(port_name) or slugify_port(port_name)
+
+    def _note_shore_introductions(
+        self,
+        introductions: list[dict[str, Any]],
+    ) -> None:
+        """Record port-acquired infections as validation ground truth."""
+        ledger = self.sentinel_ledger
+        if ledger is None:
+            return
+        for rec in introductions:
+            ledger.note_introduction(
+                person_id=str(rec["agent_id"]),
+                epoch=int(rec["epoch"]),
+                port_id=self._sentinel_port_id(str(rec.get("port") or "")),
+                pathogen=rec.get("pathogen"),
+            )
+
     def _observe_sentinel(
         self,
         epoch: int,
@@ -373,13 +398,9 @@ class ShipSimulation:
         ledger = self.sentinel_ledger
         if ledger is None or self.engine is None:
             return
-        from picard_framework.analysis.sentinel.itinerary import slugify_port
-
         epoch_voyage = self.state.epoch_voyage if self.state else None
         port_name = str(epoch_voyage.port or "") if epoch_voyage else ""
-        port_id = self._sentinel_port_ids.get(port_name) or (
-            slugify_port(port_name) if port_name else ""
-        )
+        port_id = self._sentinel_port_id(port_name)
         ashore = [a.agent_id for a in self.engine.agents if a.ashore]
 
         detections: dict[str, list[int]] = {}
@@ -496,6 +517,16 @@ class ShipSimulation:
         self.engine.isolated_ids = set(state.isolated_ids)
         self.engine.quarantined_ids = set(state.quarantined_ids)
         self.engine.step()
+
+        self._note_shore_introductions(
+            step_shore_introductions(
+                epoch,
+                self.engine,
+                self.pathogen_profiles,
+                self.rng,
+                epoch_voyage,
+            ),
+        )
 
         step_infection_progression(self.engine, self.pathogen_profiles)
 

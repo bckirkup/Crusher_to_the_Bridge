@@ -32,9 +32,27 @@
       "description": "Person-hours ashore per port_id — the hazard denominator. Observed from the run rather than inferred from itinerary fractions.",
       "additionalProperties": { "$ref": "#/$defs/exposure_total" }
     },
+    "truth_introductions": {
+      "type": "array",
+      "description": "Simulated ground truth: which person acquired at which port. Present only for synthetic voyages (no field dataset has it); used to score hazard recovery, never as model input.",
+      "items": { "$ref": "#/$defs/truth_introduction" }
+    },
     "notes": { "type": "string" }
   },
   "$defs": {
+    "truth_introduction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["person_id", "epoch", "port_id"],
+      "properties": {
+        "person_id": { "type": "string", "minLength": 1 },
+        "epoch": { "type": "integer", "minimum": 1 },
+        "port_id": { "type": "string", "minLength": 1 },
+        "pathogen": {
+          "oneOf": [{ "type": "null" }, { "type": "string" }]
+        }
+      }
+    },
     "exposure_total": {
       "type": "object",
       "additionalProperties": false,

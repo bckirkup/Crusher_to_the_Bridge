@@ -41,6 +41,18 @@
             "embarkation": { "$ref": "#/$defs/day_defaults" },
             "disembarkation": { "$ref": "#/$defs/day_defaults" }
           }
+        },
+        "shore_exposure": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Port exposure gate, narrower than effects_enabled: crew shore leave and shore pathogen introduction. Both require this to be enabled.",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": false,
+              "description": "When false (default), crew stay aboard and shore_infection_probability introduces nothing, so runs are bit-identical to pre-shore-exposure behavior."
+            }
+          }
         }
       }
     },
@@ -151,7 +163,7 @@
           "type": "number",
           "minimum": 0,
           "maximum": 1,
-          "description": "Fraction of crew taking shore leave at this port call. Config-only until shore exposure is activated; engine default is 0 (crew stay aboard)."
+          "description": "Fraction of crew taking shore leave at this port call. Applied only when voyage.shore_exposure.enabled; default 0 (crew stay aboard)."
         },
         "embarkation_window_epochs": {
           "type": "array",
@@ -178,7 +190,11 @@
           "type": "number",
           "minimum": 0,
           "maximum": 1,
-          "description": "Config-only in v1; never introduces pathogens."
+          "description": "Per-epoch-ashore introduction hazard for a person ashore at this port (not per port call, so longer excursions carry more risk). Applied only when voyage.shore_exposure.enabled."
+        },
+        "shore_pathogen": {
+          "type": "string",
+          "description": "Pathogen id introduced ashore at this port. Defaults to the lowest-sorted configured pathogen id."
         },
         "notes": { "type": "string" }
       }

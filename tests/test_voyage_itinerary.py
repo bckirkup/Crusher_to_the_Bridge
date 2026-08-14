@@ -53,12 +53,18 @@ GOLDEN_MEAL_WEIGHTS = {
 }
 
 
-def _sample_itinerary_cfg(*, effects_enabled: bool = True) -> dict:
+def _sample_itinerary_cfg(
+    *,
+    effects_enabled: bool = True,
+    shore_exposure: bool = False,
+    crew_shore_leave_fraction: float = 0.0,
+) -> dict:
     return normalize_voyage_config({
         "voyage": {
             "effects_enabled": effects_enabled,
             "total_epochs": 48,
             "epoch_duration_hours": 1,
+            "shore_exposure": {"enabled": shore_exposure},
             "itinerary": [
                 {
                     "day": 1,
@@ -75,10 +81,31 @@ def _sample_itinerary_cfg(*, effects_enabled: bool = True) -> dict:
                     "disembark_window_epochs": [8, 10],
                     "reembark_window_epochs": [16, 19],
                     "shore_infection_probability": 1.0,
+                    "crew_shore_leave_fraction": crew_shore_leave_fraction,
                 },
             ],
         },
     })
+
+
+class _ShoreAgent:
+    """Minimal agent surface used by ``apply_ashore_and_embarkation``."""
+
+    def __init__(self, aid: int, role: str) -> None:
+        self.agent_id = aid
+        self.role = role
+        self.ashore = False
+        self.current_location = "Home"
+
+
+def _shore_population(n_passengers: int = 20, n_crew: int = 10) -> list[_ShoreAgent]:
+    return [_ShoreAgent(i, "passenger") for i in range(n_passengers)] + [
+        _ShoreAgent(100 + i, "crew") for i in range(n_crew)
+    ]
+
+
+def _count_ashore(agents: list[_ShoreAgent], role: str) -> int:
+    return sum(1 for a in agents if a.role == role and a.ashore)
 
 
 def test_missing_voyage_config_is_identity() -> None:
@@ -313,8 +340,80 @@ def test_embarkation_surge_moves_passengers_to_dining() -> None:
     assert in_buffet == 40
 
 
-def test_shore_infection_probability_is_unwired_stub() -> None:
-    """shore_infection_probability=1.0 must not introduce infections."""
+def test_crew_stay_aboard_without_shore_exposure_gate() -> None:
+    """A crew fraction alone is inert: the gate is what activates shore leave."""
+    agents = _shore_population()
+    cfg = _sample_itinerary_cfg(shore_exposure=False, crew_shore_leave_fraction=0.5)
+    disembark = resolve_epoch_state(cfg, 33)
+    assert disembark.crew_shore_leave_fraction == pytest.approx(0.5)
+    assert disembark.shore_exposure_enabled is False
+    apply_ashore_and_embarkation(agents, disembark, rng=np.random.default_rng(0))
+    assert _count_ashore(agents, "crew") == 0
+    assert _count_ashore(agents, "passenger") == 14  # 0.7 * 20, unchanged
+
+
+@pytest.mark.parametrize(
+    ("fraction", "expected"),
+    [(0.0, 0), (0.3, 3), (0.5, 5), (1.0, 10)],
+)
+def test_crew_shore_leave_fraction_graded(fraction: float, expected: int) -> None:
+    """With the gate on, crew ashore tracks the configured fraction."""
+    agents = _shore_population()
+    cfg = _sample_itinerary_cfg(
+        shore_exposure=True, crew_shore_leave_fraction=fraction,
+    )
+    disembark = resolve_epoch_state(cfg, 33)
+    apply_ashore_and_embarkation(agents, disembark, rng=np.random.default_rng(0))
+    assert _count_ashore(agents, "crew") == expected
+    assert _count_ashore(agents, "passenger") == 14
+
+
+def test_crew_shore_leave_selection_is_deterministic() -> None:
+    def _chosen() -> list[int]:
+        agents = _shore_population()
+        cfg = _sample_itinerary_cfg(shore_exposure=True, crew_shore_leave_fraction=0.4)
+        apply_ashore_and_embarkation(
+            agents, resolve_epoch_state(cfg, 33), rng=np.random.default_rng(3),
+        )
+        return sorted(a.agent_id for a in agents if a.role == "crew" and a.ashore)
+
+    assert _chosen() == _chosen()
+
+
+def test_crew_reembark_and_sea_day_clear_shore_flags() -> None:
+    agents = _shore_population()
+    cfg = _sample_itinerary_cfg(shore_exposure=True, crew_shore_leave_fraction=0.5)
+    apply_ashore_and_embarkation(
+        agents, resolve_epoch_state(cfg, 33), rng=np.random.default_rng(0),
+    )
+    assert _count_ashore(agents, "crew") == 5
+
+    between = resolve_epoch_state(cfg, 37)
+    assert between.between_ashore_windows is True
+    apply_ashore_and_embarkation(agents, between, rng=np.random.default_rng(0))
+    assert _count_ashore(agents, "crew") == 5  # sticky while ashore
+
+    reembark = resolve_epoch_state(cfg, 41)
+    apply_ashore_and_embarkation(agents, reembark, rng=np.random.default_rng(0))
+    assert all(not a.ashore for a in agents)
+
+
+def test_crew_cleared_when_gate_turns_off_mid_voyage() -> None:
+    """Crew ashore must not stay stranded if shore exposure stops applying."""
+    agents = _shore_population()
+    on = resolve_epoch_state(
+        _sample_itinerary_cfg(shore_exposure=True, crew_shore_leave_fraction=1.0), 33,
+    )
+    apply_ashore_and_embarkation(agents, on, rng=np.random.default_rng(0))
+    assert _count_ashore(agents, "crew") == 10
+
+    off = resolve_epoch_state(_sample_itinerary_cfg(shore_exposure=False), 33)
+    apply_ashore_and_embarkation(agents, off, rng=np.random.default_rng(0))
+    assert _count_ashore(agents, "crew") == 0
+
+
+def test_shore_infection_probability_inert_without_gate() -> None:
+    """shore_infection_probability=1.0 must not introduce infections when off."""
     from picard_framework import PicardRunSpec, ShipSimulation
 
     # Tiny destroyer run with effects on + port day + shore_infection=1
@@ -365,6 +464,130 @@ def test_shore_infection_probability_is_unwired_stub() -> None:
         assert hist[0]["voyage_epoch"]["shore_infection_probability"] == 1.0
     finally:
         tmp.unlink(missing_ok=True)
+
+
+def _shore_run(
+    *,
+    shore_exposure: bool,
+    shore_probability: float,
+    crew_fraction: float = 0.0,
+    seed: int = 7,
+    epochs: int = 4,
+    tag: str = "shore",
+) -> tuple:
+    """Run the smoke ship with a one-port itinerary; return the ever-infected ids.
+
+    Ever-infected rather than currently-infected: over a few epochs a
+    short-course infection can already have resolved.
+    """
+    from picard_framework import PicardRunSpec, ShipSimulation
+
+    raw = copy.deepcopy(
+        json.loads(
+            (REPO_ROOT / "picard_framework" / "runs" / "smoke_2epoch.json").read_text(),
+        ),
+    )
+    raw["run"]["num_epochs"] = epochs
+    raw["run"]["random_seed"] = seed
+    voyage: dict = {
+        "effects_enabled": True,
+        "epoch_duration_hours": 1,
+        "itinerary": [
+            {
+                "day": 1,
+                "type": "port_day",
+                "port": "Cozumel",
+                "disembark_fraction": 0.5,
+                "disembark_window_epochs": [0, 23],
+                "reembark_window_epochs": [24, 24],
+                "shore_infection_probability": shore_probability,
+                "crew_shore_leave_fraction": crew_fraction,
+            },
+        ],
+    }
+    if shore_exposure:
+        voyage["shore_exposure"] = {"enabled": True}
+    raw.setdefault("config_overrides", {})["voyage"] = voyage
+    tmp = REPO_ROOT / "telemetry_buffer" / f"_tmp_voyage_{tag}.json"
+    tmp.write_text(json.dumps(raw), encoding="utf-8")
+    try:
+        spec = PicardRunSpec.from_picard_json(str(REPO_ROOT), str(tmp))
+        sim = ShipSimulation(spec, display=False)
+        sim.run(n_epochs=epochs)
+        return tuple(
+            sorted(a.agent_id for a in sim.engine.agents if a.infections),
+        )
+    finally:
+        tmp.unlink(missing_ok=True)
+
+
+def test_gate_off_run_matches_absent_shore_exposure_block() -> None:
+    """Golden invariance: the new fields change nothing while the gate is off."""
+    absent = _shore_run(shore_exposure=False, shore_probability=0.9, tag="gate_absent")
+    off = _shore_run(
+        shore_exposure=False,
+        shore_probability=0.0,
+        crew_fraction=0.0,
+        tag="gate_off",
+    )
+    assert absent == off
+
+
+def test_shore_exposure_gate_on_introduces_infections_ashore() -> None:
+    """Gate on with a high shore hazard must infect people who went ashore."""
+    off = _shore_run(shore_exposure=False, shore_probability=1.0, tag="cmp_off")
+    on = _shore_run(shore_exposure=True, shore_probability=1.0, tag="cmp_on")
+    assert len(on) > len(off)
+
+
+def test_crew_stratum_gets_exposure_and_truth_in_the_sentinel_ledger() -> None:
+    """The point of the gate: crew person-hours stop being structurally zero."""
+    from picard_framework import PicardRunSpec, ShipSimulation
+
+    raw = copy.deepcopy(
+        json.loads(
+            (REPO_ROOT / "picard_framework" / "runs" / "smoke_2epoch.json").read_text(),
+        ),
+    )
+    out = REPO_ROOT / "telemetry_buffer" / "_tmp_sentinel_crew_leave.json"
+    raw["run"]["num_epochs"] = 3
+    raw["run"]["random_seed"] = 5
+    raw["run"]["sentinel_line_list"] = str(out)
+    raw.setdefault("config_overrides", {})["voyage"] = {
+        "effects_enabled": True,
+        "epoch_duration_hours": 1,
+        "shore_exposure": {"enabled": True},
+        "itinerary": [
+            {
+                "day": 1,
+                "type": "port_day",
+                "port": "Cozumel",
+                "port_id": "MXCZM",
+                "disembark_fraction": 0.5,
+                "disembark_window_epochs": [0, 23],
+                "reembark_window_epochs": [24, 24],
+                "crew_shore_leave_fraction": 1.0,
+                "shore_infection_probability": 1.0,
+            },
+        ],
+    }
+    tmp = REPO_ROOT / "telemetry_buffer" / "_tmp_voyage_crew_ledger.json"
+    tmp.write_text(json.dumps(raw), encoding="utf-8")
+    try:
+        spec = PicardRunSpec.from_picard_json(str(REPO_ROOT), str(tmp))
+        sim = ShipSimulation(spec, display=False)
+        sim.run(n_epochs=3)
+        ledger = sim.sentinel_ledger
+        assert ledger is not None
+        totals = ledger.exposure_totals()["MXCZM"]
+        assert totals["n_crew_ashore"] > 0
+        assert totals["person_hours_crew"] > 0.0
+        truth = ledger.introductions()
+        assert truth, "shore introductions should be recorded as ground truth"
+        assert {r.port_id for r in truth} == {"MXCZM"}
+    finally:
+        tmp.unlink(missing_ok=True)
+        out.unlink(missing_ok=True)
 
 
 def test_effects_flag_changes_ashore_counts() -> None:
