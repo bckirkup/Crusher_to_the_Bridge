@@ -112,15 +112,24 @@ incubation convolution at `T_end`, so without the survival term
 early ports are the dangerous ones. This is the largest single threat to the
 paper's claim and it is cheap to fix (one `_lcdf` term per cell).
 
-### 1.7 Crew are an assumption, not a control
+### 1.7 Crew shore leave is modeled; crew are not a control
 
 The proposal's control #7 is "crew with no shore leave". Crew do take shore
 leave; CTB currently hard-codes crew never ashore in
 `apply_ashore_and_embarkation`, which is a simulator simplification, not a
-fact about ships. Either model `crew_shore_leave_fraction` explicitly (cheap,
-and it makes crew the *best* identification source — the same person exposed
-to the same port every week is a repeat-measures design) or state
-crew-as-baseline as a stated assumption. Do not present it as a control.
+fact about ships.
+
+Resolved: **model `crew_shore_leave_fraction` explicitly** (decision, 2026-08-14).
+It is cheap, and it converts crew from a shaky control into the strongest
+identification source in the design — the same person exposed to the same port
+every week is a repeat-measures design, and it is the only within-person
+contrast available. Crew-as-onboard-baseline is dropped; the crew contribution
+is now a *stratum* (`crew_ashore` / `crew_aboard`) with its own exposure
+offset, not a reference level.
+
+Consequence for PR 3: `apply_ashore_and_embarkation` gains crew handling behind
+the same `voyage.shore_exposure.enabled` gate, with
+`crew_shore_leave_fraction` defaulting to 0.0 so existing runs are unchanged.
 
 ### 1.8 Pathogen inclusion criterion, stated up front
 
@@ -203,7 +212,7 @@ class PortCall:
     departure_epoch: int
     calendar_date: date | None            # None for synthetic voyages
     pax_ashore_fraction: float            # = voyage_config disembark_fraction
-    crew_ashore_fraction: float           # 0.0 today; see §1.7
+    crew_ashore_fraction: float           # crew shore leave; default 0.0, §1.7
     mean_hours_ashore: float              # from disembark/reembark windows
 
 @dataclass(frozen=True)
@@ -277,7 +286,7 @@ Ranked by how much each actually buys, with the failure mode named:
 | Source | Buys | Fails when |
 |---|---|---|
 | Person-level hours ashore vs stayed-aboard, same voyage | Most of the signal; within-voyage contrast removes voyage-level confounding | Ashore/aboard choice correlates with age/behavior → adjust in `exposure.py` offsets |
-| Crew repeat exposure to the same port | Repeat-measures separation of port from voyage | Requires modeling crew shore leave (§1.7) |
+| Crew repeat exposure to the same port | Repeat-measures separation of port from voyage; the only within-person contrast | Crew shore leave is non-random (rank, duty rotation) → stratify by department |
 | Itinerary crossover across ships | Separates port from itinerary position | Fleet must actually differ in port order; a single repeated Caribbean loop buys nothing |
 | Incubation timing | Port resolution | `IQR(incubation) ≥ min(inter-port interval)` (§1.8) |
 | Sea-day onsets | Bounds the onboard/secondary share | Long-incubation pathogens |
@@ -315,15 +324,43 @@ Reuses the existing synthetic-recovery machinery
    last port; the last-port estimate must not collapse (guards §1.6).
 5. **Mis-specification** — fit with the wrong incubation distribution and with
    the wastewater channel off; report the bias magnitude rather than hiding it.
-6. **Retrospective** — CDC MIDRS/VSP. *Access risk, not a code risk*: I have
-   not verified that line-level data with shore-excursion status is obtainable
-   deidentified; published VSP outbreak reports give voyage-level counts, which
-   support a coarse port-visit hazard but not individual attribution. Plan a
-   voyage-level fallback model before requesting data.
+6. **Retrospective — voyage-level, not individual-level.** The proposal assumed
+   deidentified MIDRS line-level data with shore-excursion status. CDC states
+   that MIDRS AGE counts *"do not represent the number of active AGE cases at
+   any given port of call or at disembarkation"*
+   ([Federal Register, 2025-11-21](https://www.federalregister.gov/documents/2025/11/21/2025-20580/proposed-data-collection-submitted-for-public-comment-and-recommendations)).
+   Port-call attribution is therefore **outside** what MIDRS can support, at
+   any level of access — this is a data-content limit, not an access
+   negotiation. The voyage-level fallback is promoted to *the* retrospective
+   design:
+
+   - **Numerator**: MIDRS/VSP voyage-level AGE case counts and outbreak reports.
+   - **Denominator/exposure**: port-visit history reconstructed from external
+     itinerary sources — published cruise line schedules and AIS-derived port
+     calls — joined to each voyage by ship and date. Feasibility of that join
+     (coverage, ship-name matching, per-visit dwell time) is an open question
+     and the first task of that PR, not an assumption.
+   - **Ashore fraction**: not observed. It enters as a prior with a
+     platform/region-conditional distribution, and the sensitivity of the port
+     hazard to that prior is reported, since it scales the offset directly.
+
+   The identification burden therefore shifts entirely onto **itinerary
+   crossover** (§4) plus the censoring correction (§1.6): with no individual
+   shore-excursion status there is no within-voyage ashore/aboard contrast, so
+   the ranked #1 evidence source in §4 is unavailable retrospectively. Expect
+   wide intervals and report them; the retrospective validates *ranking and
+   sign*, and the synthetic suites (1–5) carry the calibration claims.
+
+   Any commercial-data fusion beyond schedules/AIS (e.g. excursion booking
+   volumes as an ashore-fraction proxy) is speculative and stays out of the
+   spec until a source is actually in hand.
 7. **Prospective pilot** — 3–5 ships, repeated itinerary, wastewater sampling,
-   voluntary symptom reporting. Note the §4 warning: a single shared loop is
-   the worst case for crossover identification; stagger port order across the
-   pilot ships deliberately.
+   voluntary symptom reporting. This is the only design that recovers
+   individual shore-excursion status, which after (6) makes it the *primary*
+   route to an individual-level hazard rather than a nice-to-have. Note the §4
+   warning: a single shared loop is the worst case for crossover
+   identification; stagger port order across the pilot ships deliberately, and
+   record shore-excursion status and crew shore leave per person.
 
 Test design follows `.agents/skills/ci-test-design`: graded sensitivity
 (raising the true hazard at one port raises its posterior mean, monotonically
@@ -339,14 +376,15 @@ Devin sessions.
 | PR | Content | Est. |
 |---|---|---|
 | 1 | Spec (this doc) + `voyage_config.schema.json` optional port metadata (`port_id`, `region`, `calendar_date`, `crew_shore_leave_fraction`) + `schemas/sentinel_observations.schema.json` + `sentinel/itinerary.py` view + fixtures + `tests/test_sentinel_data_contracts.py` | 0.5 |
-| 2 | `export_line_list.py`: per-person onset/exposure line list out of an ABM run dir. Today `orchestrator_record.record_epoch` emits aggregates (and drops per-agent blobs in `compact` retention) — no per-person onset epoch survives. This is the plumbing phase 1 silently assumed. | 1 |
-| 3 | Phase 2 port exposure: activate `shore_infection_probability` in `step_mid_cruise_introductions`, accumulate per-agent `hours_ashore` per port, gate on `voyage.shore_exposure.enabled` (default off), golden-run invariance test when off | 1 |
+| 2 | **Foundation.** `export_line_list.py`: per-person onset/exposure line list out of an ABM run dir. Today `orchestrator_record.record_epoch` emits aggregates and drops per-agent blobs in `compact` retention, so no per-person onset epoch survives — every later PR and both synthetic-recovery claims stand on this one. Land it before anything downstream is designed against a guessed schema. | 1 |
+| 3 | Phase 2 port exposure: activate `shore_infection_probability` in `step_mid_cruise_introductions`, accumulate per-agent `hours_ashore` per port, add crew shore leave (§1.7), gate on `voyage.shore_exposure.enabled` (default off, `crew_shore_leave_fraction` default 0.0), golden-run invariance test when off | 1 |
 | 4 | `incubation.py` + `exposure.py` + `observations.py`: pmfs, deconvolution, offsets, censoring survival term. Pure numpy, fully testable without Stan. | 1 |
 | 5 | `sentinel_attribution.stan` + `_sentinel_data.py` + `fit_sentinel_attribution.py`: single-ship Poisson-offset hazards with renewal secondaries and sampled `R_onboard`; fixture posterior for CI | 1.5 |
 | 6 | `sentinel_fleet.stan`: port-visit × ship hierarchy, fleet-time effect, crew repeat exposure; synthetic recovery + null + confounded + censoring suites | 1.5 |
 | 7 | `wastewater_signal.py` beta-binomial channel wired into the latent curve; per-channel `evidence_loglik` | 1 |
 | 8 | `run_sentinel.py` CLI + `figures.py` + `report.py` + `--smoke` in `ci.yml` | 0.5 |
 | 9 | (Phase 3, separate track) strain label in the ABM, then `genomic_linkage.py` | 2 |
+| 10 | (Retrospective track, gated on §6) voyage-level model: MIDRS/VSP counts × AIS/schedule port-visit reconstruction, ashore-fraction prior + sensitivity. First task is the ship/date join feasibility check. | 1.5 |
 
 Order matters: 3 before 5–6, because recovery/null/confounded validation needs
 the generator. 7 is deliberately after 6 so the wastewater channel's marginal
