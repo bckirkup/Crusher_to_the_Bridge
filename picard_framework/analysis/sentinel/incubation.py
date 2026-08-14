@@ -30,8 +30,6 @@ from picard_framework.analysis._io import read_json
 LOGNORMAL = "lognormal"
 DISCRETE = "discrete"
 
-DEFAULT_PATHOGEN = "norovirus"
-
 _DISTRIBUTIONS_FILE = "incubation_distributions.json"
 
 
@@ -222,14 +220,24 @@ def load_delay_catalog(path: str | None = None) -> dict[str, Any]:
     return raw
 
 
+def default_pathogen(catalog: Mapping[str, Any] | None = None) -> str:
+    """The catalog's declared default (Law 2: no pathogen names in code)."""
+    doc = dict(catalog) if catalog is not None else load_delay_catalog()
+    name = doc.get("default_pathogen")
+    if not isinstance(name, str) or not name:
+        raise ValueError("delay distribution catalog declares no default_pathogen")
+    return name
+
+
 def delays_for_pathogen(
-    pathogen: str = DEFAULT_PATHOGEN,
+    pathogen: str | None = None,
     *,
     epoch_hours: float = 1.0,
     catalog: Mapping[str, Any] | None = None,
 ) -> tuple[DelayDistribution, DelayDistribution]:
     """``(incubation, generation)`` for a pathogen on this epoch grid."""
     doc = dict(catalog) if catalog is not None else load_delay_catalog()
+    pathogen = pathogen if pathogen is not None else default_pathogen(doc)
     entry = (doc.get("distributions") or {}).get(pathogen)
     if entry is None:
         known = sorted((doc.get("distributions") or {}))

@@ -18,9 +18,9 @@ import pytest
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from picard_framework.analysis.sentinel.incubation import (
-    DEFAULT_PATHOGEN,
     DelayDistribution,
     deconvolve_onsets,
+    default_pathogen,
     delays_for_pathogen,
     discrete_delay,
     expected_onsets,
@@ -33,14 +33,18 @@ from picard_framework.analysis.sentinel.incubation import (
 
 
 def norovirus_incubation(epoch_hours: float = 1.0) -> DelayDistribution:
-    """Bundled norovirus incubation pmf on an epoch grid."""
-    return delays_for_pathogen(DEFAULT_PATHOGEN, epoch_hours=epoch_hours)[0]
+    """Bundled default-pathogen incubation pmf on an epoch grid."""
+    return delays_for_pathogen(epoch_hours=epoch_hours)[0]
 
 
-def test_catalog_carries_norovirus_and_the_documented_counter_example() -> None:
+def test_catalog_carries_the_default_and_the_documented_counter_example() -> None:
     catalog = load_delay_catalog()
     dists = catalog["distributions"]
-    assert "norovirus" in dists
+    # Law 2: the default pathogen is named in the catalog, not in the code.
+    assert default_pathogen(catalog) in dists
+    assert default_pathogen() == default_pathogen(catalog)
+    with pytest.raises(ValueError, match="default_pathogen"):
+        default_pathogen({"distributions": dists})
     # measles is in the catalog only as the 1.8 counter-example
     assert dists["measles"]["port_resolution"] == "inadequate"
     assert dists["norovirus"]["port_resolution"] == "adequate"

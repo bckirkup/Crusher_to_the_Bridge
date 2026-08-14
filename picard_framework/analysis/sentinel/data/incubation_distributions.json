@@ -1,6 +1,7 @@
 {
   "schema_version": "1.0.0",
   "description": "Incubation and generation-interval distributions for sentinel attribution. Hours, not epochs: the epoch grid is a property of the run, not of the pathogen. measles is carried as the documented counter-example for the port-resolution criterion (spec 1.8), not as a supported sentinel pathogen.",
+  "default_pathogen": "norovirus",
   "distributions": {
     "norovirus": {
       "port_resolution": "adequate",
