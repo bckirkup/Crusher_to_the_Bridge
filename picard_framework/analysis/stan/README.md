@@ -44,6 +44,42 @@ Stage B defaults to `--outbreaks-only` (hurdle). Use `--no-outbreaks-only` for t
 - Stage B: observed triggers; `reduce_sum` + `threads_per_chain` for multi-core
 - Outputs under each stage `posterior/`: dose, platform, surveillance, VSP, PPC tables
 
+## Sentinel attribution (single ship)
+
+`sentinel_attribution.stan` estimates a per-port introduction hazard per exposed
+person-hour ashore, with an onboard baseline, renewal secondaries at strictly
+positive lags, and a sampled `R_onboard` — see
+[`docs/sentinel_surveillance_spec.md`](../../../docs/sentinel_surveillance_spec.md).
+Exposure hours enter as offsets, so the ports are compared on a denominator
+rather than on case counts.
+
+```bash
+python3 -m picard_framework.analysis.stan.fit_sentinel_attribution \
+  picard_framework/analysis/sentinel/data/example_itinerary.json \
+  picard_framework/analysis/sentinel/data/example_observations.json \
+  --out sentinel_fit
+```
+
+Without a CmdStan toolchain the fit writes `fit_status.json` with
+`"status": "skipped"`; `--smoke` instead summarizes the committed fixture
+posterior so the data → posterior → `port_hazards.csv` path stays exercised.
+Regenerate that fixture after any prior change:
+
+```bash
+python3 -m picard_framework.analysis.stan.fit_sentinel_attribution ... \
+  --write-fixture picard_framework/analysis/sentinel/fixtures/attribution_posterior.json
+```
+
+`_sentinel_reference.py` is a numpy Metropolis sampler over *the same* log
+density, which is what lets `tests/test_sentinel_validation.py` assert on a real
+posterior in CI. `test_stan_and_numpy_reference_posteriors_agree` pins the two
+together and runs whenever CmdStan is installed.
+
+Identifiability, honestly: on one voyage, imported and onboard cases are
+separated by onset *timing* alone, so a voyage whose port days are back to back
+leaves the import share only partly identified. Sharing ports across voyages is
+what sharpens it — that is the fleet hierarchy, not this model.
+
 ## Field lessons (Step-2)
 
 First full-scale hurdle attempts on the merged C12c + C14/C14b bundle:

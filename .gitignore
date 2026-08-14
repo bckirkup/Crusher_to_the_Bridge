@@ -109,4 +109,6 @@ telemetry_buffer/c13b_contam_airborne_small/
 boundary_analysis/
 picard_framework/analysis/stan/*.exe
 picard_framework/analysis/stan/*.hpp
+# cmdstan leaves the compiled model next to the .stan file, extensionless on posix
+picard_framework/analysis/stan/sentinel_attribution
 
