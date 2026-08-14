@@ -22,6 +22,11 @@
           "description": "When false (default), EpochState is identity sea-day; ashore/contact/dining/embarkation effects are not applied."
         },
         "total_epochs": { "type": "integer", "minimum": 1 },
+        "embarkation_date": {
+          "type": "string",
+          "format": "date",
+          "description": "Real-world date of voyage day 1 (YYYY-MM-DD). Simulation-inert; sentinel analysis derives per-day calendar dates from it."
+        },
         "epoch_duration_hours": { "type": "number", "exclusiveMinimum": 0 },
         "itinerary": {
           "type": "array",
@@ -129,6 +134,25 @@
           "enum": ["sea_day", "port_day", "embarkation", "disembarkation"]
         },
         "port": { "type": "string" },
+        "port_id": {
+          "type": "string",
+          "description": "Stable port identifier (UN-LOCODE preferred, e.g. MXCZM). Sentinel analysis keys port hazards on this; falls back to a slug of `port` when absent."
+        },
+        "region": {
+          "type": "string",
+          "description": "WHO region or CDC quarantine station for regional hazard priors. Simulation-inert."
+        },
+        "calendar_date": {
+          "type": "string",
+          "format": "date",
+          "description": "Real-world date of this voyage day (YYYY-MM-DD). Simulation-inert; used to key port-visit hazards across a fleet."
+        },
+        "crew_shore_leave_fraction": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Fraction of crew taking shore leave at this port call. Config-only until shore exposure is activated; engine default is 0 (crew stay aboard)."
+        },
         "embarkation_window_epochs": {
           "type": "array",
           "minItems": 2,

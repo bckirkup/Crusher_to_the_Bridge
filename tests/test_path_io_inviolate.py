@@ -41,6 +41,8 @@ _HARDENED_MODULES = (
     "picard_framework/analysis/boundary/run_decision_model.py",
     "picard_framework/analysis/boundary/figures.py",
     "picard_framework/analysis/boundary/report.py",
+    "picard_framework/analysis/sentinel/itinerary.py",
+    "picard_framework/analysis/sentinel/observations.py",
 )
 
 # Path.write_text / read_text / unlink / open are also sinks for S2083/S8707

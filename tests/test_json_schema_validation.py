@@ -62,6 +62,12 @@ SCHEMA_DATA_MAP: dict[str, list[str]] = {
     "preboarding_decision_summary.schema.json": [
         "picard_framework/analysis/boundary/data/example_summary.json",
     ],
+    "voyage_config.schema.json": [
+        "picard_framework/analysis/sentinel/data/example_itinerary.json",
+    ],
+    "sentinel_observations.schema.json": [
+        "picard_framework/analysis/sentinel/data/example_observations.json",
+    ],
 }
 
 
