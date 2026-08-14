@@ -1,0 +1,40 @@
+{
+  "schema_version": "1.0.0",
+  "description": "Incubation and generation-interval distributions for sentinel attribution. Hours, not epochs: the epoch grid is a property of the run, not of the pathogen. measles is carried as the documented counter-example for the port-resolution criterion (spec 1.8), not as a supported sentinel pathogen.",
+  "default_pathogen": "norovirus",
+  "distributions": {
+    "norovirus": {
+      "port_resolution": "adequate",
+      "incubation": {
+        "family": "lognormal",
+        "median_hours": 33.0,
+        "sigma": 0.42,
+        "max_hours": 120.0,
+        "source": "Clinical onset 12-48 h post-exposure; central 80% of this lognormal is ~19-57 h, IQR ~19 h (under the shortest cruise inter-port interval, spec 1.8)."
+      },
+      "generation": {
+        "family": "lognormal",
+        "median_hours": 40.0,
+        "sigma": 0.5,
+        "max_hours": 168.0,
+        "source": "Household/closed-setting serial intervals, ~1.5-2 d."
+      }
+    },
+    "measles": {
+      "port_resolution": "inadequate",
+      "incubation": {
+        "family": "lognormal",
+        "median_hours": 312.0,
+        "sigma": 0.25,
+        "max_hours": 504.0,
+        "source": "10-14 d incubation. IQR far exceeds any cruise inter-port interval, so ports are not separable (spec 1.8)."
+      },
+      "generation": {
+        "family": "lognormal",
+        "median_hours": 336.0,
+        "sigma": 0.3,
+        "max_hours": 672.0
+      }
+    }
+  }
+}
