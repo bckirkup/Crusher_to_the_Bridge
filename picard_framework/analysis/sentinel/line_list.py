@@ -48,6 +48,29 @@ class LineListRecord:
         }
 
 
+@dataclass(frozen=True)
+class IntroductionRecord:
+    """Simulated ground truth: who acquired what, where.
+
+    Not an observation — it exists only for synthetic voyages, where recovery
+    of the port hazards can be scored against it. No field dataset has it.
+    """
+
+    person_id: str
+    epoch: int
+    port_id: str
+    pathogen: str | None
+
+    def to_dict(self) -> dict[str, Any]:
+        """Schema-shaped truth record."""
+        return {
+            "person_id": self.person_id,
+            "epoch": self.epoch,
+            "port_id": self.port_id,
+            "pathogen": self.pathogen,
+        }
+
+
 @dataclass
 class _PortExposure:
     """Person-hours ashore at one port, split by stratum."""
@@ -109,6 +132,7 @@ class SentinelLedger:
         self._hours: dict[int, dict[str, float]] = {}
         self._channel: dict[int, tuple[int, int]] = {}
         self._exposure: dict[str, _PortExposure] = {}
+        self._introductions: list[IntroductionRecord] = []
 
     def observe_epoch(
         self,
@@ -176,6 +200,33 @@ class SentinelLedger:
                 if prior is None or rank < prior[0]:
                     self._channel[aid] = (rank, int(epoch))
 
+    def note_introduction(
+        self,
+        *,
+        person_id: str,
+        epoch: int,
+        port_id: str,
+        pathogen: str | None = None,
+    ) -> None:
+        """Record a port-acquired infection as validation ground truth."""
+        self._introductions.append(
+            IntroductionRecord(
+                person_id=str(person_id),
+                epoch=max(1, int(epoch)),
+                port_id=str(port_id),
+                pathogen=str(pathogen) if pathogen else None,
+            ),
+        )
+
+    def introductions(self) -> tuple[IntroductionRecord, ...]:
+        """Ground-truth introductions in epoch order."""
+        return tuple(
+            sorted(
+                self._introductions,
+                key=lambda r: (r.epoch, int(r.person_id)),
+            ),
+        )
+
     def records(self) -> tuple[LineListRecord, ...]:
         """Line-list rows for every person with an observed onset."""
         rows: list[LineListRecord] = []
@@ -230,4 +281,7 @@ class SentinelLedger:
         }
         if platform_class:
             payload["platform_class"] = platform_class
+        introductions = self.introductions()
+        if introductions:
+            payload["truth_introductions"] = [r.to_dict() for r in introductions]
         return payload

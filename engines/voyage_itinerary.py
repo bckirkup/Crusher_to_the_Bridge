@@ -3,8 +3,9 @@ voyage_itinerary.py — Cruise voyage day-type / port-visit layer.
 
 Config lives in ``data/platforms/<id>/voyage_config.json``. Engine effects
 (ashore marking, contact/dining multipliers, embarkation surge) apply only
-when ``voyage.effects_enabled`` is true. Shore infection probability is
-parsed for forward compatibility but never introduces pathogens (v1 stub).
+when ``voyage.effects_enabled`` is true. Port exposure — crew shore leave and
+shore pathogen introduction — needs the second, narrower
+``voyage.shore_exposure.enabled`` gate as well (both default false).
 """
 
 from __future__ import annotations
@@ -62,6 +63,7 @@ EMPTY_VOYAGE_CONFIG: dict[str, Any] = {
         "epoch_duration_hours": 1,
         "itinerary": [],
         "defaults": copy.deepcopy(DEFAULT_DAY_DEFAULTS),
+        "shore_exposure": {"enabled": False},
     },
 }
 
@@ -87,6 +89,9 @@ class EpochState:
     buffet_surge_fraction: float = 0.0
     disembark_fraction: float = 0.0
     shore_infection_probability: float = 0.0
+    shore_pathogen: str = ""
+    crew_shore_leave_fraction: float = 0.0
+    shore_exposure_enabled: bool = False
     notes: str = ""
 
     def to_telemetry(self) -> dict[str, Any]:
@@ -107,6 +112,9 @@ class EpochState:
             "buffet_surge_fraction": self.buffet_surge_fraction,
             "disembark_fraction": self.disembark_fraction,
             "shore_infection_probability": self.shore_infection_probability,
+            "shore_pathogen": self.shore_pathogen,
+            "crew_shore_leave_fraction": self.crew_shore_leave_fraction,
+            "shore_exposure_enabled": self.shore_exposure_enabled,
         }
 
 
@@ -156,6 +164,8 @@ def normalize_voyage_config(raw: dict[str, Any]) -> dict[str, Any]:
     voyage.setdefault("effects_enabled", False)
     voyage.setdefault("epoch_duration_hours", 1)
     voyage.setdefault("itinerary", [])
+    shore = voyage.setdefault("shore_exposure", {})
+    shore.setdefault("enabled", False)
     defaults = voyage.setdefault("defaults", {})
     for day_type, day_def in DEFAULT_DAY_DEFAULTS.items():
         defaults[day_type] = deep_merge_dict(day_def, defaults.get(day_type) or {})
@@ -313,6 +323,13 @@ def resolve_epoch_state(
         shore_infection_probability=float(
             day_entry.get("shore_infection_probability", 0.0) or 0.0,
         ),
+        shore_pathogen=str(day_entry.get("shore_pathogen") or ""),
+        crew_shore_leave_fraction=float(
+            day_entry.get("crew_shore_leave_fraction", 0.0) or 0.0,
+        ),
+        shore_exposure_enabled=bool(
+            (voyage.get("shore_exposure") or {}).get("enabled", False),
+        ),
         notes=str(day_entry.get("notes") or ""),
     )
 
@@ -354,6 +371,42 @@ def _surge_dining_zone(dining_catalog: list[dict[str, Any]]) -> str | None:
     return str(dining_catalog[0]["name"])
 
 
+def _match_ashore_target(people: list[Any], fraction: float, rng: Any) -> None:
+    """Bring the ashore count of ``people`` to ``round(n * fraction)``."""
+    target = int(round(len(people) * float(fraction)))
+    currently = [a for a in people if getattr(a, "ashore", False)]
+    if len(currently) < target:
+        candidates = [a for a in people if not getattr(a, "ashore", False)]
+        need = target - len(currently)
+        if candidates and need > 0:
+            chosen = rng.choice(
+                len(candidates),
+                size=min(need, len(candidates)),
+                replace=False,
+            )
+            if not hasattr(chosen, "__iter__"):
+                chosen = [int(chosen)]
+            for i in chosen:
+                candidates[int(i)].ashore = True
+    elif len(currently) > target:
+        for a in currently[: len(currently) - target]:
+            a.ashore = False
+
+
+def crew_shore_leave_group(agents: list[Any], epoch_state: EpochState) -> list[Any]:
+    """Crew eligible for shore leave this epoch — empty unless gated on.
+
+    Crew shore leave is a *stratum* of port exposure, not a passenger effect,
+    so it needs ``voyage.shore_exposure.enabled`` in addition to
+    ``effects_enabled``, and a positive ``crew_shore_leave_fraction``.
+    """
+    if not epoch_state.shore_exposure_enabled:
+        return []
+    if float(epoch_state.crew_shore_leave_fraction) <= 0.0:
+        return []
+    return [a for a in agents if getattr(a, "role", "") == "crew"]
+
+
 def apply_ashore_and_embarkation(
     agents: list[Any],
     epoch_state: EpochState,
@@ -361,10 +414,11 @@ def apply_ashore_and_embarkation(
     rng: Any,
     dining_catalog: list[dict[str, Any]] | None = None,
 ) -> None:
-    """Mutate passenger ``ashore`` when effects are active.
+    """Mutate ``ashore`` for passengers, and for crew on shore leave.
 
-    Crew never go ashore. ``shore_infection_probability`` is intentionally
-    unused (v1 stub — no pathogen introduction).
+    Crew stay aboard unless ``voyage.shore_exposure.enabled`` is set and the
+    port call declares a positive ``crew_shore_leave_fraction``; passenger
+    draws happen first, so passenger-only runs are unaffected.
     """
     del dining_catalog  # reserved for future shore-zone catalogs
     if not epoch_state.effects_active:
@@ -374,46 +428,46 @@ def apply_ashore_and_embarkation(
         return
 
     passengers = [a for a in agents if getattr(a, "role", "") == "passenger"]
+    all_crew = [a for a in agents if getattr(a, "role", "") == "crew"]
+    # Crew do not disembark at end of cruise with passengers; shore leave is
+    # a port-day activity only.
+    crew_leaving = (
+        crew_shore_leave_group(agents, epoch_state)
+        if epoch_state.day_type == "port_day"
+        else []
+    )
 
     if epoch_state.day_type == "disembarkation":
         leave = epoch_state.in_disembark_window or epoch_state.onboard_fraction <= 0.0
         for a in passengers:
             a.ashore = bool(leave)
+        for a in all_crew:
+            a.ashore = False
         return
 
     if epoch_state.day_type == "port_day":
         if epoch_state.in_reembark_window:
-            for a in passengers:
+            for a in (*passengers, *all_crew):
                 a.ashore = False
             return
         if epoch_state.in_disembark_window:
-            target = int(round(len(passengers) * float(epoch_state.disembark_fraction)))
-            currently = [a for a in passengers if getattr(a, "ashore", False)]
-            if len(currently) < target:
-                candidates = [a for a in passengers if not getattr(a, "ashore", False)]
-                need = target - len(currently)
-                if candidates and need > 0:
-                    chosen = rng.choice(
-                        len(candidates),
-                        size=min(need, len(candidates)),
-                        replace=False,
-                    )
-                    if not hasattr(chosen, "__iter__"):
-                        chosen = [int(chosen)]
-                    for i in chosen:
-                        candidates[int(i)].ashore = True
-            elif len(currently) > target:
-                for a in currently[: len(currently) - target]:
+            _match_ashore_target(passengers, epoch_state.disembark_fraction, rng)
+            if crew_leaving:
+                _match_ashore_target(
+                    crew_leaving, epoch_state.crew_shore_leave_fraction, rng,
+                )
+            else:
+                for a in all_crew:
                     a.ashore = False
             return
         if epoch_state.between_ashore_windows:
             # Keep sticky ashore flags set during disembark window
             return
-        for a in passengers:
+        for a in (*passengers, *all_crew):
             a.ashore = False
         return
 
-    for a in passengers:
+    for a in (*passengers, *all_crew):
         a.ashore = False
 
 

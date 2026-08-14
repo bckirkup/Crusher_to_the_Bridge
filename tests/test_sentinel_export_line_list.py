@@ -229,6 +229,30 @@ def test_unknown_channel_is_rejected() -> None:
         ledger.observe_epoch(1, [agent(1)], detections={"telepathy": [1]})
 
 
+# ── Ground truth (synthetic runs only) ───────────────────────────────
+
+def test_introductions_are_ordered_and_absent_by_default() -> None:
+    ledger = SentinelLedger()
+    assert ledger.introductions() == ()
+    assert "truth_introductions" not in ledger.to_payload(voyage_id="V1", ship_id="s1")
+
+    ledger.note_introduction(person_id="7", epoch=5, port_id="MXCZM", pathogen="norovirus")
+    ledger.note_introduction(person_id="3", epoch=5, port_id="MXCZM")
+    ledger.note_introduction(person_id="9", epoch=2, port_id="KYGEC")
+    assert [(r.person_id, r.epoch) for r in ledger.introductions()] == [
+        ("9", 2), ("3", 5), ("7", 5),
+    ]
+    assert ledger.introductions()[1].pathogen is None
+    payload = ledger.to_payload(voyage_id="V1", ship_id="s1")
+    assert payload["truth_introductions"][0]["port_id"] == "KYGEC"
+
+
+def test_introduction_epoch_is_clamped_like_observations() -> None:
+    ledger = SentinelLedger()
+    ledger.note_introduction(person_id="1", epoch=0, port_id="MXCZM")
+    assert ledger.introductions()[0].epoch == 1
+
+
 # ── Payload / schema round trip ──────────────────────────────────────
 
 def test_payload_round_trips_through_the_observation_loader() -> None:

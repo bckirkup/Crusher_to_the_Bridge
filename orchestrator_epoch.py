@@ -246,6 +246,65 @@ def step_mid_cruise_introductions(
                     )
 
 
+def _shore_pathogen_id(
+    epoch_state: Any,
+    pathogen_profiles: dict[str, dict[str, Any]],
+) -> str | None:
+    requested = str(getattr(epoch_state, "shore_pathogen", "") or "")
+    if requested:
+        return requested if requested in pathogen_profiles else None
+    return min(pathogen_profiles) if pathogen_profiles else None
+
+
+def step_shore_introductions(
+    epoch: int,
+    engine: KorkinShipEngine,
+    pathogen_profiles: dict[str, dict[str, Any]],
+    rng: np.random.Generator,
+    epoch_state: Any | None,
+) -> list[dict[str, Any]]:
+    """Draw port introductions over the agents ashore this epoch.
+
+    ``shore_infection_probability`` is a per-epoch-ashore hazard, not a
+    per-port-call one, so a longer shore excursion carries proportionally more
+    risk — the same person-hours denominator the sentinel estimator uses.
+
+    Returns the ground-truth introduction records. Consumes no RNG and returns
+    an empty list unless ``voyage.shore_exposure.enabled`` is set, so runs with
+    the gate off stay bit-identical.
+    """
+    if epoch_state is None or not getattr(epoch_state, "shore_exposure_enabled", False):
+        return []
+    prob = float(getattr(epoch_state, "shore_infection_probability", 0.0) or 0.0)
+    if prob <= 0.0:
+        return []
+    pid = _shore_pathogen_id(epoch_state, pathogen_profiles)
+    if pid is None:
+        return []
+    prof = pathogen_profiles[pid]
+    port = str(getattr(epoch_state, "port", "") or "")
+    introduced: list[dict[str, Any]] = []
+    for agent in engine.agents:
+        if not getattr(agent, "ashore", False):
+            continue
+        if (
+            agent.immune
+            or agent.is_infected_with(pid)
+            or agent.infection_status == InfectionStatus.RECOVERED
+        ):
+            continue
+        if rng.random() >= prob:
+            continue
+        agent.infect_with_pathogen(pid, 1e4, epoch, rng=rng, profile=prof)
+        introduced.append({
+            "epoch": epoch,
+            "agent_id": int(agent.agent_id),
+            "port": port,
+            "pathogen": pid,
+        })
+    return introduced
+
+
 # ── Infection progression ────────────────────────────────────────────────
 
 def _advance_agent_pathogen_infections(
