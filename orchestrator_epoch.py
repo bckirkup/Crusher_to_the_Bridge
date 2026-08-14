@@ -253,7 +253,7 @@ def _shore_pathogen_id(
     requested = str(getattr(epoch_state, "shore_pathogen", "") or "")
     if requested:
         return requested if requested in pathogen_profiles else None
-    return sorted(pathogen_profiles)[0] if pathogen_profiles else None
+    return min(pathogen_profiles) if pathogen_profiles else None
 
 
 def step_shore_introductions(

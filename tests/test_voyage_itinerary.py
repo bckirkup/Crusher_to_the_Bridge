@@ -377,7 +377,10 @@ def test_crew_shore_leave_selection_is_deterministic() -> None:
         )
         return sorted(a.agent_id for a in agents if a.role == "crew" and a.ashore)
 
-    assert _chosen() == _chosen()
+    first = _chosen()
+    second = _chosen()
+    assert len(first) == 4
+    assert first == second
 
 
 def test_crew_reembark_and_sea_day_clear_shore_flags() -> None:
