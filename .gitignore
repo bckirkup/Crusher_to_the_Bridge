@@ -111,4 +111,9 @@ picard_framework/analysis/stan/*.exe
 picard_framework/analysis/stan/*.hpp
 # cmdstan leaves the compiled model next to the .stan file, extensionless on posix
 picard_framework/analysis/stan/sentinel_attribution
+picard_framework/analysis/stan/sentinel_fleet
+picard_framework/analysis/stan/norovirus_trajectory
+# fleet fit outputs (smoke and scratch runs)
+out_fleet_smoke/
+out_test_fleet_fit/
 

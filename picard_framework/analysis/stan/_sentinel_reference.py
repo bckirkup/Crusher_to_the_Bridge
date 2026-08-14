@@ -12,6 +12,9 @@ Because it shares the density with the Stan model, a disagreement between them
 is a bug in one of the two rather than a modelling choice. Chains are short and
 the proposal is crude, so treat the intervals as indicative: the tests assert
 ordering and monotonicity, never a calibrated interval width.
+
+The sampler itself lives in ``_metropolis``; this module is only the density and
+the generated quantities.
 """
 
 from __future__ import annotations
@@ -21,6 +24,7 @@ from typing import Any, Mapping
 
 import numpy as np
 
+from picard_framework.analysis.stan._metropolis import adaptive_metropolis
 from picard_framework.analysis.stan._sentinel_data import (
     expected_onsets_from_data,
     forward_incidence,
@@ -83,9 +87,6 @@ def _poisson_loglik(onsets: np.ndarray, mu_onset: np.ndarray) -> float:
     return float((onsets * np.log(mu) - mu - lgamma).sum())
 
 
-_TARGET_ACCEPT = 0.35
-
-
 def reference_posterior(
     data: Mapping[str, Any],
     *,
@@ -95,13 +96,7 @@ def reference_posterior(
     step: float = 0.4,
     seed: int = 1701,
 ) -> dict[str, list[float]]:
-    """Metropolis draws in Stan's parameter names and generated quantities.
-
-    One coordinate per update, cycling: a joint random-walk proposal is rejected
-    almost always once the onset curve carries a few hundred cases, which is how
-    a chain silently returns its initial value for every draw. Step sizes adapt
-    to ~35% acceptance during warmup and are then frozen.
-    """
+    """Metropolis draws in Stan's parameter names and generated quantities."""
     onsets = np.asarray(data["onsets"], dtype=float)
     ashore = np.asarray(data["ashore_hours"], dtype=float)
     aboard = np.asarray(data["aboard_hours"], dtype=float)
@@ -109,7 +104,6 @@ def reference_posterior(
     port_hours = ashore.sum(axis=(0, 1))
     aboard_hours_total = float(aboard.sum())
 
-    rng = np.random.default_rng(seed)
     theta = np.concatenate(
         [
             [float(data["hazard_log_prior_mean"]), math.log(0.3)],
@@ -117,30 +111,21 @@ def reference_posterior(
             [float(data["baseline_log_prior_mean"]), float(data["r_prior_mean"])],
         ],
     )
-    lp = _log_density(theta, data, onsets)
     scale = np.full(theta.size, float(step))
+    # R_onboard is the only parameter on the natural scale, so it needs a step
+    # sized in its own units rather than in log-rate units.
     scale[-1] = max(0.05, 0.25 * float(data["r_prior_sd"]))
 
-    kept: list[np.ndarray] = []
-    n_iter = int(warmup) + int(draws) * int(thin)
-    for i in range(n_iter):
-        for j in range(theta.size):
-            proposal = theta.copy()
-            proposal[j] += rng.normal(0.0, scale[j])
-            lp_new = _log_density(proposal, data, onsets)
-            accept = lp_new > lp or math.log(rng.uniform()) < lp_new - lp
-            if accept:
-                theta, lp = proposal, lp_new
-            if i < warmup:
-                # Robbins-Monro on the log step: shrink when rejecting, grow
-                # when accepting, with a decaying gain so warmup settles.
-                gain = 1.0 / math.sqrt(i + 2.0)
-                scale[j] *= math.exp(gain * ((1.0 if accept else 0.0) - _TARGET_ACCEPT))
-        if i >= warmup and (i - warmup) % thin == 0:
-            kept.append(theta.copy())
-
     return _to_stan_columns(
-        np.asarray(kept),
+        adaptive_metropolis(
+            lambda vec: _log_density(vec, data, onsets),
+            theta,
+            draws=draws,
+            warmup=warmup,
+            thin=thin,
+            scale=scale,
+            seed=seed,
+        ),
         data=data,
         onsets=onsets,
         port_hours=port_hours,

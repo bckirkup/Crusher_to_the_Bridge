@@ -42,7 +42,13 @@ class PortHazardEstimate:
         return None
 
 
-def _draws(posterior: Mapping[str, Sequence[float]], name: str) -> np.ndarray:
+def parameter_draws(posterior: Mapping[str, Sequence[float]], name: str) -> np.ndarray:
+    """Draws for one parameter, refusing an absent or empty column.
+
+    Public because the fleet summaries need the same refusal: a missing column
+    means the posterior and the meta disagree about the model, and quietly
+    treating that as zero would report a hazard nobody estimated.
+    """
     values = posterior.get(name)
     if values is None:
         raise KeyError(f"posterior has no parameter {name!r}")
@@ -93,14 +99,14 @@ def summarize_port_hazards(
     if not ports:
         raise ValueError("meta carries no port order; posterior indices are meaningless")
     visit_keys = meta.get("port_visit_keys") or {}
-    loglik = _channel_loglik(posterior)
+    loglik = channel_loglik(posterior)
     censored = bool(meta.get("censoring_corrected"))
     resolved = bool(meta.get("port_resolution_adequate"))
 
     estimates: list[PortHazardEstimate] = []
     for i, port_id in enumerate(ports, start=1):
-        hazard = _draws(posterior, f"lambda_port[{i}]")
-        cases = _draws(posterior, f"imported_cases[{i}]")
+        hazard = parameter_draws(posterior, f"lambda_port[{i}]")
+        cases = parameter_draws(posterior, f"imported_cases[{i}]")
         estimates.append(
             PortHazardEstimate(
                 port_id=port_id,
@@ -120,7 +126,7 @@ def summarize_port_hazards(
     return tuple(estimates)
 
 
-def _channel_loglik(posterior: Mapping[str, Sequence[float]]) -> dict[str, float]:
+def channel_loglik(posterior: Mapping[str, Sequence[float]]) -> dict[str, float]:
     """Per-channel evidence contribution (clinical only until PR 7)."""
     values = posterior.get("loglik_clinical")
     if values is None:
@@ -135,9 +141,9 @@ def onboard_summary(posterior: Mapping[str, Sequence[float]]) -> dict[str, float
     than asserted — the spec's original design passed it in as data, which would
     have made every port interval narrower than the evidence supports (1.5).
     """
-    r = _draws(posterior, "R_onboard")
-    share = _draws(posterior, "import_share")
-    aboard = _draws(posterior, "aboard_cases")
+    r = parameter_draws(posterior, "R_onboard")
+    share = parameter_draws(posterior, "import_share")
+    aboard = parameter_draws(posterior, "aboard_cases")
     return {
         "r_onboard_mean": float(r.mean()),
         "r_onboard_q05": float(np.quantile(r, 0.05)),
