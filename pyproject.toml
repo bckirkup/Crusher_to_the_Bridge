@@ -63,6 +63,7 @@ include = [
 
 [tool.setuptools.package-data]
 "picard_framework.analysis.stan" = ["*.stan", "README.md"]
+"picard_framework.analysis.sentinel" = ["data/*.json", "fixtures/*.json"]
 
 [tool.ruff]
 target-version = "py311"
