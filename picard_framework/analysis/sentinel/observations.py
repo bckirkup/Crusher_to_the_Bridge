@@ -8,7 +8,7 @@ voyage config.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from types import MappingProxyType
 from typing import Any, Mapping
 
@@ -72,7 +72,9 @@ class ObservationBundle:
     n_crew: int
     observation_end_epoch: int | None
     platform_class: str | None
-    exposure_totals: Mapping[str, Mapping[str, float]] = MappingProxyType({})
+    exposure_totals: Mapping[str, Mapping[str, float]] = field(
+        default_factory=lambda: MappingProxyType({}),
+    )
 
 
 def _case_from_dict(raw: dict[str, Any]) -> ClinicalCase:
