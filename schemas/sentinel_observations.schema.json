@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://crusher-to-the-bridge/schemas/sentinel_observations.schema.json",
+  "title": "SentinelObservations",
+  "description": "Per-voyage sentinel observation bundle: clinical line list plus wastewater samples, keyed to a voyage_config itinerary. Consumed by picard_framework/analysis/sentinel; see docs/sentinel_surveillance_spec.md.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["voyage_id", "ship_id", "clinical_cases"],
+  "properties": {
+    "schema_version": { "type": "string" },
+    "voyage_id": { "type": "string", "minLength": 1 },
+    "ship_id": { "type": "string", "minLength": 1 },
+    "platform_class": { "type": "string" },
+    "n_passengers": { "type": "integer", "minimum": 0 },
+    "n_crew": { "type": "integer", "minimum": 0 },
+    "epoch_duration_hours": { "type": "number", "exclusiveMinimum": 0 },
+    "observation_end_epoch": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Last epoch under observation. Onsets after this epoch are unobserved (right censoring)."
+    },
+    "clinical_cases": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/clinical_case" }
+    },
+    "wastewater_samples": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/wastewater_sample" }
+    },
+    "notes": { "type": "string" }
+  },
+  "$defs": {
+    "clinical_case": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["person_id", "onset_epoch", "crew"],
+      "properties": {
+        "person_id": { "type": "string", "minLength": 1 },
+        "onset_epoch": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "1-indexed epoch of symptom onset (not of report)."
+        },
+        "crew": { "type": "boolean" },
+        "pathogen": {
+          "oneOf": [{ "type": "null" }, { "type": "string" }]
+        },
+        "genotype": {
+          "description": "Strain identifier. Null until pathogen strain state exists in the ABM (spec §5).",
+          "oneOf": [{ "type": "null" }, { "type": "string" }]
+        },
+        "hours_ashore": {
+          "type": "object",
+          "description": "Hours ashore per port_id for this person. Keys must exist in the voyage itinerary; 0 or omitted means stayed aboard.",
+          "additionalProperties": { "type": "number", "minimum": 0 }
+        },
+        "reported_via": {
+          "type": "string",
+          "enum": ["sick_call", "screening", "cascade", "wearable", "unreported"],
+          "description": "Detection channel; drives the reporting-probability term of the observation model."
+        },
+        "report_epoch": {
+          "description": "Epoch the case entered surveillance, if later than onset.",
+          "oneOf": [{ "type": "null" }, { "type": "integer", "minimum": 1 }]
+        }
+      }
+    },
+    "wastewater_sample": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sample_epoch",
+        "collection_point",
+        "pathogen",
+        "pathogen_reads",
+        "total_reads"
+      ],
+      "properties": {
+        "sample_epoch": { "type": "integer", "minimum": 1 },
+        "collection_point": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Wastewater collection zone label (CTB sequencing modality zone)."
+        },
+        "pathogen": { "type": "string", "minLength": 1 },
+        "pathogen_reads": { "type": "integer", "minimum": 0 },
+        "total_reads": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Library depth. pathogen_reads <= total_reads is enforced by the loader."
+        },
+        "clr_anomaly_score": {
+          "type": "number",
+          "description": "GRUMB centered-log-ratio anomaly score for this pathogen."
+        },
+        "concentration_copies_per_l": {
+          "description": "External qPCR only; CTB's simulated wastewater is compositional and does not supply copies/L.",
+          "oneOf": [{ "type": "null" }, { "type": "number", "minimum": 0 }]
+        }
+      }
+    }
+  }
+}

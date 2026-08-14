@@ -1,0 +1,97 @@
+{
+  "schema_version": "1.0.0",
+  "voyage_id": "VOY-2026-01-10-ENDEAVOR",
+  "ship_id": "ENDEAVOR",
+  "platform_class": "mega",
+  "n_passengers": 4000,
+  "n_crew": 1500,
+  "epoch_duration_hours": 1,
+  "observation_end_epoch": 168,
+  "notes": "Sentinel example bundle paired with data/example_itinerary.json. Genotypes are null until pathogen strain state exists in the ABM.",
+  "clinical_cases": [
+    {
+      "person_id": "P-0412",
+      "onset_epoch": 96,
+      "crew": false,
+      "pathogen": "norovirus",
+      "genotype": null,
+      "hours_ashore": { "MXCZM": 9.5 },
+      "reported_via": "sick_call"
+    },
+    {
+      "person_id": "P-0517",
+      "onset_epoch": 104,
+      "crew": false,
+      "pathogen": "norovirus",
+      "genotype": null,
+      "hours_ashore": { "MXCZM": 8.0, "MXCTM": 5.0 },
+      "reported_via": "sick_call",
+      "report_epoch": 107
+    },
+    {
+      "person_id": "C-0031",
+      "onset_epoch": 118,
+      "crew": true,
+      "pathogen": "norovirus",
+      "genotype": null,
+      "hours_ashore": { "MXCZM": 6.0 },
+      "reported_via": "screening"
+    },
+    {
+      "person_id": "P-1180",
+      "onset_epoch": 132,
+      "crew": false,
+      "pathogen": "norovirus",
+      "genotype": null,
+      "hours_ashore": {},
+      "reported_via": "cascade"
+    },
+    {
+      "person_id": "P-2044",
+      "onset_epoch": 151,
+      "crew": false,
+      "pathogen": "norovirus",
+      "genotype": null,
+      "hours_ashore": { "KYGEC": 7.5 },
+      "reported_via": "wearable"
+    }
+  ],
+  "wastewater_samples": [
+    {
+      "sample_epoch": 72,
+      "collection_point": "aft_main_sewer",
+      "pathogen": "norovirus",
+      "pathogen_reads": 4,
+      "total_reads": 250000,
+      "clr_anomaly_score": 0.4,
+      "concentration_copies_per_l": null
+    },
+    {
+      "sample_epoch": 96,
+      "collection_point": "aft_main_sewer",
+      "pathogen": "norovirus",
+      "pathogen_reads": 61,
+      "total_reads": 248000,
+      "clr_anomaly_score": 2.1,
+      "concentration_copies_per_l": null
+    },
+    {
+      "sample_epoch": 120,
+      "collection_point": "aft_main_sewer",
+      "pathogen": "norovirus",
+      "pathogen_reads": 210,
+      "total_reads": 252000,
+      "clr_anomaly_score": 3.6,
+      "concentration_copies_per_l": null
+    },
+    {
+      "sample_epoch": 144,
+      "collection_point": "aft_main_sewer",
+      "pathogen": "norovirus",
+      "pathogen_reads": 355,
+      "total_reads": 244000,
+      "clr_anomaly_score": 4.2,
+      "concentration_copies_per_l": null
+    }
+  ]
+}
