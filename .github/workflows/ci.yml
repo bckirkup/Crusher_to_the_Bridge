@@ -50,9 +50,7 @@ jobs:
           python3 scripts/sonar_guard.py $(
             find . -type f -name '*.py' \
               ! -path './tests/*' \
-              ! -path './.agents/*' \
-              ! -path './picard_framework/analysis/stan/*' \
-              ! -path './picard_framework/runs/*'
+              ! -path './.agents/*'
           )
           python3 scripts/sonar_guard.py --workflows .github/workflows
 
@@ -297,7 +295,8 @@ jobs:
 
   sonar:
     name: SonarQube Cloud
-    if: ${{ secrets.SONAR_TOKEN != '' }}
+    env:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
     needs: test
     runs-on: ubuntu-latest
     steps:
@@ -310,6 +309,7 @@ jobs:
         with:
           name: coverage
       - name: SonarQube Cloud scan
+        if: env.SONAR_TOKEN != ''
         uses: SonarSource/sonarqube-scan-action@2f77a1ec69fb1d595b06f35ab27e97605bdef703 # v5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
