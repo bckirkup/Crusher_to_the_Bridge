@@ -656,8 +656,8 @@ def _iter_sentinel_recovery_runs(
     hazards = dict((tier.get("shore_exposure") or {}).get("port_hazards") or {})
     hazard_profile, fleet_config = sentinel_recovery.parse_tier_labels(tier_id, tier)
     epochs = int(tier.get("epochs", manifest.get("default_epochs", 168)))
-    template = sentinel_recovery.load_standard_itinerary()
     default_agents = int(manifest.get("default_num_agents", 7000))
+    embark_date = str(manifest.get("embarkation_date", "2026-01-10"))
     for plat_index, plat in enumerate(platforms):
         n_agents = _platform_num_agents(
             plat,
@@ -667,7 +667,7 @@ def _iter_sentinel_recovery_runs(
         )
         variant = sentinel_recovery.itinerary_for_platform(tier, plat_index)
         days = sentinel_recovery.stamp_port_hazards(
-            sentinel_recovery.apply_itinerary_variant(template, variant),
+            sentinel_recovery.itinerary_days(manifest, variant),
             hazards,
         )
         for r_onboard in tier["R_onboard_values"]:
@@ -680,7 +680,10 @@ def _iter_sentinel_recovery_runs(
                 "initial_infected": n_init,
             }
             voyage = sentinel_recovery.voyage_override(
-                days=days, r_onboard=r_val, epochs=epochs,
+                days=days,
+                r_onboard=r_val,
+                epochs=epochs,
+                embarkation_date=embark_date,
             )
             for sname in strategies:
                 for seed in tier["seeds"]:

@@ -1,0 +1,190 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://crusher-to-the-bridge/schemas/sentinel_recovery_design.schema.json",
+  "title": "SentinelRecoveryDesign",
+  "description": "Design spec for a sentinel port-hazard recovery campaign: port registry, itinerary templates, hazard profiles, fleet configurations, R_onboard levels and seeds. Expanded into the runnable campaign manifest by picard_framework/runs/mega_cruise_campaign/expand_design.py; see docs/synthetic_recovery_and_vsp_degradation.md.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "campaign",
+    "platform",
+    "default_epochs",
+    "default_num_agents",
+    "pathogen",
+    "embarkation_date",
+    "pathogen_configs",
+    "surveillance_configs",
+    "R_onboard_values",
+    "seeds",
+    "ports",
+    "homeport",
+    "itinerary_templates",
+    "hazard_profiles",
+    "fleet_configs"
+  ],
+  "properties": {
+    "schema_version": { "type": "string" },
+    "campaign": { "type": "string", "minLength": 1 },
+    "description": { "type": "string" },
+    "platform": { "type": "string", "minLength": 1 },
+    "default_epochs": { "type": "integer", "minimum": 1 },
+    "default_num_agents": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Population used for any platform without its own entry in campaign_runner's platform table."
+    },
+    "pathogen": { "type": "string", "minLength": 1 },
+    "embarkation_date": { "type": "string", "minLength": 1 },
+    "pathogen_configs": { "type": "object", "minProperties": 1 },
+    "surveillance_configs": { "type": "object", "minProperties": 1 },
+    "defaults": {
+      "type": "object",
+      "properties": {
+        "dose_adjustment": { "type": "number", "exclusiveMinimum": 0 },
+        "density_exponent": { "type": "number" }
+      }
+    },
+    "R_onboard_values": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "number", "minimum": 0 }
+    },
+    "seeds": {
+      "oneOf": [
+        {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "integer" }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["start", "count"],
+          "properties": {
+            "start": { "type": "integer" },
+            "count": { "type": "integer", "minimum": 1 }
+          }
+        }
+      ]
+    },
+    "ports": {
+      "type": "object",
+      "minProperties": 1,
+      "description": "UN-LOCODE keyed port registry. Exposure fields are what the hazard likelihood consumes; annual visitor counts are not model inputs.",
+      "additionalProperties": { "$ref": "#/$defs/port" }
+    },
+    "homeport": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["embarkation", "disembarkation"],
+      "properties": {
+        "embarkation": {
+          "type": "object",
+          "required": ["port_id"],
+          "properties": {
+            "port_id": { "type": "string", "minLength": 1 },
+            "embarkation_window_epochs": { "$ref": "#/$defs/epoch_window" },
+            "stateroom_available_epoch": { "type": "integer", "minimum": 0 },
+            "buffet_surge_fraction": { "type": "number", "minimum": 0, "maximum": 1 }
+          }
+        },
+        "disembarkation": {
+          "type": "object",
+          "required": ["port_id"],
+          "properties": {
+            "port_id": { "type": "string", "minLength": 1 },
+            "disembark_window_epochs": { "$ref": "#/$defs/epoch_window" }
+          }
+        }
+      }
+    },
+    "itinerary_templates": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": { "$ref": "#/$defs/itinerary_template" }
+    },
+    "hazard_profiles": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": { "$ref": "#/$defs/hazard_profile" }
+    },
+    "fleet_configs": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": { "$ref": "#/$defs/fleet_config" }
+    }
+  },
+  "$defs": {
+    "epoch_window": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": { "type": "integer", "minimum": 0 }
+    },
+    "port": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["port", "region"],
+      "properties": {
+        "port": { "type": "string", "minLength": 1 },
+        "region": { "type": "string", "minLength": 1 },
+        "role": { "type": "string", "enum": ["homeport", "call"] },
+        "disembark_fraction": { "type": "number", "minimum": 0, "maximum": 1 },
+        "crew_shore_leave_fraction": { "type": "number", "minimum": 0, "maximum": 1 },
+        "disembark_window_epochs": { "$ref": "#/$defs/epoch_window" },
+        "reembark_window_epochs": { "$ref": "#/$defs/epoch_window" }
+      }
+    },
+    "itinerary_template": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["length_days", "port_days"],
+      "properties": {
+        "description": { "type": "string" },
+        "length_days": { "type": "integer", "minimum": 3 },
+        "port_days": {
+          "type": "object",
+          "minProperties": 1,
+          "description": "Voyage day number (as a string key) to port_id. Days without a port call become sea days; day 1 and the last day are the homeport slots.",
+          "propertyNames": { "pattern": "^[0-9]+$" },
+          "additionalProperties": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "hazard_profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["port_hazards"],
+      "properties": {
+        "description": { "type": "string" },
+        "port_hazards": {
+          "type": "object",
+          "minProperties": 1,
+          "description": "Known truth lambda_p per port_id, as a per-epoch ashore infection probability.",
+          "additionalProperties": { "type": "number", "minimum": 0, "maximum": 1 }
+        }
+      }
+    },
+    "fleet_config": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ships"],
+      "properties": {
+        "description": { "type": "string" },
+        "ships": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["platform", "itinerary"],
+            "properties": {
+              "platform": { "type": "string", "minLength": 1 },
+              "itinerary": { "type": "string", "minLength": 1 }
+            }
+          }
+        }
+      }
+    }
+  }
+}
