@@ -11,7 +11,7 @@ contam_prj_bridge.py – CONTAM ``.prj`` ↔ JSON bridge
    ``spatial_layout.json`` + ``air_flow_paths.json`` (+ ``path_map.json``)
    for the fast native prescribed-flow engine.
 
-**Fiction bootstrap only (JSON → PRJ):** ``--export`` / 
+**Fiction bootstrap only (JSON → PRJ):** ``--export`` /
 ``scripts/generate_platform_contam_prj.py`` synthesize plausible ContamW 3.4
 projects for Mega Cruise / Enterprise demos that have no authentic Contam
 model. Do not treat this as the normal Contam authoring path.

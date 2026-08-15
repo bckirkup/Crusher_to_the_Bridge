@@ -19,9 +19,6 @@ import os
 from typing import Any
 
 from crusher_labs.cost_ledger import CATEGORY_INTERVENTION, CostLedger
-from simulation_utils.paths import validated_open
-
-REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 from crusher_labs.stoplight import (
     aggregate_stoplight_max,
     meets_threshold,
@@ -34,6 +31,9 @@ from crusher_labs.stoplight import (
     stoplight_from_wearable_agent,
     stoplight_from_wearable_fleet_rates,
 )
+from simulation_utils.paths import validated_open
+
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 WEARABLE_AGENT_INSTRUMENT = "wearable_physiological_monitor"
 WEARABLE_FLEET_INSTRUMENT = "wearable_fleet_monitor"

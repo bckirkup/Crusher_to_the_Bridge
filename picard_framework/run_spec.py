@@ -9,15 +9,14 @@ import os
 from dataclasses import dataclass, field
 from typing import Any, Literal
 
-from simulation_utils.paths import validated_open
-
-REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
 from picard_framework.catalog.registry import CatalogRegistry
 from picard_framework.pathogen_overrides import (
     apply_pathogen_overrides,
     load_pathogen_bundle,
 )
+from simulation_utils.paths import validated_open
+
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 _CRUSHER_CONFIG_REL = os.path.join("crusher_labs", "config.yaml")
 

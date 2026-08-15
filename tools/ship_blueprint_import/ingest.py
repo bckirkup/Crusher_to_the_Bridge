@@ -139,6 +139,7 @@ def rasterize_pdf(
             pdf_path, pages_dir, dpi=dpi, allowed_roots=allowed_roots
         )
     except ImportError:
+        # Fall back to the pdftoppm executable when the optional library is absent.
         pass
     if shutil.which("pdftoppm"):
         return _rasterize_pdf_pdftoppm(

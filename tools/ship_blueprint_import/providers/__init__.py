@@ -78,6 +78,7 @@ def extract_json_object(text: str) -> dict[str, Any]:
         if isinstance(data, dict):
             return data
     except json.JSONDecodeError:
+        # Continue to the broader object-span parser for fenced responses.
         pass
     payload = _first_json_object_span(text)
     if payload is None:

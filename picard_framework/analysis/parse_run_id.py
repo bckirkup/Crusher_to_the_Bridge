@@ -65,6 +65,7 @@ def resolve_initial_infected(
             try:
                 return max(0, int(params[key]))
             except (TypeError, ValueError):
+                # Try the next established source when a parameter is malformed.
                 pass
 
     spec = run_spec or {}

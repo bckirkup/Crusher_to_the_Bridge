@@ -206,6 +206,7 @@ def main(argv: list[str] | None = None) -> int:
                 try:
                     delta[key] = xv - nv
                 except TypeError:
+                    # Omit deltas for fields that cannot be subtracted.
                     pass
         report["delta"] = delta
         print("\nDelta (contamx - native):")

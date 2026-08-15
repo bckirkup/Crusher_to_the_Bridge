@@ -70,11 +70,14 @@ target-version = "py311"
 line-length = 120
 
 [tool.ruff.lint]
-select = ["E", "F", "W", "I"]
+select = ["E", "F", "W", "I", "C901"]
 ignore = [
     "E501",   # line too long — handled by formatter
     "E741",   # ambiguous variable name (physics code uses l, I, etc.)
 ]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 117
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = ["E402"]      # sys.path manipulation before imports
