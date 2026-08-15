@@ -38,6 +38,7 @@ def read_epoch_table(analysis_dir: str) -> list[dict[str, Any]]:
             table = pq.read_table(pa.BufferReader(data))
             return table.to_pylist()
         except ImportError:
+            # Fall back to the gzip-backed fixture when pyarrow is unavailable.
             pass
 
     if os.path.isfile(gz_path):
