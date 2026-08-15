@@ -46,6 +46,7 @@ from picard_framework.analysis.sentinel.observations import (
     validate_against_voyage,
 )
 from picard_framework.analysis.stan._data import cmdstan_available
+from picard_framework.analysis.stan._sampler_options import SamplerOptions
 from picard_framework.analysis.stan._sentinel_data import (
     build_sentinel_attribution_data,
 )
@@ -117,15 +118,12 @@ def fit_sentinel_attribution(
     reporting: float = 1.0,
     care_seeking: float = 1.0,
     testing: float = 1.0,
-    chains: int = 4,
-    iter_sampling: int = 1000,
-    iter_warmup: int = 1000,
-    seed: int = 1701,
-    show_progress: bool = True,
+    sampler: SamplerOptions | None = None,
     smoke: bool = False,
     write_fixture: str | None = None,
 ) -> dict[str, Any]:
     """Assemble the data, fit (or summarize the fixture), and write outputs."""
+    opts = sampler or SamplerOptions()
     out = ensure_out_dir(out_dir)
     bundle = load_observation_bundle(observations_path)
     voyage = load_voyage(
@@ -175,7 +173,7 @@ def fit_sentinel_attribution(
         generator = (
             "picard_framework.analysis.stan._sentinel_reference.reference_posterior"
             f"(draws={_FIXTURE_DRAWS}, warmup={_FIXTURE_WARMUP}, "
-            f"thin={_FIXTURE_THIN}, seed={seed})"
+            f"thin={_FIXTURE_THIN}, seed={opts.seed})"
         )
         write_json(
             write_fixture,
@@ -189,7 +187,7 @@ def fit_sentinel_attribution(
                     draws=_FIXTURE_DRAWS,
                     warmup=_FIXTURE_WARMUP,
                     thin=_FIXTURE_THIN,
-                    seed=seed,
+                    seed=opts.seed,
                 ),
             },
         )
@@ -223,12 +221,12 @@ def fit_sentinel_attribution(
         model = CmdStanModel(stan_file=stan_model_path())
         fit = model.sample(
             data=data,
-            chains=chains,
-            parallel_chains=chains,
-            iter_sampling=iter_sampling,
-            iter_warmup=iter_warmup,
-            seed=seed,
-            show_progress=show_progress,
+            chains=opts.chains,
+            parallel_chains=opts.chains,
+            iter_sampling=opts.iter_sampling,
+            iter_warmup=opts.iter_warmup,
+            seed=opts.seed,
+            show_progress=opts.show_progress,
         )
     except Exception as exc:
         status = {"status": "error", "reason": str(exc), "meta": meta}
@@ -291,11 +289,13 @@ def main(argv: list[str] | None = None) -> int:
         reporting=args.reporting,
         care_seeking=args.care_seeking,
         testing=args.testing,
-        chains=args.chains,
-        iter_sampling=args.iter_sampling,
-        iter_warmup=args.iter_warmup,
-        seed=args.seed,
-        show_progress=args.show_progress,
+        sampler=SamplerOptions(
+            chains=args.chains,
+            iter_sampling=args.iter_sampling,
+            iter_warmup=args.iter_warmup,
+            seed=args.seed,
+            show_progress=args.show_progress,
+        ),
         smoke=args.smoke,
         write_fixture=args.write_fixture,
     )

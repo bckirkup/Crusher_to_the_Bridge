@@ -27,7 +27,6 @@ import argparse
 import io
 import os
 import sys
-from dataclasses import dataclass
 from typing import Any, Sequence
 
 from picard_framework.analysis._io import (
@@ -63,8 +62,10 @@ from picard_framework.analysis.sentinel.observations import (
     validate_against_voyage,
 )
 from picard_framework.analysis.stan._data import cmdstan_available
+from picard_framework.analysis.stan._sampler_options import SamplerOptions
 from picard_framework.analysis.stan._sentinel_fleet_data import (
     FleetVoyage,
+    WastewaterOptions,
     build_sentinel_fleet_data,
 )
 from simulation_utils.paths import validated_open
@@ -80,21 +81,6 @@ _FLEET_TIME_COLUMNS = (
 )
 _SMOKE_DRAWS = 60
 _SMOKE_WARMUP = 200
-
-
-@dataclass(frozen=True)
-class SamplerOptions:
-    """Sampler knobs, kept together so they travel as one argument.
-
-    The numpy reference walker reads ``iter_sampling``/``iter_warmup`` as draws and
-    warmup; the rest apply to CmdStan only.
-    """
-
-    chains: int = 4
-    iter_sampling: int = 1000
-    iter_warmup: int = 1000
-    seed: int = 1701
-    show_progress: bool = True
 
 
 def stan_model_path() -> str:
@@ -241,6 +227,99 @@ def write_fleet_outputs(
     }
 
 
+def _resolve_engine(engine: str, *, smoke: bool) -> str:
+    """``stan`` or ``numpy``; a smoke run is always the reference walker."""
+    if smoke:
+        return "numpy"
+    if engine == "auto":
+        return "stan" if cmdstan_available() else "numpy"
+    return engine
+
+
+def _warn_unresolved_ports(meta: dict[str, Any]) -> None:
+    for voyage_meta in meta["voyages"]:
+        if not voyage_meta["port_resolution_adequate"]:
+            print(
+                f"warn: voyage {voyage_meta['voyage_id']} has an incubation IQR "
+                f"({meta['incubation_iqr_hours']} h) that is not shorter than its "
+                "inter-port interval; read its ports as a port-window set (spec 1.8)",
+                file=sys.stderr,
+            )
+
+
+def _numpy_status(
+    data: dict[str, Any],
+    meta: dict[str, Any],
+    *,
+    out: str,
+    pathogen: str,
+    opts: SamplerOptions,
+    smoke: bool,
+) -> dict[str, Any]:
+    """Sample with the reference walker and summarize, labelled as not a NUTS fit."""
+    from picard_framework.analysis.stan._sentinel_fleet_reference import (
+        fleet_reference_posterior,
+    )
+
+    posterior = fleet_reference_posterior(
+        data,
+        draws=_SMOKE_DRAWS if smoke else opts.iter_sampling,
+        warmup=_SMOKE_WARMUP if smoke else opts.iter_warmup,
+        seed=opts.seed,
+    )
+    return {
+        "status": "smoke" if smoke else "ok",
+        "engine": "numpy_rw_mh",
+        "reason": "reference walker; intervals are indicative, not a NUTS fit",
+        "meta": meta,
+        "summary": write_fleet_outputs(out, posterior, meta, pathogen),
+    }
+
+
+def _cmdstan_status(
+    data: dict[str, Any],
+    meta: dict[str, Any],
+    *,
+    out: str,
+    pathogen: str,
+    opts: SamplerOptions,
+) -> dict[str, Any]:
+    """Sample with CmdStan, or report why no posterior was produced."""
+    if not cmdstan_available():
+        return {
+            "status": "skipped",
+            "reason": "cmdstanpy/CmdStan not installed; --engine numpy to sample anyway",
+            "meta": meta,
+        }
+
+    from cmdstanpy import CmdStanModel
+
+    try:
+        model = CmdStanModel(stan_file=stan_model_path())
+        fit = model.sample(
+            data=data,
+            chains=opts.chains,
+            parallel_chains=opts.chains,
+            iter_sampling=opts.iter_sampling,
+            iter_warmup=opts.iter_warmup,
+            seed=opts.seed,
+            show_progress=opts.show_progress,
+        )
+    except Exception as exc:
+        print(f"sentinel fleet fit failed: {exc}", file=sys.stderr)
+        return {"status": "error", "reason": str(exc), "meta": meta}
+
+    _write_draws_csv(fit, os.path.join(out, "draws.csv"))
+    return {
+        "status": "ok",
+        "engine": "cmdstan",
+        "meta": meta,
+        "summary": write_fleet_outputs(
+            out, _posterior_from_fit(fit), meta, pathogen,
+        ),
+    }
+
+
 def fit_sentinel_fleet(
     manifest_path: str,
     out_dir: str,
@@ -272,86 +351,27 @@ def fit_sentinel_fleet(
         voyages,
         incubation,
         generation,
-        wastewater=wastewater,
-        pathogen=resolved_pathogen,
+        wastewater=WastewaterOptions(
+            enabled=wastewater, pathogen=resolved_pathogen,
+        ),
     )
     meta["pathogen"] = resolved_pathogen
     write_json(os.path.join(out, "stan_data_meta.json"), meta)
-    for voyage_meta in meta["voyages"]:
-        if not voyage_meta["port_resolution_adequate"]:
-            print(
-                f"warn: voyage {voyage_meta['voyage_id']} has an incubation IQR "
-                f"({meta['incubation_iqr_hours']} h) that is not shorter than its "
-                "inter-port interval; read its ports as a port-window set (spec 1.8)",
-                file=sys.stderr,
-            )
+    _warn_unresolved_ports(meta)
 
-    resolved_engine = engine
-    if engine == "auto":
-        resolved_engine = "stan" if cmdstan_available() else "numpy"
-    if smoke:
-        resolved_engine = "numpy"
-
-    if resolved_engine == "numpy":
-        from picard_framework.analysis.stan._sentinel_fleet_reference import (
-            fleet_reference_posterior,
-        )
-
-        posterior = fleet_reference_posterior(
+    if _resolve_engine(engine, smoke=smoke) == "numpy":
+        status = _numpy_status(
             data,
-            draws=_SMOKE_DRAWS if smoke else opts.iter_sampling,
-            warmup=_SMOKE_WARMUP if smoke else opts.iter_warmup,
-            seed=opts.seed,
+            meta,
+            out=out,
+            pathogen=resolved_pathogen,
+            opts=opts,
+            smoke=smoke,
         )
-        status: dict[str, Any] = {
-            "status": "smoke" if smoke else "ok",
-            "engine": "numpy_rw_mh",
-            "reason": (
-                "reference walker; intervals are indicative, not a NUTS fit"
-            ),
-            "meta": meta,
-            "summary": write_fleet_outputs(out, posterior, meta, resolved_pathogen),
-        }
-        write_json(os.path.join(out, _FIT_STATUS_JSON), status)
-        return status
-
-    if not cmdstan_available():
-        status = {
-            "status": "skipped",
-            "reason": "cmdstanpy/CmdStan not installed; --engine numpy to sample anyway",
-            "meta": meta,
-        }
-        write_json(os.path.join(out, _FIT_STATUS_JSON), status)
-        return status
-
-    from cmdstanpy import CmdStanModel
-
-    try:
-        model = CmdStanModel(stan_file=stan_model_path())
-        fit = model.sample(
-            data=data,
-            chains=opts.chains,
-            parallel_chains=opts.chains,
-            iter_sampling=opts.iter_sampling,
-            iter_warmup=opts.iter_warmup,
-            seed=opts.seed,
-            show_progress=opts.show_progress,
+    else:
+        status = _cmdstan_status(
+            data, meta, out=out, pathogen=resolved_pathogen, opts=opts,
         )
-    except Exception as exc:
-        status = {"status": "error", "reason": str(exc), "meta": meta}
-        write_json(os.path.join(out, _FIT_STATUS_JSON), status)
-        print(f"sentinel fleet fit failed: {exc}", file=sys.stderr)
-        return status
-
-    _write_draws_csv(fit, os.path.join(out, "draws.csv"))
-    status = {
-        "status": "ok",
-        "engine": "cmdstan",
-        "meta": meta,
-        "summary": write_fleet_outputs(
-            out, _posterior_from_fit(fit), meta, resolved_pathogen,
-        ),
-    }
     write_json(os.path.join(out, _FIT_STATUS_JSON), status)
     return status
 

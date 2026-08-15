@@ -48,6 +48,7 @@ from picard_framework.analysis.sentinel.wastewater_signal import (
 from picard_framework.analysis.stan._data import cmdstan_available
 from picard_framework.analysis.stan._sentinel_fleet_data import (
     FleetRates,
+    WastewaterOptions,
     WastewaterParams,
     build_sentinel_fleet_data,
     expected_onsets_fleet,
@@ -123,7 +124,9 @@ def fleet_data(
     voyages: Sequence[Any],
     **kwargs: Any,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
-    return build_sentinel_fleet_data(voyages, INCUBATION, GENERATION, **kwargs)
+    return build_sentinel_fleet_data(
+        voyages, INCUBATION, GENERATION, wastewater=WastewaterOptions(**kwargs),
+    )
 
 
 def truth_rates(data: dict[str, Any], hazard: float = 3.0e-3) -> FleetRates:
@@ -231,7 +234,7 @@ def test_shedding_kernel_is_a_lagged_survival_curve() -> None:
     weights = kernel.array
     lag = kernel.residence_lag_epochs
     assert lag == int(wastewater_config()["residence_lag_hours"])
-    assert float(weights[:lag].sum()) == 0.0
+    assert float(weights[:lag].sum()) == pytest.approx(0.0, abs=0.0)
     assert weights[lag] == pytest.approx(1.0)
     tail = weights[lag:]
     assert np.all(np.diff(tail) <= 1e-12), "survival curve is not non-increasing"
@@ -412,11 +415,11 @@ def test_data_block_carries_pooled_samples_and_prevalence_denominators() -> None
 
 
 def test_disabling_the_channel_leaves_a_valid_clinical_only_block() -> None:
-    """``wastewater=False`` is the baseline the channel is measured against."""
+    """A disabled channel is the baseline the channel is measured against."""
     bare, _ = fleet_data(crossover_fleet())
     rates = truth_rates(bare)
     reads = simulate_reads(simulate_onsets(bare, rates), rates)
-    data, meta = fleet_data(crossover_fleet(reads), wastewater=False)
+    data, meta = fleet_data(crossover_fleet(reads), enabled=False)
     assert data["NW"] == 0
     assert data["ww_voyage"] == []
     assert data["ww_reads"] == []
@@ -424,7 +427,9 @@ def test_disabling_the_channel_leaves_a_valid_clinical_only_block() -> None:
     assert data["L_shed"] >= 1
     assert len(data["ww_persons"]) == int(data["V"])
     assert meta["wastewater"]["enabled"] is False
-    assert wastewater_loglik(data, truth_rates(data), truth_params()) == 0.0
+    assert wastewater_loglik(
+        data, truth_rates(data), truth_params(),
+    ) == pytest.approx(0.0, abs=0.0)
 
 
 def test_a_fleet_with_no_samples_is_the_same_null_path() -> None:
@@ -559,7 +564,7 @@ def clinical_only_fit() -> tuple[dict[str, Any], dict[str, list[float]]]:
     rates = truth_rates(bare)
     simulated = simulate_onsets(bare, rates)
     reads = simulate_reads(simulated, rates)
-    data, meta = fleet_data(crossover_fleet(reads), wastewater=False)
+    data, meta = fleet_data(crossover_fleet(reads), enabled=False)
     data = dict(data)
     data["onsets"] = simulated["onsets"]
     return meta, fleet_reference_posterior(data, draws=DRAWS, warmup=WARMUP)
