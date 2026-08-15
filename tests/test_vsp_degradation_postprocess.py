@@ -72,28 +72,24 @@ def test_summary_from_zip_maps_fields_and_finds_nested_summary() -> None:
     assert row["peak_prevalence"] == 8
 
 
-@pytest.mark.parametrize(
-    ("data", "payload", "member"),
-    [
-        (b"not a zip", None, "summary.json"),
-        (_zip_bytes({"parameters": {}}), {}, "other.json"),
-        (_zip_bytes({}, member="summary.json"), b"{", "summary.json"),
-        (_zip_bytes([], member="summary.json"), [], "summary.json"),
-    ],
-)
-def test_summary_from_zip_rejects_invalid_summaries(
-    data: bytes,
-    payload: object,
-    member: str,
-) -> None:
-    if payload == {}:
-        data = _zip_bytes(payload, member=member)
-    elif payload == b"{":
-        stream = io.BytesIO()
-        with zipfile.ZipFile(stream, "w") as archive:
-            archive.writestr(member, payload)
-        data = stream.getvalue()
+def _raw_zip_bytes(member: str, body: bytes) -> bytes:
+    stream = io.BytesIO()
+    with zipfile.ZipFile(stream, "w") as archive:
+        archive.writestr(member, body)
+    return stream.getvalue()
 
+
+@pytest.mark.parametrize(
+    "data",
+    [
+        b"not a zip",
+        _raw_zip_bytes("other.json", b"{}"),
+        _raw_zip_bytes("summary.json", b"{"),
+        _zip_bytes([]),
+    ],
+    ids=["not-a-zip", "no-summary-member", "unparseable-json", "json-is-not-an-object"],
+)
+def test_summary_from_zip_rejects_invalid_summaries(data: bytes) -> None:
     row = vsp._summary_from_zip_bytes(data, "bad.zip")
 
     assert row is None
@@ -209,9 +205,12 @@ def test_iter_summaries_equivalent_for_directory_tar_and_flat_shapes(
         (flat_source / name).write_bytes(data)
     flat_rows = list(vsp.iter_summaries(str(flat_source)))
 
-    def identities(rows: list[dict]) -> set[tuple[str, float]]:
-        return {(str(row["run_id"]), float(row["attack_rate"])) for row in rows}
+    def identities(rows: list[dict]) -> list[list[tuple[str, str]]]:
+        return sorted(
+            sorted((key, repr(value)) for key, value in row.items()) for row in rows
+        )
 
+    assert len(directory_rows) == len(summaries)
     assert identities(directory_rows) == identities(tar_rows)
     assert identities(directory_rows) == identities(flat_rows)
 
