@@ -295,7 +295,8 @@ def _port_only_variance(contrast: np.ndarray, row_sums: np.ndarray) -> float:
     """
     port_part = contrast[: row_sums.size]
     live = row_sums > 0.0
-    if not np.all(live | (port_part == 0.0)):
+    zero_port = np.isclose(port_part, 0.0, rtol=0.0, atol=0.0)
+    if not np.all(live | zero_port):
         return math.inf
     return float(np.sum(port_part[live] ** 2 / row_sums[live]))
 
@@ -415,7 +416,7 @@ def diagnose(
     null_basis = _null_basis(info)
     component_of = _components(table)
     row_sums = table.sum(axis=1)
-    visit_counts = {p: 0 for p in ports}
+    visit_counts = dict.fromkeys(ports, 0)
     for visit in visits:
         visit_counts[visit.port_id] += 1
     entries = tuple(
@@ -692,7 +693,7 @@ def main(argv: list[str] | None = None) -> int:
     for report in reports:
         _print_verdict(report)
     print(f"summary: {summary_path}", flush=True)
-    return 0
+    return int(not reports)
 
 
 if __name__ == "__main__":

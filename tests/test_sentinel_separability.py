@@ -122,7 +122,9 @@ def test_bundled_preset_invariants() -> None:
 
 def test_preset_expansion_is_deterministic_and_seed_only_changes_exposure() -> None:
     for name in preset_names():
-        assert expand_preset(name) == expand_preset(name)
+        first = expand_preset(name)
+        second = expand_preset(name)
+        assert first == second
     original = expand_preset("pilot_eight_ship")
     reseeded = expand_preset("pilot_eight_ship", {"seed": 12345})
     assert [
