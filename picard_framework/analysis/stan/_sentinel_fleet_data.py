@@ -24,8 +24,8 @@ coefficient is the only within-person contrast available (spec 3).
 
 Wastewater enters as pooled read counts against the *same* latent incidence curve
 (spec 1.3) — one beta-binomial trial per voyage-epoch, never a port-labelled
-hazard. ``wastewater=False`` drops the channel entirely, which is how its marginal
-value is measured against the clinical-only baseline.
+hazard. ``WastewaterOptions(enabled=False)`` drops the channel entirely, which is
+how its marginal value is measured against the clinical-only baseline.
 
 Voyages are padded to the longest horizon; every Stan loop stops at ``T[v]`` so
 padded epochs never enter the likelihood.
@@ -95,6 +95,71 @@ DEFAULT_R_LOG_PRIOR_MEDIAN = 0.6
 DEFAULT_R_LOG_PRIOR_SD = 0.6
 DEFAULT_CREW_RATIO_PRIOR_SD = 0.5
 DEFAULT_REPEAT_PRIOR_SD = 0.3
+
+
+@dataclass(frozen=True)
+class FleetPriors:
+    """Priors on the fleet hierarchy, travelling as one argument.
+
+    Grouped rather than passed individually because they are one modelling
+    decision: the between-port spread, the fleet-time spread, and the visit
+    spread are only interpretable relative to each other (spec 3).
+    """
+
+    hazard_prior_median: float = DEFAULT_HAZARD_PRIOR_MEDIAN
+    baseline_prior_median: float = DEFAULT_BASELINE_PRIOR_MEDIAN
+    prior_log_sd: float = DEFAULT_PRIOR_LOG_SD
+    port_sd_prior_scale: float = DEFAULT_PORT_SD_PRIOR_SCALE
+    visit_sd_prior_scale: float = DEFAULT_VISIT_SD_PRIOR_SCALE
+    time_sd_prior_scale: float = DEFAULT_TIME_SD_PRIOR_SCALE
+    ship_sd_prior_scale: float = DEFAULT_SHIP_SD_PRIOR_SCALE
+    r_sd_prior_scale: float = DEFAULT_R_SD_PRIOR_SCALE
+    r_prior_median: float = DEFAULT_R_LOG_PRIOR_MEDIAN
+    r_prior_log_sd: float = DEFAULT_R_LOG_PRIOR_SD
+    crew_ratio_prior_sd: float = DEFAULT_CREW_RATIO_PRIOR_SD
+    repeat_prior_sd: float = DEFAULT_REPEAT_PRIOR_SD
+
+    def __post_init__(self) -> None:
+        medians = (
+            self.hazard_prior_median,
+            self.baseline_prior_median,
+            self.r_prior_median,
+        )
+        if any(m <= 0.0 for m in medians):
+            raise ValueError("prior medians must be positive")
+
+    def stan_fields(self) -> dict[str, float]:
+        """The prior block of the Stan data dictionary."""
+        return {
+            "hazard_log_prior_mean": math.log(float(self.hazard_prior_median)),
+            "hazard_log_prior_sd": float(self.prior_log_sd),
+            "baseline_log_prior_mean": math.log(float(self.baseline_prior_median)),
+            "baseline_log_prior_sd": float(self.prior_log_sd),
+            "r_log_prior_mean": math.log(float(self.r_prior_median)),
+            "r_log_prior_sd": float(self.r_prior_log_sd),
+            "port_sd_prior_scale": float(self.port_sd_prior_scale),
+            "visit_sd_prior_scale": float(self.visit_sd_prior_scale),
+            "time_sd_prior_scale": float(self.time_sd_prior_scale),
+            "ship_sd_prior_scale": float(self.ship_sd_prior_scale),
+            "r_sd_prior_scale": float(self.r_sd_prior_scale),
+            "crew_ratio_prior_sd": float(self.crew_ratio_prior_sd),
+            "repeat_prior_sd": float(self.repeat_prior_sd),
+        }
+
+
+@dataclass(frozen=True)
+class WastewaterOptions:
+    """Wastewater channel switches.
+
+    ``enabled=False`` is the clinical-only baseline the channel's marginal value
+    is measured against (spec 6), so it belongs with the channel's other knobs
+    rather than as a lone boolean beside the priors.
+    """
+
+    enabled: bool = True
+    pathogen: str | None = None
+    residence_lag_hours: float | None = None
+    max_effective_reads: int | None = None
 
 
 @dataclass(frozen=True)
@@ -212,22 +277,8 @@ def build_sentinel_fleet_data(
     incubation: DelayDistribution,
     generation: DelayDistribution,
     *,
-    hazard_prior_median: float = DEFAULT_HAZARD_PRIOR_MEDIAN,
-    baseline_prior_median: float = DEFAULT_BASELINE_PRIOR_MEDIAN,
-    prior_log_sd: float = DEFAULT_PRIOR_LOG_SD,
-    port_sd_prior_scale: float = DEFAULT_PORT_SD_PRIOR_SCALE,
-    visit_sd_prior_scale: float = DEFAULT_VISIT_SD_PRIOR_SCALE,
-    time_sd_prior_scale: float = DEFAULT_TIME_SD_PRIOR_SCALE,
-    ship_sd_prior_scale: float = DEFAULT_SHIP_SD_PRIOR_SCALE,
-    r_sd_prior_scale: float = DEFAULT_R_SD_PRIOR_SCALE,
-    r_prior_median: float = DEFAULT_R_LOG_PRIOR_MEDIAN,
-    r_prior_log_sd: float = DEFAULT_R_LOG_PRIOR_SD,
-    crew_ratio_prior_sd: float = DEFAULT_CREW_RATIO_PRIOR_SD,
-    repeat_prior_sd: float = DEFAULT_REPEAT_PRIOR_SD,
-    wastewater: bool = True,
-    pathogen: str | None = None,
-    residence_lag_hours: float | None = None,
-    max_effective_reads: int | None = None,
+    priors: FleetPriors | None = None,
+    wastewater: WastewaterOptions | None = None,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     """``(stan_data, meta)`` for a fleet of voyages sharing an epoch grid.
 
@@ -235,10 +286,10 @@ def build_sentinel_fleet_data(
     refer to — a fleet posterior is unreadable without them — plus the per-voyage
     port-resolution verdicts (spec 1.8).
     """
+    resolved_priors = priors or FleetPriors()
+    ww_options = wastewater or WastewaterOptions()
     if not voyages:
         raise ValueError("a fleet model needs at least one voyage")
-    if hazard_prior_median <= 0.0 or baseline_prior_median <= 0.0 or r_prior_median <= 0.0:
-        raise ValueError("prior medians must be positive")
     epoch_hours = {round(float(fv.voyage.epoch_duration_hours), 6) for fv in voyages}
     if len(epoch_hours) > 1:
         raise ValueError(
@@ -297,13 +348,10 @@ def build_sentinel_fleet_data(
     lagged = generation.strictly_lagged().weights[1:]
     ww = _wastewater_block(
         voyages,
-        enabled=wastewater,
-        pathogen=pathogen,
+        options=ww_options,
         t_max=t_max,
         aboard_all=aboard_all,
         epoch_hours=float(voyages[0].voyage.epoch_duration_hours),
-        residence_lag_hours=residence_lag_hours,
-        max_effective_reads=max_effective_reads,
     )
     data = {
         "V": len(voyages),
@@ -329,19 +377,7 @@ def build_sentinel_fleet_data(
         "aboard_hours": aboard_all,
         "secondary_share_raw": shares,
         "ascertainment": [float(fv.design.ascertainment) for fv in voyages],
-        "hazard_log_prior_mean": math.log(float(hazard_prior_median)),
-        "hazard_log_prior_sd": float(prior_log_sd),
-        "baseline_log_prior_mean": math.log(float(baseline_prior_median)),
-        "baseline_log_prior_sd": float(prior_log_sd),
-        "r_log_prior_mean": math.log(float(r_prior_median)),
-        "r_log_prior_sd": float(r_prior_log_sd),
-        "port_sd_prior_scale": float(port_sd_prior_scale),
-        "visit_sd_prior_scale": float(visit_sd_prior_scale),
-        "time_sd_prior_scale": float(time_sd_prior_scale),
-        "ship_sd_prior_scale": float(ship_sd_prior_scale),
-        "r_sd_prior_scale": float(r_sd_prior_scale),
-        "crew_ratio_prior_sd": float(crew_ratio_prior_sd),
-        "repeat_prior_sd": float(repeat_prior_sd),
+        **resolved_priors.stan_fields(),
         **ww["data"],
     }
     meta = _fleet_meta(
@@ -427,13 +463,10 @@ def _fleet_meta(
 def _wastewater_block(
     voyages: Sequence[FleetVoyage],
     *,
-    enabled: bool,
-    pathogen: str | None,
+    options: WastewaterOptions,
     t_max: int,
     aboard_all: Sequence[Sequence[Sequence[float]]],
     epoch_hours: float,
-    residence_lag_hours: float | None,
-    max_effective_reads: int | None,
 ) -> dict[str, Any]:
     """``{'data': ..., 'meta': ...}`` for the wastewater channel.
 
@@ -447,16 +480,16 @@ def _wastewater_block(
     person-hours already assembled, so the read fraction is linked to a
     *prevalence* rather than a headcount that would scale with ship size.
     """
-    resolved = pathogen or default_pathogen()
+    resolved = options.pathogen or default_pathogen()
     kernel = shedding_kernel(
         resolved,
         epoch_hours=epoch_hours,
-        residence_lag_hours=residence_lag_hours,
+        residence_lag_hours=options.residence_lag_hours,
     )
     config = wastewater_config()
     cap = int(
-        max_effective_reads
-        if max_effective_reads is not None
+        options.max_effective_reads
+        if options.max_effective_reads is not None
         else config["max_effective_reads"],
     )
 
@@ -469,7 +502,7 @@ def _wastewater_block(
 
     pooled: list[PooledSample] = []
     voyage_of: list[int] = []
-    if enabled:
+    if options.enabled:
         for i, fv in enumerate(voyages):
             samples = pool_wastewater(
                 fv.bundle,
@@ -498,7 +531,7 @@ def _wastewater_block(
         "ww_conc_prior_log_sd": float(DEFAULT_CONCENTRATION_PRIOR_LOG_SD),
     }
     meta = {
-        "enabled": bool(enabled),
+        "enabled": bool(options.enabled),
         "pathogen": resolved,
         "n_pooled_samples": len(pooled),
         "n_raw_samples": sum(s.n_collection_points for s in pooled),

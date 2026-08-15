@@ -29,6 +29,45 @@ import numpy as np
 TARGET_ACCEPT = 0.35
 
 
+def _initial_step(scale: Sequence[float] | float, theta: np.ndarray) -> np.ndarray:
+    step = (
+        np.full(theta.size, float(scale))
+        if np.isscalar(scale)
+        else np.asarray(list(scale), dtype=float)
+    )
+    if step.shape != theta.shape:
+        raise ValueError(f"scale has shape {step.shape}, expected {theta.shape}")
+    return step
+
+
+def _coordinate_sweep(
+    log_density: Callable[[np.ndarray], float],
+    theta: np.ndarray,
+    lp: float,
+    step: np.ndarray,
+    rng: np.random.Generator,
+    *,
+    gain: float | None,
+) -> tuple[np.ndarray, float]:
+    """One update per coordinate; adapts ``step`` in place when ``gain`` is given.
+
+    ``gain`` is the Robbins-Monro rate, and ``None`` means the kernel is frozen —
+    which is what makes the kept draws come from one transition kernel.
+    """
+    for j in range(theta.size):
+        proposal = theta.copy()
+        proposal[j] += rng.normal(0.0, step[j])
+        lp_new = log_density(proposal)
+        accept = lp_new > lp or math.log(rng.uniform()) < lp_new - lp
+        if accept:
+            theta, lp = proposal, lp_new
+        if gain is not None:
+            # Shrink the step when rejecting, grow it when accepting, with a
+            # decaying gain so warmup settles instead of oscillating.
+            step[j] *= math.exp(gain * ((1.0 if accept else 0.0) - TARGET_ACCEPT))
+    return theta, lp
+
+
 def adaptive_metropolis(
     log_density: Callable[[np.ndarray], float],
     init: Sequence[float],
@@ -48,13 +87,7 @@ def adaptive_metropolis(
     theta = np.asarray(list(init), dtype=float)
     if theta.ndim != 1 or theta.size == 0:
         raise ValueError("init must be a non-empty parameter vector")
-    step = (
-        np.full(theta.size, float(scale))
-        if np.isscalar(scale)
-        else np.asarray(list(scale), dtype=float)
-    )
-    if step.shape != theta.shape:
-        raise ValueError(f"scale has shape {step.shape}, expected {theta.shape}")
+    step = _initial_step(scale, theta)
 
     lp = log_density(theta)
     if not math.isfinite(lp):
@@ -64,18 +97,14 @@ def adaptive_metropolis(
     kept: list[np.ndarray] = []
     n_iter = int(warmup) + int(draws) * int(thin)
     for i in range(n_iter):
-        for j in range(theta.size):
-            proposal = theta.copy()
-            proposal[j] += rng.normal(0.0, step[j])
-            lp_new = log_density(proposal)
-            accept = lp_new > lp or math.log(rng.uniform()) < lp_new - lp
-            if accept:
-                theta, lp = proposal, lp_new
-            if i < warmup:
-                # Shrink the step when rejecting, grow it when accepting, with a
-                # decaying gain so warmup settles instead of oscillating.
-                gain = 1.0 / math.sqrt(i + 2.0)
-                step[j] *= math.exp(gain * ((1.0 if accept else 0.0) - TARGET_ACCEPT))
+        theta, lp = _coordinate_sweep(
+            log_density,
+            theta,
+            lp,
+            step,
+            rng,
+            gain=1.0 / math.sqrt(i + 2.0) if i < warmup else None,
+        )
         if i >= warmup and (i - warmup) % thin == 0:
             kept.append(theta.copy())
     return np.asarray(kept)

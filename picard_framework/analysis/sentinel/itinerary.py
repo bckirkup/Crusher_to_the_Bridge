@@ -141,6 +141,39 @@ def _pax_ashore_fraction(day: dict[str, Any], defaults: dict[str, Any]) -> float
     return max(0.0, 1.0 - onboard)
 
 
+def _port_call_from_day(
+    day: dict[str, Any],
+    *,
+    per_day: int,
+    hours: float,
+    day_defaults: dict[str, Any],
+    embark_date: date | None,
+) -> PortCall:
+    """One ``port_day`` entry as a ``PortCall``, dated off embarkation if needed."""
+    voyage_day = int(day.get("day", 1))
+    day_start = (voyage_day - 1) * per_day + 1
+    disembark = _window_bounds(day.get("disembark_window_epochs"))
+    reembark = _window_bounds(day.get("reembark_window_epochs"))
+    mean_hours, source = _ashore_hours(disembark, reembark, hours)
+    port_name = str(day.get("port") or "")
+    cal_date = _parse_date(day.get("calendar_date"))
+    if cal_date is None and embark_date is not None:
+        cal_date = embark_date + timedelta(days=voyage_day - 1)
+    return PortCall(
+        port_id=str(day.get("port_id") or slugify_port(port_name)),
+        port_name=port_name,
+        region=str(day.get("region") or "unknown"),
+        voyage_day=voyage_day,
+        arrival_epoch=day_start + (disembark[0] if disembark else 0),
+        departure_epoch=day_start + (reembark[1] if reembark else per_day - 1),
+        calendar_date=cal_date,
+        pax_ashore_fraction=_pax_ashore_fraction(day, day_defaults),
+        crew_ashore_fraction=float(day.get("crew_shore_leave_fraction") or 0.0),
+        mean_hours_ashore=mean_hours,
+        hours_ashore_source=source,
+    )
+
+
 def port_calls_from_config(config: dict[str, Any] | None) -> tuple[PortCall, ...]:
     """Derive port calls from a (possibly raw) voyage config.
 
@@ -155,35 +188,17 @@ def port_calls_from_config(config: dict[str, Any] | None) -> tuple[PortCall, ...
     day_defaults = (voyage.get("defaults") or {}).get(PORT_DAY_TYPE) or {}
     embark_date = _parse_date(voyage.get("embarkation_date"))
 
-    calls: list[PortCall] = []
-    for day in voyage.get("itinerary") or []:
-        if str(day.get("type", "")) != PORT_DAY_TYPE:
-            continue
-        voyage_day = int(day.get("day", 1))
-        day_start = (voyage_day - 1) * per_day + 1
-        disembark = _window_bounds(day.get("disembark_window_epochs"))
-        reembark = _window_bounds(day.get("reembark_window_epochs"))
-        mean_hours, source = _ashore_hours(disembark, reembark, hours)
-        port_name = str(day.get("port") or "")
-        cal_date = _parse_date(day.get("calendar_date"))
-        if cal_date is None and embark_date is not None:
-            cal_date = embark_date + timedelta(days=voyage_day - 1)
-        calls.append(
-            PortCall(
-                port_id=str(day.get("port_id") or slugify_port(port_name)),
-                port_name=port_name,
-                region=str(day.get("region") or "unknown"),
-                voyage_day=voyage_day,
-                arrival_epoch=day_start + (disembark[0] if disembark else 0),
-                departure_epoch=day_start
-                + (reembark[1] if reembark else per_day - 1),
-                calendar_date=cal_date,
-                pax_ashore_fraction=_pax_ashore_fraction(day, day_defaults),
-                crew_ashore_fraction=float(day.get("crew_shore_leave_fraction") or 0.0),
-                mean_hours_ashore=mean_hours,
-                hours_ashore_source=source,
-            ),
+    calls = [
+        _port_call_from_day(
+            day,
+            per_day=per_day,
+            hours=hours,
+            day_defaults=day_defaults,
+            embark_date=embark_date,
         )
+        for day in voyage.get("itinerary") or []
+        if str(day.get("type", "")) == PORT_DAY_TYPE
+    ]
     return tuple(sorted(calls, key=lambda c: (c.voyage_day, c.arrival_epoch)))
 
 
