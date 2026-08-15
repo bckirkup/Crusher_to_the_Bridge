@@ -2,7 +2,6 @@
 """Build class-representative deck_graphics.geojson from platform spatial_layout + airflow."""
 from __future__ import annotations
 
-import json
 import os
 from collections import defaultdict
 from typing import Any

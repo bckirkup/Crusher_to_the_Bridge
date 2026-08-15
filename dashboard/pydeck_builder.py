@@ -11,7 +11,6 @@ from dashboard.deck_geometry import (
     iter_hvac_paths,
     metric_fraction,
 )
-from dashboard.theme import LCARS_GOLD, LCARS_GREEN, LCARS_RED
 
 try:
     import pydeck as pdk

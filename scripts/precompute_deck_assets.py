@@ -30,10 +30,10 @@ from deck_photo_plate import (  # noqa: E402
     render_fiction_schematic,
     render_photo_plate,
 )
+
 from simulation_utils.paths import (  # noqa: E402
     prepare_output_directory,
     resolve_child_path,
-    resolve_repo_path,
     validate_path_component,
     validated_open,
 )
@@ -119,7 +119,7 @@ def _render_blueprint_background(
     fiction: bool,
 ) -> None:
     """Blueprint-style class plate for Plotly underlay (historic / fiction-adapted)."""
-    from PIL import Image, ImageDraw, ImageFont
+    from PIL import Image, ImageDraw
 
     bounds = compute_view_bounds(geojson, padding=2.0)
     xmin, xmax = bounds["xmin"], bounds["xmax"]

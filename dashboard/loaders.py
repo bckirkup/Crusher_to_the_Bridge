@@ -17,7 +17,6 @@ from dashboard.architectural_graphics import (
 from dashboard.paths import (
     CONFIG_YAML,
     DEFAULT_PICARD_SPEC,
-    NOTEBOOK_PATH,
     PLATFORMS_DIR,
     REPO_ROOT,
     SPATIAL_LAYOUT_JSON,

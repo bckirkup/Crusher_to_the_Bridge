@@ -5,8 +5,8 @@ import os
 import sys
 from typing import Any, Iterator
 
-from dashboard.paths import ALL_DECKS_LABEL
 from dashboard.loaders import PlatformBundle
+from dashboard.paths import ALL_DECKS_LABEL
 from telemetry_buffer.agent_axes import agent_has_symptomatic_presentation
 
 _SCRIPTS = os.path.join(os.path.dirname(os.path.dirname(__file__)), "scripts")

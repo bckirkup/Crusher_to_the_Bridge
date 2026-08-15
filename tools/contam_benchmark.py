@@ -41,6 +41,7 @@ from simulation_utils.paths import (  # noqa: E402
     resolve_repo_path,
     validated_open,
 )
+
 # resolve_repo_path used for bundled ContamW PRJ discovery
 
 _SPATIAL_LAYOUT_JSON = "spatial_layout.json"
