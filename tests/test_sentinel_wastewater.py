@@ -332,8 +332,9 @@ def test_reads_beyond_the_library_are_refused() -> None:
     The loader rejects it, so the beta-binomial can never be handed more
     successes than trials — and the pooling that follows cannot repair it either.
     """
+    bad = [sample_dict(24, reads=101, total=100)]
     with pytest.raises(ValueError, match="exceeds total_reads"):
-        one_voyage([sample_dict(24, reads=101, total=100)])
+        one_voyage(bad)
 
     voyage = one_voyage([sample_dict(24, reads=10, total=100)])
     pooled = pool_wastewater(
@@ -374,7 +375,8 @@ def test_expected_read_fraction_is_bounded_and_monotone() -> None:
     shares = np.array([0.0, 1e-6, 1e-4, 1e-2, 0.5, 1.0])
     p = expected_read_fraction(shares, logit_base=TRUE_BASE_LOGIT, slope=TRUE_SLOPE)
     assert np.all(np.isfinite(p))
-    assert np.all(p > 0.0) and np.all(p < 1.0)
+    assert np.all(p > 0.0)
+    assert np.all(p < 1.0)
     assert np.all(np.diff(p) >= 0.0)
     # slope = 0 is the "carries no information" hypothesis: a flat fraction.
     flat = expected_read_fraction(shares, logit_base=TRUE_BASE_LOGIT, slope=0.0)
@@ -416,7 +418,8 @@ def test_disabling_the_channel_leaves_a_valid_clinical_only_block() -> None:
     reads = simulate_reads(simulate_onsets(bare, rates), rates)
     data, meta = fleet_data(crossover_fleet(reads), wastewater=False)
     assert data["NW"] == 0
-    assert data["ww_voyage"] == [] and data["ww_reads"] == []
+    assert data["ww_voyage"] == []
+    assert data["ww_reads"] == []
     # The kernel and denominators still exist: only the observations are absent.
     assert data["L_shed"] >= 1
     assert len(data["ww_persons"]) == int(data["V"])
@@ -570,9 +573,9 @@ def test_the_posterior_recovers_the_shedding_signal(
     slope = np.asarray(posterior["ww_slope"], dtype=float)
     lo, hi = float(np.quantile(slope, 0.05)), float(np.quantile(slope, 0.95))
     assert lo > 0.1, f"a real signal read as no signal: slope 90% [{lo:.2f}, {hi:.2f}]"
-    assert lo <= TRUE_SLOPE * 1.4 and hi >= TRUE_SLOPE * 0.5, (
-        f"true slope {TRUE_SLOPE} far outside [{lo:.2f}, {hi:.2f}]"
-    )
+    covering = f"true slope {TRUE_SLOPE} far outside [{lo:.2f}, {hi:.2f}]"
+    assert lo <= TRUE_SLOPE * 1.4, covering
+    assert hi >= TRUE_SLOPE * 0.5, covering
     assert float(np.mean(posterior["loglik_wastewater"])) < 0.0
     assert np.all(np.isfinite(np.asarray(posterior["ww_conc"], dtype=float)))
 
@@ -703,7 +706,8 @@ def test_hazard_rows_expose_the_wastewater_column() -> None:
     rows = fleet_hazard_rows(
         summarize_fleet_hazards(posterior, meta, pathogen="norovirus"),
     )
-    assert rows and all(r["loglik_wastewater"] == pytest.approx(-19.5) for r in rows)
+    assert rows
+    assert all(r["loglik_wastewater"] == pytest.approx(-19.5) for r in rows)
 
 
 def test_wastewater_summary_reports_the_collapsed_replication() -> None:

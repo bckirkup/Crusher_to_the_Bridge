@@ -144,7 +144,7 @@ def channel_loglik(posterior: Mapping[str, Sequence[float]]) -> dict[str, float]
     wastewater = posterior.get("loglik_wastewater")
     if wastewater is not None:
         draws = np.asarray(list(wastewater), dtype=float)
-        if draws.size and bool((draws != 0.0).any()):
+        if draws.size and bool((np.abs(draws) > 0.0).any()):
             out[WASTEWATER_CHANNEL] = float(draws.mean())
     return out
 

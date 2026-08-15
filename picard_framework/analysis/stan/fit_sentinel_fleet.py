@@ -27,6 +27,7 @@ import argparse
 import io
 import os
 import sys
+from dataclasses import dataclass
 from typing import Any, Sequence
 
 from picard_framework.analysis._io import (
@@ -79,6 +80,21 @@ _FLEET_TIME_COLUMNS = (
 )
 _SMOKE_DRAWS = 60
 _SMOKE_WARMUP = 200
+
+
+@dataclass(frozen=True)
+class SamplerOptions:
+    """Sampler knobs, kept together so they travel as one argument.
+
+    The numpy reference walker reads ``iter_sampling``/``iter_warmup`` as draws and
+    warmup; the rest apply to CmdStan only.
+    """
+
+    chains: int = 4
+    iter_sampling: int = 1000
+    iter_warmup: int = 1000
+    seed: int = 1701
+    show_progress: bool = True
 
 
 def stan_model_path() -> str:
@@ -234,15 +250,12 @@ def fit_sentinel_fleet(
     care_seeking: float = 1.0,
     testing: float = 1.0,
     engine: str = "auto",
-    chains: int = 4,
-    iter_sampling: int = 1000,
-    iter_warmup: int = 1000,
-    seed: int = 1701,
-    show_progress: bool = True,
+    sampler: SamplerOptions | None = None,
     smoke: bool = False,
     wastewater: bool = True,
 ) -> dict[str, Any]:
     """Assemble the fleet, sample, and write the pooled summaries."""
+    opts = sampler or SamplerOptions()
     out = ensure_out_dir(out_dir)
     voyages, resolved_pathogen = load_fleet_voyages(
         load_fleet_manifest(manifest_path),
@@ -286,9 +299,9 @@ def fit_sentinel_fleet(
 
         posterior = fleet_reference_posterior(
             data,
-            draws=_SMOKE_DRAWS if smoke else iter_sampling,
-            warmup=_SMOKE_WARMUP if smoke else iter_warmup,
-            seed=seed,
+            draws=_SMOKE_DRAWS if smoke else opts.iter_sampling,
+            warmup=_SMOKE_WARMUP if smoke else opts.iter_warmup,
+            seed=opts.seed,
         )
         status: dict[str, Any] = {
             "status": "smoke" if smoke else "ok",
@@ -317,12 +330,12 @@ def fit_sentinel_fleet(
         model = CmdStanModel(stan_file=stan_model_path())
         fit = model.sample(
             data=data,
-            chains=chains,
-            parallel_chains=chains,
-            iter_sampling=iter_sampling,
-            iter_warmup=iter_warmup,
-            seed=seed,
-            show_progress=show_progress,
+            chains=opts.chains,
+            parallel_chains=opts.chains,
+            iter_sampling=opts.iter_sampling,
+            iter_warmup=opts.iter_warmup,
+            seed=opts.seed,
+            show_progress=opts.show_progress,
         )
     except Exception as exc:
         status = {"status": "error", "reason": str(exc), "meta": meta}
@@ -394,11 +407,13 @@ def main(argv: list[str] | None = None) -> int:
         care_seeking=args.care_seeking,
         testing=args.testing,
         engine=args.engine,
-        chains=args.chains,
-        iter_sampling=args.iter_sampling,
-        iter_warmup=args.iter_warmup,
-        seed=args.seed,
-        show_progress=args.show_progress,
+        sampler=SamplerOptions(
+            chains=args.chains,
+            iter_sampling=args.iter_sampling,
+            iter_warmup=args.iter_warmup,
+            seed=args.seed,
+            show_progress=args.show_progress,
+        ),
         smoke=args.smoke,
         wastewater=args.wastewater,
     )
