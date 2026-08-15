@@ -120,8 +120,8 @@ def test_port_slots_carry_exposure_metadata(design: dict[str, Any]) -> None:
 def test_hazard_profiles_land_on_their_tiers(design: dict[str, Any]) -> None:
     manifest = expand_design.build_manifest(design)
     one_hot = manifest["tiers"]["sr_one_hot_fleet_crossed"]["shore_exposure"]
-    assert one_hot["port_hazards"]["MXCZM"] == pytest.approx(0.01)
-    assert one_hot["port_hazards"]["KYGEC"] == pytest.approx(0.001)
+    assert one_hot["port_hazards"]["MXCZM"] == pytest.approx(0.001)
+    assert one_hot["port_hazards"]["KYGEC"] == pytest.approx(0.0001)
     null = manifest["tiers"]["sr_null_single"]["shore_exposure"]["port_hazards"]
     assert set(null.values()) == {0.0}
 

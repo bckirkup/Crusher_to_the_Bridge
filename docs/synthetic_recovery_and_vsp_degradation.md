@@ -23,6 +23,15 @@ configurations into `sr_<hazard>_<fleet>` tiers and resolves each template into
 voyage day slots that `campaign_runner` stamps hazards onto. A new region or
 port rotation is therefore a design-spec edit, not a code edit.
 
+`port_hazards` are per-epoch (hourly) infection probabilities for a person
+ashore, so a value must be read against the ~10-epoch ashore window: 1e-4 is
+~0.1% attack among shore-goers per call, 1e-3 ~1%, and 0.015 ~14% — hundreds of
+imported cases on a mega-cruise call, i.e. an outbreak rather than a quiet
+voyage. The grid therefore sits in the 1e-4 to 1e-3 decade, which is where the
+sentinel question ("can a port be seen at all when almost nothing happens")
+lives, and keeps outbreak scale only in `last_port_hot`, whose purpose is to
+stress the right-censoring correction.
+
 ```bash
 # regenerate the manifest after editing the design
 python3 -m picard_framework.runs.mega_cruise_campaign.expand_design \
