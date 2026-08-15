@@ -28,6 +28,9 @@ def tier_cartesian(manifest: dict[str, Any], tier: dict[str, Any]) -> int:
     surv = tier.get("surveillance_strategies") or [tier.get("surveillance", "none")]
     seeds = tier["seeds"]
 
+    if "R_onboard_values" in tier or "shore_exposure" in tier:
+        return len(plats) * len(tier["R_onboard_values"]) * len(seeds)
+
     if tid_hint.startswith("sr") or "parameter_vectors" in tier:
         n_vec = len(tier["parameter_vectors"])
         return len(plats) * n_vec * len(surv) * len(seeds)

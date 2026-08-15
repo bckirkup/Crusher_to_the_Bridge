@@ -32,6 +32,9 @@ from urllib.parse import urlparse
 REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT))
 
+from picard_framework.runs.mega_cruise_campaign import (  # noqa: E402
+    sentinel_recovery,
+)
 from simulation_utils.epidemic_labels import epidemic_took_off  # noqa: E402
 from simulation_utils.paths import (  # noqa: E402
     is_path_under_base,
@@ -625,6 +628,129 @@ def _iter_synthetic_recovery_runs(
                         non_susceptible=nonsus,
                         parameter_vector=vec_id,
                     )
+
+
+def _iter_sentinel_recovery_runs(
+    *,
+    manifest: dict[str, Any],
+    tier: dict[str, Any],
+    tier_id: str,
+    surv_cfgs: dict[str, Any],
+    platform_override: str | None,
+    num_agents_override: int | None,
+    yield_run,
+) -> Iterator[tuple[str, dict[str, Any]]]:
+    """Yield Picard specs for sentinel port-hazard recovery (sr_* + R_onboard)."""
+    pathogen = tier["pathogen"]
+    bundle, pathogen_id, base_overrides = get_pathogen_config(manifest, pathogen)
+    platforms = _resolve_tier_platforms(
+        tier,
+        fallback_platform=manifest["platform"],
+        platform_override=platform_override,
+    )
+    defaults = manifest.get("defaults") or {}
+    dose = float(defaults.get("dose_adjustment", 10.6))
+    alpha = float(defaults.get("density_exponent", 0.75))
+    dens_over = _density_contact_override(alpha)
+    strategies = list(tier.get("surveillance_strategies") or ["syndromic"])
+    hazards = dict((tier.get("shore_exposure") or {}).get("port_hazards") or {})
+    hazard_profile, fleet_config = sentinel_recovery.parse_tier_labels(tier_id, tier)
+    epochs = int(tier.get("epochs", manifest.get("default_epochs", 168)))
+    template = sentinel_recovery.load_standard_itinerary()
+    default_agents = int(manifest.get("default_num_agents", 7000))
+    for plat_index, plat in enumerate(platforms):
+        n_agents = _platform_num_agents(
+            plat,
+            num_agents_override=num_agents_override,
+            tier=tier,
+            default_agents=default_agents,
+        )
+        variant = sentinel_recovery.itinerary_for_platform(tier, plat_index)
+        days = sentinel_recovery.stamp_port_hazards(
+            sentinel_recovery.apply_itinerary_variant(template, variant),
+            hazards,
+        )
+        for r_onboard in tier["R_onboard_values"]:
+            r_val = float(r_onboard)
+            n_init = sentinel_recovery.initial_infected(hazards, r_val)
+            path_over = dict(base_overrides or {})
+            path_over[pathogen_id] = {
+                **(path_over.get(pathogen_id) or {}),
+                "dose_adjustment": dose,
+                "initial_infected": n_init,
+            }
+            voyage = sentinel_recovery.voyage_override(
+                days=days, r_onboard=r_val, epochs=epochs,
+            )
+            for sname in strategies:
+                for seed in tier["seeds"]:
+                    rid = "_".join(
+                        [
+                            "sr",
+                            pathogen,
+                            plat,
+                            hazard_profile,
+                            fleet_config,
+                            variant,
+                            sentinel_recovery.r_onboard_tag(r_val),
+                            f"s{seed}",
+                        ]
+                    )
+                    yield yield_run(
+                        rid,
+                        bundle=bundle,
+                        pathogen_overrides=path_over,
+                        config_overrides=merge_cfg(
+                            surv_cfgs.get(sname),
+                            dens_over,
+                            {"voyage": voyage, "voyage_id": rid},
+                        ),
+                        seed=seed,
+                        num_agents=n_agents,
+                        pathogen=pathogen,
+                        platform_id=plat,
+                        surveillance=sname,
+                        dose_adjustment=dose,
+                        density_exponent=alpha,
+                        n_init=n_init,
+                        R_onboard=r_val,
+                        hazard_profile=hazard_profile,
+                        fleet_config=fleet_config,
+                        itinerary_variant=variant,
+                        port_hazards=hazards,
+                    )
+
+
+def _iter_sr_family_runs(
+    *,
+    manifest: dict[str, Any],
+    tier: dict[str, Any],
+    tier_id: str,
+    surv_cfgs: dict[str, Any],
+    platform_override: str | None,
+    num_agents_override: int | None,
+    yield_run,
+) -> Iterator[tuple[str, dict[str, Any]]]:
+    """Dispatch ridge synthetic recovery vs sentinel port-hazard recovery."""
+    if sentinel_recovery.is_sentinel_recovery_tier(tier):
+        yield from _iter_sentinel_recovery_runs(
+            manifest=manifest,
+            tier=tier,
+            tier_id=tier_id,
+            surv_cfgs=surv_cfgs,
+            platform_override=platform_override,
+            num_agents_override=num_agents_override,
+            yield_run=yield_run,
+        )
+        return
+    yield from _iter_synthetic_recovery_runs(
+        manifest=manifest,
+        tier=tier,
+        surv_cfgs=surv_cfgs,
+        platform_override=platform_override,
+        num_agents_override=num_agents_override,
+        yield_run=yield_run,
+    )
 
 
 def _vd_active_knob_tags(tier: dict[str, Any], knobs: dict[str, Any]) -> list[str]:
@@ -1625,9 +1751,10 @@ def generate_tier_runs(
                                             )
 
     elif short.startswith("sr"):
-        yield from _iter_synthetic_recovery_runs(
+        yield from _iter_sr_family_runs(
             manifest=manifest,
             tier=tier,
+            tier_id=tier_id,
             surv_cfgs=surv_cfgs,
             platform_override=platform_override,
             num_agents_override=num_agents_override,
@@ -1773,6 +1900,15 @@ def _spec_num_agents(spec: dict[str, Any]) -> int:
     return int(cfg.get("ship_graph", {}).get("num_agents", 7000))
 
 
+def _arm_sentinel_line_list(spec: dict[str, Any], run_dir: str) -> None:
+    """Collect the sentinel ledger when shore exposure is on (compact-safe)."""
+    voyage = (spec.get("config_overrides") or {}).get("voyage") or {}
+    shore = voyage.get("shore_exposure") if isinstance(voyage, dict) else None
+    if not isinstance(shore, dict) or not shore.get("enabled"):
+        return
+    spec["run"]["sentinel_line_list"] = os.path.join(run_dir, "sentinel_line_list.json")
+
+
 def run_simulation(
     run_id: str,
     spec: dict[str, Any],
@@ -1816,6 +1952,7 @@ def run_simulation(
         # Campaign default: compact in-RAM history (summary / spaces / cost only).
         spec["run"].setdefault("history_retention", "compact")
         spec["run"].setdefault("write_ground_truth", False)
+    _arm_sentinel_line_list(spec, run_dir)
 
     spec_path = resolve_child_path(run_dir, "run_spec.json")
     with validated_open(spec_path, "w", allowed_roots=roots, encoding="utf-8") as fh:
