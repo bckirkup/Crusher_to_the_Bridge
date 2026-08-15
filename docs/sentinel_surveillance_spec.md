@@ -382,7 +382,7 @@ Devin sessions.
 | 5 | `sentinel_attribution.stan` + `_sentinel_data.py` + `fit_sentinel_attribution.py`: single-ship Poisson-offset hazards with renewal secondaries and sampled `R_onboard`; fixture posterior for CI | 1.5 |
 | 6 | `sentinel_fleet.stan`: port-visit × ship hierarchy, fleet-time effect, crew repeat exposure; synthetic recovery + null + confounded + censoring suites | 1.5 |
 | 7 | `wastewater_signal.py` beta-binomial channel wired into the latent curve; per-channel `evidence_loglik` | 1 |
-| 8 | `run_sentinel.py` CLI + `figures.py` + `report.py` + `--smoke` in `ci.yml` | 0.5 |
+| 8 | ✅ `run_sentinel.py` CLI + `artifacts.py` fit-directory loader + `figures.py` + `report.py` + `--smoke` in `ci.yml` | 0.5 |
 | 9 | (Phase 3, separate track) strain label in the ABM, then `genomic_linkage.py` | 2 |
 | 10 | (Retrospective track, gated on §6) voyage-level model: MIDRS/VSP counts × AIS/schedule port-visit reconstruction, ashore-fraction prior + sensitivity. First task is the ship/date join feasibility check. | 1.5 |
 
