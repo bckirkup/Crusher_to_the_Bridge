@@ -50,6 +50,7 @@ from picard_framework.analysis.sentinel.fleet import (
     summarize_fleet_hazards,
     summarize_visit_hazards,
     visit_hazard_rows,
+    wastewater_summary,
 )
 from picard_framework.analysis.sentinel.incubation import (
     default_pathogen,
@@ -208,12 +209,15 @@ def write_fleet_outputs(
     write_json(os.path.join(out, "onboard_summary.json"), onboard)
     crew = crew_exposure_summary(posterior)
     write_json(os.path.join(out, "crew_exposure.json"), crew)
+    wastewater = wastewater_summary(posterior, meta)
+    write_json(os.path.join(out, "wastewater_channel.json"), wastewater)
     return {
         "n_ports": len(ports),
         "n_visits": len(visits),
         "n_weeks": len(weeks),
         "onboard": onboard,
         "crew": crew,
+        "wastewater": wastewater,
         "hazard_mean": {p.port_id: p.hazard_mean for p in ports},
         "fleet_time_confounded": sorted(
             p.port_id for p in ports if p.fleet_time_confounded
@@ -236,6 +240,7 @@ def fit_sentinel_fleet(
     seed: int = 1701,
     show_progress: bool = True,
     smoke: bool = False,
+    wastewater: bool = True,
 ) -> dict[str, Any]:
     """Assemble the fleet, sample, and write the pooled summaries."""
     out = ensure_out_dir(out_dir)
@@ -250,7 +255,13 @@ def fit_sentinel_fleet(
         resolved_pathogen,
         epoch_hours=voyages[0].voyage.epoch_duration_hours,
     )
-    data, meta = build_sentinel_fleet_data(voyages, incubation, generation)
+    data, meta = build_sentinel_fleet_data(
+        voyages,
+        incubation,
+        generation,
+        wastewater=wastewater,
+        pathogen=resolved_pathogen,
+    )
     meta["pathogen"] = resolved_pathogen
     write_json(os.path.join(out, "stan_data_meta.json"), meta)
     for voyage_meta in meta["voyages"]:
@@ -364,6 +375,16 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="short numpy run that exercises the output path without a real fit",
     )
+    parser.add_argument(
+        "--wastewater",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help=(
+            "include the wastewater read counts as a second observation of the "
+            "incidence curve; --no-wastewater is the clinical-only baseline the "
+            "channel's marginal value is measured against (spec 6)"
+        ),
+    )
     args = parser.parse_args(argv)
     status = fit_sentinel_fleet(
         args.manifest,
@@ -379,6 +400,7 @@ def main(argv: list[str] | None = None) -> int:
         seed=args.seed,
         show_progress=args.show_progress,
         smoke=args.smoke,
+        wastewater=args.wastewater,
     )
     print(status.get("status"), flush=True)
     return 0 if status.get("status") in {"ok", "smoke", "skipped"} else 1

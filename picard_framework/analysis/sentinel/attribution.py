@@ -19,6 +19,7 @@ from picard_framework.analysis._io import read_json
 _FIXTURE_FILE = "attribution_posterior.json"
 
 CLINICAL_CHANNEL = "clinical"
+WASTEWATER_CHANNEL = "wastewater"
 
 
 @dataclass(frozen=True)
@@ -127,11 +128,25 @@ def summarize_port_hazards(
 
 
 def channel_loglik(posterior: Mapping[str, Sequence[float]]) -> dict[str, float]:
-    """Per-channel evidence contribution (clinical only until PR 7)."""
-    values = posterior.get("loglik_clinical")
-    if values is None:
-        return {}
-    return {CLINICAL_CHANNEL: float(np.asarray(list(values), dtype=float).mean())}
+    """Per-channel evidence contribution, kept separate on purpose.
+
+    A single combined number would hide which observation moved the estimate,
+    and the two channels are correlated by construction — wastewater observes
+    the same latent incidence as the line list — so their sum is not a
+    likelihood of independent data and must not be reported as one. An absent or
+    all-zero wastewater column means the channel was off for that fit, which is
+    reported as its absence rather than as zero evidence.
+    """
+    out: dict[str, float] = {}
+    clinical = posterior.get("loglik_clinical")
+    if clinical is not None:
+        out[CLINICAL_CHANNEL] = float(np.asarray(list(clinical), dtype=float).mean())
+    wastewater = posterior.get("loglik_wastewater")
+    if wastewater is not None:
+        draws = np.asarray(list(wastewater), dtype=float)
+        if draws.size and bool((draws != 0.0).any()):
+            out[WASTEWATER_CHANNEL] = float(draws.mean())
+    return out
 
 
 def onboard_summary(posterior: Mapping[str, Sequence[float]]) -> dict[str, float]:

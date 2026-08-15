@@ -10,6 +10,10 @@ What the fleet model adds to the single-ship summary:
   ``None`` for, because one voyage cannot support it.
 - **per-visit hazards** under a pooled port mean, so a single bad week is visible
   as a visit deviation instead of being averaged into the port.
+- **a wastewater channel summary.** Reported separately from the port hazards,
+  because the channel observes the incidence curve and never a port (spec 1.3);
+  its evidence stays in its own ``evidence_loglik`` key rather than being summed
+  into a single score with the correlated clinical term.
 - **a structural identifiability flag.** A port whose every visit falls in a week
   when no other port was called at is not separable from the fleet-time effect
   for that week (spec 3). That is a property of the itinerary, not of the draws,
@@ -26,6 +30,7 @@ import numpy as np
 
 from picard_framework.analysis.sentinel.attribution import (
     CLINICAL_CHANNEL,
+    WASTEWATER_CHANNEL,
     channel_loglik,
     parameter_draws,
 )
@@ -248,6 +253,52 @@ def crew_exposure_summary(
     }
 
 
+def wastewater_summary(
+    posterior: Mapping[str, Sequence[float]],
+    meta: Mapping[str, Any],
+) -> dict[str, Any]:
+    """What the wastewater channel contributed, or why it contributed nothing.
+
+    ``slope`` is the elasticity of the read fraction in shedder prevalence: an
+    interval that includes 0 says this ship's greywater did not track the
+    clinical curve, which is a reportable finding rather than a failure. There is
+    deliberately no port attribution here — a composite sample cannot carry one
+    (spec 1.3), and the pooled/raw sample counts are reported side by side so a
+    reader can see how much correlated replication was collapsed. ``fitted`` is
+    false when the samples exist but the posterior did not estimate the channel,
+    so a clinical-only fit reports the absence rather than an invented slope.
+    """
+    block = dict((meta.get("wastewater") or {}))
+    enabled = bool(block.get("enabled")) and int(block.get("n_pooled_samples") or 0) > 0
+    fitted = enabled and "ww_slope" in posterior
+    out: dict[str, Any] = {
+        "enabled": enabled,
+        "fitted": fitted,
+        "pathogen": block.get("pathogen"),
+        "n_pooled_samples": int(block.get("n_pooled_samples") or 0),
+        "n_raw_samples": int(block.get("n_raw_samples") or 0),
+        "max_effective_reads": block.get("max_effective_reads"),
+        "residence_lag_epochs": block.get("residence_lag_epochs"),
+        "mean_shedding_hours": block.get("mean_shedding_hours"),
+    }
+    if not fitted:
+        return out
+    slope = parameter_draws(posterior, "ww_slope")
+    conc = parameter_draws(posterior, "ww_conc")
+    loglik = channel_loglik(posterior)
+    out.update(
+        {
+            "slope_mean": float(slope.mean()),
+            "slope_q05": float(np.quantile(slope, 0.05)),
+            "slope_q95": float(np.quantile(slope, 0.95)),
+            "concentration_mean": float(conc.mean()),
+            "loglik_wastewater": loglik.get(WASTEWATER_CHANNEL),
+            "loglik_clinical": loglik.get(CLINICAL_CHANNEL),
+        },
+    )
+    return out
+
+
 def fleet_hazard_rows(estimates: Sequence[FleetPortHazard]) -> list[dict[str, Any]]:
     """Flatten pooled port estimates for CSV output."""
     return [
@@ -264,6 +315,7 @@ def fleet_hazard_rows(estimates: Sequence[FleetPortHazard]) -> list[dict[str, An
             "fleet_time_confounded": e.fleet_time_confounded,
             "port_resolution_adequate": e.port_resolution_adequate,
             "loglik_clinical": e.evidence_loglik.get(CLINICAL_CHANNEL, ""),
+            "loglik_wastewater": e.evidence_loglik.get(WASTEWATER_CHANNEL, ""),
         }
         for e in estimates
     ]
@@ -299,6 +351,7 @@ FLEET_HAZARD_COLUMNS = (
     "fleet_time_confounded",
     "port_resolution_adequate",
     "loglik_clinical",
+    "loglik_wastewater",
 )
 
 VISIT_HAZARD_COLUMNS = (

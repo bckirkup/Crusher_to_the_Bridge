@@ -46,6 +46,7 @@ def fleet_voyage(
     onset_epochs: Sequence[int] = (),
     crew_onset_epochs: Sequence[int] = (),
     crew_fraction: float = 0.2,
+    wastewater_samples: Sequence[dict[str, Any]] = (),
 ) -> FleetVoyage:
     """One voyage of the fleet: ``ports`` as ``(voyage_day, port_id)`` pairs."""
     itinerary: list[dict[str, Any]] = [
@@ -121,7 +122,7 @@ def fleet_voyage(
             "n_crew": N_CREW,
             "observation_end_epoch": end,
             "clinical_cases": cases,
-            "wastewater_samples": [],
+            "wastewater_samples": [dict(s) for s in wastewater_samples],
         },
     )
     design = build_exposure_design(voyage, bundle, INCUBATION)
