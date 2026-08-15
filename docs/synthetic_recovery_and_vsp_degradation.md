@@ -12,6 +12,35 @@ Spot ABM campaigns derived from design specs in
 Generators: tier ids `sr*` / `sr_*` (sentinel) / `vd*` in
 `picard_framework/runs/mega_cruise_campaign/campaign_runner.py`.
 
+## Sentinel: the manifest is generated, not authored
+
+`sentinel_synthetic_recovery_v1_manifest.json` is expanded from
+`sentinel_synthetic_recovery_v1_design.json`
+(schema: `schemas/sentinel_recovery_design.schema.json`). The design spec holds
+the port registry, itinerary templates, hazard profiles, `R_onboard` levels,
+fleet configurations and seeds; the expander crosses hazard profiles with fleet
+configurations into `sr_<hazard>_<fleet>` tiers and resolves each template into
+voyage day slots that `campaign_runner` stamps hazards onto. A new region or
+port rotation is therefore a design-spec edit, not a code edit.
+
+```bash
+# regenerate the manifest after editing the design
+python3 -m picard_framework.runs.mega_cruise_campaign.expand_design \
+  --design picard_framework/runs/mega_cruise_campaign/sentinel_synthetic_recovery_v1_design.json
+
+# fail on drift (also asserted by tests/test_sentinel_design_expansion.py)
+python3 -m picard_framework.runs.mega_cruise_campaign.expand_design \
+  --design picard_framework/runs/mega_cruise_campaign/sentinel_synthetic_recovery_v1_design.json \
+  --check
+```
+
+Population note: earlier hand-written sentinel experiment JSON listed
+`default_num_agents: 5000`, matching the `mega_cruise_5000` *berth* name rather
+than its agent count. Populations come from `_PLATFORM_DEFAULT_AGENTS` in
+`campaign_runner.py` (mega 7000 = passengers + crew, spirit 3000, classic 1910);
+`default_num_agents` in the design is only the fallback for platforms absent
+from that table, and is kept at 7000 so the run set is unchanged.
+
 ## Light validation
 
 ```powershell

@@ -1,0 +1,209 @@
+{
+  "schema_version": "1.0.0",
+  "campaign": "sentinel_synthetic_recovery_v1",
+  "description": "Synthetic recovery for sentinel port-attribution. 6 hazard profiles x 4 R_onboard x 3 fleet configs x 20 seeds = 3360 voyages. Shore exposure on; known lambda_p; R_onboard scales onboard contact. Platform populations: mega 7000 / spirit 3000 / classic 1910.",
+  "platform": "mega_cruise_5000",
+  "default_epochs": 168,
+  "default_num_agents": 7000,
+  "pathogen": "norovirus",
+  "embarkation_date": "2026-01-10",
+  "pathogen_configs": {
+    "norovirus": {
+      "bundle": "active_profiles",
+      "pathogen_id": "norwalk_gi",
+      "overrides": {
+        "remove": [
+          "sars_cov2_resp"
+        ]
+      }
+    }
+  },
+  "surveillance_configs": {
+    "syndromic": {
+      "diagnostic_cascade": {
+        "enabled": false
+      }
+    }
+  },
+  "defaults": {
+    "dose_adjustment": 10.6,
+    "density_exponent": 0.75
+  },
+  "R_onboard_values": [
+    0.0,
+    0.5,
+    1.0,
+    1.5
+  ],
+  "seeds": {
+    "start": 300,
+    "count": 20
+  },
+  "ports": {
+    "USMIA": {
+      "port": "Miami",
+      "region": "AMR",
+      "role": "homeport"
+    },
+    "MXCZM": {
+      "port": "Cozumel",
+      "region": "AMR",
+      "disembark_fraction": 0.72,
+      "crew_shore_leave_fraction": 0.15,
+      "disembark_window_epochs": [2, 5],
+      "reembark_window_epochs": [12, 15]
+    },
+    "MXCTM": {
+      "port": "Costa Maya",
+      "region": "AMR",
+      "disembark_fraction": 0.55,
+      "crew_shore_leave_fraction": 0.1,
+      "disembark_window_epochs": [3, 6],
+      "reembark_window_epochs": [13, 16]
+    },
+    "KYGEC": {
+      "port": "George Town",
+      "region": "AMR",
+      "disembark_fraction": 0.6,
+      "crew_shore_leave_fraction": 0.08,
+      "disembark_window_epochs": [3, 5],
+      "reembark_window_epochs": [11, 14]
+    }
+  },
+  "homeport": {
+    "embarkation": {
+      "port_id": "USMIA",
+      "embarkation_window_epochs": [10, 16],
+      "stateroom_available_epoch": 13,
+      "buffet_surge_fraction": 0.8
+    },
+    "disembarkation": {
+      "port_id": "USMIA",
+      "disembark_window_epochs": [6, 12]
+    }
+  },
+  "itinerary_templates": {
+    "standard": {
+      "description": "7-day western Caribbean: Cozumel, Costa Maya, George Town.",
+      "length_days": 7,
+      "port_days": {
+        "3": "MXCZM",
+        "4": "MXCTM",
+        "6": "KYGEC"
+      }
+    },
+    "reversed": {
+      "description": "Same day slots, reversed port order (crossover on ordering).",
+      "length_days": 7,
+      "port_days": {
+        "3": "KYGEC",
+        "4": "MXCTM",
+        "6": "MXCZM"
+      }
+    },
+    "staggered": {
+      "description": "Same port order, port calls one day earlier (crossover on timing).",
+      "length_days": 7,
+      "port_days": {
+        "2": "MXCZM",
+        "4": "MXCTM",
+        "5": "KYGEC"
+      }
+    }
+  },
+  "hazard_profiles": {
+    "uniform_low": {
+      "description": "All ports equally low hazard.",
+      "port_hazards": {
+        "MXCZM": 0.001,
+        "MXCTM": 0.001,
+        "KYGEC": 0.001
+      }
+    },
+    "uniform_high": {
+      "description": "All ports equally high hazard.",
+      "port_hazards": {
+        "MXCZM": 0.005,
+        "MXCTM": 0.005,
+        "KYGEC": 0.005
+      }
+    },
+    "one_hot": {
+      "description": "Cozumel is the hot port.",
+      "port_hazards": {
+        "MXCZM": 0.01,
+        "MXCTM": 0.001,
+        "KYGEC": 0.001
+      }
+    },
+    "gradient": {
+      "description": "Increasing hazard along the standard itinerary order.",
+      "port_hazards": {
+        "MXCZM": 0.002,
+        "MXCTM": 0.005,
+        "KYGEC": 0.01
+      }
+    },
+    "last_port_hot": {
+      "description": "Last port hot: stresses the censoring correction.",
+      "port_hazards": {
+        "MXCZM": 0.001,
+        "MXCTM": 0.001,
+        "KYGEC": 0.015
+      }
+    },
+    "null": {
+      "description": "No port hazard; every case is onboard secondary spread.",
+      "port_hazards": {
+        "MXCZM": 0.0,
+        "MXCTM": 0.0,
+        "KYGEC": 0.0
+      }
+    }
+  },
+  "fleet_configs": {
+    "single": {
+      "description": "One ship, one itinerary.",
+      "ships": [
+        {
+          "platform": "mega_cruise_5000",
+          "itinerary": "standard"
+        }
+      ]
+    },
+    "fleet_same": {
+      "description": "Three ships, same itinerary: pooling without crossover.",
+      "ships": [
+        {
+          "platform": "mega_cruise_5000",
+          "itinerary": "standard"
+        },
+        {
+          "platform": "spirit_cruise_3000",
+          "itinerary": "standard"
+        },
+        {
+          "platform": "classic_cruise_1900",
+          "itinerary": "standard"
+        }
+      ]
+    },
+    "fleet_crossed": {
+      "description": "Three ships, different port orders and timings: crossover identification.",
+      "ships": [
+        {
+          "platform": "mega_cruise_5000",
+          "itinerary": "standard"
+        },
+        {
+          "platform": "spirit_cruise_3000",
+          "itinerary": "reversed"
+        },
+        {
+          "platform": "classic_cruise_1900",
+          "itinerary": "staggered"
+        }
+      ]
+    }
+  }
+}

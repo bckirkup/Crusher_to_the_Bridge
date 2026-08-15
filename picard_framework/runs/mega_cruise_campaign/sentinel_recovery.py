@@ -1,47 +1,29 @@
 """Sentinel synthetic-recovery helpers (port-hazard × R_onboard × fleet).
 
 Turns ``sentinel_synthetic_recovery_v1`` tiers into voyage overrides: known
-``shore_infection_probability`` per UN-LOCODE, itinerary variants for fleet
-crossover, and a contact-rate scale that stands in for known ``R_onboard``.
+``shore_infection_probability`` per UN-LOCODE, the itinerary template named by
+the tier, and a contact-rate scale that stands in for known ``R_onboard``.
+
+Itinerary templates live in the manifest (expanded from the campaign design
+spec by :mod:`expand_design`) rather than in this module, so running a
+different region is a configuration change, not a code change.
 """
 from __future__ import annotations
 
 import copy
-import json
 from pathlib import Path
 from typing import Any
 
-from simulation_utils.paths import validated_open
-
 CAMPAIGN_DIR = Path(__file__).resolve().parent
 REPO_ROOT = CAMPAIGN_DIR.parents[2]
-_EXAMPLE_ITINERARY = (
-    REPO_ROOT
-    / "picard_framework"
-    / "analysis"
-    / "sentinel"
-    / "data"
-    / "example_itinerary.json"
-)
 _FLEET_SUFFIXES = ("fleet_crossed", "fleet_same", "single")
-_PORT_FIELDS = (
-    "port",
-    "port_id",
-    "region",
-    "disembark_fraction",
-    "crew_shore_leave_fraction",
-    "disembark_window_epochs",
-    "reembark_window_epochs",
-    "shore_infection_probability",
-    "shore_pathogen",
-)
+_DEFAULT_EMBARKATION_DATE = "2026-01-10"
 _NOMINAL_CONTACT = {
     "sea_day": 1.0,
     "port_day": 0.40,
     "embarkation": 1.2,
     "disembarkation": 0.2,
 }
-_EMBARKATION_DATE = "2026-01-10"
 
 
 def is_sentinel_recovery_tier(tier: dict[str, Any]) -> bool:
@@ -81,43 +63,16 @@ def initial_infected(hazards: dict[str, Any], r_onboard: float) -> int:
     return 1 if float(r_onboard) > 0.0 else 0
 
 
-def load_standard_itinerary() -> list[dict[str, Any]]:
-    """Western Caribbean 7-day template (MXCZM / MXCTM / KYGEC)."""
-    with validated_open(
-        str(_EXAMPLE_ITINERARY),
-        encoding="utf-8",
-        allowed_roots=(str(REPO_ROOT),),
-    ) as fh:
-        raw = json.load(fh)
-    days = list((raw.get("voyage") or {}).get("itinerary") or [])
-    return [copy.deepcopy(day) for day in days]
-
-
-def overlay_port(slot: dict[str, Any], source: dict[str, Any]) -> dict[str, Any]:
-    """Copy port metadata onto a day slot, keeping the slot's day number."""
-    out = dict(slot)
-    for key in _PORT_FIELDS:
-        if key in source:
-            out[key] = copy.deepcopy(source[key])
-        elif key in out:
-            del out[key]
-    return out
-
-
-def apply_itinerary_variant(
-    days: list[dict[str, Any]],
-    variant: str,
-) -> list[dict[str, Any]]:
-    """standard = template; reversed = reverse port order; staggered = earlier ports."""
+def itinerary_days(manifest: dict[str, Any], variant: str) -> list[dict[str, Any]]:
+    """Day slots for the named itinerary template declared in the manifest."""
+    templates = manifest.get("itinerary_templates") or {}
     name = str(variant or "standard")
-    cloned = [copy.deepcopy(day) for day in days]
-    if name == "standard":
-        return cloned
-    if name == "reversed":
-        return _reverse_port_order(cloned)
-    if name == "staggered":
-        return _stagger_port_days(cloned)
-    raise ValueError(f"unknown itinerary variant: {name}")
+    if name not in templates:
+        raise ValueError(
+            f"manifest declares no itinerary template {name!r}; regenerate it "
+            "from the campaign design spec with expand_design",
+        )
+    return [copy.deepcopy(day) for day in templates[name]]
 
 
 def stamp_port_hazards(
@@ -149,13 +104,14 @@ def voyage_override(
     days: list[dict[str, Any]],
     r_onboard: float,
     epochs: int,
+    embarkation_date: str = _DEFAULT_EMBARKATION_DATE,
 ) -> dict[str, Any]:
     """Picard ``config_overrides.voyage`` for one sentinel recovery run."""
     return {
         "effects_enabled": True,
         "total_epochs": int(epochs),
         "epoch_duration_hours": 1,
-        "embarkation_date": _EMBARKATION_DATE,
+        "embarkation_date": str(embarkation_date),
         "shore_exposure": {"enabled": True},
         "defaults": contact_defaults_for(r_onboard),
         "itinerary": days,
@@ -173,45 +129,3 @@ def itinerary_for_platform(
     if platform_index < len(names):
         return str(names[platform_index])
     return str(names[-1])
-
-
-def _reverse_port_order(days: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    ports = [day for day in days if day.get("type") == "port_day"]
-    ports.reverse()
-    cursor = iter(ports)
-    out: list[dict[str, Any]] = []
-    for day in days:
-        if day.get("type") == "port_day":
-            out.append(overlay_port(day, next(cursor)))
-        else:
-            out.append(day)
-    return out
-
-
-def _stagger_port_days(days: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Shift ports one day earlier on the 7-day template: 3/4/6 → 2/4/5."""
-    by_day = {int(day["day"]): day for day in days}
-    ports = [
-        by_day[day]
-        for day in sorted(by_day)
-        if by_day[day].get("type") == "port_day"
-    ]
-    sea = next(
-        by_day[day] for day in sorted(by_day) if by_day[day].get("type") == "sea_day"
-    )
-    shifted = {2: ports[0], 3: sea, 4: ports[1], 5: ports[2], 6: sea}
-    out: list[dict[str, Any]] = []
-    for day in sorted(by_day):
-        entry = copy.deepcopy(by_day[day])
-        if day in shifted:
-            source = shifted[day]
-            entry["type"] = source["type"]
-            entry["day"] = day
-            if source["type"] == "port_day":
-                entry = overlay_port(entry, source)
-                entry["day"] = day
-            else:
-                for key in _PORT_FIELDS:
-                    entry.pop(key, None)
-        out.append(entry)
-    return out
