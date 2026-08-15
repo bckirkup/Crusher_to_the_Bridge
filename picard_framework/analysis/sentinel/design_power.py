@@ -61,6 +61,7 @@ CAVEATS = [
     "Engine A is an information ceiling: other parameters treated as known, no week-to-week fleet-time variation -> widths are optimistic, MDHRs are best case.",
     "Regional-scale numbers are extrapolations: the sampler cannot be run at 1440 voyages, so full-scale claims rest on Engine A plus a pilot-scale inflation factor.",
     "`lambda_background`, `r_onboard`, and ascertainment are assumptions, not fitted from data; MDHR scales roughly as 1/sqrt(expected observed imported cases), so halving assumed ascertainment inflates MDHR accordingly.",
+    "The one-week information scaling shortcut is approximately 7-9% optimistic versus explicitly building three weeks in the measured pilot and Alaska checks.",
 ]
 
 
@@ -363,7 +364,7 @@ def ceiling_projection(
     *,
     alpha: float = DEFAULT_ALPHA,
     power: float = DEFAULT_POWER,
-    inflation: float | None = None,
+    posterior_width_ratio_vs_ceiling: float | None = None,
 ) -> dict[str, Any]:
     """Compute Engine A at the design's full scale."""
     data, meta = build_design_data(design, one_week=True)
@@ -371,12 +372,27 @@ def ceiling_projection(
     covariance = np.linalg.inv(info)
     sd_hot = math.sqrt(float(covariance[0, 0]))
     sd_ratio = math.sqrt(float(np.array([1.0, -1.0]) @ covariance @ np.array([1.0, -1.0])))
-    mdhr, trace, mdhr_inflated = _mdhr(
+    mdhr, trace, _ = _mdhr(
         design,
         data,
         alpha=alpha,
         power=power,
-        inflation=inflation,
+        inflation=posterior_width_ratio_vs_ceiling,
+    )
+    voyage_calls_per_port = (
+        design.n_ships * design.n_weeks * design.calls_per_ship_week / design.n_ports
+    )
+    realized_hot_visits = int(np.count_nonzero(np.asarray(data["visit_port"]) == 1))
+    adjusted_ratio = (
+        None
+        if posterior_width_ratio_vs_ceiling is None
+        else max(1.0, posterior_width_ratio_vs_ceiling)
+    )
+    adjusted_mdhr = None if adjusted_ratio is None else math.exp(adjusted_ratio * math.log(mdhr))
+    adjustment_applied = (
+        None
+        if posterior_width_ratio_vs_ceiling is None
+        else posterior_width_ratio_vs_ceiling >= 1.0
     )
     return {
         "engine": "ceiling",
@@ -387,12 +403,40 @@ def ceiling_projection(
         "sd_log_ratio": sd_ratio,
         "mdhr": mdhr,
         "mdhr_iteration_trace": trace,
-        "mdhr_inflated": mdhr_inflated,
+        "mdhr_adjusted": adjusted_mdhr,
+        "adjustment_applied": adjustment_applied,
+        "adjustment_explanation": (
+            None
+            if posterior_width_ratio_vs_ceiling is None
+            else "A ratio below 1 with under-nominal coverage means sampler intervals are too narrow; the ceiling MDHR is not conservative in that regime."
+        ),
         "information": info.tolist(),
         "information_positive_definite": bool(np.linalg.eigvalsh(info).min() > 0.0),
         "n_voyages": int(data["V"]) * design.n_weeks,
+        "voyage_calls_per_port": voyage_calls_per_port,
+        "realized_hot_port_visit_count": realized_hot_visits * design.n_weeks,
         "meta": {"ports": meta["ports"], "visits": len(meta["visits"])},
         "caveats": list(CAVEATS),
+    }
+
+
+def week_scaling_check(design: SentinelDesign) -> dict[str, float | int]:
+    """Compare one-week information scaling with an explicit small fleet."""
+    explicit_weeks = min(3, design.n_weeks)
+    check_design = replace(design, n_weeks=explicit_weeks)
+    one_week, _ = build_design_data(check_design, one_week=True)
+    all_weeks, _ = build_design_data(check_design)
+    scaled_info = _information(one_week, check_design, check_design.hot_port_hazard_ratio)
+    exact_info = _information(all_weeks, check_design, check_design.hot_port_hazard_ratio)
+    scaled_covariance = np.linalg.inv(scaled_info * explicit_weeks)
+    exact_covariance = np.linalg.inv(exact_info)
+    scaled_sd = math.sqrt(float(scaled_covariance[0, 0]))
+    exact_sd = math.sqrt(float(exact_covariance[0, 0]))
+    return {
+        "explicit_weeks": explicit_weeks,
+        "sd_log_lambda_hot_scaled": scaled_sd,
+        "sd_log_lambda_hot_explicit": exact_sd,
+        "scaled_to_explicit_ratio": scaled_sd / exact_sd,
     }
 
 
@@ -413,8 +457,9 @@ def _fit_replicate(
     seed: int,
     draws: int,
     warmup: int,
+    hot_ratio: float,
 ) -> dict[str, Any]:
-    mu = expected_onsets_fleet(data, _truth_rates(data, design))
+    mu = expected_onsets_fleet(data, _truth_rates(data, design, hot_ratio))
     rng = np.random.default_rng(seed)
     onsets = []
     for voyage, means in enumerate(mu):
@@ -433,10 +478,10 @@ def _fit_replicate(
     return {
         "hot_width90_log": float(np.log(_interval(hot)[1]) - np.log(_interval(hot)[0])),
         "background_width90_log": float(np.log(_interval(background[:, 0])[1]) - np.log(_interval(background[:, 0])[0])),
-        "pooled_lambda_hot_coverage": _coverage(hot, design.lambda_background * design.hot_port_hazard_ratio),
+        "pooled_lambda_hot_coverage": _coverage(hot, design.lambda_background * hot_ratio),
         "pooled_lambda_background_coverage": _coverage(background[:, 0], design.lambda_background),
         "ratio_width90_log": float(math.log(ratio_high) - math.log(ratio_low)),
-        "ratio_coverage": ratio_low <= design.hot_port_hazard_ratio <= ratio_high,
+        "ratio_coverage": ratio_low <= hot_ratio <= ratio_high,
         "detected": ratio_low > 1.0,
     }
 
@@ -450,9 +495,12 @@ def fit_projection(
     seed: int = 1701,
     alpha: float = DEFAULT_ALPHA,
     power: float = DEFAULT_POWER,
+    hot_ratio: float | None = None,
 ) -> dict[str, Any]:
     """Simulate and fit the fit-scale replica with the reference sampler."""
     fit_design = design.fit_design()
+    truth_ratio = design.hot_port_hazard_ratio if hot_ratio is None else hot_ratio
+    fit_design = replace(fit_design, hot_port_hazard_ratio=truth_ratio)
     data, meta = build_design_data(fit_design)
     ceiling = ceiling_projection(fit_design, alpha=alpha, power=power)
     results = [
@@ -462,6 +510,7 @@ def fit_projection(
             seed=seed + i,
             draws=draws,
             warmup=warmup,
+            hot_ratio=truth_ratio,
         )
         for i in range(replicates)
     ]
@@ -469,15 +518,16 @@ def fit_projection(
     ceiling_width = ceiling["sd_log_ratio"] * 2.0 * Z90
     inflation = float(widths.mean() / ceiling_width)
     regional_ceiling = ceiling_projection(
-        design,
+        replace(design, hot_port_hazard_ratio=truth_ratio),
         alpha=alpha,
         power=power,
-        inflation=inflation,
+        posterior_width_ratio_vs_ceiling=inflation,
     )
     return {
         "engine": "fit",
         "provenance": "Engine B numpy reference sampler at fit scale",
         "design": design.name,
+        "true_hot_ratio": truth_ratio,
         "fit_scale": {"ships": fit_design.n_ships, "weeks": fit_design.n_weeks, "ports": fit_design.n_ports},
         "draws": draws,
         "warmup": warmup,
@@ -496,12 +546,16 @@ def fit_projection(
         "coverage_pooled_lambda_background_truth": float(
             np.mean([r["pooled_lambda_background_coverage"] for r in results]),
         ),
-        "coverage_pooled_lambda_port_truth": float(np.mean([r["pooled_lambda_background_coverage"] for r in results])),
+        "nominal_interval_coverage": 0.90,
+        "coverage_gap": 0.90 - float(np.mean([r["ratio_coverage"] for r in results])),
         "coverage_hot_background_ratio_truth": float(np.mean([r["ratio_coverage"] for r in results])),
         "detection_power": float(np.mean([r["detected"] for r in results])),
-        "inflation_factor_vs_engine_a": inflation,
+        "posterior_width_ratio_vs_ceiling": inflation,
         "ceiling_same_fit_scale": ceiling,
-        "regional_mdhr_inflated": regional_ceiling["mdhr_inflated"],
+        "regional_mdhr_adjusted": regional_ceiling["mdhr_adjusted"],
+        "regional_adjustment_applied": regional_ceiling["adjustment_applied"],
+        "regional_adjustment_explanation": regional_ceiling["adjustment_explanation"],
+        "week_scaling_check": week_scaling_check(fit_design),
         "fleet_time_confounded_ports": sorted(fleet_time_confounded_ports(meta)),
         "caveats": list(CAVEATS),
     }

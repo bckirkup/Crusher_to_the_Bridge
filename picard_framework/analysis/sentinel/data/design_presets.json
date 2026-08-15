@@ -1,5 +1,5 @@
 {
-  "_header": "Stakeholder-brief geometries. lambda_background is an assumption anchored so one call of one 2800-pax ship yields about 0.5 imported infections; values are not tuned to make results look good.",
+  "_header": "Stakeholder-brief geometries. lambda_background, r_onboard, and ascertainment are anchored assumptions from the stakeholder brief, not tuned parameters; values are not fitted to make results look good.",
   "presets": {
     "caribbean": {
       "name": "caribbean",

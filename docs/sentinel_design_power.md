@@ -13,12 +13,11 @@ numpy reference posterior.
 * **Engine B (`fit`)** simulates Poisson onsets and fits the existing
   `fleet_reference_posterior` at the configured fit scale. The sampler cannot
   be run at Caribbean scale (1,440 voyages) in a practical projection, so
-  regional claims are Engine A curves multiplied by the pilot-scale inflation
-  factor.
+  regional claims use the Engine A ceiling with a conservative adjustment:
+  posterior-width ratios below one never reduce the ceiling MDHR.
 
-The geometries come from the stakeholder brief. `lambda_background` is an
-assumption anchored so one call of one 2,800-passenger ship yields approximately
-0.5 imported infections; it is not tuned to make results look good.
+The geometries come from the stakeholder brief. `lambda_background`, `r_onboard`,
+and ascertainment are anchored assumptions, not tuned parameters.
 
 Run a regional ceiling and the fit-scale calibration with:
 
@@ -36,14 +35,40 @@ Use `--smoke` for two short reference-sampler replicates.
 3. Engine A is an information ceiling: other parameters treated as known, no week-to-week `fleet_time` variation -> widths are optimistic, MDHRs are best case.
 4. Regional-scale numbers are extrapolations: the sampler cannot be run at 1,440 voyages, so full-scale claims rest on Engine A plus a pilot-scale inflation factor.
 5. `lambda_background`, `r_onboard`, and ascertainment are assumptions, not fitted from data; MDHR scales roughly as 1/sqrt(expected observed imported cases), so halving assumed ascertainment inflates MDHR accordingly.
+6. One-week information scaling is approximately 7-9% optimistic versus explicitly building three weeks: pilot 0.4611 versus 0.4955 (7%), Alaska 0.2961 versus 0.3242 (8.7%).
+
+## What drives detection
+
+Precision scales as `1/sqrt(ship-weeks)`: multiplying ships by 16 gives
+approximately four times narrower intervals. Calls per ship-week are a
+near-flat lever (spread under 12% and not monotone), because extra calls spread
+the same passengers over more ports. The governing quantity is voyage-calls per
+port: Caribbean 36, Alaska 25, Mediterranean 16, and Pilot 8. This is why the
+60-port Mediterranean is less precise than 10-port Alaska despite four times
+the ships.
+
+At pilot scale, the measured Engine B ratio coverage was 0.6 against the 0.9
+nominal target. Together with a posterior-width ratio below one, this indicates
+that the reference sampler intervals are too narrow or mis-calibrated, not that
+the design is more informative than the likelihood ceiling. Engine B
+power/coverage results are therefore indicative only; a real deployment claim
+requires a calibrated NUTS fit.
 
 ## Results
 
 The following table is populated from the projection run attached to the PR.
 
-| Design | Engine | sd(log lambda_hot) | 90% width | sd(log ratio) | MDHR |
-|---|---|---:|---:|---:|---:|
-| Caribbean | A ceiling | — | — | — | — |
-| Mediterranean | A ceiling | — | — | — | — |
-| Alaska | A ceiling | — | — | — | — |
-| Pilot | A ceiling | — | — | — | — |
+| Design | Voyages | Engine | sd(log lambda_hot) | 90% width | sd(log ratio) | MDHR |
+|---|---:|---|---:|---:|---:|---:|
+| Caribbean | 1440 | A ceiling | 0.1200 | 0.3949 | 0.1259 | 1.4665 |
+| Mediterranean | 960 | A ceiling | 0.1757 | 0.5780 | 0.1809 | 1.6539 |
+| Alaska | 250 | A ceiling | 0.1622 | 0.5335 | 0.2005 | 1.7144 |
+| Pilot | 48 | A ceiling | 0.3260 | 1.0726 | 0.4705 | 2.8299 |
+
+Caribbean Engine A sweeps (sd_log_hot / sd_log_ratio / MDHR):
+
+| Dimension | Values |
+|---|---|
+| Ships | 15: 0.3519 / 0.3662 / 2.3498; 30: 0.2261 / 0.2381 / 1.8520; 60: 0.1698 / 0.1781 / 1.6442; 120: 0.1200 / 0.1259 / 1.4665; 240: 0.0849 / 0.0890 / 1.3383 |
+| Weeks | 4: 0.2079 / 0.2181 / 1.7819; 12: 0.1200 / 0.1259 / 1.4665; 26: 0.0816 / 0.0855 / 1.3260; 52: 0.0577 / 0.0605 / 1.2355 |
+| Calls/ship-week | 2: 0.1314 / 0.1367 / 1.4991; 3: 0.1176 / 0.1238 / 1.4584; 4: 0.1221 / 0.1277 / 1.4730; 5: 0.1194 / 0.1253 / 1.4656 |
