@@ -1530,3 +1530,94 @@ def test_vsp_degradation_cartesian_and_generator() -> None:
     params = spec["campaign_parameters"]
     assert params["dose_adjustment"] == pytest.approx(10.6)
     assert params["density_exponent"] == pytest.approx(0.75)
+
+
+SENTINEL_MANIFEST = CAMPAIGN / "sentinel_synthetic_recovery_v1_manifest.json"
+
+
+def test_sentinel_recovery_cartesian_and_generator() -> None:
+    from picard_framework.runs.mega_cruise_campaign.count_manifest_cartesian import (
+        summarize,
+        tier_cartesian,
+    )
+
+    manifest = load_manifest(SENTINEL_MANIFEST)
+    assert manifest["campaign"] == "sentinel_synthetic_recovery_v1"
+    assert tier_cartesian(manifest, manifest["tiers"]["sr_uniform_low_single"]) == 80
+    assert (
+        tier_cartesian(manifest, manifest["tiers"]["sr_uniform_low_fleet_same"]) == 240
+    )
+    wave1, wave2 = summarize(manifest)
+    assert wave1 == 3360 and wave2 == 0
+
+    rid, spec = next(generate_tier_runs(manifest, "sr_uniform_low_single"))
+    assert rid.startswith("sr_norovirus_mega_cruise_5000_uniform_low_single_")
+    voyage = spec["config_overrides"]["voyage"]
+    assert voyage["effects_enabled"] is True
+    assert voyage["shore_exposure"]["enabled"] is True
+    hazards = {
+        day["port_id"]: day["shore_infection_probability"]
+        for day in voyage["itinerary"]
+        if day.get("type") == "port_day"
+    }
+    assert hazards == {"MXCZM": 0.001, "MXCTM": 0.001, "KYGEC": 0.001}
+    params = spec["campaign_parameters"]
+    assert params["R_onboard"] == pytest.approx(0.0)
+    assert params["n_init"] == 0
+    assert spec["pathogen_overrides"]["norwalk_gi"]["initial_infected"] == 0
+    sea = voyage["defaults"]["sea_day"]["contact_rate_multiplier"]
+    assert sea == pytest.approx(0.0)
+
+
+def test_sentinel_recovery_fleet_crossed_itineraries() -> None:
+    manifest = load_manifest(SENTINEL_MANIFEST)
+    runs = list(generate_tier_runs(manifest, "sr_one_hot_fleet_crossed"))
+    assert len(runs) == 240
+    by_plat: dict[str, dict[str, Any]] = {}
+    for rid, spec in runs:
+        if "_R0p0_s300" not in rid:
+            continue
+        plat = spec["campaign_parameters"]["platform_id"]
+        by_plat[plat] = spec
+    assert set(by_plat) == {
+        "mega_cruise_5000",
+        "spirit_cruise_3000",
+        "classic_cruise_1900",
+    }
+    mega_days = [
+        d for d in by_plat["mega_cruise_5000"]["config_overrides"]["voyage"]["itinerary"]
+        if d.get("type") == "port_day"
+    ]
+    spirit_days = [
+        d
+        for d in by_plat["spirit_cruise_3000"]["config_overrides"]["voyage"]["itinerary"]
+        if d.get("type") == "port_day"
+    ]
+    classic_days = [
+        d
+        for d in by_plat["classic_cruise_1900"]["config_overrides"]["voyage"]["itinerary"]
+        if d.get("type") == "port_day"
+    ]
+    assert [d["port_id"] for d in mega_days] == ["MXCZM", "MXCTM", "KYGEC"]
+    assert [d["day"] for d in mega_days] == [3, 4, 6]
+    assert [d["port_id"] for d in spirit_days] == ["KYGEC", "MXCTM", "MXCZM"]
+    assert [d["day"] for d in classic_days] == [2, 4, 5]
+    assert classic_days[0]["port_id"] == "MXCZM"
+    hot = by_plat["mega_cruise_5000"]["campaign_parameters"]["port_hazards"]
+    assert hot["MXCZM"] == pytest.approx(0.01)
+
+
+def test_sentinel_recovery_null_onboard_seed() -> None:
+    manifest = load_manifest(SENTINEL_MANIFEST)
+    seeded = [
+        spec
+        for rid, spec in generate_tier_runs(manifest, "sr_null_single")
+        if spec["campaign_parameters"]["R_onboard"] == 1.0
+    ]
+    empty = [
+        spec
+        for rid, spec in generate_tier_runs(manifest, "sr_null_single")
+        if spec["campaign_parameters"]["R_onboard"] == 0.0
+    ]
+    assert seeded[0]["pathogen_overrides"]["norwalk_gi"]["initial_infected"] == 1
+    assert empty[0]["pathogen_overrides"]["norwalk_gi"]["initial_infected"] == 0

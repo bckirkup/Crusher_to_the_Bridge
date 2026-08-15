@@ -6,9 +6,10 @@ Spot ABM campaigns derived from design specs in
 | Campaign | Manifest | Runs | S3 prefix |
 |----------|----------|------|-----------|
 | Synthetic recovery | `synthetic_recovery_v1_manifest.json` | **1200** | `campaign/synthetic_recovery_v1/` |
+| Sentinel port recovery | `sentinel_synthetic_recovery_v1_manifest.json` | **3360** | `campaign/sentinel_synthetic_recovery_v1/` |
 | VSP degradation | `vsp_degradation_v1_manifest.json` | **6360** | `campaign/vsp_degradation_v1/` |
 
-Generators: tier ids `sr*` / `vd*` in
+Generators: tier ids `sr*` / `sr_*` (sentinel) / `vd*` in
 `picard_framework/runs/mega_cruise_campaign/campaign_runner.py`.
 
 ## Light validation
@@ -17,6 +18,9 @@ Generators: tier ids `sr*` / `vd*` in
 python -m picard_framework.runs.mega_cruise_campaign.count_manifest_cartesian `
   picard_framework/runs/mega_cruise_campaign/synthetic_recovery_v1_manifest.json
 # expect total=1200
+python -m picard_framework.runs.mega_cruise_campaign.count_manifest_cartesian `
+  picard_framework/runs/mega_cruise_campaign/sentinel_synthetic_recovery_v1_manifest.json
+# expect total=3360
 python -m picard_framework.runs.mega_cruise_campaign.count_manifest_cartesian `
   picard_framework/runs/mega_cruise_campaign/vsp_degradation_v1_manifest.json
 # expect total=6360
@@ -34,6 +38,10 @@ uses `:latest`, then:
   -Prefix campaign/synthetic_recovery_v1/ -ShardCount 200
 
 .\deploy\aws\submit_campaign_manifest.ps1 `
+  -Manifest picard_framework/runs/mega_cruise_campaign/sentinel_synthetic_recovery_v1_manifest.json `
+  -Prefix campaign/sentinel_synthetic_recovery_v1/ -ShardCount 200
+
+.\deploy\aws\submit_campaign_manifest.ps1 `
   -Manifest picard_framework/runs/mega_cruise_campaign/vsp_degradation_v1_manifest.json `
   -Prefix campaign/vsp_degradation_v1/ -ShardCount 200
 ```
@@ -45,6 +53,8 @@ uses `:latest`, then:
 | `dose_adj` | pathogen `dose_adjustment` |
 | `alpha_c` | `transmission.density_dependent.exponent` |
 | `non_susceptible` | `innate_nonsusceptible_fraction` |
+| `λ_p` (sentinel) | itinerary `shore_infection_probability` per `port_id` |
+| `R_onboard` (sentinel) | day-type `contact_rate_multiplier` scale (1.0 = nominal) |
 | `vsp_threshold` | `escalation.lockdown_attack_rate` |
 | `detection_delay` | `medical_response.detection_delay_epochs` |
 | `isolation_compliance` | `medical_response.isolation_compliance` + `fred_behavior.quarantine_compliance` |

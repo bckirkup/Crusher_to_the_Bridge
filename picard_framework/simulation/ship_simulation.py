@@ -988,6 +988,7 @@ class ShipSimulation:
         while self._epoch + 1 < target:
             self.step()
         assert self.state is not None
+        self._write_sentinel_line_list()
         return RunResult(
             num_epochs=target,
             final_trigger_status=self.state.trigger_status,

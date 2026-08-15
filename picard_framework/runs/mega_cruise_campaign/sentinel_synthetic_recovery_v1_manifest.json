@@ -1,0 +1,926 @@
+{
+  "campaign": "sentinel_synthetic_recovery_v1",
+  "description": "Synthetic recovery for sentinel port-attribution. 6 hazard profiles x 4 R_onboard x 3 fleet configs x 20 seeds = 3360 voyages. Shore exposure on; known lambda_p; R_onboard scales onboard contact. Platform populations: mega 7000 / spirit 3000 / classic 1910.",
+  "platform": "mega_cruise_5000",
+  "default_epochs": 168,
+  "default_num_agents": 7000,
+  "pathogen_configs": {
+    "norovirus": {
+      "bundle": "active_profiles",
+      "pathogen_id": "norwalk_gi",
+      "overrides": {
+        "remove": [
+          "sars_cov2_resp"
+        ]
+      }
+    }
+  },
+  "surveillance_configs": {
+    "syndromic": {
+      "diagnostic_cascade": {
+        "enabled": false
+      }
+    }
+  },
+  "defaults": {
+    "dose_adjustment": 10.6,
+    "density_exponent": 0.75
+  },
+  "tiers": {
+    "sr_uniform_low_single": {
+      "description": "Hazard=uniform_low, Fleet=single",
+      "pathogen": "norovirus",
+      "platforms": [
+        "mega_cruise_5000"
+      ],
+      "itineraries": [
+        "standard"
+      ],
+      "shore_exposure": {
+        "enabled": true,
+        "port_hazards": {
+          "MXCZM": 0.001,
+          "MXCTM": 0.001,
+          "KYGEC": 0.001
+        }
+      },
+      "R_onboard_values": [
+        0.0,
+        0.5,
+        1.0,
+        1.5
+      ],
+      "seeds": [
+        300,
+        301,
+        302,
+        303,
+        304,
+        305,
+        306,
+        307,
+        308,
+        309,
+        310,
+        311,
+        312,
+        313,
+        314,
+        315,
+        316,
+        317,
+        318,
+        319
+      ],
+      "epochs": 168
+    },
+    "sr_uniform_low_fleet_same": {
+      "description": "Hazard=uniform_low, Fleet=fleet_same",
+      "pathogen": "norovirus",
+      "platforms": [
+        "mega_cruise_5000",
+        "spirit_cruise_3000",
+        "classic_cruise_1900"
+      ],
+      "itineraries": [
+        "standard",
+        "standard",
+        "standard"
+      ],
+      "shore_exposure": {
+        "enabled": true,
+        "port_hazards": {
+          "MXCZM": 0.001,
+          "MXCTM": 0.001,
+          "KYGEC": 0.001
+        }
+      },
+      "R_onboard_values": [
+        0.0,
+        0.5,
+        1.0,
+        1.5
+      ],
+      "seeds": [
+        300,
+        301,
+        302,
+        303,
+        304,
+        305,
+        306,
+        307,
+        308,
+        309,
+        310,
+        311,
+        312,
+        313,
+        314,
+        315,
+        316,
+        317,
+        318,
+        319
+      ],
+      "epochs": 168
+    },
+    "sr_uniform_low_fleet_crossed": {
+      "description": "Hazard=uniform_low, Fleet=fleet_crossed",
+      "pathogen": "norovirus",
+      "platforms": [
+        "mega_cruise_5000",
+        "spirit_cruise_3000",
+        "classic_cruise_1900"
+      ],
+      "itineraries": [
+        "standard",
+        "reversed",
+        "staggered"
+      ],
+      "shore_exposure": {
+        "enabled": true,
+        "port_hazards": {
+          "MXCZM": 0.001,
+          "MXCTM": 0.001,
+          "KYGEC": 0.001
+        }
+      },
+      "R_onboard_values": [
+        0.0,
+        0.5,
+        1.0,
+        1.5
+      ],
+      "seeds": [
+        300,
+        301,
+        302,
+        303,
+        304,
+        305,
+        306,
+        307,
+        308,
+        309,
+        310,
+        311,
+        312,
+        313,
+        314,
+        315,
+        316,
+        317,
+        318,
+        319
+      ],
+      "epochs": 168
+    },
+    "sr_uniform_high_single": {
+      "description": "Hazard=uniform_high, Fleet=single",
+      "pathogen": "norovirus",
+      "platforms": [
+        "mega_cruise_5000"
+      ],
+      "itineraries": [
+        "standard"
+      ],
+      "shore_exposure": {
+        "enabled": true,
+        "port_hazards": {
+          "MXCZM": 0.005,
+          "MXCTM": 0.005,
+          "KYGEC": 0.005
+        }
+      },
+      "R_onboard_values": [
+        0.0,
+        0.5,
+        1.0,
+        1.5
+      ],
+      "seeds": [
+        300,
+        301,
+        302,
+        303,
+        304,
+        305,
+        306,
+        307,
+        308,
+        309,
+        310,
+        311,
+        312,
+        313,
+        314,
+        315,
+        316,
+        317,
+        318,
+        319
+      ],
+      "epochs": 168
+    },
+    "sr_uniform_high_fleet_same": {
+      "description": "Hazard=uniform_high, Fleet=fleet_same",
+      "pathogen": "norovirus",
+      "platforms": [
+        "mega_cruise_5000",
+        "spirit_cruise_3000",
+        "classic_cruise_1900"
+      ],
+      "itineraries": [
+        "standard",
+        "standard",
+        "standard"
+      ],
+      "shore_exposure": {
+        "enabled": true,
+        "port_hazards": {
+          "MXCZM": 0.005,
+          "MXCTM": 0.005,
+          "KYGEC": 0.005
+        }
+      },
+      "R_onboard_values": [
+        0.0,
+        0.5,
+        1.0,
+        1.5
+      ],
+      "seeds": [
+        300,
+        301,
+        302,
+        303,
+        304,
+        305,
+        306,
+        307,
+        308,
+        309,
+        310,
+        311,
+        312,
+        313,
+        314,
+        315,
+        316,
+        317,
+        318,
+        319
+      ],
+      "epochs": 168
+    },
+    "sr_uniform_high_fleet_crossed": {
+      "description": "Hazard=uniform_high, Fleet=fleet_crossed",
+      "pathogen": "norovirus",
+      "platforms": [
+        "mega_cruise_5000",
+        "spirit_cruise_3000",
+        "classic_cruise_1900"
+      ],
+      "itineraries": [
+        "standard",
+        "reversed",
+        "staggered"
+      ],
+      "shore_exposure": {
+        "enabled": true,
+        "port_hazards": {
+          "MXCZM": 0.005,
+          "MXCTM": 0.005,
+          "KYGEC": 0.005
+        }
+      },
+      "R_onboard_values": [
+        0.0,
+        0.5,
+        1.0,
+        1.5
+      ],
+      "seeds": [
+        300,
+        301,
+        302,
+        303,
+        304,
+        305,
+        306,
+        307,
+        308,
+        309,
+        310,
+        311,
+        312,
+        313,
+        314,
+        315,
+        316,
+        317,
+        318,
+        319
+      ],
+      "epochs": 168
+    },
+    "sr_one_hot_single": {
+      "description": "Hazard=one_hot, Fleet=single",
+      "pathogen": "norovirus",
+      "platforms": [
+        "mega_cruise_5000"
+      ],
+      "itineraries": [
+        "standard"
+      ],
+      "shore_exposure": {
+        "enabled": true,
+        "port_hazards": {
+          "MXCZM": 0.01,
+          "MXCTM": 0.001,
+          "KYGEC": 0.001
+        }
+      },
+      "R_onboard_values": [
+        0.0,
+        0.5,
+        1.0,
+        1.5
+      ],
+      "seeds": [
+        300,
+        301,
+        302,
+        303,
+        304,
+        305,
+        306,
+        307,
+        308,
+        309,
+        310,
+        311,
+        312,
+        313,
+        314,
+        315,
+        316,
+        317,
+        318,
+        319
+      ],
+      "epochs": 168
+    },
+    "sr_one_hot_fleet_same": {
+      "description": "Hazard=one_hot, Fleet=fleet_same",
+      "pathogen": "norovirus",
+      "platforms": [
+        "mega_cruise_5000",
+        "spirit_cruise_3000",
+        "classic_cruise_1900"
+      ],
+      "itineraries": [
+        "standard",
+        "standard",
+        "standard"
+      ],
+      "shore_exposure": {
+        "enabled": true,
+        "port_hazards": {
+          "MXCZM": 0.01,
+          "MXCTM": 0.001,
+          "KYGEC": 0.001
+        }
+      },
+      "R_onboard_values": [
+        0.0,
+        0.5,
+        1.0,
+        1.5
+      ],
+      "seeds": [
+        300,
+        301,
+        302,
+        303,
+        304,
+        305,
+        306,
+        307,
+        308,
+        309,
+        310,
+        311,
+        312,
+        313,
+        314,
+        315,
+        316,
+        317,
+        318,
+        319
+      ],
+      "epochs": 168
+    },
+    "sr_one_hot_fleet_crossed": {
+      "description": "Hazard=one_hot, Fleet=fleet_crossed",
+      "pathogen": "norovirus",
+      "platforms": [
+        "mega_cruise_5000",
+        "spirit_cruise_3000",
+        "classic_cruise_1900"
+      ],
+      "itineraries": [
+        "standard",
+        "reversed",
+        "staggered"
+      ],
+      "shore_exposure": {
+        "enabled": true,
+        "port_hazards": {
+          "MXCZM": 0.01,
+          "MXCTM": 0.001,
+          "KYGEC": 0.001
+        }
+      },
+      "R_onboard_values": [
+        0.0,
+        0.5,
+        1.0,
+        1.5
+      ],
+      "seeds": [
+        300,
+        301,
+        302,
+        303,
+        304,
+        305,
+        306,
+        307,
+        308,
+        309,
+        310,
+        311,
+        312,
+        313,
+        314,
+        315,
+        316,
+        317,
+        318,
+        319
+      ],
+      "epochs": 168
+    },
+    "sr_gradient_single": {
+      "description": "Hazard=gradient, Fleet=single",
+      "pathogen": "norovirus",
+      "platforms": [
+        "mega_cruise_5000"
+      ],
+      "itineraries": [
+        "standard"
+      ],
+      "shore_exposure": {
+        "enabled": true,
+        "port_hazards": {
+          "MXCZM": 0.002,
+          "MXCTM": 0.005,
+          "KYGEC": 0.01
+        }
+      },
+      "R_onboard_values": [
+        0.0,
+        0.5,
+        1.0,
+        1.5
+      ],
+      "seeds": [
+        300,
+        301,
+        302,
+        303,
+        304,
+        305,
+        306,
+        307,
+        308,
+        309,
+        310,
+        311,
+        312,
+        313,
+        314,
+        315,
+        316,
+        317,
+        318,
+        319
+      ],
+      "epochs": 168
+    },
+    "sr_gradient_fleet_same": {
+      "description": "Hazard=gradient, Fleet=fleet_same",
+      "pathogen": "norovirus",
+      "platforms": [
+        "mega_cruise_5000",
+        "spirit_cruise_3000",
+        "classic_cruise_1900"
+      ],
+      "itineraries": [
+        "standard",
+        "standard",
+        "standard"
+      ],
+      "shore_exposure": {
+        "enabled": true,
+        "port_hazards": {
+          "MXCZM": 0.002,
+          "MXCTM": 0.005,
+          "KYGEC": 0.01
+        }
+      },
+      "R_onboard_values": [
+        0.0,
+        0.5,
+        1.0,
+        1.5
+      ],
+      "seeds": [
+        300,
+        301,
+        302,
+        303,
+        304,
+        305,
+        306,
+        307,
+        308,
+        309,
+        310,
+        311,
+        312,
+        313,
+        314,
+        315,
+        316,
+        317,
+        318,
+        319
+      ],
+      "epochs": 168
+    },
+    "sr_gradient_fleet_crossed": {
+      "description": "Hazard=gradient, Fleet=fleet_crossed",
+      "pathogen": "norovirus",
+      "platforms": [
+        "mega_cruise_5000",
+        "spirit_cruise_3000",
+        "classic_cruise_1900"
+      ],
+      "itineraries": [
+        "standard",
+        "reversed",
+        "staggered"
+      ],
+      "shore_exposure": {
+        "enabled": true,
+        "port_hazards": {
+          "MXCZM": 0.002,
+          "MXCTM": 0.005,
+          "KYGEC": 0.01
+        }
+      },
+      "R_onboard_values": [
+        0.0,
+        0.5,
+        1.0,
+        1.5
+      ],
+      "seeds": [
+        300,
+        301,
+        302,
+        303,
+        304,
+        305,
+        306,
+        307,
+        308,
+        309,
+        310,
+        311,
+        312,
+        313,
+        314,
+        315,
+        316,
+        317,
+        318,
+        319
+      ],
+      "epochs": 168
+    },
+    "sr_last_port_hot_single": {
+      "description": "Hazard=last_port_hot, Fleet=single",
+      "pathogen": "norovirus",
+      "platforms": [
+        "mega_cruise_5000"
+      ],
+      "itineraries": [
+        "standard"
+      ],
+      "shore_exposure": {
+        "enabled": true,
+        "port_hazards": {
+          "MXCZM": 0.001,
+          "MXCTM": 0.001,
+          "KYGEC": 0.015
+        }
+      },
+      "R_onboard_values": [
+        0.0,
+        0.5,
+        1.0,
+        1.5
+      ],
+      "seeds": [
+        300,
+        301,
+        302,
+        303,
+        304,
+        305,
+        306,
+        307,
+        308,
+        309,
+        310,
+        311,
+        312,
+        313,
+        314,
+        315,
+        316,
+        317,
+        318,
+        319
+      ],
+      "epochs": 168
+    },
+    "sr_last_port_hot_fleet_same": {
+      "description": "Hazard=last_port_hot, Fleet=fleet_same",
+      "pathogen": "norovirus",
+      "platforms": [
+        "mega_cruise_5000",
+        "spirit_cruise_3000",
+        "classic_cruise_1900"
+      ],
+      "itineraries": [
+        "standard",
+        "standard",
+        "standard"
+      ],
+      "shore_exposure": {
+        "enabled": true,
+        "port_hazards": {
+          "MXCZM": 0.001,
+          "MXCTM": 0.001,
+          "KYGEC": 0.015
+        }
+      },
+      "R_onboard_values": [
+        0.0,
+        0.5,
+        1.0,
+        1.5
+      ],
+      "seeds": [
+        300,
+        301,
+        302,
+        303,
+        304,
+        305,
+        306,
+        307,
+        308,
+        309,
+        310,
+        311,
+        312,
+        313,
+        314,
+        315,
+        316,
+        317,
+        318,
+        319
+      ],
+      "epochs": 168
+    },
+    "sr_last_port_hot_fleet_crossed": {
+      "description": "Hazard=last_port_hot, Fleet=fleet_crossed",
+      "pathogen": "norovirus",
+      "platforms": [
+        "mega_cruise_5000",
+        "spirit_cruise_3000",
+        "classic_cruise_1900"
+      ],
+      "itineraries": [
+        "standard",
+        "reversed",
+        "staggered"
+      ],
+      "shore_exposure": {
+        "enabled": true,
+        "port_hazards": {
+          "MXCZM": 0.001,
+          "MXCTM": 0.001,
+          "KYGEC": 0.015
+        }
+      },
+      "R_onboard_values": [
+        0.0,
+        0.5,
+        1.0,
+        1.5
+      ],
+      "seeds": [
+        300,
+        301,
+        302,
+        303,
+        304,
+        305,
+        306,
+        307,
+        308,
+        309,
+        310,
+        311,
+        312,
+        313,
+        314,
+        315,
+        316,
+        317,
+        318,
+        319
+      ],
+      "epochs": 168
+    },
+    "sr_null_single": {
+      "description": "Hazard=null, Fleet=single",
+      "pathogen": "norovirus",
+      "platforms": [
+        "mega_cruise_5000"
+      ],
+      "itineraries": [
+        "standard"
+      ],
+      "shore_exposure": {
+        "enabled": true,
+        "port_hazards": {
+          "MXCZM": 0.0,
+          "MXCTM": 0.0,
+          "KYGEC": 0.0
+        }
+      },
+      "R_onboard_values": [
+        0.0,
+        0.5,
+        1.0,
+        1.5
+      ],
+      "seeds": [
+        300,
+        301,
+        302,
+        303,
+        304,
+        305,
+        306,
+        307,
+        308,
+        309,
+        310,
+        311,
+        312,
+        313,
+        314,
+        315,
+        316,
+        317,
+        318,
+        319
+      ],
+      "epochs": 168
+    },
+    "sr_null_fleet_same": {
+      "description": "Hazard=null, Fleet=fleet_same",
+      "pathogen": "norovirus",
+      "platforms": [
+        "mega_cruise_5000",
+        "spirit_cruise_3000",
+        "classic_cruise_1900"
+      ],
+      "itineraries": [
+        "standard",
+        "standard",
+        "standard"
+      ],
+      "shore_exposure": {
+        "enabled": true,
+        "port_hazards": {
+          "MXCZM": 0.0,
+          "MXCTM": 0.0,
+          "KYGEC": 0.0
+        }
+      },
+      "R_onboard_values": [
+        0.0,
+        0.5,
+        1.0,
+        1.5
+      ],
+      "seeds": [
+        300,
+        301,
+        302,
+        303,
+        304,
+        305,
+        306,
+        307,
+        308,
+        309,
+        310,
+        311,
+        312,
+        313,
+        314,
+        315,
+        316,
+        317,
+        318,
+        319
+      ],
+      "epochs": 168
+    },
+    "sr_null_fleet_crossed": {
+      "description": "Hazard=null, Fleet=fleet_crossed",
+      "pathogen": "norovirus",
+      "platforms": [
+        "mega_cruise_5000",
+        "spirit_cruise_3000",
+        "classic_cruise_1900"
+      ],
+      "itineraries": [
+        "standard",
+        "reversed",
+        "staggered"
+      ],
+      "shore_exposure": {
+        "enabled": true,
+        "port_hazards": {
+          "MXCZM": 0.0,
+          "MXCTM": 0.0,
+          "KYGEC": 0.0
+        }
+      },
+      "R_onboard_values": [
+        0.0,
+        0.5,
+        1.0,
+        1.5
+      ],
+      "seeds": [
+        300,
+        301,
+        302,
+        303,
+        304,
+        305,
+        306,
+        307,
+        308,
+        309,
+        310,
+        311,
+        312,
+        313,
+        314,
+        315,
+        316,
+        317,
+        318,
+        319
+      ],
+      "epochs": 168
+    }
+  },
+  "total_runs": 3360
+}
