@@ -198,6 +198,7 @@ def _lines_to_edges(
                         try:
                             flow_rate = float(line_row[flow_col])
                         except (ValueError, TypeError):
+                            # Retain the calibrated default for malformed flow data.
                             pass
 
                     is_ducted = False

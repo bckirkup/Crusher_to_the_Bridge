@@ -1043,6 +1043,7 @@ def _collect_wearable_red_ids(
             try:
                 wearable_red_ids.append(int(aid_str))
             except (ValueError, TypeError):
+                # Ignore malformed agent identifiers in optional wearable data.
                 pass
     return wearable_red_ids
 

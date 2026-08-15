@@ -119,6 +119,7 @@ def fit_model(
         ) as fh:
             fh.write(buf.getvalue())
     except Exception:
+        # Continue when optional draw serialization cannot be written.
         pass
 
     artifacts = summarize_outbreak_fit(

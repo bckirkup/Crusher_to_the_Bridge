@@ -140,6 +140,7 @@ def fit_model(
         ) as fh:
             fh.write(buf.getvalue())
     except Exception:
+        # Continue when optional draw serialization cannot be written.
         pass
 
     noro = filter_norovirus_runs(run_rows)

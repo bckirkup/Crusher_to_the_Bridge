@@ -32,6 +32,7 @@ from urllib.parse import urlparse
 REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT))
 
+from simulation_utils.epidemic_labels import epidemic_took_off  # noqa: E402
 from simulation_utils.paths import (  # noqa: E402
     is_path_under_base,
     prepare_output_directory,
@@ -39,7 +40,6 @@ from simulation_utils.paths import (  # noqa: E402
     validate_path_component,
     validated_open,
 )
-from simulation_utils.epidemic_labels import epidemic_took_off  # noqa: E402
 
 CAMPAIGN_DIR = Path(__file__).resolve().parent
 MANIFEST_PATH = CAMPAIGN_DIR / "campaign_manifest.json"

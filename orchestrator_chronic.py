@@ -16,12 +16,10 @@ from typing import Any
 import numpy as np
 
 from engines.infection_dynamics_bridge import KorkinShipEngine
+from simulation_utils.numeric import float_ne
 from simulation_utils.paths import resolve_repo_path, validated_open
 
 REPO_ROOT = os.path.dirname(os.path.abspath(__file__))
-
-
-from simulation_utils.numeric import float_ne
 
 
 def load_chronic_disease_config(

@@ -7,11 +7,11 @@ import os
 from dataclasses import dataclass, field
 from typing import Any
 
+import numpy as np
+
 from simulation_utils.paths import validated_open
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-import numpy as np
 
 
 @dataclass

@@ -6,48 +6,146 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
-  test:
+  lint:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.11", "3.12"]
-
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
-          python-version: ${{ matrix.python-version }}
-
+          persist-credentials: false
+      - name: Set up Python 3.11
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.11"
       - name: Install dependencies
         run: |
           python -m pip install --only-binary=:all: --require-hashes -r requirements.lock.txt
-
       - name: Lint with ruff (closes #89)
         run: |
           # F-rules are blocking (undefined names / unused imports).
           ruff check --select F --target-version py311 \
             engines/ crusher_labs/ picard_framework/ decision_engine/ \
             orchestrator*.py presidio_runner.py deploy/aws/
-          # Remaining lint stays advisory.
-          ruff check --select E,W,I --ignore E501,E741 --target-version py311 \
+          # E/W/I and complexity are blocking.
+          ruff check --select E,W,I,C901 --ignore E501,E741 --target-version py311 \
             engines/ crusher_labs/ picard_framework/ decision_engine/ \
-            orchestrator*.py presidio_runner.py deploy/aws/ || true
-        continue-on-error: false
+            orchestrator*.py presidio_runner.py deploy/aws/
 
+  sonar-mechanical-guard:
+    name: Sonar mechanical guard
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Set up Python 3.11
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.11"
+      - name: Run Sonar mechanical guards
+        run: |
+          python3 scripts/sonar_guard.py $(
+            find . -type f -name '*.py' \
+              ! -path './tests/*' \
+              ! -path './.agents/*'
+          )
+          python3 scripts/sonar_guard.py --workflows .github/workflows
+
+  workflow-lint:
+    name: Workflow lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Set up uv
+        uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v6
+      - name: Run zizmor
+        run: |
+          for workflow in .github/workflows/ci.yml .github/workflows/picard-presidio.yml; do
+            uvx --no-build --from zizmor==1.29.0 zizmor --no-progress "$workflow"
+          done
+
+  sanity-checker:
+    name: Sanity checker
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Set up Python 3.11
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: |
+          python -m pip install --only-binary=:all: --require-hashes -r requirements.lock.txt
       - name: Run sanity checker
         run: python3 tools/sanity_checker.py --from-config
 
+  schema-validation:
+    name: Schema validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Set up Python 3.11
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: |
+          python -m pip install --only-binary=:all: --require-hashes -r requirements.lock.txt
       - name: Validate JSON schemas (closes #83)
         env:
           PYTHONPATH: .
         run: pytest tests/test_json_schema_validation.py -v --tb=short
 
+  test:
+    name: test (${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          python -m pip install --only-binary=:all: --require-hashes -r requirements.lock.txt
       - name: Run test suite with coverage (closes #89)
-        run: pytest tests/ -v --tb=short --cov --cov-report=term-missing
+        run: pytest tests/ -v --tb=short --cov --cov-report=term-missing --cov-report=xml
+      - name: Upload coverage
+        if: matrix.python-version == '3.12'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: coverage
+          path: coverage.xml
+          if-no-files-found: error
 
+  import-hygiene:
+    name: Import hygiene
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Set up Python 3.11
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: |
+          python -m pip install --only-binary=:all: --require-hashes -r requirements.lock.txt
       - name: Import hygiene (Picard / Presidio / Stackelberg)
         env:
           PYTHONPATH: .
@@ -66,6 +164,20 @@ jobs:
           print('Picard/Presidio/Stackelberg import hygiene OK')
           "
 
+  presidio-smoke:
+    name: Presidio smoke
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Set up Python 3.11
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: |
+          python -m pip install --only-binary=:all: --require-hashes -r requirements.lock.txt
       - name: Presidio smoke (1 cruise, 2 epochs)
         env:
           PYTHONPATH: .
@@ -74,6 +186,20 @@ jobs:
             --fleet-config presidio/data/config/smoke_fleet.json \
             --cruises 1
 
+  orchestrator-import-hygiene:
+    name: Orchestrator import hygiene
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Set up Python 3.11
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: |
+          python -m pip install --only-binary=:all: --require-hashes -r requirements.lock.txt
       - name: Verify import hygiene (stoplight deduplication)
         env:
           PYTHONPATH: .
@@ -93,6 +219,20 @@ jobs:
           print('Import hygiene OK: modules split correctly, stoplight canonical')
           "
 
+  dashboard-import:
+    name: Dashboard import
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Set up Python 3.11
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: |
+          python -m pip install --only-binary=:all: --require-hashes -r requirements.lock.txt
       - name: Verify dashboard imports (LCARS command deck)
         env:
           PYTHONPATH: .
@@ -114,9 +254,22 @@ jobs:
           print('Dashboard import OK')
           "
 
+  orchestrator-smoke:
+    name: Orchestrator smoke
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Set up Python 3.11
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: |
+          python -m pip install --only-binary=:all: --require-hashes -r requirements.lock.txt
       - name: Run orchestrator (24-epoch smoke test)
         run: python3 orchestrator.py
-
       - name: Verify OIS in simulation telemetry
         run: |
           python3 -c "
@@ -128,8 +281,35 @@ jobs:
           print('OIS cumulative:', c['operational_impact_cumulative'])
           "
 
+  docker-campaign-smoke:
+    name: Campaign Docker image smoke
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
       - name: Campaign Docker image smoke
         run: |
           docker build -t picard-campaign .
           docker run --rm picard-campaign --smoke
 
+  sonar:
+    name: SonarQube Cloud
+    env:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Download coverage
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: coverage
+      - name: SonarQube Cloud scan
+        if: env.SONAR_TOKEN != ''
+        uses: SonarSource/sonarqube-scan-action@2f77a1ec69fb1d595b06f35ab27e97605bdef703 # v5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

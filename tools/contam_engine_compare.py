@@ -320,8 +320,8 @@ def run_transport_job(job: dict[str, Any]) -> dict[str, Any]:
 
 
 def run_full_sim_job(job: dict[str, Any]) -> dict[str, Any]:
-    from tools.contam_outcome_compare import _build_spec, _summarize
     from picard_framework.simulation.ship_simulation import ShipSimulation
+    from tools.contam_outcome_compare import _build_spec, _summarize
 
     platform_id = job["platform"]
     epochs = int(job.get("epochs", 12))
@@ -412,6 +412,7 @@ def run_full_sim_job(job: dict[str, Any]) -> dict[str, Any]:
                 try:
                     delta[key] = xv - nv
                 except TypeError:
+                    # Omit deltas for fields that cannot be subtracted.
                     pass
         report["delta"] = delta
         nt = report["native"]["timing"]["seconds_mean"]

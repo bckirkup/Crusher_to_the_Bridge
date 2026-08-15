@@ -23,14 +23,12 @@ from __future__ import annotations
 import json
 import os
 from dataclasses import dataclass, field
-
-from simulation_utils.paths import validated_open
-
-REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 from typing import Any
 
 from crusher_labs.cascade_entry import CascadeEntryConfig
-from simulation_utils.paths import resolve_repo_path
+from simulation_utils.paths import resolve_repo_path, validated_open
+
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # ── Tier dataclass ───────────────────────────────────────────────────────
 

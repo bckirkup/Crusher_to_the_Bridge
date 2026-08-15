@@ -309,6 +309,7 @@ def load_outbreak_surface(
         try:
             return load_stan_surface(stan_fit_dir)
         except FileNotFoundError:
+            # Fall back to the checked-in fixture when no Stan fit is available.
             pass
     return load_fixture_surface(fixture_path)
 
