@@ -30,6 +30,8 @@ from picard_framework.analysis.stan._data import (
 from picard_framework.analysis.stan.posterior_summaries import summarize_outbreak_fit
 from simulation_utils.paths import validated_open
 
+FIT_STATUS_FILENAME = "fit_status.json"
+
 
 def fit_model(
     analysis_dir: str,
@@ -72,7 +74,7 @@ def fit_model(
 
     if not cmdstan_available():
         write_json(
-            os.path.join(out, "fit_status.json"),
+            os.path.join(out, FIT_STATUS_FILENAME),
             {
                 "status": "skipped",
                 "reason": "cmdstanpy/CmdStan not installed",
@@ -102,7 +104,7 @@ def fit_model(
         )
     except Exception as exc:
         write_json(
-            os.path.join(out, "fit_status.json"),
+            os.path.join(out, FIT_STATUS_FILENAME),
             {"status": "error", "reason": str(exc), "meta": meta},
         )
         print(f"[outbreak] fit failed: {exc}", file=sys.stderr)
@@ -129,7 +131,7 @@ def fit_model(
         run_summary_rows=filter_norovirus_runs(run_rows),
     )
     status = {"status": "ok", "artifacts": artifacts, "meta": meta}
-    write_json(os.path.join(out, "fit_status.json"), status)
+    write_json(os.path.join(out, FIT_STATUS_FILENAME), status)
     return status
 
 

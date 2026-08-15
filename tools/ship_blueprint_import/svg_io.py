@@ -14,9 +14,9 @@ from typing import Iterable
 
 _SVG_NS = "http://www.w3.org/2000/svg"
 _NS = {"svg": _SVG_NS}
-_PATH_CMD = re.compile(
-    r"([MmLlHhVvCcSsQqTtAaZz])|([+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?)"
-)
+_PATH_COMMAND = r"[MmLlHhVvCcSsQqTtAaZz]"
+_PATH_NUMBER = r"[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?"
+_PATH_CMD = re.compile(f"{_PATH_COMMAND}|{_PATH_NUMBER}")
 
 
 @dataclass(frozen=True)

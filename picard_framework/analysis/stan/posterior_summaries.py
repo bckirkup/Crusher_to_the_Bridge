@@ -16,6 +16,7 @@ from picard_framework.analysis._io import (
 from simulation_utils.paths import validated_open
 
 VSP_SWEEP = (0.01, 0.03, 0.05, None)  # None = off
+DOSE_PROBABILITY_WINDOW_KEY = "p_dose_in_10.4_10.8"
 
 
 def _mean(xs: Sequence[float]) -> float:
@@ -110,7 +111,7 @@ def summarize_fit(
                 "q50": round(_quantile(beta, 0.50), 6),
                 "q95": round(_quantile(beta, 0.95), 6),
                 "d0": d0,
-                "p_dose_in_10.4_10.8": round(in_window / max(n_mc, 1), 6),
+                DOSE_PROBABILITY_WINDOW_KEY: round(in_window / max(n_mc, 1), 6),
                 "note": "Weakly identified from incidence slope; interpret with PPC",
             }
         )
@@ -125,7 +126,7 @@ def summarize_fit(
             "q50",
             "q95",
             "d0",
-            "p_dose_in_10.4_10.8",
+            DOSE_PROBABILITY_WINDOW_KEY,
             "note",
         ],
     )
@@ -442,7 +443,7 @@ def summarize_outbreak_fit(
                 "q50": round(_quantile(beta, 0.50), 6),
                 "q95": round(_quantile(beta, 0.95), 6),
                 "d0": d0,
-                "p_dose_in_10.4_10.8": "",
+                DOSE_PROBABILITY_WINDOW_KEY: "",
                 "note": "Stage A logit slope on (d0 - dose_adj); P(outbreak)",
             }
         )
@@ -456,7 +457,7 @@ def summarize_outbreak_fit(
             "q50",
             "q95",
             "d0",
-            "p_dose_in_10.4_10.8",
+            DOSE_PROBABILITY_WINDOW_KEY,
             "note",
         ],
     )

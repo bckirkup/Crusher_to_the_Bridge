@@ -23,6 +23,7 @@ from tools.ship_blueprint_import.svg_io import (
 )
 
 DEFAULT_CROSS_FLOW = 50.0
+APPROVED_OVERLAY_SUFFIX = "_approved.svg"
 
 
 def _sha256_file(path: str, *, allowed_roots: tuple[str, ...]) -> str:
@@ -73,7 +74,7 @@ def discover_approved_overlays(overlays_dir: str) -> list[tuple[int, str]]:
         except ValueError:
             continue
         path = os.path.join(overlays_dir, name)
-        if name.endswith("_approved.svg"):
+        if name.endswith(APPROVED_OVERLAY_SUFFIX):
             approved.append((page_num, path))
         elif name.endswith("_draft.svg"):
             drafts.append((page_num, path))
@@ -249,7 +250,9 @@ def synthesize(
     overlay_files = discover_approved_overlays(overlays_dir)
     if require_approved:
         approved_only = [
-            (p, path) for p, path in overlay_files if path.endswith("_approved.svg")
+            (p, path)
+            for p, path in overlay_files
+            if path.endswith(APPROVED_OVERLAY_SUFFIX)
         ]
         if not approved_only:
             raise RuntimeError(
@@ -405,7 +408,7 @@ def synthesize(
         "svg_sha256": svg_hashes,
         "overlay_mode": (
             "approved"
-            if any(p.endswith("_approved.svg") for _, p in overlay_files)
+            if any(p.endswith(APPROVED_OVERLAY_SUFFIX) for _, p in overlay_files)
             else "draft"
         ),
         "zone_count": len(zones_out),

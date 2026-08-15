@@ -40,6 +40,7 @@ PLATFORMS = (
 )
 EXPEDITION = "expedition_cruise_450"
 MEGA = "mega_cruise_5000"
+SUMMARY_FILENAME = "summary.json"
 # Thesis: uncontrolled gap ~23% vs ~11% becomes "visible" again above 5 pp.
 SHADOW_BREAK_PP = 0.05
 NOMINAL = {
@@ -54,10 +55,10 @@ def _summary_from_zip_bytes(data: bytes, name: str) -> dict[str, Any] | None:
     try:
         with zipfile.ZipFile(io.BytesIO(data), "r") as zf:
             names = {n.replace("\\", "/") for n in zf.namelist()}
-            key = "summary.json" if "summary.json" in names else None
+            key = SUMMARY_FILENAME if SUMMARY_FILENAME in names else None
             if key is None:
                 for n in names:
-                    if n.endswith("summary.json"):
+                    if n.endswith(SUMMARY_FILENAME):
                         key = n
                         break
             if key is None:
@@ -108,7 +109,7 @@ def iter_summaries(source: str) -> Iterable[dict[str, Any]]:
         n.endswith(".zip") for n in os.listdir(zips_dir)
     ):
         for zp in iter_result_zips(zips_dir):
-            with open(zp, "rb") as fh:
+            with validated_open(zp, "rb", allowed_roots=allowed_roots()) as fh:
                 row = _summary_from_zip_bytes(fh.read(), os.path.basename(zp))
             if row:
                 yield row
@@ -127,7 +128,7 @@ def iter_summaries(source: str) -> Iterable[dict[str, Any]]:
         return
     if os.path.isdir(source):
         for zp in iter_result_zips(source):
-            with open(zp, "rb") as fh:
+            with validated_open(zp, "rb", allowed_roots=allowed_roots()) as fh:
                 row = _summary_from_zip_bytes(fh.read(), os.path.basename(zp))
             if row:
                 yield row
@@ -177,7 +178,7 @@ def aggregate_cells(
         n = len(group)
         outbreaks = sum(int(g["outbreak_occurred"]) for g in group)
         ars = [float(g["attack_rate"]) for g in group]
-        row = {k: v for k, v in zip(keys, key)}
+        row = dict(zip(keys, key))
         row.update(
             {
                 "n_runs": n,
@@ -203,7 +204,7 @@ def platform_gap_table(
         n_by[key][plat] = int(r["n_runs"])
     out: list[dict[str, Any]] = []
     for key, plat_ar in sorted(by_cell.items(), key=lambda kv: kv[0]):
-        row = {k: v for k, v in zip(factor_keys, key)}
+        row = dict(zip(factor_keys, key))
         for p in PLATFORMS:
             row[f"ar_{p}"] = plat_ar.get(p)
             row[f"n_{p}"] = n_by[key].get(p, 0)
