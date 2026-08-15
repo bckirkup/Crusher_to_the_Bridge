@@ -468,6 +468,12 @@ def fit_projection(
     widths = np.asarray([row["ratio_width90_log"] for row in results], dtype=float)
     ceiling_width = ceiling["sd_log_ratio"] * 2.0 * Z90
     inflation = float(widths.mean() / ceiling_width)
+    regional_ceiling = ceiling_projection(
+        design,
+        alpha=alpha,
+        power=power,
+        inflation=inflation,
+    )
     return {
         "engine": "fit",
         "provenance": "Engine B numpy reference sampler at fit scale",
@@ -477,12 +483,25 @@ def fit_projection(
         "warmup": warmup,
         "n_replicates": replicates,
         "replicates": results,
+        "realized_width90_log_lambda_hot_mean": float(
+            np.mean([r["hot_width90_log"] for r in results]),
+        ),
+        "realized_width90_log_lambda_background_mean": float(
+            np.mean([r["background_width90_log"] for r in results]),
+        ),
         "realized_width90_log_ratio_mean": float(widths.mean()),
+        "coverage_pooled_lambda_hot_truth": float(
+            np.mean([r["pooled_lambda_hot_coverage"] for r in results]),
+        ),
+        "coverage_pooled_lambda_background_truth": float(
+            np.mean([r["pooled_lambda_background_coverage"] for r in results]),
+        ),
         "coverage_pooled_lambda_port_truth": float(np.mean([r["pooled_lambda_background_coverage"] for r in results])),
         "coverage_hot_background_ratio_truth": float(np.mean([r["ratio_coverage"] for r in results])),
         "detection_power": float(np.mean([r["detected"] for r in results])),
         "inflation_factor_vs_engine_a": inflation,
         "ceiling_same_fit_scale": ceiling,
+        "regional_mdhr_inflated": regional_ceiling["mdhr_inflated"],
         "fleet_time_confounded_ports": sorted(fleet_time_confounded_ports(meta)),
         "caveats": list(CAVEATS),
     }
