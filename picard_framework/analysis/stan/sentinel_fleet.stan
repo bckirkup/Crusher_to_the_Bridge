@@ -28,6 +28,22 @@
 // Ragged voyages: arrays are padded to Tmax and every loop stops at T[v]. Padded
 // epochs are never in the likelihood, so a short voyage cannot contribute
 // phantom zero-onset epochs that would drag every rate down.
+//
+// Wastewater (spec 1.3) is a second observation of the *same* latent incidence,
+// not a second hazard: a ship's greywater is a closed integrating system, so it
+// measures the prevalence of shedders aboard whatever port infected them.
+//
+//   share[t]        = (w_shed * incidence_total)[t] / persons_aboard[t]
+//   logit(p[i])     = ww_logit_base + ww_slope * log(share[t] + floor)
+//   ww_reads[i]     ~ beta_binomial(ww_total[i], p[i] * ww_conc, (1-p[i]) * ww_conc)
+//
+// w_shed is a *survival* kernel (P(still shedding at lag k), offset by the
+// holding time), so the signal integrates rather than tracking onsets. Replicate
+// collection points are pooled into one trial and the depth is capped before the
+// data reaches Stan, and ww_conc adds the overdispersion that keeps a deep
+// library from being read as millions of independent trials — three separate
+// guards against the channel outvoting the clinical line list it is correlated
+// with. NW = 0 turns it off, leaving ww_* prior-only.
 
 functions {
   /* Per-person-hour ashore rate by (group, port) for one voyage.
@@ -76,6 +92,21 @@ functions {
       total[t] = sum(col(incidence, t));
     }
     return incidence;
+  }
+
+  /* Shedder prevalence as a share of the people aboard, per epoch. */
+  vector shedder_share(int Tv, vector w_shed, matrix incidence,
+                       vector persons) {
+    int L = num_elements(w_shed);
+    vector[Tv] share;
+    for (t in 1 : Tv) {
+      real shedders = 0;
+      for (k in 1 : min(t, L)) {
+        shedders += w_shed[k] * sum(col(incidence, t - k + 1));
+      }
+      share[t] = shedders / fmax(persons[t], 1.0);
+    }
+    return share;
   }
 
   /* Expected onsets: incubation convolution truncated at the horizon, which is
@@ -139,6 +170,22 @@ data {
   real<lower=0> r_sd_prior_scale;
   real<lower=0> crew_ratio_prior_sd;
   real<lower=0> repeat_prior_sd;
+  // Wastewater channel. NW = 0 is a valid, fully clinical fit.
+  int<lower=0> NW;                         // pooled samples (one per voyage-epoch)
+  array[NW] int<lower=1, upper=V> ww_voyage;
+  array[NW] int<lower=1> ww_epoch;
+  array[NW] int<lower=0> ww_reads;         // depth-capped pathogen reads
+  array[NW] int<lower=1> ww_total;         // depth-capped library size
+  int<lower=1> L_shed;
+  vector<lower=0>[L_shed] w_shed;           // shedding survival, lag 0 first
+  array[V] vector<lower=0>[Tmax] ww_persons;  // headcount aboard per epoch
+  real<lower=0> ww_share_floor;
+  real ww_base_prior_mean;
+  real<lower=0> ww_base_prior_sd;
+  real ww_slope_prior_mean;
+  real<lower=0> ww_slope_prior_sd;
+  real ww_conc_prior_log_mean;
+  real<lower=0> ww_conc_prior_log_sd;
 }
 
 transformed data {
@@ -168,6 +215,9 @@ parameters {
   vector[S] z_r;
   real log_crew_ratio;                     // crew:passenger ashore hazard ratio
   real beta_repeat;                        // per earlier call at the same port
+  real ww_logit_base;                      // background read fraction, logit scale
+  real<lower=0> ww_slope;                  // elasticity in shedder prevalence
+  real<lower=0> ww_conc;                   // beta-binomial concentration
 }
 
 transformed parameters {
@@ -203,21 +253,38 @@ model {
   z_r ~ std_normal();
   log_crew_ratio ~ normal(0, crew_ratio_prior_sd);
   beta_repeat ~ normal(0, repeat_prior_sd);
+  ww_logit_base ~ normal(ww_base_prior_mean, ww_base_prior_sd);
+  ww_slope ~ normal(ww_slope_prior_mean, ww_slope_prior_sd);
+  ww_conc ~ lognormal(ww_conc_prior_log_mean, ww_conc_prior_log_sd);
 
   {
     vector[NV] lambda_visit = exp(log_lambda_visit);
+    /* Per-voyage share, kept so the wastewater terms can be evaluated without
+       recomputing the incidence recursion a second time. */
+    array[V] vector[Tmax] share;
     for (v in 1 : V) {
-      matrix[G, Tmax] mu_onset = voyage_onsets(
-        T[v], f_inc,
-        voyage_incidence(
-          T[v], w_gen, ashore_hours[v], aboard_hours[v],
-          voyage_rate(visit_idx[v], is_crew, crew_repeat[v], lambda_visit,
-                      log_crew_ratio, beta_repeat),
-          secondary_share[v], lambda_aboard[ship[v]], R_onboard[ship[v]]),
-        ascertainment[v]);
+      matrix[G, Tmax] incidence = voyage_incidence(
+        T[v], w_gen, ashore_hours[v], aboard_hours[v],
+        voyage_rate(visit_idx[v], is_crew, crew_repeat[v], lambda_visit,
+                    log_crew_ratio, beta_repeat),
+        secondary_share[v], lambda_aboard[ship[v]], R_onboard[ship[v]]);
+      matrix[G, Tmax] mu_onset = voyage_onsets(T[v], f_inc, incidence,
+                                               ascertainment[v]);
       for (g in 1 : G) {
         onsets[v, g, 1 : T[v]] ~ poisson(to_vector(mu_onset[g, 1 : T[v]]));
       }
+      share[v] = rep_vector(0.0, Tmax);
+      if (NW > 0) {
+        share[v][1 : T[v]] = shedder_share(T[v], w_shed, incidence,
+                                           ww_persons[v]);
+      }
+    }
+    for (i in 1 : NW) {
+      real p = inv_logit(ww_logit_base
+                         + ww_slope * log(share[ww_voyage[i]][ww_epoch[i]]
+                                          + ww_share_floor));
+      ww_reads[i] ~ beta_binomial(ww_total[i], p * ww_conc,
+                                  (1 - p) * ww_conc);
     }
   }
 }
@@ -235,6 +302,8 @@ generated quantities {
   real crew_hazard_ratio = exp(log_crew_ratio);
   real repeat_hazard_ratio = exp(beta_repeat);
   real loglik_clinical = 0;
+  real loglik_wastewater = 0;
+  vector[NW] ww_expected_fraction = rep_vector(0.0, NW);
 
   imported_cases_visit = rep_vector(0.0, NV);
   imported_cases = rep_vector(0.0, P);
@@ -265,6 +334,22 @@ generated quantities {
     for (g in 1 : G) {
       loglik_clinical += poisson_lpmf(onsets[v, g, 1 : T[v]]
                                       | to_vector(mu_onset[g, 1 : T[v]]));
+    }
+    if (NW > 0) {
+      vector[T[v]] share = shedder_share(T[v], w_shed, incidence,
+                                         ww_persons[v]);
+      for (i in 1 : NW) {
+        if (ww_voyage[i] != v) {
+          continue;
+        }
+        real p = inv_logit(ww_logit_base
+                           + ww_slope * log(share[ww_epoch[i]]
+                                            + ww_share_floor));
+        ww_expected_fraction[i] = p;
+        loglik_wastewater += beta_binomial_lpmf(ww_reads[i] | ww_total[i],
+                                                p * ww_conc,
+                                                (1 - p) * ww_conc);
+      }
     }
   }
   secondary_cases = fmax(0.0, total_incidence - sum(imported_cases) - aboard_cases);

@@ -22,6 +22,11 @@ Crew repeat exposure is a *covariate*, not a level: ``crew_repeat[v, p]`` counts
 the earlier calls that ship made at that port inside the supplied fleet, and its
 coefficient is the only within-person contrast available (spec 3).
 
+Wastewater enters as pooled read counts against the *same* latent incidence curve
+(spec 1.3) — one beta-binomial trial per voyage-epoch, never a port-labelled
+hazard. ``wastewater=False`` drops the channel entirely, which is how its marginal
+value is measured against the clinical-only baseline.
+
 Voyages are padded to the longest horizon; every Stan loop stops at ``T[v]`` so
 padded epochs never enter the likelihood.
 """
@@ -41,10 +46,27 @@ from picard_framework.analysis.sentinel.exposure import (
 )
 from picard_framework.analysis.sentinel.incubation import (
     DelayDistribution,
+    default_pathogen,
     port_resolution_adequate,
 )
 from picard_framework.analysis.sentinel.itinerary import Voyage
 from picard_framework.analysis.sentinel.observations import ObservationBundle
+from picard_framework.analysis.sentinel.wastewater_signal import (
+    DEFAULT_BASE_LOGIT_PRIOR_MEAN,
+    DEFAULT_BASE_LOGIT_PRIOR_SD,
+    DEFAULT_CONCENTRATION_PRIOR_LOG_SD,
+    DEFAULT_CONCENTRATION_PRIOR_MEDIAN,
+    DEFAULT_SLOPE_PRIOR_MEAN,
+    DEFAULT_SLOPE_PRIOR_SD,
+    SHARE_FLOOR,
+    PooledSample,
+    beta_binomial_logpmf,
+    expected_read_fraction,
+    pool_wastewater,
+    shedder_prevalence,
+    shedding_kernel,
+    wastewater_config,
+)
 from picard_framework.analysis.stan._sentinel_data import (
     CREW,
     DEFAULT_BASELINE_PRIOR_MEDIAN,
@@ -202,6 +224,10 @@ def build_sentinel_fleet_data(
     r_prior_log_sd: float = DEFAULT_R_LOG_PRIOR_SD,
     crew_ratio_prior_sd: float = DEFAULT_CREW_RATIO_PRIOR_SD,
     repeat_prior_sd: float = DEFAULT_REPEAT_PRIOR_SD,
+    wastewater: bool = True,
+    pathogen: str | None = None,
+    residence_lag_hours: float | None = None,
+    max_effective_reads: int | None = None,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     """``(stan_data, meta)`` for a fleet of voyages sharing an epoch grid.
 
@@ -269,6 +295,16 @@ def build_sentinel_fleet_data(
         visit_idx.append(row)
 
     lagged = generation.strictly_lagged().weights[1:]
+    ww = _wastewater_block(
+        voyages,
+        enabled=wastewater,
+        pathogen=pathogen,
+        t_max=t_max,
+        aboard_all=aboard_all,
+        epoch_hours=float(voyages[0].voyage.epoch_duration_hours),
+        residence_lag_hours=residence_lag_hours,
+        max_effective_reads=max_effective_reads,
+    )
     data = {
         "V": len(voyages),
         "S": len(ships),
@@ -306,6 +342,7 @@ def build_sentinel_fleet_data(
         "r_sd_prior_scale": float(r_sd_prior_scale),
         "crew_ratio_prior_sd": float(crew_ratio_prior_sd),
         "repeat_prior_sd": float(repeat_prior_sd),
+        **ww["data"],
     }
     meta = _fleet_meta(
         voyages,
@@ -319,6 +356,7 @@ def build_sentinel_fleet_data(
         crew_repeat=crew_repeat,
         incubation=incubation,
     )
+    meta["wastewater"] = ww["meta"]
     return data, meta
 
 
@@ -384,6 +422,117 @@ def _fleet_meta(
         "port_resolution_adequate": all(resolutions.values()),
         "n_cases": sum(len(fv.bundle.clinical_cases) for fv in voyages),
     }
+
+
+def _wastewater_block(
+    voyages: Sequence[FleetVoyage],
+    *,
+    enabled: bool,
+    pathogen: str | None,
+    t_max: int,
+    aboard_all: Sequence[Sequence[Sequence[float]]],
+    epoch_hours: float,
+    residence_lag_hours: float | None,
+    max_effective_reads: int | None,
+) -> dict[str, Any]:
+    """``{'data': ..., 'meta': ...}`` for the wastewater channel.
+
+    ``enabled=False`` still emits the arrays, at length 0: Stan needs the block to
+    exist, and a zero-length observation array is how "no wastewater evidence"
+    is stated without a second copy of the model. The parameters remain in the
+    posterior and are then prior-only, which is deliberately visible — a report
+    that quotes ``ww_slope`` off a clinical-only fit should be caught.
+
+    The denominator is persons aboard per epoch, reconstructed from the aboard
+    person-hours already assembled, so the read fraction is linked to a
+    *prevalence* rather than a headcount that would scale with ship size.
+    """
+    resolved = pathogen or default_pathogen()
+    kernel = shedding_kernel(
+        resolved,
+        epoch_hours=epoch_hours,
+        residence_lag_hours=residence_lag_hours,
+    )
+    config = wastewater_config()
+    cap = int(
+        max_effective_reads
+        if max_effective_reads is not None
+        else config["max_effective_reads"],
+    )
+
+    persons: list[list[float]] = []
+    for v in range(len(voyages)):
+        aboard = np.asarray(aboard_all[v], dtype=float)
+        # Person-hours over the epoch length is the headcount aboard that epoch.
+        head = aboard.sum(axis=0) / float(epoch_hours or 1.0)
+        persons.append([float(max(x, 1.0)) for x in head])
+
+    pooled: list[PooledSample] = []
+    voyage_of: list[int] = []
+    if enabled:
+        for i, fv in enumerate(voyages):
+            samples = pool_wastewater(
+                fv.bundle,
+                pathogen=resolved,
+                observation_end_epoch=int(fv.design.observation_end_epoch),
+                max_effective_reads=cap,
+            )
+            pooled.extend(samples)
+            voyage_of.extend([i + 1] * len(samples))
+
+    data = {
+        "NW": len(pooled),
+        "ww_voyage": voyage_of,
+        "ww_epoch": [int(s.epoch) for s in pooled],
+        "ww_reads": [int(s.effective_pathogen_reads) for s in pooled],
+        "ww_total": [int(s.effective_reads) for s in pooled],
+        "L_shed": int(kernel.array.size),
+        "w_shed": [float(x) for x in kernel.array],
+        "ww_persons": persons,
+        "ww_share_floor": float(SHARE_FLOOR),
+        "ww_base_prior_mean": float(DEFAULT_BASE_LOGIT_PRIOR_MEAN),
+        "ww_base_prior_sd": float(DEFAULT_BASE_LOGIT_PRIOR_SD),
+        "ww_slope_prior_mean": float(DEFAULT_SLOPE_PRIOR_MEAN),
+        "ww_slope_prior_sd": float(DEFAULT_SLOPE_PRIOR_SD),
+        "ww_conc_prior_log_mean": math.log(float(DEFAULT_CONCENTRATION_PRIOR_MEDIAN)),
+        "ww_conc_prior_log_sd": float(DEFAULT_CONCENTRATION_PRIOR_LOG_SD),
+    }
+    meta = {
+        "enabled": bool(enabled),
+        "pathogen": resolved,
+        "n_pooled_samples": len(pooled),
+        "n_raw_samples": sum(s.n_collection_points for s in pooled),
+        "max_effective_reads": cap,
+        "residence_lag_epochs": kernel.residence_lag_epochs,
+        "mean_shedding_hours": round(kernel.mean_shedding_hours, 3),
+        "samples": [
+            {
+                "voyage_id": s.voyage_id,
+                "epoch": s.epoch,
+                "pathogen_reads": s.pathogen_reads,
+                "total_reads": s.total_reads,
+                "effective_reads": s.effective_reads,
+                "n_collection_points": s.n_collection_points,
+                "read_fraction": round(s.read_fraction, 9),
+            }
+            for s in pooled
+        ],
+    }
+    if t_max and persons and len(persons[0]) != t_max:
+        raise ValueError(
+            "aboard hours were not padded to Tmax before the wastewater "
+            f"denominators were built: {len(persons[0])} vs {t_max}",
+        )
+    return {"data": data, "meta": meta}
+
+
+@dataclass(frozen=True)
+class WastewaterParams:
+    """The wastewater link parameters, separated from the hierarchy like ``FleetRates``."""
+
+    logit_base: float = DEFAULT_BASE_LOGIT_PRIOR_MEAN
+    slope: float = DEFAULT_SLOPE_PRIOR_MEAN
+    concentration: float = DEFAULT_CONCENTRATION_PRIOR_MEDIAN
 
 
 @dataclass(frozen=True)
@@ -494,6 +643,67 @@ def visit_hours(data: Mapping[str, Any]) -> np.ndarray:
             if idx > 0:
                 hours[idx - 1] += float(ashore[:, :, p].sum())
     return hours
+
+
+def wastewater_shares(
+    data: Mapping[str, Any],
+    rates: FleetRates,
+) -> list[np.ndarray]:
+    """Shedder prevalence per voyage-epoch, as a share of the people aboard.
+
+    The quantity the wastewater channel observes: it is a function of the
+    incidence curve only, so a port hazard and an onboard secondary that produce
+    the same curve are indistinguishable here. That is the point — the channel
+    constrains the curve and leaves the attribution to the clinical data (1.3).
+    """
+    incidences, _ = fleet_forward_incidence(data, rates)
+    kernel = np.asarray(data["w_shed"], dtype=float)
+    shares: list[np.ndarray] = []
+    for v, incidence in enumerate(incidences):
+        horizon = int(data["T"][v])
+        persons = np.asarray(data["ww_persons"][v], dtype=float)[:horizon]
+        shedders = shedder_prevalence(incidence.sum(axis=0), kernel)
+        shares.append(shedders / np.clip(persons, 1.0, None))
+    return shares
+
+
+def wastewater_expected_fractions(
+    data: Mapping[str, Any],
+    rates: FleetRates,
+    params: WastewaterParams,
+) -> np.ndarray:
+    """Expected read fraction at each pooled sample, in sample order."""
+    n_samples = int(data["NW"])
+    if n_samples == 0:
+        return np.zeros(0, dtype=float)
+    shares = wastewater_shares(data, rates)
+    voyage = np.asarray(data["ww_voyage"], dtype=int) - 1
+    epoch = np.asarray(data["ww_epoch"], dtype=int) - 1
+    at_sample = np.asarray(
+        [shares[voyage[i]][epoch[i]] for i in range(n_samples)], dtype=float,
+    )
+    return expected_read_fraction(
+        at_sample, logit_base=params.logit_base, slope=params.slope,
+    )
+
+
+def wastewater_loglik(
+    data: Mapping[str, Any],
+    rates: FleetRates,
+    params: WastewaterParams,
+) -> float:
+    """Beta-binomial log likelihood of the pooled reads; 0.0 with no samples."""
+    if int(data["NW"]) == 0:
+        return 0.0
+    mean = wastewater_expected_fractions(data, rates, params)
+    return float(
+        beta_binomial_logpmf(
+            np.asarray(data["ww_reads"], dtype=int),
+            np.asarray(data["ww_total"], dtype=int),
+            mean,
+            params.concentration,
+        ).sum(),
+    )
 
 
 def aboard_hours_by_ship(data: Mapping[str, Any]) -> np.ndarray:

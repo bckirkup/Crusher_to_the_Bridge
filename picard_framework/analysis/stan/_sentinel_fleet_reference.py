@@ -21,9 +21,11 @@ import numpy as np
 from picard_framework.analysis.stan._metropolis import adaptive_metropolis
 from picard_framework.analysis.stan._sentinel_fleet_data import (
     FleetRates,
+    WastewaterParams,
     aboard_hours_by_ship,
     expected_onsets_fleet,
     fleet_forward_incidence,
+    wastewater_loglik,
 )
 
 # Log rates above 0 are more than one infection per person-hour: not a hazard,
@@ -67,6 +69,14 @@ class _Layout:
         self.z_r = take(n_ships)
         self.log_crew_ratio = take(1)
         self.beta_repeat = take(1)
+        # Wastewater link, only when there is wastewater to explain. With no
+        # samples these would be prior-only dimensions: nothing to learn, and a
+        # clinical-only fit would walk a wider space than the model it is.
+        self.has_wastewater = int(data.get("NW", 0)) > 0
+        if self.has_wastewater:
+            self.ww_logit_base = take(1)
+            self.log_ww_slope = take(1)
+            self.log_ww_conc = take(1)
         self.size = cursor
 
 
@@ -80,7 +90,7 @@ def _unpack(theta: np.ndarray, layout: _Layout) -> dict[str, Any]:
         float(theta[layout.mu_log_hazard][0]) + sigma_port * theta[layout.z_port]
     )
     fleet_time = sigma_time * theta[layout.z_time]
-    return {
+    unpacked: dict[str, Any] = {
         "sigma_port": sigma_port,
         "sigma_visit": sigma_visit,
         "sigma_time": sigma_time,
@@ -96,6 +106,11 @@ def _unpack(theta: np.ndarray, layout: _Layout) -> dict[str, Any]:
         "log_crew_ratio": float(theta[layout.log_crew_ratio][0]),
         "beta_repeat": float(theta[layout.beta_repeat][0]),
     }
+    if layout.has_wastewater:
+        unpacked["ww_logit_base"] = float(theta[layout.ww_logit_base][0])
+        unpacked["ww_slope"] = math.exp(float(theta[layout.log_ww_slope][0]))
+        unpacked["ww_conc"] = math.exp(float(theta[layout.log_ww_conc][0]))
+    return unpacked
 
 
 def _log_lambda_visit(
@@ -108,6 +123,16 @@ def _log_lambda_visit(
         np.asarray(unpacked["log_lambda_port"])[visit_port]
         + unpacked["sigma_visit"] * np.asarray(unpacked["z_visit"])
         + np.asarray(unpacked["fleet_time"])[visit_week]
+    )
+
+
+def wastewater_params(theta: np.ndarray, data: Mapping[str, Any]) -> WastewaterParams:
+    """The wastewater link parameters a parameter vector implies."""
+    unpacked = _unpack(np.asarray(theta, dtype=float), _Layout(data))
+    return WastewaterParams(
+        logit_base=unpacked["ww_logit_base"],
+        slope=unpacked["ww_slope"],
+        concentration=unpacked["ww_conc"],
     )
 
 
@@ -153,6 +178,16 @@ def _log_density(theta: np.ndarray, data: Mapping[str, Any], layout: _Layout) ->
         counts = np.asarray(data["onsets"][v], dtype=float)[:, :horizon]
         m = np.clip(mu, 1e-12, None)
         lp += float((counts * np.log(m) - m).sum())
+    if int(data.get("NW", 0)) > 0:
+        lp += wastewater_loglik(
+            data,
+            rates,
+            WastewaterParams(
+                logit_base=u["ww_logit_base"],
+                slope=u["ww_slope"],
+                concentration=u["ww_conc"],
+            ),
+        )
     if not math.isfinite(lp):
         return -math.inf
 
@@ -191,6 +226,23 @@ def _log_prior(
     )
     lp += normal(u["log_crew_ratio"], 0.0, float(data["crew_ratio_prior_sd"]))
     lp += normal(u["beta_repeat"], 0.0, float(data["repeat_prior_sd"]))
+    if layout.has_wastewater:
+        lp += normal(
+            u["ww_logit_base"],
+            float(data["ww_base_prior_mean"]),
+            float(data["ww_base_prior_sd"]),
+        )
+        # <lower=0> in Stan: the log-scale walk needs their Jacobians.
+        lp += normal(
+            u["ww_slope"],
+            float(data["ww_slope_prior_mean"]),
+            float(data["ww_slope_prior_sd"]),
+        ) + math.log(u["ww_slope"])
+        lp += _lognormal_log_scale(
+            u["ww_conc"],
+            float(data["ww_conc_prior_log_mean"]),
+            float(data["ww_conc_prior_log_sd"]),
+        )
     for key in ("z_port", "z_visit", "z_time", "z_ship", "z_r"):
         block = theta[getattr(layout, key)]
         lp += -0.5 * float((block**2).sum())
@@ -200,6 +252,15 @@ def _log_prior(
     lp += half_normal_log_scale(u["sigma_ship"], float(data["ship_sd_prior_scale"]))
     lp += half_normal_log_scale(u["sigma_r"], float(data["r_sd_prior_scale"]))
     return lp
+
+
+def _lognormal_log_scale(value: float, log_mean: float, log_sd: float) -> float:
+    """``lognormal_lpdf`` plus the log-scale Jacobian, up to a constant.
+
+    The ``-log(value)`` in the lognormal density and the ``+log(value)`` Jacobian
+    of the log-scale walk cancel, which is why only the quadratic term is left.
+    """
+    return -0.5 * ((math.log(value) - log_mean) / log_sd) ** 2
 
 
 def fleet_log_density(theta: np.ndarray, data: Mapping[str, Any]) -> float:
@@ -222,6 +283,12 @@ def initial_point(data: Mapping[str, Any]) -> np.ndarray:
         "log_sigma_r",
     ):
         theta[getattr(layout, key)] = math.log(0.25)
+    if layout.has_wastewater:
+        theta[layout.ww_logit_base] = float(data["ww_base_prior_mean"])
+        theta[layout.log_ww_slope] = math.log(
+            max(float(data["ww_slope_prior_mean"]), 0.1),
+        )
+        theta[layout.log_ww_conc] = float(data["ww_conc_prior_log_mean"])
     return theta
 
 
@@ -297,6 +364,19 @@ def _to_columns(
                 "aboard_cases": aboard_cases,
                 "total": total,
                 "loglik": _poisson_loglik(data, mu),
+                "loglik_ww": (
+                    wastewater_loglik(
+                        data,
+                        rates,
+                        WastewaterParams(
+                            logit_base=u["ww_logit_base"],
+                            slope=u["ww_slope"],
+                            concentration=u["ww_conc"],
+                        ),
+                    )
+                    if layout.has_wastewater
+                    else 0.0
+                ),
             },
         )
 
@@ -359,6 +439,11 @@ def _to_columns(
         ],
     )
     put("loglik_clinical", [d["loglik"] for d in per_draw])
+    if layout.has_wastewater:
+        put("ww_logit_base", [d["u"]["ww_logit_base"] for d in per_draw])
+        put("ww_slope", [d["u"]["ww_slope"] for d in per_draw])
+        put("ww_conc", [d["u"]["ww_conc"] for d in per_draw])
+        put("loglik_wastewater", [d["loglik_ww"] for d in per_draw])
     return columns
 
 

@@ -33,6 +33,7 @@ from picard_framework.analysis.stan._sentinel_fleet_data import (
     build_sentinel_fleet_data,
 )
 from picard_framework.analysis.stan.fit_sentinel_fleet import (
+    SamplerOptions,
     fit_sentinel_fleet,
     load_fleet_manifest,
     load_fleet_voyages,
@@ -294,7 +295,10 @@ def test_a_posterior_missing_a_column_fails_loudly(out_dir: str) -> None:
 def test_smoke_fit_writes_every_output_for_the_example_fleet(out_dir: str) -> None:
     """End to end on the committed three-voyage manifest, no CmdStan required."""
     status = fit_sentinel_fleet(
-        FLEET_MANIFEST, out_dir, smoke=True, show_progress=False,
+        FLEET_MANIFEST,
+        out_dir,
+        smoke=True,
+        sampler=SamplerOptions(show_progress=False),
     )
     assert status["status"] == "smoke"
     assert status["engine"] == "numpy_rw_mh"
