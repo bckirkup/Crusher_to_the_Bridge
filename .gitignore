@@ -116,4 +116,7 @@ picard_framework/analysis/stan/norovirus_trajectory
 # fleet fit outputs (smoke and scratch runs)
 out_fleet_smoke/
 out_test_fleet_fit/
+# sentinel operator CLI outputs (CI smoke and test scratch)
+sentinel_smoke/
+out_test_sentinel_cli/
 

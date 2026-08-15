@@ -44,6 +44,10 @@ _HARDENED_MODULES = (
     "picard_framework/analysis/sentinel/export_line_list.py",
     "picard_framework/analysis/sentinel/itinerary.py",
     "picard_framework/analysis/sentinel/observations.py",
+    "picard_framework/analysis/sentinel/artifacts.py",
+    "picard_framework/analysis/sentinel/figures.py",
+    "picard_framework/analysis/sentinel/report.py",
+    "picard_framework/analysis/sentinel/run_sentinel.py",
 )
 
 # Path.write_text / read_text / unlink / open are also sinks for S2083/S8707

@@ -186,6 +186,42 @@ jobs:
             --fleet-config presidio/data/config/smoke_fleet.json \
             --cruises 1
 
+  sentinel-smoke:
+    name: Sentinel smoke
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Set up Python 3.11
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: |
+          python -m pip install --only-binary=:all: --require-hashes -r requirements.lock.txt
+      - name: Sentinel smoke (bundled fleet, numpy reference walker)
+        env:
+          PYTHONPATH: .
+        run: |
+          python3 -m picard_framework.analysis.sentinel \
+            --smoke \
+            --out sentinel_smoke
+      - name: Verify the smoke fit produced hazards, a report, and figures
+        run: |
+          python3 -c "
+          import csv, json, os
+          status = json.load(open('sentinel_smoke/fit_status.json'))
+          assert status['status'] == 'smoke', status
+          rows = list(csv.DictReader(open('sentinel_smoke/fleet_port_hazards.csv')))
+          assert len(rows) >= 3, rows
+          assert all(float(r['hazard_mean']) > 0.0 for r in rows), rows
+          report = open('sentinel_smoke/report.md', encoding='utf-8').read()
+          assert 'Reference walker, not NUTS' in report
+          assert os.path.isfile('sentinel_smoke/figures/port_hazards.png')
+          print('sentinel smoke OK:', len(rows), 'ports')
+          "
+
   orchestrator-import-hygiene:
     name: Orchestrator import hygiene
     runs-on: ubuntu-latest
