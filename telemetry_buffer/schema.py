@@ -15,13 +15,13 @@ import json
 import os
 from typing import Any
 
+from simulation_utils.paths import is_path_under_base
 from telemetry_buffer.agent_axes import (
     COMPLIANCE_COMPLIANT,
     INFECTION_SUSCEPTIBLE,
     PRESENTATION_ASYMPTOMATIC,
     agent_axes_dict,
 )
-from simulation_utils.paths import is_path_under_base
 
 # ---------------------------------------------------------------------------
 # Schema helpers

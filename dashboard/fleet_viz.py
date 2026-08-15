@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import json
 import os
-from typing import Any
 
 import pandas as pd
 import plotly.graph_objects as go
@@ -11,10 +10,10 @@ import streamlit as st
 
 from dashboard.charts import render_bridge_status
 from dashboard.loaders import (
+    list_cruise_dirs,
     load_history_from,
     load_notebook_from,
     load_platform_bundle,
-    list_cruise_dirs,
     resolve_platform_id,
     telemetry_paths,
 )
@@ -24,10 +23,10 @@ from dashboard.theme import (
     LCARS_BLUE,
     LCARS_GOLD,
     LCARS_GREEN,
-    apply_lcars_layout,
     LCARS_RED,
     _lcars_alert_banner,
     _lcars_banner,
+    apply_lcars_layout,
 )
 
 

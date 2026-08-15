@@ -1,24 +1,12 @@
 """Bridge, sickbay, and standing orders chart stations."""
 from __future__ import annotations
 
-import json
-import os
 from typing import Any
 
-import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
-from telemetry_buffer.agent_axes import (
-    COMPLIANCE_QUARANTINED,
-    INFECTION_RECOVERED,
-    agent_has_symptomatic_presentation,
-    agent_is_infected,
-    resolve_agent_axes,
-)
-
-from dashboard.paths import PATHOGEN_PATH, PROTOCOLS_PATH
 from dashboard.theme import (
     ALERT_COLORS,
     ALERT_LABELS,
@@ -28,7 +16,6 @@ from dashboard.theme import (
     LCARS_GREEN,
     LCARS_PANEL,
     LCARS_PEACH,
-    apply_lcars_layout,
     LCARS_PURPLE,
     LCARS_RED,
     LCARS_TAN,
@@ -36,6 +23,14 @@ from dashboard.theme import (
     _lcars_alert_banner,
     _lcars_banner,
     _worst_stoplight,
+    apply_lcars_layout,
+)
+from telemetry_buffer.agent_axes import (
+    COMPLIANCE_QUARANTINED,
+    INFECTION_RECOVERED,
+    agent_has_symptomatic_presentation,
+    agent_is_infected,
+    resolve_agent_axes,
 )
 
 PLOT_MODE_LINES_MARKERS = "lines+markers"

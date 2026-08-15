@@ -17,7 +17,6 @@ from simulation_utils.paths import (
     resolve_child_path,
     validated_open,
 )
-
 from tools.contam_hobbyist import load_hobbyist_pack, resolve_orifice_type
 from tools.contam_prj_bridge import export_platform_to_prj
 from tools.contamw34_prj import path_map_from_prj, simplify_contamw34

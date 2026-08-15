@@ -33,9 +33,14 @@ from typing import Any
 _REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, _REPO_ROOT)
 
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import (  # noqa: E402  (imported after the sys.path insert above)
+    BaseModel,
+    Field,
+    field_validator,
+    model_validator,
+)
 
-from simulation_utils.paths import validated_open
+from simulation_utils.paths import validated_open  # noqa: E402
 
 # ── ANSI colour codes ────────────────────────────────────────────────────
 
