@@ -1,0 +1,222 @@
+{
+  "schema_version": "1.0.0",
+  "description": "Candidate regional deployment geometries for the sentinel design separability diagnostic. Each preset is a fleet geometry, not a fitted design: a set of itinerary rotations, how many ships fly each, how their sail days are staggered, and the ashore exposure a call generates. picard_framework/analysis/sentinel/design_presets.py expands one deterministically into a ship x port x week visit table. Numbers are the orders of magnitude the stakeholder world-model document proposes for each region; they are not tuned to produce any particular separability verdict.",
+  "field_notes": {
+    "n_weeks": "calendar horizon; week labels are W00..W(n_weeks-1)",
+    "sail_day_stagger": "distinct sail-day offsets spread across the ships of one rotation; 1 means the whole fleet sails in lockstep",
+    "rotations": "itinerary templates: itinerary_days is the cycle length, call_days are port-call day offsets within the cycle, port_pool is a [start, end) slice of the region's port list",
+    "port_step": "how far one ship's port assignment is rotated within the pool relative to the previous ship on the same rotation; 0 means every ship calls at the same port on the same cycle day (total itinerary overlap)",
+    "cycle_shift": "how far the port assignment rotates from one cycle to the next",
+    "n_ships_share": "relative number of ships flying this rotation",
+    "port_exposure_scale": "per-port multiplier on ashore person-hours, keyed by index into the region's port list; tender-only or short-call ports get a small value"
+  },
+  "presets": {
+    "caribbean_partial_overlap": {
+      "label": "Caribbean: dense partially-overlapping network, three rotations, staggered sail days",
+      "n_weeks": 12,
+      "port_prefix": "CRB",
+      "n_ports": 40,
+      "n_ships": 120,
+      "sail_day_stagger": 7,
+      "passengers_ashore_per_call": 2600,
+      "hours_ashore_per_call": 5.5,
+      "hours_jitter_fraction": 0.25,
+      "seed": 20260815,
+      "port_exposure_scale": { "5": 0.03, "21": 0.04 },
+      "rotations": [
+        {
+          "name": "western",
+          "itinerary_days": 7,
+          "call_days": [2, 3, 5, 6],
+          "port_pool": [0, 14],
+          "port_step": 1,
+          "cycle_shift": 1,
+          "n_ships_share": 2
+        },
+        {
+          "name": "eastern",
+          "itinerary_days": 7,
+          "call_days": [1, 3, 4, 6],
+          "port_pool": [14, 28],
+          "port_step": 2,
+          "cycle_shift": 1,
+          "n_ships_share": 2
+        },
+        {
+          "name": "southern",
+          "itinerary_days": 7,
+          "call_days": [2, 4, 6],
+          "port_pool": [28, 40],
+          "port_step": 1,
+          "cycle_shift": 2,
+          "n_ships_share": 1
+        }
+      ]
+    },
+    "alaska_full_overlap": {
+      "label": "Alaska: small near-fully-overlapping network, fleet in lockstep on two weekly loops",
+      "n_weeks": 12,
+      "port_prefix": "AKP",
+      "n_ports": 10,
+      "n_ships": 25,
+      "sail_day_stagger": 1,
+      "passengers_ashore_per_call": 2200,
+      "hours_ashore_per_call": 6.0,
+      "hours_jitter_fraction": 0.2,
+      "seed": 20260816,
+      "rotations": [
+        {
+          "name": "northbound",
+          "itinerary_days": 7,
+          "call_days": [1, 2, 3, 5, 6],
+          "port_pool": [0, 5],
+          "port_step": 0,
+          "cycle_shift": 0,
+          "n_ships_share": 1
+        },
+        {
+          "name": "southbound",
+          "itinerary_days": 7,
+          "call_days": [1, 2, 4, 5, 6],
+          "port_pool": [5, 10],
+          "port_step": 0,
+          "cycle_shift": 0,
+          "n_ships_share": 1
+        }
+      ]
+    },
+    "mediterranean_sparse": {
+      "label": "Mediterranean: sparser network, 7-12 day itineraries, six sail-day offsets",
+      "n_weeks": 14,
+      "port_prefix": "MED",
+      "n_ports": 60,
+      "n_ships": 80,
+      "sail_day_stagger": 6,
+      "passengers_ashore_per_call": 1500,
+      "hours_ashore_per_call": 6.5,
+      "hours_jitter_fraction": 0.3,
+      "seed": 20260817,
+      "rotations": [
+        {
+          "name": "western_med_10day",
+          "itinerary_days": 10,
+          "call_days": [1, 2, 4, 6, 8],
+          "port_pool": [0, 20],
+          "port_step": 2,
+          "cycle_shift": 3,
+          "n_ships_share": 2
+        },
+        {
+          "name": "eastern_med_12day",
+          "itinerary_days": 12,
+          "call_days": [2, 3, 5, 7, 9, 11],
+          "port_pool": [20, 40],
+          "port_step": 3,
+          "cycle_shift": 5,
+          "n_ships_share": 2
+        },
+        {
+          "name": "adriatic_7day",
+          "itinerary_days": 7,
+          "call_days": [1, 3, 5],
+          "port_pool": [40, 60],
+          "port_step": 1,
+          "cycle_shift": 2,
+          "n_ships_share": 1
+        }
+      ]
+    },
+    "pilot_eight_ship": {
+      "label": "Pilot: eight ships, one rotation, four sail-day offsets",
+      "n_weeks": 8,
+      "port_prefix": "PLT",
+      "n_ports": 6,
+      "n_ships": 8,
+      "sail_day_stagger": 4,
+      "passengers_ashore_per_call": 1800,
+      "hours_ashore_per_call": 5.0,
+      "hours_jitter_fraction": 0.2,
+      "seed": 20260818,
+      "rotations": [
+        {
+          "name": "pilot_loop",
+          "itinerary_days": 7,
+          "call_days": [2, 4, 6],
+          "port_pool": [0, 6],
+          "port_step": 1,
+          "cycle_shift": 1,
+          "n_ships_share": 1
+        }
+      ]
+    },
+    "degenerate_lockstep": {
+      "label": "Control: one port per fleet-week, every ship on the same day - port and week are one column",
+      "n_weeks": 12,
+      "port_prefix": "DGN",
+      "n_ports": 6,
+      "n_ships": 12,
+      "sail_day_stagger": 1,
+      "passengers_ashore_per_call": 2000,
+      "hours_ashore_per_call": 5.0,
+      "hours_jitter_fraction": 0.1,
+      "seed": 20260819,
+      "rotations": [
+        {
+          "name": "lockstep_single_call",
+          "itinerary_days": 7,
+          "call_days": [3],
+          "port_pool": [0, 6],
+          "port_step": 0,
+          "cycle_shift": 1,
+          "n_ships_share": 1
+        }
+      ]
+    },
+    "staggered_control": {
+      "label": "Control: the degenerate geometry with the ships' port assignments staggered instead",
+      "n_weeks": 12,
+      "port_prefix": "STG",
+      "n_ports": 6,
+      "n_ships": 12,
+      "sail_day_stagger": 1,
+      "passengers_ashore_per_call": 2000,
+      "hours_ashore_per_call": 5.0,
+      "hours_jitter_fraction": 0.1,
+      "seed": 20260820,
+      "rotations": [
+        {
+          "name": "staggered_single_call",
+          "itinerary_days": 7,
+          "call_days": [3],
+          "port_pool": [0, 6],
+          "port_step": 1,
+          "cycle_shift": 1,
+          "n_ships_share": 1
+        }
+      ]
+    },
+    "sweep_base_ten_day": {
+      "label": "Sweep base: one call per 10-day cycle, sail_day_stagger is the knob under test",
+      "n_weeks": 16,
+      "port_prefix": "SWP",
+      "n_ports": 6,
+      "n_ships": 12,
+      "sail_day_stagger": 1,
+      "passengers_ashore_per_call": 2000,
+      "hours_ashore_per_call": 5.0,
+      "hours_jitter_fraction": 0.0,
+      "seed": 20260821,
+      "rotations": [
+        {
+          "name": "ten_day_single_call",
+          "itinerary_days": 10,
+          "call_days": [4],
+          "port_pool": [0, 6],
+          "port_step": 0,
+          "cycle_shift": 1,
+          "n_ships_share": 1
+        }
+      ]
+    }
+  }
+}
