@@ -32,6 +32,8 @@ from picard_framework.analysis.stan._data import (
 from picard_framework.analysis.stan.posterior_summaries import summarize_fit
 from simulation_utils.paths import validated_open
 
+FIT_STATUS_FILENAME = "fit_status.json"
+
 # Back-compat for tests / external callers
 build_stan_data = build_trajectory_stan_data
 
@@ -90,7 +92,7 @@ def fit_model(
 
     if not cmdstan_available():
         write_json(
-            os.path.join(out, "fit_status.json"),
+            os.path.join(out, FIT_STATUS_FILENAME),
             {
                 "status": "skipped",
                 "reason": "cmdstanpy/CmdStan not installed",
@@ -123,7 +125,7 @@ def fit_model(
         )
     except Exception as exc:
         write_json(
-            os.path.join(out, "fit_status.json"),
+            os.path.join(out, FIT_STATUS_FILENAME),
             {"status": "error", "reason": str(exc), "meta": meta},
         )
         print(f"[trajectory] fit failed: {exc}", file=sys.stderr)
@@ -152,7 +154,7 @@ def fit_model(
         run_summary_rows=summary_rows,
     )
     status = {"status": "ok", "artifacts": artifacts, "meta": meta}
-    write_json(os.path.join(out, "fit_status.json"), status)
+    write_json(os.path.join(out, FIT_STATUS_FILENAME), status)
     return status
 
 

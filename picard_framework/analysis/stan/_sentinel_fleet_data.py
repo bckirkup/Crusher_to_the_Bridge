@@ -262,7 +262,7 @@ def build_sentinel_fleet_data(
     visit_idx: list[list[int]] = []
     visit_port: list[int] = [0] * len(visit_keys)
     visit_week: list[int] = [0] * len(visit_keys)
-    hours_by_visit: dict[str, float] = {k: 0.0 for k in visit_keys}
+    hours_by_visit: dict[str, float] = dict.fromkeys(visit_keys, 0.0)
 
     for i, fv in enumerate(voyages):
         ashore = ashore_hours_by_epoch(fv.design, fv.voyage, ports)

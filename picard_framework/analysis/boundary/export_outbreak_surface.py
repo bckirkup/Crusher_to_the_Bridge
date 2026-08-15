@@ -16,7 +16,6 @@ from __future__ import annotations
 import argparse
 import json
 import os
-import sys
 from collections import defaultdict
 from typing import Any, Iterable, Sequence
 
@@ -451,19 +450,15 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
-    try:
-        manifest = export_outbreak_surface(
-            args.results_dirs,
-            args.out,
-            trigger_level=args.trigger_level,
-            pathogens=args.pathogen,
-            min_runs=args.min_runs,
-            include_k0=not args.no_k0,
-            write_json_sidecar=not args.no_json,
-        )
-    except SystemExit as exc:
-        print(str(exc), file=sys.stderr)
-        return 1
+    manifest = export_outbreak_surface(
+        args.results_dirs,
+        args.out,
+        trigger_level=args.trigger_level,
+        pathogens=args.pathogen,
+        min_runs=args.min_runs,
+        include_k0=not args.no_k0,
+        write_json_sidecar=not args.no_json,
+    )
     print(json.dumps(manifest, indent=2, sort_keys=True))
     return 0
 

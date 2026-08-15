@@ -113,7 +113,7 @@ def active_pathogen(agent: Mapping[str, Any]) -> str | None:
         for pid, info in infections.items()
         if isinstance(info, Mapping) and str(info.get("status", "")) == "INFECTED"
     ]
-    return sorted(active)[0] if active else None
+    return min(active) if active else None
 
 
 class SentinelLedger:

@@ -44,6 +44,9 @@ TRUE_VECTORS: dict[str, dict[str, float]] = {
 }
 DEFAULT_D0 = 10.6
 DEFAULT_A0 = 0.75
+SUMMARY_FILENAME = "summary.json"
+META_FILENAME = "meta.json"
+OFFSET_UNITS = "offset points"
 
 
 def _parameter_vector(run_id: str, params: dict[str, Any]) -> str:
@@ -58,10 +61,10 @@ def _row_from_summary_zip(zip_path: str) -> dict[str, Any] | None:
     try:
         with zipfile.ZipFile(zip_path, "r") as zf:
             names = {n.replace("\\", "/") for n in zf.namelist()}
-            key = "summary.json" if "summary.json" in names else None
+            key = SUMMARY_FILENAME if SUMMARY_FILENAME in names else None
             if key is None:
                 for n in names:
-                    if n.endswith("summary.json"):
+                    if n.endswith(SUMMARY_FILENAME):
                         key = n
                         break
             if key is None:
@@ -166,7 +169,7 @@ def _bernoulli_logit_lpmf(y: Any, logit_p: Any) -> float:
 
     y = np.asarray(y, dtype=float)
     lp = np.asarray(logit_p, dtype=float)
-    # log(p) = -softplus(-lp); log(1-p) = -softplus(lp)
+    # Compute the Bernoulli log-likelihood with the stable softplus form.
     softplus = np.maximum(lp, 0) + np.log1p(np.exp(-np.abs(lp)))
     return float(np.sum(-softplus + y * lp))
 
@@ -531,7 +534,7 @@ def fit_pooled_ar(
     }
     ensure_out_dir(out_dir)
     write_json(
-        os.path.join(out_dir, "meta.json"),
+        os.path.join(out_dir, META_FILENAME),
         {
             "platforms": platforms,
             "kind": "pooled_ar",
@@ -587,7 +590,7 @@ def fit_pooled_covariate(
         "a0": DEFAULT_A0,
     }
     ensure_out_dir(out_dir)
-    write_json(os.path.join(out_dir, "meta.json"), {"platforms": platforms, "kind": "pooled"})
+    write_json(os.path.join(out_dir, META_FILENAME), {"platforms": platforms, "kind": "pooled"})
     result = _fit_cmdstan(
         stan,
         data,
@@ -688,7 +691,7 @@ def fit_latent_per_vector(
                         float(s.quantile(0.05)) <= float(truth_v) <= float(s.quantile(0.95))
                     )
         recovery_rows.append(row)
-        write_json(os.path.join(fit_dir, "meta.json"), {"platforms": platforms, "vector": vec})
+        write_json(os.path.join(fit_dir, META_FILENAME), {"platforms": platforms, "vector": vec})
     return recovery_rows
 
 
@@ -769,7 +772,7 @@ def _fig_ridge_outbreak(plt, agg: list[dict[str, Any]], fig_dir: str) -> str:
         ax.annotate(
             v,
             (truth["dose_adj"], truth["alpha_c"]),
-            textcoords="offset points",
+            textcoords=OFFSET_UNITS,
             xytext=(5, 5),
             fontsize=8,
         )
@@ -861,7 +864,7 @@ def _fig_dose_alpha_isolines(plt, np, pooled_draws: Any, fig_dir: str) -> str | 
             (t["dose_adj"], t["alpha_c"]),
             fontsize=7,
             xytext=(4, 4),
-            textcoords="offset points",
+            textcoords=OFFSET_UNITS,
         )
     ax.set_xlabel("dose_adj")
     ax.set_ylabel("alpha_c")
@@ -882,7 +885,7 @@ def _fig_ridge_mean_ar(plt, agg: list[dict[str, Any]], fig_dir: str) -> str:
         ax.annotate(
             f"{v}\nAR={mean_ar:.3f}",
             (truth["dose_adj"], truth["alpha_c"]),
-            textcoords="offset points",
+            textcoords=OFFSET_UNITS,
             xytext=(5, 5),
             fontsize=7,
         )
