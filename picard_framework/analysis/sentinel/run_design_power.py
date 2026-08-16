@@ -22,7 +22,7 @@ from picard_framework.analysis.sentinel.design_power import (
     scaling_sweep,
 )
 
-SWEEP_VALUES = {"ships": (4, 8, 16), "weeks": (2, 4, 8), "calls": (2, 3, 4)}
+SWEEP_VALUES = {"weeks": (4, 12, 26, 52), "calls": (2, 3, 4, 5)}
 CSV_COLUMNS = (
     "design", "dimension", "value", "sd_log_lambda_hot", "width90_log_lambda",
     "sd_log_ratio", "mdhr", "provenance",
@@ -71,10 +71,18 @@ def _run(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str, list[dict[
     )
     sweeps = {}
     for dimension in (part.strip() for part in args.sweep.split(",") if part.strip()):
+        values = SWEEP_VALUES.get(dimension)
+        if dimension == "ships":
+            values = tuple(
+                max(1, round(design.n_ships * multiplier))
+                for multiplier in (0.125, 0.25, 0.5, 1.0, 2.0)
+            )
+        if values is None:
+            raise ValueError(f"unknown sweep dimension: {dimension}")
         sweeps[dimension] = scaling_sweep(
             design,
             dimension,
-            SWEEP_VALUES[dimension],
+            values,
             alpha=args.alpha,
             power=args.power,
         )

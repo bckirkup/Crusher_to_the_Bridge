@@ -72,3 +72,16 @@ Caribbean Engine A sweeps (sd_log_hot / sd_log_ratio / MDHR):
 | Ships | 15: 0.3519 / 0.3662 / 2.3498; 30: 0.2261 / 0.2381 / 1.8520; 60: 0.1698 / 0.1781 / 1.6442; 120: 0.1200 / 0.1259 / 1.4665; 240: 0.0849 / 0.0890 / 1.3383 |
 | Weeks | 4: 0.2079 / 0.2181 / 1.7819; 12: 0.1200 / 0.1259 / 1.4665; 26: 0.0816 / 0.0855 / 1.3260; 52: 0.0577 / 0.0605 / 1.2355 |
 | Calls/ship-week | 2: 0.1314 / 0.1367 / 1.4991; 3: 0.1176 / 0.1238 / 1.4584; 4: 0.1221 / 0.1277 / 1.4730; 5: 0.1194 / 0.1253 / 1.4656 |
+
+At the pilot-scale design and assumed hot ratio 2.0, the measured Engine B
+detection power was 0.0. The reduced-fit graded-power run below is the
+signal-response check; it uses 4 ships, 2 weeks, 4 ports, 120 draws, 400
+warmup steps, and 3 replicates per ratio.
+
+| True hot ratio | Detection power | Mean ratio 90% width | Ratio coverage | Pooled hot coverage | Pooled background coverage |
+|---:|---:|---:|---:|---:|---:|
+| 1.0 | 0.0 | 2.8635314074 | 1.0 | 1.0 | 1.0 |
+| 2.0 | 0.0 | 2.6328629154 | 1.0 | 1.0 | 1.0 |
+| 4.0 | 0.0 | 1.9300300604 | 0.6666666667 | 0.6666666667 | 1.0 |
+| 8.0 | 0.0 | 2.8269030321 | 0.6666666667 | 0.3333333333 | 1.0 |
+| 16.0 | 0.3333333333 | 2.2006655695 | 0.3333333333 | 0.3333333333 | 1.0 |

@@ -88,13 +88,19 @@ def test_week_scaling_check_reports_shortcut_bias() -> None:
 
 def test_fit_power_is_sensitive_to_true_hot_ratio() -> None:
     powers = []
-    for ratio in (1.0, 4.0, 16.0):
+    design = replace(
+        load_presets()["pilot"],
+        fit_scale_ships=3,
+        fit_scale_weeks=2,
+        fit_scale_ports=4,
+    )
+    for ratio in (1.0, 16.0):
         result = fit_projection(
-            load_presets()["pilot"],
-            draws=8,
-            warmup=16,
+            design,
+            draws=40,
+            warmup=80,
             replicates=2,
-            seed=110 + int(ratio),
+            seed=111 if ratio == 1.0 else 1701,
             hot_ratio=ratio,
         )
         powers.append(result["detection_power"])

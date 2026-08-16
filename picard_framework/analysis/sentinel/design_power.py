@@ -54,12 +54,13 @@ SMOKE_WARMUP = 80
 SMOKE_REPLICATES = 2
 HOME_PORT = "HOME"
 BASE_CALLS = 3
+MAX_LOG_MDHR = math.log(np.finfo(float).max)
 
 CAVEATS = [
     "Pooled lambda_port is identified only up to the fleet-time effect; per-visit hazards are the reportable per-call number (cite summarize_fleet_hazards / summarize_visit_hazards). The hot/background ratio is the fleet-time-free quantity.",
     "The numpy reference sampler is not NUTS; its intervals are indicative, not calibrated. Any coverage/power number from Engine B inherits that.",
     "Engine A is an information ceiling: other parameters treated as known, no week-to-week fleet-time variation -> widths are optimistic, MDHRs are best case.",
-    "Regional-scale numbers are extrapolations: the sampler cannot be run at 1440 voyages, so full-scale claims rest on Engine A plus a pilot-scale inflation factor.",
+    "Regional-scale numbers are extrapolations: full-scale claims rest on Engine A. The pilot-scale sampler comparison produced narrower intervals with ratio coverage 0.6 versus 0.9 nominal, so it cannot certify calibration and no downward adjustment is applied.",
     "`lambda_background`, `r_onboard`, and ascertainment are assumptions, not fitted from data; MDHR scales roughly as 1/sqrt(expected observed imported cases), so halving assumed ascertainment inflates MDHR accordingly.",
     "The one-week information scaling shortcut is approximately 7-9% optimistic versus explicitly building three weeks in the measured pilot and Alaska checks.",
 ]
@@ -353,7 +354,7 @@ def _mdhr(
         info = _information(data, design, ratio) * design.n_weeks
         covariance = np.linalg.inv(info)
         contrast_sd = math.sqrt(float(np.array([1.0, -1.0]) @ covariance @ np.array([1.0, -1.0])))
-        ratio = math.exp((z_alpha + z_power) * contrast_sd)
+        ratio = math.exp(min((z_alpha + z_power) * contrast_sd, MAX_LOG_MDHR))
         trace.append(ratio)
     inflated = None if inflation is None else math.exp(inflation * math.log(ratio))
     return ratio, trace, inflated
