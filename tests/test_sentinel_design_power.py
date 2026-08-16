@@ -100,7 +100,7 @@ def test_fit_power_is_sensitive_to_true_hot_ratio() -> None:
             draws=40,
             warmup=80,
             replicates=2,
-            seed=111 if ratio == 1.0 else 1701,
+            seed=1701,
             hot_ratio=ratio,
         )
         powers.append(result["detection_power"])

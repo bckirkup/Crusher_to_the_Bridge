@@ -33,9 +33,9 @@ Use `--smoke` for two short reference-sampler replicates.
 1. Pooled `lambda_port` is identified only up to the fleet-time effect; per-visit hazards are the reportable per-call number (cite `summarize_fleet_hazards` / `summarize_visit_hazards`). The hot/background *ratio* is the fleet-time-free quantity.
 2. The numpy reference sampler is not NUTS; its intervals are indicative, not calibrated. Any coverage/power number from Engine B inherits that.
 3. Engine A is an information ceiling: other parameters treated as known, no week-to-week `fleet_time` variation -> widths are optimistic, MDHRs are best case.
-4. Regional-scale numbers are extrapolations: the sampler cannot be run at 1,440 voyages, so full-scale claims rest on Engine A plus a pilot-scale inflation factor.
+4. Regional-scale numbers are extrapolations: full-scale claims rest on Engine A. The pilot-scale sampler comparison produced narrower intervals with ratio coverage 0.6 versus 0.9 nominal, so it cannot certify calibration and no downward adjustment is applied.
 5. `lambda_background`, `r_onboard`, and ascertainment are assumptions, not fitted from data; MDHR scales roughly as 1/sqrt(expected observed imported cases), so halving assumed ascertainment inflates MDHR accordingly.
-6. One-week information scaling is approximately 7-9% optimistic versus explicitly building three weeks: pilot 0.4611 versus 0.4955 (7%), Alaska 0.2961 versus 0.3242 (8.7%).
+6. The one-week information scaling shortcut is approximately 7-9% optimistic versus explicitly building three weeks in the measured pilot and Alaska checks.
 
 ## What drives detection
 
@@ -80,8 +80,8 @@ warmup steps, and 3 replicates per ratio.
 
 | True hot ratio | Detection power | Mean ratio 90% width | Ratio coverage | Pooled hot coverage | Pooled background coverage |
 |---:|---:|---:|---:|---:|---:|
-| 1.0 | 0.0 | 2.8635314074 | 1.0 | 1.0 | 1.0 |
-| 2.0 | 0.0 | 2.6328629154 | 1.0 | 1.0 | 1.0 |
-| 4.0 | 0.0 | 1.9300300604 | 0.6666666667 | 0.6666666667 | 1.0 |
-| 8.0 | 0.0 | 2.8269030321 | 0.6666666667 | 0.3333333333 | 1.0 |
-| 16.0 | 0.3333333333 | 2.2006655695 | 0.3333333333 | 0.3333333333 | 1.0 |
+| 1.0 | 0.000 | 2.864 | 1.000 | 1.000 | 1.000 |
+| 2.0 | 0.000 | 2.633 | 1.000 | 1.000 | 1.000 |
+| 4.0 | 0.000 | 1.930 | 0.667 | 0.667 | 1.000 |
+| 8.0 | 0.000 | 2.827 | 0.667 | 0.333 | 1.000 |
+| 16.0 | 0.333 | 2.201 | 0.333 | 0.333 | 1.000 |
