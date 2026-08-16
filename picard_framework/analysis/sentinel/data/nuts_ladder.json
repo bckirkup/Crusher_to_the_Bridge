@@ -1,0 +1,23 @@
+{
+  "_header": {
+    "notes": "Engine C rungs, replicate counts, and truth-ratio sweeps are the lead-authored NUTS ladder specification. lambda_background, lambda_aboard, r_onboard, and ascertainment are anchored assumptions inherited from the stakeholder-brief presets, not tuned parameters."
+  },
+  "settings": {
+    "chains": 4,
+    "iter_warmup": 750,
+    "iter_sampling": 750,
+    "adapt_delta": 0.95,
+    "max_treedepth": 12,
+    "seed_base": 1701
+  },
+  "rungs": [
+    {"id": "C1", "preset": "pilot", "n_ports": 4, "n_ships": 4, "n_weeks": 2, "calls_per_port": 6.0, "replicates": 20, "ratios": [2.0], "purpose": "cheapest rung; overlaps Engine B"},
+    {"id": "C2", "preset": "pilot", "n_ports": 6, "n_ships": 8, "n_weeks": 3, "calls_per_port": 12.0, "replicates": 40, "ratios": [2.0], "purpose": "Engine B fit scale, direct A/B/C comparison"},
+    {"id": "C3", "preset": "alaska", "n_ports": 10, "n_ships": 12, "n_weeks": 4, "calls_per_port": 14.4, "replicates": 20, "ratios": [1.0, 1.25, 1.5, 2.0, 3.0], "purpose": "mid"},
+    {"id": "C4", "preset": "alaska", "n_ports": 10, "n_ships": 25, "n_weeks": 4, "calls_per_port": 30.0, "replicates": 20, "ratios": [2.0], "purpose": "Alaska geometry, short horizon"},
+    {"id": "C5", "preset": "alaska", "n_ports": 10, "n_ships": 25, "n_weeks": 10, "calls_per_port": 75.0, "replicates": 10, "ratios": [2.0], "purpose": "full Alaska preset"},
+    {"id": "C6", "preset": "caribbean", "n_ports": 40, "n_ships": 40, "n_weeks": 3, "calls_per_port": 10.5, "replicates": 40, "ratios": [1.0, 1.25, 1.5, 2.0, 3.0], "purpose": "Caribbean geometry, reduced size"},
+    {"id": "C7", "preset": "caribbean", "n_ports": 40, "n_ships": 120, "n_weeks": 3, "calls_per_port": 31.5, "replicates": 20, "ratios": [2.0], "purpose": "Caribbean geometry, largest affordable"},
+    {"id": "C8", "preset": "caribbean", "n_ports": 40, "n_ships": 120, "n_weeks": 12, "calls_per_port": 126.0, "replicates": 2, "ratios": [2.0], "purpose": "actual Caribbean design; anchor only"}
+  ]
+}
