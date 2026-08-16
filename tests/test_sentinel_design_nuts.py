@@ -121,6 +121,23 @@ def test_mixed_ratio_cells_do_not_contaminate_calibration_summary() -> None:
     assert summary["calibration_factor_r"] == pytest.approx(1.5)
 
 
+def test_sweep_power_curve_includes_calibration_arm() -> None:
+    base = [
+        _cell("C3", ratio, replicate, detected=ratio == 3.0)
+        for ratio in (1.0, 1.5, 2.0, 3.0)
+        for replicate in range(5)
+    ]
+    shifted = [
+        _cell("C3", ratio, replicate, detected=ratio >= 2.0)
+        for ratio in (1.0, 1.5, 2.0, 3.0)
+        for replicate in range(5)
+    ]
+    low = aggregate_cells(_write_cells(base))["power_curves"]["C3"]
+    high = aggregate_cells(_write_cells(shifted))["power_curves"]["C3"]
+    assert [point["true_hot_ratio"] for point in low["curve"]] == [1.0, 1.5, 2.0, 3.0]
+    assert high["mdhr_at_power_080"] < low["mdhr_at_power_080"]
+
+
 def test_prior_learning_gate_is_graded() -> None:
     dominated = aggregate_cells(
         _write_cells([_cell("C2", 2.0, i, prior_ratio=0.99) for i in range(10)]),

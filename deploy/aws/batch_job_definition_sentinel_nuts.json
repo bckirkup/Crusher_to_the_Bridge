@@ -1,0 +1,55 @@
+{
+  "jobDefinitionName": "picard-sentinel-nuts",
+  "type": "container",
+  "platformCapabilities": ["FARGATE"],
+  "containerProperties": {
+    "image": "<ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/picard-boundary-analysis:sentinel-nuts-v1",
+    "command": [
+      "--rungs", "Ref::rungs",
+      "--s3-prefix", "Ref::s3_prefix"
+    ],
+    "jobRoleArn": "arn:aws:iam::<ACCOUNT_ID>:role/picard-campaign-job-role",
+    "executionRoleArn": "arn:aws:iam::<ACCOUNT_ID>:role/picard-campaign-execution-role",
+    "resourceRequirements": [
+      { "type": "VCPU", "value": "4" },
+      { "type": "MEMORY", "value": "8192" }
+    ],
+    "fargatePlatformConfiguration": {
+      "platformVersion": "LATEST"
+    },
+    "networkConfiguration": {
+      "assignPublicIp": "ENABLED"
+    },
+    "environment": [
+      { "name": "PYTHONUTF8", "value": "1" },
+      { "name": "PYTHONPATH", "value": "/app" },
+      { "name": "CMDSTAN", "value": "/opt/cmdstan/cmdstan-2.39.0" }
+    ],
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "/aws/batch/picard-boundary-analysis",
+        "awslogs-region": "<REGION>",
+        "awslogs-stream-prefix": "sentinel-nuts"
+      }
+    }
+  },
+  "parameters": {
+    "rungs": "C1",
+    "s3_prefix": "s3://<BUCKET>/sentinel/nuts_ladder_v1/"
+  },
+  "retryStrategy": {
+    "attempts": 2,
+    "evaluateOnExit": [
+      { "onStatusReason": "Your Spot Task was interrupted*", "action": "retry" },
+      { "onReason": "OutOfMemoryError*", "action": "exit" },
+      { "onExitCode": "137", "action": "exit" },
+      { "onExitCode": "0", "action": "exit" },
+      { "onReason": "*", "action": "retry" }
+    ]
+  },
+  "propagateTags": true,
+  "timeout": {
+    "attemptDurationSeconds": 172800
+  }
+}

@@ -427,6 +427,13 @@ def _power_curve(rows: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
     }
 
 
+def _sweep_points(rung: Mapping[str, Any]) -> set[float]:
+    """Ratios on a rung's power curve: the sweep arm plus the calibration arm."""
+    points = {float(value) for value in rung.get("sweep_ratios", [])}
+    points.add(float(rung["calibration_ratio"]))
+    return points
+
+
 def aggregate_cells(directory: str, ladder: Mapping[str, Any] | None = None) -> dict[str, Any]:
     """Aggregate per-cell JSON files, retaining all clean-fraction accounting."""
     config = ladder or load_ladder()
@@ -447,9 +454,7 @@ def aggregate_cells(directory: str, ladder: Mapping[str, Any] | None = None) -> 
                 cell
                 for cell in by_rung.get(rung["id"], [])
                 if cell.get("clean")
-                and float(cell["true_hot_ratio"]) in {
-                    float(value) for value in rung.get("sweep_ratios", [])
-                }
+                and float(cell["true_hot_ratio"]) in _sweep_points(rung)
             ]
         )
         for rung in config["rungs"]
