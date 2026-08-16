@@ -9,9 +9,9 @@ ambient Batch job-role credentials.
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import sys
-import tempfile
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
@@ -20,7 +20,6 @@ _REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
-from picard_framework.analysis._io import write_json  # noqa: E402
 from picard_framework.analysis.sentinel.design_nuts import (  # noqa: E402
     enumerate_cells,
     load_ladder,
@@ -65,15 +64,12 @@ def _cell_key(cell: dict[str, Any]) -> str:
 
 
 def _put_json(client: Any, bucket: str, key: str, payload: Any) -> None:
-    with tempfile.TemporaryDirectory(prefix="sentinel-nuts-") as work:
-        path = Path(work) / "payload.json"
-        write_json(str(path), payload)
-        client.put_object(
-            Bucket=bucket,
-            Key=key,
-            Body=path.read_bytes(),
-            ContentType="application/json",
-        )
+    client.put_object(
+        Bucket=bucket,
+        Key=key,
+        Body=json.dumps(payload, indent=2, sort_keys=True).encode("utf-8"),
+        ContentType="application/json",
+    )
 
 
 def main() -> int:

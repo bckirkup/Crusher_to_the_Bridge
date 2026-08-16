@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import json
 import shutil
+import sys
+from types import SimpleNamespace
 from pathlib import Path
 
 import pytest
@@ -16,8 +18,10 @@ from picard_framework.analysis.sentinel.design_nuts import (
     aggregate_cells,
     enumerate_cells,
     load_ladder,
+    run_cell,
 )
 from picard_framework.analysis.stan._data import cmdstan_available
+from deploy.aws import sentinel_nuts_entrypoint
 
 FIXTURE_DIR = Path("tmp_sentinel_nuts_test_cells")
 
@@ -161,6 +165,76 @@ def test_nonfinite_sampling_draws_are_not_clean() -> None:
             "finite_sampling_draws": False,
         },
     ) is False
+
+
+def test_batch_payload_upload_is_in_memory() -> None:
+    class Client:
+        def __init__(self):
+            self.calls = []
+
+        def put_object(self, **kwargs):
+            self.calls.append(kwargs)
+
+    client = Client()
+    sentinel_nuts_entrypoint._put_json(client, "bucket", "key.json", {"value": 3})
+    assert len(client.calls) == 1
+    call = client.calls[0]
+    assert call["Bucket"] == "bucket"
+    assert call["Key"] == "key.json"
+    assert json.loads(call["Body"]) == {"value": 3}
+    assert call["ContentType"] == "application/json"
+
+
+def test_run_cell_contract_with_stubbed_cmdstan(monkeypatch: pytest.MonkeyPatch) -> None:
+    class Fit:
+        def summary(self):
+            return {"R_hat": [1.0], "ESS_bulk": [200.0]}
+
+        def draws_pd(self, vars):
+            import pandas as pd
+
+            if vars == ["divergent__", "treedepth__"]:
+                return pd.DataFrame({"divergent__": [0, 0], "treedepth__": [5, 6]})
+            return pd.DataFrame(
+                {
+                    "lp__": [1.0, 2.0],
+                    "lambda_port": [1.0, 2.0],
+                    "lambda_visit": [1.0, 2.0],
+                },
+            )
+
+        def stan_variable(self, name):
+            import numpy as np
+
+            if name == "lambda_port":
+                return np.array(
+                    [
+                        [2.0, 1.0, 1.0, 1.0],
+                        [2.2, 1.1, 1.1, 1.1],
+                    ],
+                )
+            return np.ones((2, 6))
+
+        runset = SimpleNamespace(get_err_msgs=lambda: "")
+
+    class Model:
+        def __init__(self, stan_file):
+            self.stan_file = stan_file
+
+        def sample(self, **kwargs):
+            assert kwargs["chains"] == 2
+            assert kwargs["iter_warmup"] == 100
+            return Fit()
+
+    monkeypatch.setitem(
+        sys.modules,
+        "cmdstanpy",
+        SimpleNamespace(CmdStanModel=Model, cmdstan_path=lambda: "/opt/cmdstan/cmdstan-2.39.0"),
+    )
+    result = run_cell(load_ladder(), rung_id="C1", ratio=2.0, replicate=0, smoke=True)
+    assert result["provenance"]["not_a_real_fit"] is True
+    assert result["finite_sampling_draws"] is True
+    assert result["clean"] is True
 
 
 def test_power_curve_reports_monotonicity() -> None:
