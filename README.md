@@ -160,8 +160,8 @@ ship_graph:
   agent_roles:
     passenger_fraction: 0.70
     crew_fraction: 0.30
-  spatial_layout: "data/platforms/destroyer_baseline/spatial_layout.json"
-  air_flow_paths: "data/platforms/destroyer_baseline/air_flow_paths.json"
+  spatial_layout: "data/platforms/mega_cruise_5000/spatial_layout.json"
+  air_flow_paths: "data/platforms/mega_cruise_5000/air_flow_paths.json"
 ```
 
 #### Agent Classes
@@ -175,13 +175,14 @@ role group, and preferred zones.  **Fractions must sum to 1.0.**
     - class_id: "passenger_general"
       role_group: "passenger"       # "passenger" or "crew"
       fraction: 0.50
-      home_zone_preference: "Berthing"
+      home_zone_preference: "PC_"
       free_zone_preference: ""
       duty_zone: ""
     - class_id: "crew_medical"
       role_group: "crew"
       fraction: 0.05
-      duty_zone: "MedBay"
+      home_zone_preference: "CC_"
+      duty_zone: "Medical_Center"
     # ... additional classes
 ```
 
@@ -465,7 +466,7 @@ airflow definitions:
 
 | Platform | Description |
 |----------|-------------|
-| `destroyer_baseline` | Gleaves-class destroyer (default, 6 zones) |
+| `destroyer_baseline` | Gleaves-class destroyer (6 zones) |
 | `enterprise_constitution_tos` | Constitution-class cruiser (TOS fiction-adapted; cabin-corridor berthing, ~45 zones, ~430 crew — see `docs/ENTERPRISE_CABIN_REVISION.md`) |
 | `enterprise_galaxy_tng` | Galaxy-class explorer (TNG fiction-adapted; enlisted/officer/family corridors, ~91 zones, ~1000 agents — see `docs/ENTERPRISE_CABIN_REVISION.md`) |
 | `expedition_cruise_300` | **Legacy** well-mixed expedition berthing (25 zones); superseded by `expedition_cruise_450` |
@@ -474,7 +475,7 @@ airflow definitions:
 | `spirit_cruise_3000` | Extra-large Spirit-class cruise (~2,100 pax + 900 crew; multi-specialty dining, teen/sports, ~86 zones) |
 | `fletcher_class_destroyer` | Fletcher-class WWII destroyer |
 | `legend_class_nsc` | USCG Legend-class National Security Cutter |
-| `mega_cruise_5000` | 5000-passenger mega cruise ship (Oasis-class; 129 zones, cabin-corridor berthing + cabin-mate pairing — see `docs/PLATFORM_CABIN_REVISION.md`, `docs/SHEDDING_AND_CABINMATES.md`) |
+| `mega_cruise_5000` | 5000-passenger mega cruise ship (default; Oasis-class; 129 zones, cabin-corridor berthing + cabin-mate pairing — see `docs/PLATFORM_CABIN_REVISION.md`, `docs/SHEDDING_AND_CABINMATES.md`) |
 | `messy_cruise_500` | **Legacy** archived berthing model (67 zones): 27 passenger blocks of ~200 pax each modeled as well-mixed spaces, which frustrated quarantine/confinement simulation |
 | `san_antonio_class_lpd` | USN San Antonio-class LPD |
 

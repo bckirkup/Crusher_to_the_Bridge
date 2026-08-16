@@ -135,6 +135,6 @@ class TestResolvePlatformId:
         pid, method = resolve_platform_id(
             [{"spaces": {"totally_fake_zone_xyz": {}}}],
         )
-        # crusher_labs/config.yaml still points at destroyer_baseline
-        assert pid == "destroyer_baseline"
+        # crusher_labs/config.yaml defaults to mega_cruise_5000
+        assert pid == "mega_cruise_5000"
         assert method == "config"

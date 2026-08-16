@@ -791,12 +791,12 @@ every configuration from scratch.
 
 | Directory | Vessel Type | Personnel | Zones | Key Feature |
 |-----------|-------------|-----------|-------|-------------|
-| `destroyer_baseline` | Generic baseline destroyer | 20 agents (config) | 6 | Default platform; minimal HVAC topology |
+| `destroyer_baseline` | Generic baseline destroyer | 20 agents (config) | 6 | Minimal HVAC topology |
 | `fletcher_class_destroyer` | WWII Fletcher-class DD | ~300 crew | 20 | Cramped, poor ventilation, hot-bunking |
 | `legend_class_nsc` | USCG Legend-class cutter | ~150 crew | 18 | Modern HVAC with NBC filtration |
 | `san_antonio_class_lpd` | San Antonio-class LPD | ~1,160 total | 22 | Extreme density in troop berthing |
 | `expedition_cruise_300` | Small expedition cruise | ~450 total | 25 | Intimate scale, 6–8 decks |
-| `mega_cruise_5000` | Mega cruise ship | ~7,000 total | 129 | Cabin-corridor berthing, cabin-mate pairing, deck-level HVAC |
+| `mega_cruise_5000` | Mega cruise ship | ~7,000 total | 129 | Default in `config.yaml`; cabin-corridor berthing, cabin-mate pairing, deck-level HVAC |
 | `messy_cruise_500` | Mega cruise ship (legacy) | ~7,000 total | 67 | **Archived** pre-revision berthing: 27 passenger cabin blocks (~200 pax each) as well-mixed zones — confinement/quarantine does not isolate block-mates |
 
 Each directory contains `spatial_layout.json` and `air_flow_paths.json`.
@@ -821,10 +821,13 @@ from the platform `spatial_layout.json` (for mega cruise:
 you want a non-default collection point.
 
 > **Note:** The default `protocols.json` contains zone-closure SOPs
-> (e.g., SOP-007 closing `Galley` and `Mess_Hall`) that reference zones
-> in the `destroyer_baseline` platform.  When switching to a different
-> platform, update `close_zones` targets in `protocols.json` to match
-> the new platform's zone names, or remove zone-closure SOPs.
+> (e.g., SOP-007 closing `Main_Galley_Aft` and `Crew_Mess_Main`) that
+> reference zones on the `mega_cruise_5000` default platform.  When
+> switching to a different platform, update `close_zones` targets in
+> `protocols.json` to match the new platform's zone names, or remove
+> zone-closure SOPs.  Missing `close_zones` IDs are reported as warnings
+> by the sanity checker so shared protocols can still validate against
+> other platforms.
 > Run `python tools/sanity_checker.py --platform-dir data/platforms/<your_platform>`
 > to verify referential integrity.
 

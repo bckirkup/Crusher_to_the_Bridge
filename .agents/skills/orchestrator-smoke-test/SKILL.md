@@ -44,8 +44,8 @@ Wearable Tier-0 entry uses confounder-aware `infection_score` (default threshold
 These specs set `config_overrides.diagnostic_cascade.enabled: true` without changing
 the default `crusher_labs/config.yaml` (cascade remains off for golden regression).
 
-Golden 24-epoch baseline (destroyer, seed 42): susceptible 2, recovered 14, trigger
-BASELINE — see `docs/SHEDDING_AND_CABINMATES.md` and `tests/test_golden_orchestrator.py`.
+Golden 24-epoch baseline (`mega_cruise_5000`, seed 42): susceptible 13, recovered 3,
+trigger BASELINE — see `docs/SHEDDING_AND_CABINMATES.md` and `tests/test_golden_orchestrator.py`.
 
 ### Validate config before running
 ```bash

@@ -530,7 +530,9 @@ def _check_graph_integrity(
             if isinstance(close_zones, list):
                 for zone in close_zones:
                     if zone not in valid_zones:
-                        report.error(
+                        # Shared protocols.json follows the config.yaml default
+                        # platform; other platforms may omit these zone IDs.
+                        report.warn(
                             _PROTOCOLS_JSON,
                             "GRAPH_REF",
                             f"{proto.protocol_id}.modifiers.close_zones references "
@@ -1743,7 +1745,7 @@ def paths_from_run_config(repo_root: str, config_yaml: str | None = None) -> dic
     from crusher_labs import load_config
     cfg = load_config(config_yaml)
     layout_rel = cfg.get("ship_graph", {}).get(
-        "spatial_layout", "data/platforms/destroyer_baseline/spatial_layout.json")
+        "spatial_layout", "data/platforms/mega_cruise_5000/spatial_layout.json")
     platform_dir = os.path.dirname(os.path.join(repo_root, layout_rel))
     profiles_rel = cfg.get("multi_pathogen", {}).get(
         "profiles_path", "data/pathogens/active_profiles.json")
@@ -1929,8 +1931,8 @@ def main() -> None:
     )
     parser.add_argument(
         "--platform-dir",
-        default=os.path.join(_REPO_ROOT, "data", "platforms", "destroyer_baseline"),
-        help="Path to platform directory (default: data/platforms/destroyer_baseline/)",
+        default=os.path.join(_REPO_ROOT, "data", "platforms", "mega_cruise_5000"),
+        help="Path to platform directory (default: data/platforms/mega_cruise_5000/)",
     )
     parser.add_argument(
         "--from-config",

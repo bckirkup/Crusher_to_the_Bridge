@@ -14,15 +14,15 @@ import pytest
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 HISTORY_PATH = os.path.join(REPO_ROOT, "telemetry_buffer", "simulation_history.json")
 
-# Updated 2026-08-03: multi-pathogen route weights on active_profiles.
+# Updated 2026-08-16: default platform mega_cruise_5000 (was destroyer_baseline).
 EXPECTED_SUMMARY = {
-    "susceptible": 5,
+    "susceptible": 13,
     "infected": 0,
     "symptomatic": 0,
-    "recovered": 11,
+    "recovered": 3,
     "immune": 4,
 }
-EXPECTED_TRIGGER = "CONFIRMED"
+EXPECTED_TRIGGER = "BASELINE"
 
 
 def _run_orchestrator(epochs: int = 24) -> list[dict]:

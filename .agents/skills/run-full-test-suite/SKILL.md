@@ -239,22 +239,22 @@ python3 -c "import json; c=json.load(open('telemetry_buffer/simulation_history.j
 
 ## Golden Test Values
 
-Seed-42 / 24-epoch destroyer baseline (epoch 23), with `shedding_variance_log10`
-on `active_profiles.json`:
+Seed-42 / 24-epoch `mega_cruise_5000` baseline (epoch 23) — the default
+platform in `crusher_labs/config.yaml`:
 
 | Metric | Expected (epoch 23) |
 |--------|-------------------|
-| Susceptible | 2 |
+| Susceptible | 13 |
 | Infected | 0 |
 | Symptomatic | 0 |
-| Recovered | 14 |
+| Recovered | 3 |
 | Immune | 4 |
-| Trigger status | CONFIRMED |
+| Trigger status | BASELINE |
 | Total financial USD | > 0 (exact value may differ slightly between Python 3.11 and 3.12) |
 | OIS cumulative | shifts with outbreak dynamics |
 
 Golden totals shift when observation, cascade, pathogen wiring, shedding variance,
-or outbreak-response (escalation / compliance) wiring changes; update
-`tests/test_golden_orchestrator.py` and `tests/test_golden_picard.py`
+outbreak-response (escalation / compliance) wiring, or the default platform
+changes; update `tests/test_golden_orchestrator.py` and `tests/test_golden_picard.py`
 after intentional epidemiological changes. See `docs/SHEDDING_AND_CABINMATES.md`
 and `docs/tiered_escalation_spec.md`.
