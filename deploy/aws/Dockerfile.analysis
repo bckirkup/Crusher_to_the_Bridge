@@ -50,4 +50,4 @@ COPY orchestrator_init.py orchestrator_record.py orchestrator_types.py ./
 RUN chown -R analysis:analysis /app
 USER analysis
 
-ENTRYPOINT ["python3", "deploy/aws/boundary_analysis_entrypoint.py"]
+ENTRYPOINT ["python3", "deploy/aws/sentinel_nuts_entrypoint.py"]
