@@ -17,6 +17,7 @@ from dashboard.architectural_graphics import (
 from dashboard.paths import (
     CONFIG_YAML,
     DEFAULT_PICARD_SPEC,
+    DEFAULT_PLATFORM_ID,
     PLATFORMS_DIR,
     REPO_ROOT,
     SPATIAL_LAYOUT_JSON,
@@ -146,7 +147,12 @@ def resolve_platform_id(
     override: str | None = None,
     picard_spec_path: str | None = None,
 ) -> tuple[str, str]:
-    """Return (platform_id, detection_method)."""
+    """Return (platform_id, detection_method).
+
+    With no telemetry fingerprint, the GUI catalog default is a cruise ship
+    (``DEFAULT_PLATFORM_ID``). Config / Picard specs still apply when history
+    is present but does not match a known platform.
+    """
     if override:
         return override, "manual"
     if history:
@@ -154,14 +160,16 @@ def resolve_platform_id(
         pid, method = fingerprint_platform(set(spaces.keys()))
         if pid:
             return pid, method
-    cfg_pid = _platform_from_config()
-    if cfg_pid:
-        return cfg_pid, "config"
-    spec = picard_spec_path or os.environ.get("CTTB_PICARD_SPEC", DEFAULT_PICARD_SPEC)
-    pic_pid = _platform_from_picard_spec(spec)
-    if pic_pid:
-        return pic_pid, "picard_spec"
-    return "destroyer_baseline", "default"
+        cfg_pid = _platform_from_config()
+        if cfg_pid:
+            return cfg_pid, "config"
+        spec = picard_spec_path or os.environ.get(
+            "CTTB_PICARD_SPEC", DEFAULT_PICARD_SPEC,
+        )
+        pic_pid = _platform_from_picard_spec(spec)
+        if pic_pid:
+            return pic_pid, "picard_spec"
+    return DEFAULT_PLATFORM_ID, "default"
 
 
 def resolve_platform_id_simple(
