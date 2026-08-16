@@ -68,6 +68,9 @@ Two credential contexts, both short-lived:
 | `batch_job_definition_boundary_*.json` | On-Demand Fargate job defs for surface / Stan / MC. | `<ACCOUNT_ID>`, `<REGION>`, `<BUCKET>` |
 | `ensure_analysis_infra.ps1` | On-Demand CE `picard-analysis-ondemand` + queue + register analysis job defs. | — |
 | `submit_boundary_analysis.ps1` | Submit one analysis phase job. | — |
+| `sentinel_nuts_entrypoint.py` | One AWS Batch array child for a Sentinel Engine C NUTS cell. | — |
+| `batch_job_definition_sentinel_nuts.json` | Fargate NUTS ladder job definition using the existing analysis image and log group. | `<ACCOUNT_ID>`, `<REGION>`, `<BUCKET>` |
+| `submit_sentinel_nuts.sh` / `monitor_sentinel_nuts.sh` | Submit and monitor rung-scoped Sentinel NUTS arrays. | — |
 | `aggregate_results.py` | Unzip `<run_id>.zip` under `./results/`, merge `summary.json` into one CSV/JSON | — |
 
 Replace `<ACCOUNT_ID>`, `<REGION>`, `<BUCKET>`, and `<EXTERNAL_ID>` placeholders
@@ -507,6 +510,41 @@ Re-apply `batch_execution_role_permissions.json` so the execution role can pull
 `picard-boundary-analysis` and write `/aws/batch/picard-boundary-analysis`.
 Lived gotchas (stale job-def tags, `CMDSTAN` versioned path, analysis COPY
 deps, `DescribeLogGroups` on `*`): `docs/boundary_aws_pipeline_lessons.md`.
+
+**Sentinel Engine C NUTS ladder** (one array child per enumerated cell):
+
+```bash
+docker build -f deploy/aws/Dockerfile.analysis \
+  -t picard-boundary-analysis:sentinel-nuts-v1 .
+docker tag picard-boundary-analysis:sentinel-nuts-v1 \
+  "$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/picard-boundary-analysis:sentinel-nuts-v1"
+docker push "$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/picard-boundary-analysis:sentinel-nuts-v1"
+
+sed -e "s/<ACCOUNT_ID>/$ACCOUNT_ID/g" \
+    -e "s/<REGION>/$REGION/g" \
+    -e "s#<BUCKET>#$BUCKET#g" \
+    deploy/aws/batch_job_definition_sentinel_nuts.json \
+    > /tmp/picard-sentinel-nuts-jobdef.json
+env -u AWS_ACCESS_KEY_ID -u AWS_SECRET_ACCESS_KEY -u AWS_SESSION_TOKEN \
+  AWS_PROFILE=picard aws batch register-job-definition \
+  --cli-input-json file:///tmp/picard-sentinel-nuts-jobdef.json \
+  --region "$REGION"
+
+# Submit only the requested rung; C1 is 20 cells.
+./deploy/aws/submit_sentinel_nuts.sh C1 "$BUCKET" "$REGION"
+./deploy/aws/monitor_sentinel_nuts.sh <JOB_ID> "$BUCKET" "$REGION"
+```
+
+The submit script writes the auditable `cells_manifest.json` once, then the
+entrypoint resolves `AWS_BATCH_JOB_ARRAY_INDEX` against
+`enumerate_cells(load_ladder())`, optionally filtered to the requested rung
+ids. Cell JSONs land under
+`s3://$BUCKET/campaign/sentinel_nuts_ladder_v1/`. Existing cell keys are
+skipped so Spot retries are idempotent. The image reuses the existing
+`picard-boundary-analysis` ECR repository and
+`/aws/batch/picard-boundary-analysis` log group; it does not create either.
+Containers use only the ambient Batch job role and never receive operator
+credentials.
 
 ## Why role assumption (vs. static keys)
 
