@@ -20,6 +20,7 @@ from picard_framework.analysis.sentinel.design_nuts import (
     load_ladder,
     run_cell,
 )
+from picard_framework.analysis.sentinel import run_design_nuts
 from picard_framework.analysis.stan._data import cmdstan_available
 from deploy.aws import sentinel_nuts_entrypoint
 
@@ -235,6 +236,46 @@ def test_run_cell_contract_with_stubbed_cmdstan(monkeypatch: pytest.MonkeyPatch)
     assert result["provenance"]["not_a_real_fit"] is True
     assert result["finite_sampling_draws"] is True
     assert result["clean"] is True
+
+
+def test_nuts_cli_cell_mode_writes_payload(monkeypatch: pytest.MonkeyPatch) -> None:
+    writes = []
+    monkeypatch.setattr(run_design_nuts, "ensure_out_dir", lambda path: path)
+    monkeypatch.setattr(run_design_nuts, "load_ladder", lambda path=None: {"rungs": []})
+    monkeypatch.setattr(
+        run_design_nuts,
+        "run_cell",
+        lambda *args, **kwargs: {
+            "rung": "C1",
+            "true_hot_ratio": 2.0,
+            "replicate": 0,
+        },
+    )
+    monkeypatch.setattr(run_design_nuts, "write_json", lambda path, payload: writes.append((path, payload)))
+    monkeypatch.setattr(run_design_nuts, "safe_path", lambda path: path)
+    assert run_design_nuts.main(["--out", "out", "--rung", "C1", "--ratio", "2"]) == 0
+    assert writes == [("out/cell_C1_ratio_2_rep_0.json", {"rung": "C1", "true_hot_ratio": 2.0, "replicate": 0})]
+
+
+def test_nuts_cli_aggregate_mode_writes_json_and_csv(monkeypatch: pytest.MonkeyPatch) -> None:
+    json_writes = []
+    csv_writes = []
+    monkeypatch.setattr(run_design_nuts, "ensure_out_dir", lambda path: path)
+    monkeypatch.setattr(run_design_nuts, "load_ladder", lambda path=None: {"rungs": []})
+    monkeypatch.setattr(run_design_nuts, "safe_path", lambda path: path)
+    monkeypatch.setattr(
+        run_design_nuts,
+        "aggregate_cells",
+        lambda directory, ladder: {
+            "rungs": [{"rung": "C1", "n_cells": 1}],
+            "directory": directory,
+        },
+    )
+    monkeypatch.setattr(run_design_nuts, "write_json", lambda path, payload: json_writes.append((path, payload)))
+    monkeypatch.setattr(run_design_nuts, "write_csv", lambda path, rows, fields: csv_writes.append((path, rows, fields)))
+    assert run_design_nuts.main(["--aggregate", "cells", "--out", "out"]) == 0
+    assert json_writes[0][0] == "out/nuts_aggregate.json"
+    assert csv_writes[0][0] == "out/nuts_rungs.csv"
 
 
 def test_power_curve_reports_monotonicity() -> None:
