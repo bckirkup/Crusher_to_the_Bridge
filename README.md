@@ -26,7 +26,7 @@ python3 orchestrator.py --epochs 250
 # Launch LCARS dashboard (after simulation)
 python3 -m streamlit run dashboard.py
 
-# Run the test suite (~900 tests)
+# Run the test suite (~1,500 tests)
 python3 -m pytest tests/ -v --tb=short
 ```
 
@@ -131,11 +131,13 @@ dashboard/                   Modular command deck (theme, charts, spatial_viz, d
 scripts/                     Enterprise platform builder, deck graphics, asset precompute
 telemetry_buffer/
 │   agent_axes.py            Orthogonal agent state (infection / presentation / compliance)
-tests/                       ~875 tests (ship, fleet, Stackelberg, OIS, behavioral, long-read, TAT, enterprise, CONTAM, schemas, wearable scoring, diagnostic cascade)
+tests/                       ~1,500 tests (ship, fleet, Stackelberg, OIS, behavioral, long-read, TAT, enterprise, CONTAM, schemas, wearable scoring, diagnostic cascade, Sentinel, boundary)
 docs/AGENTS.md               Cursor Cloud / agent development notes
 ```
 
-CI: `.github/workflows/ci.yml` (full suite + Presidio smoke) and `.github/workflows/picard-presidio.yml` (framework-focused + Stackelberg schema checks).
+CI and quality gates: see [Testing & code quality](#testing--code-quality).
+Workflows: `.github/workflows/ci.yml` (full suite + smokes) and
+`.github/workflows/picard-presidio.yml` (framework-focused + Stackelberg schema checks).
 
 ## Configuration Reference (`crusher_labs/config.yaml`)
 
@@ -595,45 +597,60 @@ python tools/sanity_checker.py --config-dir data/config \
 - Platform `graywater_zones` in spatial layout + optional config override cross-referenced against zone IDs
 - Infection counter metrics, thresholds, and `exempt_classes` referential integrity
 
-## Testing
+## Testing & code quality
 
 ```bash
-# Full suite (~875 tests)
-pytest tests/ -v --tb=short
+# Full suite (~1,500 tests)
+python3 -m pytest tests/ -v --tb=short
 
 # Picard / Presidio / Stackelberg
-pytest tests/test_picard_framework.py tests/test_decision_engine.py \
+python3 -m pytest tests/test_picard_framework.py tests/test_decision_engine.py \
   tests/test_presidio_runner.py tests/test_stackelberg.py tests/test_golden_orchestrator.py -v
 
 # Specific modules
-pytest tests/test_orchestrator.py           # orchestrator, quarantine/SOP confinement
-pytest tests/test_infection_counters.py     # attack-rate counters, exempt_classes
-pytest tests/test_enterprise_platforms.py # Enterprise platform referential integrity
-pytest tests/test_agent_axes.py           # orthogonal infection/presentation/compliance
-pytest tests/test_protocol_engine.py        # wearable + detection-escalation stoplights
-pytest tests/test_wearable_anomaly_scorer.py tests/test_cascade_entry.py  # infection_score + cascade entry
-pytest tests/test_diagnostic_cascade.py tests/test_smoke_diagnostic_cascade.py  # cascade tiers + smoke
-pytest tests/test_wearable_enhanced.py       # multi-device, confounders, detection profiles, visibility, chronic disease
-pytest tests/test_sequencing_config.py      # config.yaml read_depth wiring
-pytest tests/test_cost_accounting.py        # per-test debits and materials telemetry
-pytest tests/test_operational_impact.py     # OIS weight computation
-pytest tests/test_action_applier.py         # activate_sop, verification queue, behavioral kinds
-pytest tests/test_behavioral_syndromic.py   # hide_symptoms, belief-scaled sick-call
-pytest tests/test_transmission_pathways.py  # food/environmental pool init
-pytest tests/test_dashboard.py              # LCARS dashboard imports
-pytest tests/test_sanity_checker.py         # config validation
-pytest tests/test_law_compliance.py         # architectural law invariants
-pytest tests/test_data_contracts.py         # JSON schema / referential integrity
-pytest tests/test_telemetry_seams.py        # cross-module data flow
+python3 -m pytest tests/test_orchestrator.py           # orchestrator, quarantine/SOP confinement
+python3 -m pytest tests/test_infection_counters.py     # attack-rate counters, exempt_classes
+python3 -m pytest tests/test_enterprise_platforms.py # Enterprise platform referential integrity
+python3 -m pytest tests/test_agent_axes.py           # orthogonal infection/presentation/compliance
+python3 -m pytest tests/test_protocol_engine.py        # wearable + detection-escalation stoplights
+python3 -m pytest tests/test_wearable_anomaly_scorer.py tests/test_cascade_entry.py  # infection_score + cascade entry
+python3 -m pytest tests/test_diagnostic_cascade.py tests/test_smoke_diagnostic_cascade.py  # cascade tiers + smoke
+python3 -m pytest tests/test_wearable_enhanced.py       # multi-device, confounders, detection profiles, visibility, chronic disease
+python3 -m pytest tests/test_sequencing_config.py      # config.yaml read_depth wiring
+python3 -m pytest tests/test_cost_accounting.py        # per-test debits and materials telemetry
+python3 -m pytest tests/test_operational_impact.py     # OIS weight computation
+python3 -m pytest tests/test_action_applier.py         # activate_sop, verification queue, behavioral kinds
+python3 -m pytest tests/test_behavioral_syndromic.py   # hide_symptoms, belief-scaled sick-call
+python3 -m pytest tests/test_transmission_pathways.py  # food/environmental pool init
+python3 -m pytest tests/test_dashboard.py              # LCARS dashboard imports
+python3 -m pytest tests/test_sanity_checker.py         # config validation
+python3 -m pytest tests/test_law_compliance.py         # architectural law invariants
+python3 -m pytest tests/test_data_contracts.py         # JSON schema / referential integrity
+python3 -m pytest tests/test_telemetry_seams.py        # cross-module data flow
 ```
 
 Cloud agents and CI environments: see `docs/AGENTS.md` (`python3`, headless Streamlit).
 
-CI (`.github/workflows/ci.yml`) runs advisory ruff lint, sanity checks, JSON schema
-validation, the full pytest suite with coverage (~875 tests), Picard/Presidio import
-hygiene, Presidio smoke, long-read/TAT and wearable/cascade targeted tests, dashboard
-import smoke, a 24-epoch orchestrator run, diagnostic cascade smoke, and OIS telemetry
-verification. Framework-focused checks run in `.github/workflows/picard-presidio.yml`.
+### Quality structures
+
+Several layers keep the simulation contracts, dependencies, and CI surface
+honest as the suite grows:
+
+| Layer | Where | What it enforces |
+|-------|-------|------------------|
+| **Hash-pinned installs** | `requirements.lock.txt` | CI and agents install with `pip install --only-binary=:all: --require-hashes -r requirements.lock.txt` so published wheels are pinned and reproducible |
+| **Pre-commit** | `.pre-commit-config.yaml` | Local Ruff autofix, `scripts/sonar_guard.py` on Python + workflow YAML, and [zizmor](https://github.com/woodruffw/zizmor) on GitHub Actions |
+| **Blocking Ruff lint** | `.github/workflows/ci.yml` (`lint`) | `F` (undefined names / unused imports) plus `E`/`W`/`I`/`C901` on production packages; line-length `E501` and ambiguous-name `E741` ignored; repository `C901` ceiling ratchets downward only |
+| **Sonar mechanical guards** | `scripts/sonar_guard.py` (CI + pre-commit) | Fast, conservative checks for Sonar-class patterns and unsafe workflow install commands without waiting on a live Sonar scan |
+| **Workflow lint** | `ci.yml` (`workflow-lint`) | zizmor on `ci.yml` and `picard-presidio.yml` |
+| **Config & schema contracts** | `tools/sanity_checker.py`, `schemas/`, `tests/test_json_schema_validation.py` | Pydantic + cross-refs for ship/fleet/social config; JSON Schema validation for data contracts and platforms |
+| **Full pytest + coverage** | `ci.yml` (`test`) | ~1,500 tests on Python **3.11** and **3.12** with `--cov` / XML coverage artifact |
+| **Import & smoke gates** | `ci.yml` | Picard/Presidio/Stackelberg import hygiene; orchestrator module split + stoplight dedup; dashboard LCARS import; Presidio 1-cruise smoke; Sentinel analysis smoke; 24-epoch orchestrator + OIS telemetry fields; campaign Docker image `--smoke` |
+| **Framework CI slice** | `.github/workflows/picard-presidio.yml` | Focused Picard/Presidio/Stackelberg/OIS/behavioral/long-read/TAT/CONTAM/campaign/outbreak/boundary pytest set, Stackelberg + all-platform schema checks, Presidio smoke (runs on `main` and `cursor/**`) |
+| **SonarQube Cloud** | `.sonarcloud.properties` + `ci.yml` (`sonar`) | Autoscan configuration (Python 3.11/3.12, `tests/` as test code); optional CI scan uploads coverage when `SONAR_TOKEN` is set |
+
+Agent-oriented validation commands (pre-commit, sonar_guard, ruff, pytest,
+sanity checker, orchestrator/Presidio smokes) live in `AGENTS.md`.
 
 ## Data Contracts
 
