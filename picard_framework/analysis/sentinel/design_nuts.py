@@ -5,7 +5,6 @@ from __future__ import annotations
 import json
 import math
 import os
-import re
 import time
 from dataclasses import replace
 from importlib import resources
@@ -31,7 +30,6 @@ NOMINAL_COVERAGE = 0.90
 MIN_CLEAN_FRACTION = 0.90
 MAX_COVERAGE_GAP = 0.05
 NAN_REJECTION = "poisson_lpmf: Rate parameter"
-ITERATION_PATTERN = re.compile(r"(?:iteration|Iteration)[: =]+(\d+)")
 
 
 def load_ladder(path: str | None = None) -> dict[str, Any]:
@@ -56,9 +54,13 @@ def enumerate_cells(ladder: Mapping[str, Any]) -> list[dict[str, Any]]:
     settings = ladder.get("settings", {})
     base_seed = int(settings.get("seed_base", 1701))
     for rung_index, rung in enumerate(ladder["rungs"]):
-        ratios = rung.get("ratios", [2.0])
-        for ratio_index, ratio in enumerate(ratios):
-            for replicate in range(int(rung["replicates"])):
+        arms = [(float(rung["calibration_ratio"]), int(rung["calibration_replicates"]))]
+        arms.extend(
+            (float(ratio), int(rung["sweep_replicates"]))
+            for ratio in rung.get("sweep_ratios", [])
+        )
+        for ratio_index, (ratio, replicates) in enumerate(arms):
+            for replicate in range(replicates):
                 cells.append(
                     {
                         "rung_index": rung_index,
@@ -114,15 +116,15 @@ def _summary_diagnostics(fit: Any) -> dict[str, float]:
     }
 
 
-def _sampling_diagnostics(fit: Any, max_treedepth: int, iter_warmup: int) -> dict[str, Any]:
+def _sampling_diagnostics(fit: Any, max_treedepth: int) -> dict[str, Any]:
     draws = fit.draws_pd(vars=["divergent__", "treedepth__"])
     errors = fit.runset.get_err_msgs()
     nan_lines = [line for line in errors.splitlines() if NAN_REJECTION in line]
-    iterations = [
-        int(match.group(1))
-        for match in (ITERATION_PATTERN.search(line) for line in nan_lines)
-        if match
-    ]
+    posterior = fit.draws_pd(vars=["lp__", "lambda_port", "lambda_visit"])
+    finite = bool(np.isfinite(posterior.to_numpy(dtype=float)).all())
+    # CmdStan rejection messages are not tagged with an iteration, so the
+    # messages are retained as informational diagnostics rather than warmup
+    # versus sampling gates.
     summary = _summary_diagnostics(fit)
     return {
         "divergent_transitions": int(draws["divergent__"].sum()),
@@ -130,8 +132,9 @@ def _sampling_diagnostics(fit: Any, max_treedepth: int, iter_warmup: int) -> dic
         "max_rhat": summary["max_rhat"],
         "min_bulk_ess": summary["min_bulk_ess"],
         "nan_rejection_count": len(nan_lines),
-        "nan_rejection_latest_iteration": max(iterations) if iterations else None,
-        "nan_rejection_after_warmup": bool(iterations and max(iterations) > iter_warmup),
+        "nan_rejection_latest_iteration": None,
+        "finite_sampling_draws": finite,
+        "nonfinite_sampling_draw_count": int((~np.isfinite(posterior.to_numpy(dtype=float))).sum()),
         "nan_rejection_messages": nan_lines,
     }
 
@@ -140,6 +143,8 @@ def _posterior_quantities(
     fit: Any,
     data: Mapping[str, Any],
     ratio: float,
+    truth_hot: float,
+    truth_background: float,
 ) -> dict[str, Any]:
     ports = np.asarray(data["visit_port"], dtype=int)
     hot = fit.stan_variable("lambda_port")[:, 0]
@@ -158,12 +163,27 @@ def _posterior_quantities(
         "hot_width90_log": math.log(_interval(hot)[1]) - math.log(_interval(hot)[0]),
         "background_width90_log": math.log(_interval(background)[1]) - math.log(_interval(background)[0]),
         "ratio_width90_log": math.log(_interval(ratio_draws)[1]) - math.log(_interval(ratio_draws)[0]),
-        "pooled_lambda_hot_coverage": _coverage(hot, float(data["_truth_hot"])),
-        "pooled_lambda_background_coverage": _coverage(background, float(data["_truth_background"])),
+        "pooled_lambda_hot_coverage": _coverage(hot, truth_hot),
+        "pooled_lambda_background_coverage": _coverage(background, truth_background),
         "ratio_coverage": _coverage(ratio_draws, ratio),
         "detected": bool(ratio_low > 1.0),
         "hot_visit_width90_log": float(np.mean(visit_widths)) if visit_widths else math.nan,
         "per_visit_hot_width90_log": visit_widths,
+    }
+
+
+def _prior_reference(data: Mapping[str, Any]) -> dict[str, float]:
+    hazard_sd = float(data["hazard_log_prior_sd"])
+    port_scale = float(data["port_sd_prior_scale"])
+    ports = int(data["P"])
+    hot_sd = math.sqrt(hazard_sd**2 + port_scale**2)
+    ratio_sd = port_scale * math.sqrt(1.0 + 1.0 / (ports - 1))
+    return {
+        "prior_sd_log_lambda_hot": hot_sd,
+        "prior_sd_log_ratio": ratio_sd,
+        "prior_width90_log_lambda_hot": 2.0 * Z90 * hot_sd,
+        "prior_width90_log_ratio": 2.0 * Z90 * ratio_sd,
+        "prior_reference_is_indicative_moment_approximation": True,
     }
 
 
@@ -172,6 +192,7 @@ def _clean(diagnostics: Mapping[str, Any]) -> bool:
         diagnostics["divergent_transitions"] == 0
         and diagnostics["max_rhat"] <= 1.01
         and diagnostics["min_bulk_ess"] >= 100.0
+        and diagnostics["finite_sampling_draws"]
     )
 
 
@@ -203,7 +224,9 @@ def run_cell(
     )
     design = _rung_design(rung)
     settings = dict(ladder.get("settings", {}))
-    ratios = [float(value) for value in rung.get("ratios", [2.0])]
+    ratios = [float(rung["calibration_ratio"])] + [
+        float(value) for value in rung.get("sweep_ratios", [])
+    ]
     ratio_index = ratios.index(float(ratio))
     default_seed = (
         settings.get("seed_base", 1701)
@@ -215,11 +238,7 @@ def run_cell(
     if smoke:
         design = replace(design, n_ships=2, n_weeks=1)
     data, meta = build_design_data(design)
-    data["_truth_hot"] = design.lambda_background * ratio
-    data["_truth_background"] = design.lambda_background
     simulated = _simulate_onsets(data, design, ratio, cell_seed)
-    simulated.pop("_truth_hot", None)
-    simulated.pop("_truth_background", None)
     from cmdstanpy import CmdStanModel, cmdstan_path
 
     model = CmdStanModel(stan_file=_model_path())
@@ -235,16 +254,26 @@ def run_cell(
         max_treedepth=12 if smoke else int(max_treedepth or settings["max_treedepth"]),
     )
     elapsed = time.monotonic() - started
-    warmup = 100 if smoke else int(iter_warmup or settings["iter_warmup"])
     treedepth = 12 if smoke else int(max_treedepth or settings["max_treedepth"])
-    diagnostics = _sampling_diagnostics(fit, treedepth, warmup)
+    diagnostics = _sampling_diagnostics(fit, treedepth)
+    truth_hot = design.lambda_background * ratio
+    truth_background = design.lambda_background
     quantities = _posterior_quantities(
         fit,
-        {**simulated, "_truth_hot": data["_truth_hot"], "_truth_background": data["_truth_background"]},
+        simulated,
         ratio,
+        truth_hot,
+        truth_background,
+    )
+    prior = _prior_reference(simulated)
+    quantities["posterior_to_prior_width_ratio_hot"] = (
+        quantities["hot_width90_log"] / prior["prior_width90_log_lambda_hot"]
+    )
+    quantities["posterior_to_prior_width_ratio_ratio"] = (
+        quantities["ratio_width90_log"] / prior["prior_width90_log_ratio"]
     )
     ceiling = ceiling_projection(design)
-    diagnostics["clean"] = _clean(diagnostics) and not diagnostics["nan_rejection_after_warmup"]
+    diagnostics["clean"] = _clean(diagnostics)
     return {
         "engine": "nuts",
         "provenance": {
@@ -276,6 +305,7 @@ def run_cell(
             "max_treedepth": 12 if smoke else int(max_treedepth or settings["max_treedepth"]),
         },
         **quantities,
+        **prior,
         **diagnostics,
         "engine_a_ceiling_width90_log_ratio": ceiling["sd_log_ratio"] * 2.0 * Z90,
         "wall_clock_seconds": elapsed,
@@ -289,33 +319,71 @@ def _mean(rows: Sequence[Mapping[str, Any]], key: str) -> float:
     return float(np.mean([float(row[key]) for row in rows]))
 
 
-def _rung_summary(rung_id: str, rows: list[dict[str, Any]]) -> dict[str, Any]:
-    clean = [row for row in rows if row.get("clean")]
-    clean_fraction = len(clean) / len(rows) if rows else 0.0
+def _rung_summary(rung: Mapping[str, Any], rows: list[dict[str, Any]]) -> dict[str, Any]:
+    calibration_ratio = float(rung["calibration_ratio"])
+    calibration = [
+        row for row in rows if float(row["true_hot_ratio"]) == calibration_ratio
+    ]
+    clean = [row for row in calibration if row.get("clean")]
+    clean_fraction = len(clean) / len(calibration) if calibration else 0.0
     coverage = _mean(clean, "ratio_coverage") if clean else None
     valid_coverage = coverage is not None and 0.85 <= coverage <= 0.95
     ceiling_width = _mean(clean, "engine_a_ceiling_width90_log_ratio") if clean else None
     factor = _mean(clean, "ratio_width90_log") / ceiling_width if clean and ceiling_width else None
+    prior_ratio_values = [
+        float(row["posterior_to_prior_width_ratio_ratio"])
+        for row in clean
+        if row.get("posterior_to_prior_width_ratio_ratio") is not None
+    ]
+    prior_ratio = float(np.mean(prior_ratio_values)) if prior_ratio_values else None
+    prior_dominated = prior_ratio is not None and prior_ratio > 0.90
     inconsistent = factor is not None and factor < 1.0
+    reliable = clean_fraction >= MIN_CLEAN_FRACTION
+    reasons = []
+    if not reliable:
+        reasons.append("clean fraction below 0.90")
+    if not valid_coverage:
+        reasons.append("coverage outside [0.85, 0.95]")
+    if prior_dominated:
+        reasons.append("the data at this rung barely moved the prior")
+    if inconsistent:
+        reasons.append("r < 1 is explained by prior-dominated posterior width")
     return {
-        "rung": rung_id,
+        "rung": str(rung["id"]),
         "n_cells": len(rows),
         "n_voyages": int(rows[0]["geometry"]["voyages"]) if rows else None,
+        "calibration_ratio": calibration_ratio,
+        "n_calibration_cells": len(calibration),
         "n_clean": len(clean),
+        "n_unclean": len(calibration) - len(clean),
         "clean_fraction": clean_fraction,
-        "reliable": clean_fraction >= MIN_CLEAN_FRACTION,
+        "reliable": reliable,
         "coverage_ratio": coverage,
         "coverage_gate": bool(valid_coverage),
         "calibration_factor_r": factor,
         "r_below_one_inconsistent": bool(inconsistent),
-        "calibration_factor_usable": bool(valid_coverage and not inconsistent and factor is not None),
+        "r_below_one_reason": (
+            "r < 1 reflects a prior-dominated posterior, not extra design information."
+            if inconsistent
+            else None
+        ),
+        "posterior_to_prior_width_ratio_ratio": prior_ratio,
+        "learning_gate": not prior_dominated,
+        "calibration_factor_usable": bool(
+            valid_coverage
+            and reliable
+            and not prior_dominated
+            and not inconsistent
+            and factor is not None
+        ),
+        "calibration_factor_gate_reason": "; ".join(reasons) or None,
         "mean_ratio_width90_log": _mean(clean, "ratio_width90_log") if clean else None,
         "mean_hot_width90_log": _mean(clean, "hot_width90_log") if clean else None,
         "mean_background_width90_log": _mean(clean, "background_width90_log") if clean else None,
         "detection_power": _mean(clean, "detected") if clean else None,
         "coverage_note": (
             "two replicates cannot establish coverage"
-            if rung_id == "C8"
+            if rung.get("anchor_only", False)
             else None
         ),
     }
@@ -351,7 +419,12 @@ def _power_curve(rows: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
         }
         for ratio, group in sorted(grouped.items())
     ]
-    return {"curve": curve, "mdhr_at_power_080": _interpolate_mdhr(curve)}
+    powers = [point["power"] for point in curve]
+    return {
+        "curve": curve,
+        "monotone": all(left <= right for left, right in zip(powers, powers[1:])),
+        "mdhr_at_power_080": _interpolate_mdhr(curve),
+    }
 
 
 def aggregate_cells(directory: str, ladder: Mapping[str, Any] | None = None) -> dict[str, Any]:
@@ -367,13 +440,20 @@ def aggregate_cells(directory: str, ladder: Mapping[str, Any] | None = None) -> 
     by_rung: dict[str, list[dict[str, Any]]] = {}
     for cell in cells:
         by_rung.setdefault(str(cell["rung"]), []).append(cell)
-    rungs = [_rung_summary(rung["id"], by_rung.get(rung["id"], [])) for rung in config["rungs"]]
+    rungs = [_rung_summary(rung, by_rung.get(rung["id"], [])) for rung in config["rungs"]]
     power = {
-        rung: _power_curve(
-            [cell for cell in by_rung.get(rung, []) if cell.get("clean")]
+        rung["id"]: _power_curve(
+            [
+                cell
+                for cell in by_rung.get(rung["id"], [])
+                if cell.get("clean")
+                and float(cell["true_hot_ratio"]) in {
+                    float(value) for value in rung.get("sweep_ratios", [])
+                }
+            ]
         )
-        for rung in ("C3", "C6")
-        if rung in by_rung
+        for rung in config["rungs"]
+        if rung.get("sweep") and rung["id"] in by_rung
     }
     usable = [row for row in rungs if row["calibration_factor_usable"]]
     extrapolation = _extrapolate_caribbean(usable)

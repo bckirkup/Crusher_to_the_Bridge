@@ -11,13 +11,13 @@
     "seed_base": 1701
   },
   "rungs": [
-    {"id": "C1", "preset": "pilot", "n_ports": 4, "n_ships": 4, "n_weeks": 2, "calls_per_port": 6.0, "replicates": 20, "ratios": [2.0], "purpose": "cheapest rung; overlaps Engine B"},
-    {"id": "C2", "preset": "pilot", "n_ports": 6, "n_ships": 8, "n_weeks": 3, "calls_per_port": 12.0, "replicates": 40, "ratios": [2.0], "purpose": "Engine B fit scale, direct A/B/C comparison"},
-    {"id": "C3", "preset": "alaska", "n_ports": 10, "n_ships": 12, "n_weeks": 4, "calls_per_port": 14.4, "replicates": 20, "ratios": [1.0, 1.25, 1.5, 2.0, 3.0], "purpose": "mid"},
-    {"id": "C4", "preset": "alaska", "n_ports": 10, "n_ships": 25, "n_weeks": 4, "calls_per_port": 30.0, "replicates": 20, "ratios": [2.0], "purpose": "Alaska geometry, short horizon"},
-    {"id": "C5", "preset": "alaska", "n_ports": 10, "n_ships": 25, "n_weeks": 10, "calls_per_port": 75.0, "replicates": 10, "ratios": [2.0], "purpose": "full Alaska preset"},
-    {"id": "C6", "preset": "caribbean", "n_ports": 40, "n_ships": 40, "n_weeks": 3, "calls_per_port": 10.5, "replicates": 40, "ratios": [1.0, 1.25, 1.5, 2.0, 3.0], "purpose": "Caribbean geometry, reduced size"},
-    {"id": "C7", "preset": "caribbean", "n_ports": 40, "n_ships": 120, "n_weeks": 3, "calls_per_port": 31.5, "replicates": 20, "ratios": [2.0], "purpose": "Caribbean geometry, largest affordable"},
-    {"id": "C8", "preset": "caribbean", "n_ports": 40, "n_ships": 120, "n_weeks": 12, "calls_per_port": 126.0, "replicates": 2, "ratios": [2.0], "purpose": "actual Caribbean design; anchor only"}
+    {"id": "C1", "preset": "pilot", "n_ports": 4, "n_ships": 4, "n_weeks": 2, "calls_per_port": 6.0, "calibration_ratio": 2.0, "calibration_replicates": 20, "sweep_ratios": [], "sweep_replicates": 20, "anchor_only": false, "sweep": false, "purpose": "cheapest rung; overlaps Engine B"},
+    {"id": "C2", "preset": "pilot", "n_ports": 6, "n_ships": 8, "n_weeks": 3, "calls_per_port": 12.0, "calibration_ratio": 2.0, "calibration_replicates": 40, "sweep_ratios": [], "sweep_replicates": 20, "anchor_only": false, "sweep": false, "purpose": "Engine B fit scale, direct A/B/C comparison"},
+    {"id": "C3", "preset": "alaska", "n_ports": 10, "n_ships": 12, "n_weeks": 4, "calls_per_port": 14.4, "calibration_ratio": 2.0, "calibration_replicates": 20, "sweep_ratios": [1.0, 1.25, 1.5, 3.0], "sweep_replicates": 20, "anchor_only": false, "sweep": true, "purpose": "mid"},
+    {"id": "C4", "preset": "alaska", "n_ports": 10, "n_ships": 25, "n_weeks": 4, "calls_per_port": 30.0, "calibration_ratio": 2.0, "calibration_replicates": 20, "sweep_ratios": [], "sweep_replicates": 20, "anchor_only": false, "sweep": false, "purpose": "Alaska geometry, short horizon"},
+    {"id": "C5", "preset": "alaska", "n_ports": 10, "n_ships": 25, "n_weeks": 10, "calls_per_port": 75.0, "calibration_ratio": 2.0, "calibration_replicates": 10, "sweep_ratios": [], "sweep_replicates": 20, "anchor_only": false, "sweep": false, "purpose": "full Alaska preset"},
+    {"id": "C6", "preset": "caribbean", "n_ports": 40, "n_ships": 40, "n_weeks": 3, "calls_per_port": 10.5, "calibration_ratio": 2.0, "calibration_replicates": 40, "sweep_ratios": [1.0, 1.25, 1.5, 3.0], "sweep_replicates": 20, "anchor_only": false, "sweep": true, "purpose": "Caribbean geometry, reduced size"},
+    {"id": "C7", "preset": "caribbean", "n_ports": 40, "n_ships": 120, "n_weeks": 3, "calls_per_port": 31.5, "calibration_ratio": 2.0, "calibration_replicates": 20, "sweep_ratios": [], "sweep_replicates": 20, "anchor_only": false, "sweep": false, "purpose": "Caribbean geometry, largest affordable"},
+    {"id": "C8", "preset": "caribbean", "n_ports": 40, "n_ships": 120, "n_weeks": 12, "calls_per_port": 126.0, "calibration_ratio": 2.0, "calibration_replicates": 2, "sweep_ratios": [], "sweep_replicates": 20, "anchor_only": true, "sweep": false, "purpose": "actual Caribbean design; anchor only"}
   ]
 }
