@@ -8,7 +8,7 @@ JOB_QUEUE="${4:-picard-analysis-queue}"
 JOB_DEFINITION="${5:-picard-sentinel-nuts}"
 S3_PREFIX="s3://${BUCKET}/campaign/sentinel_nuts_ladder_v1/"
 JOB_NAME="${JOB_NAME:-picard-sentinel-nuts-${RUNG_IDS//,/-}-$(date +%Y%m%d-%H%M%S)}"
-MANIFEST_FILE="$(mktemp "${TMPDIR:-/tmp}/sentinel-nuts-manifest.XXXXXX.json")"
+MANIFEST_FILE="$(mktemp "${PWD}/.sentinel-nuts-manifest.XXXXXX.json")"
 trap 'rm -f "$MANIFEST_FILE"' EXIT
 
 ARRAY_SIZE="$(PYTHONPATH=. python3 - "$RUNG_IDS" <<'PY'
