@@ -94,3 +94,47 @@ class TestAggregateTransmissionPathways:
         monkeypatch.setattr(dashboard, "HISTORY_PATH", missing)
         dashboard.load_history.clear()
         assert dashboard.load_history() == []
+
+
+class TestResolvePlatformId:
+    def test_empty_history_defaults_to_mega_cruise(self) -> None:
+        from dashboard.loaders import resolve_platform_id
+        from dashboard.paths import DEFAULT_PLATFORM_ID
+
+        assert DEFAULT_PLATFORM_ID == "mega_cruise_5000"
+        pid, method = resolve_platform_id([])
+        assert pid == "mega_cruise_5000"
+        assert method == "default"
+
+    def test_manual_override_wins(self) -> None:
+        from dashboard.loaders import resolve_platform_id
+
+        pid, method = resolve_platform_id([], override="spirit_cruise_3000")
+        assert pid == "spirit_cruise_3000"
+        assert method == "manual"
+
+    def test_fingerprint_matches_destroyer_zones(self) -> None:
+        import json
+
+        from dashboard.loaders import resolve_platform_id
+        from dashboard.paths import PLATFORMS_DIR, SPATIAL_LAYOUT_JSON
+
+        layout_path = os.path.join(
+            PLATFORMS_DIR, "destroyer_baseline", SPATIAL_LAYOUT_JSON,
+        )
+        with open(layout_path, encoding="utf-8") as fh:
+            layout = json.load(fh)
+        spaces = {z["id"]: {} for z in layout["zones"]}
+        pid, method = resolve_platform_id([{"spaces": spaces}])
+        assert pid == "destroyer_baseline"
+        assert method == "exact"
+
+    def test_unmatched_history_uses_config_before_default(self) -> None:
+        from dashboard.loaders import resolve_platform_id
+
+        pid, method = resolve_platform_id(
+            [{"spaces": {"totally_fake_zone_xyz": {}}}],
+        )
+        # crusher_labs/config.yaml defaults to mega_cruise_5000
+        assert pid == "mega_cruise_5000"
+        assert method == "config"

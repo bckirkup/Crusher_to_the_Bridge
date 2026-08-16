@@ -64,7 +64,8 @@ Expected: 67 tests pass in ~0.5s.
 
 ### Available Platforms
 
-- `destroyer_baseline` — Default platform used by orchestrator
+- `mega_cruise_5000` — Default platform used by orchestrator (`config.yaml`)
+- `destroyer_baseline` — Gleaves-class destroyer (6 zones)
 - `enterprise_constitution_tos` — Constitution-class (fiction-adapted, 13 zones)
 - `enterprise_galaxy_tng` — Galaxy-class (fiction-adapted, 17 zones)
 - `expedition_cruise_300` (legacy)
