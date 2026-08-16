@@ -36,7 +36,7 @@
   },
   "parameters": {
     "rungs": "C1",
-    "s3_prefix": "s3://<BUCKET>/sentinel/nuts_ladder_v1/"
+    "s3_prefix": "s3://<BUCKET>/campaign/sentinel_nuts_ladder_v1/"
   },
   "retryStrategy": {
     "attempts": 2,

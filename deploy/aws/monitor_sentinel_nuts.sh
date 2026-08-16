@@ -20,6 +20,6 @@ done
 
 env -u AWS_ACCESS_KEY_ID -u AWS_SECRET_ACCESS_KEY -u AWS_SESSION_TOKEN \
   AWS_PROFILE=picard aws s3 sync \
-  "s3://${BUCKET}/sentinel/nuts_ladder_v1/cells/" \
+  "s3://${BUCKET}/campaign/sentinel_nuts_ladder_v1/cells/" \
   "tmp_nuts_batch_${JOB_ID}/" \
   --region "$REGION"

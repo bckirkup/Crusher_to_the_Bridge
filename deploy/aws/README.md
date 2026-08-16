@@ -535,11 +535,12 @@ env -u AWS_ACCESS_KEY_ID -u AWS_SECRET_ACCESS_KEY -u AWS_SESSION_TOKEN \
 ./deploy/aws/monitor_sentinel_nuts.sh <JOB_ID> "$BUCKET" "$REGION"
 ```
 
-The entrypoint resolves `AWS_BATCH_JOB_ARRAY_INDEX` against
+The submit script writes the auditable `cells_manifest.json` once, then the
+entrypoint resolves `AWS_BATCH_JOB_ARRAY_INDEX` against
 `enumerate_cells(load_ladder())`, optionally filtered to the requested rung
-ids. It writes the auditable `cells_manifest.json` and cell JSONs under
-`s3://$BUCKET/sentinel/nuts_ladder_v1/`. Existing cell keys are skipped so
-Spot retries are idempotent. The image reuses the existing
+ids. Cell JSONs land under
+`s3://$BUCKET/campaign/sentinel_nuts_ladder_v1/`. Existing cell keys are
+skipped so Spot retries are idempotent. The image reuses the existing
 `picard-boundary-analysis` ECR repository and
 `/aws/batch/picard-boundary-analysis` log group; it does not create either.
 Containers use only the ambient Batch job role and never receive operator

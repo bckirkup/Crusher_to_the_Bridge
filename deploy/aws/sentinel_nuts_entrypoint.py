@@ -79,7 +79,11 @@ def _put_json(client: Any, bucket: str, key: str, payload: Any) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--rungs", default=None, help="Comma-separated rung ids to enumerate")
-    parser.add_argument("--s3-prefix", required=True, help="s3://bucket/sentinel/nuts_ladder_v1/")
+    parser.add_argument(
+        "--s3-prefix",
+        required=True,
+        help="s3://bucket/campaign/sentinel_nuts_ladder_v1/",
+    )
     args = parser.parse_args()
 
     cells = _selected_cells(args.rungs)
@@ -99,7 +103,6 @@ def main() -> int:
     client = _s3_client()
     cell = cells[index]
     key = f"{prefix}cells/{_cell_key(cell)}"
-    manifest_key = f"{prefix}cells_manifest.json"
     missing = False
     try:
         client.head_object(Bucket=bucket, Key=key)
@@ -109,19 +112,20 @@ def main() -> int:
         # A missing object is the normal first-attempt path.
         missing = True
     except Exception as exc:
-        if getattr(exc, "response", {}).get("ResponseMetadata", {}).get("HTTPStatusCode") != 404:
+        status_code = getattr(exc, "response", {}).get("ResponseMetadata", {}).get(
+            "HTTPStatusCode"
+        )
+        if status_code == 403:
+            raise SystemExit(
+                "S3 HeadObject returned 403: the Sentinel prefix must be under "
+                "the job role's campaign/* scope"
+            ) from exc
+        if status_code != 404:
             raise
         missing = True
     if not missing:
         raise RuntimeError(f"Could not establish idempotence for s3://{bucket}/{key}")
 
-    manifest = {
-        "engine": "nuts_cell_manifest",
-        "rung_ids": args.rungs.split(",") if args.rungs else None,
-        "array_size": len(cells),
-        "cells": cells,
-    }
-    _put_json(client, bucket, manifest_key, manifest)
     payload = run_cell(
         load_ladder(),
         rung_id=str(cell["rung"]),
