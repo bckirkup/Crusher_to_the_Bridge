@@ -29,6 +29,7 @@ _HARDENED_MODULES = (
     "deploy/aws/aggregate_results.py",
     "deploy/aws/analyze_campaign_curves.py",
     "deploy/aws/boundary_analysis_entrypoint.py",
+    "deploy/aws/sentinel_recovery_analysis_entrypoint.py",
     "deploy/aws/classify_batch_failures.py",
     "deploy/aws/download_boundary_results.py",
     "deploy/aws/path_safety.py",
@@ -48,6 +49,7 @@ _HARDENED_MODULES = (
     "picard_framework/analysis/sentinel/figures.py",
     "picard_framework/analysis/sentinel/report.py",
     "picard_framework/analysis/sentinel/run_sentinel.py",
+    "picard_framework/analysis/sentinel_recovery_postprocess.py",
 )
 
 # Path.write_text / read_text / unlink / open are also sinks for S2083/S8707

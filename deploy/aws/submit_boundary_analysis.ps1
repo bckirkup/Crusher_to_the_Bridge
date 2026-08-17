@@ -65,7 +65,7 @@ Write-Host "  phase=$Phase pathogen=$Pathogen def=$jobDef queue=$JobQueue"
 # Job defs bake a default --phase; override when the phase is not the def default.
 if ($Phase -in @('report', 'bundle')) {
   $overFile = Join-Path $env:TEMP 'boundary-container-overrides.json'
-  ('{"command":["--phase","' + $Phase + '","--pathogen","' + $Pathogen + '","--s3-campaign","' + $s3Campaign + '","--s3-analysis","' + $s3Analysis + '"]}') | Set-Content -NoNewline $overFile
+  ('{"command":["deploy/aws/boundary_analysis_entrypoint.py","--phase","' + $Phase + '","--pathogen","' + $Pathogen + '","--s3-campaign","' + $s3Campaign + '","--s3-analysis","' + $s3Analysis + '"]}') | Set-Content -NoNewline $overFile
   $jobId = aws --profile $AwsProfile batch submit-job `
     --job-name $JobName `
     --job-queue $JobQueue `

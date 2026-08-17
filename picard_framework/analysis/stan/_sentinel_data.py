@@ -52,8 +52,9 @@ DEFAULT_HAZARD_PRIOR_MEDIAN = 1.0e-4
 DEFAULT_BASELINE_PRIOR_MEDIAN = 1.0e-5
 DEFAULT_PRIOR_LOG_SD = 2.0
 DEFAULT_PORT_SD_PRIOR_SCALE = 0.75
-DEFAULT_R_PRIOR_MEAN = 0.6
-DEFAULT_R_PRIOR_SD = 0.4
+# CTB Stage B norovirus hurdle posterior (mega); see sentinel_stan_fix_spec.md.
+DEFAULT_R_PRIOR_MEAN = 0.06
+DEFAULT_R_PRIOR_SD = 0.02
 
 
 def attribution_ports(design: ExposureDesign) -> tuple[str, ...]:

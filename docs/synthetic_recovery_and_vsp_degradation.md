@@ -77,6 +77,44 @@ Writes `run_summary.csv`, aggregates, Stage A Bernoulli + Stage B Beta-AR
 pooled fits, per-vector latent recovery, figures, and `report.md`. Uses CmdStan
 when `mingw32-make` is available; otherwise a NumPy Metropolis fallback.
 
+**Sentinel port recovery** (local; 3360 compact zips). Drops home-port
+(`miami` / `USMIA`) hours the fleet model does not treat as port calls,
+treats each seed as a distinct `ship_id`, then fits the fleet attribution
+model on each of the 72 hazard × fleet × `R_onboard` cells with CTB-informed
+``R_onboard`` priors and a tightened onboard-baseline prior (clinical-only;
+wastewater channel off until line lists carry reads):
+
+```powershell
+$env:PYTHONUTF8 = "1"
+python -m picard_framework.analysis.sentinel_recovery_postprocess `
+  results/sentinel_synthetic_recovery_v1 `
+  --out results/sentinel_synthetic_recovery_v1/analysis
+```
+
+Writes per-voyage itinerary/observation JSON, one fleet manifest per cell,
+CmdStan (or NumPy) fits, `recovery.csv`, and `report.md` with 90% CrI coverage
+of true `λ_p` and `R_onboard`. `--extract-only` stops after manifests; `--fits-only` reuses them;
+`--cell <id>` / `--max-cells N` subset the grid; existing `ok` fits are skipped
+unless `--force`.
+
+**AWS On-Demand (preferred for the 72-cell grid).** Local 60-voyage fleet cells
+take hours; push the extract and run a Batch array on
+`picard-analysis-queue`:
+
+```powershell
+# After local --extract-only:
+aws --profile picard s3 sync results/sentinel_synthetic_recovery_v1/analysis/ `
+  s3://$env:CAMPAIGN_BUCKET/campaign/sentinel_synthetic_recovery_v1/analysis/ `
+  --exclude "fits/*" --exclude "recovery.csv" --exclude "report.md"
+
+docker build -f deploy/aws/Dockerfile.analysis -t picard-boundary-analysis .
+# push :latest to ECR, then:
+.\deploy\aws\ensure_analysis_infra.ps1 -RegisterOnly
+.\deploy\aws\submit_sentinel_recovery_stan.ps1
+# when 72/72 SUCCEEDED:
+.\deploy\aws\submit_sentinel_recovery_stan.ps1 -Phase score
+```
+
 **VSP degradation** (local; streams `run_zips.tar`):
 
 ```powershell

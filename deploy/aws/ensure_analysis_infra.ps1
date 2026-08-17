@@ -115,7 +115,8 @@ if (-not $RegisterOnly) {
 foreach ($jd in @(
   'batch_job_definition_boundary_surface.json',
   'batch_job_definition_boundary_stan.json',
-  'batch_job_definition_boundary_mc.json'
+  'batch_job_definition_boundary_mc.json',
+  'batch_job_definition_sentinel_recovery_stan.json'
 )) {
   $src = Join-Path $here $jd
   $tmp = Join-Path $env:TEMP $jd

@@ -503,6 +503,16 @@ docker build -f deploy/aws/Dockerfile.analysis -t picard-boundary-analysis .
 .\deploy\aws\submit_boundary_analysis.ps1 -Phase mc -Pathogen norovirus
 ```
 
+**Sentinel recovery Stan** (72-cell array on the same On-Demand queue / CmdStan
+image; extract must already be under
+`campaign/sentinel_synthetic_recovery_v1/analysis/`):
+
+```powershell
+.\deploy\aws\ensure_analysis_infra.ps1 -RegisterOnly
+.\deploy\aws\submit_sentinel_recovery_stan.ps1
+.\deploy\aws\submit_sentinel_recovery_stan.ps1 -Phase score
+```
+
 Re-apply `batch_execution_role_permissions.json` so the execution role can pull
 `picard-boundary-analysis` and write `/aws/batch/picard-boundary-analysis`.
 Lived gotchas (stale job-def tags, `CMDSTAN` versioned path, analysis COPY

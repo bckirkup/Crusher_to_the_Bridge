@@ -5,6 +5,7 @@
   "containerProperties": {
     "image": "<ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/picard-boundary-analysis:latest",
     "command": [
+      "deploy/aws/boundary_analysis_entrypoint.py",
       "--phase", "surface",
       "--s3-campaign", "Ref::s3_campaign",
       "--s3-analysis", "Ref::s3_analysis"

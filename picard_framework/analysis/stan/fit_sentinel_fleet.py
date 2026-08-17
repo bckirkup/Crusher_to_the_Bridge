@@ -64,6 +64,7 @@ from picard_framework.analysis.sentinel.observations import (
 from picard_framework.analysis.stan._data import cmdstan_available
 from picard_framework.analysis.stan._sampler_options import SamplerOptions
 from picard_framework.analysis.stan._sentinel_fleet_data import (
+    FleetPriors,
     FleetVoyage,
     WastewaterOptions,
     build_sentinel_fleet_data,
@@ -332,6 +333,7 @@ def fit_sentinel_fleet(
     sampler: SamplerOptions | None = None,
     smoke: bool = False,
     wastewater: bool = True,
+    priors: FleetPriors | None = None,
 ) -> dict[str, Any]:
     """Assemble the fleet, sample, and write the pooled summaries."""
     opts = sampler or SamplerOptions()
@@ -351,6 +353,7 @@ def fit_sentinel_fleet(
         voyages,
         incubation,
         generation,
+        priors=priors,
         wastewater=WastewaterOptions(
             enabled=wastewater, pathogen=resolved_pathogen,
         ),

@@ -109,6 +109,7 @@ class FleetPriors:
     hazard_prior_median: float = DEFAULT_HAZARD_PRIOR_MEDIAN
     baseline_prior_median: float = DEFAULT_BASELINE_PRIOR_MEDIAN
     prior_log_sd: float = DEFAULT_PRIOR_LOG_SD
+    baseline_prior_log_sd: float | None = None
     port_sd_prior_scale: float = DEFAULT_PORT_SD_PRIOR_SCALE
     visit_sd_prior_scale: float = DEFAULT_VISIT_SD_PRIOR_SCALE
     time_sd_prior_scale: float = DEFAULT_TIME_SD_PRIOR_SCALE
@@ -130,11 +131,16 @@ class FleetPriors:
 
     def stan_fields(self) -> dict[str, float]:
         """The prior block of the Stan data dictionary."""
+        baseline_log_sd = (
+            float(self.prior_log_sd)
+            if self.baseline_prior_log_sd is None
+            else float(self.baseline_prior_log_sd)
+        )
         return {
             "hazard_log_prior_mean": math.log(float(self.hazard_prior_median)),
             "hazard_log_prior_sd": float(self.prior_log_sd),
             "baseline_log_prior_mean": math.log(float(self.baseline_prior_median)),
-            "baseline_log_prior_sd": float(self.prior_log_sd),
+            "baseline_log_prior_sd": baseline_log_sd,
             "r_log_prior_mean": math.log(float(self.r_prior_median)),
             "r_log_prior_sd": float(self.r_prior_log_sd),
             "port_sd_prior_scale": float(self.port_sd_prior_scale),
