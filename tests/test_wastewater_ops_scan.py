@@ -33,7 +33,7 @@ WW_DESIGN = CAMPAIGN_DIR / "sentinel_ww_ops_scan_v1_design.json"
 WW_MANIFEST = CAMPAIGN_DIR / "sentinel_ww_ops_scan_v1_manifest.json"
 LEGACY_DESIGN = CAMPAIGN_DIR / "sentinel_synthetic_recovery_v1_design.json"
 
-EXPECTED_TOTAL_RUNS = 4230
+EXPECTED_TOTAL_RUNS = 4500
 
 
 def _config(**over: Any) -> WastewaterOpsConfig:
@@ -124,6 +124,7 @@ class TestConfigValidation:
         ).to_metadata()
         assert meta == {
             "wastewater_enabled": True,
+            "ww_assay_mode": "metagenomic",
             "ww_sampling_interval_epochs": 6,
             "ww_residence_hours": 8.0,
             "ww_sequencing_depth": 1_000_000,
@@ -330,7 +331,13 @@ class TestCampaignDesign:
         blocks: dict[str, int] = {}
         for cell in cells:
             blocks[cell["block"]] = blocks.get(cell["block"], 0) + 1
-        assert blocks == {"core": 25, "depth": 6, "collection": 2, "control": 1}
+        assert blocks == {
+            "core": 25,
+            "depth": 6,
+            "collection": 2,
+            "assay": 3,
+            "control": 1,
+        }
         assert len({c["cell_id"] for c in cells}) == len(cells)
 
     def test_control_cell_is_the_clinical_only_baseline(self) -> None:

@@ -249,6 +249,43 @@ def _collection_cells(
     return cells
 
 
+def _assay_cells(
+    scan: dict[str, Any],
+    base: dict[str, Any],
+    seeds: list[int],
+) -> list[dict[str, Any]]:
+    """Assay-mode comparison arm at the reference cadence and residence.
+
+    A separate arm rather than a factor crossed with the core grid: the core grid
+    answers "how often, and how long in the tank", which is an operating question
+    the ship controls, and the answer to it should not be conditioned on a
+    laboratory choice. Crossing them fully would multiply the campaign by the
+    number of modes to compare cadences the fleet will never run per mode.
+    """
+    block = scan.get("assay_sensitivity")
+    if not block:
+        return []
+    interval = int(_require(block, "sampling_interval_epochs", "assay_sensitivity"))
+    residence = float(
+        _require(block, "holding_tank_residence_hours", "assay_sensitivity"),
+    )
+    tag = _residence_tag(residence)
+    return [
+        _ww_cell(
+            "assay",
+            f"assay_{str(mode)}_f{interval}_{tag}",
+            base,
+            {
+                "sampling_interval_epochs": interval,
+                "holding_tank_residence_hours": residence,
+                "assay_mode": str(mode),
+            },
+            seeds,
+        )
+        for mode in _require(block, "assay_modes", "assay_sensitivity")
+    ]
+
+
 def _control_cells(
     scan: dict[str, Any],
     base: dict[str, Any],
@@ -283,6 +320,7 @@ def build_wastewater_cells(design: dict[str, Any]) -> list[dict[str, Any]]:
         *_core_cells(scan, base, core_seeds),
         *_depth_cells(scan, base, sens_seeds),
         *_collection_cells(scan, base, sens_seeds),
+        *_assay_cells(scan, base, sens_seeds),
         *_control_cells(scan, base, core_seeds),
     ]
     ids = [cell["cell_id"] for cell in cells]

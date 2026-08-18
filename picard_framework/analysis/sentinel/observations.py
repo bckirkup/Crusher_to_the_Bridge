@@ -17,6 +17,10 @@ from picard_framework.analysis.sentinel.itinerary import (
     HOURS_FROM_WINDOWS,
     Voyage,
 )
+from picard_framework.analysis.sentinel.wastewater_assays import (
+    ASSAY_METAGENOMIC,
+    resolve_assay_mode,
+)
 
 REPORTING_CHANNELS = frozenset(
     {"sick_call", "screening", "cascade", "wearable", "unreported"},
@@ -44,7 +48,19 @@ class ClinicalCase:
 
 @dataclass(frozen=True)
 class WastewaterSample:
-    """One compositional wastewater observation (GRUMB read counts)."""
+    """One wastewater observation, in whatever assay mode produced it.
+
+    The read fields and the concentration fields are alternatives, not a pair: a
+    qPCR row has no library and a shotgun row has no Ct. Both are carried on one
+    dataclass because they are the same *sample* — the same tank, epoch, and tap
+    — and the fit routes them to the channel their populated fields support
+    (:mod:`wastewater_signal`).
+
+    A non-detect keeps ``ct_value`` and ``concentration_copies_per_l`` at
+    ``None`` and reports ``lod_copies_per_l``: that is a censored observation,
+    which is evidence, and dropping it or filling it with a zero would bias the
+    inferred prevalence in opposite directions.
+    """
 
     sample_epoch: int
     collection_point: str
@@ -53,11 +69,24 @@ class WastewaterSample:
     total_reads: int
     clr_anomaly_score: float
     concentration_copies_per_l: float | None
+    assay_mode: str = ASSAY_METAGENOMIC
+    ct_value: float | None = None
+    detected: bool | None = None
+    lod_copies_per_l: float | None = None
+    turnaround_hours: float | None = None
+    genotype: str | None = None
 
     @property
     def relative_abundance(self) -> float:
         """Pathogen read fraction (0.0 for an empty library)."""
         return self.pathogen_reads / self.total_reads if self.total_reads > 0 else 0.0
+
+    @property
+    def has_concentration_observation(self) -> bool:
+        """True when the row carries a quantitative or censored concentration."""
+        if self.lod_copies_per_l is None:
+            return False
+        return self.concentration_copies_per_l is not None or self.detected is False
 
 
 @dataclass(frozen=True)
@@ -106,15 +135,36 @@ def _case_from_dict(raw: dict[str, Any]) -> ClinicalCase:
     )
 
 
+def _optional_float(raw: dict[str, Any], key: str) -> float | None:
+    value = raw.get(key)
+    return None if value is None else float(value)
+
+
 def _sample_from_dict(raw: dict[str, Any]) -> WastewaterSample:
-    reads = int(raw["pathogen_reads"])
-    total = int(raw["total_reads"])
+    # Absent read fields mean "this mode does not sequence", not zero reads out of
+    # zero: an empty library is dropped by the read channel either way, but the
+    # distinction is what keeps a qPCR row from being scored as a failed shotgun.
+    reads = int(raw.get("pathogen_reads") or 0)
+    total = int(raw.get("total_reads") or 0)
     if reads > total:
         raise ValueError(
             f"pathogen_reads ({reads}) exceeds total_reads ({total}) "
             f"at epoch {raw.get('sample_epoch')}",
         )
-    conc = raw.get("concentration_copies_per_l")
+    detected = raw.get("detected")
+    mode = resolve_assay_mode(raw.get("assay_mode") or ASSAY_METAGENOMIC)
+    conc = _optional_float(raw, "concentration_copies_per_l")
+    lod = _optional_float(raw, "lod_copies_per_l")
+    if conc is not None and detected is False:
+        raise ValueError(
+            "a sample below the limit of detection cannot report a "
+            f"concentration at epoch {raw.get('sample_epoch')}",
+        )
+    if conc is not None and lod is None and mode != ASSAY_METAGENOMIC:
+        raise ValueError(
+            "a quantitative wastewater sample must report lod_copies_per_l "
+            f"at epoch {raw.get('sample_epoch')}",
+        )
     return WastewaterSample(
         sample_epoch=int(raw["sample_epoch"]),
         collection_point=str(raw["collection_point"]),
@@ -122,7 +172,13 @@ def _sample_from_dict(raw: dict[str, Any]) -> WastewaterSample:
         pathogen_reads=reads,
         total_reads=total,
         clr_anomaly_score=float(raw.get("clr_anomaly_score") or 0.0),
-        concentration_copies_per_l=None if conc is None else float(conc),
+        concentration_copies_per_l=conc,
+        assay_mode=mode,
+        ct_value=_optional_float(raw, "ct_value"),
+        detected=None if detected is None else bool(detected),
+        lod_copies_per_l=lod,
+        turnaround_hours=_optional_float(raw, "turnaround_hours"),
+        genotype=None if raw.get("genotype") is None else str(raw["genotype"]),
     )
 
 

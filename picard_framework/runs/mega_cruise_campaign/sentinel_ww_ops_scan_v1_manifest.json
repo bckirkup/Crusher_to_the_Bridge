@@ -353,6 +353,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -387,6 +388,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -421,6 +423,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -455,6 +458,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -489,6 +493,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -523,6 +528,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -557,6 +563,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -591,6 +598,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -625,6 +633,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -659,6 +668,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -693,6 +703,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -727,6 +738,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -761,6 +773,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -795,6 +808,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -829,6 +843,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -863,6 +878,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -897,6 +913,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -931,6 +948,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -965,6 +983,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -999,6 +1018,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -1033,6 +1053,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -1067,6 +1088,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -1101,6 +1123,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -1135,6 +1158,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -1169,6 +1193,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -1198,6 +1223,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -1227,6 +1253,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -1256,6 +1283,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -1285,6 +1313,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -1314,6 +1343,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -1343,6 +1373,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -1372,6 +1403,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -1401,10 +1433,101 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main",
               "midship",
               "forward"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 6,
+            "holding_tank_residence_hours": 4.0
+          }
+        },
+        {
+          "cell_id": "assay_metagenomic_f6_r4",
+          "block": "assay",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "assay_mode": "metagenomic",
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 6,
+            "holding_tank_residence_hours": 4.0
+          }
+        },
+        {
+          "cell_id": "assay_amplicon_f6_r4",
+          "block": "assay",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "assay_mode": "amplicon",
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 6,
+            "holding_tank_residence_hours": 4.0
+          }
+        },
+        {
+          "cell_id": "assay_long_read_f6_r4",
+          "block": "assay",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "assay_mode": "long_read",
+            "collection_points": [
+              "aft_main"
             ],
             "sequencing_depth": 250000,
             "pathogen_shedding_to_reads_scale": 1.0,
@@ -1437,6 +1560,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": false,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -1516,6 +1640,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -1550,6 +1675,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -1584,6 +1710,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -1618,6 +1745,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -1652,6 +1780,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -1686,6 +1815,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -1720,6 +1850,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -1754,6 +1885,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -1788,6 +1920,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -1822,6 +1955,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -1856,6 +1990,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -1890,6 +2025,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -1924,6 +2060,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -1958,6 +2095,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -1992,6 +2130,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -2026,6 +2165,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -2060,6 +2200,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -2094,6 +2235,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -2128,6 +2270,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -2162,6 +2305,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -2196,6 +2340,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -2230,6 +2375,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -2264,6 +2410,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -2298,6 +2445,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -2332,6 +2480,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -2361,6 +2510,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -2390,6 +2540,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -2419,6 +2570,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -2448,6 +2600,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -2477,6 +2630,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -2506,6 +2660,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -2535,6 +2690,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -2564,10 +2720,101 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main",
               "midship",
               "forward"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 6,
+            "holding_tank_residence_hours": 4.0
+          }
+        },
+        {
+          "cell_id": "assay_metagenomic_f6_r4",
+          "block": "assay",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "assay_mode": "metagenomic",
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 6,
+            "holding_tank_residence_hours": 4.0
+          }
+        },
+        {
+          "cell_id": "assay_amplicon_f6_r4",
+          "block": "assay",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "assay_mode": "amplicon",
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 6,
+            "holding_tank_residence_hours": 4.0
+          }
+        },
+        {
+          "cell_id": "assay_long_read_f6_r4",
+          "block": "assay",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "assay_mode": "long_read",
+            "collection_points": [
+              "aft_main"
             ],
             "sequencing_depth": 250000,
             "pathogen_shedding_to_reads_scale": 1.0,
@@ -2600,6 +2847,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": false,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -2679,6 +2927,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -2713,6 +2962,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -2747,6 +2997,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -2781,6 +3032,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -2815,6 +3067,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -2849,6 +3102,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -2883,6 +3137,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -2917,6 +3172,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -2951,6 +3207,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -2985,6 +3242,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -3019,6 +3277,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -3053,6 +3312,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -3087,6 +3347,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -3121,6 +3382,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -3155,6 +3417,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -3189,6 +3452,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -3223,6 +3487,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -3257,6 +3522,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -3291,6 +3557,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -3325,6 +3592,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -3359,6 +3627,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -3393,6 +3662,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -3427,6 +3697,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -3461,6 +3732,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -3495,6 +3767,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -3524,6 +3797,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -3553,6 +3827,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -3582,6 +3857,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -3611,6 +3887,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -3640,6 +3917,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -3669,6 +3947,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -3698,6 +3977,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -3727,10 +4007,101 @@
           ],
           "wastewater_surveillance": {
             "enabled": true,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main",
               "midship",
               "forward"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 6,
+            "holding_tank_residence_hours": 4.0
+          }
+        },
+        {
+          "cell_id": "assay_metagenomic_f6_r4",
+          "block": "assay",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "assay_mode": "metagenomic",
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 6,
+            "holding_tank_residence_hours": 4.0
+          }
+        },
+        {
+          "cell_id": "assay_amplicon_f6_r4",
+          "block": "assay",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "assay_mode": "amplicon",
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 6,
+            "holding_tank_residence_hours": 4.0
+          }
+        },
+        {
+          "cell_id": "assay_long_read_f6_r4",
+          "block": "assay",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "assay_mode": "long_read",
+            "collection_points": [
+              "aft_main"
             ],
             "sequencing_depth": 250000,
             "pathogen_shedding_to_reads_scale": 1.0,
@@ -3763,6 +4134,7 @@
           ],
           "wastewater_surveillance": {
             "enabled": false,
+            "assay_mode": "qpcr",
             "collection_points": [
               "aft_main"
             ],
@@ -3776,5 +4148,5 @@
       ]
     }
   },
-  "total_runs": 4230
+  "total_runs": 4500
 }

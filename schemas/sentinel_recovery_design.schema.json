@@ -182,6 +182,27 @@
             }
           }
         },
+        "assay_sensitivity": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Laboratory-mode comparison arm at one reference operating point. A separate arm rather than a factor crossed with the core grid: cadence and residence are operating choices whose answer should not be conditioned on the assay.",
+          "required": [
+            "sampling_interval_epochs",
+            "holding_tank_residence_hours",
+            "assay_modes"
+          ],
+          "properties": {
+            "description": { "type": "string" },
+            "sampling_interval_epochs": { "type": "integer", "minimum": 1 },
+            "holding_tank_residence_hours": { "type": "number", "minimum": 0 },
+            "assay_modes": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": { "$ref": "#/$defs/assay_mode" }
+            }
+          }
+        },
         "include_control": {
           "type": "boolean",
           "description": "Emit the clinical-only cell the wastewater gains are measured against."
@@ -214,12 +235,18 @@
       "uniqueItems": true,
       "items": { "type": "string", "minLength": 1 }
     },
+    "assay_mode": {
+      "type": "string",
+      "enum": ["qpcr", "amplicon", "metagenomic", "long_read"],
+      "description": "Laboratory mode the sampler reports in; see wastewater_assays.py. Absent means metagenomic, the mode that predates the switch."
+    },
     "wastewater_settings": {
       "type": "object",
       "additionalProperties": false,
       "description": "One wastewater sampling policy; mirrors WastewaterOpsConfig in picard_framework/analysis/sentinel/wastewater_ops.py.",
       "properties": {
         "enabled": { "type": "boolean" },
+        "assay_mode": { "$ref": "#/$defs/assay_mode" },
         "sampling_interval_epochs": { "type": "integer", "minimum": 1 },
         "holding_tank_residence_hours": { "type": "number", "minimum": 0 },
         "collection_points": { "$ref": "#/$defs/collection_points" },

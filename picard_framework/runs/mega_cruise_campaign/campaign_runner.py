@@ -32,6 +32,9 @@ from urllib.parse import urlparse
 REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT))
 
+from picard_framework.analysis.sentinel.wastewater_assays import (  # noqa: E402
+    DEFAULT_ASSAY_MODE,
+)
 from picard_framework.runs.mega_cruise_campaign import (  # noqa: E402
     sentinel_recovery,
 )
@@ -648,17 +651,21 @@ def _wastewater_cell_factors(cell: dict[str, Any]) -> dict[str, Any]:
 
     Collection points are recorded as a count: the analysis asks whether more
     taps help, not which deck they were on. The clinical-only arm names no
-    cadence or residence, so those label as 0 rather than going missing — the
-    aggregate CSV is read as a factorial table and a hole in a column is worse
-    than an explicit "never sampled".
+    cadence, residence, or assay, so those label as 0 or empty rather than going
+    missing — the aggregate CSV is read as a factorial table and a hole in a
+    column is worse than an explicit "never sampled".
     """
     settings = cell.get("wastewater_surveillance")
     if not settings:
         return {}
+    enabled = bool(settings.get("enabled", False))
     return {
         "wastewater_cell": str(cell.get("cell_id") or ""),
         "wastewater_block": str(cell.get("block") or ""),
-        "wastewater_enabled": bool(settings.get("enabled", False)),
+        "wastewater_enabled": enabled,
+        "ww_assay_mode": (
+            str(settings.get("assay_mode") or DEFAULT_ASSAY_MODE) if enabled else ""
+        ),
         "ww_sampling_interval_epochs": int(settings.get("sampling_interval_epochs") or 0),
         "ww_residence_hours": float(settings.get("holding_tank_residence_hours") or 0.0),
         "ww_sequencing_depth": int(settings.get("sequencing_depth") or 0),

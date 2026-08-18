@@ -32,14 +32,37 @@ matches it counts people shedding into the system rather than integrating an
 intensity curve in arbitrary units. ``pathogen_shedding_to_reads_scale`` and
 ``background_read_fraction`` are the two knobs that place that prevalence on the
 read-fraction scale metagenomics actually reports.
+
+``assay_mode`` chooses what the laboratory reports from that tank —
+:mod:`wastewater_assays` holds the four modes and the physical chain they share.
+Cadence, residence, and collection-point routing are the *operating* policy and
+are identical across modes, on purpose: a mode comparison that also moved the
+plumbing would not be a mode comparison. The mode-specific knobs
+(``pathogen_shedding_to_reads_scale``, ``background_read_fraction``,
+``sequencing_depth``) remain metagenomic knobs and are ignored by the other
+modes rather than reinterpreted by them.
 """
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Mapping, Sequence
 
 import numpy as np
+
+from picard_framework.analysis.sentinel.wastewater_assays import (
+    ASSAY_AMPLICON,
+    ASSAY_LONG_READ,
+    ASSAY_METAGENOMIC,
+    ASSAY_QPCR,
+    AmpliconAssayConfig,
+    LongReadAssayConfig,
+    QpcrAssayConfig,
+    ShedLoadModel,
+    gate_config,
+    qpcr_reading,
+    resolve_assay_mode,
+)
 
 # A six-hour composite with a four-hour tank: a defensible mid-range operating
 # point, not a recommendation. The scan exists to find the recommendation.
@@ -71,6 +94,11 @@ class WastewaterOpsConfig:
     """
 
     enabled: bool = False
+    assay_mode: str = ASSAY_METAGENOMIC
+    qpcr: QpcrAssayConfig = field(default_factory=QpcrAssayConfig)
+    amplicon: AmpliconAssayConfig = field(default_factory=AmpliconAssayConfig)
+    long_read: LongReadAssayConfig = field(default_factory=LongReadAssayConfig)
+    load_model: ShedLoadModel = field(default_factory=ShedLoadModel)
     sampling_interval_epochs: int = DEFAULT_SAMPLING_INTERVAL_EPOCHS
     holding_tank_residence_hours: float = DEFAULT_RESIDENCE_HOURS
     collection_points: tuple[str, ...] = DEFAULT_COLLECTION_POINTS
@@ -82,6 +110,8 @@ class WastewaterOpsConfig:
     pathogen_id: str = ""
 
     def __post_init__(self) -> None:
+        if self.assay_mode != resolve_assay_mode(self.assay_mode):
+            raise ValueError(f"assay_mode must be normalized: {self.assay_mode!r}")
         if self.sampling_interval_epochs < 1:
             raise ValueError(
                 "sampling_interval_epochs must be >= 1: "
@@ -129,6 +159,11 @@ class WastewaterOpsConfig:
             points = list(DEFAULT_COLLECTION_POINTS)
         return cls(
             enabled=bool(cfg.get("enabled", False)),
+            assay_mode=resolve_assay_mode(cfg.get("assay_mode")),
+            qpcr=QpcrAssayConfig.from_mapping(cfg.get("qpcr")),
+            amplicon=AmpliconAssayConfig.from_mapping(cfg.get("amplicon")),
+            long_read=LongReadAssayConfig.from_mapping(cfg.get("long_read")),
+            load_model=ShedLoadModel.from_mapping(cfg),
             sampling_interval_epochs=int(
                 cfg.get("sampling_interval_epochs", DEFAULT_SAMPLING_INTERVAL_EPOCHS),
             ),
@@ -157,11 +192,28 @@ class WastewaterOpsConfig:
         """Operating point as flat labels for campaign bookkeeping."""
         return {
             "wastewater_enabled": bool(self.enabled),
+            "ww_assay_mode": str(self.assay_mode),
             "ww_sampling_interval_epochs": int(self.sampling_interval_epochs),
             "ww_residence_hours": float(self.holding_tank_residence_hours),
             "ww_sequencing_depth": int(self.sequencing_depth),
             "ww_collection_points": len(self.collection_points),
         }
+
+    @property
+    def assay_depth(self) -> int:
+        """Library depth the configured mode sequences at (0 for qPCR).
+
+        ``sequencing_depth`` stays the metagenomic knob the ops scan sweeps;
+        the sequencing modes carry their own depth because a 250 000-read
+        shotgun library and a 50 000-read amplicon library are not the same cost
+        or the same measurement.
+        """
+        depths = {
+            ASSAY_METAGENOMIC: int(self.sequencing_depth),
+            ASSAY_AMPLICON: int(self.amplicon.sequencing_depth),
+            ASSAY_LONG_READ: int(self.long_read.sequencing_depth),
+        }
+        return depths.get(self.assay_mode, 0)
 
 
 def assign_collection_points(
@@ -260,19 +312,111 @@ class WastewaterOpsSampler:
         return tuple(dict(row) for row in drawn)
 
     def _draw_sample(self, epoch: int, point: str) -> dict[str, Any]:
-        """One beta-binomial read draw from one tap's current tank."""
+        """One sample from one tap's current tank, in the configured assay mode."""
+        row = {
+            "sample_epoch": int(epoch),
+            "collection_point": str(point),
+            "pathogen": self.config.pathogen,
+            "assay_mode": str(self.config.assay_mode),
+        }
+        row.update(self._assay_fields(self._tank[point]))
+        return row
+
+    def _assay_fields(self, tank_share: float) -> dict[str, Any]:
+        """Assay-specific fields for a tank at the given shedder prevalence."""
+        mode = self.config.assay_mode
+        if mode == ASSAY_METAGENOMIC:
+            return self._metagenomic_fields(tank_share)
+        if mode == ASSAY_QPCR:
+            return self._qpcr_fields(tank_share)
+        if mode == ASSAY_AMPLICON:
+            return self._amplicon_fields(tank_share)
+        return self._long_read_fields(tank_share)
+
+    def _metagenomic_fields(self, tank_share: float) -> dict[str, Any]:
+        """Beta-binomial compositional read draw: the pre-switch behaviour."""
         cfg = self.config
-        share = cfg.pathogen_shedding_to_reads_scale * self._tank[point]
+        share = cfg.pathogen_shedding_to_reads_scale * tank_share
         mean = cfg.informative_read_fraction * min(max(share, 0.0), 1.0)
         depth = int(cfg.sequencing_depth)
         p = min(max(mean, _P_FLOOR), 1.0 - _P_FLOOR)
         conc = float(cfg.read_concentration)
         q = float(self._rng.beta(p * conc, (1.0 - p) * conc))
         reads = int(self._rng.binomial(depth, min(max(q, 0.0), 1.0)))
-        return {
-            "sample_epoch": int(epoch),
-            "collection_point": str(point),
-            "pathogen": cfg.pathogen,
-            "pathogen_reads": min(reads, depth),
-            "total_reads": depth,
-        }
+        return {"pathogen_reads": min(reads, depth), "total_reads": depth}
+
+    def _qpcr_fields(self, tank_share: float) -> dict[str, Any]:
+        """Ct, detection, and the concentration a detected Ct implies."""
+        reading = qpcr_reading(
+            self.config.load_model.gc_per_l(tank_share),
+            config=self.config.qpcr,
+            rng=self._rng,
+        )
+        return reading.as_row()
+
+    def _amplicon_fields(self, tank_share: float) -> dict[str, Any]:
+        """qPCR gate first, then on-target reads only if the gate opened.
+
+        A library is not sequenced off a negative well, so a non-detect emits an
+        empty library rather than a depth's worth of background: an amplicon run
+        that reports reads it never generated would let the read channel claim
+        precision the assay never had.
+        """
+        amplicon = self.config.amplicon
+        gate = gate_config(
+            self.config.qpcr,
+            extraction_efficiency=amplicon.extraction_efficiency,
+            lod_ct_threshold=amplicon.lod_ct_threshold,
+        )
+        reading = qpcr_reading(
+            self.config.load_model.gc_per_l(tank_share),
+            config=gate,
+            rng=self._rng,
+        )
+        fields = reading.as_row()
+        depth = int(amplicon.sequencing_depth) if reading.detected else 0
+        fraction = (
+            amplicon.on_target_fraction(reading.copies_per_reaction)
+            if reading.detected
+            else 0.0
+        )
+        reads = int(self._rng.binomial(depth, min(max(fraction, 0.0), 1.0))) if depth else 0
+        fields.update(
+            {
+                "pathogen_reads": min(reads, depth),
+                "total_reads": depth,
+                "primer_target": amplicon.primer_targets[0],
+                "genotype": None,
+            },
+        )
+        return fields
+
+    def _long_read_fields(self, tank_share: float) -> dict[str, Any]:
+        """Confirmation run: the same gate, its own depth, and a turnaround.
+
+        ``genotype`` stays the configured reference or ``None``: the ABM has no
+        strain state (spec 5), so a typing call here would be invented.
+        """
+        long_read = self.config.long_read
+        gate = gate_config(
+            self.config.qpcr,
+            extraction_efficiency=long_read.extraction_efficiency,
+            lod_ct_threshold=long_read.lod_ct_threshold,
+        )
+        reading = qpcr_reading(
+            self.config.load_model.gc_per_l(tank_share),
+            config=gate,
+            rng=self._rng,
+        )
+        fields = reading.as_row()
+        depth = int(long_read.sequencing_depth) if reading.detected else 0
+        reads = int(self._rng.binomial(depth, long_read.on_target_fraction)) if depth else 0
+        fields.update(
+            {
+                "pathogen_reads": min(reads, depth),
+                "total_reads": depth,
+                "turnaround_hours": float(long_read.turnaround_hours),
+                "genotype": long_read.reference_genotype if reading.detected else None,
+            },
+        )
+        return fields
