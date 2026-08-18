@@ -32,6 +32,22 @@ optional keys: `port_id` (IATA/UN-LOCODE), `region`, `calendar_date`,
 `crew_shore_leave_fraction`. One itinerary truth, one validator, one schema
 test.
 
+The view keeps the **home port**: embarkation and disembarkation are port calls,
+not scaffolding around the itinerary. Every agent stands on that pier at least
+once, the simulated ledger records ashore hours there, and the premise of the
+scenario is a pathogen carried aboard at the home port — so dropping those days
+made campaign bundles fail validation with *"hours_ashore references unknown
+port 'miami'"*. Consequences: `PortCall.is_home_port` marks them, a port can be
+called more than once (home port twice, or a repositioning itinerary repeating a
+port), so ashore hours are checked against the **sum** of the visits
+(`Voyage.port_calls_for`); the embarkation window contributes hours before
+boarding closes and the disembarkation window hours after walk-off; and
+separability metrics such as `min_inter_port_hours` only count calls that
+actually put people ashore, so a default embarkation day with everyone already
+onboard neither carries a hazard nor changes a separability claim.
+`port_calls_from_config(..., include_home_port=False)` remains for callers that
+want the excursion-only view.
+
 ### 1.2 Phase 2 comes before Phase 1's validation, and it is small
 
 The proposal defers coupled simulation to "future", but the validation plan's
@@ -218,6 +234,7 @@ class PortCall:
     pax_ashore_fraction: float            # = voyage_config disembark_fraction
     crew_ashore_fraction: float           # crew shore leave; default 0.0, §1.7
     mean_hours_ashore: float              # from disembark/reembark windows
+    is_home_port: bool                    # embarkation / disembarkation day
 
 @dataclass(frozen=True)
 class Voyage:

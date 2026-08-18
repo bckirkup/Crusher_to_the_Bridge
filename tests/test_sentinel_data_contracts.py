@@ -44,6 +44,13 @@ def _read(path: Path) -> dict[str, Any]:
         return json.load(fh)
 
 
+def _call_for(config: dict[str, Any], port_id: str):
+    """The first call at ``port_id`` (the home port is called twice)."""
+    calls = [c for c in port_calls_from_config(config) if c.port_id == port_id]
+    assert calls, f"no port call for {port_id}"
+    return calls[0]
+
+
 @pytest.fixture
 def itinerary_config() -> dict[str, Any]:
     return _read(ITINERARY_FIXTURE)
@@ -68,9 +75,63 @@ def voyage(itinerary_config: dict[str, Any]):
 # ---------------------------------------------------------------- itinerary
 
 
-def test_only_port_days_become_port_calls(voyage) -> None:
-    assert voyage.port_ids == ("MXCZM", "MXCTM", "KYGEC")
-    assert all(call.voyage_day in (3, 4, 6) for call in voyage.port_calls)
+def test_home_port_and_excursion_days_become_port_calls(voyage) -> None:
+    assert voyage.port_ids == ("USMIA", "MXCZM", "MXCTM", "KYGEC")
+    excursions = [c for c in voyage.port_calls if not c.is_home_port]
+    assert [c.voyage_day for c in excursions] == [3, 4, 6]
+    home = [c for c in voyage.port_calls if c.is_home_port]
+    assert [c.voyage_day for c in home] == [1, 7]
+    assert {c.port_id for c in home} == {"USMIA"}
+
+
+def test_home_port_excluded_on_request(itinerary_config: dict[str, Any]) -> None:
+    excursions = port_calls_from_config(itinerary_config, include_home_port=False)
+    assert [c.port_id for c in excursions] == ["MXCZM", "MXCTM", "KYGEC"]
+    assert not any(c.is_home_port for c in excursions)
+
+
+def test_home_port_visits_are_summed_into_one_port(voyage) -> None:
+    visits = voyage.port_calls_for("USMIA")
+    assert len(visits) == 2
+    assert [v.voyage_day for v in visits] == [1, 7]
+    assert voyage.port_calls_for("MXCZM") == (voyage.port_call("MXCZM"),)
+    assert voyage.port_calls_for("NOWHERE") == ()
+
+
+def test_embarkation_day_carries_no_ashore_hours_by_default(voyage) -> None:
+    embark = voyage.port_calls_for("USMIA")[0]
+    # The default embarkation day keeps every passenger aboard once boarded, so
+    # the pier contributes no exposure denominator.
+    assert embark.pax_ashore_fraction == pytest.approx(0.0)
+    assert embark.mean_hours_ashore == 0.0
+    assert embark.hours_ashore_source == HOURS_UNSPECIFIED
+
+
+def test_disembarkation_day_carries_home_port_ashore_hours(voyage) -> None:
+    walk_off = voyage.port_calls_for("USMIA")[1]
+    assert walk_off.pax_ashore_fraction == pytest.approx(1.0)
+    # Window midpoint 9 to the last epoch of the day (23) at 1 h per epoch.
+    assert walk_off.mean_hours_ashore == pytest.approx(14.0)
+    assert walk_off.hours_ashore_source == HOURS_FROM_WINDOWS
+
+
+def test_home_port_ashore_hours_grade_with_the_disembark_window(
+    itinerary_config: dict[str, Any],
+) -> None:
+    observed: list[float] = []
+    for start in (2, 6, 14):
+        cfg = copy.deepcopy(itinerary_config)
+        for day in cfg["voyage"]["itinerary"]:
+            if day.get("type") == "disembarkation":
+                day["disembark_window_epochs"] = [start, start + 6]
+        observed.append(port_calls_from_config(cfg)[-1].mean_hours_ashore)
+    assert observed == sorted(observed, reverse=True)
+    assert observed[0] - observed[-1] > 6.0
+
+
+def test_home_port_windows_stay_inside_the_voyage(voyage) -> None:
+    for call in voyage.port_calls:
+        assert 1 <= call.arrival_epoch <= call.departure_epoch <= voyage.total_epochs
 
 
 def test_port_calls_ordered_and_within_voyage(voyage) -> None:
@@ -78,6 +139,21 @@ def test_port_calls_ordered_and_within_voyage(voyage) -> None:
     assert days == sorted(days)
     for call in voyage.port_calls:
         assert 1 <= call.arrival_epoch < call.departure_epoch <= voyage.total_epochs
+
+
+def test_observation_end_ignores_the_home_port_departure(
+    itinerary_config: dict[str, Any],
+) -> None:
+    # The disembarkation day runs to the last epoch of the voyage; a ledger
+    # that stops one epoch earlier is not censoring a shore excursion.
+    built = voyage_from_config(
+        itinerary_config,
+        voyage_id=VOYAGE_ID,
+        ship_id=SHIP_ID,
+        observation_end_epoch=167,
+    )
+    assert built.observation_end_epoch == 167
+    assert max(c.departure_epoch for c in built.port_calls) == 168
 
 
 def test_epoch_windows_match_voyage_day_arithmetic(voyage) -> None:
@@ -103,7 +179,7 @@ def test_explicit_calendar_date_overrides_derived(
     for day in cfg["voyage"]["itinerary"]:
         if day.get("port_id") == "MXCZM":
             day["calendar_date"] = "2026-02-01"
-    call = port_calls_from_config(cfg)[0]
+    call = _call_for(cfg, "MXCZM")
     assert call.calendar_date == date(2026, 2, 1)
 
 
@@ -124,7 +200,7 @@ def test_mean_hours_ashore_increases_with_later_reembarkation(
         for day in cfg["voyage"]["itinerary"]:
             if day.get("port_id") == "MXCZM":
                 day["reembark_window_epochs"] = [12 + shift, 15 + shift]
-        observed.append(port_calls_from_config(cfg)[0].mean_hours_ashore)
+        observed.append(_call_for(cfg, "MXCZM").mean_hours_ashore)
     assert observed == sorted(observed)
     assert observed[-1] > observed[0]
 
@@ -137,7 +213,7 @@ def test_missing_windows_flag_hours_as_unspecified(
         if day.get("port_id") == "MXCZM":
             day.pop("disembark_window_epochs")
             day.pop("reembark_window_epochs")
-    call = port_calls_from_config(cfg)[0]
+    call = _call_for(cfg, "MXCZM")
     assert call.hours_ashore_source == HOURS_UNSPECIFIED
     assert call.mean_hours_ashore == 0.0
     assert call.departure_epoch == 49 + 23
@@ -147,7 +223,7 @@ def test_crew_shore_leave_defaults_to_zero(itinerary_config: dict[str, Any]) -> 
     cfg = copy.deepcopy(itinerary_config)
     for day in cfg["voyage"]["itinerary"]:
         day.pop("crew_shore_leave_fraction", None)
-    calls = port_calls_from_config(cfg)
+    calls = port_calls_from_config(cfg, include_home_port=False)
     assert [c.crew_ashore_fraction for c in calls] == [0.0, 0.0, 0.0]
 
 
@@ -164,7 +240,7 @@ def test_pax_ashore_fraction_falls_back_to_day_defaults(
     for day in cfg["voyage"]["itinerary"]:
         day.pop("disembark_fraction", None)
     # port_day default onboard fraction is 0.30 → 0.70 ashore
-    assert port_calls_from_config(cfg)[0].pax_ashore_fraction == pytest.approx(0.70)
+    assert _call_for(cfg, "MXCZM").pax_ashore_fraction == pytest.approx(0.70)
 
 
 def test_view_is_independent_of_effects_enabled(
@@ -194,9 +270,11 @@ def test_slugify_port_ids_when_codes_absent(
     for day in cfg["voyage"]["itinerary"]:
         day.pop("port_id", None)
     assert [c.port_id for c in port_calls_from_config(cfg)] == [
+        "miami",
         "cozumel",
         "costa_maya",
         "george_town",
+        "miami",
     ]
     assert slugify_port("  ") == "unknown_port"
 
@@ -232,7 +310,7 @@ def test_load_voyage_reads_config_from_disk(
         voyage_id=VOYAGE_ID,
         ship_id=SHIP_ID,
     )
-    assert loaded.port_ids == ("MXCZM", "MXCTM", "KYGEC")
+    assert loaded.port_ids == ("USMIA", "MXCZM", "MXCTM", "KYGEC")
     assert loaded.platform_class == "mega"
 
 
@@ -310,6 +388,31 @@ def test_unknown_port_reported(voyage, observations_payload: dict[str, Any]) -> 
     payload["clinical_cases"][0]["hours_ashore"] = {"XXNOP": 4.0}
     problems = validate_against_voyage(bundle_from_dict(payload), voyage)
     assert any("unknown port" in p for p in problems)
+
+
+def test_home_port_ashore_hours_validate(
+    voyage,
+    observations_payload: dict[str, Any],
+) -> None:
+    """The pier the voyage starts and ends on is not an unknown port.
+
+    Simulated ledgers record ashore hours at the home port on the
+    disembarkation day; rejecting them would make every campaign bundle unfit.
+    """
+    payload = copy.deepcopy(observations_payload)
+    payload["clinical_cases"][0]["hours_ashore"] = {"USMIA": 10.0}
+    assert validate_against_voyage(bundle_from_dict(payload), voyage) == []
+
+
+def test_home_port_hours_beyond_both_calls_reported(
+    voyage,
+    observations_payload: dict[str, Any],
+) -> None:
+    """Two home-port calls raise the dwell ceiling, they do not remove it."""
+    payload = copy.deepcopy(observations_payload)
+    payload["clinical_cases"][0]["hours_ashore"] = {"USMIA": 500.0}
+    problems = validate_against_voyage(bundle_from_dict(payload), voyage)
+    assert any("exceeds the" in p for p in problems)
 
 
 def test_onset_past_observation_end_reported(

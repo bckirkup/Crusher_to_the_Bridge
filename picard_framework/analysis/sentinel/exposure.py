@@ -164,8 +164,12 @@ def ashore_epochs(voyage: Voyage, call: PortCall) -> tuple[int, ...]:
 
 
 def min_inter_port_hours(voyage: Voyage) -> float:
-    """Shortest gap between consecutive port arrivals, in hours (spec 1.8)."""
-    calls = voyage.port_calls
+    """Shortest gap between consecutive port arrivals, in hours (spec 1.8).
+
+    Only calls that put people ashore count: a home-port day with nobody on the
+    pier carries no hazard, so it cannot make two ports harder to separate.
+    """
+    calls = tuple(c for c in voyage.port_calls if c.carries_ashore_exposure)
     if len(calls) < 2:
         return math.inf
     gaps = [

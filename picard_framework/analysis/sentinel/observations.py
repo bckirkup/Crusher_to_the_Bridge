@@ -188,15 +188,20 @@ def _port_hours_problems(
 ) -> list[str]:
     problems: list[str] = []
     for port_id, hours in case.hours_ashore.items():
-        call = voyage.port_call(port_id)
-        if call is None:
+        calls = voyage.port_calls_for(port_id)
+        if not calls:
             problems.append(
                 f"case {case.person_id}: hours_ashore references unknown port {port_id!r}",
             )
             continue
-        if call.hours_ashore_source != HOURS_FROM_WINDOWS:
+        # The home port is visited twice and a repositioning itinerary can
+        # repeat a port, so the budget is the sum of the windowed visits.
+        windowed = [c for c in calls if c.hours_ashore_source == HOURS_FROM_WINDOWS]
+        if not windowed:
             continue
-        dwell = (call.departure_epoch - call.arrival_epoch + 1) * voyage.epoch_duration_hours
+        dwell = voyage.epoch_duration_hours * sum(
+            c.departure_epoch - c.arrival_epoch + 1 for c in windowed
+        )
         if hours > dwell:
             problems.append(
                 f"case {case.person_id}: {hours:.1f} h ashore at {port_id} "

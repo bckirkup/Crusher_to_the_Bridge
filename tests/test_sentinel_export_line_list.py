@@ -6,6 +6,7 @@ rules, then a handful of labeled golden values as change detectors.
 
 from __future__ import annotations
 
+import copy
 import json
 import os
 import sys
@@ -334,9 +335,23 @@ def test_history_replay_recovers_onset_exposure_and_channel() -> None:
 
 def test_history_replay_uses_port_ids_from_the_voyage_config() -> None:
     lookup = port_id_lookup(VOYAGE_CFG)
-    assert lookup == {"Cozumel": "MXCZM"}
+    # The home port is a port call too; with no declared code it slugifies.
+    assert lookup == {"Cozumel": "MXCZM", "Miami": "miami"}
     unmapped = ledger_from_history(HISTORY)
     assert set(unmapped.exposure_totals()) == {"cozumel"}
+
+
+def test_home_port_code_keys_the_ledger_when_declared() -> None:
+    """Ashore hours at the home port must key on its code, not a name slug.
+
+    This is what lets the exposure model resolve the pier the voyage starts and
+    ends on instead of rejecting the bundle as an unknown port.
+    """
+    cfg = copy.deepcopy(VOYAGE_CFG)
+    for day in cfg["voyage"]["itinerary"]:
+        if day.get("port") == "Miami":
+            day["port_id"] = "USMIA"
+    assert port_id_lookup(cfg) == {"Cozumel": "MXCZM", "Miami": "USMIA"}
 
 
 def test_compact_history_yields_nothing_which_is_why_the_ledger_exists() -> None:
