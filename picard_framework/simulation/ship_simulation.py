@@ -453,6 +453,37 @@ class ShipSimulation:
                 pathogen=rec.get("pathogen"),
             )
 
+    def _channel_ids(self, values: Any) -> list[int]:
+        return [int(agent) for agent in values or []]
+
+    def _sentinel_detections(
+        self,
+        syn_result: dict[str, Any] | None,
+        cascade_result: dict[str, Any] | None,
+        wearable_result: dict[str, Any] | None,
+    ) -> dict[str, list[int]]:
+        syn = syn_result or {}
+        screening = self._channel_ids(syn.get("crew_screening_ids"))
+        screening_set = set(screening)
+        cascade = cascade_result or {}
+        channels = {
+            "sick_call": [
+                agent
+                for agent in self._channel_ids(syn.get("sick_call_agents"))
+                if agent not in screening_set
+            ],
+            "screening": screening,
+            "cascade": [
+                int(agent)
+                for key in ("new_tier0_agents", "new_tier1_agents")
+                for agent in cascade.get(key) or []
+            ],
+            "wearable": self._channel_ids(
+                (wearable_result or {}).get("staff_visible_agents"),
+            ),
+        }
+        return {name: ids for name, ids in channels.items() if ids}
+
     def _observe_sentinel(
         self,
         epoch: int,
@@ -467,39 +498,14 @@ class ShipSimulation:
             return
         epoch_voyage = self.state.epoch_voyage if self.state else None
         port_name = str(epoch_voyage.port or "") if epoch_voyage else ""
-        port_id = self._sentinel_port_id(port_name)
-        ashore = [a.agent_id for a in self.engine.agents if a.ashore]
-
-        detections: dict[str, list[int]] = {}
-        syn = syn_result or {}
-        screening = [int(a) for a in syn.get("crew_screening_ids") or []]
-        sick_call = [
-            int(a)
-            for a in syn.get("sick_call_agents") or []
-            if int(a) not in set(screening)
-        ]
-        if sick_call:
-            detections["sick_call"] = sick_call
-        if screening:
-            detections["screening"] = screening
-        cascade = cascade_result or {}
-        tiers = [
-            int(a)
-            for key in ("new_tier0_agents", "new_tier1_agents")
-            for a in cascade.get(key) or []
-        ]
-        if tiers:
-            detections["cascade"] = tiers
-        visible = [int(a) for a in (wearable_result or {}).get("staff_visible_agents") or []]
-        if visible:
-            detections["wearable"] = visible
-
         ledger.observe_epoch(
             epoch,
             agents,
-            port_id=port_id,
-            ashore_ids=ashore,
-            detections=detections,
+            port_id=self._sentinel_port_id(port_name),
+            ashore_ids=[a.agent_id for a in self.engine.agents if a.ashore],
+            detections=self._sentinel_detections(
+                syn_result, cascade_result, wearable_result,
+            ),
         )
         self._observe_wastewater(epoch)
 

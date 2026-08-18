@@ -210,6 +210,53 @@ class PooledSample:
         return self.pathogen_reads / self.total_reads if self.total_reads > 0 else 0.0
 
 
+def _in_observation_window(sample: WastewaterSample, observation_end_epoch: int) -> bool:
+    return 1 <= sample.sample_epoch <= int(observation_end_epoch)
+
+
+def _group_read_samples(
+    bundle: ObservationBundle,
+    pathogen: str,
+    observation_end_epoch: int,
+) -> dict[int, list[WastewaterSample]]:
+    by_epoch: dict[int, list[WastewaterSample]] = {}
+    for sample in bundle.wastewater_samples:
+        if sample.pathogen != pathogen or sample.total_reads <= 0:
+            continue
+        if not _in_observation_window(sample, observation_end_epoch):
+            continue
+        if sample.pathogen_reads > sample.total_reads:
+            raise ValueError(
+                f"{bundle.voyage_id} epoch {sample.sample_epoch}: pathogen_reads "
+                f"{sample.pathogen_reads} exceeds total_reads {sample.total_reads}",
+            )
+        by_epoch.setdefault(int(sample.sample_epoch), []).append(sample)
+    return by_epoch
+
+
+def _pooled_read_epoch(
+    bundle: ObservationBundle,
+    epoch: int,
+    group: Sequence[WastewaterSample],
+    max_effective_reads: int,
+) -> PooledSample:
+    reads = sum(s.pathogen_reads for s in group)
+    total = sum(s.total_reads for s in group)
+    effective = min(total // len(group), int(max_effective_reads))
+    # Down-scaling keeps the observed fraction and discards only the claimed
+    # precision, which is the part the correlation invalidates.
+    effective_reads = int(round(reads * effective / total)) if total else 0
+    return PooledSample(
+        voyage_id=bundle.voyage_id,
+        epoch=epoch,
+        pathogen_reads=reads,
+        total_reads=total,
+        effective_reads=effective,
+        effective_pathogen_reads=min(effective_reads, effective),
+        n_collection_points=len(group),
+    )
+
+
 def pool_wastewater(
     bundle: ObservationBundle,
     *,
@@ -226,42 +273,11 @@ def pool_wastewater(
     """
     if max_effective_reads <= 0:
         raise ValueError(f"max_effective_reads must be positive: {max_effective_reads}")
-    by_epoch: dict[int, list[WastewaterSample]] = {}
-    for sample in bundle.wastewater_samples:
-        if sample.pathogen != pathogen:
-            continue
-        if sample.total_reads <= 0:
-            continue
-        if sample.sample_epoch < 1 or sample.sample_epoch > int(observation_end_epoch):
-            continue
-        if sample.pathogen_reads > sample.total_reads:
-            raise ValueError(
-                f"{bundle.voyage_id} epoch {sample.sample_epoch}: pathogen_reads "
-                f"{sample.pathogen_reads} exceeds total_reads {sample.total_reads}",
-            )
-        by_epoch.setdefault(int(sample.sample_epoch), []).append(sample)
-
-    pooled: list[PooledSample] = []
-    for epoch in sorted(by_epoch):
-        group = by_epoch[epoch]
-        reads = sum(s.pathogen_reads for s in group)
-        total = sum(s.total_reads for s in group)
-        effective = min(total // len(group), int(max_effective_reads))
-        # Down-scaling keeps the observed fraction and discards only the claimed
-        # precision, which is the part the correlation invalidates.
-        effective_reads = int(round(reads * effective / total)) if total else 0
-        pooled.append(
-            PooledSample(
-                voyage_id=bundle.voyage_id,
-                epoch=epoch,
-                pathogen_reads=reads,
-                total_reads=total,
-                effective_reads=effective,
-                effective_pathogen_reads=min(effective_reads, effective),
-                n_collection_points=len(group),
-            ),
-        )
-    return tuple(pooled)
+    by_epoch = _group_read_samples(bundle, pathogen, observation_end_epoch)
+    return tuple(
+        _pooled_read_epoch(bundle, epoch, by_epoch[epoch], max_effective_reads)
+        for epoch in sorted(by_epoch)
+    )
 
 
 @dataclass(frozen=True)
@@ -293,6 +309,46 @@ def _log10_floor(value: float) -> float:
     return math.log10(max(float(value), CONCENTRATION_FLOOR))
 
 
+def _group_concentration_samples(
+    bundle: ObservationBundle,
+    pathogen: str,
+    observation_end_epoch: int,
+) -> dict[int, list[WastewaterSample]]:
+    by_epoch: dict[int, list[WastewaterSample]] = {}
+    for sample in bundle.wastewater_samples:
+        if sample.pathogen != pathogen or not sample.has_concentration_observation:
+            continue
+        if not _in_observation_window(sample, observation_end_epoch):
+            continue
+        by_epoch.setdefault(int(sample.sample_epoch), []).append(sample)
+    return by_epoch
+
+
+def _pooled_concentration_epoch(
+    bundle: ObservationBundle,
+    epoch: int,
+    group: Sequence[WastewaterSample],
+) -> PooledConcentration:
+    detected = [
+        s.concentration_copies_per_l
+        for s in group
+        if s.concentration_copies_per_l is not None
+    ]
+    bounds = [s.lod_copies_per_l for s in group if s.lod_copies_per_l is not None]
+    if detected:
+        value = sum(_log10_floor(c) for c in detected) / len(detected)
+    else:
+        value = sum(_log10_floor(b) for b in bounds) / len(bounds)
+    return PooledConcentration(
+        voyage_id=bundle.voyage_id,
+        epoch=epoch,
+        log10_copies_per_l=float(value),
+        censored=not detected,
+        n_collection_points=len(group),
+        n_detected=len(detected),
+    )
+
+
 def pool_concentrations(
     bundle: ObservationBundle,
     *,
@@ -307,40 +363,11 @@ def pool_concentrations(
     Rows carrying no concentration information at all (a shotgun library, an
     external row without an LOD) are left to the read channel.
     """
-    by_epoch: dict[int, list[WastewaterSample]] = {}
-    for sample in bundle.wastewater_samples:
-        if sample.pathogen != pathogen:
-            continue
-        if not sample.has_concentration_observation:
-            continue
-        if sample.sample_epoch < 1 or sample.sample_epoch > int(observation_end_epoch):
-            continue
-        by_epoch.setdefault(int(sample.sample_epoch), []).append(sample)
-
-    pooled: list[PooledConcentration] = []
-    for epoch in sorted(by_epoch):
-        group = by_epoch[epoch]
-        detected = [
-            s.concentration_copies_per_l
-            for s in group
-            if s.concentration_copies_per_l is not None
-        ]
-        bounds = [s.lod_copies_per_l for s in group if s.lod_copies_per_l is not None]
-        if detected:
-            value = sum(_log10_floor(c) for c in detected) / len(detected)
-        else:
-            value = sum(_log10_floor(b) for b in bounds) / len(bounds)
-        pooled.append(
-            PooledConcentration(
-                voyage_id=bundle.voyage_id,
-                epoch=epoch,
-                log10_copies_per_l=float(value),
-                censored=not detected,
-                n_collection_points=len(group),
-                n_detected=len(detected),
-            ),
-        )
-    return tuple(pooled)
+    by_epoch = _group_concentration_samples(bundle, pathogen, observation_end_epoch)
+    return tuple(
+        _pooled_concentration_epoch(bundle, epoch, by_epoch[epoch])
+        for epoch in sorted(by_epoch)
+    )
 
 
 def expected_log10_concentration(

@@ -554,41 +554,62 @@ def _sweep_points(rung: Mapping[str, Any]) -> set[float]:
     return points
 
 
-def aggregate_cells(directory: str, ladder: Mapping[str, Any] | None = None) -> dict[str, Any]:
-    """Aggregate per-cell JSON files, retaining all clean-fraction accounting."""
-    config = ladder or load_ladder()
+def _load_nuts_cells(directory: str) -> list[dict[str, Any]]:
     cells: list[dict[str, Any]] = []
     for root, _dirs, files in os.walk(directory):
         for name in sorted(files):
-            if name.endswith(".json"):
-                payload = read_json(os.path.join(root, name))
-                if isinstance(payload, dict) and payload.get("engine") == "nuts":
-                    cells.append(payload)
+            if not name.endswith(".json"):
+                continue
+            payload = read_json(os.path.join(root, name))
+            if isinstance(payload, dict) and payload.get("engine") == "nuts":
+                cells.append(payload)
+    return cells
+
+
+def _cells_by_rung(cells: Sequence[Mapping[str, Any]]) -> dict[str, list[dict[str, Any]]]:
     by_rung: dict[str, list[dict[str, Any]]] = {}
     for cell in cells:
-        by_rung.setdefault(str(cell["rung"]), []).append(cell)
-    rungs = [_rung_summary(rung, by_rung.get(rung["id"], [])) for rung in config["rungs"]]
-    power = {
-        rung["id"]: _power_curve(
-            [
-                cell
-                for cell in by_rung.get(rung["id"], [])
-                if cell.get("clean")
-                and float(cell["true_hot_ratio"]) in _sweep_points(rung)
-            ]
-        )
+        by_rung.setdefault(str(cell["rung"]), []).append(dict(cell))
+    return by_rung
+
+
+def _sweep_cells(
+    by_rung: Mapping[str, Sequence[Mapping[str, Any]]],
+    rung: Mapping[str, Any],
+) -> list[Mapping[str, Any]]:
+    points = _sweep_points(rung)
+    return [
+        cell
+        for cell in by_rung.get(str(rung["id"]), [])
+        if cell.get("clean") and float(cell["true_hot_ratio"]) in points
+    ]
+
+
+def _rung_power_curves(
+    config: Mapping[str, Any],
+    by_rung: Mapping[str, Sequence[Mapping[str, Any]]],
+) -> dict[str, Any]:
+    return {
+        str(rung["id"]): _power_curve(_sweep_cells(by_rung, rung))
         for rung in config["rungs"]
         if rung.get("sweep") and rung["id"] in by_rung
     }
+
+
+def aggregate_cells(directory: str, ladder: Mapping[str, Any] | None = None) -> dict[str, Any]:
+    """Aggregate per-cell JSON files, retaining all clean-fraction accounting."""
+    config = ladder or load_ladder()
+    cells = _load_nuts_cells(directory)
+    by_rung = _cells_by_rung(cells)
+    rungs = [_rung_summary(rung, by_rung.get(rung["id"], [])) for rung in config["rungs"]]
     usable = [row for row in rungs if row["calibration_factor_usable"]]
-    extrapolation = _extrapolate_caribbean(usable)
     return {
         "engine": "nuts_aggregate",
         "provenance": "Engine C CmdStan NUTS calibration ladder",
         "n_cells": len(cells),
         "rungs": rungs,
-        "power_curves": power,
-        "caribbean_extrapolation": extrapolation,
+        "power_curves": _rung_power_curves(config, by_rung),
+        "caribbean_extrapolation": _extrapolate_caribbean(usable),
     }
 
 
