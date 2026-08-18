@@ -8,6 +8,7 @@ Spot ABM campaigns derived from design specs in
 | Synthetic recovery | `synthetic_recovery_v1_manifest.json` | **1200** | `campaign/synthetic_recovery_v1/` |
 | Sentinel port recovery | `sentinel_synthetic_recovery_v1_manifest.json` | **3360** | `campaign/sentinel_synthetic_recovery_v1/` |
 | VSP degradation | `vsp_degradation_v1_manifest.json` | **6360** | `campaign/vsp_degradation_v1/` |
+| Sentinel wastewater ops scan | `sentinel_ww_ops_scan_v1_manifest.json` | **4230** | `campaign/sentinel_ww_ops_scan_v1/` |
 
 Generators: tier ids `sr*` / `sr_*` (sentinel) / `vd*` in
 `picard_framework/runs/mega_cruise_campaign/campaign_runner.py`.
@@ -22,6 +23,10 @@ fleet configurations and seeds; the expander crosses hazard profiles with fleet
 configurations into `sr_<hazard>_<fleet>` tiers and resolves each template into
 voyage day slots that `campaign_runner` stamps hazards onto. A new region or
 port rotation is therefore a design-spec edit, not a code edit.
+
+The wastewater operations scan (`sentinel_ww_ops_scan_v1`) reuses that expander
+and the `sr_*` generator, adding per-cell `wastewater_surveillance` overrides —
+see `docs/sentinel_wastewater_ops_scan.md`.
 
 `port_hazards` are per-epoch (hourly) infection probabilities for a person
 ashore, so a value must be read against the ~10-epoch ashore window: 1e-4 is
@@ -62,6 +67,9 @@ python -m picard_framework.runs.mega_cruise_campaign.count_manifest_cartesian `
 python -m picard_framework.runs.mega_cruise_campaign.count_manifest_cartesian `
   picard_framework/runs/mega_cruise_campaign/vsp_degradation_v1_manifest.json
 # expect total=6360
+python -m picard_framework.runs.mega_cruise_campaign.count_manifest_cartesian `
+  picard_framework/runs/mega_cruise_campaign/sentinel_ww_ops_scan_v1_manifest.json
+# expect total=4230
 python picard_framework/runs/mega_cruise_campaign/campaign_runner.py --smoke
 ```
 
@@ -82,6 +90,10 @@ uses `:latest`, then:
 .\deploy\aws\submit_campaign_manifest.ps1 `
   -Manifest picard_framework/runs/mega_cruise_campaign/vsp_degradation_v1_manifest.json `
   -Prefix campaign/vsp_degradation_v1/ -ShardCount 200
+
+.\deploy\aws\submit_campaign_manifest.ps1 `
+  -Manifest picard_framework/runs/mega_cruise_campaign/sentinel_ww_ops_scan_v1_manifest.json `
+  -Prefix campaign/sentinel_ww_ops_scan_v1/ -ShardCount 200
 ```
 
 ## Parameter mapping
@@ -93,6 +105,7 @@ uses `:latest`, then:
 | `non_susceptible` | `innate_nonsusceptible_fraction` |
 | `λ_p` (sentinel) | itinerary `shore_infection_probability` per `port_id` |
 | `R_onboard` (sentinel) | day-type `contact_rate_multiplier` scale (1.0 = nominal) |
+| `wastewater_scan` cells (sentinel) | `wastewater_surveillance` block per run |
 | `vsp_threshold` | `escalation.lockdown_attack_rate` |
 | `detection_delay` | `medical_response.detection_delay_epochs` |
 | `isolation_compliance` | `medical_response.isolation_compliance` + `fred_behavior.quarantine_compliance` |

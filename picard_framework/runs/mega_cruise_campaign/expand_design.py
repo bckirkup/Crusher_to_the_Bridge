@@ -119,15 +119,176 @@ def build_itinerary_templates(design: dict[str, Any]) -> dict[str, list[dict[str
     }
 
 
-def _seed_list(design: dict[str, Any]) -> list[int]:
-    seeds = _require(design, "seeds", "design")
+def _seed_values(seeds: Any, label: str = "seeds") -> list[int]:
+    """Seed list from either an explicit list or a ``{start, count}`` range."""
     if isinstance(seeds, list):
         return [int(seed) for seed in seeds]
-    start = int(_require(seeds, "start", "seeds"))
-    count = int(_require(seeds, "count", "seeds"))
+    start = int(_require(seeds, "start", label))
+    count = int(_require(seeds, "count", label))
     if count <= 0:
-        raise ValueError("seeds.count must be positive")
+        raise ValueError(f"{label}.count must be positive")
     return [start + offset for offset in range(count)]
+
+
+def _seed_list(design: dict[str, Any]) -> list[int]:
+    return _seed_values(_require(design, "seeds", "design"), "seeds")
+
+
+def _residence_tag(hours: float) -> str:
+    """Run-id-safe tag for a residence time in hours (0.5 -> ``r0p5``)."""
+    return "r" + f"{float(hours):g}".replace(".", "p")
+
+
+def _ww_cell(
+    block: str,
+    cell_id: str,
+    base: dict[str, Any],
+    overrides: dict[str, Any],
+    seeds: list[int],
+) -> dict[str, Any]:
+    """One scan cell: an operating point plus the seeds it is replicated over."""
+    return {
+        "cell_id": cell_id,
+        "block": block,
+        "seeds": list(seeds),
+        "wastewater_surveillance": {**base, **overrides},
+    }
+
+
+def _core_cells(
+    scan: dict[str, Any],
+    base: dict[str, Any],
+    seeds: list[int],
+) -> list[dict[str, Any]]:
+    """Cadence x residence grid: the interaction the scan exists to measure."""
+    intervals = [
+        int(v) for v in _require(scan, "sampling_interval_epochs", "wastewater_scan")
+    ]
+    residences = [
+        float(v)
+        for v in _require(scan, "holding_tank_residence_hours", "wastewater_scan")
+    ]
+    return [
+        _ww_cell(
+            "core",
+            f"core_f{interval}_{_residence_tag(residence)}",
+            base,
+            {
+                "sampling_interval_epochs": interval,
+                "holding_tank_residence_hours": residence,
+            },
+            seeds,
+        )
+        for interval in intervals
+        for residence in residences
+    ]
+
+
+def _depth_cells(
+    scan: dict[str, Any],
+    base: dict[str, Any],
+    seeds: list[int],
+) -> list[dict[str, Any]]:
+    """Depth sensitivity at a fixed cadence and two residence levels."""
+    block = scan.get("depth_sensitivity")
+    if not block:
+        return []
+    interval = int(_require(block, "sampling_interval_epochs", "depth_sensitivity"))
+    depths = [int(v) for v in _require(block, "sequencing_depth", "depth_sensitivity")]
+    residences = [
+        float(v)
+        for v in _require(block, "holding_tank_residence_hours", "depth_sensitivity")
+    ]
+    return [
+        _ww_cell(
+            "depth",
+            f"depth_d{depth}_{_residence_tag(residence)}",
+            base,
+            {
+                "sampling_interval_epochs": interval,
+                "holding_tank_residence_hours": residence,
+                "sequencing_depth": depth,
+            },
+            seeds,
+        )
+        for depth in depths
+        for residence in residences
+    ]
+
+
+def _collection_cells(
+    scan: dict[str, Any],
+    base: dict[str, Any],
+    seeds: list[int],
+) -> list[dict[str, Any]]:
+    """Spatial resolution: one tap vs several, at the reference operating point."""
+    block = scan.get("collection_sensitivity")
+    if not block:
+        return []
+    interval = int(_require(block, "sampling_interval_epochs", "collection_sensitivity"))
+    residence = float(
+        _require(block, "holding_tank_residence_hours", "collection_sensitivity"),
+    )
+    tag = _residence_tag(residence)
+    cells = []
+    for points in _require(block, "collection_points", "collection_sensitivity"):
+        names = [str(point) for point in points]
+        cells.append(
+            _ww_cell(
+                "collection",
+                f"collection_p{len(names)}_f{interval}_{tag}",
+                base,
+                {
+                    "sampling_interval_epochs": interval,
+                    "holding_tank_residence_hours": residence,
+                    "collection_points": names,
+                },
+                seeds,
+            ),
+        )
+    return cells
+
+
+def _control_cells(
+    scan: dict[str, Any],
+    base: dict[str, Any],
+    seeds: list[int],
+) -> list[dict[str, Any]]:
+    """Clinical-only control: the baseline every coverage gain is measured from."""
+    if not scan.get("include_control", True):
+        return []
+    return [_ww_cell("control", "control_clinical_only", base, {"enabled": False}, seeds)]
+
+
+def build_wastewater_cells(design: dict[str, Any]) -> list[dict[str, Any]]:
+    """Expand a ``wastewater_scan`` block into per-run operating points.
+
+    The blocks are deliberately unbalanced. The cadence x residence core carries
+    the full seed count because that is where the answer lives; depth and
+    collection are one-factor slices off a reference cell with fewer seeds. A
+    full cartesian of every factor would cost roughly an order of magnitude more
+    runs to answer questions the core grid already conditions on.
+    """
+    scan = design.get("wastewater_scan")
+    if not scan:
+        return []
+    base = dict(_require(scan, "base_wastewater", "wastewater_scan"))
+    core_seeds = _seed_values(
+        _require(scan, "core_seeds", "wastewater_scan"), "core_seeds",
+    )
+    sens_seeds = _seed_values(
+        scan.get("sensitivity_seeds", scan.get("core_seeds")), "sensitivity_seeds",
+    )
+    cells = [
+        *_core_cells(scan, base, core_seeds),
+        *_depth_cells(scan, base, sens_seeds),
+        *_collection_cells(scan, base, sens_seeds),
+        *_control_cells(scan, base, core_seeds),
+    ]
+    ids = [cell["cell_id"] for cell in cells]
+    if len(set(ids)) != len(ids):
+        raise ValueError("wastewater_scan produced duplicate cell ids")
+    return cells
 
 
 def _validate_fleet(
@@ -177,7 +338,8 @@ def build_tier(
     """One manifest tier: a hazard profile crossed with a fleet configuration."""
     fleet = dict(_require(design, "fleet_configs", "design")[fleet_name])
     ships = _validate_fleet(design, fleet_name, fleet)
-    return {
+    cells = build_wastewater_cells(design)
+    tier: dict[str, Any] = {
         "description": f"Hazard={hazard_name}, Fleet={fleet_name}",
         "pathogen": str(_require(design, "pathogen", "design")),
         "hazard_profile": hazard_name,
@@ -194,6 +356,25 @@ def build_tier(
         "seeds": _seed_list(design),
         "epochs": int(_require(design, "default_epochs", "design")),
     }
+    if cells:
+        # Present only for wastewater scans, so existing manifests expand byte
+        # for byte and the runner can tell the two campaign shapes apart.
+        tier["wastewater_cells"] = cells
+    return tier
+
+
+def tier_run_count(tier: dict[str, Any], r_values: list[Any], seeds: list[int]) -> int:
+    """Runs a tier generates: platform x R_onboard x (cells x their own seeds).
+
+    Scan cells carry their own seed lists because the core grid and the
+    sensitivity arms are replicated differently, so the tier's shared seed list
+    only counts when there are no cells.
+    """
+    cells = tier.get("wastewater_cells")
+    per_platform = (
+        sum(len(cell["seeds"]) for cell in cells) if cells else len(seeds)
+    )
+    return len(tier["platforms"]) * len(r_values) * per_platform
 
 
 def build_manifest(design: dict[str, Any]) -> dict[str, Any]:
@@ -206,7 +387,7 @@ def build_manifest(design: dict[str, Any]) -> dict[str, Any]:
         for fleet_name in _require(design, "fleet_configs", "design"):
             tier = build_tier(design, hazard_name, fleet_name)
             tiers[f"sr_{hazard_name}_{fleet_name}"] = tier
-            total += len(tier["platforms"]) * len(r_values) * len(seeds)
+            total += tier_run_count(tier, r_values, seeds)
     return {
         "campaign": str(_require(design, "campaign", "design")),
         "description": str(design.get("description", "")),

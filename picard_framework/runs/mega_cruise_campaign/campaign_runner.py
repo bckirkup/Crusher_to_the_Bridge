@@ -630,6 +630,42 @@ def _iter_synthetic_recovery_runs(
                     )
 
 
+def _wastewater_scan_cells(tier: dict[str, Any]) -> list[dict[str, Any]]:
+    """Scan cells for a tier, or one unlabelled cell using the tier's own seeds.
+
+    Lets a wastewater scan and a plain sentinel recovery tier share one
+    generator: without ``wastewater_cells`` the single cell reproduces the
+    previous run ids and seed loop exactly.
+    """
+    cells = tier.get("wastewater_cells")
+    if not cells:
+        return [{"cell_id": "", "block": "", "seeds": list(tier["seeds"])}]
+    return [dict(cell) for cell in cells]
+
+
+def _wastewater_cell_factors(cell: dict[str, Any]) -> dict[str, Any]:
+    """Flat labels identifying which operating point a run came from.
+
+    Collection points are recorded as a count: the analysis asks whether more
+    taps help, not which deck they were on. The clinical-only arm names no
+    cadence or residence, so those label as 0 rather than going missing — the
+    aggregate CSV is read as a factorial table and a hole in a column is worse
+    than an explicit "never sampled".
+    """
+    settings = cell.get("wastewater_surveillance")
+    if not settings:
+        return {}
+    return {
+        "wastewater_cell": str(cell.get("cell_id") or ""),
+        "wastewater_block": str(cell.get("block") or ""),
+        "wastewater_enabled": bool(settings.get("enabled", False)),
+        "ww_sampling_interval_epochs": int(settings.get("sampling_interval_epochs") or 0),
+        "ww_residence_hours": float(settings.get("holding_tank_residence_hours") or 0.0),
+        "ww_sequencing_depth": int(settings.get("sequencing_depth") or 0),
+        "ww_collection_points": len(settings.get("collection_points") or []),
+    }
+
+
 def _iter_sentinel_recovery_runs(
     *,
     manifest: dict[str, Any],
@@ -686,42 +722,51 @@ def _iter_sentinel_recovery_runs(
                 embarkation_date=embark_date,
             )
             for sname in strategies:
-                for seed in tier["seeds"]:
-                    rid = "_".join(
-                        [
-                            "sr",
-                            pathogen,
-                            plat,
-                            hazard_profile,
-                            fleet_config,
-                            variant,
-                            sentinel_recovery.r_onboard_tag(r_val),
-                            f"s{seed}",
-                        ]
+                for cell in _wastewater_scan_cells(tier):
+                    ww_settings = cell.get("wastewater_surveillance")
+                    ww_over = (
+                        {"wastewater_surveillance": ww_settings}
+                        if ww_settings
+                        else None
                     )
-                    yield yield_run(
-                        rid,
-                        bundle=bundle,
-                        pathogen_overrides=path_over,
-                        config_overrides=merge_cfg(
-                            surv_cfgs.get(sname),
-                            dens_over,
-                            {"voyage": voyage, "voyage_id": rid},
-                        ),
-                        seed=seed,
-                        num_agents=n_agents,
-                        pathogen=pathogen,
-                        platform_id=plat,
-                        surveillance=sname,
-                        dose_adjustment=dose,
-                        density_exponent=alpha,
-                        n_init=n_init,
-                        R_onboard=r_val,
-                        hazard_profile=hazard_profile,
-                        fleet_config=fleet_config,
-                        itinerary_variant=variant,
-                        port_hazards=hazards,
-                    )
+                    ww_factors = _wastewater_cell_factors(cell)
+                    prefix = [
+                        "sr",
+                        pathogen,
+                        plat,
+                        hazard_profile,
+                        fleet_config,
+                        variant,
+                        sentinel_recovery.r_onboard_tag(r_val),
+                        *([str(cell["cell_id"])] if cell.get("cell_id") else []),
+                    ]
+                    for seed in cell["seeds"]:
+                        rid = "_".join([*prefix, f"s{seed}"])
+                        yield yield_run(
+                            rid,
+                            bundle=bundle,
+                            pathogen_overrides=path_over,
+                            config_overrides=merge_cfg(
+                                surv_cfgs.get(sname),
+                                dens_over,
+                                ww_over,
+                                {"voyage": voyage, "voyage_id": rid},
+                            ),
+                            seed=seed,
+                            num_agents=n_agents,
+                            pathogen=pathogen,
+                            platform_id=plat,
+                            surveillance=sname,
+                            dose_adjustment=dose,
+                            density_exponent=alpha,
+                            n_init=n_init,
+                            R_onboard=r_val,
+                            hazard_profile=hazard_profile,
+                            fleet_config=fleet_config,
+                            itinerary_variant=variant,
+                            port_hazards=hazards,
+                            **ww_factors,
+                        )
 
 
 def _iter_sr_family_runs(

@@ -332,8 +332,18 @@ def fit_sentinel_fleet(
     sampler: SamplerOptions | None = None,
     smoke: bool = False,
     wastewater: bool = True,
+    wastewater_residence_hours: float | None = None,
+    wastewater_max_effective_reads: int | None = None,
 ) -> dict[str, Any]:
-    """Assemble the fleet, sample, and write the pooled summaries."""
+    """Assemble the fleet, sample, and write the pooled summaries.
+
+    ``wastewater_residence_hours`` and ``wastewater_max_effective_reads`` let a
+    fit be told the operating point the voyages were sampled under, instead of
+    falling back to the delay catalog's fleet-wide defaults. A parameter scan
+    needs that: the residence time is what sets the lag between incidence and
+    reads, so fitting every cell with the catalog's 12 h would confound the
+    channel's value with a misspecified kernel.
+    """
     opts = sampler or SamplerOptions()
     out = ensure_out_dir(out_dir)
     voyages, resolved_pathogen = load_fleet_voyages(
@@ -352,7 +362,10 @@ def fit_sentinel_fleet(
         incubation,
         generation,
         wastewater=WastewaterOptions(
-            enabled=wastewater, pathogen=resolved_pathogen,
+            enabled=wastewater,
+            pathogen=resolved_pathogen,
+            residence_lag_hours=wastewater_residence_hours,
+            max_effective_reads=wastewater_max_effective_reads,
         ),
     )
     meta["pathogen"] = resolved_pathogen
@@ -418,6 +431,24 @@ def main(argv: list[str] | None = None) -> int:
             "channel's marginal value is measured against (spec 6)"
         ),
     )
+    parser.add_argument(
+        "--wastewater-residence-hours",
+        type=float,
+        default=None,
+        help=(
+            "holding-tank residence time the samples were collected under; sets "
+            "the shedding kernel's lag. Defaults to the delay catalog value"
+        ),
+    )
+    parser.add_argument(
+        "--wastewater-max-effective-reads",
+        type=int,
+        default=None,
+        help=(
+            "cap on the effective depth one pooled sample may claim, so deeper "
+            "libraries cannot buy unbounded certainty from one tank draw"
+        ),
+    )
     args = parser.parse_args(argv)
     status = fit_sentinel_fleet(
         args.manifest,
@@ -436,6 +467,8 @@ def main(argv: list[str] | None = None) -> int:
         ),
         smoke=args.smoke,
         wastewater=args.wastewater,
+        wastewater_residence_hours=args.wastewater_residence_hours,
+        wastewater_max_effective_reads=args.wastewater_max_effective_reads,
     )
     print(status.get("status"), flush=True)
     return 0 if status.get("status") in {"ok", "smoke", "skipped"} else 1

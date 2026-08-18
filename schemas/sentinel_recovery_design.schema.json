@@ -112,9 +112,129 @@
       "type": "object",
       "minProperties": 1,
       "additionalProperties": { "$ref": "#/$defs/fleet_config" }
+    },
+    "wastewater_scan": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Optional wastewater operating-envelope scan. Expanded into per-tier wastewater_cells, each a wastewater_surveillance block plus the seeds it is replicated over. Absent for campaigns that do not sweep the channel.",
+      "required": [
+        "sampling_interval_epochs",
+        "holding_tank_residence_hours",
+        "core_seeds",
+        "base_wastewater"
+      ],
+      "properties": {
+        "description": { "type": "string" },
+        "sampling_interval_epochs": {
+          "type": "array",
+          "minItems": 1,
+          "description": "Core grid cadences, in epochs between composite samples.",
+          "items": { "type": "integer", "minimum": 1 }
+        },
+        "holding_tank_residence_hours": {
+          "type": "array",
+          "minItems": 1,
+          "description": "Core grid mean holding-tank residence times, in hours; 0 is a direct line tap.",
+          "items": { "type": "number", "minimum": 0 }
+        },
+        "core_seeds": { "$ref": "#/$defs/seed_spec" },
+        "sensitivity_seeds": { "$ref": "#/$defs/seed_spec" },
+        "base_wastewater": { "$ref": "#/$defs/wastewater_settings" },
+        "depth_sensitivity": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "sampling_interval_epochs",
+            "sequencing_depth",
+            "holding_tank_residence_hours"
+          ],
+          "properties": {
+            "description": { "type": "string" },
+            "sampling_interval_epochs": { "type": "integer", "minimum": 1 },
+            "sequencing_depth": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "type": "integer", "minimum": 1 }
+            },
+            "holding_tank_residence_hours": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "type": "number", "minimum": 0 }
+            }
+          }
+        },
+        "collection_sensitivity": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "sampling_interval_epochs",
+            "holding_tank_residence_hours",
+            "collection_points"
+          ],
+          "properties": {
+            "description": { "type": "string" },
+            "sampling_interval_epochs": { "type": "integer", "minimum": 1 },
+            "holding_tank_residence_hours": { "type": "number", "minimum": 0 },
+            "collection_points": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "$ref": "#/$defs/collection_points" }
+            }
+          }
+        },
+        "include_control": {
+          "type": "boolean",
+          "description": "Emit the clinical-only cell the wastewater gains are measured against."
+        }
+      }
     }
   },
   "$defs": {
+    "seed_spec": {
+      "oneOf": [
+        {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "integer" }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["start", "count"],
+          "properties": {
+            "start": { "type": "integer" },
+            "count": { "type": "integer", "minimum": 1 }
+          }
+        }
+      ]
+    },
+    "collection_points": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "wastewater_settings": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "One wastewater sampling policy; mirrors WastewaterOpsConfig in picard_framework/analysis/sentinel/wastewater_ops.py.",
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "sampling_interval_epochs": { "type": "integer", "minimum": 1 },
+        "holding_tank_residence_hours": { "type": "number", "minimum": 0 },
+        "collection_points": { "$ref": "#/$defs/collection_points" },
+        "sequencing_depth": { "type": "integer", "minimum": 1 },
+        "pathogen_shedding_to_reads_scale": { "type": "number", "exclusiveMinimum": 0 },
+        "background_read_fraction": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMaximum": 1
+        },
+        "read_concentration": { "type": "number", "exclusiveMinimum": 0 },
+        "pathogen": { "type": "string", "minLength": 1 },
+        "pathogen_id": { "type": "string" }
+      }
+    },
     "epoch_window": {
       "type": "array",
       "minItems": 2,
