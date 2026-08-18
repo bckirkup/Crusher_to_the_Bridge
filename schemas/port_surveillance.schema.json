@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://crusher-to-the-bridge/schemas/port_surveillance.schema.json",
+  "title": "PortSurveillanceProfiles",
+  "description": "Regional library of port public-health surveillance capabilities, keyed by UN-LOCODE. Capability is metadata on generated signals, not a generation gate: every port emits every channel and suppression happens at fleet-analysis time. Consumed by picard_framework/analysis/sentinel/port_profiles.py; see docs/sentinel_port_health.md.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["port_surveillance_profiles"],
+  "properties": {
+    "region": { "type": "string" },
+    "description": { "type": "string" },
+    "port_surveillance_profiles": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": { "pattern": "^[A-Z]{5}$" },
+      "additionalProperties": { "$ref": "#/$defs/capability" }
+    }
+  },
+  "$defs": {
+    "capability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["port_name", "region", "population", "reports_to"],
+      "properties": {
+        "port_id": { "type": "string", "pattern": "^[A-Z]{5}$" },
+        "port_name": { "type": "string", "minLength": 1 },
+        "region": { "type": "string", "minLength": 1 },
+        "population": { "type": "integer", "minimum": 1 },
+        "note": { "type": "string" },
+        "syndromic_enabled": { "type": "boolean" },
+        "syndromic_delay_days": { "type": "integer", "minimum": 0, "maximum": 60 },
+        "syndromic_coverage": { "type": "number", "minimum": 0, "maximum": 1 },
+        "syndromic_pathogens": { "type": "array", "items": { "type": "string" } },
+        "wbe_enabled": { "type": "boolean" },
+        "wbe_assay": {
+          "type": ["string", "null"],
+          "enum": ["qpcr", "amplicon", "metagenomic", "long_read", null]
+        },
+        "wbe_frequency_days": { "type": "number", "exclusiveMinimum": 0 },
+        "wbe_pathogens": { "type": "array", "items": { "type": "string" } },
+        "wbe_lod_gc_per_L": { "type": "number", "exclusiveMinimum": 0 },
+        "wbe_lod_gc_per_l": { "type": "number", "exclusiveMinimum": 0 },
+        "wbe_log10_noise_sd": { "type": "number", "minimum": 0 },
+        "lab_confirmation": { "type": "boolean" },
+        "lab_turnaround_days": { "type": ["number", "null"], "minimum": 0 },
+        "lab_confirmation_fraction": { "type": "number", "minimum": 0, "maximum": 1 },
+        "genotyping_available": { "type": "boolean" },
+        "reports_to": {
+          "type": "string",
+          "enum": ["CDC_VSP", "CARPHA", "ECDC", "WHO_IHR", "local_only"]
+        },
+        "reporting_threshold": { "type": ["string", "null"] },
+        "cruise_arrival_screening": { "type": "boolean" },
+        "departure_health_cert": { "type": "boolean" },
+        "alert_thresholds": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "elevated_rate_per_100k": { "type": "number", "exclusiveMinimum": 0 },
+            "outbreak_rate_per_100k": { "type": "number", "exclusiveMinimum": 0 },
+            "wbe_elevated_gc_per_l": { "type": "number", "exclusiveMinimum": 0 },
+            "wbe_escalation_enabled": { "type": "boolean" }
+          }
+        }
+      }
+    }
+  }
+}
