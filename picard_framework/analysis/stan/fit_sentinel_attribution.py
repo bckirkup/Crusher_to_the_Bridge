@@ -19,6 +19,10 @@ import os
 import sys
 from typing import Any
 
+from picard_framework.analysis._fit_exit import (
+    add_allow_skipped_argument,
+    fit_exit_code,
+)
 from picard_framework.analysis._io import (
     allowed_roots,
     ensure_out_dir,
@@ -280,6 +284,7 @@ def main(argv: list[str] | None = None) -> int:
             "reference sampler (no CmdStan); rerun after changing the priors"
         ),
     )
+    add_allow_skipped_argument(parser)
     args = parser.parse_args(argv)
     status = fit_sentinel_attribution(
         args.itinerary,
@@ -300,7 +305,7 @@ def main(argv: list[str] | None = None) -> int:
         write_fixture=args.write_fixture,
     )
     print(status.get("status"), flush=True)
-    return 0 if status.get("status") in {"ok", "smoke", "skipped", "fixture"} else 1
+    return fit_exit_code(status, allow_skipped=args.allow_skipped_fit)
 
 
 if __name__ == "__main__":

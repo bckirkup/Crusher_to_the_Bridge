@@ -22,6 +22,11 @@ import os
 from importlib import resources
 from typing import Any
 
+from picard_framework.analysis._fit_exit import (
+    POSTERIOR_STATUSES,
+    add_allow_skipped_argument,
+    fit_exit_code,
+)
 from picard_framework.analysis._io import allowed_roots, ensure_out_dir, safe_path
 from picard_framework.analysis.sentinel.artifacts import load_fit_artifacts
 from picard_framework.analysis.sentinel.figures import (
@@ -39,7 +44,7 @@ from simulation_utils.paths import validated_open
 _PACKAGE = "picard_framework.analysis.sentinel"
 _SMOKE_MANIFEST = "example_fleet.json"
 _SMOKE_INPUTS = "inputs"
-_OK_STATUSES = frozenset({"ok", "smoke"})
+_OK_STATUSES = POSTERIOR_STATUSES
 
 
 def _packaged_data(name: str) -> str:
@@ -146,6 +151,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument(
         "--no-figures", action="store_true", help="write the report without figures",
     )
+    add_allow_skipped_argument(p)
     return p
 
 
@@ -251,8 +257,7 @@ def main(argv: list[str] | None = None) -> int:
         if label not in _OK_STATUSES:
             # A skipped fit (no CmdStan, no --smoke) wrote no hazards; reporting
             # on it would mean inventing them.
-            print(f"reason: {status.get('reason', 'unknown')}", flush=True)
-            return 0 if label == "skipped" else 1
+            return fit_exit_code(status, allow_skipped=args.allow_skipped_fit)
         fit_dir = out_dir
 
     want_figures = not args.no_figures

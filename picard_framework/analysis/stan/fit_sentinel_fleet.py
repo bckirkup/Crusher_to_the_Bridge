@@ -29,6 +29,10 @@ import os
 import sys
 from typing import Any, Sequence
 
+from picard_framework.analysis._fit_exit import (
+    add_allow_skipped_argument,
+    fit_exit_code,
+)
 from picard_framework.analysis._io import (
     allowed_roots,
     ensure_out_dir,
@@ -452,6 +456,7 @@ def main(argv: list[str] | None = None) -> int:
             "libraries cannot buy unbounded certainty from one tank draw"
         ),
     )
+    add_allow_skipped_argument(parser)
     args = parser.parse_args(argv)
     status = fit_sentinel_fleet(
         args.manifest,
@@ -474,7 +479,7 @@ def main(argv: list[str] | None = None) -> int:
         wastewater_max_effective_reads=args.wastewater_max_effective_reads,
     )
     print(status.get("status"), flush=True)
-    return 0 if status.get("status") in {"ok", "smoke", "skipped"} else 1
+    return fit_exit_code(status, allow_skipped=args.allow_skipped_fit)
 
 
 if __name__ == "__main__":

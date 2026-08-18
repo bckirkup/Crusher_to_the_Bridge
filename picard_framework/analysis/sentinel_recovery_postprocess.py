@@ -11,10 +11,16 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import math
 import os
 from collections import defaultdict
 from typing import Any
 
+from picard_framework.analysis._fit_exit import (
+    add_allow_skipped_argument,
+    fit_exit_code,
+    worst_exit_code,
+)
 from picard_framework.analysis._io import (
     allowed_roots,
     ensure_out_dir,
@@ -366,7 +372,7 @@ def score_cell(cell: dict[str, Any], status: dict[str, Any]) -> list[dict[str, A
             onboard = json.load(fh)
         r_mean, r_lo, r_hi = _onboard_r_interval(onboard)
     r_true = float(cell["R_onboard"])
-    r_covered = interval_covers(r_true, r_lo, r_hi) if r_lo == r_lo else False
+    r_covered = not math.isnan(r_lo) and interval_covers(r_true, r_lo, r_hi)
     rows: list[dict[str, Any]] = []
     port_rows = _read_csv(hazards_path) if os.path.isfile(hazards_path) else []
     truth = cell["port_hazards"]
@@ -377,8 +383,8 @@ def score_cell(cell: dict[str, Any], status: dict[str, Any]) -> list[dict[str, A
         lam_mean = float(port["hazard_mean"]) if "hazard_mean" in port else float("nan")
         lam_lo = float(port["hazard_q05"]) if "hazard_q05" in port else float("nan")
         lam_hi = float(port["hazard_q95"]) if "hazard_q95" in port else float("nan")
-        covered = (
-            interval_covers(lam_true, lam_lo, lam_hi) if lam_lo == lam_lo else False
+        covered = not math.isnan(lam_lo) and interval_covers(
+            lam_true, lam_lo, lam_hi,
         )
         rows.append(
             {
@@ -515,6 +521,7 @@ def main(argv: list[str] | None = None) -> int:
         default=None,
         help="delay catalog entry to fit under; default is the catalog default",
     )
+    add_allow_skipped_argument(parser)
     args = parser.parse_args(argv)
 
     results_dir = safe_path(args.results)
@@ -546,6 +553,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     wanted = set(args.cell)
     rows: list[dict[str, Any]] = []
+    cell_statuses: list[dict[str, Any]] = []
     for cell in _select_cells(cells, wanted, args.max_cells):
         print(f"Fitting {cell['cell_id']} n={cell['n_voyages']}…", flush=True)
         status = fit_cell(
@@ -556,11 +564,16 @@ def main(argv: list[str] | None = None) -> int:
             pathogen=args.pathogen,
         )
         print(f"  {status.get('status')}", flush=True)
+        cell_statuses.append(status)
         rows.extend(score_cell(cell, status))
     write_csv(os.path.join(out_dir, "recovery.csv"), rows, RECOVERY_COLUMNS)
     report = write_report(out_dir, rows)
     print(f"report: {report}", flush=True)
-    return 0
+    # A recovery sweep whose cells produced no posterior has measured nothing;
+    # exiting 0 would let a campaign shard report success on empty coverage.
+    return worst_exit_code(
+        fit_exit_code(s, allow_skipped=args.allow_skipped_fit) for s in cell_statuses
+    )
 
 
 if __name__ == "__main__":
