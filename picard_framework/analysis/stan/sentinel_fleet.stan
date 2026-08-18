@@ -44,6 +44,16 @@
 // library from being read as millions of independent trials — three separate
 // guards against the channel outvoting the clinical line list it is correlated
 // with. NW = 0 turns it off, leaving ww_* prior-only.
+//
+// RT-qPCR reports a concentration rather than a library, so it enters as its own
+// channel on the *same* latent share:
+//
+//   conc_log10[i] ~ normal(conc_intercept + conc_slope * log10(share + floor),
+//                          conc_sigma)                        [detected]
+//                 ~ censored below conc_log10[i]              [non-detect]
+//
+// The two channels never share a likelihood term: a bundle may carry both, and
+// each row was routed by the fields its assay populated before reaching Stan.
 
 functions {
   /* Per-person-hour ashore rate by (group, port) for one voyage.
@@ -186,6 +196,18 @@ data {
   real<lower=0> ww_slope_prior_sd;
   real ww_conc_prior_log_mean;
   real<lower=0> ww_conc_prior_log_sd;
+  // RT-qPCR concentration channel, sharing the same latent shedder share.
+  // NC = 0 turns it off; NW = NC = 0 is a fully clinical fit.
+  int<lower=0> NC;                         // pooled qPCR results (one per voyage-epoch)
+  array[NC] int<lower=1, upper=V> conc_voyage;
+  array[NC] int<lower=1> conc_epoch;
+  vector[NC] conc_log10;                   // log10 copies/L, or the LOD if censored
+  array[NC] int<lower=0, upper=1> conc_censored;  // 1 = all taps below the LOD
+  real conc_intercept_prior_mean;
+  real<lower=0> conc_intercept_prior_sd;
+  real conc_slope_prior_mean;
+  real<lower=0> conc_slope_prior_sd;
+  real<lower=0> conc_sigma_prior_scale;
 }
 
 transformed data {
@@ -218,6 +240,9 @@ parameters {
   real ww_logit_base;                      // background read fraction, logit scale
   real<lower=0> ww_slope;                  // elasticity in shedder prevalence
   real<lower=0> ww_conc;                   // beta-binomial concentration
+  real conc_intercept;                     // log10 copies/L at full shedding
+  real<lower=0> conc_slope;                // decades of copies per decade of share
+  real<lower=0> conc_sigma;                // residual sd on log10 copies/L
 }
 
 transformed parameters {
@@ -256,6 +281,9 @@ model {
   ww_logit_base ~ normal(ww_base_prior_mean, ww_base_prior_sd);
   ww_slope ~ normal(ww_slope_prior_mean, ww_slope_prior_sd);
   ww_conc ~ lognormal(ww_conc_prior_log_mean, ww_conc_prior_log_sd);
+  conc_intercept ~ normal(conc_intercept_prior_mean, conc_intercept_prior_sd);
+  conc_slope ~ normal(conc_slope_prior_mean, conc_slope_prior_sd);
+  conc_sigma ~ normal(0, conc_sigma_prior_scale);
 
   {
     vector[NV] lambda_visit = exp(log_lambda_visit);
@@ -274,7 +302,7 @@ model {
         onsets[v, g, 1 : T[v]] ~ poisson(to_vector(mu_onset[g, 1 : T[v]]));
       }
       share[v] = rep_vector(0.0, Tmax);
-      if (NW > 0) {
+      if (NW > 0 || NC > 0) {
         share[v][1 : T[v]] = shedder_share(T[v], w_shed, incidence,
                                            ww_persons[v]);
       }
@@ -285,6 +313,20 @@ model {
                                           + ww_share_floor));
       ww_reads[i] ~ beta_binomial(ww_total[i], p * ww_conc,
                                   (1 - p) * ww_conc);
+    }
+    for (i in 1 : NC) {
+      real mu = conc_intercept
+                + conc_slope * log10(share[conc_voyage[i]][conc_epoch[i]]
+                                     + ww_share_floor);
+      /* A non-detect is censored, not zero: it says the tank was somewhere below
+         the assay's limit, which bounds prevalence from above. Scoring it as a
+         measured zero would drag the fit down by an unbounded amount, and
+         dropping it would throw away the only evidence a quiet ship provides. */
+      if (conc_censored[i] == 1) {
+        target += normal_lcdf(conc_log10[i] | mu, conc_sigma);
+      } else {
+        target += normal_lpdf(conc_log10[i] | mu, conc_sigma);
+      }
     }
   }
 }
@@ -303,7 +345,9 @@ generated quantities {
   real repeat_hazard_ratio = exp(beta_repeat);
   real loglik_clinical = 0;
   real loglik_wastewater = 0;
+  real loglik_concentration = 0;
   vector[NW] ww_expected_fraction = rep_vector(0.0, NW);
+  vector[NC] conc_expected_log10 = rep_vector(0.0, NC);
 
   imported_cases_visit = rep_vector(0.0, NV);
   imported_cases = rep_vector(0.0, P);
@@ -335,9 +379,20 @@ generated quantities {
       loglik_clinical += poisson_lpmf(onsets[v, g, 1 : T[v]]
                                       | to_vector(mu_onset[g, 1 : T[v]]));
     }
-    if (NW > 0) {
+    if (NW > 0 || NC > 0) {
       vector[T[v]] share = shedder_share(T[v], w_shed, incidence,
                                          ww_persons[v]);
+      for (i in 1 : NC) {
+        if (conc_voyage[i] != v) {
+          continue;
+        }
+        real mu = conc_intercept
+                  + conc_slope * log10(share[conc_epoch[i]] + ww_share_floor);
+        conc_expected_log10[i] = mu;
+        loglik_concentration += conc_censored[i] == 1
+                                ? normal_lcdf(conc_log10[i] | mu, conc_sigma)
+                                : normal_lpdf(conc_log10[i] | mu, conc_sigma);
+      }
       for (i in 1 : NW) {
         if (ww_voyage[i] != v) {
           continue;

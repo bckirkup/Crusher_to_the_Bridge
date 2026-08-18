@@ -379,6 +379,7 @@ wastewater_sequencing:
 # sentinel_ww_ops_scan_v1 campaign sweeps it.
 wastewater_surveillance:
   enabled: false
+  assay_mode: "metagenomic"            # qpcr | amplicon | metagenomic | long_read
   sampling_interval_epochs: 6          # epochs between composite samples
   holding_tank_residence_hours: 4.0    # mean residence; 0 = direct line tap
   collection_points: ["aft_main"]      # taps sampled per sampling epoch

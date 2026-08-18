@@ -50,6 +50,7 @@
     },
     "base_wastewater": {
       "enabled": true,
+      "assay_mode": "qpcr",
       "collection_points": ["aft_main"],
       "sequencing_depth": 250000,
       "pathogen_shedding_to_reads_scale": 1.0,
@@ -71,6 +72,12 @@
         ["aft_main"],
         ["aft_main", "midship", "forward"]
       ]
+    },
+    "assay_sensitivity": {
+      "description": "Laboratory mode at the reference cell. The scan runs RT-qPCR everywhere else because it is the only mode that reports a quantitative concentration at the prevalences a cruise actually reaches; metagenomics is kept as an explicit arm to show it is blind there (~0.06 expected reads per 250k library at 0.26% shedder prevalence), and long-read is a confirmation rather than a cadence.",
+      "sampling_interval_epochs": 6,
+      "holding_tank_residence_hours": 4,
+      "assay_modes": ["metagenomic", "amplicon", "long_read"]
     },
     "include_control": true
   },

@@ -267,10 +267,17 @@ def wastewater_summary(
     reader can see how much correlated replication was collapsed. ``fitted`` is
     false when the samples exist but the posterior did not estimate the channel,
     so a clinical-only fit reports the absence rather than an invented slope.
+
+    The two arms are reported separately because the assay decides which one
+    exists: ``fitted`` is the read arm (metagenomic or amplicon libraries) and
+    ``concentration_fitted`` the qPCR arm, and a qPCR-only fit has evidence in
+    the channel with no ``ww_slope`` to quote at all.
     """
     block = dict((meta.get("wastewater") or {}))
-    enabled = bool(block.get("enabled")) and int(block.get("n_pooled_samples") or 0) > 0
-    fitted = enabled and "ww_slope" in posterior
+    n_pooled = int(block.get("n_pooled_samples") or 0)
+    n_conc = int(block.get("n_concentration_samples") or 0)
+    enabled = bool(block.get("enabled")) and (n_pooled > 0 or n_conc > 0)
+    fitted = bool(block.get("enabled")) and n_pooled > 0 and "ww_slope" in posterior
     out: dict[str, Any] = {
         "enabled": enabled,
         "fitted": fitted,
@@ -280,7 +287,10 @@ def wastewater_summary(
         "max_effective_reads": block.get("max_effective_reads"),
         "residence_lag_epochs": block.get("residence_lag_epochs"),
         "mean_shedding_hours": block.get("mean_shedding_hours"),
+        "n_concentration_samples": int(block.get("n_concentration_samples") or 0),
+        "n_concentration_censored": int(block.get("n_concentration_censored") or 0),
     }
+    out.update(_concentration_summary(posterior, out["n_concentration_samples"]))
     if not fitted:
         return out
     slope = parameter_draws(posterior, "ww_slope")
@@ -296,6 +306,40 @@ def wastewater_summary(
             "loglik_clinical": loglik.get(CLINICAL_CHANNEL),
         },
     )
+    return out
+
+
+def _concentration_summary(
+    posterior: Mapping[str, Sequence[float]],
+    n_concentration: int,
+) -> dict[str, Any]:
+    """The qPCR arm of the channel, reported apart from the read arm.
+
+    A concentration slope near 0 says the Ct series did not track the clinical
+    curve. ``concentration_fitted`` is false when no quantitative sample was
+    pooled, so a metagenomic-only or clinical-only fit reports the absence
+    rather than a slope estimated from the prior alone.
+    """
+    fitted = n_concentration > 0 and "conc_slope" in posterior
+    out: dict[str, Any] = {"concentration_fitted": fitted}
+    if not fitted:
+        return out
+    slope = parameter_draws(posterior, "conc_slope")
+    intercept = parameter_draws(posterior, "conc_intercept")
+    sigma = parameter_draws(posterior, "conc_sigma")
+    out.update(
+        {
+            "conc_slope_mean": float(slope.mean()),
+            "conc_slope_q05": float(np.quantile(slope, 0.05)),
+            "conc_slope_q95": float(np.quantile(slope, 0.95)),
+            "conc_intercept_mean": float(intercept.mean()),
+            "conc_sigma_mean": float(sigma.mean()),
+        },
+    )
+    if "loglik_concentration" in posterior:
+        out["loglik_concentration"] = float(
+            parameter_draws(posterior, "loglik_concentration").mean(),
+        )
     return out
 
 
