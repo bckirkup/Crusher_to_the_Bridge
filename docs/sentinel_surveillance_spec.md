@@ -491,6 +491,14 @@ ablated at fleet-analysis time — see `docs/sentinel_port_health.md`. Port sign
 never enter the shipboard likelihood; they are a comparison target (§1.3 still
 holds: no observation acquires a port label of its own).
 
+The marginal value of each channel is read off a staircase of separate fits —
+clinical only, then the shipboard wastewater channel, then one port channel at a
+time, then everything — in
+`picard_framework/analysis/sentinel/multiphase.py`. Each phase correlates the
+inferred λ_p against the port channels it retained, excluding (never
+zero-filling) ports whose channel is absent or ablated, and reports the
+truth-recovery correlation as the ceiling those comparisons are judged against.
+
 | PR | Content | Est. |
 |---|---|---|
 | 11 | ✅ `wastewater_ops.py` generator + `wastewater_surveillance` config + `sentinel_ww_ops_scan_v1` design/manifest + residence/effective-read fit controls | 1 |
