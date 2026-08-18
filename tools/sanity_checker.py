@@ -1016,6 +1016,7 @@ def _check_config_yaml(
     _check_infection_counters(cfg, report)
     _check_wearable_monitoring(cfg, report)
     _check_modality_params(cfg, report)
+    _check_wastewater_surveillance(cfg, report)
     _check_clinical_diagnostics(cfg, report)
     _check_hvac_params(cfg, report)
     _check_emod_progression(cfg, report)
@@ -1442,6 +1443,24 @@ def _check_modality_params(cfg: dict[str, Any], report: Report) -> None:
                          f"{section}.{key} = {val} is negative")
 
     _check_crew_screening_interval(cfg, report)
+
+
+def _check_wastewater_surveillance(cfg: dict[str, Any], report: Report) -> None:
+    """Validate the sentinel wastewater sampling policy against its own dataclass.
+
+    The dataclass is the single source of truth for what a runnable operating
+    point is, so the config check asks it rather than re-deriving the bounds and
+    drifting from the simulator.
+    """
+    block = cfg.get("wastewater_surveillance")
+    if not isinstance(block, dict):
+        return
+    from picard_framework.analysis.sentinel.wastewater_ops import WastewaterOpsConfig
+
+    try:
+        WastewaterOpsConfig.from_mapping(block)
+    except (TypeError, ValueError) as exc:
+        report.error(_CONFIG_YAML, "MATH_BOUND", f"wastewater_surveillance: {exc}")
 
 
 def _check_clinical_diagnostics(cfg: dict[str, Any], report: Report) -> None:

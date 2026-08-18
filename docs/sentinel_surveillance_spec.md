@@ -66,6 +66,10 @@ second, aggregate observation of *onset timing*. Treated as an independent
 hazard channel it double-counts the clinical line list. It enters the model as
 an additional observation of the same latent incidence curve.
 
+The generator side of that channel is `sentinel/wastewater_ops.py` (§8): the
+holding tank is an explicit first-order lag on aboard shedder prevalence, so a
+run's samples carry the same residence smearing the fit deconvolves.
+
 ### 1.4 The Stan sketch estimates shares, not hazards
 
 As sketched, the likelihood runs over `N_cases` only. A rate needs a
@@ -393,5 +397,42 @@ a result worth reporting.
 
 Out of scope: no change to transmission physics, HVAC, the diagnostic cascade,
 or SOP escalation. The sentinel layer never calls `ShipSimulation`; it reads
-run outputs (as `boundary/` does), with the single exception of PR 3, which
-touches the simulator behind a default-off flag.
+run outputs (as `boundary/` does), with the exceptions of PR 3 and PR 11, which
+touch the simulator behind default-off flags.
+
+## 8. Shipboard wastewater sampling operations
+
+PR 7 gave the fit a wastewater channel; nothing generated samples for it, so its
+value was untestable. `picard_framework/analysis/sentinel/wastewater_ops.py` is
+the generator, behind `wastewater_surveillance.enabled` (default **false**, so
+every existing run stays bit-identical — the draws also use a separate RNG
+stream so enabling the channel cannot perturb the epidemic it observes).
+
+| Setting | Meaning |
+|---|---|
+| `sampling_interval_epochs` | Epochs between bottles; gates emission only |
+| `holding_tank_residence_hours` | Mean residence `tau` of a first-order tank lag, `w = exp(-epoch_hours / tau)`; `0` is a direct line tap |
+| `collection_points` | Greywater taps; zones split into contiguous blocks, one row each per sampled epoch |
+| `sequencing_depth` | `total_reads` per row |
+| `pathogen_shedding_to_reads_scale`, `background_read_fraction` | Place shedder prevalence on the read-fraction scale metagenomics reports |
+| `pathogen` / `pathogen_id` | Delay-catalog key written on samples / ABM profile counted as shedding |
+
+The tank advances every epoch whether or not a sample is drawn, because the
+smearing is physical rather than an artifact of observation. Rows match
+`WastewaterSample` (§3) and reach the fit via the sentinel line list;
+`concentration_copies_per_l` and `clr_anomaly_score` stay optional — the
+simulator has no qPCR observable (§1.3).
+
+Multiple taps in one epoch are **correlated replicates**, not independent
+likelihood terms: `pool_wastewater` collapses an epoch's rows into one trial
+with a capped effective depth, so spatial coverage sharpens an epoch instead of
+multiplying the evidence. `fit_sentinel_fleet` therefore takes
+`--wastewater-residence-hours` and `--wastewater-max-effective-reads`, so a cell
+can be fit under the residence time it was actually sampled with.
+
+The operating envelope this opens up is scanned by `sentinel_ww_ops_scan_v1`
+(4230 runs) — see `docs/sentinel_wastewater_ops_scan.md`.
+
+| PR | Content | Est. |
+|---|---|---|
+| 11 | ✅ `wastewater_ops.py` generator + `wastewater_surveillance` config + `sentinel_ww_ops_scan_v1` design/manifest + residence/effective-read fit controls | 1 |

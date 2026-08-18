@@ -92,11 +92,27 @@ from orchestrator_types import (
     SimulationState,
 )
 from picard_framework.analysis.sentinel.line_list import SentinelLedger
+from picard_framework.analysis.sentinel.wastewater_ops import (
+    WastewaterOpsConfig,
+    WastewaterOpsSampler,
+    assign_collection_points,
+)
 from picard_framework.run_spec import PicardRunSpec
 from picard_framework.simulation.action_applier import apply_action_envelope
 from picard_framework.simulation.step_result import StepResult
 from picard_framework.world_state import WorldState
 from telemetry_buffer.schema import make_ground_truth, read_ground_truth, write_ground_truth
+
+# Keeps wastewater read draws from consuming the transmission stream, so turning
+# the channel on cannot change the epidemic it observes.
+_WASTEWATER_SEED_OFFSET = 977
+
+
+def _agent_is_shedding(agent: Any, pathogen_id: str) -> bool:
+    """Whether an agent is shedding the sampled pathogen into the plumbing."""
+    if pathogen_id:
+        return bool(agent.is_infected_with(pathogen_id))
+    return bool(agent.is_infected)
 
 
 @dataclass
@@ -154,6 +170,8 @@ class ShipSimulation:
         self.chronic_behavioral_mods: dict[int, dict[str, float]] = {}
         self.sentinel_ledger: SentinelLedger | None = None
         self._sentinel_port_ids: dict[str, str] = {}
+        self.wastewater_sampler: WastewaterOpsSampler | None = None
+        self._wastewater_routing: dict[str, str] = {}
 
 
     @property
@@ -326,6 +344,7 @@ class ShipSimulation:
         )
         self.state = sim_state
         self._init_sentinel_ledger(voyage_cfg)
+        self._init_wastewater_ops(voyage_cfg)
         self.world = WorldState(
             simulation=sim_state,
             observation=self.obs,
@@ -361,6 +380,54 @@ class ShipSimulation:
             epoch_duration_hours=float(voyage.get("epoch_duration_hours", 1) or 1),
         )
         self._sentinel_port_ids = port_id_lookup(voyage_cfg)
+
+    def _init_wastewater_ops(self, voyage_cfg: dict[str, Any] | None) -> None:
+        """Arm shipboard wastewater sampling when the run asks for the channel.
+
+        Tied to the sentinel ledger: the samples exist to be written into the
+        observation bundle, so a run that collects no bundle draws no samples.
+        """
+        if self.sentinel_ledger is None:
+            return
+        config = WastewaterOpsConfig.from_mapping(self.cfg.get("wastewater_surveillance"))
+        if not config.enabled:
+            return
+        voyage = (voyage_cfg or {}).get("voyage") or {}
+        self.wastewater_sampler = WastewaterOpsSampler(
+            config,
+            epoch_duration_hours=float(voyage.get("epoch_duration_hours", 1) or 1),
+            rng=np.random.default_rng(int(self.seed) + _WASTEWATER_SEED_OFFSET),
+        )
+        self._wastewater_routing = assign_collection_points(
+            self.zone_names, config.collection_points,
+        )
+
+    def _observe_wastewater(self, epoch: int) -> None:
+        """Mix this epoch's shedder prevalence into the holding tanks.
+
+        Agents ashore are excluded: they are not using the ship's plumbing, so
+        counting them would dilute the very port-call epochs the channel is
+        supposed to inform.
+        """
+        sampler = self.wastewater_sampler
+        if sampler is None or self.engine is None:
+            return
+        pathogen_id = sampler.config.pathogen_id
+        fallback = sampler.config.collection_points[0]
+        aboard: dict[str, float] = {}
+        shedders: dict[str, float] = {}
+        for agent in self.engine.agents:
+            if agent.ashore:
+                continue
+            point = self._wastewater_routing.get(agent.home_zone, fallback)
+            aboard[point] = aboard.get(point, 0.0) + 1.0
+            if _agent_is_shedding(agent, pathogen_id):
+                shedders[point] = shedders.get(point, 0.0) + 1.0
+        sampler.observe_epoch(
+            epoch,
+            shedders_by_point=shedders,
+            population_by_point=aboard,
+        )
 
     def _sentinel_port_id(self, port_name: str) -> str:
         """Configured ``port_id`` for a port name, or a slug of it."""
@@ -434,6 +501,7 @@ class ShipSimulation:
             ashore_ids=ashore,
             detections=detections,
         )
+        self._observe_wastewater(epoch)
 
     def _write_sentinel_line_list(self) -> None:
         """Write the sentinel observation bundle, if one was collected."""
@@ -445,6 +513,7 @@ class ShipSimulation:
 
         agents = self.engine.agents if self.engine else []
         n_crew = sum(1 for a in agents if a.role == "crew")
+        sampler = self.wastewater_sampler
         payload = ledger.to_payload(
             voyage_id=str(self.cfg.get("voyage_id") or f"seed{self.seed}"),
             ship_id=self.run_spec.platform_id,
@@ -452,6 +521,7 @@ class ShipSimulation:
             n_crew=n_crew,
             platform_class=self.run_spec.platform_id,
             observation_end_epoch=max(self._epoch, 1),
+            wastewater_samples=() if sampler is None else sampler.samples(),
         )
         write_json(safe_path(paths.sentinel_line_list), payload)
 

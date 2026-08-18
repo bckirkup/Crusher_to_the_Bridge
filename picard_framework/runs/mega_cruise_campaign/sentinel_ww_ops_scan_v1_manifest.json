@@ -1,0 +1,3780 @@
+{
+  "campaign": "sentinel_ww_ops_scan_v1",
+  "description": "Wastewater operational envelope for sentinel port attribution. 3 hazard profiles x fleet_crossed (3 ships) x R_onboard 1.0 x 34 wastewater cells = 4230 voyages. Core grid: 5 sampling intervals x 5 holding-tank residence times x 15 seeds, the interaction that decides whether the channel can separate consecutive port calls -- residence near the ~24 h inter-port interval smears a port-call spike across the next call, so cadence buys nothing once the tank has already mixed the signal. Depth (3 levels) and collection points (1 vs 3) are one-factor arms off the reference cell at 10 seeds. The clinical-only control cell is the baseline the coverage and CI-width gains are measured against. Hazards, ports, itineraries and dose calibration are inherited from sentinel_synthetic_recovery_v1 so the wastewater deltas are attributable to the sampling policy alone.",
+  "generated_from": "sentinel_ww_ops_scan_v1_design.json",
+  "platform": "mega_cruise_5000",
+  "default_epochs": 168,
+  "default_num_agents": 7000,
+  "embarkation_date": "2026-01-10",
+  "pathogen_configs": {
+    "norovirus": {
+      "bundle": "active_profiles",
+      "pathogen_id": "norwalk_gi",
+      "overrides": {
+        "remove": [
+          "sars_cov2_resp"
+        ]
+      }
+    }
+  },
+  "surveillance_configs": {
+    "syndromic": {
+      "diagnostic_cascade": {
+        "enabled": false
+      }
+    }
+  },
+  "defaults": {
+    "dose_adjustment": 10.6,
+    "density_exponent": 0.75
+  },
+  "itinerary_templates": {
+    "standard": [
+      {
+        "day": 1,
+        "type": "embarkation",
+        "port": "Miami",
+        "port_id": "USMIA",
+        "region": "AMR",
+        "embarkation_window_epochs": [
+          10,
+          16
+        ],
+        "stateroom_available_epoch": 13,
+        "buffet_surge_fraction": 0.8
+      },
+      {
+        "day": 2,
+        "type": "sea_day"
+      },
+      {
+        "day": 3,
+        "type": "port_day",
+        "port": "Cozumel",
+        "port_id": "MXCZM",
+        "region": "AMR",
+        "disembark_fraction": 0.72,
+        "crew_shore_leave_fraction": 0.15,
+        "disembark_window_epochs": [
+          2,
+          5
+        ],
+        "reembark_window_epochs": [
+          12,
+          15
+        ]
+      },
+      {
+        "day": 4,
+        "type": "port_day",
+        "port": "Costa Maya",
+        "port_id": "MXCTM",
+        "region": "AMR",
+        "disembark_fraction": 0.55,
+        "crew_shore_leave_fraction": 0.1,
+        "disembark_window_epochs": [
+          3,
+          6
+        ],
+        "reembark_window_epochs": [
+          13,
+          16
+        ]
+      },
+      {
+        "day": 5,
+        "type": "sea_day"
+      },
+      {
+        "day": 6,
+        "type": "port_day",
+        "port": "George Town",
+        "port_id": "KYGEC",
+        "region": "AMR",
+        "disembark_fraction": 0.6,
+        "crew_shore_leave_fraction": 0.08,
+        "disembark_window_epochs": [
+          3,
+          5
+        ],
+        "reembark_window_epochs": [
+          11,
+          14
+        ]
+      },
+      {
+        "day": 7,
+        "type": "disembarkation",
+        "port": "Miami",
+        "port_id": "USMIA",
+        "region": "AMR",
+        "disembark_window_epochs": [
+          6,
+          12
+        ]
+      }
+    ],
+    "reversed": [
+      {
+        "day": 1,
+        "type": "embarkation",
+        "port": "Miami",
+        "port_id": "USMIA",
+        "region": "AMR",
+        "embarkation_window_epochs": [
+          10,
+          16
+        ],
+        "stateroom_available_epoch": 13,
+        "buffet_surge_fraction": 0.8
+      },
+      {
+        "day": 2,
+        "type": "sea_day"
+      },
+      {
+        "day": 3,
+        "type": "port_day",
+        "port": "George Town",
+        "port_id": "KYGEC",
+        "region": "AMR",
+        "disembark_fraction": 0.6,
+        "crew_shore_leave_fraction": 0.08,
+        "disembark_window_epochs": [
+          3,
+          5
+        ],
+        "reembark_window_epochs": [
+          11,
+          14
+        ]
+      },
+      {
+        "day": 4,
+        "type": "port_day",
+        "port": "Costa Maya",
+        "port_id": "MXCTM",
+        "region": "AMR",
+        "disembark_fraction": 0.55,
+        "crew_shore_leave_fraction": 0.1,
+        "disembark_window_epochs": [
+          3,
+          6
+        ],
+        "reembark_window_epochs": [
+          13,
+          16
+        ]
+      },
+      {
+        "day": 5,
+        "type": "sea_day"
+      },
+      {
+        "day": 6,
+        "type": "port_day",
+        "port": "Cozumel",
+        "port_id": "MXCZM",
+        "region": "AMR",
+        "disembark_fraction": 0.72,
+        "crew_shore_leave_fraction": 0.15,
+        "disembark_window_epochs": [
+          2,
+          5
+        ],
+        "reembark_window_epochs": [
+          12,
+          15
+        ]
+      },
+      {
+        "day": 7,
+        "type": "disembarkation",
+        "port": "Miami",
+        "port_id": "USMIA",
+        "region": "AMR",
+        "disembark_window_epochs": [
+          6,
+          12
+        ]
+      }
+    ],
+    "staggered": [
+      {
+        "day": 1,
+        "type": "embarkation",
+        "port": "Miami",
+        "port_id": "USMIA",
+        "region": "AMR",
+        "embarkation_window_epochs": [
+          10,
+          16
+        ],
+        "stateroom_available_epoch": 13,
+        "buffet_surge_fraction": 0.8
+      },
+      {
+        "day": 2,
+        "type": "port_day",
+        "port": "Cozumel",
+        "port_id": "MXCZM",
+        "region": "AMR",
+        "disembark_fraction": 0.72,
+        "crew_shore_leave_fraction": 0.15,
+        "disembark_window_epochs": [
+          2,
+          5
+        ],
+        "reembark_window_epochs": [
+          12,
+          15
+        ]
+      },
+      {
+        "day": 3,
+        "type": "sea_day"
+      },
+      {
+        "day": 4,
+        "type": "port_day",
+        "port": "Costa Maya",
+        "port_id": "MXCTM",
+        "region": "AMR",
+        "disembark_fraction": 0.55,
+        "crew_shore_leave_fraction": 0.1,
+        "disembark_window_epochs": [
+          3,
+          6
+        ],
+        "reembark_window_epochs": [
+          13,
+          16
+        ]
+      },
+      {
+        "day": 5,
+        "type": "port_day",
+        "port": "George Town",
+        "port_id": "KYGEC",
+        "region": "AMR",
+        "disembark_fraction": 0.6,
+        "crew_shore_leave_fraction": 0.08,
+        "disembark_window_epochs": [
+          3,
+          5
+        ],
+        "reembark_window_epochs": [
+          11,
+          14
+        ]
+      },
+      {
+        "day": 6,
+        "type": "sea_day"
+      },
+      {
+        "day": 7,
+        "type": "disembarkation",
+        "port": "Miami",
+        "port_id": "USMIA",
+        "region": "AMR",
+        "disembark_window_epochs": [
+          6,
+          12
+        ]
+      }
+    ]
+  },
+  "tiers": {
+    "sr_one_hot_fleet_crossed": {
+      "description": "Hazard=one_hot, Fleet=fleet_crossed",
+      "pathogen": "norovirus",
+      "hazard_profile": "one_hot",
+      "fleet_config": "fleet_crossed",
+      "platforms": [
+        "mega_cruise_5000",
+        "spirit_cruise_3000",
+        "classic_cruise_1900"
+      ],
+      "itineraries": [
+        "standard",
+        "reversed",
+        "staggered"
+      ],
+      "shore_exposure": {
+        "enabled": true,
+        "port_hazards": {
+          "MXCZM": 0.001,
+          "MXCTM": 0.0001,
+          "KYGEC": 0.0001
+        }
+      },
+      "R_onboard_values": [
+        1.0
+      ],
+      "seeds": [
+        500,
+        501,
+        502,
+        503,
+        504,
+        505,
+        506,
+        507,
+        508,
+        509,
+        510,
+        511,
+        512,
+        513,
+        514
+      ],
+      "epochs": 168,
+      "wastewater_cells": [
+        {
+          "cell_id": "core_f1_r0p5",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 1,
+            "holding_tank_residence_hours": 0.5
+          }
+        },
+        {
+          "cell_id": "core_f1_r2",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 1,
+            "holding_tank_residence_hours": 2.0
+          }
+        },
+        {
+          "cell_id": "core_f1_r4",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 1,
+            "holding_tank_residence_hours": 4.0
+          }
+        },
+        {
+          "cell_id": "core_f1_r8",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 1,
+            "holding_tank_residence_hours": 8.0
+          }
+        },
+        {
+          "cell_id": "core_f1_r12",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 1,
+            "holding_tank_residence_hours": 12.0
+          }
+        },
+        {
+          "cell_id": "core_f3_r0p5",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 3,
+            "holding_tank_residence_hours": 0.5
+          }
+        },
+        {
+          "cell_id": "core_f3_r2",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 3,
+            "holding_tank_residence_hours": 2.0
+          }
+        },
+        {
+          "cell_id": "core_f3_r4",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 3,
+            "holding_tank_residence_hours": 4.0
+          }
+        },
+        {
+          "cell_id": "core_f3_r8",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 3,
+            "holding_tank_residence_hours": 8.0
+          }
+        },
+        {
+          "cell_id": "core_f3_r12",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 3,
+            "holding_tank_residence_hours": 12.0
+          }
+        },
+        {
+          "cell_id": "core_f6_r0p5",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 6,
+            "holding_tank_residence_hours": 0.5
+          }
+        },
+        {
+          "cell_id": "core_f6_r2",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 6,
+            "holding_tank_residence_hours": 2.0
+          }
+        },
+        {
+          "cell_id": "core_f6_r4",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 6,
+            "holding_tank_residence_hours": 4.0
+          }
+        },
+        {
+          "cell_id": "core_f6_r8",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 6,
+            "holding_tank_residence_hours": 8.0
+          }
+        },
+        {
+          "cell_id": "core_f6_r12",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 6,
+            "holding_tank_residence_hours": 12.0
+          }
+        },
+        {
+          "cell_id": "core_f12_r0p5",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 12,
+            "holding_tank_residence_hours": 0.5
+          }
+        },
+        {
+          "cell_id": "core_f12_r2",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 12,
+            "holding_tank_residence_hours": 2.0
+          }
+        },
+        {
+          "cell_id": "core_f12_r4",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 12,
+            "holding_tank_residence_hours": 4.0
+          }
+        },
+        {
+          "cell_id": "core_f12_r8",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 12,
+            "holding_tank_residence_hours": 8.0
+          }
+        },
+        {
+          "cell_id": "core_f12_r12",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 12,
+            "holding_tank_residence_hours": 12.0
+          }
+        },
+        {
+          "cell_id": "core_f24_r0p5",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 24,
+            "holding_tank_residence_hours": 0.5
+          }
+        },
+        {
+          "cell_id": "core_f24_r2",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 24,
+            "holding_tank_residence_hours": 2.0
+          }
+        },
+        {
+          "cell_id": "core_f24_r4",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 24,
+            "holding_tank_residence_hours": 4.0
+          }
+        },
+        {
+          "cell_id": "core_f24_r8",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 24,
+            "holding_tank_residence_hours": 8.0
+          }
+        },
+        {
+          "cell_id": "core_f24_r12",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 24,
+            "holding_tank_residence_hours": 12.0
+          }
+        },
+        {
+          "cell_id": "depth_d50000_r2",
+          "block": "depth",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 50000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 6,
+            "holding_tank_residence_hours": 2.0
+          }
+        },
+        {
+          "cell_id": "depth_d50000_r8",
+          "block": "depth",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 50000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 6,
+            "holding_tank_residence_hours": 8.0
+          }
+        },
+        {
+          "cell_id": "depth_d250000_r2",
+          "block": "depth",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 6,
+            "holding_tank_residence_hours": 2.0
+          }
+        },
+        {
+          "cell_id": "depth_d250000_r8",
+          "block": "depth",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 6,
+            "holding_tank_residence_hours": 8.0
+          }
+        },
+        {
+          "cell_id": "depth_d1000000_r2",
+          "block": "depth",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 1000000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 6,
+            "holding_tank_residence_hours": 2.0
+          }
+        },
+        {
+          "cell_id": "depth_d1000000_r8",
+          "block": "depth",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 1000000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 6,
+            "holding_tank_residence_hours": 8.0
+          }
+        },
+        {
+          "cell_id": "collection_p1_f6_r4",
+          "block": "collection",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 6,
+            "holding_tank_residence_hours": 4.0
+          }
+        },
+        {
+          "cell_id": "collection_p3_f6_r4",
+          "block": "collection",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main",
+              "midship",
+              "forward"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 6,
+            "holding_tank_residence_hours": 4.0
+          }
+        },
+        {
+          "cell_id": "control_clinical_only",
+          "block": "control",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": false,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi"
+          }
+        }
+      ]
+    },
+    "sr_last_port_hot_fleet_crossed": {
+      "description": "Hazard=last_port_hot, Fleet=fleet_crossed",
+      "pathogen": "norovirus",
+      "hazard_profile": "last_port_hot",
+      "fleet_config": "fleet_crossed",
+      "platforms": [
+        "mega_cruise_5000",
+        "spirit_cruise_3000",
+        "classic_cruise_1900"
+      ],
+      "itineraries": [
+        "standard",
+        "reversed",
+        "staggered"
+      ],
+      "shore_exposure": {
+        "enabled": true,
+        "port_hazards": {
+          "MXCZM": 0.0001,
+          "MXCTM": 0.0001,
+          "KYGEC": 0.015
+        }
+      },
+      "R_onboard_values": [
+        1.0
+      ],
+      "seeds": [
+        500,
+        501,
+        502,
+        503,
+        504,
+        505,
+        506,
+        507,
+        508,
+        509,
+        510,
+        511,
+        512,
+        513,
+        514
+      ],
+      "epochs": 168,
+      "wastewater_cells": [
+        {
+          "cell_id": "core_f1_r0p5",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 1,
+            "holding_tank_residence_hours": 0.5
+          }
+        },
+        {
+          "cell_id": "core_f1_r2",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 1,
+            "holding_tank_residence_hours": 2.0
+          }
+        },
+        {
+          "cell_id": "core_f1_r4",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 1,
+            "holding_tank_residence_hours": 4.0
+          }
+        },
+        {
+          "cell_id": "core_f1_r8",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 1,
+            "holding_tank_residence_hours": 8.0
+          }
+        },
+        {
+          "cell_id": "core_f1_r12",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 1,
+            "holding_tank_residence_hours": 12.0
+          }
+        },
+        {
+          "cell_id": "core_f3_r0p5",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 3,
+            "holding_tank_residence_hours": 0.5
+          }
+        },
+        {
+          "cell_id": "core_f3_r2",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 3,
+            "holding_tank_residence_hours": 2.0
+          }
+        },
+        {
+          "cell_id": "core_f3_r4",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 3,
+            "holding_tank_residence_hours": 4.0
+          }
+        },
+        {
+          "cell_id": "core_f3_r8",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 3,
+            "holding_tank_residence_hours": 8.0
+          }
+        },
+        {
+          "cell_id": "core_f3_r12",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 3,
+            "holding_tank_residence_hours": 12.0
+          }
+        },
+        {
+          "cell_id": "core_f6_r0p5",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 6,
+            "holding_tank_residence_hours": 0.5
+          }
+        },
+        {
+          "cell_id": "core_f6_r2",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 6,
+            "holding_tank_residence_hours": 2.0
+          }
+        },
+        {
+          "cell_id": "core_f6_r4",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 6,
+            "holding_tank_residence_hours": 4.0
+          }
+        },
+        {
+          "cell_id": "core_f6_r8",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 6,
+            "holding_tank_residence_hours": 8.0
+          }
+        },
+        {
+          "cell_id": "core_f6_r12",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 6,
+            "holding_tank_residence_hours": 12.0
+          }
+        },
+        {
+          "cell_id": "core_f12_r0p5",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 12,
+            "holding_tank_residence_hours": 0.5
+          }
+        },
+        {
+          "cell_id": "core_f12_r2",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 12,
+            "holding_tank_residence_hours": 2.0
+          }
+        },
+        {
+          "cell_id": "core_f12_r4",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 12,
+            "holding_tank_residence_hours": 4.0
+          }
+        },
+        {
+          "cell_id": "core_f12_r8",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 12,
+            "holding_tank_residence_hours": 8.0
+          }
+        },
+        {
+          "cell_id": "core_f12_r12",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 12,
+            "holding_tank_residence_hours": 12.0
+          }
+        },
+        {
+          "cell_id": "core_f24_r0p5",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 24,
+            "holding_tank_residence_hours": 0.5
+          }
+        },
+        {
+          "cell_id": "core_f24_r2",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 24,
+            "holding_tank_residence_hours": 2.0
+          }
+        },
+        {
+          "cell_id": "core_f24_r4",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 24,
+            "holding_tank_residence_hours": 4.0
+          }
+        },
+        {
+          "cell_id": "core_f24_r8",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 24,
+            "holding_tank_residence_hours": 8.0
+          }
+        },
+        {
+          "cell_id": "core_f24_r12",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 24,
+            "holding_tank_residence_hours": 12.0
+          }
+        },
+        {
+          "cell_id": "depth_d50000_r2",
+          "block": "depth",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 50000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 6,
+            "holding_tank_residence_hours": 2.0
+          }
+        },
+        {
+          "cell_id": "depth_d50000_r8",
+          "block": "depth",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 50000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 6,
+            "holding_tank_residence_hours": 8.0
+          }
+        },
+        {
+          "cell_id": "depth_d250000_r2",
+          "block": "depth",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 6,
+            "holding_tank_residence_hours": 2.0
+          }
+        },
+        {
+          "cell_id": "depth_d250000_r8",
+          "block": "depth",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 6,
+            "holding_tank_residence_hours": 8.0
+          }
+        },
+        {
+          "cell_id": "depth_d1000000_r2",
+          "block": "depth",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 1000000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 6,
+            "holding_tank_residence_hours": 2.0
+          }
+        },
+        {
+          "cell_id": "depth_d1000000_r8",
+          "block": "depth",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 1000000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 6,
+            "holding_tank_residence_hours": 8.0
+          }
+        },
+        {
+          "cell_id": "collection_p1_f6_r4",
+          "block": "collection",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 6,
+            "holding_tank_residence_hours": 4.0
+          }
+        },
+        {
+          "cell_id": "collection_p3_f6_r4",
+          "block": "collection",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main",
+              "midship",
+              "forward"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 6,
+            "holding_tank_residence_hours": 4.0
+          }
+        },
+        {
+          "cell_id": "control_clinical_only",
+          "block": "control",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": false,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi"
+          }
+        }
+      ]
+    },
+    "sr_null_fleet_crossed": {
+      "description": "Hazard=null, Fleet=fleet_crossed",
+      "pathogen": "norovirus",
+      "hazard_profile": "null",
+      "fleet_config": "fleet_crossed",
+      "platforms": [
+        "mega_cruise_5000",
+        "spirit_cruise_3000",
+        "classic_cruise_1900"
+      ],
+      "itineraries": [
+        "standard",
+        "reversed",
+        "staggered"
+      ],
+      "shore_exposure": {
+        "enabled": true,
+        "port_hazards": {
+          "MXCZM": 0.0,
+          "MXCTM": 0.0,
+          "KYGEC": 0.0
+        }
+      },
+      "R_onboard_values": [
+        1.0
+      ],
+      "seeds": [
+        500,
+        501,
+        502,
+        503,
+        504,
+        505,
+        506,
+        507,
+        508,
+        509,
+        510,
+        511,
+        512,
+        513,
+        514
+      ],
+      "epochs": 168,
+      "wastewater_cells": [
+        {
+          "cell_id": "core_f1_r0p5",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 1,
+            "holding_tank_residence_hours": 0.5
+          }
+        },
+        {
+          "cell_id": "core_f1_r2",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 1,
+            "holding_tank_residence_hours": 2.0
+          }
+        },
+        {
+          "cell_id": "core_f1_r4",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 1,
+            "holding_tank_residence_hours": 4.0
+          }
+        },
+        {
+          "cell_id": "core_f1_r8",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 1,
+            "holding_tank_residence_hours": 8.0
+          }
+        },
+        {
+          "cell_id": "core_f1_r12",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 1,
+            "holding_tank_residence_hours": 12.0
+          }
+        },
+        {
+          "cell_id": "core_f3_r0p5",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 3,
+            "holding_tank_residence_hours": 0.5
+          }
+        },
+        {
+          "cell_id": "core_f3_r2",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 3,
+            "holding_tank_residence_hours": 2.0
+          }
+        },
+        {
+          "cell_id": "core_f3_r4",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 3,
+            "holding_tank_residence_hours": 4.0
+          }
+        },
+        {
+          "cell_id": "core_f3_r8",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 3,
+            "holding_tank_residence_hours": 8.0
+          }
+        },
+        {
+          "cell_id": "core_f3_r12",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 3,
+            "holding_tank_residence_hours": 12.0
+          }
+        },
+        {
+          "cell_id": "core_f6_r0p5",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 6,
+            "holding_tank_residence_hours": 0.5
+          }
+        },
+        {
+          "cell_id": "core_f6_r2",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 6,
+            "holding_tank_residence_hours": 2.0
+          }
+        },
+        {
+          "cell_id": "core_f6_r4",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 6,
+            "holding_tank_residence_hours": 4.0
+          }
+        },
+        {
+          "cell_id": "core_f6_r8",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 6,
+            "holding_tank_residence_hours": 8.0
+          }
+        },
+        {
+          "cell_id": "core_f6_r12",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 6,
+            "holding_tank_residence_hours": 12.0
+          }
+        },
+        {
+          "cell_id": "core_f12_r0p5",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 12,
+            "holding_tank_residence_hours": 0.5
+          }
+        },
+        {
+          "cell_id": "core_f12_r2",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 12,
+            "holding_tank_residence_hours": 2.0
+          }
+        },
+        {
+          "cell_id": "core_f12_r4",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 12,
+            "holding_tank_residence_hours": 4.0
+          }
+        },
+        {
+          "cell_id": "core_f12_r8",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 12,
+            "holding_tank_residence_hours": 8.0
+          }
+        },
+        {
+          "cell_id": "core_f12_r12",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 12,
+            "holding_tank_residence_hours": 12.0
+          }
+        },
+        {
+          "cell_id": "core_f24_r0p5",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 24,
+            "holding_tank_residence_hours": 0.5
+          }
+        },
+        {
+          "cell_id": "core_f24_r2",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 24,
+            "holding_tank_residence_hours": 2.0
+          }
+        },
+        {
+          "cell_id": "core_f24_r4",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 24,
+            "holding_tank_residence_hours": 4.0
+          }
+        },
+        {
+          "cell_id": "core_f24_r8",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 24,
+            "holding_tank_residence_hours": 8.0
+          }
+        },
+        {
+          "cell_id": "core_f24_r12",
+          "block": "core",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 24,
+            "holding_tank_residence_hours": 12.0
+          }
+        },
+        {
+          "cell_id": "depth_d50000_r2",
+          "block": "depth",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 50000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 6,
+            "holding_tank_residence_hours": 2.0
+          }
+        },
+        {
+          "cell_id": "depth_d50000_r8",
+          "block": "depth",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 50000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 6,
+            "holding_tank_residence_hours": 8.0
+          }
+        },
+        {
+          "cell_id": "depth_d250000_r2",
+          "block": "depth",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 6,
+            "holding_tank_residence_hours": 2.0
+          }
+        },
+        {
+          "cell_id": "depth_d250000_r8",
+          "block": "depth",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 6,
+            "holding_tank_residence_hours": 8.0
+          }
+        },
+        {
+          "cell_id": "depth_d1000000_r2",
+          "block": "depth",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 1000000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 6,
+            "holding_tank_residence_hours": 2.0
+          }
+        },
+        {
+          "cell_id": "depth_d1000000_r8",
+          "block": "depth",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 1000000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 6,
+            "holding_tank_residence_hours": 8.0
+          }
+        },
+        {
+          "cell_id": "collection_p1_f6_r4",
+          "block": "collection",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 6,
+            "holding_tank_residence_hours": 4.0
+          }
+        },
+        {
+          "cell_id": "collection_p3_f6_r4",
+          "block": "collection",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509
+          ],
+          "wastewater_surveillance": {
+            "enabled": true,
+            "collection_points": [
+              "aft_main",
+              "midship",
+              "forward"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi",
+            "sampling_interval_epochs": 6,
+            "holding_tank_residence_hours": 4.0
+          }
+        },
+        {
+          "cell_id": "control_clinical_only",
+          "block": "control",
+          "seeds": [
+            500,
+            501,
+            502,
+            503,
+            504,
+            505,
+            506,
+            507,
+            508,
+            509,
+            510,
+            511,
+            512,
+            513,
+            514
+          ],
+          "wastewater_surveillance": {
+            "enabled": false,
+            "collection_points": [
+              "aft_main"
+            ],
+            "sequencing_depth": 250000,
+            "pathogen_shedding_to_reads_scale": 1.0,
+            "background_read_fraction": 0.9999,
+            "pathogen": "norovirus",
+            "pathogen_id": "norwalk_gi"
+          }
+        }
+      ]
+    }
+  },
+  "total_runs": 4230
+}
