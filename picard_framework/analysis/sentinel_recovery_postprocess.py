@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import math
 import os
 from collections import defaultdict
 from typing import Any
@@ -371,7 +372,7 @@ def score_cell(cell: dict[str, Any], status: dict[str, Any]) -> list[dict[str, A
             onboard = json.load(fh)
         r_mean, r_lo, r_hi = _onboard_r_interval(onboard)
     r_true = float(cell["R_onboard"])
-    r_covered = interval_covers(r_true, r_lo, r_hi) if r_lo == r_lo else False
+    r_covered = not math.isnan(r_lo) and interval_covers(r_true, r_lo, r_hi)
     rows: list[dict[str, Any]] = []
     port_rows = _read_csv(hazards_path) if os.path.isfile(hazards_path) else []
     truth = cell["port_hazards"]
@@ -382,8 +383,8 @@ def score_cell(cell: dict[str, Any], status: dict[str, Any]) -> list[dict[str, A
         lam_mean = float(port["hazard_mean"]) if "hazard_mean" in port else float("nan")
         lam_lo = float(port["hazard_q05"]) if "hazard_q05" in port else float("nan")
         lam_hi = float(port["hazard_q95"]) if "hazard_q95" in port else float("nan")
-        covered = (
-            interval_covers(lam_true, lam_lo, lam_hi) if lam_lo == lam_lo else False
+        covered = not math.isnan(lam_lo) and interval_covers(
+            lam_true, lam_lo, lam_hi,
         )
         rows.append(
             {
