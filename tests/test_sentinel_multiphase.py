@@ -24,6 +24,7 @@ import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+from picard_framework.analysis._fit_exit import EXIT_NO_POSTERIOR
 from picard_framework.analysis.sentinel import multiphase
 from picard_framework.analysis.sentinel.multiphase import (
     CHANNEL_SIGNALS,
@@ -315,7 +316,7 @@ def test_a_skipped_fit_fails_the_run_rather_than_reading_as_success(
         "--phase",
         PHASE_CLINICAL_ONLY,
     ])
-    assert code == 1
+    assert code == EXIT_NO_POSTERIOR
 
 
 def test_cli_smoke_runs_the_reference_walker_end_to_end(scratch):

@@ -15,6 +15,11 @@ import os
 from collections import defaultdict
 from typing import Any
 
+from picard_framework.analysis._fit_exit import (
+    add_allow_skipped_argument,
+    fit_exit_code,
+    worst_exit_code,
+)
 from picard_framework.analysis._io import (
     allowed_roots,
     ensure_out_dir,
@@ -515,6 +520,7 @@ def main(argv: list[str] | None = None) -> int:
         default=None,
         help="delay catalog entry to fit under; default is the catalog default",
     )
+    add_allow_skipped_argument(parser)
     args = parser.parse_args(argv)
 
     results_dir = safe_path(args.results)
@@ -546,6 +552,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     wanted = set(args.cell)
     rows: list[dict[str, Any]] = []
+    cell_statuses: list[dict[str, Any]] = []
     for cell in _select_cells(cells, wanted, args.max_cells):
         print(f"Fitting {cell['cell_id']} n={cell['n_voyages']}…", flush=True)
         status = fit_cell(
@@ -556,11 +563,16 @@ def main(argv: list[str] | None = None) -> int:
             pathogen=args.pathogen,
         )
         print(f"  {status.get('status')}", flush=True)
+        cell_statuses.append(status)
         rows.extend(score_cell(cell, status))
     write_csv(os.path.join(out_dir, "recovery.csv"), rows, RECOVERY_COLUMNS)
     report = write_report(out_dir, rows)
     print(f"report: {report}", flush=True)
-    return 0
+    # A recovery sweep whose cells produced no posterior has measured nothing;
+    # exiting 0 would let a campaign shard report success on empty coverage.
+    return worst_exit_code(
+        fit_exit_code(s, allow_skipped=args.allow_skipped_fit) for s in cell_statuses
+    )
 
 
 if __name__ == "__main__":

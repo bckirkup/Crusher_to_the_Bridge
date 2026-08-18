@@ -26,6 +26,7 @@ import os
 from dataclasses import dataclass, replace
 from typing import Any, Mapping, Sequence
 
+from picard_framework.analysis._fit_exit import fit_exit_code, worst_exit_code
 from picard_framework.analysis._io import (
     ensure_out_dir,
     read_json,
@@ -355,6 +356,7 @@ def run_phase(
     payload = {
         **phase.to_metadata(),
         "fit_status": status.get("status"),
+        "fit_reason": status.get("reason"),
         "engine": status.get("engine"),
         "n_ports_inferred": len(hazards),
         "ports_inferred": sorted(hazards),
@@ -470,12 +472,20 @@ def main(argv: Sequence[str] | None = None) -> int:
         ),
         smoke=args.smoke,
     )
-    statuses = {str(p["fit_status"]) for p in payload["phases"]}
+    # A staircase with a missing rung must not read as a successful comparison,
+    # so the worst phase sets the exit code.
+    codes: list[int] = []
     for phase in payload["phases"]:
         print(f"{phase['phase']}: {phase['fit_status']}", flush=True)
-    # "skipped" means no posterior was produced: a staircase with a missing
-    # rung must not read as a successful comparison.
-    return 0 if statuses <= {"ok", "smoke"} else 1
+        codes.append(
+            fit_exit_code(
+                {
+                    "status": phase["fit_status"],
+                    "reason": phase.get("fit_reason"),
+                },
+            ),
+        )
+    return worst_exit_code(codes)
 
 
 if __name__ == "__main__":  # pragma: no cover - CLI entry point
