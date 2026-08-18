@@ -14,7 +14,7 @@ censoring suites can run in CI, where CmdStan is an optional extra.
 from __future__ import annotations
 
 import math
-from typing import Any, Mapping
+from typing import Any, Callable, Mapping, Sequence
 
 import numpy as np
 
@@ -374,6 +374,208 @@ def fleet_reference_posterior(
     return _to_columns(samples, data=data, layout=layout)
 
 
+def _wastewater_loglik_draw(
+    data: Mapping[str, Any],
+    rates: FleetRates,
+    u: Mapping[str, Any],
+    layout: _Layout,
+) -> float:
+    if not layout.has_wastewater:
+        return 0.0
+    return wastewater_loglik(
+        data,
+        rates,
+        WastewaterParams(
+            logit_base=u["ww_logit_base"],
+            slope=u["ww_slope"],
+            concentration=u["ww_conc"],
+        ),
+    )
+
+
+def _concentration_loglik_draw(
+    data: Mapping[str, Any],
+    rates: FleetRates,
+    u: Mapping[str, Any],
+    layout: _Layout,
+) -> float:
+    if not layout.has_concentration:
+        return 0.0
+    return concentration_loglik(
+        data,
+        rates,
+        WastewaterParams(
+            conc_intercept=u["conc_intercept"],
+            conc_slope=u["conc_slope"],
+            conc_sigma=u["conc_sigma"],
+        ),
+    )
+
+
+def _quantities_for_draw(
+    row: np.ndarray,
+    *,
+    data: Mapping[str, Any],
+    layout: _Layout,
+    hours_aboard_ship: np.ndarray,
+    visit_port: np.ndarray,
+) -> dict[str, Any]:
+    u = _unpack(row, layout)
+    log_visit = _log_lambda_visit(u, data)
+    rates = FleetRates(
+        lambda_visit=np.exp(log_visit),
+        lambda_aboard=np.exp(u["log_lambda_aboard"]),
+        r_onboard=np.exp(u["log_r"]),
+        crew_ratio=math.exp(u["log_crew_ratio"]),
+        beta_repeat=u["beta_repeat"],
+    )
+    incidence, mu = fleet_forward_incidence(data, rates)
+    imported_visit = _imported_by_visit(data, rates)
+    imported_port = np.zeros(layout.n_ports, dtype=float)
+    for i, value in enumerate(imported_visit):
+        imported_port[visit_port[i]] += value
+    return {
+        "u": u,
+        "log_visit": log_visit,
+        "imported_visit": imported_visit,
+        "imported_port": imported_port,
+        "aboard_cases": float((np.exp(u["log_lambda_aboard"]) * hours_aboard_ship).sum()),
+        "total": float(sum(float(inc.sum()) for inc in incidence)),
+        "loglik": _poisson_loglik(data, mu),
+        "loglik_ww": _wastewater_loglik_draw(data, rates, u, layout),
+        "loglik_conc": _concentration_loglik_draw(data, rates, u, layout),
+    }
+
+
+def _put_indexed(
+    columns: dict[str, list[float]],
+    template: str,
+    count: int,
+    values: Callable[[int], list[float]],
+) -> None:
+    for index in range(count):
+        columns[template.format(index + 1)] = values(index)
+
+
+def _put_wastewater_columns(
+    columns: dict[str, list[float]],
+    per_draw: Sequence[Mapping[str, Any]],
+    layout: _Layout,
+) -> None:
+    if not layout.has_wastewater:
+        return
+    columns["ww_logit_base"] = [d["u"]["ww_logit_base"] for d in per_draw]
+    columns["ww_slope"] = [d["u"]["ww_slope"] for d in per_draw]
+    columns["ww_conc"] = [d["u"]["ww_conc"] for d in per_draw]
+    columns["loglik_wastewater"] = [d["loglik_ww"] for d in per_draw]
+
+
+def _put_concentration_columns(
+    columns: dict[str, list[float]],
+    per_draw: Sequence[Mapping[str, Any]],
+    layout: _Layout,
+) -> None:
+    if not layout.has_concentration:
+        return
+    columns["conc_intercept"] = [d["u"]["conc_intercept"] for d in per_draw]
+    columns["conc_slope"] = [d["u"]["conc_slope"] for d in per_draw]
+    columns["conc_sigma"] = [d["u"]["conc_sigma"] for d in per_draw]
+    columns["loglik_concentration"] = [d["loglik_conc"] for d in per_draw]
+
+
+def _put_hierarchy_columns(
+    columns: dict[str, list[float]],
+    samples: np.ndarray,
+    per_draw: Sequence[Mapping[str, Any]],
+    layout: _Layout,
+) -> None:
+    columns["mu_log_hazard"] = [float(r[layout.mu_log_hazard][0]) for r in samples]
+    columns["mu_log_aboard"] = [float(r[layout.mu_log_aboard][0]) for r in samples]
+    columns["mu_log_r"] = [float(r[layout.mu_log_r][0]) for r in samples]
+    columns["sigma_port"] = [d["u"]["sigma_port"] for d in per_draw]
+    columns["sigma_visit"] = [d["u"]["sigma_visit"] for d in per_draw]
+    columns["sigma_time"] = [d["u"]["sigma_time"] for d in per_draw]
+    columns["sigma_ship"] = [d["u"]["sigma_ship"] for d in per_draw]
+    columns["sigma_r"] = [d["u"]["sigma_r"] for d in per_draw]
+
+
+def _put_derived_columns(
+    columns: dict[str, list[float]],
+    per_draw: Sequence[Mapping[str, Any]],
+) -> None:
+    columns["log_crew_ratio"] = [d["u"]["log_crew_ratio"] for d in per_draw]
+    columns["crew_hazard_ratio"] = [math.exp(d["u"]["log_crew_ratio"]) for d in per_draw]
+    columns["beta_repeat"] = [d["u"]["beta_repeat"] for d in per_draw]
+    columns["repeat_hazard_ratio"] = [math.exp(d["u"]["beta_repeat"]) for d in per_draw]
+    columns["aboard_cases"] = [d["aboard_cases"] for d in per_draw]
+    columns["total_incidence"] = [d["total"] for d in per_draw]
+    columns["secondary_cases"] = [
+        max(0.0, d["total"] - float(d["imported_port"].sum()) - d["aboard_cases"])
+        for d in per_draw
+    ]
+    columns["import_share"] = [
+        float(d["imported_port"].sum() / max(d["total"], 1e-12)) for d in per_draw
+    ]
+    columns["loglik_clinical"] = [d["loglik"] for d in per_draw]
+
+
+def _put_structure_columns(
+    columns: dict[str, list[float]],
+    per_draw: Sequence[Mapping[str, Any]],
+    layout: _Layout,
+) -> None:
+    _put_indexed(
+        columns,
+        "lambda_port[{}]",
+        layout.n_ports,
+        lambda p: [float(math.exp(d["u"]["log_lambda_port"][p])) for d in per_draw],
+    )
+    _put_indexed(
+        columns,
+        "imported_cases[{}]",
+        layout.n_ports,
+        lambda p: [float(d["imported_port"][p]) for d in per_draw],
+    )
+    _put_indexed(
+        columns,
+        "attribution_share[{}]",
+        layout.n_ports,
+        lambda p: [
+            float(d["imported_port"][p] / max(d["total"], 1e-12)) for d in per_draw
+        ],
+    )
+    _put_indexed(
+        columns,
+        "lambda_visit[{}]",
+        layout.n_visits,
+        lambda i: [float(math.exp(d["log_visit"][i])) for d in per_draw],
+    )
+    _put_indexed(
+        columns,
+        "imported_cases_visit[{}]",
+        layout.n_visits,
+        lambda i: [float(d["imported_visit"][i]) for d in per_draw],
+    )
+    _put_indexed(
+        columns,
+        "fleet_time[{}]",
+        layout.n_weeks,
+        lambda w: [float(d["u"]["fleet_time"][w]) for d in per_draw],
+    )
+    _put_indexed(
+        columns,
+        "lambda_aboard[{}]",
+        layout.n_ships,
+        lambda s: [float(math.exp(d["u"]["log_lambda_aboard"][s])) for d in per_draw],
+    )
+    _put_indexed(
+        columns,
+        "R_onboard[{}]",
+        layout.n_ships,
+        lambda s: [float(math.exp(d["u"]["log_r"][s])) for d in per_draw],
+    )
+
+
 def _to_columns(
     samples: np.ndarray,
     *,
@@ -383,139 +585,22 @@ def _to_columns(
     """Stan-named columns, including the generated quantities the report needs."""
     hours_aboard_ship = aboard_hours_by_ship(data)
     visit_port = np.asarray(data["visit_port"], dtype=int) - 1
-
+    per_draw = [
+        _quantities_for_draw(
+            row,
+            data=data,
+            layout=layout,
+            hours_aboard_ship=hours_aboard_ship,
+            visit_port=visit_port,
+        )
+        for row in samples
+    ]
     columns: dict[str, list[float]] = {}
-
-    def put(name: str, values: list[float]) -> None:
-        columns[name] = values
-
-    per_draw: list[dict[str, Any]] = []
-    for row in samples:
-        u = _unpack(row, layout)
-        log_visit = _log_lambda_visit(u, data)
-        rates = FleetRates(
-            lambda_visit=np.exp(log_visit),
-            lambda_aboard=np.exp(u["log_lambda_aboard"]),
-            r_onboard=np.exp(u["log_r"]),
-            crew_ratio=math.exp(u["log_crew_ratio"]),
-            beta_repeat=u["beta_repeat"],
-        )
-        incidence, mu = fleet_forward_incidence(data, rates)
-        total = float(sum(float(inc.sum()) for inc in incidence))
-        imported_visit = _imported_by_visit(data, rates)
-        imported_port = np.zeros(layout.n_ports, dtype=float)
-        for i, value in enumerate(imported_visit):
-            imported_port[visit_port[i]] += value
-        aboard_cases = float(
-            (np.exp(u["log_lambda_aboard"]) * hours_aboard_ship).sum(),
-        )
-        per_draw.append(
-            {
-                "u": u,
-                "log_visit": log_visit,
-                "imported_visit": imported_visit,
-                "imported_port": imported_port,
-                "aboard_cases": aboard_cases,
-                "total": total,
-                "loglik": _poisson_loglik(data, mu),
-                "loglik_ww": (
-                    wastewater_loglik(
-                        data,
-                        rates,
-                        WastewaterParams(
-                            logit_base=u["ww_logit_base"],
-                            slope=u["ww_slope"],
-                            concentration=u["ww_conc"],
-                        ),
-                    )
-                    if layout.has_wastewater
-                    else 0.0
-                ),
-                "loglik_conc": (
-                    concentration_loglik(
-                        data,
-                        rates,
-                        WastewaterParams(
-                            conc_intercept=u["conc_intercept"],
-                            conc_slope=u["conc_slope"],
-                            conc_sigma=u["conc_sigma"],
-                        ),
-                    )
-                    if layout.has_concentration
-                    else 0.0
-                ),
-            },
-        )
-
-    put("mu_log_hazard", [float(r[layout.mu_log_hazard][0]) for r in samples])
-    put("mu_log_aboard", [float(r[layout.mu_log_aboard][0]) for r in samples])
-    put("mu_log_r", [float(r[layout.mu_log_r][0]) for r in samples])
-    put("sigma_port", [d["u"]["sigma_port"] for d in per_draw])
-    put("sigma_visit", [d["u"]["sigma_visit"] for d in per_draw])
-    put("sigma_time", [d["u"]["sigma_time"] for d in per_draw])
-    put("sigma_ship", [d["u"]["sigma_ship"] for d in per_draw])
-    put("sigma_r", [d["u"]["sigma_r"] for d in per_draw])
-    put("log_crew_ratio", [d["u"]["log_crew_ratio"] for d in per_draw])
-    put("crew_hazard_ratio", [math.exp(d["u"]["log_crew_ratio"]) for d in per_draw])
-    put("beta_repeat", [d["u"]["beta_repeat"] for d in per_draw])
-    put("repeat_hazard_ratio", [math.exp(d["u"]["beta_repeat"]) for d in per_draw])
-    for p in range(layout.n_ports):
-        put(
-            f"lambda_port[{p + 1}]",
-            [float(math.exp(d["u"]["log_lambda_port"][p])) for d in per_draw],
-        )
-        put(f"imported_cases[{p + 1}]", [float(d["imported_port"][p]) for d in per_draw])
-        put(
-            f"attribution_share[{p + 1}]",
-            [float(d["imported_port"][p] / max(d["total"], 1e-12)) for d in per_draw],
-        )
-    for i in range(layout.n_visits):
-        put(
-            f"lambda_visit[{i + 1}]",
-            [float(math.exp(d["log_visit"][i])) for d in per_draw],
-        )
-        put(
-            f"imported_cases_visit[{i + 1}]",
-            [float(d["imported_visit"][i]) for d in per_draw],
-        )
-    for w in range(layout.n_weeks):
-        put(f"fleet_time[{w + 1}]", [float(d["u"]["fleet_time"][w]) for d in per_draw])
-    for s in range(layout.n_ships):
-        put(
-            f"lambda_aboard[{s + 1}]",
-            [float(math.exp(d["u"]["log_lambda_aboard"][s])) for d in per_draw],
-        )
-        put(
-            f"R_onboard[{s + 1}]",
-            [float(math.exp(d["u"]["log_r"][s])) for d in per_draw],
-        )
-    put("aboard_cases", [d["aboard_cases"] for d in per_draw])
-    put("total_incidence", [d["total"] for d in per_draw])
-    put(
-        "secondary_cases",
-        [
-            max(0.0, d["total"] - float(d["imported_port"].sum()) - d["aboard_cases"])
-            for d in per_draw
-        ],
-    )
-    put(
-        "import_share",
-        [
-            float(d["imported_port"].sum() / max(d["total"], 1e-12))
-            for d in per_draw
-        ],
-    )
-    put("loglik_clinical", [d["loglik"] for d in per_draw])
-    if layout.has_wastewater:
-        put("ww_logit_base", [d["u"]["ww_logit_base"] for d in per_draw])
-        put("ww_slope", [d["u"]["ww_slope"] for d in per_draw])
-        put("ww_conc", [d["u"]["ww_conc"] for d in per_draw])
-        put("loglik_wastewater", [d["loglik_ww"] for d in per_draw])
-    if layout.has_concentration:
-        put("conc_intercept", [d["u"]["conc_intercept"] for d in per_draw])
-        put("conc_slope", [d["u"]["conc_slope"] for d in per_draw])
-        put("conc_sigma", [d["u"]["conc_sigma"] for d in per_draw])
-        put("loglik_concentration", [d["loglik_conc"] for d in per_draw])
+    _put_hierarchy_columns(columns, samples, per_draw, layout)
+    _put_derived_columns(columns, per_draw)
+    _put_structure_columns(columns, per_draw, layout)
+    _put_wastewater_columns(columns, per_draw, layout)
+    _put_concentration_columns(columns, per_draw, layout)
     return columns
 
 
