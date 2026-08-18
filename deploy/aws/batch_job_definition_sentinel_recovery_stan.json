@@ -1,16 +1,16 @@
 {
-  "jobDefinitionName": "picard-boundary-mc",
+  "jobDefinitionName": "picard-sentinel-recovery-stan",
   "type": "container",
   "platformCapabilities": ["FARGATE"],
   "containerProperties": {
     "image": "<ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/picard-boundary-analysis:latest",
     "command": [
-      "deploy/aws/boundary_analysis_entrypoint.py",
-      "--phase", "mc",
-      "--pathogen", "Ref::pathogen",
-      "--s3-campaign", "Ref::s3_campaign",
+      "deploy/aws/sentinel_recovery_analysis_entrypoint.py",
+      "--phase", "fit",
       "--s3-analysis", "Ref::s3_analysis",
-      "--n-mc", "Ref::n_mc",
+      "--chains", "Ref::chains",
+      "--iter-warmup", "Ref::iter_warmup",
+      "--iter-sampling", "Ref::iter_sampling",
       "--seed", "Ref::seed"
     ],
     "jobRoleArn": "arn:aws:iam::<ACCOUNT_ID>:role/picard-campaign-job-role",
@@ -19,6 +19,7 @@
       { "type": "VCPU", "value": "4" },
       { "type": "MEMORY", "value": "8192" }
     ],
+    "ephemeralStorage": { "sizeInGiB": 40 },
     "fargatePlatformConfiguration": {
       "platformVersion": "LATEST"
     },
@@ -27,26 +28,27 @@
     },
     "environment": [
       { "name": "PYTHONUTF8", "value": "1" },
-      { "name": "PYTHONPATH", "value": "/app" }
+      { "name": "PYTHONPATH", "value": "/app" },
+      { "name": "CMDSTAN", "value": "/opt/cmdstan/cmdstan-2.39.0" }
     ],
     "logConfiguration": {
       "logDriver": "awslogs",
       "options": {
         "awslogs-group": "/aws/batch/picard-boundary-analysis",
         "awslogs-region": "<REGION>",
-        "awslogs-stream-prefix": "boundary-mc"
+        "awslogs-stream-prefix": "sentinel-recovery-stan"
       }
     }
   },
   "parameters": {
-    "pathogen": "norovirus",
-    "s3_campaign": "s3://<BUCKET>/campaign/boundary_surface_v1/",
-    "s3_analysis": "s3://<BUCKET>/campaign/boundary_surface_v1/analysis/",
-    "n_mc": "2000",
+    "s3_analysis": "s3://<BUCKET>/campaign/sentinel_synthetic_recovery_v1/analysis/",
+    "chains": "2",
+    "iter_warmup": "400",
+    "iter_sampling": "400",
     "seed": "1701"
   },
   "retryStrategy": {
-    "attempts": 3,
+    "attempts": 2,
     "evaluateOnExit": [
       { "onReason": "OutOfMemoryError*", "action": "exit" },
       { "onExitCode": "137", "action": "exit" },
@@ -56,6 +58,6 @@
   },
   "propagateTags": true,
   "timeout": {
-    "attemptDurationSeconds": 21600
+    "attemptDurationSeconds": 86400
   }
 }

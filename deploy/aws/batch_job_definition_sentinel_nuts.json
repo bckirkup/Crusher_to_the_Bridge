@@ -5,6 +5,7 @@
   "containerProperties": {
     "image": "<ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/picard-boundary-analysis:sentinel-nuts-v1",
     "command": [
+      "deploy/aws/sentinel_nuts_entrypoint.py",
       "--rungs", "Ref::rungs",
       "--s3-prefix", "Ref::s3_prefix"
     ],
