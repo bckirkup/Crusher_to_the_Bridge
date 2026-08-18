@@ -1,0 +1,8 @@
+{
+  "crew_hazard_ratio_mean": 1.3149150387691675,
+  "crew_hazard_ratio_q05": 0.3660212329280569,
+  "crew_hazard_ratio_q95": 4.517066259001641,
+  "repeat_hazard_ratio_mean": 1.0293869210736841,
+  "repeat_hazard_ratio_q05": 0.5565529574055791,
+  "repeat_hazard_ratio_q95": 1.6319963529292738
+}

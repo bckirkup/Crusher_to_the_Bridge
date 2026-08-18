@@ -481,7 +481,23 @@ multiplying the evidence. `fit_sentinel_fleet` therefore takes
 can be fit under the residence time it was actually sampled with.
 
 The operating envelope this opens up is scanned by `sentinel_ww_ops_scan_v1`
-(4230 runs) — see `docs/sentinel_wastewater_ops_scan.md`.
+(4500 runs) — see `docs/sentinel_wastewater_ops_scan.md`.
+
+The port's *own* public health system is a separate, independent observation of
+the same community prevalence that drives λ_p, and is the only external check on
+an inferred port hazard: every port generates syndromic, municipal-WBE,
+laboratory and genotyping signals whatever its real capability, and channels are
+ablated at fleet-analysis time — see `docs/sentinel_port_health.md`. Port signals
+never enter the shipboard likelihood; they are a comparison target (§1.3 still
+holds: no observation acquires a port label of its own).
+
+The marginal value of each channel is read off a staircase of separate fits —
+clinical only, then the shipboard wastewater channel, then one port channel at a
+time, then everything — in
+`picard_framework/analysis/sentinel/multiphase.py`. Each phase correlates the
+inferred λ_p against the port channels it retained, excluding (never
+zero-filling) ports whose channel is absent or ablated, and reports the
+truth-recovery correlation as the ceiling those comparisons are judged against.
 
 | PR | Content | Est. |
 |---|---|---|

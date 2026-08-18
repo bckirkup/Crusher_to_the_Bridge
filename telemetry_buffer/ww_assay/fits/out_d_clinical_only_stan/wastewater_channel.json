@@ -1,0 +1,13 @@
+{
+  "concentration_fitted": false,
+  "enabled": false,
+  "fitted": false,
+  "max_effective_reads": 1000000,
+  "mean_shedding_hours": 184.592,
+  "n_concentration_censored": 0,
+  "n_concentration_samples": 0,
+  "n_pooled_samples": 0,
+  "n_raw_samples": 0,
+  "pathogen": "norovirus",
+  "residence_lag_epochs": 2
+}

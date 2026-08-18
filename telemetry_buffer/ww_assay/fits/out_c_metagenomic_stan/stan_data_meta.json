@@ -1,0 +1,124 @@
+{
+  "censoring_corrected": true,
+  "epoch_duration_hours": 1.0,
+  "groups": [
+    "passenger",
+    "crew"
+  ],
+  "incubation_iqr_hours": 19.0,
+  "model": "sentinel_fleet",
+  "n_cases": 12,
+  "pathogen": "norovirus",
+  "person_hours_ashore": {
+    "MXCZM@seed7/d1": 91.0
+  },
+  "port_resolution_adequate": true,
+  "ports": [
+    "MXCZM"
+  ],
+  "ships": [
+    "destroyer_baseline"
+  ],
+  "visits": [
+    {
+      "person_hours_ashore": 91.0,
+      "port_id": "MXCZM",
+      "visit_key": "MXCZM@seed7/d1",
+      "week": "seed7/unscheduled"
+    }
+  ],
+  "voyages": [
+    {
+      "ascertainment": 1.0,
+      "crew_repeat": {},
+      "n_cases": 12,
+      "observation_end_epoch": 7,
+      "port_resolution_adequate": true,
+      "ports": [
+        "MXCZM"
+      ],
+      "ship_id": "destroyer_baseline",
+      "voyage_id": "seed7"
+    }
+  ],
+  "wastewater": {
+    "concentrations": [],
+    "enabled": true,
+    "max_effective_reads": 1000000,
+    "mean_shedding_hours": 184.592,
+    "n_concentration_censored": 0,
+    "n_concentration_samples": 0,
+    "n_pooled_samples": 7,
+    "n_raw_samples": 7,
+    "pathogen": "norovirus",
+    "residence_lag_epochs": 2,
+    "samples": [
+      {
+        "effective_reads": 250000,
+        "epoch": 1,
+        "n_collection_points": 1,
+        "pathogen_reads": 1,
+        "read_fraction": 4e-06,
+        "total_reads": 250000,
+        "voyage_id": "seed7"
+      },
+      {
+        "effective_reads": 250000,
+        "epoch": 2,
+        "n_collection_points": 1,
+        "pathogen_reads": 2,
+        "read_fraction": 8e-06,
+        "total_reads": 250000,
+        "voyage_id": "seed7"
+      },
+      {
+        "effective_reads": 250000,
+        "epoch": 3,
+        "n_collection_points": 1,
+        "pathogen_reads": 3,
+        "read_fraction": 1.2e-05,
+        "total_reads": 250000,
+        "voyage_id": "seed7"
+      },
+      {
+        "effective_reads": 250000,
+        "epoch": 4,
+        "n_collection_points": 1,
+        "pathogen_reads": 1,
+        "read_fraction": 4e-06,
+        "total_reads": 250000,
+        "voyage_id": "seed7"
+      },
+      {
+        "effective_reads": 250000,
+        "epoch": 5,
+        "n_collection_points": 1,
+        "pathogen_reads": 3,
+        "read_fraction": 1.2e-05,
+        "total_reads": 250000,
+        "voyage_id": "seed7"
+      },
+      {
+        "effective_reads": 250000,
+        "epoch": 6,
+        "n_collection_points": 1,
+        "pathogen_reads": 3,
+        "read_fraction": 1.2e-05,
+        "total_reads": 250000,
+        "voyage_id": "seed7"
+      },
+      {
+        "effective_reads": 250000,
+        "epoch": 7,
+        "n_collection_points": 1,
+        "pathogen_reads": 1,
+        "read_fraction": 4e-06,
+        "total_reads": 250000,
+        "voyage_id": "seed7"
+      }
+    ]
+  },
+  "weeks": [
+    "seed7/unscheduled"
+  ]
+}

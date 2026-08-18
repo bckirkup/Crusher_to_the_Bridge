@@ -68,6 +68,12 @@ SCHEMA_DATA_MAP: dict[str, list[str]] = {
     "sentinel_observations.schema.json": [
         "picard_framework/analysis/sentinel/data/example_observations.json",
     ],
+    "port_surveillance.schema.json": [
+        "picard_framework/analysis/sentinel/data/port_surveillance_caribbean.json",
+        "picard_framework/analysis/sentinel/data/port_surveillance_mediterranean.json",
+        "picard_framework/analysis/sentinel/data/port_surveillance_nordic.json",
+        "picard_framework/analysis/sentinel/data/port_surveillance_alaska.json",
+    ],
     "sentinel_recovery_design.schema.json": [
         "picard_framework/runs/mega_cruise_campaign/"
         "sentinel_synthetic_recovery_v1_design.json",

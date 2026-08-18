@@ -1,0 +1,32 @@
+{
+  "schema_version": "1.0.0",
+  "platform_class": "mega",
+  "voyage": {
+    "effects_enabled": true,
+    "epoch_duration_hours": 1,
+    "shore_exposure": {
+      "enabled": true
+    },
+    "itinerary": [
+      {
+        "day": 1,
+        "type": "port_day",
+        "port": "Cozumel",
+        "port_id": "MXCZM",
+        "region": "AMR",
+        "disembark_fraction": 0.5,
+        "disembark_window_epochs": [
+          0,
+          5
+        ],
+        "reembark_window_epochs": [
+          6,
+          6
+        ],
+        "crew_shore_leave_fraction": 1.0,
+        "shore_infection_probability": 1.0
+      }
+    ],
+    "total_epochs": 16
+  }
+}

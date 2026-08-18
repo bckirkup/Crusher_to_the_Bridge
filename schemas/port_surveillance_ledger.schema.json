@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://crusher-to-the-bridge/schemas/port_surveillance_ledger.schema.json",
+  "title": "PortSurveillanceLedger",
+  "description": "Port-side surveillance signals generated for every port of a voyage, one row per port per day, with the latent truth alongside. Signals are null only in an ablated analysis view (see the optional 'ablation' block). Produced by picard_framework/analysis/sentinel/port_ledger.py; see docs/sentinel_port_health.md.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["pathogen", "observations"],
+  "properties": {
+    "schema_version": { "type": "string" },
+    "pathogen": { "type": "string", "minLength": 1 },
+    "n_days": { "type": "integer", "minimum": 0 },
+    "seed": { "type": "integer" },
+    "start_date": { "type": ["string", "null"] },
+    "prevalence_link": {
+      "type": "object",
+      "description": "Hazard <-> prevalence <-> gc/L conversions shared with the ship-side truth.",
+      "additionalProperties": false,
+      "properties": {
+        "hazard_per_prevalence_hour": { "type": "number", "exclusiveMinimum": 0 },
+        "infectious_days": { "type": "number", "exclusiveMinimum": 0 },
+        "gc_per_person_day": { "type": "number", "exclusiveMinimum": 0 },
+        "municipal_l_per_person_day": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+    "port_hazards": {
+      "type": "object",
+      "additionalProperties": { "type": "number", "minimum": 0 }
+    },
+    "capabilities": {
+      "type": "object",
+      "additionalProperties": { "type": "object" }
+    },
+    "ablation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["channels", "respect_capability"],
+      "properties": {
+        "channels": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["syndromic", "wbe", "lab", "genotyping"]
+          }
+        },
+        "respect_capability": { "type": "boolean" }
+      }
+    },
+    "observations": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/port_day" }
+    },
+    "notes": { "type": "string" }
+  },
+  "$defs": {
+    "port_day": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "port_id",
+        "pathogen",
+        "day_index",
+        "true_community_prevalence",
+        "true_incidence_per_100k_day",
+        "true_ww_gc_per_l",
+        "alert_level"
+      ],
+      "properties": {
+        "port_id": { "type": "string", "minLength": 1 },
+        "pathogen": { "type": "string", "minLength": 1 },
+        "day_index": { "type": "integer", "minimum": 0 },
+        "observation_date": { "type": "string" },
+        "true_community_prevalence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "true_incidence_per_100k_day": { "type": "number", "minimum": 0 },
+        "true_ww_gc_per_l": { "type": "number", "minimum": 0 },
+        "syndromic_cases_reported": { "type": ["integer", "null"], "minimum": 0 },
+        "syndromic_rate_per_100k": { "type": ["number", "null"], "minimum": 0 },
+        "syndromic_report_date": { "type": ["string", "null"] },
+        "wbe_sampled": { "type": "boolean" },
+        "wbe_gc_per_l_observed": { "type": ["number", "null"], "minimum": 0 },
+        "wbe_detected": { "type": ["boolean", "null"] },
+        "lab_confirmed_cases": { "type": ["integer", "null"], "minimum": 0 },
+        "lab_result_date": { "type": ["string", "null"] },
+        "genotype": { "type": ["string", "null"] },
+        "alert_level": {
+          "type": "string",
+          "enum": ["normal", "elevated", "outbreak", "unknown"]
+        },
+        "reports_to": {
+          "type": "string",
+          "enum": ["CDC_VSP", "CARPHA", "ECDC", "WHO_IHR", "local_only"]
+        },
+        "reporting_threshold": { "type": ["string", "null"] },
+        "syndromic_capable": { "type": "boolean" },
+        "wbe_capable": { "type": "boolean" },
+        "lab_capable": { "type": "boolean" },
+        "genotyping_capable": { "type": "boolean" }
+      }
+    }
+  }
+}

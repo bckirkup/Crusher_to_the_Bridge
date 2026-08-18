@@ -421,6 +421,7 @@ def fit_cell(
     engine: str,
     sampler: SamplerOptions,
     force: bool,
+    pathogen: str | None = None,
 ) -> dict[str, Any]:
     """Run the fleet attribution model for one recovery cell."""
     if not force:
@@ -431,7 +432,9 @@ def fit_cell(
     return fit_sentinel_fleet(
         cell["manifest"],
         cell["fit_dir"],
-        pathogen="norovirus",
+        # None resolves through the incubation catalog's default_pathogen
+        # rather than naming a pathogen in code (Law 2).
+        pathogen=pathogen,
         engine=engine,
         sampler=sampler,
         priors=recovery_fleet_priors(fleet_config=str(cell["fleet_config"])),
@@ -507,6 +510,11 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="refit cells even when fit_status.json already reports ok",
     )
+    parser.add_argument(
+        "--pathogen",
+        default=None,
+        help="delay catalog entry to fit under; default is the catalog default",
+    )
     args = parser.parse_args(argv)
 
     results_dir = safe_path(args.results)
@@ -541,7 +549,11 @@ def main(argv: list[str] | None = None) -> int:
     for cell in _select_cells(cells, wanted, args.max_cells):
         print(f"Fitting {cell['cell_id']} n={cell['n_voyages']}…", flush=True)
         status = fit_cell(
-            cell, engine=engine, sampler=sampler, force=args.force,
+            cell,
+            engine=engine,
+            sampler=sampler,
+            force=args.force,
+            pathogen=args.pathogen,
         )
         print(f"  {status.get('status')}", flush=True)
         rows.extend(score_cell(cell, status))

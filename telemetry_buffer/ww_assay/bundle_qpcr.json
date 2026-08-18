@@ -1,0 +1,292 @@
+{
+  "clinical_cases": [
+    {
+      "crew": false,
+      "genotype": null,
+      "hours_ashore": {},
+      "onset_epoch": 1,
+      "pathogen": null,
+      "person_id": "0",
+      "report_epoch": null,
+      "reported_via": "unreported"
+    },
+    {
+      "crew": false,
+      "genotype": null,
+      "hours_ashore": {
+        "MXCZM": 7.0
+      },
+      "onset_epoch": 1,
+      "pathogen": "norwalk_gi",
+      "person_id": "1",
+      "report_epoch": 1,
+      "reported_via": "sick_call"
+    },
+    {
+      "crew": false,
+      "genotype": null,
+      "hours_ashore": {
+        "MXCZM": 7.0
+      },
+      "onset_epoch": 1,
+      "pathogen": "norwalk_gi",
+      "person_id": "2",
+      "report_epoch": null,
+      "reported_via": "unreported"
+    },
+    {
+      "crew": false,
+      "genotype": null,
+      "hours_ashore": {
+        "MXCZM": 7.0
+      },
+      "onset_epoch": 1,
+      "pathogen": "norwalk_gi",
+      "person_id": "3",
+      "report_epoch": 5,
+      "reported_via": "cascade"
+    },
+    {
+      "crew": false,
+      "genotype": null,
+      "hours_ashore": {
+        "MXCZM": 7.0
+      },
+      "onset_epoch": 1,
+      "pathogen": "norwalk_gi",
+      "person_id": "7",
+      "report_epoch": null,
+      "reported_via": "unreported"
+    },
+    {
+      "crew": false,
+      "genotype": null,
+      "hours_ashore": {
+        "MXCZM": 7.0
+      },
+      "onset_epoch": 1,
+      "pathogen": "norwalk_gi",
+      "person_id": "12",
+      "report_epoch": 1,
+      "reported_via": "wearable"
+    },
+    {
+      "crew": false,
+      "genotype": null,
+      "hours_ashore": {},
+      "onset_epoch": 1,
+      "pathogen": "norwalk_gi",
+      "person_id": "13",
+      "report_epoch": 1,
+      "reported_via": "sick_call"
+    },
+    {
+      "crew": true,
+      "genotype": null,
+      "hours_ashore": {
+        "MXCZM": 7.0
+      },
+      "onset_epoch": 1,
+      "pathogen": "norwalk_gi",
+      "person_id": "14",
+      "report_epoch": 6,
+      "reported_via": "cascade"
+    },
+    {
+      "crew": true,
+      "genotype": null,
+      "hours_ashore": {
+        "MXCZM": 7.0
+      },
+      "onset_epoch": 1,
+      "pathogen": "norwalk_gi",
+      "person_id": "15",
+      "report_epoch": 2,
+      "reported_via": "cascade"
+    },
+    {
+      "crew": true,
+      "genotype": null,
+      "hours_ashore": {
+        "MXCZM": 7.0
+      },
+      "onset_epoch": 1,
+      "pathogen": "norwalk_gi",
+      "person_id": "17",
+      "report_epoch": 1,
+      "reported_via": "wearable"
+    },
+    {
+      "crew": true,
+      "genotype": null,
+      "hours_ashore": {
+        "MXCZM": 7.0
+      },
+      "onset_epoch": 1,
+      "pathogen": "norwalk_gi",
+      "person_id": "19",
+      "report_epoch": 1,
+      "reported_via": "wearable"
+    },
+    {
+      "crew": false,
+      "genotype": null,
+      "hours_ashore": {},
+      "onset_epoch": 6,
+      "pathogen": "sars_cov2_resp",
+      "person_id": "10",
+      "report_epoch": 6,
+      "reported_via": "sick_call"
+    }
+  ],
+  "epoch_duration_hours": 1.0,
+  "exposure_totals": {
+    "MXCZM": {
+      "n_crew_ashore": 6,
+      "n_passengers_ashore": 7,
+      "person_hours_crew": 42.0,
+      "person_hours_passenger": 49.0
+    }
+  },
+  "n_crew": 6,
+  "n_passengers": 14,
+  "observation_end_epoch": 7,
+  "platform_class": "destroyer_baseline",
+  "schema_version": "1.0.0",
+  "ship_id": "destroyer_baseline",
+  "truth_introductions": [
+    {
+      "epoch": 1,
+      "pathogen": "norwalk_gi",
+      "person_id": "1",
+      "port_id": "MXCZM"
+    },
+    {
+      "epoch": 1,
+      "pathogen": "norwalk_gi",
+      "person_id": "2",
+      "port_id": "MXCZM"
+    },
+    {
+      "epoch": 1,
+      "pathogen": "norwalk_gi",
+      "person_id": "3",
+      "port_id": "MXCZM"
+    },
+    {
+      "epoch": 1,
+      "pathogen": "norwalk_gi",
+      "person_id": "7",
+      "port_id": "MXCZM"
+    },
+    {
+      "epoch": 1,
+      "pathogen": "norwalk_gi",
+      "person_id": "12",
+      "port_id": "MXCZM"
+    },
+    {
+      "epoch": 1,
+      "pathogen": "norwalk_gi",
+      "person_id": "14",
+      "port_id": "MXCZM"
+    },
+    {
+      "epoch": 1,
+      "pathogen": "norwalk_gi",
+      "person_id": "15",
+      "port_id": "MXCZM"
+    },
+    {
+      "epoch": 1,
+      "pathogen": "norwalk_gi",
+      "person_id": "17",
+      "port_id": "MXCZM"
+    },
+    {
+      "epoch": 1,
+      "pathogen": "norwalk_gi",
+      "person_id": "18",
+      "port_id": "MXCZM"
+    },
+    {
+      "epoch": 1,
+      "pathogen": "norwalk_gi",
+      "person_id": "19",
+      "port_id": "MXCZM"
+    }
+  ],
+  "voyage_id": "seed7",
+  "wastewater_samples": [
+    {
+      "assay_mode": "qpcr",
+      "collection_point": "aft_main",
+      "concentration_copies_per_l": 56518757.90474479,
+      "ct_value": 22.41,
+      "detected": true,
+      "lod_copies_per_l": 1142.8228502084287,
+      "pathogen": "norovirus",
+      "sample_epoch": 1
+    },
+    {
+      "assay_mode": "qpcr",
+      "collection_point": "aft_main",
+      "concentration_copies_per_l": 41722714.888470575,
+      "ct_value": 22.84,
+      "detected": true,
+      "lod_copies_per_l": 1142.8228502084287,
+      "pathogen": "norovirus",
+      "sample_epoch": 2
+    },
+    {
+      "assay_mode": "qpcr",
+      "collection_point": "aft_main",
+      "concentration_copies_per_l": 110015253.01107429,
+      "ct_value": 21.44,
+      "detected": true,
+      "lod_copies_per_l": 1142.8228502084287,
+      "pathogen": "norovirus",
+      "sample_epoch": 3
+    },
+    {
+      "assay_mode": "qpcr",
+      "collection_point": "aft_main",
+      "concentration_copies_per_l": 71628643.52474214,
+      "ct_value": 22.06,
+      "detected": true,
+      "lod_copies_per_l": 1142.8228502084287,
+      "pathogen": "norovirus",
+      "sample_epoch": 4
+    },
+    {
+      "assay_mode": "qpcr",
+      "collection_point": "aft_main",
+      "concentration_copies_per_l": 54232565.410185926,
+      "ct_value": 22.47,
+      "detected": true,
+      "lod_copies_per_l": 1142.8228502084287,
+      "pathogen": "norovirus",
+      "sample_epoch": 5
+    },
+    {
+      "assay_mode": "qpcr",
+      "collection_point": "aft_main",
+      "concentration_copies_per_l": 47839910.61293959,
+      "ct_value": 22.65,
+      "detected": true,
+      "lod_copies_per_l": 1142.8228502084287,
+      "pathogen": "norovirus",
+      "sample_epoch": 6
+    },
+    {
+      "assay_mode": "qpcr",
+      "collection_point": "aft_main",
+      "concentration_copies_per_l": 16308418.861560887,
+      "ct_value": 24.2,
+      "detected": true,
+      "lod_copies_per_l": 1142.8228502084287,
+      "pathogen": "norovirus",
+      "sample_epoch": 7
+    }
+  ]
+}
