@@ -1,0 +1,2 @@
+port_id,pathogen,hazard_mean,hazard_q05,hazard_q95,n_attributed_cases,attribution_share,n_visits,person_hours_ashore,fleet_time_confounded,port_resolution_adequate,loglik_clinical,loglik_wastewater
+MXCZM,norovirus,0.11588432160858245,8.02554061e-06,0.28756585099999943,495.5618525978292,0.8484940190130001,1,91.0,True,True,-254.0087999,-13.174244445

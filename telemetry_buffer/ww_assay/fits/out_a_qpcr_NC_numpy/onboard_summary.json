@@ -1,0 +1,16 @@
+{
+  "aboard_cases_mean": 0.018923362030396268,
+  "import_share_mean": 0.9329156709896779,
+  "import_share_q05": 0.6501625085537918,
+  "import_share_q95": 0.9975959968386203,
+  "secondary_cases_mean": 0.03632798518057905,
+  "ships": [
+    {
+      "lambda_aboard_mean": 9.054240205931229e-05,
+      "r_onboard_mean": 0.7735732345642432,
+      "r_onboard_q05": 0.17112620948018675,
+      "r_onboard_q95": 2.1382160325719908,
+      "ship_id": "destroyer_baseline"
+    }
+  ]
+}

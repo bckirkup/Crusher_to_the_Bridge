@@ -1,0 +1,9 @@
+{
+  "schema_version": "1.0.0",
+  "voyages": [
+    {
+      "itinerary": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/ww_assay/fits/itinerary_c_metagenomic.json",
+      "observations": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/ww_assay/bundle_metagenomic.json"
+    }
+  ]
+}

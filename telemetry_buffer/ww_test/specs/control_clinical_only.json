@@ -1,0 +1,203 @@
+{
+  "schema_version": "1.0.0",
+  "description": "sr_norovirus_mega_cruise_5000_one_hot_fleet_crossed_standard_R1p0_control_clinical_only_s500",
+  "catalog": {
+    "platform_id": "mega_cruise_5000",
+    "pathogen_bundle_id": "active_profiles"
+  },
+  "run": {
+    "random_seed": 500,
+    "num_epochs": 168,
+    "write_ground_truth": false,
+    "history_retention": "compact"
+  },
+  "legacy_yaml": "crusher_labs/config.yaml",
+  "actors": [],
+  "incentives": {},
+  "pathogen_overrides": {
+    "remove": [
+      "sars_cov2_resp"
+    ],
+    "norwalk_gi": {
+      "dose_adjustment": 10.6,
+      "initial_infected": 0
+    }
+  },
+  "config_overrides": {
+    "ship_graph": {
+      "num_agents": 700
+    },
+    "escalation": {
+      "lockdown_attack_rate": 0.05,
+      "suspect_attack_rate": 0.02,
+      "confirm_attack_rate": 0.03
+    },
+    "diagnostic_cascade": {
+      "enabled": false
+    },
+    "transmission": {
+      "contact_mode": "density_dependent",
+      "density_dependent": {
+        "exponent": 0.75
+      }
+    },
+    "wastewater_surveillance": {
+      "enabled": false,
+      "assay_mode": "qpcr",
+      "collection_points": [
+        "aft_main"
+      ],
+      "sequencing_depth": 250000,
+      "pathogen_shedding_to_reads_scale": 1.0,
+      "background_read_fraction": 0.9999,
+      "pathogen": "norovirus",
+      "pathogen_id": "norwalk_gi"
+    },
+    "voyage": {
+      "effects_enabled": true,
+      "total_epochs": 168,
+      "epoch_duration_hours": 1,
+      "embarkation_date": "2026-01-10",
+      "shore_exposure": {
+        "enabled": true
+      },
+      "defaults": {
+        "sea_day": {
+          "contact_rate_multiplier": 1.0
+        },
+        "port_day": {
+          "contact_rate_multiplier": 0.4
+        },
+        "embarkation": {
+          "contact_rate_multiplier": 1.2
+        },
+        "disembarkation": {
+          "contact_rate_multiplier": 0.2
+        }
+      },
+      "itinerary": [
+        {
+          "day": 1,
+          "type": "embarkation",
+          "port": "Miami",
+          "port_id": "USMIA",
+          "region": "AMR",
+          "embarkation_window_epochs": [
+            10,
+            16
+          ],
+          "stateroom_available_epoch": 13,
+          "buffet_surge_fraction": 0.8
+        },
+        {
+          "day": 2,
+          "type": "sea_day"
+        },
+        {
+          "day": 3,
+          "type": "port_day",
+          "port": "Cozumel",
+          "port_id": "MXCZM",
+          "region": "AMR",
+          "disembark_fraction": 0.72,
+          "crew_shore_leave_fraction": 0.15,
+          "disembark_window_epochs": [
+            2,
+            5
+          ],
+          "reembark_window_epochs": [
+            12,
+            15
+          ],
+          "shore_infection_probability": 0.001
+        },
+        {
+          "day": 4,
+          "type": "port_day",
+          "port": "Costa Maya",
+          "port_id": "MXCTM",
+          "region": "AMR",
+          "disembark_fraction": 0.55,
+          "crew_shore_leave_fraction": 0.1,
+          "disembark_window_epochs": [
+            3,
+            6
+          ],
+          "reembark_window_epochs": [
+            13,
+            16
+          ],
+          "shore_infection_probability": 0.0001
+        },
+        {
+          "day": 5,
+          "type": "sea_day"
+        },
+        {
+          "day": 6,
+          "type": "port_day",
+          "port": "George Town",
+          "port_id": "KYGEC",
+          "region": "AMR",
+          "disembark_fraction": 0.6,
+          "crew_shore_leave_fraction": 0.08,
+          "disembark_window_epochs": [
+            3,
+            5
+          ],
+          "reembark_window_epochs": [
+            11,
+            14
+          ],
+          "shore_infection_probability": 0.0001
+        },
+        {
+          "day": 7,
+          "type": "disembarkation",
+          "port": "Miami",
+          "port_id": "USMIA",
+          "region": "AMR",
+          "disembark_window_epochs": [
+            6,
+            12
+          ]
+        }
+      ]
+    },
+    "voyage_id": "sr_norovirus_mega_cruise_5000_one_hot_fleet_crossed_standard_R1p0_control_clinical_only_s500"
+  },
+  "campaign_parameters": {
+    "tier_id": "sr_one_hot_fleet_crossed",
+    "run_id": "sr_norovirus_mega_cruise_5000_one_hot_fleet_crossed_standard_R1p0_control_clinical_only_s500",
+    "platform_id": "mega_cruise_5000",
+    "pathogen_bundle_id": "active_profiles",
+    "seed": 500,
+    "num_epochs": 168,
+    "num_agents": 700,
+    "history_retention": "compact",
+    "pathogen": "norovirus",
+    "surveillance": "syndromic",
+    "dose_adjustment": 10.6,
+    "density_exponent": 0.75,
+    "n_init": 0,
+    "R_onboard": 1.0,
+    "hazard_profile": "one_hot",
+    "fleet_config": "fleet_crossed",
+    "itinerary_variant": "standard",
+    "port_hazards": {
+      "MXCZM": 0.001,
+      "MXCTM": 0.0001,
+      "KYGEC": 0.0001
+    },
+    "wastewater_cell": "control_clinical_only",
+    "wastewater_block": "control",
+    "wastewater_enabled": false,
+    "ww_assay_mode": "",
+    "ww_sampling_interval_epochs": 0,
+    "ww_residence_hours": 0.0,
+    "ww_sequencing_depth": 250000,
+    "ww_collection_points": 1,
+    "suspect_attack_rate": 0.02,
+    "lockdown_attack_rate": 0.05
+  }
+}

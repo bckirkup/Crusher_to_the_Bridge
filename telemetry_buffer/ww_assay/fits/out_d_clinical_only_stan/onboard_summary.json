@@ -1,0 +1,16 @@
+{
+  "aboard_cases_mean": 0.808565517081,
+  "import_share_mean": 0.5326152218503999,
+  "import_share_q05": 0.0429136622,
+  "import_share_q95": 0.8510749729999999,
+  "secondary_cases_mean": 1.3174325559,
+  "ships": [
+    {
+      "lambda_aboard_mean": 8.38917553899e-06,
+      "r_onboard_mean": 0.41614564451999997,
+      "r_onboard_q05": 0.136120795,
+      "r_onboard_q95": 0.8930639169999999,
+      "ship_id": "mega_cruise_5000"
+    }
+  ]
+}

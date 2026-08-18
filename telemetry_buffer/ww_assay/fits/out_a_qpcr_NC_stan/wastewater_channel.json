@@ -1,0 +1,19 @@
+{
+  "conc_intercept_mean": 7.511841984,
+  "conc_sigma_mean": 0.9099184940499999,
+  "conc_slope_mean": 0.19669517284725,
+  "conc_slope_q05": 0.013151195850000002,
+  "conc_slope_q95": 0.4854358179999999,
+  "concentration_fitted": true,
+  "enabled": true,
+  "fitted": false,
+  "loglik_concentration": -19.971341499999998,
+  "max_effective_reads": 1000000,
+  "mean_shedding_hours": 184.592,
+  "n_concentration_censored": 3,
+  "n_concentration_samples": 15,
+  "n_pooled_samples": 0,
+  "n_raw_samples": 0,
+  "pathogen": "norovirus",
+  "residence_lag_epochs": 2
+}

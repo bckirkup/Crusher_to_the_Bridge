@@ -291,6 +291,28 @@ def test_wastewater_detection_alone_does_not_escalate():
     assert state.alert_level == ALERT_NORMAL
 
 
+def test_off_cadence_days_cannot_raise_a_wastewater_alert():
+    """A high concentration only escalates on days the port ran the assay."""
+    capability = _capability(
+        wbe_frequency_days=7.0,
+        syndromic_coverage=0.0,
+    )
+    states = generate_port_series(
+        capability,
+        pathogen=PATHOGEN,
+        prevalence_by_day=[0.15] * 8,
+        rng=np.random.default_rng(11),
+    )
+    sampled = [s for s in states if s.wbe_sampled]
+    unsampled = [s for s in states if not s.wbe_sampled]
+    assert sampled
+    assert unsampled
+    assert all(s.alert_level == ALERT_ELEVATED for s in sampled)
+    assert all(s.alert_level == ALERT_NORMAL for s in unsampled)
+    # The counterfactual concentration is still generated for every day.
+    assert all(s.wbe_gc_per_l_observed is not None for s in unsampled)
+
+
 def test_no_channel_reads_unknown_not_normal():
     capability = _capability()
     level = alert_level_for(

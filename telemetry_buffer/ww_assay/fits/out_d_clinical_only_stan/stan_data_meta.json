@@ -1,0 +1,88 @@
+{
+  "censoring_corrected": true,
+  "epoch_duration_hours": 1.0,
+  "groups": [
+    "passenger",
+    "crew"
+  ],
+  "incubation_iqr_hours": 19.0,
+  "model": "sentinel_fleet",
+  "n_cases": 4,
+  "pathogen": "norovirus",
+  "person_hours_ashore": {
+    "KYGEC@2026-W03": 2488.0,
+    "MXCTM@2026-W03": 2910.0,
+    "MXCZM@2026-W03": 3850.0,
+    "USMIA@2026-W02": 11270.0
+  },
+  "port_resolution_adequate": true,
+  "ports": [
+    "KYGEC",
+    "MXCTM",
+    "MXCZM",
+    "USMIA"
+  ],
+  "ships": [
+    "mega_cruise_5000"
+  ],
+  "visits": [
+    {
+      "person_hours_ashore": 2488.0,
+      "port_id": "KYGEC",
+      "visit_key": "KYGEC@2026-W03",
+      "week": "2026-W03"
+    },
+    {
+      "person_hours_ashore": 2910.0,
+      "port_id": "MXCTM",
+      "visit_key": "MXCTM@2026-W03",
+      "week": "2026-W03"
+    },
+    {
+      "person_hours_ashore": 3850.0,
+      "port_id": "MXCZM",
+      "visit_key": "MXCZM@2026-W03",
+      "week": "2026-W03"
+    },
+    {
+      "person_hours_ashore": 11270.0,
+      "port_id": "USMIA",
+      "visit_key": "USMIA@2026-W02",
+      "week": "2026-W02"
+    }
+  ],
+  "voyages": [
+    {
+      "ascertainment": 1.0,
+      "crew_repeat": {},
+      "n_cases": 4,
+      "observation_end_epoch": 167,
+      "port_resolution_adequate": true,
+      "ports": [
+        "KYGEC",
+        "MXCTM",
+        "MXCZM",
+        "USMIA"
+      ],
+      "ship_id": "mega_cruise_5000",
+      "voyage_id": "sr_norovirus_mega_cruise_5000_one_hot_fleet_crossed_standard_R1p0_control_clinical_only_s500"
+    }
+  ],
+  "wastewater": {
+    "concentrations": [],
+    "enabled": true,
+    "max_effective_reads": 1000000,
+    "mean_shedding_hours": 184.592,
+    "n_concentration_censored": 0,
+    "n_concentration_samples": 0,
+    "n_pooled_samples": 0,
+    "n_raw_samples": 0,
+    "pathogen": "norovirus",
+    "residence_lag_epochs": 2,
+    "samples": []
+  },
+  "weeks": [
+    "2026-W02",
+    "2026-W03"
+  ]
+}

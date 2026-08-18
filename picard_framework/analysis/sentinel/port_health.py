@@ -544,6 +544,7 @@ def generate_port_signals(
     cases, rate = _syndromic_signal(capability, incidence_cases, rng)
     true_gc = model.gc_per_l(prevalence)
     observed_gc, detected = _wbe_signal(capability, true_gc, rng)
+    sampled = capability.samples_on_day(day_index)
     confirmed = int(rng.binomial(cases, capability.lab_confirmation_fraction))
     return PortEpidemiologicalState(
         port_id=capability.port_id,
@@ -558,16 +559,18 @@ def generate_port_signals(
         syndromic_report_date=_iso(
             start_date, day_index, capability.syndromic_delay_days,
         ),
-        wbe_sampled=capability.samples_on_day(day_index),
+        wbe_sampled=sampled,
         wbe_gc_per_l_observed=observed_gc,
         wbe_detected=detected,
         lab_confirmed_cases=confirmed,
         lab_result_date=_iso(start_date, day_index, capability.lab_turnaround_days),
         genotype=genotype,
+        # An authority escalates on assays it actually ran: off-cadence days
+        # carry the counterfactual concentration but cannot raise an alert.
         alert_level=alert_level_for(
             capability,
             syndromic_rate_per_100k=rate,
-            wbe_gc_per_l=observed_gc,
+            wbe_gc_per_l=observed_gc if sampled else None,
         ),
         reports_to=capability.reports_to,
         reporting_threshold=capability.reporting_threshold,
@@ -666,7 +669,9 @@ def ablate_state(
         alert_level=alert_level_for(
             capability,
             syndromic_rate_per_100k=masked.syndromic_rate_per_100k,
-            wbe_gc_per_l=masked.wbe_gc_per_l_observed,
+            wbe_gc_per_l=(
+                masked.wbe_gc_per_l_observed if masked.wbe_sampled else None
+            ),
         ),
     )
 

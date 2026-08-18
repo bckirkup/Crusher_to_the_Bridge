@@ -98,7 +98,9 @@ normalize away. Defaults: elevated ≥ 50/100k/day, outbreak ≥ 200/100k/day.
 Municipal WBE escalates on **concentration**, not on detection
 (`wbe_elevated_gc_per_l`, default 1e6 gc/L ≈ 2% prevalence): at municipal
 dilution a qPCR assay detects background norovirus every single day, so
-"detected" carries no alerting information.
+"detected" carries no alerting information. Escalation also requires
+`wbe_sampled` — the counterfactual concentration is generated for every day, but
+an authority can only act on an assay it actually ran.
 
 A port with every channel ablated reads `unknown`, never `normal` — an
 uninstrumented port has no evidence of quiet, only an absence of evidence.
@@ -139,7 +141,7 @@ From explicit hazards:
 python3 -m picard_framework.analysis.sentinel.port_ledger \
   --hazard USMIA=0.0001 --hazard MXCZM=0.001 --hazard KYGEC=0.0001 \
   --pathogen norovirus --days 7 --seed 501 \
-  --channels syndromic,wbe --out tmp_port_health_out
+  --channels syndromic,wbe --out telemetry_buffer/portout
 ```
 
 writes `port_surveillance_ledger.json` (the full generation), the ablated
