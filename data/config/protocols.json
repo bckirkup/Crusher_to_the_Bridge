@@ -212,8 +212,8 @@
       },
       "modifiers": {
         "close_zones": [
-          "Galley",
-          "Mess_Hall"
+          "Main_Galley_Aft",
+          "Crew_Mess_Main"
         ],
         "zone_occupancy_cap": 2
       },
@@ -291,8 +291,8 @@
         "fomite_scalar": 0.2,
         "hvac_airborne_scalar": 0.7,
         "close_zones": [
-          "Galley",
-          "Mess_Hall"
+          "Main_Galley_Aft",
+          "Crew_Mess_Main"
         ]
       },
       "costs_per_epoch": {

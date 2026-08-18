@@ -5,11 +5,14 @@ what it measures is the prevalence of shedders *aboard*, whatever port they were
 infected at, delayed by the holding time of the plumbing (spec 1.3). Given that,
 three things follow, and this module exists to enforce them:
 
-1. **The likelihood is on read counts, not concentration.** CTB's modality is
-   Dirichlet-multinomial metagenomics, so ``pathogen_reads`` out of
-   ``total_reads`` with beta-binomial overdispersion. A normal on
-   log-concentration understates uncertainty at the depths that actually occur,
-   and ``concentration_copies_per_l`` only exists for external qPCR datasets.
+1. **The likelihood follows the assay, not a house convention.** A shotgun
+   library is ``pathogen_reads`` out of ``total_reads`` with beta-binomial
+   overdispersion — a normal on log-concentration would understate uncertainty at
+   the depths that actually occur. An RT-qPCR result is a concentration with a
+   limit of detection, and its non-detects are *censored*, not zero, so it gets a
+   Tobit term on log10 copies/L. The two channels share the latent prevalence and
+   nothing else; a bundle may carry both, and each row is routed by the fields it
+   populates (``pool_wastewater`` for reads, ``pool_concentrations`` for qPCR).
 2. **Correlated samples must not be counted as independent evidence.** Several
    collection points sampled the same epoch are replicate draws on one holding
    tank, so they are pooled into a single trial rather than multiplied into the
@@ -73,6 +76,22 @@ DEFAULT_BASE_LOGIT_PRIOR_SD = 2.0
 # Guards log(0) for an epoch with no shedders; 1e-6 of the ship's complement is
 # well below one person, so it cannot be mistaken for a real prevalence.
 SHARE_FLOOR = 1e-6
+
+
+# qPCR channel. With slope 1 the link is the physical chain in
+# ``wastewater_assays``: a decade more shedder prevalence is a decade more
+# copies per litre. The intercept is then log10 of the concentration a fully
+# shedding ship would present (1e10 gc/person/day into 30 L/person/day), and its
+# prior is wide enough to absorb a wrong shedding rate without forcing the slope
+# to absorb it instead.
+DEFAULT_CONC_INTERCEPT_PRIOR_MEAN = 8.5
+DEFAULT_CONC_INTERCEPT_PRIOR_SD = 1.5
+DEFAULT_CONC_SLOPE_PRIOR_MEAN = 1.0
+DEFAULT_CONC_SLOPE_PRIOR_SD = 0.3
+# Residual sd on log10 copies/L: extraction and Ct noise, roughly half a decade.
+DEFAULT_CONC_SIGMA_PRIOR_SCALE = 0.5
+# Guards log10(0) for a tank the assay reports as empty.
+CONCENTRATION_FLOOR = 1e-3
 
 
 @dataclass(frozen=True)
@@ -243,6 +262,123 @@ def pool_wastewater(
             ),
         )
     return tuple(pooled)
+
+
+@dataclass(frozen=True)
+class PooledConcentration:
+    """All qPCR results for one voyage-epoch, as a single observation.
+
+    ``censored`` says the epoch's taps all came back below the limit of
+    detection, in which case ``log10_copies_per_l`` holds the bound rather than a
+    measurement. A censored epoch is evidence — it bounds prevalence from above —
+    so it is kept, and the likelihood integrates the normal below the bound
+    instead of pretending the tank was empty.
+
+    ``n_detected`` alongside ``n_collection_points`` keeps the replicate
+    structure visible: taps sampled the same epoch are draws on one tank, so
+    their detections are averaged into one observation and never multiplied into
+    the posterior.
+    """
+
+    voyage_id: str
+    epoch: int
+    log10_copies_per_l: float
+    censored: bool
+    n_collection_points: int
+    n_detected: int
+
+
+def _log10_floor(value: float) -> float:
+    """``log10`` with a floor, so an empty tank stays finite."""
+    return math.log10(max(float(value), CONCENTRATION_FLOOR))
+
+
+def pool_concentrations(
+    bundle: ObservationBundle,
+    *,
+    pathogen: str,
+    observation_end_epoch: int,
+) -> tuple[PooledConcentration, ...]:
+    """One qPCR observation per sampled epoch, in epoch order.
+
+    Detected taps are averaged on the log10 scale, which is the scale the
+    likelihood is on and the scale Ct is linear in. An epoch with no detection
+    is censored at the mean limit of detection of the taps that reported one.
+    Rows carrying no concentration information at all (a shotgun library, an
+    external row without an LOD) are left to the read channel.
+    """
+    by_epoch: dict[int, list[WastewaterSample]] = {}
+    for sample in bundle.wastewater_samples:
+        if sample.pathogen != pathogen:
+            continue
+        if not sample.has_concentration_observation:
+            continue
+        if sample.sample_epoch < 1 or sample.sample_epoch > int(observation_end_epoch):
+            continue
+        by_epoch.setdefault(int(sample.sample_epoch), []).append(sample)
+
+    pooled: list[PooledConcentration] = []
+    for epoch in sorted(by_epoch):
+        group = by_epoch[epoch]
+        detected = [
+            s.concentration_copies_per_l
+            for s in group
+            if s.concentration_copies_per_l is not None
+        ]
+        bounds = [s.lod_copies_per_l for s in group if s.lod_copies_per_l is not None]
+        if detected:
+            value = sum(_log10_floor(c) for c in detected) / len(detected)
+        else:
+            value = sum(_log10_floor(b) for b in bounds) / len(bounds)
+        pooled.append(
+            PooledConcentration(
+                voyage_id=bundle.voyage_id,
+                epoch=epoch,
+                log10_copies_per_l=float(value),
+                censored=not detected,
+                n_collection_points=len(group),
+                n_detected=len(detected),
+            ),
+        )
+    return tuple(pooled)
+
+
+def expected_log10_concentration(
+    share: Sequence[float] | np.ndarray,
+    *,
+    intercept: float,
+    slope: float,
+) -> np.ndarray:
+    """``intercept + slope * log10(share + eps)`` — the qPCR link, in numpy."""
+    x = np.asarray(list(share), dtype=float)
+    return intercept + slope * np.log10(np.clip(x, 0.0, None) + SHARE_FLOOR)
+
+
+def censored_normal_logpdf(
+    observed: Sequence[float] | np.ndarray,
+    mean: Sequence[float] | np.ndarray,
+    sigma: float,
+    censored: Sequence[bool] | np.ndarray,
+) -> np.ndarray:
+    """Tobit term per observation: density if measured, lower tail if censored.
+
+    Mirrors ``normal_lpdf`` / ``normal_lcdf`` in ``sentinel_fleet.stan`` term for
+    term, so the numpy reference sampler and Stan cannot disagree about what a
+    non-detect is worth.
+    """
+    y = np.asarray(list(observed), dtype=float)
+    mu = np.asarray(list(mean), dtype=float)
+    is_censored = np.asarray(list(censored), dtype=bool)
+    sd = float(sigma)
+    if sd <= 0.0:
+        raise ValueError(f"sigma must be positive: {sd}")
+    z = (y - mu) / sd
+    density = -0.5 * z**2 - math.log(sd) - 0.5 * math.log(2.0 * math.pi)
+    # log Phi(z) via erfc, which stays finite for the very negative z a bound far
+    # above the expected concentration produces.
+    erfc = np.vectorize(math.erfc)
+    tail = np.log(np.clip(0.5 * erfc(-z / math.sqrt(2.0)), 1e-300, None))
+    return np.where(is_censored, tail, density)
 
 
 def shedder_prevalence(

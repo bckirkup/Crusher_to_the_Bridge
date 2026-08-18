@@ -43,6 +43,7 @@ COPY data/ ./data/
 COPY scripts/ ./scripts/
 COPY deploy/aws/boundary_analysis_entrypoint.py ./deploy/aws/boundary_analysis_entrypoint.py
 COPY deploy/aws/sentinel_recovery_analysis_entrypoint.py ./deploy/aws/sentinel_recovery_analysis_entrypoint.py
+COPY deploy/aws/sentinel_nuts_entrypoint.py ./deploy/aws/sentinel_nuts_entrypoint.py
 COPY orchestrator.py ./
 COPY orchestrator_chronic.py orchestrator_display.py orchestrator_epoch.py ./
 COPY orchestrator_init.py orchestrator_record.py orchestrator_types.py ./
@@ -50,5 +51,5 @@ COPY orchestrator_init.py orchestrator_record.py orchestrator_types.py ./
 RUN chown -R analysis:analysis /app
 USER analysis
 
-# Job definitions supply the worker script as argv[0] (boundary or sentinel).
+# Job definitions supply the worker script as argv[0] (boundary, recovery, or NUTS).
 ENTRYPOINT ["python3"]

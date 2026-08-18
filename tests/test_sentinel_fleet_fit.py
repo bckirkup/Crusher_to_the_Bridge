@@ -315,10 +315,11 @@ def test_smoke_fit_writes_every_output_for_the_example_fleet(out_dir: str) -> No
 
     meta = status["meta"]
     # The manifest pools two ships in one week and the same ship a week later:
-    # three voyages, two weeks, and ports that recur across them.
+    # three voyages and ports that recur across them. Visits span three
+    # calendar weeks because the home-port calls sit on the voyage boundaries.
     assert len(meta["voyages"]) == 3
     assert len(meta["ships"]) == 2
-    assert len(meta["weeks"]) == 2
+    assert len(meta["weeks"]) == 3
     assert status["summary"]["n_visits"] > len(meta["ports"])
     assert all(v > 0.0 for v in status["summary"]["hazard_mean"].values())
 

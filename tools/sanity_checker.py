@@ -530,7 +530,9 @@ def _check_graph_integrity(
             if isinstance(close_zones, list):
                 for zone in close_zones:
                     if zone not in valid_zones:
-                        report.error(
+                        # Shared protocols.json follows the config.yaml default
+                        # platform; other platforms may omit these zone IDs.
+                        report.warn(
                             _PROTOCOLS_JSON,
                             "GRAPH_REF",
                             f"{proto.protocol_id}.modifiers.close_zones references "
@@ -1014,6 +1016,7 @@ def _check_config_yaml(
     _check_infection_counters(cfg, report)
     _check_wearable_monitoring(cfg, report)
     _check_modality_params(cfg, report)
+    _check_wastewater_surveillance(cfg, report)
     _check_clinical_diagnostics(cfg, report)
     _check_hvac_params(cfg, report)
     _check_emod_progression(cfg, report)
@@ -1442,6 +1445,24 @@ def _check_modality_params(cfg: dict[str, Any], report: Report) -> None:
     _check_crew_screening_interval(cfg, report)
 
 
+def _check_wastewater_surveillance(cfg: dict[str, Any], report: Report) -> None:
+    """Validate the sentinel wastewater sampling policy against its own dataclass.
+
+    The dataclass is the single source of truth for what a runnable operating
+    point is, so the config check asks it rather than re-deriving the bounds and
+    drifting from the simulator.
+    """
+    block = cfg.get("wastewater_surveillance")
+    if not isinstance(block, dict):
+        return
+    from picard_framework.analysis.sentinel.wastewater_ops import WastewaterOpsConfig
+
+    try:
+        WastewaterOpsConfig.from_mapping(block)
+    except (TypeError, ValueError) as exc:
+        report.error(_CONFIG_YAML, "MATH_BOUND", f"wastewater_surveillance: {exc}")
+
+
 def _check_clinical_diagnostics(cfg: dict[str, Any], report: Report) -> None:
     """Validate clinical test autocorrelation matrix."""
     block = cfg.get("clinical_diagnostics", {})
@@ -1743,7 +1764,7 @@ def paths_from_run_config(repo_root: str, config_yaml: str | None = None) -> dic
     from crusher_labs import load_config
     cfg = load_config(config_yaml)
     layout_rel = cfg.get("ship_graph", {}).get(
-        "spatial_layout", "data/platforms/destroyer_baseline/spatial_layout.json")
+        "spatial_layout", "data/platforms/mega_cruise_5000/spatial_layout.json")
     platform_dir = os.path.dirname(os.path.join(repo_root, layout_rel))
     profiles_rel = cfg.get("multi_pathogen", {}).get(
         "profiles_path", "data/pathogens/active_profiles.json")
@@ -1929,8 +1950,8 @@ def main() -> None:
     )
     parser.add_argument(
         "--platform-dir",
-        default=os.path.join(_REPO_ROOT, "data", "platforms", "destroyer_baseline"),
-        help="Path to platform directory (default: data/platforms/destroyer_baseline/)",
+        default=os.path.join(_REPO_ROOT, "data", "platforms", "mega_cruise_5000"),
+        help="Path to platform directory (default: data/platforms/mega_cruise_5000/)",
     )
     parser.add_argument(
         "--from-config",

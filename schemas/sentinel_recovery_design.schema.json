@@ -1,0 +1,337 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://crusher-to-the-bridge/schemas/sentinel_recovery_design.schema.json",
+  "title": "SentinelRecoveryDesign",
+  "description": "Design spec for a sentinel port-hazard recovery campaign: port registry, itinerary templates, hazard profiles, fleet configurations, R_onboard levels and seeds. Expanded into the runnable campaign manifest by picard_framework/runs/mega_cruise_campaign/expand_design.py; see docs/synthetic_recovery_and_vsp_degradation.md.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "campaign",
+    "platform",
+    "default_epochs",
+    "default_num_agents",
+    "pathogen",
+    "embarkation_date",
+    "pathogen_configs",
+    "surveillance_configs",
+    "R_onboard_values",
+    "seeds",
+    "ports",
+    "homeport",
+    "itinerary_templates",
+    "hazard_profiles",
+    "fleet_configs"
+  ],
+  "properties": {
+    "schema_version": { "type": "string" },
+    "campaign": { "type": "string", "minLength": 1 },
+    "description": { "type": "string" },
+    "platform": { "type": "string", "minLength": 1 },
+    "default_epochs": { "type": "integer", "minimum": 1 },
+    "default_num_agents": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Population used for any platform without its own entry in campaign_runner's platform table."
+    },
+    "pathogen": { "type": "string", "minLength": 1 },
+    "embarkation_date": { "type": "string", "minLength": 1 },
+    "pathogen_configs": { "type": "object", "minProperties": 1 },
+    "surveillance_configs": { "type": "object", "minProperties": 1 },
+    "defaults": {
+      "type": "object",
+      "properties": {
+        "dose_adjustment": { "type": "number", "exclusiveMinimum": 0 },
+        "density_exponent": { "type": "number" }
+      }
+    },
+    "R_onboard_values": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "number", "minimum": 0 }
+    },
+    "seeds": {
+      "oneOf": [
+        {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "integer" }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["start", "count"],
+          "properties": {
+            "start": { "type": "integer" },
+            "count": { "type": "integer", "minimum": 1 }
+          }
+        }
+      ]
+    },
+    "ports": {
+      "type": "object",
+      "minProperties": 1,
+      "description": "UN-LOCODE keyed port registry. Exposure fields are what the hazard likelihood consumes; annual visitor counts are not model inputs.",
+      "additionalProperties": { "$ref": "#/$defs/port" }
+    },
+    "homeport": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["embarkation", "disembarkation"],
+      "properties": {
+        "embarkation": {
+          "type": "object",
+          "required": ["port_id"],
+          "properties": {
+            "port_id": { "type": "string", "minLength": 1 },
+            "embarkation_window_epochs": { "$ref": "#/$defs/epoch_window" },
+            "stateroom_available_epoch": { "type": "integer", "minimum": 0 },
+            "buffet_surge_fraction": { "type": "number", "minimum": 0, "maximum": 1 }
+          }
+        },
+        "disembarkation": {
+          "type": "object",
+          "required": ["port_id"],
+          "properties": {
+            "port_id": { "type": "string", "minLength": 1 },
+            "disembark_window_epochs": { "$ref": "#/$defs/epoch_window" }
+          }
+        }
+      }
+    },
+    "itinerary_templates": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": { "$ref": "#/$defs/itinerary_template" }
+    },
+    "hazard_profiles": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": { "$ref": "#/$defs/hazard_profile" }
+    },
+    "fleet_configs": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": { "$ref": "#/$defs/fleet_config" }
+    },
+    "wastewater_scan": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Optional wastewater operating-envelope scan. Expanded into per-tier wastewater_cells, each a wastewater_surveillance block plus the seeds it is replicated over. Absent for campaigns that do not sweep the channel.",
+      "required": [
+        "sampling_interval_epochs",
+        "holding_tank_residence_hours",
+        "core_seeds",
+        "base_wastewater"
+      ],
+      "properties": {
+        "description": { "type": "string" },
+        "sampling_interval_epochs": {
+          "type": "array",
+          "minItems": 1,
+          "description": "Core grid cadences, in epochs between composite samples.",
+          "items": { "type": "integer", "minimum": 1 }
+        },
+        "holding_tank_residence_hours": {
+          "type": "array",
+          "minItems": 1,
+          "description": "Core grid mean holding-tank residence times, in hours; 0 is a direct line tap.",
+          "items": { "type": "number", "minimum": 0 }
+        },
+        "core_seeds": { "$ref": "#/$defs/seed_spec" },
+        "sensitivity_seeds": { "$ref": "#/$defs/seed_spec" },
+        "base_wastewater": { "$ref": "#/$defs/wastewater_settings" },
+        "depth_sensitivity": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "sampling_interval_epochs",
+            "sequencing_depth",
+            "holding_tank_residence_hours"
+          ],
+          "properties": {
+            "description": { "type": "string" },
+            "sampling_interval_epochs": { "type": "integer", "minimum": 1 },
+            "sequencing_depth": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "type": "integer", "minimum": 1 }
+            },
+            "holding_tank_residence_hours": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "type": "number", "minimum": 0 }
+            }
+          }
+        },
+        "collection_sensitivity": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "sampling_interval_epochs",
+            "holding_tank_residence_hours",
+            "collection_points"
+          ],
+          "properties": {
+            "description": { "type": "string" },
+            "sampling_interval_epochs": { "type": "integer", "minimum": 1 },
+            "holding_tank_residence_hours": { "type": "number", "minimum": 0 },
+            "collection_points": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "$ref": "#/$defs/collection_points" }
+            }
+          }
+        },
+        "assay_sensitivity": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Laboratory-mode comparison arm at one reference operating point. A separate arm rather than a factor crossed with the core grid: cadence and residence are operating choices whose answer should not be conditioned on the assay.",
+          "required": [
+            "sampling_interval_epochs",
+            "holding_tank_residence_hours",
+            "assay_modes"
+          ],
+          "properties": {
+            "description": { "type": "string" },
+            "sampling_interval_epochs": { "type": "integer", "minimum": 1 },
+            "holding_tank_residence_hours": { "type": "number", "minimum": 0 },
+            "assay_modes": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": { "$ref": "#/$defs/assay_mode" }
+            }
+          }
+        },
+        "include_control": {
+          "type": "boolean",
+          "description": "Emit the clinical-only cell the wastewater gains are measured against."
+        }
+      }
+    }
+  },
+  "$defs": {
+    "seed_spec": {
+      "oneOf": [
+        {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "integer" }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["start", "count"],
+          "properties": {
+            "start": { "type": "integer" },
+            "count": { "type": "integer", "minimum": 1 }
+          }
+        }
+      ]
+    },
+    "collection_points": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "assay_mode": {
+      "type": "string",
+      "enum": ["qpcr", "amplicon", "metagenomic", "long_read"],
+      "description": "Laboratory mode the sampler reports in; see wastewater_assays.py. Absent means metagenomic, the mode that predates the switch."
+    },
+    "wastewater_settings": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "One wastewater sampling policy; mirrors WastewaterOpsConfig in picard_framework/analysis/sentinel/wastewater_ops.py.",
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "assay_mode": { "$ref": "#/$defs/assay_mode" },
+        "sampling_interval_epochs": { "type": "integer", "minimum": 1 },
+        "holding_tank_residence_hours": { "type": "number", "minimum": 0 },
+        "collection_points": { "$ref": "#/$defs/collection_points" },
+        "sequencing_depth": { "type": "integer", "minimum": 1 },
+        "pathogen_shedding_to_reads_scale": { "type": "number", "exclusiveMinimum": 0 },
+        "background_read_fraction": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMaximum": 1
+        },
+        "read_concentration": { "type": "number", "exclusiveMinimum": 0 },
+        "pathogen": { "type": "string", "minLength": 1 },
+        "pathogen_id": { "type": "string" }
+      }
+    },
+    "epoch_window": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": { "type": "integer", "minimum": 0 }
+    },
+    "port": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["port", "region"],
+      "properties": {
+        "port": { "type": "string", "minLength": 1 },
+        "region": { "type": "string", "minLength": 1 },
+        "role": { "type": "string", "enum": ["homeport", "call"] },
+        "disembark_fraction": { "type": "number", "minimum": 0, "maximum": 1 },
+        "crew_shore_leave_fraction": { "type": "number", "minimum": 0, "maximum": 1 },
+        "disembark_window_epochs": { "$ref": "#/$defs/epoch_window" },
+        "reembark_window_epochs": { "$ref": "#/$defs/epoch_window" }
+      }
+    },
+    "itinerary_template": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["length_days", "port_days"],
+      "properties": {
+        "description": { "type": "string" },
+        "length_days": { "type": "integer", "minimum": 3 },
+        "port_days": {
+          "type": "object",
+          "minProperties": 1,
+          "description": "Voyage day number (as a string key) to port_id. Days without a port call become sea days; day 1 and the last day are the homeport slots.",
+          "propertyNames": { "pattern": "^[0-9]+$" },
+          "additionalProperties": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "hazard_profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["port_hazards"],
+      "properties": {
+        "description": { "type": "string" },
+        "port_hazards": {
+          "type": "object",
+          "minProperties": 1,
+          "description": "Known truth lambda_p per port_id, as a per-epoch ashore infection probability.",
+          "additionalProperties": { "type": "number", "minimum": 0, "maximum": 1 }
+        }
+      }
+    },
+    "fleet_config": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ships"],
+      "properties": {
+        "description": { "type": "string" },
+        "ships": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["platform", "itinerary"],
+            "properties": {
+              "platform": { "type": "string", "minLength": 1 },
+              "itinerary": { "type": "string", "minLength": 1 }
+            }
+          }
+        }
+      }
+    }
+  }
+}

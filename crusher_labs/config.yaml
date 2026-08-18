@@ -25,43 +25,43 @@ ship_graph:
     - class_id: "passenger_general"
       role_group: "passenger"
       fraction: 0.50
-      home_zone_preference: "Berthing"
+      home_zone_preference: "PC_"
       free_zone_preference: ""
       duty_zone: ""
     - class_id: "passenger_family"
       role_group: "passenger"
       fraction: 0.10
-      home_zone_preference: "Berthing"
+      home_zone_preference: "PC_"
       free_zone_preference: ""
       duty_zone: ""
     - class_id: "passenger_elderly"
       role_group: "passenger"
       fraction: 0.10
-      home_zone_preference: "Berthing"
+      home_zone_preference: "PC_"
       free_zone_preference: ""
       duty_zone: ""
     - class_id: "crew_general"
       role_group: "crew"
       fraction: 0.10
-      home_zone_preference: "Berthing"
+      home_zone_preference: "CC_"
       free_zone_preference: ""
       duty_zone: ""
     - class_id: "crew_medical"
       role_group: "crew"
       fraction: 0.05
-      home_zone_preference: "Berthing"
-      free_zone_preference: "MedBay"
-      duty_zone: "MedBay"
+      home_zone_preference: "CC_"
+      free_zone_preference: "Medical"
+      duty_zone: "Medical_Center"
     - class_id: "crew_engineering"
       role_group: "crew"
       fraction: 0.10
-      home_zone_preference: "Berthing"
+      home_zone_preference: "CC_"
       free_zone_preference: "Engine"
       duty_zone: "Engine"
     - class_id: "crew_galley"
       role_group: "crew"
       fraction: 0.05
-      home_zone_preference: "Berthing"
+      home_zone_preference: "CC_"
       free_zone_preference: ""
       duty_zone: "Galley"
 
@@ -124,8 +124,8 @@ ship_graph:
     female: 0.50
 
   # Zones loaded from spatial layout JSON at runtime
-  spatial_layout: "data/platforms/destroyer_baseline/spatial_layout.json"
-  air_flow_paths: "data/platforms/destroyer_baseline/air_flow_paths.json"
+  spatial_layout: "data/platforms/mega_cruise_5000/spatial_layout.json"
+  air_flow_paths: "data/platforms/mega_cruise_5000/air_flow_paths.json"
   # Fallback inline zones (used if spatial_layout file not found)
   zones:
     - {name: "Bridge",      type: "Free",     traffic: "low"}
@@ -369,6 +369,25 @@ wastewater_sequencing:
   dirichlet_concentration: 100.0      # Dirichlet prior strength (compositional noise)
   pseudocount: 1.0e-6                 # for CLR zero-handling
   aitchison_anomaly_threshold: 0.08   # GRUMB Aitchison beta-diversity anomaly gate
+
+# ── Sentinel wastewater sampling operations ──────────────────
+# Operating policy for the wastewater channel of the sentinel observation bundle
+# (picard_framework/analysis/sentinel/wastewater_ops.py). Distinct from the
+# wastewater_sequencing instrument above: that one samples zone pools every epoch
+# for onboard detection, this one emits the composite samples the port-attribution
+# fit consumes, on a cadence, through a holding tank. Off by default; the
+# sentinel_ww_ops_scan_v1 campaign sweeps it.
+wastewater_surveillance:
+  enabled: false
+  assay_mode: "metagenomic"            # qpcr | amplicon | metagenomic | long_read
+  sampling_interval_epochs: 6          # epochs between composite samples
+  holding_tank_residence_hours: 4.0    # mean residence; 0 = direct line tap
+  collection_points: ["aft_main"]      # taps sampled per sampling epoch
+  sequencing_depth: 250000             # total reads per sample
+  pathogen_shedding_to_reads_scale: 1.0
+  background_read_fraction: 0.9999     # 1 - max informative read fraction
+  pathogen: "norovirus"                # delay-catalog key written on samples
+  pathogen_id: "norwalk_gi"            # ABM profile whose shedders are counted
 
 # ── Instrument turnaround (TAT) ───────────────────────────────
 instrument_turnaround:

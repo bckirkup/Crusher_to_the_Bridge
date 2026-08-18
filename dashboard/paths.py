@@ -11,6 +11,8 @@ PROTOCOLS_PATH = os.path.join(REPO_ROOT, "data", "config", "protocols.json")
 DEFAULT_FLEET_OUTPUT = os.path.join(
     REPO_ROOT, "presidio", "data", "experiences", "smoke_runs",
 )
+# Catalog default for the LCARS GUI when telemetry does not fingerprint a class.
+DEFAULT_PLATFORM_ID = "mega_cruise_5000"
 DEFAULT_PICARD_SPEC = os.path.join(
     REPO_ROOT, "picard_framework", "runs", "destroyer_baseline_default.json",
 )

@@ -54,14 +54,23 @@ from picard_framework.analysis.sentinel.observations import ObservationBundle
 from picard_framework.analysis.sentinel.wastewater_signal import (
     DEFAULT_BASE_LOGIT_PRIOR_MEAN,
     DEFAULT_BASE_LOGIT_PRIOR_SD,
+    DEFAULT_CONC_INTERCEPT_PRIOR_MEAN,
+    DEFAULT_CONC_INTERCEPT_PRIOR_SD,
+    DEFAULT_CONC_SIGMA_PRIOR_SCALE,
+    DEFAULT_CONC_SLOPE_PRIOR_MEAN,
+    DEFAULT_CONC_SLOPE_PRIOR_SD,
     DEFAULT_CONCENTRATION_PRIOR_LOG_SD,
     DEFAULT_CONCENTRATION_PRIOR_MEDIAN,
     DEFAULT_SLOPE_PRIOR_MEAN,
     DEFAULT_SLOPE_PRIOR_SD,
     SHARE_FLOOR,
+    PooledConcentration,
     PooledSample,
     beta_binomial_logpmf,
+    censored_normal_logpdf,
+    expected_log10_concentration,
     expected_read_fraction,
+    pool_concentrations,
     pool_wastewater,
     shedder_prevalence,
     shedding_kernel,
@@ -508,6 +517,8 @@ def _wastewater_block(
 
     pooled: list[PooledSample] = []
     voyage_of: list[int] = []
+    conc: list[PooledConcentration] = []
+    conc_voyage_of: list[int] = []
     if options.enabled:
         for i, fv in enumerate(voyages):
             samples = pool_wastewater(
@@ -518,6 +529,13 @@ def _wastewater_block(
             )
             pooled.extend(samples)
             voyage_of.extend([i + 1] * len(samples))
+            readings = pool_concentrations(
+                fv.bundle,
+                pathogen=resolved,
+                observation_end_epoch=int(fv.design.observation_end_epoch),
+            )
+            conc.extend(readings)
+            conc_voyage_of.extend([i + 1] * len(readings))
 
     data = {
         "NW": len(pooled),
@@ -535,11 +553,34 @@ def _wastewater_block(
         "ww_slope_prior_sd": float(DEFAULT_SLOPE_PRIOR_SD),
         "ww_conc_prior_log_mean": math.log(float(DEFAULT_CONCENTRATION_PRIOR_MEDIAN)),
         "ww_conc_prior_log_sd": float(DEFAULT_CONCENTRATION_PRIOR_LOG_SD),
+        "NC": len(conc),
+        "conc_voyage": conc_voyage_of,
+        "conc_epoch": [int(c.epoch) for c in conc],
+        "conc_log10": [float(c.log10_copies_per_l) for c in conc],
+        "conc_censored": [int(bool(c.censored)) for c in conc],
+        "conc_intercept_prior_mean": float(DEFAULT_CONC_INTERCEPT_PRIOR_MEAN),
+        "conc_intercept_prior_sd": float(DEFAULT_CONC_INTERCEPT_PRIOR_SD),
+        "conc_slope_prior_mean": float(DEFAULT_CONC_SLOPE_PRIOR_MEAN),
+        "conc_slope_prior_sd": float(DEFAULT_CONC_SLOPE_PRIOR_SD),
+        "conc_sigma_prior_scale": float(DEFAULT_CONC_SIGMA_PRIOR_SCALE),
     }
     meta = {
         "enabled": bool(options.enabled),
         "pathogen": resolved,
         "n_pooled_samples": len(pooled),
+        "n_concentration_samples": len(conc),
+        "n_concentration_censored": sum(1 for c in conc if c.censored),
+        "concentrations": [
+            {
+                "voyage_id": c.voyage_id,
+                "epoch": c.epoch,
+                "log10_copies_per_l": round(c.log10_copies_per_l, 6),
+                "censored": bool(c.censored),
+                "n_collection_points": c.n_collection_points,
+                "n_detected": c.n_detected,
+            }
+            for c in conc
+        ],
         "n_raw_samples": sum(s.n_collection_points for s in pooled),
         "max_effective_reads": cap,
         "residence_lag_epochs": kernel.residence_lag_epochs,
@@ -567,11 +608,19 @@ def _wastewater_block(
 
 @dataclass(frozen=True)
 class WastewaterParams:
-    """The wastewater link parameters, separated from the hierarchy like ``FleetRates``."""
+    """The wastewater link parameters, separated from the hierarchy like ``FleetRates``.
+
+    Carries both channels' links. The read parameters and the qPCR parameters are
+    never used on the same observation, but they are one object because they are
+    one measurement model of one latent shedder prevalence.
+    """
 
     logit_base: float = DEFAULT_BASE_LOGIT_PRIOR_MEAN
     slope: float = DEFAULT_SLOPE_PRIOR_MEAN
     concentration: float = DEFAULT_CONCENTRATION_PRIOR_MEDIAN
+    conc_intercept: float = DEFAULT_CONC_INTERCEPT_PRIOR_MEAN
+    conc_slope: float = DEFAULT_CONC_SLOPE_PRIOR_MEAN
+    conc_sigma: float = DEFAULT_CONC_SIGMA_PRIOR_SCALE
 
 
 @dataclass(frozen=True)
@@ -741,6 +790,45 @@ def wastewater_loglik(
             np.asarray(data["ww_total"], dtype=int),
             mean,
             params.concentration,
+        ).sum(),
+    )
+
+
+def concentration_expected_log10(
+    data: Mapping[str, Any],
+    rates: FleetRates,
+    params: WastewaterParams,
+) -> np.ndarray:
+    """Expected log10 copies/L at each pooled qPCR result, in result order."""
+    n_conc = int(data.get("NC", 0))
+    if n_conc == 0:
+        return np.zeros(0, dtype=float)
+    shares = wastewater_shares(data, rates)
+    voyage = np.asarray(data["conc_voyage"], dtype=int) - 1
+    epoch = np.asarray(data["conc_epoch"], dtype=int) - 1
+    at_sample = np.asarray(
+        [shares[voyage[i]][epoch[i]] for i in range(n_conc)], dtype=float,
+    )
+    return expected_log10_concentration(
+        at_sample, intercept=params.conc_intercept, slope=params.conc_slope,
+    )
+
+
+def concentration_loglik(
+    data: Mapping[str, Any],
+    rates: FleetRates,
+    params: WastewaterParams,
+) -> float:
+    """Tobit log likelihood of the pooled qPCR results; 0.0 with no results."""
+    if int(data.get("NC", 0)) == 0:
+        return 0.0
+    mean = concentration_expected_log10(data, rates, params)
+    return float(
+        censored_normal_logpdf(
+            np.asarray(data["conc_log10"], dtype=float),
+            mean,
+            params.conc_sigma,
+            np.asarray(data["conc_censored"], dtype=int).astype(bool),
         ).sum(),
     )
 

@@ -57,13 +57,15 @@ Write-Host "Ensuring boundary analysis infra:"
 Write-Host "  profile=$AwsProfile account=$AccountId region=$Region bucket=$Bucket"
 Write-Host "  CE=$CeName queue=$QueueName log=$LogGroup"
 
-# Log group
-$lg = aws --profile $AwsProfile logs describe-log-groups --log-group-name-prefix $LogGroup --region $Region --query "logGroups[?logGroupName=='$LogGroup'].logGroupName" --output text
-if (-not $lg) {
-  aws --profile $AwsProfile logs create-log-group --log-group-name $LogGroup --region $Region
+# Log group — create directly; do not rely on DescribeLogGroups (deploy role may
+# lack logs:DescribeLogGroups on * until deploy_role_permissions_policy is reapplied).
+$createLg = aws --profile $AwsProfile logs create-log-group --log-group-name $LogGroup --region $Region 2>&1
+if ($LASTEXITCODE -eq 0) {
   Write-Host "  created log group $LogGroup"
-} else {
+} elseif ($createLg -match 'ResourceAlreadyExistsException') {
   Write-Host "  log group exists"
+} else {
+  throw "create-log-group failed: $createLg"
 }
 
 if (-not $RegisterOnly) {
@@ -124,4 +126,5 @@ foreach ($jd in @(
   aws --profile $AwsProfile batch register-job-definition --cli-input-json "file://$tmp" --region $Region --query 'jobDefinitionArn' --output text
 }
 
-Write-Host "Done. Submit analysis jobs with submit_boundary_analysis.ps1"
+Write-Host "Done. Submit boundary jobs with submit_boundary_analysis.ps1"
+Write-Host "       Submit sentinel recovery Stan with submit_sentinel_recovery_stan.ps1"

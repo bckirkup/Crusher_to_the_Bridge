@@ -76,13 +76,13 @@ def test_picard_golden_summary_and_trigger() -> None:
     picard_history = _run_picard()
     assert len(picard_history) >= GOLDEN_LAST + 1
     fp = _fingerprint(picard_history, GOLDEN_LAST)
-    # Updated 2026-08-03: multi-pathogen route weights on active_profiles.
-    assert fp["susceptible"] == 5
+    # Updated 2026-08-16: default platform mega_cruise_5000 (was destroyer_baseline).
+    assert fp["susceptible"] == 13
     assert fp["infected"] == 0
     assert fp["symptomatic"] == 0
-    assert fp["recovered"] == 11
+    assert fp["recovered"] == 3
     assert fp["immune"] == 4
-    assert fp["trigger_status"] == "CONFIRMED"
+    assert fp["trigger_status"] == "BASELINE"
 
 
 @pytest.mark.timeout(240)

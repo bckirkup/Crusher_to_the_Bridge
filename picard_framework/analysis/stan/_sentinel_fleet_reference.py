@@ -23,6 +23,7 @@ from picard_framework.analysis.stan._sentinel_fleet_data import (
     FleetRates,
     WastewaterParams,
     aboard_hours_by_ship,
+    concentration_loglik,
     expected_onsets_fleet,
     fleet_forward_incidence,
     wastewater_loglik,
@@ -77,6 +78,14 @@ class _Layout:
             self.ww_logit_base = take(1)
             self.log_ww_slope = take(1)
             self.log_ww_conc = take(1)
+        # The qPCR link is dimensioned independently of the read link: a fit may
+        # carry either channel, both, or neither, and an unused link would be a
+        # prior-only dimension the walk pays for.
+        self.has_concentration = int(data.get("NC", 0)) > 0
+        if self.has_concentration:
+            self.conc_intercept = take(1)
+            self.log_conc_slope = take(1)
+            self.log_conc_sigma = take(1)
         self.size = cursor
 
 
@@ -110,6 +119,10 @@ def _unpack(theta: np.ndarray, layout: _Layout) -> dict[str, Any]:
         unpacked["ww_logit_base"] = float(theta[layout.ww_logit_base][0])
         unpacked["ww_slope"] = math.exp(float(theta[layout.log_ww_slope][0]))
         unpacked["ww_conc"] = math.exp(float(theta[layout.log_ww_conc][0]))
+    if layout.has_concentration:
+        unpacked["conc_intercept"] = float(theta[layout.conc_intercept][0])
+        unpacked["conc_slope"] = math.exp(float(theta[layout.log_conc_slope][0]))
+        unpacked["conc_sigma"] = math.exp(float(theta[layout.log_conc_sigma][0]))
     return unpacked
 
 
@@ -127,12 +140,20 @@ def _log_lambda_visit(
 
 
 def wastewater_params(theta: np.ndarray, data: Mapping[str, Any]) -> WastewaterParams:
-    """The wastewater link parameters a parameter vector implies."""
+    """The wastewater link parameters a parameter vector implies.
+
+    Links the fit does not carry keep their prior means, so callers can read the
+    object without first asking which channels the bundle had.
+    """
     unpacked = _unpack(np.asarray(theta, dtype=float), _Layout(data))
+    defaults = WastewaterParams()
     return WastewaterParams(
-        logit_base=unpacked["ww_logit_base"],
-        slope=unpacked["ww_slope"],
-        concentration=unpacked["ww_conc"],
+        logit_base=unpacked.get("ww_logit_base", defaults.logit_base),
+        slope=unpacked.get("ww_slope", defaults.slope),
+        concentration=unpacked.get("ww_conc", defaults.concentration),
+        conc_intercept=unpacked.get("conc_intercept", defaults.conc_intercept),
+        conc_slope=unpacked.get("conc_slope", defaults.conc_slope),
+        conc_sigma=unpacked.get("conc_sigma", defaults.conc_sigma),
     )
 
 
@@ -178,7 +199,7 @@ def _log_density(theta: np.ndarray, data: Mapping[str, Any], layout: _Layout) ->
         counts = np.asarray(data["onsets"][v], dtype=float)[:, :horizon]
         m = np.clip(mu, 1e-12, None)
         lp += float((counts * np.log(m) - m).sum())
-    if int(data.get("NW", 0)) > 0:
+    if layout.has_wastewater:
         lp += wastewater_loglik(
             data,
             rates,
@@ -186,6 +207,16 @@ def _log_density(theta: np.ndarray, data: Mapping[str, Any], layout: _Layout) ->
                 logit_base=u["ww_logit_base"],
                 slope=u["ww_slope"],
                 concentration=u["ww_conc"],
+            ),
+        )
+    if layout.has_concentration:
+        lp += concentration_loglik(
+            data,
+            rates,
+            WastewaterParams(
+                conc_intercept=u["conc_intercept"],
+                conc_slope=u["conc_slope"],
+                conc_sigma=u["conc_sigma"],
             ),
         )
     if not math.isfinite(lp):
@@ -243,6 +274,21 @@ def _log_prior(
             float(data["ww_conc_prior_log_mean"]),
             float(data["ww_conc_prior_log_sd"]),
         )
+    if layout.has_concentration:
+        lp += normal(
+            u["conc_intercept"],
+            float(data["conc_intercept_prior_mean"]),
+            float(data["conc_intercept_prior_sd"]),
+        )
+        # Both are <lower=0> in Stan, so the log-scale walk carries a Jacobian.
+        lp += normal(
+            u["conc_slope"],
+            float(data["conc_slope_prior_mean"]),
+            float(data["conc_slope_prior_sd"]),
+        ) + math.log(u["conc_slope"])
+        lp += normal(
+            u["conc_sigma"], 0.0, float(data["conc_sigma_prior_scale"]),
+        ) + math.log(u["conc_sigma"])
     for key in ("z_port", "z_visit", "z_time", "z_ship", "z_r"):
         block = theta[getattr(layout, key)]
         lp += -0.5 * float((block**2).sum())
@@ -289,6 +335,14 @@ def initial_point(data: Mapping[str, Any]) -> np.ndarray:
             max(float(data["ww_slope_prior_mean"]), 0.1),
         )
         theta[layout.log_ww_conc] = float(data["ww_conc_prior_log_mean"])
+    if layout.has_concentration:
+        theta[layout.conc_intercept] = float(data["conc_intercept_prior_mean"])
+        theta[layout.log_conc_slope] = math.log(
+            max(float(data["conc_slope_prior_mean"]), 0.1),
+        )
+        theta[layout.log_conc_sigma] = math.log(
+            max(float(data["conc_sigma_prior_scale"]), 0.05),
+        )
     return theta
 
 
@@ -377,6 +431,19 @@ def _to_columns(
                     if layout.has_wastewater
                     else 0.0
                 ),
+                "loglik_conc": (
+                    concentration_loglik(
+                        data,
+                        rates,
+                        WastewaterParams(
+                            conc_intercept=u["conc_intercept"],
+                            conc_slope=u["conc_slope"],
+                            conc_sigma=u["conc_sigma"],
+                        ),
+                    )
+                    if layout.has_concentration
+                    else 0.0
+                ),
             },
         )
 
@@ -444,6 +511,11 @@ def _to_columns(
         put("ww_slope", [d["u"]["ww_slope"] for d in per_draw])
         put("ww_conc", [d["u"]["ww_conc"] for d in per_draw])
         put("loglik_wastewater", [d["loglik_ww"] for d in per_draw])
+    if layout.has_concentration:
+        put("conc_intercept", [d["u"]["conc_intercept"] for d in per_draw])
+        put("conc_slope", [d["u"]["conc_slope"] for d in per_draw])
+        put("conc_sigma", [d["u"]["conc_sigma"] for d in per_draw])
+        put("loglik_concentration", [d["loglik_conc"] for d in per_draw])
     return columns
 
 

@@ -1560,7 +1560,7 @@ def test_sentinel_recovery_cartesian_and_generator() -> None:
         for day in voyage["itinerary"]
         if day.get("type") == "port_day"
     }
-    assert hazards == {"MXCZM": 0.001, "MXCTM": 0.001, "KYGEC": 0.001}
+    assert hazards == {"MXCZM": 0.0001, "MXCTM": 0.0001, "KYGEC": 0.0001}
     params = spec["campaign_parameters"]
     assert params["R_onboard"] == pytest.approx(0.0)
     assert params["n_init"] == 0
@@ -1604,7 +1604,7 @@ def test_sentinel_recovery_fleet_crossed_itineraries() -> None:
     assert [d["day"] for d in classic_days] == [2, 4, 5]
     assert classic_days[0]["port_id"] == "MXCZM"
     hot = by_plat["mega_cruise_5000"]["campaign_parameters"]["port_hazards"]
-    assert hot["MXCZM"] == pytest.approx(0.01)
+    assert hot["MXCZM"] == pytest.approx(0.001)
 
 
 def test_sentinel_recovery_null_onboard_seed() -> None:

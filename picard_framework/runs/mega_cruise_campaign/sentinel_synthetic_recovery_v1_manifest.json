@@ -1,9 +1,11 @@
 {
   "campaign": "sentinel_synthetic_recovery_v1",
-  "description": "Synthetic recovery for sentinel port-attribution. 6 hazard profiles x 4 R_onboard x 3 fleet configs x 20 seeds = 3360 voyages. Shore exposure on; known lambda_p; R_onboard scales onboard contact. Platform populations: mega 7000 / spirit 3000 / classic 1910.",
+  "description": "Synthetic recovery for sentinel port-attribution. 6 hazard profiles x 4 R_onboard x 3 fleet configs x 20 seeds = 3360 voyages. Shore exposure on; known lambda_p; R_onboard scales onboard contact. Hazards are per-epoch (hourly) ashore infection probabilities, centred on the quiet-surveillance decade 1e-4 to 1e-3 (~0.1% to ~1% attack over a ~10h call); only last_port_hot sits at outbreak scale, as the censoring stress cell. Platform populations: mega 7000 / spirit 3000 / classic 1910.",
+  "generated_from": "sentinel_synthetic_recovery_v1_design.json",
   "platform": "mega_cruise_5000",
   "default_epochs": 168,
   "default_num_agents": 7000,
+  "embarkation_date": "2026-01-10",
   "pathogen_configs": {
     "norovirus": {
       "bundle": "active_profiles",
@@ -26,10 +28,269 @@
     "dose_adjustment": 10.6,
     "density_exponent": 0.75
   },
+  "itinerary_templates": {
+    "standard": [
+      {
+        "day": 1,
+        "type": "embarkation",
+        "port": "Miami",
+        "port_id": "USMIA",
+        "region": "AMR",
+        "embarkation_window_epochs": [
+          10,
+          16
+        ],
+        "stateroom_available_epoch": 13,
+        "buffet_surge_fraction": 0.8
+      },
+      {
+        "day": 2,
+        "type": "sea_day"
+      },
+      {
+        "day": 3,
+        "type": "port_day",
+        "port": "Cozumel",
+        "port_id": "MXCZM",
+        "region": "AMR",
+        "disembark_fraction": 0.72,
+        "crew_shore_leave_fraction": 0.15,
+        "disembark_window_epochs": [
+          2,
+          5
+        ],
+        "reembark_window_epochs": [
+          12,
+          15
+        ]
+      },
+      {
+        "day": 4,
+        "type": "port_day",
+        "port": "Costa Maya",
+        "port_id": "MXCTM",
+        "region": "AMR",
+        "disembark_fraction": 0.55,
+        "crew_shore_leave_fraction": 0.1,
+        "disembark_window_epochs": [
+          3,
+          6
+        ],
+        "reembark_window_epochs": [
+          13,
+          16
+        ]
+      },
+      {
+        "day": 5,
+        "type": "sea_day"
+      },
+      {
+        "day": 6,
+        "type": "port_day",
+        "port": "George Town",
+        "port_id": "KYGEC",
+        "region": "AMR",
+        "disembark_fraction": 0.6,
+        "crew_shore_leave_fraction": 0.08,
+        "disembark_window_epochs": [
+          3,
+          5
+        ],
+        "reembark_window_epochs": [
+          11,
+          14
+        ]
+      },
+      {
+        "day": 7,
+        "type": "disembarkation",
+        "port": "Miami",
+        "port_id": "USMIA",
+        "region": "AMR",
+        "disembark_window_epochs": [
+          6,
+          12
+        ]
+      }
+    ],
+    "reversed": [
+      {
+        "day": 1,
+        "type": "embarkation",
+        "port": "Miami",
+        "port_id": "USMIA",
+        "region": "AMR",
+        "embarkation_window_epochs": [
+          10,
+          16
+        ],
+        "stateroom_available_epoch": 13,
+        "buffet_surge_fraction": 0.8
+      },
+      {
+        "day": 2,
+        "type": "sea_day"
+      },
+      {
+        "day": 3,
+        "type": "port_day",
+        "port": "George Town",
+        "port_id": "KYGEC",
+        "region": "AMR",
+        "disembark_fraction": 0.6,
+        "crew_shore_leave_fraction": 0.08,
+        "disembark_window_epochs": [
+          3,
+          5
+        ],
+        "reembark_window_epochs": [
+          11,
+          14
+        ]
+      },
+      {
+        "day": 4,
+        "type": "port_day",
+        "port": "Costa Maya",
+        "port_id": "MXCTM",
+        "region": "AMR",
+        "disembark_fraction": 0.55,
+        "crew_shore_leave_fraction": 0.1,
+        "disembark_window_epochs": [
+          3,
+          6
+        ],
+        "reembark_window_epochs": [
+          13,
+          16
+        ]
+      },
+      {
+        "day": 5,
+        "type": "sea_day"
+      },
+      {
+        "day": 6,
+        "type": "port_day",
+        "port": "Cozumel",
+        "port_id": "MXCZM",
+        "region": "AMR",
+        "disembark_fraction": 0.72,
+        "crew_shore_leave_fraction": 0.15,
+        "disembark_window_epochs": [
+          2,
+          5
+        ],
+        "reembark_window_epochs": [
+          12,
+          15
+        ]
+      },
+      {
+        "day": 7,
+        "type": "disembarkation",
+        "port": "Miami",
+        "port_id": "USMIA",
+        "region": "AMR",
+        "disembark_window_epochs": [
+          6,
+          12
+        ]
+      }
+    ],
+    "staggered": [
+      {
+        "day": 1,
+        "type": "embarkation",
+        "port": "Miami",
+        "port_id": "USMIA",
+        "region": "AMR",
+        "embarkation_window_epochs": [
+          10,
+          16
+        ],
+        "stateroom_available_epoch": 13,
+        "buffet_surge_fraction": 0.8
+      },
+      {
+        "day": 2,
+        "type": "port_day",
+        "port": "Cozumel",
+        "port_id": "MXCZM",
+        "region": "AMR",
+        "disembark_fraction": 0.72,
+        "crew_shore_leave_fraction": 0.15,
+        "disembark_window_epochs": [
+          2,
+          5
+        ],
+        "reembark_window_epochs": [
+          12,
+          15
+        ]
+      },
+      {
+        "day": 3,
+        "type": "sea_day"
+      },
+      {
+        "day": 4,
+        "type": "port_day",
+        "port": "Costa Maya",
+        "port_id": "MXCTM",
+        "region": "AMR",
+        "disembark_fraction": 0.55,
+        "crew_shore_leave_fraction": 0.1,
+        "disembark_window_epochs": [
+          3,
+          6
+        ],
+        "reembark_window_epochs": [
+          13,
+          16
+        ]
+      },
+      {
+        "day": 5,
+        "type": "port_day",
+        "port": "George Town",
+        "port_id": "KYGEC",
+        "region": "AMR",
+        "disembark_fraction": 0.6,
+        "crew_shore_leave_fraction": 0.08,
+        "disembark_window_epochs": [
+          3,
+          5
+        ],
+        "reembark_window_epochs": [
+          11,
+          14
+        ]
+      },
+      {
+        "day": 6,
+        "type": "sea_day"
+      },
+      {
+        "day": 7,
+        "type": "disembarkation",
+        "port": "Miami",
+        "port_id": "USMIA",
+        "region": "AMR",
+        "disembark_window_epochs": [
+          6,
+          12
+        ]
+      }
+    ]
+  },
   "tiers": {
     "sr_uniform_low_single": {
       "description": "Hazard=uniform_low, Fleet=single",
       "pathogen": "norovirus",
+      "hazard_profile": "uniform_low",
+      "fleet_config": "single",
       "platforms": [
         "mega_cruise_5000"
       ],
@@ -39,9 +300,9 @@
       "shore_exposure": {
         "enabled": true,
         "port_hazards": {
-          "MXCZM": 0.001,
-          "MXCTM": 0.001,
-          "KYGEC": 0.001
+          "MXCZM": 0.0001,
+          "MXCTM": 0.0001,
+          "KYGEC": 0.0001
         }
       },
       "R_onboard_values": [
@@ -77,6 +338,8 @@
     "sr_uniform_low_fleet_same": {
       "description": "Hazard=uniform_low, Fleet=fleet_same",
       "pathogen": "norovirus",
+      "hazard_profile": "uniform_low",
+      "fleet_config": "fleet_same",
       "platforms": [
         "mega_cruise_5000",
         "spirit_cruise_3000",
@@ -90,9 +353,9 @@
       "shore_exposure": {
         "enabled": true,
         "port_hazards": {
-          "MXCZM": 0.001,
-          "MXCTM": 0.001,
-          "KYGEC": 0.001
+          "MXCZM": 0.0001,
+          "MXCTM": 0.0001,
+          "KYGEC": 0.0001
         }
       },
       "R_onboard_values": [
@@ -128,6 +391,8 @@
     "sr_uniform_low_fleet_crossed": {
       "description": "Hazard=uniform_low, Fleet=fleet_crossed",
       "pathogen": "norovirus",
+      "hazard_profile": "uniform_low",
+      "fleet_config": "fleet_crossed",
       "platforms": [
         "mega_cruise_5000",
         "spirit_cruise_3000",
@@ -141,9 +406,9 @@
       "shore_exposure": {
         "enabled": true,
         "port_hazards": {
-          "MXCZM": 0.001,
-          "MXCTM": 0.001,
-          "KYGEC": 0.001
+          "MXCZM": 0.0001,
+          "MXCTM": 0.0001,
+          "KYGEC": 0.0001
         }
       },
       "R_onboard_values": [
@@ -179,6 +444,8 @@
     "sr_uniform_high_single": {
       "description": "Hazard=uniform_high, Fleet=single",
       "pathogen": "norovirus",
+      "hazard_profile": "uniform_high",
+      "fleet_config": "single",
       "platforms": [
         "mega_cruise_5000"
       ],
@@ -188,9 +455,9 @@
       "shore_exposure": {
         "enabled": true,
         "port_hazards": {
-          "MXCZM": 0.005,
-          "MXCTM": 0.005,
-          "KYGEC": 0.005
+          "MXCZM": 0.001,
+          "MXCTM": 0.001,
+          "KYGEC": 0.001
         }
       },
       "R_onboard_values": [
@@ -226,6 +493,8 @@
     "sr_uniform_high_fleet_same": {
       "description": "Hazard=uniform_high, Fleet=fleet_same",
       "pathogen": "norovirus",
+      "hazard_profile": "uniform_high",
+      "fleet_config": "fleet_same",
       "platforms": [
         "mega_cruise_5000",
         "spirit_cruise_3000",
@@ -239,9 +508,9 @@
       "shore_exposure": {
         "enabled": true,
         "port_hazards": {
-          "MXCZM": 0.005,
-          "MXCTM": 0.005,
-          "KYGEC": 0.005
+          "MXCZM": 0.001,
+          "MXCTM": 0.001,
+          "KYGEC": 0.001
         }
       },
       "R_onboard_values": [
@@ -277,6 +546,8 @@
     "sr_uniform_high_fleet_crossed": {
       "description": "Hazard=uniform_high, Fleet=fleet_crossed",
       "pathogen": "norovirus",
+      "hazard_profile": "uniform_high",
+      "fleet_config": "fleet_crossed",
       "platforms": [
         "mega_cruise_5000",
         "spirit_cruise_3000",
@@ -290,9 +561,9 @@
       "shore_exposure": {
         "enabled": true,
         "port_hazards": {
-          "MXCZM": 0.005,
-          "MXCTM": 0.005,
-          "KYGEC": 0.005
+          "MXCZM": 0.001,
+          "MXCTM": 0.001,
+          "KYGEC": 0.001
         }
       },
       "R_onboard_values": [
@@ -328,6 +599,8 @@
     "sr_one_hot_single": {
       "description": "Hazard=one_hot, Fleet=single",
       "pathogen": "norovirus",
+      "hazard_profile": "one_hot",
+      "fleet_config": "single",
       "platforms": [
         "mega_cruise_5000"
       ],
@@ -337,9 +610,9 @@
       "shore_exposure": {
         "enabled": true,
         "port_hazards": {
-          "MXCZM": 0.01,
-          "MXCTM": 0.001,
-          "KYGEC": 0.001
+          "MXCZM": 0.001,
+          "MXCTM": 0.0001,
+          "KYGEC": 0.0001
         }
       },
       "R_onboard_values": [
@@ -375,6 +648,8 @@
     "sr_one_hot_fleet_same": {
       "description": "Hazard=one_hot, Fleet=fleet_same",
       "pathogen": "norovirus",
+      "hazard_profile": "one_hot",
+      "fleet_config": "fleet_same",
       "platforms": [
         "mega_cruise_5000",
         "spirit_cruise_3000",
@@ -388,9 +663,9 @@
       "shore_exposure": {
         "enabled": true,
         "port_hazards": {
-          "MXCZM": 0.01,
-          "MXCTM": 0.001,
-          "KYGEC": 0.001
+          "MXCZM": 0.001,
+          "MXCTM": 0.0001,
+          "KYGEC": 0.0001
         }
       },
       "R_onboard_values": [
@@ -426,6 +701,8 @@
     "sr_one_hot_fleet_crossed": {
       "description": "Hazard=one_hot, Fleet=fleet_crossed",
       "pathogen": "norovirus",
+      "hazard_profile": "one_hot",
+      "fleet_config": "fleet_crossed",
       "platforms": [
         "mega_cruise_5000",
         "spirit_cruise_3000",
@@ -439,9 +716,9 @@
       "shore_exposure": {
         "enabled": true,
         "port_hazards": {
-          "MXCZM": 0.01,
-          "MXCTM": 0.001,
-          "KYGEC": 0.001
+          "MXCZM": 0.001,
+          "MXCTM": 0.0001,
+          "KYGEC": 0.0001
         }
       },
       "R_onboard_values": [
@@ -477,6 +754,8 @@
     "sr_gradient_single": {
       "description": "Hazard=gradient, Fleet=single",
       "pathogen": "norovirus",
+      "hazard_profile": "gradient",
+      "fleet_config": "single",
       "platforms": [
         "mega_cruise_5000"
       ],
@@ -486,9 +765,9 @@
       "shore_exposure": {
         "enabled": true,
         "port_hazards": {
-          "MXCZM": 0.002,
-          "MXCTM": 0.005,
-          "KYGEC": 0.01
+          "MXCZM": 0.0001,
+          "MXCTM": 0.0003,
+          "KYGEC": 0.001
         }
       },
       "R_onboard_values": [
@@ -524,6 +803,8 @@
     "sr_gradient_fleet_same": {
       "description": "Hazard=gradient, Fleet=fleet_same",
       "pathogen": "norovirus",
+      "hazard_profile": "gradient",
+      "fleet_config": "fleet_same",
       "platforms": [
         "mega_cruise_5000",
         "spirit_cruise_3000",
@@ -537,9 +818,9 @@
       "shore_exposure": {
         "enabled": true,
         "port_hazards": {
-          "MXCZM": 0.002,
-          "MXCTM": 0.005,
-          "KYGEC": 0.01
+          "MXCZM": 0.0001,
+          "MXCTM": 0.0003,
+          "KYGEC": 0.001
         }
       },
       "R_onboard_values": [
@@ -575,6 +856,8 @@
     "sr_gradient_fleet_crossed": {
       "description": "Hazard=gradient, Fleet=fleet_crossed",
       "pathogen": "norovirus",
+      "hazard_profile": "gradient",
+      "fleet_config": "fleet_crossed",
       "platforms": [
         "mega_cruise_5000",
         "spirit_cruise_3000",
@@ -588,9 +871,9 @@
       "shore_exposure": {
         "enabled": true,
         "port_hazards": {
-          "MXCZM": 0.002,
-          "MXCTM": 0.005,
-          "KYGEC": 0.01
+          "MXCZM": 0.0001,
+          "MXCTM": 0.0003,
+          "KYGEC": 0.001
         }
       },
       "R_onboard_values": [
@@ -626,6 +909,8 @@
     "sr_last_port_hot_single": {
       "description": "Hazard=last_port_hot, Fleet=single",
       "pathogen": "norovirus",
+      "hazard_profile": "last_port_hot",
+      "fleet_config": "single",
       "platforms": [
         "mega_cruise_5000"
       ],
@@ -635,8 +920,8 @@
       "shore_exposure": {
         "enabled": true,
         "port_hazards": {
-          "MXCZM": 0.001,
-          "MXCTM": 0.001,
+          "MXCZM": 0.0001,
+          "MXCTM": 0.0001,
           "KYGEC": 0.015
         }
       },
@@ -673,6 +958,8 @@
     "sr_last_port_hot_fleet_same": {
       "description": "Hazard=last_port_hot, Fleet=fleet_same",
       "pathogen": "norovirus",
+      "hazard_profile": "last_port_hot",
+      "fleet_config": "fleet_same",
       "platforms": [
         "mega_cruise_5000",
         "spirit_cruise_3000",
@@ -686,8 +973,8 @@
       "shore_exposure": {
         "enabled": true,
         "port_hazards": {
-          "MXCZM": 0.001,
-          "MXCTM": 0.001,
+          "MXCZM": 0.0001,
+          "MXCTM": 0.0001,
           "KYGEC": 0.015
         }
       },
@@ -724,6 +1011,8 @@
     "sr_last_port_hot_fleet_crossed": {
       "description": "Hazard=last_port_hot, Fleet=fleet_crossed",
       "pathogen": "norovirus",
+      "hazard_profile": "last_port_hot",
+      "fleet_config": "fleet_crossed",
       "platforms": [
         "mega_cruise_5000",
         "spirit_cruise_3000",
@@ -737,8 +1026,8 @@
       "shore_exposure": {
         "enabled": true,
         "port_hazards": {
-          "MXCZM": 0.001,
-          "MXCTM": 0.001,
+          "MXCZM": 0.0001,
+          "MXCTM": 0.0001,
           "KYGEC": 0.015
         }
       },
@@ -775,6 +1064,8 @@
     "sr_null_single": {
       "description": "Hazard=null, Fleet=single",
       "pathogen": "norovirus",
+      "hazard_profile": "null",
+      "fleet_config": "single",
       "platforms": [
         "mega_cruise_5000"
       ],
@@ -822,6 +1113,8 @@
     "sr_null_fleet_same": {
       "description": "Hazard=null, Fleet=fleet_same",
       "pathogen": "norovirus",
+      "hazard_profile": "null",
+      "fleet_config": "fleet_same",
       "platforms": [
         "mega_cruise_5000",
         "spirit_cruise_3000",
@@ -873,6 +1166,8 @@
     "sr_null_fleet_crossed": {
       "description": "Hazard=null, Fleet=fleet_crossed",
       "pathogen": "norovirus",
+      "hazard_profile": "null",
+      "fleet_config": "fleet_crossed",
       "platforms": [
         "mega_cruise_5000",
         "spirit_cruise_3000",

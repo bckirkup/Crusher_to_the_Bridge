@@ -32,6 +32,22 @@ optional keys: `port_id` (IATA/UN-LOCODE), `region`, `calendar_date`,
 `crew_shore_leave_fraction`. One itinerary truth, one validator, one schema
 test.
 
+The view keeps the **home port**: embarkation and disembarkation are port calls,
+not scaffolding around the itinerary. Every agent stands on that pier at least
+once, the simulated ledger records ashore hours there, and the premise of the
+scenario is a pathogen carried aboard at the home port — so dropping those days
+made campaign bundles fail validation with *"hours_ashore references unknown
+port 'miami'"*. Consequences: `PortCall.is_home_port` marks them, a port can be
+called more than once (home port twice, or a repositioning itinerary repeating a
+port), so ashore hours are checked against the **sum** of the visits
+(`Voyage.port_calls_for`); the embarkation window contributes hours before
+boarding closes and the disembarkation window hours after walk-off; and
+separability metrics such as `min_inter_port_hours` only count calls that
+actually put people ashore, so a default embarkation day with everyone already
+onboard neither carries a hazard nor changes a separability claim.
+`port_calls_from_config(..., include_home_port=False)` remains for callers that
+want the excursion-only view.
+
 ### 1.2 Phase 2 comes before Phase 1's validation, and it is small
 
 The proposal defers coupled simulation to "future", but the validation plan's
@@ -59,12 +75,41 @@ likelihood is beta-binomial on pathogen reads out of total reads; a normal on
 log-concentration understates uncertainty at the low read depths that actually
 occur.
 
+**Addendum (assay modes).** The revision above was right about the instrument
+and wrong about the range. Compositional metagenomics is blind at the shedder
+prevalences a cruise reaches: with an informative ceiling of `1e-4` of the
+library, 0.26% prevalence expects 0.064 pathogen reads in a 250 000-read
+library. `wastewater_surveillance.assay_mode` therefore selects the laboratory
+(`picard_framework/analysis/sentinel/wastewater_assays.py`):
+
+- `metagenomic` — the model described above, unchanged, and the **default** so
+  no pre-existing cell changes meaning. Kept as the arm that demonstrates the
+  blindness.
+- `qpcr` — a simulated standard curve, so the concentration observable is no
+  longer external-only. Reports a Ct above the LOD and *only the bound* below
+  it; the fit puts a censored normal on pooled log10 concentration with its own
+  link parameters, never sharing the read channel's calibration.
+- `amplicon` / `long_read` — the same qPCR detection gate followed by a
+  targeted library; their read fraction saturates, so they type rather than
+  quantify, and long read additionally carries instrument turnaround.
+
+A normal on log-concentration is the right likelihood *for qPCR* precisely
+because a Ct is a log-scale measurement with roughly constant error, and the
+non-detects that the low-read-depth objection was really about are handled as
+censored rather than as measurements. The two channels stay separate: reads to
+the beta-binomial, concentrations to the censored normal. Neither carries a port
+label, for the reason below.
+
 Second and more important: a ship's greywater is a **closed, integrating
 system** with a residence-time lag. Its signal is dominated by onboard
 shedding prevalence, so it does not carry an independent port label — it is a
 second, aggregate observation of *onset timing*. Treated as an independent
 hazard channel it double-counts the clinical line list. It enters the model as
 an additional observation of the same latent incidence curve.
+
+The generator side of that channel is `sentinel/wastewater_ops.py` (§8): the
+holding tank is an explicit first-order lag on aboard shedder prevalence, so a
+run's samples carry the same residence smearing the fit deconvolves.
 
 ### 1.4 The Stan sketch estimates shares, not hazards
 
@@ -214,6 +259,7 @@ class PortCall:
     pax_ashore_fraction: float            # = voyage_config disembark_fraction
     crew_ashore_fraction: float           # crew shore leave; default 0.0, §1.7
     mean_hours_ashore: float              # from disembark/reembark windows
+    is_home_port: bool                    # embarkation / disembarkation day
 
 @dataclass(frozen=True)
 class Voyage:
@@ -243,10 +289,16 @@ class WastewaterSample:
     sample_epoch: int
     collection_point: str        # greywater zone
     pathogen: str
-    pathogen_reads: int
+    pathogen_reads: int          # sequencing modes; 0 for qPCR rows
     total_reads: int
     clr_anomaly_score: float
-    concentration_copies_per_l: float | None = None   # external qPCR only
+    concentration_copies_per_l: float | None = None   # qPCR / external qPCR
+    assay_mode: str = "metagenomic"                   # see §1.3 addendum
+    ct_value: float | None = None                     # detected qPCR only
+    detected: bool | None = None                      # False = censored at LOD
+    lod_copies_per_l: float | None = None             # the censoring bound
+    turnaround_hours: float | None = None             # long read
+    genotype: str | None = None                       # long read
 
 @dataclass(frozen=True)
 class ExposureCell:
@@ -393,5 +445,44 @@ a result worth reporting.
 
 Out of scope: no change to transmission physics, HVAC, the diagnostic cascade,
 or SOP escalation. The sentinel layer never calls `ShipSimulation`; it reads
-run outputs (as `boundary/` does), with the single exception of PR 3, which
-touches the simulator behind a default-off flag.
+run outputs (as `boundary/` does), with the exceptions of PR 3 and PR 11, which
+touch the simulator behind default-off flags.
+
+## 8. Shipboard wastewater sampling operations
+
+PR 7 gave the fit a wastewater channel; nothing generated samples for it, so its
+value was untestable. `picard_framework/analysis/sentinel/wastewater_ops.py` is
+the generator, behind `wastewater_surveillance.enabled` (default **false**, so
+every existing run stays bit-identical — the draws also use a separate RNG
+stream so enabling the channel cannot perturb the epidemic it observes).
+
+| Setting | Meaning |
+|---|---|
+| `sampling_interval_epochs` | Epochs between bottles; gates emission only |
+| `holding_tank_residence_hours` | Mean residence `tau` of a first-order tank lag, `w = exp(-epoch_hours / tau)`; `0` is a direct line tap |
+| `collection_points` | Greywater taps; zones split into contiguous blocks, one row each per sampled epoch |
+| `sequencing_depth` | `total_reads` per row |
+| `pathogen_shedding_to_reads_scale`, `background_read_fraction` | Place shedder prevalence on the read-fraction scale metagenomics reports |
+| `assay_mode` | `qpcr` \| `amplicon` \| `metagenomic` (default) \| `long_read` — what the laboratory reports off the tank (§1.3 addendum) |
+| `qpcr`, `amplicon`, `long_read` | Optional per-mode calibration blocks (standard curve, LOD, extraction recovery, depth, turnaround) |
+| `pathogen` / `pathogen_id` | Delay-catalog key written on samples / ABM profile counted as shedding |
+
+The tank advances every epoch whether or not a sample is drawn, because the
+smearing is physical rather than an artifact of observation. Rows match
+`WastewaterSample` (§3) and reach the fit via the sentinel line list;
+`concentration_copies_per_l` and `clr_anomaly_score` stay optional — the
+simulator has no qPCR observable (§1.3).
+
+Multiple taps in one epoch are **correlated replicates**, not independent
+likelihood terms: `pool_wastewater` collapses an epoch's rows into one trial
+with a capped effective depth, so spatial coverage sharpens an epoch instead of
+multiplying the evidence. `fit_sentinel_fleet` therefore takes
+`--wastewater-residence-hours` and `--wastewater-max-effective-reads`, so a cell
+can be fit under the residence time it was actually sampled with.
+
+The operating envelope this opens up is scanned by `sentinel_ww_ops_scan_v1`
+(4230 runs) — see `docs/sentinel_wastewater_ops_scan.md`.
+
+| PR | Content | Est. |
+|---|---|---|
+| 11 | ✅ `wastewater_ops.py` generator + `wastewater_surveillance` config + `sentinel_ww_ops_scan_v1` design/manifest + residence/effective-read fit controls | 1 |

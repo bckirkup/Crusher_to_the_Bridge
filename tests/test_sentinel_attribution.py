@@ -336,10 +336,21 @@ def test_incidence_respects_the_group_secondary_share() -> None:
     assert incidence[GROUPS.index(PASSENGER)].sum() > incidence[GROUPS.index(CREW)].sum()
 
 
-def test_pax_ashore_cells_exist_for_both_ports() -> None:
-    """Guards the group mapping the data builder relies on."""
+def test_pax_ashore_cells_exist_for_every_called_port() -> None:
+    """Guards the group mapping the data builder relies on.
+
+    The home port is called twice, so it gets a cell too; without ashore
+    windows on those days the cell carries no exposure and drops out of the
+    fitted design rather than contributing a hazard with no denominator.
+    """
     v = voyage()
     b = bundle([40])
     design = build_exposure_design(v, b, INCUBATION)
     ashore_ports = {c.port_id for c in design.port_cells if c.stratum == PAX_ASHORE}
-    assert ashore_ports == {"MXCZM", "KYGEC"}
+    assert ashore_ports == {"MXCZM", "KYGEC", "USMIA"}
+    home = next(
+        c for c in design.port_cells if c.port_id == "USMIA" and c.stratum == PAX_ASHORE
+    )
+    assert home.person_hours_ashore == 0.0
+    assert home.log_offset is None
+    assert {c.port_id for c in design.usable_cells} == {"MXCZM", "KYGEC"}
