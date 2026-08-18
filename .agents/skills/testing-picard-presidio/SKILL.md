@@ -36,13 +36,18 @@ PYTHONPATH=. python3 -m pytest \
   tests/test_py_contam_bridge.py \
   tests/test_contam_engine_compare.py \
   tests/test_mega_cruise_campaign.py \
+  tests/test_tier_iterators.py \
+  tests/test_campaign_boundaries.py \
   tests/test_outbreak_response_architecture.py \
   tests/test_pathogen_overrides.py \
   tests/test_cabin_corridor_transmission.py \
   tests/test_shedding_variance_cabin_mates.py \
+  tests/test_ship_epoch_helpers.py \
+  tests/test_sentinel_fleet_columns.py \
   tests/test_density_contact.py \
   tests/test_multi_pathogen_model_phase_a.py \
   tests/test_multi_pathogen_model_phase_b.py \
+  tests/test_boundary_decision_model.py \
   -v --tb=short
 ```
 
@@ -77,7 +82,7 @@ check-jsonschema --schemafile schemas/utility_observation_bundle.schema.json \
 | Workflow | When |
 |----------|------|
 | `.github/workflows/ci.yml` | All `main` PRs — full pytest (~875) + Presidio smoke + import hygiene + OIS verify + Docker campaign smoke |
-| `.github/workflows/picard-presidio.yml` | `main` and `cursor/**` — framework slice (~190+ tests, incl. density contact + multi-pathogen Phase A/B + outbreak response) + Stackelberg/platform schema checks + Presidio smoke |
+| `.github/workflows/picard-presidio.yml` | `main` and `cursor/**` — framework slice (~190+ tests, incl. density contact + multi-pathogen Phase A/B + outbreak response + campaign/ship/Stan boundary tests) + Stackelberg/platform schema checks + Presidio smoke |
 
 Replicate main CI framework steps:
 

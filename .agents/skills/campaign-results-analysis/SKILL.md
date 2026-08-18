@@ -119,3 +119,5 @@ whether to escalate Fargate memory or just re-submit Spot.
 - Local campaign ops: `.agents/skills/mega-cruise-campaign-local/SKILL.md`
 - AWS deploy gotchas: `.agents/skills/aws-batch-campaign/SKILL.md`
 - Canonical deploy doc: `deploy/aws/README.md`
+- Fleet Stan column builders: `picard_framework/analysis/stan/_sentinel_fleet_reference.py`
+  and `_sentinel_fleet_data.py`; lock with `tests/test_sentinel_fleet_columns.py`

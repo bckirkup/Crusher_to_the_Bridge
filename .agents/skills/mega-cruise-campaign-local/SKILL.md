@@ -1,6 +1,6 @@
 ---
 name: mega-cruise-campaign-local
-description: Run and validate the ~17780-run mega cruise campaign locally (smoke, dry-run, tiers, resume, sharding) before AWS Batch. Use when editing campaign_runner.py, campaign_manifest.json, run_campaign scripts, or preparing a Batch submit.
+description: Run and validate the ~17780-run mega cruise campaign locally (smoke, dry-run, tiers, resume, sharding) before AWS Batch. Use when editing campaign_runner.py, tier_iterators.py, campaign_manifest.json, run_campaign scripts, or preparing a Batch submit.
 ---
 
 # Mega cruise campaign (local)
@@ -51,16 +51,27 @@ containing `run_spec.json`, `summary.json` (SIR + costs + `parameters` + `derive
 and compact `timeseries.json`. Use `--full-telemetry` only when you need history /
 lab notebook / ground truth (much larger).
 
+`generate_tier_runs` in `campaign_runner.py` dispatches `t1`–`t16` and
+calibration shorts (`c1`–`c6`, `a2`, `b1`, `b2`) through
+`tier_iterators.dispatch_standard_or_calibration` (a plain function that
+returns an iterator or `None` — not a generator). `sr*` and `vd*` families
+stay in `campaign_runner.py`. Nested cartesian products in new iterators
+use `itertools.product` so new functions stay at cognitive complexity ≤15.
+
 ## Tests
 
 ```bash
-python3 -m pytest tests/test_mega_cruise_campaign.py -v --tb=short
+python3 -m pytest tests/test_mega_cruise_campaign.py \
+  tests/test_tier_iterators.py tests/test_campaign_boundaries.py -v --tb=short
 ```
 
-Covers dry-run counts, surveillance ladder divergence, OA/compliance/immunity
-sweeps, smoke zip layout, S3 resume mocks, HVAC OA sensitivity, shard
-partitioning, and Campaign v5 T11/T15/T16 generators
-(decision latency, SOP AR thresholds, reluctant fraction).
+`test_mega_cruise_campaign.py` is the behavior lock for dry-run cartesian
+counts, surveillance ladder divergence, OA/compliance/immunity sweeps, smoke
+zip layout, S3 resume mocks, HVAC OA sensitivity, shard partitioning, and
+Campaign v5 T11/T15/T16 generators (decision latency, SOP AR thresholds,
+reluctant fraction). `test_tier_iterators.py` locks the extracted iterator
+table and seed grading; `test_campaign_boundaries.py` locks HVAC factor
+mapping, shard partitions, and unknown-tier `ValueError`.
 
 Outbreak-response knobs: skill `outbreak-response-architecture` +
 `docs/tiered_escalation_spec.md`. Also run:
@@ -93,7 +104,8 @@ python3 -m pytest tests/test_density_contact.py \
 
 1. `--dry-run` count matches README (~17,780) for the current manifest.
 2. `--smoke` produces a valid zip under `telemetry_buffer/mega_cruise_campaign/`.
-3. `tests/test_mega_cruise_campaign.py` green.
+3. `tests/test_mega_cruise_campaign.py`, `tests/test_tier_iterators.py`, and
+   `tests/test_campaign_boundaries.py` green.
 4. Docker image smoke (optional locally, required in main CI when Docker available):
 
 ```bash

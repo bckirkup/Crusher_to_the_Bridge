@@ -619,7 +619,10 @@ python3 -m pytest tests/test_wearable_enhanced.py       # multi-device, confound
 python3 -m pytest tests/test_sequencing_config.py      # config.yaml read_depth wiring
 python3 -m pytest tests/test_cost_accounting.py        # per-test debits and materials telemetry
 python3 -m pytest tests/test_operational_impact.py     # OIS weight computation
-python3 -m pytest tests/test_action_applier.py         # activate_sop, verification queue, behavioral kinds
+python3 -m pytest tests/test_action_applier.py         # dispatch table, missing-ctx no-ops, behavioral kinds
+python3 -m pytest tests/test_tier_iterators.py tests/test_campaign_boundaries.py  # campaign iterator seams
+python3 -m pytest tests/test_ship_epoch_helpers.py     # epoch merge / belief clamp
+python3 -m pytest tests/test_sentinel_fleet_columns.py # Stan fleet column builders
 python3 -m pytest tests/test_behavioral_syndromic.py   # hide_symptoms, belief-scaled sick-call
 python3 -m pytest tests/test_transmission_pathways.py  # food/environmental pool init
 python3 -m pytest tests/test_dashboard.py              # LCARS dashboard imports

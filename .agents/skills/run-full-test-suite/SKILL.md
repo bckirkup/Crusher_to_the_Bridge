@@ -89,8 +89,10 @@ python3 -m pytest tests/test_protocol_engine.py -v --tb=short
 # Cost ledger (budget, labor, materials, OIS)
 python3 -m pytest tests/test_cost_ledger.py tests/test_operational_impact.py -v --tb=short
 
-# Action envelopes & behavioral syndromic (Picard / Stackelberg)
-python3 -m pytest tests/test_action_applier.py tests/test_behavioral_syndromic.py -v --tb=short
+# Action envelopes, campaign seams, and Stan fleet columns
+python3 -m pytest tests/test_action_applier.py tests/test_behavioral_syndromic.py \
+  tests/test_tier_iterators.py tests/test_campaign_boundaries.py \
+  tests/test_ship_epoch_helpers.py tests/test_sentinel_fleet_columns.py -v --tb=short
 
 # Law compliance (architectural invariants, extended to picard_framework/crusher_labs/decision_engine)
 python3 -m pytest tests/test_law_compliance.py -v --tb=short
@@ -235,7 +237,11 @@ python3 -c "import json; c=json.load(open('telemetry_buffer/simulation_history.j
 | `test_golden_orchestrator.py` | 2 | `orchestrator.py` | 24-epoch reproducibility via Picard |
 | `test_presidio_runner.py` | 1 | `presidio_runner.py` | Fleet smoke, experience store |
 | `test_cost_accounting.py` | 1 | `orchestrator_record.py` | Per-test debits and materials telemetry |
-| `test_action_applier.py` | 1 | `action_applier.py` | Executable action kinds |
+| `test_action_applier.py` | 7 | `action_applier.py` | Handler table, missing-ctx no-ops, isolation/stance |
+| `test_tier_iterators.py` | 9 | `tier_iterators.py` | Campaign iterator table and seed grading |
+| `test_campaign_boundaries.py` | 11 | `campaign_runner.py` | HVAC mapping, shards, unknown-tier errors |
+| `test_ship_epoch_helpers.py` | 7 | `ship_simulation.py` | `_merge_applied`, belief clamp |
+| `test_sentinel_fleet_columns.py` | 5 | `_sentinel_fleet_reference.py` | 1-based Stan names, WW columns |
 
 ## Golden Test Values
 

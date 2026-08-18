@@ -1638,7 +1638,11 @@ See `AGENTS.md` for cloud agent commands.
 | `test_sequencing_config.py` | `config.yaml` read_depth for WW grid and modalities |
 | `test_cost_accounting.py` | Per-test debits and materials in telemetry |
 | `test_operational_impact.py` | OIS weight computation and galley-type matching |
-| `test_action_applier.py` | `activate_sop`, verification queue, behavioral overrides |
+| `test_action_applier.py` | `activate_sop`, verification queue, handler dispatch, missing-ctx no-ops |
+| `test_tier_iterators.py` | Campaign `t1`–`t16` table, cartesian seed grading, latency/lockdown helpers |
+| `test_campaign_boundaries.py` | HVAC factor mapping, shard partitions, unknown-tier `ValueError` |
+| `test_ship_epoch_helpers.py` | `_merge_applied`, belief clamp in `[0, 1]` |
+| `test_sentinel_fleet_columns.py` | 1-based Stan names, non-negative secondary cases, WW columns |
 | `test_behavioral_syndromic.py` | `hide_symptoms`, belief-scaled sick-call |
 | `test_infection_counters.py` | Attack-rate counters, thresholds, `exempt_classes` |
 | `test_transmission_pathways.py` | Food/environmental pool initialization |

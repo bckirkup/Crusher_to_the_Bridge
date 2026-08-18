@@ -65,7 +65,7 @@ Install from the hash-pinned lockfile: `pip install --only-binary=:all: --requir
 
 **Picard/Presidio** (`.github/workflows/picard-presidio.yml` on `main` and `cursor/**`):
 
-- Framework-focused pytest slice (~190+ tests: Picard, Presidio, Stackelberg, OIS, behavioral, long-read, TAT, enterprise platforms, agent axes, sequencing config, wearable scoring, cascade entry, ContamX subset, mega-cruise campaign, outbreak response, golden Picard, cabin/shedding, pathogen overrides, density contact, multi-pathogen Phase A/B)
+- Framework-focused pytest slice (~190+ tests: Picard, Presidio, Stackelberg, OIS, behavioral, long-read, TAT, enterprise platforms, agent axes, sequencing config, wearable scoring, cascade entry, ContamX subset, mega-cruise campaign, campaign/ship/Stan boundary tests, outbreak response, golden Picard, cabin/shedding, pathogen overrides, density contact, multi-pathogen Phase A/B)
 - Stackelberg + platform JSON schema validation (all `data/platforms/*/`)
 - Presidio smoke
 
@@ -77,6 +77,7 @@ Install from the hash-pinned lockfile: `pip install --only-binary=:all: --requir
 | `presidio-fleet-run` | `presidio_runner.py`, fleet configs |
 | `stackelberg-utility-export` | Social config, utility bundles, action import |
 | `testing-picard-presidio` | Before PRs on framework code |
+| `sonar-quality` | Before source/workflow edits; complexity-backlog splits (C901 117, new-code 15) |
 | `configuring-stackelberg-social` | Adding/editing diffusion, class interactions, profiles |
 | `operational-impact-behavioral-policies` | OIS weights, action kinds, ThresholdBeliefPolicy |
 | `outbreak-response-architecture` | Escalation levels, decision latency, bimodal compliance, T11/T15/T16 |
@@ -113,6 +114,7 @@ Install from the hash-pinned lockfile: `pip install --only-binary=:all: --requir
 - Utility **weights and optimization** are out-of-repo; only feature export and action apply are in-repo.
 - Nine ship platforms in `data/platforms/` (including fiction-adapted Enterprise bundles and legacy `messy_cruise_500`); see `README.md` Platforms table.
 - **Wearable cascade entry** uses confounder-aware `infection_score` (not raw `anomaly_count`) via `diagnostic_cascade.entry.wearable_alert_fusion` or defaults in `data/config/diagnostic_cascade*.json`. Fleet stoplight SOPs (SOP-013/014) still use shipwide `anomaly_rate`.
+- **Complexity backlog:** new functions stay at cognitive complexity ≤15. Campaign `t1`–`t16` / calibration iterators live in `tier_iterators.py`; `ShipSimulation.step` is `_begin_epoch` plus `_step_*` phases. See skill `sonar-quality`.
 - **Outbreak response architecture:** SOP policy (attack-rate escalation + `min_escalation_status`), organizational decision latency (`escalation.decision_latency` / SOP `activation_delay_epochs`), and bimodal compliance (compliant/reluctant/defiant) are separate systems — see `docs/tiered_escalation_spec.md` and skill `outbreak-response-architecture`. Default `lockdown_attack_rate: never` for n=20 smokes; mega-cruise campaign injects `0.05`.
 - **Shedding variance:** `shedding_variance_log10` on pathogen profiles draws a persistent per-agent multiplier at infection (`docs/SHEDDING_AND_CABINMATES.md`).
 - **Cabin-mates:** `mega_cruise_5000` `Cabin_Corridor` zones pair agents into staterooms at init; confinement direct contact is cabin-mate-aware (`assign_cabin_mates` in `orchestrator_init.py`).

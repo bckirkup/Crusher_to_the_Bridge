@@ -35,6 +35,10 @@ When the Picard run spec includes a `social` block, each epoch follows this orde
 26. **Operational impact score (OIS)** accounting
 27. `record_epoch` → append to `simulation_history`
 
+Picard implements this order as `_begin_epoch` plus `_step_*` methods sharing
+`_EpochWork`. Extracting phases must not reorder these steps; golden Picard is
+the behavior lock.
+
 Finalization writes `simulation_history.json` and `artificial_lab_notebook.json`.
 
 ### Sick-call vs zone contacts

@@ -11,10 +11,11 @@ pre-commit install
 
 Read `.agents/skills/sonar-quality/SKILL.md` before changing code or workflows.
 
-Crusher's local Ruff pre-commit hook uses the repository `C901` ceiling of 117:
-the backlog contains 128 `S3776` findings, while Sonar's new-code gate holds
-new functions to cognitive complexity 15. The ceiling only ever ratchets
-downward.
+Crusher's local Ruff pre-commit hook uses the repository `C901` ceiling of 117.
+Sonar's new-code gate holds new functions to cognitive complexity 15. Dedicated
+complexity-backlog splits are allowed as their own change; do not mix them into
+Sentinel analysis. The last documented official `S3776` count was 128 — update
+it only from a live Sonar scan. The ceiling only ever ratchets downward.
 
 ## Validation
 
