@@ -24,6 +24,7 @@ import numpy as np
 
 from picard_framework.analysis._io import ensure_out_dir, safe_path, write_json
 from picard_framework.analysis.sentinel.port_health import (
+    CHANNEL_GENOTYPING,
     CHANNELS,
     PortEpidemiologicalState,
     PortSurveillanceCapability,
@@ -209,6 +210,7 @@ def port_signal_table(ledger: Mapping[str, Any]) -> list[dict[str, Any]]:
     ports the argument is about.
     """
     table: list[dict[str, Any]] = []
+    kept = set((ledger.get("ablation") or {}).get("channels") or CHANNELS)
     for port_id, states in sorted(states_by_port(ledger).items()):
         rates = [
             s.syndromic_rate_per_100k
@@ -225,6 +227,17 @@ def port_signal_table(ledger: Mapping[str, Any]) -> list[dict[str, Any]]:
             for s in states
             if s.lab_confirmed_cases is not None
         ]
+        # None where the channel is ablated or the port runs no typing, so a
+        # port that reports no genotype stays distinguishable from a port that
+        # was never asked.
+        typing_live = CHANNEL_GENOTYPING in kept and any(
+            s.genotyping_capable for s in states
+        )
+        genotyped = (
+            _mean([1.0 if s.genotype else 0.0 for s in states])
+            if typing_live
+            else None
+        )
         table.append({
             "port_id": port_id,
             "n_days": len(states),
@@ -239,6 +252,7 @@ def port_signal_table(ledger: Mapping[str, Any]) -> list[dict[str, Any]]:
             "n_wbe_samples": len(sampled),
             "wbe_detection_fraction": _mean(detections),
             "mean_observed_log10_gc_per_l": _mean(log_gc),
+            "genotyped_day_fraction": genotyped,
             "alert_levels": sorted({s.alert_level for s in states}),
         })
     return table

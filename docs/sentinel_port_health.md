@@ -163,6 +163,51 @@ and not of the visit.
 Each port draws from its own RNG stream keyed by UN-LOCODE, so adding a port to
 an itinerary cannot renumber another port's draws.
 
+## Multiphase analysis
+
+`picard_framework/analysis/sentinel/multiphase.py` runs the staircase — one
+*separate* fit per phase, so a change in an interval belongs to the channel that
+was added and nothing else:
+
+| Phase | Shipboard WW in the likelihood | Port channels compared |
+|---|---|---|
+| `clinical_only` | no | — |
+| `clinical_wastewater` | yes | — |
+| `clinical_port_syndromic` | yes | syndromic |
+| `clinical_port_wbe` | yes | wbe |
+| `clinical_port_laboratory` | yes | lab |
+| `clinical_port_genotyping` | yes | genotyping |
+| `full_surveillance` | yes | all four |
+
+```bash
+python3 -m picard_framework.analysis.sentinel.multiphase \
+  picard_framework/analysis/sentinel/data/example_fleet.json \
+  --ledger telemetry_buffer/portout/port_surveillance_ledger.json \
+  --out telemetry_buffer/multiphase --engine numpy --smoke
+```
+
+Each phase directory gets the usual fit outputs plus `port_analysis_view.json`,
+`port_signal_table.json`, and `phase_summary.json`; the run root gets
+`multiphase_summary.json` and `multiphase_comparisons.csv`.
+
+Two invariants:
+
+- **Port data never enters the shipboard likelihood.** Only the manifest and the
+  wastewater switch reach `fit_sentinel_fleet`; the ledger is read *after*
+  sampling. A signal that fed the fit could not then validate it, and no
+  observation acquires a port label of its own (spec §1.3).
+- **Missing is missing.** A channel a port does not run, or that the phase
+  ablated, is excluded from the correlation — never scored as zero, which would
+  manufacture agreement at exactly the surveillance-desert ports the argument is
+  about. Each comparison row carries `n_ports` and the `excluded_ports` that
+  produced it.
+
+Every phase also reports a `truth` row (inferred λ_p against latent prevalence).
+That is the recovery ceiling: a channel correlation that beats it is reading
+noise. Correlations are `None` below three usable ports or with no spread, and a
+phase whose fit came back `skipped` (no CmdStan, no posterior) fails the run
+rather than reading as a successful comparison.
+
 ## Limitations
 
 - **Flat community prevalence.** A port's prevalence is constant across the
