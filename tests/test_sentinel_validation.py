@@ -52,6 +52,16 @@ DRAWS = 120
 WARMUP = 300
 THIN = 1
 
+# The onsets below are simulated at ``r_onboard=0.4``, so the fits have to run
+# under a prior that admits that value. The shipped default is the CTB Stage B
+# norovirus posterior (0.06 +/- 0.02), which puts 0.4 seventeen prior SDs out:
+# under it the sampler cannot move R at all, every contrast lands on the port
+# hazards, and a self-consistency suite stops testing the density it means to.
+# Recovering a truth requires a prior containing it; the campaign's calibration
+# is a separate claim, made elsewhere.
+R_PRIOR_MEAN = 0.6
+R_PRIOR_SD = 0.4
+
 
 def design_data(
     *,
@@ -61,7 +71,15 @@ def design_data(
     v = voyage(crew_fraction=crew_fraction)
     b = bundle([], observation_end_epoch=observation_end_epoch)
     design = build_exposure_design(v, b, INCUBATION)
-    return build_sentinel_attribution_data(design, v, b, INCUBATION, GENERATION)
+    return build_sentinel_attribution_data(
+        design,
+        v,
+        b,
+        INCUBATION,
+        GENERATION,
+        r_prior_mean=R_PRIOR_MEAN,
+        r_prior_sd=R_PRIOR_SD,
+    )
 
 
 def spaced_design_data(
@@ -116,7 +134,15 @@ def spaced_design_data(
     )
     b = bundle([], observation_end_epoch=observation_end_epoch)
     design = build_exposure_design(v, b, INCUBATION)
-    return build_sentinel_attribution_data(design, v, b, INCUBATION, GENERATION)
+    return build_sentinel_attribution_data(
+        design,
+        v,
+        b,
+        INCUBATION,
+        GENERATION,
+        r_prior_mean=R_PRIOR_MEAN,
+        r_prior_sd=R_PRIOR_SD,
+    )
 
 
 def simulate(
@@ -182,7 +208,8 @@ def test_null_hazards_do_not_separate_the_ports() -> None:
     posterior = fit(simulate(data, lambda_port=[flat, flat], seed=11))
     lo1, hi1 = interval(posterior, "lambda_port[1]")
     lo2, hi2 = interval(posterior, "lambda_port[2]")
-    assert lo1 <= hi2 and lo2 <= hi1, "flat hazards produced disjoint port intervals"
+    assert lo1 <= hi2, "flat hazards produced disjoint port intervals"
+    assert lo2 <= hi1, "flat hazards produced disjoint port intervals"
     ratio = np.mean(posterior["lambda_port[1]"]) / np.mean(posterior["lambda_port[2]"])
     assert 0.25 < ratio < 4.0, f"flat hazards produced a {ratio:.2f}x port difference"
 
@@ -327,7 +354,8 @@ def test_fixture_posterior_summarizes_to_port_hazards() -> None:
     for e in estimates:
         assert 0.0 < e.hazard_q05 <= e.hazard_mean <= e.hazard_q95
         assert e.n_attributed_cases > 0.0
-        assert e.censoring_corrected and e.port_resolution_adequate
+        assert e.censoring_corrected
+        assert e.port_resolution_adequate
         assert e.attribution_share is None  # single-ship model reports no share
     assert estimates[0].port_visit_key == "KYGEC@2026-01-15"
     assert estimates[1].port_visit_key is None

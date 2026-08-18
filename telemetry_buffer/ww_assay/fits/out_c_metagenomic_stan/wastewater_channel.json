@@ -1,0 +1,19 @@
+{
+  "concentration_fitted": false,
+  "concentration_mean": 889421.055945,
+  "enabled": true,
+  "fitted": true,
+  "loglik_clinical": -254.0087999,
+  "loglik_wastewater": -13.174244445,
+  "max_effective_reads": 1000000,
+  "mean_shedding_hours": 184.592,
+  "n_concentration_censored": 0,
+  "n_concentration_samples": 0,
+  "n_pooled_samples": 7,
+  "n_raw_samples": 7,
+  "pathogen": "norovirus",
+  "residence_lag_epochs": 2,
+  "slope_mean": 0.1516736714375,
+  "slope_q05": 0.0043356726,
+  "slope_q95": 0.4443842324999997
+}

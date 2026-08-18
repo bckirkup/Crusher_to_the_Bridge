@@ -1,0 +1,2 @@
+visit_key,port_id,week,hazard_mean,hazard_q05,hazard_q95,n_attributed_cases,person_hours_ashore
+MXCZM@seed7/d1,MXCZM,seed7/unscheduled,0.055210406288561505,4.723984640000001e-05,0.27301614199999963,4.81632579923365,91.0

@@ -1,0 +1,181 @@
+{
+  "censoring_corrected": true,
+  "epoch_duration_hours": 1.0,
+  "groups": [
+    "passenger",
+    "crew"
+  ],
+  "incubation_iqr_hours": 19.0,
+  "model": "sentinel_fleet",
+  "n_cases": 12,
+  "pathogen": "norovirus",
+  "person_hours_ashore": {
+    "MXCZM@seed7/d1": 91.0
+  },
+  "port_resolution_adequate": true,
+  "ports": [
+    "MXCZM"
+  ],
+  "ships": [
+    "destroyer_baseline"
+  ],
+  "visits": [
+    {
+      "person_hours_ashore": 91.0,
+      "port_id": "MXCZM",
+      "visit_key": "MXCZM@seed7/d1",
+      "week": "seed7/unscheduled"
+    }
+  ],
+  "voyages": [
+    {
+      "ascertainment": 1.0,
+      "crew_repeat": {},
+      "n_cases": 12,
+      "observation_end_epoch": 15,
+      "port_resolution_adequate": true,
+      "ports": [
+        "MXCZM"
+      ],
+      "ship_id": "destroyer_baseline",
+      "voyage_id": "seed7"
+    }
+  ],
+  "wastewater": {
+    "concentrations": [
+      {
+        "censored": false,
+        "epoch": 1,
+        "log10_copies_per_l": 7.752193,
+        "n_collection_points": 1,
+        "n_detected": 1,
+        "voyage_id": "seed7"
+      },
+      {
+        "censored": false,
+        "epoch": 2,
+        "log10_copies_per_l": 7.620373,
+        "n_collection_points": 1,
+        "n_detected": 1,
+        "voyage_id": "seed7"
+      },
+      {
+        "censored": false,
+        "epoch": 3,
+        "log10_copies_per_l": 8.041453,
+        "n_collection_points": 1,
+        "n_detected": 1,
+        "voyage_id": "seed7"
+      },
+      {
+        "censored": false,
+        "epoch": 4,
+        "log10_copies_per_l": 7.855087,
+        "n_collection_points": 1,
+        "n_detected": 1,
+        "voyage_id": "seed7"
+      },
+      {
+        "censored": false,
+        "epoch": 5,
+        "log10_copies_per_l": 7.73426,
+        "n_collection_points": 1,
+        "n_detected": 1,
+        "voyage_id": "seed7"
+      },
+      {
+        "censored": false,
+        "epoch": 6,
+        "log10_copies_per_l": 7.67979,
+        "n_collection_points": 1,
+        "n_detected": 1,
+        "voyage_id": "seed7"
+      },
+      {
+        "censored": false,
+        "epoch": 7,
+        "log10_copies_per_l": 7.212412,
+        "n_collection_points": 1,
+        "n_detected": 1,
+        "voyage_id": "seed7"
+      },
+      {
+        "censored": false,
+        "epoch": 8,
+        "log10_copies_per_l": 6.753554,
+        "n_collection_points": 1,
+        "n_detected": 1,
+        "voyage_id": "seed7"
+      },
+      {
+        "censored": false,
+        "epoch": 9,
+        "log10_copies_per_l": 6.866182,
+        "n_collection_points": 1,
+        "n_detected": 1,
+        "voyage_id": "seed7"
+      },
+      {
+        "censored": false,
+        "epoch": 10,
+        "log10_copies_per_l": 6.570965,
+        "n_collection_points": 1,
+        "n_detected": 1,
+        "voyage_id": "seed7"
+      },
+      {
+        "censored": false,
+        "epoch": 11,
+        "log10_copies_per_l": 6.471175,
+        "n_collection_points": 1,
+        "n_detected": 1,
+        "voyage_id": "seed7"
+      },
+      {
+        "censored": false,
+        "epoch": 12,
+        "log10_copies_per_l": 6.41086,
+        "n_collection_points": 1,
+        "n_detected": 1,
+        "voyage_id": "seed7"
+      },
+      {
+        "censored": true,
+        "epoch": 13,
+        "log10_copies_per_l": 6.369237,
+        "n_collection_points": 1,
+        "n_detected": 0,
+        "voyage_id": "seed7"
+      },
+      {
+        "censored": true,
+        "epoch": 14,
+        "log10_copies_per_l": 6.369237,
+        "n_collection_points": 1,
+        "n_detected": 0,
+        "voyage_id": "seed7"
+      },
+      {
+        "censored": true,
+        "epoch": 15,
+        "log10_copies_per_l": 6.369237,
+        "n_collection_points": 1,
+        "n_detected": 0,
+        "voyage_id": "seed7"
+      }
+    ],
+    "enabled": true,
+    "max_effective_reads": 1000000,
+    "mean_shedding_hours": 184.592,
+    "n_concentration_censored": 3,
+    "n_concentration_samples": 15,
+    "n_pooled_samples": 0,
+    "n_raw_samples": 0,
+    "pathogen": "norovirus",
+    "residence_lag_epochs": 2,
+    "samples": []
+  },
+  "weeks": [
+    "seed7/unscheduled"
+  ]
+}

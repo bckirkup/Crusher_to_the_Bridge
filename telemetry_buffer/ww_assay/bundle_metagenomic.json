@@ -1,0 +1,278 @@
+{
+  "clinical_cases": [
+    {
+      "crew": false,
+      "genotype": null,
+      "hours_ashore": {},
+      "onset_epoch": 1,
+      "pathogen": null,
+      "person_id": "0",
+      "report_epoch": null,
+      "reported_via": "unreported"
+    },
+    {
+      "crew": false,
+      "genotype": null,
+      "hours_ashore": {
+        "MXCZM": 7.0
+      },
+      "onset_epoch": 1,
+      "pathogen": "norwalk_gi",
+      "person_id": "1",
+      "report_epoch": 1,
+      "reported_via": "sick_call"
+    },
+    {
+      "crew": false,
+      "genotype": null,
+      "hours_ashore": {
+        "MXCZM": 7.0
+      },
+      "onset_epoch": 1,
+      "pathogen": "norwalk_gi",
+      "person_id": "2",
+      "report_epoch": null,
+      "reported_via": "unreported"
+    },
+    {
+      "crew": false,
+      "genotype": null,
+      "hours_ashore": {
+        "MXCZM": 7.0
+      },
+      "onset_epoch": 1,
+      "pathogen": "norwalk_gi",
+      "person_id": "3",
+      "report_epoch": 5,
+      "reported_via": "cascade"
+    },
+    {
+      "crew": false,
+      "genotype": null,
+      "hours_ashore": {
+        "MXCZM": 7.0
+      },
+      "onset_epoch": 1,
+      "pathogen": "norwalk_gi",
+      "person_id": "7",
+      "report_epoch": null,
+      "reported_via": "unreported"
+    },
+    {
+      "crew": false,
+      "genotype": null,
+      "hours_ashore": {
+        "MXCZM": 7.0
+      },
+      "onset_epoch": 1,
+      "pathogen": "norwalk_gi",
+      "person_id": "12",
+      "report_epoch": 1,
+      "reported_via": "wearable"
+    },
+    {
+      "crew": false,
+      "genotype": null,
+      "hours_ashore": {},
+      "onset_epoch": 1,
+      "pathogen": "norwalk_gi",
+      "person_id": "13",
+      "report_epoch": 1,
+      "reported_via": "sick_call"
+    },
+    {
+      "crew": true,
+      "genotype": null,
+      "hours_ashore": {
+        "MXCZM": 7.0
+      },
+      "onset_epoch": 1,
+      "pathogen": "norwalk_gi",
+      "person_id": "14",
+      "report_epoch": 6,
+      "reported_via": "cascade"
+    },
+    {
+      "crew": true,
+      "genotype": null,
+      "hours_ashore": {
+        "MXCZM": 7.0
+      },
+      "onset_epoch": 1,
+      "pathogen": "norwalk_gi",
+      "person_id": "15",
+      "report_epoch": 2,
+      "reported_via": "cascade"
+    },
+    {
+      "crew": true,
+      "genotype": null,
+      "hours_ashore": {
+        "MXCZM": 7.0
+      },
+      "onset_epoch": 1,
+      "pathogen": "norwalk_gi",
+      "person_id": "17",
+      "report_epoch": 1,
+      "reported_via": "wearable"
+    },
+    {
+      "crew": true,
+      "genotype": null,
+      "hours_ashore": {
+        "MXCZM": 7.0
+      },
+      "onset_epoch": 1,
+      "pathogen": "norwalk_gi",
+      "person_id": "19",
+      "report_epoch": 1,
+      "reported_via": "wearable"
+    },
+    {
+      "crew": false,
+      "genotype": null,
+      "hours_ashore": {},
+      "onset_epoch": 6,
+      "pathogen": "sars_cov2_resp",
+      "person_id": "10",
+      "report_epoch": 6,
+      "reported_via": "sick_call"
+    }
+  ],
+  "epoch_duration_hours": 1.0,
+  "exposure_totals": {
+    "MXCZM": {
+      "n_crew_ashore": 6,
+      "n_passengers_ashore": 7,
+      "person_hours_crew": 42.0,
+      "person_hours_passenger": 49.0
+    }
+  },
+  "n_crew": 6,
+  "n_passengers": 14,
+  "observation_end_epoch": 7,
+  "platform_class": "destroyer_baseline",
+  "schema_version": "1.0.0",
+  "ship_id": "destroyer_baseline",
+  "truth_introductions": [
+    {
+      "epoch": 1,
+      "pathogen": "norwalk_gi",
+      "person_id": "1",
+      "port_id": "MXCZM"
+    },
+    {
+      "epoch": 1,
+      "pathogen": "norwalk_gi",
+      "person_id": "2",
+      "port_id": "MXCZM"
+    },
+    {
+      "epoch": 1,
+      "pathogen": "norwalk_gi",
+      "person_id": "3",
+      "port_id": "MXCZM"
+    },
+    {
+      "epoch": 1,
+      "pathogen": "norwalk_gi",
+      "person_id": "7",
+      "port_id": "MXCZM"
+    },
+    {
+      "epoch": 1,
+      "pathogen": "norwalk_gi",
+      "person_id": "12",
+      "port_id": "MXCZM"
+    },
+    {
+      "epoch": 1,
+      "pathogen": "norwalk_gi",
+      "person_id": "14",
+      "port_id": "MXCZM"
+    },
+    {
+      "epoch": 1,
+      "pathogen": "norwalk_gi",
+      "person_id": "15",
+      "port_id": "MXCZM"
+    },
+    {
+      "epoch": 1,
+      "pathogen": "norwalk_gi",
+      "person_id": "17",
+      "port_id": "MXCZM"
+    },
+    {
+      "epoch": 1,
+      "pathogen": "norwalk_gi",
+      "person_id": "18",
+      "port_id": "MXCZM"
+    },
+    {
+      "epoch": 1,
+      "pathogen": "norwalk_gi",
+      "person_id": "19",
+      "port_id": "MXCZM"
+    }
+  ],
+  "voyage_id": "seed7",
+  "wastewater_samples": [
+    {
+      "assay_mode": "metagenomic",
+      "collection_point": "aft_main",
+      "pathogen": "norovirus",
+      "pathogen_reads": 1,
+      "sample_epoch": 1,
+      "total_reads": 250000
+    },
+    {
+      "assay_mode": "metagenomic",
+      "collection_point": "aft_main",
+      "pathogen": "norovirus",
+      "pathogen_reads": 2,
+      "sample_epoch": 2,
+      "total_reads": 250000
+    },
+    {
+      "assay_mode": "metagenomic",
+      "collection_point": "aft_main",
+      "pathogen": "norovirus",
+      "pathogen_reads": 3,
+      "sample_epoch": 3,
+      "total_reads": 250000
+    },
+    {
+      "assay_mode": "metagenomic",
+      "collection_point": "aft_main",
+      "pathogen": "norovirus",
+      "pathogen_reads": 1,
+      "sample_epoch": 4,
+      "total_reads": 250000
+    },
+    {
+      "assay_mode": "metagenomic",
+      "collection_point": "aft_main",
+      "pathogen": "norovirus",
+      "pathogen_reads": 3,
+      "sample_epoch": 5,
+      "total_reads": 250000
+    },
+    {
+      "assay_mode": "metagenomic",
+      "collection_point": "aft_main",
+      "pathogen": "norovirus",
+      "pathogen_reads": 3,
+      "sample_epoch": 6,
+      "total_reads": 250000
+    },
+    {
+      "assay_mode": "metagenomic",
+      "collection_point": "aft_main",
+      "pathogen": "norovirus",
+      "pathogen_reads": 1,
+      "sample_epoch": 7,
+      "total_reads": 250000
+    }
+  ]
+}

@@ -1,0 +1,240 @@
+{
+  "engine": "numpy_rw_mh",
+  "meta": {
+    "censoring_corrected": true,
+    "epoch_duration_hours": 1.0,
+    "groups": [
+      "passenger",
+      "crew"
+    ],
+    "incubation_iqr_hours": 19.0,
+    "model": "sentinel_fleet",
+    "n_cases": 12,
+    "pathogen": "norovirus",
+    "person_hours_ashore": {
+      "MXCZM@seed7/d1": 91.0
+    },
+    "port_resolution_adequate": true,
+    "ports": [
+      "MXCZM"
+    ],
+    "ships": [
+      "destroyer_baseline"
+    ],
+    "visits": [
+      {
+        "person_hours_ashore": 91.0,
+        "port_id": "MXCZM",
+        "visit_key": "MXCZM@seed7/d1",
+        "week": "seed7/unscheduled"
+      }
+    ],
+    "voyages": [
+      {
+        "ascertainment": 1.0,
+        "crew_repeat": {},
+        "n_cases": 12,
+        "observation_end_epoch": 15,
+        "port_resolution_adequate": true,
+        "ports": [
+          "MXCZM"
+        ],
+        "ship_id": "destroyer_baseline",
+        "voyage_id": "seed7"
+      }
+    ],
+    "wastewater": {
+      "concentrations": [
+        {
+          "censored": false,
+          "epoch": 1,
+          "log10_copies_per_l": 7.752193,
+          "n_collection_points": 1,
+          "n_detected": 1,
+          "voyage_id": "seed7"
+        },
+        {
+          "censored": false,
+          "epoch": 2,
+          "log10_copies_per_l": 7.620373,
+          "n_collection_points": 1,
+          "n_detected": 1,
+          "voyage_id": "seed7"
+        },
+        {
+          "censored": false,
+          "epoch": 3,
+          "log10_copies_per_l": 8.041453,
+          "n_collection_points": 1,
+          "n_detected": 1,
+          "voyage_id": "seed7"
+        },
+        {
+          "censored": false,
+          "epoch": 4,
+          "log10_copies_per_l": 7.855087,
+          "n_collection_points": 1,
+          "n_detected": 1,
+          "voyage_id": "seed7"
+        },
+        {
+          "censored": false,
+          "epoch": 5,
+          "log10_copies_per_l": 7.73426,
+          "n_collection_points": 1,
+          "n_detected": 1,
+          "voyage_id": "seed7"
+        },
+        {
+          "censored": false,
+          "epoch": 6,
+          "log10_copies_per_l": 7.67979,
+          "n_collection_points": 1,
+          "n_detected": 1,
+          "voyage_id": "seed7"
+        },
+        {
+          "censored": false,
+          "epoch": 7,
+          "log10_copies_per_l": 7.212412,
+          "n_collection_points": 1,
+          "n_detected": 1,
+          "voyage_id": "seed7"
+        },
+        {
+          "censored": false,
+          "epoch": 8,
+          "log10_copies_per_l": 6.753554,
+          "n_collection_points": 1,
+          "n_detected": 1,
+          "voyage_id": "seed7"
+        },
+        {
+          "censored": false,
+          "epoch": 9,
+          "log10_copies_per_l": 6.866182,
+          "n_collection_points": 1,
+          "n_detected": 1,
+          "voyage_id": "seed7"
+        },
+        {
+          "censored": false,
+          "epoch": 10,
+          "log10_copies_per_l": 6.570965,
+          "n_collection_points": 1,
+          "n_detected": 1,
+          "voyage_id": "seed7"
+        },
+        {
+          "censored": false,
+          "epoch": 11,
+          "log10_copies_per_l": 6.471175,
+          "n_collection_points": 1,
+          "n_detected": 1,
+          "voyage_id": "seed7"
+        },
+        {
+          "censored": false,
+          "epoch": 12,
+          "log10_copies_per_l": 6.41086,
+          "n_collection_points": 1,
+          "n_detected": 1,
+          "voyage_id": "seed7"
+        },
+        {
+          "censored": true,
+          "epoch": 13,
+          "log10_copies_per_l": 6.369237,
+          "n_collection_points": 1,
+          "n_detected": 0,
+          "voyage_id": "seed7"
+        },
+        {
+          "censored": true,
+          "epoch": 14,
+          "log10_copies_per_l": 6.369237,
+          "n_collection_points": 1,
+          "n_detected": 0,
+          "voyage_id": "seed7"
+        },
+        {
+          "censored": true,
+          "epoch": 15,
+          "log10_copies_per_l": 6.369237,
+          "n_collection_points": 1,
+          "n_detected": 0,
+          "voyage_id": "seed7"
+        }
+      ],
+      "enabled": true,
+      "max_effective_reads": 1000000,
+      "mean_shedding_hours": 184.592,
+      "n_concentration_censored": 3,
+      "n_concentration_samples": 15,
+      "n_pooled_samples": 0,
+      "n_raw_samples": 0,
+      "pathogen": "norovirus",
+      "residence_lag_epochs": 2,
+      "samples": []
+    },
+    "weeks": [
+      "seed7/unscheduled"
+    ]
+  },
+  "reason": "reference walker; intervals are indicative, not a NUTS fit",
+  "status": "ok",
+  "summary": {
+    "crew": {
+      "crew_hazard_ratio_mean": 1.3149150387691675,
+      "crew_hazard_ratio_q05": 0.3660212329280569,
+      "crew_hazard_ratio_q95": 4.517066259001641,
+      "repeat_hazard_ratio_mean": 1.0293869210736841,
+      "repeat_hazard_ratio_q05": 0.5565529574055791,
+      "repeat_hazard_ratio_q95": 1.6319963529292738
+    },
+    "fleet_time_confounded": [
+      "MXCZM"
+    ],
+    "hazard_mean": {
+      "MXCZM": 0.03036870333513754
+    },
+    "n_ports": 1,
+    "n_visits": 1,
+    "n_weeks": 1,
+    "onboard": {
+      "aboard_cases_mean": 0.018923362030396268,
+      "import_share_mean": 0.9329156709896779,
+      "import_share_q05": 0.6501625085537918,
+      "import_share_q95": 0.9975959968386203,
+      "secondary_cases_mean": 0.03632798518057905,
+      "ships": [
+        {
+          "lambda_aboard_mean": 9.054240205931229e-05,
+          "r_onboard_mean": 0.7735732345642432,
+          "r_onboard_q05": 0.17112620948018675,
+          "r_onboard_q95": 2.1382160325719908,
+          "ship_id": "destroyer_baseline"
+        }
+      ]
+    },
+    "wastewater": {
+      "conc_intercept_mean": 7.230980617778273,
+      "conc_sigma_mean": 0.8261304300773727,
+      "conc_slope_mean": 0.09564403023126751,
+      "conc_slope_q05": 0.01437104502148994,
+      "conc_slope_q95": 0.22180063668255637,
+      "concentration_fitted": true,
+      "enabled": true,
+      "fitted": false,
+      "loglik_concentration": -18.596508052780862,
+      "max_effective_reads": 1000000,
+      "mean_shedding_hours": 184.592,
+      "n_concentration_censored": 3,
+      "n_concentration_samples": 15,
+      "n_pooled_samples": 0,
+      "n_raw_samples": 0,
+      "pathogen": "norovirus",
+      "residence_lag_epochs": 2
+    }
+  }
+}

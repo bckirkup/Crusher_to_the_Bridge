@@ -1,0 +1,44 @@
+[
+  {
+    "alert_levels": [
+      "normal"
+    ],
+    "mean_lab_confirmed_cases": null,
+    "mean_observed_log10_gc_per_l": null,
+    "mean_syndromic_rate_per_100k": 0.0,
+    "n_days": 7,
+    "n_wbe_samples": 0,
+    "port_id": "KYGEC",
+    "true_community_prevalence": 0.0,
+    "true_log10_gc_per_l": -3.0,
+    "wbe_detection_fraction": null
+  },
+  {
+    "alert_levels": [
+      "elevated"
+    ],
+    "mean_lab_confirmed_cases": null,
+    "mean_observed_log10_gc_per_l": null,
+    "mean_syndromic_rate_per_100k": 102.14285714285714,
+    "n_days": 7,
+    "n_wbe_samples": 0,
+    "port_id": "MXCZM",
+    "true_community_prevalence": 0.01,
+    "true_log10_gc_per_l": 5.698970004336019,
+    "wbe_detection_fraction": null
+  },
+  {
+    "alert_levels": [
+      "normal"
+    ],
+    "mean_lab_confirmed_cases": 65.28571428571429,
+    "mean_observed_log10_gc_per_l": 4.610385857354414,
+    "mean_syndromic_rate_per_100k": 29.428571428571427,
+    "n_days": 7,
+    "n_wbe_samples": 4,
+    "port_id": "USMIA",
+    "true_community_prevalence": 0.001,
+    "true_log10_gc_per_l": 4.698970004336019,
+    "wbe_detection_fraction": 1.0
+  }
+]

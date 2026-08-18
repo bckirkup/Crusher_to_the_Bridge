@@ -70,6 +70,22 @@ python3 -m picard_framework.analysis.stan.fit_sentinel_attribution ... \
   --write-fixture picard_framework/analysis/sentinel/fixtures/attribution_posterior.json
 ```
 
+Exit codes, because a campaign shard reads them instead of the console:
+
+| code | meaning | statuses |
+| --- | --- | --- |
+| 0 | a posterior was written | `ok`, `smoke`, `fixture` |
+| 1 | the fit failed | `error`, or a status nobody wrote |
+| 2 | no posterior exists | `skipped` (no CmdStan) |
+
+Code 2 is separate from 1 because the operator response differs — install a
+toolchain, or pass `--engine numpy` to sample with the reference walker, versus
+debug a model. A caller that deliberately exercises the data path without a
+sampler says so with `--allow-skipped-fit`, which turns `skipped` back into 0;
+nothing else changes. Sweeps that fit many cells (multiphase, recovery
+post-processing) report the worst code they saw, a real failure outranking a
+skip.
+
 `_sentinel_reference.py` is a numpy Metropolis sampler over *the same* log
 density, which is what lets `tests/test_sentinel_validation.py` assert on a real
 posterior in CI. `test_stan_and_numpy_reference_posteriors_agree` pins the two

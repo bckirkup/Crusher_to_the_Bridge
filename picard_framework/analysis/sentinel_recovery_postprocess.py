@@ -11,10 +11,16 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import math
 import os
 from collections import defaultdict
 from typing import Any, Mapping
 
+from picard_framework.analysis._fit_exit import (
+    add_allow_skipped_argument,
+    fit_exit_code,
+    worst_exit_code,
+)
 from picard_framework.analysis._io import (
     allowed_roots,
     ensure_out_dir,
@@ -359,7 +365,9 @@ def _score_port(
     lam_true = _true_lambda(port_id, dict(truth))
     lam_lo = _field_float(port, "hazard_q05")
     lam_hi = _field_float(port, "hazard_q95")
-    covered = interval_covers(lam_true, lam_lo, lam_hi) if lam_lo == lam_lo else False
+    covered = not math.isnan(lam_lo) and interval_covers(
+        lam_true, lam_lo, lam_hi,
+    )
     return {
         "cell_id": cell["cell_id"],
         "hazard_profile": cell["hazard_profile"],
@@ -407,7 +415,7 @@ def score_cell(cell: dict[str, Any], status: dict[str, Any]) -> list[dict[str, A
             onboard = json.load(fh)
         r_mean, r_lo, r_hi = _onboard_r_interval(onboard)
     r_true = float(cell["R_onboard"])
-    r_covered = interval_covers(r_true, r_lo, r_hi) if r_lo == r_lo else False
+    r_covered = not math.isnan(r_lo) and interval_covers(r_true, r_lo, r_hi)
     port_rows = _read_csv(hazards_path) if os.path.isfile(hazards_path) else []
     truth = cell["port_hazards"]
     ports = port_rows or [{"port_id": pid} for pid in sorted(truth)]
@@ -445,6 +453,7 @@ def fit_cell(
     engine: str,
     sampler: SamplerOptions,
     force: bool,
+    pathogen: str | None = None,
 ) -> dict[str, Any]:
     """Run the fleet attribution model for one recovery cell."""
     if not force:
@@ -455,7 +464,9 @@ def fit_cell(
     return fit_sentinel_fleet(
         cell["manifest"],
         cell["fit_dir"],
-        pathogen="norovirus",
+        # None resolves through the incubation catalog's default_pathogen
+        # rather than naming a pathogen in code (Law 2).
+        pathogen=pathogen,
         engine=engine,
         sampler=sampler,
         priors=recovery_fleet_priors(fleet_config=str(cell["fleet_config"])),
@@ -531,6 +542,12 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="refit cells even when fit_status.json already reports ok",
     )
+    parser.add_argument(
+        "--pathogen",
+        default=None,
+        help="delay catalog entry to fit under; default is the catalog default",
+    )
+    add_allow_skipped_argument(parser)
     args = parser.parse_args(argv)
 
     results_dir = safe_path(args.results)
@@ -562,17 +579,27 @@ def main(argv: list[str] | None = None) -> int:
     )
     wanted = set(args.cell)
     rows: list[dict[str, Any]] = []
+    cell_statuses: list[dict[str, Any]] = []
     for cell in _select_cells(cells, wanted, args.max_cells):
         print(f"Fitting {cell['cell_id']} n={cell['n_voyages']}…", flush=True)
         status = fit_cell(
-            cell, engine=engine, sampler=sampler, force=args.force,
+            cell,
+            engine=engine,
+            sampler=sampler,
+            force=args.force,
+            pathogen=args.pathogen,
         )
         print(f"  {status.get('status')}", flush=True)
+        cell_statuses.append(status)
         rows.extend(score_cell(cell, status))
     write_csv(os.path.join(out_dir, "recovery.csv"), rows, RECOVERY_COLUMNS)
     report = write_report(out_dir, rows)
     print(f"report: {report}", flush=True)
-    return 0
+    # A recovery sweep whose cells produced no posterior has measured nothing;
+    # exiting 0 would let a campaign shard report success on empty coverage.
+    return worst_exit_code(
+        fit_exit_code(s, allow_skipped=args.allow_skipped_fit) for s in cell_statuses
+    )
 
 
 if __name__ == "__main__":

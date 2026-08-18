@@ -1,0 +1,204 @@
+{
+  "clinical_cases": [
+    {
+      "crew": false,
+      "genotype": null,
+      "hours_ashore": {},
+      "onset_epoch": 1,
+      "pathogen": null,
+      "person_id": "0",
+      "report_epoch": null,
+      "reported_via": "unreported"
+    },
+    {
+      "crew": false,
+      "genotype": null,
+      "hours_ashore": {},
+      "onset_epoch": 1,
+      "pathogen": "norwalk_gi",
+      "person_id": "13",
+      "report_epoch": 14,
+      "reported_via": "sick_call"
+    },
+    {
+      "crew": false,
+      "genotype": null,
+      "hours_ashore": {
+        "MXCZM": 7.0
+      },
+      "onset_epoch": 6,
+      "pathogen": "sars_cov2_resp",
+      "person_id": "7",
+      "report_epoch": null,
+      "reported_via": "unreported"
+    }
+  ],
+  "epoch_duration_hours": 1.0,
+  "exposure_totals": {
+    "MXCZM": {
+      "n_crew_ashore": 6,
+      "n_passengers_ashore": 7,
+      "person_hours_crew": 42.0,
+      "person_hours_passenger": 49.0
+    }
+  },
+  "n_crew": 6,
+  "n_passengers": 14,
+  "observation_end_epoch": 15,
+  "platform_class": "destroyer_baseline",
+  "schema_version": "1.0.0",
+  "ship_id": "destroyer_baseline",
+  "voyage_id": "seed7",
+  "wastewater_samples": [
+    {
+      "assay_mode": "qpcr",
+      "collection_point": "aft_main",
+      "concentration_copies_per_l": 34835238.589849785,
+      "ct_value": 23.1,
+      "detected": true,
+      "lod_copies_per_l": 1142.8228502084287,
+      "pathogen": "norovirus",
+      "sample_epoch": 1
+    },
+    {
+      "assay_mode": "qpcr",
+      "collection_point": "aft_main",
+      "concentration_copies_per_l": 15752021.683067515,
+      "ct_value": 24.25,
+      "detected": true,
+      "lod_copies_per_l": 1142.8228502084287,
+      "pathogen": "norovirus",
+      "sample_epoch": 2
+    },
+    {
+      "assay_mode": "qpcr",
+      "collection_point": "aft_main",
+      "concentration_copies_per_l": 18236302.105187826,
+      "ct_value": 24.04,
+      "detected": true,
+      "lod_copies_per_l": 1142.8228502084287,
+      "pathogen": "norovirus",
+      "sample_epoch": 3
+    },
+    {
+      "assay_mode": "qpcr",
+      "collection_point": "aft_main",
+      "concentration_copies_per_l": 8118924.339144452,
+      "ct_value": 25.21,
+      "detected": true,
+      "lod_copies_per_l": 1142.8228502084287,
+      "pathogen": "norovirus",
+      "sample_epoch": 4
+    },
+    {
+      "assay_mode": "qpcr",
+      "collection_point": "aft_main",
+      "concentration_copies_per_l": 4040627.6448249794,
+      "ct_value": 26.21,
+      "detected": true,
+      "lod_copies_per_l": 1142.8228502084287,
+      "pathogen": "norovirus",
+      "sample_epoch": 5
+    },
+    {
+      "assay_mode": "qpcr",
+      "collection_point": "aft_main",
+      "concentration_copies_per_l": 3564339.320601152,
+      "ct_value": 26.39,
+      "detected": true,
+      "lod_copies_per_l": 1142.8228502084287,
+      "pathogen": "norovirus",
+      "sample_epoch": 6
+    },
+    {
+      "assay_mode": "qpcr",
+      "collection_point": "aft_main",
+      "concentration_copies_per_l": 1215067.876597843,
+      "ct_value": 27.95,
+      "detected": true,
+      "lod_copies_per_l": 1142.8228502084287,
+      "pathogen": "norovirus",
+      "sample_epoch": 7
+    },
+    {
+      "assay_mode": "qpcr",
+      "collection_point": "aft_main",
+      "concentration_copies_per_l": 422417.94486919104,
+      "ct_value": 29.47,
+      "detected": true,
+      "lod_copies_per_l": 1142.8228502084287,
+      "pathogen": "norovirus",
+      "sample_epoch": 8
+    },
+    {
+      "assay_mode": "qpcr",
+      "collection_point": "aft_main",
+      "concentration_copies_per_l": 547482.6420580286,
+      "ct_value": 29.1,
+      "detected": true,
+      "lod_copies_per_l": 1142.8228502084287,
+      "pathogen": "norovirus",
+      "sample_epoch": 9
+    },
+    {
+      "assay_mode": "qpcr",
+      "collection_point": "aft_main",
+      "concentration_copies_per_l": 277430.4140706776,
+      "ct_value": 30.08,
+      "detected": true,
+      "lod_copies_per_l": 1142.8228502084287,
+      "pathogen": "norovirus",
+      "sample_epoch": 10
+    },
+    {
+      "assay_mode": "qpcr",
+      "collection_point": "aft_main",
+      "concentration_copies_per_l": 220477.25136465218,
+      "ct_value": 30.41,
+      "detected": true,
+      "lod_copies_per_l": 1142.8228502084287,
+      "pathogen": "norovirus",
+      "sample_epoch": 11
+    },
+    {
+      "assay_mode": "qpcr",
+      "collection_point": "aft_main",
+      "concentration_copies_per_l": 191888.22541322914,
+      "ct_value": 30.61,
+      "detected": true,
+      "lod_copies_per_l": 1142.8228502084287,
+      "pathogen": "norovirus",
+      "sample_epoch": 12
+    },
+    {
+      "assay_mode": "qpcr",
+      "collection_point": "aft_main",
+      "concentration_copies_per_l": 93822.50689891915,
+      "ct_value": 31.64,
+      "detected": true,
+      "lod_copies_per_l": 1142.8228502084287,
+      "pathogen": "norovirus",
+      "sample_epoch": 13
+    },
+    {
+      "assay_mode": "qpcr",
+      "collection_point": "aft_main",
+      "concentration_copies_per_l": 51427.977548599694,
+      "ct_value": 32.51,
+      "detected": true,
+      "lod_copies_per_l": 1142.8228502084287,
+      "pathogen": "norovirus",
+      "sample_epoch": 14
+    },
+    {
+      "assay_mode": "qpcr",
+      "collection_point": "aft_main",
+      "concentration_copies_per_l": 19479.89711899793,
+      "ct_value": 33.91,
+      "detected": true,
+      "lod_copies_per_l": 1142.8228502084287,
+      "pathogen": "norovirus",
+      "sample_epoch": 15
+    }
+  ]
+}

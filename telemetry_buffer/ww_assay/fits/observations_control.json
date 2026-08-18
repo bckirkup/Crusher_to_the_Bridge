@@ -1,0 +1,114 @@
+{
+  "clinical_cases": [
+    {
+      "crew": false,
+      "genotype": null,
+      "hours_ashore": {
+        "MXCTM": 10.0,
+        "MXCZM": 10.0,
+        "USMIA": 23.0
+      },
+      "onset_epoch": 1,
+      "pathogen": null,
+      "person_id": "0",
+      "report_epoch": 54,
+      "reported_via": "sick_call"
+    },
+    {
+      "crew": false,
+      "genotype": null,
+      "hours_ashore": {
+        "MXCZM": 10.0,
+        "USMIA": 23.0
+      },
+      "onset_epoch": 53,
+      "pathogen": "norwalk_gi",
+      "person_id": "387",
+      "report_epoch": 53,
+      "reported_via": "sick_call"
+    },
+    {
+      "crew": false,
+      "genotype": null,
+      "hours_ashore": {
+        "MXCTM": 10.0,
+        "MXCZM": 10.0,
+        "USMIA": 23.0
+      },
+      "onset_epoch": 53,
+      "pathogen": "norwalk_gi",
+      "person_id": "412",
+      "report_epoch": 83,
+      "reported_via": "sick_call"
+    },
+    {
+      "crew": false,
+      "genotype": null,
+      "hours_ashore": {
+        "MXCTM": 10.0,
+        "MXCZM": 10.0,
+        "USMIA": 23.0
+      },
+      "onset_epoch": 57,
+      "pathogen": "norwalk_gi",
+      "person_id": "208",
+      "report_epoch": 126,
+      "reported_via": "sick_call"
+    }
+  ],
+  "epoch_duration_hours": 1.0,
+  "exposure_totals": {
+    "KYGEC": {
+      "n_crew_ashore": 17,
+      "n_passengers_ashore": 294,
+      "person_hours_crew": 136.0,
+      "person_hours_passenger": 2352.0
+    },
+    "MXCTM": {
+      "n_crew_ashore": 21,
+      "n_passengers_ashore": 270,
+      "person_hours_crew": 210.0,
+      "person_hours_passenger": 2700.0
+    },
+    "MXCZM": {
+      "n_crew_ashore": 32,
+      "n_passengers_ashore": 353,
+      "person_hours_crew": 320.0,
+      "person_hours_passenger": 3530.0
+    },
+    "USMIA": {
+      "n_crew_ashore": 0,
+      "n_passengers_ashore": 490,
+      "person_hours_crew": 0.0,
+      "person_hours_passenger": 11270.0
+    }
+  },
+  "n_crew": 210,
+  "n_passengers": 490,
+  "observation_end_epoch": 167,
+  "platform_class": "mega_cruise_5000",
+  "schema_version": "1.0.0",
+  "ship_id": "mega_cruise_5000",
+  "truth_introductions": [
+    {
+      "epoch": 53,
+      "pathogen": "norwalk_gi",
+      "person_id": "387",
+      "port_id": "MXCZM"
+    },
+    {
+      "epoch": 53,
+      "pathogen": "norwalk_gi",
+      "person_id": "412",
+      "port_id": "MXCZM"
+    },
+    {
+      "epoch": 56,
+      "pathogen": "norwalk_gi",
+      "person_id": "208",
+      "port_id": "MXCZM"
+    }
+  ],
+  "voyage_id": "sr_norovirus_mega_cruise_5000_one_hot_fleet_crossed_standard_R1p0_control_clinical_only_s500",
+  "wastewater_samples": []
+}

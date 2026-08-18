@@ -25,6 +25,7 @@ import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+from picard_framework.analysis._fit_exit import EXIT_NO_POSTERIOR, EXIT_OK
 from picard_framework.analysis.sentinel import figures as figures_module
 from picard_framework.analysis.sentinel import run_sentinel
 from picard_framework.analysis.sentinel.artifacts import (
@@ -433,7 +434,11 @@ def test_cli_requires_an_input_selection() -> None:
 def test_cli_reports_a_skipped_fit_instead_of_writing_a_report(
     scratch: str, monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """No CmdStan and no --smoke: exit clean, but write no report."""
+    """No CmdStan and no --smoke: no report, and no success exit code either.
+
+    A campaign shard reads the exit code, not the console, so a run that wrote
+    no posterior must not look like one that did.
+    """
     monkeypatch.setattr(
         run_sentinel,
         "fit_sentinel_fleet",
@@ -444,7 +449,31 @@ def test_cli_reports_a_skipped_fit_instead_of_writing_a_report(
         "picard_framework", "analysis", "sentinel", "data", "example_fleet.json",
     )
     code = run_sentinel.main(["--manifest", manifest, "--out", _relative(out)])
-    assert code == 0
+    assert code == EXIT_NO_POSTERIOR
+    assert not os.path.isfile(os.path.join(out, "report.md"))
+
+
+def test_allow_skipped_fit_opts_back_into_a_clean_exit(
+    scratch: str, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A caller that knowingly has no sampler can still exit 0 — explicitly."""
+    monkeypatch.setattr(
+        run_sentinel,
+        "fit_sentinel_fleet",
+        lambda *a, **k: {"status": "skipped", "reason": "cmdstanpy not installed"},
+    )
+    out = os.path.join(scratch, "skipped_allowed_run")
+    manifest = os.path.join(
+        "picard_framework", "analysis", "sentinel", "data", "example_fleet.json",
+    )
+    code = run_sentinel.main([
+        "--manifest",
+        manifest,
+        "--out",
+        _relative(out),
+        "--allow-skipped-fit",
+    ])
+    assert code == EXIT_OK
     assert not os.path.isfile(os.path.join(out, "report.md"))
 
 

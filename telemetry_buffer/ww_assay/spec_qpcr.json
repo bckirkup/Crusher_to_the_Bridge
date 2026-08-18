@@ -1,0 +1,60 @@
+{
+  "schema_version": "1.0.0",
+  "catalog": {
+    "platform_id": "destroyer_baseline",
+    "pathogen_bundle_id": "active_profiles"
+  },
+  "run": {
+    "random_seed": 7,
+    "num_epochs": 8,
+    "write_ground_truth": false,
+    "sentinel_line_list": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/ww_assay/bundle_qpcr.json",
+    "ground_truth": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/ww_assay/gt_qpcr.json",
+    "simulation_history": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/ww_assay/hist_qpcr.json"
+  },
+  "legacy_yaml": "crusher_labs/config.yaml",
+  "actors": [],
+  "incentives": {},
+  "config_overrides": {
+    "voyage": {
+      "effects_enabled": true,
+      "epoch_duration_hours": 1,
+      "shore_exposure": {
+        "enabled": true
+      },
+      "itinerary": [
+        {
+          "day": 1,
+          "type": "port_day",
+          "port": "Cozumel",
+          "port_id": "MXCZM",
+          "region": "AMR",
+          "disembark_fraction": 0.5,
+          "disembark_window_epochs": [
+            0,
+            5
+          ],
+          "reembark_window_epochs": [
+            6,
+            6
+          ],
+          "crew_shore_leave_fraction": 1.0,
+          "shore_infection_probability": 1.0
+        }
+      ],
+      "total_epochs": 8
+    },
+    "wastewater_surveillance": {
+      "enabled": true,
+      "assay_mode": "qpcr",
+      "sampling_interval_epochs": 1,
+      "holding_tank_residence_hours": 2.0,
+      "collection_points": [
+        "aft_main"
+      ],
+      "sequencing_depth": 250000,
+      "pathogen": "norovirus",
+      "pathogen_id": "norwalk_gi"
+    }
+  }
+}

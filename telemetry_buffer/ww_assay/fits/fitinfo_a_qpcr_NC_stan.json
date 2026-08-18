@@ -1,0 +1,279 @@
+{
+  "a_qpcr_NC": {
+    "name": "a_qpcr_NC",
+    "engine_req": "stan",
+    "returncode": 0,
+    "out": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/ww_assay/fits/out_a_qpcr_NC_stan",
+    "stdout_tail": "ok\n",
+    "stderr_tail": "21:49:57 - cmdstanpy - INFO - CmdStan start processing\n21:49:57 - cmdstanpy - INFO - Chain [1] start processing\n21:49:58 - cmdstanpy - INFO - Chain [1] done processing\n21:49:58 - cmdstanpy - WARNING - Non-fatal error during sampling:\nException: poisson_lpmf: Rate parameter[1] is -nan, but must be nonnegative! (in 'sentinel_fleet.stan', line 302, column 8 to column 75)\n\tException: poisson_lpmf: Rate parameter[1] is -nan, but must be nonnegative! (in 'sentinel_fleet.stan', line 302, column 8 to column 75)\n\tException: poisson_lpmf: Rate parameter[1] is -nan, but must be nonnegative! (in 'sentinel_fleet.stan', line 302, column 8 to column 75)\n\tException: poisson_lpmf: Rate parameter[8] is -nan, but must be nonnegative! (in 'sentinel_fleet.stan', line 302, column 8 to column 75)\n\tException: poisson_lpmf: Rate parameter[8] is -nan, but must be nonnegative! (in 'sentinel_fleet.stan', line 302, column 8 to column 75)\n\tException: poisson_lpmf: Rate parameter[8] is -nan, but must be nonnegative! (in 'sentinel_fleet.stan', line 302, column 8 to column 75)\n\tException: poisson_lpmf: Rate parameter[8] is -nan, but must be nonnegative! (in 'sentinel_fleet.stan', line 302, column 8 to column 75)\n\tException: poisson_lpmf: Rate parameter[8] is -nan, but must be nonnegative! (in 'sentinel_fleet.stan', line 302, column 8 to column 75)\n\tException: poisson_lpmf: Rate parameter[8] is -nan, but must be nonnegative! (in 'sentinel_fleet.stan', line 302, column 8 to column 75)\nConsider re-running with show_console=True if the above output is unclear!\n",
+    "files": [
+      "crew_exposure.json",
+      "draws.csv",
+      "fit_status.json",
+      "fleet_port_hazards.csv",
+      "fleet_time.csv",
+      "onboard_summary.json",
+      "stan_data_meta.json",
+      "visit_hazards.csv",
+      "wastewater_channel.json"
+    ],
+    "wastewater_channel.json": {
+      "conc_intercept_mean": 7.511841984,
+      "conc_sigma_mean": 0.9099184940499999,
+      "conc_slope_mean": 0.19669517284725,
+      "conc_slope_q05": 0.013151195850000002,
+      "conc_slope_q95": 0.4854358179999999,
+      "concentration_fitted": true,
+      "enabled": true,
+      "fitted": false,
+      "loglik_concentration": -19.971341499999998,
+      "max_effective_reads": 1000000,
+      "mean_shedding_hours": 184.592,
+      "n_concentration_censored": 3,
+      "n_concentration_samples": 15,
+      "n_pooled_samples": 0,
+      "n_raw_samples": 0,
+      "pathogen": "norovirus",
+      "residence_lag_epochs": 2
+    },
+    "fit_status.json": {
+      "engine": "cmdstan",
+      "meta": {
+        "censoring_corrected": true,
+        "epoch_duration_hours": 1.0,
+        "groups": [
+          "passenger",
+          "crew"
+        ],
+        "incubation_iqr_hours": 19.0,
+        "model": "sentinel_fleet",
+        "n_cases": 12,
+        "pathogen": "norovirus",
+        "person_hours_ashore": {
+          "MXCZM@seed7/d1": 91.0
+        },
+        "port_resolution_adequate": true,
+        "ports": [
+          "MXCZM"
+        ],
+        "ships": [
+          "destroyer_baseline"
+        ],
+        "visits": [
+          {
+            "person_hours_ashore": 91.0,
+            "port_id": "MXCZM",
+            "visit_key": "MXCZM@seed7/d1",
+            "week": "seed7/unscheduled"
+          }
+        ],
+        "voyages": [
+          {
+            "ascertainment": 1.0,
+            "crew_repeat": {},
+            "n_cases": 12,
+            "observation_end_epoch": 15,
+            "port_resolution_adequate": true,
+            "ports": [
+              "MXCZM"
+            ],
+            "ship_id": "destroyer_baseline",
+            "voyage_id": "seed7"
+          }
+        ],
+        "wastewater": {
+          "concentrations": [
+            {
+              "censored": false,
+              "epoch": 1,
+              "log10_copies_per_l": 7.752193,
+              "n_collection_points": 1,
+              "n_detected": 1,
+              "voyage_id": "seed7"
+            },
+            {
+              "censored": false,
+              "epoch": 2,
+              "log10_copies_per_l": 7.620373,
+              "n_collection_points": 1,
+              "n_detected": 1,
+              "voyage_id": "seed7"
+            },
+            {
+              "censored": false,
+              "epoch": 3,
+              "log10_copies_per_l": 8.041453,
+              "n_collection_points": 1,
+              "n_detected": 1,
+              "voyage_id": "seed7"
+            },
+            {
+              "censored": false,
+              "epoch": 4,
+              "log10_copies_per_l": 7.855087,
+              "n_collection_points": 1,
+              "n_detected": 1,
+              "voyage_id": "seed7"
+            },
+            {
+              "censored": false,
+              "epoch": 5,
+              "log10_copies_per_l": 7.73426,
+              "n_collection_points": 1,
+              "n_detected": 1,
+              "voyage_id": "seed7"
+            },
+            {
+              "censored": false,
+              "epoch": 6,
+              "log10_copies_per_l": 7.67979,
+              "n_collection_points": 1,
+              "n_detected": 1,
+              "voyage_id": "seed7"
+            },
+            {
+              "censored": false,
+              "epoch": 7,
+              "log10_copies_per_l": 7.212412,
+              "n_collection_points": 1,
+              "n_detected": 1,
+              "voyage_id": "seed7"
+            },
+            {
+              "censored": false,
+              "epoch": 8,
+              "log10_copies_per_l": 6.753554,
+              "n_collection_points": 1,
+              "n_detected": 1,
+              "voyage_id": "seed7"
+            },
+            {
+              "censored": false,
+              "epoch": 9,
+              "log10_copies_per_l": 6.866182,
+              "n_collection_points": 1,
+              "n_detected": 1,
+              "voyage_id": "seed7"
+            },
+            {
+              "censored": false,
+              "epoch": 10,
+              "log10_copies_per_l": 6.570965,
+              "n_collection_points": 1,
+              "n_detected": 1,
+              "voyage_id": "seed7"
+            },
+            {
+              "censored": false,
+              "epoch": 11,
+              "log10_copies_per_l": 6.471175,
+              "n_collection_points": 1,
+              "n_detected": 1,
+              "voyage_id": "seed7"
+            },
+            {
+              "censored": false,
+              "epoch": 12,
+              "log10_copies_per_l": 6.41086,
+              "n_collection_points": 1,
+              "n_detected": 1,
+              "voyage_id": "seed7"
+            },
+            {
+              "censored": true,
+              "epoch": 13,
+              "log10_copies_per_l": 6.369237,
+              "n_collection_points": 1,
+              "n_detected": 0,
+              "voyage_id": "seed7"
+            },
+            {
+              "censored": true,
+              "epoch": 14,
+              "log10_copies_per_l": 6.369237,
+              "n_collection_points": 1,
+              "n_detected": 0,
+              "voyage_id": "seed7"
+            },
+            {
+              "censored": true,
+              "epoch": 15,
+              "log10_copies_per_l": 6.369237,
+              "n_collection_points": 1,
+              "n_detected": 0,
+              "voyage_id": "seed7"
+            }
+          ],
+          "enabled": true,
+          "max_effective_reads": 1000000,
+          "mean_shedding_hours": 184.592,
+          "n_concentration_censored": 3,
+          "n_concentration_samples": 15,
+          "n_pooled_samples": 0,
+          "n_raw_samples": 0,
+          "pathogen": "norovirus",
+          "residence_lag_epochs": 2,
+          "samples": []
+        },
+        "weeks": [
+          "seed7/unscheduled"
+        ]
+      },
+      "status": "ok",
+      "summary": {
+        "crew": {
+          "crew_hazard_ratio_mean": 1.091653615,
+          "crew_hazard_ratio_q05": 0.466887676,
+          "crew_hazard_ratio_q95": 2.048187619999999,
+          "repeat_hazard_ratio_mean": 1.02273534115,
+          "repeat_hazard_ratio_q05": 0.6505334225,
+          "repeat_hazard_ratio_q95": 1.5501115949999997
+        },
+        "fleet_time_confounded": [
+          "MXCZM"
+        ],
+        "hazard_mean": {
+          "MXCZM": 0.0372357159130235
+        },
+        "n_ports": 1,
+        "n_visits": 1,
+        "n_weeks": 1,
+        "onboard": {
+          "aboard_cases_mean": 0.029708415533358998,
+          "import_share_mean": 0.8890779554950001,
+          "import_share_q05": 0.2762465810000001,
+          "import_share_q95": 0.996465393,
+          "secondary_cases_mean": 0.031417025993277996,
+          "ships": [
+            {
+              "lambda_aboard_mean": 0.00014214552887782501,
+              "r_onboard_mean": 0.763156588985,
+              "r_onboard_q05": 0.17892155750000002,
+              "r_onboard_q95": 1.7608018149999984,
+              "ship_id": "destroyer_baseline"
+            }
+          ]
+        },
+        "wastewater": {
+          "conc_intercept_mean": 7.511841984,
+          "conc_sigma_mean": 0.9099184940499999,
+          "conc_slope_mean": 0.19669517284725,
+          "conc_slope_q05": 0.013151195850000002,
+          "conc_slope_q95": 0.4854358179999999,
+          "concentration_fitted": true,
+          "enabled": true,
+          "fitted": false,
+          "loglik_concentration": -19.971341499999998,
+          "max_effective_reads": 1000000,
+          "mean_shedding_hours": 184.592,
+          "n_concentration_censored": 3,
+          "n_concentration_samples": 15,
+          "n_pooled_samples": 0,
+          "n_raw_samples": 0,
+          "pathogen": "norovirus",
+          "residence_lag_epochs": 2
+        }
+      }
+    }
+  }
+}
