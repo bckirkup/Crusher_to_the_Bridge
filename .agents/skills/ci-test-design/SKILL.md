@@ -220,6 +220,17 @@ class TestChangeDetectors:
 
 ## Repo-specific notes
 
+- **Crusher-to-the-Bridge**: new internal seams get graded sensitivity and
+  bounds tests, not goldens. Campaign iterators and HVAC/shard mapping live in
+  `tests/test_tier_iterators.py` and `tests/test_campaign_boundaries.py`.
+  Epoch helpers (`_merge_applied`, beliefs in `[0, 1]`) live in
+  `tests/test_ship_epoch_helpers.py`. Action dispatch (unknown kind / missing
+  ctx no-ops, isolation/stance grading) lives in `tests/test_action_applier.py`.
+  Stan fleet columns (1-based indexed names, non-negative secondary cases) live
+  in `tests/test_sentinel_fleet_columns.py`. Golden Picard remains the
+  change-detector for `ShipSimulation.step` order; mega-cruise dry-run
+  cartesian counts remain the campaign behavior lock. Use `pytest.approx` for
+  floats (`scripts/sonar_guard.py` S1244).
 - **GutModelBacteriocins (C++/CTest)**: `sim_fingerprint.h` and
   `test_config_diversity.cpp` currently express sensitivity as fingerprint
   inequality. Keep them, but when touching a mechanism add an ordered sweep on a

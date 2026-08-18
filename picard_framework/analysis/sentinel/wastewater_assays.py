@@ -39,7 +39,7 @@ to overstate a wastewater assay's sensitivity by two orders of magnitude.
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass, replace
+from dataclasses import asdict, dataclass
 from typing import Any, Mapping
 
 import numpy as np
@@ -361,11 +361,10 @@ def gate_config(
     extraction recovery or the cutoff, so those two are substituted rather than
     duplicating the curve in each mode's config.
     """
-    return replace(
-        base,
-        extraction_efficiency=float(extraction_efficiency),
-        lod_ct_threshold=float(lod_ct_threshold),
-    )
+    payload = asdict(base)
+    payload["extraction_efficiency"] = float(extraction_efficiency)
+    payload["lod_ct_threshold"] = float(lod_ct_threshold)
+    return QpcrAssayConfig(**payload)
 
 
 def resolve_assay_mode(mode: object) -> str:

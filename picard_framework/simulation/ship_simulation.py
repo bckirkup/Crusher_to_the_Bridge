@@ -122,6 +122,73 @@ class RunResult:
     history: list[dict[str, Any]] = field(default_factory=list)
 
 
+@dataclass
+class _EpochWork:
+    """Scratch pad for one ``ShipSimulation.step`` so phase helpers share locals."""
+
+    epoch: int
+    state: Any
+    cfg: dict[str, Any]
+    syndromic: Any
+    rdt: Any
+    pcr: Any
+    seq: Any
+    dr: Any
+    applied: dict[str, Any]
+    epoch_voyage: Any = None
+    tracing_matrix: Any = None
+    zone_microflora_shifts: dict[str, dict[str, float]] = field(default_factory=dict)
+    agents: list[dict[str, Any]] = field(default_factory=list)
+    spaces: list[Any] = field(default_factory=list)
+    payload: Any = None
+    truth: Any = None
+    wearable_result: Any = None
+    information_state: dict[str, Any] = field(default_factory=dict)
+    syn_result: Any = None
+    cascade_result: Any = None
+    rdt_result: Any = None
+    pcr_result: Any = None
+    seq_result: Any = None
+    air_results: Any = None
+    swab_results: Any = None
+    ww_results: Any = None
+    clin_rdt_results: Any = None
+    clin_qpcr_results: Any = None
+    clin_microbio_results: Any = None
+    long_read_results: Any = None
+    long_read_ordered_count: int = 0
+    prev_status: str = ""
+    stoplights: dict[str, Any] = field(default_factory=dict)
+    active_mods: Any = None
+    merged_mods: Any = None
+    counter_results: Any = None
+    epoch_record: dict[str, Any] = field(default_factory=dict)
+
+
+def _merge_applied(current: dict[str, Any], extra: dict[str, Any]) -> dict[str, Any]:
+    if not extra:
+        return current
+    return extra if not current else {**current, **extra}
+
+
+def _beliefs_from_information(information_state: dict[str, Any]) -> dict[int, dict[str, float]]:
+    beliefs: dict[int, dict[str, float]] = {}
+    agent_inf = information_state.get("agents", information_state)
+    if not isinstance(agent_inf, dict):
+        return beliefs
+    for aid_str, inf in agent_inf.items():
+        if not isinstance(inf, dict):
+            continue
+        try:
+            beliefs[int(aid_str)] = {
+                "severity_belief": float(inf.get("severity_belief", 0.1)),
+                "trust_medical": float(inf.get("trust_medical", 0.75)),
+            }
+        except (TypeError, ValueError):
+            continue
+    return beliefs
+
+
 class ShipSimulation:
     """One ship cruise: init, step, run, finalize."""
 
@@ -453,6 +520,37 @@ class ShipSimulation:
                 pathogen=rec.get("pathogen"),
             )
 
+    def _channel_ids(self, values: Any) -> list[int]:
+        return [int(agent) for agent in values or []]
+
+    def _sentinel_detections(
+        self,
+        syn_result: dict[str, Any] | None,
+        cascade_result: dict[str, Any] | None,
+        wearable_result: dict[str, Any] | None,
+    ) -> dict[str, list[int]]:
+        syn = syn_result or {}
+        screening = self._channel_ids(syn.get("crew_screening_ids"))
+        screening_set = set(screening)
+        cascade = cascade_result or {}
+        channels = {
+            "sick_call": [
+                agent
+                for agent in self._channel_ids(syn.get("sick_call_agents"))
+                if agent not in screening_set
+            ],
+            "screening": screening,
+            "cascade": [
+                int(agent)
+                for key in ("new_tier0_agents", "new_tier1_agents")
+                for agent in cascade.get(key) or []
+            ],
+            "wearable": self._channel_ids(
+                (wearable_result or {}).get("staff_visible_agents"),
+            ),
+        }
+        return {name: ids for name, ids in channels.items() if ids}
+
     def _observe_sentinel(
         self,
         epoch: int,
@@ -467,39 +565,14 @@ class ShipSimulation:
             return
         epoch_voyage = self.state.epoch_voyage if self.state else None
         port_name = str(epoch_voyage.port or "") if epoch_voyage else ""
-        port_id = self._sentinel_port_id(port_name)
-        ashore = [a.agent_id for a in self.engine.agents if a.ashore]
-
-        detections: dict[str, list[int]] = {}
-        syn = syn_result or {}
-        screening = [int(a) for a in syn.get("crew_screening_ids") or []]
-        sick_call = [
-            int(a)
-            for a in syn.get("sick_call_agents") or []
-            if int(a) not in set(screening)
-        ]
-        if sick_call:
-            detections["sick_call"] = sick_call
-        if screening:
-            detections["screening"] = screening
-        cascade = cascade_result or {}
-        tiers = [
-            int(a)
-            for key in ("new_tier0_agents", "new_tier1_agents")
-            for a in cascade.get(key) or []
-        ]
-        if tiers:
-            detections["cascade"] = tiers
-        visible = [int(a) for a in (wearable_result or {}).get("staff_visible_agents") or []]
-        if visible:
-            detections["wearable"] = visible
-
         ledger.observe_epoch(
             epoch,
             agents,
-            port_id=port_id,
-            ashore_ids=ashore,
-            detections=detections,
+            port_id=self._sentinel_port_id(port_name),
+            ashore_ids=[a.agent_id for a in self.engine.agents if a.ashore],
+            detections=self._sentinel_detections(
+                syn_result, cascade_result, wearable_result,
+            ),
         )
         self._observe_wastewater(epoch)
 
@@ -526,6 +599,28 @@ class ShipSimulation:
         write_json(safe_path(paths.sentinel_line_list), payload)
 
     def step(self, actions: ActionEnvelope | None = None) -> StepResult:
+        work = self._begin_epoch(actions)
+        self._step_biology(work)
+        self._step_export_truth(work)
+        self._step_information(work)
+        self._step_surveillance(work)
+        self._step_labs(work)
+        self._step_escalation(work)
+        self._step_command(work)
+        self._step_protocols(work)
+        self._step_record(work)
+        return StepResult(
+            epoch=work.epoch,
+            trigger_status=work.state.trigger_status,
+            stoplights=work.stoplights,
+            epoch_record=work.epoch_record,
+            ground_truth=work.payload,
+            active_protocols=work.active_mods,
+            merged_modifiers=work.merged_mods,
+            decisions=work.applied,
+        )
+
+    def _begin_epoch(self, actions: ActionEnvelope | None) -> _EpochWork:
         if not self._initialized:
             self.initialize()
         assert self.state is not None
@@ -541,13 +636,9 @@ class ShipSimulation:
         state = self.state
         cfg = self.cfg
         syndromic = self.modalities["syndromic"]
-        rdt = self.modalities["clinical_rdt"]
-        pcr = self.modalities["targeted_pcr"]
-        seq = self.modalities["sequencing"]
-
+        dr = self.decision_runtime
         state.agent_behavioral_overrides.clear()
         cfg.pop("_picard_epoch_overrides", None)
-        dr = self.decision_runtime
         if dr is not None:
             dr.decision_ctx.reset_ephemeral()
 
@@ -558,9 +649,7 @@ class ShipSimulation:
             decision_ctx=dr.decision_ctx if dr else None,
             valid_zones=set(self.zone_names),
         )
-
-        # Lightweight agent view for reluctant→symptomatic re-checks (pre-step)
-        _fred_agents = [
+        fred_agents = [
             {
                 "agent_id": a.agent_id,
                 "agent_class": a.agent_class,
@@ -570,8 +659,10 @@ class ShipSimulation:
             }
             for a in self.engine.agents
         ]
-        step_fred_compliance(epoch, state, syndromic, agents=_fred_agents)
-        step_mid_cruise_introductions(epoch, self.engine, self.pathogen_profiles, self.rng)
+        step_fred_compliance(epoch, state, syndromic, agents=fred_agents)
+        step_mid_cruise_introductions(
+            epoch, self.engine, self.pathogen_profiles, self.rng,
+        )
 
         from engines.voyage_itinerary import resolve_epoch_state
 
@@ -583,25 +674,38 @@ class ShipSimulation:
             if epoch_voyage.effects_active
             else 1.0
         )
+        return _EpochWork(
+            epoch=epoch,
+            state=state,
+            cfg=cfg,
+            syndromic=syndromic,
+            rdt=self.modalities["clinical_rdt"],
+            pcr=self.modalities["targeted_pcr"],
+            seq=self.modalities["sequencing"],
+            dr=dr,
+            applied=applied,
+            epoch_voyage=epoch_voyage,
+        )
 
+    def _step_biology(self, work: _EpochWork) -> None:
+        assert self.engine is not None
+        assert self.tx_core is not None
+        state = work.state
         self.engine.isolated_ids = set(state.isolated_ids)
         self.engine.quarantined_ids = set(state.quarantined_ids)
         self.engine.step()
-
         self._note_shore_introductions(
             step_shore_introductions(
-                epoch,
+                work.epoch,
                 self.engine,
                 self.pathogen_profiles,
                 self.rng,
-                epoch_voyage,
+                work.epoch_voyage,
             ),
         )
-
         step_infection_progression(self.engine, self.pathogen_profiles)
-
-        tracing_matrix, _tx_events = self.tx_core.execute_transmission(
-            epoch=epoch,
+        work.tracing_matrix, _tx_events = self.tx_core.execute_transmission(
+            epoch=work.epoch,
             agents=self.engine.agents,
             zone_pathogen_mass=self.engine.zone_pathogen_mass,
             hvac_downstream_zones=self.hvac_downstream,
@@ -610,417 +714,429 @@ class ShipSimulation:
             ),
             quarantined_ids=set(state.quarantined_ids),
         )
-
         if self.contam_engine is not None:
-            updated = self.contam_engine.transport_step(self.engine.zone_pathogen_mass)
-            self.engine.zone_pathogen_mass = updated
-
-        zone_microflora_shifts: dict[str, dict[str, float]] = {}
+            self.engine.zone_pathogen_mass = self.contam_engine.transport_step(
+                self.engine.zone_pathogen_mass,
+            )
         if self.pathogen_profiles and self.enable_dual_signal:
-            zone_microflora_shifts = compute_zone_microflora_shifts(
-                self.engine.agents, self.pathogen_profiles, cfg,
+            work.zone_microflora_shifts = compute_zone_microflora_shifts(
+                self.engine.agents, self.pathogen_profiles, work.cfg,
             )
 
+    def _step_export_truth(self, work: _EpochWork) -> None:
+        assert self.engine is not None
         engine_payload = self.engine._export_payload()
-        agents, spaces = engine_payload_to_schema(
+        work.agents, work.spaces = engine_payload_to_schema(
             engine_payload,
-            state.isolated_ids,
-            state.quarantined_ids,
-            state.quarantine_refusers,
+            work.state.isolated_ids,
+            work.state.quarantined_ids,
+            work.state.quarantine_refusers,
             pathogen_profiles=self.pathogen_profiles,
         )
-
         if self.chronic_assignments:
-            apply_chronic_severity_escalation(agents, self.engine, self.rng)
-
-        payload = make_ground_truth(epoch=epoch, agents=agents, spaces=spaces)
+            apply_chronic_severity_escalation(work.agents, self.engine, self.rng)
+        work.payload = make_ground_truth(
+            epoch=work.epoch, agents=work.agents, spaces=work.spaces,
+        )
         gt_path = self.run_spec.telemetry.ground_truth if self.run_spec.telemetry else None
-        if self.run_spec.write_ground_truth:
-            if gt_path:
-                write_ground_truth(payload, path=gt_path)
-                truth = read_ground_truth(path=gt_path)
-            else:
-                write_ground_truth(payload)
-                truth = read_ground_truth()
-            assert truth is not payload, "Shared-memory leak!"
+        if not self.run_spec.write_ground_truth:
+            work.truth = work.payload
+        elif gt_path:
+            write_ground_truth(work.payload, path=gt_path)
+            work.truth = read_ground_truth(path=gt_path)
+            assert work.truth is not work.payload, "Shared-memory leak!"
         else:
-            truth = payload
-
-        wearable_result = step_wearable_monitoring(
-            epoch, self.engine, self.wearable_monitor, self.wearable_modality,
-            truth, self.pathogen_profiles,
+            write_ground_truth(work.payload)
+            work.truth = read_ground_truth()
+            assert work.truth is not work.payload, "Shared-memory leak!"
+        work.wearable_result = step_wearable_monitoring(
+            work.epoch, self.engine, self.wearable_monitor, self.wearable_modality,
+            work.truth, self.pathogen_profiles,
         )
 
-        information_state: dict = {}
-        pop_envelope: ActionEnvelope | None = None
-        if dr is not None:
-            tracing_dict = tracing_matrix.to_dict()
-            dr.contact_graph.update(agents, tracing_dict, dr.class_matrix)
-            pop = max(1, len(agents))
-            conf_rate = len(state.quarantined_ids) / pop
-            agent_classes = {
-                int(a["agent_id"]): a.get("agent_class", "unknown") for a in agents
-            }
-            information_state = dr.information_engine.step(
-                dr.contact_graph.agent_adjacency,
-                agent_classes,
-                state.trigger_status,
-                conf_rate,
-            )
-            pre_snapshot = {
-                "epoch": epoch,
-                "agents": agents,
-                "summary": self._build_summary(agents, syn_result=None),
-                "trigger_status": state.trigger_status,
-                "high_traffic_zones": self.high_traffic,
-            }
-            if dr.stackelberg is not None:
-                pop_envelope = dr.stackelberg.solve_population(
-                    epoch, pre_snapshot, information_state, self.decision_experience,
-                )
-                pop_applied = apply_action_envelope(
-                    pop_envelope, state, cfg, dr.decision_ctx, set(self.zone_names),
-                )
-                if pop_applied:
-                    applied = pop_applied if not applied else {**applied, **pop_applied}
+    def _step_information(self, work: _EpochWork) -> None:
+        dr = work.dr
+        if dr is None:
+            return
+        dr.contact_graph.update(
+            work.agents, work.tracing_matrix.to_dict(), dr.class_matrix,
+        )
+        conf_rate = len(work.state.quarantined_ids) / max(1, len(work.agents))
+        agent_classes = {
+            int(a["agent_id"]): a.get("agent_class", "unknown") for a in work.agents
+        }
+        work.information_state = dr.information_engine.step(
+            dr.contact_graph.agent_adjacency,
+            agent_classes,
+            work.state.trigger_status,
+            conf_rate,
+        )
+        if dr.stackelberg is None:
+            return
+        pop_applied = apply_action_envelope(
+            dr.stackelberg.solve_population(
+                work.epoch,
+                {
+                    "epoch": work.epoch,
+                    "agents": work.agents,
+                    "summary": self._build_summary(work.agents, syn_result=None),
+                    "trigger_status": work.state.trigger_status,
+                    "high_traffic_zones": self.high_traffic,
+                },
+                work.information_state,
+                self.decision_experience,
+            ),
+            work.state,
+            work.cfg,
+            dr.decision_ctx,
+            set(self.zone_names),
+        )
+        work.applied = _merge_applied(work.applied, pop_applied)
 
-        beliefs: dict[int, dict[str, float]] = {}
-        agent_inf = information_state.get("agents", information_state)
-        if isinstance(agent_inf, dict):
-            for aid_str, inf in agent_inf.items():
-                if not isinstance(inf, dict):
-                    continue
-                try:
-                    beliefs[int(aid_str)] = {
-                        "severity_belief": float(inf.get("severity_belief", 0.1)),
-                        "trust_medical": float(inf.get("trust_medical", 0.75)),
-                    }
-                except (TypeError, ValueError):
-                    continue
+    def _step_surveillance(self, work: _EpochWork) -> None:
+        from crusher_labs.clinical_presentation import apply_noise_syndromes_to_agents
 
-        if surveillance_is_active(epoch, cfg):
-            syn_result = syndromic.query_ground_truth(
-                truth,
-                behavioral_overrides=state.agent_behavioral_overrides,
+        beliefs = _beliefs_from_information(work.information_state)
+        if surveillance_is_active(work.epoch, work.cfg):
+            work.syn_result = work.syndromic.query_ground_truth(
+                work.truth,
+                behavioral_overrides=work.state.agent_behavioral_overrides,
                 information_beliefs=beliefs,
                 chronic_behavioral_mods=self.chronic_behavioral_mods,
             )
-            cascade_result = step_diagnostic_cascade(
-                epoch, state, agents, syn_result, wearable_result, self.obs,
+            work.cascade_result = step_diagnostic_cascade(
+                work.epoch, work.state, work.agents, work.syn_result,
+                work.wearable_result, self.obs,
                 wearable_monitor=self.wearable_monitor,
-                syndromic=syndromic,
-                cfg=cfg,
+                syndromic=work.syndromic,
+                cfg=work.cfg,
             )
         else:
-            syn_result = inactive_syndromic_result(epoch, n_agents=len(agents))
-            cascade_result = None
-        from crusher_labs.clinical_presentation import apply_noise_syndromes_to_agents
-
+            work.syn_result = inactive_syndromic_result(
+                work.epoch, n_agents=len(work.agents),
+            )
+            work.cascade_result = None
         apply_noise_syndromes_to_agents(
-            agents,
-            syn_result,
-            cfg.get("fred_behavior", {}).get("healthy_noise_categories"),
+            work.agents,
+            work.syn_result,
+            work.cfg.get("fred_behavior", {}).get("healthy_noise_categories"),
         )
-
-        step_cascade_cost_accounting(epoch, self.proto_ctx, cascade_result)
-
-        sick_call_ids = syn_result["sick_call_agents"]
-        rdt_result = rdt.query_ground_truth(truth, sick_call_ids=sick_call_ids)
-
-        if dr is not None:
-            dr.lived_store.update(
-                epoch, agents, syn_result,
-                [], state.quarantined_ids, state.isolated_ids,
-                dr.contact_graph.agent_adjacency,
-                wearable_result, dr.profiles,
+        step_cascade_cost_accounting(work.epoch, self.proto_ctx, work.cascade_result)
+        work.rdt_result = work.rdt.query_ground_truth(
+            work.truth, sick_call_ids=work.syn_result["sick_call_agents"],
+        )
+        if work.dr is not None:
+            work.dr.lived_store.update(
+                work.epoch, work.agents, work.syn_result,
+                [], work.state.quarantined_ids, work.state.isolated_ids,
+                work.dr.contact_graph.agent_adjacency,
+                work.wearable_result, work.dr.profiles,
             )
 
-        overrides = cfg.get("_picard_epoch_overrides", {})
+    def _query_pcr_seq(self, work: _EpochWork) -> None:
+        overrides = work.cfg.get("_picard_epoch_overrides", {})
         pcr_cadence = overrides.get(
-            "pcr_cadence", cfg.get("targeted_pcr", {}).get("cadence", 4),
+            "pcr_cadence", work.cfg.get("targeted_pcr", {}).get("cadence", 4),
         )
         seq_cadence = overrides.get(
-            "sequencing_cadence", cfg.get("sequencing", {}).get("cadence", 8),
+            "sequencing_cadence", work.cfg.get("sequencing", {}).get("cadence", 8),
         )
-
         verify_zones = [
-            str(q["zone"]) for q in state.verification_test_queue
-            if int(q.get("epoch", 0)) <= epoch
+            str(q["zone"]) for q in work.state.verification_test_queue
+            if int(q.get("epoch", 0)) <= work.epoch
         ]
-        state.verification_test_queue = [
-            q for q in state.verification_test_queue
-            if int(q.get("epoch", 0)) > epoch
+        work.state.verification_test_queue = [
+            q for q in work.state.verification_test_queue
+            if int(q.get("epoch", 0)) > work.epoch
         ]
-
-        pcr_result = None
-        seq_result = None
-        observation_enabled = cfg.get("observation", {}).get("enabled", True)
-        status_rank = STATUS_RANK.get(state.trigger_status, 0)
-        if observation_enabled:
-            if status_rank >= STATUS_RANK[STATUS_CONFIRMED]:
-                wipe = list(dict.fromkeys(self.zone_names + verify_zones))
-                pcr_result = pcr.query_ground_truth(truth, surface_wipe_zones=wipe)
-            elif status_rank >= STATUS_RANK[STATUS_ALERT]:
-                wipe = list(dict.fromkeys(self.high_traffic + verify_zones))
-                pcr_result = pcr.query_ground_truth(truth, surface_wipe_zones=wipe)
-            elif epoch % int(pcr_cadence) == 0:
-                if verify_zones:
-                    pcr_result = pcr.query_ground_truth(
-                        truth, surface_wipe_zones=verify_zones,
-                    )
-                else:
-                    pcr_result = pcr.query_ground_truth(truth)
-
-            if epoch % int(seq_cadence) == 0:
-                seq_result = seq.query_ground_truth(
-                    truth, zone_microflora_shifts=zone_microflora_shifts,
-                )
-
-        (air_results, swab_results, ww_results,
-         clin_rdt_results, clin_qpcr_results, clin_microbio_results,
-         long_read_results, long_read_ordered_count) = (
-            run_observation_sampling(
-                epoch, self.obs, agents, spaces, self.zone_names, self.zone_volumes,
-                zone_microflora_shifts, state.trigger_status, self.high_traffic,
-                syn_result, self.engine, self.pathogen_profiles, cfg,
+        if not work.cfg.get("observation", {}).get("enabled", True):
+            return
+        status_rank = STATUS_RANK.get(work.state.trigger_status, 0)
+        if status_rank >= STATUS_RANK[STATUS_CONFIRMED]:
+            wipe = list(dict.fromkeys(self.zone_names + verify_zones))
+            work.pcr_result = work.pcr.query_ground_truth(
+                work.truth, surface_wipe_zones=wipe,
             )
+        elif status_rank >= STATUS_RANK[STATUS_ALERT]:
+            wipe = list(dict.fromkeys(self.high_traffic + verify_zones))
+            work.pcr_result = work.pcr.query_ground_truth(
+                work.truth, surface_wipe_zones=wipe,
+            )
+        elif work.epoch % int(pcr_cadence) == 0:
+            if verify_zones:
+                work.pcr_result = work.pcr.query_ground_truth(
+                    work.truth, surface_wipe_zones=verify_zones,
+                )
+            else:
+                work.pcr_result = work.pcr.query_ground_truth(work.truth)
+        if work.epoch % int(seq_cadence) == 0:
+            work.seq_result = work.seq.query_ground_truth(
+                work.truth, zone_microflora_shifts=work.zone_microflora_shifts,
+            )
+
+    def _step_labs(self, work: _EpochWork) -> None:
+        self._query_pcr_seq(work)
+        (
+            work.air_results, work.swab_results, work.ww_results,
+            work.clin_rdt_results, work.clin_qpcr_results, work.clin_microbio_results,
+            work.long_read_results, work.long_read_ordered_count,
+        ) = run_observation_sampling(
+            work.epoch, self.obs, work.agents, work.spaces, self.zone_names,
+            self.zone_volumes, work.zone_microflora_shifts,
+            work.state.trigger_status, self.high_traffic, work.syn_result,
+            self.engine, self.pathogen_profiles, work.cfg,
         )
 
-        n_confirmed = update_cumulative_confirmed_cases(
-            clin_qpcr_results, clin_rdt_results,
-            state.cumulative_confirmed_case_ids,
+    def _log_pending_escalation(
+        self,
+        work: _EpochWork,
+        prev_status: str,
+        new_pending: dict[str, Any] | None,
+    ) -> None:
+        if new_pending is None or prev_status != work.state.trigger_status:
+            return
+        pending_to = new_pending.get("to")
+        already = any(
+            e.get("pending_to") == pending_to
+            and e.get("epoch_triggered") == new_pending.get("epoch_triggered")
+            for e in work.state.escalation_log
         )
-        prev_status = state.trigger_status
+        if already:
+            return
+        work.state.escalation_log.append({
+            "epoch": work.epoch,
+            "from": work.state.trigger_status,
+            "to": pending_to,
+            "pending": True,
+            "pending_to": pending_to,
+            "epoch_triggered": new_pending.get("epoch_triggered"),
+        })
+
+    def _step_escalation(self, work: _EpochWork) -> None:
+        n_confirmed = update_cumulative_confirmed_cases(
+            work.clin_qpcr_results, work.clin_rdt_results,
+            work.state.cumulative_confirmed_case_ids,
+        )
+        work.prev_status = work.state.trigger_status
         new_status, new_pending, _rates = check_escalation(
-            state.trigger_status, syn_result, pcr_result, cfg,
-            agents=agents,
-            ever_ill_ids=state.ever_ill_ids,
+            work.state.trigger_status, work.syn_result, work.pcr_result, work.cfg,
+            agents=work.agents,
+            ever_ill_ids=work.state.ever_ill_ids,
             cumulative_confirmed_cases=n_confirmed,
-            epoch=epoch,
-            escalation_pending=state.escalation_pending,
+            epoch=work.epoch,
+            escalation_pending=work.state.escalation_pending,
             respiratory_mode=pathogen_profiles_are_respiratory(self.pathogen_profiles),
         )
-        state.escalation_pending = new_pending
-        state.trigger_status = new_status
-        if state.trigger_status != prev_status:
-            state.escalation_log.append({
-                "epoch": epoch, "from": prev_status, "to": state.trigger_status,
+        work.state.escalation_pending = new_pending
+        work.state.trigger_status = new_status
+        if work.state.trigger_status != work.prev_status:
+            work.state.escalation_log.append({
+                "epoch": work.epoch,
+                "from": work.prev_status,
+                "to": work.state.trigger_status,
             })
             if self.obs.lab_notebook_enabled:
                 self.obs.notebook.log_trigger_transition(
-                    epoch, prev_status, state.trigger_status,
+                    work.epoch, work.prev_status, work.state.trigger_status,
                 )
-        elif new_pending is not None and (
-            prev_status == state.trigger_status
-        ):
-            # Log queued (not-yet-effective) transitions once
-            pending_to = new_pending.get("to")
-            already = any(
-                e.get("pending_to") == pending_to
-                and e.get("epoch_triggered") == new_pending.get("epoch_triggered")
-                for e in state.escalation_log
-            )
-            if not already:
-                state.escalation_log.append({
-                    "epoch": epoch,
-                    "from": state.trigger_status,
-                    "to": pending_to,
-                    "pending": True,
-                    "pending_to": pending_to,
-                    "epoch_triggered": new_pending.get("epoch_triggered"),
-                })
-
-        stoplights = compute_stoplights(
-            air_results, swab_results, ww_results,
-            clin_rdt_results, clin_qpcr_results, clin_microbio_results,
-            wearable_result=wearable_result,
-            syndromic_result=syn_result,
-            long_read_results=long_read_results,
-            cfg=cfg,
+        else:
+            self._log_pending_escalation(work, work.prev_status, new_pending)
+        work.stoplights = compute_stoplights(
+            work.air_results, work.swab_results, work.ww_results,
+            work.clin_rdt_results, work.clin_qpcr_results, work.clin_microbio_results,
+            wearable_result=work.wearable_result,
+            syndromic_result=work.syn_result,
+            long_read_results=work.long_read_results,
+            cfg=work.cfg,
         )
 
-        cmd_envelope: ActionEnvelope | None = None
-        if dr is not None:
-            for msg in dr.decision_ctx.sop_announcements + dr.lived_store.sop_announcements:
-                dr.information_engine.seed_public_message(msg)
-            dr.information_engine.reputation.on_corporate_stance(
-                dr.decision_ctx.corporate_communication_stance,
-            )
-            eligible = eligible_protocol_ids(
-                self.proto_ctx.standing_protocols, stoplights,
-                trigger_status=state.trigger_status,
-            )
-            epoch_snapshot = {
-                "epoch": epoch,
-                "agents": agents,
-                "trigger_status": state.trigger_status,
-                "summary": self._build_summary(agents, syn_result),
-                "reactive_protocols": {"stoplights": stoplights},
-                "observation_engine": {
-                    "air_sniffer": air_results,
-                    "surface_swab": swab_results,
+    def _step_command(self, work: _EpochWork) -> None:
+        dr = work.dr
+        if dr is None:
+            return
+        for msg in dr.decision_ctx.sop_announcements + dr.lived_store.sop_announcements:
+            dr.information_engine.seed_public_message(msg)
+        dr.information_engine.reputation.on_corporate_stance(
+            dr.decision_ctx.corporate_communication_stance,
+        )
+        if dr.stackelberg is None:
+            return
+        eligible = eligible_protocol_ids(
+            self.proto_ctx.standing_protocols, work.stoplights,
+            trigger_status=work.state.trigger_status,
+        )
+        cmd_applied = apply_action_envelope(
+            dr.stackelberg.solve_command_medical(
+                work.epoch,
+                {
+                    "epoch": work.epoch,
+                    "agents": work.agents,
+                    "trigger_status": work.state.trigger_status,
+                    "summary": self._build_summary(work.agents, work.syn_result),
+                    "reactive_protocols": {"stoplights": work.stoplights},
+                    "observation_engine": {
+                        "air_sniffer": work.air_results,
+                        "surface_swab": work.swab_results,
+                    },
+                    "cost_accounting": {
+                        "operational_impact_cumulative": (
+                            self.proto_ctx.cost_ledger.operational_impact_cumulative
+                        ),
+                    },
+                    "high_traffic_zones": self.high_traffic,
                 },
-                "cost_accounting": {
-                    "operational_impact_cumulative": (
-                        self.proto_ctx.cost_ledger.operational_impact_cumulative
-                    ),
-                },
-                "high_traffic_zones": self.high_traffic,
-            }
-            if dr.stackelberg is not None:
-                cmd_envelope = dr.stackelberg.solve_command_medical(
-                    epoch,
-                    epoch_snapshot,
-                    dr.decision_ctx,
-                    dr.lived_store,
-                    information_state,
-                    dr.information_engine.reputation,
-                    dr.global_health_timeline,
-                    self.decision_experience,
-                    eligible,
-                )
-                cmd_applied = apply_action_envelope(
-                    cmd_envelope, state, cfg, dr.decision_ctx, set(self.zone_names),
-                )
-                if cmd_applied:
-                    applied = cmd_applied if not applied else {**applied, **cmd_applied}
+                dr.decision_ctx,
+                dr.lived_store,
+                work.information_state,
+                dr.information_engine.reputation,
+                dr.global_health_timeline,
+                self.decision_experience,
+                eligible,
+            ),
+            work.state,
+            work.cfg,
+            dr.decision_ctx,
+            set(self.zone_names),
+        )
+        work.applied = _merge_applied(work.applied, cmd_applied)
 
+    def _step_protocols(self, work: _EpochWork) -> None:
         reset_modifiers(
             self.contam_engine, self.tx_core, self.proto_ctx.original_filter_eff,
         )
-        cascade_ctx = build_cascade_context(state, cascade_result)
-        authorized = dr.decision_ctx.authorized_sop_ids if dr else None
-        active_mods = self.proto_ctx.protocol_engine.evaluate_epoch(
-            epoch,
-            stoplights,
-            forced_protocol_ids=state.forced_protocol_ids,
+        authorized = work.dr.decision_ctx.authorized_sop_ids if work.dr else None
+        work.active_mods = self.proto_ctx.protocol_engine.evaluate_epoch(
+            work.epoch,
+            work.stoplights,
+            forced_protocol_ids=work.state.forced_protocol_ids,
             authorized_sop_ids=authorized,
-            cascade_context=cascade_ctx,
-            trigger_status=state.trigger_status,
+            cascade_context=build_cascade_context(work.state, work.cascade_result),
+            trigger_status=work.state.trigger_status,
         )
-        if dr is not None and dr.decision_ctx.authorized_sop_ids is not None:
-            active_mods = filter_active_modifiers(
-                active_mods, dr.decision_ctx.authorized_sop_ids,
+        if work.dr is not None and work.dr.decision_ctx.authorized_sop_ids is not None:
+            work.active_mods = filter_active_modifiers(
+                work.active_mods, work.dr.decision_ctx.authorized_sop_ids,
             )
-        merged_mods = self.proto_ctx.protocol_engine.get_merged_modifiers(active_mods)
+        work.merged_mods = self.proto_ctx.protocol_engine.get_merged_modifiers(
+            work.active_mods,
+        )
+        if not work.merged_mods:
+            return
+        apply_hvac_modifiers(self.contam_engine, work.merged_mods)
+        apply_transmission_modifiers(self.tx_core, work.merged_mods)
+        if "close_zones" in work.merged_mods:
+            apply_zone_closures(self.engine, work.merged_mods["close_zones"])
+        if "surface_decontamination_factor" in work.merged_mods:
+            apply_surface_decontamination(
+                self.engine, work.merged_mods["surface_decontamination_factor"],
+            )
 
-        if merged_mods:
-            apply_hvac_modifiers(self.contam_engine, merged_mods)
-            apply_transmission_modifiers(self.tx_core, merged_mods)
-            if "close_zones" in merged_mods:
-                apply_zone_closures(self.engine, merged_mods["close_zones"])
-            if "surface_decontamination_factor" in merged_mods:
-                apply_surface_decontamination(
-                    self.engine, merged_mods["surface_decontamination_factor"],
-                )
+    def _attach_decision_telemetry(self, work: _EpochWork) -> None:
+        dr = work.dr
+        if dr is None:
+            return
+        if self.run_spec.history_retention == "compact":
+            dr.capture_sop_events(self.proto_ctx.protocol_engine, work.epoch)
+            return
+        dr.capture_sop_events(self.proto_ctx.protocol_engine, work.epoch)
+        work.epoch_record.setdefault("reactive_protocols", {})["sop_events"] = (
+            dr.sop_events_buffer
+        )
+        work.epoch_record["information_state"] = work.information_state
+        if dr.decision_detail_telemetry and work.wearable_result:
+            work.epoch_record["wearable_agent_snapshot"] = (
+                work.wearable_result.get("agent_results", {})
+            )
+        for ag in work.epoch_record.get("agents", []):
+            pid = dr.profiles.get(int(ag.get("agent_id", -1)))
+            if pid:
+                ag["profile_id"] = pid.profile_id
+        work.epoch_record.setdefault("contact_tracing", {})["agent_adjacency"] = (
+            dr.contact_graph.to_dict().get("agent_adjacency", {})
+        )
 
+    def _step_record(self, work: _EpochWork) -> None:
         step_cost_accounting(
-            epoch, self.proto_ctx,
-            air_results, swab_results, ww_results,
-            clin_rdt_results, clin_qpcr_results, clin_microbio_results,
+            work.epoch, self.proto_ctx,
+            work.air_results, work.swab_results, work.ww_results,
+            work.clin_rdt_results, work.clin_qpcr_results, work.clin_microbio_results,
         )
-        step_long_read_cost_accounting(epoch, self.proto_ctx, long_read_ordered_count)
+        step_long_read_cost_accounting(
+            work.epoch, self.proto_ctx, work.long_read_ordered_count,
+        )
         step_quarantine_confinement(
-            epoch, agents, merged_mods, state.trigger_status, state, syndromic,
+            work.epoch, work.agents, work.merged_mods, work.state.trigger_status,
+            work.state, work.syndromic,
         )
-
         counter_defs = self.graph_cfg.get("infection_counters", [])
-        counter_results = compute_infection_counters(agents, counter_defs)
+        work.counter_results = compute_infection_counters(work.agents, counter_defs)
         step_counter_thresholds(
-            epoch, agents, counter_results, counter_defs, state, syndromic,
+            work.epoch, work.agents, work.counter_results, counter_defs,
+            work.state, work.syndromic,
             confinement_enabled=self.graph_cfg.get(
                 "counter_confinement_enabled", True,
             ),
         )
-
         step_operational_impact_accounting(
-            epoch, state, agents, merged_mods, self.proto_ctx,
+            work.epoch, work.state, work.agents, work.merged_mods, self.proto_ctx,
             zone_type_by_id=self.zone_types,
         )
-
-        state.agent_behavioral_overrides.clear()
-
-        epoch_cost = self.proto_ctx.cost_ledger.get_epoch_summary(epoch)
-        epoch_record = record_epoch(
-            epoch=epoch,
-            trigger_status=state.trigger_status,
-            agents=agents,
-            spaces=spaces,
+        work.state.agent_behavioral_overrides.clear()
+        work.epoch_record = record_epoch(
+            epoch=work.epoch,
+            trigger_status=work.state.trigger_status,
+            agents=work.agents,
+            spaces=work.spaces,
             engine=self.engine,
             contam_engine=self.contam_engine,
             pathogen_profiles=self.pathogen_profiles,
             zone_names=self.zone_names,
-            zone_microflora_shifts=zone_microflora_shifts,
-            syn_result=syn_result,
-            rdt_result=rdt_result,
-            pcr_result=pcr_result,
-            seq_result=seq_result,
-            tracing_matrix=tracing_matrix,
-            state=state,
+            zone_microflora_shifts=work.zone_microflora_shifts,
+            syn_result=work.syn_result,
+            rdt_result=work.rdt_result,
+            pcr_result=work.pcr_result,
+            seq_result=work.seq_result,
+            tracing_matrix=work.tracing_matrix,
+            state=work.state,
             obs=self.obs,
-            active_mods=active_mods,
-            merged_mods=merged_mods,
-            stoplights=stoplights,
-            epoch_cost=epoch_cost,
-            cfg=cfg,
-            air_results=air_results,
-            swab_results=swab_results,
-            ww_results=ww_results,
-            clin_rdt_results=clin_rdt_results,
-            clin_qpcr_results=clin_qpcr_results,
-            clin_microbio_results=clin_microbio_results,
-            wearable_result=wearable_result,
-            infection_counters=counter_results,
-            long_read_results=long_read_results,
-            cascade_result=cascade_result,
+            active_mods=work.active_mods,
+            merged_mods=work.merged_mods,
+            stoplights=work.stoplights,
+            epoch_cost=self.proto_ctx.cost_ledger.get_epoch_summary(work.epoch),
+            cfg=work.cfg,
+            air_results=work.air_results,
+            swab_results=work.swab_results,
+            ww_results=work.ww_results,
+            clin_rdt_results=work.clin_rdt_results,
+            clin_qpcr_results=work.clin_qpcr_results,
+            clin_microbio_results=work.clin_microbio_results,
+            wearable_result=work.wearable_result,
+            infection_counters=work.counter_results,
+            long_read_results=work.long_read_results,
+            cascade_result=work.cascade_result,
             history_retention=self.run_spec.history_retention,
         )
-        if applied and self.run_spec.history_retention != "compact":
-            epoch_record["decisions"] = applied
-        if state.epoch_voyage is not None:
-            epoch_record["voyage_epoch"] = state.epoch_voyage.to_telemetry()
-        if dr is not None and self.run_spec.history_retention != "compact":
-            dr.capture_sop_events(self.proto_ctx.protocol_engine, epoch)
-            epoch_record.setdefault("reactive_protocols", {})["sop_events"] = dr.sop_events_buffer
-            epoch_record["information_state"] = information_state
-            if dr.decision_detail_telemetry and wearable_result:
-                epoch_record["wearable_agent_snapshot"] = wearable_result.get("agent_results", {})
-            for ag in epoch_record.get("agents", []):
-                pid = dr.profiles.get(int(ag.get("agent_id", -1)))
-                if pid:
-                    ag["profile_id"] = pid.profile_id
-            epoch_record.setdefault("contact_tracing", {})["agent_adjacency"] = (
-                dr.contact_graph.to_dict().get("agent_adjacency", {})
-            )
-        elif dr is not None:
-            # Still capture SOP events for runtime, but do not retain in history.
-            dr.capture_sop_events(self.proto_ctx.protocol_engine, epoch)
-        state.simulation_history.append(epoch_record)
+        if work.applied and self.run_spec.history_retention != "compact":
+            work.epoch_record["decisions"] = work.applied
+        if work.state.epoch_voyage is not None:
+            work.epoch_record["voyage_epoch"] = work.state.epoch_voyage.to_telemetry()
+        self._attach_decision_telemetry(work)
+        work.state.simulation_history.append(work.epoch_record)
         self._observe_sentinel(
-            epoch, agents, syn_result, cascade_result, wearable_result,
+            work.epoch, work.agents, work.syn_result, work.cascade_result,
+            work.wearable_result,
         )
-        self._epoch = epoch
-
-        if self.display:
-            from orchestrator_display import print_progress
-            total_spent = (
-                self.proto_ctx.cost_ledger.starting_financial_usd
-                - self.proto_ctx.cost_ledger.financial_balance
-            )
-            print_progress(
-                epoch, self.num_epochs, state.trigger_status,
-                len(active_mods), total_spent, prev_status,
-            )
-
-        return StepResult(
-            epoch=epoch,
-            trigger_status=state.trigger_status,
-            stoplights=stoplights,
-            epoch_record=epoch_record,
-            ground_truth=payload,
-            active_protocols=active_mods,
-            merged_modifiers=merged_mods,
-            decisions=applied,
+        self._epoch = work.epoch
+        if not self.display:
+            return
+        from orchestrator_display import print_progress
+        total_spent = (
+            self.proto_ctx.cost_ledger.starting_financial_usd
+            - self.proto_ctx.cost_ledger.financial_balance
+        )
+        print_progress(
+            work.epoch, self.num_epochs, work.state.trigger_status,
+            len(work.active_mods), total_spent, work.prev_status,
         )
 
     @staticmethod
@@ -1032,24 +1148,21 @@ class ShipSimulation:
             agent_has_symptomatic_presentation,
             resolve_agent_axes,
         )
-        summary: dict[str, Any] = {
+        counts = {
             "sick_call_count": syn_result.get("sick_call_count", 0) if syn_result else 0,
+            "susceptible": 0,
+            "infected": 0,
+            "recovered": 0,
+            "immune": 0,
+            "symptomatic": 0,
         }
-        for key in ("susceptible", "infected", "recovered", "immune", "symptomatic"):
-            summary[key] = 0
         for ag in agents:
             inf, _, _ = resolve_agent_axes(ag)
-            if inf == "susceptible":
-                summary["susceptible"] += 1
-            elif inf == "infected":
-                summary["infected"] += 1
-            elif inf == "recovered":
-                summary["recovered"] += 1
-            elif inf == "immune":
-                summary["immune"] += 1
+            if inf in counts:
+                counts[inf] += 1
             if agent_has_symptomatic_presentation(ag):
-                summary["symptomatic"] += 1
-        return summary
+                counts["symptomatic"] += 1
+        return counts
 
     def run(self, n_epochs: int | None = None) -> RunResult:
         if not self._initialized:

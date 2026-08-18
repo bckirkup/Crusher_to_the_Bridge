@@ -287,6 +287,76 @@ def _crew_repeat_counts(
     return counts
 
 
+def _visit_index_row(
+    fv: FleetVoyage,
+    ports: Sequence[str],
+    visit_index: Mapping[str, int],
+    week_index: Mapping[str, int],
+    hours_by_visit: dict[str, float],
+    ashore: np.ndarray,
+    visit_port: list[int],
+    visit_week: list[int],
+) -> list[int]:
+    row = [0] * len(ports)
+    voyage_ports = attribution_ports(fv.design)
+    for p, port_id in enumerate(ports):
+        if port_id not in voyage_ports:
+            continue
+        key = fleet_visit_key(
+            port_id, fv.voyage, _first_call_day(fv.voyage, port_id),
+        )
+        idx = visit_index[key]
+        row[p] = idx
+        visit_port[idx - 1] = p + 1
+        visit_week[idx - 1] = week_index[_week_key(fv.voyage, port_id)]
+        hours_by_visit[key] += float(ashore[:, :, p].sum())
+    return row
+
+
+def _fill_voyage_exposures(
+    voyages: Sequence[FleetVoyage],
+    *,
+    ports: Sequence[str],
+    visit_index: Mapping[str, int],
+    week_index: Mapping[str, int],
+    t_max: int,
+    visit_port: list[int],
+    visit_week: list[int],
+    hours_by_visit: dict[str, float],
+) -> tuple[
+    list[list[list[int]]],
+    list[list[list[list[float]]]],
+    list[list[list[float]]],
+    list[list[float]],
+    list[list[int]],
+]:
+    onsets: list[list[list[int]]] = []
+    ashore_all: list[list[list[list[float]]]] = []
+    aboard_all: list[list[list[float]]] = []
+    shares: list[list[float]] = []
+    visit_idx: list[list[int]] = []
+    for fv in voyages:
+        ashore = ashore_hours_by_epoch(fv.design, fv.voyage, ports)
+        aboard = aboard_hours_by_epoch(fv.voyage, fv.bundle, ashore)
+        counts = group_onsets(fv.bundle, fv.design.observation_end_epoch)
+        ashore_all.append(
+            [_pad_rows(ashore[g], t_max) for g in range(len(GROUPS))],
+        )
+        aboard_all.append(_pad_cols(aboard, t_max))
+        onsets.append(_pad_cols(counts, t_max, dtype=int))
+        share = aboard.sum(axis=1)
+        if share.sum() <= 0.0:
+            share = np.ones(len(GROUPS), dtype=float)
+        shares.append([float(x) for x in share])
+        visit_idx.append(
+            _visit_index_row(
+                fv, ports, visit_index, week_index, hours_by_visit, ashore,
+                visit_port, visit_week,
+            ),
+        )
+    return onsets, ashore_all, aboard_all, shares, visit_idx
+
+
 def build_sentinel_fleet_data(
     voyages: Sequence[FleetVoyage],
     incubation: DelayDistribution,
@@ -321,44 +391,19 @@ def build_sentinel_fleet_data(
     horizons = [int(fv.design.observation_end_epoch) for fv in voyages]
     t_max = max(horizons)
 
-    onsets: list[list[list[int]]] = []
-    ashore_all: list[list[list[list[float]]]] = []
-    aboard_all: list[list[list[float]]] = []
-    shares: list[list[float]] = []
-    visit_idx: list[list[int]] = []
     visit_port: list[int] = [0] * len(visit_keys)
     visit_week: list[int] = [0] * len(visit_keys)
     hours_by_visit: dict[str, float] = dict.fromkeys(visit_keys, 0.0)
-
-    for i, fv in enumerate(voyages):
-        ashore = ashore_hours_by_epoch(fv.design, fv.voyage, ports)
-        aboard = aboard_hours_by_epoch(fv.voyage, fv.bundle, ashore)
-        counts = group_onsets(fv.bundle, fv.design.observation_end_epoch)
-        # (epoch, port) per group, which is Stan's matrix[Tmax, P].
-        ashore_all.append(
-            [_pad_rows(ashore[g], t_max) for g in range(len(GROUPS))],
-        )
-        aboard_all.append(_pad_cols(aboard, t_max))
-        onsets.append(_pad_cols(counts, t_max, dtype=int))
-        share = aboard.sum(axis=1)
-        if share.sum() <= 0.0:
-            share = np.ones(len(GROUPS), dtype=float)
-        shares.append([float(x) for x in share])
-
-        row = [0] * len(ports)
-        voyage_ports = attribution_ports(fv.design)
-        for p, port_id in enumerate(ports):
-            if port_id not in voyage_ports:
-                continue
-            key = fleet_visit_key(
-                port_id, fv.voyage, _first_call_day(fv.voyage, port_id),
-            )
-            idx = visit_index[key]
-            row[p] = idx
-            visit_port[idx - 1] = p + 1
-            visit_week[idx - 1] = week_index[_week_key(fv.voyage, port_id)]
-            hours_by_visit[key] += float(ashore[:, :, p].sum())
-        visit_idx.append(row)
+    onsets, ashore_all, aboard_all, shares, visit_idx = _fill_voyage_exposures(
+        voyages,
+        ports=ports,
+        visit_index=visit_index,
+        week_index=week_index,
+        t_max=t_max,
+        visit_port=visit_port,
+        visit_week=visit_week,
+        hours_by_visit=hours_by_visit,
+    )
 
     lagged = generation.strictly_lagged().weights[1:]
     ww = _wastewater_block(
@@ -475,71 +520,50 @@ def _fleet_meta(
     }
 
 
-def _wastewater_block(
+def _pool_ww_observations(
     voyages: Sequence[FleetVoyage],
     *,
-    options: WastewaterOptions,
-    t_max: int,
-    aboard_all: Sequence[Sequence[Sequence[float]]],
-    epoch_hours: float,
-) -> dict[str, Any]:
-    """``{'data': ..., 'meta': ...}`` for the wastewater channel.
-
-    ``enabled=False`` still emits the arrays, at length 0: Stan needs the block to
-    exist, and a zero-length observation array is how "no wastewater evidence"
-    is stated without a second copy of the model. The parameters remain in the
-    posterior and are then prior-only, which is deliberately visible — a report
-    that quotes ``ww_slope`` off a clinical-only fit should be caught.
-
-    The denominator is persons aboard per epoch, reconstructed from the aboard
-    person-hours already assembled, so the read fraction is linked to a
-    *prevalence* rather than a headcount that would scale with ship size.
-    """
-    resolved = options.pathogen or default_pathogen()
-    kernel = shedding_kernel(
-        resolved,
-        epoch_hours=epoch_hours,
-        residence_lag_hours=options.residence_lag_hours,
-    )
-    config = wastewater_config()
-    cap = int(
-        options.max_effective_reads
-        if options.max_effective_reads is not None
-        else config["max_effective_reads"],
-    )
-
-    persons: list[list[float]] = []
-    for v in range(len(voyages)):
-        aboard = np.asarray(aboard_all[v], dtype=float)
-        # Person-hours over the epoch length is the headcount aboard that epoch.
-        head = aboard.sum(axis=0) / float(epoch_hours or 1.0)
-        persons.append([float(max(x, 1.0)) for x in head])
-
+    resolved: Any,
+    cap: int,
+    enabled: bool,
+) -> tuple[list[Any], list[int], list[Any], list[int]]:
     pooled: list[PooledSample] = []
     voyage_of: list[int] = []
     conc: list[PooledConcentration] = []
     conc_voyage_of: list[int] = []
-    if options.enabled:
-        for i, fv in enumerate(voyages):
-            samples = pool_wastewater(
-                fv.bundle,
-                pathogen=resolved,
-                observation_end_epoch=int(fv.design.observation_end_epoch),
-                max_effective_reads=cap,
-            )
-            pooled.extend(samples)
-            voyage_of.extend([i + 1] * len(samples))
-            readings = pool_concentrations(
-                fv.bundle,
-                pathogen=resolved,
-                observation_end_epoch=int(fv.design.observation_end_epoch),
-            )
-            conc.extend(readings)
-            conc_voyage_of.extend([i + 1] * len(readings))
+    if not enabled:
+        return pooled, voyage_of, conc, conc_voyage_of
+    for i, fv in enumerate(voyages):
+        samples = pool_wastewater(
+            fv.bundle,
+            pathogen=resolved,
+            observation_end_epoch=int(fv.design.observation_end_epoch),
+            max_effective_reads=cap,
+        )
+        pooled.extend(samples)
+        voyage_of.extend([i + 1] * len(samples))
+        readings = pool_concentrations(
+            fv.bundle,
+            pathogen=resolved,
+            observation_end_epoch=int(fv.design.observation_end_epoch),
+        )
+        conc.extend(readings)
+        conc_voyage_of.extend([i + 1] * len(readings))
+    return pooled, voyage_of, conc, conc_voyage_of
 
-    data = {
+
+def _ww_stan_data(
+    *,
+    pooled: Sequence[PooledSample],
+    voyage_of: Sequence[int],
+    conc: Sequence[PooledConcentration],
+    conc_voyage_of: Sequence[int],
+    kernel: Any,
+    persons: Sequence[Sequence[float]],
+) -> dict[str, Any]:
+    return {
         "NW": len(pooled),
-        "ww_voyage": voyage_of,
+        "ww_voyage": list(voyage_of),
         "ww_epoch": [int(s.epoch) for s in pooled],
         "ww_reads": [int(s.effective_pathogen_reads) for s in pooled],
         "ww_total": [int(s.effective_reads) for s in pooled],
@@ -554,7 +578,7 @@ def _wastewater_block(
         "ww_conc_prior_log_mean": math.log(float(DEFAULT_CONCENTRATION_PRIOR_MEDIAN)),
         "ww_conc_prior_log_sd": float(DEFAULT_CONCENTRATION_PRIOR_LOG_SD),
         "NC": len(conc),
-        "conc_voyage": conc_voyage_of,
+        "conc_voyage": list(conc_voyage_of),
         "conc_epoch": [int(c.epoch) for c in conc],
         "conc_log10": [float(c.log10_copies_per_l) for c in conc],
         "conc_censored": [int(bool(c.censored)) for c in conc],
@@ -564,7 +588,18 @@ def _wastewater_block(
         "conc_slope_prior_sd": float(DEFAULT_CONC_SLOPE_PRIOR_SD),
         "conc_sigma_prior_scale": float(DEFAULT_CONC_SIGMA_PRIOR_SCALE),
     }
-    meta = {
+
+
+def _ww_meta(
+    *,
+    options: WastewaterOptions,
+    resolved: Any,
+    pooled: Sequence[PooledSample],
+    conc: Sequence[PooledConcentration],
+    cap: int,
+    kernel: Any,
+) -> dict[str, Any]:
+    return {
         "enabled": bool(options.enabled),
         "pathogen": resolved,
         "n_pooled_samples": len(pooled),
@@ -598,6 +633,53 @@ def _wastewater_block(
             for s in pooled
         ],
     }
+
+
+def _wastewater_block(
+    voyages: Sequence[FleetVoyage],
+    *,
+    options: WastewaterOptions,
+    t_max: int,
+    aboard_all: Sequence[Sequence[Sequence[float]]],
+    epoch_hours: float,
+) -> dict[str, Any]:
+    """Stan wastewater arrays plus the meta a report needs to read them."""
+    resolved = options.pathogen or default_pathogen()
+    kernel = shedding_kernel(
+        resolved,
+        epoch_hours=epoch_hours,
+        residence_lag_hours=options.residence_lag_hours,
+    )
+    config = wastewater_config()
+    cap = int(
+        options.max_effective_reads
+        if options.max_effective_reads is not None
+        else config["max_effective_reads"],
+    )
+    persons: list[list[float]] = []
+    for v in range(len(voyages)):
+        aboard = np.asarray(aboard_all[v], dtype=float)
+        head = aboard.sum(axis=0) / float(epoch_hours or 1.0)
+        persons.append([float(max(x, 1.0)) for x in head])
+    pooled, voyage_of, conc, conc_voyage_of = _pool_ww_observations(
+        voyages, resolved=resolved, cap=cap, enabled=bool(options.enabled),
+    )
+    data = _ww_stan_data(
+        pooled=pooled,
+        voyage_of=voyage_of,
+        conc=conc,
+        conc_voyage_of=conc_voyage_of,
+        kernel=kernel,
+        persons=persons,
+    )
+    meta = _ww_meta(
+        options=options,
+        resolved=resolved,
+        pooled=pooled,
+        conc=conc,
+        cap=cap,
+        kernel=kernel,
+    )
     if t_max and persons and len(persons[0]) != t_max:
         raise ValueError(
             "aboard hours were not padded to Tmax before the wastewater "

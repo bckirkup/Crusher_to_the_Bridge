@@ -3,12 +3,12 @@
 from __future__ import annotations
 
 import json
-from dataclasses import replace
 
 import numpy as np
 import pytest
 
 from picard_framework.analysis.sentinel.design_power import (
+    SentinelDesign,
     build_design_data,
     build_synthetic_fleet,
     ceiling_projection,
@@ -41,6 +41,16 @@ def test_all_presets_have_crossed_identifiable_fit_scale() -> None:
         assert len(weeks) > 1
 
 
+def test_evolved_keeps_sentinel_design_type() -> None:
+    design = load_presets()["pilot"]
+    ships = [4, 8, 16]
+    copies = [design.evolved(n_ships=n) for n in ships]
+    assert all(isinstance(item, SentinelDesign) for item in copies)
+    assert [item.n_ships for item in copies] == ships
+    assert copies[0].n_ships < copies[1].n_ships < copies[2].n_ships
+    assert design.n_ships != copies[-1].n_ships
+
+
 @pytest.mark.parametrize(
     ("dimension", "values"),
     (("ships", (4, 8, 16)), ("weeks", (2, 4, 8)), ("calls", (2, 3, 4, 5))),
@@ -66,7 +76,7 @@ def test_ceiling_has_positive_information_and_mdhr_decreases() -> None:
     design = load_presets()["pilot"]
     values = []
     for ships in (4, 8, 16):
-        values.append(ceiling_projection(replace(design, n_ships=ships)))
+        values.append(ceiling_projection(design.evolved(n_ships=ships)))
     assert all(np.isfinite(item["width90_log_lambda"]) for item in values)
     assert all(item["width90_log_lambda"] > 0 for item in values)
     assert all(item["mdhr"] > 1 for item in values)
@@ -88,8 +98,7 @@ def test_week_scaling_check_reports_shortcut_bias() -> None:
 
 def test_fit_power_is_sensitive_to_true_hot_ratio() -> None:
     powers = []
-    design = replace(
-        load_presets()["pilot"],
+    design = load_presets()["pilot"].evolved(
         fit_scale_ships=3,
         fit_scale_weeks=2,
         fit_scale_ports=4,

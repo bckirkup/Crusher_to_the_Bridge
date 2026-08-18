@@ -11,7 +11,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 from datetime import date, timedelta
-from typing import Any
+from typing import Any, Sequence
 
 from engines.voyage_itinerary import (
     DEFAULT_DAY_DEFAULTS,
@@ -341,6 +341,27 @@ def port_calls_from_config(
     return tuple(sorted(calls, key=lambda c: (c.voyage_day, c.arrival_epoch)))
 
 
+def _observation_span(
+    calls: Sequence[PortCall],
+    total_epochs: int,
+    observation_end_epoch: int | None,
+) -> tuple[int, int]:
+    span = total_epochs
+    if span <= 0 and calls:
+        span = max(c.departure_epoch for c in calls)
+    end_epoch = int(observation_end_epoch or span)
+    last_excursion = max(
+        (c.departure_epoch for c in calls if not c.is_home_port),
+        default=0,
+    )
+    if last_excursion and end_epoch < last_excursion:
+        raise ValueError(
+            "observation_end_epoch precedes the last port departure; "
+            "censoring would be misattributed",
+        )
+    return span, end_epoch
+
+
 def voyage_from_config(
     config: dict[str, Any] | None,
     *,
@@ -354,17 +375,12 @@ def voyage_from_config(
     """Build the sentinel ``Voyage`` view from a voyage config document."""
     cfg = normalize_voyage_config(config or {})
     voyage = cfg.get("voyage") or {}
-    total_epochs = int(voyage.get("total_epochs", 0) or 0)
     calls = port_calls_from_config(cfg)
-    if total_epochs <= 0 and calls:
-        total_epochs = max(c.departure_epoch for c in calls)
-    end_epoch = int(observation_end_epoch or total_epochs)
-    excursions = [c for c in calls if not c.is_home_port]
-    if excursions and end_epoch < max(c.departure_epoch for c in excursions):
-        raise ValueError(
-            "observation_end_epoch precedes the last port departure; "
-            "censoring would be misattributed",
-        )
+    total_epochs, end_epoch = _observation_span(
+        calls,
+        int(voyage.get("total_epochs", 0) or 0),
+        observation_end_epoch,
+    )
     return Voyage(
         voyage_id=voyage_id,
         ship_id=ship_id,

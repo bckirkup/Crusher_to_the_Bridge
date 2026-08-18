@@ -249,6 +249,7 @@ Tier 1 alone: ~15 hours (300 × 3 min).
 |------|------|
 | `campaign_manifest.json` | Mega-cruise tier matrix (~17,780) |
 | `calibration_manifest_v1.json` | Multi-platform calibration matrix (c1–c4) |
-| `campaign_runner.py` | Spec generator + Picard executor (sharding + S3 upload) |
+| `tier_iterators.py` | `t1`–`t16` and calibration (`c1`–`c6`, `a2`, `b1`, `b2`) cartesian generators; `dispatch_standard_or_calibration` |
+| `campaign_runner.py` | Spec generator + Picard executor (sharding + S3 upload); `sr*` / `vd*` families stay here |
 | `README.md` | This file |
 | [`deploy/aws/`](../../../deploy/aws/README.md) | Dockerfile is at repo root; ECR + AWS Batch array-job deployment using IAM **role assumption** (short-lived creds) — bootstrap user → `picard-deploy-role`; containers use Batch execution/job roles |

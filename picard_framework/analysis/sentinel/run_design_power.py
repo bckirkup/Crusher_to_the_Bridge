@@ -46,15 +46,20 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def _run(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str, list[dict[str, Any]]]]:
-    design = load_design(args.preset, safe_path(args.presets_file) if args.presets_file else None)
-    draws = SMOKE_DRAWS if args.smoke else args.draws
-    warmup = SMOKE_WARMUP if args.smoke else args.warmup
-    replicates = SMOKE_REPLICATES if args.smoke else args.replicates
+def _engine_payload(
+    args: argparse.Namespace,
+    design: Any,
+    *,
+    draws: int,
+    warmup: int,
+    replicates: int,
+) -> dict[str, Any]:
     payload: dict[str, Any] = {"preset": design.name, "caveats": []}
-    if args.engine in ("ceiling", "both"):
-        payload["ceiling"] = ceiling_projection(design, alpha=args.alpha, power=args.power)
-    if args.engine in ("fit", "both"):
+    if args.engine in {"ceiling", "both"}:
+        payload["ceiling"] = ceiling_projection(
+            design, alpha=args.alpha, power=args.power,
+        )
+    if args.engine in {"fit", "both"}:
         payload["fit"] = fit_projection(
             design,
             draws=draws,
@@ -69,20 +74,36 @@ def _run(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str, list[dict[
         or payload.get("fit", {}).get("caveats")
         or []
     )
+    return payload
+
+
+def _sweep_values(design: Any, dimension: str) -> tuple[int, ...]:
+    if dimension == "ships":
+        return tuple(
+            max(1, round(design.n_ships * multiplier))
+            for multiplier in (0.125, 0.25, 0.5, 1.0, 2.0)
+        )
+    values = SWEEP_VALUES.get(dimension)
+    if values is None:
+        raise ValueError(f"unknown sweep dimension: {dimension}")
+    return values
+
+
+def _run(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str, list[dict[str, Any]]]]:
+    design = load_design(args.preset, safe_path(args.presets_file) if args.presets_file else None)
+    payload = _engine_payload(
+        args,
+        design,
+        draws=SMOKE_DRAWS if args.smoke else args.draws,
+        warmup=SMOKE_WARMUP if args.smoke else args.warmup,
+        replicates=SMOKE_REPLICATES if args.smoke else args.replicates,
+    )
     sweeps = {}
     for dimension in (part.strip() for part in args.sweep.split(",") if part.strip()):
-        values = SWEEP_VALUES.get(dimension)
-        if dimension == "ships":
-            values = tuple(
-                max(1, round(design.n_ships * multiplier))
-                for multiplier in (0.125, 0.25, 0.5, 1.0, 2.0)
-            )
-        if values is None:
-            raise ValueError(f"unknown sweep dimension: {dimension}")
         sweeps[dimension] = scaling_sweep(
             design,
             dimension,
-            values,
+            _sweep_values(design, dimension),
             alpha=args.alpha,
             power=args.power,
         )

@@ -115,24 +115,28 @@ def _posix_relpath(rel: str) -> str:
     return str(rel).replace("\\", "/")
 
 
+def _posix_voyage_fields(entry: dict[str, Any]) -> bool:
+    changed = False
+    for field in ("itinerary", "observations"):
+        raw = entry.get(field)
+        if not isinstance(raw, str) or not raw:
+            continue
+        fixed = _posix_relpath(raw)
+        if fixed != raw:
+            entry[field] = fixed
+            changed = True
+    return changed
+
+
 def _rewrite_manifest_paths(manifest_path: str) -> None:
     """Ensure voyage paths in ``manifest_path`` use forward slashes."""
     payload = _read_json(manifest_path)
     voyages = payload.get("voyages") or []
     if not isinstance(voyages, list):
         return
-    changed = False
-    for entry in voyages:
-        if not isinstance(entry, dict):
-            continue
-        for field in ("itinerary", "observations"):
-            raw = entry.get(field)
-            if not isinstance(raw, str) or not raw:
-                continue
-            fixed = _posix_relpath(raw)
-            if fixed != raw:
-                entry[field] = fixed
-                changed = True
+    changed = any(
+        isinstance(entry, dict) and _posix_voyage_fields(entry) for entry in voyages
+    )
     if not changed:
         return
     parent = os.path.dirname(manifest_path)
@@ -145,19 +149,18 @@ def _rewrite_manifest_paths(manifest_path: str) -> None:
         fh.write("\n")
 
 
-def _download_cell_inputs(s3_analysis: str, cell_id: str) -> str:
-    """Pull cells.json, one manifest, and that cell's voyage JSON only."""
-    bucket, base = _analysis_prefix(s3_analysis)
-    _download_object(bucket, f"{base}cells.json", "analysis/cells.json")
-    manifest = f"analysis/manifests/{cell_id}.json"
-    _download_object(bucket, f"{base}manifests/{cell_id}.json", manifest)
+def _download_run_json(bucket: str, base: str, run_id: str) -> None:
+    for name in ("itinerary.json", "observations.json"):
+        dest = f"analysis/voyages/{run_id}/{name}"
+        if os.path.isfile(dest):
+            continue
+        _download_object(bucket, f"{base}voyages/{run_id}/{name}", dest)
 
-    payload = _read_json(manifest)
-    voyages = payload.get("voyages") or []
-    if not isinstance(voyages, list) or not voyages:
+
+def _cell_run_ids(voyages: list[Any], cell_id: str) -> list[str]:
+    if not voyages:
         raise SystemExit(f"manifest {cell_id} lists no voyages")
-
-    seen: set[str] = set()
+    seen: list[str] = []
     for entry in voyages:
         if not isinstance(entry, dict):
             continue
@@ -165,14 +168,23 @@ def _download_cell_inputs(s3_analysis: str, cell_id: str) -> str:
         if not rel:
             continue
         run_id = _voyage_run_id(rel)
-        if run_id in seen:
-            continue
-        seen.add(run_id)
-        for name in ("itinerary.json", "observations.json"):
-            dest = f"analysis/voyages/{run_id}/{name}"
-            if os.path.isfile(dest):
-                continue
-            _download_object(bucket, f"{base}voyages/{run_id}/{name}", dest)
+        if run_id not in seen:
+            seen.append(run_id)
+    return seen
+
+
+def _download_cell_inputs(s3_analysis: str, cell_id: str) -> str:
+    """Pull cells.json, one manifest, and that cell's voyage JSON only."""
+    bucket, base = _analysis_prefix(s3_analysis)
+    _download_object(bucket, f"{base}cells.json", "analysis/cells.json")
+    manifest = f"analysis/manifests/{cell_id}.json"
+    _download_object(bucket, f"{base}manifests/{cell_id}.json", manifest)
+    payload = _read_json(manifest)
+    voyages = payload.get("voyages") or []
+    if not isinstance(voyages, list):
+        raise SystemExit(f"manifest {cell_id} lists no voyages")
+    for run_id in _cell_run_ids(voyages, cell_id):
+        _download_run_json(bucket, base, run_id)
     return manifest
 
 

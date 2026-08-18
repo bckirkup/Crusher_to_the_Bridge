@@ -91,14 +91,16 @@ forced-compliance path is removed (key ignored if present).
 | T15 `t15_sop_threshold_sweep` | `suspect_attack_rate` × `lockdown_attack_rate` (incl. `"never"`) |
 | T16 `t16_reluctant_fraction_sweep` | `reluctant_fraction` × `reluctant_delay_epochs` |
 
-Mega-cruise generator injects `_CAMPAIGN_ESCALATION_DEFAULTS`
-(`lockdown_attack_rate: 0.05`) so large ships enable LOCKDOWN; smoke
-`config.yaml` keeps `never`.
+Mega-cruise T11/T15/T16 cartesian products live in
+`picard_framework/runs/mega_cruise_campaign/tier_iterators.py`. The generator
+injects `_CAMPAIGN_ESCALATION_DEFAULTS` (`lockdown_attack_rate: 0.05`) so large
+ships enable LOCKDOWN; smoke `config.yaml` keeps `never`.
 
 ## Verify after changes
 
 ```bash
 python3 -m pytest tests/test_outbreak_response_architecture.py \
+  tests/test_tier_iterators.py \
   tests/test_orchestrator.py::TestCheckEscalation \
   tests/test_orchestrator.py::TestCascadeQuarantineCompliance \
   tests/test_protocol_engine.py -v --tb=short

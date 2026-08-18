@@ -258,7 +258,7 @@ class WastewaterOpsSampler:
         self.config = config
         self.epoch_duration_hours = float(epoch_duration_hours or 1.0)
         self._rng = rng
-        self._tank: dict[str, float] = {p: 0.0 for p in config.collection_points}
+        self._tank: dict[str, float] = dict.fromkeys(config.collection_points, 0.0)
         self._samples: list[dict[str, Any]] = []
 
     @property

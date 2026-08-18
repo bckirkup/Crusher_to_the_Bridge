@@ -26,7 +26,8 @@ import traceback
 import zipfile
 from itertools import product
 from pathlib import Path
-from typing import Any, Iterator
+from types import SimpleNamespace
+from typing import Any, Iterator, Mapping, Sequence
 from urllib.parse import urlparse
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -37,6 +38,9 @@ from picard_framework.analysis.sentinel.wastewater_assays import (  # noqa: E402
 )
 from picard_framework.runs.mega_cruise_campaign import (  # noqa: E402
     sentinel_recovery,
+)
+from picard_framework.runs.mega_cruise_campaign.tier_iterators import (  # noqa: E402
+    dispatch_standard_or_calibration,
 )
 from simulation_utils.epidemic_labels import epidemic_took_off  # noqa: E402
 from simulation_utils.paths import (  # noqa: E402
@@ -530,30 +534,40 @@ def _vsp_degradation_overrides(knobs: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _fat_knob_combos(
+    tier: dict[str, Any], nominal: dict[str, Any],
+) -> list[dict[str, Any]]:
+    name = str(tier["factor"])
+    combos: list[dict[str, Any]] = []
+    for val in tier["values"]:
+        knobs = {k: nominal[k] for k in _VSP_KNOB_KEYS}
+        knobs[name] = val
+        combos.append(knobs)
+    return combos
+
+
+def _interaction_knob_combos(
+    tier: dict[str, Any], nominal: dict[str, Any],
+) -> list[dict[str, Any]]:
+    factors = tier["factors"]
+    names = list(factors.keys())
+    combos: list[dict[str, Any]] = []
+    for vals in product(*(list(factors[n]) for n in names)):
+        knobs = {k: nominal[k] for k in _VSP_KNOB_KEYS}
+        knobs.update(zip(names, vals))
+        combos.append(knobs)
+    return combos
+
+
 def _iter_vsp_knob_combos(
     tier: dict[str, Any],
     nominal: dict[str, Any],
 ) -> list[dict[str, Any]]:
     """FAT (single factor) or interaction panel (factors product) knob dicts."""
     if "factor" in tier and "values" in tier:
-        name = str(tier["factor"])
-        combos: list[dict[str, Any]] = []
-        for val in tier["values"]:
-            knobs = {k: nominal[k] for k in _VSP_KNOB_KEYS}
-            knobs[name] = val
-            combos.append(knobs)
-        return combos
+        return _fat_knob_combos(tier, nominal)
     if "factors" in tier:
-        factors = tier["factors"]
-        names = list(factors.keys())
-        value_lists = [list(factors[n]) for n in names]
-        combos = []
-        for vals in product(*value_lists):
-            knobs = {k: nominal[k] for k in _VSP_KNOB_KEYS}
-            for n, v in zip(names, vals):
-                knobs[n] = v
-            combos.append(knobs)
-        return combos
+        return _interaction_knob_combos(tier, nominal)
     raise ValueError("VSP degradation tier needs 'factor'+'values' or 'factors'")
 
 
@@ -673,6 +687,14 @@ def _wastewater_cell_factors(cell: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _cell_seed_pairs(tier: dict[str, Any]) -> list[tuple[dict[str, Any], Any]]:
+    return [
+        (cell, seed)
+        for cell in _wastewater_scan_cells(tier)
+        for seed in cell["seeds"]
+    ]
+
+
 def _iter_sentinel_recovery_runs(
     *,
     manifest: dict[str, Any],
@@ -701,7 +723,12 @@ def _iter_sentinel_recovery_runs(
     epochs = int(tier.get("epochs", manifest.get("default_epochs", 168)))
     default_agents = int(manifest.get("default_num_agents", 7000))
     embark_date = str(manifest.get("embarkation_date", "2026-01-10"))
-    for plat_index, plat in enumerate(platforms):
+    for (plat_index, plat), r_onboard, sname, (cell, seed) in product(
+        list(enumerate(platforms)),
+        tier["R_onboard_values"],
+        strategies,
+        _cell_seed_pairs(tier),
+    ):
         n_agents = _platform_num_agents(
             plat,
             num_agents_override=num_agents_override,
@@ -713,67 +740,52 @@ def _iter_sentinel_recovery_runs(
             sentinel_recovery.itinerary_days(manifest, variant),
             hazards,
         )
-        for r_onboard in tier["R_onboard_values"]:
-            r_val = float(r_onboard)
-            n_init = sentinel_recovery.initial_infected(hazards, r_val)
-            path_over = dict(base_overrides or {})
-            path_over[pathogen_id] = {
-                **(path_over.get(pathogen_id) or {}),
-                "dose_adjustment": dose,
-                "initial_infected": n_init,
-            }
-            voyage = sentinel_recovery.voyage_override(
-                days=days,
-                r_onboard=r_val,
-                epochs=epochs,
-                embarkation_date=embark_date,
-            )
-            for sname in strategies:
-                for cell in _wastewater_scan_cells(tier):
-                    ww_settings = cell.get("wastewater_surveillance")
-                    ww_over = (
-                        {"wastewater_surveillance": ww_settings}
-                        if ww_settings
-                        else None
-                    )
-                    ww_factors = _wastewater_cell_factors(cell)
-                    prefix = [
-                        "sr",
-                        pathogen,
-                        plat,
-                        hazard_profile,
-                        fleet_config,
-                        variant,
-                        sentinel_recovery.r_onboard_tag(r_val),
-                        *([str(cell["cell_id"])] if cell.get("cell_id") else []),
-                    ]
-                    for seed in cell["seeds"]:
-                        rid = "_".join([*prefix, f"s{seed}"])
-                        yield yield_run(
-                            rid,
-                            bundle=bundle,
-                            pathogen_overrides=path_over,
-                            config_overrides=merge_cfg(
-                                surv_cfgs.get(sname),
-                                dens_over,
-                                ww_over,
-                                {"voyage": voyage, "voyage_id": rid},
-                            ),
-                            seed=seed,
-                            num_agents=n_agents,
-                            pathogen=pathogen,
-                            platform_id=plat,
-                            surveillance=sname,
-                            dose_adjustment=dose,
-                            density_exponent=alpha,
-                            n_init=n_init,
-                            R_onboard=r_val,
-                            hazard_profile=hazard_profile,
-                            fleet_config=fleet_config,
-                            itinerary_variant=variant,
-                            port_hazards=hazards,
-                            **ww_factors,
-                        )
+        r_val = float(r_onboard)
+        n_init = sentinel_recovery.initial_infected(hazards, r_val)
+        path_over = dict(base_overrides or {})
+        path_over[pathogen_id] = {
+            **(path_over.get(pathogen_id) or {}),
+            "dose_adjustment": dose,
+            "initial_infected": n_init,
+        }
+        voyage = sentinel_recovery.voyage_override(
+            days=days,
+            r_onboard=r_val,
+            epochs=epochs,
+            embarkation_date=embark_date,
+        )
+        ww_settings = cell.get("wastewater_surveillance")
+        prefix = [
+            "sr", pathogen, plat, hazard_profile, fleet_config, variant,
+            sentinel_recovery.r_onboard_tag(r_val),
+            *([str(cell["cell_id"])] if cell.get("cell_id") else []),
+        ]
+        rid = "_".join([*prefix, f"s{seed}"])
+        yield yield_run(
+            rid,
+            bundle=bundle,
+            pathogen_overrides=path_over,
+            config_overrides=merge_cfg(
+                surv_cfgs.get(sname),
+                dens_over,
+                {"wastewater_surveillance": ww_settings} if ww_settings else None,
+                {"voyage": voyage, "voyage_id": rid},
+            ),
+            seed=seed,
+            num_agents=n_agents,
+            pathogen=pathogen,
+            platform_id=plat,
+            surveillance=sname,
+            dose_adjustment=dose,
+            density_exponent=alpha,
+            n_init=n_init,
+            R_onboard=r_val,
+            hazard_profile=hazard_profile,
+            fleet_config=fleet_config,
+            itinerary_variant=variant,
+            port_hazards=hazards,
+            **_wastewater_cell_factors(cell),
+        )
 
 
 def _iter_sr_family_runs(
@@ -849,7 +861,9 @@ def _iter_vsp_degradation_runs(
     dens_over = _density_contact_override(alpha)
     knobs_list = _iter_vsp_knob_combos(tier, nominal)
     default_agents = int(manifest.get("default_num_agents", 7000))
-    for plat in platforms:
+    for plat, knobs, sname, seed in product(
+        platforms, knobs_list, strategies, tier["seeds"],
+    ):
         n_agents = _platform_num_agents(
             plat,
             num_agents_override=num_agents_override,
@@ -862,44 +876,33 @@ def _iter_vsp_degradation_runs(
             "dose_adjustment": dose,
             "initial_infected": n_init,
         }
-        for knobs in knobs_list:
-            deg_over = _vsp_degradation_overrides(knobs)
-            tags = _vd_active_knob_tags(tier, knobs)
-            for sname in strategies:
-                for seed in tier["seeds"]:
-                    rid = "_".join(
-                        [
-                            "vd",
-                            pathogen,
-                            plat,
-                            *tags,
-                            _dose_tag(dose),
-                            _alpha_tag(alpha),
-                            f"init{n_init}",
-                            sname,
-                            f"s{seed}",
-                        ]
-                    )
-                    yield yield_run(
-                        rid,
-                        bundle=bundle,
-                        pathogen_overrides=path_over,
-                        config_overrides=merge_cfg(
-                            surv_cfgs.get(sname), dens_over, deg_over,
-                        ),
-                        seed=seed,
-                        num_agents=n_agents,
-                        pathogen=pathogen,
-                        platform_id=plat,
-                        surveillance=sname,
-                        dose_adjustment=dose,
-                        density_exponent=alpha,
-                        n_init=n_init,
-                        vsp_threshold=float(knobs["vsp_threshold"]),
-                        detection_delay_epochs=int(knobs["detection_delay"]),
-                        isolation_compliance=float(knobs["isolation_compliance"]),
-                        sick_call_probability=float(knobs["sick_call_probability"]),
-                    )
+        tags = _vd_active_knob_tags(tier, knobs)
+        rid = "_".join(
+            [
+                "vd", pathogen, plat, *tags, _dose_tag(dose), _alpha_tag(alpha),
+                f"init{n_init}", sname, f"s{seed}",
+            ]
+        )
+        yield yield_run(
+            rid,
+            bundle=bundle,
+            pathogen_overrides=path_over,
+            config_overrides=merge_cfg(
+                surv_cfgs.get(sname), dens_over, _vsp_degradation_overrides(knobs),
+            ),
+            seed=seed,
+            num_agents=n_agents,
+            pathogen=pathogen,
+            platform_id=plat,
+            surveillance=sname,
+            dose_adjustment=dose,
+            density_exponent=alpha,
+            n_init=n_init,
+            vsp_threshold=float(knobs["vsp_threshold"]),
+            detection_delay_epochs=int(knobs["detection_delay"]),
+            isolation_compliance=float(knobs["isolation_compliance"]),
+            sick_call_probability=float(knobs["sick_call_probability"]),
+        )
 
 
 def _resolve_tier_platforms(
@@ -1015,6 +1018,106 @@ def make_picard_spec(
     return spec
 
 
+_HVAC_PARAM_MAP: tuple[tuple[str, str], ...] = (
+    ("transport_engine", "transport_engine"),
+    ("filter_efficiency", "filter_efficiency"),
+    ("oa_fraction", "outdoor_air_fraction"),
+    ("natural_decay_rate", "decay_rate"),
+)
+_WEAR_PARAM_MAP: tuple[tuple[str, str], ...] = (
+    ("deployment_profile", "wearables"),
+    ("detection_sensitivity_scale", "wearable_sensitivity"),
+)
+
+
+def _copy_present(
+    params: dict[str, Any],
+    source: Mapping[str, Any],
+    mapping: Sequence[tuple[str, str]],
+    *,
+    skip_if_present: frozenset[str] = frozenset(),
+) -> None:
+    for src, dest in mapping:
+        if src not in source:
+            continue
+        if dest in skip_if_present and dest in params:
+            continue
+        params[dest] = source[src]
+
+
+def _fill_override_params(params: dict[str, Any], cfg: Mapping[str, Any]) -> None:
+    hvac = cfg.get("hvac") or {}
+    _copy_present(
+        params, hvac, _HVAC_PARAM_MAP,
+        skip_if_present=frozenset({"transport_engine"}),
+    )
+    ship = cfg.get("ship_graph") or {}
+    _copy_present(params, ship, (("immune_fraction", "immune_fraction"),))
+    fred = cfg.get("fred_behavior") or {}
+    _copy_present(
+        params,
+        fred,
+        (
+            ("quarantine_compliance", "quarantine_compliance"),
+            ("reluctant_fraction", "reluctant_fraction"),
+            ("reluctant_delay_epochs", "reluctant_delay_epochs"),
+        ),
+        skip_if_present=frozenset({
+            "reluctant_fraction", "reluctant_delay_epochs",
+        }),
+    )
+    wear = cfg.get("wearable_monitoring") or {}
+    _copy_present(
+        params, wear, _WEAR_PARAM_MAP,
+        skip_if_present=frozenset({"wearables", "wearable_sensitivity"}),
+    )
+    syn = cfg.get("syndromic") or {}
+    _copy_present(
+        params,
+        syn,
+        (
+            ("sick_call_probability", "sick_call_probability"),
+            ("activation_delay_epochs", "surveillance_delay_epochs"),
+        ),
+        skip_if_present=frozenset({
+            "sick_call_probability", "surveillance_delay_epochs",
+        }),
+    )
+    esc = cfg.get("escalation") or {}
+    latency = esc.get("decision_latency") or {}
+    _copy_present(
+        params,
+        latency,
+        (("confirmed_delay_epochs", "decision_latency_epochs"),),
+        skip_if_present=frozenset({"decision_latency_epochs"}),
+    )
+    _copy_present(
+        params,
+        esc,
+        (
+            ("suspect_attack_rate", "suspect_attack_rate"),
+            ("lockdown_attack_rate", "lockdown_attack_rate"),
+        ),
+        skip_if_present=frozenset({
+            "suspect_attack_rate", "lockdown_attack_rate",
+        }),
+    )
+    med = cfg.get("medical_response") or {}
+    _copy_present(
+        params,
+        med,
+        (
+            ("detection_delay_epochs", "detection_delay_epochs"),
+            ("isolation_compliance", "isolation_compliance"),
+            ("sick_call_probability", "sick_call_probability"),
+        ),
+        skip_if_present=frozenset({
+            "detection_delay_epochs", "isolation_compliance",
+            "sick_call_probability",
+        }),
+    )
+
+
 def _campaign_parameters(
     *,
     tier_id: str,
@@ -1045,60 +1148,7 @@ def _campaign_parameters(
     for key, value in factors.items():
         if value is not None:
             params[key] = value
-    cfg = config_overrides or {}
-    hvac = cfg.get("hvac") or {}
-    if "transport_engine" in hvac and "transport_engine" not in params:
-        params["transport_engine"] = hvac["transport_engine"]
-    if "filter_efficiency" in hvac:
-        params["filter_efficiency"] = hvac["filter_efficiency"]
-    if "oa_fraction" in hvac:
-        params["outdoor_air_fraction"] = hvac["oa_fraction"]
-    if "natural_decay_rate" in hvac:
-        params["decay_rate"] = hvac["natural_decay_rate"]
-    ship = cfg.get("ship_graph") or {}
-    if "immune_fraction" in ship:
-        params["immune_fraction"] = ship["immune_fraction"]
-    fred = cfg.get("fred_behavior") or {}
-    if "quarantine_compliance" in fred:
-        params["quarantine_compliance"] = fred["quarantine_compliance"]
-    wear = cfg.get("wearable_monitoring") or {}
-    if "deployment_profile" in wear and "wearables" not in params:
-        params["wearables"] = wear["deployment_profile"]
-    if "detection_sensitivity_scale" in wear and "wearable_sensitivity" not in params:
-        params["wearable_sensitivity"] = wear["detection_sensitivity_scale"]
-    syn = cfg.get("syndromic") or {}
-    if "sick_call_probability" in syn and "sick_call_probability" not in params:
-        params["sick_call_probability"] = syn["sick_call_probability"]
-    if (
-        "activation_delay_epochs" in syn
-        and "surveillance_delay_epochs" not in params
-    ):
-        params["surveillance_delay_epochs"] = syn["activation_delay_epochs"]
-    esc = cfg.get("escalation") or {}
-    latency = esc.get("decision_latency") or {}
-    if (
-        "confirmed_delay_epochs" in latency
-        and "decision_latency_epochs" not in params
-    ):
-        params["decision_latency_epochs"] = latency["confirmed_delay_epochs"]
-    if "suspect_attack_rate" in esc and "suspect_attack_rate" not in params:
-        params["suspect_attack_rate"] = esc["suspect_attack_rate"]
-    if "lockdown_attack_rate" in esc and "lockdown_attack_rate" not in params:
-        params["lockdown_attack_rate"] = esc["lockdown_attack_rate"]
-    med = cfg.get("medical_response") or {}
-    if "detection_delay_epochs" in med and "detection_delay_epochs" not in params:
-        params["detection_delay_epochs"] = med["detection_delay_epochs"]
-    if "isolation_compliance" in med and "isolation_compliance" not in params:
-        params["isolation_compliance"] = med["isolation_compliance"]
-    if "sick_call_probability" in med and "sick_call_probability" not in params:
-        params["sick_call_probability"] = med["sick_call_probability"]
-    if "reluctant_fraction" in fred and "reluctant_fraction" not in params:
-        params["reluctant_fraction"] = fred["reluctant_fraction"]
-    if (
-        "reluctant_delay_epochs" in fred
-        and "reluctant_delay_epochs" not in params
-    ):
-        params["reluctant_delay_epochs"] = fred["reluctant_delay_epochs"]
+    _fill_override_params(params, config_overrides or {})
     return params
 
 
@@ -1125,23 +1175,18 @@ def parameters_from_spec(spec: dict[str, Any]) -> dict[str, Any]:
         "num_agents": ship.get("num_agents"),
         "history_retention": run.get("history_retention", "full"),
     }
-    hvac = cfg.get("hvac") or {}
-    if "transport_engine" in hvac:
-        params["transport_engine"] = hvac["transport_engine"]
-    if "filter_efficiency" in hvac:
-        params["filter_efficiency"] = hvac["filter_efficiency"]
-    if "oa_fraction" in hvac:
-        params["outdoor_air_fraction"] = hvac["oa_fraction"]
-    if "natural_decay_rate" in hvac:
-        params["decay_rate"] = hvac["natural_decay_rate"]
-    if "immune_fraction" in ship:
-        params["immune_fraction"] = ship["immune_fraction"]
-    fred = cfg.get("fred_behavior") or {}
-    if "quarantine_compliance" in fred:
-        params["quarantine_compliance"] = fred["quarantine_compliance"]
-    wear = cfg.get("wearable_monitoring") or {}
-    if "deployment_profile" in wear:
-        params["wearables"] = wear["deployment_profile"]
+    _copy_present(params, cfg.get("hvac") or {}, _HVAC_PARAM_MAP)
+    _copy_present(params, ship, (("immune_fraction", "immune_fraction"),))
+    _copy_present(
+        params,
+        cfg.get("fred_behavior") or {},
+        (("quarantine_compliance", "quarantine_compliance"),),
+    )
+    _copy_present(
+        params,
+        cfg.get("wearable_monitoring") or {},
+        (("deployment_profile", "wearables"),),
+    )
     # Drop empty / None so aggregate columns stay sparse.
     return {k: v for k, v in params.items() if v is not None and v != ""}
 
@@ -1215,597 +1260,36 @@ def generate_tier_runs(
             parameters=params,
         )
 
-    if short == "t1":
-        hvac = {"hvac": tier["hvac"]} if tier.get("hvac") else None
-        # v4 uses surveillance_strategies; legacy manifests use a single
-        # ``surveillance`` string (default "none"). Keep old run ids when
-        # there is no strategy sweep so existing dry-run counts stay stable.
-        strategies = list(tier.get("surveillance_strategies") or [])
-        if not strategies:
-            strategies = [tier.get("surveillance", "none")]
-        multi_surv = "surveillance_strategies" in tier
-        for pathogen in tier["pathogens"]:
-            bundle, _pid, overrides = get_pathogen_config(manifest, pathogen)
-            for sname in strategies:
-                for seed in tier["seeds"]:
-                    rid = (
-                        f"{short}_{pathogen}_{sname}_s{seed}"
-                        if multi_surv
-                        else f"{short}_{pathogen}_s{seed}"
-                    )
-                    yield _yield(
-                        rid,
-                        bundle=bundle,
-                        pathogen_overrides=overrides,
-                        config_overrides=merge_cfg(hvac, surv_cfgs.get(sname)),
-                        seed=seed,
-                        pathogen=pathogen,
-                        surveillance=sname,
-                    )
-
-    elif short == "t2":
-        oa_fractions = tier.get("oa_fractions") or {"oa20": 0.20}
-        for pathogen in tier["pathogens"]:
-            bundle, _pid, overrides = get_pathogen_config(manifest, pathogen)
-            for fname, fval in tier["filter_efficiencies"].items():
-                for oaname, oaval in oa_fractions.items():
-                    for dname, dval in tier["decay_rates"].items():
-                        hvac = {"hvac": {
-                            "filter_efficiency": fval,
-                            "natural_decay_rate": dval,
-                            "oa_fraction": oaval,
-                        }}
-                        for seed in tier["seeds"]:
-                            rid = f"{short}_{pathogen}_{fname}_{oaname}_{dname}_s{seed}"
-                            yield _yield(
-                                rid,
-                                bundle=bundle,
-                                pathogen_overrides=overrides,
-                                config_overrides=hvac,
-                                seed=seed,
-                                pathogen=pathogen,
-                                filter=fname,
-                                oa=oaname,
-                                decay=dname,
-                            )
-
-    elif short == "t3":
-        hvac = {"hvac": tier["hvac"]} if tier.get("hvac") else None
-        for pathogen in tier["pathogens"]:
-            bundle, _pid, overrides = get_pathogen_config(manifest, pathogen)
-            for sname in tier["surveillance_strategies"]:
-                for seed in tier["seeds"]:
-                    rid = f"{short}_{pathogen}_{sname}_s{seed}"
-                    yield _yield(
-                        rid,
-                        bundle=bundle,
-                        pathogen_overrides=overrides,
-                        config_overrides=merge_cfg(hvac, surv_cfgs.get(sname)),
-                        seed=seed,
-                        pathogen=pathogen,
-                        surveillance=sname,
-                    )
-
-    elif short == "t4":
-        for pathogen in tier["pathogens"]:
-            bundle, _pid, overrides = get_pathogen_config(manifest, pathogen)
-            for fname, fval in tier["filter_efficiencies"].items():
-                for dname, dval in tier["decay_rates"].items():
-                    for sname in tier["surveillance_strategies"]:
-                        hvac = {"hvac": {
-                            "filter_efficiency": fval,
-                            "natural_decay_rate": dval,
-                        }}
-                        for seed in tier["seeds"]:
-                            rid = f"{short}_{pathogen}_{fname}_{dname}_{sname}_s{seed}"
-                            yield _yield(
-                                rid,
-                                bundle=bundle,
-                                pathogen_overrides=overrides,
-                                config_overrides=merge_cfg(hvac, surv_cfgs.get(sname)),
-                                seed=seed,
-                                pathogen=pathogen,
-                                filter=fname,
-                                decay=dname,
-                                surveillance=sname,
-                            )
-
-    elif short == "t5":
-        for combo in tier["combos"]:
-            bundle, overrides = combo_overrides(manifest, combo)
-            safe = combo.replace("+", "_")
-            for sname in tier["surveillance_strategies"]:
-                for seed in tier["seeds"]:
-                    rid = f"{short}_{safe}_{sname}_s{seed}"
-                    yield _yield(
-                        rid,
-                        bundle=bundle,
-                        pathogen_overrides=overrides,
-                        config_overrides=surv_cfgs.get(sname),
-                        seed=seed,
-                        combo=combo,
-                        surveillance=sname,
-                    )
-
-    elif short == "t6":
-        immunities = tier.get("pre_immunity_fractions", [None])
-        for pathogen in tier["pathogens"]:
-            bundle, pathogen_id, overrides = get_pathogen_config(manifest, pathogen)
-            for n_init in tier["initial_infected"]:
-                path_over = dict(overrides or {})
-                path_over[pathogen_id] = {
-                    **(path_over.get(pathogen_id) or {}),
-                    "initial_infected": int(n_init),
-                }
-                for imm_frac in immunities:
-                    cfg_over, imm_tag = _immunity_override(imm_frac)
-                    for seed in tier["seeds"]:
-                        rid = f"{short}_{pathogen}_init{n_init}{imm_tag}_s{seed}"
-                        yield _yield(
-                            rid,
-                            bundle=bundle,
-                            pathogen_overrides=path_over,
-                            config_overrides=cfg_over,
-                            seed=seed,
-                            pathogen=pathogen,
-                            n_init=int(n_init),
-                            immunity=imm_frac,
-                        )
-
-    elif short == "t7":
-        immunities = tier.get("pre_immunity_fractions", [None])
-        for pathogen in tier["pathogens"]:
-            bundle, _pid, overrides = get_pathogen_config(manifest, pathogen)
-            for sname in tier["surveillance_strategies"]:
-                for comp in tier["compliance_levels"]:
-                    behavior = {
-                        "fred_behavior": {"quarantine_compliance": float(comp)},
-                    }
-                    for imm_frac in immunities:
-                        imm_over, imm_tag = _immunity_override(imm_frac)
-                        cfg_over = merge_cfg(
-                            merge_cfg(surv_cfgs.get(sname), behavior), imm_over,
-                        )
-                        for seed in tier["seeds"]:
-                            rid = (
-                                f"{short}_{pathogen}_{sname}"
-                                f"_comp{int(comp * 100)}{imm_tag}_s{seed}"
-                            )
-                            yield _yield(
-                                rid,
-                                bundle=bundle,
-                                pathogen_overrides=overrides,
-                                config_overrides=cfg_over,
-                                seed=seed,
-                                pathogen=pathogen,
-                                surveillance=sname,
-                                compliance=float(comp),
-                                immunity=imm_frac,
-                            )
-
-    elif short == "t8":
-        for pathogen in tier["pathogens"]:
-            bundle, _pid, overrides = get_pathogen_config(manifest, pathogen)
-            for wname in tier["wearable_configs"]:
-                wear = {"wearable_monitoring": {"deployment_profile": wname}}
-                for sname in tier["surveillance_strategies"]:
-                    for seed in tier["seeds"]:
-                        rid = f"{short}_{pathogen}_{wname}_{sname}_s{seed}"
-                        yield _yield(
-                            rid,
-                            bundle=bundle,
-                            pathogen_overrides=overrides,
-                            config_overrides=merge_cfg(surv_cfgs.get(sname), wear),
-                            seed=seed,
-                            pathogen=pathogen,
-                            wearables=wname,
-                            surveillance=sname,
-                        )
-
-    elif short == "t9":
-        for pathogen in tier["pathogens"]:
-            bundle, _pid, overrides = get_pathogen_config(manifest, pathogen)
-            for sname in tier["surveillance_strategies"]:
-                for seed in tier["seeds"]:
-                    rid = f"{short}_{pathogen}_{sname}_s{seed}"
-                    yield _yield(
-                        rid,
-                        bundle=bundle,
-                        pathogen_overrides=overrides,
-                        config_overrides=surv_cfgs.get(sname),
-                        seed=seed,
-                        pathogen=pathogen,
-                        surveillance=sname,
-                    )
-
-    elif short == "t10":
-        strategies = list(tier.get("surveillance_strategies") or [])
-        multi_surv = bool(strategies)
-        if not strategies:
-            strategies = [None]  # legacy: no surveillance override / tag
-        for pathogen in tier["pathogens"]:
-            bundle, _pid, overrides = get_pathogen_config(manifest, pathogen)
-            for n_agents in tier["population_sizes"]:
-                for sname in strategies:
-                    surv = surv_cfgs.get(sname) if sname is not None else None
-                    for seed in tier["seeds"]:
-                        if multi_surv:
-                            rid = (
-                                f"{short}_{pathogen}_{sname}"
-                                f"_n{n_agents}_s{seed}"
-                            )
-                        else:
-                            rid = f"{short}_{pathogen}_n{n_agents}_s{seed}"
-                        yield _yield(
-                            rid,
-                            bundle=bundle,
-                            pathogen_overrides=overrides,
-                            config_overrides=surv,
-                            seed=seed,
-                            num_agents=int(n_agents),
-                            pathogen=pathogen,
-                            surveillance=sname,
-                        )
-
-    elif short == "t11":
-        # Campaign v5: decision-latency sweep (escalation.decision_latency).
-        # Legacy: surveillance_delay_epochs still supported for v4 manifests.
-        if "decision_latency_levels" in tier:
-            for pathogen in tier["pathogens"]:
-                bundle, _pid, overrides = get_pathogen_config(manifest, pathogen)
-                for level in tier["decision_latency_levels"]:
-                    # level may be int (confirmed delay) or dict of delays
-                    if isinstance(level, dict):
-                        lat = {
-                            "alert_delay_epochs": int(level.get("alert", 0)),
-                            "suspected_delay_epochs": int(level.get("suspected", 0)),
-                            "confirmed_delay_epochs": int(level.get("confirmed", 0)),
-                            "lockdown_delay_epochs": int(level.get("lockdown", 0)),
-                        }
-                        delay_tag = int(level.get("confirmed", 0))
-                    else:
-                        delay_tag = int(level)
-                        lat = {
-                            "alert_delay_epochs": min(delay_tag, 6),
-                            "suspected_delay_epochs": delay_tag,
-                            "confirmed_delay_epochs": delay_tag,
-                            "lockdown_delay_epochs": max(delay_tag, 24),
-                        }
-                    lat_over = {"escalation": {"decision_latency": lat}}
-                    for sname in tier["surveillance_strategies"]:
-                        for comp in tier.get("compliance_levels", [None]):
-                            behavior = None
-                            if comp is not None:
-                                behavior = {
-                                    "fred_behavior": {
-                                        "quarantine_compliance": float(comp),
-                                    },
-                                }
-                            for seed in tier["seeds"]:
-                                comp_tag = (
-                                    f"_comp{int(float(comp) * 100)}"
-                                    if comp is not None else ""
-                                )
-                                rid = (
-                                    f"{short}_{pathogen}_{sname}"
-                                    f"_lat{delay_tag}{comp_tag}_s{seed}"
-                                )
-                                yield _yield(
-                                    rid,
-                                    bundle=bundle,
-                                    pathogen_overrides=overrides,
-                                    config_overrides=merge_cfg(
-                                        merge_cfg(surv_cfgs.get(sname), lat_over),
-                                        behavior,
-                                    ),
-                                    seed=seed,
-                                    pathogen=pathogen,
-                                    surveillance=sname,
-                                    decision_latency_epochs=delay_tag,
-                                    compliance=(
-                                        float(comp) if comp is not None else None
-                                    ),
-                                )
-        else:
-            # Legacy: activation_delay_epochs on syndromic + cascade.
-            # Optional compliance_levels (v6) crossed with delay × surveillance.
-            for pathogen in tier["pathogens"]:
-                bundle, _pid, overrides = get_pathogen_config(manifest, pathogen)
-                for delay in tier["surveillance_delay_epochs"]:
-                    delay_over = {
-                        "syndromic": {"activation_delay_epochs": int(delay)},
-                        "diagnostic_cascade": {"activation_delay_epochs": int(delay)},
-                    }
-                    for sname in tier["surveillance_strategies"]:
-                        for comp in tier.get("compliance_levels", [None]):
-                            behavior = None
-                            if comp is not None:
-                                behavior = {
-                                    "fred_behavior": {
-                                        "quarantine_compliance": float(comp),
-                                    },
-                                }
-                            for seed in tier["seeds"]:
-                                comp_tag = (
-                                    f"_comp{int(float(comp) * 100)}"
-                                    if comp is not None else ""
-                                )
-                                rid = (
-                                    f"{short}_{pathogen}_{sname}"
-                                    f"_delay{int(delay)}{comp_tag}_s{seed}"
-                                )
-                                yield _yield(
-                                    rid,
-                                    bundle=bundle,
-                                    pathogen_overrides=overrides,
-                                    config_overrides=merge_cfg(
-                                        merge_cfg(surv_cfgs.get(sname), delay_over),
-                                        behavior,
-                                    ),
-                                    seed=seed,
-                                    pathogen=pathogen,
-                                    surveillance=sname,
-                                    surveillance_delay_epochs=int(delay),
-                                    compliance=(
-                                        float(comp) if comp is not None else None
-                                    ),
-                                )
-
-    elif short == "t12":
-        for pathogen in tier["pathogens"]:
-            bundle, _pid, overrides = get_pathogen_config(manifest, pathogen)
-            for scp in tier["sick_call_probabilities"]:
-                sick_over = {"syndromic": {"sick_call_probability": float(scp)}}
-                for sname in tier["surveillance_strategies"]:
-                    for seed in tier["seeds"]:
-                        rid = (
-                            f"{short}_{pathogen}_{sname}"
-                            f"_scp{int(round(float(scp) * 100))}_s{seed}"
-                        )
-                        yield _yield(
-                            rid,
-                            bundle=bundle,
-                            pathogen_overrides=overrides,
-                            config_overrides=merge_cfg(
-                                surv_cfgs.get(sname), sick_over,
-                            ),
-                            seed=seed,
-                            pathogen=pathogen,
-                            surveillance=sname,
-                            sick_call_probability=float(scp),
-                        )
-
-    elif short == "t13":
-        wname = tier.get("wearable_config", "crew_only")
-        for pathogen in tier["pathogens"]:
-            bundle, _pid, overrides = get_pathogen_config(manifest, pathogen)
-            for sens in tier["wearable_sensitivities"]:
-                wear = {
-                    "wearable_monitoring": {
-                        "deployment_profile": wname,
-                        "detection_sensitivity_scale": float(sens),
-                    },
-                }
-                for sname in tier["surveillance_strategies"]:
-                    for seed in tier["seeds"]:
-                        rid = (
-                            f"{short}_{pathogen}_{wname}_{sname}"
-                            f"_wsens{int(round(float(sens) * 100))}_s{seed}"
-                        )
-                        yield _yield(
-                            rid,
-                            bundle=bundle,
-                            pathogen_overrides=overrides,
-                            config_overrides=merge_cfg(
-                                surv_cfgs.get(sname), wear,
-                            ),
-                            seed=seed,
-                            pathogen=pathogen,
-                            wearables=wname,
-                            surveillance=sname,
-                            wearable_sensitivity=float(sens),
-                        )
-
-    elif short == "t14":
-        sname = tier.get("surveillance", "syndromic")
-        surv = surv_cfgs.get(sname)
-        for pathogen in tier["pathogens"]:
-            bundle, _pid, overrides = get_pathogen_config(manifest, pathogen)
-            for imm_frac in tier["pre_immunity_fractions"]:
-                imm_over, imm_tag = _immunity_override(imm_frac)
-                for seed in tier["seeds"]:
-                    rid = f"{short}_{pathogen}{imm_tag}_s{seed}"
-                    yield _yield(
-                        rid,
-                        bundle=bundle,
-                        pathogen_overrides=overrides,
-                        config_overrides=merge_cfg(surv, imm_over),
-                        seed=seed,
-                        pathogen=pathogen,
-                        surveillance=sname,
-                        immunity=imm_frac,
-                    )
-
-    elif short == "t15":
-        # SOP threshold sweep: suspect_attack_rate × lockdown_attack_rate
-        for pathogen in tier["pathogens"]:
-            bundle, _pid, overrides = get_pathogen_config(manifest, pathogen)
-            for suspect_ar in tier["suspect_attack_rates"]:
-                for lockdown_ar in tier["lockdown_attack_rates"]:
-                    lockdown_val = (
-                        None if lockdown_ar in (None, "never") else float(lockdown_ar)
-                    )
-                    lockdown_tag = (
-                        "never" if lockdown_val is None
-                        else f"{int(round(float(lockdown_ar) * 100))}"
-                    )
-                    esc_over = {
-                        "escalation": {
-                            "suspect_attack_rate": float(suspect_ar),
-                            "lockdown_attack_rate": lockdown_val,
-                        },
-                    }
-                    for seed in tier["seeds"]:
-                        rid = (
-                            f"{short}_{pathogen}"
-                            f"_sar{int(round(float(suspect_ar) * 100))}"
-                            f"_lar{lockdown_tag}_s{seed}"
-                        )
-                        yield _yield(
-                            rid,
-                            bundle=bundle,
-                            pathogen_overrides=overrides,
-                            config_overrides=esc_over,
-                            seed=seed,
-                            pathogen=pathogen,
-                            suspect_attack_rate=float(suspect_ar),
-                            lockdown_attack_rate=(
-                                "never" if lockdown_val is None else float(lockdown_ar)
-                            ),
-                        )
-
-    elif short == "t16":
-        # Reluctant fraction × reluctant delay sweep
-        for pathogen in tier["pathogens"]:
-            bundle, _pid, overrides = get_pathogen_config(manifest, pathogen)
-            for rfrac in tier["reluctant_fractions"]:
-                for rdelay in tier["reluctant_delay_epochs"]:
-                    behavior = {
-                        "fred_behavior": {
-                            "reluctant_fraction": float(rfrac),
-                            "reluctant_delay_epochs": int(rdelay),
-                            "quarantine_compliance": float(
-                                tier.get("quarantine_compliance", 0.6),
-                            ),
-                        },
-                    }
-                    for seed in tier["seeds"]:
-                        rid = (
-                            f"{short}_{pathogen}"
-                            f"_rf{int(round(float(rfrac) * 100))}"
-                            f"_rd{int(rdelay)}_s{seed}"
-                        )
-                        yield _yield(
-                            rid,
-                            bundle=bundle,
-                            pathogen_overrides=overrides,
-                            config_overrides=behavior,
-                            seed=seed,
-                            pathogen=pathogen,
-                            reluctant_fraction=float(rfrac),
-                            reluctant_delay_epochs=int(rdelay),
-                        )
-
-    elif short in ("c1", "c2", "c3", "c4", "c5", "c6", "a2", "b1", "b2"):
-        # Multi-platform calibration / sensitivity (data-driven): keys off
-        # tier fields. c1: dose × init × platform; c2: immunity × platforms;
-        # c3: SARS-CoV-2 dose × platforms; c4: epoch_durations × dose;
-        # c5: density_exponents × dose × platforms;
-        # c6: contact_modes (density vs heterogeneous) sensitivity;
-        # a2: fine dose × FUT2 immunity at a pinned density exponent.
-        # b1/b2: boundary_surface_v1 k-sweep (core + dose_adj sensitivity).
-        pathogen = tier["pathogen"]  # singular (not pathogens[])
-        bundle, pathogen_id, base_overrides = get_pathogen_config(manifest, pathogen)
-        platforms = _resolve_tier_platforms(
-            tier,
-            fallback_platform=manifest["platform"],
-            platform_override=platform_override,
-        )
-        doses = _calibration_dose_values(tier)
-        inits = _calibration_init_values(tier)
-        alphas = _density_exponent_values(tier)
-        contact_modes = _contact_mode_values(tier)
-        immunities = tier.get("pre_immunity_fractions", [None])
-        hvac = {"hvac": tier["hvac"]} if tier.get("hvac") else None
-        if epochs_override is not None:
-            epoch_list = [int(epochs_override)]
-        elif "epoch_durations" in tier:
-            epoch_list = [int(e) for e in tier["epoch_durations"]]
-        else:
-            epoch_list = [int(default_epochs)]
-        sweep_epochs = "epoch_durations" in tier and epochs_override is None
-        strategies = list(tier.get("surveillance_strategies") or [])
-        if not strategies:
-            strategies = [tier.get("surveillance", "none")]
-
-        for plat in platforms:
-            n_agents = _platform_num_agents(
-                plat,
-                num_agents_override=num_agents_override,
-                tier=tier,
-                default_agents=int(manifest.get("default_num_agents", 7000)),
-            )
-            for dose in doses:
-                for n_init in inits:
-                    path_over = dict(base_overrides or {})
-                    patch: dict[str, Any] = {}
-                    if dose is not None:
-                        patch["dose_adjustment"] = float(dose)
-                    if n_init is not None:
-                        patch["initial_infected"] = int(n_init)
-                    if patch:
-                        path_over[pathogen_id] = {
-                            **(path_over.get(pathogen_id) or {}),
-                            **patch,
-                        }
-                    for alpha in alphas:
-                        for cmode in contact_modes:
-                            dens_over = _density_contact_override(
-                                alpha, contact_mode=cmode,
-                            )
-                            for imm_frac in immunities:
-                                imm_over, imm_tag = _immunity_override(imm_frac)
-                                for n_epochs in epoch_list:
-                                    for sname in strategies:
-                                        for seed in tier["seeds"]:
-                                            rid_parts = [short, pathogen, plat]
-                                            if dose is not None:
-                                                rid_parts.append(_dose_tag(dose))
-                                            if n_init is not None:
-                                                rid_parts.append(
-                                                    f"init{int(n_init)}",
-                                                )
-                                            if alpha is not None:
-                                                rid_parts.append(_alpha_tag(alpha))
-                                            if cmode is not None:
-                                                rid_parts.append(
-                                                    _contact_mode_tag(cmode),
-                                                )
-                                            if sweep_epochs:
-                                                rid_parts.append(
-                                                    f"ep{int(n_epochs)}",
-                                                )
-                                            if imm_tag:
-                                                rid_parts.append(
-                                                    imm_tag.lstrip("_"),
-                                                )
-                                            rid_parts.append(sname)
-                                            rid_parts.append(f"s{seed}")
-                                            rid = "_".join(rid_parts)
-                                            yield _yield(
-                                                rid,
-                                                bundle=bundle,
-                                                pathogen_overrides=path_over,
-                                                config_overrides=merge_cfg(
-                                                    surv_cfgs.get(sname),
-                                                    imm_over,
-                                                    dens_over,
-                                                    hvac,
-                                                ),
-                                                seed=seed,
-                                                num_agents=n_agents,
-                                                pathogen=pathogen,
-                                                platform_id=plat,
-                                                epochs=int(n_epochs),
-                                                surveillance=sname,
-                                                dose_adjustment=dose,
-                                                n_init=n_init,
-                                                immunity=imm_frac,
-                                                density_exponent=alpha,
-                                                contact_mode=cmode,
-                                            )
-
-    elif short.startswith("sr"):
+    ctx = SimpleNamespace(
+        yield_run=_yield,
+        tier=tier,
+        short=short,
+        surv_cfgs=surv_cfgs,
+        manifest=manifest,
+        platform_override=platform_override,
+        num_agents_override=num_agents_override,
+        epochs_override=epochs_override,
+        default_epochs=default_epochs,
+        get_pathogen_config=get_pathogen_config,
+        merge_cfg=merge_cfg,
+        combo_overrides=combo_overrides,
+        immunity_override=_immunity_override,
+        dose_tag=_dose_tag,
+        alpha_tag=_alpha_tag,
+        contact_mode_tag=_contact_mode_tag,
+        resolve_tier_platforms=_resolve_tier_platforms,
+        platform_num_agents=_platform_num_agents,
+        calibration_dose_values=_calibration_dose_values,
+        calibration_init_values=_calibration_init_values,
+        density_exponent_values=_density_exponent_values,
+        contact_mode_values=_contact_mode_values,
+        density_contact_override=_density_contact_override,
+    )
+    streamed = dispatch_standard_or_calibration(ctx)
+    if streamed is not None:
+        yield from streamed
+        return
+    if short.startswith("sr"):
         yield from _iter_sr_family_runs(
             manifest=manifest,
             tier=tier,
@@ -1815,8 +1299,8 @@ def generate_tier_runs(
             num_agents_override=num_agents_override,
             yield_run=_yield,
         )
-
-    elif short.startswith("vd"):
+        return
+    if short.startswith("vd"):
         yield from _iter_vsp_degradation_runs(
             manifest=manifest,
             tier=tier,
@@ -1825,9 +1309,8 @@ def generate_tier_runs(
             num_agents_override=num_agents_override,
             yield_run=_yield,
         )
-
-    else:
-        raise ValueError(f"No generator for tier {tier_id}")
+        return
+    raise ValueError(f"No generator for tier {tier_id}")
 
 
 def extract_timeseries(history: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -1893,6 +1376,20 @@ def extract_timeseries(history: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return series
 
 
+def _detection_epochs(
+    ts: list[dict[str, Any]],
+) -> tuple[int | None, int | None]:
+    detection_epoch = None
+    confirmation_epoch = None
+    for e in ts:
+        status = e.get("trigger_status", "none")
+        if status in ("SUSPECTED", "CONFIRMED") and detection_epoch is None:
+            detection_epoch = e["epoch"]
+        if status == "CONFIRMED" and confirmation_epoch is None:
+            confirmation_epoch = e["epoch"]
+    return detection_epoch, confirmation_epoch
+
+
 def compute_derived_metrics(ts: list[dict[str, Any]], num_agents: int) -> dict[str, Any]:
     """Compute publication-ready scalar metrics from an epoch time series."""
     if not ts:
@@ -1905,30 +1402,14 @@ def compute_derived_metrics(ts: list[dict[str, Any]], num_agents: int) -> dict[s
     final = ts[-1]
     recovered = int(final.get("recovered", 0) or 0)
     infected_final = int(final.get("infected", 0) or 0)
-    # Cumulative attack: still-infectious + recovered (not recovered alone).
     ever_infected = infected_final + recovered
     attack_rate = ever_infected / num_agents if num_agents > 0 else 0
-
-    # Outbreak = takeoff (VSP while still accelerating) vs fizzle.
     outbreak_occurred = epidemic_took_off(ts)
-
-    detection_epoch = None
-    confirmation_epoch = None
-    for e in ts:
-        status = e.get("trigger_status", "none")
-        if status in ("SUSPECTED", "CONFIRMED") and detection_epoch is None:
-            detection_epoch = e["epoch"]
-        if status == "CONFIRMED" and confirmation_epoch is None:
-            confirmation_epoch = e["epoch"]
-
-    total_quarantine_epochs = sum(e.get("quarantined", 0) for e in ts)
-
-    # Crude R_effective at peak: new infections at peak / prevalence just before.
+    detection_epoch, confirmation_epoch = _detection_epochs(ts)
     r_eff_at_peak = None
     if peak_epoch > 0 and infected_by_epoch[peak_epoch - 1] > 0:
         new_at_peak = ts[peak_epoch].get("new_infections", 0)
         r_eff_at_peak = new_at_peak / infected_by_epoch[peak_epoch - 1]
-
     return {
         "attack_rate": round(attack_rate, 4),
         "peak_prevalence": peak_infected,
@@ -1939,7 +1420,7 @@ def compute_derived_metrics(ts: list[dict[str, Any]], num_agents: int) -> dict[s
         "detection_lag": (
             peak_epoch - detection_epoch if detection_epoch is not None else None
         ),
-        "total_quarantine_person_epochs": total_quarantine_epochs,
+        "total_quarantine_person_epochs": sum(e.get("quarantined", 0) for e in ts),
         "r_effective_at_peak": (
             round(r_eff_at_peak, 3) if r_eff_at_peak is not None else None
         ),
@@ -2061,6 +1542,51 @@ def run_simulation(
         return False
 
 
+def _poll_child(proc: subprocess.Popen[str], timeout: int) -> tuple[bool, int | None]:
+    deadline = time.monotonic() + timeout
+    peak_rss_kb: int | None = None
+    timed_out = False
+    while True:
+        hwm = _read_vmhwm_kb(proc.pid)
+        if hwm is not None:
+            peak_rss_kb = hwm if peak_rss_kb is None else max(peak_rss_kb, hwm)
+        if proc.poll() is not None:
+            break
+        if time.monotonic() >= deadline:
+            proc.kill()
+            timed_out = True
+            break
+        time.sleep(0.5)
+    return timed_out, peak_rss_kb
+
+
+def _write_subprocess_stderr(
+    safe_id: str,
+    roots: tuple[str, ...],
+    *,
+    timed_out: bool,
+    timeout: int,
+    returncode: int | None,
+    stdout: str,
+    stderr: str,
+) -> None:
+    err_path = _output_artifact(f"{safe_id}.subprocess_stderr.txt")
+    with validated_open(err_path, "w", allowed_roots=roots, encoding="utf-8") as fh:
+        if timed_out:
+            fh.write(f"TimeoutExpired after {timeout}s\n")
+            if stdout or stderr:
+                fh.write("\n--- stdout ---\n")
+                fh.write(stdout)
+                fh.write("\n--- stderr ---\n")
+                fh.write(stderr)
+            return
+        fh.write(f"returncode={returncode}\n\n")
+        fh.write("--- stdout ---\n")
+        fh.write(stdout)
+        fh.write("\n--- stderr ---\n")
+        fh.write(stderr)
+
+
 def run_simulation_subprocess(
     run_id: str,
     spec: dict[str, Any],
@@ -2115,18 +1641,7 @@ def run_simulation_subprocess(
                 "PYTHONUTF8": os.environ.get("PYTHONUTF8", "1"),
             },
         )
-        deadline = time.monotonic() + timeout
-        while True:
-            hwm = _read_vmhwm_kb(proc.pid)
-            if hwm is not None:
-                peak_rss_kb = hwm if peak_rss_kb is None else max(peak_rss_kb, hwm)
-            if proc.poll() is not None:
-                break
-            if time.monotonic() >= deadline:
-                proc.kill()
-                timed_out = True
-                break
-            time.sleep(0.5)
+        timed_out, peak_rss_kb = _poll_child(proc, timeout)
         try:
             out_err = proc.communicate(timeout=30)
         except subprocess.TimeoutExpired:
@@ -2137,23 +1652,11 @@ def run_simulation_subprocess(
         returncode = proc.returncode
         zip_path = _output_artifact(f"{safe_id}.zip")
         ok = (not timed_out) and returncode == 0 and os.path.isfile(zip_path)
-        if timed_out:
-            err_path = _output_artifact(f"{safe_id}.subprocess_stderr.txt")
-            with validated_open(err_path, "w", allowed_roots=roots, encoding="utf-8") as fh:
-                fh.write(f"TimeoutExpired after {timeout}s\n")
-                if stdout or stderr:
-                    fh.write("\n--- stdout ---\n")
-                    fh.write(stdout)
-                    fh.write("\n--- stderr ---\n")
-                    fh.write(stderr)
-        elif not ok:
-            err_path = _output_artifact(f"{safe_id}.subprocess_stderr.txt")
-            with validated_open(err_path, "w", allowed_roots=roots, encoding="utf-8") as fh:
-                fh.write(f"returncode={returncode}\n\n")
-                fh.write("--- stdout ---\n")
-                fh.write(stdout)
-                fh.write("\n--- stderr ---\n")
-                fh.write(stderr)
+        if timed_out or not ok:
+            _write_subprocess_stderr(
+                safe_id, roots, timed_out=timed_out, timeout=timeout,
+                returncode=returncode, stdout=stdout, stderr=stderr,
+            )
     except Exception:
         ok = False
         raise
@@ -2198,7 +1701,7 @@ def _run_single(
     return 0 if ok else 1
 
 
-def main(argv: list[str] | None = None) -> int:
+def _campaign_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Mega cruise campaign runner")
     parser.add_argument("--tier", default=None, help="Tier id or short prefix (t1…t16, c1…c6, a2)")
     parser.add_argument("--dry-run", action="store_true", help="Count runs without executing")
@@ -2292,71 +1795,43 @@ def main(argv: list[str] | None = None) -> int:
         help="Per-run subprocess timeout in seconds (default 3600; "
         "~30 min 7000-agent runs need headroom beyond the old 600s cap).",
     )
-    args = parser.parse_args(argv)
+    return parser
 
-    if args.single:
-        spec_path, outdir = args.single
-        return _run_single(
-            spec_path, outdir,
-            full_telemetry=args.full_telemetry,
-            keep_workdir=args.keep_workdir,
-        )
 
-    if args.output_dir is not None:
-        set_output_root(args.output_dir)
+def _apply_smoke_defaults(args: argparse.Namespace) -> None:
+    if not args.smoke:
+        return
+    args.tier = args.tier or "t1"
+    args.platform = args.platform or "destroyer_baseline"
+    args.epochs = args.epochs if args.epochs is not None else 2
+    args.num_agents = args.num_agents if args.num_agents is not None else 20
+    args.limit = args.limit if args.limit is not None else 1
 
-    if args.smoke:
-        args.tier = args.tier or "t1"
-        args.platform = args.platform or "destroyer_baseline"
-        args.epochs = args.epochs if args.epochs is not None else 2
-        args.num_agents = args.num_agents if args.num_agents is not None else 20
-        args.limit = args.limit if args.limit is not None else 1
 
-    # Default shard index from the AWS Batch array job index when present.
+def _resolve_shard(args: argparse.Namespace) -> tuple[int | None, int]:
     if args.shard_index is None:
         env_idx = os.environ.get("AWS_BATCH_JOB_ARRAY_INDEX")
         if env_idx is not None:
             args.shard_index = int(env_idx)
-
     shard_count = args.shard_count
     shard_index = args.shard_index if args.shard_index is not None else 0
-    if shard_count is not None:
-        if shard_count < 1:
-            raise SystemExit("--shard-count must be >= 1")
-        if not 0 <= shard_index < shard_count:
-            raise SystemExit(
-                f"--shard-index {shard_index} out of range for "
-                f"--shard-count {shard_count}",
-            )
-
-    uploader = S3Uploader(args.s3_prefix) if args.s3_prefix else None
-
-    # Spot/Batch retries start with an empty local disk — pull this shard's
-    # resume log from S3 before deciding what to skip.
-    if uploader is not None and (args.resume or args.retry_failed):
-        _download_completed_log(uploader, shard_index, shard_count)
-
-    manifest = load_manifest(args.manifest)
-    done = completed_runs() if (args.resume or args.retry_failed) else set()
-    retry_only = failed_runs() if args.retry_failed else None
-    if args.retry_failed and not retry_only:
-        print(f"  --retry-failed: {FAILED_RUNS_FILENAME} is empty; nothing to retry.")
-        return 0
-    tiers = resolve_tier_ids(
-        manifest, args.tier, include_deferred=args.include_deferred,
-    )
-    deferred_skipped = [
-        tid for tid, t in sorted(manifest["tiers"].items())
-        if _tier_is_deferred(t) and tid not in tiers
-    ]
-    if deferred_skipped and (not args.tier or args.tier in ("all", "*")):
-        print(
-            "  Skipping deferred tiers (pin dose then --tier <id> "
-            f"or --include-deferred): {', '.join(deferred_skipped)}",
+    if shard_count is None:
+        return None, shard_index
+    if shard_count < 1:
+        raise SystemExit("--shard-count must be >= 1")
+    if not 0 <= shard_index < shard_count:
+        raise SystemExit(
+            f"--shard-index {shard_index} out of range for "
+            f"--shard-count {shard_count}",
         )
+    return shard_count, shard_index
 
-    # Build the full flattened, ordered run list across selected tiers so the
-    # global index is stable and independent of which shard is executing.
+
+def _collect_all_runs(
+    manifest: dict[str, Any],
+    tiers: list[str],
+    args: argparse.Namespace,
+) -> list[tuple[str, str, dict[str, Any]]]:
     all_runs: list[tuple[str, str, dict[str, Any]]] = []
     for tier_id in tiers:
         runs = list(generate_tier_runs(
@@ -2366,117 +1841,174 @@ def main(argv: list[str] | None = None) -> int:
             epochs_override=args.epochs,
             num_agents_override=args.num_agents,
         ))
-        for run_id, spec in runs:
-            all_runs.append((tier_id, run_id, spec))
+        all_runs.extend((tier_id, run_id, spec) for run_id, spec in runs)
         print(f"\n{'=' * 60}")
         print(f"  {tier_id}: {len(runs)} runs")
         print(f"{'=' * 60}")
+    return all_runs
 
-    def in_shard(global_index: int) -> bool:
-        return shard_count is None or global_index % shard_count == shard_index
 
-    shard_total = sum(1 for gi in range(len(all_runs)) if in_shard(gi))
-    if shard_count is not None:
-        print(
-            f"\n  Shard {shard_index}/{shard_count}: "
-            f"{shard_total} of {len(all_runs)} runs assigned to this shard",
+def _campaign_gate(
+    *,
+    global_index: int,
+    run_id: str,
+    args: argparse.Namespace,
+    shard_count: int | None,
+    shard_index: int,
+    executed: int,
+    done: set[str],
+    retry_only: set[str] | None,
+    uploader: Any,
+) -> str:
+    if shard_count is not None and global_index % shard_count != shard_index:
+        return "ignore"
+    if args.limit is not None and executed >= args.limit:
+        return "stop"
+    if run_id in done:
+        return "skip"
+    if retry_only is not None and run_id not in retry_only:
+        return "skip"
+    if (
+        (args.resume or args.retry_failed)
+        and uploader is not None
+        and uploader.object_exists(f"{run_id}.zip")
+    ):
+        return "skip_s3"
+    return "run"
+
+
+def _print_run_ok(uploader: Any, run_id: str) -> None:
+    if uploader is None:
+        print(" OK")
+        return
+    zip_path = Path(_output_artifact(f"{run_id}.zip"))
+    try:
+        uploader.upload_file(zip_path, f"{run_id}.zip")
+        print(" OK+s3")
+    except Exception as exc:  # noqa: BLE001
+        print(f" OK (s3 upload failed: {exc})")
+
+
+def _perform_campaign_run(
+    *,
+    run_id: str,
+    spec: dict[str, Any],
+    args: argparse.Namespace,
+    global_index: int,
+    n_runs: int,
+    shard_total: int,
+    shard_index: int,
+    shard_count: int | None,
+    total: int,
+    succeeded: int,
+    failed: int,
+    skipped: int,
+    executed: int,
+    uploader: Any,
+    t0: float,
+) -> bool:
+    if args.retry_failed:
+        clear_failed_artifacts(run_id)
+    elapsed = time.time() - t0
+    rate = max(executed, 1) / max(elapsed, 1e-6)
+    eta_min = max(shard_total - total, 0) / max(rate, 1e-6) / 60.0
+    print(
+        f"  [g{global_index + 1}/{n_runs}] {run_id}  "
+        f"({succeeded}ok {failed}err {skipped}skip  "
+        f"~{eta_min:.0f}min left)",
+        end="",
+        flush=True,
+    )
+    if args.in_process:
+        ok = run_simulation(
+            run_id, spec,
+            full_telemetry=args.full_telemetry,
+            keep_workdir=args.keep_workdir,
         )
+    else:
+        ok = run_simulation_subprocess(
+            run_id, spec,
+            full_telemetry=args.full_telemetry,
+            keep_workdir=args.keep_workdir,
+            timeout=args.timeout,
+        )
+    if not ok:
+        mark_failed(run_id)
+        print(" FAIL")
+        return False
+    mark_completed(run_id)
+    _print_run_ok(uploader, run_id)
+    if (
+        uploader is not None
+        and args.s3_log_every > 0
+        and (succeeded + 1) % args.s3_log_every == 0
+    ):
+        _upload_completed_log(uploader, shard_index, shard_count)
+    return True
 
-    total = 0
-    succeeded = 0
-    failed = 0
-    skipped = 0
-    executed = 0
-    t0 = time.time()
 
-    if args.dry_run:
-        elapsed = time.time() - t0
-        print(f"\n{'=' * 60}")
-        print(f"  DRY RUN — {len(all_runs)} runs total across {len(tiers)} tier(s)")
-        if shard_count is not None:
-            print(f"  DRY RUN — {shard_total} runs would run on shard {shard_index}")
-        print(f"  Output: {OUTPUT_ROOT}")
-        print(f"{'=' * 60}")
-        return 0
-
+def _execute_assigned_runs(
+    *,
+    all_runs: list[tuple[str, str, dict[str, Any]]],
+    args: argparse.Namespace,
+    shard_count: int | None,
+    shard_index: int,
+    shard_total: int,
+    done: set[str],
+    retry_only: set[str] | None,
+    uploader: Any,
+    t0: float,
+) -> int:
+    total = succeeded = failed = skipped = executed = 0
     for global_index, (_tier_id, run_id, spec) in enumerate(all_runs):
-        if not in_shard(global_index):
+        gate = _campaign_gate(
+            global_index=global_index,
+            run_id=run_id,
+            args=args,
+            shard_count=shard_count,
+            shard_index=shard_index,
+            executed=executed,
+            done=done,
+            retry_only=retry_only,
+            uploader=uploader,
+        )
+        if gate == "ignore":
             continue
-        if args.limit is not None and executed >= args.limit:
+        if gate == "stop":
             break
         total += 1
-        if run_id in done:
+        if gate == "skip":
             skipped += 1
             continue
-        if retry_only is not None and run_id not in retry_only:
-            skipped += 1
-            continue
-        # Belt-and-suspenders on resume: if the zip already landed in S3, treat
-        # as done even when the resume log was truncated mid-upload.
-        if (
-            (args.resume or args.retry_failed)
-            and uploader is not None
-            and uploader.object_exists(f"{run_id}.zip")
-        ):
+        if gate == "skip_s3":
             mark_completed(run_id)
             done.add(run_id)
             skipped += 1
             continue
-
-        if args.retry_failed:
-            clear_failed_artifacts(run_id)
-
-        elapsed = time.time() - t0
-        rate = max(executed, 1) / max(elapsed, 1e-6)
-        remaining_n = max(shard_total - total, 0)
-        eta_min = remaining_n / max(rate, 1e-6) / 60.0
-        print(
-            f"  [g{global_index + 1}/{len(all_runs)}] {run_id}  "
-            f"({succeeded}ok {failed}err {skipped}skip  "
-            f"~{eta_min:.0f}min left)",
-            end="",
-            flush=True,
+        ok = _perform_campaign_run(
+            run_id=run_id,
+            spec=spec,
+            args=args,
+            global_index=global_index,
+            n_runs=len(all_runs),
+            shard_total=shard_total,
+            shard_index=shard_index,
+            shard_count=shard_count,
+            total=total,
+            succeeded=succeeded,
+            failed=failed,
+            skipped=skipped,
+            executed=executed,
+            uploader=uploader,
+            t0=t0,
         )
-
-        if args.in_process:
-            ok = run_simulation(
-                run_id,
-                spec,
-                full_telemetry=args.full_telemetry,
-                keep_workdir=args.keep_workdir,
-            )
-        else:
-            ok = run_simulation_subprocess(
-                run_id,
-                spec,
-                full_telemetry=args.full_telemetry,
-                keep_workdir=args.keep_workdir,
-                timeout=args.timeout,
-            )
         executed += 1
         if ok:
             succeeded += 1
-            mark_completed(run_id)
-            if uploader is not None:
-                zip_path = Path(_output_artifact(f"{run_id}.zip"))
-                try:
-                    uploader.upload_file(zip_path, f"{run_id}.zip")
-                    print(" OK+s3")
-                except Exception as exc:  # noqa: BLE001
-                    print(f" OK (s3 upload failed: {exc})")
-                if args.s3_log_every > 0 and succeeded % args.s3_log_every == 0:
-                    _upload_completed_log(uploader, shard_index, shard_count)
-            else:
-                print(" OK")
         else:
             failed += 1
-            mark_failed(run_id)
-            print(" FAIL")
-
-    # Final upload of this shard's resume log so retries skip finished runs.
     if uploader is not None:
         _upload_completed_log(uploader, shard_index, shard_count)
-
     elapsed = time.time() - t0
     print(f"\n{'=' * 60}")
     print(f"  Campaign: {total} listed, {succeeded} ok, {failed} err, {skipped} skip")
@@ -2484,6 +2016,90 @@ def main(argv: list[str] | None = None) -> int:
     print(f"  Output: {OUTPUT_ROOT}")
     print(f"{'=' * 60}")
     return 1 if failed else 0
+
+
+def _print_deferred_tiers(
+    manifest: dict[str, Any],
+    tiers: list[str],
+    args: argparse.Namespace,
+) -> None:
+    deferred_skipped = [
+        tid for tid, t in sorted(manifest["tiers"].items())
+        if _tier_is_deferred(t) and tid not in tiers
+    ]
+    if not deferred_skipped or (args.tier and args.tier not in ("all", "*")):
+        return
+    print(
+        "  Skipping deferred tiers (pin dose then --tier <id> "
+        f"or --include-deferred): {', '.join(deferred_skipped)}",
+    )
+
+
+def _print_dry_run(
+    all_runs: list[tuple[str, str, dict[str, Any]]],
+    tiers: list[str],
+    shard_count: int | None,
+    shard_index: int,
+    shard_total: int,
+) -> int:
+    print(f"\n{'=' * 60}")
+    print(f"  DRY RUN — {len(all_runs)} runs total across {len(tiers)} tier(s)")
+    if shard_count is not None:
+        print(f"  DRY RUN — {shard_total} runs would run on shard {shard_index}")
+    print(f"  Output: {OUTPUT_ROOT}")
+    print(f"{'=' * 60}")
+    return 0
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = _campaign_parser().parse_args(argv)
+    if args.single:
+        spec_path, outdir = args.single
+        return _run_single(
+            spec_path, outdir,
+            full_telemetry=args.full_telemetry,
+            keep_workdir=args.keep_workdir,
+        )
+    if args.output_dir is not None:
+        set_output_root(args.output_dir)
+    _apply_smoke_defaults(args)
+    shard_count, shard_index = _resolve_shard(args)
+    uploader = S3Uploader(args.s3_prefix) if args.s3_prefix else None
+    if uploader is not None and (args.resume or args.retry_failed):
+        _download_completed_log(uploader, shard_index, shard_count)
+    manifest = load_manifest(args.manifest)
+    done = completed_runs() if (args.resume or args.retry_failed) else set()
+    retry_only = failed_runs() if args.retry_failed else None
+    if args.retry_failed and not retry_only:
+        print(f"  --retry-failed: {FAILED_RUNS_FILENAME} is empty; nothing to retry.")
+        return 0
+    tiers = resolve_tier_ids(
+        manifest, args.tier, include_deferred=args.include_deferred,
+    )
+    _print_deferred_tiers(manifest, tiers, args)
+    all_runs = _collect_all_runs(manifest, tiers, args)
+    shard_total = sum(
+        1 for gi in range(len(all_runs))
+        if shard_count is None or gi % shard_count == shard_index
+    )
+    if shard_count is not None:
+        print(
+            f"\n  Shard {shard_index}/{shard_count}: "
+            f"{shard_total} of {len(all_runs)} runs assigned to this shard",
+        )
+    if args.dry_run:
+        return _print_dry_run(all_runs, tiers, shard_count, shard_index, shard_total)
+    return _execute_assigned_runs(
+        all_runs=all_runs,
+        args=args,
+        shard_count=shard_count,
+        shard_index=shard_index,
+        shard_total=shard_total,
+        done=done,
+        retry_only=retry_only,
+        uploader=uploader,
+        t0=time.time(),
+    )
 
 
 def _resume_log_key(shard_index: int, shard_count: int | None) -> str:

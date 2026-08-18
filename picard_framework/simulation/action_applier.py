@@ -6,11 +6,13 @@ Maps decision_engine ActionEnvelope entries to existing orchestrator hooks.
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Callable
 
 from decision_engine.actions import ActionEnvelope
 from decision_engine.context import EpochDecisionContext
 from orchestrator_types import SimulationState
+
+_ActionHandler = Callable[..., str]
 
 
 def _protocol_id_from_action(action: dict[str, Any]) -> str:
@@ -43,6 +45,144 @@ def _apply_behavioral_override(
         state.agent_behavioral_overrides[int(aid)] = action.get("kind", "")
 
 
+def _handle_cadence(action: dict[str, Any], *, overrides: dict[str, Any], **_: Any) -> str:
+    _apply_surveillance_cadence(action, overrides)
+    return "set_surveillance_cadence"
+
+
+def _handle_budget(action: dict[str, Any], *, overrides: dict[str, Any], **_: Any) -> str:
+    _apply_surveillance_budget_emphasis(action, overrides)
+    return "set_surveillance_budget_emphasis"
+
+
+def _handle_isolation(action: dict[str, Any], *, overrides: dict[str, Any], **_: Any) -> str:
+    overrides["isolation_threshold_scale"] = float(action.get("threshold_scale", 1.0))
+    return "set_isolation_posture"
+
+
+def _handle_noop(_action: dict[str, Any], **_: Any) -> str:
+    return "noop"
+
+
+def _handle_authorize(action: dict[str, Any], *, ctx: EpochDecisionContext, **_: Any) -> str:
+    ids = action.get("protocol_ids")
+    if isinstance(ids, list):
+        ctx.authorized_sop_ids = [str(x) for x in ids]
+    return "authorize_sop_subset"
+
+
+def _handle_directive(action: dict[str, Any], *, ctx: EpochDecisionContext, **_: Any) -> str:
+    ctx.command_directives.append(action.get("directive", action))
+    return "directive_to_medical"
+
+
+def _handle_stance(action: dict[str, Any], *, ctx: EpochDecisionContext, **_: Any) -> str:
+    ctx.corporate_communication_stance = float(action.get("stance", 0.0))
+    return "corporate_communication_stance"
+
+
+def _handle_instruction(action: dict[str, Any], *, ctx: EpochDecisionContext, **_: Any) -> str:
+    msg = action.get("message", "")
+    if msg:
+        ctx.sop_announcements.append(msg)
+    return "issue_crew_instruction"
+
+
+def _handle_activate(action: dict[str, Any], *, state: SimulationState, **_: Any) -> str:
+    pid = _protocol_id_from_action(action)
+    if pid:
+        state.forced_protocol_ids.add(pid)
+    return f"activate:{pid}"
+
+
+def _handle_deactivate(action: dict[str, Any], *, state: SimulationState, **_: Any) -> str:
+    pid = _protocol_id_from_action(action)
+    if pid:
+        state.forced_protocol_ids.discard(pid)
+    return f"deactivate:{pid}"
+
+
+def _handle_verify(
+    action: dict[str, Any],
+    *,
+    state: SimulationState,
+    zones_ok: set[str],
+    envelope: ActionEnvelope,
+    **_: Any,
+) -> str:
+    zone = str(action.get("zone", ""))
+    if zone and (not zones_ok or zone in zones_ok):
+        state.verification_test_queue.append({"epoch": envelope.epoch, "zone": zone})
+    return f"verify:{zone}"
+
+
+def _handle_recommend(action: dict[str, Any], *, ctx: EpochDecisionContext, **_: Any) -> str:
+    pid = _protocol_id_from_action(action)
+    if pid:
+        ctx.sop_recommendations.append(pid)
+    return f"recommend:{pid}"
+
+
+def _handle_behavior(action: dict[str, Any], *, state: SimulationState, **_: Any) -> str:
+    _apply_behavioral_override(action, state)
+    return f"{action.get('kind')}:{action.get('agent_id')}"
+
+
+_NEEDS_CTX = frozenset(
+    {
+        "authorize_sop_subset",
+        "directive_to_medical",
+        "corporate_communication_stance",
+        "issue_crew_instruction",
+        "recommend_sop",
+    },
+)
+
+_ACTION_HANDLERS: dict[str, _ActionHandler] = {
+    "set_surveillance_cadence": _handle_cadence,
+    "set_surveillance_budget_emphasis": _handle_budget,
+    "set_isolation_posture": _handle_isolation,
+    "noop": _handle_noop,
+    "authorize_sop_subset": _handle_authorize,
+    "directive_to_medical": _handle_directive,
+    "corporate_communication_stance": _handle_stance,
+    "issue_crew_instruction": _handle_instruction,
+    "activate_sop": _handle_activate,
+    "request_sop_activation": _handle_activate,
+    "deactivate_sop": _handle_deactivate,
+    "order_verification_test": _handle_verify,
+    "recommend_sop": _handle_recommend,
+    "hide_symptoms": _handle_behavior,
+    "report_sick_call": _handle_behavior,
+    "refuse_quarantine": _handle_behavior,
+}
+
+
+def _dispatch_action(
+    action: dict[str, Any],
+    *,
+    state: SimulationState,
+    overrides: dict[str, Any],
+    ctx: EpochDecisionContext | None,
+    zones_ok: set[str],
+    envelope: ActionEnvelope,
+) -> str | None:
+    kind = str(action.get("kind") or "")
+    handler = _ACTION_HANDLERS.get(kind)
+    if handler is None:
+        return None
+    if kind in _NEEDS_CTX and ctx is None:
+        return None
+    return handler(
+        action,
+        state=state,
+        overrides=overrides,
+        ctx=ctx,
+        zones_ok=zones_ok,
+        envelope=envelope,
+    )
+
+
 def apply_action_envelope(
     envelope: ActionEnvelope | None,
     state: SimulationState,
@@ -56,67 +196,21 @@ def apply_action_envelope(
 
     applied: dict[str, Any] = {"by_actor": {}}
     overrides = cfg.setdefault("_picard_epoch_overrides", {})
-    ctx = decision_ctx
     zones_ok = valid_zones or set()
 
     for actor_id, actions in envelope.actions.items():
         actor_log: list[str] = []
         for action in actions:
-            kind = action.get("kind", "")
-            if kind == "set_surveillance_cadence":
-                _apply_surveillance_cadence(action, overrides)
-                actor_log.append(kind)
-            elif kind == "set_surveillance_budget_emphasis":
-                _apply_surveillance_budget_emphasis(action, overrides)
-                actor_log.append(kind)
-            elif kind == "set_isolation_posture":
-                factor = action.get("threshold_scale", 1.0)
-                overrides["isolation_threshold_scale"] = float(factor)
-                actor_log.append(kind)
-            elif kind == "noop":
-                actor_log.append("noop")
-            elif kind == "authorize_sop_subset" and ctx is not None:
-                ids = action.get("protocol_ids")
-                if isinstance(ids, list):
-                    ctx.authorized_sop_ids = [str(x) for x in ids]
-                actor_log.append(kind)
-            elif kind == "directive_to_medical" and ctx is not None:
-                ctx.command_directives.append(action.get("directive", action))
-                actor_log.append(kind)
-            elif kind == "corporate_communication_stance" and ctx is not None:
-                ctx.corporate_communication_stance = float(action.get("stance", 0.0))
-                actor_log.append(kind)
-            elif kind == "issue_crew_instruction" and ctx is not None:
-                msg = action.get("message", "")
-                if msg:
-                    ctx.sop_announcements.append(msg)
-                actor_log.append(kind)
-            elif kind in ("activate_sop", "request_sop_activation"):
-                pid = _protocol_id_from_action(action)
-                if pid:
-                    state.forced_protocol_ids.add(pid)
-                actor_log.append(f"activate:{pid}")
-            elif kind == "deactivate_sop":
-                pid = _protocol_id_from_action(action)
-                if pid:
-                    state.forced_protocol_ids.discard(pid)
-                actor_log.append(f"deactivate:{pid}")
-            elif kind == "order_verification_test":
-                zone = str(action.get("zone", ""))
-                if zone and (not zones_ok or zone in zones_ok):
-                    state.verification_test_queue.append({
-                        "epoch": envelope.epoch,
-                        "zone": zone,
-                    })
-                actor_log.append(f"verify:{zone}")
-            elif kind == "recommend_sop" and ctx is not None:
-                pid = _protocol_id_from_action(action)
-                if pid:
-                    ctx.sop_recommendations.append(pid)
-                actor_log.append(f"recommend:{pid}")
-            elif kind in ("hide_symptoms", "report_sick_call", "refuse_quarantine"):
-                _apply_behavioral_override(action, state)
-                actor_log.append(f"{kind}:{action.get('agent_id')}")
+            label = _dispatch_action(
+                action,
+                state=state,
+                overrides=overrides,
+                ctx=decision_ctx,
+                zones_ok=zones_ok,
+                envelope=envelope,
+            )
+            if label:
+                actor_log.append(label)
         if actor_log:
             applied["by_actor"][str(actor_id)] = actor_log
 
