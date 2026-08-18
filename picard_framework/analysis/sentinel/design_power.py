@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import json
 import math
-from dataclasses import dataclass, replace
+from dataclasses import asdict, dataclass
 from datetime import date, timedelta
 from fractions import Fraction
 from importlib import resources
@@ -103,7 +103,7 @@ class SentinelDesign:
             raise ValueError("design sizes and dwell must be positive")
         if self.dwell_hours > 18 or self.calls_per_ship_week <= 0:
             raise ValueError("calls_per_ship_week must be positive and dwell <= 18")
-        if not 0.0 < self.hot_port_hazard_ratio:
+        if self.hot_port_hazard_ratio <= 0.0:
             raise ValueError("hot_port_hazard_ratio must be positive")
         if self.lambda_background <= 0.0 or self.lambda_aboard <= 0.0:
             raise ValueError("hazards must be positive")
@@ -128,10 +128,20 @@ class SentinelDesign:
         fields.update({key: raw[key] for key in optional if key in raw})
         return cls(**fields)
 
+    def evolved(self, **changes: Any) -> "SentinelDesign":
+        """Return a copy with selected fields replaced, typed as this class.
+
+        ``dataclasses.replace`` is inferred as a generic dataclass instance, which
+        then fails every caller that asks for ``SentinelDesign``. Reconstructing
+        through the constructor keeps the public type.
+        """
+        payload = asdict(self)
+        payload.update(changes)
+        return SentinelDesign(**payload)
+
     def fit_design(self) -> "SentinelDesign":
         """Return the explicitly configured sub-scale replica for Engine B."""
-        return replace(
-            self,
+        return self.evolved(
             n_ports=self.fit_scale_ports,
             n_ships=self.fit_scale_ships,
             n_weeks=self.fit_scale_weeks,
@@ -278,7 +288,7 @@ def build_design_data(
     one_week: bool = False,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     """Build fleet Stan data, optionally retaining one exchangeable week."""
-    actual = replace(design, n_weeks=1) if one_week else design
+    actual = design.evolved(n_weeks=1) if one_week else design
     incubation, generation = delays_for_pathogen(default_pathogen(), epoch_hours=1.0)
     return build_sentinel_fleet_data(
         build_synthetic_fleet(actual),
@@ -424,7 +434,7 @@ def ceiling_projection(
 def week_scaling_check(design: SentinelDesign) -> dict[str, float | int]:
     """Compare one-week information scaling with an explicit small fleet."""
     explicit_weeks = min(3, design.n_weeks)
-    check_design = replace(design, n_weeks=explicit_weeks)
+    check_design = design.evolved(n_weeks=explicit_weeks)
     one_week, _ = build_design_data(check_design, one_week=True)
     all_weeks, _ = build_design_data(check_design)
     scaled_info = _information(one_week, check_design, check_design.hot_port_hazard_ratio)
@@ -499,9 +509,8 @@ def fit_projection(
     hot_ratio: float | None = None,
 ) -> dict[str, Any]:
     """Simulate and fit the fit-scale replica with the reference sampler."""
-    fit_design = design.fit_design()
     truth_ratio = design.hot_port_hazard_ratio if hot_ratio is None else hot_ratio
-    fit_design = replace(fit_design, hot_port_hazard_ratio=truth_ratio)
+    fit_design = design.fit_design().evolved(hot_port_hazard_ratio=truth_ratio)
     data, meta = build_design_data(fit_design)
     ceiling = ceiling_projection(fit_design, alpha=alpha, power=power)
     results = [
@@ -519,7 +528,7 @@ def fit_projection(
     ceiling_width = ceiling["sd_log_ratio"] * 2.0 * Z90
     inflation = float(widths.mean() / ceiling_width)
     regional_ceiling = ceiling_projection(
-        replace(design, hot_port_hazard_ratio=truth_ratio),
+        design.evolved(hot_port_hazard_ratio=truth_ratio),
         alpha=alpha,
         power=power,
         posterior_width_ratio_vs_ceiling=inflation,
@@ -562,6 +571,20 @@ def fit_projection(
     }
 
 
+def _sweep_design(
+    design: SentinelDesign,
+    dimension: str,
+    value: float,
+) -> SentinelDesign:
+    if dimension == "ships":
+        return design.evolved(n_ships=int(value))
+    if dimension == "weeks":
+        return design.evolved(n_weeks=int(value))
+    if dimension == "calls":
+        return design.evolved(calls_per_ship_week=float(value))
+    raise ValueError(f"unknown sweep dimension: {dimension}")
+
+
 def scaling_sweep(
     design: SentinelDesign,
     dimension: str,
@@ -573,14 +596,7 @@ def scaling_sweep(
     """Rebuild one-week fleets while varying one design dimension."""
     rows = []
     for value in values:
-        if dimension == "ships":
-            candidate = replace(design, n_ships=int(value))
-        elif dimension == "weeks":
-            candidate = replace(design, n_weeks=int(value))
-        elif dimension == "calls":
-            candidate = replace(design, calls_per_ship_week=float(value))
-        else:
-            raise ValueError(f"unknown sweep dimension: {dimension}")
+        candidate = _sweep_design(design, dimension, value)
         result = ceiling_projection(candidate, alpha=alpha, power=power)
         rows.append(
             {

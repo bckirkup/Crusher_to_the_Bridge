@@ -13,7 +13,7 @@ import csv
 import json
 import os
 from collections import defaultdict
-from typing import Any
+from typing import Any, Mapping
 
 from picard_framework.analysis._io import (
     allowed_roots,
@@ -339,6 +339,47 @@ def _true_lambda(port_id: str, hazards: dict[str, Any]) -> float:
     return _HOME_PORT_TRUTH
 
 
+def _field_float(row: Mapping[str, Any], key: str) -> float:
+    return float(row[key]) if key in row else float("nan")
+
+
+def _score_port(
+    cell: Mapping[str, Any],
+    status: Mapping[str, Any],
+    port: Mapping[str, Any],
+    *,
+    r_true: float,
+    r_mean: float,
+    r_lo: float,
+    r_hi: float,
+    r_covered: bool,
+    truth: Mapping[str, Any],
+) -> dict[str, Any]:
+    port_id = str(port.get("port_id") or "")
+    lam_true = _true_lambda(port_id, dict(truth))
+    lam_lo = _field_float(port, "hazard_q05")
+    lam_hi = _field_float(port, "hazard_q95")
+    covered = interval_covers(lam_true, lam_lo, lam_hi) if lam_lo == lam_lo else False
+    return {
+        "cell_id": cell["cell_id"],
+        "hazard_profile": cell["hazard_profile"],
+        "fleet_config": cell["fleet_config"],
+        "R_onboard_true": r_true,
+        "n_voyages": cell["n_voyages"],
+        "fit_status": str(status.get("status") or "missing"),
+        "port_id": port_id,
+        "lambda_true": lam_true,
+        "lambda_mean": _field_float(port, "hazard_mean"),
+        "lambda_q05": lam_lo,
+        "lambda_q95": lam_hi,
+        "lambda_covered": covered,
+        "R_mean": r_mean,
+        "R_q05": r_lo,
+        "R_q95": r_hi,
+        "R_covered": r_covered,
+    }
+
+
 def _onboard_r_interval(onboard: dict[str, Any]) -> tuple[float, float, float]:
     ships = onboard.get("ships") or []
     if not ships:
@@ -367,40 +408,23 @@ def score_cell(cell: dict[str, Any], status: dict[str, Any]) -> list[dict[str, A
         r_mean, r_lo, r_hi = _onboard_r_interval(onboard)
     r_true = float(cell["R_onboard"])
     r_covered = interval_covers(r_true, r_lo, r_hi) if r_lo == r_lo else False
-    rows: list[dict[str, Any]] = []
     port_rows = _read_csv(hazards_path) if os.path.isfile(hazards_path) else []
     truth = cell["port_hazards"]
     ports = port_rows or [{"port_id": pid} for pid in sorted(truth)]
-    for port in ports:
-        port_id = str(port.get("port_id") or "")
-        lam_true = _true_lambda(port_id, truth)
-        lam_mean = float(port["hazard_mean"]) if "hazard_mean" in port else float("nan")
-        lam_lo = float(port["hazard_q05"]) if "hazard_q05" in port else float("nan")
-        lam_hi = float(port["hazard_q95"]) if "hazard_q95" in port else float("nan")
-        covered = (
-            interval_covers(lam_true, lam_lo, lam_hi) if lam_lo == lam_lo else False
+    return [
+        _score_port(
+            cell,
+            status,
+            port,
+            r_true=r_true,
+            r_mean=r_mean,
+            r_lo=r_lo,
+            r_hi=r_hi,
+            r_covered=r_covered,
+            truth=truth,
         )
-        rows.append(
-            {
-                "cell_id": cell["cell_id"],
-                "hazard_profile": cell["hazard_profile"],
-                "fleet_config": cell["fleet_config"],
-                "R_onboard_true": r_true,
-                "n_voyages": cell["n_voyages"],
-                "fit_status": str(status.get("status") or "missing"),
-                "port_id": port_id,
-                "lambda_true": lam_true,
-                "lambda_mean": lam_mean,
-                "lambda_q05": lam_lo,
-                "lambda_q95": lam_hi,
-                "lambda_covered": covered,
-                "R_mean": r_mean,
-                "R_q05": r_lo,
-                "R_q95": r_hi,
-                "R_covered": r_covered,
-            },
-        )
-    return rows
+        for port in ports
+    ]
 
 
 def _load_fit_status(fit_dir: str) -> dict[str, Any] | None:

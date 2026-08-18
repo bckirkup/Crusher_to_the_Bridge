@@ -5,12 +5,14 @@ from __future__ import annotations
 import json
 import shutil
 import sys
-from types import SimpleNamespace
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
+from deploy.aws import sentinel_nuts_entrypoint
 from picard_framework.analysis._io import write_json
+from picard_framework.analysis.sentinel import run_design_nuts
 from picard_framework.analysis.sentinel.design_nuts import (
     _clean,
     _interpolate_mdhr,
@@ -20,9 +22,7 @@ from picard_framework.analysis.sentinel.design_nuts import (
     load_ladder,
     run_cell,
 )
-from picard_framework.analysis.sentinel import run_design_nuts
 from picard_framework.analysis.stan._data import cmdstan_available
-from deploy.aws import sentinel_nuts_entrypoint
 
 FIXTURE_DIR = Path("tmp_sentinel_nuts_test_cells")
 
@@ -254,7 +254,15 @@ def test_nuts_cli_cell_mode_writes_payload(monkeypatch: pytest.MonkeyPatch) -> N
     monkeypatch.setattr(run_design_nuts, "write_json", lambda path, payload: writes.append((path, payload)))
     monkeypatch.setattr(run_design_nuts, "safe_path", lambda path: path)
     assert run_design_nuts.main(["--out", "out", "--rung", "C1", "--ratio", "2"]) == 0
-    assert writes == [("out/cell_C1_ratio_2_rep_0.json", {"rung": "C1", "true_hot_ratio": 2.0, "replicate": 0})]
+    assert Path(writes[0][0]) == Path("out") / "cell_C1_ratio_2_rep_0.json"
+    assert writes[0][1] == {"rung": "C1", "true_hot_ratio": 2.0, "replicate": 0}
+
+
+def test_nuts_cli_missing_rung_returns_nonzero(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(run_design_nuts, "ensure_out_dir", lambda path: path)
+    monkeypatch.setattr(run_design_nuts, "load_ladder", lambda path=None: {"rungs": []})
+    monkeypatch.setattr(run_design_nuts, "safe_path", lambda path: path)
+    assert run_design_nuts.main(["--out", "out"]) == 2
 
 
 def test_nuts_cli_aggregate_mode_writes_json_and_csv(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -274,8 +282,8 @@ def test_nuts_cli_aggregate_mode_writes_json_and_csv(monkeypatch: pytest.MonkeyP
     monkeypatch.setattr(run_design_nuts, "write_json", lambda path, payload: json_writes.append((path, payload)))
     monkeypatch.setattr(run_design_nuts, "write_csv", lambda path, rows, fields: csv_writes.append((path, rows, fields)))
     assert run_design_nuts.main(["--aggregate", "cells", "--out", "out"]) == 0
-    assert json_writes[0][0] == "out/nuts_aggregate.json"
-    assert csv_writes[0][0] == "out/nuts_rungs.csv"
+    assert Path(json_writes[0][0]) == Path("out") / "nuts_aggregate.json"
+    assert Path(csv_writes[0][0]) == Path("out") / "nuts_rungs.csv"
 
 
 def test_power_curve_reports_monotonicity() -> None:

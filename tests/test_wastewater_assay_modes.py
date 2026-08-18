@@ -39,6 +39,7 @@ from picard_framework.analysis.sentinel.wastewater_assays import (
     AmpliconAssayConfig,
     QpcrAssayConfig,
     ShedLoadModel,
+    gate_config,
     qpcr_reading,
     resolve_assay_mode,
 )
@@ -213,6 +214,19 @@ class TestQpcr:
         # A decade of template is one slope's worth of cycles (~3.32).
         gaps = [b - a for a, b in zip(cts[1:], cts[:-1])]
         assert all(3.0 < g < 3.7 for g in gaps), gaps
+
+    def test_gate_config_overrides_recovery_and_lod_only(self) -> None:
+        base = QpcrAssayConfig()
+        gated = gate_config(
+            base, extraction_efficiency=0.2, lod_ct_threshold=42.0,
+        )
+        assert isinstance(gated, QpcrAssayConfig)
+        assert gated.extraction_efficiency == pytest.approx(0.2)
+        assert gated.lod_ct_threshold == pytest.approx(42.0)
+        assert gated.ct_slope == base.ct_slope
+        assert gated.sample_volume_ml == base.sample_volume_ml
+        assert gated.extraction_efficiency != base.extraction_efficiency
+        assert gated.lod_ct_threshold != base.lod_ct_threshold
 
     def test_detection_rate_grades_across_the_limit_of_detection(self) -> None:
         cfg = _config(assay_mode=ASSAY_QPCR)

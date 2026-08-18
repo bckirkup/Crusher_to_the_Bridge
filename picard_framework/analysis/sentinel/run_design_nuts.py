@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import sys
 from typing import Any
 
 from picard_framework.analysis._io import ensure_out_dir, safe_path, write_csv, write_json
@@ -66,7 +67,11 @@ def main(argv: list[str] | None = None) -> int:
         args.rung = "C1"
         args.ratio = 2.0
     if not args.rung or args.ratio is None:
-        raise SystemExit("--rung and --ratio are required unless --aggregate is used")
+        print(
+            "--rung and --ratio are required unless --aggregate is used",
+            file=sys.stderr,
+        )
+        return 2
     payload = run_cell(
         ladder,
         rung_id=args.rung,
