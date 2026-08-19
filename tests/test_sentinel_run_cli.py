@@ -188,7 +188,7 @@ def _write_json(path: str, payload: Any) -> None:
         json.dump(payload, fh)
 
 
-@pytest.fixture()
+@pytest.fixture
 def scratch() -> Iterator[str]:
     shutil.rmtree(SCRATCH, ignore_errors=True)
     os.makedirs(SCRATCH)
@@ -282,16 +282,18 @@ def test_fit_with_no_hazard_table_is_refused_not_reported(scratch: str) -> None:
         os.path.join(fit, "fit_status.json"),
         {"status": "skipped", "reason": "cmdstanpy not installed"},
     )
+    fit_dir = _relative(fit)
     with pytest.raises(SystemExit) as exc:
-        load_fit_artifacts(_relative(fit))
+        load_fit_artifacts(fit_dir)
     message = str(exc.value)
     assert "skipped" in message
     assert "cmdstanpy not installed" in message
 
 
 def test_missing_directory_is_refused(scratch: str) -> None:
+    missing = _relative(os.path.join(scratch, "absent"))
     with pytest.raises(SystemExit):
-        load_fit_artifacts(_relative(os.path.join(scratch, "absent")))
+        load_fit_artifacts(missing)
 
 
 @pytest.mark.parametrize(

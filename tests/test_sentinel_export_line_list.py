@@ -226,8 +226,10 @@ def test_report_epoch_is_never_before_onset() -> None:
 
 def test_unknown_channel_is_rejected() -> None:
     ledger = SentinelLedger()
+    agents = [agent(1)]
+    detections = {"telepathy": [1]}
     with pytest.raises(ValueError, match="Unknown detection channel"):
-        ledger.observe_epoch(1, [agent(1)], detections={"telepathy": [1]})
+        ledger.observe_epoch(1, agents, detections=detections)
 
 
 # ── Ground truth (synthetic runs only) ───────────────────────────────

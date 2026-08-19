@@ -76,8 +76,6 @@ def test_ship_simulation_suppresses_sick_calls_during_delay() -> None:
         assert rec["summary"]["sick_call_count"] == 0
         cascade = rec.get("diagnostic_cascade")
         if cascade is not None:
-            assert not (
-                cascade.get("new_tier0_agents")
-                or cascade.get("new_tier1_agents")
-                or cascade.get("tier_advancements")
-            )
+            assert not cascade.get("new_tier0_agents")
+            assert not cascade.get("new_tier1_agents")
+            assert not cascade.get("tier_advancements")

@@ -55,7 +55,7 @@ def write_manifest(directory: str, payload: Any, name: str = "fleet.json") -> st
     return path
 
 
-@pytest.fixture()
+@pytest.fixture
 def scratch() -> Iterator[str]:
     """A scratch directory under the repo: analysis I/O refuses paths outside CWD."""
     base = os.path.join(REPO, "out_test_fleet_fit")
@@ -67,7 +67,7 @@ def scratch() -> Iterator[str]:
         shutil.rmtree(base, ignore_errors=True)
 
 
-@pytest.fixture()
+@pytest.fixture
 def out_dir(scratch: str) -> str:
     return scratch
 
@@ -76,8 +76,10 @@ def test_committed_manifest_resolves_to_files_that_exist() -> None:
     pairs = load_fleet_manifest(FLEET_MANIFEST)
     assert len(pairs) == 3
     for itinerary, observations in pairs:
-        assert os.path.isabs(itinerary) and os.path.isfile(itinerary)
-        assert os.path.isabs(observations) and os.path.isfile(observations)
+        assert os.path.isabs(itinerary)
+        assert os.path.isfile(itinerary)
+        assert os.path.isabs(observations)
+        assert os.path.isfile(observations)
 
 
 def test_relative_entries_resolve_against_the_manifest_directory(
@@ -153,8 +155,9 @@ def test_a_missing_voyage_file_is_not_silently_dropped(scratch: str) -> None:
             ],
         },
     )
+    pairs = load_fleet_manifest(path)
     with pytest.raises((FileNotFoundError, OSError, ValueError)):
-        load_fleet_voyages(load_fleet_manifest(path))
+        load_fleet_voyages(pairs)
 
 
 def test_observations_that_contradict_the_itinerary_are_refused(scratch: str) -> None:
@@ -182,8 +185,9 @@ def test_observations_that_contradict_the_itinerary_are_refused(scratch: str) ->
             ],
         },
     )
+    pairs = load_fleet_manifest(path)
     with pytest.raises(ValueError, match="do not match the itinerary"):
-        load_fleet_voyages(load_fleet_manifest(path))
+        load_fleet_voyages(pairs)
 
 
 def test_a_bundle_may_be_paired_with_any_itinerary_shape(scratch: str) -> None:

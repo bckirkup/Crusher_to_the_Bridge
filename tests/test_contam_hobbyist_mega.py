@@ -72,7 +72,8 @@ def test_mega_hobbyist_export_scale_safe() -> None:
     assert _section_count(text, "species") == 2
     # ContamX-critical: names ≤ 15
     names = _zone_names_from_prj(text)
-    assert names and all(len(n) <= 15 for n in names)
+    assert names
+    assert all(len(n) <= 15 for n in names)
 
 
 def test_mega_bundled_hobbyist_prj() -> None:

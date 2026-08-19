@@ -104,7 +104,8 @@ class TestSpatialLayout:
     def test_zones_have_display_coords(self, layout: dict) -> None:
         for z in layout["zones"]:
             assert "display" in z, f"Zone '{z['id']}' missing display coordinates"
-            assert "x" in z["display"] and "y" in z["display"]
+            assert "x" in z["display"]
+            assert "y" in z["display"]
 
 
 class TestAirFlowPaths:
@@ -211,7 +212,11 @@ class TestProtocols:
     def test_activation_delay_non_negative(self, protocols: dict) -> None:
         for p in protocols["protocols"]:
             delay = p.get("activation_delay_epochs", 0)
-            assert isinstance(delay, int) and delay >= 0, (
+            assert isinstance(delay, int), (
+                f"Protocol '{p['protocol_id']}' has invalid "
+                f"activation_delay_epochs: {delay}"
+            )
+            assert delay >= 0, (
                 f"Protocol '{p['protocol_id']}' has invalid "
                 f"activation_delay_epochs: {delay}"
             )

@@ -95,7 +95,8 @@ def test_bundled_enterprise_and_mega_contam_dirs() -> None:
         text = prj.read_text(encoding="utf-8")
         assert text.startswith("ContamW 3.4")
         entries = json.loads(pmap.read_text(encoding="utf-8"))
-        assert isinstance(entries, list) and entries
+        assert isinstance(entries, list)
+        assert entries
         m = re.search(r"^(\d+) ! flow paths:", text, re.M)
         assert m is not None
         assert int(m.group(1)) == len(entries)
@@ -136,7 +137,8 @@ def test_path_map_from_prj_authentic_fixtures(fixture: str) -> None:
         assert any(int(e.get("ahs_nr") or 0) > 0 for e in entries)
     # Every entry has ContamX bridge fields
     for e in entries:
-        assert "from_zone" in e and "to_zone" in e
+        assert "from_zone" in e
+        assert "to_zone" in e
         assert "crusher_transfer" in e
 
 
@@ -155,7 +157,8 @@ def test_simplify_cli_writes_path_map(tmp_path) -> None:
         assert Path(airflow).is_file()
         assert Path(pmap).is_file()
         entries = json.loads(Path(pmap).read_text(encoding="utf-8"))
-        assert isinstance(entries, list) and entries
+        assert isinstance(entries, list)
+        assert entries
         assert any(e.get("kind", "").startswith("ahs_") for e in entries)
     finally:
         import shutil
@@ -389,6 +392,8 @@ def test_unique_contam_name_truncates_and_dedupes() -> None:
     used: set[str] = set()
     a = _unique_contam_name("zone_saucer_command_bridge", used)
     b = _unique_contam_name("zone_saucer_command_bridge", used)
-    assert len(a) <= 15 and len(b) <= 15
+    assert len(a) <= 15
+    assert len(b) <= 15
     assert a != b
-    assert a in used and b in used
+    assert a in used
+    assert b in used

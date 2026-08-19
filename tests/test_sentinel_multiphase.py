@@ -65,7 +65,7 @@ HAZARDS = {
 }
 
 
-@pytest.fixture()
+@pytest.fixture
 def scratch() -> Iterator[str]:
     path = os.path.join(REPO, "tmp_multiphase_test")
     shutil.rmtree(path, ignore_errors=True)
@@ -350,9 +350,10 @@ def test_ledger_must_be_an_object(scratch):
     path = os.path.join(scratch, "not_a_ledger.json")
     with open(path, "w", encoding="utf-8") as fh:
         json.dump([1, 2, 3], fh)
+    out_dir = os.path.join(scratch, "out")
     with pytest.raises(ValueError, match="must be an object"):
         run_multiphase(
             manifest_path=FLEET_MANIFEST,
             ledger_path=path,
-            out_dir=os.path.join(scratch, "out"),
+            out_dir=out_dir,
         )

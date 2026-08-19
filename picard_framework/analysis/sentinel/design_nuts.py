@@ -76,11 +76,12 @@ def enumerate_cells(ladder: Mapping[str, Any]) -> list[dict[str, Any]]:
 
 
 def _rung_design(rung: Mapping[str, Any]) -> SentinelDesign:
-    return load_design(str(rung["preset"])).evolved(
+    design: SentinelDesign = load_design(str(rung["preset"])).evolved(
         n_ports=int(rung["n_ports"]),
         n_ships=int(rung["n_ships"]),
         n_weeks=int(rung["n_weeks"]),
     )
+    return design
 
 
 def _simulate_onsets(

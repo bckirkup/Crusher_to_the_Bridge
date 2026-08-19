@@ -230,10 +230,12 @@ def test_a_last_port_call_is_censored_hard() -> None:
 
 @pytest.mark.parametrize("ascertainment", [0.0, 1.5])
 def test_impossible_ascertainment_is_refused(ascertainment: float) -> None:
+    itinerary = voyage()
+    observations = bundle([])
     with pytest.raises(ValueError, match="ascertainment"):
         build_exposure_design(
-            voyage(),
-            bundle([]),
+            itinerary,
+            observations,
             INCUBATION,
             ascertainment=ascertainment,
         )

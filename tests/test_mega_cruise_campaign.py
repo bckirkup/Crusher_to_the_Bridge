@@ -408,7 +408,9 @@ def test_tier_specs_carry_compact_retention_and_parameters() -> None:
 
     _rid2, spec2 = next(generate_tier_runs(manifest, "t2_hvac_sweep"))
     p2 = spec2["campaign_parameters"]
-    assert "filter" in p2 and "oa" in p2 and "decay" in p2
+    assert "filter" in p2
+    assert "oa" in p2
+    assert "decay" in p2
     assert "filter_efficiency" in p2
     assert "outdoor_air_fraction" in p2
 
@@ -547,7 +549,8 @@ def _load_aggregator():
 
     path = REPO_ROOT / "deploy" / "aws" / "aggregate_results.py"
     spec = importlib.util.spec_from_file_location("aggregate_results", path)
-    assert spec and spec.loader
+    assert spec is not None
+    assert spec.loader is not None
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
     return mod
@@ -671,7 +674,8 @@ def test_looks_like_oom_and_classify_helpers() -> None:
 
     clf_path = REPO_ROOT / "deploy" / "aws" / "classify_batch_failures.py"
     spec = importlib.util.spec_from_file_location("classify_batch_failures", clf_path)
-    assert spec is not None and spec.loader is not None
+    assert spec is not None
+    assert spec.loader is not None
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
     classify_attempt = mod.classify_attempt
@@ -807,7 +811,8 @@ def test_native_oa_fraction_changes_supply_flow() -> None:
 
     eng_lo = build_transport_engine(str(REPO_ROOT), base_cfg)
     eng_hi = build_transport_engine(str(REPO_ROOT), high_oa)
-    assert eng_lo is not None and eng_hi is not None
+    assert eng_lo is not None
+    assert eng_hi is not None
     supplies_lo = [
         p.flow_rate_m3h for p in eng_lo.airflow_paths
         if p.path_type == PATH_TYPE_HVAC_SUPPLY
@@ -816,7 +821,8 @@ def test_native_oa_fraction_changes_supply_flow() -> None:
         p.flow_rate_m3h for p in eng_hi.airflow_paths
         if p.path_type == PATH_TYPE_HVAC_SUPPLY
     ]
-    assert supplies_lo and supplies_hi
+    assert supplies_lo
+    assert supplies_hi
     # Higher OA → less recirculated supply.
     assert sum(supplies_hi) < sum(supplies_lo)
 
@@ -897,7 +903,8 @@ def test_analyze_campaign_curves_long_form(
 
     mod_path = REPO_ROOT / "deploy" / "aws" / "analyze_campaign_curves.py"
     spec = importlib.util.spec_from_file_location("analyze_campaign_curves", mod_path)
-    assert spec and spec.loader
+    assert spec is not None
+    assert spec.loader is not None
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
 
@@ -1479,7 +1486,8 @@ def test_synthetic_recovery_cartesian_and_generator() -> None:
     assert manifest["campaign"] == "synthetic_recovery_v1"
     assert tier_cartesian(manifest, manifest["tiers"]["sr1_ridge"]) == 1200
     wave1, wave2 = summarize(manifest)
-    assert wave1 == 1200 and wave2 == 0
+    assert wave1 == 1200
+    assert wave2 == 0
 
     rid, spec = next(generate_tier_runs(manifest, "sr1_ridge"))
     assert rid.startswith("sr_norovirus_")
@@ -1518,7 +1526,8 @@ def test_vsp_degradation_cartesian_and_generator() -> None:
         tier_cartesian(manifest, manifest["tiers"]["vd2_worst_case_gradient"]) == 2160
     )
     wave1, wave2 = summarize(manifest)
-    assert wave1 == 6360 and wave2 == 0
+    assert wave1 == 6360
+    assert wave2 == 0
 
     rid, spec = next(generate_tier_runs(manifest, "vd1_vsp_threshold"))
     assert rid.startswith("vd_norovirus_")
@@ -1548,7 +1557,8 @@ def test_sentinel_recovery_cartesian_and_generator() -> None:
         tier_cartesian(manifest, manifest["tiers"]["sr_uniform_low_fleet_same"]) == 240
     )
     wave1, wave2 = summarize(manifest)
-    assert wave1 == 3360 and wave2 == 0
+    assert wave1 == 3360
+    assert wave2 == 0
 
     rid, spec = next(generate_tier_runs(manifest, "sr_uniform_low_single"))
     assert rid.startswith("sr_norovirus_mega_cruise_5000_uniform_low_single_")

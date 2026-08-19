@@ -479,7 +479,9 @@ def test_ledger_covers_every_port_every_day():
 
 
 def test_ledger_is_seeded_and_deterministic():
-    assert _scan_ledger() == _scan_ledger()
+    first = _scan_ledger()
+    second = _scan_ledger()
+    assert first == second
 
 
 def test_ledger_seed_changes_the_signals_not_the_truth():

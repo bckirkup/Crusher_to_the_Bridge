@@ -60,7 +60,8 @@ def test_expedition_hobbyist_export() -> None:
     assert _section_count(text, "flow paths") == len(path_map)
     assert len(path_map) >= 100
     names = _zone_names_from_prj(text)
-    assert names and all(len(n) <= 15 for n in names)
+    assert names
+    assert all(len(n) <= 15 for n in names)
 
 
 def test_expedition_bundled_hobbyist_prj() -> None:
