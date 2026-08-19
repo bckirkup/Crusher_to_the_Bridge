@@ -115,8 +115,10 @@ def test_apply_escalation_latency_sensitivity() -> None:
     eff2, pend2 = apply_escalation_latency(
         STATUS_BASELINE, STATUS_ALERT, 0, None, cfg2,
     )
-    assert eff0 == STATUS_ALERT and pend0 is None
-    assert eff2 == STATUS_BASELINE and pend2 is not None
+    assert eff0 == STATUS_ALERT
+    assert pend0 is None
+    assert eff2 == STATUS_BASELINE
+    assert pend2 is not None
 
 
 def test_compliance_by_class_sensitivity() -> None:

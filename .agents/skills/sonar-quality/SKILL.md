@@ -21,11 +21,10 @@ quality fixes separate from Sentinel analysis and campaign implementation work.
 - Dedicated complexity-backlog splits are allowed when the user asks for
   them, as their own change. Do not sneak extractions into unrelated
   maintenance, Sentinel analysis, or campaign-science PRs.
-- The last documented official Sonar `S3776` count was 110 (live scan
-  18 Aug 2026). That scan still includes pre-split functions such as
-  `generate_tier_runs` (530) and `ShipSimulation.step` (93). A local
-  walk of those 110 sites after the extraction pass closes about 12 of
-  them; do not publish a new official count until Sonar rescans.
+- The last documented official Sonar `S3776` count was 98 (live scan
+  19 Aug 2026). The campaign generator, `ShipSimulation.step`, and
+  action dispatch are already closed on that scan. Remaining complexity
+  backlog is listed below.
 - Split composite assertions into independently diagnosable checks.
 - Replace duplicated literals with named constants when the duplication is
   accidental; preserve repeated domain values when they are part of a
@@ -78,11 +77,9 @@ not goldens:
 
 A dedicated backlog pass already split campaign generators
 (`tier_iterators.py`), `ShipSimulation.step`, action dispatch, and Stan
-fleet column / wastewater builders. Of the 110 official open `S3776`
-issues, those extractions locally close the campaign generator (530),
-`step` (93), `action_applier` dispatch (54), and a handful of nearby
-helpers. The rest of that list is still hot. Next named follow-ups
-(local ranking, not official Sonar):
+fleet column / wastewater builders. Official open `S3776` is 98 after
+those extractions scanned. Next named follow-ups (local ranking, not
+official Sonar):
 
 - `picard_framework/analysis/stan/posterior_summaries.py` `summarize_fit`
 - `crusher_labs/diagnostic_cascade.py` `evaluate_epoch`

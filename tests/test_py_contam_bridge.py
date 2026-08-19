@@ -121,7 +121,8 @@ class TestMassConservation:
         # k_A = 50/100 = 0.5; M_A = 1000*exp(-0.5); S_B = 50*(1000/100)=500
         assert result["A"] == pytest.approx(1000.0 * math.exp(-0.5))
         assert result["B"] == pytest.approx(500.0)
-        assert result["A"] >= 0.0 and result["B"] >= 0.0
+        assert result["A"] >= 0.0
+        assert result["B"] >= 0.0
 
     def test_no_negative_mass(self) -> None:
         """Mass should never go negative after transport (even at high ACH)."""

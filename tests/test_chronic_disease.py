@@ -497,14 +497,13 @@ class TestSimulationStateChronicFields:
 # ── Sanity checker validation ────────────────────────────────────────────
 
 class TestSanityCheckerChronic:
-    def test_sanity_checker_validates_chronic_config(self) -> None:
-        import sys
-        sys.path.insert(0, os.path.join(
-            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-            "tools",
-        ))
-        from sanity_checker import _check_chronic_disease, Report
+    def test_sanity_checker_validates_chronic_config(
+        self, monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
         repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        monkeypatch.syspath_prepend(os.path.join(repo_root, "tools"))
+        monkeypatch.chdir(repo_root)
+        from sanity_checker import Report, _check_chronic_disease
         cfg = {
             "chronic_disease": {
                 "enabled": True,
@@ -512,17 +511,15 @@ class TestSanityCheckerChronic:
             },
         }
         report = Report()
-        os.chdir(repo_root)
         _check_chronic_disease(cfg, report)
         assert report.passed, f"Sanity check failed: {[f.message for f in report.findings]}"
 
-    def test_sanity_checker_disabled_skips(self) -> None:
-        import sys
-        sys.path.insert(0, os.path.join(
-            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-            "tools",
-        ))
-        from sanity_checker import _check_chronic_disease, Report
+    def test_sanity_checker_disabled_skips(
+        self, monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        monkeypatch.syspath_prepend(os.path.join(repo_root, "tools"))
+        from sanity_checker import Report, _check_chronic_disease
         cfg = {"chronic_disease": {"enabled": False}}
         report = Report()
         _check_chronic_disease(cfg, report)

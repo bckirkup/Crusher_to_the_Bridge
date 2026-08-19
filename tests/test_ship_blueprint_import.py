@@ -25,7 +25,7 @@ TEMPLATE_DIGEST = (
 FIXTURES = REPO_ROOT / "tests" / "fixtures" / "blueprint_import"
 
 
-@pytest.fixture()
+@pytest.fixture
 def roots(tmp_path: Path) -> tuple[str, ...]:
     return (str(tmp_path), str(REPO_ROOT))
 
@@ -493,7 +493,8 @@ class TestAuthorContam:
             assert overrides.get("skip_duct_spines") is True
             assert overrides.get("duct_hvac_ids") == []
             gate = result["offline_gate"]
-            assert gate and gate["ok"], gate
+            assert gate, gate
+            assert gate["ok"], gate
             assert gate["zone_count"] >= 6
             assert gate["path_map_entries"] >= 1
             # Zones gained Contam geometry

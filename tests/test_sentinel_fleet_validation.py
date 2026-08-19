@@ -206,7 +206,8 @@ def test_flat_truth_does_not_separate_the_ports() -> None:
     )
     lo1, hi1 = interval(posterior, "lambda_port[1]")
     lo2, hi2 = interval(posterior, "lambda_port[2]")
-    assert lo1 <= hi2 and lo2 <= hi1, "flat hazards produced disjoint port intervals"
+    assert lo1 <= hi2, "flat hazards produced disjoint port intervals"
+    assert lo2 <= hi1, "flat hazards produced disjoint port intervals"
     ratio = float(
         np.mean(posterior["lambda_port[1]"]) / np.mean(posterior["lambda_port[2]"]),
     )

@@ -78,7 +78,8 @@ class TestClinicalPresentation:
         presentation = profiles["measles_virus"]["clinical_presentation"]
         early = resolve_phase(presentation, 1)
         classic = resolve_phase(presentation, 4)
-        assert early is not None and classic is not None
+        assert early is not None
+        assert classic is not None
         assert "maculopapular_rash" not in (early.get("features") or [])
         assert "maculopapular_rash" in (classic.get("features") or [])
 

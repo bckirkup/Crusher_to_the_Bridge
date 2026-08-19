@@ -36,7 +36,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass, field, replace
 from datetime import date, timedelta
-from typing import Any, Iterable, Mapping, Sequence
+from typing import Any, Iterable, Mapping, Sequence, cast
 
 import numpy as np
 
@@ -664,13 +664,16 @@ def ablate_state(
         for name in fields:
             updates[name] = None
     masked = replace(state, **updates)
-    return replace(
-        masked,
-        alert_level=alert_level_for(
-            capability,
-            syndromic_rate_per_100k=masked.syndromic_rate_per_100k,
-            wbe_gc_per_l=(
-                masked.wbe_gc_per_l_observed if masked.wbe_sampled else None
+    return cast(
+        PortEpidemiologicalState,
+        replace(
+            masked,
+            alert_level=alert_level_for(
+                capability,
+                syndromic_rate_per_100k=masked.syndromic_rate_per_100k,
+                wbe_gc_per_l=(
+                    masked.wbe_gc_per_l_observed if masked.wbe_sampled else None
+                ),
             ),
         ),
     )

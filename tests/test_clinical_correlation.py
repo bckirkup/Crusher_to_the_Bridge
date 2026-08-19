@@ -137,7 +137,9 @@ def test_run_correlated_clinical_panel_keys() -> None:
     obs = _make_obs()
     corr = ClinicalTestCorrelation.from_config({})
     rdt, qpcr, micro = run_correlated_clinical_panel(obs, agents, corr)
-    assert 0 in rdt and 0 in qpcr and 0 in micro
+    assert 0 in rdt
+    assert 0 in qpcr
+    assert 0 in micro
     assert rdt[0]["instrument"] == "clinical_rdt"
     assert qpcr[0]["instrument"] == "clinical_qpcr"
     assert micro[0]["instrument"] == "clinical_microbiology"

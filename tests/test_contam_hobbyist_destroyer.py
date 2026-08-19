@@ -98,7 +98,8 @@ def test_destroyer_hobbyist_export_section_counts() -> None:
     assert _section_count(text, "initial junction concentrations") == n_jct * n_ctm
     # ContamX 3.4.0.3: vf_node_name present, no ContamW "T:" marker
     assert re.search(r"\bnone 0 0 0 0 -1 0\b", text)
-    assert " T: " not in text and not re.search(r"\bT:", text)
+    assert " T: " not in text
+    assert re.search(r"\bT:", text) is None
     # Destroyer with room×room cross-zone expansion: 44 Contam paths
     # (6 envelope + 6 adjacency + 11 cross + 9 AHS system + 12 terminals)
     assert len(path_map) == 44

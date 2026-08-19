@@ -56,6 +56,8 @@ def compute_voyage_costs(
     n_pax_boarded: int,
 ) -> VoyageCosts:
     """Expected cost components for one voyage realization (onboard terms use expectations)."""
+    if n_total < 0:
+        raise ValueError(f"n_total must be >= 0, got {n_total}")
     screening = float(n_adopted) * params.C_screen
     # P1 advisory: no operational screening charge by default (n_adopted may be >0
     # but caller can pass n_adopted=0 for P1). Secondary still 0.
