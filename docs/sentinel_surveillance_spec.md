@@ -481,7 +481,7 @@ multiplying the evidence. `fit_sentinel_fleet` therefore takes
 can be fit under the residence time it was actually sampled with.
 
 The operating envelope this opens up is scanned by `sentinel_ww_ops_scan_v1`
-(4500 runs) — see `docs/sentinel_wastewater_ops_scan.md`.
+(9000 runs) — see `docs/sentinel_wastewater_ops_scan.md`.
 
 The port's *own* public health system is a separate, independent observation of
 the same community prevalence that drives λ_p, and is the only external check on
