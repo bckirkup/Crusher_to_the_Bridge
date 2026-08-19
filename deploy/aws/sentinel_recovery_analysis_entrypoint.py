@@ -188,6 +188,22 @@ def _download_cell_inputs(s3_analysis: str, cell_id: str) -> str:
     return manifest
 
 
+def _ww_fit_kwargs_from_meta(meta: dict[str, Any]) -> dict[str, Any]:
+    from picard_framework.analysis.sentinel_recovery_postprocess import (
+        _ww_fit_fields,
+    )
+
+    fields = _ww_fit_fields(meta)
+    kwargs: dict[str, Any] = {"wastewater": bool(fields.get("wastewater", False))}
+    if fields.get("wastewater_residence_hours") is not None:
+        kwargs["wastewater_residence_hours"] = fields["wastewater_residence_hours"]
+    if fields.get("wastewater_max_effective_reads") is not None:
+        kwargs["wastewater_max_effective_reads"] = fields[
+            "wastewater_max_effective_reads"
+        ]
+    return kwargs
+
+
 def _fit_cell(
     manifest: str,
     fit_dir: str,
@@ -205,6 +221,21 @@ def _fit_cell(
     from picard_framework.analysis.stan._sampler_options import SamplerOptions
     from picard_framework.analysis.stan.fit_sentinel_fleet import fit_sentinel_fleet
 
+    payload = _read_json(manifest)
+    voyages = payload.get("voyages") or []
+    meta: dict[str, Any] = {}
+    if isinstance(voyages, list) and voyages:
+        first = voyages[0]
+        if isinstance(first, dict):
+            rel = str(first.get("itinerary") or first.get("observations") or "")
+            run_id = _voyage_run_id(rel) if rel else ""
+            if run_id:
+                meta_path = f"analysis/voyages/{run_id}/meta.json"
+                if os.path.isfile(meta_path):
+                    loaded = _read_json(meta_path)
+                    if isinstance(loaded, dict):
+                        meta = loaded
+
     return fit_sentinel_fleet(
         manifest,
         fit_dir,
@@ -220,7 +251,7 @@ def _fit_cell(
         priors=recovery_fleet_priors(
             fleet_config=fleet_config_from_cell_id(cell_id),
         ),
-        wastewater=False,
+        **_ww_fit_kwargs_from_meta(meta),
     )
 
 
