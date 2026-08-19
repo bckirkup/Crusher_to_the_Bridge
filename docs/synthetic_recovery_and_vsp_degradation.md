@@ -8,7 +8,7 @@ Spot ABM campaigns derived from design specs in
 | Synthetic recovery | `synthetic_recovery_v1_manifest.json` | **1200** | `campaign/synthetic_recovery_v1/` |
 | Sentinel port recovery | `sentinel_synthetic_recovery_v1_manifest.json` | **3360** | `campaign/sentinel_synthetic_recovery_v1/` |
 | VSP degradation | `vsp_degradation_v1_manifest.json` | **6360** | `campaign/vsp_degradation_v1/` |
-| Sentinel wastewater ops scan | `sentinel_ww_ops_scan_v1_manifest.json` | **4230** | `campaign/sentinel_ww_ops_scan_v1/` |
+| Sentinel wastewater ops scan | `sentinel_ww_ops_scan_v1_manifest.json` | **9000** | `campaign/sentinel_ww_ops_scan_v1/` |
 
 Generators: tier ids `sr*` / `sr_*` (sentinel) / `vd*` in
 `picard_framework/runs/mega_cruise_campaign/campaign_runner.py`.
@@ -67,9 +67,10 @@ python -m picard_framework.runs.mega_cruise_campaign.count_manifest_cartesian `
 python -m picard_framework.runs.mega_cruise_campaign.count_manifest_cartesian `
   picard_framework/runs/mega_cruise_campaign/vsp_degradation_v1_manifest.json
 # expect total=6360
-python -m picard_framework.runs.mega_cruise_campaign.count_manifest_cartesian `
-  picard_framework/runs/mega_cruise_campaign/sentinel_ww_ops_scan_v1_manifest.json
-# expect total=4230
+python picard_framework/runs/mega_cruise_campaign/campaign_runner.py `
+  --manifest picard_framework/runs/mega_cruise_campaign/sentinel_ww_ops_scan_v1_manifest.json `
+  --dry-run
+# expect total=9000
 python picard_framework/runs/mega_cruise_campaign/campaign_runner.py --smoke
 ```
 

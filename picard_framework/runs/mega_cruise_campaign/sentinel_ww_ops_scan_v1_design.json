@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
   "campaign": "sentinel_ww_ops_scan_v1",
-  "description": "Wastewater operational envelope for sentinel port attribution. 3 hazard profiles x fleet_crossed (3 ships) x R_onboard 1.0 x 34 wastewater cells = 4230 voyages. Core grid: 5 sampling intervals x 5 holding-tank residence times x 15 seeds, the interaction that decides whether the channel can separate consecutive port calls -- residence near the ~24 h inter-port interval smears a port-call spike across the next call, so cadence buys nothing once the tank has already mixed the signal. Depth (3 levels) and collection points (1 vs 3) are one-factor arms off the reference cell at 10 seeds. The clinical-only control cell is the baseline the coverage and CI-width gains are measured against. Hazards, ports, itineraries and dose calibration are inherited from sentinel_synthetic_recovery_v1 so the wastewater deltas are attributable to the sampling policy alone.",
+  "description": "Wastewater operational envelope for sentinel port attribution. 3 hazard profiles x fleet_crossed (3 ships) x R_onboard 1.0 x 37 wastewater cells = 9000 voyages. Core grid: 5 sampling intervals x 5 holding-tank residence times x 30 seeds, the interaction that decides whether the channel can separate consecutive port calls -- residence near the ~24 h inter-port interval smears a port-call spike across the next call, so cadence buys nothing once the tank has already mixed the signal. Depth (3 levels) and collection points (1 vs 3) are one-factor arms off the reference cell at 20 seeds. The clinical-only control cell is the baseline the coverage and CI-width gains are measured against. Hazards, ports, itineraries and dose calibration are inherited from sentinel_synthetic_recovery_v1 so the wastewater deltas are attributable to the sampling policy alone.",
   "platform": "mega_cruise_5000",
   "default_epochs": 168,
   "default_num_agents": 7000,
@@ -34,7 +34,7 @@
   ],
   "seeds": {
     "start": 500,
-    "count": 15
+    "count": 30
   },
   "wastewater_scan": {
     "description": "Sampling cadence and holding-tank residence are the two operational knobs; depth and collection points are the cost knobs whose returns are expected to saturate.",
@@ -42,11 +42,11 @@
     "holding_tank_residence_hours": [0.5, 2, 4, 8, 12],
     "core_seeds": {
       "start": 500,
-      "count": 15
+      "count": 30
     },
     "sensitivity_seeds": {
       "start": 500,
-      "count": 10
+      "count": 20
     },
     "base_wastewater": {
       "enabled": true,

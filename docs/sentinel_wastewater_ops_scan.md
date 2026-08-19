@@ -8,7 +8,7 @@ residence time a ship must run before wastewater buys port-hazard recovery**.
 |---|---|
 | Design | `picard_framework/runs/mega_cruise_campaign/sentinel_ww_ops_scan_v1_design.json` |
 | Manifest | `picard_framework/runs/mega_cruise_campaign/sentinel_ww_ops_scan_v1_manifest.json` |
-| Runs | **4500** |
+| Runs | **9000** |
 | Tiers | `sr_one_hot_fleet_crossed`, `sr_last_port_hot_fleet_crossed`, `sr_null_fleet_crossed` |
 | Generator | `_iter_sentinel_recovery_runs` in `campaign_runner.py` (shared with `sentinel_synthetic_recovery_v1`) |
 | Simulator layer | `picard_framework/analysis/sentinel/wastewater_ops.py` (ops) + `wastewater_assays.py` (laboratory) |
@@ -40,12 +40,12 @@ run's `config_overrides`:
 
 | Block | Cells | Grid | Seeds | Runs |
 |---|---|---|---|---|
-| `core` | 25 | cadence {1,3,6,12,24} × residence {0.5,2,4,8,12} h, depth 250 K, 1 tap | 15 | 3375 |
-| `depth` | 6 | depth {50 K, 250 K, 1 M} × residence {2, 8} h, cadence 6 | 10 | 540 |
-| `collection` | 2 | {1, 3} taps at cadence 6 / residence 4 h | 10 | 180 |
-| `assay` | 3 | `metagenomic`, `amplicon`, `long_read` at cadence 6 / residence 4 h | 10 | 270 |
-| `control` | 1 | wastewater **off** — clinical-only baseline | 15 | 135 |
-| | | | | **4500** |
+| `core` | 25 | cadence {1,3,6,12,24} × residence {0.5,2,4,8,12} h, depth 250 K, 1 tap | 30 | 6750 |
+| `depth` | 6 | depth {50 K, 250 K, 1 M} × residence {2, 8} h, cadence 6 | 20 | 1080 |
+| `collection` | 2 | {1, 3} taps at cadence 6 / residence 4 h | 20 | 360 |
+| `assay` | 3 | `metagenomic`, `amplicon`, `long_read` at cadence 6 / residence 4 h | 20 | 540 |
+| `control` | 1 | wastewater **off** — clinical-only baseline | 30 | 270 |
+| | | | | **9000** |
 
 Every cell except the `assay` block runs **`qpcr`**: it is the only mode that
 reports a quantitative concentration at the prevalences a cruise reaches. The
@@ -192,7 +192,7 @@ estimated from the prior alone.
 Samples reach the fit through the sentinel line list
 (`run.sentinel_line_list` → `wastewater_samples`, `schemas/sentinel_observations.schema.json`).
 A run with the channel off still writes clinical cases and exposure totals, which
-is what makes the 135-run control a usable baseline.
+is what makes the 270-run control a usable baseline.
 
 ## Regenerate and validate
 
@@ -206,7 +206,7 @@ python3 -m picard_framework.runs.mega_cruise_campaign.expand_design \
   --design picard_framework/runs/mega_cruise_campaign/sentinel_ww_ops_scan_v1_design.json \
   --check
 
-# cartesian count + generator agreement: expect 4500
+# cartesian count + generator agreement: expect 9000
 python3 -m picard_framework.runs.mega_cruise_campaign.campaign_runner \
   --manifest picard_framework/runs/mega_cruise_campaign/sentinel_ww_ops_scan_v1_manifest.json \
   --dry-run

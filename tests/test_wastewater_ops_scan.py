@@ -33,7 +33,7 @@ WW_DESIGN = CAMPAIGN_DIR / "sentinel_ww_ops_scan_v1_design.json"
 WW_MANIFEST = CAMPAIGN_DIR / "sentinel_ww_ops_scan_v1_manifest.json"
 LEGACY_DESIGN = CAMPAIGN_DIR / "sentinel_synthetic_recovery_v1_design.json"
 
-EXPECTED_TOTAL_RUNS = 4500
+EXPECTED_TOTAL_RUNS = 9000
 
 
 def _config(**over: Any) -> WastewaterOpsConfig:
