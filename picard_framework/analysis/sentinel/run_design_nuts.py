@@ -15,6 +15,17 @@ from picard_framework.analysis.sentinel.design_nuts import (
     run_cell,
 )
 
+_NUTS_RUNG_FIELDS = [
+    "rung",
+    "n_cells",
+    "n_clean",
+    "clean_fraction",
+    "coverage_ratio",
+    "calibration_factor_r",
+    "reliable",
+    "coverage_gate",
+]
+
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
@@ -39,39 +50,18 @@ def _cell_path(out: str, payload: dict[str, Any]) -> str:
     return os.path.join(out, name)
 
 
-def main(argv: list[str] | None = None) -> int:
-    args = build_parser().parse_args(argv)
-    out = ensure_out_dir(args.out)
-    ladder = load_ladder(safe_path(args.ladder) if args.ladder else None)
-    if args.aggregate:
-        directory = safe_path(args.aggregate)
-        payload = aggregate_cells(directory, ladder)
-        write_json(os.path.join(out, "nuts_aggregate.json"), payload)
-        write_csv(
-            os.path.join(out, "nuts_rungs.csv"),
-            payload["rungs"],
-            [
-                "rung",
-                "n_cells",
-                "n_clean",
-                "clean_fraction",
-                "coverage_ratio",
-                "calibration_factor_r",
-                "reliable",
-                "coverage_gate",
-            ],
-        )
-        print(json.dumps(payload, indent=2, sort_keys=True))
-        return 0
-    if args.smoke and not args.rung:
-        args.rung = "C1"
-        args.ratio = 2.0
-    if not args.rung or args.ratio is None:
-        print(
-            "--rung and --ratio are required unless --aggregate is used",
-            file=sys.stderr,
-        )
-        return 2
+def _dump_json(payload: dict[str, Any]) -> None:
+    print(json.dumps(payload, indent=2, sort_keys=True))
+
+
+def _write_aggregate(out: str, directory: str, ladder: dict[str, Any]) -> None:
+    payload = aggregate_cells(directory, ladder)
+    write_json(os.path.join(out, "nuts_aggregate.json"), payload)
+    write_csv(os.path.join(out, "nuts_rungs.csv"), payload["rungs"], _NUTS_RUNG_FIELDS)
+    _dump_json(payload)
+
+
+def _write_cell(out: str, args: argparse.Namespace, ladder: dict[str, Any]) -> None:
     payload = run_cell(
         ladder,
         rung_id=args.rung,
@@ -86,7 +76,26 @@ def main(argv: list[str] | None = None) -> int:
         smoke=args.smoke,
     )
     write_json(_cell_path(out, payload), payload)
-    print(json.dumps(payload, indent=2, sort_keys=True))
+    _dump_json(payload)
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = build_parser().parse_args(argv)
+    out = ensure_out_dir(args.out)
+    ladder = load_ladder(safe_path(args.ladder) if args.ladder else None)
+    if not args.aggregate:
+        if args.smoke and not args.rung:
+            args.rung = "C1"
+            args.ratio = 2.0
+        if not args.rung or args.ratio is None:
+            print(
+                "--rung and --ratio are required unless --aggregate is used",
+                file=sys.stderr,
+            )
+            return 2
+        _write_cell(out, args, ladder)
+    else:
+        _write_aggregate(out, safe_path(args.aggregate), ladder)
     return 0
 
 
