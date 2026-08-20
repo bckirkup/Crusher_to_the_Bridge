@@ -9,9 +9,17 @@ simulator.
 Companion planning docs: `docs/sentinel_surveillance_spec.md` (paper 2, whose
 §5 deferred exactly this work), `docs/multi_pathogen_model_changes_spec.md`.
 
+**Integration branch.** All Paper 3 work lands on the long-lived
+`paper3-variant-surveillance` branch, not `main`, so that `main` stays usable
+for unrelated work while this capability is built (decision 6). Every PR in
+§§3–5 targets that branch; it is rebased on `main` periodically and merged once
+the capability is coherent. Practical consequence for the PR sequence: the
+flag-off byte-identity tests matter more than usual, because they are the only
+thing that will make the eventual merge to `main` reviewable.
+
 ## 0. Author decisions (2026-08-20)
 
-Four rulings from the spec's author, folded into the plan below:
+Six rulings from the spec's author, folded into the plan below:
 
 1. **Co-infection is in scope** as a deliberate design change, not deferred to
    v2. That promotes recombination into Paper 3 and reshapes Phase 1: see §3
@@ -24,8 +32,11 @@ Four rulings from the spec's author, folded into the plan below:
 3. **`transmissibility_multiplier` acts at emission.**
 4. **Costs must support a two-community benefit split** — shore versus afloat —
    so the economics can ask whether ports would rationally pay into shipboard
-   capability, including **in kind via labour** rather than cash. See §5 PR 11,
-   and the modelling gap it exposes.
+   capability, including **in kind via labour** rather than cash. See §5 PR 11.
+5. **The shore-side model gets built,** not stubbed or cited away, since
+   decision 4's question cannot be answered without it. See PR 11b.
+6. **Development happens on a long-lived branch,** `paper3-variant-surveillance`
+   (see above), to keep `main` free for other work.
 
 The spec is a starting point, not gospel; where this plan contradicts it, this
 plan is the current intent.
@@ -278,13 +289,40 @@ does not have:
   transmission model, so "cases averted ashore" cannot come out of the ABM.
   The defensible construction is a downstream analytic layer: the ABM yields
   *earlier detection* and *fewer infectious disembarkations* per scenario, and
-  a separately parameterised shore model (a renewal process on the port
-  population with its own R and importation multiplier) converts those into
-  shore cases averted, with its parameters flagged as external. The paper then
-  reports the shore:afloat benefit ratio as a function of that external
-  parameter, and a port's willingness-to-pay threshold as the point where its
-  share of benefit exceeds its share of cost. That keeps the ports' incentive
-  argument honest about which half is simulated.
+  a shore model (PR 11b) converts those into shore cases averted. The paper
+  then reports the shore:afloat benefit ratio, and a port's
+  willingness-to-pay threshold as the point where its share of benefit exceeds
+  its share of cost.
+
+**PR 11b — shore-side transmission model (decision 5).** New
+`picard_framework/analysis/shore/`, deliberately *not* a second agent-based
+model: a compartmental/renewal layer for the port community, seeded by CTB
+output and small enough to run inside a campaign's post-processing.
+
+- **Interface from the ship.** Per port call, the ABM already knows who
+  disembarks and in what infection state; the shore model consumes an
+  importation vector (infectious disembarkations by epoch, with their strain
+  labels from Phase 1) plus the detection timestamp from Phase 2. That interface
+  is the only coupling, which keeps the shore model swappable and testable in
+  isolation.
+- **Dynamics.** A renewal process (or SEIR, if age structure earns its keep) on
+  the port population with its own `R_shore`, generation-interval
+  distribution, and a reporting delay drawn from the port's existing
+  surveillance capability in `port_surveillance_<region>.json` — so the ports
+  already parameterised for Paper 2 carry over rather than being re-specified.
+- **Counterfactual.** Benefit is the difference between two shore trajectories:
+  importation timed by *shipboard* detection versus by the port's own detection
+  latency. That difference, not an absolute case count, is what the economics
+  needs, and it is far less sensitive to `R_shore` than either arm alone — worth
+  showing explicitly.
+- **Honesty about scope.** Strain-resolved shore spread is only as good as the
+  importation labels; the model must not claim shore-side *evolution*. It
+  propagates what the ship exported.
+- **Tests.** Zero importations → zero shore cases; monotone benefit in detection
+  lead time; `R_shore < 1` produces bounded outbreaks and the total scales
+  linearly in importations (the check that the renewal implementation is
+  right); and a sensitivity sweep over `R_shore` and the importation multiplier
+  reported as a surface rather than a point.
 
 **PR 12 — campaign manifests.** Five designs under
 `picard_framework/runs/mega_cruise_campaign/` reusing `campaign_runner.py` /
@@ -333,7 +371,7 @@ questions. Items 1–4 are regime-independent; 5 is new with co-infection:
 
 ## 7. Open questions for the author
 
-The author's four rulings are in §0. What is still open:
+The author's six rulings are in §0. What is still open:
 
 1. What should `superinfection_susceptibility` default to? It sets how often
    co-infection — and therefore recombination — happens at all, so norovirus
@@ -342,6 +380,11 @@ The author's four rulings are in §0. What is still open:
    labour? `resource_costs.json` distinguishes the two, and decision 4's
    labour-medium contributions make the distinction load-bearing rather than
    cosmetic.
-3. Which shore model does the benefit split get parameterised against? Any
-   answer is external to CTB (PR 11), so it needs a citation rather than a
-   value fitted to ship output.
+3. What sets `R_shore` and the port generation interval in PR 11b? The
+   structure is ours to build, but those two numbers decide the shore:afloat
+   ratio, so they need a literature anchor per pathogen (norovirus community
+   transmission in particular) rather than a value chosen to make the ports'
+   case.
+4. Should the shore model track the port's *resident* population only, or also
+   onward transmission to other travellers? The second closes a loop back to
+   the fleet and is the more interesting claim, but it is a bigger model.
