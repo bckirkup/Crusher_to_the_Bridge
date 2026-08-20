@@ -9,7 +9,28 @@ simulator.
 Companion planning docs: `docs/sentinel_surveillance_spec.md` (paper 2, whose
 §5 deferred exactly this work), `docs/multi_pathogen_model_changes_spec.md`.
 
-## 0. Summary of the substantive findings
+## 0. Author decisions (2026-08-20)
+
+Four rulings from the spec's author, folded into the plan below:
+
+1. **Co-infection is in scope** as a deliberate design change, not deferred to
+   v2. That promotes recombination into Paper 3 and reshapes Phase 1: see §3
+   and PRs 3b–3c.
+2. **Both evolutionary regimes get explored** — de novo emergence *and* typing
+   of introduced diversity. The question the paper asks is how much ship
+   surveillance can learn and on what timescale, so mutational supply becomes a
+   swept axis rather than a fixed rate, and "nothing evolves in 7 days" is a
+   reportable answer. See §1 finding 3 and PR 12.
+3. **`transmissibility_multiplier` acts at emission.**
+4. **Costs must support a two-community benefit split** — shore versus afloat —
+   so the economics can ask whether ports would rationally pay into shipboard
+   capability, including **in kind via labour** rather than cash. See §5 PR 11,
+   and the modelling gap it exposes.
+
+The spec is a starting point, not gospel; where this plan contradicts it, this
+plan is the current intent.
+
+## 1. Summary of the substantive findings
 
 Six things the spec does not account for. Each is expanded below.
 
@@ -28,16 +49,20 @@ Six things the spec does not account for. Each is expanded below.
    created at `immune_ratio` (`infection_dynamics_bridge.py:864`), who by
    construction never had an infection event.
 3. **Within-voyage de novo phenotype evolution is not detectable at the spec's
-   own rates,** and the paper's headline result (§7.3a) has to be re-aimed.
+   own rates,** so mutational supply becomes a swept axis (decision 2).
    Norovirus at `0.02 × 0.05 = 1e-3` phenotype-affecting mutations per
    transmission over a few hundred transmissions expects ~0.2–0.5 phenotype
-   events *per voyage*, most of them neutral in effect size. What a 7-day
-   closed cohort can actually show is **typing of introduced diversity**:
-   multiple introductions, genotype competition, founder bottlenecks, and drift
-   of neutral labels. De novo phenotype emergence is a Trek arm (Psi-2000 at
-   `0.10 × 0.50` is 100× norovirus) and an explicit high-rate sensitivity arm.
-   Campaigns must therefore seed **multi-genotype embarkation**, which the spec
-   does not currently ask for.
+   events *per voyage*, most of them small in effect size. Two consequences:
+   (a) the *introduced diversity* regime — multiple introductions, genotype
+   competition, founder bottlenecks, neutral drift — needs **multi-genotype
+   embarkation**, which the spec does not ask for; (b) the *de novo* regime
+   needs a mutational supply the spec's per-transmission-only model cannot
+   reach, because supply is then capped by the number of transmissions in a
+   7-day voyage. So mutation gets a second, optional source: per-infected-
+   agent-epoch within-host draws (PR 3), which is also the honest reading of
+   GutIBM's per-division rates. The deliverable is a **time-to-detect versus
+   mutational-supply curve** across both regimes, with Psi-2000 (`0.10 × 0.50`,
+   100× norovirus) as the upper anchor.
 4. **The genotype fields already exist and are asserted `None`.** The sentinel
    layer plumbed `genotype: str | None` through `observations.py`,
    `port_health.py`, `port_ledger.py`, `wastewater_ops.py`, and
@@ -61,7 +86,7 @@ Six things the spec does not account for. Each is expanded below.
    existing `enterprise_constitution_tos` / `enterprise_galaxy_tng` platforms.
    No new port model, per `sentinel_surveillance_spec.md` §1.1.
 
-## 1. What GutModelBacteriocins actually contributes
+## 2. What GutModelBacteriocins actually contributes
 
 GutIBM is C++17/MPI/CUDA against CTB's Python, so this is **design reuse, not
 code reuse**. Four things are worth copying:
@@ -70,17 +95,19 @@ code reuse**. Four things are worth copying:
 |---|---|
 | `src/fixes/fix_mutation.{h,cpp}` | The typed mutation *menu* (duplication / recombination / receptor / super-killer / compensatory) instead of one undifferentiated "point mutation", and — directly usable — its immunity-escape draw: a fraction of escape mutants (`immunity_escape_prob`) with escape sampled from a range (`escape_affinity_lo..hi`), rather than a single scalar. CTB's `immune_escape` should be drawn the same way. |
 | `src/genome/lineage_tracker.{h,cpp}` | The observable set: an event log (`BIRTH/DEATH/MUTATION/HGT/WASHOUT`) plus **periodic population snapshots** carrying `lineage_counts`, `num_lineages`, `dominant_fraction`, with `resident_retention(window)` and `dominant_lineage()` derived from them. This is exactly the drift/bottleneck result set the paper's §7.5 needs, and the snapshot-not-log design is what keeps a 8,500-run campaign's artifacts finite. |
-| `src/genome/plasmid.cpp` + `src/fixes/fix_conjugation.cpp` | The v2 recombination template: donor/recipient pairing, a per-event record, and co-residence of two genetic elements in one host. CTB's co-infection prerequisite (spec §1.2) is the same structure — two lineages resident in one agent, recombination drawn per co-infected epoch. |
+| `src/genome/plasmid.cpp` + `src/fixes/fix_conjugation.cpp` | The recombination template, now in scope (decision 1): donor/recipient pairing, a per-event record, and co-residence of two genetic elements in one host. CTB's co-infection change is the same structure — two lineages resident in one agent, recombination drawn per co-infected epoch. |
 | Toxin lumping / dysbiosis guard | The performance discipline: lump strains below a frequency floor and cap live lineages, or strain-indexed pools grow without bound. |
 
 One unit mismatch to state in Methods: GutIBM mutates **per cell division**
 (1e-5..1e-8 per division); the spec mutates **per transmission**
-(0.005..0.10). Those are not comparable numbers, and the spec's rates are
-per-transmission-bottleneck substitution probabilities, which is the right
-choice for CTB's epoch scale. Any later within-host generation model has to
-convert explicitly.
+(0.005..0.10). Those are not comparable numbers — the spec's rates are
+per-transmission-bottleneck substitution probabilities. Since decision 2 puts a
+within-host source in scope (PR 3), the conversion has to be explicit in the
+config: `within_host_mutation_rate` is per infected-agent-epoch, and any claim
+relating it to a per-division rate needs a stated replication assumption rather
+than a silent identification.
 
-## 2. Phase 1 — heritable strain state (PRs 1–5)
+## 3. Phase 1 — heritable strain state (PRs 1–5, 3b–3c)
 
 Everything is gated by `variant_surveillance.enabled` (default `false`) in
 `crusher_labs/config.yaml`; with the flag off, no RNG draw changes, so golden
@@ -107,21 +134,57 @@ probability is unchanged; on success the parent strain is drawn multinomially
 over the strain-weighted contributions, and `TransmissionEvent.source_agent_id`
 / `source_strain_id` are populated where the contributing pathway knows the
 shedder. `transmissibility_multiplier` multiplies that strain's contribution at
-emission, not the recipient's dose-response — otherwise a mixed exposure gets
-the wrong marginal. Tests: dose conservation (Σ strain doses == legacy pooled
+emission per decision 3, not the recipient's dose-response — otherwise a mixed
+exposure gets the wrong marginal. Tests: dose conservation (Σ strain doses == legacy pooled
 dose to float tolerance), parent-draw frequencies matching contribution shares,
 and flag-off byte-identity of a 24-epoch run.
 
-**PR 3 — mutation at transmission.**
+**PR 3 — mutation.**
 `Agent.infect_with_pathogen` takes an optional `parent_strain`, and mutation is
 drawn in one place: Bernoulli(`mutation_rate`), then
 Bernoulli(`phenotype_mutation_fraction`), then a typed effect on one of
 transmissibility / shedding / incubation / immune_escape with GutIBM-style
 range draws. `n_mutations` and `generation` increment; `parent_strain_id` is
-recorded. Recombination stays out (v2). Tests: graded sensitivity — a few
-mutation rates produce a few different mean `n_mutations` and lineage counts —
-plus bounds (multipliers finite and positive, `immune_escape` in [0,1],
-`generation` monotone along a chain).
+recorded. Per decision 2 the same operator is also reachable from an optional
+**within-host** source — `within_host_mutation_rate` per infected-agent-epoch,
+default 0 so the transmission-only model stays the baseline — which is what
+lets the de novo regime have any mutational supply at all in a 7-day voyage.
+`generation` stays a *transmission* generation count; within-host mutations
+increment `n_mutations` only, so the phylogeny keeps its meaning. Tests: graded
+sensitivity — a few rates produce a few different mean `n_mutations` and
+lineage counts, from each source independently — plus bounds (multipliers
+finite and positive, `immune_escape` in [0,1], `generation` monotone along a
+transmission chain and unchanged by within-host draws).
+
+**PR 3b — co-infection and within-host competition (decision 1).**
+The blocking design change. `agent.infections` is keyed by pathogen id and
+`execute_transmission` skips any agent already infected
+(`transmission_core.py:467`), so a second strain of the same pathogen can never
+establish and recombination has no substrate. Change: `infections[pid]` gains a
+`strains: dict[strain_id, StrainInfection]` map carrying each strain's own
+`time_infected`, `acquired_particles`, and `shedding_multiplier`; re-exposure of
+an infected agent is evaluated against a `superinfection_susceptibility` factor
+(homotypic interference, per pathogen) instead of being skipped; shedding is the
+competition-weighted sum over resident strains; recovery is per strain, and the
+pathogen-level status stays `INFECTED` until the last strain clears so every
+existing consumer of `infections[pid]["status"]` keeps working.
+`is_infected_with` keeps its current meaning; a new `resident_strains(pid)` is
+the strain-aware accessor. Tests: superinfection frequency responds
+monotonically to the interference factor; single-strain runs stay identical to
+PR 2 behaviour; pathogen-level status and legacy fields unchanged under
+co-infection; shedding conserved against the sum of per-strain curves.
+
+**PR 3c — recombination (promoted from v2 by decision 1).**
+With co-residence available, recombination is drawn per co-infected
+agent-epoch: two resident strains produce a child inheriting each phenotype
+axis from one parent (uniform crossover over the four axes plus `genotype`),
+with `parent_strain_id` extended to a parent *pair* and a `recombinant: bool`
+flag on `StrainState`. This is `fix_conjugation`'s donor/recipient event record
+with both parents inside one host. Tests: recombinants only in co-infected
+hosts; each child axis traces to one of its two parents; rate sensitivity; a
+recombination-off run matching PR 3b exactly. Recombination also changes what
+sequencing can reconstruct — an amplicon over one locus cannot see a crossover
+elsewhere in the genome — so PR 6 must record which loci each assay covers.
 
 **PR 4 — strain composition in environmental pools.**
 `zone_pathogen_mass` / `multi_pathogen_mass` / surface pools / food pools /
@@ -147,7 +210,7 @@ profile (`cross_immunity`), row-validated by the sanity checker. Tests:
 same-genotype rechallenge is strongly protected, cross-genotype weakly, escape
 mutants recover susceptibility monotonically in `immune_escape`.
 
-## 3. Phase 2 — observation models (PRs 6–9)
+## 4. Phase 2 — observation models (PRs 6–9)
 
 **PR 6 — clinical specimen sequencing.**
 Extend `crusher_labs/modalities/long_read_sequencing.py` and
@@ -184,7 +247,7 @@ campaign cannot carry per-event logs (see the GutIBM ECR/S3 retention
 lesson — artifacts, not compute, are what overruns). The two tests that pin
 `genotype is None` are rewritten as flag-conditional contracts.
 
-## 4. Phase 3 — ports, economics, campaigns (PRs 10–13)
+## 5. Phase 3 — ports, economics, campaigns (PRs 10–13)
 
 **PR 10 — Federation port region.** A fifth
 `port_surveillance_federation.json` matching the existing schema, plus the
@@ -192,28 +255,60 @@ lesson — artifacts, not compute, are what overruns). The two tests that pin
 that the spec's Risa population (50,000) and DS9 (3,000) are *port* populations
 that only enter the hazard prior; nothing else in CTB consumes them.
 
-**PR 11 — surveillance cost model.** The §4 scenarios as Presidio fleet
-configs over `crusher_labs/cost_ledger.py` and `resource_costs.json`, with
-onboard/ashore split and the OIS treatment already used for interventions. The
-"variants detected" column of §4 is an *output*, not an input, and must be
-deleted from the config or it becomes a circular assumption.
+**PR 11 — surveillance cost model and the two-community benefit split
+(decision 4).** The §4 scenarios as Presidio fleet configs over
+`crusher_labs/cost_ledger.py` and `resource_costs.json`, with the OIS treatment
+already used for interventions. The "variants detected" column of §4 is an
+*output*, not an input, and must be deleted from the config or it becomes a
+circular assumption.
+
+Beyond that, the ledger has to answer *who benefits*, which needs two things it
+does not have:
+
+- **In-kind contribution as a first-class cost line.** A port paying in labour
+  (seconded technician hours, shared bioinformatics staff, reagent supply) is
+  not a cash transfer, so `cost_ledger` gains a contribution record with a
+  payer (`ship_operator` / `port_authority` / `public_health_agency`), a medium
+  (`cash` / `labour_hours` / `consumables`), and an explicit conversion rate to
+  monetary equivalent so sensitivity to that rate is reportable. Net cost *per
+  payer*, not one total, is the output.
+- **Shore-side benefit is not simulable in CTB today, and must not be
+  invented.** CTB simulates the ship; ports enter only as a hazard prior and a
+  capability profile (`port_health.py`, `port_ledger.py`). There is no shore
+  transmission model, so "cases averted ashore" cannot come out of the ABM.
+  The defensible construction is a downstream analytic layer: the ABM yields
+  *earlier detection* and *fewer infectious disembarkations* per scenario, and
+  a separately parameterised shore model (a renewal process on the port
+  population with its own R and importation multiplier) converts those into
+  shore cases averted, with its parameters flagged as external. The paper then
+  reports the shore:afloat benefit ratio as a function of that external
+  parameter, and a port's willingness-to-pay threshold as the point where its
+  share of benefit exceeds its share of cost. That keeps the ports' incentive
+  argument honest about which half is simulated.
 
 **PR 12 — campaign manifests.** Five designs under
 `picard_framework/runs/mega_cruise_campaign/` reusing `campaign_runner.py` /
-`tier_iterators.py` / expand_design, with multi-genotype embarkation and a
-mutation-rate sensitivity tier added per finding 3. 8,500 runs is under half
-the existing mega-campaign, so the AWS Batch Fargate Spot path
-(`.agents/skills/aws-batch-campaign`) needs no change beyond a job definition.
+`tier_iterators.py` / `expand_design.py`. Per decision 2 mutational supply is
+swept in both regimes rather than fixed: a *diversity* arm (multi-genotype
+embarkation, 1–4 founders, nominal per-pathogen rates) and an *emergence* arm
+(single founder, per-transmission and within-host rates swept over ~2 decades
+around nominal), crossed with voyage length so the answer is a timescale rather
+than a single number. Co-infection interference and recombination rate get one
+sensitivity tier each. The spec's 8,500 runs is under half the existing
+mega-campaign, so the AWS Batch Fargate Spot path
+(`.agents/skills/aws-batch-campaign`) needs no change beyond a job definition —
+but the added axes push the count up, so it gets re-counted with
+`count_manifest_cartesian.py` before submitting.
 
 **PR 13 — phylodynamic observables and figures.** Detection-speed curves
 (ship vs ashore), lineage diversity trajectories, retention/bottleneck
 statistics ported from `lineage_tracker`'s definitions, and the investment
 frontier, in `picard_framework/analysis/figures.py`.
 
-## 5. Validation plan
+## 6. Validation plan
 
 Following `sentinel_surveillance_spec.md` §6, since reviewers will ask the same
-questions:
+questions. Items 1–4 are regime-independent; 5 is new with co-infection:
 
 1. **Neutral-label recovery** — with all phenotype effects off, the observed
    genotype frequencies must be an unbiased read of the true mixture at high
@@ -225,24 +320,28 @@ questions:
 4. **Confounding** — two genotypes seeded at embarkation with equal
    phenotypes; the analysis must not report a transmissibility difference.
    This is the check that finding 3 makes essential.
-5. **Miscall robustness** — detection-speed conclusions re-run at the §2.1
+5. **Co-infection neutrality** — with recombination off and interference at the
+   neutral value, co-infection must not change pathogen-level incidence or
+   shedding totals. It is a new pathway into the transmission model, and this
+   is the check that it did not quietly change the epidemiology.
+6. **Miscall robustness** — detection-speed conclusions re-run at the §2.1
    accuracies and at 100%, reporting the bias rather than hiding it.
-6. **Power** — the minimum detectable transmissibility difference given voyage
+7. **Power** — the minimum detectable transmissibility difference given voyage
    length, cohort size, and sequencing depth, reported as a curve. If the
-   answer is "a 7-day voyage cannot see a 10% difference", that is a result.
+   answer is "a 7-day voyage cannot see a 10% difference", that is a result,
+   and per decision 2 it is one of the results the paper is for.
 
-## 6. Open questions for the author
+## 7. Open questions for the author
 
-1. Is Paper 3's headline meant to be *de novo* within-voyage evolution, or
-   detection and typing of introduced diversity? Finding 3 says the second;
-   §7.3a reads like the first.
-2. Should Phase 1 make `transmissibility_multiplier` act at emission (per this
-   plan) or on the recipient's dose-response? Emission is the defensible
-   choice under mixed exposure but it changes the meaning of the parameter
-   relative to the spec's "dose_adj modifier".
-3. Co-infection by two strains of the *same* pathogen is currently impossible
-   (`infections` is keyed by pathogen id and `is_infected_with` short-circuits
-   re-exposure). Recombination v2 requires changing that key. Confirm it stays
-   out of scope for Paper 3.
-4. Sequencing costs (§2.1) — are those per-sample list prices or fully loaded
-   with labour? `resource_costs.json` distinguishes the two.
+The author's four rulings are in §0. What is still open:
+
+1. What should `superinfection_susceptibility` default to? It sets how often
+   co-infection — and therefore recombination — happens at all, so norovirus
+   co-infection frequency in closed outbreaks is the citation to hunt for.
+2. Sequencing costs (§2.1) — per-sample list prices or fully loaded with
+   labour? `resource_costs.json` distinguishes the two, and decision 4's
+   labour-medium contributions make the distinction load-bearing rather than
+   cosmetic.
+3. Which shore model does the benefit split get parameterised against? Any
+   answer is external to CTB (PR 11), so it needs a citation rather than a
+   value fitted to ship output.
