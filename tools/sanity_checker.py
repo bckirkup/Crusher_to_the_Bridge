@@ -40,6 +40,10 @@ from pydantic import (  # noqa: E402  (imported after the sys.path insert above)
     model_validator,
 )
 
+from engines.strain_state import (  # noqa: E402
+    StrainConfigError,
+    StrainEvolutionConfig,
+)
 from simulation_utils.paths import validated_open  # noqa: E402
 
 # ── ANSI colour codes ────────────────────────────────────────────────────
@@ -295,6 +299,7 @@ class PathogenProfile(BaseModel):
     initial_infected: int = 1
     initial_time_infected: int = 0
     shedding_profile: dict[str, Any] = {}
+    strain_evolution: dict[str, Any] = {}
 
     @field_validator("initial_time_infected")
     @classmethod
@@ -457,6 +462,63 @@ def _check_mathematical_bounds(
                         f"{p.pathogen_id}.illness_probability.{key} = {val} "
                         f"is outside [0.0, 1.0]",
                     )
+
+
+def _check_strain_evolution(
+    pathogens: PathogensFile | None,
+    report: Report,
+) -> None:
+    """Validate optional strain_evolution blocks (variant surveillance).
+
+    Parsing is delegated to ``StrainEvolutionConfig.from_profile`` so the
+    checker and the engine cannot disagree about what a valid block is.
+    """
+    if pathogens is None:
+        return
+    for p in pathogens.pathogens:
+        if not p.strain_evolution:
+            continue
+        try:
+            StrainEvolutionConfig.from_profile(p.model_dump())
+        except StrainConfigError as exc:
+            report.error(
+                _ACTIVE_PROFILES_JSON,
+                "STRAIN_CONFIG",
+                f"{p.pathogen_id}.strain_evolution invalid: {exc}",
+            )
+            continue
+        _warn_unreachable_strain_rates(p, report)
+
+
+def _warn_unreachable_strain_rates(profile: PathogenProfile, report: Report) -> None:
+    """Flag rate combinations that can never produce a phenotype variant."""
+    block = profile.strain_evolution
+    mutation = float(block.get("mutation_rate", 0.0) or 0.0)
+    within_host = float(block.get("within_host_mutation_rate", 0.0) or 0.0)
+    phenotype = float(block.get("phenotype_mutation_fraction", 0.0) or 0.0)
+    if mutation <= 0.0 and within_host <= 0.0:
+        report.warn(
+            _ACTIVE_PROFILES_JSON,
+            "STRAIN_CONFIG",
+            f"{profile.pathogen_id}.strain_evolution has both mutation rates at "
+            f"0: strains are inherited but never diversify",
+        )
+    elif phenotype <= 0.0:
+        report.warn(
+            _ACTIVE_PROFILES_JSON,
+            "STRAIN_CONFIG",
+            f"{profile.pathogen_id}.strain_evolution mutates but "
+            f"phenotype_mutation_fraction is 0: labels drift, phenotype cannot",
+        )
+    if float(block.get("recombination_rate", 0.0) or 0.0) > 0.0 and \
+            float(block.get("superinfection_susceptibility", 0.0) or 0.0) <= 0.0:
+        report.warn(
+            _ACTIVE_PROFILES_JSON,
+            "STRAIN_CONFIG",
+            f"{profile.pathogen_id}.strain_evolution has recombination_rate > 0 "
+            f"but superinfection_susceptibility 0: co-infection can never occur, "
+            f"so no recombination is reachable",
+        )
 
 
 def _check_graph_integrity(
@@ -1027,6 +1089,26 @@ def _check_config_yaml(
     _check_microflora_params(cfg, report, zone_ids)
     _check_long_read_sequencing(cfg, report)
     _check_instrument_turnaround(cfg, report)
+    _check_variant_surveillance(cfg, report)
+
+
+def _check_variant_surveillance(cfg: dict[str, Any], report: Report) -> None:
+    """Validate the variant_surveillance block (strain tracking gate)."""
+    vs = cfg.get("variant_surveillance", {})
+    if not isinstance(vs, dict):
+        report.error(_CONFIG_YAML, "CONFIG",
+                     "variant_surveillance must be a mapping")
+        return
+    founders = vs.get("founder_strains_per_pathogen")
+    if isinstance(founders, (int, float)) and founders < 1:
+        report.error(_CONFIG_YAML, "MATH_BOUND",
+                     f"variant_surveillance.founder_strains_per_pathogen = "
+                     f"{founders} must be >= 1")
+    interval = vs.get("census_interval_epochs")
+    if isinstance(interval, (int, float)) and interval < 1:
+        report.error(_CONFIG_YAML, "MATH_BOUND",
+                     f"variant_surveillance.census_interval_epochs = {interval} "
+                     f"must be >= 1")
 
 
 def _check_instrument_turnaround(cfg: dict[str, Any], report: Report) -> None:
@@ -1879,6 +1961,15 @@ def run_checks(
         print(f"  {_YELLOW}Found {added} issue(s){_RESET}")
     else:
         print(f"  {_GREEN}No contradictions detected{_RESET}")
+
+    print(f"  {_CYAN}Running strain evolution checks...{_RESET}")
+    pre = len(report.findings)
+    _check_strain_evolution(pathogens, report)
+    added = len(report.findings) - pre
+    if added:
+        print(f"  {_YELLOW}Found {added} issue(s){_RESET}")
+    else:
+        print(f"  {_GREEN}Strain parameters valid{_RESET}")
 
     if cfg is not None:
         zone_ids = {z.id for z in layout.zones} if layout else None
