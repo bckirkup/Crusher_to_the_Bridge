@@ -349,7 +349,11 @@ def _advance_agent_pathogen_infections(
         recovery_day = agent.get_chronic_recovery_day(
             pid, prof.get("recovery_day", 3),
         )
-        if dpi >= recovery_day:
+        # Co-resident lineages clear on their own clocks, so the pathogen-level
+        # infection stays open until the last one goes: a strain acquired on day
+        # four is still being shed when the primary infection would have ended.
+        residents_left = agent.advance_resident_strains(pid, recovery_day)
+        if dpi >= recovery_day and residents_left == 0:
             inf["status"] = InfectionStatus.RECOVERED
             inf["illness"] = IllnessStatus.RECOVERED
 

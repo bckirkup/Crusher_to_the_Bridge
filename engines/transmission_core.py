@@ -454,6 +454,25 @@ class TransmissionCore:
             self._env_strain_ids[pathogen_id] = strain_id
         return strain_id
 
+    def _shed_masses(
+        self,
+        agent: KorkinAgent,
+        pathogen_id: str,
+        emitted: float,
+    ) -> list[tuple[str, float]]:
+        """One host's emitted mass, split among the lineages it carries.
+
+        A co-infected host emits a mixture, so its onward transmissions are
+        attributable to either lineage in proportion to what it is shedding.
+        """
+        shares = agent.strain_shedding_shares(
+            pathogen_id, self.pathogen_profiles.get(pathogen_id, {}),
+        )
+        if not shares:
+            strain_id = self._resident_strain_id(agent, pathogen_id)
+            return [] if strain_id is None else [(strain_id, emitted)]
+        return [(sid, emitted * share) for sid, share in shares.items()]
+
     def _emissions(
         self,
         weighted_shedders: list[tuple[KorkinAgent, float]],
@@ -461,15 +480,13 @@ class TransmissionCore:
     ) -> list[EmissionContribution]:
         contributions: list[EmissionContribution] = []
         for agent, emitted in weighted_shedders:
-            strain_id = self._resident_strain_id(agent, pathogen_id)
-            if strain_id is None:
-                continue
-            contributions.append(EmissionContribution(
-                strain_id=strain_id,
-                source_agent_id=agent.agent_id,
-                emitted=emitted,
-                transmissibility=self._transmissibility(strain_id),
-            ))
+            for strain_id, mass in self._shed_masses(agent, pathogen_id, emitted):
+                contributions.append(EmissionContribution(
+                    strain_id=strain_id,
+                    source_agent_id=agent.agent_id,
+                    emitted=mass,
+                    transmissibility=self._transmissibility(strain_id),
+                ))
         return contributions
 
     def _shedder_mix(
@@ -530,10 +547,10 @@ class TransmissionCore:
             return
         key = ReservoirComposition.key(kind, pathogen_id, zone_name)
         for agent, mass in deposits:
-            strain_id = self._resident_strain_id(agent, pathogen_id)
-            if strain_id is None:
-                continue
-            self._reservoir.deposit(key, (strain_id, agent.agent_id), mass)
+            for strain_id, strain_mass in self._shed_masses(agent, pathogen_id, mass):
+                self._reservoir.deposit(
+                    key, (strain_id, agent.agent_id), strain_mass,
+                )
 
     def _environmental_attribution(
         self,
@@ -665,6 +682,79 @@ class TransmissionCore:
         )
         return max(0.0, min(1.0, weighted / total))
 
+    def _dose_response(self, pathogen_id: str, dose: float) -> float:
+        """Probability one epoch's dose of a pathogen establishes an infection."""
+        dr = self.pathogen_profiles.get(pathogen_id, {}).get("dose_response", {})
+        if dr.get("model", "beta_poisson") == "exponential":
+            return 1.0 - math.exp(-dr.get("k", 0.01) * dose)
+        return 1.0 - math.pow(
+            1.0 + dose / dr.get("beta", BETA), -dr.get("alpha", ALPHA),
+        )
+
+    def _superinfection_susceptibility(self, pathogen_id: str) -> float:
+        """How much of a naive host's susceptibility an infected host retains.
+
+        Homotypic interference: an established infection occupies the niche, so
+        a second lineage of the same pathogen faces a discounted challenge. This
+        is the *non*-genotype-specific part — genotype-specific interference
+        already arrives through ``cross_immunity``, which sees the resident
+        strain as the host's prior exposure.
+        """
+        config = self.strain_configs.get(pathogen_id)
+        if config is None:
+            return 0.0
+        return max(0.0, min(1.0, config.superinfection_susceptibility))
+
+    def _superinfection_open(self, pathogen_id: str) -> bool:
+        """True when a second lineage of this pathogen can establish at all.
+
+        False without strain tracking, which is what keeps an already-infected
+        agent skipped exactly as before.
+        """
+        if self.strain_registry is None:
+            return False
+        return self._superinfection_susceptibility(pathogen_id) > 0.0
+
+    def _establish(
+        self,
+        agent: KorkinAgent,
+        pathogen_id: str,
+        acquired_strain_id: str,
+        dose: float,
+        epoch: int,
+        *,
+        resident: bool,
+    ) -> bool:
+        """Install an acquired strain, as a new infection or a co-resident.
+
+        False when nothing new established — re-exposure of a host that already
+        carries this very lineage, whose inoculum is absorbed rather than
+        counted as a transmission event.
+        """
+        if agent.immune and not resident:
+            # Breakthrough: genotype-specific immunity was breached, so the host
+            # leaves the immune compartment and takes the ordinary legacy path.
+            agent.immune = False
+            agent.infection_status = InfectionStatus.SUSCEPTIBLE
+        if resident:
+            return agent.superinfect_with_strain(
+                pathogen_id,
+                acquired_strain_id,
+                dose,
+                epoch,
+                phenotype=self._phenotype(acquired_strain_id),
+            )
+        agent.infect_with_pathogen(
+            pathogen_id,
+            dose,
+            epoch,
+            rng=self.rng,
+            profile=self.pathogen_profiles.get(pathogen_id, {}),
+            strain_id=acquired_strain_id or None,
+            strain_phenotype=self._phenotype(acquired_strain_id),
+        )
+        return True
+
     def _inherit_strain(self, parent_strain_id: str) -> str:
         """Strain a new infection acquires: the parent's, or a mutant of it.
 
@@ -676,14 +766,16 @@ class TransmissionCore:
         return self.mutation_operator.on_transmission(parent_strain_id, self.rng)
 
     def apply_within_host_mutations(self, agents: list[KorkinAgent]) -> None:
-        """Draw one within-host mutation chance per infected agent-epoch.
+        """Draw one within-host mutation chance per resident lineage-epoch.
 
         Off unless a pathogen sets ``within_host_mutation_rate`` > 0, which is
         the only mutational supply available to the de novo regime when a voyage
         is too short for transmission chains to supply it (plan §0 decision 2).
         Untracked infections are left alone rather than minted a founder here:
         founders appear when an agent first sheds, so enabling the within-host
-        source cannot change who is a founder.
+        source cannot change who is a founder. In a co-infected host each
+        lineage mutates on its own, replacing itself rather than the mixture, so
+        a mutation in one strain never erases its co-resident.
         """
         if self.mutation_operator is None:
             return
@@ -696,14 +788,13 @@ class TransmissionCore:
             return
         for agent in agents:
             for pathogen_id in rates:
-                strain_id = agent.strain_id_for(pathogen_id)
-                if strain_id is None or not agent.is_infected_with(pathogen_id):
-                    continue
-                mutated = self.mutation_operator.within_host(strain_id, self.rng)
-                if mutated != strain_id:
-                    agent.assign_strain(
-                        pathogen_id, mutated, self._phenotype(mutated),
-                    )
+                for strain_id in tuple(agent.resident_strains(pathogen_id)):
+                    mutated = self.mutation_operator.within_host(strain_id, self.rng)
+                    if mutated != strain_id:
+                        agent.replace_strain(
+                            pathogen_id, strain_id, mutated,
+                            self._phenotype(mutated),
+                        )
 
     def _aerosol_ventilation_factor(self, zone_name: str) -> float:
         """Outdoor-air dilution for balcony cabin corridors."""
@@ -858,7 +949,8 @@ class TransmissionCore:
         # ── Apply combined dose-response per pathogen ───────────────
         for agent in agents:
             for pathogen_id in active_pathogens:
-                if agent.is_infected_with(pathogen_id):
+                resident = agent.is_infected_with(pathogen_id)
+                if resident and not self._superinfection_open(pathogen_id):
                     continue
                 p_dose = agent_pathogen_doses.get(agent.agent_id, {}).get(pathogen_id, 0.0)
                 if p_dose <= 0:
@@ -867,34 +959,21 @@ class TransmissionCore:
                 if protection >= 1.0:
                     continue
 
-                profile = self.pathogen_profiles.get(pathogen_id, {})
-                dr = profile.get("dose_response", {})
-                model_type = dr.get("model", "beta_poisson")
-                if model_type == "exponential":
-                    k = dr.get("k", 0.01)
-                    inf_prob = 1.0 - math.exp(-k * p_dose)
-                else:
-                    p_alpha = dr.get("alpha", ALPHA)
-                    p_beta = dr.get("beta", BETA)
-                    inf_prob = 1.0 - math.pow(1.0 + p_dose / p_beta, -p_alpha)
-
+                inf_prob = self._dose_response(pathogen_id, p_dose)
                 inf_prob *= 1.0 - protection
+                if resident:
+                    inf_prob *= self._superinfection_susceptibility(pathogen_id)
 
                 if self.rng.random() < inf_prob:
-                    profile = self.pathogen_profiles.get(pathogen_id, {})
                     parent_strain_id, source_agent_id = self._draw_source(
                         agent.agent_id, pathogen_id,
                     )
                     acquired_strain_id = self._inherit_strain(parent_strain_id)
-                    agent.infect_with_pathogen(
-                        pathogen_id,
-                        p_dose,
-                        epoch,
-                        rng=self.rng,
-                        profile=profile,
-                        strain_id=acquired_strain_id or None,
-                        strain_phenotype=self._phenotype(acquired_strain_id),
-                    )
+                    if not self._establish(
+                        agent, pathogen_id, acquired_strain_id, p_dose, epoch,
+                        resident=resident,
+                    ):
+                        continue
 
                     pw_doses = agent_pathway_doses.get(agent.agent_id, {})
                     dominant = max(pw_doses, key=pw_doses.get) if pw_doses else "unknown"
@@ -914,6 +993,7 @@ class TransmissionCore:
                         "pathogen_id": pathogen_id,
                         "dominant_pathway": dominant,
                         "total_dose": round(p_dose, 4),
+                        "superinfection": resident,
                         "pathway_breakdown": {
                             k: round(v, 4)
                             for k, v in pw_doses.items()
@@ -1712,18 +1792,34 @@ class TransmissionCore:
         occupants: list[KorkinAgent],
         pathogen_id: str,
     ) -> list[KorkinAgent]:
-        """Return agents susceptible to this specific pathogen."""
+        """Return agents this pathogen can still challenge.
+
+        Naive agents always. Additionally, once variant surveillance is on: an
+        already-infected agent when a second lineage can establish, and an
+        immune agent when the pathogen has a ``cross_immunity`` matrix — an
+        escape mutant that never reaches an immune host can never be seen to
+        escape anything.
+        """
         result = []
+        challengeable = pathogen_id != "_default" and self.strain_registry is not None
         for a in occupants:
-            if a.immune:
+            if a.immune and not (
+                challengeable and self._genotype_aware(pathogen_id)
+            ):
                 continue
             if pathogen_id == "_default":
                 if a.infection_status == InfectionStatus.SUSCEPTIBLE:
                     result.append(a)
-            else:
-                if not a.is_infected_with(pathogen_id):
-                    result.append(a)
+            elif not a.is_infected_with(pathogen_id) or (
+                challengeable and self._superinfection_open(pathogen_id)
+            ):
+                result.append(a)
         return result
+
+    def _genotype_aware(self, pathogen_id: str) -> bool:
+        """True when this pathogen's immunity is genotype-specific."""
+        config = self.strain_configs.get(pathogen_id)
+        return config is not None and bool(config.cross_immunity)
 
     # ── Per-zone contact summary ─────────────────────────────────────
 

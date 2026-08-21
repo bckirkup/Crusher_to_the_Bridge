@@ -27,6 +27,7 @@ The bridge outputs agent states compatible with ``telemetry_buffer.schema``.
 from __future__ import annotations
 
 import math
+from dataclasses import dataclass
 from enum import Enum
 from typing import Any
 
@@ -273,6 +274,25 @@ def draw_shedding_multiplier(
     if variance <= 0:
         return 1.0
     return 10.0 ** float(rng.normal(0.0, variance))
+
+
+# ── Co-resident strains ──────────────────────────────────────────────────
+
+@dataclass
+class StrainInfection:
+    """One lineage residing in one host's infection of one pathogen.
+
+    Same-pathogen co-infection needs a per-lineage clock and inoculum: a strain
+    acquired on day four is at the start of its own shedding curve inside a host
+    whose infection is four days old, and it clears on its own schedule.
+    """
+
+    strain_id: str
+    time_infected: int
+    acquired_particles: float
+    shedding_multiplier: float = 1.0
+    incubation_modifier: float = 0.0
+    infection_epoch: int = 0
 
 
 # ── Agent class ──────────────────────────────────────────────────────────
@@ -584,6 +604,87 @@ class KorkinAgent:
             self.acquired_particles = dose
             self.shedding_multiplier = shedding_mult
 
+    def superinfect_with_strain(
+        self,
+        pathogen_id: str,
+        strain_id: str,
+        dose: float,
+        epoch: int,
+        *,
+        phenotype: Phenotype | None = None,
+    ) -> bool:
+        """Add a co-resident strain to an existing infection of one pathogen.
+
+        The host's illness clock, cumulative dose, and pathogen-level status are
+        already running and are left alone: superinfection adds a lineage, it
+        does not restart the infection. A strain already resident simply takes
+        on the extra inoculum, which is what reinfection by the same lineage
+        amounts to. Returns True when a new lineage established.
+        """
+        residents = self.resident_strains(pathogen_id)
+        if not residents:
+            return False
+        resident = residents.get(strain_id)
+        if resident is not None:
+            resident.acquired_particles += dose
+            return False
+        pheno = phenotype or Phenotype()
+        residents[strain_id] = StrainInfection(
+            strain_id=strain_id,
+            time_infected=0,
+            acquired_particles=dose,
+            shedding_multiplier=pheno.shedding_multiplier,
+            incubation_modifier=pheno.incubation_modifier,
+            infection_epoch=epoch,
+        )
+        return True
+
+    def resident_strains(self, pathogen_id: str) -> dict[str, StrainInfection]:
+        """Lineages co-residing in an active infection, keyed by strain id.
+
+        Empty for an untracked infection, which is how a consumer tells one
+        unnamed infection from one named lineage.
+        """
+        inf = self.infections.get(pathogen_id)
+        if inf is None or inf["status"] != InfectionStatus.INFECTED:
+            return {}
+        residents = inf.get("strains")
+        return residents if isinstance(residents, dict) else {}
+
+    def advance_resident_strains(self, pathogen_id: str, recovery_day: int) -> int:
+        """Age each resident lineage by a day and clear those past recovery.
+
+        Returns the number still resident, so the caller can hold the
+        pathogen-level infection open until the last lineage clears.
+        """
+        residents = self.resident_strains(pathogen_id)
+        for strain_id, resident in tuple(residents.items()):
+            resident.time_infected += 1
+            if resident.time_infected >= recovery_day:
+                del residents[strain_id]
+        if residents:
+            self._promote_primary_strain(pathogen_id, residents)
+        return len(residents)
+
+    def _promote_primary_strain(
+        self,
+        pathogen_id: str,
+        residents: dict[str, StrainInfection],
+    ) -> None:
+        """Hand the pathogen-level strain fields to a surviving lineage.
+
+        The primary lineage can clear while a later superinfecting one is still
+        resident, and the pathogen-level record has to keep naming something
+        that is actually there. The longest-resident survivor takes over.
+        """
+        inf = self.infections[pathogen_id]
+        if inf.get("strain_id") in residents:
+            return
+        heir = min(residents.values(), key=lambda r: r.infection_epoch)
+        inf["strain_id"] = heir.strain_id
+        inf["strain_shedding_multiplier"] = heir.shedding_multiplier
+        inf["strain_incubation_modifier"] = heir.incubation_modifier
+
     def is_infected_with(self, pathogen_id: str) -> bool:
         """Check if agent is infected with a specific pathogen."""
         inf = self.infections.get(pathogen_id)
@@ -592,7 +693,11 @@ class KorkinAgent:
         return inf["status"] == InfectionStatus.INFECTED
 
     def strain_id_for(self, pathogen_id: str) -> str | None:
-        """Resident strain of an active infection, or ``None`` if untracked."""
+        """Primary strain of an infection, or ``None`` if untracked.
+
+        The primary lineage is the one that started (or now carries) this
+        infection; ``resident_strains`` is the co-infection-aware view.
+        """
         inf = self.infections.get(pathogen_id)
         if inf is None:
             return None
@@ -614,18 +719,63 @@ class KorkinAgent:
             raise KeyError(f"agent {self.agent_id} has no {pathogen_id} infection")
         self._write_strain(pathogen_id, strain_id, phenotype)
 
+    def replace_strain(
+        self,
+        pathogen_id: str,
+        old_strain_id: str,
+        new_strain_id: str,
+        phenotype: Phenotype | None = None,
+    ) -> None:
+        """Substitute one resident lineage for its descendant, clock intact.
+
+        A within-host mutation happens inside an infection already under way, so
+        the resident's day post-infection and inoculum carry over to the child
+        instead of resetting.
+        """
+        residents = self.resident_strains(pathogen_id)
+        resident = residents.pop(old_strain_id, None)
+        if resident is None:
+            return
+        pheno = phenotype or Phenotype()
+        residents[new_strain_id] = StrainInfection(
+            strain_id=new_strain_id,
+            time_infected=resident.time_infected,
+            acquired_particles=resident.acquired_particles,
+            shedding_multiplier=pheno.shedding_multiplier,
+            incubation_modifier=pheno.incubation_modifier,
+            infection_epoch=resident.infection_epoch,
+        )
+        inf = self.infections[pathogen_id]
+        if inf.get("strain_id") == old_strain_id:
+            inf["strain_id"] = new_strain_id
+            inf["strain_shedding_multiplier"] = pheno.shedding_multiplier
+            inf["strain_incubation_modifier"] = pheno.incubation_modifier
+
     def _write_strain(
         self,
         pathogen_id: str,
         strain_id: str,
         phenotype: Phenotype | None,
     ) -> None:
-        """Record a strain plus the phenotype axes read outside transmission."""
+        """Record a strain plus the phenotype axes read outside transmission.
+
+        The pathogen-level fields describe the *primary* lineage — the one whose
+        arrival started this infection — since illness onset belongs to the
+        infection rather than to whatever superinfects it on day four.
+        """
         pheno = phenotype or Phenotype()
         inf = self.infections[pathogen_id]
         inf["strain_id"] = strain_id
         inf["strain_shedding_multiplier"] = pheno.shedding_multiplier
         inf["strain_incubation_modifier"] = pheno.incubation_modifier
+        inf["strains"] = {strain_id: StrainInfection(
+            strain_id=strain_id,
+            time_infected=int(inf["time_infected"] or 0),
+            acquired_particles=float(inf["acquired_particles"]),
+            shedding_multiplier=pheno.shedding_multiplier,
+            incubation_modifier=pheno.incubation_modifier,
+            infection_epoch=int(inf["infection_epoch"]),
+        )}
 
     def get_pathogen_shedding(self, pathogen_id: str, profile: dict) -> float:
         """Shedding value for a specific pathogen based on its profile."""
@@ -643,16 +793,82 @@ class KorkinAgent:
         if not is_symp:
             curve = profile.get("asymptomatic_shedding_log10", curve)
         adj = profile.get("dose_adjustment", DOSE_ADJUSTMENT)
-        idx = min(dpi, len(curve) - 1)
-        base = math.pow(10, curve[idx] - adj)
+        host_mult = inf.get("shedding_multiplier", 1.0)
+        residents = self.resident_strains(pathogen_id)
+        if residents:
+            # Each lineage is read at its own day post infection, which for a
+            # lone resident is the infection's own — identical to the legacy
+            # single-strain result.
+            return host_mult * sum(
+                self._resident_emissions(residents, curve, adj).values(),
+            )
         # Host factor (per-agent log-normal draw) and strain factor (heritable)
         # compose multiplicatively and are kept apart so a high shedder stays
         # attributable to the host or to the lineage, not to both at once.
+        idx = min(dpi, len(curve) - 1)
         return (
-            base
-            * inf.get("shedding_multiplier", 1.0)
+            math.pow(10, curve[idx] - adj)
+            * host_mult
             * inf.get("strain_shedding_multiplier", 1.0)
         )
+
+    def strain_shedding_shares(
+        self, pathogen_id: str, profile: dict,
+    ) -> dict[str, float]:
+        """Fraction of this host's emission owed to each resident lineage.
+
+        Empty when nothing is co-resident, so callers can keep their
+        single-strain path. Shares are what attributes an onward transmission to
+        one of the lineages a co-infected host is carrying.
+        """
+        residents = self.resident_strains(pathogen_id)
+        if len(residents) < 2:
+            return {}
+        inf = self.infections[pathogen_id]
+        is_symp = inf["illness"] == IllnessStatus.SYMPTOMATIC
+        curve = profile.get(
+            "shedding_curve_log10",
+            SYMPTOMATIC_SHEDDING if is_symp else ASYMPTOMATIC_SHEDDING,
+        )
+        if not is_symp:
+            curve = profile.get("asymptomatic_shedding_log10", curve)
+        adj = profile.get("dose_adjustment", DOSE_ADJUSTMENT)
+        emissions = self._resident_emissions(residents, curve, adj)
+        total = sum(emissions.values())
+        if total <= 0.0:
+            return {}
+        return {sid: value / total for sid, value in emissions.items()}
+
+    @staticmethod
+    def _resident_emissions(
+        residents: dict[str, StrainInfection],
+        curve: list[float],
+        adj: float,
+    ) -> dict[str, float]:
+        """Emission of each co-resident lineage, before the host factor.
+
+        Lineages partition one host's shedding capacity in proportion to the
+        inoculum that established them — co-infection redistributes emission
+        rather than multiplying it, so two strains in one host do not out-shed
+        the same host carrying one. Each is read at its own day post infection
+        and scaled by its own heritable factor, which is what lets a fitter or
+        later-arriving strain take over the mix.
+        """
+        inocula = {
+            sid: max(resident.acquired_particles, 0.0)
+            for sid, resident in residents.items()
+        }
+        pool = sum(inocula.values())
+        emissions: dict[str, float] = {}
+        for sid, resident in residents.items():
+            share = inocula[sid] / pool if pool > 0.0 else 1.0 / len(residents)
+            idx = min(max(resident.time_infected, 0), len(curve) - 1)
+            emissions[sid] = (
+                share
+                * math.pow(10, curve[idx] - adj)
+                * resident.shedding_multiplier
+            )
+        return emissions
 
     def update_microflora_disruption(self, pathogen_profiles: dict) -> None:
         """Recompute microflora_disruption_status from all active infections."""

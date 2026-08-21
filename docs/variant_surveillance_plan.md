@@ -252,6 +252,37 @@ monotonically to the interference factor; single-strain runs stay identical to
 PR 2 behaviour; pathogen-level status and legacy fields unchanged under
 co-infection; shedding conserved against the sum of per-strain curves.
 
+*As built.* `infections[pid]["strains"]` holds a `StrainInfection` per resident
+lineage, each with its own day post infection and establishing inoculum, so a
+strain acquired on day four starts at the head of its own shedding curve inside
+a four-day-old infection and clears on its own schedule. Competition is
+implemented as partition rather than addition: resident lineages divide the
+host's shedding capacity in proportion to establishing inoculum × heritable
+shedding multiplier, so two strains in one host never out-shed the same host
+carrying one, and a fitter or larger-inoculum lineage takes over the mixture.
+Those same shares split the host's emitted mass in the dose ledger and in the
+lagged surface/food reservoirs, which is what makes an onward transmission
+attributable to one of the lineages a co-infected host carries. Pathogen-level
+fields keep describing the *primary* lineage (illness onset belongs to the
+infection, not to whatever superinfects it later); if the primary clears first,
+the longest-resident survivor inherits them, and the infection stays `INFECTED`
+until the last lineage goes. Within-host mutation now replaces one resident with
+its descendant, clock and inoculum intact, instead of overwriting the mixture.
+
+Two judgement calls worth knowing about. First, the gate is
+`p_superinfection = p(dose) × (1 − cross-immunity protection) ×
+superinfection_susceptibility`: the susceptibility factor is the
+*non*-genotype-specific niche interference, because genotype-specific
+interference already arrives through `cross_immunity`, which reads the resident
+strain as the host's prior exposure — so a homologous challenge is rejected by
+immunity while a heterologous one is only discounted. Second, this PR also
+un-blocks something PR 3d shipped inert: `_get_susceptible` filtered immune
+agents out before any dose was computed, so an escape mutant could never reach
+the immunity it was built to escape. Immune agents are now challengeable
+whenever the pathogen declares `cross_immunity`, and a breakthrough moves the
+host out of the immune compartment. Both widenings are gated on strain tracking,
+so a flag-off run keeps skipping infected and immune agents exactly as before.
+
 **PR 3c — recombination (promoted from v2 by decision 1).**
 With co-residence available, recombination is drawn per co-infected
 agent-epoch: two resident strains produce a child inheriting each phenotype
