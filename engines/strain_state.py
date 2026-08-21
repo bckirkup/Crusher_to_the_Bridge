@@ -512,6 +512,53 @@ class StrainRegistry:
         )
         return self.register(child)
 
+    def recombine(
+        self,
+        recipient: StrainState,
+        donor: StrainState,
+        *,
+        genotype: str | None = None,
+        phenotype: Phenotype | None = None,
+        source_location: str | None = None,
+    ) -> StrainState:
+        """Child of two co-resident parents (plan §3 PR 3c).
+
+        ``generation`` is the more advanced parent's and ``n_mutations`` likewise
+        the larger: recombination happens inside one host, so no transmission
+        generation passes, and the mosaic is at least as far from the founder as
+        the parent it inherited most of its segments from. Parents are recorded
+        recipient-first, so ``lineage_root`` follows the lineage the recombinant
+        physically replaced rather than the one that donated to it.
+        """
+        for parent in (recipient, donor):
+            if parent.strain_id not in self._strains:
+                raise StrainConfigError(f"unknown parent strain {parent.strain_id!r}")
+        if recipient.pathogen_id != donor.pathogen_id:
+            raise StrainConfigError(
+                "cannot recombine strains of different pathogens: "
+                f"{recipient.pathogen_id!r} and {donor.pathogen_id!r}",
+            )
+        if recipient.strain_id == donor.strain_id:
+            raise StrainConfigError(
+                f"recombination needs two distinct parents, got {recipient.strain_id!r} twice",
+            )
+        pheno = phenotype or Phenotype.of(recipient)
+        child = replace(
+            recipient,
+            strain_id=self.allocate_id(recipient.pathogen_id),
+            parent_strain_ids=(recipient.strain_id, donor.strain_id),
+            generation=max(recipient.generation, donor.generation),
+            n_mutations=max(recipient.n_mutations, donor.n_mutations),
+            origin="recombination",
+            source_location=source_location or recipient.source_location,
+            genotype=recipient.genotype if genotype is None else genotype,
+            transmissibility_multiplier=pheno.transmissibility_multiplier,
+            shedding_multiplier=pheno.shedding_multiplier,
+            incubation_modifier=pheno.incubation_modifier,
+            immune_escape=pheno.immune_escape,
+        )
+        return self.register(child)
+
     def get(self, strain_id: str) -> StrainState:
         try:
             return self._strains[strain_id]

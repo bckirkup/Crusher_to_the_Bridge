@@ -796,6 +796,48 @@ class TransmissionCore:
                             self._phenotype(mutated),
                         )
 
+    def apply_recombination(self, agents: list[KorkinAgent]) -> None:
+        """Draw one recombination chance per co-infected agent-epoch.
+
+        Recombination is the only evolutionary source that needs two parents in
+        one place, which is why it could not exist before co-infection did. It
+        runs after within-host mutation so a lineage that mutated this epoch is
+        already the thing that recombines, and it is off unless a pathogen sets
+        ``recombination_rate`` > 0.
+
+        The recombinant *replaces the lineage it arose in* and the donor stays
+        resident, so one event leaves a host's resident count unchanged:
+        reassortment happens in place, and only superinfection widens a mixture.
+        Over a voyage the population still diversifies, since a recombinant is a
+        new lineage that can superinfect a host already carrying both parents.
+        """
+        if self.mutation_operator is None:
+            return
+        pathogens = tuple(
+            pid for pid, cfg in self.strain_configs.items()
+            if cfg.recombination_rate > 0.0
+        )
+        if not pathogens:
+            return
+        for agent in agents:
+            for pathogen_id in pathogens:
+                self._recombine_in_host(agent, pathogen_id)
+
+    def _recombine_in_host(self, agent: KorkinAgent, pathogen_id: str) -> None:
+        """One recombination draw for one host's residents of one pathogen."""
+        if self.mutation_operator is None:
+            return
+        residents = tuple(agent.resident_strains(pathogen_id))
+        if len(residents) < 2:
+            return
+        outcome = self.mutation_operator.recombine(residents, self.rng)
+        if outcome is None:
+            return
+        replaced, recombinant = outcome
+        agent.replace_strain(
+            pathogen_id, replaced, recombinant, self._phenotype(recombinant),
+        )
+
     def _aerosol_ventilation_factor(self, zone_name: str) -> float:
         """Outdoor-air dilution for balcony cabin corridors."""
         vent = self.zone_ventilation.get(zone_name, "")
@@ -912,6 +954,7 @@ class TransmissionCore:
         events: list[TransmissionEvent] = []
         self._quarantined_ids = set(quarantined_ids or ())
         self.apply_within_host_mutations(agents)
+        self.apply_recombination(agents)
 
         # Build zone occupancy maps
         zone_occupants: dict[str, list[KorkinAgent]] = {}
