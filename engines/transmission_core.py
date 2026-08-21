@@ -62,6 +62,7 @@ from engines.strain_dose_ledger import (
     draw_contributor,
     single_strain_mix,
 )
+from engines.strain_mutation import MutationOperator
 from engines.strain_state import StrainEvolutionConfig, StrainRegistry
 
 # ── Pathway-specific parameters ──────────────────────────────────────────
@@ -369,6 +370,11 @@ class TransmissionCore:
                 )
                 if config is not None:
                     self.strain_configs[pid] = config
+        self.mutation_operator: MutationOperator | None = (
+            MutationOperator(self.strain_registry, self.strain_configs)
+            if self.strain_registry is not None
+            else None
+        )
         # Strain composition of the lagged reservoirs (surfaces, food, environment)
         self._reservoir = ReservoirComposition()
         # Founder strain of each pathogen's environmental reservoir
@@ -589,6 +595,44 @@ class TransmissionCore:
         contributor = draw_contributor(shares, self.rng)
         return contributor if contributor is not None else ("", None)
 
+    def _inherit_strain(self, parent_strain_id: str) -> str:
+        """Strain a new infection acquires: the parent's, or a mutant of it.
+
+        Mutation is drawn once per infection event, so a lineage label means one
+        genome rather than one infection.
+        """
+        if self.mutation_operator is None or not parent_strain_id:
+            return parent_strain_id
+        return self.mutation_operator.on_transmission(parent_strain_id, self.rng)
+
+    def apply_within_host_mutations(self, agents: list[KorkinAgent]) -> None:
+        """Draw one within-host mutation chance per infected agent-epoch.
+
+        Off unless a pathogen sets ``within_host_mutation_rate`` > 0, which is
+        the only mutational supply available to the de novo regime when a voyage
+        is too short for transmission chains to supply it (plan §0 decision 2).
+        Untracked infections are left alone rather than minted a founder here:
+        founders appear when an agent first sheds, so enabling the within-host
+        source cannot change who is a founder.
+        """
+        if self.mutation_operator is None:
+            return
+        rates = {
+            pid: cfg.within_host_mutation_rate
+            for pid, cfg in self.strain_configs.items()
+            if cfg.within_host_mutation_rate > 0.0
+        }
+        if not rates:
+            return
+        for agent in agents:
+            for pathogen_id in rates:
+                strain_id = agent.strain_id_for(pathogen_id)
+                if strain_id is None or not agent.is_infected_with(pathogen_id):
+                    continue
+                mutated = self.mutation_operator.within_host(strain_id, self.rng)
+                if mutated != strain_id:
+                    agent.assign_strain(pathogen_id, mutated)
+
     def _aerosol_ventilation_factor(self, zone_name: str) -> float:
         """Outdoor-air dilution for balcony cabin corridors."""
         vent = self.zone_ventilation.get(zone_name, "")
@@ -704,6 +748,7 @@ class TransmissionCore:
         matrix = ContactTracingMatrix(epoch=epoch)
         events: list[TransmissionEvent] = []
         self._quarantined_ids = set(quarantined_ids or ())
+        self.apply_within_host_mutations(agents)
 
         # Build zone occupancy maps
         zone_occupants: dict[str, list[KorkinAgent]] = {}
@@ -765,13 +810,14 @@ class TransmissionCore:
                     parent_strain_id, source_agent_id = self._draw_source(
                         agent.agent_id, pathogen_id,
                     )
+                    acquired_strain_id = self._inherit_strain(parent_strain_id)
                     agent.infect_with_pathogen(
                         pathogen_id,
                         p_dose,
                         epoch,
                         rng=self.rng,
                         profile=profile,
-                        strain_id=parent_strain_id or None,
+                        strain_id=acquired_strain_id or None,
                     )
 
                     pw_doses = agent_pathway_doses.get(agent.agent_id, {})
