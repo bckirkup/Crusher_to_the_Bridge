@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, paper3-variant-surveillance]
   pull_request:
-    branches: [main]
+    branches: [main, paper3-variant-surveillance]
 
 permissions:
   contents: read
