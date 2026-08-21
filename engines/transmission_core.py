@@ -63,7 +63,11 @@ from engines.strain_dose_ledger import (
     single_strain_mix,
 )
 from engines.strain_mutation import MutationOperator
-from engines.strain_state import StrainEvolutionConfig, StrainRegistry
+from engines.strain_state import (
+    Phenotype,
+    StrainEvolutionConfig,
+    StrainRegistry,
+)
 
 # ── Pathway-specific parameters ──────────────────────────────────────────
 
@@ -393,6 +397,17 @@ class TransmissionCore:
             return 1.0
         return self.strain_registry.get(strain_id).transmissibility_multiplier
 
+    def _phenotype(self, strain_id: str | None) -> Phenotype | None:
+        """Heritable effects of a strain, cached onto the infection record.
+
+        The shedding and incubation axes are read outside transmission (by the
+        shedding curve and the epoch's illness draw), so they travel with the
+        infection rather than requiring those call sites to hold a registry.
+        """
+        if self.strain_registry is None or not strain_id:
+            return None
+        return Phenotype.of(self.strain_registry.get(strain_id))
+
     def _founder_genotype(self, pathogen_id: str) -> str:
         """Draw a founder genotype from the pathogen's prior distribution."""
         config = self.strain_configs.get(pathogen_id)
@@ -419,7 +434,9 @@ class TransmissionCore:
             genotype=self._founder_genotype(pathogen_id),
             origin="founder",
         )
-        agent.assign_strain(pathogen_id, founder.strain_id)
+        agent.assign_strain(
+            pathogen_id, founder.strain_id, Phenotype.of(founder),
+        )
         return founder.strain_id
 
     def _environmental_strain_id(self, pathogen_id: str) -> str | None:
@@ -595,6 +612,59 @@ class TransmissionCore:
         contributor = draw_contributor(shares, self.rng)
         return contributor if contributor is not None else ("", None)
 
+    def _prior_genotype(self, agent: KorkinAgent, pathogen_id: str) -> str | None:
+        """Genotype this agent's standing immunity was raised against.
+
+        Two sources: a resolved infection of the same pathogen (its strain's
+        genotype), or, for an agent immune at embarkation, a genotype drawn once
+        from ``prior_genotype_distribution`` — pre-existing immunity has to be
+        *against something* before a challenge genotype can escape it.
+        """
+        if self.strain_registry is None:
+            return None
+        prior_strain = agent.strain_id_for(pathogen_id)
+        if prior_strain is not None:
+            return self.strain_registry.get(prior_strain).genotype or None
+        if not agent.immune:
+            return None
+        cached = agent.prior_genotypes.get(pathogen_id)
+        if cached is None:
+            cached = self._founder_genotype(pathogen_id)
+            agent.prior_genotypes[pathogen_id] = cached
+        return cached or None
+
+    def _challenge_protection(self, agent: KorkinAgent, pathogen_id: str) -> float:
+        """Protection against this epoch's challenge, in [0, 1].
+
+        Absolute (1.0) for an agent immune at embarkation, which reproduces the
+        legacy behaviour exactly whenever variant surveillance is off or the
+        pathogen declares no ``cross_immunity``. With genotype-aware immunity
+        configured, protection instead becomes specific and breachable: the
+        dose-share-weighted mean of ``effective_protection`` over the strains
+        challenging this agent, so a heterologous or escape mutant gets through
+        an immunity that a homologous strain would not.
+        """
+        config = self.strain_configs.get(pathogen_id)
+        legacy = 1.0 if agent.immune else 0.0
+        if self.strain_registry is None or config is None or not config.cross_immunity:
+            return legacy
+        prior = self._prior_genotype(agent, pathogen_id)
+        if prior is None:
+            return 0.0
+        shares = self._strain_doses.get(agent.agent_id, {}).get(pathogen_id, {})
+        total = sum(shares.values())
+        if total <= 0.0:
+            return legacy
+        # Unattributed dose (no strain) carries no genotype to be recognised, so
+        # it stays in the denominator at zero protection rather than being
+        # credited to whichever strains happen to be identified.
+        weighted = sum(
+            dose * config.effective_protection(prior, self.strain_registry.get(sid))
+            for (sid, _source), dose in shares.items()
+            if sid
+        )
+        return max(0.0, min(1.0, weighted / total))
+
     def _inherit_strain(self, parent_strain_id: str) -> str:
         """Strain a new infection acquires: the parent's, or a mutant of it.
 
@@ -631,7 +701,9 @@ class TransmissionCore:
                     continue
                 mutated = self.mutation_operator.within_host(strain_id, self.rng)
                 if mutated != strain_id:
-                    agent.assign_strain(pathogen_id, mutated)
+                    agent.assign_strain(
+                        pathogen_id, mutated, self._phenotype(mutated),
+                    )
 
     def _aerosol_ventilation_factor(self, zone_name: str) -> float:
         """Outdoor-air dilution for balcony cabin corridors."""
@@ -788,10 +860,11 @@ class TransmissionCore:
             for pathogen_id in active_pathogens:
                 if agent.is_infected_with(pathogen_id):
                     continue
-                if agent.immune:
-                    continue
                 p_dose = agent_pathogen_doses.get(agent.agent_id, {}).get(pathogen_id, 0.0)
                 if p_dose <= 0:
+                    continue
+                protection = self._challenge_protection(agent, pathogen_id)
+                if protection >= 1.0:
                     continue
 
                 profile = self.pathogen_profiles.get(pathogen_id, {})
@@ -804,6 +877,8 @@ class TransmissionCore:
                     p_alpha = dr.get("alpha", ALPHA)
                     p_beta = dr.get("beta", BETA)
                     inf_prob = 1.0 - math.pow(1.0 + p_dose / p_beta, -p_alpha)
+
+                inf_prob *= 1.0 - protection
 
                 if self.rng.random() < inf_prob:
                     profile = self.pathogen_profiles.get(pathogen_id, {})
@@ -818,6 +893,7 @@ class TransmissionCore:
                         rng=self.rng,
                         profile=profile,
                         strain_id=acquired_strain_id or None,
+                        strain_phenotype=self._phenotype(acquired_strain_id),
                     )
 
                     pw_doses = agent_pathway_doses.get(agent.agent_id, {})

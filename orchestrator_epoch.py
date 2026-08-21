@@ -45,6 +45,10 @@ from telemetry_buffer.agent_axes import (
     agent_requires_confinement,
 )
 
+# Earliest day post-infection symptoms can appear (Person.java: dpi >= 1),
+# before any strain-specific incubation modifier.
+ONSET_DAY = 1.0
+
 
 # All confined IDs (quarantined + isolated) helper
 def _all_confined(state: SimulationState) -> set[int]:
@@ -321,7 +325,16 @@ def _advance_agent_pathogen_infections(
             inf["time_infected"] += 1
 
         dpi = inf["time_infected"] or 0
-        if dpi >= 1 and inf["illness"] == IllnessStatus.NOT_ILL:
+        # A strain's incubation modifier shifts the earliest day symptoms can
+        # appear (negative = faster onset). Faster onset only becomes visible
+        # for a pathogen whose baseline onset is later than the first day post
+        # infection, since nothing is evaluated before then.
+        onset_day = max(
+            0.0,
+            float(prof.get("symptom_onset_day", ONSET_DAY))
+            + float(inf.get("strain_incubation_modifier", 0.0)),
+        )
+        if dpi >= onset_day and inf["illness"] == IllnessStatus.NOT_ILL:
             ill_params = prof.get("illness_probability", {})
             eta_p = ill_params.get("eta", 0.508)
             gamma_p = ill_params.get("gamma", 0.095)

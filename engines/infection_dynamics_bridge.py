@@ -32,6 +32,8 @@ from typing import Any
 
 import numpy as np
 
+from engines.strain_state import Phenotype
+
 # ── Korkin Lab parameters (from Person.java) ─────────────────────────────
 
 # RT-PCR shedding values: log10(copies/g), indexed by day post-infection.
@@ -304,6 +306,8 @@ class KorkinAgent:
         "chronic_disease_ids", "chronic_pathogen_mods",
         "chronic_wearable_response_scale",
         "shedding_multiplier", "cabin_mate_ids", "ashore",
+        # Variant surveillance: genotype standing immunity was raised against
+        "prior_genotypes",
     )
 
     def __init__(
@@ -361,6 +365,10 @@ class KorkinAgent:
         self.cabin_mate_ids: frozenset[int] = frozenset()
         # Voyage layer: passenger ashore during port/disembark windows
         self.ashore: bool = False
+
+        # {pathogen_id: genotype} the agent's pre-existing immunity was raised
+        # against; empty unless variant surveillance is on
+        self.prior_genotypes: dict[str, str] = {}
 
     @property
     def days_post_infection(self) -> int:
@@ -534,6 +542,7 @@ class KorkinAgent:
         rng: np.random.Generator | None = None,
         profile: dict[str, Any] | None = None,
         strain_id: str | None = None,
+        strain_phenotype: Phenotype | None = None,
     ) -> None:
         """Record co-infection for a specific pathogen.
 
@@ -545,8 +554,10 @@ class KorkinAgent:
         ``shedding_multiplier`` from ``profile['shedding_variance_log10']``.
 
         ``strain_id`` is the resident strain when variant surveillance is on,
-        and ``None`` otherwise; it is the inherited parent strain, since
-        mutation is drawn elsewhere.
+        and ``None`` otherwise; it is the strain actually acquired, since
+        mutation is drawn elsewhere. ``strain_phenotype`` caches that strain's
+        heritable effects on the infection record, so the epoch loop and the
+        shedding read need no registry of their own.
         """
         if time_infected < 0:
             raise ValueError(f"time_infected must be non-negative, got {time_infected}")
@@ -564,7 +575,7 @@ class KorkinAgent:
             "shedding_multiplier": shedding_mult,
         }
         if strain_id is not None:
-            self.infections[pathogen_id]["strain_id"] = strain_id
+            self._write_strain(pathogen_id, strain_id, strain_phenotype)
         # Set legacy fields to infected if this is the first infection
         if self.infection_status == InfectionStatus.SUSCEPTIBLE:
             self.infection_status = InfectionStatus.INFECTED
@@ -588,15 +599,33 @@ class KorkinAgent:
         strain_id = inf.get("strain_id")
         return None if strain_id is None else str(strain_id)
 
-    def assign_strain(self, pathogen_id: str, strain_id: str) -> None:
-        """Attach a strain to an existing infection record.
+    def assign_strain(
+        self,
+        pathogen_id: str,
+        strain_id: str,
+        phenotype: Phenotype | None = None,
+    ) -> None:
+        """Attach a strain, and its heritable effects, to an infection record.
 
-        Used for seeded infections, which are created before any strain exists.
+        Used for seeded infections, which are created before any strain exists,
+        and after a within-host mutation replaces the resident strain.
         """
-        inf = self.infections.get(pathogen_id)
-        if inf is None:
+        if pathogen_id not in self.infections:
             raise KeyError(f"agent {self.agent_id} has no {pathogen_id} infection")
+        self._write_strain(pathogen_id, strain_id, phenotype)
+
+    def _write_strain(
+        self,
+        pathogen_id: str,
+        strain_id: str,
+        phenotype: Phenotype | None,
+    ) -> None:
+        """Record a strain plus the phenotype axes read outside transmission."""
+        pheno = phenotype or Phenotype()
+        inf = self.infections[pathogen_id]
         inf["strain_id"] = strain_id
+        inf["strain_shedding_multiplier"] = pheno.shedding_multiplier
+        inf["strain_incubation_modifier"] = pheno.incubation_modifier
 
     def get_pathogen_shedding(self, pathogen_id: str, profile: dict) -> float:
         """Shedding value for a specific pathogen based on its profile."""
@@ -616,7 +645,14 @@ class KorkinAgent:
         adj = profile.get("dose_adjustment", DOSE_ADJUSTMENT)
         idx = min(dpi, len(curve) - 1)
         base = math.pow(10, curve[idx] - adj)
-        return base * inf.get("shedding_multiplier", 1.0)
+        # Host factor (per-agent log-normal draw) and strain factor (heritable)
+        # compose multiplicatively and are kept apart so a high shedder stays
+        # attributable to the host or to the lineage, not to both at once.
+        return (
+            base
+            * inf.get("shedding_multiplier", 1.0)
+            * inf.get("strain_shedding_multiplier", 1.0)
+        )
 
     def update_microflora_disruption(self, pathogen_profiles: dict) -> None:
         """Recompute microflora_disruption_status from all active infections."""
