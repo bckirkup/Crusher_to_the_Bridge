@@ -295,6 +295,24 @@ recombination-off run matching PR 3b exactly. Recombination also changes what
 sequencing can reconstruct — an amplicon over one locus cannot see a crossover
 elsewhere in the genome — so PR 6 must record which loci each assay covers.
 
+*Implemented.* One Bernoulli per co-infected host-epoch at the pathogen's
+`recombination_rate`, drawn after within-host mutation so a lineage that mutated
+this epoch is what recombines. On a hit two distinct residents are drawn: the
+first is the *recipient*, whose slot the recombinant takes over — inheriting its
+day post infection, inoculum, and infection epoch — and the second is the
+*donor*, which stays resident. So one event never widens a host's mixture;
+only superinfection does. Crossover is uniform and per axis rather than
+single-point, because CTB has no locus order to put a crossover coordinate on:
+the four phenotype axes and `genotype` are each drawn 50/50 from one parent.
+`generation` and `n_mutations` take the more derived parent's value, since
+recombination passes no transmission generation and adds no substitution, and
+the mosaic is at least as far from the founder as its more travelled parent.
+Ancestry is recorded recipient-first, so `lineage_root` follows the lineage the
+recombinant physically replaced. Note for the campaign arms: the *population*
+does diversify faster than PR 3b even though single events do not, because a
+recombinant is a new lineage that can later superinfect a host already carrying
+both of its parents — three-way resident mixtures are reachable only this way.
+
 **PR 4 — strain composition in environmental pools.**
 `zone_pathogen_mass` / `multi_pathogen_mass` / surface pools / food pools /
 `env_contamination` reservoirs carry a strain mixture rather than a scalar,

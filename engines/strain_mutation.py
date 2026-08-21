@@ -18,11 +18,16 @@ which is exactly the signal the typing-introduced-diversity arm reads.
 ``generation`` counts *transmission* generations only: a within-host mutant is
 the same generation with one more mutation, so the phylogeny keeps its meaning
 (see ``StrainRegistry.derive``).
+
+Recombination (plan §3 PR 3c) is the third source and the only one with two
+parents. It lives here rather than in its own module because it draws against
+the same registry, rates, and RNG, and because a recombinant is a mutant with a
+second parent as far as every consumer downstream is concerned.
 """
 
 from __future__ import annotations
 
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, replace
 
 import numpy as np
@@ -126,6 +131,35 @@ def mutate_phenotype(
     return AXIS_EFFECTS[axis](parent, ranges, rng)
 
 
+def crossover_phenotype(
+    recipient: Phenotype,
+    donor: Phenotype,
+    rng: np.random.Generator,
+) -> Phenotype:
+    """Uniform crossover: each axis independently from one parent (spec §1.5).
+
+    Uniform rather than single-crossover because CTB carries no locus order —
+    the four axes are unlinked by construction, so any crossover model that
+    needs a genome coordinate would be inventing one.
+    """
+    def pick(mine: float, theirs: float) -> float:
+        return mine if rng.random() < 0.5 else theirs
+
+    return Phenotype(
+        transmissibility_multiplier=pick(
+            recipient.transmissibility_multiplier,
+            donor.transmissibility_multiplier,
+        ),
+        shedding_multiplier=pick(
+            recipient.shedding_multiplier, donor.shedding_multiplier,
+        ),
+        incubation_modifier=pick(
+            recipient.incubation_modifier, donor.incubation_modifier,
+        ),
+        immune_escape=pick(recipient.immune_escape, donor.immune_escape),
+    )
+
+
 @dataclass(frozen=True)
 class MutationOperator:
     """Draws mutations for both sources against one registry.
@@ -166,6 +200,49 @@ class MutationOperator:
     ) -> str:
         """Strain an already-infected host carries after one epoch of replication."""
         return self._draw(strain_id, rng, WITHIN_HOST_ORIGIN, source_location)
+
+    def recombine(
+        self,
+        resident_strain_ids: Sequence[str],
+        rng: np.random.Generator,
+        *,
+        source_location: str | None = None,
+    ) -> tuple[str, str] | None:
+        """One recombination draw for a co-infected host.
+
+        Returns ``(replaced_strain_id, recombinant_strain_id)`` on a hit and
+        ``None`` otherwise, so the caller substitutes the recombinant for the
+        lineage it arose in and leaves the donor resident — GutIBM's
+        donor/recipient conjugation event with both parents inside one host.
+        The Bernoulli is drawn once per co-infected host-epoch and the parent
+        pair only on a hit, so an epoch in which nothing recombines costs the
+        same RNG draws whatever the resident count is.
+        """
+        known = tuple(sid for sid in resident_strain_ids if sid in self.registry)
+        if len(known) < 2:
+            return None
+        config = self.configs.get(self.registry.get(known[0]).pathogen_id)
+        if config is None or config.recombination_rate <= 0.0:
+            return None
+        if rng.random() >= config.recombination_rate:
+            return None
+        first, second = rng.choice(len(known), size=2, replace=False)
+        recipient = self.registry.get(known[int(first)])
+        donor = self.registry.get(known[int(second)])
+        if recipient.pathogen_id != donor.pathogen_id:
+            return None
+        child = self.registry.recombine(
+            recipient,
+            donor,
+            genotype=(
+                recipient.genotype if rng.random() < 0.5 else donor.genotype
+            ),
+            phenotype=crossover_phenotype(
+                Phenotype.of(recipient), Phenotype.of(donor), rng,
+            ),
+            source_location=source_location,
+        )
+        return recipient.strain_id, child.strain_id
 
     def _rate(self, config: StrainEvolutionConfig, origin: str) -> float:
         if origin == TRANSMISSION_ORIGIN:
