@@ -184,6 +184,32 @@ lineage counts, from each source independently — plus bounds (multipliers
 finite and positive, `immune_escape` in [0,1], `generation` monotone along a
 transmission chain and unchanged by within-host draws).
 
+*As built* (`engines/strain_mutation.py` + `TransmissionCore`): a mutation mints
+a new lineage, and a transmission *without* one keeps the parent's strain id, so
+a strain label means one genome rather than one infection — otherwise every
+infection would be its own lineage and both the census and `generation` would
+lose their meaning. Neutral mutations (the `1 - phenotype_mutation_fraction`
+majority) still mint a lineage: they are visible to sequencing and invisible to
+epidemiology, which is exactly the signal the typing arm reads. Phenotype
+effects are multiplicative on transmissibility/shedding and additive on
+incubation/immune escape, one axis per mutation, and multipliers are clamped to
+[0.05, 20] because compounding an unbounded random walk over a long chain
+eventually produces a strain that either cannot transmit or dominates by
+numerical accident. The within-host source runs once per infected agent-epoch at
+the top of `execute_transmission`, and does not mint founders for untracked
+infections — founders still appear only when an agent first sheds, so enabling
+the within-host source cannot change *who* is a founder, only what its
+descendants look like.
+
+**Consequence — phenotype consumption is not yet wired (new PR 3d).**
+Of the four axes a mutation can move, only `transmissibility_multiplier` is
+consumed today (at emission, PR 2). `shedding_multiplier` needs the shedding
+seam in `infection_dynamics_bridge`, `incubation_modifier` the incubation draw,
+and `immune_escape` the cross-immunity term in `StrainEvolutionConfig.
+effective_protection`, which nothing calls yet. Until PR 3d lands, a mutant is
+epidemiologically distinguishable only through transmissibility, so any de novo
+result before then understates variant impact rather than overstating it.
+
 **PR 3b — co-infection and within-host competition (decision 1).**
 The blocking design change. `agent.infections` is keyed by pathogen id and
 `execute_transmission` skips any agent already infected
