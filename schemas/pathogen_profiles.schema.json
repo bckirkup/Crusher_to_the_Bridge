@@ -23,6 +23,91 @@
     }
   },
   "$defs": {
+    "EffectRange": {
+      "type": "array",
+      "description": "[lo, hi] bounds a phenotype mutation's effect is drawn from.",
+      "items": {"type": "number"},
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "StrainEvolution": {
+      "type": "object",
+      "description": "Optional heritable-strain parameters (variant surveillance, Paper 3). Absent block = no strain structure for this pathogen.",
+      "required": ["genotypes"],
+      "properties": {
+        "mutation_rate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Probability of a point mutation per transmission event."
+        },
+        "phenotype_mutation_fraction": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Fraction of mutations that alter phenotype rather than only the neutral label."
+        },
+        "within_host_mutation_rate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Probability of a point mutation per infected-agent-epoch. Default 0 keeps the transmission-only model as the baseline."
+        },
+        "recombination_rate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Probability of a recombination event per co-infected agent-epoch."
+        },
+        "superinfection_susceptibility": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Relative susceptibility of an already-infected host to a second strain of the same pathogen (0 = complete homotypic interference)."
+        },
+        "genotypes": {
+          "type": "array",
+          "items": {"type": "string"},
+          "minItems": 1,
+          "description": "Genotype labels (e.g. GII.4, GII.17)."
+        },
+        "prior_genotype_distribution": {
+          "type": "object",
+          "description": "Weights over genotypes for pre-existing immunity in baseline immune agents. Renormalized on load; keys must be declared genotypes.",
+          "additionalProperties": {"type": "number", "minimum": 0}
+        },
+        "cross_immunity": {
+          "type": "object",
+          "description": "Matrix [prior_genotype][challenge_genotype] = protection in [0,1]. Keys must be declared genotypes.",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": {"type": "number", "minimum": 0, "maximum": 1}
+          }
+        },
+        "effect_ranges": {
+          "type": "object",
+          "description": "Ranges phenotype mutation effects are drawn from.",
+          "properties": {
+            "transmissibility": {"$ref": "#/$defs/EffectRange"},
+            "shedding": {"$ref": "#/$defs/EffectRange"},
+            "incubation_days": {"$ref": "#/$defs/EffectRange"},
+            "immune_escape": {"$ref": "#/$defs/EffectRange"}
+          },
+          "additionalProperties": false
+        },
+        "min_strain_fraction": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Frequency floor below which strains are lumped into an unresolved bin, bounding state growth."
+        },
+        "notes": {
+          "type": "string",
+          "description": "Provenance for these rates: literature anchor, or the fact that a value is a placeholder pending one."
+        }
+      },
+      "additionalProperties": false
+    },
     "PathogenProfile": {
       "type": "object",
       "required": ["pathogen_id", "name", "transmission_routes"],
@@ -152,6 +237,9 @@
           "type": "integer",
           "minimum": 0,
           "description": "Days post-infection when seeding initial_infected agents at introduction_epoch. Transmission-acquired infections always start at 0."
+        },
+        "strain_evolution": {
+          "$ref": "#/$defs/StrainEvolution"
         },
         "clinical_presentation": {
           "type": "object",
