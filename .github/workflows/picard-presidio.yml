@@ -2,9 +2,9 @@ name: Picard & Presidio
 
 on:
   push:
-    branches: [main, 'cursor/**']
+    branches: [main, paper3-variant-surveillance, 'cursor/**']
   pull_request:
-    branches: [main]
+    branches: [main, paper3-variant-surveillance]
 
 permissions:
   contents: read
