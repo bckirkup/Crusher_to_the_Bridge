@@ -533,6 +533,7 @@ class KorkinAgent:
         time_infected: int = 0,
         rng: np.random.Generator | None = None,
         profile: dict[str, Any] | None = None,
+        strain_id: str | None = None,
     ) -> None:
         """Record co-infection for a specific pathogen.
 
@@ -542,6 +543,10 @@ class KorkinAgent:
 
         When ``rng`` and ``profile`` are supplied, draws a persistent
         ``shedding_multiplier`` from ``profile['shedding_variance_log10']``.
+
+        ``strain_id`` is the resident strain when variant surveillance is on,
+        and ``None`` otherwise; it is the inherited parent strain, since
+        mutation is drawn elsewhere.
         """
         if time_infected < 0:
             raise ValueError(f"time_infected must be non-negative, got {time_infected}")
@@ -558,6 +563,8 @@ class KorkinAgent:
             "infection_epoch": epoch,
             "shedding_multiplier": shedding_mult,
         }
+        if strain_id is not None:
+            self.infections[pathogen_id]["strain_id"] = strain_id
         # Set legacy fields to infected if this is the first infection
         if self.infection_status == InfectionStatus.SUSCEPTIBLE:
             self.infection_status = InfectionStatus.INFECTED
@@ -572,6 +579,24 @@ class KorkinAgent:
         if inf is None:
             return False
         return inf["status"] == InfectionStatus.INFECTED
+
+    def strain_id_for(self, pathogen_id: str) -> str | None:
+        """Resident strain of an active infection, or ``None`` if untracked."""
+        inf = self.infections.get(pathogen_id)
+        if inf is None:
+            return None
+        strain_id = inf.get("strain_id")
+        return None if strain_id is None else str(strain_id)
+
+    def assign_strain(self, pathogen_id: str, strain_id: str) -> None:
+        """Attach a strain to an existing infection record.
+
+        Used for seeded infections, which are created before any strain exists.
+        """
+        inf = self.infections.get(pathogen_id)
+        if inf is None:
+            raise KeyError(f"agent {self.agent_id} has no {pathogen_id} infection")
+        inf["strain_id"] = strain_id
 
     def get_pathogen_shedding(self, pathogen_id: str, profile: dict) -> float:
         """Shedding value for a specific pathogen based on its profile."""
