@@ -173,6 +173,22 @@ def _cell_run_ids(voyages: list[Any], cell_id: str) -> list[str]:
     return seen
 
 
+def _existing_fit_ok(s3_analysis: str, cell_id: str) -> bool:
+    """True when this cell already has an ok/smoke fit artifact on S3."""
+    bucket, base = _analysis_prefix(s3_analysis)
+    key = f"{base}fits/{cell_id}/fit_status.json"
+    client = _s3_client()
+    try:
+        resp = client.get_object(Bucket=bucket, Key=key)
+        payload = json.loads(resp["Body"].read())
+    except client.exceptions.NoSuchKey:
+        return False
+    except Exception as exc:  # pragma: no cover - network
+        print(f"warn: could not read s3://{bucket}/{key}: {exc}", flush=True)
+        return False
+    return isinstance(payload, dict) and payload.get("status") in {"ok", "smoke"}
+
+
 def _download_cell_inputs(s3_analysis: str, cell_id: str) -> str:
     """Pull cells.json, one manifest, and that cell's voyage JSON only."""
     bucket, base = _analysis_prefix(s3_analysis)
@@ -281,6 +297,10 @@ def _phase_fit(
     cell_ids = _load_sorted_cells("analysis/cells.json")
     chosen = _resolve_cell_id(cell_ids, cell_id=cell_id, cell_index=cell_index)
     print(f"Fitting cell={chosen} index={cell_ids.index(chosen)}", flush=True)
+
+    if _existing_fit_ok(s3_analysis, chosen):
+        print(f"skip cell={chosen} (ok fit already on S3)", flush=True)
+        return
 
     manifest = _download_cell_inputs(s3_analysis, chosen)
     _rewrite_manifest_paths(manifest)
