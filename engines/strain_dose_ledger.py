@@ -144,7 +144,7 @@ class StrainDoseLedger:
             weight = 1.0 if pathway_weights is None else float(
                 pathway_weights.get(pathway, 1.0),
             )
-            if weight == 0.0:
+            if weight <= 0.0:
                 continue
             for contributor, dose in bucket.items():
                 totals[contributor] = totals.get(contributor, 0.0) + dose * weight
@@ -239,7 +239,7 @@ class ReservoirComposition:
             bucket = self._mass.get(name)
             if not bucket:
                 continue
-            for contributor in list(bucket):
+            for contributor in bucket:
                 bucket[contributor] *= scale
 
     def contributors(self, key: str) -> Mapping[Contributor, float]:

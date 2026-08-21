@@ -810,6 +810,33 @@ class TransmissionCore:
 
         return matrix, events
 
+    def _merge_pathogen_doses(
+        self,
+        agents: list[KorkinAgent],
+        pathogen_id: str,
+        p_agent_doses: dict[int, float],
+        agent_doses: dict[int, float],
+        agent_pathogen_doses: dict[int, dict[str, float]],
+    ) -> dict[int, float]:
+        """Scale one pathogen's doses by susceptibility and merge them in.
+
+        Returns the per-agent susceptibility multipliers, so the strain-resolved
+        shadow can be scaled by exactly the same factors.
+        """
+        susceptibility: dict[int, float] = {}
+        for aid, dose in p_agent_doses.items():
+            agent_obj = next((a for a in agents if a.agent_id == aid), None)
+            mult = (
+                agent_obj.susceptibility_multiplier.get(pathogen_id, 1.0)
+                if agent_obj is not None else 1.0
+            )
+            susceptibility[aid] = mult
+            scaled_dose = dose * mult
+            agent_doses[aid] = agent_doses.get(aid, 0.0) + scaled_dose
+            apd = agent_pathogen_doses.setdefault(aid, {})
+            apd[pathogen_id] = apd.get(pathogen_id, 0.0) + scaled_dose
+        return susceptibility
+
     def _execute_pathogen_pathways(
         self,
         epoch: int,
@@ -876,18 +903,10 @@ class TransmissionCore:
 
         self._apply_route_weights(profile, p_agent_doses, p_agent_pw)
 
-        susceptibility: dict[int, float] = {}
-        for aid, dose in p_agent_doses.items():
-            agent_obj = next((a for a in agents if a.agent_id == aid), None)
-            mult = (
-                agent_obj.susceptibility_multiplier.get(pathogen_id, 1.0)
-                if agent_obj is not None else 1.0
-            )
-            susceptibility[aid] = mult
-            scaled_dose = dose * mult
-            agent_doses[aid] = agent_doses.get(aid, 0.0) + scaled_dose
-            apd = agent_pathogen_doses.setdefault(aid, {})
-            apd[pathogen_id] = apd.get(pathogen_id, 0.0) + scaled_dose
+        susceptibility = self._merge_pathogen_doses(
+            agents, pathogen_id, p_agent_doses,
+            agent_doses, agent_pathogen_doses,
+        )
 
         self._fold_strain_doses(
             pathogen_id, ledger, self._route_weights(profile), susceptibility,
