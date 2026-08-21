@@ -201,14 +201,38 @@ infections — founders still appear only when an agent first sheds, so enabling
 the within-host source cannot change *who* is a founder, only what its
 descendants look like.
 
-**Consequence — phenotype consumption is not yet wired (new PR 3d).**
-Of the four axes a mutation can move, only `transmissibility_multiplier` is
-consumed today (at emission, PR 2). `shedding_multiplier` needs the shedding
-seam in `infection_dynamics_bridge`, `incubation_modifier` the incubation draw,
-and `immune_escape` the cross-immunity term in `StrainEvolutionConfig.
-effective_protection`, which nothing calls yet. Until PR 3d lands, a mutant is
-epidemiologically distinguishable only through transmissibility, so any de novo
-result before then understates variant impact rather than overstating it.
+**PR 3d — phenotype consumption.**
+Of the four axes a mutation can move, PR 3 left only
+`transmissibility_multiplier` consumed (at emission, PR 2), so a mutant was
+epidemiologically distinguishable through one axis and any de novo result
+understated variant impact. PR 3d wires the other three.
+
+*As built.* Shedding and incubation travel *with the infection*: an acquired
+strain's `Phenotype` is cached onto the infection record
+(`strain_shedding_multiplier`, `strain_incubation_modifier`), so the shedding
+curve and the epoch's illness draw read heritable effects without either call
+site holding a `StrainRegistry`. Strain shedding multiplies the host's own
+`shedding_variance_log10` draw rather than replacing it — host variation and
+strain variation are different things and the typing arm needs to be able to
+confuse them. Incubation shifts the symptom-onset gate, whose baseline is now
+`symptom_onset_day` on the pathogen profile (default 1.0, the legacy value).
+Immune escape is read at dose-response time instead, because protection depends
+on both the challenge strain's genotype and what the host's immunity was raised
+against: `_challenge_protection` takes the dose-share-weighted mean of
+`effective_protection` over the strains actually challenging the agent, so a
+heterologous or escape mutant breaches an immunity a homologous strain would
+not, and dose that no strain claims stays in the denominator with zero
+protection. Absolute immunity survives wherever the pathogen declares no
+`cross_immunity` or the flag is off, which is what keeps legacy runs identical.
+
+*Known limit, worth a decision.* Negative `incubation_modifier` draws are
+currently inert for every shipped pathogen: progression is evaluated from day 1
+post infection onward, and the baseline onset is day 1, so "faster" has nowhere
+to go. The `symptom_onset_day` seam makes the negative half live for any
+pathogen given a later baseline (SARS-CoV-2 at ~5 days being the obvious
+candidate), but setting one changes main-line presentation timing — hence
+detection timing, hence every headline result — so it is left unset here rather
+than folded into a phenotype PR.
 
 **PR 3b — co-infection and within-host competition (decision 1).**
 The blocking design change. `agent.infections` is keyed by pathogen id and

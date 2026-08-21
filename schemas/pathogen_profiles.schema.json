@@ -195,6 +195,7 @@
           }
         },
         "recovery_day": {"type": "integer", "minimum": 0},
+        "symptom_onset_day": {"type": "number", "minimum": 0},
         "surface_deposition_fraction": {
           "type": "number",
           "minimum": 0,
