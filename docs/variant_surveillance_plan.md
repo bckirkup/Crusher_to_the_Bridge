@@ -150,6 +150,23 @@ exposure gets the wrong marginal. Tests: dose conservation (Σ strain doses == l
 dose to float tolerance), parent-draw frequencies matching contribution shares,
 and flag-off byte-identity of a 24-epoch run.
 
+*As built* (`engines/strain_dose_ledger.py` + `TransmissionCore`): the ledger is a
+shadow of the pooled dose rather than a replacement for it, so pooled dose,
+route weighting, susceptibility scaling and the dose-response draw are the
+original code path and the flag-off run makes no extra RNG draw. Three details
+the spec left open. (a) Emission-side transmissibility is applied as the
+emission-weighted mean multiplier (`EmissionMix.emission_factor`), which is
+exactly per-strain emission scaling because every pathway kernel is linear in
+emitted mass. (b) The lagged pathways — surfaces and food pools — carry their
+own strain composition (`ReservoirComposition`, decayed with the pool it
+shadows), so a pickup is attributed to what is still on the surface rather than
+to whoever happens to be shedding now; environmental reservoirs get a founder
+strain per pathogen, with a strain but no source agent. (c) Seeded and
+pre-existing infections predate any strain, so the first time one is used as a
+source it is minted a founder with a genotype drawn from
+`prior_genotype_distribution` — which is where the introduced-diversity regime's
+diversity comes from, one lineage per index case.
+
 **PR 3 — mutation.**
 `Agent.infect_with_pathogen` takes an optional `parent_strain`, and mutation is
 drawn in one place: Bernoulli(`mutation_rate`), then

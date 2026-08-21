@@ -50,6 +50,19 @@ from engines.infection_dynamics_bridge import (
     InfectionStatus,
     KorkinAgent,
 )
+from engines.strain_dose_ledger import (
+    Contributor,
+    DoseAttribution,
+    EmissionContribution,
+    EmissionMix,
+    ReservoirComposition,
+    StrainDoseLedger,
+    attribution,
+    build_emission_mix,
+    draw_contributor,
+    single_strain_mix,
+)
+from engines.strain_state import StrainEvolutionConfig, StrainRegistry
 
 # ── Pathway-specific parameters ──────────────────────────────────────────
 
@@ -122,13 +135,19 @@ CONTACT_MODES = frozenset({
 
 @dataclass
 class TransmissionEvent:
-    """A single transmission event across any pathway."""
+    """A single transmission event across any pathway.
+
+    ``source_agent_id`` and ``source_strain_id`` are populated only when strain
+    attribution is active and the winning contribution came from a pathway that
+    knows its shedder; reservoir pathways name a strain but no source agent.
+    """
     epoch: int
     pathway: str  # "direct_contact" | "droplet" | "hvac_airborne" | "fomite"
     source_agent_id: int | None
     target_agent_id: int
     zone: str
     dose: float
+    source_strain_id: str | None = None
 
 
 @dataclass
@@ -204,6 +223,10 @@ FOOD_INGESTION_FRACTION = 0.05
 # Fraction of environmental load delivered per zone per epoch
 ENV_DELIVERY_FRACTION = 0.01
 
+# Reservoir kinds tracked by the strain composition shadow of the pools
+SURFACE_RESERVOIR = "surface"
+FOOD_RESERVOIR = "food"
+
 
 class TransmissionCore:
     """Executes six transmission pathways per epoch.
@@ -235,6 +258,7 @@ class TransmissionCore:
         corridor_direct_contact_factor: float = DEFAULT_CORRIDOR_DIRECT_CONTACT_FACTOR,
         cfg: dict[str, Any] | None = None,
         food_zone_multipliers: dict[str, float] | None = None,
+        strain_registry: StrainRegistry | None = None,
     ) -> None:
         self.rng = rng
         self.zone_volumes = zone_volumes or {}
@@ -312,10 +336,258 @@ class TransmissionCore:
         self._prev_zone_shedders: dict[str, list[int]] = {}
         self._prev_zone_shedders_by_pathogen: dict[str, dict[str, list[int]]] = {}
 
+        self._init_strain_tracking(cfg, strain_registry)
+
         # Protocol-driven pathway scalars (1.0 = no modification)
         self.direct_contact_scalar: float = 1.0
         self.droplet_scalar: float = 1.0
         self.hvac_airborne_scalar: float = 1.0
+
+    # ── Strain attribution (variant surveillance) ────────────────────
+
+    def _init_strain_tracking(
+        self,
+        cfg: dict[str, Any] | None,
+        strain_registry: StrainRegistry | None,
+    ) -> None:
+        """Set up the strain-resolved dose ledger when the flag is on.
+
+        With ``variant_surveillance.enabled`` false there is no registry, every
+        attribution hook short-circuits, and no RNG draw is added — so a run is
+        bit-identical to the pre-strain engine.
+        """
+        vs = (cfg or {}).get("variant_surveillance", {}) or {}
+        enabled = bool(vs.get("enabled", False))
+        self.strain_registry: StrainRegistry | None = strain_registry or (
+            StrainRegistry() if enabled else None
+        )
+        self.strain_configs: dict[str, StrainEvolutionConfig] = {}
+        if self.strain_registry is not None:
+            for pid, profile in self.pathogen_profiles.items():
+                config = StrainEvolutionConfig.from_profile(
+                    {**profile, "pathogen_id": pid},
+                )
+                if config is not None:
+                    self.strain_configs[pid] = config
+        # Strain composition of the lagged reservoirs (surfaces, food, environment)
+        self._reservoir = ReservoirComposition()
+        # Founder strain of each pathogen's environmental reservoir
+        self._env_strain_ids: dict[str, str] = {}
+        # Per-epoch strain-resolved dose: {agent: {pathogen: {contributor: dose}}}
+        self._strain_doses: dict[int, dict[str, dict[Contributor, float]]] = {}
+        self._last_pathogen_doses: dict[int, dict[str, float]] = {}
+
+    @property
+    def strain_tracking(self) -> bool:
+        """True when doses are attributed to strains."""
+        return self.strain_registry is not None
+
+    def _transmissibility(self, strain_id: str) -> float:
+        if self.strain_registry is None:
+            return 1.0
+        return self.strain_registry.get(strain_id).transmissibility_multiplier
+
+    def _founder_genotype(self, pathogen_id: str) -> str:
+        """Draw a founder genotype from the pathogen's prior distribution."""
+        config = self.strain_configs.get(pathogen_id)
+        if config is None or not config.prior_genotype_distribution:
+            return ""
+        genotypes = tuple(config.prior_genotype_distribution)
+        probs = [config.prior_genotype_distribution[g] for g in genotypes]
+        return str(self.rng.choice(genotypes, p=probs))
+
+    def _resident_strain_id(self, agent: KorkinAgent, pathogen_id: str) -> str | None:
+        """Strain an agent is shedding, minting a founder for seeded infections.
+
+        Seeded and pre-existing infections predate any strain, so the first time
+        one is used as a source it is assigned a founder lineage — which is also
+        how the introduced-diversity regime gets its diversity.
+        """
+        if self.strain_registry is None or pathogen_id == "_default":
+            return None
+        strain_id = agent.strain_id_for(pathogen_id)
+        if strain_id is not None:
+            return strain_id
+        founder = self.strain_registry.mint(
+            pathogen_id,
+            genotype=self._founder_genotype(pathogen_id),
+            origin="founder",
+        )
+        agent.assign_strain(pathogen_id, founder.strain_id)
+        return founder.strain_id
+
+    def _environmental_strain_id(self, pathogen_id: str) -> str | None:
+        """Founder strain of a pathogen's environmental reservoir."""
+        if self.strain_registry is None or pathogen_id == "_default":
+            return None
+        strain_id = self._env_strain_ids.get(pathogen_id)
+        if strain_id is None:
+            founder = self.strain_registry.mint(
+                pathogen_id,
+                genotype=self._founder_genotype(pathogen_id),
+                origin="founder",
+            )
+            strain_id = founder.strain_id
+            self._env_strain_ids[pathogen_id] = strain_id
+        return strain_id
+
+    def _emissions(
+        self,
+        weighted_shedders: list[tuple[KorkinAgent, float]],
+        pathogen_id: str,
+    ) -> list[EmissionContribution]:
+        contributions: list[EmissionContribution] = []
+        for agent, emitted in weighted_shedders:
+            strain_id = self._resident_strain_id(agent, pathogen_id)
+            if strain_id is None:
+                continue
+            contributions.append(EmissionContribution(
+                strain_id=strain_id,
+                source_agent_id=agent.agent_id,
+                emitted=emitted,
+                transmissibility=self._transmissibility(strain_id),
+            ))
+        return contributions
+
+    def _shedder_mix(
+        self,
+        shedders: list[tuple[KorkinAgent, float]],
+        pathogen_id: str,
+    ) -> EmissionMix | None:
+        """Emission mix of the strains shed into one zone."""
+        if self.strain_registry is None:
+            return None
+        return build_emission_mix(self._emissions(shedders, pathogen_id))
+
+    def _direct_contact_mix(
+        self,
+        target: KorkinAgent,
+        shedders: list[tuple[KorkinAgent, float]],
+        pathogen_id: str,
+        zone_mix: EmissionMix | None,
+    ) -> EmissionMix | None:
+        """Direct-contact mix for one target.
+
+        ``zone_mix`` serves every target in a well-mixed zone; under cabin
+        confinement each pair has its own contact factor, so the shares are
+        rebuilt per target.
+        """
+        if zone_mix is not None or self.strain_registry is None:
+            return zone_mix
+        return self._shedder_mix(
+            [
+                (shedder, emitted * self._cabin_pair_contact_factor(shedder, target))
+                for shedder, emitted in shedders
+            ],
+            pathogen_id,
+        )
+
+    def _reservoir_mix(
+        self, kind: str, pathogen_id: str, zone_name: str,
+    ) -> EmissionMix | None:
+        """Emission mix of a surface or food reservoir's deposited strains."""
+        if self.strain_registry is None:
+            return None
+        key = ReservoirComposition.key(kind, pathogen_id, zone_name)
+        multipliers = {
+            strain_id: self._transmissibility(strain_id)
+            for strain_id, _ in self._reservoir.contributors(key)
+        }
+        return self._reservoir.mix(key, multipliers)
+
+    def _deposit_reservoir_strains(
+        self,
+        kind: str,
+        pathogen_id: str,
+        zone_name: str,
+        deposits: list[tuple[KorkinAgent, float]],
+    ) -> None:
+        """Record who deposited what into a lagged reservoir."""
+        if self.strain_registry is None:
+            return
+        key = ReservoirComposition.key(kind, pathogen_id, zone_name)
+        for agent, mass in deposits:
+            strain_id = self._resident_strain_id(agent, pathogen_id)
+            if strain_id is None:
+                continue
+            self._reservoir.deposit(key, (strain_id, agent.agent_id), mass)
+
+    def _environmental_attribution(
+        self,
+        ledger: StrainDoseLedger | None,
+        pathogen_id: str,
+    ) -> DoseAttribution | None:
+        """Attribution for reservoir-only exposure (no shedder to name)."""
+        strain_id = self._environmental_strain_id(pathogen_id)
+        if strain_id is None:
+            return None
+        return attribution(
+            ledger,
+            single_strain_mix(
+                strain_id, transmissibility=self._transmissibility(strain_id),
+            ),
+        )
+
+    def _decay_surface_composition(self) -> None:
+        """Age surface strain composition with the surface pools it shadows."""
+        if self.strain_registry is None:
+            return
+        self._reservoir.decay_kind(1.0 - SURFACE_DECAY_RATE, SURFACE_RESERVOIR)
+
+    def _accumulate(
+        self,
+        target_id: int,
+        pathway: str,
+        dose: float,
+        agent_doses: dict[int, float],
+        agent_pathway_doses: dict[int, dict[str, float]] | None,
+        attribution_: DoseAttribution | None = None,
+    ) -> float:
+        """Add one exposure's dose, scaled by emission-side transmissibility.
+
+        Returns the dose actually credited, which is what the tracing record
+        should report.
+        """
+        if attribution_ is not None:
+            dose *= attribution_.emission_factor
+        agent_doses[target_id] = agent_doses.get(target_id, 0.0) + dose
+        if agent_pathway_doses is not None:
+            pw = agent_pathway_doses.setdefault(target_id, {})
+            pw[pathway] = pw.get(pathway, 0.0) + dose
+        if attribution_ is not None:
+            attribution_.record(target_id, pathway, dose)
+        return dose
+
+    def _fold_strain_doses(
+        self,
+        pathogen_id: str,
+        ledger: StrainDoseLedger | None,
+        weights: dict[str, float],
+        susceptibility: dict[int, float],
+    ) -> None:
+        """Merge one pathogen pass's ledger into the epoch's strain doses."""
+        if ledger is None:
+            return
+        pathway_weights = {
+            pathway: float(weights.get(PATHWAY_WEIGHT_KEYS.get(pathway, pathway), 1.0))
+            for pathway in PATHWAY_WEIGHT_KEYS
+        }
+        for agent_id in ledger.agent_ids():
+            mult = susceptibility.get(agent_id, 1.0)
+            by_pathogen = self._strain_doses.setdefault(agent_id, {})
+            bucket = by_pathogen.setdefault(pathogen_id, {})
+            for contributor, dose in ledger.strain_doses(
+                agent_id, pathway_weights,
+            ).items():
+                bucket[contributor] = bucket.get(contributor, 0.0) + dose * mult
+
+    def _draw_source(self, agent_id: int, pathogen_id: str) -> Contributor:
+        """Draw the parent strain (and its shedder) from the dose shares."""
+        shares = self._strain_doses.get(agent_id, {}).get(pathogen_id, {})
+        if not shares:
+            return ("", None)
+        contributor = draw_contributor(shares, self.rng)
+        return contributor if contributor is not None else ("", None)
 
     def _aerosol_ventilation_factor(self, zone_name: str) -> float:
         """Outdoor-air dilution for balcony cabin corridors."""
@@ -449,6 +721,11 @@ class TransmissionCore:
         agent_pathway_doses: dict[int, dict[str, float]] = {}
         # Per-agent per-pathogen dose accumulator
         agent_pathogen_doses: dict[int, dict[str, float]] = {}
+        # Strain-resolved shadow of the same doses (empty when flag is off);
+        # the pooled doses are kept so the shadow can be checked against the
+        # dose that actually drove the draw
+        self._strain_doses = {}
+        self._last_pathogen_doses = agent_pathogen_doses
 
         # Determine which pathogens are active this epoch
         active_pathogens = list(self.pathogen_profiles.keys()) if self.pathogen_profiles else ["_default"]
@@ -485,12 +762,16 @@ class TransmissionCore:
 
                 if self.rng.random() < inf_prob:
                     profile = self.pathogen_profiles.get(pathogen_id, {})
+                    parent_strain_id, source_agent_id = self._draw_source(
+                        agent.agent_id, pathogen_id,
+                    )
                     agent.infect_with_pathogen(
                         pathogen_id,
                         p_dose,
                         epoch,
                         rng=self.rng,
                         profile=profile,
+                        strain_id=parent_strain_id or None,
                     )
 
                     pw_doses = agent_pathway_doses.get(agent.agent_id, {})
@@ -498,10 +779,11 @@ class TransmissionCore:
                     event = TransmissionEvent(
                         epoch=epoch,
                         pathway=dominant,
-                        source_agent_id=None,
+                        source_agent_id=source_agent_id,
                         target_agent_id=agent.agent_id,
                         zone=agent.current_location,
                         dose=p_dose,
+                        source_strain_id=parent_strain_id or None,
                     )
                     events.append(event)
                     matrix.transmission_events.append({
@@ -528,6 +810,33 @@ class TransmissionCore:
 
         return matrix, events
 
+    def _merge_pathogen_doses(
+        self,
+        agents: list[KorkinAgent],
+        pathogen_id: str,
+        p_agent_doses: dict[int, float],
+        agent_doses: dict[int, float],
+        agent_pathogen_doses: dict[int, dict[str, float]],
+    ) -> dict[int, float]:
+        """Scale one pathogen's doses by susceptibility and merge them in.
+
+        Returns the per-agent susceptibility multipliers, so the strain-resolved
+        shadow can be scaled by exactly the same factors.
+        """
+        susceptibility: dict[int, float] = {}
+        for aid, dose in p_agent_doses.items():
+            agent_obj = next((a for a in agents if a.agent_id == aid), None)
+            mult = (
+                agent_obj.susceptibility_multiplier.get(pathogen_id, 1.0)
+                if agent_obj is not None else 1.0
+            )
+            susceptibility[aid] = mult
+            scaled_dose = dose * mult
+            agent_doses[aid] = agent_doses.get(aid, 0.0) + scaled_dose
+            apd = agent_pathogen_doses.setdefault(aid, {})
+            apd[pathogen_id] = apd.get(pathogen_id, 0.0) + scaled_dose
+        return susceptibility
+
     def _execute_pathogen_pathways(
         self,
         epoch: int,
@@ -547,6 +856,7 @@ class TransmissionCore:
         p_mass = (multi_pathogen_mass or {}).get(pathogen_id, zone_pathogen_mass)
         p_agent_doses: dict[int, float] = {}
         p_agent_pw: dict[int, dict[str, float]] = {}
+        ledger = StrainDoseLedger() if self.strain_tracking else None
         ec = profile.get("environmental_contamination", {})
         person_to_person = ec.get("person_to_person", True)
 
@@ -554,23 +864,26 @@ class TransmissionCore:
             self._pathway_direct_contact(
                 epoch, zone_occupants, p_agent_doses, matrix, events,
                 p_agent_pw, pathogen_id=pathogen_id, profile=profile,
+                ledger=ledger,
             )
             self._pathway_droplet(
                 epoch, zone_occupants, p_agent_doses, matrix, events,
                 p_agent_pw, pathogen_id=pathogen_id, profile=profile,
+                ledger=ledger,
             )
 
         self._pathway_hvac_airborne(
             epoch, zone_occupants, p_mass,
             hvac_downstream_zones or {},
             p_agent_doses, matrix, events,
-            p_agent_pw, pathogen_id=pathogen_id,
+            p_agent_pw, pathogen_id=pathogen_id, ledger=ledger,
         )
 
         if person_to_person:
             self._pathway_fomite(
                 epoch, zone_occupants, p_agent_doses, matrix, events,
                 p_agent_pw, pathogen_id=pathogen_id, profile=profile,
+                ledger=ledger,
             )
 
         fc = profile.get("food_contamination", {})
@@ -578,26 +891,26 @@ class TransmissionCore:
             self._pathway_food_contamination(
                 epoch, zone_occupants, p_agent_doses, matrix,
                 p_agent_pw, pathogen_id=pathogen_id, profile=profile,
+                ledger=ledger,
             )
 
         if ec.get("enabled", False):
             self._pathway_environmental(
                 zone_occupants, p_agent_doses, matrix,
                 p_agent_pw, pathogen_id=pathogen_id, profile=profile,
+                ledger=ledger,
             )
 
         self._apply_route_weights(profile, p_agent_doses, p_agent_pw)
 
-        for aid, dose in p_agent_doses.items():
-            agent_obj = next((a for a in agents if a.agent_id == aid), None)
-            mult = (
-                agent_obj.susceptibility_multiplier.get(pathogen_id, 1.0)
-                if agent_obj is not None else 1.0
-            )
-            scaled_dose = dose * mult
-            agent_doses[aid] = agent_doses.get(aid, 0.0) + scaled_dose
-            apd = agent_pathogen_doses.setdefault(aid, {})
-            apd[pathogen_id] = apd.get(pathogen_id, 0.0) + scaled_dose
+        susceptibility = self._merge_pathogen_doses(
+            agents, pathogen_id, p_agent_doses,
+            agent_doses, agent_pathogen_doses,
+        )
+
+        self._fold_strain_doses(
+            pathogen_id, ledger, self._route_weights(profile), susceptibility,
+        )
 
         for aid, pw in p_agent_pw.items():
             merged = agent_pathway_doses.setdefault(aid, {})
@@ -743,6 +1056,7 @@ class TransmissionCore:
         agent_pathway_doses: dict[int, dict[str, float]] | None = None,
         pathogen_id: str = "_default",
         profile: dict | None = None,
+        ledger: StrainDoseLedger | None = None,
     ) -> None:
         """Person-to-person transmission via close contact in shared rooms."""
         use_het = self.contact_mode == "heterogeneous_zone_dose"
@@ -759,6 +1073,10 @@ class TransmissionCore:
             cabin_confinement = self._zone_has_cabin_confinement(
                 zone_name, shedders, susceptible,
             )
+            zone_mix = (
+                None if cabin_confinement
+                else self._shedder_mix(shedders, pathogen_id)
+            )
 
             for target in susceptible:
                 r0_draw = self._draw_contact_multiplier(n_occupants, target)
@@ -772,12 +1090,14 @@ class TransmissionCore:
                 if use_het:
                     exposure_factor = self._zone_exposure_factor(zone_name)
                     dose *= exposure_factor
-                agent_doses[target.agent_id] = (
-                    agent_doses.get(target.agent_id, 0.0) + dose
+                mix = self._direct_contact_mix(
+                    target, shedders, pathogen_id, zone_mix,
                 )
-                if agent_pathway_doses is not None:
-                    pw = agent_pathway_doses.setdefault(target.agent_id, {})
-                    pw["direct_contact"] = pw.get("direct_contact", 0.0) + dose
+                dose = self._accumulate(
+                    target.agent_id, "direct_contact", dose,
+                    agent_doses, agent_pathway_doses,
+                    attribution(ledger, mix),
+                )
 
                 rec: dict[str, Any] = {
                     "target_id": target.agent_id,
@@ -804,6 +1124,7 @@ class TransmissionCore:
         agent_pathway_doses: dict[int, dict[str, float]] | None = None,
         pathogen_id: str = "_default",
         profile: dict | None = None,
+        ledger: StrainDoseLedger | None = None,
     ) -> None:
         """Immediate aerosol exposure from shedders in the same room."""
         for zone_name, occupants in zone_occupants.items():
@@ -824,18 +1145,18 @@ class TransmissionCore:
             concentration = total_aerosol / max(volume, 1.0)
             shedder_ids = [s.agent_id for s, _ in shedders]
             vent_factor = self._aerosol_ventilation_factor(zone_name)
+            mix = self._shedder_mix(shedders, pathogen_id)
 
             for target in susceptible:
                 dose = concentration * volume * AEROSOL_INHALATION_FRACTION
                 dose *= self.droplet_scalar
                 dose *= vent_factor
                 dose *= self._confinement_factor(target)
-                agent_doses[target.agent_id] = (
-                    agent_doses.get(target.agent_id, 0.0) + dose
+                dose = self._accumulate(
+                    target.agent_id, "droplet", dose,
+                    agent_doses, agent_pathway_doses,
+                    attribution(ledger, mix),
                 )
-                if agent_pathway_doses is not None:
-                    pw = agent_pathway_doses.setdefault(target.agent_id, {})
-                    pw["droplet"] = pw.get("droplet", 0.0) + dose
 
                 matrix.droplet_exposures.append({
                     "target_id": target.agent_id,
@@ -860,6 +1181,7 @@ class TransmissionCore:
         matrix: ContactTracingMatrix,
         agent_pathway_doses: dict[int, dict[str, float]] | None,
         pathogen_id: str,
+        source_attribution: DoseAttribution | None = None,
     ) -> None:
         volume = self.zone_volumes.get(target_zone, 100.0)
         concentration = mass_in_target / max(volume, 1.0)
@@ -872,12 +1194,10 @@ class TransmissionCore:
             dose = concentration * AEROSOL_INHALATION_FRACTION * volume
             dose *= self.hvac_airborne_scalar
             dose *= self._aerosol_ventilation_factor(target_zone)
-            agent_doses[target.agent_id] = (
-                agent_doses.get(target.agent_id, 0.0) + dose
+            dose = self._accumulate(
+                target.agent_id, "hvac_airborne", dose,
+                agent_doses, agent_pathway_doses, source_attribution,
             )
-            if agent_pathway_doses is not None:
-                pw = agent_pathway_doses.setdefault(target.agent_id, {})
-                pw["hvac_airborne"] = pw.get("hvac_airborne", 0.0) + dose
 
             matrix.hvac_downstream_exposures.append({
                 "target_id": target.agent_id,
@@ -901,16 +1221,20 @@ class TransmissionCore:
         _events: list[TransmissionEvent],
         agent_pathway_doses: dict[int, dict[str, float]] | None = None,
         pathogen_id: str = "_default",
+        ledger: StrainDoseLedger | None = None,
     ) -> None:
         """Exposure from airborne pathogen drifted via HVAC from upstream zones."""
-        shedding_zones: dict[str, list[int]] = {}
+        shedding_zones: dict[str, tuple[list[int], EmissionMix | None]] = {}
         for zone_name, occupants in zone_occupants.items():
             shedders = self._get_shedders(occupants, pathogen_id, None)
             if shedders:
-                shedding_zones[zone_name] = [s.agent_id for s, _ in shedders]
+                shedding_zones[zone_name] = (
+                    [s.agent_id for s, _ in shedders],
+                    self._shedder_mix(shedders, pathogen_id),
+                )
 
         # For each downstream zone receiving HVAC air from a shedding zone
-        for source_zone, shedder_ids in shedding_zones.items():
+        for source_zone, (shedder_ids, mix) in shedding_zones.items():
             downstream = hvac_downstream_zones.get(source_zone, [])
             for target_zone in downstream:
                 if target_zone == source_zone:
@@ -924,6 +1248,7 @@ class TransmissionCore:
                     target_zone, source_zone, shedder_ids, mass_in_target,
                     zone_occupants, agent_doses, matrix,
                     agent_pathway_doses, pathogen_id,
+                    attribution(ledger, mix),
                 )
 
     # ── Pathway 4: Fomite Deposition & Surface Touch ─────────────────
@@ -939,19 +1264,17 @@ class TransmissionCore:
         matrix: ContactTracingMatrix,
         agent_pathway_doses: dict[int, dict[str, float]] | None,
         pathogen_id: str,
+        surface_attribution: DoseAttribution | None = None,
     ) -> None:
         if self._cabin_confinement_active(target):
             return
         if self.rng.random() > FOMITE_PICKUP_PROBABILITY:
             return
 
-        dose = surface_mass * FOMITE_TRANSFER_FRACTION
-        agent_doses[target.agent_id] = (
-            agent_doses.get(target.agent_id, 0.0) + dose
+        dose = self._accumulate(
+            target.agent_id, "fomite", surface_mass * FOMITE_TRANSFER_FRACTION,
+            agent_doses, agent_pathway_doses, surface_attribution,
         )
-        if agent_pathway_doses is not None:
-            pw = agent_pathway_doses.setdefault(target.agent_id, {})
-            pw["fomite"] = pw.get("fomite", 0.0) + dose
 
         is_trailing = (
             target.agent_id not in prev_occupant_ids
@@ -978,6 +1301,7 @@ class TransmissionCore:
         agent_pathway_doses: dict[int, dict[str, float]] | None = None,
         pathogen_id: str = "_default",
         profile: dict | None = None,
+        ledger: StrainDoseLedger | None = None,
     ) -> None:
         """Surface contamination from shedders; stochastic pickup by later visitors."""
         dep_frac = SURFACE_DEPOSITION_FRACTION
@@ -987,13 +1311,18 @@ class TransmissionCore:
         # a) Deposit new fomite mass from current shedders (not confined to cabin)
         for zone_name, occupants in zone_occupants.items():
             shedders = self._get_shedders(occupants, pathogen_id, profile)
+            deposits: list[tuple[KorkinAgent, float]] = []
             for agent, sv in shedders:
                 if self._cabin_confinement_active(agent):
                     continue
                 deposit = sv * dep_frac
+                deposits.append((agent, deposit))
                 self.surface_pools[zone_name] = (
                     self.surface_pools.get(zone_name, 0.0) + deposit
                 )
+            self._deposit_reservoir_strains(
+                SURFACE_RESERVOIR, pathogen_id, zone_name, deposits,
+            )
 
         # b) Fomite trailing detection + pickup
         for zone_name, occupants in zone_occupants.items():
@@ -1009,12 +1338,17 @@ class TransmissionCore:
             # but a shedder WAS here last epoch
             prev_shedders = self._prev_zone_shedders.get(zone_name, [])
             prev_occupant_ids = self._prev_zone_occupants.get(zone_name, set())
+            surface_attribution = attribution(
+                ledger,
+                self._reservoir_mix(SURFACE_RESERVOIR, pathogen_id, zone_name),
+            )
 
             for target in susceptible:
                 self._apply_fomite_pickup(
                     target, zone_name, surface_mass,
                     prev_occupant_ids, prev_shedders,
                     agent_doses, matrix, agent_pathway_doses, pathogen_id,
+                    surface_attribution,
                 )
 
     # ── Pathway 5: Food Contamination ────────────────────────────────
@@ -1028,6 +1362,7 @@ class TransmissionCore:
         agent_pathway_doses: dict[int, dict[str, float]] | None = None,
         pathogen_id: str = "_default",
         profile: dict | None = None,
+        ledger: StrainDoseLedger | None = None,
     ) -> None:
         """Food contamination in Dining-type zones.
 
@@ -1052,6 +1387,10 @@ class TransmissionCore:
 
             # Deposit from shedders present in this food zone
             shedders = self._get_shedders(occupants, pathogen_id, profile)
+            self._deposit_reservoir_strains(
+                FOOD_RESERVOIR, pathogen_id, zone_name,
+                [(a, sv * FOOD_DEPOSITION_FRACTION) for a, sv in shedders],
+            )
             for _, sv in shedders:
                 food_zones[zone_name] += sv * FOOD_DEPOSITION_FRACTION
 
@@ -1067,14 +1406,20 @@ class TransmissionCore:
             # Dose to susceptible agents eating here
             susceptible = self._get_susceptible(occupants, pathogen_id)
             zone_mult = self._food_zone_multiplier(zone_name)
+            self._reservoir.decay(
+                1.0 + growth - decay,
+                ReservoirComposition.key(FOOD_RESERVOIR, pathogen_id, zone_name),
+            )
+            food_attribution = attribution(
+                ledger,
+                self._reservoir_mix(FOOD_RESERVOIR, pathogen_id, zone_name),
+            )
             for target in susceptible:
                 dose = food_zones[zone_name] * FOOD_INGESTION_FRACTION * zone_mult
-                agent_doses[target.agent_id] = (
-                    agent_doses.get(target.agent_id, 0.0) + dose
+                dose = self._accumulate(
+                    target.agent_id, "food", dose,
+                    agent_doses, agent_pathway_doses, food_attribution,
                 )
-                if agent_pathway_doses is not None:
-                    pw = agent_pathway_doses.setdefault(target.agent_id, {})
-                    pw["food"] = pw.get("food", 0.0) + dose
 
                 matrix.food_contamination_exposures.append({
                     "target_id": target.agent_id,
@@ -1109,6 +1454,7 @@ class TransmissionCore:
         agent_pathway_doses: dict[int, dict[str, float]] | None = None,
         pathogen_id: str = "_default",
         profile: dict | None = None,
+        ledger: StrainDoseLedger | None = None,
     ) -> None:
         """Environmental source pathway (HVAC-systemic or zone-scoped).
 
@@ -1124,7 +1470,7 @@ class TransmissionCore:
         if source_zones:
             self._pathway_environmental_zone_scoped(
                 zone_occupants, agent_doses, matrix, agent_pathway_doses,
-                pathogen_id=pathogen_id, profile=profile or {},
+                pathogen_id=pathogen_id, profile=profile or {}, ledger=ledger,
             )
             return
 
@@ -1138,6 +1484,8 @@ class TransmissionCore:
         if load <= 0:
             return
 
+        env_attribution = self._environmental_attribution(ledger, pathogen_id)
+
         # Deliver to all zones (environmental pathogen is HVAC-systemic)
         for zone_name, occupants in zone_occupants.items():
             volume = self.zone_volumes.get(zone_name, 100.0)
@@ -1148,12 +1496,10 @@ class TransmissionCore:
             for target in susceptible:
                 dose = concentration * AEROSOL_INHALATION_FRACTION * volume
                 dose *= self.hvac_airborne_scalar
-                agent_doses[target.agent_id] = (
-                    agent_doses.get(target.agent_id, 0.0) + dose
+                dose = self._accumulate(
+                    target.agent_id, "environmental", dose,
+                    agent_doses, agent_pathway_doses, env_attribution,
                 )
-                if agent_pathway_doses is not None:
-                    pw = agent_pathway_doses.setdefault(target.agent_id, {})
-                    pw["environmental"] = pw.get("environmental", 0.0) + dose
 
                 matrix.environmental_exposures.append({
                     "target_id": target.agent_id,
@@ -1173,6 +1519,7 @@ class TransmissionCore:
         *,
         pathogen_id: str,
         profile: dict[str, Any],
+        ledger: StrainDoseLedger | None = None,
     ) -> None:
         """Per-zone environmental reservoirs (Legionella spa / C.diff spores)."""
         ec = profile.get("environmental_contamination", {})
@@ -1201,16 +1548,14 @@ class TransmissionCore:
             if contamination <= 0.0:
                 continue
             susceptible = self._get_susceptible(occupants, pathogen_id)
+            env_attribution = self._environmental_attribution(ledger, pathogen_id)
             for target in susceptible:
                 if self.rng.random() >= p_expose:
                     continue
-                dose = contamination * emission
-                agent_doses[target.agent_id] = (
-                    agent_doses.get(target.agent_id, 0.0) + dose
+                dose = self._accumulate(
+                    target.agent_id, "environmental", contamination * emission,
+                    agent_doses, agent_pathway_doses, env_attribution,
                 )
-                if agent_pathway_doses is not None:
-                    pw = agent_pathway_doses.setdefault(target.agent_id, {})
-                    pw["environmental"] = pw.get("environmental", 0.0) + dose
                 matrix.environmental_exposures.append({
                     "target_id": target.agent_id,
                     "zone": zone_name,
@@ -1321,6 +1666,7 @@ class TransmissionCore:
         """Apply surface decay after fomite interactions."""
         for zone_name in self.surface_pools:
             self.surface_pools[zone_name] *= (1.0 - SURFACE_DECAY_RATE)
+        self._decay_surface_composition()
 
     def _update_prev_occupancy(
         self, zone_occupants: dict[str, list[KorkinAgent]],
