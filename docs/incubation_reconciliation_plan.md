@@ -73,12 +73,26 @@ CTB-generated line list into a Stan fit are exposed.
 
 Ordered by dependency. Sizing is in Devin sessions.
 
-**R1 — one source of truth for pathogen delay parameters (1 session).**
+**R1 — one source of truth for pathogen delay parameters (1 session). DONE.**
 Make B a projection of A rather than a parallel file: derive
 `median_hours`/`sigma` for the sentinel catalog from the profile's
 `incubation` block at build time, with a test that fails when they drift. Keep
 B's `generation` and `shedding` kernels where they are — they are not incubation
 and A does not carry them.
+
+Delivered in `picard_framework/analysis/sentinel/profile_delays.py`: catalog
+entries carrying `pathogen_id` are projections of that profile
+(`median_hours = median_days * 24`, `sigma = log(dispersion)` because the profile
+states a geometric standard deviation, `min_hours`/`max_hours` from the profile's
+clamps), and `tests/test_sentinel_profile_delays.py` fails on any drift, on a
+`pathogen_id` naming a profile the bundle lacks, and on a linked profile that
+loses its incubation block. `lognormal_delay` gained left truncation so the
+profile's `min_days` survives the projection instead of being dropped. Catalog
+entries without `pathogen_id` (measles) stay sentinel-side and unchecked.
+Consequence: the bundled norovirus kernel moved from 33 h / IQR 19 h / 120 h of
+support to 28.8 h / IQR 17 h / 144 h, and `sars_cov2` gained an entry
+(IQR ~86 h — `port_resolution: inadequate`, so single-onset port attribution is
+not available for it at cruise inter-port intervals).
 
 **R2 — state the dose-conditioning contract for the analysis side (1 session).**
 The Stan kernel is pathogen-level by construction. Options, in preference order:

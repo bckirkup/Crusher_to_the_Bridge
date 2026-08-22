@@ -431,9 +431,19 @@ def test_hours_ashore_are_the_denominator_not_a_covariate() -> None:
 
     This is the property the spec's original model lacked: without the offset the
     fitted quantity is an attribution share, not a rate per person-hour (1.4).
+
+    Checked twice, because the two checks fail for different reasons. The exact
+    one is on the forward model: halving every hazard while doubling every hour
+    must reproduce the expected onsets bin for bin, which is what "denominator"
+    means and holds regardless of sampling. The posterior check then confirms the
+    estimator inherits it, and needs four weeks of crossover (~850 onsets rather
+    than ~50) to do so: at one week the posterior mean of a single port hazard
+    moves by more between seeds than doubling the hours moves it, so the ratio
+    was reading chain noise.
     """
-    data, meta = fleet_data(crossover_fleet())
-    truth = [2.0e-3] * int(data["NV"])
+    weeks = ("2026-03-02", "2026-03-09", "2026-03-16", "2026-03-23")
+    data, meta = fleet_data(crossover_fleet(weeks=weeks))
+    truth = [8.0e-3] * int(data["NV"])
     simulated = simulate(data, lambda_visit=truth, seed=37)
 
     doubled = dict(simulated)
@@ -443,6 +453,18 @@ def test_hours_ashore_are_the_denominator_not_a_covariate() -> None:
     np.testing.assert_allclose(
         visit_hours(doubled), 2.0 * visit_hours(simulated), rtol=1e-9,
     )
+
+    def expected(payload: dict[str, Any], scale: float) -> list[np.ndarray]:
+        rates = FleetRates(
+            lambda_visit=[scale * t for t in truth],
+            lambda_aboard=[1.0e-6] * int(payload["S"]),
+            r_onboard=[0.4] * int(payload["S"]),
+        )
+        mu = expected_onsets_fleet(payload, rates)
+        return [np.asarray(m, dtype=float) for m in mu]
+
+    for base_mu, halved_mu in zip(expected(simulated, 1.0), expected(doubled, 0.5)):
+        np.testing.assert_allclose(halved_mu, base_mu, rtol=1e-9)
 
     base = float(np.mean(fit(simulated)["lambda_port[1]"]))
     halved = float(np.mean(fit(doubled)["lambda_port[1]"]))

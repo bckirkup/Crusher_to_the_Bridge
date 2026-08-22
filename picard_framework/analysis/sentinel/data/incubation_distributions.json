@@ -1,6 +1,7 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "1.1.0",
   "description": "Incubation and generation-interval distributions for sentinel attribution. Hours, not epochs: the epoch grid is a property of the run, not of the pathogen. measles is carried as the documented counter-example for the port-resolution criterion (spec 1.8), not as a supported sentinel pathogen.",
+  "incubation_source_of_truth": "For any entry carrying pathogen_id, the incubation block is a projection of that pathogen profile's incubation block in data/pathogens/active_profiles.json: median_hours = median_days * 24, sigma = log(dispersion) (the profile's dispersion is a geometric standard deviation), min_hours/max_hours = min_days/max_days * 24. Do not edit those fields here; edit the profile and re-project. picard_framework/analysis/sentinel/profile_delays.py performs the projection and tests/test_sentinel_profile_delays.py fails on drift. Generation and shedding kernels have no profile counterpart and remain sentinel-side literature values. The projection is the kernel of a host at the profile's dose reference: the profile conditions each draw on dose and this pathogen-level kernel cannot (docs/incubation_reconciliation_plan.md, R2).",
   "default_pathogen": "norovirus",
   "wastewater": {
     "residence_lag_hours": 12.0,
@@ -9,20 +10,22 @@
   },
   "distributions": {
     "norovirus": {
+      "pathogen_id": "norwalk_gi",
       "port_resolution": "adequate",
       "incubation": {
         "family": "lognormal",
-        "median_hours": 33.0,
-        "sigma": 0.42,
-        "max_hours": 120.0,
-        "source": "Clinical onset 12-48 h post-exposure; central 80% of this lognormal is ~19-57 h, IQR ~19 h (under the shortest cruise inter-port interval, spec 1.8)."
+        "median_hours": 28.8,
+        "sigma": 0.444686,
+        "min_hours": 2.4,
+        "max_hours": 144.0,
+        "source": "Projected from the norwalk_gi profile (median 1.2 d, GSD 1.56, 0.1-6 d): Lee et al. 2013 pooled norovirus GII via docs/ctb_incubation_spec.md. Discretized IQR is ~17 h, inside the shortest cruise inter-port interval, so ports stay separable (spec 1.8)."
       },
       "generation": {
         "family": "lognormal",
         "median_hours": 40.0,
         "sigma": 0.5,
         "max_hours": 168.0,
-        "source": "Household/closed-setting serial intervals, ~1.5-2 d."
+        "source": "Household/closed-setting serial intervals, ~1.5-2 d. Sentinel-side: the pathogen profile states no generation interval, and an incubation period is not one."
       },
       "shedding": {
         "family": "lognormal",
@@ -32,6 +35,32 @@
         "source": "Faecal shedding duration, ~1-3 weeks post-infection and longer in a minority. Used as a survival kernel (P(still shedding at lag k)), not as a delay pmf: wastewater observes prevalence of shedders, not onsets."
       }
     },
+    "sars_cov2": {
+      "pathogen_id": "sars_cov2_resp",
+      "port_resolution": "inadequate",
+      "incubation": {
+        "family": "lognormal",
+        "median_hours": 139.2,
+        "sigma": 0.451076,
+        "min_hours": 12.0,
+        "max_hours": 504.0,
+        "source": "Projected from the sars_cov2_resp profile (median 5.8 d, GSD 1.57, 0.5-21 d): Wei et al. 2021 ancestral lineage via docs/ctb_incubation_spec.md. Discretized IQR is ~86 h, far past any cruise inter-port interval, so a single onset attributes to a port window set rather than a port (spec 1.8). Later lineages incubate faster; change median_days on the profile per scenario, not this file."
+      },
+      "generation": {
+        "family": "lognormal",
+        "median_hours": 120.0,
+        "sigma": 0.5,
+        "max_hours": 336.0,
+        "source": "Ancestral-lineage generation interval ~5 d. Sentinel-side literature value, uncalibrated against this simulator's onboard secondaries; it sets the renewal term, so a paper quoting onboard R should refit it."
+      },
+      "shedding": {
+        "family": "lognormal",
+        "median_hours": 240.0,
+        "sigma": 0.6,
+        "max_hours": 720.0,
+        "source": "Respiratory RNA positivity ~1-2 weeks, long tail. As for norovirus this is a survival kernel, and it is the weakest-anchored number in this entry: wastewater deconvolution weights depend on it."
+      }
+    },
     "measles": {
       "port_resolution": "inadequate",
       "incubation": {
@@ -39,7 +68,7 @@
         "median_hours": 312.0,
         "sigma": 0.25,
         "max_hours": 504.0,
-        "source": "10-14 d incubation. IQR far exceeds any cruise inter-port interval, so ports are not separable (spec 1.8)."
+        "source": "10-14 d incubation. IQR far exceeds any cruise inter-port interval, so ports are not separable (spec 1.8). No pathogen_id: the simulator does not model measles, so this entry is sentinel-side only and is not drift-checked."
       },
       "generation": {
         "family": "lognormal",
