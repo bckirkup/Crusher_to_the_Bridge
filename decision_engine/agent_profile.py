@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import os
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, Protocol, runtime_checkable
 
 import numpy as np
 
@@ -125,11 +125,36 @@ def build_profiles_for_agents(
     device_map = _build_device_map(class_device_map)
 
     for agent in agents:
-        profiles[agent.agent_id] = _profile_for_agent(
+        profile = _profile_for_agent(
             agent, templates, default_template, device_map, rng,
             immunocompromised_fraction,
         )
+        profiles[agent.agent_id] = profile
+        _publish_host_biology(agent, profile)
     return profiles
+
+
+@runtime_checkable
+class HostBiologyAgent(Protocol):
+    """An agent that can carry the host biology an infection model reads."""
+
+    age_band: str
+    immunocompromised: bool
+
+
+def _publish_host_biology(agent: object, profile: AgentProfile) -> None:
+    """Copy the host attributes the infection model conditions on onto the agent.
+
+    Age band lives only in this layer, and the incubation distribution needs it
+    where the infection is. Agent types without these fields are left alone, so
+    a population that cannot carry host biology keeps the neutral default rather
+    than a guessed one.
+    """
+    if not isinstance(agent, HostBiologyAgent):
+        return
+    agent.age_band = profile.age_band
+    if profile.immunocompromised:
+        agent.immunocompromised = True
 
 
 def default_bundle_path(repo_root: str) -> str:

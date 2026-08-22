@@ -179,10 +179,21 @@ class TestSheddingAxis:
 # ── Incubation axis ─────────────────────────────────────────────────────
 
 def _onset_day(
-    modifier: float, *, seed: int = 3, symptom_onset_day: float | None = None,
+    modifier: float,
+    *,
+    seed: int = 3,
+    symptom_onset_day: float | None = None,
+    legacy: bool = False,
 ) -> int:
-    """First day post-infection on which symptoms appear, given a modifier."""
+    """First day post-infection on which symptoms appear, given a modifier.
+
+    ``legacy`` drops the pathogen's incubation distribution, which is how a
+    profile that has never been given one behaves; the modifier then shifts the
+    fixed onset day instead of a drawn period.
+    """
     profile = _norwalk_profile()
+    if legacy:
+        profile.pop("incubation", None)
     if symptom_onset_day is not None:
         profile["symptom_onset_day"] = symptom_onset_day
     # A large dose makes the illness draw all but certain, so the day that comes
@@ -211,11 +222,13 @@ class TestIncubationAxis:
         assert onsets[0] < onsets[-1]
 
     def test_zero_modifier_reproduces_the_legacy_onset_day(self) -> None:
-        assert _onset_day(0.0) == int(ONSET_DAY)
+        assert _onset_day(0.0, legacy=True) == int(ONSET_DAY)
         untracked = _agent()
         untracked.infect_with_pathogen(PATHOGEN, 1e12, 0)
         rng = np.random.default_rng(3)
-        profile = {**_norwalk_profile(), "recovery_day": 30}
+        profile = _norwalk_profile()
+        profile.pop("incubation", None)
+        profile["recovery_day"] = 30
         _advance_agent_pathogen_infections(untracked, {PATHOGEN: profile}, rng)
         assert untracked.infections[PATHOGEN]["illness"] == IllnessStatus.SYMPTOMATIC
 
@@ -225,13 +238,13 @@ class TestIncubationAxis:
 
     def test_faster_onset_bites_when_the_baseline_onset_is_later(self) -> None:
         """The negative half of the axis is live for a slower-incubating pathogen."""
-        baseline = _onset_day(0.0, symptom_onset_day=4.0)
-        faster = _onset_day(-2.0, symptom_onset_day=4.0)
+        baseline = _onset_day(0.0, symptom_onset_day=4.0, legacy=True)
+        faster = _onset_day(-2.0, symptom_onset_day=4.0, legacy=True)
         assert baseline == 4
         assert faster == 2
 
     def test_slower_onset_can_outlast_the_observation_window(self) -> None:
-        assert _onset_day(1.0) > int(ONSET_DAY)
+        assert _onset_day(3.0) > _onset_day(0.0)
 
 
 # ── Immune escape / cross-immunity ──────────────────────────────────────
@@ -366,17 +379,24 @@ class TestUnrelatedKnobs:
         assert values[0] == pytest.approx(values[-1])
 
     def test_shedding_does_not_move_onset(self) -> None:
-        agent = _agent()
-        agent.infect_with_pathogen(
-            PATHOGEN, 1e12, 0,
-            strain_id="s:1",
-            strain_phenotype=Phenotype(shedding_multiplier=8.0),
-        )
-        rng = np.random.default_rng(3)
-        profile = {**_norwalk_profile(), "recovery_day": 30}
-        _advance_agent_pathogen_infections(agent, {PATHOGEN: profile}, rng)
-        assert agent.infections[PATHOGEN]["illness"] == IllnessStatus.SYMPTOMATIC
-        assert agent.infections[PATHOGEN]["time_infected"] == int(ONSET_DAY)
+        onsets = []
+        for multiplier in (0.25, 1.0, 8.0):
+            agent = _agent()
+            agent.infect_with_pathogen(
+                PATHOGEN, 1e12, 0,
+                strain_id="s:1",
+                strain_phenotype=Phenotype(shedding_multiplier=multiplier),
+            )
+            rng = np.random.default_rng(3)
+            profile = {**_norwalk_profile(), "recovery_day": 30}
+            for _ in range(12):
+                _advance_agent_pathogen_infections(agent, {PATHOGEN: profile}, rng)
+                inf = agent.infections[PATHOGEN]
+                if inf["illness"] == IllnessStatus.SYMPTOMATIC:
+                    onsets.append(int(inf["time_infected"]))
+                    break
+        assert len(onsets) == 3
+        assert len(set(onsets)) == 1, onsets
 
     def test_registry_phenotype_reaches_the_infection_record(self) -> None:
         registry = StrainRegistry()

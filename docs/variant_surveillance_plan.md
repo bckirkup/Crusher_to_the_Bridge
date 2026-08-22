@@ -234,6 +234,10 @@ candidate), but setting one changes main-line presentation timing — hence
 detection timing, hence every headline result — so it is left unset here rather
 than folded into a phenotype PR.
 
+*Resolved by PR 7b.* A point onset day was the wrong instrument: incubation is
+now a per-infection draw from a per-pathogen distribution conditioned on dose
+and host biology, which subsumes `symptom_onset_day` and retires the seam.
+
 **PR 3b — co-infection and within-host competition (decision 1).**
 The blocking design change. `agent.infections` is keyed by pathogen id and
 `execute_transmission` skips any agent already infected
@@ -435,6 +439,44 @@ to one. And the failure mode is graded by two separate dials — `min_pathogen_r
 (a library too shallow to separate anything) versus `min_lineage_reads` /
 `min_lineage_fraction` (a minority lineage present but unreportable) — because
 the paper's claim about sufficient depth depends on which of the two bites.
+
+**PR 7b — incubation as a distribution (supersedes the `symptom_onset_day`
+decision).** Parameters and provenance live in
+[`ctb_incubation_spec.md`](ctb_incubation_spec.md); this section records only
+what the implementation does with them. `engines/incubation.py` draws one
+lognormal or gamma incubation period per infection, conditioned on the
+establishing inoculum (`dose_log10_shortening` above `dose_reference_log10`,
+clamped below by a per-pathogen `dose_floor`) and truncated to the pathogen's
+plausible window; the draw is persisted on the infection record, and
+`incubation_modifier` shifts the drawn value, which is what finally makes the
+negative half of that phenotype axis live. A profile with no `incubation` block
+keeps the legacy fixed-onset path exactly, so pathogens are migrated one at a
+time.
+
+Three deliberate departures from the sketch. The profile states `median_days`
+and `dispersion` rather than the spec's `mu`/`sigma`, because a reviewer reads a
+median in days and a geometric standard deviation, and the lognormal parameters
+are recoverable from them exactly. `host_factors` exist in the schema but are
+*absent* from every shipped profile: the spec's own reading is that frailty
+moves severity strongly and incubation at most weakly, so host conditioning is a
+sensitivity arm rather than a main-line default — a test asserts both the
+absence and that switching the axis on still moves onset. And
+`dose_reference_log10` is each profile's own beta-Poisson `N50` in model units,
+not the spec's literature figure in RT-PCR units or TCID50: taking the
+literature unit literally put every simulated host three or more log10 above the
+reference, pinned the dose factor at the floor, and moved main-line onset enough
+to flip both golden trigger fixtures from `BASELINE` to `CONFIRMED` — a constant
+acceleration masquerading as dose conditioning. Referenced to `N50` the goldens
+are unchanged, a typical host presents at the literature median, and both
+directions of the dose effect stay reachable; a regression test asserts the
+reference is not saturating. What remains uncalibrated is the *magnitude* of the
+shift at a given simulated dose, so its direction can be claimed and its size
+cannot.
+
+Still unimplemented from the spec, each its own scoped work: the frailty score
+and its severity coupling, wearable-baseline coupling and pre-symptomatic
+anomaly lead time, long-shedder behaviour, gamma-fitted variant lineages
+(Alpha/Delta), and the remaining pathogen rows beyond norovirus and SARS-CoV-2.
 
 **PR 8 — surface sampling strain recovery.**
 Surface swabs report the strain mixture of the depositing agents from PR 4's

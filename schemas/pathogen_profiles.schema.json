@@ -151,6 +151,84 @@
       },
       "additionalProperties": false
     },
+    "Incubation": {
+      "type": "object",
+      "description": "Incubation period as a distribution, conditioned on inoculum and host biology. Absent → the fixed symptom_onset_day path. Cross-field constraints JSON Schema cannot express (max_days > min_days, min_days below the median) are enforced by IncubationModel and reported by tools/sanity_checker.py.",
+      "required": ["median_days", "notes"],
+      "properties": {
+        "distribution": {
+          "type": "string",
+          "enum": ["lognormal", "gamma"],
+          "description": "Family the incubation period is drawn from."
+        },
+        "median_days": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Literature median incubation period at the reference dose in a neutral host."
+        },
+        "dispersion": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Geometric standard deviation (lognormal) or coefficient of variation (gamma). Lognormal requires > 1."
+        },
+        "min_days": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Lower truncation of the drawn period."
+        },
+        "max_days": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Upper truncation of the drawn period; must exceed min_days."
+        },
+        "dose_reference_log10": {
+          "type": "number",
+          "description": "log10 inoculum at which median_days applies."
+        },
+        "dose_log10_shortening": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Fractional reduction of the median per log10 of inoculum above the reference (and lengthening below it)."
+        },
+        "dose_floor": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1,
+          "description": "Smallest multiple of the median a large inoculum may produce (docs/ctb_incubation_spec.md dose_floor)."
+        },
+        "host_factors": {
+          "type": "object",
+          "description": "Multipliers on the median per host axis; > 1 lengthens incubation. Absent (the shipped default) is the spec's recommendation: host frailty modifies severity strongly and incubation at most weakly, so these belong to a sensitivity arm rather than the main line.",
+          "properties": {
+            "immunocompromised": {"type": "number", "exclusiveMinimum": 0},
+            "prior_immunity": {"type": "number", "exclusiveMinimum": 0},
+            "age_bands": {
+              "type": "object",
+              "additionalProperties": {"type": "number", "exclusiveMinimum": 0}
+            }
+          },
+          "additionalProperties": false
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Provenance for the median, dispersion, and conditioning terms. Required: an unanchored incubation period silently sets detection timing for every result."
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "description": "A lognormal dispersion is a geometric standard deviation, so 1 is a point mass and below 1 is inverted.",
+          "if": {
+            "anyOf": [
+              {"properties": {"distribution": {"const": "lognormal"}}, "required": ["distribution"]},
+              {"not": {"required": ["distribution"]}}
+            ]
+          },
+          "then": {"properties": {"dispersion": {"exclusiveMinimum": 1}}}
+        }
+      ]
+    },
     "PathogenProfile": {
       "type": "object",
       "required": ["pathogen_id", "name", "transmission_routes"],
@@ -239,6 +317,7 @@
         },
         "recovery_day": {"type": "integer", "minimum": 0},
         "symptom_onset_day": {"type": "number", "minimum": 0},
+        "incubation": {"$ref": "#/$defs/Incubation"},
         "surface_deposition_fraction": {
           "type": "number",
           "minimum": 0,

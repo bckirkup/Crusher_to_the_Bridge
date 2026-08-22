@@ -44,6 +44,7 @@ from crusher_labs.modalities.clinical_strain_typing import (  # noqa: E402
     AssayConfigError,
     SequencingAssay,
 )
+from engines.incubation import IncubationModel  # noqa: E402
 from engines.strain_state import (  # noqa: E402
     StrainConfigError,
     StrainEvolutionConfig,
@@ -303,6 +304,8 @@ class PathogenProfile(BaseModel):
     initial_infected: int = 1
     initial_time_infected: int = 0
     shedding_profile: dict[str, Any] = {}
+    incubation: dict[str, Any] = {}
+    symptom_onset_day: float | None = None
     strain_evolution: dict[str, Any] = {}
     sequencing_assay: dict[str, Any] = {}
 
@@ -495,6 +498,69 @@ def _check_strain_evolution(
         _warn_unreachable_strain_rates(p, report)
         _warn_cross_immunity_shape(p, report)
         _check_sequencing_assay(p, report)
+
+
+def _check_incubation_models(
+    pathogens: PathogensFile | None,
+    report: Report,
+) -> None:
+    """Validate optional incubation distributions.
+
+    Parsing is delegated to ``IncubationModel.from_mapping`` so the checker and
+    the progression seam cannot disagree about what a valid distribution is.
+    """
+    if pathogens is None:
+        return
+    for p in pathogens.pathogens:
+        if not p.incubation:
+            continue
+        try:
+            model = IncubationModel.from_mapping(p.incubation)
+        except ValueError as exc:
+            report.error(
+                _ACTIVE_PROFILES_JSON,
+                "INCUBATION_CONFIG",
+                f"{p.pathogen_id}.incubation invalid: {exc}",
+            )
+            continue
+        if model is not None:
+            _check_incubation_shape(p, model, report)
+
+
+def _check_incubation_shape(
+    profile: PathogenProfile,
+    model: IncubationModel,
+    report: Report,
+) -> None:
+    """Flag distributions that cannot produce observable illness.
+
+    A median past the recovery day means the typical host clears before it
+    presents, which reads as a mild pathogen but is really a mis-specified
+    incubation period; and a leftover ``symptom_onset_day`` alongside a
+    distribution is dead configuration that will mislead the next reader.
+    """
+    if not str(profile.incubation.get("notes", "")).strip():
+        report.error(
+            _ACTIVE_PROFILES_JSON,
+            "INCUBATION_CONFIG",
+            f"{profile.pathogen_id}.incubation has no notes: an incubation "
+            f"period with no provenance sets detection timing for every result",
+        )
+    if model.median_days >= float(profile.recovery_day):
+        report.warn(
+            _ACTIVE_PROFILES_JSON,
+            "INCUBATION_CONFIG",
+            f"{profile.pathogen_id}.incubation.median_days "
+            f"({model.median_days}) is at or past recovery_day "
+            f"({profile.recovery_day}): most hosts recover before presenting",
+        )
+    if profile.symptom_onset_day is not None:
+        report.warn(
+            _ACTIVE_PROFILES_JSON,
+            "INCUBATION_CONFIG",
+            f"{profile.pathogen_id} has both incubation and symptom_onset_day: "
+            f"the distribution wins and symptom_onset_day is never read",
+        )
 
 
 def _check_sequencing_assay(profile: PathogenProfile, report: Report) -> None:
@@ -2029,6 +2095,15 @@ def run_checks(
         print(f"  {_YELLOW}Found {added} issue(s){_RESET}")
     else:
         print(f"  {_GREEN}No contradictions detected{_RESET}")
+
+    print(f"  {_CYAN}Running incubation distribution checks...{_RESET}")
+    pre = len(report.findings)
+    _check_incubation_models(pathogens, report)
+    added = len(report.findings) - pre
+    if added:
+        print(f"  {_YELLOW}Found {added} issue(s){_RESET}")
+    else:
+        print(f"  {_GREEN}Incubation distributions valid{_RESET}")
 
     print(f"  {_CYAN}Running strain evolution checks...{_RESET}")
     pre = len(report.findings)

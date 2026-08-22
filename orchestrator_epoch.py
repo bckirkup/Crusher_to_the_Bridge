@@ -16,6 +16,11 @@ from typing import Any
 import numpy as np
 
 from crusher_labs.modalities.wearable import WearableDataStream
+from engines.incubation import (
+    IncubationHost,
+    IncubationModel,
+    host_incubation_state,
+)
 from engines.infection_dynamics_bridge import (
     IllnessStatus,
     InfectionStatus,
@@ -47,7 +52,8 @@ from telemetry_buffer.agent_axes import (
 )
 
 # Earliest day post-infection symptoms can appear (Person.java: dpi >= 1),
-# before any strain-specific incubation modifier.
+# before any strain-specific incubation modifier. Used only by pathogens
+# without an ``incubation`` distribution block.
 ONSET_DAY = 1.0
 
 
@@ -340,6 +346,53 @@ def _record_cleared_immunity(
         ))
 
 
+def _incubation_days(
+    agent: IncubationHost,
+    pathogen_id: str,
+    inf: dict[str, Any],
+    profile: dict[str, Any],
+    rng: np.random.Generator,
+) -> float:
+    """This infection's incubation period, drawn once and then remembered.
+
+    Drawn at the first progression step rather than at infection so every entry
+    point — seeding, transmission, environmental acquisition — gets a draw, and
+    conditioned on the inoculum actually acquired. A pathogen with no
+    ``incubation`` block keeps its fixed onset day.
+    """
+    stored = inf.get("incubation_days")
+    if stored is not None:
+        return float(stored)
+    model = IncubationModel.from_mapping(profile.get("incubation"))
+    if model is None:
+        drawn = float(profile.get("symptom_onset_day", ONSET_DAY))
+    else:
+        drawn = model.sample_days(
+            dose=float(inf["acquired_particles"]),
+            host=host_incubation_state(agent, pathogen_id),
+            rng=rng,
+        )
+    inf["incubation_days"] = drawn
+    return drawn
+
+
+def _onset_day(
+    agent: IncubationHost,
+    pathogen_id: str,
+    inf: dict[str, Any],
+    profile: dict[str, Any],
+    rng: np.random.Generator,
+) -> float:
+    """Day post-infection this host's symptoms can first appear.
+
+    A strain's incubation modifier shifts the host's own drawn period (negative
+    = faster onset), so both halves of the phenotype axis are live for any
+    pathogen whose incubation distribution has room below its median.
+    """
+    drawn = _incubation_days(agent, pathogen_id, inf, profile, rng)
+    return max(0.0, drawn + float(inf.get("strain_incubation_modifier", 0.0)))
+
+
 def _advance_agent_pathogen_infections(
     agent: Any,
     pathogen_profiles: dict[str, dict[str, Any]],
@@ -356,15 +409,7 @@ def _advance_agent_pathogen_infections(
             inf["time_infected"] += 1
 
         dpi = inf["time_infected"] or 0
-        # A strain's incubation modifier shifts the earliest day symptoms can
-        # appear (negative = faster onset). Faster onset only becomes visible
-        # for a pathogen whose baseline onset is later than the first day post
-        # infection, since nothing is evaluated before then.
-        onset_day = max(
-            0.0,
-            float(prof.get("symptom_onset_day", ONSET_DAY))
-            + float(inf.get("strain_incubation_modifier", 0.0)),
-        )
+        onset_day = _onset_day(agent, pid, inf, prof, rng)
         if dpi >= onset_day and inf["illness"] == IllnessStatus.NOT_ILL:
             ill_params = prof.get("illness_probability", {})
             eta_p = ill_params.get("eta", 0.508)
