@@ -34,7 +34,7 @@ import math
 import os
 import statistics
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Any, Mapping, Sequence
 
 from picard_framework import PicardRunSpec, ShipSimulation
@@ -120,7 +120,7 @@ class ArmsDesign:
     hazard_profile: str = DEFAULT_HAZARD_PROFILE
     fleet_config: str = DEFAULT_FLEET_CONFIG
     r_onboard: float = DEFAULT_R_ONBOARD
-    pathogen: str = "norovirus"
+    pathogen: str = ""  # empty: take the manifest's sole pathogen config
     surveillance: str = DEFAULT_SURVEILLANCE
 
 
@@ -454,6 +454,7 @@ def simulate_arm(
 ) -> str:
     """Simulate every voyage of one arm; write the extract layout and onsets."""
     man = dict(manifest or load_manifest())
+    design = replace(design, pathogen=resolve_pathogen_key(man, design.pathogen))
     hazards = hazards_for_profile(man, design.hazard_profile)
     bundle, pathogen_id, base_overrides = _pathogen_config(man, design.pathogen)
     profiles = bundle_profiles(bundle)
@@ -558,11 +559,24 @@ def _write_arm_index(
     )
 
 
+def resolve_pathogen_key(manifest: Mapping[str, Any], pathogen: str) -> str:
+    """Manifest pathogen-config key, defaulting to the sole one declared."""
+    configs = manifest.get("pathogen_configs") or {}
+    if pathogen:
+        return pathogen
+    if len(configs) != 1:
+        raise SystemExit(
+            "manifest declares several pathogen configs; name one explicitly",
+        )
+    return str(next(iter(configs)))
+
+
 def _pathogen_config(
     manifest: Mapping[str, Any],
     pathogen: str,
 ) -> tuple[str, str, dict[str, Any] | None]:
-    cfg = (manifest.get("pathogen_configs") or {}).get(pathogen)
+    configs = manifest.get("pathogen_configs") or {}
+    cfg = configs.get(resolve_pathogen_key(manifest, pathogen))
     if not isinstance(cfg, dict):
         raise SystemExit(f"manifest has no pathogen config named {pathogen!r}")
     overrides = cfg.get("overrides")

@@ -721,6 +721,15 @@ class TestDefensiveEdges:
                 n_init=0,
             )
 
+    def test_a_sole_pathogen_config_needs_no_naming(self):
+        manifest = {"pathogen_configs": {"only": {"pathogen_id": "p"}}}
+        assert ia.resolve_pathogen_key(manifest, "") == "only"
+
+    def test_an_ambiguous_manifest_demands_an_explicit_pathogen(self):
+        manifest = {"pathogen_configs": {"a": {}, "b": {}}}
+        with pytest.raises(SystemExit):
+            ia.resolve_pathogen_key(manifest, "")
+
     def test_non_dict_clinical_cases_are_dropped(self):
         obs = _observations([("1", 50, 74)])
         obs["clinical_cases"].append("not a case")
