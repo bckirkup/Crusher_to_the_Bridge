@@ -33,7 +33,7 @@ from typing import Any
 
 import numpy as np
 
-from engines.strain_state import Phenotype
+from engines.strain_state import ImmuneRecord, Phenotype
 
 # ── Korkin Lab parameters (from Person.java) ─────────────────────────────
 
@@ -327,7 +327,7 @@ class KorkinAgent:
         "chronic_wearable_response_scale",
         "shedding_multiplier", "cabin_mate_ids", "ashore",
         # Variant surveillance: genotype standing immunity was raised against
-        "prior_genotypes",
+        "prior_genotypes", "immune_history",
     )
 
     def __init__(
@@ -389,6 +389,10 @@ class KorkinAgent:
         # {pathogen_id: genotype} the agent's pre-existing immunity was raised
         # against; empty unless variant surveillance is on
         self.prior_genotypes: dict[str, str] = {}
+
+        # Every resolved exposure, appended as each lineage clears; empty unless
+        # variant surveillance is on
+        self.immune_history: list[ImmuneRecord] = []
 
     @property
     def days_post_infection(self) -> int:
@@ -651,17 +655,26 @@ class KorkinAgent:
         residents = inf.get("strains")
         return residents if isinstance(residents, dict) else {}
 
-    def advance_resident_strains(self, pathogen_id: str, recovery_day: int) -> int:
+    def advance_resident_strains(
+        self,
+        pathogen_id: str,
+        recovery_day: int,
+        cleared: list[str] | None = None,
+    ) -> int:
         """Age each resident lineage by a day and clear those past recovery.
 
         Returns the number still resident, so the caller can hold the
-        pathogen-level infection open until the last lineage clears.
+        pathogen-level infection open until the last lineage clears. Ids of the
+        lineages that cleared this call are appended to ``cleared`` when given,
+        since each one is an exposure the host now has immune memory of.
         """
         residents = self.resident_strains(pathogen_id)
         for strain_id, resident in tuple(residents.items()):
             resident.time_infected += 1
             if resident.time_infected >= recovery_day:
                 del residents[strain_id]
+                if cleared is not None:
+                    cleared.append(strain_id)
         if residents:
             self._promote_primary_strain(pathogen_id, residents)
         return len(residents)
@@ -691,6 +704,23 @@ class KorkinAgent:
         if inf is None:
             return False
         return inf["status"] == InfectionStatus.INFECTED
+
+    def record_immunity(self, record: ImmuneRecord) -> None:
+        """Remember one resolved exposure.
+
+        A repeat of a genotype already recorded is still appended: exposure count
+        and timing are what a serology or reinfection analysis reads, and
+        protection is computed over the distinct genotypes anyway.
+        """
+        self.immune_history.append(record)
+
+    def immune_genotypes(self, pathogen_id: str) -> tuple[str, ...]:
+        """Distinct genotypes this host has immune memory of, in first-seen order."""
+        seen: dict[str, None] = {}
+        for record in self.immune_history:
+            if record.pathogen_id == pathogen_id and record.genotype:
+                seen.setdefault(record.genotype, None)
+        return tuple(seen)
 
     def strain_id_for(self, pathogen_id: str) -> str | None:
         """Primary strain of an infection, or ``None`` if untracked.

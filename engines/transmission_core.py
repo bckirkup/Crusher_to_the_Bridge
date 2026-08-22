@@ -64,9 +64,12 @@ from engines.strain_dose_ledger import (
 )
 from engines.strain_mutation import MutationOperator
 from engines.strain_state import (
+    IMMUNITY_AT_EMBARKATION,
+    ImmuneRecord,
     Phenotype,
     StrainEvolutionConfig,
     StrainRegistry,
+    StrainState,
 )
 
 # ── Pathway-specific parameters ──────────────────────────────────────────
@@ -249,6 +252,21 @@ AIRBORNE_COMPOSITION_RETENTION = 0.5
 
 # Pool mass at or under which a contributor counts as gone from a reservoir
 POOL_EXTINCTION_MASS = 1e-12
+
+
+def _best_protection(
+    config: StrainEvolutionConfig,
+    priors: tuple[str, ...],
+    challenge: StrainState,
+) -> float:
+    """Protection the best-matched prior exposure gives against a challenge.
+
+    The maximum over the host's immune history rather than a sum: repeated
+    exposure to related genotypes does not stack past what the closest match
+    already gives, and a host that has met the challenge genotype itself is
+    protected as if its heterologous exposures had not happened.
+    """
+    return max(config.effective_protection(prior, challenge) for prior in priors)
 
 
 class TransmissionCore:
@@ -757,26 +775,57 @@ class TransmissionCore:
             return ("", None)
         return contributor
 
-    def _prior_genotype(self, agent: KorkinAgent, pathogen_id: str) -> str | None:
-        """Genotype this agent's standing immunity was raised against.
+    def _embarkation_genotype(
+        self, agent: KorkinAgent, pathogen_id: str,
+    ) -> str | None:
+        """Genotype an agent immune at embarkation is immune *against*.
 
-        Two sources: a resolved infection of the same pathogen (its strain's
-        genotype), or, for an agent immune at embarkation, a genotype drawn once
-        from ``prior_genotype_distribution`` — pre-existing immunity has to be
-        *against something* before a challenge genotype can escape it.
+        Drawn once from ``prior_genotype_distribution`` and cached, because
+        pre-existing immunity has to be against something before a challenge
+        genotype can escape it. Also written to the immune history, so standing
+        immunity and immunity earned aboard read the same way downstream.
         """
-        if self.strain_registry is None:
-            return None
-        prior_strain = agent.strain_id_for(pathogen_id)
-        if prior_strain is not None:
-            return self.strain_registry.get(prior_strain).genotype or None
         if not agent.immune:
             return None
         cached = agent.prior_genotypes.get(pathogen_id)
         if cached is None:
             cached = self._founder_genotype(pathogen_id)
             agent.prior_genotypes[pathogen_id] = cached
+            if cached:
+                agent.record_immunity(ImmuneRecord(
+                    pathogen_id=pathogen_id,
+                    genotype=cached,
+                    origin=IMMUNITY_AT_EMBARKATION,
+                ))
         return cached or None
+
+    def _prior_genotypes(
+        self, agent: KorkinAgent, pathogen_id: str,
+    ) -> tuple[str, ...]:
+        """Every genotype this agent's standing immunity was raised against.
+
+        Three sources: exposures resolved aboard (the immune history, which is a
+        snapshot and so survives the lineage being collected), lineages still
+        resident — an ongoing infection interferes with a challenge of its own
+        genotype before it has cleared — and, for an agent immune at
+        embarkation, the drawn prior. A host that has resolved two genotypes is
+        protected by both, so the challenge is scored against the best match
+        rather than the most recent exposure.
+        """
+        if self.strain_registry is None:
+            return ()
+        priors: dict[str, None] = dict.fromkeys(
+            agent.immune_genotypes(pathogen_id),
+        )
+        for strain_id in agent.resident_strains(pathogen_id):
+            if strain_id in self.strain_registry:
+                genotype = self.strain_registry.get(strain_id).genotype
+                if genotype:
+                    priors.setdefault(genotype, None)
+        embarked = self._embarkation_genotype(agent, pathogen_id)
+        if embarked:
+            priors.setdefault(embarked, None)
+        return tuple(priors)
 
     def _challenge_protection(self, agent: KorkinAgent, pathogen_id: str) -> float:
         """Protection against this epoch's challenge, in [0, 1].
@@ -793,8 +842,8 @@ class TransmissionCore:
         legacy = 1.0 if agent.immune else 0.0
         if self.strain_registry is None or config is None or not config.cross_immunity:
             return legacy
-        prior = self._prior_genotype(agent, pathogen_id)
-        if prior is None:
+        priors = self._prior_genotypes(agent, pathogen_id)
+        if not priors:
             return 0.0
         shares = self._strain_doses.get(agent.agent_id, {}).get(pathogen_id, {})
         total = sum(shares.values())
@@ -804,7 +853,9 @@ class TransmissionCore:
         # genotype to be recognised, so it stays in the denominator at zero
         # protection rather than being credited to the identified strains.
         weighted = sum(
-            dose * config.effective_protection(prior, self.strain_registry.get(sid))
+            dose * _best_protection(
+                config, priors, self.strain_registry.get(sid),
+            )
             for (sid, _source), dose in shares.items()
             if sid and sid != UNRESOLVED_STRAIN
         )

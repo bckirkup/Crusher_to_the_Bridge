@@ -488,6 +488,7 @@ def _check_strain_evolution(
             )
             continue
         _warn_unreachable_strain_rates(p, report)
+        _warn_cross_immunity_shape(p, report)
 
 
 def _warn_unreachable_strain_rates(profile: PathogenProfile, report: Report) -> None:
@@ -519,6 +520,40 @@ def _warn_unreachable_strain_rates(profile: PathogenProfile, report: Report) -> 
             f"but superinfection_susceptibility 0: co-infection can never occur, "
             f"so no recombination is reachable",
         )
+
+
+def _warn_cross_immunity_shape(profile: PathogenProfile, report: Report) -> None:
+    """Flag a cross-immunity matrix whose rows cannot mean what they say.
+
+    Two shapes are almost always mistakes rather than models: a genotype with no
+    row, which silently makes every host that resolved it fully susceptible to
+    everything, and a row whose homologous entry is not its maximum, which says
+    a host is better protected against a genotype it has never met.
+    """
+    block = profile.strain_evolution
+    matrix = block.get("cross_immunity") or {}
+    if not matrix:
+        return
+    for genotype in block.get("genotypes", []) or []:
+        row = matrix.get(genotype)
+        if not row:
+            report.warn(
+                _ACTIVE_PROFILES_JSON,
+                "STRAIN_CONFIG",
+                f"{profile.pathogen_id}.strain_evolution.cross_immunity has no "
+                f"row for genotype {genotype}: prior infection with it confers "
+                f"no protection at all",
+            )
+            continue
+        homologous = float(row.get(genotype, 0.0))
+        if homologous < max(float(v) for v in row.values()):
+            report.warn(
+                _ACTIVE_PROFILES_JSON,
+                "STRAIN_CONFIG",
+                f"{profile.pathogen_id}.strain_evolution.cross_immunity"
+                f"[{genotype}] protects better against another genotype than "
+                f"against itself",
+            )
 
 
 def _check_graph_integrity(

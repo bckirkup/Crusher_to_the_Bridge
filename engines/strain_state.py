@@ -30,6 +30,11 @@ STRAIN_ORIGINS = frozenset(
 
 SHIP_LOCATION = "ship"
 
+# How a host came to have immunity against a genotype.
+IMMUNITY_FROM_INFECTION = "infection"
+IMMUNITY_AT_EMBARKATION = "embarkation"
+IMMUNITY_ORIGINS = frozenset({IMMUNITY_FROM_INFECTION, IMMUNITY_AT_EMBARKATION})
+
 # Phenotype axes a single mutation can act on (spec §1.2).
 PHENOTYPE_AXES: tuple[str, ...] = (
     "transmissibility",
@@ -132,6 +137,51 @@ class StrainState:
             "origin": self.origin,
             "source_location": self.source_location,
             "recombinant": self.recombinant,
+        }
+
+
+@dataclass(frozen=True)
+class ImmuneRecord:
+    """One resolved exposure of one host to one pathogen (spec §1.4).
+
+    A self-contained snapshot rather than a pointer into the registry: the
+    genotype and the escape phenotype are copied at recovery, because
+    :meth:`StrainRegistry.collect` forgets a lineage once no host and no pool
+    carry it, while the immunity that lineage raised outlives it for the rest of
+    the voyage.
+
+    ``origin`` distinguishes immunity earned aboard (``infection``) from standing
+    immunity an agent embarked with (``embarkation``), whose genotype is drawn
+    from ``prior_genotype_distribution`` and whose ``epoch`` is 0 because the
+    exposure predates the run.
+    """
+
+    pathogen_id: str
+    genotype: str
+    strain_id: str = ""
+    epoch: int = 0
+    immune_escape: float = 0.0
+    origin: str = IMMUNITY_FROM_INFECTION
+
+    def __post_init__(self) -> None:
+        if not self.pathogen_id:
+            raise StrainConfigError("immune record pathogen_id must be non-empty")
+        if self.origin not in IMMUNITY_ORIGINS:
+            raise StrainConfigError(
+                f"unknown immunity origin {self.origin!r}; "
+                f"expected one of {sorted(IMMUNITY_ORIGINS)}",
+            )
+        _require_unit_interval("immune_escape", self.immune_escape)
+
+    def to_telemetry(self) -> dict[str, Any]:
+        """Compact serializable form for line lists and immunity artifacts."""
+        return {
+            "pathogen_id": self.pathogen_id,
+            "genotype": self.genotype,
+            "strain_id": self.strain_id,
+            "epoch": self.epoch,
+            "immune_escape": self.immune_escape,
+            "origin": self.origin,
         }
 
 

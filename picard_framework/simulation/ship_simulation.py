@@ -703,7 +703,12 @@ class ShipSimulation:
                 work.epoch_voyage,
             ),
         )
-        step_infection_progression(self.engine, self.pathogen_profiles)
+        step_infection_progression(
+            self.engine,
+            self.pathogen_profiles,
+            self.tx_core.strain_registry,
+            work.epoch,
+        )
         work.tracing_matrix, _tx_events = self.tx_core.execute_transmission(
             epoch=work.epoch,
             agents=self.engine.agents,

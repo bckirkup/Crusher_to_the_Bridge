@@ -21,6 +21,7 @@ from engines.infection_dynamics_bridge import (
     InfectionStatus,
     KorkinShipEngine,
 )
+from engines.strain_state import ImmuneRecord, StrainRegistry
 from engines.wearable_monitor import WearableMonitor
 from orchestrator_types import (
     DEFAULT_AIRBORNE_FRACTION,
@@ -311,10 +312,40 @@ def step_shore_introductions(
 
 # ── Infection progression ────────────────────────────────────────────────
 
+def _record_cleared_immunity(
+    agent: Any,
+    pathogen_id: str,
+    cleared: list[str],
+    strain_registry: StrainRegistry | None,
+    epoch: int,
+) -> None:
+    """Write an immune record for each lineage that just cleared.
+
+    One record per lineage, not one per infection: a co-infected host resolves
+    two exposures and comes out of it with memory of both genotypes, which is
+    the whole point of sequencing a mixed infection.
+    """
+    if strain_registry is None:
+        return
+    for strain_id in cleared:
+        if strain_id not in strain_registry:
+            continue
+        strain = strain_registry.get(strain_id)
+        agent.record_immunity(ImmuneRecord(
+            pathogen_id=pathogen_id,
+            genotype=strain.genotype,
+            strain_id=strain_id,
+            epoch=epoch,
+            immune_escape=strain.immune_escape,
+        ))
+
+
 def _advance_agent_pathogen_infections(
     agent: Any,
     pathogen_profiles: dict[str, dict[str, Any]],
     rng: np.random.Generator,
+    strain_registry: StrainRegistry | None = None,
+    epoch: int = 0,
 ) -> None:
     for pid, inf in tuple(agent.infections.items()):
         if inf["status"] != InfectionStatus.INFECTED:
@@ -352,7 +383,9 @@ def _advance_agent_pathogen_infections(
         # Co-resident lineages clear on their own clocks, so the pathogen-level
         # infection stays open until the last one goes: a strain acquired on day
         # four is still being shed when the primary infection would have ended.
-        residents_left = agent.advance_resident_strains(pid, recovery_day)
+        cleared: list[str] = []
+        residents_left = agent.advance_resident_strains(pid, recovery_day, cleared)
+        _record_cleared_immunity(agent, pid, cleared, strain_registry, epoch)
         if dpi >= recovery_day and residents_left == 0:
             inf["status"] = InfectionStatus.RECOVERED
             inf["illness"] = IllnessStatus.RECOVERED
@@ -361,13 +394,22 @@ def _advance_agent_pathogen_infections(
 def step_infection_progression(
     engine: KorkinShipEngine,
     pathogen_profiles: dict[str, dict[str, Any]],
+    strain_registry: StrainRegistry | None = None,
+    epoch: int = 0,
 ) -> None:
-    """Advance multi-pathogen infection, illness, recovery, and mass accumulation."""
+    """Advance multi-pathogen infection, illness, recovery, and mass accumulation.
+
+    ``strain_registry`` is the transmission core's registry when variant
+    surveillance is on, read here (before the epoch's collection) so a clearing
+    lineage can leave the host an immune record of its genotype.
+    """
     if not pathogen_profiles:
         return
 
     for agent in engine.agents:
-        _advance_agent_pathogen_infections(agent, pathogen_profiles, engine.rng)
+        _advance_agent_pathogen_infections(
+            agent, pathogen_profiles, engine.rng, strain_registry, epoch,
+        )
 
         any_active = any(
             inf["status"] == InfectionStatus.INFECTED
