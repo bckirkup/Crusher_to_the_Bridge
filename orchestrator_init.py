@@ -939,6 +939,9 @@ def init_multi_pathogen(
         for aid in chosen:
             immunocompromised_ids.add(int(aid))
             agent = engine.agents[int(aid)]
+            # Also host biology, not only a susceptibility multiplier: an
+            # immunosuppressed host incubates longer as well as infecting easier.
+            agent.immunocompromised = True
             for pid in pathogen_profiles:
                 # Preserve innate nonsusceptibility (multiplier 0).
                 if agent.susceptibility_multiplier.get(pid, 1.0) > 0.0:

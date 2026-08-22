@@ -328,6 +328,8 @@ class KorkinAgent:
         "shedding_multiplier", "cabin_mate_ids", "ashore",
         # Variant surveillance: genotype standing immunity was raised against
         "prior_genotypes", "immune_history",
+        # Host biology read by the incubation distribution
+        "age_band", "immunocompromised",
     )
 
     def __init__(
@@ -350,6 +352,10 @@ class KorkinAgent:
         self.immune = immune
         self.infection_status = InfectionStatus.IMMUNE if immune else InfectionStatus.SUSCEPTIBLE
         self.illness_status = IllnessStatus.NOT_ILL
+        # Host biology conditioning the incubation draw. Populated by the
+        # population builders that know it; neutral (no effect) when they don't.
+        self.age_band: str = ""
+        self.immunocompromised: bool = False
         self.time_infected: int | None = None
         self.acquired_particles: float = 0.0
         self.home_zone = home_zone
