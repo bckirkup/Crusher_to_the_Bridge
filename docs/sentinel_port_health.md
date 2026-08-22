@@ -119,7 +119,7 @@ uninstrumented port has no evidence of quiet, only an absence of evidence.
 
 ## Port profile libraries
 
-Four cruise theatres, as data rather than code:
+Four cruise theatres plus one fictional network, as data rather than code:
 
 | Region | Ports | Character |
 |---|---|---|
@@ -127,6 +127,7 @@ Four cruise theatres, as data rather than code:
 | `mediterranean` | ESPMI, GRPIR, ITCIV, FRMRS, HRDBV, TRIST | ECDC coordination, EU sewage sentinel WBE |
 | `nordic` | DKCPH, NOOSL, SESTO, DEKEL, ISREY | Best instrumented: 1–2 day delays, high coverage, low LODs |
 | `alaska` | USSEA, USJNU, USKTN, USSIT, CAVAN | US pathways, tiny catchments — the noisiest Poisson regime |
+| `federation` | SBONE, SBELV, FARPT, DSNIN, SBSVF, RISAA, MEMAL, KSEVN | **Fictional** (`docs/variant_surveillance_spec.md` §3), for the Enterprise platforms; invented capabilities, not citable ones |
 
 The four ports of `sentinel_ww_ops_scan_v1` (USMIA, MXCZM, MXCTM, KYGEC) are all
 profiled. A port called by an itinerary but absent from every library gets a

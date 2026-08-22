@@ -7,7 +7,10 @@ real port can be corrected against a citation without touching the model.
 The regions are the four cruise theatres the sentinel scan uses: the Caribbean
 (the surveillance desert the ship is meant to fill), the Mediterranean and the
 Nordic ports (dense municipal WBE, so the validation correlation is computable),
-and Alaska (US-flag reporting with sparse municipal infrastructure).
+and Alaska (US-flag reporting with sparse municipal infrastructure). A fifth,
+``federation``, is the fictional port network of the Enterprise platforms; its
+values are invented for the setting rather than cited, and it loads through the
+same path as the other four so nothing downstream special-cases it.
 """
 
 from __future__ import annotations
@@ -24,11 +27,13 @@ REGION_CARIBBEAN = "caribbean"
 REGION_MEDITERRANEAN = "mediterranean"
 REGION_NORDIC = "nordic"
 REGION_ALASKA = "alaska"
+REGION_FEDERATION = "federation"
 PROFILE_REGIONS: tuple[str, ...] = (
     REGION_CARIBBEAN,
     REGION_MEDITERRANEAN,
     REGION_NORDIC,
     REGION_ALASKA,
+    REGION_FEDERATION,
 )
 
 _PROFILE_KEY = "port_surveillance_profiles"
