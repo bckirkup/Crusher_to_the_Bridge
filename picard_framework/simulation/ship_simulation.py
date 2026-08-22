@@ -11,6 +11,7 @@ from typing import Any
 import numpy as np
 
 from crusher_labs import build_modalities
+from crusher_labs.modalities.clinical_strain_typing import specimen_genotype_mixture
 from crusher_labs.protocol_engine import (
     apply_hvac_modifiers,
     apply_transmission_modifiers,
@@ -113,6 +114,27 @@ def _agent_is_shedding(agent: Any, pathogen_id: str) -> bool:
     if pathogen_id:
         return bool(agent.is_infected_with(pathogen_id))
     return bool(agent.is_infected)
+
+
+def _agent_wastewater_lineages(
+    agent: Any,
+    pathogen_id: str,
+    profile: dict[str, Any],
+    registry: Any,
+) -> dict[str, float]:
+    """Genotype mass one host contributes to the plumbing this epoch.
+
+    Weighted by emitted shedding rather than per capita: a host at peak sheds
+    orders of magnitude more than one on its last day, and a tank's composition
+    is set by what arrived in it, not by how many people contributed.
+    """
+    mixture = specimen_genotype_mixture(agent, pathogen_id, profile, registry)
+    if not mixture:
+        return {}
+    emitted = float(agent.get_pathogen_shedding(pathogen_id, dict(profile)))
+    if emitted <= 0.0:
+        return {}
+    return {genotype: emitted * share for genotype, share in mixture.items()}
 
 
 @dataclass
@@ -481,20 +503,46 @@ class ShipSimulation:
             return
         pathogen_id = sampler.config.pathogen_id
         fallback = sampler.config.collection_points[0]
+        registry = self._wastewater_strain_registry()
+        profile = (self.pathogen_profiles or {}).get(pathogen_id) or {}
         aboard: dict[str, float] = {}
         shedders: dict[str, float] = {}
+        composition: dict[str, dict[str, float]] = {}
         for agent in self.engine.agents:
             if agent.ashore:
                 continue
             point = self._wastewater_routing.get(agent.home_zone, fallback)
             aboard[point] = aboard.get(point, 0.0) + 1.0
-            if _agent_is_shedding(agent, pathogen_id):
-                shedders[point] = shedders.get(point, 0.0) + 1.0
+            if not _agent_is_shedding(agent, pathogen_id):
+                continue
+            shedders[point] = shedders.get(point, 0.0) + 1.0
+            if registry is None:
+                continue
+            tap = composition.setdefault(point, {})
+            for genotype, mass in _agent_wastewater_lineages(
+                agent, pathogen_id, profile, registry,
+            ).items():
+                tap[genotype] = tap.get(genotype, 0.0) + mass
         sampler.observe_epoch(
             epoch,
             shedders_by_point=shedders,
             population_by_point=aboard,
+            composition_by_point=composition,
         )
+
+    def _wastewater_strain_registry(self) -> Any | None:
+        """Strain registry the wastewater channel deconvolves against, if any.
+
+        ``None`` when strains are untracked or deconvolution is not configured:
+        without a registry there are no lineages in the tank, and the pathogen
+        call is the whole result.
+        """
+        sampler = self.wastewater_sampler
+        if sampler is None or not sampler.config.strain_deconvolution.enabled:
+            return None
+        if self.tx_core is None or not sampler.config.pathogen_id:
+            return None
+        return self.tx_core.strain_registry
 
     def _sentinel_port_id(self, port_name: str) -> str:
         """Configured ``port_id`` for a port name, or a slug of it."""

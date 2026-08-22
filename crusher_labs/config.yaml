@@ -398,6 +398,15 @@ wastewater_surveillance:
   background_read_fraction: 0.9999     # 1 - max informative read fraction
   pathogen: "norovirus"                # delay-catalog key written on samples
   pathogen_id: "norwalk_gi"            # ABM profile whose shedders are counted
+  # Lineage recovery inside the on-target reads of the amplicon/long_read modes.
+  # Requires variant_surveillance.enabled: with no strain registry the tank has
+  # no composition to recover. metagenomic and qpcr ignore it by construction.
+  strain_deconvolution:
+    enabled: false
+    dirichlet_concentration: 200.0     # library/amplification reproducibility
+    min_pathogen_reads: 100            # library too shallow to separate lineages
+    min_lineage_reads: 20              # reads a reported lineage must clear
+    min_lineage_fraction: 0.02         # abundance floor a reported lineage clears
 
 # ── Instrument turnaround (TAT) ───────────────────────────────
 instrument_turnaround:
