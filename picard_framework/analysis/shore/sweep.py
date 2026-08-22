@@ -52,6 +52,7 @@ def _row(
     residual_importation_fraction: float,
     case_threshold: float,
     capability: PortSurveillanceCapability | None,
+    surveillance_label: str | None,
 ) -> dict[str, Any]:
     """Run and flatten one Cartesian surface point."""
     result = evaluate_counterfactual(
@@ -60,6 +61,7 @@ def _row(
         residual_importation_fraction=residual_importation_fraction,
         case_threshold=case_threshold,
         capability=capability,
+        surveillance_label=surveillance_label,
     )
     return {
         "r_shore": params.r_shore,
@@ -76,12 +78,6 @@ def _row(
         "unbounded_growth_ship": result.ship_arm.unbounded_growth,
         "unbounded_growth_port": result.port_arm.unbounded_growth,
     }
-
-
-def _dispersion(values: Iterable[float]) -> float:
-    """Population standard deviation for a reported surface metric."""
-    arr = np.asarray(list(values), dtype=float)
-    return float(np.std(arr)) if arr.size else 0.0
 
 
 def _relative_dispersion(values: Sequence[float]) -> float:
@@ -117,6 +113,7 @@ def benefit_surface(
     residual_importation_fraction: float,
     case_threshold: float,
     capability: PortSurveillanceCapability | None = None,
+    surveillance_label: str | None = None,
 ) -> dict[str, Any]:
     """Return rows and dispersion summary for ``R_shore × multiplier``.
 
@@ -145,14 +142,9 @@ def benefit_surface(
             residual_importation_fraction=residual_importation_fraction,
             case_threshold=case_threshold,
             capability=capability,
+            surveillance_label=surveillance_label,
         )
         for r_value, multiplier in product(r_values, multipliers)
-    ]
-    fractions = [row["benefit_fraction"] for row in rows]
-    arm_totals = [
-        value
-        for row in rows
-        for value in (row["total_ship_arm"], row["total_port_arm"])
     ]
     fraction_cv = _mean_cv_across_r(rows, multipliers, "benefit_fraction")
     ship_cv = _mean_cv_across_r(rows, multipliers, "total_ship_arm")
@@ -161,8 +153,6 @@ def benefit_surface(
     return {
         "rows": rows,
         "summary": {
-            "benefit_fraction_dispersion": _dispersion(fractions),
-            "absolute_arm_total_dispersion": _dispersion(arm_totals),
             "benefit_fraction_cv_across_r": fraction_cv,
             "ship_arm_total_cv_across_r": ship_cv,
             "port_arm_total_cv_across_r": port_cv,

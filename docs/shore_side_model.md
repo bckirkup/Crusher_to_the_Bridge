@@ -25,7 +25,13 @@ capability and the canonical incubation projection from the active pathogen
 profile. Active profile identifiers and the surveillance catalog's
 public-health labels are not guaranteed to match, so the detection module
 resolves the catalog label against the canonical profile name; that is a
-translation, not a new surveillance parameter. Ascertainment is syndromic coverage times expected onsets; the
+translation, not a new surveillance parameter. Callers may instead provide an
+explicit surveillance label when they have authoritative vocabulary mapping.
+An unresolved non-empty catalog vocabulary raises an error: silently treating
+that mismatch as no ascertainment would leave the port arm uncurtailed and
+inflate the apparent benefit of shipboard detection. A label that does resolve
+but is not covered by the programme is different and legitimately returns no
+port detection. Ascertainment is syndromic coverage times expected onsets; the
 profile's syndromic delay and, when applicable, laboratory turnaround are
 converted to epochs. Detection is measured on the uncontrolled trajectory,
 which is exact before detection because both counterfactual arms are identical

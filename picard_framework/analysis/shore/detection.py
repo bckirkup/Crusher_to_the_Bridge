@@ -11,7 +11,9 @@ The active profile identifiers and the surveillance catalog's public-health
 labels are not guaranteed to be identical.  The small translation below
 matches catalog labels against the canonical profile name; it is a vocabulary
 adapter, not a new surveillance parameter.  Callers still select the port
-capability from the existing catalog.
+capability from the existing catalog.  An unresolved mismatch raises instead
+of silently making the port programme mute, because that would inflate the
+apparent benefit of shipboard detection.
 """
 
 from __future__ import annotations
@@ -42,17 +44,30 @@ def _ascertains(
     capability: PortSurveillanceCapability,
     pathogen_id: str,
     profile: Mapping[str, object],
+    surveillance_label: str | None,
 ) -> bool:
     """Whether this port's syndromic programme reports these cases at all."""
-    profile_name = str(profile.get("name", "")).casefold()
-    label = next(
-        (
-            candidate
-            for candidate in capability.syndromic_pathogens
-            if candidate.casefold() in profile_name
-        ),
-        pathogen_id,
-    )
+    if surveillance_label is not None:
+        label = surveillance_label
+    else:
+        profile_name = str(profile.get("name", ""))
+        label = next(
+            (
+                candidate
+                for candidate in capability.syndromic_pathogens
+                if candidate.casefold() in profile_name.casefold()
+            ),
+            None,
+        )
+        if label is None and capability.syndromic_pathogens:
+            raise ValueError(
+                "could not resolve surveillance label for pathogen "
+                f"{pathogen_id!r} with profile name {profile_name!r}; "
+                "capability syndromic_pathogens="
+                f"{capability.syndromic_pathogens!r}",
+            )
+        if label is None:
+            label = pathogen_id
     return capability.reports_syndromic(label)
 
 
@@ -77,8 +92,17 @@ def port_detection_epoch(
     case_threshold: float,
     capability: PortSurveillanceCapability | None = None,
     profiles: Mapping[str, Mapping[str, object]] | None = None,
+    surveillance_label: str | None = None,
 ) -> int | None:
-    """Return first reported-threshold epoch, or ``None`` if never crossed."""
+    """Return first reported-threshold epoch, or ``None`` if never crossed.
+
+    ``surveillance_label`` explicitly selects the capability vocabulary when
+    supplied.  Without it, a catalog label must match the canonical profile
+    name or this function raises ``ValueError``; silently treating an
+    unresolved label as an uncovered pathogen would bias benefit upward.
+    A resolved label that the capability does not cover legitimately returns
+    ``None`` after producing no ascertained onsets.
+    """
     if epoch_hours <= 0.0:
         raise ValueError("epoch_hours must be positive")
     if case_threshold < 0.0 or not math.isfinite(float(case_threshold)):
@@ -95,32 +119,10 @@ def port_detection_epoch(
     selected = _capability(port_id, capability)
     ascertained = (
         onsets * selected.syndromic_coverage
-        if _ascertains(selected, pathogen_id, profile)
+        if _ascertains(selected, pathogen_id, profile, surveillance_label)
         else np.zeros_like(onsets)
     )
     crossed = np.flatnonzero(np.cumsum(ascertained) >= case_threshold)
     if crossed.size == 0:
         return None
     return int(crossed[0]) + _reporting_delay_epochs(selected, epoch_hours=epoch_hours)
-
-
-def detect_port(
-    incidence: Sequence[float] | np.ndarray,
-    *,
-    port_id: str,
-    pathogen_id: str,
-    epoch_hours: float,
-    case_threshold: float,
-    capability: PortSurveillanceCapability | None = None,
-    profiles: Mapping[str, Mapping[str, object]] | None = None,
-) -> int | None:
-    """Descriptive alias for :func:`port_detection_epoch`."""
-    return port_detection_epoch(
-        incidence,
-        port_id=port_id,
-        pathogen_id=pathogen_id,
-        epoch_hours=epoch_hours,
-        case_threshold=case_threshold,
-        capability=capability,
-        profiles=profiles,
-    )

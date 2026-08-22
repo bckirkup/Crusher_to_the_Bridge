@@ -187,8 +187,6 @@ class TestSurface:
         # arm-total CV across R = 0.559986, ratio = 0.118374.
         assert summary["benefit_fraction_cv_across_r"] < summary["arm_total_cv_across_r"]
         assert summary["cv_ratio_across_r"] < 0.5
-        assert summary["benefit_fraction_dispersion"] >= 0.0
-        assert summary["absolute_arm_total_dispersion"] > 0.0
 
     def test_surface_grid_validation(self) -> None:
         kwargs = {

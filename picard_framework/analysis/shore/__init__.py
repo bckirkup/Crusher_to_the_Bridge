@@ -13,10 +13,7 @@ from picard_framework.analysis.shore.counterfactual import (
     ShoreArmResult,
     evaluate_counterfactual,
 )
-from picard_framework.analysis.shore.detection import (
-    detect_port,
-    port_detection_epoch,
-)
+from picard_framework.analysis.shore.detection import port_detection_epoch
 from picard_framework.analysis.shore.importation import PortCallImportation
 from picard_framework.analysis.shore.renewal import (
     DEPLETION_FRACTION,
@@ -36,7 +33,6 @@ __all__ = [
     "ShoreRenewalParameters",
     "ShoreRenewalResult",
     "benefit_surface",
-    "detect_port",
     "evaluate_counterfactual",
     "port_detection_epoch",
     "renewal_by_strain",

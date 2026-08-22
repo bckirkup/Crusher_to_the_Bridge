@@ -90,12 +90,12 @@ class CounterfactualResult:
 
     @property
     def total_ship_arm(self) -> float:
-        """Compatibility-friendly scalar arm total."""
+        """Return total shore cases in the ship-timed arm."""
         return self.ship_arm.total_cases
 
     @property
     def total_port_arm(self) -> float:
-        """Compatibility-friendly scalar arm total."""
+        """Return total shore cases in the port-timed arm."""
         return self.port_arm.total_cases
 
 
@@ -106,6 +106,7 @@ def evaluate_counterfactual(
     residual_importation_fraction: float,
     case_threshold: float,
     capability: PortSurveillanceCapability | None = None,
+    surveillance_label: str | None = None,
 ) -> CounterfactualResult:
     """Evaluate the required two-arm counterfactual.
 
@@ -121,6 +122,7 @@ def evaluate_counterfactual(
         epoch_hours=importation.epoch_hours,
         case_threshold=case_threshold,
         capability=capability,
+        surveillance_label=surveillance_label,
     )
     ship_importation = _curtailed_importation(
         importation,

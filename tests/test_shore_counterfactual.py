@@ -9,7 +9,6 @@ from picard_framework.analysis.sentinel.port_health import PortSurveillanceCapab
 from picard_framework.analysis.shore import (
     PortCallImportation,
     ShoreRenewalParameters,
-    detect_port,
     evaluate_counterfactual,
     port_detection_epoch,
 )
@@ -243,18 +242,6 @@ class TestDetection:
             capability=_capability(),
         ) is None
 
-    def test_alias_matches_primary_detection_function(self) -> None:
-        kwargs = {
-            "port_id": "TESTPORT",
-            "pathogen_id": "norwalk_gi",
-            "epoch_hours": EPOCH_HOURS,
-            "case_threshold": 5.0,
-            "capability": _capability(),
-        }
-        primary = port_detection_epoch(np.full(30, 5.0), **kwargs)
-        alias = detect_port(np.full(30, 5.0), **kwargs)
-        assert alias == primary
-
     def test_reporting_delay_and_lab_turnaround_are_added(self) -> None:
         incidence = np.full(30, 5.0)
         syndromic_only = port_detection_epoch(
@@ -288,6 +275,7 @@ class TestDetection:
             epoch_hours=EPOCH_HOURS,
             case_threshold=5.0,
             capability=capability,
+            surveillance_label="norovirus",
         ) is None
 
     def test_active_profile_and_public_label_are_adapted(self) -> None:
@@ -301,6 +289,49 @@ class TestDetection:
             capability=capability,
         )
         assert detected is not None
+
+    def test_unresolvable_surveillance_label_raises_loudly(self) -> None:
+        capability = _capability(syndromic_pathogens=("dengue",))
+        with pytest.raises(
+            ValueError,
+            match="norwalk_gi.*Norwalk Virus.*dengue",
+        ):
+            port_detection_epoch(
+                np.full(30, 5.0),
+                port_id="TESTPORT",
+                pathogen_id="norwalk_gi",
+                epoch_hours=EPOCH_HOURS,
+                case_threshold=5.0,
+                capability=capability,
+            )
+
+    def test_real_catalog_reporting_delay_anchors_counterfactual(self) -> None:
+        importation = _importation(ship_detection_epoch=0)
+        slow_port = PortCallImportation(
+            port_id="MXCTM",
+            pathogen_id=importation.pathogen_id,
+            epoch_hours=importation.epoch_hours,
+            strain_importations=importation.strain_importations,
+            ship_detection_epoch=importation.ship_detection_epoch,
+        )
+        fast_port = PortCallImportation(
+            port_id="USMIA",
+            pathogen_id=importation.pathogen_id,
+            epoch_hours=importation.epoch_hours,
+            strain_importations=importation.strain_importations,
+            ship_detection_epoch=importation.ship_detection_epoch,
+        )
+        kwargs = {
+            "parameters": _parameters(),
+            "residual_importation_fraction": 0.0,
+            "case_threshold": 10.0,
+        }
+        slow = evaluate_counterfactual(slow_port, **kwargs)
+        fast = evaluate_counterfactual(fast_port, **kwargs)
+        assert slow.port_detection_epoch > fast.port_detection_epoch
+        assert slow.port_detection_epoch - fast.port_detection_epoch >= 6
+        assert slow.benefit > fast.benefit
+        assert slow.benefit - fast.benefit > 10.0
 
     @pytest.mark.parametrize(
         "kwargs, message",
