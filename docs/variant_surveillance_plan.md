@@ -478,7 +478,10 @@ representations, a sentinel delay catalog that is not derived from the profiles,
 13 profiles still on the fixed-onset fallback, and a calibration axis the dose
 term now interacts with — is audited and sequenced in
 [`incubation_reconciliation_plan.md`](incubation_reconciliation_plan.md),
-together with the re-fit and `main`-exposure calls.
+together with the re-fit and `main`-exposure calls. Whether the already
+published paper 1 and paper 2 conclusions survive the refinement is a separate
+question with its own paired-arm protocol:
+[`incubation_sensitivity_protocol.md`](incubation_sensitivity_protocol.md).
 
 Still unimplemented from the spec, each its own scoped work: the frailty score
 and its severity coupling, wearable-baseline coupling and pre-symptomatic
