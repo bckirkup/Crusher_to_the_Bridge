@@ -130,8 +130,17 @@ def lognormal_delay(
     sigma: float,
     epoch_hours: float,
     max_hours: float,
+    min_hours: float = 0.0,
 ) -> DelayDistribution:
-    """Discretize a lognormal delay onto the epoch grid by CDF differences."""
+    """Discretize a lognormal delay onto the epoch grid by CDF differences.
+
+    ``min_hours`` truncates on the left as ``max_hours`` does on the right: mass
+    below it is removed before renormalizing, so the pmf is the delay
+    distribution *conditional* on landing in ``(min_hours, max_hours]``. The
+    pathogen profiles state such a minimum (no case presents in the first hour
+    of a norovirus exposure), and dropping it silently would make the sentinel
+    kernel earlier than the simulator that generated the onsets.
+    """
     if median_hours <= 0.0:
         raise ValueError(f"{name}: median_hours must be positive")
     if sigma <= 0.0:
@@ -139,10 +148,22 @@ def lognormal_delay(
     hours = float(epoch_hours or 1.0)
     if hours <= 0.0:
         raise ValueError(f"{name}: epoch_hours must be positive")
+    floor_hours = float(min_hours)
+    if floor_hours < 0.0:
+        raise ValueError(f"{name}: min_hours must not be negative")
+    if floor_hours >= float(max_hours):
+        raise ValueError(
+            f"{name}: min_hours={floor_hours} leaves no support below "
+            f"max_hours={max_hours}",
+        )
     n_bins = max(1, int(math.ceil(float(max_hours) / hours)))
     mu = math.log(float(median_hours))
-    edges = [_normal_cdf((math.log(k * hours) - mu) / sigma) if k > 0 else 0.0
-             for k in range(n_bins + 1)]
+    edges = [
+        _normal_cdf((math.log(max(k * hours, floor_hours)) - mu) / sigma)
+        if max(k * hours, floor_hours) > 0.0
+        else 0.0
+        for k in range(n_bins + 1)
+    ]
     masses = np.diff(np.asarray(edges, dtype=float))
     total = masses.sum()
     if total <= 0.0:
@@ -192,6 +213,7 @@ def delay_from_spec(
             median_hours=float(spec["median_hours"]),
             sigma=float(spec["sigma"]),
             epoch_hours=epoch_hours,
+            min_hours=float(spec.get("min_hours") or 0.0),
             max_hours=float(spec.get("max_hours") or 240.0),
         )
     if family == DISCRETE:

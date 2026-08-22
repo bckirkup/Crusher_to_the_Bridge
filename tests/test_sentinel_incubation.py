@@ -259,9 +259,15 @@ def test_discrete_delay_validation() -> None:
 
 
 def test_norovirus_golden_summary() -> None:
-    """Change detector for the bundled norovirus incubation pmf."""
+    """Change detector for the bundled norovirus incubation pmf.
+
+    Now a projection of the norwalk_gi profile (median 1.2 d, GSD 1.56, 0.1-6 d)
+    rather than a separately authored entry, which is why these numbers moved
+    from 33 h / 19 h / 120 h of support. tests/test_sentinel_profile_delays.py
+    is what holds them to the profile; this stays a change detector.
+    """
     incubation = norovirus_incubation()
-    assert incubation.quantile_hours(0.5) == pytest.approx(33.0)
-    assert incubation.iqr_hours == pytest.approx(19.0)
-    assert incubation.max_lag == 119  # 120 h of support on a 1 h grid
+    assert incubation.quantile_hours(0.5) == pytest.approx(29.0)
+    assert incubation.iqr_hours == pytest.approx(17.0)
+    assert incubation.max_lag == 143  # 144 h of support on a 1 h grid
     assert math.isclose(sum(incubation.pmf), 1.0, rel_tol=1e-9)
