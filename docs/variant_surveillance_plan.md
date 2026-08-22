@@ -323,6 +323,48 @@ and no pool references them. Tests: mass conservation per pathogen across the
 mixture, floor behaviour, and a memory/step-time ceiling check on a
 2,000-agent run.
 
+*Implemented.* Every lagged pool the engine doses from — zone aerosol (read by
+the HVAC pathway from `zone_pathogen_mass` / `multi_pathogen_mass`), surfaces,
+food, and the `env_contamination` reservoirs — now carries a
+`{(strain, depositor): mass}` composition that ages with the same factor as the
+scalar pool it shadows, so a pickup is attributed to what is *in* the pool
+rather than to whoever happens to be shedding at pickup time. Aerosol
+composition is read before this epoch's shedding is added, which is what makes a
+downstream HVAC dose inherit the air already standing in the target zone;
+upstream shedders remain the fallback for air the composition does not yet
+cover. A zone-scoped environmental reservoir is minted a founder lineage at its
+own standing mass the first time it is read (a spa biofilm or spore load has a
+lineage no host deposited), and under strain tracking a shedding occupant now
+adds `ENV_HOST_DEPOSITION_FRACTION` of its emission to both the reservoir and
+its composition, so the two describe the same pool. With tracking off no
+composition exists and no host input is added, so the scalar reservoir is the
+legacy reservoir exactly.
+
+Two semantics worth stating because they change what a pool assay can claim.
+First, the frequency floor conserves mass exactly rather than truncating: below
+`min_strain_fraction` a contributor's *depositor* is forgotten first (the lineage
+survives, its provenance does not), and a lineage still below the floor moves to
+an `unresolved` pseudo-strain. That bin is deliberately never registered, so a
+dose drawn from it yields *no* parent strain — the acquiring host is minted its
+own founder — and it contributes nothing to cross-immunity recognition while
+staying in the denominator at zero protection. This is the modelling statement
+that a pool assay cannot call a variant below its limit of detection: the mass
+is real, the lineage is not attributable. That floor is a property of the
+*state representation* (it bounds a pool at roughly one entry per resolvable
+lineage regardless of host count); the depth of a particular assay is a design
+choice and stays in PR 6, so the two must not be conflated. Second, the largest
+lineage is always kept even when every share is sub-floor, so a flat mixture
+never collapses a pool to pure `unresolved`.
+
+Registry collection runs once per epoch: a lineage is live if an infection
+carries it (any resident of a co-infection, not only the primary) or if a pool
+still holds more than `POOL_EXTINCTION_MASS` of it, and the ancestry of anything
+live is retained — both parents of a recombinant included — because
+`lineage_root` and the tree an assay reconstructs are the point of the exercise.
+Ids are monotone, so a collected id is never reused. The environmental founders
+are also held, one per pathogen, since they are reused whenever a reservoir is
+re-seeded.
+
 **PR 5 — immune history and cross-immunity.**
 `agent.immune_history: list[ImmuneRecord]` appended at the per-pathogen
 recovery seam (`orchestrator_epoch.py:340`) carrying pathogen, genotype,

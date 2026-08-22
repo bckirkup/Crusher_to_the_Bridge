@@ -51,6 +51,7 @@ from engines.infection_dynamics_bridge import (
     KorkinAgent,
 )
 from engines.strain_dose_ledger import (
+    UNRESOLVED_STRAIN,
     Contributor,
     DoseAttribution,
     EmissionContribution,
@@ -60,7 +61,6 @@ from engines.strain_dose_ledger import (
     attribution,
     build_emission_mix,
     draw_contributor,
-    single_strain_mix,
 )
 from engines.strain_mutation import MutationOperator
 from engines.strain_state import (
@@ -228,9 +228,27 @@ FOOD_INGESTION_FRACTION = 0.05
 # Fraction of environmental load delivered per zone per epoch
 ENV_DELIVERY_FRACTION = 0.01
 
+# Fraction of a shedding host's emission entering a zone-scoped environmental
+# reservoir (spore shedding into a spa or ward). Applied only under variant
+# surveillance, since it adds a host input the scalar reservoir never had.
+ENV_HOST_DEPOSITION_FRACTION = 1e-4
+
 # Reservoir kinds tracked by the strain composition shadow of the pools
 SURFACE_RESERVOIR = "surface"
 FOOD_RESERVOIR = "food"
+AIRBORNE_RESERVOIR = "air"
+ENV_RESERVOIR = "env"
+
+# Zone stand-in for the ship-wide (HVAC-systemic) environmental reservoir
+SHIP_WIDE_ZONE = "_ship"
+
+# Per-epoch survival of a zone's aerosol composition. Mirrors the bridge's flat
+# airborne decay (ENV_DECAY_RATE); only shares are read, so any uniform
+# rescaling the transport engine applies on top leaves attribution unchanged.
+AIRBORNE_COMPOSITION_RETENTION = 0.5
+
+# Pool mass at or under which a contributor counts as gone from a reservoir
+POOL_EXTINCTION_MASS = 1e-12
 
 
 class TransmissionCore:
@@ -379,7 +397,7 @@ class TransmissionCore:
             if self.strain_registry is not None
             else None
         )
-        # Strain composition of the lagged reservoirs (surfaces, food, environment)
+        # Strain composition of the lagged pools (air, surfaces, food, environment)
         self._reservoir = ReservoirComposition()
         # Founder strain of each pathogen's environmental reservoir
         self._env_strain_ids: dict[str, str] = {}
@@ -393,7 +411,7 @@ class TransmissionCore:
         return self.strain_registry is not None
 
     def _transmissibility(self, strain_id: str) -> float:
-        if self.strain_registry is None:
+        if self.strain_registry is None or strain_id == UNRESOLVED_STRAIN:
             return 1.0
         return self.strain_registry.get(strain_id).transmissibility_multiplier
 
@@ -522,10 +540,15 @@ class TransmissionCore:
             pathogen_id,
         )
 
+    def _min_strain_fraction(self, pathogen_id: str) -> float:
+        """Frequency floor below which a pool's lineages are lumped."""
+        config = self.strain_configs.get(pathogen_id)
+        return 0.0 if config is None else config.min_strain_fraction
+
     def _reservoir_mix(
         self, kind: str, pathogen_id: str, zone_name: str,
     ) -> EmissionMix | None:
-        """Emission mix of a surface or food reservoir's deposited strains."""
+        """Emission mix of a pool's current strain composition."""
         if self.strain_registry is None:
             return None
         key = ReservoirComposition.key(kind, pathogen_id, zone_name)
@@ -542,7 +565,7 @@ class TransmissionCore:
         zone_name: str,
         deposits: list[tuple[KorkinAgent, float]],
     ) -> None:
-        """Record who deposited what into a lagged reservoir."""
+        """Record who deposited what into a lagged pool."""
         if self.strain_registry is None:
             return
         key = ReservoirComposition.key(kind, pathogen_id, zone_name)
@@ -551,28 +574,126 @@ class TransmissionCore:
                 self._reservoir.deposit(
                     key, (strain_id, agent.agent_id), strain_mass,
                 )
+        self._reservoir.lump(self._min_strain_fraction(pathogen_id), key)
+
+    def _seed_environmental_composition(
+        self,
+        pathogen_id: str,
+        zone_name: str,
+        level: float,
+    ) -> None:
+        """Give a reservoir its founder lineage the first time it is read.
+
+        A reservoir that predates the run (spa biofilm, spore load) has a
+        lineage no host deposited, so it is minted once at the pool's own mass
+        and then competes with host deposits like any other contributor. An
+        empty reservoir is not seeded: its composition is whatever hosts put in
+        it.
+        """
+        key = ReservoirComposition.key(ENV_RESERVOIR, pathogen_id, zone_name)
+        if level <= 0.0 or self._reservoir.contributors(key):
+            return
+        strain_id = self._environmental_strain_id(pathogen_id)
+        if strain_id is None:
+            return
+        self._reservoir.deposit(key, (strain_id, None), level)
 
     def _environmental_attribution(
         self,
         ledger: StrainDoseLedger | None,
         pathogen_id: str,
+        zone_name: str = SHIP_WIDE_ZONE,
+        level: float = 0.0,
     ) -> DoseAttribution | None:
         """Attribution for reservoir-only exposure (no shedder to name)."""
-        strain_id = self._environmental_strain_id(pathogen_id)
-        if strain_id is None:
+        if self.strain_registry is None or pathogen_id == "_default":
             return None
-        return attribution(
-            ledger,
-            single_strain_mix(
-                strain_id, transmissibility=self._transmissibility(strain_id),
-            ),
+        self._seed_environmental_composition(pathogen_id, zone_name, level)
+        mix = self._reservoir_mix(ENV_RESERVOIR, pathogen_id, zone_name)
+        if mix is None:
+            return None
+        return attribution(ledger, mix)
+
+    def _update_env_reservoir_strains(
+        self,
+        pathogen_id: str,
+        zone_name: str,
+        level: float,
+        factor: float,
+        occupants: list[KorkinAgent],
+        profile: dict[str, Any],
+    ) -> float:
+        """Age a zone reservoir's composition and add host shedding to it.
+
+        Returns the mass deposited, which is added to the scalar reservoir too so
+        the pool and its composition describe the same thing.
+        """
+        if self.strain_registry is None or pathogen_id == "_default":
+            return 0.0
+        key = ReservoirComposition.key(ENV_RESERVOIR, pathogen_id, zone_name)
+        self._seed_environmental_composition(pathogen_id, zone_name, level)
+        self._reservoir.decay(factor, key)
+        deposits = [
+            (agent, sv * ENV_HOST_DEPOSITION_FRACTION)
+            for agent, sv in self._get_shedders(occupants, pathogen_id, profile)
+        ]
+        self._deposit_reservoir_strains(
+            ENV_RESERVOIR, pathogen_id, zone_name, deposits,
         )
+        return sum(mass for _, mass in deposits)
+
+    def _airborne_composition(
+        self,
+        pathogen_id: str,
+        zone_shedders: dict[str, list[tuple[KorkinAgent, float]]],
+    ) -> None:
+        """Age each zone's aerosol composition, then add this epoch's shedding.
+
+        Read before the deposit, so a downstream pickup is attributed to the air
+        that is already in the zone rather than to whoever is shedding upstream
+        right now — the composition is the lag the scalar pool does not carry.
+        """
+        if self.strain_registry is None:
+            return
+        self._reservoir.decay_kind(
+            AIRBORNE_COMPOSITION_RETENTION,
+            f"{AIRBORNE_RESERVOIR}|{pathogen_id}",
+        )
+        for zone_name, shedders in zone_shedders.items():
+            self._deposit_reservoir_strains(
+                AIRBORNE_RESERVOIR, pathogen_id, zone_name, list(shedders),
+            )
 
     def _decay_surface_composition(self) -> None:
         """Age surface strain composition with the surface pools it shadows."""
         if self.strain_registry is None:
             return
         self._reservoir.decay_kind(1.0 - SURFACE_DECAY_RATE, SURFACE_RESERVOIR)
+
+    def collect_extinct_strains(self, agents: list[KorkinAgent]) -> tuple[str, ...]:
+        """Drop registry entries no host and no pool still references.
+
+        Live means carried by an infection (any resident lineage of a
+        co-infection, not just the record's primary) or standing in a pool above
+        :data:`POOL_EXTINCTION_MASS`; the registry additionally keeps the
+        ancestry of what is live, so a lineage's parents stay callable after the
+        lineage itself dies out. The environmental founders are held too — one
+        per pathogen, reused whenever a reservoir is re-seeded.
+        """
+        if self.strain_registry is None:
+            return ()
+        self._reservoir.drop_empty(POOL_EXTINCTION_MASS)
+        live: set[str] = set(self._env_strain_ids.values())
+        live |= self._reservoir.strain_ids()
+        for agent in agents:
+            for infection in agent.infections.values():
+                strain_id = infection.get("strain_id")
+                if strain_id is not None:
+                    live.add(str(strain_id))
+                residents = infection.get("strains")
+                if isinstance(residents, dict):
+                    live |= {str(sid) for sid in residents}
+        return self.strain_registry.collect(live)
 
     def _accumulate(
         self,
@@ -622,12 +743,19 @@ class TransmissionCore:
                 bucket[contributor] = bucket.get(contributor, 0.0) + dose * mult
 
     def _draw_source(self, agent_id: int, pathogen_id: str) -> Contributor:
-        """Draw the parent strain (and its shedder) from the dose shares."""
+        """Draw the parent strain (and its shedder) from the dose shares.
+
+        A draw that lands on the unresolved bin of a pool returns no parent: the
+        acquiring host carries a lineage the pool could not resolve, and is
+        minted its own founder if it ever sheds.
+        """
         shares = self._strain_doses.get(agent_id, {}).get(pathogen_id, {})
         if not shares:
             return ("", None)
         contributor = draw_contributor(shares, self.rng)
-        return contributor if contributor is not None else ("", None)
+        if contributor is None or contributor[0] == UNRESOLVED_STRAIN:
+            return ("", None)
+        return contributor
 
     def _prior_genotype(self, agent: KorkinAgent, pathogen_id: str) -> str | None:
         """Genotype this agent's standing immunity was raised against.
@@ -672,13 +800,13 @@ class TransmissionCore:
         total = sum(shares.values())
         if total <= 0.0:
             return legacy
-        # Unattributed dose (no strain) carries no genotype to be recognised, so
-        # it stays in the denominator at zero protection rather than being
-        # credited to whichever strains happen to be identified.
+        # Unattributed dose — no strain, or a pool's sub-floor tail — carries no
+        # genotype to be recognised, so it stays in the denominator at zero
+        # protection rather than being credited to the identified strains.
         weighted = sum(
             dose * config.effective_protection(prior, self.strain_registry.get(sid))
             for (sid, _source), dose in shares.items()
-            if sid
+            if sid and sid != UNRESOLVED_STRAIN
         )
         return max(0.0, min(1.0, weighted / total))
 
@@ -1052,6 +1180,7 @@ class TransmissionCore:
         # ── Update persistent state for next epoch ───────────────────
         self._update_surface_pools(zone_occupants)
         self._update_prev_occupancy(zone_occupants)
+        self.collect_extinct_strains(agents)
 
         return matrix, events
 
@@ -1468,18 +1597,21 @@ class TransmissionCore:
         pathogen_id: str = "_default",
         ledger: StrainDoseLedger | None = None,
     ) -> None:
-        """Exposure from airborne pathogen drifted via HVAC from upstream zones."""
-        shedding_zones: dict[str, tuple[list[int], EmissionMix | None]] = {}
+        """Exposure from airborne pathogen drifted via HVAC from upstream zones.
+
+        The dose is taken from the mass standing in the *target* zone, which is
+        older than this epoch's shedding, so it is attributed to that zone's
+        aerosol composition; the upstream shedders are the fallback for air whose
+        history the composition does not yet cover.
+        """
+        zone_shedders: dict[str, list[tuple[KorkinAgent, float]]] = {}
         for zone_name, occupants in zone_occupants.items():
             shedders = self._get_shedders(occupants, pathogen_id, None)
             if shedders:
-                shedding_zones[zone_name] = (
-                    [s.agent_id for s, _ in shedders],
-                    self._shedder_mix(shedders, pathogen_id),
-                )
+                zone_shedders[zone_name] = shedders
 
         # For each downstream zone receiving HVAC air from a shedding zone
-        for source_zone, (shedder_ids, mix) in shedding_zones.items():
+        for source_zone, shedders in zone_shedders.items():
             downstream = hvac_downstream_zones.get(source_zone, [])
             for target_zone in downstream:
                 if target_zone == source_zone:
@@ -1489,12 +1621,18 @@ class TransmissionCore:
                 if mass_in_target <= 0:
                     continue
 
+                mix = self._reservoir_mix(
+                    AIRBORNE_RESERVOIR, pathogen_id, target_zone,
+                ) or self._shedder_mix(shedders, pathogen_id)
                 self._apply_hvac_downstream_doses(
-                    target_zone, source_zone, shedder_ids, mass_in_target,
+                    target_zone, source_zone, [s.agent_id for s, _ in shedders],
+                    mass_in_target,
                     zone_occupants, agent_doses, matrix,
                     agent_pathway_doses, pathogen_id,
                     attribution(ledger, mix),
                 )
+
+        self._airborne_composition(pathogen_id, zone_shedders)
 
     # ── Pathway 4: Fomite Deposition & Surface Touch ─────────────────
 
@@ -1639,11 +1777,18 @@ class TransmissionCore:
             for _, sv in shedders:
                 food_zones[zone_name] += sv * FOOD_DEPOSITION_FRACTION
 
-            # Net growth (reproduction minus decay)
+            # Net growth (reproduction minus decay), applied to the pool and to
+            # its composition together so the two stay proportional
             pool = food_zones[zone_name]
             if pool > 0:
                 pool *= (1.0 + growth - decay)
                 food_zones[zone_name] = max(pool, 0.0)
+                self._reservoir.decay(
+                    1.0 + growth - decay,
+                    ReservoirComposition.key(
+                        FOOD_RESERVOIR, pathogen_id, zone_name,
+                    ),
+                )
 
             if food_zones[zone_name] <= 0:
                 continue
@@ -1651,10 +1796,6 @@ class TransmissionCore:
             # Dose to susceptible agents eating here
             susceptible = self._get_susceptible(occupants, pathogen_id)
             zone_mult = self._food_zone_multiplier(zone_name)
-            self._reservoir.decay(
-                1.0 + growth - decay,
-                ReservoirComposition.key(FOOD_RESERVOIR, pathogen_id, zone_name),
-            )
             food_attribution = attribution(
                 ledger,
                 self._reservoir_mix(FOOD_RESERVOIR, pathogen_id, zone_name),
@@ -1729,7 +1870,9 @@ class TransmissionCore:
         if load <= 0:
             return
 
-        env_attribution = self._environmental_attribution(ledger, pathogen_id)
+        env_attribution = self._environmental_attribution(
+            ledger, pathogen_id, SHIP_WIDE_ZONE, load,
+        )
 
         # Deliver to all zones (environmental pathogen is HVAC-systemic)
         for zone_name, occupants in zone_occupants.items():
@@ -1782,9 +1925,12 @@ class TransmissionCore:
             level = float(reservoirs.get(zone_name, 0.0))
             if level <= 0.0 and zone_name not in reservoirs:
                 level = float(ec.get("baseline_environmental_load", 0.0))
-            level *= (1.0 + col_rate)
-            level *= max(0.0, 1.0 - spore_decay)
-            reservoirs[zone_name] = max(level, 0.0)
+            factor = (1.0 + col_rate) * max(0.0, 1.0 - spore_decay)
+            deposited = self._update_env_reservoir_strains(
+                pathogen_id, zone_name, level, factor,
+                zone_occupants[zone_name], profile,
+            )
+            reservoirs[zone_name] = max(level * factor + deposited, 0.0)
 
         for zone_name, occupants in zone_occupants.items():
             if not self._zone_matches(zone_name, source_zones):
@@ -1793,7 +1939,9 @@ class TransmissionCore:
             if contamination <= 0.0:
                 continue
             susceptible = self._get_susceptible(occupants, pathogen_id)
-            env_attribution = self._environmental_attribution(ledger, pathogen_id)
+            env_attribution = self._environmental_attribution(
+                ledger, pathogen_id, zone_name, contamination,
+            )
             for target in susceptible:
                 if self.rng.random() >= p_expose:
                     continue
