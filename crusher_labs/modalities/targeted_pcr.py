@@ -17,6 +17,27 @@ from __future__ import annotations
 import math
 from typing import Any
 
+DEFAULT_CT_SLOPE = -3.322
+DEFAULT_CT_INTERCEPT = 40.0
+
+
+def ct_from_mass(
+    pathogen_mass: float,
+    extraction_efficiency: float,
+    ct_slope: float = DEFAULT_CT_SLOPE,
+    ct_intercept: float = DEFAULT_CT_INTERCEPT,
+) -> float | None:
+    """Map absolute pathogen mass to a Ct value after extraction.
+
+    Returns ``None`` when recovered mass is effectively zero, i.e. there is no
+    template to amplify. Shared so any assay that needs a Ct gate — including
+    clinical strain typing — reads the same standard curve rather than its own.
+    """
+    recovered = pathogen_mass * extraction_efficiency
+    if recovered <= 0.0:
+        return None
+    return round(ct_slope * math.log10(recovered) + ct_intercept, 2)
+
 
 class TargetedPCR:
     """RT-qPCR environmental / surface-wipe sampling modality."""
@@ -26,8 +47,8 @@ class TargetedPCR:
     def __init__(
         self,
         extraction_efficiency: float = 0.35,
-        ct_slope: float = -3.322,
-        ct_intercept: float = 40.0,
+        ct_slope: float = DEFAULT_CT_SLOPE,
+        ct_intercept: float = DEFAULT_CT_INTERCEPT,
         lod_ct_threshold: float = 38.0,
     ) -> None:
         self.extraction_efficiency = extraction_efficiency
@@ -40,11 +61,12 @@ class TargetedPCR:
 
         Returns ``None`` when recovered mass is effectively zero.
         """
-        recovered = pathogen_mass * self.extraction_efficiency
-        if recovered <= 0.0:
-            return None
-        ct = self.ct_slope * math.log10(recovered) + self.ct_intercept
-        return round(ct, 2)
+        return ct_from_mass(
+            pathogen_mass,
+            self.extraction_efficiency,
+            self.ct_slope,
+            self.ct_intercept,
+        )
 
     def query_ground_truth(
         self,

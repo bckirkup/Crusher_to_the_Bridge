@@ -108,6 +108,49 @@
       },
       "additionalProperties": false
     },
+    "SequencingAssay": {
+      "type": "object",
+      "description": "Optional clinical amplicon typing assay (variant surveillance, Paper 3, spec §2.1). Absent block = this pathogen is not typed clinically. Read depth and the reporting floor are operator dials set at run time, not pathogen properties.",
+      "required": ["amplicon_target", "read_accuracy", "ct_threshold"],
+      "properties": {
+        "amplicon_target": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Sequenced region (e.g. 'Capsid (VP1)', 'HA + NA')."
+        },
+        "read_accuracy": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1,
+          "description": "Probability a read is assigned to the lineage it came from. Below 1 the assay can name the wrong genotype, not merely fail."
+        },
+        "ct_threshold": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Ct above which the specimen cannot be typed (shares the targeted-PCR standard curve)."
+        },
+        "cost_usd": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Per-specimen financial cost; overrides the ledger default for clinical_strain_typing."
+        },
+        "read_depth": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Default reads per specimen for this assay; sweepable at run time."
+        },
+        "min_reads_for_genotype": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Reads a genotype must clear to be reported, which sets the mixture resolution."
+        },
+        "notes": {
+          "type": "string",
+          "description": "Provenance for these assay values."
+        }
+      },
+      "additionalProperties": false
+    },
     "PathogenProfile": {
       "type": "object",
       "required": ["pathogen_id", "name", "transmission_routes"],
@@ -241,6 +284,9 @@
         },
         "strain_evolution": {
           "$ref": "#/$defs/StrainEvolution"
+        },
+        "sequencing_assay": {
+          "$ref": "#/$defs/SequencingAssay"
         },
         "clinical_presentation": {
           "type": "object",

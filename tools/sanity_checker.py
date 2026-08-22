@@ -40,6 +40,10 @@ from pydantic import (  # noqa: E402  (imported after the sys.path insert above)
     model_validator,
 )
 
+from crusher_labs.modalities.clinical_strain_typing import (  # noqa: E402
+    AssayConfigError,
+    SequencingAssay,
+)
 from engines.strain_state import (  # noqa: E402
     StrainConfigError,
     StrainEvolutionConfig,
@@ -300,6 +304,7 @@ class PathogenProfile(BaseModel):
     initial_time_infected: int = 0
     shedding_profile: dict[str, Any] = {}
     strain_evolution: dict[str, Any] = {}
+    sequencing_assay: dict[str, Any] = {}
 
     @field_validator("initial_time_infected")
     @classmethod
@@ -489,6 +494,33 @@ def _check_strain_evolution(
             continue
         _warn_unreachable_strain_rates(p, report)
         _warn_cross_immunity_shape(p, report)
+        _check_sequencing_assay(p, report)
+
+
+def _check_sequencing_assay(profile: PathogenProfile, report: Report) -> None:
+    """Validate the optional clinical typing assay for a strain-tracked pathogen.
+
+    Parsing is delegated to ``SequencingAssay.from_profile`` so the checker and
+    the modality cannot disagree. A strain-tracked pathogen with no assay is
+    worth a warning rather than an error: the biology diversifies, but no
+    clinical specimen can ever say which lineage it was.
+    """
+    if not profile.sequencing_assay:
+        report.warn(
+            _ACTIVE_PROFILES_JSON,
+            "STRAIN_CONFIG",
+            f"{profile.pathogen_id} tracks strains but has no sequencing_assay: "
+            f"lineages exist and cannot be typed clinically",
+        )
+        return
+    try:
+        SequencingAssay.from_profile(profile.model_dump())
+    except AssayConfigError as exc:
+        report.error(
+            _ACTIVE_PROFILES_JSON,
+            "STRAIN_CONFIG",
+            f"{profile.pathogen_id}.sequencing_assay invalid: {exc}",
+        )
 
 
 def _warn_unreachable_strain_rates(profile: PathogenProfile, report: Report) -> None:
@@ -1178,6 +1210,7 @@ def _check_instrument_turnaround(cfg: dict[str, Any], report: Report) -> None:
         "clinical_microbiology",
         "wastewater_sequencing",
         "long_read_verification",
+        "clinical_strain_typing",
     }
     for key, block in instruments.items():
         if key not in known:

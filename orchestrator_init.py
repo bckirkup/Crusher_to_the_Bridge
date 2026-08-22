@@ -973,6 +973,30 @@ def init_multi_pathogen(
 
 # ── Observation engine initialization ────────────────────────────────────
 
+def _build_strain_typing(
+    cfg: dict[str, Any],
+    pathogen_profiles: dict[str, dict[str, Any]] | None,
+    *,
+    seed: int,
+) -> Any | None:
+    """Clinical amplicon typing engine, or ``None`` when strains are untracked.
+
+    Gated on ``variant_surveillance.enabled``: without a strain registry there
+    are no lineages to type, and the pathogen-level call is the whole result.
+    """
+    from crusher_labs.modalities.clinical_strain_typing import (
+        ClinicalStrainTyping,
+        SequencingAssay,
+    )
+
+    if not (cfg.get("variant_surveillance", {}) or {}).get("enabled", False):
+        return None
+    assays = SequencingAssay.load_profiles(pathogen_profiles or {})
+    if not assays:
+        return None
+    return ClinicalStrainTyping(assays, rng=np.random.default_rng(seed))
+
+
 def init_observation_engine(
     cfg: dict[str, Any],
     seed: int,
@@ -1083,6 +1107,9 @@ def init_observation_engine(
             enabled=True,
             rng=np.random.default_rng(seed + 7),
             repo_root=REPO_ROOT,
+            strain_typing=_build_strain_typing(
+                cfg, pathogen_profiles, seed=seed + 9,
+            ),
         )
         lr_profile_turnaround = modality.turnaround
         long_read_inst = LongReadVerificationSequencing(
