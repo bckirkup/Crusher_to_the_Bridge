@@ -341,6 +341,16 @@ multi_pathogen:
   immunocompromised_fraction: 0.05    # fraction of agents with elevated susceptibility
   immunocompromised_multiplier: 2.0   # dose scaling for immunocompromised
 
+# ── Variant Surveillance (heritable strain tracking) ─────────
+# Off by default: with enabled=false no strain is minted and no RNG draw
+# changes, so legacy runs and campaign goldens stay bit-identical.
+variant_surveillance:
+  enabled: false
+  # Per-pathogen rates, genotypes, and cross-immunity live in the
+  # strain_evolution block of data/pathogens/*.json, not here.
+  founder_strains_per_pathogen: 1     # >1 seeds embarkation diversity
+  census_interval_epochs: 1           # epochs between lineage snapshots
+
 # ── Microflora Disruption ────────────────────────────────────
 microflora:
   enable_dual_signal: true            # shed altered microflora alongside pathogen
@@ -388,6 +398,15 @@ wastewater_surveillance:
   background_read_fraction: 0.9999     # 1 - max informative read fraction
   pathogen: "norovirus"                # delay-catalog key written on samples
   pathogen_id: "norwalk_gi"            # ABM profile whose shedders are counted
+  # Lineage recovery inside the on-target reads of the amplicon/long_read modes.
+  # Requires variant_surveillance.enabled: with no strain registry the tank has
+  # no composition to recover. metagenomic and qpcr ignore it by construction.
+  strain_deconvolution:
+    enabled: false
+    dirichlet_concentration: 200.0     # library/amplification reproducibility
+    min_pathogen_reads: 100            # library too shallow to separate lineages
+    min_lineage_reads: 20              # reads a reported lineage must clear
+    min_lineage_fraction: 0.02         # abundance floor a reported lineage clears
 
 # ── Instrument turnaround (TAT) ───────────────────────────────
 instrument_turnaround:

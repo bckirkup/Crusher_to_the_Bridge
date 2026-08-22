@@ -95,7 +95,59 @@
         "environmental_source": 0.0
       },
       "innate_nonsusceptible_fraction": 0.0,
-      "nonsusceptible_mechanism": "none"
+      "nonsusceptible_mechanism": "none",
+      "strain_evolution": {
+        "mutation_rate": 0.05,
+        "phenotype_mutation_fraction": 0.3,
+        "within_host_mutation_rate": 0.0,
+        "recombination_rate": 0.03,
+        "superinfection_susceptibility": 0.2,
+        "genotypes": [
+          "Genesis-prime",
+          "Genesis-delta"
+        ],
+        "prior_genotype_distribution": {
+          "Genesis-prime": 0.5,
+          "Genesis-delta": 0.5
+        },
+        "cross_immunity": {
+          "Genesis-prime": {
+            "Genesis-prime": 0.6,
+            "Genesis-delta": 0.12
+          },
+          "Genesis-delta": {
+            "Genesis-prime": 0.12,
+            "Genesis-delta": 0.6
+          }
+        },
+        "effect_ranges": {
+          "transmissibility": [
+            0.8,
+            1.25
+          ],
+          "shedding": [
+            0.8,
+            1.25
+          ],
+          "incubation_days": [
+            -1.0,
+            1.0
+          ],
+          "immune_escape": [
+            0.01,
+            0.3
+          ]
+        },
+        "min_strain_fraction": 0.001,
+        "notes": "Fictional pathogen: rates from docs/variant_surveillance_spec.md \u00a71.3, deliberately more mutationally dynamic than real pathogens. No literature anchor exists."
+      },
+      "sequencing_assay": {
+        "amplicon_target": "Genesis factor",
+        "read_accuracy": 0.88,
+        "ct_threshold": 25.0,
+        "cost_usd": 250.0,
+        "notes": "Assay design from docs/variant_surveillance_spec.md \u00a72.1. read_accuracy is per-read consensus accuracy for this amplicon; read depth and the reporting floor are operator dials set at run time, not pathogen properties."
+      }
     },
     {
       "pathogen_id": "tng_shipboard_influenza",
@@ -182,7 +234,59 @@
         "environmental_source": 0.0
       },
       "innate_nonsusceptible_fraction": 0.0,
-      "nonsusceptible_mechanism": "none"
+      "nonsusceptible_mechanism": "none",
+      "strain_evolution": {
+        "mutation_rate": 0.04,
+        "phenotype_mutation_fraction": 0.15,
+        "within_host_mutation_rate": 0.0,
+        "recombination_rate": 0.02,
+        "superinfection_susceptibility": 0.08,
+        "genotypes": [
+          "TNG-H1",
+          "TNG-H3"
+        ],
+        "prior_genotype_distribution": {
+          "TNG-H1": 0.5,
+          "TNG-H3": 0.5
+        },
+        "cross_immunity": {
+          "TNG-H1": {
+            "TNG-H1": 0.75,
+            "TNG-H3": 0.2
+          },
+          "TNG-H3": {
+            "TNG-H1": 0.2,
+            "TNG-H3": 0.75
+          }
+        },
+        "effect_ranges": {
+          "transmissibility": [
+            0.8,
+            1.25
+          ],
+          "shedding": [
+            0.8,
+            1.25
+          ],
+          "incubation_days": [
+            -1.0,
+            1.0
+          ],
+          "immune_escape": [
+            0.01,
+            0.3
+          ]
+        },
+        "min_strain_fraction": 0.001,
+        "notes": "Fictional pathogen: rates from docs/variant_surveillance_spec.md \u00a71.3, deliberately more mutationally dynamic than real pathogens. No literature anchor exists."
+      },
+      "sequencing_assay": {
+        "amplicon_target": "HA + NA",
+        "read_accuracy": 0.95,
+        "ct_threshold": 30.0,
+        "cost_usd": 120.0,
+        "notes": "Assay design from docs/variant_surveillance_spec.md \u00a72.1. read_accuracy is per-read consensus accuracy for this amplicon; read depth and the reporting floor are operator dials set at run time, not pathogen properties."
+      }
     }
   ]
 }

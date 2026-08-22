@@ -16,11 +16,17 @@ from typing import Any
 import numpy as np
 
 from crusher_labs.modalities.wearable import WearableDataStream
+from engines.incubation import (
+    IncubationHost,
+    IncubationModel,
+    host_incubation_state,
+)
 from engines.infection_dynamics_bridge import (
     IllnessStatus,
     InfectionStatus,
     KorkinShipEngine,
 )
+from engines.strain_state import ImmuneRecord, StrainRegistry
 from engines.wearable_monitor import WearableMonitor
 from orchestrator_types import (
     DEFAULT_AIRBORNE_FRACTION,
@@ -44,6 +50,11 @@ from telemetry_buffer.agent_axes import (
     agent_is_infected,
     agent_requires_confinement,
 )
+
+# Earliest day post-infection symptoms can appear (Person.java: dpi >= 1),
+# before any strain-specific incubation modifier. Used only by pathogens
+# without an ``incubation`` distribution block.
+ONSET_DAY = 1.0
 
 
 # All confined IDs (quarantined + isolated) helper
@@ -307,10 +318,87 @@ def step_shore_introductions(
 
 # ── Infection progression ────────────────────────────────────────────────
 
+def _record_cleared_immunity(
+    agent: Any,
+    pathogen_id: str,
+    cleared: list[str],
+    strain_registry: StrainRegistry | None,
+    epoch: int,
+) -> None:
+    """Write an immune record for each lineage that just cleared.
+
+    One record per lineage, not one per infection: a co-infected host resolves
+    two exposures and comes out of it with memory of both genotypes, which is
+    the whole point of sequencing a mixed infection.
+    """
+    if strain_registry is None:
+        return
+    for strain_id in cleared:
+        if strain_id not in strain_registry:
+            continue
+        strain = strain_registry.get(strain_id)
+        agent.record_immunity(ImmuneRecord(
+            pathogen_id=pathogen_id,
+            genotype=strain.genotype,
+            strain_id=strain_id,
+            epoch=epoch,
+            immune_escape=strain.immune_escape,
+        ))
+
+
+def _incubation_days(
+    agent: IncubationHost,
+    pathogen_id: str,
+    inf: dict[str, Any],
+    profile: dict[str, Any],
+    rng: np.random.Generator,
+) -> float:
+    """This infection's incubation period, drawn once and then remembered.
+
+    Drawn at the first progression step rather than at infection so every entry
+    point — seeding, transmission, environmental acquisition — gets a draw, and
+    conditioned on the inoculum actually acquired. A pathogen with no
+    ``incubation`` block keeps its fixed onset day.
+    """
+    stored = inf.get("incubation_days")
+    if stored is not None:
+        return float(stored)
+    model = IncubationModel.from_mapping(profile.get("incubation"))
+    if model is None:
+        drawn = float(profile.get("symptom_onset_day", ONSET_DAY))
+    else:
+        drawn = model.sample_days(
+            dose=float(inf["acquired_particles"]),
+            host=host_incubation_state(agent, pathogen_id),
+            rng=rng,
+        )
+    inf["incubation_days"] = drawn
+    return drawn
+
+
+def _onset_day(
+    agent: IncubationHost,
+    pathogen_id: str,
+    inf: dict[str, Any],
+    profile: dict[str, Any],
+    rng: np.random.Generator,
+) -> float:
+    """Day post-infection this host's symptoms can first appear.
+
+    A strain's incubation modifier shifts the host's own drawn period (negative
+    = faster onset), so both halves of the phenotype axis are live for any
+    pathogen whose incubation distribution has room below its median.
+    """
+    drawn = _incubation_days(agent, pathogen_id, inf, profile, rng)
+    return max(0.0, drawn + float(inf.get("strain_incubation_modifier", 0.0)))
+
+
 def _advance_agent_pathogen_infections(
     agent: Any,
     pathogen_profiles: dict[str, dict[str, Any]],
     rng: np.random.Generator,
+    strain_registry: StrainRegistry | None = None,
+    epoch: int = 0,
 ) -> None:
     for pid, inf in tuple(agent.infections.items()):
         if inf["status"] != InfectionStatus.INFECTED:
@@ -321,7 +409,8 @@ def _advance_agent_pathogen_infections(
             inf["time_infected"] += 1
 
         dpi = inf["time_infected"] or 0
-        if dpi >= 1 and inf["illness"] == IllnessStatus.NOT_ILL:
+        onset_day = _onset_day(agent, pid, inf, prof, rng)
+        if dpi >= onset_day and inf["illness"] == IllnessStatus.NOT_ILL:
             ill_params = prof.get("illness_probability", {})
             eta_p = ill_params.get("eta", 0.508)
             gamma_p = ill_params.get("gamma", 0.095)
@@ -336,7 +425,13 @@ def _advance_agent_pathogen_infections(
         recovery_day = agent.get_chronic_recovery_day(
             pid, prof.get("recovery_day", 3),
         )
-        if dpi >= recovery_day:
+        # Co-resident lineages clear on their own clocks, so the pathogen-level
+        # infection stays open until the last one goes: a strain acquired on day
+        # four is still being shed when the primary infection would have ended.
+        cleared: list[str] = []
+        residents_left = agent.advance_resident_strains(pid, recovery_day, cleared)
+        _record_cleared_immunity(agent, pid, cleared, strain_registry, epoch)
+        if dpi >= recovery_day and residents_left == 0:
             inf["status"] = InfectionStatus.RECOVERED
             inf["illness"] = IllnessStatus.RECOVERED
 
@@ -344,13 +439,22 @@ def _advance_agent_pathogen_infections(
 def step_infection_progression(
     engine: KorkinShipEngine,
     pathogen_profiles: dict[str, dict[str, Any]],
+    strain_registry: StrainRegistry | None = None,
+    epoch: int = 0,
 ) -> None:
-    """Advance multi-pathogen infection, illness, recovery, and mass accumulation."""
+    """Advance multi-pathogen infection, illness, recovery, and mass accumulation.
+
+    ``strain_registry`` is the transmission core's registry when variant
+    surveillance is on, read here (before the epoch's collection) so a clearing
+    lineage can leave the host an immune record of its genotype.
+    """
     if not pathogen_profiles:
         return
 
     for agent in engine.agents:
-        _advance_agent_pathogen_infections(agent, pathogen_profiles, engine.rng)
+        _advance_agent_pathogen_infections(
+            agent, pathogen_profiles, engine.rng, strain_registry, epoch,
+        )
 
         any_active = any(
             inf["status"] == InfectionStatus.INFECTED

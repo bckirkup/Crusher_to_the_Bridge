@@ -151,9 +151,45 @@
           "oneOf": [{ "type": "null" }, { "type": "number", "minimum": 0 }]
         },
         "genotype": {
-          "description": "Strain identifier. Null until pathogen strain state exists in the ABM (spec §5).",
+          "description": "Consensus lineage of the sample: the most abundant lineage the library resolved, the configured long-read reference, or null when nothing was typed.",
           "oneOf": [{ "type": "null" }, { "type": "string" }]
+        },
+        "lineage_status": {
+          "description": "Outcome of strain deconvolution on this library. 'not_configured' when the assay does not attempt it, 'no_composition' when the pool carries no tracked lineage, 'insufficient_reads'/'below_reporting_floor' when the library could not resolve one.",
+          "oneOf": [
+            { "type": "null" },
+            {
+              "type": "string",
+              "enum": [
+                "not_configured",
+                "no_template",
+                "no_composition",
+                "insufficient_reads",
+                "below_reporting_floor",
+                "deconvolved"
+              ]
+            }
+          ]
+        },
+        "lineage_calls": {
+          "type": "array",
+          "description": "Lineages reported from the on-target reads, most abundant first. Reads sum to at most pathogen_reads; the remainder is lineage_unresolved_reads.",
+          "items": { "$ref": "#/$defs/lineage_call" }
+        },
+        "lineage_unresolved_reads": {
+          "description": "On-target reads not attributed to any reported lineage: below the reporting floor, or from pool mass whose lineage is untracked.",
+          "oneOf": [{ "type": "null" }, { "type": "integer", "minimum": 0 }]
         }
+      }
+    },
+    "lineage_call": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["genotype", "reads"],
+      "properties": {
+        "genotype": { "type": "string", "minLength": 1 },
+        "reads": { "type": "integer", "minimum": 0 },
+        "fraction": { "type": "number", "minimum": 0, "maximum": 1 }
       }
     }
   }

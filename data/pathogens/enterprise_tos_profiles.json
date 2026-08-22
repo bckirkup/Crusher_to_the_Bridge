@@ -90,7 +90,68 @@
         "environmental_source": 0.0
       },
       "innate_nonsusceptible_fraction": 0.0,
-      "nonsusceptible_mechanism": "none"
+      "nonsusceptible_mechanism": "none",
+      "strain_evolution": {
+        "mutation_rate": 0.05,
+        "phenotype_mutation_fraction": 0.2,
+        "within_host_mutation_rate": 0.0,
+        "recombination_rate": 0.03,
+        "superinfection_susceptibility": 0.2,
+        "genotypes": [
+          "Alpha",
+          "Beta",
+          "Gamma"
+        ],
+        "prior_genotype_distribution": {
+          "Alpha": 0.3333,
+          "Beta": 0.3333,
+          "Gamma": 0.3333
+        },
+        "cross_immunity": {
+          "Alpha": {
+            "Alpha": 0.7,
+            "Beta": 0.15,
+            "Gamma": 0.15
+          },
+          "Beta": {
+            "Alpha": 0.15,
+            "Beta": 0.7,
+            "Gamma": 0.15
+          },
+          "Gamma": {
+            "Alpha": 0.15,
+            "Beta": 0.15,
+            "Gamma": 0.7
+          }
+        },
+        "effect_ranges": {
+          "transmissibility": [
+            0.8,
+            1.25
+          ],
+          "shedding": [
+            0.8,
+            1.25
+          ],
+          "incubation_days": [
+            -1.0,
+            1.0
+          ],
+          "immune_escape": [
+            0.01,
+            0.3
+          ]
+        },
+        "min_strain_fraction": 0.001,
+        "notes": "Fictional pathogen: rates from docs/variant_surveillance_spec.md \u00a71.3, deliberately more mutationally dynamic than real pathogens. No literature anchor exists."
+      },
+      "sequencing_assay": {
+        "amplicon_target": "16S + virulence",
+        "read_accuracy": 0.9,
+        "ct_threshold": 32.0,
+        "cost_usd": 200.0,
+        "notes": "Assay design from docs/variant_surveillance_spec.md \u00a72.1. read_accuracy is per-read consensus accuracy for this amplicon; read depth and the reporting floor are operator dials set at run time, not pathogen properties."
+      }
     },
     {
       "pathogen_id": "psi_2000_polywater",
@@ -177,7 +238,59 @@
         "environmental_source": 0.0
       },
       "innate_nonsusceptible_fraction": 0.0,
-      "nonsusceptible_mechanism": "none"
+      "nonsusceptible_mechanism": "none",
+      "strain_evolution": {
+        "mutation_rate": 0.1,
+        "phenotype_mutation_fraction": 0.5,
+        "within_host_mutation_rate": 0.0,
+        "recombination_rate": 0.05,
+        "superinfection_susceptibility": 0.3,
+        "genotypes": [
+          "Phase I",
+          "Phase II"
+        ],
+        "prior_genotype_distribution": {
+          "Phase I": 0.5,
+          "Phase II": 0.5
+        },
+        "cross_immunity": {
+          "Phase I": {
+            "Phase I": 0.5,
+            "Phase II": 0.1
+          },
+          "Phase II": {
+            "Phase I": 0.1,
+            "Phase II": 0.5
+          }
+        },
+        "effect_ranges": {
+          "transmissibility": [
+            0.8,
+            1.25
+          ],
+          "shedding": [
+            0.8,
+            1.25
+          ],
+          "incubation_days": [
+            -1.0,
+            1.0
+          ],
+          "immune_escape": [
+            0.05,
+            0.6
+          ]
+        },
+        "min_strain_fraction": 0.001,
+        "notes": "Fictional pathogen: rates from docs/variant_surveillance_spec.md \u00a71.3, deliberately more mutationally dynamic than real pathogens. No literature anchor exists."
+      },
+      "sequencing_assay": {
+        "amplicon_target": "BML (behavioral modification locus)",
+        "read_accuracy": 0.85,
+        "ct_threshold": 20.0,
+        "cost_usd": 300.0,
+        "notes": "Assay design from docs/variant_surveillance_spec.md \u00a72.1. read_accuracy is per-read consensus accuracy for this amplicon; read depth and the reporting floor are operator dials set at run time, not pathogen properties."
+      }
     }
   ]
 }

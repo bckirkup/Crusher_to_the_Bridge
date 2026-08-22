@@ -40,6 +40,15 @@ from pydantic import (  # noqa: E402  (imported after the sys.path insert above)
     model_validator,
 )
 
+from crusher_labs.modalities.clinical_strain_typing import (  # noqa: E402
+    AssayConfigError,
+    SequencingAssay,
+)
+from engines.incubation import IncubationModel  # noqa: E402
+from engines.strain_state import (  # noqa: E402
+    StrainConfigError,
+    StrainEvolutionConfig,
+)
 from simulation_utils.paths import validated_open  # noqa: E402
 
 # ── ANSI colour codes ────────────────────────────────────────────────────
@@ -295,6 +304,10 @@ class PathogenProfile(BaseModel):
     initial_infected: int = 1
     initial_time_infected: int = 0
     shedding_profile: dict[str, Any] = {}
+    incubation: dict[str, Any] = {}
+    symptom_onset_day: float | None = None
+    strain_evolution: dict[str, Any] = {}
+    sequencing_assay: dict[str, Any] = {}
 
     @field_validator("initial_time_infected")
     @classmethod
@@ -457,6 +470,188 @@ def _check_mathematical_bounds(
                         f"{p.pathogen_id}.illness_probability.{key} = {val} "
                         f"is outside [0.0, 1.0]",
                     )
+
+
+def _check_strain_evolution(
+    pathogens: PathogensFile | None,
+    report: Report,
+) -> None:
+    """Validate optional strain_evolution blocks (variant surveillance).
+
+    Parsing is delegated to ``StrainEvolutionConfig.from_profile`` so the
+    checker and the engine cannot disagree about what a valid block is.
+    """
+    if pathogens is None:
+        return
+    for p in pathogens.pathogens:
+        if not p.strain_evolution:
+            continue
+        try:
+            StrainEvolutionConfig.from_profile(p.model_dump())
+        except StrainConfigError as exc:
+            report.error(
+                _ACTIVE_PROFILES_JSON,
+                "STRAIN_CONFIG",
+                f"{p.pathogen_id}.strain_evolution invalid: {exc}",
+            )
+            continue
+        _warn_unreachable_strain_rates(p, report)
+        _warn_cross_immunity_shape(p, report)
+        _check_sequencing_assay(p, report)
+
+
+def _check_incubation_models(
+    pathogens: PathogensFile | None,
+    report: Report,
+) -> None:
+    """Validate optional incubation distributions.
+
+    Parsing is delegated to ``IncubationModel.from_mapping`` so the checker and
+    the progression seam cannot disagree about what a valid distribution is.
+    """
+    if pathogens is None:
+        return
+    for p in pathogens.pathogens:
+        if not p.incubation:
+            continue
+        try:
+            model = IncubationModel.from_mapping(p.incubation)
+        except ValueError as exc:
+            report.error(
+                _ACTIVE_PROFILES_JSON,
+                "INCUBATION_CONFIG",
+                f"{p.pathogen_id}.incubation invalid: {exc}",
+            )
+            continue
+        if model is not None:
+            _check_incubation_shape(p, model, report)
+
+
+def _check_incubation_shape(
+    profile: PathogenProfile,
+    model: IncubationModel,
+    report: Report,
+) -> None:
+    """Flag distributions that cannot produce observable illness.
+
+    A median past the recovery day means the typical host clears before it
+    presents, which reads as a mild pathogen but is really a mis-specified
+    incubation period; and a leftover ``symptom_onset_day`` alongside a
+    distribution is dead configuration that will mislead the next reader.
+    """
+    if not str(profile.incubation.get("notes", "")).strip():
+        report.error(
+            _ACTIVE_PROFILES_JSON,
+            "INCUBATION_CONFIG",
+            f"{profile.pathogen_id}.incubation has no notes: an incubation "
+            f"period with no provenance sets detection timing for every result",
+        )
+    if model.median_days >= float(profile.recovery_day):
+        report.warn(
+            _ACTIVE_PROFILES_JSON,
+            "INCUBATION_CONFIG",
+            f"{profile.pathogen_id}.incubation.median_days "
+            f"({model.median_days}) is at or past recovery_day "
+            f"({profile.recovery_day}): most hosts recover before presenting",
+        )
+    if profile.symptom_onset_day is not None:
+        report.warn(
+            _ACTIVE_PROFILES_JSON,
+            "INCUBATION_CONFIG",
+            f"{profile.pathogen_id} has both incubation and symptom_onset_day: "
+            f"the distribution wins and symptom_onset_day is never read",
+        )
+
+
+def _check_sequencing_assay(profile: PathogenProfile, report: Report) -> None:
+    """Validate the optional clinical typing assay for a strain-tracked pathogen.
+
+    Parsing is delegated to ``SequencingAssay.from_profile`` so the checker and
+    the modality cannot disagree. A strain-tracked pathogen with no assay is
+    worth a warning rather than an error: the biology diversifies, but no
+    clinical specimen can ever say which lineage it was.
+    """
+    if not profile.sequencing_assay:
+        report.warn(
+            _ACTIVE_PROFILES_JSON,
+            "STRAIN_CONFIG",
+            f"{profile.pathogen_id} tracks strains but has no sequencing_assay: "
+            f"lineages exist and cannot be typed clinically",
+        )
+        return
+    try:
+        SequencingAssay.from_profile(profile.model_dump())
+    except AssayConfigError as exc:
+        report.error(
+            _ACTIVE_PROFILES_JSON,
+            "STRAIN_CONFIG",
+            f"{profile.pathogen_id}.sequencing_assay invalid: {exc}",
+        )
+
+
+def _warn_unreachable_strain_rates(profile: PathogenProfile, report: Report) -> None:
+    """Flag rate combinations that can never produce a phenotype variant."""
+    block = profile.strain_evolution
+    mutation = float(block.get("mutation_rate", 0.0) or 0.0)
+    within_host = float(block.get("within_host_mutation_rate", 0.0) or 0.0)
+    phenotype = float(block.get("phenotype_mutation_fraction", 0.0) or 0.0)
+    if mutation <= 0.0 and within_host <= 0.0:
+        report.warn(
+            _ACTIVE_PROFILES_JSON,
+            "STRAIN_CONFIG",
+            f"{profile.pathogen_id}.strain_evolution has both mutation rates at "
+            f"0: strains are inherited but never diversify",
+        )
+    elif phenotype <= 0.0:
+        report.warn(
+            _ACTIVE_PROFILES_JSON,
+            "STRAIN_CONFIG",
+            f"{profile.pathogen_id}.strain_evolution mutates but "
+            f"phenotype_mutation_fraction is 0: labels drift, phenotype cannot",
+        )
+    if float(block.get("recombination_rate", 0.0) or 0.0) > 0.0 and \
+            float(block.get("superinfection_susceptibility", 0.0) or 0.0) <= 0.0:
+        report.warn(
+            _ACTIVE_PROFILES_JSON,
+            "STRAIN_CONFIG",
+            f"{profile.pathogen_id}.strain_evolution has recombination_rate > 0 "
+            f"but superinfection_susceptibility 0: co-infection can never occur, "
+            f"so no recombination is reachable",
+        )
+
+
+def _warn_cross_immunity_shape(profile: PathogenProfile, report: Report) -> None:
+    """Flag a cross-immunity matrix whose rows cannot mean what they say.
+
+    Two shapes are almost always mistakes rather than models: a genotype with no
+    row, which silently makes every host that resolved it fully susceptible to
+    everything, and a row whose homologous entry is not its maximum, which says
+    a host is better protected against a genotype it has never met.
+    """
+    block = profile.strain_evolution
+    matrix = block.get("cross_immunity") or {}
+    if not matrix:
+        return
+    for genotype in block.get("genotypes", []) or []:
+        row = matrix.get(genotype)
+        if not row:
+            report.warn(
+                _ACTIVE_PROFILES_JSON,
+                "STRAIN_CONFIG",
+                f"{profile.pathogen_id}.strain_evolution.cross_immunity has no "
+                f"row for genotype {genotype}: prior infection with it confers "
+                f"no protection at all",
+            )
+            continue
+        homologous = float(row.get(genotype, 0.0))
+        if homologous < max(float(v) for v in row.values()):
+            report.warn(
+                _ACTIVE_PROFILES_JSON,
+                "STRAIN_CONFIG",
+                f"{profile.pathogen_id}.strain_evolution.cross_immunity"
+                f"[{genotype}] protects better against another genotype than "
+                f"against itself",
+            )
 
 
 def _check_graph_integrity(
@@ -1027,6 +1222,26 @@ def _check_config_yaml(
     _check_microflora_params(cfg, report, zone_ids)
     _check_long_read_sequencing(cfg, report)
     _check_instrument_turnaround(cfg, report)
+    _check_variant_surveillance(cfg, report)
+
+
+def _check_variant_surveillance(cfg: dict[str, Any], report: Report) -> None:
+    """Validate the variant_surveillance block (strain tracking gate)."""
+    vs = cfg.get("variant_surveillance", {})
+    if not isinstance(vs, dict):
+        report.error(_CONFIG_YAML, "CONFIG",
+                     "variant_surveillance must be a mapping")
+        return
+    founders = vs.get("founder_strains_per_pathogen")
+    if isinstance(founders, (int, float)) and founders < 1:
+        report.error(_CONFIG_YAML, "MATH_BOUND",
+                     f"variant_surveillance.founder_strains_per_pathogen = "
+                     f"{founders} must be >= 1")
+    interval = vs.get("census_interval_epochs")
+    if isinstance(interval, (int, float)) and interval < 1:
+        report.error(_CONFIG_YAML, "MATH_BOUND",
+                     f"variant_surveillance.census_interval_epochs = {interval} "
+                     f"must be >= 1")
 
 
 def _check_instrument_turnaround(cfg: dict[str, Any], report: Report) -> None:
@@ -1061,6 +1276,7 @@ def _check_instrument_turnaround(cfg: dict[str, Any], report: Report) -> None:
         "clinical_microbiology",
         "wastewater_sequencing",
         "long_read_verification",
+        "clinical_strain_typing",
     }
     for key, block in instruments.items():
         if key not in known:
@@ -1879,6 +2095,24 @@ def run_checks(
         print(f"  {_YELLOW}Found {added} issue(s){_RESET}")
     else:
         print(f"  {_GREEN}No contradictions detected{_RESET}")
+
+    print(f"  {_CYAN}Running incubation distribution checks...{_RESET}")
+    pre = len(report.findings)
+    _check_incubation_models(pathogens, report)
+    added = len(report.findings) - pre
+    if added:
+        print(f"  {_YELLOW}Found {added} issue(s){_RESET}")
+    else:
+        print(f"  {_GREEN}Incubation distributions valid{_RESET}")
+
+    print(f"  {_CYAN}Running strain evolution checks...{_RESET}")
+    pre = len(report.findings)
+    _check_strain_evolution(pathogens, report)
+    added = len(report.findings) - pre
+    if added:
+        print(f"  {_YELLOW}Found {added} issue(s){_RESET}")
+    else:
+        print(f"  {_GREEN}Strain parameters valid{_RESET}")
 
     if cfg is not None:
         zone_ids = {z.id for z in layout.zones} if layout else None

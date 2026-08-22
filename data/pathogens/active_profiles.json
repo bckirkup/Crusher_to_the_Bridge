@@ -61,6 +61,17 @@
         "gamma": 0.095
       },
       "recovery_day": 3,
+      "incubation": {
+        "distribution": "lognormal",
+        "median_days": 1.2,
+        "dispersion": 1.56,
+        "min_days": 0.1,
+        "max_days": 6.0,
+        "dose_reference_log10": 4.23,
+        "dose_log10_shortening": 0.12,
+        "dose_floor": 0.3,
+        "notes": "Pooled norovirus GII: mu 0.182, sigma 0.445 (median 1.2 d, GSD 1.56, 95% 0.5-2.9 d) from Lee et al. 2013 via docs/ctb_incubation_spec.md - GII rather than the GI the pathogen_id implies, because this profile's genotypes are GII.4/GII.17/GII.2, and the spec finds no genotype-specific fits within GII. Dose term dose_shift 0.12 / floor 0.3 from the spec. dose_reference_log10 is this profile's own beta-Poisson N50 (16871 particles, alpha 0.111 / beta 32.81), not the spec's 18 RT-PCR units: acquired_particles is in model units, so referencing the literature assay unit would put every simulated host on the dose floor and turn a conditioning term into a constant. Consequence: a typical (near-ID50) host presents at the literature median, and the dose effect is anchored in direction but not calibrated in magnitude. host_factors omitted deliberately: the spec finds no literature support for a frailty effect on incubation, so it stays a sensitivity arm."
+      },
       "surface_deposition_fraction": 0.0001,
       "base_susceptibility": 1.0,
       "microflora_disruption": {
@@ -126,7 +137,68 @@
         "environmental_source": 0.0
       },
       "innate_nonsusceptible_fraction": 0.0,
-      "nonsusceptible_mechanism": "none"
+      "nonsusceptible_mechanism": "none",
+      "strain_evolution": {
+        "mutation_rate": 0.02,
+        "phenotype_mutation_fraction": 0.05,
+        "within_host_mutation_rate": 0.0,
+        "recombination_rate": 0.01,
+        "superinfection_susceptibility": 0.1,
+        "genotypes": [
+          "GII.4",
+          "GII.17",
+          "GII.2"
+        ],
+        "prior_genotype_distribution": {
+          "GII.4": 0.3333,
+          "GII.17": 0.3333,
+          "GII.2": 0.3333
+        },
+        "cross_immunity": {
+          "GII.4": {
+            "GII.4": 0.85,
+            "GII.17": 0.18,
+            "GII.2": 0.18
+          },
+          "GII.17": {
+            "GII.4": 0.18,
+            "GII.17": 0.85,
+            "GII.2": 0.18
+          },
+          "GII.2": {
+            "GII.4": 0.18,
+            "GII.17": 0.18,
+            "GII.2": 0.85
+          }
+        },
+        "effect_ranges": {
+          "transmissibility": [
+            0.8,
+            1.25
+          ],
+          "shedding": [
+            0.8,
+            1.25
+          ],
+          "incubation_days": [
+            -1.0,
+            1.0
+          ],
+          "immune_escape": [
+            0.01,
+            0.3
+          ]
+        },
+        "min_strain_fraction": 0.001,
+        "notes": "Rates from docs/variant_surveillance_spec.md \u00a71.3. superinfection_susceptibility and recombination_rate are placeholders pending a literature anchor (docs/variant_surveillance_plan.md \u00a77)."
+      },
+      "sequencing_assay": {
+        "amplicon_target": "Capsid (VP1)",
+        "read_accuracy": 0.92,
+        "ct_threshold": 30.0,
+        "cost_usd": 150.0,
+        "notes": "Assay design from docs/variant_surveillance_spec.md \u00a72.1. read_accuracy is per-read consensus accuracy for this amplicon; read depth and the reporting floor are operator dials set at run time, not pathogen properties."
+      }
     },
     {
       "pathogen_id": "sars_cov2_resp",
@@ -183,6 +255,17 @@
         "gamma": 0.12
       },
       "recovery_day": 7,
+      "incubation": {
+        "distribution": "lognormal",
+        "median_days": 5.8,
+        "dispersion": 1.57,
+        "min_days": 0.5,
+        "max_days": 21.0,
+        "dose_reference_log10": 3.43,
+        "dose_log10_shortening": 0.15,
+        "dose_floor": 0.3,
+        "notes": "SARS-CoV-2 ancestral: mu 1.758, sigma 0.450 (median 5.8 d, GSD 1.57, 95% 2.3-14.6 d) from Wei et al. 2021 via docs/ctb_incubation_spec.md. Later lineages incubate faster (Omicron median 3.5 d, mu 1.253 / sigma 0.400): set median_days per scenario rather than treating 5.8 as current. Dose term dose_shift 0.15 / floor 0.3 from the spec, referenced to this profile's own beta-Poisson N50 (2670 particles, alpha 0.18 / beta 58) rather than the spec's TCID50 figure, for the model-unit reason given on norwalk_gi."
+      },
       "surface_deposition_fraction": 5e-05,
       "base_susceptibility": 1.0,
       "microflora_disruption": {
@@ -256,7 +339,79 @@
         "environmental_source": 0.05
       },
       "innate_nonsusceptible_fraction": 0.0,
-      "nonsusceptible_mechanism": "none"
+      "nonsusceptible_mechanism": "none",
+      "strain_evolution": {
+        "mutation_rate": 0.03,
+        "phenotype_mutation_fraction": 0.1,
+        "within_host_mutation_rate": 0.0,
+        "recombination_rate": 0.005,
+        "superinfection_susceptibility": 0.05,
+        "genotypes": [
+          "ancestral",
+          "alpha",
+          "delta",
+          "omicron"
+        ],
+        "prior_genotype_distribution": {
+          "ancestral": 0.25,
+          "alpha": 0.25,
+          "delta": 0.25,
+          "omicron": 0.25
+        },
+        "cross_immunity": {
+          "ancestral": {
+            "ancestral": 0.8,
+            "alpha": 0.3,
+            "delta": 0.3,
+            "omicron": 0.3
+          },
+          "alpha": {
+            "ancestral": 0.3,
+            "alpha": 0.8,
+            "delta": 0.3,
+            "omicron": 0.3
+          },
+          "delta": {
+            "ancestral": 0.3,
+            "alpha": 0.3,
+            "delta": 0.8,
+            "omicron": 0.3
+          },
+          "omicron": {
+            "ancestral": 0.3,
+            "alpha": 0.3,
+            "delta": 0.3,
+            "omicron": 0.8
+          }
+        },
+        "effect_ranges": {
+          "transmissibility": [
+            0.8,
+            1.25
+          ],
+          "shedding": [
+            0.8,
+            1.25
+          ],
+          "incubation_days": [
+            -1.0,
+            1.0
+          ],
+          "immune_escape": [
+            0.01,
+            0.3
+          ]
+        },
+        "min_strain_fraction": 0.001,
+        "notes": "Rates from docs/variant_surveillance_spec.md \u00a71.3. superinfection_susceptibility and recombination_rate are placeholders pending a literature anchor (docs/variant_surveillance_plan.md \u00a77)."
+      },
+      "sequencing_assay": {
+        "amplicon_target": "Spike + WGS",
+        "read_accuracy": 0.97,
+        "ct_threshold": 28.0,
+        "cost_usd": 100.0,
+        "notes": "Assay design from docs/variant_surveillance_spec.md \u00a72.1. read_accuracy is per-read consensus accuracy for this amplicon; read depth and the reporting floor are operator dials set at run time, not pathogen properties."
+      }
     }
   ]
 }
