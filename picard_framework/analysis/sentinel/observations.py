@@ -47,6 +47,15 @@ class ClinicalCase:
 
 
 @dataclass(frozen=True)
+class LineageCall:
+    """One lineage a wastewater library resolved, and how much of it it saw."""
+
+    genotype: str
+    reads: int
+    fraction: float
+
+
+@dataclass(frozen=True)
 class WastewaterSample:
     """One wastewater observation, in whatever assay mode produced it.
 
@@ -75,6 +84,22 @@ class WastewaterSample:
     lod_copies_per_l: float | None = None
     turnaround_hours: float | None = None
     genotype: str | None = None
+    lineage_status: str | None = None
+    lineage_calls: tuple[LineageCall, ...] = ()
+    lineage_unresolved_reads: int | None = None
+
+    @property
+    def resolved_lineage_fraction(self) -> float:
+        """Share of the on-target reads a lineage call was made for.
+
+        The honest measure of how much of the pool the assay typed: reads that
+        fell below the reporting floor, or that came from untracked pool mass,
+        are pathogen the library saw and could not name.
+        """
+        if self.pathogen_reads <= 0:
+            return 0.0
+        called = sum(call.reads for call in self.lineage_calls)
+        return called / self.pathogen_reads
 
     @property
     def relative_abundance(self) -> float:
@@ -140,6 +165,37 @@ def _optional_float(raw: dict[str, Any], key: str) -> float | None:
     return None if value is None else float(value)
 
 
+def _lineage_calls_from_raw(
+    raw: dict[str, Any],
+    *,
+    pathogen_reads: int,
+) -> tuple[LineageCall, ...]:
+    """Lineage calls of one wastewater row, validated against its library.
+
+    Called reads cannot exceed the on-target reads they were drawn from: a row
+    claiming otherwise has had its composition renormalized somewhere upstream,
+    which is exactly the error that makes a deconvolution look better than it is.
+    """
+    entries = raw.get("lineage_calls") or []
+    if not isinstance(entries, list):
+        raise ValueError("lineage_calls must be a list of lineage objects")
+    calls = tuple(
+        LineageCall(
+            genotype=str(entry["genotype"]),
+            reads=int(entry["reads"]),
+            fraction=float(entry.get("fraction") or 0.0),
+        )
+        for entry in entries
+    )
+    called = sum(call.reads for call in calls)
+    if called > pathogen_reads:
+        raise ValueError(
+            f"lineage reads ({called}) exceed pathogen_reads ({pathogen_reads}) "
+            f"at epoch {raw.get('sample_epoch')}",
+        )
+    return calls
+
+
 def _sample_from_dict(raw: dict[str, Any]) -> WastewaterSample:
     # Absent read fields mean "this mode does not sequence", not zero reads out of
     # zero: an empty library is dropped by the read channel either way, but the
@@ -179,6 +235,15 @@ def _sample_from_dict(raw: dict[str, Any]) -> WastewaterSample:
         lod_copies_per_l=lod,
         turnaround_hours=_optional_float(raw, "turnaround_hours"),
         genotype=None if raw.get("genotype") is None else str(raw["genotype"]),
+        lineage_status=(
+            None if raw.get("lineage_status") is None else str(raw["lineage_status"])
+        ),
+        lineage_calls=_lineage_calls_from_raw(raw, pathogen_reads=reads),
+        lineage_unresolved_reads=(
+            None
+            if raw.get("lineage_unresolved_reads") is None
+            else int(raw["lineage_unresolved_reads"])
+        ),
     )
 
 

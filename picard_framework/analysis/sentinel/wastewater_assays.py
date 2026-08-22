@@ -93,6 +93,29 @@ DEFAULT_LONG_READ_ON_TARGET_FRACTION = 0.2
 # data/config/long_read_sequencing_params.json: a confirmation, not a cadence.
 DEFAULT_LONG_READ_TURNAROUND_HOURS = 12.0
 
+# Strain deconvolution: a nested draw *inside* the on-target reads, never a
+# second detection decision. The pathogen call is the qPCR gate's; what the
+# lineages add is composition, and only the reads the gate already earned.
+DEFAULT_DIRICHLET_CONCENTRATION = 200.0
+DEFAULT_MIN_PATHOGEN_READS = 100
+DEFAULT_MIN_LINEAGE_READS = 20
+DEFAULT_MIN_LINEAGE_FRACTION = 0.02
+
+LINEAGE_STATUS_NOT_CONFIGURED = "not_configured"
+LINEAGE_STATUS_NO_TEMPLATE = "no_template"
+LINEAGE_STATUS_NO_COMPOSITION = "no_composition"
+LINEAGE_STATUS_INSUFFICIENT_READS = "insufficient_reads"
+LINEAGE_STATUS_BELOW_REPORTING_FLOOR = "below_reporting_floor"
+LINEAGE_STATUS_DECONVOLVED = "deconvolved"
+
+# Pool mass whose lineage is untracked: PR 4's sub-floor ``unresolved`` bin and
+# any strain carrying no genotype label. It consumes reads — it is real pathogen
+# in the tank — but it can never be *called*, so it is reported as unresolved
+# rather than being renormalized away into the lineages that happen to be typed.
+UNREPORTABLE_GENOTYPES = frozenset({"", "unresolved"})
+# Numerical guard: a vanishingly rare lineage still needs a positive alpha.
+_DIRICHLET_ALPHA_FLOOR = 1e-6
+
 HOURS_PER_DAY = 24.0
 ML_PER_L = 1000.0
 
@@ -346,6 +369,201 @@ class LongReadAssayConfig:
             ),
             reference_genotype=None if genotype is None else str(genotype),
         )
+
+
+@dataclass(frozen=True)
+class StrainDeconvolutionConfig:
+    """Lineage recovery from a wastewater library: the dials a lab operator turns.
+
+    Every field here is an assay or reporting choice, not biology. The pool's
+    composition is the simulator's; how many reads are spent on it, how much
+    compositional bias the library preparation imposes, and how small a minority
+    lineage a laboratory is willing to put its name to are ours.
+    """
+
+    enabled: bool = False
+    dirichlet_concentration: float = DEFAULT_DIRICHLET_CONCENTRATION
+    min_pathogen_reads: int = DEFAULT_MIN_PATHOGEN_READS
+    min_lineage_reads: int = DEFAULT_MIN_LINEAGE_READS
+    min_lineage_fraction: float = DEFAULT_MIN_LINEAGE_FRACTION
+
+    def __post_init__(self) -> None:
+        _require_positive("dirichlet_concentration", self.dirichlet_concentration)
+        if self.min_pathogen_reads < 1:
+            raise ValueError(
+                f"min_pathogen_reads must be >= 1: {self.min_pathogen_reads}",
+            )
+        if self.min_lineage_reads < 1:
+            raise ValueError(f"min_lineage_reads must be >= 1: {self.min_lineage_reads}")
+        if not 0.0 <= self.min_lineage_fraction < 1.0:
+            raise ValueError(
+                f"min_lineage_fraction must be in [0, 1): {self.min_lineage_fraction}",
+            )
+
+    @classmethod
+    def from_mapping(cls, block: Mapping[str, Any] | None) -> StrainDeconvolutionConfig:
+        """Build from a ``strain_deconvolution`` config block (or nothing)."""
+        cfg = dict(block or {})
+        return cls(
+            enabled=bool(cfg.get("enabled", False)),
+            dirichlet_concentration=float(
+                cfg.get("dirichlet_concentration", DEFAULT_DIRICHLET_CONCENTRATION),
+            ),
+            min_pathogen_reads=int(
+                cfg.get("min_pathogen_reads", DEFAULT_MIN_PATHOGEN_READS),
+            ),
+            min_lineage_reads=int(
+                cfg.get("min_lineage_reads", DEFAULT_MIN_LINEAGE_READS),
+            ),
+            min_lineage_fraction=float(
+                cfg.get("min_lineage_fraction", DEFAULT_MIN_LINEAGE_FRACTION),
+            ),
+        )
+
+
+@dataclass(frozen=True)
+class LineageMixture:
+    """What the lineage channel reports from one library's on-target reads.
+
+    Reads are conserved: every on-target read is either attributed to a reported
+    lineage or counted as unresolved. A deconvolution that silently discarded
+    the reads below its floor would report a composition summing to one and
+    overstate how much of the pool it had actually resolved.
+    """
+
+    status: str
+    pathogen_reads: int
+    calls: tuple[tuple[str, int], ...] = ()
+    unresolved_reads: int = 0
+
+    @property
+    def resolved_reads(self) -> int:
+        """On-target reads attributed to a reported lineage."""
+        return sum(reads for _genotype, reads in self.calls)
+
+    @property
+    def consensus_genotype(self) -> str | None:
+        """Most abundant reported lineage, or ``None`` when nothing was called."""
+        return next((genotype for genotype, _reads in self.calls), None)
+
+    def as_row(self) -> dict[str, Any]:
+        """Lineage fields of an observation row."""
+        total = float(self.pathogen_reads)
+        return {
+            "lineage_status": str(self.status),
+            "lineage_calls": [
+                {
+                    "genotype": genotype,
+                    "reads": int(reads),
+                    "fraction": (reads / total) if total > 0.0 else 0.0,
+                }
+                for genotype, reads in self.calls
+            ],
+            "lineage_unresolved_reads": int(self.unresolved_reads),
+        }
+
+
+def _normalized_composition(
+    composition: Mapping[str, float] | None,
+) -> dict[str, float]:
+    """Pool composition as proportions, dropping non-positive entries."""
+    weights = {
+        str(genotype): float(weight)
+        for genotype, weight in (composition or {}).items()
+        if float(weight) > 0.0
+    }
+    total = sum(weights.values())
+    if total <= 0.0:
+        return {}
+    return {genotype: weight / total for genotype, weight in weights.items()}
+
+
+def _draw_lineage_reads(
+    pathogen_reads: int,
+    proportions: Mapping[str, float],
+    *,
+    concentration: float,
+    rng: np.random.Generator,
+) -> dict[str, int]:
+    """Nested Dirichlet-multinomial draw over the pool's lineages.
+
+    The Dirichlet layer is library preparation and amplification bias: two runs
+    off the same tank do not report the same proportions, and a multinomial-only
+    draw would let a deep library claim a precision no amplicon protocol has.
+    ``concentration`` is that reproducibility, so a high value approaches the
+    multinomial and a low one is a badly behaved assay.
+    """
+    genotypes = sorted(proportions)
+    alpha = np.array(
+        [max(concentration * proportions[g], _DIRICHLET_ALPHA_FLOOR) for g in genotypes],
+        dtype=float,
+    )
+    sampled = np.asarray(rng.dirichlet(alpha), dtype=float)
+    counts = rng.multinomial(int(pathogen_reads), sampled)
+    return {g: int(counts[idx]) for idx, g in enumerate(genotypes)}
+
+
+def _reported_lineages(
+    reads_by_genotype: Mapping[str, int],
+    *,
+    pathogen_reads: int,
+    config: StrainDeconvolutionConfig,
+) -> tuple[tuple[tuple[str, int], ...], int]:
+    """Split drawn reads into reported lineages and unresolved reads."""
+    floor_reads = max(
+        config.min_lineage_reads,
+        math.ceil(config.min_lineage_fraction * pathogen_reads),
+    )
+    calls: list[tuple[str, int]] = []
+    unresolved = 0
+    for genotype, reads in reads_by_genotype.items():
+        reportable = genotype.strip().lower() not in UNREPORTABLE_GENOTYPES
+        if reportable and reads >= floor_reads:
+            calls.append((genotype, int(reads)))
+        else:
+            unresolved += int(reads)
+    calls.sort(key=lambda item: (-item[1], item[0]))
+    return tuple(calls), unresolved
+
+
+def deconvolve_lineages(
+    pathogen_reads: int,
+    composition: Mapping[str, float] | None,
+    *,
+    config: StrainDeconvolutionConfig,
+    rng: np.random.Generator,
+) -> LineageMixture:
+    """Recover lineage composition from the on-target reads of one library.
+
+    Never a detection decision and never a rescue: with no reads there is no
+    composition to report, and a library too shallow to separate lineages says
+    so rather than reporting the pool's truth at full confidence.
+    """
+    reads = max(int(pathogen_reads), 0)
+    if not config.enabled:
+        return LineageMixture(LINEAGE_STATUS_NOT_CONFIGURED, reads)
+    if reads <= 0:
+        return LineageMixture(LINEAGE_STATUS_NO_TEMPLATE, 0)
+    proportions = _normalized_composition(composition)
+    if not proportions:
+        return LineageMixture(LINEAGE_STATUS_NO_COMPOSITION, reads, unresolved_reads=reads)
+    if reads < config.min_pathogen_reads:
+        return LineageMixture(
+            LINEAGE_STATUS_INSUFFICIENT_READS, reads, unresolved_reads=reads,
+        )
+    drawn = _draw_lineage_reads(
+        reads,
+        proportions,
+        concentration=config.dirichlet_concentration,
+        rng=rng,
+    )
+    calls, unresolved = _reported_lineages(
+        drawn, pathogen_reads=reads, config=config,
+    )
+    status = (
+        LINEAGE_STATUS_DECONVOLVED if calls else LINEAGE_STATUS_BELOW_REPORTING_FLOOR
+    )
+    return LineageMixture(status, reads, calls=calls, unresolved_reads=unresolved)
 
 
 def gate_config(

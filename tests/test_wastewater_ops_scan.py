@@ -129,6 +129,7 @@ class TestConfigValidation:
             "ww_residence_hours": 8.0,
             "ww_sequencing_depth": 1_000_000,
             "ww_collection_points": 3,
+            "ww_strain_deconvolution": False,
         }
 
 

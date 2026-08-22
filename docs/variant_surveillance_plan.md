@@ -426,6 +426,16 @@ is the negative control. Tests: recovery of known mixtures at high depth,
 degradation to non-informative at cruise-realistic depth, and dominance
 ordering preserved.
 
+*Delivered.* Two things the implementation settled that the sketch left open.
+Reads are **conserved, not renormalized**: a lineage below the reporting floor,
+and PR 4's untracked `unresolved` pool mass, stay counted as
+`lineage_unresolved_reads`, so a row states how much of its library it actually
+typed (`resolved_lineage_fraction`) rather than reporting a composition summing
+to one. And the failure mode is graded by two separate dials — `min_pathogen_reads`
+(a library too shallow to separate anything) versus `min_lineage_reads` /
+`min_lineage_fraction` (a minority lineage present but unreportable) — because
+the paper's claim about sufficient depth depends on which of the two bites.
+
 **PR 8 — surface sampling strain recovery.**
 Surface swabs report the strain mixture of the depositing agents from PR 4's
 pools, with recovery probability by surface type and time since deposition.
