@@ -23,15 +23,27 @@ from picard_framework.analysis.shore.renewal import (
     renewal_result,
     renewal_trajectory,
 )
+from picard_framework.analysis.shore.scenarios import (
+    NORWALK_GI_ENVIRONMENTAL_SHORE_SCENARIO,
+    NORWALK_GI_SHORE_SCENARIO,
+    SHORE_SCENARIOS,
+    ParameterProvenance,
+    ShoreTransmissionScenario,
+)
 from picard_framework.analysis.shore.sweep import benefit_surface
 
 __all__ = [
     "CounterfactualResult",
     "DEPLETION_FRACTION",
+    "NORWALK_GI_ENVIRONMENTAL_SHORE_SCENARIO",
+    "NORWALK_GI_SHORE_SCENARIO",
     "PortCallImportation",
+    "ParameterProvenance",
+    "SHORE_SCENARIOS",
     "ShoreArmResult",
     "ShoreRenewalParameters",
     "ShoreRenewalResult",
+    "ShoreTransmissionScenario",
     "benefit_surface",
     "evaluate_counterfactual",
     "port_detection_epoch",
