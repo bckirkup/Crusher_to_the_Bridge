@@ -473,6 +473,13 @@ reference is not saturating. What remains uncalibrated is the *magnitude* of the
 shift at a given simulated dose, so its direction can be claimed and its size
 cannot.
 
+What PR 7b left inconsistent across the repository — three incubation
+representations, a sentinel delay catalog that is not derived from the profiles,
+13 profiles still on the fixed-onset fallback, and a calibration axis the dose
+term now interacts with — is audited and sequenced in
+[`incubation_reconciliation_plan.md`](incubation_reconciliation_plan.md),
+together with the re-fit and `main`-exposure calls.
+
 Still unimplemented from the spec, each its own scoped work: the frailty score
 and its severity coupling, wearable-baseline coupling and pre-symptomatic
 anomaly lead time, long-shedder behaviour, gamma-fitted variant lineages
