@@ -60,6 +60,34 @@ model (clinical-only, pending reads on line lists), so unexposed. Note and skip.
 Compute: the paired subset is the 72 hazard × fleet × `R_onboard` cells at
 reduced seeds, not the full 3360. One session plus a modest re-run.
 
+### 1a. The harness
+
+`picard_framework/analysis/incubation_arms.py` implements the paired arms as
+three stages. The only difference between arms is whether the pathogen profile
+carries its `incubation` block; platform, population, seeds, itineraries, port
+hazards, `dose_adjustment`, seeding count, surveillance config and the *fitted*
+delay kernel are identical, so the comparison isolates the data-generating
+onset process from the estimator.
+
+```bash
+python -m picard_framework.analysis.incubation_arms --out results/incubation_arms \
+  simulate                       # both arms, cached per voyage
+python -m picard_framework.analysis.incubation_arms --out results/incubation_arms \
+  fit --engine auto              # same recovery model on each arm
+python -m picard_framework.analysis.incubation_arms --out results/incubation_arms \
+  compare                        # arms_comparison.csv + arms_report.md
+```
+
+Each arm also records its *realized* truth-introduction → onset spans
+(`onsets.csv`, `onset_summary.json`), which is the direct measurement of the
+IQR-narrowing prediction in C2.1 — the fixed-onset arm's spans are the control.
+The comparison table reports, per cell and port, λ_true, each arm's posterior
+mean and interval width, signed relative bias and coverage; C2.2 is read off
+`rel_bias_*` (sign included), not off interval width alone.
+
+Sampler defaults are the post-#293 long chains (400 draws, 1600 warmup); the
+shorter chains that predate that PR make these comparisons seed-luck.
+
 ## 2. Paper 1 — VSP degradation, detection timing, and the economics
 
 Paper 1's conclusions split cleanly by what they depend on, and the split is
