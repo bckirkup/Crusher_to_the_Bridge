@@ -365,19 +365,44 @@ Ids are monotone, so a collected id is never reused. The environmental founders
 are also held, one per pathogen, since they are reused whenever a reservoir is
 re-seeded.
 
-**PR 5 — immune history and cross-immunity.**
-`agent.immune_history: list[ImmuneRecord]` appended at the per-pathogen
-recovery seam (`orchestrator_epoch.py:340`) carrying pathogen, genotype,
-epoch, and the strain's `immune_escape`. Baseline immunes drawn at
-`immune_ratio` get a genotype sampled from a configured
-`prior_genotype_distribution` so §1.4's matrix has an argument for them.
+**PR 5 — immune history and cross-immunity. (implemented)**
+`agent.immune_history: list[ImmuneRecord]` is appended at the per-pathogen
+recovery seam, one record per *lineage* as it clears rather than one per
+infection: a co-infected host resolves two exposures and comes out with memory
+of both genotypes, which is exactly what makes sequencing a mixed infection
+worth doing. Each record carries pathogen, genotype, strain id, the epoch it
+cleared, and the strain's `immune_escape`, and is a **self-contained snapshot**
+rather than a pointer into the registry — PR 4's collection forgets a lineage
+once no host and no pool carries it, while the immunity it raised has to outlive
+it. That also removes a latent failure: the old single prior read the recovered
+infection's `strain_id` straight out of the registry, which a collection could
+already have dropped.
+
 Protection at exposure is
-`base_protection[prior_genotype][challenge_genotype] * (1 - immune_escape)`,
-folded into the existing `susceptibility_multiplier` path rather than a new
-branch in the dose-response. Cross-immunity matrices live in the pathogen
-profile (`cross_immunity`), row-validated by the sanity checker. Tests:
-same-genotype rechallenge is strongly protected, cross-genotype weakly, escape
-mutants recover susceptibility monotonically in `immune_escape`.
+`max_over_priors(base_protection[prior][challenge]) * (1 - immune_escape)`,
+dose-share weighted over the challenging strains as before. The maximum, not a
+sum: repeated exposure to related genotypes does not stack past what the closest
+match already gives, and a host that has met the challenge genotype itself is
+protected as if its heterologous exposures had not happened. Priors come from
+three places — the immune history, the lineages still resident (an ongoing
+infection interferes before it clears), and, for an agent immune at embarkation,
+one genotype drawn from `prior_genotype_distribution` and now also written to
+the history as an `embarkation` record at epoch 0, since that immunity predates
+the run. Unattributed and sub-floor `unresolved` dose still carries no genotype
+to recognise and stays in the denominator at zero protection.
+
+Cross-immunity matrices live in the pathogen profile (`cross_immunity`) and are
+row-validated by the sanity checker, which now also warns on the two shapes that
+are mistakes rather than models: a declared genotype with no row (silently making
+every host that resolved it fully susceptible) and a row protecting better
+against some other genotype than against itself.
+
+With variant surveillance off nothing is recorded and immunity stays absolute,
+so the legacy compartment is unchanged. Tests in `tests/test_immune_history.py`:
+homologous rechallenge beats heterologous, escape grades protection down
+monotonically to zero, a two-genotype history is scored on the best match,
+repeat exposure does not stack, protection survives the lineage being collected,
+and history length tracks resolved exposures rather than epochs.
 
 ## 4. Phase 2 — observation models (PRs 6–9)
 

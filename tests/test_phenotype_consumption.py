@@ -325,20 +325,25 @@ class TestImmuneEscapeAxis:
             PATHOGEN, 1e4, 0, strain_id=past.strain_id,
             strain_phenotype=Phenotype.of(past),
         )
-        agent.infections[PATHOGEN]["status"] = InfectionStatus.RECOVERED
-        assert core._prior_genotype(agent, PATHOGEN) == GENOTYPES[2]
+        profile = {**_norwalk_profile(), "recovery_day": 1}
+        _advance_agent_pathogen_infections(
+            agent, {PATHOGEN: profile}, np.random.default_rng(3), registry, 4,
+        )
+        assert agent.infections[PATHOGEN]["status"] == InfectionStatus.RECOVERED
+        assert core._prior_genotypes(agent, PATHOGEN) == (GENOTYPES[2],)
 
     def test_pre_immune_prior_genotype_is_drawn_once_and_kept(self) -> None:
         core = _core()
         agent = _agent(11, immune=True)
-        first = core._prior_genotype(agent, PATHOGEN)
-        assert first in GENOTYPES
-        assert core._prior_genotype(agent, PATHOGEN) == first
+        first = core._prior_genotypes(agent, PATHOGEN)
+        assert len(first) == 1
+        assert first[0] in GENOTYPES
+        assert core._prior_genotypes(agent, PATHOGEN) == first
 
     def test_naive_agent_has_no_prior_and_no_protection(self) -> None:
         core = _core()
         agent = _agent(12)
-        assert core._prior_genotype(agent, PATHOGEN) is None
+        assert core._prior_genotypes(agent, PATHOGEN) == ()
         assert core._challenge_protection(agent, PATHOGEN) == pytest.approx(0.0)
 
 
