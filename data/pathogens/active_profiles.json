@@ -179,7 +179,14 @@
           ]
         },
         "min_strain_fraction": 0.001,
-        "notes": "Rates from docs/variant_surveillance_spec.md §1.3. superinfection_susceptibility and recombination_rate are placeholders pending a literature anchor (docs/variant_surveillance_plan.md §7)."
+        "notes": "Rates from docs/variant_surveillance_spec.md \u00a71.3. superinfection_susceptibility and recombination_rate are placeholders pending a literature anchor (docs/variant_surveillance_plan.md \u00a77)."
+      },
+      "sequencing_assay": {
+        "amplicon_target": "Capsid (VP1)",
+        "read_accuracy": 0.92,
+        "ct_threshold": 30.0,
+        "cost_usd": 150.0,
+        "notes": "Assay design from docs/variant_surveillance_spec.md \u00a72.1. read_accuracy is per-read consensus accuracy for this amplicon; read depth and the reporting floor are operator dials set at run time, not pathogen properties."
       }
     },
     {
@@ -374,7 +381,14 @@
           ]
         },
         "min_strain_fraction": 0.001,
-        "notes": "Rates from docs/variant_surveillance_spec.md §1.3. superinfection_susceptibility and recombination_rate are placeholders pending a literature anchor (docs/variant_surveillance_plan.md §7)."
+        "notes": "Rates from docs/variant_surveillance_spec.md \u00a71.3. superinfection_susceptibility and recombination_rate are placeholders pending a literature anchor (docs/variant_surveillance_plan.md \u00a77)."
+      },
+      "sequencing_assay": {
+        "amplicon_target": "Spike + WGS",
+        "read_accuracy": 0.97,
+        "ct_threshold": 28.0,
+        "cost_usd": 100.0,
+        "notes": "Assay design from docs/variant_surveillance_spec.md \u00a72.1. read_accuracy is per-read consensus accuracy for this amplicon; read depth and the reporting floor are operator dials set at run time, not pathogen properties."
       }
     }
   ]

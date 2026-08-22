@@ -143,7 +143,14 @@
           ]
         },
         "min_strain_fraction": 0.001,
-        "notes": "Fictional pathogen: rates from docs/variant_surveillance_spec.md §1.3, deliberately more mutationally dynamic than real pathogens. No literature anchor exists."
+        "notes": "Fictional pathogen: rates from docs/variant_surveillance_spec.md \u00a71.3, deliberately more mutationally dynamic than real pathogens. No literature anchor exists."
+      },
+      "sequencing_assay": {
+        "amplicon_target": "16S + virulence",
+        "read_accuracy": 0.9,
+        "ct_threshold": 32.0,
+        "cost_usd": 200.0,
+        "notes": "Assay design from docs/variant_surveillance_spec.md \u00a72.1. read_accuracy is per-read consensus accuracy for this amplicon; read depth and the reporting floor are operator dials set at run time, not pathogen properties."
       }
     },
     {
@@ -275,7 +282,14 @@
           ]
         },
         "min_strain_fraction": 0.001,
-        "notes": "Fictional pathogen: rates from docs/variant_surveillance_spec.md §1.3, deliberately more mutationally dynamic than real pathogens. No literature anchor exists."
+        "notes": "Fictional pathogen: rates from docs/variant_surveillance_spec.md \u00a71.3, deliberately more mutationally dynamic than real pathogens. No literature anchor exists."
+      },
+      "sequencing_assay": {
+        "amplicon_target": "BML (behavioral modification locus)",
+        "read_accuracy": 0.85,
+        "ct_threshold": 20.0,
+        "cost_usd": 300.0,
+        "notes": "Assay design from docs/variant_surveillance_spec.md \u00a72.1. read_accuracy is per-read consensus accuracy for this amplicon; read depth and the reporting floor are operator dials set at run time, not pathogen properties."
       }
     }
   ]

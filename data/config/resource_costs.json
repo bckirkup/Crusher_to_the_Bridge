@@ -204,6 +204,15 @@
       "labor_person_hours": 0.0,
       "description": "Oxford Nanopore long-read escalation for verification/typing (framework placeholder; configure externally)."
     },
+    "clinical_strain_typing": {
+      "financial_usd": 150.0,
+      "materials": {
+        "library_prep_kits": 1,
+        "swab_kits": 1
+      },
+      "labor_person_hours": 2.0,
+      "description": "Clinical amplicon strain typing (Nanopore) for variant surveillance. Default financial cost; a pathogen profile's sequencing_assay.cost_usd overrides it per specimen. ROM $100-300/specimen."
+    },
     "metagenomic_shotgun_sequencing": {
       "financial_usd": 300.0,
       "materials": {

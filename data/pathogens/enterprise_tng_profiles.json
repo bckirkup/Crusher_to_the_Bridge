@@ -139,7 +139,14 @@
           ]
         },
         "min_strain_fraction": 0.001,
-        "notes": "Fictional pathogen: rates from docs/variant_surveillance_spec.md §1.3, deliberately more mutationally dynamic than real pathogens. No literature anchor exists."
+        "notes": "Fictional pathogen: rates from docs/variant_surveillance_spec.md \u00a71.3, deliberately more mutationally dynamic than real pathogens. No literature anchor exists."
+      },
+      "sequencing_assay": {
+        "amplicon_target": "Genesis factor",
+        "read_accuracy": 0.88,
+        "ct_threshold": 25.0,
+        "cost_usd": 250.0,
+        "notes": "Assay design from docs/variant_surveillance_spec.md \u00a72.1. read_accuracy is per-read consensus accuracy for this amplicon; read depth and the reporting floor are operator dials set at run time, not pathogen properties."
       }
     },
     {
@@ -271,7 +278,14 @@
           ]
         },
         "min_strain_fraction": 0.001,
-        "notes": "Fictional pathogen: rates from docs/variant_surveillance_spec.md §1.3, deliberately more mutationally dynamic than real pathogens. No literature anchor exists."
+        "notes": "Fictional pathogen: rates from docs/variant_surveillance_spec.md \u00a71.3, deliberately more mutationally dynamic than real pathogens. No literature anchor exists."
+      },
+      "sequencing_assay": {
+        "amplicon_target": "HA + NA",
+        "read_accuracy": 0.95,
+        "ct_threshold": 30.0,
+        "cost_usd": 120.0,
+        "notes": "Assay design from docs/variant_surveillance_spec.md \u00a72.1. read_accuracy is per-read consensus accuracy for this amplicon; read depth and the reporting floor are operator dials set at run time, not pathogen properties."
       }
     }
   ]

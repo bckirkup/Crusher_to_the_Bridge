@@ -7,6 +7,13 @@ Oxford Nanopore long-read verification / pathogen-typing modality.
 Loads assay parameters from ``data/config/long_read_sequencing_params.json``,
 samples compositional read counts from ground-truth pathogen mass, applies
 configured error injection, and returns pathogen classification calls.
+
+When the caller supplies the genotype mixture a clinical specimen actually
+contains, the same run also produces amplicon genotype calls through
+:class:`crusher_labs.modalities.clinical_strain_typing.ClinicalStrainTyping`
+(variant surveillance, Paper 3): pathogen-level calls say *what*, genotype
+calls say *which lineage*, and the latter can be wrong rather than merely
+absent.
 """
 
 from __future__ import annotations
@@ -18,6 +25,7 @@ from typing import Any
 
 import numpy as np
 
+from crusher_labs.modalities.clinical_strain_typing import ClinicalStrainTyping
 from crusher_labs.modalities.sequencing import MULTI_KINGDOM_TAXA
 from simulation_utils.numeric import default_simulation_rng
 from simulation_utils.paths import resolve_repo_path, validated_open
@@ -70,8 +78,10 @@ class LongReadNanoporeSequencing:
         *,
         enabled: bool = True,
         rng: np.random.Generator | None = None,
+        strain_typing: ClinicalStrainTyping | None = None,
     ) -> None:
         self.enabled = enabled
+        self.strain_typing = strain_typing
         self.params = params
         self.profile_name = profile_name
         self.rng = rng if rng is not None else default_simulation_rng()
@@ -93,6 +103,7 @@ class LongReadNanoporeSequencing:
         enabled: bool = True,
         rng: np.random.Generator | None = None,
         repo_root: str | None = None,
+        strain_typing: ClinicalStrainTyping | None = None,
     ) -> LongReadNanoporeSequencing:
         root = repo_root or REPO_ROOT
         path = resolve_repo_path(root, path)
@@ -100,7 +111,9 @@ class LongReadNanoporeSequencing:
             params = json.load(fh)
         sim = params.get("simulation_parameters", {})
         profile = profile_name or sim.get("default_profile", "flongle_rapid")
-        return cls(params, profile, enabled=enabled, rng=rng)
+        return cls(
+            params, profile, enabled=enabled, rng=rng, strain_typing=strain_typing,
+        )
 
     @property
     def turnaround(self) -> dict[str, Any]:
@@ -319,6 +332,47 @@ class LongReadNanoporeSequencing:
         )
         return calls[:max_org]
 
+    def _genotype_calls(
+        self,
+        request: LongReadVerificationRequest,
+        *,
+        agents: list[dict[str, Any]],
+        pathogen_profiles: dict[str, dict[str, Any]],
+        genotype_mixtures: dict[str, dict[str, float]] | None,
+        epoch: int,
+        typing_read_depth: int | None,
+    ) -> list[dict[str, Any]]:
+        """Amplicon typing results for a clinical specimen, one per pathogen.
+
+        Empty unless a typing assay is configured and the caller passed the
+        specimen's genotype truth; the amplicon Ct gate is fed by the same
+        clinical specimen mass the metagenomic pass uses, so a specimen too
+        dilute to sequence is too dilute to type.
+        """
+        if self.strain_typing is None or not genotype_mixtures:
+            return []
+        if request.specimen_source not in (SPECIMEN_CLINICAL, SPECIMEN_CLINICAL_CULTURE):
+            return []
+        proc = self.specimen_processing.get(request.specimen_source, {})
+        masses = self._clinical_pathogen_masses(
+            request, agents, pathogen_profiles, proc, request.specimen_source,
+        )
+        try:
+            agent_id = int(request.collection_key)
+        except ValueError:
+            agent_id = -1
+        calls: list[dict[str, Any]] = []
+        for pid, mixture in genotype_mixtures.items():
+            calls.append(self.strain_typing.type_specimen(
+                agent_id,
+                str(pid),
+                masses.get(str(pid), masses.get("target", 0.0)),
+                mixture,
+                epoch=epoch,
+                read_depth=typing_read_depth,
+            ))
+        return calls
+
     def verify(
         self,
         request: LongReadVerificationRequest,
@@ -327,8 +381,17 @@ class LongReadNanoporeSequencing:
         spaces: dict[str, dict[str, Any]] | None = None,
         agents: list[dict[str, Any]] | None = None,
         pathogen_profiles: dict[str, dict[str, Any]] | None = None,
+        genotype_mixtures: dict[str, dict[str, float]] | None = None,
+        typing_read_depth: int | None = None,
     ) -> dict[str, Any]:
-        """Run verification/typing pass from ground-truth specimen composition."""
+        """Run verification/typing pass from ground-truth specimen composition.
+
+        ``genotype_mixtures`` maps pathogen id to the genotype composition the
+        specimen actually carries (see
+        :func:`crusher_labs.modalities.clinical_strain_typing.specimen_genotype_mixture`).
+        Supplying it adds ``genotype_calls`` to the result; omitting it leaves
+        the pathogen-level behaviour exactly as before.
+        """
         spaces = spaces or {}
         agents = agents or []
         pathogen_profiles = pathogen_profiles or {}
@@ -369,6 +432,15 @@ class LongReadNanoporeSequencing:
         total_reads = sum(read_dict.values())
         pathogen_calls = self._classify_calls(read_dict, total_reads)
 
+        genotype_calls = self._genotype_calls(
+            request,
+            agents=agents,
+            pathogen_profiles=pathogen_profiles,
+            genotype_mixtures=genotype_mixtures,
+            epoch=epoch,
+            typing_read_depth=typing_read_depth,
+        )
+
         det = self.profile.get("detection", {})
         reads_strain = int(det.get("reads_for_strain_typing", 10_000))
         top_reads = pathogen_calls[0]["classified_reads"] if pathogen_calls else 0
@@ -390,6 +462,7 @@ class LongReadNanoporeSequencing:
             "total_classified_reads": total_reads,
             "read_counts": read_dict,
             "pathogen_calls": pathogen_calls,
+            "genotype_calls": genotype_calls,
             "consensus_ready": consensus_ready,
             "mixed_infection_flag": (
                 "mixed_infection_suspected" in request.trigger_reasons
