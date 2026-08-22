@@ -71,10 +71,11 @@ TRUE_SLOPE = 1.0
 TRUE_CONC = 100_000.0
 SAMPLE_EPOCHS = (24, 36, 48, 60, 72, 84)
 VOYAGE_IDS = ("shipA-0", "shipB-0")
-# Short chains: these buy ordering, not precision (as in the fleet validation
-# suite, whose parity test is what lets the numpy walker stand in for Stan).
-DRAWS = 120
-WARMUP = 400
+# Chains long enough that the ordering claims are properties, not seed luck (see
+# the note on the same constants in tests/test_sentinel_fleet_validation.py); as
+# there, the parity test is what lets the numpy walker stand in for Stan.
+DRAWS = 400
+WARMUP = 1600
 
 
 def sample_dict(
