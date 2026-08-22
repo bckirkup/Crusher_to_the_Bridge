@@ -307,7 +307,7 @@ class ClinicalStrainTyping:
     ) -> dict[str, Any]:
         """Assemble one typing payload; only a typed result carries calls."""
         call_list = list(calls or [])
-        consensus = call_list[0]["genotype"] if call_list else None
+        consensus = next((call["genotype"] for call in call_list), None)
         true_genotypes = sorted(truth or {})
         return {
             "instrument": self.name,
