@@ -32,6 +32,11 @@ Contributor = tuple[str, int | None]
 
 NO_SOURCE_AGENT: int | None = None
 
+# Pseudo-strain holding pool mass whose lineage is below the resolution floor.
+# It is never registered, so an acquisition drawn from it has no callable parent
+# — which is what a sub-detection-limit pool fraction means for an assay.
+UNRESOLVED_STRAIN = "unresolved"
+
 
 class EmissionContribution(NamedTuple):
     """One source's emitted mass and its strain's transmissibility."""
@@ -196,13 +201,17 @@ def draw_contributor(
 
 @dataclass
 class ReservoirComposition:
-    """Strain composition of lagged reservoirs (surfaces, food, environment).
+    """Strain composition of lagged reservoirs (air, surfaces, food, environment).
 
     Pool *masses* stay where they are in the transmission core; this tracks only
     who deposited what, so a pickup epochs later is attributed to the strains
     still present rather than to whoever happens to be shedding now. Decay is
     applied with the same factor as the pool it shadows, which is what makes
     older deposits fade relative to newer ones.
+
+    Only *shares* are read (through :meth:`mix`), so a composition tracks its
+    pool up to a constant: any uniform rescaling of a pool — external CONTAM
+    transport included — leaves attribution unchanged.
     """
 
     _mass: dict[str, dict[Contributor, float]] = field(default_factory=dict)
@@ -245,6 +254,52 @@ class ReservoirComposition:
     def contributors(self, key: str) -> Mapping[Contributor, float]:
         return self._mass.get(key, {})
 
+    def keys(self) -> tuple[str, ...]:
+        return tuple(self._mass)
+
+    def strain_ids(self) -> set[str]:
+        """Every strain still present in any reservoir."""
+        return {
+            strain_id
+            for bucket in self._mass.values()
+            for strain_id, _ in bucket
+        }
+
+    def total_mass(self, key: str) -> float:
+        """Mass a reservoir's composition accounts for, unresolved bin included."""
+        return sum(self._mass.get(key, {}).values())
+
+    def drop_empty(self, threshold: float = 0.0) -> None:
+        """Forget contributors that have decayed to nothing."""
+        for name in tuple(self._mass):
+            bucket = self._mass[name]
+            for contributor in tuple(bucket):
+                if bucket[contributor] <= threshold:
+                    del bucket[contributor]
+            if not bucket:
+                del self._mass[name]
+
+    def lump(self, min_fraction: float, key: str | None = None) -> None:
+        """Collapse the sub-floor tail of a reservoir (GutIBM's lumping).
+
+        Without a floor a reservoir accumulates one entry per
+        ``(strain, depositor)`` pair, so state grows with the product of
+        lineages and hosts. Below the floor the depositor is forgotten first
+        (the lineage survives, its provenance does not), and a lineage still
+        below the floor moves to :data:`UNRESOLVED_STRAIN`: a pool assay cannot
+        call a variant under its limit of detection, so such mass is real but
+        unattributable. Mass is therefore conserved exactly — only who gets
+        credited for it changes — and the largest lineage is always kept, so a
+        reservoir never loses its identity just because its diversity is flat.
+        """
+        if min_fraction <= 0.0:
+            return
+        names: Sequence[str] = (key,) if key is not None else tuple(self._mass)
+        for name in names:
+            bucket = self._mass.get(name)
+            if bucket:
+                self._mass[name] = _lumped(bucket, min_fraction)
+
     def mix(
         self,
         key: str,
@@ -261,3 +316,30 @@ class ReservoirComposition:
             )
             for (strain_id, source_agent_id), mass in self.contributors(key).items()
         )
+
+
+def _lumped(
+    bucket: Mapping[Contributor, float],
+    min_fraction: float,
+) -> dict[Contributor, float]:
+    """One reservoir's composition with its sub-floor tail collapsed."""
+    total = sum(bucket.values())
+    if total <= 0.0:
+        return dict(bucket)
+    floor = total * min_fraction
+    by_strain: dict[str, float] = {}
+    for (strain_id, _), mass in bucket.items():
+        by_strain[strain_id] = by_strain.get(strain_id, 0.0) + mass
+    kept = {sid for sid, mass in by_strain.items() if mass >= floor}
+    if not kept:
+        kept = {max(by_strain, key=lambda sid: by_strain[sid])}
+
+    lumped: dict[Contributor, float] = {}
+    for (strain_id, agent_id), mass in bucket.items():
+        if strain_id in kept:
+            resolved = agent_id if mass >= floor else NO_SOURCE_AGENT
+            contributor: Contributor = (strain_id, resolved)
+        else:
+            contributor = (UNRESOLVED_STRAIN, NO_SOURCE_AGENT)
+        lumped[contributor] = lumped.get(contributor, 0.0) + mass
+    return lumped

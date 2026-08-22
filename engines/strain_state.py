@@ -595,6 +595,44 @@ class StrainRegistry:
             current = self.get(str(parent_id))
         return current.strain_id
 
+    def ancestors(self, strain_id: str) -> set[str]:
+        """Every ancestor of a strain, following both parents of a recombinant."""
+        seen: set[str] = set()
+        frontier = [strain_id]
+        while frontier:
+            current = frontier.pop()
+            for parent_id in self.get(current).parent_strain_ids:
+                if parent_id in self._strains and parent_id not in seen:
+                    seen.add(parent_id)
+                    frontier.append(parent_id)
+        return seen
+
+    def collect(self, live_strain_ids: Iterable[str]) -> tuple[str, ...]:
+        """Forget extinct lineages, keeping the ancestry of the live ones.
+
+        A voyage under mutation mints a lineage per transmission, so without
+        collection the registry is the run's whole phylogeny in memory. Ancestors
+        of live strains are retained even when extinct themselves, because
+        ``lineage_root`` and the ancestry a sequencing assay reconstructs are
+        exactly what a phylogenomic observatory is for; only lineages with no
+        living descendant and no pool remnant are dropped. Ids are never reused
+        (the counters are monotone), so a collected id cannot be confused with a
+        later strain.
+        """
+        keep: set[str] = set()
+        for strain_id in live_strain_ids:
+            if strain_id in self._strains and strain_id not in keep:
+                keep.add(strain_id)
+                keep |= self.ancestors(strain_id)
+        dropped = tuple(sid for sid in self._strains if sid not in keep)
+        for strain_id in dropped:
+            del self._strains[strain_id]
+        for pathogen_id, founders in tuple(self._founders.items()):
+            self._founders[pathogen_id] = [
+                sid for sid in founders if sid in self._strains
+            ]
+        return dropped
+
     # ── census ──────────────────────────────────────────────────────────
 
     def census(
