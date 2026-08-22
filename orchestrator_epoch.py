@@ -15,6 +15,12 @@ from typing import Any
 
 import numpy as np
 
+from crusher_labs.modalities.clinical_strain_typing import specimen_genotype_mixture
+from crusher_labs.modalities.long_read_sequencing import (
+    SPECIMEN_CLINICAL,
+    SPECIMEN_CLINICAL_CULTURE,
+    LongReadVerificationRequest,
+)
 from crusher_labs.modalities.wearable import WearableDataStream
 from engines.incubation import (
     IncubationHost,
@@ -562,6 +568,60 @@ def _submit_observation_queue(
     queue.submit_dict(INSTRUMENT_MICROBIO, clin_microbio_results, epoch)
 
 
+def clinical_genotype_mixtures(
+    requests: list[LongReadVerificationRequest],
+    engine: KorkinShipEngine | None,
+    strain_registry: StrainRegistry | None,
+    pathogen_profiles: dict[str, dict[str, Any]],
+) -> dict[str, dict[str, dict[str, float]]]:
+    """True genotype composition of each clinical specimen being sequenced.
+
+    Empty without strain tracking, which is what keeps a run with no
+    ``strain_evolution`` block pathogen-level: an assay cannot type lineages
+    the biology never minted. Keyed by ``collection_key`` (the agent id) so the
+    lab layer never has to know how a host stores its resident strains.
+    """
+    if engine is None or strain_registry is None or not pathogen_profiles:
+        return {}
+    clinical = (SPECIMEN_CLINICAL, SPECIMEN_CLINICAL_CULTURE)
+    mixtures: dict[str, dict[str, dict[str, float]]] = {}
+    for req in requests:
+        if req.specimen_source not in clinical:
+            continue
+        key = str(req.collection_key)
+        agent = _agent_by_id(engine, key)
+        if agent is None:
+            continue
+        specimen = {
+            str(pid): mixture
+            for pid, profile in pathogen_profiles.items()
+            if (
+                mixture := specimen_genotype_mixture(
+                    agent, str(pid), profile, strain_registry,
+                )
+            )
+        }
+        if specimen:
+            mixtures[key] = specimen
+    return mixtures
+
+
+def _agent_by_id(engine: KorkinShipEngine, collection_key: str) -> Any | None:
+    """Resolve a clinical collection key to the host it was drawn from.
+
+    Keys come from the escalation layer as free-form strings, and an
+    environmental or pooled specimen has no host at all, so a key that is not
+    an agent id yields ``None`` rather than a wrong host's lineages.
+    """
+    if not collection_key.isdigit():
+        return None
+    agent_id = int(collection_key)
+    for agent in engine.agents:
+        if agent.agent_id == agent_id:
+            return agent
+    return None
+
+
 def _run_long_read_escalation(
     obs: ObservationEngine,
     queue: Any,
@@ -575,6 +635,8 @@ def _run_long_read_escalation(
     clin_rdt_results: dict[int, dict[str, Any]],
     clin_qpcr_results: dict[int, dict[str, Any]],
     clin_microbio_results: dict[int, dict[str, Any]],
+    engine: KorkinShipEngine | None = None,
+    strain_registry: StrainRegistry | None = None,
 ) -> tuple[dict[str, dict[str, Any]], int]:
     from crusher_labs.instrument_turnaround import INSTRUMENT_LONG_READ
     from crusher_labs.long_read_escalation import collect_long_read_escalation_requests
@@ -601,6 +663,9 @@ def _run_long_read_escalation(
         spaces=spaces,
         agents=agents,
         pathogen_profiles=pathogen_profiles,
+        genotype_mixtures_by_key=clinical_genotype_mixtures(
+            requests, engine, strain_registry, pathogen_profiles,
+        ),
     )
     for req_id, payload in raw_lr.items():
         queue.submit(INSTRUMENT_LONG_READ, req_id, payload, epoch)
@@ -624,6 +689,7 @@ def run_observation_sampling(
     engine: KorkinShipEngine,
     pathogen_profiles: dict[str, dict[str, Any]],
     cfg: dict[str, Any],
+    strain_registry: StrainRegistry | None = None,
 ) -> tuple[
     dict[str, dict[str, Any]],
     dict[str, dict[str, Any]],
@@ -736,6 +802,8 @@ def run_observation_sampling(
             obs, queue, cfg, epoch, spaces, agents, pathogen_profiles,
             ww_results, swab_results,
             clin_rdt_results, clin_qpcr_results, clin_microbio_results,
+            engine=engine,
+            strain_registry=strain_registry,
         )
 
     if obs.lab_notebook_enabled:

@@ -11,7 +11,10 @@ from typing import Any
 import numpy as np
 
 from crusher_labs import build_modalities
-from crusher_labs.modalities.clinical_strain_typing import specimen_genotype_mixture
+from crusher_labs.modalities.clinical_strain_typing import (
+    specimen_genotype_mixture,
+    typed_genotypes,
+)
 from crusher_labs.protocol_engine import (
     apply_hvac_modifiers,
     apply_transmission_modifiers,
@@ -606,6 +609,7 @@ class ShipSimulation:
         syn_result: dict[str, Any] | None,
         cascade_result: dict[str, Any] | None,
         wearable_result: dict[str, Any] | None,
+        long_read_results: dict[str, dict[str, Any]] | None = None,
     ) -> None:
         """Fold this epoch's per-person state into the sentinel ledger."""
         ledger = self.sentinel_ledger
@@ -621,6 +625,7 @@ class ShipSimulation:
             detections=self._sentinel_detections(
                 syn_result, cascade_result, wearable_result,
             ),
+            genotypes=typed_genotypes(long_read_results),
         )
         self._observe_wastewater(epoch)
 
@@ -938,6 +943,9 @@ class ShipSimulation:
             self.zone_volumes, work.zone_microflora_shifts,
             work.state.trigger_status, self.high_traffic, work.syn_result,
             self.engine, self.pathogen_profiles, work.cfg,
+            strain_registry=(
+                None if self.tx_core is None else self.tx_core.strain_registry
+            ),
         )
 
     def _log_pending_escalation(
@@ -1084,6 +1092,29 @@ class ShipSimulation:
                 self.engine, work.merged_mods["surface_decontamination_factor"],
             )
 
+    def _attach_strain_census(self, work: _EpochWork) -> None:
+        """Record this epoch's lineage census, once per tracked pathogen.
+
+        A census, not an event log: a mutating voyage mints a lineage per
+        transmission, so the per-epoch carrier counts are what keeps a
+        thousand-run campaign's telemetry finite. Absent entirely when strains
+        are untracked, so a run without ``variant_surveillance`` writes the
+        same record it always did — and it survives ``compact`` retention,
+        because the census *is* the aggregate.
+        """
+        registry = None if self.tx_core is None else self.tx_core.strain_registry
+        if registry is None or self.engine is None or not self.tx_core.strain_configs:
+            return
+        census: list[dict[str, Any]] = []
+        for pathogen_id in sorted(self.tx_core.strain_configs):
+            counts: dict[str, int] = {}
+            for agent in self.engine.agents:
+                for strain_id in agent.resident_strains(pathogen_id):
+                    counts[strain_id] = counts.get(strain_id, 0) + 1
+            snapshot = registry.take_snapshot(work.epoch, pathogen_id, counts)
+            census.append(snapshot.to_telemetry())
+        work.epoch_record["strain_census"] = census
+
     def _attach_decision_telemetry(self, work: _EpochWork) -> None:
         dr = work.dr
         if dr is None:
@@ -1174,10 +1205,11 @@ class ShipSimulation:
         if work.state.epoch_voyage is not None:
             work.epoch_record["voyage_epoch"] = work.state.epoch_voyage.to_telemetry()
         self._attach_decision_telemetry(work)
+        self._attach_strain_census(work)
         work.state.simulation_history.append(work.epoch_record)
         self._observe_sentinel(
             work.epoch, work.agents, work.syn_result, work.cascade_result,
-            work.wearable_result,
+            work.wearable_result, work.long_read_results,
         )
         self._epoch = work.epoch
         if not self.display:

@@ -173,6 +173,33 @@ def specimen_genotype_mixture(
     return {g: w / total for g, w in mixture.items()}
 
 
+def typed_genotypes(
+    long_read_results: Mapping[str, Mapping[str, Any]] | None,
+) -> dict[int, str]:
+    """Consensus genotype per agent from delivered long-read typing results.
+
+    Reads only ``genotype_calls`` payloads that reached a typed consensus, so a
+    specimen that failed its Ct gate or fell below the read floor contributes
+    nothing — an untyped case stays untyped rather than inheriting the truth.
+    A single delivery can type several pathogens; the alphabetically first
+    pathogen's consensus wins, matching how :func:`active_pathogen` picks the
+    line list's pathogen for a co-infected host.
+    """
+    typed: dict[int, str] = {}
+    for payload in (long_read_results or {}).values():
+        calls = payload.get("genotype_calls") or []
+        for call in sorted(
+            (c for c in calls if isinstance(c, Mapping)),
+            key=lambda c: str(c.get("pathogen_id", "")),
+        ):
+            consensus = call.get("consensus_genotype")
+            if call.get("status") != STATUS_TYPED or not consensus:
+                continue
+            typed.setdefault(int(call.get("agent_id", -1)), str(consensus))
+    typed.pop(-1, None)
+    return typed
+
+
 class ClinicalStrainTyping:
     """Amplicon sequencing of a clinical specimen into genotype calls."""
 
