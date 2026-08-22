@@ -12,6 +12,10 @@ import numpy as np
 
 from crusher_labs import build_modalities
 from crusher_labs.modalities.clinical_strain_typing import specimen_genotype_mixture
+from crusher_labs.modalities.surface_strain_recovery import (
+    SurfaceRecoveryConfig,
+    recover_surface_mixture,
+)
 from crusher_labs.protocol_engine import (
     apply_hvac_modifiers,
     apply_transmission_modifiers,
@@ -107,6 +111,8 @@ from telemetry_buffer.schema import make_ground_truth, read_ground_truth, write_
 # Keeps wastewater read draws from consuming the transmission stream, so turning
 # the channel on cannot change the epidemic it observes.
 _WASTEWATER_SEED_OFFSET = 977
+# Keeps surface lineage draws from consuming the transmission or swab streams.
+_SURFACE_RECOVERY_SEED_OFFSET = 978
 
 
 def _agent_is_shedding(agent: Any, pathogen_id: str) -> bool:
@@ -261,6 +267,8 @@ class ShipSimulation:
         self._sentinel_port_ids: dict[str, str] = {}
         self.wastewater_sampler: WastewaterOpsSampler | None = None
         self._wastewater_routing: dict[str, str] = {}
+        self.surface_recovery_config: SurfaceRecoveryConfig | None = None
+        self.surface_recovery_rng: np.random.Generator | None = None
 
 
     @property
@@ -434,6 +442,7 @@ class ShipSimulation:
         self.state = sim_state
         self._init_sentinel_ledger(voyage_cfg)
         self._init_wastewater_ops(voyage_cfg)
+        self._init_surface_strain_recovery()
         self.world = WorldState(
             simulation=sim_state,
             observation=self.obs,
@@ -489,6 +498,26 @@ class ShipSimulation:
         )
         self._wastewater_routing = assign_collection_points(
             self.zone_names, config.collection_points,
+        )
+
+    def _init_surface_strain_recovery(self) -> None:
+        """Arm surface lineage recovery when configured and strains are tracked.
+
+        Surface recovery reads the PR-4 reservoir composition after the swab
+        instrument has drawn its sample, so the disabled channel adds no draws
+        to the transmission or existing swab streams.
+        """
+        if self.tx_core is None or self.tx_core.strain_registry is None:
+            return
+        variant_cfg = self.cfg.get("variant_surveillance", {}) or {}
+        config = SurfaceRecoveryConfig.from_mapping(
+            variant_cfg.get("surface_sampling"),
+        )
+        if not config.enabled:
+            return
+        self.surface_recovery_config = config
+        self.surface_recovery_rng = np.random.default_rng(
+            int(self.seed) + _SURFACE_RECOVERY_SEED_OFFSET,
         )
 
     def _observe_wastewater(self, epoch: int) -> None:
@@ -939,6 +968,49 @@ class ShipSimulation:
             work.state.trigger_status, self.high_traffic, work.syn_result,
             self.engine, self.pathogen_profiles, work.cfg,
         )
+        self._attach_surface_strain_recovery(work)
+
+    def _attach_surface_strain_recovery(self, work: _EpochWork) -> None:
+        """Attach conserved lineage payloads without changing swab fields."""
+        if (
+            self.surface_recovery_config is None
+            or self.surface_recovery_rng is None
+            or self.tx_core is None
+        ):
+            return
+        for zone_name, swab in work.swab_results.items():
+            recovered_mass = float(swab.get("recovered_mass", 0.0))
+            aggregate = float(self.tx_core.surface_pools.get(zone_name, 0.0))
+            if recovered_mass <= 0.0 or aggregate <= 0.0:
+                continue
+            by_pathogen: dict[str, dict[str, float]] = {}
+            for pathogen_id in self.pathogen_profiles:
+                pathogen_pool = self.tx_core.surface_pools_by_pathogen.get(
+                    pathogen_id, {},
+                )
+                pathogen_mass = float(pathogen_pool.get(zone_name, 0.0))
+                if pathogen_mass <= 0.0:
+                    continue
+                composition = self.tx_core.surface_lineage_masses(
+                    pathogen_id, zone_name,
+                )
+                epochs = self.tx_core.surface_epochs_since_deposition(
+                    pathogen_id, zone_name, work.epoch,
+                )
+                if not composition or epochs is None:
+                    continue
+                sampled = recovered_mass * pathogen_mass / aggregate
+                mixture = recover_surface_mixture(
+                    sampled,
+                    composition,
+                    surface_type=self.zone_types.get(zone_name, ""),
+                    epochs_since_deposition=epochs,
+                    config=self.surface_recovery_config,
+                    rng=self.surface_recovery_rng,
+                )
+                by_pathogen[pathogen_id] = mixture.as_row()
+            if by_pathogen:
+                swab["strain_recovery"] = by_pathogen
 
     def _log_pending_escalation(
         self,

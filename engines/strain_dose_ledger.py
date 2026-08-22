@@ -36,6 +36,8 @@ NO_SOURCE_AGENT: int | None = None
 # It is never registered, so an acquisition drawn from it has no callable parent
 # — which is what a sub-detection-limit pool fraction means for an assay.
 UNRESOLVED_STRAIN = "unresolved"
+# Genotype labels that cannot be reported as resolved lineages.
+UNREPORTABLE_GENOTYPES = frozenset({"", UNRESOLVED_STRAIN})
 
 
 class EmissionContribution(NamedTuple):
