@@ -51,6 +51,38 @@ containing `run_spec.json`, `summary.json` (SIR + costs + `parameters` + `derive
 and compact `timeseries.json`. Use `--full-telemetry` only when you need history /
 lab notebook / ground truth (much larger).
 
+In addition, each shard accumulates completed run dirs under
+`<output_root>/_shard_runs/<run_id>/` and publishes a coalesced bundle
+`<suffix>.zip` (nested `<run_id>/{summary,timeseries,run_spec}.json`) plus
+`<suffix>.manifest.json` (`[{run_id, parameters, derived}]` in completion
+order), where `<suffix>` is `shard-<i>` with `--shard-count` and `single`
+without. Both are re-packed/re-uploaded every `--s3-log-every K` successes and
+once at shard end; with an uploader configured each checkpoint prints
+`fused <suffix>.zip + manifest (<n> runs) -> s3`.
+
+### Testing the shard bundle locally
+
+- `--output-dir` must resolve under the repo (or another non-world-writable
+  root); `simulation_utils.paths` refuses `/tmp`
+  ("Refusing to write under publicly writable directory").
+- A run with `--platform destroyer_baseline --epochs 2 --num-agents 20` costs
+  ~0.5 s, so multi-run + resume scenarios are cheap.
+- Exercise the S3 code paths with no AWS by monkeypatching
+  `campaign_runner.S3Uploader` with a class implementing
+  `upload_file(Path, name)`, `download_file(name, Path) -> bool` (and
+  optionally `object_exists`) backed by a local directory, then calling
+  `campaign_runner.main([...])`. The resume gate consults the downloaded
+  shard manifest, so a fake bucket is enough to test skip/append behavior.
+- Running two shard indices into the **same** `--output-dir` lets the later
+  shard's pack pick up the earlier shard's `_shard_runs/` entries (its zip
+  becomes a superset; manifests stay disjoint). Use a separate output dir per
+  shard locally — that matches per-container Batch filesystems.
+- On `--resume` **without** `--s3-prefix` the in-memory manifest starts empty,
+  so `<suffix>.manifest.json` is rewritten with only the newly executed runs
+  while `<suffix>.zip` keeps the union. The `deploy/aws` readers dedupe by
+  `run_id` and prefer zip contents, so aggregation is still complete, but do
+  not treat a local-only-resume manifest as the full run list.
+
 `generate_tier_runs` in `campaign_runner.py` dispatches `t1`–`t16` and
 calibration shorts (`c1`–`c6`, `a2`, `b1`, `b2`) through
 `tier_iterators.dispatch_standard_or_calibration` (a plain function that
