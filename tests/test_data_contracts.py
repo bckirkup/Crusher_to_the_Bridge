@@ -19,7 +19,6 @@ REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_DIR = os.path.join(REPO_ROOT, "data")
 SCHEMA_DIR = os.path.join(REPO_ROOT, "schemas")
 
-
 def _load_json(path: str) -> Any:
     with open(path, "r", encoding="utf-8") as fh:
         return json.load(fh)
@@ -249,6 +248,23 @@ class TestResourceCosts:
             assert data.get("starting_count", 0) >= 0, (
                 f"Material '{item}' has negative starting count"
             )
+
+    def test_contribution_media_have_sweeps_and_provenance(self, costs: dict) -> None:
+        media = costs.get("contribution_media", {})
+        assert set(media) == {"cash", "labour_hours", "consumables"}
+        for medium, data in media.items():
+            rate = data["conversion_rate_usd_per_unit"]
+            sweep = data["conversion_rate_sweep"]
+            assert rate >= 0
+            assert sweep
+            assert sweep == sorted(set(sweep))
+            assert rate in sweep
+            assert data["description"]
+            if medium == "cash":
+                assert rate == 1.0
+            else:
+                assert len(sweep) >= 3
+                assert "unanchored" in data["description"].lower()
 
 
     def test_operational_impact_weights_present(self, costs: dict) -> None:

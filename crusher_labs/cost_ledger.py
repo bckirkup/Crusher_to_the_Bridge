@@ -22,7 +22,9 @@ from __future__ import annotations
 
 import json
 import os
-from typing import Any
+from dataclasses import dataclass
+from math import isfinite
+from typing import Any, Mapping
 
 from simulation_utils.paths import validated_open
 
@@ -32,6 +34,86 @@ REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # ── Ledger entry categories ──────────────────────────────────────────────
 CATEGORY_SURVEILLANCE = "surveillance"
 CATEGORY_INTERVENTION = "intervention"
+
+CONTRIBUTION_PAYERS = (
+    "ship_operator",
+    "port_authority",
+    "public_health_agency",
+)
+CONTRIBUTION_MEDIA = ("cash", "labour_hours", "consumables")
+CONTRIBUTION_CATEGORIES = (CATEGORY_SURVEILLANCE, CATEGORY_INTERVENTION)
+
+
+@dataclass(frozen=True)
+class ContributionRecord:
+    """Payer-attributed contribution, separate from ledger expenditure."""
+
+    epoch: int
+    payer: str
+    medium: str
+    quantity: float
+    conversion_rate_usd_per_unit: float
+    category: str
+    source: str
+    description: str = ""
+
+    def __post_init__(self) -> None:
+        if self.payer not in CONTRIBUTION_PAYERS:
+            raise ValueError(f"unknown contribution payer: {self.payer}")
+        if self.medium not in CONTRIBUTION_MEDIA:
+            raise ValueError(f"unknown contribution medium: {self.medium}")
+        if self.category not in CONTRIBUTION_CATEGORIES:
+            raise ValueError(f"unknown contribution category: {self.category}")
+        if self.epoch < 0:
+            raise ValueError("contribution epoch must be non-negative")
+        if not isfinite(float(self.quantity)) or self.quantity < 0.0:
+            raise ValueError("contribution quantity must be finite and non-negative")
+        if (
+            not isfinite(float(self.conversion_rate_usd_per_unit))
+            or self.conversion_rate_usd_per_unit < 0.0
+        ):
+            raise ValueError(
+                "contribution conversion rate must be finite and non-negative"
+            )
+        if self.medium == "cash" and self.conversion_rate_usd_per_unit != 1.0:
+            raise ValueError("cash contribution conversion rate must be exactly 1.0")
+
+    @property
+    def monetary_equivalent_usd(self) -> float:
+        """Return quantity converted to its monetary equivalent."""
+        return self.quantity * self.conversion_rate_usd_per_unit
+
+    def to_dict(self) -> dict[str, Any]:
+        """Return a serializable representation of this contribution."""
+        return {
+            "epoch": self.epoch,
+            "payer": self.payer,
+            "medium": self.medium,
+            "quantity": self.quantity,
+            "conversion_rate_usd_per_unit": self.conversion_rate_usd_per_unit,
+            "monetary_equivalent_usd": self.monetary_equivalent_usd,
+            "category": self.category,
+            "source": self.source,
+            "description": self.description,
+        }
+
+
+def _validate_conversion_overrides(
+    overrides: Mapping[str, float] | None,
+) -> dict[str, float]:
+    """Validate and copy caller-supplied medium conversion rates."""
+    validated = dict(overrides or {})
+    unknown = set(validated) - set(CONTRIBUTION_MEDIA)
+    if unknown:
+        raise ValueError(f"unknown contribution media: {sorted(unknown)}")
+    for medium, rate in validated.items():
+        if not isfinite(float(rate)) or rate < 0.0:
+            raise ValueError(
+                f"conversion override for {medium} must be finite and non-negative"
+            )
+        if medium == "cash" and rate != 1.0:
+            raise ValueError("cash contribution conversion rate must be exactly 1.0")
+    return validated
 
 
 class LedgerEntry:
@@ -113,6 +195,7 @@ class CostLedger:
         self.material_unit_costs: dict[str, float] = dict(material_unit_costs or {})
 
         self.entries: list[LedgerEntry] = []
+        self.contributions: list[ContributionRecord] = []
 
         self._total_surveillance_usd = 0.0
         self._total_intervention_usd = 0.0
@@ -129,6 +212,73 @@ class CostLedger:
         self._cumulative_ois: float = 0.0
         self._epoch_ois: dict[int, float] = {}
         self._epoch_ois_breakdown: dict[int, dict[str, float]] = {}
+
+    def record_contribution(
+        self,
+        contribution: ContributionRecord,
+    ) -> ContributionRecord:
+        """Record an attribution line without changing any spend totals."""
+        if not isinstance(contribution, ContributionRecord):
+            raise TypeError("contribution must be a ContributionRecord")
+        self.contributions.append(contribution)
+        return contribution
+
+    def contribution_summary(
+        self,
+        conversion_rate_overrides: Mapping[str, float] | None = None,
+    ) -> dict[str, dict[str, Any]]:
+        """Return contribution monetary equivalents and shares by payer."""
+        overrides = _validate_conversion_overrides(conversion_rate_overrides)
+        summary: dict[str, dict[str, Any]] = {
+            payer: {
+                "cash_usd": 0.0,
+                "in_kind_usd": {
+                    "labour_hours": 0.0,
+                    "consumables": 0.0,
+                },
+                "total_usd": 0.0,
+                "share_of_total": 0.0,
+            }
+            for payer in CONTRIBUTION_PAYERS
+        }
+        for contribution in self.contributions:
+            rate = overrides.get(
+                contribution.medium,
+                contribution.conversion_rate_usd_per_unit,
+            )
+            amount = contribution.quantity * rate
+            payer_summary = summary[contribution.payer]
+            if contribution.medium == "cash":
+                payer_summary["cash_usd"] += amount
+            else:
+                payer_summary["in_kind_usd"][contribution.medium] += amount
+            payer_summary["total_usd"] += amount
+
+        total = sum(item["total_usd"] for item in summary.values())
+        if total:
+            for item in summary.values():
+                item["share_of_total"] = item["total_usd"] / total
+        return summary
+
+    def contribution_reconciliation(
+        self,
+        conversion_rate_overrides: Mapping[str, float] | None = None,
+    ) -> dict[str, float]:
+        """Compare attributed contributions with total ledger expenditure."""
+        summary = self.contribution_summary(conversion_rate_overrides)
+        contribution_total = sum(
+            item["total_usd"] for item in summary.values()
+        )
+        expenditure_total = (
+            self._total_surveillance_usd + self._total_intervention_usd
+        )
+        gap = contribution_total - expenditure_total
+        return {
+            "contribution_total_usd": contribution_total,
+            "ledger_total_expenditure_usd": expenditure_total,
+            "gap_usd": gap,
+            "unallocated_expenditure_usd": -gap,
+        }
 
     # ── Operational impact (tracker only) ─────────────────────────────
 
@@ -366,7 +516,7 @@ class CostLedger:
                 "cumulative_balance_usd": round(running_balance, 2),
             })
 
-        return {
+        audit = {
             "audit_type": "FINANCIAL_AUDIT",
             "summary": {
                 "starting_financial_budget_usd": round(self.starting_financial_usd, 2),
@@ -385,6 +535,13 @@ class CostLedger:
             "cost_by_epoch": per_epoch,
             "itemized_entries": [e.to_dict() for e in self.entries],
         }
+        if self.contributions:
+            audit["contributions"] = {
+                "entries": [c.to_dict() for c in self.contributions],
+                "by_payer": self.contribution_summary(),
+                "reconciliation": self.contribution_reconciliation(),
+            }
+        return audit
 
 
 # ── Operational impact computation ───────────────────────────────────────
