@@ -2,8 +2,9 @@
   "schema_version": "1.0.0",
   "catalog": {
     "picard_run_spec": "picard_framework/runs/smoke_2epoch.json",
-    "economics_id": "presidio/data/economics/surveillance_scenarios.json",
-    "economics_scenario_id": "moderate"
+    "economics_id": "presidio/data/economics/fleet_economics.json",
+    "surveillance_economics_id": "presidio/data/economics/surveillance_scenarios.json",
+    "surveillance_scenario_id": "moderate"
   },
   "fleet": {"num_cruises": 1},
   "run": {

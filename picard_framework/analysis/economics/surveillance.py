@@ -26,7 +26,7 @@ from picard_framework.analysis.shore.counterfactual import CounterfactualResult
 from simulation_utils.paths import resolve_repo_path, validated_open
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-DEFAULT_CONSUMABLES_RATE_USD = 10.0
+COMMUNITIES = ("afloat", "shore")
 
 
 def _finite_nonnegative(value: float, label: str) -> float:
@@ -60,7 +60,7 @@ class CostAllocation:
         *,
         epoch: int,
         labour_conversion_rate: float,
-        consumables_conversion_rate: float = DEFAULT_CONSUMABLES_RATE_USD,
+        consumables_conversion_rate: float,
     ) -> ContributionRecord:
         """Convert this medium quantity to a ledger attribution record."""
         rates = {
@@ -147,10 +147,7 @@ def _scenario_from_dict(raw: Mapping[str, Any]) -> SurveillanceScenario:
         voyages_per_year_sweep=tuple(raw["voyages_per_year_sweep"]),
         allocations=allocations,
         provenance=MappingProxyType(dict(raw["provenance"])),
-        scope_note=raw.get(
-            "scope_note",
-            "Variants detected is a model output excluded by design.",
-        ),
+        scope_note=raw["scope_note"],
     )
 
 
@@ -190,10 +187,13 @@ def load_scenario_from_fleet_config(
     fleet_path = resolve_repo_path(repo_root, fleet_config_path)
     raw = _load_json(fleet_path)
     catalog = raw.get("catalog", {})
-    scenario_path = resolve_repo_path(repo_root, catalog["economics_id"])
+    scenario_path = resolve_repo_path(
+        repo_root,
+        catalog["surveillance_economics_id"],
+    )
     return load_surveillance_scenario(
         scenario_path,
-        catalog["economics_scenario_id"],
+        catalog["surveillance_scenario_id"],
     )
 
 
@@ -201,7 +201,7 @@ def cost_shares_for_scenario(
     scenario: SurveillanceScenario,
     *,
     labour_conversion_rate: float,
-    consumables_conversion_rate: float = DEFAULT_CONSUMABLES_RATE_USD,
+    consumables_conversion_rate: float,
 ) -> dict[str, dict[str, Any]]:
     """Attribute one representative voyage's allocation by payer."""
     ledger = CostLedger()
@@ -247,23 +247,45 @@ class BenefitSplit:
         return self.shore_cases_averted + self.afloat_cases_averted
 
     @property
-    def shore_benefit_share(self) -> float:
-        """Return shore's signed share, or zero when total benefit is zero."""
+    def shore_benefit_share(self) -> float | None:
+        """Return shore's share when total benefit is positive."""
         total = self.total_cases_averted
-        return 0.0 if total == 0.0 else self.shore_cases_averted / total
+        return None if total <= 0.0 else self.shore_cases_averted / total
 
     @property
-    def afloat_benefit_share(self) -> float:
-        """Return afloat's signed share, or zero when total benefit is zero."""
+    def afloat_benefit_share(self) -> float | None:
+        """Return afloat's share when total benefit is positive."""
         total = self.total_cases_averted
-        return 0.0 if total == 0.0 else self.afloat_cases_averted / total
+        return None if total <= 0.0 else self.afloat_cases_averted / total
 
 
 def _share_value(value: Any) -> float:
-    """Read a share from either a ledger payer report or a scalar."""
+    """Read a share from a ledger report or an explicitly supplied scalar."""
     if isinstance(value, Mapping):
-        return float(value.get("share_of_total", value.get("share", 0.0)))
-    return float(value)
+        if "share_of_total" not in value:
+            raise ValueError("payer report must include share_of_total")
+        return float(value["share_of_total"])
+    if isinstance(value, (int, float)):
+        return float(value)
+    raise TypeError("payer cost must be a scalar share or ledger report")
+
+
+def _validate_community_map(
+    payer_community_map: Mapping[str, str],
+    per_payer_costs: Mapping[str, Any],
+    port_community: str,
+) -> None:
+    """Ensure all payer costs map to a known community."""
+    expected = set(CONTRIBUTION_PAYERS)
+    actual = set(payer_community_map)
+    if actual != expected:
+        raise ValueError("payer community map must cover exactly every payer")
+    if any(community not in COMMUNITIES for community in payer_community_map.values()):
+        raise ValueError("unknown payer community")
+    if port_community not in COMMUNITIES:
+        raise ValueError(f"unknown port community: {port_community}")
+    if set(per_payer_costs) != expected:
+        raise ValueError("per-payer costs must cover exactly every payer")
 
 
 @dataclass(frozen=True)
@@ -284,12 +306,19 @@ def willingness_to_pay(
     port_community: str = "shore",
 ) -> WillingnessToPayResult:
     """Compare the port community's benefit share with its cost share."""
+    _validate_community_map(payer_community_map, per_payer_costs, port_community)
+    benefit_share = (
+        benefit_split.shore_benefit_share
+        if port_community == "shore"
+        else benefit_split.afloat_benefit_share
+    )
+    if benefit_share is None:
+        raise ValueError("benefit shares are unavailable when total benefit is non-positive")
     port_cost_share = sum(
         _share_value(per_payer_costs[payer])
         for payer, community in payer_community_map.items()
-        if community == port_community and payer in per_payer_costs
+        if community == port_community
     )
-    benefit_share = benefit_split.shore_benefit_share if port_community == "shore" else benefit_split.afloat_benefit_share
     difference = benefit_share - port_cost_share
     return WillingnessToPayResult(
         benefit_share=benefit_share,
@@ -315,7 +344,7 @@ def sweep_willingness_to_pay(
     benefit_split: BenefitSplit,
     labour_conversion_rates: Iterable[float],
     *,
-    consumables_conversion_rate: float = DEFAULT_CONSUMABLES_RATE_USD,
+    consumables_conversion_rate: float,
     port_community: str = "shore",
 ) -> WillingnessToPaySweep:
     """Sweep labour rates and report grid crossings without interpolation."""

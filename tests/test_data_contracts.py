@@ -298,6 +298,8 @@ class TestSurveillanceScenarios:
         assert "scope_note" in scenarios
         assert "variants detected" in scenarios["scope_note"].lower()
         for entry in entries:
+            assert "scope_note" in entry
+            assert "variants detected" in entry["scope_note"].lower()
             assert entry["annual_cost_usd"] >= 0
             assert entry["voyages_per_year"] > 0
             sweep = entry["voyages_per_year_sweep"]

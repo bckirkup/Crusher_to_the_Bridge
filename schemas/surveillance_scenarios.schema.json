@@ -20,6 +20,7 @@
       "required": [
         "scenario_id",
         "label",
+        "scope_note",
         "onboard_capability",
         "ashore_capability",
         "ships_covered",

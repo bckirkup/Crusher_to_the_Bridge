@@ -6,6 +6,7 @@
     {
       "scenario_id": "baseline",
       "label": "Baseline",
+      "scope_note": "Variants detected is a model output from the surveillance simulation and is intentionally excluded from scenario configuration.",
       "onboard_capability": "Syndromic only",
       "ashore_capability": "VSP reporting",
       "ships_covered": 1,
@@ -27,6 +28,7 @@
     {
       "scenario_id": "minimal",
       "label": "Minimal",
+      "scope_note": "Variants detected is a model output from the surveillance simulation and is intentionally excluded from scenario configuration.",
       "onboard_capability": "Clinical qPCR",
       "ashore_capability": "Reference lab",
       "ships_covered": 1,
@@ -49,6 +51,7 @@
     {
       "scenario_id": "moderate",
       "label": "Moderate",
+      "scope_note": "Variants detected is a model output from the surveillance simulation and is intentionally excluded from scenario configuration.",
       "onboard_capability": "Nanopore + WW qPCR",
       "ashore_capability": "Regional lab",
       "ships_covered": 1,
@@ -71,6 +74,7 @@
     {
       "scenario_id": "full",
       "label": "Full",
+      "scope_note": "Variants detected is a model output from the surveillance simulation and is intentionally excluded from scenario configuration.",
       "onboard_capability": "Nanopore + WW amplicon + surface",
       "ashore_capability": "Bioinfo hub + port WBE",
       "ships_covered": 1,
@@ -93,6 +97,7 @@
     {
       "scenario_id": "fleet_network",
       "label": "Fleet network",
+      "scope_note": "Variants detected is a model output from the surveillance simulation and is intentionally excluded from scenario configuration.",
       "onboard_capability": "Full x 10 ships",
       "ashore_capability": "Centralized + port network",
       "ships_covered": 10,

@@ -19,6 +19,14 @@ operator, without tuning the allocation to favour either community.
 “Variants detected” is intentionally absent from configuration: it is a
 surveillance-model output, not an input.
 
+Presidio fleet configs keep `catalog.economics_id` pointed at the existing
+`fleet_economics.json` reward configuration. The surveillance catalog is
+separate: `catalog.surveillance_economics_id` identifies the scenario file and
+`catalog.surveillance_scenario_id` selects the scenario. Both conversion rates
+(`labour_conversion_rate` and `consumables_conversion_rate`) are required by
+the analysis API; callers should supply them from the central values or sweep
+grids in `data/config/resource_costs.json`.
+
 ## Cost and benefit accounting
 
 `CostAllocation` entries become the existing `CostLedger` contribution records.
@@ -37,7 +45,9 @@ way when its benefit share is at least its cost share. Labour conversion rates
 are swept without changing the benefit side. The reported crossing is the
 first pair of grid rates where the port cost share overtakes its benefit share;
 the package does not interpolate a threshold or claim monotonicity unless the
-observed grid is monotone.
+observed grid is monotone. Benefit shares are unavailable (`None`) when total
+signed benefit is zero or negative, and the WTP comparison rejects that regime
+instead of reporting a misleading share.
 
 The shore side remains a linear renewal approximation. In particular, the
 central 11b norovirus scenario is deliberately supercritical, so its

@@ -9,9 +9,18 @@ from pathlib import Path
 
 import pytest
 
+from crusher_labs.cost_ledger import (
+    CATEGORY_SURVEILLANCE,
+    CONTRIBUTION_MEDIA as LEDGER_MEDIA,
+    CONTRIBUTION_PAYERS as LEDGER_PAYERS,
+    CostLedger,
+)
 from picard_framework.analysis.economics import (
     BenefitSplit,
+    COMMUNITIES,
     CostAllocation,
+    CONTRIBUTION_MEDIA,
+    CONTRIBUTION_PAYERS,
     SurveillanceScenario,
     cost_shares_for_scenario,
     load_scenario_from_fleet_config,
@@ -28,10 +37,24 @@ from picard_framework.analysis.shore import (
     evaluate_counterfactual,
 )
 from picard_framework.analysis.sentinel.port_profiles import capability_for
+from presidio.run_spec import PresidioRunSpec
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SCENARIO_PATH = REPO_ROOT / "presidio" / "data" / "economics" / "surveillance_scenarios.json"
+RESOURCE_COSTS_PATH = REPO_ROOT / "data" / "config" / "resource_costs.json"
 FLEET_CONFIG = REPO_ROOT / "presidio" / "data" / "config" / "minimal_surveillance_fleet.json"
+FLEET_CONFIGS = sorted(
+    (REPO_ROOT / "presidio" / "data" / "config").glob("*surveillance_fleet.json")
+)
+
+
+def _conversion_rates() -> tuple[float, float]:
+    costs = json.loads(RESOURCE_COSTS_PATH.read_text(encoding="utf-8"))
+    media = costs["contribution_media"]
+    return (
+        media["labour_hours"]["conversion_rate_usd_per_unit"],
+        media["consumables"]["conversion_rate_usd_per_unit"],
+    )
 
 
 def _importation(port_id: str = "USMIA", horizon: int = 40) -> PortCallImportation:
@@ -70,6 +93,9 @@ def test_all_scenarios_load_and_amortise_by_ships_and_voyages() -> None:
 
     fleet_scenario = load_scenario_from_fleet_config(str(FLEET_CONFIG))
     assert fleet_scenario.scenario_id == "minimal"
+    for fleet_config in FLEET_CONFIGS:
+        spec = PresidioRunSpec.from_fleet_json(REPO_ROOT.as_posix(), str(fleet_config))
+        assert spec.economics_path.endswith("presidio/data/economics/fleet_economics.json")
     with pytest.raises(ValueError, match="unknown surveillance scenario"):
         load_surveillance_scenario(str(SCENARIO_PATH), "missing")
 
@@ -101,6 +127,8 @@ def test_real_shore_counterfactual_flows_into_signed_benefit_split() -> None:
     split = BenefitSplit.from_counterfactuals([result], afloat_cases_averted=12.0)
     assert split.shore_cases_averted == pytest.approx(result.benefit)
     assert split.total_cases_averted == pytest.approx(result.benefit + 12.0)
+    assert split.shore_benefit_share is not None
+    assert split.afloat_benefit_share is not None
     assert split.shore_benefit_share + split.afloat_benefit_share == pytest.approx(1.0)
 
 
@@ -129,15 +157,74 @@ def test_shore_surface_is_populated_and_sensitive_to_scenario_r_grid() -> None:
 def test_benefit_split_handles_zero_and_nonpositive_ratio_denominators() -> None:
     zero = BenefitSplit(shore_cases_averted=0.0, afloat_cases_averted=0.0)
     assert zero.shore_afloat_ratio is None
-    assert zero.shore_benefit_share == 0.0
-    assert zero.afloat_benefit_share == 0.0
+    assert zero.shore_benefit_share is None
+    assert zero.afloat_benefit_share is None
 
-    negative_denominator = BenefitSplit(shore_cases_averted=2.0, afloat_cases_averted=-1.0)
+    negative_denominator = BenefitSplit(shore_cases_averted=2.0, afloat_cases_averted=-4.0)
     assert negative_denominator.shore_afloat_ratio is None
-    assert negative_denominator.shore_benefit_share == pytest.approx(2.0)
-    assert negative_denominator.afloat_benefit_share == pytest.approx(-1.0)
+    assert negative_denominator.shore_benefit_share is None
+    assert negative_denominator.afloat_benefit_share is None
     positive_denominator = BenefitSplit(shore_cases_averted=2.0, afloat_cases_averted=4.0)
     assert positive_denominator.shore_afloat_ratio == pytest.approx(0.5)
+
+
+def test_willingness_to_pay_rejects_unavailable_shares_and_bad_maps() -> None:
+    costs = {
+        "ship_operator": {"share_of_total": 0.5},
+        "port_authority": {"share_of_total": 0.3},
+        "public_health_agency": {"share_of_total": 0.2},
+    }
+    valid_map = {
+        "ship_operator": "afloat",
+        "port_authority": "shore",
+        "public_health_agency": "shore",
+    }
+    for split in (
+        BenefitSplit(shore_cases_averted=0.0, afloat_cases_averted=0.0),
+        BenefitSplit(shore_cases_averted=1.0, afloat_cases_averted=-2.0),
+    ):
+        with pytest.raises(ValueError, match="non-positive"):
+            willingness_to_pay(costs, valid_map, split)
+
+    with pytest.raises(ValueError, match="exactly every payer"):
+        willingness_to_pay(costs, {"ship_operator": "afloat"}, BenefitSplit(1.0, 1.0))
+    with pytest.raises(ValueError, match="unknown payer community"):
+        willingness_to_pay(
+            costs,
+            {**valid_map, "port_authority": "unknown"},
+            BenefitSplit(1.0, 1.0),
+        )
+    with pytest.raises(ValueError, match="unknown port community"):
+        willingness_to_pay(
+            costs,
+            valid_map,
+            BenefitSplit(1.0, 1.0),
+            port_community="typo",
+        )
+    with pytest.raises(ValueError, match="share_of_total"):
+        willingness_to_pay(
+            {
+                **costs,
+                "port_authority": {"total_usd": 3.0},
+            },
+            valid_map,
+            BenefitSplit(1.0, 1.0),
+        )
+    with pytest.raises(ValueError, match="exactly every payer"):
+        willingness_to_pay(
+            {**costs, "unexpected": {"share_of_total": 0.1}},
+            valid_map,
+            BenefitSplit(1.0, 1.0),
+        )
+    with pytest.raises(TypeError, match="scalar share or ledger report"):
+        willingness_to_pay(
+            {
+                **costs,
+                "port_authority": object(),
+            },
+            valid_map,
+            BenefitSplit(1.0, 1.0),
+        )
 
 
 def test_labour_sweep_changes_port_cost_but_not_benefit_share() -> None:
@@ -153,6 +240,7 @@ def test_labour_sweep_changes_port_cost_but_not_benefit_share() -> None:
         payer_communities,
         split,
         (10.0, 50.0, 100.0, 200.0),
+        consumables_conversion_rate=10.0,
     )
     assert sweep.cost_share_monotone
     assert sweep.crossing_bracketing_rates == (100.0, 200.0)
@@ -164,22 +252,46 @@ def test_labour_sweep_changes_port_cost_but_not_benefit_share() -> None:
 
 def test_cost_shares_have_all_payers_and_cash_only_total_is_rate_invariant() -> None:
     scenario = load_surveillance_scenario(str(SCENARIO_PATH), "minimal")
-    low = cost_shares_for_scenario(scenario, labour_conversion_rate=25.0)
-    high = cost_shares_for_scenario(scenario, labour_conversion_rate=100.0)
+    low = cost_shares_for_scenario(
+        scenario,
+        labour_conversion_rate=25.0,
+        consumables_conversion_rate=10.0,
+    )
+    high = cost_shares_for_scenario(
+        scenario,
+        labour_conversion_rate=100.0,
+        consumables_conversion_rate=10.0,
+    )
     assert set(low) == {"ship_operator", "port_authority", "public_health_agency"}
     assert sum(report["share_of_total"] for report in low.values()) == pytest.approx(1.0)
     assert high["ship_operator"]["total_usd"] == pytest.approx(low["ship_operator"]["total_usd"])
     assert high["port_authority"]["total_usd"] > low["port_authority"]["total_usd"]
 
     direct = willingness_to_pay(
-        {"port_authority": {"share_of_total": 0.4}, "public_health_agency": 0.1},
-        {"port_authority": "shore", "public_health_agency": "shore"},
+        {
+            "ship_operator": {"share_of_total": 0.5},
+            "port_authority": {"share_of_total": 0.4},
+            "public_health_agency": {"share_of_total": 0.1},
+        },
+        {
+            "ship_operator": "afloat",
+            "port_authority": "shore",
+            "public_health_agency": "shore",
+        },
         BenefitSplit(shore_cases_averted=1.0, afloat_cases_averted=1.0),
     )
     assert direct.cost_share == pytest.approx(0.5)
     afloat = willingness_to_pay(
-        {"ship_operator": 0.25},
-        {"ship_operator": "afloat"},
+        {
+            "ship_operator": 0.25,
+            "port_authority": 0.5,
+            "public_health_agency": 0.25,
+        },
+        {
+            "ship_operator": "afloat",
+            "port_authority": "shore",
+            "public_health_agency": "shore",
+        },
         BenefitSplit(shore_cases_averted=1.0, afloat_cases_averted=3.0),
         port_community="afloat",
     )
@@ -210,7 +322,7 @@ def test_scenario_and_allocation_validation_guards() -> None:
             replace(scenario, **changes)
 
 
-def test_loader_rejects_duplicate_ids_and_supports_legacy_scope_default(monkeypatch) -> None:
+def test_loader_rejects_duplicate_ids_and_requires_scope_note(monkeypatch) -> None:
     payload = json.loads(SCENARIO_PATH.read_text(encoding="utf-8"))
     payload["scenarios"] = [payload["scenarios"][0], payload["scenarios"][0]]
     monkeypatch.setattr(surveillance_module, "_load_json", lambda _: payload)
@@ -219,8 +331,8 @@ def test_loader_rejects_duplicate_ids_and_supports_legacy_scope_default(monkeypa
 
     raw = dict(payload["scenarios"][0])
     raw.pop("scope_note", None)
-    fallback = surveillance_module._scenario_from_dict(raw)
-    assert "Variants detected" in fallback.scope_note
+    with pytest.raises(KeyError, match="scope_note"):
+        surveillance_module._scenario_from_dict(raw)
 
 
 def test_sweep_reports_no_crossing_and_nonmonotone_input() -> None:
@@ -231,7 +343,13 @@ def test_sweep_reports_no_crossing_and_nonmonotone_input() -> None:
         "port_authority": "shore",
         "public_health_agency": "shore",
     }
-    result = sweep_willingness_to_pay(scenario, communities, split, (100.0, 10.0))
+    result = sweep_willingness_to_pay(
+        scenario,
+        communities,
+        split,
+        (100.0, 10.0),
+        consumables_conversion_rate=10.0,
+    )
     assert result.crossing_bracketing_rates is None
     assert not result.cost_share_monotone
 
@@ -258,8 +376,44 @@ def test_new_json_inputs_explicitly_exclude_variants_detected() -> None:
 def test_scenario_allocations_remain_in_medium_units() -> None:
     scenario = load_surveillance_scenario(str(SCENARIO_PATH), "minimal")
     records = [
-        allocation.as_contribution(epoch=0, labour_conversion_rate=50.0)
+        allocation.as_contribution(
+            epoch=0,
+            labour_conversion_rate=50.0,
+            consumables_conversion_rate=10.0,
+        )
         for allocation in scenario.allocations
     ]
     assert any(record.medium == "labour_hours" and record.quantity == 10.0 for record in records)
     assert all(math.isfinite(record.monetary_equivalent_usd) for record in records)
+
+
+def test_central_allocations_reconcile_for_every_scenario() -> None:
+    labour_rate, consumables_rate = _conversion_rates()
+    scenarios = load_surveillance_scenarios(str(SCENARIO_PATH))
+    for scenario in scenarios.values():
+        ledger = CostLedger()
+        for allocation in scenario.allocations:
+            ledger.record_contribution(
+                allocation.as_contribution(
+                    epoch=0,
+                    labour_conversion_rate=labour_rate,
+                    consumables_conversion_rate=consumables_rate,
+                )
+            )
+        ledger.debit(
+            epoch=0,
+            source="programme_cost",
+            category=CATEGORY_SURVEILLANCE,
+            financial_usd=scenario.per_voyage_programme_cost_usd,
+        )
+        reconciliation = ledger.contribution_reconciliation()
+        assert reconciliation["contribution_total_usd"] == pytest.approx(
+            scenario.per_voyage_programme_cost_usd
+        )
+        assert reconciliation["gap_usd"] == pytest.approx(0.0)
+
+
+def test_shared_cost_vocabularies_are_single_source_of_truth() -> None:
+    assert CONTRIBUTION_PAYERS is LEDGER_PAYERS
+    assert CONTRIBUTION_MEDIA is LEDGER_MEDIA
+    assert set(COMMUNITIES) == {"afloat", "shore"}

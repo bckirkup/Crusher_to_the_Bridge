@@ -1,6 +1,9 @@
 """Deterministic surveillance-economics post-processing."""
 
 from picard_framework.analysis.economics.surveillance import (
+    COMMUNITIES,
+    CONTRIBUTION_MEDIA,
+    CONTRIBUTION_PAYERS,
     BenefitSplit,
     CostAllocation,
     SurveillanceScenario,
@@ -16,7 +19,10 @@ from picard_framework.analysis.economics.surveillance import (
 
 __all__ = [
     "BenefitSplit",
+    "COMMUNITIES",
     "CostAllocation",
+    "CONTRIBUTION_MEDIA",
+    "CONTRIBUTION_PAYERS",
     "SurveillanceScenario",
     "WillingnessToPayResult",
     "WillingnessToPaySweep",
