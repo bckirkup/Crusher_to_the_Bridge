@@ -103,7 +103,7 @@ def test_dispersion_at_or_below_one_refuses_to_project(dispersion: float) -> Non
 
 
 def test_profile_without_incubation_block_has_no_kernel() -> None:
-    """13 of 15 shipped profiles are still fixed-onset; that must be explicit."""
+    """Profiles without incubation remain fixed-onset; that must be explicit."""
     with pytest.raises(ValueError, match="no incubation block"):
         incubation_delay_for_profile({"pathogen_id": "legacy"})
 
