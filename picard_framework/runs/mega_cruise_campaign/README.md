@@ -212,12 +212,21 @@ so the campaign can run as one AWS Batch array job of many Fargate Spot
 containers. See [`deploy/aws/`](../../../deploy/aws/README.md) for the full
 ECR + Batch workflow.
 
+Each shard periodically refreshes one fused zip and one JSON manifest. The zip
+contains every completed run under `<run_id>/`, while the manifest lists each
+run's parameters and derived metrics. Terminal progress is tracked by the
+shard-scoped resume-log line counts; for example:
+
+```bash
+aws s3 sync s3://$BUCKET/$PREFIX/_resume/ ./_resume/ && cat ./_resume/completed_runs.shard-*.txt | wc -l
+```
+
 | Flag | Meaning |
 |------|---------|
 | `--shard-count N` | Total number of shards. A run executes only when `global_index % N == shard_index`, where `global_index` is its position in the full flattened, ordered run list across the selected tiers. |
 | `--shard-index i` | This shard's index in `[0, N)`. Defaults to the `AWS_BATCH_JOB_ARRAY_INDEX` env var when present (so Batch array child *i* runs shard *i*). |
-| `--s3-prefix s3://bucket/path` | After each run's zip is written to `telemetry_buffer/mega_cruise_campaign/<run_id>.zip`, upload it to `<s3-prefix>/<run_id>.zip`. With `--resume`, the shard's `completed_runs.txt` is **downloaded** from `<s3-prefix>/_resume/` at start, then re-uploaded periodically. Requires `boto3`. |
-| `--s3-log-every K` | Upload `completed_runs.txt` every `K` successful runs (default 25). |
+| `--s3-prefix s3://bucket/path` | Upload one periodically refreshed `<suffix>.zip` and `<suffix>.manifest.json` per shard (`shard-3.*`, or `single.*`), plus the shard's resume log. With `--resume`, both shard artifacts and the resume log are downloaded from `<s3-prefix>` before skipping. Requires `boto3`. |
+| `--s3-log-every K` | Upload the fused shard zip, JSON manifest, and resume log every `K` successful runs (default 25). |
 | `--retry-failed` | Re-run only ids in `failed_runs.txt` (clears their leftover artifacts first). |
 
 ```bash

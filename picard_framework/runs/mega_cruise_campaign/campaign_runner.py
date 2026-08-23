@@ -24,6 +24,7 @@ import sys
 import time
 import traceback
 import zipfile
+from collections import OrderedDict
 from itertools import product
 from pathlib import Path
 from types import SimpleNamespace
@@ -44,6 +45,7 @@ from picard_framework.runs.mega_cruise_campaign.tier_iterators import (  # noqa:
 )
 from simulation_utils.epidemic_labels import epidemic_took_off  # noqa: E402
 from simulation_utils.paths import (  # noqa: E402
+    confine_to_base,
     is_path_under_base,
     prepare_output_directory,
     resolve_child_path,
@@ -342,6 +344,205 @@ class S3Uploader:
             return True
         except Exception:  # noqa: BLE001
             return False
+
+
+def _shard_suffix(shard_index: int, shard_count: int | None) -> str:
+    return f"shard-{shard_index}" if shard_count is not None else "single"
+
+
+def _resolve_relative_path(parent: str, relative: str) -> str:
+    """Resolve a relative archive path one validated component at a time."""
+    current = parent
+    parts = Path(relative).parts
+    if not parts or Path(relative).is_absolute():
+        raise ValueError(f"Invalid relative archive path: {relative!r}")
+    for part in parts:
+        current = resolve_child_path(
+            current,
+            validate_path_component(part, label="archive path component"),
+        )
+    return current
+
+
+class ShardBundle:
+    """Accumulate completed run directories and publish one shard bundle."""
+
+    def __init__(self, shard_index: int, shard_count: int | None) -> None:
+        self.suffix = _shard_suffix(shard_index, shard_count)
+        root = _ensure_output_root()
+        self.accumulation_root = confine_to_base(
+            root, os.path.join(root, "_shard_runs"),
+        )
+        prepare_output_directory(
+            self.accumulation_root,
+            allowed_roots=_allowed_roots(root),
+        )
+        self.zip_path = resolve_child_path(root, f"{self.suffix}.zip")
+        self.manifest_path = resolve_child_path(
+            root, f"{self.suffix}.manifest.json",
+        )
+        self.entries: OrderedDict[str, dict[str, Any]] = OrderedDict()
+
+    def _write_manifest(self) -> None:
+        with validated_open(
+            self.manifest_path,
+            "w",
+            allowed_roots=_allowed_roots(),
+            encoding="utf-8",
+        ) as fh:
+            json.dump(list(self.entries.values()), fh, indent=2)
+            fh.write("\n")
+
+    def record_run(self, run_id: str) -> None:
+        safe_id = _safe_run_id(run_id)
+        summary_path = resolve_child_path(
+            resolve_child_path(self.accumulation_root, safe_id),
+            "summary.json",
+        )
+        parameters: dict[str, Any] = {}
+        derived: dict[str, Any] = {}
+        try:
+            with validated_open(
+                summary_path,
+                allowed_roots=_allowed_roots(),
+                encoding="utf-8",
+            ) as fh:
+                summary = json.load(fh)
+            parameters = summary.get("parameters") or {}
+            derived = summary.get("derived") or {}
+            if not isinstance(parameters, dict):
+                parameters = {}
+            if not isinstance(derived, dict):
+                derived = {}
+        except (OSError, TypeError, ValueError, json.JSONDecodeError):
+            # Missing summaries are valid for lightweight test runners.
+            pass
+        self.entries[safe_id] = {
+            "run_id": safe_id,
+            "parameters": parameters,
+            "derived": derived,
+        }
+        self._write_manifest()
+
+    def _archive_members(self) -> Iterator[tuple[str, str]]:
+        if not os.path.isdir(self.accumulation_root):
+            return
+        for run_id in sorted(os.listdir(self.accumulation_root)):
+            safe_id = _safe_run_id(run_id)
+            run_root = resolve_child_path(self.accumulation_root, safe_id)
+            if not os.path.isdir(run_root):
+                continue
+            for dirpath, _dirnames, filenames in os.walk(run_root):
+                for filename in sorted(filenames):
+                    relative = os.path.relpath(
+                        os.path.join(dirpath, filename), run_root,
+                    )
+                    file_path = _resolve_relative_path(run_root, relative)
+                    yield file_path, f"{safe_id}/{relative}"
+
+    def _pack(self) -> None:
+        temp_path = resolve_child_path(
+            _ensure_output_root(), f"{self.suffix}.zip.tmp",
+        )
+        try:
+            with zipfile.ZipFile(
+                temp_path, "w", zipfile.ZIP_DEFLATED,
+            ) as zf:
+                for file_path, archive_name in self._archive_members() or ():
+                    zf.write(file_path, archive_name)
+            os.replace(temp_path, self.zip_path)
+        except Exception:
+            if os.path.isfile(temp_path):
+                os.remove(temp_path)
+            raise
+
+    def flush(self, uploader: Any) -> None:
+        self._pack()
+        if uploader is None:
+            return
+        for path, name in (
+            (self.zip_path, f"{self.suffix}.zip"),
+            (self.manifest_path, f"{self.suffix}.manifest.json"),
+        ):
+            try:
+                uploader.upload_file(Path(path), name)
+            except Exception as exc:  # noqa: BLE001
+                print(f"  (s3 upload failed for {name}: {exc})")
+
+    def _unpack(self, zip_path: str) -> None:
+        try:
+            with zipfile.ZipFile(zip_path) as zf:
+                for member in zf.infolist():
+                    target = _resolve_relative_path(
+                        self.accumulation_root, member.filename,
+                    )
+                    if member.is_dir():
+                        prepare_output_directory(
+                            target, allowed_roots=_allowed_roots(),
+                        )
+                        continue
+                    parent = os.path.dirname(target)
+                    prepare_output_directory(
+                        parent, allowed_roots=_allowed_roots(),
+                    )
+                    with zf.open(member) as source, validated_open(
+                        target,
+                        "wb",
+                        allowed_roots=_allowed_roots(),
+                    ) as destination:
+                        shutil.copyfileobj(source, destination)
+        except zipfile.BadZipFile:
+            print(f"  (s3 shard zip is invalid: {zip_path})")
+
+    def download(self, uploader: Any) -> None:
+        root = _ensure_output_root()
+        zip_download = resolve_child_path(root, f"{self.suffix}.zip")
+        manifest_download = resolve_child_path(
+            root, f"{self.suffix}.manifest.json",
+        )
+        try:
+            zip_present = uploader.download_file(
+                f"{self.suffix}.zip", Path(zip_download),
+            )
+        except Exception as exc:  # noqa: BLE001
+            print(f"  (s3 shard zip download failed: {exc})")
+            zip_present = False
+        if zip_present:
+            self._unpack(zip_download)
+        try:
+            manifest_present = uploader.download_file(
+                f"{self.suffix}.manifest.json", Path(manifest_download),
+            )
+        except Exception as exc:  # noqa: BLE001
+            print(f"  (s3 shard manifest download failed: {exc})")
+            manifest_present = False
+        if not manifest_present:
+            return
+        try:
+            with validated_open(
+                manifest_download,
+                allowed_roots=_allowed_roots(),
+                encoding="utf-8",
+            ) as fh:
+                entries = json.load(fh)
+            if isinstance(entries, list):
+                for entry in entries:
+                    if not isinstance(entry, dict):
+                        continue
+                    run_id = entry.get("run_id")
+                    if not isinstance(run_id, str):
+                        continue
+                    safe_id = _safe_run_id(run_id)
+                    self.entries[safe_id] = {
+                        "run_id": safe_id,
+                        "parameters": entry.get("parameters") or {},
+                        "derived": entry.get("derived") or {},
+                    }
+        except (OSError, TypeError, ValueError, json.JSONDecodeError):
+            print("  (s3 shard manifest is unreadable; starting with no entries)")
+
+    def completed_run_ids(self) -> set[str]:
+        return set(self.entries)
 
 
 def _tier_is_deferred(tier: dict[str, Any]) -> bool:
@@ -1530,8 +1731,17 @@ def run_simulation(
                 for fname in filenames:
                     fpath = os.path.join(dirpath, fname)
                     zf.write(fpath, os.path.relpath(fpath, run_dir))
-        if not keep_workdir:
-            shutil.rmtree(run_dir)
+        accumulation_root = confine_to_base(
+            root_str, os.path.join(root_str, "_shard_runs"),
+        )
+        prepare_output_directory(accumulation_root, allowed_roots=roots)
+        accumulation_dir = resolve_child_path(accumulation_root, safe_id)
+        if os.path.isdir(accumulation_dir):
+            shutil.rmtree(accumulation_dir)
+        if keep_workdir:
+            shutil.copytree(run_dir, accumulation_dir)
+        else:
+            shutil.move(run_dir, accumulation_dir)
         return True
 
     except Exception as exc:
@@ -1767,13 +1977,15 @@ def _campaign_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--s3-prefix",
         default=None,
-        help=f"s3://bucket/path to upload each <run_id>.zip and {COMPLETED_LOG.name}.",
+        help=f"s3://bucket/path to upload the fused shard zip, manifest, and "
+        f"{COMPLETED_LOG.name}.",
     )
     parser.add_argument(
         "--s3-log-every",
         type=int,
         default=25,
-        help=f"Upload {COMPLETED_LOG.name} to S3 every N successful runs (default 25).",
+        help=f"Upload the fused shard zip, manifest, and {COMPLETED_LOG.name} "
+        "every N successful runs (default 25).",
     )
     parser.add_argument(
         "--single",
@@ -1858,7 +2070,8 @@ def _campaign_gate(
     executed: int,
     done: set[str],
     retry_only: set[str] | None,
-    uploader: Any,
+    bundle: ShardBundle | None = None,
+    uploader: Any = None,
 ) -> str:
     if shard_count is not None and global_index % shard_count != shard_index:
         return "ignore"
@@ -1868,25 +2081,14 @@ def _campaign_gate(
         return "skip"
     if retry_only is not None and run_id not in retry_only:
         return "skip"
-    if (
-        (args.resume or args.retry_failed)
-        and uploader is not None
-        and uploader.object_exists(f"{run_id}.zip")
-    ):
+    if (args.resume or args.retry_failed) and bundle is not None and run_id in bundle.completed_run_ids():
         return "skip_s3"
     return "run"
 
 
-def _print_run_ok(uploader: Any, run_id: str) -> None:
-    if uploader is None:
-        print(" OK")
-        return
-    zip_path = Path(_output_artifact(f"{run_id}.zip"))
-    try:
-        uploader.upload_file(zip_path, f"{run_id}.zip")
-        print(" OK+s3")
-    except Exception as exc:  # noqa: BLE001
-        print(f" OK (s3 upload failed: {exc})")
+def _print_run_ok(bundle: ShardBundle, run_id: str) -> None:
+    bundle.record_run(run_id)
+    print(" OK")
 
 
 def _perform_campaign_run(
@@ -1905,6 +2107,7 @@ def _perform_campaign_run(
     skipped: int,
     executed: int,
     uploader: Any,
+    bundle: ShardBundle,
     t0: float,
 ) -> bool:
     if args.retry_failed:
@@ -1937,13 +2140,14 @@ def _perform_campaign_run(
         print(" FAIL")
         return False
     mark_completed(run_id)
-    _print_run_ok(uploader, run_id)
+    _print_run_ok(bundle, run_id)
     if (
         uploader is not None
         and args.s3_log_every > 0
         and (succeeded + 1) % args.s3_log_every == 0
     ):
         _upload_completed_log(uploader, shard_index, shard_count)
+        bundle.flush(uploader)
     return True
 
 
@@ -1957,6 +2161,7 @@ def _execute_assigned_runs(
     done: set[str],
     retry_only: set[str] | None,
     uploader: Any,
+    bundle: ShardBundle,
     t0: float,
 ) -> int:
     total = succeeded = failed = skipped = executed = 0
@@ -1970,7 +2175,7 @@ def _execute_assigned_runs(
             executed=executed,
             done=done,
             retry_only=retry_only,
-            uploader=uploader,
+            bundle=bundle,
         )
         if gate == "ignore":
             continue
@@ -2000,6 +2205,7 @@ def _execute_assigned_runs(
             skipped=skipped,
             executed=executed,
             uploader=uploader,
+            bundle=bundle,
             t0=t0,
         )
         executed += 1
@@ -2009,6 +2215,7 @@ def _execute_assigned_runs(
             failed += 1
     if uploader is not None:
         _upload_completed_log(uploader, shard_index, shard_count)
+    bundle.flush(uploader)
     elapsed = time.time() - t0
     print(f"\n{'=' * 60}")
     print(f"  Campaign: {total} listed, {succeeded} ok, {failed} err, {skipped} skip")
@@ -2065,8 +2272,10 @@ def main(argv: list[str] | None = None) -> int:
     _apply_smoke_defaults(args)
     shard_count, shard_index = _resolve_shard(args)
     uploader = S3Uploader(args.s3_prefix) if args.s3_prefix else None
+    bundle = ShardBundle(shard_index, shard_count)
     if uploader is not None and (args.resume or args.retry_failed):
         _download_completed_log(uploader, shard_index, shard_count)
+        bundle.download(uploader)
     manifest = load_manifest(args.manifest)
     done = completed_runs() if (args.resume or args.retry_failed) else set()
     retry_only = failed_runs() if args.retry_failed else None
@@ -2098,13 +2307,13 @@ def main(argv: list[str] | None = None) -> int:
         done=done,
         retry_only=retry_only,
         uploader=uploader,
+        bundle=bundle,
         t0=time.time(),
     )
 
 
 def _resume_log_key(shard_index: int, shard_count: int | None) -> str:
-    suffix = f"shard-{shard_index}" if shard_count is not None else "single"
-    return f"_resume/completed_runs.{suffix}.txt"
+    return f"_resume/completed_runs.{_shard_suffix(shard_index, shard_count)}.txt"
 
 
 def _upload_completed_log(

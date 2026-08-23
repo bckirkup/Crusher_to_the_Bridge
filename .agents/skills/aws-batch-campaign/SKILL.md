@@ -8,7 +8,8 @@ description: Deploy and run the ~17780-run mega cruise campaign as an AWS Batch 
 Deploy and run the ~17,780-run mega cruise campaign
 (`picard_framework/runs/mega_cruise_campaign/campaign_runner.py`) as a single
 **AWS Batch array job** on **Fargate Spot**. Each array child runs a disjoint
-shard and uploads per-run `<run_id>.zip` results to one shared S3 prefix.
+shard and uploads one periodically refreshed fused zip plus one JSON manifest
+per shard to one shared S3 prefix.
 Each simulation runs in a **subprocess** by default (OS reclaim of RSS); the
 job definition defaults to **1 vCPU / 2048 MB** after compact history retention.
 Escalate memory if `classify_batch_failures.py` reports OOM.
@@ -264,12 +265,17 @@ aws logs create-log-group --log-group-name /aws/batch/picard-campaign --region u
   Compare `jobs_with_spot_reclaim` vs `jobs_with_oom`. OOM attempts exit
   without retry (job def `evaluateOnExit`), so they stay visible as FAILED.
 - **`SUCCEEDED` stays 0 for a while.** A child is `SUCCEEDED` only when its
-  **entire shard** finishes. Individual `<run_id>.zip` files land in S3
-  **continuously** well before any child flips to SUCCEEDED — watch S3, not
-  just `statusSummary`, for early progress.
+  **entire shard** finishes. Shard zips and manifests are refreshed
+  **continuously** well before any child flips to SUCCEEDED — watch resume-log
+  line counts, not just `statusSummary`, for early progress.
 - **Resume must download.** On `--resume` with `--s3-prefix`, the runner pulls
-  `_resume/completed_runs.shard-<i>.txt` from S3 before skipping — uploads alone
-  do not seed a fresh Spot container.
+  `_resume/completed_runs.shard-<i>.txt` plus the shard zip and manifest from S3
+  before skipping — uploads alone do not seed a fresh Spot container.
+- Terminal progress can be counted from the resume logs:
+
+  ```bash
+  aws s3 sync s3://$BUCKET/$PREFIX/_resume/ ./_resume/ && cat ./_resume/completed_runs.shard-*.txt | wc -l
+  ```
 - Inspect a failed child:
 
   ```bash
@@ -288,9 +294,9 @@ aws --profile picard s3 sync s3://<bucket>/campaign/ ./results/
 python3 deploy/aws/aggregate_results.py ./results/ --out-csv campaign_summary.csv --out-json campaign_summary.json
 ```
 
-`aggregate_results.py` unzips every `<run_id>.zip`, reads its `summary.json`,
-and flattens `summary` / `cost_accounting` / `derived` into one row per run.
-For stacked epidemic curves / OA–immunity frontiers use
+`aggregate_results.py` reads nested run artifacts from each shard zip plus
+shard manifests, and flattens `summary` / `cost_accounting` / `derived` into
+one row per run. For stacked epidemic curves / OA–immunity frontiers use
 `deploy/aws/analyze_campaign_curves.py`.
 
 ## Illustrative campaign parameters
