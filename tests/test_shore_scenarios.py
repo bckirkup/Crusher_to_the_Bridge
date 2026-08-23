@@ -77,12 +77,11 @@ class TestNorovirusScenario:
         } == {
             "generation_median_hours",
             "generation_sigma",
-            "generation_max_hours",
         }
         assert {
             field
             for field, record in scenario.provenance.items()
-            if record.status == "unanchored"
+            if record.anchoring == "unanchored"
         } == {
             "residual_importation_fraction",
             "residual_importation_fraction_grid",
@@ -92,14 +91,13 @@ class TestNorovirusScenario:
         assert {
             field
             for field, record in scenario.provenance.items()
-            if record.citation_pending
-        } == set()
+            if record.anchoring == "cited_range_author_selected"
+        } == {"r_shore", "r_shore_grid"}
         assert {
             field
             for field, record in scenario.provenance.items()
-            if record.status == "cited_range_author_selected"
-        } == {"r_shore", "r_shore_grid"}
-        assert scenario.provenance["generation_max_hours"].modelling_choice
+            if record.anchoring == "modelling_choice"
+        } == {"generation_max_hours"}
         assert "Harris et al. 2014" in scenario.provenance["generation_sigma"].source_text
         assert "not attributed" in scenario.provenance[
             "generation_max_hours"
@@ -114,6 +112,15 @@ class TestNorovirusScenario:
                 record.source_text.strip()
                 for record in alternative.provenance.values()
             )
+            assert {
+                field
+                for field, record in alternative.provenance.items()
+                if record.anchoring == "modelling_choice"
+            } == {
+                "generation_median_hours",
+                "generation_sigma",
+                "generation_max_hours",
+            }
 
     def test_grids_are_sorted_unique_and_include_centres(self) -> None:
         scenario = NORWALK_GI_SHORE_SCENARIO
@@ -167,6 +174,8 @@ class TestNorovirusScenario:
         assert np.all(np.isfinite(result.port_arm.trajectory))
         assert result.total_ship_arm >= 0.0
         assert result.total_port_arm >= 0.0
+        assert result.port_arm.unbounded_growth
+        assert result.port_arm.depletion_regime
         assert result.benefit == pytest.approx(
             result.total_port_arm - result.total_ship_arm
         )
@@ -249,13 +258,12 @@ def test_scenario_requires_complete_nonempty_provenance() -> None:
     with pytest.raises(ValueError, match="exactly"):
         _scenario(provenance={})
     records = dict(NORWALK_GI_SHORE_SCENARIO.provenance)
-    records["r_shore"] = ParameterProvenance("", "unanchored", True)
+    records["r_shore"] = ParameterProvenance("", "unanchored")
     with pytest.raises(ValueError, match="source_text"):
         _scenario(provenance=records)
     records["r_shore"] = ParameterProvenance(
         "author",
         "unanchored",
-        True,
         semantics={"": "missing key"},
     )
     with pytest.raises(ValueError, match="semantics"):

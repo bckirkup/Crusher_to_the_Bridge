@@ -18,7 +18,11 @@ the canonical `renewal_incidence` recursion is applied. The model has no
 susceptible depletion, so it is intended for cases small relative to the port
 population. It reports an attack fraction and flags a depletion regime when
 cumulative cases exceed 5% of that population. `R_shore >= 1` is reported as a
-finite-horizon unbounded-growth regime.
+finite-horizon unbounded-growth regime. The central named scenario is
+deliberately supercritical (`R_shore = 1.6`), so its `unbounded_growth` flag is
+expected rather than a misconfiguration; on a sufficiently long horizon its
+`depletion_regime` flag is expected as well. Results are interpretable only
+while cumulative cases remain small relative to the port population.
 
 The port detection epoch is derived from the existing port surveillance
 capability and the canonical incubation projection from the active pathogen

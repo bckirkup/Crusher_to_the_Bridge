@@ -11,6 +11,11 @@ threshold values are policy/scenario assumptions, not literature estimates.
 Every numeric scenario field has a machine-readable :class:`ParameterProvenance`
 record.  This keeps the distinction between anchored inputs, modelling choices,
 and unanchored assumptions auditable without adding a JSON configuration file.
+The central scenario is deliberately supercritical because ``r_shore = 1.6``;
+its ``unbounded_growth`` flag is therefore expected, and its
+``depletion_regime`` flag is expected on a sufficiently long horizon.  Results
+are interpretable only while cumulative cases remain small relative to the port
+population.
 """
 
 from __future__ import annotations
@@ -25,6 +30,7 @@ from picard_framework.analysis.shore.renewal import ShoreRenewalParameters
 AnchoringStatus = Literal[
     "anchored",
     "unanchored",
+    "modelling_choice",
     "cited_range_author_selected",
 ]
 
@@ -35,19 +41,12 @@ class ParameterProvenance:
 
     source_text: str
     anchoring: AnchoringStatus
-    citation_pending: bool
-    modelling_choice: bool = False
     semantics: Mapping[str, str] = MappingProxyType({})
 
     @property
     def anchored(self) -> bool:
         """Whether the field is anchored to the stated source."""
         return self.anchoring == "anchored"
-
-    @property
-    def status(self) -> AnchoringStatus:
-        """Return the structured anchoring status."""
-        return self.anchoring
 
 
 _NUMERIC_FIELDS = (
@@ -206,6 +205,35 @@ _THRESHOLD_SEMANTICS = {
     "5": "moderate capacity",
     "10": "weak surveillance after substantial spread",
 }
+_RESIDUAL_CENTRAL_SEMANTIC = (
+    "moderate response; central value justified by VSP notification "
+    "requirements with incomplete enforcement and pre-symptomatic shedders"
+)
+_THRESHOLD_CENTRAL_SEMANTIC = "standard cluster threshold"
+_POLICY_PROVENANCE = MappingProxyType(
+    {
+        "residual_importation_fraction": ParameterProvenance(
+            _POLICY_SOURCE,
+            "unanchored",
+            semantics={"0.3": _RESIDUAL_CENTRAL_SEMANTIC},
+        ),
+        "residual_importation_fraction_grid": ParameterProvenance(
+            _POLICY_SOURCE,
+            "unanchored",
+            semantics=_RESIDUAL_SEMANTICS,
+        ),
+        "case_threshold": ParameterProvenance(
+            _POLICY_SOURCE,
+            "unanchored",
+            semantics={"3": _THRESHOLD_CENTRAL_SEMANTIC},
+        ),
+        "case_threshold_grid": ParameterProvenance(
+            _POLICY_SOURCE,
+            "unanchored",
+            semantics=_THRESHOLD_SEMANTICS,
+        ),
+    }
+)
 
 NORWALK_GI_SHORE_SCENARIO = ShoreTransmissionScenario(
     pathogen_id="norwalk_gi",
@@ -223,54 +251,25 @@ NORWALK_GI_SHORE_SCENARIO = ShoreTransmissionScenario(
         "r_shore": ParameterProvenance(
             _R_SHORE_SOURCE,
             "cited_range_author_selected",
-            False,
         ),
         "r_shore_grid": ParameterProvenance(
             _R_SHORE_SOURCE,
             "cited_range_author_selected",
-            False,
         ),
         "generation_median_hours": ParameterProvenance(
             _HARRIS_GENERATION_SOURCE,
             "anchored",
-            False,
         ),
         "generation_sigma": ParameterProvenance(
             _HARRIS_GENERATION_SOURCE,
             "anchored",
-            False,
         ),
         "generation_max_hours": ParameterProvenance(
             f"{_HARRIS_GENERATION_SOURCE}; eight-day truncation is a modelling "
             "choice, not attributed to Harris et al. 2014.",
-            "anchored",
-            False,
-            modelling_choice=True,
+            "modelling_choice",
         ),
-        "residual_importation_fraction": ParameterProvenance(
-            _POLICY_SOURCE,
-            "unanchored",
-            False,
-            semantics={"0.3": "moderate response; central value justified by VSP notification requirements with incomplete enforcement and pre-symptomatic shedders"},
-        ),
-        "residual_importation_fraction_grid": ParameterProvenance(
-            _POLICY_SOURCE,
-            "unanchored",
-            False,
-            semantics=_RESIDUAL_SEMANTICS,
-        ),
-        "case_threshold": ParameterProvenance(
-            _POLICY_SOURCE,
-            "unanchored",
-            False,
-            semantics={"3": "standard cluster threshold"},
-        ),
-        "case_threshold_grid": ParameterProvenance(
-            _POLICY_SOURCE,
-            "unanchored",
-            False,
-            semantics=_THRESHOLD_SEMANTICS,
-        ),
+        **_POLICY_PROVENANCE,
     },
 )
 
@@ -290,12 +289,10 @@ NORWALK_GI_ENVIRONMENTAL_SHORE_SCENARIO = ShoreTransmissionScenario(
         "r_shore": ParameterProvenance(
             _R_SHORE_SOURCE,
             "cited_range_author_selected",
-            False,
         ),
         "r_shore_grid": ParameterProvenance(
             _R_SHORE_SOURCE,
             "cited_range_author_selected",
-            False,
         ),
         "generation_median_hours": ParameterProvenance(
             "Heijne et al. 2009, Netherlands scout-jamboree outbreak, "
@@ -303,49 +300,20 @@ NORWALK_GI_ENVIRONMENTAL_SHORE_SCENARIO = ShoreTransmissionScenario(
             "gamma-fitted from Swedish outbreak data. This scenario "
             "approximates that mean as 86.4 h in the lognormal median field; "
             "it is not silently treated as a median.",
-            "unanchored",
-            False,
-            modelling_choice=True,
+            "modelling_choice",
         ),
         "generation_sigma": ParameterProvenance(
             "Carried from the central Harris et al. 2014 scenario because "
             "Heijne et al. 2009 supplies no spread parameter; not estimated "
             "from the environmental outbreak.",
-            "unanchored",
-            False,
-            modelling_choice=True,
+            "modelling_choice",
         ),
         "generation_max_hours": ParameterProvenance(
             "Eight-day truncation is a modelling choice in this scenario, "
             "not attributed to Harris et al. 2014 or Heijne et al. 2009.",
-            "unanchored",
-            False,
-            modelling_choice=True,
+            "modelling_choice",
         ),
-        "residual_importation_fraction": ParameterProvenance(
-            _POLICY_SOURCE,
-            "unanchored",
-            False,
-            semantics={"0.3": "moderate response; central value justified by VSP notification requirements with incomplete enforcement and pre-symptomatic shedders"},
-        ),
-        "residual_importation_fraction_grid": ParameterProvenance(
-            _POLICY_SOURCE,
-            "unanchored",
-            False,
-            semantics=_RESIDUAL_SEMANTICS,
-        ),
-        "case_threshold": ParameterProvenance(
-            _POLICY_SOURCE,
-            "unanchored",
-            False,
-            semantics={"3": "standard cluster threshold"},
-        ),
-        "case_threshold_grid": ParameterProvenance(
-            _POLICY_SOURCE,
-            "unanchored",
-            False,
-            semantics=_THRESHOLD_SEMANTICS,
-        ),
+        **_POLICY_PROVENANCE,
     },
 )
 
