@@ -1424,27 +1424,38 @@ class KorkinShipEngine:
         are days, and the clock is the only thing that relates them. The illness
         draw fires once per day of natural history rather than once per epoch, so
         a finer grid does not hand a host more chances to present.
+
+        A host carrying per-pathogen records has its natural history owned by
+        those records, not by this fallback: they hold the drawn incubation
+        period, the profile's own dose response and recovery day, and the
+        strain's modifiers. Only the epoch counter is advanced for such a host,
+        since the shedding read and the payload still read it.
         """
         for agent in self.agents:
             if not agent.is_infected:
                 continue
             if agent.time_infected is not None:
                 agent.time_infected += 1
-            due = (
-                agent.illness_status == IllnessStatus.NOT_ILL
-                and crossed_day_boundary(
-                    self.clock, agent.time_infected or 0, ONSET_DAY,
-                )
-            )
-            if due:
-                ill_prob = illness_probability(agent.acquired_particles)
-                if self.rng.random() < ill_prob:
-                    agent.illness_status = IllnessStatus.SYMPTOMATIC
+            if agent.infections:
+                continue
+            self._draw_fallback_onset(agent)
 
         for agent in self.agents:
+            if agent.infections:
+                continue
             if agent.is_infected and agent.days_post_infection >= RECOVERY_DAY:
                 agent.infection_status = InfectionStatus.RECOVERED
                 agent.illness_status = IllnessStatus.RECOVERED
+
+    def _draw_fallback_onset(self, agent: KorkinAgent) -> None:
+        """Present a host that has no per-pathogen record, on the fixed day."""
+        if agent.illness_status != IllnessStatus.NOT_ILL:
+            return
+        if not crossed_day_boundary(self.clock, agent.time_infected or 0, ONSET_DAY):
+            return
+        ill_prob = illness_probability(agent.acquired_particles)
+        if self.rng.random() < ill_prob:
+            agent.illness_status = IllnessStatus.SYMPTOMATIC
 
     def step(self) -> dict[str, Any]:
         """Advance the simulation by one epoch.
