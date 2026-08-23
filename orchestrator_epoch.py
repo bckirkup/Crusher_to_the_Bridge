@@ -445,12 +445,13 @@ def _advance_agent_pathogen_infections(
         days_infected = clock.days_elapsed(epochs_infected)
         onset_day = _onset_day(agent, pid, inf, prof, rng)
         if (
-            days_infected >= onset_day
-            and inf["illness"] == IllnessStatus.NOT_ILL
-            and _crossed_day_boundary(clock, epochs_infected)
+            inf["illness"] == IllnessStatus.NOT_ILL
+            and _crossed_day_boundary(clock, epochs_infected, onset_day)
         ):
-            # Once per day of natural history, not once per epoch, so the
-            # chance of presenting does not depend on how finely time is cut.
+            # Once per day of natural history, not once per epoch, so the chance
+            # of presenting does not depend on how finely time is cut — and the
+            # first chance is the epoch that crosses this host's own drawn
+            # incubation period, so onset is not rounded up to a whole day.
             _draw_symptom_onset(agent, pid, inf, prof, rng)
 
         recovery_day = agent.get_chronic_recovery_day(

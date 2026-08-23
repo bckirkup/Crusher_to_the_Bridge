@@ -950,12 +950,13 @@ class TransmissionCore:
             agent.immune = False
             agent.infection_status = InfectionStatus.SUSCEPTIBLE
         if resident:
+            strain_id = acquired_strain_id or self._unresolved_founder(pathogen_id)
             return agent.superinfect_with_strain(
                 pathogen_id,
-                acquired_strain_id,
+                strain_id,
                 dose,
                 epoch,
-                phenotype=self._phenotype(acquired_strain_id),
+                phenotype=self._phenotype(strain_id),
             )
         agent.infect_with_pathogen(
             pathogen_id,
@@ -967,6 +968,25 @@ class TransmissionCore:
             strain_phenotype=self._phenotype(acquired_strain_id),
         )
         return True
+
+    def _unresolved_founder(self, pathogen_id: str) -> str:
+        """Founder for a superinfection whose parent the pool could not resolve.
+
+        A co-resident lineage has to be nameable: the census counts it and every
+        assay reads it back, so an acquisition drawn from a sub-floor pool bin
+        founds its own lineage here — the same contract
+        :meth:`_resident_strain_id` applies when such a host first sheds. Before
+        this, an unresolved superinfection installed a resident keyed on the
+        empty string, which the lineage census then failed to look up.
+        """
+        if self.strain_registry is None:
+            return ""
+        founder = self.strain_registry.mint(
+            pathogen_id,
+            genotype=self._founder_genotype(pathogen_id),
+            origin="founder",
+        )
+        return founder.strain_id
 
     def _inherit_strain(self, parent_strain_id: str) -> str:
         """Strain a new infection acquires: the parent's, or a mutant of it.

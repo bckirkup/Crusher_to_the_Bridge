@@ -21,10 +21,14 @@ HISTORY_PATH = os.path.join(REPO_ROOT, "telemetry_buffer", "simulation_history.j
 # epoch-as-day reading cleared them inside 3 epochs.  Prior expectation was
 # infected 0 / symptomatic 0 / recovered 3; the legacy reading is still asserted
 # directly in tests/test_sim_clock.py.
+# Updated 2026-08-23 (onset off the day lattice): the illness hazard now opens at
+# each host's own drawn incubation period rather than at the next whole day, so a
+# case whose draw exceeds 1 day has not presented by epoch 23.  Prior expectation
+# under the hours clock was symptomatic 2.
 EXPECTED_SUMMARY = {
     "susceptible": 13,
     "infected": 3,
-    "symptomatic": 2,
+    "symptomatic": 1,
     "recovered": 0,
     "immune": 4,
 }

@@ -37,8 +37,7 @@
         "sequencing_to_species_id_minutes": 30,
         "sequencing_to_strain_typing_hours": 2,
         "full_run_hours": 16,
-        "epoch_fraction": 0.04,
-        "notes": "epoch_fraction assumes 1 epoch = 1 day. Species ID available within 0.02 epochs."
+        "notes": "full_run_hours is physical; the run's SimClock converts it to epochs. The former epoch_fraction assumed 1 epoch = 1 day and is dropped."
       },
       "detection": {
         "reads_for_species_id": 100,
@@ -87,8 +86,7 @@
         "sequencing_to_species_id_minutes": 30,
         "sequencing_to_strain_typing_hours": 4,
         "sequencing_to_full_genome_hours": 12,
-        "full_run_hours": 48,
-        "epoch_fraction": 0.08
+        "full_run_hours": 48
       },
       "detection": {
         "reads_for_species_id": 100,

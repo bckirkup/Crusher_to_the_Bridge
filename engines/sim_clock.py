@@ -67,7 +67,9 @@ def _epoch_duration_hours(
             "the itinerary and the natural history cannot run on two clocks",
         )
     hours = voyage_hours if voyage_hours is not None else top_hours
-    return float(hours if hours else DEFAULT_EPOCH_DURATION_HOURS)
+    if hours is None:
+        return DEFAULT_EPOCH_DURATION_HOURS
+    return float(hours)
 
 
 def _clock_mode(
@@ -108,9 +110,23 @@ class SimClock:
 
     # ── epochs → wall clock ───────────────────────────────────────────────
 
+    @property
+    def hours_per_epoch(self) -> float:
+        """Wall-clock hours one epoch spans.
+
+        Under the legacy clock an epoch *is* a day of natural history, so a
+        physical delay must be read on that same day-long grid — otherwise the
+        control arm gets a 72-epoch (72-day) microbiology turnaround while its
+        biology still advances a day per epoch, which is not the pre-clock
+        behaviour it exists to reproduce.
+        """
+        if self.mode == LEGACY_EPOCH_DAY:
+            return HOURS_PER_DAY
+        return self.epoch_duration_hours
+
     def hours_elapsed(self, epochs: float) -> float:
         """Wall-clock hours spanned by ``epochs`` epochs."""
-        return float(epochs) * self.epoch_duration_hours
+        return float(epochs) * self.hours_per_epoch
 
     def days_elapsed(self, epochs: float) -> float:
         """Days of natural history that ``epochs`` epochs represent."""
@@ -145,7 +161,7 @@ class SimClock:
         Turnaround is a delay before a result exists, so a partial epoch still
         costs one.
         """
-        return max(0, int(math.ceil(float(hours) / self.epoch_duration_hours)))
+        return max(0, int(math.ceil(float(hours) / self.hours_per_epoch)))
 
     # ── construction ──────────────────────────────────────────────────────
 
@@ -195,16 +211,32 @@ class SimClock:
         )
 
 
-def crossed_day_boundary(clock: SimClock, epochs_infected: float) -> bool:
-    """Whether this epoch is the first inside a new day of natural history.
+def crossed_day_boundary(
+    clock: SimClock,
+    epochs_infected: float,
+    offset_days: float = 0.0,
+) -> bool:
+    """Whether this epoch opens a new day of natural history since ``offset_days``.
 
     Per-day hazards (the illness draw) are evaluated on this, so how finely time
     is cut does not change how many chances a host gets to present. Under the
-    legacy clock every epoch is a new day, so it is always true.
+    legacy clock every epoch is a new day, so it is always true once the offset
+    is reached.
+
+    ``offset_days`` is the threshold the hazard starts at — a host's drawn
+    incubation period, say. Counting the day grid from it rather than from
+    infection is what keeps onset off the whole-day lattice: a 1.2-day
+    incubation presents in the epoch that crosses 1.2 days, not at the next
+    midnight, so realized onset carries the sub-day resolution the incubation
+    distribution was drawn at.
     """
-    if epochs_infected <= 0:
+    elapsed = clock.days_elapsed(epochs_infected) - offset_days
+    if elapsed < 0:
+        return False
+    previous = clock.days_elapsed(epochs_infected - 1) - offset_days
+    if previous < 0:
         return True
-    return clock.day_index(epochs_infected) != clock.day_index(epochs_infected - 1)
+    return math.floor(elapsed) != math.floor(previous)
 
 
 #: Pre-clock behaviour: one epoch advances natural history by one day.

@@ -166,6 +166,43 @@ def test_every_legacy_epoch_is_a_day_boundary() -> None:
     assert all(crossed_day_boundary(LEGACY_CLOCK, e) for e in range(5))
 
 
+def test_a_hazard_offset_starts_at_the_threshold_not_the_next_midnight() -> None:
+    """A 1.2-day incubation gets its first chance at 1.2 days, then daily."""
+    crossings = [e for e in range(0, 80) if crossed_day_boundary(HOURLY, e, 1.2)]
+    assert crossings == [29, 53, 77]
+
+
+def test_a_hazard_offset_is_closed_before_the_threshold() -> None:
+    assert not any(crossed_day_boundary(HOURLY, e, 1.2) for e in range(0, 29))
+
+
+def test_the_legacy_arm_reads_a_physical_delay_on_its_day_long_epoch() -> None:
+    """The control arm has to reproduce pre-clock operational timing.
+
+    Its epoch *is* a day of natural history, so a 72-hour microbiology assay is
+    three epochs there — the pre-clock ``hours_per_epoch: 24`` result — rather
+    than the 72 epochs an hour-long epoch would give, which would be 72 days of
+    biology in an arm whose biology still advances a day per epoch.
+    """
+    assert LEGACY_CLOCK.hours_per_epoch == pytest.approx(24.0)
+    assert LEGACY_CLOCK.epochs_for_hours(72) == 3
+    assert LEGACY_CLOCK.epochs_for_hours(24) == 1
+    assert LEGACY_CLOCK.hours_elapsed(3) == pytest.approx(72.0)
+
+
+def test_hours_mode_reads_a_physical_delay_on_the_voyage_grid() -> None:
+    assert HOURLY.hours_per_epoch == pytest.approx(1.0)
+    assert HOURLY.epochs_for_hours(72) == 72
+    assert SIX_HOURLY.epochs_for_hours(72) == 12
+
+
+@pytest.mark.parametrize("declared", [0, 0.0, -1])
+def test_a_configured_zero_epoch_duration_is_refused(declared: float) -> None:
+    """Zero is a bad declaration, not an absent one; it must not default to 1."""
+    with pytest.raises(ValueError, match="must be positive"):
+        SimClock.from_config({"voyage": {"epoch_duration_hours": declared}})
+
+
 # ── progression reads the clock ──────────────────────────────────────────
 
 ZONES = [
@@ -350,6 +387,28 @@ def test_clinical_phases_resolve_on_the_converted_day() -> None:
     assert day_zero["days_since_symptom_onset"] == 1
     assert day_two["observed_syndromes"] == ["systemic_febrile"]
     assert day_two["days_since_symptom_onset"] == 2
+
+
+def test_onset_is_not_rounded_up_to_a_whole_voyage_day() -> None:
+    """A drawn incubation period is realized at its own resolution.
+
+    The illness hazard is per day, but its first opportunity is the epoch that
+    crosses this host's drawn period — otherwise every onset lands on the
+    24-epoch lattice and the sub-day spread the incubation distribution was
+    fitted to disappears from the line list.
+    """
+    profile = dict(NORO, symptom_onset_day=1.2)
+    agent = _infected_agent(HOURLY)
+    rng = _AlwaysIllRng()
+    onset_epoch = None
+    for epoch in range(1, 73):
+        _advance_agent_pathogen_infections(agent, {"noro": profile}, rng)
+        if (
+            onset_epoch is None
+            and agent.infections["noro"]["illness"] == IllnessStatus.SYMPTOMATIC
+        ):
+            onset_epoch = epoch
+    assert onset_epoch == 29
 
 
 def test_index_cases_are_seeded_one_day_in_on_either_clock() -> None:

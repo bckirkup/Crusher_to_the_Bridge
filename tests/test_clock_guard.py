@@ -144,6 +144,42 @@ def test_agreeing_declarations_pass(tmp_path: Path) -> None:
     assert check_config_file(path) == []
 
 
+def test_yaml_is_read_without_a_yaml_library(tmp_path: Path) -> None:
+    """The guard runs in CI before dependencies are installed.
+
+    It shares the lint job with ``sonar_guard``, which runs on a bare
+    interpreter, so importing pyyaml made the job fail with
+    ``ModuleNotFoundError`` rather than checking anything.
+    """
+    source = (Path(REPO_ROOT) / "scripts" / "clock_guard.py").read_text()
+    assert "import yaml" not in source
+    path = _write(
+        tmp_path,
+        "config.yaml",
+        "# a comment\n"
+        "epoch_duration_hours: 24  # trailing comment\n"
+        "voyage:\n"
+        "  natural_history_clock: hours\n"
+        "  epoch_duration_hours: 1\n",
+    )
+    assert [f.rule for f in check_config_file(path)] == ["CLOCK003"]
+
+
+def test_a_nested_block_is_not_mistaken_for_a_second_declaration(
+    tmp_path: Path,
+) -> None:
+    """A key of the same name outside ``voyage:`` is a different setting."""
+    path = _write(
+        tmp_path,
+        "config.yaml",
+        "voyage:\n"
+        "  epoch_duration_hours: 1\n"
+        "reporting:\n"
+        "  epoch_duration_hours: 24\n",
+    )
+    assert check_config_file(path) == []
+
+
 def test_a_non_mapping_config_is_not_a_finding(tmp_path: Path) -> None:
     assert check_config_file(_write(tmp_path, "list.json", "[1, 2]")) == []
 

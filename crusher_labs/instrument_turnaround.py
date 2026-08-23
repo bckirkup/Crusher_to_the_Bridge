@@ -55,7 +55,13 @@ class TurnaroundSpec:
         *,
         clock: SimClock,
     ) -> TurnaroundSpec:
-        """Resolve a deployment profile's own turnaround block."""
+        """Resolve a deployment profile's own turnaround block.
+
+        A physical ``full_run_hours`` outranks ``epoch_fraction``: the fraction
+        is grid-native, and every shipped one was written against the
+        day-per-epoch grid, so honouring it first delivered a 48-hour MinION run
+        inside the ordering epoch at any clock.
+        """
         return cls._from_run_length(turnaround, clock=clock)
 
     @classmethod
@@ -67,13 +73,13 @@ class TurnaroundSpec:
     ) -> TurnaroundSpec:
         if not block:
             return cls(0)
+        if "full_run_hours" in block:
+            return cls(clock.epochs_for_hours(float(block["full_run_hours"])))
         if "epoch_fraction" in block:
             frac = float(block["epoch_fraction"])
             if frac < 1.0:
                 return cls(0)
             return cls(max(0, int(math.ceil(frac))))
-        if "full_run_hours" in block:
-            return cls(clock.epochs_for_hours(float(block["full_run_hours"])))
         return cls(0)
 
 

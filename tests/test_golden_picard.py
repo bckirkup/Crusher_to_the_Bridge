@@ -80,9 +80,12 @@ def test_picard_golden_summary_and_trigger() -> None:
     # Updated 2026-08-23 (hours clock): 24 epochs is one calendar day, so the seeded
     # cases are past onset and short of ``recovery_day: 3``.  Prior expectation was
     # infected 0 / symptomatic 0 / recovered 3 under the epoch-as-day reading.
+    # Updated 2026-08-23 (onset off the day lattice): the illness hazard opens at
+    # each host's drawn incubation period rather than the next whole day, so a
+    # host whose draw exceeds a day has not presented yet.  Prior value: 2.
     assert fp["susceptible"] == 13
     assert fp["infected"] == 3
-    assert fp["symptomatic"] == 2
+    assert fp["symptomatic"] == 1
     assert fp["recovered"] == 0
     assert fp["immune"] == 4
     # A day-long symptomatic window is visible to syndromic surveillance where a

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import os
 import sys
 
@@ -93,14 +94,36 @@ def test_microbiology_pending_three_epochs() -> None:
 
 
 def test_long_read_profile_turnaround_from_json() -> None:
+    """A profile's physical run length outranks a grid-native ``epoch_fraction``.
+
+    The shipped fractions were written when an epoch was a day, so honouring
+    them first delivered a 16-hour flongle run inside the ordering epoch on any
+    grid. ``full_run_hours`` wins, and the delay follows the run's clock.
+    """
     path = os.path.join(REPO_ROOT, "data/config/long_read_sequencing_params.json")
     reg = InstrumentTurnaroundRegistry.load(path, repo_root=REPO_ROOT)
     flongle = reg._instruments.get("long_read_verification", {"use_profile": True})
-    reg_f = InstrumentTurnaroundRegistry(
-        {"hours_per_epoch": 24, "instruments": {"long_read_verification": flongle}},
-        long_read_profile_turnaround={
-            "epoch_fraction": 0.04,
-            "full_run_hours": 16,
-        },
-    )
-    assert reg_f.delay_epochs_for("long_read_verification") == 0
+
+    def registry(clock: SimClock) -> InstrumentTurnaroundRegistry:
+        return InstrumentTurnaroundRegistry(
+            {"instruments": {"long_read_verification": flongle}},
+            long_read_profile_turnaround={
+                "epoch_fraction": 0.04,
+                "full_run_hours": 16,
+            },
+            clock=clock,
+        )
+
+    assert registry(DAY_EPOCH_CLOCK).delay_epochs_for("long_read_verification") == 1
+    assert registry(HOURLY_CLOCK).delay_epochs_for("long_read_verification") == 16
+
+
+def test_shipped_long_read_profiles_carry_no_stale_epoch_fraction() -> None:
+    """The day-per-epoch fractions are gone from the shipped profiles."""
+    path = os.path.join(REPO_ROOT, "data/config/long_read_sequencing_params.json")
+    with open(path, encoding="utf-8") as handle:
+        params = json.load(handle)
+    for profile in params["deployment_profiles"].values():
+        turnaround = profile.get("turnaround", {})
+        assert "epoch_fraction" not in turnaround
+        assert turnaround["full_run_hours"] > 0

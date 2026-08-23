@@ -29,8 +29,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterable, Iterator
 
-import yaml
-
 CLOCK_MODULE = Path("engines/sim_clock.py")
 EXEMPT_MARKER = "clock-exempt"
 
@@ -152,25 +150,48 @@ def check_python_file(path: Path) -> list[Finding]:
     ]
 
 
-def _load_config(path: Path) -> dict[str, Any]:
-    text = path.read_text(encoding="utf-8")
-    if path.suffix in {".yaml", ".yml"}:
-        loaded = yaml.safe_load(text)
-    else:
-        loaded = json.loads(text)
-    return loaded if isinstance(loaded, dict) else {}
-
-
-def _declared(cfg: dict[str, Any], key: str) -> list[Any]:
+def _json_declarations(text: str, key: str) -> list[Any]:
+    loaded = json.loads(text)
+    cfg = loaded if isinstance(loaded, dict) else {}
     voyage = cfg.get("voyage") if isinstance(cfg.get("voyage"), dict) else {}
     return [value for value in (cfg.get(key), voyage.get(key)) if value is not None]
 
 
+def _yaml_declarations(text: str, key: str) -> list[Any]:
+    """Top-level and ``voyage:`` values of a scalar key, without a YAML parser.
+
+    This guard runs in the dependency-free lint job alongside ``sonar_guard``,
+    so it reads the two scalars it cares about directly rather than importing
+    pyyaml, which is not installed there.
+    """
+    declared: list[Any] = []
+    in_voyage = False
+    for raw in text.splitlines():
+        line = raw.split("#", 1)[0].rstrip()
+        if not line.strip():
+            continue
+        top_level = not line[:1].isspace()
+        if top_level:
+            in_voyage = line.strip() == "voyage:"
+        elif not in_voyage:
+            continue
+        name, sep, value = line.strip().partition(":")
+        if sep and name.strip() == key and value.strip():
+            declared.append(value.strip().strip("'\""))
+    return declared
+
+
+def _declared(path: Path, key: str) -> list[Any]:
+    text = path.read_text(encoding="utf-8")
+    if path.suffix in {".yaml", ".yml"}:
+        return _yaml_declarations(text, key)
+    return _json_declarations(text, key)
+
+
 def check_config_file(path: Path) -> list[Finding]:
-    cfg = _load_config(path)
     findings: list[Finding] = []
     for key in ("epoch_duration_hours", "natural_history_clock"):
-        declared = _declared(cfg, key)
+        declared = _declared(path, key)
         if len(declared) > 1 and len({str(value) for value in declared}) > 1:
             findings.append(
                 Finding(

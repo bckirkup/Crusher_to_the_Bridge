@@ -1431,9 +1431,10 @@ class KorkinShipEngine:
             if agent.time_infected is not None:
                 agent.time_infected += 1
             due = (
-                agent.days_post_infection >= ONSET_DAY
-                and agent.illness_status == IllnessStatus.NOT_ILL
-                and crossed_day_boundary(self.clock, agent.time_infected or 0)
+                agent.illness_status == IllnessStatus.NOT_ILL
+                and crossed_day_boundary(
+                    self.clock, agent.time_infected or 0, ONSET_DAY,
+                )
             )
             if due:
                 ill_prob = illness_probability(agent.acquired_particles)
