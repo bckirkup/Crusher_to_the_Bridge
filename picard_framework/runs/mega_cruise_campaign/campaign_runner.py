@@ -370,8 +370,15 @@ class ShardBundle:
     def __init__(self, shard_index: int, shard_count: int | None) -> None:
         self.suffix = _shard_suffix(shard_index, shard_count)
         root = _ensure_output_root()
-        self.accumulation_root = confine_to_base(
+        accumulation_base = confine_to_base(
             root, os.path.join(root, "_shard_runs"),
+        )
+        prepare_output_directory(
+            accumulation_base,
+            allowed_roots=_allowed_roots(root),
+        )
+        self.accumulation_root = resolve_child_path(
+            accumulation_base, self.suffix,
         )
         prepare_output_directory(
             self.accumulation_root,
@@ -392,6 +399,40 @@ class ShardBundle:
         ) as fh:
             json.dump(list(self.entries.values()), fh, indent=2)
             fh.write("\n")
+
+    def _merge_manifest(self, entries: object) -> None:
+        if not isinstance(entries, list):
+            return
+        for entry in entries:
+            if not isinstance(entry, dict):
+                continue
+            run_id = entry.get("run_id")
+            if not isinstance(run_id, str):
+                continue
+            try:
+                safe_id = _safe_run_id(run_id)
+            except ValueError:
+                continue
+            parameters = entry.get("parameters") or {}
+            derived = entry.get("derived") or {}
+            self.entries[safe_id] = {
+                "run_id": safe_id,
+                "parameters": parameters if isinstance(parameters, dict) else {},
+                "derived": derived if isinstance(derived, dict) else {},
+            }
+
+    def load_local_manifest(self) -> None:
+        if not os.path.isfile(self.manifest_path):
+            return
+        try:
+            with validated_open(
+                self.manifest_path,
+                allowed_roots=_allowed_roots(),
+                encoding="utf-8",
+            ) as fh:
+                self._merge_manifest(json.load(fh))
+        except (OSError, TypeError, ValueError, json.JSONDecodeError):
+            print("  (local shard manifest is unreadable; starting with no entries)")
 
     def record_run(self, run_id: str) -> None:
         safe_id = _safe_run_id(run_id)
@@ -550,7 +591,7 @@ class ShardBundle:
                     prepare_output_directory(
                         parent, allowed_roots=_allowed_roots(),
                     )
-                    with zf.open(member) as source, validated_open(
+                    with getattr(zf, "open")(member) as source, validated_open(
                         target,
                         "wb",
                         allowed_roots=_allowed_roots(),
@@ -589,20 +630,7 @@ class ShardBundle:
                 allowed_roots=_allowed_roots(),
                 encoding="utf-8",
             ) as fh:
-                entries = json.load(fh)
-            if isinstance(entries, list):
-                for entry in entries:
-                    if not isinstance(entry, dict):
-                        continue
-                    run_id = entry.get("run_id")
-                    if not isinstance(run_id, str):
-                        continue
-                    safe_id = _safe_run_id(run_id)
-                    self.entries[safe_id] = {
-                        "run_id": safe_id,
-                        "parameters": entry.get("parameters") or {},
-                        "derived": entry.get("derived") or {},
-                    }
+                self._merge_manifest(json.load(fh))
         except (OSError, TypeError, ValueError, json.JSONDecodeError):
             print("  (s3 shard manifest is unreadable; starting with no entries)")
 
@@ -1718,6 +1746,7 @@ def run_simulation(
     full_telemetry: bool = False,
     keep_workdir: bool = False,
     output_root: Path | None = None,
+    accumulation_suffix: str = "single",
 ) -> bool:
     """Run one simulation, write summary zip, return success.
 
@@ -1796,8 +1825,15 @@ def run_simulation(
                 for fname in filenames:
                     fpath = os.path.join(dirpath, fname)
                     zf.write(fpath, os.path.relpath(fpath, run_dir))
-        accumulation_root = confine_to_base(
+        accumulation_base = confine_to_base(
             root_str, os.path.join(root_str, "_shard_runs"),
+        )
+        prepare_output_directory(accumulation_base, allowed_roots=roots)
+        accumulation_root = resolve_child_path(
+            accumulation_base,
+            validate_path_component(
+                accumulation_suffix, label="shard suffix",
+            ),
         )
         prepare_output_directory(accumulation_root, allowed_roots=roots)
         accumulation_dir = resolve_child_path(accumulation_root, safe_id)
@@ -1869,6 +1905,7 @@ def run_simulation_subprocess(
     full_telemetry: bool = False,
     keep_workdir: bool = False,
     timeout: int = 3600,
+    accumulation_suffix: str = "single",
 ) -> bool:
     """Run one simulation in a fresh child process, then reclaim its memory.
 
@@ -1890,6 +1927,7 @@ def run_simulation_subprocess(
         sys.executable,
         str(CAMPAIGN_DIR / "campaign_runner.py"),
         "--single", spec_path, _output_root_str(),
+        "--accumulation-suffix", accumulation_suffix,
     ]
     if full_telemetry:
         cmd.append("--full-telemetry")
@@ -1956,6 +1994,7 @@ def _run_single(
     *,
     full_telemetry: bool = False,
     keep_workdir: bool = False,
+    accumulation_suffix: str = "single",
 ) -> int:
     """Child-process entry: run exactly one simulation into ``outdir``."""
     out_base = os.path.realpath(outdir)
@@ -1972,6 +2011,7 @@ def _run_single(
         safe_id, spec,
         full_telemetry=full_telemetry, keep_workdir=keep_workdir,
         output_root=Path(out_base),
+        accumulation_suffix=accumulation_suffix,
     )
     return 0 if ok else 1
 
@@ -2058,6 +2098,11 @@ def _campaign_parser() -> argparse.ArgumentParser:
         metavar=("SPEC", "OUTDIR"),
         default=None,
         help="Child mode: run one simulation from SPEC (a run_spec.json) into OUTDIR.",
+    )
+    parser.add_argument(
+        "--accumulation-suffix",
+        default="single",
+        help=argparse.SUPPRESS,
     )
     parser.add_argument(
         "--in-process",
@@ -2195,6 +2240,7 @@ def _perform_campaign_run(
             run_id, spec,
             full_telemetry=args.full_telemetry,
             keep_workdir=args.keep_workdir,
+            accumulation_suffix=_shard_suffix(shard_index, shard_count),
         )
     else:
         ok = run_simulation_subprocess(
@@ -2202,6 +2248,7 @@ def _perform_campaign_run(
             full_telemetry=args.full_telemetry,
             keep_workdir=args.keep_workdir,
             timeout=args.timeout,
+            accumulation_suffix=_shard_suffix(shard_index, shard_count),
         )
     if not ok:
         mark_failed(run_id)
@@ -2334,6 +2381,7 @@ def main(argv: list[str] | None = None) -> int:
             spec_path, outdir,
             full_telemetry=args.full_telemetry,
             keep_workdir=args.keep_workdir,
+            accumulation_suffix=args.accumulation_suffix,
         )
     if args.output_dir is not None:
         set_output_root(args.output_dir)
@@ -2341,6 +2389,8 @@ def main(argv: list[str] | None = None) -> int:
     shard_count, shard_index = _resolve_shard(args)
     uploader = S3Uploader(args.s3_prefix) if args.s3_prefix else None
     bundle = ShardBundle(shard_index, shard_count)
+    if args.resume or args.retry_failed:
+        bundle.load_local_manifest()
     if uploader is not None and (args.resume or args.retry_failed):
         _download_completed_log(uploader, shard_index, shard_count)
         bundle.download(uploader)
