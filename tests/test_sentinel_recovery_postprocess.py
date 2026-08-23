@@ -36,7 +36,7 @@ def test_posix_join_normalizes_windows_separators() -> None:
 
 
 def test_cell_key_reads_campaign_parameters() -> None:
-    hazard, fleet, r_val = cell_key(
+    hazard, fleet, r_val, ww = cell_key(
         {
             "hazard_profile": "last_port_hot",
             "fleet_config": "single",
@@ -46,6 +46,22 @@ def test_cell_key_reads_campaign_parameters() -> None:
     assert hazard == "last_port_hot"
     assert fleet == "single"
     assert r_val == pytest.approx(1.5)
+    assert ww == ""
+
+
+def test_cell_key_includes_wastewater_operating_point() -> None:
+    hazard, fleet, r_val, ww = cell_key(
+        {
+            "hazard_profile": "one_hot",
+            "fleet_config": "fleet_crossed",
+            "R_onboard": 1.0,
+            "wastewater_cell": "core_f6_r4",
+        },
+    )
+    assert ww == "core_f6_r4"
+    assert cell_id(hazard, fleet, r_val, ww) == (
+        "one_hot__fleet_crossed__R1p0__core_f6_r4"
+    )
 
 
 def test_interval_covers_closed_90_percent() -> None:
@@ -115,6 +131,10 @@ def test_prepare_observations_uniques_ship_and_drops_home_port() -> None:
 def test_fleet_config_from_cell_id() -> None:
     assert fleet_config_from_cell_id("one_hot__fleet_same__R1p0") == "fleet_same"
     assert fleet_config_from_cell_id("null__single__R0p0") == "single"
+    assert (
+        fleet_config_from_cell_id("one_hot__fleet_crossed__R1p0__core_f6_r4")
+        == "fleet_crossed"
+    )
 
 
 def test_recovery_fleet_priors_tighten_r_and_baseline() -> None:
