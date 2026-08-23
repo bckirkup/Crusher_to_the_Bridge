@@ -25,7 +25,6 @@ from dashboard.loaders import PlatformBundle
 from dashboard.pydeck_builder import build_pydeck_deck
 from dashboard.retention import render_retention_banner
 from dashboard.session_state import get_selected_agent_id, get_selected_zone_id, set_selected_zone
-from dashboard.units import axis
 from dashboard.theme import (
     LCARS_GOLD,
     LCARS_PEACH,
@@ -35,6 +34,7 @@ from dashboard.theme import (
     _worst_stoplight,
     apply_lcars_layout,
 )
+from dashboard.units import axis
 
 _AGENT_COLORS = {
     "susceptible": "#4a90d9",
