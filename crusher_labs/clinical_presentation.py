@@ -70,12 +70,9 @@ def presentation_for_pathogen(
     return block if isinstance(block, dict) else {}
 
 
-def apply_noise_syndromes_to_agents(
-    agents: list[dict[str, Any]],
-    syn_result: dict[str, Any],
-    noise_categories: list[dict[str, Any]] | None = None,
-) -> None:
-    """Stamp observed_syndromes on noise sick-call agents from category config."""
+def _noise_reason_to_syndrome(
+    noise_categories: list[dict[str, Any]] | None,
+) -> dict[str, str]:
     reason_to_syndrome: dict[str, str] = {}
     for cat in noise_categories or []:
         reason = str(cat.get("reason", ""))
@@ -86,7 +83,32 @@ def apply_noise_syndromes_to_agents(
     reason_to_syndrome.setdefault("seasickness", "gastrointestinal")
     reason_to_syndrome.setdefault("fatigue", "systemic_febrile")
     reason_to_syndrome.setdefault("minor_injury", "wound_soft_tissue")
+    return reason_to_syndrome
 
+
+def _stamp_noise_syndrome_on_agent(
+    agent: dict[str, Any],
+    reason: str,
+    reason_to_syndrome: dict[str, str],
+) -> None:
+    if agent.get("observed_syndromes"):
+        return
+    syn = reason_to_syndrome.get(reason)
+    if not syn:
+        return
+    agent["observed_syndromes"] = [syn]
+    agent["days_since_symptom_onset"] = max(
+        1, int(agent.get("days_since_symptom_onset") or 1),
+    )
+
+
+def apply_noise_syndromes_to_agents(
+    agents: list[dict[str, Any]],
+    syn_result: dict[str, Any],
+    noise_categories: list[dict[str, Any]] | None = None,
+) -> None:
+    """Stamp observed_syndromes on noise sick-call agents from category config."""
+    reason_to_syndrome = _noise_reason_to_syndrome(noise_categories)
     by_id = {int(a["agent_id"]): a for a in agents}
     for entry in syn_result.get("noise_reasons") or []:
         if not isinstance(entry, dict):
@@ -96,14 +118,34 @@ def apply_noise_syndromes_to_agents(
         agent = by_id.get(aid)
         if agent is None:
             continue
-        if agent.get("observed_syndromes"):
-            continue
-        syn = reason_to_syndrome.get(reason)
-        if syn:
-            agent["observed_syndromes"] = [syn]
-            agent["days_since_symptom_onset"] = max(
-                1, int(agent.get("days_since_symptom_onset") or 1),
-            )
+        _stamp_noise_syndrome_on_agent(agent, reason, reason_to_syndrome)
+
+
+def _collect_phase_features(
+    phase: dict[str, Any] | None,
+    seen_feat: set[str],
+    features: list[str],
+) -> list[Any] | None:
+    if phase is None:
+        return None
+    for feat in phase.get("features") or []:
+        key = str(feat)
+        if key not in seen_feat:
+            seen_feat.add(key)
+            features.append(key)
+    return phase.get("syndromes")
+
+
+def _append_unique_syndromes(
+    base_syndromes: list[Any],
+    seen_syn: set[str],
+    syndromes: list[str],
+) -> None:
+    for syn in base_syndromes:
+        key = str(syn)
+        if key in SYNDROME_TOKENS and key not in seen_syn:
+            seen_syn.add(key)
+            syndromes.append(key)
 
 
 def annotate_agent_clinical_presentation(
@@ -130,20 +172,9 @@ def annotate_agent_clinical_presentation(
         max_symptom_days = max(max_symptom_days, symptom_days)
         presentation = presentation_for_pathogen(str(pid), pathogen_profiles)
         phase = resolve_phase(presentation, dpi)
-        phase_syndromes = None
-        if phase is not None:
-            phase_syndromes = phase.get("syndromes")
-            for feat in phase.get("features") or []:
-                key = str(feat)
-                if key not in seen_feat:
-                    seen_feat.add(key)
-                    features.append(key)
+        phase_syndromes = _collect_phase_features(phase, seen_feat, features)
         base_syndromes = phase_syndromes or presentation.get("syndromes") or []
-        for syn in base_syndromes:
-            key = str(syn)
-            if key in SYNDROME_TOKENS and key not in seen_syn:
-                seen_syn.add(key)
-                syndromes.append(key)
+        _append_unique_syndromes(base_syndromes, seen_syn, syndromes)
 
     agent["observed_syndromes"] = syndromes
     agent["clinical_features"] = features

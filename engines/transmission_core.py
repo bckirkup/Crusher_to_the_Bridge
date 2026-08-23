@@ -269,6 +269,43 @@ def _best_protection(
     return max(config.effective_protection(prior, challenge) for prior in priors)
 
 
+def _parse_contact_mode(tx: dict[str, Any]) -> str:
+    mode = str(tx.get("contact_mode", DEFAULT_CONTACT_MODE))
+    if mode not in CONTACT_MODES:
+        return DEFAULT_CONTACT_MODE
+    return mode
+
+
+def _parse_density_cfg(tx: dict[str, Any]) -> dict[str, float]:
+    provided = tx.get("density_dependent") or {}
+    if not isinstance(provided, dict):
+        provided = {}
+    return {
+        **DEFAULT_DENSITY_CFG,
+        **{k: float(v) for k, v in provided.items() if k in DEFAULT_DENSITY_CFG},
+    }
+
+
+def _parse_heterogeneous_sigma(
+    tx: dict[str, Any],
+) -> tuple[dict[str, float], float, float]:
+    het_raw = tx.get("heterogeneous_zone_dose") or {}
+    if not isinstance(het_raw, dict):
+        het_raw = {}
+    sigma_map = dict(DEFAULT_HETEROGENEOUS_SIGMA_BY_ZONE_TYPE)
+    provided_sigma = het_raw.get("sigma_by_zone_type") or {}
+    if isinstance(provided_sigma, dict):
+        for k, v in provided_sigma.items():
+            sigma_map[str(k)] = float(v)
+    sigma_service = float(
+        het_raw.get("sigma_service", DEFAULT_HETEROGENEOUS_SIGMA_SERVICE),
+    )
+    sigma_default = float(
+        het_raw.get("default_sigma", DEFAULT_HETEROGENEOUS_SIGMA_DEFAULT),
+    )
+    return sigma_map, sigma_service, sigma_default
+
+
 class TransmissionCore:
     """Executes six transmission pathways per epoch.
 
@@ -314,44 +351,19 @@ class TransmissionCore:
         self.voyage_contact_multiplier: float = 1.0
 
         tx = (cfg or {}).get("transmission", {}) or {}
-        mode = str(tx.get("contact_mode", DEFAULT_CONTACT_MODE))
-        if mode not in CONTACT_MODES:
-            mode = DEFAULT_CONTACT_MODE
-        self.contact_mode = mode
-        provided = tx.get("density_dependent") or {}
-        if not isinstance(provided, dict):
-            provided = {}
-        self.density_cfg: dict[str, float] = {
-            **DEFAULT_DENSITY_CFG,
-            **{k: float(v) for k, v in provided.items() if k in DEFAULT_DENSITY_CFG},
-        }
+        self.contact_mode = _parse_contact_mode(tx)
+        self.density_cfg: dict[str, float] = _parse_density_cfg(tx)
         # Dining-type zones or Galley IDs: crew contact multiplier applies here
         self._service_zones: set[str] = {
             z
             for z, t in self.zone_types.items()
             if t == "Dining" or "Galley" in z
         }
-        het_raw = tx.get("heterogeneous_zone_dose") or {}
-        if not isinstance(het_raw, dict):
-            het_raw = {}
-        sigma_map = dict(DEFAULT_HETEROGENEOUS_SIGMA_BY_ZONE_TYPE)
-        provided_sigma = het_raw.get("sigma_by_zone_type") or {}
-        if isinstance(provided_sigma, dict):
-            for k, v in provided_sigma.items():
-                sigma_map[str(k)] = float(v)
-        self.heterogeneous_sigma_by_zone_type = sigma_map
-        self.heterogeneous_sigma_service = float(
-            het_raw.get(
-                "sigma_service",
-                DEFAULT_HETEROGENEOUS_SIGMA_SERVICE,
-            ),
-        )
-        self.heterogeneous_sigma_default = float(
-            het_raw.get(
-                "default_sigma",
-                DEFAULT_HETEROGENEOUS_SIGMA_DEFAULT,
-            ),
-        )
+        (
+            self.heterogeneous_sigma_by_zone_type,
+            self.heterogeneous_sigma_service,
+            self.heterogeneous_sigma_default,
+        ) = _parse_heterogeneous_sigma(tx)
 
         # Persistent state: surface fomite pools per zone per pathogen
         # {pathogen_id: {zone: mass}}
