@@ -18,6 +18,7 @@ from dataclasses import replace
 
 import pytest
 
+from engines.incubation import IncubationModel
 from engines.voyage_itinerary import (
     load_voyage_config,
     voyage_config_path_for_platform,
@@ -30,7 +31,11 @@ from picard_framework.analysis.sentinel.port_profiles import (
     load_all_profiles,
     load_region_profiles,
 )
+from picard_framework.analysis.sentinel.profile_delays import (
+    incubation_delay_for_profile,
+)
 from picard_framework.analysis.shore.detection import port_detection_epoch
+from picard_framework.pathogen_overrides import load_pathogen_bundle
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PROFILE_PATH = os.path.join(
@@ -42,6 +47,16 @@ PROFILE_PATH = os.path.join(
     f"port_surveillance_{REGION_FEDERATION}.json",
 )
 SCHEMA_PATH = os.path.join(REPO_ROOT, "schemas", "port_surveillance.schema.json")
+VOYAGE_SCHEMA_PATH = os.path.join(REPO_ROOT, "schemas", "voyage_config.schema.json")
+
+# The fiction pathogen bundles the Enterprise platforms run on. They are not
+# the active bundle, so the shore model only sees them when handed them.
+TOS_BUNDLE = os.path.join(
+    REPO_ROOT, "data", "pathogens", "enterprise_tos_profiles.json",
+)
+TNG_BUNDLE = os.path.join(
+    REPO_ROOT, "data", "pathogens", "enterprise_tng_profiles.json",
+)
 
 TOS_PLATFORM = "enterprise_constitution_tos"
 TNG_PLATFORM = "enterprise_galaxy_tng"
@@ -57,6 +72,10 @@ FLAT_INCIDENCE = [6.0] * 90
 SWEEP_PATHOGEN = "norwalk_gi"
 EPOCH_HOURS = 24.0
 CASE_THRESHOLD = 12.0
+
+
+def _bundle(path: str) -> dict:
+    return load_pathogen_bundle(path)
 
 
 def _itinerary_config(platform_id: str) -> dict:
@@ -262,6 +281,101 @@ def test_capability_gradient_orders_the_federation_ports():
     assert sparse is not None
     assert dense < middling
     assert middling < sparse
+
+
+# --- the Enterprise pathogen bundles run through the shore model ----------
+
+
+@pytest.mark.parametrize("bundle", [TOS_BUNDLE, TNG_BUNDLE])
+def test_enterprise_profiles_carry_a_projectable_incubation(bundle):
+    """Every fiction pathogen has a kernel the sentinel projection accepts."""
+    for pathogen_id, profile in _bundle(bundle).items():
+        model = IncubationModel.from_mapping(profile["incubation"])
+        assert 0.0 < model.median_days < float(profile["recovery_day"]), pathogen_id
+        delay = incubation_delay_for_profile(profile, epoch_hours=EPOCH_HOURS)
+        assert len(delay.pmf) > 0
+        assert sum(delay.pmf) == pytest.approx(1.0)
+        assert "fiction" in str(profile["incubation"]["notes"]).casefold(), pathogen_id
+
+
+def test_enterprise_kernels_span_a_fast_and_a_slow_pathogen():
+    """The bundles are only a useful test bed if their kernels differ."""
+    profiles = {**_bundle(TOS_BUNDLE), **_bundle(TNG_BUNDLE)}
+    medians = {
+        pathogen_id: IncubationModel.from_mapping(profile["incubation"]).median_days
+        for pathogen_id, profile in profiles.items()
+    }
+    assert medians["psi_2000_polywater"] < 2.0
+    assert medians["barclay_protomorphosis"] > 4.0
+    assert len(set(medians.values())) == len(medians)
+
+
+@pytest.mark.parametrize("bundle", [TOS_BUNDLE, TNG_BUNDLE])
+def test_every_federation_port_resolves_every_enterprise_pathogen(bundle):
+    """No fiction pathogen is silently mute at a port that has a programme.
+
+    detection.py raises on a label it cannot resolve precisely so that an
+    unwatched pathogen cannot pass for an undetected one; this asserts the
+    region's vocabulary is complete enough that the raise never fires.
+    """
+    profiles = _bundle(bundle)
+    capabilities = load_region_profiles(REGION_FEDERATION)
+    for pathogen_id in profiles:
+        for port_id, capability in capabilities.items():
+            epoch = port_detection_epoch(
+                FLAT_INCIDENCE,
+                port_id=port_id,
+                pathogen_id=pathogen_id,
+                epoch_hours=EPOCH_HOURS,
+                case_threshold=CASE_THRESHOLD,
+                capability=capability,
+                profiles=profiles,
+            )
+            if port_id == "MEMAL":
+                assert epoch is None
+                continue
+            assert epoch is not None, (pathogen_id, port_id)
+            assert epoch > 0
+
+
+def test_slow_kernel_detects_later_than_the_fast_one_at_one_port():
+    """The kernel, not only the port programme, moves the detection epoch."""
+    capability = load_region_profiles(REGION_FEDERATION)["SBONE"]
+    profiles = {**_bundle(TOS_BUNDLE), **_bundle(TNG_BUNDLE)}
+    epochs = {
+        pathogen_id: port_detection_epoch(
+            FLAT_INCIDENCE,
+            port_id=capability.port_id,
+            pathogen_id=pathogen_id,
+            epoch_hours=EPOCH_HOURS,
+            case_threshold=CASE_THRESHOLD,
+            capability=capability,
+            profiles=profiles,
+        )
+        for pathogen_id in ("psi_2000_polywater", "barclay_protomorphosis")
+    }
+    assert epochs["psi_2000_polywater"] < epochs["barclay_protomorphosis"]
+
+
+# --- platform_class ------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("platform_id", "platform_class"),
+    [(TOS_PLATFORM, "constitution"), (TNG_PLATFORM, "galaxy")],
+)
+def test_itinerary_declares_a_schema_valid_platform_class(platform_id, platform_class):
+    jsonschema = pytest.importorskip("jsonschema")
+    with open(VOYAGE_SCHEMA_PATH, encoding="utf-8") as fh:
+        schema = json.load(fh)
+    with open(voyage_config_path_for_platform(REPO_ROOT, platform_id)) as fh:
+        document = json.load(fh)
+    assert document["platform_class"] == platform_class
+    jsonschema.validate(document, schema)
+    # Widening the enum did not drop the cruise classes it already carried.
+    assert {"expedition", "classic", "spirit", "mega"} <= set(
+        schema["properties"]["platform_class"]["enum"],
+    )
 
 
 # --- the existing libraries are untouched --------------------------------

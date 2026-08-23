@@ -1,6 +1,7 @@
 {
   "schema_version": "1.0",
-  "description": "FICTIONAL Constitution-class (TOS) patrol itinerary: Starbase 1 -> Starbase 11 -> K-7 -> Memory Alpha -> Starbase 1, over the fictional federation port library (docs/variant_surveillance_spec.md §3). Ports, dates, and ashore windows are invented for the setting, not literature-anchored. effects_enabled=false and shore_exposure.enabled=false, so the itinerary is analysis-only metadata and campaigns stay identical to the pre-itinerary baseline. platform_class is omitted: the schema enum covers cruise classes only, and a starship class is not one of them.",
+  "platform_class": "constitution",
+  "description": "FICTIONAL Constitution-class (TOS) patrol itinerary: Starbase 1 -> Starbase 11 -> K-7 -> Memory Alpha -> Starbase 1, over the fictional federation port library (docs/variant_surveillance_spec.md §3). Ports, dates, and ashore windows are invented for the setting, not literature-anchored. effects_enabled=false and shore_exposure.enabled=false, so the itinerary is analysis-only metadata and campaigns stay identical to the pre-itinerary baseline.",
   "voyage": {
     "effects_enabled": false,
     "total_epochs": 240,

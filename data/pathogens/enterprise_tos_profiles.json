@@ -60,6 +60,17 @@
         "gamma": 0.1
       },
       "recovery_day": 9,
+      "incubation": {
+        "distribution": "lognormal",
+        "median_days": 4.0,
+        "dispersion": 1.5,
+        "min_days": 1.0,
+        "max_days": 14.0,
+        "dose_reference_log10": 3.66,
+        "dose_log10_shortening": 0.12,
+        "dose_floor": 0.3,
+        "notes": "FICTIONAL, not a clinical claim: Rigelian fever has no literature. Median 4 d / GSD 1.5 is borrowed from the shape of a systemic febrile bacterial illness (the enteric-fever and rickettsial ranges, ~4-10 d, are the closest real analogues) and chosen so the typical host presents around day 4 of a 9-day course rather than after clearing. dose_reference_log10 3.66 is this profile's own beta-Poisson N50 (4527 particles, alpha 0.15 / beta 45), following the model-unit convention documented on norwalk_gi in active_profiles.json; dose_shift 0.12 and floor 0.3 are the norovirus/SARS-CoV-2 spec values reused for want of anything specific. Direction is anchored, magnitude is invented: do not read a result off this median as if it were calibrated. host_factors omitted, as on the shipped profiles."
+      },
       "surface_deposition_fraction": 0.08,
       "base_susceptibility": 1.0,
       "microflora_disruption": {
@@ -208,6 +219,17 @@
         "gamma": 0.08
       },
       "recovery_day": 5,
+      "incubation": {
+        "distribution": "lognormal",
+        "median_days": 1.0,
+        "dispersion": 1.4,
+        "min_days": 0.2,
+        "max_days": 4.0,
+        "dose_reference_log10": 3.95,
+        "dose_log10_shortening": 0.15,
+        "dose_floor": 0.3,
+        "notes": "FICTIONAL, not a clinical claim. The story beat is a shipwide behavioral outbreak that presents within a watch or two of exposure, so the median is 1 d with a tight GSD 1.4 (fast and synchronous, unlike the fever profiles) and truncation 0.2-4 d inside the 5-day course. No real pathogen anchors this: the nearest real shapes are toxin-mediated and inhalational-irritant syndromes with sub-day onset. dose_reference_log10 3.95 is this profile's own beta-Poisson N50 (9003 particles, alpha 0.12 / beta 28) per the model-unit convention on norwalk_gi; dose_shift 0.15 / floor 0.3 reuse the spec defaults. Note that a short, tight incubation makes port attribution *easier*, so this profile flatters port-side surveillance rather than the ship: it was not chosen to favour either."
+      },
       "surface_deposition_fraction": 0.02,
       "base_susceptibility": 1.0,
       "microflora_disruption": {
