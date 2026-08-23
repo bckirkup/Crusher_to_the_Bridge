@@ -23,7 +23,7 @@ from __future__ import annotations
 
 import math
 import os
-from typing import Any
+from typing import Any, Mapping
 
 import numpy as np
 
@@ -1384,16 +1384,32 @@ class LongReadVerificationSequencing:
         spaces: dict[str, dict[str, Any]] | None = None,
         agents: list[dict[str, Any]] | None = None,
         pathogen_profiles: dict[str, dict[str, Any]] | None = None,
+        genotype_mixtures_by_key: Mapping[str, Mapping[str, Mapping[str, float]]]
+        | None = None,
+        typing_read_depth: int | None = None,
     ) -> dict[str, dict[str, Any]]:
-        """Execute queued verification runs; keys are ``request_id``."""
+        """Execute queued verification runs; keys are ``request_id``.
+
+        ``genotype_mixtures_by_key`` maps a request's ``collection_key`` (the
+        agent id, for a clinical specimen) to that specimen's true genotype
+        composition per pathogen. Absent, the run is pathogen-level only, which
+        is the behaviour of every configuration without strain tracking.
+        """
+        mixtures = dict(genotype_mixtures_by_key or {})
         results: dict[str, dict[str, Any]] = {}
         for req in requests:
+            specimen = mixtures.get(str(req.collection_key))
             out = self.modality.verify(
                 req,
                 epoch=epoch,
                 spaces=spaces,
                 agents=agents,
                 pathogen_profiles=pathogen_profiles,
+                genotype_mixtures=(
+                    None if specimen is None
+                    else {str(pid): dict(mix) for pid, mix in specimen.items()}
+                ),
+                typing_read_depth=typing_read_depth,
             )
             if self.qc.should_run_control():
                 out["qc_control"] = self.qc.run_negative_control()

@@ -80,7 +80,7 @@
           "oneOf": [{ "type": "null" }, { "type": "string" }]
         },
         "genotype": {
-          "description": "Strain identifier. Null until pathogen strain state exists in the ABM (spec §5).",
+          "description": "Genotype this case was typed as by a delivered sequencing assay — the reported call, which accuracy can make wrong, not the host's true lineage. Null when the case was never typed (no strain tracking, no assay, or a specimen that failed its Ct gate or read floor).",
           "oneOf": [{ "type": "null" }, { "type": "string" }]
         },
         "hours_ashore": {

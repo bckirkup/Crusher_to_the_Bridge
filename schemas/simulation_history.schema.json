@@ -53,6 +53,13 @@
             "$ref": "#/$defs/PathogenEpochSummary"
           }
         },
+        "strain_census": {
+          "type": "array",
+          "description": "Lineage census for each pathogen with strain tracking (variant surveillance, Paper 3). Absent when no pathogen declares strain_evolution.",
+          "items": {
+            "$ref": "#/$defs/LineageCensus"
+          }
+        },
         "reactive_protocols": {
           "type": "object",
           "properties": {
@@ -299,6 +306,34 @@
         "symptomatic": {"type": "integer", "minimum": 0},
         "recovered": {"type": "integer", "minimum": 0},
         "co_infected_count": {"type": "integer", "minimum": 0}
+      }
+    },
+    "LineageCensus": {
+      "type": "object",
+      "description": "Carrier counts per lineage at one epoch, for one pathogen. A snapshot series, not a phylogeny: the registry holds the ancestry.",
+      "required": [
+        "epoch",
+        "pathogen_id",
+        "lineage_counts",
+        "total_carriers",
+        "num_lineages",
+        "dominant_strain_id",
+        "dominant_fraction"
+      ],
+      "properties": {
+        "epoch": {"type": "integer", "minimum": 0},
+        "pathogen_id": {"type": "string", "minLength": 1},
+        "lineage_counts": {
+          "type": "object",
+          "additionalProperties": {"type": "integer", "minimum": 1}
+        },
+        "total_carriers": {"type": "integer", "minimum": 0},
+        "num_lineages": {"type": "integer", "minimum": 0},
+        "dominant_strain_id": {
+          "type": "string",
+          "description": "Empty when no lineage is carried this epoch."
+        },
+        "dominant_fraction": {"type": "number", "minimum": 0, "maximum": 1}
       }
     }
   }
