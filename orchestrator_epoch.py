@@ -32,6 +32,7 @@ from engines.infection_dynamics_bridge import (
     InfectionStatus,
     KorkinShipEngine,
 )
+from engines.sim_clock import crossed_day_boundary as _crossed_day_boundary
 from engines.strain_state import ImmuneRecord, StrainRegistry
 from engines.wearable_monitor import WearableMonitor
 from orchestrator_types import (
@@ -256,10 +257,14 @@ def step_mid_cruise_introductions(
                     size=min(n_init, len(candidates)),
                     replace=False,
                 )
-                dpi = int(prof.get("initial_time_infected", 0))
+                # The profile field is days post infection; the record is epochs.
+                epochs_infected = int(round(engine.clock.epochs_for_days(
+                    float(prof.get("initial_time_infected", 0)),
+                )))
                 for agent in chosen:
                     agent.infect_with_pathogen(
-                        pid, 1e4, epoch, time_infected=dpi, rng=rng, profile=prof,
+                        pid, 1e4, epoch,
+                        time_infected=epochs_infected, rng=rng, profile=prof,
                     )
 
 
@@ -399,6 +404,26 @@ def _onset_day(
     return max(0.0, drawn + float(inf.get("strain_incubation_modifier", 0.0)))
 
 
+def _draw_symptom_onset(
+    agent: Any,
+    pid: str,
+    inf: dict[str, Any],
+    prof: dict[str, Any],
+    rng: np.random.Generator,
+) -> None:
+    """One dose-conditioned illness draw for a host past its incubation period."""
+    ill_params = prof.get("illness_probability", {})
+    eta_p = ill_params.get("eta", 0.508)
+    gamma_p = ill_params.get("gamma", 0.095)
+    dose = inf["acquired_particles"]
+    ill_prob = 1.0 - math.pow(1.0 + eta_p * dose, -gamma_p)
+    ill_prob = min(1.0, ill_prob + agent.get_chronic_illness_boost(pid))
+    if rng.random() < ill_prob:
+        inf["illness"] = IllnessStatus.SYMPTOMATIC
+        if agent.illness_status == IllnessStatus.NOT_ILL:
+            agent.illness_status = IllnessStatus.SYMPTOMATIC
+
+
 def _advance_agent_pathogen_infections(
     agent: Any,
     pathogen_profiles: dict[str, dict[str, Any]],
@@ -406,6 +431,7 @@ def _advance_agent_pathogen_infections(
     strain_registry: StrainRegistry | None = None,
     epoch: int = 0,
 ) -> None:
+    clock = agent.clock
     for pid, inf in tuple(agent.infections.items()):
         if inf["status"] != InfectionStatus.INFECTED:
             continue
@@ -414,19 +440,18 @@ def _advance_agent_pathogen_infections(
         if inf["time_infected"] is not None:
             inf["time_infected"] += 1
 
-        dpi = inf["time_infected"] or 0
+        # The counter is in epochs; every threshold below is in days.
+        epochs_infected = inf["time_infected"] or 0
+        days_infected = clock.days_elapsed(epochs_infected)
         onset_day = _onset_day(agent, pid, inf, prof, rng)
-        if dpi >= onset_day and inf["illness"] == IllnessStatus.NOT_ILL:
-            ill_params = prof.get("illness_probability", {})
-            eta_p = ill_params.get("eta", 0.508)
-            gamma_p = ill_params.get("gamma", 0.095)
-            dose = inf["acquired_particles"]
-            ill_prob = 1.0 - math.pow(1.0 + eta_p * dose, -gamma_p)
-            ill_prob = min(1.0, ill_prob + agent.get_chronic_illness_boost(pid))
-            if rng.random() < ill_prob:
-                inf["illness"] = IllnessStatus.SYMPTOMATIC
-                if agent.illness_status == IllnessStatus.NOT_ILL:
-                    agent.illness_status = IllnessStatus.SYMPTOMATIC
+        if (
+            days_infected >= onset_day
+            and inf["illness"] == IllnessStatus.NOT_ILL
+            and _crossed_day_boundary(clock, epochs_infected)
+        ):
+            # Once per day of natural history, not once per epoch, so the
+            # chance of presenting does not depend on how finely time is cut.
+            _draw_symptom_onset(agent, pid, inf, prof, rng)
 
         recovery_day = agent.get_chronic_recovery_day(
             pid, prof.get("recovery_day", 3),
@@ -437,7 +462,7 @@ def _advance_agent_pathogen_infections(
         cleared: list[str] = []
         residents_left = agent.advance_resident_strains(pid, recovery_day, cleared)
         _record_cleared_immunity(agent, pid, cleared, strain_registry, epoch)
-        if dpi >= recovery_day and residents_left == 0:
+        if days_infected >= recovery_day and residents_left == 0:
             inf["status"] = InfectionStatus.RECOVERED
             inf["illness"] = IllnessStatus.RECOVERED
 

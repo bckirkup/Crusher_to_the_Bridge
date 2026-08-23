@@ -53,6 +53,14 @@ jobs:
               ! -path './.agents/*'
           )
           python3 scripts/sonar_guard.py --workflows .github/workflows
+      - name: Run clock unit guards
+        run: |
+          python3 scripts/clock_guard.py $(
+            find . -type f -name '*.py' \
+              ! -path './tests/*' \
+              ! -path './.agents/*'
+          )
+          python3 scripts/clock_guard.py --configs
 
   workflow-lint:
     name: Workflow lint

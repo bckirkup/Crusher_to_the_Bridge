@@ -23,6 +23,7 @@ from typing import Mapping, Sequence
 
 import numpy as np
 
+from engines.sim_clock import HOURS, SimClock
 from picard_framework.analysis.sentinel.incubation import expected_onsets
 from picard_framework.analysis.sentinel.port_health import PortSurveillanceCapability
 from picard_framework.analysis.sentinel.port_profiles import capability_for
@@ -80,7 +81,7 @@ def _reporting_delay_epochs(
     days = float(capability.syndromic_delay_days)
     if capability.lab_confirmation:
         days += float(capability.lab_turnaround_days)
-    return int(math.ceil(days * 24.0 / float(epoch_hours)))
+    return int(math.ceil(SimClock(float(epoch_hours), HOURS).epochs_for_days(days)))
 
 
 def port_detection_epoch(

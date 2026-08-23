@@ -36,6 +36,7 @@ from engines.py_contam_bridge import (
 from engines.py_contam_bridge import (
     load_spatial_layout as load_platform_layout,
 )
+from engines.sim_clock import SimClock
 from engines.transmission_core import (
     DEFAULT_CONFINEMENT_ISOLATION_FACTOR,
     DEFAULT_CORRIDOR_DIRECT_CONTACT_FACTOR,
@@ -356,7 +357,10 @@ class ShipSimulation:
         self.high_traffic = ship["high_traffic_zones"]
         self.graph_cfg = cfg.get("ship_graph", {})
 
-        self.engine = build_engine(cfg, seed=self.seed)
+        # One clock for the whole run: the itinerary sets the epoch length and
+        # the natural history reads it, so the two cannot drift apart.
+        self.clock = SimClock.for_run(cfg, voyage_cfg)
+        self.engine = build_engine(cfg, seed=self.seed, clock=self.clock)
         if self.display:
             from orchestrator_display import print_korkin_engine
             print_korkin_engine(self.engine)
@@ -404,7 +408,10 @@ class ShipSimulation:
         self._init_transmission_core(ship, airflow_data, platform_layout)
 
         self.obs = init_observation_engine(
-            cfg, self.seed, pathogen_profiles=self.pathogen_profiles,
+            cfg,
+            self.seed,
+            pathogen_profiles=self.pathogen_profiles,
+            clock=self.clock,
         )
         # Compact retention skips lab-notebook accumulation (campaign never finalizes it).
         if self.run_spec.history_retention == "compact":

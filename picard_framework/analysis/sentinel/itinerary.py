@@ -13,6 +13,7 @@ from dataclasses import dataclass
 from datetime import date, timedelta
 from typing import Any, Sequence
 
+from engines.sim_clock import HOURS, SimClock
 from engines.voyage_itinerary import (
     DEFAULT_DAY_DEFAULTS,
     normalize_voyage_config,
@@ -133,7 +134,7 @@ def epochs_per_day_for(epoch_duration_hours: float) -> int:
     hours = float(epoch_duration_hours or 1.0)
     if hours <= 0:
         hours = 1.0
-    return max(1, int(round(24.0 / hours)))
+    return max(1, int(round(SimClock(hours, HOURS).epochs_per_day)))
 
 
 def _parse_date(raw: Any) -> date | None:

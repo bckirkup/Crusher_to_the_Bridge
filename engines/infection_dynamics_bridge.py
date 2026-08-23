@@ -33,6 +33,7 @@ from typing import Any
 
 import numpy as np
 
+from engines.sim_clock import LEGACY_CLOCK, SimClock, crossed_day_boundary
 from engines.strain_state import ImmuneRecord, Phenotype
 
 # ── Korkin Lab parameters (from Person.java) ─────────────────────────────
@@ -59,6 +60,9 @@ VSP_THRESHOLD_FRACTION = 0.03
 
 # Recovery threshold (from Person.java)
 RECOVERY_DAY = 3
+
+# Earliest day post infection at which the legacy path checks for symptoms
+ONSET_DAY = 1
 
 # Environmental deposition: fraction of shedding that deposits on surfaces
 # (ViralParticle.java: particles survive 86400 steps = 1 day)
@@ -330,6 +334,8 @@ class KorkinAgent:
         "prior_genotypes", "immune_history",
         # Host biology read by the incubation distribution
         "age_band", "immunocompromised",
+        # Shared epoch/day conversion; every day-valued comparison goes through it
+        "clock",
     )
 
     def __init__(
@@ -358,6 +364,9 @@ class KorkinAgent:
         self.immunocompromised: bool = False
         self.time_infected: int | None = None
         self.acquired_particles: float = 0.0
+        # One shared instance per run, assigned by the engine. Legacy by default
+        # so an agent built outside a simulation behaves as it always did.
+        self.clock: SimClock = LEGACY_CLOCK
         self.home_zone = home_zone
         self.dining_zone = dining_zone
         self.work_zone = work_zone
@@ -402,10 +411,14 @@ class KorkinAgent:
 
     @property
     def days_post_infection(self) -> int:
-        """Days since infection (0-indexed).  -1 if not infected."""
+        """Days since infection (0-indexed).  -1 if not infected.
+
+        ``time_infected`` counts epochs; this is that count read in days through
+        the run's clock, which is the only place the two units meet.
+        """
         if self.time_infected is None:
             return -1
-        return self.time_infected
+        return self.clock.day_index(self.time_infected)
 
     @property
     def is_infected(self) -> bool:
@@ -576,9 +589,10 @@ class KorkinAgent:
     ) -> None:
         """Record co-infection for a specific pathogen.
 
-        ``time_infected`` is days post-infection at assignment (index into
-        shedding curves). Seeded introductions read ``initial_time_infected``
-        from the pathogen profile; transmission events use the default 0.
+        ``time_infected`` is the infection's age in **epochs** at assignment;
+        the day-valued ``initial_time_infected`` profile field is converted
+        through the run's clock by the seeding caller. Transmission events use
+        the default 0.
 
         When ``rng`` and ``profile`` are supplied, draws a persistent
         ``shedding_multiplier`` from ``profile['shedding_variance_log10']``.
@@ -667,17 +681,19 @@ class KorkinAgent:
         recovery_day: int,
         cleared: list[str] | None = None,
     ) -> int:
-        """Age each resident lineage by a day and clear those past recovery.
+        """Age each resident lineage by an epoch and clear those past recovery.
 
-        Returns the number still resident, so the caller can hold the
-        pathogen-level infection open until the last lineage clears. Ids of the
-        lineages that cleared this call are appended to ``cleared`` when given,
-        since each one is an exposure the host now has immune memory of.
+        ``recovery_day`` is in days, the lineage counter is in epochs, and the
+        run's clock converts between them. Returns the number still resident, so
+        the caller can hold the pathogen-level infection open until the last
+        lineage clears. Ids of the lineages that cleared this call are appended
+        to ``cleared`` when given, since each one is an exposure the host now has
+        immune memory of.
         """
         residents = self.resident_strains(pathogen_id)
         for strain_id, resident in tuple(residents.items()):
             resident.time_infected += 1
-            if resident.time_infected >= recovery_day:
+            if self.clock.days_elapsed(resident.time_infected) >= recovery_day:
                 del residents[strain_id]
                 if cleared is not None:
                     cleared.append(strain_id)
@@ -818,9 +834,10 @@ class KorkinAgent:
         inf = self.infections.get(pathogen_id)
         if inf is None or inf["status"] != InfectionStatus.INFECTED:
             return 0.0
-        dpi = inf["time_infected"]
-        if dpi is None or dpi < 0:
+        epochs_infected = inf["time_infected"]
+        if epochs_infected is None or epochs_infected < 0:
             return 0.0
+        dpi = self.clock.day_index(epochs_infected)
         is_symp = inf["illness"] == IllnessStatus.SYMPTOMATIC
         curve = profile.get(
             "shedding_curve_log10",
@@ -836,7 +853,7 @@ class KorkinAgent:
             # lone resident is the infection's own — identical to the legacy
             # single-strain result.
             return host_mult * sum(
-                self._resident_emissions(residents, curve, adj).values(),
+                self._resident_emissions(residents, curve, adj, self.clock).values(),
             )
         # Host factor (per-agent log-normal draw) and strain factor (heritable)
         # compose multiplicatively and are kept apart so a high shedder stays
@@ -869,7 +886,7 @@ class KorkinAgent:
         if not is_symp:
             curve = profile.get("asymptomatic_shedding_log10", curve)
         adj = profile.get("dose_adjustment", DOSE_ADJUSTMENT)
-        emissions = self._resident_emissions(residents, curve, adj)
+        emissions = self._resident_emissions(residents, curve, adj, self.clock)
         total = sum(emissions.values())
         if total <= 0.0:
             return {}
@@ -880,6 +897,7 @@ class KorkinAgent:
         residents: dict[str, StrainInfection],
         curve: list[float],
         adj: float,
+        clock: SimClock = LEGACY_CLOCK,
     ) -> dict[str, float]:
         """Emission of each co-resident lineage, before the host factor.
 
@@ -898,7 +916,7 @@ class KorkinAgent:
         emissions: dict[str, float] = {}
         for sid, resident in residents.items():
             share = inocula[sid] / pool if pool > 0.0 else 1.0 / len(residents)
-            idx = min(max(resident.time_infected, 0), len(curve) - 1)
+            idx = min(clock.day_index(resident.time_infected), len(curve) - 1)
             emissions[sid] = (
                 share
                 * math.pow(10, curve[idx] - adj)
@@ -1025,7 +1043,10 @@ class KorkinAgent:
             pathogen_states[pid] = {
                 "status": inf["status"].name,
                 "illness": inf["illness"].name,
-                "days_post_infection": inf["time_infected"],
+                "days_post_infection": (
+                    None if inf["time_infected"] is None
+                    else self.clock.day_index(inf["time_infected"])
+                ),
             }
 
         result = {
@@ -1055,8 +1076,9 @@ class KorkinAgent:
 class KorkinShipEngine:
     """Python bridge to the Korkin Lab infection-dynamics ABM.
 
-    Initialises the agent graph from the real model parameters and
-    advances the simulation one epoch (= one day) at a time.
+    Initialises the agent graph from the real model parameters and advances the
+    simulation one epoch at a time. How much natural history an epoch buys is
+    the ``clock``'s business, not this class's: see ``engines.sim_clock``.
     """
 
     def __init__(
@@ -1071,8 +1093,10 @@ class KorkinShipEngine:
         agent_classes: list[dict[str, Any]] | None = None,
         gender_distribution: dict[str, float] | None = None,
         agent_behavior: dict[str, Any] | None = None,
+        clock: SimClock | None = None,
     ) -> None:
         self.rng = np.random.default_rng(seed)
+        self.clock = clock or LEGACY_CLOCK
         self.zones = zones or DEFAULT_ZONES
         self.num_passengers = num_passengers
         self.num_crew = num_crew
@@ -1187,6 +1211,18 @@ class KorkinShipEngine:
                 agent_id, immune_remaining, infected_remaining,
             )
 
+        for agent in self.agents:
+            agent.clock = self.clock
+
+    @property
+    def _seed_infection_epochs(self) -> int:
+        """Epochs of infection age an index case is seeded with.
+
+        Index cases start one day post infection, at the peak of the shedding
+        curve, which is one epoch only when an epoch is a day.
+        """
+        return max(1, int(round(self.clock.epochs_for_days(1.0))))
+
     def _initialize_agents_from_classes(
         self,
         start_id: int,
@@ -1278,10 +1314,11 @@ class KorkinShipEngine:
 
         return agent_id, immune_remaining, infected_remaining, agents_left
 
-    @staticmethod
-    def _seed_initial_infection(agent: KorkinAgent, rng: np.random.Generator) -> None:
+    def _seed_initial_infection(
+        self, agent: KorkinAgent, rng: np.random.Generator,
+    ) -> None:
         agent.infection_status = InfectionStatus.INFECTED
-        agent.time_infected = 1
+        agent.time_infected = self._seed_infection_epochs
         agent.acquired_particles = math.pow(
             10, SYMPTOMATIC_SHEDDING[1] - DOSE_ADJUSTMENT,
         )
@@ -1329,7 +1366,7 @@ class KorkinShipEngine:
 
             if not immune and infected_remaining > 0:
                 agent.infection_status = InfectionStatus.INFECTED
-                agent.time_infected = 1
+                agent.time_infected = self._seed_infection_epochs
                 agent.acquired_particles = math.pow(10, SYMPTOMATIC_SHEDDING[1] - DOSE_ADJUSTMENT)
                 ill_prob = illness_probability(agent.acquired_particles)
                 if self.rng.random() < ill_prob:
@@ -1368,7 +1405,7 @@ class KorkinShipEngine:
 
             if not immune and infected_remaining > 0:
                 agent.infection_status = InfectionStatus.INFECTED
-                agent.time_infected = 1
+                agent.time_infected = self._seed_infection_epochs
                 agent.acquired_particles = math.pow(10, SYMPTOMATIC_SHEDDING[1] - DOSE_ADJUSTMENT)
                 ill_prob = illness_probability(agent.acquired_particles)
                 if self.rng.random() < ill_prob:
@@ -1380,8 +1417,36 @@ class KorkinShipEngine:
 
         return agent_id
 
+    def _advance_illness_and_recovery(self) -> None:
+        """Age every infection one epoch, then present and recover on days.
+
+        ``time_infected`` is an epoch count; ``ONSET_DAY`` and ``RECOVERY_DAY``
+        are days, and the clock is the only thing that relates them. The illness
+        draw fires once per day of natural history rather than once per epoch, so
+        a finer grid does not hand a host more chances to present.
+        """
+        for agent in self.agents:
+            if not agent.is_infected:
+                continue
+            if agent.time_infected is not None:
+                agent.time_infected += 1
+            due = (
+                agent.days_post_infection >= ONSET_DAY
+                and agent.illness_status == IllnessStatus.NOT_ILL
+                and crossed_day_boundary(self.clock, agent.time_infected or 0)
+            )
+            if due:
+                ill_prob = illness_probability(agent.acquired_particles)
+                if self.rng.random() < ill_prob:
+                    agent.illness_status = IllnessStatus.SYMPTOMATIC
+
+        for agent in self.agents:
+            if agent.is_infected and agent.days_post_infection >= RECOVERY_DAY:
+                agent.infection_status = InfectionStatus.RECOVERED
+                agent.illness_status = IllnessStatus.RECOVERED
+
     def step(self) -> dict[str, Any]:
-        """Advance the simulation by one epoch (≈ one day).
+        """Advance the simulation by one epoch.
 
         Performs, in order:
         1. Update agent locations based on hour-of-day schedules
@@ -1489,23 +1554,8 @@ class KorkinShipEngine:
                         target.time_infected = 0
                         target.acquired_particles = contact_shedding
 
-        # 3. Illness progression
-        for agent in self.agents:
-            if not agent.is_infected:
-                continue
-            if agent.time_infected is not None:
-                agent.time_infected += 1
-            dpi = agent.days_post_infection
-            if dpi >= 1 and agent.illness_status == IllnessStatus.NOT_ILL:
-                ill_prob = illness_probability(agent.acquired_particles)
-                if self.rng.random() < ill_prob:
-                    agent.illness_status = IllnessStatus.SYMPTOMATIC
-
-        # 4. Recovery (Person.java: dpi >= 3)
-        for agent in self.agents:
-            if agent.is_infected and agent.days_post_infection >= RECOVERY_DAY:
-                agent.infection_status = InfectionStatus.RECOVERED
-                agent.illness_status = IllnessStatus.RECOVERED
+        # 3-4. Illness progression and recovery, both on the day scale
+        self._advance_illness_and_recovery()
 
         # 5. VSP quarantine check (Agent.java: 3% threshold)
         # VSP confinement sends symptomatic agents to quarters (quarantine),

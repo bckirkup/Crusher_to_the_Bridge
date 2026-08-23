@@ -15,16 +15,53 @@ from crusher_labs.instrument_turnaround import (
     InstrumentTurnaroundRegistry,
     TurnaroundSpec,
 )
+from engines.sim_clock import HOURS, SimClock
+
+DAY_EPOCH_CLOCK = SimClock(epoch_duration_hours=24.0, mode=HOURS)
+HOURLY_CLOCK = SimClock(epoch_duration_hours=1.0, mode=HOURS)
 
 
 def test_turnaround_spec_sub_epoch_fraction() -> None:
-    spec = TurnaroundSpec.from_config_block({"epoch_fraction": 0.04})
+    spec = TurnaroundSpec.from_config_block(
+        {"epoch_fraction": 0.04}, clock=DAY_EPOCH_CLOCK,
+    )
     assert spec.delay_epochs == 0
 
 
 def test_turnaround_spec_full_run_hours() -> None:
-    spec = TurnaroundSpec.from_config_block({"full_run_hours": 48})
+    spec = TurnaroundSpec.from_config_block(
+        {"full_run_hours": 48}, clock=DAY_EPOCH_CLOCK,
+    )
     assert spec.delay_epochs == 2
+
+
+def test_full_run_hours_is_physical_on_an_hourly_grid() -> None:
+    """The same 48-hour assay is 48 epochs when an epoch is an hour."""
+    spec = TurnaroundSpec.from_config_block(
+        {"full_run_hours": 48}, clock=HOURLY_CLOCK,
+    )
+    assert spec.delay_epochs == 48
+
+
+def test_delay_hours_partial_epoch_costs_a_whole_one() -> None:
+    clock = SimClock(epoch_duration_hours=4.0, mode=HOURS)
+    spec = TurnaroundSpec.from_config_block({"delay_hours": 5}, clock=clock)
+    assert spec.delay_epochs == 2
+
+
+def test_shipped_config_delays_are_physical_hours() -> None:
+    """The shipped TAT config reads the run's clock, not its own constant."""
+    path = os.path.join(REPO_ROOT, "data/config/instrument_turnaround.json")
+    hourly = InstrumentTurnaroundRegistry.load(
+        path, repo_root=REPO_ROOT, clock=HOURLY_CLOCK,
+    )
+    daily = InstrumentTurnaroundRegistry.load(
+        path, repo_root=REPO_ROOT, clock=DAY_EPOCH_CLOCK,
+    )
+    assert hourly.delay_epochs_for(INSTRUMENT_WW) == 24
+    assert daily.delay_epochs_for(INSTRUMENT_WW) == 1
+    assert hourly.delay_epochs_for(INSTRUMENT_MICROBIO) == 72
+    assert daily.delay_epochs_for(INSTRUMENT_MICROBIO) == 3
 
 
 def test_wastewater_delay_one_epoch() -> None:
