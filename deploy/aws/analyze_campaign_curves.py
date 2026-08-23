@@ -66,6 +66,7 @@ def _zip_groups(names: list[str]) -> dict[str, dict[str, str]]:
 
 def iter_curve_rows(results_dir: Path) -> Iterator[dict[str, Any]]:
     """Yield long-form epoch rows for every run in each shard zip."""
+    emitted_run_ids: set[str] = set()
     for zip_path in sorted(results_dir.rglob("*.zip")):
         try:
             with zipfile.ZipFile(zip_path) as zf:
@@ -92,6 +93,9 @@ def iter_curve_rows(results_dir: Path) -> Iterator[dict[str, Any]]:
 
                     fallback = Path(prefix).name if prefix != "." else zip_path.stem
                     run_id = str(summary.get("run_id") or fallback)
+                    if run_id in emitted_run_ids:
+                        continue
+                    emitted_run_ids.add(run_id)
                     derived = summary.get("derived") or {}
                     tags = parse_run_tags(run_id)
                     for point in ts:

@@ -161,13 +161,21 @@ def main(argv: list[str] | None = None) -> int:
     print(f"Found {len(zips)} zip(s) under {results_dir}")
 
     rows: list[dict[str, Any]] = []
+    seen_run_ids: set[str] = set()
     for zp in zips:
-        rows.extend(iter_summary_rows(zp))
-    zip_run_ids = {str(row["run_id"]) for row in rows}
+        for row in iter_summary_rows(zp):
+            run_id = str(row["run_id"])
+            if run_id in seen_run_ids:
+                continue
+            seen_run_ids.add(run_id)
+            rows.append(row)
     for manifest_path in sorted(results_dir.rglob("*.manifest.json")):
         for row in _manifest_rows(manifest_path):
-            if str(row["run_id"]) not in zip_run_ids:
-                rows.append(row)
+            run_id = str(row["run_id"])
+            if run_id in seen_run_ids:
+                continue
+            seen_run_ids.add(run_id)
+            rows.append(row)
 
     if not rows:
         print("No summaries found; nothing written.", file=sys.stderr)

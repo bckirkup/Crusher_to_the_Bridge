@@ -16,6 +16,7 @@ sys.path.insert(0, str(REPO_ROOT))
 from typing import Any  # noqa: E402
 
 from picard_framework.runs.mega_cruise_campaign.campaign_runner import (  # noqa: E402
+    ShardBundle,
     clear_failed_artifacts,
     compute_derived_metrics,
     extract_timeseries,
@@ -627,6 +628,34 @@ def test_aggregate_backward_compatible_without_derived(tmp_path: Path) -> None:
     assert not any(k.startswith("parameters.") for k in row)
 
 
+def test_aggregate_deduplicates_local_run_and_shard_zips(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    agg = _load_aggregator()
+    results = tmp_path / "results"
+    results.mkdir()
+    payload = {
+        "run_id": "run_a",
+        "parameters": {"seed": 42},
+        "summary": {"infected": 1},
+    }
+    _write_zip(results / "run_a.zip", payload, [{"epoch": 0}])
+    with zipfile.ZipFile(results / "single.zip", "w") as zf:
+        zf.writestr("run_a/summary.json", json.dumps(payload))
+        zf.writestr("run_a/timeseries.json", json.dumps([{"epoch": 0}]))
+
+    output_json = tmp_path / "aggregate.json"
+    output_csv = tmp_path / "aggregate.csv"
+    monkeypatch.chdir(tmp_path)
+    assert agg.main([
+        str(results),
+        "--out-json", str(output_json),
+        "--out-csv", str(output_csv),
+    ]) == 0
+    rows = json.loads(output_json.read_text(encoding="utf-8"))
+    assert [row["run_id"] for row in rows] == ["run_a"]
+
+
 def test_subprocess_timeout_writes_stderr(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -930,6 +959,21 @@ def test_analyze_campaign_curves_long_form(
         )
         zf.writestr(
             "timeseries.json",
+            json.dumps([
+                {"epoch": 0, "infected": 1, "recovered": 0},
+                {"epoch": 1, "infected": 3, "recovered": 1},
+            ]),
+        )
+    with zipfile.ZipFile(tmp_path / "single.zip", "w") as zf:
+        zf.writestr(
+            "run_a/summary.json",
+            json.dumps({
+                "run_id": "t2_noro_merv8_oa20_med_s42",
+                "derived": {"attack_rate": 0.1, "peak_prevalence": 5},
+            }),
+        )
+        zf.writestr(
+            "run_a/timeseries.json",
             json.dumps([
                 {"epoch": 0, "infected": 1, "recovered": 0},
                 {"epoch": 1, "infected": 3, "recovered": 1},
@@ -1248,6 +1292,53 @@ def test_periodic_shard_bundle_upload_and_resume_append(
     assert {"single.zip", "single.manifest.json"} <= set(
         name for name in storage if name.startswith("single")
     )
+
+
+def test_shard_bundle_incremental_flush_and_corrupt_rebuild(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    out = tmp_path / "mega_cruise_campaign"
+    monkeypatch.setattr(
+        "picard_framework.runs.mega_cruise_campaign.campaign_runner.OUTPUT_ROOT",
+        out,
+    )
+    bundle = ShardBundle(0, None)
+
+    def add_run(run_id: str) -> None:
+        run_dir = Path(bundle.accumulation_root) / run_id
+        run_dir.mkdir(parents=True)
+        (run_dir / "summary.json").write_text(
+            json.dumps({"run_id": run_id, "parameters": {}, "derived": {}}),
+            encoding="utf-8",
+        )
+
+    add_run("run_a")
+    bundle.record_run("run_a")
+    bundle.flush(None)
+    with zipfile.ZipFile(bundle.zip_path) as zf:
+        first_info = zf.getinfo("run_a/summary.json")
+
+    full_rebuilds: list[list[tuple[str, str]]] = []
+    original_pack_full = bundle._pack_full
+
+    def track_full_rebuild(members: list[tuple[str, str]]) -> None:
+        full_rebuilds.append(members)
+        original_pack_full(members)
+
+    monkeypatch.setattr(bundle, "_pack_full", track_full_rebuild)
+    add_run("run_b")
+    bundle.record_run("run_b")
+    bundle.flush(None)
+    assert full_rebuilds == []
+    with zipfile.ZipFile(bundle.zip_path) as zf:
+        assert zf.getinfo("run_a/summary.json").CRC == first_info.CRC
+        assert "run_b/summary.json" in zf.namelist()
+
+    Path(bundle.zip_path).write_bytes(b"not a zip")
+    bundle.flush(None)
+    assert len(full_rebuilds) == 1
+    with zipfile.ZipFile(bundle.zip_path) as zf:
+        assert {"run_a/summary.json", "run_b/summary.json"} <= set(zf.namelist())
 
 
 # ---------------------------------------------------------------------------

@@ -126,7 +126,6 @@ class TestCampaignGate:
                     executed=0,
                     done=set(),
                     retry_only=None,
-                    uploader=None,
                 )
                 if gate == "run":
                     assigned[shard].append(index)
@@ -144,7 +143,6 @@ class TestCampaignGate:
             executed=0,
             done={"done_run"},
             retry_only=None,
-            uploader=None,
         )
         assert gate == "skip"
 
@@ -158,7 +156,6 @@ class TestCampaignGate:
             executed=2,
             done=set(),
             retry_only=None,
-            uploader=None,
         )
         assert gate == "stop"
 

@@ -428,10 +428,14 @@ class ShardBundle:
         if not os.path.isdir(self.accumulation_root):
             return
         for run_id in sorted(os.listdir(self.accumulation_root)):
-            safe_id = _safe_run_id(run_id)
-            run_root = resolve_child_path(self.accumulation_root, safe_id)
+            run_root = os.path.join(self.accumulation_root, run_id)
             if not os.path.isdir(run_root):
                 continue
+            try:
+                safe_id = _safe_run_id(run_id)
+            except ValueError:
+                continue
+            run_root = resolve_child_path(self.accumulation_root, safe_id)
             for dirpath, _dirnames, filenames in os.walk(run_root):
                 for filename in sorted(filenames):
                     relative = os.path.relpath(
@@ -440,7 +444,7 @@ class ShardBundle:
                     file_path = _resolve_relative_path(run_root, relative)
                     yield file_path, f"{safe_id}/{relative}"
 
-    def _pack(self) -> None:
+    def _pack_full(self, members: list[tuple[str, str]]) -> None:
         temp_path = resolve_child_path(
             _ensure_output_root(), f"{self.suffix}.zip.tmp",
         )
@@ -448,7 +452,7 @@ class ShardBundle:
             with zipfile.ZipFile(
                 temp_path, "w", zipfile.ZIP_DEFLATED,
             ) as zf:
-                for file_path, archive_name in self._archive_members() or ():
+                for file_path, archive_name in members:
                     zf.write(file_path, archive_name)
             os.replace(temp_path, self.zip_path)
         except Exception:
@@ -456,10 +460,65 @@ class ShardBundle:
                 os.remove(temp_path)
             raise
 
+    def _existing_run_ids(
+        self,
+        members: list[tuple[str, str]],
+    ) -> set[str] | None:
+        expected_by_run: dict[str, set[str]] = {}
+        for _file_path, archive_name in members:
+            run_id, _separator, _relative = archive_name.partition("/")
+            expected_by_run.setdefault(run_id, set()).add(archive_name)
+        try:
+            with zipfile.ZipFile(self.zip_path) as zf:
+                names = zf.namelist()
+        except (FileNotFoundError, zipfile.BadZipFile, OSError):
+            return None
+        if len(names) != len(set(names)):
+            return None
+        expected_names = {archive_name for _path, archive_name in members}
+        existing_by_run: dict[str, set[str]] = {}
+        for name in names:
+            run_id, separator, _relative = name.partition("/")
+            if not separator:
+                return None
+            try:
+                safe_id = _safe_run_id(run_id)
+            except ValueError:
+                return None
+            if safe_id != run_id or name not in expected_names:
+                return None
+            existing_by_run.setdefault(run_id, set()).add(name)
+        for run_id, existing_names in existing_by_run.items():
+            if existing_names != expected_by_run.get(run_id, set()):
+                return None
+        return set(existing_by_run)
+
+    def _pack(self) -> None:
+        members = list(self._archive_members())
+        existing_run_ids = self._existing_run_ids(members)
+        if existing_run_ids is None:
+            self._pack_full(members)
+            return
+        by_run: dict[str, list[tuple[str, str]]] = {}
+        for member in members:
+            run_id = member[1].partition("/")[0]
+            by_run.setdefault(run_id, []).append(member)
+        new_run_ids = sorted(set(by_run) - existing_run_ids)
+        if not new_run_ids:
+            return
+        try:
+            with zipfile.ZipFile(self.zip_path, "a", zipfile.ZIP_DEFLATED) as zf:
+                for run_id in new_run_ids:
+                    for file_path, archive_name in by_run[run_id]:
+                        zf.write(file_path, archive_name)
+        except (OSError, RuntimeError, zipfile.BadZipFile):
+            self._pack_full(members)
+
     def flush(self, uploader: Any) -> None:
         self._pack()
         if uploader is None:
             return
+        uploaded = True
         for path, name in (
             (self.zip_path, f"{self.suffix}.zip"),
             (self.manifest_path, f"{self.suffix}.manifest.json"),
@@ -467,7 +526,13 @@ class ShardBundle:
             try:
                 uploader.upload_file(Path(path), name)
             except Exception as exc:  # noqa: BLE001
+                uploaded = False
                 print(f"  (s3 upload failed for {name}: {exc})")
+        if uploaded:
+            print(
+                f"  fused {self.suffix}.zip + manifest "
+                f"({len(self.entries)} runs) -> s3",
+            )
 
     def _unpack(self, zip_path: str) -> None:
         try:
@@ -2071,7 +2136,6 @@ def _campaign_gate(
     done: set[str],
     retry_only: set[str] | None,
     bundle: ShardBundle | None = None,
-    uploader: Any = None,
 ) -> str:
     if shard_count is not None and global_index % shard_count != shard_index:
         return "ignore"
@@ -2081,12 +2145,16 @@ def _campaign_gate(
         return "skip"
     if retry_only is not None and run_id not in retry_only:
         return "skip"
-    if (args.resume or args.retry_failed) and bundle is not None and run_id in bundle.completed_run_ids():
+    if (
+        (args.resume or args.retry_failed)
+        and bundle is not None
+        and run_id in bundle.completed_run_ids()
+    ):
         return "skip_s3"
     return "run"
 
 
-def _print_run_ok(bundle: ShardBundle, run_id: str) -> None:
+def _record_run_ok(bundle: ShardBundle, run_id: str) -> None:
     bundle.record_run(run_id)
     print(" OK")
 
@@ -2140,7 +2208,7 @@ def _perform_campaign_run(
         print(" FAIL")
         return False
     mark_completed(run_id)
-    _print_run_ok(bundle, run_id)
+    _record_run_ok(bundle, run_id)
     if (
         uploader is not None
         and args.s3_log_every > 0
