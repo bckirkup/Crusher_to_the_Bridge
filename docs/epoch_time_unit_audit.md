@@ -101,6 +101,14 @@ Not a new defect: this predates paper 3. PR #290 (incubation as a distribution)
 made it *visible* by putting a day-scale distribution where a constant 1.0 had
 been, but the mismatch is as old as the voyage layer's hourly grid.
 
+To be clear about where the defect is not: the pathogen profiles are correct.
+`norwalk_gi` carries a 1.2-day incubation median and `recovery_day: 3`, which is
+norovirus as published; `sars_cov2_resp` carries 5.8 days and 7. Nothing needs
+re-parameterising. The defect is entirely in the consumer, which treats those
+day-valued fields as epoch counts. The repository's own canonical definition —
+"Epoch: one-hour discrete simulation time step" — agrees with the voyage layer,
+which makes the ABM's `≈ one day` docstring the side that is wrong.
+
 ## 4. Options
 
 **Option 1 — the ABM moves to the hourly grid.** Convert every day-scale clock
