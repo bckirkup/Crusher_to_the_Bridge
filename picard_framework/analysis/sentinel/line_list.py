@@ -131,6 +131,7 @@ class SentinelLedger:
         self._pathogen: dict[int, str | None] = {}
         self._hours: dict[int, dict[str, float]] = {}
         self._channel: dict[int, tuple[int, int]] = {}
+        self._genotype: dict[int, str] = {}
         self._exposure: dict[str, _PortExposure] = {}
         self._introductions: list[IntroductionRecord] = []
 
@@ -142,11 +143,16 @@ class SentinelLedger:
         port_id: str = "",
         ashore_ids: Iterable[int] = (),
         detections: Mapping[str, Iterable[int]] | None = None,
+        genotypes: Mapping[int, str] | None = None,
     ) -> None:
         """Fold one epoch of agent records into the ledger.
 
         Epochs are clamped to >= 1 the same way ``resolve_epoch_state`` clamps
         them, so a run whose loop starts at 0 still lands on voyage day 1.
+
+        ``genotypes`` are *typed calls delivered this epoch*, not the host's
+        true lineage: a line list carries what the assay reported, so a
+        miscalled genotype has to be able to reach the attribution model.
         """
         epoch = max(1, int(epoch))
         self.last_epoch = max(self.last_epoch, epoch)
@@ -163,6 +169,7 @@ class SentinelLedger:
         if port_id and ashore:
             self._accumulate_ashore(port_id, ashore, crew_by_id)
         self._record_detections(epoch, detections)
+        self._record_genotypes(genotypes)
 
     def _accumulate_ashore(
         self,
@@ -199,6 +206,22 @@ class SentinelLedger:
                 prior = self._channel.get(aid)
                 if prior is None or rank < prior[0]:
                     self._channel[aid] = (rank, int(epoch))
+
+    def _record_genotypes(self, genotypes: Mapping[int, str] | None) -> None:
+        """Keep each person's first typed genotype call.
+
+        First rather than latest: the epidemiological question is which lineage
+        a case was typed as when it was investigated, and a later re-type of
+        the same person would otherwise silently overwrite the call the
+        response actually acted on.
+        """
+        if not genotypes:
+            return
+        for raw_id, genotype in genotypes.items():
+            label = str(genotype or "").strip()
+            if not label:
+                continue
+            self._genotype.setdefault(int(raw_id), label)
 
     def note_introduction(
         self,
@@ -240,7 +263,7 @@ class SentinelLedger:
                     onset_epoch=onset,
                     crew=self._crew.get(aid, False),
                     pathogen=self._pathogen.get(aid),
-                    genotype=None,
+                    genotype=self._genotype.get(aid),
                     hours_ashore=dict(self._hours.get(aid, {})),
                     reported_via=reported_via,
                     report_epoch=report_epoch,

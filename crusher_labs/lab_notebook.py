@@ -473,6 +473,59 @@ def _clinical_microbio_record(
     return record
 
 
+def _long_read_record(
+    epoch: int,
+    data: dict[str, Any],
+    fidelity_name: str,
+    _fidelity: FidelityProfile,
+) -> dict[str, Any]:
+    """Notebook entry for one delivered long-read verification.
+
+    Keyed on the request rather than an agent, because the specimen may be
+    environmental. The genotype recorded is the assay's consensus call, so a
+    notebook read back later shows what the lab reported, not the truth.
+    """
+    calls = data.get("pathogen_calls") or []
+    genotypes = data.get("genotype_calls") or []
+    detected = bool(calls)
+    record: dict[str, Any] = {
+        "sample_id": _sample_id(epoch, f"REQ{data.get('request_id', '')}", "LONG_READ"),
+        "timestamp_epoch": epoch,
+        "collection_point_type": "long_read_verification",
+        "collection_zone": data.get("collection_key", ""),
+        "assay_type": data.get("purpose", "long_read_verification"),
+        "fidelity_tier": fidelity_name,
+    }
+    if fidelity_name == FIDELITY_LOW:
+        record["stoplight"] = "RED" if detected else "GREEN"
+        record["inferred_anomaly_score"] = 1.0 if detected else 0.0
+        return record
+
+    record["binary_result"] = BINARY_DETECTED if detected else BINARY_NOT_DETECTED
+    record["inferred_anomaly_score"] = 1.0 if detected else 0.0
+    record["specimen_source"] = data.get("specimen_source", "")
+    record["consensus_ready"] = bool(data.get("consensus_ready", False))
+    record["mixed_infection_detected"] = bool(data.get("mixed_infection_flag", False))
+    record["genotype_calls"] = [
+        {
+            "pathogen_id": call.get("pathogen_id"),
+            "status": call.get("status"),
+            "consensus_genotype": call.get("consensus_genotype"),
+        }
+        for call in genotypes
+    ]
+    qc = data.get("qc_control")
+    record["qc_status"] = qc["qc_status"] if qc else "QC_NOT_RUN"
+
+    if fidelity_name == FIDELITY_HIGH:
+        record["read_depth"] = data.get("read_depth")
+        record["total_classified_reads"] = data.get("total_classified_reads")
+        record["pathogen_calls"] = calls
+        record["trigger_reasons"] = data.get("trigger_reasons", [])
+
+    return record
+
+
 # ── Main notebook class ──────────────────────────────────────────────────
 
 class ArtificialLabNotebook:
@@ -570,6 +623,16 @@ class ArtificialLabNotebook:
         for _aid, data in results.items():
             self.records.append(
                 _clinical_microbio_record(epoch, data, self.fidelity_name, self.fidelity)
+            )
+
+    def log_long_read_verification(
+        self,
+        epoch: int,
+        results: dict[str, dict[str, Any]],
+    ) -> None:
+        for _req_id, data in results.items():
+            self.records.append(
+                _long_read_record(epoch, data, self.fidelity_name, self.fidelity)
             )
 
     # ── System events ────────────────────────────────────────────────
