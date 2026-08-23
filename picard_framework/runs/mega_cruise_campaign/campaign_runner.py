@@ -142,8 +142,6 @@ def _ensure_clock_arm(
     explicit: bool = False,
     persist: bool = True,
 ) -> None:
-    if clock is None:
-        return
     marker_path = _output_artifact(CLOCK_MARKER_FILENAME)
     existing = _clock_marker()
     if (
