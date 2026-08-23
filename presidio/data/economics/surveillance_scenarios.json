@@ -1,0 +1,116 @@
+{
+  "schema_version": "1.0.0",
+  "description": "Paper 3 §4 surveillance economics scenarios. Annual costs are rough-order-of-magnitude specification estimates, not measurements.",
+  "scope_note": "Variants detected is a model output from the surveillance simulation and is intentionally excluded from scenario configuration.",
+  "scenarios": [
+    {
+      "scenario_id": "baseline",
+      "label": "Baseline",
+      "onboard_capability": "Syndromic only",
+      "ashore_capability": "VSP reporting",
+      "ships_covered": 1,
+      "annual_cost_usd": 0.0,
+      "voyages_per_year": 20.0,
+      "voyages_per_year_sweep": [10.0, 20.0, 40.0],
+      "allocations": [
+        {"payer": "ship_operator", "medium": "cash", "quantity_per_voyage": 0.0, "provenance": "Unanchored allocation assumption for the no-additional-cost baseline."},
+        {"payer": "port_authority", "medium": "cash", "quantity_per_voyage": 0.0, "provenance": "Unanchored allocation assumption for the no-additional-cost baseline."}
+      ],
+      "provenance": {
+        "ships_covered": "§4 scenario structure; one ship is covered.",
+        "annual_cost_usd": "§4 ROM estimate of approximately $0 per ship per year; not a measurement.",
+        "voyages_per_year": "Unanchored amortisation assumption for sensitivity analysis.",
+        "voyages_per_year_sweep": "Unanchored amortisation sweep assumption.",
+        "allocation_quantities_per_voyage": "Unanchored cost-allocation assumptions."
+      }
+    },
+    {
+      "scenario_id": "minimal",
+      "label": "Minimal",
+      "onboard_capability": "Clinical qPCR",
+      "ashore_capability": "Reference lab",
+      "ships_covered": 1,
+      "annual_cost_usd": 50000.0,
+      "voyages_per_year": 20.0,
+      "voyages_per_year_sweep": [10.0, 20.0, 40.0],
+      "allocations": [
+        {"payer": "ship_operator", "medium": "cash", "quantity_per_voyage": 1800.0, "provenance": "Unanchored allocation assumption for onboard clinical qPCR capability."},
+        {"payer": "port_authority", "medium": "labour_hours", "quantity_per_voyage": 10.0, "provenance": "Unanchored allocation assumption for reference-lab technician support."},
+        {"payer": "public_health_agency", "medium": "consumables", "quantity_per_voyage": 20.0, "provenance": "Unanchored allocation assumption for reference-lab consumable supply."}
+      ],
+      "provenance": {
+        "ships_covered": "§4 scenario structure; one ship is covered.",
+        "annual_cost_usd": "§4 ROM estimate of approximately $50K per ship per year; not a measurement.",
+        "voyages_per_year": "Unanchored amortisation assumption for sensitivity analysis.",
+        "voyages_per_year_sweep": "Unanchored amortisation sweep assumption.",
+        "allocation_quantities_per_voyage": "Unanchored cost-allocation assumptions; shore capability lines are assigned to port/agency payers and onboard lines to the ship operator."
+      }
+    },
+    {
+      "scenario_id": "moderate",
+      "label": "Moderate",
+      "onboard_capability": "Nanopore + WW qPCR",
+      "ashore_capability": "Regional lab",
+      "ships_covered": 1,
+      "annual_cost_usd": 150000.0,
+      "voyages_per_year": 20.0,
+      "voyages_per_year_sweep": [10.0, 20.0, 40.0],
+      "allocations": [
+        {"payer": "ship_operator", "medium": "cash", "quantity_per_voyage": 5500.0, "provenance": "Unanchored allocation assumption for onboard Nanopore and wastewater qPCR capability."},
+        {"payer": "port_authority", "medium": "labour_hours", "quantity_per_voyage": 30.0, "provenance": "Unanchored allocation assumption for regional-lab technician support."},
+        {"payer": "public_health_agency", "medium": "consumables", "quantity_per_voyage": 50.0, "provenance": "Unanchored allocation assumption for regional-lab consumable supply."}
+      ],
+      "provenance": {
+        "ships_covered": "§4 scenario structure; one ship is covered.",
+        "annual_cost_usd": "§4 ROM estimate of approximately $150K per ship per year; not a measurement.",
+        "voyages_per_year": "Unanchored amortisation assumption for sensitivity analysis.",
+        "voyages_per_year_sweep": "Unanchored amortisation sweep assumption.",
+        "allocation_quantities_per_voyage": "Unanchored cost-allocation assumptions; shore capability lines are assigned to port/agency payers and onboard lines to the ship operator."
+      }
+    },
+    {
+      "scenario_id": "full",
+      "label": "Full",
+      "onboard_capability": "Nanopore + WW amplicon + surface",
+      "ashore_capability": "Bioinfo hub + port WBE",
+      "ships_covered": 1,
+      "annual_cost_usd": 500000.0,
+      "voyages_per_year": 20.0,
+      "voyages_per_year_sweep": [10.0, 20.0, 40.0],
+      "allocations": [
+        {"payer": "ship_operator", "medium": "cash", "quantity_per_voyage": 18000.0, "provenance": "Unanchored allocation assumption for onboard sequencing, wastewater, and surface surveillance."},
+        {"payer": "port_authority", "medium": "labour_hours", "quantity_per_voyage": 100.0, "provenance": "Unanchored allocation assumption for bioinformatics and port-WBE staff support."},
+        {"payer": "public_health_agency", "medium": "consumables", "quantity_per_voyage": 200.0, "provenance": "Unanchored allocation assumption for bioinformatics-hub and port-WBE consumable supply."}
+      ],
+      "provenance": {
+        "ships_covered": "§4 scenario structure; one ship is covered.",
+        "annual_cost_usd": "§4 ROM estimate of approximately $500K per ship per year; not a measurement.",
+        "voyages_per_year": "Unanchored amortisation assumption for sensitivity analysis.",
+        "voyages_per_year_sweep": "Unanchored amortisation sweep assumption.",
+        "allocation_quantities_per_voyage": "Unanchored cost-allocation assumptions; shore capability lines are assigned to port/agency payers and onboard lines to the ship operator."
+      }
+    },
+    {
+      "scenario_id": "fleet_network",
+      "label": "Fleet network",
+      "onboard_capability": "Full x 10 ships",
+      "ashore_capability": "Centralized + port network",
+      "ships_covered": 10,
+      "annual_cost_usd": 3000000.0,
+      "voyages_per_year": 20.0,
+      "voyages_per_year_sweep": [10.0, 20.0, 40.0],
+      "allocations": [
+        {"payer": "ship_operator", "medium": "cash", "quantity_per_voyage": 10500.0, "provenance": "Unanchored allocation assumption for the fleet's onboard full-surveillance capability."},
+        {"payer": "port_authority", "medium": "labour_hours", "quantity_per_voyage": 70.0, "provenance": "Unanchored allocation assumption for centralized and port-network staff support."},
+        {"payer": "public_health_agency", "medium": "consumables", "quantity_per_voyage": 100.0, "provenance": "Unanchored allocation assumption for centralized and port-network consumable supply."}
+      ],
+      "provenance": {
+        "ships_covered": "§4 scenario structure; fleet network covers ten ships.",
+        "annual_cost_usd": "§4 ROM estimate of approximately $3M per year for the fleet network; not a measurement.",
+        "voyages_per_year": "Unanchored amortisation assumption for sensitivity analysis.",
+        "voyages_per_year_sweep": "Unanchored amortisation sweep assumption.",
+        "allocation_quantities_per_voyage": "Unanchored cost-allocation assumptions; shore capability lines are assigned to port/agency payers and onboard lines to the ship operator."
+      }
+    }
+  ]
+}

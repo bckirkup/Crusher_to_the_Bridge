@@ -19,6 +19,7 @@ REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_DIR = os.path.join(REPO_ROOT, "data")
 SCHEMA_DIR = os.path.join(REPO_ROOT, "schemas")
 
+
 def _load_json(path: str) -> Any:
     with open(path, "r", encoding="utf-8") as fh:
         return json.load(fh)
@@ -266,7 +267,6 @@ class TestResourceCosts:
                 assert len(sweep) >= 3
                 assert "unanchored" in data["description"].lower()
 
-
     def test_operational_impact_weights_present(self, costs: dict) -> None:
         ois = costs.get("operational_impact_weights", {})
         assert ois, "operational_impact_weights block is required"
@@ -278,6 +278,38 @@ class TestResourceCosts:
             assert ois.get(key, 0) >= 0, f"OIS weight {key} must be non-negative"
         assert isinstance(ois.get("essential_crew_classes", []), list)
         assert isinstance(ois.get("galley_zone_types", []), list)
+
+
+class TestSurveillanceScenarios:
+    """Validate the Paper 3 §4 surveillance scenario catalog."""
+
+    @pytest.fixture
+    def scenarios(self) -> dict:
+        return _load_json(
+            os.path.join(DATA_DIR, "..", "presidio", "data", "economics",
+                         "surveillance_scenarios.json")
+        )
+
+    def test_scenario_catalog_has_expected_contract(self, scenarios: dict) -> None:
+        entries = scenarios["scenarios"]
+        assert {entry["scenario_id"] for entry in entries} == {
+            "baseline", "minimal", "moderate", "full", "fleet_network",
+        }
+        assert "scope_note" in scenarios
+        assert "variants detected" in scenarios["scope_note"].lower()
+        for entry in entries:
+            assert entry["annual_cost_usd"] >= 0
+            assert entry["voyages_per_year"] > 0
+            sweep = entry["voyages_per_year_sweep"]
+            assert sweep == sorted(set(sweep))
+            assert entry["voyages_per_year"] in sweep
+            assert entry["provenance"]["annual_cost_usd"]
+            assert entry["provenance"]["voyages_per_year"]
+            assert entry["provenance"]["voyages_per_year_sweep"]
+            assert entry["provenance"]["allocation_quantities_per_voyage"]
+            for allocation in entry["allocations"]:
+                assert allocation["quantity_per_voyage"] >= 0
+                assert allocation["provenance"]
 
 
 class TestLongReadSequencingParams:

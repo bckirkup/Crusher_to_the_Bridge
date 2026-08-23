@@ -35,6 +35,9 @@ SCHEMA_DATA_MAP: dict[str, list[str]] = {
         # materials (0.1 flow_cells) which violates "integer" in schema.
         # Schema should be relaxed to "number" — tracked separately.
     ],
+    "surveillance_scenarios.schema.json": [
+        "presidio/data/economics/surveillance_scenarios.json",
+    ],
     "logging_profile.schema.json": [
         "data/config/logging_profile.json",
     ],
