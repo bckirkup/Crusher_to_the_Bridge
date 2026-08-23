@@ -446,7 +446,8 @@ per-shard-checkpointed simulation tiers only. Do not submit Stan or Sentinel
 inference tiers to the Spot queue because those fits do not survive an
 interruption.
 
-This submits one array job of 200 children. Each child runs:
+The unflagged 200-shard command at the top of this section submits one array
+job of 200 children. Each child runs:
 
 ```
 campaign_runner.py --shard-count 200 \
