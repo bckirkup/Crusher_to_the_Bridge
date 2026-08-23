@@ -110,3 +110,21 @@ def test_is_publicly_writable_recursive(tmp_path) -> None:
     # Check that a nonexistent subdirectory under it is detected as publicly writable
     nested_nonexistent = writable_dir / "sub1" / "sub2" / "file.txt"
     assert is_publicly_writable(str(nested_nonexistent)) is True
+
+
+def test_safe_listdir_rejects_outside_root(tmp_path) -> None:
+    from simulation_utils.paths import safe_listdir
+
+    base = tmp_path / "repo"
+    base.mkdir()
+    (base / "cruise_000").mkdir()
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    names = safe_listdir(str(base), allowed_roots=(str(base),))
+    assert "cruise_000" in names
+    try:
+        safe_listdir(str(outside), allowed_roots=(str(base),))
+        raised = False
+    except ValueError:
+        raised = True
+    assert raised

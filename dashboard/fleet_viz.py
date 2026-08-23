@@ -191,11 +191,14 @@ def render_fleet_operations(
 
     summary_path = resolve_child_path(fleet_root, "fleet_summary.json")
     fleet_summary: dict = {}
-    if os.path.isfile(summary_path):
+    try:
         with validated_open(
             summary_path, "r", allowed_roots=(REPO_ROOT,), encoding="utf-8",
         ) as fh:
             fleet_summary = json.load(fh)
+    except (OSError, ValueError, json.JSONDecodeError):
+        fleet_summary = {}
+    if fleet_summary:
         st.markdown(
             _lcars_banner(
                 f"Fleet summary — {fleet_summary.get('num_cruises', '?')} cruises",

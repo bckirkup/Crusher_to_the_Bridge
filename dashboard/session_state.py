@@ -17,8 +17,6 @@ SESSION_DEFAULTS: dict[str, object] = {
     "_epoch_slider_needs_sync": False,
 }
 
-_EPOCH_SLIDER_PREFIX = "global_epoch_slider"
-
 
 def init_session_state(*, history_len: int = 0) -> None:
     """Ensure session keys exist and clamp epoch to valid range."""
