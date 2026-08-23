@@ -279,6 +279,31 @@ def _best_protection(
     )
 
 
+def _nonspecific_protection(
+    config: StrainEvolutionConfig,
+    priors: Mapping[str, float | None],
+) -> float:
+    """Protection a host has against a challenge it cannot even name.
+
+    Only the refractory window counts: it is a genotype-blind post-resolution
+    refractoriness, so it applies to unlabeled dose exactly as it applies to a
+    named lineage, while the matched ``cross_immunity`` value cannot — there is
+    no genotype to match. Passing a matched value of zero makes the waning
+    kernel return the window inside it and decay to zero after it, so unlabeled
+    dose outside the window stays unprotected as it was.
+
+    A prior with no resolution age (a resident lineage, or an embarkation prior
+    of unknown date) has no window and contributes nothing here.
+    """
+    return max(
+        (
+            config.immune_waning.protection_at(0.0, age, 0.0)
+            for age in priors.values() if age is not None
+        ),
+        default=0.0,
+    )
+
+
 class TransmissionCore:
     """Executes six transmission pathways per epoch.
 
@@ -945,14 +970,18 @@ class TransmissionCore:
         if total <= 0.0:
             return legacy
         # Unattributed dose — no strain, or a pool's sub-floor tail — carries no
-        # genotype to be recognised, so it stays in the denominator at zero
-        # protection rather than being credited to the identified strains.
+        # genotype to be recognised, so it earns only the *non*-specific part of
+        # the host's immunity: the refractory window, which is genotype-blind by
+        # construction, and nothing from the matched cross-immunity matrix. It
+        # stays in the denominator either way, so after the window it is
+        # unprotected dose as before.
+        unnamed = _nonspecific_protection(config, priors)
         weighted = sum(
-            dose * _best_protection(
-                config, priors, self.strain_registry.get(sid),
+            dose * (
+                _best_protection(config, priors, self.strain_registry.get(sid))
+                if sid and sid != UNRESOLVED_STRAIN else unnamed
             )
             for (sid, _source), dose in shares.items()
-            if sid and sid != UNRESOLVED_STRAIN
         )
         return max(0.0, min(1.0, weighted / total))
 

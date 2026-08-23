@@ -675,23 +675,32 @@ everything but the freshness term fixed:
 
 | seed | re-infections, no waning | with waning | episodes | median gap to re-infection |
 |---|---|---|---|---|
-| 11 | 30 / 297 infected | 0 | 327 → 301 | 6 epochs → n/a |
-| 23 | 36 / 267 | 0 | 303 → 270 | 9.5 epochs → n/a |
-| 47 | 25 / 208 | 2 | 233 → 222 | 6 epochs → 2.5 |
+| 11 | 30 / 297 infected | 0 | 327 → 300 | 6 epochs → n/a |
+| 23 | 36 / 267 | 0 | 303 → 249 | 9.5 epochs → n/a |
+| 47 | 25 / 208 | 0 | 233 → 211 | 6 epochs → n/a |
 
 So the pre-change model re-challenged recovered hosts within hours of clearing,
 and the corrected one essentially does not re-infect anyone within a voyage —
 which is the expectation for norovirus over eight days. Peak prevalence is
-essentially unmoved (seed 11: records 279 → 280 infected, 109 → 99 symptomatic),
+essentially unmoved (seed 11: records 279 → 277 infected, 109 → 94 symptomatic),
 so this corrects the re-challenge rate without re-parameterising the epidemic.
 The legacy agent-level fields are now a projection of the per-pathogen records
 rather than a second state machine, and record-level and legacy peaks agree
 exactly in both arms.
 
-The two residual events at seed 47 are within a few epochs of recovery and carry
-no immune record at challenge, which points at per-pathogen record bookkeeping
-around the resolution epoch rather than at the immunity kernel; it is tracked as
-a separate defect, not explained away as escape.
+Reaching zero took a second correction that instrumentation, not inspection,
+found. The first pass left two events at seed 47 that did carry a valid,
+hours-old, homologous immune record and saw protection 0.9989 rather than 1.0:
+protection is a dose-share-weighted mean, and the `unresolved` share an
+environmental pool reports below its resolution floor (median 7.7e-05 of the
+dose, up to 2.7e-03) sat in the denominator at zero protection. A few parts in
+ten thousand of residual hazard *per epoch* is enough to re-infect over a
+voyage. Since the window is genotype-blind by construction, unnamed dose now
+earns the window too — and only the window, so past it, unattributable dose is
+unprotected as before, and a resident lineage (no resolution age) confers
+nothing. With that, within-window re-infection is escape-only in the literal
+sense: all three seeds report zero re-infections and every infected host has
+exactly one episode.
 
 ## 7. Open questions for the author
 

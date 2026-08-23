@@ -43,6 +43,7 @@ from engines.strain_state import (  # noqa: E402
     StrainRegistry,
     StrainState,
 )
+from engines.strain_dose_ledger import UNRESOLVED_STRAIN  # noqa: E402
 from engines.transmission_core import TransmissionCore  # noqa: E402
 from orchestrator_epoch import (  # noqa: E402
     _advance_agent_pathogen_infections,
@@ -436,6 +437,101 @@ class TestClockConversion:
         assert escaping < 0.2
 
 
+# ── A window that does not leak ─────────────────────────────────────────
+
+class TestSterilizingWindow:
+    """The window is a per-epoch hazard reduction, and every share pays it."""
+
+    def test_unnamed_dose_inside_the_window_does_not_leak(self) -> None:
+        """The window is genotype-blind, so it also covers dose it cannot name.
+
+        Environmental pools report a sub-floor tail as ``unresolved``, and that
+        share used to sit in the protection denominator at zero — dropping
+        protection just under the short-circuit and leaving a hazard of a few
+        parts in ten thousand *per epoch*, enough for homologous, zero-escape
+        re-infections inside the refractory window at ship doses.
+        """
+        core = _core()
+        registry = core.strain_registry
+        assert registry is not None
+        agent = _agent()
+        _recovered(agent, GENOTYPES[0], epoch=0)
+        named = registry.mint(PATHOGEN, genotype=GENOTYPES[0])
+        core._strain_doses = {agent.agent_id: {PATHOGEN: {
+            (named.strain_id, 0): 100.0,
+            (UNRESOLVED_STRAIN, None): 3.0,
+        }}}
+        assert core._challenge_protection(agent, PATHOGEN, 24) == pytest.approx(1.0)
+
+    def test_unnamed_dose_past_the_window_is_still_unprotected(self) -> None:
+        """Only the window is non-specific: matched immunity needs a genotype."""
+        core = _core()
+        registry = core.strain_registry
+        assert registry is not None
+        agent = _agent()
+        _recovered(agent, GENOTYPES[0], epoch=0)
+        named = registry.mint(PATHOGEN, genotype=GENOTYPES[0])
+        core._strain_doses = {agent.agent_id: {PATHOGEN: {
+            (named.strain_id, 0): 90.0,
+            (UNRESOLVED_STRAIN, None): 10.0,
+        }}}
+        aged = core._challenge_protection(agent, PATHOGEN, 24 * 4000)
+        matched = _challenge(core, agent, GENOTYPES[0], epoch=24 * 4000)
+        assert aged == pytest.approx(0.9 * matched)
+        assert 0.0 < aged < matched
+
+    def test_a_resident_only_prior_gives_unnamed_dose_nothing(self) -> None:
+        """No resolution age, no window: interference is a separate mechanism."""
+        core = _core()
+        agent = _agent()
+        agent.prior_genotypes[PATHOGEN] = GENOTYPES[0]
+        core._strain_doses = {agent.agent_id: {PATHOGEN: {
+            (UNRESOLVED_STRAIN, None): 10.0,
+        }}}
+        assert core._challenge_protection(agent, PATHOGEN, 24) == pytest.approx(0.0)
+
+    def test_shipped_profiles_declare_a_sterilizing_window(self) -> None:
+        """A per-epoch hazard reduction below 1.0 leaks every hour.
+
+        ``TransmissionCore`` applies ``inf_prob *= 1 - protection`` once per
+        epoch, so ``refractory_protection: 0.98`` is a 2% hourly hazard, i.e.
+        a near-certain homologous re-infection over a voyage. Within-window
+        breach is meant to be escape-driven, so every shipped bundle declares
+        1.0 and the escape discount is the only way through.
+        """
+        bundles = sorted((REPO_ROOT / "data/pathogens").glob("*.json"))
+        assert bundles
+        seen = 0
+        for bundle in bundles:
+            for entry in json.loads(bundle.read_text())["pathogens"]:
+                waning = (entry.get("strain_evolution") or {}).get(
+                    "immune_waning",
+                )
+                if waning is None:
+                    continue
+                seen += 1
+                assert waning["refractory_protection"] == pytest.approx(1.0), (
+                    f"{bundle.name}:{entry['pathogen_id']} leaks "
+                    f"{1 - waning['refractory_protection']:.3g} per epoch"
+                )
+        assert seen >= 2
+
+    def test_an_escape_variant_still_breaches_a_sterilizing_window(self) -> None:
+        """1.0 is not an absolute wall: escape grades straight through it."""
+        waning = ImmuneWaningConfig(
+            refractory_days=56.0, refractory_protection=1.0,
+            half_life_days=1095.0,
+        )
+        graded = [
+            waning.protection_at(HOMOLOGOUS, 1.0, escape)
+            for escape in (0.0, 0.1, 0.3, 0.6)
+        ]
+        assert graded == sorted(graded, reverse=True)
+        assert graded[0] == pytest.approx(1.0)
+        assert graded[-1] < graded[0] - 0.1
+        assert min(graded) >= HOMOLOGOUS - 1e-9
+
+
 # ── Legacy fields as a projection of the records ────────────────────────
 
 class TestLegacyProjection:
@@ -498,47 +594,6 @@ class TestLegacyProjection:
         assert agent.infection_status == InfectionStatus.INFECTED
         assert agent.illness_status == IllnessStatus.NOT_ILL
         assert agent.time_infected == 0
-
-    def test_shipped_profiles_declare_a_sterilizing_window(self) -> None:
-        """A per-epoch hazard reduction below 1.0 leaks every hour.
-
-        ``TransmissionCore`` applies ``inf_prob *= 1 - protection`` once per
-        epoch, so ``refractory_protection: 0.98`` is a 2% hourly hazard, i.e.
-        a near-certain homologous re-infection over a voyage. Within-window
-        breach is meant to be escape-driven, so every shipped bundle declares
-        1.0 and the escape discount is the only way through.
-        """
-        bundles = sorted((REPO_ROOT / "data/pathogens").glob("*.json"))
-        assert bundles
-        seen = 0
-        for bundle in bundles:
-            for entry in json.loads(bundle.read_text())["pathogens"]:
-                waning = (entry.get("strain_evolution") or {}).get(
-                    "immune_waning",
-                )
-                if waning is None:
-                    continue
-                seen += 1
-                assert waning["refractory_protection"] == 1.0, (
-                    f"{bundle.name}:{entry['pathogen_id']} leaks "
-                    f"{1 - waning['refractory_protection']:.3g} per epoch"
-                )
-        assert seen >= 2
-
-    def test_an_escape_variant_still_breaches_a_sterilizing_window(self) -> None:
-        """1.0 is not an absolute wall: escape grades straight through it."""
-        waning = ImmuneWaningConfig(
-            refractory_days=56.0, refractory_protection=1.0,
-            half_life_days=1095.0,
-        )
-        graded = [
-            waning.protection_at(HOMOLOGOUS, 1.0, escape)
-            for escape in (0.0, 0.1, 0.3, 0.6)
-        ]
-        assert graded == sorted(graded, reverse=True)
-        assert graded[0] == pytest.approx(1.0)
-        assert graded[-1] < graded[0] - 0.1
-        assert min(graded) >= HOMOLOGOUS - 1e-9
 
     def test_an_immune_host_breached_by_an_escape_variant_is_visible(self) -> None:
         """A breakthrough episode is an episode, not a host that stays IMMUNE."""
