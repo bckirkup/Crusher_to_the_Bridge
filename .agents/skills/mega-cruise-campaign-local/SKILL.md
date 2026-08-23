@@ -112,6 +112,48 @@ Outbreak-response knobs: skill `outbreak-response-architecture` +
 python3 -m pytest tests/test_outbreak_response_architecture.py -v --tb=short
 ```
 
+## Natural-history clock arms
+
+`--natural-history-clock {hours,legacy_epoch_day}` (default omitted = specs
+unchanged, engine default is `hours`). The value is merged into every generated
+spec's `config_overrides` and surfaced as `summary.json`
+`parameters.natural_history_clock`, which `deploy/aws/aggregate_results.py`
+flattens to the CSV column `parameters.natural_history_clock`.
+
+Run IDs are identical across arms, so each arm needs its own `--output-dir`.
+The runner drops `natural_history_clock.txt` in the output dir and exits
+non-zero on a mismatched arm (this guard is what prevents a "silently skipped
+every run via the resume log" empty arm). `--dry-run` does not write the marker.
+
+Fast paired probe (~1.3 s/run; the calibration c1 tiers at 168 epochs are far
+too slow for a smoke check):
+
+```bash
+R=picard_framework/runs/mega_cruise_campaign/campaign_runner.py
+for c in hours legacy_epoch_day; do
+  python3 $R --tier t1 --platform destroyer_baseline --epochs 24 \
+    --num-agents 60 --limit 2 --natural-history-clock $c \
+    --output-dir telemetry_buffer/arm_$c
+done
+```
+
+At 24 epochs the arms diverge clearly (`hours` peaks ~epoch 17-22 with
+`recovered: 0`; `legacy_epoch_day` peaks ~epoch 0-4 and has already recovered).
+If matched-seed runs come out identical, the flag is not reaching
+`engines/sim_clock.py`.
+
+Caveat: the guard only protects dirs that already have a marker. A dir first
+populated *without* the flag has no marker, so a later `--resume` with an arm
+flag is accepted and marks it retroactively — the dir then mixes unflagged and
+flagged runs (distinguishable in the CSV as empty vs. arm value). Always start
+a fresh dir per arm.
+
+AWS wiring: `deploy/aws/batch_job_definition.json` passes
+`--natural-history-clock Ref::clock` (parameter default `hours`);
+`deploy/aws/submit_array_job.sh` takes `CLOCK=` or a 6th positional arg and
+forwards `clock=$CLOCK` in `--parameters`. To verify without submitting, put a
+fake executable `aws` that echoes `"$@"` first on `PATH` and run the script.
+
 ## Calibration tiers (density + multi-pathogen)
 
 Manifest: `picard_framework/runs/mega_cruise_campaign/calibration_manifest_v1.json`.
