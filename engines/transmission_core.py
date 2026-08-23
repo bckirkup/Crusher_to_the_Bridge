@@ -357,6 +357,7 @@ class TransmissionCore:
         # {pathogen_id: {zone: mass}}
         self.surface_pools: dict[str, float] = {}  # aggregate (legacy)
         self.surface_pools_by_pathogen: dict[str, dict[str, float]] = {}
+        self._surface_last_deposition_epoch: dict[str, int] = {}
 
         # Persistent state: airborne aerosol pools per zone per pathogen
         self.aerosol_pools: dict[str, float] = {}  # aggregate (legacy)
@@ -593,6 +594,39 @@ class TransmissionCore:
                     key, (strain_id, agent.agent_id), strain_mass,
                 )
         self._reservoir.lump(self._min_strain_fraction(pathogen_id), key)
+
+    def surface_lineage_masses(
+        self,
+        pathogen_id: str,
+        zone_name: str,
+    ) -> dict[str, float]:
+        """Return current surface mass grouped by reportable genotype."""
+        if self.strain_registry is None:
+            return {}
+        key = ReservoirComposition.key(SURFACE_RESERVOIR, pathogen_id, zone_name)
+        grouped: dict[str, float] = {}
+        for (strain_id, _source_agent_id), mass in self._reservoir.contributors(key).items():
+            if strain_id == UNRESOLVED_STRAIN:
+                genotype = UNRESOLVED_STRAIN
+            else:
+                genotype = self.strain_registry.get(strain_id).genotype or UNRESOLVED_STRAIN
+            grouped[genotype] = grouped.get(genotype, 0.0) + float(mass)
+        return grouped
+
+    def surface_epochs_since_deposition(
+        self,
+        pathogen_id: str,
+        zone_name: str,
+        current_epoch: int,
+    ) -> int | None:
+        """Return elapsed epochs since the last positive surface deposit."""
+        if self.strain_registry is None:
+            return None
+        key = ReservoirComposition.key(SURFACE_RESERVOIR, pathogen_id, zone_name)
+        deposited = self._surface_last_deposition_epoch.get(key)
+        if deposited is None:
+            return None
+        return max(int(current_epoch) - deposited, 0)
 
     def _seed_environmental_composition(
         self,
@@ -1757,6 +1791,13 @@ class TransmissionCore:
             self._deposit_reservoir_strains(
                 SURFACE_RESERVOIR, pathogen_id, zone_name, deposits,
             )
+            if self.strain_registry is not None:
+                deposited_mass = sum(mass for _, mass in deposits)
+                if deposited_mass > 0.0:
+                    key = ReservoirComposition.key(
+                        SURFACE_RESERVOIR, pathogen_id, zone_name,
+                    )
+                    self._surface_last_deposition_epoch[key] = int(epoch)
 
         # b) Fomite trailing detection + pickup
         for zone_name, occupants in zone_occupants.items():

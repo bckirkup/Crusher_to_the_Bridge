@@ -44,6 +44,8 @@ from typing import Any, Mapping, cast
 
 import numpy as np
 
+from engines.strain_dose_ledger import UNREPORTABLE_GENOTYPES
+
 ASSAY_QPCR = "qpcr"
 ASSAY_AMPLICON = "amplicon"
 ASSAY_METAGENOMIC = "metagenomic"
@@ -108,11 +110,6 @@ LINEAGE_STATUS_INSUFFICIENT_READS = "insufficient_reads"
 LINEAGE_STATUS_BELOW_REPORTING_FLOOR = "below_reporting_floor"
 LINEAGE_STATUS_DECONVOLVED = "deconvolved"
 
-# Pool mass whose lineage is untracked: PR 4's sub-floor ``unresolved`` bin and
-# any strain carrying no genotype label. It consumes reads — it is real pathogen
-# in the tank — but it can never be *called*, so it is reported as unresolved
-# rather than being renormalized away into the lineages that happen to be typed.
-UNREPORTABLE_GENOTYPES = frozenset({"", "unresolved"})
 # Numerical guard: a vanishingly rare lineage still needs a positive alpha.
 _DIRICHLET_ALPHA_FLOOR = 1e-6
 

@@ -350,6 +350,20 @@ variant_surveillance:
   # strain_evolution block of data/pathogens/*.json, not here.
   founder_strains_per_pathogen: 1     # >1 seeds embarkation diversity
   census_interval_epochs: 1           # epochs between lineage snapshots
+  surface_sampling:
+    enabled: false
+    # Operator dials with no literature anchor; defaults are a sweepable spread,
+    # not tuned recovery estimates.
+    recovery_by_surface_type:
+      Medical: 0.85
+      Dining: 0.75
+      Room: 0.50
+      Cabin_Corridor: 0.40
+      Engineering: 0.60
+      Free: 0.25
+    default_recovery: 0.25
+    min_lineage_abundance: 0.0
+    min_lineage_fraction: 0.02
 
 # ── Microflora Disruption ────────────────────────────────────
 microflora:
