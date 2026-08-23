@@ -168,3 +168,61 @@ Fast ways to grade timing without a long voyage:
 - `python3 scripts/clock_guard.py <files>` / `--configs` is the mechanical
   guard; it recognises names like `time_infected`, `days_post_infection`,
   `*_day`, so aliased comparisons can slip past it.
+
+## Auditing immune memory / re-infection at runtime
+
+Protection is applied as a hazard multiplier: `inf_prob *= 1 - protection` in
+`TransmissionCore` (dose-response loop). So a `refractory_protection` of 0.98
+is *not* sterilising — it leaves 2 % of the per-epoch hazard, which at the
+Paper 1 operating point (450 agents, `dose_adjustment` 10.6, hourly epochs)
+still produces a handful of homologous, zero-escape re-infections inside the
+refractory window. That is arithmetic, not escape: only
+`refractory_protection: 1.0` yields zero, which is why every shipped bundle
+declares it and a test asserts it. Read any within-window value below 1.0 as a
+per-hour hazard, never as a percentage of protection.
+
+For a control arm, monkeypatch `ImmuneWaningConfig.protection_at` to return the
+matched protection at any age *before* constructing `ShipSimulation` — the
+config objects are built at `initialize()`, and this keeps every other draw on
+the same RNG stream, so arms are comparable seed-by-seed.
+
+Watch out when probing the strain layer directly:
+- `StrainRegistry` is empty until the first `sim.step()` mints founders, so pick
+  a challenge strain after stepping, not right after `initialize()`.
+- `TransmissionCore._strain_doses[agent_id][pathogen_id]` is keyed by
+  `(strain_id, source)` tuples, not bare strain ids.
+- `StrainEvolutionConfig.from_profile(profile)` takes the whole profile dict.
+- Mutated escape phenotypes are rare in a 200-epoch run: every circulating
+  strain can still carry `immune_escape == 0.0`, so an "escape breaches the
+  window" hypothesis has to be exercised by evaluating the kernel directly
+  (`immune_waning.protection_at(matched, days, escape)`) rather than by hoping
+  the run produces one.
+- Immune records are written only when a lineage clears
+  (`orchestrator_epoch._record_cleared_immunity`), so hosts still infected at
+  the end of the run legitimately have no `origin == "infection"` record; count
+  them against the still-active set before calling it lost memory.
+
+Legacy-vs-record agreement is the cheap regression check for the agent-level
+projection: per epoch, compare `agent.infection_status` / `illness_status`
+counts against `agent.infections[pid]["status"] / ["illness"]`. They should be
+equal except for record-less hosts (the fixed-day fallback still owns those),
+so a persistent difference larger than the record-less population means the
+summary channel has drifted from the records again.
+
+### Protection is a dose-share-weighted mean, so every share has to be accounted
+
+`TransmissionCore._challenge_protection` averages protection over the strains challenging the host,
+weighted by their dose shares. Dose carrying no strain label (`"unresolved"`, the sub-floor tail of
+a pool) is in that denominator too: it earns the genotype-blind refractory window (via
+`_nonspecific_protection`) and nothing from the matched `cross_immunity` matrix, so past the window
+it is unprotected dose. Before that rule existed, a fresh homologous in-window record returned
+`1 - unattributed_dose_fraction` — ~0.999, just under the `if protection >= 1.0: continue`
+short-circuit, i.e. ~0.1 %/epoch of residual hazard, enough for "impossible" homologous
+within-window re-infections over a couple of hundred epochs at high dose. The lesson generalises:
+any new dose bin added to that mean needs an explicit protection value, or it silently leaks.
+
+Do not diagnose such events by evaluating `_challenge_protection` after the epoch: `_strain_doses`
+is rebuilt each epoch, so a post-hoc call returns 1.0 and hides the cause. Instead monkeypatch the
+method for the run and log `self._strain_doses[agent_id][pathogen_id]` at the call, together with
+`_prior_exposures` (its ages are `None` while the lineage is still resident, numeric once a record
+exists — a useful marker of the resolution epoch).
