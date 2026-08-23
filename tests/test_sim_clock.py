@@ -426,3 +426,104 @@ def test_index_cases_are_seeded_one_day_in_on_either_clock() -> None:
     assert hourly_seed and legacy_seed
     assert set(hourly_seed) == {24}
     assert set(legacy_seed) == {1}
+
+
+# ── one owner of presentation ────────────────────────────────────────────
+#
+# Two paths advance a host's natural history: the engine's own fallback and the
+# multi-pathogen record. Both write ``agent.illness_status``, which is what the
+# sentinel line list reads, so the fallback presenting on its fixed day would
+# report onset before the host's drawn incubation period and put the line list
+# back on the whole-day lattice.
+
+def _engine_with_a_record(clock: SimClock, *, onset_day: float) -> KorkinShipEngine:
+    """An engine whose single host carries a per-pathogen record."""
+    engine = KorkinShipEngine(
+        num_passengers=1, num_crew=0, initial_infected=0,
+        zones=ZONES, seed=1, clock=clock,
+    )
+    engine.rng = _AlwaysIllRng()  # type: ignore[assignment]
+    agent = engine.agents[0]
+    agent.infect_with_pathogen("noro", 1e4, 0)
+    agent.infections["noro"]["incubation_days"] = onset_day
+    return engine
+
+
+def _engine_with_a_legacy_only_host(clock: SimClock) -> KorkinShipEngine:
+    """An engine whose single host was infected without a pathogen record."""
+    engine = KorkinShipEngine(
+        num_passengers=1, num_crew=0, initial_infected=1,
+        zones=ZONES, seed=1, clock=clock,
+    )
+    engine.rng = _AlwaysIllRng()  # type: ignore[assignment]
+    agent = engine.agents[0]
+    agent.time_infected = 0
+    agent.illness_status = IllnessStatus.NOT_ILL
+    assert not agent.infections
+    return engine
+
+
+def test_the_fallback_does_not_present_a_host_that_has_a_drawn_incubation() -> None:
+    """Five days of incubation is five days, not the fallback's one."""
+    engine = _engine_with_a_record(HOURLY, onset_day=5.0)
+    agent = engine.agents[0]
+    for _ in range(96):  # four voyage days
+        engine._advance_illness_and_recovery()
+    assert agent.illness_status == IllnessStatus.NOT_ILL
+    assert agent.time_infected == 96  # the counter is still advanced
+
+
+def test_the_fallback_still_presents_a_host_with_no_pathogen_record() -> None:
+    engine = _engine_with_a_legacy_only_host(HOURLY)
+    agent = engine.agents[0]
+    for _ in range(23):
+        engine._advance_illness_and_recovery()
+    assert agent.illness_status == IllnessStatus.NOT_ILL
+    engine._advance_illness_and_recovery()
+    assert agent.illness_status == IllnessStatus.SYMPTOMATIC
+
+
+def test_the_fallback_offers_no_illness_draw_to_a_record_carrying_host() -> None:
+    """Not merely a later draw: the fallback must not draw at all.
+
+    A second Bernoulli on the same day would raise the realized symptomatic
+    fraction above the profile's dose response, whatever threshold it used.
+    """
+    engine = _engine_with_a_record(HOURLY, onset_day=1.0)
+    engine.rng = _NeverIllRng()  # type: ignore[assignment]
+    for _ in range(72):
+        engine._advance_illness_and_recovery()
+    assert engine.rng.draws == 0  # type: ignore[attr-defined]
+
+
+def test_the_fallback_does_not_clear_a_case_it_does_not_own() -> None:
+    """Recovery of a record-carrying host is the record's call, not the fallback's.
+
+    Otherwise a pathogen with a recovery day past the fallback's three would be
+    cleared at the agent level while its own record is still shedding.
+    """
+    engine = _engine_with_a_record(HOURLY, onset_day=1.0)
+    agent = engine.agents[0]
+    for _ in range(96):
+        engine._advance_illness_and_recovery()
+    assert agent.infection_status == InfectionStatus.INFECTED
+    assert agent.infections["noro"]["status"] == InfectionStatus.INFECTED
+
+
+def test_the_sentinel_visible_onset_is_the_hosts_own_incubation_period() -> None:
+    """The agent-level status the line list reads follows the drawn period.
+
+    Both paths are stepped in the order ``ShipSimulation`` steps them — engine
+    first, records second — so this is the epoch a sentinel line list would
+    report as onset.
+    """
+    engine = _engine_with_a_record(HOURLY, onset_day=1.2)
+    agent = engine.agents[0]
+    rng = _AlwaysIllRng()
+    onset_epoch = None
+    for epoch in range(1, 73):
+        engine._advance_illness_and_recovery()
+        _advance_agent_pathogen_infections(agent, {"noro": NORO}, rng)
+        if onset_epoch is None and agent.illness_status == IllnessStatus.SYMPTOMATIC:
+            onset_epoch = epoch
+    assert onset_epoch == 29  # 1.2 days, not the fallback's 24 epochs
