@@ -79,12 +79,44 @@ epochs:
 | current (day clock per epoch) | 230 | 606 | 360 |
 | probe (day clock per 24 epochs) | 145 | 456 | 360 |
 
-Read this as evidence that the clock matters, not as the size of the effect: the
-attack rate saturates on this platform (all 360 susceptibles infected in both
-arms), and quarantine removes hosts from the prevalence count, so the
-calibration-relevant quantity is not measurable here. Sizing it properly needs
-the unsaturated `dose_adjustment` tiers of `calibration_manifest_v1.json`, run
-both ways.
+That probe understates the effect, and the reason is itself a finding: the day
+clock is implemented **twice**. `KorkinShipEngine.step()` advances the legacy
+per-agent `time_infected` and applies its own onset and `RECOVERY_DAY` checks
+(§3 and §4 of the step), while `step_infection_progression` advances the
+multi-pathogen records in `orchestrator_epoch`. `ShipSimulation.step()` calls
+both. The summary counts a paper reads — `infected`, `symptomatic` — come from
+the legacy fields, so a probe that slows only the multi-pathogen path moves
+ship-level output by <6% and looks like a null result. Any correction has to
+convert both, or the two clocks disagree with each other as well as with the
+itinerary.
+
+### 2a. Paper 1's operating point, both clocks converted
+
+Probe at the VSP degradation campaign's operating point — `expedition_cruise_450`
+at 450 agents, norovirus only, `dose_adjustment: 10.6`, 3 index cases, syndromic
+surveillance with the cascade off, 168 epochs, seeds 200–202 — comparing current
+behaviour against one where both the legacy `days_post_infection` and the
+multi-pathogen progression read the hourly grid (medians of 3 seeds):
+
+| outcome | current | hourly clock | factor |
+|---|---|---|---|
+| ever infected (attack rate) | 153 (0.34) | 141 (0.31) | ~1× |
+| peak concurrent infected | 16 | 113 | ~7× |
+| symptomatic person-epochs | 145 | 3285 | ~23× |
+| epoch crossing 5% attack rate | 116 | 89 | earlier in 2 of 3 seeds |
+
+The split matters more than any single number. **Cumulative incidence is close to
+invariant** — per-seed 153/186/60 against 141/189/135, one seed doubling and two
+unchanged — because the dose calibration that produced it is fit to a cumulative
+target. **Everything that integrates over time is not**: concurrent prevalence
+rises ~7× and symptomatic person-time ~23×, because a case that used to clear in
+three epochs now occupies seventy-two.
+
+Still an approximation, not the correction: it is a monkeypatch on three seeds
+and one platform, it holds `dose_adjustment` fixed rather than re-fitting, and
+detection timing is unresolved here because the seeded index cases put the first
+sick call at epoch 0 in both arms. Sizing it properly needs the unsaturated
+`dose_adjustment` tiers of `calibration_manifest_v1.json`, run both ways.
 
 ## 3. What is and is not affected
 
@@ -96,6 +128,16 @@ Affected: every voyage-configured Picard/Presidio run, hence the paper 1
 detection-timing results, the paper 2 attribution campaign, the VSP
 `dose_adjustment` tiers (which absorbed the compression when they were fit), and
 every paper 3 arm that quotes a rate per day or a detection delay.
+
+Paper 1's claims sort onto the §2a split:
+
+| paper 1 claim | exposure |
+|---|---|
+| attack rate, epidemic size, route attribution | robust — cumulative, and near-invariant in the probe |
+| VSP degradation monotone in the swept dial | qualitatively robust; the operating point shifts, so the curve is re-read after R6 |
+| quarantine-bed occupancy, OIS and cost ledger | order-of-magnitude exposed — they integrate symptomatic person-time |
+| time-to-detection, wearable lead time in hours | exposed in absolute units; partly self-cancelling because `hours_per_epoch: 24` compresses assay turnaround by the same factor |
+| insurance / wearable ROI (arm difference) | least exposed; both arms carry the same clock, so expect the ratio to hold and the dollar figures to move |
 
 Not a new defect: this predates paper 3. PR #290 (incubation as a distribution)
 made it *visible* by putting a day-scale distribution where a constant 1.0 had
