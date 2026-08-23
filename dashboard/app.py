@@ -34,8 +34,6 @@ from dashboard.retrospective import render_voyage_retrospective
 from dashboard.run_console import render_run_console
 from dashboard.session_state import get_selected_epoch, init_session_state
 from dashboard.spatial_viz import render_tactical_grid
-from dashboard.time_control import render_time_control
-from dashboard.transmission_viz import render_transmission_explorer
 from dashboard.theme import (
     LCARS_AMBER,
     LCARS_BG,
@@ -45,6 +43,8 @@ from dashboard.theme import (
     _lcars_alert_banner,
     _lcars_banner,
 )
+from dashboard.time_control import render_time_control
+from dashboard.transmission_viz import render_transmission_explorer
 
 
 @st.cache_data
