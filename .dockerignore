@@ -16,13 +16,11 @@ build/
 .mypy_cache/
 
 # Runtime telemetry artifacts (regenerated inside each container).
-# NOTE: telemetry_buffer/ is also a Python package (agent_axes.py); keep its
-# source and only drop generated output.
-telemetry_buffer/ground_truth.json
-telemetry_buffer/simulation_history.json
-telemetry_buffer/artificial_lab_notebook.json
-telemetry_buffer/contam_compare/
-telemetry_buffer/mega_cruise_campaign/
+# NOTE: telemetry_buffer/ is also a Python package; keep only its modules.
+telemetry_buffer/*
+!telemetry_buffer/__init__.py
+!telemetry_buffer/agent_axes.py
+!telemetry_buffer/schema.py
 
 # Dashboard / GIS-only assets not needed by the headless campaign runner
 dashboard/
