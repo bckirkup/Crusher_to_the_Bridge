@@ -18,6 +18,7 @@ registry rather than carrying a parallel notion of lineage.
 
 from __future__ import annotations
 
+import math
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass, field, replace
 from typing import Any
@@ -274,7 +275,7 @@ def _as_range(
 
 def _require_non_negative(name: str, value: float) -> float:
     val = float(value)
-    if val < 0.0 or val != val or val in (float("inf"), float("-inf")):
+    if not math.isfinite(val) or val < 0.0:
         raise StrainConfigError(f"{name} must be a finite value >= 0, got {value!r}")
     return val
 

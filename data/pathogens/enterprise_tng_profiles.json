@@ -151,12 +151,12 @@
         },
         "immune_waning": {
           "refractory_days": 60.0,
-          "refractory_protection": 0.95,
+          "refractory_protection": 1.0,
           "half_life_days": 540.0,
           "residual_protection": 0.0
         },
         "min_strain_fraction": 0.001,
-        "notes": "Fictional pathogen: rates from docs/variant_surveillance_spec.md \u00a71.3, deliberately more mutationally dynamic than real pathogens. No literature anchor exists. immune_waning values are in-universe placeholders: stiff within a voyage, waning over a deployment."
+        "notes": "Fictional pathogen: rates from docs/variant_surveillance_spec.md \u00a71.3, deliberately more mutationally dynamic than real pathogens. No literature anchor exists. immune_waning values are in-universe placeholders: stiff within a voyage, waning over a deployment. refractory_protection is applied as a per-epoch hazard reduction, so any value below 1.0 leaks at that rate every hour: 1.0 makes within-window re-infection escape-only, which is the intended contract."
       },
       "sequencing_assay": {
         "amplicon_target": "Genesis factor",
@@ -307,12 +307,12 @@
         },
         "immune_waning": {
           "refractory_days": 45.0,
-          "refractory_protection": 0.95,
+          "refractory_protection": 1.0,
           "half_life_days": 365.0,
           "residual_protection": 0.0
         },
         "min_strain_fraction": 0.001,
-        "notes": "Fictional pathogen: rates from docs/variant_surveillance_spec.md \u00a71.3, deliberately more mutationally dynamic than real pathogens. No literature anchor exists. immune_waning: strain-specific protection stiff for ~45 days, matched protection halving in about a year as antigenic distance grows. Placeholder pending a literature anchor."
+        "notes": "Fictional pathogen: rates from docs/variant_surveillance_spec.md \u00a71.3, deliberately more mutationally dynamic than real pathogens. No literature anchor exists. immune_waning: strain-specific protection stiff for ~45 days, matched protection halving in about a year as antigenic distance grows. Placeholder pending a literature anchor. refractory_protection is applied as a per-epoch hazard reduction, so any value below 1.0 leaks at that rate every hour: 1.0 makes within-window re-infection escape-only, which is the intended contract."
       },
       "sequencing_assay": {
         "amplicon_target": "HA + NA",

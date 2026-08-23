@@ -642,6 +642,16 @@ The contract now has two separable terms, both per pathogen:
   a window earned against something else), then exponential decay of the matched
   value with `half_life_days` toward `residual_protection`.
 
+The window's protection is a *per-epoch* hazard reduction, and that is the unit
+that matters: 0.98 is not "98% protected", it is a 2% hazard every hour, which
+over a 56-day window is a near-certain re-infection. Runtime verification caught
+this — with 0.98 shipped, 17 of the 23 surviving events were homologous,
+zero-escape challenges inside the window, i.e. leakage, not breakthrough. Every
+shipped bundle therefore declares `refractory_protection: 1.0`, so within-window
+re-infection is escape-only, and a test asserts that across the bundles. The
+value is still graded rather than absolute: `immune_escape` discounts it, so an
+escape variant walks through the window in proportion to how novel it is.
+
 Times are days of natural history and are aged through the run's `SimClock`, so
 the same profile is stiff on a week-long cruise and genuinely leaky on a
 year-long deployment — the requirement the author set. Two consequences worth
@@ -660,14 +670,28 @@ waning of protection against infection) and are sensitivity axes, not claims.
 Every profile note records which.
 
 Measured at the Paper 1 operating point (`expedition_cruise_450`, norovirus,
-dose 10.6, 12 index cases, 200 hourly epochs, seed 11), holding everything but
-the freshness term fixed: re-infection events fall from 30 among 297 infected
-hosts to 6, and the pre-change arm's median gap from recovery to re-infection is
-6 epochs — six hours. Peak prevalence is essentially unmoved (records 279 → 275
-infected, 109 → 98 symptomatic), so this corrects the re-challenge rate without
-re-parameterising the epidemic. The legacy agent-level fields are now a
-projection of the per-pathogen records rather than a second state machine, and
-record-level and legacy peaks agree exactly in both arms.
+dose 10.6, 12 index cases, 200 hourly epochs, seeds 11/23/47), holding
+everything but the freshness term fixed:
+
+| seed | re-infections, no waning | with waning | episodes | median gap to re-infection |
+|---|---|---|---|---|
+| 11 | 30 / 297 infected | 0 | 327 → 301 | 6 epochs → n/a |
+| 23 | 36 / 267 | 0 | 303 → 270 | 9.5 epochs → n/a |
+| 47 | 25 / 208 | 2 | 233 → 222 | 6 epochs → 2.5 |
+
+So the pre-change model re-challenged recovered hosts within hours of clearing,
+and the corrected one essentially does not re-infect anyone within a voyage —
+which is the expectation for norovirus over eight days. Peak prevalence is
+essentially unmoved (seed 11: records 279 → 280 infected, 109 → 99 symptomatic),
+so this corrects the re-challenge rate without re-parameterising the epidemic.
+The legacy agent-level fields are now a projection of the per-pathogen records
+rather than a second state machine, and record-level and legacy peaks agree
+exactly in both arms.
+
+The two residual events at seed 47 are within a few epochs of recovery and carry
+no immune record at challenge, which points at per-pathogen record bookkeeping
+around the resolution epoch rather than at the immunity kernel; it is tracked as
+a separate defect, not explained away as escape.
 
 ## 7. Open questions for the author
 

@@ -499,6 +499,47 @@ class TestLegacyProjection:
         assert agent.illness_status == IllnessStatus.NOT_ILL
         assert agent.time_infected == 0
 
+    def test_shipped_profiles_declare_a_sterilizing_window(self) -> None:
+        """A per-epoch hazard reduction below 1.0 leaks every hour.
+
+        ``TransmissionCore`` applies ``inf_prob *= 1 - protection`` once per
+        epoch, so ``refractory_protection: 0.98`` is a 2% hourly hazard, i.e.
+        a near-certain homologous re-infection over a voyage. Within-window
+        breach is meant to be escape-driven, so every shipped bundle declares
+        1.0 and the escape discount is the only way through.
+        """
+        bundles = sorted((REPO_ROOT / "data/pathogens").glob("*.json"))
+        assert bundles
+        seen = 0
+        for bundle in bundles:
+            for entry in json.loads(bundle.read_text())["pathogens"]:
+                waning = (entry.get("strain_evolution") or {}).get(
+                    "immune_waning",
+                )
+                if waning is None:
+                    continue
+                seen += 1
+                assert waning["refractory_protection"] == 1.0, (
+                    f"{bundle.name}:{entry['pathogen_id']} leaks "
+                    f"{1 - waning['refractory_protection']:.3g} per epoch"
+                )
+        assert seen >= 2
+
+    def test_an_escape_variant_still_breaches_a_sterilizing_window(self) -> None:
+        """1.0 is not an absolute wall: escape grades straight through it."""
+        waning = ImmuneWaningConfig(
+            refractory_days=56.0, refractory_protection=1.0,
+            half_life_days=1095.0,
+        )
+        graded = [
+            waning.protection_at(HOMOLOGOUS, 1.0, escape)
+            for escape in (0.0, 0.1, 0.3, 0.6)
+        ]
+        assert graded == sorted(graded, reverse=True)
+        assert graded[0] == pytest.approx(1.0)
+        assert graded[-1] < graded[0] - 0.1
+        assert min(graded) >= HOMOLOGOUS - 1e-9
+
     def test_an_immune_host_breached_by_an_escape_variant_is_visible(self) -> None:
         """A breakthrough episode is an episode, not a host that stays IMMUNE."""
         agent = _agent(immune=True)
