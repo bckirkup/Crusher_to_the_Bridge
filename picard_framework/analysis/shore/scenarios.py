@@ -20,7 +20,7 @@ population.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from math import isfinite
 from types import MappingProxyType
 from typing import Literal, Mapping
@@ -41,7 +41,9 @@ class ParameterProvenance:
 
     source_text: str
     anchoring: AnchoringStatus
-    semantics: Mapping[str, str] = MappingProxyType({})
+    semantics: Mapping[str, str] = field(
+        default_factory=lambda: MappingProxyType({})
+    )
 
     @property
     def anchored(self) -> bool:
