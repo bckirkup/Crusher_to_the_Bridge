@@ -474,8 +474,8 @@ shift at a given simulated dose, so its direction can be claimed and its size
 cannot.
 
 What PR 7b left inconsistent across the repository — three incubation
-representations, a sentinel delay catalog that is not derived from the profiles,
-13 profiles still on the fixed-onset fallback, and a calibration axis the dose
+representations, a sentinel delay catalog projected only from active profiles,
+12 profiles still on the fixed-onset fallback, and a calibration axis the dose
 term now interacts with — is audited and sequenced in
 [`incubation_reconciliation_plan.md`](incubation_reconciliation_plan.md),
 together with the re-fit and `main`-exposure calls. Whether the already

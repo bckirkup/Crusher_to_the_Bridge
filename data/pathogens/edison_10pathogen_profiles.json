@@ -445,6 +445,17 @@
         "gamma": 0.1
       },
       "recovery_day": 5,
+      "incubation": {
+        "distribution": "lognormal",
+        "median_days": 1.4,
+        "dispersion": 1.51,
+        "min_days": 0.5,
+        "max_days": 7.0,
+        "dose_reference_log10": 0.59,
+        "dose_log10_shortening": 0.1,
+        "dose_floor": 0.4,
+        "notes": "Human influenza A: mu 0.336, sigma 0.412 (median 1.4 d, GSD 1.51) from Lessler et al. 2009 via docs/ctb_incubation_spec.md, truncated 0.5-7.0 d to match the tng_shipboard_influenza analogue that already carries this same kernel as a shape. Dose terms dose_shift 0.10 / floor 0.4 from the spec. dose_reference_log10 0.59 is this profile's own exponential-model N50 (ln(2)/k = 0.693/0.18 = 3.85 particles), the exponential analogue of the beta-Poisson N50 convention documented on norwalk_gi in active_profiles.json: acquired_particles is in model units, so referencing a literature TCID50 or EID50 figure would put every simulated host on the dose floor and turn a conditioning term into a constant. Consequence: a near-ID50 host presents at the literature median, and the dose effect is anchored in direction but not calibrated in magnitude. host_factors omitted, as on the shipped profiles."
+      },
       "surface_deposition_fraction": 0.001,
       "base_susceptibility": 0.65,
       "microflora_disruption": {
