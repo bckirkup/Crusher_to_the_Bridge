@@ -1,0 +1,75 @@
+{
+  "schema_version": "1.0",
+  "description": "FICTIONAL Constitution-class (TOS) patrol itinerary: Starbase 1 -> Starbase 11 -> K-7 -> Memory Alpha -> Starbase 1, over the fictional federation port library (docs/variant_surveillance_spec.md §3). Ports, dates, and ashore windows are invented for the setting, not literature-anchored. effects_enabled=false and shore_exposure.enabled=false, so the itinerary is analysis-only metadata and campaigns stay identical to the pre-itinerary baseline. platform_class is omitted: the schema enum covers cruise classes only, and a starship class is not one of them.",
+  "voyage": {
+    "effects_enabled": false,
+    "total_epochs": 240,
+    "epoch_duration_hours": 1,
+    "embarkation_date": "2266-03-01",
+    "itinerary": [
+      {
+        "day": 1,
+        "type": "embarkation",
+        "port": "Starbase 1 (Earth)",
+        "port_id": "SBONE",
+        "region": "SOL",
+        "embarkation_window_epochs": [9, 15],
+        "stateroom_available_epoch": 12,
+        "buffet_surge_fraction": 0.7,
+        "notes": "Homeport. Crew boards from the orbital yard."
+      },
+      { "day": 2, "type": "sea_day" },
+      {
+        "day": 3,
+        "type": "port_day",
+        "port": "Starbase 11",
+        "port_id": "SBELV",
+        "region": "ALPHA_CORE",
+        "disembark_fraction": 0.6,
+        "crew_shore_leave_fraction": 0.2,
+        "disembark_window_epochs": [3, 6],
+        "reembark_window_epochs": [13, 16],
+        "notes": "Long call: resupply plus general shore leave."
+      },
+      { "day": 4, "type": "sea_day" },
+      {
+        "day": 5,
+        "type": "port_day",
+        "port": "K-7 Station",
+        "port_id": "KSEVN",
+        "region": "KLINGON_BORDER",
+        "disembark_fraction": 0.35,
+        "crew_shore_leave_fraction": 0.1,
+        "disembark_window_epochs": [4, 6],
+        "reembark_window_epochs": [10, 12],
+        "notes": "Border station: short call, restricted liberty."
+      },
+      { "day": 6, "type": "sea_day" },
+      {
+        "day": 7,
+        "type": "port_day",
+        "port": "Memory Alpha",
+        "port_id": "MEMAL",
+        "region": "ALPHA",
+        "disembark_fraction": 0.15,
+        "crew_shore_leave_fraction": 0.05,
+        "disembark_window_epochs": [5, 7],
+        "reembark_window_epochs": [9, 11],
+        "notes": "Archive facility, tiny catchment and no public health programme: the call where the ship is the only instrument."
+      },
+      { "day": 8, "type": "sea_day" },
+      { "day": 9, "type": "sea_day" },
+      {
+        "day": 10,
+        "type": "disembarkation",
+        "port": "Starbase 1 (Earth)",
+        "port_id": "SBONE",
+        "region": "SOL",
+        "disembark_window_epochs": [6, 12]
+      }
+    ],
+    "shore_exposure": {
+      "enabled": false
+    }
+  }
+}
