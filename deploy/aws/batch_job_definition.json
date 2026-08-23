@@ -8,6 +8,7 @@
       "--manifest", "Ref::manifest",
       "--shard-count", "Ref::shard_count",
       "--s3-prefix", "Ref::s3_prefix",
+      "--natural-history-clock", "Ref::clock",
       "--resume",
       "--timeout", "3600"
     ],
@@ -39,7 +40,8 @@
   "parameters": {
     "manifest": "picard_framework/runs/mega_cruise_campaign/campaign_manifest.json",
     "shard_count": "200",
-    "s3_prefix": "s3://<BUCKET>/campaign/"
+    "s3_prefix": "s3://<BUCKET>/campaign/",
+    "clock": "hours"
   },
   "retryStrategy": {
     "attempts": 10,

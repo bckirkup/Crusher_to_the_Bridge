@@ -66,6 +66,29 @@ python3 "$RUNNER" --manifest "$MANIFEST" --tier c2 --dry-run
 
 Use a distinct S3 prefix for Batch (e.g. `s3://…/campaign/calibration_v1/`).
 
+### Paired natural-history clock arms
+
+The campaign runner accepts `--natural-history-clock hours` or
+`--natural-history-clock legacy_epoch_day`. The flag is optional, leaves
+existing generated specs unchanged when absent, and records the selected arm
+in `parameters.natural_history_clock` for aggregation. Submit paired
+calibration arrays with separate S3 prefixes so their unchanged run IDs and
+resume logs cannot collide:
+
+```bash
+CLOCK=hours ./deploy/aws/submit_array_job.sh 80 \
+  s3://bucket/calibration_hours/ picard-campaign-queue picard-campaign \
+  "$MANIFEST"
+CLOCK=legacy_epoch_day ./deploy/aws/submit_array_job.sh 80 \
+  s3://bucket/calibration_legacy/ picard-campaign-queue picard-campaign \
+  "$MANIFEST"
+```
+
+The local output directory records its selected arm in
+`natural_history_clock.txt`; requesting a different arm against that directory
+fails clearly. An invocation without the flag remains compatible with an
+existing marked directory and does not hard-fail.
+
 Mega-cruise runs inject `escalation.lockdown_attack_rate: 0.05` (default
 `config.yaml` uses `never` for small smokes).
 

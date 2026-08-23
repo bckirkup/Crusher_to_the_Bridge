@@ -230,7 +230,7 @@ aws --profile picard batch register-job-definition \
   --region "$REGION"
 ```
 
-The command is `--manifest <path> --shard-count <N> --s3-prefix s3://<bucket>/campaign/ --resume --timeout 3600`.
+The command is `--manifest <path> --shard-count <N> --s3-prefix s3://<bucket>/campaign/ --natural-history-clock hours --resume --timeout 3600`.
 `--shard-index` is **not** passed — the runner reads `AWS_BATCH_JOB_ARRAY_INDEX`,
 which Batch injects into every array child, so child *i* runs shard *i*.
 `Ref::manifest` defaults to `campaign_manifest.json` (mega-cruise); pass
@@ -394,6 +394,30 @@ Then classify Spot vs OOM with `classify_batch_failures.py --recent 1`.
 ```bash
 AWS_PROFILE=picard ./submit_array_job.sh 200 "s3://$BUCKET/campaign/" picard-campaign-queue picard-campaign
 ```
+
+### Paired natural-history clock arms
+
+Submit the same calibration manifest twice, using distinct S3 prefixes and
+clock arms. The runner leaves generated run IDs unchanged, records the
+selected arm in each summary's `parameters.natural_history_clock`, and keeps
+each arm's resume log independent:
+
+```bash
+AWS_PROFILE=picard CLOCK=hours ./submit_array_job.sh 80 \
+  "s3://$BUCKET/campaign/calibration_hours/" picard-campaign-queue \
+  picard-campaign \
+  picard_framework/runs/mega_cruise_campaign/calibration_manifest_v1.json
+
+AWS_PROFILE=picard CLOCK=legacy_epoch_day ./submit_array_job.sh 80 \
+  "s3://$BUCKET/campaign/calibration_legacy/" picard-campaign-queue \
+  picard-campaign \
+  picard_framework/runs/mega_cruise_campaign/calibration_manifest_v1.json
+```
+
+The `clock` Batch parameter defaults to `hours`, preserving existing
+submissions. A local output directory marked for one arm refuses a later
+invocation requesting the other arm; invocations without the flag remain
+backward-compatible and do not hard-fail on a marked directory.
 
 This submits one array job of 200 children. Each child runs:
 
