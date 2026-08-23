@@ -329,6 +329,7 @@ class ShipSimulation:
             ),
             cfg=self.cfg,
             food_zone_multipliers=food_zone_multipliers,
+            clock=self.clock,
         )
         self.tx_core.initialize_zones(self.zone_names)
         self.engine.enable_external_transmission()
