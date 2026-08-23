@@ -48,12 +48,9 @@ def _load_cruise_histories(cruise_dirs: list[str]) -> dict[str, list]:
     out: dict[str, list] = {}
     for cdir in cruise_dirs:
         hist_path, _ = telemetry_paths(cdir)
-        if not os.path.isfile(hist_path):
-            continue
-        with validated_open(
-            hist_path, "r", allowed_roots=(REPO_ROOT,), encoding="utf-8",
-        ) as fh:
-            out[cdir] = json.load(fh)
+        hist = load_history_from(hist_path)
+        if hist:
+            out[cdir] = hist
     return out
 
 
@@ -236,10 +233,13 @@ def render_fleet_operations(
         _render_port_voyage_strips(cruises, histories)
 
     cruise_labels = [os.path.basename(c) for c in cruises]
-    selected = st.selectbox("Select cruise (loads active run context)", cruise_labels, key="fleet_cruise")
-    cruise_dir = os.path.join(fleet_root, selected)
+    selected = st.selectbox(
+        "Select cruise (detail only — use button below to load globally)",
+        cruise_labels,
+        key="fleet_cruise",
+    )
+    cruise_dir = resolve_child_path(fleet_root, selected)
     st.session_state.selected_cruise_dir = cruise_dir
-    st.session_state.telemetry_dir = cruise_dir
 
     hist_path, nb_path = telemetry_paths(cruise_dir)
     history = load_history_from(hist_path)

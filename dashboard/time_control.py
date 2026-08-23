@@ -6,7 +6,12 @@ from typing import Any
 
 import streamlit as st
 
-from dashboard.session_state import get_selected_epoch, set_selected_epoch
+from dashboard.session_state import (
+    apply_slider_epoch,
+    get_selected_epoch,
+    set_selected_epoch,
+    sync_epoch_slider_key,
+)
 from dashboard.units import time_xaxis_title
 
 PLAYBACK_INTERVAL_SEC = 0.5
@@ -50,14 +55,15 @@ def render_time_control(history: list[dict[str, Any]], *, key_suffix: str = "") 
         caption_bits.append(str(voyage["port"]))
     st.caption(" · ".join(caption_bits))
 
+    slider_key = f"global_epoch_slider{key_suffix}"
+    sync_epoch_slider_key(slider_key)
     epoch = st.slider(
         x_label,
         0,
         num_epochs - 1,
-        value=get_selected_epoch(),
-        key=f"global_epoch_slider{key_suffix}",
+        key=slider_key,
     )
-    set_selected_epoch(epoch, num_epochs)
+    apply_slider_epoch(epoch, num_epochs)
 
     c1, c2, c3, c4 = st.columns(4)
     with c1:

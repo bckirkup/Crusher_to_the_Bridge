@@ -43,6 +43,29 @@ _AGENT_COLORS = {
     "immune": "#808080",
 }
 
+_CLASS_COLOR_PALETTE = [
+    "#4a90d9", "#e05050", "#50a050", "#c9a227", "#9b59b6",
+    "#e67e22", "#1abc9c", "#e91e63", "#3498db", "#8e44ad",
+]
+
+
+def _colors_for_agents(positions: list[dict[str, Any]], color_by: str) -> list[str]:
+    """Map agent markers to colors for infection state or agent class."""
+    if color_by == "agent_class":
+        classes = sorted({str(p.get("agent_class", "") or "unknown") for p in positions})
+        class_colors = {
+            cls: _CLASS_COLOR_PALETTE[i % len(_CLASS_COLOR_PALETTE)]
+            for i, cls in enumerate(classes)
+        }
+        return [
+            class_colors.get(str(p.get("agent_class", "") or "unknown"), "#333333")
+            for p in positions
+        ]
+    return [
+        _AGENT_COLORS.get(p.get("infection_state", ""), "#333333")
+        for p in positions
+    ]
+
 
 def _add_agent_layer(
     fig: go.Figure,
@@ -77,10 +100,7 @@ def _add_agent_layer(
     if not show_agents or not positions:
         return
     color_key = color_by if color_by in ("infection_state", "agent_class") else "infection_state"
-    colors = [
-        _AGENT_COLORS.get(p.get(color_key, ""), "#333333")
-        for p in positions
-    ]
+    colors = _colors_for_agents(positions, color_key)
     sel = get_selected_agent_id()
     sizes = [10 if p["agent_id"] == sel else 5 for p in positions]
     fig.add_trace(go.Scatter(
@@ -89,7 +109,8 @@ def _add_agent_layer(
         mode="markers",
         marker={"color": colors, "size": sizes, "line": {"width": 1, "color": _INK}},
         text=[
-            f"Agent {p['agent_id']}<br>{p['location']}<br>{p['infection_state']}"
+            f"Agent {p['agent_id']}<br>{p['location']}<br>"
+            f"{p['infection_state']} / {p.get('agent_class', '')}"
             for p in positions
         ],
         hoverinfo="text",

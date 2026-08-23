@@ -847,14 +847,13 @@ def _build_epidemic_curve(history: list[dict[str, Any]]) -> go.Figure:
         name="Recovered (R)", line={"color": LCARS_GREEN, "width": 2, "dash": "dot"},
     ))
 
-    for record in history:
-        epoch = record["epoch"]
+    for i, record in enumerate(history):
         status = record["trigger_status"]
-        if epoch > 0:
-            prev_status = history[epoch - 1]["trigger_status"]
+        if i > 0:
+            prev_status = history[i - 1]["trigger_status"]
             if status != prev_status:
                 fig.add_vline(
-                    x=epoch, line_dash="dash",
+                    x=epochs[i], line_dash="dash",
                     line_color=ALERT_COLORS.get(status, "gray"),
                     annotation_text=f"{ALERT_LABELS.get(status, status)}",
                     annotation_position="top",

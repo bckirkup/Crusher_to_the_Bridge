@@ -157,6 +157,57 @@ class TestUnitsRegistry:
         assert time_xaxis_title(history) == "Voyage day"
 
 
+class TestAgentClassColors:
+    def test_distinct_class_colors(self) -> None:
+        from dashboard.spatial_viz import _colors_for_agents
+
+        positions = [
+            {"agent_class": "crew_medical", "infection_state": "infected"},
+            {"agent_class": "passenger", "infection_state": "susceptible"},
+            {"agent_class": "crew_medical", "infection_state": "susceptible"},
+        ]
+        colors = _colors_for_agents(positions, "agent_class")
+        assert colors[0] == colors[2]
+        assert colors[0] != colors[1]
+
+    def test_infection_state_palette(self) -> None:
+        from dashboard.spatial_viz import _AGENT_COLORS, _colors_for_agents
+
+        positions = [{"infection_state": "infected", "agent_class": "x"}]
+        assert _colors_for_agents(positions, "infection_state") == [_AGENT_COLORS["infected"]]
+
+
+class TestEpidemicVlineAlignment:
+    def test_status_vline_uses_voyage_day_x(self) -> None:
+        from dashboard.charts import _build_epidemic_curve
+
+        history = [
+            {
+                "epoch": 0,
+                "trigger_status": "BASELINE",
+                "voyage_epoch": {"voyage_day": 10},
+                "summary": {
+                    "susceptible": 10, "infected": 0, "symptomatic": 0,
+                    "quarantined": 0, "isolated": 0, "recovered": 0,
+                },
+            },
+            {
+                "epoch": 1,
+                "trigger_status": "CONFIRMED",
+                "voyage_epoch": {"voyage_day": 11},
+                "summary": {
+                    "susceptible": 9, "infected": 1, "symptomatic": 0,
+                    "quarantined": 0, "isolated": 0, "recovered": 0,
+                },
+            },
+        ]
+        fig = _build_epidemic_curve(history)
+        shapes = fig.layout.shapes or ()
+        vlines = [s for s in shapes if getattr(s, "type", None) == "line"]
+        assert vlines
+        assert float(vlines[0].x0) == 11.0
+
+
 class TestRetentionDetection:
     def test_full_when_agents(self) -> None:
         from dashboard.loaders import detect_retention_mode
