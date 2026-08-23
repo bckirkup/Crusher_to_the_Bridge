@@ -591,12 +591,12 @@ class ShardBundle:
                     prepare_output_directory(
                         parent, allowed_roots=_allowed_roots(),
                     )
-                    with getattr(zf, "open")(member) as source, validated_open(
+                    with validated_open(
                         target,
                         "wb",
                         allowed_roots=_allowed_roots(),
                     ) as destination:
-                        shutil.copyfileobj(source, destination)
+                        destination.write(zf.read(member))
         except zipfile.BadZipFile:
             print(f"  (s3 shard zip is invalid: {zip_path})")
 
