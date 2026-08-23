@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import os
 import sys
+from collections import defaultdict
 from typing import Any, Iterator
 
 from dashboard.loaders import PlatformBundle
@@ -129,3 +130,65 @@ def iter_hvac_paths(
                 [float(a["x"]), float(a["y"])],
                 [float(b["x"]), float(b["y"])],
             ]
+
+
+def _jitter_for_agent(agent_id: int, index_in_zone: int) -> tuple[float, float]:
+    """Deterministic sub-zone offset (meters) from agent id."""
+    import math
+    angle = (agent_id * 17 + index_in_zone * 41) % 360
+    radius = 0.8 + (agent_id % 5) * 0.15
+    return radius * math.cos(math.radians(angle)), radius * math.sin(math.radians(angle))
+
+
+def compute_agent_positions(
+    record: dict[str, Any],
+    bundle: PlatformBundle,
+    deck_filter: str | None,
+) -> list[dict[str, Any]]:
+    """Zone-centroid positions with jitter for agents on the selected deck."""
+    zone_counts: dict[str, int] = defaultdict(int)
+    positions: list[dict[str, Any]] = []
+    for agent in record.get("agents", []):
+        loc = agent.get("location", "")
+        zinfo = bundle.zone_coords.get(loc)
+        if not zinfo:
+            continue
+        deck = zinfo.get("deck", "main")
+        if deck_filter and deck_filter != ALL_DECKS_LABEL and deck != deck_filter:
+            continue
+        idx = zone_counts[loc]
+        zone_counts[loc] += 1
+        jx, jy = _jitter_for_agent(int(agent["agent_id"]), idx)
+        positions.append({
+            "agent_id": int(agent["agent_id"]),
+            "x": float(zinfo["x"]) + jx,
+            "y": float(zinfo["y"]) + jy,
+            "location": loc,
+            "infection_state": agent.get("infection_state", ""),
+            "symptom_presentation": agent.get("symptom_presentation", ""),
+            "agent_class": agent.get("agent_class", ""),
+        })
+    return positions
+
+
+def compute_agent_trail(
+    history: list[dict[str, Any]],
+    agent_id: int,
+    bundle: PlatformBundle,
+    *,
+    end_epoch: int,
+    max_points: int = 24,
+) -> list[tuple[float, float]]:
+    """Recent movement trail ending at end_epoch (inclusive)."""
+    trail: list[tuple[float, float]] = []
+    start = max(0, end_epoch - max_points + 1)
+    for rec in history[start : end_epoch + 1]:
+        for agent in rec.get("agents", []):
+            if int(agent["agent_id"]) != agent_id:
+                continue
+            loc = agent.get("location", "")
+            zinfo = bundle.zone_coords.get(loc)
+            if zinfo:
+                trail.append((float(zinfo["x"]), float(zinfo["y"])))
+            break
+    return trail

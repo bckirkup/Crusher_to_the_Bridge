@@ -138,3 +138,113 @@ class TestResolvePlatformId:
         # crusher_labs/config.yaml defaults to mega_cruise_5000
         assert pid == "mega_cruise_5000"
         assert method == "config"
+
+
+class TestUnitsRegistry:
+    def test_axis_persons(self) -> None:
+        from dashboard.units import axis
+
+        assert axis("persons").title == "Persons"
+
+    def test_time_x_values_voyage_day(self) -> None:
+        from dashboard.units import time_x_values, time_xaxis_title
+
+        history = [
+            {"epoch": 0, "voyage_epoch": {"voyage_day": 1}},
+            {"epoch": 1, "voyage_epoch": {"voyage_day": 2}},
+        ]
+        assert time_x_values(history) == [1, 2]
+        assert time_xaxis_title(history) == "Voyage day"
+
+
+class TestAgentClassColors:
+    def test_distinct_class_colors(self) -> None:
+        from dashboard.spatial_viz import _colors_for_agents
+
+        positions = [
+            {"agent_class": "crew_medical", "infection_state": "infected"},
+            {"agent_class": "passenger", "infection_state": "susceptible"},
+            {"agent_class": "crew_medical", "infection_state": "susceptible"},
+        ]
+        colors = _colors_for_agents(positions, "agent_class")
+        assert colors[0] == colors[2]
+        assert colors[0] != colors[1]
+
+    def test_infection_state_palette(self) -> None:
+        from dashboard.spatial_viz import _AGENT_COLORS, _colors_for_agents
+
+        positions = [{"infection_state": "infected", "agent_class": "x"}]
+        assert _colors_for_agents(positions, "infection_state") == [_AGENT_COLORS["infected"]]
+
+
+class TestEpidemicVlineAlignment:
+    def test_status_vline_uses_voyage_day_x(self) -> None:
+        from dashboard.charts import _build_epidemic_curve
+
+        history = [
+            {
+                "epoch": 0,
+                "trigger_status": "BASELINE",
+                "voyage_epoch": {"voyage_day": 10},
+                "summary": {
+                    "susceptible": 10, "infected": 0, "symptomatic": 0,
+                    "quarantined": 0, "isolated": 0, "recovered": 0,
+                },
+            },
+            {
+                "epoch": 1,
+                "trigger_status": "CONFIRMED",
+                "voyage_epoch": {"voyage_day": 11},
+                "summary": {
+                    "susceptible": 9, "infected": 1, "symptomatic": 0,
+                    "quarantined": 0, "isolated": 0, "recovered": 0,
+                },
+            },
+        ]
+        fig = _build_epidemic_curve(history)
+        shapes = fig.layout.shapes or ()
+        vlines = [s for s in shapes if getattr(s, "type", None) == "line"]
+        assert vlines
+        assert float(vlines[0].x0) == 11.0
+
+
+class TestRetentionDetection:
+    def test_full_when_agents(self) -> None:
+        from dashboard.loaders import detect_retention_mode
+
+        history = [{"agents": [{"agent_id": 1}], "epoch": 0}]
+        assert detect_retention_mode(history) == "full"
+
+    def test_compact_without_agents(self) -> None:
+        from dashboard.loaders import detect_retention_mode
+
+        history = [{"summary": {}, "epoch": 0}]
+        assert detect_retention_mode(history) == "compact"
+
+
+class TestTransmissionTimeSeries:
+    def test_per_epoch_pathways(self) -> None:
+        from dashboard.transmission_viz import aggregate_pathway_time_series
+
+        history = [
+            {
+                "epoch": 0,
+                "contact_tracing": {
+                    "transmission_events": [
+                        {"pathway_breakdown": {"droplet:n1": 1.0}},
+                    ],
+                },
+            },
+            {
+                "epoch": 1,
+                "contact_tracing": {
+                    "transmission_events": [
+                        {"dominant_pathway": "fomite", "total_dose": 2.0},
+                    ],
+                },
+            },
+        ]
+        epochs, series = aggregate_pathway_time_series(history)
+        assert len(epochs) == 2
+        assert series["droplet"][0] == pytest.approx(1.0)
+        assert series["fomite"][1] == pytest.approx(2.0)

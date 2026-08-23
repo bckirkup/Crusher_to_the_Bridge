@@ -112,7 +112,33 @@ class TestMetricFraction:
         assert metric_fraction(5.0, 0.0) == pytest.approx(0.0)
 
 
-# ── pydeck_builder tests ────────────────────────────────────────────────
+class TestComputeAgentPositions:
+    def test_positions_at_zone_centroid(self) -> None:
+        from dashboard.deck_geometry import compute_agent_positions
+        from dashboard.loaders import PlatformBundle
+
+        bundle = PlatformBundle(
+            platform_id="test",
+            layout={"zones": [{"id": "Z1", "display": {"x": 10, "y": 5}, "deck": "main", "type": "Free", "volume_m3": 50}]},
+            airflow={},
+            manifest={},
+            deck_graphics={},
+            hull_png_path=None,
+            blueprint_bg_path=None,
+            zone_coords={
+                "Z1": {"x": 10, "y": 5, "deck": "main", "type": "Free", "volume_m3": 50},
+            },
+        )
+        record = {
+            "agents": [
+                {"agent_id": 1, "location": "Z1", "infection_state": "infected"},
+            ],
+        }
+        positions = compute_agent_positions(record, bundle, "main")
+        assert len(positions) == 1
+        assert abs(positions[0]["x"] - 10) > 0.2
+        assert abs(positions[0]["y"] - 5) > 0.2
+
 
 class TestLcarsRgba:
     def test_zero_fraction(self) -> None:
