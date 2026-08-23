@@ -1,0 +1,234 @@
+{
+  "campaign": "clock_arm_c1_refit_v1",
+  "platform": "mega_cruise_5000",
+  "description": "Paired natural-history-clock arms of the C1 norovirus dose_adjustment refit across all four ship classes. Submit twice with identical factors and seeds, once per clock arm (--natural-history-clock hours | legacy_epoch_day) into separate S3 prefixes; run_ids are identical between arms by design, so the arm must be separated by prefix, not by id. dose_adjustment is a log10 shedding penalty subtracted from the shedding curve in engines/infection_dynamics_bridge.py, so higher values mean less transmission. The ladder is concentrated on 8-18: a full-seed local probe at current HEAD put every value below 8 at the saturated attack rate of 0.800 on expedition_cruise_450 (the entire non-secretor-adjusted susceptible pool) and found no takeoff at all by 16, so the shipped 1-20 ladder spends most of its runs outside the informative band. The larger hulls carry the ladder two steps further up because the band was only measured on the 450 hull and more contacts should need more shedding penalty to sit at the same attack rate; the overlap from 8-14 is what makes the classes comparable. Both surveillance arms are present for a reason: syndromic is the branch the VSP fit is scored on, because a VSP record is a rate reported after an adaptive response has acted, and none_true is the counterfactual that says what the response averted. Fit targets are the class-binned CDC VSP norovirus distributions (expedition n=17 median 8.56 percent IQR 4.51-13.60; classic n=172 median 5.59 IQR 4.46-7.76; spirit n=52 median 5.64 IQR 4.44-7.90; mega n=9 median 5.61 IQR 3.40-7.45), scored as a bracket rather than a point, since 20 seeds do not resolve a median more tightly than the empirical IQR. Simulation tiers only: no Stan or Sentinel inference belongs in this manifest, as those fits do not survive a Spot interruption.",
+  "default_epochs": 168,
+  "default_num_agents": 7000,
+  "tiers": {
+    "c1_expedition_cruise_450": {
+      "description": "Norovirus dose_adjustment refit on expedition_cruise_450, focused ladder, paired clock arms",
+      "platform": "expedition_cruise_450",
+      "pathogen": "norovirus",
+      "dose_adjustments": [
+        8.0,
+        10.0,
+        10.6,
+        12.0,
+        13.0,
+        14.0
+      ],
+      "initial_infected_values": [
+        1,
+        5
+      ],
+      "surveillance_strategies": [
+        "none_true",
+        "syndromic"
+      ],
+      "epochs": 168,
+      "seeds": [
+        500,
+        501,
+        502,
+        503,
+        504,
+        505,
+        506,
+        507,
+        508,
+        509,
+        510,
+        511,
+        512,
+        513,
+        514,
+        515,
+        516,
+        517,
+        518,
+        519
+      ],
+      "calibration_target": "CDC VSP expedition class (complement <900): n=17, median passenger AR 8.56%, IQR 4.51-13.60%"
+    },
+    "c1_classic_cruise_1900": {
+      "description": "Norovirus dose_adjustment refit on classic_cruise_1900, focused ladder, paired clock arms",
+      "platform": "classic_cruise_1900",
+      "pathogen": "norovirus",
+      "dose_adjustments": [
+        8.0,
+        10.0,
+        10.6,
+        12.0,
+        13.0,
+        14.0,
+        16.0,
+        18.0
+      ],
+      "initial_infected_values": [
+        1,
+        5
+      ],
+      "surveillance_strategies": [
+        "none_true",
+        "syndromic"
+      ],
+      "epochs": 168,
+      "seeds": [
+        500,
+        501,
+        502,
+        503,
+        504,
+        505,
+        506,
+        507,
+        508,
+        509,
+        510,
+        511,
+        512,
+        513,
+        514,
+        515,
+        516,
+        517,
+        518,
+        519
+      ],
+      "calibration_target": "CDC VSP classic class (complement 900-2400): n=172, median passenger AR 5.59%, IQR 4.46-7.76%"
+    },
+    "c1_spirit_cruise_3000": {
+      "description": "Norovirus dose_adjustment refit on spirit_cruise_3000, focused ladder, paired clock arms",
+      "platform": "spirit_cruise_3000",
+      "pathogen": "norovirus",
+      "dose_adjustments": [
+        8.0,
+        10.0,
+        10.6,
+        12.0,
+        13.0,
+        14.0,
+        16.0,
+        18.0
+      ],
+      "initial_infected_values": [
+        1,
+        5
+      ],
+      "surveillance_strategies": [
+        "none_true",
+        "syndromic"
+      ],
+      "epochs": 168,
+      "seeds": [
+        500,
+        501,
+        502,
+        503,
+        504,
+        505,
+        506,
+        507,
+        508,
+        509,
+        510,
+        511,
+        512,
+        513,
+        514,
+        515,
+        516,
+        517,
+        518,
+        519
+      ],
+      "calibration_target": "CDC VSP spirit class (complement 2400-3600): n=52, median passenger AR 5.64%, IQR 4.44-7.90%"
+    },
+    "c1_mega_cruise_5000": {
+      "description": "Norovirus dose_adjustment refit on mega_cruise_5000, focused ladder, paired clock arms",
+      "platform": "mega_cruise_5000",
+      "pathogen": "norovirus",
+      "dose_adjustments": [
+        8.0,
+        10.0,
+        10.6,
+        12.0,
+        13.0,
+        14.0,
+        16.0,
+        18.0
+      ],
+      "initial_infected_values": [
+        1,
+        5
+      ],
+      "surveillance_strategies": [
+        "none_true",
+        "syndromic"
+      ],
+      "epochs": 168,
+      "seeds": [
+        500,
+        501,
+        502,
+        503,
+        504,
+        505,
+        506,
+        507,
+        508,
+        509,
+        510,
+        511,
+        512,
+        513,
+        514,
+        515,
+        516,
+        517,
+        518,
+        519
+      ],
+      "calibration_target": "CDC VSP mega class (complement >=3600): n=9, median passenger AR 5.61%, IQR 3.40-7.45%"
+    }
+  },
+  "pathogen_configs": {
+    "norovirus": {
+      "bundle": "active_profiles",
+      "pathogen_id": "norwalk_gi",
+      "overrides": {
+        "remove": [
+          "sars_cov2_resp"
+        ]
+      }
+    }
+  },
+  "surveillance_configs": {
+    "none_true": {
+      "diagnostic_cascade": {
+        "enabled": false
+      },
+      "syndromic": {
+        "sick_call_probability": 0.0,
+        "background_noise_rate": 0.0
+      },
+      "fred_behavior": {
+        "healthy_noise_categories": []
+      },
+      "observation": {
+        "enabled": false
+      },
+      "wearable_monitoring": {
+        "enabled": false
+      },
+      "ship_graph": {
+        "counter_confinement_enabled": false
+      }
+    },
+    "syndromic": {
+      "diagnostic_cascade": {
+        "enabled": false
+      }
+    }
+  }
+}

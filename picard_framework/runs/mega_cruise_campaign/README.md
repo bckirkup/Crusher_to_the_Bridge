@@ -89,6 +89,33 @@ The local output directory records its selected arm in
 fails clearly. An invocation without the flag remains compatible with an
 existing marked directory and does not hard-fail.
 
+### C1 VSP refit paired arms
+
+`clock_arm_c1_v1_manifest.json` is the focused C1 norovirus VSP refit manifest.
+It contains four simulation tiers: 480 expedition runs and 640 runs for each
+of classic, spirit, and mega, or 2,400 runs when selecting `--tier all`.
+Submit the same manifest once per clock arm, always using separate S3 prefixes:
+
+```bash
+MANIFEST=picard_framework/runs/mega_cruise_campaign/clock_arm_c1_v1_manifest.json
+AWS_PROFILE=picard CLOCK=hours ./deploy/aws/submit_array_job.sh 80 \
+  "s3://$BUCKET/campaign/clock_hours/" picard-campaign-queue \
+  picard-campaign "$MANIFEST"
+
+AWS_PROFILE=picard CLOCK=legacy_epoch_day ./deploy/aws/submit_array_job.sh 80 \
+  "s3://$BUCKET/campaign/clock_legacy/" picard-campaign-queue \
+  picard-campaign "$MANIFEST"
+```
+
+The two arms intentionally have identical run IDs. A shared prefix would
+silently mix the two models in one shard bundle, and the resume log would make
+the second arm's runs appear already complete. The shell submitter and default
+job definition do not provide `--tier`; for one tier, use a dedicated manifest
+or the PowerShell submitter's `-Tier` container override. Submit only the
+independent, checkpointed simulation tiers to Fargate Spot. Stan and Sentinel
+inference tiers must run on a non-Spot path because their fits do not survive
+an interruption.
+
 Mega-cruise runs inject `escalation.lockdown_attack_rate: 0.05` (default
 `config.yaml` uses `never` for small smokes).
 

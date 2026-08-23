@@ -35,6 +35,7 @@ from picard_framework.runs.mega_cruise_campaign.campaign_runner import (  # noqa
 
 CAMPAIGN = REPO_ROOT / "picard_framework" / "runs" / "mega_cruise_campaign"
 CALIBRATION_MANIFEST = CAMPAIGN / "calibration_manifest_v1.json"
+CLOCK_ARM_C1_MANIFEST = CAMPAIGN / "clock_arm_c1_v1_manifest.json"
 
 STANDARD_TIERS = [
     "t1_pathogen_baselines",
@@ -1627,6 +1628,43 @@ def test_calibration_dry_run_counts() -> None:
         assert len(runs) == n_exp, f"{tier_id}: {len(runs)} != {n_exp}"
         total += len(runs)
     assert total == 6360
+
+
+def _clock_arm_c1_manifest() -> dict[str, Any]:
+    return load_manifest(CLOCK_ARM_C1_MANIFEST)
+
+
+def test_clock_arm_c1_manifest_loads() -> None:
+    manifest = _clock_arm_c1_manifest()
+    assert manifest["campaign"] == "clock_arm_c1_refit_v1"
+    assert set(manifest["tiers"]) == {
+        "c1_expedition_cruise_450",
+        "c1_classic_cruise_1900",
+        "c1_spirit_cruise_3000",
+        "c1_mega_cruise_5000",
+    }
+    assert manifest["pathogen_configs"]["norovirus"]["pathogen_id"] == "norwalk_gi"
+
+
+def test_clock_arm_c1_dry_run_counts() -> None:
+    """Golden run counts from the focused C1 clock-arm factorials."""
+    manifest = _clock_arm_c1_manifest()
+    expected = {
+        # 6 doses × 2 init × 2 surv × 20 seeds
+        "c1_expedition_cruise_450": 480,
+        # 8 × 2 × 2 × 20
+        "c1_classic_cruise_1900": 640,
+        # 8 × 2 × 2 × 20
+        "c1_spirit_cruise_3000": 640,
+        # 8 × 2 × 2 × 20
+        "c1_mega_cruise_5000": 640,
+    }
+    total = 0
+    for tier_id, n_exp in expected.items():
+        runs = list(generate_tier_runs(manifest, tier_id))
+        assert len(runs) == n_exp, f"{tier_id}: {len(runs)} != {n_exp}"
+        total += len(runs)
+    assert total == 2400
 
 
 def test_campaign_generator_c5() -> None:

@@ -419,6 +419,33 @@ submissions. A local output directory marked for one arm refuses a later
 invocation requesting the other arm; invocations without the flag remain
 backward-compatible and do not hard-fail on a marked directory.
 
+The focused C1 VSP refit uses
+`picard_framework/runs/mega_cruise_campaign/clock_arm_c1_v1_manifest.json`.
+Submit its paired arms with the same array size and manifest, but never reuse
+one prefix:
+
+```bash
+MANIFEST=picard_framework/runs/mega_cruise_campaign/clock_arm_c1_v1_manifest.json
+AWS_PROFILE=picard CLOCK=hours ./submit_array_job.sh 80 \
+  "s3://$BUCKET/campaign/clock_hours/" picard-campaign-queue \
+  picard-campaign "$MANIFEST"
+
+AWS_PROFILE=picard CLOCK=legacy_epoch_day ./submit_array_job.sh 80 \
+  "s3://$BUCKET/campaign/clock_legacy/" picard-campaign-queue \
+  picard-campaign "$MANIFEST"
+```
+
+The two clock arms intentionally produce identical run IDs. They must use
+different S3 prefixes: putting both arms under one prefix silently interleaves
+different models into the same shard bundles, and the resume log causes the
+second arm's IDs to be treated as already complete. The shipped
+`submit_array_job.sh` and default job definition do not expose `--tier`; use a
+dedicated single-tier manifest, or use `submit_campaign_manifest.ps1 -Tier`
+with a container-command override. This Spot path is for independent,
+per-shard-checkpointed simulation tiers only. Do not submit Stan or Sentinel
+inference tiers to the Spot queue because those fits do not survive an
+interruption.
+
 This submits one array job of 200 children. Each child runs:
 
 ```
