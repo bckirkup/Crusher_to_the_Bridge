@@ -16,6 +16,8 @@ import os
 from dataclasses import asdict, dataclass, field
 from typing import Any
 
+from engines.sim_clock import HOURS, SimClock
+
 DAY_TYPES = frozenset({"sea_day", "port_day", "embarkation", "disembarkation"})
 
 IDENTITY_DINING: dict[str, float] = {
@@ -250,7 +252,7 @@ def resolve_epoch_state(
     )
     if hours <= 0:
         hours = 1.0
-    epochs_per_day = max(1, int(round(24.0 / hours)))
+    epochs_per_day = max(1, int(round(SimClock(hours, HOURS).epochs_per_day)))
     ep = max(1, int(epoch))
     voyage_day = (ep - 1) // epochs_per_day + 1
     epoch_of_day = (ep - 1) % epochs_per_day

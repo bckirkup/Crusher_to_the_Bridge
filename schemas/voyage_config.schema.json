@@ -35,7 +35,18 @@
           "format": "date",
           "description": "Real-world date of voyage day 1 (YYYY-MM-DD). Simulation-inert; sentinel analysis derives per-day calendar dates from it."
         },
-        "epoch_duration_hours": { "type": "number", "exclusiveMinimum": 0 },
+        "epoch_duration_hours": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "default": 1,
+          "description": "Physical duration of one epoch in hours. The natural-history clock converts day-valued pathogen parameters through this, so it must agree with any top-level epoch_duration_hours; a disagreement is refused rather than silently resolved."
+        },
+        "natural_history_clock": {
+          "type": "string",
+          "enum": ["hours", "legacy_epoch_day"],
+          "default": "hours",
+          "description": "hours (default): one epoch lasts epoch_duration_hours of physical time and day-valued pathogen parameters are converted. legacy_epoch_day: one epoch is one day of natural history regardless of the voyage grid, retained only as the historical control arm for paired sensitivity analysis."
+        },
         "itinerary": {
           "type": "array",
           "items": { "$ref": "#/$defs/itinerary_day" }

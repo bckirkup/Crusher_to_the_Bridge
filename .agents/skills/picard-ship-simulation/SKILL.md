@@ -130,3 +130,41 @@ Do not reorder phases when extracting; golden Picard is the behavior lock.
 `tests/test_ship_epoch_helpers.py` grades `_merge_applied` and belief
 clamping. Unknown action kinds and `_NEEDS_CTX` kinds with `ctx is None`
 are no-ops.
+
+## Clock modes: hours vs legacy_epoch_day
+
+`engines/sim_clock.py` is the only place epoch counters become day-valued
+pathogen parameters. `ShipSimulation.initialize()` builds one `SimClock` and
+hands the *same object* to the engine, agents, observation engine and the
+instrument-turnaround registry — `sim.clock is sim.engine.clock is
+sim.engine.agents[i].clock` is a cheap way to catch a second opinion about epoch
+length. Note `sim.clock` only exists after `initialize()`.
+
+Flip the mode with `config_overrides.natural_history_clock`
+(`"hours"` default, `"legacy_epoch_day"` control arm) and the epoch length with
+`epoch_duration_hours` (must agree between the top level and the `voyage` block,
+or `SimClock.for_run` raises). Shipped platform voyage configs use 1 h/epoch, so
+a norovirus case incubates ~24-29 epochs and clears at ~72 epochs; budget
+`num_epochs >= 168` for any run that must observe recovery. In
+`legacy_epoch_day` the same run collapses to onset in 1-2 epochs and recovery at
+3 — the old-behaviour control. Physical `delay_hours` in
+`data/config/instrument_turnaround.json` are read on that arm's day-long epoch
+(`SimClock.hours_per_epoch` is 24 in legacy mode whatever the voyage grid says),
+so a 72 h microbiology TAT is 3 legacy epochs, matching pre-clock behaviour.
+
+Fast ways to grade timing without a long voyage:
+- `InstrumentTurnaroundRegistry.load('data/config/instrument_turnaround.json',
+  clock=SimClock(h, "hours")).delay_epochs_for(name)` — physical hours should
+  scale inversely with `h`. `full_run_hours` outranks a profile's grid-native
+  `epoch_fraction` (every shipped fraction was written against the day-per-epoch
+  grid); a TAT that is still clock-insensitive means the block declares only
+  `epoch_fraction` or `delay_epochs`.
+- `orchestrator_epoch.step_mid_cruise_introductions` converts a profile's
+  `initial_time_infected` (days) through the clock: 2 days -> 48 epochs at
+  1 h/epoch, 2 at legacy.
+- The sentinel line list (`run.sentinel_line_list`) records `onset_epoch` /
+  `report_epoch` in epochs and echoes `epoch_duration_hours`, which is the
+  cheapest end-to-end evidence that natural history moved to the physical clock.
+- `python3 scripts/clock_guard.py <files>` / `--configs` is the mechanical
+  guard; it recognises names like `time_infected`, `days_post_infection`,
+  `*_day`, so aliased comparisons can slip past it.

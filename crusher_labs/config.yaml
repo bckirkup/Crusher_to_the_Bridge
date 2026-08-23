@@ -9,6 +9,17 @@
 random_seed: 42
 num_epochs: 24                         # total simulation epochs (override via --epochs CLI flag)
 
+# ── Simulation clock ──────────────────────────────────────────
+# One epoch is one hour, as the voyage layer defines it; pathogen profiles stay
+# in literature days and are converted through engines/sim_clock.py. A voyage
+# config declares the same duration for its itinerary; the two must agree, and
+# SimClock refuses the run if they do not.
+epoch_duration_hours: 1
+# hours = the physical reading. legacy_epoch_day advances natural history one
+# day per epoch, which is what the model did before the clock existed; it is
+# kept only as the control arm for re-testing published results.
+natural_history_clock: hours
+
 # ── Ship Graph (infection-dynamics reference) ─────────────────
 ship_graph:
   num_agents: 20

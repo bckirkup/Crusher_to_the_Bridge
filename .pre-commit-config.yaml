@@ -14,6 +14,18 @@ repos:
         language: system
         files: ^(?!tests/)(?!\.agents/).*\.py$
         types: [python]
+      - id: clock-unit-guards
+        name: Clock unit guards
+        entry: python scripts/clock_guard.py
+        language: system
+        files: ^(?!tests/)(?!\.agents/).*\.py$
+        types: [python]
+      - id: clock-config-guards
+        name: Clock config guards
+        entry: python scripts/clock_guard.py --configs
+        language: system
+        pass_filenames: false
+        files: ^(crusher_labs/config\.yaml|data/(platforms/[^/]+/voyage_config|config/[^/]+)\.json)$
       - id: sonar-workflow-guards
         name: Sonar workflow guards
         entry: python scripts/sonar_guard.py --workflows

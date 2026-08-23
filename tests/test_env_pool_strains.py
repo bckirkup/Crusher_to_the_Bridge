@@ -380,6 +380,33 @@ class TestUnresolvedMass:
         core = _core()
         assert core._transmissibility(UNRESOLVED_STRAIN) == pytest.approx(1.0)
 
+    def test_an_unresolved_superinfection_founds_a_nameable_lineage(self) -> None:
+        """A co-resident has to be in the registry: the census looks it up.
+
+        An acquisition drawn from a pool's sub-floor bin names no parent, and
+        installing that as a resident keyed on the empty string crashed the
+        per-epoch lineage census with ``unknown strain ''``. It founds its own
+        lineage instead, which is what an unattributable acquisition is.
+        """
+        core = _core()
+        registry = core.strain_registry
+        assert registry is not None
+        host = _agent(1, "Cabin_A", infected=True)
+        resident = registry.mint(PATHOGEN)
+        host.assign_strain(PATHOGEN, resident.strain_id, Phenotype.of(resident))
+
+        assert core._establish(host, PATHOGEN, "", 1e4, 5, resident=True)
+
+        strain_ids = set(host.resident_strains(PATHOGEN))
+        assert "" not in strain_ids
+        founded = strain_ids - {resident.strain_id}
+        assert len(founded) == 1
+        assert all(sid in registry for sid in strain_ids)
+        census = registry.census(
+            5, PATHOGEN, {sid: 1 for sid in strain_ids},
+        )
+        assert set(census.lineage_counts) == strain_ids
+
 
 # ── Bounded state ──────────────────────────────────────────────────────
 

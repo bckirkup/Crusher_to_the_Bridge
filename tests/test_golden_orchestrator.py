@@ -15,14 +15,27 @@ REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 HISTORY_PATH = os.path.join(REPO_ROOT, "telemetry_buffer", "simulation_history.json")
 
 # Updated 2026-08-16: default platform mega_cruise_5000 (was destroyer_baseline).
+# Updated 2026-08-23 (hours clock): an epoch is one physical hour, so this 24-epoch
+# run covers one calendar day.  The three seeded norovirus cases pass day-1 onset
+# but cannot reach ``recovery_day: 3`` (72 epochs), where the previous
+# epoch-as-day reading cleared them inside 3 epochs.  Prior expectation was
+# infected 0 / symptomatic 0 / recovered 3; the legacy reading is still asserted
+# directly in tests/test_sim_clock.py.
+# Updated 2026-08-23 (onset off the day lattice): the illness hazard now opens at
+# each host's own drawn incubation period rather than at the next whole day, so a
+# case whose draw exceeds 1 day has not presented by epoch 23.  Prior expectation
+# under the hours clock was symptomatic 2.
 EXPECTED_SUMMARY = {
     "susceptible": 13,
-    "infected": 0,
-    "symptomatic": 0,
-    "recovered": 3,
+    "infected": 3,
+    "symptomatic": 1,
+    "recovered": 0,
     "immune": 4,
 }
-EXPECTED_TRIGGER = "BASELINE"
+# The trigger moves with the same contract: cases that used to clear inside three
+# epochs now stay symptomatic for the whole day, so syndromic surveillance has a
+# real symptomatic window to see and escalates.  Prior expectation was BASELINE.
+EXPECTED_TRIGGER = "CONFIRMED"
 
 
 def _run_orchestrator(epochs: int = 24) -> list[dict]:

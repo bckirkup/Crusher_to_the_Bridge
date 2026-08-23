@@ -27,6 +27,7 @@ import numpy as np
 
 from crusher_labs.modalities.clinical_strain_typing import ClinicalStrainTyping
 from crusher_labs.modalities.sequencing import MULTI_KINGDOM_TAXA
+from engines.sim_clock import SimClock
 from simulation_utils.numeric import default_simulation_rng
 from simulation_utils.paths import resolve_repo_path, validated_open
 
@@ -119,12 +120,12 @@ class LongReadNanoporeSequencing:
     def turnaround(self) -> dict[str, Any]:
         return dict(self.profile.get("turnaround", {}))
 
-    def profile_turnaround_delay_epochs(self, hours_per_epoch: float = 24.0) -> int:
+    def profile_turnaround_delay_epochs(self, clock: SimClock) -> int:
         from crusher_labs.instrument_turnaround import TurnaroundSpec
 
         return TurnaroundSpec.from_profile_turnaround(
             self.turnaround,
-            hours_per_epoch=hours_per_epoch,
+            clock=clock,
         ).delay_epochs
 
     def _background_taxa(self) -> tuple[list[str], np.ndarray]:

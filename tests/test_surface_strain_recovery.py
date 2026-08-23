@@ -417,8 +417,12 @@ class TestSurfaceReservoirIntegration:
     def test_armed_recovery_adds_conserved_payload_without_changing_swab_fields(
         self,
     ) -> None:
+        # Deposition needs a shedding host, and under the hours clock a host is
+        # not one epoch (one hour) past infection when it starts: the run has to
+        # cover a biological day for surfaces to carry a lineage at all.
+        epochs = 26
         enabled_spec = PicardRunSpec.from_legacy_yaml(
-            str(REPO_ROOT), num_epochs=1,
+            str(REPO_ROOT), num_epochs=epochs,
         )
         enabled_spec.legacy_cfg["initial_infected"] = 3
         variant_cfg = copy.deepcopy(
@@ -444,12 +448,12 @@ class TestSurfaceReservoirIntegration:
         armed_sim = ShipSimulation(
             enabled_spec, display=False, repo_root=str(REPO_ROOT),
         )
-        armed = armed_sim.run(n_epochs=1)
+        armed = armed_sim.run(n_epochs=epochs)
         baseline = ShipSimulation(
             baseline_spec, display=False, repo_root=str(REPO_ROOT),
-        ).run(n_epochs=1)
-        armed_swabs = armed.history[0]["observation_engine"]["surface_swab"]
-        baseline_swabs = baseline.history[0]["observation_engine"]["surface_swab"]
+        ).run(n_epochs=epochs)
+        armed_swabs = armed.history[-1]["observation_engine"]["surface_swab"]
+        baseline_swabs = baseline.history[-1]["observation_engine"]["surface_swab"]
 
         payload_rows = [
             (zone_name, swab["strain_recovery"])

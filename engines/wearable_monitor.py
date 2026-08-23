@@ -165,7 +165,7 @@ def _compute_infection_delta(
     for pid, inf in agent.infections.items():
         if inf["status"] != InfectionStatus.INFECTED:
             continue
-        dpi = inf.get("time_infected", 0) or 0
+        dpi = agent.clock.day_index(inf.get("time_infected", 0) or 0)
         phase = _get_infection_phase(dpi, phase_boundaries)
 
         profile = pathogen_profiles.get(pid, {})
@@ -623,9 +623,13 @@ class WearableMonitor:
                 # Circadian modulation for temp and heart rate
                 circadian = 0.0
                 if ch == "body_temp":
-                    circadian = 0.3 * math.sin(2 * math.pi * (hour - 4) / 24.0)
+                    circadian = 0.3 * math.sin(
+                        2 * math.pi * (hour - 4) / 24.0,  # clock-exempt: hour-of-day phase
+                    )
                 elif ch == "heart_rate":
-                    circadian = 3.0 * math.sin(2 * math.pi * (hour - 4) / 24.0)
+                    circadian = 3.0 * math.sin(
+                        2 * math.pi * (hour - 4) / 24.0,  # clock-exempt: hour-of-day phase
+                    )
 
                 # Sleep modulation
                 is_sleep_hour = (
@@ -700,12 +704,12 @@ class WearableMonitor:
         # Latency: suppress alerts if infection is too recent
         latency_hours = int(profile.get("alert_latency_hours", 0))
         if latency_hours > 0 and is_truly_infected:
-            min_dpi = min(
+            min_epochs = min(
                 (inf.get("time_infected", 0) or 0)
                 for inf in agent.infections.values()
                 if inf["status"] == InfectionStatus.INFECTED
             )
-            if min_dpi * 24 < latency_hours:
+            if agent.clock.hours_elapsed(min_epochs) < latency_hours:
                 is_truly_infected = False
 
         # Anomaly sensitivity/specificity

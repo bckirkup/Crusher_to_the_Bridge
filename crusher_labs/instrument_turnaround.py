@@ -15,6 +15,7 @@ import os
 from dataclasses import dataclass
 from typing import Any
 
+from engines.sim_clock import LEGACY_CLOCK, SimClock
 from simulation_utils.paths import resolve_repo_path, validated_open
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -31,39 +32,54 @@ class TurnaroundSpec:
         cls,
         block: dict[str, Any] | None,
         *,
-        hours_per_epoch: float = 24.0,
+        clock: SimClock,
     ) -> TurnaroundSpec:
+        """Resolve one instrument block.
+
+        ``delay_hours`` and ``full_run_hours`` are physical and pass through the
+        run's clock; ``delay_epochs`` and ``epoch_fraction`` are grid-native and
+        are taken as written, which is what makes an explicit zero "this epoch".
+        """
         if not block:
             return cls(0)
         if "delay_epochs" in block:
             return cls(max(0, int(block["delay_epochs"])))
-        if "epoch_fraction" in block:
-            frac = float(block["epoch_fraction"])
-            if frac < 1.0:
-                return cls(0)
-            return cls(max(0, int(math.ceil(frac))))
-        if "full_run_hours" in block:
-            hours = float(block["full_run_hours"])
-            return cls(max(0, int(math.ceil(hours / hours_per_epoch))))
-        return cls(0)
+        if "delay_hours" in block:
+            return cls(clock.epochs_for_hours(float(block["delay_hours"])))
+        return cls._from_run_length(block, clock=clock)
 
     @classmethod
     def from_profile_turnaround(
         cls,
         turnaround: dict[str, Any] | None,
         *,
-        hours_per_epoch: float = 24.0,
+        clock: SimClock,
     ) -> TurnaroundSpec:
-        if not turnaround:
+        """Resolve a deployment profile's own turnaround block.
+
+        A physical ``full_run_hours`` outranks ``epoch_fraction``: the fraction
+        is grid-native, and every shipped one was written against the
+        day-per-epoch grid, so honouring it first delivered a 48-hour MinION run
+        inside the ordering epoch at any clock.
+        """
+        return cls._from_run_length(turnaround, clock=clock)
+
+    @classmethod
+    def _from_run_length(
+        cls,
+        block: dict[str, Any] | None,
+        *,
+        clock: SimClock,
+    ) -> TurnaroundSpec:
+        if not block:
             return cls(0)
-        if "epoch_fraction" in turnaround:
-            frac = float(turnaround["epoch_fraction"])
+        if "full_run_hours" in block:
+            return cls(clock.epochs_for_hours(float(block["full_run_hours"])))
+        if "epoch_fraction" in block:
+            frac = float(block["epoch_fraction"])
             if frac < 1.0:
                 return cls(0)
             return cls(max(0, int(math.ceil(frac))))
-        if "full_run_hours" in turnaround:
-            hours = float(turnaround["full_run_hours"])
-            return cls(max(0, int(math.ceil(hours / hours_per_epoch))))
         return cls(0)
 
 
@@ -84,10 +100,24 @@ class InstrumentTurnaroundRegistry:
         config: dict[str, Any],
         *,
         long_read_profile_turnaround: dict[str, Any] | None = None,
+        clock: SimClock | None = None,
     ) -> None:
-        self.hours_per_epoch = float(config.get("hours_per_epoch", 24.0))
+        self.clock = clock or self._clock_from_config(config)
         self._instruments = config.get("instruments", {})
         self._long_read_profile_turnaround = long_read_profile_turnaround
+
+    @staticmethod
+    def _clock_from_config(config: dict[str, Any]) -> SimClock:
+        """Fallback clock for a registry built without the run's own.
+
+        ``hours_per_epoch`` in the TAT config is retained only for that case: the
+        run's ``voyage.epoch_duration_hours`` is authoritative whenever a clock is
+        passed, so the two cannot disagree in a simulation.
+        """
+        hours = config.get("hours_per_epoch")
+        if hours is None:
+            return LEGACY_CLOCK
+        return SimClock(epoch_duration_hours=float(hours), mode="hours")
 
     @classmethod
     def load(
@@ -96,23 +126,28 @@ class InstrumentTurnaroundRegistry:
         *,
         repo_root: str | None = None,
         long_read_profile_turnaround: dict[str, Any] | None = None,
+        clock: SimClock | None = None,
     ) -> InstrumentTurnaroundRegistry:
         root = repo_root or REPO_ROOT
         path = resolve_repo_path(root, path)
         with validated_open(path, "r", allowed_roots=(root,), encoding="utf-8") as fh:
             data = json.load(fh)
-        return cls(data, long_read_profile_turnaround=long_read_profile_turnaround)
+        return cls(
+            data,
+            long_read_profile_turnaround=long_read_profile_turnaround,
+            clock=clock,
+        )
 
     def delay_epochs_for(self, instrument: str) -> int:
         block = self._instruments.get(instrument, {})
         if block.get("use_profile"):
             return TurnaroundSpec.from_profile_turnaround(
                 self._long_read_profile_turnaround,
-                hours_per_epoch=self.hours_per_epoch,
+                clock=self.clock,
             ).delay_epochs
         return TurnaroundSpec.from_config_block(
             block,
-            hours_per_epoch=self.hours_per_epoch,
+            clock=self.clock,
         ).delay_epochs
 
 

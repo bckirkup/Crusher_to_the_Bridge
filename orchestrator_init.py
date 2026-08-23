@@ -42,6 +42,7 @@ from engines.infection_dynamics_bridge import (
     KorkinShipEngine,
 )
 from engines.py_contam_bridge import ContamTransportEngine
+from engines.sim_clock import SimClock
 from engines.wearable_monitor import (
     WearableMonitor,
     build_wearable_monitor_from_config,
@@ -417,11 +418,17 @@ def apply_voyage_medical_response(
 def build_engine(
     cfg: dict[str, Any],
     seed: int = 42,
+    *,
+    clock: SimClock | None = None,
 ) -> KorkinShipEngine:
     """Initialise the real infection-dynamics engine from config.
 
     Uses the ship_graph zones from spatial_layout.json (or inline
     fallback), mapping them to the Korkin Lab zone types.
+
+    ``clock`` is the run's single natural-history clock; callers that have
+    resolved the itinerary pass it so the engine and the itinerary cannot
+    disagree about how long an epoch is.
     """
     graph_cfg = cfg.get("ship_graph", {})
     num_agents = graph_cfg.get("num_agents", 20)
@@ -466,6 +473,7 @@ def build_engine(
         agent_classes=agent_classes,
         gender_distribution=gender_distribution,
         agent_behavior=cfg.get("agent_behavior"),
+        clock=clock or SimClock.from_config(cfg),
         **engine_kwargs,
     )
 
@@ -963,10 +971,14 @@ def init_multi_pathogen(
                     size=min(n_init, len(candidates)),
                     replace=False,
                 )
-                dpi = int(prof.get("initial_time_infected", 0))
+                # The profile field is days post infection; the record is epochs.
+                epochs_infected = int(round(engine.clock.epochs_for_days(
+                    float(prof.get("initial_time_infected", 0)),
+                )))
                 for agent in chosen:
                     agent.infect_with_pathogen(
-                        pid, 1e4, 0, time_infected=dpi, rng=rng, profile=prof,
+                        pid, 1e4, 0,
+                        time_infected=epochs_infected, rng=rng, profile=prof,
                     )
                     print(f"  Seeded {pid} -> agent {agent.agent_id}")
     print()
@@ -1005,6 +1017,7 @@ def init_observation_engine(
     seed: int,
     *,
     pathogen_profiles: dict[str, dict[str, Any]] | None = None,
+    clock: SimClock | None = None,
 ) -> ObservationEngine:
     """Initialise diagnostic instruments and the lab notebook."""
     from crusher_labs.clinical_instrument_params import (
@@ -1126,6 +1139,7 @@ def init_observation_engine(
         tat_path,
         repo_root=REPO_ROOT,
         long_read_profile_turnaround=lr_profile_turnaround,
+        clock=clock or SimClock.from_config(cfg),
     )
     turnaround = InstrumentTurnaroundQueue(tat_registry)
 

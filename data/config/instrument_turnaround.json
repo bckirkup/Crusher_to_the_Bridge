@@ -1,15 +1,15 @@
 {
   "meta": {
     "description": "Per-instrument assay turnaround (TAT) for observation delivery",
-    "version": "1.0",
+    "version": "1.1",
     "notes": [
-      "1 epoch = 1 simulation day unless hours_per_epoch is overridden",
-      "epoch_fraction < 1.0 delivers within the same epoch (sub-day assays)",
+      "delay_hours and full_run_hours are physical and convert through the run's epoch duration (voyage.epoch_duration_hours)",
+      "delay_epochs is grid-native: 0 means the result is available in the epoch it was ordered",
+      "epoch_fraction < 1.0 delivers within the same epoch (sub-epoch assays)",
       "long_read_verification with use_profile reads deployment profile turnaround",
-      "clinical_strain_typing is shipboard amplicon sequencing: library prep plus run, one epoch"
+      "clinical_strain_typing is shipboard amplicon sequencing: library prep plus run, 18 h"
     ]
   },
-  "hours_per_epoch": 24,
   "instruments": {
     "continuous_air_sampler": {
       "delay_epochs": 0
@@ -30,10 +30,10 @@
       "delay_epochs": 0
     },
     "clinical_microbiology": {
-      "delay_epochs": 3
+      "delay_hours": 72
     },
     "wastewater_sequencing": {
-      "delay_epochs": 1
+      "delay_hours": 24
     },
     "long_read_verification": {
       "use_profile": true

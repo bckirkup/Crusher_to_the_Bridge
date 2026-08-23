@@ -19,6 +19,7 @@ from typing import Any, Mapping, Sequence
 
 import numpy as np
 
+from engines.sim_clock import HOURS, SimClock
 from picard_framework.analysis._io import read_json
 from picard_framework.analysis.sentinel.exposure import (
     ascertainment_fraction,
@@ -221,13 +222,16 @@ def _make_voyage(
     itinerary.append(
         {"day": design.voyage_days, "type": "disembarkation", "port": "Home", "port_id": HOME_PORT},
     )
-    total_epochs = design.voyage_days * 24
+    epoch_hours = 1
+    total_epochs = int(
+        design.voyage_days * SimClock(float(epoch_hours), HOURS).epochs_per_day,
+    )
     voyage_id = f"S{ship}W{week}"
     config = {
         "voyage": {
             "effects_enabled": True,
             "total_epochs": total_epochs,
-            "epoch_duration_hours": 1,
+            "epoch_duration_hours": epoch_hours,
             "embarkation_date": (START_DATE + timedelta(days=7 * week)).isoformat(),
             "itinerary": itinerary,
         },
