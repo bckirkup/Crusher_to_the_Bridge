@@ -33,6 +33,7 @@ from dashboard.theme import (
     apply_lcars_layout,
 )
 from dashboard.units import axis, time_x_values, time_xaxis_title
+from simulation_utils.paths import resolve_child_path, resolve_repo_path, validated_open
 
 
 def _trigger_status_color(status: str) -> str:
@@ -47,9 +48,12 @@ def _load_cruise_histories(cruise_dirs: list[str]) -> dict[str, list]:
     out: dict[str, list] = {}
     for cdir in cruise_dirs:
         hist_path, _ = telemetry_paths(cdir)
-        if os.path.isfile(hist_path):
-            with open(hist_path, encoding="utf-8") as fh:
-                out[cdir] = json.load(fh)
+        if not os.path.isfile(hist_path):
+            continue
+        with validated_open(
+            hist_path, "r", allowed_roots=(REPO_ROOT,), encoding="utf-8",
+        ) as fh:
+            out[cdir] = json.load(fh)
     return out
 
 
@@ -174,19 +178,26 @@ def render_fleet_operations(
 ) -> None:
     st.subheader("Fleet Operations")
 
-    fleet_root = st.text_input(
+    fleet_root_input = st.text_input(
         "Presidio output root",
         value=st.session_state.get("fleet_root") or default_fleet_root or os.path.join(
             REPO_ROOT, "presidio", "data", "experiences", "smoke_runs",
         ),
         key="fleet_root",
     )
+    try:
+        fleet_root = resolve_repo_path(REPO_ROOT, fleet_root_input)
+    except ValueError:
+        st.error("Fleet output root must be inside the repository.")
+        return
     st.session_state.fleet_root = fleet_root
 
-    summary_path = os.path.join(fleet_root, "fleet_summary.json")
+    summary_path = resolve_child_path(fleet_root, "fleet_summary.json")
     fleet_summary: dict = {}
     if os.path.isfile(summary_path):
-        with open(summary_path, encoding="utf-8") as fh:
+        with validated_open(
+            summary_path, "r", allowed_roots=(REPO_ROOT,), encoding="utf-8",
+        ) as fh:
             fleet_summary = json.load(fh)
         st.markdown(
             _lcars_banner(

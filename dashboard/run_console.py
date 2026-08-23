@@ -10,6 +10,11 @@ import streamlit as st
 
 from dashboard.loaders import list_platform_ids
 from dashboard.paths import REPO_ROOT
+from simulation_utils.paths import (
+    prepare_output_directory,
+    resolve_repo_path,
+    validated_open,
+)
 
 
 def _list_ship_presets() -> list[str]:
@@ -24,7 +29,7 @@ def _list_fleet_presets() -> list[str]:
 
 
 def _load_json(path: str) -> dict[str, Any]:
-    with open(path, encoding="utf-8") as fh:
+    with validated_open(path, "r", allowed_roots=(REPO_ROOT,), encoding="utf-8") as fh:
         return json.load(fh)
 
 
@@ -40,7 +45,8 @@ def _build_ship_spec(
     if preset_path and os.path.isfile(preset_path):
         spec = _load_json(preset_path)
     else:
-        spec = _load_json(os.path.join(REPO_ROOT, "picard_framework", "runs", "smoke_2epoch.json"))
+        default = os.path.join(REPO_ROOT, "picard_framework", "runs", "smoke_2epoch.json")
+        spec = _load_json(default)
 
     spec.setdefault("catalog", {})["platform_id"] = platform_id
     spec.setdefault("run", {})["num_epochs"] = num_epochs
@@ -55,21 +61,21 @@ def _build_ship_spec(
     return spec
 
 
-def _repo_relative_dir(path: str) -> str:
-    """Return a repo-relative directory for Picard telemetry paths."""
-    abs_path = os.path.abspath(path)
-    repo = os.path.abspath(REPO_ROOT)
-    if abs_path.startswith(repo + os.sep) or abs_path == repo:
-        rel = os.path.relpath(abs_path, repo)
-        return rel.replace("\\", "/")
-    return "telemetry_buffer"
+def _safe_telemetry_dir(telemetry_dir: str) -> str:
+    """Resolve UI telemetry path under the repo root; fall back to telemetry_buffer."""
+    try:
+        return resolve_repo_path(REPO_ROOT, telemetry_dir)
+    except ValueError:
+        return resolve_repo_path(REPO_ROOT, "telemetry_buffer")
 
 
 def _launch_ship(spec_dict: dict[str, Any], telemetry_dir: str) -> str:
     from picard_framework import PicardRunSpec, ShipSimulation
 
-    rel_dir = _repo_relative_dir(telemetry_dir)
-    os.makedirs(os.path.join(REPO_ROOT, rel_dir), exist_ok=True)
+    abs_dir = _safe_telemetry_dir(telemetry_dir)
+    prepare_output_directory(abs_dir, allowed_roots=(REPO_ROOT,))
+    rel_dir = os.path.relpath(abs_dir, REPO_ROOT).replace("\\", "/")
+
     run_block = spec_dict.setdefault("run", {})
     run_block["simulation_history"] = f"{rel_dir}/simulation_history.json"
     run_block["lab_notebook"] = f"{rel_dir}/artificial_lab_notebook.json"
@@ -81,14 +87,15 @@ def _launch_ship(spec_dict: dict[str, Any], telemetry_dir: str) -> str:
     sim.run()
     sim.finalize(display=False)
     out = spec.telemetry.simulation_history if spec.telemetry else run_block["simulation_history"]
-    return os.path.join(REPO_ROOT, out) if not os.path.isabs(out) else out
+    return out if os.path.isabs(out) else os.path.join(REPO_ROOT, out)
 
 
 def _launch_fleet(fleet_config: str, num_cruises: int) -> str:
     from presidio.run_spec import PresidioRunSpec
     from presidio_runner import run
 
-    fleet_spec = PresidioRunSpec.from_fleet_json(REPO_ROOT, fleet_config)
+    safe_config = resolve_repo_path(REPO_ROOT, fleet_config)
+    fleet_spec = PresidioRunSpec.from_fleet_json(REPO_ROOT, safe_config)
     fleet_spec.num_cruises = num_cruises
     run(fleet_spec, display=False)
     return fleet_spec.output_root
@@ -130,8 +137,6 @@ def _render_ship_console() -> None:
         value=os.path.join(REPO_ROOT, "telemetry_buffer"),
         key="ship_telemetry_dir",
     )
-    if not os.path.abspath(telemetry_dir).startswith(os.path.abspath(REPO_ROOT)):
-        st.warning("Telemetry directory must be inside the repository. Runs will use telemetry_buffer/.")
 
     confirm = False
     if num_epochs > 24:
@@ -141,7 +146,9 @@ def _render_ship_console() -> None:
         if num_epochs > 24 and not confirm:
             st.error("Confirm long run before launching.")
             return
-        os.makedirs(telemetry_dir, exist_ok=True)
+        if not _path_under_repo(telemetry_dir):
+            st.warning("Path outside repo — using telemetry_buffer/.")
+        safe_dir = _safe_telemetry_dir(telemetry_dir)
         spec = _build_ship_spec(
             platform_id=platform_id,
             num_epochs=int(num_epochs),
@@ -152,15 +159,23 @@ def _render_ship_console() -> None:
         )
         with st.spinner(f"Running {num_epochs}-epoch simulation…"):
             try:
-                hist_path = _launch_ship(spec, telemetry_dir)
+                hist_path = _launch_ship(spec, safe_dir)
             except Exception as exc:
                 st.error(f"Run failed: {exc}")
                 return
         st.success(f"Run complete. History: {hist_path}")
-        st.session_state.telemetry_dir = telemetry_dir
+        st.session_state.telemetry_dir = safe_dir
         st.session_state.active_history_source = "ship"
         st.cache_data.clear()
         st.rerun()
+
+
+def _path_under_repo(path: str) -> bool:
+    try:
+        resolve_repo_path(REPO_ROOT, path)
+        return True
+    except ValueError:
+        return False
 
 
 def _render_fleet_console() -> None:
