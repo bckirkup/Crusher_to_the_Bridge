@@ -4,8 +4,8 @@
   Monitor an AWS Batch Fargate Spot campaign array job.
 
 .DESCRIPTION
-  Prints Batch array statusSummary plus an S3 zip count under the campaign
-  prefix. Prefer S3 zip growth for early progress — children stay RUNNING
+  Prints Batch array statusSummary plus a completed-run count from the
+  shard-scoped resume logs under the campaign prefix. Children stay RUNNING
   until their entire shard finishes, so SUCCEEDED can stay 0 for a long time.
 
   Set AWS_PROFILE (e.g. picard or your SSO PowerUser profile) and pass
@@ -63,6 +63,8 @@ if (-not $Bucket) {
   throw "Set -Bucket or env CAMPAIGN_BUCKET (or create deploy/aws/.env from .env.example)."
 }
 
+$Prefix = $Prefix.TrimEnd('/') + '/'
+
 function AwsArgs {
   $a = @("--region", $Region)
   if ($AwsProfile) { $a = @("--profile", $AwsProfile) + $a }
@@ -77,31 +79,46 @@ function Get-StatusSummary {
   return ($raw | ConvertFrom-Json)
 }
 
-function Get-ZipCount {
-  # `aws s3 ls --recursive` follows all pages. Avoid a list-objects-v2 JMESPath
-  # count, which returns an error when a new prefix has no Contents property.
-  $output = @(aws @(AwsArgs) s3 ls "s3://$Bucket/$Prefix" --recursive 2>&1)
+function Get-CompletedRunCount {
+  $resumePrefix = "s3://$Bucket/${Prefix}_resume/"
+  $output = @(aws @(AwsArgs) s3 ls $resumePrefix --recursive 2>&1)
   if ($LASTEXITCODE -ne 0) {
-    # AWS CLI v2 returns 1 with no message for an empty prefix.
     if ($output.Count -eq 0) { return 0 }
-    throw "S3 listing failed for s3://$Bucket/$Prefix`: $($output -join ' ')"
+    throw "S3 listing failed for $resumePrefix`: $($output -join ' ')"
   }
-  return @($output | Select-String '\.zip$').Count
+  $keys = @(
+    $output | ForEach-Object {
+      $key = ($_ -split '\s+')[-1]
+      if ($key -match 'completed_runs\.[^/]+\.txt$') { $key }
+    }
+  )
+  $count = 0
+  foreach ($key in $keys) {
+    $lines = @(aws @(AwsArgs) s3 cp "s3://$Bucket/$key" - 2>&1)
+    if ($LASTEXITCODE -ne 0) {
+      if ($lines.Count -eq 0) { continue }
+      throw "S3 download failed for s3://$Bucket/$key`: $($lines -join ' ')"
+    }
+    $count += @($lines | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }).Count
+  }
+  return $count
 }
 
 function Show-Snapshot {
   $ts = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
   $info = Get-StatusSummary
-  $zips = Get-ZipCount
+  $runs = Get-CompletedRunCount
+  $shards = @(aws @(AwsArgs) s3 ls "s3://$Bucket/${Prefix}_resume/" --recursive 2>$null |
+    Select-String 'completed_runs\.[^/]+\.txt$').Count
   $s = $info.summary
-  Write-Host ("{0} status={1} size={2} SUBMITTED={3} PENDING={4} RUNNABLE={5} STARTING={6} RUNNING={7} SUCCEEDED={8} FAILED={9} zips={10}" -f `
+  Write-Host ("{0} status={1} size={2} SUBMITTED={3} PENDING={4} RUNNABLE={5} STARTING={6} RUNNING={7} SUCCEEDED={8} FAILED={9} runs={10} shards={11}" -f `
     $ts, $info.status, $info.size, `
-    $s.SUBMITTED, $s.PENDING, $s.RUNNABLE, $s.STARTING, $s.RUNNING, $s.SUCCEEDED, $s.FAILED, $zips)
+    $s.SUBMITTED, $s.PENDING, $s.RUNNABLE, $s.STARTING, $s.RUNNING, $s.SUCCEEDED, $s.FAILED, $runs, $shards)
   if ($info.statusReason) {
     Write-Host ("  statusReason: {0}" -f $info.statusReason)
   }
   Write-Host ("  jobDefinition: {0}" -f $info.jobDefinition)
-  Write-Host ("  s3://{0}/{1}*.zip" -f $Bucket, $Prefix)
+  Write-Host ("  s3://{0}/{1}<shard-*.zip|shard-*.manifest.json>" -f $Bucket, $Prefix)
   return $info
 }
 

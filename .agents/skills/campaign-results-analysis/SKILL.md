@@ -16,8 +16,9 @@ Path I/O is confined to the process CWD via `simulation_utils.paths`
 
 ## Prerequisites
 
-- Local directory of `<run_id>.zip` files (from local campaign output or
-  `aws s3 sync`)
+- Local directory of campaign artifacts: local runs may be individual
+  `<run_id>.zip` files, while AWS Batch results are nested shard zips plus
+  shard manifests (from `aws s3 sync`)
 - For Batch failure classification: AWS CLI + `AWS_PROFILE=picard` (or equivalent)
 - For Stan fits: `pip install -e '.[analysis]'` and CmdStan
   (`python3 -c 'import cmdstanpy; cmdstanpy.install_cmdstan()'`)

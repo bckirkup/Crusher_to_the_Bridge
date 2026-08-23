@@ -4,9 +4,10 @@ Package the ~17,780-run mega cruise campaign
 (`picard_framework/runs/mega_cruise_campaign/campaign_runner.py`) as a Docker
 image in Amazon ECR and run it as a single **AWS Batch array job** across many
 short-lived **Fargate Spot** containers. Each array child executes a disjoint
-shard of the run list and uploads every per-run result zip to one shared S3
-prefix. Interrupted Spot containers resume from `completed_runs.txt` on retry
-(the runner downloads the shard resume log from S3 at start).
+shard of the run list and uploads one periodically refreshed fused zip plus one
+JSON manifest per shard to one shared S3 prefix. Interrupted Spot containers
+resume from the shard artifacts and `completed_runs.txt` on retry (the runner
+downloads them from S3 at start).
 
 This deployment uses **IAM role assumption (short-lived credentials)** — there
 are **no long-lived access keys** in the deploy path beyond a single minimal
@@ -26,7 +27,8 @@ bootstrap user that can do nothing except assume a deploy role:
                    │  identity = picard-campaign-job-role  (S3 write via boto3 chain)       │
                     └───────────────────────────────┬──────────────────────────────────────┘
                                                      ▼
-                                     s3://<bucket>/campaign/<run_id>.zip
+                                     s3://<bucket>/campaign/shard-3.zip
+                                     s3://<bucket>/campaign/shard-3.manifest.json
                                      s3://<bucket>/campaign/_resume/completed_runs.shard-*.txt
                                                      ▼
                         aws s3 sync  ──►  ./results/  ──►  aggregate_results.py  ──►  CSV/JSON
@@ -55,11 +57,11 @@ Two credential contexts, both short-lived:
 | `batch_execution_role_trust.json` | Trust policy for `picard-campaign-execution-role`. Assumed by the ECS/Fargate agent so it can pull the ECR image and write logs on behalf of the task. | *(none)* |
 | `batch_execution_role_permissions.json` | Permission policy for the execution role (the Fargate agent): pull the `picard-campaign` image from ECR and write container logs. Equivalent to the AWS-managed `AmazonECSTaskExecutionRolePolicy`, scoped to this repo/log group. | `<REGION>`, `<ACCOUNT_ID>` |
 | `batch_job_role_trust.json` | Trust policy for `picard-campaign-job-role` — the running container's own identity (used by boto3's ambient credential chain to upload results to S3). Assumed by the ECS/Fargate task. | *(none)* |
-| `batch_job_role_permissions.json` | Permission policy for `picard-campaign-job-role` (the container's own identity). boto3 in `campaign_runner.py` picks this up from the ambient credential chain to upload each `<run_id>.zip` and `completed_runs.txt` to the shared results prefix. S3 write to `campaign/*`. | `<BUCKET>` |
+| `batch_job_role_permissions.json` | Permission policy for `picard-campaign-job-role` (the container's own identity). boto3 in `campaign_runner.py` picks this up from the ambient credential chain to upload shard zips, manifests, and resume logs to the shared results prefix. S3 write to `campaign/*`. | `<BUCKET>` |
 | `batch_job_definition.json` | Fargate Spot Batch job definition (ECR image, both role ARNs, vCPU/mem, shard/s3 command). Sized at **1 vCPU / 2048 MB (2 GB)** after compact history + subprocess isolation. Per-run `--timeout 3600` covers ~30 min 7000-agent sims. OOM (exit 137 / `OutOfMemoryError*`) **exits without retry** so memory kills are countable; Spot `Host EC2*` still retries. Escalate 1/4 → 1/8 → 2/16 GB if `classify_batch_failures.py` shows non-zero OOM. **Not an IAM document.** | `<ACCOUNT_ID>`, `<REGION>`, `<BUCKET>` |
 | `submit_array_job.sh` | Wrapper around `aws batch submit-job --array-properties size=<N>` (honors `AWS_PROFILE`) | — |
 | `classify_batch_failures.py` | Classify array-child attempts: Spot reclaim vs OOM vs timeout vs other. Write JSON/CSV; optional upload to `s3://…/campaign/_ops/`. | — |
-| `monitor_campaign.ps1` | Windows-friendly poller: Batch `statusSummary` + S3 `*.zip` count (optional `-Watch` / `-Classify`). | — |
+| `monitor_campaign.ps1` | Windows-friendly poller: Batch `statusSummary` + completed-run count from shard resume logs (optional `-Watch` / `-Classify`). | — |
 | `ensure_campaign_infra.sh` | Recreate missing queue/log group and register the current job definition (`AWS_PROFILE=picard`). Optional `--smoke-submit N`. | `ACCOUNT_ID`, `REGION`, `BUCKET` |
 | `submit_boundary_surface.ps1` | Submit `boundary_surface_v1` Spot array (`-Tier b2` / `-IncludeDeferred` via containerOverrides). | — |
 | `submit_campaign_manifest.ps1` | Submit any mega-cruise manifest Spot array (synthetic recovery, VSP degradation, …). | — |
@@ -71,7 +73,7 @@ Two credential contexts, both short-lived:
 | `sentinel_nuts_entrypoint.py` | One AWS Batch array child for a Sentinel Engine C NUTS cell. | — |
 | `batch_job_definition_sentinel_nuts.json` | Fargate NUTS ladder job definition using the existing analysis image and log group. | `<ACCOUNT_ID>`, `<REGION>`, `<BUCKET>` |
 | `submit_sentinel_nuts.sh` / `monitor_sentinel_nuts.sh` | Submit and monitor rung-scoped Sentinel NUTS arrays. | — |
-| `aggregate_results.py` | Unzip `<run_id>.zip` under `./results/`, merge `summary.json` into one CSV/JSON | — |
+| `aggregate_results.py` | Read shard zips/manifests under `./results/`, merge one row per run into CSV/JSON | — |
 
 Replace `<ACCOUNT_ID>`, `<REGION>`, `<BUCKET>`, and `<EXTERNAL_ID>` placeholders
 throughout.
@@ -305,8 +307,10 @@ As of the 1 vCPU / 2 GB resize work:
 
 ### Result bookkeeping
 
-Each `<run_id>.zip` packs `summary.json` with a structured `parameters` block
-(tier, pathogen, seed, HVAC/OA/decay/surveillance/… factors) next to outcomes.
+Each shard zip packs many runs as `<run_id>/summary.json` and
+`<run_id>/timeseries.json`; its manifest carries a structured `parameters`
+block (tier, pathogen, seed, HVAC/OA/decay/surveillance/… factors) next to
+outcomes.
 `aggregate_results.py` flattens `parameters.*` into CSV columns so you do not
 need to parse opaque run_ids or reopen `run_spec.json` / the manifest.
 
@@ -402,14 +406,14 @@ campaign_runner.py --shard-count 200 \
 so the ~17,780 runs are split into 200 disjoint shards (~89 runs each). On Spot
 interruption Batch retries the child; `--resume` **downloads** the shard's
 `completed_runs.txt` from `s3://<bucket>/campaign/_resume/` at start, then
-skips those run_ids (and any `<run_id>.zip` already present under the prefix).
+skips those run_ids listed in the shard resume log or manifest.
 The log is also re-uploaded periodically. Inside the container, boto3 uses the
 **picard-campaign-job-role** automatically — no keys in the image.
 
 Monitor progress (PowerShell-friendly wrapper — prefer this on Windows):
 
 ```powershell
-# Status + S3 zip count every 60s (Ctrl+C to stop)
+# Status + completed-run count every 60s (Ctrl+C to stop)
 $env:AWS_PROFILE = 'picard'   # or your SSO PowerUser profile
 $env:CAMPAIGN_BUCKET = '<BUCKET>'
 .\deploy\aws\monitor_campaign.ps1 -JobId <jobId> `
@@ -431,7 +435,7 @@ aws --profile picard batch describe-jobs --jobs <jobId> --region "$REGION" \
 | Signal | Why |
 |--------|-----|
 | `statusSummary` (RUNNING / RUNNABLE / SUCCEEDED / FAILED) | Shard-level only — a child is SUCCEEDED only when its **entire** shard finishes. Early progress looks like RUNNABLE↔RUNNING bounce with SUCCEEDED=0. |
-| S3 `campaign/*.zip` object count | True throughput — zips land continuously while shards are still RUNNING. |
+| S3 resume-log line count | Terminal progress — completed run_ids are appended and uploaded periodically while shards are still RUNNING. |
 | `classify_batch_failures.py` | Separates Spot reclaim from real OOM / timeout. |
 
 Classify Spot reclaim vs OOM vs timeout (during or after the run):
@@ -463,10 +467,17 @@ python3 aggregate_results.py ./results/ \
   --out-csv campaign_summary.csv --out-json campaign_summary.json
 ```
 
-`aggregate_results.py` unzips every `<run_id>.zip`, reads its `summary.json`,
-and flattens the `summary` / `cost_accounting` / `derived` blocks into one row
-per run (plus `timeseries.present` / `timeseries.n_epochs`). For stacked
-epidemic curves see `deploy/aws/analyze_campaign_curves.py`.
+`aggregate_results.py` reads each shard zip's nested run artifacts and any
+shard manifests, then flattens the `summary` / `cost_accounting` /
+`derived` blocks into one row per run (plus `timeseries.present` /
+`timeseries.n_epochs`). For stacked epidemic curves see
+`deploy/aws/analyze_campaign_curves.py`.
+
+Terminal progress can be counted directly from the resume logs:
+
+```bash
+aws s3 sync s3://$BUCKET/$PREFIX/_resume/ ./_resume/ && cat ./_resume/completed_runs.shard-*.txt | wc -l
+```
 
 ## Boundary surface campaign (`boundary_surface_v1`)
 

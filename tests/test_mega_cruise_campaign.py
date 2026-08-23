@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import json
+import shutil
 import sys
+import zipfile
 from pathlib import Path
 
 import pytest
@@ -14,6 +16,7 @@ sys.path.insert(0, str(REPO_ROOT))
 from typing import Any  # noqa: E402
 
 from picard_framework.runs.mega_cruise_campaign.campaign_runner import (  # noqa: E402
+    ShardBundle,
     clear_failed_artifacts,
     compute_derived_metrics,
     extract_timeseries,
@@ -492,7 +495,7 @@ def test_compute_derived_metrics() -> None:
 
 @pytest.mark.timeout(180)
 def test_smoke_cli_one_run(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    """End-to-end via the default subprocess-isolated path: one run -> one zip."""
+    """End-to-end subprocess path writes local and fused shard artifacts."""
     import zipfile
 
     out = tmp_path / "mega_cruise_campaign"
@@ -506,11 +509,13 @@ def test_smoke_cli_one_run(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> N
     )
     rc = main(["--smoke", "--keep-workdir"])
     assert rc == 0
-    zips = list(out.glob("*.zip"))
-    assert len(zips) == 1
+    zips = {path.name: path for path in out.glob("*.zip")}
+    assert len(zips) == 2
+    assert "single.zip" in zips
+    assert "single.manifest.json" in {path.name for path in out.glob("*.json")}
     completed = (out / "completed_runs.txt").read_text(encoding="utf-8").strip()
     assert completed
-    # summary present in workdir when keep_workdir
+    # summary present in both the retained workdir and accumulation dir.
     work = out / completed
     assert (work / "summary.json").is_file()
     summary = json.loads((work / "summary.json").read_text(encoding="utf-8"))
@@ -519,17 +524,22 @@ def test_smoke_cli_one_run(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> N
     assert "parameters" in summary
     assert summary["parameters"]["seed"] is not None
     assert summary["parameters"].get("history_retention") == "compact"
+    accumulated = out / "_shard_runs" / "single" / completed
+    assert (accumulated / "summary.json").is_file()
     # timeseries.json is written and packed into the zip.
     assert (work / "timeseries.json").is_file()
-    with zipfile.ZipFile(zips[0]) as zf:
+    with zipfile.ZipFile(zips["single.zip"]) as zf:
         names = zf.namelist()
-    assert any(n.endswith("timeseries.json") for n in names)
-    assert any(n.endswith("summary.json") for n in names)
+    assert any(n == f"{completed}/timeseries.json" for n in names)
+    assert any(n == f"{completed}/summary.json" for n in names)
+    manifest = json.loads((out / "single.manifest.json").read_text(encoding="utf-8"))
+    assert manifest[0]["run_id"] == completed
+    assert manifest[0]["parameters"] == summary["parameters"]
 
 
 @pytest.mark.timeout(120)
 def test_smoke_in_process(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    """--in-process runs one sim in the parent and still writes the zip."""
+    """--in-process runs one sim and writes local plus fused shard zips."""
     out = tmp_path / "mega_cruise_campaign"
     monkeypatch.setattr(
         "picard_framework.runs.mega_cruise_campaign.campaign_runner.OUTPUT_ROOT",
@@ -541,7 +551,8 @@ def test_smoke_in_process(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> No
     )
     rc = main(["--smoke", "--in-process", "--keep-workdir"])
     assert rc == 0
-    assert len(list(out.glob("*.zip"))) == 1
+    assert "single.zip" in {path.name for path in out.glob("*.zip")}
+    assert len(list(out.glob("*.zip"))) == 2
 
 
 def _load_aggregator():
@@ -615,6 +626,34 @@ def test_aggregate_backward_compatible_without_derived(tmp_path: Path) -> None:
     assert row["timeseries.n_epochs"] is None
     assert not any(k.startswith("derived.") for k in row)
     assert not any(k.startswith("parameters.") for k in row)
+
+
+def test_aggregate_deduplicates_local_run_and_shard_zips(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    agg = _load_aggregator()
+    results = tmp_path / "results"
+    results.mkdir()
+    payload = {
+        "run_id": "run_a",
+        "parameters": {"seed": 42},
+        "summary": {"infected": 1},
+    }
+    _write_zip(results / "run_a.zip", payload, [{"epoch": 0}])
+    with zipfile.ZipFile(results / "single.zip", "w") as zf:
+        zf.writestr("run_a/summary.json", json.dumps(payload))
+        zf.writestr("run_a/timeseries.json", json.dumps([{"epoch": 0}]))
+
+    output_json = tmp_path / "aggregate.json"
+    output_csv = tmp_path / "aggregate.csv"
+    monkeypatch.chdir(tmp_path)
+    assert agg.main([
+        str(results),
+        "--out-json", str(output_json),
+        "--out-csv", str(output_csv),
+    ]) == 0
+    rows = json.loads(output_json.read_text(encoding="utf-8"))
+    assert [row["run_id"] for row in rows] == ["run_a"]
 
 
 def test_subprocess_timeout_writes_stderr(
@@ -767,7 +806,8 @@ def test_resume_downloads_s3_completed_log(
             pass
 
         def download_file(self, name: str, local_path: Path) -> bool:
-            assert "_resume/completed_runs" in name
+            if not name.startswith("_resume/"):
+                return False
             local_path.parent.mkdir(parents=True, exist_ok=True)
             local_path.write_text("already_done\n", encoding="utf-8")
             return True
@@ -924,6 +964,21 @@ def test_analyze_campaign_curves_long_form(
                 {"epoch": 1, "infected": 3, "recovered": 1},
             ]),
         )
+    with zipfile.ZipFile(tmp_path / "single.zip", "w") as zf:
+        zf.writestr(
+            "run_a/summary.json",
+            json.dumps({
+                "run_id": "t2_noro_merv8_oa20_med_s42",
+                "derived": {"attack_rate": 0.1, "peak_prevalence": 5},
+            }),
+        )
+        zf.writestr(
+            "run_a/timeseries.json",
+            json.dumps([
+                {"epoch": 0, "infected": 1, "recovered": 0},
+                {"epoch": 1, "infected": 3, "recovered": 1},
+            ]),
+        )
 
     rows = list(mod.iter_curve_rows(tmp_path))
     assert len(rows) == 2
@@ -1055,14 +1110,14 @@ def test_smoke_s3_upload_failure_still_succeeds(
     out_text = capsys.readouterr().out
     assert "s3 upload failed" in out_text or "completed_runs.txt upload failed" in out_text
     zips = list(out.glob("*.zip"))
-    assert len(zips) == 1
+    assert len(zips) == 2
     assert (out / "completed_runs.txt").is_file()
 
 
-def test_resume_skips_when_s3_zip_already_exists(
+def test_resume_skips_when_s3_manifest_contains_run(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """On --resume, an existing S3 zip should mark the run completed and skip it."""
+    """On --resume, a downloaded shard manifest marks the run completed."""
     out = tmp_path / "mega_cruise_campaign"
     out.mkdir(parents=True)
     monkeypatch.setattr(
@@ -1083,11 +1138,25 @@ def test_resume_skips_when_s3_zip_already_exists(
             pass
 
         def download_file(self, name: str, local_path: Path) -> bool:
+            if name.endswith(".manifest.json"):
+                candidate = list(generate_tier_runs(
+                    load_manifest(),
+                    "t1_pathogen_baselines",
+                    platform="destroyer_baseline",
+                    epochs_override=2,
+                    num_agents_override=20,
+                ))[0][0]
+                local_path.parent.mkdir(parents=True, exist_ok=True)
+                local_path.write_text(
+                    json.dumps([{
+                        "run_id": candidate,
+                        "parameters": {"seed": 1},
+                        "derived": {},
+                    }]),
+                    encoding="utf-8",
+                )
+                return True
             return False
-
-        def object_exists(self, name: str) -> bool:
-            # Pretend every run zip already landed in S3.
-            return name.endswith(".zip")
 
         def upload_file(self, local_path: Path, name: str) -> str:
             return f"s3://fake/{name}"
@@ -1111,18 +1180,287 @@ def test_resume_skips_when_s3_zip_already_exists(
         fake_run,
     )
 
-    # Smoke selects t1/limit 1; with all zips present in S3 the first candidate
+    # Smoke selects t1/limit 1; with the candidate in the shard manifest
     # is skipped and marked completed without invoking the simulator.
     rc = main([
         "--smoke", "--resume",
         "--s3-prefix", "s3://fake-bucket/campaign/",
-        "--in-process",
+        "--in-process", "--shard-count", "300", "--shard-index", "0",
     ])
     assert rc == 0
     assert called == []
     completed = (out / "completed_runs.txt").read_text(encoding="utf-8").strip()
     assert completed  # at least the first smoke candidate was marked done
-    assert not list(out.glob("*.zip"))  # no local zip written when skipped
+    assert [path.name for path in out.glob("*.zip")] == ["shard-0.zip"]
+
+
+def test_periodic_shard_bundle_upload_and_resume_append(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Periodic bundle uploads are resumable and append later shard runs."""
+    out = tmp_path / "mega_cruise_campaign"
+    monkeypatch.setattr(
+        "picard_framework.runs.mega_cruise_campaign.campaign_runner.OUTPUT_ROOT",
+        out,
+    )
+    monkeypatch.setattr(
+        "picard_framework.runs.mega_cruise_campaign.campaign_runner.COMPLETED_LOG",
+        out / "completed_runs.txt",
+    )
+    monkeypatch.setattr(
+        "picard_framework.runs.mega_cruise_campaign.campaign_runner.FAILED_LOG",
+        out / "failed_runs.txt",
+    )
+
+    storage: dict[str, bytes] = {}
+    upload_events: list[str] = []
+
+    class MemoryUploader:
+        def __init__(self, _prefix: str) -> None:
+            self.uploads: list[str] = []
+
+        def download_file(self, name: str, local_path: Path) -> bool:
+            payload = storage.get(name)
+            if payload is None:
+                return False
+            local_path.parent.mkdir(parents=True, exist_ok=True)
+            local_path.write_bytes(payload)
+            return True
+
+        def upload_file(self, local_path: Path, name: str) -> str:
+            self.uploads.append(name)
+            upload_events.append(name)
+            storage[name] = local_path.read_bytes()
+            return f"s3://fake/{name}"
+
+    calls: list[str] = []
+
+    def fake_run(run_id: str, spec: dict, **kwargs: Any) -> bool:
+        calls.append(run_id)
+        suffix = kwargs.get("accumulation_suffix", "single")
+        run_dir = out / "_shard_runs" / suffix / run_id
+        run_dir.mkdir(parents=True, exist_ok=True)
+        summary = {
+            "run_id": run_id,
+            "parameters": {"seed": spec["run"]["random_seed"]},
+            "derived": {"attack_rate": 0.1},
+        }
+        (run_dir / "summary.json").write_text(json.dumps(summary), encoding="utf-8")
+        (run_dir / "timeseries.json").write_text("[]", encoding="utf-8")
+        (out / f"{run_id}.zip").write_bytes(b"local")
+        return True
+
+    monkeypatch.setattr(
+        "picard_framework.runs.mega_cruise_campaign.campaign_runner.S3Uploader",
+        MemoryUploader,
+    )
+    monkeypatch.setattr(
+        "picard_framework.runs.mega_cruise_campaign.campaign_runner.run_simulation",
+        fake_run,
+    )
+    monkeypatch.setattr(
+        "picard_framework.runs.mega_cruise_campaign.campaign_runner.run_simulation_subprocess",
+        fake_run,
+    )
+
+    args = [
+        "--tier", "t1", "--platform", "destroyer_baseline",
+        "--epochs", "2", "--num-agents", "20", "--limit", "2",
+        "--in-process", "--s3-log-every", "1",
+        "--s3-prefix", "s3://fake-bucket/campaign/",
+    ]
+    assert main(args) == 0
+    first_ids = calls[:2]
+    assert "single.zip" in storage
+    assert "single.manifest.json" in storage
+    assert "_resume/completed_runs.single.txt" in storage
+    first_manifest = json.loads(storage["single.manifest.json"])
+    assert [entry["run_id"] for entry in first_manifest] == first_ids
+    assert upload_events.count("single.zip") >= 2
+    assert upload_events.count("single.manifest.json") >= 2
+    with zipfile.ZipFile(out / "single.zip") as zf:
+        assert all(f"{run_id}/summary.json" in zf.namelist() for run_id in first_ids)
+
+    (out / "completed_runs.txt").unlink()
+    (out / "single.zip").unlink()
+    (out / "single.manifest.json").unlink()
+    shutil.rmtree(out / "_shard_runs")
+    args[args.index("--limit") + 1] = "1"
+    assert main([*args, "--resume"]) == 0
+    assert calls[2] not in first_ids
+    final_manifest = json.loads(storage["single.manifest.json"])
+    assert [entry["run_id"] for entry in final_manifest] == calls[:3]
+    assert {"single.zip", "single.manifest.json"} <= set(
+        name for name in storage if name.startswith("single")
+    )
+
+
+def test_shard_bundle_incremental_flush_and_corrupt_rebuild(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    out = tmp_path / "mega_cruise_campaign"
+    monkeypatch.setattr(
+        "picard_framework.runs.mega_cruise_campaign.campaign_runner.OUTPUT_ROOT",
+        out,
+    )
+    bundle = ShardBundle(0, None)
+
+    def add_run(run_id: str) -> None:
+        run_dir = Path(bundle.accumulation_root) / run_id
+        run_dir.mkdir(parents=True)
+        (run_dir / "summary.json").write_text(
+            json.dumps({"run_id": run_id, "parameters": {}, "derived": {}}),
+            encoding="utf-8",
+        )
+
+    add_run("run_a")
+    bundle.record_run("run_a")
+    bundle.flush(None)
+    with zipfile.ZipFile(bundle.zip_path) as zf:
+        first_info = zf.getinfo("run_a/summary.json")
+
+    full_rebuilds: list[list[tuple[str, str]]] = []
+    original_pack_full = bundle._pack_full
+
+    def track_full_rebuild(members: list[tuple[str, str]]) -> None:
+        full_rebuilds.append(members)
+        original_pack_full(members)
+
+    monkeypatch.setattr(bundle, "_pack_full", track_full_rebuild)
+    add_run("run_b")
+    bundle.record_run("run_b")
+    bundle.flush(None)
+    assert full_rebuilds == []
+    with zipfile.ZipFile(bundle.zip_path) as zf:
+        assert zf.getinfo("run_a/summary.json").CRC == first_info.CRC
+        assert "run_b/summary.json" in zf.namelist()
+
+    Path(bundle.zip_path).write_bytes(b"not a zip")
+    bundle.flush(None)
+    assert len(full_rebuilds) == 1
+    with zipfile.ZipFile(bundle.zip_path) as zf:
+        assert {"run_a/summary.json", "run_b/summary.json"} <= set(zf.namelist())
+
+
+def test_local_resume_preserves_manifest_entries_without_s3(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    out = tmp_path / "mega_cruise_campaign"
+    monkeypatch.setattr(
+        "picard_framework.runs.mega_cruise_campaign.campaign_runner.OUTPUT_ROOT",
+        out,
+    )
+    monkeypatch.setattr(
+        "picard_framework.runs.mega_cruise_campaign.campaign_runner.COMPLETED_LOG",
+        out / "completed_runs.txt",
+    )
+    monkeypatch.setattr(
+        "picard_framework.runs.mega_cruise_campaign.campaign_runner.FAILED_LOG",
+        out / "failed_runs.txt",
+    )
+    calls: list[str] = []
+
+    def fake_run(run_id: str, spec: dict, **kwargs: Any) -> bool:
+        calls.append(run_id)
+        suffix = kwargs.get("accumulation_suffix", "single")
+        run_dir = out / "_shard_runs" / suffix / run_id
+        run_dir.mkdir(parents=True, exist_ok=True)
+        (run_dir / "summary.json").write_text(
+            json.dumps({
+                "run_id": run_id,
+                "parameters": {"seed": spec["run"]["random_seed"]},
+                "derived": {},
+            }),
+            encoding="utf-8",
+        )
+        (run_dir / "timeseries.json").write_text("[]", encoding="utf-8")
+        (out / f"{run_id}.zip").write_bytes(b"local")
+        return True
+
+    monkeypatch.setattr(
+        "picard_framework.runs.mega_cruise_campaign.campaign_runner.run_simulation",
+        fake_run,
+    )
+    monkeypatch.setattr(
+        "picard_framework.runs.mega_cruise_campaign.campaign_runner.run_simulation_subprocess",
+        fake_run,
+    )
+    args = [
+        "--tier", "t1", "--platform", "destroyer_baseline",
+        "--epochs", "2", "--num-agents", "20", "--limit", "2",
+        "--in-process",
+    ]
+    assert main(args) == 0
+    first_ids = calls[:2]
+    args[args.index("--limit") + 1] = "1"
+    assert main([*args, "--resume"]) == 0
+    manifest = json.loads(
+        (out / "single.manifest.json").read_text(encoding="utf-8"),
+    )
+    assert [entry["run_id"] for entry in manifest] == calls[:3]
+    assert first_ids == calls[:2]
+
+
+def test_shard_accumulation_isolated_by_shard_index(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    out = tmp_path / "mega_cruise_campaign"
+    monkeypatch.setattr(
+        "picard_framework.runs.mega_cruise_campaign.campaign_runner.OUTPUT_ROOT",
+        out,
+    )
+    monkeypatch.setattr(
+        "picard_framework.runs.mega_cruise_campaign.campaign_runner.COMPLETED_LOG",
+        out / "completed_runs.txt",
+    )
+    monkeypatch.setattr(
+        "picard_framework.runs.mega_cruise_campaign.campaign_runner.FAILED_LOG",
+        out / "failed_runs.txt",
+    )
+
+    def fake_run(run_id: str, spec: dict, **kwargs: Any) -> bool:
+        suffix = kwargs.get("accumulation_suffix", "single")
+        run_dir = out / "_shard_runs" / suffix / run_id
+        run_dir.mkdir(parents=True, exist_ok=True)
+        (run_dir / "summary.json").write_text(
+            json.dumps({
+                "run_id": run_id,
+                "parameters": {},
+                "derived": {},
+            }),
+            encoding="utf-8",
+        )
+        (run_dir / "timeseries.json").write_text("[]", encoding="utf-8")
+        (out / f"{run_id}.zip").write_bytes(b"local")
+        return True
+
+    monkeypatch.setattr(
+        "picard_framework.runs.mega_cruise_campaign.campaign_runner.run_simulation",
+        fake_run,
+    )
+    monkeypatch.setattr(
+        "picard_framework.runs.mega_cruise_campaign.campaign_runner.run_simulation_subprocess",
+        fake_run,
+    )
+    common = [
+        "--tier", "t1", "--platform", "destroyer_baseline",
+        "--epochs", "2", "--num-agents", "20", "--limit", "2",
+        "--in-process", "--shard-count", "2",
+    ]
+    assert main([*common, "--shard-index", "0"]) == 0
+    assert main([*common, "--shard-index", "1"]) == 0
+
+    shard_runs: dict[str, set[str]] = {}
+    for suffix in ("shard-0", "shard-1"):
+        with zipfile.ZipFile(out / f"{suffix}.zip") as zf:
+            shard_runs[suffix] = {
+                name.split("/", 1)[0] for name in zf.namelist()
+            }
+        manifest = json.loads(
+            (out / f"{suffix}.manifest.json").read_text(encoding="utf-8"),
+        )
+        assert {entry["run_id"] for entry in manifest} == shard_runs[suffix]
+    assert shard_runs["shard-0"].isdisjoint(shard_runs["shard-1"])
 
 
 # ---------------------------------------------------------------------------

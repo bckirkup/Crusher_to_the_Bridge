@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-analyze_campaign_curves.py — stack per-run timeseries.json into long-form tables.
+analyze_campaign_curves.py — stack campaign shard curves into long-form tables.
 
 After ``aggregate_results.py`` builds the scalar summary CSV, use this to pull
-epidemic curves out of every ``<run_id>.zip`` for notebooks / plotting:
+epidemic curves out of every shard zip for notebooks / plotting:
 
     python3 deploy/aws/analyze_campaign_curves.py ./results/ \
         --out-csv campaign_curves.csv \
@@ -54,61 +54,78 @@ def parse_run_tags(run_id: str) -> dict[str, str | None]:
     return tags
 
 
+def _zip_groups(names: list[str]) -> dict[str, dict[str, str]]:
+    groups: dict[str, dict[str, str]] = {}
+    for name in names:
+        path = Path(name)
+        if path.name not in {"summary.json", "timeseries.json"}:
+            continue
+        groups.setdefault(str(path.parent), {})[path.name] = name
+    return groups
+
+
 def iter_curve_rows(results_dir: Path) -> Iterator[dict[str, Any]]:
-    """Yield long-form epoch rows from every zip under ``results_dir``."""
+    """Yield long-form epoch rows for every run in each shard zip."""
+    emitted_run_ids: set[str] = set()
     for zip_path in sorted(results_dir.rglob("*.zip")):
         try:
             with zipfile.ZipFile(zip_path) as zf:
-                names = zf.namelist()
-                ts_names = [n for n in names if n.endswith("timeseries.json")]
-                if not ts_names:
-                    continue
-                try:
-                    ts = json.loads(zf.read(ts_names[0]).decode("utf-8"))
-                except (json.JSONDecodeError, UnicodeDecodeError):
-                    continue
-                if not isinstance(ts, list):
-                    continue
-
-                summary: dict[str, Any] = {}
-                sum_names = [n for n in names if n.endswith("summary.json")]
-                if sum_names:
-                    try:
-                        summary = json.loads(zf.read(sum_names[0]).decode("utf-8"))
-                    except (json.JSONDecodeError, UnicodeDecodeError):
-                        summary = {}
-
-                run_id = str(summary.get("run_id") or zip_path.stem)
-                derived = summary.get("derived") or {}
-                tags = parse_run_tags(run_id)
-                for point in ts:
-                    if not isinstance(point, dict):
+                for prefix, group in _zip_groups(zf.namelist()).items():
+                    ts_name = group.get("timeseries.json")
+                    if not ts_name:
                         continue
-                    row: dict[str, Any] = {
-                        "run_id": run_id,
-                        "epoch": point.get("epoch"),
-                        "susceptible": point.get("susceptible"),
-                        "infected": point.get("infected"),
-                        "symptomatic": point.get("symptomatic"),
-                        "recovered": point.get("recovered"),
-                        "immune": point.get("immune"),
-                        "quarantined": point.get("quarantined"),
-                        "isolated": point.get("isolated"),
-                        "new_infections": point.get("new_infections"),
-                        "total_pathogen_mass": point.get("total_pathogen_mass"),
-                        "n_zones_contaminated": point.get("n_zones_contaminated"),
-                        "max_concentration": point.get("max_concentration"),
-                        "cumulative_cost_usd": point.get("cumulative_cost_usd"),
-                        "cumulative_ois": point.get("cumulative_ois"),
-                        "trigger_status": point.get("trigger_status"),
-                        "attack_rate": derived.get("attack_rate"),
-                        "peak_prevalence": derived.get("peak_prevalence"),
-                        "peak_epoch": derived.get("peak_epoch"),
-                        "detection_epoch": derived.get("detection_epoch"),
-                        "r_effective_at_peak": derived.get("r_effective_at_peak"),
-                    }
-                    row.update(tags)
-                    yield row
+                    try:
+                        ts = json.loads(zf.read(ts_name).decode("utf-8"))
+                    except (json.JSONDecodeError, UnicodeDecodeError):
+                        continue
+                    if not isinstance(ts, list):
+                        continue
+
+                    summary: dict[str, Any] = {}
+                    sum_name = group.get("summary.json")
+                    if sum_name:
+                        try:
+                            summary = json.loads(
+                                zf.read(sum_name).decode("utf-8"),
+                            )
+                        except (json.JSONDecodeError, UnicodeDecodeError):
+                            summary = {}
+
+                    fallback = Path(prefix).name if prefix != "." else zip_path.stem
+                    run_id = str(summary.get("run_id") or fallback)
+                    if run_id in emitted_run_ids:
+                        continue
+                    emitted_run_ids.add(run_id)
+                    derived = summary.get("derived") or {}
+                    tags = parse_run_tags(run_id)
+                    for point in ts:
+                        if not isinstance(point, dict):
+                            continue
+                        row: dict[str, Any] = {
+                            "run_id": run_id,
+                            "epoch": point.get("epoch"),
+                            "susceptible": point.get("susceptible"),
+                            "infected": point.get("infected"),
+                            "symptomatic": point.get("symptomatic"),
+                            "recovered": point.get("recovered"),
+                            "immune": point.get("immune"),
+                            "quarantined": point.get("quarantined"),
+                            "isolated": point.get("isolated"),
+                            "new_infections": point.get("new_infections"),
+                            "total_pathogen_mass": point.get("total_pathogen_mass"),
+                            "n_zones_contaminated": point.get("n_zones_contaminated"),
+                            "max_concentration": point.get("max_concentration"),
+                            "cumulative_cost_usd": point.get("cumulative_cost_usd"),
+                            "cumulative_ois": point.get("cumulative_ois"),
+                            "trigger_status": point.get("trigger_status"),
+                            "attack_rate": derived.get("attack_rate"),
+                            "peak_prevalence": derived.get("peak_prevalence"),
+                            "peak_epoch": derived.get("peak_epoch"),
+                            "detection_epoch": derived.get("detection_epoch"),
+                            "r_effective_at_peak": derived.get("r_effective_at_peak"),
+                        }
+                        row.update(tags)
+                        yield row
         except zipfile.BadZipFile:
             print(f"  WARN: {zip_path.name} is not a valid zip; skipping", file=sys.stderr)
 
@@ -172,7 +189,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description="Stack campaign timeseries.json files into long-form CSVs",
     )
-    parser.add_argument("results_dir", type=Path, help="Directory of <run_id>.zip files")
+    parser.add_argument("results_dir", type=Path, help="Directory of shard zips")
     parser.add_argument(
         "--out-csv", type=Path, default=Path("campaign_curves.csv"),
         help="Long-form per-epoch CSV (default campaign_curves.csv)",
