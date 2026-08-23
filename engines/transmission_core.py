@@ -1798,12 +1798,6 @@ class TransmissionCore:
                         SURFACE_RESERVOIR, pathogen_id, zone_name,
                     )
                     self._surface_last_deposition_epoch[key] = int(epoch)
-                    by_pathogen = self.surface_pools_by_pathogen.setdefault(
-                        pathogen_id, {},
-                    )
-                    by_pathogen[zone_name] = (
-                        by_pathogen.get(zone_name, 0.0) + deposited_mass
-                    )
 
         # b) Fomite trailing detection + pickup
         for zone_name, occupants in zone_occupants.items():
@@ -2173,10 +2167,6 @@ class TransmissionCore:
         """Apply surface decay after fomite interactions."""
         for zone_name in self.surface_pools:
             self.surface_pools[zone_name] *= (1.0 - SURFACE_DECAY_RATE)
-        if self.strain_registry is not None:
-            for pools in self.surface_pools_by_pathogen.values():
-                for zone_name in pools:
-                    pools[zone_name] *= (1.0 - SURFACE_DECAY_RATE)
         self._decay_surface_composition()
 
     def _update_prev_occupancy(

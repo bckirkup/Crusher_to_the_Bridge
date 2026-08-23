@@ -24,12 +24,6 @@ STATUS_NO_DEPOSITION = "no_deposition"
 STATUS_NO_COMPOSITION = "no_composition"
 STATUS_BELOW_REPORTING_FLOOR = "below_reporting_floor"
 STATUS_RECOVERED = "recovered"
-# Names mirror the wastewater assay's public status constants.
-LINEAGE_STATUS_NOT_CONFIGURED = STATUS_NOT_CONFIGURED
-LINEAGE_STATUS_NO_TEMPLATE = STATUS_NO_DEPOSITION
-LINEAGE_STATUS_NO_COMPOSITION = STATUS_NO_COMPOSITION
-LINEAGE_STATUS_BELOW_REPORTING_FLOOR = STATUS_BELOW_REPORTING_FLOOR
-LINEAGE_STATUS_DECONVOLVED = STATUS_RECOVERED
 
 SURFACE_TYPE_RECOVERY_ORDER: tuple[str, ...] = (
     "Free",
@@ -215,13 +209,21 @@ def _recovered_calls(
     floor: float,
     rng: np.random.Generator,
 ) -> tuple[tuple[tuple[str, float], ...], float]:
-    """Draw, floor, and conserve each candidate genotype's abundance."""
+    """Draw reportable lineages, floor, and conserve each abundance.
+
+    Unreportable genotypes are routed to unresolved before the Bernoulli draw,
+    so the recovery stream contains draws only for candidate reportable
+    lineages.
+    """
     calls: list[tuple[str, float]] = []
     unresolved = 0.0
     for genotype in sorted(proportions):
         abundance = sampled_abundance * proportions[genotype]
-        recovered = bool(rng.random() < probability)
         reportable = genotype.strip().lower() not in UNREPORTABLE_GENOTYPES
+        if not reportable:
+            unresolved += abundance
+            continue
+        recovered = bool(rng.random() < probability)
         if recovered and reportable and abundance >= floor:
             calls.append((genotype, abundance))
         else:

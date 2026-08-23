@@ -11,6 +11,7 @@ from __future__ import annotations
 import copy
 import json
 from pathlib import Path
+from types import SimpleNamespace
 
 import numpy as np
 import pytest
@@ -274,6 +275,33 @@ class TestSurfaceLineageMixture:
         assert dict(result.calls) == {"GII.4": pytest.approx(2.0 / 3.0)}
         assert result.unresolved_abundance == pytest.approx(4.0 / 3.0)
 
+    def test_unreportable_genotypes_do_not_consume_recovery_draws(self) -> None:
+        with_unreportable = recover_surface_mixture(
+            2.0,
+            {"": 1.0, "GII.4": 1.0},
+            surface_type="Medical",
+            epochs_since_deposition=0,
+            config=_config(
+                recovery_by_surface_type={"Medical": 0.7},
+                min_lineage_fraction=0.0,
+            ),
+            rng=np.random.default_rng(7),
+        )
+        reportable_only = recover_surface_mixture(
+            1.0,
+            {"GII.4": 1.0},
+            surface_type="Medical",
+            epochs_since_deposition=0,
+            config=_config(
+                recovery_by_surface_type={"Medical": 0.7},
+                min_lineage_fraction=0.0,
+            ),
+            rng=np.random.default_rng(7),
+        )
+        assert with_unreportable.calls == reportable_only.calls == (
+            ("GII.4", 1.0),
+        )
+
     @pytest.mark.parametrize("seed", range(20))
     def test_abundance_is_conserved_for_random_draws(self, seed: int) -> None:
         result = recover_surface_mixture(
@@ -385,3 +413,116 @@ class TestSurfaceReservoirIntegration:
         assert all(
             "strain_recovery" not in swab for swab in disabled_swabs.values()
         )
+
+    def test_armed_recovery_adds_conserved_payload_without_changing_swab_fields(
+        self,
+    ) -> None:
+        enabled_spec = PicardRunSpec.from_legacy_yaml(
+            str(REPO_ROOT), num_epochs=1,
+        )
+        enabled_spec.legacy_cfg["initial_infected"] = 3
+        variant_cfg = copy.deepcopy(
+            enabled_spec.legacy_cfg["variant_surveillance"],
+        )
+        variant_cfg["enabled"] = True
+        variant_cfg["surface_sampling"] = {
+            "enabled": True,
+            "recovery_by_surface_type": {
+                surface_type: 1.0 for surface_type in SURFACE_TYPE_RECOVERY_ORDER
+            },
+            "default_recovery": 1.0,
+            "min_lineage_abundance": 0.0,
+            "min_lineage_fraction": 0.0,
+        }
+        enabled_spec.legacy_cfg["variant_surveillance"] = variant_cfg
+
+        baseline_spec = copy.deepcopy(enabled_spec)
+        baseline_variant_cfg = copy.deepcopy(variant_cfg)
+        baseline_variant_cfg["surface_sampling"]["enabled"] = False
+        baseline_spec.legacy_cfg["variant_surveillance"] = baseline_variant_cfg
+
+        armed_sim = ShipSimulation(
+            enabled_spec, display=False, repo_root=str(REPO_ROOT),
+        )
+        armed = armed_sim.run(n_epochs=1)
+        baseline = ShipSimulation(
+            baseline_spec, display=False, repo_root=str(REPO_ROOT),
+        ).run(n_epochs=1)
+        armed_swabs = armed.history[0]["observation_engine"]["surface_swab"]
+        baseline_swabs = baseline.history[0]["observation_engine"]["surface_swab"]
+
+        payload_rows = [
+            (zone_name, swab["strain_recovery"])
+            for zone_name, swab in armed_swabs.items()
+            if "strain_recovery" in swab
+        ]
+        assert payload_rows
+        assert set(armed_swabs) == set(baseline_swabs)
+        assert armed_sim.tx_core is not None
+        for zone_name, swab in armed_swabs.items():
+            preexisting = {
+                key: value
+                for key, value in swab.items()
+                if key != "strain_recovery"
+            }
+            assert preexisting == baseline_swabs[zone_name]
+
+            for pathogen_id, payload in swab.get(
+                "strain_recovery", {},
+            ).items():
+                composition = armed_sim.tx_core.surface_lineage_masses(
+                    pathogen_id, zone_name,
+                )
+                calls = payload["lineage_calls"]
+                assert sum(
+                    call["abundance"] for call in calls
+                ) + payload["lineage_unresolved_abundance"] == pytest.approx(
+                    payload["sampled_abundance"],
+                )
+                assert {
+                    call["genotype"] for call in calls
+                } <= set(composition)
+
+    @pytest.mark.parametrize(
+        "swab,aggregate,deposit",
+        [
+            ({"recovered_mass": 0.0}, 1.0, False),
+            ({"recovered_mass": 1.0}, 0.0, False),
+            ({"recovered_mass": 1.0}, 1.0, False),
+            ({"recovered_mass": 1.0}, 1.0, True),
+        ],
+    )
+    def test_armed_recovery_skips_empty_sampling_inputs(
+        self,
+        swab: dict[str, float],
+        aggregate: float,
+        deposit: bool,
+    ) -> None:
+        spec = PicardRunSpec.from_legacy_yaml(str(REPO_ROOT), num_epochs=1)
+        spec.legacy_cfg["variant_surveillance"]["enabled"] = True
+        spec.legacy_cfg["variant_surveillance"]["surface_sampling"] = {
+            "enabled": True,
+            "recovery_by_surface_type": {"Dining": 1.0},
+            "default_recovery": 1.0,
+            "min_lineage_fraction": 0.0,
+        }
+        sim = ShipSimulation(spec, display=False, repo_root=str(REPO_ROOT))
+        sim.initialize()
+        assert sim.tx_core is not None
+        zone_name = sim.zone_names[0]
+        sim.tx_core.surface_pools[zone_name] = aggregate
+        if deposit:
+            assert sim.tx_core.strain_registry is not None
+            strain = sim.tx_core.strain_registry.mint(
+                PATHOGEN, genotype="GII.4",
+            )
+            key = ReservoirComposition.key(
+                SURFACE_RESERVOIR, PATHOGEN, zone_name,
+            )
+            sim.tx_core._reservoir.deposit(key, (strain.strain_id, None), 1.0)
+        work = SimpleNamespace(
+            swab_results={zone_name: dict(swab)},
+            epoch=0,
+        )
+        sim._attach_surface_strain_recovery(work)
+        assert "strain_recovery" not in work.swab_results[zone_name]

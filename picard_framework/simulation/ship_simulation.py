@@ -985,21 +985,19 @@ class ShipSimulation:
                 continue
             by_pathogen: dict[str, dict[str, float]] = {}
             for pathogen_id in self.pathogen_profiles:
-                pathogen_pool = self.tx_core.surface_pools_by_pathogen.get(
-                    pathogen_id, {},
-                )
-                pathogen_mass = float(pathogen_pool.get(zone_name, 0.0))
-                if pathogen_mass <= 0.0:
-                    continue
                 composition = self.tx_core.surface_lineage_masses(
                     pathogen_id, zone_name,
                 )
+                pathogen_mass = sum(composition.values())
+                if pathogen_mass <= 0.0:
+                    continue
                 epochs = self.tx_core.surface_epochs_since_deposition(
                     pathogen_id, zone_name, work.epoch,
                 )
                 if not composition or epochs is None:
                     continue
-                sampled = recovered_mass * pathogen_mass / aggregate
+                pathogen_share = min(pathogen_mass / aggregate, 1.0)
+                sampled = recovered_mass * pathogen_share
                 mixture = recover_surface_mixture(
                     sampled,
                     composition,
