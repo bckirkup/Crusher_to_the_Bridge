@@ -38,6 +38,7 @@ from __future__ import annotations
 
 import fnmatch
 import math
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -50,6 +51,7 @@ from engines.infection_dynamics_bridge import (
     InfectionStatus,
     KorkinAgent,
 )
+from engines.sim_clock import SimClock
 from engines.strain_dose_ledger import (
     UNRESOLVED_STRAIN,
     Contributor,
@@ -256,7 +258,7 @@ POOL_EXTINCTION_MASS = 1e-12
 
 def _best_protection(
     config: StrainEvolutionConfig,
-    priors: tuple[str, ...],
+    priors: Mapping[str, float | None],
     challenge: StrainState,
 ) -> float:
     """Protection the best-matched prior exposure gives against a challenge.
@@ -265,8 +267,15 @@ def _best_protection(
     exposure to related genotypes does not stack past what the closest match
     already gives, and a host that has met the challenge genotype itself is
     protected as if its heterologous exposures had not happened.
+
+    Each prior carries its own age in days of natural history (``None`` for a
+    lineage still resident), so a fresh exposure and a year-old one to the same
+    genotype are not the same immunity.
     """
-    return max(config.effective_protection(prior, challenge) for prior in priors)
+    return max(
+        config.waned_protection(prior, challenge, age)
+        for prior, age in priors.items()
+    )
 
 
 class TransmissionCore:
@@ -300,8 +309,12 @@ class TransmissionCore:
         cfg: dict[str, Any] | None = None,
         food_zone_multipliers: dict[str, float] | None = None,
         strain_registry: StrainRegistry | None = None,
+        clock: SimClock | None = None,
     ) -> None:
         self.rng = rng
+        # The run's one clock, so an immunity parameter written in days of
+        # natural history is aged on the same grid the biology advances on.
+        self.clock = clock if clock is not None else SimClock.from_config(cfg)
         self.zone_volumes = zone_volumes or {}
         self.pathogen_profiles = pathogen_profiles or {}
         self.zone_types = zone_types or {}
@@ -833,6 +846,42 @@ class TransmissionCore:
                 ))
         return cached or None
 
+    def _resolved_exposure_ages(
+        self, agent: KorkinAgent, pathogen_id: str, epoch: int,
+    ) -> dict[str, float]:
+        """Days of natural history since each genotype's exposure resolved.
+
+        The most recent record wins for a genotype met more than once, and the
+        conversion from epochs runs through the run's clock, so a refractory
+        window written in days means the same thing on any epoch grid.
+        """
+        ages: dict[str, float] = {}
+        for record in agent.immune_history:
+            if record.pathogen_id != pathogen_id or not record.genotype:
+                continue
+            days = self.clock.days_elapsed(max(0, epoch - record.epoch))
+            prior = ages.get(record.genotype)
+            if prior is None or days < prior:
+                ages[record.genotype] = days
+        return ages
+
+    def _prior_exposures(
+        self, agent: KorkinAgent, pathogen_id: str, epoch: int,
+    ) -> dict[str, float | None]:
+        """Prior genotypes mapped to the age of the exposure that raised them.
+
+        ``None`` marks a lineage still resident: interference from an ongoing
+        infection, which is not memory and so is not aged. A genotype the host
+        has both resolved and re-acquired keeps its resolved age, since the
+        memory is the thing a challenge of that genotype meets first.
+        """
+        ages = self._resolved_exposure_ages(agent, pathogen_id, epoch)
+        exposures: dict[str, float | None] = {
+            genotype: ages.get(genotype)
+            for genotype in self._prior_genotypes(agent, pathogen_id)
+        }
+        return exposures
+
     def _prior_genotypes(
         self, agent: KorkinAgent, pathogen_id: str,
     ) -> tuple[str, ...]:
@@ -861,7 +910,9 @@ class TransmissionCore:
             priors.setdefault(embarked, None)
         return tuple(priors)
 
-    def _challenge_protection(self, agent: KorkinAgent, pathogen_id: str) -> float:
+    def _challenge_protection(
+        self, agent: KorkinAgent, pathogen_id: str, epoch: int = 0,
+    ) -> float:
         """Protection against this epoch's challenge, in [0, 1].
 
         Absolute (1.0) for an agent immune at embarkation, which reproduces the
@@ -876,7 +927,7 @@ class TransmissionCore:
         legacy = 1.0 if agent.immune else 0.0
         if self.strain_registry is None or config is None or not config.cross_immunity:
             return legacy
-        priors = self._prior_genotypes(agent, pathogen_id)
+        priors = self._prior_exposures(agent, pathogen_id, epoch)
         if not priors:
             return 0.0
         shares = self._strain_doses.get(agent.agent_id, {}).get(pathogen_id, {})
@@ -1231,7 +1282,7 @@ class TransmissionCore:
                 p_dose = agent_pathogen_doses.get(agent.agent_id, {}).get(pathogen_id, 0.0)
                 if p_dose <= 0:
                     continue
-                protection = self._challenge_protection(agent, pathogen_id)
+                protection = self._challenge_protection(agent, pathogen_id, epoch)
                 if protection >= 1.0:
                     continue
 

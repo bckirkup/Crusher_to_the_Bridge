@@ -178,8 +178,14 @@
             0.3
           ]
         },
+        "immune_waning": {
+          "refractory_days": 56.0,
+          "refractory_protection": 0.98,
+          "half_life_days": 1095.0,
+          "residual_protection": 0.0
+        },
         "min_strain_fraction": 0.001,
-        "notes": "Rates from docs/variant_surveillance_spec.md \u00a71.3. superinfection_susceptibility and recombination_rate are placeholders pending a literature anchor (docs/variant_surveillance_plan.md \u00a77)."
+        "notes": "Rates from docs/variant_surveillance_spec.md \u00a71.3. superinfection_susceptibility and recombination_rate are placeholders pending a literature anchor (docs/variant_surveillance_plan.md \u00a77). immune_waning: refractory_days 56 and half_life_days 1095 are anchored on homotypic challenge protection lasting at least months and modelled immunity duration of 4.1-8.7 years (Simmons et al., Emerg Infect Dis 2013); the homotypic HR 0.39 of Ford-Siltz et al. (Clin Infect Dis 2020) is a multi-year hazard ratio, not a per-epoch susceptibility. Both are sensitivity axes."
       },
       "sequencing_assay": {
         "amplicon_target": "Capsid (VP1)",
@@ -381,8 +387,14 @@
             0.3
           ]
         },
+        "immune_waning": {
+          "refractory_days": 90.0,
+          "refractory_protection": 0.95,
+          "half_life_days": 180.0,
+          "residual_protection": 0.05
+        },
         "min_strain_fraction": 0.001,
-        "notes": "Rates from docs/variant_surveillance_spec.md \u00a71.3. superinfection_susceptibility and recombination_rate are placeholders pending a literature anchor (docs/variant_surveillance_plan.md \u00a77)."
+        "notes": "Rates from docs/variant_surveillance_spec.md \u00a71.3. superinfection_susceptibility and recombination_rate are placeholders pending a literature anchor (docs/variant_surveillance_plan.md \u00a77). immune_waning: refractory_days 90 follows the 90-day reinfection convention; half_life_days 180 reflects rapid waning of protection against infection, with a small residual. Sensitivity axis."
       },
       "sequencing_assay": {
         "amplicon_target": "Spike + WGS",
@@ -565,8 +577,14 @@
             0.3
           ]
         },
+        "immune_waning": {
+          "refractory_days": 45.0,
+          "refractory_protection": 0.95,
+          "half_life_days": 365.0,
+          "residual_protection": 0.0
+        },
         "min_strain_fraction": 0.001,
-        "notes": "Rates from docs/variant_surveillance_spec.md \u00a71.3. superinfection_susceptibility and recombination_rate are placeholders pending a literature anchor (docs/variant_surveillance_plan.md \u00a77). recombination_rate stands in for reassortment between co-resident segments."
+        "notes": "Rates from docs/variant_surveillance_spec.md \u00a71.3. superinfection_susceptibility and recombination_rate are placeholders pending a literature anchor (docs/variant_surveillance_plan.md \u00a77). recombination_rate stands in for reassortment between co-resident segments. immune_waning: strain-specific protection stiff for ~45 days, matched protection halving in about a year as antigenic distance grows. Placeholder pending a literature anchor."
       },
       "sequencing_assay": {
         "amplicon_target": "HA + NA",
@@ -790,8 +808,14 @@
             0.3
           ]
         },
+        "immune_waning": {
+          "refractory_days": 3650.0,
+          "refractory_protection": 1.0,
+          "half_life_days": 0.0,
+          "residual_protection": 0.0
+        },
         "min_strain_fraction": 0.001,
-        "notes": "Rates from docs/variant_surveillance_spec.md \u00a71.3. superinfection_susceptibility and recombination_rate are placeholders pending a literature anchor (docs/variant_surveillance_plan.md \u00a77). Genotype-independent immunity: cross-protection is near-complete."
+        "notes": "Rates from docs/variant_surveillance_spec.md \u00a71.3. superinfection_susceptibility and recombination_rate are placeholders pending a literature anchor (docs/variant_surveillance_plan.md \u00a77). Genotype-independent immunity: cross-protection is near-complete. immune_waning: protection after a resolved infection is lifelong on any voyage timescale (long refractory window, no waning term)."
       },
       "sequencing_assay": {
         "amplicon_target": "N gene",

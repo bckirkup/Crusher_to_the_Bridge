@@ -153,8 +153,14 @@
             0.3
           ]
         },
+        "immune_waning": {
+          "refractory_days": 60.0,
+          "refractory_protection": 0.9,
+          "half_life_days": 365.0,
+          "residual_protection": 0.05
+        },
         "min_strain_fraction": 0.001,
-        "notes": "Fictional pathogen: rates from docs/variant_surveillance_spec.md \u00a71.3, deliberately more mutationally dynamic than real pathogens. No literature anchor exists."
+        "notes": "Fictional pathogen: rates from docs/variant_surveillance_spec.md \u00a71.3, deliberately more mutationally dynamic than real pathogens. No literature anchor exists. immune_waning values are in-universe placeholders: stiff within a voyage, waning over a deployment."
       },
       "sequencing_assay": {
         "amplicon_target": "16S + virulence",
@@ -303,8 +309,14 @@
             0.6
           ]
         },
+        "immune_waning": {
+          "refractory_days": 30.0,
+          "refractory_protection": 0.9,
+          "half_life_days": 120.0,
+          "residual_protection": 0.0
+        },
         "min_strain_fraction": 0.001,
-        "notes": "Fictional pathogen: rates from docs/variant_surveillance_spec.md \u00a71.3, deliberately more mutationally dynamic than real pathogens. No literature anchor exists."
+        "notes": "Fictional pathogen: rates from docs/variant_surveillance_spec.md \u00a71.3, deliberately more mutationally dynamic than real pathogens. No literature anchor exists. immune_waning values are in-universe placeholders: stiff within a voyage, waning over a deployment."
       },
       "sequencing_assay": {
         "amplicon_target": "BML (behavioral modification locus)",
