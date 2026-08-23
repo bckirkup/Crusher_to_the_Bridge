@@ -58,6 +58,7 @@ MANIFEST_PATH = CAMPAIGN_DIR / "campaign_manifest.json"
 COMPLETED_RUNS_FILENAME = "completed_runs.txt"
 FAILED_RUNS_FILENAME = "failed_runs.txt"
 CLOCK_MARKER_FILENAME = "natural_history_clock.txt"
+DEFAULT_NATURAL_HISTORY_CLOCK = "hours"
 OUTPUT_ROOT = REPO_ROOT / "telemetry_buffer" / "mega_cruise_campaign"
 COMPLETED_LOG = OUTPUT_ROOT / COMPLETED_RUNS_FILENAME
 FAILED_LOG = OUTPUT_ROOT / FAILED_RUNS_FILENAME
@@ -130,11 +131,34 @@ def _clock_marker() -> str | None:
     return value or None
 
 
-def _ensure_clock_arm(clock: str | None, *, persist: bool = True) -> None:
+def _completed_results_present() -> bool:
+    log_path = _output_artifact(COMPLETED_RUNS_FILENAME)
+    return bool(_read_run_id_log(Path(log_path)))
+
+
+def _ensure_clock_arm(
+    clock: str,
+    *,
+    explicit: bool = False,
+    persist: bool = True,
+) -> None:
     if clock is None:
         return
     marker_path = _output_artifact(CLOCK_MARKER_FILENAME)
     existing = _clock_marker()
+    if (
+        existing is None
+        and explicit
+        and clock != DEFAULT_NATURAL_HISTORY_CLOCK
+        and _completed_results_present()
+    ):
+        existing = DEFAULT_NATURAL_HISTORY_CLOCK
+        if persist:
+            with validated_open(
+                marker_path, "w",
+                allowed_roots=_allowed_roots(), encoding="utf-8",
+            ) as fh:
+                fh.write(existing + "\n")
     if existing is not None and existing != clock:
         raise SystemExit(
             "natural-history clock arm mismatch: "
@@ -2439,7 +2463,11 @@ def main(argv: list[str] | None = None) -> int:
     if args.output_dir is not None:
         set_output_root(args.output_dir)
     _apply_smoke_defaults(args)
-    _ensure_clock_arm(args.natural_history_clock, persist=not args.dry_run)
+    _ensure_clock_arm(
+        args.natural_history_clock or DEFAULT_NATURAL_HISTORY_CLOCK,
+        explicit=args.natural_history_clock is not None,
+        persist=not args.dry_run,
+    )
     shard_count, shard_index = _resolve_shard(args)
     uploader = S3Uploader(args.s3_prefix) if args.s3_prefix else None
     bundle = ShardBundle(shard_index, shard_count)

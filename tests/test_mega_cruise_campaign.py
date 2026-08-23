@@ -227,6 +227,23 @@ def test_natural_history_clock_arm_mismatch_is_refused(
         _ensure_clock_arm("legacy_epoch_day")
 
 
+def test_natural_history_clock_arm_refuses_legacy_unmarked_results(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    out = tmp_path / "unmarked_clock_arm"
+    out.mkdir()
+    (out / "completed_runs.txt").write_text("existing_run\n", encoding="utf-8")
+    monkeypatch.setattr(
+        "picard_framework.runs.mega_cruise_campaign.campaign_runner.OUTPUT_ROOT",
+        out,
+    )
+    with pytest.raises(SystemExit, match="hours.*legacy_epoch_day"):
+        _ensure_clock_arm("legacy_epoch_day", explicit=True)
+    assert (out / "natural_history_clock.txt").read_text(
+        encoding="utf-8",
+    ).strip() == "hours"
+
+
 @pytest.mark.timeout(120)
 def test_natural_history_clock_changes_single_run(
     tmp_path: Path,
