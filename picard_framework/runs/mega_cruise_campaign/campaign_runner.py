@@ -57,6 +57,7 @@ CAMPAIGN_DIR = Path(__file__).resolve().parent
 MANIFEST_PATH = CAMPAIGN_DIR / "campaign_manifest.json"
 COMPLETED_RUNS_FILENAME = "completed_runs.txt"
 FAILED_RUNS_FILENAME = "failed_runs.txt"
+CLOCK_MARKER_FILENAME = "natural_history_clock.txt"
 OUTPUT_ROOT = REPO_ROOT / "telemetry_buffer" / "mega_cruise_campaign"
 COMPLETED_LOG = OUTPUT_ROOT / COMPLETED_RUNS_FILENAME
 FAILED_LOG = OUTPUT_ROOT / FAILED_RUNS_FILENAME
@@ -116,6 +117,35 @@ def _output_artifact(filename: str) -> str:
     root = _ensure_output_root()
     safe_name = validate_path_component(filename, label="output artifact")
     return resolve_child_path(root, safe_name)
+
+
+def _clock_marker() -> str | None:
+    marker_path = _output_artifact(CLOCK_MARKER_FILENAME)
+    if not os.path.isfile(marker_path):
+        return None
+    with validated_open(
+        marker_path, allowed_roots=_allowed_roots(), encoding="utf-8",
+    ) as fh:
+        value = fh.read().strip()
+    return value or None
+
+
+def _ensure_clock_arm(clock: str | None, *, persist: bool = True) -> None:
+    if clock is None:
+        return
+    marker_path = _output_artifact(CLOCK_MARKER_FILENAME)
+    existing = _clock_marker()
+    if existing is not None and existing != clock:
+        raise SystemExit(
+            "natural-history clock arm mismatch: "
+            f"output directory {OUTPUT_ROOT} is marked {existing!r}, "
+            f"but {clock!r} was requested ({marker_path})",
+        )
+    if existing is None and persist:
+        with validated_open(
+            marker_path, "w", allowed_roots=_allowed_roots(), encoding="utf-8",
+        ) as fh:
+            fh.write(clock + "\n")
 
 
 def _run_workdir(run_id: str, *, output_root: str | None = None) -> str:
@@ -1295,7 +1325,7 @@ def make_picard_spec(
         spec["campaign_parameters"] = dict(parameters)
     elif parameters is None:
         # Always attach a minimal parameters block for bookkeeping.
-        spec["campaign_parameters"] = {
+        campaign_parameters = {
             "run_id": run_id,
             "platform_id": platform,
             "pathogen_bundle_id": bundle,
@@ -1304,6 +1334,8 @@ def make_picard_spec(
             "num_agents": int(num_agents),
             "history_retention": retention,
         }
+        _fill_override_params(campaign_parameters, cfg)
+        spec["campaign_parameters"] = campaign_parameters
     if telemetry_dir is not None:
         # Absolute paths so finalize does not clobber shared telemetry_buffer/.
         spec["run"]["simulation_history"] = str(telemetry_dir / "simulation_history.json")
@@ -1340,6 +1372,9 @@ def _copy_present(
 
 
 def _fill_override_params(params: dict[str, Any], cfg: Mapping[str, Any]) -> None:
+    clock = cfg.get("natural_history_clock")
+    if clock is not None:
+        params["natural_history_clock"] = clock
     hvac = cfg.get("hvac") or {}
     _copy_present(
         params, hvac, _HVAC_PARAM_MAP,
@@ -1469,6 +1504,9 @@ def parameters_from_spec(spec: dict[str, Any]) -> dict[str, Any]:
         "num_agents": ship.get("num_agents"),
         "history_retention": run.get("history_retention", "full"),
     }
+    _copy_present(
+        params, cfg, (("natural_history_clock", "natural_history_clock"),),
+    )
     _copy_present(params, cfg.get("hvac") or {}, _HVAC_PARAM_MAP)
     _copy_present(params, ship, (("immune_fraction", "immune_fraction"),))
     _copy_present(
@@ -1503,6 +1541,7 @@ def generate_tier_runs(
     platform: str | None = None,
     epochs_override: int | None = None,
     num_agents_override: int | None = None,
+    natural_history_clock: str | None = None,
 ) -> Iterator[tuple[str, dict[str, Any]]]:
     """Yield (run_id, picard_spec_dict) for a tier."""
     tier = manifest["tiers"][tier_id]
@@ -1529,7 +1568,14 @@ def generate_tier_runs(
         n_agents = default_agents if num_agents is None else int(num_agents)
         plat = platform if platform_id is None else str(platform_id)
         n_epochs = default_epochs if epochs is None else int(epochs)
-        cfg = merge_cfg(_CAMPAIGN_ESCALATION_DEFAULTS, config_overrides)
+        clock_cfg = (
+            {"natural_history_clock": natural_history_clock}
+            if natural_history_clock is not None
+            else None
+        )
+        cfg = merge_cfg(
+            _CAMPAIGN_ESCALATION_DEFAULTS, config_overrides, clock_cfg,
+        )
         params = _campaign_parameters(
             tier_id=tier_id,
             run_id=rid,
@@ -2032,6 +2078,12 @@ def _campaign_parser() -> argparse.ArgumentParser:
     parser.add_argument("--platform", default=None, help="Override platform_id")
     parser.add_argument("--num-agents", type=int, default=None, help="Override ship_graph.num_agents")
     parser.add_argument(
+        "--natural-history-clock",
+        choices=("hours", "legacy_epoch_day"),
+        default=None,
+        help="Select the natural-history clock arm without changing run_ids.",
+    )
+    parser.add_argument(
         "--smoke",
         action="store_true",
         help="Fast local smoke: destroyer_baseline, 2 epochs, 20 agents, t1, limit 1",
@@ -2162,6 +2214,7 @@ def _collect_all_runs(
             platform=args.platform,
             epochs_override=args.epochs,
             num_agents_override=args.num_agents,
+            natural_history_clock=args.natural_history_clock,
         ))
         all_runs.extend((tier_id, run_id, spec) for run_id, spec in runs)
         print(f"\n{'=' * 60}")
@@ -2386,6 +2439,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.output_dir is not None:
         set_output_root(args.output_dir)
     _apply_smoke_defaults(args)
+    _ensure_clock_arm(args.natural_history_clock, persist=not args.dry_run)
     shard_count, shard_index = _resolve_shard(args)
     uploader = S3Uploader(args.s3_prefix) if args.s3_prefix else None
     bundle = ShardBundle(shard_index, shard_count)

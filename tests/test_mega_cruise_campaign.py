@@ -17,6 +17,8 @@ from typing import Any  # noqa: E402
 
 from picard_framework.runs.mega_cruise_campaign.campaign_runner import (  # noqa: E402
     ShardBundle,
+    _campaign_parser,
+    _ensure_clock_arm,
     clear_failed_artifacts,
     compute_derived_metrics,
     extract_timeseries,
@@ -186,6 +188,85 @@ def test_t1_spec_shape_and_pathogen_override() -> None:
     assert spec["run"]["num_epochs"] == 240
     assert spec["config_overrides"]["ship_graph"]["num_agents"] == 7000
     assert "pathogen_overrides" in spec
+
+
+def test_natural_history_clock_flag_is_optional_and_recorded() -> None:
+    manifest = load_manifest()
+    assert _campaign_parser().parse_args([]).natural_history_clock is None
+    _rid, default_spec = next(
+        generate_tier_runs(manifest, "t1_pathogen_baselines"),
+    )
+    assert "natural_history_clock" not in default_spec.get("config_overrides", {})
+    assert "natural_history_clock" not in default_spec["campaign_parameters"]
+
+    _rid, arm_spec = next(
+        generate_tier_runs(
+            manifest,
+            "t1_pathogen_baselines",
+            natural_history_clock="legacy_epoch_day",
+        ),
+    )
+    assert arm_spec["config_overrides"]["natural_history_clock"] == (
+        "legacy_epoch_day"
+    )
+    assert arm_spec["campaign_parameters"]["natural_history_clock"] == (
+        "legacy_epoch_day"
+    )
+
+
+def test_natural_history_clock_arm_mismatch_is_refused(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    out = tmp_path / "clock_arm"
+    monkeypatch.setattr(
+        "picard_framework.runs.mega_cruise_campaign.campaign_runner.OUTPUT_ROOT",
+        out,
+    )
+    assert _ensure_clock_arm("hours") is None
+    with pytest.raises(SystemExit, match="hours.*legacy_epoch_day"):
+        _ensure_clock_arm("legacy_epoch_day")
+
+
+@pytest.mark.timeout(120)
+def test_natural_history_clock_changes_single_run(
+    tmp_path: Path,
+) -> None:
+    run_id = "clock_arm_probe"
+    for clock in ("hours", "legacy_epoch_day"):
+        spec = make_picard_spec(
+            run_id,
+            platform="destroyer_baseline",
+            bundle="active_profiles",
+            pathogen_overrides={
+                "norwalk_gi": {
+                    "dose_adjustment": 10.6,
+                    "initial_infected": 1,
+                },
+                "remove": ["sars_cov2_resp"],
+            },
+            config_overrides={
+                "natural_history_clock": clock,
+                "ship_graph": {"num_agents": 20},
+            },
+            seed=200,
+            epochs=24,
+            num_agents=20,
+        )
+        out = tmp_path / clock
+        out.mkdir()
+        spec_path = out / f"{clock}.json"
+        spec_path.write_text(json.dumps(spec), encoding="utf-8")
+        assert main(["--single", str(spec_path), str(out)]) == 0
+
+    summaries = {}
+    for clock in ("hours", "legacy_epoch_day"):
+        with zipfile.ZipFile(tmp_path / clock / f"{run_id}.zip") as zf:
+            summaries[clock] = json.loads(zf.read("summary.json"))
+    assert summaries["hours"]["parameters"]["natural_history_clock"] == "hours"
+    assert summaries["legacy_epoch_day"]["parameters"][
+        "natural_history_clock"
+    ] == "legacy_epoch_day"
+    assert summaries["hours"]["derived"] != summaries["legacy_epoch_day"]["derived"]
 
 
 def test_t6_sets_initial_infected_on_pathogen_id() -> None:
