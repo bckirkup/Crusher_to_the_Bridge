@@ -12,6 +12,11 @@ Measurements quoted below were taken on `paper3-variant-surveillance` at
 `eadcef1` (`expedition_cruise_450`, norovirus, 168 epochs, 5 seeds per arm,
 incubation block present vs stripped).
 
+A fourth representation surfaced later, in the *units* rather than the
+distribution: the ABM advances its day-scale clocks once per hourly epoch. See
+[`epoch_time_unit_audit.md`](epoch_time_unit_audit.md); it changes the size of
+every effect measured below without changing which representation is which.
+
 ## 1. There are three incubation representations, not one
 
 | # | Where | Form | Consumers |

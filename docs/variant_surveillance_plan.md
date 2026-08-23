@@ -483,6 +483,13 @@ published paper 1 and paper 2 conclusions survive the refinement is a separate
 question with its own paired-arm protocol:
 [`incubation_sensitivity_protocol.md`](incubation_sensitivity_protocol.md).
 
+Running that protocol exposed a deeper unit problem underneath all three
+representations: the ABM treats one epoch as one day while the voyage, sentinel,
+and calibration layers treat it as one hour, so natural history runs 24× fast
+against the itinerary. Audit, measurements, and options in
+[`epoch_time_unit_audit.md`](epoch_time_unit_audit.md); it is a decision for the
+PI, not a change made in passing.
+
 Still unimplemented from the spec, each its own scoped work: the frailty score
 and its severity coupling, wearable-baseline coupling and pre-symptomatic
 anomaly lead time, long-shedder behaviour, gamma-fitted variant lineages

@@ -5,6 +5,12 @@ which says *what* has to be reconciled. This document says how to test whether
 already-published conclusions hold under the refined infection mechanism, in the
 order the author set: paper 3 merges, then paper 2 sensitivity, then paper 1.
 
+A second switch is now on the table: the natural-history clock advances a
+day-scale counter once per hourly epoch, so a case incubates and clears 24× fast
+against the itinerary calendar. That is audited separately in
+[`epoch_time_unit_audit.md`](epoch_time_unit_audit.md) and, if adopted, becomes a
+third arm of the design below rather than a second harness.
+
 The design principle throughout: **paired arms, same seeds, one switch.** The
 switch is the presence of the `incubation` block on the pathogen profile
 (representation A vs the fixed 1-day fallback C). Everything else — platform,
