@@ -621,6 +621,54 @@ questions. Items 1–4 are regime-independent; 5 is new with co-infection:
    answer is "a 7-day voyage cannot see a 10% difference", that is a result,
    and per decision 2 it is one of the results the paper is for.
 
+## 6a. Re-infection: how well matched, and how fresh (correction)
+
+PR 5 gave a recovered host one protection number — the `cross_immunity` entry —
+and applied it as a per-epoch susceptibility multiplier. On the hourly clock a
+homologous 0.85 therefore left a recovered host 15% susceptible *every hour* of
+continuous shipboard dose, and a heterologous 0.18 left it 82% susceptible, with
+no post-recovery window at all. That reads a multi-year hazard ratio (homotypic
+HR ≈ 0.39 in an endemic cohort, Ford-Siltz et al., *Clin Infect Dis* 2020) as an
+instantaneous rate: the same category error as the epoch/day bug, and it made
+re-infection a near-certainty on any voyage long enough to clear one episode.
+
+The contract now has two separable terms, both per pathogen:
+
+- **How well matched** an exposure is — `cross_immunity[prior][challenge]`,
+  discounted by the challenge strain's `immune_escape`. Unchanged.
+- **How fresh** it is — the `immune_waning` block: a `refractory_days` window in
+  which `refractory_protection` applies regardless of genotype (breached in
+  proportion to `immune_escape`, so a genuinely novel variant is not stopped by
+  a window earned against something else), then exponential decay of the matched
+  value with `half_life_days` toward `residual_protection`.
+
+Times are days of natural history and are aged through the run's `SimClock`, so
+the same profile is stiff on a week-long cruise and genuinely leaky on a
+year-long deployment — the requirement the author set. Two consequences worth
+knowing: short-term protection is deliberately *non*-specific (inside the window
+homologous and heterologous challenges are alike, which is what the literature
+supports and what the tests assert), and an exposure with no resolution time on
+this voyage — a still-resident lineage, or an embarkation prior raised at an
+unknown past date — keeps the declared `cross_immunity` value and gets no
+window. Resident-lineage interference stays where it was:
+`superinfection_susceptibility` times matched cross-immunity.
+
+Shipped values are anchored where a citation exists (norovirus: months of
+homotypic protection, modelled duration 4.1–8.7 years, Simmons et al., *Emerg
+Infect Dis* 2013; SARS-CoV-2: the 90-day re-infection convention plus rapid
+waning of protection against infection) and are sensitivity axes, not claims.
+Every profile note records which.
+
+Measured at the Paper 1 operating point (`expedition_cruise_450`, norovirus,
+dose 10.6, 12 index cases, 200 hourly epochs, seed 11), holding everything but
+the freshness term fixed: re-infection events fall from 30 among 297 infected
+hosts to 6, and the pre-change arm's median gap from recovery to re-infection is
+6 epochs — six hours. Peak prevalence is essentially unmoved (records 279 → 275
+infected, 109 → 98 symptomatic), so this corrects the re-challenge rate without
+re-parameterising the epidemic. The legacy agent-level fields are now a
+projection of the per-pathogen records rather than a second state machine, and
+record-level and legacy peaks agree exactly in both arms.
+
 ## 7. Open questions for the author
 
 The author's six rulings are in §0. What is still open:

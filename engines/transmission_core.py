@@ -67,6 +67,7 @@ from engines.strain_dose_ledger import (
 from engines.strain_mutation import MutationOperator
 from engines.strain_state import (
     IMMUNITY_AT_EMBARKATION,
+    IMMUNITY_FROM_INFECTION,
     ImmuneRecord,
     Phenotype,
     StrainEvolutionConfig,
@@ -854,10 +855,17 @@ class TransmissionCore:
         The most recent record wins for a genotype met more than once, and the
         conversion from epochs runs through the run's clock, so a refractory
         window written in days means the same thing on any epoch grid.
+
+        Only exposures resolved aboard have a resolution time. An embarkation
+        prior was raised at an unknown point before the voyage, so it is left
+        ageless rather than dated to epoch 0, which would hand a host whose
+        infection was years ago a fresh refractory window.
         """
         ages: dict[str, float] = {}
         for record in agent.immune_history:
             if record.pathogen_id != pathogen_id or not record.genotype:
+                continue
+            if record.origin != IMMUNITY_FROM_INFECTION:
                 continue
             days = self.clock.days_elapsed(max(0, epoch - record.epoch))
             prior = ages.get(record.genotype)
@@ -870,10 +878,12 @@ class TransmissionCore:
     ) -> dict[str, float | None]:
         """Prior genotypes mapped to the age of the exposure that raised them.
 
-        ``None`` marks a lineage still resident: interference from an ongoing
-        infection, which is not memory and so is not aged. A genotype the host
-        has both resolved and re-acquired keeps its resolved age, since the
-        memory is the thing a challenge of that genotype meets first.
+        ``None`` marks an exposure with no resolution time on this voyage: a
+        lineage still resident (interference from an ongoing infection, which is
+        not memory) or an embarkation prior. Both keep the declared
+        ``cross_immunity`` value, neither gains a refractory window. A genotype
+        the host has both resolved and re-acquired keeps its resolved age, since
+        the memory is the thing a challenge of that genotype meets first.
         """
         ages = self._resolved_exposure_ages(agent, pathogen_id, epoch)
         exposures: dict[str, float | None] = {

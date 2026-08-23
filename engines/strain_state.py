@@ -371,7 +371,7 @@ class ImmuneWaningConfig:
         base = min(1.0, max(0.0, float(matched_protection)))
         days = max(0.0, float(days_since_resolution))
         escape = min(1.0, max(0.0, float(immune_escape)))
-        if days <= self.refractory_days:
+        if self.refractory_days > 0.0 and days <= self.refractory_days:
             return min(1.0, max(base, self.refractory_protection * (1.0 - escape)))
         if self.half_life_days <= 0.0:
             return base
