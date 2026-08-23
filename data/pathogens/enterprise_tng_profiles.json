@@ -61,6 +61,17 @@
         "gamma": 0.09
       },
       "recovery_day": 12,
+      "incubation": {
+        "distribution": "lognormal",
+        "median_days": 5.0,
+        "dispersion": 1.6,
+        "min_days": 1.0,
+        "max_days": 21.0,
+        "dose_reference_log10": 4.35,
+        "dose_log10_shortening": 0.15,
+        "dose_floor": 0.3,
+        "notes": "FICTIONAL, not a clinical claim: protomorphosis has no literature. Median 5 d / GSD 1.6 is deliberately the slow, dispersed end of the shipped profiles (the SARS-CoV-2 ancestral kernel, median 5.8 d / GSD 1.57, is the nearest real shape) so the bundle spans a fast and a slow kernel; it sits inside the 12-day course. A median this long with this dispersion means one onset does not resolve to a single port call (the port_resolution 'inadequate' case in the sentinel catalog) - that is a property of the kernel, not a bug. dose_reference_log10 4.35 is this profile's own beta-Poisson N50 (22510 particles, alpha 0.1 / beta 22) per the model-unit convention on norwalk_gi; dose_shift 0.15 / floor 0.3 reuse the spec defaults. Magnitude invented, direction only anchored."
+      },
       "surface_deposition_fraction": 0.04,
       "base_susceptibility": 1.0,
       "microflora_disruption": {
@@ -204,6 +215,17 @@
         "gamma": 0.11
       },
       "recovery_day": 7,
+      "incubation": {
+        "distribution": "lognormal",
+        "median_days": 1.6,
+        "dispersion": 1.5,
+        "min_days": 0.5,
+        "max_days": 7.0,
+        "dose_reference_log10": 3.4,
+        "dose_log10_shortening": 0.15,
+        "dose_floor": 0.3,
+        "notes": "FICTION-ADAPTED but the one entry in these bundles with a real anchor: this is an influenza analogue, and median 1.6 d / GSD ~1.5 (truncated 0.5-7 d) is the human influenza A incubation period from Lessler et al. 2009 (median ~1.4-1.6 d). It is used here as a shape, not as a claim about a 24th-century pathogen. dose_reference_log10 3.4 is this profile's own beta-Poisson N50 (2532 particles, alpha 0.18 / beta 55), following the model-unit convention documented on norwalk_gi in active_profiles.json rather than a literature assay unit; dose_shift 0.15 / floor 0.3 are the spec values. host_factors omitted, as on the shipped profiles."
+      },
       "surface_deposition_fraction": 0.03,
       "base_susceptibility": 1.0,
       "microflora_disruption": {

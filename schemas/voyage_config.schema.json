@@ -9,7 +9,15 @@
     "schema_version": { "type": "string" },
     "platform_class": {
       "type": "string",
-      "enum": ["expedition", "classic", "spirit", "mega"]
+      "description": "Hull class of the platform this itinerary belongs to. The first four are the cruise platforms in data/platforms/; constitution and galaxy are the fictional Enterprise platforms (docs/variant_surveillance_spec.md §3). Consumed as an opaque grouping label (sentinel itinerary/line-list metadata), so adding a class does not change any behaviour keyed on the cruise four.",
+      "enum": [
+        "expedition",
+        "classic",
+        "spirit",
+        "mega",
+        "constitution",
+        "galaxy"
+      ]
     },
     "description": { "type": "string" },
     "voyage": {
