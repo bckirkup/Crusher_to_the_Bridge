@@ -461,19 +461,18 @@ class TestBundlePlumbing:
         assert sample.resolved_lineage_fraction == pytest.approx(0.9)
 
     def test_a_row_claiming_more_lineage_reads_than_it_sequenced_is_rejected(self) -> None:
+        row = self._payload(
+            {
+                "sample_epoch": 6,
+                "collection_point": "aft_main",
+                "pathogen": PATHOGEN,
+                "pathogen_reads": 100,
+                "total_reads": 1_000,
+                "lineage_calls": [{"genotype": DOMINANT, "reads": 900}],
+            },
+        )
         with pytest.raises(ValueError, match="exceed pathogen_reads"):
-            bundle_from_dict(
-                self._payload(
-                    {
-                        "sample_epoch": 6,
-                        "collection_point": "aft_main",
-                        "pathogen": PATHOGEN,
-                        "pathogen_reads": 100,
-                        "total_reads": 1_000,
-                        "lineage_calls": [{"genotype": DOMINANT, "reads": 900}],
-                    },
-                ),
-            )
+            bundle_from_dict(row)
 
     def test_a_legacy_row_has_no_lineage_information(self) -> None:
         bundle = bundle_from_dict(

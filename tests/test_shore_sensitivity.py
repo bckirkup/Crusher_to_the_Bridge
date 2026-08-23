@@ -198,23 +198,24 @@ class TestSurface:
             "case_threshold": 10.0,
             "capability": _capability(),
         }
+        importation = _continuous_importation()
         with pytest.raises(ValueError, match="non-empty"):
             benefit_surface(
-                _continuous_importation(),
+                importation,
                 r_shore_grid=(),
                 importation_multiplier_grid=(1.0,),
                 **kwargs,
             )
         with pytest.raises(ValueError, match="r_shore_grid"):
             benefit_surface(
-                _continuous_importation(),
+                importation,
                 r_shore_grid=(-0.1,),
                 importation_multiplier_grid=(1.0,),
                 **kwargs,
             )
         with pytest.raises(ValueError, match="multiplier"):
             benefit_surface(
-                _continuous_importation(),
+                importation,
                 r_shore_grid=(0.5,),
                 importation_multiplier_grid=(float("inf"),),
                 **kwargs,

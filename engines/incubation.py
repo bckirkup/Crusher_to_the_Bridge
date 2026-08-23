@@ -125,7 +125,7 @@ class HostIncubationFactors:
 
 def _require_positive(name: str, value: float) -> None:
     """Reject a non-positive value for a strictly positive parameter."""
-    if not value > 0.0:
+    if value <= 0.0:
         raise ValueError(f"{name} must be > 0: {value}")
 
 

@@ -123,9 +123,9 @@ def build_outbreak_stan_data(
         raise ValueError("No norovirus runs found in run_summary")
 
     platforms, surveillances, plat_idx, surv_idx = _factor_indices(noro)
-    N_runs = len(noro)
+    n_runs = len(noro)
     data = {
-        "N_runs": N_runs,
+        "N_runs": n_runs,
         "P": len(platforms),
         "S": len(surveillances),
         "outbreak": [1 if coerce_bool(r.get("outbreak_occurred")) else 0 for r in noro],
@@ -145,9 +145,9 @@ def build_outbreak_stan_data(
         "run_ids": [str(r["run_id"]) for r in noro],
         "d0": float(d0),
         "vsp_ref": float(vsp_ref),
-        "N_runs": N_runs,
+        "N_runs": n_runs,
         "n_outbreaks": int(sum(data["outbreak"])),
-        "outbreak_rate": round(sum(data["outbreak"]) / N_runs, 4),
+        "outbreak_rate": round(sum(data["outbreak"]) / n_runs, 4),
     }
     return data, meta
 
@@ -187,11 +187,11 @@ def build_trajectory_stan_data(
     if T < 1:
         raise ValueError("No epoch rows for trajectory runs")
 
-    N_runs = len(noro)
-    gs = grainsize if grainsize is not None else max(1, N_runs // 8)
+    n_runs = len(noro)
+    gs = grainsize if grainsize is not None else max(1, n_runs // 8)
 
     def _mat(field: str, default: int = 0) -> list[list[int]]:
-        mat = [[default for _ in range(T)] for _ in range(N_runs)]
+        mat = [[default for _ in range(T)] for _ in range(n_runs)]
         for rid, by_ep in epochs_by_run.items():
             ri = run_index[rid]
             for t in range(T):
@@ -208,7 +208,7 @@ def build_trajectory_stan_data(
         return mat
 
     data = {
-        "N_runs": N_runs,
+        "N_runs": n_runs,
         "T": T,
         "P": len(platforms),
         "S": len(surveillances),
@@ -238,7 +238,7 @@ def build_trajectory_stan_data(
         "run_ids": run_ids,
         "d0": float(d0),
         "vsp_ref": float(vsp_ref),
-        "N_runs": N_runs,
+        "N_runs": n_runs,
         "T": T,
         "grainsize": int(gs),
     }
