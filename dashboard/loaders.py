@@ -274,3 +274,38 @@ def list_cruise_dirs(fleet_root: str) -> list[str]:
         if re.match(r"cruise_\d+", name):
             cruises.append(resolve_child_path(fleet_root, name))
     return cruises
+
+
+def detect_retention_mode(history: list[dict[str, Any]]) -> str:
+    """Return ``full``, ``compact``, or ``empty`` based on telemetry shape."""
+    if not history:
+        return "empty"
+    sample = history[min(len(history) // 2, len(history) - 1)]
+    if sample.get("agents"):
+        return "full"
+    if sample.get("contact_tracing"):
+        return "full"
+    return "compact"
+
+
+def load_voyage_config(platform_id: str) -> dict[str, Any]:
+    """Load platform voyage_config.json if present."""
+    path = os.path.join(platform_dir(platform_id), "voyage_config.json")
+    return _load_json(path)
+
+
+def extract_run_metadata(
+    notebook: dict[str, Any],
+    *,
+    fleet_summary: dict[str, Any] | None = None,
+    cruise_id: int | None = None,
+) -> dict[str, Any]:
+    """Merge run metadata from lab notebook and optional fleet summary."""
+    meta: dict[str, Any] = dict(notebook.get("run_metadata") or {})
+    if fleet_summary and cruise_id is not None:
+        for rec in fleet_summary.get("records", []):
+            if rec.get("cruise_id") == cruise_id:
+                meta.update(rec.get("metadata") or {})
+                meta["seed"] = meta.get("seed", rec.get("metadata", {}).get("seed"))
+                break
+    return meta

@@ -25,6 +25,7 @@ from dashboard.theme import (
     _worst_stoplight,
     apply_lcars_layout,
 )
+from dashboard.units import axis, time_x_values, time_xaxis_title
 from telemetry_buffer.agent_axes import (
     COMPLIANCE_QUARANTINED,
     INFECTION_RECOVERED,
@@ -176,7 +177,7 @@ def _render_bridge_resource_allocation(notebook: dict[str, Any]) -> None:
         apply_lcars_layout(
             cost_fig,
             height=280,
-            xaxis_title="Epoch (Stardate)", yaxis_title="Cumulative Credits (USD)",
+            xaxis_title=axis("time_epoch").title, yaxis_title=axis("usd").title,
             margin={"t": 30, "b": 40, "l": 50, "r": 20},
             legend={"orientation": "h", "y": 1.1, "x": 0.5, "xanchor": "center"},
         )
@@ -327,8 +328,8 @@ def _render_rate_counter_chart(
         fig,
         height=300,
         title="Attack Rate Tracking",
-        xaxis_title="Epoch", yaxis_title="Rate",
-        yaxis_tickformat=".1%",
+        xaxis_title=time_xaxis_title(history), yaxis_title=axis("attack_rate").title,
+        yaxis_tickformat=axis("attack_rate").tickformat,
         margin={"t": 50, "b": 40, "l": 60, "r": 20},
         legend={"orientation": "h", "y": -0.2, "x": 0.5, "xanchor": "center"},
     )
@@ -358,7 +359,7 @@ def _render_count_counter_chart(
         fig,
         height=280,
         title="Infection Count Tracking",
-        xaxis_title="Epoch", yaxis_title="Count",
+        xaxis_title=time_xaxis_title(history), yaxis_title=axis("persons").title,
         barmode="group",
         margin={"t": 50, "b": 40, "l": 50, "r": 20},
         legend={"orientation": "h", "y": -0.2, "x": 0.5, "xanchor": "center"},
@@ -465,7 +466,7 @@ def _render_pathogen_curves(history: list[dict[str, Any]]) -> None:
         fig,
         height=300,
         title="Per-Pathogen Active Infections",
-        xaxis_title="Epoch", yaxis_title="Active Infections",
+        xaxis_title=time_xaxis_title(history), yaxis_title=axis("active_infections").title,
         margin={"t": 50, "b": 40, "l": 50, "r": 20},
         legend={"orientation": "h", "y": -0.2, "x": 0.5, "xanchor": "center"},
     )
@@ -547,8 +548,8 @@ def _render_wearable_trends(history: list[dict[str, Any]]) -> None:
         fig,
         height=260,
         title="Wearable Monitoring Trends",
-        xaxis_title="Epoch", yaxis_title="Rate",
-        yaxis_tickformat=".1%",
+        xaxis_title=time_xaxis_title(history), yaxis_title=axis("attack_rate").title,
+        yaxis_tickformat=axis("attack_rate").tickformat,
         margin={"t": 50, "b": 40, "l": 60, "r": 20},
         legend={"orientation": "h", "y": -0.2, "x": 0.5, "xanchor": "center"},
     )
@@ -618,7 +619,7 @@ def _render_diagnostic_cascade(history: list[dict[str, Any]]) -> None:
             height=260,
             barmode="group",
             title="Cascade Entries by Epoch",
-            xaxis_title="Epoch", yaxis_title="New Agents",
+            xaxis_title=time_xaxis_title(history), yaxis_title=axis("new_agents").title,
             margin={"t": 50, "b": 40, "l": 50, "r": 20},
             legend={"orientation": "h", "y": -0.2, "x": 0.5, "xanchor": "center"},
         )
@@ -691,7 +692,7 @@ def _render_operational_impact(history: list[dict[str, Any]]) -> None:
             fig,
             height=280,
             title="Operational Impact Over Time",
-            xaxis_title="Epoch", yaxis_title="OIS",
+            xaxis_title=time_xaxis_title(history), yaxis_title=axis("ois").title,
             margin={"t": 50, "b": 40, "l": 50, "r": 20},
             legend={"orientation": "h", "y": -0.2, "x": 0.5, "xanchor": "center"},
         )
@@ -810,14 +811,13 @@ def _render_transmission_pathways(history: list[dict[str, Any]]) -> None:
 
 
 def _build_epidemic_curve(history: list[dict[str, Any]]) -> go.Figure:
-    epochs = []
-    susceptible = []
-    infected = []
-    quarantined = []
-    isolated = []
-    recovered = []
+    epochs = time_x_values(history)
+    susceptible: list[int] = []
+    infected: list[int] = []
+    quarantined: list[int] = []
+    isolated: list[int] = []
+    recovered: list[int] = []
     for record in history:
-        epochs.append(record["epoch"])
         s = record["summary"]
         susceptible.append(s.get("susceptible", 0))
         infected.append(s.get("infected", 0) + s.get("symptomatic", 0))
@@ -864,7 +864,7 @@ def _build_epidemic_curve(history: list[dict[str, Any]]) -> go.Figure:
     apply_lcars_layout(
         fig,
         height=350,
-        xaxis_title="Epoch (Stardate)", yaxis_title="Personnel Count",
+        xaxis_title=time_xaxis_title(history), yaxis_title=axis("persons").title,
         legend={"orientation": "h", "y": 1.08, "x": 0.5, "xanchor": "center"},
         margin={"t": 50, "b": 40, "l": 50, "r": 20},
     )
@@ -1068,7 +1068,7 @@ def _render_amplification_curves(records: list[dict[str, Any]]) -> None:
         apply_lcars_layout(
             fig,
             height=350,
-            xaxis_title="Cycle", yaxis_title="Fluorescence (RFU)",
+            xaxis_title=axis("cycle").title, yaxis_title=axis("fluorescence").title,
             margin={"t": 30, "b": 40, "l": 50, "r": 20},
             legend={"font": {"size": 9}},
         )
@@ -1136,7 +1136,7 @@ def _render_kingdom_charts(records: list[dict[str, Any]]) -> None:
         fig,
         barmode="stack",
         height=380,
-        xaxis_title="Sample", yaxis_title="Read Counts",
+        xaxis_title=axis("sample").title, yaxis_title=axis("read_counts").title,
         title="Multi-Kingdom Metagenomic Analysis",
         margin={"t": 50, "b": 60, "l": 50, "r": 20},
         legend={"orientation": "h", "y": 1.08, "x": 0.5, "xanchor": "center"},

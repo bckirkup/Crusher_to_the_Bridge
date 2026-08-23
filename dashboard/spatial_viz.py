@@ -13,6 +13,8 @@ from dashboard.architectural_graphics import ordered_decks
 from dashboard.deck_geometry import (
     collect_zone_metrics,
     color_scale_max,
+    compute_agent_positions,
+    compute_agent_trail,
     iter_compartment_rings,
     iter_hull_rings,
     iter_hvac_paths,
@@ -21,6 +23,9 @@ from dashboard.deck_geometry import (
 )
 from dashboard.loaders import PlatformBundle
 from dashboard.pydeck_builder import build_pydeck_deck
+from dashboard.retention import render_retention_banner
+from dashboard.session_state import get_selected_agent_id, get_selected_zone_id, set_selected_zone
+from dashboard.units import axis
 from dashboard.theme import (
     LCARS_GOLD,
     LCARS_PEACH,
@@ -31,7 +36,89 @@ from dashboard.theme import (
     apply_lcars_layout,
 )
 
-# Architectural drawing palette (light paper — distinct from LCARS bridge chrome).
+_AGENT_COLORS = {
+    "susceptible": "#4a90d9",
+    "infected": "#e05050",
+    "recovered": "#50a050",
+    "immune": "#808080",
+}
+
+
+def _add_agent_layer(
+    fig: go.Figure,
+    history: list[dict[str, Any]],
+    record: dict[str, Any],
+    bundle: PlatformBundle,
+    deck_filter: str,
+    *,
+    show_agents: bool,
+    show_trails: bool,
+    color_by: str,
+) -> None:
+    if not show_agents and not show_trails:
+        return
+    positions = compute_agent_positions(record, bundle, deck_filter)
+    if show_trails:
+        trail_agent = get_selected_agent_id()
+        if trail_agent is not None:
+            trail = compute_agent_trail(
+                history, trail_agent, bundle, end_epoch=record["epoch"],
+            )
+            if len(trail) > 1:
+                fig.add_trace(go.Scatter(
+                    x=[p[0] for p in trail],
+                    y=[p[1] for p in trail],
+                    mode="lines+markers",
+                    line={"color": LCARS_GOLD, "width": 2, "dash": "dot"},
+                    marker={"size": 4},
+                    name=f"Trail agent {trail_agent}",
+                    showlegend=True,
+                ))
+    if not show_agents or not positions:
+        return
+    color_key = color_by if color_by in ("infection_state", "agent_class") else "infection_state"
+    colors = [
+        _AGENT_COLORS.get(p.get(color_key, ""), "#333333")
+        for p in positions
+    ]
+    sel = get_selected_agent_id()
+    sizes = [10 if p["agent_id"] == sel else 5 for p in positions]
+    fig.add_trace(go.Scatter(
+        x=[p["x"] for p in positions],
+        y=[p["y"] for p in positions],
+        mode="markers",
+        marker={"color": colors, "size": sizes, "line": {"width": 1, "color": _INK}},
+        text=[
+            f"Agent {p['agent_id']}<br>{p['location']}<br>{p['infection_state']}"
+            for p in positions
+        ],
+        hoverinfo="text",
+        name="Agents",
+        showlegend=False,
+    ))
+
+
+def _add_hvac_exposure_overlay(
+    fig: go.Figure,
+    record: dict[str, Any],
+    bundle: PlatformBundle,
+    deck_filter: str,
+) -> None:
+    exposed_zones: set[str] = set()
+    for exp in record.get("contact_tracing", {}).get("hvac_downstream_exposures", []):
+        exposed_zones.add(str(exp.get("zone", "")))
+    if not exposed_zones:
+        return
+    for path in iter_hvac_paths(bundle, deck_filter):
+        fig.add_trace(go.Scatter(
+            x=[c[0] for c in path],
+            y=[c[1] for c in path],
+            mode="lines",
+            line={"color": "rgba(220,80,40,0.75)", "width": 3},
+            hoverinfo="skip",
+            showlegend=False,
+        ))
+
 _PAPER = "#f4f7fb"
 _INK = "#1a2a3a"
 _GRID = "rgba(40, 80, 120, 0.12)"
@@ -139,6 +226,12 @@ def _build_plotly_plan_map(
     bundle: PlatformBundle,
     color_mode: str,
     deck_filter: str,
+    *,
+    history: list[dict[str, Any]] | None = None,
+    show_agents: bool = False,
+    show_trails: bool = False,
+    agent_color_by: str = "infection_state",
+    hvac_exposure: bool = False,
 ) -> go.Figure:
     """Top-down architectural plan for a single deck (never stacks all decks)."""
     fig = go.Figure()
@@ -205,6 +298,16 @@ def _build_plotly_plan_map(
             showlegend=False,
         ))
 
+    if history is not None:
+        _add_agent_layer(
+            fig, history, record, bundle, deck_filter,
+            show_agents=show_agents,
+            show_trails=show_trails,
+            color_by=agent_color_by,
+        )
+    if hvac_exposure:
+        _add_hvac_exposure_overlay(fig, record, bundle, deck_filter)
+
     label = bundle.manifest.get("ship_class_label", bundle.platform_id)
     apply_lcars_layout(
         fig,
@@ -217,7 +320,7 @@ def _build_plotly_plan_map(
             "range": [xmin, xmax],
             "showgrid": True,
             "gridcolor": _GRID,
-            "title": "Ship length (m)",
+            "title": axis("length_m").title,
             "scaleanchor": "y",
             "scaleratio": 1,
             "constrain": "domain",
@@ -227,7 +330,7 @@ def _build_plotly_plan_map(
             "range": [ymin, ymax],
             "showgrid": True,
             "gridcolor": _GRID,
-            "title": "Beam (m)",
+            "title": axis("beam_m").title,
             "constrain": "domain",
             "color": _INK,
         },
@@ -316,13 +419,13 @@ def _build_plotly_elevation(
             "range": [xmin, xmax],
             "showgrid": True,
             "gridcolor": _GRID,
-            "title": "Ship length (m)",
+            "title": axis("length_m").title,
             "color": _INK,
         },
         yaxis={
             "range": [ymin, ymax],
             "showgrid": False,
-            "title": "Deck stack (keel → top)",
+            "title": axis("deck_stack").title,
             "color": _INK,
             "tickvals": [],
         },
@@ -378,6 +481,8 @@ def render_tactical_grid(
     bundle: PlatformBundle,
     *,
     key_suffix: str = "",
+    selected_epoch: int | None = None,
+    retention_mode: str = "full",
 ) -> None:
     if not history:
         st.warning("Sensors offline. No telemetry data.")
@@ -390,17 +495,12 @@ def render_tactical_grid(
         )
         return
 
-    # Attach architectural credits into caption path.
     if bundle.architectural and bundle.architectural.raw:
         bundle.manifest.setdefault(
             "architectural_graphics",
             {
-                "elevation": {
-                    "credit": bundle.architectural.elevation_credit,
-                },
-                "plan": {
-                    "credit": bundle.architectural.plan_credit,
-                },
+                "elevation": {"credit": bundle.architectural.elevation_credit},
+                "plan": {"credit": bundle.architectural.plan_credit},
             },
         )
 
@@ -413,17 +513,12 @@ def render_tactical_grid(
             "then re-run precompute if needed."
         )
 
-    decks = ordered_decks(bundle.layout)
-    if not decks:
-        decks = ["main"]
+    decks = ordered_decks(bundle.layout) or ["main"]
+    epoch_idx = selected_epoch if selected_epoch is not None else 0
+    epoch_idx = max(0, min(epoch_idx, len(history) - 1))
 
-    num_epochs = len(history)
-    c1, c2, c3 = st.columns([2, 3, 2])
+    c1, c2 = st.columns([3, 2])
     with c1:
-        selected_epoch = st.slider(
-            "Epoch", 0, num_epochs - 1, 0, key=f"deck_epoch{key_suffix}",
-        )
-    with c2:
         color_mode = st.radio(
             "Sensor Overlay",
             [
@@ -434,19 +529,46 @@ def render_tactical_grid(
             horizontal=True,
             key=f"deck_color{key_suffix}",
         )
-    with c3:
-        # Single-deck selection only — "All Decks" stacking removed (writes over itself).
+    with c2:
         deck_filter = _render_deck_filter(decks, key_suffix=key_suffix)
 
-    record = history[selected_epoch]
+    has_agents = retention_mode == "full" and bool(history[0].get("agents"))
+    show_agents = False
+    show_trails = False
+    agent_color_by = "infection_state"
+    hvac_exposure = False
+    if has_agents:
+        show_agents = st.checkbox("Show agents on plan", value=False, key=f"show_agents{key_suffix}")
+        show_trails = st.checkbox("Show selected agent trail", value=False, key=f"show_trails{key_suffix}")
+        agent_color_by = st.selectbox(
+            "Agent color by",
+            ["infection_state", "agent_class"],
+            key=f"agent_color{key_suffix}",
+        )
+        hvac_exposure = st.checkbox("Highlight HVAC exposures", value=False, key=f"hvac_exp{key_suffix}")
+    elif retention_mode == "compact":
+        render_retention_banner(retention_mode, feature="Agent movement layer")
+
+    record = history[epoch_idx]
     st.markdown(_lcars_alert_banner(record["trigger_status"]), unsafe_allow_html=True)
+
+    sel_zone = get_selected_zone_id()
+    if sel_zone:
+        st.caption(f"Selected zone: **{sel_zone}**")
+        zone_pick = st.selectbox(
+            "Filter by zone",
+            ["(all)"] + sorted(record.get("spaces", {}).keys()),
+            index=0,
+            key=f"zone_filter{key_suffix}",
+        )
+        if zone_pick != "(all)":
+            set_selected_zone(zone_pick)
 
     metrics = collect_zone_metrics(record, bundle, color_mode, deck_filter)
     active = sum(1 for v in metrics.values() if v > 0)
     st.caption(
-        f"Plan overlay: **{len(metrics)}** compartments on **{deck_filter}** "
-        f"({active} non-zero). Elevation shows per-deck totals; plan and elevation "
-        f"are separate panels so drawings do not overwrite each other."
+        f"Epoch **{record['epoch']}** · **{len(metrics)}** compartments on **{deck_filter}** "
+        f"({active} non-zero)."
     )
 
     left, right = st.columns(2, gap="large")
@@ -467,7 +589,14 @@ def render_tactical_grid(
             _lcars_banner(f"Deck Plan — {deck_filter}", LCARS_PEACH),
             unsafe_allow_html=True,
         )
-        plan_fig = _build_plotly_plan_map(record, bundle, color_mode, deck_filter)
+        plan_fig = _build_plotly_plan_map(
+            record, bundle, color_mode, deck_filter,
+            history=history,
+            show_agents=show_agents,
+            show_trails=show_trails,
+            agent_color_by=agent_color_by,
+            hvac_exposure=hvac_exposure,
+        )
         st.plotly_chart(plan_fig, use_container_width=True)
         if arch and arch.plan_credit:
             st.caption(arch.plan_credit)
@@ -496,11 +625,13 @@ def render_tactical_grid(
             unsafe_allow_html=True,
         )
 
-    with st.expander(f"Crew Disposition — Epoch {selected_epoch}", expanded=False):
+    with st.expander(f"Crew Disposition — Epoch {epoch_idx}", expanded=False):
         agents = record.get("agents", [])
         if agents:
             import pandas as pd
             df = pd.DataFrame(agents).sort_values("agent_id")
+            if sel_zone:
+                df = df[df["location"] == sel_zone]
             preferred = [
                 "agent_id", "agent_class", "location",
                 "infection_state", "symptom_presentation", "compliance_status",
@@ -513,3 +644,5 @@ def render_tactical_grid(
                 use_container_width=True,
                 hide_index=True,
             )
+        elif retention_mode == "compact":
+            st.info("Per-agent disposition requires full telemetry retention.")
