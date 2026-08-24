@@ -986,6 +986,57 @@ class ShipSimulation:
         )
         self._attach_surface_strain_recovery(work)
 
+    def _recover_zone_surface_strains(
+        self,
+        work: _EpochWork,
+        zone_name: str,
+        swab: dict[str, Any],
+    ) -> None:
+        recovered_mass = float(swab.get("recovered_mass", 0.0))
+        aggregate = float(self.tx_core.surface_pools.get(zone_name, 0.0))
+        if recovered_mass <= 0.0 or aggregate <= 0.0:
+            return
+        by_pathogen: dict[str, dict[str, float]] = {}
+        for pathogen_id in self.pathogen_profiles:
+            mixture_row = self._recover_pathogen_surface_mixture(
+                work, zone_name, pathogen_id, recovered_mass, aggregate,
+            )
+            if mixture_row is not None:
+                by_pathogen[pathogen_id] = mixture_row
+        if by_pathogen:
+            swab["strain_recovery"] = by_pathogen
+
+    def _recover_pathogen_surface_mixture(
+        self,
+        work: _EpochWork,
+        zone_name: str,
+        pathogen_id: str,
+        recovered_mass: float,
+        aggregate: float,
+    ) -> dict[str, float] | None:
+        composition = self.tx_core.surface_lineage_masses(
+            pathogen_id, zone_name,
+        )
+        pathogen_mass = sum(composition.values())
+        if pathogen_mass <= 0.0:
+            return None
+        epochs = self.tx_core.surface_epochs_since_deposition(
+            pathogen_id, zone_name, work.epoch,
+        )
+        if not composition or epochs is None:
+            return None
+        pathogen_share = min(pathogen_mass / aggregate, 1.0)
+        sampled = recovered_mass * pathogen_share
+        mixture = recover_surface_mixture(
+            sampled,
+            composition,
+            surface_type=self.zone_types.get(zone_name, ""),
+            epochs_since_deposition=epochs,
+            config=self.surface_recovery_config,
+            rng=self.surface_recovery_rng,
+        )
+        return mixture.as_row()
+
     def _attach_surface_strain_recovery(self, work: _EpochWork) -> None:
         """Attach conserved lineage payloads without changing swab fields."""
         if (
@@ -995,36 +1046,7 @@ class ShipSimulation:
         ):
             return
         for zone_name, swab in work.swab_results.items():
-            recovered_mass = float(swab.get("recovered_mass", 0.0))
-            aggregate = float(self.tx_core.surface_pools.get(zone_name, 0.0))
-            if recovered_mass <= 0.0 or aggregate <= 0.0:
-                continue
-            by_pathogen: dict[str, dict[str, float]] = {}
-            for pathogen_id in self.pathogen_profiles:
-                composition = self.tx_core.surface_lineage_masses(
-                    pathogen_id, zone_name,
-                )
-                pathogen_mass = sum(composition.values())
-                if pathogen_mass <= 0.0:
-                    continue
-                epochs = self.tx_core.surface_epochs_since_deposition(
-                    pathogen_id, zone_name, work.epoch,
-                )
-                if not composition or epochs is None:
-                    continue
-                pathogen_share = min(pathogen_mass / aggregate, 1.0)
-                sampled = recovered_mass * pathogen_share
-                mixture = recover_surface_mixture(
-                    sampled,
-                    composition,
-                    surface_type=self.zone_types.get(zone_name, ""),
-                    epochs_since_deposition=epochs,
-                    config=self.surface_recovery_config,
-                    rng=self.surface_recovery_rng,
-                )
-                by_pathogen[pathogen_id] = mixture.as_row()
-            if by_pathogen:
-                swab["strain_recovery"] = by_pathogen
+            self._recover_zone_surface_strains(work, zone_name, swab)
 
     def _log_pending_escalation(
         self,

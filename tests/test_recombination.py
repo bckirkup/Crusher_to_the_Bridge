@@ -202,15 +202,17 @@ class TestRegistryRecombine:
     def test_two_distinct_registered_parents_are_required(self) -> None:
         registry = StrainRegistry()
         first, _ = _parents(registry)
+        parent = registry.get(first)
         with pytest.raises(StrainConfigError, match="two distinct parents"):
-            registry.recombine(registry.get(first), registry.get(first))
+            registry.recombine(parent, parent)
 
     def test_parents_must_share_a_pathogen(self) -> None:
         registry = StrainRegistry()
         first, _ = _parents(registry)
+        recipient = registry.get(first)
         alien = registry.mint(OTHER_PATHOGEN, genotype="H3N2")
         with pytest.raises(StrainConfigError, match="different pathogens"):
-            registry.recombine(registry.get(first), alien)
+            registry.recombine(recipient, alien)
 
 
 # ── Uniform crossover ──────────────────────────────────────────────────

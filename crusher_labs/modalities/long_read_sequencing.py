@@ -155,30 +155,28 @@ class LongReadNanoporeSequencing:
                 pathogen_masses["target"] = pm * extraction
         return pathogen_masses
 
-    def _clinical_pathogen_masses(
+    def _lookup_agent(
         self,
-        request: LongReadVerificationRequest,
         agents: list[dict[str, Any]],
+        collection_key: str,
+    ) -> dict[str, Any]:
+        try:
+            aid = int(collection_key)
+        except ValueError:
+            return {}
+        for ag in agents:
+            if ag.get("agent_id") == aid:
+                return ag
+        return {}
+
+    def _masses_from_infections(
+        self,
+        infections: dict[str, Any],
         pathogen_profiles: dict[str, dict[str, Any]],
-        proc: dict[str, Any],
-        specimen: str,
+        shedding: float,
+        eff: float,
     ) -> dict[str, float]:
         pathogen_masses: dict[str, float] = {}
-        try:
-            aid = int(request.collection_key)
-        except ValueError:
-            aid = None
-        agent_data: dict[str, Any] = {}
-        if aid is not None:
-            for ag in agents:
-                if ag.get("agent_id") == aid:
-                    agent_data = ag
-                    break
-        shedding = float(agent_data.get("shedding_rate", 0.0))
-        infections = agent_data.get("pathogen_infections", {}) or {}
-        eff = float(proc.get("extraction_efficiency", 0.4))
-        if specimen == SPECIMEN_CLINICAL_CULTURE:
-            eff *= float(proc.get("extraction_efficiency", 0.7))
         for pid, inf in infections.items():
             status = inf.get("status", "") if isinstance(inf, dict) else ""
             if status == "INFECTED" or pid in pathogen_profiles:
@@ -189,6 +187,24 @@ class LongReadNanoporeSequencing:
         if shedding > 0 and not pathogen_masses:
             pathogen_masses["target"] = shedding * eff
         return pathogen_masses
+
+    def _clinical_pathogen_masses(
+        self,
+        request: LongReadVerificationRequest,
+        agents: list[dict[str, Any]],
+        pathogen_profiles: dict[str, dict[str, Any]],
+        proc: dict[str, Any],
+        specimen: str,
+    ) -> dict[str, float]:
+        agent_data = self._lookup_agent(agents, request.collection_key)
+        shedding = float(agent_data.get("shedding_rate", 0.0))
+        infections = agent_data.get("pathogen_infections", {}) or {}
+        eff = float(proc.get("extraction_efficiency", 0.4))
+        if specimen == SPECIMEN_CLINICAL_CULTURE:
+            eff *= float(proc.get("extraction_efficiency", 0.7))
+        return self._masses_from_infections(
+            infections, pathogen_profiles, shedding, eff,
+        )
 
     def _pathogen_fractions(
         self,

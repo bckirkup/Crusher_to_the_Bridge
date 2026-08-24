@@ -178,8 +178,10 @@ def test_a_symlink_out_of_the_base_is_rejected(tmp_path) -> None:
     outside.mkdir()
     (outside / "loot.txt").write_text("x", encoding="utf-8")
     (base / "door").symlink_to(outside)
+    base_path = str(base)
+    target = os.path.join("door", "loot.txt")
     with pytest.raises(ValueError, match="escapes repository root"):
-        resolve_repo_path(str(base), os.path.join("door", "loot.txt"))
+        resolve_repo_path(base_path, target)
 
 
 def test_distinct_inputs_resolve_to_distinct_contained_paths(tmp_path) -> None:

@@ -483,7 +483,7 @@ class ShardBundle:
                 encoding="utf-8",
             ) as fh:
                 self._merge_manifest(json.load(fh))
-        except (OSError, TypeError, ValueError, json.JSONDecodeError):
+        except (OSError, TypeError, ValueError):
             print("  (local shard manifest is unreadable; starting with no entries)")
 
     def record_run(self, run_id: str) -> None:
@@ -507,7 +507,7 @@ class ShardBundle:
                 parameters = {}
             if not isinstance(derived, dict):
                 derived = {}
-        except (OSError, TypeError, ValueError, json.JSONDecodeError):
+        except (OSError, TypeError, ValueError):
             # Missing summaries are valid for lightweight test runners.
             pass
         self.entries[safe_id] = {
@@ -564,7 +564,7 @@ class ShardBundle:
         try:
             with zipfile.ZipFile(self.zip_path) as zf:
                 names = zf.namelist()
-        except (FileNotFoundError, zipfile.BadZipFile, OSError):
+        except (zipfile.BadZipFile, OSError):
             return None
         if len(names) != len(set(names)):
             return None
@@ -683,7 +683,7 @@ class ShardBundle:
                 encoding="utf-8",
             ) as fh:
                 self._merge_manifest(json.load(fh))
-        except (OSError, TypeError, ValueError, json.JSONDecodeError):
+        except (OSError, TypeError, ValueError):
             print("  (s3 shard manifest is unreadable; starting with no entries)")
 
     def completed_run_ids(self) -> set[str]:

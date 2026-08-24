@@ -133,7 +133,11 @@ def evaluate_counterfactual(
     ship_arm = _arm_result(renewal_result(ship_importation, parameters))
     port_arm = _arm_result(renewal_result(port_importation, parameters))
     benefit = port_arm.total_cases - ship_arm.total_cases
-    fraction = 0.0 if port_arm.total_cases == 0.0 else benefit / port_arm.total_cases
+    fraction = (
+        0.0
+        if abs(port_arm.total_cases) < 1e-15
+        else benefit / port_arm.total_cases
+    )
     lead = (
         None
         if port_epoch is None or importation.ship_detection_epoch is None

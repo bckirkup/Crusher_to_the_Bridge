@@ -423,7 +423,8 @@ def test_index_cases_are_seeded_one_day_in_on_either_clock() -> None:
     )
     hourly_seed = [a.time_infected for a in hourly.agents if a.is_infected]
     legacy_seed = [a.time_infected for a in legacy.agents if a.is_infected]
-    assert hourly_seed and legacy_seed
+    assert hourly_seed
+    assert legacy_seed
     assert set(hourly_seed) == {24}
     assert set(legacy_seed) == {1}
 

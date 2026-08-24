@@ -21,7 +21,7 @@ from __future__ import annotations
 import math
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass, field, replace
-from typing import Any
+from typing import Any, cast
 
 # Origins a strain can be minted from. ``shore_import`` covers strains that
 # entered the ship already formed (embarkation, port reservoir, shore model).
@@ -678,19 +678,22 @@ class StrainRegistry:
             )
         generation = parent.generation + (1 if origin == "transmission" else 0)
         pheno = phenotype or Phenotype.of(parent)
-        child = replace(
-            parent,
-            strain_id=self.allocate_id(parent.pathogen_id),
-            parent_strain_ids=(parent.strain_id,),
-            generation=generation,
-            n_mutations=parent.n_mutations + mutations_added,
-            origin=origin,
-            source_location=source_location or parent.source_location,
-            genotype=parent.genotype if genotype is None else genotype,
-            transmissibility_multiplier=pheno.transmissibility_multiplier,
-            shedding_multiplier=pheno.shedding_multiplier,
-            incubation_modifier=pheno.incubation_modifier,
-            immune_escape=pheno.immune_escape,
+        child = cast(
+            StrainState,
+            replace(
+                parent,
+                strain_id=self.allocate_id(parent.pathogen_id),
+                parent_strain_ids=(parent.strain_id,),
+                generation=generation,
+                n_mutations=parent.n_mutations + mutations_added,
+                origin=origin,
+                source_location=source_location or parent.source_location,
+                genotype=parent.genotype if genotype is None else genotype,
+                transmissibility_multiplier=pheno.transmissibility_multiplier,
+                shedding_multiplier=pheno.shedding_multiplier,
+                incubation_modifier=pheno.incubation_modifier,
+                immune_escape=pheno.immune_escape,
+            ),
         )
         return self.register(child)
 
@@ -725,19 +728,22 @@ class StrainRegistry:
                 f"recombination needs two distinct parents, got {recipient.strain_id!r} twice",
             )
         pheno = phenotype or Phenotype.of(recipient)
-        child = replace(
-            recipient,
-            strain_id=self.allocate_id(recipient.pathogen_id),
-            parent_strain_ids=(recipient.strain_id, donor.strain_id),
-            generation=max(recipient.generation, donor.generation),
-            n_mutations=max(recipient.n_mutations, donor.n_mutations),
-            origin="recombination",
-            source_location=source_location or recipient.source_location,
-            genotype=recipient.genotype if genotype is None else genotype,
-            transmissibility_multiplier=pheno.transmissibility_multiplier,
-            shedding_multiplier=pheno.shedding_multiplier,
-            incubation_modifier=pheno.incubation_modifier,
-            immune_escape=pheno.immune_escape,
+        child = cast(
+            StrainState,
+            replace(
+                recipient,
+                strain_id=self.allocate_id(recipient.pathogen_id),
+                parent_strain_ids=(recipient.strain_id, donor.strain_id),
+                generation=max(recipient.generation, donor.generation),
+                n_mutations=max(recipient.n_mutations, donor.n_mutations),
+                origin="recombination",
+                source_location=source_location or recipient.source_location,
+                genotype=recipient.genotype if genotype is None else genotype,
+                transmissibility_multiplier=pheno.transmissibility_multiplier,
+                shedding_multiplier=pheno.shedding_multiplier,
+                incubation_modifier=pheno.incubation_modifier,
+                immune_escape=pheno.immune_escape,
+            ),
         )
         return self.register(child)
 

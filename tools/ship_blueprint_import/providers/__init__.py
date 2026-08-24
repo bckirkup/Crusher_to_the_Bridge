@@ -41,6 +41,17 @@ def _strip_markdown_fence(text: str) -> str:
     return body
 
 
+def _consume_string_char(ch: str, escape: bool) -> tuple[bool, bool]:
+    """Advance string-scan state. Returns (still_in_string, next_escape)."""
+    if escape:
+        return True, False
+    if ch == "\\":
+        return True, True
+    if ch == '"':
+        return False, False
+    return True, False
+
+
 def _first_json_object_span(text: str) -> str | None:
     """Return the first top-level ``{...}`` slice via brace counting (no ReDoS)."""
     start = text.find("{")
@@ -52,12 +63,7 @@ def _first_json_object_span(text: str) -> str | None:
     for idx in range(start, len(text)):
         ch = text[idx]
         if in_string:
-            if escape:
-                escape = False
-            elif ch == "\\":
-                escape = True
-            elif ch == '"':
-                in_string = False
+            in_string, escape = _consume_string_char(ch, escape)
             continue
         if ch == '"':
             in_string = True

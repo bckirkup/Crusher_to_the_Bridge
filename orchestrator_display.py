@@ -357,6 +357,18 @@ def _executive_epidemiology_rows(
     ]
 
 
+def _format_counter_threshold(
+    cid: str,
+    threshold: Any,
+    exceeded: bool,
+) -> str:
+    if threshold is None:
+        return ""
+    if "rate" in cid:
+        return f"  thr={threshold:.1%}  {'EXCEEDED' if exceeded else 'ok'}"
+    return f"  thr={threshold}  {'EXCEEDED' if exceeded else 'ok'}"
+
+
 def _executive_counter_rows(
     row: Any,
     thin_div: str,
@@ -370,12 +382,7 @@ def _executive_counter_rows(
         threshold = cdata.get("threshold")
         exceeded = cdata.get("exceeded", False)
         val_str = f"{value:.1%}" if "rate" in cid else f"{value:.0f}"
-        thr_str = ""
-        if threshold is not None:
-            if "rate" in cid:
-                thr_str = f"  thr={threshold:.1%}  {'EXCEEDED' if exceeded else 'ok'}"
-            else:
-                thr_str = f"  thr={threshold}  {'EXCEEDED' if exceeded else 'ok'}"
+        thr_str = _format_counter_threshold(cid, threshold, exceeded)
         lines.append(row(f"  {label:30s} {val_str:>8s}  (n={pop}){thr_str}"))
     return lines
 
