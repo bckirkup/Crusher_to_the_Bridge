@@ -331,15 +331,21 @@ Use placeholders (or env vars) only — examples of the *shape*:
 
 - `deploy/aws/README.md` — canonical commands, file table, IAM grammar note.
 - `picard_framework/runs/mega_cruise_campaign/clock_arm_c1_v1_manifest.json`
-  — focused C1 VSP refit manifest. Submit it twice with
-  `CLOCK=hours` and `CLOCK=legacy_epoch_day` using distinct S3 prefixes
-  (for example `campaign/clock_hours/` and `campaign/clock_legacy/`).
-  The arms intentionally share run IDs, so a shared prefix would interleave
-  models and make the second arm look complete to resume. The shell submitter
-  and default job definition have no `--tier`; use a dedicated manifest or
-  `submit_campaign_manifest.ps1 -Tier` for a single-tier submission.
+  — historical paired-clock C1 VSP refit manifest. Its legacy arm is
+  retired; use `legacy_epoch_day` only to reproduce old runs, not for a new
+  campaign. The arms intentionally shared run IDs, so a shared prefix would
+  interleave models and make the second arm look complete to resume. The
+  shell submitter and default job definition have no `--tier`; use a dedicated
+  manifest or `submit_campaign_manifest.ps1 -Tier` for a single-tier
+  submission.
   Keep Stan and Sentinel inference off the Spot queue; only independent
   checkpointed simulation tiers belong there.
+- `picard_framework/runs/mega_cruise_campaign/c1_single_dose_hours_v1_manifest.json`
+  — current hourly-only single-dose norovirus C1 VSP refit. It enumerates
+  560 runs per hull and 2,240 total with the common dose ladder, `n_init=1`,
+  `none_true` plus `syndromic`, and matched seeds 720–759. Submit only with
+  `CLOCK=hours`; `legacy_epoch_day` is retired and its historical numbers are
+  not a reference.
 - `deploy/aws/ensure_campaign_infra.sh` — recreate missing queue/log group +
   register current job def; optional `--smoke-submit N`.
 - `deploy/aws/submit_boundary_surface.ps1` — boundary_surface_v1 Spot array.

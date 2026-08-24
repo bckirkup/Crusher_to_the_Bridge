@@ -1,0 +1,308 @@
+{
+  "campaign": "c1_single_dose_hours_v1",
+  "platform": "mega_cruise_5000",
+  "description": "Single-dose test of the norovirus dose_adjustment refit under the hourly natural-history clock. The question is not what each hull's best dose is, it is whether ONE dose_adjustment can sit inside all four class-binned CDC VSP IQRs simultaneously, so every tier carries the IDENTICAL ladder and the identical seeds; any per-hull ladder difference would confound the comparison. The legacy_epoch_day arm is retired and is not run here: it is not a supported configuration and its numbers are not a reference. dose_adjustment is a log10 shedding penalty subtracted from the shedding curve in engines/infection_dynamics_bridge.py, so higher values mean less transmission. The 11.5-13.0 window at 0.25 steps is where clock_arm_c1_refit_v1 (hours arm, 2400 runs, seeds 700-719) left the answer undecided: at adj 12.0 expedition (12.44%), spirit (5.43%) and mega (4.39%) all land inside their IQRs while classic misses high at 8.50% against a 7.76% ceiling, and at adj 13.0 expedition (6.11%) and classic (6.00%) are inside while spirit falls to 3.70%, below its 4.44% floor. A common value, if it exists, is between those two points and the 1.0-step grid cannot resolve it. Only n_init=1 is run: the fit is scored on the single-introduction cell, and the earlier campaign showed n_init=5 overshoots every class IQR at every dose in this band, so it carries no information about the common dose. 40 seeds per cell instead of 20 because the endpoint that separates these cells is takeoff probability, which sits near 0.5-0.7 in this band; at 20 seeds the marginal median attack rate flips between fizzle and outbreak across seed sets, so both the marginal median and the conditional-on-takeoff median must be resolved. Seeds 720-759 are disjoint from the local expedition pilot (500-519) and from clock_arm_c1_refit_v1 (700-719), so all three sets pool as independent draws. syndromic is the branch the VSP fit is scored on, because a VSP record is a rate reported after an adaptive response has acted; none_true is the counterfactual that says what the response averted. Simulation tiers only: no Stan or Sentinel inference belongs in this manifest, as those fits do not survive a Spot interruption. Tier ids reuse the c1_ prefix because the campaign runner dispatches its calibration tier generators off that prefix; the run_ids do not collide with clock_arm_c1_refit_v1 because the seed sets are disjoint, and the S3 prefix separates the campaigns regardless.",
+  "default_epochs": 168,
+  "default_num_agents": 7000,
+  "tiers": {
+    "c1_expedition_cruise_450": {
+      "description": "Norovirus single-dose VSP test on expedition_cruise_450, common 11.5-13.0 ladder, hourly clock",
+      "platform": "expedition_cruise_450",
+      "pathogen": "norovirus",
+      "dose_adjustments": [
+        11.5,
+        11.75,
+        12.0,
+        12.25,
+        12.5,
+        12.75,
+        13.0
+      ],
+      "initial_infected_values": [
+        1
+      ],
+      "surveillance_strategies": [
+        "none_true",
+        "syndromic"
+      ],
+      "epochs": 168,
+      "seeds": [
+        720,
+        721,
+        722,
+        723,
+        724,
+        725,
+        726,
+        727,
+        728,
+        729,
+        730,
+        731,
+        732,
+        733,
+        734,
+        735,
+        736,
+        737,
+        738,
+        739,
+        740,
+        741,
+        742,
+        743,
+        744,
+        745,
+        746,
+        747,
+        748,
+        749,
+        750,
+        751,
+        752,
+        753,
+        754,
+        755,
+        756,
+        757,
+        758,
+        759
+      ],
+      "calibration_target": "CDC VSP expedition class (complement <900): n=17, median passenger AR 8.56%, IQR 4.51-13.60%"
+    },
+    "c1_classic_cruise_1900": {
+      "description": "Norovirus single-dose VSP test on classic_cruise_1900, common 11.5-13.0 ladder, hourly clock",
+      "platform": "classic_cruise_1900",
+      "pathogen": "norovirus",
+      "dose_adjustments": [
+        11.5,
+        11.75,
+        12.0,
+        12.25,
+        12.5,
+        12.75,
+        13.0
+      ],
+      "initial_infected_values": [
+        1
+      ],
+      "surveillance_strategies": [
+        "none_true",
+        "syndromic"
+      ],
+      "epochs": 168,
+      "seeds": [
+        720,
+        721,
+        722,
+        723,
+        724,
+        725,
+        726,
+        727,
+        728,
+        729,
+        730,
+        731,
+        732,
+        733,
+        734,
+        735,
+        736,
+        737,
+        738,
+        739,
+        740,
+        741,
+        742,
+        743,
+        744,
+        745,
+        746,
+        747,
+        748,
+        749,
+        750,
+        751,
+        752,
+        753,
+        754,
+        755,
+        756,
+        757,
+        758,
+        759
+      ],
+      "calibration_target": "CDC VSP classic class: n=172, median passenger AR 5.59%, IQR 4.46-7.76%"
+    },
+    "c1_spirit_cruise_3000": {
+      "description": "Norovirus single-dose VSP test on spirit_cruise_3000, common 11.5-13.0 ladder, hourly clock",
+      "platform": "spirit_cruise_3000",
+      "pathogen": "norovirus",
+      "dose_adjustments": [
+        11.5,
+        11.75,
+        12.0,
+        12.25,
+        12.5,
+        12.75,
+        13.0
+      ],
+      "initial_infected_values": [
+        1
+      ],
+      "surveillance_strategies": [
+        "none_true",
+        "syndromic"
+      ],
+      "epochs": 168,
+      "seeds": [
+        720,
+        721,
+        722,
+        723,
+        724,
+        725,
+        726,
+        727,
+        728,
+        729,
+        730,
+        731,
+        732,
+        733,
+        734,
+        735,
+        736,
+        737,
+        738,
+        739,
+        740,
+        741,
+        742,
+        743,
+        744,
+        745,
+        746,
+        747,
+        748,
+        749,
+        750,
+        751,
+        752,
+        753,
+        754,
+        755,
+        756,
+        757,
+        758,
+        759
+      ],
+      "calibration_target": "CDC VSP spirit class: n=52, median passenger AR 5.64%, IQR 4.44-7.90%"
+    },
+    "c1_mega_cruise_5000": {
+      "description": "Norovirus single-dose VSP test on mega_cruise_5000, common 11.5-13.0 ladder, hourly clock",
+      "platform": "mega_cruise_5000",
+      "pathogen": "norovirus",
+      "dose_adjustments": [
+        11.5,
+        11.75,
+        12.0,
+        12.25,
+        12.5,
+        12.75,
+        13.0
+      ],
+      "initial_infected_values": [
+        1
+      ],
+      "surveillance_strategies": [
+        "none_true",
+        "syndromic"
+      ],
+      "epochs": 168,
+      "seeds": [
+        720,
+        721,
+        722,
+        723,
+        724,
+        725,
+        726,
+        727,
+        728,
+        729,
+        730,
+        731,
+        732,
+        733,
+        734,
+        735,
+        736,
+        737,
+        738,
+        739,
+        740,
+        741,
+        742,
+        743,
+        744,
+        745,
+        746,
+        747,
+        748,
+        749,
+        750,
+        751,
+        752,
+        753,
+        754,
+        755,
+        756,
+        757,
+        758,
+        759
+      ],
+      "calibration_target": "CDC VSP mega class: n=9, median passenger AR 5.61%, IQR 3.40-7.45%"
+    }
+  },
+  "pathogen_configs": {
+    "norovirus": {
+      "bundle": "active_profiles",
+      "pathogen_id": "norwalk_gi",
+      "overrides": {
+        "remove": [
+          "sars_cov2_resp"
+        ]
+      }
+    }
+  },
+  "surveillance_configs": {
+    "none_true": {
+      "diagnostic_cascade": {
+        "enabled": false
+      },
+      "syndromic": {
+        "sick_call_probability": 0.0,
+        "background_noise_rate": 0.0
+      },
+      "fred_behavior": {
+        "healthy_noise_categories": []
+      },
+      "observation": {
+        "enabled": false
+      },
+      "wearable_monitoring": {
+        "enabled": false
+      },
+      "ship_graph": {
+        "counter_confinement_enabled": false
+      }
+    },
+    "syndromic": {
+      "diagnostic_cascade": {
+        "enabled": false
+      }
+    }
+  }
+}
