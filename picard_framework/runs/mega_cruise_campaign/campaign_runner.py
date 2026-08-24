@@ -1852,6 +1852,19 @@ def _arm_sentinel_line_list(spec: dict[str, Any], run_dir: str) -> None:
     spec["run"]["sentinel_line_list"] = os.path.join(run_dir, "sentinel_line_list.json")
 
 
+def _arm_lineage_census(spec: dict[str, Any], run_dir: str) -> None:
+    """Collect the lineage census when strains are tracked (compact-safe).
+
+    The truth channel the observed lineages are scored against, so it is armed
+    by ``variant_surveillance`` rather than by shore exposure: a Paper 3 arm
+    without it can report what was sequenced and not what was there.
+    """
+    variant = (spec.get("config_overrides") or {}).get("variant_surveillance")
+    if not isinstance(variant, dict) or not variant.get("enabled"):
+        return
+    spec["run"]["lineage_census"] = os.path.join(run_dir, "lineage_census.json")
+
+
 def run_simulation(
     run_id: str,
     spec: dict[str, Any],
@@ -1897,6 +1910,7 @@ def run_simulation(
         spec["run"].setdefault("history_retention", "compact")
         spec["run"].setdefault("write_ground_truth", False)
     _arm_sentinel_line_list(spec, run_dir)
+    _arm_lineage_census(spec, run_dir)
 
     spec_path = resolve_child_path(run_dir, "run_spec.json")
     with validated_open(spec_path, "w", allowed_roots=roots, encoding="utf-8") as fh:

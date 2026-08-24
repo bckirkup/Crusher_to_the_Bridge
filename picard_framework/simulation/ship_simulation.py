@@ -688,6 +688,38 @@ class ShipSimulation:
         )
         write_json(safe_path(paths.sentinel_line_list), payload)
 
+    def _write_lineage_census(self) -> None:
+        """Write the run's lineage census artifact, if one was asked for.
+
+        The phylodynamic truth channel, and the reason it is its own file: the
+        per-epoch census is attached to the epoch record, which a ``compact``
+        campaign run never persists, so at campaign scale the observed lineages
+        had nothing to be compared against. Carries the clock with it, because
+        every phylodynamic observable is a rate per physical hour.
+        """
+        paths = self.run_spec.telemetry
+        registry = None if self.tx_core is None else self.tx_core.strain_registry
+        if paths is None or not paths.lineage_census or registry is None:
+            return
+        from picard_framework.analysis._io import safe_path, write_json
+        from picard_framework.analysis.phylodynamics.artifact import (
+            LINEAGE_CENSUS_SCHEMA_VERSION,
+        )
+
+        clock = self.clock
+        payload = {
+            "schema_version": LINEAGE_CENSUS_SCHEMA_VERSION,
+            "voyage_id": str(self.cfg.get("voyage_id") or f"seed{self.seed}"),
+            "ship_id": self.run_spec.platform_id,
+            "random_seed": self.seed,
+            "num_epochs": self.num_epochs,
+            "observation_end_epoch": max(self._epoch, 1),
+            "epoch_duration_hours": clock.hours_per_epoch,
+            "natural_history_clock": clock.mode,
+            **registry.to_telemetry(),
+        }
+        write_json(safe_path(paths.lineage_census), payload)
+
     def step(self, actions: ActionEnvelope | None = None) -> StepResult:
         work = self._begin_epoch(actions)
         self._step_biology(work)
@@ -1357,6 +1389,7 @@ class ShipSimulation:
             self.step()
         assert self.state is not None
         self._write_sentinel_line_list()
+        self._write_lineage_census()
         return RunResult(
             num_epochs=target,
             final_trigger_status=self.state.trigger_status,
@@ -1385,3 +1418,4 @@ class ShipSimulation:
             display=show,
         )
         self._write_sentinel_line_list()
+        self._write_lineage_census()
