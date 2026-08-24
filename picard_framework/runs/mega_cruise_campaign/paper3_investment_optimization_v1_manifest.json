@@ -1,0 +1,245 @@
+{
+  "campaign": "paper3_investment_optimization_v1",
+  "platform": "classic_cruise_1900",
+  "description": "Paper 3 design 4 (spec \u00a76 'Investment optimization', ~2,000 runs): the four spec \u00a74 surveillance investment tiers (Baseline / Minimal / Moderate / Full) crossed with hull, voyage length and founder count, for the cost-benefit frontier that picard_framework/analysis/economics consumes. Absolute dollar levels stay provisional: the valuation rates are placeholders and the dose is unpinned until the C1 hourly refit. Hourly clock, drawn-incubation arm.",
+  "natural_history_clock": "hours",
+  "incubation_arm": "distribution",
+  "epoch_duration_hours": 1,
+  "default_epochs": 168,
+  "default_num_agents": 7000,
+  "defaults": {
+    "dose_adjustment": 12.0,
+    "initial_infected": 1,
+    "voyage_days": [
+      7
+    ],
+    "founder_strains": [
+      1
+    ],
+    "census_interval_epochs": 6
+  },
+  "pathogen_configs": {
+    "norovirus": {
+      "bundle": "active_profiles",
+      "pathogen_id": "norwalk_gi",
+      "wastewater_label": "norovirus",
+      "overrides": {
+        "remove": [
+          "sars_cov2_resp"
+        ]
+      }
+    },
+    "sars_cov2": {
+      "bundle": "active_profiles",
+      "pathogen_id": "sars_cov2_resp",
+      "wastewater_label": "SARS-CoV-2",
+      "overrides": {
+        "remove": [
+          "norwalk_gi"
+        ]
+      }
+    }
+  },
+  "surveillance_tier_notes": {
+    "inv_baseline": "Spec \u00a74 Baseline: syndromic sick-call only, no sequencing.",
+    "inv_minimal": "Spec \u00a74 Minimal: clinical qPCR/amplicon typing via the cascade.",
+    "inv_moderate": "Spec \u00a74 Moderate: cascade + Nanopore verification + amplicon wastewater with lineage deconvolution.",
+    "inv_full": "Spec \u00a74 Full: Moderate plus surface sampling and a deeper, long-read wastewater library."
+  },
+  "surveillance_configs": {
+    "inv_baseline": {
+      "diagnostic_cascade": {
+        "enabled": false
+      }
+    },
+    "inv_minimal": {
+      "diagnostic_cascade": {
+        "enabled": true,
+        "config_path": "data/config/diagnostic_cascade.json"
+      }
+    },
+    "inv_moderate": {
+      "diagnostic_cascade": {
+        "enabled": true,
+        "config_path": "data/config/diagnostic_cascade.json"
+      },
+      "long_read_sequencing": {
+        "enabled": true
+      },
+      "wastewater_surveillance": {
+        "enabled": true,
+        "assay_mode": "amplicon",
+        "sampling_interval_epochs": 6,
+        "sequencing_depth": 250000,
+        "strain_deconvolution": {
+          "enabled": true,
+          "dirichlet_concentration": 200.0,
+          "min_pathogen_reads": 100,
+          "min_lineage_reads": 20,
+          "min_lineage_fraction": 0.02
+        }
+      }
+    },
+    "inv_full": {
+      "diagnostic_cascade": {
+        "enabled": true,
+        "config_path": "data/config/diagnostic_cascade.json"
+      },
+      "long_read_sequencing": {
+        "enabled": true
+      },
+      "wastewater_surveillance": {
+        "enabled": true,
+        "assay_mode": "long_read",
+        "sampling_interval_epochs": 3,
+        "sequencing_depth": 1000000,
+        "strain_deconvolution": {
+          "enabled": true,
+          "dirichlet_concentration": 200.0,
+          "min_pathogen_reads": 100,
+          "min_lineage_reads": 20,
+          "min_lineage_fraction": 0.02
+        }
+      },
+      "variant_surveillance": {
+        "surface_sampling": {
+          "enabled": true
+        }
+      }
+    }
+  },
+  "tiers": {
+    "vs6_investment_frontier_norovirus": {
+      "description": "Investment frontier: four tiers x four hulls, norovirus",
+      "regime": "investment",
+      "pathogen": "norovirus",
+      "platforms": [
+        "expedition_cruise_450",
+        "classic_cruise_1900",
+        "spirit_cruise_3000",
+        "mega_cruise_5000"
+      ],
+      "voyage_days": [
+        7,
+        14
+      ],
+      "surveillance_strategies": [
+        "inv_baseline",
+        "inv_minimal",
+        "inv_moderate",
+        "inv_full"
+      ],
+      "deferred": true,
+      "deferred_reason": "Deferred: dose_adjustment is provisional until the C1 hourly refit (c1_single_dose_hours_v1_manifest.json) pins it. Recount with count_manifest_cartesian.py and re-read this note before submitting.",
+      "seeds": [
+        1600,
+        1601,
+        1602,
+        1603,
+        1604,
+        1605,
+        1606,
+        1607,
+        1608,
+        1609,
+        1610,
+        1611,
+        1612,
+        1613,
+        1614
+      ],
+      "founder_strains": [
+        1,
+        4
+      ]
+    },
+    "vs6_investment_frontier_sars_cov2": {
+      "description": "Investment frontier: four tiers x four hulls, sars_cov2",
+      "regime": "investment",
+      "pathogen": "sars_cov2",
+      "platforms": [
+        "expedition_cruise_450",
+        "classic_cruise_1900",
+        "spirit_cruise_3000",
+        "mega_cruise_5000"
+      ],
+      "voyage_days": [
+        7,
+        14
+      ],
+      "surveillance_strategies": [
+        "inv_baseline",
+        "inv_minimal",
+        "inv_moderate",
+        "inv_full"
+      ],
+      "deferred": true,
+      "deferred_reason": "Deferred: dose_adjustment is provisional until the C1 hourly refit (c1_single_dose_hours_v1_manifest.json) pins it. Recount with count_manifest_cartesian.py and re-read this note before submitting.",
+      "seeds": [
+        1700,
+        1701,
+        1702,
+        1703,
+        1704,
+        1705,
+        1706,
+        1707,
+        1708,
+        1709,
+        1710,
+        1711,
+        1712,
+        1713,
+        1714
+      ],
+      "founder_strains": [
+        1,
+        4
+      ]
+    },
+    "vs6_investment_long_voyage_norovirus": {
+      "description": "Investment frontier at a 10-day voyage on the largest hull, where within-voyage diversity has time to accumulate",
+      "regime": "investment",
+      "pathogen": "norovirus",
+      "platforms": [
+        "mega_cruise_5000"
+      ],
+      "voyage_days": [
+        10
+      ],
+      "surveillance_strategies": [
+        "inv_baseline",
+        "inv_minimal",
+        "inv_moderate",
+        "inv_full"
+      ],
+      "deferred": true,
+      "deferred_reason": "Deferred: dose_adjustment is provisional until the C1 hourly refit (c1_single_dose_hours_v1_manifest.json) pins it. Recount with count_manifest_cartesian.py and re-read this note before submitting.",
+      "seeds": [
+        1800,
+        1801,
+        1802,
+        1803,
+        1804,
+        1805,
+        1806,
+        1807,
+        1808,
+        1809,
+        1810,
+        1811,
+        1812,
+        1813,
+        1814,
+        1815,
+        1816,
+        1817,
+        1818,
+        1819
+      ],
+      "founder_strains": [
+        1
+      ]
+    }
+  }
+}

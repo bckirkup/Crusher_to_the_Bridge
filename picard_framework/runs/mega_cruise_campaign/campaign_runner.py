@@ -39,6 +39,7 @@ from picard_framework.analysis.sentinel.wastewater_assays import (  # noqa: E402
 )
 from picard_framework.runs.mega_cruise_campaign import (  # noqa: E402
     sentinel_recovery,
+    variant_campaign,
 )
 from picard_framework.runs.mega_cruise_campaign.tier_iterators import (  # noqa: E402
     dispatch_standard_or_calibration,
@@ -168,6 +169,34 @@ def _ensure_clock_arm(
             marker_path, "w", allowed_roots=_allowed_roots(), encoding="utf-8",
         ) as fh:
             fh.write(clock + "\n")
+
+
+def _resolve_manifest_clock(
+    manifest: dict[str, Any],
+    args: argparse.Namespace,
+) -> str | None:
+    """Reconcile the CLI clock arm with a manifest that declares one.
+
+    A manifest may pin its own arm (Paper 3 ``vs*`` campaigns must). Disagreement
+    is refused rather than resolved: silently preferring one side is how two
+    natural-history models end up pooled in one output directory.
+    """
+    declared = manifest.get("natural_history_clock")
+    if declared is None:
+        return args.natural_history_clock
+    declared = str(declared)
+    if declared not in variant_campaign.CLOCKS:
+        raise SystemExit(
+            f"manifest natural_history_clock must be one of "
+            f"{variant_campaign.CLOCKS}, got {declared!r}",
+        )
+    requested = args.natural_history_clock
+    if requested is not None and requested != declared:
+        raise SystemExit(
+            "natural-history clock arm mismatch: manifest declares "
+            f"{declared!r} but {requested!r} was requested on the command line",
+        )
+    return declared
 
 
 def _run_workdir(run_id: str, *, output_root: str | None = None) -> str:
@@ -1672,6 +1701,22 @@ def generate_tier_runs(
             yield_run=_yield,
         )
         return
+    if short.startswith("vs"):
+        yield from variant_campaign.iter_variant_runs(
+            manifest=manifest,
+            tier=tier,
+            tier_id=tier_id,
+            surv_cfgs=surv_cfgs,
+            platform_override=platform_override,
+            num_agents_override=num_agents_override,
+            epochs_override=epochs_override,
+            get_pathogen_config=get_pathogen_config,
+            merge_cfg=merge_cfg,
+            platform_num_agents=_platform_num_agents,
+            default_agents=default_agents,
+            yield_run=_yield,
+        )
+        return
     raise ValueError(f"No generator for tier {tier_id}")
 
 
@@ -2103,7 +2148,10 @@ def _campaign_parser() -> argparse.ArgumentParser:
         "--natural-history-clock",
         choices=("hours", "legacy_epoch_day"),
         default=None,
-        help="Select the natural-history clock arm without changing run_ids.",
+        help=(
+            "Select the natural-history clock arm. Manifests may declare their own "
+            "(vs* Paper 3 campaigns must); a disagreement is refused, not resolved."
+        ),
     )
     parser.add_argument(
         "--smoke",
@@ -2461,6 +2509,8 @@ def main(argv: list[str] | None = None) -> int:
     if args.output_dir is not None:
         set_output_root(args.output_dir)
     _apply_smoke_defaults(args)
+    manifest = load_manifest(args.manifest)
+    args.natural_history_clock = _resolve_manifest_clock(manifest, args)
     _ensure_clock_arm(
         args.natural_history_clock or DEFAULT_NATURAL_HISTORY_CLOCK,
         explicit=args.natural_history_clock is not None,
@@ -2474,7 +2524,6 @@ def main(argv: list[str] | None = None) -> int:
     if uploader is not None and (args.resume or args.retry_failed):
         _download_completed_log(uploader, shard_index, shard_count)
         bundle.download(uploader)
-    manifest = load_manifest(args.manifest)
     done = completed_runs() if (args.resume or args.retry_failed) else set()
     retry_only = failed_runs() if args.retry_failed else None
     if args.retry_failed and not retry_only:

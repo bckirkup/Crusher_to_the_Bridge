@@ -1,0 +1,268 @@
+{
+  "campaign": "paper3_fleet_network_value_v1",
+  "platform": "mega_cruise_5000",
+  "description": "Paper 3 design 3 (spec \u00a76 'Fleet network value', ~3,000 runs): independent single-ship voyages across all four hulls, pooled in post-processing into fleets of ten to compare fleet against single-ship detection power. Each run is one ship; the fleet is an analysis-time aggregation, so no new engine coupling is implied. Hourly clock, drawn-incubation arm.",
+  "natural_history_clock": "hours",
+  "incubation_arm": "distribution",
+  "epoch_duration_hours": 1,
+  "default_epochs": 168,
+  "default_num_agents": 7000,
+  "defaults": {
+    "dose_adjustment": 12.0,
+    "initial_infected": 1,
+    "voyage_days": [
+      7
+    ],
+    "founder_strains": [
+      1
+    ],
+    "census_interval_epochs": 6
+  },
+  "pathogen_configs": {
+    "norovirus": {
+      "bundle": "active_profiles",
+      "pathogen_id": "norwalk_gi",
+      "wastewater_label": "norovirus",
+      "overrides": {
+        "remove": [
+          "sars_cov2_resp"
+        ]
+      }
+    },
+    "sars_cov2": {
+      "bundle": "active_profiles",
+      "pathogen_id": "sars_cov2_resp",
+      "wastewater_label": "SARS-CoV-2",
+      "overrides": {
+        "remove": [
+          "norwalk_gi"
+        ]
+      }
+    }
+  },
+  "surveillance_tier_notes": {
+    "inv_baseline": "Spec \u00a74 Baseline: syndromic sick-call only, no sequencing.",
+    "inv_minimal": "Spec \u00a74 Minimal: clinical qPCR/amplicon typing via the cascade.",
+    "inv_moderate": "Spec \u00a74 Moderate: cascade + Nanopore verification + amplicon wastewater with lineage deconvolution.",
+    "inv_full": "Spec \u00a74 Full: Moderate plus surface sampling and a deeper, long-read wastewater library."
+  },
+  "surveillance_configs": {
+    "inv_baseline": {
+      "diagnostic_cascade": {
+        "enabled": false
+      }
+    },
+    "inv_minimal": {
+      "diagnostic_cascade": {
+        "enabled": true,
+        "config_path": "data/config/diagnostic_cascade.json"
+      }
+    },
+    "inv_moderate": {
+      "diagnostic_cascade": {
+        "enabled": true,
+        "config_path": "data/config/diagnostic_cascade.json"
+      },
+      "long_read_sequencing": {
+        "enabled": true
+      },
+      "wastewater_surveillance": {
+        "enabled": true,
+        "assay_mode": "amplicon",
+        "sampling_interval_epochs": 6,
+        "sequencing_depth": 250000,
+        "strain_deconvolution": {
+          "enabled": true,
+          "dirichlet_concentration": 200.0,
+          "min_pathogen_reads": 100,
+          "min_lineage_reads": 20,
+          "min_lineage_fraction": 0.02
+        }
+      }
+    },
+    "inv_full": {
+      "diagnostic_cascade": {
+        "enabled": true,
+        "config_path": "data/config/diagnostic_cascade.json"
+      },
+      "long_read_sequencing": {
+        "enabled": true
+      },
+      "wastewater_surveillance": {
+        "enabled": true,
+        "assay_mode": "long_read",
+        "sampling_interval_epochs": 3,
+        "sequencing_depth": 1000000,
+        "strain_deconvolution": {
+          "enabled": true,
+          "dirichlet_concentration": 200.0,
+          "min_pathogen_reads": 100,
+          "min_lineage_reads": 20,
+          "min_lineage_fraction": 0.02
+        }
+      },
+      "variant_surveillance": {
+        "surface_sampling": {
+          "enabled": true
+        }
+      }
+    }
+  },
+  "tiers": {
+    "vs1_fleet_diversity_norovirus": {
+      "description": "Fleet pool: four hulls x founders x voyage length x investment tier, norovirus",
+      "regime": "diversity",
+      "pathogen": "norovirus",
+      "platforms": [
+        "expedition_cruise_450",
+        "classic_cruise_1900",
+        "spirit_cruise_3000",
+        "mega_cruise_5000"
+      ],
+      "voyage_days": [
+        7,
+        10,
+        14
+      ],
+      "surveillance_strategies": [
+        "inv_baseline",
+        "inv_moderate"
+      ],
+      "deferred": true,
+      "deferred_reason": "Deferred: dose_adjustment is provisional until the C1 hourly refit (c1_single_dose_hours_v1_manifest.json) pins it. Recount with count_manifest_cartesian.py and re-read this note before submitting.",
+      "seeds": [
+        1300,
+        1301,
+        1302,
+        1303,
+        1304,
+        1305,
+        1306,
+        1307,
+        1308,
+        1309,
+        1310,
+        1311,
+        1312,
+        1313,
+        1314,
+        1315,
+        1316,
+        1317,
+        1318,
+        1319,
+        1320,
+        1321,
+        1322,
+        1323,
+        1324,
+        1325,
+        1326,
+        1327,
+        1328,
+        1329
+      ],
+      "founder_strains": [
+        1,
+        4
+      ]
+    },
+    "vs1_fleet_diversity_sars_cov2": {
+      "description": "Fleet pool: four hulls x founders x voyage length x investment tier, sars_cov2",
+      "regime": "diversity",
+      "pathogen": "sars_cov2",
+      "platforms": [
+        "expedition_cruise_450",
+        "classic_cruise_1900",
+        "spirit_cruise_3000",
+        "mega_cruise_5000"
+      ],
+      "voyage_days": [
+        7,
+        10,
+        14
+      ],
+      "surveillance_strategies": [
+        "inv_baseline",
+        "inv_moderate"
+      ],
+      "deferred": true,
+      "deferred_reason": "Deferred: dose_adjustment is provisional until the C1 hourly refit (c1_single_dose_hours_v1_manifest.json) pins it. Recount with count_manifest_cartesian.py and re-read this note before submitting.",
+      "seeds": [
+        1400,
+        1401,
+        1402,
+        1403,
+        1404,
+        1405,
+        1406,
+        1407,
+        1408,
+        1409,
+        1410,
+        1411,
+        1412,
+        1413,
+        1414,
+        1415,
+        1416,
+        1417,
+        1418,
+        1419,
+        1420,
+        1421,
+        1422,
+        1423,
+        1424,
+        1425,
+        1426,
+        1427,
+        1428,
+        1429
+      ],
+      "founder_strains": [
+        1,
+        4
+      ]
+    },
+    "vs2_fleet_emergence_norovirus": {
+      "description": "Fleet pool, emergence arm: rare-lineage detection power across hulls at three per-transmission rates",
+      "regime": "emergence",
+      "pathogen": "norovirus",
+      "platforms": [
+        "expedition_cruise_450",
+        "classic_cruise_1900",
+        "spirit_cruise_3000",
+        "mega_cruise_5000"
+      ],
+      "voyage_days": [
+        7
+      ],
+      "surveillance_strategies": [
+        "inv_moderate"
+      ],
+      "deferred": true,
+      "deferred_reason": "Deferred: dose_adjustment is provisional until the C1 hourly refit (c1_single_dose_hours_v1_manifest.json) pins it. Recount with count_manifest_cartesian.py and re-read this note before submitting.",
+      "seeds": [
+        1500,
+        1501,
+        1502,
+        1503,
+        1504,
+        1505,
+        1506,
+        1507,
+        1508,
+        1509
+      ],
+      "founder_strains": [
+        1
+      ],
+      "mutation_rates": [
+        0.002,
+        0.02,
+        0.2
+      ]
+    }
+  }
+}
