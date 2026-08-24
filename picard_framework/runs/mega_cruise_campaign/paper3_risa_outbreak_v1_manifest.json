@@ -1,0 +1,225 @@
+{
+  "campaign": "paper3_risa_outbreak_v1",
+  "platform": "enterprise_galaxy_tng",
+  "description": "Paper 3 design 5 (spec \u00a76 'Risa outbreak', ~500 runs): FICTIONAL tourism-port scenario \u2014 a large importation onto a hull whose next calls have weak port programmes, so shipboard detection is the only fast channel. Importation is represented as initial_infected=5 at embarkation; the port-side asymmetry lives in the shore/port post-processing layer, not in a new engine mechanism. Hourly clock, drawn-incubation arm.",
+  "natural_history_clock": "hours",
+  "incubation_arm": "distribution",
+  "epoch_duration_hours": 1,
+  "default_epochs": 168,
+  "default_num_agents": 7000,
+  "defaults": {
+    "dose_adjustment": 12.0,
+    "initial_infected": 5,
+    "voyage_days": [
+      7
+    ],
+    "founder_strains": [
+      1
+    ],
+    "census_interval_epochs": 6
+  },
+  "pathogen_configs": {
+    "rigelian_fever": {
+      "bundle": "enterprise_tos_profiles",
+      "pathogen_id": "rigelian_fever",
+      "wastewater_label": "Rigelian Fever",
+      "overrides": {
+        "remove": [
+          "psi_2000_polywater"
+        ]
+      }
+    },
+    "psi_2000": {
+      "bundle": "enterprise_tos_profiles",
+      "pathogen_id": "psi_2000_polywater",
+      "wastewater_label": "Psi-2000",
+      "overrides": {
+        "remove": [
+          "rigelian_fever"
+        ]
+      }
+    },
+    "protomorphosis": {
+      "bundle": "enterprise_tng_profiles",
+      "pathogen_id": "barclay_protomorphosis",
+      "wastewater_label": "Protomorphosis",
+      "overrides": {
+        "remove": [
+          "tng_shipboard_influenza"
+        ]
+      }
+    },
+    "tng_influenza": {
+      "bundle": "enterprise_tng_profiles",
+      "pathogen_id": "tng_shipboard_influenza",
+      "wastewater_label": "influenza",
+      "overrides": {
+        "remove": [
+          "barclay_protomorphosis"
+        ]
+      }
+    }
+  },
+  "surveillance_tier_notes": {
+    "inv_baseline": "Spec \u00a74 Baseline: syndromic sick-call only, no sequencing.",
+    "inv_minimal": "Spec \u00a74 Minimal: clinical qPCR/amplicon typing via the cascade.",
+    "inv_moderate": "Spec \u00a74 Moderate: cascade + Nanopore verification + amplicon wastewater with lineage deconvolution.",
+    "inv_full": "Spec \u00a74 Full: Moderate plus surface sampling and a deeper, long-read wastewater library."
+  },
+  "surveillance_configs": {
+    "inv_baseline": {
+      "diagnostic_cascade": {
+        "enabled": false
+      }
+    },
+    "inv_minimal": {
+      "diagnostic_cascade": {
+        "enabled": true,
+        "config_path": "data/config/diagnostic_cascade.json"
+      }
+    },
+    "inv_moderate": {
+      "diagnostic_cascade": {
+        "enabled": true,
+        "config_path": "data/config/diagnostic_cascade.json"
+      },
+      "long_read_sequencing": {
+        "enabled": true
+      },
+      "wastewater_surveillance": {
+        "enabled": true,
+        "assay_mode": "amplicon",
+        "sampling_interval_epochs": 6,
+        "sequencing_depth": 250000,
+        "strain_deconvolution": {
+          "enabled": true,
+          "dirichlet_concentration": 200.0,
+          "min_pathogen_reads": 100,
+          "min_lineage_reads": 20,
+          "min_lineage_fraction": 0.02
+        }
+      }
+    },
+    "inv_full": {
+      "diagnostic_cascade": {
+        "enabled": true,
+        "config_path": "data/config/diagnostic_cascade.json"
+      },
+      "long_read_sequencing": {
+        "enabled": true
+      },
+      "wastewater_surveillance": {
+        "enabled": true,
+        "assay_mode": "long_read",
+        "sampling_interval_epochs": 3,
+        "sequencing_depth": 1000000,
+        "strain_deconvolution": {
+          "enabled": true,
+          "dirichlet_concentration": 200.0,
+          "min_pathogen_reads": 100,
+          "min_lineage_reads": 20,
+          "min_lineage_fraction": 0.02
+        }
+      },
+      "variant_surveillance": {
+        "surface_sampling": {
+          "enabled": true
+        }
+      }
+    }
+  },
+  "tiers": {
+    "vs1_risa_diversity_protomorphosis": {
+      "description": "Diversity arm under weak port surveillance: 1-4 founders, baseline vs minimal onboard investment",
+      "regime": "diversity",
+      "pathogen": "protomorphosis",
+      "platforms": [
+        "enterprise_galaxy_tng"
+      ],
+      "voyage_days": [
+        7,
+        14
+      ],
+      "surveillance_strategies": [
+        "inv_baseline",
+        "inv_minimal"
+      ],
+      "deferred": true,
+      "deferred_reason": "Deferred: dose_adjustment is provisional until the C1 hourly refit (c1_single_dose_hours_v1_manifest.json) pins it. Recount with count_manifest_cartesian.py and re-read this note before submitting.",
+      "seeds": [
+        1900,
+        1901,
+        1902,
+        1903,
+        1904,
+        1905,
+        1906,
+        1907,
+        1908,
+        1909,
+        1910,
+        1911,
+        1912,
+        1913,
+        1914,
+        1915,
+        1916,
+        1917,
+        1918,
+        1919,
+        1920,
+        1921
+      ],
+      "founder_strains": [
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    "vs2_risa_emergence_protomorphosis": {
+      "description": "Emergence arm: how much onboard sequencing buys when the next port cannot type anything",
+      "regime": "emergence",
+      "pathogen": "protomorphosis",
+      "platforms": [
+        "enterprise_galaxy_tng"
+      ],
+      "voyage_days": [
+        7
+      ],
+      "surveillance_strategies": [
+        "inv_minimal",
+        "inv_moderate"
+      ],
+      "deferred": true,
+      "deferred_reason": "Deferred: dose_adjustment is provisional until the C1 hourly refit (c1_single_dose_hours_v1_manifest.json) pins it. Recount with count_manifest_cartesian.py and re-read this note before submitting.",
+      "seeds": [
+        1950,
+        1951,
+        1952,
+        1953,
+        1954,
+        1955,
+        1956,
+        1957,
+        1958,
+        1959,
+        1960,
+        1961,
+        1962,
+        1963,
+        1964
+      ],
+      "founder_strains": [
+        1
+      ],
+      "mutation_rates": [
+        0.005,
+        0.016,
+        0.05,
+        0.16,
+        0.5
+      ]
+    }
+  }
+}

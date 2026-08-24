@@ -1,0 +1,471 @@
+{
+  "campaign": "paper3_federation_patrol_v1",
+  "platform": "enterprise_galaxy_tng",
+  "description": "Paper 3 design 2 (spec \u00a76 'Federation patrol', ~1,000 runs): FICTIONAL Starfleet arm generalising the ship-as-observatory result to a port network whose surveillance gradient is invented, not measured (see picard_framework/analysis/sentinel/data/port_surveillance_federation.json). No number from this campaign may be reported as a measured capability. Diversity and emergence arms on both Enterprise hulls, hourly clock, drawn-incubation arm.",
+  "natural_history_clock": "hours",
+  "incubation_arm": "distribution",
+  "epoch_duration_hours": 1,
+  "default_epochs": 168,
+  "default_num_agents": 7000,
+  "defaults": {
+    "dose_adjustment": 12.0,
+    "initial_infected": 1,
+    "voyage_days": [
+      7
+    ],
+    "founder_strains": [
+      1
+    ],
+    "census_interval_epochs": 6
+  },
+  "pathogen_configs": {
+    "rigelian_fever": {
+      "bundle": "enterprise_tos_profiles",
+      "pathogen_id": "rigelian_fever",
+      "wastewater_label": "Rigelian Fever",
+      "overrides": {
+        "remove": [
+          "psi_2000_polywater"
+        ]
+      }
+    },
+    "psi_2000": {
+      "bundle": "enterprise_tos_profiles",
+      "pathogen_id": "psi_2000_polywater",
+      "wastewater_label": "Psi-2000",
+      "overrides": {
+        "remove": [
+          "rigelian_fever"
+        ]
+      }
+    },
+    "protomorphosis": {
+      "bundle": "enterprise_tng_profiles",
+      "pathogen_id": "barclay_protomorphosis",
+      "wastewater_label": "Protomorphosis",
+      "overrides": {
+        "remove": [
+          "tng_shipboard_influenza"
+        ]
+      }
+    },
+    "tng_influenza": {
+      "bundle": "enterprise_tng_profiles",
+      "pathogen_id": "tng_shipboard_influenza",
+      "wastewater_label": "influenza",
+      "overrides": {
+        "remove": [
+          "barclay_protomorphosis"
+        ]
+      }
+    }
+  },
+  "surveillance_tier_notes": {
+    "inv_baseline": "Spec \u00a74 Baseline: syndromic sick-call only, no sequencing.",
+    "inv_minimal": "Spec \u00a74 Minimal: clinical qPCR/amplicon typing via the cascade.",
+    "inv_moderate": "Spec \u00a74 Moderate: cascade + Nanopore verification + amplicon wastewater with lineage deconvolution.",
+    "inv_full": "Spec \u00a74 Full: Moderate plus surface sampling and a deeper, long-read wastewater library."
+  },
+  "surveillance_configs": {
+    "inv_baseline": {
+      "diagnostic_cascade": {
+        "enabled": false
+      }
+    },
+    "inv_minimal": {
+      "diagnostic_cascade": {
+        "enabled": true,
+        "config_path": "data/config/diagnostic_cascade.json"
+      }
+    },
+    "inv_moderate": {
+      "diagnostic_cascade": {
+        "enabled": true,
+        "config_path": "data/config/diagnostic_cascade.json"
+      },
+      "long_read_sequencing": {
+        "enabled": true
+      },
+      "wastewater_surveillance": {
+        "enabled": true,
+        "assay_mode": "amplicon",
+        "sampling_interval_epochs": 6,
+        "sequencing_depth": 250000,
+        "strain_deconvolution": {
+          "enabled": true,
+          "dirichlet_concentration": 200.0,
+          "min_pathogen_reads": 100,
+          "min_lineage_reads": 20,
+          "min_lineage_fraction": 0.02
+        }
+      }
+    },
+    "inv_full": {
+      "diagnostic_cascade": {
+        "enabled": true,
+        "config_path": "data/config/diagnostic_cascade.json"
+      },
+      "long_read_sequencing": {
+        "enabled": true
+      },
+      "wastewater_surveillance": {
+        "enabled": true,
+        "assay_mode": "long_read",
+        "sampling_interval_epochs": 3,
+        "sequencing_depth": 1000000,
+        "strain_deconvolution": {
+          "enabled": true,
+          "dirichlet_concentration": 200.0,
+          "min_pathogen_reads": 100,
+          "min_lineage_reads": 20,
+          "min_lineage_fraction": 0.02
+        }
+      },
+      "variant_surveillance": {
+        "surface_sampling": {
+          "enabled": true
+        }
+      }
+    }
+  },
+  "tiers": {
+    "vs1_diversity_rigelian_fever": {
+      "description": "Diversity arm: 1-4 founders at nominal rates, rigelian_fever",
+      "regime": "diversity",
+      "pathogen": "rigelian_fever",
+      "platforms": [
+        "enterprise_constitution_tos"
+      ],
+      "voyage_days": [
+        7,
+        14
+      ],
+      "surveillance_strategies": [
+        "inv_moderate"
+      ],
+      "deferred": true,
+      "deferred_reason": "Deferred: dose_adjustment is provisional until the C1 hourly refit (c1_single_dose_hours_v1_manifest.json) pins it. Recount with count_manifest_cartesian.py and re-read this note before submitting.",
+      "seeds": [
+        1100,
+        1101,
+        1102,
+        1103,
+        1104,
+        1105,
+        1106,
+        1107,
+        1108,
+        1109,
+        1110,
+        1111,
+        1112,
+        1113,
+        1114,
+        1115,
+        1116,
+        1117
+      ],
+      "founder_strains": [
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    "vs1_diversity_psi_2000": {
+      "description": "Diversity arm: 1-4 founders at nominal rates, psi_2000",
+      "regime": "diversity",
+      "pathogen": "psi_2000",
+      "platforms": [
+        "enterprise_constitution_tos"
+      ],
+      "voyage_days": [
+        7,
+        14
+      ],
+      "surveillance_strategies": [
+        "inv_moderate"
+      ],
+      "deferred": true,
+      "deferred_reason": "Deferred: dose_adjustment is provisional until the C1 hourly refit (c1_single_dose_hours_v1_manifest.json) pins it. Recount with count_manifest_cartesian.py and re-read this note before submitting.",
+      "seeds": [
+        1120,
+        1121,
+        1122,
+        1123,
+        1124,
+        1125,
+        1126,
+        1127,
+        1128,
+        1129,
+        1130,
+        1131,
+        1132,
+        1133,
+        1134,
+        1135,
+        1136,
+        1137
+      ],
+      "founder_strains": [
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    "vs1_diversity_protomorphosis": {
+      "description": "Diversity arm: 1-4 founders at nominal rates, protomorphosis",
+      "regime": "diversity",
+      "pathogen": "protomorphosis",
+      "platforms": [
+        "enterprise_galaxy_tng"
+      ],
+      "voyage_days": [
+        7,
+        14
+      ],
+      "surveillance_strategies": [
+        "inv_moderate"
+      ],
+      "deferred": true,
+      "deferred_reason": "Deferred: dose_adjustment is provisional until the C1 hourly refit (c1_single_dose_hours_v1_manifest.json) pins it. Recount with count_manifest_cartesian.py and re-read this note before submitting.",
+      "seeds": [
+        1140,
+        1141,
+        1142,
+        1143,
+        1144,
+        1145,
+        1146,
+        1147,
+        1148,
+        1149,
+        1150,
+        1151,
+        1152,
+        1153,
+        1154,
+        1155,
+        1156,
+        1157
+      ],
+      "founder_strains": [
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    "vs1_diversity_tng_influenza": {
+      "description": "Diversity arm: 1-4 founders at nominal rates, tng_influenza",
+      "regime": "diversity",
+      "pathogen": "tng_influenza",
+      "platforms": [
+        "enterprise_galaxy_tng"
+      ],
+      "voyage_days": [
+        7,
+        14
+      ],
+      "surveillance_strategies": [
+        "inv_moderate"
+      ],
+      "deferred": true,
+      "deferred_reason": "Deferred: dose_adjustment is provisional until the C1 hourly refit (c1_single_dose_hours_v1_manifest.json) pins it. Recount with count_manifest_cartesian.py and re-read this note before submitting.",
+      "seeds": [
+        1160,
+        1161,
+        1162,
+        1163,
+        1164,
+        1165,
+        1166,
+        1167,
+        1168,
+        1169,
+        1170,
+        1171,
+        1172,
+        1173,
+        1174,
+        1175,
+        1176,
+        1177
+      ],
+      "founder_strains": [
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    "vs2_emergence_transmission_rigelian_fever": {
+      "description": "Emergence arm: single founder, per-transmission mutation rate over ~2 decades around nominal, rigelian_fever",
+      "regime": "emergence",
+      "pathogen": "rigelian_fever",
+      "platforms": [
+        "enterprise_constitution_tos"
+      ],
+      "voyage_days": [
+        7,
+        14
+      ],
+      "surveillance_strategies": [
+        "inv_moderate"
+      ],
+      "deferred": true,
+      "deferred_reason": "Deferred: dose_adjustment is provisional until the C1 hourly refit (c1_single_dose_hours_v1_manifest.json) pins it. Recount with count_manifest_cartesian.py and re-read this note before submitting.",
+      "seeds": [
+        1200,
+        1201,
+        1202,
+        1203,
+        1204,
+        1205,
+        1206,
+        1207,
+        1208,
+        1209,
+        1210,
+        1211,
+        1212,
+        1213,
+        1214,
+        1215
+      ],
+      "founder_strains": [
+        1
+      ],
+      "mutation_rates": [
+        0.005,
+        0.016,
+        0.05,
+        0.16,
+        0.5
+      ]
+    },
+    "vs2_emergence_transmission_protomorphosis": {
+      "description": "Emergence arm: single founder, per-transmission mutation rate over ~2 decades around nominal, protomorphosis",
+      "regime": "emergence",
+      "pathogen": "protomorphosis",
+      "platforms": [
+        "enterprise_galaxy_tng"
+      ],
+      "voyage_days": [
+        7,
+        14
+      ],
+      "surveillance_strategies": [
+        "inv_moderate"
+      ],
+      "deferred": true,
+      "deferred_reason": "Deferred: dose_adjustment is provisional until the C1 hourly refit (c1_single_dose_hours_v1_manifest.json) pins it. Recount with count_manifest_cartesian.py and re-read this note before submitting.",
+      "seeds": [
+        1220,
+        1221,
+        1222,
+        1223,
+        1224,
+        1225,
+        1226,
+        1227,
+        1228,
+        1229,
+        1230,
+        1231,
+        1232,
+        1233,
+        1234,
+        1235
+      ],
+      "founder_strains": [
+        1
+      ],
+      "mutation_rates": [
+        0.005,
+        0.016,
+        0.05,
+        0.16,
+        0.5
+      ]
+    },
+    "vs3_coinfection_interference_protomorphosis": {
+      "description": "Sensitivity tier: superinfection_susceptibility, protomorphosis",
+      "regime": "interference",
+      "pathogen": "protomorphosis",
+      "platforms": [
+        "enterprise_galaxy_tng"
+      ],
+      "voyage_days": [
+        14
+      ],
+      "surveillance_strategies": [
+        "inv_moderate"
+      ],
+      "deferred": true,
+      "deferred_reason": "Deferred: dose_adjustment is provisional until the C1 hourly refit (c1_single_dose_hours_v1_manifest.json) pins it. Recount with count_manifest_cartesian.py and re-read this note before submitting.",
+      "seeds": [
+        1240,
+        1241,
+        1242,
+        1243,
+        1244,
+        1245,
+        1246,
+        1247,
+        1248,
+        1249
+      ],
+      "founder_strains": [
+        2
+      ],
+      "superinfection_susceptibilities": [
+        0.02,
+        0.063,
+        0.2,
+        0.63,
+        1.0
+      ]
+    },
+    "vs4_recombination_rigelian_fever": {
+      "description": "Sensitivity tier: recombination_rate, rigelian_fever",
+      "regime": "recombination",
+      "pathogen": "rigelian_fever",
+      "platforms": [
+        "enterprise_constitution_tos"
+      ],
+      "voyage_days": [
+        14
+      ],
+      "surveillance_strategies": [
+        "inv_moderate"
+      ],
+      "deferred": true,
+      "deferred_reason": "Deferred: dose_adjustment is provisional until the C1 hourly refit (c1_single_dose_hours_v1_manifest.json) pins it. Recount with count_manifest_cartesian.py and re-read this note before submitting.",
+      "seeds": [
+        1260,
+        1261,
+        1262,
+        1263,
+        1264,
+        1265,
+        1266,
+        1267,
+        1268,
+        1269
+      ],
+      "founder_strains": [
+        2
+      ],
+      "recombination_rates": [
+        0.003,
+        0.0095,
+        0.03,
+        0.095,
+        0.3
+      ]
+    }
+  }
+}

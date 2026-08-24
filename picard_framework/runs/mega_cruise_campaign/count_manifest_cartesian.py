@@ -13,14 +13,22 @@ import sys
 from pathlib import Path
 from typing import Any
 
+REPO_ROOT = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(REPO_ROOT))
+
+from picard_framework.runs.mega_cruise_campaign import variant_campaign  # noqa: E402
+
 
 def tier_cartesian(manifest: dict[str, Any], tier: dict[str, Any]) -> int:
-    """Arithmetic run count for one tier (generator-aware for sr/vd)."""
+    """Arithmetic run count for one tier (generator-aware for sr/vd/vs)."""
     tid_hint = ""
     for k, v in (manifest.get("tiers") or {}).items():
         if v is tier:
             tid_hint = k
             break
+
+    if tid_hint.startswith("vs") or "voyage_days" in tier:
+        return variant_campaign.tier_run_count(manifest, tier)
 
     plats = tier.get("platforms") or (
         [tier["platform"]] if "platform" in tier else [manifest["platform"]]
