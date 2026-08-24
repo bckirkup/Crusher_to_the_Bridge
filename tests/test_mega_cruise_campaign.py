@@ -36,6 +36,7 @@ from picard_framework.runs.mega_cruise_campaign.campaign_runner import (  # noqa
 CAMPAIGN = REPO_ROOT / "picard_framework" / "runs" / "mega_cruise_campaign"
 CALIBRATION_MANIFEST = CAMPAIGN / "calibration_manifest_v1.json"
 CLOCK_ARM_C1_MANIFEST = CAMPAIGN / "clock_arm_c1_v1_manifest.json"
+SINGLE_DOSE_HOURS_MANIFEST = CAMPAIGN / "c1_single_dose_hours_v1_manifest.json"
 
 STANDARD_TIERS = [
     "t1_pathogen_baselines",
@@ -1665,6 +1666,40 @@ def test_clock_arm_c1_dry_run_counts() -> None:
         assert len(runs) == n_exp, f"{tier_id}: {len(runs)} != {n_exp}"
         total += len(runs)
     assert total == 2400
+
+
+def _single_dose_hours_manifest() -> dict[str, Any]:
+    return load_manifest(SINGLE_DOSE_HOURS_MANIFEST)
+
+
+def test_single_dose_hours_manifest_loads() -> None:
+    manifest = _single_dose_hours_manifest()
+    assert manifest["campaign"] == "c1_single_dose_hours_v1"
+    assert set(manifest["tiers"]) == {
+        "c1_expedition_cruise_450",
+        "c1_classic_cruise_1900",
+        "c1_spirit_cruise_3000",
+        "c1_mega_cruise_5000",
+    }
+    assert manifest["pathogen_configs"]["norovirus"]["pathogen_id"] == "norwalk_gi"
+
+
+def test_single_dose_hours_dry_run_counts() -> None:
+    """Golden run counts for the hourly single-dose C1 refit."""
+    manifest = _single_dose_hours_manifest()
+    expected = {
+        # 7 doses × 1 init × 2 surv × 40 seeds
+        "c1_expedition_cruise_450": 560,
+        "c1_classic_cruise_1900": 560,
+        "c1_spirit_cruise_3000": 560,
+        "c1_mega_cruise_5000": 560,
+    }
+    total = 0
+    for tier_id, n_exp in expected.items():
+        runs = list(generate_tier_runs(manifest, tier_id))
+        assert len(runs) == n_exp, f"{tier_id}: {len(runs)} != {n_exp}"
+        total += len(runs)
+    assert total == 2240
 
 
 def test_campaign_generator_c5() -> None:

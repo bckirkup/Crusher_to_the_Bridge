@@ -112,13 +112,17 @@ Outbreak-response knobs: skill `outbreak-response-architecture` +
 python3 -m pytest tests/test_outbreak_response_architecture.py -v --tb=short
 ```
 
-## Natural-history clock arms
+## Natural-history clock
 
 `--natural-history-clock {hours,legacy_epoch_day}` (default omitted = specs
 unchanged, engine default is `hours`). The value is merged into every generated
 spec's `config_overrides` and surfaced as `summary.json`
 `parameters.natural_history_clock`, which `deploy/aws/aggregate_results.py`
 flattens to the CSV column `parameters.natural_history_clock`.
+
+`hours` is the supported configuration for new campaigns. The
+`legacy_epoch_day` option is retained only to reproduce old runs; it is
+retired for new campaigns and its historical numbers are not a reference.
 
 Run IDs are identical across arms, so each arm needs its own `--output-dir`.
 The runner drops `natural_history_clock.txt` in the output dir and exits
@@ -153,6 +157,14 @@ AWS wiring: `deploy/aws/batch_job_definition.json` passes
 `deploy/aws/submit_array_job.sh` takes `CLOCK=` or a 6th positional arg and
 forwards `clock=$CLOCK` in `--parameters`. To verify without submitting, put a
 fake executable `aws` that echoes `"$@"` first on `PATH` and run the script.
+
+### Current C1 single-dose refit
+
+`c1_single_dose_hours_v1_manifest.json` is an hourly-only campaign with a
+common 11.5–13.0 dose ladder at 0.25 steps, `n_init=1`, both `none_true` and
+`syndromic`, and matched seeds 720–759 across four hulls. It enumerates 560
+runs per hull and 2,240 total. Run its dry run with
+`--natural-history-clock hours`; do not launch a new `legacy_epoch_day` arm.
 
 ## Calibration tiers (density + multi-pathogen)
 
