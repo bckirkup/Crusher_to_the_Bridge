@@ -16,7 +16,6 @@ Import ``BenefitSplit`` from ``benefit`` for monetised splits, or from
 from __future__ import annotations
 
 from crusher_labs.cost_ledger import CONTRIBUTION_MEDIA, CONTRIBUTION_PAYERS
-
 from picard_framework.analysis.economics.benefit import (
     COMMUNITIES,
     COMMUNITY_AFLOAT,
