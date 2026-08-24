@@ -250,6 +250,22 @@ class TestResourceCosts:
                 f"Material '{item}' has negative starting count"
             )
 
+    def test_contribution_media_have_sweeps_and_provenance(self, costs: dict) -> None:
+        media = costs.get("contribution_media", {})
+        assert set(media) == {"cash", "labour_hours", "consumables"}
+        for medium, data in media.items():
+            rate = data["conversion_rate_usd_per_unit"]
+            sweep = data["conversion_rate_sweep"]
+            assert rate >= 0
+            assert sweep
+            assert sweep == sorted(set(sweep))
+            assert rate in sweep
+            assert data["description"]
+            if medium == "cash":
+                assert rate == 1.0
+            else:
+                assert len(sweep) >= 3
+                assert "unanchored" in data["description"].lower()
 
     def test_operational_impact_weights_present(self, costs: dict) -> None:
         ois = costs.get("operational_impact_weights", {})
@@ -262,6 +278,40 @@ class TestResourceCosts:
             assert ois.get(key, 0) >= 0, f"OIS weight {key} must be non-negative"
         assert isinstance(ois.get("essential_crew_classes", []), list)
         assert isinstance(ois.get("galley_zone_types", []), list)
+
+
+class TestSurveillanceScenarios:
+    """Validate the Paper 3 §4 surveillance scenario catalog."""
+
+    @pytest.fixture
+    def scenarios(self) -> dict:
+        return _load_json(
+            os.path.join(DATA_DIR, "..", "presidio", "data", "economics",
+                         "surveillance_scenarios.json")
+        )
+
+    def test_scenario_catalog_has_expected_contract(self, scenarios: dict) -> None:
+        entries = scenarios["scenarios"]
+        assert {entry["scenario_id"] for entry in entries} == {
+            "baseline", "minimal", "moderate", "full", "fleet_network",
+        }
+        assert "scope_note" in scenarios
+        assert "variants detected" in scenarios["scope_note"].lower()
+        for entry in entries:
+            assert "scope_note" in entry
+            assert "variants detected" in entry["scope_note"].lower()
+            assert entry["annual_cost_usd"] >= 0
+            assert entry["voyages_per_year"] > 0
+            sweep = entry["voyages_per_year_sweep"]
+            assert sweep == sorted(set(sweep))
+            assert entry["voyages_per_year"] in sweep
+            assert entry["provenance"]["annual_cost_usd"]
+            assert entry["provenance"]["voyages_per_year"]
+            assert entry["provenance"]["voyages_per_year_sweep"]
+            assert entry["provenance"]["allocation_quantities_per_voyage"]
+            for allocation in entry["allocations"]:
+                assert allocation["quantity_per_voyage"] >= 0
+                assert allocation["provenance"]
 
 
 class TestLongReadSequencingParams:

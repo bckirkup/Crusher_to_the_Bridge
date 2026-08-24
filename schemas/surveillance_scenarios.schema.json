@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://crusher-to-the-bridge/schemas/surveillance_scenarios.schema.json",
+  "title": "Surveillance Economics Scenarios",
+  "type": "object",
+  "required": ["schema_version", "scenarios", "scope_note"],
+  "properties": {
+    "schema_version": {"type": "string"},
+    "description": {"type": "string"},
+    "scope_note": {"type": "string", "minLength": 1},
+    "scenarios": {
+      "type": "array",
+      "minItems": 5,
+      "items": {"$ref": "#/$defs/Scenario"}
+    }
+  },
+  "$defs": {
+    "Scenario": {
+      "type": "object",
+      "required": [
+        "scenario_id",
+        "label",
+        "scope_note",
+        "onboard_capability",
+        "ashore_capability",
+        "ships_covered",
+        "annual_cost_usd",
+        "voyages_per_year",
+        "voyages_per_year_sweep",
+        "allocations",
+        "provenance"
+      ],
+      "properties": {
+        "scenario_id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+        "label": {"type": "string", "minLength": 1},
+        "onboard_capability": {"type": "string", "minLength": 1},
+        "ashore_capability": {"type": "string", "minLength": 1},
+        "ships_covered": {"type": "integer", "minimum": 1},
+        "annual_cost_usd": {"type": "number", "minimum": 0},
+        "voyages_per_year": {"type": "number", "exclusiveMinimum": 0},
+        "voyages_per_year_sweep": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "number", "exclusiveMinimum": 0}
+        },
+        "allocations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/Allocation"}
+        },
+        "provenance": {
+          "type": "object",
+          "required": [
+            "ships_covered",
+            "annual_cost_usd",
+            "voyages_per_year",
+            "voyages_per_year_sweep",
+            "allocation_quantities_per_voyage"
+          ],
+          "additionalProperties": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "Allocation": {
+      "type": "object",
+      "required": ["payer", "medium", "quantity_per_voyage", "provenance"],
+      "properties": {
+        "payer": {
+          "type": "string",
+          "enum": ["ship_operator", "port_authority", "public_health_agency"]
+        },
+        "medium": {
+          "type": "string",
+          "enum": ["cash", "labour_hours", "consumables"]
+        },
+        "quantity_per_voyage": {"type": "number", "minimum": 0},
+        "provenance": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}

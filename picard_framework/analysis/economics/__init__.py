@@ -6,10 +6,16 @@ renewal layer converts earlier shipboard detection into shore cases averted.
 This package attributes the cost to payers, splits the benefit between the
 afloat and shore communities, and reports each payer's break-even
 contribution — in cash and in the labour hours that could be given instead.
+
+The ``surveillance`` submodule adds §4 scenario loading and per-voyage
+allocation from ``presidio/data/economics/surveillance_scenarios.json``.
+Import ``BenefitSplit`` from ``benefit`` for monetised splits, or from
+``surveillance`` for signed case-only counterfactual splits.
 """
 
 from __future__ import annotations
 
+from crusher_labs.cost_ledger import CONTRIBUTION_MEDIA, CONTRIBUTION_PAYERS
 from picard_framework.analysis.economics.benefit import (
     COMMUNITIES,
     COMMUNITY_AFLOAT,
@@ -38,6 +44,18 @@ from picard_framework.analysis.economics.contributions import (
 )
 from picard_framework.analysis.economics.ledger_bridge import (
     contributions_from_financial_audit,
+)
+from picard_framework.analysis.economics.surveillance import (
+    CostAllocation,
+    SurveillanceScenario,
+    WillingnessToPayResult,
+    WillingnessToPaySweep,
+    cost_shares_for_scenario,
+    load_scenario_from_fleet_config,
+    load_surveillance_scenario,
+    load_surveillance_scenarios,
+    sweep_willingness_to_pay,
+    willingness_to_pay,
 )
 from picard_framework.analysis.economics.valuations import (
     LABOUR_RATE_GRID,
@@ -75,17 +93,29 @@ __all__ = [
     "PLACEHOLDER_VALUATION",
     "UNIT_VALUATION",
     "VALUATION_PROVENANCE",
+    "CONTRIBUTION_MEDIA",
+    "CONTRIBUTION_PAYERS",
     "AfloatBenefit",
     "BenefitSplit",
     "BenefitValuation",
     "Contribution",
     "ContributionLedger",
     "ContributionRates",
+    "CostAllocation",
     "PayerPosition",
     "ShoreBenefit",
+    "SurveillanceScenario",
+    "WillingnessToPayResult",
+    "WillingnessToPaySweep",
     "benefit_split",
     "contributions_from_financial_audit",
+    "cost_shares_for_scenario",
     "evaluate_payers",
     "labour_rate_sensitivity",
+    "load_scenario_from_fleet_config",
+    "load_surveillance_scenario",
+    "load_surveillance_scenarios",
     "payer_benefit_usd",
+    "sweep_willingness_to_pay",
+    "willingness_to_pay",
 ]

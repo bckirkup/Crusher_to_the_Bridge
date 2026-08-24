@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0.0",
+  "catalog": {
+    "picard_run_spec": "picard_framework/runs/smoke_2epoch.json",
+    "economics_id": "presidio/data/economics/fleet_economics.json",
+    "surveillance_economics_id": "presidio/data/economics/surveillance_scenarios.json",
+    "surveillance_scenario_id": "baseline"
+  },
+  "fleet": {"num_cruises": 1},
+  "run": {
+    "seed_base": 42,
+    "experience_store": "presidio/data/experiences/surveillance_baseline_experience.json",
+    "output_root": "presidio/data/experiences/surveillance_baseline_runs"
+  },
+  "actors": [],
+  "incentives": {}
+}

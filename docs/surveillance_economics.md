@@ -49,6 +49,41 @@ ship-timed against a port-timed detection. Detection lead arrives in epochs and
 is converted to physical hours through `epoch_hours`; a missing detection stays
 `None` rather than becoming zero.
 
+The package exposes two benefit-split shapes:
+
+- **`benefit.BenefitSplit`** — monetised under an explicit `BenefitValuation`.
+- **`surveillance.BenefitSplit`** — signed case counts only, built from 11b
+  `CounterfactualResult.benefit` values plus campaign-supplied afloat cases
+  averted. No dollar value is assigned to a case averted in this path.
+
+## §4 scenarios and provenance
+
+`presidio/data/economics/surveillance_scenarios.json` records the five §4
+scenarios: Baseline, Minimal, Moderate, Full, and Fleet network. The annual
+costs are rough-order-of-magnitude values from the specification, not
+measurements. The voyage-frequency grid and every allocation quantity are
+unanchored modelling assumptions. Allocation quantities remain in their
+native medium units (cash dollars, labour hours, or consumable units) so that
+conversion-rate sensitivity remains visible. Shore capability lines are
+attributed to port or public-health payers, and onboard lines to the ship
+operator, without tuning the allocation to favour either community.
+
+“Variants detected” is intentionally absent from configuration: it is a
+surveillance-model output, not an input.
+
+Presidio fleet configs keep `catalog.economics_id` pointed at the existing
+`fleet_economics.json` reward configuration. The surveillance catalog is
+separate: `catalog.surveillance_economics_id` identifies the scenario file and
+`catalog.surveillance_scenario_id` selects the scenario. Both conversion rates
+(`labour_conversion_rate` and `consumables_conversion_rate`) are required by
+the scenario analysis API; callers should supply them from the central values
+or sweep grids in `data/config/resource_costs.json`.
+
+`CostAllocation` entries become `CostLedger` contribution records. They are
+attribution lines alongside ledger expenditure, not new spend. Cash is recorded
+at face value; labour and consumables are converted explicitly when a report is
+requested.
+
 ## What is reportable, and what is not, before the re-fit
 
 The absolute dollar levels in `valuations.py` are **unanchored placeholders**
@@ -67,7 +102,9 @@ What *is* reportable now:
 - **break-even contribution**, in cash and in the labour hours that could be
   given instead — the form a port actually negotiates in;
 - the **labour-rate sensitivity surface** (`labour_rate_sensitivity`), reported
-  in the same shape the shore module reports its `R_shore` surface.
+  in the same shape the shore module reports its `R_shore` surface;
+- the **scenario WTP sweep** (`sweep_willingness_to_pay`) over conversion-rate
+  grids without changing the benefit side.
 
 The within-community split of shore benefit between a port authority and a
 public-health agency is an institutional assumption, not a simulation result. It
@@ -79,3 +116,18 @@ A payer is willing to contribute while its share of the benefit covers its share
 of the cost, so its break-even contribution is the monetary equivalent of the
 benefit it receives. A payer contributing nothing reports *no* benefit-to-cost
 ratio rather than an infinite one: an infinity reads as a result and is not.
+
+For the scenario path, willingness to pay is a share comparison on signed case
+benefit: a community pays its own way when its benefit share is at least its cost
+share. The reported crossing is the first pair of grid rates where the port cost
+share overtakes its benefit share; the package does not interpolate a threshold
+or claim monotonicity unless the observed grid is monotone. Benefit shares are
+unavailable (`None`) when total signed benefit is zero or negative, and the WTP
+comparison rejects that regime instead of reporting a misleading share.
+
+The shore side remains a linear renewal approximation. In particular, the
+central 11b norovirus scenario is deliberately supercritical, so its
+`unbounded_growth` (and, on sufficiently long horizons, `depletion_regime`)
+flags are expected. Results are interpretable only while cumulative cases
+remain small relative to the port population. This layer also does not model
+shore-side evolution or claim a monetised value for cases.

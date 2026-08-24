@@ -25,6 +25,12 @@
         }
       }
     },
+    "contribution_media": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/ContributionMedium"
+      }
+    },
     "material_inventory": {
       "type": "object",
       "additionalProperties": {
@@ -88,6 +94,32 @@
         "materials": {
           "type": "object",
           "additionalProperties": {"type": "integer", "minimum": 0}
+        }
+      }
+    },
+    "ContributionMedium": {
+      "type": "object",
+      "required": [
+        "conversion_rate_usd_per_unit",
+        "conversion_rate_sweep",
+        "description"
+      ],
+      "properties": {
+        "conversion_rate_usd_per_unit": {
+          "type": "number",
+          "minimum": 0
+        },
+        "conversion_rate_sweep": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "number",
+            "minimum": 0
+          }
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
         }
       }
     }

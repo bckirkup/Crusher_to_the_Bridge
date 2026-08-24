@@ -12,7 +12,9 @@
       "properties": {
         "libraries_index": { "type": "string" },
         "picard_run_spec": { "type": "string", "minLength": 1 },
-        "economics_id": { "type": "string" }
+        "economics_id": { "type": "string" },
+        "surveillance_economics_id": { "type": "string", "minLength": 1 },
+        "surveillance_scenario_id": { "type": "string", "minLength": 1 }
       },
       "additionalProperties": true
     },

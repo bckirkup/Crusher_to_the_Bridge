@@ -10,6 +10,23 @@
       "description": "Starting crew person-hours allocation (20 crew x 24 hours). Tracked for reporting, not enforced as a limit."
     }
   },
+  "contribution_media": {
+    "cash": {
+      "conversion_rate_usd_per_unit": 1.0,
+      "conversion_rate_sweep": [1.0],
+      "description": "Cash is recorded at face value; the fixed rate is an accounting identity, not an unanchored assumption."
+    },
+    "labour_hours": {
+      "conversion_rate_usd_per_unit": 50.0,
+      "conversion_rate_sweep": [25.0, 50.0, 100.0],
+      "description": "Seconded technician-hour value is an unanchored modelling assumption for sensitivity analysis, not a reimbursement rate."
+    },
+    "consumables": {
+      "conversion_rate_usd_per_unit": 10.0,
+      "conversion_rate_sweep": [5.0, 10.0, 20.0],
+      "description": "Reagent and consumable supply value is an unanchored modelling assumption for sensitivity analysis, not a procurement price."
+    }
+  },
   "material_inventory": {
     "surgical_masks": {
       "starting_count": 500,
