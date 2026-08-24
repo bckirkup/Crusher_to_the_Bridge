@@ -14,6 +14,12 @@ Always canonicalize then contain via one of:
 
 Sonar rules ``pythonsecurity:S8707`` and ``pythonsecurity:S2083`` specifically
 flag agent-supplied CLI paths that skip these helpers.
+
+Containment is written as canonicalize-then-``startswith``, and every helper
+returns the value it checked rather than checking one variable and using
+another. Taint analysis recognizes that shape as a containment check, so the
+filesystem calls downstream of these helpers are provably guarded rather than
+annotated as guarded.
 """
 
 from __future__ import annotations
@@ -29,14 +35,30 @@ def _real(path: str) -> str:
     return os.path.realpath(path)
 
 
+def _prefix(base_real: str) -> str:
+    """Return *base_real* with a trailing separator, so ``/a`` never covers ``/ab``."""
+    return base_real if base_real.endswith(os.sep) else base_real + os.sep
+
+
+def _contain(base_real: str, resolved: str, message: str) -> str:
+    """Return *resolved* when it is *base_real* or lies beneath it, else raise.
+
+    Both arguments must already be canonicalized. The base itself is returned
+    as the base, not as the caller's string, so nothing downstream of this
+    function reads an unchecked path.
+    """
+    if resolved == base_real:
+        return base_real
+    if not resolved.startswith(_prefix(base_real)):
+        raise ValueError(message)
+    return resolved
+
+
 def is_path_under_base(base_dir: str, candidate: str) -> bool:
     """Return True when *candidate* resolves inside *base_dir*."""
     base = _real(base_dir)
     resolved = _real(candidate)
-    try:
-        return os.path.commonpath([base, resolved]) == base
-    except ValueError:
-        return False
+    return resolved == base or resolved.startswith(_prefix(base))
 
 
 def validate_path_component(name: str, *, label: str = "path component") -> str:
@@ -62,9 +84,7 @@ def confine_to_base(base_dir: str, path: str) -> str:
         raise ValueError("base_dir is required")
     base = _real(base_dir)
     resolved = _real(path)
-    if not is_path_under_base(base, resolved):
-        raise ValueError(f"Path {path!r} escapes allowed base {base_dir!r}")
-    return resolved
+    return _contain(base, resolved, f"Path {path!r} escapes allowed base {base_dir!r}")
 
 
 def resolve_repo_path(repo_root: str, path: str) -> str:
@@ -73,9 +93,7 @@ def resolve_repo_path(repo_root: str, path: str) -> str:
         raise ValueError("repo_root is required")
     base = _real(repo_root)
     resolved = _real(path if os.path.isabs(path) else os.path.join(base, path))
-    if not is_path_under_base(base, resolved):
-        raise ValueError(f"Path {path!r} escapes repository root {repo_root!r}")
-    return resolved
+    return _contain(base, resolved, f"Path {path!r} escapes repository root {repo_root!r}")
 
 
 def resolve_child_path(parent_dir: str, child_name: str) -> str:
@@ -83,9 +101,9 @@ def resolve_child_path(parent_dir: str, child_name: str) -> str:
     parent = _real(parent_dir)
     safe_name = validate_path_component(child_name, label="child path")
     resolved = _real(os.path.join(parent, safe_name))
-    if not is_path_under_base(parent, resolved):
-        raise ValueError(f"Child path {child_name!r} escapes parent directory")
-    return resolved
+    return _contain(
+        parent, resolved, f"Child path {child_name!r} escapes parent directory"
+    )
 
 
 def is_publicly_writable(path: str) -> bool:
@@ -107,12 +125,17 @@ def is_publicly_writable(path: str) -> bool:
         return False
 
 
-def _check_containment(resolved: str, allowed_roots: tuple[str, ...]) -> None:
-    """Helper to validate path absolute status and root containment."""
+def _confine_to_roots(resolved: str, allowed_roots: tuple[str, ...]) -> str:
+    """Return the canonical *resolved* path once one allowed root contains it."""
     if not os.path.isabs(resolved):
         raise ValueError(f"Resolved path must be absolute: {resolved!r}")
-    if not any(is_path_under_base(root, resolved) for root in allowed_roots):
-        raise ValueError(f"Path {resolved!r} is outside allowed roots")
+    for root in allowed_roots:
+        base = _real(root)
+        if resolved == base:
+            return base
+        if resolved.startswith(_prefix(base)):
+            return resolved
+    raise ValueError(f"Path {resolved!r} is outside allowed roots")
 
 
 def _get_target_dir(resolved: str) -> str:
@@ -120,15 +143,26 @@ def _get_target_dir(resolved: str) -> str:
     return resolved if os.path.isdir(resolved) else os.path.dirname(resolved) or resolved
 
 
-def prepare_output_directory(path: str, *, allowed_roots: tuple[str, ...]) -> str:
-    """Create an output directory with restrictive permissions after validation."""
-    resolved = _real(path)
-    _check_containment(resolved, allowed_roots)
-    target_dir = _get_target_dir(resolved)
+def _refuse_public_target(safe: str) -> None:
+    target_dir = _get_target_dir(safe)
     if is_publicly_writable(target_dir):
         raise ValueError(f"Refusing to write under publicly writable directory: {target_dir}")
-    os.makedirs(resolved, mode=0o700, exist_ok=True)  # NOSONAR
-    return resolved
+
+
+def prepare_output_directory(path: str, *, allowed_roots: tuple[str, ...]) -> str:
+    """Create an output directory with restrictive permissions after validation."""
+    safe = _confine_to_roots(_real(path), allowed_roots)
+    _refuse_public_target(safe)
+    os.makedirs(safe, mode=0o700, exist_ok=True)  # NOSONAR
+    return safe
+
+
+def safe_listdir(path: str, *, allowed_roots: tuple[str, ...]) -> list[str]:
+    """List a directory after containment checks."""
+    safe = _confine_to_roots(_real(path), allowed_roots)
+    if not os.path.isdir(safe):
+        return []
+    return sorted(os.listdir(safe))
 
 
 def _open_resolved(
@@ -140,18 +174,15 @@ def _open_resolved(
     allowed_roots: tuple[str, ...],
 ) -> TextIO | BinaryIO:
     """Open a path that has already been validated and resolved."""
-    _check_containment(resolved, allowed_roots)
-    for_write = any(flag in mode for flag in ("w", "a", "+"))
-    if for_write:
-        target_dir = _get_target_dir(resolved)
-        if is_publicly_writable(target_dir):
-            raise ValueError(f"Refusing to write under publicly writable directory: {target_dir}")
+    safe = _confine_to_roots(resolved, allowed_roots)
+    if any(flag in mode for flag in ("w", "a", "+")):
+        _refuse_public_target(safe)
     open_kwargs: dict[str, str | None] = {}
     if encoding is not None:
         open_kwargs["encoding"] = encoding
     if newline is not None:
         open_kwargs["newline"] = newline
-    return open(resolved, mode, **open_kwargs)  # NOSONAR
+    return open(safe, mode, **open_kwargs)  # NOSONAR
 
 
 def validated_open(

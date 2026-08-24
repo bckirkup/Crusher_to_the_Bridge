@@ -29,6 +29,7 @@ from __future__ import annotations
 
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, replace
+from typing import cast
 
 import numpy as np
 
@@ -63,12 +64,16 @@ def _draw(rng: np.random.Generator, bounds: tuple[float, float]) -> float:
 def _mutate_transmissibility(
     parent: Phenotype, ranges: PhenotypeEffectRanges, rng: np.random.Generator,
 ) -> Phenotype:
-    return replace(
-        parent,
-        transmissibility_multiplier=_clamp(
-            parent.transmissibility_multiplier * _draw(rng, ranges.transmissibility),
-            MIN_MULTIPLIER,
-            MAX_MULTIPLIER,
+    return cast(
+        Phenotype,
+        replace(
+            parent,
+            transmissibility_multiplier=_clamp(
+                parent.transmissibility_multiplier
+                * _draw(rng, ranges.transmissibility),
+                MIN_MULTIPLIER,
+                MAX_MULTIPLIER,
+            ),
         ),
     )
 
@@ -76,12 +81,15 @@ def _mutate_transmissibility(
 def _mutate_shedding(
     parent: Phenotype, ranges: PhenotypeEffectRanges, rng: np.random.Generator,
 ) -> Phenotype:
-    return replace(
-        parent,
-        shedding_multiplier=_clamp(
-            parent.shedding_multiplier * _draw(rng, ranges.shedding),
-            MIN_MULTIPLIER,
-            MAX_MULTIPLIER,
+    return cast(
+        Phenotype,
+        replace(
+            parent,
+            shedding_multiplier=_clamp(
+                parent.shedding_multiplier * _draw(rng, ranges.shedding),
+                MIN_MULTIPLIER,
+                MAX_MULTIPLIER,
+            ),
         ),
     )
 
@@ -89,10 +97,13 @@ def _mutate_shedding(
 def _mutate_incubation(
     parent: Phenotype, ranges: PhenotypeEffectRanges, rng: np.random.Generator,
 ) -> Phenotype:
-    return replace(
-        parent,
-        incubation_modifier=(
-            parent.incubation_modifier + _draw(rng, ranges.incubation_days)
+    return cast(
+        Phenotype,
+        replace(
+            parent,
+            incubation_modifier=(
+                parent.incubation_modifier + _draw(rng, ranges.incubation_days)
+            ),
         ),
     )
 
@@ -100,10 +111,13 @@ def _mutate_incubation(
 def _mutate_immune_escape(
     parent: Phenotype, ranges: PhenotypeEffectRanges, rng: np.random.Generator,
 ) -> Phenotype:
-    return replace(
-        parent,
-        immune_escape=_clamp(
-            parent.immune_escape + _draw(rng, ranges.immune_escape), 0.0, 1.0,
+    return cast(
+        Phenotype,
+        replace(
+            parent,
+            immune_escape=_clamp(
+                parent.immune_escape + _draw(rng, ranges.immune_escape), 0.0, 1.0,
+            ),
         ),
     )
 

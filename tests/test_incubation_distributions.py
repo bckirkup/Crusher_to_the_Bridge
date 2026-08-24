@@ -52,6 +52,7 @@ from tools.sanity_checker import (  # noqa: E402
 
 PATHOGEN = "norwalk_gi"
 RESPIRATORY = "sars_cov2_resp"
+INFLUENZA = "influenza_a"
 NEUTRAL_HOST = HostIncubationState()
 REFERENCE_DOSE = 1e4
 SAMPLE_SIZE = 4000
@@ -60,6 +61,14 @@ SAMPLE_SIZE = 4000
 def _profile(pathogen_id: str = PATHOGEN) -> dict:
     data = json.loads(
         (REPO_ROOT / "data/pathogens/active_profiles.json").read_text(),
+    )
+    profile = next(p for p in data["pathogens"] if p["pathogen_id"] == pathogen_id)
+    return copy.deepcopy(profile)
+
+
+def _edison_profile(pathogen_id: str = INFLUENZA) -> dict:
+    data = json.loads(
+        (REPO_ROOT / "data/pathogens/edison_10pathogen_profiles.json").read_text(),
     )
     profile = next(p for p in data["pathogens"] if p["pathogen_id"] == pathogen_id)
     return copy.deepcopy(profile)
@@ -587,6 +596,33 @@ class TestShippedProfiles:
         assert enteric is not None
         assert respiratory is not None
         assert respiratory.median_days > enteric.median_days
+
+    def test_influenza_draws_a_stochastic_dose_conditioned_incubation(self) -> None:
+        profile = _edison_profile()
+        model = IncubationModel.from_mapping(profile["incubation"])
+        assert model is not None
+        low_dose = np.array([
+            _period(
+                profile,
+                INFLUENZA,
+                dose=1.0,
+                rng=np.random.default_rng(seed),
+            )
+            for seed in range(200, 400)
+        ])
+        high_dose = np.array([
+            _period(
+                profile,
+                INFLUENZA,
+                dose=1e4,
+                rng=np.random.default_rng(seed),
+            )
+            for seed in range(200, 400)
+        ])
+        assert len(set(low_dose)) > 1
+        assert float(np.median(high_dose)) < float(np.median(low_dose))
+        assert low_dose.min() >= model.min_days
+        assert low_dose.max() <= model.max_days
 
 
 # ── Schema contract ─────────────────────────────────────────────────────

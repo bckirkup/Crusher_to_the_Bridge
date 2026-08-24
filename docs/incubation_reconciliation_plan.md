@@ -25,13 +25,15 @@ every effect measured below without changing which representation is which.
 | B | `picard_framework/analysis/sentinel/data/incubation_distributions.json` | pathogen-level lognormal in *hours*, discretized to the epoch grid | Stan attribution likelihood, right-censoring factor, Richardson-Lucy back-calculation, port-resolution criterion (spec 1.8), MDHR |
 | C | `ONSET_DAY` fallback in `orchestrator_epoch._incubation_days` | fixed 1.0 day | every profile without an `incubation` block |
 
-Representation C still covers **13 of the 15 shipped profiles**, including
+Representation C still covers the remaining fixed-onset profiles, including
 `measles_virus`, `ebola_virus`, and `legionella_pneumophila` in
 `edison_10pathogen_profiles.json` — all of which currently present symptoms one
-day after exposure. Only `norwalk_gi` and `sars_cov2_resp` use A.
+day after exposure. `norwalk_gi`, `sars_cov2_resp`, and now `influenza_a` use A
+in their respective shipped bundles.
 
-A and B are independent files with no cross-check. B is *not* derived from A and
-nothing fails if they disagree.
+A and B remain separate representations, but linked entries in B are projected
+from the active profiles and checked for drift. Edison-only profiles such as
+`influenza_a` are outside that linked Sentinel catalog scope.
 
 ## 2. What the measurements show
 
@@ -171,7 +173,7 @@ What lands at merge time:
 | Calibrated `dose_adjustment` values in campaign designs | re-runs will not reproduce prior case counts | moderate, needs R6 |
 | CTB → Stan sentinel fits | onset DGP changed; kernel mismatch smaller than before but now dose-dependent | moderate, needs R1/R2 |
 | Sentinel synthetic validation, MDHR power tests | self-consistent in B, unaffected | none |
-| 13 fixed-onset profiles | unchanged behaviour, now inconsistent with the two migrated ones | high fidelity debt, needs R3 |
+| Remaining fixed-onset profiles | unchanged behaviour, now inconsistent with the three migrated ones | high fidelity debt, needs R3 |
 | Published monographs and prior campaign reports | describe the previous model version | none, provided the model version is stated |
 
 **The one decision that changes this table.** Representation A activates

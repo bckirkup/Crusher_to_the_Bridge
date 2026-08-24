@@ -20,7 +20,7 @@ from __future__ import annotations
 from dataclasses import replace
 from itertools import product
 from math import isfinite
-from typing import Any, Iterable, Sequence
+from typing import Any, Iterable, Sequence, cast
 
 import numpy as np
 
@@ -35,12 +35,15 @@ def _scaled_importation(
     multiplier: float,
 ) -> PortCallImportation:
     """Scale every exported strain without changing labels or timing."""
-    return replace(
-        importation,
-        strain_importations={
-            label: tuple(float(value) * multiplier for value in values)
-            for label, values in importation.strain_importations.items()
-        },
+    return cast(
+        PortCallImportation,
+        replace(
+            importation,
+            strain_importations={
+                label: tuple(float(value) * multiplier for value in values)
+                for label, values in importation.strain_importations.items()
+            },
+        ),
     )
 
 
@@ -84,7 +87,7 @@ def _relative_dispersion(values: Sequence[float]) -> float:
     """Coefficient of variation of a non-empty column, 0.0 at a zero mean."""
     arr = np.asarray(list(values), dtype=float)
     mean = float(np.mean(arr))
-    return 0.0 if mean == 0.0 else float(np.std(arr)) / abs(mean)
+    return 0.0 if abs(mean) < 1e-15 else float(np.std(arr)) / abs(mean)
 
 
 def _mean_cv_across_r(
@@ -158,7 +161,7 @@ def benefit_surface(
             "port_arm_total_cv_across_r": port_cv,
             "arm_total_cv_across_r": arm_total_cv,
             "cv_ratio_across_r": (
-                0.0 if arm_total_cv == 0.0 else fraction_cv / arm_total_cv
+                0.0 if abs(arm_total_cv) < 1e-15 else fraction_cv / arm_total_cv
             ),
             "r_shore_values": list(r_values),
             "importation_multipliers": list(multipliers),

@@ -45,6 +45,9 @@ PATHOGEN = "norwalk_gi"
 VARIANT_CFG = {"variant_surveillance": {"enabled": True}}
 ZONES = ["Cabin_A", "MainDining_L"]
 GENOTYPES = ("GII.4", "GII.17", "GII.2")
+# Hourly epochs past norovirus's 56-day refractory window, where protection is
+# genotype-specific again rather than non-specifically fresh.
+PAST_REFRACTORY = 24 * 60
 
 
 def _norwalk_profile(**overrides: object) -> dict:
@@ -128,15 +131,22 @@ def _challenge(
     genotype: str,
     *,
     escape: float = 0.0,
+    epoch: int = 0,
 ) -> float:
-    """Protection against a single fresh strain of *genotype*."""
+    """Protection against a single fresh strain of *genotype* at *epoch*.
+
+    ``epoch`` matters because protection is now matched *and* aged: inside a
+    pathogen's refractory window short-term protection is deliberately
+    non-specific, so genotype specificity is read past that window
+    (``PAST_REFRACTORY``). See ``tests/test_immune_waning.py``.
+    """
     strain = _registry(core).mint(
         PATHOGEN, genotype=genotype, phenotype=Phenotype(immune_escape=escape),
     )
     core._strain_doses = {
         agent.agent_id: {PATHOGEN: {(strain.strain_id, 0): 100.0}},
     }
-    return core._challenge_protection(agent, PATHOGEN)
+    return core._challenge_protection(agent, PATHOGEN, epoch)
 
 
 # ── Recording at the recovery seam ──────────────────────────────────────
@@ -249,8 +259,8 @@ class TestProtectionFromHistory:
         _infect(agent, registry, GENOTYPES[0])
         _resolve(agent, registry)
 
-        homologous = _challenge(core, agent, GENOTYPES[0])
-        heterologous = _challenge(core, agent, GENOTYPES[1])
+        homologous = _challenge(core, agent, GENOTYPES[0], epoch=PAST_REFRACTORY)
+        heterologous = _challenge(core, agent, GENOTYPES[1], epoch=PAST_REFRACTORY)
         assert homologous > heterologous
         assert 0.0 < heterologous < homologous <= 1.0
 
@@ -295,15 +305,16 @@ class TestProtectionFromHistory:
         _infect(both, registry, GENOTYPES[0])
         _resolve(both, registry, epoch=9)
 
-        cross_only = _challenge(core, one, GENOTYPES[0])
-        matched = _challenge(core, both, GENOTYPES[0])
+        cross_only = _challenge(core, one, GENOTYPES[0], epoch=PAST_REFRACTORY)
+        matched = _challenge(core, both, GENOTYPES[0], epoch=PAST_REFRACTORY)
         homologous_only = _agent(3)
         _infect(homologous_only, registry, GENOTYPES[0])
         _resolve(homologous_only, registry)
 
         assert matched > cross_only
         assert matched == pytest.approx(
-            _challenge(core, homologous_only, GENOTYPES[0]),
+            _challenge(core, homologous_only, GENOTYPES[0], epoch=PAST_REFRACTORY),
+            abs=1e-3,
         )
 
     def test_repeat_exposures_do_not_stack_protection(self) -> None:

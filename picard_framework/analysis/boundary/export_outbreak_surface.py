@@ -119,12 +119,9 @@ def _triggered(row: dict[str, Any], *, trigger_level: str) -> bool:
     return row.get("detection_epoch") is not None
 
 
-def run_row_from_payload(
+def _payload_sections(
     payload: dict[str, Any],
-    *,
-    trigger_level: str = "suspected",
-) -> dict[str, Any] | None:
-    """Build one aggregation row from a loaded run zip payload."""
+) -> tuple[dict[str, Any], list[Any], dict[str, Any], dict[str, Any], str]:
     summary = payload.get("summary") or {}
     if not isinstance(summary, dict):
         summary = {}
@@ -134,6 +131,16 @@ def run_row_from_payload(
     params = summary.get("parameters") if isinstance(summary.get("parameters"), dict) else {}
     run_spec = payload.get("run_spec") if isinstance(payload.get("run_spec"), dict) else {}
     run_id = str(payload.get("run_id") or summary.get("run_id") or "")
+    return summary, timeseries, params, run_spec, run_id
+
+
+def run_row_from_payload(
+    payload: dict[str, Any],
+    *,
+    trigger_level: str = "suspected",
+) -> dict[str, Any] | None:
+    """Build one aggregation row from a loaded run zip payload."""
+    _summary, timeseries, params, run_spec, run_id = _payload_sections(payload)
 
     base = build_run_summary_row(payload)
     k = resolve_initial_infected(
@@ -181,6 +188,32 @@ def _as_float(value: Any) -> float | None:
         return None
 
 
+def _pathogen_row_allowed(row: dict[str, Any], pathogens: set[str]) -> bool:
+    allowed = {normalize_pathogen(p) for p in pathogens}
+    if row["pathogen"] in allowed:
+        return True
+    allowed_lower = {p.lower() for p in allowed}
+    return row["pathogen"].lower() in allowed_lower
+
+
+def _row_from_zip(
+    zip_path: str,
+    *,
+    trigger_level: str,
+    pathogens: set[str] | None,
+) -> tuple[dict[str, Any] | None, bool]:
+    """Return (row_or_none, skipped). skipped True when zip/payload unusable."""
+    payload = load_run_zip(zip_path)
+    if payload is None:
+        return None, True
+    row = run_row_from_payload(payload, trigger_level=trigger_level)
+    if row is None:
+        return None, True
+    if pathogens is not None and not _pathogen_row_allowed(row, pathogens):
+        return None, False
+    return row, False
+
+
 def collect_run_rows(
     results_dirs: Sequence[str],
     *,
@@ -192,21 +225,14 @@ def collect_run_rows(
     skipped = 0
     for results_dir in results_dirs:
         for zip_path in iter_result_zips(results_dir):
-            payload = load_run_zip(zip_path)
-            if payload is None:
+            row, was_skipped = _row_from_zip(
+                zip_path, trigger_level=trigger_level, pathogens=pathogens,
+            )
+            if was_skipped:
                 skipped += 1
                 continue
-            row = run_row_from_payload(payload, trigger_level=trigger_level)
-            if row is None:
-                skipped += 1
-                continue
-            if pathogens is not None:
-                allowed = {normalize_pathogen(p) for p in pathogens}
-                if row["pathogen"] not in allowed and row["pathogen"].lower() not in {
-                    p.lower() for p in allowed
-                }:
-                    continue
-            rows.append(row)
+            if row is not None:
+                rows.append(row)
     return rows, skipped
 
 

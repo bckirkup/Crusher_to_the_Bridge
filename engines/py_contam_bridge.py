@@ -250,6 +250,72 @@ class ContamTransportEngine:
             temperature_k=DEFAULT_AIR_TEMP,
         )
 
+    def _append_hvac_room_paths(
+        self,
+        zone_id: str,
+        plenum_id: str,
+        room: str,
+        room_flow: float,
+        oa: float,
+    ) -> None:
+        if room_flow <= 0:
+            return
+        # Return: full design flow room → plenum (no filter)
+        self.airflow_paths.append(ContamAirflowPath(
+            path_id=f"{zone_id}_ret_{room}",
+            from_zone=room,
+            to_zone=plenum_id,
+            flow_rate_m3h=room_flow,
+            path_type=PATH_TYPE_HVAC_RETURN,
+            is_hvac_ducted=False,
+        ))
+        # Supply: recirculated fraction only; OA dilutes pathogen.
+        # Filter applies on the ducted supply leg.
+        supply_flow = room_flow * (1.0 - oa)
+        if supply_flow <= 0:
+            return
+        self.airflow_paths.append(ContamAirflowPath(
+            path_id=f"{zone_id}_sup_{room}",
+            from_zone=plenum_id,
+            to_zone=room,
+            flow_rate_m3h=supply_flow,
+            path_type=PATH_TYPE_HVAC_SUPPLY,
+            is_hvac_ducted=True,
+        ))
+
+    def _build_one_hvac_zone_paths(
+        self,
+        hvac_zone: dict[str, Any],
+        default_oa: float,
+        default_duty: float,
+    ) -> None:
+        zone_id = hvac_zone["id"]
+        rooms = [
+            r for r in hvac_zone.get("rooms", [])
+            if r in self.zone_nodes and not is_plenum_zone(r)
+        ]
+        if not rooms:
+            return
+        total_volume = sum(self.zone_nodes[r].volume_m3 for r in rooms)
+        if total_volume <= 0:
+            return
+        oa = float(hvac_zone.get("oa_fraction", default_oa))
+        duty = float(hvac_zone.get("hvac_duty", default_duty))
+        oa = min(max(oa, 0.0), 1.0)
+        duty = max(duty, 0.0)
+        ach = float(hvac_zone.get("ach", 6.0))
+        supply_total = ach * total_volume * duty
+        if supply_total <= 0:
+            return
+        plenum_id = f"{PLENUM_PREFIX}{zone_id}"
+        self._ensure_plenum_node(plenum_id)
+        for room in rooms:
+            room_volume = self.zone_nodes[room].volume_m3
+            room_flow = supply_total * (room_volume / total_volume)
+            self._append_hvac_room_paths(
+                zone_id, plenum_id, room, room_flow, oa,
+            )
+
     def _build_hvac_recirculation_paths(self, airflow: dict[str, Any]) -> None:
         """Build star-topology HVAC paths through a virtual AHU plenum.
 
@@ -269,53 +335,7 @@ class ContamTransportEngine:
         default_oa = float(airflow.get("oa_fraction", 0.2))
         default_duty = float(airflow.get("hvac_duty", 1.0))
         for hvac_zone in airflow.get("hvac_zones", []):
-            zone_id = hvac_zone["id"]
-            rooms = [
-                r for r in hvac_zone.get("rooms", [])
-                if r in self.zone_nodes and not is_plenum_zone(r)
-            ]
-            if not rooms:
-                continue
-            total_volume = sum(self.zone_nodes[r].volume_m3 for r in rooms)
-            if total_volume <= 0:
-                continue
-            oa = float(hvac_zone.get("oa_fraction", default_oa))
-            duty = float(hvac_zone.get("hvac_duty", default_duty))
-            oa = min(max(oa, 0.0), 1.0)
-            duty = max(duty, 0.0)
-            ach = float(hvac_zone.get("ach", 6.0))
-            supply_total = ach * total_volume * duty
-            if supply_total <= 0:
-                continue
-            plenum_id = f"{PLENUM_PREFIX}{zone_id}"
-            self._ensure_plenum_node(plenum_id)
-            for room in rooms:
-                room_volume = self.zone_nodes[room].volume_m3
-                room_flow = supply_total * (room_volume / total_volume)
-                if room_flow <= 0:
-                    continue
-                # Return: full design flow room → plenum (no filter)
-                self.airflow_paths.append(ContamAirflowPath(
-                    path_id=f"{zone_id}_ret_{room}",
-                    from_zone=room,
-                    to_zone=plenum_id,
-                    flow_rate_m3h=room_flow,
-                    path_type=PATH_TYPE_HVAC_RETURN,
-                    is_hvac_ducted=False,
-                ))
-                # Supply: recirculated fraction only; OA dilutes pathogen.
-                # Filter applies on the ducted supply leg.
-                supply_flow = room_flow * (1.0 - oa)
-                if supply_flow <= 0:
-                    continue
-                self.airflow_paths.append(ContamAirflowPath(
-                    path_id=f"{zone_id}_sup_{room}",
-                    from_zone=plenum_id,
-                    to_zone=room,
-                    flow_rate_m3h=supply_flow,
-                    path_type=PATH_TYPE_HVAC_SUPPLY,
-                    is_hvac_ducted=True,
-                ))
+            self._build_one_hvac_zone_paths(hvac_zone, default_oa, default_duty)
 
     def _build_cross_zone_paths(self, airflow: dict[str, Any]) -> None:
         for link in airflow.get("cross_zone_links", []):

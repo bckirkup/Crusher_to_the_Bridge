@@ -702,6 +702,48 @@ def _lockdown_threshold(esc_cfg: dict[str, Any]) -> float | None:
     return float(raw)
 
 
+def _escalation_ar_thresholds(
+    esc_cfg: dict[str, Any],
+    *,
+    respiratory_mode: bool,
+) -> tuple[float, float, int | None]:
+    resp = esc_cfg.get("respiratory_overrides") or {}
+    if respiratory_mode:
+        suspect_ar = float(resp.get(
+            "suspect_attack_rate",
+            esc_cfg.get("suspect_attack_rate", 0.01),
+        ))
+        confirm_ar = float(esc_cfg.get("confirm_attack_rate", 0.03))
+        alert_confirmed: int | None = int(resp.get("alert_confirmed_cases", 1))
+    else:
+        suspect_ar = float(esc_cfg.get("suspect_attack_rate", 0.02))
+        confirm_ar = float(esc_cfg.get("confirm_attack_rate", 0.03))
+        alert_confirmed = None
+    return suspect_ar, confirm_ar, alert_confirmed
+
+
+def _propose_alert_level(
+    trigger_status: str,
+    *,
+    sick_calls: int,
+    alert_threshold: int,
+    respiratory_mode: bool,
+    alert_confirmed: int | None,
+    cumulative_confirmed_cases: int,
+) -> str:
+    from orchestrator_types import STATUS_ALERT
+
+    if sick_calls >= alert_threshold:
+        return STATUS_ALERT
+    if (
+        respiratory_mode
+        and alert_confirmed is not None
+        and cumulative_confirmed_cases >= alert_confirmed
+    ):
+        return STATUS_ALERT
+    return trigger_status
+
+
 def propose_escalation_level(
     trigger_status: str,
     syndromic_result: dict[str, Any],
@@ -731,19 +773,9 @@ def propose_escalation_level(
             esc_cfg.get("syndromic_suspect_threshold", 3),
         ),
     )
-    resp = esc_cfg.get("respiratory_overrides") or {}
-    if respiratory_mode:
-        suspect_ar = float(resp.get(
-            "suspect_attack_rate",
-            esc_cfg.get("suspect_attack_rate", 0.01),
-        ))
-        confirm_ar = float(esc_cfg.get("confirm_attack_rate", 0.03))
-        alert_confirmed = int(resp.get("alert_confirmed_cases", 1))
-    else:
-        suspect_ar = float(esc_cfg.get("suspect_attack_rate", 0.02))
-        confirm_ar = float(esc_cfg.get("confirm_attack_rate", 0.03))
-        alert_confirmed = None
-
+    suspect_ar, confirm_ar, alert_confirmed = _escalation_ar_thresholds(
+        esc_cfg, respiratory_mode=respiratory_mode,
+    )
     lockdown_ar = _lockdown_threshold(esc_cfg)
 
     sick_calls = int(syndromic_result.get("sick_call_count", 0))
@@ -752,15 +784,14 @@ def propose_escalation_level(
     # Advance at most one level per evaluation (organizational stair-step).
     # Latency then applies to that single step.
     if current_rank < STATUS_RANK[STATUS_ALERT]:
-        if sick_calls >= alert_threshold:
-            return STATUS_ALERT
-        if (
-            respiratory_mode
-            and alert_confirmed is not None
-            and cumulative_confirmed_cases >= alert_confirmed
-        ):
-            return STATUS_ALERT
-        return trigger_status
+        return _propose_alert_level(
+            trigger_status,
+            sick_calls=sick_calls,
+            alert_threshold=alert_threshold,
+            respiratory_mode=respiratory_mode,
+            alert_confirmed=alert_confirmed,
+            cumulative_confirmed_cases=cumulative_confirmed_cases,
+        )
 
     if current_rank < STATUS_RANK[STATUS_SUSPECTED]:
         if attack_rate >= suspect_ar:
@@ -780,6 +811,53 @@ def propose_escalation_level(
     return trigger_status
 
 
+def _release_pending_escalation(
+    current_status: str,
+    epoch: int,
+    pending: dict[str, Any] | None,
+    esc_cfg: dict[str, Any],
+) -> tuple[str, dict[str, Any] | None]:
+    from orchestrator_types import STATUS_RANK
+
+    effective = current_status
+    updated_pending = dict(pending) if pending else None
+    if updated_pending is None:
+        return effective, updated_pending
+    target = str(updated_pending.get("to", current_status))
+    triggered_at = int(updated_pending.get("epoch_triggered", epoch))
+    delay = _escalation_delay_epochs(esc_cfg, target)
+    if epoch >= triggered_at + delay:
+        if STATUS_RANK.get(target, 0) > STATUS_RANK.get(effective, 0):
+            effective = target
+        updated_pending = None
+    return effective, updated_pending
+
+
+def _queue_escalation_transition(
+    effective: str,
+    proposed_status: str,
+    epoch: int,
+    updated_pending: dict[str, Any] | None,
+    esc_cfg: dict[str, Any],
+) -> tuple[str, dict[str, Any] | None]:
+    from orchestrator_types import STATUS_RANK
+
+    if STATUS_RANK.get(proposed_status, 0) <= STATUS_RANK.get(effective, 0):
+        return effective, updated_pending
+    pending_target = (
+        str(updated_pending["to"]) if updated_pending else effective
+    )
+    if STATUS_RANK.get(proposed_status, 0) <= STATUS_RANK.get(pending_target, 0):
+        return effective, updated_pending
+    delay = _escalation_delay_epochs(esc_cfg, proposed_status)
+    if delay <= 0:
+        return proposed_status, None
+    return effective, {
+        "to": proposed_status,
+        "epoch_triggered": epoch,
+    }
+
+
 def apply_escalation_latency(
     current_status: str,
     proposed_status: str,
@@ -791,39 +869,13 @@ def apply_escalation_latency(
 
     Returns ``(effective_status, updated_pending)``.
     """
-    from orchestrator_types import STATUS_RANK
-
     esc_cfg = cfg.get("escalation", {})
-    effective = current_status
-    updated_pending = dict(pending) if pending else None
-
-    # Release a matured pending transition first.
-    if updated_pending is not None:
-        target = str(updated_pending.get("to", current_status))
-        triggered_at = int(updated_pending.get("epoch_triggered", epoch))
-        delay = _escalation_delay_epochs(esc_cfg, target)
-        if epoch >= triggered_at + delay:
-            if STATUS_RANK.get(target, 0) > STATUS_RANK.get(effective, 0):
-                effective = target
-            updated_pending = None
-
-    # Queue a new higher target if signals justify it.
-    if STATUS_RANK.get(proposed_status, 0) > STATUS_RANK.get(effective, 0):
-        pending_target = (
-            str(updated_pending["to"]) if updated_pending else effective
-        )
-        if STATUS_RANK.get(proposed_status, 0) > STATUS_RANK.get(pending_target, 0):
-            delay = _escalation_delay_epochs(esc_cfg, proposed_status)
-            if delay <= 0:
-                effective = proposed_status
-                updated_pending = None
-            else:
-                updated_pending = {
-                    "to": proposed_status,
-                    "epoch_triggered": epoch,
-                }
-
-    return effective, updated_pending
+    effective, updated_pending = _release_pending_escalation(
+        current_status, epoch, pending, esc_cfg,
+    )
+    return _queue_escalation_transition(
+        effective, proposed_status, epoch, updated_pending, esc_cfg,
+    )
 
 
 def check_escalation(

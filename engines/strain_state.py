@@ -18,9 +18,10 @@ registry rather than carrying a parallel notion of lineage.
 
 from __future__ import annotations
 
+import math
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass, field, replace
-from typing import Any
+from typing import Any, cast
 
 # Origins a strain can be minted from. ``shore_import`` covers strains that
 # entered the ship already formed (embarkation, port reservoir, shore model).
@@ -272,6 +273,114 @@ def _as_range(
     return (float(raw[0]), float(raw[1]))
 
 
+def _require_non_negative(name: str, value: float) -> float:
+    val = float(value)
+    if not math.isfinite(val) or val < 0.0:
+        raise StrainConfigError(f"{name} must be a finite value >= 0, got {value!r}")
+    return val
+
+
+@dataclass(frozen=True)
+class ImmuneWaningConfig:
+    """How a resolved exposure's protection decays with time (per pathogen).
+
+    ``cross_immunity`` says how *well matched* a prior exposure is to a
+    challenge; this says how *fresh* it is. The two are different physics and
+    were previously collapsed into one number, which read a multi-year hazard
+    ratio as a per-epoch susceptibility and re-infected a recovered host on the
+    next epoch's dose.
+
+    Three parameters, all in **days**, because that is the unit the literature
+    reports and the unit the profiles are written in — the caller converts
+    elapsed epochs through the run's :class:`~engines.sim_clock.SimClock` and
+    passes days here, so this module never touches the epoch grid.
+
+    ``refractory_days``
+        Window after an exposure resolves in which protection is
+        ``refractory_protection``, regardless of genotype match: the short-term,
+        largely non-specific immunity that makes re-infection within a week-long
+        voyage a rarity rather than a certainty.
+    ``half_life_days``
+        Half-life of the genotype-matched protection *after* that window. 0
+        means no waning, which is the pre-existing behaviour and the default for
+        a profile that declares no block.
+    ``residual_protection``
+        Floor the decay approaches, capped at the matched protection itself, for
+        pathogens whose immunity never returns fully to naive.
+
+    An escape phenotype breaches the refractory window in proportion to its
+    escape, so a genuinely novel variant is not stopped by a window earned
+    against something else.
+    """
+
+    refractory_days: float = 0.0
+    refractory_protection: float = 1.0
+    half_life_days: float = 0.0
+    residual_protection: float = 0.0
+
+    def __post_init__(self) -> None:
+        _require_non_negative("immune_waning.refractory_days", self.refractory_days)
+        _require_non_negative("immune_waning.half_life_days", self.half_life_days)
+        _require_unit_interval(
+            "immune_waning.refractory_protection", self.refractory_protection,
+        )
+        _require_unit_interval(
+            "immune_waning.residual_protection", self.residual_protection,
+        )
+
+    @classmethod
+    def from_config(cls, raw: Mapping[str, Any] | None) -> "ImmuneWaningConfig":
+        """Parse an ``immune_waning`` block; absent block means no waning."""
+        if raw is None:
+            return cls()
+        if not isinstance(raw, Mapping):
+            raise StrainConfigError("immune_waning must be an object")
+        defaults = cls()
+        return cls(
+            refractory_days=float(
+                raw.get("refractory_days", defaults.refractory_days),
+            ),
+            refractory_protection=float(
+                raw.get("refractory_protection", defaults.refractory_protection),
+            ),
+            half_life_days=float(
+                raw.get("half_life_days", defaults.half_life_days),
+            ),
+            residual_protection=float(
+                raw.get("residual_protection", defaults.residual_protection),
+            ),
+        )
+
+    @property
+    def active(self) -> bool:
+        """True when this block changes any protection value."""
+        return self.refractory_days > 0.0 or self.half_life_days > 0.0
+
+    def protection_at(
+        self,
+        matched_protection: float,
+        days_since_resolution: float,
+        immune_escape: float = 0.0,
+    ) -> float:
+        """Protection a prior exposure still gives ``days_since`` later.
+
+        Inside the refractory window the window's own protection applies when it
+        exceeds the genotype-matched value, discounted by the challenge's escape.
+        After it, matched protection decays exponentially from the window's edge
+        toward ``residual_protection``.
+        """
+        base = min(1.0, max(0.0, float(matched_protection)))
+        days = max(0.0, float(days_since_resolution))
+        escape = min(1.0, max(0.0, float(immune_escape)))
+        if self.refractory_days > 0.0 and days <= self.refractory_days:
+            return min(1.0, max(base, self.refractory_protection * (1.0 - escape)))
+        if self.half_life_days <= 0.0:
+            return base
+        floor = min(self.residual_protection, base)
+        decay = 0.5 ** ((days - self.refractory_days) / self.half_life_days)
+        return min(1.0, max(0.0, floor + (base - floor) * decay))
+
+
 @dataclass(frozen=True)
 class StrainEvolutionConfig:
     """Per-pathogen strain parameters (spec §1.3, §1.4).
@@ -292,6 +401,7 @@ class StrainEvolutionConfig:
     cross_immunity: Mapping[str, Mapping[str, float]] = field(default_factory=dict)
     effect_ranges: PhenotypeEffectRanges = field(default_factory=PhenotypeEffectRanges)
     min_strain_fraction: float = 0.0
+    immune_waning: ImmuneWaningConfig = field(default_factory=ImmuneWaningConfig)
 
     @classmethod
     def from_profile(
@@ -336,6 +446,7 @@ class StrainEvolutionConfig:
             min_strain_fraction=_require_unit_interval(
                 "min_strain_fraction", raw.get("min_strain_fraction", 0.0),
             ),
+            immune_waning=ImmuneWaningConfig.from_config(raw.get("immune_waning")),
         )
         if not cfg.pathogen_id:
             raise StrainConfigError("strain_evolution requires a pathogen_id")
@@ -360,6 +471,27 @@ class StrainEvolutionConfig:
         """``base * (1 - immune_escape)`` (spec §1.4)."""
         base = self.protection(prior_genotype, challenge_strain.genotype)
         return base * (1.0 - challenge_strain.immune_escape)
+
+    def waned_protection(
+        self,
+        prior_genotype: str,
+        challenge_strain: StrainState,
+        days_since_resolution: float | None,
+    ) -> float:
+        """Genotype-matched protection, aged by ``immune_waning``.
+
+        ``days_since_resolution`` is ``None`` for an exposure that has not
+        resolved — a lineage still resident in the host. An ongoing infection is
+        interference rather than memory, so it is not aged, and its discount
+        stays where it was: ``superinfection_susceptibility`` plus the matched
+        cross-immunity.
+        """
+        matched = self.effective_protection(prior_genotype, challenge_strain)
+        if days_since_resolution is None:
+            return matched
+        return self.immune_waning.protection_at(
+            matched, days_since_resolution, challenge_strain.immune_escape,
+        )
 
 
 def _normalized_prior(
@@ -546,19 +678,22 @@ class StrainRegistry:
             )
         generation = parent.generation + (1 if origin == "transmission" else 0)
         pheno = phenotype or Phenotype.of(parent)
-        child = replace(
-            parent,
-            strain_id=self.allocate_id(parent.pathogen_id),
-            parent_strain_ids=(parent.strain_id,),
-            generation=generation,
-            n_mutations=parent.n_mutations + mutations_added,
-            origin=origin,
-            source_location=source_location or parent.source_location,
-            genotype=parent.genotype if genotype is None else genotype,
-            transmissibility_multiplier=pheno.transmissibility_multiplier,
-            shedding_multiplier=pheno.shedding_multiplier,
-            incubation_modifier=pheno.incubation_modifier,
-            immune_escape=pheno.immune_escape,
+        child = cast(
+            StrainState,
+            replace(
+                parent,
+                strain_id=self.allocate_id(parent.pathogen_id),
+                parent_strain_ids=(parent.strain_id,),
+                generation=generation,
+                n_mutations=parent.n_mutations + mutations_added,
+                origin=origin,
+                source_location=source_location or parent.source_location,
+                genotype=parent.genotype if genotype is None else genotype,
+                transmissibility_multiplier=pheno.transmissibility_multiplier,
+                shedding_multiplier=pheno.shedding_multiplier,
+                incubation_modifier=pheno.incubation_modifier,
+                immune_escape=pheno.immune_escape,
+            ),
         )
         return self.register(child)
 
@@ -593,19 +728,22 @@ class StrainRegistry:
                 f"recombination needs two distinct parents, got {recipient.strain_id!r} twice",
             )
         pheno = phenotype or Phenotype.of(recipient)
-        child = replace(
-            recipient,
-            strain_id=self.allocate_id(recipient.pathogen_id),
-            parent_strain_ids=(recipient.strain_id, donor.strain_id),
-            generation=max(recipient.generation, donor.generation),
-            n_mutations=max(recipient.n_mutations, donor.n_mutations),
-            origin="recombination",
-            source_location=source_location or recipient.source_location,
-            genotype=recipient.genotype if genotype is None else genotype,
-            transmissibility_multiplier=pheno.transmissibility_multiplier,
-            shedding_multiplier=pheno.shedding_multiplier,
-            incubation_modifier=pheno.incubation_modifier,
-            immune_escape=pheno.immune_escape,
+        child = cast(
+            StrainState,
+            replace(
+                recipient,
+                strain_id=self.allocate_id(recipient.pathogen_id),
+                parent_strain_ids=(recipient.strain_id, donor.strain_id),
+                generation=max(recipient.generation, donor.generation),
+                n_mutations=max(recipient.n_mutations, donor.n_mutations),
+                origin="recombination",
+                source_location=source_location or recipient.source_location,
+                genotype=recipient.genotype if genotype is None else genotype,
+                transmissibility_multiplier=pheno.transmissibility_multiplier,
+                shedding_multiplier=pheno.shedding_multiplier,
+                incubation_modifier=pheno.incubation_modifier,
+                immune_escape=pheno.immune_escape,
+            ),
         )
         return self.register(child)
 

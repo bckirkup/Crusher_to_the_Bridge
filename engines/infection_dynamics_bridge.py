@@ -620,8 +620,11 @@ class KorkinAgent:
         }
         if strain_id is not None:
             self._write_strain(pathogen_id, strain_id, strain_phenotype)
-        # Set legacy fields to infected if this is the first infection
-        if self.infection_status == InfectionStatus.SUSCEPTIBLE:
+        # The agent-level fields follow the records: any episode that starts
+        # while they show no active infection reopens them, so a second episode
+        # is visible in the legacy channel instead of being hidden behind the
+        # first one's RECOVERED.
+        if self.infection_status != InfectionStatus.INFECTED:
             self.infection_status = InfectionStatus.INFECTED
             self.illness_status = IllnessStatus.NOT_ILL
             self.time_infected = time_infected

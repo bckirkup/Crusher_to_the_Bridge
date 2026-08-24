@@ -468,6 +468,39 @@ def _advance_agent_pathogen_infections(
             inf["illness"] = IllnessStatus.RECOVERED
 
 
+def _project_legacy_illness(agent: Any) -> None:
+    """Rewrite the agent-level illness fields from the per-pathogen records.
+
+    The agent-level fields are a summary channel, not a second state machine:
+    every summary, VSP threshold and legacy prevalence series reads them, and
+    they used to be updated only on the transitions the fallback happened to
+    see. A host re-infected before its last lineage cleared therefore never
+    reached agent-level recovery and latched SYMPTOMATIC for the rest of the
+    voyage, while the records it shadows kept moving.
+
+    A host with no records keeps whatever the fallback path gave it.
+    """
+    if not agent.infections:
+        return
+    active = [
+        inf for inf in agent.infections.values()
+        if inf["status"] == InfectionStatus.INFECTED
+    ]
+    if not active:
+        if agent.infection_status == InfectionStatus.INFECTED:
+            agent.infection_status = InfectionStatus.RECOVERED
+            agent.illness_status = IllnessStatus.RECOVERED
+        return
+    agent.infection_status = InfectionStatus.INFECTED
+    agent.time_infected = max(inf["time_infected"] or 0 for inf in active)
+    symptomatic = any(
+        inf["illness"] == IllnessStatus.SYMPTOMATIC for inf in active
+    )
+    agent.illness_status = (
+        IllnessStatus.SYMPTOMATIC if symptomatic else IllnessStatus.NOT_ILL
+    )
+
+
 def step_infection_progression(
     engine: KorkinShipEngine,
     pathogen_profiles: dict[str, dict[str, Any]],
@@ -488,14 +521,7 @@ def step_infection_progression(
             agent, pathogen_profiles, engine.rng, strain_registry, epoch,
         )
 
-        any_active = any(
-            inf["status"] == InfectionStatus.INFECTED
-            for inf in agent.infections.values()
-        )
-        if agent.infections and not any_active:
-            if agent.infection_status == InfectionStatus.INFECTED:
-                agent.infection_status = InfectionStatus.RECOVERED
-                agent.illness_status = IllnessStatus.RECOVERED
+        _project_legacy_illness(agent)
 
         agent.update_microflora_disruption(pathogen_profiles)
 

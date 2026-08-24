@@ -161,13 +161,16 @@ class TestCounterfactual:
         assert result.detection_lead_epochs < 0
 
     def test_negative_residual_fraction_rejected(self) -> None:
+        importation = _importation()
+        parameters = _parameters()
+        capability = _capability()
         with pytest.raises(ValueError, match="residual_importation_fraction"):
             evaluate_counterfactual(
-                _importation(),
-                _parameters(),
+                importation,
+                parameters,
                 residual_importation_fraction=-0.1,
                 case_threshold=1.0,
-                capability=_capability(),
+                capability=capability,
             )
 
     def test_non_integer_detection_epoch_rejected(self) -> None:
@@ -181,13 +184,16 @@ class TestCounterfactual:
             )
 
     def test_residual_fraction_above_one_rejected(self) -> None:
+        importation = _importation()
+        parameters = _parameters()
+        capability = _capability()
         with pytest.raises(ValueError, match="residual_importation_fraction"):
             evaluate_counterfactual(
-                _importation(),
-                _parameters(),
+                importation,
+                parameters,
                 residual_importation_fraction=1.1,
                 case_threshold=1.0,
-                capability=_capability(),
+                capability=capability,
             )
 
     def test_per_strain_arms_conserve_combined_totals(self) -> None:
@@ -358,6 +364,7 @@ class TestDetection:
             port_detection_epoch([1.0], **args)
 
     def test_unknown_active_profile_is_rejected(self) -> None:
+        capability = _capability()
         with pytest.raises(KeyError, match="missing"):
             port_detection_epoch(
                 [1.0],
@@ -365,5 +372,5 @@ class TestDetection:
                 pathogen_id="missing",
                 epoch_hours=EPOCH_HOURS,
                 case_threshold=1.0,
-                capability=_capability(),
+                capability=capability,
             )

@@ -101,6 +101,35 @@
           "maximum": 1,
           "description": "Frequency floor below which strains are lumped into an unresolved bin, bounding state growth."
         },
+        "immune_waning": {
+          "type": "object",
+          "description": "How protection from a resolved exposure ages, per pathogen. cross_immunity says how well a prior exposure matches a challenge; this says how fresh it is. All times are days of natural history, converted from epochs through the run's clock. Absent block = no refractory window and no waning, i.e. the matched cross_immunity value applies at any age.",
+          "properties": {
+            "refractory_days": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Days after an exposure resolves during which refractory_protection applies regardless of genotype match. Sized so re-infection within a week-long voyage is rare; the waning term below is what a year-long deployment sees."
+            },
+            "refractory_protection": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Protection inside the refractory window, breached in proportion to a challenge strain's immune_escape. 1.0 = sterile against a non-escaping challenge."
+            },
+            "half_life_days": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Half-life of the genotype-matched protection after the refractory window. 0 = no waning."
+            },
+            "residual_protection": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Floor the decay approaches, capped at the matched protection itself."
+            }
+          },
+          "additionalProperties": false
+        },
         "notes": {
           "type": "string",
           "description": "Provenance for these rates: literature anchor, or the fact that a value is a placeholder pending one."

@@ -65,12 +65,21 @@ def r_onboard_tag(value: float) -> str:
     return "R" + str(float(value)).replace(".", "p")
 
 
-def cell_id(hazard: str, fleet: str, r_onboard: float) -> str:
-    """Filesystem-safe id for one (hazard × fleet × R) recovery cell."""
-    return validate_path_component(
+def cell_id(
+    hazard: str,
+    fleet: str,
+    r_onboard: float,
+    wastewater_cell: str = "",
+) -> str:
+    """Filesystem-safe id for one recovery cell (optional ww operating point)."""
+    base = validate_path_component(
         f"{hazard}__{fleet}__{r_onboard_tag(r_onboard)}",
         label="cell_id",
     )
+    ww = str(wastewater_cell or "").strip()
+    if not ww:
+        return base
+    return f"{base}__{validate_path_component(ww, label='wastewater_cell')}"
 
 
 def _posix_join(*parts: str) -> str:
@@ -215,13 +224,40 @@ def voyage_record_from_zip(zip_path: str) -> dict[str, Any] | None:
     }
 
 
-def cell_key(params: dict[str, Any]) -> tuple[str, str, float]:
-    """Grouping key for one recovery cell."""
+def cell_key(params: dict[str, Any]) -> tuple[str, str, float, str]:
+    """Grouping key for one recovery cell (ww scan adds wastewater_cell)."""
+    ww = str(params.get("wastewater_cell") or "").strip()
     return (
         str(params.get("hazard_profile") or "unknown"),
         str(params.get("fleet_config") or "unknown"),
         float(params.get("R_onboard") or 0.0),
+        ww,
     )
+
+
+def _ww_fit_fields(params: Mapping[str, Any]) -> dict[str, Any]:
+    """Wastewater channel options for one campaign run's operating point."""
+    enabled = bool(params.get("wastewater_enabled", True))
+    residence = float(params.get("ww_residence_hours") or 0.0)
+    depth = int(params.get("ww_sequencing_depth") or 0)
+    fields: dict[str, Any] = {
+        "wastewater_cell": str(params.get("wastewater_cell") or ""),
+        "wastewater_block": str(params.get("wastewater_block") or ""),
+        "wastewater_enabled": enabled,
+        "ww_residence_hours": residence,
+        "ww_sampling_interval_epochs": int(
+            params.get("ww_sampling_interval_epochs") or 0,
+        ),
+        "ww_sequencing_depth": depth,
+    }
+    if not enabled or residence <= 0.0:
+        fields["wastewater"] = False
+        return fields
+    fields["wastewater"] = True
+    fields["wastewater_residence_hours"] = residence
+    if depth > 0:
+        fields["wastewater_max_effective_reads"] = min(200_000, depth)
+    return fields
 
 
 def extract_voyages(results_dir: str, out_dir: str) -> dict[str, list[dict[str, Any]]]:
@@ -237,8 +273,8 @@ def extract_voyages(results_dir: str, out_dir: str) -> dict[str, list[dict[str, 
         write_json(os.path.join(dest, "itinerary.json"), rec["itinerary"])
         write_json(os.path.join(dest, "observations.json"), rec["observations"])
         write_json(os.path.join(dest, "meta.json"), rec["params"])
-        hazard, fleet, r_val = cell_key(rec["params"])
-        cid = cell_id(hazard, fleet, r_val)
+        hazard, fleet, r_val, ww_cell = cell_key(rec["params"])
+        cid = cell_id(hazard, fleet, r_val, ww_cell)
         grouped[cid].append(
             {
                 "run_id": run_id,
@@ -246,6 +282,7 @@ def extract_voyages(results_dir: str, out_dir: str) -> dict[str, list[dict[str, 
                 "fleet_config": fleet,
                 "R_onboard": r_val,
                 "port_hazards": dict(rec["params"].get("port_hazards") or {}),
+                "params": dict(rec["params"]),
                 "itinerary": os.path.join("voyages", run_id, "itinerary.json"),
                 "observations": os.path.join("voyages", run_id, "observations.json"),
             },
@@ -297,6 +334,7 @@ def write_cell_manifests(
                 "n_voyages": len(voyages),
                 "manifest": path,
                 "fit_dir": os.path.join(out_dir, "fits", cid),
+                **_ww_fit_fields(first.get("params") or {}),
             },
         )
     return cells
@@ -315,7 +353,7 @@ def cells_from_out(out_dir: str) -> list[dict[str, Any]]:
         meta = read_json(os.path.join(out_dir, "voyages", run_id, "meta.json"))
         if not isinstance(meta, dict):
             continue
-        hazard, fleet, r_val = cell_key(meta)
+        hazard, fleet, r_val, _ww = cell_key(meta)
         cell = validate_path_component(str(cid), label="cell_id")
         cells.append(
             {
@@ -327,6 +365,7 @@ def cells_from_out(out_dir: str) -> list[dict[str, Any]]:
                 "n_voyages": len(run_ids),
                 "manifest": os.path.join(out_dir, "manifests", f"{cell}.json"),
                 "fit_dir": os.path.join(out_dir, "fits", cell),
+                **_ww_fit_fields(meta),
             },
         )
     return cells
@@ -461,6 +500,17 @@ def fit_cell(
         if previous and previous.get("status") in {"ok", "smoke"}:
             return previous
     ensure_out_dir(cell["fit_dir"])
+    ww_kwargs = {
+        "wastewater": bool(cell.get("wastewater", cell.get("wastewater_enabled", False))),
+    }
+    if cell.get("wastewater_residence_hours") is not None:
+        ww_kwargs["wastewater_residence_hours"] = float(
+            cell["wastewater_residence_hours"],
+        )
+    if cell.get("wastewater_max_effective_reads") is not None:
+        ww_kwargs["wastewater_max_effective_reads"] = int(
+            cell["wastewater_max_effective_reads"],
+        )
     return fit_sentinel_fleet(
         cell["manifest"],
         cell["fit_dir"],
@@ -470,7 +520,7 @@ def fit_cell(
         engine=engine,
         sampler=sampler,
         priors=recovery_fleet_priors(fleet_config=str(cell["fleet_config"])),
-        wastewater=False,
+        **ww_kwargs,
     )
 
 

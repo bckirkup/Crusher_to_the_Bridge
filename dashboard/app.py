@@ -6,6 +6,7 @@ import os
 
 import streamlit as st
 
+from dashboard.agent_explorer import render_agent_explorer
 from dashboard.charts import (
     render_bridge_status,
     render_sickbay_console,
@@ -14,6 +15,7 @@ from dashboard.charts import (
 from dashboard.fleet_viz import render_fleet_operations
 from dashboard.loaders import (
     default_telemetry_dir,
+    detect_retention_mode,
     load_history_from,
     load_notebook_from,
     load_platform_bundle,
@@ -27,6 +29,10 @@ from dashboard.paths import (
     PROTOCOLS_PATH,
     REPO_ROOT,
 )
+from dashboard.retention import render_retention_banner
+from dashboard.retrospective import render_voyage_retrospective
+from dashboard.run_console import render_run_console
+from dashboard.session_state import get_selected_epoch, init_session_state
 from dashboard.spatial_viz import render_tactical_grid
 from dashboard.theme import (
     LCARS_AMBER,
@@ -37,6 +43,8 @@ from dashboard.theme import (
     _lcars_alert_banner,
     _lcars_banner,
 )
+from dashboard.time_control import render_time_control
+from dashboard.transmission_viz import render_transmission_explorer
 
 
 @st.cache_data
@@ -68,7 +76,6 @@ def _detection_label(method: str) -> str:
 
 
 def _locked_platform_id(history: list) -> tuple[str, str]:
-    """Single source of truth for vessel class — no UI picker."""
     env_override = os.environ.get("CTTB_PLATFORM_OVERRIDE", "").strip()
     if env_override:
         return env_override, "manual"
@@ -83,10 +90,12 @@ def main() -> None:
     )
     st.markdown(LCARS_CSS, unsafe_allow_html=True)
 
-    tel_dir = default_telemetry_dir()
+    tel_dir = st.session_state.get("telemetry_dir") or default_telemetry_dir()
     hist_path, nb_path = telemetry_paths(tel_dir)
     history = load_history_from(hist_path)
     notebook = load_notebook_from(nb_path)
+
+    init_session_state(history_len=len(history))
 
     with st.sidebar:
         st.markdown(
@@ -99,12 +108,18 @@ def main() -> None:
         tel_dir_input = st.text_input(
             "Telemetry directory",
             value=tel_dir,
-            key="telemetry_dir",
+            key="telemetry_dir_input",
         )
         if tel_dir_input != tel_dir:
+            st.session_state.telemetry_dir = tel_dir_input
             hist_path, nb_path = telemetry_paths(tel_dir_input)
             history = load_history_from(hist_path)
             notebook = load_notebook_from(nb_path)
+            init_session_state(history_len=len(history))
+            tel_dir = tel_dir_input
+
+        if history:
+            render_time_control(history)
 
         active_pid, detect_method = _locked_platform_id(history)
         bundle = load_platform_bundle(active_pid)
@@ -139,19 +154,16 @@ def main() -> None:
                 if plate_kind == "reference_photo_composite"
                 else "Class blueprint plate"
             )
-            st.image(
-                bundle.blueprint_bg_path,
-                caption=cap,
-                use_container_width=True,
-            )
+            st.image(bundle.blueprint_bg_path, caption=cap, use_container_width=True)
         elif bundle.hull_png_path:
             st.image(bundle.hull_png_path, use_container_width=True)
 
         if history:
-            last = history[-1]
-            st.markdown(_lcars_alert_banner(last["trigger_status"]), unsafe_allow_html=True)
+            epoch_idx = get_selected_epoch()
+            rec = history[min(epoch_idx, len(history) - 1)]
+            st.markdown(_lcars_alert_banner(rec["trigger_status"]), unsafe_allow_html=True)
             st.divider()
-            summary = last["summary"]
+            summary = rec["summary"]
             st.metric("Epochs Elapsed", len(history))
             total_pop = (
                 summary.get("susceptible", 0)
@@ -163,7 +175,7 @@ def main() -> None:
             st.metric("Crew Complement", total_pop)
             st.metric("Confined to Quarters", summary.get("quarantined", 0))
             st.metric("Isolation Ward", summary.get("isolated", 0))
-            ca = last.get("cost_accounting", {})
+            ca = rec.get("cost_accounting", {})
             st.metric(
                 "Credits Remaining",
                 f"${ca.get('financial_balance_remaining', 0):,.0f}",
@@ -176,11 +188,14 @@ def main() -> None:
 
     if not history:
         st.error(
-            "No sensor telemetry found. Run `python orchestrator.py` "
-            "or point Telemetry directory at a Presidio cruise folder."
+            "No sensor telemetry found. Run `python orchestrator.py`, use the "
+            "Operations Console tab, or point Telemetry directory at a Presidio cruise folder."
         )
+        render_run_console()
         return
 
+    retention_mode = detect_retention_mode(history)
+    selected_epoch = get_selected_epoch()
     ship_label = bundle.manifest.get("ship_class_label", bundle.platform_id)
     desc = (bundle.layout.get("description") or "")[:120]
 
@@ -199,31 +214,61 @@ def main() -> None:
         unsafe_allow_html=True,
     )
 
+    if retention_mode == "compact":
+        render_retention_banner(
+            retention_mode,
+            feature="Agent-level and transmission views",
+        )
+
     pathogen_data = _load_pathogen_profiles()
     protocol_data = _load_protocols()
 
-    tab1, tab2, tab3, tab4, tab5 = st.tabs([
+    tabs = st.tabs([
+        "Voyage Retrospective",
         "Bridge Status Display",
         "Tactical Sensor Grid",
+        "Transmission Explorer",
+        "Agent Illness & Care",
         "Sickbay Diagnostic Console",
         "Standing Orders & Threat Profiles",
         "Fleet Operations",
+        "Operations Console",
     ])
 
-    with tab1:
+    with tabs[0]:
+        render_voyage_retrospective(
+            history, notebook,
+            platform_id=active_pid,
+            ship_label=ship_label,
+        )
+    with tabs[1]:
         render_bridge_status(history, notebook)
-    with tab2:
-        render_tactical_grid(history, bundle)
-    with tab3:
+    with tabs[2]:
+        render_tactical_grid(
+            history, bundle,
+            selected_epoch=selected_epoch,
+            retention_mode=retention_mode,
+        )
+    with tabs[3]:
+        render_transmission_explorer(
+            history,
+            retention_mode=retention_mode,
+            selected_epoch=selected_epoch,
+        )
+    with tabs[4]:
+        render_agent_explorer(history, notebook, retention_mode=retention_mode)
+    with tabs[5]:
         render_sickbay_console(history, notebook)
-    with tab4:
+    with tabs[6]:
         render_standing_orders(pathogen_data, protocol_data)
-    with tab5:
+    with tabs[7]:
         fleet_cfg = os.path.join(
             REPO_ROOT, "presidio", "data", "config", "smoke_fleet.json",
         )
         fleet_root = parse_fleet_output_root(fleet_cfg) or DEFAULT_FLEET_OUTPUT
-        render_fleet_operations(fleet_root)
+        render_fleet_operations(fleet_root, selected_epoch=selected_epoch)
+    with tabs[8]:
+        render_run_console()
 
 
 if __name__ == "__main__":

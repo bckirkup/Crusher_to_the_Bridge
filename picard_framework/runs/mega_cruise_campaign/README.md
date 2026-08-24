@@ -66,6 +66,80 @@ python3 "$RUNNER" --manifest "$MANIFEST" --tier c2 --dry-run
 
 Use a distinct S3 prefix for Batch (e.g. `s3://…/campaign/calibration_v1/`).
 
+### Natural-history clock selection
+
+The campaign runner accepts `--natural-history-clock hours` or
+`--natural-history-clock legacy_epoch_day`. The flag is optional, leaves
+existing generated specs unchanged when absent, and records the selected arm
+in `parameters.natural_history_clock` for aggregation. `hours` is the
+supported configuration for new campaigns. `legacy_epoch_day` is retired and
+is retained only to reproduce old runs; it is not a reference or a supported
+new-campaign arm.
+
+Historical paired calibration arrays used separate S3 prefixes so their
+unchanged run IDs and resume logs could not collide:
+
+```bash
+CLOCK=hours ./deploy/aws/submit_array_job.sh 80 \
+  s3://bucket/calibration_hours/ picard-campaign-queue picard-campaign \
+  "$MANIFEST"
+CLOCK=legacy_epoch_day ./deploy/aws/submit_array_job.sh 80 \
+  s3://bucket/calibration_legacy/ picard-campaign-queue picard-campaign \
+  "$MANIFEST"
+```
+
+The local output directory records its selected arm in
+`natural_history_clock.txt`; requesting a different arm against that directory
+fails clearly. An invocation without the flag remains compatible with an
+existing marked directory and does not hard-fail.
+
+### Historical C1 VSP refit paired arms
+
+`clock_arm_c1_v1_manifest.json` is the focused C1 norovirus VSP refit manifest.
+It contains four simulation tiers: 480 expedition runs and 640 runs for each
+of classic, spirit, and mega, or 2,400 runs when selecting `--tier all`.
+This paired-arm campaign is historical. The legacy arm is retired; reproduce
+an old result only when needed, always using separate S3 prefixes:
+
+```bash
+MANIFEST=picard_framework/runs/mega_cruise_campaign/clock_arm_c1_v1_manifest.json
+AWS_PROFILE=picard CLOCK=hours ./deploy/aws/submit_array_job.sh 80 \
+  "s3://$BUCKET/campaign/clock_hours/" picard-campaign-queue \
+  picard-campaign "$MANIFEST"
+
+AWS_PROFILE=picard CLOCK=legacy_epoch_day ./deploy/aws/submit_array_job.sh 80 \
+  "s3://$BUCKET/campaign/clock_legacy/" picard-campaign-queue \
+  picard-campaign "$MANIFEST"
+```
+
+The two arms intentionally have identical run IDs. A shared prefix would
+silently mix the two models in one shard bundle, and the resume log would make
+the second arm's runs appear already complete. The shell submitter and default
+job definition do not provide `--tier`; for one tier, use a dedicated manifest
+or the PowerShell submitter's `-Tier` container override. Submit only the
+independent, checkpointed simulation tiers to Fargate Spot. Stan and Sentinel
+inference tiers must run on a non-Spot path because their fits do not survive
+an interruption.
+
+### Current C1 single-dose hourly refit
+
+`c1_single_dose_hours_v1_manifest.json` is the current hourly-only
+single-dose norovirus VSP test. It uses the same 11.5–13.0
+`dose_adjustment` ladder at 0.25 steps, `n_init=1`, both `none_true` and
+`syndromic`, and matched seeds 720–759 across all four hulls. Each hull
+enumerates 560 runs, for 2,240 runs with `--tier all`:
+
+```bash
+MANIFEST=picard_framework/runs/mega_cruise_campaign/c1_single_dose_hours_v1_manifest.json
+python3 "$RUNNER" --manifest "$MANIFEST" \
+  --tier all --natural-history-clock hours --dry-run
+```
+
+This campaign is hourly-only. `legacy_epoch_day` is retired and is not run
+here; its historical numbers are not a reference. Use a distinct S3 prefix
+from the historical C1 refit campaign, and keep only the independent,
+checkpointed simulation tiers on the Spot path.
+
 Mega-cruise runs inject `escalation.lockdown_attack_rate: 0.05` (default
 `config.yaml` uses `never` for small smokes).
 
@@ -258,6 +332,8 @@ Tier 1 alone: ~15 hours (300 × 3 min).
 |------|------|
 | `campaign_manifest.json` | Mega-cruise tier matrix (~17,780) |
 | `calibration_manifest_v1.json` | Multi-platform calibration matrix (c1–c4) |
+| `clock_arm_c1_v1_manifest.json` | Historical paired-clock C1 VSP refit |
+| `c1_single_dose_hours_v1_manifest.json` | Hourly-only single-dose C1 VSP refit |
 | `tier_iterators.py` | `t1`–`t16` and calibration (`c1`–`c6`, `a2`, `b1`, `b2`) cartesian generators; `dispatch_standard_or_calibration` |
 | `campaign_runner.py` | Spec generator + Picard executor (sharding + S3 upload); `sr*` / `vd*` families stay here |
 | `README.md` | This file |

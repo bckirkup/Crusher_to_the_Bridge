@@ -185,6 +185,27 @@ class WearableAnomalyScorer:
         }
 
 
+def _merge_template_dict(
+    templates: dict[str, dict[str, float]],
+    source: dict[str, Any],
+) -> None:
+    for cid, tvec in source.items():
+        if isinstance(tvec, dict):
+            templates[cid] = {k: float(v) for k, v in tvec.items()}
+
+
+def _merge_device_confounder_templates(
+    templates: dict[str, dict[str, float]],
+    devices: dict[str, Any],
+) -> None:
+    for device in devices.values():
+        for conf in getattr(device, "confounders", []) or []:
+            cid = conf.get("confounder_id", "")
+            tvec = conf.get("template_z_vector")
+            if cid and isinstance(tvec, dict):
+                templates[cid] = {k: float(v) for k, v in tvec.items()}
+
+
 def _load_confounder_templates(
     block: dict[str, Any],
     devices: dict[str, Any] | None,
@@ -193,17 +214,10 @@ def _load_confounder_templates(
 
     global_templates = block.get("confounder_templates", {})
     if isinstance(global_templates, dict):
-        for cid, tvec in global_templates.items():
-            if isinstance(tvec, dict):
-                templates[cid] = {k: float(v) for k, v in tvec.items()}
+        _merge_template_dict(templates, global_templates)
 
     if devices:
-        for device in devices.values():
-            for conf in getattr(device, "confounders", []) or []:
-                cid = conf.get("confounder_id", "")
-                tvec = conf.get("template_z_vector")
-                if cid and isinstance(tvec, dict):
-                    templates[cid] = {k: float(v) for k, v in tvec.items()}
+        _merge_device_confounder_templates(templates, devices)
 
     return templates
 

@@ -198,25 +198,31 @@ class TestSurface:
             "case_threshold": 10.0,
             "capability": _capability(),
         }
+        importation = _continuous_importation()
+        empty_grid: tuple[float, ...] = ()
+        unit_grid = (1.0,)
+        negative_r = (-0.1,)
+        single_r = (0.5,)
+        infinite_multiplier = (float("inf"),)
         with pytest.raises(ValueError, match="non-empty"):
             benefit_surface(
-                _continuous_importation(),
-                r_shore_grid=(),
-                importation_multiplier_grid=(1.0,),
+                importation,
+                r_shore_grid=empty_grid,
+                importation_multiplier_grid=unit_grid,
                 **kwargs,
             )
         with pytest.raises(ValueError, match="r_shore_grid"):
             benefit_surface(
-                _continuous_importation(),
-                r_shore_grid=(-0.1,),
-                importation_multiplier_grid=(1.0,),
+                importation,
+                r_shore_grid=negative_r,
+                importation_multiplier_grid=unit_grid,
                 **kwargs,
             )
         with pytest.raises(ValueError, match="multiplier"):
             benefit_surface(
-                _continuous_importation(),
-                r_shore_grid=(0.5,),
-                importation_multiplier_grid=(float("inf"),),
+                importation,
+                r_shore_grid=single_r,
+                importation_multiplier_grid=infinite_multiplier,
                 **kwargs,
             )
 

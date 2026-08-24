@@ -173,6 +173,22 @@ def _cell_run_ids(voyages: list[Any], cell_id: str) -> list[str]:
     return seen
 
 
+def _existing_fit_ok(s3_analysis: str, cell_id: str) -> bool:
+    """True when this cell already has an ok/smoke fit artifact on S3."""
+    bucket, base = _analysis_prefix(s3_analysis)
+    key = f"{base}fits/{cell_id}/fit_status.json"
+    client = _s3_client()
+    try:
+        resp = client.get_object(Bucket=bucket, Key=key)
+        payload = json.loads(resp["Body"].read())
+    except client.exceptions.NoSuchKey:
+        return False
+    except Exception as exc:  # pragma: no cover - network
+        print(f"warn: could not read s3://{bucket}/{key}: {exc}", flush=True)
+        return False
+    return isinstance(payload, dict) and payload.get("status") in {"ok", "smoke"}
+
+
 def _download_cell_inputs(s3_analysis: str, cell_id: str) -> str:
     """Pull cells.json, one manifest, and that cell's voyage JSON only."""
     bucket, base = _analysis_prefix(s3_analysis)
@@ -186,6 +202,22 @@ def _download_cell_inputs(s3_analysis: str, cell_id: str) -> str:
     for run_id in _cell_run_ids(voyages, cell_id):
         _download_run_json(bucket, base, run_id)
     return manifest
+
+
+def _ww_fit_kwargs_from_meta(meta: dict[str, Any]) -> dict[str, Any]:
+    from picard_framework.analysis.sentinel_recovery_postprocess import (
+        _ww_fit_fields,
+    )
+
+    fields = _ww_fit_fields(meta)
+    kwargs: dict[str, Any] = {"wastewater": bool(fields.get("wastewater", False))}
+    if fields.get("wastewater_residence_hours") is not None:
+        kwargs["wastewater_residence_hours"] = fields["wastewater_residence_hours"]
+    if fields.get("wastewater_max_effective_reads") is not None:
+        kwargs["wastewater_max_effective_reads"] = fields[
+            "wastewater_max_effective_reads"
+        ]
+    return kwargs
 
 
 def _fit_cell(
@@ -205,6 +237,21 @@ def _fit_cell(
     from picard_framework.analysis.stan._sampler_options import SamplerOptions
     from picard_framework.analysis.stan.fit_sentinel_fleet import fit_sentinel_fleet
 
+    payload = _read_json(manifest)
+    voyages = payload.get("voyages") or []
+    meta: dict[str, Any] = {}
+    if isinstance(voyages, list) and voyages:
+        first = voyages[0]
+        if isinstance(first, dict):
+            rel = str(first.get("itinerary") or first.get("observations") or "")
+            run_id = _voyage_run_id(rel) if rel else ""
+            if run_id:
+                meta_path = f"analysis/voyages/{run_id}/meta.json"
+                if os.path.isfile(meta_path):
+                    loaded = _read_json(meta_path)
+                    if isinstance(loaded, dict):
+                        meta = loaded
+
     return fit_sentinel_fleet(
         manifest,
         fit_dir,
@@ -220,7 +267,7 @@ def _fit_cell(
         priors=recovery_fleet_priors(
             fleet_config=fleet_config_from_cell_id(cell_id),
         ),
-        wastewater=False,
+        **_ww_fit_kwargs_from_meta(meta),
     )
 
 
@@ -250,6 +297,10 @@ def _phase_fit(
     cell_ids = _load_sorted_cells("analysis/cells.json")
     chosen = _resolve_cell_id(cell_ids, cell_id=cell_id, cell_index=cell_index)
     print(f"Fitting cell={chosen} index={cell_ids.index(chosen)}", flush=True)
+
+    if _existing_fit_ok(s3_analysis, chosen):
+        print(f"skip cell={chosen} (ok fit already on S3)", flush=True)
+        return
 
     manifest = _download_cell_inputs(s3_analysis, chosen)
     _rewrite_manifest_paths(manifest)

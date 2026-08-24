@@ -25,7 +25,9 @@ from dashboard.paths import (
 from simulation_utils.paths import (
     resolve_child_path,
     resolve_repo_path,
+    safe_listdir,
     validate_path_component,
+    validated_open,
 )
 
 
@@ -232,18 +234,20 @@ def telemetry_paths(telemetry_dir: str) -> tuple[str, str]:
 
 @st.cache_data
 def load_history_from(path: str) -> list[dict[str, Any]]:
-    if not os.path.isfile(path):
+    try:
+        with validated_open(path, "r", allowed_roots=(REPO_ROOT,), encoding="utf-8") as fh:
+            return json.load(fh)
+    except (OSError, ValueError, json.JSONDecodeError):
         return []
-    with open(path, encoding="utf-8") as fh:
-        return json.load(fh)
 
 
 @st.cache_data
 def load_notebook_from(path: str) -> dict[str, Any]:
-    if not os.path.isfile(path):
+    try:
+        with validated_open(path, "r", allowed_roots=(REPO_ROOT,), encoding="utf-8") as fh:
+            return json.load(fh)
+    except (OSError, ValueError, json.JSONDecodeError):
         return {}
-    with open(path, encoding="utf-8") as fh:
-        return json.load(fh)
 
 
 def default_telemetry_dir() -> str:
@@ -254,23 +258,68 @@ def default_telemetry_dir() -> str:
 
 
 def parse_fleet_output_root(fleet_config_path: str) -> str:
-    fleet_config_path = resolve_repo_path(REPO_ROOT, fleet_config_path)
-    if not os.path.isfile(fleet_config_path):
+    try:
+        fleet_config_path = resolve_repo_path(REPO_ROOT, fleet_config_path)
+    except ValueError:
         return ""
-    with open(fleet_config_path, encoding="utf-8") as fh:
-        raw = json.load(fh)
+    try:
+        with validated_open(
+            fleet_config_path, "r", allowed_roots=(REPO_ROOT,), encoding="utf-8",
+        ) as fh:
+            raw = json.load(fh)
+    except (OSError, ValueError, json.JSONDecodeError):
+        return ""
     output_root = (raw.get("run") or {}).get("output_root", "")
     if not output_root:
         return ""
-    return resolve_repo_path(REPO_ROOT, output_root)
+    try:
+        return resolve_repo_path(REPO_ROOT, output_root)
+    except ValueError:
+        return ""
 
 
 def list_cruise_dirs(fleet_root: str) -> list[str]:
-    fleet_root = resolve_repo_path(REPO_ROOT, fleet_root)
-    if not os.path.isdir(fleet_root):
+    try:
+        fleet_root = resolve_repo_path(REPO_ROOT, fleet_root)
+    except ValueError:
         return []
     cruises = []
-    for name in sorted(os.listdir(fleet_root)):
+    for name in safe_listdir(fleet_root, allowed_roots=(REPO_ROOT,)):
         if re.match(r"cruise_\d+", name):
             cruises.append(resolve_child_path(fleet_root, name))
     return cruises
+
+
+def detect_retention_mode(history: list[dict[str, Any]]) -> str:
+    """Return ``full``, ``compact``, or ``empty`` based on telemetry shape."""
+    if not history:
+        return "empty"
+    sample = history[min(len(history) // 2, len(history) - 1)]
+    if sample.get("agents"):
+        return "full"
+    if sample.get("contact_tracing"):
+        return "full"
+    return "compact"
+
+
+def load_voyage_config(platform_id: str) -> dict[str, Any]:
+    """Load platform voyage_config.json if present."""
+    path = os.path.join(platform_dir(platform_id), "voyage_config.json")
+    return _load_json(path)
+
+
+def extract_run_metadata(
+    notebook: dict[str, Any],
+    *,
+    fleet_summary: dict[str, Any] | None = None,
+    cruise_id: int | None = None,
+) -> dict[str, Any]:
+    """Merge run metadata from lab notebook and optional fleet summary."""
+    meta: dict[str, Any] = dict(notebook.get("run_metadata") or {})
+    if fleet_summary and cruise_id is not None:
+        for rec in fleet_summary.get("records", []):
+            if rec.get("cruise_id") == cruise_id:
+                meta.update(rec.get("metadata") or {})
+                meta["seed"] = meta.get("seed", rec.get("metadata", {}).get("seed"))
+                break
+    return meta
