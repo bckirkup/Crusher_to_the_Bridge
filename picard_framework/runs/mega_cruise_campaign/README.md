@@ -140,6 +140,27 @@ here; its historical numbers are not a reference. Use a distinct S3 prefix
 from the historical C1 refit campaign, and keep only the independent,
 checkpointed simulation tiers on the Spot path.
 
+### Current C1 reported-case hourly refit
+
+`c1_reported_case_refit_v1_manifest.json` is the corrected-model norovirus
+refit. It uses a common 12.0–14.0 `dose_adjustment` ladder at 0.25 steps,
+`n_init=1`, both `none_true` and `syndromic`, and matched seeds 760–799 across
+all four hulls. Each hull enumerates 720 runs, for 2,880 runs with
+`--tier all`:
+
+```bash
+MANIFEST=picard_framework/runs/mega_cruise_campaign/c1_reported_case_refit_v1_manifest.json
+python3 "$RUNNER" --manifest "$MANIFEST" \
+  --tier all --natural-history-clock hours --dry-run
+```
+
+The scored endpoint is cumulative reported symptomatic **passenger** cases
+divided by the passenger complement on the `syndromic` branch, not infections
+divided by the complement. The `none_true` runs are the matched
+counterfactual. This campaign is hourly-only; do not run a new
+`legacy_epoch_day` arm, and keep its independent simulation tiers on the Spot
+path rather than Stan inference.
+
 Mega-cruise runs inject `escalation.lockdown_attack_rate: 0.05` (default
 `config.yaml` uses `never` for small smokes).
 
@@ -334,6 +355,7 @@ Tier 1 alone: ~15 hours (300 × 3 min).
 | `calibration_manifest_v1.json` | Multi-platform calibration matrix (c1–c4) |
 | `clock_arm_c1_v1_manifest.json` | Historical paired-clock C1 VSP refit |
 | `c1_single_dose_hours_v1_manifest.json` | Hourly-only single-dose C1 VSP refit |
+| `c1_reported_case_refit_v1_manifest.json` | Corrected-model reported-case C1 refit |
 | `tier_iterators.py` | `t1`–`t16` and calibration (`c1`–`c6`, `a2`, `b1`, `b2`) cartesian generators; `dispatch_standard_or_calibration` |
 | `campaign_runner.py` | Spec generator + Picard executor (sharding + S3 upload); `sr*` / `vd*` families stay here |
 | `README.md` | This file |

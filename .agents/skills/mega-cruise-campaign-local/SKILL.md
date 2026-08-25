@@ -166,6 +166,24 @@ common 11.5–13.0 dose ladder at 0.25 steps, `n_init=1`, both `none_true` and
 runs per hull and 2,240 total. Run its dry run with
 `--natural-history-clock hours`; do not launch a new `legacy_epoch_day` arm.
 
+### Current C1 reported-case hourly refit
+
+`c1_reported_case_refit_v1_manifest.json` is the corrected-model norovirus
+refit with four `c1_*` tiers, 720 runs per hull, and 2,880 total. It uses
+`dose_adjustment` 12.0–14.0 at 0.25 steps, `n_init=1`, `none_true` plus
+`syndromic`, and matched seeds 760–799. Run its hourly-only dry run with:
+
+```bash
+MANIFEST=picard_framework/runs/mega_cruise_campaign/c1_reported_case_refit_v1_manifest.json
+python3 "$RUNNER" --manifest "$MANIFEST" \
+  --tier all --natural-history-clock hours --dry-run
+```
+
+The scored `syndromic` endpoint is cumulative reported symptomatic passenger
+cases divided by the passenger complement, not infections divided by the
+complement. `none_true` is the matched counterfactual. Do not launch a new
+`legacy_epoch_day` arm; keep the independent simulation tiers on Spot.
+
 ## Calibration tiers (density + multi-pathogen)
 
 Manifest: `picard_framework/runs/mega_cruise_campaign/calibration_manifest_v1.json`.

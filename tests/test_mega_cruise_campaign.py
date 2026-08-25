@@ -37,6 +37,7 @@ CAMPAIGN = REPO_ROOT / "picard_framework" / "runs" / "mega_cruise_campaign"
 CALIBRATION_MANIFEST = CAMPAIGN / "calibration_manifest_v1.json"
 CLOCK_ARM_C1_MANIFEST = CAMPAIGN / "clock_arm_c1_v1_manifest.json"
 SINGLE_DOSE_HOURS_MANIFEST = CAMPAIGN / "c1_single_dose_hours_v1_manifest.json"
+REPORTED_CASE_REFIT_MANIFEST = CAMPAIGN / "c1_reported_case_refit_v1_manifest.json"
 
 STANDARD_TIERS = [
     "t1_pathogen_baselines",
@@ -1700,6 +1701,49 @@ def test_single_dose_hours_dry_run_counts() -> None:
         assert len(runs) == n_exp, f"{tier_id}: {len(runs)} != {n_exp}"
         total += len(runs)
     assert total == 2240
+
+
+def _reported_case_refit_manifest() -> dict[str, Any]:
+    return load_manifest(REPORTED_CASE_REFIT_MANIFEST)
+
+
+def test_reported_case_refit_manifest_loads() -> None:
+    manifest = _reported_case_refit_manifest()
+    assert manifest["campaign"] == "c1_reported_case_refit_v1"
+    assert set(manifest["tiers"]) == {
+        "c1_expedition_cruise_450",
+        "c1_classic_cruise_1900",
+        "c1_spirit_cruise_3000",
+        "c1_mega_cruise_5000",
+    }
+    assert manifest["pathogen_configs"]["norovirus"]["pathogen_id"] == "norwalk_gi"
+    assert manifest["tiers"]["c1_expedition_cruise_450"]["epochs"] == 168
+
+
+def test_reported_case_refit_dry_run_counts_and_specs() -> None:
+    """Lock the corrected-model C1 factorial and hourly run wiring."""
+    manifest = _reported_case_refit_manifest()
+    expected_tiers = {
+        "c1_expedition_cruise_450": 720,
+        "c1_classic_cruise_1900": 720,
+        "c1_spirit_cruise_3000": 720,
+        "c1_mega_cruise_5000": 720,
+    }
+    total = 0
+    for tier_id, expected in expected_tiers.items():
+        runs = list(generate_tier_runs(manifest, tier_id, natural_history_clock="hours"))
+        assert len(runs) == expected, f"{tier_id}: {len(runs)} != {expected}"
+        for run_id, spec in runs:
+            assert spec["config_overrides"]["natural_history_clock"] == "hours"
+            assert spec["campaign_parameters"]["natural_history_clock"] == "hours"
+            assert spec["campaign_parameters"]["dose_adjustment"] in (
+                manifest["tiers"][tier_id]["dose_adjustments"]
+            )
+            assert spec["campaign_parameters"]["seed"] in range(760, 800)
+            assert "legacy_epoch_day" not in repr(spec)
+            assert run_id.startswith("c1_norovirus_")
+        total += len(runs)
+    assert total == 2880
 
 
 def test_campaign_generator_c5() -> None:
