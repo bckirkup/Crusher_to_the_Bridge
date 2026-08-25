@@ -342,6 +342,20 @@ class TestMetagenomic:
             }
             assert 0 <= row["pathogen_reads"] <= row["total_reads"] == 250_000
 
+    def test_a_named_profile_is_carried_beside_the_assay_label(self) -> None:
+        """Truth joins on the profile id; the fit still filters on the label.
+
+        The two are different vocabularies (``norovirus`` vs ``norwalk_gi``), so
+        a row that reports only the label leaves analysis nothing to join the
+        lineage census on.
+        """
+        samples = _run(
+            _sampler(assay_mode=ASSAY_METAGENOMIC, pathogen_id="norwalk_gi"),
+            prevalence=0.2,
+        )
+        assert {row["pathogen"] for row in samples} == {PATHOGEN}
+        assert {row["pathogen_id"] for row in samples} == {"norwalk_gi"}
+
     def test_the_default_mode_reproduces_the_recorded_read_series(self) -> None:
         """Change-detector: the compatibility default must not drift."""
         explicit = _run(_sampler(seed=17, assay_mode=ASSAY_METAGENOMIC), prevalence=0.2)

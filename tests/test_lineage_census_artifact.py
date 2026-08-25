@@ -185,6 +185,45 @@ def test_campaign_runner_arms_the_census_for_variant_runs() -> None:
     assert spec["run"]["lineage_census"].endswith("lineage_census.json")
 
 
+def test_campaign_runner_arms_observations_for_variant_runs() -> None:
+    """Truth without observations scores nothing: a variant run needs both."""
+    from picard_framework.runs.mega_cruise_campaign.campaign_runner import (
+        _arm_sentinel_line_list,
+    )
+
+    spec: dict[str, Any] = {
+        "run": {},
+        "config_overrides": {"variant_surveillance": {"enabled": True}},
+    }
+    _arm_sentinel_line_list(spec, "/tmp/run9")
+    assert spec["run"]["sentinel_line_list"].endswith("sentinel_line_list.json")
+
+
+def test_campaign_runner_still_arms_observations_for_shore_runs() -> None:
+    """The importation fit's reason for the ledger is unchanged."""
+    from picard_framework.runs.mega_cruise_campaign.campaign_runner import (
+        _arm_sentinel_line_list,
+    )
+
+    spec: dict[str, Any] = {
+        "run": {},
+        "config_overrides": {"voyage": {"shore_exposure": {"enabled": True}}},
+    }
+    _arm_sentinel_line_list(spec, "/tmp/run10")
+    assert spec["run"]["sentinel_line_list"].endswith("sentinel_line_list.json")
+
+
+def test_campaign_runner_leaves_unobserved_runs_alone() -> None:
+    """Neither channel asked for: no ledger, and no compact-mode cost."""
+    from picard_framework.runs.mega_cruise_campaign.campaign_runner import (
+        _arm_sentinel_line_list,
+    )
+
+    spec: dict[str, Any] = {"run": {}, "config_overrides": {}}
+    _arm_sentinel_line_list(spec, "/tmp/run11")
+    assert "sentinel_line_list" not in spec["run"]
+
+
 def test_campaign_runner_leaves_untracked_runs_alone() -> None:
     """No strain tracking, no census: the artifact would be empty anyway."""
     from picard_framework.runs.mega_cruise_campaign.campaign_runner import (

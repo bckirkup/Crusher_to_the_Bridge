@@ -160,12 +160,16 @@ def _sample(
     calls: list[tuple[str, int]],
     *,
     turnaround_hours: float | None = None,
+    pathogen: str = PATHOGEN,
+    pathogen_id: str | None = None,
 ) -> dict[str, Any]:
     reads = sum(n for _, n in calls)
+    row_id = {} if pathogen_id is None else {"pathogen_id": pathogen_id}
     return {
+        **row_id,
         "sample_epoch": sample_epoch,
         "collection_point": "tank_a",
-        "pathogen": PATHOGEN,
+        "pathogen": pathogen,
         "pathogen_reads": max(reads, 1),
         "total_reads": max(reads, 1) * 10,
         "clr_anomaly_score": 0.5,
@@ -373,6 +377,75 @@ def test_wastewater_detection_waits_for_turnaround() -> None:
     )
     detected = {row.genotype: row.wastewater_detection_hours for row in rows}
     assert detected["GII.17"] == pytest.approx(13.0)
+
+
+def test_the_assay_label_does_not_have_to_be_the_profile_id() -> None:
+    """Real runs label sewage ``norovirus`` and truth ``norwalk_gi``.
+
+    The delay catalog the fit filters on and the ABM profile are different
+    vocabularies by design, so the join reads the id the row carries; without
+    this, every genotype the sequencer typed comes back censored.
+    """
+    rows = detection_rows(
+        _census(THREE_LINEAGES),
+        _bundle(
+            wastewater=[
+                _sample(
+                    1,
+                    [("GII.17", 40)],
+                    pathogen="norovirus",
+                    pathogen_id=PATHOGEN,
+                ),
+            ],
+        ),
+    )
+    detected = {row.genotype: row.detected for row in rows}
+    assert detected["GII.17"] is True
+
+
+def test_a_row_with_no_profile_id_falls_back_to_its_label() -> None:
+    """Bundles written before the id was carried still join on the label."""
+    rows = detection_rows(
+        _census(THREE_LINEAGES),
+        _bundle(wastewater=[_sample(1, [("GII.17", 40)], pathogen_id=None)]),
+    )
+    detected = {row.genotype: row.detected for row in rows}
+    assert detected["GII.17"] is True
+
+
+def test_a_foreign_profile_id_is_not_credited_to_this_pathogen() -> None:
+    """Resolving the vocabulary must not turn the join into a wildcard."""
+    rows = detection_rows(
+        _census(THREE_LINEAGES),
+        _bundle(
+            wastewater=[
+                _sample(
+                    1,
+                    [("GII.17", 40)],
+                    pathogen="norovirus",
+                    pathogen_id="sars_cov2_resp",
+                ),
+            ],
+        ),
+    )
+    assert [row.detected for row in rows] == [False, False, False]
+
+
+def test_typed_sewage_reads_inform_even_under_a_config_label() -> None:
+    """Information gain is about what was typed, not how it was labelled."""
+    census = _census(THREE_LINEAGES)
+    bundle = _bundle(
+        wastewater=[
+            _sample(
+                1,
+                [("GII.4", 40), ("GII.17", 20), ("GII.2", 20)],
+                pathogen="norovirus",
+                pathogen_id=PATHOGEN,
+            ),
+        ],
+    )
+    rows = information_rows(census, bundle, CHANNEL_WASTEWATER)
+    assert max(row.information_gain_bits for row in rows) > 0.0
 
 
 def test_detection_lag_is_measured_from_emergence() -> None:

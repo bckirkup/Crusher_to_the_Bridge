@@ -103,10 +103,14 @@ def wastewater_detection_hours(
     bundle: ObservationBundle,
     epoch_duration_hours: float,
 ) -> dict[tuple[str, str], float]:
-    """First reporting hour each ``(pathogen, genotype)`` was resolved in sewage."""
+    """First reporting hour each ``(pathogen, genotype)`` was resolved in sewage.
+
+    Keyed on the sample's profile id, not on its delay-catalog label: the two
+    are different vocabularies, and joining truth to the label matches nothing.
+    """
     out: dict[tuple[str, str], float] = {}
     for sample in bundle.wastewater_samples:
-        if not sample.pathogen:
+        if not sample.profile_key:
             continue
         available = float(sample.sample_epoch) * epoch_duration_hours + float(
             sample.turnaround_hours or 0.0,
@@ -114,7 +118,7 @@ def wastewater_detection_hours(
         for call in sample.lineage_calls:
             if call.reads <= 0 or not call.genotype:
                 continue
-            key = (sample.pathogen, call.genotype)
+            key = (sample.profile_key, call.genotype)
             current = out.get(key)
             if current is None or available < current:
                 out[key] = available

@@ -13,7 +13,7 @@ an axis labelled "epochs" hides it again.
 | channel | file | written when |
 |---|---|---|
 | truth | `lineage_census.json` | `run.lineage_census` is set; the campaign runner arms it for any run with `variant_surveillance.enabled` |
-| observation | `sentinel_line_list.json` | the sentinel observation bundle is collected |
+| observation | `sentinel_line_list.json` | `run.sentinel_line_list` is set; the campaign runner arms it for shore-exposure runs (the importation fit) **and** for `variant_surveillance.enabled` runs, because the observed half of every observable below lives there |
 
 The census is a separate artifact rather than a slice of the simulation
 history: a `compact` campaign run never persists epoch records, so at campaign
@@ -49,6 +49,14 @@ Definitions worth stating once:
   denominator, so the curve is not dragged down by the future.
 - **Wastewater detection** is dated at collection **plus turnaround**: a library
   is evidence when it comes back.
+- **The join key is the profile id, not the assay label.** A wastewater row
+  carries both: `pathogen` is the delay-catalog key the Sentinel fit filters on
+  (`norovirus`), and `pathogen_id` is the ABM profile the census is keyed on
+  (`norwalk_gi`). Those are deliberately different vocabularies, so the
+  truth-versus-observed join reads `pathogen_id`, falling back to `pathogen`
+  only for bundles written before the id was carried. Joining on the label
+  alone censors every genotype the sequencer actually typed and reports a flat
+  0 bits gained.
 - **Information gain** is the KL divergence of truth from a uniform genotype
   prior minus that from the reported composition, in bits, under Jeffreys
   smoothing over the union of genotypes. A silent channel scores exactly 0 (it

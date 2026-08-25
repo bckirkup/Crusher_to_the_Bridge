@@ -87,6 +87,18 @@ class WastewaterSample:
     lineage_status: str | None = None
     lineage_calls: tuple[LineageCall, ...] = ()
     lineage_unresolved_reads: int | None = None
+    pathogen_id: str = ""
+
+    @property
+    def profile_key(self) -> str:
+        """Key to join this row to ABM truth by.
+
+        ``pathogen`` is the delay-catalog label the fit filters on, which is a
+        different vocabulary from the profile id a lineage census is keyed on
+        (``norovirus`` vs ``norwalk_gi``). Joining on the label drops every row
+        silently, so the id is used whenever the run named one.
+        """
+        return self.pathogen_id or self.pathogen
 
     @property
     def resolved_lineage_fraction(self) -> float:
@@ -225,6 +237,7 @@ def _sample_from_dict(raw: dict[str, Any]) -> WastewaterSample:
         sample_epoch=int(raw["sample_epoch"]),
         collection_point=str(raw["collection_point"]),
         pathogen=str(raw["pathogen"]),
+        pathogen_id=str(raw.get("pathogen_id") or ""),
         pathogen_reads=reads,
         total_reads=total,
         clr_anomaly_score=float(raw.get("clr_anomaly_score") or 0.0),

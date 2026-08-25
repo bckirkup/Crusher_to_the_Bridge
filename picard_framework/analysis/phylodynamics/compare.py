@@ -66,7 +66,7 @@ def _wastewater_observed(
     out: dict[str, float] = {}
     horizon = float(epoch) * hours_per_epoch
     for sample in bundle.wastewater_samples:
-        if sample.pathogen != pathogen_id:
+        if sample.profile_key != pathogen_id:
             continue
         available = float(sample.sample_epoch) * hours_per_epoch + float(
             sample.turnaround_hours or 0.0,

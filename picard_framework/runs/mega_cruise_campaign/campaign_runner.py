@@ -1844,10 +1844,21 @@ def _spec_num_agents(spec: dict[str, Any]) -> int:
 
 
 def _arm_sentinel_line_list(spec: dict[str, Any], run_dir: str) -> None:
-    """Collect the sentinel ledger when shore exposure is on (compact-safe)."""
-    voyage = (spec.get("config_overrides") or {}).get("voyage") or {}
+    """Collect the sentinel ledger when anything downstream reads it.
+
+    Shore exposure arms it because the importation fit needs hours ashore, and
+    variant surveillance arms it because the observed half of every
+    phylodynamic observable lives here: armed on truth alone, a Paper 3 run
+    reports what was circulating and nothing about what surveillance saw.
+    """
+    overrides = spec.get("config_overrides") or {}
+    voyage = overrides.get("voyage") or {}
     shore = voyage.get("shore_exposure") if isinstance(voyage, dict) else None
-    if not isinstance(shore, dict) or not shore.get("enabled"):
+    variant = overrides.get("variant_surveillance")
+    wanted = (isinstance(shore, dict) and shore.get("enabled")) or (
+        isinstance(variant, dict) and variant.get("enabled")
+    )
+    if not wanted:
         return
     spec["run"]["sentinel_line_list"] = os.path.join(run_dir, "sentinel_line_list.json")
 
