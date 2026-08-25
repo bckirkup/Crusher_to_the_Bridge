@@ -339,9 +339,11 @@ class TestImmuneEscapeAxis:
             strain_phenotype=Phenotype.of(past),
         )
         profile = {**_norwalk_profile(), "recovery_day": 1}
-        _advance_agent_pathogen_infections(
-            agent, {PATHOGEN: profile}, np.random.default_rng(3), registry, 4,
-        )
+        for _ in range(5):
+            _advance_agent_pathogen_infections(
+                agent, {PATHOGEN: profile},
+                np.random.default_rng(3), registry, 4,
+            )
         assert agent.infections[PATHOGEN]["status"] == InfectionStatus.RECOVERED
         assert core._prior_genotypes(agent, PATHOGEN) == (GENOTYPES[2],)
 

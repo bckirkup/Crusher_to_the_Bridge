@@ -683,17 +683,18 @@ class KorkinAgent:
     def advance_resident_strains(
         self,
         pathogen_id: str,
-        recovery_day: int,
+        recovery_day: float,
         cleared: list[str] | None = None,
     ) -> int:
         """Age each resident lineage by an epoch and clear those past recovery.
 
-        ``recovery_day`` is in days, the lineage counter is in epochs, and the
-        run's clock converts between them. Returns the number still resident, so
-        the caller can hold the pathogen-level infection open until the last
-        lineage clears. Ids of the lineages that cleared this call are appended
-        to ``cleared`` when given, since each one is an exposure the host now has
-        immune memory of.
+        The threshold is the host's total course in days: incubation/onset plus
+        the symptomatic ``recovery_day`` duration. The lineage counter is in
+        epochs, and the run's clock converts between them. Returns the number
+        still resident, so the caller can hold the pathogen-level infection
+        open until the last lineage clears. Ids of the lineages that cleared
+        this call are appended to ``cleared`` when given, since each one is an
+        exposure the host now has immune memory of.
         """
         residents = self.resident_strains(pathogen_id)
         for strain_id, resident in tuple(residents.items()):
@@ -1013,6 +1014,15 @@ class KorkinAgent:
     def has_chronic_disease(self) -> bool:
         return len(self.chronic_disease_ids) > 0
 
+    def _symptom_days(self, inf: dict[str, Any]) -> int | None:
+        """Return one-based symptom days, or ``None`` when onset is unknown."""
+        time_infected = inf.get("time_infected")
+        onset_time = inf.get("onset_time_infected")
+        if time_infected is None or onset_time is None:
+            return None
+        elapsed = max(0, int(time_infected) - int(onset_time))
+        return self.clock.day_index(elapsed) + 1
+
     def to_schema_dict(self) -> dict[str, Any]:
         """Export agent state in telemetry_buffer.schema format."""
         from telemetry_buffer.agent_axes import (
@@ -1052,6 +1062,7 @@ class KorkinAgent:
                     None if inf["time_infected"] is None
                     else self.clock.day_index(inf["time_infected"])
                 ),
+                "days_since_symptom_onset": self._symptom_days(inf),
             }
 
         result = {
@@ -1434,9 +1445,11 @@ class KorkinShipEngine:
         """Age every infection one epoch, then present and recover on days.
 
         ``time_infected`` is an epoch count; ``ONSET_DAY`` and ``RECOVERY_DAY``
-        are days, and the clock is the only thing that relates them. The illness
-        draw fires once per day of natural history rather than once per epoch, so
-        a finer grid does not hand a host more chances to present.
+        are days, with recovery measured from onset, so the total course is
+        incubation plus ``RECOVERY_DAY``. The clock is the only thing that
+        relates those units. The illness draw fires once per day of natural
+        history rather than once per epoch, so a finer grid does not hand a
+        host more chances to present.
 
         A host carrying per-pathogen records has its natural history owned by
         those records, not by this fallback: they hold the drawn incubation
@@ -1456,7 +1469,10 @@ class KorkinShipEngine:
         for agent in self.agents:
             if agent.infections:
                 continue
-            if agent.is_infected and agent.days_post_infection >= RECOVERY_DAY:
+            if (
+                agent.is_infected
+                and agent.days_post_infection >= ONSET_DAY + RECOVERY_DAY
+            ):
                 agent.infection_status = InfectionStatus.RECOVERED
                 agent.illness_status = IllnessStatus.RECOVERED
 

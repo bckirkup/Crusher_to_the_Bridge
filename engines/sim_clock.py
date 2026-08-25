@@ -6,7 +6,8 @@ One conversion between the two units this model is written in.
 
 Pathogen natural history is parameterised in **days**, because that is how the
 literature reports it: `norwalk_gi` has a 1.2-day incubation median and a
-`recovery_day` of 3. The simulation advances in **epochs**, and the voyage layer
+`recovery_day` of 3 symptomatic days from onset. The total course is incubation
+plus `recovery_day`. The simulation advances in **epochs**, and the voyage layer
 defines an epoch as one hour (`epoch_duration_hours`, 24 epochs per voyage day).
 Nothing may bridge those two units except a ``SimClock``: no other module should
 multiply or divide by 24.

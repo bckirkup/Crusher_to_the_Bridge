@@ -410,6 +410,7 @@ def _draw_symptom_onset(
     inf: dict[str, Any],
     prof: dict[str, Any],
     rng: np.random.Generator,
+    epoch: int = 0,
 ) -> None:
     """One dose-conditioned illness draw for a host past its incubation period."""
     ill_params = prof.get("illness_probability", {})
@@ -420,6 +421,7 @@ def _draw_symptom_onset(
     ill_prob = min(1.0, ill_prob + agent.get_chronic_illness_boost(pid))
     if rng.random() < ill_prob:
         inf["illness"] = IllnessStatus.SYMPTOMATIC
+        inf["onset_time_infected"] = inf.get("time_infected", 0)
         if agent.illness_status == IllnessStatus.NOT_ILL:
             agent.illness_status = IllnessStatus.SYMPTOMATIC
 
@@ -452,18 +454,22 @@ def _advance_agent_pathogen_infections(
             # of presenting does not depend on how finely time is cut — and the
             # first chance is the epoch that crosses this host's own drawn
             # incubation period, so onset is not rounded up to a whole day.
-            _draw_symptom_onset(agent, pid, inf, prof, rng)
+            _draw_symptom_onset(agent, pid, inf, prof, rng, epoch)
 
         recovery_day = agent.get_chronic_recovery_day(
             pid, prof.get("recovery_day", 3),
         )
-        # Co-resident lineages clear on their own clocks, so the pathogen-level
-        # infection stays open until the last one goes: a strain acquired on day
-        # four is still being shed when the primary infection would have ended.
+        # Recovery is a symptomatic duration measured from onset; the total
+        # course is the host's incubation plus this recovery duration.
+        clearance_day = onset_day + recovery_day
         cleared: list[str] = []
-        residents_left = agent.advance_resident_strains(pid, recovery_day, cleared)
+        # Co-resident lineages clear on their own clocks, so the pathogen-level
+        # infection stays open until the last one goes: a strain acquired on
+        # day four is still being shed when the primary infection would have
+        # ended.
+        residents_left = agent.advance_resident_strains(pid, clearance_day, cleared)
         _record_cleared_immunity(agent, pid, cleared, strain_registry, epoch)
-        if days_infected >= recovery_day and residents_left == 0:
+        if days_infected >= clearance_day and residents_left == 0:
             inf["status"] = InfectionStatus.RECOVERED
             inf["illness"] = IllnessStatus.RECOVERED
 
