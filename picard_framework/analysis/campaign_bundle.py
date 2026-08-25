@@ -31,6 +31,7 @@ from picard_framework.analysis.metrics import (
     epoch_table_columns,
 )
 from picard_framework.analysis.pairwise import build_pairwise_deltas, write_pairwise_csv
+from picard_framework.analysis.phylodynamics.campaign import write_campaign_tables
 
 
 def build_bundle(results_dir: str, out_dir: str) -> dict[str, Any]:
@@ -70,6 +71,7 @@ def build_bundle(results_dir: str, out_dir: str) -> dict[str, Any]:
         pairwise_name = write_pairwise_csv(out, pairwise_rows)
 
     fig_names = write_standard_figures(out, run_rows, epoch_rows)
+    phylo = write_campaign_tables(out, results_dir)
 
     manifest = {
         "n_runs": len(run_rows),
@@ -82,6 +84,10 @@ def build_bundle(results_dir: str, out_dir: str) -> dict[str, Any]:
             "aggregate_metrics": "aggregate_metrics.json",
             "pairwise_deltas": pairwise_name,
             "figures": fig_names,
+            **phylo["artifacts"],
+        },
+        "phylodynamics": {
+            key: value for key, value in phylo.items() if key != "artifacts"
         },
     }
     write_json(os.path.join(out, "bundle_manifest.json"), manifest)

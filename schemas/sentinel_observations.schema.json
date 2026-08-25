@@ -111,6 +111,10 @@
           "description": "Wastewater collection zone label (CTB sequencing modality zone)."
         },
         "pathogen": { "type": "string", "minLength": 1 },
+        "pathogen_id": {
+          "type": "string",
+          "description": "ABM pathogen profile id the sample counted infections of (e.g. norwalk_gi). 'pathogen' is the delay-catalog key the fit filters on, and the two are deliberately different vocabularies — but a truth-vs-observed join needs the id, so it is carried here. Empty when the run did not name one; 'pathogen' is then the only key available."
+        },
         "assay_mode": {
           "type": "string",
           "enum": ["qpcr", "amplicon", "metagenomic", "long_read"],
