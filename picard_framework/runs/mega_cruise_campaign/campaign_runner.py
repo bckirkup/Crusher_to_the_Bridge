@@ -1861,8 +1861,9 @@ def compute_derived_metrics(ts: list[dict[str, Any]], num_agents: int) -> dict[s
         r_eff_at_peak = new_at_peak / infected_by_epoch[peak_epoch - 1]
     return {
         "attack_rate": round(attack_rate, 4),
-        "reported_case_attack_rate": float(
-            final.get("reported_case_rate_passenger", 0.0) or 0.0,
+        "reported_case_attack_rate": round(
+            float(final.get("reported_case_rate_passenger", 0.0) or 0.0),
+            4,
         ),
         "ever_ill_attack_rate": round(
             float(final.get("ever_ill_rate_passenger", 0.0) or 0.0), 4,

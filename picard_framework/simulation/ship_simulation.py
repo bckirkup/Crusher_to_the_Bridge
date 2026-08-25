@@ -72,7 +72,6 @@ from orchestrator_epoch import (
     step_shore_introductions,
     step_wearable_monitoring,
     surveillance_is_active,
-    sync_vsp_isolation,
 )
 from orchestrator_init import (
     apply_voyage_dining_meal_weights,
@@ -788,7 +787,6 @@ class ShipSimulation:
         self.engine.quarantined_ids = set(state.quarantined_ids)
         self.engine.vsp_reported_case_fraction = state.vsp_reported_case_fraction
         self.engine.step()
-        sync_vsp_isolation(work.epoch, self.engine, state, work.syndromic)
         self._note_shore_introductions(
             step_shore_introductions(
                 work.epoch,

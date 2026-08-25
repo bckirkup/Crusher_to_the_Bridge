@@ -620,7 +620,7 @@ def pathogen_profiles_are_respiratory(
     return False
 
 
-def _role_group_for_agent(agent: dict[str, Any]) -> str:
+def role_group_for_agent(agent: dict[str, Any]) -> str:
     role = str(agent.get("role") or "").lower()
     if role in ("crew", "passenger"):
         return role
@@ -628,6 +628,9 @@ def _role_group_for_agent(agent: dict[str, Any]) -> str:
     if a_class.startswith("crew"):
         return "crew"
     return "passenger"
+
+
+_role_group_for_agent = role_group_for_agent
 
 
 def update_ever_ill_ids(
