@@ -18,6 +18,7 @@ from orchestrator_init import (
 from orchestrator_types import SimulationState
 from picard_framework.runs.mega_cruise_campaign.campaign_runner import (
     compute_derived_metrics,
+    extract_timeseries,
 )
 
 
@@ -110,6 +111,12 @@ def test_campaign_metrics_include_reported_case_and_vsp_fields() -> None:
             "cumulative_ever_ill_passenger": 1,
             "ever_ill_rate_passenger": 0.1,
             "vsp_triggered": False,
+            "infection_counters": {
+                "passenger_reported_case_rate": {
+                    "value": 0.01,
+                    "exceeded": False,
+                },
+            },
         },
         {
             "epoch": 1,
@@ -122,6 +129,12 @@ def test_campaign_metrics_include_reported_case_and_vsp_fields() -> None:
             "cumulative_ever_ill_passenger": 2,
             "ever_ill_rate_passenger": 0.2,
             "vsp_triggered": False,
+            "infection_counters": {
+                "passenger_reported_case_rate": {
+                    "value": 0.03,
+                    "exceeded": True,
+                },
+            },
         },
         {
             "epoch": 2,
@@ -134,9 +147,49 @@ def test_campaign_metrics_include_reported_case_and_vsp_fields() -> None:
             "cumulative_ever_ill_passenger": 3,
             "ever_ill_rate_passenger": 0.3,
             "vsp_triggered": True,
+            "infection_counters": {
+                "passenger_reported_case_rate": {
+                    "value": 0.05,
+                    "exceeded": True,
+                },
+            },
         },
     ]
     derived = compute_derived_metrics(ts, num_agents=10)
     assert derived["reported_case_attack_rate"] == pytest.approx(0.3)
     assert derived["ever_ill_attack_rate"] == pytest.approx(0.3)
-    assert derived["vsp_trigger_epoch"] == 2
+    assert derived["vsp_trigger_epoch"] == 1
+
+
+def test_campaign_metrics_have_no_vsp_epoch_without_counter() -> None:
+    ts = [
+        {
+            "epoch": 0,
+            "infected": 1,
+            "recovered": 0,
+            "susceptible": 9,
+            "vsp_triggered": True,
+        },
+    ]
+    assert compute_derived_metrics(ts, num_agents=10)["vsp_trigger_epoch"] is None
+
+
+def test_timeseries_emits_reported_case_counter_fields() -> None:
+    history = [{
+        "summary": {
+            "infected": 1,
+            "recovered": 0,
+            "susceptible": 9,
+        },
+        "spaces": {},
+        "cost_accounting": {},
+        "infection_counters": {
+            "passenger_reported_case_rate": {
+                "value": 0.03125,
+                "exceeded": True,
+            },
+        },
+    }]
+    series = extract_timeseries(history)
+    assert series[0]["reported_case_rate_passenger"] == pytest.approx(0.03125)
+    assert series[0]["passenger_reported_case_rate_exceeded"] is True

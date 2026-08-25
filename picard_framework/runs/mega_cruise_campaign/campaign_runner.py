@@ -1736,6 +1736,9 @@ def extract_timeseries(history: list[dict[str, Any]]) -> list[dict[str, Any]]:
         s = rec.get("summary", {})
         cost = rec.get("cost_accounting", {})
         spaces = rec.get("spaces", {})
+        reported_case_counter = rec.get(
+            "infection_counters", {},
+        ).get("passenger_reported_case_rate", {})
 
         infected = int(s.get("infected", 0) or 0)
         recovered = int(s.get("recovered", 0) or 0)
@@ -1790,8 +1793,11 @@ def extract_timeseries(history: list[dict[str, Any]]) -> list[dict[str, Any]]:
                 "cumulative_ever_ill_passenger", 0,
             ),
             "cumulative_ever_ill_crew": s.get("cumulative_ever_ill_crew", 0),
-            "reported_case_rate_passenger": s.get(
-                "reported_case_rate_passenger", 0.0,
+            "reported_case_rate_passenger": reported_case_counter.get(
+                "value", s.get("reported_case_rate_passenger", 0.0),
+            ),
+            "passenger_reported_case_rate_exceeded": bool(
+                reported_case_counter.get("exceeded", False),
             ),
             "ever_ill_rate_passenger": s.get("ever_ill_rate_passenger", 0.0),
             "vsp_triggered": bool(s.get("vsp_triggered", False)),
@@ -1817,6 +1823,15 @@ def _detection_epochs(
     return detection_epoch, confirmation_epoch
 
 
+def _reported_case_counter_exceeded(epoch: dict[str, Any]) -> bool:
+    """Return the emitted passenger reported-case threshold state."""
+    if epoch.get("passenger_reported_case_rate_exceeded", False):
+        return True
+    counters = epoch.get("infection_counters") or {}
+    counter = counters.get("passenger_reported_case_rate") or {}
+    return bool(counter.get("exceeded", False))
+
+
 def compute_derived_metrics(ts: list[dict[str, Any]], num_agents: int) -> dict[str, Any]:
     """Compute publication-ready scalar metrics from an epoch time series."""
     if not ts:
@@ -1834,7 +1849,10 @@ def compute_derived_metrics(ts: list[dict[str, Any]], num_agents: int) -> dict[s
     outbreak_occurred = epidemic_took_off(ts)
     detection_epoch, confirmation_epoch = _detection_epochs(ts)
     vsp_trigger_epoch = next(
-        (e["epoch"] for e in ts if e.get("vsp_triggered", False)),
+        (
+            e["epoch"] for e in ts
+            if _reported_case_counter_exceeded(e)
+        ),
         None,
     )
     r_eff_at_peak = None

@@ -1269,7 +1269,11 @@ class ShipSimulation:
             work.state, work.syndromic,
         )
         counter_defs = self.graph_cfg.get("infection_counters", [])
-        work.counter_results = compute_infection_counters(work.agents, counter_defs)
+        work.counter_results = compute_infection_counters(
+            work.agents,
+            counter_defs,
+            ever_reported_ids=work.state.ever_reported_ids,
+        )
         step_counter_thresholds(
             work.epoch, work.agents, work.counter_results, counter_defs,
             work.state, work.syndromic,

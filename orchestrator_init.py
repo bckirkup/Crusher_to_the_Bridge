@@ -474,12 +474,16 @@ def build_engine(
     if "immune_fraction" in graph_cfg:
         engine_kwargs["immune_ratio"] = float(graph_cfg["immune_fraction"])
 
+    # VSP threshold confinement is handled by configurable infection counters
+    # in the orchestrator, not by the engine's internal check.  The
+    # ``vsp_trigger_rule`` governs that engine path when a caller enables it.
     return KorkinShipEngine(
         num_passengers=num_passengers,
         num_crew=num_crew,
         initial_infected=cfg.get("initial_infected", 1),
         zones=engine_zones,
         seed=seed,
+        vsp_isolation=False,
         vsp_trigger_rule=load_vsp_trigger_rule(cfg),
         agent_classes=agent_classes,
         gender_distribution=gender_distribution,

@@ -111,7 +111,7 @@ def print_korkin_engine(engine: KorkinShipEngine) -> None:
         # codeql[py/clear-text-logging-sensitive-data]
         print(f"  Gender: {g_str}")
     print(f"  Zones: {', '.join(z['name'] for z in engine.zones)}")
-    print(f"  VSP isolation: {engine.vsp_trigger_rule}")
+    print("  VSP isolation: counter-driven (engine-internal disabled)")
     print()
 
 

@@ -83,6 +83,7 @@ ship_graph:
   #
   # Supported metrics:
   #   attack_rate        – symptomatic / population in group
+  #   reported_case_rate – cumulative reported cases / population in group
   #   infected_count     – currently infected agents in group
   #   symptomatic_count  – symptomatic agents in group
   #   recovered_count    – recovered agents in group
@@ -115,8 +116,26 @@ ship_graph:
       label: "Overall Attack Rate"
       metric: "attack_rate"
       filter: {}
+      # Instantaneous symptomatic prevalence is diagnostic only, not the VSP
+      # rule; at hourly resolution it is unreachable (0.04%-0.44% peak vs 3%).
+    - counter_id: "passenger_reported_case_rate"
+      label: "Passenger Reported Case Rate"
+      metric: "reported_case_rate"
+      filter:
+        role_group: "passenger"
       threshold: 0.03
+      # Cumulative reported passenger cases / passenger complement per
+      # equation ``vsp-trigger`` in docs/reports/05_vsp.tex.
       on_exceed: "confine_symptomatic"
+    - counter_id: "crew_reported_case_rate"
+      label: "Crew Reported Case Rate"
+      metric: "reported_case_rate"
+      filter:
+        role_group: "crew"
+    - counter_id: "all_reported_case_rate"
+      label: "Overall Reported Case Rate"
+      metric: "reported_case_rate"
+      filter: {}
     - counter_id: "crew_infected_count"
       label: "Crew Infected"
       metric: "infected_count"

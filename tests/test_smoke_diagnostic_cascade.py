@@ -41,10 +41,27 @@ CASCADE_RESULT_KEYS = frozenset({
 })
 
 
-def _run_cascade_smoke(spec_rel: str) -> list[dict]:
+def _run_cascade_smoke(
+    spec_rel: str,
+    *,
+    prevalence_confinement: bool = False,
+) -> list[dict]:
     spec_path = os.path.join(REPO_ROOT, spec_rel)
     spec = PicardRunSpec.from_picard_json(REPO_ROOT, spec_path)
     assert spec.legacy_cfg.get("diagnostic_cascade", {}).get("enabled") is True
+    if prevalence_confinement:
+        # This fixture deliberately pins prevalence-based confinement because
+        # the shipped default now uses cumulative reported passenger cases.
+        spec.legacy_cfg.setdefault("ship_graph", {})["infection_counters"] = [
+            {
+                "counter_id": "fixture_attack_rate",
+                "label": "Fixture Attack Rate",
+                "metric": "attack_rate",
+                "filter": {},
+                "threshold": 0.03,
+                "on_exceed": "confine_symptomatic",
+            },
+        ]
 
     sim = ShipSimulation(spec, display=False, repo_root=REPO_ROOT)
     result = sim.run()
@@ -80,7 +97,10 @@ def test_cascade_smoke_run_completes(spec_rel: str, cascade_config: str) -> None
 @pytest.mark.timeout(120)
 def test_cascade_smoke_standard_clinical_progression() -> None:
     """Standard cascade smoke orders clinical tests under default seed."""
-    history = _run_cascade_smoke("picard_framework/runs/smoke_cascade_6epoch.json")
+    history = _run_cascade_smoke(
+        "picard_framework/runs/smoke_cascade_6epoch.json",
+        prevalence_confinement=True,
+    )
     assert any(
         rec["diagnostic_cascade"].get("tests_ordered")
         for rec in history

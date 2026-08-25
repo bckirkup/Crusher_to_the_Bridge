@@ -1371,6 +1371,7 @@ def build_cascade_context(
 
 VALID_COUNTER_METRICS = {
     "attack_rate",
+    "reported_case_rate",
     "infected_count",
     "symptomatic_count",
     "recovered_count",
@@ -1400,6 +1401,7 @@ def _counter_metric_value(
     metric: str,
     group: list[dict[str, Any]],
     pop: int,
+    ever_reported_ids: set[int] | None = None,
 ) -> float:
     if metric == "attack_rate":
         n_symptomatic = sum(
@@ -1407,6 +1409,12 @@ def _counter_metric_value(
             if agent_has_symptomatic_presentation(a)
         )
         return (n_symptomatic / pop) if pop > 0 else 0.0
+    if metric == "reported_case_rate":
+        if pop == 0 or not ever_reported_ids:
+            return 0.0
+        return sum(
+            int(a["agent_id"]) in ever_reported_ids for a in group
+        ) / pop
     if metric == "infected_count":
         return float(sum(1 for a in group if agent_is_infected(a)))
     if metric == "symptomatic_count":
@@ -1435,6 +1443,8 @@ def _counter_metric_value(
 def compute_infection_counters(
     agents: list[dict[str, Any]],
     counter_defs: list[dict[str, Any]],
+    *,
+    ever_reported_ids: set[int] | None = None,
 ) -> dict[str, dict[str, Any]]:
     """Evaluate all configured infection counters for the current epoch.
 
@@ -1452,7 +1462,9 @@ def compute_infection_counters(
 
         group = [a for a in agents if _agent_matches_filter(a, cfilter)]
         pop = len(group)
-        value = _counter_metric_value(metric, group, pop)
+        value = _counter_metric_value(
+            metric, group, pop, ever_reported_ids,
+        )
 
         exceeded = threshold is not None and value >= threshold
         entry: dict[str, Any] = {
