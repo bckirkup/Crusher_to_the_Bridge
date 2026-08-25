@@ -66,6 +66,8 @@ class TelemetryPaths:
     lab_notebook: str = ""
     # Empty means no sentinel line list is collected (default off).
     sentinel_line_list: str = ""
+    # Empty means the lineage census artifact is not written (default off).
+    lineage_census: str = ""
 
     def __post_init__(self) -> None:
         if not self.ground_truth:
@@ -274,6 +276,7 @@ class PicardRunSpec:
                 simulation_history=run.get("simulation_history", ""),
                 lab_notebook=run.get("lab_notebook", ""),
                 sentinel_line_list=run.get("sentinel_line_list", ""),
+                lineage_census=run.get("lineage_census", ""),
             ),
             write_ground_truth=bool(run.get("write_ground_truth", True)),
             history_retention=_parse_history_retention(

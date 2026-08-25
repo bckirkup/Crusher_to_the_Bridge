@@ -1896,12 +1896,36 @@ def _spec_num_agents(spec: dict[str, Any]) -> int:
 
 
 def _arm_sentinel_line_list(spec: dict[str, Any], run_dir: str) -> None:
-    """Collect the sentinel ledger when shore exposure is on (compact-safe)."""
-    voyage = (spec.get("config_overrides") or {}).get("voyage") or {}
+    """Collect the sentinel ledger when anything downstream reads it.
+
+    Shore exposure arms it because the importation fit needs hours ashore, and
+    variant surveillance arms it because the observed half of every
+    phylodynamic observable lives here: armed on truth alone, a Paper 3 run
+    reports what was circulating and nothing about what surveillance saw.
+    """
+    overrides = spec.get("config_overrides") or {}
+    voyage = overrides.get("voyage") or {}
     shore = voyage.get("shore_exposure") if isinstance(voyage, dict) else None
-    if not isinstance(shore, dict) or not shore.get("enabled"):
+    variant = overrides.get("variant_surveillance")
+    wanted = (isinstance(shore, dict) and shore.get("enabled")) or (
+        isinstance(variant, dict) and variant.get("enabled")
+    )
+    if not wanted:
         return
     spec["run"]["sentinel_line_list"] = os.path.join(run_dir, "sentinel_line_list.json")
+
+
+def _arm_lineage_census(spec: dict[str, Any], run_dir: str) -> None:
+    """Collect the lineage census when strains are tracked (compact-safe).
+
+    The truth channel the observed lineages are scored against, so it is armed
+    by ``variant_surveillance`` rather than by shore exposure: a Paper 3 arm
+    without it can report what was sequenced and not what was there.
+    """
+    variant = (spec.get("config_overrides") or {}).get("variant_surveillance")
+    if not isinstance(variant, dict) or not variant.get("enabled"):
+        return
+    spec["run"]["lineage_census"] = os.path.join(run_dir, "lineage_census.json")
 
 
 def run_simulation(
@@ -1949,6 +1973,7 @@ def run_simulation(
         spec["run"].setdefault("history_retention", "compact")
         spec["run"].setdefault("write_ground_truth", False)
     _arm_sentinel_line_list(spec, run_dir)
+    _arm_lineage_census(spec, run_dir)
 
     spec_path = resolve_child_path(run_dir, "run_spec.json")
     with validated_open(spec_path, "w", allowed_roots=roots, encoding="utf-8") as fh:

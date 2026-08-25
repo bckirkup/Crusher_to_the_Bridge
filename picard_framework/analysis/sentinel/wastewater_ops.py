@@ -389,13 +389,22 @@ class WastewaterOpsSampler:
         self._composition[point] = lagged
 
     def _draw_sample(self, epoch: int, point: str) -> dict[str, Any]:
-        """One sample from one tap's current tank, in the configured assay mode."""
+        """One sample from one tap's current tank, in the configured assay mode.
+
+        The row carries the ABM profile id alongside the delay-catalog label
+        when the run named one, because truth-versus-observed analysis joins on
+        the id while the fit filters on the label. It is omitted rather than
+        written empty, so a run that named no profile keeps the pre-switch row
+        shape.
+        """
         row = {
             "sample_epoch": int(epoch),
             "collection_point": str(point),
             "pathogen": self.config.pathogen,
             "assay_mode": str(self.config.assay_mode),
         }
+        if self.config.pathogen_id:
+            row["pathogen_id"] = self.config.pathogen_id
         row.update(self._assay_fields(self._tank[point], self._composition[point]))
         return row
 

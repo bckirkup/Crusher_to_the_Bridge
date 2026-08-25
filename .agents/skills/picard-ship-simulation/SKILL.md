@@ -287,3 +287,59 @@ Caveats worth re-checking whenever this area changes:
 - `derived.reported_case_attack_rate_passenger` / `ever_ill_attack_rate_passenger` are
   *passenger-complement* rates (final `reported_case_rate_passenger` /
   `ever_ill_rate_passenger`), not counts over `num_agents`.
+
+## Runtime-testing the lineage census and phylodynamic observables
+
+`ShipSimulation` only writes `lineage_census.json` when `run.lineage_census`
+(`TelemetryPaths.lineage_census`) is set. In the mega-cruise campaign runner the two Sentinel
+artifacts are armed by *different, non-overlapping* conditions:
+
+- `_arm_lineage_census` fires on `config_overrides.variant_surveillance.enabled`
+  (Paper 3 `vs*` tiers), and
+- `_arm_sentinel_line_list` fires on `config_overrides.voyage.shore_exposure.enabled`
+  (Sentinel `sr*` tiers).
+
+So no shipped tier produces truth *and* observations together. To exercise anything that joins
+them (`picard_framework.analysis.phylodynamics`), generate a `vs*` run spec with
+`campaign_runner.py --dry-run`/spec dump, graft a real `voyage.shore_exposure` block from an `sr*`
+tier plus a `run.sentinel_line_list` path into the spec JSON, and execute it with
+`campaign_runner.py --single <spec> <outdir>`. Keep every output under repo-root
+`telemetry_buffer/...` — the telemetry writers reject paths outside the repo, including /tmp.
+
+### Pathogen keys are not consistent across channels — check before trusting a join
+
+Within one `sentinel_line_list.json` the channels can name the same pathogen differently:
+`clinical_cases[].pathogen` carries the profile **id** (`norwalk_gi`) while
+`wastewater_samples[].pathogen` carries the assay/config **label** (`norovirus`, from the shipped
+wastewater default), and `lineage_census.json` snapshots key on `pathogen_id`. Any analysis that
+joins on an exact `(pathogen, genotype)` tuple therefore silently produces an all-censored,
+zero-information result rather than an error. When a derived observable comes back empty, first
+print the distinct pathogen keys per channel; then re-run the report with the keys aligned in
+memory (`dataclasses.replace` on the loaded `ObservationBundle`) to prove whether the join key is
+the only cause. Note some figures (e.g. `detection_lag_hours.png`) are skipped entirely when
+nothing is detected, so a missing figure is a symptom, not necessarily a separate bug.
+
+### After the `profile_key` fix: what to check first
+
+`WastewaterSample` carries an optional `pathogen_id` and exposes
+`profile_key = pathogen_id or pathogen`; `phylodynamics/detection.py` and `compare.py` join on
+`profile_key`. That only works if the run's wastewater config actually names `pathogen_id`
+(Paper 3 `vs*` specs do: `variant_campaign` writes
+`wastewater_surveillance = {"pathogen": <label>, "pathogen_id": <profile id>}`). So when a report
+still comes back all-censored, print
+`{(r["pathogen"], r.get("pathogen_id")) for r in bundle["wastewater_samples"]}` first — a missing
+`pathogen_id` means the *config*, not the analysis, is the problem.
+
+Also note `_arm_sentinel_line_list` now arms on `variant_surveillance.enabled` too, so a plain
+`vs*` run emits both `lineage_census.json` and `sentinel_line_list.json` and the shore-exposure
+graft is no longer needed for arming. The graft is still useful for *reproducing a specific
+multi-importation scenario* (shore exposure keeps seeding new genotypes, which is what makes more
+than one genotype available to detect in a 168-epoch voyage).
+
+Positive `turnaround_hours` on real wastewater rows only appears on long-read assays: the
+`inv_full` investment cells (`vs6_investment_*`) emit `assay_mode: "long_read"` with
+`turnaround_hours: 12.0`, which is the cheapest way to exercise
+`sample_epoch * epoch_duration_hours + turnaround_hours`. Amplicon cells leave it null.
+
+Clinical `genotype` is null on every clinical case in all runs observed so far, so the clinical
+information channel legitimately reports exactly 0 bits; do not treat that as a detection bug.
