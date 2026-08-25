@@ -57,6 +57,8 @@ IMMUNE_RATIO = 0.2
 
 # Containment threshold (from Agent.java)
 VSP_THRESHOLD_FRACTION = 0.03
+VSP_RULE_REPORTED_PASSENGER_CASES = "reported_passenger_cases"
+VSP_RULE_INSTANT_PREVALENCE = "instant_prevalence"
 
 # Recovery threshold (from Person.java)
 RECOVERY_DAY = 3
@@ -1097,7 +1099,13 @@ class KorkinShipEngine:
         gender_distribution: dict[str, float] | None = None,
         agent_behavior: dict[str, Any] | None = None,
         clock: SimClock | None = None,
+        vsp_trigger_rule: str = VSP_RULE_REPORTED_PASSENGER_CASES,
     ) -> None:
+        if vsp_trigger_rule not in {
+            VSP_RULE_REPORTED_PASSENGER_CASES,
+            VSP_RULE_INSTANT_PREVALENCE,
+        }:
+            raise ValueError(f"Unknown VSP trigger rule: {vsp_trigger_rule!r}")
         self.rng = np.random.default_rng(seed)
         self.clock = clock or LEGACY_CLOCK
         self.zones = zones or DEFAULT_ZONES
@@ -1106,9 +1114,11 @@ class KorkinShipEngine:
         self.initial_infected = initial_infected
         self.immune_ratio = immune_ratio
         self.vsp_isolation = vsp_isolation
+        self.vsp_trigger_rule = vsp_trigger_rule
         self._agent_classes = agent_classes
         self._gender_distribution = gender_distribution or DEFAULT_GENDER_DISTRIBUTION
         self.vsp_threshold_fraction: float = VSP_THRESHOLD_FRACTION
+        self.vsp_reported_case_fraction: float = 0.0
         behavior = dict(DEFAULT_AGENT_BEHAVIOR)
         if agent_behavior:
             behavior.update({
@@ -1572,20 +1582,8 @@ class KorkinShipEngine:
         # 3-4. Illness progression and recovery, both on the day scale
         self._advance_illness_and_recovery()
 
-        # 5. VSP quarantine check (Agent.java: 3% threshold)
-        # VSP confinement sends symptomatic agents to quarters (quarantine),
-        # not to isolation units.  Quarantined agents remain HVAC-connected.
-        total_pop = len(self.agents)
-        total_ill = sum(1 for a in self.agents if a.is_symptomatic)
-        vsp_threshold = int(self.vsp_threshold_fraction * total_pop)
-        if self.vsp_isolation and total_ill >= vsp_threshold and not self.vsp_triggered:
-            self.vsp_triggered = True
-
-        if self.vsp_triggered:
-            confined = self.isolated_ids | self.quarantined_ids
-            for agent in self.agents:
-                if agent.is_symptomatic and agent.agent_id not in confined:
-                    self.quarantined_ids.add(agent.agent_id)
+        # 5. VSP quarantine check
+        self._check_vsp_trigger()
 
         # 6. Zone pathogen mass: new deposits from shedders
         # NOTE: Decay is now handled externally by the CONTAM transport
@@ -1606,6 +1604,35 @@ class KorkinShipEngine:
         # 7. Export payload
         return self._export_payload()
 
+    def _check_vsp_trigger(self) -> None:
+        """Apply the VSP trigger and quarantine symptomatic agents.
+
+        The reported-case fraction is cumulative reported passenger cases
+        divided by the passenger complement, as specified by equation
+        ``vsp-trigger`` in ``docs/reports/05_vsp.tex``.  It is one epoch stale
+        by construction because sick calls for epoch *t* are generated in the
+        surveillance phase after biology; that reporting lag is realistic.
+        The default is reported passenger cases because the instantaneous
+        prevalence form is unreachable at hourly resolution.
+        """
+        if self.vsp_trigger_rule == VSP_RULE_REPORTED_PASSENGER_CASES:
+            threshold_reached = (
+                self.vsp_reported_case_fraction >= self.vsp_threshold_fraction
+            )
+        else:
+            total_pop = len(self.agents)
+            total_ill = sum(1 for a in self.agents if a.is_symptomatic)
+            vsp_threshold = int(self.vsp_threshold_fraction * total_pop)
+            threshold_reached = total_ill >= vsp_threshold
+        if self.vsp_isolation and threshold_reached and not self.vsp_triggered:
+            self.vsp_triggered = True
+
+        if self.vsp_triggered:
+            confined = self.isolated_ids | self.quarantined_ids
+            for agent in self.agents:
+                if agent.is_symptomatic and agent.agent_id not in confined:
+                    self.quarantined_ids.add(agent.agent_id)
+
     def _export_payload(self) -> dict[str, Any]:
         """Build the telemetry schema payload from current state."""
         agents_out = [a.to_schema_dict() for a in self.agents]
@@ -1624,6 +1651,8 @@ class KorkinShipEngine:
             "epoch": self.epoch,
             "agents": agents_out,
             "spaces": spaces_out,
+            "vsp_triggered": self.vsp_triggered,
+            "vsp_reported_case_fraction": self.vsp_reported_case_fraction,
         }
 
     @property
@@ -1713,6 +1742,7 @@ class KorkinShipEngine:
             "isolated": isolated,
             "quarantined": quarantined,
             "vsp_triggered": self.vsp_triggered,
+            "vsp_reported_case_fraction": self.vsp_reported_case_fraction,
             "agent_classes": class_counts,
             "gender_distribution": gender_counts,
         }

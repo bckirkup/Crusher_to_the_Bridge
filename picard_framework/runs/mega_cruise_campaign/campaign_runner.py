@@ -1775,6 +1775,26 @@ def extract_timeseries(history: list[dict[str, Any]]) -> list[dict[str, Any]]:
             "max_conc_zone": max_conc_zone,
             "cumulative_cost_usd": cost.get("total_financial_usd", 0),
             "cumulative_ois": cost.get("operational_impact_cumulative", 0),
+            "cumulative_reported_cases": s.get("cumulative_reported_cases", 0),
+            "cumulative_reported_cases_passenger": s.get(
+                "cumulative_reported_cases_passenger", 0,
+            ),
+            "cumulative_reported_cases_crew": s.get(
+                "cumulative_reported_cases_crew", 0,
+            ),
+            "cumulative_reported_noise_cases": s.get(
+                "cumulative_reported_noise_cases", 0,
+            ),
+            "cumulative_ever_ill": s.get("cumulative_ever_ill", 0),
+            "cumulative_ever_ill_passenger": s.get(
+                "cumulative_ever_ill_passenger", 0,
+            ),
+            "cumulative_ever_ill_crew": s.get("cumulative_ever_ill_crew", 0),
+            "reported_case_rate_passenger": s.get(
+                "reported_case_rate_passenger", 0.0,
+            ),
+            "ever_ill_rate_passenger": s.get("ever_ill_rate_passenger", 0.0),
+            "vsp_triggered": bool(s.get("vsp_triggered", False)),
             "trigger_status": rec.get(
                 "trigger_status",
                 rec.get("reactive_protocols", {}).get("trigger_status", "none"),
@@ -1813,12 +1833,23 @@ def compute_derived_metrics(ts: list[dict[str, Any]], num_agents: int) -> dict[s
     attack_rate = ever_infected / num_agents if num_agents > 0 else 0
     outbreak_occurred = epidemic_took_off(ts)
     detection_epoch, confirmation_epoch = _detection_epochs(ts)
+    vsp_trigger_epoch = next(
+        (e["epoch"] for e in ts if e.get("vsp_triggered", False)),
+        None,
+    )
     r_eff_at_peak = None
     if peak_epoch > 0 and infected_by_epoch[peak_epoch - 1] > 0:
         new_at_peak = ts[peak_epoch].get("new_infections", 0)
         r_eff_at_peak = new_at_peak / infected_by_epoch[peak_epoch - 1]
     return {
         "attack_rate": round(attack_rate, 4),
+        "reported_case_attack_rate": float(
+            final.get("reported_case_rate_passenger", 0.0) or 0.0,
+        ),
+        "ever_ill_attack_rate": round(
+            float(final.get("ever_ill_rate_passenger", 0.0) or 0.0), 4,
+        ),
+        "vsp_trigger_epoch": vsp_trigger_epoch,
         "peak_prevalence": peak_infected,
         "peak_epoch": peak_epoch,
         "outbreak_occurred": outbreak_occurred,
