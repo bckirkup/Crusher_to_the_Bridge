@@ -115,6 +115,8 @@ class SyndromicSurveillance:
         onset = self._symptom_onset_epoch[aid]
         if (int(epoch) - onset) < self.detection_delay_epochs:
             return
+        if self.sick_call_probability <= 0.0:
+            return
         inf = beliefs.get(aid, {})
         prob = self.effective_sick_call_probability(
             self.sick_call_probability,

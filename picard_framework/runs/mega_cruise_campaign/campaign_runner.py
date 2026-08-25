@@ -1796,11 +1796,13 @@ def extract_timeseries(history: list[dict[str, Any]]) -> list[dict[str, Any]]:
             "reported_case_rate_passenger": reported_case_counter.get(
                 "value", s.get("reported_case_rate_passenger", 0.0),
             ),
+            "passenger_reported_case_rate_newly_confined": reported_case_counter.get(
+                "newly_confined", 0,
+            ),
             "passenger_reported_case_rate_exceeded": bool(
                 reported_case_counter.get("exceeded", False),
             ),
             "ever_ill_rate_passenger": s.get("ever_ill_rate_passenger", 0.0),
-            "vsp_triggered": bool(s.get("vsp_triggered", False)),
             "trigger_status": rec.get(
                 "trigger_status",
                 rec.get("reactive_protocols", {}).get("trigger_status", "none"),
@@ -1861,11 +1863,11 @@ def compute_derived_metrics(ts: list[dict[str, Any]], num_agents: int) -> dict[s
         r_eff_at_peak = new_at_peak / infected_by_epoch[peak_epoch - 1]
     return {
         "attack_rate": round(attack_rate, 4),
-        "reported_case_attack_rate": round(
+        "reported_case_attack_rate_passenger": round(
             float(final.get("reported_case_rate_passenger", 0.0) or 0.0),
             4,
         ),
-        "ever_ill_attack_rate": round(
+        "ever_ill_attack_rate_passenger": round(
             float(final.get("ever_ill_rate_passenger", 0.0) or 0.0), 4,
         ),
         "vsp_trigger_epoch": vsp_trigger_epoch,

@@ -13,6 +13,7 @@ from engines.infection_dynamics_bridge import (
 from orchestrator_init import (
     compute_group_rates_for_ids,
     load_vsp_trigger_rule,
+    update_ever_ill_ids,
     update_ever_reported_ids,
 )
 from orchestrator_types import SimulationState
@@ -62,19 +63,93 @@ def test_instant_prevalence_rule_preserves_old_trigger() -> None:
 
 
 def test_reported_ids_are_unique_and_noise_is_separate() -> None:
+    agents = [
+        {
+            "agent_id": 1,
+            "infection_state": "infected",
+            "symptom_presentation": "symptomatic",
+            "compliance_status": "compliant",
+        },
+        {
+            "agent_id": 2,
+            "infection_state": "infected",
+            "symptom_presentation": "symptomatic",
+            "compliance_status": "compliant",
+        },
+        {
+            "agent_id": 3,
+            "infection_state": "infected",
+            "symptom_presentation": "symptomatic",
+            "compliance_status": "compliant",
+        },
+    ]
     state = SimulationState()
     update_ever_reported_ids(
+        agents,
         {"true_positive_ids": [1, 1, 2], "noise_ids": [9, 9]},
         state.ever_reported_ids,
         state.ever_reported_noise_ids,
     )
     update_ever_reported_ids(
+        agents,
         {"true_positive_ids": [2, 3], "noise_ids": [9, 10]},
         state.ever_reported_ids,
         state.ever_reported_noise_ids,
     )
     assert state.ever_reported_ids == {1, 2, 3}
     assert state.ever_reported_noise_ids == {9, 10}
+
+
+def test_reported_ids_exclude_noncompliant_agents_without_symptoms() -> None:
+    agents = [
+        {
+            "agent_id": 1,
+            "infection_state": "susceptible",
+            "symptom_presentation": "asymptomatic",
+            "compliance_status": "non_compliant",
+        },
+        {
+            "agent_id": 2,
+            "infection_state": "infected",
+            "symptom_presentation": "symptomatic",
+            "compliance_status": "compliant",
+        },
+    ]
+    state = SimulationState()
+    update_ever_reported_ids(
+        agents,
+        {"true_positive_ids": [1, 2]},
+        state.ever_reported_ids,
+        state.ever_reported_noise_ids,
+    )
+    assert state.ever_reported_ids == {2}
+
+
+def test_reported_cases_never_exceed_ever_ill_cases() -> None:
+    agents = [
+        {
+            "agent_id": 1,
+            "infection_state": "infected",
+            "symptom_presentation": "symptomatic",
+            "compliance_status": "compliant",
+        },
+        {
+            "agent_id": 2,
+            "infection_state": "susceptible",
+            "symptom_presentation": "asymptomatic",
+            "compliance_status": "non_compliant",
+        },
+    ]
+    state = SimulationState()
+    for reported_ids in ([1, 2], [1], [2], [1, 2]):
+        update_ever_ill_ids(agents, state.ever_ill_ids)
+        update_ever_reported_ids(
+            agents,
+            {"true_positive_ids": reported_ids},
+            state.ever_reported_ids,
+            state.ever_reported_noise_ids,
+        )
+        assert state.ever_reported_ids <= state.ever_ill_ids
 
 
 def test_reported_rates_split_roles_and_class_fallback() -> None:
@@ -114,6 +189,7 @@ def test_campaign_metrics_include_reported_case_and_vsp_fields() -> None:
             "infection_counters": {
                 "passenger_reported_case_rate": {
                     "value": 0.01,
+                    "newly_confined": 0,
                     "exceeded": False,
                 },
             },
@@ -132,6 +208,7 @@ def test_campaign_metrics_include_reported_case_and_vsp_fields() -> None:
             "infection_counters": {
                 "passenger_reported_case_rate": {
                     "value": 0.03,
+                    "newly_confined": 2,
                     "exceeded": True,
                 },
             },
@@ -150,14 +227,15 @@ def test_campaign_metrics_include_reported_case_and_vsp_fields() -> None:
             "infection_counters": {
                 "passenger_reported_case_rate": {
                     "value": 0.05,
+                    "newly_confined": 0,
                     "exceeded": True,
                 },
             },
         },
     ]
     derived = compute_derived_metrics(ts, num_agents=10)
-    assert derived["reported_case_attack_rate"] == pytest.approx(0.3)
-    assert derived["ever_ill_attack_rate"] == pytest.approx(0.3)
+    assert derived["reported_case_attack_rate_passenger"] == pytest.approx(0.3)
+    assert derived["ever_ill_attack_rate_passenger"] == pytest.approx(0.3)
     assert derived["vsp_trigger_epoch"] == 1
 
 
@@ -186,10 +264,13 @@ def test_timeseries_emits_reported_case_counter_fields() -> None:
         "infection_counters": {
             "passenger_reported_case_rate": {
                 "value": 0.03125,
+                "newly_confined": 3,
                 "exceeded": True,
             },
         },
     }]
     series = extract_timeseries(history)
     assert series[0]["reported_case_rate_passenger"] == pytest.approx(0.03125)
+    assert series[0]["passenger_reported_case_rate_newly_confined"] == 3
     assert series[0]["passenger_reported_case_rate_exceeded"] is True
+    assert "vsp_triggered" not in series[0]

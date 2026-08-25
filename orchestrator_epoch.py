@@ -1498,17 +1498,22 @@ def step_counter_thresholds(
     When *confinement_enabled* is false (``ship_graph.counter_confinement_enabled``),
     counters may still be logged by the caller but no confine actions run.
     """
-    if not confinement_enabled:
-        return
     for cdef in counter_defs:
         cid = cdef.get("counter_id", "")
         on_exceed = cdef.get("on_exceed", "log_only")
         result = counter_results.get(cid, {})
         if not result.get("exceeded", False):
             continue
+        result["newly_confined"] = 0
+        if not confinement_enabled:
+            continue
         if on_exceed == "confine_symptomatic":
             exempt = set(cdef.get("exempt_classes", []))
+            quarantined_before = set(state.quarantined_ids)
             confine_agents(
                 epoch, agents, state, syndromic,
                 include_shedding=False, exempt_classes=exempt,
+            )
+            result["newly_confined"] = len(
+                state.quarantined_ids - quarantined_before,
             )

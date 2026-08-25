@@ -153,7 +153,6 @@ def _summary_counts(
         "cumulative_ever_ill_crew": ill_counts["crew"],
         "reported_case_rate_passenger": round(reported_rates["passenger"], 6),
         "ever_ill_rate_passenger": round(ever_ill_rates["passenger"], 6),
-        "vsp_triggered": bool(engine.vsp_triggered),
     }
     for a in agents:
         _update_summary_from_agent(summary, a)

@@ -236,6 +236,7 @@ class TestCounterConfinementEnabled:
         )
         assert state.quarantined_ids == set()
         assert results["all_attack_rate"]["exceeded"] is True
+        assert results["all_attack_rate"]["newly_confined"] == 0
 
     def test_reported_case_threshold_replaces_prevalence_trigger(self) -> None:
         state = SimulationState()
@@ -267,6 +268,31 @@ class TestCounterConfinementEnabled:
             2, agents, reported, defs, state, syndromic,
         )
         assert reported["passenger_reported_case_rate"]["value"] == 0.5
+        assert reported["passenger_reported_case_rate"]["newly_confined"] == 2
+        assert state.quarantined_ids == {0, 1}
+
+    def test_counter_confinement_reports_only_newly_confined_agents(self) -> None:
+        state = SimulationState(quarantined_ids={0})
+        agents = [
+            _agent(0, SYMPTOM_SYMPTOMATIC),
+            _agent(1, SYMPTOM_SYMPTOMATIC),
+        ]
+        defs = [{
+            "counter_id": "passenger_reported_case_rate",
+            "metric": "reported_case_rate",
+            "filter": {"role_group": "passenger"},
+            "threshold": 0.03,
+            "on_exceed": "confine_symptomatic",
+        }]
+        results = compute_infection_counters(
+            agents, defs, ever_reported_ids={0, 1},
+        )
+        syndromic = MagicMock()
+        syndromic.check_quarantine_compliance.return_value = True
+
+        step_counter_thresholds(1, agents, results, defs, state, syndromic)
+
+        assert results["passenger_reported_case_rate"]["newly_confined"] == 1
         assert state.quarantined_ids == {0, 1}
 
 

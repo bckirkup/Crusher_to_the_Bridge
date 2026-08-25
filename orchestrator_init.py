@@ -64,7 +64,10 @@ from orchestrator_types import (
     ProtocolContext,
 )
 from simulation_utils.paths import resolve_repo_path, validated_open
-from telemetry_buffer.agent_axes import resolve_agent_axes
+from telemetry_buffer.agent_axes import (
+    agent_has_symptomatic_presentation,
+    resolve_agent_axes,
+)
 from telemetry_buffer.schema import make_agent, make_space
 
 # ── Spatial layout & ship graph ──────────────────────────────────────────
@@ -646,12 +649,28 @@ def update_ever_ill_ids(
 
 
 def update_ever_reported_ids(
+    agents: list[dict[str, Any]],
     syn_result: dict[str, Any],
     ever_reported_ids: set[int],
     ever_reported_noise_ids: set[int],
 ) -> None:
-    """Accumulate unique true-positive and background-noise sick-call IDs."""
-    ever_reported_ids.update(int(aid) for aid in syn_result.get("true_positive_ids", []))
+    """Accumulate symptomatic reports and separate background-noise IDs.
+
+    ``syndromic.query_ground_truth`` currently mislabels non-compliant,
+    asymptomatic agents in ``true_positive_ids``; intersecting with the
+    current symptomatic roster prevents those IDs from becoming reported
+    cases while preserving the modality's existing sick-call behavior.
+    """
+    symptomatic_ids = {
+        int(agent["agent_id"])
+        for agent in agents
+        if agent_has_symptomatic_presentation(agent)
+    }
+    ever_reported_ids.update(
+        symptomatic_ids.intersection(
+            int(aid) for aid in syn_result.get("true_positive_ids", [])
+        ),
+    )
     ever_reported_noise_ids.update(int(aid) for aid in syn_result.get("noise_ids", []))
 
 

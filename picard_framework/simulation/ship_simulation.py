@@ -933,6 +933,7 @@ class ShipSimulation:
         if work.syn_result is None:
             return
         update_ever_reported_ids(
+            work.agents,
             work.syn_result,
             work.state.ever_reported_ids,
             work.state.ever_reported_noise_ids,
