@@ -446,6 +446,27 @@ per-shard-checkpointed simulation tiers only. Do not submit Stan or Sentinel
 inference tiers to the Spot queue because those fits do not survive an
 interruption.
 
+### Current C1 reported-case hourly refit
+
+The corrected-model norovirus refit uses
+`picard_framework/runs/mega_cruise_campaign/c1_reported_case_refit_v1_manifest.json`.
+It has four `c1_*` tiers at 720 runs each, for 2,880 runs total, with the
+hourly clock, `dose_adjustment` 12.0–14.0 in 0.25 steps, `n_init=1`,
+`none_true` and `syndromic`, and matched seeds 760–799:
+
+```bash
+MANIFEST=picard_framework/runs/mega_cruise_campaign/c1_reported_case_refit_v1_manifest.json
+python3 picard_framework/runs/mega_cruise_campaign/campaign_runner.py \
+  --manifest "$MANIFEST" --tier all --natural-history-clock hours --dry-run
+```
+
+Score the `syndromic` branch on cumulative reported symptomatic passenger
+cases divided by the passenger complement. This is a reported-case endpoint,
+not infections divided by the complement; `none_true` is the matched
+counterfactual. The campaign is hourly-only, so do not submit a new
+`legacy_epoch_day` arm. Keep the independent simulation tiers on the
+checkpointed Spot path and do not send Stan inference to Spot.
+
 The unflagged 200-shard command at the top of this section submits one array
 job of 200 children. Each child runs:
 
