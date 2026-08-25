@@ -226,3 +226,64 @@ is rebuilt each epoch, so a post-hoc call returns 1.0 and hides the cause. Inste
 method for the run and log `self._strain_doses[agent_id][pathogen_id]` at the call, together with
 `_prior_exposures` (its ages are `None` while the lineage is still resident, numeric once a record
 exists — a useful marker of the resolution epoch).
+
+### Forcing (and auditing) the VSP reported-case confinement counter
+
+The VSP rule is no longer the engine's internal instantaneous-prevalence check:
+`orchestrator_init.build_engine` passes `vsp_isolation=False`, so
+`KorkinShipEngine._check_vsp_trigger` never sets `vsp_triggered`; that engine
+attribute is not emitted as run telemetry because it can never be true there.
+All confinement comes from the counter path
+(`orchestrator_epoch.step_counter_thresholds` → `confine_agents`) driven by
+`crusher_labs/config.yaml` counter `passenger_reported_case_rate`
+(metric `reported_case_rate`, threshold 0.03, `on_exceed: confine_symptomatic`).
+Audit the counter with `derived.vsp_trigger_epoch` /
+`passenger_reported_case_rate_exceeded`, not with `vsp_triggered`.
+
+A cheap way to make the rule fire in a real full-length run (~40 s, 450 agents,
+168 hourly epochs) is to generate a spec from the calibration manifest tier and
+run it single:
+
+```bash
+python3 - <<'PY'
+import json, picard_framework.runs.mega_cruise_campaign.campaign_runner as cr
+m = json.load(open("picard_framework/runs/mega_cruise_campaign/"
+                   "clock_arm_c1_v1_manifest.json"))
+runs = dict(cr.generate_tier_runs(m, "c1_expedition_cruise_450",
+                                  natural_history_clock="hours"))
+json.dump(runs["c1_norovirus_expedition_cruise_450_dose8_init5_syndromic_s700"],
+          open("telemetry_buffer/vsp_probe/syndromic.json", "w"), indent=1)
+PY
+python3 picard_framework/runs/mega_cruise_campaign/campaign_runner.py \
+  --single telemetry_buffer/vsp_probe/syndromic.json telemetry_buffer/vsp_probe/out
+```
+
+`dose_adjustment 8.0` + `initial_infected 5` on `expedition_cruise_450` crosses
+3 % reported passenger cases around epoch 100 (seed 700 → 101).
+Artifacts land in `<out>/<run_id>.zip` and `<out>/_shard_runs/single/<run_id>/`
+(`/tmp` is refused by `paths.py`).
+
+Caveats worth re-checking whenever this area changes:
+
+- The counter *firing* and the quarantine curve *rising* are different claims.
+  SOP-008/011 already confine every symptomatic agent, so `confine_agents` from
+  the counter usually adds ~0 agents. Prove causality with a control run using
+  `config_overrides.ship_graph.counter_confinement_enabled = false` (same seed):
+  if the quarantine trajectory is unchanged, the counter had no effect. Each
+  exceeded counter now reports how many agents its action newly confined, via
+  the timeseries field `passenger_reported_case_rate_newly_confined`; it is
+  usually 0 for exactly this reason.
+- `cumulative_reported_cases` counts only agents that sick-called *while*
+  symptomatic. Syndromic `_process_symptomatic_agent` treats
+  `compliance == non_compliant` agents as reporters, so `true_positive_ids`
+  still contains susceptible/immune asymptomatic refusers;
+  `update_ever_reported_ids` intersects it with the symptomatic roster, which is
+  what keeps `cumulative_reported_cases <= cumulative_ever_ill`.
+- The `none_true` surveillance arm is report-free: chronic-disease
+  `sick_call_probability_boost` (up to 0.30 from
+  `data/config/chronic_diseases.json`) no longer bypasses
+  `syndromic.sick_call_probability = 0.0`, so no reported cases accumulate and
+  `derived.vsp_trigger_epoch` stays null.
+- `derived.reported_case_attack_rate_passenger` / `ever_ill_attack_rate_passenger` are
+  *passenger-complement* rates (final `reported_case_rate_passenger` /
+  `ever_ill_rate_passenger`), not counts over `num_agents`.
