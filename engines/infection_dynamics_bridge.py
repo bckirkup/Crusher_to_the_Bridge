@@ -1015,7 +1015,11 @@ class KorkinAgent:
         return len(self.chronic_disease_ids) > 0
 
     def _symptom_days(self, inf: dict[str, Any]) -> int | None:
-        """Return one-based symptom days, or ``None`` when onset is unknown."""
+        """Return 1-based symptom days, or ``None`` when onset is unknown.
+
+        This differs from the 0-based ``days_post_infection`` value, so the
+        fields must not be compared as an ordering invariant.
+        """
         time_infected = inf.get("time_infected")
         onset_time = inf.get("onset_time_infected")
         if time_infected is None or onset_time is None:
