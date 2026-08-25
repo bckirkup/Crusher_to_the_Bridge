@@ -410,6 +410,7 @@ def _draw_symptom_onset(
     inf: dict[str, Any],
     prof: dict[str, Any],
     rng: np.random.Generator,
+    epoch: int = 0,
 ) -> None:
     """One dose-conditioned illness draw for a host past its incubation period."""
     ill_params = prof.get("illness_probability", {})
@@ -420,6 +421,7 @@ def _draw_symptom_onset(
     ill_prob = min(1.0, ill_prob + agent.get_chronic_illness_boost(pid))
     if rng.random() < ill_prob:
         inf["illness"] = IllnessStatus.SYMPTOMATIC
+        inf["onset_time_infected"] = inf.get("time_infected", 0)
         if agent.illness_status == IllnessStatus.NOT_ILL:
             agent.illness_status = IllnessStatus.SYMPTOMATIC
 
@@ -452,18 +454,22 @@ def _advance_agent_pathogen_infections(
             # of presenting does not depend on how finely time is cut — and the
             # first chance is the epoch that crosses this host's own drawn
             # incubation period, so onset is not rounded up to a whole day.
-            _draw_symptom_onset(agent, pid, inf, prof, rng)
+            _draw_symptom_onset(agent, pid, inf, prof, rng, epoch)
 
         recovery_day = agent.get_chronic_recovery_day(
             pid, prof.get("recovery_day", 3),
         )
-        # Co-resident lineages clear on their own clocks, so the pathogen-level
-        # infection stays open until the last one goes: a strain acquired on day
-        # four is still being shed when the primary infection would have ended.
+        # Recovery is a symptomatic duration measured from onset; the total
+        # course is the host's incubation plus this recovery duration.
+        clearance_day = onset_day + recovery_day
         cleared: list[str] = []
-        residents_left = agent.advance_resident_strains(pid, recovery_day, cleared)
+        # Co-resident lineages clear on their own clocks, so the pathogen-level
+        # infection stays open until the last one goes: a strain acquired on
+        # day four is still being shed when the primary infection would have
+        # ended.
+        residents_left = agent.advance_resident_strains(pid, clearance_day, cleared)
         _record_cleared_immunity(agent, pid, cleared, strain_registry, epoch)
-        if days_infected >= recovery_day and residents_left == 0:
+        if days_infected >= clearance_day and residents_left == 0:
             inf["status"] = InfectionStatus.RECOVERED
             inf["illness"] = IllnessStatus.RECOVERED
 
@@ -1371,6 +1377,7 @@ def build_cascade_context(
 
 VALID_COUNTER_METRICS = {
     "attack_rate",
+    "reported_case_rate",
     "infected_count",
     "symptomatic_count",
     "recovered_count",
@@ -1400,6 +1407,7 @@ def _counter_metric_value(
     metric: str,
     group: list[dict[str, Any]],
     pop: int,
+    ever_reported_ids: set[int] | None = None,
 ) -> float:
     if metric == "attack_rate":
         n_symptomatic = sum(
@@ -1407,6 +1415,12 @@ def _counter_metric_value(
             if agent_has_symptomatic_presentation(a)
         )
         return (n_symptomatic / pop) if pop > 0 else 0.0
+    if metric == "reported_case_rate":
+        if pop == 0 or not ever_reported_ids:
+            return 0.0
+        return sum(
+            int(a["agent_id"]) in ever_reported_ids for a in group
+        ) / pop
     if metric == "infected_count":
         return float(sum(1 for a in group if agent_is_infected(a)))
     if metric == "symptomatic_count":
@@ -1435,6 +1449,8 @@ def _counter_metric_value(
 def compute_infection_counters(
     agents: list[dict[str, Any]],
     counter_defs: list[dict[str, Any]],
+    *,
+    ever_reported_ids: set[int] | None = None,
 ) -> dict[str, dict[str, Any]]:
     """Evaluate all configured infection counters for the current epoch.
 
@@ -1452,7 +1468,9 @@ def compute_infection_counters(
 
         group = [a for a in agents if _agent_matches_filter(a, cfilter)]
         pop = len(group)
-        value = _counter_metric_value(metric, group, pop)
+        value = _counter_metric_value(
+            metric, group, pop, ever_reported_ids,
+        )
 
         exceeded = threshold is not None and value >= threshold
         entry: dict[str, Any] = {
@@ -1486,17 +1504,22 @@ def step_counter_thresholds(
     When *confinement_enabled* is false (``ship_graph.counter_confinement_enabled``),
     counters may still be logged by the caller but no confine actions run.
     """
-    if not confinement_enabled:
-        return
     for cdef in counter_defs:
         cid = cdef.get("counter_id", "")
         on_exceed = cdef.get("on_exceed", "log_only")
         result = counter_results.get(cid, {})
         if not result.get("exceeded", False):
             continue
+        result["newly_confined"] = 0
+        if not confinement_enabled:
+            continue
         if on_exceed == "confine_symptomatic":
             exempt = set(cdef.get("exempt_classes", []))
+            quarantined_before = set(state.quarantined_ids)
             confine_agents(
                 epoch, agents, state, syndromic,
                 include_shedding=False, exempt_classes=exempt,
+            )
+            result["newly_confined"] = len(
+                state.quarantined_ids - quarantined_before,
             )

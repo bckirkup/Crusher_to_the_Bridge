@@ -1736,6 +1736,9 @@ def extract_timeseries(history: list[dict[str, Any]]) -> list[dict[str, Any]]:
         s = rec.get("summary", {})
         cost = rec.get("cost_accounting", {})
         spaces = rec.get("spaces", {})
+        reported_case_counter = rec.get(
+            "infection_counters", {},
+        ).get("passenger_reported_case_rate", {})
 
         infected = int(s.get("infected", 0) or 0)
         recovered = int(s.get("recovered", 0) or 0)
@@ -1775,6 +1778,31 @@ def extract_timeseries(history: list[dict[str, Any]]) -> list[dict[str, Any]]:
             "max_conc_zone": max_conc_zone,
             "cumulative_cost_usd": cost.get("total_financial_usd", 0),
             "cumulative_ois": cost.get("operational_impact_cumulative", 0),
+            "cumulative_reported_cases": s.get("cumulative_reported_cases", 0),
+            "cumulative_reported_cases_passenger": s.get(
+                "cumulative_reported_cases_passenger", 0,
+            ),
+            "cumulative_reported_cases_crew": s.get(
+                "cumulative_reported_cases_crew", 0,
+            ),
+            "cumulative_reported_noise_cases": s.get(
+                "cumulative_reported_noise_cases", 0,
+            ),
+            "cumulative_ever_ill": s.get("cumulative_ever_ill", 0),
+            "cumulative_ever_ill_passenger": s.get(
+                "cumulative_ever_ill_passenger", 0,
+            ),
+            "cumulative_ever_ill_crew": s.get("cumulative_ever_ill_crew", 0),
+            "reported_case_rate_passenger": reported_case_counter.get(
+                "value", s.get("reported_case_rate_passenger", 0.0),
+            ),
+            "passenger_reported_case_rate_newly_confined": reported_case_counter.get(
+                "newly_confined", 0,
+            ),
+            "passenger_reported_case_rate_exceeded": bool(
+                reported_case_counter.get("exceeded", False),
+            ),
+            "ever_ill_rate_passenger": s.get("ever_ill_rate_passenger", 0.0),
             "trigger_status": rec.get(
                 "trigger_status",
                 rec.get("reactive_protocols", {}).get("trigger_status", "none"),
@@ -1797,6 +1825,15 @@ def _detection_epochs(
     return detection_epoch, confirmation_epoch
 
 
+def _reported_case_counter_exceeded(epoch: dict[str, Any]) -> bool:
+    """Return the emitted passenger reported-case threshold state."""
+    if epoch.get("passenger_reported_case_rate_exceeded", False):
+        return True
+    counters = epoch.get("infection_counters") or {}
+    counter = counters.get("passenger_reported_case_rate") or {}
+    return bool(counter.get("exceeded", False))
+
+
 def compute_derived_metrics(ts: list[dict[str, Any]], num_agents: int) -> dict[str, Any]:
     """Compute publication-ready scalar metrics from an epoch time series."""
     if not ts:
@@ -1813,12 +1850,27 @@ def compute_derived_metrics(ts: list[dict[str, Any]], num_agents: int) -> dict[s
     attack_rate = ever_infected / num_agents if num_agents > 0 else 0
     outbreak_occurred = epidemic_took_off(ts)
     detection_epoch, confirmation_epoch = _detection_epochs(ts)
+    vsp_trigger_epoch = next(
+        (
+            e["epoch"] for e in ts
+            if _reported_case_counter_exceeded(e)
+        ),
+        None,
+    )
     r_eff_at_peak = None
     if peak_epoch > 0 and infected_by_epoch[peak_epoch - 1] > 0:
         new_at_peak = ts[peak_epoch].get("new_infections", 0)
         r_eff_at_peak = new_at_peak / infected_by_epoch[peak_epoch - 1]
     return {
         "attack_rate": round(attack_rate, 4),
+        "reported_case_attack_rate_passenger": round(
+            float(final.get("reported_case_rate_passenger", 0.0) or 0.0),
+            4,
+        ),
+        "ever_ill_attack_rate_passenger": round(
+            float(final.get("ever_ill_rate_passenger", 0.0) or 0.0), 4,
+        ),
+        "vsp_trigger_epoch": vsp_trigger_epoch,
         "peak_prevalence": peak_infected,
         "peak_epoch": peak_epoch,
         "outbreak_occurred": outbreak_occurred,

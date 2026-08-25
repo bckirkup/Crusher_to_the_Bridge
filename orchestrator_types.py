@@ -112,6 +112,9 @@ class SimulationState:
     # Outbreak-response architecture (escalation + compliance)
     cumulative_confirmed_case_ids: set[int] = field(default_factory=set)
     ever_ill_ids: set[int] = field(default_factory=set)
+    ever_reported_ids: set[int] = field(default_factory=set)
+    ever_reported_noise_ids: set[int] = field(default_factory=set)
+    vsp_reported_case_fraction: float = 0.0
     # Pending escalation: {"to": status, "epoch_triggered": int} or None
     escalation_pending: dict[str, Any] | None = None
     # agent_id → compliant | reluctant | defiant (sticky for the cruise)

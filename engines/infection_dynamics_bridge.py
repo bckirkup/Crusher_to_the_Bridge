@@ -57,6 +57,8 @@ IMMUNE_RATIO = 0.2
 
 # Containment threshold (from Agent.java)
 VSP_THRESHOLD_FRACTION = 0.03
+VSP_RULE_REPORTED_PASSENGER_CASES = "reported_passenger_cases"
+VSP_RULE_INSTANT_PREVALENCE = "instant_prevalence"
 
 # Recovery threshold (from Person.java)
 RECOVERY_DAY = 3
@@ -681,17 +683,18 @@ class KorkinAgent:
     def advance_resident_strains(
         self,
         pathogen_id: str,
-        recovery_day: int,
+        recovery_day: float,
         cleared: list[str] | None = None,
     ) -> int:
         """Age each resident lineage by an epoch and clear those past recovery.
 
-        ``recovery_day`` is in days, the lineage counter is in epochs, and the
-        run's clock converts between them. Returns the number still resident, so
-        the caller can hold the pathogen-level infection open until the last
-        lineage clears. Ids of the lineages that cleared this call are appended
-        to ``cleared`` when given, since each one is an exposure the host now has
-        immune memory of.
+        The threshold is the host's total course in days: incubation/onset plus
+        the symptomatic ``recovery_day`` duration. The lineage counter is in
+        epochs, and the run's clock converts between them. Returns the number
+        still resident, so the caller can hold the pathogen-level infection
+        open until the last lineage clears. Ids of the lineages that cleared
+        this call are appended to ``cleared`` when given, since each one is an
+        exposure the host now has immune memory of.
         """
         residents = self.resident_strains(pathogen_id)
         for strain_id, resident in tuple(residents.items()):
@@ -1011,6 +1014,19 @@ class KorkinAgent:
     def has_chronic_disease(self) -> bool:
         return len(self.chronic_disease_ids) > 0
 
+    def _symptom_days(self, inf: dict[str, Any]) -> int | None:
+        """Return 1-based symptom days, or ``None`` when onset is unknown.
+
+        This differs from the 0-based ``days_post_infection`` value, so the
+        fields must not be compared as an ordering invariant.
+        """
+        time_infected = inf.get("time_infected")
+        onset_time = inf.get("onset_time_infected")
+        if time_infected is None or onset_time is None:
+            return None
+        elapsed = max(0, int(time_infected) - int(onset_time))
+        return self.clock.day_index(elapsed) + 1
+
     def to_schema_dict(self) -> dict[str, Any]:
         """Export agent state in telemetry_buffer.schema format."""
         from telemetry_buffer.agent_axes import (
@@ -1050,6 +1066,7 @@ class KorkinAgent:
                     None if inf["time_infected"] is None
                     else self.clock.day_index(inf["time_infected"])
                 ),
+                "days_since_symptom_onset": self._symptom_days(inf),
             }
 
         result = {
@@ -1097,7 +1114,13 @@ class KorkinShipEngine:
         gender_distribution: dict[str, float] | None = None,
         agent_behavior: dict[str, Any] | None = None,
         clock: SimClock | None = None,
+        vsp_trigger_rule: str = VSP_RULE_REPORTED_PASSENGER_CASES,
     ) -> None:
+        if vsp_trigger_rule not in {
+            VSP_RULE_REPORTED_PASSENGER_CASES,
+            VSP_RULE_INSTANT_PREVALENCE,
+        }:
+            raise ValueError(f"Unknown VSP trigger rule: {vsp_trigger_rule!r}")
         self.rng = np.random.default_rng(seed)
         self.clock = clock or LEGACY_CLOCK
         self.zones = zones or DEFAULT_ZONES
@@ -1106,9 +1129,11 @@ class KorkinShipEngine:
         self.initial_infected = initial_infected
         self.immune_ratio = immune_ratio
         self.vsp_isolation = vsp_isolation
+        self.vsp_trigger_rule = vsp_trigger_rule
         self._agent_classes = agent_classes
         self._gender_distribution = gender_distribution or DEFAULT_GENDER_DISTRIBUTION
         self.vsp_threshold_fraction: float = VSP_THRESHOLD_FRACTION
+        self.vsp_reported_case_fraction: float = 0.0
         behavior = dict(DEFAULT_AGENT_BEHAVIOR)
         if agent_behavior:
             behavior.update({
@@ -1424,9 +1449,11 @@ class KorkinShipEngine:
         """Age every infection one epoch, then present and recover on days.
 
         ``time_infected`` is an epoch count; ``ONSET_DAY`` and ``RECOVERY_DAY``
-        are days, and the clock is the only thing that relates them. The illness
-        draw fires once per day of natural history rather than once per epoch, so
-        a finer grid does not hand a host more chances to present.
+        are days, with recovery measured from onset, so the total course is
+        incubation plus ``RECOVERY_DAY``. The clock is the only thing that
+        relates those units. The illness draw fires once per day of natural
+        history rather than once per epoch, so a finer grid does not hand a
+        host more chances to present.
 
         A host carrying per-pathogen records has its natural history owned by
         those records, not by this fallback: they hold the drawn incubation
@@ -1446,7 +1473,10 @@ class KorkinShipEngine:
         for agent in self.agents:
             if agent.infections:
                 continue
-            if agent.is_infected and agent.days_post_infection >= RECOVERY_DAY:
+            if (
+                agent.is_infected
+                and agent.days_post_infection >= ONSET_DAY + RECOVERY_DAY
+            ):
                 agent.infection_status = InfectionStatus.RECOVERED
                 agent.illness_status = IllnessStatus.RECOVERED
 
@@ -1572,20 +1602,8 @@ class KorkinShipEngine:
         # 3-4. Illness progression and recovery, both on the day scale
         self._advance_illness_and_recovery()
 
-        # 5. VSP quarantine check (Agent.java: 3% threshold)
-        # VSP confinement sends symptomatic agents to quarters (quarantine),
-        # not to isolation units.  Quarantined agents remain HVAC-connected.
-        total_pop = len(self.agents)
-        total_ill = sum(1 for a in self.agents if a.is_symptomatic)
-        vsp_threshold = int(self.vsp_threshold_fraction * total_pop)
-        if self.vsp_isolation and total_ill >= vsp_threshold and not self.vsp_triggered:
-            self.vsp_triggered = True
-
-        if self.vsp_triggered:
-            confined = self.isolated_ids | self.quarantined_ids
-            for agent in self.agents:
-                if agent.is_symptomatic and agent.agent_id not in confined:
-                    self.quarantined_ids.add(agent.agent_id)
+        # 5. VSP quarantine check
+        self._check_vsp_trigger()
 
         # 6. Zone pathogen mass: new deposits from shedders
         # NOTE: Decay is now handled externally by the CONTAM transport
@@ -1606,6 +1624,35 @@ class KorkinShipEngine:
         # 7. Export payload
         return self._export_payload()
 
+    def _check_vsp_trigger(self) -> None:
+        """Apply the VSP trigger and quarantine symptomatic agents.
+
+        The reported-case fraction is cumulative reported passenger cases
+        divided by the passenger complement, as specified by equation
+        ``vsp-trigger`` in ``docs/reports/05_vsp.tex``.  It is one epoch stale
+        by construction because sick calls for epoch *t* are generated in the
+        surveillance phase after biology; that reporting lag is realistic.
+        The default is reported passenger cases because the instantaneous
+        prevalence form is unreachable at hourly resolution.
+        """
+        if self.vsp_trigger_rule == VSP_RULE_REPORTED_PASSENGER_CASES:
+            threshold_reached = (
+                self.vsp_reported_case_fraction >= self.vsp_threshold_fraction
+            )
+        else:
+            total_pop = len(self.agents)
+            total_ill = sum(1 for a in self.agents if a.is_symptomatic)
+            vsp_threshold = int(self.vsp_threshold_fraction * total_pop)
+            threshold_reached = total_ill >= vsp_threshold
+        if self.vsp_isolation and threshold_reached and not self.vsp_triggered:
+            self.vsp_triggered = True
+
+        if self.vsp_triggered:
+            confined = self.isolated_ids | self.quarantined_ids
+            for agent in self.agents:
+                if agent.is_symptomatic and agent.agent_id not in confined:
+                    self.quarantined_ids.add(agent.agent_id)
+
     def _export_payload(self) -> dict[str, Any]:
         """Build the telemetry schema payload from current state."""
         agents_out = [a.to_schema_dict() for a in self.agents]
@@ -1624,6 +1671,8 @@ class KorkinShipEngine:
             "epoch": self.epoch,
             "agents": agents_out,
             "spaces": spaces_out,
+            "vsp_triggered": self.vsp_triggered,
+            "vsp_reported_case_fraction": self.vsp_reported_case_fraction,
         }
 
     @property
@@ -1713,6 +1762,7 @@ class KorkinShipEngine:
             "isolated": isolated,
             "quarantined": quarantined,
             "vsp_triggered": self.vsp_triggered,
+            "vsp_reported_case_fraction": self.vsp_reported_case_fraction,
             "agent_classes": class_counts,
             "gender_distribution": gender_counts,
         }

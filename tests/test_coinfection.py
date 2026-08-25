@@ -272,15 +272,15 @@ def _advance(agent: KorkinAgent, days: int, *, recovery_day: int = 3) -> None:
 
 
 class TestPerStrainRecovery:
-    def test_single_resident_recovers_on_the_legacy_day(self) -> None:
+    def test_single_resident_recovers_after_incubation_plus_recovery(self) -> None:
         legacy = _agent()
         legacy.infect_with_pathogen(PATHOGEN, 1e4, 0)
         tracked = _agent(2)
         tracked.infect_with_pathogen(
             PATHOGEN, 1e4, 0, strain_id=RESIDENT, strain_phenotype=Phenotype(),
         )
-        _advance(legacy, 3)
-        _advance(tracked, 3)
+        _advance(legacy, 5)
+        _advance(tracked, 5)
         assert legacy.infections[PATHOGEN]["status"] == InfectionStatus.RECOVERED
         assert tracked.infections[PATHOGEN]["status"] == InfectionStatus.RECOVERED
         assert tracked.resident_strains(PATHOGEN) == {}
@@ -288,23 +288,23 @@ class TestPerStrainRecovery:
     def test_a_later_lineage_holds_the_infection_open(self) -> None:
         agent = _coinfected(dpi_a=0, epoch_b=0)
         agent.resident_strains(PATHOGEN)[INVADER].time_infected = -2
-        _advance(agent, 3)
+        _advance(agent, 5)
         inf = agent.infections[PATHOGEN]
         assert inf["status"] == InfectionStatus.INFECTED
         assert list(agent.resident_strains(PATHOGEN)) == [INVADER]
-        assert inf["time_infected"] == 3
+        assert inf["time_infected"] == 5
 
     def test_the_pathogen_recovers_when_the_last_lineage_clears(self) -> None:
         agent = _coinfected(dpi_a=0, epoch_b=0)
         agent.resident_strains(PATHOGEN)[INVADER].time_infected = -2
-        _advance(agent, 5)
+        _advance(agent, 7)
         assert agent.infections[PATHOGEN]["status"] == InfectionStatus.RECOVERED
         assert agent.resident_strains(PATHOGEN) == {}
 
     def test_a_surviving_lineage_inherits_the_pathogen_level_fields(self) -> None:
         agent = _coinfected(dpi_a=0, epoch_b=0, shedding_b=2.0)
         agent.resident_strains(PATHOGEN)[INVADER].time_infected = -2
-        _advance(agent, 3)
+        _advance(agent, 5)
         inf = agent.infections[PATHOGEN]
         assert inf["strain_id"] == INVADER
         assert inf["strain_shedding_multiplier"] == pytest.approx(2.0)

@@ -579,10 +579,11 @@ class TestLegacyProjection:
             PATHOGEN, 1e4, 0,
             strain_id=first.strain_id, strain_phenotype=Phenotype.of(first),
         )
-        _advance_agent_pathogen_infections(
-            agent, {PATHOGEN: _profile(recovery_day=1)},
-            np.random.default_rng(1), registry, 96,
-        )
+        for _ in range(3):
+            _advance_agent_pathogen_infections(
+                agent, {PATHOGEN: _profile(recovery_day=1)},
+                np.random.default_rng(1), registry, 96,
+            )
         _project_legacy_illness(agent)
         assert agent.infection_status == InfectionStatus.RECOVERED
 

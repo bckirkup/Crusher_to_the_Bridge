@@ -385,7 +385,7 @@ class TestSyndromicChronicMods:
         from telemetry_buffer.agent_axes import PRESENTATION_SYMPTOMATIC
 
         rng = np.random.default_rng(42)
-        syn = SyndromicSurveillance(sick_call_probability=0.0, rng=rng)
+        syn = SyndromicSurveillance(sick_call_probability=0.5, rng=rng)
         agents = [
             {
                 "agent_id": 0,
@@ -397,12 +397,32 @@ class TestSyndromicChronicMods:
         ]
         truth = {"epoch": 1, "agents": agents}
 
-        # With boost=1.0, agent should always report
+        # A nonzero base probability still receives the chronic boost.
         chronic_mods = {0: {"sick_call_probability_boost": 1.0}}
         result = syn.query_ground_truth(
             truth, chronic_behavioral_mods=chronic_mods,
         )
         assert 0 in result["sick_call_agents"]
+
+    def test_zero_sick_call_base_blocks_chronic_boost(self) -> None:
+        from crusher_labs.modalities.syndromic import SyndromicSurveillance
+        from telemetry_buffer.agent_axes import PRESENTATION_SYMPTOMATIC
+
+        syn = SyndromicSurveillance(sick_call_probability=0.0, rng=np.random.default_rng(42))
+        truth = {
+            "epoch": 1,
+            "agents": [{
+                "agent_id": 0,
+                "infection_state": "infected",
+                "symptom_presentation": PRESENTATION_SYMPTOMATIC,
+                "compliance_status": "compliant",
+            }],
+        }
+        result = syn.query_ground_truth(
+            truth,
+            chronic_behavioral_mods={0: {"sick_call_probability_boost": 1.0}},
+        )
+        assert result["sick_call_agents"] == []
 
     def test_quarantine_compliance_boost(self) -> None:
         from crusher_labs.modalities.syndromic import SyndromicSurveillance

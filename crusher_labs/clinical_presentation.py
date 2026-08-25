@@ -167,11 +167,17 @@ def annotate_agent_clinical_presentation(
         if not _infection_is_active(info) or not _infection_is_symptomatic(info):
             continue
         dpi = int(info.get("days_post_infection") or 0)
-        # Approximate symptom-day clock from dpi once symptomatic.
-        symptom_days = max(1, dpi)
+        recorded_symptom_days = info.get("days_since_symptom_onset")
+        if recorded_symptom_days is None:
+            # Fallback for legacy payloads and hosts whose onset was not saved.
+            symptom_days = max(1, dpi)
+            phase_day = dpi
+        else:
+            symptom_days = max(1, int(recorded_symptom_days))
+            phase_day = symptom_days
         max_symptom_days = max(max_symptom_days, symptom_days)
         presentation = presentation_for_pathogen(str(pid), pathogen_profiles)
-        phase = resolve_phase(presentation, dpi)
+        phase = resolve_phase(presentation, phase_day)
         phase_syndromes = _collect_phase_features(phase, seen_feat, features)
         base_syndromes = phase_syndromes or presentation.get("syndromes") or []
         _append_unique_syndromes(base_syndromes, seen_syn, syndromes)

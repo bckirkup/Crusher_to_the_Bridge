@@ -79,6 +79,7 @@ from orchestrator_init import (
     assign_cabin_mates,
     build_engine,
     check_escalation,
+    compute_group_rates_for_ids,
     engine_payload_to_schema,
     init_multi_pathogen,
     init_observation_engine,
@@ -91,6 +92,7 @@ from orchestrator_init import (
     load_pathogen_profiles,
     pathogen_profiles_are_respiratory,
     update_cumulative_confirmed_cases,
+    update_ever_reported_ids,
 )
 from orchestrator_record import finalize_simulation, record_epoch
 from orchestrator_types import (
@@ -815,6 +817,7 @@ class ShipSimulation:
         state = work.state
         self.engine.isolated_ids = set(state.isolated_ids)
         self.engine.quarantined_ids = set(state.quarantined_ids)
+        self.engine.vsp_reported_case_fraction = state.vsp_reported_case_fraction
         self.engine.step()
         self._note_shore_introductions(
             step_shore_introductions(
@@ -959,6 +962,18 @@ class ShipSimulation:
                 work.dr.contact_graph.agent_adjacency,
                 work.wearable_result, work.dr.profiles,
             )
+        if work.syn_result is None:
+            return
+        update_ever_reported_ids(
+            work.agents,
+            work.syn_result,
+            work.state.ever_reported_ids,
+            work.state.ever_reported_noise_ids,
+        )
+        reported_rates = compute_group_rates_for_ids(
+            work.agents, work.state.ever_reported_ids,
+        )
+        work.state.vsp_reported_case_fraction = reported_rates["passenger"]
 
     def _query_pcr_seq(self, work: _EpochWork) -> None:
         overrides = work.cfg.get("_picard_epoch_overrides", {})
@@ -1285,7 +1300,11 @@ class ShipSimulation:
             work.state, work.syndromic,
         )
         counter_defs = self.graph_cfg.get("infection_counters", [])
-        work.counter_results = compute_infection_counters(work.agents, counter_defs)
+        work.counter_results = compute_infection_counters(
+            work.agents,
+            counter_defs,
+            ever_reported_ids=work.state.ever_reported_ids,
+        )
         step_counter_thresholds(
             work.epoch, work.agents, work.counter_results, counter_defs,
             work.state, work.syndromic,

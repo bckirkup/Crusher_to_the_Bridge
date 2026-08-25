@@ -38,6 +38,8 @@ from crusher_labs.protocol_engine import (
     load_protocols,
 )
 from engines.infection_dynamics_bridge import (
+    VSP_RULE_INSTANT_PREVALENCE,
+    VSP_RULE_REPORTED_PASSENGER_CASES,
     InfectionStatus,
     KorkinShipEngine,
 )
@@ -62,7 +64,10 @@ from orchestrator_types import (
     ProtocolContext,
 )
 from simulation_utils.paths import resolve_repo_path, validated_open
-from telemetry_buffer.agent_axes import resolve_agent_axes
+from telemetry_buffer.agent_axes import (
+    agent_has_symptomatic_presentation,
+    resolve_agent_axes,
+)
 from telemetry_buffer.schema import make_agent, make_space
 
 # ── Spatial layout & ship graph ──────────────────────────────────────────
@@ -179,6 +184,17 @@ def load_isolation_unit_capacity(cfg: dict[str, Any], default: int = 0) -> int:
     if layout is None:
         return default
     return int(layout.get("isolation_unit_capacity", default))
+
+
+def load_vsp_trigger_rule(cfg: dict[str, Any]) -> str:
+    """Read and validate the selectable VSP trigger rule."""
+    rule = cfg.get("escalation", {}).get(
+        "vsp_trigger_rule", VSP_RULE_REPORTED_PASSENGER_CASES,
+    )
+    valid = {VSP_RULE_REPORTED_PASSENGER_CASES, VSP_RULE_INSTANT_PREVALENCE}
+    if rule not in valid:
+        raise ValueError(f"Unknown VSP trigger rule: {rule!r}")
+    return str(rule)
 
 
 def initialize_ship_graph(cfg: dict[str, Any]) -> dict[str, Any]:
@@ -461,8 +477,9 @@ def build_engine(
     if "immune_fraction" in graph_cfg:
         engine_kwargs["immune_ratio"] = float(graph_cfg["immune_fraction"])
 
-    # VSP threshold confinement is now handled by configurable infection
-    # counters in the orchestrator, not by the engine's internal check.
+    # VSP threshold confinement is handled by configurable infection counters
+    # in the orchestrator, not by the engine's internal check.  The
+    # ``vsp_trigger_rule`` governs that engine path when a caller enables it.
     return KorkinShipEngine(
         num_passengers=num_passengers,
         num_crew=num_crew,
@@ -470,6 +487,7 @@ def build_engine(
         zones=engine_zones,
         seed=seed,
         vsp_isolation=False,
+        vsp_trigger_rule=load_vsp_trigger_rule(cfg),
         agent_classes=agent_classes,
         gender_distribution=gender_distribution,
         agent_behavior=cfg.get("agent_behavior"),
@@ -605,7 +623,7 @@ def pathogen_profiles_are_respiratory(
     return False
 
 
-def _role_group_for_agent(agent: dict[str, Any]) -> str:
+def role_group_for_agent(agent: dict[str, Any]) -> str:
     role = str(agent.get("role") or "").lower()
     if role in ("crew", "passenger"):
         return role
@@ -613,6 +631,9 @@ def _role_group_for_agent(agent: dict[str, Any]) -> str:
     if a_class.startswith("crew"):
         return "crew"
     return "passenger"
+
+
+_role_group_for_agent = role_group_for_agent
 
 
 def update_ever_ill_ids(
@@ -627,33 +648,70 @@ def update_ever_ill_ids(
             ever_ill_ids.add(int(agent["agent_id"]))
 
 
-def compute_group_attack_rates(
+def update_ever_reported_ids(
     agents: list[dict[str, Any]],
-    ever_ill_ids: set[int],
+    syn_result: dict[str, Any],
+    ever_reported_ids: set[int],
+    ever_reported_noise_ids: set[int],
+) -> None:
+    """Accumulate symptomatic reports and separate background-noise IDs.
+
+    ``syndromic.query_ground_truth`` currently mislabels non-compliant,
+    asymptomatic agents in ``true_positive_ids``; intersecting with the
+    current symptomatic roster prevents those IDs from becoming reported
+    cases while preserving the modality's existing sick-call behavior.
+    """
+    symptomatic_ids = {
+        int(agent["agent_id"])
+        for agent in agents
+        if agent_has_symptomatic_presentation(agent)
+    }
+    ever_reported_ids.update(
+        symptomatic_ids.intersection(
+            int(aid) for aid in syn_result.get("true_positive_ids", [])
+        ),
+    )
+    ever_reported_noise_ids.update(int(aid) for aid in syn_result.get("noise_ids", []))
+
+
+def _compute_group_rates(
+    agents: list[dict[str, Any]],
+    id_set: set[int],
 ) -> dict[str, float]:
-    """Cumulative attack rates (ever-ill / population) overall and by role group."""
     if not agents:
         return {"overall": 0.0, "passenger": 0.0, "crew": 0.0, "max_group": 0.0}
 
     groups: dict[str, list[int]] = {"passenger": [], "crew": []}
     for agent in agents:
-        aid = int(agent["agent_id"])
-        groups[_role_group_for_agent(agent)].append(aid)
+        groups[_role_group_for_agent(agent)].append(int(agent["agent_id"]))
 
     def _rate(ids: list[int]) -> float:
-        if not ids:
-            return 0.0
-        return sum(1 for i in ids if i in ever_ill_ids) / len(ids)
+        return sum(aid in id_set for aid in ids) / len(ids) if ids else 0.0
 
-    passenger_ar = _rate(groups["passenger"])
-    crew_ar = _rate(groups["crew"])
-    overall = len(ever_ill_ids) / len(agents)
+    passenger = _rate(groups["passenger"])
+    crew = _rate(groups["crew"])
     return {
-        "overall": overall,
-        "passenger": passenger_ar,
-        "crew": crew_ar,
-        "max_group": max(passenger_ar, crew_ar),
+        "overall": len(id_set) / len(agents),
+        "passenger": passenger,
+        "crew": crew,
+        "max_group": max(passenger, crew),
     }
+
+
+def compute_group_attack_rates(
+    agents: list[dict[str, Any]],
+    ever_ill_ids: set[int],
+) -> dict[str, float]:
+    """Cumulative attack rates (ever-ill / population) overall and by role group."""
+    return _compute_group_rates(agents, ever_ill_ids)
+
+
+def compute_group_rates_for_ids(
+    agents: list[dict[str, Any]],
+    ids: set[int],
+) -> dict[str, float]:
+    """Return overall and role-group rates for an arbitrary agent ID set."""
+    return _compute_group_rates(agents, ids)
 
 
 def update_cumulative_confirmed_cases(

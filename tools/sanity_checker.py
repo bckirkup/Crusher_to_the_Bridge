@@ -1405,7 +1405,7 @@ def _check_gender_distribution(cfg: dict[str, Any], report: Report) -> None:
 
 
 _VALID_COUNTER_METRICS = {
-    "attack_rate", "infected_count", "symptomatic_count",
+    "attack_rate", "reported_case_rate", "infected_count", "symptomatic_count",
     "recovered_count", "susceptible_count",
 }
 

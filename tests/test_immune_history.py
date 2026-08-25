@@ -100,11 +100,13 @@ def _resolve(
     epoch: int = 3,
     recovery_day: int = 1,
 ) -> None:
-    """Run the progression seam far enough for every resident lineage to clear."""
+    """Run through incubation plus the symptomatic recovery duration."""
     profile = _norwalk_profile(recovery_day=recovery_day)
-    _advance_agent_pathogen_infections(
-        agent, {PATHOGEN: profile}, np.random.default_rng(1), registry, epoch,
-    )
+    steps = recovery_day + 2
+    for _ in range(steps):
+        _advance_agent_pathogen_infections(
+            agent, {PATHOGEN: profile}, np.random.default_rng(1), registry, epoch,
+        )
 
 
 def _infect(

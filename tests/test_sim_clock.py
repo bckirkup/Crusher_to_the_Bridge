@@ -2,8 +2,8 @@
 
 Two kinds of test here: the conversion contract of ``SimClock``, and
 differential tests showing that the clock actually governs natural history —
-the same pathogen profile has to clear in three days of voyage time under the
-hourly clock and in three epochs under the legacy one.
+the same pathogen profile has to clear after incubation plus three symptomatic
+days under each supported clock.
 """
 
 from __future__ import annotations
@@ -235,26 +235,26 @@ def _advance(agent: KorkinAgent, epochs: int) -> None:
         _advance_agent_pathogen_infections(agent, {"noro": NORO}, rng)
 
 
-def test_hourly_clock_holds_a_case_open_for_three_voyage_days() -> None:
+def test_hourly_clock_clears_after_incubation_plus_three_symptomatic_days() -> None:
     agent = _infected_agent(HOURLY)
-    _advance(agent, 71)
+    _advance(agent, 95)
     assert agent.infections["noro"]["status"] == InfectionStatus.INFECTED
     _advance(agent, 1)
     assert agent.infections["noro"]["status"] == InfectionStatus.RECOVERED
 
 
-def test_legacy_clock_clears_the_same_case_in_three_epochs() -> None:
+def test_legacy_clock_clears_after_incubation_plus_three_symptomatic_days() -> None:
     agent = _infected_agent(LEGACY_CLOCK)
-    _advance(agent, 2)
+    _advance(agent, 3)
     assert agent.infections["noro"]["status"] == InfectionStatus.INFECTED
     _advance(agent, 1)
     assert agent.infections["noro"]["status"] == InfectionStatus.RECOVERED
 
 
 def test_recovery_tracks_the_configured_epoch_duration() -> None:
-    """Four six-hour epochs to the day, so twelve epochs to a three-day case."""
+    """Four six-hour epochs to the day, so sixteen to a four-day course."""
     agent = _infected_agent(SIX_HOURLY)
-    _advance(agent, 11)
+    _advance(agent, 15)
     assert agent.infections["noro"]["status"] == InfectionStatus.INFECTED
     _advance(agent, 1)
     assert agent.infections["noro"]["status"] == InfectionStatus.RECOVERED
@@ -291,15 +291,16 @@ class _NeverIllRng:
 
 @pytest.mark.parametrize(
     ("clock", "epochs", "expected_draws"),
-    [(HOURLY, 72, 3), (LEGACY_CLOCK, 3, 3), (SIX_HOURLY, 12, 3)],
+    [(HOURLY, 96, 4), (LEGACY_CLOCK, 4, 4), (SIX_HOURLY, 16, 4)],
 )
 def test_the_illness_draw_is_per_day_not_per_epoch(
     clock: SimClock, epochs: int, expected_draws: int,
 ) -> None:
     """A finer grid must not hand a host more chances to present.
 
-    Three days of natural history is three chances at symptoms whatever the
-    epoch length, so a host who declines every draw declines exactly three.
+    The incubation day plus three symptomatic days before day-four clearance
+    provide four chances at symptoms whatever the epoch length, so a host who
+    declines every draw declines exactly four.
     """
     agent = _infected_agent(clock)
     rng = _NeverIllRng()
@@ -409,6 +410,26 @@ def test_onset_is_not_rounded_up_to_a_whole_voyage_day() -> None:
         ):
             onset_epoch = epoch
     assert onset_epoch == 29
+
+
+def test_late_incubation_extends_recovery_and_resets_symptom_day() -> None:
+    """A late onset still gets the full symptomatic recovery duration."""
+    profile = {**NORO, "symptom_onset_day": 3.0, "recovery_day": 2}
+    agent = _infected_agent(HOURLY)
+    rng = _AlwaysIllRng()
+    for epoch in range(72):
+        _advance_agent_pathogen_infections(agent, {"noro": profile}, rng, epoch=epoch)
+
+    infection = agent.infections["noro"]
+    telemetry = agent.to_schema_dict()["pathogen_infections"]["noro"]
+    assert infection["status"] == InfectionStatus.INFECTED
+    assert infection["illness"] == IllnessStatus.SYMPTOMATIC
+    assert telemetry["days_post_infection"] == 3
+    assert telemetry["days_since_symptom_onset"] == 1
+
+    for epoch in range(72, 120):
+        _advance_agent_pathogen_infections(agent, {"noro": profile}, rng, epoch=epoch)
+    assert agent.infections["noro"]["status"] == InfectionStatus.RECOVERED
 
 
 def test_index_cases_are_seeded_one_day_in_on_either_clock() -> None:
