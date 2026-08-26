@@ -315,7 +315,7 @@ def _parse_density_cfg(tx: dict[str, Any]) -> dict[str, float]:
         "max_contacts": "max_contacts_per_day",
     }
     normalized = {aliases.get(k, k): v for k, v in provided.items()}
-    parsed = {
+    return {
         **DEFAULT_DENSITY_CFG,
         **{
             k: float(v)
@@ -323,7 +323,6 @@ def _parse_density_cfg(tx: dict[str, Any]) -> dict[str, float]:
             if k in DEFAULT_DENSITY_CFG
         },
     }
-    return parsed
 
 
 def _parse_heterogeneous_sigma(
