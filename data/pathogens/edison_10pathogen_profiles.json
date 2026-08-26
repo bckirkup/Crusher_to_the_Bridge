@@ -8,6 +8,8 @@
   "pathogens": [
     {
       "pathogen_id": "norovirus_gii4",
+      "surface_decay_per_day": 0.25,
+      "airborne_half_life_hours": 1.1,
       "name": "Norovirus GII.4",
       "category": "enteric_viral",
       "transmission_routes": [
@@ -82,8 +84,8 @@
       },
       "food_contamination": {
         "enabled": true,
-        "growth_rate_per_epoch": 0.3,
-        "decay_rate_per_epoch": 0.1
+        "growth_rate_per_day": 0.0,
+        "decay_rate_per_day": 0.1
       },
       "introduction_epoch": 0,
       "initial_infected": 1,
@@ -130,8 +132,8 @@
       "strain_evolution": {
         "mutation_rate": 0.02,
         "phenotype_mutation_fraction": 0.05,
-        "within_host_mutation_rate": 0.0,
-        "recombination_rate": 0.01,
+        "within_host_mutation_rate_per_day": 0.0,
+        "recombination_rate_per_day": 0.01,
         "superinfection_susceptibility": 0.1,
         "genotypes": [
           "GII.4",
@@ -197,6 +199,8 @@
     },
     {
       "pathogen_id": "sars_cov2_resp",
+      "surface_decay_per_day": 0.95,
+      "airborne_half_life_hours": 1.1,
       "name": "SARS-CoV-2",
       "category": "respiratory_viral",
       "transmission_routes": [
@@ -328,8 +332,8 @@
       "strain_evolution": {
         "mutation_rate": 0.03,
         "phenotype_mutation_fraction": 0.1,
-        "within_host_mutation_rate": 0.0,
-        "recombination_rate": 0.005,
+        "within_host_mutation_rate_per_day": 0.0,
+        "recombination_rate_per_day": 0.005,
         "superinfection_susceptibility": 0.05,
         "genotypes": [
           "ancestral",
@@ -406,6 +410,8 @@
     },
     {
       "pathogen_id": "influenza_a",
+      "surface_decay_per_day": 0.94,
+      "airborne_half_life_hours": 1.5,
       "name": "Influenza A",
       "category": "respiratory_viral",
       "transmission_routes": [
@@ -538,8 +544,8 @@
       "strain_evolution": {
         "mutation_rate": 0.04,
         "phenotype_mutation_fraction": 0.15,
-        "within_host_mutation_rate": 0.0,
-        "recombination_rate": 0.02,
+        "within_host_mutation_rate_per_day": 0.0,
+        "recombination_rate_per_day": 0.02,
         "superinfection_susceptibility": 0.08,
         "genotypes": [
           "H1N1",
@@ -749,8 +755,8 @@
       "strain_evolution": {
         "mutation_rate": 0.005,
         "phenotype_mutation_fraction": 0.01,
-        "within_host_mutation_rate": 0.0,
-        "recombination_rate": 0.0,
+        "within_host_mutation_rate_per_day": 0.0,
+        "recombination_rate_per_day": 0.0,
         "superinfection_susceptibility": 0.01,
         "genotypes": [
           "A",
@@ -895,7 +901,7 @@
       "environmental_contamination": {
         "enabled": true,
         "source_type": "hvac",
-        "colonization_rate_per_epoch": 0.02,
+        "colonization_rate_per_day": 0.02,
         "baseline_environmental_load": 100.0,
         "person_to_person": false,
         "source_zones": [
@@ -909,7 +915,7 @@
           "EC_*"
         ],
         "base_emission_rate": 0.001,
-        "exposure_probability_per_epoch": 0.1
+        "exposure_probability_per_day": 0.1
       },
       "introduction_epoch": 30,
       "initial_infected": 0,
@@ -972,6 +978,8 @@
     },
     {
       "pathogen_id": "vibrio_cholerae_parahaemolyticus",
+      "surface_decay_per_day": 0.50,
+      "airborne_half_life_hours": 1.1,
       "name": "Vibrio cholerae/parahaemolyticus",
       "category": "enteric_bacterial",
       "transmission_routes": [
@@ -1047,8 +1055,8 @@
       },
       "food_contamination": {
         "enabled": true,
-        "growth_rate_per_epoch": 0.5,
-        "decay_rate_per_epoch": 0.1
+        "growth_rate_per_day": 0.5,
+        "decay_rate_per_day": 0.1
       },
       "introduction_epoch": 40,
       "initial_infected": 1,
@@ -1106,6 +1114,8 @@
     },
     {
       "pathogen_id": "campylobacter_jejuni",
+      "surface_decay_per_day": 0.50,
+      "airborne_half_life_hours": 1.1,
       "name": "Campylobacter jejuni",
       "category": "enteric_bacterial",
       "transmission_routes": [
@@ -1176,8 +1186,8 @@
       },
       "food_contamination": {
         "enabled": true,
-        "growth_rate_per_epoch": 0.2,
-        "decay_rate_per_epoch": 0.05
+        "growth_rate_per_day": 0.2,
+        "decay_rate_per_day": 0.1
       },
       "introduction_epoch": 50,
       "initial_infected": 1,
@@ -1368,10 +1378,10 @@
           "EC_*"
         ],
         "base_emission_rate": 0.0001,
-        "exposure_probability_per_epoch": 0.1,
+        "exposure_probability_per_day": 0.1,
         "amplification_by_antibiotic_use": 5.0,
-        "spore_decay_rate_per_epoch": 0.001,
-        "colonization_rate_per_epoch": 0.0,
+        "spore_decay_rate_per_day": 0.001,
+        "colonization_rate_per_day": 0.0,
         "baseline_environmental_load": 50.0,
         "person_to_person": true
       }

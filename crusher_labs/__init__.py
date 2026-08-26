@@ -48,6 +48,7 @@ from crusher_labs.observation_core import (
     WastewaterSequencingGrid,
 )
 from crusher_labs.protocol_engine import ProtocolEngine
+from engines.sim_clock import SimClock
 from simulation_utils.paths import resolve_repo_path, validated_open
 
 _CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.yaml")
@@ -113,6 +114,7 @@ def build_modalities(
     cfg: dict[str, Any] | None = None,
     rng: np.random.Generator | None = None,
     total_epochs: int = 24,
+    clock: SimClock | None = None,
 ) -> dict[str, Any]:
     """Instantiate all modalities from *cfg*, sharing *rng*.
 
@@ -124,6 +126,7 @@ def build_modalities(
         rng = np.random.default_rng(cfg.get("random_seed", 42))
 
     syn_cfg = cfg.get("syndromic", {})
+    run_clock = clock or SimClock.from_config(cfg)
     rdt_cfg = cfg.get("clinical_rdt", {})
     pcr_cfg = cfg.get("targeted_pcr", {})
     fred_cfg = cfg.get("fred_behavior", {})
@@ -132,7 +135,11 @@ def build_modalities(
 
     return {
         "syndromic": SyndromicSurveillance(
-            sick_call_probability=syn_cfg.get("sick_call_probability", 0.70),
+            sick_call_probability=(
+                syn_cfg["sick_call_probability"]
+                if "sick_call_probability" in syn_cfg
+                else syn_cfg.get("sick_call_probability_per_day", 0.70)
+            ),
             background_noise_rate=syn_cfg.get("background_noise_rate", 0.015),
             noise_categories=fred_cfg.get("healthy_noise_categories"),
             quarantine_compliance=fred_cfg.get("quarantine_compliance", 0.85),
@@ -144,6 +151,7 @@ def build_modalities(
             crew_screening_interval_epochs=syn_cfg.get(
                 "crew_screening_interval_epochs",
             ),
+            clock=run_clock,
             rng=rng,
         ),
         "clinical_rdt": ClinicalRDT(

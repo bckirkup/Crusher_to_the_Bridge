@@ -426,10 +426,18 @@ class StrainEvolutionConfig:
                 raw.get("phenotype_mutation_fraction", 0.0),
             ),
             within_host_mutation_rate=_require_unit_interval(
-                "within_host_mutation_rate", raw.get("within_host_mutation_rate", 0.0),
+                "within_host_mutation_rate_per_day",
+                raw.get(
+                    "within_host_mutation_rate_per_day",
+                    raw.get("within_host_mutation_rate", 0.0),
+                ),
             ),
             recombination_rate=_require_unit_interval(
-                "recombination_rate", raw.get("recombination_rate", 0.0),
+                "recombination_rate_per_day",
+                raw.get(
+                    "recombination_rate_per_day",
+                    raw.get("recombination_rate", 0.0),
+                ),
             ),
             superinfection_susceptibility=_require_unit_interval(
                 "superinfection_susceptibility",

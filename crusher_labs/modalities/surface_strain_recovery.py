@@ -16,8 +16,9 @@ from types import MappingProxyType
 
 import numpy as np
 
+from engines.sim_clock import LEGACY_CLOCK
 from engines.strain_dose_ledger import UNREPORTABLE_GENOTYPES
-from engines.transmission_core import SURFACE_DECAY_RATE
+from engines.transmission_core import DEFAULT_SURFACE_DECAY_PER_DAY
 
 STATUS_NOT_CONFIGURED = "not_configured"
 STATUS_NO_DEPOSITION = "no_deposition"
@@ -124,7 +125,10 @@ class SurfaceRecoveryConfig:
 def surface_persistence(epochs_since_deposition: int) -> float:
     """Surface mass retained after ``epochs_since_deposition`` epochs."""
     epochs = max(int(epochs_since_deposition), 0)
-    return float((1.0 - SURFACE_DECAY_RATE) ** epochs)
+    survival = 1.0 - LEGACY_CLOCK.decay_per_epoch(
+        DEFAULT_SURFACE_DECAY_PER_DAY,
+    )
+    return float(survival ** epochs)
 
 
 def recovery_probability(

@@ -354,7 +354,6 @@ class ShipSimulation:
         # Keep local cfg and run_spec in sync for downstream helpers
         self.cfg = cfg
         self.run_spec.legacy_cfg = cfg
-        self.modalities = build_modalities(cfg, self.rng, total_epochs=self.num_epochs)
         ship = initialize_ship_graph(cfg)
         self.zone_names = ship["zone_names"]
         self.high_traffic = ship["high_traffic_zones"]
@@ -363,6 +362,9 @@ class ShipSimulation:
         # One clock for the whole run: the itinerary sets the epoch length and
         # the natural history reads it, so the two cannot drift apart.
         self.clock = SimClock.for_run(cfg, voyage_cfg)
+        self.modalities = build_modalities(
+            cfg, self.rng, total_epochs=self.num_epochs, clock=self.clock,
+        )
         self.engine = build_engine(cfg, seed=self.seed, clock=self.clock)
         if self.display:
             from orchestrator_display import print_korkin_engine

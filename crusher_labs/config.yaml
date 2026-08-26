@@ -190,9 +190,9 @@ fred_behavior:
   # Deprecated: forced post-delay compliance removed (ignored if present)
   # compliance_delay_epochs: 1
   healthy_noise_categories:           # background sick-call reasons for healthy agents
-    - {reason: "seasickness",  probability: 0.008, syndrome: "gastrointestinal"}
-    - {reason: "fatigue",      probability: 0.005, syndrome: "systemic_febrile"}
-    - {reason: "minor_injury", probability: 0.002, syndrome: "wound_soft_tissue"}
+    - {reason: "seasickness",  probability_per_day: 0.0042, syndrome: "gastrointestinal"}
+    - {reason: "fatigue",      probability_per_day: 0.0030, syndrome: "systemic_febrile"}
+    - {reason: "minor_injury", probability_per_day: 0.0020, syndrome: "wound_soft_tissue"}
 
 # ── EMOD-Style Clinical Progression ──────────────────────────
 emod_progression:
@@ -317,7 +317,7 @@ observation:
 # ── Syndromic Surveillance ────────────────────────────────────
 syndromic:
   description: "Symptom-based screening (fever, GI distress, etc.)"
-  sick_call_probability: 0.70         # P(symptomatic agent reports to sick-call)
+  sick_call_probability_per_day: 0.70 # P(symptomatic agent reports per day)
   background_noise_rate: 0.015        # P(healthy agent reports daily – seasickness etc.)
   cadence: 1
   # Epochs after symptom onset before sick-call Bernoulli is allowed (0 = immediate).
@@ -502,21 +502,21 @@ wearable_monitoring:
         fever_specificity: 0.94
       confounders:
         - confounder_id: "seasickness"
-          prevalence: 0.15
+          prevalence_per_day: 0.15
           affected_channels:
             heart_rate:     {bias: 8.0, noise_mult: 1.5}
             hrv:            {bias: -12.0, noise_mult: 1.8}
           susceptible_classes: ["passenger_general", "passenger_family", "passenger_elderly"]
           susceptible_role_group: "passenger"
         - confounder_id: "alcohol"
-          prevalence: 0.08
+          prevalence_per_day: 0.08
           affected_channels:
             hrv:            {bias: -10.0, noise_mult: 2.0}
             heart_rate:     {bias: 6.0, noise_mult: 1.4}
             sleep_score:    {bias: -8.0, noise_mult: 1.5}
           susceptible_classes: ["passenger_general", "passenger_family"]
         - confounder_id: "exercise"
-          prevalence: 0.20
+          prevalence_per_day: 0.20
           affected_channels:
             heart_rate:     {bias: 15.0, noise_mult: 1.2}
           susceptible_classes: []
@@ -569,7 +569,7 @@ wearable_monitoring:
         fever_specificity: 0.92
       confounders:
         - confounder_id: "exercise"
-          prevalence: 0.25
+          prevalence_per_day: 0.25
           affected_channels:
             heart_rate:     {bias: 15.0, noise_mult: 1.2}
             activity_score: {bias: 20.0, noise_mult: 1.0}
@@ -619,7 +619,7 @@ wearable_monitoring:
         fever_specificity: 0.90
       confounders:
         - confounder_id: "meal_glucose_spike"
-          prevalence: 0.40
+          prevalence_per_day: 0.40
           affected_channels:
             glucose:        {bias: 30.0, noise_mult: 1.8}
           susceptible_classes: []
@@ -641,21 +641,21 @@ wearable_monitoring:
         fever_specificity: 0.91
       confounders:
         - confounder_id: "seasickness"
-          prevalence: 0.15
+          prevalence_per_day: 0.15
           affected_channels:
             heart_rate:     {bias: 8.0, noise_mult: 1.5}
             hrv:            {bias: -12.0, noise_mult: 1.8}
           susceptible_classes: ["passenger_general", "passenger_family", "passenger_elderly"]
           susceptible_role_group: "passenger"
         - confounder_id: "alcohol"
-          prevalence: 0.08
+          prevalence_per_day: 0.08
           affected_channels:
             hrv:            {bias: -10.0, noise_mult: 2.0}
             heart_rate:     {bias: 6.0, noise_mult: 1.4}
             sleep_score:    {bias: -8.0, noise_mult: 1.5}
           susceptible_classes: ["passenger_general", "passenger_family"]
         - confounder_id: "exercise"
-          prevalence: 0.20
+          prevalence_per_day: 0.20
           affected_channels:
             heart_rate:     {bias: 15.0, noise_mult: 1.2}
           susceptible_classes: []
@@ -677,21 +677,21 @@ wearable_monitoring:
         fever_specificity: 0.94
       confounders:
         - confounder_id: "seasickness"
-          prevalence: 0.15
+          prevalence_per_day: 0.15
           affected_channels:
             heart_rate:     {bias: 8.0, noise_mult: 1.5}
             hrv:            {bias: -12.0, noise_mult: 1.8}
           susceptible_classes: ["passenger_general", "passenger_family", "passenger_elderly"]
           susceptible_role_group: "passenger"
         - confounder_id: "alcohol"
-          prevalence: 0.08
+          prevalence_per_day: 0.08
           affected_channels:
             hrv:            {bias: -10.0, noise_mult: 2.0}
             heart_rate:     {bias: 6.0, noise_mult: 1.4}
             sleep_score:    {bias: -8.0, noise_mult: 1.5}
           susceptible_classes: ["passenger_general", "passenger_family"]
         - confounder_id: "exercise"
-          prevalence: 0.20
+          prevalence_per_day: 0.20
           affected_channels:
             heart_rate:     {bias: 15.0, noise_mult: 1.2}
           susceptible_classes: []
@@ -713,21 +713,21 @@ wearable_monitoring:
         fever_specificity: 0.95
       confounders:
         - confounder_id: "seasickness"
-          prevalence: 0.15
+          prevalence_per_day: 0.15
           affected_channels:
             heart_rate:     {bias: 8.0, noise_mult: 1.4}
             hrv:            {bias: -12.0, noise_mult: 1.7}
           susceptible_classes: ["passenger_general", "passenger_family", "passenger_elderly"]
           susceptible_role_group: "passenger"
         - confounder_id: "alcohol"
-          prevalence: 0.08
+          prevalence_per_day: 0.08
           affected_channels:
             hrv:            {bias: -10.0, noise_mult: 1.9}
             heart_rate:     {bias: 6.0, noise_mult: 1.3}
             sleep_score:    {bias: -8.0, noise_mult: 1.4}
           susceptible_classes: ["passenger_general", "passenger_family"]
         - confounder_id: "exercise"
-          prevalence: 0.20
+          prevalence_per_day: 0.20
           affected_channels:
             heart_rate:     {bias: 15.0, noise_mult: 1.2}
           susceptible_classes: []
@@ -749,7 +749,7 @@ wearable_monitoring:
         fever_specificity: 0.90
       confounders:
         - confounder_id: "seasickness"
-          prevalence: 0.15
+          prevalence_per_day: 0.15
           affected_channels:
             heart_rate:     {bias: 10.0, noise_mult: 1.6}
             hrv:            {bias: -14.0, noise_mult: 2.0}
@@ -757,19 +757,19 @@ wearable_monitoring:
           susceptible_classes: ["passenger_general", "passenger_family", "passenger_elderly"]
           susceptible_role_group: "passenger"
         - confounder_id: "alcohol"
-          prevalence: 0.08
+          prevalence_per_day: 0.08
           affected_channels:
             hrv:            {bias: -10.0, noise_mult: 2.0}
             heart_rate:     {bias: 6.0, noise_mult: 1.4}
           susceptible_classes: ["passenger_general", "passenger_family"]
         - confounder_id: "exercise"
-          prevalence: 0.25
+          prevalence_per_day: 0.25
           affected_channels:
             heart_rate:     {bias: 20.0, noise_mult: 1.5}
             activity_score: {bias: 25.0, noise_mult: 1.0}
           susceptible_classes: []
         - confounder_id: "wrist_motion"
-          prevalence: 0.30
+          prevalence_per_day: 0.30
           affected_channels:
             heart_rate:     {bias: 3.0, noise_mult: 1.3}
             spo2:           {bias: 0.0, noise_mult: 1.5}
@@ -792,13 +792,13 @@ wearable_monitoring:
         fever_specificity: 0.90
       confounders:
         - confounder_id: "exercise"
-          prevalence: 0.25
+          prevalence_per_day: 0.25
           affected_channels:
             heart_rate:     {bias: 15.0, noise_mult: 1.2}
             activity_score: {bias: 20.0, noise_mult: 1.0}
           susceptible_classes: []
         - confounder_id: "wrist_motion"
-          prevalence: 0.30
+          prevalence_per_day: 0.30
           affected_channels:
             heart_rate:     {bias: 3.0, noise_mult: 1.3}
             spo2:           {bias: 0.0, noise_mult: 1.5}

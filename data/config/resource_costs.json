@@ -109,8 +109,8 @@
       "description": "Multiplex rapid diagnostic panel kits (e.g. BioFire FilmArray GI). ROM $35-50/test."
     }
   },
-  "baseline_surveillance_costs_per_epoch": {
-    "description": "Fixed surveillance costs incurred every epoch regardless of protocol activation. Covers routine environmental swab + qPCR check.",
+  "baseline_surveillance_costs_per_day": {
+    "description": "Fixed surveillance costs incurred every natural-history day regardless of protocol activation. Covers routine environmental swab + qPCR check.",
     "financial_usd": 55.0,
     "materials": {
       "swab_kits": 1,

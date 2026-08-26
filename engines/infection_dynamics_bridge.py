@@ -69,7 +69,6 @@ ONSET_DAY = 1
 # Environmental deposition: fraction of shedding that deposits on surfaces
 # (ViralParticle.java: particles survive 86400 steps = 1 day)
 SURFACE_DEPOSITION_FRACTION = 1e-4
-ENV_DECAY_RATE = 0.5  # legacy flat daily decay (unused when CONTAM transport is active)
 
 # SEIQR compartmental parameters (from compartmental-models/SEIQR-SCM-diamond.Rmd)
 SEIQR_R0 = 2.1
@@ -460,6 +459,7 @@ class KorkinAgent:
         Optional dining/free rotation uses engine RNG + zone catalog.
         """
         adjusted_hour = int((hour + randomness + 24.0) % 24.0)
+        adjusted_hour %= len(self.schedule)
         activity = self.schedule[adjusted_hour]
         if activity == "Sleep":
             return self.home_zone
@@ -1506,8 +1506,8 @@ class KorkinShipEngine:
         """
         self.epoch += 1
 
-        # Representative hour for this epoch (midday activity peak)
-        hour = 12
+        # The legacy clock intentionally retains its historical midday lookup.
+        hour = self.clock.hour_of_day(self.epoch)
 
         from engines.voyage_itinerary import (
             LOCATION_ASHORE,
@@ -1545,6 +1545,8 @@ class KorkinShipEngine:
                 agent.current_location = agent.home_zone
                 continue
             randomness = self.rng.uniform(-1.0, 1.0)
+            if self.clock.mode == "hours":
+                randomness = 0.0
             agent.current_location = agent.get_location_for_hour(
                 hour,
                 randomness,
@@ -1609,10 +1611,12 @@ class KorkinShipEngine:
         # NOTE: Decay is now handled externally by the CONTAM transport
         # engine (py_contam_bridge) when available.  If no transport engine
         # is configured, the orchestrator falls back to the legacy flat
-        # decay rate (ENV_DECAY_RATE).
+        # fallback airborne survival when external transport is disabled.
         if not self._external_transport:
             for zname in self._all_zone_names:
-                self._zone_pathogen_mass[zname] *= ENV_DECAY_RATE
+                self._zone_pathogen_mass[zname] *= (
+                    self.clock.survival_from_half_life(1.1)
+                )
 
         for agent in self.agents:
             if agent.is_infected and agent.current_shedding > 0:
