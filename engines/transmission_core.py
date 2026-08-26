@@ -315,7 +315,7 @@ def _parse_density_cfg(tx: dict[str, Any]) -> dict[str, float]:
         "max_contacts": "max_contacts_per_day",
     }
     normalized = {aliases.get(k, k): v for k, v in provided.items()}
-    return {
+    parsed = {
         **DEFAULT_DENSITY_CFG,
         **{
             k: float(v)
@@ -323,6 +323,7 @@ def _parse_density_cfg(tx: dict[str, Any]) -> dict[str, float]:
             if k in DEFAULT_DENSITY_CFG
         },
     }
+    return parsed
 
 
 def _parse_heterogeneous_sigma(
@@ -466,14 +467,20 @@ class TransmissionCore:
                 )
                 if config is not None:
                     raw = profile.get("strain_evolution", {})
-                    if "within_host_mutation_rate_per_day" in raw:
+                    if (
+                        "within_host_mutation_rate_per_day" in raw
+                        or "within_host_mutation_rate" in raw
+                    ):
                         config = replace(
                             config,
                             within_host_mutation_rate=self.clock.probability_per_epoch(
                                 config.within_host_mutation_rate,
                             ),
                         )
-                    if "recombination_rate_per_day" in raw:
+                    if (
+                        "recombination_rate_per_day" in raw
+                        or "recombination_rate" in raw
+                    ):
                         config = replace(
                             config,
                             recombination_rate=self.clock.probability_per_epoch(
@@ -1621,8 +1628,12 @@ class TransmissionCore:
         mean_contacts = min(raw, max_c)
         if mean_contacts <= 0.0:
             return 0
-        # Cap again after the Poisson draw so max_contacts is a hard limit.
-        return min(int(max_c), max(0, int(self.rng.poisson(mean_contacts))))
+        draw = max(0, int(self.rng.poisson(mean_contacts)))
+        # In sub-day runs max_contacts caps the mean, not each draw. A
+        # per-epoch integer cap would make a daily cap bind 24 times.
+        if self.clock.day_fraction_per_epoch == 1.0:
+            return min(math.ceil(max_c), draw)
+        return draw
 
     def _draw_contact_multiplier(
         self,
@@ -1634,12 +1645,15 @@ class TransmissionCore:
             return self._effective_contacts(n_occupants, target)
         base = int(self.rng.choice(AVG_R_POOL))
         # Legacy mode: still scale by voyage contact multiplier when active
-        scaled = int(round(
+        scaled = (
             base
             * self.clock.day_fraction_per_epoch
-            * float(self.voyage_contact_multiplier),
-        ))
-        return max(0, scaled)
+            * float(self.voyage_contact_multiplier)
+        )
+        if self.clock.day_fraction_per_epoch == 1.0:
+            return max(0, int(round(scaled)))
+        whole = math.floor(scaled)
+        return max(0, whole + int(self.rng.random() < scaled - whole))
 
     def _zone_exposure_sigma(self, zone_name: str) -> float:
         """Log-sigma for within-zone exposure heterogeneity."""
@@ -2023,13 +2037,17 @@ class TransmissionCore:
                 1.0 + float(fc["growth_rate_per_day"]),
             )
         else:
-            growth_factor = 1.0 + float(fc.get("growth_rate_per_epoch", 0.0))
+            growth_factor = self.clock.growth_factor_per_epoch(
+                1.0 + float(fc.get("growth_rate_per_epoch", 0.0)),
+            )
         if "decay_rate_per_day" in fc:
             decay_factor = 1.0 - self.clock.decay_per_epoch(
                 float(fc["decay_rate_per_day"]),
             )
         else:
-            decay_factor = 1.0 - float(fc.get("decay_rate_per_epoch", 0.1))
+            decay_factor = 1.0 - self.clock.decay_per_epoch(
+                float(fc.get("decay_rate_per_epoch", 0.1)),
+            )
 
         for zone_name in food_zones:
             occupants = zone_occupants.get(zone_name, [])
@@ -2132,7 +2150,9 @@ class TransmissionCore:
                 1.0 + float(ec["colonization_rate_per_day"]),
             )
         else:
-            col_factor = 1.0 + float(ec.get("colonization_rate_per_epoch", 0.0))
+            col_factor = self.clock.growth_factor_per_epoch(
+                1.0 + float(ec.get("colonization_rate_per_epoch", 0.0)),
+            )
 
         # Grow the HVAC biofilm load
         load *= col_factor
@@ -2187,19 +2207,25 @@ class TransmissionCore:
         p_expose = (
             self.clock.probability_per_epoch(float(ec["exposure_probability_per_day"]))
             if "exposure_probability_per_day" in ec
-            else float(ec.get("exposure_probability_per_epoch", 0.1))
+            else self.clock.probability_per_epoch(
+                float(ec.get("exposure_probability_per_epoch", 0.1)),
+            )
         )
         spore_decay = (
             self.clock.decay_per_epoch(float(ec["spore_decay_rate_per_day"]))
             if "spore_decay_rate_per_day" in ec
-            else float(ec.get("spore_decay_rate_per_epoch", 0.0))
+            else self.clock.decay_per_epoch(
+                float(ec.get("spore_decay_rate_per_epoch", 0.0)),
+            )
         )
         col_factor = (
             self.clock.growth_factor_per_epoch(
                 1.0 + float(ec["colonization_rate_per_day"]),
             )
             if "colonization_rate_per_day" in ec
-            else 1.0 + float(ec.get("colonization_rate_per_epoch", 0.0))
+            else self.clock.growth_factor_per_epoch(
+                1.0 + float(ec.get("colonization_rate_per_epoch", 0.0)),
+            )
         )
         reservoirs = self.env_contamination.setdefault(pathogen_id, {})
 

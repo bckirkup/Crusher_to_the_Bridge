@@ -33,7 +33,7 @@ from typing import Any
 
 import numpy as np
 
-from engines.sim_clock import LEGACY_CLOCK, SimClock, crossed_day_boundary
+from engines.sim_clock import LEGACY_CLOCK, LEGACY_EPOCH_DAY, SimClock, crossed_day_boundary
 from engines.strain_state import ImmuneRecord, Phenotype
 
 # ── Korkin Lab parameters (from Person.java) ─────────────────────────────
@@ -69,6 +69,10 @@ ONSET_DAY = 1
 # Environmental deposition: fraction of shedding that deposits on surfaces
 # (ViralParticle.java: particles survive 86400 steps = 1 day)
 SURFACE_DEPOSITION_FRACTION = 1e-4
+
+# Aerosol half-life fallback for the pathogen-agnostic zone-mass path.
+# van Doremalen et al., NEJM 2020;382:1564 (SARS-CoV-2 aerosol half-life).
+DEFAULT_AIRBORNE_HALF_LIFE_HOURS = 1.1
 
 # SEIQR compartmental parameters (from compartmental-models/SEIQR-SCM-diamond.Rmd)
 SEIQR_R0 = 2.1
@@ -1545,7 +1549,7 @@ class KorkinShipEngine:
                 agent.current_location = agent.home_zone
                 continue
             randomness = self.rng.uniform(-1.0, 1.0)
-            if self.clock.mode == "hours":
+            if self.clock.mode != LEGACY_EPOCH_DAY:
                 randomness = 0.0
             agent.current_location = agent.get_location_for_hour(
                 hour,
@@ -1615,7 +1619,9 @@ class KorkinShipEngine:
         if not self._external_transport:
             for zname in self._all_zone_names:
                 self._zone_pathogen_mass[zname] *= (
-                    self.clock.survival_from_half_life(1.1)
+                    self.clock.survival_from_half_life(
+                        DEFAULT_AIRBORNE_HALF_LIFE_HOURS,
+                    )
                 )
 
         for agent in self.agents:

@@ -16,7 +16,7 @@ from types import MappingProxyType
 
 import numpy as np
 
-from engines.sim_clock import LEGACY_CLOCK
+from engines.sim_clock import LEGACY_CLOCK, SimClock
 from engines.strain_dose_ledger import UNREPORTABLE_GENOTYPES
 from engines.transmission_core import DEFAULT_SURFACE_DECAY_PER_DAY
 
@@ -122,10 +122,14 @@ class SurfaceRecoveryConfig:
         ))
 
 
-def surface_persistence(epochs_since_deposition: int) -> float:
+def surface_persistence(
+    epochs_since_deposition: int,
+    *,
+    clock: SimClock = LEGACY_CLOCK,
+) -> float:
     """Surface mass retained after ``epochs_since_deposition`` epochs."""
     epochs = max(int(epochs_since_deposition), 0)
-    survival = 1.0 - LEGACY_CLOCK.decay_per_epoch(
+    survival = 1.0 - clock.decay_per_epoch(
         DEFAULT_SURFACE_DECAY_PER_DAY,
     )
     return float(survival ** epochs)
@@ -136,12 +140,16 @@ def recovery_probability(
     epochs_since_deposition: int,
     *,
     config: SurfaceRecoveryConfig | None = None,
+    clock: SimClock = LEGACY_CLOCK,
 ) -> float:
     """Base recovery attenuated by the repository's surface decay factor."""
     settings = config or SurfaceRecoveryConfig(enabled=True)
     probability = settings.recovery_for_surface_type(surface_type)
     return float(np.clip(
-        probability * surface_persistence(epochs_since_deposition),
+        probability * surface_persistence(
+            epochs_since_deposition,
+            clock=clock,
+        ),
         0.0,
         1.0,
     ))
@@ -244,6 +252,7 @@ def recover_surface_mixture(
     epochs_since_deposition: int,
     config: SurfaceRecoveryConfig,
     rng: np.random.Generator,
+    clock: SimClock = LEGACY_CLOCK,
 ) -> SurfaceLineageMixture:
     """Recover a conserved lineage mixture from a sampled surface abundance."""
     sampled = max(float(sampled_abundance), 0.0)
@@ -251,6 +260,7 @@ def recover_surface_mixture(
         surface_type,
         epochs_since_deposition,
         config=config,
+        clock=clock,
     )
     if not config.enabled:
         return SurfaceLineageMixture(

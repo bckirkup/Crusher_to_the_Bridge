@@ -1047,18 +1047,23 @@ def step_cost_accounting(
     ledger = proto_ctx.cost_ledger
     resource_costs_cfg = proto_ctx.resource_costs_cfg
 
-    baseline_costs = dict(resource_costs_cfg.get(
-        "baseline_surveillance_costs_per_day",
-        resource_costs_cfg.get("baseline_surveillance_costs_per_epoch", {}),
-    ))
-    if "baseline_surveillance_costs_per_day" in resource_costs_cfg:
+    baseline_key = (
+        "baseline_surveillance_costs_per_day"
+        if "baseline_surveillance_costs_per_day" in resource_costs_cfg
+        else "baseline_surveillance_costs_per_epoch"
+    )
+    baseline_costs = dict(resource_costs_cfg.get(baseline_key, {}))
+    if baseline_key in resource_costs_cfg:
         baseline_costs["financial_usd"] = proto_ctx.clock.amount_per_epoch(
             baseline_costs.get("financial_usd", 0.0),
         )
         baseline_costs["labor_person_hours"] = proto_ctx.clock.amount_per_epoch(
             baseline_costs.get("labor_person_hours", 0.0),
         )
-        baseline_costs["materials"] = dict(baseline_costs.get("materials", {}))
+        baseline_costs["materials"] = {
+            item: proto_ctx.clock.amount_per_epoch(amount)
+            for item, amount in baseline_costs.get("materials", {}).items()
+        }
     ledger.debit_baseline_surveillance(epoch, baseline_costs)
 
     per_test = resource_costs_cfg.get("per_test_costs", {})

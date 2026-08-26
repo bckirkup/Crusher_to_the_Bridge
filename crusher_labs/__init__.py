@@ -12,6 +12,7 @@ behavioral compliance, and EMOD clinical progression phases.
 from __future__ import annotations
 
 import os
+import warnings
 from typing import Any
 
 import numpy as np
@@ -54,12 +55,67 @@ from simulation_utils.paths import resolve_repo_path, validated_open
 _CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.yaml")
 
 
+def _warn_legacy_config_units(
+    cfg: dict[str, Any],
+    *,
+    include_density: bool = True,
+) -> None:
+    """Warn once per configuration load for retired day-valued keys."""
+    syndromic = cfg.get("syndromic", {}) or {}
+    if "sick_call_probability" in syndromic:
+        warnings.warn(
+            "syndromic.sick_call_probability is deprecated; "
+            "use sick_call_probability_per_day",
+            DeprecationWarning,
+            stacklevel=3,
+        )
+    for category in (cfg.get("fred_behavior", {}) or {}).get(
+        "healthy_noise_categories", [],
+    ):
+        if isinstance(category, dict) and "probability" in category:
+            warnings.warn(
+                "fred_behavior healthy-noise probability is deprecated; "
+                "use probability_per_day",
+                DeprecationWarning,
+                stacklevel=3,
+            )
+    if include_density:
+        density = (cfg.get("transmission", {}) or {}).get(
+            "density_dependent",
+            {},
+        ) or {}
+        for key in ("base_contacts", "max_contacts"):
+            if key in density:
+                warnings.warn(
+                    f"transmission.density_dependent.{key} is deprecated",
+                    DeprecationWarning,
+                    stacklevel=3,
+                )
+    wearable = cfg.get("wearable_monitoring", {}) or {}
+    stack = [wearable]
+    while stack:
+        current = stack.pop()
+        if isinstance(current, dict):
+            if "prevalence" in current:
+                warnings.warn(
+                    "wearable confounder prevalence is deprecated; "
+                    "use prevalence_per_day",
+                    DeprecationWarning,
+                    stacklevel=3,
+                )
+            stack.extend(current.values())
+        elif isinstance(current, list):
+            stack.extend(current)
+
+
 def load_config(path: str = _CONFIG_PATH) -> dict[str, Any]:
     """Load and return the Crusher Labs YAML configuration."""
     repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     resolved = resolve_repo_path(repo_root, path)
     with validated_open(resolved, allowed_roots=(repo_root,), encoding="utf-8") as fh:
-        return yaml.safe_load(fh)
+        config = yaml.safe_load(fh)
+    _warn_legacy_config_units(config)
+    return config
 
 
 def wastewater_sequencing_params(cfg: dict[str, Any] | None = None) -> dict[str, Any]:
@@ -122,6 +178,8 @@ def build_modalities(
     """
     if cfg is None:
         cfg = load_config()
+    else:
+        _warn_legacy_config_units(cfg, include_density=False)
     if rng is None:
         rng = np.random.default_rng(cfg.get("random_seed", 42))
 

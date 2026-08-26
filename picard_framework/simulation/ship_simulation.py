@@ -1083,6 +1083,7 @@ class ShipSimulation:
             epochs_since_deposition=epochs,
             config=self.surface_recovery_config,
             rng=self.surface_recovery_rng,
+            clock=self.clock,
         )
         return mixture.as_row()
 

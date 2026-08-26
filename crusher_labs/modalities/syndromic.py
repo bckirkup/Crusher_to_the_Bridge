@@ -249,11 +249,9 @@ class SyndromicSurveillance:
         if self.background_noise_rate <= 0.0:
             return False, None
         for cat in self.noise_categories:
-            probability = float(cat.get("probability", 0.0))
-            if "probability_per_day" in cat:
-                probability = self.clock.probability_per_epoch(
-                    float(cat["probability_per_day"]),
-                )
+            probability = self.clock.probability_per_epoch(float(
+                cat.get("probability_per_day", cat.get("probability", 0.0)),
+            ))
             if self.rng.random() < probability:
                 return True, cat["reason"]
         return False, None

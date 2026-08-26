@@ -183,7 +183,7 @@ def _print_pathogen_profile(pid: str, prof: dict[str, Any]) -> None:
     if fc.get("enabled"):
         gr = fc.get("growth_rate_per_day", fc.get("growth_rate_per_epoch", 0))
         dr = fc.get("decay_rate_per_day", fc.get("decay_rate_per_epoch", 0))
-        print(f"      Food contam: growth={gr}/epoch  decay={dr}/epoch")
+        print(f"      Food contam: growth={gr}/day  decay={dr}/day")
     ec = prof.get("environmental_contamination", {})
     if ec.get("enabled"):
         src = ec.get("source_type", "?")

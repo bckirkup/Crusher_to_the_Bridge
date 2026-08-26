@@ -1187,7 +1187,7 @@
       "food_contamination": {
         "enabled": true,
         "growth_rate_per_day": 0.2,
-        "decay_rate_per_day": 0.1
+        "decay_rate_per_day": 0.05
       },
       "introduction_epoch": 50,
       "initial_infected": 1,
