@@ -33,6 +33,7 @@ from orchestrator_types import (
     STATUS_BASELINE,
     STATUS_CONFIRMED,
     STATUS_LOCKDOWN,
+    STATUS_RANK,
     STATUS_SUSPECTED,
 )
 from picard_framework import PicardRunSpec, ShipSimulation
@@ -89,13 +90,12 @@ def test_hourly_reporting_drives_autonomous_escalation() -> None:
             sim.step(ActionEnvelope(epoch=epoch, actions={})).trigger_status,
         )
 
-    transitions = [
-        epoch for epoch, status in enumerate(statuses)
-        if epoch > 0 and status != statuses[epoch - 1]
-    ]
     first_suspected = next(
-        epoch for epoch, status in enumerate(statuses)
-        if status in {STATUS_SUSPECTED, STATUS_CONFIRMED, STATUS_LOCKDOWN}
+        (
+            epoch for epoch, status in enumerate(statuses)
+            if status in {STATUS_SUSPECTED, STATUS_CONFIRMED, STATUS_LOCKDOWN}
+        ),
+        None,
     )
 
     assert true_positive_events, "hourly reporting produced no true-positive call"
@@ -103,10 +103,11 @@ def test_hourly_reporting_drives_autonomous_escalation() -> None:
     assert sim.state.cumulative_confirmed_case_ids, (
         "reported case did not produce a confirmed clinical case"
     )
-    assert 0 <= first_suspected < epochs
-    assert transitions
-    assert transitions == sorted(set(transitions))
-    assert all(0 < epoch < epochs for epoch in transitions)
+    assert first_suspected is not None
+    assert 24 <= first_suspected <= 60
+    assert [STATUS_RANK[status] for status in statuses] == sorted(
+        STATUS_RANK[status] for status in statuses
+    )
 
 
 def test_sop_min_escalation_gate() -> None:

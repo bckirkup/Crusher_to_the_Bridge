@@ -103,18 +103,6 @@ def test_cascade_smoke_standard_clinical_progression() -> None:
     )
     spec = PicardRunSpec.from_picard_json(REPO_ROOT, spec_path)
     spec.num_epochs = 24
-    spec.legacy_cfg.setdefault("syndromic", {})["sick_call_probability"] = 1.0
-    spec.legacy_cfg["syndromic"]["sick_call_probability_per_day"] = 1.0
-    spec.legacy_cfg.setdefault("ship_graph", {})["infection_counters"] = [
-        {
-            "counter_id": "fixture_attack_rate",
-            "label": "Fixture Attack Rate",
-            "metric": "attack_rate",
-            "filter": {},
-            "threshold": 0.03,
-            "on_exceed": "confine_symptomatic",
-        },
-    ]
     sim = ShipSimulation(spec, display=False, repo_root=REPO_ROOT)
     sim.initialize()
     assert sim.state is not None
