@@ -34,6 +34,24 @@ from typing import Any
 _REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, _REPO_ROOT)
 
+from pydantic import (  # noqa: E402  (imported after the sys.path insert above)
+    BaseModel,
+    Field,
+    field_validator,
+    model_validator,
+)
+
+from crusher_labs.modalities.clinical_strain_typing import (  # noqa: E402
+    AssayConfigError,
+    SequencingAssay,
+)
+from engines.incubation import IncubationModel  # noqa: E402
+from engines.strain_state import (  # noqa: E402
+    StrainConfigError,
+    StrainEvolutionConfig,
+)
+from simulation_utils.paths import validated_open  # noqa: E402
+
 
 def _config_value_with_retired_alias(
     section: dict[str, Any],
@@ -52,24 +70,6 @@ def _config_value_with_retired_alias(
         )
         return section[retired_key]
     return default
-
-from pydantic import (  # noqa: E402  (imported after the sys.path insert above)
-    BaseModel,
-    Field,
-    field_validator,
-    model_validator,
-)
-
-from crusher_labs.modalities.clinical_strain_typing import (  # noqa: E402
-    AssayConfigError,
-    SequencingAssay,
-)
-from engines.incubation import IncubationModel  # noqa: E402
-from engines.strain_state import (  # noqa: E402
-    StrainConfigError,
-    StrainEvolutionConfig,
-)
-from simulation_utils.paths import validated_open  # noqa: E402
 
 # ── ANSI colour codes ────────────────────────────────────────────────────
 

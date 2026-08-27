@@ -187,8 +187,8 @@ def normalize_voyage_config(raw: dict[str, Any]) -> dict[str, Any]:
                 )
                 day[canonical] = day[retired]
             elif canonical in day and retired not in day:
-                # Keep the retired shape available to Sentinel consumers until
-                # their separate unit migration lands.
+                # Sentinel itinerary.py still reads the retired shape; remove
+                # this bridge when the separate Sentinel unit pass lands.
                 day[retired] = day[canonical]
         dtype = str(day.get("type", ""))
         if dtype not in DAY_TYPES:
@@ -274,6 +274,8 @@ def resolve_epoch_state(
     epochs_per_day = max(1, int(round(clock.epochs_per_day)))
     ep = max(1, int(epoch))
     voyage_day = (ep - 1) // epochs_per_day + 1
+    # Retired legacy_epoch_day now follows the clock's 12:00 compatibility
+    # convention rather than the former modulo result of 0; this is deliberate.
     epoch_of_day = clock.hour_of_day(ep - 1)
 
     effects_enabled = bool(voyage.get("effects_enabled", False))

@@ -512,7 +512,7 @@ def _iter_t16_runs(ctx: Any) -> Iterator[tuple[str, dict[str, Any]]]:
     qcomp = float(ctx.tier.get("quarantine_compliance", 0.6))
     delay_values = ctx.tier.get(
         "reluctant_delay_hours",
-        ctx.tier.get("reluctant_delay_hours", ctx.tier.get("reluctant_delay_epochs", [])),
+        ctx.tier.get("reluctant_delay_epochs", []),
     )
     for pathogen, rfrac, rdelay, seed in product(
         ctx.tier["pathogens"],
