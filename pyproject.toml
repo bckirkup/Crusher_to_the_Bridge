@@ -93,23 +93,7 @@ markers = [
 ]
 
 [tool.coverage.run]
-source = [
-    "engines",
-    "crusher_labs",
-    "picard_framework",
-    "decision_engine",
-    "orchestrator",
-    "orchestrator_chronic",
-    "orchestrator_display",
-    "orchestrator_epoch",
-    "orchestrator_init",
-    "orchestrator_record",
-    "orchestrator_types",
-    "presidio_runner",
-    "simulation_utils",
-    "telemetry_buffer",
-    "tools",
-]
+source = ["."]
 omit = [
     "dashboard/*",
     "scripts/*",
