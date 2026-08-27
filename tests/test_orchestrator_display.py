@@ -7,6 +7,7 @@ import pytest
 from orchestrator_display import (
     _executive_counter_rows,
     _executive_epidemiology_rows,
+    print_initialization,
     print_executive_summary,
     print_progress,
 )
@@ -54,6 +55,27 @@ class TestProgressAndIcons:
         print_progress(1, 4, "ALERT", 1, 100.0, "BASELINE")
         out = capsys.readouterr().out
         assert "BASELINE → ALERT" in out
+
+
+def test_initialization_displays_noise_probability_per_day(capsys: pytest.CaptureFixture[str]) -> None:
+    print_initialization(
+        ship={
+            "num_agents": 2,
+            "agent_roles": {1: "passenger", 2: "crew"},
+            "zone_names": ["Bridge"],
+            "high_traffic_zones": [],
+        },
+        seeds={},
+        cfg={
+            "fred_behavior": {
+                "healthy_noise_categories": [
+                    {"reason": "fatigue", "probability_per_day": 0.2},
+                ],
+            },
+        },
+    )
+    output = capsys.readouterr().out
+    assert "Noise: fatigue          P/day=0.200" in output
 
 
 class TestExecutiveCounterRows:
