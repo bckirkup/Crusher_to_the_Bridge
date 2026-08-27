@@ -71,7 +71,6 @@ def print_initialization(
     cats = fred_cfg.get("healthy_noise_categories", [])
     for cat in cats:
         probability = cat.get("probability_per_day", cat.get("probability", 0.0))
-        # codeql[py/clear-text-logging-sensitive-data]
         print(f"    Noise: {cat['reason']:15s}  P/day={probability:.3f}")
 
     emod_cfg = cfg.get("emod_progression", {})
