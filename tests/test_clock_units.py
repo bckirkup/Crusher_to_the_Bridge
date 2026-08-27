@@ -5,6 +5,7 @@ import math
 import pytest
 import numpy as np
 
+from crusher_labs import _warn_legacy_config_units, build_modalities
 from crusher_labs.cost_ledger import CostLedger
 from engines.transmission_core import ContactTracingMatrix, TransmissionCore
 from engines.sim_clock import SimClock
@@ -150,6 +151,61 @@ def test_engine_baseline_costs_match_across_clock_grids() -> None:
         assert hourly_audit["material_inventory"][item]["consumed"] == pytest.approx(
             legacy_audit["material_inventory"][item]["consumed"],
         )
+
+
+def test_retired_config_keys_warn_and_keep_daily_semantics() -> None:
+    cfg = {
+        "syndromic": {"sick_call_probability": 0.7},
+        "fred_behavior": {
+            "healthy_noise_categories": [
+                {"reason": "fatigue", "probability": 0.2},
+            ],
+        },
+        "transmission": {
+            "density_dependent": {
+                "base_contacts": 2.0,
+                "max_contacts": 4.0,
+            },
+        },
+        "wearable_monitoring": {
+            "anomaly_detection": {
+                "confounders": [{"prevalence": 0.1}],
+            },
+        },
+    }
+    with pytest.warns(DeprecationWarning) as caught:
+        _warn_legacy_config_units(cfg)
+    assert len(caught) == 5
+    syn = build_modalities(
+        cfg,
+        clock=SimClock(epoch_duration_hours=1.0, mode="hours"),
+        rng=np.random.default_rng(4),
+    )["syndromic"]
+    assert syn.sick_call_probability == pytest.approx(0.7)
+    assert syn.clock.probability_per_epoch(0.7) == pytest.approx(0.0489, abs=1e-4)
+
+
+def test_retired_food_rates_convert_on_the_active_clock() -> None:
+    hourly = _reservoir_core(SimClock(epoch_duration_hours=1.0, mode="hours"))
+    profile = {
+        "food_contamination": {
+            "enabled": True,
+            "growth_rate_per_epoch": 0.2,
+            "decay_rate_per_epoch": 0.1,
+        },
+    }
+    hourly.food_pools["test"]["Dining"] = 10.0
+    for epoch in range(24):
+        hourly._pathway_food_contamination(
+            epoch,
+            {"Dining": []},
+            {},
+            ContactTracingMatrix(epoch),
+            pathogen_id="test",
+            profile=profile,
+        )
+    expected = 10.0 * 1.2 * 0.9
+    assert hourly.food_pools["test"]["Dining"] == pytest.approx(expected)
 
 
 def test_engine_contacts_match_daily_mean_at_hourly_resolution() -> None:

@@ -51,7 +51,7 @@ from engines.infection_dynamics_bridge import (
     InfectionStatus,
     KorkinAgent,
 )
-from engines.sim_clock import SimClock
+from engines.sim_clock import LEGACY_EPOCH_DAY, SimClock
 from engines.strain_dose_ledger import (
     UNRESOLVED_STRAIN,
     Contributor,
@@ -461,31 +461,8 @@ class TransmissionCore:
         self.strain_configs: dict[str, StrainEvolutionConfig] = {}
         if self.strain_registry is not None:
             for pid, profile in self.pathogen_profiles.items():
-                config = StrainEvolutionConfig.from_profile(
-                    {**profile, "pathogen_id": pid},
-                )
+                config = self._strain_config_for_profile(pid, profile)
                 if config is not None:
-                    raw = profile.get("strain_evolution", {})
-                    if (
-                        "within_host_mutation_rate_per_day" in raw
-                        or "within_host_mutation_rate" in raw
-                    ):
-                        config = replace(
-                            config,
-                            within_host_mutation_rate=self.clock.probability_per_epoch(
-                                config.within_host_mutation_rate,
-                            ),
-                        )
-                    if (
-                        "recombination_rate_per_day" in raw
-                        or "recombination_rate" in raw
-                    ):
-                        config = replace(
-                            config,
-                            recombination_rate=self.clock.probability_per_epoch(
-                                config.recombination_rate,
-                            ),
-                        )
                     self.strain_configs[pid] = config
         self.mutation_operator: MutationOperator | None = (
             MutationOperator(self.strain_registry, self.strain_configs)
@@ -499,6 +476,36 @@ class TransmissionCore:
         # Per-epoch strain-resolved dose: {agent: {pathogen: {contributor: dose}}}
         self._strain_doses: dict[int, dict[str, dict[Contributor, float]]] = {}
         self._last_pathogen_doses: dict[int, dict[str, float]] = {}
+
+    def _strain_config_for_profile(
+        self,
+        pathogen_id: str,
+        profile: dict[str, Any],
+    ) -> StrainEvolutionConfig | None:
+        config = StrainEvolutionConfig.from_profile(
+            {**profile, "pathogen_id": pathogen_id},
+        )
+        if config is None:
+            return None
+        raw = profile.get("strain_evolution", {})
+        if (
+            "within_host_mutation_rate_per_day" in raw
+            or "within_host_mutation_rate" in raw
+        ):
+            config = replace(
+                config,
+                within_host_mutation_rate=self.clock.probability_per_epoch(
+                    config.within_host_mutation_rate,
+                ),
+            )
+        if "recombination_rate_per_day" in raw or "recombination_rate" in raw:
+            config = replace(
+                config,
+                recombination_rate=self.clock.probability_per_epoch(
+                    config.recombination_rate,
+                ),
+            )
+        return config
 
     @property
     def strain_tracking(self) -> bool:
@@ -1630,7 +1637,7 @@ class TransmissionCore:
         draw = max(0, int(self.rng.poisson(mean_contacts)))
         # In sub-day runs max_contacts caps the mean, not each draw. A
         # per-epoch integer cap would make a daily cap bind 24 times.
-        if self.clock.day_fraction_per_epoch == 1.0:
+        if self.clock.mode == LEGACY_EPOCH_DAY:
             return min(math.ceil(max_c), draw)
         return draw
 
@@ -1649,7 +1656,7 @@ class TransmissionCore:
             * self.clock.day_fraction_per_epoch
             * float(self.voyage_contact_multiplier)
         )
-        if self.clock.day_fraction_per_epoch == 1.0:
+        if self.clock.mode == LEGACY_EPOCH_DAY:
             return max(0, int(round(scaled)))
         whole = math.floor(scaled)
         return max(0, whole + int(self.rng.random() < scaled - whole))
@@ -2031,22 +2038,7 @@ class TransmissionCore:
         if not food_zones:
             return
 
-        if "growth_rate_per_day" in fc:
-            growth_factor = self.clock.growth_factor_per_epoch(
-                1.0 + float(fc["growth_rate_per_day"]),
-            )
-        else:
-            growth_factor = self.clock.growth_factor_per_epoch(
-                1.0 + float(fc.get("growth_rate_per_epoch", 0.0)),
-            )
-        if "decay_rate_per_day" in fc:
-            decay_factor = 1.0 - self.clock.decay_per_epoch(
-                float(fc["decay_rate_per_day"]),
-            )
-        else:
-            decay_factor = 1.0 - self.clock.decay_per_epoch(
-                float(fc.get("decay_rate_per_epoch", 0.1)),
-            )
+        growth_factor, decay_factor = self._food_rate_factors(fc)
 
         for zone_name in food_zones:
             occupants = zone_occupants.get(zone_name, [])
@@ -2098,6 +2090,19 @@ class TransmissionCore:
                     "food_zone_multiplier": zone_mult,
                     "dose": round(dose, 4),
                 })
+
+    def _food_rate_factors(self, food_cfg: dict[str, Any]) -> tuple[float, float]:
+        growth = food_cfg.get(
+            "growth_rate_per_day",
+            food_cfg.get("growth_rate_per_epoch", 0.0),
+        )
+        decay = food_cfg.get(
+            "decay_rate_per_day",
+            food_cfg.get("decay_rate_per_epoch", 0.1),
+        )
+        growth_factor = self.clock.growth_factor_per_epoch(1.0 + float(growth))
+        decay_factor = 1.0 - self.clock.decay_per_epoch(float(decay))
+        return growth_factor, decay_factor
 
     # ── Pathway 6: Environmental Source ─────────────────────────────
 

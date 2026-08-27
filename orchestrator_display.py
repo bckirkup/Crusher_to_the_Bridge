@@ -70,8 +70,9 @@ def print_initialization(
     print(f"    Reluctant delay:         {fred_cfg.get('reluctant_delay_epochs', 48)} epoch(s)")
     cats = fred_cfg.get("healthy_noise_categories", [])
     for cat in cats:
+        reason = cat.get("reason", "")
         probability = cat.get("probability_per_day", cat.get("probability", 0.0))
-        print(f"    Noise: {cat['reason']:15s}  P/day={probability:.3f}")
+        print(f"    Noise: {reason:15s}  P/day={probability:.3f}")
 
     emod_cfg = cfg.get("emod_progression", {})
     phases = emod_cfg.get("shedding_phases", [])

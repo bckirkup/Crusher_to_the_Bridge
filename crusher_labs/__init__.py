@@ -55,13 +55,7 @@ from simulation_utils.paths import resolve_repo_path, validated_open
 _CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.yaml")
 
 
-def _warn_legacy_config_units(
-    cfg: dict[str, Any],
-    *,
-    include_density: bool = True,
-) -> None:
-    """Warn once per configuration load for retired day-valued keys."""
-    syndromic = cfg.get("syndromic", {}) or {}
+def _warn_legacy_syndromic_units(syndromic: dict[str, Any]) -> None:
     if "sick_call_probability" in syndromic:
         warnings.warn(
             "syndromic.sick_call_probability is deprecated; "
@@ -69,9 +63,10 @@ def _warn_legacy_config_units(
             DeprecationWarning,
             stacklevel=3,
         )
-    for category in (cfg.get("fred_behavior", {}) or {}).get(
-        "healthy_noise_categories", [],
-    ):
+
+
+def _warn_legacy_noise_units(fred_behavior: dict[str, Any]) -> None:
+    for category in fred_behavior.get("healthy_noise_categories", []):
         if isinstance(category, dict) and "probability" in category:
             warnings.warn(
                 "fred_behavior healthy-noise probability is deprecated; "
@@ -79,19 +74,20 @@ def _warn_legacy_config_units(
                 DeprecationWarning,
                 stacklevel=3,
             )
-    if include_density:
-        density = (cfg.get("transmission", {}) or {}).get(
-            "density_dependent",
-            {},
-        ) or {}
-        for key in ("base_contacts", "max_contacts"):
-            if key in density:
-                warnings.warn(
-                    f"transmission.density_dependent.{key} is deprecated",
-                    DeprecationWarning,
-                    stacklevel=3,
-                )
-    wearable = cfg.get("wearable_monitoring", {}) or {}
+
+
+def _warn_legacy_density_units(transmission: dict[str, Any]) -> None:
+    density = transmission.get("density_dependent", {}) or {}
+    for key in ("base_contacts", "max_contacts"):
+        if key in density:
+            warnings.warn(
+                f"transmission.density_dependent.{key} is deprecated",
+                DeprecationWarning,
+                stacklevel=3,
+            )
+
+
+def _warn_legacy_wearable_units(wearable: dict[str, Any]) -> None:
     stack = [wearable]
     while stack:
         current = stack.pop()
@@ -106,6 +102,19 @@ def _warn_legacy_config_units(
             stack.extend(current.values())
         elif isinstance(current, list):
             stack.extend(current)
+
+
+def _warn_legacy_config_units(
+    cfg: dict[str, Any],
+    *,
+    include_density: bool = True,
+) -> None:
+    """Warn once per configuration load for retired day-valued keys."""
+    _warn_legacy_syndromic_units(cfg.get("syndromic", {}) or {})
+    _warn_legacy_noise_units(cfg.get("fred_behavior", {}) or {})
+    if include_density:
+        _warn_legacy_density_units(cfg.get("transmission", {}) or {})
+    _warn_legacy_wearable_units(cfg.get("wearable_monitoring", {}) or {})
 
 
 def load_config(path: str = _CONFIG_PATH) -> dict[str, Any]:
