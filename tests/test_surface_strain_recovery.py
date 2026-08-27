@@ -32,6 +32,7 @@ from crusher_labs.modalities.surface_strain_recovery import (
 from engines.infection_dynamics_bridge import InfectionStatus, KorkinAgent
 from engines.strain_dose_ledger import ReservoirComposition
 from engines.transmission_core import (
+    DEFAULT_SURFACE_DECAY_PER_DAY,
     SURFACE_RESERVOIR,
     ContactTracingMatrix,
     TransmissionCore,
@@ -114,7 +115,8 @@ class TestSurfaceRecoveryConfig:
 class TestSurfaceRecoveryFunctions:
     def test_persistence_reuses_surface_decay_factor(self) -> None:
         assert surface_persistence(0) == pytest.approx(1.0)
-        assert surface_persistence(3) == pytest.approx(0.95**3)
+        expected_survival = 1.0 - DEFAULT_SURFACE_DECAY_PER_DAY
+        assert surface_persistence(3) == pytest.approx(expected_survival**3)
 
     def test_recovery_probability_is_monotone_by_surface_type(self) -> None:
         probabilities = [

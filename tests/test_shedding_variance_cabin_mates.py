@@ -107,21 +107,30 @@ class TestCabinMateTransmission:
             corridor_direct_contact_factor=0.15,
         )
         core.initialize_zones([zone])
-        matrix_free, _ = core.execute_transmission(
-            epoch=1,
-            agents=[shedder, free_target],
-            zone_pathogen_mass={zone: 0.0},
-            quarantined_ids=set(),
-        )
-        matrix_confined, _ = core.execute_transmission(
-            epoch=2,
-            agents=[shedder, confined],
-            zone_pathogen_mass={zone: 0.0},
-            quarantined_ids={2},
-        )
-        assert matrix_confined.shared_room_exposures[0]["dose"] < (
-            matrix_free.shared_room_exposures[0]["dose"] * 0.2
-        )
+        free_dose = 0.0
+        confined_dose = 0.0
+        for epoch in range(24):
+            matrix_free, _ = core.execute_transmission(
+                epoch=epoch,
+                agents=[shedder, free_target],
+                zone_pathogen_mass={zone: 0.0},
+                quarantined_ids=set(),
+            )
+            matrix_confined, _ = core.execute_transmission(
+                epoch=epoch,
+                agents=[shedder, confined],
+                zone_pathogen_mass={zone: 0.0},
+                quarantined_ids={2},
+            )
+            free_dose += sum(
+                exposure["dose"]
+                for exposure in matrix_free.shared_room_exposures
+            )
+            confined_dose += sum(
+                exposure["dose"]
+                for exposure in matrix_confined.shared_room_exposures
+            )
+        assert confined_dose < free_dose * 0.2
 
     def test_confined_cabin_mate_receives_full_direct_contact(self) -> None:
         zone = "PC_D6_P_F"
@@ -136,19 +145,28 @@ class TestCabinMateTransmission:
             corridor_direct_contact_factor=0.15,
         )
         core.initialize_zones([zone])
-        matrix_mate, _ = core.execute_transmission(
-            epoch=1,
-            agents=[shedder, confined],
-            zone_pathogen_mass={zone: 0.0},
-            quarantined_ids={2},
-        )
         free_target = _agent(3, zone)
-        matrix_free, _ = core.execute_transmission(
-            epoch=2,
-            agents=[shedder, free_target],
-            zone_pathogen_mass={zone: 0.0},
-            quarantined_ids=set(),
-        )
-        mate_dose = matrix_mate.shared_room_exposures[0]["dose"]
-        free_dose = matrix_free.shared_room_exposures[0]["dose"]
+        mate_dose = 0.0
+        free_dose = 0.0
+        for epoch in range(24):
+            matrix_mate, _ = core.execute_transmission(
+                epoch=epoch,
+                agents=[shedder, confined],
+                zone_pathogen_mass={zone: 0.0},
+                quarantined_ids={2},
+            )
+            matrix_free, _ = core.execute_transmission(
+                epoch=epoch,
+                agents=[shedder, free_target],
+                zone_pathogen_mass={zone: 0.0},
+                quarantined_ids=set(),
+            )
+            mate_dose += sum(
+                exposure["dose"]
+                for exposure in matrix_mate.shared_room_exposures
+            )
+            free_dose += sum(
+                exposure["dose"]
+                for exposure in matrix_free.shared_room_exposures
+            )
         assert mate_dose > free_dose * NON_MATE_CONFINEMENT_CONTACT_FACTOR * 5

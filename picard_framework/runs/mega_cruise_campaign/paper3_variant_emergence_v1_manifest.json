@@ -245,7 +245,7 @@
       "founder_strains": [
         1
       ],
-      "within_host_mutation_rates": [
+      "within_host_mutation_rates_per_day": [
         0.0,
         0.002,
         0.0063,
@@ -435,7 +435,7 @@
       "founder_strains": [
         1
       ],
-      "within_host_mutation_rates": [
+      "within_host_mutation_rates_per_day": [
         0.0,
         0.003,
         0.0095,
@@ -579,7 +579,7 @@
       "founder_strains": [
         2
       ],
-      "recombination_rates": [
+      "recombination_rates_per_day": [
         0.001,
         0.0032,
         0.01,

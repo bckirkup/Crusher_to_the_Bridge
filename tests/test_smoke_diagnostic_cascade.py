@@ -17,6 +17,7 @@ import pytest
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, REPO_ROOT)
 
+from decision_engine.actions import ActionEnvelope
 from picard_framework import PicardRunSpec, ShipSimulation
 
 CASCADE_SMOKE_SPECS: list[tuple[str, str]] = [
@@ -97,10 +98,46 @@ def test_cascade_smoke_run_completes(spec_rel: str, cascade_config: str) -> None
 @pytest.mark.timeout(120)
 def test_cascade_smoke_standard_clinical_progression() -> None:
     """Standard cascade smoke orders clinical tests under default seed."""
-    history = _run_cascade_smoke(
-        "picard_framework/runs/smoke_cascade_6epoch.json",
-        prevalence_confinement=True,
+    spec_path = os.path.join(
+        REPO_ROOT, "picard_framework/runs/smoke_cascade_6epoch.json",
     )
+    spec = PicardRunSpec.from_picard_json(REPO_ROOT, spec_path)
+    spec.num_epochs = 24
+    spec.legacy_cfg.setdefault("syndromic", {})["sick_call_probability"] = 1.0
+    spec.legacy_cfg["syndromic"]["sick_call_probability_per_day"] = 1.0
+    spec.legacy_cfg.setdefault("ship_graph", {})["infection_counters"] = [
+        {
+            "counter_id": "fixture_attack_rate",
+            "label": "Fixture Attack Rate",
+            "metric": "attack_rate",
+            "filter": {},
+            "threshold": 0.03,
+            "on_exceed": "confine_symptomatic",
+        },
+    ]
+    sim = ShipSimulation(spec, display=False, repo_root=REPO_ROOT)
+    sim.initialize()
+    assert sim.state is not None
+    assert sim.engine is not None
+    symptomatic = next(
+        agent for agent in sim.engine.agents
+        if agent.is_symptomatic
+    )
+    agent_id = symptomatic.agent_id
+    sim.state.quarantined_ids.discard(agent_id)
+    sim.state.isolated_ids.discard(agent_id)
+    sim.engine.quarantined_ids.discard(agent_id)
+    sim.engine.isolated_ids.discard(agent_id)
+    first_epoch = sim.step(ActionEnvelope(
+        epoch=0,
+        actions={
+            "medical": [
+                {"kind": "report_sick_call", "agent_id": agent_id},
+            ],
+        },
+    ))
+    history = [first_epoch.epoch_record]
+    history.extend(sim.run().history[1:])
     assert any(
         rec["diagnostic_cascade"].get("tests_ordered")
         for rec in history

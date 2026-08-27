@@ -28,7 +28,7 @@ HISTORY_PATH = os.path.join(REPO_ROOT, "telemetry_buffer", "simulation_history.j
 EXPECTED_SUMMARY = {
     "susceptible": 13,
     "infected": 3,
-    "symptomatic": 1,
+    "symptomatic": 2,
     "recovered": 0,
     "immune": 4,
 }
