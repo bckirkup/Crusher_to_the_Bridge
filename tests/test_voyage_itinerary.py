@@ -143,8 +143,8 @@ def test_platform_dining_meal_weights_golden(platform_id: str, klass: str) -> No
 STOCK_MEDICAL_RESPONSE = {
     "sick_call_probability": 0.70,
     "isolation_compliance": 0.85,
-    "detection_delay_epochs": 0,
-    "crew_screening_interval_epochs": None,
+    "detection_delay_hours": 0,
+    "crew_screening_interval_hours": None,
 }
 
 
@@ -174,8 +174,8 @@ def test_apply_voyage_medical_response_noop_at_stock() -> None:
     merged = apply_voyage_medical_response(cfg, voyage)
     assert merged["syndromic"]["sick_call_probability"] == 0.70
     assert merged["fred_behavior"]["quarantine_compliance"] == 0.85
-    assert merged["syndromic"].get("detection_delay_epochs", 0) == 0
-    assert merged["syndromic"].get("crew_screening_interval_epochs") is None
+    assert merged["syndromic"].get("detection_delay_hours", 0) == 0
+    assert merged["syndromic"].get("crew_screening_interval_hours") is None
 
 
 def test_apply_voyage_medical_response_seeds_when_stock() -> None:
@@ -194,8 +194,8 @@ def test_apply_voyage_medical_response_seeds_when_stock() -> None:
     merged = apply_voyage_medical_response(cfg, voyage)
     assert merged["syndromic"]["sick_call_probability"] == 0.40
     assert merged["fred_behavior"]["quarantine_compliance"] == 0.80
-    assert merged["syndromic"]["detection_delay_epochs"] == 3
-    assert merged["syndromic"]["crew_screening_interval_epochs"] == 24
+    assert merged["syndromic"]["detection_delay_hours"] == 3
+    assert merged["syndromic"]["crew_screening_interval_hours"] == 24
 
 
 def test_apply_voyage_medical_response_respects_none_true_override() -> None:

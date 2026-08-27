@@ -310,7 +310,7 @@ def test_variant_surveillance_is_enabled_with_the_founder_count(
     for _run_id, spec in generate_tier_runs(emergence, "vs1_diversity_norovirus"):
         block = spec["config_overrides"]["variant_surveillance"]
         assert block["enabled"] is True
-        assert block["census_interval_epochs"] == 6
+        assert block["census_interval_hours"] == 6
         assert (
             block["founder_strains_per_pathogen"]
             == spec["campaign_parameters"]["founder_strains"]

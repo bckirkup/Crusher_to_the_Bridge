@@ -31,6 +31,7 @@ declared ``epoch_duration_hours`` (1 by default), so no tier multiplies by 24.
 from __future__ import annotations
 
 import os
+import warnings
 from itertools import product
 from typing import Any, Iterator, Mapping, Sequence
 
@@ -301,14 +302,23 @@ def _variant_config(
     founder_strains: int,
     clock: str,
 ) -> dict[str, Any]:
-    census = int(
-        (manifest.get("defaults") or {}).get("census_interval_epochs", 1),
-    )
+    defaults = manifest.get("defaults") or {}
+    if "census_interval_hours" in defaults:
+        census = int(defaults["census_interval_hours"])
+    else:
+        if "census_interval_epochs" in defaults:
+            warnings.warn(
+                "census_interval_epochs is deprecated; "
+                "use census_interval_hours",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+        census = int(defaults.get("census_interval_epochs", 1))
     return {
         "variant_surveillance": {
             "enabled": True,
             "founder_strains_per_pathogen": int(founder_strains),
-            "census_interval_epochs": census,
+            "census_interval_hours": census,
         },
         "natural_history_clock": clock,
     }

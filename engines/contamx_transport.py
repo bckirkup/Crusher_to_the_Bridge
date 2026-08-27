@@ -44,6 +44,7 @@ from engines.py_contam_bridge import (
     ContamTransportEngine,
     is_plenum_zone,
 )
+from engines.sim_clock import SimClock
 from simulation_utils.paths import (
     is_path_under_base,
     resolve_repo_path,
@@ -69,7 +70,15 @@ class ContamXTransportEngine(ContamTransportEngine):
         *,
         path_map_entries: list[dict[str, Any]] | None = None,
         oa_fraction: float = 0.2,
+        clock: SimClock | None = None,
     ) -> None:
+        super().__init__(
+            spatial_layout,
+            {},
+            filter_efficiency=filter_efficiency,
+            natural_decay_rate=natural_decay_rate,
+            clock=clock,
+        )
         self.filter_efficiency = filter_efficiency
         self.natural_decay_rate = natural_decay_rate
         self.zone_nodes = {}
@@ -281,6 +290,8 @@ def _load_path_map_beside_prj(
 def build_contamx_engine(
     repo_root: str,
     cfg: dict[str, Any],
+    *,
+    clock: SimClock | None = None,
 ) -> ContamXTransportEngine:
     """Build a ContamX-backed transport engine for the configured platform.
 
@@ -366,4 +377,5 @@ def build_contamx_engine(
         natural_decay_rate=decay_rate,
         path_map_entries=entries,
         oa_fraction=float(airflow.get("oa_fraction", 0.2)),
+        clock=clock,
     )

@@ -269,7 +269,7 @@
       "category": "intervention",
       "required_cascade_tier": 2,
       "min_escalation_status": "ALERT",
-      "activation_delay_epochs": 2
+      "activation_delay_hours": 6
     },
     {
       "protocol_id": "SOP-009",
@@ -315,7 +315,7 @@
       "category": "intervention",
       "required_cascade_tier": 3,
       "min_escalation_status": "LOCKDOWN",
-      "activation_delay_epochs": 0
+      "activation_delay_hours": 0
     },
     {
       "protocol_id": "SOP-010",
@@ -352,7 +352,7 @@
       "category": "intervention",
       "required_cascade_tier": 2,
       "min_escalation_status": "SUSPECTED",
-      "activation_delay_epochs": 2
+      "activation_delay_hours": 6
     },
     {
       "protocol_id": "SOP-011",
@@ -392,7 +392,7 @@
       "category": "intervention",
       "required_cascade_tier": 2,
       "min_escalation_status": "CONFIRMED",
-      "activation_delay_epochs": 4
+      "activation_delay_hours": 24
     },
     {
       "protocol_id": "SOP-012",

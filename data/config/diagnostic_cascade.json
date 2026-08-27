@@ -12,7 +12,7 @@
         "financial_usd": 0,
         "labor_person_hours": 0.25
       },
-      "tat_epochs": 0,
+      "tat_hours": 0,
       "regret_level": "low",
       "actions_on_positive": ["advance_to_tier_1"],
       "confinement_on_positive": false,
@@ -30,7 +30,7 @@
         "materials": {"rdt_kits": 1},
         "labor_person_hours": 0.50
       },
-      "tat_epochs": 0,
+      "tat_hours": 0,
       "regret_level": "low",
       "actions_on_positive": ["advance_to_tier_2", "offer_wearable"],
       "confinement_on_positive": false,
@@ -51,7 +51,7 @@
         },
         "labor_person_hours": 2.50
       },
-      "tat_epochs": 0,
+      "tat_hours": 0,
       "regret_level": "medium",
       "actions_on_positive": ["advance_to_tier_3"],
       "confinement_on_positive": true,
@@ -67,7 +67,7 @@
         "financial_usd": 0,
         "labor_person_hours": 0
       },
-      "tat_epochs": 0,
+      "tat_hours": 0,
       "regret_level": "high",
       "actions_on_positive": [],
       "confinement_on_positive": true,

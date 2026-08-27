@@ -372,7 +372,9 @@ class ShipSimulation:
 
         assign_cabin_mates(self.engine.agents, ship["zones"])
 
-        self.contam_engine = build_transport_engine(self.repo_root, cfg)
+        self.contam_engine = build_transport_engine(
+            self.repo_root, cfg, clock=self.clock,
+        )
         if self.contam_engine is not None:
             self.engine.enable_external_transport()
         if self.display:
@@ -446,7 +448,9 @@ class ShipSimulation:
 
         from crusher_labs.diagnostic_cascade import build_cascade_engine
 
-        cascade_engine = build_cascade_engine(cfg, repo_root=self.repo_root)
+        cascade_engine = build_cascade_engine(
+            cfg, repo_root=self.repo_root, clock=self.clock,
+        )
         sim_state = SimulationState(
             isolation_unit_capacity=load_isolation_unit_capacity(cfg),
             cascade_engine=cascade_engine,
@@ -929,7 +933,7 @@ class ShipSimulation:
         from crusher_labs.clinical_presentation import apply_noise_syndromes_to_agents
 
         beliefs = _beliefs_from_information(work.information_state)
-        if surveillance_is_active(work.epoch, work.cfg):
+        if surveillance_is_active(work.epoch, work.cfg, self.clock):
             work.syn_result = work.syndromic.query_ground_truth(
                 work.truth,
                 behavioral_overrides=work.state.agent_behavioral_overrides,
@@ -942,6 +946,7 @@ class ShipSimulation:
                 wearable_monitor=self.wearable_monitor,
                 syndromic=work.syndromic,
                 cfg=work.cfg,
+                clock=self.clock,
             )
         else:
             work.syn_result = inactive_syndromic_result(
@@ -1137,6 +1142,7 @@ class ShipSimulation:
             epoch=work.epoch,
             escalation_pending=work.state.escalation_pending,
             respiratory_mode=pathogen_profiles_are_respiratory(self.pathogen_profiles),
+            clock=self.clock,
         )
         work.state.escalation_pending = new_pending
         work.state.trigger_status = new_status

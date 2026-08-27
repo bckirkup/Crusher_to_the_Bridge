@@ -49,7 +49,7 @@ from crusher_labs.observation_core import (
     WastewaterSequencingGrid,
 )
 from crusher_labs.protocol_engine import ProtocolEngine
-from engines.sim_clock import SimClock
+from engines.sim_clock import SimClock, config_epochs_for_hours
 from simulation_utils.paths import resolve_repo_path, validated_open
 
 _CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.yaml")
@@ -200,6 +200,22 @@ def build_modalities(
     emod_cfg = cfg.get("emod_progression", {})
     seq_params = metagenomic_sequencing_params(cfg)
 
+    reluctant_delay = config_epochs_for_hours(
+        fred_cfg, "reluctant_delay_hours", "reluctant_delay_epochs",
+        run_clock, default=48,
+    )
+    compliance_delay = config_epochs_for_hours(
+        fred_cfg, "compliance_delay_hours", "compliance_delay_epochs",
+        run_clock, default=1,
+    )
+    detection_delay = config_epochs_for_hours(
+        syn_cfg, "detection_delay_hours", "detection_delay_epochs",
+        run_clock, default=0,
+    )
+    screening_interval = config_epochs_for_hours(
+        syn_cfg, "crew_screening_interval_hours",
+        "crew_screening_interval_epochs", run_clock, default=None,
+    )
     return {
         "syndromic": SyndromicSurveillance(
             sick_call_probability=(
@@ -210,14 +226,12 @@ def build_modalities(
             background_noise_rate=syn_cfg.get("background_noise_rate", 0.015),
             noise_categories=fred_cfg.get("healthy_noise_categories"),
             quarantine_compliance=fred_cfg.get("quarantine_compliance", 0.85),
-            compliance_delay_epochs=fred_cfg.get("compliance_delay_epochs", 1),
+            compliance_delay_epochs=compliance_delay or 0,
             reluctant_fraction=fred_cfg.get("reluctant_fraction", 0.75),
-            reluctant_delay_epochs=fred_cfg.get("reluctant_delay_epochs", 48),
+            reluctant_delay_epochs=reluctant_delay or 0,
             compliance_by_class=fred_cfg.get("compliance_by_class"),
-            detection_delay_epochs=syn_cfg.get("detection_delay_epochs", 0),
-            crew_screening_interval_epochs=syn_cfg.get(
-                "crew_screening_interval_epochs",
-            ),
+            detection_delay_epochs=detection_delay or 0,
+            crew_screening_interval_epochs=screening_interval,
             clock=run_clock,
             rng=rng,
         ),

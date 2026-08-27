@@ -180,15 +180,16 @@ fred_behavior:
   quarantine_compliance: 0.85
   # Of non-compliers, fraction that are Reluctant (vs Defiant). 1.0 = no defiants.
   reluctant_fraction: 0.75
-  # Epochs before a Reluctant agent may comply (also complies if they become symptomatic)
-  reluctant_delay_epochs: 48
+  # Wall-clock hours before a Reluctant agent may comply (also complies if symptomatic)
+  reluctant_delay_hours: 48
   # Optional per-class overrides (class_id, role_group prefix, or passenger_young)
   compliance_by_class:
     crew: 0.85
     passenger_elderly: 0.70
     passenger_young: 0.45
   # Deprecated: forced post-delay compliance removed (ignored if present)
-  # compliance_delay_epochs: 1
+  # Deprecated legacy forced-compliance setting; retained only for compatibility.
+  # compliance_delay_hours: 24
   healthy_noise_categories:           # background sick-call reasons for healthy agents
     - {reason: "seasickness",  probability_per_day: 0.0042, syndrome: "gastrointestinal"}
     - {reason: "fatigue",      probability_per_day: 0.0030, syndrome: "systemic_febrile"}
@@ -196,12 +197,13 @@ fred_behavior:
 
 # ── EMOD-Style Clinical Progression ──────────────────────────
 emod_progression:
-  incubation_epochs: 2                # epochs from exposure before shedding starts
+  # Advisory values only; progression uses pathogen profiles, not this block.
+  incubation_days: 2                # natural-history days from exposure before shedding starts
   shedding_phases:
     - {name: "early",  max_rate: 20.0, sensitivity_cap: 0.30}
     - {name: "peak",   max_rate: 80.0, sensitivity_cap: 0.95}
     - {name: "late",   max_rate: 40.0, sensitivity_cap: 0.80}
-  phase_durations: [3, 5, 4]          # epochs per phase
+  phase_durations_days: [3, 5, 4]          # natural-history days per phase (advisory)
 
 # ── Agent dining / free-zone rotation ──────────────────────────
 # Probabilistic venue selection (0 = fixed assigned zones; goldens stable).
@@ -297,10 +299,10 @@ escalation:
   # Organizational decision latency (epochs between signal and status taking effect)
   # Default 0 for short smoke runs; campaign T11 sweeps non-zero values.
   decision_latency:
-    alert_delay_epochs: 0
-    suspected_delay_epochs: 0
-    confirmed_delay_epochs: 0
-    lockdown_delay_epochs: 0
+    alert_delay_hours: 0
+    suspected_delay_hours: 0
+    confirmed_delay_hours: 0
+    lockdown_delay_hours: 0
   # Integrated detection-mode stoplights (SOP-015 / SOP-016)
   detection_modes:
     syndromic:
@@ -320,15 +322,15 @@ syndromic:
   sick_call_probability_per_day: 0.70 # P(symptomatic agent reports per day)
   background_noise_rate: 0.015        # P(healthy agent reports daily – seasickness etc.)
   cadence: 1
-  # Epochs after symptom onset before sick-call Bernoulli is allowed (0 = immediate).
+  # Wall-clock hours after symptom onset before sick-call Bernoulli is allowed (0 = immediate).
   # Platform voyage_config medical_response may seed this when still at stock.
-  detection_delay_epochs: 0
-  # Proactive crew screening every N epochs (null/omit = off). Non-isolated crew
+  detection_delay_hours: 0
+  # Proactive crew screening every N hours (null/omit = off). Non-isolated crew
   # enter the sick-call roster on interval epochs.
-  # crew_screening_interval_epochs: null
-  # Optional campaign T11 knob: suppress sick-calls for the first N epochs
+  # crew_screening_interval_hours: null
+  # Optional campaign T11 knob: suppress sick-calls for the first N hours
   # (0-based). Surveillance begins at epoch N. Default 0 = always active.
-  # activation_delay_epochs: 0
+  # activation_delay_hours: 0
 
 # ── Clinical diagnostics (observation instruments) ───────────
 # Gaussian-copula autocorrelation between sick-call clinical tests.
@@ -379,7 +381,7 @@ variant_surveillance:
   # Per-pathogen rates, genotypes, and cross-immunity live in the
   # strain_evolution block of data/pathogens/*.json, not here.
   founder_strains_per_pathogen: 1     # >1 seeds embarkation diversity
-  census_interval_epochs: 1           # epochs between lineage snapshots
+  census_interval_hours: 1           # wall-clock hours between lineage snapshots
   surface_sampling:
     enabled: false
     # Operator dials with no literature anchor; defaults are a sweepable spread,
@@ -867,9 +869,9 @@ chronic_disease:
 diagnostic_cascade:
   enabled: true
   config_path: "data/config/diagnostic_cascade_multiplex.json"
-  # Optional campaign T11 knob (paired with syndromic.activation_delay_epochs):
-  # skip cascade evaluate_epoch until epoch >= N (0-based). Default 0 = always active.
-  # activation_delay_epochs: 0
+  # Optional campaign T11 knob (paired with syndromic.activation_delay_hours):
+  # skip cascade evaluate_epoch until elapsed hours >= N. Default 0 = always active.
+  # activation_delay_hours: 0
   # Optional runtime overrides for cascade entry routing and wearable fusion.
   # entry:
   #   sick_call_tier: 1

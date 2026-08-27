@@ -16,7 +16,7 @@
     "founder_strains": [
       1
     ],
-    "census_interval_epochs": 6
+    "census_interval_hours": 6
   },
   "pathogen_configs": {
     "rigelian_fever": {

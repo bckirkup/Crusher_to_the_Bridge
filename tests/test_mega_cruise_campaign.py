@@ -356,8 +356,8 @@ def test_t11_sweeps_surveillance_activation_delay() -> None:
         (rid, s) for rid, s in runs if "delay24" in rid and "syndromic" in rid
     )
     assert "delay24" in sample_rid
-    assert sample["config_overrides"]["syndromic"]["activation_delay_epochs"] == 24
-    assert sample["config_overrides"]["diagnostic_cascade"]["activation_delay_epochs"] == 24
+    assert sample["config_overrides"]["syndromic"]["activation_delay_hours"] == 24
+    assert sample["config_overrides"]["diagnostic_cascade"]["activation_delay_hours"] == 24
     assert sample["campaign_parameters"]["surveillance_delay_epochs"] == 24
     expected = (
         len(manifest["tiers"]["t11_intervention_timing"]["pathogens"])
@@ -2087,7 +2087,7 @@ def test_vsp_degradation_cartesian_and_generator() -> None:
     assert "vsp" in rid
     cfg = spec["config_overrides"]
     assert "lockdown_attack_rate" in cfg["escalation"]
-    assert "detection_delay_epochs" in cfg["medical_response"]
+    assert "detection_delay_hours" in cfg["medical_response"]
     assert "isolation_compliance" in cfg["medical_response"]
     params = spec["campaign_parameters"]
     assert params["dose_adjustment"] == pytest.approx(10.6)

@@ -46,8 +46,8 @@
   "medical_response": {
     "sick_call_probability": 0.70,
     "isolation_compliance": 0.85,
-    "detection_delay_epochs": 0,
-    "crew_screening_interval_epochs": null,
+    "detection_delay_hours": 0,
+    "crew_screening_interval_hours": null,
     "notes": "Stock defaults (= current global behavior). Class gradient available via campaign overrides."
   }
 }

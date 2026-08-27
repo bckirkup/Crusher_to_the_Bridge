@@ -4,7 +4,7 @@ crusher_labs.modalities.syndromic
 
 Syndromic surveillance – models sick-call reporting with:
 - A parameterizable probability that truly symptomatic agents report.
-- Optional detection_delay_epochs gate after symptom onset.
+- Optional detection_delay_hours gate after symptom onset.
 - Optional proactive crew screening on a fixed interval.
 - FRED-style categorized background noise (seasickness, fatigue,
   minor injury) so healthy agents generate realistic false-signal
@@ -51,6 +51,10 @@ class SyndromicSurveillance:
         compliance_by_class: dict[str, float] | None = None,
         detection_delay_epochs: int = 0,
         crew_screening_interval_epochs: int | None = None,
+        reluctant_delay_hours: float | None = None,
+        compliance_delay_hours: float | None = None,
+        detection_delay_hours: float | None = None,
+        crew_screening_interval_hours: float | None = None,
         clock: SimClock | None = None,
         rng: np.random.Generator | None = None,
     ) -> None:
@@ -59,11 +63,27 @@ class SyndromicSurveillance:
         self.background_noise_rate = background_noise_rate
         self.quarantine_compliance = quarantine_compliance
         # Deprecated: forced post-delay compliance removed. Kept for config compat.
-        self.compliance_delay_epochs = compliance_delay_epochs
+        self.compliance_delay_epochs = (
+            self.clock.epochs_for_hours(compliance_delay_hours)
+            if compliance_delay_hours is not None
+            else compliance_delay_epochs
+        )
         self.reluctant_fraction = float(reluctant_fraction)
-        self.reluctant_delay_epochs = int(reluctant_delay_epochs)
+        self.reluctant_delay_epochs = (
+            self.clock.epochs_for_hours(reluctant_delay_hours)
+            if reluctant_delay_hours is not None
+            else int(reluctant_delay_epochs)
+        )
         self.compliance_by_class = dict(compliance_by_class or {})
-        self.detection_delay_epochs = max(0, int(detection_delay_epochs))
+        self.detection_delay_epochs = (
+            self.clock.epochs_for_hours(detection_delay_hours)
+            if detection_delay_hours is not None
+            else max(0, int(detection_delay_epochs))
+        )
+        if crew_screening_interval_hours is not None:
+            crew_screening_interval_epochs = self.clock.epochs_for_hours(
+                crew_screening_interval_hours,
+            )
         if crew_screening_interval_epochs is None:
             self.crew_screening_interval_epochs: int | None = None
         else:
@@ -72,7 +92,7 @@ class SyndromicSurveillance:
         self.rng = rng if rng is not None else default_simulation_rng()
         # Sticky per-agent compliance class for the cruise (compliant/reluctant/defiant)
         self._compliance_class: dict[int, str] = {}
-        # First epoch agent observed symptomatic (for detection_delay_epochs)
+        # First epoch agent observed symptomatic (for detection_delay_hours)
         self._symptom_onset_epoch: dict[int, int] = {}
 
         # None → built-in defaults; explicit [] disables background noise categories.
@@ -323,10 +343,10 @@ class SyndromicSurveillance:
 
         Compliance class is drawn once per agent at first order and sticky.
         - compliant: follows immediately
-        - reluctant: complies after ``reluctant_delay_epochs`` or if symptomatic
+        - reluctant: complies after ``reluctant_delay_hours`` or if symptomatic
         - defiant: never complies (unless override cleared)
 
-        The legacy ``compliance_delay_epochs`` forced-compliance path is removed.
+        The legacy ``compliance_delay_hours`` forced-compliance path is removed.
         """
         if behavioral_override == "refuse_quarantine":
             self._compliance_class[agent_id] = "defiant"

@@ -31,6 +31,7 @@ from crusher_labs.stoplight import (
     stoplight_from_wearable_agent,
     stoplight_from_wearable_fleet_rates,
 )
+from engines.sim_clock import SimClock, config_epochs_for_hours
 from simulation_utils.paths import validated_open
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -233,7 +234,12 @@ def compute_stoplights(
 class StandingProtocol:
     """A single SOP loaded from ``protocols.json``."""
 
-    def __init__(self, config: dict[str, Any]) -> None:
+    def __init__(
+        self,
+        config: dict[str, Any],
+        *,
+        clock: SimClock | None = None,
+    ) -> None:
         self.protocol_id: str = config["protocol_id"]
         self.name: str = config["name"]
         self.description: str = config.get("description", "")
@@ -243,8 +249,13 @@ class StandingProtocol:
         self.activation_costs: dict[str, Any] = config.get("activation_costs", {})
         self.category: str = config.get("category", CATEGORY_INTERVENTION)
         self.required_cascade_tier: int | None = config.get("required_cascade_tier")
-        # Organizational decision latency after stoplight trigger (epochs)
-        self.activation_delay_epochs: int = int(config.get("activation_delay_epochs", 0))
+        # Organizational decision latency is authored in wall-clock hours.
+        self.activation_delay_epochs = config_epochs_for_hours(
+            config,
+            "activation_delay_hours",
+            "activation_delay_epochs",
+            clock or SimClock.from_config({}),
+        ) or 0
         # Minimum ship escalation status required (ALERT/SUSPECTED/CONFIRMED/LOCKDOWN)
         self.min_escalation_status: str | None = config.get("min_escalation_status")
 
@@ -331,7 +342,7 @@ class ProtocolEngine:
         self.ledger = ledger
         self._active: dict[str, bool] = {p.protocol_id: False for p in protocols}
         self._activation_epoch: dict[str, int] = {}
-        # Epoch when stoplight/force first became true (for activation_delay_epochs)
+        # Epoch when stoplight/force first became true (for activation_delay_hours)
         self._trigger_first_seen_epoch: dict[str, int | None] = {
             p.protocol_id: None for p in protocols
         }
@@ -415,7 +426,7 @@ class ProtocolEngine:
         ``required_cascade_tier`` are gated by the cascade engine's
         current state.
 
-        ``activation_delay_epochs`` defers modifier application after the
+        ``activation_delay_hours`` defers modifier application after the
         first epoch the SOP becomes eligible (stoplight + escalation gate).
         Forced activations bypass the per-SOP delay.
 
@@ -570,8 +581,12 @@ def reset_modifiers(
 
 # ── Factory ──────────────────────────────────────────────────────────────
 
-def load_protocols(config_path: str) -> list[StandingProtocol]:
+def load_protocols(
+    config_path: str,
+    *,
+    clock: SimClock | None = None,
+) -> list[StandingProtocol]:
     """Load standing protocols from ``protocols.json``."""
     with validated_open(config_path, "r", allowed_roots=(REPO_ROOT,), encoding="utf-8") as fh:
         cfg = json.load(fh)
-    return [StandingProtocol(p) for p in cfg.get("protocols", [])]
+    return [StandingProtocol(p, clock=clock) for p in cfg.get("protocols", [])]

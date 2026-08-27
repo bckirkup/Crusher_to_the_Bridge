@@ -69,7 +69,7 @@
             "enabled": {
               "type": "boolean",
               "default": false,
-              "description": "When false (default), crew stay aboard and shore_infection_probability introduces nothing, so runs are bit-identical to pre-shore-exposure behavior."
+              "description": "When false (default), crew stay aboard and shore_infection_probability_per_hour introduces nothing, so runs are bit-identical to pre-shore-exposure behavior."
             }
           }
         }
@@ -104,13 +104,13 @@
           "maximum": 1,
           "description": "Seeds fred_behavior.quarantine_compliance when still at stock default."
         },
-        "detection_delay_epochs": {
+        "detection_delay_hours": {
           "type": "integer",
           "minimum": 0,
-          "description": "Minimum epochs after symptom onset before sick-call Bernoulli is allowed. 0 = current behavior."
+          "description": "Minimum wall-clock hours after symptom onset before sick-call Bernoulli is allowed. 0 = current behavior."
         },
-        "crew_screening_interval_epochs": {
-          "description": "If set to a positive int, crew are proactively screened every N epochs. null = off.",
+        "crew_screening_interval_hours": {
+          "description": "If set to a positive int, crew are proactively screened every N hours. null = off.",
           "oneOf": [
             { "type": "null" },
             { "type": "integer", "minimum": 1 }
@@ -184,32 +184,35 @@
           "maximum": 1,
           "description": "Fraction of crew taking shore leave at this port call. Applied only when voyage.shore_exposure.enabled; default 0 (crew stay aboard)."
         },
-        "embarkation_window_epochs": {
+        "embarkation_window_hours_of_day": {
           "type": "array",
           "minItems": 2,
           "maxItems": 2,
-          "items": { "type": "integer", "minimum": 0 }
+          "items": { "type": "number", "minimum": 0 },
+          "description": "Hour-of-day interval in which embarkation occurs."
         },
         "stateroom_available_epoch": { "type": "integer", "minimum": 0 },
         "buffet_surge_fraction": { "type": "number", "minimum": 0, "maximum": 1 },
         "disembark_fraction": { "type": "number", "minimum": 0, "maximum": 1 },
-        "disembark_window_epochs": {
+        "disembark_window_hours_of_day": {
           "type": "array",
           "minItems": 2,
           "maxItems": 2,
-          "items": { "type": "integer", "minimum": 0 }
+          "items": { "type": "number", "minimum": 0 },
+          "description": "Hour-of-day interval in which disembarkation occurs."
         },
-        "reembark_window_epochs": {
+        "reembark_window_hours_of_day": {
           "type": "array",
           "minItems": 2,
           "maxItems": 2,
-          "items": { "type": "integer", "minimum": 0 }
+          "items": { "type": "number", "minimum": 0 },
+          "description": "Hour-of-day interval in which reembarkation occurs."
         },
-        "shore_infection_probability": {
+        "shore_infection_probability_per_hour": {
           "type": "number",
           "minimum": 0,
           "maximum": 1,
-          "description": "Per-epoch-ashore introduction hazard for a person ashore at this port (not per port call, so longer excursions carry more risk). Applied only when voyage.shore_exposure.enabled."
+          "description": "Per-person-hour shore infection hazard for a person ashore at this port. Applied only when voyage.shore_exposure.enabled."
         },
         "shore_pathogen": {
           "type": "string",

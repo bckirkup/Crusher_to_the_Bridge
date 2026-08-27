@@ -32,8 +32,10 @@ theirs; a value converted here is the only place the two meet.
 from __future__ import annotations
 
 import math
+import warnings
+from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Any, Mapping
+from typing import Any
 
 HOURS_PER_DAY = 24.0
 
@@ -43,6 +45,58 @@ DEFAULT_EPOCH_DURATION_HOURS = 1.0
 HOURS = "hours"
 LEGACY_EPOCH_DAY = "legacy_epoch_day"
 MODES = (HOURS, LEGACY_EPOCH_DAY)
+
+
+def config_epochs_for_hours(
+    config: Mapping[str, Any],
+    canonical_key: str,
+    retired_key: str,
+    clock: "SimClock",
+    default: Any = 0,
+) -> int | None:
+    """Read a wall-clock delay/interval and convert it once to epochs."""
+    if canonical_key in config:
+        raw = config[canonical_key]
+    elif retired_key in config:
+        warnings.warn(
+            f"{retired_key} is deprecated; use {canonical_key}",
+            DeprecationWarning,
+            stacklevel=3,
+        )
+        raw = config[retired_key]
+    else:
+        raw = default
+    if raw is None:
+        return None
+    value = float(raw)
+    if not math.isfinite(value):
+        raise ValueError(f"{canonical_key} must be finite")
+    return clock.epochs_for_hours(value)
+
+
+def config_epochs_for_days(
+    config: Mapping[str, Any],
+    canonical_key: str,
+    retired_key: str,
+    clock: "SimClock",
+    default: Any = 0,
+) -> int:
+    """Read a natural-history duration and convert it once to epochs."""
+    if canonical_key in config:
+        raw = config[canonical_key]
+    elif retired_key in config:
+        warnings.warn(
+            f"{retired_key} is deprecated; use {canonical_key}",
+            DeprecationWarning,
+            stacklevel=3,
+        )
+        raw = config[retired_key]
+    else:
+        raw = default
+    value = float(raw)
+    if not math.isfinite(value):
+        raise ValueError(f"{canonical_key} must be finite")
+    return max(0, int(math.ceil(clock.epochs_for_days(value))))
 
 
 def _epoch_duration_hours(

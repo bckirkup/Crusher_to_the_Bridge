@@ -45,7 +45,7 @@ from engines.infection_dynamics_bridge import (
     KorkinShipEngine,
 )
 from engines.py_contam_bridge import ContamTransportEngine
-from engines.sim_clock import SimClock
+from engines.sim_clock import SimClock, config_epochs_for_hours
 from engines.wearable_monitor import (
     WearableMonitor,
     build_wearable_monitor_from_config,
@@ -370,12 +370,26 @@ def _seed_detection_delay_if_stock(
     syndromic: dict[str, Any],
     med: dict[str, Any],
 ) -> bool:
-    if "detection_delay_epochs" not in med:
+    key = (
+        "detection_delay_hours"
+        if "detection_delay_hours" in med
+        else "detection_delay_epochs"
+    )
+    if key not in med:
         return False
-    current = syndromic.get("detection_delay_epochs", _STOCK_DETECTION_DELAY_EPOCHS)
+    if key == "detection_delay_epochs":
+        warnings.warn(
+            "detection_delay_epochs is deprecated; use detection_delay_hours",
+            DeprecationWarning,
+            stacklevel=3,
+        )
+    current = syndromic.get(
+        "detection_delay_hours",
+        syndromic.get("detection_delay_epochs", _STOCK_DETECTION_DELAY_EPOCHS),
+    )
     if not _is_stock_int(current, _STOCK_DETECTION_DELAY_EPOCHS):
         return False
-    syndromic["detection_delay_epochs"] = int(med["detection_delay_epochs"])
+    syndromic["detection_delay_hours"] = float(med[key])
     return True
 
 
@@ -383,15 +397,32 @@ def _seed_crew_screening_if_stock(
     syndromic: dict[str, Any],
     med: dict[str, Any],
 ) -> bool:
-    if "crew_screening_interval_epochs" not in med:
+    key = (
+        "crew_screening_interval_hours"
+        if "crew_screening_interval_hours" in med
+        else "crew_screening_interval_epochs"
+    )
+    if key not in med:
         return False
+    if key == "crew_screening_interval_epochs":
+        warnings.warn(
+            "crew_screening_interval_epochs is deprecated; "
+            "use crew_screening_interval_hours",
+            DeprecationWarning,
+            stacklevel=3,
+        )
     current = syndromic.get(
-        "crew_screening_interval_epochs", _STOCK_CREW_SCREENING_INTERVAL,
+        "crew_screening_interval_hours",
+        syndromic.get(
+            "crew_screening_interval_epochs", _STOCK_CREW_SCREENING_INTERVAL,
+        ),
     )
     if current is not None and current != _STOCK_CREW_SCREENING_INTERVAL:
         return False
-    raw = med["crew_screening_interval_epochs"]
-    syndromic["crew_screening_interval_epochs"] = None if raw is None else int(raw)
+    raw = med[key]
+    syndromic["crew_screening_interval_hours"] = (
+        None if raw is None else float(raw)
+    )
     return True
 
 
@@ -732,7 +763,11 @@ def update_cumulative_confirmed_cases(
     return len(cumulative_confirmed_case_ids)
 
 
-def _escalation_delay_epochs(esc_cfg: dict[str, Any], target_status: str) -> int:
+def _escalation_delay_epochs(
+    esc_cfg: dict[str, Any],
+    target_status: str,
+    clock: SimClock | None = None,
+) -> int:
     from orchestrator_types import (
         STATUS_ALERT,
         STATUS_CONFIRMED,
@@ -742,15 +777,17 @@ def _escalation_delay_epochs(esc_cfg: dict[str, Any], target_status: str) -> int
 
     latency = esc_cfg.get("decision_latency") or {}
     key_by_status = {
-        STATUS_ALERT: "alert_delay_epochs",
-        STATUS_SUSPECTED: "suspected_delay_epochs",
-        STATUS_CONFIRMED: "confirmed_delay_epochs",
-        STATUS_LOCKDOWN: "lockdown_delay_epochs",
+        STATUS_ALERT: ("alert_delay_hours", "alert_delay_epochs"),
+        STATUS_SUSPECTED: ("suspected_delay_hours", "suspected_delay_epochs"),
+        STATUS_CONFIRMED: ("confirmed_delay_hours", "confirmed_delay_epochs"),
+        STATUS_LOCKDOWN: ("lockdown_delay_hours", "lockdown_delay_epochs"),
     }
-    key = key_by_status.get(target_status)
-    if key is None:
+    keys = key_by_status.get(target_status)
+    if keys is None:
         return 0
-    return max(0, int(latency.get(key, 0)))
+    return config_epochs_for_hours(
+        latency, keys[0], keys[1], clock or SimClock.from_config({}),
+    ) or 0
 
 
 def _lockdown_threshold(esc_cfg: dict[str, Any]) -> float | None:
@@ -875,6 +912,7 @@ def _release_pending_escalation(
     epoch: int,
     pending: dict[str, Any] | None,
     esc_cfg: dict[str, Any],
+    clock: SimClock | None = None,
 ) -> tuple[str, dict[str, Any] | None]:
     from orchestrator_types import STATUS_RANK
 
@@ -884,7 +922,7 @@ def _release_pending_escalation(
         return effective, updated_pending
     target = str(updated_pending.get("to", current_status))
     triggered_at = int(updated_pending.get("epoch_triggered", epoch))
-    delay = _escalation_delay_epochs(esc_cfg, target)
+    delay = _escalation_delay_epochs(esc_cfg, target, clock)
     if epoch >= triggered_at + delay:
         if STATUS_RANK.get(target, 0) > STATUS_RANK.get(effective, 0):
             effective = target
@@ -898,6 +936,7 @@ def _queue_escalation_transition(
     epoch: int,
     updated_pending: dict[str, Any] | None,
     esc_cfg: dict[str, Any],
+    clock: SimClock | None = None,
 ) -> tuple[str, dict[str, Any] | None]:
     from orchestrator_types import STATUS_RANK
 
@@ -908,7 +947,7 @@ def _queue_escalation_transition(
     )
     if STATUS_RANK.get(proposed_status, 0) <= STATUS_RANK.get(pending_target, 0):
         return effective, updated_pending
-    delay = _escalation_delay_epochs(esc_cfg, proposed_status)
+    delay = _escalation_delay_epochs(esc_cfg, proposed_status, clock)
     if delay <= 0:
         return proposed_status, None
     return effective, {
@@ -923,6 +962,8 @@ def apply_escalation_latency(
     epoch: int,
     pending: dict[str, Any] | None,
     cfg: dict[str, Any],
+    *,
+    clock: SimClock | None = None,
 ) -> tuple[str, dict[str, Any] | None]:
     """Queue escalation transitions and release them after decision latency.
 
@@ -930,10 +971,10 @@ def apply_escalation_latency(
     """
     esc_cfg = cfg.get("escalation", {})
     effective, updated_pending = _release_pending_escalation(
-        current_status, epoch, pending, esc_cfg,
+        current_status, epoch, pending, esc_cfg, clock,
     )
     return _queue_escalation_transition(
-        effective, proposed_status, epoch, updated_pending, esc_cfg,
+        effective, proposed_status, epoch, updated_pending, esc_cfg, clock,
     )
 
 
@@ -949,6 +990,7 @@ def check_escalation(
     epoch: int = 0,
     escalation_pending: dict[str, Any] | None = None,
     respiratory_mode: bool = False,
+    clock: SimClock | None = None,
 ) -> tuple[str, dict[str, Any] | None, dict[str, float]]:
     """Evaluate escalation thresholds with optional decision latency.
 
@@ -981,7 +1023,7 @@ def check_escalation(
         respiratory_mode=respiratory_mode,
     )
     effective, pending = apply_escalation_latency(
-        trigger_status, proposed, epoch, escalation_pending, cfg,
+        trigger_status, proposed, epoch, escalation_pending, cfg, clock=clock,
     )
     return effective, pending, rates
 
@@ -1331,7 +1373,8 @@ def init_protocol_engine(
 
     cost_ledger = build_ledger_from_config(resource_cfg_path)
     resource_costs_cfg = load_resource_costs(resource_cfg_path)
-    standing_protocols = load_protocols(protocols_cfg_path)
+    run_clock = SimClock.from_config(_cfg)
+    standing_protocols = load_protocols(protocols_cfg_path, clock=run_clock)
     protocol_engine = ProtocolEngine(standing_protocols, cost_ledger)
 
     original_filter_eff = (
@@ -1346,7 +1389,7 @@ def init_protocol_engine(
         resource_costs_cfg=resource_costs_cfg,
         standing_protocols=standing_protocols,
         original_filter_eff=original_filter_eff,
-        clock=SimClock.from_config(_cfg),
+        clock=run_clock,
     )
 
 
