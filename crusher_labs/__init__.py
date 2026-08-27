@@ -12,6 +12,7 @@ behavioral compliance, and EMOD clinical progression phases.
 from __future__ import annotations
 
 import os
+import warnings
 from typing import Any
 
 import numpy as np
@@ -48,9 +49,72 @@ from crusher_labs.observation_core import (
     WastewaterSequencingGrid,
 )
 from crusher_labs.protocol_engine import ProtocolEngine
+from engines.sim_clock import SimClock
 from simulation_utils.paths import resolve_repo_path, validated_open
 
 _CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.yaml")
+
+
+def _warn_legacy_syndromic_units(syndromic: dict[str, Any]) -> None:
+    if "sick_call_probability" in syndromic:
+        warnings.warn(
+            "syndromic.sick_call_probability is deprecated; "
+            "use sick_call_probability_per_day",
+            DeprecationWarning,
+            stacklevel=3,
+        )
+
+
+def _warn_legacy_noise_units(fred_behavior: dict[str, Any]) -> None:
+    for category in fred_behavior.get("healthy_noise_categories", []):
+        if isinstance(category, dict) and "probability" in category:
+            warnings.warn(
+                "fred_behavior healthy-noise probability is deprecated; "
+                "use probability_per_day",
+                DeprecationWarning,
+                stacklevel=3,
+            )
+
+
+def _warn_legacy_density_units(transmission: dict[str, Any]) -> None:
+    density = transmission.get("density_dependent", {}) or {}
+    for key in ("base_contacts", "max_contacts"):
+        if key in density:
+            warnings.warn(
+                f"transmission.density_dependent.{key} is deprecated",
+                DeprecationWarning,
+                stacklevel=3,
+            )
+
+
+def _warn_legacy_wearable_units(wearable: dict[str, Any]) -> None:
+    stack = [wearable]
+    while stack:
+        current = stack.pop()
+        if isinstance(current, dict):
+            if "prevalence" in current:
+                warnings.warn(
+                    "wearable confounder prevalence is deprecated; "
+                    "use prevalence_per_day",
+                    DeprecationWarning,
+                    stacklevel=3,
+                )
+            stack.extend(current.values())
+        elif isinstance(current, list):
+            stack.extend(current)
+
+
+def _warn_legacy_config_units(
+    cfg: dict[str, Any],
+    *,
+    include_density: bool = True,
+) -> None:
+    """Warn once per configuration load for retired day-valued keys."""
+    _warn_legacy_syndromic_units(cfg.get("syndromic", {}) or {})
+    _warn_legacy_noise_units(cfg.get("fred_behavior", {}) or {})
+    if include_density:
+        _warn_legacy_density_units(cfg.get("transmission", {}) or {})
+    _warn_legacy_wearable_units(cfg.get("wearable_monitoring", {}) or {})
 
 
 def load_config(path: str = _CONFIG_PATH) -> dict[str, Any]:
@@ -58,7 +122,9 @@ def load_config(path: str = _CONFIG_PATH) -> dict[str, Any]:
     repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     resolved = resolve_repo_path(repo_root, path)
     with validated_open(resolved, allowed_roots=(repo_root,), encoding="utf-8") as fh:
-        return yaml.safe_load(fh)
+        config = yaml.safe_load(fh)
+    _warn_legacy_config_units(config)
+    return config
 
 
 def wastewater_sequencing_params(cfg: dict[str, Any] | None = None) -> dict[str, Any]:
@@ -113,6 +179,7 @@ def build_modalities(
     cfg: dict[str, Any] | None = None,
     rng: np.random.Generator | None = None,
     total_epochs: int = 24,
+    clock: SimClock | None = None,
 ) -> dict[str, Any]:
     """Instantiate all modalities from *cfg*, sharing *rng*.
 
@@ -120,10 +187,13 @@ def build_modalities(
     """
     if cfg is None:
         cfg = load_config()
+    else:
+        _warn_legacy_config_units(cfg, include_density=False)
     if rng is None:
         rng = np.random.default_rng(cfg.get("random_seed", 42))
 
     syn_cfg = cfg.get("syndromic", {})
+    run_clock = clock or SimClock.from_config(cfg)
     rdt_cfg = cfg.get("clinical_rdt", {})
     pcr_cfg = cfg.get("targeted_pcr", {})
     fred_cfg = cfg.get("fred_behavior", {})
@@ -132,7 +202,11 @@ def build_modalities(
 
     return {
         "syndromic": SyndromicSurveillance(
-            sick_call_probability=syn_cfg.get("sick_call_probability", 0.70),
+            sick_call_probability=(
+                syn_cfg["sick_call_probability"]
+                if "sick_call_probability" in syn_cfg
+                else syn_cfg.get("sick_call_probability_per_day", 0.70)
+            ),
             background_noise_rate=syn_cfg.get("background_noise_rate", 0.015),
             noise_categories=fred_cfg.get("healthy_noise_categories"),
             quarantine_compliance=fred_cfg.get("quarantine_compliance", 0.85),
@@ -144,6 +218,7 @@ def build_modalities(
             crew_screening_interval_epochs=syn_cfg.get(
                 "crew_screening_interval_epochs",
             ),
+            clock=run_clock,
             rng=rng,
         ),
         "clinical_rdt": ClinicalRDT(

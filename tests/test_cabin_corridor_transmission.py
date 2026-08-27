@@ -45,28 +45,37 @@ class TestCabinCorridorTransmission:
             corridor_direct_contact_factor=0.15,
         )
         core.initialize_zones([zone])
-        matrix_free, _ = core.execute_transmission(
-            epoch=1,
-            agents=[shedder, free_target],
-            zone_pathogen_mass={zone: 0.0},
-            quarantined_ids=set(),
-        )
-        matrix_confined, _ = core.execute_transmission(
-            epoch=2,
-            agents=[shedder, confined_target],
-            zone_pathogen_mass={zone: 0.0},
-            quarantined_ids={3},
-        )
-        assert matrix_confined.shared_room_exposures[0]["dose"] < (
-            matrix_free.shared_room_exposures[0]["dose"] * 0.2
-        )
+        free_dose = 0.0
+        confined_dose = 0.0
+        for epoch in range(24):
+            matrix_free, _ = core.execute_transmission(
+                epoch=epoch,
+                agents=[shedder, free_target],
+                zone_pathogen_mass={zone: 0.0},
+                quarantined_ids=set(),
+            )
+            matrix_confined, _ = core.execute_transmission(
+                epoch=epoch,
+                agents=[shedder, confined_target],
+                zone_pathogen_mass={zone: 0.0},
+                quarantined_ids={3},
+            )
+            free_dose += sum(
+                exposure["dose"]
+                for exposure in matrix_free.shared_room_exposures
+            )
+            confined_dose += sum(
+                exposure["dose"]
+                for exposure in matrix_confined.shared_room_exposures
+            )
+        assert confined_dose < free_dose * 0.2
 
     def test_quarantine_in_non_cabin_zone_unchanged(self) -> None:
         zone = "Berthing"
         shedder = _agent(1, zone, infected=True)
         confined = _agent(2, zone)
         core = TransmissionCore(
-            rng=np.random.default_rng(99),
+            rng=np.random.default_rng(5),
             zone_volumes={zone: 200.0},
             zone_types={zone: "Room"},
             confinement_isolation_factor=0.05,
@@ -74,13 +83,19 @@ class TestCabinCorridorTransmission:
             cfg={"transmission": {"contact_mode": "legacy"}},
         )
         core.initialize_zones([zone])
-        matrix, _ = core.execute_transmission(
-            epoch=1,
-            agents=[shedder, confined],
-            zone_pathogen_mass={zone: 0.0},
-            quarantined_ids={2},
-        )
-        assert matrix.shared_room_exposures[0]["dose"] > 0
+        dose = 0.0
+        for epoch in range(24):
+            matrix, _ = core.execute_transmission(
+                epoch=epoch,
+                agents=[shedder, confined],
+                zone_pathogen_mass={zone: 0.0},
+                quarantined_ids={2},
+            )
+            dose += sum(
+                exposure["dose"]
+                for exposure in matrix.shared_room_exposures
+            )
+        assert dose > 0
 
     def test_quarantined_agent_skips_fomite_pickup(self) -> None:
         zone = "PC_D6_P_M"

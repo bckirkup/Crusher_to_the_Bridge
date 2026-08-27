@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import json
 import os
+import warnings
 from collections import defaultdict
 from typing import Any
 
@@ -998,7 +999,9 @@ def load_pathogen_profiles(
     mp_cfg = cfg.get("multi_pathogen", {})
     resolved = mp_cfg.get("resolved_profiles")
     if isinstance(resolved, dict) and resolved:
-        return {str(pid): dict(prof) for pid, prof in resolved.items()}
+        return _normalize_profile_units(
+            {str(pid): dict(prof) for pid, prof in resolved.items()},
+        )
 
     profiles_path = mp_cfg.get("profiles_path", "data/pathogens/active_profiles.json")
     full_path = resolve_repo_path(REPO_ROOT, profiles_path)
@@ -1010,7 +1013,36 @@ def load_pathogen_profiles(
     for p in data.get("pathogens", []):
         pid = p.get("pathogen_id", "unknown")
         profiles[pid] = p
-    return profiles
+    return _normalize_profile_units(profiles)
+
+
+def _normalize_profile_units(
+    profiles: dict[str, dict[str, Any]],
+) -> dict[str, dict[str, Any]]:
+    """Warn once when a profile uses a retired epoch-rate key."""
+    aliases = (
+        ("food_contamination", "growth_rate_per_epoch"),
+        ("food_contamination", "decay_rate_per_epoch"),
+        ("environmental_contamination", "colonization_rate_per_epoch"),
+        ("environmental_contamination", "spore_decay_rate_per_epoch"),
+        ("environmental_contamination", "exposure_probability_per_epoch"),
+        ("strain_evolution", "within_host_mutation_rate"),
+        ("strain_evolution", "recombination_rate"),
+    )
+    normalized = {}
+    for pathogen_id, profile in profiles.items():
+        copied = dict(profile)
+        for block_name, old_key in aliases:
+            block = copied.get(block_name)
+            if isinstance(block, dict) and old_key in block:
+                warnings.warn(
+                    f"{pathogen_id}.{block_name}.{old_key} is deprecated; "
+                    "use the corresponding per-day key",
+                    DeprecationWarning,
+                    stacklevel=2,
+                )
+        normalized[str(pathogen_id)] = copied
+    return normalized
 
 
 def init_multi_pathogen(
@@ -1314,6 +1346,7 @@ def init_protocol_engine(
         resource_costs_cfg=resource_costs_cfg,
         standing_protocols=standing_protocols,
         original_filter_eff=original_filter_eff,
+        clock=SimClock.from_config(_cfg),
     )
 
 

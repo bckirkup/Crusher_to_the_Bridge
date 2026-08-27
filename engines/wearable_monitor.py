@@ -455,7 +455,11 @@ class WearableMonitor:
         active: dict[str, dict[str, Any]] = {}
         for conf in device.confounders:
             cid = conf.get("confounder_id", "")
-            prevalence = float(conf.get("prevalence", 0.0))
+            prevalence = float(conf.get(
+                "prevalence_per_day",
+                conf.get("prevalence", 0.0),
+            ))
+            prevalence = agent.clock.probability_per_epoch(prevalence)
             susceptible_classes = conf.get("susceptible_classes", [])
             susceptible_role = conf.get("susceptible_role_group", "")
 

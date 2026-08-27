@@ -20,6 +20,7 @@ from typing import Any
 
 import numpy as np
 
+from engines.sim_clock import SimClock
 from simulation_utils.numeric import default_simulation_rng
 
 
@@ -50,9 +51,11 @@ class SyndromicSurveillance:
         compliance_by_class: dict[str, float] | None = None,
         detection_delay_epochs: int = 0,
         crew_screening_interval_epochs: int | None = None,
+        clock: SimClock | None = None,
         rng: np.random.Generator | None = None,
     ) -> None:
         self.sick_call_probability = sick_call_probability
+        self.clock = clock or SimClock()
         self.background_noise_rate = background_noise_rate
         self.quarantine_compliance = quarantine_compliance
         # Deprecated: forced post-delay compliance removed. Kept for config compat.
@@ -75,9 +78,9 @@ class SyndromicSurveillance:
         # None → built-in defaults; explicit [] disables background noise categories.
         if noise_categories is None:
             self.noise_categories = [
-                {"reason": "seasickness",  "probability": 0.008},
-                {"reason": "fatigue",      "probability": 0.005},
-                {"reason": "minor_injury", "probability": 0.002},
+                {"reason": "seasickness",  "probability_per_day": 0.0042},
+                {"reason": "fatigue",      "probability_per_day": 0.0030},
+                {"reason": "minor_injury", "probability_per_day": 0.0020},
             ]
         else:
             self.noise_categories = list(noise_categories)
@@ -127,6 +130,7 @@ class SyndromicSurveillance:
         prob = min(1.0, prob + agent_chronic.get(
             "sick_call_probability_boost", 0.0,
         ))
+        prob = self.clock.probability_per_epoch(prob)
         if self.rng.random() < prob:
             sick_call_ids.append(aid)
             true_positive_ids.append(aid)
@@ -245,7 +249,10 @@ class SyndromicSurveillance:
         if self.background_noise_rate <= 0.0:
             return False, None
         for cat in self.noise_categories:
-            if self.rng.random() < cat["probability"]:
+            probability = self.clock.probability_per_epoch(float(
+                cat.get("probability_per_day", cat.get("probability", 0.0)),
+            ))
+            if self.rng.random() < probability:
                 return True, cat["reason"]
         return False, None
 

@@ -171,7 +171,23 @@ class TestBehavioralSyndromic:
             1: {"severity_belief": 1.0, "trust_medical": 1.0},
         }
         none_result = none_mod.query_ground_truth(truth, information_beliefs=beliefs)
-        syn_result = syn_mod.query_ground_truth(truth, information_beliefs=beliefs)
+        syn_results = [
+            syn_mod.query_ground_truth(
+                {**truth, "epoch": epoch},
+                information_beliefs=beliefs,
+            )
+            for epoch in range(24)
+        ]
+        syn_result = {
+            "sick_call_count": sum(
+                result["sick_call_count"] for result in syn_results
+            ),
+            "sick_call_agents": [
+                aid
+                for result in syn_results
+                for aid in result["sick_call_agents"]
+            ],
+        }
         assert none_result["sick_call_count"] == 0
         assert syn_result["sick_call_count"] > 0
         assert none_result["sick_call_agents"] != syn_result["sick_call_agents"]

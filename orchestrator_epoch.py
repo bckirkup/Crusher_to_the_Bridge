@@ -32,6 +32,7 @@ from engines.infection_dynamics_bridge import (
     InfectionStatus,
     KorkinShipEngine,
 )
+from engines.sim_clock import SimClock
 from engines.sim_clock import crossed_day_boundary as _crossed_day_boundary
 from engines.strain_state import ImmuneRecord, StrainRegistry
 from engines.wearable_monitor import WearableMonitor
@@ -576,6 +577,10 @@ def apply_chronic_severity_escalation(
             sev = korkin_agent.get_chronic_severity_multiplier(pid)
             max_sev = max(max_sev, sev)
         escalation_prob = min(1.0, max(0.0, max_sev - 1.0))
+        clock = getattr(engine, "clock", None)
+        if not isinstance(clock, SimClock):
+            clock = SimClock()
+        escalation_prob = clock.probability_per_epoch(escalation_prob)
         if escalation_prob > 0 and rng.random() < escalation_prob:
             agent_dict["symptom_presentation"] = PRESENTATION_SEVERE
 
@@ -1042,7 +1047,23 @@ def step_cost_accounting(
     ledger = proto_ctx.cost_ledger
     resource_costs_cfg = proto_ctx.resource_costs_cfg
 
-    baseline_costs = resource_costs_cfg.get("baseline_surveillance_costs_per_epoch", {})
+    baseline_key = (
+        "baseline_surveillance_costs_per_day"
+        if "baseline_surveillance_costs_per_day" in resource_costs_cfg
+        else "baseline_surveillance_costs_per_epoch"
+    )
+    baseline_costs = dict(resource_costs_cfg.get(baseline_key, {}))
+    if baseline_key in resource_costs_cfg:
+        baseline_costs["financial_usd"] = proto_ctx.clock.amount_per_epoch(
+            baseline_costs.get("financial_usd", 0.0),
+        )
+        baseline_costs["labor_person_hours"] = proto_ctx.clock.amount_per_epoch(
+            baseline_costs.get("labor_person_hours", 0.0),
+        )
+        baseline_costs["materials"] = {
+            item: proto_ctx.clock.amount_per_epoch(amount)
+            for item, amount in baseline_costs.get("materials", {}).items()
+        }
     ledger.debit_baseline_surveillance(epoch, baseline_costs)
 
     per_test = resource_costs_cfg.get("per_test_costs", {})

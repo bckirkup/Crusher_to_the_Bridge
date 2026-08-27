@@ -39,7 +39,7 @@ from __future__ import annotations
 import fnmatch
 import math
 from collections.abc import Mapping
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Any
 
 import numpy as np
@@ -51,7 +51,7 @@ from engines.infection_dynamics_bridge import (
     InfectionStatus,
     KorkinAgent,
 )
-from engines.sim_clock import SimClock
+from engines.sim_clock import LEGACY_EPOCH_DAY, SimClock
 from engines.strain_dose_ledger import (
     UNRESOLVED_STRAIN,
     Contributor,
@@ -87,8 +87,8 @@ AEROSOL_INHALATION_FRACTION = 0.02
 FOMITE_PICKUP_PROBABILITY = 0.10
 FOMITE_TRANSFER_FRACTION = 0.01
 
-# Surface decay rate per epoch (distinct from airborne CONTAM decay)
-SURFACE_DECAY_RATE = 0.05
+# Default surface decay rate, authored as a per-day fractional loss.
+DEFAULT_SURFACE_DECAY_PER_DAY = 0.50
 
 # R0-calibrated contact pool (from Person.java avgR array) — legacy contact_mode
 AVG_R_POOL = [1, 2, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2]
@@ -96,8 +96,8 @@ AVG_R_POOL = [1, 2, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2]
 # Defaults for density_dependent contact_mode (partial overrides merge onto these)
 DEFAULT_DENSITY_CFG: dict[str, float] = {
     "reference_occupancy": 50.0,
-    "base_contacts": 1.33,
-    "max_contacts": 20.0,
+    "base_contacts_per_day": 13.4,
+    "max_contacts_per_day": 40.0,
     "exponent": 0.5,
     "crew_contact_multiplier": 2.0,
 }
@@ -248,11 +248,6 @@ ENV_RESERVOIR = "env"
 # Zone stand-in for the ship-wide (HVAC-systemic) environmental reservoir
 SHIP_WIDE_ZONE = "_ship"
 
-# Per-epoch survival of a zone's aerosol composition. Mirrors the bridge's flat
-# airborne decay (ENV_DECAY_RATE); only shares are read, so any uniform
-# rescaling the transport engine applies on top leaves attribution unchanged.
-AIRBORNE_COMPOSITION_RETENTION = 0.5
-
 # Pool mass at or under which a contributor counts as gone from a reservoir
 POOL_EXTINCTION_MASS = 1e-12
 
@@ -315,9 +310,18 @@ def _parse_density_cfg(tx: dict[str, Any]) -> dict[str, float]:
     provided = tx.get("density_dependent") or {}
     if not isinstance(provided, dict):
         provided = {}
+    aliases = {
+        "base_contacts": "base_contacts_per_day",
+        "max_contacts": "max_contacts_per_day",
+    }
+    normalized = {aliases.get(k, k): v for k, v in provided.items()}
     return {
         **DEFAULT_DENSITY_CFG,
-        **{k: float(v) for k, v in provided.items() if k in DEFAULT_DENSITY_CFG},
+        **{
+            k: float(v)
+            for k, v in normalized.items()
+            if k in DEFAULT_DENSITY_CFG
+        },
     }
 
 
@@ -457,9 +461,7 @@ class TransmissionCore:
         self.strain_configs: dict[str, StrainEvolutionConfig] = {}
         if self.strain_registry is not None:
             for pid, profile in self.pathogen_profiles.items():
-                config = StrainEvolutionConfig.from_profile(
-                    {**profile, "pathogen_id": pid},
-                )
+                config = self._strain_config_for_profile(pid, profile)
                 if config is not None:
                     self.strain_configs[pid] = config
         self.mutation_operator: MutationOperator | None = (
@@ -474,6 +476,36 @@ class TransmissionCore:
         # Per-epoch strain-resolved dose: {agent: {pathogen: {contributor: dose}}}
         self._strain_doses: dict[int, dict[str, dict[Contributor, float]]] = {}
         self._last_pathogen_doses: dict[int, dict[str, float]] = {}
+
+    def _strain_config_for_profile(
+        self,
+        pathogen_id: str,
+        profile: dict[str, Any],
+    ) -> StrainEvolutionConfig | None:
+        config = StrainEvolutionConfig.from_profile(
+            {**profile, "pathogen_id": pathogen_id},
+        )
+        if config is None:
+            return None
+        raw = profile.get("strain_evolution", {})
+        if (
+            "within_host_mutation_rate_per_day" in raw
+            or "within_host_mutation_rate" in raw
+        ):
+            config = replace(
+                config,
+                within_host_mutation_rate=self.clock.probability_per_epoch(
+                    config.within_host_mutation_rate,
+                ),
+            )
+        if "recombination_rate_per_day" in raw or "recombination_rate" in raw:
+            config = replace(
+                config,
+                recombination_rate=self.clock.probability_per_epoch(
+                    config.recombination_rate,
+                ),
+            )
+        return config
 
     @property
     def strain_tracking(self) -> bool:
@@ -759,7 +791,7 @@ class TransmissionCore:
         if self.strain_registry is None:
             return
         self._reservoir.decay_kind(
-            AIRBORNE_COMPOSITION_RETENTION,
+            self._airborne_survival(pathogen_id),
             f"{AIRBORNE_RESERVOIR}|{pathogen_id}",
         )
         for zone_name, shedders in zone_shedders.items():
@@ -771,7 +803,26 @@ class TransmissionCore:
         """Age surface strain composition with the surface pools it shadows."""
         if self.strain_registry is None:
             return
-        self._reservoir.decay_kind(1.0 - SURFACE_DECAY_RATE, SURFACE_RESERVOIR)
+        for pathogen_id, profile in self.pathogen_profiles.items():
+            self._reservoir.decay_kind(
+                self._surface_survival(profile),
+                f"{SURFACE_RESERVOIR}|{pathogen_id}",
+            )
+
+    def _surface_survival(self, profile: dict[str, Any] | None = None) -> float:
+        """Return one-epoch surface survival for a pathogen profile."""
+        per_day = float(
+            (profile or {}).get(
+                "surface_decay_per_day", DEFAULT_SURFACE_DECAY_PER_DAY,
+            ),
+        )
+        return 1.0 - self.clock.decay_per_epoch(per_day)
+
+    def _airborne_survival(self, pathogen_id: str) -> float:
+        """Return one-epoch aerosol survival from the pathogen half-life."""
+        profile = self.pathogen_profiles.get(pathogen_id, {})
+        half_life = float(profile.get("airborne_half_life_hours", 1.1))
+        return self.clock.survival_from_half_life(half_life)
 
     def collect_extinct_strains(self, agents: list[KorkinAgent]) -> tuple[str, ...]:
         """Drop registry entries no host and no pool still references.
@@ -1570,9 +1621,9 @@ class TransmissionCore:
         """
         cfg = self.density_cfg
         ref = max(float(cfg["reference_occupancy"]), 1e-9)
-        base = float(cfg["base_contacts"])
+        base = self.clock.amount_per_epoch(float(cfg["base_contacts_per_day"]))
         alpha = float(cfg["exponent"])
-        max_c = float(cfg["max_contacts"])
+        max_c = self.clock.amount_per_epoch(float(cfg["max_contacts_per_day"]))
 
         raw = base * (max(n_occupants, 0) / ref) ** alpha
         loc = getattr(agent, "current_location", None) or ""
@@ -1583,8 +1634,12 @@ class TransmissionCore:
         mean_contacts = min(raw, max_c)
         if mean_contacts <= 0.0:
             return 0
-        # Cap again after the Poisson draw so max_contacts is a hard limit.
-        return min(int(max_c), max(0, int(self.rng.poisson(mean_contacts))))
+        draw = max(0, int(self.rng.poisson(mean_contacts)))
+        # In sub-day runs max_contacts caps the mean, not each draw. A
+        # per-epoch integer cap would make a daily cap bind 24 times.
+        if self.clock.mode == LEGACY_EPOCH_DAY:
+            return min(math.ceil(max_c), draw)
+        return draw
 
     def _draw_contact_multiplier(
         self,
@@ -1596,8 +1651,15 @@ class TransmissionCore:
             return self._effective_contacts(n_occupants, target)
         base = int(self.rng.choice(AVG_R_POOL))
         # Legacy mode: still scale by voyage contact multiplier when active
-        scaled = int(round(base * float(self.voyage_contact_multiplier)))
-        return max(0, scaled)
+        scaled = (
+            base
+            * self.clock.day_fraction_per_epoch
+            * float(self.voyage_contact_multiplier)
+        )
+        if self.clock.mode == LEGACY_EPOCH_DAY:
+            return max(0, int(round(scaled)))
+        whole = math.floor(scaled)
+        return max(0, whole + int(self.rng.random() < scaled - whole))
 
     def _zone_exposure_sigma(self, zone_name: str) -> float:
         """Log-sigma for within-zone exposure heterogeneity."""
@@ -1976,8 +2038,7 @@ class TransmissionCore:
         if not food_zones:
             return
 
-        growth = fc.get("growth_rate_per_epoch", 0.0)
-        decay = fc.get("decay_rate_per_epoch", 0.1)
+        growth_factor, decay_factor = self._food_rate_factors(fc)
 
         for zone_name in food_zones:
             occupants = zone_occupants.get(zone_name, [])
@@ -1995,10 +2056,10 @@ class TransmissionCore:
             # its composition together so the two stay proportional
             pool = food_zones[zone_name]
             if pool > 0:
-                pool *= (1.0 + growth - decay)
+                pool *= growth_factor * decay_factor
                 food_zones[zone_name] = max(pool, 0.0)
                 self._reservoir.decay(
-                    1.0 + growth - decay,
+                    growth_factor * decay_factor,
                     ReservoirComposition.key(
                         FOOD_RESERVOIR, pathogen_id, zone_name,
                     ),
@@ -2029,6 +2090,19 @@ class TransmissionCore:
                     "food_zone_multiplier": zone_mult,
                     "dose": round(dose, 4),
                 })
+
+    def _food_rate_factors(self, food_cfg: dict[str, Any]) -> tuple[float, float]:
+        growth = food_cfg.get(
+            "growth_rate_per_day",
+            food_cfg.get("growth_rate_per_epoch", 0.0),
+        )
+        decay = food_cfg.get(
+            "decay_rate_per_day",
+            food_cfg.get("decay_rate_per_epoch", 0.1),
+        )
+        growth_factor = self.clock.growth_factor_per_epoch(1.0 + float(growth))
+        decay_factor = 1.0 - self.clock.decay_per_epoch(float(decay))
+        return growth_factor, decay_factor
 
     # ── Pathway 6: Environmental Source ─────────────────────────────
 
@@ -2075,10 +2149,17 @@ class TransmissionCore:
             return
 
         load = self.environmental_load.get(pathogen_id, 0.0)
-        col_rate = ec.get("colonization_rate_per_epoch", 0.0)
+        if "colonization_rate_per_day" in ec:
+            col_factor = self.clock.growth_factor_per_epoch(
+                1.0 + float(ec["colonization_rate_per_day"]),
+            )
+        else:
+            col_factor = self.clock.growth_factor_per_epoch(
+                1.0 + float(ec.get("colonization_rate_per_epoch", 0.0)),
+            )
 
         # Grow the HVAC biofilm load
-        load *= (1.0 + col_rate)
+        load *= col_factor
         self.environmental_load[pathogen_id] = load
 
         if load <= 0:
@@ -2127,9 +2208,29 @@ class TransmissionCore:
         ec = profile.get("environmental_contamination", {})
         source_zones = list(ec.get("source_zones") or [])
         emission = float(ec.get("base_emission_rate", 0.001))
-        p_expose = float(ec.get("exposure_probability_per_epoch", 0.1))
-        spore_decay = float(ec.get("spore_decay_rate_per_epoch", 0.0))
-        col_rate = float(ec.get("colonization_rate_per_epoch", 0.0))
+        p_expose = (
+            self.clock.probability_per_epoch(float(ec["exposure_probability_per_day"]))
+            if "exposure_probability_per_day" in ec
+            else self.clock.probability_per_epoch(
+                float(ec.get("exposure_probability_per_epoch", 0.1)),
+            )
+        )
+        spore_decay = (
+            self.clock.decay_per_epoch(float(ec["spore_decay_rate_per_day"]))
+            if "spore_decay_rate_per_day" in ec
+            else self.clock.decay_per_epoch(
+                float(ec.get("spore_decay_rate_per_epoch", 0.0)),
+            )
+        )
+        col_factor = (
+            self.clock.growth_factor_per_epoch(
+                1.0 + float(ec["colonization_rate_per_day"]),
+            )
+            if "colonization_rate_per_day" in ec
+            else self.clock.growth_factor_per_epoch(
+                1.0 + float(ec.get("colonization_rate_per_epoch", 0.0)),
+            )
+        )
         reservoirs = self.env_contamination.setdefault(pathogen_id, {})
 
         # Grow / decay matching zones; ensure keys exist for occupied matches
@@ -2139,7 +2240,7 @@ class TransmissionCore:
             level = float(reservoirs.get(zone_name, 0.0))
             if level <= 0.0 and zone_name not in reservoirs:
                 level = float(ec.get("baseline_environmental_load", 0.0))
-            factor = (1.0 + col_rate) * max(0.0, 1.0 - spore_decay)
+            factor = col_factor * max(0.0, 1.0 - spore_decay)
             deposited = self._update_env_reservoir_strains(
                 pathogen_id, zone_name, level, factor,
                 zone_occupants[zone_name], profile,
@@ -2287,8 +2388,15 @@ class TransmissionCore:
         self, _zone_occupants: dict[str, list[KorkinAgent]],
     ) -> None:
         """Apply surface decay after fomite interactions."""
+        survival = self._surface_survival()
         for zone_name in self.surface_pools:
-            self.surface_pools[zone_name] *= (1.0 - SURFACE_DECAY_RATE)
+            self.surface_pools[zone_name] *= survival
+        for pathogen_id, pools in self.surface_pools_by_pathogen.items():
+            survival = self._surface_survival(
+                self.pathogen_profiles.get(pathogen_id),
+            )
+            for zone_name in pools:
+                pools[zone_name] *= survival
         self._decay_surface_composition()
 
     def _update_prev_occupancy(

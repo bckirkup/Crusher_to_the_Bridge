@@ -45,13 +45,16 @@ def _core(
     density: dict | None = None,
     zone_types: dict[str, str] | None = None,
     seed: int = 0,
+    natural_history_clock: str | None = None,
 ) -> TransmissionCore:
-    cfg = {
+    cfg: dict = {
         "transmission": {
             "contact_mode": contact_mode,
             "density_dependent": density or {},
         },
     }
+    if natural_history_clock is not None:
+        cfg["natural_history_clock"] = natural_history_clock
     zt = zone_types or {
         "Lounge": "Free",
         "MainDining": "Dining",
@@ -72,7 +75,11 @@ class TestDensityContactMode:
         zone = "Lounge"
         shedder = _agent(1, zone, infected=True)
         targets = [_agent(i, zone) for i in range(2, 12)]
-        core = _core(contact_mode="legacy", seed=123)
+        core = _core(
+            contact_mode="legacy",
+            seed=123,
+            natural_history_clock="legacy_epoch_day",
+        )
         core.initialize_zones([zone])
         matrix, _ = core.execute_transmission(
             epoch=1,
@@ -83,75 +90,133 @@ class TestDensityContactMode:
         assert draws
         assert all(d in AVG_R_POOL for d in draws)
 
+        hourly = _core(contact_mode="legacy", seed=123)
+        agent = _agent(1, zone, infected=True)
+        expected_daily = sum(AVG_R_POOL) / len(AVG_R_POOL)
+        daily_draws = [
+            sum(hourly._draw_contact_multiplier(10, agent) for _ in range(24))
+            for _ in range(8000)
+        ]
+        assert sum(daily_draws) / len(daily_draws) == pytest.approx(
+            expected_daily, rel=0.08,
+        )
+
     def test_density_dependent_contacts_scale(self) -> None:
         """At α=0.5, doubling occupancy increases mean contacts by ~√2 (~41%)."""
         dens = {
             "reference_occupancy": 50,
-            "base_contacts": 1.33,
-            "max_contacts": 100,
+            "base_contacts_per_day": 1.33,
+            "max_contacts_per_day": 100,
             "exponent": 0.5,
             "crew_contact_multiplier": 1.0,
         }
-        core = _core(density=dens, seed=7)
+        hourly = _core(density=dens, seed=7)
+        legacy = _core(
+            density=dens,
+            seed=7,
+            natural_history_clock="legacy_epoch_day",
+        )
         agent = _agent(1, "Lounge")
         n_samples = 8000
-        draws_n = [core._effective_contacts(50, agent) for _ in range(n_samples)]
-        draws_2n = [core._effective_contacts(100, agent) for _ in range(n_samples)]
+        draws_n = [
+            sum(hourly._effective_contacts(50, agent) for _ in range(24))
+            for _ in range(n_samples)
+        ]
+        draws_2n = [
+            sum(hourly._effective_contacts(100, agent) for _ in range(24))
+            for _ in range(n_samples)
+        ]
         mean_n = sum(draws_n) / n_samples
         mean_2n = sum(draws_2n) / n_samples
-        # Expected: 1.33 and 1.33*√2 ≈ 1.881
+        legacy_n = [
+            legacy._effective_contacts(50, agent) for _ in range(n_samples)
+        ]
+        legacy_2n = [
+            legacy._effective_contacts(100, agent) for _ in range(n_samples)
+        ]
         assert mean_n == pytest.approx(1.33, rel=0.08)
+        assert mean_n == pytest.approx(sum(legacy_n) / n_samples, rel=0.08)
+        assert mean_2n == pytest.approx(sum(legacy_2n) / n_samples, rel=0.08)
         assert mean_2n / mean_n == pytest.approx(math.sqrt(2), rel=0.08)
 
     def test_density_dependent_alpha_zero_matches_legacy(self) -> None:
         """α=0 → mean ≈ base_contacts (1.33) regardless of occupancy."""
         dens = {
             "reference_occupancy": 50,
-            "base_contacts": 1.33,
-            "max_contacts": 100,
+            "base_contacts_per_day": 1.33,
+            "max_contacts_per_day": 100,
             "exponent": 0.0,
             "crew_contact_multiplier": 1.0,
         }
-        core = _core(density=dens, seed=11)
+        hourly = _core(density=dens, seed=11)
+        legacy = _core(
+            density=dens,
+            seed=11,
+            natural_history_clock="legacy_epoch_day",
+        )
         agent = _agent(1, "Lounge")
         n_samples = 6000
         for n_occ in (5, 50, 200):
-            draws = [core._effective_contacts(n_occ, agent) for _ in range(n_samples)]
+            draws = [
+                sum(hourly._effective_contacts(n_occ, agent) for _ in range(24))
+                for _ in range(n_samples)
+            ]
+            legacy_draws = [
+                legacy._effective_contacts(n_occ, agent)
+                for _ in range(n_samples)
+            ]
             assert sum(draws) / n_samples == pytest.approx(1.33, rel=0.08)
+            assert sum(draws) / n_samples == pytest.approx(
+                sum(legacy_draws) / n_samples, rel=0.08,
+            )
 
     def test_crew_multiplier_applies_in_dining(self) -> None:
         """Crew in Dining get multiplied contacts; crew in cabins do not."""
         dens = {
             "reference_occupancy": 50,
-            "base_contacts": 4.0,
-            "max_contacts": 100,
+            "base_contacts_per_day": 4.0,
+            "max_contacts_per_day": 100,
             "exponent": 0.0,  # occupancy-independent for clean ratio
             "crew_contact_multiplier": 2.0,
         }
-        core = _core(density=dens, seed=21)
-        assert "MainDining" in core._service_zones
-        assert "Main_Galley_Aft" in core._service_zones
+        hourly = _core(density=dens, seed=21)
+        legacy = _core(
+            density=dens,
+            seed=21,
+            natural_history_clock="legacy_epoch_day",
+        )
+        assert "MainDining" in hourly._service_zones
+        assert "Main_Galley_Aft" in hourly._service_zones
 
         crew_dining = _agent(1, "MainDining", role="crew")
         crew_cabin = _agent(2, "CrewCabin", role="crew")
         pax_dining = _agent(3, "MainDining", role="passenger")
 
         n_samples = 5000
-        mean_crew_dining = (
-            sum(core._effective_contacts(50, crew_dining) for _ in range(n_samples))
-            / n_samples
-        )
-        mean_crew_cabin = (
-            sum(core._effective_contacts(50, crew_cabin) for _ in range(n_samples))
-            / n_samples
-        )
-        mean_pax_dining = (
-            sum(core._effective_contacts(50, pax_dining) for _ in range(n_samples))
-            / n_samples
-        )
+        def hourly_daily_mean(agent: KorkinAgent) -> float:
+            return sum(
+                sum(hourly._effective_contacts(50, agent) for _ in range(24))
+                for _ in range(n_samples)
+            ) / n_samples
+
+        def legacy_mean(agent: KorkinAgent) -> float:
+            return sum(
+                legacy._effective_contacts(50, agent)
+                for _ in range(n_samples)
+            ) / n_samples
+
+        mean_crew_dining = hourly_daily_mean(crew_dining)
+        mean_crew_cabin = hourly_daily_mean(crew_cabin)
+        mean_pax_dining = hourly_daily_mean(pax_dining)
+        legacy_crew_dining = legacy_mean(crew_dining)
+        legacy_crew_cabin = legacy_mean(crew_cabin)
+        legacy_pax_dining = legacy_mean(pax_dining)
         assert mean_crew_dining == pytest.approx(8.0, rel=0.08)
         assert mean_crew_cabin == pytest.approx(4.0, rel=0.08)
         assert mean_pax_dining == pytest.approx(4.0, rel=0.08)
+        assert mean_crew_dining == pytest.approx(legacy_crew_dining, rel=0.08)
+        assert mean_crew_cabin == pytest.approx(legacy_crew_cabin, rel=0.08)
+        assert mean_pax_dining == pytest.approx(legacy_pax_dining, rel=0.08)
 
     def test_max_contacts_cap(self) -> None:
         """Contacts never exceed max_contacts even at high occupancy."""
@@ -210,9 +275,14 @@ class TestDensityContactMode:
         )
         assert core.density_cfg["exponent"] == pytest.approx(0.25)
         assert core.density_cfg["reference_occupancy"] == pytest.approx(50.0)
-        assert core.density_cfg["base_contacts"] == pytest.approx(1.33)
-        assert core.density_cfg["max_contacts"] == pytest.approx(20.0)
+        assert core.density_cfg["base_contacts_per_day"] == pytest.approx(13.4)
+        assert core.density_cfg["max_contacts_per_day"] == pytest.approx(40.0)
         assert core.density_cfg["crew_contact_multiplier"] == pytest.approx(2.0)
+        retired = _core(
+            density={"base_contacts": 1.33, "max_contacts": 20.0},
+        )
+        assert retired.density_cfg["base_contacts_per_day"] == pytest.approx(1.33)
+        assert retired.density_cfg["max_contacts_per_day"] == pytest.approx(20.0)
 
 
 class TestHeterogeneousZoneDose:

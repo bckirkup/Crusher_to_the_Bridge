@@ -70,7 +70,9 @@ def print_initialization(
     print(f"    Reluctant delay:         {fred_cfg.get('reluctant_delay_epochs', 48)} epoch(s)")
     cats = fred_cfg.get("healthy_noise_categories", [])
     for cat in cats:
-        print(f"    Noise: {cat['reason']:15s}  P={cat['probability']:.3f}")
+        reason = cat.get("reason", "")
+        probability = cat.get("probability_per_day", cat.get("probability", 0.0))
+        print(f"    Noise: {reason:15s}  P/day={probability:.3f}")
 
     emod_cfg = cfg.get("emod_progression", {})
     phases = emod_cfg.get("shedding_phases", [])
@@ -181,9 +183,9 @@ def _print_pathogen_profile(pid: str, prof: dict[str, Any]) -> None:
     print(f"      Intro:    epoch {intro}")
     fc = prof.get("food_contamination", {})
     if fc.get("enabled"):
-        gr = fc.get("growth_rate_per_epoch", 0)
-        dr = fc.get("decay_rate_per_epoch", 0)
-        print(f"      Food contam: growth={gr}/epoch  decay={dr}/epoch")
+        gr = fc.get("growth_rate_per_day", fc.get("growth_rate_per_epoch", 0))
+        dr = fc.get("decay_rate_per_day", fc.get("decay_rate_per_epoch", 0))
+        print(f"      Food contam: growth={gr}/day  decay={dr}/day")
     ec = prof.get("environmental_contamination", {})
     if ec.get("enabled"):
         src = ec.get("source_type", "?")

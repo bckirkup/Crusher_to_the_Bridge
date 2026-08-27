@@ -60,12 +60,17 @@ _HOURS_PER_DAY = 24.0
 _RATE_AXES: tuple[tuple[str, str, str, str], ...] = (
     ("mutation_rates", "mu", "mutation_rate", "mutation_rate"),
     (
-        "within_host_mutation_rates",
+        "within_host_mutation_rates_per_day",
         "wh",
-        "within_host_mutation_rate",
-        "within_host_mutation_rate",
+        "within_host_mutation_rate_per_day",
+        "within_host_mutation_rate_per_day",
     ),
-    ("recombination_rates", "rec", "recombination_rate", "recombination_rate"),
+    (
+        "recombination_rates_per_day",
+        "rec",
+        "recombination_rate_per_day",
+        "recombination_rate_per_day",
+    ),
     (
         "superinfection_susceptibilities",
         "sup",
@@ -73,6 +78,10 @@ _RATE_AXES: tuple[tuple[str, str, str, str], ...] = (
         "superinfection_susceptibility",
     ),
 )
+_RATE_AXIS_ALIASES = {
+    "within_host_mutation_rates_per_day": "within_host_mutation_rates",
+    "recombination_rates_per_day": "recombination_rates",
+}
 
 
 class VariantManifestError(ValueError):
@@ -198,7 +207,11 @@ def tier_axes(
         "founder_strains": _founders(tier, manifest),
     }
     for key, _tag, _param, _field in _RATE_AXES:
-        axes[key] = _axis(tier, key)
+        source_key = _RATE_AXIS_ALIASES.get(key, key)
+        axes[key] = _axis(
+            tier,
+            key if key in tier else source_key,
+        )
     axes["surveillance"] = tuple(
         str(s) for s in (tier.get("surveillance_strategies") or ["syndromic"])
     )
@@ -344,7 +357,8 @@ def _run_id(
         f"f{int(cell['founder_strains'])}",
     ]
     for key, tag, _param, _field in _RATE_AXES:
-        if key in tier and cell[key] is not None:
+        source_key = _RATE_AXIS_ALIASES.get(key, key)
+        if (key in tier or source_key in tier) and cell[key] is not None:
             parts.append(_rate_tag(tag, cell[key]))
     parts.append(str(cell["surveillance"]))
     parts.append(f"s{int(cell['seeds'])}")

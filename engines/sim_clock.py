@@ -129,6 +129,59 @@ class SimClock:
         """Wall-clock hours spanned by ``epochs`` epochs."""
         return float(epochs) * self.hours_per_epoch
 
+    @property
+    def day_fraction_per_epoch(self) -> float:
+        """Fraction of a natural-history day represented by one epoch."""
+        return self.hours_per_epoch / HOURS_PER_DAY
+
+    def amount_per_epoch(self, amount_per_day: float) -> float:
+        """Convert a per-day amount to the amount for one epoch."""
+        if self.mode == LEGACY_EPOCH_DAY:
+            return float(amount_per_day)
+        return float(amount_per_day) * self.day_fraction_per_epoch
+
+    def probability_per_epoch(self, probability_per_day: float) -> float:
+        """Convert an independent per-day probability to one epoch."""
+        probability = float(probability_per_day)
+        if probability < 0.0:
+            raise ValueError("probability_per_day must be non-negative")
+        probability = min(1.0, probability)
+        if self.mode == LEGACY_EPOCH_DAY:
+            return probability
+        return 1.0 - (1.0 - probability) ** self.day_fraction_per_epoch
+
+    def decay_per_epoch(self, decay_per_day: float) -> float:
+        """Convert a fractional per-day loss to one epoch."""
+        decay = float(decay_per_day)
+        if decay < 0.0:
+            raise ValueError("decay_per_day must be non-negative")
+        decay = min(1.0, decay)
+        if self.mode == LEGACY_EPOCH_DAY:
+            return decay
+        return 1.0 - (1.0 - decay) ** self.day_fraction_per_epoch
+
+    def growth_factor_per_epoch(self, growth_factor_per_day: float) -> float:
+        """Convert a multiplicative per-day growth factor to one epoch."""
+        factor = float(growth_factor_per_day)
+        if factor <= 0.0:
+            raise ValueError("growth_factor_per_day must be positive")
+        if self.mode == LEGACY_EPOCH_DAY:
+            return factor
+        return factor ** self.day_fraction_per_epoch
+
+    def survival_from_half_life(self, half_life_hours: float) -> float:
+        """Return one-epoch survival for an hourly half-life."""
+        half_life = float(half_life_hours)
+        if half_life <= 0.0:
+            raise ValueError("half_life_hours must be positive")
+        return 0.5 ** (self.hours_per_epoch / half_life)
+
+    def hour_of_day(self, epoch: float, start_hour: int = 0) -> int:
+        """Return the physical hour represented by an epoch."""
+        if self.mode == LEGACY_EPOCH_DAY:
+            return 12
+        return int(self.hours_elapsed(epoch) + start_hour) % 24
+
     def days_elapsed(self, epochs: float) -> float:
         """Days of natural history that ``epochs`` epochs represent."""
         if self.mode == LEGACY_EPOCH_DAY:

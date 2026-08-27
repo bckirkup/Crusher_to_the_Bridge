@@ -26,6 +26,7 @@ from crusher_labs.observation_core import (
     WastewaterSequencingGrid,
 )
 from crusher_labs.protocol_engine import ProtocolEngine
+from engines.sim_clock import SimClock
 
 # ── Trigger status constants ─────────────────────────────────────────────
 # Five-level escalation (Campaign v5 / outbreak response architecture):
@@ -160,3 +161,4 @@ class ProtocolContext:
     resource_costs_cfg: dict[str, Any]
     standing_protocols: list[Any]
     original_filter_eff: float
+    clock: SimClock = field(default_factory=SimClock)

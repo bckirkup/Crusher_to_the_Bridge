@@ -30,6 +30,122 @@
       "minItems": 2,
       "maxItems": 2
     },
+    "FoodContamination": {
+      "type": "object",
+      "properties": {
+        "enabled": {"type": "boolean"},
+        "growth_rate_per_day": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Daily food-reservoir growth factor input."
+        },
+        "growth_rate_per_epoch": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Deprecated daily-authored alias for growth_rate_per_day."
+        },
+        "growth_rate": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Deprecated daily-authored alias for growth_rate_per_day."
+        },
+        "decay_rate_per_day": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Daily fraction of viable food-reservoir mass lost."
+        },
+        "decay_rate_per_epoch": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Deprecated daily-authored alias for decay_rate_per_day."
+        },
+        "decay_rate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Deprecated daily-authored alias for decay_rate_per_day."
+        }
+      },
+      "additionalProperties": false
+    },
+    "EnvironmentalContamination": {
+      "type": "object",
+      "properties": {
+        "enabled": {"type": "boolean"},
+        "source_type": {"type": "string"},
+        "source_zones": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "baseline_environmental_load": {
+          "type": "number",
+          "minimum": 0
+        },
+        "base_emission_rate": {
+          "type": "number",
+          "minimum": 0
+        },
+        "person_to_person": {"type": "boolean"},
+        "amplification_by_antibiotic_use": {
+          "type": "number",
+          "minimum": 0
+        },
+        "colonization_rate_per_day": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Daily environmental colonization rate."
+        },
+        "colonization_rate_per_epoch": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Deprecated daily-authored alias for colonization_rate_per_day."
+        },
+        "colonization_rate": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Deprecated daily-authored alias for colonization_rate_per_day."
+        },
+        "spore_decay_rate_per_day": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Daily fraction of environmental spore mass lost."
+        },
+        "spore_decay_rate_per_epoch": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Deprecated daily-authored alias for spore_decay_rate_per_day."
+        },
+        "spore_decay_rate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Deprecated daily-authored alias for spore_decay_rate_per_day."
+        },
+        "exposure_probability_per_day": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Daily environmental exposure probability."
+        },
+        "exposure_probability_per_epoch": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Deprecated daily-authored alias for exposure_probability_per_day."
+        },
+        "exposure_probability": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Deprecated daily-authored alias for exposure_probability_per_day."
+        }
+      },
+      "additionalProperties": false
+    },
     "StrainEvolution": {
       "type": "object",
       "description": "Optional heritable-strain parameters (variant surveillance, Paper 3). Absent block = no strain structure for this pathogen.",
@@ -53,11 +169,23 @@
           "maximum": 1,
           "description": "Probability of a point mutation per infected-agent-epoch. Default 0 keeps the transmission-only model as the baseline."
         },
+        "within_host_mutation_rate_per_day": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Daily-authored probability of a point mutation per infected-agent day."
+        },
         "recombination_rate": {
           "type": "number",
           "minimum": 0,
           "maximum": 1,
           "description": "Probability of a recombination event per co-infected agent-epoch."
+        },
+        "recombination_rate_per_day": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Daily-authored probability of a recombination event per co-infected-agent day."
         },
         "superinfection_susceptibility": {
           "type": "number",
@@ -351,6 +479,23 @@
           "type": "number",
           "minimum": 0,
           "maximum": 1
+        },
+        "surface_decay_per_day": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Daily fraction of viable surface-reservoir mass lost."
+        },
+        "airborne_half_life_hours": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Airborne decay half-life in hours, excluding ventilation."
+        },
+        "food_contamination": {
+          "$ref": "#/$defs/FoodContamination"
+        },
+        "environmental_contamination": {
+          "$ref": "#/$defs/EnvironmentalContamination"
         },
         "base_susceptibility": {"type": "number", "minimum": 0},
         "microflora_disruption": {

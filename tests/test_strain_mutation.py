@@ -268,11 +268,11 @@ class TestTransmissionCoreIntegration:
         core = _core(
             cfg=VARIANT_CFG,
             profile=_profile_with(
-                mutation_rate=0.0, within_host_mutation_rate=1.0,
+                mutation_rate=0.0, within_host_mutation_rate_per_day=1.0,
             ),
         )
         agents = _population(n_shedders=2, n_susceptible=0)
-        _run(core, agents, epochs=6)
+        _run(core, agents, epochs=24)
         registry = core.strain_registry
         assert registry is not None
         mutants = [

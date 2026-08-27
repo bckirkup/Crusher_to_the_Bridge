@@ -96,6 +96,11 @@ jobs:
             check-jsonschema --schemafile schemas/air_flow_paths.schema.json \
               "$dir/air_flow_paths.json"
           done
+          for profile in data/pathogens/*.json; do
+            echo "=== pathogen profile schema: $(basename "$profile") ==="
+            check-jsonschema --schemafile schemas/pathogen_profiles.schema.json \
+              "$profile"
+          done
       - name: Presidio smoke (1 cruise, 2 epochs)
         env:
           PYTHONPATH: .

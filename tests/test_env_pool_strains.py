@@ -350,7 +350,7 @@ class TestPoolAttribution:
             pathogen_id=PATHOGEN, profile=profile, ledger=None,
         )
         assert core.env_contamination[PATHOGEN]["Medical_Bay"] == pytest.approx(
-            100.0 * 0.9,
+            100.0 * (1.0 - core.clock.decay_per_epoch(0.1)),
         )
         assert core._reservoir.keys() == ()
 

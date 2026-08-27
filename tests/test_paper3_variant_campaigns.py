@@ -163,7 +163,7 @@ def test_emergence_design_carries_both_sensitivity_tiers(
     interference = tiers["vs3_coinfection_interference_norovirus"]
     recombination = tiers["vs4_recombination_norovirus"]
     assert len(interference["superinfection_susceptibilities"]) == 5
-    assert len(recombination["recombination_rates"]) == 5
+    assert len(recombination["recombination_rates_per_day"]) == 5
     # Both sensitivity axes are crossed with voyage length.
     assert interference["voyage_days"] == [7, 14]
     assert recombination["voyage_days"] == [7, 14]
@@ -257,7 +257,9 @@ def test_swept_rates_reach_the_pathogen_profile(emergence: dict[str, Any]) -> No
         ).pathogen_profiles["norwalk_gi"]
         assert profile["strain_evolution"]["mutation_rate"] == rate
         # A patched rate must not disturb the rest of strain_evolution.
-        assert profile["strain_evolution"]["recombination_rate"] == pytest.approx(0.01)
+        assert profile["strain_evolution"]["recombination_rate_per_day"] == pytest.approx(
+            0.01,
+        )
     assert set(seen) == set(
         emergence["tiers"]["vs2_emergence_transmission_norovirus"]["mutation_rates"],
     )
@@ -271,7 +273,7 @@ def test_within_host_and_interference_axes_are_independent(
     _iid, interference = _first(emergence, "vs3_coinfection_interference_norovirus")
     within_patch = within["pathogen_overrides"]["norwalk_gi"]["strain_evolution"]
     inter_patch = interference["pathogen_overrides"]["norwalk_gi"]["strain_evolution"]
-    assert set(within_patch) == {"within_host_mutation_rate"}
+    assert set(within_patch) == {"within_host_mutation_rate_per_day"}
     assert set(inter_patch) == {"superinfection_susceptibility"}
 
 

@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import json
 import os
+import warnings
 from dataclasses import dataclass
 from math import isfinite
 from typing import Any, Mapping
@@ -653,4 +654,12 @@ def build_ledger_from_config(config_path: str) -> CostLedger:
 def load_resource_costs(config_path: str) -> dict[str, Any]:
     """Load the raw resource costs config."""
     with validated_open(config_path, "r", allowed_roots=(REPO_ROOT,), encoding="utf-8") as fh:
-        return json.load(fh)
+        config = json.load(fh)
+    if "baseline_surveillance_costs_per_epoch" in config:
+        warnings.warn(
+            "baseline_surveillance_costs_per_epoch is deprecated; "
+            "use baseline_surveillance_costs_per_day",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+    return config

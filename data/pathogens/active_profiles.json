@@ -7,6 +7,8 @@
   "pathogens": [
     {
       "pathogen_id": "norwalk_gi",
+      "surface_decay_per_day": 0.25,
+      "airborne_half_life_hours": 1.1,
       "name": "Norwalk Virus (Norovirus GII.4)",
       "category": "enteric_viral",
       "transmission_routes": [
@@ -93,8 +95,8 @@
       },
       "food_contamination": {
         "enabled": true,
-        "growth_rate_per_epoch": 0.3,
-        "decay_rate_per_epoch": 0.1
+        "growth_rate_per_day": 0.0,
+        "decay_rate_per_day": 0.1
       },
       "introduction_epoch": 0,
       "initial_infected": 1,
@@ -141,8 +143,8 @@
       "strain_evolution": {
         "mutation_rate": 0.02,
         "phenotype_mutation_fraction": 0.05,
-        "within_host_mutation_rate": 0.0,
-        "recombination_rate": 0.01,
+        "within_host_mutation_rate_per_day": 0.0,
+        "recombination_rate_per_day": 0.01,
         "superinfection_susceptibility": 0.1,
         "genotypes": [
           "GII.4",
@@ -208,6 +210,8 @@
     },
     {
       "pathogen_id": "sars_cov2_resp",
+      "surface_decay_per_day": 0.95,
+      "airborne_half_life_hours": 1.1,
       "name": "SARS-CoV-2 (Respiratory)",
       "category": "respiratory_viral",
       "transmission_routes": [
@@ -349,8 +353,8 @@
       "strain_evolution": {
         "mutation_rate": 0.03,
         "phenotype_mutation_fraction": 0.1,
-        "within_host_mutation_rate": 0.0,
-        "recombination_rate": 0.005,
+        "within_host_mutation_rate_per_day": 0.0,
+        "recombination_rate_per_day": 0.005,
         "superinfection_susceptibility": 0.05,
         "genotypes": [
           "ancestral",
