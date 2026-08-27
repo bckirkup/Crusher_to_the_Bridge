@@ -88,9 +88,8 @@ def test_picard_golden_summary_and_trigger() -> None:
     assert fp["symptomatic"] == 2
     assert fp["recovered"] == 0
     assert fp["immune"] == 4
-    # A day-long symptomatic window is visible to syndromic surveillance where a
-    # three-epoch one was not, so the trigger escalates.  Prior value: BASELINE.
-    assert fp["trigger_status"] == "CONFIRMED"
+    # No true-positive sick call is expected inside 24 h at 0.70/day.
+    assert fp["trigger_status"] == "BASELINE"
 
 
 @pytest.mark.timeout(240)

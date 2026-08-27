@@ -32,10 +32,9 @@ EXPECTED_SUMMARY = {
     "recovered": 0,
     "immune": 4,
 }
-# The trigger moves with the same contract: cases that used to clear inside three
-# epochs now stay symptomatic for the whole day, so syndromic surveillance has a
-# real symptomatic window to see and escalates.  Prior expectation was BASELINE.
-EXPECTED_TRIGGER = "CONFIRMED"
+# A 24-hour run is too short for a true-positive report at the 0.70/day
+# reporting rate, so no clinical escalation is expected in this golden.
+EXPECTED_TRIGGER = "BASELINE"
 
 
 def _run_orchestrator(epochs: int = 24) -> list[dict]:
@@ -76,6 +75,7 @@ def test_golden_24_epoch_summary_and_costs() -> None:
     assert len(history) >= GOLDEN_LAST_EPOCH + 1
     fp = _fingerprint(history)
     assert fp["summary"] == EXPECTED_SUMMARY
+    # No true-positive sick call is expected inside 24 h at 0.70/day.
     assert fp["trigger_status"] == EXPECTED_TRIGGER
     assert fp["total_financial_usd"] is not None
     assert fp["total_financial_usd"] > 0
