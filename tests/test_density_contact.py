@@ -286,17 +286,17 @@ class TestDensityContactMode:
 
 
 class TestHeterogeneousZoneDose:
-    """Optional second-stage contact_mode (not the default)."""
+    """Heterogeneous-zone contact mode remains explicitly selectable."""
 
-    def test_default_mode_remains_density_dependent(self) -> None:
+    def test_default_mode_is_per_partner_contact(self) -> None:
         core = TransmissionCore(rng=np.random.default_rng(0))
-        assert core.contact_mode == "density_dependent"
+        assert core.contact_mode == "per_partner_contact"
 
-    def test_config_yaml_default_is_density_dependent(self) -> None:
+    def test_config_yaml_default_is_per_partner_contact(self) -> None:
         from crusher_labs import load_config
 
         cfg = load_config()
-        assert cfg["transmission"]["contact_mode"] == "density_dependent"
+        assert cfg["transmission"]["contact_mode"] == "per_partner_contact"
 
     def test_zone_sigma_ordering(self) -> None:
         core = _core(
@@ -424,3 +424,112 @@ class TestHeterogeneousZoneDose:
             return sum((x - mean) ** 2 for x in draws) / len(draws)
 
         assert _var(1.0) > _var(0.2) * 2.0
+
+
+class TestPerPartnerContact:
+    """Distinct partner sampling changes variance without changing scale."""
+
+    def test_mean_dose_matches_density_average(self) -> None:
+        zone = "Lounge"
+        shedders = [
+            (_agent(1, zone, infected=True), 1.0),
+            (_agent(2, zone, infected=True), 2.0),
+            (_agent(3, zone, infected=True), 3.0),
+            (_agent(4, zone, infected=True), 4.0),
+        ]
+        target = _agent(5, zone)
+        partner = _core(contact_mode="per_partner_contact", seed=13)
+        density = _core(contact_mode="density_dependent", seed=13)
+        draws = [
+            partner._direct_contact_dose(
+                target, shedders, 10.0, 100, 4, False,
+            )
+            for _ in range(12000)
+        ]
+        expected = density._direct_contact_dose(
+            target, shedders, 10.0, 100, 4, False,
+        )
+        assert sum(draws) / len(draws) == pytest.approx(expected, rel=0.03)
+
+    def test_single_shedder_creates_contact_heterogeneity(self) -> None:
+        zone = "Lounge"
+        shedders = [(_agent(1, zone, infected=True), 4.0)]
+        target = _agent(2, zone)
+        partner = _core(contact_mode="per_partner_contact", seed=22)
+        density = _core(contact_mode="density_dependent", seed=22)
+        partner_doses = [
+            partner._direct_contact_dose(
+                target, shedders, 4.0, 100, 1, False,
+            )
+            for _ in range(6000)
+        ]
+        density_dose = density._direct_contact_dose(
+            target, shedders, 4.0, 100, 1, False,
+        )
+        partner_variance = np.var(partner_doses)
+        assert sum(dose > 0 for dose in partner_doses) < len(partner_doses) * 0.03
+        assert partner_variance > np.var([density_dose] * len(partner_doses))
+
+    def test_mean_dose_per_contact_is_occupancy_invariant(self) -> None:
+        zone = "Lounge"
+        target = _agent(999, zone)
+
+        def _mean_per_contact(n_occupants: int, copies: int) -> float:
+            shedders = [
+                (_agent(i, zone, infected=True), float(i % 4 + 1))
+                for i in range(copies)
+            ]
+            core = _core(contact_mode="per_partner_contact", seed=n_occupants)
+            draws = [
+                core._direct_contact_dose(
+                    target, shedders, sum(v for _, v in shedders),
+                    n_occupants, 1, False,
+                )
+                for _ in range(50000)
+            ]
+            return sum(draws) / len(draws)
+
+        lower_occupancy = _mean_per_contact(20, 4)
+        higher_occupancy = _mean_per_contact(200, 40)
+        assert higher_occupancy >= lower_occupancy * 0.9
+
+    def test_zero_contacts_and_no_shedders_are_zero(self) -> None:
+        zone = "Lounge"
+        target = _agent(1, zone)
+        core = _core(contact_mode="per_partner_contact", seed=3)
+        assert core._direct_contact_dose(
+            target, [(_agent(2, zone, infected=True), 1.0)],
+            1.0, 10, 0, False,
+        ) == 0.0
+        assert core._direct_contact_dose(
+            target, [], 0.0, 10, 2, False,
+        ) == 0.0
+        assert core._sample_contact_partners(
+            [(_agent(2, zone, infected=True), 1.0)], 1, 4,
+        ) == ([], 0)
+
+    def test_records_sampled_sources_and_contact_count(self) -> None:
+        zone = "Lounge"
+        shedder = _agent(1, zone, infected=True)
+        targets = [_agent(i, zone) for i in range(2, 12)]
+        core = _core(
+            contact_mode="per_partner_contact",
+            density={
+                "base_contacts": 3.0,
+                "max_contacts": 3.0,
+                "exponent": 0.0,
+                "crew_contact_multiplier": 1.0,
+            },
+            seed=8,
+        )
+        core.initialize_zones([zone])
+        matrix, _ = core.execute_transmission(
+            epoch=1,
+            agents=[shedder, *targets],
+            zone_pathogen_mass={zone: 0.0},
+        )
+        assert matrix.shared_room_exposures
+        for exposure in matrix.shared_room_exposures:
+            assert len(exposure["source_ids"]) <= exposure["n_contacts"]
+            assert exposure["n_contacts"] == exposure["r0_draw"]
+            assert set(exposure["source_ids"]) <= {1}

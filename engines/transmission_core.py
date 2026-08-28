@@ -101,7 +101,7 @@ DEFAULT_DENSITY_CFG: dict[str, float] = {
     "exponent": 0.5,
     "crew_contact_multiplier": 2.0,
 }
-DEFAULT_CONTACT_MODE = "density_dependent"
+DEFAULT_CONTACT_MODE = "per_partner_contact"
 
 # Per-pathogen route weights (identity default → no change when absent)
 DEFAULT_ROUTE_WEIGHTS: dict[str, float] = {
@@ -139,6 +139,7 @@ CONTACT_MODES = frozenset({
     "legacy",
     "density_dependent",
     "heterogeneous_zone_dose",
+    "per_partner_contact",
 })
 
 
@@ -1604,6 +1605,13 @@ class TransmissionCore:
         r0_draw: int,
         cabin_confinement: bool,
     ) -> float:
+        if self.contact_mode == "per_partner_contact":
+            sampled, _ = self._sample_contact_partners(
+                shedders, n_occupants, r0_draw,
+            )
+            return self._per_partner_contact_dose(
+                target, sampled, cabin_confinement,
+            )
         if cabin_confinement:
             dose = 0.0
             for shedder, sv in shedders:
@@ -1611,6 +1619,43 @@ class TransmissionCore:
                 dose += sv * pair_factor / n_occupants * r0_draw
             return dose
         dose = total_shedding / n_occupants * r0_draw
+        return dose * self._confinement_factor(target)
+
+    def _sample_contact_partners(
+        self,
+        shedders: list[tuple[KorkinAgent, float]],
+        n_occupants: int,
+        r0_draw: int,
+    ) -> tuple[list[tuple[KorkinAgent, float]], int]:
+        """Sample distinct shedding partners for one target."""
+        eligible = max(n_occupants - 1, 0)
+        k = min(max(int(r0_draw), 0), eligible)
+        if eligible <= 0 or k <= 0 or not shedders:
+            return [], k
+        n_shedders = min(len(shedders), eligible)
+        n_non_shedders = eligible - n_shedders
+        sampled_shedders = int(
+            self.rng.hypergeometric(n_shedders, n_non_shedders, k),
+        )
+        if sampled_shedders <= 0:
+            return [], k
+        indices = self.rng.choice(
+            len(shedders), size=sampled_shedders, replace=False,
+        )
+        return [shedders[int(index)] for index in np.atleast_1d(indices)], k
+
+    def _per_partner_contact_dose(
+        self,
+        target: KorkinAgent,
+        sampled_shedders: list[tuple[KorkinAgent, float]],
+        cabin_confinement: bool,
+    ) -> float:
+        """Sum sampled partner shedding without zone-average dilution."""
+        dose = 0.0
+        for shedder, shedding in sampled_shedders:
+            if cabin_confinement:
+                shedding *= self._cabin_pair_contact_factor(shedder, target)
+            dose += shedding
         return dose * self._confinement_factor(target)
 
     def _effective_contacts(self, n_occupants: int, agent: KorkinAgent) -> int:
@@ -1703,6 +1748,7 @@ class TransmissionCore:
     ) -> None:
         """Person-to-person transmission via close contact in shared rooms."""
         use_het = self.contact_mode == "heterogeneous_zone_dose"
+        use_partner = self.contact_mode == "per_partner_contact"
         for zone_name, occupants in zone_occupants.items():
             shedders = self._get_shedders(occupants, pathogen_id, profile)
             susceptible = self._get_susceptible(occupants, pathogen_id)
@@ -1723,10 +1769,20 @@ class TransmissionCore:
 
             for target in susceptible:
                 r0_draw = self._draw_contact_multiplier(n_occupants, target)
-                dose = self._direct_contact_dose(
-                    target, shedders, total_shedding, n_occupants, r0_draw,
-                    cabin_confinement,
-                )
+                sampled_shedders = shedders
+                n_contacts = r0_draw
+                if use_partner:
+                    sampled_shedders, n_contacts = self._sample_contact_partners(
+                        shedders, n_occupants, r0_draw,
+                    )
+                    dose = self._per_partner_contact_dose(
+                        target, sampled_shedders, cabin_confinement,
+                    )
+                else:
+                    dose = self._direct_contact_dose(
+                        target, shedders, total_shedding, n_occupants, r0_draw,
+                        cabin_confinement,
+                    )
                 dose *= self.direct_contact_scalar
                 dose *= zone_dc_factor
                 exposure_factor = 1.0
@@ -1734,7 +1790,10 @@ class TransmissionCore:
                     exposure_factor = self._zone_exposure_factor(zone_name)
                     dose *= exposure_factor
                 mix = self._direct_contact_mix(
-                    target, shedders, pathogen_id, zone_mix,
+                    target,
+                    sampled_shedders,
+                    pathogen_id,
+                    None if use_partner else zone_mix,
                 )
                 dose = self._accumulate(
                     target.agent_id, "direct_contact", dose,
@@ -1751,6 +1810,11 @@ class TransmissionCore:
                     "occupant_count": len(occupants),
                     "r0_draw": r0_draw,
                 }
+                if use_partner:
+                    rec["source_ids"] = [
+                        shedder.agent_id for shedder, _ in sampled_shedders
+                    ]
+                    rec["n_contacts"] = n_contacts
                 if use_het:
                     rec["zone_exposure_factor"] = round(exposure_factor, 6)
                 matrix.shared_room_exposures.append(rec)

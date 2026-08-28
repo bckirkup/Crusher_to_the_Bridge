@@ -226,20 +226,19 @@ agent_behavior:
       specialty: 0.3
 
 # ── Transmission contact model ─────────────────────────────────
-# Direct-contact r0_draw: density_dependent (default) scales contacts
-# with zone occupancy; legacy uses fixed AVG_R_POOL (frequency-dependent).
+# Direct-contact r0_draw: per_partner_contact (default) samples distinct
+# partners; density_dependent scales contacts with zone occupancy; legacy uses
+# fixed AVG_R_POOL (frequency-dependent).
 # heterogeneous_zone_dose: density mean + optional mean-1 lognormal
-# within-zone exposure factor (second-stage sensitivity; not default).
+# within-zone exposure factor.
 transmission:
-  contact_mode: "density_dependent"   # "legacy" | "density_dependent" | "heterogeneous_zone_dose"
+  contact_mode: "per_partner_contact"   # "legacy" | "density_dependent" | "heterogeneous_zone_dose" | "per_partner_contact"
   density_dependent:
     reference_occupancy: 50           # occupancy at which contacts = base_contacts
     base_contacts: 1.33               # mean contacts at reference_occupancy
     max_contacts: 20                  # cap on contacts per agent per zone per epoch
     exponent: 0.5                     # α: contacts = base * (n/ref)^α
     crew_contact_multiplier: 2.0      # crew in Dining/Galley service zones
-  # Opt-in only — leave contact_mode as density_dependent until sensitivity
-  # campaigns show whether within-zone stochasticity changes conclusions.
   heterogeneous_zone_dose:
     # Log-sigma of mean-1 lognormal (μ = -σ²/2 so E[factor]=1)
     sigma_by_zone_type:

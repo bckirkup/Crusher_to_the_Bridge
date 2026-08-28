@@ -830,6 +830,7 @@ def _contact_mode_tag(mode: str) -> str:
         "legacy": "legacy",
         "density_dependent": "dd",
         "heterogeneous_zone_dose": "het",
+        "per_partner_contact": "ppc",
     }
     return aliases.get(mode, mode.replace("_", "")[:8])
 
