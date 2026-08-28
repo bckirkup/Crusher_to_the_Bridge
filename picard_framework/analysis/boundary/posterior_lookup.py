@@ -26,27 +26,6 @@ class SurfacePoint:
     e_cost_onboard: float
     e_peak_epoch: float | None = None
 
-    # Spec aliases kept for callers expecting Stan-style names.
-    @property
-    def P_trigger(self) -> float:
-        return self.p_trigger
-
-    @property
-    def E_AR(self) -> float:
-        return self.e_ar
-
-    @property
-    def P_accel(self) -> float:
-        return self.p_accel
-
-    @property
-    def E_cost_onboard(self) -> float:
-        return self.e_cost_onboard
-
-    @property
-    def E_peak_epoch(self) -> float | None:
-        return self.e_peak_epoch
-
 
 @dataclass
 class OutbreakSurface:

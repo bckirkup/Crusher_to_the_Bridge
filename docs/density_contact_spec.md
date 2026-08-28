@@ -1,4 +1,15 @@
 # Contact Model Revision: Density-Dependent Contact Scaling
+
+> **Superseded by PR #329:** The former `total_shedding / n_occupants` zone-average
+> dose applied aerosol-style dilution to physical contact. It created an
+> `n^(α−1)` per-capita dilution artifact, so per-capita exposure fell as hull
+> size increased. PR #329 replaced that path with per-partner contact draws,
+> now the default `transmission.contact_mode`. `density_dependent`,
+> `heterogeneous_zone_dose`, and `legacy` remain selectable historical or
+> sensitivity modes. Hull-specific dose adjustments are **not** the model's
+> answer to the hull gradient: one pathogen profile and one dose must serve all
+> hull classes.
+
 ## For: Crusher to the Bridge — Implementation Spec
 
 ### Problem
@@ -25,7 +36,7 @@ density-dependent contacts: more people in a space → more close contacts per p
 In `crusher_labs/config.yaml`:
 ```yaml
 transmission:
-  contact_mode: "density_dependent"    # "legacy" | "density_dependent"
+  contact_mode: "per_partner_contact"  # "per_partner_contact" | "density_dependent" | "heterogeneous_zone_dose" | "legacy"
   # Legacy: fixed AVG_R_POOL draws (Korkin default, frequency-dependent)
   # density_dependent: effective contacts scale with zone occupancy
 
@@ -172,7 +183,7 @@ Runs: 4 platforms × 3 dose_adj × 5 α × 2 immunity × 2 surveillance × 15 se
 
 ### Backward compatibility
 
-- Default contact_mode is **density_dependent** (new model); set
+- Default contact_mode is **per_partner_contact** (new model); set
   `contact_mode: legacy` to restore fixed AVG_R_POOL draws
 - The density_dependent config block is optional; missing keys fall back to defaults
 - Campaign manifests can override contact_mode / exponent per-tier via config_overrides

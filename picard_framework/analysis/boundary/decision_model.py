@@ -70,8 +70,8 @@ def simulate_one_voyage(
         n_fp=screening.n_fp,
         n_tp=screening.n_tp,
         k_missed=screening.k_board,  # infectious who boarded
-        p_trigger=point.P_trigger,
-        e_ar=point.E_AR,
+        p_trigger=point.p_trigger,
+        e_ar=point.e_ar,
         n_pax_boarded=n_boarded,
     )
 
@@ -83,9 +83,9 @@ def simulate_one_voyage(
         "n_tp": float(screening.n_tp),
         "n_adopted": float(screening.adopted.sum()),
         "n_secondary": float(screening.n_secondary),
-        "P_trigger": float(point.P_trigger),
-        "P_accel": float(point.P_accel),
-        "attack_rate": float(point.E_AR),
+        "P_trigger": float(point.p_trigger),
+        "P_accel": float(point.p_accel),
+        "attack_rate": float(point.e_ar),
         "screening_cost": float(voyage_costs.screening + voyage_costs.secondary),
         "false_positive_cost": float(voyage_costs.false_positive),
         "true_positive_cost": float(voyage_costs.true_positive),

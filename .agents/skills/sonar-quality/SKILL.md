@@ -21,8 +21,8 @@ quality fixes separate from Sentinel analysis and campaign implementation work.
 - Dedicated complexity-backlog splits are allowed when the user asks for
   them, as their own change. Do not sneak extractions into unrelated
   maintenance, Sentinel analysis, or campaign-science PRs.
-- The last documented official Sonar `S3776` count was 98 (live scan
-  19 Aug 2026). The campaign generator, `ShipSimulation.step`, and
+- The last documented official Sonar `S3776` count was 87 (live scan
+  28 Aug 2026). The campaign generator, `ShipSimulation.step`, and
   action dispatch are already closed on that scan. Remaining complexity
   backlog is listed below.
 - Split composite assertions into independently diagnosable checks.
@@ -33,9 +33,11 @@ quality fixes separate from Sentinel analysis and campaign implementation work.
   module vocabulary.
 - Keep parameter counts bounded for new APIs; prefer a configuration object
   over adding unrelated positional parameters.
-- The Stan-style `P_trigger` and `E_AR` property aliases in
-  `picard_framework/analysis/boundary/posterior_lookup.py` are compatibility
-  aliases. Do not rename them.
+- The Stan-style `P_trigger`, `E_AR`, `P_accel`, `E_cost_onboard`, and
+  `E_peak_epoch` property aliases in
+  `picard_framework/analysis/boundary/posterior_lookup.py` were removed to
+  clear Sonar `S1845` blockers. Use the snake_case `SurfacePoint` fields;
+  serialized dictionary keys retain their schema-defined names.
 
 ## Extracting high-complexity functions
 
@@ -77,7 +79,7 @@ not goldens:
 
 A dedicated backlog pass already split campaign generators
 (`tier_iterators.py`), `ShipSimulation.step`, action dispatch, and Stan
-fleet column / wastewater builders. Official open `S3776` is 98 after
+fleet column / wastewater builders. Official open `S3776` is 87 after
 those extractions scanned. Next named follow-ups (local ranking, not
 official Sonar):
 
@@ -89,7 +91,12 @@ official Sonar):
 - `summarize_outbreak_fit`
 
 Keep that work under the owning package and out of Sentinel analysis
-changes. `P_trigger` / `E_AR` aliases remain BLOCKER `S1845` by design.
+changes. The boundary aliases are removed and the `S1845` blockers are
+cleared. Remaining `S100`/`S116` findings on `C_screen`/`C_case`-style
+boundary cost fields are accepted as intentional: those names are fixed by
+`schemas/preboarding_decision_scenario.schema.json` and the shipped
+`picard_framework/analysis/boundary/data/*.json`; renaming them would require
+a data migration for a naming nit.
 
 ## Supply-Chain Rules
 

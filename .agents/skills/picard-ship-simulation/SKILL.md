@@ -49,7 +49,7 @@ ShipSimulation(spec).run()
 
 | Block | Role |
 |-------|------|
-| `transmission.contact_mode` | `density_dependent` (default), `legacy`, or opt-in `heterogeneous_zone_dose` — see `docs/density_contact_spec.md` |
+| `transmission.contact_mode` | `per_partner_contact` (default): sampled partners' shedding, not a zone average; other modes are `density_dependent`, `heterogeneous_zone_dose`, and `legacy` — see `docs/density_contact_spec.md` |
 | `agent_behavior` | Dining/free rotation probabilities (default `0.0` for golden stability) — see `docs/multi_pathogen_model_changes_spec.md` |
 
 Pathogen profiles may include `transmission_route_weights`, formal `dose_adjustment`
@@ -282,7 +282,7 @@ Caveats worth re-checking whenever this area changes:
 - The `none_true` surveillance arm is report-free: chronic-disease
   `sick_call_probability_boost` (up to 0.30 from
   `data/config/chronic_diseases.json`) no longer bypasses
-  `syndromic.sick_call_probability = 0.0`, so no reported cases accumulate and
+  `syndromic.sick_call_probability_per_day = 0.0`, so no reported cases accumulate and
   `derived.vsp_trigger_epoch` stays null.
 - `derived.reported_case_attack_rate_passenger` / `ever_ill_attack_rate_passenger` are
   *passenger-complement* rates (final `reported_case_rate_passenger` /

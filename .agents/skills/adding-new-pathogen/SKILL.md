@@ -34,6 +34,13 @@ Profiles live in `data/pathogens/active_profiles.json`. Each pathogen entry requ
     "alpha": 0.04,
     "beta": 0.055
   },
+  "surface_decay_per_day": 0.25,
+  "airborne_half_life_hours": 1.1,
+  "food_contamination": {
+    "enabled": true,
+    "growth_rate_per_day": 0.0,
+    "decay_rate_per_day": 0.1
+  },
   "illness_probability": {"eta": 0.6, "gamma": 0.4},
   "recovery_day": 5,
   "surface_deposition_fraction": 0.3,
@@ -78,15 +85,21 @@ Optional blocks for extended transmission pathways (PR #43):
 ```json
 "food_contamination": {
   "enabled": true,
-  "food_zones": ["Galley", "Mess_Hall"]
+  "food_zones": ["Galley", "Mess_Hall"],
+  "growth_rate_per_day": 0.0,
+  "decay_rate_per_day": 0.1
 },
 "environmental_contamination": {
   "enabled": true,
   "baseline_environmental_load": 0.01,
-  "colonization_rate_per_epoch": 0.05,
+  "colonization_rate_per_day": 0.05,
   "source_zones": ["Spa", "Pool_*"]
 }
 ```
+
+For norovirus, `growth_rate_per_day` is `0.0`: viruses cannot replicate in
+food. The worked kinetics above use the literature-anchored surface loss and
+airborne half-life values for the shipped norovirus profile.
 
 **`source_zones`** (optional): when present, environmental load is updated
 only in matching zones (exact id or `*` prefix/suffix glob). Absent → legacy

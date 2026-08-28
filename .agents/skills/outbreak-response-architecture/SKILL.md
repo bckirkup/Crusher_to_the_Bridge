@@ -1,6 +1,6 @@
 ---
 name: outbreak-response-architecture
-description: Configure the three separated outbreak-response systems — SOP/policy escalation, organizational decision latency, and bimodal quarantine compliance. Use when editing check_escalation, fred_behavior, protocols.json min_escalation_status/activation_delay_epochs, or Campaign T11/T15/T16 sweeps.
+description: Configure the three separated outbreak-response systems — SOP/policy escalation, organizational decision latency, and bimodal quarantine compliance. Use when editing check_escalation, fred_behavior, protocols.json min_escalation_status/activation_delay_hours, or Campaign T11/T15/T16 sweeps.
 ---
 
 # Outbreak Response Architecture
@@ -14,7 +14,7 @@ collapsed — early confine-all + forced compliance made surveillance knobs irre
 | System | What it controls | Primary knobs |
 |--------|------------------|---------------|
 | **1. SOP / policy** | Which response fires at which information state | `escalation.*_attack_rate`, `min_escalation_status` on SOPs |
-| **2. Decision latency** | Delay from signal → effective status / SOP | `escalation.decision_latency.*`, SOP `activation_delay_epochs` |
+| **2. Decision latency** | Delay from signal → effective status / SOP | `escalation.decision_latency.*_delay_hours`, SOP `activation_delay_hours` |
 | **3. Compliance** | Whether agents follow quarantine orders | `fred_behavior.quarantine_compliance`, `reluctant_*`, `compliance_by_class` |
 
 ## System 1 — Escalation levels
@@ -51,18 +51,18 @@ Stoplight triggers still required unless forced via `activate_sop`.
 ```yaml
 escalation:
   decision_latency:
-    alert_delay_epochs: 0
-    suspected_delay_epochs: 0
-    confirmed_delay_epochs: 0
-    lockdown_delay_epochs: 0
+    alert_delay_hours: 0
+    suspected_delay_hours: 0
+    confirmed_delay_hours: 0
+    lockdown_delay_hours: 0
 ```
 
 When a higher level is proposed, `SimulationState.escalation_pending`
 queues `{to, epoch_triggered}` until `epoch >= triggered + delay`.
-Per-SOP `activation_delay_epochs` further defers modifier application after
+Per-SOP `activation_delay_hours` further defers modifier application after
 stoplight + escalation gate eligibility (forced SOPs bypass SOP delay).
 
-**Do not confuse** with surveillance `activation_delay_epochs` on
+**Do not confuse** with surveillance `activation_delay_hours` on
 `syndromic` / `diagnostic_cascade` (Campaign legacy T11 / start-delay).
 
 ## System 3 — Bimodal compliance
@@ -71,7 +71,7 @@ stoplight + escalation gate eligibility (forced SOPs bypass SOP delay).
 fred_behavior:
   quarantine_compliance: 0.85     # fraction Compliant
   reluctant_fraction: 0.75        # of non-compliers → Reluctant (rest Defiant)
-  reluctant_delay_epochs: 48
+  reluctant_delay_hours: 48
   compliance_by_class:
     crew: 0.85
     passenger_elderly: 0.70
@@ -80,8 +80,9 @@ fred_behavior:
 
 Class is sticky at first quarantine order (`SyndromicSurveillance._compliance_class`).
 Reluctant complies after delay **or** if symptomatic; Defiant never complies.
-`refuse_quarantine` action forces Defiant. Legacy `compliance_delay_epochs`
-forced-compliance path is removed (key ignored if present).
+`refuse_quarantine` action forces Defiant. Legacy `compliance_delay_hours`
+forced-compliance path is removed (key ignored if present); the older
+`compliance_delay_epochs` spelling is also a loader fallback.
 
 ## Campaign sweeps (v5)
 
@@ -89,7 +90,7 @@ forced-compliance path is removed (key ignored if present).
 |------|----------|
 | T11 `t11_intervention_timing` | Decision latency (`decision_latency_levels`) × surv × compliance |
 | T15 `t15_sop_threshold_sweep` | `suspect_attack_rate` × `lockdown_attack_rate` (incl. `"never"`) |
-| T16 `t16_reluctant_fraction_sweep` | `reluctant_fraction` × `reluctant_delay_epochs` |
+| T16 `t16_reluctant_fraction_sweep` | `reluctant_fraction` × `reluctant_delay_hours` |
 
 Mega-cruise T11/T15/T16 cartesian products live in
 `picard_framework/runs/mega_cruise_campaign/tier_iterators.py`. The generator

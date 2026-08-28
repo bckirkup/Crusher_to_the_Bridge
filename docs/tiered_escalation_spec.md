@@ -111,13 +111,13 @@ USS Theodore Roosevelt took weeks for full response.
 
 ### Design
 
-Add `activation_delay_epochs` to each SOP in `protocols.json`:
+Add `activation_delay_hours` to each SOP in `protocols.json`:
 
 ```json
 {
   "protocol_id": "SOP-008",
   "name": "Individual Symptomatic Confinement",
-  "activation_delay_epochs": 2,
+  "activation_delay_hours": 2,
   ...
 }
 ```
@@ -127,10 +127,10 @@ And an escalation-level delay in `config.yaml`:
 ```yaml
 escalation:
   decision_latency:
-    alert_delay_epochs: 1              # 1 hour to start isolating individuals
-    suspected_delay_epochs: 6          # 6 hours for enhanced response
-    confirmed_delay_epochs: 24         # 1 day for outbreak-level response
-    lockdown_delay_epochs: 48          # 2 days for ship-wide lockdown decision
+    alert_delay_hours: 1               # 1 hour to start isolating individuals
+    suspected_delay_hours: 6            # 6 hours for enhanced response
+    confirmed_delay_hours: 24           # 1 day for outbreak-level response
+    lockdown_delay_hours: 48             # 2 days for ship-wide lockdown decision
 ```
 
 #### Implementation
@@ -145,9 +145,9 @@ This is simple to implement: a pending-transition queue in SimulationState.
 ### Parameters for campaign sweep
 
 ```
-decision_latency.alert_delay_epochs: [0, 1, 2, 6]
-decision_latency.confirmed_delay_epochs: [6, 12, 24, 48, 72]
-decision_latency.lockdown_delay_epochs: [24, 48, 72, 168]
+decision_latency.alert_delay_hours: [0, 1, 2, 6]
+decision_latency.confirmed_delay_hours: [6, 12, 24, 48, 72]
+decision_latency.lockdown_delay_hours: [24, 48, 72, 168]
 ```
 
 ---
@@ -160,7 +160,7 @@ human behavior, determined by psychology, sociology, and circumstance —
 not by policy.
 
 ### Current problem
-`compliance_delay_epochs: 1` forces all agents to comply after 1 epoch 
+`compliance_delay_hours: 1` forces all agents to comply after 1 hour
 regardless of their compliance parameter. This eliminates compliance as 
 a meaningful variable.
 
@@ -175,7 +175,7 @@ influenza ABM parameterizations), compliance is best modeled as a
 | Agent class | Fraction | Behavior | Basis |
 |-------------|----------|----------|-------|
 | **Compliant** | `compliance` param (e.g., 0.6) | Immediately follows quarantine orders. Stays quarantined for full duration. | ~45-75% in real outbreaks |
-| **Reluctant** | `(1 - compliance) × reluctant_fraction` (e.g., 0.3) | Initially refuses. May comply after `reluctant_delay_epochs` (e.g., 48-72 hours) if they develop symptoms or see others getting sick. | Intention-behavior gap population |
+| **Reluctant** | `(1 - compliance) × reluctant_fraction` (e.g., 0.3) | Initially refuses. May comply after `reluctant_delay_hours` (e.g., 48-72 hours) if they develop symptoms or see others getting sick. | Intention-behavior gap population |
 | **Defiant** | `(1 - compliance) × (1 - reluctant_fraction)` (e.g., 0.1) | Refuses quarantine for the duration. Does not comply regardless of delay or social pressure. | ~5-15% persistent non-compliers |
 
 The `compliance` parameter (0.0 to 1.0) sets the fraction in the Compliant 
@@ -190,7 +190,7 @@ compliance. In `config.yaml`:
 fred_behavior:
   quarantine_compliance: 0.60          # population default
   reluctant_fraction: 0.75             # of non-compliers, 75% are reluctant (vs defiant)
-  reluctant_delay_epochs: 48           # reluctant agents may comply after 48 hours
+  reluctant_delay_hours: 48            # reluctant agents may comply after 48 hours
   compliance_by_class:
     crew: 0.85                         # crew more compliant (military/employment)
     passenger_elderly: 0.70            # higher perceived risk → more compliant
@@ -222,12 +222,13 @@ def check_quarantine_compliance(self, agent_id, epochs_since_order, ...):
         return False
     elif cls == "reluctant":
         # May comply after delay, OR if they become symptomatic
-        if epochs_since_order >= self.reluctant_delay_epochs:
+        if hours_since_order >= self.reluctant_delay_hours:
             return True
         return False
 ```
 
-Remove the old `compliance_delay_epochs` forced-compliance behavior entirely.
+Remove the old forced-compliance behavior entirely. The retired
+`compliance_delay_epochs` spelling remains a loader fallback.
 
 #### Structural non-compliance (physics, not behavior)
 
@@ -244,7 +245,7 @@ exposure?) is already architecturally separated.
 ```
 quarantine_compliance: [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]
 reluctant_fraction: [0.5, 0.75, 1.0]  # 1.0 = no defiants
-reluctant_delay_epochs: [24, 48, 72, 168]
+reluctant_delay_hours: [24, 48, 72, 168]
 ```
 
 ---
