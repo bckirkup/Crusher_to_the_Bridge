@@ -138,21 +138,21 @@ H_z\sim\exp\{\mathcal{N}(-\sigma_z^2/2,\sigma_z^2)\}
 \end{equation}
 multiplies within-zone dose so that expected mean exposure is preserved while crowded or service venues can generate stronger tails.
 
-Short-range droplet exposure converts a fraction of shedding to same-room aerosol mass. The implementation uses a droplet aerosolization fraction and an inhalation fraction per epoch. For
-target $i$ in zone $z$,
+Short-range droplet exposure converts a fraction of shedding to same-room aerosol mass. The implementation uses a droplet aerosolization fraction and the clock-scaled inhaled air volume
+$B_e=\operatorname{amount\_per\_epoch}(14.4\ {\rm m^3/day})$. For target $i$ in zone $z$,
 \begin{equation}
-D_{i,p,\mathrm{droplet}}(t)=\phi_{\mathrm{drop}}\,\psi_{\mathrm{inh}}\,
-\sum_{j\in\mathcal{I}_{p,z}(t)}V_{j,p}(t)\,q_i(t)\,b_z,
+D_{i,p,\mathrm{droplet}}(t)=\phi_{\mathrm{drop}}\,
+\frac{\sum_{j\in\mathcal{I}_{p,z}(t)}V_{j,p}(t)}{V_z}\,
+B_e\,q_i(t)\,b_z,
 \end{equation}
-where $\phi_{\mathrm{drop}}$ is the droplet aerosol fraction, $\psi_{\mathrm{inh}}$ is the inhaled fraction, $q_i(t)$ is the confinement factor, and $b_z$ is the balcony or zone ventilation
+where $\phi_{\mathrm{drop}}$ is the droplet aerosol fraction, $V_z$ is zone volume, $q_i(t)$ is the confinement factor, and $b_z$ is the balcony or zone ventilation
 factor. The same shedding mass is also added to the zone aerosol pool for later transport.
 
 Long-range airborne exposure uses the mass present in a target zone after native or CONTAM transport. If $M_{z,p}(t)$ is aerosol mass and $V_z$ is zone volume, then
 \begin{equation}
-D_{i,p,\mathrm{airborne}}(t)=\psi_{\mathrm{inh}}\,\frac{M_{z,p}(t)}{V_z}\,V_z\,a_{\mathrm{HVAC}}(t)b_z,
+D_{i,p,\mathrm{airborne}}(t)=\frac{M_{z,p}(t)}{V_z}\,B_e\,a_{\mathrm{HVAC}}(t)b_z,
 \end{equation}
-where $a_{\mathrm{HVAC}}$ is the active HVAC-airborne scalar injected by protocols. The algebra cancels $V_z$ in this implementation because inhalation is represented as a fraction of room
-mass rather than as an explicit breathing-flow term. That simplification is adequate for campaign comparisons but should be refined for absolute inhaled-dose validation.
+where $a_{\mathrm{HVAC}}$ is the active HVAC-airborne scalar injected by protocols. The explicit inhaled-volume term preserves the concentration-per-volume dependence, so larger zones dilute a fixed aerosol mass rather than receiving the same whole-zone dose.
 
 Fomite exposure is persistent across epochs. Surface pools receive deposited mass from shedders, decay each epoch, and are picked up by later agents with a pickup probability and transfer
 fraction. Quarantined agents in cabin corridors skip public fomite pickup, while cabin-mate exposure remains possible. Food contamination is a separate pool for dining-type zones. A small

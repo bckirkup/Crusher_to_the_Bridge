@@ -80,8 +80,8 @@ from engines.strain_state import (
 # Fraction of total shedding that becomes immediate room-level aerosol
 DROPLET_AEROSOL_FRACTION = 0.05
 
-# Fraction of room aerosol pool inhaled by an occupant per epoch
-AEROSOL_INHALATION_FRACTION = 0.02
+# ICRP-style adult daily inhaled air volume, converted through SimClock.
+BREATHING_RATE_M3_PER_DAY = 14.4
 
 # Fraction of surface fomite mass picked up by a touching agent per visit
 FOMITE_PICKUP_PROBABILITY = 0.10
@@ -383,6 +383,9 @@ class TransmissionCore:
         # The run's one clock, so an immunity parameter written in days of
         # natural history is aged on the same grid the biology advances on.
         self.clock = clock if clock is not None else SimClock.from_config(cfg)
+        self.inhaled_air_volume_m3_per_epoch = self.clock.amount_per_epoch(
+            BREATHING_RATE_M3_PER_DAY,
+        )
         self.zone_volumes = zone_volumes or {}
         self.pathogen_profiles = pathogen_profiles or {}
         self.zone_types = zone_types or {}
@@ -1855,7 +1858,7 @@ class TransmissionCore:
             mix = self._shedder_mix(shedders, pathogen_id)
 
             for target in susceptible:
-                dose = concentration * volume * AEROSOL_INHALATION_FRACTION
+                dose = concentration * self.inhaled_air_volume_m3_per_epoch
                 dose *= self.droplet_scalar
                 dose *= vent_factor
                 dose *= self._confinement_factor(target)
@@ -1898,7 +1901,7 @@ class TransmissionCore:
             return
 
         for target in susceptible:
-            dose = concentration * AEROSOL_INHALATION_FRACTION * volume
+            dose = concentration * self.inhaled_air_volume_m3_per_epoch
             dose *= self.hvac_airborne_scalar
             dose *= self._aerosol_ventilation_factor(target_zone)
             dose = self._accumulate(
@@ -2241,7 +2244,7 @@ class TransmissionCore:
 
             susceptible = self._get_susceptible(occupants, pathogen_id)
             for target in susceptible:
-                dose = concentration * AEROSOL_INHALATION_FRACTION * volume
+                dose = concentration * self.inhaled_air_volume_m3_per_epoch
                 dose *= self.hvac_airborne_scalar
                 dose = self._accumulate(
                     target.agent_id, "environmental", dose,

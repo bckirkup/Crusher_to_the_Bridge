@@ -2,12 +2,14 @@
 from __future__ import annotations
 
 import numpy as np
+import pytest
 
 from engines.infection_dynamics_bridge import (
     IllnessStatus,
     InfectionStatus,
     KorkinAgent,
 )
+from engines.sim_clock import SimClock
 from engines.transmission_core import TransmissionCore
 
 
@@ -30,7 +32,54 @@ def _agent(aid: int, loc: str, infected: bool = False) -> KorkinAgent:
     return a
 
 
+def _droplet_doses(
+    volume: float,
+    susceptible_count: int = 1,
+    clock: SimClock | None = None,
+) -> list[float]:
+    zone = "Droplet_Test"
+    shedder = _agent(1, zone, infected=True)
+    targets = [_agent(aid, zone) for aid in range(2, 2 + susceptible_count)]
+    core = TransmissionCore(
+        rng=np.random.default_rng(42),
+        zone_volumes={zone: volume},
+        clock=clock,
+    )
+    core.initialize_zones([zone])
+    matrix, _ = core.execute_transmission(
+        epoch=1,
+        agents=[shedder, *targets],
+        zone_pathogen_mass={zone: 0.0},
+    )
+    return [exposure["dose"] for exposure in matrix.droplet_exposures]
+
+
 class TestCabinCorridorTransmission:
+    def test_droplet_dose_halves_when_zone_volume_doubles(self) -> None:
+        dose_small = _droplet_doses(20.0)[0]
+        dose_large = _droplet_doses(40.0)[0]
+
+        assert dose_large == pytest.approx(dose_small / 2.0)
+
+    def test_droplet_dose_does_not_depend_on_susceptible_count(self) -> None:
+        one_target = _droplet_doses(20.0, susceptible_count=1)[0]
+        two_targets = _droplet_doses(20.0, susceptible_count=2)
+
+        assert two_targets[0] == pytest.approx(one_target)
+        assert two_targets[1] == pytest.approx(one_target)
+
+    def test_droplet_dose_scales_with_clock_epoch_duration(self) -> None:
+        one_hour = _droplet_doses(
+            20.0,
+            clock=SimClock(epoch_duration_hours=1.0, mode="hours"),
+        )[0]
+        two_hours = _droplet_doses(
+            20.0,
+            clock=SimClock(epoch_duration_hours=2.0, mode="hours"),
+        )[0]
+
+        assert two_hours == pytest.approx(one_hour * 2.0)
+
     def test_quarantined_agent_receives_reduced_direct_contact(self) -> None:
         zone = "PC_D6_P_F"
         shedder = _agent(1, zone, infected=True)
