@@ -440,7 +440,12 @@ class KorkinAgent:
 
     @property
     def current_shedding(self) -> float:
-        """Active shedding value (0 if not infected or recovered)."""
+        """Active legacy shedding value, with no presymptomatic window.
+
+        The legacy property has no pathogen profile to supply a
+        presymptomatic window, so its empty profile intentionally means
+        shedding begins at virtual or realized onset.
+        """
         if not self.is_infected:
             return 0.0
         if self.time_infected is None:
@@ -978,18 +983,15 @@ class KorkinAgent:
             )
         incubation_days = inf.get("incubation_days")
         if incubation_days is not None:
-            day_index = clock.day_index(epochs_infected)
             days_since_onset = clock.days_elapsed(epochs_infected) - float(
                 incubation_days,
             )
-            return days_since_onset, math.floor(
-                day_index - float(incubation_days),
-            )
+            return days_since_onset, math.floor(days_since_onset)
         onset_day = float(profile.get("symptom_onset_day", ONSET_DAY))
-        day_index = clock.day_index(epochs_infected)
+        days_since_onset = clock.days_elapsed(epochs_infected) - onset_day
         return (
-            clock.days_elapsed(epochs_infected) - onset_day,
-            math.floor(day_index - onset_day),
+            days_since_onset,
+            math.floor(days_since_onset),
         )
 
     def update_microflora_disruption(self, pathogen_profiles: dict) -> None:

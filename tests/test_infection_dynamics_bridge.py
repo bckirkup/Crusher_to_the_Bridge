@@ -138,6 +138,18 @@ class TestOnsetAnchoredShedding:
             two_hours.get_pathogen_shedding("test_pathogen", profile),
         )
 
+    def test_virtual_onset_index_uses_elapsed_fractional_days(self) -> None:
+        agent = _shedding_agent(
+            SimClock(epoch_duration_hours=1.0, mode=HOURS),
+            time_infected=round(2.9 * 24),
+        )
+        infection = agent.infections["test_pathogen"]
+        infection["incubation_days"] = 1.2
+
+        assert agent.get_pathogen_shedding(
+            "test_pathogen", SHEDDING_PROFILE,
+        ) == pytest.approx(10.0**9)
+
     def test_absent_presymptomatic_field_means_no_shedding_before_onset(self) -> None:
         agent = _shedding_agent(
             SimClock(epoch_duration_hours=1.0, mode=HOURS),
