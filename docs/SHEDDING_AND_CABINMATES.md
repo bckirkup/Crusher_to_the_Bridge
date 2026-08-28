@@ -16,7 +16,8 @@ means 10x higher shedding. A multiplier of 0.1 means 10x lower.
 
 The shedding function becomes:
 ```
-shedding = 10^(curve[dpi] - dose_adjustment) * agent.shedding_multiplier
+shedding = 10^(curve[days_since_onset] - dose_adjustment) *
+agent.shedding_multiplier
 ```
 
 ### Parameters per pathogen (add to pathogen profile JSON)

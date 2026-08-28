@@ -99,13 +99,13 @@ if (sheddingValue < 1) sheddingValue = 1.0;
 **Target** — `infection_dynamics_bridge.py:145–153`:
 ```python
 curve = SYMPTOMATIC_SHEDDING if is_symptomatic else ASYMPTOMATIC_SHEDDING
-idx = min(day_post_infection, len(curve) - 1)
+idx = min(max(day_post_onset, 0), len(curve) - 1)
 return max(1.0, math.pow(10, curve[idx] - DOSE_ADJUSTMENT))
 ```
 
 | Aspect | Verdict | Detail |
 |--------|---------|--------|
-| Core formula 10^(curve[dpi] − adj) | **MATCH** | |
+| Core formula 10^(curve[days_since_onset] − adj) | **MATCH** | |
 | Floor clamp to 1.0 | **MATCH** | Java: `if < 1 then 1.0`; Python: `max(1.0, …)` |
 | Index out-of-bounds handling | **APPROXIMATION** | Java catches `ArrayIndexOutOfBoundsException` and defaults to 1.0. Python clamps index to 14 (`min(dpi, len-1)`) and computes from the last curve entry. Both prevent crash; Python preserves the Day-14 shedding level while Java falls back to 1.0. |
 

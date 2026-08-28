@@ -48,7 +48,10 @@ def _norwalk_profile() -> dict:
         (REPO_ROOT / "data/pathogens/active_profiles.json").read_text(),
     )
     return copy.deepcopy(
-        next(p for p in data["pathogens"] if p["pathogen_id"] == PATHOGEN),
+        {
+            **next(p for p in data["pathogens"] if p["pathogen_id"] == PATHOGEN),
+            "symptom_onset_day": 0,
+        },
     )
 
 

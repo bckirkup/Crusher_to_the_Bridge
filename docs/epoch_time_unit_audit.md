@@ -29,11 +29,11 @@ contract is `docs/clock_unit_safety_spec.md`.
   schedule.
 - `orchestrator_epoch._advance_agent_pathogen_infections` increments
   `inf["time_infected"]` once per epoch, and `time_infected` is documented in
-  `engines/infection_dynamics_bridge.py` as "days post-infection … index into
-  shedding curves".
+  `engines/infection_dynamics_bridge.py` as an epoch counter converted through
+  `SimClock`; shedding curves are indexed by days since symptom onset.
 - That day counter is compared against day-scale profile parameters:
   `recovery_day`, the incubation draw from `engines/incubation.py` (in days), and
-  the 15-entry `shedding_curve_log10` (one entry per day post-infection).
+  the 15-entry `shedding_curve_log10` (one entry per day post-onset).
 - `data/config/instrument_turnaround.json` states it outright: "1 epoch = 1
   simulation day unless `hours_per_epoch` is overridden", with
   `hours_per_epoch: 24`. Assay turnaround in hours is converted to epochs by
@@ -164,7 +164,8 @@ which makes the ABM's `≈ one day` docstring the side that is wrong.
 
 **Option 1 — the ABM moves to the hourly grid.** Convert every day-scale clock
 at read time (`time_infected` in hours, `recovery_day × 24`, incubation days ×
-24, shedding curve indexed by `dpi // 24` or interpolated), walk the 24-slot
+24, shedding curve indexed by days since onset rather than infection),
+walk the 24-slot
 schedule instead of `hour = 12`, and set `hours_per_epoch: 1` for instrument
 turnaround. This is the physically correct reading and the one the itinerary,
 sentinel kernel, and calibration manifest already assume. Cost: every calibrated

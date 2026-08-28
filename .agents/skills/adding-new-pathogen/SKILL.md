@@ -28,6 +28,7 @@ Profiles live in `data/pathogens/active_profiles.json`. Each pathogen entry requ
   "transmission_routes": ["direct_contact", "fomite", "food"],
   "shedding_curve_log10": [2.0, 3.5, 4.0],
   "asymptomatic_shedding_log10": [1.0, 2.0, 2.5],
+  "presymptomatic_shedding_days": 0.0,
   "dose_adjustment": 4.0,
   "dose_response": {
     "model": "beta_poisson",
@@ -69,7 +70,9 @@ Profiles live in `data/pathogens/active_profiles.json`. Each pathogen entry requ
 ```
 
 **`dose_adjustment`** is a **log10 shedding offset**
-(`shedding = 10^(curve[dpi] − dose_adjustment) * shedding_multiplier`),
+(`shedding = 10^(curve[days_since_onset] − dose_adjustment) *
+shedding_multiplier`), with an optional bounded
+`presymptomatic_shedding_days` window that uses the curve's first value.
 not a dose-response α/β scaler. Campaigns calibrate infectivity via
 `pathogen_overrides.<id>.dose_adjustment`.
 

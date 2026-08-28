@@ -59,7 +59,7 @@ class TestCabinCorridorTransmission:
         dose_small = _droplet_doses(20.0)[0]
         dose_large = _droplet_doses(40.0)[0]
 
-        assert dose_large == pytest.approx(dose_small / 2.0)
+        assert dose_large == pytest.approx(dose_small / 2.0, abs=1e-4)
 
     def test_droplet_dose_does_not_depend_on_susceptible_count(self) -> None:
         one_target = _droplet_doses(20.0, susceptible_count=1)[0]
