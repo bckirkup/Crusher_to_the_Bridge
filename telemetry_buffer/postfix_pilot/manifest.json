@@ -1,0 +1,177 @@
+{
+ "campaign": "postfix_dose_pilot_v1",
+ "platform": "classic_cruise_1900",
+ "description": "Post-#332 pilot: relocate the norovirus dose ladder on the corrected airborne-inhalation model. Transmission-only branch, constant-prevalence seeding, two extreme hulls.",
+ "default_epochs": 168,
+ "default_num_agents": 7000,
+ "embarkation_date": "2026-01-10",
+ "pathogen_configs": {
+  "norovirus": {
+   "bundle": "active_profiles",
+   "pathogen_id": "norwalk_gi",
+   "overrides": {
+    "remove": [
+     "sars_cov2_resp"
+    ]
+   }
+  }
+ },
+ "surveillance_configs": {
+  "none_response": {
+   "diagnostic_cascade": {
+    "enabled": false
+   },
+   "syndromic": {
+    "sick_call_probability_per_day": 0.0,
+    "background_noise_rate": 0.0
+   },
+   "fred_behavior": {
+    "healthy_noise_categories": []
+   },
+   "observation": {
+    "enabled": false
+   },
+   "wearable_monitoring": {
+    "enabled": false
+   },
+   "ship_graph": {
+    "counter_confinement_enabled": false
+   },
+   "escalation": {
+    "alert_sick_call_threshold": 1000000,
+    "suspect_attack_rate": 2.0,
+    "confirm_attack_rate": 2.0,
+    "lockdown_attack_rate": "never"
+   }
+  },
+  "syndromic_comp85": {
+   "diagnostic_cascade": {
+    "enabled": false
+   },
+   "fred_behavior": {
+    "quarantine_compliance": 0.85,
+    "compliance_by_class": {
+     "crew": 0.85,
+     "passenger_elderly": 0.7,
+     "passenger_young": 0.45
+    }
+   }
+  },
+  "syndromic_comp65": {
+   "diagnostic_cascade": {
+    "enabled": false
+   },
+   "fred_behavior": {
+    "quarantine_compliance": 0.65,
+    "compliance_by_class": {
+     "crew": 0.65,
+     "passenger_elderly": 0.54,
+     "passenger_young": 0.34
+    }
+   }
+  },
+  "syndromic_comp45": {
+   "diagnostic_cascade": {
+    "enabled": false
+   },
+   "fred_behavior": {
+    "quarantine_compliance": 0.45,
+    "compliance_by_class": {
+     "crew": 0.45,
+     "passenger_elderly": 0.37,
+     "passenger_young": 0.24
+    }
+   }
+  },
+  "syndromic_comp25": {
+   "diagnostic_cascade": {
+    "enabled": false
+   },
+   "fred_behavior": {
+    "quarantine_compliance": 0.25,
+    "compliance_by_class": {
+     "crew": 0.25,
+     "passenger_elderly": 0.21,
+     "passenger_young": 0.13
+    }
+   }
+  }
+ },
+ "tiers": {
+  "c1_pilot_expedition_450": {
+   "description": "Pilot ladder, expedition (450), 1 index case.",
+   "platform": "expedition_cruise_450",
+   "pathogen": "norovirus",
+   "dose_adjustments": [
+    2.0,
+    3.0,
+    4.0,
+    5.0,
+    6.0,
+    7.0
+   ],
+   "initial_infected_values": [
+    1
+   ],
+   "surveillance_strategies": [
+    "none_response"
+   ],
+   "epochs": 168,
+   "seeds": [
+    930,
+    931,
+    932
+   ]
+  },
+  "c1_pilot_classic_1900": {
+   "description": "Pilot ladder, classic (1900), 4 index cases.",
+   "platform": "classic_cruise_1900",
+   "pathogen": "norovirus",
+   "dose_adjustments": [
+    2.0,
+    3.0,
+    4.0,
+    5.0,
+    6.0,
+    7.0
+   ],
+   "initial_infected_values": [
+    4
+   ],
+   "surveillance_strategies": [
+    "none_response"
+   ],
+   "epochs": 168,
+   "seeds": [
+    930,
+    931,
+    932
+   ]
+  },
+  "c1_pilot_mega_5000": {
+   "description": "Pilot ladder, mega (5000), 11 index cases.",
+   "platform": "mega_cruise_5000",
+   "pathogen": "norovirus",
+   "dose_adjustments": [
+    2.0,
+    3.0,
+    4.0,
+    5.0,
+    6.0,
+    7.0
+   ],
+   "initial_infected_values": [
+    11
+   ],
+   "surveillance_strategies": [
+    "none_response"
+   ],
+   "epochs": 168,
+   "seeds": [
+    930,
+    931,
+    932
+   ]
+  }
+ }
+}
