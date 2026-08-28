@@ -43,6 +43,7 @@ class TestCabinCorridorTransmission:
             zone_volumes={zone: 1200.0},
             zone_types={zone: "Cabin_Corridor"},
             corridor_direct_contact_factor=0.15,
+            cfg={"transmission": {"contact_mode": "density_dependent"}},
         )
         core.initialize_zones([zone])
         free_dose = 0.0
