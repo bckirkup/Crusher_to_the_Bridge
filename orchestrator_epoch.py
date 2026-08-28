@@ -32,7 +32,7 @@ from engines.infection_dynamics_bridge import (
     InfectionStatus,
     KorkinShipEngine,
 )
-from engines.sim_clock import SimClock
+from engines.sim_clock import SimClock, config_epochs_for_hours
 from engines.sim_clock import crossed_day_boundary as _crossed_day_boundary
 from engines.strain_state import ImmuneRecord, StrainRegistry
 from engines.wearable_monitor import WearableMonitor
@@ -1226,10 +1226,13 @@ def step_wearable_monitoring(
 
 # ── Surveillance activation delay (campaign T11) ─────────────────────────
 
-def surveillance_activation_delay_epochs(cfg: dict[str, Any] | None) -> int:
+def surveillance_activation_delay_epochs(
+    cfg: dict[str, Any] | None,
+    clock: SimClock | None = None,
+) -> int:
     """Return epochs to suppress syndromic + cascade before activation.
 
-    Reads ``activation_delay_epochs`` from ``syndromic`` and/or
+    Reads ``activation_delay_hours`` from ``syndromic`` and/or
     ``diagnostic_cascade`` (campaign T11 sets both to the same value).
     Takes the max so a single-sided override still works. Negative values
     clamp to 0.
@@ -1238,26 +1241,31 @@ def surveillance_activation_delay_epochs(cfg: dict[str, Any] | None) -> int:
         return 0
     syn = cfg.get("syndromic") or {}
     casc = cfg.get("diagnostic_cascade") or {}
-    raw = [
-        syn.get("activation_delay_epochs", 0),
-        casc.get("activation_delay_epochs", 0),
-    ]
+    raw = []
+    for section in (syn, casc):
+        raw.append(config_epochs_for_hours(
+            section,
+            "activation_delay_hours",
+            "activation_delay_epochs",
+            clock or SimClock.from_config({}),
+        ))
     delay = 0
     for value in raw:
-        try:
-            delay = max(delay, int(value or 0))
-        except (TypeError, ValueError):
-            continue
+        delay = max(delay, int(value or 0))
     return max(0, delay)
 
 
-def surveillance_is_active(epoch: int, cfg: dict[str, Any] | None) -> bool:
+def surveillance_is_active(
+    epoch: int,
+    cfg: dict[str, Any] | None,
+    clock: SimClock | None = None,
+) -> bool:
     """True once the 0-based simulation epoch has cleared the activation delay.
 
-    With ``activation_delay_epochs=N``, epochs ``0..N-1`` are silent and
+    With ``activation_delay_hours=N``, epochs ``0..N-1`` are silent and
     surveillance begins at epoch ``N``. ``N=0`` means always active.
     """
-    return int(epoch) >= surveillance_activation_delay_epochs(cfg)
+    return int(epoch) >= surveillance_activation_delay_epochs(cfg, clock)
 
 
 def inactive_syndromic_result(
@@ -1311,6 +1319,7 @@ def step_diagnostic_cascade(
     syndromic: Any | None = None,
     *,
     cfg: dict[str, Any] | None = None,
+    clock: SimClock | None = None,
 ) -> dict[str, Any] | None:
     """Run one epoch of the diagnostic cascade engine.
 
@@ -1324,7 +1333,7 @@ def step_diagnostic_cascade(
     cascade = state.cascade_engine
     if cascade is None:
         return None
-    if not surveillance_is_active(epoch, cfg):
+    if not surveillance_is_active(epoch, cfg, clock):
         return None
 
     from crusher_labs.cascade_entry import (

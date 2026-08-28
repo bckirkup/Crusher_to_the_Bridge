@@ -12,7 +12,7 @@
         "financial_usd": 0,
         "labor_person_hours": 0.25
       },
-      "tat_epochs": 0,
+      "tat_hours": 0,
       "regret_level": "low",
       "actions_on_positive": [
         "advance_to_tier_1"
@@ -36,7 +36,7 @@
         },
         "labor_person_hours": 0.5
       },
-      "tat_epochs": 0,
+      "tat_hours": 0,
       "regret_level": "low",
       "actions_on_positive": [
         "advance_to_tier_2",
@@ -68,7 +68,7 @@
         },
         "labor_person_hours": 2.5
       },
-      "tat_epochs": 0,
+      "tat_hours": 0,
       "regret_level": "medium",
       "actions_on_positive": [
         "advance_to_tier_3"
@@ -91,7 +91,7 @@
         "financial_usd": 0,
         "labor_person_hours": 0
       },
-      "tat_epochs": 0,
+      "tat_hours": 0,
       "regret_level": "high",
       "actions_on_positive": [],
       "confinement_on_positive": true,

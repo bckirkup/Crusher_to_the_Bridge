@@ -154,7 +154,7 @@
       "description": "Bimodal compliance: reluctant fraction × delay",
       "pathogens": ["norovirus", "sarscov2", "influenza", "cdiff"],
       "reluctant_fractions": [0.5, 0.75, 1.0],
-      "reluctant_delay_epochs": [24, 48, 72, 168],
+      "reluctant_delay_hours": [24, 48, 72, 168],
       "quarantine_compliance": 0.6,
       "seeds": [42, 43, 44, 45, 46]
     }

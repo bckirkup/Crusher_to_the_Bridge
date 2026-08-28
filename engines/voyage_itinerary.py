@@ -13,6 +13,7 @@ from __future__ import annotations
 import copy
 import json
 import os
+import warnings
 from dataclasses import asdict, dataclass, field
 from typing import Any
 
@@ -172,6 +173,23 @@ def normalize_voyage_config(raw: dict[str, Any]) -> dict[str, Any]:
     for day_type, day_def in DEFAULT_DAY_DEFAULTS.items():
         defaults[day_type] = deep_merge_dict(day_def, defaults.get(day_type) or {})
     for day in voyage.get("itinerary") or []:
+        for canonical, retired in (
+            ("embarkation_window_hours_of_day", "embarkation_window_epochs"),
+            ("disembark_window_hours_of_day", "disembark_window_epochs"),
+            ("reembark_window_hours_of_day", "reembark_window_epochs"),
+            ("shore_infection_probability_per_hour", "shore_infection_probability"),
+        ):
+            if canonical not in day and retired in day:
+                warnings.warn(
+                    f"{retired} is deprecated; use {canonical}",
+                    DeprecationWarning,
+                    stacklevel=2,
+                )
+                day[canonical] = day[retired]
+            elif canonical in day and retired not in day:
+                # Sentinel itinerary.py still reads the retired shape; remove
+                # this bridge when the separate Sentinel unit pass lands.
+                day[retired] = day[canonical]
         dtype = str(day.get("type", ""))
         if dtype not in DAY_TYPES:
             raise ValueError(f"Unknown itinerary day type: {dtype!r}")
@@ -252,10 +270,13 @@ def resolve_epoch_state(
     )
     if hours <= 0:
         hours = 1.0
-    epochs_per_day = max(1, int(round(SimClock(hours, HOURS).epochs_per_day)))
+    clock = SimClock(hours, HOURS)
+    epochs_per_day = max(1, int(round(clock.epochs_per_day)))
     ep = max(1, int(epoch))
     voyage_day = (ep - 1) // epochs_per_day + 1
-    epoch_of_day = (ep - 1) % epochs_per_day
+    # Retired legacy_epoch_day now follows the clock's 12:00 compatibility
+    # convention rather than the former modulo result of 0; this is deliberate.
+    epoch_of_day = clock.hour_of_day(ep - 1)
 
     effects_enabled = bool(voyage.get("effects_enabled", False))
     itinerary = list(voyage.get("itinerary") or [])
@@ -280,14 +301,20 @@ def resolve_epoch_state(
     contact = float(defaults.get("contact_rate_multiplier", 1.0))
     onboard = float(defaults.get("onboard_passenger_fraction", 1.0))
 
-    in_embark = _in_window(epoch_of_day, day_entry.get("embarkation_window_epochs"))
-    in_disembark = _in_window(epoch_of_day, day_entry.get("disembark_window_epochs"))
-    in_reembark = _in_window(epoch_of_day, day_entry.get("reembark_window_epochs"))
+    in_embark = _in_window(
+        epoch_of_day, day_entry.get("embarkation_window_hours_of_day"),
+    )
+    in_disembark = _in_window(
+        epoch_of_day, day_entry.get("disembark_window_hours_of_day"),
+    )
+    in_reembark = _in_window(
+        epoch_of_day, day_entry.get("reembark_window_hours_of_day"),
+    )
 
     between_ashore = False
     if day_type == "port_day":
-        d_win = day_entry.get("disembark_window_epochs") or []
-        r_win = day_entry.get("reembark_window_epochs") or []
+        d_win = day_entry.get("disembark_window_hours_of_day") or []
+        r_win = day_entry.get("reembark_window_hours_of_day") or []
         if len(d_win) >= 2 and len(r_win) >= 2:
             d_end = max(int(d_win[0]), int(d_win[1]))
             r_start = min(int(r_win[0]), int(r_win[1]))
@@ -323,7 +350,10 @@ def resolve_epoch_state(
         buffet_surge_fraction=buffet_surge,
         disembark_fraction=disembark_fraction,
         shore_infection_probability=float(
-            day_entry.get("shore_infection_probability", 0.0) or 0.0,
+            _shore_probability_per_epoch(
+                day_entry.get("shore_infection_probability_per_hour", 0.0),
+                clock,
+            ),
         ),
         shore_pathogen=str(day_entry.get("shore_pathogen") or ""),
         crew_shore_leave_fraction=float(
@@ -334,6 +364,12 @@ def resolve_epoch_state(
         ),
         notes=str(day_entry.get("notes") or ""),
     )
+
+
+def _shore_probability_per_epoch(raw: Any, clock: SimClock) -> float:
+    """Convert a per-person-hour shore hazard to one epoch."""
+    hazard = min(1.0, max(0.0, float(raw or 0.0)))
+    return 1.0 - (1.0 - hazard) ** clock.hours_per_epoch
 
 
 def dining_meal_weights_from_config(config: dict[str, Any] | None) -> dict[str, Any] | None:

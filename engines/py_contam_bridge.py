@@ -40,13 +40,13 @@ import math
 import os
 from typing import Any
 
+from engines.sim_clock import SimClock
 from simulation_utils.paths import resolve_repo_path, validated_open
 
 # ── Constants ────────────────────────────────────────────────────────────
 
 DEFAULT_AIR_DENSITY = 1.2041  # kg/m³ at 20°C, 101.325 kPa (STP)
 DEFAULT_AIR_TEMP = 293.15     # K (20°C)
-HOURS_PER_EPOCH = 1.0         # each epoch represents 1 hour
 # Virtual AHU mixing junctions (star topology). Near-zero volume — used for
 # topology bookkeeping only; transport_step mixes analytically.
 PLENUM_PREFIX = "_plenum_"
@@ -204,9 +204,11 @@ class ContamTransportEngine:
         air_flow_paths: dict[str, Any],
         filter_efficiency: float = 0.50,
         natural_decay_rate: float = 0.10,
+        clock: SimClock | None = None,
     ) -> None:
         self.filter_efficiency = filter_efficiency
         self.natural_decay_rate = natural_decay_rate
+        self.clock = clock or SimClock.from_config({})
 
         self.zone_nodes: dict[str, ContamZoneNode] = {}
         self.airflow_paths: list[ContamAirflowPath] = []
@@ -503,7 +505,7 @@ class ContamTransportEngine:
             Updated pathogen mass per real zone after transport and decay.
             Virtual ``_plenum_*`` keys are never returned.
         """
-        dt = HOURS_PER_EPOCH
+        dt = self.clock.hours_per_epoch
 
         real_input = {
             zid: mass
@@ -631,18 +633,22 @@ def _build_native_engine(
     spatial: dict[str, Any],
     airflow: dict[str, Any],
     hvac_cfg: dict[str, Any],
+    clock: SimClock | None = None,
 ) -> ContamTransportEngine:
     return ContamTransportEngine(
         spatial_layout=spatial,
         air_flow_paths=airflow,
         filter_efficiency=hvac_cfg.get("filter_efficiency", 0.50),
         natural_decay_rate=hvac_cfg.get("natural_decay_rate", 0.10),
+        clock=clock,
     )
 
 
 def build_transport_engine(
     repo_root: str,
     cfg: dict[str, Any],
+    *,
+    clock: SimClock | None = None,
 ) -> ContamTransportEngine | None:
     """Build a CONTAM transport engine from config and layout files.
 
@@ -675,7 +681,7 @@ def build_transport_engine(
         from engines.contamx_runner import ContamXUnavailable
         from engines.contamx_transport import build_contamx_engine
         try:
-            return build_contamx_engine(repo_root, cfg)
+            return build_contamx_engine(repo_root, cfg, clock=clock)
         except ContamXUnavailable as exc:
             if selection == "contamx":
                 print(
@@ -684,4 +690,4 @@ def build_transport_engine(
                 )
             # "auto" falls back silently.
 
-    return _build_native_engine(spatial, airflow, hvac_cfg)
+    return _build_native_engine(spatial, airflow, hvac_cfg, clock=clock)

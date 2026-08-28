@@ -26,6 +26,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from crusher_labs.cascade_entry import CascadeEntryConfig
+from engines.sim_clock import SimClock, config_epochs_for_hours
 from simulation_utils.paths import resolve_repo_path, validated_open
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -50,7 +51,12 @@ class DiagnosticTier:
     implicit_positive: bool = True
 
     @classmethod
-    def from_config(cls, d: dict[str, Any]) -> DiagnosticTier:
+    def from_config(
+        cls,
+        d: dict[str, Any],
+        *,
+        clock: SimClock | None = None,
+    ) -> DiagnosticTier:
         tests = list(d.get("tests", []))
         return cls(
             tier_id=int(d["tier_id"]),
@@ -59,7 +65,9 @@ class DiagnosticTier:
             sensitivity=float(d.get("sensitivity", 0.5)),
             specificity=float(d.get("specificity", 0.9)),
             cost_per_agent=dict(d.get("cost_per_agent", {})),
-            tat_epochs=int(d.get("tat_epochs", 0)),
+            tat_epochs=config_epochs_for_hours(
+                d, "tat_hours", "tat_epochs", clock or SimClock.from_config({}),
+            ) or 0,
             regret_level=str(d.get("regret_level", "low")),
             actions_on_positive=list(d.get("actions_on_positive", [])),
             confinement_on_positive=bool(d.get("confinement_on_positive", False)),
@@ -563,6 +571,7 @@ class _CascadeTestRunner:
 def load_diagnostic_cascade(
     config_path: str | None = None,
     repo_root: str | None = None,
+    clock: SimClock | None = None,
 ) -> tuple[list[DiagnosticTier], list[FleetEscalationRule], CascadeEntryConfig]:
     """Load tier definitions and fleet rules from JSON config."""
     if config_path is None:
@@ -575,7 +584,7 @@ def load_diagnostic_cascade(
     with validated_open(config_path, "r", allowed_roots=(root,), encoding="utf-8") as fh:
         cfg = json.load(fh)
 
-    tiers = [DiagnosticTier.from_config(t) for t in cfg.get("tiers", [])]
+    tiers = [DiagnosticTier.from_config(t, clock=clock) for t in cfg.get("tiers", [])]
     rules = [FleetEscalationRule.from_config(r) for r in cfg.get("fleet_escalation_rules", [])]
     entry_config = CascadeEntryConfig.from_config(cascade_json=cfg)
     return tiers, rules, entry_config
@@ -584,6 +593,7 @@ def load_diagnostic_cascade(
 def build_cascade_engine(
     cfg: dict[str, Any],
     repo_root: str | None = None,
+    clock: SimClock | None = None,
 ) -> DiagnosticCascadeEngine | None:
     """Build cascade engine from config.yaml if enabled."""
     cascade_cfg = cfg.get("diagnostic_cascade", {})
@@ -596,7 +606,9 @@ def build_cascade_engine(
     root = repo_root or os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     config_path = resolve_repo_path(root, config_path)
 
-    tiers, rules, _entry_config = load_diagnostic_cascade(config_path, repo_root=root)
+    tiers, rules, _entry_config = load_diagnostic_cascade(
+        config_path, repo_root=root, clock=clock,
+    )
     entry_config = CascadeEntryConfig.from_config(
         cascade_json=_load_cascade_json(config_path),
         runtime_cfg=cascade_cfg,

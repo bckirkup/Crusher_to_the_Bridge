@@ -14,7 +14,7 @@
         "port": "Starbase 1 (Earth)",
         "port_id": "SBONE",
         "region": "SOL",
-        "embarkation_window_epochs": [8, 16],
+        "embarkation_window_hours_of_day": [8, 16],
         "stateroom_available_epoch": 11,
         "buffet_surge_fraction": 0.8,
         "notes": "Homeport. Crew and civilian families board."
@@ -28,8 +28,8 @@
         "region": "ALPHA_FRONTIER",
         "disembark_fraction": 0.45,
         "crew_shore_leave_fraction": 0.15,
-        "disembark_window_epochs": [3, 5],
-        "reembark_window_epochs": [12, 15],
+        "disembark_window_hours_of_day": [3, 5],
+        "reembark_window_hours_of_day": [12, 15],
         "notes": "Frontier construction site: limited port programme, so a shore introduction here is largely invisible ashore."
       },
       { "day": 4, "type": "sea_day" },
@@ -41,8 +41,8 @@
         "region": "AG_BORDER",
         "disembark_fraction": 0.55,
         "crew_shore_leave_fraction": 0.2,
-        "disembark_window_epochs": [2, 6],
-        "reembark_window_epochs": [14, 18],
+        "disembark_window_hours_of_day": [2, 6],
+        "reembark_window_hours_of_day": [14, 18],
         "notes": "Wormhole chokepoint: heavy mixing on the Promenade, and the one call with arrival screening in both directions."
       },
       {
@@ -53,8 +53,8 @@
         "region": "ALPHA",
         "disembark_fraction": 0.85,
         "crew_shore_leave_fraction": 0.35,
-        "disembark_window_epochs": [2, 7],
-        "reembark_window_epochs": [16, 21],
+        "disembark_window_hours_of_day": [2, 7],
+        "reembark_window_hours_of_day": [16, 21],
         "notes": "Largest catchment and highest liberty of either itinerary against a minimal port programme: the dominant exposure term."
       },
       { "day": 7, "type": "sea_day" },
@@ -66,8 +66,8 @@
         "region": "ALPHA",
         "disembark_fraction": 0.4,
         "crew_shore_leave_fraction": 0.25,
-        "disembark_window_epochs": [4, 7],
-        "reembark_window_epochs": [13, 17],
+        "disembark_window_hours_of_day": [4, 7],
+        "reembark_window_hours_of_day": [13, 17],
         "notes": "Yard call: dense port surveillance, so this is where a ship-inferred hazard can be checked against an independent signal."
       },
       { "day": 9, "type": "sea_day" },
@@ -79,7 +79,7 @@
         "port": "Starbase 1 (Earth)",
         "port_id": "SBONE",
         "region": "SOL",
-        "disembark_window_epochs": [5, 13]
+        "disembark_window_hours_of_day": [5, 13]
       }
     ],
     "shore_exposure": {

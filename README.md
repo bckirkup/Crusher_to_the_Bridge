@@ -221,12 +221,12 @@ hvac:
 
 ```yaml
 emod_progression:
-  incubation_epochs: 2
+  incubation_days: 2
   shedding_phases:
     - {name: "early",  max_rate: 20.0, sensitivity_cap: 0.30}
     - {name: "peak",   max_rate: 80.0, sensitivity_cap: 0.95}
     - {name: "late",   max_rate: 40.0, sensitivity_cap: 0.80}
-  phase_durations: [3, 5, 4]   # must match shedding_phases count
+  phase_durations_days: [3, 5, 4]   # must match shedding_phases count
 ```
 
 ### FRED-Style Behavioral Compliance
@@ -238,7 +238,7 @@ Bimodal sticky classes (compliant / reluctant / defiant). See
 fred_behavior:
   quarantine_compliance: 0.85   # [0,1] — fraction in Compliant class
   reluctant_fraction: 0.75      # of non-compliers that are Reluctant
-  reluctant_delay_epochs: 48
+  reluctant_delay_hours: 48
   compliance_by_class:
     crew: 0.85
     passenger_elderly: 0.70
@@ -539,7 +539,7 @@ reporting only — spending is never blocked when inventory is depleted.
 
 Protocols in `data/config/protocols.json` (SOP-001..SOP-016), activated from
 stoplights **and** (where set) `min_escalation_status` gates. Optional
-`activation_delay_epochs` defers modifiers after eligibility. No hardcoded
+`activation_delay_hours` defers modifiers after eligibility. No hardcoded
 epoch schedules (Law 1).
 
 | SOP | Name | Trigger instrument | Min escalation | Key modifiers |

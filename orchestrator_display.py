@@ -67,7 +67,10 @@ def print_initialization(
     print("\n  FRED behavioral params:")
     print(f"    Quarantine compliance:   {fred_cfg.get('quarantine_compliance', 0.85):.0%}")
     print(f"    Reluctant fraction:      {fred_cfg.get('reluctant_fraction', 0.75):.0%}")
-    print(f"    Reluctant delay:         {fred_cfg.get('reluctant_delay_epochs', 48)} epoch(s)")
+    print(
+        "    Reluctant delay:         "
+        f"{fred_cfg.get('reluctant_delay_hours', 48)} hour(s)",
+    )
     cats = fred_cfg.get("healthy_noise_categories", [])
     for cat in cats:
         reason = cat.get("reason", "")
@@ -77,7 +80,10 @@ def print_initialization(
     emod_cfg = cfg.get("emod_progression", {})
     phases = emod_cfg.get("shedding_phases", [])
     print("\n  EMOD clinical progression:")
-    print(f"    Incubation:  {emod_cfg.get('incubation_epochs', 2)} epochs")
+    print(
+        f"    Incubation:  {emod_cfg.get('incubation_days', 2)} days "
+        "(advisory; pathogen profiles drive progression)",
+    )
     for ph in phases:
         print(f"    Phase {ph['name']:6s}  max_rate={ph['max_rate']:5.1f}  "
               f"sensitivity_cap={ph['sensitivity_cap']:.2f}")

@@ -331,12 +331,12 @@ with the EMOD epidemiological modeling framework.
 
 ```yaml
 emod_progression:
-  incubation_epochs: 2
+  incubation_days: 2
   shedding_phases:
     - {name: "early",  max_rate: 20.0, sensitivity_cap: 0.30}
     - {name: "peak",   max_rate: 80.0, sensitivity_cap: 0.95}
     - {name: "late",   max_rate: 40.0, sensitivity_cap: 0.80}
-  phase_durations: [3, 5, 4]   # must match shedding_phases count
+  phase_durations_days: [3, 5, 4]   # must match shedding_phases count
 ```
 
 | Phase | Duration | Shedding Rate | Diagnostic Sensitivity |
@@ -350,7 +350,7 @@ These phases also drive the wearable infection response profiles
 (heart rate elevation, temperature rise, SpO2 drop, etc.).
 
 **Rules:**
-- `phase_durations` count must match `shedding_phases` count
+- `phase_durations_days` count must match `shedding_phases` count
 - All durations must be positive
 - `sensitivity_cap` values must be in [0.0, 1.0]
 
@@ -363,7 +363,7 @@ of agent types (see `docs/tiered_escalation_spec.md`).
 fred_behavior:
   quarantine_compliance: 0.85   # [0,1] — fraction in Compliant class
   reluctant_fraction: 0.75      # of non-compliers that are Reluctant
-  reluctant_delay_epochs: 48    # epochs before Reluctant agents may comply
+  reluctant_delay_hours: 48     # hours before Reluctant agents may comply
   compliance_by_class:
     crew: 0.85
     passenger_elderly: 0.70
@@ -377,7 +377,7 @@ fred_behavior:
 - `quarantine_compliance` — Fraction of agents drawn into the **Compliant**
   class at first quarantine order (sticky for the cruise).
 - `reluctant_fraction` — Of the remainder, fraction that are **Reluctant**
-  (vs **Defiant**). Reluctant agents comply after `reluctant_delay_epochs`
+  (vs **Defiant**). Reluctant agents comply after `reluctant_delay_hours`
   or when they become symptomatic; Defiant agents never comply.
 - `compliance_by_class` — Optional per-class / role-group overrides.
 - `healthy_noise_categories` — Background sick-call reasons for healthy

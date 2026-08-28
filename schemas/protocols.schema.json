@@ -80,11 +80,11 @@
           "type": "string",
           "enum": ["intervention", "surveillance"]
         },
-        "activation_delay_epochs": {
+        "activation_delay_hours": {
           "type": "integer",
           "minimum": 0,
           "default": 0,
-          "description": "Epochs to wait after stoplight eligibility before modifiers apply (organizational latency)."
+          "description": "Wall-clock hours to wait after stoplight eligibility before modifiers apply (organizational latency)."
         },
         "min_escalation_status": {
           "type": "string",

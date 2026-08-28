@@ -2,15 +2,75 @@ from __future__ import annotations
 
 import math
 
-import pytest
 import numpy as np
+import pytest
 
 from crusher_labs import _warn_legacy_config_units, build_modalities
 from crusher_labs.cost_ledger import CostLedger
 from engines.transmission_core import ContactTracingMatrix, TransmissionCore
-from engines.sim_clock import SimClock
+from engines.sim_clock import (
+    HOURS,
+    SimClock,
+    config_epochs_for_days,
+    config_epochs_for_hours,
+)
 from orchestrator_epoch import step_cost_accounting
 from orchestrator_types import ProtocolContext
+
+
+@pytest.mark.parametrize(
+    ("canonical", "retired"),
+    [
+        ("activation_delay_hours", "activation_delay_epochs"),
+        ("reluctant_delay_hours", "reluctant_delay_epochs"),
+        ("compliance_delay_hours", "compliance_delay_epochs"),
+        ("detection_delay_hours", "detection_delay_epochs"),
+        ("crew_screening_interval_hours", "crew_screening_interval_epochs"),
+        ("alert_delay_hours", "alert_delay_epochs"),
+        ("suspected_delay_hours", "suspected_delay_epochs"),
+        ("confirmed_delay_hours", "confirmed_delay_epochs"),
+        ("lockdown_delay_hours", "lockdown_delay_epochs"),
+        ("tat_hours", "tat_epochs"),
+        ("census_interval_hours", "census_interval_epochs"),
+    ],
+)
+def test_retired_hour_aliases_match_canonical_and_warn(
+    canonical: str,
+    retired: str,
+) -> None:
+    clock = SimClock(epoch_duration_hours=1.0, mode=HOURS)
+    with pytest.warns(DeprecationWarning, match=retired):
+        legacy = config_epochs_for_hours({retired: 24}, canonical, retired, clock)
+    current = config_epochs_for_hours({canonical: 24}, canonical, retired, clock)
+    assert legacy == current == 24
+
+
+@pytest.mark.parametrize("value", [0.0, 1.0, 1e9])
+def test_configuration_conversions_are_finite_nonnegative_integers(value: float) -> None:
+    clock = SimClock(epoch_duration_hours=1.0, mode=HOURS)
+    hours = config_epochs_for_hours(
+        {"delay_hours": value}, "delay_hours", "delay_epochs", clock,
+    )
+    days = config_epochs_for_days(
+        {"duration_days": value}, "duration_days", "duration_epochs", clock,
+    )
+    assert isinstance(hours, int)
+    assert hours >= 0
+    assert isinstance(days, int)
+    assert days >= 0
+    assert np.isfinite(hours)
+    assert np.isfinite(days)
+
+
+@pytest.mark.parametrize("value", [math.inf, -math.inf, math.nan])
+def test_configuration_conversions_reject_nonfinite_values(value: float) -> None:
+    clock = SimClock(epoch_duration_hours=1.0, mode=HOURS)
+    with pytest.raises(ValueError, match="finite"):
+        config_epochs_for_hours({"delay_hours": value}, "delay_hours", "delay_epochs", clock)
+    with pytest.raises(ValueError, match="finite"):
+        config_epochs_for_days(
+            {"duration_days": value}, "duration_days", "duration_epochs", clock,
+        )
 
 
 def test_conversion_helpers_are_legacy_identities() -> None:

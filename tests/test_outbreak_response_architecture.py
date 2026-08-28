@@ -22,6 +22,7 @@ from crusher_labs.cost_ledger import CostLedger
 from crusher_labs.modalities.syndromic import SyndromicSurveillance
 from crusher_labs.protocol_engine import ProtocolEngine, StandingProtocol
 from decision_engine.actions import ActionEnvelope
+from engines.sim_clock import HOURS, SimClock
 from orchestrator_init import (
     apply_escalation_latency,
     check_escalation,
@@ -152,6 +153,53 @@ def test_sop_activation_delay() -> None:
     assert mods2[0]["protocol_id"] == "SOP-008"
 
 
+def test_activation_delay_hours_grades_protocol_activation() -> None:
+    first_activation: list[int] = []
+    for delay in (0, 6, 24, 72):
+        proto = StandingProtocol({
+            "protocol_id": "SOP-008",
+            "name": "Confine symptomatic",
+            "trigger": {
+                "instrument_class": "clinical_rdt",
+                "stoplight_level": "RED",
+                "min_agents_affected": 1,
+            },
+            "modifiers": {"confine_symptomatic_to_quarters": True},
+            "activation_delay_hours": delay,
+        })
+        engine = ProtocolEngine([proto], CostLedger())
+        lights = {"clinical_rdt": {"1": "RED"}}
+        activation = next(
+            epoch for epoch in range(80)
+            if engine.evaluate_epoch(epoch, lights)
+        )
+        first_activation.append(activation)
+    assert first_activation == sorted(first_activation)
+    assert min(
+        later - earlier
+        for earlier, later in zip(first_activation, first_activation[1:])
+    ) >= 6
+
+
+def test_reluctant_delay_hours_grades_compliance_timing() -> None:
+    first_compliance: list[int] = []
+    for delay in (0, 6, 24, 72):
+        syn = SyndromicSurveillance(
+            quarantine_compliance=0.0,
+            reluctant_fraction=1.0,
+            reluctant_delay_hours=delay,
+            clock=SimClock(epoch_duration_hours=1.0, mode=HOURS),
+            rng=np.random.default_rng(7),
+        )
+        first_compliance.append(
+            next(
+                epoch for epoch in range(80)
+                if syn.check_quarantine_compliance(1, epoch)
+            )
+        )
+    assert first_compliance == [0, 6, 24, 72]
+
+
 def test_apply_escalation_latency_sensitivity() -> None:
     """Config sensitivity: delay 0 vs 2 changes when status takes effect."""
     cfg0 = {"escalation": {"decision_latency": {"alert_delay_epochs": 0}}}
@@ -210,7 +258,7 @@ def test_t16_reluctant_generator() -> None:
     sample = next(s for rid, s in runs if "rf75" in rid and "rd48" in rid)
     fred = sample["config_overrides"]["fred_behavior"]
     assert fred["reluctant_fraction"] == pytest.approx(0.75)
-    assert fred["reluctant_delay_epochs"] == 48
+    assert fred["reluctant_delay_hours"] == 48
 
 
 def test_t11_decision_latency_generator() -> None:
@@ -219,7 +267,7 @@ def test_t11_decision_latency_generator() -> None:
     assert any("lat24" in rid for rid, _ in runs)
     sample = next(s for rid, s in runs if "lat24" in rid)
     lat = sample["config_overrides"]["escalation"]["decision_latency"]
-    assert lat["confirmed_delay_epochs"] == 24
+    assert lat["confirmed_delay_hours"] == 24
     assert sample["campaign_parameters"]["decision_latency_epochs"] == 24
 
 

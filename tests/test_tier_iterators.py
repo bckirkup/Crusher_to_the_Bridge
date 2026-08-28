@@ -105,7 +105,7 @@ def test_latency_from_level_grades_confirmed_delay() -> None:
     for delay in delays:
         lat, tag = _latency_from_level(delay)
         tags.append(tag)
-        confirmed.append(lat["confirmed_delay_epochs"])
+        confirmed.append(lat["confirmed_delay_hours"])
     assert tags == delays
     assert confirmed == delays
     assert all(lat_tag >= 0 for lat_tag in tags)
@@ -116,8 +116,8 @@ def test_latency_dict_uses_confirmed_as_the_run_tag() -> None:
         {"alert": 1, "suspected": 2, "confirmed": 8, "lockdown": 24},
     )
     assert tag == 8
-    assert lat["alert_delay_epochs"] == 1
-    assert lat["lockdown_delay_epochs"] == 24
+    assert lat["alert_delay_hours"] == 1
+    assert lat["lockdown_delay_hours"] == 24
 
 
 def test_lockdown_tag_never_versus_numeric_rates() -> None:

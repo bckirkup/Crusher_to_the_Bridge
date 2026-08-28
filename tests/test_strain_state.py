@@ -472,7 +472,7 @@ def test_variant_surveillance_is_off_by_default():
     block = cfg["variant_surveillance"]
     assert block["enabled"] is False
     assert block["founder_strains_per_pathogen"] >= 1
-    assert block["census_interval_epochs"] >= 1
+    assert block["census_interval_hours"] >= 1
 
 
 # ── schema ──────────────────────────────────────────────────────────────

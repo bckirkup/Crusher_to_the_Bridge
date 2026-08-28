@@ -14,7 +14,7 @@
         "port": "Starbase 1 (Earth)",
         "port_id": "SBONE",
         "region": "SOL",
-        "embarkation_window_epochs": [9, 15],
+        "embarkation_window_hours_of_day": [9, 15],
         "stateroom_available_epoch": 12,
         "buffet_surge_fraction": 0.7,
         "notes": "Homeport. Crew boards from the orbital yard."
@@ -28,8 +28,8 @@
         "region": "ALPHA_CORE",
         "disembark_fraction": 0.6,
         "crew_shore_leave_fraction": 0.2,
-        "disembark_window_epochs": [3, 6],
-        "reembark_window_epochs": [13, 16],
+        "disembark_window_hours_of_day": [3, 6],
+        "reembark_window_hours_of_day": [13, 16],
         "notes": "Long call: resupply plus general shore leave."
       },
       { "day": 4, "type": "sea_day" },
@@ -41,8 +41,8 @@
         "region": "KLINGON_BORDER",
         "disembark_fraction": 0.35,
         "crew_shore_leave_fraction": 0.1,
-        "disembark_window_epochs": [4, 6],
-        "reembark_window_epochs": [10, 12],
+        "disembark_window_hours_of_day": [4, 6],
+        "reembark_window_hours_of_day": [10, 12],
         "notes": "Border station: short call, restricted liberty."
       },
       { "day": 6, "type": "sea_day" },
@@ -54,8 +54,8 @@
         "region": "ALPHA",
         "disembark_fraction": 0.15,
         "crew_shore_leave_fraction": 0.05,
-        "disembark_window_epochs": [5, 7],
-        "reembark_window_epochs": [9, 11],
+        "disembark_window_hours_of_day": [5, 7],
+        "reembark_window_hours_of_day": [9, 11],
         "notes": "Archive facility, tiny catchment and no public health programme: the call where the ship is the only instrument."
       },
       { "day": 8, "type": "sea_day" },
@@ -66,7 +66,7 @@
         "port": "Starbase 1 (Earth)",
         "port_id": "SBONE",
         "region": "SOL",
-        "disembark_window_epochs": [6, 12]
+        "disembark_window_hours_of_day": [6, 12]
       }
     ],
     "shore_exposure": {

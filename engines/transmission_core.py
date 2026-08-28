@@ -226,7 +226,7 @@ NON_MATE_CONFINEMENT_CONTACT_FACTOR = 0.01
 DEFAULT_CORRIDOR_DIRECT_CONTACT_FACTOR = 0.15
 
 # Fraction of shedding deposited into food pools in Dining-type zones
-FOOD_DEPOSITION_FRACTION = 1e-4
+FOOD_DEPOSITION_FRACTION_PER_EPOCH = 1e-4
 
 # Fraction of food-pool pathogen ingested per agent per epoch
 FOOD_INGESTION_FRACTION = 0.05
@@ -2047,10 +2047,10 @@ class TransmissionCore:
             shedders = self._get_shedders(occupants, pathogen_id, profile)
             self._deposit_reservoir_strains(
                 FOOD_RESERVOIR, pathogen_id, zone_name,
-                [(a, sv * FOOD_DEPOSITION_FRACTION) for a, sv in shedders],
+                [(a, sv * FOOD_DEPOSITION_FRACTION_PER_EPOCH) for a, sv in shedders],
             )
             for _, sv in shedders:
-                food_zones[zone_name] += sv * FOOD_DEPOSITION_FRACTION
+                food_zones[zone_name] += sv * FOOD_DEPOSITION_FRACTION_PER_EPOCH
 
             # Net growth (reproduction minus decay), applied to the pool and to
             # its composition together so the two stay proportional

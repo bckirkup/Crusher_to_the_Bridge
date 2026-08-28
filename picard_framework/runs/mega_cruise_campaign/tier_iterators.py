@@ -21,19 +21,19 @@ def _comp_behavior(comp: Any) -> tuple[dict[str, Any] | None, str]:
 def _latency_from_level(level: Any) -> tuple[dict[str, int], int]:
     if isinstance(level, dict):
         lat = {
-            "alert_delay_epochs": int(level.get("alert", 0)),
-            "suspected_delay_epochs": int(level.get("suspected", 0)),
-            "confirmed_delay_epochs": int(level.get("confirmed", 0)),
-            "lockdown_delay_epochs": int(level.get("lockdown", 0)),
+            "alert_delay_hours": int(level.get("alert", 0)),
+            "suspected_delay_hours": int(level.get("suspected", 0)),
+            "confirmed_delay_hours": int(level.get("confirmed", 0)),
+            "lockdown_delay_hours": int(level.get("lockdown", 0)),
         }
         return lat, int(level.get("confirmed", 0))
     delay_tag = int(level)
     return (
         {
-            "alert_delay_epochs": min(delay_tag, 6),
-            "suspected_delay_epochs": delay_tag,
-            "confirmed_delay_epochs": delay_tag,
-            "lockdown_delay_epochs": max(delay_tag, 24),
+            "alert_delay_hours": min(delay_tag, 6),
+            "suspected_delay_hours": delay_tag,
+            "confirmed_delay_hours": delay_tag,
+            "lockdown_delay_hours": max(delay_tag, 24),
         },
         delay_tag,
     )
@@ -376,8 +376,8 @@ def _iter_t11_legacy(ctx: Any) -> Iterator[tuple[str, dict[str, Any]]]:
         bundle, _pid, overrides = _pathogen_bundle(ctx, pathogen)
         behavior, comp_tag = _comp_behavior(comp)
         delay_over = {
-            "syndromic": {"activation_delay_epochs": int(delay)},
-            "diagnostic_cascade": {"activation_delay_epochs": int(delay)},
+            "syndromic": {"activation_delay_hours": int(delay)},
+            "diagnostic_cascade": {"activation_delay_hours": int(delay)},
         }
         yield ctx.yield_run(
             f"{ctx.short}_{pathogen}_{sname}_delay{int(delay)}{comp_tag}_s{seed}",
@@ -510,10 +510,14 @@ def _iter_t15_runs(ctx: Any) -> Iterator[tuple[str, dict[str, Any]]]:
 
 def _iter_t16_runs(ctx: Any) -> Iterator[tuple[str, dict[str, Any]]]:
     qcomp = float(ctx.tier.get("quarantine_compliance", 0.6))
+    delay_values = ctx.tier.get(
+        "reluctant_delay_hours",
+        ctx.tier.get("reluctant_delay_epochs", []),
+    )
     for pathogen, rfrac, rdelay, seed in product(
         ctx.tier["pathogens"],
         ctx.tier["reluctant_fractions"],
-        ctx.tier["reluctant_delay_epochs"],
+        delay_values,
         ctx.tier["seeds"],
     ):
         bundle, _pid, overrides = _pathogen_bundle(ctx, pathogen)
@@ -528,7 +532,7 @@ def _iter_t16_runs(ctx: Any) -> Iterator[tuple[str, dict[str, Any]]]:
             config_overrides={
                 "fred_behavior": {
                     "reluctant_fraction": float(rfrac),
-                    "reluctant_delay_epochs": int(rdelay),
+                    "reluctant_delay_hours": int(rdelay),
                     "quarantine_compliance": qcomp,
                 },
             },
@@ -631,4 +635,3 @@ def dispatch_standard_or_calibration(
     if ctx.short in _CALIBRATION_SHORTS:
         return _iter_calibration_runs(ctx)
     return None
-

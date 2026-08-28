@@ -211,14 +211,14 @@ class TestProtocols:
 
     def test_activation_delay_non_negative(self, protocols: dict) -> None:
         for p in protocols["protocols"]:
-            delay = p.get("activation_delay_epochs", 0)
+            delay = p.get("activation_delay_hours", 0)
             assert isinstance(delay, int), (
                 f"Protocol '{p['protocol_id']}' has invalid "
-                f"activation_delay_epochs: {delay}"
+                f"activation_delay_hours: {delay}"
             )
             assert delay >= 0, (
                 f"Protocol '{p['protocol_id']}' has invalid "
-                f"activation_delay_epochs: {delay}"
+                f"activation_delay_hours: {delay}"
             )
 
 

@@ -897,12 +897,12 @@ def _vsp_degradation_overrides(knobs: dict[str, Any]) -> dict[str, Any]:
     return {
         "escalation": {"lockdown_attack_rate": thr},
         "medical_response": {
-            "detection_delay_epochs": delay,
+            "detection_delay_hours": delay,
             "isolation_compliance": iso,
             "sick_call_probability": scp,
         },
         "syndromic": {
-            "detection_delay_epochs": delay,
+            "detection_delay_hours": delay,
             "sick_call_probability": scp,
         },
         "fred_behavior": {"quarantine_compliance": iso},
@@ -1274,7 +1274,7 @@ def _iter_vsp_degradation_runs(
             density_exponent=alpha,
             n_init=n_init,
             vsp_threshold=float(knobs["vsp_threshold"]),
-            detection_delay_epochs=int(knobs["detection_delay"]),
+            detection_delay_hours=int(knobs["detection_delay"]),
             isolation_compliance=float(knobs["isolation_compliance"]),
             sick_call_probability=float(knobs["sick_call_probability"]),
         )
@@ -1440,7 +1440,7 @@ def _fill_override_params(params: dict[str, Any], cfg: Mapping[str, Any]) -> Non
         (
             ("quarantine_compliance", "quarantine_compliance"),
             ("reluctant_fraction", "reluctant_fraction"),
-            ("reluctant_delay_epochs", "reluctant_delay_epochs"),
+            ("reluctant_delay_hours", "reluctant_delay_epochs"),
         ),
         skip_if_present=frozenset({
             "reluctant_fraction", "reluctant_delay_epochs",
@@ -1457,7 +1457,7 @@ def _fill_override_params(params: dict[str, Any], cfg: Mapping[str, Any]) -> Non
         syn,
         (
             ("sick_call_probability", "sick_call_probability"),
-            ("activation_delay_epochs", "surveillance_delay_epochs"),
+            ("activation_delay_hours", "surveillance_delay_epochs"),
         ),
         skip_if_present=frozenset({
             "sick_call_probability", "surveillance_delay_epochs",
@@ -1468,7 +1468,7 @@ def _fill_override_params(params: dict[str, Any], cfg: Mapping[str, Any]) -> Non
     _copy_present(
         params,
         latency,
-        (("confirmed_delay_epochs", "decision_latency_epochs"),),
+        (("confirmed_delay_hours", "decision_latency_epochs"),),
         skip_if_present=frozenset({"decision_latency_epochs"}),
     )
     _copy_present(
@@ -1487,7 +1487,7 @@ def _fill_override_params(params: dict[str, Any], cfg: Mapping[str, Any]) -> Non
         params,
         med,
         (
-            ("detection_delay_epochs", "detection_delay_epochs"),
+            ("detection_delay_hours", "detection_delay_epochs"),
             ("isolation_compliance", "isolation_compliance"),
             ("sick_call_probability", "sick_call_probability"),
         ),

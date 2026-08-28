@@ -171,7 +171,7 @@ Two generator modes (pick one key in the tier):
 | Manifest key | What it sweeps | Optional cross |
 |--------------|----------------|----------------|
 | `decision_latency_levels` | Organizational SOP delay (`escalation.decision_latency`) | `compliance_levels` → run ids `…_lat{N}_comp{pct}_s{seed}` |
-| `surveillance_delay_epochs` | Surveillance activation delay (`activation_delay_epochs` on syndromic + cascade) | `compliance_levels` → run ids `…_delay{N}_comp{pct}_s{seed}` |
+| `surveillance_delay_epochs` | Surveillance activation delay (`activation_delay_hours` on syndromic + cascade) | `compliance_levels` → run ids `…_delay{N}_comp{pct}_s{seed}` |
 
 If `compliance_levels` is omitted, both modes keep the previous single-compliance
 run-id shape (no `_comp` tag). Campaign v6 controllable manifests use the

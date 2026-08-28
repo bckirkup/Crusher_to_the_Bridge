@@ -26,6 +26,7 @@ import argparse
 import json
 import os
 import sys
+import warnings
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
@@ -50,6 +51,25 @@ from engines.strain_state import (  # noqa: E402
     StrainEvolutionConfig,
 )
 from simulation_utils.paths import validated_open  # noqa: E402
+
+
+def _config_value_with_retired_alias(
+    section: dict[str, Any],
+    canonical_key: str,
+    retired_key: str,
+    default: Any = None,
+) -> Any:
+    """Read a canonical config value while warning on its retired alias."""
+    if canonical_key in section:
+        return section[canonical_key]
+    if retired_key in section:
+        warnings.warn(
+            f"{retired_key} is deprecated; use {canonical_key}",
+            DeprecationWarning,
+            stacklevel=3,
+        )
+        return section[retired_key]
+    return default
 
 # ── ANSI colour codes ────────────────────────────────────────────────────
 
@@ -1237,10 +1257,12 @@ def _check_variant_surveillance(cfg: dict[str, Any], report: Report) -> None:
         report.error(_CONFIG_YAML, "MATH_BOUND",
                      f"variant_surveillance.founder_strains_per_pathogen = "
                      f"{founders} must be >= 1")
-    interval = vs.get("census_interval_epochs")
+    interval = _config_value_with_retired_alias(
+        vs, "census_interval_hours", "census_interval_epochs",
+    )
     if isinstance(interval, (int, float)) and interval < 1:
         report.error(_CONFIG_YAML, "MATH_BOUND",
-                     f"variant_surveillance.census_interval_epochs = {interval} "
+                     f"variant_surveillance.census_interval_hours = {interval} "
                      f"must be >= 1")
 
 
@@ -1611,14 +1633,18 @@ def _check_wearable_monitoring(cfg: dict[str, Any], report: Report) -> None:
 
 
 def _check_crew_screening_interval(cfg: dict[str, Any], report: Report) -> None:
-    crew_screen = cfg.get("syndromic", {}).get("crew_screening_interval_epochs")
+    crew_screen = _config_value_with_retired_alias(
+        cfg.get("syndromic", {}),
+        "crew_screening_interval_hours",
+        "crew_screening_interval_epochs",
+    )
     if crew_screen is None or not isinstance(crew_screen, (int, float)):
         return
     if crew_screen >= 1:
         return
     report.error(
         _CONFIG_YAML, "MATH_BOUND",
-        f"syndromic.crew_screening_interval_epochs = {crew_screen} "
+        f"syndromic.crew_screening_interval_hours = {crew_screen} "
         f"must be null or >= 1",
     )
 
@@ -1640,9 +1666,9 @@ def _check_modality_params(cfg: dict[str, Any], report: Report) -> None:
 
     _non_neg_fields = [
         ("syndromic", "cadence"),
-        ("syndromic", "activation_delay_epochs"),
-        ("syndromic", "detection_delay_epochs"),
-        ("diagnostic_cascade", "activation_delay_epochs"),
+        ("syndromic", "activation_delay_hours"),
+        ("syndromic", "detection_delay_hours"),
+        ("diagnostic_cascade", "activation_delay_hours"),
         ("clinical_rdt", "cadence"),
         ("targeted_pcr", "cadence"),
         ("targeted_pcr", "extraction_efficiency"),
@@ -1732,13 +1758,17 @@ def _check_hvac_params(cfg: dict[str, Any], report: Report) -> None:
 def _check_emod_progression(cfg: dict[str, Any], report: Report) -> None:
     """Validate EMOD progression phases and durations."""
     emod = cfg.get("emod_progression", {})
-    incub = emod.get("incubation_epochs")
+    incub = _config_value_with_retired_alias(
+        emod, "incubation_days", "incubation_epochs",
+    )
     if incub is not None and isinstance(incub, (int, float)) and incub < 0:
         report.error(_CONFIG_YAML, "MATH_BOUND",
-                     f"emod_progression.incubation_epochs = {incub} is negative")
+                     f"emod_progression.incubation_days = {incub} is negative")
 
     phases_raw = emod.get("shedding_phases", [])
-    durations = emod.get("phase_durations", [])
+    durations = _config_value_with_retired_alias(
+        emod, "phase_durations_days", "phase_durations", [],
+    )
 
     for i, p in enumerate(phases_raw):
         try:
@@ -1751,11 +1781,11 @@ def _check_emod_progression(cfg: dict[str, Any], report: Report) -> None:
         if len(phases_raw) != len(durations):
             report.error(_CONFIG_YAML, "LOGIC_MISMATCH",
                          f"emod_progression has {len(phases_raw)} shedding_phases "
-                         f"but {len(durations)} phase_durations — counts must match")
+                         f"but {len(durations)} phase_durations_days — counts must match")
         for i, d in enumerate(durations):
             if isinstance(d, (int, float)) and d <= 0:
                 report.error(_CONFIG_YAML, "MATH_BOUND",
-                             f"emod_progression.phase_durations[{i}] = {d} must be positive")
+                             f"emod_progression.phase_durations_days[{i}] = {d} must be positive")
 
 
 def _check_escalation_params(cfg: dict[str, Any], report: Report) -> None:
@@ -1814,18 +1844,22 @@ def _check_fred_behavior(cfg: dict[str, Any], report: Report) -> None:
     if qc is not None and isinstance(qc, (int, float)) and (qc < 0 or qc > 1):
         report.error(_CONFIG_YAML, "MATH_BOUND",
                      f"fred_behavior.quarantine_compliance = {qc} outside [0,1]")
-    delay = fred.get("compliance_delay_epochs")
+    delay = _config_value_with_retired_alias(
+        fred, "compliance_delay_hours", "compliance_delay_epochs",
+    )
     if delay is not None and isinstance(delay, (int, float)) and delay < 0:
         report.error(_CONFIG_YAML, "MATH_BOUND",
-                     f"fred_behavior.compliance_delay_epochs = {delay} is negative")
+                     f"fred_behavior.compliance_delay_hours = {delay} is negative")
     rf = fred.get("reluctant_fraction")
     if rf is not None and isinstance(rf, (int, float)) and (rf < 0 or rf > 1):
         report.error(_CONFIG_YAML, "MATH_BOUND",
                      f"fred_behavior.reluctant_fraction = {rf} outside [0,1]")
-    rd = fred.get("reluctant_delay_epochs")
+    rd = _config_value_with_retired_alias(
+        fred, "reluctant_delay_hours", "reluctant_delay_epochs",
+    )
     if rd is not None and isinstance(rd, (int, float)) and rd < 0:
         report.error(_CONFIG_YAML, "MATH_BOUND",
-                     f"fred_behavior.reluctant_delay_epochs = {rd} is negative")
+                     f"fred_behavior.reluctant_delay_hours = {rd} is negative")
     for key, val in (fred.get("compliance_by_class") or {}).items():
         if isinstance(val, (int, float)) and (val < 0 or val > 1):
             report.error(_CONFIG_YAML, "MATH_BOUND",
