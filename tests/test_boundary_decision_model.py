@@ -180,7 +180,7 @@ def test_lookup_interpolation_and_clamp():
         baseline_response="vsp",
         k=2,
     )
-    assert lo.P_trigger < mid.P_trigger < hi.P_trigger
+    assert lo.p_trigger < mid.p_trigger < hi.p_trigger
     clamped = surface.lookup(
         platform_class="mega",
         pathogen="norovirus",
@@ -193,7 +193,7 @@ def test_lookup_interpolation_and_clamp():
         baseline_response="vsp",
         k=40,
     )
-    assert clamped.P_trigger == pytest.approx(top.P_trigger)
+    assert clamped.p_trigger == pytest.approx(top.p_trigger)
 
 
 def test_stan_surface_csv_loader(tmp_path):
@@ -249,7 +249,7 @@ def test_stan_surface_csv_loader(tmp_path):
             baseline_response="vsp",
             k=1,
         )
-        assert pt.P_trigger == pytest.approx(0.25)
+        assert pt.p_trigger == pytest.approx(0.25)
         auto = load_outbreak_surface(lookup="auto", stan_fit_dir="stan_fit")
         assert auto.source.startswith("stan:")
     finally:
@@ -628,6 +628,6 @@ def test_aggregate_outbreak_surface_and_export(tmp_path):
             baseline_response="vsp",
             k=2,
         )
-        assert pt.P_trigger == pytest.approx(1.0)
+        assert pt.p_trigger == pytest.approx(1.0)
     finally:
         os.chdir(prev)

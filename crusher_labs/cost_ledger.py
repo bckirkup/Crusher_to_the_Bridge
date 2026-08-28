@@ -24,7 +24,7 @@ import json
 import os
 import warnings
 from dataclasses import dataclass
-from math import isfinite
+from math import isclose, isfinite
 from typing import Any, Mapping
 
 from simulation_utils.paths import validated_open
@@ -76,7 +76,11 @@ class ContributionRecord:
             raise ValueError(
                 "contribution conversion rate must be finite and non-negative"
             )
-        if self.medium == "cash" and self.conversion_rate_usd_per_unit != 1.0:
+        if self.medium == "cash" and not isclose(
+            self.conversion_rate_usd_per_unit,
+            1.0,
+            rel_tol=1e-9,
+        ):
             raise ValueError("cash contribution conversion rate must be exactly 1.0")
 
     @property
@@ -112,7 +116,7 @@ def _validate_conversion_overrides(
             raise ValueError(
                 f"conversion override for {medium} must be finite and non-negative"
             )
-        if medium == "cash" and rate != 1.0:
+        if medium == "cash" and not isclose(rate, 1.0, rel_tol=1e-9):
             raise ValueError("cash contribution conversion rate must be exactly 1.0")
     return validated
 

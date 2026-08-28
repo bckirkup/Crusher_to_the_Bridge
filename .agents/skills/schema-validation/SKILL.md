@@ -28,7 +28,7 @@ check-jsonschema --schemafile schemas/spatial_layout.schema.json data/platforms/
 # Air flow paths (per platform)
 check-jsonschema --schemafile schemas/air_flow_paths.schema.json data/platforms/destroyer_baseline/air_flow_paths.json
 
-# Protocols (min_escalation_status, activation_delay_epochs)
+# Protocols (min_escalation_status, activation_delay_hours)
 check-jsonschema --schemafile schemas/protocols.schema.json data/config/protocols.json
 
 # Resource costs

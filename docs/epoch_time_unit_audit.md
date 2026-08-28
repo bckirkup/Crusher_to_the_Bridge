@@ -1,3 +1,11 @@
+> **Status — resolved by PRs #327 and #328:** The `hour = 12` hard-code in
+> `engines/infection_dynamics_bridge.py` is gone; the schedule is now
+> clock-driven. Time-dependent parameters declare their units and are converted
+> through `SimClock`. The canonical specification is now
+> [`docs/clock_unit_safety_spec.md`](clock_unit_safety_spec.md), copied from the
+> implementation contract that was previously kept in
+> `telemetry_buffer/clock_audit/unit_safety_spec.md`.
+
 # The epoch is a day in the ABM and an hour in the voyage layer
 
 Written after the paired-arm incubation harness (PR #295) produced a degenerate
@@ -7,8 +15,9 @@ problem. Two layers of the simulator disagree about what one epoch *is*, and the
 disagreement has been in every voyage-configured run to date, including the runs
 behind papers 1 and 2.
 
-This document is an audit and a decision request. Nothing here changes
-behaviour.
+This document records the historical audit and decision request. The
+implementation is resolved by PRs #327 and #328; the canonical implementation
+contract is `docs/clock_unit_safety_spec.md`.
 
 ## 1. The two contracts
 

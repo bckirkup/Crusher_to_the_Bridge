@@ -26,7 +26,7 @@ When the Picard run spec includes a `social` block, each epoch follows this orde
 19. Stoplight computation
 20. **Stackelberg command / medical** (`solve_command_medical`) → apply command/medical actions
 21. Protocol engine evaluation (`forced_protocol_ids` + stoplight triggers +
-    `min_escalation_status` + SOP `activation_delay_epochs`; authorized debits)
+    `min_escalation_status` + SOP `activation_delay_hours`; authorized debits)
 22. Apply merged SOP modifiers (HVAC, transmission, zone closure, surfaces)
 23. Cost accounting (financial / labor / materials)
 24. Quarantine confinement (scope from escalation level and/or SOP modifiers;
@@ -47,7 +47,7 @@ Syndromic sick-call is a **reporting roster only** (`sick_call_agents` IDs for c
 
 ## Legacy `orchestrator.py` loop
 
-Same Crusher Labs physics and instruments as Picard, but **no** Stackelberg population/command passes. OIS is accumulated after confinement. Epoch order matches the pre–game-theory orchestrator (stoplight-only SOPs, flat syndromic `sick_call_probability` unless extended later).
+Same Crusher Labs physics and instruments as Picard, but **no** Stackelberg population/command passes. OIS is accumulated after confinement. Epoch order matches the pre–game-theory orchestrator (stoplight-only SOPs, flat syndromic `sick_call_probability_per_day` unless extended later).
 
 1. FRED compliance through ground-truth export
 2. Wearable (multi-device, confounders, detection profiles) → syndromic → RDT → PCR → sequencing → instruments
