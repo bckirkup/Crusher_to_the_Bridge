@@ -1,0 +1,370 @@
+{
+  "campaign": "common_dose_containment_v3",
+  "platform": "classic_cruise_1900",
+  "description": "Fit one common norovirus dose-response across all four hull classes on the onset-anchored model (PR #334: shedding curves read on their own days-since-onset axis, bounded pre-symptomatic windows, a real norovirus incubation kernel, and the wearable phase curve moved onto the same axis), on top of the hourly clock, the unit-safe reservoir/behaviour/cost parameters, per-partner direct-contact dose, and inhaled-air-volume airborne dose. Pathogen biology is identical in every cell: one profile, one dose ladder, applied unchanged to expedition/classic/spirit/mega. What differs operationally is quarantine compliance, swept as four named response branches on top of the same syndromic surveillance, plus a transmission-only counterfactual on the same cells so dose and containment stay separable. The ladder moves down from v2's 4.5-8.0 to 3.0-7.0: with a latent period restored, local probes put the expedition VSP crossing near dose 3.5-4.0 and the classic crossing near 5.0, so v2's grid would have been mostly extinctions at the small end. Seeds are held out from every diagnostic and from v1/v2.",
+  "default_epochs": 168,
+  "default_num_agents": 7000,
+  "embarkation_date": "2026-01-10",
+  "pathogen_configs": {
+    "norovirus": {
+      "bundle": "active_profiles",
+      "pathogen_id": "norwalk_gi",
+      "overrides": {
+        "remove": [
+          "sars_cov2_resp"
+        ]
+      }
+    }
+  },
+  "surveillance_configs": {
+    "none_response": {
+      "diagnostic_cascade": {
+        "enabled": false
+      },
+      "syndromic": {
+        "sick_call_probability_per_day": 0.0,
+        "background_noise_rate": 0.0
+      },
+      "fred_behavior": {
+        "healthy_noise_categories": []
+      },
+      "observation": {
+        "enabled": false
+      },
+      "wearable_monitoring": {
+        "enabled": false
+      },
+      "ship_graph": {
+        "counter_confinement_enabled": false
+      },
+      "escalation": {
+        "alert_sick_call_threshold": 1000000,
+        "suspect_attack_rate": 2.0,
+        "confirm_attack_rate": 2.0,
+        "lockdown_attack_rate": "never"
+      }
+    },
+    "syndromic_comp85": {
+      "diagnostic_cascade": {
+        "enabled": false
+      },
+      "fred_behavior": {
+        "quarantine_compliance": 0.85,
+        "compliance_by_class": {
+          "crew": 0.85,
+          "passenger_elderly": 0.7,
+          "passenger_young": 0.45
+        }
+      }
+    },
+    "syndromic_comp65": {
+      "diagnostic_cascade": {
+        "enabled": false
+      },
+      "fred_behavior": {
+        "quarantine_compliance": 0.65,
+        "compliance_by_class": {
+          "crew": 0.65,
+          "passenger_elderly": 0.54,
+          "passenger_young": 0.34
+        }
+      }
+    },
+    "syndromic_comp45": {
+      "diagnostic_cascade": {
+        "enabled": false
+      },
+      "fred_behavior": {
+        "quarantine_compliance": 0.45,
+        "compliance_by_class": {
+          "crew": 0.45,
+          "passenger_elderly": 0.37,
+          "passenger_young": 0.24
+        }
+      }
+    },
+    "syndromic_comp25": {
+      "diagnostic_cascade": {
+        "enabled": false
+      },
+      "fred_behavior": {
+        "quarantine_compliance": 0.25,
+        "compliance_by_class": {
+          "crew": 0.25,
+          "passenger_elderly": 0.21,
+          "passenger_young": 0.13
+        }
+      }
+    }
+  },
+  "tiers": {
+    "c1_fit_expedition_450": {
+      "description": "Common-dose fit, expedition (450), 1 index case = constant prevalence reference.",
+      "platform": "expedition_cruise_450",
+      "pathogen": "norovirus",
+      "dose_adjustments": [
+        3.0,
+        3.5,
+        4.0,
+        4.5,
+        5.0,
+        5.5,
+        6.0,
+        6.5,
+        7.0
+      ],
+      "initial_infected_values": [
+        1
+      ],
+      "surveillance_strategies": [
+        "none_response",
+        "syndromic_comp85",
+        "syndromic_comp65",
+        "syndromic_comp45",
+        "syndromic_comp25"
+      ],
+      "epochs": 168,
+      "seeds": [
+        950,
+        951,
+        952,
+        953,
+        954,
+        955,
+        956,
+        957,
+        958,
+        959
+      ]
+    },
+    "c1_fit_classic_1900": {
+      "description": "Common-dose fit, classic (1900), 4 index cases = constant per-capita prevalence.",
+      "platform": "classic_cruise_1900",
+      "pathogen": "norovirus",
+      "dose_adjustments": [
+        3.0,
+        3.5,
+        4.0,
+        4.5,
+        5.0,
+        5.5,
+        6.0,
+        6.5,
+        7.0
+      ],
+      "initial_infected_values": [
+        4
+      ],
+      "surveillance_strategies": [
+        "none_response",
+        "syndromic_comp85",
+        "syndromic_comp65",
+        "syndromic_comp45",
+        "syndromic_comp25"
+      ],
+      "epochs": 168,
+      "seeds": [
+        950,
+        951,
+        952,
+        953,
+        954,
+        955,
+        956,
+        957,
+        958,
+        959
+      ]
+    },
+    "c1_fit_spirit_3000": {
+      "description": "Common-dose fit, spirit (3000), 7 index cases = constant per-capita prevalence.",
+      "platform": "spirit_cruise_3000",
+      "pathogen": "norovirus",
+      "dose_adjustments": [
+        3.0,
+        3.5,
+        4.0,
+        4.5,
+        5.0,
+        5.5,
+        6.0,
+        6.5,
+        7.0
+      ],
+      "initial_infected_values": [
+        7
+      ],
+      "surveillance_strategies": [
+        "none_response",
+        "syndromic_comp85",
+        "syndromic_comp65",
+        "syndromic_comp45",
+        "syndromic_comp25"
+      ],
+      "epochs": 168,
+      "seeds": [
+        950,
+        951,
+        952,
+        953,
+        954,
+        955,
+        956,
+        957,
+        958,
+        959
+      ]
+    },
+    "c1_fit_mega_5000": {
+      "description": "Common-dose fit, mega (5000), 11 index cases = constant per-capita prevalence.",
+      "platform": "mega_cruise_5000",
+      "pathogen": "norovirus",
+      "dose_adjustments": [
+        3.0,
+        3.5,
+        4.0,
+        4.5,
+        5.0,
+        5.5,
+        6.0,
+        6.5,
+        7.0
+      ],
+      "initial_infected_values": [
+        11
+      ],
+      "surveillance_strategies": [
+        "none_response",
+        "syndromic_comp85",
+        "syndromic_comp65",
+        "syndromic_comp45",
+        "syndromic_comp25"
+      ],
+      "epochs": 168,
+      "seeds": [
+        950,
+        951,
+        952,
+        953,
+        954,
+        955,
+        956,
+        957,
+        958,
+        959
+      ]
+    },
+    "c1_seedsens_expedition_450": {
+      "description": "Seeding sensitivity at dose 5.0: single index case regardless of complement.",
+      "platform": "expedition_cruise_450",
+      "pathogen": "norovirus",
+      "dose_adjustments": [
+        5.0
+      ],
+      "initial_infected_values": [
+        1
+      ],
+      "surveillance_strategies": [
+        "none_response",
+        "syndromic_comp85"
+      ],
+      "epochs": 168,
+      "seeds": [
+        950,
+        951,
+        952,
+        953,
+        954,
+        955,
+        956,
+        957,
+        958,
+        959
+      ]
+    },
+    "c1_seedsens_classic_1900": {
+      "description": "Seeding sensitivity at dose 5.0: single index case regardless of complement.",
+      "platform": "classic_cruise_1900",
+      "pathogen": "norovirus",
+      "dose_adjustments": [
+        5.0
+      ],
+      "initial_infected_values": [
+        1
+      ],
+      "surveillance_strategies": [
+        "none_response",
+        "syndromic_comp85"
+      ],
+      "epochs": 168,
+      "seeds": [
+        950,
+        951,
+        952,
+        953,
+        954,
+        955,
+        956,
+        957,
+        958,
+        959
+      ]
+    },
+    "c1_seedsens_spirit_3000": {
+      "description": "Seeding sensitivity at dose 5.0: single index case regardless of complement.",
+      "platform": "spirit_cruise_3000",
+      "pathogen": "norovirus",
+      "dose_adjustments": [
+        5.0
+      ],
+      "initial_infected_values": [
+        1
+      ],
+      "surveillance_strategies": [
+        "none_response",
+        "syndromic_comp85"
+      ],
+      "epochs": 168,
+      "seeds": [
+        950,
+        951,
+        952,
+        953,
+        954,
+        955,
+        956,
+        957,
+        958,
+        959
+      ]
+    },
+    "c1_seedsens_mega_5000": {
+      "description": "Seeding sensitivity at dose 5.0: single index case regardless of complement.",
+      "platform": "mega_cruise_5000",
+      "pathogen": "norovirus",
+      "dose_adjustments": [
+        5.0
+      ],
+      "initial_infected_values": [
+        1
+      ],
+      "surveillance_strategies": [
+        "none_response",
+        "syndromic_comp85"
+      ],
+      "epochs": 168,
+      "seeds": [
+        950,
+        951,
+        952,
+        953,
+        954,
+        955,
+        956,
+        957,
+        958,
+        959
+      ]
+    }
+  }
+}
