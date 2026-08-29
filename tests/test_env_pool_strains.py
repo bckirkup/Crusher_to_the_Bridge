@@ -201,6 +201,21 @@ class TestCompositionMass:
         assert reservoir.strain_ids() == set()
 
 
+class TestSeededFounderRegistration:
+    def test_registration_is_idempotent_for_existing_infections(self) -> None:
+        core = _core()
+        agent = _agent(1, "Cabin_A", infected=True)
+
+        core.register_seeded_founders([agent])
+        first_strain = agent.strain_id_for(PATHOGEN)
+        assert first_strain is not None
+        assert len(core.strain_registry) == 1
+
+        core.register_seeded_founders([agent])
+        assert agent.strain_id_for(PATHOGEN) == first_strain
+        assert len(core.strain_registry) == 1
+
+
 # ── Registry collection ────────────────────────────────────────────────
 
 class TestRegistryCollection:

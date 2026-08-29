@@ -4,15 +4,19 @@ This document outlines the literature and quantitative microbial risk assessment
 
 ## 1. Norovirus GII.4
 - **Dose-Response**: Beta-Poisson ($lpha=0.111$, $eta=32.81$ usually, alternative $lpha=0.04$ per Teunis 2008). Used standard active_profiles base values.
-- **Shedding**: High shedding in feces (up to $10^{11}$ copies/g) peaking at day 3-4.
+- **Shedding**: High shedding in feces (up to $10^{11}$ copies/g), with the
+  curve indexed by days since symptom onset and a 0.5-day presymptomatic
+  window (Atmar et al., Emerg Infect Dis 2008).
 
 ## 2. SARS-CoV-2
 - **Dose-Response**: Beta-Poisson ($lpha=0.18$, $eta=58.0$ based on Watanabe 2020 derived models for SARS-CoV-1 and adapted for CoV-2).
-- **Shedding**: Peak viral load near symptom onset (days 4-6).
+- **Shedding**: Peak viral load near symptom onset (days 4-6), with a
+  2.0-day presymptomatic window (He et al., Nat Med 2020).
 
 ## 3. Influenza A
 - **Dose-Response**: Exponential ($k=0.18$ based on Alford 1966 human challenge studies converted for aerosolized TCID50 limits; often modelled in QMRA between 0.012 - 0.18 depending on strain/route).
-- **Shedding**: Upper respiratory shedding peaks shortly after symptom onset.
+- **Shedding**: Upper respiratory shedding peaks shortly after symptom onset,
+  with a 1.0-day presymptomatic window (Ip et al., Clin Infect Dis 2017).
 
 ## 4. Measles Virus
 - **Dose-Response**: Exponential ($k=0.5$). Highly infectious via airborne route. Estimated very high probability of infection per inhaled quantum/particle.
@@ -44,5 +48,7 @@ This document outlines the literature and quantitative microbial risk assessment
 - **Shedding**: Peaks late in disease course with very high viral loads in bodily fluids. No asymptomatic shedding modelled.
 
 ## Limitations
-- Shedding curves are simplified to 15-day discrete arrays representing $\log_{10}$ daily shedding. 
+- Shedding curves are simplified to 15-day discrete arrays representing
+  $\log_{10}$ daily shedding indexed from symptom onset; absent a profile
+  window, hosts do not shed before onset.
 - Disruption magnitudes and taxa fold-changes are illustrative directional shifts based on expected microbiome derangements, not precise longitudinal kinetic data.

@@ -46,7 +46,7 @@ Where `α` and `β` are pathogen-specific parameters from `active_profiles.json`
 **Host shedding variance** (optional, `shedding_variance_log10` on pathogen profile):
 
 ```
-shedding = 10^(curve[dpi] − dose_adjustment) × shedding_multiplier
+shedding = 10^(curve[days_since_onset] − dose_adjustment) × shedding_multiplier
 shedding_multiplier = 10^(Normal(0, σ))   at infection time; persists for that infection
 ```
 

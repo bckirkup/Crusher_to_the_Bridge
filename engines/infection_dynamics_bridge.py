@@ -38,7 +38,7 @@ from engines.strain_state import ImmuneRecord, Phenotype
 
 # ── Korkin Lab parameters (from Person.java) ─────────────────────────────
 
-# RT-PCR shedding values: log10(copies/g), indexed by day post-infection.
+# RT-PCR shedding values: log10(copies/g), indexed by day post-onset.
 # Source: "Norwalk Virus Shedding after Experimental Human Infection" Fig 1C/E.
 SYMPTOMATIC_SHEDDING = [7.75, 9.0, 11.0, 11.0, 11.0, 10.0, 10.0, 9.5, 9.0, 9.0, 8.0, 8.0, 8.0, 8.0, 8.0]
 ASYMPTOMATIC_SHEDDING = [7.75, 9.5, 10.5, 10.0, 9.0, 8.0, 7.75, 7.75, 7.75, 7.75, 7.75, 7.75, 7.75, 7.75, 7.75]
@@ -63,7 +63,7 @@ VSP_RULE_INSTANT_PREVALENCE = "instant_prevalence"
 # Recovery threshold (from Person.java)
 RECOVERY_DAY = 3
 
-# Earliest day post infection at which the legacy path checks for symptoms
+# Virtual symptom-onset day used by the legacy fallback path
 ONSET_DAY = 1
 
 # Environmental deposition: fraction of shedding that deposits on surfaces
@@ -259,14 +259,15 @@ def illness_probability(
     return 1.0 - math.pow(1.0 + eta * dose, -gamma)
 
 
-def shedding_value(day_post_infection: int, is_symptomatic: bool) -> float:
+def shedding_value(day_post_onset: int, is_symptomatic: bool) -> float:
     """Compute shedding as 10^(log10_rate - doseAdjustment).
 
-    Clamps to day index 14 if past the shedding curve length.
+    Curves are indexed from symptom onset. Clamps to the last day if the
+    requested index is past the shedding curve length.
     (Person.java lines 321-332)
     """
     curve = SYMPTOMATIC_SHEDDING if is_symptomatic else ASYMPTOMATIC_SHEDDING
-    idx = min(day_post_infection, len(curve) - 1)
+    idx = min(max(day_post_onset, 0), len(curve) - 1)
     return max(1.0, math.pow(10, curve[idx] - DOSE_ADJUSTMENT))
 
 
@@ -439,13 +440,23 @@ class KorkinAgent:
 
     @property
     def current_shedding(self) -> float:
-        """Active shedding value (0 if not infected or recovered)."""
+        """Active legacy shedding value, with no presymptomatic window.
+
+        The legacy property has no pathogen profile to supply a
+        presymptomatic window, so its empty profile intentionally means
+        shedding begins at virtual or realized onset.
+        """
         if not self.is_infected:
             return 0.0
-        dpi = self.days_post_infection
-        if dpi < 0:
+        if self.time_infected is None:
             return 0.0
-        return shedding_value(dpi, self.is_symptomatic) * self.shedding_multiplier
+        infection = next(iter(self.infections.values()), {})
+        days_since_onset, curve_index = self._shedding_age(
+            self.time_infected, infection, {}, self.clock,
+        )
+        if days_since_onset < 0.0:
+            return 0.0
+        return shedding_value(curve_index, self.is_symptomatic) * self.shedding_multiplier
 
     def get_location_for_hour(
         self,
@@ -847,7 +858,6 @@ class KorkinAgent:
         epochs_infected = inf["time_infected"]
         if epochs_infected is None or epochs_infected < 0:
             return 0.0
-        dpi = self.clock.day_index(epochs_infected)
         is_symp = inf["illness"] == IllnessStatus.SYMPTOMATIC
         curve = profile.get(
             "shedding_curve_log10",
@@ -859,16 +869,22 @@ class KorkinAgent:
         host_mult = inf.get("shedding_multiplier", 1.0)
         residents = self.resident_strains(pathogen_id)
         if residents:
-            # Each lineage is read at its own day post infection, which for a
-            # lone resident is the infection's own — identical to the legacy
-            # single-strain result.
+            # Each lineage starts its own onset-anchored curve at acquisition;
+            # the host-level illness clock remains on the primary infection.
             return host_mult * sum(
-                self._resident_emissions(residents, curve, adj, self.clock).values(),
+                self._resident_emissions(
+                    residents, curve, adj, self.clock, profile,
+                ).values(),
             )
         # Host factor (per-agent log-normal draw) and strain factor (heritable)
         # compose multiplicatively and are kept apart so a high shedder stays
         # attributable to the host or to the lineage, not to both at once.
-        idx = min(dpi, len(curve) - 1)
+        days_since_onset, curve_index = self._shedding_age(
+            epochs_infected, inf, profile, self.clock,
+        )
+        if days_since_onset < -float(profile.get("presymptomatic_shedding_days", 0.0)):
+            return 0.0
+        idx = min(max(curve_index, 0), len(curve) - 1)
         return (
             math.pow(10, curve[idx] - adj)
             * host_mult
@@ -896,7 +912,9 @@ class KorkinAgent:
         if not is_symp:
             curve = profile.get("asymptomatic_shedding_log10", curve)
         adj = profile.get("dose_adjustment", DOSE_ADJUSTMENT)
-        emissions = self._resident_emissions(residents, curve, adj, self.clock)
+        emissions = self._resident_emissions(
+            residents, curve, adj, self.clock, profile,
+        )
         total = sum(emissions.values())
         if total <= 0.0:
             return {}
@@ -907,15 +925,17 @@ class KorkinAgent:
         residents: dict[str, StrainInfection],
         curve: list[float],
         adj: float,
-        clock: SimClock = LEGACY_CLOCK,
+        clock: SimClock,
+        profile: dict,
     ) -> dict[str, float]:
         """Emission of each co-resident lineage, before the host factor.
 
         Lineages partition one host's shedding capacity in proportion to the
         inoculum that established them — co-infection redistributes emission
         rather than multiplying it, so two strains in one host do not out-shed
-        the same host carrying one. Each is read at its own day post infection
-        and scaled by its own heritable factor, which is what lets a fitter or
+        the same host carrying one. Each is read on its own acquisition-
+        anchored onset curve and scaled by its heritable factor, which is what
+        lets a fitter or
         later-arriving strain take over the mix.
         """
         inocula = {
@@ -926,13 +946,53 @@ class KorkinAgent:
         emissions: dict[str, float] = {}
         for sid, resident in residents.items():
             share = inocula[sid] / pool if pool > 0.0 else 1.0 / len(residents)
-            idx = min(clock.day_index(resident.time_infected), len(curve) - 1)
+            days_since_onset, curve_index = KorkinAgent._shedding_age(
+                resident.time_infected, {}, profile, clock,
+            )
+            if days_since_onset < -float(
+                profile.get("presymptomatic_shedding_days", 0.0),
+            ):
+                continue
+            idx = min(max(curve_index, 0), len(curve) - 1)
             emissions[sid] = (
                 share
                 * math.pow(10, curve[idx] - adj)
                 * resident.shedding_multiplier
             )
         return emissions
+
+    @staticmethod
+    def _shedding_age(
+        epochs_infected: int,
+        inf: dict[str, Any],
+        profile: dict,
+        clock: SimClock,
+    ) -> tuple[float, int]:
+        """Return elapsed days since onset and the day-curve index.
+
+        Shedding curves are authored on the onset axis.  A realized onset is
+        preferred; an unpresented infection uses its drawn incubation as a
+        virtual onset, and legacy profiles use their configured onset day.
+        """
+        onset_time = inf.get("onset_time_infected")
+        if onset_time is not None:
+            elapsed_epochs = max(0, epochs_infected - int(onset_time))
+            return (
+                clock.days_elapsed(elapsed_epochs),
+                clock.day_index(elapsed_epochs),
+            )
+        incubation_days = inf.get("incubation_days")
+        if incubation_days is not None:
+            days_since_onset = clock.days_elapsed(epochs_infected) - float(
+                incubation_days,
+            )
+            return days_since_onset, math.floor(days_since_onset)
+        onset_day = float(profile.get("symptom_onset_day", ONSET_DAY))
+        days_since_onset = clock.days_elapsed(epochs_infected) - onset_day
+        return (
+            days_since_onset,
+            math.floor(days_since_onset),
+        )
 
     def update_microflora_disruption(self, pathogen_profiles: dict) -> None:
         """Recompute microflora_disruption_status from all active infections."""
@@ -1250,8 +1310,8 @@ class KorkinShipEngine:
     def _seed_infection_epochs(self) -> int:
         """Epochs of infection age an index case is seeded with.
 
-        Index cases start one day post infection, at the peak of the shedding
-        curve, which is one epoch only when an epoch is a day.
+        Index cases start one day into the fallback onset clock, at the head
+        of the shedding curve, which is one epoch only when an epoch is a day.
         """
         return max(1, int(round(self.clock.epochs_for_days(1.0))))
 

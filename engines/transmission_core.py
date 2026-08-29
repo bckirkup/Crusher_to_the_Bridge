@@ -38,7 +38,7 @@ from __future__ import annotations
 
 import fnmatch
 import math
-from collections.abc import Mapping
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass, field, replace
 from typing import Any
 
@@ -562,6 +562,20 @@ class TransmissionCore:
             pathogen_id, founder.strain_id, Phenotype.of(founder),
         )
         return founder.strain_id
+
+    def register_seeded_founders(self, agents: Iterable[KorkinAgent]) -> None:
+        """Assign founder strains to infections present before transmission.
+
+        Seeded infections have a genome before they become shedders.  Register
+        those founders eagerly so short runs still expose their lineage census.
+        """
+        if self.strain_registry is None:
+            return
+        for agent in agents:
+            for pathogen_id, infection in agent.infections.items():
+                if infection.get("status") != InfectionStatus.INFECTED:
+                    continue
+                self._resident_strain_id(agent, pathogen_id)
 
     def _environmental_strain_id(self, pathogen_id: str) -> str | None:
         """Founder strain of a pathogen's environmental reservoir."""

@@ -410,16 +410,26 @@
         "shedding_curve_log10": {
           "type": "array",
           "items": {"type": "number", "minimum": 0},
-          "description": "Day-by-day symptomatic shedding rate (log10 copies)"
+          "description": "Day-by-day symptomatic shedding rate (log10 copies), indexed by days since symptom onset."
         },
         "asymptomatic_shedding_log10": {
           "type": "array",
           "items": {"type": "number", "minimum": 0}
         },
+        "presymptomatic_shedding_days": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Maximum days before virtual or realized symptom onset during which the host sheds at the first curve value. Absent means no presymptomatic shedding."
+        },
+        "presymptomatic_shedding_notes": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Literature provenance or rationale for presymptomatic_shedding_days."
+        },
         "dose_adjustment": {
           "type": "number",
           "minimum": 0,
-          "description": "Log10 shedding offset: shedding = 10^(curve[dpi] - dose_adjustment) * shedding_multiplier. Campaigns calibrate infectivity via pathogen_overrides; not a dose-response α/β scaler."
+          "description": "Log10 shedding offset: shedding = 10^(curve[days_since_onset] - dose_adjustment) * shedding_multiplier. Campaigns calibrate infectivity via pathogen_overrides; not a dose-response α/β scaler."
         },
         "shedding_variance_log10": {
           "type": "number",

@@ -195,6 +195,16 @@
         "ct_threshold": 30.0,
         "cost_usd": 150.0,
         "notes": "Assay design from docs/variant_surveillance_spec.md \u00a72.1. read_accuracy is per-read consensus accuracy for this amplicon; read depth and the reporting floor are operator dials set at run time, not pathogen properties."
+      },
+      "presymptomatic_shedding_days": 0.5,
+      "presymptomatic_shedding_notes": "Atmar et al., Emerg Infect Dis 2008: virus was first detected in stool at a median approximately 36 hours post-challenge, essentially concurrent with symptom onset; 0.5 days is the generous presymptomatic window.",
+      "incubation": {
+        "distribution": "lognormal",
+        "median_days": 1.2,
+        "dispersion": 1.5,
+        "min_days": 0.5,
+        "max_days": 3.0,
+        "notes": "Lee et al., Epidemiol Infect 2013: pooled norovirus incubation median 1.2 days, with onsets spanning approximately 12 hours to 3 days."
       }
     },
     {
@@ -406,7 +416,9 @@
         "ct_threshold": 28.0,
         "cost_usd": 100.0,
         "notes": "Assay design from docs/variant_surveillance_spec.md \u00a72.1. read_accuracy is per-read consensus accuracy for this amplicon; read depth and the reporting floor are operator dials set at run time, not pathogen properties."
-      }
+      },
+      "presymptomatic_shedding_days": 2.0,
+      "presymptomatic_shedding_notes": "He et al., Nat Med 2020: infectiousness begins approximately 2.3 days before symptom onset; 2.0 days is the profile window."
     },
     {
       "pathogen_id": "influenza_a",
@@ -598,7 +610,9 @@
         "ct_threshold": 30.0,
         "cost_usd": 120.0,
         "notes": "Assay design from docs/variant_surveillance_spec.md \u00a72.1. read_accuracy is per-read consensus accuracy for this amplicon; read depth and the reporting floor are operator dials set at run time, not pathogen properties."
-      }
+      },
+      "presymptomatic_shedding_days": 1.0,
+      "presymptomatic_shedding_notes": "Ip et al., Clin Infect Dis 2017: shedding begins approximately 1 day before symptom onset; 1.0 day is the profile window."
     },
     {
       "pathogen_id": "measles_virus",
@@ -829,7 +843,8 @@
         "ct_threshold": 25.0,
         "cost_usd": 100.0,
         "notes": "Assay design from docs/variant_surveillance_spec.md \u00a72.1. read_accuracy is per-read consensus accuracy for this amplicon; read depth and the reporting floor are operator dials set at run time, not pathogen properties."
-      }
+      },
+      "presymptomatic_shedding_days": 0.0
     },
     {
       "pathogen_id": "legionella_pneumophila",
@@ -974,7 +989,8 @@
         "environmental_source": 1.0
       },
       "innate_nonsusceptible_fraction": 0.0,
-      "nonsusceptible_mechanism": "none"
+      "nonsusceptible_mechanism": "none",
+      "presymptomatic_shedding_days": 0.0
     },
     {
       "pathogen_id": "vibrio_cholerae_parahaemolyticus",
@@ -1110,7 +1126,8 @@
         "environmental_source": 0.05
       },
       "innate_nonsusceptible_fraction": 0.0,
-      "nonsusceptible_mechanism": "none"
+      "nonsusceptible_mechanism": "none",
+      "presymptomatic_shedding_days": 0.0
     },
     {
       "pathogen_id": "campylobacter_jejuni",
@@ -1241,7 +1258,8 @@
         "environmental_source": 0.05
       },
       "innate_nonsusceptible_fraction": 0.0,
-      "nonsusceptible_mechanism": "none"
+      "nonsusceptible_mechanism": "none",
+      "presymptomatic_shedding_days": 0.0
     },
     {
       "pathogen_id": "clostridioides_difficile",
@@ -1384,7 +1402,8 @@
         "colonization_rate_per_day": 0.0,
         "baseline_environmental_load": 50.0,
         "person_to_person": true
-      }
+      },
+      "presymptomatic_shedding_days": 0.0
     },
     {
       "pathogen_id": "andes_hantavirus",
@@ -1513,7 +1532,8 @@
         "environmental_source": 0.05
       },
       "innate_nonsusceptible_fraction": 0.0,
-      "nonsusceptible_mechanism": "none"
+      "nonsusceptible_mechanism": "none",
+      "presymptomatic_shedding_days": 0.0
     },
     {
       "pathogen_id": "ebola_virus",
@@ -1652,7 +1672,8 @@
         "environmental_source": 0.0
       },
       "innate_nonsusceptible_fraction": 0.0,
-      "nonsusceptible_mechanism": "none"
+      "nonsusceptible_mechanism": "none",
+      "presymptomatic_shedding_days": 0.0
     }
   ]
 }

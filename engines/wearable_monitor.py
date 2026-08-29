@@ -120,8 +120,9 @@ DEFAULT_INFECTION_RESPONSES: dict[str, dict[str, dict[str, float]]] = {
     },
 }
 
-# Phase boundaries (days post infection → phase name)
-# Aligned with EMOD shedding_phases config: early=[0,3), peak=[3,8), late=[8,12)
+# Phase boundaries (days post symptom onset → phase name)
+# Aligned with EMOD shedding_phases config; negative days are pre-symptomatic
+# and remain in the first (early/prodromal) phase.
 DEFAULT_PHASE_BOUNDARIES: list[tuple[int, str]] = [
     (0, "early"),
     (3, "peak"),
@@ -144,11 +145,13 @@ DEFAULT_NOISE: dict[str, dict[str, float]] = {
 }
 
 
-def _get_infection_phase(days_post_infection: int, boundaries: list[tuple[int, str]]) -> str:
-    """Map days-post-infection to a named shedding phase."""
+def _get_infection_phase(days_post_onset: int, boundaries: list[tuple[int, str]]) -> str:
+    """Map days-post-onset to a named shedding phase."""
+    if days_post_onset < 0 and boundaries:
+        return boundaries[0][1]
     phase = "recovery"
     for threshold, name in boundaries:
-        if days_post_infection >= threshold:
+        if days_post_onset >= threshold:
             phase = name
     return phase
 
@@ -165,10 +168,14 @@ def _compute_infection_delta(
     for pid, inf in agent.infections.items():
         if inf["status"] != InfectionStatus.INFECTED:
             continue
-        dpi = agent.clock.day_index(inf.get("time_infected", 0) or 0)
-        phase = _get_infection_phase(dpi, phase_boundaries)
-
         profile = pathogen_profiles.get(pid, {})
+        _days_since_onset, phase_day = KorkinAgent._shedding_age(
+            inf.get("time_infected", 0) or 0,
+            inf,
+            profile,
+            agent.clock,
+        )
+        phase = _get_infection_phase(phase_day, phase_boundaries)
         category = profile.get("category", "enteric_viral")
 
         response_map = infection_responses.get(category, {})

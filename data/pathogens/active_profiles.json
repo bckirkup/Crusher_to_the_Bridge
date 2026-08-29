@@ -206,7 +206,9 @@
         "ct_threshold": 30.0,
         "cost_usd": 150.0,
         "notes": "Assay design from docs/variant_surveillance_spec.md \u00a72.1. read_accuracy is per-read consensus accuracy for this amplicon; read depth and the reporting floor are operator dials set at run time, not pathogen properties."
-      }
+      },
+      "presymptomatic_shedding_days": 0.5,
+      "presymptomatic_shedding_notes": "Atmar et al., Emerg Infect Dis 2008: virus was first detected in stool at a median approximately 36 hours post-challenge, essentially concurrent with symptom onset; 0.5 days is the generous presymptomatic window."
     },
     {
       "pathogen_id": "sars_cov2_resp",
@@ -427,7 +429,9 @@
         "ct_threshold": 28.0,
         "cost_usd": 100.0,
         "notes": "Assay design from docs/variant_surveillance_spec.md \u00a72.1. read_accuracy is per-read consensus accuracy for this amplicon; read depth and the reporting floor are operator dials set at run time, not pathogen properties."
-      }
+      },
+      "presymptomatic_shedding_days": 2.0,
+      "presymptomatic_shedding_notes": "He et al., Nat Med 2020: infectiousness begins approximately 2.3 days before symptom onset; 2.0 days is the profile window."
     }
   ]
 }

@@ -355,16 +355,72 @@ def test_the_wearable_phase_advances_on_voyage_days() -> None:
     boundaries = [(0, "incubation"), (2, "symptomatic")]
     agent = _infected_agent(HOURLY)
     responses = {"enteric_viral": {"hr": {"incubation": 1.0, "symptomatic": 9.0}}}
+    profile = {"category": "enteric_viral", "symptom_onset_day": 0.0}
 
     agent.infections["noro"]["time_infected"] = 2
     early = _compute_infection_delta(
-        "hr", agent, {"noro": {"category": "enteric_viral"}}, responses, boundaries,
+        "hr", agent, {"noro": profile}, responses, boundaries,
     )
     agent.infections["noro"]["time_infected"] = 48
     late = _compute_infection_delta(
-        "hr", agent, {"noro": {"category": "enteric_viral"}}, responses, boundaries,
+        "hr", agent, {"noro": profile}, responses, boundaries,
     )
     assert (early, late) == (1.0, 9.0)
+
+
+def _wearable_phase_agent(
+    clock: SimClock,
+    time_infected: int,
+    *,
+    onset_time_infected: int | None = None,
+    incubation_days: float | None = None,
+) -> KorkinAgent:
+    agent = _infected_agent(clock)
+    infection = agent.infections["noro"]
+    infection["time_infected"] = time_infected
+    if onset_time_infected is not None:
+        infection["onset_time_infected"] = onset_time_infected
+    if incubation_days is not None:
+        infection["incubation_days"] = incubation_days
+    return agent
+
+
+def _wearable_phase_delta(agent: KorkinAgent) -> float:
+    responses = {
+        "enteric_viral": {
+            "hr": {"early": 1.0, "peak": 3.0, "late": 5.0, "recovery": 7.0},
+        },
+    }
+    return _compute_infection_delta(
+        "hr",
+        agent,
+        {"noro": {"category": "enteric_viral"}},
+        responses,
+        [(0, "early"), (3, "peak"), (8, "late"), (12, "recovery")],
+    )
+
+
+def test_wearable_pre_onset_host_uses_first_phase() -> None:
+    agent = _wearable_phase_agent(HOURLY, 12, incubation_days=1.2)
+    assert _wearable_phase_delta(agent) == pytest.approx(1.0)
+
+
+def test_wearable_phase_follows_realized_onset_not_infection_age() -> None:
+    realized = _wearable_phase_agent(HOURLY, 96, onset_time_infected=24)
+    virtual = _wearable_phase_agent(HOURLY, 96, incubation_days=1.2)
+
+    assert _wearable_phase_delta(realized) == pytest.approx(3.0)
+    assert _wearable_phase_delta(virtual) == pytest.approx(1.0)
+
+
+def test_wearable_phase_progresses_with_onset_age() -> None:
+    phases = [
+        _wearable_phase_delta(
+            _wearable_phase_agent(HOURLY, onset_age * 24, onset_time_infected=0),
+        )
+        for onset_age in (0, 3, 8)
+    ]
+    assert phases == [1.0, 3.0, 5.0]
 
 
 def test_clinical_phases_resolve_on_the_converted_day() -> None:

@@ -257,7 +257,7 @@ PR 2 behaviour; pathogen-level status and legacy fields unchanged under
 co-infection; shedding conserved against the sum of per-strain curves.
 
 *As built.* `infections[pid]["strains"]` holds a `StrainInfection` per resident
-lineage, each with its own day post infection and establishing inoculum, so a
+lineage, each with its own infection clock and establishing inoculum, so a
 strain acquired on day four starts at the head of its own shedding curve inside
 a four-day-old infection and clears on its own schedule. Competition is
 implemented as partition rather than addition: resident lineages divide the
@@ -303,7 +303,7 @@ elsewhere in the genome — so PR 6 must record which loci each assay covers.
 `recombination_rate`, drawn after within-host mutation so a lineage that mutated
 this epoch is what recombines. On a hit two distinct residents are drawn: the
 first is the *recipient*, whose slot the recombinant takes over — inheriting its
-day post infection, inoculum, and infection epoch — and the second is the
+infection clock, inoculum, and infection epoch — and the second is the
 *donor*, which stays resident. So one event never widens a host's mixture;
 only superinfection does. Crossover is uniform and per axis rather than
 single-point, because CTB has no locus order to put a crossover coordinate on:

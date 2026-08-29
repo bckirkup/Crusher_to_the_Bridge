@@ -47,7 +47,10 @@ def _norwalk_profile() -> dict:
     profile = next(
         p for p in data["pathogens"] if p["pathogen_id"] == PATHOGEN
     )
-    return copy.deepcopy(profile)
+    return {
+        **copy.deepcopy(profile),
+        "symptom_onset_day": 0,
+    }
 
 
 def _agent(aid: int = 1, *, immune: bool = False) -> KorkinAgent:
