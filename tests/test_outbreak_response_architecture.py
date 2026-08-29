@@ -110,9 +110,9 @@ def test_hourly_reporting_drives_autonomous_escalation() -> None:
         "reported case did not produce a confirmed clinical case"
     )
     assert first_suspected is not None
-    # The corrected dose-pathway semantics require the longer run, but the
-    # escalation timing remains bounded by the existing onset-based contract.
-    assert 24 <= first_suspected <= 72
+    # Own-severity sick calls may occur during the first day; the upper
+    # onset-based bound remains unchanged.
+    assert 16 <= first_suspected <= 72
     assert [STATUS_RANK[status] for status in statuses] == sorted(
         STATUS_RANK[status] for status in statuses
     )

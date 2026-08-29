@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import os
 import sys
 import warnings
@@ -301,6 +302,30 @@ class DoseResponse(BaseModel):
         return self
 
 
+class SymptomSeverityStratum(BaseModel):
+    name: str
+    weight: float
+    sick_call_probability_per_day: float
+
+    @field_validator("weight", "sick_call_probability_per_day")
+    @classmethod
+    def probability_bounded(cls, v: float) -> float:
+        if v < 0 or v > 1:
+            raise ValueError(f"symptom severity probability must be in [0,1], got {v}")
+        return v
+
+
+class SymptomSeverity(BaseModel):
+    notes: str = ""
+    strata: list[SymptomSeverityStratum]
+
+    @model_validator(mode="after")
+    def weights_sum_to_one(self) -> "SymptomSeverity":
+        if not math.isclose(sum(item.weight for item in self.strata), 1.0):
+            raise ValueError("symptom severity weights must sum to 1.0")
+        return self
+
+
 class PathogenProfile(BaseModel):
     pathogen_id: str
     name: str
@@ -311,6 +336,7 @@ class PathogenProfile(BaseModel):
     dose_adjustment: float = 1.0
     dose_response: DoseResponse | None = None
     illness_probability: dict[str, float] = {}
+    symptom_severity: SymptomSeverity | None = None
     recovery_day: int = 3
     surface_deposition_fraction: float = 0.0001
     base_susceptibility: float = 1.0

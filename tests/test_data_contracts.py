@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 import os
+from copy import deepcopy
 from typing import Any
 
 import pytest
@@ -78,6 +79,45 @@ class TestPathogenProfiles:
         for p in profiles["pathogens"]:
             dpi = p.get("initial_time_infected", 0)
             assert dpi >= 0, f"{p['pathogen_id']}: initial_time_infected must be >= 0"
+
+    def test_symptom_severity_weights_sum_to_one(self, profiles: dict) -> None:
+        for p in profiles["pathogens"]:
+            severity = p.get("symptom_severity")
+            if severity is None:
+                continue
+            weights = [float(item["weight"]) for item in severity["strata"]]
+            assert sum(weights) == pytest.approx(1.0), (
+                f"{p['pathogen_id']}: symptom severity weights must sum to 1"
+            )
+
+    def test_symptom_severity_requires_hazard(self, profiles: dict) -> None:
+        from orchestrator_init import _validate_symptom_severity_profiles
+
+        for p in profiles["pathogens"]:
+            severity = p.get("symptom_severity")
+            if severity is None:
+                continue
+            invalid = deepcopy(p)
+            del invalid["symptom_severity"]["strata"][0][
+                "sick_call_probability_per_day"
+            ]
+            with pytest.raises(ValueError, match="missing sick_call"):
+                _validate_symptom_severity_profiles(
+                    {invalid["pathogen_id"]: invalid},
+                )
+
+    def test_symptom_severity_rejects_bad_weights(self, profiles: dict) -> None:
+        from orchestrator_init import _validate_symptom_severity_profiles
+
+        severity = profiles["pathogens"][0].get("symptom_severity")
+        if severity is None:
+            pytest.skip("no active profile has symptom severity")
+        invalid = deepcopy(profiles["pathogens"][0])
+        invalid["symptom_severity"]["strata"][0]["weight"] += 0.1
+        with pytest.raises(ValueError, match="weights must sum"):
+            _validate_symptom_severity_profiles(
+                {invalid["pathogen_id"]: invalid},
+            )
 
 
 class TestSpatialLayout:

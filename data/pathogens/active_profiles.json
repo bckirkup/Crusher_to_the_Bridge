@@ -62,6 +62,26 @@
         "eta": 0.508,
         "gamma": 0.095
       },
+      "symptom_severity": {
+        "notes": "Provisional mild/moderate/severe prior from graded modified-Vesikari norovirus challenge spectra; the calibrated quantity is aggregate episode capture.",
+        "strata": [
+          {
+            "name": "mild",
+            "weight": 0.35,
+            "sick_call_probability_per_day": 0.30
+          },
+          {
+            "name": "moderate",
+            "weight": 0.5,
+            "sick_call_probability_per_day": 0.56
+          },
+          {
+            "name": "severe",
+            "weight": 0.15,
+            "sick_call_probability_per_day": 0.90
+          }
+        ]
+      },
       "recovery_day": 3,
       "incubation": {
         "distribution": "lognormal",

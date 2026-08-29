@@ -425,8 +425,23 @@ def _draw_symptom_onset(
     if rng.random() < ill_prob:
         inf["illness"] = IllnessStatus.SYMPTOMATIC
         inf["onset_time_infected"] = inf.get("time_infected", 0)
+        if "symptom_severity" not in inf:
+            inf["symptom_severity"] = _draw_symptom_severity(prof, rng)
         if agent.illness_status == IllnessStatus.NOT_ILL:
             agent.illness_status = IllnessStatus.SYMPTOMATIC
+
+
+def _draw_symptom_severity(
+    profile: dict[str, Any],
+    rng: np.random.Generator,
+) -> str:
+    """Draw one persistent illness severity stratum from the profile."""
+    strata = profile.get("symptom_severity", {}).get("strata", [])
+    if not strata:
+        return ""
+    names = [str(item["name"]) for item in strata]
+    weights = [float(item["weight"]) for item in strata]
+    return str(rng.choice(names, p=weights))
 
 
 def _advance_agent_pathogen_infections(
@@ -1302,6 +1317,7 @@ def inactive_syndromic_result(
         "noise_reasons": [],
         "sick_call_count": 0,
         "total_agents": int(n_agents),
+        "first_detection_events": [],
         "activation_delayed": True,
     }
 

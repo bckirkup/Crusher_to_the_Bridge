@@ -1041,9 +1041,11 @@ def load_pathogen_profiles(
     mp_cfg = cfg.get("multi_pathogen", {})
     resolved = mp_cfg.get("resolved_profiles")
     if isinstance(resolved, dict) and resolved:
-        return _normalize_profile_units(
-            {str(pid): dict(prof) for pid, prof in resolved.items()},
-        )
+        profiles = {
+            str(pid): dict(prof) for pid, prof in resolved.items()
+        }
+        _validate_symptom_severity_profiles(profiles)
+        return _normalize_profile_units(profiles)
 
     profiles_path = mp_cfg.get("profiles_path", "data/pathogens/active_profiles.json")
     full_path = resolve_repo_path(REPO_ROOT, profiles_path)
@@ -1055,7 +1057,60 @@ def load_pathogen_profiles(
     for p in data.get("pathogens", []):
         pid = p.get("pathogen_id", "unknown")
         profiles[pid] = p
+    _validate_symptom_severity_profiles(profiles)
     return _normalize_profile_units(profiles)
+
+
+def _validate_symptom_severity_profiles(
+    profiles: dict[str, dict[str, Any]],
+) -> None:
+    """Validate optional severity strata before they reach observations."""
+    for pathogen_id, profile in profiles.items():
+        block = profile.get("symptom_severity")
+        if block is None:
+            continue
+        strata = block.get("strata") if isinstance(block, dict) else None
+        if not isinstance(strata, list) or not strata:
+            raise ValueError(
+                f"{pathogen_id}.symptom_severity.strata must be non-empty",
+            )
+        weights = []
+        for stratum in strata:
+            if not isinstance(stratum, dict):
+                raise ValueError(
+                    f"{pathogen_id}.symptom_severity strata must be objects",
+                )
+            if not stratum.get("name"):
+                raise ValueError(
+                    f"{pathogen_id}.symptom_severity stratum missing name",
+                )
+            if "weight" not in stratum:
+                raise ValueError(
+                    f"{pathogen_id}.symptom_severity.{stratum['name']} "
+                    "missing weight",
+                )
+            if "sick_call_probability_per_day" not in stratum:
+                raise ValueError(
+                    f"{pathogen_id}.symptom_severity.{stratum['name']} "
+                    "missing sick_call_probability_per_day",
+                )
+            weight = float(stratum["weight"])
+            hazard = float(stratum["sick_call_probability_per_day"])
+            if not 0.0 <= weight <= 1.0:
+                raise ValueError(
+                    f"{pathogen_id}.symptom_severity.{stratum['name']} "
+                    "weight must be in [0, 1]",
+                )
+            if not 0.0 <= hazard <= 1.0:
+                raise ValueError(
+                    f"{pathogen_id}.symptom_severity.{stratum['name']} "
+                    "sick-call hazard must be in [0, 1]",
+                )
+            weights.append(weight)
+        if not np.isclose(sum(weights), 1.0):
+            raise ValueError(
+                f"{pathogen_id}.symptom_severity weights must sum to 1.0",
+            )
 
 
 def _normalize_profile_units(

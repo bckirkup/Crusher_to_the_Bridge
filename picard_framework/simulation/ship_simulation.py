@@ -362,8 +362,13 @@ class ShipSimulation:
         # One clock for the whole run: the itinerary sets the epoch length and
         # the natural history reads it, so the two cannot drift apart.
         self.clock = SimClock.for_run(cfg, voyage_cfg)
+        self.pathogen_profiles = load_pathogen_profiles(cfg)
         self.modalities = build_modalities(
-            cfg, self.rng, total_epochs=self.num_epochs, clock=self.clock,
+            cfg,
+            self.rng,
+            total_epochs=self.num_epochs,
+            clock=self.clock,
+            pathogen_profiles=self.pathogen_profiles,
         )
         self.engine = build_engine(cfg, seed=self.seed, clock=self.clock)
         if self.display:
@@ -381,7 +386,6 @@ class ShipSimulation:
             from orchestrator_display import print_contam_engine
             print_contam_engine(self.contam_engine, self.engine, cfg)
 
-        self.pathogen_profiles = load_pathogen_profiles(cfg)
         self.mp_cfg = cfg.get("multi_pathogen", {})
         self.mf_cfg = cfg.get("microflora", {})
         self.enable_dual_signal = self.mf_cfg.get("enable_dual_signal", True)

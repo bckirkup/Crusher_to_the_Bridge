@@ -316,6 +316,13 @@ def record_epoch(  # NOSONAR
     epoch_record["crusher_ops"]["quarantined_agents"] = sorted(state.quarantined_ids)
 
     epoch_record["observation_engine"] = {
+        "syndromic": {
+            "sick_call_agents": syn_result.get("sick_call_agents", []),
+            "true_positive_ids": syn_result.get("true_positive_ids", []),
+            "first_detection_events": syn_result.get(
+                "first_detection_events", [],
+            ),
+        },
         "air_sniffer": air_results,
         "surface_swab": swab_results,
         "wastewater_sequencing": ww_results,
