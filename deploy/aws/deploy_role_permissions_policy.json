@@ -101,6 +101,15 @@
       "Condition": {
         "StringEquals": { "iam:PassedToService": "ecs-tasks.amazonaws.com" }
       }
+    },
+    {
+      "Sid": "PassEcsInstanceRole",
+      "Effect": "Allow",
+      "Action": "iam:PassRole",
+      "Resource": ["arn:aws:iam::<ACCOUNT_ID>:role/ecsInstanceRole"],
+      "Condition": {
+        "StringEquals": { "iam:PassedToService": "ec2.amazonaws.com" }
+      }
     }
   ]
 }

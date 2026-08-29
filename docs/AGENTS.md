@@ -98,8 +98,8 @@ Install from the hash-pinned lockfile: `pip install --only-binary=:all: --requir
 | `mega-cruise-campaign-local` | Local `--smoke` / `--dry-run` / shard hygiene; synthetic recovery + VSP degradation (`docs/synthetic_recovery_and_vsp_degradation.md`) |
 | `campaign-results-analysis` | Analysis bundle + two-stage Stan hurdle (outbreak + trajectory); see `docs/stan_hurdle_lessons.md` for Step-2 field notes |
 | `preboarding-wearable-decision` | Pre-boarding wearable ROI / policy Monte Carlo (`picard_framework/analysis/boundary/`); fixture or Stan `outbreak_surface` lookup |
-| `boundary-aws-pipeline` | `boundary_surface_v1` Spot campaign + On-Demand surface/Stan/MC (`deploy/aws/`, Bernoulli+Beta-AR) |
-| `aws-batch-campaign` | Running large Crusher simulation batches on AWS Batch / Fargate Spot |
+| `boundary-aws-pipeline` | `boundary_surface_v1` EC2 Spot campaign + On-Demand compute/memory surface/Stan/MC pathways (`deploy/aws/`, Bernoulli+Beta-AR) |
+| `aws-batch-campaign` | Running large Crusher simulation batches on AWS Batch / EC2 Spot |
 | `managing-github-issues` | Issue triage, batching, PR lifecycle |
 | `download-deepwiki` | Offline DeepWiki export for a public GitHub repo |
 

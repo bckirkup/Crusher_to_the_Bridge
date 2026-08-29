@@ -1,13 +1,13 @@
 ---
 name: aws-batch-campaign
-description: Deploy and run the ~17780-run mega cruise campaign as an AWS Batch Fargate Spot array job using role-based (no-root) access; build/push the ECR image, register the job definition, create the compute environment + queue, submit, monitor, and sync results back locally. Use when running large Crusher simulation batches on AWS.
+description: Deploy and run the ~17780-run mega cruise campaign as an AWS Batch EC2 Spot array job using role-based (no-root) access; build/push the ECR image, register the job definition, create the compute environment + queue, submit, monitor, and sync results back locally. Use when running large Crusher simulation batches on AWS.
 ---
 
 # AWS Batch mega cruise campaign
 
 Deploy and run the ~17,780-run mega cruise campaign
 (`picard_framework/runs/mega_cruise_campaign/campaign_runner.py`) as a single
-**AWS Batch array job** on **Fargate Spot**. Each array child runs a disjoint
+**AWS Batch array job** on **EC2 Spot** (scale-to-zero compute environment). Each array child runs a disjoint
 shard and uploads one periodically refreshed fused zip plus one JSON manifest
 per shard to one shared S3 prefix.
 Each simulation runs in a **subprocess** by default (OS reclaim of RSS); the
@@ -28,7 +28,7 @@ bite you" companion.
 - The one-time IAM setup in `deploy/aws/README.md` **section 1** already done
   by an **admin** identity (root or an admin IAM user). Day-to-day deploys do
   **not** need admin.
-- An S3 results bucket and a Fargate Spot compute environment + queue (README
+- An S3 results bucket and an EC2 Spot compute environment + queue (README
   sections 4–5).
 
 ## Devin Secrets Needed
@@ -152,7 +152,7 @@ re-registering:
 - **`evaluateOnExit` restricted characters.** A leading-asterisk pattern like
   `"*Spot*"` and uppercase actions `RETRY`/`EXIT` cause
   `ClientException: Evaluate on exit condition contains restricted characters`.
-  Use **lowercase** `retry`/`exit` and **no leading asterisks**. Fargate Spot
+  Use **lowercase** `retry`/`exit` and **no leading asterisks**. Spot
   reclaim arrives as exit **137** with
   `statusReason: "Your Spot Task was interrupted."` — match Spot **before**
   the bare exit-137 OOM rule:
@@ -167,12 +167,13 @@ re-registering:
   ]
   ```
 
-  (Max **five** rules. This stack is Fargate Spot only, so omit `Host EC2*`.)
+  (Max **five** rules. `Host EC2*` comes first on EC2 Spot; the Fargate-only
+  `Your Spot Task was interrupted*` rule is gone.)
   Keep OOM (`137` / `OutOfMemoryError*`) on **exit** so memory kills stay
   countable via `classify_batch_failures.py`; Spot interrupt still retries.
 
 
-- **Fargate resource sizing.** Two layers: (1) **subprocess-per-run** stops
+- **Resource sizing.** Two layers: (1) **subprocess-per-run** stops
   cumulative RSS growth across a shard; (2) **campaign compact history**
   (`run.history_retention=compact`) stops within-run telemetry from growing
   linearly with epochs; (3) default **1 vCPU / 2048 MB** with per-run
@@ -194,9 +195,13 @@ re-registering:
   aws --profile picard batch describe-job-definitions --job-definition-name picard-campaign --status ACTIVE --region us-east-1 --query "jobDefinitions[-1].[revision,containerProperties.resourceRequirements]"
   ```
 
-- **Job queue may be missing.** Inventory has seen `picard-campaign-spot` CE
-  VALID while `picard-campaign-queue` was absent. Recreate the queue (README
-  §5) before submit.
+- **Job queue may be missing.** Inventory has seen the campaign CE VALID while
+  `picard-campaign-queue` was absent. `ensure_campaign_infra.sh` recreates both
+  (README §5) before submit.
+- **A queue cannot mix Fargate and EC2 compute environments.** Repointing
+  `picard-campaign-queue` at `picard-abm-campaign-spot` replaces the whole
+  compute-environment order; the retired `FARGATE_SPOT` CE is deleted
+  separately.
 ## CloudWatch log group (must exist BEFORE submit)
 
 The **execution role** can create log *streams* and put events but **cannot
@@ -217,7 +222,7 @@ aws logs create-log-group --log-group-name /aws/batch/picard-campaign --region u
   until `VALID`/`ENABLED` before creating the queue:**
 
   ```bash
-  aws --profile picard batch describe-compute-environments --compute-environments picard-campaign-spot --region us-east-1 --query "computeEnvironments[0].[status,state]"
+  aws --profile picard batch describe-compute-environments --compute-environments picard-abm-campaign-spot --region us-east-1 --query "computeEnvironments[0].[status,state]"
   ```
 
 - If `create-compute-environment` complains about a **missing service-linked

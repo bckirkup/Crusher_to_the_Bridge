@@ -1,7 +1,7 @@
 {
   "jobDefinitionName": "picard-sentinel-recovery-stan",
   "type": "container",
-  "platformCapabilities": ["FARGATE"],
+  "platformCapabilities": ["EC2"],
   "containerProperties": {
     "image": "<ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/picard-boundary-analysis:latest",
     "command": [
@@ -19,13 +19,7 @@
       { "type": "VCPU", "value": "4" },
       { "type": "MEMORY", "value": "8192" }
     ],
-    "ephemeralStorage": { "sizeInGiB": 40 },
-    "fargatePlatformConfiguration": {
-      "platformVersion": "LATEST"
-    },
-    "networkConfiguration": {
-      "assignPublicIp": "ENABLED"
-    },
+    "linuxParameters": { "sharedMemorySize": 2048 },
     "environment": [
       { "name": "PYTHONUTF8", "value": "1" },
       { "name": "PYTHONPATH", "value": "/app" },
@@ -50,6 +44,7 @@
   "retryStrategy": {
     "attempts": 2,
     "evaluateOnExit": [
+      { "onStatusReason": "Host EC2*", "action": "retry" },
       { "onReason": "OutOfMemoryError*", "action": "exit" },
       { "onExitCode": "137", "action": "exit" },
       { "onExitCode": "0", "action": "exit" },
@@ -58,6 +53,6 @@
   },
   "propagateTags": true,
   "timeout": {
-    "attemptDurationSeconds": 86400
+    "attemptDurationSeconds": 21600
   }
 }

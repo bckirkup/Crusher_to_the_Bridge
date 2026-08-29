@@ -18,9 +18,13 @@ runs. Prefer:
 
 | Workload | Compute | Why |
 |----------|---------|-----|
-| Phase 1 ABM shards | Fargate **Spot** (`picard-campaign-queue`) | Interruptible; `--resume` + shard logs make retries cheap |
-| Phase 3 Stan | Fargate **On-Demand** (`picard-analysis-queue`) | MCMC does not resume mid-chain after Spot reclaim |
-| Phase 2 surface / Phase 4 MC | On-Demand (same analysis queue) | Modest CPU; keep off Spot reclaim noise |
+| Phase 1 ABM shards | EC2 **Spot**, c7i/c7a (`picard-campaign-queue`) | Interruptible; `--resume` + shard logs make retries cheap |
+| Phase 3 Stan | EC2 **On-Demand**, c7i/c7a (`picard-analysis-queue`) | MCMC does not resume mid-chain after Spot reclaim |
+| Phase 4 MC | EC2 On-Demand, c7i/c7a (same analysis queue) | Modest CPU; keep off Spot reclaim noise |
+| Phase 2 surface / bundle / report | EC2 On-Demand, r7i/r7a (`picard-analysis-memory-queue`) | Aggregation holds a whole campaign frame in RAM |
+
+All three compute environments sit at `minvCpus: 0`, so an idle pathway runs no
+instances at all.
 
 Do **not** put CmdStan in the `picard-campaign` Spot image.
 

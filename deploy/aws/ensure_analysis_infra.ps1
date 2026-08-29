@@ -1,15 +1,24 @@
 #Requires -Version 5.1
 <#
 .SYNOPSIS
-  Ensure On-Demand Batch infra for boundary analysis jobs (surface / Stan / MC).
+  Ensure the EC2 scale-to-zero Batch infra for boundary analysis jobs.
 
 .DESCRIPTION
-  Creates log group, On-Demand Fargate CE + queue if missing, and registers
-  the three boundary analysis job definitions. Does NOT create Spot campaign
-  infra (use ensure_campaign_infra.sh for that).
+  Creates the log group and both analysis pathways, then registers the
+  analysis job definitions. Does NOT create campaign infra (use
+  ensure_campaign_infra.sh for that).
+
+  Two pathways, because the analysis jobs bottleneck differently:
+    compute (picard-analysis-queue)        c7i/c7a, 1-2 GiB per vCPU:
+                                           CmdStan fits, boundary MC,
+                                           sentinel recovery/NUTS.
+    memory  (picard-analysis-memory-queue) r7i/r7a, 8 GiB per vCPU:
+                                           surface aggregation, which holds a
+                                           whole campaign frame in RAM.
+  Both sit at minvCpus 0, so neither holds an instance between runs.
 
   Requires: AWS_PROFILE=picard, ACCOUNT_ID/REGION/BUCKET (or deploy/aws/.env),
-  and an existing VPC subnet + security group (same as Spot CE).
+  and an existing VPC subnet + security group (same as campaign CE).
 #>
 param(
   [string]$Bucket = $env:CAMPAIGN_BUCKET,
@@ -19,9 +28,13 @@ param(
   [string]$AccountId = $env:ACCOUNT_ID,
   [string]$SubnetIds = $env:SUBNET_IDS,
   [string]$SecurityGroupIds = $env:SECURITY_GROUP_IDS,
-  [string]$CeName = 'picard-analysis-ondemand',
   [string]$QueueName = 'picard-analysis-queue',
+  [string]$MemoryQueueName = 'picard-analysis-memory-queue',
   [string]$LogGroup = '/aws/batch/picard-boundary-analysis',
+  [ValidateSet('spot', 'on_demand')]
+  [string]$Capacity = 'on_demand',
+  [int]$MaxVcpus = 256,
+  [string]$LaunchTemplate = $env:BATCH_LAUNCH_TEMPLATE,
   [switch]$RegisterOnly
 )
 
@@ -55,7 +68,7 @@ function Render($file, $out) {
 
 Write-Host "Ensuring boundary analysis infra:"
 Write-Host "  profile=$AwsProfile account=$AccountId region=$Region bucket=$Bucket"
-Write-Host "  CE=$CeName queue=$QueueName log=$LogGroup"
+Write-Host "  capacity=$Capacity queues=$QueueName,$MemoryQueueName log=$LogGroup"
 
 # Log group — create directly; do not rely on DescribeLogGroups (deploy role may
 # lack logs:DescribeLogGroups on * until deploy_role_permissions_policy is reapplied).
@@ -69,48 +82,28 @@ if ($LASTEXITCODE -eq 0) {
 }
 
 if (-not $RegisterOnly) {
-  $ceStatus = aws --profile $AwsProfile batch describe-compute-environments --compute-environments $CeName --region $Region --query 'computeEnvironments[0].status' --output text 2>$null
-  if ($ceStatus -eq 'None' -or -not $ceStatus -or $ceStatus -eq 'INVALID') {
-    if (-not $SubnetIds -or -not $SecurityGroupIds) {
-      throw "CE missing; set -SubnetIds and -SecurityGroupIds (or SUBNET_IDS / SECURITY_GROUP_IDS in .env) to create $CeName"
-    }
-    $subnets = ($SubnetIds -split ',') | ForEach-Object { $_.Trim() } | Where-Object { $_ }
-    $sgs = ($SecurityGroupIds -split ',') | ForEach-Object { $_.Trim() } | Where-Object { $_ }
-    $subnetJson = ($subnets | ForEach-Object { "`"$_`"" }) -join ','
-    $sgJson = ($sgs | ForEach-Object { "`"$_`"" }) -join ','
-    $ceBody = @"
-{
-  "computeEnvironmentName": "$CeName",
-  "type": "MANAGED",
-  "state": "ENABLED",
-  "computeResources": {
-    "type": "FARGATE",
-    "maxvCpus": 256,
-    "subnets": [$subnetJson],
-    "securityGroupIds": [$sgJson]
+  if (-not $SubnetIds -or -not $SecurityGroupIds) {
+    throw 'Set -SubnetIds and -SecurityGroupIds (or SUBNET_IDS / SECURITY_GROUP_IDS in .env) to ensure the analysis compute environments'
   }
-}
-"@
-    $ceFile = Join-Path $env:TEMP 'picard-analysis-ce.json'
-    Set-Content -NoNewline -Path $ceFile -Value $ceBody
-    aws --profile $AwsProfile batch create-compute-environment --cli-input-json "file://$ceFile" --region $Region | Out-Null
-    Write-Host "  creating CE $CeName …"
-    do {
-      Start-Sleep -Seconds 5
-      $ceStatus = aws --profile $AwsProfile batch describe-compute-environments --compute-environments $CeName --region $Region --query 'computeEnvironments[0].status' --output text
-      Write-Host "  CE status=$ceStatus"
-    } while ($ceStatus -eq 'CREATING')
-    if ($ceStatus -ne 'VALID') { throw "CE $CeName status=$ceStatus" }
-  } else {
-    Write-Host "  CE status=$ceStatus"
-  }
-
-  $qArn = aws --profile $AwsProfile batch describe-job-queues --job-queues $QueueName --region $Region --query 'jobQueues[0].jobQueueArn' --output text 2>$null
-  if (-not $qArn -or $qArn -eq 'None') {
-    aws --profile $AwsProfile batch create-job-queue --job-queue-name $QueueName --state ENABLED --priority 1 --compute-environment-order "order=1,computeEnvironment=$CeName" --region $Region | Out-Null
-    Write-Host "  created queue $QueueName"
-  } else {
-    Write-Host "  queue exists"
+  $pathways = @(
+    @{ Pathway = 'analysis_compute'; Queue = $QueueName },
+    @{ Pathway = 'analysis_memory'; Queue = $MemoryQueueName }
+  )
+  foreach ($p in $pathways) {
+    $ensureArgs = @(
+      (Join-Path $here 'ensure_batch_pathways.py'),
+      '--pathway', $p.Pathway,
+      '--queue', $p.Queue,
+      '--capacity', $Capacity,
+      '--max-vcpus', $MaxVcpus,
+      '--subnets', $SubnetIds,
+      '--security-groups', $SecurityGroupIds,
+      '--region', $Region,
+      '--profile', $AwsProfile
+    )
+    if ($LaunchTemplate) { $ensureArgs += @('--launch-template', $LaunchTemplate) }
+    python3 @ensureArgs
+    if ($LASTEXITCODE -ne 0) { throw "ensure_batch_pathways.py failed for $($p.Pathway)" }
   }
 }
 
@@ -118,7 +111,8 @@ foreach ($jd in @(
   'batch_job_definition_boundary_surface.json',
   'batch_job_definition_boundary_stan.json',
   'batch_job_definition_boundary_mc.json',
-  'batch_job_definition_sentinel_recovery_stan.json'
+  'batch_job_definition_sentinel_recovery_stan.json',
+  'batch_job_definition_sentinel_nuts.json'
 )) {
   $src = Join-Path $here $jd
   $tmp = Join-Path $env:TEMP $jd

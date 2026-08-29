@@ -3,7 +3,7 @@
 classify_batch_failures.py — classify AWS Batch array-child attempts.
 
 Separates Spot reclaim from OOM (exit 137 / OutOfMemoryError), attempt
-timeouts, and other failures so operators can tell whether Fargate Spot
+timeouts, and other failures so operators can tell whether EC2 Spot
 reclaims or the 1 vCPU / 2 GB sizing is biting.
 
 Examples::
@@ -61,7 +61,7 @@ def classify_attempt(
         if not status or status.upper() in {"NONE", "SUCCESS", "SUCCEEDED"}:
             return "ok"
 
-    # Fargate Spot reclaim often SIGKILLs with exit 137 and
+    # Spot reclaim often SIGKILLs with exit 137 and
     # statusReason "Your Spot Task was interrupted." — check Spot BEFORE OOM.
     if SPOT_RE.search(combined):
         return "spot_reclaim"

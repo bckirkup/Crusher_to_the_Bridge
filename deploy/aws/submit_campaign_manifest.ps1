@@ -1,7 +1,7 @@
 #Requires -Version 5.1
 <#
 .SYNOPSIS
-  Submit a mega-cruise campaign manifest as an AWS Batch Fargate Spot array.
+  Submit a mega-cruise campaign manifest as an AWS Batch EC2 Spot array.
 
 .EXAMPLE
   .\deploy\aws\submit_campaign_manifest.ps1 `

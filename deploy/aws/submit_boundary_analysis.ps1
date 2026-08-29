@@ -20,7 +20,9 @@ param(
   [string]$Bucket = $env:CAMPAIGN_BUCKET,
   [string]$CampaignPrefix = 'campaign/boundary_surface_v1/',
   [string]$AnalysisPrefix = 'campaign/boundary_surface_v1/analysis/',
-  [string]$JobQueue = 'picard-analysis-queue',
+  [string]$JobQueue = '',
+  [string]$ComputeQueue = 'picard-analysis-queue',
+  [string]$MemoryQueue = 'picard-analysis-memory-queue',
   [string]$Region = $(if ($env:AWS_REGION) { $env:AWS_REGION } else { 'us-east-1' }),
   [Alias('Profile')]
   [string]$AwsProfile = $(if ($env:AWS_PROFILE) { $env:AWS_PROFILE } else { 'picard' }),
@@ -44,6 +46,12 @@ if (-not $Bucket) { throw 'Set -Bucket or CAMPAIGN_BUCKET' }
 
 $s3Campaign = "s3://$Bucket/$($CampaignPrefix.TrimStart('/'))"
 $s3Analysis = "s3://$Bucket/$($AnalysisPrefix.TrimStart('/'))"
+
+# Aggregation phases hold a whole campaign frame in RAM and take the
+# memory-optimised pathway; the fits are core-bound and take the compute one.
+if (-not $JobQueue) {
+  $JobQueue = if ($Phase -in @('bundle', 'surface', 'report')) { $MemoryQueue } else { $ComputeQueue }
+}
 
 $jobDef = switch ($Phase) {
   'bundle' { 'picard-boundary-surface' }  # same sizing as surface export

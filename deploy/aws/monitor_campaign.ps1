@@ -1,7 +1,7 @@
 #Requires -Version 5.1
 <#
 .SYNOPSIS
-  Monitor an AWS Batch Fargate Spot campaign array job.
+  Monitor an AWS Batch EC2 Spot campaign array job.
 
 .DESCRIPTION
   Prints Batch array statusSummary plus a completed-run count from the

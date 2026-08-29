@@ -1,6 +1,6 @@
 ---
 name: boundary-aws-pipeline
-description: Run the boundary_surface_v1 pre-boarding outbreak-surface campaign on AWS — Phase 1 Fargate Spot ABM, then On-Demand surface/Stan/MC analysis. Use when submitting boundary Spot jobs, building the analysis image, or fitting Bernoulli+Beta-AR boundary Stan.
+description: Run the boundary_surface_v1 pre-boarding outbreak-surface campaign on AWS — Phase 1 EC2 Spot ABM, then EC2 On-Demand surface/Stan/MC analysis on scale-to-zero compute environments. Use when submitting boundary Spot jobs, building the analysis image, or fitting Bernoulli+Beta-AR boundary Stan.
 ---
 
 # Boundary surface AWS pipeline
@@ -41,8 +41,14 @@ docker run --rm picard-campaign --smoke
 
 ## Phases 2–5 — On-Demand analysis
 
-Separate image (`deploy/aws/Dockerfile.analysis`) with CmdStan. Queue:
-`picard-analysis-queue` (Fargate On-Demand CE `picard-analysis-ondemand`).
+Separate image (`deploy/aws/Dockerfile.analysis`) with CmdStan. Two EC2
+On-Demand pathways, both `minvCpus: 0`: core-bound fits go to
+`picard-analysis-queue` (CE `picard-analysis-compute-ondemand`, c7i/c7a) and
+aggregation phases (surface / bundle / report) to
+`picard-analysis-memory-queue` (CE `picard-analysis-memory-ondemand`, r7i/r7a).
+`submit_boundary_analysis.ps1` picks the queue from `-Phase`; override with
+`-JobQueue`. `ensure_analysis_infra.ps1` creates both and needs `SUBNET_IDS` /
+`SECURITY_GROUP_IDS`.
 
 ```powershell
 docker build -f deploy/aws/Dockerfile.analysis -t picard-boundary-analysis .

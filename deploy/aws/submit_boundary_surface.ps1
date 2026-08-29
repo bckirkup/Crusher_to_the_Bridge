@@ -5,7 +5,7 @@
 
 .DESCRIPTION
   Wave-1 = b1_* (10,000 runs; b2_* deferred). Uses existing picard-campaign
-  job definition + Fargate Spot queue. Rebuild/push the ECR image after
+  job definition + EC2 Spot queue. Rebuild/push the ECR image after
   adding boundary_surface_v1_manifest.json.
 
 .EXAMPLE

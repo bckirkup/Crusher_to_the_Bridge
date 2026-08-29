@@ -1,7 +1,7 @@
 {
   "jobDefinitionName": "picard-boundary-stan",
   "type": "container",
-  "platformCapabilities": ["FARGATE"],
+  "platformCapabilities": ["EC2"],
   "containerProperties": {
     "image": "<ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/picard-boundary-analysis:latest",
     "command": [
@@ -19,14 +19,9 @@
     "executionRoleArn": "arn:aws:iam::<ACCOUNT_ID>:role/picard-campaign-execution-role",
     "resourceRequirements": [
       { "type": "VCPU", "value": "16" },
-      { "type": "MEMORY", "value": "32768" }
+      { "type": "MEMORY", "value": "30720" }
     ],
-    "fargatePlatformConfiguration": {
-      "platformVersion": "LATEST"
-    },
-    "networkConfiguration": {
-      "assignPublicIp": "ENABLED"
-    },
+    "linuxParameters": { "sharedMemorySize": 2048 },
     "environment": [
       { "name": "PYTHONUTF8", "value": "1" },
       { "name": "PYTHONPATH", "value": "/app" },
@@ -53,6 +48,7 @@
   "retryStrategy": {
     "attempts": 2,
     "evaluateOnExit": [
+      { "onStatusReason": "Host EC2*", "action": "retry" },
       { "onReason": "OutOfMemoryError*", "action": "exit" },
       { "onExitCode": "137", "action": "exit" },
       { "onExitCode": "0", "action": "exit" },
@@ -61,6 +57,6 @@
   },
   "propagateTags": true,
   "timeout": {
-    "attemptDurationSeconds": 172800
+    "attemptDurationSeconds": 43200
   }
 }
