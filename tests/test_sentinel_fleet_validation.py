@@ -50,6 +50,10 @@ from picard_framework.analysis.stan.fit_sentinel_fleet import stan_model_path
 from tests.test_sentinel_attribution import GENERATION, INCUBATION
 from tests.test_sentinel_fleet import fleet_voyage
 
+# Every fit in this file is a Metropolis recovery run; the file was measured at
+# 32 min of the 41 min suite, so it belongs to the nightly tier.
+pytestmark = pytest.mark.slow
+
 # Long enough that the coarse assertions below are properties of the design
 # rather than of the seed. At 120/400 the walker had not left the initial
 # neighbourhood on the hierarchical fits: perturbing the delay kernel by ~0.1%

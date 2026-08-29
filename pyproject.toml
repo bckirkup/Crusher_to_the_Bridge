@@ -90,6 +90,7 @@ addopts = "-v --tb=short"
 timeout = 0
 markers = [
     "timeout: mark test with a timeout (seconds)",
+    "slow: posterior-recovery or campaign-scale test; nightly tier, deselected on PRs with -m 'not slow'",
 ]
 
 [tool.coverage.run]

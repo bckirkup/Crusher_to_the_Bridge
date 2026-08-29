@@ -319,6 +319,8 @@ def test_a_skipped_fit_fails_the_run_rather_than_reading_as_success(
     assert code == EXIT_NO_POSTERIOR
 
 
+# Nightly tier — 50 s: end-to-end reference walker.
+@pytest.mark.slow
 def test_cli_smoke_runs_the_reference_walker_end_to_end(scratch):
     out = os.path.join(scratch, "out")
     code = multiphase.main([
