@@ -80,43 +80,112 @@ class TestPathogenProfiles:
             dpi = p.get("initial_time_infected", 0)
             assert dpi >= 0, f"{p['pathogen_id']}: initial_time_infected must be >= 0"
 
-    def test_symptom_severity_weights_sum_to_one(self, profiles: dict) -> None:
+    def test_five_state_severity_probabilities_form_a_simplex(self, profiles: dict) -> None:
         for p in profiles["pathogens"]:
-            severity = p.get("symptom_severity")
+            severity = p.get("severity_model")
             if severity is None:
                 continue
-            weights = [float(item["weight"]) for item in severity["strata"]]
-            assert sum(weights) == pytest.approx(1.0), (
-                f"{p['pathogen_id']}: symptom severity weights must sum to 1"
+            assert severity["states"] == [
+                "asymptomatic", "subclinical", "mild", "moderate",
+                "severe_critical",
+            ]
+            assert len(severity["base_probabilities"]) == 5
+            assert sum(severity["base_probabilities"]) == pytest.approx(1.0), (
+                f"{p['pathogen_id']}: five-state probabilities must sum to 1"
             )
 
-    def test_symptom_severity_requires_hazard(self, profiles: dict) -> None:
-        from orchestrator_init import _validate_symptom_severity_profiles
-
+    def test_five_state_observation_vectors_are_bounded_and_ordered(
+        self,
+        profiles: dict,
+    ) -> None:
         for p in profiles["pathogens"]:
-            severity = p.get("symptom_severity")
-            if severity is None:
+            observation = p.get("observation_model")
+            if observation is None:
                 continue
-            invalid = deepcopy(p)
-            del invalid["symptom_severity"]["strata"][0][
-                "sick_call_probability_per_day"
-            ]
-            with pytest.raises(ValueError, match="missing sick_call"):
-                _validate_symptom_severity_profiles(
-                    {invalid["pathogen_id"]: invalid},
-                )
+            for key in (
+                "syndrome_case_eligibility_by_severity",
+                "reporting_probability_by_severity_pre_recognition",
+                "reporting_probability_by_severity_post_recognition",
+                "lab_sampling_probability_by_severity",
+            ):
+                vector = observation[key]
+                assert len(vector) == 5
+                assert vector[0] == 0.0
+                assert all(0 <= value <= 1 for value in vector)
+                assert vector == sorted(vector)
 
-    def test_symptom_severity_rejects_bad_weights(self, profiles: dict) -> None:
+    def test_five_state_observation_vectors_require_zero_index(self, profiles: dict) -> None:
         from orchestrator_init import _validate_symptom_severity_profiles
 
-        severity = profiles["pathogens"][0].get("symptom_severity")
-        if severity is None:
-            pytest.skip("no active profile has symptom severity")
         invalid = deepcopy(profiles["pathogens"][0])
-        invalid["symptom_severity"]["strata"][0]["weight"] += 0.1
-        with pytest.raises(ValueError, match="weights must sum"):
+        invalid["observation_model"][
+            "syndrome_case_eligibility_by_severity"
+        ][0] = 0.1
+        with pytest.raises(ValueError, match=r"\[0\].*0.0"):
             _validate_symptom_severity_profiles(
                 {invalid["pathogen_id"]: invalid},
+            )
+
+    def test_five_state_observation_vectors_require_ordering(self, profiles: dict) -> None:
+        from orchestrator_init import _validate_symptom_severity_profiles
+
+        invalid = deepcopy(profiles["pathogens"][0])
+        invalid["observation_model"][
+            "reporting_probability_by_severity_post_recognition"
+        ][2] = 0.1
+        with pytest.raises(ValueError, match="non-decreasing"):
+            _validate_symptom_severity_profiles(
+                {invalid["pathogen_id"]: invalid},
+            )
+
+    def test_legacy_three_stratum_severity_is_rejected(self, profiles: dict) -> None:
+        from orchestrator_init import _validate_symptom_severity_profiles
+
+        invalid = deepcopy(profiles["pathogens"][0])
+        invalid["symptom_severity"] = {
+            "strata": [{
+                "name": "mild",
+                "weight": 1.0,
+                "sick_call_probability_per_day": 0.2,
+            }],
+        }
+        with pytest.raises(ValueError, match="retired"):
+            _validate_symptom_severity_profiles(
+                {invalid["pathogen_id"]: invalid},
+            )
+
+    def test_five_state_severity_rejects_bad_simplex(self, profiles: dict) -> None:
+        from orchestrator_init import _validate_symptom_severity_profiles
+
+        invalid = deepcopy(profiles["pathogens"][0])
+        invalid["severity_model"]["base_probabilities"][0] += 0.1
+        with pytest.raises(ValueError, match="sum to 1"):
+            _validate_symptom_severity_profiles(
+                {invalid["pathogen_id"]: invalid},
+            )
+
+    def test_five_state_severity_rejects_non_null_unimplemented_inputs(
+        self,
+        profiles: dict,
+    ) -> None:
+        from orchestrator_init import _validate_symptom_severity_profiles
+
+        fatality = deepcopy(profiles["pathogens"][0])
+        fatality["severity_model"]["fatality_probability_by_severity"] = [
+            0, 0, 0, 0, 0,
+        ]
+        with pytest.raises(NotImplementedError, match="fatality"):
+            _validate_symptom_severity_profiles(
+                {fatality["pathogen_id"]: fatality},
+            )
+
+        assay = deepcopy(profiles["pathogens"][0])
+        assay["observation_model"]["assay_sensitivity_by_time_since_infection"] = {
+            "assay": "stool_RT_PCR",
+        }
+        with pytest.raises(NotImplementedError, match="assay"):
+            _validate_symptom_severity_profiles(
+                {assay["pathogen_id"]: assay},
             )
 
 

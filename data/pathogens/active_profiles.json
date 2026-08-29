@@ -62,25 +62,42 @@
         "eta": 0.508,
         "gamma": 0.095
       },
-      "symptom_severity": {
-        "notes": "Provisional mild/moderate/severe prior from graded modified-Vesikari norovirus challenge spectra; the calibrated quantity is aggregate episode capture.",
-        "strata": [
-          {
-            "name": "mild",
-            "weight": 0.35,
-            "sick_call_probability_per_day": 0.30
-          },
-          {
-            "name": "moderate",
-            "weight": 0.5,
-            "sick_call_probability_per_day": 0.56
-          },
-          {
-            "name": "severe",
-            "weight": 0.15,
-            "sick_call_probability_per_day": 0.90
+      "severity_model": {
+        "states": [
+          "asymptomatic",
+          "subclinical",
+          "mild",
+          "moderate",
+          "severe_critical"
+        ],
+        "base_probabilities": [0.25, 0.55, 0.19, 0.009, 0.001],
+        "prior": {
+          "type": "dirichlet",
+          "parameters": {
+            "mean": [0.25, 0.55, 0.19, 0.009, 0.001],
+            "concentration": 80
           }
-        ]
+        },
+        "fatality_probability_by_severity": null,
+        "evidence_grade": "M/A"
+      },
+      "observation_model": {
+        "system": "VSP_AGE",
+        "syndrome_case_eligibility_by_severity": [0, 0.55, 0.98, 1, 1],
+        "reporting_probability_by_severity_pre_recognition": [
+          0, 0.45, 0.70, 0.94, 1
+        ],
+        "reporting_probability_by_severity_post_recognition": [
+          0, 0.50, 0.76, 0.96, 1
+        ],
+        "active_screening": {
+          "enabled": false,
+          "modality": null,
+          "selection_probability_by_time": null
+        },
+        "lab_sampling_probability_by_severity": [0, 0.05, 0.20, 0.60, 0.90],
+        "assay_sensitivity_by_time_since_infection": null,
+        "episode_reporting_window_days": 2.0
       },
       "recovery_day": 3,
       "incubation": {

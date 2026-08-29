@@ -101,6 +101,7 @@ from orchestrator_types import (
     STATUS_ALERT,
     STATUS_CONFIRMED,
     STATUS_RANK,
+    STATUS_SUSPECTED,
     SimulationState,
 )
 from picard_framework.analysis.sentinel.line_list import SentinelLedger
@@ -949,6 +950,12 @@ class ShipSimulation:
                 chronic_behavioral_mods=self.chronic_behavioral_mods,
                 include_episode_telemetry=(
                     work.epoch + 1 >= self.num_epochs
+                ),
+                # Surveillance runs before escalation, so this is the prior
+                # epoch's recognition state by design.
+                outbreak_recognized=(
+                    STATUS_RANK.get(work.state.trigger_status, 0)
+                    >= STATUS_RANK[STATUS_SUSPECTED]
                 ),
             )
             work.cascade_result = step_diagnostic_cascade(

@@ -1077,52 +1077,99 @@ def load_pathogen_profiles(
 def _validate_symptom_severity_profiles(
     profiles: dict[str, dict[str, Any]],
 ) -> None:
-    """Validate optional severity strata before they reach observations."""
+    """Validate the authored five-state severity and observation models."""
+    states = [
+        "asymptomatic",
+        "subclinical",
+        "mild",
+        "moderate",
+        "severe_critical",
+    ]
     for pathogen_id, profile in profiles.items():
-        block = profile.get("symptom_severity")
-        if block is None:
-            continue
-        strata = block.get("strata") if isinstance(block, dict) else None
-        if not isinstance(strata, list) or not strata:
+        if "symptom_severity" in profile:
             raise ValueError(
-                f"{pathogen_id}.symptom_severity.strata must be non-empty",
+                f"{pathogen_id}.symptom_severity is retired; use severity_model",
             )
-        weights = []
-        for stratum in strata:
-            if not isinstance(stratum, dict):
-                raise ValueError(
-                    f"{pathogen_id}.symptom_severity strata must be objects",
-                )
-            if not stratum.get("name"):
-                raise ValueError(
-                    f"{pathogen_id}.symptom_severity stratum missing name",
-                )
-            if "weight" not in stratum:
-                raise ValueError(
-                    f"{pathogen_id}.symptom_severity.{stratum['name']} "
-                    "missing weight",
-                )
-            if "sick_call_probability_per_day" not in stratum:
-                raise ValueError(
-                    f"{pathogen_id}.symptom_severity.{stratum['name']} "
-                    "missing sick_call_probability_per_day",
-                )
-            weight = float(stratum["weight"])
-            hazard = float(stratum["sick_call_probability_per_day"])
-            if not 0.0 <= weight <= 1.0:
-                raise ValueError(
-                    f"{pathogen_id}.symptom_severity.{stratum['name']} "
-                    "weight must be in [0, 1]",
-                )
-            if not 0.0 <= hazard <= 1.0:
-                raise ValueError(
-                    f"{pathogen_id}.symptom_severity.{stratum['name']} "
-                    "sick-call hazard must be in [0, 1]",
-                )
-            weights.append(weight)
-        if not np.isclose(sum(weights), 1.0):
+        severity = profile.get("severity_model")
+        observation = profile.get("observation_model")
+        if severity is None and observation is None:
+            continue
+        if severity is None or observation is None:
             raise ValueError(
-                f"{pathogen_id}.symptom_severity weights must sum to 1.0",
+                f"{pathogen_id}.severity_model and observation_model must be paired",
+            )
+        if not isinstance(severity, dict):
+            raise ValueError(
+                f"{pathogen_id}.severity_model must be an object",
+            )
+        actual_states = severity.get("states")
+        if actual_states != states:
+            raise ValueError(
+                f"{pathogen_id}.severity_model.states must equal {states}",
+            )
+        probabilities = severity.get("base_probabilities")
+        if not isinstance(probabilities, list) or len(probabilities) != 5:
+            raise ValueError(
+                f"{pathogen_id}.severity_model.base_probabilities must have length 5",
+            )
+        values = [float(value) for value in probabilities]
+        if not all(np.isfinite(value) and 0.0 <= value <= 1.0 for value in values):
+            raise ValueError(
+                f"{pathogen_id}.severity_model.base_probabilities must be finite and bounded",
+            )
+        if not np.isclose(sum(values), 1.0):
+            raise ValueError(
+                f"{pathogen_id}.severity_model.base_probabilities must sum to 1.0",
+            )
+        if values[0] >= 1.0:
+            raise ValueError(
+                f"{pathogen_id}.severity_model.base_probabilities[0] must be < 1",
+            )
+        if not isinstance(observation, dict):
+            raise ValueError(
+                f"{pathogen_id}.observation_model must be an object",
+            )
+        arrays = (
+            "syndrome_case_eligibility_by_severity",
+            "reporting_probability_by_severity_pre_recognition",
+            "reporting_probability_by_severity_post_recognition",
+            "lab_sampling_probability_by_severity",
+        )
+        for key in arrays:
+            array = observation.get(key)
+            if not isinstance(array, list) or len(array) != 5:
+                raise ValueError(
+                    f"{pathogen_id}.observation_model.{key} must have length 5",
+                )
+            numbers = [float(value) for value in array]
+            if not all(
+                np.isfinite(value) and 0.0 <= value <= 1.0
+                for value in numbers
+            ):
+                raise ValueError(
+                    f"{pathogen_id}.observation_model.{key} must be finite and bounded",
+                )
+            if numbers[0] != 0.0:
+                raise ValueError(
+                    f"{pathogen_id}.observation_model.{key}[0] must equal 0.0",
+                )
+            if any(left > right for left, right in zip(numbers, numbers[1:])):
+                raise ValueError(
+                    f"{pathogen_id}.observation_model.{key} must be non-decreasing",
+                )
+        window = observation.get("episode_reporting_window_days")
+        if window is None or not np.isfinite(float(window)) or float(window) <= 0:
+            raise ValueError(
+                f"{pathogen_id}.observation_model.episode_reporting_window_days "
+                "must be positive",
+            )
+        if severity.get("fatality_probability_by_severity") is not None:
+            raise NotImplementedError(
+                f"{pathogen_id}: severity-conditioned fatality is not implemented",
+            )
+        if observation.get("assay_sensitivity_by_time_since_infection") is not None:
+            raise NotImplementedError(
+                f"{pathogen_id}: time-varying assay sensitivity is not implemented",
             )
 
 
