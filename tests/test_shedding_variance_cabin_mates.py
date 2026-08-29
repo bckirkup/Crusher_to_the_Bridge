@@ -44,11 +44,11 @@ class TestSheddingVariance:
 
     def test_multiplier_drawn_at_infection(self) -> None:
         rng = np.random.default_rng(42)
-        profile = {"shedding_variance_log10": 1.5}
+        profile = {"shedding_variance_log10": 1.0}
         agent = _agent(1, "Berthing")
         agent.infect_with_pathogen("norovirus_gii4", 100.0, 0, rng=rng, profile=profile)
         mult = agent.infections["norovirus_gii4"]["shedding_multiplier"]
-        assert mult == pytest.approx(2.8646767258185335)
+        assert mult == pytest.approx(2.017051931260503)
         assert mult > 1.0
 
     def test_multiplier_scales_get_pathogen_shedding(self) -> None:

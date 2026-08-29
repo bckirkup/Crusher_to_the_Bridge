@@ -100,6 +100,18 @@ class TestCabinCorridorTransmission:
         confined, _ = self._droplet_case(quarantined_ids={2})
         assert confined == pytest.approx(baseline * 0.05, abs=5e-5)
 
+    def test_unconfined_shedder_and_confined_cabin_mate_share_full_dose(self) -> None:
+        """Cabin mates share the cabin, so confinement does not separate them."""
+        baseline, _ = self._droplet_case(
+            quarantined_ids=set(),
+            cabin_mates=True,
+        )
+        confined, _ = self._droplet_case(
+            quarantined_ids={2},
+            cabin_mates=True,
+        )
+        assert confined == pytest.approx(baseline)
+
     def test_confined_shedder_and_confined_cabin_mate_are_not_double_attenuated(
         self,
     ) -> None:

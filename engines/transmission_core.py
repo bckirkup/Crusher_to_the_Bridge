@@ -1316,6 +1316,33 @@ class TransmissionCore:
             return self.confinement_isolation_factor
         return 1.0
 
+    def _cabin_mate_droplet_addback(
+        self,
+        target: KorkinAgent,
+        shedders: list[tuple[KorkinAgent, float]],
+        volume: float,
+        vent_factor: float,
+        target_factor: float,
+    ) -> float:
+        """Restore withheld emission for cabin mates sharing the cabin."""
+        addback = 0.0
+        for shedder, shedding in shedders:
+            if shedder.agent_id not in target.cabin_mate_ids:
+                continue
+            unattenuated = (
+                shedding * DROPLET_AEROSOL_FRACTION
+                / max(volume, 1.0)
+                * self.inhaled_air_volume_m3_per_epoch
+                * self.droplet_scalar
+                * vent_factor
+            )
+            addback += unattenuated * (
+                1.0
+                - self.confinement_emission_factor(shedder)
+                * target_factor
+            )
+        return addback
+
     def _cabin_pair_contact_factor(
         self, shedder: KorkinAgent, target: KorkinAgent,
     ) -> float:
@@ -1953,21 +1980,9 @@ class TransmissionCore:
                 dose *= vent_factor
                 target_factor = self._confinement_factor(target)
                 dose *= target_factor
-                for shedder, shedding in shedders:
-                    if shedder.agent_id not in target.cabin_mate_ids:
-                        continue
-                    unattenuated = (
-                        shedding * DROPLET_AEROSOL_FRACTION
-                        / max(volume, 1.0)
-                        * self.inhaled_air_volume_m3_per_epoch
-                        * self.droplet_scalar
-                        * vent_factor
-                    )
-                    dose += unattenuated * (
-                        1.0
-                        - self.confinement_emission_factor(shedder)
-                        * target_factor
-                    )
+                dose += self._cabin_mate_droplet_addback(
+                    target, shedders, volume, vent_factor, target_factor,
+                )
                 dose = self._accumulate(
                     target.agent_id, "droplet", dose,
                     agent_doses, agent_pathway_doses,
@@ -2195,10 +2210,9 @@ class TransmissionCore:
             shedders = self._get_shedders(occupants, pathogen_id, profile)
             deposits: list[tuple[KorkinAgent, float]] = []
             for agent, sv in shedders:
-                deposit = (
-                    sv * dep_frac
-                    * self.confinement_emission_factor(agent)
-                )
+                if self._cabin_confinement_active(agent):
+                    continue
+                deposit = sv * dep_frac
                 deposits.append((agent, deposit))
                 self.surface_pools[zone_name] = (
                     self.surface_pools.get(zone_name, 0.0) + deposit
