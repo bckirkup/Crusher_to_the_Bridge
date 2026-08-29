@@ -66,6 +66,8 @@ from orchestrator_types import (
 )
 from simulation_utils.paths import resolve_repo_path, validated_open
 from telemetry_buffer.agent_axes import (
+    INFECTION_INFECTED,
+    INFECTION_RECOVERED,
     agent_has_symptomatic_presentation,
     resolve_agent_axes,
 )
@@ -678,6 +680,17 @@ def update_ever_ill_ids(
     for agent in agents:
         if agent_has_symptomatic_presentation(agent):
             ever_ill_ids.add(int(agent["agent_id"]))
+
+
+def update_ever_infected_ids(
+    agents: list[dict[str, Any]],
+    ever_infected_ids: set[int],
+) -> None:
+    """Accumulate agents who are currently or were previously infected."""
+    for agent in agents:
+        infection_state, _, _ = resolve_agent_axes(agent)
+        if infection_state in (INFECTION_INFECTED, INFECTION_RECOVERED):
+            ever_infected_ids.add(int(agent["agent_id"]))
 
 
 def update_ever_reported_ids(

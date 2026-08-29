@@ -21,7 +21,11 @@ from engines.infection_dynamics_bridge import (
 )
 from engines.py_contam_bridge import ContamTransportEngine
 from orchestrator_display import print_executive_summary
-from orchestrator_init import role_group_for_agent
+from orchestrator_init import (
+    compute_group_attack_rates,
+    compute_group_rates_for_ids,
+    role_group_for_agent,
+)
 from orchestrator_types import (
     REPO_ROOT,
     ObservationEngine,
@@ -111,25 +115,23 @@ def _summary_counts(
 ) -> dict[str, Any]:
     reported_counts = {"passenger": 0, "crew": 0}
     ill_counts = {"passenger": 0, "crew": 0}
-    population_counts = {"passenger": 0, "crew": 0}
+    infected_counts = {"passenger": 0, "crew": 0}
     for agent in agents:
         aid = int(agent["agent_id"])
         group = role_group_for_agent(agent)
-        population_counts[group] += 1
         if aid in state.ever_reported_ids:
             reported_counts[group] += 1
         if aid in state.ever_ill_ids:
             ill_counts[group] += 1
-    reported_rates = {
-        group: reported_counts[group] / population_counts[group]
-        if population_counts[group] else 0.0
-        for group in ("passenger", "crew")
-    }
-    ever_ill_rates = {
-        group: ill_counts[group] / population_counts[group]
-        if population_counts[group] else 0.0
-        for group in ("passenger", "crew")
-    }
+        if aid in state.ever_infected_ids:
+            infected_counts[group] += 1
+    reported_rates = compute_group_rates_for_ids(
+        agents, state.ever_reported_ids,
+    )
+    infected_rates = compute_group_rates_for_ids(
+        agents, state.ever_infected_ids,
+    )
+    ever_ill_rates = compute_group_attack_rates(agents, state.ever_ill_ids)
     disrupted_count = sum(
         1 for a in engine.agents if a.microflora_disruption_status > 0
     )
@@ -148,11 +150,18 @@ def _summary_counts(
         "cumulative_reported_cases_passenger": reported_counts["passenger"],
         "cumulative_reported_cases_crew": reported_counts["crew"],
         "cumulative_reported_noise_cases": len(state.ever_reported_noise_ids),
+        "cumulative_ever_infected": len(state.ever_infected_ids),
+        "cumulative_ever_infected_passenger": infected_counts["passenger"],
+        "cumulative_ever_infected_crew": infected_counts["crew"],
         "cumulative_ever_ill": len(state.ever_ill_ids),
         "cumulative_ever_ill_passenger": ill_counts["passenger"],
         "cumulative_ever_ill_crew": ill_counts["crew"],
         "reported_case_rate_passenger": round(reported_rates["passenger"], 6),
+        "reported_case_rate_crew": round(reported_rates["crew"], 6),
+        "infection_attack_rate_passenger": round(infected_rates["passenger"], 6),
+        "infection_attack_rate_crew": round(infected_rates["crew"], 6),
         "ever_ill_rate_passenger": round(ever_ill_rates["passenger"], 6),
+        "ever_ill_rate_crew": round(ever_ill_rates["crew"], 6),
     }
     for a in agents:
         _update_summary_from_agent(summary, a)
