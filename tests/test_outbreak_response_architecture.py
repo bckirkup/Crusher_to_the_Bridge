@@ -110,10 +110,9 @@ def test_hourly_reporting_drives_autonomous_escalation() -> None:
         "reported case did not produce a confirmed clinical case"
     )
     assert first_suspected is not None
-    # Own-severity sick calls can occur during the first day, and the lower
-    # common shedding variance delays ignition, so escalation is bounded on
-    # both sides by the onset-based contract rather than by a tight window.
-    assert 16 <= first_suspected <= 120
+    # Escalation requires incubation, symptom onset, and a sick call, so it
+    # cannot be instantaneous; it must also occur well within the voyage.
+    assert 8 <= first_suspected <= 72
     assert [STATUS_RANK[status] for status in statuses] == sorted(
         STATUS_RANK[status] for status in statuses
     )
