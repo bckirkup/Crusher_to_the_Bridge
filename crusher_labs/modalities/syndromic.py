@@ -286,6 +286,25 @@ class SyndromicSurveillance:
                 "first_sick_call_epoch": int(epoch),
                 "symptom_severity": infection.get("symptom_severity", ""),
             })
+        episode_telemetry = []
+        for agent in agents:
+            aid = int(agent["agent_id"])
+            if aid not in self._symptom_onset_epoch:
+                continue
+            infection = next(
+                (
+                    record for record in
+                    (agent.get("pathogen_infections") or {}).values()
+                    if record.get("illness") == "SYMPTOMATIC"
+                ),
+                {},
+            )
+            episode_telemetry.append({
+                "agent_id": aid,
+                "symptom_onset_epoch": self._symptom_onset_epoch[aid],
+                "first_sick_call_epoch": self._first_sick_call_epoch.get(aid),
+                "symptom_severity": infection.get("symptom_severity", ""),
+            })
 
         return {
             "modality": self.name,
@@ -298,6 +317,7 @@ class SyndromicSurveillance:
             "sick_call_count": len(sick_call_ids),
             "total_agents": len(agents),
             "first_detection_events": detection_events,
+            "episode_detection_telemetry": episode_telemetry,
         }
 
     def _severity_hazard(self, agent: dict[str, Any]) -> float:

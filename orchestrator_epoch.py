@@ -1318,6 +1318,7 @@ def inactive_syndromic_result(
         "sick_call_count": 0,
         "total_agents": int(n_agents),
         "first_detection_events": [],
+        "episode_detection_telemetry": [],
         "activation_delayed": True,
     }
 

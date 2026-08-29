@@ -194,6 +194,12 @@ class TestBehavioralSyndromic:
             "first_sick_call_epoch": 12,
             "symptom_severity": "moderate",
         }]
+        assert result["episode_detection_telemetry"] == [{
+            "agent_id": 3,
+            "symptom_onset_epoch": 12,
+            "first_sick_call_epoch": 12,
+            "symptom_severity": "moderate",
+        }]
     def test_hide_symptoms_suppresses_sick_call(self) -> None:
         syn = SyndromicSurveillance(sick_call_probability=1.0, rng=np.random.default_rng(0))
         truth = {

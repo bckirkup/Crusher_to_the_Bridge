@@ -322,6 +322,9 @@ def record_epoch(  # NOSONAR
             "first_detection_events": syn_result.get(
                 "first_detection_events", [],
             ),
+            "episode_detection_telemetry": syn_result.get(
+                "episode_detection_telemetry", [],
+            ),
         },
         "air_sniffer": air_results,
         "surface_swab": swab_results,
