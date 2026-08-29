@@ -212,6 +212,8 @@ class SyndromicSurveillance:
         information_beliefs: dict[int, dict[str, float]] | None = None,
         chronic_behavioral_mods: dict[int, dict[str, float]] | None = None,
         include_episode_telemetry: bool = False,
+        *,
+        outbreak_recognized: bool = False,
     ) -> dict[str, Any]:
         """Parse ground-truth agent states and return sick-call roster.
 
@@ -257,7 +259,9 @@ class SyndromicSurveillance:
                 continue
 
             if is_symptomatic:
-                severity_hazards[aid] = self._severity_hazard(agent)
+                severity_hazards[aid] = self._severity_hazard(
+                    agent, outbreak_recognized=outbreak_recognized,
+                )
                 self._process_symptomatic_agent(
                     aid, epoch, overrides, beliefs, chronic_mods,
                     severity_hazards,
@@ -315,11 +319,18 @@ class SyndromicSurveillance:
             "episode_detection_telemetry": episode_telemetry,
         }
 
-    def _severity_hazard(self, agent: dict[str, Any]) -> float:
-        """Resolve host hazard; missing severity profiles use the base hazard."""
+    def _severity_hazard(
+        self,
+        agent: dict[str, Any],
+        *,
+        outbreak_recognized: bool = False,
+    ) -> float:
+        """Resolve per-day hazard; missing profiles use the unattenuated base."""
         infection = _symptomatic_infection(agent)
         if infection:
             severity = str(infection.get("symptom_severity") or "")
+            if severity == "asymptomatic":
+                return 0.0
             pathogen_id = str(infection.get("pathogen_id") or "")
             if not pathogen_id:
                 for candidate_id, candidate in (
@@ -328,17 +339,50 @@ class SyndromicSurveillance:
                     if candidate is infection:
                         pathogen_id = str(candidate_id)
                         break
-            for stratum in self._severity_strata(pathogen_id):
-                if stratum.get("name") == severity:
-                    return float(stratum["sick_call_probability_per_day"])
+            profile = self.symptom_severity_profiles.get(pathogen_id, {})
+            if "severity_model" not in profile:
+                return self.sick_call_probability
+            model = self._severity_model(pathogen_id)
+            if model is None:
+                raise ValueError(
+                    f"{pathogen_id} severity_model requires observation_model",
+                )
+            if severity not in model["states"]:
+                raise ValueError(
+                    f"{pathogen_id} has unrecognised symptom severity "
+                    f"state {severity!r}",
+                )
+            index = model["states"].index(severity)
+            eligibility = model["eligibility"][index]
+            reporting = model["reporting_post" if outbreak_recognized else "reporting_pre"]
+            episode_probability = eligibility * reporting[index]
+            window = model["window_days"]
+            hazard = 1.0 - (1.0 - episode_probability) ** (1.0 / window)
+            return hazard
         return self.sick_call_probability
 
-    def _severity_strata(self, pathogen_id: str) -> list[dict[str, Any]]:
-        """Return strata matching the pathogen record, or no override."""
+    def _severity_model(self, pathogen_id: str) -> dict[str, Any] | None:
+        """Return normalized five-state observation vectors for a pathogen."""
         profile = self.symptom_severity_profiles.get(pathogen_id, {})
-        block = profile.get("symptom_severity", {})
-        strata = block.get("strata", []) if isinstance(block, dict) else []
-        return list(strata) if isinstance(strata, list) else []
+        severity = profile.get("severity_model")
+        observation = profile.get("observation_model")
+        if not isinstance(severity, dict) or not isinstance(observation, dict):
+            return None
+        return {
+            "states": list(severity.get("states", [])),
+            "eligibility": list(
+                observation.get("syndrome_case_eligibility_by_severity", []),
+            ),
+            "reporting_pre": list(
+                observation.get("reporting_probability_by_severity_pre_recognition", []),
+            ),
+            "reporting_post": list(
+                observation.get("reporting_probability_by_severity_post_recognition", []),
+            ),
+            "window_days": float(
+                observation.get("episode_reporting_window_days", 1.0),
+            ),
+        }
 
     def _check_background_noise(self, _aid: int) -> tuple[bool, str | None]:
         """FRED-style categorized background noise check.

@@ -302,27 +302,74 @@ class DoseResponse(BaseModel):
         return self
 
 
-class SymptomSeverityStratum(BaseModel):
-    name: str
-    weight: float
-    sick_call_probability_per_day: float
-
-    @field_validator("weight", "sick_call_probability_per_day")
-    @classmethod
-    def probability_bounded(cls, v: float) -> float:
-        if v < 0 or v > 1:
-            raise ValueError(f"symptom severity probability must be in [0,1], got {v}")
-        return v
-
-
-class SymptomSeverity(BaseModel):
-    notes: str = ""
-    strata: list[SymptomSeverityStratum]
+class SeverityModel(BaseModel):
+    states: list[str]
+    base_probabilities: list[float]
+    prior: dict[str, Any] = {}
+    fatality_probability_by_severity: Any | None = None
+    evidence_grade: str = ""
 
     @model_validator(mode="after")
-    def weights_sum_to_one(self) -> "SymptomSeverity":
-        if not math.isclose(sum(item.weight for item in self.strata), 1.0):
-            raise ValueError("symptom severity weights must sum to 1.0")
+    def validate_shape(self) -> "SeverityModel":
+        expected = [
+            "asymptomatic", "subclinical", "mild", "moderate", "severe_critical",
+        ]
+        if self.states != expected:
+            raise ValueError("severity_model.states must use canonical five-state order")
+        if len(self.base_probabilities) != 5:
+            raise ValueError("severity_model.base_probabilities must have length 5")
+        if any(
+            not math.isfinite(value) or not 0.0 <= value <= 1.0
+            for value in self.base_probabilities
+        ):
+            raise ValueError("severity_model.base_probabilities must be finite and bounded")
+        if not math.isclose(sum(self.base_probabilities), 1.0):
+            raise ValueError("severity_model.base_probabilities must sum to 1.0")
+        if self.base_probabilities[0] >= 1.0:
+            raise ValueError("severity_model.base_probabilities[0] must be < 1")
+        if self.fatality_probability_by_severity is not None:
+            raise NotImplementedError(
+                "severity-conditioned fatality is not implemented",
+            )
+        return self
+
+
+class ObservationModel(BaseModel):
+    system: str
+    syndrome_case_eligibility_by_severity: list[float]
+    reporting_probability_by_severity_pre_recognition: list[float]
+    reporting_probability_by_severity_post_recognition: list[float]
+    active_screening: dict[str, Any] | None = None
+    lab_sampling_probability_by_severity: list[float] = []
+    assay_sensitivity_by_time_since_infection: Any | None = None
+    episode_reporting_window_days: float
+
+    @model_validator(mode="after")
+    def validate_vectors(self) -> "ObservationModel":
+        vectors = (
+            self.syndrome_case_eligibility_by_severity,
+            self.reporting_probability_by_severity_pre_recognition,
+            self.reporting_probability_by_severity_post_recognition,
+            self.lab_sampling_probability_by_severity,
+        )
+        for vector in vectors:
+            if len(vector) != 5 or any(
+                not math.isfinite(value) or not 0.0 <= value <= 1.0
+                for value in vector
+            ):
+                raise ValueError("observation severity vectors must have five bounded values")
+            if vector[0] != 0.0 or any(
+                left > right for left, right in zip(vector, vector[1:])
+            ):
+                raise ValueError(
+                    "observation severity vectors must start at zero and be non-decreasing",
+                )
+        if self.episode_reporting_window_days <= 0:
+            raise ValueError("episode_reporting_window_days must be positive")
+        if self.assay_sensitivity_by_time_since_infection is not None:
+            raise NotImplementedError(
+                "time-varying assay sensitivity is not implemented",
+            )
         return self
 
 
@@ -336,7 +383,8 @@ class PathogenProfile(BaseModel):
     dose_adjustment: float = 1.0
     dose_response: DoseResponse | None = None
     illness_probability: dict[str, float] = {}
-    symptom_severity: SymptomSeverity | None = None
+    severity_model: SeverityModel | None = None
+    observation_model: ObservationModel | None = None
     recovery_day: int = 3
     surface_deposition_fraction: float = 0.0001
     base_susceptibility: float = 1.0
@@ -354,6 +402,17 @@ class PathogenProfile(BaseModel):
     symptom_onset_day: float | None = None
     strain_evolution: dict[str, Any] = {}
     sequencing_assay: dict[str, Any] = {}
+    symptom_severity: dict[str, Any] | None = None
+
+    @model_validator(mode="after")
+    def reject_retired_severity_model(self) -> "PathogenProfile":
+        if self.symptom_severity is not None:
+            raise ValueError("symptom_severity is retired; use severity_model")
+        if self.severity_model is None and self.observation_model is None:
+            return self
+        if self.severity_model is None or self.observation_model is None:
+            raise ValueError("severity_model and observation_model must be paired")
+        return self
 
     @field_validator("initial_time_infected")
     @classmethod

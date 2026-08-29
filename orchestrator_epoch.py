@@ -425,23 +425,28 @@ def _draw_symptom_onset(
     if rng.random() < ill_prob:
         inf["illness"] = IllnessStatus.SYMPTOMATIC
         inf["onset_time_infected"] = inf.get("time_infected", 0)
-        if "symptom_severity" not in inf:
+        if inf.get("symptom_severity") in (None, "", "asymptomatic"):
             inf["symptom_severity"] = _draw_symptom_severity(prof, rng)
         if agent.illness_status == IllnessStatus.NOT_ILL:
             agent.illness_status = IllnessStatus.SYMPTOMATIC
+    else:
+        inf["symptom_severity"] = "asymptomatic"
 
 
 def _draw_symptom_severity(
     profile: dict[str, Any],
     rng: np.random.Generator,
 ) -> str:
-    """Draw one persistent illness severity stratum from the profile."""
-    strata = profile.get("symptom_severity", {}).get("strata", [])
-    if not strata:
+    """Draw one symptomatic state from the renormalised five-state prior."""
+    severity = profile.get("severity_model", {})
+    states = severity.get("states", [])
+    probabilities = severity.get("base_probabilities", [])
+    if len(states) != 5 or len(probabilities) != 5:
         return ""
-    names = [str(item["name"]) for item in strata]
-    weights = [float(item["weight"]) for item in strata]
-    return str(rng.choice(names, p=weights))
+    symptomatic_states = [str(state) for state in states[1:]]
+    symptomatic_probabilities = np.asarray(probabilities[1:], dtype=float)
+    symptomatic_probabilities /= symptomatic_probabilities.sum()
+    return str(rng.choice(symptomatic_states, p=symptomatic_probabilities))
 
 
 def _advance_agent_pathogen_infections(

@@ -392,26 +392,97 @@
         }
       ]
     },
-    "SymptomSeverity": {
+    "SeverityModel": {
       "type": "object",
-      "required": ["strata"],
+      "required": ["states", "base_probabilities"],
       "properties": {
-        "notes": {"type": "string", "minLength": 1},
-        "strata": {
+        "states": {
           "type": "array",
-          "minItems": 1,
-          "items": {
-            "type": "object",
-            "required": ["name", "weight", "sick_call_probability_per_day"],
-            "properties": {
-              "name": {"type": "string", "minLength": 1},
-              "weight": {"type": "number", "minimum": 0, "maximum": 1},
-              "sick_call_probability_per_day": {
-                "type": "number", "minimum": 0, "maximum": 1
-              }
+          "minItems": 5,
+          "maxItems": 5,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "base_probabilities": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "items": {"type": "number", "minimum": 0, "maximum": 1}
+        },
+        "prior": {
+          "type": "object",
+          "required": ["type", "parameters"],
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": ["dirichlet", "logistic_normal", "scenario_set"]
             },
-            "additionalProperties": false
-          }
+            "parameters": {"type": "object"}
+          },
+          "additionalProperties": false
+        },
+        "fatality_probability_by_severity": {
+          "type": [
+            "array",
+            "object",
+            "number",
+            "string",
+            "boolean",
+            "null"
+          ]
+        },
+        "evidence_grade": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "ObservationModel": {
+      "type": "object",
+      "required": [
+        "system",
+        "syndrome_case_eligibility_by_severity",
+        "reporting_probability_by_severity_pre_recognition",
+        "reporting_probability_by_severity_post_recognition",
+        "episode_reporting_window_days"
+      ],
+      "properties": {
+        "system": {"type": "string"},
+        "syndrome_case_eligibility_by_severity": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "items": {"type": "number", "minimum": 0, "maximum": 1}
+        },
+        "reporting_probability_by_severity_pre_recognition": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "items": {"type": "number", "minimum": 0, "maximum": 1}
+        },
+        "reporting_probability_by_severity_post_recognition": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "items": {"type": "number", "minimum": 0, "maximum": 1}
+        },
+        "active_screening": {"type": ["object", "null"]},
+        "lab_sampling_probability_by_severity": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "items": {"type": "number", "minimum": 0, "maximum": 1}
+        },
+        "assay_sensitivity_by_time_since_infection": {
+          "type": [
+            "array",
+            "object",
+            "number",
+            "string",
+            "boolean",
+            "null"
+          ]
+        },
+        "episode_reporting_window_days": {
+          "type": "number",
+          "exclusiveMinimum": 0
         }
       },
       "additionalProperties": false
@@ -512,7 +583,8 @@
             "gamma": {"type": "number", "minimum": 0, "maximum": 1}
           }
         },
-        "symptom_severity": {"$ref": "#/$defs/SymptomSeverity"},
+        "severity_model": {"$ref": "#/$defs/SeverityModel"},
+        "observation_model": {"$ref": "#/$defs/ObservationModel"},
         "recovery_day": {"type": "integer", "minimum": 0},
         "symptom_onset_day": {"type": "number", "minimum": 0},
         "incubation": {"$ref": "#/$defs/Incubation"},
@@ -644,7 +716,18 @@
             }
           }
         }
+      },
+      "allOf": [
+        {
+          "if": {"required": ["severity_model"]},
+          "then": {"required": ["observation_model"]}
+        },
+        {
+          "if": {"required": ["observation_model"]},
+          "then": {"required": ["severity_model"]}
+        }
+      ],
+      "not": {"required": ["symptom_severity"]}
       }
     }
   }
-}
