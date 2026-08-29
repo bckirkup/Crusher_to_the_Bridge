@@ -20,7 +20,6 @@ from engines.transmission_core import (
 )
 from orchestrator_epoch import step_infection_progression
 
-
 ZONE = "Test_Zone"
 PATHOGEN = "test_pathogen"
 
@@ -174,6 +173,37 @@ def test_airborne_mass_decays_without_a_shedder() -> None:
     assert trace == sorted(trace, reverse=True)
     assert trace[-1] < 100.0
     assert min(trace) >= 0.0
+
+
+def test_confined_shedder_airborne_deposition_is_attenuated() -> None:
+    clock = SimClock(epoch_duration_hours=1.0, mode="hours")
+    profile = {
+        "shedding_curve_log10": [4.0] * 40,
+        "asymptomatic_shedding_log10": [4.0] * 40,
+        "surface_deposition_fraction": 1.0,
+        "airborne_half_life_hours": 1.0,
+    }
+
+    def deposited(quarantined: bool) -> float:
+        engine = _aging_engine(shedder=True)
+        core = TransmissionCore(
+            rng=np.random.default_rng(19),
+            zone_volumes={ZONE: 50.0},
+            zone_types={ZONE: "Cabin_Corridor"},
+            clock=clock,
+        )
+        core.initialize_zones([ZONE])
+        if quarantined:
+            core._quarantined_ids = {engine.agents[0].agent_id}
+        step_infection_progression(
+            engine,
+            {PATHOGEN: profile},
+            epoch=0,
+            confinement_core=core,
+        )
+        return engine.get_pathogen_zone_mass(PATHOGEN)[ZONE]
+
+    assert deposited(True) == pytest.approx(deposited(False) * 0.05)
 
 
 def test_simultaneous_delivery_is_independent_of_occupant_order() -> None:

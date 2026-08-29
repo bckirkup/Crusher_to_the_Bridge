@@ -841,6 +841,7 @@ class ShipSimulation:
             self.pathogen_profiles,
             self.tx_core.strain_registry,
             work.epoch,
+            self.tx_core,
         )
         work.tracing_matrix, _tx_events = self.tx_core.execute_transmission(
             epoch=work.epoch,

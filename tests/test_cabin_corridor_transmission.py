@@ -55,6 +55,93 @@ def _droplet_doses(
 
 
 class TestCabinCorridorTransmission:
+    @staticmethod
+    def _droplet_case(
+        *,
+        quarantined_ids: set[int],
+        cabin_mates: bool = False,
+    ) -> tuple[float, float]:
+        zone = "PC_D6_P_F"
+        shedder = _agent(1, zone, infected=True)
+        target = _agent(2, zone)
+        if cabin_mates:
+            shedder.cabin_mate_ids = frozenset({2})
+            target.cabin_mate_ids = frozenset({1})
+        core = TransmissionCore(
+            rng=np.random.default_rng(42),
+            zone_volumes={zone: 1200.0},
+            zone_types={zone: "Cabin_Corridor"},
+        )
+        core.initialize_zones([zone])
+        matrix, _ = core.execute_transmission(
+            epoch=1,
+            agents=[shedder, target],
+            zone_pathogen_mass={zone: 0.0},
+            quarantined_ids=quarantined_ids,
+        )
+        exposure = matrix.droplet_exposures[0]
+        return exposure["dose"], core.aerosol_pools[zone]
+
+    def test_confined_shedder_attenuates_shared_droplet_emission(self) -> None:
+        baseline, _ = self._droplet_case(quarantined_ids=set())
+        confined, _ = self._droplet_case(quarantined_ids={1})
+        assert confined == pytest.approx(baseline * 0.05, abs=5e-5)
+
+    def test_confined_shedder_preserves_cabin_mate_droplet_dose(self) -> None:
+        baseline, _ = self._droplet_case(quarantined_ids=set(), cabin_mates=True)
+        confined, _ = self._droplet_case(
+            quarantined_ids={1},
+            cabin_mates=True,
+        )
+        assert confined == pytest.approx(baseline)
+
+    def test_confined_target_receipt_attenuation_is_preserved(self) -> None:
+        baseline, _ = self._droplet_case(quarantined_ids=set())
+        confined, _ = self._droplet_case(quarantined_ids={2})
+        assert confined == pytest.approx(baseline * 0.05, abs=5e-5)
+
+    def test_confined_shedder_and_confined_cabin_mate_are_not_double_attenuated(
+        self,
+    ) -> None:
+        baseline, _ = self._droplet_case(quarantined_ids=set(), cabin_mates=True)
+        confined, _ = self._droplet_case(
+            quarantined_ids={1, 2},
+            cabin_mates=True,
+        )
+        assert confined == pytest.approx(baseline)
+
+    def test_confined_shedder_and_non_mate_target_apply_both_factors(self) -> None:
+        baseline, _ = self._droplet_case(quarantined_ids=set())
+        confined, _ = self._droplet_case(quarantined_ids={1, 2})
+        assert confined == pytest.approx(baseline * 0.05 * 0.05, abs=5e-5)
+
+    def test_aerosol_pool_records_attenuated_shared_emission(self) -> None:
+        _, baseline_pool = self._droplet_case(quarantined_ids=set())
+        _, confined_pool = self._droplet_case(quarantined_ids={1})
+        assert confined_pool == pytest.approx(baseline_pool * 0.05)
+
+    def test_shared_droplet_dose_is_monotonic_in_isolation_factor(self) -> None:
+        doses = []
+        for factor in (0.0, 0.05, 0.5, 1.0):
+            zone = "PC_D6_P_F"
+            shedder = _agent(1, zone, infected=True)
+            target = _agent(2, zone)
+            core = TransmissionCore(
+                rng=np.random.default_rng(42),
+                zone_volumes={zone: 1200.0},
+                zone_types={zone: "Cabin_Corridor"},
+                confinement_isolation_factor=factor,
+            )
+            core.initialize_zones([zone])
+            matrix, _ = core.execute_transmission(
+                epoch=1,
+                agents=[shedder, target],
+                zone_pathogen_mass={zone: 0.0},
+                quarantined_ids={1},
+            )
+            doses.append(matrix.droplet_exposures[0]["dose"])
+        assert doses == sorted(doses)
+
     def test_droplet_dose_halves_when_zone_volume_doubles(self) -> None:
         dose_small = _droplet_doses(20.0)[0]
         dose_large = _droplet_doses(40.0)[0]
