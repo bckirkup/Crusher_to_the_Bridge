@@ -327,39 +327,59 @@ class SyndromicSurveillance:
     ) -> float:
         """Resolve per-day hazard; missing profiles use the unattenuated base."""
         infection = _symptomatic_infection(agent)
-        if infection:
-            severity = str(infection.get("symptom_severity") or "")
-            if severity == "asymptomatic":
-                return 0.0
-            pathogen_id = str(infection.get("pathogen_id") or "")
-            if not pathogen_id:
-                for candidate_id, candidate in (
-                    agent.get("pathogen_infections") or {}
-                ).items():
-                    if candidate is infection:
-                        pathogen_id = str(candidate_id)
-                        break
-            profile = self.symptom_severity_profiles.get(pathogen_id, {})
-            if "severity_model" not in profile:
-                return self.sick_call_probability
-            model = self._severity_model(pathogen_id)
-            if model is None:
-                raise ValueError(
-                    f"{pathogen_id} severity_model requires observation_model",
-                )
-            if severity not in model["states"]:
-                raise ValueError(
-                    f"{pathogen_id} has unrecognised symptom severity "
-                    f"state {severity!r}",
-                )
-            index = model["states"].index(severity)
-            eligibility = model["eligibility"][index]
-            reporting = model["reporting_post" if outbreak_recognized else "reporting_pre"]
-            episode_probability = eligibility * reporting[index]
-            window = model["window_days"]
-            hazard = 1.0 - (1.0 - episode_probability) ** (1.0 / window)
-            return hazard
-        return self.sick_call_probability
+        if not infection:
+            return self.sick_call_probability
+        severity = str(infection.get("symptom_severity") or "")
+        if severity == "asymptomatic":
+            return 0.0
+        pathogen_id = self._infection_pathogen_id(agent, infection)
+        profile = self.symptom_severity_profiles.get(pathogen_id, {})
+        if "severity_model" not in profile:
+            return self.sick_call_probability
+        return self._five_state_hazard(
+            pathogen_id,
+            severity,
+            outbreak_recognized,
+        )
+
+    @staticmethod
+    def _infection_pathogen_id(
+        agent: dict[str, Any],
+        infection: dict[str, Any],
+    ) -> str:
+        pathogen_id = str(infection.get("pathogen_id") or "")
+        if pathogen_id:
+            return pathogen_id
+        for candidate_id, candidate in (
+            agent.get("pathogen_infections") or {}
+        ).items():
+            if candidate is infection:
+                return str(candidate_id)
+        return ""
+
+    def _five_state_hazard(
+        self,
+        pathogen_id: str,
+        severity: str,
+        outbreak_recognized: bool,
+    ) -> float:
+        model = self._severity_model(pathogen_id)
+        if model is None:
+            raise ValueError(
+                f"{pathogen_id} severity_model requires observation_model",
+            )
+        if severity not in model["states"]:
+            raise ValueError(
+                f"{pathogen_id} has unrecognised symptom severity "
+                f"state {severity!r}",
+            )
+        index = model["states"].index(severity)
+        eligibility = model["eligibility"][index]
+        reporting = model["reporting_post" if outbreak_recognized else "reporting_pre"]
+        episode_probability = eligibility * reporting[index]
+        window = model["window_days"]
+        hazard = 1.0 - (1.0 - episode_probability) ** (1.0 / window)
+        return hazard
 
     def _severity_model(self, pathogen_id: str) -> dict[str, Any] | None:
         """Return normalized five-state observation vectors for a pathogen."""
