@@ -112,6 +112,7 @@ class SimulationState:
     chronic_behavioral_mods: dict[int, dict[str, float]] = field(default_factory=dict)
     # Outbreak-response architecture (escalation + compliance)
     cumulative_confirmed_case_ids: set[int] = field(default_factory=set)
+    ever_infected_ids: set[int] = field(default_factory=set)
     ever_ill_ids: set[int] = field(default_factory=set)
     ever_reported_ids: set[int] = field(default_factory=set)
     ever_reported_noise_ids: set[int] = field(default_factory=set)

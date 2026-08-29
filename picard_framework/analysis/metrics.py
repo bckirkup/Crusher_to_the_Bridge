@@ -29,6 +29,10 @@ RUN_SUMMARY_COLUMNS: tuple[str, ...] = (
     "num_agents",
     "num_epochs",
     "attack_rate",
+    "infection_attack_rate_passenger",
+    "infection_attack_rate_crew",
+    "ever_ill_attack_rate_crew",
+    "reported_case_attack_rate_crew",
     "outbreak_occurred",
     "peak_prevalence",
     "peak_epoch",
@@ -74,6 +78,13 @@ EPOCH_COLUMNS: tuple[str, ...] = (
     "trigger_state",
     "cumulative_cost_usd",
     "cumulative_ois",
+    "cumulative_ever_infected",
+    "cumulative_ever_infected_passenger",
+    "cumulative_ever_infected_crew",
+    "infection_attack_rate_passenger",
+    "infection_attack_rate_crew",
+    "ever_ill_rate_crew",
+    "reported_case_rate_crew",
 )
 
 # Factor columns repeated on epoch rows for join-free Stan prep.
@@ -151,6 +162,20 @@ def compute_derived_metrics(
 
     return {
         "attack_rate": round(attack_rate, 4),
+        "infection_attack_rate_passenger": round(
+            float(final.get("infection_attack_rate_passenger", 0.0) or 0.0),
+            4,
+        ),
+        "infection_attack_rate_crew": round(
+            float(final.get("infection_attack_rate_crew", 0.0) or 0.0),
+            4,
+        ),
+        "ever_ill_attack_rate_crew": round(
+            float(final.get("ever_ill_rate_crew", 0.0) or 0.0), 4,
+        ),
+        "reported_case_attack_rate_crew": round(
+            float(final.get("reported_case_rate_crew", 0.0) or 0.0), 4,
+        ),
         "peak_prevalence": peak_infected,
         "peak_epoch": peak_epoch,
         "outbreak_occurred": outbreak_occurred,
@@ -225,6 +250,16 @@ def build_run_summary_row(payload: dict[str, Any]) -> dict[str, Any]:
             "final_susceptible_fraction": derived.get("final_susceptible_fraction"),
             "cumulative_cost_usd": usd,
             "cumulative_ois": ois,
+            "infection_attack_rate_passenger": derived.get(
+                "infection_attack_rate_passenger",
+            ),
+            "infection_attack_rate_crew": derived.get(
+                "infection_attack_rate_crew",
+            ),
+            "ever_ill_rate_crew": derived.get("ever_ill_attack_rate_crew"),
+            "reported_case_rate_crew": derived.get(
+                "reported_case_attack_rate_crew",
+            ),
         }
     )
     row["run_id"] = factors["run_id"]
@@ -274,6 +309,19 @@ def build_epoch_rows(
             "trigger_state": encode_trigger_status(status),
             "cumulative_cost_usd": point.get("cumulative_cost_usd"),
             "cumulative_ois": point.get("cumulative_ois"),
+            "cumulative_ever_infected": point.get("cumulative_ever_infected"),
+            "cumulative_ever_infected_passenger": point.get(
+                "cumulative_ever_infected_passenger",
+            ),
+            "cumulative_ever_infected_crew": point.get(
+                "cumulative_ever_infected_crew",
+            ),
+            "infection_attack_rate_passenger": point.get(
+                "infection_attack_rate_passenger",
+            ),
+            "infection_attack_rate_crew": point.get("infection_attack_rate_crew"),
+            "ever_ill_rate_crew": point.get("ever_ill_rate_crew"),
+            "reported_case_rate_crew": point.get("reported_case_rate_crew"),
         }
         for col in EPOCH_FACTOR_COLUMNS:
             row[col] = summary_row.get(col)

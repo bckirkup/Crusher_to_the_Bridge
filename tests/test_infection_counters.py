@@ -81,6 +81,19 @@ class TestComputeInfectionCounters:
         results = compute_infection_counters(agents, defs)
         assert results["all_attack_rate"]["exceeded"] is True
 
+    def test_attack_rate_alias_matches_symptomatic_prevalence(self) -> None:
+        agents = [
+            _agent(0, SYMPTOM_SYMPTOMATIC),
+            _agent(1, SYMPTOM_ASYMPTOMATIC),
+        ]
+        defs = [
+            {"counter_id": "legacy", "metric": "attack_rate"},
+            {"counter_id": "canonical", "metric": "symptomatic_prevalence"},
+        ]
+        results = compute_infection_counters(agents, defs)
+        assert results["legacy"]["value"] == results["canonical"]["value"]
+        assert results["legacy"]["value"] == pytest.approx(0.5)
+
     def test_threshold_not_exceeded(self) -> None:
         agents = [
             _agent(0, SYMPTOM_SYMPTOMATIC),

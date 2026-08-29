@@ -1432,6 +1432,7 @@ def build_cascade_context(
 
 VALID_COUNTER_METRICS = {
     "attack_rate",
+    "symptomatic_prevalence",
     "reported_case_rate",
     "infected_count",
     "symptomatic_count",
@@ -1458,18 +1459,31 @@ def _agent_matches_filter(
     return True
 
 
+def _symptomatic_prevalence_value(
+    group: list[dict[str, Any]],
+    pop: int,
+) -> float:
+    n_symptomatic = sum(
+        1 for a in group
+        if agent_has_symptomatic_presentation(a)
+    )
+    return (n_symptomatic / pop) if pop > 0 else 0.0
+
+
 def _counter_metric_value(
     metric: str,
     group: list[dict[str, Any]],
     pop: int,
     ever_reported_ids: set[int] | None = None,
 ) -> float:
-    if metric == "attack_rate":
-        n_symptomatic = sum(
-            1 for a in group
-            if agent_has_symptomatic_presentation(a)
-        )
-        return (n_symptomatic / pop) if pop > 0 else 0.0
+    """Evaluate a counter metric.
+
+    ``symptomatic_prevalence`` is the canonical instantaneous metric name.
+    ``attack_rate`` remains a deprecated alias for the same function so
+    existing thresholds and configurations retain identical values.
+    """
+    if metric in {"symptomatic_prevalence", "attack_rate"}:
+        return _symptomatic_prevalence_value(group, pop)
     if metric == "reported_case_rate":
         if pop == 0 or not ever_reported_ids:
             return 0.0

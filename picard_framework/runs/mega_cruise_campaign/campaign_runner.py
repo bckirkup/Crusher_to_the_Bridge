@@ -1794,9 +1794,23 @@ def extract_timeseries(history: list[dict[str, Any]]) -> list[dict[str, Any]]:
                 "cumulative_ever_ill_passenger", 0,
             ),
             "cumulative_ever_ill_crew": s.get("cumulative_ever_ill_crew", 0),
+            "cumulative_ever_infected": s.get("cumulative_ever_infected", 0),
+            "cumulative_ever_infected_passenger": s.get(
+                "cumulative_ever_infected_passenger", 0,
+            ),
+            "cumulative_ever_infected_crew": s.get(
+                "cumulative_ever_infected_crew", 0,
+            ),
+            "infection_attack_rate_passenger": s.get(
+                "infection_attack_rate_passenger", 0.0,
+            ),
+            "infection_attack_rate_crew": s.get(
+                "infection_attack_rate_crew", 0.0,
+            ),
             "reported_case_rate_passenger": reported_case_counter.get(
                 "value", s.get("reported_case_rate_passenger", 0.0),
             ),
+            "reported_case_rate_crew": s.get("reported_case_rate_crew", 0.0),
             "passenger_reported_case_rate_newly_confined": reported_case_counter.get(
                 "newly_confined", 0,
             ),
@@ -1804,6 +1818,7 @@ def extract_timeseries(history: list[dict[str, Any]]) -> list[dict[str, Any]]:
                 reported_case_counter.get("exceeded", False),
             ),
             "ever_ill_rate_passenger": s.get("ever_ill_rate_passenger", 0.0),
+            "ever_ill_rate_crew": s.get("ever_ill_rate_crew", 0.0),
             "trigger_status": rec.get(
                 "trigger_status",
                 rec.get("reactive_protocols", {}).get("trigger_status", "none"),
@@ -1870,6 +1885,20 @@ def compute_derived_metrics(ts: list[dict[str, Any]], num_agents: int) -> dict[s
         ),
         "ever_ill_attack_rate_passenger": round(
             float(final.get("ever_ill_rate_passenger", 0.0) or 0.0), 4,
+        ),
+        "infection_attack_rate_passenger": round(
+            float(final.get("infection_attack_rate_passenger", 0.0) or 0.0),
+            4,
+        ),
+        "infection_attack_rate_crew": round(
+            float(final.get("infection_attack_rate_crew", 0.0) or 0.0),
+            4,
+        ),
+        "ever_ill_attack_rate_crew": round(
+            float(final.get("ever_ill_rate_crew", 0.0) or 0.0), 4,
+        ),
+        "reported_case_attack_rate_crew": round(
+            float(final.get("reported_case_rate_crew", 0.0) or 0.0), 4,
         ),
         "vsp_trigger_epoch": vsp_trigger_epoch,
         "peak_prevalence": peak_infected,

@@ -13,9 +13,11 @@ from engines.infection_dynamics_bridge import (
 from orchestrator_init import (
     compute_group_rates_for_ids,
     load_vsp_trigger_rule,
+    update_ever_infected_ids,
     update_ever_ill_ids,
     update_ever_reported_ids,
 )
+from orchestrator_record import _summary_counts
 from orchestrator_types import SimulationState
 from picard_framework.runs.mega_cruise_campaign.campaign_runner import (
     compute_derived_metrics,
@@ -98,6 +100,98 @@ def test_reported_ids_are_unique_and_noise_is_separate() -> None:
     )
     assert state.ever_reported_ids == {1, 2, 3}
     assert state.ever_reported_noise_ids == {9, 10}
+
+
+def test_ever_infected_ids_are_monotone_and_include_recovered_agents() -> None:
+    agents = [
+        {"agent_id": 1, "infection_state": "infected"},
+        {"agent_id": 2, "infection_state": "susceptible"},
+    ]
+    ever_infected: set[int] = set()
+
+    update_ever_infected_ids(agents, ever_infected)
+    assert ever_infected == {1}
+
+    agents[0]["infection_state"] = "recovered"
+    agents[1]["infection_state"] = "infected"
+    update_ever_infected_ids(agents, ever_infected)
+    assert ever_infected == {1, 2}
+
+    agents[1]["infection_state"] = "susceptible"
+    update_ever_infected_ids(agents, ever_infected)
+    assert ever_infected == {1, 2}
+
+
+def test_epoch_rates_use_role_denominators_and_emit_crew_fields() -> None:
+    from types import SimpleNamespace
+
+    agents = [
+        {
+            "agent_id": 1,
+            "agent_class": "passenger_general",
+            "infection_state": "infected",
+        },
+        {
+            "agent_id": 2,
+            "agent_class": "passenger_general",
+            "infection_state": "susceptible",
+        },
+        {
+            "agent_id": 3,
+            "agent_class": "crew_general",
+            "infection_state": "infected",
+        },
+        {
+            "agent_id": 4,
+            "agent_class": "crew_general",
+            "infection_state": "recovered",
+        },
+    ]
+    state = SimulationState(
+        ever_infected_ids={1, 3, 4},
+        ever_ill_ids={1, 3},
+        ever_reported_ids={1, 4},
+    )
+    engine = SimpleNamespace(
+        agents=[
+            SimpleNamespace(microflora_disruption_status=0)
+            for _ in agents
+        ],
+    )
+    summary = _summary_counts(
+        agents, engine, state, {"sick_call_count": 0},
+    )
+
+    assert summary["infection_attack_rate_passenger"] == pytest.approx(0.5)
+    assert summary["infection_attack_rate_crew"] == pytest.approx(1.0)
+    assert summary["reported_case_rate_crew"] == pytest.approx(0.5)
+    assert summary["ever_ill_rate_crew"] == pytest.approx(0.5)
+    assert summary["infection_attack_rate_passenger"] != pytest.approx(0.75)
+
+
+def test_derived_anchor_fields_are_present_and_bounded() -> None:
+    derived = compute_derived_metrics(
+        [{
+            "epoch": 0,
+            "infected": 1,
+            "recovered": 2,
+            "susceptible": 7,
+            "infection_attack_rate_passenger": 0.4,
+            "infection_attack_rate_crew": 0.8,
+            "ever_ill_rate_crew": 0.6,
+            "reported_case_rate_crew": 0.3,
+        }],
+        num_agents=10,
+    )
+    assert derived["attack_rate"] == pytest.approx(0.3)
+    for field in (
+        "infection_attack_rate_passenger",
+        "infection_attack_rate_crew",
+        "ever_ill_attack_rate_crew",
+        "reported_case_attack_rate_crew",
+    ):
+        assert field in derived
+        assert 0.0 <= derived[field] <= 1.0
 
 
 def test_reported_ids_exclude_noncompliant_agents_without_symptoms() -> None:
@@ -258,6 +352,13 @@ def test_timeseries_emits_reported_case_counter_fields() -> None:
             "infected": 1,
             "recovered": 0,
             "susceptible": 9,
+            "cumulative_ever_infected": 2,
+            "cumulative_ever_infected_passenger": 1,
+            "cumulative_ever_infected_crew": 1,
+            "infection_attack_rate_passenger": 0.125,
+            "infection_attack_rate_crew": 0.25,
+            "ever_ill_rate_crew": 0.125,
+            "reported_case_rate_crew": 0.0625,
         },
         "spaces": {},
         "cost_accounting": {},
@@ -273,4 +374,11 @@ def test_timeseries_emits_reported_case_counter_fields() -> None:
     assert series[0]["reported_case_rate_passenger"] == pytest.approx(0.03125)
     assert series[0]["passenger_reported_case_rate_newly_confined"] == 3
     assert series[0]["passenger_reported_case_rate_exceeded"] is True
+    assert series[0]["cumulative_ever_infected"] == 2
+    assert series[0]["cumulative_ever_infected_passenger"] == 1
+    assert series[0]["cumulative_ever_infected_crew"] == 1
+    assert series[0]["infection_attack_rate_passenger"] == pytest.approx(0.125)
+    assert series[0]["infection_attack_rate_crew"] == pytest.approx(0.25)
+    assert series[0]["ever_ill_rate_crew"] == pytest.approx(0.125)
+    assert series[0]["reported_case_rate_crew"] == pytest.approx(0.0625)
     assert "vsp_triggered" not in series[0]

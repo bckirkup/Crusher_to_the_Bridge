@@ -92,6 +92,7 @@ from orchestrator_init import (
     load_pathogen_profiles,
     pathogen_profiles_are_respiratory,
     update_cumulative_confirmed_cases,
+    update_ever_infected_ids,
     update_ever_reported_ids,
 )
 from orchestrator_record import finalize_simulation, record_epoch
@@ -1132,6 +1133,7 @@ class ShipSimulation:
         })
 
     def _step_escalation(self, work: _EpochWork) -> None:
+        update_ever_infected_ids(work.agents, work.state.ever_infected_ids)
         n_confirmed = update_cumulative_confirmed_cases(
             work.clin_qpcr_results, work.clin_rdt_results,
             work.state.cumulative_confirmed_case_ids,
