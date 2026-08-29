@@ -429,7 +429,7 @@ class TestSurfaceReservoirIntegration:
         enabled_spec = PicardRunSpec.from_legacy_yaml(
             str(REPO_ROOT), num_epochs=epochs,
         )
-        enabled_spec.legacy_cfg["initial_infected"] = 10
+        enabled_spec.pathogen_profiles[PATHOGEN]["initial_infected"] = 10
         variant_cfg = copy.deepcopy(
             enabled_spec.legacy_cfg["variant_surveillance"],
         )
