@@ -1,7 +1,7 @@
 #Requires -Version 5.1
 <#
 .SYNOPSIS
-  Submit the multi-platform calibration wave-1 campaign to AWS Batch Fargate Spot.
+  Submit the multi-platform calibration wave-1 campaign to AWS Batch EC2 Spot.
 
 .DESCRIPTION
   Registers nothing — assumes picard-campaign job definition already includes

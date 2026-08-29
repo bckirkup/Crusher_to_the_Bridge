@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ============================================================================
 #  submit_array_job.sh — submit a Picard campaign as an AWS Batch array
-#  job of N Fargate Spot children, each running a disjoint shard.
+#  job of N EC2 Spot children, each running a disjoint shard.
 #
 #  Each array child receives AWS_BATCH_JOB_ARRAY_INDEX automatically; the
 #  campaign runner uses it as --shard-index, so we only pass --shard-count

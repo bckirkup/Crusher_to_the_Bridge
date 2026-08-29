@@ -1,7 +1,7 @@
 {
   "jobDefinitionName": "picard-campaign",
   "type": "container",
-  "platformCapabilities": ["FARGATE"],
+  "platformCapabilities": ["EC2"],
   "containerProperties": {
     "image": "<ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/picard-campaign:latest",
     "command": [
@@ -18,12 +18,7 @@
       { "type": "VCPU", "value": "1" },
       { "type": "MEMORY", "value": "2048" }
     ],
-    "fargatePlatformConfiguration": {
-      "platformVersion": "LATEST"
-    },
-    "networkConfiguration": {
-      "assignPublicIp": "ENABLED"
-    },
+    "linuxParameters": { "sharedMemorySize": 512 },
     "environment": [
       { "name": "PYTHONUTF8", "value": "1" },
       { "name": "PYTHONPATH", "value": "/app" }
@@ -46,7 +41,7 @@
   "retryStrategy": {
     "attempts": 10,
     "evaluateOnExit": [
-      { "onStatusReason": "Your Spot Task was interrupted*", "action": "retry" },
+      { "onStatusReason": "Host EC2*", "action": "retry" },
       { "onReason": "OutOfMemoryError*", "action": "exit" },
       { "onExitCode": "137", "action": "exit" },
       { "onExitCode": "0", "action": "exit" },

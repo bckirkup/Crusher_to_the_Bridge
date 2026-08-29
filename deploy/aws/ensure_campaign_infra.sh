@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
 # ============================================================================
-#  ensure_campaign_infra.sh — recreate missing Batch queue / log group and
-#  register the current picard-campaign job definition (1 vCPU / 2 GB,
-#  --timeout 3600, OOM exit-without-retry).
+#  ensure_campaign_infra.sh — ensure the EC2 Spot scale-to-zero campaign
+#  pathway (compute environment / queue / log group) and register the current
+#  picard-campaign job definition (1 vCPU / 2 GB, --timeout 3600,
+#  OOM exit-without-retry).
 #
 #  Prerequisites:
 #    AWS_PROFILE=picard   # assumes picard-deploy-role with ExternalId
 #    ACCOUNT_ID, REGION, BUCKET env vars set (or pass as args)
+#    SUBNET_IDS, SECURITY_GROUP_IDS  # only needed to create/refresh the CE
 #
 #  Usage:
 #    export AWS_PROFILE=picard REGION=us-east-1 ACCOUNT_ID=<ACCOUNT_ID> BUCKET=<bucket>
@@ -20,7 +22,11 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REGION="${REGION:-us-east-1}"
 ACCOUNT_ID="${ACCOUNT_ID:-}"
 BUCKET="${BUCKET:-}"
-CE_NAME="${CE_NAME:-picard-campaign-spot}"
+CE_NAME="${CE_NAME:-picard-abm-campaign-spot}"
+PATHWAY="${PATHWAY:-abm_campaign}"
+SUBNET_IDS="${SUBNET_IDS:-}"
+SECURITY_GROUP_IDS="${SECURITY_GROUP_IDS:-}"
+MAX_VCPUS="${MAX_VCPUS:-256}"
 QUEUE_NAME="${QUEUE_NAME:-picard-campaign-queue}"
 LOG_GROUP="${LOG_GROUP:-/aws/batch/picard-campaign}"
 JOB_DEF_NAME="${JOB_DEF_NAME:-picard-campaign}"
@@ -63,17 +69,6 @@ echo "  CE         : $CE_NAME"
 echo "  queue      : $QUEUE_NAME"
 
 if [[ "$REGISTER_ONLY" -eq 0 ]]; then
-  # Compute environment must already exist (created once in README §5).
-  ce_status="$(aws "${AWS_PROFILE_ARG[@]}" batch describe-compute-environments \
-    --compute-environments "$CE_NAME" --region "$REGION" \
-    --query 'computeEnvironments[0].status' --output text 2>/dev/null || true)"
-  if [[ "$ce_status" != "VALID" ]]; then
-    echo "ERROR: compute environment $CE_NAME status=$ce_status (want VALID)." >&2
-    echo "Create it first (README §5)." >&2
-    exit 1
-  fi
-  echo "  CE status  : $ce_status"
-
   # Log group (execution role cannot create it).
   if aws "${AWS_PROFILE_ARG[@]}" logs describe-log-groups \
       --log-group-name-prefix "$LOG_GROUP" --region "$REGION" \
@@ -86,20 +81,23 @@ if [[ "$REGISTER_ONLY" -eq 0 ]]; then
     echo "  log group  : created $LOG_GROUP"
   fi
 
-  # Job queue (inventory has seen CE present with queue missing).
-  q_status="$(aws "${AWS_PROFILE_ARG[@]}" batch describe-job-queues \
-    --job-queues "$QUEUE_NAME" --region "$REGION" \
-    --query 'jobQueues[0].status' --output text 2>/dev/null || true)"
-  if [[ "$q_status" == "VALID" || "$q_status" == "CREATING" ]]; then
-    echo "  queue      : $q_status"
-  else
-    aws "${AWS_PROFILE_ARG[@]}" batch create-job-queue \
-      --job-queue-name "$QUEUE_NAME" \
-      --state ENABLED --priority 1 \
-      --compute-environment-order "order=1,computeEnvironment=$CE_NAME" \
-      --region "$REGION"
-    echo "  queue      : create requested"
+  # EC2 Spot compute environment (minvCpus 0) + queue. Shared implementation
+  # with ensure_analysis_infra.ps1 so the two platforms cannot drift.
+  if [[ -z "$SUBNET_IDS" || -z "$SECURITY_GROUP_IDS" ]]; then
+    echo "ERROR: set SUBNET_IDS and SECURITY_GROUP_IDS to ensure $CE_NAME" >&2
+    echo "       (or pass --register-only to skip compute-environment work)" >&2
+    exit 1
   fi
+  python3 "$ROOT/ensure_batch_pathways.py" \
+    --pathway "$PATHWAY" \
+    --ce-name "$CE_NAME" \
+    --queue "$QUEUE_NAME" \
+    --capacity spot \
+    --max-vcpus "$MAX_VCPUS" \
+    --subnets "$SUBNET_IDS" \
+    --security-groups "$SECURITY_GROUP_IDS" \
+    --region "$REGION" \
+    ${AWS_PROFILE:+--profile "$AWS_PROFILE"}
 
   # Wait briefly for queue VALID.
   for _ in $(seq 1 30); do

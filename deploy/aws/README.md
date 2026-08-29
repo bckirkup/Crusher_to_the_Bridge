@@ -1,9 +1,9 @@
-# AWS Batch (Fargate Spot) deployment — mega cruise campaign
+# AWS Batch (EC2 Spot) deployment — mega cruise campaign
 
 Package the ~17,780-run mega cruise campaign
 (`picard_framework/runs/mega_cruise_campaign/campaign_runner.py`) as a Docker
 image in Amazon ECR and run it as a single **AWS Batch array job** across many
-short-lived **Fargate Spot** containers. Each array child executes a disjoint
+short-lived **EC2 Spot** containers on a scale-to-zero compute environment. Each array child executes a disjoint
 shard of the run list and uploads one periodically refreshed fused zip plus one
 JSON manifest per shard to one shared S3 prefix. Interrupted Spot containers
 resume from the shard artifacts and `completed_runs.txt` on retry (the runner
@@ -41,7 +41,7 @@ Two credential contexts, both short-lived:
   `picard-deploy-role`. A `~/.aws/config` named profile (`picard`) makes the CLI
   auto-assume that role (supplying the `ExternalId`) and auto-refresh the
   temporary credentials, which expire in ≤1h (`MaxSessionDuration=3600`).
-- **Running containers (runtime side):** each Fargate task gets its identity
+- **Running containers (runtime side):** each Batch task gets its identity
   from two Batch roles — an **execution role** (image pull + logs) and a **job
   role** (S3 write). boto3 in `campaign_runner.py` reads the job role
   automatically from the ambient credential chain; no keys are baked into the
@@ -54,24 +54,26 @@ Two credential contexts, both short-lived:
 | `bootstrap_user_policy.json` | Permission policy for the long-lived `devin-bootstrap` IAM user. Its **only** permission is `sts:AssumeRole` on `picard-deploy-role`; all ECR/Batch/S3 access comes from the assumed role's short-lived credentials, never from this user. | `<ACCOUNT_ID>` |
 | `deploy_role_trust_policy.json` | Trust policy for `picard-deploy-role`. Only the `devin-bootstrap` user may assume it, and only when it supplies the shared-secret `sts:ExternalId`. Pair with `MaxSessionDuration=3600` (set on the role via `create-role`, not in this document) so issued credentials are short-lived. | `<ACCOUNT_ID>`, `<EXTERNAL_ID>` |
 | `deploy_role_permissions_policy.json` | Permission policy attached to `picard-deploy-role` — the role Devin assumes (with an `ExternalId`) to build/push the `picard-campaign` image and run it as an AWS Batch array job. Least-privilege ECR + S3 + Batch + Logs + read-only EC2 subnet/SG/VPC discovery + `iam:PassRole`. | `<REGION>`, `<ACCOUNT_ID>`, `<BUCKET>` |
-| `batch_execution_role_trust.json` | Trust policy for `picard-campaign-execution-role`. Assumed by the ECS/Fargate agent so it can pull the ECR image and write logs on behalf of the task. | *(none)* |
-| `batch_execution_role_permissions.json` | Permission policy for the execution role (the Fargate agent): pull the `picard-campaign` image from ECR and write container logs. Equivalent to the AWS-managed `AmazonECSTaskExecutionRolePolicy`, scoped to this repo/log group. | `<REGION>`, `<ACCOUNT_ID>` |
-| `batch_job_role_trust.json` | Trust policy for `picard-campaign-job-role` — the running container's own identity (used by boto3's ambient credential chain to upload results to S3). Assumed by the ECS/Fargate task. | *(none)* |
+| `batch_execution_role_trust.json` | Trust policy for `picard-campaign-execution-role`. Assumed by the ECS agent so it can pull the ECR image and write logs on behalf of the task. | *(none)* |
+| `batch_execution_role_permissions.json` | Permission policy for the execution role (the ECS agent): pull the `picard-campaign` image from ECR and write container logs. Equivalent to the AWS-managed `AmazonECSTaskExecutionRolePolicy`, scoped to this repo/log group. | `<REGION>`, `<ACCOUNT_ID>` |
+| `batch_job_role_trust.json` | Trust policy for `picard-campaign-job-role` — the running container's own identity (used by boto3's ambient credential chain to upload results to S3). Assumed by the ECS task. | *(none)* |
 | `batch_job_role_permissions.json` | Permission policy for `picard-campaign-job-role` (the container's own identity). boto3 in `campaign_runner.py` picks this up from the ambient credential chain to upload shard zips, manifests, and resume logs to the shared results prefix. S3 write to `campaign/*`. | `<BUCKET>` |
-| `batch_job_definition.json` | Fargate Spot Batch job definition (ECR image, both role ARNs, vCPU/mem, shard/s3 command). Sized at **1 vCPU / 2048 MB (2 GB)** after compact history + subprocess isolation. Per-run `--timeout 3600` covers ~30 min 7000-agent sims. OOM (exit 137 / `OutOfMemoryError*`) **exits without retry** so memory kills are countable; Spot `Host EC2*` still retries. Escalate 1/4 → 1/8 → 2/16 GB if `classify_batch_failures.py` shows non-zero OOM. **Not an IAM document.** | `<ACCOUNT_ID>`, `<REGION>`, `<BUCKET>` |
+| `batch_job_definition.json` | EC2 Spot Batch job definition (ECR image, both role ARNs, vCPU/mem, shard/s3 command). Sized at **1 vCPU / 2048 MB (2 GB)** after compact history + subprocess isolation. Per-run `--timeout 3600` covers ~30 min 7000-agent sims. OOM (exit 137 / `OutOfMemoryError*`) **exits without retry** so memory kills are countable; Spot `Host EC2*` still retries. Escalate 1/4 → 1/8 → 2/16 GB if `classify_batch_failures.py` shows non-zero OOM. **Not an IAM document.** | `<ACCOUNT_ID>`, `<REGION>`, `<BUCKET>` |
 | `submit_array_job.sh` | Wrapper around `aws batch submit-job --array-properties size=<N>` (honors `AWS_PROFILE`) | — |
 | `classify_batch_failures.py` | Classify array-child attempts: Spot reclaim vs OOM vs timeout vs other. Write JSON/CSV; optional upload to `s3://…/campaign/_ops/`. | — |
 | `monitor_campaign.ps1` | Windows-friendly poller: Batch `statusSummary` + completed-run count from shard resume logs (optional `-Watch` / `-Classify`). | — |
-| `ensure_campaign_infra.sh` | Recreate missing queue/log group and register the current job definition (`AWS_PROFILE=picard`). Optional `--smoke-submit N`. | `ACCOUNT_ID`, `REGION`, `BUCKET` |
+| `ensure_campaign_infra.sh` | Ensure the EC2 Spot scale-to-zero campaign CE + queue + log group and register the current job definition (`AWS_PROFILE=picard`). Optional `--smoke-submit N`. | `ACCOUNT_ID`, `REGION`, `BUCKET`, `SUBNET_IDS`, `SECURITY_GROUP_IDS` |
+| `ensure_batch_pathways.py` | Shared CE/queue provisioner behind both ensure scripts: native EC2, `minvCpus`/`desiredvCpus` 0, instance types from `instance_pathways.json`. `--dry-run` prints the CE body without calling AWS. | — |
+| `instance_pathways.json` | Instance families per pathway (`abm_campaign`, `analysis_compute`, `analysis_memory`) and architecture. | — |
 | `submit_boundary_surface.ps1` | Submit `boundary_surface_v1` Spot array (`-Tier b2` / `-IncludeDeferred` via containerOverrides). | — |
 | `submit_campaign_manifest.ps1` | Submit any mega-cruise manifest Spot array (synthetic recovery, VSP degradation, …). | — |
 | `Dockerfile.analysis` | CmdStan analysis image for surface / Stan / MC (not Spot ABM). Must COPY crusher_labs + orchestrator deps; pin `CMDSTAN` to versioned install dir. | — |
 | `boundary_analysis_entrypoint.py` | Analysis container entrypoint (`--phase surface\|stan\|mc\|report`). | — |
-| `batch_job_definition_boundary_*.json` | On-Demand Fargate job defs for surface / Stan / MC. | `<ACCOUNT_ID>`, `<REGION>`, `<BUCKET>` |
-| `ensure_analysis_infra.ps1` | On-Demand CE `picard-analysis-ondemand` + queue + register analysis job defs. | — |
+| `batch_job_definition_boundary_*.json` | EC2 job defs for surface / Stan / MC. | `<ACCOUNT_ID>`, `<REGION>`, `<BUCKET>` |
+| `ensure_analysis_infra.ps1` | Both analysis pathways (`picard-analysis-compute-ondemand` + `picard-analysis-queue`, `picard-analysis-memory-ondemand` + `picard-analysis-memory-queue`) + register analysis job defs. `-Capacity spot` for interruption-tolerant runs. | — |
 | `submit_boundary_analysis.ps1` | Submit one analysis phase job. | — |
 | `sentinel_nuts_entrypoint.py` | One AWS Batch array child for a Sentinel Engine C NUTS cell. | — |
-| `batch_job_definition_sentinel_nuts.json` | Fargate NUTS ladder job definition using the existing analysis image and log group. | `<ACCOUNT_ID>`, `<REGION>`, `<BUCKET>` |
+| `batch_job_definition_sentinel_nuts.json` | EC2 NUTS ladder job definition using the existing analysis image and log group. | `<ACCOUNT_ID>`, `<REGION>`, `<BUCKET>` |
 | `submit_sentinel_nuts.sh` / `monitor_sentinel_nuts.sh` | Submit and monitor rung-scoped Sentinel NUTS arrays. | — |
 | `aggregate_results.py` | Read shard zips/manifests under `./results/`, merge one row per run into CSV/JSON | — |
 
@@ -96,7 +98,7 @@ throughout.
   in step 1. After that, day-to-day deploys need only the `devin-bootstrap`
   credentials.
 - An S3 bucket for results.
-- A Batch **Fargate Spot** compute environment + job queue (see step 4).
+- A Batch **EC2 Spot** compute environment + job queue (see step 4).
 
 ```bash
 export REGION=us-east-1
@@ -141,7 +143,7 @@ aws iam put-role-policy --role-name picard-deploy-role \
 ### 1b. Batch execution + job roles (container runtime identities)
 
 ```bash
-# Execution role — Fargate agent pulls the image and writes logs.
+# Execution role — the ECS agent pulls the image and writes logs.
 aws iam create-role --role-name picard-campaign-execution-role \
   --assume-role-policy-document "$(render batch_execution_role_trust.json)"
 aws iam put-role-policy --role-name picard-campaign-execution-role \
@@ -240,20 +242,22 @@ which Batch injects into every array child, so child *i* runs shard *i*.
 
 ### Spot reclaim vs OOM (`evaluateOnExit`)
 
-Fargate Spot interruptions often arrive as exit code **137** with
+Spot interruptions often arrive as exit code **137** with
 `statusReason: "Your Spot Task was interrupted."` — the same exit code as an
 OOM kill. The job definition **must** match Spot status reasons **before** the
 exit-137 / `OutOfMemoryError*` exit rules, or Batch will treat reclaim as a
 permanent OOM and stop retrying. Current order:
 
-1. `Your Spot Task was interrupted*` → `retry` (must precede exit-137)
+1. `Host EC2*` → `retry` (EC2 Spot reclaim / instance loss; must precede exit-137)
 2. `OutOfMemoryError*` → `exit` (countable, no retry)
 3. exit `137` → `exit` (bare memory kill without reason text)
 4. exit `0` → `exit`
 5. `*` → `retry`
 
-(AWS Batch allows at most **five** `evaluateOnExit` rules. This CE is
-`FARGATE_SPOT` only, so the EC2-style `Host EC2*` rule is omitted.)
+(AWS Batch allows at most **five** `evaluateOnExit` rules. On EC2, reclaim
+arrives as `Host EC2 <instance-id> terminated`, so the Fargate-only
+`Your Spot Task was interrupted*` rule was dropped for the `Host EC2*` one
+rather than added alongside it.)
 
 `attempts` is **10** so a shard can survive repeated Spot reclaim. `--resume`
 still skips completed runs after each restart.
@@ -278,10 +282,10 @@ Two separate memory problems, two fixes:
    `{run_id}.failure.json` on failure. Use `--full-telemetry` only when you
    need the full history dump.
 
-On **Fargate, memory is constrained by vCPU** — you can only pick a `MEMORY`
-value from the valid set for the chosen `VCPU`. At **1 vCPU** the allowed range
-is **2048–8192 MB** (in 1024 MB increments). Escalation if
-`classify_batch_failures.py` reports OOM:
+On EC2 the vCPU/memory pairs are free-form — Batch packs jobs onto an instance
+until either dimension is exhausted, so `MEMORY` must stay under the
+instance's ECS-available memory (roughly 1 GiB below its nominal size).
+Escalation if `classify_batch_failures.py` reports OOM:
 
 | Step | VCPU | MEMORY |
 |------|------|--------|
@@ -291,8 +295,9 @@ is **2048–8192 MB** (in 1024 MB increments). Escalation if
 | +3 | 2 | 16384 |
 | last resort | 4 | 30720 |
 
-See the AWS docs for the full
-[Fargate task CPU/memory combinations](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html#task_size).
+Keep an escalated `MEMORY` inside `instance_pathways.json`'s families: the
+`abm_campaign` c-family gives 2 GiB per vCPU, so anything above that ratio
+strands cores and belongs on the memory pathway instead.
 
 ### Account inventory notes (us-east-1)
 
@@ -300,7 +305,7 @@ As of the 1 vCPU / 2 GB resize work:
 
 | Resource | Status |
 |----------|--------|
-| `picard-campaign-spot` compute env | Present: `VALID` / `ENABLED`, `FARGATE_SPOT`, `maxvCpus: 256` |
+| `picard-abm-campaign-spot` compute env | EC2 `SPOT`, `minvCpus: 0`, `maxvCpus: 256`. The retired `picard-campaign-spot` (`FARGATE_SPOT`) can be deleted once the queue points at the EC2 CE. |
 | `picard-campaign-queue` | May be missing — recreate (step 5) before submit |
 | `picard-campaign` job definition | Register a new revision from this JSON after each sizing/timeout change |
 | Deploy identity | Use `--profile picard` (assumes `picard-deploy-role`). The `devin-bootstrap` user alone cannot call ECR/S3/Logs. |
@@ -314,34 +319,56 @@ outcomes.
 `aggregate_results.py` flattens `parameters.*` into CSV columns so you do not
 need to parse opaque run_ids or reopen `run_spec.json` / the manifest.
 
-## 5. Compute environment + job queue (one-time)
+## 5. Compute environments + job queues (one-time)
 
-Create a Fargate **Spot** compute environment and a queue pointing at it
-(replace subnets / security groups):
+Three pathways, all native EC2 at `minvCpus: 0` / `desiredvCpus: 0` — Batch
+terminates the last instance a few minutes after a queue drains, so an idle
+pathway costs nothing:
+
+| Pathway | CE | Queue | Capacity | Instances |
+|---------|----|-------|----------|-----------|
+| ABM campaign shards | `picard-abm-campaign-spot` | `picard-campaign-queue` | Spot | c7i / c7a / c6i |
+| Analysis, core-bound (Stan fits, MC, sentinel) | `picard-analysis-compute-ondemand` | `picard-analysis-queue` | On-Demand | c7i / c7a / c6i |
+| Analysis, memory-bound (surface / bundle / report) | `picard-analysis-memory-ondemand` | `picard-analysis-memory-queue` | On-Demand | r7i / r7a / r6i |
+
+Shards are interruption-tolerant (`--resume` plus 10 attempts), so they stay on
+Spot. MCMC does not resume mid-chain, so the analysis pathways default to EC2
+On-Demand — still far below the Fargate On-Demand rate they replace. Pass
+`-Capacity spot` to `ensure_analysis_infra.ps1` for runs that can afford a
+restart.
+
+Both ensure scripts call `ensure_batch_pathways.py`, which reads the instance
+families from `instance_pathways.json`, creates or aligns the CE, waits for
+`VALID`, and points the queue at it:
 
 ```bash
-aws --profile picard batch create-compute-environment \
-  --compute-environment-name picard-campaign-spot \
-  --type MANAGED --state ENABLED \
-  --compute-resources '{
-    "type":"FARGATE_SPOT","maxvCpus":256,
-    "subnets":["subnet-xxxx"],"securityGroupIds":["sg-xxxx"]
-  }' --region "$REGION"
-
-aws --profile picard batch create-job-queue \
-  --job-queue-name picard-campaign-queue \
-  --state ENABLED --priority 1 \
-  --compute-environment-order order=1,computeEnvironment=picard-campaign-spot \
-  --region "$REGION"
+export SUBNET_IDS=subnet-xxxx,subnet-yyyy SECURITY_GROUP_IDS=sg-xxxx
+./deploy/aws/ensure_campaign_infra.sh          # campaign pathway + job def
+python3 deploy/aws/ensure_batch_pathways.py \
+  --pathway analysis_compute --queue picard-analysis-queue --dry-run
 ```
+
+`--dry-run` prints the compute-environment body and calls no AWS API; use it to
+review instance families before provisioning.
+
+A CE cannot change capacity type in place. Repointing `picard-campaign-queue`
+from the old `FARGATE_SPOT` CE to the EC2 CE is an `update-job-queue` (the
+script does it); the Fargate CE must then be disabled and deleted separately,
+and a queue can never hold both kinds at once.
+
+EC2 compute environments also need an ECS instance profile (default
+`ecsInstanceRole`, override with `--instance-profile`) and `iam:PassRole` on it
+for the deploy role. CmdStan jobs that need more than the AMI's 30 GiB root
+volume take a launch template: create it once in CloudShell and pass
+`BATCH_LAUNCH_TEMPLATE` / `--launch-template`.
 
 **`create-compute-environment` returns immediately, but the environment sits in
 `status: CREATING`** — `create-job-queue` fails with *"Compute Environment ... is
-not valid"* until it reaches `VALID`. Poll before creating the queue:
+not valid"* until it reaches `VALID`; `ensure_batch_pathways.py` polls for it.
 
 ```bash
 aws --profile picard batch describe-compute-environments \
-  --compute-environments picard-campaign-spot --region "$REGION" \
+  --compute-environments picard-abm-campaign-spot --region "$REGION" \
   --query 'computeEnvironments[0].[status,state]'
 ```
 
@@ -520,7 +547,7 @@ AWS_PROFILE=picard python3 classify_batch_failures.py \
   --s3-uri "s3://$BUCKET/campaign/_ops/failure_report_<jobId>.json"
 ```
 
-`RUNNING`↔`RUNNABLE` bounce on Fargate Spot is normal reclaim + retry. Use the
+`RUNNING`↔`RUNNABLE` bounce on EC2 Spot is normal reclaim + retry. Use the
 classifier's `jobs_with_spot_reclaim` vs `jobs_with_oom` counts to separate
 reclaim noise from real memory pressure. True OOM attempts **do not retry**
 (job def exits on `OutOfMemoryError*` / bare exit 137 after Spot rules) so they

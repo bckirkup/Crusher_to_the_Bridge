@@ -1,7 +1,7 @@
 #Requires -Version 5.1
 <#
 .SYNOPSIS
-  Submit the 72-cell sentinel recovery Stan array on On-Demand Fargate.
+  Submit the 72-cell sentinel recovery Stan array on On-Demand EC2 (compute-optimized analysis queue).
 
 .DESCRIPTION
   Requires analysis extract already on S3 under
