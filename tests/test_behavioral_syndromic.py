@@ -140,10 +140,10 @@ class TestBehavioralSyndromic:
         eligible = float(np.dot(base, eligibility))
         reported = float(np.dot(base, eligibility * reporting))
         symptomatic = float(base[1:].sum())
-        assert eligible == pytest.approx(0.4987, abs=0.001)
-        assert reported == pytest.approx(0.3018, abs=0.001)
-        assert reported / eligible == pytest.approx(0.6053, abs=0.002)
-        assert reported / symptomatic == pytest.approx(0.4024, abs=0.002)
+        assert eligible == pytest.approx(0.498700, abs=1e-6)
+        assert reported == pytest.approx(0.302402, abs=1e-6)
+        assert reported / eligible == pytest.approx(0.606381, abs=1e-6)
+        assert reported / symptomatic == pytest.approx(0.403203, abs=1e-6)
 
     def test_recognition_increases_five_state_reporting_hazard(self) -> None:
         profile = {
@@ -236,29 +236,141 @@ class TestBehavioralSyndromic:
             1.0 - (1.0 - 1.0 * 0.94) ** 0.5,
         )
 
-    def test_asymptomatic_host_never_makes_true_sick_call(self) -> None:
+    def test_unknown_state_raises_but_legacy_profile_uses_base_hazard(self) -> None:
+        profile = {
+            "norwalk_gi": {
+                "severity_model": {
+                    "states": [
+                        "asymptomatic", "subclinical", "mild", "moderate",
+                        "severe_critical",
+                    ],
+                },
+                "observation_model": {},
+            },
+        }
+        agent = {
+            "agent_id": 7,
+            "symptom_presentation": PRESENTATION_SYMPTOMATIC,
+            "pathogen_infections": {
+                "norwalk_gi": {
+                    "illness": "SYMPTOMATIC",
+                    "symptom_severity": "unrecognised",
+                },
+            },
+        }
         syn = SyndromicSurveillance(
-            sick_call_probability=1.0,
-            background_noise_rate=0.0,
-            noise_categories=[],
-            rng=np.random.default_rng(4),
+            sick_call_probability=0.7,
+            symptom_severity_profiles=profile,
         )
+        with pytest.raises(ValueError, match="norwalk_gi.*unrecognised"):
+            syn._severity_hazard(agent)
+
+        legacy = SyndromicSurveillance(
+            sick_call_probability=0.37,
+            symptom_severity_profiles={"norwalk_gi": {}},
+        )
+        assert legacy._severity_hazard(agent) == pytest.approx(0.37)
+
+    def test_asymptomatic_host_never_makes_true_sick_call(self) -> None:
         agent = {
             "agent_id": 7,
             "infection_state": INFECTION_INFECTED,
-            "symptom_presentation": "asymptomatic",
+            "symptom_presentation": PRESENTATION_SYMPTOMATIC,
             "compliance_status": COMPLIANCE_COMPLIANT,
             "pathogen_infections": {
                 "norwalk_gi": {
                     "pathogen_id": "norwalk_gi",
-                    "illness": "NOT_ILL",
+                    "illness": "SYMPTOMATIC",
                     "symptom_severity": "asymptomatic",
                 },
             },
         }
-        result = syn.query_ground_truth({"epoch": 0, "agents": [agent]})
-        assert result["true_positive_ids"] == []
-        assert result["sick_call_agents"] == []
+        five_state_profile = {
+            "norwalk_gi": {
+                "severity_model": {
+                    "states": [
+                        "asymptomatic", "subclinical", "mild", "moderate",
+                        "severe_critical",
+                    ],
+                },
+                "observation_model": {},
+            },
+        }
+        for profiles in (None, five_state_profile):
+            syn = SyndromicSurveillance(
+                sick_call_probability=1.0,
+                background_noise_rate=0.0,
+                noise_categories=[],
+                symptom_severity_profiles=profiles,
+                rng=np.random.default_rng(4),
+            )
+            result = syn.query_ground_truth({"epoch": 0, "agents": [agent]})
+            assert result["true_positive_ids"] == []
+            assert result["sick_call_agents"] == []
+
+    def test_asymptomatic_label_is_recorded_and_replaced_once_on_symptom_onset(
+        self,
+    ) -> None:
+        class Host:
+            illness_status = IllnessStatus.NOT_ILL
+
+            @staticmethod
+            def get_chronic_illness_boost(_pid: str) -> float:
+                return 0.0
+
+        profile = {
+            "illness_probability": {"eta": 0.0, "gamma": 1.0},
+            "severity_model": {
+                "states": [
+                    "asymptomatic", "subclinical", "mild", "moderate",
+                    "severe_critical",
+                ],
+                "base_probabilities": [0.0, 0.0, 1.0, 0.0, 0.0],
+            },
+        }
+        infection = {
+            "acquired_particles": 1e9,
+            "time_infected": 0,
+            "illness": IllnessStatus.NOT_ILL,
+        }
+        host = Host()
+        rng = np.random.default_rng(8)
+        _draw_symptom_onset(host, "norwalk_gi", infection, profile, rng)
+        assert infection["symptom_severity"] == "asymptomatic"
+        assert infection["illness"] == IllnessStatus.NOT_ILL
+
+        symptomatic_profile = {
+            **profile,
+            "illness_probability": {"eta": 1.0, "gamma": 1.0},
+        }
+        _draw_symptom_onset(
+            host,
+            "norwalk_gi",
+            infection,
+            symptomatic_profile,
+            rng,
+        )
+        assert infection["illness"] == IllnessStatus.SYMPTOMATIC
+        assert infection["symptom_severity"] == "mild"
+
+        replacement_profile = {
+            **symptomatic_profile,
+            "severity_model": {
+                "states": [
+                    "asymptomatic", "subclinical", "mild", "moderate",
+                    "severe_critical",
+                ],
+                "base_probabilities": [0.0, 0.0, 0.0, 0.0, 1.0],
+            },
+        }
+        _draw_symptom_onset(
+            host,
+            "norwalk_gi",
+            infection,
+            replacement_profile,
+            rng,
+        )
+        assert infection["symptom_severity"] == "mild"
 
     def test_information_belief_mode_keeps_legacy_formula(self) -> None:
         syn = SyndromicSurveillance(

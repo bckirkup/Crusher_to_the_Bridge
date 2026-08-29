@@ -425,10 +425,12 @@ def _draw_symptom_onset(
     if rng.random() < ill_prob:
         inf["illness"] = IllnessStatus.SYMPTOMATIC
         inf["onset_time_infected"] = inf.get("time_infected", 0)
-        if "symptom_severity" not in inf:
+        if inf.get("symptom_severity") in (None, "", "asymptomatic"):
             inf["symptom_severity"] = _draw_symptom_severity(prof, rng)
         if agent.illness_status == IllnessStatus.NOT_ILL:
             agent.illness_status = IllnessStatus.SYMPTOMATIC
+    else:
+        inf["symptom_severity"] = "asymptomatic"
 
 
 def _draw_symptom_severity(
