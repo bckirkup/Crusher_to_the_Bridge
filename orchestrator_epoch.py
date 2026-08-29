@@ -28,6 +28,7 @@ from engines.incubation import (
     host_incubation_state,
 )
 from engines.infection_dynamics_bridge import (
+    DEFAULT_AIRBORNE_HALF_LIFE_HOURS,
     IllnessStatus,
     InfectionStatus,
     KorkinShipEngine,
@@ -35,6 +36,7 @@ from engines.infection_dynamics_bridge import (
 from engines.sim_clock import SimClock, config_epochs_for_hours
 from engines.sim_clock import crossed_day_boundary as _crossed_day_boundary
 from engines.strain_state import ImmuneRecord, StrainRegistry
+from engines.transmission_core import TransmissionCore
 from engines.wearable_monitor import WearableMonitor
 from orchestrator_types import (
     DEFAULT_AIRBORNE_FRACTION,
@@ -532,10 +534,25 @@ def step_infection_progression(
 
         agent.update_microflora_disruption(pathogen_profiles)
 
-    # Per-pathogen mass accumulation
+    # Per-pathogen mass accumulation, aged before this epoch's deposit so the
+    # reservoir the HVAC pathway reads holds current rather than cumulative
+    # emission. External CONTAM transport only moves the aggregate array, so the
+    # per-pathogen pools have to be aged here on either transport path.
+    clock = getattr(engine, "clock", None)
+    if not isinstance(clock, SimClock):
+        clock = SimClock()
     for pid, prof in pathogen_profiles.items():
         dep_frac = prof.get("surface_deposition_fraction", 1e-4)
+        survival = clock.survival_from_half_life(
+            float(
+                prof.get(
+                    "airborne_half_life_hours", DEFAULT_AIRBORNE_HALF_LIFE_HOURS,
+                ),
+            ),
+        )
         masses = engine.get_pathogen_zone_mass(pid)
+        for zone_name in masses:
+            masses[zone_name] *= survival
         for agent in engine.agents:
             sv = agent.get_pathogen_shedding(pid, prof)
             if sv > 0:
@@ -1007,17 +1024,19 @@ def confine_all_agents(
 
 
 def apply_surface_decontamination(
-    engine: KorkinShipEngine,
+    tx_core: TransmissionCore | None,
     factor: float,
 ) -> None:
-    """SOP-010: reduce surface pathogen mass by a decontamination factor.
+    """SOP-010: reduce the fomite surface reservoir by a decontamination factor.
 
     ``factor`` is the *reduction* fraction (e.g. 0.60 means remove 60% of
-    surface mass, retaining 40%).
+    surface mass, retaining 40%). Scrubbing surfaces acts on the fomite pools
+    the touch pathway reads, not on the airborne mass the HVAC pathway reads.
     """
+    if tx_core is None:
+        return
     retention = 1.0 - max(0.0, min(1.0, factor))
-    for zname in engine.zone_pathogen_mass:
-        engine.zone_pathogen_mass[zname] *= retention
+    tx_core.decontaminate_surfaces(retention)
 
 
 def apply_zone_closures(

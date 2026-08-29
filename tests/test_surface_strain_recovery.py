@@ -422,11 +422,14 @@ class TestSurfaceReservoirIntegration:
         # Deposition needs a shedding host, and under the hours clock a host is
         # not one epoch (one hour) past infection when it starts: the run has to
         # cover a biological day for surfaces to carry a lineage at all.
-        epochs = 26
+        # Rebaselined for the dose-pathway dimensional fix: corrected
+        # per-epoch shedding is 24x smaller, so the run must supply enough
+        # biological time and seeded hosts to clear the 1e-4 swab quantisation.
+        epochs = 48
         enabled_spec = PicardRunSpec.from_legacy_yaml(
             str(REPO_ROOT), num_epochs=epochs,
         )
-        enabled_spec.legacy_cfg["initial_infected"] = 3
+        enabled_spec.legacy_cfg["initial_infected"] = 10
         variant_cfg = copy.deepcopy(
             enabled_spec.legacy_cfg["variant_surveillance"],
         )

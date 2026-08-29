@@ -85,7 +85,13 @@
         },
         "base_emission_rate": {
           "type": "number",
-          "minimum": 0
+          "minimum": 0,
+          "description": "Deprecated per-epoch alias for base_emission_rate_per_day."
+        },
+        "base_emission_rate_per_day": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Daily environmental emission rate."
         },
         "person_to_person": {"type": "boolean"},
         "amplification_by_antibiotic_use": {
@@ -500,6 +506,13 @@
           "type": "number",
           "exclusiveMinimum": 0,
           "description": "Airborne decay half-life in hours, excluding ventilation."
+        },
+        "contact_transfer_fraction": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 1.0,
+          "description": "Fraction of a contacted partner's emission that reaches the target."
         },
         "food_contamination": {
           "$ref": "#/$defs/FoodContamination"

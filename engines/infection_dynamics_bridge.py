@@ -456,7 +456,12 @@ class KorkinAgent:
         )
         if days_since_onset < 0.0:
             return 0.0
-        return shedding_value(curve_index, self.is_symptomatic) * self.shedding_multiplier
+        return (
+            self.clock.amount_per_epoch(
+                shedding_value(curve_index, self.is_symptomatic),
+            )
+            * self.shedding_multiplier
+        )
 
     def get_location_for_hour(
         self,
@@ -885,10 +890,10 @@ class KorkinAgent:
         if days_since_onset < -float(profile.get("presymptomatic_shedding_days", 0.0)):
             return 0.0
         idx = min(max(curve_index, 0), len(curve) - 1)
-        return (
+        return self.clock.amount_per_epoch(
             math.pow(10, curve[idx] - adj)
             * host_mult
-            * inf.get("strain_shedding_multiplier", 1.0)
+            * inf.get("strain_shedding_multiplier", 1.0),
         )
 
     def strain_shedding_shares(
@@ -955,9 +960,11 @@ class KorkinAgent:
                 continue
             idx = min(max(curve_index, 0), len(curve) - 1)
             emissions[sid] = (
-                share
-                * math.pow(10, curve[idx] - adj)
-                * resident.shedding_multiplier
+                clock.amount_per_epoch(
+                    share
+                    * math.pow(10, curve[idx] - adj)
+                    * resident.shedding_multiplier,
+                )
             )
         return emissions
 
