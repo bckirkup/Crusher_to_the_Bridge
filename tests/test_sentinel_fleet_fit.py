@@ -296,6 +296,8 @@ def test_a_posterior_missing_a_column_fails_loudly(out_dir: str) -> None:
         write_fleet_outputs(out_dir, {"import_share": [0.5]}, meta, pathogen)
 
 
+# Nightly tier — 70 s: reference-walker fit over the example fleet.
+@pytest.mark.slow
 def test_smoke_fit_writes_every_output_for_the_example_fleet(out_dir: str) -> None:
     """End to end on the committed three-voyage manifest, no CmdStan required."""
     status = fit_sentinel_fleet(
@@ -328,6 +330,8 @@ def test_smoke_fit_writes_every_output_for_the_example_fleet(out_dir: str) -> No
     assert all(v > 0.0 for v in status["summary"]["hazard_mean"].values())
 
 
+# Nightly tier — 60 s: two CLI fits.
+@pytest.mark.slow
 def test_cli_exit_code_and_engine_choice(out_dir: str) -> None:
     assert (
         main([FLEET_MANIFEST, "--out", out_dir, "--smoke", "--no-show-progress"]) == 0

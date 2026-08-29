@@ -243,6 +243,8 @@ def test_fixed_onset_arm_strips_incubation_and_relabels(
     assert "incubation" in resolved_dist.pathogen_profiles["norwalk_gi"]
 
 
+# Nightly tier — 23 s: swept campaign generation.
+@pytest.mark.slow
 def test_swept_rates_reach_the_pathogen_profile(emergence: dict[str, Any]) -> None:
     seen: dict[float, str] = {}
     for run_id, spec in generate_tier_runs(

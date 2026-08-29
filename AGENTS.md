@@ -27,13 +27,21 @@ python3 scripts/sonar_guard.py --workflows .github/workflows
 ruff check --select E,F,W,I,C901 --ignore E501,E741 --target-version py311 \
   engines/ crusher_labs/ picard_framework/ decision_engine/ \
   orchestrator*.py presidio_runner.py deploy/aws/
-python3 -m pytest tests/ -v --tb=short --cov --cov-report=xml
+python3 -m pytest tests/ -m 'not slow' -v --tb=short --cov --cov-report=xml
 python3 tools/sanity_checker.py --from-config
 python3 orchestrator.py
 python3 presidio_runner.py \
   --fleet-config presidio/data/config/smoke_fleet.json \
   --cruises 1
 ```
+
+`-m 'not slow'` is the fast tier that `.github/workflows/ci.yml` runs on every
+push (about 4.5 min locally). The `slow` marker covers the posterior-recovery
+fits — all of `tests/test_sentinel_fleet_validation.py` plus a few reference-walker
+and campaign cases — measured at 35 of the suite's 41 min;
+`.github/workflows/nightly.yml` runs the whole suite on cron and on demand. Run
+`python3 -m pytest tests/ -v --tb=short` locally before changing anything under
+`picard_framework/analysis/stan/`.
 
 Docker campaign smoke is optional when Docker is unavailable:
 

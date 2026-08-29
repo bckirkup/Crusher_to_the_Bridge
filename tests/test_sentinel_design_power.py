@@ -96,6 +96,8 @@ def test_week_scaling_check_reports_shortcut_bias() -> None:
     assert result["scaled_to_explicit_ratio"] < 1.0
 
 
+# Nightly tier — 96 s: a full power fit per ratio.
+@pytest.mark.slow
 def test_fit_power_is_sensitive_to_true_hot_ratio() -> None:
     powers = []
     design = load_presets()["pilot"].evolved(
