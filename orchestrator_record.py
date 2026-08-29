@@ -115,26 +115,19 @@ def _summary_counts(
 ) -> dict[str, Any]:
     reported_counts = {"passenger": 0, "crew": 0}
     ill_counts = {"passenger": 0, "crew": 0}
-    population_counts = {"passenger": 0, "crew": 0}
+    infected_counts = {"passenger": 0, "crew": 0}
     for agent in agents:
         aid = int(agent["agent_id"])
         group = role_group_for_agent(agent)
-        population_counts[group] += 1
         if aid in state.ever_reported_ids:
             reported_counts[group] += 1
         if aid in state.ever_ill_ids:
             ill_counts[group] += 1
+        if aid in state.ever_infected_ids:
+            infected_counts[group] += 1
     reported_rates = compute_group_rates_for_ids(
         agents, state.ever_reported_ids,
     )
-    infected_counts = {
-        group: sum(
-            role_group_for_agent(agent) == group
-            and int(agent["agent_id"]) in state.ever_infected_ids
-            for agent in agents
-        )
-        for group in ("passenger", "crew")
-    }
     infected_rates = compute_group_rates_for_ids(
         agents, state.ever_infected_ids,
     )

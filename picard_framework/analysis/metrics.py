@@ -256,8 +256,10 @@ def build_run_summary_row(payload: dict[str, Any]) -> dict[str, Any]:
             "infection_attack_rate_crew": derived.get(
                 "infection_attack_rate_crew",
             ),
-            "ever_ill_rate_crew": derived.get("ever_ill_attack_rate_crew"),
-            "reported_case_rate_crew": derived.get(
+            "ever_ill_attack_rate_crew": derived.get(
+                "ever_ill_attack_rate_crew",
+            ),
+            "reported_case_attack_rate_crew": derived.get(
                 "reported_case_attack_rate_crew",
             ),
         }

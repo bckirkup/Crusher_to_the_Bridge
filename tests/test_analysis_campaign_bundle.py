@@ -11,6 +11,7 @@ import pytest
 
 from picard_framework.analysis.campaign_bundle import build_bundle
 from picard_framework.analysis.metrics import (
+    EPOCH_COLUMNS,
     RUN_SUMMARY_COLUMNS,
     build_aggregate_metrics,
     coerce_bool,
@@ -314,6 +315,20 @@ def test_build_bundle_writes_required_artifacts(results_dir: Path, tmp_path: Pat
         pairs = list(csv.DictReader(fh))
     assert any(p["comparison_id"] == "native_vs_contamx" for p in pairs)
     assert any(p["comparison_id"] == "none_true_vs_syndromic" for p in pairs)
+
+
+def test_metric_column_lists_match_row_keys(results_dir: Path) -> None:
+    from picard_framework.analysis._io import load_run_zip
+    from picard_framework.analysis.metrics import build_epoch_rows, build_run_summary_row
+
+    payload = load_run_zip(str(next(results_dir.glob("*.zip"))))
+    assert payload is not None
+    summary_row = build_run_summary_row(payload)
+    epoch_rows = build_epoch_rows(payload, summary_row)
+
+    assert all(column in summary_row for column in RUN_SUMMARY_COLUMNS)
+    assert epoch_rows
+    assert all(column in epoch_rows[0] for column in EPOCH_COLUMNS)
 
 
 def test_pairwise_trajectory_match_rates(results_dir: Path) -> None:
