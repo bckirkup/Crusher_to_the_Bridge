@@ -392,6 +392,30 @@
         }
       ]
     },
+    "SymptomSeverity": {
+      "type": "object",
+      "required": ["strata"],
+      "properties": {
+        "notes": {"type": "string", "minLength": 1},
+        "strata": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["name", "weight", "sick_call_probability_per_day"],
+            "properties": {
+              "name": {"type": "string", "minLength": 1},
+              "weight": {"type": "number", "minimum": 0, "maximum": 1},
+              "sick_call_probability_per_day": {
+                "type": "number", "minimum": 0, "maximum": 1
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
     "PathogenProfile": {
       "type": "object",
       "required": ["pathogen_id", "name", "transmission_routes"],
@@ -488,6 +512,7 @@
             "gamma": {"type": "number", "minimum": 0, "maximum": 1}
           }
         },
+        "symptom_severity": {"$ref": "#/$defs/SymptomSeverity"},
         "recovery_day": {"type": "integer", "minimum": 0},
         "symptom_onset_day": {"type": "number", "minimum": 0},
         "incubation": {"$ref": "#/$defs/Incubation"},

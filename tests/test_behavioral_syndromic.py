@@ -6,11 +6,14 @@ import os
 import sys
 
 import numpy as np
+import pytest
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, REPO_ROOT)
 
 from crusher_labs.modalities.syndromic import SyndromicSurveillance
+from engines.infection_dynamics_bridge import IllnessStatus
+from orchestrator_epoch import _draw_symptom_onset, _draw_symptom_severity
 from telemetry_buffer.agent_axes import (
     COMPLIANCE_COMPLIANT,
     INFECTION_INFECTED,
@@ -19,6 +22,218 @@ from telemetry_buffer.agent_axes import (
 
 
 class TestBehavioralSyndromic:
+    def test_symptom_severity_is_drawn_once_per_episode(self) -> None:
+        class Host:
+            illness_status = IllnessStatus.NOT_ILL
+
+            @staticmethod
+            def get_chronic_illness_boost(_pid: str) -> float:
+                return 0.0
+
+        profile = {
+            "illness_probability": {"eta": 1.0, "gamma": 1.0},
+            "symptom_severity": {
+                "strata": [
+                    {"name": "mild", "weight": 1.0,
+                     "sick_call_probability_per_day": 0.2},
+                ],
+            },
+        }
+        infection = {
+            "acquired_particles": 1e9,
+            "time_infected": 0,
+            "illness": IllnessStatus.NOT_ILL,
+        }
+        host = Host()
+        rng = np.random.default_rng(4)
+        _draw_symptom_onset(host, "norwalk_gi", infection, profile, rng)
+        first = infection["symptom_severity"]
+        _draw_symptom_onset(host, "norwalk_gi", infection, {
+            **profile,
+            "symptom_severity": {
+                "strata": [{
+                    "name": "severe", "weight": 1.0,
+                    "sick_call_probability_per_day": 0.9,
+                }],
+            },
+        }, rng)
+        assert infection["symptom_severity"] == first == "mild"
+
+    def test_symptom_severity_weights_are_respected(self) -> None:
+        profile = {
+            "symptom_severity": {
+                "strata": [
+                    {"name": "mild", "weight": 0.35,
+                     "sick_call_probability_per_day": 0.2},
+                    {"name": "moderate", "weight": 0.5,
+                     "sick_call_probability_per_day": 0.4},
+                    {"name": "severe", "weight": 0.15,
+                     "sick_call_probability_per_day": 0.8},
+                ],
+            },
+        }
+        rng = np.random.default_rng(11)
+        counts = {name: 0 for name in ("mild", "moderate", "severe")}
+        for _ in range(20000):
+            counts[_draw_symptom_severity(profile, rng)] += 1
+        total = sum(counts.values())
+        assert counts["mild"] / total == pytest.approx(0.35, abs=0.02)
+        assert counts["moderate"] / total == pytest.approx(0.50, abs=0.02)
+        assert counts["severe"] / total == pytest.approx(0.15, abs=0.02)
+
+    def test_own_severity_hazard_is_ordered(self) -> None:
+        profile = {
+            "norwalk_gi": {
+                "symptom_severity": {
+                    "strata": [
+                        {"name": "mild", "weight": 0.35,
+                         "sick_call_probability_per_day": 0.1},
+                        {"name": "moderate", "weight": 0.5,
+                         "sick_call_probability_per_day": 0.3},
+                        {"name": "severe", "weight": 0.15,
+                         "sick_call_probability_per_day": 0.7},
+                    ],
+                },
+            },
+        }
+        counts = {}
+        for severity in ("mild", "moderate", "severe"):
+            syn = SyndromicSurveillance(
+                background_noise_rate=0.0,
+                symptom_severity_profiles=profile,
+                rng=np.random.default_rng(7),
+            )
+            agent = {
+                "agent_id": 1,
+                "infection_state": INFECTION_INFECTED,
+                "symptom_presentation": PRESENTATION_SYMPTOMATIC,
+                "compliance_status": COMPLIANCE_COMPLIANT,
+                "pathogen_infections": {
+                    "norwalk_gi": {
+                        "pathogen_id": "norwalk_gi",
+                        "illness": "SYMPTOMATIC",
+                        "symptom_severity": severity,
+                    },
+                },
+            }
+            counts[severity] = sum(
+                bool(syn.query_ground_truth({"epoch": epoch, "agents": [agent]})[
+                    "sick_call_agents"
+                ])
+                for epoch in range(1000)
+            )
+        assert counts["severe"] > counts["moderate"] > counts["mild"]
+
+    def test_information_belief_mode_keeps_legacy_formula(self) -> None:
+        syn = SyndromicSurveillance(
+            sick_call_probability=0.7,
+            sick_call_severity_mode="information_belief",
+            background_noise_rate=0.0,
+            rng=np.random.default_rng(1),
+        )
+        truth = {
+            "epoch": 1,
+            "agents": [{
+                "agent_id": 1,
+                "infection_state": INFECTION_INFECTED,
+                "symptom_presentation": PRESENTATION_SYMPTOMATIC,
+                "compliance_status": COMPLIANCE_COMPLIANT,
+            }],
+        }
+        beliefs = {1: {"severity_belief": 0.1, "trust_medical": 0.2}}
+        expected = syn.clock.probability_per_epoch(
+            syn.effective_sick_call_probability(
+                0.7, severity_belief=0.1, trust_medical=0.2,
+            ),
+        )
+        observed = 0
+        for epoch in range(1, 10001):
+            result = syn.query_ground_truth(
+                {**truth, "epoch": epoch},
+                information_beliefs=beliefs,
+            )
+            observed += int(bool(result["sick_call_agents"]))
+        assert observed / 10000 == pytest.approx(expected, abs=0.015)
+
+    def test_first_detection_event_persists_episode_metadata(self) -> None:
+        syn = SyndromicSurveillance(
+            sick_call_probability=0.0,
+            background_noise_rate=0.0,
+            symptom_severity_profiles={
+                "norwalk_gi": {
+                    "symptom_severity": {
+                        "strata": [{
+                            "name": "moderate",
+                            "weight": 1.0,
+                            "sick_call_probability_per_day": 0.0,
+                        }],
+                    },
+                },
+            },
+            rng=np.random.default_rng(0),
+        )
+        agent = {
+            "agent_id": 3,
+            "infection_state": INFECTION_INFECTED,
+            "symptom_presentation": PRESENTATION_SYMPTOMATIC,
+            "compliance_status": COMPLIANCE_COMPLIANT,
+            "pathogen_infections": {
+                "norwalk_gi": {
+                    "illness": "SYMPTOMATIC",
+                    "symptom_severity": "moderate",
+                },
+            },
+        }
+        result = syn.query_ground_truth(
+            {"epoch": 12, "agents": [agent]},
+            behavioral_overrides={3: "report_sick_call"},
+            include_episode_telemetry=True,
+        )
+        assert result["first_detection_events"] == [{
+            "agent_id": 3,
+            "symptom_onset_epoch": 12,
+            "first_sick_call_epoch": 12,
+            "symptom_severity": "moderate",
+        }]
+        assert result["episode_detection_telemetry"] == [{
+            "agent_id": 3,
+            "symptom_onset_epoch": 12,
+            "first_sick_call_epoch": 12,
+            "symptom_severity": "moderate",
+        }]
+
+    def test_zero_base_hazard_disables_own_severity_reporting(self) -> None:
+        syn = SyndromicSurveillance(
+            sick_call_probability=0.0,
+            background_noise_rate=0.0,
+            symptom_severity_profiles={
+                "norwalk_gi": {
+                    "symptom_severity": {
+                        "strata": [{
+                            "name": "severe",
+                            "weight": 1.0,
+                            "sick_call_probability_per_day": 1.0,
+                        }],
+                    },
+                },
+            },
+            rng=np.random.default_rng(0),
+        )
+        agent = {
+            "agent_id": 4,
+            "infection_state": INFECTION_INFECTED,
+            "symptom_presentation": PRESENTATION_SYMPTOMATIC,
+            "compliance_status": COMPLIANCE_COMPLIANT,
+            "pathogen_infections": {
+                "norwalk_gi": {
+                    "illness": "SYMPTOMATIC",
+                    "symptom_severity": "severe",
+                },
+            },
+        }
+        result = syn.query_ground_truth({"epoch": 12, "agents": [agent]})
+        assert result["sick_call_agents"] == []
+
     def test_hide_symptoms_suppresses_sick_call(self) -> None:
         syn = SyndromicSurveillance(sick_call_probability=1.0, rng=np.random.default_rng(0))
         truth = {

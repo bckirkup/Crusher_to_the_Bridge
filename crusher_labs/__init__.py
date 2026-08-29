@@ -180,6 +180,7 @@ def build_modalities(
     rng: np.random.Generator | None = None,
     total_epochs: int = 24,
     clock: SimClock | None = None,
+    pathogen_profiles: dict[str, dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """Instantiate all modalities from *cfg*, sharing *rng*.
 
@@ -232,6 +233,10 @@ def build_modalities(
             compliance_by_class=fred_cfg.get("compliance_by_class"),
             detection_delay_epochs=detection_delay or 0,
             crew_screening_interval_epochs=screening_interval,
+            sick_call_severity_mode=syn_cfg.get(
+                "sick_call_severity_mode", "own_severity",
+            ),
+            symptom_severity_profiles=pathogen_profiles,
             clock=run_clock,
             rng=rng,
         ),

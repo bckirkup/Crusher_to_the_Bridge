@@ -1131,6 +1131,7 @@ class KorkinAgent:
         pathogen_states = {}
         for pid, inf in self.infections.items():
             pathogen_states[pid] = {
+                "pathogen_id": pid,
                 "status": inf["status"].name,
                 "illness": inf["illness"].name,
                 "days_post_infection": (
@@ -1138,6 +1139,7 @@ class KorkinAgent:
                     else self.clock.day_index(inf["time_infected"])
                 ),
                 "days_since_symptom_onset": self._symptom_days(inf),
+                "symptom_severity": inf.get("symptom_severity", ""),
             }
 
         result = {

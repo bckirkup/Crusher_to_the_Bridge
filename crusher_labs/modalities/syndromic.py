@@ -24,6 +24,18 @@ from engines.sim_clock import SimClock
 from simulation_utils.numeric import default_simulation_rng
 
 
+def _symptomatic_infection(agent: dict[str, Any]) -> dict[str, Any]:
+    """Return the first symptomatic pathogen infection on an agent."""
+    return next(
+        (
+            record
+            for record in (agent.get("pathogen_infections") or {}).values()
+            if record.get("illness") == "SYMPTOMATIC"
+        ),
+        {},
+    )
+
+
 def _agent_is_crew(agent: dict[str, Any]) -> bool:
     role = str(agent.get("role") or "").lower()
     if role == "crew":
@@ -55,10 +67,14 @@ class SyndromicSurveillance:
         compliance_delay_hours: float | None = None,
         detection_delay_hours: float | None = None,
         crew_screening_interval_hours: float | None = None,
+        sick_call_severity_mode: str = "own_severity",
+        symptom_severity_profiles: dict[str, dict[str, Any]] | None = None,
         clock: SimClock | None = None,
         rng: np.random.Generator | None = None,
     ) -> None:
         self.sick_call_probability = sick_call_probability
+        self.sick_call_severity_mode = sick_call_severity_mode
+        self.symptom_severity_profiles = dict(symptom_severity_profiles or {})
         self.clock = clock or SimClock()
         self.background_noise_rate = background_noise_rate
         self.quarantine_compliance = quarantine_compliance
@@ -94,6 +110,7 @@ class SyndromicSurveillance:
         self._compliance_class: dict[int, str] = {}
         # First epoch agent observed symptomatic (for detection_delay_hours)
         self._symptom_onset_epoch: dict[int, int] = {}
+        self._first_sick_call_epoch: dict[int, int] = {}
 
         # None → built-in defaults; explicit [] disables background noise categories.
         if noise_categories is None:
@@ -123,6 +140,7 @@ class SyndromicSurveillance:
         overrides: dict[int, str],
         beliefs: dict[int, dict[str, float]],
         chronic_mods: dict[int, dict[str, float]],
+        severity_hazards: dict[int, float],
         sick_call_ids: list[int],
         true_positive_ids: list[int],
     ) -> None:
@@ -141,11 +159,16 @@ class SyndromicSurveillance:
         if self.sick_call_probability <= 0.0:
             return
         inf = beliefs.get(aid, {})
-        prob = self.effective_sick_call_probability(
-            self.sick_call_probability,
-            severity_belief=inf.get("severity_belief", 0.5),
-            trust_medical=inf.get("trust_medical", 0.75),
-        )
+        if self.sick_call_severity_mode == "information_belief":
+            prob = self.effective_sick_call_probability(
+                self.sick_call_probability,
+                severity_belief=inf.get("severity_belief", 0.5),
+                trust_medical=inf.get("trust_medical", 0.75),
+            )
+        else:
+            prob = severity_hazards.get(aid, self.sick_call_probability)
+            trust = max(0.0, min(1.0, float(inf.get("trust_medical", 0.75))))
+            prob *= 0.5 + 0.5 * trust
         agent_chronic = chronic_mods.get(aid, {})
         prob = min(1.0, prob + agent_chronic.get(
             "sick_call_probability_boost", 0.0,
@@ -188,6 +211,7 @@ class SyndromicSurveillance:
         behavioral_overrides: dict[int, str] | None = None,
         information_beliefs: dict[int, dict[str, float]] | None = None,
         chronic_behavioral_mods: dict[int, dict[str, float]] | None = None,
+        include_episode_telemetry: bool = False,
     ) -> dict[str, Any]:
         """Parse ground-truth agent states and return sick-call roster.
 
@@ -218,6 +242,7 @@ class SyndromicSurveillance:
         overrides = behavioral_overrides or {}
         beliefs = information_beliefs or {}
         chronic_mods = chronic_behavioral_mods or {}
+        severity_hazards: dict[int, float] = {}
 
         for agent in agents:
             aid = agent["agent_id"]
@@ -232,8 +257,10 @@ class SyndromicSurveillance:
                 continue
 
             if is_symptomatic:
+                severity_hazards[aid] = self._severity_hazard(agent)
                 self._process_symptomatic_agent(
                     aid, epoch, overrides, beliefs, chronic_mods,
+                    severity_hazards,
                     sick_call_ids, true_positive_ids,
                 )
             else:
@@ -246,6 +273,33 @@ class SyndromicSurveillance:
         self._apply_crew_screening(
             agents, epoch, sick_call_ids, crew_screening_ids,
         )
+        detection_events = []
+        agents_by_id = {int(agent["agent_id"]): agent for agent in agents}
+        for aid in dict.fromkeys(sick_call_ids):
+            if aid in self._first_sick_call_epoch:
+                continue
+            self._first_sick_call_epoch[aid] = int(epoch)
+            agent = agents_by_id.get(int(aid), {})
+            infection = _symptomatic_infection(agent)
+            detection_events.append({
+                "agent_id": int(aid),
+                "symptom_onset_epoch": self._symptom_onset_epoch.get(aid),
+                "first_sick_call_epoch": int(epoch),
+                "symptom_severity": infection.get("symptom_severity", ""),
+            })
+        episode_telemetry = []
+        if include_episode_telemetry:
+            for agent in agents:
+                aid = int(agent["agent_id"])
+                if aid not in self._symptom_onset_epoch:
+                    continue
+                infection = _symptomatic_infection(agent)
+                episode_telemetry.append({
+                    "agent_id": aid,
+                    "symptom_onset_epoch": self._symptom_onset_epoch[aid],
+                    "first_sick_call_epoch": self._first_sick_call_epoch.get(aid),
+                    "symptom_severity": infection.get("symptom_severity", ""),
+                })
 
         return {
             "modality": self.name,
@@ -257,7 +311,34 @@ class SyndromicSurveillance:
             "crew_screening_ids": crew_screening_ids,
             "sick_call_count": len(sick_call_ids),
             "total_agents": len(agents),
+            "first_detection_events": detection_events,
+            "episode_detection_telemetry": episode_telemetry,
         }
+
+    def _severity_hazard(self, agent: dict[str, Any]) -> float:
+        """Resolve host hazard; missing severity profiles use the base hazard."""
+        infection = _symptomatic_infection(agent)
+        if infection:
+            severity = str(infection.get("symptom_severity") or "")
+            pathogen_id = str(infection.get("pathogen_id") or "")
+            if not pathogen_id:
+                for candidate_id, candidate in (
+                    agent.get("pathogen_infections") or {}
+                ).items():
+                    if candidate is infection:
+                        pathogen_id = str(candidate_id)
+                        break
+            for stratum in self._severity_strata(pathogen_id):
+                if stratum.get("name") == severity:
+                    return float(stratum["sick_call_probability_per_day"])
+        return self.sick_call_probability
+
+    def _severity_strata(self, pathogen_id: str) -> list[dict[str, Any]]:
+        """Return strata matching the pathogen record, or no override."""
+        profile = self.symptom_severity_profiles.get(pathogen_id, {})
+        block = profile.get("symptom_severity", {})
+        strata = block.get("strata", []) if isinstance(block, dict) else []
+        return list(strata) if isinstance(strata, list) else []
 
     def _check_background_noise(self, _aid: int) -> tuple[bool, str | None]:
         """FRED-style categorized background noise check.

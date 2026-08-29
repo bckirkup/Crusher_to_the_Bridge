@@ -110,9 +110,9 @@ def test_hourly_reporting_drives_autonomous_escalation() -> None:
         "reported case did not produce a confirmed clinical case"
     )
     assert first_suspected is not None
-    # Lower common norovirus shedding variance delays this integration path,
-    # while the onset-based contract still bounds escalation within five days.
-    assert 24 <= first_suspected <= 120
+    # Escalation requires incubation, symptom onset, and a sick call, so it
+    # cannot be instantaneous; it must also occur well within the voyage.
+    assert 8 <= first_suspected <= 72
     assert [STATUS_RANK[status] for status in statuses] == sorted(
         STATUS_RANK[status] for status in statuses
     )

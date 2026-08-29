@@ -88,8 +88,8 @@ def test_picard_golden_summary_and_trigger() -> None:
     assert fp["symptomatic"] == 2
     assert fp["recovered"] == 0
     assert fp["immune"] == 4
-    # No true-positive sick call is expected inside 24 h at 0.70/day.
-    assert fp["trigger_status"] == "BASELINE"
+    # Own-severity reporting can produce a true-positive sick call inside 24 h.
+    assert fp["trigger_status"] == "CONFIRMED"
 
 
 @pytest.mark.timeout(240)
