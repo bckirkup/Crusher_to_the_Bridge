@@ -187,6 +187,7 @@ class TestBehavioralSyndromic:
         result = syn.query_ground_truth(
             {"epoch": 12, "agents": [agent]},
             behavioral_overrides={3: "report_sick_call"},
+            include_episode_telemetry=True,
         )
         assert result["first_detection_events"] == [{
             "agent_id": 3,
@@ -200,6 +201,39 @@ class TestBehavioralSyndromic:
             "first_sick_call_epoch": 12,
             "symptom_severity": "moderate",
         }]
+
+    def test_zero_base_hazard_disables_own_severity_reporting(self) -> None:
+        syn = SyndromicSurveillance(
+            sick_call_probability=0.0,
+            background_noise_rate=0.0,
+            symptom_severity_profiles={
+                "norwalk_gi": {
+                    "symptom_severity": {
+                        "strata": [{
+                            "name": "severe",
+                            "weight": 1.0,
+                            "sick_call_probability_per_day": 1.0,
+                        }],
+                    },
+                },
+            },
+            rng=np.random.default_rng(0),
+        )
+        agent = {
+            "agent_id": 4,
+            "infection_state": INFECTION_INFECTED,
+            "symptom_presentation": PRESENTATION_SYMPTOMATIC,
+            "compliance_status": COMPLIANCE_COMPLIANT,
+            "pathogen_infections": {
+                "norwalk_gi": {
+                    "illness": "SYMPTOMATIC",
+                    "symptom_severity": "severe",
+                },
+            },
+        }
+        result = syn.query_ground_truth({"epoch": 12, "agents": [agent]})
+        assert result["sick_call_agents"] == []
+
     def test_hide_symptoms_suppresses_sick_call(self) -> None:
         syn = SyndromicSurveillance(sick_call_probability=1.0, rng=np.random.default_rng(0))
         truth = {

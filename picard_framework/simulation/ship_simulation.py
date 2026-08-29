@@ -945,6 +945,9 @@ class ShipSimulation:
                 behavioral_overrides=work.state.agent_behavioral_overrides,
                 information_beliefs=beliefs,
                 chronic_behavioral_mods=self.chronic_behavioral_mods,
+                include_episode_telemetry=(
+                    work.epoch + 1 >= self.num_epochs
+                ),
             )
             work.cascade_result = step_diagnostic_cascade(
                 work.epoch, work.state, work.agents, work.syn_result,
@@ -1366,6 +1369,7 @@ class ShipSimulation:
             long_read_results=work.long_read_results,
             cascade_result=work.cascade_result,
             history_retention=self.run_spec.history_retention,
+            final_epoch=(work.epoch + 1 >= self.num_epochs),
         )
         if work.applied and self.run_spec.history_retention != "compact":
             work.epoch_record["decisions"] = work.applied

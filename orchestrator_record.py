@@ -192,6 +192,7 @@ def record_epoch(  # NOSONAR
     long_read_results: dict[str, dict[str, Any]] | None = None,
     cascade_result: dict[str, Any] | None = None,
     history_retention: str = "full",
+    final_epoch: bool = False,
 ) -> dict[str, Any]:
     """Build an epoch record for simulation_history.
 
@@ -322,9 +323,6 @@ def record_epoch(  # NOSONAR
             "first_detection_events": syn_result.get(
                 "first_detection_events", [],
             ),
-            "episode_detection_telemetry": syn_result.get(
-                "episode_detection_telemetry", [],
-            ),
         },
         "air_sniffer": air_results,
         "surface_swab": swab_results,
@@ -335,6 +333,10 @@ def record_epoch(  # NOSONAR
         "long_read_verification": long_read_results or {},
         "logging_fidelity": obs.fidelity_name,
     }
+    if final_epoch:
+        epoch_record["observation_engine"]["syndromic"][
+            "episode_detection_telemetry"
+        ] = syn_result.get("episode_detection_telemetry", [])
 
     if wearable_result is not None:
         fleet = wearable_result.get("fleet_summary", {})
