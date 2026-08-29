@@ -1247,7 +1247,8 @@ class ShipSimulation:
             apply_zone_closures(self.engine, work.merged_mods["close_zones"])
         if "surface_decontamination_factor" in work.merged_mods:
             apply_surface_decontamination(
-                self.engine, work.merged_mods["surface_decontamination_factor"],
+                self.tx_core,
+                work.merged_mods["surface_decontamination_factor"],
             )
 
     def _attach_strain_census(self, work: _EpochWork) -> None:

@@ -86,6 +86,9 @@ BREATHING_RATE_M3_PER_DAY = 14.4
 # Fraction of surface fomite mass picked up by a touching agent per visit
 FOMITE_PICKUP_PROBABILITY = 0.10
 FOMITE_TRANSFER_FRACTION = 0.01
+DECK_HEIGHT_M = 2.5
+# AuYeung et al. 2008 QMRA convention: fingerpad contact area per touch.
+FOMITE_CONTACT_AREA_M2 = 2e-4
 
 # Default surface decay rate, authored as a per-day fractional loss.
 DEFAULT_SURFACE_DECAY_PER_DAY = 0.50
@@ -827,6 +830,29 @@ class TransmissionCore:
                 f"{SURFACE_RESERVOIR}|{pathogen_id}",
             )
 
+    def _age_aerosol_pools(self) -> None:
+        """Age telemetry aerosol pools once before this epoch's deposits."""
+        survival = self.clock.survival_from_half_life(1.1)
+        for zone_name in self.aerosol_pools:
+            self.aerosol_pools[zone_name] = max(
+                0.0, self.aerosol_pools[zone_name] * survival,
+            )
+        for pathogen_id, pools in self.aerosol_pools_by_pathogen.items():
+            survival = self._airborne_survival(pathogen_id)
+            for zone_name in pools:
+                pools[zone_name] = max(0.0, pools[zone_name] * survival)
+
+    def decontaminate_surfaces(self, retention: float) -> None:
+        """Scale fomite pools and their strain composition together."""
+        retention = max(0.0, min(1.0, float(retention)))
+        for zone_name in self.surface_pools:
+            self.surface_pools[zone_name] *= retention
+        for pools in self.surface_pools_by_pathogen.values():
+            for zone_name in pools:
+                pools[zone_name] *= retention
+        if self.strain_registry is not None:
+            self._reservoir.decay_kind(retention, SURFACE_RESERVOIR)
+
     def _surface_survival(self, profile: dict[str, Any] | None = None) -> float:
         """Return one-epoch surface survival for a pathogen profile."""
         per_day = float(
@@ -1359,6 +1385,7 @@ class TransmissionCore:
         self._quarantined_ids = set(quarantined_ids or ())
         self.apply_within_host_mutations(agents)
         self.apply_recombination(agents)
+        self._age_aerosol_pools()
 
         # Build zone occupancy maps
         zone_occupants: dict[str, list[KorkinAgent]] = {}
@@ -1621,22 +1648,32 @@ class TransmissionCore:
         n_occupants: int,
         r0_draw: int,
         cabin_confinement: bool,
+        transfer_fraction: float = 1.0,
     ) -> float:
         if self.contact_mode == "per_partner_contact":
             sampled, _ = self._sample_contact_partners(
                 shedders, n_occupants, r0_draw,
             )
             return self._per_partner_contact_dose(
-                target, sampled, cabin_confinement,
+                target, sampled, cabin_confinement, transfer_fraction,
             )
         if cabin_confinement:
             dose = 0.0
             for shedder, sv in shedders:
                 pair_factor = self._cabin_pair_contact_factor(shedder, target)
-                dose += sv * pair_factor / n_occupants * r0_draw
+                dose += (
+                    sv
+                    * pair_factor
+                    / n_occupants
+                    * r0_draw
+                )
             return dose
         dose = total_shedding / n_occupants * r0_draw
-        return dose * self._confinement_factor(target)
+        return (
+            dose
+            * transfer_fraction
+            * self._confinement_factor(target)
+        )
 
     def _sample_contact_partners(
         self,
@@ -1666,6 +1703,7 @@ class TransmissionCore:
         target: KorkinAgent,
         sampled_shedders: list[tuple[KorkinAgent, float]],
         cabin_confinement: bool,
+        transfer_fraction: float = 1.0,
     ) -> float:
         """Sum sampled partner shedding without zone-average dilution."""
         dose = 0.0
@@ -1673,7 +1711,11 @@ class TransmissionCore:
             if cabin_confinement:
                 shedding *= self._cabin_pair_contact_factor(shedder, target)
             dose += shedding
-        return dose * self._confinement_factor(target)
+        return (
+            dose
+            * transfer_fraction
+            * self._confinement_factor(target)
+        )
 
     def _effective_contacts(self, n_occupants: int, agent: KorkinAgent) -> int:
         """Occupancy-scaled contact draw for density_dependent contact_mode.
@@ -1776,6 +1818,9 @@ class TransmissionCore:
             shedder_ids = [s.agent_id for s, _ in shedders]
             n_occupants = max(len(occupants), 1)
             zone_dc_factor = self._direct_contact_zone_factor(zone_name)
+            transfer_fraction = float(
+                (profile or {}).get("contact_transfer_fraction", 1.0),
+            )
             cabin_confinement = self._zone_has_cabin_confinement(
                 zone_name, shedders, susceptible,
             )
@@ -1794,11 +1839,12 @@ class TransmissionCore:
                     )
                     dose = self._per_partner_contact_dose(
                         target, sampled_shedders, cabin_confinement,
+                        transfer_fraction,
                     )
                 else:
                     dose = self._direct_contact_dose(
                         target, shedders, total_shedding, n_occupants, r0_draw,
-                        cabin_confinement,
+                        cabin_confinement, transfer_fraction,
                     )
                 dose *= self.direct_contact_scalar
                 dose *= zone_dc_factor
@@ -1863,6 +1909,14 @@ class TransmissionCore:
 
             self.aerosol_pools[zone_name] = (
                 self.aerosol_pools.get(zone_name, 0.0) + total_aerosol
+            )
+            self.aerosol_pools_by_pathogen.setdefault(
+                pathogen_id, {},
+            )[zone_name] = (
+                self.aerosol_pools_by_pathogen.get(pathogen_id, {}).get(
+                    zone_name, 0.0,
+                )
+                + total_aerosol
             )
 
             volume = self.zone_volumes.get(zone_name, 100.0)
@@ -1998,14 +2052,27 @@ class TransmissionCore:
         agent_pathway_doses: dict[int, dict[str, float]] | None,
         pathogen_id: str,
         surface_attribution: DoseAttribution | None = None,
-    ) -> None:
+    ) -> float:
         if self._cabin_confinement_active(target):
-            return
+            return 0.0
         if self.rng.random() > FOMITE_PICKUP_PROBABILITY:
-            return
+            return 0.0
 
+        zone_volume_m3 = max(self.zone_volumes.get(zone_name, 0.0), 0.0)
+        zone_touchable_area_m2 = zone_volume_m3 / DECK_HEIGHT_M
+        if zone_touchable_area_m2 <= 0.0:
+            return 0.0
+        delivered = min(
+            surface_mass,
+            (
+                surface_mass
+                / zone_touchable_area_m2
+                * FOMITE_CONTACT_AREA_M2
+                * FOMITE_TRANSFER_FRACTION
+            ),
+        )
         dose = self._accumulate(
-            target.agent_id, "fomite", surface_mass * FOMITE_TRANSFER_FRACTION,
+            target.agent_id, "fomite", delivered,
             agent_doses, agent_pathway_doses, surface_attribution,
         )
 
@@ -2023,6 +2090,30 @@ class TransmissionCore:
             "is_trailing": is_trailing,
             "prev_shedder_ids": prev_shedders if is_trailing else [],
         })
+        return delivered
+
+    def _consume_surface_mass(
+        self,
+        pathogen_id: str,
+        zone_name: str,
+        delivered: float,
+        previous_mass: float,
+    ) -> None:
+        """Remove delivered fomite mass and scale its strain composition."""
+        if delivered <= 0.0 or previous_mass <= 0.0:
+            return
+        remaining = max(0.0, previous_mass - delivered)
+        self.surface_pools[zone_name] = max(
+            0.0,
+            self.surface_pools.get(zone_name, 0.0) - delivered,
+        )
+        pools = self.surface_pools_by_pathogen.get(pathogen_id)
+        if pools is not None and zone_name in pools:
+            pools[zone_name] = remaining
+        self._reservoir.decay(
+            remaining / previous_mass,
+            ReservoirComposition.key(SURFACE_RESERVOIR, pathogen_id, zone_name),
+        )
 
     def _pathway_fomite(
         self,
@@ -2053,6 +2144,14 @@ class TransmissionCore:
                 self.surface_pools[zone_name] = (
                     self.surface_pools.get(zone_name, 0.0) + deposit
                 )
+                self.surface_pools_by_pathogen.setdefault(
+                    pathogen_id, {},
+                )[zone_name] = (
+                    self.surface_pools_by_pathogen.get(pathogen_id, {}).get(
+                        zone_name, 0.0,
+                    )
+                    + deposit
+                )
             self._deposit_reservoir_strains(
                 SURFACE_RESERVOIR, pathogen_id, zone_name, deposits,
             )
@@ -2066,7 +2165,11 @@ class TransmissionCore:
 
         # b) Fomite trailing detection + pickup
         for zone_name, occupants in zone_occupants.items():
-            surface_mass = self.surface_pools.get(zone_name, 0.0)
+            path_pools = self.surface_pools_by_pathogen.get(pathogen_id)
+            if path_pools is None:
+                surface_mass = self.surface_pools.get(zone_name, 0.0)
+            else:
+                surface_mass = path_pools.get(zone_name, 0.0)
             if surface_mass <= 0:
                 continue
 
@@ -2084,12 +2187,19 @@ class TransmissionCore:
             )
 
             for target in susceptible:
-                self._apply_fomite_pickup(
+                delivered = self._apply_fomite_pickup(
                     target, zone_name, surface_mass,
                     prev_occupant_ids, prev_shedders,
                     agent_doses, matrix, agent_pathway_doses, pathogen_id,
                     surface_attribution,
                 )
+                if delivered > 0.0:
+                    self._consume_surface_mass(
+                        pathogen_id, zone_name, delivered, surface_mass,
+                    )
+                    surface_mass = max(0.0, surface_mass - delivered)
+                    if surface_mass <= 0.0:
+                        break
 
     # ── Pathway 5: Food Contamination ────────────────────────────────
 
@@ -2156,8 +2266,16 @@ class TransmissionCore:
                 ledger,
                 self._reservoir_mix(FOOD_RESERVOIR, pathogen_id, zone_name),
             )
+            n_occupants = max(len(occupants), 1)
+            pool_before_delivery = food_zones[zone_name]
             for target in susceptible:
-                dose = food_zones[zone_name] * FOOD_INGESTION_FRACTION * zone_mult
+                dose = (
+                    food_zones[zone_name]
+                    / n_occupants
+                    * FOOD_INGESTION_FRACTION
+                    * zone_mult
+                )
+                delivered = min(food_zones[zone_name], dose)
                 dose = self._accumulate(
                     target.agent_id, "food", dose,
                     agent_doses, agent_pathway_doses, food_attribution,
@@ -2171,6 +2289,19 @@ class TransmissionCore:
                     "food_zone_multiplier": zone_mult,
                     "dose": round(dose, 4),
                 })
+                food_zones[zone_name] = max(
+                    0.0, food_zones[zone_name] - delivered,
+                )
+                if pool_before_delivery > 0.0 and delivered > 0.0:
+                    self._reservoir.decay(
+                        food_zones[zone_name] / pool_before_delivery,
+                        ReservoirComposition.key(
+                            FOOD_RESERVOIR, pathogen_id, zone_name,
+                        ),
+                    )
+                    pool_before_delivery = food_zones[zone_name]
+                if food_zones[zone_name] <= 0.0:
+                    break
 
     def _food_rate_factors(self, food_cfg: dict[str, Any]) -> tuple[float, float]:
         growth = food_cfg.get(
@@ -2288,7 +2419,14 @@ class TransmissionCore:
         """Per-zone environmental reservoirs (Legionella spa / C.diff spores)."""
         ec = profile.get("environmental_contamination", {})
         source_zones = list(ec.get("source_zones") or [])
-        emission = float(ec.get("base_emission_rate", 0.001))
+        emission = self.clock.amount_per_epoch(
+            float(
+                ec.get(
+                    "base_emission_rate_per_day",
+                    ec.get("base_emission_rate", 0.001),
+                ),
+            ),
+        )
         p_expose = (
             self.clock.probability_per_epoch(float(ec["exposure_probability_per_day"]))
             if "exposure_probability_per_day" in ec
