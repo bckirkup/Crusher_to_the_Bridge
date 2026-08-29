@@ -145,13 +145,13 @@ DEFAULT_NOISE: dict[str, dict[str, float]] = {
 }
 
 
-def _get_infection_phase(days_post_infection: int, boundaries: list[tuple[int, str]]) -> str:
+def _get_infection_phase(days_post_onset: int, boundaries: list[tuple[int, str]]) -> str:
     """Map days-post-onset to a named shedding phase."""
-    if days_post_infection < 0 and boundaries:
+    if days_post_onset < 0 and boundaries:
         return boundaries[0][1]
     phase = "recovery"
     for threshold, name in boundaries:
-        if days_post_infection >= threshold:
+        if days_post_onset >= threshold:
             phase = name
     return phase
 
