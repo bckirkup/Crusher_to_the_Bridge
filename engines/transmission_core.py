@@ -1310,6 +1310,39 @@ class TransmissionCore:
             return self.confinement_isolation_factor
         return 1.0
 
+    def confinement_emission_factor(self, agent: KorkinAgent) -> float:
+        """Scale emission into shared pools for cabin-confined agents."""
+        if self._cabin_confinement_active(agent):
+            return self.confinement_isolation_factor
+        return 1.0
+
+    def _cabin_mate_droplet_addback(
+        self,
+        target: KorkinAgent,
+        shedders: list[tuple[KorkinAgent, float]],
+        volume: float,
+        vent_factor: float,
+        target_factor: float,
+    ) -> float:
+        """Restore withheld emission for cabin mates sharing the cabin."""
+        addback = 0.0
+        for shedder, shedding in shedders:
+            if shedder.agent_id not in target.cabin_mate_ids:
+                continue
+            unattenuated = (
+                shedding * DROPLET_AEROSOL_FRACTION
+                / max(volume, 1.0)
+                * self.inhaled_air_volume_m3_per_epoch
+                * self.droplet_scalar
+                * vent_factor
+            )
+            addback += unattenuated * (
+                1.0
+                - self.confinement_emission_factor(shedder)
+                * target_factor
+            )
+        return addback
+
     def _cabin_pair_contact_factor(
         self, shedder: KorkinAgent, target: KorkinAgent,
     ) -> float:
@@ -1914,8 +1947,13 @@ class TransmissionCore:
             if not shedders or not susceptible:
                 continue
 
+            emitted_shedders = [
+                (shedder, sv * self.confinement_emission_factor(shedder))
+                for shedder, sv in shedders
+            ]
             total_aerosol = sum(
-                sv * DROPLET_AEROSOL_FRACTION for _, sv in shedders
+                emitted * DROPLET_AEROSOL_FRACTION
+                for _, emitted in emitted_shedders
             )
 
             self.aerosol_pools[zone_name] = (
@@ -1934,13 +1972,17 @@ class TransmissionCore:
             concentration = total_aerosol / max(volume, 1.0)
             shedder_ids = [s.agent_id for s, _ in shedders]
             vent_factor = self._aerosol_ventilation_factor(zone_name)
-            mix = self._shedder_mix(shedders, pathogen_id)
+            mix = self._shedder_mix(emitted_shedders, pathogen_id)
 
             for target in susceptible:
                 dose = concentration * self.inhaled_air_volume_m3_per_epoch
                 dose *= self.droplet_scalar
                 dose *= vent_factor
-                dose *= self._confinement_factor(target)
+                target_factor = self._confinement_factor(target)
+                dose *= target_factor
+                dose += self._cabin_mate_droplet_addback(
+                    target, shedders, volume, vent_factor, target_factor,
+                )
                 dose = self._accumulate(
                     target.agent_id, "droplet", dose,
                     agent_doses, agent_pathway_doses,
@@ -2282,10 +2324,22 @@ class TransmissionCore:
             shedders = self._get_shedders(occupants, pathogen_id, profile)
             self._deposit_reservoir_strains(
                 FOOD_RESERVOIR, pathogen_id, zone_name,
-                [(a, sv * FOOD_DEPOSITION_FRACTION_PER_EPOCH) for a, sv in shedders],
+                [
+                    (
+                        a,
+                        sv
+                        * self.confinement_emission_factor(a)
+                        * FOOD_DEPOSITION_FRACTION_PER_EPOCH,
+                    )
+                    for a, sv in shedders
+                ],
             )
-            for _, sv in shedders:
-                food_zones[zone_name] += sv * FOOD_DEPOSITION_FRACTION_PER_EPOCH
+            for agent, sv in shedders:
+                food_zones[zone_name] += (
+                    sv
+                    * self.confinement_emission_factor(agent)
+                    * FOOD_DEPOSITION_FRACTION_PER_EPOCH
+                )
 
             # Net growth (reproduction minus decay), applied to the pool and to
             # its composition together so the two stay proportional

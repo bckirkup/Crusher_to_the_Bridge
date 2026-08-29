@@ -515,6 +515,7 @@ def step_infection_progression(
     pathogen_profiles: dict[str, dict[str, Any]],
     strain_registry: StrainRegistry | None = None,
     epoch: int = 0,
+    confinement_core: TransmissionCore | None = None,
 ) -> None:
     """Advance multi-pathogen infection, illness, recovery, and mass accumulation.
 
@@ -558,7 +559,12 @@ def step_infection_progression(
             if sv > 0:
                 loc = agent.current_location
                 if loc in masses:
-                    masses[loc] += sv * dep_frac
+                    emission_factor = (
+                        confinement_core.confinement_emission_factor(agent)
+                        if confinement_core is not None
+                        else 1.0
+                    )
+                    masses[loc] += sv * dep_frac * emission_factor
         engine.set_pathogen_zone_mass(pid, masses)
 
 
