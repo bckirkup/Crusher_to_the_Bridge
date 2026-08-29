@@ -630,23 +630,46 @@ class TestSOP009GeneralConfinement:
 # ── SOP-010: Surface decontamination & VSP threshold tests ──────────────
 
 class TestSOP010Modifiers:
+    # Rebaselined for the dose-pathway dimensional fix: SOP-010 scrubs the
+    # fomite reservoir in TransmissionCore, not the airborne mass the HVAC
+    # route reads, so these assert on surface_pools and additionally pin that
+    # the airborne reservoir is left alone.
+    @staticmethod
+    def _decontamination_core() -> Any:
+        from engines.transmission_core import TransmissionCore
+        core = TransmissionCore(
+            rng=np.random.default_rng(42),
+            zone_volumes={"Bridge": 100.0},
+            pathogen_profiles={"norwalk_gi": {}},
+            zone_types={"Bridge": "Work"},
+        )
+        core.initialize_zones(["Bridge"])
+        core.surface_pools["Bridge"] = 100.0
+        core.surface_pools_by_pathogen["norwalk_gi"]["Bridge"] = 100.0
+        return core
+
     def test_surface_decontamination_reduces_mass(self) -> None:
         from orchestrator_epoch import apply_surface_decontamination
         cfg = load_config()
         from orchestrator_init import build_engine
         engine = build_engine(cfg, seed=42)
         engine.zone_pathogen_mass["Bridge"] = 100.0
-        apply_surface_decontamination(engine, 0.60)
-        assert abs(engine.zone_pathogen_mass["Bridge"] - 40.0) < 1e-9
+        core = self._decontamination_core()
+        apply_surface_decontamination(core, 0.60)
+        assert core.surface_pools["Bridge"] == pytest.approx(40.0)
+        assert core.surface_pools_by_pathogen["norwalk_gi"][
+            "Bridge"
+        ] == pytest.approx(40.0)
+        assert engine.zone_pathogen_mass["Bridge"] == pytest.approx(100.0)
 
     def test_surface_decontamination_factor_clamped(self) -> None:
         from orchestrator_epoch import apply_surface_decontamination
-        cfg = load_config()
-        from orchestrator_init import build_engine
-        engine = build_engine(cfg, seed=42)
-        engine.zone_pathogen_mass["Bridge"] = 100.0
-        apply_surface_decontamination(engine, 1.5)
-        assert engine.zone_pathogen_mass["Bridge"] == pytest.approx(0.0)
+        core = self._decontamination_core()
+        apply_surface_decontamination(core, 1.5)
+        assert core.surface_pools["Bridge"] == pytest.approx(0.0)
+        assert core.surface_pools_by_pathogen["norwalk_gi"][
+            "Bridge"
+        ] == pytest.approx(0.0)
 
     def test_vsp_threshold_overridable(self) -> None:
         from engines.infection_dynamics_bridge import VSP_THRESHOLD_FRACTION

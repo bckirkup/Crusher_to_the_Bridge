@@ -93,62 +93,69 @@ class TestOnsetAnchoredShedding:
         ) == 0.0
 
     def test_presymptomatic_shedding_uses_first_curve_value(self) -> None:
-        agent = _shedding_agent(
-            SimClock(epoch_duration_hours=1.0, mode=HOURS),
-            time_infected=24,
-        )
+        # Rebaselined for the dose-pathway dimensional fix: the curve is a
+        # per-day emission, so the host emits the clock's share of it each
+        # epoch instead of a whole day's worth per epoch.
+        clock = SimClock(epoch_duration_hours=1.0, mode=HOURS)
+        agent = _shedding_agent(clock, time_infected=24)
         infection = agent.infections["test_pathogen"]
         infection["incubation_days"] = 1.2
 
         assert agent.get_pathogen_shedding(
             "test_pathogen", SHEDDING_PROFILE,
-        ) == pytest.approx(10.0**7)
+        ) == pytest.approx(clock.amount_per_epoch(10.0**7))
 
     def test_curve_peak_is_indexed_from_realized_onset(self) -> None:
-        agent = _shedding_agent(
-            SimClock(epoch_duration_hours=1.0, mode=HOURS),
-            time_infected=48,
-            symptomatic=True,
-        )
+        # Rebaselined for the dose-pathway dimensional fix: per-day curve
+        # value converted through the clock.
+        clock = SimClock(epoch_duration_hours=1.0, mode=HOURS)
+        agent = _shedding_agent(clock, time_infected=48, symptomatic=True)
         infection = agent.infections["test_pathogen"]
         infection["onset_time_infected"] = 0
 
         assert agent.get_pathogen_shedding(
             "test_pathogen", SHEDDING_PROFILE,
-        ) == pytest.approx(10.0**11)
+        ) == pytest.approx(clock.amount_per_epoch(10.0**11))
 
     def test_curve_index_scales_with_epoch_duration(self) -> None:
+        # Rebaselined for the dose-pathway dimensional fix: curve *indexing*
+        # is still clock-independent, but emission is a per-day quantity, so
+        # the invariant is per-day agreement rather than per-epoch equality —
+        # a two-hour epoch carries twice an hourly epoch's emission.
         profile = SHEDDING_PROFILE
+        one_hour_clock = SimClock(epoch_duration_hours=1.0, mode=HOURS)
+        two_hour_clock = SimClock(epoch_duration_hours=2.0, mode=HOURS)
         one_hour = _shedding_agent(
-            SimClock(epoch_duration_hours=1.0, mode=HOURS),
-            time_infected=48,
-            symptomatic=True,
+            one_hour_clock, time_infected=48, symptomatic=True,
         )
         two_hours = _shedding_agent(
-            SimClock(epoch_duration_hours=2.0, mode=HOURS),
-            time_infected=24,
-            symptomatic=True,
+            two_hour_clock, time_infected=24, symptomatic=True,
         )
         one_hour.infections["test_pathogen"]["onset_time_infected"] = 0
         two_hours.infections["test_pathogen"]["onset_time_infected"] = 0
 
-        assert one_hour.get_pathogen_shedding(
-            "test_pathogen", profile,
-        ) == pytest.approx(
-            two_hours.get_pathogen_shedding("test_pathogen", profile),
+        one_hour_per_day = (
+            one_hour.get_pathogen_shedding("test_pathogen", profile)
+            * one_hour_clock.epochs_per_day
+        )
+        two_hour_per_day = (
+            two_hours.get_pathogen_shedding("test_pathogen", profile)
+            * two_hour_clock.epochs_per_day
         )
 
+        assert one_hour_per_day == pytest.approx(two_hour_per_day)
+
     def test_virtual_onset_index_uses_elapsed_fractional_days(self) -> None:
-        agent = _shedding_agent(
-            SimClock(epoch_duration_hours=1.0, mode=HOURS),
-            time_infected=round(2.9 * 24),
-        )
+        # Rebaselined for the dose-pathway dimensional fix: per-day curve
+        # value converted through the clock.
+        clock = SimClock(epoch_duration_hours=1.0, mode=HOURS)
+        agent = _shedding_agent(clock, time_infected=round(2.9 * 24))
         infection = agent.infections["test_pathogen"]
         infection["incubation_days"] = 1.2
 
         assert agent.get_pathogen_shedding(
             "test_pathogen", SHEDDING_PROFILE,
-        ) == pytest.approx(10.0**9)
+        ) == pytest.approx(clock.amount_per_epoch(10.0**9))
 
     def test_absent_presymptomatic_field_means_no_shedding_before_onset(self) -> None:
         agent = _shedding_agent(

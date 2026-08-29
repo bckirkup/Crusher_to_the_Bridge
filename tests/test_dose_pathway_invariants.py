@@ -11,12 +11,14 @@ from engines.infection_dynamics_bridge import (
     IllnessStatus,
     InfectionStatus,
     KorkinAgent,
+    KorkinShipEngine,
 )
 from engines.sim_clock import SimClock
 from engines.transmission_core import (
     ContactTracingMatrix,
     TransmissionCore,
 )
+from orchestrator_epoch import step_infection_progression
 
 
 ZONE = "Test_Zone"
@@ -93,6 +95,127 @@ def _core(
     )
     core.initialize_zones([ZONE])
     return core
+
+
+AGING_PROFILE = {
+    "shedding_curve_log10": [4.0] * 40,
+    "asymptomatic_shedding_log10": [4.0] * 40,
+    "dose_adjustment": 0.0,
+    "presymptomatic_shedding_days": 1.0,
+    "symptom_onset_day": 0.0,
+    "recovery_day": 1000.0,
+    "surface_deposition_fraction": 1.0,
+    "airborne_half_life_hours": 1.0,
+}
+
+
+def _aging_engine(shedder: bool) -> KorkinShipEngine:
+    """One host in one zone, so the zone's airborne mass is analytic."""
+    clock = SimClock(epoch_duration_hours=1.0, mode="hours")
+    engine = KorkinShipEngine(
+        num_passengers=1,
+        num_crew=0,
+        initial_infected=0,
+        immune_ratio=0.0,
+        seed=11,
+        clock=clock,
+    )
+    agent = engine.agents[0]
+    agent.current_location = ZONE
+    if shedder:
+        agent.infection_status = InfectionStatus.INFECTED
+        agent.illness_status = IllnessStatus.SYMPTOMATIC
+        agent.infect_with_pathogen(PATHOGEN, 1.0, 0, time_infected=24)
+        agent.infections[PATHOGEN]["illness"] = IllnessStatus.SYMPTOMATIC
+        agent.infections[PATHOGEN]["onset_time_infected"] = 0
+    engine.set_pathogen_zone_mass(PATHOGEN, {ZONE: 0.0})
+    return engine
+
+
+def _run_aging(engine: KorkinShipEngine, epochs: int) -> list[float]:
+    profiles = {PATHOGEN: AGING_PROFILE}
+    trace = []
+    for epoch in range(epochs):
+        step_infection_progression(engine, profiles, epoch=epoch)
+        trace.append(engine.get_pathogen_zone_mass(PATHOGEN)[ZONE])
+    return trace
+
+
+def test_airborne_mass_converges_instead_of_accumulating() -> None:
+    """A constant shedder drives the zone to a bounded airborne fixed point.
+
+    Without per-pathogen aging on the production path the reservoir is a
+    running total, so it grows by the same deposit every epoch forever. Aged,
+    it converges to deposit / (1 - survival).
+    """
+    engine = _aging_engine(shedder=True)
+    clock = engine.clock
+    trace = _run_aging(engine, 40)
+
+    survival = clock.survival_from_half_life(
+        AGING_PROFILE["airborne_half_life_hours"],
+    )
+    deposit = clock.amount_per_epoch(10.0 ** 4.0)
+    assert trace[-1] == pytest.approx(deposit / (1.0 - survival), rel=1e-6)
+
+    first_ten = trace[9] - trace[0]
+    last_ten = trace[-1] - trace[-11]
+    assert last_ten < first_ten
+    assert all(math.isfinite(mass) for mass in trace)
+    assert all(mass >= 0.0 for mass in trace)
+    assert engine.zone_pathogen_mass[ZONE] == pytest.approx(trace[-1])
+
+
+def test_airborne_mass_decays_without_a_shedder() -> None:
+    engine = _aging_engine(shedder=False)
+    engine.set_pathogen_zone_mass(PATHOGEN, {ZONE: 100.0})
+    trace = _run_aging(engine, 6)
+
+    assert trace == sorted(trace, reverse=True)
+    assert trace[-1] < 100.0
+    assert min(trace) >= 0.0
+
+
+def test_simultaneous_delivery_is_independent_of_occupant_order() -> None:
+    """Everyone in a zone eats from the same pool, so order cannot matter."""
+    def doses(order: list[int]) -> list[float]:
+        core = _core(food=True)
+        core.food_pools[PATHOGEN][ZONE] = 10.0
+        occupants = [_agent(agent_id) for agent_id in order]
+        agent_doses: dict[int, float] = {}
+        core._pathway_food_contamination(
+            0,
+            {ZONE: occupants},
+            agent_doses,
+            ContactTracingMatrix(epoch=0),
+            pathogen_id=PATHOGEN,
+            profile=core.pathogen_profiles[PATHOGEN],
+        )
+        return [agent_doses[agent_id] for agent_id in sorted(order)]
+
+    forward = doses([1, 2, 3])
+    assert forward == pytest.approx(doses([3, 2, 1]))
+    assert forward[0] == pytest.approx(forward[-1])
+
+
+def test_food_delivery_cannot_exceed_a_depleted_pool() -> None:
+    """Demand above the pool is shared out, not served first-come."""
+    core = _core(food=True)
+    core.food_pools[PATHOGEN][ZONE] = 1e-3
+    occupants = [_agent(agent_id) for agent_id in range(1, 41)]
+    agent_doses: dict[int, float] = {}
+    core._pathway_food_contamination(
+        0,
+        {ZONE: occupants},
+        agent_doses,
+        ContactTracingMatrix(epoch=0),
+        pathogen_id=PATHOGEN,
+        profile=core.pathogen_profiles[PATHOGEN],
+    )
+    delivered = 1e-3 - core.food_pools[PATHOGEN][ZONE]
+    assert delivered <= 1e-3 + 1e-12
+    assert core.food_pools[PATHOGEN][ZONE] >= 0.0
+    assert len(set(round(dose, 15) for dose in agent_doses.values())) == 1
 
 
 def test_empty_reservoirs_only_decay() -> None:
@@ -273,7 +396,5 @@ def test_doses_and_dose_response_are_bounded_and_monotone() -> None:
     core = _core()
     doses = [0.0, 0.1, 1.0, 10.0, 100.0]
     probabilities = [core._dose_response(PATHOGEN, dose) for dose in doses]
-    assert all(math.isfinite(value) for value in doses)
-    assert all(value >= 0.0 for value in doses)
     assert all(0.0 <= value <= 1.0 for value in probabilities)
     assert probabilities == sorted(probabilities)

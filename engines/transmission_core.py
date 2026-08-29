@@ -47,6 +47,7 @@ import numpy as np
 from engines.infection_dynamics_bridge import (
     ALPHA,
     BETA,
+    DEFAULT_AIRBORNE_HALF_LIFE_HOURS,
     SURFACE_DEPOSITION_FRACTION,
     InfectionStatus,
     KorkinAgent,
@@ -831,16 +832,31 @@ class TransmissionCore:
             )
 
     def _age_aerosol_pools(self) -> None:
-        """Age telemetry aerosol pools once before this epoch's deposits."""
-        survival = self.clock.survival_from_half_life(1.1)
-        for zone_name in self.aerosol_pools:
-            self.aerosol_pools[zone_name] = max(
-                0.0, self.aerosol_pools[zone_name] * survival,
-            )
+        """Age telemetry aerosol pools once before this epoch's deposits.
+
+        The aggregate pool is rebuilt from the per-pathogen sums wherever a
+        zone is tracked per pathogen, so the two views cannot drift when
+        pathogens carry different airborne half-lives. A zone written only
+        into the aggregate ages at the default half-life.
+        """
         for pathogen_id, pools in self.aerosol_pools_by_pathogen.items():
             survival = self._airborne_survival(pathogen_id)
             for zone_name in pools:
                 pools[zone_name] = max(0.0, pools[zone_name] * survival)
+        default_survival = self.clock.survival_from_half_life(
+            DEFAULT_AIRBORNE_HALF_LIFE_HOURS,
+        )
+        for zone_name in self.aerosol_pools:
+            tracked = [
+                pools[zone_name]
+                for pools in self.aerosol_pools_by_pathogen.values()
+                if zone_name in pools
+            ]
+            self.aerosol_pools[zone_name] = max(
+                0.0,
+                sum(tracked) if tracked
+                else self.aerosol_pools[zone_name] * default_survival,
+            )
 
     def decontaminate_surfaces(self, retention: float) -> None:
         """Scale fomite pools and their strain composition together."""
@@ -1661,13 +1677,8 @@ class TransmissionCore:
             dose = 0.0
             for shedder, sv in shedders:
                 pair_factor = self._cabin_pair_contact_factor(shedder, target)
-                dose += (
-                    sv
-                    * pair_factor
-                    / n_occupants
-                    * r0_draw
-                )
-            return dose
+                dose += sv * pair_factor / n_occupants * r0_draw
+            return dose * transfer_fraction
         dose = total_shedding / n_occupants * r0_draw
         return (
             dose
@@ -2040,11 +2051,50 @@ class TransmissionCore:
 
     # ── Pathway 4: Fomite Deposition & Surface Touch ─────────────────
 
-    def _apply_fomite_pickup(
+    def _fomite_pickup_request(
         self,
         target: KorkinAgent,
         zone_name: str,
         surface_mass: float,
+    ) -> float:
+        """Mass one target would touch up from a start-of-epoch surface pool."""
+        if self._cabin_confinement_active(target):
+            return 0.0
+        if self.rng.random() > FOMITE_PICKUP_PROBABILITY:
+            return 0.0
+
+        zone_volume_m3 = max(self.zone_volumes.get(zone_name, 100.0), 0.0)
+        zone_touchable_area_m2 = zone_volume_m3 / DECK_HEIGHT_M
+        if zone_touchable_area_m2 <= 0.0:
+            return 0.0
+        return min(
+            surface_mass,
+            surface_mass
+            / zone_touchable_area_m2
+            * FOMITE_CONTACT_AREA_M2
+            * FOMITE_TRANSFER_FRACTION,
+        )
+
+    @staticmethod
+    def _delivery_scale(requested_total: float, pool_mass: float) -> float:
+        """Scale simultaneous deliveries so their sum cannot exceed the pool.
+
+        Everyone in the zone is exposed to the same pool at the same time, so
+        each dose is computed from the start-of-epoch mass and the whole set is
+        scaled down together when demand exceeds supply. Doing it per target in
+        list order would privilege whoever the occupant list happens to name
+        first.
+        """
+        if requested_total <= 0.0 or requested_total <= pool_mass:
+            return 1.0
+        return pool_mass / requested_total
+
+    def _record_fomite_pickup(
+        self,
+        target: KorkinAgent,
+        zone_name: str,
+        surface_mass: float,
+        delivered: float,
         prev_occupant_ids: set[int],
         prev_shedders: list[int],
         agent_doses: dict[int, float],
@@ -2052,25 +2102,7 @@ class TransmissionCore:
         agent_pathway_doses: dict[int, dict[str, float]] | None,
         pathogen_id: str,
         surface_attribution: DoseAttribution | None = None,
-    ) -> float:
-        if self._cabin_confinement_active(target):
-            return 0.0
-        if self.rng.random() > FOMITE_PICKUP_PROBABILITY:
-            return 0.0
-
-        zone_volume_m3 = max(self.zone_volumes.get(zone_name, 0.0), 0.0)
-        zone_touchable_area_m2 = zone_volume_m3 / DECK_HEIGHT_M
-        if zone_touchable_area_m2 <= 0.0:
-            return 0.0
-        delivered = min(
-            surface_mass,
-            (
-                surface_mass
-                / zone_touchable_area_m2
-                * FOMITE_CONTACT_AREA_M2
-                * FOMITE_TRANSFER_FRACTION
-            ),
-        )
+    ) -> None:
         dose = self._accumulate(
             target.agent_id, "fomite", delivered,
             agent_doses, agent_pathway_doses, surface_attribution,
@@ -2090,7 +2122,6 @@ class TransmissionCore:
             "is_trailing": is_trailing,
             "prev_shedder_ids": prev_shedders if is_trailing else [],
         })
-        return delivered
 
     def _consume_surface_mass(
         self,
@@ -2186,20 +2217,33 @@ class TransmissionCore:
                 self._reservoir_mix(SURFACE_RESERVOIR, pathogen_id, zone_name),
             )
 
-            for target in susceptible:
-                delivered = self._apply_fomite_pickup(
-                    target, zone_name, surface_mass,
+            requests = [
+                (
+                    target,
+                    self._fomite_pickup_request(
+                        target, zone_name, surface_mass,
+                    ),
+                )
+                for target in susceptible
+            ]
+            scale = self._delivery_scale(
+                sum(mass for _, mass in requests), surface_mass,
+            )
+            delivered_total = 0.0
+            for target, requested in requests:
+                delivered = requested * scale
+                if delivered <= 0.0:
+                    continue
+                self._record_fomite_pickup(
+                    target, zone_name, surface_mass, delivered,
                     prev_occupant_ids, prev_shedders,
                     agent_doses, matrix, agent_pathway_doses, pathogen_id,
                     surface_attribution,
                 )
-                if delivered > 0.0:
-                    self._consume_surface_mass(
-                        pathogen_id, zone_name, delivered, surface_mass,
-                    )
-                    surface_mass = max(0.0, surface_mass - delivered)
-                    if surface_mass <= 0.0:
-                        break
+                delivered_total += delivered
+            self._consume_surface_mass(
+                pathogen_id, zone_name, delivered_total, surface_mass,
+            )
 
     # ── Pathway 5: Food Contamination ────────────────────────────────
 
@@ -2267,17 +2311,16 @@ class TransmissionCore:
                 self._reservoir_mix(FOOD_RESERVOIR, pathogen_id, zone_name),
             )
             n_occupants = max(len(occupants), 1)
-            pool_before_delivery = food_zones[zone_name]
+            pool_before = food_zones[zone_name]
+            per_head = (
+                pool_before / n_occupants * FOOD_INGESTION_FRACTION * zone_mult
+            )
+            delivered_each = per_head * self._delivery_scale(
+                per_head * len(susceptible), pool_before,
+            )
             for target in susceptible:
-                dose = (
-                    food_zones[zone_name]
-                    / n_occupants
-                    * FOOD_INGESTION_FRACTION
-                    * zone_mult
-                )
-                delivered = min(food_zones[zone_name], dose)
                 dose = self._accumulate(
-                    target.agent_id, "food", dose,
+                    target.agent_id, "food", delivered_each,
                     agent_doses, agent_pathway_doses, food_attribution,
                 )
 
@@ -2285,23 +2328,21 @@ class TransmissionCore:
                     "target_id": target.agent_id,
                     "zone": zone_name,
                     "pathogen_id": pathogen_id,
-                    "food_pool_mass": round(food_zones[zone_name], 4),
+                    "food_pool_mass": round(pool_before, 4),
                     "food_zone_multiplier": zone_mult,
                     "dose": round(dose, 4),
                 })
-                food_zones[zone_name] = max(
-                    0.0, food_zones[zone_name] - delivered,
+            remaining = max(
+                0.0, pool_before - delivered_each * len(susceptible),
+            )
+            food_zones[zone_name] = remaining
+            if pool_before > 0.0 and remaining < pool_before:
+                self._reservoir.decay(
+                    remaining / pool_before,
+                    ReservoirComposition.key(
+                        FOOD_RESERVOIR, pathogen_id, zone_name,
+                    ),
                 )
-                if pool_before_delivery > 0.0 and delivered > 0.0:
-                    self._reservoir.decay(
-                        food_zones[zone_name] / pool_before_delivery,
-                        ReservoirComposition.key(
-                            FOOD_RESERVOIR, pathogen_id, zone_name,
-                        ),
-                    )
-                    pool_before_delivery = food_zones[zone_name]
-                if food_zones[zone_name] <= 0.0:
-                    break
 
     def _food_rate_factors(self, food_cfg: dict[str, Any]) -> tuple[float, float]:
         growth = food_cfg.get(
