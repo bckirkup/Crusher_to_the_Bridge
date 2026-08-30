@@ -38,7 +38,7 @@ from engines.sim_clock import crossed_day_boundary as _crossed_day_boundary
 from engines.strain_state import ImmuneRecord, StrainRegistry
 from engines.transmission_core import (
     TransmissionCore,
-    _draw_emesis_schedule,
+    draw_emesis_schedule,
 )
 from engines.wearable_monitor import WearableMonitor
 from orchestrator_types import (
@@ -428,13 +428,14 @@ def _draw_symptom_onset(
     if rng.random() < ill_prob:
         inf["illness"] = IllnessStatus.SYMPTOMATIC
         inf["onset_time_infected"] = inf.get("time_infected", 0)
-        _draw_emesis_schedule(agent, pid, prof, rng)
+        draw_emesis_schedule(agent, pid, prof, rng)
         if inf.get("symptom_severity") in (None, "", "asymptomatic"):
             inf["symptom_severity"] = _draw_symptom_severity(prof, rng)
         if agent.illness_status == IllnessStatus.NOT_ILL:
             agent.illness_status = IllnessStatus.SYMPTOMATIC
     else:
         inf["symptom_severity"] = "asymptomatic"
+
 
 def _draw_symptom_severity(
     profile: dict[str, Any],

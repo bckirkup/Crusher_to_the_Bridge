@@ -123,7 +123,7 @@ EMESIS_AEROSOL_FRACTION_RANGE = (7.2e-7, 2.67e-4)
 EMESIS_DEPOSITION_AREA_M2 = 7.8
 
 
-def _draw_emesis_schedule(
+def draw_emesis_schedule(
     agent: Any,
     pathogen_id: str,
     profile: dict[str, Any],
