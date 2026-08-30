@@ -7,17 +7,29 @@ Sampled expectations of the implemented distributions
   te_hm          0.339
   hand load     7244.36 copies (Liu 2013 anchor)
 
+Routine cleaning multiplier on the time-averaged pool
+------------------------------------------------------------------------------
+  coverage 0.37, 1.29 log10 per pass, 1 pass/day
+  cabin   loss 0.02872/h -> pool x 0.7396
+  public  loss 0.3325/h -> pool x 0.956
+  A pass matters only where hand pickup is slow enough to let the cleaned
+  share recharge; in a busy public zone pickup already dominates removal.
+
 Predicted steady-state surface loading
 ------------------------------------------------------------------------------
-zone     | scenario                           |        pool | copies/swab |     Park range | verdict
-cabin    | sick passenger confined to cabin   |   1.295e+05 |        5571 |       80-31217 | IN RANGE
-cabin    | sick passenger, unconfined         |   4.711e+04 |        2026 |       80-31217 | IN RANGE
-public   | lounge, 10 shedder-hours/day       |        5967 |       64.15 |         16-113 | IN RANGE
-public   | lounge, 60 shedder-hours/day       |    3.58e+04 |       384.9 |         16-113 | out of range
-public   | lounge, 200 shedder-hours/day      |   1.193e+05 |        1283 |         16-113 | out of range
+zone     | scenario                           |        pool | copies/swab | no cleaning |     Park range | verdict
+cabin    | sick passenger confined to cabin   |   9.582e+04 |        4120 |        5571 |       80-31217 | IN RANGE
+cabin    | sick passenger, unconfined         |   3.484e+04 |        1498 |        2026 |       80-31217 | IN RANGE
+public   | lounge, 10 shedder-hours/day       |        5705 |       61.33 |       64.15 |         16-113 | IN RANGE
+public   | lounge, 60 shedder-hours/day       |   3.423e+04 |         368 |       384.9 |         16-113 | out of range
+public   | lounge, 200 shedder-hours/day      |   1.141e+05 |        1227 |        1283 |         16-113 | out of range
 
-Cabin/public gradient: 14.5x
+Cabin/public gradient: 11.2x
+Same gradient without routine cleaning: 14.5x
 Park observed gradient: roughly 100-300x
+Cleaning moves the gradient the wrong way: it removes more from a quiet cabin
+than from a busy public zone, where hand pickup already clears the pool faster
+than housekeeping can. The gradient shortfall is therefore not a cleaning gap.
 
 Shedder-hour asymmetry required for a 100x gradient, holding the implemented constants fixed:
   needed shedder-hours(cabin)/shedder-hours(public) = 29.33
@@ -36,11 +48,11 @@ Emesis term as implemented
 Time-averaged loading with emesis, swept over cabin localization f
 ------------------------------------------------------------------------------
      f |  cabin copies/swab |  public copies/swab |  gradient | vs Park 100-300x
-  0.50 |          4.776e+04 |                9495 |     5.03x | out of range
-  0.80 |          7.307e+04 |                4029 |    18.14x | out of range
-  0.95 |          8.573e+04 |                1296 |    66.15x | out of range
-  0.99 |          8.911e+04 |               567.1 |    157.1x | IN RANGE
-  1.00 |          8.995e+04 |               384.9 |    233.7x | IN RANGE
+  0.50 |          3.533e+04 |                9078 |    3.891x | out of range
+  0.80 |          5.405e+04 |                3852 |    14.03x | out of range
+  0.95 |          6.341e+04 |                1239 |    51.18x | out of range
+  0.99 |          6.591e+04 |               542.2 |    121.6x | IN RANGE
+  1.00 |          6.653e+04 |                 368 |    180.8x | IN RANGE
 
 f is the fraction of a host's vomiting episodes that occur in its own cabin.
 No study measures it. It is NOT a model parameter and the model does not use

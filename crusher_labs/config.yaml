@@ -250,6 +250,15 @@ transmission:
       Engineering: 0.5
     sigma_service: 1.0                # Galley / service zone IDs (high)
     default_sigma: 0.75               # unknown zone types
+  surface_cleaning:
+    enabled: true
+    routine:
+      coverage: 0.37
+      log10_reduction: 1.29
+      events_per_day: 1.0
+    outbreak_response:
+      coverage: 0.58
+      log10_reduction: 4.29
 
 # ── HVAC / CONTAM Transport ────────────────────────────────────
 hvac:

@@ -545,7 +545,7 @@ epoch schedules (Law 1).
 | SOP | Name | Trigger instrument | Min escalation | Key modifiers |
 |-----|------|-------------------|----------------|---------------|
 | SOP-001–002 | Ventilation upgrades | Air sniffer | SUSPECTED / CONFIRMED | HVAC filters |
-| SOP-003 | Surface Decontamination | Surface swab | SUSPECTED | `surface_decontamination_factor` |
+| SOP-003 | Surface Disinfection | Surface swab | SUSPECTED | `surface_disinfection_log10_reduction` |
 | SOP-004–005 | PPE | Wastewater | ALERT / CONFIRMED | Transmission scalars |
 | SOP-006 | Diagnostics | Clinical RDT | ALERT | `diagnostic_cadence_multiplier` |
 | SOP-007 | Galley Closure | Clinical micro | SUSPECTED | `close_zones` |

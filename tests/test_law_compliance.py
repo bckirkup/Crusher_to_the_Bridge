@@ -155,7 +155,6 @@ class TestLaw3ScalarBounds:
 
     BOUNDED_KEYS = [
         "hvac_filter_efficiency_override",
-        "surface_decontamination_factor",
         "direct_contact_scalar",
         "droplet_scalar",
         "hvac_airborne_scalar",

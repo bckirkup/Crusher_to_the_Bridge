@@ -86,12 +86,12 @@ VSP passenger attack-rate targets, for A4:
 ever fitted to it. Observed 80-31,217 copies/swab in sick passengers' cabins,
 16-113 in public spaces, a gradient of roughly 100-300x.
 
-| | #351 (hand chain) | #352 (+ emesis) | #353 (+ measured contact) |
-|---|---:|---:|---:|
-| cabin, confined | 1,434 | 1,434 | 5,571 |
-| public, 60 shedder-h/day | 356.9 | 356.9 | 384.9 |
-| cabin/public gradient | 4.02x | 4.02x | 14.5x |
-| shedder-hour asymmetry needed for 100x | 75x | 75x | 29.3x |
+| | #351 (hand chain) | #352 (+ emesis) | #353 (+ measured contact) | #355 (+ cleaning) |
+|---|---:|---:|---:|---:|
+| cabin, confined | 1,434 | 1,434 | 5,571 | 4,120 |
+| public, 60 shedder-h/day | 356.9 | 356.9 | 384.9 | 368.0 |
+| cabin/public gradient | 4.02x | 4.02x | 14.5x | 11.2x |
+| shedder-hour asymmetry needed for 100x | 75x | 75x | 29.3x | 29.3x |
 
 Levels sit inside the observed ranges across 1.5 orders of magnitude, from
 independently sourced constants. The **gradient still fails**. A single emesis
@@ -103,11 +103,25 @@ cabin. That fraction is unmeasured, is not a model parameter, and reading it off
 Park's gradient would be fitting. Refused. Harness:
 `telemetry_buffer/observation_model/park_surface_check.py`.
 
+Routine cleaning (#355) moves the gradient the **wrong way**, from 14.5x to
+11.2x, and the reason is instructive: a daily pass over 37% of objects competes
+with continuous removal by hand pickup, so it multiplies the time-averaged pool
+by 0.74 in a quiet cabin (loss 0.029/h) but only 0.96 in a busy public zone
+(loss 0.33/h), where pickup already clears surfaces faster than housekeeping
+can. Real ships clean cabins and public spaces on different schedules with
+different products; the model does not, because nothing measured says how. The
+gradient shortfall is therefore not a cleaning gap — it remains §4's sick-host
+movement problem. Measured at the #355 head with
+`ROUTINE_CLEANING_COVERAGE=0.37`, 1.29 log10/pass, one pass/day.
+
 **The COVID discontinuity** is the better instrument and is not yet used as a
-target. It is a *difference*, so errors common to both arms cancel — which is
-what this effort needs, having spent its length finding errors that cancel in
-levels. Two caveats before it is scored against: the reported attack rate is
-conditioned on the ≥3% VSP reporting threshold, so a change in testing
+target. #355 supplies the NPI lever it needs (routine coverage and per-event
+log10 are now separately configurable, and outbreak response is a distinct
+mechanism), but the discontinuity has not been scored. It is a *difference*, so
+errors common to both arms cancel — which is what this effort needs, having
+spent its length finding errors that cancel in levels. Two caveats before it is
+scored against: the reported attack rate is conditioned on the ≥3% VSP
+reporting threshold, so a change in testing
 intensity moves it with no change in transmission; and the outbreak count has no
 voyage denominator. Detecting the effect (~15-20%, p=0.032 passengers, p=0.07
 norovirus-only) needs hundreds of simulated voyages per configuration.
@@ -116,15 +130,18 @@ norovirus-only) needs hundreds of simulated voyages per configuration.
 
 Roughly in dependency order.
 
-1. **Cleaning and disinfection of surface pools.** Nothing cleans surfaces
-   today; they decay at 0.25/day and that is all. Routine cleaning is 1-2 log10
-   per event, outbreak hypochlorite 4-5. Routine and outbreak-response must be
-   separate mechanisms — do not fit one universal cleaning parameter. This is
-   also the missing NPI lever the COVID discontinuity needs, and the reason
-   crew rates did not move is that enhanced sanitation was passenger-facing.
-2. **Refit the common dose** against VSP class targets, once the contact layer
-   and cleaning are settled. One common dose-response across all four hull
-   classes; no hull-specific pathogen biology, ever.
+1. **Zone-differentiated cleaning schedules.** #355 closed the "nothing cleans
+   surfaces" gap — routine housekeeping is now a discrete daily pass over the
+   measured 37% of objects it reaches, and outbreak-response hypochlorite is a
+   separate, stronger, SOP-triggered mechanism — but it applies one schedule to
+   every zone class. Enhanced sanitation during the COVID era was
+   passenger-facing, which is the stated reason crew rates did not move, and
+   that asymmetry cannot be expressed until coverage is per zone class. No
+   measurement of per-zone-class frequency was found; do not invent one.
+2. **Refit the common dose** against VSP class targets. The contact layer
+   (#353) and cleaning (#355) are now in place, so this is next. One common
+   dose-response across all four hull classes; no hull-specific pathogen
+   biology, ever.
 3. **Re-measure route shares and the passenger/crew ratio** on the refitted
    model. Expect #353 to push A5 *further* from 2.9 — crew work the highest
    touch-rate zones and their berthing is already ~3x denser than passengers'.
@@ -164,6 +181,18 @@ is over-determined only *given* them. Full list in §10 of the history document.
   cohort — an assumption that bears directly on A5.
 - Crew presenteeism and mandatory occupational reporting: absent in both
   directions.
+- `OUTBREAK_CLEANING_COVERAGE` 0.58 — no shipboard measurement exists. Carried
+  over from a 34%→53% supervision-and-feedback effect in two hospitals
+  (Murphy 2011) applied to Carling's 37%. Sweep it; never assert it.
+- Log10 additivity of the two-step outbreak procedure (detergent preclean then
+  hypochlorite, 1.29 + 3.0 = 4.29). The field reports two-step efficacy that
+  way; nobody measured the composition.
+- One housekeeping pass per day, uniform across zone classes — the denominator
+  of Carling's "cleaned on a daily basis", not an observed schedule.
+- Newly deposited surface mass is split into cleaned and missed shares in
+  proportion to coverage, i.e. shedders touch reached and missed objects alike.
+  Untested; if soiling concentrates on the objects housekeeping skips, the
+  missed reservoir is larger than modelled.
 
 ## 6. Maintaining this file
 

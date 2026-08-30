@@ -35,8 +35,7 @@
           "properties": {
             "hvac_filter_efficiency_override": {"type": "number", "minimum": 0, "maximum": 1},
             "hvac_filter_type_label": {"type": "string"},
-            "surface_decontamination_factor": {"type": "number", "minimum": 0, "maximum": 1},
-            "surface_decay_rate_override": {"type": "number", "minimum": 0, "maximum": 1},
+            "surface_disinfection_log10_reduction": {"type": "number", "minimum": 0, "maximum": 10},
             "ppe_transmission_reduction": {"type": "number", "minimum": 0, "maximum": 1},
             "direct_contact_scalar": {"type": "number", "minimum": 0, "maximum": 1},
             "droplet_scalar": {"type": "number", "minimum": 0, "maximum": 1},

@@ -523,8 +523,6 @@ class ResourceCosts(BaseModel):
 
 _PROBABILITY_MODIFIER_KEYS = {
     "hvac_filter_efficiency_override",
-    "surface_decontamination_factor",
-    "surface_decay_rate_override",
     "ppe_transmission_reduction",
     "direct_contact_scalar",
     "droplet_scalar",
@@ -1328,6 +1326,47 @@ def _check_config_yaml(
     _check_long_read_sequencing(cfg, report)
     _check_instrument_turnaround(cfg, report)
     _check_variant_surveillance(cfg, report)
+    _check_surface_cleaning(cfg, report)
+
+
+def _check_surface_cleaning(cfg: dict[str, Any], report: Report) -> None:
+    """Validate routine and outbreak surface-cleaning settings."""
+    cleaning = (cfg.get("transmission", {}) or {}).get(
+        "surface_cleaning", {},
+    )
+    if not isinstance(cleaning, dict):
+        report.error(_CONFIG_YAML, "CONFIG",
+                     "transmission.surface_cleaning must be a mapping")
+        return
+    routine = cleaning.get("routine", {}) or {}
+    outbreak = cleaning.get("outbreak_response", {}) or {}
+    blocks = (
+        ("routine", routine),
+        ("outbreak_response", outbreak),
+    )
+    for name, block in blocks:
+        if not isinstance(block, dict):
+            report.error(_CONFIG_YAML, "CONFIG",
+                         f"surface_cleaning.{name} must be a mapping")
+            continue
+        coverage = block.get("coverage")
+        if isinstance(coverage, (int, float)) and not 0 <= coverage <= 1:
+            report.error(
+                _CONFIG_YAML, "MATH_BOUND",
+                f"surface_cleaning.{name}.coverage must be in [0,1]",
+            )
+        reduction = block.get("log10_reduction")
+        if isinstance(reduction, (int, float)) and reduction < 0:
+            report.error(
+                _CONFIG_YAML, "MATH_BOUND",
+                f"surface_cleaning.{name}.log10_reduction must be >= 0",
+            )
+    events = routine.get("events_per_day")
+    if isinstance(events, (int, float)) and events <= 0:
+        report.error(
+            _CONFIG_YAML, "MATH_BOUND",
+            "surface_cleaning.routine.events_per_day must be > 0",
+        )
 
 
 def _check_variant_surveillance(cfg: dict[str, Any], report: Report) -> None:

@@ -65,7 +65,7 @@
     },
     {
       "protocol_id": "SOP-003",
-      "name": "Surface Decontamination Protocol",
+      "name": "Surface Disinfection Protocol",
       "description": "Deploy sanitizer teams when surface swab triggers AMBER or above.",
       "trigger": {
         "instrument_class": "targeted_surface_swab",
@@ -73,8 +73,7 @@
         "min_zones_affected": 1
       },
       "modifiers": {
-        "surface_decontamination_factor": 0.5,
-        "surface_decay_rate_override": 0.3
+        "surface_disinfection_log10_reduction": 4.29
       },
       "costs_per_epoch": {
         "financial_usd": 200.0,
@@ -320,7 +319,7 @@
     {
       "protocol_id": "SOP-010",
       "name": "VSP-Threshold Mass Isolation",
-      "description": "Quarantine symptomatic agents upon RED clinical RDT with surface decontamination. The VSP 3% attack-rate threshold is now enforced via configurable infection_counters in config.yaml rather than an engine-internal check. Agents remain HVAC-connected in their home zone.",
+      "description": "Quarantine symptomatic agents upon RED clinical RDT with outbreak-response surface disinfection. The VSP 3% attack-rate threshold is now enforced via configurable infection_counters in config.yaml rather than an engine-internal check. Agents remain HVAC-connected in their home zone.",
       "trigger": {
         "instrument_class": "clinical_rdt",
         "stoplight_level": "RED",
@@ -328,7 +327,7 @@
       },
       "modifiers": {
         "confine_symptomatic_to_quarters": true,
-        "surface_decontamination_factor": 0.6
+        "surface_disinfection_log10_reduction": 4.29
       },
       "costs_per_epoch": {
         "financial_usd": 600.0,
@@ -524,7 +523,7 @@
     {
       "protocol_id": "SOP-016",
       "name": "Integrated Detection Escalation \u2014 Critical",
-      "description": "Critical escalation when at least two integrated detection modes reach RED simultaneously. Combines symptomatic confinement with standard PPE and surface decontamination.",
+      "description": "Critical escalation when at least two integrated detection modes reach RED simultaneously. Combines symptomatic confinement with standard PPE and outbreak-response surface disinfection.",
       "trigger": {
         "instrument_class": "detection_escalation",
         "stoplight_level": "RED",
@@ -535,7 +534,7 @@
         "ppe_transmission_reduction": 0.6,
         "direct_contact_scalar": 0.4,
         "droplet_scalar": 0.4,
-        "surface_decontamination_factor": 0.4
+        "surface_disinfection_log10_reduction": 4.29
       },
       "costs_per_epoch": {
         "financial_usd": 700.0,

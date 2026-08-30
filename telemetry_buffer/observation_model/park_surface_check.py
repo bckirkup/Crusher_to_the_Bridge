@@ -15,6 +15,14 @@ The prediction is a steady-state surface loading, so it is reported as a
 function of shedder-hours per zone per day rather than for one arbitrary
 occupancy: the point of the check is the cabin-to-public gradient, and that
 gradient depends on how shedder time distributes across zone classes.
+
+Routine housekeeping is a discrete daily event over the 37% of high-touch
+objects it actually reaches, so it is not representable as an extra continuous
+loss rate. It enters here as the closed-form periodic steady state of the two
+compartments the engine keeps: a cleaned share that is knocked down every pass
+and recharges between passes, and a missed share that only ever decays. Both
+layouts are reported so the effect of the mechanism is visible rather than
+baked in.
 """
 
 from __future__ import annotations
@@ -64,17 +72,51 @@ def _expectations() -> dict[str, float]:
     }
 
 
+def routine_cleaning_multiplier(
+    loss_per_hour: float,
+    *,
+    enabled: bool = True,
+) -> float:
+    """Time-averaged pool with routine cleaning, over the pool without it.
+
+    The engine splits a zone's surface mass into a share housekeeping reaches
+    (``ROUTINE_CLEANING_COVERAGE``) and a share it misses. Under a constant
+    deposition rate D and a continuous loss rate ``loss_per_hour``, the missed
+    share sits at (1-c)D/lambda forever. The cleaned share is periodic: it
+    relaxes towards cD/lambda between passes and is multiplied by
+    k = 10**-log10_reduction at each pass, giving a cycle-start value of
+    x0 = k(1-E)/(1-kE) times its own asymptote, with E = exp(-lambda T) and
+    T the interval between passes. A swab lands at a uniformly random time in
+    the cycle, so the comparator is the cycle mean of that trajectory.
+    """
+    if not enabled:
+        return 1.0
+    coverage = tc.ROUTINE_CLEANING_COVERAGE
+    events_per_day = tc.ROUTINE_CLEANING_EVENTS_PER_DAY
+    if coverage <= 0.0 or events_per_day <= 0.0:
+        return 1.0
+    kill = 10.0 ** -tc.ROUTINE_CLEANING_LOG10_REDUCTION
+    interval_hours = 24.0 / events_per_day  # clock-exempt: analytic harness
+    tau = loss_per_hour * interval_hours
+    decayed = math.exp(-tau)
+    start_ratio = kill * (1.0 - decayed) / (1.0 - kill * decayed)
+    cycle_mean_ratio = 1.0 + (start_ratio - 1.0) * (1.0 - decayed) / tau
+    return (1.0 - coverage) + coverage * cycle_mean_ratio
+
+
 def steady_state_pool(
     zone_class: str,
     shedder_hours_per_day: float,
     susceptible_present: float,
     exp_: dict[str, float],
     surface_decay_per_day: float = 0.25,
+    cleaning: bool = True,
 ) -> float:
     """Copies resident on a zone's high-touch surfaces at steady state.
 
-    Deposition is shedder hand -> surface; removal is surface inactivation
-    plus pickup by every susceptible hand touching the same pool.
+    Deposition is shedder hand -> surface; removal is surface inactivation,
+    pickup by every susceptible hand touching the same pool, and routine
+    housekeeping over the objects it reaches.
     """
     contacts = tc.SURFACE_CONTACTS_PER_HOUR[zone_class]
 
@@ -89,7 +131,10 @@ def steady_state_pool(
     loss_per_hour = surface_loss_per_hour(
         zone_class, susceptible_present, exp_, surface_decay_per_day,
     )
-    return deposition_per_hour / loss_per_hour
+    uncleaned = deposition_per_hour / loss_per_hour
+    return uncleaned * routine_cleaning_multiplier(
+        loss_per_hour, enabled=cleaning,
+    )
 
 
 def concentration_per_swab(pool: float, zone_class: str) -> float:
@@ -188,6 +233,8 @@ def _emit_emesis_section(
     # host's own cabin. That fraction is unmeasured; see the closing note.
     loss_cabin = surface_loss_per_hour("cabin", 1.0, exp_)
     loss_public = surface_loss_per_hour("public", 60.0, exp_)
+    clean_cabin = routine_cleaning_multiplier(loss_cabin)
+    clean_public = routine_cleaning_multiplier(loss_public)
     lounge_shedder_equivalents = 60.0 / 24.0  # clock-exempt: shedder-hours/day to concurrent shedders
 
     emit(
@@ -204,8 +251,10 @@ def _emit_emesis_section(
         public_rate = (
             (1.0 - fraction) * per_illness_hour * lounge_shedder_equivalents
         )
-        cabin_pool = cabin_rate * per_episode_cabin / loss_cabin
-        public_pool = public_rate * per_episode_public / loss_public
+        cabin_pool = cabin_rate * per_episode_cabin / loss_cabin * clean_cabin
+        public_pool = (
+            public_rate * per_episode_public / loss_public * clean_public
+        )
         cabin_total = (
             hand_only["sick passenger confined to cabin"]
             + concentration_per_swab(cabin_pool, "cabin")
@@ -270,29 +319,76 @@ def main() -> None:
         ("public", "lounge, 200 shedder-hours/day", 200.0, 60.0),
     ]
 
+    emit("Routine cleaning multiplier on the time-averaged pool")
+    emit("-" * 78)
+    emit(
+        f"  coverage {tc.ROUTINE_CLEANING_COVERAGE:g}, "
+        f"{tc.ROUTINE_CLEANING_LOG10_REDUCTION:g} log10 per pass, "
+        f"{tc.ROUTINE_CLEANING_EVENTS_PER_DAY:g} pass/day",
+    )
+    for zone_class, susceptible in (("cabin", 1.0), ("public", 60.0)):
+        loss = surface_loss_per_hour(zone_class, susceptible, exp_)
+        emit(
+            f"  {zone_class:<7} loss {loss:.4g}/h -> pool x "
+            f"{routine_cleaning_multiplier(loss):.4g}",
+        )
+    emit(
+        "  A pass matters only where hand pickup is slow enough to let the "
+        "cleaned",
+    )
+    emit(
+        "  share recharge; in a busy public zone pickup already dominates "
+        "removal.",
+    )
+    emit()
+
     emit("Predicted steady-state surface loading")
     emit("-" * 78)
     emit(
         f"{'zone':<8} | {'scenario':<34} | {'pool':>11} | "
-        f"{'copies/swab':>11} | {'Park range':>14} | verdict",
+        f"{'copies/swab':>11} | {'no cleaning':>11} | "
+        f"{'Park range':>14} | verdict",
     )
     results: dict[str, float] = {}
     for zone_class, label, shedder_hours, susceptible in scenarios:
         pool = steady_state_pool(zone_class, shedder_hours, susceptible, exp_)
+        bare = steady_state_pool(
+            zone_class, shedder_hours, susceptible, exp_, cleaning=False,
+        )
         conc = concentration_per_swab(pool, zone_class)
+        bare_conc = concentration_per_swab(bare, zone_class)
         low, high = PARK[zone_class]
         verdict = "IN RANGE" if low <= conc <= high else "out of range"
         emit(
             f"{zone_class:<8} | {label:<34} | {pool:>11.4g} | "
-            f"{conc:>11.4g} | {f'{low:g}-{high:g}':>14} | {verdict}",
+            f"{conc:>11.4g} | {bare_conc:>11.4g} | "
+            f"{f'{low:g}-{high:g}':>14} | {verdict}",
         )
         results[label] = conc
+        results[f"{label} (no cleaning)"] = bare_conc
     emit()
 
     cabin = results["sick passenger confined to cabin"]
     public = results["lounge, 60 shedder-hours/day"]
+    bare_gradient = (
+        results["sick passenger confined to cabin (no cleaning)"]
+        / results["lounge, 60 shedder-hours/day (no cleaning)"]
+    )
     emit(f"Cabin/public gradient: {cabin / public:.3g}x")
+    emit(f"Same gradient without routine cleaning: {bare_gradient:.3g}x")
     emit("Park observed gradient: roughly 100-300x")
+    emit(
+        "Cleaning moves the gradient the wrong way: it removes more from a "
+        "quiet cabin",
+    )
+    emit(
+        "than from a busy public zone, where hand pickup already clears the "
+        "pool faster",
+    )
+    emit(
+        "than housekeeping can. The gradient shortfall is therefore not a "
+        "cleaning gap.",
+    )
     emit()
 
     # What shedder-hour ratio would be needed to reach Park's gradient?

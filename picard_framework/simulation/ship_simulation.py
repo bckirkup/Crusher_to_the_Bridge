@@ -52,7 +52,7 @@ from orchestrator_chronic import (
 )
 from orchestrator_epoch import (
     apply_chronic_severity_escalation,
-    apply_surface_decontamination,
+    apply_outbreak_surface_disinfection,
     apply_zone_closures,
     build_cascade_context,
     compute_infection_counters,
@@ -1262,10 +1262,10 @@ class ShipSimulation:
         apply_transmission_modifiers(self.tx_core, work.merged_mods)
         if "close_zones" in work.merged_mods:
             apply_zone_closures(self.engine, work.merged_mods["close_zones"])
-        if "surface_decontamination_factor" in work.merged_mods:
-            apply_surface_decontamination(
+        if "surface_disinfection_log10_reduction" in work.merged_mods:
+            apply_outbreak_surface_disinfection(
                 self.tx_core,
-                work.merged_mods["surface_decontamination_factor"],
+                work.merged_mods["surface_disinfection_log10_reduction"],
             )
 
     def _attach_strain_census(self, work: _EpochWork) -> None:
