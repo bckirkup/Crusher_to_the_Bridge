@@ -46,7 +46,7 @@ This specification defines the within-host infection dynamics module for the Cru
 
 **In scope:** Dose delivery to a susceptible host, pre-establishment clearance, cumulative dose tracking, establishment via dose-response, incubation, symptom onset and severity, shedding dynamics, within-host recovery/clearance, immunity acquisition.
 
-**Out of scope:** Transmission pathways (direct contact, droplet, HVAC, fomite — see `transmission_core.py`), environmental contamination/persistence, spatial movement, diagnostic observation mechanics, containment interventions, strain mutation/recombination. These systems consume the interfaces defined here but are specified separately.
+**Out of scope:** Transmission pathways (direct contact, droplet, HVAC, fomite — see `transmission_core.py`), environmental contamination/persistence, spatial movement, diagnostic observation mechanics, containment intervention *policies* and compliance models, strain mutation/recombination. These systems consume the interfaces defined here but are specified separately. Note: the **dose-reduction interface** for non-pharmacological interventions (masks, gloves, hand sanitizer) is defined in §3.7 as an integration point, though the intervention policies themselves are out of scope.
 
 ### 1.3 Source Materials
 
@@ -282,6 +282,103 @@ def deliver_dose(agent, pathogen_id, raw_dose, route, profile, dt_hours):
 4. **No-clearance legacy equivalence**: With `gastric_survival_fraction` absent and `pre_establishment_clearance` absent, verify cumulative dose equals sum of all delivered doses (no decay). This is the current SHA d557f39 behaviour.
 
 5. **Antacid modifier (future)**: With `gastric_survival_fraction = 0.5` for Vibrio (simulating PPI user), verify infection rate increases ~50× compared to default 0.01, within stochastic tolerance over 10,000 agents.
+### 3.7 Integration Point: Non-Pharmacological Interventions (NPIs)
+
+Non-pharmacological interventions — masks, gloves, hand sanitizer, enhanced sanitation — operate on the same pre-establishment pathway as biological clearance. They reduce the effective dose that enters the cumulative exposure accumulator. This section defines the **interface** consumed by the intervention/compliance layer (specified separately); it does not define intervention policies or compliance models.
+
+#### 3.7.1 Per-Agent Route-Specific Dose Reduction
+
+Each agent carries an optional `dose_reduction_multipliers` dict mapping route names to a surviving fraction $\in [0, 1]$:
+
+```python
+agent.dose_reduction_multipliers = {
+    "droplet":       0.3,   # surgical mask: ~70% filtration of large droplets
+    "hvac_airborne": 0.7,   # surgical mask: ~30% filtration of fine aerosol
+    "fomite":        0.0,   # gloves: complete fomite pathway block
+    "direct_contact": 0.5,  # gloves reduce but don't eliminate skin contact
+}
+```
+
+If a route key is absent, the multiplier defaults to 1.0 (no reduction). The dose delivery pipeline applies these **after** external dose computation but **before** gastric survival and cumulative exposure accumulation:
+
+$$
+D^{\text{delivered}}_{i,p,r} = D^{\text{external}}_{i,p,r} \cdot m_{i,r} \cdot f_{\text{gastric},p,r}
+$$
+
+where $m_{i,r}$ is the agent's dose reduction multiplier for route $r$.
+
+#### 3.7.2 Reference NPI Efficacy Values
+
+| Intervention | Route Affected | Multiplier $m$ | Range | Notes |
+|---|---|---|---|---|
+| **Surgical mask** (wearer) | droplet | 0.3–0.5 | 0.2–0.6 | Source control + inward filtration |
+| **Surgical mask** (wearer) | hvac_airborne | 0.6–0.8 | 0.5–0.9 | Poor fine-aerosol filtration |
+| **N95/FFP2** (wearer) | droplet | 0.05–0.10 | 0.02–0.15 | High filtration efficiency |
+| **N95/FFP2** (wearer) | hvac_airborne | 0.05–0.10 | 0.02–0.15 | Fit-dependent |
+| **Gloves** | fomite | 0.0–0.05 | 0.0–0.1 | Near-complete block if worn correctly |
+| **Gloves** | direct_contact | 0.3–0.5 | 0.2–0.7 | Reduce but don't eliminate skin contact |
+| **Hand sanitizer (alcohol)** | fomite | 0.001–0.01 | 0.0001–0.1 | >99.9% kill for enveloped viruses (SARS-CoV-2, influenza); ~90% for norovirus; ineffective for C. difficile spores |
+| **Hand sanitizer (alcohol)** | direct_contact | 0.01–0.1 | 0.001–0.3 | Same pathogen-dependence as above |
+| **Enhanced HVAC filtration** | hvac_airborne | 0.3–0.5 | 0.1–0.7 | MERV-13+ filters; depends on air changes/hr |
+
+**Behavioral compliance modifier:**
+
+The reference multipliers above assume correct use. In practice, NPI efficacy is a function of compliance quality, not just presence:
+
+- **Gloves worn incorrectly** can increase cross-contamination: touching the face with a contaminated glove transfers fomite dose as effectively as a bare hand. The model should distinguish `glove_compliance` (fraction of time gloves are worn correctly without face-touching) from `glove_present` (binary). An agent with gloves but poor compliance may have $m_{\text{fomite}} \approx 0.8$ rather than 0.0, because gloves reduce the psychological barrier to touching contaminated surfaces.
+- **Masks reduce hand-to-face contact** even when filtration is imperfect. A surgical mask physically blocks nose/mouth touching, which reduces the fomite→mucosa pathway dose independently of aerosol filtration. This cross-pathway effect means masks may reduce fomite-route dose by 30–50% even though that is not their designed function.
+- **Hand sanitizer timing matters**: sanitizer applied *after* a surface touch but *before* face contact is effective; sanitizer applied after face contact is not. The model can represent this as a probabilistic compliance factor on the fomite dose reduction.
+
+The recommended implementation is a single per-agent `npi_compliance` $\in [0, 1]$ that interpolates between "no NPI" ($m = 1.0$) and "perfect NPI" ($m = m_{\text{ref}}$):
+
+$$
+m_{\text{effective},r} = 1.0 - \text{compliance} \cdot (1.0 - m_{\text{ref},r})
+$$
+
+At `npi_compliance = 0`, the agent gets no benefit. At `npi_compliance = 1`, they get the reference efficacy. This is a simplification — real compliance is route-specific and time-varying — but it captures the dominant effect with one parameter per agent.
+
+**Pathogen-specific notes:**
+- **Norovirus**: alcohol sanitizer efficacy is limited (~90% kill, $m \approx 0.1$); quaternary ammonium or bleach-based sanitizers are more effective ($m \approx 0.01$).
+- **C. difficile**: alcohol sanitizer is ineffective against spores ($m \approx 1.0$); soap-and-water handwashing is the relevant intervention ($m \approx 0.1$).
+- **Enveloped viruses** (SARS-CoV-2, influenza, measles, hantavirus, Ebola): alcohol sanitizer is highly effective ($m \approx 0.001$).
+
+#### 3.7.3 Updated Pseudocode
+
+```python
+def deliver_dose(agent, pathogen_id, raw_dose, route, profile, dt_hours):
+    """Apply NPI reduction, gastric survival, and accumulate into retained inoculum."""
+    # Step 0: NPI dose reduction
+    npi_mult = getattr(agent, 'dose_reduction_multipliers', {}).get(route, 1.0)
+    dose_after_npi = raw_dose * npi_mult
+
+    # Step 1: Gastric survival (enteric routes only)
+    gastric_routes = {"food", "water"}
+    if route in gastric_routes:
+        gsf = profile.get("gastric_survival_fraction", 1.0)
+        delivered = dose_after_npi * gsf
+    else:
+        delivered = dose_after_npi
+
+    # Step 2: Accumulate
+    cumulative = agent.cumulative_exposure.get(pathogen_id, 0.0) + delivered
+
+    # Step 3: Continuous clearance
+    clearance_cfg = profile.get("pre_establishment_clearance", {})
+    route_overrides = clearance_cfg.get("route_overrides", {})
+    rate = route_overrides.get(route, clearance_cfg.get("rate_per_hour", 0.0))
+    if rate > 0.0:
+        cumulative *= math.exp(-rate * dt_hours)
+
+    agent.cumulative_exposure[pathogen_id] = cumulative
+    return cumulative
+```
+
+#### 3.7.4 COVID-Era Cruise Industry Changes
+
+Post-2020, the cruise industry adopted widespread NPIs including enhanced HVAC filtration, universal hand sanitizer stations, reduced buffet service (lowering food-route exposure), and (temporarily) universal masking. These changes may produce a structural break in VSP surveillance data around 2020–2021. The model should be able to represent pre-COVID and post-COVID ship configurations as distinct NPI parameter sets, enabling validation against the historical VSP record.
+
+This is a natural validation target for campaign runs: configure pre-2020 defaults (no NPI multipliers) vs. post-2020 defaults (enhanced sanitation, HVAC upgrades, sanitizer availability) and compare simulated outbreak rates against the observed VSP discontinuity.
+
 ## 4. Cumulative Exposure and Infection Establishment
 
 ### 4.1 Overview
