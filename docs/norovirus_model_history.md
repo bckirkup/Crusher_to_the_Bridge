@@ -400,6 +400,68 @@ reporting are absent in both directions. The route constants must be fixed on
 physical grounds with sources, not fitted to 2.9. Detail:
 `telemetry_buffer/observation_model/a5_role_asymmetry_diagnosis.md`.
 
+## 9e. The fomite chain rebuilt from measurements, and the first out-of-sample test
+
+The §9d magnitudes were re-derived rather than rescaled. Detail:
+`telemetry_buffer/observation_model/fomite_food_rederivation.md`.
+
+Two findings came out of the derivation before any code changed. First,
+`dose_adjustment` is not a calibration constant: the shedding curve is log10
+copies per *gram of stool*, and `10^(curve − adj)` is an absolute amount, so
+`adj` is `−log10` of the grams of stool released to the environment per epoch.
+At the default of 4.0 it asserts 0.1 mg per shedder per hour. It has been
+renamed to say so, with the old key kept as an alias. Second, the fomite
+discount was applied twice — a 1e-4 deposition fraction at emission and the
+0.30 route weight at delivery — doing the same job in two places.
+
+The replacement is the standard fomite QMRA chain with a per-agent hand
+compartment: shedder hand load anchored to Liu et al.'s 3.86 log10 copies per
+hand from the Norwalk challenge study, hand-to-surface and surface-to-hand
+transfer at Julian et al.'s efficiencies, hand-to-mouth at Rusin et al.'s,
+contact frequencies from Wilson et al.'s 199-adult public-venue observations,
+and a high-touch surface area of 1.5-10 m² by zone class in place of the
+400 m² deck footprint. Hands decay fast (0.61-1.7/h) and surfaces slowly
+(0.0048-0.013/h); the existing `surface_decay_per_day: 0.25` sits mid-range in
+the literature interval and was left alone. Hand hygiene is implemented with
+efficacy from the same source but a rate defaulting to zero, so the change is
+an upper bound with respect to hygiene rather than a guess at compliance.
+
+Two quantities remain declared rather than measured — shared-surface contact
+frequency and the per-zone high-touch areas — and both are Grade C and swept
+rather than asserted.
+
+**The first out-of-sample test this model has faced returned a split verdict.**
+Park et al. (2015) swabbed a cruise ship during a norovirus outbreak: 80-31,217
+copies per swab in sick passengers' cabins against 16-113 in public spaces.
+Nothing here was fitted to that. The corrected chain predicts 1,434 and 59
+copies/swab at plausible occupancy — both inside the observed ranges, across
+1.5 orders of magnitude, from constants assembled entirely from independent
+studies. That is a real result and it deserves a discount: shedder-hours per
+zone is a free input, and the public prediction slides from 59 to 1,190 across
+its plausible range, so the check constrains the chain to about a factor of 10
+rather than pinning it.
+
+The gradient is the part occupancy cannot move, and it fails. Predicted
+cabin/public ratio 4.0× against an observed 100-300×. The emission scale and
+transfer efficiencies cancel out of a ratio, leaving a structural 1.33× times
+the shedder-hour ratio, so reaching 100× would need a cabin to accumulate 75×
+more shedder-hours than a public lounge — the real ratio runs the other way.
+No adjustment to any Grade C declaration can produce it.
+
+That failure is diagnostic. Park's sick-cabin loads are the signature of direct
+emesis and faecal deposition in a small bathroom, not of contaminated hands on
+a door handle. Every route the model has is continuous in time and proportional
+to shedding; a vomiting event is discrete, enormous and spatially concentrated,
+in exactly the zone class where a sick passenger is confined. §9d asked why role
+structure cannot appear and found the routes carrying it deliver nothing; §9e
+asks why sick cabins are not hotter than lounges and finds the same absence of
+concentrated, localised deposition. Detail:
+`telemetry_buffer/observation_model/park_surface_findings.md`.
+
+None of this is validation. It says the fomite route is now in the right
+numerical territory to be worth testing, which at 0.13 particles per voyage it
+was not, and it says nothing yet about A1-A5.
+
 ## 10. Parameters held fixed by assumption
 
 These are not identified by anything in the fit, and any of them could move the
@@ -435,7 +497,7 @@ over-determined *given* these.
 
 ## 12. Standing defect base rate
 
-Ten distinct unit, dimension, time-origin, sign or state-scoping defects were
+Eleven distinct unit, dimension, time-origin, sign or state-scoping defects were
 found in this effort, the first eight by chasing an anomaly rather than by a
 check that would have caught it, and every campaign before v4 was invalidated by
 a defect discovered after it ran. The ninth (§9a) is the only one found by
@@ -443,7 +505,21 @@ reading a specification against the code rather than by an anomaly, which is an
 argument for more of that and not evidence that the rest are gone. The tenth
 (§9d, the fomite and food pickup magnitudes) was found by asking why a
 role asymmetry could not appear, which is the same pattern: an anchor failure
-led to a defect nobody was looking for. Guards now cover naked epochs, dose-pathway dimensions, reservoir
+led to a defect nobody was looking for. The eleventh (§9e, the fomite route
+discount applied twice, once as a deposition fraction and once as a route
+weight) was found while re-deriving the tenth, which is the ordinary way
+defects are found: by rewriting the code rather than by reading it.
+
+Two things from §9e belong here rather than in the count. `dose_adjustment`
+being grams of stool per epoch wearing a calibration constant's name is a
+semantics defect, not a numeric one — the arithmetic was self-consistent and no
+result changes — but it meant the one fitted parameter had no interpretation for
+the entire effort, and nobody noticed until a joke about fomite transfer
+prompted the dimensional check. And the replacement hand compartment shipped
+with a timestep-dependent steady state, the same class of defect as §9, caught
+in review before it landed. The base rate applies to new code too.
+
+Guards now cover naked epochs, dose-pathway dimensions, reservoir
 conservation, per-capita invariance to occupancy, cross-clock equivalence of
 per-day quantities and epoch-invariance of the dose-response. The audit is not exhausted, and the correct prior is that
 further defects exist. Absence of a further finding is not evidence of

@@ -1,0 +1,30 @@
+Sampled expectations of the implemented distributions
+----------------------------------------------------------
+  hand_area_m2   0.049
+  s_h            0.129
+  s_m            0.01
+  te_sh          0.242618
+  te_hm          0.339
+  hand load     7244.36 copies (Liu 2013 anchor)
+
+Predicted steady-state surface loading
+------------------------------------------------------------------------------
+zone     | scenario                           |        pool | copies/swab |     Park range | verdict
+cabin    | sick passenger confined to cabin   |   3.336e+04 |        1434 |       80-31217 | IN RANGE
+cabin    | sick passenger, unconfined         |   1.213e+04 |       521.6 |       80-31217 | IN RANGE
+public   | lounge, 10 shedder-hours/day       |        5534 |       59.49 |         16-113 | IN RANGE
+public   | lounge, 60 shedder-hours/day       |    3.32e+04 |       356.9 |         16-113 | out of range
+public   | lounge, 200 shedder-hours/day      |   1.107e+05 |        1190 |         16-113 | out of range
+
+Cabin/public gradient: 4.02x
+Park observed gradient: roughly 100-300x
+
+Shedder-hour asymmetry required for a 100x gradient, holding the implemented constants fixed:
+  needed shedder-hours(cabin)/shedder-hours(public) = 75
+  A cabin cannot accumulate that many more shedder-hours than a public zone;
+  the gradient is therefore not reachable by hand transfer at any occupancy.
+
+Interpretation: the hand-transfer chain reproduces public-space contamination,
+and cannot reproduce sick-cabin contamination. Park's cabin figures are the
+signature of direct emesis/faecal deposition in a small bathroom, which is a
+deposition mechanism the model does not have.

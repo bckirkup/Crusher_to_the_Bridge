@@ -497,6 +497,7 @@ def _advance_agent_pathogen_infections(
             inf["illness"] = IllnessStatus.RECOVERED
             agent.cumulative_exposure.pop(pid, None)
             agent.cumulative_exposure_by_route.pop(pid, None)
+            agent.hand_load_by_pathogen.pop(pid, None)
 
 
 def _project_legacy_illness(agent: Any) -> None:
