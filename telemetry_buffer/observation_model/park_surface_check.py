@@ -75,6 +75,8 @@ def _expectations() -> dict[str, float]:
 def routine_cleaning_multiplier(
     loss_per_hour: float,
     *,
+    coverage: float = tc.ROUTINE_CLEANING_COVERAGE,
+    events_per_day: float = tc.ROUTINE_CLEANING_EVENTS_PER_DAY,
     enabled: bool = True,
 ) -> float:
     """Time-averaged pool with routine cleaning, over the pool without it.
@@ -91,8 +93,6 @@ def routine_cleaning_multiplier(
     """
     if not enabled:
         return 1.0
-    coverage = tc.ROUTINE_CLEANING_COVERAGE
-    events_per_day = tc.ROUTINE_CLEANING_EVENTS_PER_DAY
     if coverage <= 0.0 or events_per_day <= 0.0:
         return 1.0
     kill = 10.0 ** -tc.ROUTINE_CLEANING_LOG10_REDUCTION

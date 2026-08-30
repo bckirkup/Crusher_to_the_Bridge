@@ -734,3 +734,41 @@ resample returns a tail share of zero, the interval collapses to [0, 0], and it
 excludes 1 — a decisive tail collapse on the evidence of nothing at all. It is
 now reported as counts with Wilson intervals and an exact test, and the
 degenerate case is a regression test.
+
+## 9i. Per-zone cleaning was swept, not fitted
+
+PR #355 made routine housekeeping a discrete pass over separate cleanable and
+missed surface compartments, but its coverage and one-pass-per-day frequency
+remain uniform across zone classes. The open question was whether a measured
+schedule could replace that uniform pair. A search found no measured
+cleaning-frequency schedule differentiated by zone class in an accommodation or
+passenger-vessel setting. The implementation therefore exposes an optional
+per-zone-class schedule and evaluates it only as the sourced envelope described
+in
+[`cleaning_schedule_sweep_spec.md`](../telemetry_buffer/observation_model/cleaning_schedule_sweep_spec.md).
+
+The frequency bounds are 0.33–1.0 events/day for cabins, 1.0–12.0 for public
+zones, and 1.0–6.0 for dining, galley, and crew-mess zones. The coverage bounds
+are 0.336–0.600 for cabins, 0.292–0.454 for public zones, and 0.292–0.600 for
+dining, galley, and crew-mess zones. Boone et al. 2025/Gerba 2025, Carling et
+al. 2009, Zhang et al. 2024, Ge et al. 2020, and McKinley et al. 2022 are
+retained as the named sources and the spec distinguishes measured practice
+from modelled optima and analogues. Zhuang et al. 2023 and Odoyo et al. 2021
+were intentionally not used as bounds. Carling's Grade A 37% is a measurement
+of public restrooms on cruise ships; applying it to cabins is an unsourced
+extension.
+
+Two independent mechanism findings support retaining the explicit process
+without supplying a fitted schedule. Lei et al. 2017's MRSA ODE model found
+that even daily whole-room cleaning at 100% efficiency leaves substantial
+transmission when surfaces recontaminate rapidly, agreeing that a daily pass
+cannot hold down a fast-recontaminating zone. Park et al. 2019 found higher ATP
+readings and counted high-touch surfaces in hotel guestrooms than in public
+areas, independently supporting the sign of the cabin/public contamination
+gradient in a hospitality setting.
+
+The sweep reports the minimum and maximum gradient over the fixed cabin/public
+81-cell grid and leaves the uniform shipped default alongside it. Its result
+is an envelope, not a fit: no cell of the sweep may be read back into the model
+or adopted as a parameter value. A future measured per-zone-class schedule may
+narrow the bounds, but the no-selection rule remains.
