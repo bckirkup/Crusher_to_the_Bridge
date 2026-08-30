@@ -1,0 +1,451 @@
+{
+  "norovirus_gii4": {
+    "pre_establishment_clearance_rate_per_hour": {
+      "food": {
+        "value": 0.0,
+        "range": [
+          0.0,
+          0.05
+        ],
+        "grade": "B",
+        "note": "Acid-stable; ~100% gastric survival"
+      },
+      "fomite": {
+        "value": 0.1,
+        "range": [
+          0.07,
+          0.5
+        ],
+        "grade": "C",
+        "note": "Hand-to-mouth transfer loss + mucosal clearance"
+      },
+      "direct_contact": {
+        "value": 0.1,
+        "range": [
+          0.07,
+          0.5
+        ],
+        "grade": "C",
+        "note": "Same as fomite\u2192oral pathway"
+      },
+      "droplet": {
+        "value": 0.7,
+        "range": [
+          0.2,
+          0.9
+        ],
+        "grade": "C",
+        "note": "Respiratory clearance proxy; not primary route"
+      },
+      "hvac_airborne": {
+        "value": 0.7,
+        "range": [
+          0.2,
+          0.9
+        ],
+        "grade": "C",
+        "note": "Respiratory clearance proxy; not primary route"
+      }
+    },
+    "citations": [
+      "Teunis2008",
+      "Lindesmith2003",
+      "Green1964",
+      "Goldstein1974",
+      "Julian2010"
+    ]
+  },
+  "norwalk_gi": {
+    "pre_establishment_clearance_rate_per_hour": {
+      "food": {
+        "value": 0.0,
+        "range": [
+          0.0,
+          0.05
+        ],
+        "grade": "B",
+        "note": "Acid-stable; ~100% gastric survival"
+      },
+      "fomite": {
+        "value": 0.1,
+        "range": [
+          0.07,
+          0.5
+        ],
+        "grade": "C",
+        "note": "Hand-to-mouth transfer loss + mucosal clearance"
+      },
+      "direct_contact": {
+        "value": 0.1,
+        "range": [
+          0.07,
+          0.5
+        ],
+        "grade": "C",
+        "note": "Same as fomite\u2192oral pathway"
+      },
+      "droplet": {
+        "value": 0.7,
+        "range": [
+          0.2,
+          0.9
+        ],
+        "grade": "C",
+        "note": "Respiratory clearance proxy; not primary route"
+      },
+      "hvac_airborne": {
+        "value": 0.7,
+        "range": [
+          0.2,
+          0.9
+        ],
+        "grade": "C",
+        "note": "Respiratory clearance proxy; not primary route"
+      }
+    },
+    "citations": [
+      "Teunis2008",
+      "Lindesmith2003",
+      "Green1964",
+      "Goldstein1974",
+      "Julian2010"
+    ]
+  },
+  "sars_cov2_resp": {
+    "pre_establishment_clearance_rate_per_hour": {
+      "droplet": {
+        "value": 0.15,
+        "range": [
+          0.07,
+          0.35
+        ],
+        "grade": "B",
+        "note": "Mucociliary clearance t\u00bd ~2-10h"
+      },
+      "hvac_airborne": {
+        "value": 0.15,
+        "range": [
+          0.07,
+          0.35
+        ],
+        "grade": "B",
+        "note": "Mucociliary clearance t\u00bd ~2-10h"
+      },
+      "direct_contact": {
+        "value": 0.1,
+        "range": [
+          0.07,
+          0.5
+        ],
+        "grade": "C",
+        "note": "Contact\u2192mucosa transfer loss"
+      },
+      "fomite": {
+        "value": 0.1,
+        "range": [
+          0.07,
+          0.5
+        ],
+        "grade": "C",
+        "note": "Contact\u2192mucosa transfer loss"
+      }
+    },
+    "citations": [
+      "Green1964",
+      "Goldstein1974",
+      "Ke2021",
+      "Rehm1980"
+    ]
+  },
+  "influenza_a": {
+    "pre_establishment_clearance_rate_per_hour": {
+      "droplet": {
+        "value": 0.15,
+        "range": [
+          0.07,
+          0.35
+        ],
+        "grade": "B",
+        "note": "Mucociliary + alveolar macrophage clearance"
+      },
+      "hvac_airborne": {
+        "value": 0.15,
+        "range": [
+          0.07,
+          0.35
+        ],
+        "grade": "B",
+        "note": "Mucociliary + alveolar macrophage clearance"
+      },
+      "fomite": {
+        "value": 0.1,
+        "range": [
+          0.07,
+          0.5
+        ],
+        "grade": "C",
+        "note": "Contact\u2192mucosa proxy"
+      }
+    },
+    "citations": [
+      "Green1964",
+      "Goldstein1974",
+      "Rehm1980"
+    ]
+  },
+  "measles_virus": {
+    "pre_establishment_clearance_rate_per_hour": {
+      "hvac_airborne": {
+        "value": 0.15,
+        "range": [
+          0.07,
+          0.35
+        ],
+        "grade": "B",
+        "note": "Respiratory clearance; alveolar deposition dominant"
+      },
+      "droplet": {
+        "value": 0.15,
+        "range": [
+          0.07,
+          0.35
+        ],
+        "grade": "B",
+        "note": "Respiratory clearance proxy"
+      }
+    },
+    "citations": [
+      "Green1964",
+      "Goldstein1974"
+    ]
+  },
+  "andes_hantavirus": {
+    "pre_establishment_clearance_rate_per_hour": {
+      "hvac_airborne": {
+        "value": 0.15,
+        "range": [
+          0.07,
+          0.35
+        ],
+        "grade": "C",
+        "note": "Respiratory proxy; no pathogen-specific data"
+      },
+      "droplet": {
+        "value": 0.15,
+        "range": [
+          0.07,
+          0.35
+        ],
+        "grade": "C",
+        "note": "Respiratory proxy"
+      },
+      "direct_contact": {
+        "value": 0.1,
+        "range": [
+          0.07,
+          0.5
+        ],
+        "grade": "C",
+        "note": "Generic contact proxy"
+      }
+    },
+    "citations": [
+      "Green1964",
+      "Goldstein1974"
+    ]
+  },
+  "ebola_virus": {
+    "pre_establishment_clearance_rate_per_hour": {
+      "direct_contact": {
+        "value": 0.1,
+        "range": [
+          0.07,
+          0.5
+        ],
+        "grade": "C",
+        "note": "Mucous membrane exposure proxy"
+      },
+      "fomite": {
+        "value": 0.1,
+        "range": [
+          0.07,
+          0.5
+        ],
+        "grade": "C",
+        "note": "Mucous membrane exposure proxy"
+      },
+      "bodily_fluids": {
+        "value": 0.1,
+        "range": [
+          0.07,
+          0.5
+        ],
+        "grade": "C",
+        "note": "Direct mucosa/wound inoculation; proxy"
+      }
+    },
+    "citations": [
+      "Julian2010"
+    ]
+  },
+  "legionella_pneumophila": {
+    "pre_establishment_clearance_rate_per_hour": {
+      "hvac_airborne": {
+        "value": 0.05,
+        "range": [
+          0.02,
+          0.1
+        ],
+        "grade": "B",
+        "note": "Survives macrophage phagocytosis (>95%); replicates intracellularly"
+      },
+      "water_aerosol": {
+        "value": 0.05,
+        "range": [
+          0.02,
+          0.1
+        ],
+        "grade": "B",
+        "note": "Same as airborne; amoeba-contained \u03bb\u22480.013"
+      }
+    },
+    "citations": [
+      "Green1964",
+      "Rehm1980"
+    ]
+  },
+  "vibrio_cholerae_parahaemolyticus": {
+    "pre_establishment_clearance_rate_per_hour": {
+      "food": {
+        "value": 2.5,
+        "range": [
+          1.0,
+          5.0
+        ],
+        "grade": "B",
+        "note": "Very acid-sensitive; food buffering raises survival 10-100\u00d7"
+      },
+      "water": {
+        "value": 4.0,
+        "range": [
+          3.0,
+          7.0
+        ],
+        "grade": "B",
+        "note": "Unbuffered water; near-maximal gastric acid exposure"
+      },
+      "direct_contact": {
+        "value": 0.1,
+        "range": [
+          0.07,
+          0.5
+        ],
+        "grade": "C",
+        "note": "Contact\u2192oral pathway; acid applies after ingestion"
+      },
+      "fomite": {
+        "value": 0.1,
+        "range": [
+          0.07,
+          0.5
+        ],
+        "grade": "C",
+        "note": "Contact\u2192oral pathway"
+      }
+    },
+    "citations": [
+      "Chen2016",
+      "Cash1974"
+    ]
+  },
+  "campylobacter_jejuni": {
+    "pre_establishment_clearance_rate_per_hour": {
+      "food": {
+        "value": 3.5,
+        "range": [
+          2.3,
+          7.0
+        ],
+        "grade": "B",
+        "note": "Extremely acid-sensitive; 1-10% gastric survival"
+      },
+      "direct_contact": {
+        "value": 0.1,
+        "range": [
+          0.07,
+          0.5
+        ],
+        "grade": "C",
+        "note": "Contact\u2192oral; acid applies after ingestion"
+      },
+      "fomite": {
+        "value": 0.1,
+        "range": [
+          0.07,
+          0.5
+        ],
+        "grade": "C",
+        "note": "Contact\u2192oral"
+      }
+    },
+    "citations": [
+      "Black1988"
+    ]
+  },
+  "clostridioides_difficile": {
+    "pre_establishment_clearance_rate_per_hour": {
+      "fomite": {
+        "value": 0.02,
+        "range": [
+          0.01,
+          0.05
+        ],
+        "grade": "B",
+        "note": "Spore form; ~100% gastric survival; extremely resistant"
+      },
+      "direct_contact": {
+        "value": 0.02,
+        "range": [
+          0.01,
+          0.05
+        ],
+        "grade": "B",
+        "note": "Spore form; same as fomite"
+      }
+    },
+    "citations": [
+      "Jump2007"
+    ]
+  },
+  "_defaults": {
+    "pre_establishment_clearance_rate_per_hour": {
+      "respiratory": {
+        "value": 0.15,
+        "range": [
+          0.07,
+          0.35
+        ],
+        "grade": "B",
+        "note": "Generic mucociliary + macrophage clearance"
+      },
+      "enteric": {
+        "value": 2.5,
+        "range": [
+          1.0,
+          5.0
+        ],
+        "grade": "C",
+        "note": "Generic acid-sensitive organism benchmark"
+      },
+      "contact": {
+        "value": 0.1,
+        "range": [
+          0.07,
+          0.5
+        ],
+        "grade": "C",
+        "note": "Generic hand-to-face transfer + mucosal clearance"
+      }
+    }
+  }
+}

@@ -136,69 +136,152 @@ Probability     = float         # [0, 1]
 
 In the current codebase (SHA d557f39), there is **no explicit pre-establishment clearance model**. Dose delivered in one epoch is immediately evaluated for establishment in that same epoch's dose-response draw. The cumulative-exposure mechanism (§4) implicitly allows subinfectious doses to accumulate across epochs, but no mucosal or innate-immune clearance reduces the retained viable inoculum between epochs.
 
-The literature review (cumulative exposure report §1, §5) documents that fractionated exposures can substantially reduce infection risk compared to bolus exposures of equal total dose, due to immune clearance between sub-doses. For example, spreading 313 *Cryptosporidium* organisms across a 100-fold longer window reduced predicted risk from 0.66 to 0.09.
+The literature supports two distinct pre-establishment clearance mechanisms:
 
-### 3.2 Mathematical Model
+1. **Gastric acid inactivation** (enteric routes only): a one-time fractional kill at ingestion. Acid-sensitive bacteria (Vibrio, Campylobacter) lose 90–99.9% of ingested organisms during gastric transit. Acid-stable pathogens (norovirus, C. difficile spores) survive nearly intact. This is an instantaneous event, not a continuous rate.
 
-**NEW — not yet implemented in SHA d557f39.**
+2. **Mucosal/innate immune clearance** (all routes): continuous exponential decay of retained viable inoculum at the site of deposition — mucociliary transport in airways, mucosal turnover in the gut, innate immune killing (macrophages, complement, interferon). Half-lives range from ~1 hour (alveolar macrophage killing of susceptible bacteria) to days (acid-resistant spores on gut mucosa).
 
-Between epochs, retained viable inoculum decays exponentially:
+Separating these mechanisms allows the model to represent host-level modifiers (e.g., antacid/PPI users with elevated gastric pH have higher Vibrio susceptibility) and route-specific clearance without conflating instantaneous and continuous processes.
+
+### 3.2 Mechanism 1: Gastric Survival Fraction
+
+**Applied once at dose delivery for enteric routes** (`food`, `water`, and the enteric component of `fomite`/`direct_contact` for oral-route pathogens).
 
 $$
-C_{i,p}(t+1) = \bigl[C_{i,p}(t) + D^{\text{eff}}_{i,p}(t)\bigr] \cdot \exp(-\lambda_{\text{clear},p} \cdot dt)
+D^{\text{delivered}}_{i,p} = D^{\text{external}}_{i,p} \cdot f_{\text{gastric},p}
 $$
 
-where $$\lambda_{\text{clear},p}$$ is the per-pathogen mucosal/innate clearance rate (day$$^{-1}$$).
+where $f_{\text{gastric},p} \in [0, 1]$ is the pathogen-specific gastric survival fraction. This is applied **before** the dose enters the cumulative exposure accumulator.
 
-This is a continuous exponential decay applied as a multiplicative factor each epoch. It is **not** an all-or-nothing clearance event. The exponential form ensures timestep invariance: splitting one epoch of duration $$dt$$ into $$n$$ sub-epochs of duration $$dt/n$$ with no new dose between them yields the same retained inoculum:
+For non-enteric routes (droplet, hvac_airborne, bodily_fluids, water_aerosol), $f_{\text{gastric}}$ is not applied (equivalently, = 1.0).
+
+#### 3.2.1 Parameters
+
+| Parameter | Key | Type | Default | Valid Range | Description |
+|---|---|---|---|---|---|
+| Gastric survival fraction | `gastric_survival_fraction` | `float` | `1.0` | $[0, 1]$ | Fraction of ingested inoculum surviving gastric acid. Applied once at enteric dose delivery. |
+
+#### 3.2.2 Reference Values
+
+| Pathogen | $f_{\text{gastric}}$ | Range | Grade | Rationale |
+|---|---|---|---|---|
+| `norovirus_gii4` / `norwalk_gi` | 1.0 | 0.9–1.0 | B | Acid-stable; survives pH 2–3 |
+| `vibrio_cholerae_parahaemolyticus` | 0.01 | 0.001–0.10 | B | Very acid-sensitive; food buffering raises to ~10% |
+| `campylobacter_jejuni` | 0.05 | 0.01–0.10 | B | Extremely acid-sensitive; 1–10% survival |
+| `clostridioides_difficile` | 1.0 | 0.95–1.0 | B | Spore form; ~100% acid resistance |
+
+**Host modifiers** (future extension, not required for initial implementation):
+- Antacid/PPI users: multiply `gastric_survival_fraction` by 10–100× (clamped to 1.0). This is a documented risk factor for Vibrio and Campylobacter infection.
+- Food co-ingestion: use upper end of range (food buffers gastric pH).
+
+### 3.3 Mechanism 2: Continuous Mucosal/Innate Clearance
+
+**Applied between epochs to all retained inoculum**, after new dose is added.
+
+$$
+C_{i,p}(t+1) = \bigl[C_{i,p}(t) + D^{\text{eff}}_{i,p}(t)\bigr] \cdot \exp(-\lambda_{\text{clear},p,r} \cdot dt)
+$$
+
+where $\lambda_{\text{clear},p,r}$ is the **per-pathogen, per-route** clearance rate (hr$^{-1}$) and $dt$ is the epoch duration in hours.
+
+The exponential form ensures timestep invariance: splitting one epoch of duration $dt$ into $n$ sub-epochs of duration $dt/n$ with no new dose between them yields the same retained inoculum:
 
 $$
 C \cdot \bigl(\exp(-\lambda \cdot dt/n)\bigr)^n = C \cdot \exp(-\lambda \cdot dt)
 $$
 
-When `inoculum_clearance_rate_per_day` > 0, stale dose decays naturally without requiring a separate timeout mechanism. A dose that has not been refreshed for $$t$$ days is attenuated by $$\exp(-\lambda t)$$. For example, with $$\lambda = \ln(2)/2$$ day$$^{-1}$$ (half-life 2 days), after 10 days of no new exposure the retained dose is 0.3% of its original value — effectively negligible. This eliminates the need for a separate configurable "no-dose window" timeout (resolving the v1.0-draft §3.6 TODO-1).
+When $\lambda_{\text{clear}} = 0$ (default), cumulative dose persists indefinitely — reproducing current behaviour.
 
-### 3.3 Parameters
+#### 3.3.1 Route Resolution
 
-| Parameter | Key | Type | Default | Valid Range | Description |
+If the agent was exposed via multiple routes in one epoch, the effective clearance rate is the **exposure-weighted mean** of the per-route rates:
+
+$$
+\lambda_{\text{eff}} = \frac{\sum_r D_r \cdot \lambda_r}{\sum_r D_r}
+$$
+
+If route-specific rates are not configured, fall back to category defaults:
+
+| Route Category | Default $\lambda_{\text{clear}}$ (1/hr) | Range | Grade |
+|---|---|---|---|
+| Respiratory (droplet, hvac_airborne) | 0.15 | 0.07–0.35 | B |
+| Enteric (food, water) — post-gastric | 0.10 | 0.05–0.30 | C |
+| Contact (fomite, direct_contact) | 0.10 | 0.07–0.50 | C |
+
+#### 3.3.2 Per-Pathogen Reference Values
+
+| Pathogen | Primary Route | $\lambda_{\text{clear}}$ (1/hr) | Range | Grade | Key Mechanism |
 |---|---|---|---|---|---|
-| Inoculum clearance rate | `inoculum_clearance_rate_per_day` | `float` | 0.0 | $$[0, \infty)$$ | Pre-establishment mucosal clearance rate (day$$^{-1}$$). 0 = no clearance (current behaviour). |
+| `norovirus_gii4` | enteric | 0.05 | 0.0–0.1 | C | Minimal; acid-stable, adheres to epithelium rapidly |
+| `sars_cov2_resp` | respiratory | 0.15 | 0.07–0.35 | B | Mucociliary clearance t½ ~2–10h |
+| `influenza_a` | respiratory | 0.15 | 0.07–0.35 | B | Mucociliary + alveolar macrophage |
+| `measles_virus` | respiratory | 0.15 | 0.07–0.35 | B | Respiratory clearance; alveolar deposition |
+| `andes_hantavirus` | respiratory | 0.15 | 0.07–0.35 | C | Respiratory proxy; no pathogen-specific data |
+| `ebola_virus` | contact | 0.10 | 0.07–0.50 | C | Mucous membrane/wound inoculation proxy |
+| `legionella_pneumophila` | airborne | 0.05 | 0.02–0.10 | B | Survives macrophage phagocytosis >95%; replicates intracellularly |
+| `vibrio_cholerae` | enteric | 0.10 | 0.05–0.30 | C | Residual intestinal mucosal clearance (post-gastric) |
+| `campylobacter_jejuni` | enteric | 0.10 | 0.05–0.30 | C | Residual intestinal clearance (post-gastric) |
+| `clostridioides_difficile` | contact/oral | 0.02 | 0.01–0.05 | B | Spore; minimal mucosal clearance |
 
-### 3.4 Pseudocode
+### 3.4 Configuration Schema
+
+```json
+{
+  "pathogen_id": "vibrio_cholerae_parahaemolyticus",
+  "gastric_survival_fraction": 0.01,
+  "pre_establishment_clearance": {
+    "rate_per_hour": 0.10,
+    "route_overrides": {
+      "food": 0.10,
+      "water": 0.10,
+      "direct_contact": 0.10,
+      "fomite": 0.10
+    }
+  }
+}
+```
+
+If `pre_establishment_clearance` is absent or `rate_per_hour` is 0.0, no clearance is applied (legacy behaviour). If `gastric_survival_fraction` is absent, it defaults to 1.0 (no gastric kill).
+
+### 3.5 Pseudocode
 
 ```python
-def update_cumulative_exposure(agent, pathogen_id, effective_dose, dt, profile):
-    """Update retained viable inoculum with new dose and clearance decay."""
-    clearance_rate = profile.get("inoculum_clearance_rate_per_day", 0.0)
+def deliver_dose(agent, pathogen_id, raw_dose, route, profile, dt_hours):
+    """Apply gastric survival and accumulate into retained inoculum."""
+    # Mechanism 1: gastric survival (enteric routes only)
+    gastric_routes = {"food", "water"}
+    if route in gastric_routes:
+        gsf = profile.get("gastric_survival_fraction", 1.0)
+        delivered = raw_dose * gsf
+    else:
+        delivered = raw_dose
 
-    # Accumulate new dose
-    cumulative = agent.cumulative_exposure.get(pathogen_id, 0.0) + effective_dose
+    # Accumulate
+    cumulative = agent.cumulative_exposure.get(pathogen_id, 0.0) + delivered
 
-    # Apply exponential clearance
-    if clearance_rate > 0.0:
-        cumulative *= math.exp(-clearance_rate * dt)
+    # Mechanism 2: continuous clearance
+    clearance_cfg = profile.get("pre_establishment_clearance", {})
+    route_overrides = clearance_cfg.get("route_overrides", {})
+    rate = route_overrides.get(route, clearance_cfg.get("rate_per_hour", 0.0))
+    if rate > 0.0:
+        cumulative *= math.exp(-rate * dt_hours)
 
     agent.cumulative_exposure[pathogen_id] = cumulative
     return cumulative
 ```
 
-### 3.5 Current Behaviour Preservation
+### 3.6 Acceptance Tests
 
-When `inoculum_clearance_rate_per_day = 0.0` (default), this reduces to the current additive-only accumulation in `transmission_core.py:1520-1524`.
+1. **Gastric kill test**: Deliver 10,000 Vibrio via food route to 10,000 agents with `gastric_survival_fraction = 0.01`. Verify mean retained dose is 100 ± 5 (no stochastic element in gastric survival; it is deterministic).
 
-### 3.6 Cumulative Exposure Reset Policy
+2. **Acid-stable passthrough**: Deliver 10,000 norovirus via food route with `gastric_survival_fraction = 1.0`. Verify retained dose = 10,000 exactly.
 
-The current codebase does **not** clear `cumulative_exposure` on recovery without establishment (audit finding 8.3, MODERATE). This specification requires:
+3. **Continuous clearance timestep invariance**: Set $\lambda = 0.15$/hr. Deliver dose 1000 at t=0. Compare retained dose at t=6h computed as one 6h epoch vs six 1h epochs vs twenty-four 0.25h epochs. All must agree within floating-point tolerance ($< 10^{-10}$ relative error).
 
-> **SPEC-CLEAR-01**: `cumulative_exposure[pathogen_id]` MUST be reset to 0.0 when:
-> 1. An infection establishes (already implemented, `transmission_core.py:1539`).
-> 2. The agent transitions to `RECOVERED` for this pathogen (new requirement).
-> 3. The agent's immune protection $$\pi_{i,p}$$ reaches 1.0 (full immunity acquired via other means).
->
-> **Rationale:** When `inoculum_clearance_rate_per_day` > 0, the exponential decay naturally eliminates stale dose over time, making an explicit timeout unnecessary. When clearance rate = 0 (current default), SPEC-CLEAR-01 prevents residual dose from the previous susceptible window from carrying across a recovery boundary. The permanent host susceptibility (`dose_response_susceptibility`) is NOT reset.
+4. **No-clearance legacy equivalence**: With `gastric_survival_fraction` absent and `pre_establishment_clearance` absent, verify cumulative dose equals sum of all delivered doses (no decay). This is the current SHA d557f39 behaviour.
 
----
-
+5. **Antacid modifier (future)**: With `gastric_survival_fraction = 0.5` for Vibrio (simulating PPI user), verify infection rate increases ~50× compared to default 0.01, within stochastic tolerance over 10,000 agents.
 ## 4. Cumulative Exposure and Infection Establishment
 
 ### 4.1 Overview
