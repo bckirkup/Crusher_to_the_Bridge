@@ -191,11 +191,14 @@ DEFAULT_SURFACE_DECAY_PER_DAY = 0.50
 
 # R0-calibrated contact pool (from Person.java avgR array) — legacy contact_mode
 AVG_R_POOL = [1, 2, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2]
+# Mean daily contacts, POLYMOD 8-country diary study (Mossong et al. 2008,
+# PLoS Med). Supersedes the avgR pool inherited from Korkin's Person.java.
+POLYMOD_CONTACTS_PER_DAY = 13.4
 
 # Defaults for density_dependent contact_mode (partial overrides merge onto these)
 DEFAULT_DENSITY_CFG: dict[str, float] = {
     "reference_occupancy": 50.0,
-    "base_contacts_per_day": 13.4,
+    "base_contacts_per_day": POLYMOD_CONTACTS_PER_DAY,
     "max_contacts_per_day": 40.0,
     "exponent": 0.5,
     "crew_contact_multiplier": 2.0,
@@ -1981,17 +1984,21 @@ class TransmissionCore:
         """Return r0_draw for direct contact under the active contact_mode."""
         if self.contact_mode in ("density_dependent", "heterogeneous_zone_dose"):
             return self._effective_contacts(n_occupants, target)
-        base = int(self.rng.choice(AVG_R_POOL))
-        # Legacy mode: still scale by voyage contact multiplier when active
-        scaled = (
-            base
-            * self.clock.day_fraction_per_epoch
-            * float(self.voyage_contact_multiplier)
-        )
-        if self.clock.mode == LEGACY_EPOCH_DAY:
-            return max(0, int(round(scaled)))
-        whole = math.floor(scaled)
-        return max(0, whole + int(self.rng.random() < scaled - whole))
+        if self.contact_mode == "legacy":
+            base = int(self.rng.choice(AVG_R_POOL))
+            # Legacy mode: still scale by voyage contact multiplier when active
+            scaled = (
+                base
+                * self.clock.day_fraction_per_epoch
+                * float(self.voyage_contact_multiplier)
+            )
+            if self.clock.mode == LEGACY_EPOCH_DAY:
+                return max(0, int(round(scaled)))
+            whole = math.floor(scaled)
+            return max(0, whole + int(self.rng.random() < scaled - whole))
+        mean = self.clock.amount_per_epoch(POLYMOD_CONTACTS_PER_DAY)
+        mean *= float(self.voyage_contact_multiplier)
+        return max(0, int(self.rng.poisson(mean)))
 
     def _zone_exposure_sigma(self, zone_name: str) -> float:
         """Log-sigma for within-zone exposure heterogeneity."""
