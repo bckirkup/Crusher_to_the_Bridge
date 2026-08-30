@@ -111,3 +111,55 @@ against the rest. This is a proxy for, not a measurement of, the secondary-case
 share, and must be labelled as such wherever it is quoted. It needs a per-host
 emission ledger that does not exist yet, so it is a separate change from the
 denominator fixes above.
+
+## A7, the COVID discontinuity: a difference, and an out-of-sample one
+
+A1-A5 are levels, and a level can be matched by compensating errors. A7 is a
+difference across the 2020 break in the same observation system, so anything
+wrong in both arms cancels — which is why it earns a place here after an effort
+spent finding errors that cancel in levels.
+
+Measured on `vsp_outbreak_series.csv` (428 posted outbreaks extracted from
+CDC-hosted pages; 262 in the `pre` arm ending 2004-2019, 66 in the `post` arm
+ending 2022 onward), by `vsp_discontinuity_analysis.py`, reported in
+`vsp_covid_discontinuity_findings.md`, justified in
+`vsp_covid_discontinuity_design.md`. All values conditional on VSP posting a
+voyage; VSP publishes no voyage denominator, so nothing here is per voyage.
+
+| # | quantity | measured | target for the model |
+|---|---|---|---|
+| A7a | post/pre ratio of median passenger reported attack rate | 0.912 (0.788-1.182), p=0.26 | compatible with 1; **not** a level drop |
+| A7b | post/pre ratio of median crew reported attack rate | 1.365 (1.004-1.677), p=0.007 | rose; 1.211 (0.846-1.561) on 1000+ pax ships |
+| A7c | A7a / A7b, the passenger-specific component | 0.668 (0.532-0.907), p<0.001 | **0.53-0.91**, and 0.581-1.053 under the composition control |
+| A7d | share of postings above 15% of passengers ill | 18/262 → 2/66; on 1000+ pax ships 11/226 → 0/48 | direction only, Fisher p=0.22; never a fitted target |
+| A7e | postings per year, norovirus fraction | descriptive | never scored, no denominator |
+
+**A7c is the scored anchor; A7a, A7b and A7d are reported context.** Three
+things about it must travel with the number wherever it is quoted:
+
+1. It is scored as an *out-of-sample prediction*. The common dose is fitted on
+   the pre-2020 arm alone; the post-2020 arm runs at that same dose with an
+   independently sourced post-2020 configuration. Fitting anything to A7c
+   destroys its value as evidence — it is the only anchor here that can
+   discriminate a mechanism, and it can only do that once.
+2. Simulated voyages must pass VSP's own posting rule (100+ passengers, 3-21
+   days, 3% of passengers or crew reporting) before entering the statistic, or
+   the two sides are not truncated alike. The posting floor attenuates A7a and
+   can push A7b above 1 with no change in crew behaviour at all, which is the
+   documented reason A7a alone is not the anchor.
+3. Crew are not a clean control. They are selected by the same posting rule from
+   a smaller denominator, and about half of the crew rise is fleet composition —
+   small expedition vessels, several below VSP's own 100-passenger criterion,
+   are posted post-2020 and carry a few hundred crew, where two cases move the
+   rate by a point. The composition-controlled arm (1000+ passengers) is
+   reported alongside for that reason and its interval touches 1.
+
+The ledger's earlier reading of this break — a 15-20% fall in passenger attack
+rates with crew unchanged — does not survive the per-outbreak data. Passenger
+medians barely move; crew rise. What actually disappears is the upper tail: on
+ships carrying 1000+ passengers the worst post-2020 posting reaches 13.5% of
+passengers ill against a pre-2020 maximum of 25.2%, with 11 of 226 pre-2020
+postings above 15% and none of 48 after. A model that matches A7c by lowering
+every voyage uniformly, and one that matches it by removing the tail, are
+different models; A7d exists to keep that distinction visible even though its
+counts are too sparse to score.

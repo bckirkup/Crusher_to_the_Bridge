@@ -48,8 +48,17 @@ Targets, from `telemetry_buffer/observation_model/anchor_measurement_spec.md`:
 
 A5's two figures come from different sources and are both live: the anchor spec
 says ~3.5 (7% vs 2%); the VSP 424-outbreak series gives ~2.9 (passenger
-5.7-6.9% against crew 2.0-2.4%), stable on both sides of the COVID break. Treat
-the target as a range, not a point.
+5.7-6.9% against crew 2.0-2.4%). Treat the target as a range, not a point.
+
+**"Stable on both sides of the COVID break" was wrong, and is withdrawn.** It
+was inferred from A5 rather than measured, and the per-outbreak series
+contradicts it: across the break the median crew rate rises by 1.37x
+(1.004-1.677, p=0.007) while the passenger median does not move detectably,
+so the passenger/crew ratio falls by about a third (A7c = 0.668, 0.532-0.907).
+A5 must therefore be quoted per era, not as one era-independent number, and any
+fit that reproduces A5 pooled across both arms is reproducing an average of two
+different ratios. Measured at `e167e32`; see A7 in
+`telemetry_buffer/observation_model/anchor_measurement_spec.md`.
 
 **Last measured values, and this is the part that matters: they are stale.**
 All of the following were taken at `d557f39`, immediately after #346 and
@@ -114,17 +123,50 @@ gradient shortfall is therefore not a cleaning gap — it remains §4's sick-hos
 movement problem. Measured at the #355 head with
 `ROUTINE_CLEANING_COVERAGE=0.37`, 1.29 log10/pass, one pass/day.
 
-**The COVID discontinuity** is the better instrument and is not yet used as a
-target. #355 supplies the NPI lever it needs (routine coverage and per-event
-log10 are now separately configurable, and outbreak response is a distinct
-mechanism), but the discontinuity has not been scored. It is a *difference*, so
-errors common to both arms cancel — which is what this effort needs, having
-spent its length finding errors that cancel in levels. Two caveats before it is
-scored against: the reported attack rate is conditioned on the ≥3% VSP
-reporting threshold, so a change in testing
-intensity moves it with no change in transmission; and the outbreak count has no
-voyage denominator. Detecting the effect (~15-20%, p=0.032 passengers, p=0.07
-norovirus-only) needs hundreds of simulated voyages per configuration.
+**The COVID discontinuity** is the better instrument, is now measured, and is
+not yet scored. It is a *difference*, so errors common to both arms cancel —
+which is what this effort needs, having spent its length finding errors that
+cancel in levels. #355 supplies the NPI lever it needs (routine coverage and
+per-event log10 are separately configurable, and outbreak response is a
+distinct mechanism), but one schedule still applies to every zone class, so the
+passenger-facing asymmetry cannot yet be expressed.
+
+Two limits on the instrument, from
+`telemetry_buffer/observation_model/post_covid_configuration_sources.md`. Every
+A7 statistic is conditional on VSP posting, so an intervention that stops an
+introduction from taking off is *invisible* to all of them — it prevents the
+posting rather than shrinking it, and pre-boarding screening and denial of
+boarding are exactly that kind. A7c is therefore a lower bound on NPI effect,
+and a flat A7a is not evidence that NPIs did nothing. Second, the post-2020 arm
+carries two changes with opposite signs: the NPI change, and a susceptibility
+rise from two years of interrupted exposure (O'Reilly 2021, Lappe 2023, the
+latter projecting >2-fold community incidence at full contact resumption).
+Prior immunity must be set from those sources, or the NPI configuration
+silently absorbs the immunity effect. Also note the industry's own hand-hygiene
+push was alcohol-rub-centric, and alcohol rub is measurably weaker than soap
+against norovirus (Tuladhar 2015), so it is expected to be near-null here.
+
+The two caveats that blocked it are now handled by construction rather than by
+correction, per `vsp_covid_discontinuity_design.md`: score only statistics
+conditional on posting, so the missing voyage denominator never enters; and run
+VSP's own posting rule over simulated voyages, so both arms are truncated
+identically. The reporting-intensity confound is cancelled by taking the
+passenger shift over the crew shift.
+
+**The "~15-20% drop, p=0.032" figure is withdrawn.** It was read off
+`docs/vsp_covid_discontinuity.png`, whose per-outbreak table was never in the
+repository. Rebuilt from CDC-hosted pages (`vsp_outbreak_series.csv`, 428
+postings, `e167e32`), the passenger median moves 5.39% → 4.91%, a ratio of
+0.912 (0.788-1.182, p=0.26) — no detectable level drop. The discontinuity is
+real but it is not that: the crew median rises, the passenger/crew ratio falls
+by a third (A7c = 0.668, p<0.001, and 0.736 with fleet composition held), and
+what disappears from the passenger distribution is its upper tail — on ships
+carrying 1000+ passengers, 11 of 226 pre-2020 postings exceeded 15% of
+passengers ill and 0 of 48 post-2020 do, the maximum falling 25.2% → 13.5%.
+About half the crew rise is composition, not behaviour: small expedition
+vessels, several below VSP's own 100-passenger criterion, are posted post-2020.
+Detecting an effect of this size needs hundreds of posted simulated voyages per
+configuration; the design fixes 1,000.
 
 ## 4. Outstanding
 
@@ -135,8 +177,10 @@ Roughly in dependency order.
    measured 37% of objects it reaches, and outbreak-response hypochlorite is a
    separate, stronger, SOP-triggered mechanism — but it applies one schedule to
    every zone class. Enhanced sanitation during the COVID era was
-   passenger-facing, which is the stated reason crew rates did not move, and
-   that asymmetry cannot be expressed until coverage is per zone class. No
+   passenger-facing, and that asymmetry cannot be expressed until coverage is
+   per zone class. Note that the premise has changed: crew rates did *not* hold
+   still across the break, they rose (A7b), so a configuration that leaves the
+   crew arm untouched now contradicts the data rather than matching it. No
    measurement of per-zone-class frequency was found; do not invent one.
 2. **Refit the common dose** against VSP class targets. The contact layer
    (#353) and cleaning (#355) are now in place, so this is next. One common
