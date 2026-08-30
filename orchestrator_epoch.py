@@ -36,7 +36,10 @@ from engines.infection_dynamics_bridge import (
 from engines.sim_clock import SimClock, config_epochs_for_hours
 from engines.sim_clock import crossed_day_boundary as _crossed_day_boundary
 from engines.strain_state import ImmuneRecord, StrainRegistry
-from engines.transmission_core import EMESIS_EPISODES_RANGE, TransmissionCore
+from engines.transmission_core import (
+    TransmissionCore,
+    _draw_emesis_schedule,
+)
 from engines.wearable_monitor import WearableMonitor
 from orchestrator_types import (
     DEFAULT_AIRBORNE_FRACTION,
@@ -435,42 +438,6 @@ def _draw_symptom_onset(
             agent.illness_status = IllnessStatus.SYMPTOMATIC
     else:
         inf["symptom_severity"] = "asymptomatic"
-
-
-def _draw_emesis_schedule(
-    agent: Any,
-    pathogen_id: str,
-    profile: dict[str, Any],
-    rng: np.random.Generator,
-) -> None:
-    """Draw onset-relative emesis times once for a symptomatic illness."""
-    if not hasattr(agent, "emesis_episode_schedule_by_pathogen"):
-        return
-    phases = profile.get("clinical_presentation", {}).get("phases", [])
-    emetic_phases = [
-        phase for phase in phases if "vomiting" in phase.get("features", [])
-    ]
-    if not emetic_phases:
-        agent.emesis_episode_schedule_by_pathogen[pathogen_id] = []
-        return
-    bounds = [
-        (
-            float(phase.get("dpi_min", 0)),
-            float(phase["dpi_max"]) + 1.0
-            if phase.get("dpi_max") is not None
-            else float(profile.get("recovery_day", 3)),
-        )
-        for phase in emetic_phases
-    ]
-    window_start = min(start for start, _ in bounds)
-    window_end = max(end for _, end in bounds)
-    low, high = profile.get("emesis_episodes_range", EMESIS_EPISODES_RANGE)
-    count = int(rng.integers(int(low), int(high) + 1))
-    schedule = rng.uniform(window_start, window_end, count)
-    agent.emesis_episode_schedule_by_pathogen[pathogen_id] = sorted(
-        float(age) for age in schedule
-    )
-
 
 def _draw_symptom_severity(
     profile: dict[str, Any],

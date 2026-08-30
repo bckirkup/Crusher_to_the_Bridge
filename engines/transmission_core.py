@@ -121,6 +121,43 @@ EMESIS_AEROSOL_FRACTION_RANGE = (7.2e-7, 2.67e-4)
 # Forward/lateral deposition footprint from Booth 2014 and Booth & Frost 2019;
 # measured geometry, evidence grade B.
 EMESIS_DEPOSITION_AREA_M2 = 7.8
+
+
+def _draw_emesis_schedule(
+    agent: Any,
+    pathogen_id: str,
+    profile: dict[str, Any],
+    rng: np.random.Generator,
+) -> None:
+    """Draw onset-relative emesis times once for a symptomatic illness."""
+    if not hasattr(agent, "emesis_episode_schedule_by_pathogen"):
+        return
+    phases = profile.get("clinical_presentation", {}).get("phases", [])
+    emetic_phases = [
+        phase for phase in phases if "vomiting" in phase.get("features", [])
+    ]
+    if not emetic_phases:
+        agent.emesis_episode_schedule_by_pathogen[pathogen_id] = []
+        return
+    bounds = [
+        (
+            float(phase.get("dpi_min", 0)),
+            float(phase["dpi_max"]) + 1.0
+            if phase.get("dpi_max") is not None
+            else float(profile.get("recovery_day", 3)),
+        )
+        for phase in emetic_phases
+    ]
+    window_start = min(start for start, _ in bounds)
+    window_end = max(end for _, end in bounds)
+    low, high = profile.get("emesis_episodes_range", EMESIS_EPISODES_RANGE)
+    count = int(rng.integers(int(low), int(high) + 1))
+    schedule = rng.uniform(window_start, window_end, count)
+    agent.emesis_episode_schedule_by_pathogen[pathogen_id] = sorted(
+        float(age) for age in schedule
+    )
+
+
 # Deprecated names retained for import compatibility. The measured hand
 # transfer chain above no longer uses these lumped factors.
 FOMITE_PICKUP_PROBABILITY = 0.10
@@ -2399,32 +2436,6 @@ class TransmissionCore:
             return None
         return phase, age
 
-    def _ensure_emesis_schedule(
-        self,
-        agent: KorkinAgent,
-        pathogen_id: str,
-        profile: dict,
-        phase: dict,
-    ) -> None:
-        if pathogen_id in agent.emesis_episode_schedule_by_pathogen:
-            return
-        episode_low, episode_high = self._emesis_range(
-            profile, "emesis_episodes_range", EMESIS_EPISODES_RANGE,
-        )
-        count = int(self.rng.integers(
-            math.ceil(episode_low), math.floor(episode_high) + 1,
-        ))
-        window_start = float(phase.get("dpi_min", 0))
-        dpi_max = phase.get("dpi_max")
-        window_end = (
-            float(dpi_max) + 1.0 if dpi_max is not None
-            else window_start + float(profile.get("recovery_day", 3))
-        )
-        agent.emesis_episode_schedule_by_pathogen[pathogen_id] = sorted(
-            float(value)
-            for value in self.rng.uniform(window_start, window_end, count)
-        )
-
     def _emit_emesis(
         self,
         agent: KorkinAgent,
@@ -2436,9 +2447,10 @@ class TransmissionCore:
         eligible = self._emesis_phase(agent, pathogen_id, profile)
         if eligible is None:
             return 0.0
-        phase, age = eligible
-        self._ensure_emesis_schedule(agent, pathogen_id, profile, phase)
-        schedule = agent.emesis_episode_schedule_by_pathogen[pathogen_id]
+        _, age = eligible
+        schedule = agent.emesis_episode_schedule_by_pathogen.get(
+            pathogen_id, [],
+        )
         due = [event_age for event_age in schedule if event_age <= age]
         if not due:
             return 0.0
