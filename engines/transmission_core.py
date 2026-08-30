@@ -128,6 +128,50 @@ HIGH_TOUCH_AREA_M2 = {
     "galley": 10.0,
     "crew_mess": 4.0,
 }
+
+# Fraction of high-touch objects actually cleaned in a daily housekeeping
+# pass. Covert fluorescent-marker audit of 8,344 objects in 273 public
+# restrooms on 56 cruise ships: 37% cleaned daily (range 4-100%, 95% CI
+# 29.2-45.4%). Carling et al. 2009, Clin Infect Dis 49:1312. Direct
+# measurement of this quantity in this setting. Grade A.
+ROUTINE_CLEANING_COVERAGE = 0.37
+
+# Log10 reduction of norovirus on a hard surface per cleaning event, over the
+# objects actually cleaned. Midpoint of the two definition-matched
+# measurements: 1.0 for a single liquid-soap or 250-ppm-chlorine wipe of
+# hNoV on stainless steel (Tuladhar et al. 2012, lab carrier test) and 1.57
+# for targeted hygiene wipes and sprays measured with a viral tracer in a
+# hotel lobby (Spitzer et al. 2025, Int J Hyg Environ Health 267:114586 —
+# field, hospitality). Midpoint of the two, stated as such. Grade B.
+ROUTINE_CLEANING_LOG10_REDUCTION = 1.29
+
+# Housekeeping passes per day. One pass is the denominator of Carling's
+# "cleaned on a daily basis". Grade B.
+ROUTINE_CLEANING_EVENTS_PER_DAY = 1.0
+
+# Log10 reduction of the hypochlorite step of outbreak-response disinfection.
+# 5,000 ppm sodium hypochlorite on a fecally soiled stainless steel surface
+# reduces norovirus surrogates by 3 log10 at >=3 min contact (Park et al.
+# 2011, Foodborne Pathog Dis 8:1005); 1,000-5,000 ppm for 60 s gives 2.5-3.1
+# log10 GEC on soiled steel (Escudero-Abarca et al. 2022, J Appl Microbiol).
+# Grade B.
+OUTBREAK_DISINFECTION_STEP_LOG10_REDUCTION = 3.0
+
+# Outbreak response is a two-step procedure: detergent preclean, then
+# hypochlorite (Dancer 2014; Park et al. 2011 both recommend precleaning to
+# drop the organic load first). The field reports two-step efficacy additively
+# in log10, and that additivity is an assumption, not a measurement. Grade C.
+OUTBREAK_DISINFECTION_LOG10_REDUCTION = (
+    ROUTINE_CLEANING_LOG10_REDUCTION + OUTBREAK_DISINFECTION_STEP_LOG10_REDUCTION
+)
+
+# Fraction of high-touch objects reached by an outbreak-response pass. Not
+# measured on ships. The only measured effect of supervision and feedback on
+# cleaning thoroughness is 34% -> 53% in two hospitals (Murphy et al. 2011,
+# Healthcare Infection, fluorescent marker), a relative factor of 1.56, which
+# applied to Carling's 37% baseline gives 0.58. Inferred across settings, and
+# it must be swept rather than asserted. Grade C.
+OUTBREAK_CLEANING_COVERAGE = 0.58
 # GII mean titre from Kirby et al. 2016; measured, evidence grade B.
 EMESIS_TITRE_GEC_PER_ML = 3.9e4
 # Vomitus volume from Tung-Thompson et al. 2015 and Booth & Frost 2019;
@@ -449,6 +493,39 @@ def _parse_heterogeneous_sigma(
     return sigma_map, sigma_service, sigma_default
 
 
+def _parse_surface_cleaning_cfg(
+    tx: dict[str, Any],
+) -> dict[str, float | bool]:
+    """Resolve surface-cleaning settings, retaining module defaults."""
+    cleaning = tx.get("surface_cleaning") or {}
+    routine = cleaning.get("routine") or {}
+    outbreak = cleaning.get("outbreak_response") or {}
+    return {
+        "enabled": bool(cleaning.get("enabled", True)),
+        "routine_coverage": float(
+            routine.get("coverage", ROUTINE_CLEANING_COVERAGE),
+        ),
+        "routine_log10_reduction": float(
+            routine.get(
+                "log10_reduction", ROUTINE_CLEANING_LOG10_REDUCTION,
+            ),
+        ),
+        "routine_events_per_day": float(
+            routine.get(
+                "events_per_day", ROUTINE_CLEANING_EVENTS_PER_DAY,
+            ),
+        ),
+        "outbreak_coverage": float(
+            outbreak.get("coverage", OUTBREAK_CLEANING_COVERAGE),
+        ),
+        "outbreak_log10_reduction": float(
+            outbreak.get(
+                "log10_reduction", OUTBREAK_DISINFECTION_LOG10_REDUCTION,
+            ),
+        ),
+    }
+
+
 class TransmissionCore:
     """Executes six transmission pathways per epoch.
 
@@ -503,6 +580,21 @@ class TransmissionCore:
         tx = (cfg or {}).get("transmission", {}) or {}
         self.contact_mode = _parse_contact_mode(tx)
         self.density_cfg: dict[str, float] = _parse_density_cfg(tx)
+        cleaning_cfg = _parse_surface_cleaning_cfg(tx)
+        self.surface_cleaning_enabled = bool(cleaning_cfg["enabled"])
+        self.routine_cleaning_coverage = float(cleaning_cfg["routine_coverage"])
+        self.routine_cleaning_log10_reduction = float(
+            cleaning_cfg["routine_log10_reduction"],
+        )
+        self.routine_cleaning_events_per_day = float(
+            cleaning_cfg["routine_events_per_day"],
+        )
+        self.outbreak_cleaning_coverage = float(
+            cleaning_cfg["outbreak_coverage"],
+        )
+        self.outbreak_cleaning_log10_reduction = float(
+            cleaning_cfg["outbreak_log10_reduction"],
+        )
         # Dining-type zones or Galley IDs: crew contact multiplier applies here
         self._service_zones: set[str] = {
             z
@@ -519,6 +611,9 @@ class TransmissionCore:
         # {pathogen_id: {zone: mass}}
         self.surface_pools: dict[str, float] = {}  # aggregate (legacy)
         self.surface_pools_by_pathogen: dict[str, dict[str, float]] = {}
+        self.surface_pools_cleanable_by_pathogen: dict[str, dict[str, float]] = {}
+        self._routine_cleaning_accumulators: dict[str, float] = {}
+        self._routine_cleaning_event_counts: dict[str, int] = {}
         self._surface_last_deposition_epoch: dict[str, int] = {}
 
         # Persistent state: airborne aerosol pools per zone per pathogen
@@ -962,16 +1057,164 @@ class TransmissionCore:
                 else self.aerosol_pools[zone_name] * default_survival,
             )
 
-    def decontaminate_surfaces(self, retention: float) -> None:
-        """Scale fomite pools and their strain composition together."""
-        retention = max(0.0, min(1.0, float(retention)))
-        for zone_name in self.surface_pools:
-            self.surface_pools[zone_name] *= retention
+    @staticmethod
+    def _bounded_fraction(value: float) -> float:
+        return max(0.0, min(1.0, float(value)))
+
+    def _deposit_surface_mass(
+        self,
+        pathogen_id: str,
+        zone_name: str,
+        mass: float,
+    ) -> None:
+        """Add surface mass to the aggregate and cleanable compartments."""
+        mass = float(mass)
+        if not math.isfinite(mass) or mass <= 0.0:
+            return
+        coverage = self._bounded_fraction(self.routine_cleaning_coverage)
+        self.surface_pools[zone_name] = (
+            self.surface_pools.get(zone_name, 0.0) + mass
+        )
+        pools = self.surface_pools_by_pathogen.setdefault(pathogen_id, {})
+        pools[zone_name] = pools.get(zone_name, 0.0) + mass
+        cleanable = self.surface_pools_cleanable_by_pathogen.setdefault(
+            pathogen_id, {},
+        )
+        cleanable[zone_name] = cleanable.get(zone_name, 0.0) + mass * coverage
+        self._routine_cleaning_accumulators.setdefault(zone_name, 0.0)
+
+    def _scale_surface_mass(
+        self,
+        pathogen_id: str,
+        zone_name: str,
+        factor: float,
+    ) -> None:
+        """Scale one pathogen's total and cleanable surface mass together."""
+        factor = self._bounded_fraction(factor)
+        pools = self.surface_pools_by_pathogen.get(pathogen_id)
+        if pools is None or zone_name not in pools:
+            if pathogen_id == "_default" and zone_name in self.surface_pools:
+                self.surface_pools[zone_name] = max(
+                    0.0, self.surface_pools[zone_name] * factor,
+                )
+            return
+        previous = max(0.0, float(pools[zone_name]))
+        remaining = previous * factor
+        pools[zone_name] = remaining
+        aggregate = max(0.0, float(self.surface_pools.get(zone_name, 0.0)))
+        self.surface_pools[zone_name] = max(
+            0.0, aggregate - previous + remaining,
+        )
+        cleanable = self.surface_pools_cleanable_by_pathogen.setdefault(
+            pathogen_id, {},
+        )
+        cleanable[zone_name] = min(
+            remaining,
+            max(0.0, float(cleanable.get(zone_name, 0.0))) * factor,
+        )
+
+    def _routine_cleaning_event(self, zone_name: str) -> None:
+        """Apply one routine pass to the cleanable compartment in a zone."""
+        multiplier = 10.0 ** -max(
+            0.0, float(self.routine_cleaning_log10_reduction),
+        )
+        for pathogen_id, pools in self.surface_pools_by_pathogen.items():
+            total = max(0.0, float(pools.get(zone_name, 0.0)))
+            if total <= 0.0:
+                continue
+            cleanable = self.surface_pools_cleanable_by_pathogen.setdefault(
+                pathogen_id, {},
+            )
+            old_cleanable = min(
+                total, max(0.0, float(cleanable.get(zone_name, 0.0))),
+            )
+            retention = 1.0 - (old_cleanable / total) * (1.0 - multiplier)
+            self._scale_surface_mass(pathogen_id, zone_name, retention)
+            cleanable[zone_name] = old_cleanable * multiplier
+            if self.strain_registry is not None:
+                self._reservoir.decay(
+                    retention,
+                    ReservoirComposition.key(
+                        SURFACE_RESERVOIR, pathogen_id, zone_name,
+                    ),
+                )
+
+    def _step_routine_surface_cleaning(self) -> None:
+        """Advance daily housekeeping accumulators and fire discrete passes."""
+        if not self.surface_cleaning_enabled:
+            return
+        increment = (
+            max(0.0, self.routine_cleaning_events_per_day)
+            * self.clock.day_fraction_per_epoch
+        )
+        if increment <= 0.0:
+            return
+        zones = set(self._routine_cleaning_accumulators)
+        zones.update(self.surface_pools)
         for pools in self.surface_pools_by_pathogen.values():
-            for zone_name in pools:
-                pools[zone_name] *= retention
-        if self.strain_registry is not None:
-            self._reservoir.decay_kind(retention, SURFACE_RESERVOIR)
+            zones.update(pools)
+        for zone_name in zones:
+            self._routine_cleaning_accumulators.setdefault(zone_name, 0.0)
+            accumulator = self._routine_cleaning_accumulators[zone_name] + increment
+            while accumulator + 1e-12 >= 1.0:
+                self._routine_cleaning_event(zone_name)
+                self._routine_cleaning_event_counts[zone_name] = (
+                    self._routine_cleaning_event_counts.get(zone_name, 0) + 1
+                )
+                accumulator -= 1.0
+            accumulator = max(0.0, accumulator)
+            self._routine_cleaning_accumulators[zone_name] = accumulator
+
+    def disinfect_surfaces(self, log10_reduction: float, coverage: float) -> None:
+        """Apply nested outbreak-response disinfection to surface compartments."""
+        reduction = max(0.0, float(log10_reduction))
+        coverage = self._bounded_fraction(coverage)
+        routine_coverage = self._bounded_fraction(
+            self.routine_cleaning_coverage,
+        )
+        kill_multiplier = 10.0 ** -reduction
+        if coverage > routine_coverage and routine_coverage < 1.0:
+            # Grade C assumption: outbreak coverage nests routine coverage.
+            nested_fraction = (coverage - routine_coverage) / (
+                1.0 - routine_coverage
+            )
+            cleanable_factor = kill_multiplier
+            missed_factor = 1.0 - nested_fraction * (1.0 - kill_multiplier)
+        elif routine_coverage > 0.0:
+            cleanable_factor = 1.0 - (
+                coverage / routine_coverage
+            ) * (1.0 - kill_multiplier)
+            missed_factor = 1.0
+        else:
+            cleanable_factor = 1.0
+            missed_factor = 1.0
+        cleanable_factor = self._bounded_fraction(cleanable_factor)
+        missed_factor = self._bounded_fraction(missed_factor)
+        for pathogen_id, pools in self.surface_pools_by_pathogen.items():
+            for zone_name, value in list(pools.items()):
+                total = max(0.0, float(value))
+                if total <= 0.0:
+                    continue
+                cleanable = self.surface_pools_cleanable_by_pathogen.setdefault(
+                    pathogen_id, {},
+                )
+                old_cleanable = min(
+                    total, max(0.0, float(cleanable.get(zone_name, 0.0))),
+                )
+                old_missed = total - old_cleanable
+                retention = (
+                    old_cleanable * cleanable_factor
+                    + old_missed * missed_factor
+                ) / total
+                self._scale_surface_mass(pathogen_id, zone_name, retention)
+                cleanable[zone_name] = old_cleanable * cleanable_factor
+                if self.strain_registry is not None:
+                    self._reservoir.decay(
+                        retention,
+                        ReservoirComposition.key(
+                            SURFACE_RESERVOIR, pathogen_id, zone_name,
+                        ),
+                    )
 
     def _surface_survival(self, profile: dict[str, Any] | None = None) -> float:
         """Return one-epoch surface survival for a pathogen profile."""
@@ -1501,6 +1744,8 @@ class TransmissionCore:
             self.aerosol_pools.setdefault(z, 0.0)
             self._prev_zone_occupants.setdefault(z, set())
             self._prev_zone_shedders.setdefault(z, [])
+            self._routine_cleaning_accumulators.setdefault(z, 0.0)
+            self._routine_cleaning_event_counts.setdefault(z, 0)
         # Identify Dining-type zones for food contamination
         dining_zones = [
             z for z in zone_names
@@ -1509,10 +1754,12 @@ class TransmissionCore:
         # Initialize per-pathogen pools
         for pid, profile in self.pathogen_profiles.items():
             self.surface_pools_by_pathogen.setdefault(pid, {})
+            self.surface_pools_cleanable_by_pathogen.setdefault(pid, {})
             self.aerosol_pools_by_pathogen.setdefault(pid, {})
             self._prev_zone_shedders_by_pathogen.setdefault(pid, {})
             for z in zone_names:
                 self.surface_pools_by_pathogen[pid].setdefault(z, 0.0)
+                self.surface_pools_cleanable_by_pathogen[pid].setdefault(z, 0.0)
                 self.aerosol_pools_by_pathogen[pid].setdefault(z, 0.0)
                 self._prev_zone_shedders_by_pathogen[pid].setdefault(z, [])
             # Initialize food contamination pools for Dining zones
@@ -2553,16 +2800,7 @@ class TransmissionCore:
         )
         if pool_gain <= 0.0:
             return 0.0
-        self.surface_pools[zone_name] = (
-            self.surface_pools.get(zone_name, 0.0) + pool_gain
-        )
-        self.surface_pools_by_pathogen.setdefault(
-            pathogen_id, {},
-        )[zone_name] = (
-            self.surface_pools_by_pathogen.get(pathogen_id, {}).get(
-                zone_name, 0.0,
-            ) + pool_gain
-        )
+        self._deposit_surface_mass(pathogen_id, zone_name, pool_gain)
         self._deposit_reservoir_strains(
             SURFACE_RESERVOIR, pathogen_id, zone_name, [(agent, pool_gain)],
         )
@@ -2653,13 +2891,9 @@ class TransmissionCore:
         if delivered <= 0.0 or previous_mass <= 0.0:
             return
         remaining = max(0.0, previous_mass - delivered)
-        self.surface_pools[zone_name] = max(
-            0.0,
-            self.surface_pools.get(zone_name, 0.0) - delivered,
+        self._scale_surface_mass(
+            pathogen_id, zone_name, remaining / previous_mass,
         )
-        pools = self.surface_pools_by_pathogen.get(pathogen_id)
-        if pools is not None and zone_name in pools:
-            pools[zone_name] = remaining
         self._reservoir.decay(
             remaining / previous_mass,
             ReservoirComposition.key(SURFACE_RESERVOIR, pathogen_id, zone_name),
@@ -2684,17 +2918,7 @@ class TransmissionCore:
                     continue
                 deposit = shedding * SURFACE_DEPOSITION_FRACTION
                 deposits.append((agent, deposit))
-                self.surface_pools[zone_name] = (
-                    self.surface_pools.get(zone_name, 0.0) + deposit
-                )
-                self.surface_pools_by_pathogen.setdefault(
-                    pathogen_id, {},
-                )[zone_name] = (
-                    self.surface_pools_by_pathogen.get(pathogen_id, {}).get(
-                        zone_name, 0.0,
-                    )
-                    + deposit
-                )
+                self._deposit_surface_mass(pathogen_id, zone_name, deposit)
             self._deposit_reservoir_strains(
                 SURFACE_RESERVOIR, pathogen_id, zone_name, deposits,
             )
@@ -2814,17 +3038,7 @@ class TransmissionCore:
                 deposit = min(hand, max(0.0, requested))
                 agent.hand_load_by_pathogen[pathogen_id] = hand - deposit
                 deposits.append((agent, deposit))
-                self.surface_pools[zone_name] = (
-                    self.surface_pools.get(zone_name, 0.0) + deposit
-                )
-                self.surface_pools_by_pathogen.setdefault(
-                    pathogen_id, {},
-                )[zone_name] = (
-                    self.surface_pools_by_pathogen.get(pathogen_id, {}).get(
-                        zone_name, 0.0,
-                    )
-                    + deposit
-                )
+                self._deposit_surface_mass(pathogen_id, zone_name, deposit)
             self._deposit_reservoir_strains(
                 SURFACE_RESERVOIR, pathogen_id, zone_name, deposits,
             )
@@ -3312,16 +3526,25 @@ class TransmissionCore:
         self, _zone_occupants: dict[str, list[KorkinAgent]],
     ) -> None:
         """Apply surface decay after fomite interactions."""
-        survival = self._surface_survival()
-        for zone_name in self.surface_pools:
-            self.surface_pools[zone_name] *= survival
         for pathogen_id, pools in self.surface_pools_by_pathogen.items():
             survival = self._surface_survival(
                 self.pathogen_profiles.get(pathogen_id),
             )
             for zone_name in pools:
-                pools[zone_name] *= survival
+                self._scale_surface_mass(pathogen_id, zone_name, survival)
+        tracked_zones = {
+            zone_name
+            for pools in self.surface_pools_by_pathogen.values()
+            for zone_name in pools
+        }
+        default_survival = self._surface_survival()
+        for zone_name in self.surface_pools:
+            if zone_name not in tracked_zones:
+                self._scale_surface_mass(
+                    "_default", zone_name, default_survival,
+                )
         self._decay_surface_composition()
+        self._step_routine_surface_cleaning()
 
     def _update_prev_occupancy(
         self, zone_occupants: dict[str, list[KorkinAgent]],

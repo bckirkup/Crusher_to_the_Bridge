@@ -1967,8 +1967,7 @@
         "diagnostic_cadence_multiplier": 2.0,
         "ppe_transmission_reduction": 0.5,
         "direct_contact_scalar": 0.4,
-        "droplet_scalar": 0.4,
-        "surface_decontamination_factor": 0.4
+        "droplet_scalar": 0.4
       },
       "stoplights": {
         "continuous_air_sampler": {
@@ -2077,8 +2076,7 @@
             "confine_symptomatic_to_quarters": true,
             "ppe_transmission_reduction": 0.6,
             "direct_contact_scalar": 0.4,
-            "droplet_scalar": 0.4,
-            "surface_decontamination_factor": 0.4
+            "droplet_scalar": 0.4
           },
           "forced": false
         }
@@ -3930,8 +3928,7 @@
         "diagnostic_cadence_multiplier": 2.0,
         "ppe_transmission_reduction": 0.5,
         "direct_contact_scalar": 0.4,
-        "droplet_scalar": 0.4,
-        "surface_decontamination_factor": 0.4
+        "droplet_scalar": 0.4
       },
       "stoplights": {
         "continuous_air_sampler": {
@@ -5809,8 +5806,7 @@
         "diagnostic_cadence_multiplier": 2.0,
         "ppe_transmission_reduction": 0.5,
         "direct_contact_scalar": 0.4,
-        "droplet_scalar": 0.4,
-        "surface_decontamination_factor": 0.4
+        "droplet_scalar": 0.4
       },
       "stoplights": {
         "continuous_air_sampler": {
@@ -7911,8 +7907,6 @@
         }
       ],
       "merged_modifiers": {
-        "surface_decontamination_factor": 0.5,
-        "surface_decay_rate_override": 0.3,
         "close_zones": [
           "Main_Galley_Aft",
           "Crew_Mess_Main"
@@ -7980,8 +7974,6 @@
           "name": "Surface Decontamination Protocol",
           "event": "ACTIVATED",
           "modifiers": {
-            "surface_decontamination_factor": 0.5,
-            "surface_decay_rate_override": 0.3
           },
           "forced": false
         },
@@ -10134,8 +10126,6 @@
         }
       ],
       "merged_modifiers": {
-        "surface_decontamination_factor": 0.5,
-        "surface_decay_rate_override": 0.3,
         "confine_symptomatic_to_quarters": true,
         "diagnostic_cadence_multiplier": 2.0
       },
@@ -12238,8 +12228,6 @@
         }
       ],
       "merged_modifiers": {
-        "surface_decontamination_factor": 0.5,
-        "surface_decay_rate_override": 0.3,
         "close_zones": [
           "Main_Galley_Aft",
           "Crew_Mess_Main"
@@ -12336,8 +12324,7 @@
             "confine_symptomatic_to_quarters": true,
             "ppe_transmission_reduction": 0.6,
             "direct_contact_scalar": 0.4,
-            "droplet_scalar": 0.4,
-            "surface_decontamination_factor": 0.4
+            "droplet_scalar": 0.4
           },
           "forced": false
         }
@@ -14450,8 +14437,6 @@
         }
       ],
       "merged_modifiers": {
-        "surface_decontamination_factor": 0.5,
-        "surface_decay_rate_override": 0.3,
         "confine_symptomatic_to_quarters": true,
         "diagnostic_cadence_multiplier": 2.0,
         "ppe_transmission_reduction": 0.5,
@@ -16592,8 +16577,6 @@
         }
       ],
       "merged_modifiers": {
-        "surface_decontamination_factor": 0.5,
-        "surface_decay_rate_override": 0.3,
         "diagnostic_cadence_multiplier": 2.0,
         "confine_symptomatic_to_quarters": true
       },

@@ -1082,8 +1082,7 @@ The trigger defines **when** the SOP activates:
 |----------|-------|--------|
 | `hvac_filter_efficiency_override` | [0.0, 1.0] | Override HVAC filter efficiency |
 | `hvac_filter_type_label` | string | Dashboard display label |
-| `surface_decontamination_factor` | [0.0, 1.0] | Fraction of surface mass removed/epoch |
-| `surface_decay_rate_override` | [0.0, 1.0] | Override natural surface decay |
+| `surface_disinfection_log10_reduction` | [0.0, 10.0] | Log10 reduction applied by outbreak-response surface disinfection |
 | `ppe_transmission_reduction` | [0.0, 1.0] | Overall PPE transmission reduction |
 | `direct_contact_scalar` | [0.0, 1.0] | Scale Pathway 1 dose (1.0=no change) |
 | `droplet_scalar` | [0.0, 1.0] | Scale Pathway 2 dose |
@@ -1093,7 +1092,6 @@ The trigger defines **when** the SOP activates:
 | `close_zones` | list of zone IDs | Zones to close (restrict occupancy) |
 | `zone_occupancy_cap` | integer ≥ 0 | Max agents in closed zones |
 | `confine_all_to_quarters` | boolean | Relocate all agents to home zones (full-ship lockdown) |
-| `surface_decontamination_factor` | [0.0, 1.0] | Emergency zone surface mass reduction factor |
 
 ### 5.4 Cost Accounting
 
@@ -1112,7 +1110,7 @@ cost ledger flags a `DEPLETED` warning in the executive summary.
 |-----|------|---------|----------------|----------|
 | SOP-001 | Enhanced Ventilation | Air sniffer AMBER | SUSPECTED | MERV-16 filter (80%) |
 | SOP-002 | HEPA Lockdown Ventilation | Air sniffer RED | CONFIRMED | HEPA filter (99.9%) |
-| SOP-003 | Surface Decontamination | Surface swab AMBER | SUSPECTED | 50% surface removal |
+| SOP-003 | Surface Disinfection | Surface swab AMBER | SUSPECTED | 4.29 log10 surface reduction |
 | SOP-004 | PPE — Standard | Wastewater AMBER | ALERT | Surgical masks, 40% reduction |
 | SOP-005 | PPE — Full N95 | Wastewater RED | CONFIRMED | N95 respirators, 80% reduction |
 | SOP-006 | Increased Diagnostics | Clinical RDT AMBER | ALERT | 2× testing frequency |

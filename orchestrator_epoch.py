@@ -1062,20 +1062,17 @@ def confine_all_agents(
         )
 
 
-def apply_surface_decontamination(
+def apply_outbreak_surface_disinfection(
     tx_core: TransmissionCore | None,
-    factor: float,
+    log10_reduction: float,
 ) -> None:
-    """SOP-010: reduce the fomite surface reservoir by a decontamination factor.
-
-    ``factor`` is the *reduction* fraction (e.g. 0.60 means remove 60% of
-    surface mass, retaining 40%). Scrubbing surfaces acts on the fomite pools
-    the touch pathway reads, not on the airborne mass the HVAC pathway reads.
-    """
+    """Apply SOP-triggered outbreak-response surface disinfection."""
     if tx_core is None:
         return
-    retention = 1.0 - max(0.0, min(1.0, factor))
-    tx_core.decontaminate_surfaces(retention)
+    tx_core.disinfect_surfaces(
+        log10_reduction,
+        tx_core.outbreak_cleaning_coverage,
+    )
 
 
 def apply_zone_closures(
