@@ -103,8 +103,8 @@ def test_pickup_is_monotonic_in_shared_surface_touch_frequency(
     for frequency in (2.0, 6.0, 12.0):
         monkeypatch.setattr(
             transmission_core,
-            "PUBLIC_SURFACE_CONTACTS_PER_HOUR",
-            frequency,
+            "SURFACE_CONTACTS_PER_HOUR",
+            {**transmission_core.SURFACE_CONTACTS_PER_HOUR, "public": frequency},
         )
         core = _core(seed=13)
         values.append(core._fomite_pickup_request(_agent(), ZONE, 10.0))

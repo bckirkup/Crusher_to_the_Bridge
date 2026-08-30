@@ -323,7 +323,7 @@ def test_fomite_delivery_is_conservative_and_intensive() -> None:
         1.0,
     )
     expected_pickup = (
-        transmission_core.PUBLIC_SURFACE_CONTACTS_PER_HOUR
+        transmission_core.SURFACE_CONTACTS_PER_HOUR["dining"]
         * surface_fraction
         * hand_area
         / transmission_core.HIGH_TOUCH_AREA_M2["dining"]
