@@ -152,22 +152,22 @@ def test_mouth_dose_is_monotonic_in_mouth_contact_frequency(
     assert values == sorted(values)
 
 
-def test_hand_decay_uses_sim_clock_hourly_rate() -> None:
+def test_hand_relaxation_uses_sim_clock_hourly_rate() -> None:
     hourly = _core(seed=23)
     half_hour = _core(
         seed=23,
     )
     hourly.clock = SimClock(epoch_duration_hours=1.0, mode=HOURS)
     half_hour.clock = SimClock(epoch_duration_hours=0.5, mode=HOURS)
-    first = _agent()
-    second = _agent()
+    first = _agent(infected=True)
+    second = _agent(infected=True)
     first.hand_load_by_pathogen[PATHOGEN] = 1.0
     second.hand_load_by_pathogen[PATHOGEN] = 1.0
     first.hand_inactivation_rate_by_pathogen[PATHOGEN] = 1.0
     second.hand_inactivation_rate_by_pathogen[PATHOGEN] = 1.0
-    hourly._decay_hand_load(first, PATHOGEN, _profile())
-    half_hour._decay_hand_load(second, PATHOGEN, _profile())
-    half_hour._decay_hand_load(second, PATHOGEN, _profile())
+    hourly._replenish_hand(first, PATHOGEN, _profile())
+    half_hour._replenish_hand(second, PATHOGEN, _profile())
+    half_hour._replenish_hand(second, PATHOGEN, _profile())
     assert first.hand_load_by_pathogen[PATHOGEN] == pytest.approx(
         second.hand_load_by_pathogen[PATHOGEN],
     )

@@ -2339,28 +2339,6 @@ class TransmissionCore:
             target + (current - target) * survival
         )
 
-    def _decay_hand_load(
-        self,
-        agent: KorkinAgent,
-        pathogen_id: str,
-        profile: dict | None,
-    ) -> None:
-        hand = agent.hand_load_by_pathogen.get(pathogen_id, 0.0)
-        if hand <= 0.0:
-            return
-        rate = self._hand_inactivation_rate(agent, pathogen_id, profile)
-        hand *= math.exp(-rate * self.clock.hours_per_epoch)
-        hygiene_rate = float((profile or {}).get(
-            "hand_hygiene_rate_per_hour",
-            HAND_HYGIENE_RATE_PER_HOUR_DEFAULT,
-        ))
-        event_probability = 1.0 - math.exp(
-            -max(hygiene_rate, 0.0) * self.clock.hours_per_epoch,
-        )
-        if event_probability > 0.0 and self.rng.random() < event_probability:
-            hand *= math.pow(10.0, -self._hand_hygiene_efficacy(profile))
-        agent.hand_load_by_pathogen[pathogen_id] = max(hand, 0.0)
-
     def _apply_hand_hygiene(
         self,
         agent: KorkinAgent,
