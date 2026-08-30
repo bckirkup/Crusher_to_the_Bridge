@@ -92,7 +92,7 @@ JSON schemas live in `schemas/`:
 | `air_flow_paths.schema.json` | HVAC zones, cross-zone links, adjacency |
 | `protocols.schema.json` | SOP trigger/modifier/cost structure |
 | `resource_costs.schema.json` | Budget and material inventory |
-| `pathogen_profiles.schema.json` | Pathogen profiles (incl. `shedding_variance_log10`, `transmission_route_weights`, `dose_adjustment`, `innate_nonsusceptible_fraction`, env `source_zones`) |
+| `pathogen_profiles.schema.json` | Pathogen profiles (incl. `shedding_variance_log10`, `transmission_route_weights`, `environmental_faecal_release_log10_g_per_epoch` with deprecated `dose_adjustment` alias, `innate_nonsusceptible_fraction`, env `source_zones`) |
 | `simulation_history.schema.json` | Output epoch record structure |
 | `lab_notebook.schema.json` | Observation engine log records |
 | `logging_profile.schema.json` | Logging configuration |
@@ -129,7 +129,7 @@ The sanity checker uses **pydantic models** for strict structural validation bey
 ## Testing Tips
 
 - **When adding a new platform**: Create `spatial_layout.json` and `air_flow_paths.json` under `data/platforms/<new_platform>/`. Run `python tools/sanity_checker.py --platform-dir data/platforms/<new_platform>` to validate. Also add targeted data contract tests if the platform has unusual properties.
-- **When adding a new pathogen**: Add to `data/pathogens/active_profiles.json`. Required fields: `pathogen_id`, `name`, `transmission_routes`. Optional: `shedding_variance_log10`, `transmission_route_weights`, `dose_adjustment` (log10 shedding offset), `innate_nonsusceptible_fraction`, env `source_zones` (see `docs/SHEDDING_AND_CABINMATES.md`, `docs/multi_pathogen_model_changes_spec.md`). Run `pytest tests/test_data_contracts.py::TestPathogenProfiles -v` and Phase A/B tests as needed.
+- **When adding a new pathogen**: Add to `data/pathogens/active_profiles.json`. Required fields: `pathogen_id`, `name`, `transmission_routes`. Optional: `shedding_variance_log10`, `transmission_route_weights`, `environmental_faecal_release_log10_g_per_epoch` (−log10 grams of stool released per epoch; deprecated `dose_adjustment` alias remains supported), `innate_nonsusceptible_fraction`, env `source_zones` (see `docs/SHEDDING_AND_CABINMATES.md`, `docs/multi_pathogen_model_changes_spec.md`). Run `pytest tests/test_data_contracts.py::TestPathogenProfiles -v` and Phase A/B tests as needed.
 - **When modifying protocols**: After editing `data/config/protocols.json`, run `pytest tests/test_data_contracts.py::TestProtocols -v` and `pytest tests/test_law_compliance.py::TestLaw5ReferentialIntegrity -v` to verify protocol instrument classes and stoplight levels are valid. For `min_escalation_status` / `activation_delay_hours` changes, also run `pytest tests/test_outbreak_response_architecture.py -v`.
 - **Valid escalation statuses** (SOP `min_escalation_status`): `BASELINE`, `ALERT`, `SUSPECTED`, `CONFIRMED`, `LOCKDOWN`.
 - **Cross-file referential integrity** is critical: air_flow_paths references zone IDs from spatial_layout, protocols reference instrument classes from the observation engine, resource_costs materials are referenced by protocol costs. The sanity checker catches most of these.

@@ -10,7 +10,7 @@ can initialise the real agent graph at t=0 and advance it each epoch.
 
 Key parameters extracted from the Java source
 ----------------------------------------------
-- **Person.java**: Norwalk shedding curves (log10 copies/g, days 0-14),
+- **Person.java**: Norwalk shedding curves (log10 copies/g stool, days 0-14),
   dose-response infection probability P(inf) = 1 - (1+dose/β)^{-α},
   illness probability P(ill) = 1 - (1+η·dose)^{-γ}.
 - **Agent.java**: 24-hour behavior schedule (Sleep/Meal/Free/Work),
@@ -38,11 +38,29 @@ from engines.strain_state import ImmuneRecord, Phenotype
 
 # ── Korkin Lab parameters (from Person.java) ─────────────────────────────
 
-# RT-PCR shedding values: log10(copies/g), indexed by day post-onset.
+# RT-PCR shedding values: log10(copies per gram of stool), indexed by day
+# post-onset.
 # Source: "Norwalk Virus Shedding after Experimental Human Infection" Fig 1C/E.
 SYMPTOMATIC_SHEDDING = [7.75, 9.0, 11.0, 11.0, 11.0, 10.0, 10.0, 9.5, 9.0, 9.0, 8.0, 8.0, 8.0, 8.0, 8.0]
 ASYMPTOMATIC_SHEDDING = [7.75, 9.5, 10.5, 10.0, 9.0, 8.0, 7.75, 7.75, 7.75, 7.75, 7.75, 7.75, 7.75, 7.75, 7.75]
-DOSE_ADJUSTMENT = 4.0
+# Preferred physical interpretation: -log10 grams of stool released to the
+# environment per epoch. Keep the old name as a compatibility alias.
+ENVIRONMENTAL_FAECAL_RELEASE_LOG10_G_PER_EPOCH = 4.0
+DOSE_ADJUSTMENT = ENVIRONMENTAL_FAECAL_RELEASE_LOG10_G_PER_EPOCH
+
+
+def environmental_faecal_release_log10_g_per_epoch(
+    profile: dict[str, Any] | None,
+) -> float:
+    """Read the preferred stool-release key with legacy compatibility."""
+    values = profile or {}
+    return float(values.get(
+        "environmental_faecal_release_log10_g_per_epoch",
+        values.get(
+            "dose_adjustment",
+            ENVIRONMENTAL_FAECAL_RELEASE_LOG10_G_PER_EPOCH,
+        ),
+    ))
 
 # Dose-response coefficients: "Norwalk virus: How infectious is it?" Table III.
 ALPHA = 0.111
@@ -334,6 +352,7 @@ class KorkinAgent:
         "infections", "susceptibility_multiplier",
         "dose_response_susceptibility", "cumulative_exposure",
         "cumulative_exposure_by_route",
+        "hand_load_by_pathogen", "hand_inactivation_rate_by_pathogen",
         "microflora_disruption_status",
         # Chronic disease extensions
         "chronic_disease_ids", "chronic_pathogen_mods",
@@ -396,6 +415,10 @@ class KorkinAgent:
         self.cumulative_exposure: dict[str, float] = {}
         # Effective dose accumulated by route during the current challenge.
         self.cumulative_exposure_by_route: dict[str, dict[str, float]] = {}
+        # Copies carried on each hand, keyed by pathogen.
+        self.hand_load_by_pathogen: dict[str, float] = {}
+        # Per-host/pathogen hand inactivation draws, sampled lazily.
+        self.hand_inactivation_rate_by_pathogen: dict[str, float] = {}
 
         # Microflora disruption scalar [0.0 = healthy, 1.0 = fully disrupted]
         self.microflora_disruption_status: float = 0.0
@@ -887,7 +910,7 @@ class KorkinAgent:
         )
         if not is_symp:
             curve = profile.get("asymptomatic_shedding_log10", curve)
-        adj = profile.get("dose_adjustment", DOSE_ADJUSTMENT)
+        adj = environmental_faecal_release_log10_g_per_epoch(profile)
         host_mult = inf.get("shedding_multiplier", 1.0)
         residents = self.resident_strains(pathogen_id)
         if residents:
@@ -913,6 +936,39 @@ class KorkinAgent:
             * inf.get("strain_shedding_multiplier", 1.0),
         )
 
+    def get_pathogen_hand_target(
+        self,
+        pathogen_id: str,
+        profile: dict[str, Any],
+    ) -> float:
+        """Return the measured stool-linked target load for one hand."""
+        inf = self.infections.get(pathogen_id)
+        if inf is None or inf["status"] != InfectionStatus.INFECTED:
+            return 0.0
+        epochs_infected = inf.get("time_infected")
+        if epochs_infected is None or epochs_infected < 0:
+            return 0.0
+        symptomatic = inf["illness"] == IllnessStatus.SYMPTOMATIC
+        curve = profile.get(
+            "shedding_curve_log10",
+            SYMPTOMATIC_SHEDDING if symptomatic else ASYMPTOMATIC_SHEDDING,
+        )
+        if not symptomatic:
+            curve = profile.get("asymptomatic_shedding_log10", curve)
+        days_since_onset, curve_index = self._shedding_age(
+            epochs_infected, inf, profile, self.clock,
+        )
+        if days_since_onset < -float(
+            profile.get("presymptomatic_shedding_days", 0.0),
+        ):
+            return 0.0
+        idx = min(max(curve_index, 0), len(curve) - 1)
+        return (
+            math.pow(10.0, 3.86)
+            * math.pow(10.0, curve[idx] - 11.0)
+            * float(inf.get("shedding_multiplier", 1.0))
+        )
+
     def strain_shedding_shares(
         self, pathogen_id: str, profile: dict,
     ) -> dict[str, float]:
@@ -933,7 +989,7 @@ class KorkinAgent:
         )
         if not is_symp:
             curve = profile.get("asymptomatic_shedding_log10", curve)
-        adj = profile.get("dose_adjustment", DOSE_ADJUSTMENT)
+        adj = environmental_faecal_release_log10_g_per_epoch(profile)
         emissions = self._resident_emissions(
             residents, curve, adj, self.clock, profile,
         )
@@ -1569,6 +1625,7 @@ class KorkinShipEngine:
             ):
                 agent.infection_status = InfectionStatus.RECOVERED
                 agent.illness_status = IllnessStatus.RECOVERED
+                agent.hand_load_by_pathogen.clear()
 
     def _draw_fallback_onset(self, agent: KorkinAgent) -> None:
         """Present a host that has no per-pathogen record, on the fixed day."""

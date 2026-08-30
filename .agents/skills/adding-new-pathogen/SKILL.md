@@ -29,7 +29,7 @@ Profiles live in `data/pathogens/active_profiles.json`. Each pathogen entry requ
   "shedding_curve_log10": [2.0, 3.5, 4.0],
   "asymptomatic_shedding_log10": [1.0, 2.0, 2.5],
   "presymptomatic_shedding_days": 0.0,
-  "dose_adjustment": 4.0,
+  "environmental_faecal_release_log10_g_per_epoch": 4.0,
   "dose_response": {
     "model": "beta_poisson",
     "alpha": 0.04,
@@ -69,12 +69,15 @@ Profiles live in `data/pathogens/active_profiles.json`. Each pathogen entry requ
 }
 ```
 
-**`dose_adjustment`** is a **log10 shedding offset**
-(`shedding = 10^(curve[days_since_onset] − dose_adjustment) *
-shedding_multiplier`), with an optional bounded
+**`environmental_faecal_release_log10_g_per_epoch`** is
+**−log10 grams of stool released to the environment per epoch**
+(`shedding = 10^(curve[days_since_onset] −
+environmental_faecal_release_log10_g_per_epoch) * shedding_multiplier`),
+with an optional bounded
 `presymptomatic_shedding_days` window that uses the curve's first value.
-not a dose-response α/β scaler. Campaigns calibrate infectivity via
-`pathogen_overrides.<id>.dose_adjustment`.
+It is not a dose-response α/β scaler. The deprecated
+`pathogen_overrides.<id>.dose_adjustment` alias remains supported for
+campaign compatibility.
 
 **`transmission_route_weights`** (optional; default all 1.0) scale each
 pathway's dose contribution. Prefer weights that sum to ≈1.0.

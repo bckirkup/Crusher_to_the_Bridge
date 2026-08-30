@@ -292,12 +292,9 @@ def test_empty_reservoirs_only_decay() -> None:
     assert all(new < old for old, new in zip(before, after))
 
 
-def test_fomite_delivery_is_conservative_and_intensive(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
+def test_fomite_delivery_is_conservative_and_intensive() -> None:
     import engines.transmission_core as transmission_core
 
-    monkeypatch.setattr(transmission_core, "FOMITE_PICKUP_PROBABILITY", 1.0)
     core = _core()
     core.surface_pools[ZONE] = 10.0
     core.surface_pools_by_pathogen[PATHOGEN][ZONE] = 10.0
@@ -313,9 +310,51 @@ def test_fomite_delivery_is_conservative_and_intensive(
         profile=core.pathogen_profiles[PATHOGEN],
     )
     delivered = 10.0 - core.surface_pools_by_pathogen[PATHOGEN][ZONE]
-    expected = 10.0 / (50.0 / 2.5) * 2e-4 * 0.01
-    assert delivered == pytest.approx(expected)
-    assert doses[target.agent_id] == pytest.approx(delivered)
+    expected_rng = np.random.default_rng(19)
+    hand_area = expected_rng.uniform(
+        *transmission_core.HAND_AREA_CM2_RANGE,
+    ) / 1.0e4
+    surface_fraction = expected_rng.uniform(
+        *transmission_core.SURFACE_CONTACT_FRACTION_RANGE,
+    )
+    surface_efficiency = np.clip(
+        expected_rng.lognormal(*transmission_core.SURFACE_TO_HAND_LOGNORMAL),
+        0.0,
+        1.0,
+    )
+    expected_pickup = (
+        transmission_core.PUBLIC_SURFACE_CONTACTS_PER_HOUR
+        * surface_fraction
+        * hand_area
+        / transmission_core.HIGH_TOUCH_AREA_M2["dining"]
+        * surface_efficiency
+        * 10.0
+    )
+    expected_mouth_area = expected_rng.uniform(
+        *transmission_core.HAND_AREA_CM2_RANGE,
+    ) / 1.0e4
+    mouth_fraction = expected_rng.uniform(
+        *transmission_core.MOUTH_CONTACT_FRACTION_RANGE,
+    )
+    mouth_efficiency = np.clip(
+        expected_rng.normal(*transmission_core.HAND_TO_MOUTH_NORMAL),
+        0.0,
+        1.0,
+    )
+    mouth_contacts = max(
+        0.0,
+        expected_rng.normal(*transmission_core.NON_EATING_MOUTH_CONTACTS_PER_HOUR),
+    )
+    expected_dose = (
+        mouth_contacts
+        * mouth_fraction
+        * expected_mouth_area
+        * mouth_efficiency
+        * expected_pickup
+        / expected_mouth_area
+    )
+    assert delivered == pytest.approx(expected_pickup)
+    assert doses[target.agent_id] == pytest.approx(expected_dose)
     assert 0.0 <= delivered <= 10.0
     assert core.surface_pools[ZONE] == pytest.approx(10.0 - delivered)
 
@@ -337,30 +376,38 @@ def test_food_delivery_is_conservative_and_intensive() -> None:
     assert core.food_pools[PATHOGEN][ZONE] == pytest.approx(9.5)
 
 
-def test_reservoir_doses_are_invariant_to_scaled_zone_size() -> None:
-    def fomite_dose(volume: float, mass: float) -> float:
-        import engines.transmission_core as transmission_core
+def test_reservoir_doses_are_invariant_to_scaled_zone_size(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import engines.transmission_core as transmission_core
 
-        core = _core(volume=volume)
+    def fomite_dose(
+        occupancy: int,
+        mass: float,
+        high_touch_area: float = 8.0,
+    ) -> float:
+        monkeypatch.setitem(
+            transmission_core.HIGH_TOUCH_AREA_M2,
+            "dining",
+            high_touch_area,
+        )
+        core = _core(volume=50.0)
         core.surface_pools[ZONE] = mass
         core.surface_pools_by_pathogen[PATHOGEN][ZONE] = mass
-        target = _agent(1)
+        occupants = [_agent(1)] + [
+            _agent(index, immune=True) for index in range(2, occupancy + 1)
+        ]
         doses: dict[int, float] = {}
-        original = transmission_core.FOMITE_PICKUP_PROBABILITY
-        transmission_core.FOMITE_PICKUP_PROBABILITY = 1.0
-        try:
-            core._pathway_fomite(
-                0,
-                {ZONE: [target]},
-                doses,
-                ContactTracingMatrix(epoch=0),
-                [],
-                pathogen_id=PATHOGEN,
-                profile=core.pathogen_profiles[PATHOGEN],
-            )
-        finally:
-            transmission_core.FOMITE_PICKUP_PROBABILITY = original
-        return doses[target.agent_id]
+        core._pathway_fomite(
+            0,
+            {ZONE: occupants},
+            doses,
+            ContactTracingMatrix(epoch=0),
+            [],
+            pathogen_id=PATHOGEN,
+            profile=core.pathogen_profiles[PATHOGEN],
+        )
+        return doses[1]
 
     def food_dose(occupancy: int, mass: float) -> float:
         core = _core(food=True)
@@ -379,8 +426,11 @@ def test_reservoir_doses_are_invariant_to_scaled_zone_size() -> None:
         )
         return doses[1]
 
-    assert fomite_dose(50.0, 10.0) == pytest.approx(
-        fomite_dose(100.0, 20.0),
+    assert fomite_dose(1, 10.0) == pytest.approx(
+        fomite_dose(2, 10.0),
+    )
+    assert fomite_dose(1, 10.0, 8.0) == pytest.approx(
+        fomite_dose(1, 20.0, 16.0),
     )
     assert food_dose(1, 10.0) == pytest.approx(food_dose(2, 20.0))
 

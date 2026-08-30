@@ -530,7 +530,23 @@
         "dose_adjustment": {
           "type": "number",
           "minimum": 0,
-          "description": "Log10 shedding offset: shedding = 10^(curve[days_since_onset] - dose_adjustment) * shedding_multiplier. Campaigns calibrate infectivity via pathogen_overrides; not a dose-response α/β scaler."
+          "description": "Deprecated compatibility alias for environmental_faecal_release_log10_g_per_epoch."
+        },
+        "hand_inactivation_rate_per_hour": {
+          "type": ["number", "array"],
+          "description": "Optional hand-skin inactivation rate in h^-1, or [low, high] Uniform bounds."
+        },
+        "hand_hygiene_efficacy_log10_reduction": {
+          "type": "array",
+          "items": {"type": "number"},
+          "minItems": 2,
+          "maxItems": 4,
+          "description": "Optional [mean, SD] or [mean, SD, low, high] truncated log10 hand-hygiene reduction."
+        },
+        "hand_hygiene_rate_per_hour": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Hand-hygiene event rate; defaults to zero because no event model is currently fitted."
         },
         "shedding_variance_log10": {
           "type": "number",
@@ -715,6 +731,13 @@
               }
             }
           }
+        }
+      },
+      "patternProperties": {
+        "^environmental_faecal_release_log10_g_per_epoch$": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Preferred physical key: -log10 grams of stool released to the environment per epoch."
         }
       },
       "allOf": [

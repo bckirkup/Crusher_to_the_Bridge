@@ -84,11 +84,32 @@ DROPLET_AEROSOL_FRACTION = 0.05
 # ICRP-style adult daily inhaled air volume, converted through SimClock.
 BREATHING_RATE_M3_PER_DAY = 14.4
 
-# Fraction of surface fomite mass picked up by a touching agent per visit
+# Hand-transfer distributions and contact frequencies from the authored
+# fomite rederivation specification.
+HAND_AREA_CM2_RANGE = (445.0, 535.0)
+SURFACE_CONTACT_FRACTION_RANGE = (0.008, 0.25)
+MOUTH_CONTACT_FRACTION_RANGE = (0.008, 0.012)
+SURFACE_TO_HAND_LOGNORMAL = (-2.1, 1.4)
+HAND_TO_MOUTH_NORMAL = (0.339, 0.132)
+HAND_INACTIVATION_RATE_PER_HOUR_RANGE = (0.61, 1.7)
+HAND_HYGIENE_EFFICACY_LOG10 = (1.06, 0.54, 0.0, 1.89)
+HAND_HYGIENE_RATE_PER_HOUR_DEFAULT = 0.0
+NON_EATING_MOUTH_CONTACTS_PER_HOUR = (2.9, 2.5)
+EATING_MOUTH_CONTACTS_PER_HOUR = (7.7, 4.1)
+PUBLIC_SURFACE_CONTACTS_PER_HOUR = 6.0
+CABIN_SURFACE_CONTACTS_PER_HOUR = 2.0
+HIGH_TOUCH_AREA_M2 = {
+    "cabin": 1.5,
+    "dining": 8.0,
+    "public": 6.0,
+    "galley": 10.0,
+    "crew_mess": 4.0,
+}
+# Deprecated names retained for import compatibility. The measured hand
+# transfer chain above no longer uses these lumped factors.
 FOMITE_PICKUP_PROBABILITY = 0.10
 FOMITE_TRANSFER_FRACTION = 0.01
 DECK_HEIGHT_M = 2.5
-# AuYeung et al. 2008 QMRA convention: fingerpad contact area per touch.
 FOMITE_CONTACT_AREA_M2 = 2e-4
 
 # Default surface decay rate, authored as a per-day fractional loss.
@@ -441,6 +462,8 @@ class TransmissionCore:
         # Previous epoch's zone shedders per pathogen
         self._prev_zone_shedders: dict[str, list[int]] = {}
         self._prev_zone_shedders_by_pathogen: dict[str, dict[str, list[int]]] = {}
+        # Per-epoch route cache, initialized before any direct helper call.
+        self._last_pathogen_route_doses: dict[str, dict[int, dict[str, float]]] = {}
 
         self._init_strain_tracking(cfg, strain_registry)
 
@@ -2180,29 +2203,169 @@ class TransmissionCore:
 
     # ── Pathway 4: Fomite Deposition & Surface Touch ─────────────────
 
+    def _fomite_zone_class(self, zone_name: str) -> str:
+        """Map an existing ship zone classification to the fomite table."""
+        zone_type = self.zone_types.get(zone_name, "")
+        lowered = zone_name.lower()
+        if "galley" in lowered or "service" in lowered:
+            return "galley"
+        if "crew" in lowered and ("mess" in lowered or "berth" in lowered):
+            return "crew_mess"
+        if zone_type == "Cabin_Corridor" or zone_type == "Room":
+            return "cabin"
+        if zone_type == "Dining":
+            return "dining"
+        return "public"
+
+    def _fomite_surface_area(self, zone_name: str) -> float:
+        return HIGH_TOUCH_AREA_M2[self._fomite_zone_class(zone_name)]
+
+    def _fomite_surface_contacts(self, zone_name: str) -> float:
+        hourly = (
+            CABIN_SURFACE_CONTACTS_PER_HOUR
+            if self._fomite_zone_class(zone_name) == "cabin"
+            else PUBLIC_SURFACE_CONTACTS_PER_HOUR
+        )
+        return hourly * self.clock.hours_per_epoch
+
+    def _fomite_is_eating(self, target: KorkinAgent, epoch: int) -> bool:
+        if not target.schedule:
+            return False
+        hour = self.clock.hour_of_day(epoch)
+        activity = target.schedule[hour % len(target.schedule)]
+        return str(activity).startswith("Meal")
+
+    def _fomite_mouth_contacts(
+        self,
+        target: KorkinAgent,
+        epoch: int,
+    ) -> float:
+        mean, sd = (
+            EATING_MOUTH_CONTACTS_PER_HOUR
+            if self._fomite_is_eating(target, epoch)
+            else NON_EATING_MOUTH_CONTACTS_PER_HOUR
+        )
+        return max(
+            0.0,
+            float(self.rng.normal(mean, sd))
+            * self.clock.hours_per_epoch,
+        )
+
     def _fomite_pickup_request(
         self,
         target: KorkinAgent,
         zone_name: str,
         surface_mass: float,
     ) -> float:
-        """Mass one target would touch up from a start-of-epoch surface pool."""
+        """Mass one target transfers from surface to hands."""
         if self._cabin_confinement_active(target):
             return 0.0
-        if self.rng.random() > FOMITE_PICKUP_PROBABILITY:
-            return 0.0
-
-        zone_volume_m3 = max(self.zone_volumes.get(zone_name, 100.0), 0.0)
-        zone_touchable_area_m2 = zone_volume_m3 / DECK_HEIGHT_M
-        if zone_touchable_area_m2 <= 0.0:
-            return 0.0
-        return min(
-            surface_mass,
-            surface_mass
-            / zone_touchable_area_m2
-            * FOMITE_CONTACT_AREA_M2
-            * FOMITE_TRANSFER_FRACTION,
+        hand_area = self.rng.uniform(*HAND_AREA_CM2_RANGE) / 1.0e4
+        used_fraction = self.rng.uniform(*SURFACE_CONTACT_FRACTION_RANGE)
+        transfer_efficiency = min(
+            1.0,
+            max(0.0, float(self.rng.lognormal(*SURFACE_TO_HAND_LOGNORMAL))),
         )
+        area = self._fomite_surface_area(zone_name)
+        request = (
+            self._fomite_surface_contacts(zone_name)
+            * (used_fraction * hand_area / area)
+            * transfer_efficiency
+            * surface_mass
+        )
+        return min(surface_mass, max(0.0, request))
+
+    def _hand_inactivation_rate(
+        self,
+        agent: KorkinAgent,
+        pathogen_id: str,
+        profile: dict | None,
+    ) -> float:
+        existing = agent.hand_inactivation_rate_by_pathogen.get(pathogen_id)
+        if existing is not None:
+            return existing
+        configured = (profile or {}).get("hand_inactivation_rate_per_hour")
+        if isinstance(configured, (list, tuple)) and len(configured) >= 2:
+            rate = float(self.rng.uniform(float(configured[0]), float(configured[1])))
+        elif configured is None:
+            rate = float(self.rng.uniform(*HAND_INACTIVATION_RATE_PER_HOUR_RANGE))
+        else:
+            rate = float(configured)
+        agent.hand_inactivation_rate_by_pathogen[pathogen_id] = max(rate, 0.0)
+        return agent.hand_inactivation_rate_by_pathogen[pathogen_id]
+
+    def _hand_hygiene_efficacy(self, profile: dict | None) -> float:
+        configured = (profile or {}).get(
+            "hand_hygiene_efficacy_log10_reduction",
+        )
+        if isinstance(configured, (list, tuple)) and len(configured) >= 4:
+            mean, sd, low, high = map(float, configured[:4])
+        elif isinstance(configured, (list, tuple)) and len(configured) >= 2:
+            mean, sd = map(float, configured[:2])
+            low, high = 0.0, 1.89
+        else:
+            mean, sd, low, high = HAND_HYGIENE_EFFICACY_LOG10
+        return float(np.clip(self.rng.normal(mean, sd), low, high))
+
+    def _replenish_hand(
+        self,
+        agent: KorkinAgent,
+        pathogen_id: str,
+        profile: dict | None,
+    ) -> None:
+        target = agent.get_pathogen_hand_target(pathogen_id, profile or {})
+        if target <= 0.0:
+            return
+        rate = self._hand_inactivation_rate(agent, pathogen_id, profile)
+        agent.hand_load_by_pathogen[pathogen_id] = (
+            agent.hand_load_by_pathogen.get(pathogen_id, 0.0)
+            + target * rate * self.clock.hours_per_epoch
+        )
+
+    def _decay_hand_load(
+        self,
+        agent: KorkinAgent,
+        pathogen_id: str,
+        profile: dict | None,
+    ) -> None:
+        hand = agent.hand_load_by_pathogen.get(pathogen_id, 0.0)
+        if hand <= 0.0:
+            return
+        rate = self._hand_inactivation_rate(agent, pathogen_id, profile)
+        hand *= math.exp(-rate * self.clock.hours_per_epoch)
+        hygiene_rate = float((profile or {}).get(
+            "hand_hygiene_rate_per_hour",
+            HAND_HYGIENE_RATE_PER_HOUR_DEFAULT,
+        ))
+        event_probability = 1.0 - math.exp(
+            -max(hygiene_rate, 0.0) * self.clock.hours_per_epoch,
+        )
+        if event_probability > 0.0 and self.rng.random() < event_probability:
+            hand *= math.pow(10.0, -self._hand_hygiene_efficacy(profile))
+        agent.hand_load_by_pathogen[pathogen_id] = max(hand, 0.0)
+
+    def _hand_to_mouth_dose(
+        self,
+        target: KorkinAgent,
+        epoch: int,
+        hand_load: float,
+    ) -> float:
+        if hand_load <= 0.0:
+            return 0.0
+        hand_area = self.rng.uniform(*HAND_AREA_CM2_RANGE) / 1.0e4
+        used_fraction = self.rng.uniform(*MOUTH_CONTACT_FRACTION_RANGE)
+        transfer_efficiency = float(np.clip(
+            self.rng.normal(*HAND_TO_MOUTH_NORMAL), 0.0, 1.0,
+        ))
+        dose = (
+            self._fomite_mouth_contacts(target, epoch)
+            * used_fraction
+            * hand_area
+            * transfer_efficiency
+            * hand_load
+            / hand_area
+        )
+        return min(hand_load, max(0.0, dose))
 
     @staticmethod
     def _delivery_scale(requested_total: float, pool_mass: float) -> float:
@@ -2224,6 +2387,7 @@ class TransmissionCore:
         zone_name: str,
         surface_mass: float,
         delivered: float,
+        dose: float,
         prev_occupant_ids: set[int],
         prev_shedders: list[int],
         agent_doses: dict[int, float],
@@ -2232,8 +2396,8 @@ class TransmissionCore:
         pathogen_id: str,
         surface_attribution: DoseAttribution | None = None,
     ) -> None:
-        dose = self._accumulate(
-            target.agent_id, "fomite", delivered,
+        credited_dose = self._accumulate(
+            target.agent_id, "fomite", dose,
             agent_doses, agent_pathway_doses, surface_attribution,
         )
 
@@ -2247,7 +2411,7 @@ class TransmissionCore:
             "zone": zone_name,
             "pathogen_id": pathogen_id,
             "surface_mass": round(surface_mass, 4),
-            "dose": round(dose, 4),
+            "dose": round(credited_dose, 4),
             "is_trailing": is_trailing,
             "prev_shedder_ids": prev_shedders if is_trailing else [],
         })
@@ -2275,6 +2439,107 @@ class TransmissionCore:
             ReservoirComposition.key(SURFACE_RESERVOIR, pathogen_id, zone_name),
         )
 
+    def _pathway_fomite_legacy_default(
+        self,
+        epoch: int,
+        zone_occupants: dict[str, list[KorkinAgent]],
+        agent_doses: dict[int, float],
+        matrix: ContactTracingMatrix,
+        agent_pathway_doses: dict[int, dict[str, float]] | None,
+        pathogen_id: str,
+        ledger: StrainDoseLedger | None,
+    ) -> None:
+        """Preserve the unprofiled legacy harness fomite semantics."""
+        for zone_name, occupants in zone_occupants.items():
+            shedders = self._get_shedders(occupants, pathogen_id, None)
+            deposits: list[tuple[KorkinAgent, float]] = []
+            for agent, shedding in shedders:
+                if self._cabin_confinement_active(agent):
+                    continue
+                deposit = shedding * SURFACE_DEPOSITION_FRACTION
+                deposits.append((agent, deposit))
+                self.surface_pools[zone_name] = (
+                    self.surface_pools.get(zone_name, 0.0) + deposit
+                )
+                self.surface_pools_by_pathogen.setdefault(
+                    pathogen_id, {},
+                )[zone_name] = (
+                    self.surface_pools_by_pathogen.get(pathogen_id, {}).get(
+                        zone_name, 0.0,
+                    )
+                    + deposit
+                )
+            self._deposit_reservoir_strains(
+                SURFACE_RESERVOIR, pathogen_id, zone_name, deposits,
+            )
+            if self.strain_registry is not None and deposits:
+                key = ReservoirComposition.key(
+                    SURFACE_RESERVOIR, pathogen_id, zone_name,
+                )
+                self._surface_last_deposition_epoch[key] = int(epoch)
+
+        for zone_name, occupants in zone_occupants.items():
+            surface_mass = self.surface_pools_by_pathogen.get(
+                pathogen_id, {},
+            ).get(zone_name, self.surface_pools.get(zone_name, 0.0))
+            if surface_mass <= 0.0:
+                continue
+            susceptible = self._get_susceptible(occupants, pathogen_id)
+            if not susceptible:
+                continue
+            prev_shedders = self._prev_zone_shedders.get(zone_name, [])
+            prev_occupants = self._prev_zone_occupants.get(zone_name, set())
+            surface_attribution = attribution(
+                ledger,
+                self._reservoir_mix(SURFACE_RESERVOIR, pathogen_id, zone_name),
+            )
+            requests = [
+                (
+                    target,
+                    self._legacy_fomite_pickup_request(
+                        target, zone_name, surface_mass,
+                    ),
+                )
+                for target in susceptible
+            ]
+            scale = self._delivery_scale(
+                sum(mass for _, mass in requests), surface_mass,
+            )
+            delivered_total = 0.0
+            for target, requested in requests:
+                delivered = requested * scale
+                if delivered <= 0.0:
+                    continue
+                self._record_fomite_pickup(
+                    target, zone_name, surface_mass, delivered, delivered,
+                    prev_occupants, prev_shedders, agent_doses, matrix,
+                    agent_pathway_doses, pathogen_id, surface_attribution,
+                )
+                delivered_total += delivered
+            self._consume_surface_mass(
+                pathogen_id, zone_name, delivered_total, surface_mass,
+            )
+
+    def _legacy_fomite_pickup_request(
+        self,
+        target: KorkinAgent,
+        zone_name: str,
+        surface_mass: float,
+    ) -> float:
+        if self._cabin_confinement_active(target):
+            return 0.0
+        if self.rng.random() > FOMITE_PICKUP_PROBABILITY:
+            return 0.0
+        area = max(self.zone_volumes.get(zone_name, 100.0), 0.0)
+        area /= DECK_HEIGHT_M
+        if area <= 0.0:
+            return 0.0
+        return min(
+            surface_mass,
+            surface_mass / area * FOMITE_CONTACT_AREA_M2
+            * FOMITE_TRANSFER_FRACTION,
+        )
+
     def _pathway_fomite(
         self,
         epoch: int,
@@ -2288,18 +2553,34 @@ class TransmissionCore:
         ledger: StrainDoseLedger | None = None,
     ) -> None:
         """Surface contamination from shedders; stochastic pickup by later visitors."""
-        dep_frac = SURFACE_DEPOSITION_FRACTION
-        if profile:
-            dep_frac = profile.get("surface_deposition_fraction", dep_frac)
-
+        if pathogen_id == "_default" and not self.pathogen_profiles:
+            self._pathway_fomite_legacy_default(
+                epoch, zone_occupants, agent_doses, matrix,
+                agent_pathway_doses, pathogen_id, ledger,
+            )
+            return
         # a) Deposit new fomite mass from current shedders (not confined to cabin)
         for zone_name, occupants in zone_occupants.items():
             shedders = self._get_shedders(occupants, pathogen_id, profile)
             deposits: list[tuple[KorkinAgent, float]] = []
-            for agent, sv in shedders:
+            for agent, _sv in shedders:
                 if self._cabin_confinement_active(agent):
                     continue
-                deposit = sv * dep_frac
+                self._replenish_hand(agent, pathogen_id, profile)
+                hand = agent.hand_load_by_pathogen.get(pathogen_id, 0.0)
+                used_fraction = self.rng.uniform(*SURFACE_CONTACT_FRACTION_RANGE)
+                transfer_efficiency = min(
+                    1.0,
+                    max(0.0, float(self.rng.lognormal(*SURFACE_TO_HAND_LOGNORMAL))),
+                )
+                requested = (
+                    self._fomite_surface_contacts(zone_name)
+                    * used_fraction
+                    * transfer_efficiency
+                    * hand
+                )
+                deposit = min(hand, max(0.0, requested))
+                agent.hand_load_by_pathogen[pathogen_id] = hand - deposit
                 deposits.append((agent, deposit))
                 self.surface_pools[zone_name] = (
                     self.surface_pools.get(zone_name, 0.0) + deposit
@@ -2363,8 +2644,14 @@ class TransmissionCore:
                 delivered = requested * scale
                 if delivered <= 0.0:
                     continue
+                hand = target.hand_load_by_pathogen.get(pathogen_id, 0.0)
+                target.hand_load_by_pathogen[pathogen_id] = hand + delivered
+                dose = self._hand_to_mouth_dose(target, epoch, hand + delivered)
+                target.hand_load_by_pathogen[pathogen_id] = (
+                    hand + delivered - dose
+                )
                 self._record_fomite_pickup(
-                    target, zone_name, surface_mass, delivered,
+                    target, zone_name, surface_mass, delivered, dose,
                     prev_occupant_ids, prev_shedders,
                     agent_doses, matrix, agent_pathway_doses, pathogen_id,
                     surface_attribution,
@@ -2373,6 +2660,10 @@ class TransmissionCore:
             self._consume_surface_mass(
                 pathogen_id, zone_name, delivered_total, surface_mass,
             )
+
+        for occupants in zone_occupants.values():
+            for agent in occupants:
+                self._decay_hand_load(agent, pathogen_id, profile)
 
     # ── Pathway 5: Food Contamination ────────────────────────────────
 
