@@ -206,6 +206,11 @@ def test_replenishment_is_invariant_to_one_hour_or_half_hour_epochs() -> None:
         second.hand_load_by_pathogen[PATHOGEN],
         rel=1e-9,
     )
+    target = first.get_pathogen_hand_target(PATHOGEN, profile)
+    assert first.hand_load_by_pathogen[PATHOGEN] == pytest.approx(
+        target,
+        rel=0.02,
+    )
 
 
 def test_empty_fomite_step_is_a_no_op() -> None:
