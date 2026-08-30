@@ -353,6 +353,8 @@ class KorkinAgent:
         "dose_response_susceptibility", "cumulative_exposure",
         "cumulative_exposure_by_route",
         "hand_load_by_pathogen", "hand_inactivation_rate_by_pathogen",
+        "emesis_episode_schedule_by_pathogen",
+        "emesis_deposition_records_by_pathogen",
         "microflora_disruption_status",
         # Chronic disease extensions
         "chronic_disease_ids", "chronic_pathogen_mods",
@@ -419,6 +421,11 @@ class KorkinAgent:
         self.hand_load_by_pathogen: dict[str, float] = {}
         # Per-host/pathogen hand inactivation draws, sampled lazily.
         self.hand_inactivation_rate_by_pathogen: dict[str, float] = {}
+        # Elapsed days since onset, drawn once for each symptomatic illness.
+        self.emesis_episode_schedule_by_pathogen: dict[str, list[float]] = {}
+        self.emesis_deposition_records_by_pathogen: dict[
+            str, list[dict[str, Any]]
+        ] = {}
 
         # Microflora disruption scalar [0.0 = healthy, 1.0 = fully disrupted]
         self.microflora_disruption_status: float = 0.0
@@ -660,6 +667,8 @@ class KorkinAgent:
         """
         if time_infected < 0:
             raise ValueError(f"time_infected must be non-negative, got {time_infected}")
+        self.emesis_episode_schedule_by_pathogen.pop(pathogen_id, None)
+        self.emesis_deposition_records_by_pathogen.pop(pathogen_id, None)
         shedding_mult = (
             draw_shedding_multiplier(rng, profile or {})
             if rng is not None

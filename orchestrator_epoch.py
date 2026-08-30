@@ -36,7 +36,7 @@ from engines.infection_dynamics_bridge import (
 from engines.sim_clock import SimClock, config_epochs_for_hours
 from engines.sim_clock import crossed_day_boundary as _crossed_day_boundary
 from engines.strain_state import ImmuneRecord, StrainRegistry
-from engines.transmission_core import TransmissionCore
+from engines.transmission_core import EMESIS_EPISODES_RANGE, TransmissionCore
 from engines.wearable_monitor import WearableMonitor
 from orchestrator_types import (
     DEFAULT_AIRBORNE_FRACTION,
@@ -414,6 +414,7 @@ def _draw_symptom_onset(
     prof: dict[str, Any],
     rng: np.random.Generator,
     epoch: int = 0,
+    emesis_rng: np.random.Generator | None = None,
 ) -> None:
     """One dose-conditioned illness draw for a host past its incubation period."""
     ill_params = prof.get("illness_probability", {})
@@ -425,12 +426,50 @@ def _draw_symptom_onset(
     if rng.random() < ill_prob:
         inf["illness"] = IllnessStatus.SYMPTOMATIC
         inf["onset_time_infected"] = inf.get("time_infected", 0)
+        _draw_emesis_schedule(
+            agent, pid, prof, emesis_rng if emesis_rng is not None else rng,
+        )
         if inf.get("symptom_severity") in (None, "", "asymptomatic"):
             inf["symptom_severity"] = _draw_symptom_severity(prof, rng)
         if agent.illness_status == IllnessStatus.NOT_ILL:
             agent.illness_status = IllnessStatus.SYMPTOMATIC
     else:
         inf["symptom_severity"] = "asymptomatic"
+
+
+def _draw_emesis_schedule(
+    agent: Any,
+    pathogen_id: str,
+    profile: dict[str, Any],
+    rng: np.random.Generator,
+) -> None:
+    """Draw onset-relative emesis times once for a symptomatic illness."""
+    if not hasattr(agent, "emesis_episode_schedule_by_pathogen"):
+        return
+    phases = profile.get("clinical_presentation", {}).get("phases", [])
+    emetic_phases = [
+        phase for phase in phases if "vomiting" in phase.get("features", [])
+    ]
+    if not emetic_phases:
+        agent.emesis_episode_schedule_by_pathogen[pathogen_id] = []
+        return
+    bounds = [
+        (
+            float(phase.get("dpi_min", 0)),
+            float(phase["dpi_max"]) + 1.0
+            if phase.get("dpi_max") is not None
+            else float(profile.get("recovery_day", 3)),
+        )
+        for phase in emetic_phases
+    ]
+    window_start = min(start for start, _ in bounds)
+    window_end = max(end for _, end in bounds)
+    low, high = profile.get("emesis_episodes_range", EMESIS_EPISODES_RANGE)
+    count = int(rng.integers(int(low), int(high) + 1))
+    schedule = rng.uniform(window_start, window_end, count)
+    agent.emesis_episode_schedule_by_pathogen[pathogen_id] = sorted(
+        float(age) for age in schedule
+    )
 
 
 def _draw_symptom_severity(
@@ -455,6 +494,7 @@ def _advance_agent_pathogen_infections(
     rng: np.random.Generator,
     strain_registry: StrainRegistry | None = None,
     epoch: int = 0,
+    emesis_rng: np.random.Generator | None = None,
 ) -> None:
     clock = agent.clock
     for pid, inf in tuple(agent.infections.items()):
@@ -477,7 +517,9 @@ def _advance_agent_pathogen_infections(
             # of presenting does not depend on how finely time is cut — and the
             # first chance is the epoch that crosses this host's own drawn
             # incubation period, so onset is not rounded up to a whole day.
-            _draw_symptom_onset(agent, pid, inf, prof, rng, epoch)
+            _draw_symptom_onset(
+                agent, pid, inf, prof, rng, epoch, emesis_rng,
+            )
 
         recovery_day = agent.get_chronic_recovery_day(
             pid, prof.get("recovery_day", 3),
@@ -498,6 +540,8 @@ def _advance_agent_pathogen_infections(
             agent.cumulative_exposure.pop(pid, None)
             agent.cumulative_exposure_by_route.pop(pid, None)
             agent.hand_load_by_pathogen.pop(pid, None)
+            agent.emesis_episode_schedule_by_pathogen.pop(pid, None)
+            agent.emesis_deposition_records_by_pathogen.pop(pid, None)
 
 
 def _project_legacy_illness(agent: Any) -> None:
@@ -551,7 +595,12 @@ def step_infection_progression(
 
     for agent in engine.agents:
         _advance_agent_pathogen_infections(
-            agent, pathogen_profiles, engine.rng, strain_registry, epoch,
+            agent,
+            pathogen_profiles,
+            engine.rng,
+            strain_registry,
+            epoch,
+            confinement_core.rng if confinement_core is not None else None,
         )
 
         _project_legacy_illness(agent)

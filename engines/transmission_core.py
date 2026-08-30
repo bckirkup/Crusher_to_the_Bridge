@@ -44,11 +44,13 @@ from typing import Any
 
 import numpy as np
 
+from crusher_labs.clinical_presentation import resolve_phase
 from engines.infection_dynamics_bridge import (
     ALPHA,
     BETA,
     DEFAULT_AIRBORNE_HALF_LIFE_HOURS,
     SURFACE_DEPOSITION_FRACTION,
+    IllnessStatus,
     InfectionStatus,
     KorkinAgent,
 )
@@ -105,6 +107,20 @@ HIGH_TOUCH_AREA_M2 = {
     "galley": 10.0,
     "crew_mess": 4.0,
 }
+# GII mean titre from Kirby et al. 2016; measured, evidence grade B.
+EMESIS_TITRE_GEC_PER_ML = 3.9e4
+# Vomitus volume from Tung-Thompson et al. 2015 and Booth & Frost 2019;
+# measured range, evidence grade B.
+EMESIS_VOLUME_ML_RANGE = (50.0, 800.0)
+# Illness episode count inferred from measured episode/illness quantities;
+# evidence grade C.
+EMESIS_EPISODES_RANGE = (1, 3)
+# Aerosol fraction from Tung-Thompson et al. 2015 surrogate measurements;
+# evidence grade B.
+EMESIS_AEROSOL_FRACTION_RANGE = (7.2e-7, 2.67e-4)
+# Forward/lateral deposition footprint from Booth 2014 and Booth & Frost 2019;
+# measured geometry, evidence grade B.
+EMESIS_DEPOSITION_AREA_M2 = 7.8
 # Deprecated names retained for import compatibility. The measured hand
 # transfer chain above no longer uses these lumped factors.
 FOMITE_PICKUP_PROBABILITY = 0.10
@@ -2366,6 +2382,171 @@ class TransmissionCore:
             hand *= math.pow(10.0, -self._hand_hygiene_efficacy(profile))
         agent.hand_load_by_pathogen[pathogen_id] = max(hand, 0.0)
 
+    @staticmethod
+    def _emesis_range(
+        profile: dict | None,
+        key: str,
+        default: tuple[float, float],
+    ) -> tuple[float, float]:
+        value = (profile or {}).get(key)
+        if isinstance(value, (list, tuple)) and len(value) >= 2:
+            low, high = float(value[0]), float(value[1])
+            if low > 0.0 and high >= low:
+                return low, high
+        return default
+
+    def _emesis_phase(
+        self,
+        agent: KorkinAgent,
+        pathogen_id: str,
+        profile: dict,
+    ) -> tuple[dict, float] | None:
+        inf = agent.infections.get(pathogen_id)
+        if (
+            inf is None
+            or inf.get("status") != InfectionStatus.INFECTED
+            or inf.get("illness") != IllnessStatus.SYMPTOMATIC
+        ):
+            return None
+        age, _ = KorkinAgent._shedding_age(
+            int(inf.get("time_infected") or 0), inf, profile, agent.clock,
+        )
+        if age < 0.0:
+            return None
+        phase = resolve_phase(
+            profile.get("clinical_presentation", {}),
+            math.floor(age),
+        )
+        if phase is None or "vomiting" not in phase.get("features", []):
+            return None
+        return phase, age
+
+    def _ensure_emesis_schedule(
+        self,
+        agent: KorkinAgent,
+        pathogen_id: str,
+        profile: dict,
+        phase: dict,
+    ) -> None:
+        if pathogen_id in agent.emesis_episode_schedule_by_pathogen:
+            return
+        episode_low, episode_high = self._emesis_range(
+            profile, "emesis_episodes_range", EMESIS_EPISODES_RANGE,
+        )
+        count = int(self.rng.integers(
+            math.ceil(episode_low), math.floor(episode_high) + 1,
+        ))
+        window_start = float(phase.get("dpi_min", 0))
+        dpi_max = phase.get("dpi_max")
+        window_end = (
+            float(dpi_max) + 1.0 if dpi_max is not None
+            else window_start + float(profile.get("recovery_day", 3))
+        )
+        agent.emesis_episode_schedule_by_pathogen[pathogen_id] = sorted(
+            float(value)
+            for value in self.rng.uniform(window_start, window_end, count)
+        )
+
+    def _emit_emesis(
+        self,
+        agent: KorkinAgent,
+        pathogen_id: str,
+        profile: dict,
+        zone_name: str,
+        epoch: int,
+    ) -> float:
+        eligible = self._emesis_phase(agent, pathogen_id, profile)
+        if eligible is None:
+            return 0.0
+        phase, age = eligible
+        self._ensure_emesis_schedule(agent, pathogen_id, profile, phase)
+        schedule = agent.emesis_episode_schedule_by_pathogen[pathogen_id]
+        due = [event_age for event_age in schedule if event_age <= age]
+        if not due:
+            return 0.0
+        agent.emesis_episode_schedule_by_pathogen[pathogen_id] = [
+            event_age for event_age in schedule if event_age > age
+        ]
+        volume_low, volume_high = self._emesis_range(
+            profile, "emesis_volume_ml_range", EMESIS_VOLUME_ML_RANGE,
+        )
+        aerosol_low, aerosol_high = self._emesis_range(
+            profile,
+            "emesis_aerosol_fraction_range",
+            EMESIS_AEROSOL_FRACTION_RANGE,
+        )
+        titre = float(profile.get(
+            "emesis_titre_gec_per_ml", EMESIS_TITRE_GEC_PER_ML,
+        ))
+        area = float(profile.get(
+            "emesis_deposition_area_m2", EMESIS_DEPOSITION_AREA_M2,
+        ))
+        touchable_fraction = min(
+            1.0, self._fomite_surface_area(zone_name) / area,
+        )
+        records = agent.emesis_deposition_records_by_pathogen.setdefault(
+            pathogen_id, [],
+        )
+        pool_gain_total = 0.0
+        for _ in due:
+            volume = math.exp(self.rng.uniform(
+                math.log(volume_low), math.log(volume_high),
+            ))
+            episode_load = volume * titre
+            aerosol_fraction = math.exp(self.rng.uniform(
+                math.log(aerosol_low), math.log(aerosol_high),
+            ))
+            surface_load = episode_load * (1.0 - aerosol_fraction)
+            aerosol_load = episode_load * aerosol_fraction
+            pool_gain = surface_load * touchable_fraction
+            records.append({
+                "epoch": int(epoch),
+                "zone": zone_name,
+                "volume_ml": volume,
+                "titre_gec_per_ml": titre,
+                "episode_load": episode_load,
+                "surface_load": surface_load,
+                "aerosol_load": aerosol_load,
+                "pool_gain": pool_gain,
+                "non_touchable": surface_load - pool_gain,
+                "touchable_fraction": touchable_fraction,
+            })
+            pool_gain_total += pool_gain
+        return pool_gain_total
+
+    def _deposit_emesis(
+        self,
+        agent: KorkinAgent,
+        pathogen_id: str,
+        zone_name: str,
+        epoch: int,
+        profile: dict,
+    ) -> float:
+        pool_gain = self._emit_emesis(
+            agent, pathogen_id, profile, zone_name, epoch,
+        )
+        if pool_gain <= 0.0:
+            return 0.0
+        self.surface_pools[zone_name] = (
+            self.surface_pools.get(zone_name, 0.0) + pool_gain
+        )
+        self.surface_pools_by_pathogen.setdefault(
+            pathogen_id, {},
+        )[zone_name] = (
+            self.surface_pools_by_pathogen.get(pathogen_id, {}).get(
+                zone_name, 0.0,
+            ) + pool_gain
+        )
+        self._deposit_reservoir_strains(
+            SURFACE_RESERVOIR, pathogen_id, zone_name, [(agent, pool_gain)],
+        )
+        if self.strain_registry is not None:
+            key = ReservoirComposition.key(
+                SURFACE_RESERVOIR, pathogen_id, zone_name,
+            )
+            self._surface_last_deposition_epoch[key] = int(epoch)
+        return pool_gain
+
     def _hand_to_mouth_dose(
         self,
         target: KorkinAgent,
@@ -2584,6 +2765,9 @@ class TransmissionCore:
         for zone_name, occupants in zone_occupants.items():
             for agent in occupants:
                 self._replenish_hand(agent, pathogen_id, profile)
+                self._deposit_emesis(
+                    agent, pathogen_id, zone_name, epoch, profile or {},
+                )
             shedders = self._get_shedders(occupants, pathogen_id, profile)
             deposits: list[tuple[KorkinAgent, float]] = []
             for agent, _sv in shedders:
