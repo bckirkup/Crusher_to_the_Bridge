@@ -152,14 +152,22 @@ class, which is precisely the asymmetry a passenger-facing intervention needs.
 That is ledger §4.1 and it blocks this.
 
 The pre/post configuration sets must come from what the industry actually
-changed and what the literature says those changes do — §3.7.2's table, and for
-norovirus specifically the fact that alcohol hand sanitizer is weak
-(~90% kill, m ≈ 0.1) while the enhanced-HVAC row is irrelevant to a
-faecal-oral pathogen. Reduced buffet service, sanitizer availability and
-passenger-facing cleaning intensity are the live ones. **The post-2020 set may
-not be chosen to produce A7c.** If the literature ranges cannot produce the
-observed difference, that is recorded as a failure of the model, and the ranges
-are not widened to fix it.
+changed and what the literature says those changes do. That audit is now its
+own document, `post_covid_configuration_sources.md`, and it revises two guesses
+made here. Alcohol hand rub is weak against norovirus, but the figure to use is
+the measured one — soap and water removes >3.0 log10 infectious MNV1 against
+2.8 for alcohol rub, and >5-6 log10 genomic copies against 1.2-3.3
+(Tuladhar 2015) — not the "~90% kill, m ≈ 0.1" previously written here, which
+had no source. And the enhanced-HVAC row is **not** irrelevant: norovirus has
+an aerosolised-vomitus route, the fleetwide MERV 8 → MERV 13 upgrade is
+specified and quantified (Healthy Sail Panel Rec. 31), and it acts on the
+mechanism behind large events rather than on the median voyage. The post-2020
+arm must also carry raised susceptibility (O'Reilly 2021, Lappe 2023), which
+pushes the opposite way; leaving it at the pre-2020 value would let the NPI
+configuration silently absorb it. **The post-2020 set may not be chosen to
+produce A7c.** If the literature ranges cannot produce the observed difference,
+that is recorded as a failure of the model, and the ranges are not widened to
+fix it.
 
 ## 6. What the estimator actually recovers
 
@@ -199,6 +207,21 @@ high-crew voyages into the sample. So if the measured A7b comes out above 1,
 that is not evidence crew fared worse post-COVID, and the ledger's "crew rates
 did not move" is not testable by reading A7b alone. Only A7c, or the model run
 through Rule 2's filter, can separate the two.
+
+**A whole class of intervention is invisible here, and A7c is a lower bound.**
+Conditioning on posting is what makes the estimator admissible (§3), and it
+costs exactly this: an intervention that stops an introduction from taking off
+prevents the posting rather than shrinking it, so it leaves no trace in any A7
+statistic. Its effect lands entirely in the annual posting count, the one
+series with no voyage denominator, which is why A7e stays descriptive. An
+intervention that halved the number of outbreaks while leaving the survivors'
+shape untouched scores A7c = 1.0 exactly. So a flat A7a is not evidence that
+NPIs did nothing, and A7c bounds the capping half of the effect only. Several
+of the best-documented post-2020 measures — pre-boarding screening, denial of
+boarding — are of precisely the invisible kind; see
+`post_covid_configuration_sources.md` §1. Recovering the takeoff channel needs
+a voyage denominator from outside VSP, which would be a separate anchor on
+outbreak incidence and is not part of this design.
 
 A fifth point, from the same synthetic voyages: the naive tail bootstrap
 degenerates to [0, 0] exactly as §4 describes, which is why A7d is scored by an

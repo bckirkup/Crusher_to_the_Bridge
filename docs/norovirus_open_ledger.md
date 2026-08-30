@@ -131,6 +131,21 @@ per-event log10 are separately configurable, and outbreak response is a
 distinct mechanism), but one schedule still applies to every zone class, so the
 passenger-facing asymmetry cannot yet be expressed.
 
+Two limits on the instrument, from
+`telemetry_buffer/observation_model/post_covid_configuration_sources.md`. Every
+A7 statistic is conditional on VSP posting, so an intervention that stops an
+introduction from taking off is *invisible* to all of them — it prevents the
+posting rather than shrinking it, and pre-boarding screening and denial of
+boarding are exactly that kind. A7c is therefore a lower bound on NPI effect,
+and a flat A7a is not evidence that NPIs did nothing. Second, the post-2020 arm
+carries two changes with opposite signs: the NPI change, and a susceptibility
+rise from two years of interrupted exposure (O'Reilly 2021, Lappe 2023, the
+latter projecting >2-fold community incidence at full contact resumption).
+Prior immunity must be set from those sources, or the NPI configuration
+silently absorbs the immunity effect. Also note the industry's own hand-hygiene
+push was alcohol-rub-centric, and alcohol rub is measurably weaker than soap
+against norovirus (Tuladhar 2015), so it is expected to be near-null here.
+
 The two caveats that blocked it are now handled by construction rather than by
 correction, per `vsp_covid_discontinuity_design.md`: score only statistics
 conditional on posting, so the missing voyage denominator never enters; and run
