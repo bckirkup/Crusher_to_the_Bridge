@@ -369,6 +369,37 @@ valid only against a dose-response referenced to the dose arriving at the
 epithelium, or as a *relative* modifier for hosts whose gastric pH differs from
 the challenge-study population.
 
+## 9d. The role asymmetry (A5) is blocked by the same route defect
+
+VSP puts passenger attack rates at 5.7-6.9% against crew 2.0-2.4%, a ratio near
+2.9 that holds on both sides of the COVID break. The model returns roughly
+parity, and it does so at the *illness* level (ever-ill ratios 0.94-1.15 at the
+fitted dose), not merely in reporting — so this is not an observation-layer
+defect. Nothing in the sick-call path reads role; the only role-aware
+surveillance is an optional crew screening pass that can only add crew reports.
+
+The cause is that 94-96% of establishing dose arrives by droplet, a per-zone
+aerosol pool that every occupant draws from on the same terms. The routes that
+carry role structure — who you touch, which mess you eat in, whose cabin you
+share — are the ones delivering nothing. Total fomite dose over a classic
+voyage is 0.13 particles against 7.0e7 for droplet, a factor of about 6e8, and
+the factor is arithmetic: a 1e-4 surface deposition fraction against droplet's
+0.05 at emission, then a pickup step that spreads surface mass over the zone's
+whole deck footprint (`zone_volume / 2.5`) and samples a 2e-4 m² fingerpad from
+it, at 0.1 touch events per epoch. Norovirus contaminates touched surfaces of
+order 1-10 m², not 400 m² of floor, and hand-to-surface contact is two to three
+orders more frequent than that; there is also no hand-to-mouth step at all.
+
+The model therefore behaves as a set of well-mixed rooms with a schedule
+decoration. That is sufficient for a hull-size gradient and an epidemic curve
+and insufficient for any role, venue or food-handler structure. Restoring the
+route magnitudes is necessary for A5, not shown to be sufficient: uniform
+`immune_ratio` across a resident crew and a weekly-turnover passenger cohort is
+itself an assumption, and crew presenteeism and mandatory occupational
+reporting are absent in both directions. The route constants must be fixed on
+physical grounds with sources, not fitted to 2.9. Detail:
+`telemetry_buffer/observation_model/a5_role_asymmetry_diagnosis.md`.
+
 ## 10. Parameters held fixed by assumption
 
 These are not identified by anything in the fit, and any of them could move the
@@ -404,12 +435,15 @@ over-determined *given* these.
 
 ## 12. Standing defect base rate
 
-Nine distinct unit, dimension, time-origin, sign or state-scoping defects were
+Ten distinct unit, dimension, time-origin, sign or state-scoping defects were
 found in this effort, the first eight by chasing an anomaly rather than by a
 check that would have caught it, and every campaign before v4 was invalidated by
 a defect discovered after it ran. The ninth (§9a) is the only one found by
 reading a specification against the code rather than by an anomaly, which is an
-argument for more of that and not evidence that the rest are gone. Guards now cover naked epochs, dose-pathway dimensions, reservoir
+argument for more of that and not evidence that the rest are gone. The tenth
+(§9d, the fomite and food pickup magnitudes) was found by asking why a
+role asymmetry could not appear, which is the same pattern: an anchor failure
+led to a defect nobody was looking for. Guards now cover naked epochs, dose-pathway dimensions, reservoir
 conservation, per-capita invariance to occupancy, cross-clock equivalence of
 per-day quantities and epoch-invariance of the dose-response. The audit is not exhausted, and the correct prior is that
 further defects exist. Absence of a further finding is not evidence of
