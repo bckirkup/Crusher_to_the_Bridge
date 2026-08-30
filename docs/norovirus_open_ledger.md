@@ -190,8 +190,16 @@ Roughly in dependency order.
    restrooms on cruise ships, not cabins. Applying it to cabins is an
    unsourced extension, not evidence of a cabin schedule. The shipped model
    retains its uniform default; the schedule sweep exposes this uncertainty
-   without fitting it to an anchor. Note that the premise has changed: crew
-   rates did *not* hold still across the break, they rose (A7b), so a
+   without fitting it to an anchor. Its hand-only gradient envelope is
+   8.6635–18.5054x, against 11.1977x for the shipped default: that is a
+   bound on schedule leverage (at most 1.6526x upward), not a test of Park
+   reachability, because the hand-transfer channel was already shown
+   unreachable at any occupancy. The Park comparison is instead made with
+   the emesis-inclusive calculation, swept over the separate, unmeasured
+   cabin-localization fraction f; at f=0.99, 78 of 81 schedule cells reach
+   Park's 100–300x range, and at f=1.00 all 81 do. f is not a schedule
+   parameter and no value is selected. Note that the premise has changed:
+   crew rates did *not* hold still across the break, they rose (A7b), so a
    configuration that leaves the crew arm untouched now contradicts the data
    rather than matching it.
 2. **Refit the common dose** against VSP class targets. The contact layer

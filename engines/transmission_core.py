@@ -512,6 +512,34 @@ def _parse_surface_cleaning_cfg(
         raise ValueError("surface_cleaning.routine must be a mapping")
     if not isinstance(outbreak, Mapping):
         raise ValueError("surface_cleaning.outbreak_response must be a mapping")
+    routine_coverage, routine_events, routine_log10_reduction = (
+        _parse_routine_cleaning_scalars(routine)
+    )
+    return {
+        "enabled": bool(cleaning.get("enabled", True)),
+        "routine_coverage": routine_coverage,
+        "routine_log10_reduction": routine_log10_reduction,
+        "routine_events_per_day": routine_events,
+        "routine_by_zone_class": _parse_routine_by_zone_class(
+            routine.get("by_zone_class", {}),
+            routine_coverage,
+            routine_events,
+        ),
+        "outbreak_coverage": float(
+            outbreak.get("coverage", OUTBREAK_CLEANING_COVERAGE),
+        ),
+        "outbreak_log10_reduction": float(
+            outbreak.get(
+                "log10_reduction", OUTBREAK_DISINFECTION_LOG10_REDUCTION,
+            ),
+        ),
+    }
+
+
+def _parse_routine_cleaning_scalars(
+    routine: Mapping[str, Any],
+) -> tuple[float, float, float]:
+    """Parse and validate global routine-cleaning values."""
     routine_coverage = float(
         routine.get("coverage", ROUTINE_CLEANING_COVERAGE),
     )
@@ -522,13 +550,30 @@ def _parse_surface_cleaning_cfg(
         raise ValueError("surface_cleaning.routine.coverage must be in [0,1]")
     if routine_events < 0.0:
         raise ValueError("surface_cleaning.routine.events_per_day must be >= 0")
-    by_zone_class_raw = routine.get("by_zone_class", {})
-    if by_zone_class_raw is None:
-        by_zone_class_raw = {}
-    if not isinstance(by_zone_class_raw, Mapping):
+    routine_log10_reduction = float(
+        routine.get(
+            "log10_reduction", ROUTINE_CLEANING_LOG10_REDUCTION,
+        ),
+    )
+    if routine_log10_reduction < 0.0:
+        raise ValueError(
+            "surface_cleaning.routine.log10_reduction must be >= 0",
+        )
+    return routine_coverage, routine_events, routine_log10_reduction
+
+
+def _parse_routine_by_zone_class(
+    raw: Any,
+    routine_coverage: float,
+    routine_events: float,
+) -> dict[str, dict[str, float]]:
+    """Parse optional per-zone routine-cleaning overrides."""
+    if raw is None:
+        raw = {}
+    if not isinstance(raw, Mapping):
         raise ValueError("surface_cleaning.routine.by_zone_class must be a mapping")
     by_zone_class: dict[str, dict[str, float]] = {}
-    for zone_class, values in by_zone_class_raw.items():
+    for zone_class, values in raw.items():
         if zone_class not in HIGH_TOUCH_AREA_M2:
             raise ValueError(
                 f"unknown surface-cleaning zone class: {zone_class}",
@@ -560,30 +605,7 @@ def _parse_surface_cleaning_cfg(
             "coverage": coverage,
             "events_per_day": events,
         }
-    routine_log10_reduction = float(
-        routine.get(
-            "log10_reduction", ROUTINE_CLEANING_LOG10_REDUCTION,
-        ),
-    )
-    if routine_log10_reduction < 0.0:
-        raise ValueError(
-            "surface_cleaning.routine.log10_reduction must be >= 0",
-        )
-    return {
-        "enabled": bool(cleaning.get("enabled", True)),
-        "routine_coverage": routine_coverage,
-        "routine_log10_reduction": routine_log10_reduction,
-        "routine_events_per_day": routine_events,
-        "routine_by_zone_class": by_zone_class,
-        "outbreak_coverage": float(
-            outbreak.get("coverage", OUTBREAK_CLEANING_COVERAGE),
-        ),
-        "outbreak_log10_reduction": float(
-            outbreak.get(
-                "log10_reduction", OUTBREAK_DISINFECTION_LOG10_REDUCTION,
-            ),
-        ),
-    }
+    return by_zone_class
 
 
 class TransmissionCore:
@@ -1234,6 +1256,19 @@ class TransmissionCore:
         reduction = max(0.0, float(log10_reduction))
         coverage = self._bounded_fraction(coverage)
         kill_multiplier = 10.0 ** -reduction
+        zone_names = {
+            zone_name
+            for pools in self.surface_pools_by_pathogen.values()
+            for zone_name in pools
+        }
+        disinfection_factors = {
+            zone_name: self._nested_disinfection_factors(
+                self._routine_cleaning_schedule(zone_name)[0],
+                coverage,
+                kill_multiplier,
+            )
+            for zone_name in zone_names
+        }
         for pathogen_id, pools in self.surface_pools_by_pathogen.items():
             for zone_name, value in list(pools.items()):
                 total = max(0.0, float(value))
@@ -1246,12 +1281,7 @@ class TransmissionCore:
                     total, max(0.0, float(cleanable.get(zone_name, 0.0))),
                 )
                 old_missed = total - old_cleanable
-                routine_coverage = self._routine_cleaning_schedule(zone_name)[0]
-                cleanable_factor, missed_factor = (
-                    self._nested_disinfection_factors(
-                        routine_coverage, coverage, kill_multiplier,
-                    )
-                )
+                cleanable_factor, missed_factor = disinfection_factors[zone_name]
                 retention = (
                     old_cleanable * cleanable_factor
                     + old_missed * missed_factor
@@ -2629,10 +2659,13 @@ class TransmissionCore:
         schedule = self.routine_cleaning_by_zone_class.get(zone_class)
         if schedule is None:
             return (
-                self.routine_cleaning_coverage,
+                self._bounded_fraction(self.routine_cleaning_coverage),
                 self.routine_cleaning_events_per_day,
             )
-        return schedule["coverage"], schedule["events_per_day"]
+        return (
+            self._bounded_fraction(schedule["coverage"]),
+            schedule["events_per_day"],
+        )
 
     def _fomite_surface_area(self, zone_name: str) -> float:
         return HIGH_TOUCH_AREA_M2[self._fomite_zone_class(zone_name)]

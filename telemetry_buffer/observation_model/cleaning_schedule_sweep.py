@@ -11,8 +11,10 @@ import math
 from pathlib import Path
 
 from telemetry_buffer.observation_model.park_surface_check import (
-    _expectations,
+    CABIN_LOCALIZATION_SWEEP,
     concentration_per_swab,
+    emesis_inclusive_surface_values,
+    expectations,
     routine_cleaning_multiplier,
     steady_state_pool,
     surface_loss_per_hour,
@@ -48,7 +50,7 @@ def grid_values(
 
 def sweep_cells() -> list[dict[str, float]]:
     """Evaluate the 3x3x3x3 cabin/public schedule grid."""
-    exp_ = _expectations()
+    exp_ = expectations()
     cabin_loss = surface_loss_per_hour("cabin", 1.0, exp_)
     public_loss = surface_loss_per_hour("public", 60.0, exp_)
     cabin_bare = concentration_per_swab(
@@ -98,9 +100,67 @@ def sweep_cells() -> list[dict[str, float]]:
     return cells
 
 
+def emesis_cells(
+    fraction: float,
+    cells: list[dict[str, float]] | None = None,
+) -> list[dict[str, float]]:
+    """Add emesis-inclusive copies and gradients for one localization value."""
+    if cells is None:
+        cells = sweep_cells()
+    exp_ = expectations()
+    results: list[dict[str, float]] = []
+    for cell in cells:
+        cabin_copies, public_copies, gradient = (
+            emesis_inclusive_surface_values(
+                fraction,
+                exp_,
+                {
+                    "sick passenger confined to cabin": cell[
+                        "cabin_copies_per_swab"
+                    ],
+                    "lounge, 60 shedder-hours/day": cell[
+                        "public_copies_per_swab"
+                    ],
+                },
+                cabin_cleaning_multiplier=cell["cabin_multiplier"],
+                public_cleaning_multiplier=cell["public_multiplier"],
+            )
+        )
+        results.append(
+            {
+                **cell,
+                "emesis_cabin_copies_per_swab": cabin_copies,
+                "emesis_public_copies_per_swab": public_copies,
+                "emesis_gradient": gradient,
+            },
+        )
+    return results
+
+
+def _uniform_emesis_values(
+    fraction: float,
+    exp_: dict[str, float],
+) -> tuple[float, float, float]:
+    cabin_loss = surface_loss_per_hour("cabin", 1.0, exp_)
+    public_loss = surface_loss_per_hour("public", 60.0, exp_)
+    hand_only = {
+        "sick passenger confined to cabin": concentration_per_swab(
+            steady_state_pool("cabin", 22.0, 1.0, exp_, cleaning=False),
+            "cabin",
+        ) * routine_cleaning_multiplier(cabin_loss),
+        "lounge, 60 shedder-hours/day": concentration_per_swab(
+            steady_state_pool(
+                "public", 60.0, 60.0, exp_, cleaning=False,
+            ),
+            "public",
+        ) * routine_cleaning_multiplier(public_loss),
+    }
+    return emesis_inclusive_surface_values(fraction, exp_, hand_only)
+
+
 def _render() -> str:
     cells = sweep_cells()
-    exp_ = _expectations()
+    exp_ = expectations()
     default_cabin_loss = surface_loss_per_hour("cabin", 1.0, exp_)
     default_public_loss = surface_loss_per_hour("public", 60.0, exp_)
     default_cabin = concentration_per_swab(
@@ -116,9 +176,7 @@ def _render() -> str:
         "public",
     ) * routine_cleaning_multiplier(default_public_loss)
     gradients = [cell["gradient"] for cell in cells]
-    in_park = [
-        gradient for gradient in gradients if 100.0 <= gradient <= 300.0
-    ]
+    default_gradient = default_cabin / default_public
     lines = [
         "Cleaning schedule sweep through the Park surface check",
         "=" * 68,
@@ -166,17 +224,51 @@ def _render() -> str:
     lines.extend(
         [
             "",
-            "Envelope over the sourced box:",
+            "Hand-only envelope over the sourced box:",
+            "  Park already shows this channel is unreachable at any "
+            "occupancy.",
             f"  minimum gradient: {min(gradients):.6g}x",
             f"  maximum gradient: {max(gradients):.6g}x",
-            f"  cells in Park's 100-300x range: {len(in_park)}",
+            f"  uniform shipped default gradient: {default_gradient:.6g}x",
             (
-                "  uniform shipped default gradient: "
-                f"{default_cabin / default_public:.6g}x"
+                "  maximum/default leverage: "
+                f"{max(gradients) / default_gradient:.6g}x upward"
+            ),
+            (
+                "  default shortfall from Park's 100x lower bound: "
+                f"{100.0 / default_gradient:.6g}x"
             ),
             "",
+            "Emesis-inclusive envelope by unmeasured cabin-localization f:",
+            "f is a separate behavioural axis, not part of the schedule grid.",
+            (
+                "       f | min gradient | max gradient | "
+                "cells in Park 100-300x | uniform default"
+            ),
+            "-" * 78,
+        ]
+    )
+    for fraction in CABIN_LOCALIZATION_SWEEP:
+        emesis = emesis_cells(fraction, cells)
+        emesis_gradients = [cell["emesis_gradient"] for cell in emesis]
+        _, _, default_emesis_gradient = _uniform_emesis_values(
+            fraction, exp_,
+        )
+        in_park = [
+            gradient
+            for gradient in emesis_gradients
+            if 100.0 <= gradient <= 300.0
+        ]
+        lines.append(
+            f"{fraction:>8.2f} | {min(emesis_gradients):>12.6g} | "
+            f"{max(emesis_gradients):>12.6g} | {len(in_park):>22} | "
+            f"{default_emesis_gradient:>15.6g}x"
+        )
+    lines.extend(
+        [
             "Rule 3: the best-fitting cell is not read back into the model.",
             "The sweep selects nothing; no cell becomes a parameter value.",
+            "The f-axis is also unmeasured and must not be read from Park.",
         ]
     )
     return "\n".join(lines) + "\n"

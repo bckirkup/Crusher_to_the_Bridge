@@ -767,8 +767,19 @@ readings and counted high-touch surfaces in hotel guestrooms than in public
 areas, independently supporting the sign of the cabin/public contamination
 gradient in a hospitality setting.
 
-The sweep reports the minimum and maximum gradient over the fixed cabin/public
-81-cell grid and leaves the uniform shipped default alongside it. Its result
-is an envelope, not a fit: no cell of the sweep may be read back into the model
-or adopted as a parameter value. A future measured per-zone-class schedule may
-narrow the bounds, but the no-selection rule remains.
+The sweep reports the minimum and maximum hand-only gradient over the fixed
+cabin/public 81-cell grid and leaves the uniform shipped default alongside it.
+That envelope is 8.6635–18.5054x versus 11.1977x for the default: it bounds
+schedule leverage at roughly 1.65x upward, rather than testing whether a
+schedule can reach Park, because Park already showed the hand-transfer channel
+unreachable at any occupancy. The Park comparison is made by adding the
+emesis term and evaluating the same 81 cells at the separate, unmeasured
+cabin-localization values f=0.50, 0.80, 0.95, 0.99, and 1.00. The
+emesis-inclusive gradient envelopes are respectively 3.01078–6.43105x,
+10.8563–23.1892x, 39.5985–84.583x, 94.0539–200.9x, and
+139.893–298.813x; 0, 0, 0, 78, and 81 cells respectively fall in Park's
+100–300x range. The uniform-default gradients at those f values are 3.89146x,
+14.0319x, 51.1815x, 121.566x, and 180.813x. Neither f nor any schedule cell
+may be read back into the model or adopted as a parameter value. A future
+measured per-zone-class schedule may narrow the bounds, but the no-selection
+rule remains.

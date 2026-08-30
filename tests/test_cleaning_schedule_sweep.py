@@ -140,6 +140,14 @@ def test_unknown_zone_class_is_rejected() -> None:
         _core(by_zone_class={"atrium": {"coverage": 0.4}})
 
 
+def test_schedule_resolution_clamps_mutable_coverage() -> None:
+    core = _core(by_zone_class={"public": {"coverage": 0.4}})
+    core.routine_cleaning_by_zone_class["public"]["coverage"] = 2.0
+    core.routine_cleaning_coverage = -1.0
+    assert core._routine_cleaning_schedule("Bridge")[0] == 1.0
+    assert core._routine_cleaning_schedule("Cabin-1")[0] == 0.0
+
+
 @pytest.mark.parametrize(
     "schedule, message",
     [
@@ -222,3 +230,12 @@ def test_sweep_grid_has_specified_endpoints_and_geometric_midpoints() -> None:
     assert public_events[1] == pytest.approx(math.sqrt(12.0))
     assert cabin_events[1] != pytest.approx((0.33 + 1.0) / 2.0)
     assert len(cleaning_schedule_sweep.sweep_cells()) == 81
+
+
+def test_emesis_sweep_reuses_the_fixed_schedule_grid() -> None:
+    cells = cleaning_schedule_sweep.sweep_cells()
+    for fraction in cleaning_schedule_sweep.CABIN_LOCALIZATION_SWEEP:
+        emesis = cleaning_schedule_sweep.emesis_cells(fraction, cells)
+        assert len(emesis) == 81
+        gradients = [cell["emesis_gradient"] for cell in emesis]
+        assert all(math.isfinite(value) and value > 0.0 for value in gradients)

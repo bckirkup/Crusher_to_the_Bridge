@@ -92,11 +92,23 @@ cabin cov | cabin/day | public cov | public/day | cabin x | public x | cabin cop
     0.600 |     1.0000 |      0.454 |     3.4641 |  0.57780 |  0.83083 |            3218.7 |             319.77 | 10.06566x
     0.600 |     1.0000 |      0.454 |    12.0000 |  0.57780 |  0.67687 |            3218.7 |            260.514 | 12.35520x
 
-Envelope over the sourced box:
+Hand-only envelope over the sourced box:
+  Park already shows this channel is unreachable at any occupancy.
   minimum gradient: 8.6635x
   maximum gradient: 18.5054x
-  cells in Park's 100-300x range: 0
   uniform shipped default gradient: 11.1977x
+  maximum/default leverage: 1.65261x upward
+  default shortfall from Park's 100x lower bound: 8.93043x
 
+Emesis-inclusive envelope by unmeasured cabin-localization f:
+f is a separate behavioural axis, not part of the schedule grid.
+       f | min gradient | max gradient | cells in Park 100-300x | uniform default
+------------------------------------------------------------------------------
+    0.50 |      3.01078 |      6.43105 |                      0 |         3.89146x
+    0.80 |      10.8563 |      23.1892 |                      0 |         14.0319x
+    0.95 |      39.5985 |       84.583 |                      0 |         51.1815x
+    0.99 |      94.0539 |        200.9 |                     78 |         121.566x
+    1.00 |      139.893 |      298.813 |                     81 |         180.813x
 Rule 3: the best-fitting cell is not read back into the model.
 The sweep selects nothing; no cell becomes a parameter value.
+The f-axis is also unmeasured and must not be read from Park.
