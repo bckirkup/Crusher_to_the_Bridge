@@ -80,8 +80,8 @@ Extraction run date: 2026-08-30
 
 ## Rough completeness cross-check
 
-- pre (2004-2019): 265 rows; operator-supplied rough comparison: approximately 261
-- post (2022-2026): 68 rows; operator-supplied rough comparison: approximately 64
+- index years 2004-2019: 264 rows; operator-supplied rough comparison: approximately 261
+- index years 2022-2026: 68 rows; operator-supplied rough comparison: approximately 64
 
 ## Threshold check
 

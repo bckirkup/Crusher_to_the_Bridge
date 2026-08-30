@@ -597,6 +597,8 @@ def write_log(
         era = record["era"]
         if era:
             era_counts[era] = era_counts.get(era, 0) + 1
+    pre_index_rows = sum(2004 <= int(record["year"]) <= 2019 for record in records)
+    post_index_rows = sum(2022 <= int(record["year"]) <= 2026 for record in records)
     threshold = threshold_counts(records)
     unresolved = unresolved_dates(records)
     rows_2022 = [record for record in records if record["year"] == "2022"]
@@ -646,9 +648,9 @@ def write_log(
             "",
             "## Rough completeness cross-check",
             "",
-            f"- pre (2004-2019): {era_counts.get('pre', 0)} rows; "
+            f"- index years 2004-2019: {pre_index_rows} rows; "
             "operator-supplied rough comparison: approximately 261",
-            f"- post (2022-2026): {era_counts.get('post', 0)} rows; "
+            f"- index years 2022-2026: {post_index_rows} rows; "
             "operator-supplied rough comparison: approximately 64",
             "",
             "## Threshold check",
