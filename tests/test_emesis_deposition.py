@@ -10,6 +10,7 @@ import pytest
 from engines.infection_dynamics_bridge import IllnessStatus, KorkinAgent
 from engines.sim_clock import HOURS, SimClock
 from engines.transmission_core import (
+    EMESIS_EPISODES_RANGE,
     EMESIS_TITRE_GEC_PER_ML,
     EMESIS_VOLUME_ML_RANGE,
     ContactTracingMatrix,
@@ -114,7 +115,8 @@ def test_emesis_partition_conserves_episode_load() -> None:
 
 
 def test_expected_emitted_load_matches_ge_cross_check() -> None:
-    expected_episodes = 2.0
+    episode_low, episode_high = EMESIS_EPISODES_RANGE
+    expected_episodes = (episode_low + episode_high) / 2.0
     low, high = EMESIS_VOLUME_ML_RANGE
     expected_volume = (high - low) / math.log(high / low)
     expected_total = expected_episodes * expected_volume * EMESIS_TITRE_GEC_PER_ML
