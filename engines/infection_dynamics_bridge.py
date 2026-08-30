@@ -27,7 +27,7 @@ The bridge outputs agent states compatible with ``telemetry_buffer.schema``.
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
 
@@ -300,6 +300,7 @@ class StrainInfection:
     strain_id: str
     time_infected: int
     acquired_particles: float
+    acquired_particles_by_route: dict[str, float] = field(default_factory=dict)
     shedding_multiplier: float = 1.0
     incubation_modifier: float = 0.0
     infection_epoch: int = 0
@@ -332,6 +333,7 @@ class KorkinAgent:
         # Multi-pathogen extensions
         "infections", "susceptibility_multiplier",
         "dose_response_susceptibility", "cumulative_exposure",
+        "cumulative_exposure_by_route",
         "microflora_disruption_status",
         # Chronic disease extensions
         "chronic_disease_ids", "chronic_pathogen_mods",
@@ -392,6 +394,8 @@ class KorkinAgent:
         self.dose_response_susceptibility: dict[str, float] = {}
         # Effective dose accumulated during the current infection challenge.
         self.cumulative_exposure: dict[str, float] = {}
+        # Effective dose accumulated by route during the current challenge.
+        self.cumulative_exposure_by_route: dict[str, dict[str, float]] = {}
 
         # Microflora disruption scalar [0.0 = healthy, 1.0 = fully disrupted]
         self.microflora_disruption_status: float = 0.0
@@ -613,6 +617,7 @@ class KorkinAgent:
         profile: dict[str, Any] | None = None,
         strain_id: str | None = None,
         strain_phenotype: Phenotype | None = None,
+        acquired_particles_by_route: dict[str, float] | None = None,
     ) -> None:
         """Record co-infection for a specific pathogen.
 
@@ -642,6 +647,7 @@ class KorkinAgent:
             "illness": IllnessStatus.NOT_ILL,
             "time_infected": time_infected,
             "acquired_particles": dose,
+            "acquired_particles_by_route": dict(acquired_particles_by_route or {}),
             "infection_epoch": epoch,
             "shedding_multiplier": shedding_mult,
         }
@@ -666,6 +672,7 @@ class KorkinAgent:
         epoch: int,
         *,
         phenotype: Phenotype | None = None,
+        acquired_particles_by_route: dict[str, float] | None = None,
     ) -> bool:
         """Add a co-resident strain to an existing infection of one pathogen.
 
@@ -687,6 +694,7 @@ class KorkinAgent:
             strain_id=strain_id,
             time_infected=0,
             acquired_particles=dose,
+            acquired_particles_by_route=dict(acquired_particles_by_route or {}),
             shedding_multiplier=pheno.shedding_multiplier,
             incubation_modifier=pheno.incubation_modifier,
             infection_epoch=epoch,
@@ -824,6 +832,7 @@ class KorkinAgent:
             strain_id=new_strain_id,
             time_infected=resident.time_infected,
             acquired_particles=resident.acquired_particles,
+            acquired_particles_by_route=dict(resident.acquired_particles_by_route),
             shedding_multiplier=pheno.shedding_multiplier,
             incubation_modifier=pheno.incubation_modifier,
             infection_epoch=resident.infection_epoch,
@@ -855,6 +864,9 @@ class KorkinAgent:
             strain_id=strain_id,
             time_infected=int(inf["time_infected"] or 0),
             acquired_particles=float(inf["acquired_particles"]),
+            acquired_particles_by_route=dict(
+                inf.get("acquired_particles_by_route", {}),
+            ),
             shedding_multiplier=pheno.shedding_multiplier,
             incubation_modifier=pheno.incubation_modifier,
             infection_epoch=int(inf["infection_epoch"]),

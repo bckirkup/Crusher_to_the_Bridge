@@ -164,6 +164,7 @@ class TransmissionEvent:
     zone: str
     dose: float
     source_strain_id: str | None = None
+    acquired_particles_by_route: dict[str, float] = field(default_factory=dict)
 
 
 @dataclass
@@ -1179,6 +1180,7 @@ class TransmissionCore:
         epoch: int,
         *,
         resident: bool,
+        acquired_particles_by_route: dict[str, float] | None = None,
     ) -> bool:
         """Install an acquired strain, as a new infection or a co-resident.
 
@@ -1193,13 +1195,19 @@ class TransmissionCore:
             agent.infection_status = InfectionStatus.SUSCEPTIBLE
         if resident:
             strain_id = acquired_strain_id or self._unresolved_founder(pathogen_id)
-            return agent.superinfect_with_strain(
+            established = agent.superinfect_with_strain(
                 pathogen_id,
                 strain_id,
                 dose,
                 epoch,
                 phenotype=self._phenotype(strain_id),
+                acquired_particles_by_route=acquired_particles_by_route,
             )
+            if established:
+                agent.infections[pathogen_id]["acquired_particles_by_route"] = dict(
+                    acquired_particles_by_route or {},
+                )
+            return established
         agent.infect_with_pathogen(
             pathogen_id,
             dose,
@@ -1208,6 +1216,7 @@ class TransmissionCore:
             profile=self.pathogen_profiles.get(pathogen_id, {}),
             strain_id=acquired_strain_id or None,
             strain_phenotype=self._phenotype(acquired_strain_id),
+            acquired_particles_by_route=acquired_particles_by_route,
         )
         return True
 
@@ -1486,6 +1495,9 @@ class TransmissionCore:
         # dose that actually drove the draw
         self._strain_doses = {}
         self._last_pathogen_doses = agent_pathogen_doses
+        self._last_pathogen_route_doses: dict[
+            str, dict[int, dict[str, float]]
+        ] = {}
 
         # Determine which pathogens are active this epoch
         active_pathogens = list(self.pathogen_profiles.keys()) if self.pathogen_profiles else ["_default"]
@@ -1521,7 +1533,17 @@ class TransmissionCore:
                     agent.cumulative_exposure.get(pathogen_id, 0.0)
                     + effective_dose
                 )
+                route_doses = self._effective_route_doses(
+                    agent.agent_id,
+                    pathogen_id,
+                    effective_dose,
+                )
                 agent.cumulative_exposure[pathogen_id] = cumulative_dose
+                route_ledger = agent.cumulative_exposure_by_route.setdefault(
+                    pathogen_id, {},
+                )
+                for route, route_dose in route_doses.items():
+                    route_ledger[route] = route_ledger.get(route, 0.0) + route_dose
                 inf_prob = self._dose_response_hazard(
                     agent, pathogen_id, effective_dose,
                 )
@@ -1534,12 +1556,15 @@ class TransmissionCore:
                     if not self._establish(
                         agent, pathogen_id, acquired_strain_id, cumulative_dose, epoch,
                         resident=resident,
+                        acquired_particles_by_route=dict(route_ledger),
                     ):
                         continue
                     agent.cumulative_exposure[pathogen_id] = 0.0
+                    agent.cumulative_exposure_by_route.pop(pathogen_id, None)
 
                     pw_doses = agent_pathway_doses.get(agent.agent_id, {})
                     dominant = max(pw_doses, key=pw_doses.get) if pw_doses else "unknown"
+                    route_ledger = dict(route_ledger)
                     event = TransmissionEvent(
                         epoch=epoch,
                         pathway=dominant,
@@ -1548,6 +1573,7 @@ class TransmissionCore:
                         zone=agent.current_location,
                         dose=p_dose,
                         source_strain_id=parent_strain_id or None,
+                        acquired_particles_by_route=route_ledger,
                     )
                     events.append(event)
                     matrix.transmission_events.append({
@@ -1602,6 +1628,27 @@ class TransmissionCore:
             apd = agent_pathogen_doses.setdefault(aid, {})
             apd[pathogen_id] = apd.get(pathogen_id, 0.0) + scaled_dose
         return susceptibility
+
+    def _effective_route_doses(
+        self,
+        agent_id: int,
+        pathogen_id: str,
+        effective_dose: float,
+    ) -> dict[str, float]:
+        """Return this epoch's effective dose split by transmission route."""
+        raw = self._last_pathogen_route_doses.get(pathogen_id, {}).get(
+            agent_id, {},
+        )
+        raw_total = sum(raw.values())
+        if raw_total <= 0.0:
+            return {}
+        route_doses = {
+            route: dose * effective_dose / raw_total
+            for route, dose in raw.items()
+        }
+        dominant = max(route_doses, key=route_doses.get)
+        route_doses[dominant] += effective_dose - sum(route_doses.values())
+        return route_doses
 
     def _execute_pathogen_pathways(
         self,
@@ -1677,6 +1724,9 @@ class TransmissionCore:
         self._fold_strain_doses(
             pathogen_id, ledger, self._route_weights(profile), susceptibility,
         )
+        self._last_pathogen_route_doses[pathogen_id] = {
+            aid: dict(pw) for aid, pw in p_agent_pw.items()
+        }
 
         for aid, pw in p_agent_pw.items():
             merged = agent_pathway_doses.setdefault(aid, {})
