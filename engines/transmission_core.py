@@ -1117,6 +1117,35 @@ class TransmissionCore:
             1.0 + dose / dr.get("beta", BETA), -dr.get("alpha", ALPHA),
         )
 
+    def _dose_response_susceptibility(
+        self,
+        agent: KorkinAgent,
+        pathogen_id: str,
+    ) -> float:
+        """Return the host's persistent dose-response susceptibility."""
+        existing = agent.dose_response_susceptibility.get(pathogen_id)
+        if existing is not None:
+            return existing
+        dr = self.pathogen_profiles.get(pathogen_id, {}).get("dose_response", {})
+        if dr.get("model", "beta_poisson") == "exponential":
+            susceptibility = float(dr.get("k", 0.01))
+        else:
+            susceptibility = float(
+                self.rng.beta(dr.get("alpha", ALPHA), dr.get("beta", BETA)),
+            )
+        agent.dose_response_susceptibility[pathogen_id] = susceptibility
+        return susceptibility
+
+    def _dose_response_hazard(
+        self,
+        agent: KorkinAgent,
+        pathogen_id: str,
+        effective_dose: float,
+    ) -> float:
+        """Compute one epoch's hazard from persistent host susceptibility."""
+        susceptibility = self._dose_response_susceptibility(agent, pathogen_id)
+        return -math.expm1(-susceptibility * effective_dose)
+
     def _superinfection_susceptibility(self, pathogen_id: str) -> float:
         """How much of a naive host's susceptibility an infected host retains.
 
@@ -1482,10 +1511,20 @@ class TransmissionCore:
                 if protection >= 1.0:
                     continue
 
-                inf_prob = self._dose_response(pathogen_id, p_dose)
-                inf_prob *= 1.0 - protection
+                effective_dose = p_dose * (1.0 - protection)
                 if resident:
-                    inf_prob *= self._superinfection_susceptibility(pathogen_id)
+                    effective_dose *= self._superinfection_susceptibility(pathogen_id)
+                if effective_dose <= 0.0:
+                    continue
+
+                cumulative_dose = (
+                    agent.cumulative_exposure.get(pathogen_id, 0.0)
+                    + effective_dose
+                )
+                agent.cumulative_exposure[pathogen_id] = cumulative_dose
+                inf_prob = self._dose_response_hazard(
+                    agent, pathogen_id, effective_dose,
+                )
 
                 if self.rng.random() < inf_prob:
                     parent_strain_id, source_agent_id = self._draw_source(
@@ -1493,10 +1532,11 @@ class TransmissionCore:
                     )
                     acquired_strain_id = self._inherit_strain(parent_strain_id)
                     if not self._establish(
-                        agent, pathogen_id, acquired_strain_id, p_dose, epoch,
+                        agent, pathogen_id, acquired_strain_id, cumulative_dose, epoch,
                         resident=resident,
                     ):
                         continue
+                    agent.cumulative_exposure[pathogen_id] = 0.0
 
                     pw_doses = agent_pathway_doses.get(agent.agent_id, {})
                     dominant = max(pw_doses, key=pw_doses.get) if pw_doses else "unknown"

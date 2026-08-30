@@ -331,6 +331,7 @@ class KorkinAgent:
         "current_location", "schedule",
         # Multi-pathogen extensions
         "infections", "susceptibility_multiplier",
+        "dose_response_susceptibility", "cumulative_exposure",
         "microflora_disruption_status",
         # Chronic disease extensions
         "chronic_disease_ids", "chronic_pathogen_mods",
@@ -387,6 +388,10 @@ class KorkinAgent:
 
         # Per-pathogen susceptibility scaling (higher = more vulnerable)
         self.susceptibility_multiplier: dict[str, float] = {}
+        # Persistent beta-Poisson host mixing variable, drawn lazily per pathogen.
+        self.dose_response_susceptibility: dict[str, float] = {}
+        # Effective dose accumulated during the current infection challenge.
+        self.cumulative_exposure: dict[str, float] = {}
 
         # Microflora disruption scalar [0.0 = healthy, 1.0 = fully disrupted]
         self.microflora_disruption_status: float = 0.0
