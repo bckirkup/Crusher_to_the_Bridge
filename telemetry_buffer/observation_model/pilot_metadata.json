@@ -1,0 +1,996 @@
+{
+  "source_manifest": "/home/ubuntu/repos/Crusher-to-the-Bridge/picard_framework/runs/mega_cruise_campaign/common_dose_containment_v4_manifest.json",
+  "mechanism": "manifest tier generation with pathogen_overrides",
+  "branch_commit": "9d06492",
+  "hulls": [
+    "expedition_cruise_450",
+    "classic_cruise_1900"
+  ],
+  "strategies": [
+    "none_response",
+    "syndromic_comp85"
+  ],
+  "doses": [
+    2.0,
+    2.5,
+    3.0
+  ],
+  "seeds": [
+    940,
+    941,
+    942,
+    943,
+    944,
+    945,
+    946,
+    947,
+    948,
+    949
+  ],
+  "initial_infected": 1,
+  "epochs": 168,
+  "natural_history_clock": "hours",
+  "run_count": 120,
+  "runs": [
+    {
+      "run_id": "postfix_pilot_expedition_cruise_450_dose2_none_response_s940",
+      "hull": "expedition_cruise_450",
+      "dose_adjustment": 2.0,
+      "surveillance": "none_response",
+      "seed": 940,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/expedition_cruise_450/postfix_pilot_expedition_cruise_450_dose2_none_response_s940.json"
+    },
+    {
+      "run_id": "postfix_pilot_expedition_cruise_450_dose2_none_response_s941",
+      "hull": "expedition_cruise_450",
+      "dose_adjustment": 2.0,
+      "surveillance": "none_response",
+      "seed": 941,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/expedition_cruise_450/postfix_pilot_expedition_cruise_450_dose2_none_response_s941.json"
+    },
+    {
+      "run_id": "postfix_pilot_expedition_cruise_450_dose2_none_response_s942",
+      "hull": "expedition_cruise_450",
+      "dose_adjustment": 2.0,
+      "surveillance": "none_response",
+      "seed": 942,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/expedition_cruise_450/postfix_pilot_expedition_cruise_450_dose2_none_response_s942.json"
+    },
+    {
+      "run_id": "postfix_pilot_expedition_cruise_450_dose2_none_response_s943",
+      "hull": "expedition_cruise_450",
+      "dose_adjustment": 2.0,
+      "surveillance": "none_response",
+      "seed": 943,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/expedition_cruise_450/postfix_pilot_expedition_cruise_450_dose2_none_response_s943.json"
+    },
+    {
+      "run_id": "postfix_pilot_expedition_cruise_450_dose2_none_response_s944",
+      "hull": "expedition_cruise_450",
+      "dose_adjustment": 2.0,
+      "surveillance": "none_response",
+      "seed": 944,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/expedition_cruise_450/postfix_pilot_expedition_cruise_450_dose2_none_response_s944.json"
+    },
+    {
+      "run_id": "postfix_pilot_expedition_cruise_450_dose2_none_response_s945",
+      "hull": "expedition_cruise_450",
+      "dose_adjustment": 2.0,
+      "surveillance": "none_response",
+      "seed": 945,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/expedition_cruise_450/postfix_pilot_expedition_cruise_450_dose2_none_response_s945.json"
+    },
+    {
+      "run_id": "postfix_pilot_expedition_cruise_450_dose2_none_response_s946",
+      "hull": "expedition_cruise_450",
+      "dose_adjustment": 2.0,
+      "surveillance": "none_response",
+      "seed": 946,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/expedition_cruise_450/postfix_pilot_expedition_cruise_450_dose2_none_response_s946.json"
+    },
+    {
+      "run_id": "postfix_pilot_expedition_cruise_450_dose2_none_response_s947",
+      "hull": "expedition_cruise_450",
+      "dose_adjustment": 2.0,
+      "surveillance": "none_response",
+      "seed": 947,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/expedition_cruise_450/postfix_pilot_expedition_cruise_450_dose2_none_response_s947.json"
+    },
+    {
+      "run_id": "postfix_pilot_expedition_cruise_450_dose2_none_response_s948",
+      "hull": "expedition_cruise_450",
+      "dose_adjustment": 2.0,
+      "surveillance": "none_response",
+      "seed": 948,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/expedition_cruise_450/postfix_pilot_expedition_cruise_450_dose2_none_response_s948.json"
+    },
+    {
+      "run_id": "postfix_pilot_expedition_cruise_450_dose2_none_response_s949",
+      "hull": "expedition_cruise_450",
+      "dose_adjustment": 2.0,
+      "surveillance": "none_response",
+      "seed": 949,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/expedition_cruise_450/postfix_pilot_expedition_cruise_450_dose2_none_response_s949.json"
+    },
+    {
+      "run_id": "postfix_pilot_expedition_cruise_450_dose2_syndromic_comp85_s940",
+      "hull": "expedition_cruise_450",
+      "dose_adjustment": 2.0,
+      "surveillance": "syndromic_comp85",
+      "seed": 940,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/expedition_cruise_450/postfix_pilot_expedition_cruise_450_dose2_syndromic_comp85_s940.json"
+    },
+    {
+      "run_id": "postfix_pilot_expedition_cruise_450_dose2_syndromic_comp85_s941",
+      "hull": "expedition_cruise_450",
+      "dose_adjustment": 2.0,
+      "surveillance": "syndromic_comp85",
+      "seed": 941,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/expedition_cruise_450/postfix_pilot_expedition_cruise_450_dose2_syndromic_comp85_s941.json"
+    },
+    {
+      "run_id": "postfix_pilot_expedition_cruise_450_dose2_syndromic_comp85_s942",
+      "hull": "expedition_cruise_450",
+      "dose_adjustment": 2.0,
+      "surveillance": "syndromic_comp85",
+      "seed": 942,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/expedition_cruise_450/postfix_pilot_expedition_cruise_450_dose2_syndromic_comp85_s942.json"
+    },
+    {
+      "run_id": "postfix_pilot_expedition_cruise_450_dose2_syndromic_comp85_s943",
+      "hull": "expedition_cruise_450",
+      "dose_adjustment": 2.0,
+      "surveillance": "syndromic_comp85",
+      "seed": 943,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/expedition_cruise_450/postfix_pilot_expedition_cruise_450_dose2_syndromic_comp85_s943.json"
+    },
+    {
+      "run_id": "postfix_pilot_expedition_cruise_450_dose2_syndromic_comp85_s944",
+      "hull": "expedition_cruise_450",
+      "dose_adjustment": 2.0,
+      "surveillance": "syndromic_comp85",
+      "seed": 944,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/expedition_cruise_450/postfix_pilot_expedition_cruise_450_dose2_syndromic_comp85_s944.json"
+    },
+    {
+      "run_id": "postfix_pilot_expedition_cruise_450_dose2_syndromic_comp85_s945",
+      "hull": "expedition_cruise_450",
+      "dose_adjustment": 2.0,
+      "surveillance": "syndromic_comp85",
+      "seed": 945,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/expedition_cruise_450/postfix_pilot_expedition_cruise_450_dose2_syndromic_comp85_s945.json"
+    },
+    {
+      "run_id": "postfix_pilot_expedition_cruise_450_dose2_syndromic_comp85_s946",
+      "hull": "expedition_cruise_450",
+      "dose_adjustment": 2.0,
+      "surveillance": "syndromic_comp85",
+      "seed": 946,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/expedition_cruise_450/postfix_pilot_expedition_cruise_450_dose2_syndromic_comp85_s946.json"
+    },
+    {
+      "run_id": "postfix_pilot_expedition_cruise_450_dose2_syndromic_comp85_s947",
+      "hull": "expedition_cruise_450",
+      "dose_adjustment": 2.0,
+      "surveillance": "syndromic_comp85",
+      "seed": 947,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/expedition_cruise_450/postfix_pilot_expedition_cruise_450_dose2_syndromic_comp85_s947.json"
+    },
+    {
+      "run_id": "postfix_pilot_expedition_cruise_450_dose2_syndromic_comp85_s948",
+      "hull": "expedition_cruise_450",
+      "dose_adjustment": 2.0,
+      "surveillance": "syndromic_comp85",
+      "seed": 948,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/expedition_cruise_450/postfix_pilot_expedition_cruise_450_dose2_syndromic_comp85_s948.json"
+    },
+    {
+      "run_id": "postfix_pilot_expedition_cruise_450_dose2_syndromic_comp85_s949",
+      "hull": "expedition_cruise_450",
+      "dose_adjustment": 2.0,
+      "surveillance": "syndromic_comp85",
+      "seed": 949,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/expedition_cruise_450/postfix_pilot_expedition_cruise_450_dose2_syndromic_comp85_s949.json"
+    },
+    {
+      "run_id": "postfix_pilot_expedition_cruise_450_dose2.5_none_response_s940",
+      "hull": "expedition_cruise_450",
+      "dose_adjustment": 2.5,
+      "surveillance": "none_response",
+      "seed": 940,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/expedition_cruise_450/postfix_pilot_expedition_cruise_450_dose2.5_none_response_s940.json"
+    },
+    {
+      "run_id": "postfix_pilot_expedition_cruise_450_dose2.5_none_response_s941",
+      "hull": "expedition_cruise_450",
+      "dose_adjustment": 2.5,
+      "surveillance": "none_response",
+      "seed": 941,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/expedition_cruise_450/postfix_pilot_expedition_cruise_450_dose2.5_none_response_s941.json"
+    },
+    {
+      "run_id": "postfix_pilot_expedition_cruise_450_dose2.5_none_response_s942",
+      "hull": "expedition_cruise_450",
+      "dose_adjustment": 2.5,
+      "surveillance": "none_response",
+      "seed": 942,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/expedition_cruise_450/postfix_pilot_expedition_cruise_450_dose2.5_none_response_s942.json"
+    },
+    {
+      "run_id": "postfix_pilot_expedition_cruise_450_dose2.5_none_response_s943",
+      "hull": "expedition_cruise_450",
+      "dose_adjustment": 2.5,
+      "surveillance": "none_response",
+      "seed": 943,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/expedition_cruise_450/postfix_pilot_expedition_cruise_450_dose2.5_none_response_s943.json"
+    },
+    {
+      "run_id": "postfix_pilot_expedition_cruise_450_dose2.5_none_response_s944",
+      "hull": "expedition_cruise_450",
+      "dose_adjustment": 2.5,
+      "surveillance": "none_response",
+      "seed": 944,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/expedition_cruise_450/postfix_pilot_expedition_cruise_450_dose2.5_none_response_s944.json"
+    },
+    {
+      "run_id": "postfix_pilot_expedition_cruise_450_dose2.5_none_response_s945",
+      "hull": "expedition_cruise_450",
+      "dose_adjustment": 2.5,
+      "surveillance": "none_response",
+      "seed": 945,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/expedition_cruise_450/postfix_pilot_expedition_cruise_450_dose2.5_none_response_s945.json"
+    },
+    {
+      "run_id": "postfix_pilot_expedition_cruise_450_dose2.5_none_response_s946",
+      "hull": "expedition_cruise_450",
+      "dose_adjustment": 2.5,
+      "surveillance": "none_response",
+      "seed": 946,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/expedition_cruise_450/postfix_pilot_expedition_cruise_450_dose2.5_none_response_s946.json"
+    },
+    {
+      "run_id": "postfix_pilot_expedition_cruise_450_dose2.5_none_response_s947",
+      "hull": "expedition_cruise_450",
+      "dose_adjustment": 2.5,
+      "surveillance": "none_response",
+      "seed": 947,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/expedition_cruise_450/postfix_pilot_expedition_cruise_450_dose2.5_none_response_s947.json"
+    },
+    {
+      "run_id": "postfix_pilot_expedition_cruise_450_dose2.5_none_response_s948",
+      "hull": "expedition_cruise_450",
+      "dose_adjustment": 2.5,
+      "surveillance": "none_response",
+      "seed": 948,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/expedition_cruise_450/postfix_pilot_expedition_cruise_450_dose2.5_none_response_s948.json"
+    },
+    {
+      "run_id": "postfix_pilot_expedition_cruise_450_dose2.5_none_response_s949",
+      "hull": "expedition_cruise_450",
+      "dose_adjustment": 2.5,
+      "surveillance": "none_response",
+      "seed": 949,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/expedition_cruise_450/postfix_pilot_expedition_cruise_450_dose2.5_none_response_s949.json"
+    },
+    {
+      "run_id": "postfix_pilot_expedition_cruise_450_dose2.5_syndromic_comp85_s940",
+      "hull": "expedition_cruise_450",
+      "dose_adjustment": 2.5,
+      "surveillance": "syndromic_comp85",
+      "seed": 940,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/expedition_cruise_450/postfix_pilot_expedition_cruise_450_dose2.5_syndromic_comp85_s940.json"
+    },
+    {
+      "run_id": "postfix_pilot_expedition_cruise_450_dose2.5_syndromic_comp85_s941",
+      "hull": "expedition_cruise_450",
+      "dose_adjustment": 2.5,
+      "surveillance": "syndromic_comp85",
+      "seed": 941,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/expedition_cruise_450/postfix_pilot_expedition_cruise_450_dose2.5_syndromic_comp85_s941.json"
+    },
+    {
+      "run_id": "postfix_pilot_expedition_cruise_450_dose2.5_syndromic_comp85_s942",
+      "hull": "expedition_cruise_450",
+      "dose_adjustment": 2.5,
+      "surveillance": "syndromic_comp85",
+      "seed": 942,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/expedition_cruise_450/postfix_pilot_expedition_cruise_450_dose2.5_syndromic_comp85_s942.json"
+    },
+    {
+      "run_id": "postfix_pilot_expedition_cruise_450_dose2.5_syndromic_comp85_s943",
+      "hull": "expedition_cruise_450",
+      "dose_adjustment": 2.5,
+      "surveillance": "syndromic_comp85",
+      "seed": 943,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/expedition_cruise_450/postfix_pilot_expedition_cruise_450_dose2.5_syndromic_comp85_s943.json"
+    },
+    {
+      "run_id": "postfix_pilot_expedition_cruise_450_dose2.5_syndromic_comp85_s944",
+      "hull": "expedition_cruise_450",
+      "dose_adjustment": 2.5,
+      "surveillance": "syndromic_comp85",
+      "seed": 944,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/expedition_cruise_450/postfix_pilot_expedition_cruise_450_dose2.5_syndromic_comp85_s944.json"
+    },
+    {
+      "run_id": "postfix_pilot_expedition_cruise_450_dose2.5_syndromic_comp85_s945",
+      "hull": "expedition_cruise_450",
+      "dose_adjustment": 2.5,
+      "surveillance": "syndromic_comp85",
+      "seed": 945,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/expedition_cruise_450/postfix_pilot_expedition_cruise_450_dose2.5_syndromic_comp85_s945.json"
+    },
+    {
+      "run_id": "postfix_pilot_expedition_cruise_450_dose2.5_syndromic_comp85_s946",
+      "hull": "expedition_cruise_450",
+      "dose_adjustment": 2.5,
+      "surveillance": "syndromic_comp85",
+      "seed": 946,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/expedition_cruise_450/postfix_pilot_expedition_cruise_450_dose2.5_syndromic_comp85_s946.json"
+    },
+    {
+      "run_id": "postfix_pilot_expedition_cruise_450_dose2.5_syndromic_comp85_s947",
+      "hull": "expedition_cruise_450",
+      "dose_adjustment": 2.5,
+      "surveillance": "syndromic_comp85",
+      "seed": 947,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/expedition_cruise_450/postfix_pilot_expedition_cruise_450_dose2.5_syndromic_comp85_s947.json"
+    },
+    {
+      "run_id": "postfix_pilot_expedition_cruise_450_dose2.5_syndromic_comp85_s948",
+      "hull": "expedition_cruise_450",
+      "dose_adjustment": 2.5,
+      "surveillance": "syndromic_comp85",
+      "seed": 948,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/expedition_cruise_450/postfix_pilot_expedition_cruise_450_dose2.5_syndromic_comp85_s948.json"
+    },
+    {
+      "run_id": "postfix_pilot_expedition_cruise_450_dose2.5_syndromic_comp85_s949",
+      "hull": "expedition_cruise_450",
+      "dose_adjustment": 2.5,
+      "surveillance": "syndromic_comp85",
+      "seed": 949,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/expedition_cruise_450/postfix_pilot_expedition_cruise_450_dose2.5_syndromic_comp85_s949.json"
+    },
+    {
+      "run_id": "postfix_pilot_expedition_cruise_450_dose3_none_response_s940",
+      "hull": "expedition_cruise_450",
+      "dose_adjustment": 3.0,
+      "surveillance": "none_response",
+      "seed": 940,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/expedition_cruise_450/postfix_pilot_expedition_cruise_450_dose3_none_response_s940.json"
+    },
+    {
+      "run_id": "postfix_pilot_expedition_cruise_450_dose3_none_response_s941",
+      "hull": "expedition_cruise_450",
+      "dose_adjustment": 3.0,
+      "surveillance": "none_response",
+      "seed": 941,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/expedition_cruise_450/postfix_pilot_expedition_cruise_450_dose3_none_response_s941.json"
+    },
+    {
+      "run_id": "postfix_pilot_expedition_cruise_450_dose3_none_response_s942",
+      "hull": "expedition_cruise_450",
+      "dose_adjustment": 3.0,
+      "surveillance": "none_response",
+      "seed": 942,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/expedition_cruise_450/postfix_pilot_expedition_cruise_450_dose3_none_response_s942.json"
+    },
+    {
+      "run_id": "postfix_pilot_expedition_cruise_450_dose3_none_response_s943",
+      "hull": "expedition_cruise_450",
+      "dose_adjustment": 3.0,
+      "surveillance": "none_response",
+      "seed": 943,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/expedition_cruise_450/postfix_pilot_expedition_cruise_450_dose3_none_response_s943.json"
+    },
+    {
+      "run_id": "postfix_pilot_expedition_cruise_450_dose3_none_response_s944",
+      "hull": "expedition_cruise_450",
+      "dose_adjustment": 3.0,
+      "surveillance": "none_response",
+      "seed": 944,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/expedition_cruise_450/postfix_pilot_expedition_cruise_450_dose3_none_response_s944.json"
+    },
+    {
+      "run_id": "postfix_pilot_expedition_cruise_450_dose3_none_response_s945",
+      "hull": "expedition_cruise_450",
+      "dose_adjustment": 3.0,
+      "surveillance": "none_response",
+      "seed": 945,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/expedition_cruise_450/postfix_pilot_expedition_cruise_450_dose3_none_response_s945.json"
+    },
+    {
+      "run_id": "postfix_pilot_expedition_cruise_450_dose3_none_response_s946",
+      "hull": "expedition_cruise_450",
+      "dose_adjustment": 3.0,
+      "surveillance": "none_response",
+      "seed": 946,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/expedition_cruise_450/postfix_pilot_expedition_cruise_450_dose3_none_response_s946.json"
+    },
+    {
+      "run_id": "postfix_pilot_expedition_cruise_450_dose3_none_response_s947",
+      "hull": "expedition_cruise_450",
+      "dose_adjustment": 3.0,
+      "surveillance": "none_response",
+      "seed": 947,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/expedition_cruise_450/postfix_pilot_expedition_cruise_450_dose3_none_response_s947.json"
+    },
+    {
+      "run_id": "postfix_pilot_expedition_cruise_450_dose3_none_response_s948",
+      "hull": "expedition_cruise_450",
+      "dose_adjustment": 3.0,
+      "surveillance": "none_response",
+      "seed": 948,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/expedition_cruise_450/postfix_pilot_expedition_cruise_450_dose3_none_response_s948.json"
+    },
+    {
+      "run_id": "postfix_pilot_expedition_cruise_450_dose3_none_response_s949",
+      "hull": "expedition_cruise_450",
+      "dose_adjustment": 3.0,
+      "surveillance": "none_response",
+      "seed": 949,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/expedition_cruise_450/postfix_pilot_expedition_cruise_450_dose3_none_response_s949.json"
+    },
+    {
+      "run_id": "postfix_pilot_expedition_cruise_450_dose3_syndromic_comp85_s940",
+      "hull": "expedition_cruise_450",
+      "dose_adjustment": 3.0,
+      "surveillance": "syndromic_comp85",
+      "seed": 940,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/expedition_cruise_450/postfix_pilot_expedition_cruise_450_dose3_syndromic_comp85_s940.json"
+    },
+    {
+      "run_id": "postfix_pilot_expedition_cruise_450_dose3_syndromic_comp85_s941",
+      "hull": "expedition_cruise_450",
+      "dose_adjustment": 3.0,
+      "surveillance": "syndromic_comp85",
+      "seed": 941,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/expedition_cruise_450/postfix_pilot_expedition_cruise_450_dose3_syndromic_comp85_s941.json"
+    },
+    {
+      "run_id": "postfix_pilot_expedition_cruise_450_dose3_syndromic_comp85_s942",
+      "hull": "expedition_cruise_450",
+      "dose_adjustment": 3.0,
+      "surveillance": "syndromic_comp85",
+      "seed": 942,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/expedition_cruise_450/postfix_pilot_expedition_cruise_450_dose3_syndromic_comp85_s942.json"
+    },
+    {
+      "run_id": "postfix_pilot_expedition_cruise_450_dose3_syndromic_comp85_s943",
+      "hull": "expedition_cruise_450",
+      "dose_adjustment": 3.0,
+      "surveillance": "syndromic_comp85",
+      "seed": 943,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/expedition_cruise_450/postfix_pilot_expedition_cruise_450_dose3_syndromic_comp85_s943.json"
+    },
+    {
+      "run_id": "postfix_pilot_expedition_cruise_450_dose3_syndromic_comp85_s944",
+      "hull": "expedition_cruise_450",
+      "dose_adjustment": 3.0,
+      "surveillance": "syndromic_comp85",
+      "seed": 944,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/expedition_cruise_450/postfix_pilot_expedition_cruise_450_dose3_syndromic_comp85_s944.json"
+    },
+    {
+      "run_id": "postfix_pilot_expedition_cruise_450_dose3_syndromic_comp85_s945",
+      "hull": "expedition_cruise_450",
+      "dose_adjustment": 3.0,
+      "surveillance": "syndromic_comp85",
+      "seed": 945,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/expedition_cruise_450/postfix_pilot_expedition_cruise_450_dose3_syndromic_comp85_s945.json"
+    },
+    {
+      "run_id": "postfix_pilot_expedition_cruise_450_dose3_syndromic_comp85_s946",
+      "hull": "expedition_cruise_450",
+      "dose_adjustment": 3.0,
+      "surveillance": "syndromic_comp85",
+      "seed": 946,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/expedition_cruise_450/postfix_pilot_expedition_cruise_450_dose3_syndromic_comp85_s946.json"
+    },
+    {
+      "run_id": "postfix_pilot_expedition_cruise_450_dose3_syndromic_comp85_s947",
+      "hull": "expedition_cruise_450",
+      "dose_adjustment": 3.0,
+      "surveillance": "syndromic_comp85",
+      "seed": 947,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/expedition_cruise_450/postfix_pilot_expedition_cruise_450_dose3_syndromic_comp85_s947.json"
+    },
+    {
+      "run_id": "postfix_pilot_expedition_cruise_450_dose3_syndromic_comp85_s948",
+      "hull": "expedition_cruise_450",
+      "dose_adjustment": 3.0,
+      "surveillance": "syndromic_comp85",
+      "seed": 948,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/expedition_cruise_450/postfix_pilot_expedition_cruise_450_dose3_syndromic_comp85_s948.json"
+    },
+    {
+      "run_id": "postfix_pilot_expedition_cruise_450_dose3_syndromic_comp85_s949",
+      "hull": "expedition_cruise_450",
+      "dose_adjustment": 3.0,
+      "surveillance": "syndromic_comp85",
+      "seed": 949,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/expedition_cruise_450/postfix_pilot_expedition_cruise_450_dose3_syndromic_comp85_s949.json"
+    },
+    {
+      "run_id": "postfix_pilot_classic_cruise_1900_dose2_none_response_s940",
+      "hull": "classic_cruise_1900",
+      "dose_adjustment": 2.0,
+      "surveillance": "none_response",
+      "seed": 940,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/classic_cruise_1900/postfix_pilot_classic_cruise_1900_dose2_none_response_s940.json"
+    },
+    {
+      "run_id": "postfix_pilot_classic_cruise_1900_dose2_none_response_s941",
+      "hull": "classic_cruise_1900",
+      "dose_adjustment": 2.0,
+      "surveillance": "none_response",
+      "seed": 941,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/classic_cruise_1900/postfix_pilot_classic_cruise_1900_dose2_none_response_s941.json"
+    },
+    {
+      "run_id": "postfix_pilot_classic_cruise_1900_dose2_none_response_s942",
+      "hull": "classic_cruise_1900",
+      "dose_adjustment": 2.0,
+      "surveillance": "none_response",
+      "seed": 942,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/classic_cruise_1900/postfix_pilot_classic_cruise_1900_dose2_none_response_s942.json"
+    },
+    {
+      "run_id": "postfix_pilot_classic_cruise_1900_dose2_none_response_s943",
+      "hull": "classic_cruise_1900",
+      "dose_adjustment": 2.0,
+      "surveillance": "none_response",
+      "seed": 943,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/classic_cruise_1900/postfix_pilot_classic_cruise_1900_dose2_none_response_s943.json"
+    },
+    {
+      "run_id": "postfix_pilot_classic_cruise_1900_dose2_none_response_s944",
+      "hull": "classic_cruise_1900",
+      "dose_adjustment": 2.0,
+      "surveillance": "none_response",
+      "seed": 944,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/classic_cruise_1900/postfix_pilot_classic_cruise_1900_dose2_none_response_s944.json"
+    },
+    {
+      "run_id": "postfix_pilot_classic_cruise_1900_dose2_none_response_s945",
+      "hull": "classic_cruise_1900",
+      "dose_adjustment": 2.0,
+      "surveillance": "none_response",
+      "seed": 945,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/classic_cruise_1900/postfix_pilot_classic_cruise_1900_dose2_none_response_s945.json"
+    },
+    {
+      "run_id": "postfix_pilot_classic_cruise_1900_dose2_none_response_s946",
+      "hull": "classic_cruise_1900",
+      "dose_adjustment": 2.0,
+      "surveillance": "none_response",
+      "seed": 946,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/classic_cruise_1900/postfix_pilot_classic_cruise_1900_dose2_none_response_s946.json"
+    },
+    {
+      "run_id": "postfix_pilot_classic_cruise_1900_dose2_none_response_s947",
+      "hull": "classic_cruise_1900",
+      "dose_adjustment": 2.0,
+      "surveillance": "none_response",
+      "seed": 947,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/classic_cruise_1900/postfix_pilot_classic_cruise_1900_dose2_none_response_s947.json"
+    },
+    {
+      "run_id": "postfix_pilot_classic_cruise_1900_dose2_none_response_s948",
+      "hull": "classic_cruise_1900",
+      "dose_adjustment": 2.0,
+      "surveillance": "none_response",
+      "seed": 948,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/classic_cruise_1900/postfix_pilot_classic_cruise_1900_dose2_none_response_s948.json"
+    },
+    {
+      "run_id": "postfix_pilot_classic_cruise_1900_dose2_none_response_s949",
+      "hull": "classic_cruise_1900",
+      "dose_adjustment": 2.0,
+      "surveillance": "none_response",
+      "seed": 949,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/classic_cruise_1900/postfix_pilot_classic_cruise_1900_dose2_none_response_s949.json"
+    },
+    {
+      "run_id": "postfix_pilot_classic_cruise_1900_dose2_syndromic_comp85_s940",
+      "hull": "classic_cruise_1900",
+      "dose_adjustment": 2.0,
+      "surveillance": "syndromic_comp85",
+      "seed": 940,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/classic_cruise_1900/postfix_pilot_classic_cruise_1900_dose2_syndromic_comp85_s940.json"
+    },
+    {
+      "run_id": "postfix_pilot_classic_cruise_1900_dose2_syndromic_comp85_s941",
+      "hull": "classic_cruise_1900",
+      "dose_adjustment": 2.0,
+      "surveillance": "syndromic_comp85",
+      "seed": 941,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/classic_cruise_1900/postfix_pilot_classic_cruise_1900_dose2_syndromic_comp85_s941.json"
+    },
+    {
+      "run_id": "postfix_pilot_classic_cruise_1900_dose2_syndromic_comp85_s942",
+      "hull": "classic_cruise_1900",
+      "dose_adjustment": 2.0,
+      "surveillance": "syndromic_comp85",
+      "seed": 942,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/classic_cruise_1900/postfix_pilot_classic_cruise_1900_dose2_syndromic_comp85_s942.json"
+    },
+    {
+      "run_id": "postfix_pilot_classic_cruise_1900_dose2_syndromic_comp85_s943",
+      "hull": "classic_cruise_1900",
+      "dose_adjustment": 2.0,
+      "surveillance": "syndromic_comp85",
+      "seed": 943,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/classic_cruise_1900/postfix_pilot_classic_cruise_1900_dose2_syndromic_comp85_s943.json"
+    },
+    {
+      "run_id": "postfix_pilot_classic_cruise_1900_dose2_syndromic_comp85_s944",
+      "hull": "classic_cruise_1900",
+      "dose_adjustment": 2.0,
+      "surveillance": "syndromic_comp85",
+      "seed": 944,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/classic_cruise_1900/postfix_pilot_classic_cruise_1900_dose2_syndromic_comp85_s944.json"
+    },
+    {
+      "run_id": "postfix_pilot_classic_cruise_1900_dose2_syndromic_comp85_s945",
+      "hull": "classic_cruise_1900",
+      "dose_adjustment": 2.0,
+      "surveillance": "syndromic_comp85",
+      "seed": 945,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/classic_cruise_1900/postfix_pilot_classic_cruise_1900_dose2_syndromic_comp85_s945.json"
+    },
+    {
+      "run_id": "postfix_pilot_classic_cruise_1900_dose2_syndromic_comp85_s946",
+      "hull": "classic_cruise_1900",
+      "dose_adjustment": 2.0,
+      "surveillance": "syndromic_comp85",
+      "seed": 946,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/classic_cruise_1900/postfix_pilot_classic_cruise_1900_dose2_syndromic_comp85_s946.json"
+    },
+    {
+      "run_id": "postfix_pilot_classic_cruise_1900_dose2_syndromic_comp85_s947",
+      "hull": "classic_cruise_1900",
+      "dose_adjustment": 2.0,
+      "surveillance": "syndromic_comp85",
+      "seed": 947,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/classic_cruise_1900/postfix_pilot_classic_cruise_1900_dose2_syndromic_comp85_s947.json"
+    },
+    {
+      "run_id": "postfix_pilot_classic_cruise_1900_dose2_syndromic_comp85_s948",
+      "hull": "classic_cruise_1900",
+      "dose_adjustment": 2.0,
+      "surveillance": "syndromic_comp85",
+      "seed": 948,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/classic_cruise_1900/postfix_pilot_classic_cruise_1900_dose2_syndromic_comp85_s948.json"
+    },
+    {
+      "run_id": "postfix_pilot_classic_cruise_1900_dose2_syndromic_comp85_s949",
+      "hull": "classic_cruise_1900",
+      "dose_adjustment": 2.0,
+      "surveillance": "syndromic_comp85",
+      "seed": 949,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/classic_cruise_1900/postfix_pilot_classic_cruise_1900_dose2_syndromic_comp85_s949.json"
+    },
+    {
+      "run_id": "postfix_pilot_classic_cruise_1900_dose2.5_none_response_s940",
+      "hull": "classic_cruise_1900",
+      "dose_adjustment": 2.5,
+      "surveillance": "none_response",
+      "seed": 940,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/classic_cruise_1900/postfix_pilot_classic_cruise_1900_dose2.5_none_response_s940.json"
+    },
+    {
+      "run_id": "postfix_pilot_classic_cruise_1900_dose2.5_none_response_s941",
+      "hull": "classic_cruise_1900",
+      "dose_adjustment": 2.5,
+      "surveillance": "none_response",
+      "seed": 941,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/classic_cruise_1900/postfix_pilot_classic_cruise_1900_dose2.5_none_response_s941.json"
+    },
+    {
+      "run_id": "postfix_pilot_classic_cruise_1900_dose2.5_none_response_s942",
+      "hull": "classic_cruise_1900",
+      "dose_adjustment": 2.5,
+      "surveillance": "none_response",
+      "seed": 942,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/classic_cruise_1900/postfix_pilot_classic_cruise_1900_dose2.5_none_response_s942.json"
+    },
+    {
+      "run_id": "postfix_pilot_classic_cruise_1900_dose2.5_none_response_s943",
+      "hull": "classic_cruise_1900",
+      "dose_adjustment": 2.5,
+      "surveillance": "none_response",
+      "seed": 943,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/classic_cruise_1900/postfix_pilot_classic_cruise_1900_dose2.5_none_response_s943.json"
+    },
+    {
+      "run_id": "postfix_pilot_classic_cruise_1900_dose2.5_none_response_s944",
+      "hull": "classic_cruise_1900",
+      "dose_adjustment": 2.5,
+      "surveillance": "none_response",
+      "seed": 944,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/classic_cruise_1900/postfix_pilot_classic_cruise_1900_dose2.5_none_response_s944.json"
+    },
+    {
+      "run_id": "postfix_pilot_classic_cruise_1900_dose2.5_none_response_s945",
+      "hull": "classic_cruise_1900",
+      "dose_adjustment": 2.5,
+      "surveillance": "none_response",
+      "seed": 945,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/classic_cruise_1900/postfix_pilot_classic_cruise_1900_dose2.5_none_response_s945.json"
+    },
+    {
+      "run_id": "postfix_pilot_classic_cruise_1900_dose2.5_none_response_s946",
+      "hull": "classic_cruise_1900",
+      "dose_adjustment": 2.5,
+      "surveillance": "none_response",
+      "seed": 946,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/classic_cruise_1900/postfix_pilot_classic_cruise_1900_dose2.5_none_response_s946.json"
+    },
+    {
+      "run_id": "postfix_pilot_classic_cruise_1900_dose2.5_none_response_s947",
+      "hull": "classic_cruise_1900",
+      "dose_adjustment": 2.5,
+      "surveillance": "none_response",
+      "seed": 947,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/classic_cruise_1900/postfix_pilot_classic_cruise_1900_dose2.5_none_response_s947.json"
+    },
+    {
+      "run_id": "postfix_pilot_classic_cruise_1900_dose2.5_none_response_s948",
+      "hull": "classic_cruise_1900",
+      "dose_adjustment": 2.5,
+      "surveillance": "none_response",
+      "seed": 948,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/classic_cruise_1900/postfix_pilot_classic_cruise_1900_dose2.5_none_response_s948.json"
+    },
+    {
+      "run_id": "postfix_pilot_classic_cruise_1900_dose2.5_none_response_s949",
+      "hull": "classic_cruise_1900",
+      "dose_adjustment": 2.5,
+      "surveillance": "none_response",
+      "seed": 949,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/classic_cruise_1900/postfix_pilot_classic_cruise_1900_dose2.5_none_response_s949.json"
+    },
+    {
+      "run_id": "postfix_pilot_classic_cruise_1900_dose2.5_syndromic_comp85_s940",
+      "hull": "classic_cruise_1900",
+      "dose_adjustment": 2.5,
+      "surveillance": "syndromic_comp85",
+      "seed": 940,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/classic_cruise_1900/postfix_pilot_classic_cruise_1900_dose2.5_syndromic_comp85_s940.json"
+    },
+    {
+      "run_id": "postfix_pilot_classic_cruise_1900_dose2.5_syndromic_comp85_s941",
+      "hull": "classic_cruise_1900",
+      "dose_adjustment": 2.5,
+      "surveillance": "syndromic_comp85",
+      "seed": 941,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/classic_cruise_1900/postfix_pilot_classic_cruise_1900_dose2.5_syndromic_comp85_s941.json"
+    },
+    {
+      "run_id": "postfix_pilot_classic_cruise_1900_dose2.5_syndromic_comp85_s942",
+      "hull": "classic_cruise_1900",
+      "dose_adjustment": 2.5,
+      "surveillance": "syndromic_comp85",
+      "seed": 942,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/classic_cruise_1900/postfix_pilot_classic_cruise_1900_dose2.5_syndromic_comp85_s942.json"
+    },
+    {
+      "run_id": "postfix_pilot_classic_cruise_1900_dose2.5_syndromic_comp85_s943",
+      "hull": "classic_cruise_1900",
+      "dose_adjustment": 2.5,
+      "surveillance": "syndromic_comp85",
+      "seed": 943,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/classic_cruise_1900/postfix_pilot_classic_cruise_1900_dose2.5_syndromic_comp85_s943.json"
+    },
+    {
+      "run_id": "postfix_pilot_classic_cruise_1900_dose2.5_syndromic_comp85_s944",
+      "hull": "classic_cruise_1900",
+      "dose_adjustment": 2.5,
+      "surveillance": "syndromic_comp85",
+      "seed": 944,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/classic_cruise_1900/postfix_pilot_classic_cruise_1900_dose2.5_syndromic_comp85_s944.json"
+    },
+    {
+      "run_id": "postfix_pilot_classic_cruise_1900_dose2.5_syndromic_comp85_s945",
+      "hull": "classic_cruise_1900",
+      "dose_adjustment": 2.5,
+      "surveillance": "syndromic_comp85",
+      "seed": 945,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/classic_cruise_1900/postfix_pilot_classic_cruise_1900_dose2.5_syndromic_comp85_s945.json"
+    },
+    {
+      "run_id": "postfix_pilot_classic_cruise_1900_dose2.5_syndromic_comp85_s946",
+      "hull": "classic_cruise_1900",
+      "dose_adjustment": 2.5,
+      "surveillance": "syndromic_comp85",
+      "seed": 946,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/classic_cruise_1900/postfix_pilot_classic_cruise_1900_dose2.5_syndromic_comp85_s946.json"
+    },
+    {
+      "run_id": "postfix_pilot_classic_cruise_1900_dose2.5_syndromic_comp85_s947",
+      "hull": "classic_cruise_1900",
+      "dose_adjustment": 2.5,
+      "surveillance": "syndromic_comp85",
+      "seed": 947,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/classic_cruise_1900/postfix_pilot_classic_cruise_1900_dose2.5_syndromic_comp85_s947.json"
+    },
+    {
+      "run_id": "postfix_pilot_classic_cruise_1900_dose2.5_syndromic_comp85_s948",
+      "hull": "classic_cruise_1900",
+      "dose_adjustment": 2.5,
+      "surveillance": "syndromic_comp85",
+      "seed": 948,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/classic_cruise_1900/postfix_pilot_classic_cruise_1900_dose2.5_syndromic_comp85_s948.json"
+    },
+    {
+      "run_id": "postfix_pilot_classic_cruise_1900_dose2.5_syndromic_comp85_s949",
+      "hull": "classic_cruise_1900",
+      "dose_adjustment": 2.5,
+      "surveillance": "syndromic_comp85",
+      "seed": 949,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/classic_cruise_1900/postfix_pilot_classic_cruise_1900_dose2.5_syndromic_comp85_s949.json"
+    },
+    {
+      "run_id": "postfix_pilot_classic_cruise_1900_dose3_none_response_s940",
+      "hull": "classic_cruise_1900",
+      "dose_adjustment": 3.0,
+      "surveillance": "none_response",
+      "seed": 940,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/classic_cruise_1900/postfix_pilot_classic_cruise_1900_dose3_none_response_s940.json"
+    },
+    {
+      "run_id": "postfix_pilot_classic_cruise_1900_dose3_none_response_s941",
+      "hull": "classic_cruise_1900",
+      "dose_adjustment": 3.0,
+      "surveillance": "none_response",
+      "seed": 941,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/classic_cruise_1900/postfix_pilot_classic_cruise_1900_dose3_none_response_s941.json"
+    },
+    {
+      "run_id": "postfix_pilot_classic_cruise_1900_dose3_none_response_s942",
+      "hull": "classic_cruise_1900",
+      "dose_adjustment": 3.0,
+      "surveillance": "none_response",
+      "seed": 942,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/classic_cruise_1900/postfix_pilot_classic_cruise_1900_dose3_none_response_s942.json"
+    },
+    {
+      "run_id": "postfix_pilot_classic_cruise_1900_dose3_none_response_s943",
+      "hull": "classic_cruise_1900",
+      "dose_adjustment": 3.0,
+      "surveillance": "none_response",
+      "seed": 943,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/classic_cruise_1900/postfix_pilot_classic_cruise_1900_dose3_none_response_s943.json"
+    },
+    {
+      "run_id": "postfix_pilot_classic_cruise_1900_dose3_none_response_s944",
+      "hull": "classic_cruise_1900",
+      "dose_adjustment": 3.0,
+      "surveillance": "none_response",
+      "seed": 944,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/classic_cruise_1900/postfix_pilot_classic_cruise_1900_dose3_none_response_s944.json"
+    },
+    {
+      "run_id": "postfix_pilot_classic_cruise_1900_dose3_none_response_s945",
+      "hull": "classic_cruise_1900",
+      "dose_adjustment": 3.0,
+      "surveillance": "none_response",
+      "seed": 945,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/classic_cruise_1900/postfix_pilot_classic_cruise_1900_dose3_none_response_s945.json"
+    },
+    {
+      "run_id": "postfix_pilot_classic_cruise_1900_dose3_none_response_s946",
+      "hull": "classic_cruise_1900",
+      "dose_adjustment": 3.0,
+      "surveillance": "none_response",
+      "seed": 946,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/classic_cruise_1900/postfix_pilot_classic_cruise_1900_dose3_none_response_s946.json"
+    },
+    {
+      "run_id": "postfix_pilot_classic_cruise_1900_dose3_none_response_s947",
+      "hull": "classic_cruise_1900",
+      "dose_adjustment": 3.0,
+      "surveillance": "none_response",
+      "seed": 947,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/classic_cruise_1900/postfix_pilot_classic_cruise_1900_dose3_none_response_s947.json"
+    },
+    {
+      "run_id": "postfix_pilot_classic_cruise_1900_dose3_none_response_s948",
+      "hull": "classic_cruise_1900",
+      "dose_adjustment": 3.0,
+      "surveillance": "none_response",
+      "seed": 948,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/classic_cruise_1900/postfix_pilot_classic_cruise_1900_dose3_none_response_s948.json"
+    },
+    {
+      "run_id": "postfix_pilot_classic_cruise_1900_dose3_none_response_s949",
+      "hull": "classic_cruise_1900",
+      "dose_adjustment": 3.0,
+      "surveillance": "none_response",
+      "seed": 949,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/classic_cruise_1900/postfix_pilot_classic_cruise_1900_dose3_none_response_s949.json"
+    },
+    {
+      "run_id": "postfix_pilot_classic_cruise_1900_dose3_syndromic_comp85_s940",
+      "hull": "classic_cruise_1900",
+      "dose_adjustment": 3.0,
+      "surveillance": "syndromic_comp85",
+      "seed": 940,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/classic_cruise_1900/postfix_pilot_classic_cruise_1900_dose3_syndromic_comp85_s940.json"
+    },
+    {
+      "run_id": "postfix_pilot_classic_cruise_1900_dose3_syndromic_comp85_s941",
+      "hull": "classic_cruise_1900",
+      "dose_adjustment": 3.0,
+      "surveillance": "syndromic_comp85",
+      "seed": 941,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/classic_cruise_1900/postfix_pilot_classic_cruise_1900_dose3_syndromic_comp85_s941.json"
+    },
+    {
+      "run_id": "postfix_pilot_classic_cruise_1900_dose3_syndromic_comp85_s942",
+      "hull": "classic_cruise_1900",
+      "dose_adjustment": 3.0,
+      "surveillance": "syndromic_comp85",
+      "seed": 942,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/classic_cruise_1900/postfix_pilot_classic_cruise_1900_dose3_syndromic_comp85_s942.json"
+    },
+    {
+      "run_id": "postfix_pilot_classic_cruise_1900_dose3_syndromic_comp85_s943",
+      "hull": "classic_cruise_1900",
+      "dose_adjustment": 3.0,
+      "surveillance": "syndromic_comp85",
+      "seed": 943,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/classic_cruise_1900/postfix_pilot_classic_cruise_1900_dose3_syndromic_comp85_s943.json"
+    },
+    {
+      "run_id": "postfix_pilot_classic_cruise_1900_dose3_syndromic_comp85_s944",
+      "hull": "classic_cruise_1900",
+      "dose_adjustment": 3.0,
+      "surveillance": "syndromic_comp85",
+      "seed": 944,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/classic_cruise_1900/postfix_pilot_classic_cruise_1900_dose3_syndromic_comp85_s944.json"
+    },
+    {
+      "run_id": "postfix_pilot_classic_cruise_1900_dose3_syndromic_comp85_s945",
+      "hull": "classic_cruise_1900",
+      "dose_adjustment": 3.0,
+      "surveillance": "syndromic_comp85",
+      "seed": 945,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/classic_cruise_1900/postfix_pilot_classic_cruise_1900_dose3_syndromic_comp85_s945.json"
+    },
+    {
+      "run_id": "postfix_pilot_classic_cruise_1900_dose3_syndromic_comp85_s946",
+      "hull": "classic_cruise_1900",
+      "dose_adjustment": 3.0,
+      "surveillance": "syndromic_comp85",
+      "seed": 946,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/classic_cruise_1900/postfix_pilot_classic_cruise_1900_dose3_syndromic_comp85_s946.json"
+    },
+    {
+      "run_id": "postfix_pilot_classic_cruise_1900_dose3_syndromic_comp85_s947",
+      "hull": "classic_cruise_1900",
+      "dose_adjustment": 3.0,
+      "surveillance": "syndromic_comp85",
+      "seed": 947,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/classic_cruise_1900/postfix_pilot_classic_cruise_1900_dose3_syndromic_comp85_s947.json"
+    },
+    {
+      "run_id": "postfix_pilot_classic_cruise_1900_dose3_syndromic_comp85_s948",
+      "hull": "classic_cruise_1900",
+      "dose_adjustment": 3.0,
+      "surveillance": "syndromic_comp85",
+      "seed": 948,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/classic_cruise_1900/postfix_pilot_classic_cruise_1900_dose3_syndromic_comp85_s948.json"
+    },
+    {
+      "run_id": "postfix_pilot_classic_cruise_1900_dose3_syndromic_comp85_s949",
+      "hull": "classic_cruise_1900",
+      "dose_adjustment": 3.0,
+      "surveillance": "syndromic_comp85",
+      "seed": 949,
+      "path": "/home/ubuntu/repos/Crusher-to-the-Bridge/telemetry_buffer/observation_model/specs/classic_cruise_1900/postfix_pilot_classic_cruise_1900_dose3_syndromic_comp85_s949.json"
+    }
+  ]
+}

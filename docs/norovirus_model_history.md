@@ -218,6 +218,24 @@ inflated by this, and every ill/infected, which is deflated by it — including
 the v4 campaign and the post-merge anchor pilot at `7a9b439`. Fitted doses from
 those runs do not transfer.
 
+Measured after the fix, matched seeds, nothing else changed (120 runs at
+`d557f39` against the same 120 at `7a9b439`;
+`telemetry_buffer/observation_model/postfix_anchor_pilot_d557f39/postfix_anchor_findings.md`).
+Natural-history arm, dose 2.0: infection attack rate 0.797 -> 0.407
+(expedition) and 0.794 -> 0.465 (classic); ill/infected 0.264 -> 0.341 and
+0.224 -> 0.364. Direction is uniform across all six natural-history cells,
+1.8-2.9x down on infection and 1.3-2.0x up on illness.
+
+**The fix cost the model its one endpoint agreement, and that is the honest
+result.** Expedition's reported attack rate sat inside the VSP IQR at 6.02%
+before the fix; it was a cancellation of an inflated infection rate against a
+deflated illness ratio, and correcting only the inflated side drops it to 3.48%,
+below the 4.51% floor. A4 now fails on both hulls. Classic's reported rate, by
+contrast, is unchanged to three decimals (3.88% -> 3.89%) because the same two
+moves cancelled there. Any claim that this model reproduces VSP attack rates is
+withdrawn. Take-off also fell in five of six cells at fixed dose, so the ladder
+is effectively lower and must be re-cut before any fit.
+
 The fix does not reach the anchors and must not be read as doing so. Under the
 corrected form, infection attack rate and ill/infected are welded to the same
 dose (attack rate 0.32 caps ill/infected at 0.45; 0.68 caps it at 0.71), so A1
