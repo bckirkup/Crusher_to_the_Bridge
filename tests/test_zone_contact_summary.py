@@ -72,7 +72,8 @@ class TestZoneContactSummary:
         assert row["shedder_ids"] == [1]
         assert row["shared_room_exposure_count"] >= 1
         assert row["droplet_exposure_count"] >= 1
-        assert row["infection_count"] == 0
+        # Change detector: the POLYMOD contact rate yields one infection.
+        assert row["infection_count"] == 1
 
         as_dict = matrix.to_dict()
         assert "zone_contact_summary" in as_dict

@@ -76,11 +76,7 @@ def steady_state_pool(
     Deposition is shedder hand -> surface; removal is surface inactivation
     plus pickup by every susceptible hand touching the same pool.
     """
-    contacts = (
-        tc.CABIN_SURFACE_CONTACTS_PER_HOUR
-        if zone_class == "cabin"
-        else tc.PUBLIC_SURFACE_CONTACTS_PER_HOUR
-    )
+    contacts = tc.SURFACE_CONTACTS_PER_HOUR[zone_class]
 
     # Deposition per shedder-hour: hand load x touches x hand fraction x TE.
     dep_per_shedder_hour = (
@@ -133,11 +129,7 @@ def surface_loss_per_hour(
 ) -> float:
     """Inactivation plus pickup by every susceptible hand on the pool."""
     area = tc.HIGH_TOUCH_AREA_M2[zone_class]
-    contacts = (
-        tc.CABIN_SURFACE_CONTACTS_PER_HOUR
-        if zone_class == "cabin"
-        else tc.PUBLIC_SURFACE_CONTACTS_PER_HOUR
-    )
+    contacts = tc.SURFACE_CONTACTS_PER_HOUR[zone_class]
     pickup_fraction_per_person_hour = (
         contacts * exp_["s_h"] * (exp_["hand_area_m2"] / area) * exp_["te_sh"]
     )
@@ -312,9 +304,9 @@ def main() -> None:
     area_c = tc.HIGH_TOUCH_AREA_M2["cabin"]
     area_p = tc.HIGH_TOUCH_AREA_M2["public"]
     # concentration ratio scales as (dep_c/area_c)/(dep_p/area_p) for equal
-    # loss rates, i.e. (2*h_c/1.5)/(6*h_p/6.0).
-    per_hour_c = tc.CABIN_SURFACE_CONTACTS_PER_HOUR / area_c
-    per_hour_p = tc.PUBLIC_SURFACE_CONTACTS_PER_HOUR / area_p
+    # loss rates, where deposition is proportional to contacts per hour.
+    per_hour_c = tc.SURFACE_CONTACTS_PER_HOUR["cabin"] / area_c
+    per_hour_p = tc.SURFACE_CONTACTS_PER_HOUR["public"] / area_p
     emit(
         f"  needed shedder-hours(cabin)/shedder-hours(public) = "
         f"{ratio_needed * per_hour_p / per_hour_c:.4g}",

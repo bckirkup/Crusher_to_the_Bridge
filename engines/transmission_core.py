@@ -98,8 +98,29 @@ HAND_HYGIENE_EFFICACY_LOG10 = (1.06, 0.54, 0.0, 1.89)
 HAND_HYGIENE_RATE_PER_HOUR_DEFAULT = 0.0
 NON_EATING_MOUTH_CONTACTS_PER_HOUR = (2.9, 2.5)
 EATING_MOUTH_CONTACTS_PER_HOUR = (7.7, 4.1)
-PUBLIC_SURFACE_CONTACTS_PER_HOUR = 6.0
-CABIN_SURFACE_CONTACTS_PER_HOUR = 2.0
+# Measured shared-surface touch rates, contacts per hour. These are
+# public/shared-surface rates, not all-surface rates: the studies separate
+# touches of one's own belongings from touches of shared fomites, and only the
+# latter drive fomite transmission.
+SURFACE_CONTACTS_PER_HOUR = {
+    # University dormitory primary shared surfaces, 10.4-25.4/h; midpoint.
+    # Yuan et al. 2024, Building and Environment. Grade B.
+    "cabin": 17.9,
+    # Hotel lobby, 627 touches by 324 people over 30 h.
+    # Ackerley et al. 2023/2025. Grade B, and the only hospitality field study.
+    "public": 21.0,
+    # Restaurant diners, public-surface contacts. Jin et al. 2022, IJID
+    # (a norovirus surface-transmission study). Grade B.
+    "dining": 42.8,
+    # Restaurant staff, public-surface contacts. Jin et al. 2022. Grade B.
+    "galley": 545.4,
+    # Crew eating; diner rate applies to the eater, not the server.
+    "crew_mess": 42.8,
+}
+# Same restaurant, same study, same hour: staff touch shared surfaces 12.7x
+# more than diners do. Touch rate is a property of the activity, not only of
+# the room, so crew working a service zone take the staff rate.
+CREW_SERVICE_SURFACE_CONTACTS_PER_HOUR = 545.4
 HIGH_TOUCH_AREA_M2 = {
     "cabin": 1.5,
     "dining": 8.0,
@@ -170,11 +191,14 @@ DEFAULT_SURFACE_DECAY_PER_DAY = 0.50
 
 # R0-calibrated contact pool (from Person.java avgR array) — legacy contact_mode
 AVG_R_POOL = [1, 2, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2]
+# Mean daily contacts, POLYMOD 8-country diary study (Mossong et al. 2008,
+# PLoS Med). Supersedes the avgR pool inherited from Korkin's Person.java.
+POLYMOD_CONTACTS_PER_DAY = 13.4
 
 # Defaults for density_dependent contact_mode (partial overrides merge onto these)
 DEFAULT_DENSITY_CFG: dict[str, float] = {
     "reference_occupancy": 50.0,
-    "base_contacts_per_day": 13.4,
+    "base_contacts_per_day": POLYMOD_CONTACTS_PER_DAY,
     "max_contacts_per_day": 40.0,
     "exponent": 0.5,
     "crew_contact_multiplier": 2.0,
@@ -1960,17 +1984,21 @@ class TransmissionCore:
         """Return r0_draw for direct contact under the active contact_mode."""
         if self.contact_mode in ("density_dependent", "heterogeneous_zone_dose"):
             return self._effective_contacts(n_occupants, target)
-        base = int(self.rng.choice(AVG_R_POOL))
-        # Legacy mode: still scale by voyage contact multiplier when active
-        scaled = (
-            base
-            * self.clock.day_fraction_per_epoch
-            * float(self.voyage_contact_multiplier)
-        )
-        if self.clock.mode == LEGACY_EPOCH_DAY:
-            return max(0, int(round(scaled)))
-        whole = math.floor(scaled)
-        return max(0, whole + int(self.rng.random() < scaled - whole))
+        if self.contact_mode == "legacy":
+            base = int(self.rng.choice(AVG_R_POOL))
+            # Legacy mode: still scale by voyage contact multiplier when active
+            scaled = (
+                base
+                * self.clock.day_fraction_per_epoch
+                * float(self.voyage_contact_multiplier)
+            )
+            if self.clock.mode == LEGACY_EPOCH_DAY:
+                return max(0, int(round(scaled)))
+            whole = math.floor(scaled)
+            return max(0, whole + int(self.rng.random() < scaled - whole))
+        mean = self.clock.amount_per_epoch(POLYMOD_CONTACTS_PER_DAY)
+        mean *= float(self.voyage_contact_multiplier)
+        return max(0, int(self.rng.poisson(mean)))
 
     def _zone_exposure_sigma(self, zone_name: str) -> float:
         """Log-sigma for within-zone exposure heterogeneity."""
@@ -2273,12 +2301,20 @@ class TransmissionCore:
     def _fomite_surface_area(self, zone_name: str) -> float:
         return HIGH_TOUCH_AREA_M2[self._fomite_zone_class(zone_name)]
 
-    def _fomite_surface_contacts(self, zone_name: str) -> float:
-        hourly = (
-            CABIN_SURFACE_CONTACTS_PER_HOUR
-            if self._fomite_zone_class(zone_name) == "cabin"
-            else PUBLIC_SURFACE_CONTACTS_PER_HOUR
-        )
+    def _fomite_surface_contacts(
+        self,
+        zone_name: str,
+        agent: KorkinAgent | None = None,
+    ) -> float:
+        zone_class = self._fomite_zone_class(zone_name)
+        if (
+            agent is not None
+            and getattr(agent, "role", "") == "crew"
+            and zone_name in self._service_zones
+        ):
+            hourly = CREW_SERVICE_SURFACE_CONTACTS_PER_HOUR
+        else:
+            hourly = SURFACE_CONTACTS_PER_HOUR[zone_class]
         return hourly * self.clock.hours_per_epoch
 
     def _fomite_is_eating(self, target: KorkinAgent, epoch: int) -> bool:
@@ -2321,7 +2357,7 @@ class TransmissionCore:
         )
         area = self._fomite_surface_area(zone_name)
         request = (
-            self._fomite_surface_contacts(zone_name)
+            self._fomite_surface_contacts(zone_name, target)
             * (used_fraction * hand_area / area)
             * transfer_efficiency
             * surface_mass
@@ -2770,7 +2806,7 @@ class TransmissionCore:
                     max(0.0, float(self.rng.lognormal(*SURFACE_TO_HAND_LOGNORMAL))),
                 )
                 requested = (
-                    self._fomite_surface_contacts(zone_name)
+                    self._fomite_surface_contacts(zone_name, agent)
                     * used_fraction
                     * transfer_efficiency
                     * hand

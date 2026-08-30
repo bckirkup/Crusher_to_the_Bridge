@@ -236,14 +236,9 @@ a miss and **not** corrected by adjusting these constants.
   last being the only field hospitality measurement, at 1.57 log10). This is a
   separate change and is the natural lever for the post-COVID NPI
   discontinuity.
-- The shared-surface contact rates `PUBLIC_SURFACE_CONTACTS_PER_HOUR = 6.0` and
-  `CABIN_SURFACE_CONTACTS_PER_HOUR = 2.0`, declared Grade C in PR #351, are now
-  known to be low by 4-10x against behavioural-observation measurements (hotel
-  lobby 21/h, restaurant diners 42.8/h on shared surfaces, airport manual
-  check-in 55.8/h, dormitory primary surfaces 10.4-25.4/h; Ackerley et al. 2023,
-  Jin et al. 2022, Zhuang et al. 2023, Yuan et al. 2024). Correcting them is a
-  separate change, kept separate so that its effect on route share is
-  measurable independently of this one.
+- The shared-surface contact rates from PR #351 were replaced by the measured,
+  zone-class and role-aware rates in the contact-layer re-derivation. The
+  correction is kept separate so its effect on route share remains measurable.
 
 ## 8. A gap that is the field's, not ours
 
