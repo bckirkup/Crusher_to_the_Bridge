@@ -462,6 +462,61 @@ None of this is validation. It says the fomite route is now in the right
 numerical territory to be worth testing, which at 0.13 particles per voyage it
 was not, and it says nothing yet about A1-A5.
 
+## 9f. The contact layer re-derived, and the fitted scalar's second passenger
+
+Two unsourced constants in different mechanisms, both low by about a decade,
+both absorbed by the same fitted parameter. Corrected together in #353, because
+splitting them would have attributed the correction to whichever landed first.
+
+**Shared-surface touch rates.** `PUBLIC_SURFACE_CONTACTS_PER_HOUR = 6.0` and
+`CABIN_SURFACE_CONTACTS_PER_HOUR = 2.0`, the two Grade C declarations §9e left
+outstanding, were replaced by a zone-class table: cabin 17.9/h (Yuan et al.
+2024, dormitory primary shared surfaces), public 21.0/h (Ackerley et al.
+2023/2025, hotel lobby), dining 42.8/h and galley 545.4/h (Jin et al. 2022,
+restaurant diners and staff respectively). These are shared-surface rates, not
+all-surface rates: the studies separate touches of one's own belongings from
+touches of shared fomites, and only the latter drive fomite transmission.
+Taking a study's headline all-surface figure instead would overstate the route
+substantially, which is a definitional error rather than a magnitude one and is
+easy to make.
+
+The last two are the same study, setting and hour, differing only in what the
+person was doing: staff touch shared surfaces 12.7x more than diners. Touch
+rate is a property of the activity, so crew in a service zone take the staff
+rate, reusing the `_service_zones` set that `_effective_contacts` already uses
+for `crew_contact_multiplier`.
+
+**The inherited Korkin contact kernel.** `AVG_R_POOL` averages 1.333
+contacts/day against POLYMOD's 13.4 (Mossong et al. 2008). §10 recorded this as
+unresolved and `docs/density_contact_spec.md` had already concluded the
+inherited kernel should be rejected; it never was, because
+`base_contacts_per_day = 13.4` applied only to `density_dependent` and
+`heterogeneous_zone_dose` while the shipped default `per_partner_contact` fell
+through to the pool. **The shipped model had been running at 1.33 contacts/day
+throughout the effort.** `per_partner_contact` now draws
+`Poisson(POLYMOD_CONTACTS_PER_DAY per epoch)`, which is exactly
+timestep-invariant rather than invariant in mean only. `legacy` is unchanged.
+
+**Measured, not fitted.** Park's cabin/public gradient moves 4.02x -> 14.5x and
+the shedder-hour asymmetry needed to reach 100x by hand transfer alone falls
+from 75x to 29.3x. Still short, and the §9e conclusion is unchanged: the
+residual is where people vomit. Cabin loading rises 1,434 -> 5,571 copies/swab
+and public 356.9 -> 384.9, both still inside Park's observed ranges.
+
+The deposition clamp `min(hand, n·f·e·hand)` now binds: reachable from 4
+contacts/h in the tail, mean crossover at ~31.9/h, binding on 19.9% of draws at
+21/h, 35.5% at 42.8/h and 88.5% at the 545.4/h service rate. So the fomite
+route is superlinear in touch rate at the low end and saturates at the high
+end, and the galley rate does far less than its 90x nominal increase suggests —
+a galley worker's hands turn over completely every hour and cannot deposit more
+than they carry.
+
+This is expected to push A5 *further* from 2.9, since crew work the
+highest-rate zones and their berthing is already denser. That would be a
+finding about what is still missing, not a reason to revisit the constants.
+Every dose figure is withdrawn again: the fit was against a contact layer that
+no longer exists.
+
 ## 10. Parameters held fixed by assumption
 
 These are not identified by anything in the fit, and any of them could move the
@@ -473,9 +528,17 @@ over-determined *given* these.
   assumed, not traced to a source.
 - Direct-contact transfer fraction: implicitly 1.0, where a contact-model
   anchor in the literature is ~0.25, and contact is the largest dose route.
-- Contact rate: Korkin 1.33/day against POLYMOD 13.4/day. Unresolved. Raising it
-  is not equivalent to raising dose, because it changes the variance that
-  produces the intermediate outbreak regime.
+- ~~Contact rate: Korkin 1.33/day against POLYMOD 13.4/day. Unresolved.~~
+  Resolved in #353 (§9f): `per_partner_contact` now draws Poisson at POLYMOD's
+  13.4/day. Raising it was not equivalent to raising dose, because it changes
+  the variance that produces the intermediate outbreak regime — which is why
+  the fitted scalar could absorb it without the error becoming visible.
+- Per-zone high-touch surface areas (`HIGH_TOUCH_AREA_M2`, 1.5-10 m² by class):
+  no study has ever measured high-touch surface area per room in m². Permanent
+  Grade C. It is the denominator of the fomite pickup model.
+- The fraction of a host's vomiting episodes occurring in its own cabin:
+  unmeasured, swept rather than asserted, and not a model parameter (§9f, and
+  `telemetry_buffer/observation_model/park_emesis_findings.md`).
 - Confinement attenuation factor 0.05.
 - The 20% innate non-susceptible ceiling, which is why infection attack rate
   pins at exactly 0.800 and why the fit must be read on reported cases.
@@ -518,6 +581,15 @@ the entire effort, and nobody noticed until a joke about fomite transfer
 prompted the dimensional check. And the replacement hand compartment shipped
 with a timestep-dependent steady state, the same class of defect as §9, caught
 in review before it landed. The base rate applies to new code too.
+
+The twelfth (§9f) is the contact layer: two unsourced constants, in unrelated
+mechanisms, each about a decade low, both absorbed by the same fitted scalar.
+One of them — the Korkin kernel — had been recorded as a known discrepancy in
+two separate documents for weeks without being acted on, which is its own
+lesson: writing a defect down is not fixing it, and a documented-but-live defect
+is more dangerous than an unknown one because it reads as handled. It was found
+not by a check but by a joke about fomite transfer prompting a dimensional
+audit, then by asking what else the fitted scalar might be covering for.
 
 Guards now cover naked epochs, dose-pathway dimensions, reservoir
 conservation, per-capita invariance to occupancy, cross-clock equivalence of

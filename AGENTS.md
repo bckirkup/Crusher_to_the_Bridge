@@ -11,6 +11,16 @@ pre-commit install
 
 Read `.agents/skills/sonar-quality/SKILL.md` before changing code or workflows.
 
+Before changing any epidemiological constant — transmission rates, transfer
+fractions, contact kernels, decay rates, titres, areas, deposition fractions —
+read `.agents/skills/model-parameter-provenance/SKILL.md`. Constants carry a
+source and an evidence grade at their definition, and none of them may be
+chosen to make VSP, Park, or the passenger/crew ratio come out right.
+
+`docs/norovirus_open_ledger.md` records what is currently withdrawn. **Every
+dose figure in the repository is void pending a refit** — check the ledger
+before quoting one.
+
 Crusher's local Ruff pre-commit hook uses the repository `C901` ceiling of 117.
 Sonar's new-code gate holds new functions to cognitive complexity 15. Dedicated
 complexity-backlog splits are allowed as their own change; do not mix them into
@@ -52,7 +62,12 @@ docker run --rm picard-campaign --smoke
 
 ## Scope Rules
 
-- Do not modify tests to make them pass.
+- Do not modify tests to make them pass. When a model change legitimately moves
+  a numeric expectation, attribute the move to a specific part of your diff
+  before updating it; an unattributed baseline move is a possible defect.
+- Do not fit a physical constant to an anchor the model is scored against.
+- Update `docs/norovirus_open_ledger.md` in the same change as anything that
+  invalidates a measurement recorded there.
 - Preserve the hash-pinned installation and both CI workflows.
 - Keep substantive Sentinel work under `picard_framework/analysis/stan/` and
   `picard_framework/runs/` separate from mechanical maintenance.

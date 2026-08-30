@@ -78,6 +78,7 @@ Install from the hash-pinned lockfile: `pip install --only-binary=:all: --requir
 | `stackelberg-utility-export` | Social config, utility bundles, action import |
 | `testing-picard-presidio` | Before PRs on framework code |
 | `sonar-quality` | Before source/workflow edits; complexity-backlog splits (C901 117, new-code 15) |
+| `model-parameter-provenance` | Before changing any epidemiological constant, rate, fraction or kernel; sourcing, evidence grades, no-tuning rules, moved goldens |
 | `configuring-stackelberg-social` | Adding/editing diffusion, class interactions, profiles |
 | `operational-impact-behavioral-policies` | OIS weights, action kinds, ThresholdBeliefPolicy |
 | `outbreak-response-architecture` | Escalation levels, decision latency, bimodal compliance, T11/T15/T16 |
@@ -119,6 +120,8 @@ Install from the hash-pinned lockfile: `pip install --only-binary=:all: --requir
 - **Shedding variance:** `shedding_variance_log10` on pathogen profiles draws a persistent per-agent multiplier at infection (`docs/SHEDDING_AND_CABINMATES.md`).
 - **Cabin-mates:** `mega_cruise_5000` `Cabin_Corridor` zones pair agents into staterooms at init; confinement direct contact is cabin-mate-aware (`assign_cabin_mates` in `orchestrator_init.py`).
 - **Contact mode:** default `transmission.contact_mode: per_partner_contact` (`docs/density_contact_spec.md`): each susceptible receives shedding from the specific partners sampled from the zone, not the zone average. Other modes are `density_dependent`, `heterogeneous_zone_dose`, and `legacy`.
-- **Multi-pathogen calibration knobs:** `transmission_route_weights`, log10 `dose_adjustment`, `innate_nonsusceptible_fraction`, `agent_behavior` dining/free rotation (default off), Dining `food_contamination_multiplier` / `dining_service_type`, env `source_zones` — see `docs/multi_pathogen_model_changes_spec.md`.
+- **Norovirus fit status:** `docs/norovirus_open_ledger.md` is the live record of what is currently withdrawn — **every dose figure is void pending a refit**. `docs/norovirus_model_history.md` is the permanent defect and revision record. Read the ledger before quoting any dose, route share, or anchor result.
+- **`dose_adjustment` is not a calibration constant.** It is `−log10` of the grams of stool released to the environment per epoch, and is now spelled `environmental_faecal_release_log10_g_per_epoch` (old key accepted as an alias). Historical fitted values are not validated biological constants.
+- **Multi-pathogen calibration knobs:** `transmission_route_weights`, log10 `environmental_faecal_release_log10_g_per_epoch` (legacy `dose_adjustment`), `innate_nonsusceptible_fraction`, `agent_behavior` dining/free rotation (default off), Dining `food_contamination_multiplier` / `dining_service_type`, env `source_zones` — see `docs/multi_pathogen_model_changes_spec.md`.
 - Ruff lint: **F-rules are blocking** in main CI; E/W/I remain advisory (`continue-on-error` / `|| true`). Keep unused-import and undefined-name findings clean before campaigns.
 - **SonarCloud** uses GitHub-app Automatic Analysis (Autoscan). Configure analysis via in-repo `.sonarcloud.properties` (`sonar.python.version`, `sonar.tests`, exclusions) — not `sonar-project.properties` (that file is ignored while Autoscan is on). Agents still rely on ruff, `tests/test_path_io_inviolate.py`, and pytest for local gates; do not block on live Sonar MCP/CLI unless explicitly integrating.

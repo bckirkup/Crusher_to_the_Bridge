@@ -1,0 +1,174 @@
+# Norovirus fit: open ledger
+
+**Live status as of `1329bbf` (#353 merged).** What is currently withdrawn,
+what each anchor last measured and *when*, and what is outstanding.
+
+`docs/norovirus_model_history.md` is the permanent record of defects and
+corrections. This file is the volatile counterpart: it goes stale by design and
+must be updated whenever a model change lands. If the head commit below is not
+the current head, treat every number here as unverified.
+
+Read this before quoting any dose figure or anchor result.
+
+---
+
+## 1. Currently withdrawn
+
+**Every dose figure in this repository is void.**
+`environmental_faecal_release_log10_g_per_epoch` (the old `dose_adjustment`,
+still accepted as a legacy alias) was last fitted against a contact layer that no
+longer exists: #351 rebuilt the fomite chain, #352 added emesis, and #353
+raised the direct-contact kernel about 10x and the shared-surface touch rates
+4-10x. A dose fitted before those is not transferable, and no refit has been
+run since.
+
+Also withdrawn and not yet replaced:
+
+- **The v4 campaign** and every campaign before it. Each was invalidated by a
+  defect found after it ran (§12 of the history).
+- **Any claim that the model reproduces VSP attack rates.** Withdrawn at #346
+  and not re-established. Expedition's earlier agreement was a cancellation of
+  an inflated infection rate against a deflated illness ratio.
+- **Route shares.** Last measured before #351/#352/#353, all three of which
+  change route magnitudes directly. The often-quoted "droplet carries 94-96% of
+  establishing dose" dates from the post-#338 measurement and is stale.
+- **The passenger/crew ratio.** Same reason.
+
+## 2. Anchors
+
+Targets, from `telemetry_buffer/observation_model/anchor_measurement_spec.md`:
+
+| | quantity | target |
+|---|---|---|
+| A1 | ever-ill attack rate, passengers (Wikswo whole-ship cohort) | ~0.154 |
+| A2 | ever-ill / infected | 0.68-0.81 (0.59-0.81 GII.4-weighted) |
+| A3 | reported / ever-ill (infirmary capture) | 0.60 ± 0.05 |
+| A4 | reported passenger attack rate | inside the hull-class IQR |
+| A5 | passenger / crew reported attack rate | ~2.9-3.5 |
+
+A5's two figures come from different sources and are both live: the anchor spec
+says ~3.5 (7% vs 2%); the VSP 424-outbreak series gives ~2.9 (passenger
+5.7-6.9% against crew 2.0-2.4%), stable on both sides of the COVID break. Treat
+the target as a range, not a point.
+
+**Last measured values, and this is the part that matters: they are stale.**
+All of the following were taken at `d557f39`, immediately after #346 and
+*before* #348, #351, #352 and #353 landed. Every one of those changed
+transmission. Do not quote these as current model behaviour; they are recorded
+so the next measurement has something to compare against.
+
+| | expedition | classic | measured at |
+|---|---:|---:|---|
+| infection attack rate | 0.407 | 0.465 | `d557f39`, 120 runs, dose 2.0 |
+| ill / infected (A2) | 0.341 | 0.364 | `d557f39` |
+| reported passenger AR (A4) | 3.48% | 3.89% | `d557f39` |
+| A5, ever-ill ratio | 0.94-1.15 across hulls | | pre-#351 |
+| A5, reported ratio | 0.85-0.97 across hulls | | pre-#351 |
+
+Status at that measurement: **A4 failed on both hulls** (expedition below the
+4.51% floor). **A2 missed by ~1.8x.** **A5 missed by ~3x, in a model that
+returns roughly parity.** A1 and A3 were not jointly satisfiable with A2 under
+homogeneous exposure — infection attack rate and ill/infected are welded to the
+same dose, so they cannot be separated by refitting.
+
+VSP passenger attack-rate targets, for A4:
+
+| hull | n | median | IQR |
+|---|---:|---:|---|
+| expedition | 17 | 8.56% | 4.51-13.60% |
+| classic | 172 | 5.59% | 4.46-7.76% |
+| spirit | 52 | 5.64% | 4.44-7.90% |
+| mega | 9 | 5.61% | 3.40-7.45% |
+
+## 3. Out-of-sample checks
+
+**Park et al. (2015)** — surface swabs during a shipboard outbreak; nothing was
+ever fitted to it. Observed 80-31,217 copies/swab in sick passengers' cabins,
+16-113 in public spaces, a gradient of roughly 100-300x.
+
+| | #351 (hand chain) | #352 (+ emesis) | #353 (+ measured contact) |
+|---|---:|---:|---:|
+| cabin, confined | 1,434 | 1,434 | 5,571 |
+| public, 60 shedder-h/day | 356.9 | 356.9 | 384.9 |
+| cabin/public gradient | 4.02x | 4.02x | 14.5x |
+| shedder-hour asymmetry needed for 100x | 75x | 75x | 29.3x |
+
+Levels sit inside the observed ranges across 1.5 orders of magnitude, from
+independently sourced constants. The **gradient still fails**. A single emesis
+episode reaches Park's level (1,047-31,400 copies/swab at Park's stated
+recovery) but carries no intrinsic cabin/public gradient — the touchable-area
+factor and the per-area concentration cancel exactly. The residual is *where*
+people vomit, and reaching 100x needs 98.5-99.7% of episodes in the host's own
+cabin. That fraction is unmeasured, is not a model parameter, and reading it off
+Park's gradient would be fitting. Refused. Harness:
+`telemetry_buffer/observation_model/park_surface_check.py`.
+
+**The COVID discontinuity** is the better instrument and is not yet used as a
+target. It is a *difference*, so errors common to both arms cancel — which is
+what this effort needs, having spent its length finding errors that cancel in
+levels. Two caveats before it is scored against: the reported attack rate is
+conditioned on the ≥3% VSP reporting threshold, so a change in testing
+intensity moves it with no change in transmission; and the outbreak count has no
+voyage denominator. Detecting the effect (~15-20%, p=0.032 passengers, p=0.07
+norovirus-only) needs hundreds of simulated voyages per configuration.
+
+## 4. Outstanding
+
+Roughly in dependency order.
+
+1. **Cleaning and disinfection of surface pools.** Nothing cleans surfaces
+   today; they decay at 0.25/day and that is all. Routine cleaning is 1-2 log10
+   per event, outbreak hypochlorite 4-5. Routine and outbreak-response must be
+   separate mechanisms — do not fit one universal cleaning parameter. This is
+   also the missing NPI lever the COVID discontinuity needs, and the reason
+   crew rates did not move is that enhanced sanitation was passenger-facing.
+2. **Refit the common dose** against VSP class targets, once the contact layer
+   and cleaning are settled. One common dose-response across all four hull
+   classes; no hull-specific pathogen biology, ever.
+3. **Re-measure route shares and the passenger/crew ratio** on the refitted
+   model. Expect #353 to push A5 *further* from 2.9 — crew work the highest
+   touch-rate zones and their berthing is already ~3x denser than passengers'.
+   If it does, that is a finding about what is still missing.
+4. **Score the v4-successor campaign** against VSP class targets.
+5. **Cabin-level environmental compartments.** The finest mixing compartment is
+   `Cabin_Corridor`: ~37 people in 800 m³ where reality is 2 people in ~40 m³
+   (crew 3). `cabin_size` and `cabin_mate_ids` exist but only exempt a mate from
+   confinement attenuation. Building this would raise crew rates — away from the
+   anchor — so build it honestly and do not expect it to help. No cruise
+   platform has four-berth cabins; crew are three.
+6. **Aerosol portal efficiency.** #352 computes and records the emesis aerosol
+   load but does not route it into the airborne reservoir. The direction is
+   settled (norovirus establishes enterically; inhalation is delivery-to-gut via
+   swallowing, so the respiratory clearance proxy is the wrong quantity) but the
+   magnitude is not: the 10-30% figure is deposition in mouth/nose/trachea and
+   is explicitly **not** an intestinal-delivery fraction.
+7. **Sick-host movement and a bathroom destination.** The Park gradient needs
+   it; see §3.
+8. **AWS daughter session: CONTAM vs native accumulation comparison.** Deferred.
+
+## 5. Held fixed by assumption
+
+Live Grade C liabilities. Any of these could move the reported rate; the system
+is over-determined only *given* them. Full list in §10 of the history document.
+
+- Route weights (contact 0.35, fomite 0.30, food 0.20, droplet 0.10, HVAC 0.05)
+  — assumed, not traced to a source. **The largest single unsourced input.**
+- `HIGH_TOUCH_AREA_M2` — per-room high-touch area in m² has never been measured
+  by anybody. Permanent Grade C; the gap is the field's, not ours.
+- Fraction of emesis episodes occurring in the host's own cabin — swept, never
+  asserted.
+- Confinement attenuation factor 0.05.
+- The 20% innate non-susceptible ceiling, which is why infection attack rate
+  pins at 0.800 and why the fit must be read on reported cases.
+- Uniform `immune_ratio` across a resident crew and a weekly-turnover passenger
+  cohort — an assumption that bears directly on A5.
+- Crew presenteeism and mandatory occupational reporting: absent in both
+  directions.
+
+## 6. Maintaining this file
+
+Update it in the same PR as any change that invalidates something here. The
+failure mode this file exists to prevent is a future session reading a stale
+dose figure from a doc and building on it in good faith — so a ledger that is
+quietly out of date is worse than no ledger. Date-stamp every measurement with
+the commit it was taken at.
