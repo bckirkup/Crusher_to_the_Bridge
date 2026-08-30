@@ -495,6 +495,8 @@ def _advance_agent_pathogen_infections(
         if days_infected >= clearance_day and residents_left == 0:
             inf["status"] = InfectionStatus.RECOVERED
             inf["illness"] = IllnessStatus.RECOVERED
+            agent.cumulative_exposure.pop(pid, None)
+            agent.cumulative_exposure_by_route.pop(pid, None)
 
 
 def _project_legacy_illness(agent: Any) -> None:

@@ -246,6 +246,71 @@ literature describes; the droplet pathway, carrying 94-95% of establishments,
 gives every susceptible in a zone the identical well-mixed dose and cannot
 produce it.
 
+## 9a. Stale inoculum surviving recovery
+
+**A host's unresolved challenge dose carried across episodes.**
+`cumulative_exposure` was zeroed when an infection established, but never when
+one resolved. An already-infected host keeps accumulating superinfection dose
+into the same pool, so on recovery the residue survived and would have been
+added to the inoculum of any later episode, inflating that episode's
+dose-conditioned illness and incubation draws. The persistent Beta draw
+`dose_response_susceptibility` is deliberately *not* reset: secretor-status-like
+susceptibility is a permanent property of the host, and resetting it would
+re-introduce the defect of §9 across episodes rather than within them.
+
+Reach is small — it needs superinfection during an episode followed by
+reinfection after it — so no reported measurement changes. It is recorded
+because it is the same class of error as §9 (state that should be scoped to one
+challenge outliving it), and because it was found by specification review rather
+than by an anomaly.
+
+## 9b. Clearance proposed as the mechanism for A2, and why it is not
+
+A within-host specification review proposed exponential clearance of the
+retained pre-establishment inoculum
+(`inoculum_clearance_rate_per_day`) as the mechanism that would make diffuse and
+concentrated exposure biologically distinct, and so raise ill/infected without
+touching the Teunis constants. **It cannot, and the reason is algebraic.** With
+hazard linear in the retained pool `R` and `R` decaying exponentially, the
+accumulated hazard from deliveries `D_i` at times `t_i` over a horizon `T` is
+
+```text
+H = (r_rate / lambda) * sum_i D_i * (1 - exp(-lambda * (T - t_i)))
+```
+
+Each delivery enters linearly, discounted only by the part of its decay integral
+that the end of the horizon truncates. Once the horizon extends past the
+exposure, the weights go to 1 and `H` depends on total delivered dose and
+nothing else. This is the same result that withdrew the fixed-window proposal:
+grouping, resetting, or leaking a linear accumulator cannot distinguish diffuse
+from concentrated delivery.
+
+Measured over 40,000 hosts at total dose 1000 delivered across five days
+(`telemetry_buffer/observation_model/clearance_additivity_check.py`), every
+calibrated cell sits on the additive closed form 0.3181 regardless of `lambda`
+or of delivery in 1, 24 or 168 increments; the single departure (0.306 at
+`lambda` = 0.5) is predicted to three decimals by the end-of-voyage truncation
+weight. And ill/infected moves the *wrong* way — 0.43 for a bolus against 0.354,
+0.297 and 0.226 at `lambda` = 0.5, 2 and 12 — because clearance shrinks the
+retained pool that conditions the illness draw. A2 is already ~1.8x low; this
+would deepen the miss.
+
+Two further points on the proposal, recorded so they are not rediscovered.
+Calibration is not optional: a bolus accrues total hazard `r_rate * D / lambda`,
+so keeping the single-bolus response equal to the fitted beta-frailty form
+requires `r_rate = r * lambda`, and without that rescaling the parameter
+silently multiplies all infectivity by `1 / lambda` — an unlabelled fit knob on
+the dose-response itself. And a zero default is not behaviour-preserving under
+that formulation: with no decay the pool accrues hazard indefinitely, returning
+attack rate 0.42-0.45 against the correct 0.318.
+
+What remains open is any mechanism nonlinear in delivered dose: host-level
+exposure heterogeneity as near-field physics, cooperative or multi-hit
+establishment (the aggregate/packaging picture), or clearance that is itself
+induced by exposure. Clearance remains the right description of the inoculum's
+fate and worth parameterising from the literature per pathogen; it is not the
+resolution of A1/A2.
+
 ## 10. Parameters held fixed by assumption
 
 These are not identified by anything in the fit, and any of them could move the
@@ -281,10 +346,12 @@ over-determined *given* these.
 
 ## 12. Standing defect base rate
 
-Eight distinct unit, dimension, time-origin or sign defects were found in this
-effort, each by chasing an anomaly rather than by a check that would have caught
-it, and every campaign before v4 was invalidated by a defect discovered after it
-ran. Guards now cover naked epochs, dose-pathway dimensions, reservoir
+Nine distinct unit, dimension, time-origin, sign or state-scoping defects were
+found in this effort, the first eight by chasing an anomaly rather than by a
+check that would have caught it, and every campaign before v4 was invalidated by
+a defect discovered after it ran. The ninth (§9a) is the only one found by
+reading a specification against the code rather than by an anomaly, which is an
+argument for more of that and not evidence that the rest are gone. Guards now cover naked epochs, dose-pathway dimensions, reservoir
 conservation, per-capita invariance to occupancy, cross-clock equivalence of
 per-day quantities and epoch-invariance of the dose-response. The audit is not exhausted, and the correct prior is that
 further defects exist. Absence of a further finding is not evidence of

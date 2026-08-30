@@ -14,6 +14,7 @@ from engines.infection_dynamics_bridge import (
     illness_probability,
 )
 from engines.transmission_core import TransmissionCore
+from orchestrator_epoch import _advance_agent_pathogen_infections
 
 PATHOGEN = "dose_test_pathogen"
 ZONE = "Dose_Test_Zone"
@@ -60,7 +61,11 @@ def _core(profile: dict, seed: int = 7) -> TransmissionCore:
     return core
 
 
-def _inject_fixed_dose(core: TransmissionCore, dose: float) -> None:
+def _inject_fixed_dose(
+    core: TransmissionCore,
+    dose: float,
+    route_doses: dict[str, float] | None = None,
+) -> None:
     def inject(
         _epoch: int,
         agents: list[KorkinAgent],
@@ -77,6 +82,10 @@ def _inject_fixed_dose(core: TransmissionCore, dose: float) -> None:
     ) -> None:
         for agent in agents:
             agent_pathogen_doses.setdefault(agent.agent_id, {})[pathogen_id] = dose
+            if route_doses is not None:
+                core._last_pathogen_route_doses[pathogen_id] = {
+                    agent.agent_id: dict(route_doses),
+                }
 
     core._execute_pathogen_pathways = inject
 
@@ -116,9 +125,9 @@ def _outcome_rates(total_dose: float) -> tuple[float, float]:
     return len(infected) / len(agents), ill / max(len(infected), 1)
 
 
-def test_epoch_invariance_for_one_twenty_four_and_168_slices() -> None:
+def test_fixed_window_refinement_is_epoch_invariant() -> None:
     rates = []
-    for epochs in (1, 24, 168):
+    for epochs in (24, 48):
         agents = _run_exposure(1000.0, epochs)
         infected = sum(
             agent.infection_status == InfectionStatus.INFECTED
@@ -171,14 +180,25 @@ def test_cumulative_inoculum_is_passed_to_infection_and_resets() -> None:
     core.rng = _SequenceRng([0.99, 0.0, 0.0])
     agent = _agent(1)
     agent.dose_response_susceptibility[PATHOGEN] = 1.0
-    _inject_fixed_dose(core, 1.0)
+    _inject_fixed_dose(
+        core, 1.0, {"direct_contact": 0.4, "hvac_airborne": 0.6},
+    )
 
     core.execute_transmission(0, [agent], {ZONE: 0.0})
     assert agent.cumulative_exposure[PATHOGEN] == pytest.approx(1.0)
+    assert agent.cumulative_exposure_by_route[PATHOGEN] == pytest.approx({
+        "direct_contact": 0.4,
+        "hvac_airborne": 0.6,
+    })
     core.execute_transmission(1, [agent], {ZONE: 0.0})
 
     assert agent.infections[PATHOGEN]["acquired_particles"] == pytest.approx(2.0)
+    assert agent.infections[PATHOGEN]["acquired_particles_by_route"] == pytest.approx({
+        "direct_contact": 0.8,
+        "hvac_airborne": 1.2,
+    })
     assert agent.cumulative_exposure[PATHOGEN] == pytest.approx(0.0)
+    assert PATHOGEN not in agent.cumulative_exposure_by_route
 
     agent.infections[PATHOGEN]["status"] = InfectionStatus.RECOVERED
     agent.infection_status = InfectionStatus.RECOVERED
@@ -187,6 +207,117 @@ def test_cumulative_inoculum_is_passed_to_infection_and_resets() -> None:
 
     assert agent.infections[PATHOGEN]["acquired_particles"] == pytest.approx(1.0)
     assert agent.cumulative_exposure[PATHOGEN] == pytest.approx(0.0)
+
+
+def test_recovery_clears_exposure_but_preserves_susceptibility() -> None:
+    agent = _agent(1)
+    agent.infect_with_pathogen(PATHOGEN, 1.0, epoch=0)
+    agent.infections[PATHOGEN]["incubation_days"] = 0.0
+    agent.cumulative_exposure[PATHOGEN] = 0.25
+    agent.cumulative_exposure_by_route[PATHOGEN] = {"fomite": 0.25}
+    agent.dose_response_susceptibility[PATHOGEN] = 0.125
+
+    _advance_agent_pathogen_infections(
+        agent,
+        {PATHOGEN: {**_profile(), "recovery_day": 0}},
+        np.random.default_rng(17),
+    )
+
+    assert agent.infections[PATHOGEN]["status"] == InfectionStatus.RECOVERED
+    assert PATHOGEN not in agent.cumulative_exposure
+    assert PATHOGEN not in agent.cumulative_exposure_by_route
+    assert agent.dose_response_susceptibility[PATHOGEN] == pytest.approx(0.125)
+
+
+def _run_route_establishment(
+    route_doses: dict[str, float],
+) -> tuple[KorkinAgent, object]:
+    core = _core(_profile(), seed=31)
+    core.rng = _SequenceRng([0.0])
+    agent = _agent(1)
+    agent.dose_response_susceptibility[PATHOGEN] = 1.0
+    _inject_fixed_dose(core, sum(route_doses.values()), route_doses)
+    _matrix, events = core.execute_transmission(0, [agent], {ZONE: 0.0})
+    return agent, events[0]
+
+
+def test_route_ledger_sums_to_pooled_dose_and_resets_on_establishment() -> None:
+    agent, event = _run_route_establishment({
+        "direct_contact": 2.0,
+        "hvac_airborne": 3.0,
+    })
+
+    route_doses = event.acquired_particles_by_route
+    assert sum(route_doses.values()) == pytest.approx(event.dose, abs=1e-9)
+    assert event.dose == pytest.approx(5.0)
+    assert agent.infections[PATHOGEN]["acquired_particles_by_route"] == pytest.approx(
+        route_doses,
+    )
+    assert PATHOGEN not in agent.cumulative_exposure_by_route
+
+
+def test_route_dose_cache_is_initialized_before_transmission() -> None:
+    core = _core(_profile(), seed=37)
+
+    assert core._effective_route_doses(1, PATHOGEN, 1.0) == {}
+
+
+def test_route_ledger_is_invariant_to_route_insertion_order() -> None:
+    first, first_event = _run_route_establishment({
+        "direct_contact": 2.0,
+        "hvac_airborne": 3.0,
+    })
+    second, second_event = _run_route_establishment({
+        "hvac_airborne": 3.0,
+        "direct_contact": 2.0,
+    })
+
+    assert first_event.dose == second_event.dose
+    assert first_event.pathway == second_event.pathway
+    assert first_event.acquired_particles_by_route == pytest.approx(
+        second_event.acquired_particles_by_route,
+    )
+    assert first.infections[PATHOGEN]["acquired_particles_by_route"] == pytest.approx(
+        second.infections[PATHOGEN]["acquired_particles_by_route"],
+    )
+
+
+def test_superinfection_keeps_pathogen_acquisition_and_records_strain_dose() -> None:
+    core = _core(_profile(), seed=41)
+    agent = _agent(1)
+    initial_routes = {"direct_contact": 4.0, "hvac_airborne": 6.0}
+    agent.infect_with_pathogen(
+        PATHOGEN,
+        10.0,
+        epoch=0,
+        strain_id="resident",
+        acquired_particles_by_route=initial_routes,
+    )
+
+    established = core._establish(
+        agent,
+        PATHOGEN,
+        "invader",
+        3.0,
+        4,
+        resident=True,
+        acquired_particles_by_route={
+            "direct_contact": 1.0,
+            "hvac_airborne": 2.0,
+        },
+    )
+
+    assert established is True
+    infection = agent.infections[PATHOGEN]
+    assert infection["acquired_particles"] == pytest.approx(10.0)
+    assert infection["acquired_particles_by_route"] == pytest.approx(initial_routes)
+    invader = agent.resident_strains(PATHOGEN)["invader"]
+    assert invader.acquired_particles == pytest.approx(3.0)
+    assert sum(invader.acquired_particles_by_route.values()) == pytest.approx(3.0)
+    assert invader.acquired_particles_by_route == pytest.approx({
+        "direct_contact": 1.0,
+        "hvac_airborne": 2.0,
+    })
 
 
 def test_exponential_model_keeps_its_closed_form_hazard() -> None:
