@@ -485,6 +485,9 @@ class TransmissionCore:
         # Per-epoch strain-resolved dose: {agent: {pathogen: {contributor: dose}}}
         self._strain_doses: dict[int, dict[str, dict[Contributor, float]]] = {}
         self._last_pathogen_doses: dict[int, dict[str, float]] = {}
+        self._last_pathogen_route_doses: dict[
+            str, dict[int, dict[str, float]]
+        ] = {}
 
     def _strain_config_for_profile(
         self,
@@ -1203,10 +1206,6 @@ class TransmissionCore:
                 phenotype=self._phenotype(strain_id),
                 acquired_particles_by_route=acquired_particles_by_route,
             )
-            if established:
-                agent.infections[pathogen_id]["acquired_particles_by_route"] = dict(
-                    acquired_particles_by_route or {},
-                )
             return established
         agent.infect_with_pathogen(
             pathogen_id,
@@ -1495,9 +1494,7 @@ class TransmissionCore:
         # dose that actually drove the draw
         self._strain_doses = {}
         self._last_pathogen_doses = agent_pathogen_doses
-        self._last_pathogen_route_doses: dict[
-            str, dict[int, dict[str, float]]
-        ] = {}
+        self._last_pathogen_route_doses = {}
 
         # Determine which pathogens are active this epoch
         active_pathogens = list(self.pathogen_profiles.keys()) if self.pathogen_profiles else ["_default"]
