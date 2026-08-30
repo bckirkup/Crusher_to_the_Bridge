@@ -196,7 +196,39 @@ Both fixed and renamed. #342.
 
 Withdrawn: all ill/infected ratios computed before #342.
 
-## 9. Parameters held fixed by assumption
+## 9. Dose-response applied per epoch
+
+**Infection depended on how finely time was sliced, not on the dose received.**
+The beta-Poisson dose-response was evaluated on one epoch's dose with an
+independent Bernoulli drawn every epoch, and the illness draw then conditioned
+on `acquired_particles` = that single epoch's slice. Beta-Poisson is a Poisson
+single-hit model mixed over a host susceptibility `r ~ Beta(alpha, beta)`; `r` is
+a property of the host, so re-drawing it hourly treats each hour as a fresh
+person. At 10^3 total particles, splitting into 24 hourly slices instead of one
+exposure took infection attack rate from 0.32 to 0.89 and ill/infected from 0.45
+to 0.26. The hourly-epoch migration did not introduce this, but multiplied the
+trial count by ~24. Fixed by drawing `r` once per host and pathogen, running the
+hazard on effective dose (protection and superinfection now scale dose, not
+probability, because scaling probability is not epoch-invariant), and passing
+the cumulative inoculum to the illness and incubation draws. No fitted parameter
+added. #346.
+
+Withdrawn: every infection attack rate reported under hourly epochs, which are
+inflated by this, and every ill/infected, which is deflated by it — including
+the v4 campaign and the post-merge anchor pilot at `7a9b439`. Fitted doses from
+those runs do not transfer.
+
+The fix does not reach the anchors and must not be read as doing so. Under the
+corrected form, infection attack rate and ill/infected are welded to the same
+dose (attack rate 0.32 caps ill/infected at 0.45; 0.68 caps it at 0.71), so A1
+and A2 are jointly unsatisfiable with homogeneous exposure. Host-level exposure
+heterogeneity reconciles them (at attack rate 0.21 and sigma_log10 = 3,
+ill/infected 0.61 and ever-ill 0.128), which is the point-source picture the
+literature describes; the droplet pathway, carrying 94-95% of establishments,
+gives every susceptible in a zone the identical well-mixed dose and cannot
+produce it.
+
+## 10. Parameters held fixed by assumption
 
 These are not identified by anything in the fit, and any of them could move the
 reported rate. They are listed so that "one fitted parameter against six
@@ -215,7 +247,7 @@ over-determined *given* these.
   pins at exactly 0.800 and why the fit must be read on reported cases.
 - `shedding_variance_log10` = 1.0: literature-anchored, but to a range.
 
-## 10. Corrections to claims made during the work
+## 11. Corrections to claims made during the work
 
 - GitHub Actions was reported as broken on the #341 branch. It was slow to
   queue; the full check set ran. Escalated too fast.
@@ -229,13 +261,13 @@ over-determined *given* these.
   quantity is a proxy (per-host cumulative emission weighted by susceptible
   co-occupants) and must be labelled as one.
 
-## 11. Standing defect base rate
+## 12. Standing defect base rate
 
-Seven distinct unit, dimension, time-origin or sign defects were found in this
+Eight distinct unit, dimension, time-origin or sign defects were found in this
 effort, each by chasing an anomaly rather than by a check that would have caught
 it, and every campaign before v4 was invalidated by a defect discovered after it
 ran. Guards now cover naked epochs, dose-pathway dimensions, reservoir
-conservation, per-capita invariance to occupancy and cross-clock equivalence of
-per-day quantities. The audit is not exhausted, and the correct prior is that
+conservation, per-capita invariance to occupancy, cross-clock equivalence of
+per-day quantities and epoch-invariance of the dose-response. The audit is not exhausted, and the correct prior is that
 further defects exist. Absence of a further finding is not evidence of
 correctness.
