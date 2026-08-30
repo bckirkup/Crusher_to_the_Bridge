@@ -75,7 +75,21 @@ AGENT_VOCABULARY = (
     "staphylococcus",
     "clostridium",
     "etec",
+    "specimens not obtained",
+    "legionella",
+    "sappovirus",
+    "viral gastroenteritis",
+    "c. perfringens",
 )
+TABLE_HEADERS = {
+    "cruise line": "cruise_line",
+    "cruise ship": "ship",
+    "sailing dates": "voyage_dates_raw",
+    "voyage number": None,
+    "causative agent": "causative_agent",
+    "case counts (passengers)": "pax_text",
+    "case counts (crew)": "crew_text",
+}
 COUNT_RE = re.compile(
     r"(?P<ill>\d[\d,]*)\s+of\s+(?P<total>\d[\d,]*)\s*"
     r"(?:\(\s*(?P<pct>\d+(?:\.\d+)?)\s*%\s*\))?",
@@ -279,13 +293,51 @@ def table_year(caption: str) -> int | None:
 def is_outbreak_table(table: Table) -> bool:
     if not table.rows:
         return False
-    headers = {clean_text(cell.text).lower() for cell in table.rows[0]}
-    return "cruise line" in headers and "cruise ship" in headers
+    headers = {
+        re.sub(r"\s+", " ", clean_text(cell.text)).strip().casefold()
+        for cell in table.rows[0]
+    }
+    return bool(headers & set(TABLE_HEADERS)) and bool(
+        headers & {"cruise line", "cruise ship"}
+    )
 
 
-def table_layout(table: Table) -> str:
-    header = " ".join(clean_text(cell.text).lower() for cell in table.rows[0])
-    return "index_counts" if "case counts" in header else "detail_counts"
+def table_columns(
+    table: Table, source_url: str
+) -> tuple[dict[str, int], str]:
+    headers = [
+        re.sub(r"\s+", " ", clean_text(cell.text)).strip().casefold()
+        for cell in table.rows[0]
+    ]
+    unknown = [header for header in headers if header not in TABLE_HEADERS]
+    required = {
+        "cruise line",
+        "cruise ship",
+        "sailing dates",
+        "causative agent",
+    }
+    missing = sorted(required - set(headers))
+    count_headers = {
+        "case counts (passengers)",
+        "case counts (crew)",
+    }
+    present_counts = count_headers & set(headers)
+    if unknown or missing or len(present_counts) == 1:
+        raise RuntimeError(
+            f"{source_url}: unrecognised or incomplete outbreak-table "
+            f"headers={headers!r}; unknown={unknown!r}; missing={missing!r}"
+        )
+    columns: dict[str, int] = {}
+    for index, header in enumerate(headers):
+        name = TABLE_HEADERS[header]
+        if name is not None:
+            if name in columns:
+                raise RuntimeError(
+                    f"{source_url}: duplicate outbreak-table header "
+                    f"{header!r}; headers={headers!r}"
+                )
+            columns[name] = index
+    return columns, "index_counts" if present_counts else "detail_counts"
 
 
 def expanded_rows(table: Table) -> list[list[Cell]]:
@@ -334,41 +386,60 @@ def index_rows(page: Page, index_url: str, years: set[int]) -> list[IndexRow]:
     parser.feed(page.body)
     rows: list[IndexRow] = []
     for table in parser.tables:
-        year = table_year(table.caption)
-        if year not in years or not is_outbreak_table(table):
+        if not is_outbreak_table(table):
             continue
-        headers = [
-            clean_text(cell.text).lower() for cell in table.rows[0]
-        ]
-        has_voyage_number = "voyage number" in headers
-        layout = "detail_required" if has_voyage_number else table_layout(table)
+        columns, layout = table_columns(table, index_url)
+        year = table_year(table.caption)
+        if year not in years:
+            continue
         for cells in expanded_rows(table)[1:]:
             values = [clean_text(cell.text) for cell in cells]
             full_span = len(cells) == 1 and cells[0].colspan >= 4
             if full_span:
                 values = ["", "", values[0], ""]
-            date_index = 2
-            date_cell = cells[date_index]
+                date_cell = Cell()
+            else:
+                if len(values) <= max(columns.values()):
+                    raise RuntimeError(
+                        f"{index_url}: row has fewer cells than headers; "
+                        f"headers={table.rows[0]!r}; row={values!r}"
+                    )
+                date_index = columns["voyage_dates_raw"]
+                date_cell = cells[date_index]
             if not full_span and len(values) == 1:
                 values = ["", "", values[0], ""]
             elif not full_span and len(values) == 2:
                 values = ["", "", values[0], values[1]]
             elif not full_span and len(values) == 3:
                 values = ["", *values]
-            agent_index = 4 if has_voyage_number else 3
+            if full_span:
+                row_values = {
+                    "cruise_line": "",
+                    "ship": "",
+                    "voyage_dates_raw": values[2],
+                    "causative_agent": "",
+                    "pax_text": "",
+                    "crew_text": "",
+                }
+            else:
+                row_values = {
+                    name: values[index]
+                    for name, index in columns.items()
+                    if index < len(values)
+                }
             row = IndexRow(
                 year=year,
-                cruise_line=values[0],
-                ship=values[1],
-                voyage_dates_raw=values[2],
-                causative_agent=values[agent_index].lower(),
+                cruise_line=row_values["cruise_line"],
+                ship=row_values["ship"],
+                voyage_dates_raw=row_values["voyage_dates_raw"],
+                causative_agent=row_values["causative_agent"].lower(),
                 href=normalize_href(index_url, date_cell.href),
                 source_url=index_url,
                 layout=layout,
             )
-            if layout == "index_counts" and not has_voyage_number:
-                row.pax_text = values[-2] if len(values) >= 6 else ""
-                row.crew_text = values[-1] if len(values) >= 6 else ""
+            if layout == "index_counts":
+                row.pax_text = row_values["pax_text"]
+                row.crew_text = row_values["crew_text"]
             rows.append(row)
     return rows
 
@@ -392,42 +463,55 @@ def archived_rows(page: Page, source_url: str) -> list[IndexRow]:
     for table in parser.tables:
         if not is_outbreak_table(table):
             continue
+        columns, layout = table_columns(table, source_url)
+        if layout != "index_counts":
+            raise RuntimeError(
+                f"{source_url}: archived outbreak table lacks inline counts"
+            )
         for cells in expanded_rows(table)[1:]:
             values = [clean_text(cell.text) for cell in cells]
-            if len(values) < 6:
-                continue
-            year = archive_index_year(values[2])
+            if len(values) <= max(columns.values()):
+                raise RuntimeError(
+                    f"{source_url}: row has fewer cells than headers; "
+                    f"headers={table.rows[0]!r}; row={values!r}"
+                )
+            year = archive_index_year(values[columns["voyage_dates_raw"]])
             if year is None:
                 continue
             rows.append(
                 IndexRow(
                     year=year,
-                    cruise_line=values[0],
-                    ship=values[1],
-                    voyage_dates_raw=values[2],
-                    causative_agent=values[3].lower(),
+                    cruise_line=values[columns["cruise_line"]],
+                    ship=values[columns["ship"]],
+                    voyage_dates_raw=values[columns["voyage_dates_raw"]],
+                    causative_agent=values[columns["causative_agent"]].lower(),
                     href=None,
-                    pax_text=values[4],
-                    crew_text=values[5],
+                    pax_text=values[columns["pax_text"]],
+                    crew_text=values[columns["crew_text"]],
                     source_url=source_url,
-                    layout="index_counts",
+                    layout=layout,
                 )
             )
     return rows
 
 
-def archived_table_counts(page: Page) -> dict[int, int]:
+def archived_table_counts(page: Page, source_url: str) -> dict[int, int]:
     parser = PageParser()
     parser.feed(page.body)
     counts: dict[int, int] = {}
     for table in parser.tables:
         if not is_outbreak_table(table):
             continue
+        columns, _ = table_columns(table, source_url)
         for cells in expanded_rows(table)[1:]:
             values = [clean_text(cell.text) for cell in cells]
-            if len(values) < 3:
-                continue
-            year = archive_index_year(values[2])
+            date_index = columns["voyage_dates_raw"]
+            if len(values) <= date_index:
+                raise RuntimeError(
+                    f"{source_url}: row has fewer cells than headers; "
+                    f"headers={table.rows[0]!r}; row={values!r}"
+                )
+            year = archive_index_year(values[date_index])
             if year is not None:
                 counts[year] = counts.get(year, 0) + 1
     return counts
@@ -486,13 +570,18 @@ def try_fetch_detail(
         raise
 
 
-def index_table_counts(page: Page, years: set[int]) -> dict[int, int]:
+def index_table_counts(
+    page: Page, source_url: str, years: set[int]
+) -> dict[int, int]:
     parser = PageParser()
     parser.feed(page.body)
     counts: dict[int, int] = {}
     for table in parser.tables:
+        if not is_outbreak_table(table):
+            continue
+        table_columns(table, source_url)
         year = table_year(table.caption)
-        if year in years and is_outbreak_table(table):
+        if year in years:
             counts[year] = counts.get(year, 0) + max(
                 0, len(expanded_rows(table)) - 1
             )
@@ -1135,11 +1224,11 @@ def run(args: argparse.Namespace) -> None:
         )
         all_rows.extend(rows)
         if source_url in {CDC_HISTORICAL_ARCHIVE, CDC_2019_2022_ARCHIVE}:
-            table_counts = archived_table_counts(page)
+            table_counts = archived_table_counts(page, source_url)
             for year, count in table_counts.items():
                 expected_rows[year] = expected_rows.get(year, 0) + count
         else:
-            table_counts = index_table_counts(page, years)
+            table_counts = index_table_counts(page, source_url, years)
             for year, count in table_counts.items():
                 expected_rows[year] = expected_rows.get(year, 0) + count
         for row in rows:

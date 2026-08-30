@@ -42,8 +42,8 @@ Extraction run date: 2026-08-30
 | 2020 | index_counts |
 | 2021 | index_counts |
 | 2022 | index_counts |
-| 2023 | detail_required |
-| 2024 | detail_required |
+| 2023 | index_counts |
+| 2024 | index_counts |
 | 2025 | detail_counts |
 | 2026 | detail_counts |
 
@@ -112,11 +112,11 @@ Independent cross-check snapshot timestamp: `20191215062717`.
 
 ## counts_published breakdown
 
-- full: 313 rows
+- full: 332 rows
 - passenger_only: 1 rows
 - crew_only: 1 rows
 - data_not_available: 91 rows
-- unparsed: 22 rows
+- unparsed: 3 rows
 
 ## Cross-source reconciliation
 
@@ -161,48 +161,16 @@ Independent cross-check snapshot timestamp: `20191215062717`.
 
 ## Agent vocabulary check
 
-- Overall: FAIL (33 invalid values)
+- Overall: PASS (0 invalid values)
 - Modal identifier flags:
 - None
 - Invalid agent values:
-- 2017 Crown Princess causative_agent='c. perfringens enterotoxin': url=https://archive.cdc.gov/www_cdc_gov/nceh/vsp/surv/outbreak/archived-outbreaks-1993-2018.html
-- 2007 Norwegian Pearl causative_agent='specimens not obtained': url=https://archive.cdc.gov/www_cdc_gov/nceh/vsp/surv/outbreak/archived-outbreaks-1993-2018.html
-- 2007 Volendam causative_agent='specimens not obtained': url=https://archive.cdc.gov/www_cdc_gov/nceh/vsp/surv/outbreak/archived-outbreaks-1993-2018.html
-- 2007 Volendam causative_agent='specimens not obtained': url=https://archive.cdc.gov/www_cdc_gov/nceh/vsp/surv/outbreak/archived-outbreaks-1993-2018.html
-- 2004 Silver Shadow causative_agent='specimens not obtained': url=https://archive.cdc.gov/www_cdc_gov/nceh/vsp/surv/outbreak/archived-outbreaks-1993-2018.html
-- 2004 Nantucket Clipper causative_agent='specimens not obtained': url=https://archive.cdc.gov/www_cdc_gov/nceh/vsp/surv/outbreak/archived-outbreaks-1993-2018.html
-- 2004 Norwegian Wind causative_agent='specimens not obtained': url=https://archive.cdc.gov/www_cdc_gov/nceh/vsp/surv/outbreak/archived-outbreaks-1993-2018.html
-- 2004 The World causative_agent='specimens not obtained': url=https://archive.cdc.gov/www_cdc_gov/nceh/vsp/surv/outbreak/archived-outbreaks-1993-2018.html
-- 2004 Queen Elizabeth 2 causative_agent='specimens not obtained': url=https://archive.cdc.gov/www_cdc_gov/nceh/vsp/surv/outbreak/archived-outbreaks-1993-2018.html
-- 2004 Legacy causative_agent='specimens not obtained': url=https://archive.cdc.gov/www_cdc_gov/nceh/vsp/surv/outbreak/archived-outbreaks-1993-2018.html
-- 2003 Legacy causative_agent='specimens not obtained': url=https://archive.cdc.gov/www_cdc_gov/nceh/vsp/surv/outbreak/archived-outbreaks-1993-2018.html
-- 2003 Nantucket Clipper causative_agent='specimens not obtained': url=https://archive.cdc.gov/www_cdc_gov/nceh/vsp/surv/outbreak/archived-outbreaks-1993-2018.html
-- 2003 Norwegian Star causative_agent='specimens not obtained': url=https://archive.cdc.gov/www_cdc_gov/nceh/vsp/surv/outbreak/archived-outbreaks-1993-2018.html
-- 2003 Clipper Odyssey causative_agent='specimens not obtained': url=https://archive.cdc.gov/www_cdc_gov/nceh/vsp/surv/outbreak/archived-outbreaks-1993-2018.html
-- 2003 Rhapsody of the Seas causative_agent='specimens not obtained': url=https://archive.cdc.gov/www_cdc_gov/nceh/vsp/surv/outbreak/archived-outbreaks-1993-2018.html
-- 2003 Royal Princess causative_agent='specimens not obtained': url=https://archive.cdc.gov/www_cdc_gov/nceh/vsp/surv/outbreak/archived-outbreaks-1993-2018.html
-- 2003 Nantucket Clipper causative_agent='specimens not obtained': url=https://archive.cdc.gov/www_cdc_gov/nceh/vsp/surv/outbreak/archived-outbreaks-1993-2018.html
-- 2003 Arabella causative_agent='specimens not obtained': url=https://archive.cdc.gov/www_cdc_gov/nceh/vsp/surv/outbreak/archived-outbreaks-1993-2018.html
-- 2002 Nantucket Clipper causative_agent='specimens not obtained': url=https://archive.cdc.gov/www_cdc_gov/nceh/vsp/surv/outbreak/archived-outbreaks-1993-2018.html
-- 2002 Norway causative_agent='specimens not obtained': url=https://archive.cdc.gov/www_cdc_gov/nceh/vsp/surv/outbreak/archived-outbreaks-1993-2018.html
-- 2002 Seabourn Pride causative_agent='specimens not obtained': url=https://archive.cdc.gov/www_cdc_gov/nceh/vsp/surv/outbreak/archived-outbreaks-1993-2018.html
-- 2002 Nantucket Clipper causative_agent='sappovirus': url=https://archive.cdc.gov/www_cdc_gov/nceh/vsp/surv/outbreak/archived-outbreaks-1993-2018.html
-- 2002 Norwegian Sun causative_agent='specimens not obtained': url=https://archive.cdc.gov/www_cdc_gov/nceh/vsp/surv/outbreak/archived-outbreaks-1993-2018.html
-- 2002 Yorktown Clipper causative_agent='specimens not obtained': url=https://archive.cdc.gov/www_cdc_gov/nceh/vsp/surv/outbreak/archived-outbreaks-1993-2018.html
-- 2002 Amsterdam causative_agent='specimens not obtained': url=https://archive.cdc.gov/www_cdc_gov/nceh/vsp/surv/outbreak/archived-outbreaks-1993-2018.html
-- 2001 Oriana causative_agent='specimens not obtained': url=https://archive.cdc.gov/www_cdc_gov/nceh/vsp/surv/outbreak/archived-outbreaks-1993-2018.html
-- 2000 Palm Beach Princess causative_agent='specimens not obtained': url=https://archive.cdc.gov/www_cdc_gov/nceh/vsp/surv/outbreak/archived-outbreaks-1993-2018.html
-- 1998 Vision of the Seas causative_agent='specimens not obtained': url=https://archive.cdc.gov/www_cdc_gov/nceh/vsp/surv/outbreak/archived-outbreaks-1993-2018.html
-- 1998 Statendam causative_agent='specimens not obtained': url=https://archive.cdc.gov/www_cdc_gov/nceh/vsp/surv/outbreak/archived-outbreaks-1993-2018.html
-- 1997 Zenith causative_agent='specimens not obtained': url=https://archive.cdc.gov/www_cdc_gov/nceh/vsp/surv/outbreak/archived-outbreaks-1993-2018.html
-- 1997 Regal Princess causative_agent='specimens not obtained': url=https://archive.cdc.gov/www_cdc_gov/nceh/vsp/surv/outbreak/archived-outbreaks-1993-2018.html
-- 1994 Horizon causative_agent='legionella': url=https://archive.cdc.gov/www_cdc_gov/nceh/vsp/surv/outbreak/archived-outbreaks-1993-2018.html
-- 1994 Regent Rainbow causative_agent='viral gastroenteritis': url=https://archive.cdc.gov/www_cdc_gov/nceh/vsp/surv/outbreak/archived-outbreaks-1993-2018.html
+- None
 
 ## Printed-percentage check and triage (checks 1 and 4b)
 
-- Overall: FAIL (19 failures)
-- CDC truncating rather than rounding: 5
+- Overall: FAIL (20 failures)
+- CDC truncating rather than rounding: 6
 - CDC error of another kind: 14
 - parse error on our side: 0
 - 2013 Celebrity Millennium passenger: calculated=1.1717, printed=6.275, classification=CDC error of another kind, url=https://archive.cdc.gov/www_cdc_gov/nceh/vsp/surv/outbreak/archived-outbreaks-1993-2018.html
@@ -223,7 +191,8 @@ Independent cross-check snapshot timestamp: `20191215062717`.
 - 2004 Legacy crew: calculated=4.3478, printed=4.65, classification=CDC error of another kind, url=https://archive.cdc.gov/www_cdc_gov/nceh/vsp/surv/outbreak/archived-outbreaks-1993-2018.html
 - 2022 Silver Moon passenger: calculated=2.8791, printed=2.8, classification=CDC truncating rather than rounding, url=https://archive.cdc.gov/www_cdc_gov/vessel-sanitation/cruise-ship-outbreaks/earlier-outbreaks-2019-2022.html
 - 2025 Viking Mars passenger: calculated=6.9899, printed=7.2, classification=CDC error of another kind, url=https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/viking-mars-january-2025.html
-- 2024 Arcadia passenger: calculated=6.5339, printed=5.57, classification=CDC error of another kind, url=https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/arcadia-september-2024.html
+- 2024 Arcadia passenger: calculated=6.5339, printed=5.57, classification=CDC error of another kind, url=https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/earlier-outbreaks.html
+- 2023 Nieuw Amsterdam passenger: calculated=12.4810, printed=12.4, classification=CDC truncating rather than rounding, url=https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/earlier-outbreaks.html
 
 ## Plausibility check failures
 
@@ -244,7 +213,7 @@ Independent cross-check snapshot timestamp: `20191215062717`.
 
 ## Missing or unparseable counts
 
-- 140 field-level gaps were preserved as empty CSV fields.
+- 26 field-level gaps were preserved as empty CSV fields.
 - 2006 Freedom of the Seas pax_pct_page: https://archive.cdc.gov/www_cdc_gov/nceh/vsp/surv/outbreak/archived-outbreaks-1993-2018.html
 - 2005 Ryndam crew_pct_page: https://archive.cdc.gov/www_cdc_gov/nceh/vsp/surv/outbreak/archived-outbreaks-1993-2018.html
 - 2004 Nantucket Clipper pax_ill: https://archive.cdc.gov/www_cdc_gov/nceh/vsp/surv/outbreak/archived-outbreaks-1993-2018.html
@@ -271,120 +240,6 @@ Independent cross-check snapshot timestamp: `20191215062717`.
 - 2025 Coral Princess crew_ill: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/coral-princess-february-2025.html
 - 2025 Coral Princess crew_total: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/coral-princess-february-2025.html
 - 2025 Coral Princess crew_pct_page: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/coral-princess-february-2025.html
-- 2024 Queen Mary 2 pax_ill: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/queen-mary-2-december-2024.html
-- 2024 Queen Mary 2 pax_total: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/queen-mary-2-december-2024.html
-- 2024 Queen Mary 2 pax_pct_page: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/queen-mary-2-december-2024.html
-- 2024 Queen Mary 2 crew_ill: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/queen-mary-2-december-2024.html
-- 2024 Queen Mary 2 crew_total: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/queen-mary-2-december-2024.html
-- 2024 Queen Mary 2 crew_pct_page: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/queen-mary-2-december-2024.html
-- 2024 Coral Princess pax_ill: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/coral-princess-october-2024.html
-- 2024 Coral Princess pax_total: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/coral-princess-october-2024.html
-- 2024 Coral Princess pax_pct_page: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/coral-princess-october-2024.html
-- 2024 Coral Princess crew_ill: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/coral-princess-october-2024.html
-- 2024 Coral Princess crew_total: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/coral-princess-october-2024.html
-- 2024 Coral Princess crew_pct_page: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/coral-princess-october-2024.html
-- 2024 Radiance of the Seas pax_ill: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/radiance-of-the-seas-april-2024.html
-- 2024 Radiance of the Seas pax_total: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/radiance-of-the-seas-april-2024.html
-- 2024 Radiance of the Seas pax_pct_page: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/radiance-of-the-seas-april-2024.html
-- 2024 Radiance of the Seas crew_ill: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/radiance-of-the-seas-april-2024.html
-- 2024 Radiance of the Seas crew_total: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/radiance-of-the-seas-april-2024.html
-- 2024 Radiance of the Seas crew_pct_page: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/radiance-of-the-seas-april-2024.html
-- 2024 Silver Nova pax_ill: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/silver-nova-march-2024.html
-- 2024 Silver Nova pax_total: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/silver-nova-march-2024.html
-- 2024 Silver Nova pax_pct_page: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/silver-nova-march-2024.html
-- 2024 Silver Nova crew_ill: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/silver-nova-march-2024.html
-- 2024 Silver Nova crew_total: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/silver-nova-march-2024.html
-- 2024 Silver Nova crew_pct_page: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/silver-nova-march-2024.html
-- 2024 Koningsdam pax_ill: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/koningsdam-february-2024.html
-- 2024 Koningsdam pax_total: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/koningsdam-february-2024.html
-- 2024 Koningsdam pax_pct_page: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/koningsdam-february-2024.html
-- 2024 Koningsdam crew_ill: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/koningsdam-february-2024.html
-- 2024 Koningsdam crew_total: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/koningsdam-february-2024.html
-- 2024 Koningsdam crew_pct_page: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/koningsdam-february-2024.html
-- 2023 Scarlet Lady pax_ill: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/scarlet-lady-october-2023.html
-- 2023 Scarlet Lady pax_total: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/scarlet-lady-october-2023.html
-- 2023 Scarlet Lady pax_pct_page: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/scarlet-lady-october-2023.html
-- 2023 Scarlet Lady crew_ill: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/scarlet-lady-october-2023.html
-- 2023 Scarlet Lady crew_total: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/scarlet-lady-october-2023.html
-- 2023 Scarlet Lady crew_pct_page: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/scarlet-lady-october-2023.html
-- 2023 Viking Neptune pax_ill: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/viking-neptune-june-2023.html
-- 2023 Viking Neptune pax_total: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/viking-neptune-june-2023.html
-- 2023 Viking Neptune pax_pct_page: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/viking-neptune-june-2023.html
-- 2023 Viking Neptune crew_ill: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/viking-neptune-june-2023.html
-- 2023 Viking Neptune crew_total: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/viking-neptune-june-2023.html
-- 2023 Viking Neptune crew_pct_page: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/viking-neptune-june-2023.html
-- 2023 Celebrity Summit pax_ill: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/celebrity-summit-may-2023.html
-- 2023 Celebrity Summit pax_total: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/celebrity-summit-may-2023.html
-- 2023 Celebrity Summit pax_pct_page: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/celebrity-summit-may-2023.html
-- 2023 Celebrity Summit crew_ill: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/celebrity-summit-may-2023.html
-- 2023 Celebrity Summit crew_total: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/celebrity-summit-may-2023.html
-- 2023 Celebrity Summit crew_pct_page: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/celebrity-summit-may-2023.html
-- 2023 Nieuw Amsterdam pax_ill: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/nieuw-amsterdam-may-2023.html
-- 2023 Nieuw Amsterdam pax_total: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/nieuw-amsterdam-may-2023.html
-- 2023 Nieuw Amsterdam pax_pct_page: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/nieuw-amsterdam-may-2023.html
-- 2023 Nieuw Amsterdam crew_ill: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/nieuw-amsterdam-may-2023.html
-- 2023 Nieuw Amsterdam crew_total: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/nieuw-amsterdam-may-2023.html
-- 2023 Nieuw Amsterdam crew_pct_page: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/nieuw-amsterdam-may-2023.html
-- 2023 Grand Princess pax_ill: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/grand-princess-march-2023.html
-- 2023 Grand Princess pax_total: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/grand-princess-march-2023.html
-- 2023 Grand Princess pax_pct_page: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/grand-princess-march-2023.html
-- 2023 Grand Princess crew_ill: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/grand-princess-march-2023.html
-- 2023 Grand Princess crew_total: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/grand-princess-march-2023.html
-- 2023 Grand Princess crew_pct_page: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/grand-princess-march-2023.html
-- 2023 Emerald Princess pax_ill: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/emerald-princess-march-2023.html
-- 2023 Emerald Princess pax_total: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/emerald-princess-march-2023.html
-- 2023 Emerald Princess pax_pct_page: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/emerald-princess-march-2023.html
-- 2023 Emerald Princess crew_ill: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/emerald-princess-march-2023.html
-- 2023 Emerald Princess crew_total: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/emerald-princess-march-2023.html
-- 2023 Emerald Princess crew_pct_page: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/emerald-princess-march-2023.html
-- 2023 Enchantment of the Seas pax_ill: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/enchantment-of-the-seas-march-2023.html
-- 2023 Enchantment of the Seas pax_total: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/enchantment-of-the-seas-march-2023.html
-- 2023 Enchantment of the Seas pax_pct_page: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/enchantment-of-the-seas-march-2023.html
-- 2023 Enchantment of the Seas crew_ill: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/enchantment-of-the-seas-march-2023.html
-- 2023 Enchantment of the Seas crew_total: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/enchantment-of-the-seas-march-2023.html
-- 2023 Enchantment of the Seas crew_pct_page: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/enchantment-of-the-seas-march-2023.html
-- 2023 Enchantment of the Seas pax_ill: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/enchantment-of-the-seas-march-2023.html
-- 2023 Enchantment of the Seas pax_total: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/enchantment-of-the-seas-march-2023.html
-- 2023 Enchantment of the Seas pax_pct_page: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/enchantment-of-the-seas-march-2023.html
-- 2023 Enchantment of the Seas crew_ill: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/enchantment-of-the-seas-march-2023.html
-- 2023 Enchantment of the Seas crew_total: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/enchantment-of-the-seas-march-2023.html
-- 2023 Enchantment of the Seas crew_pct_page: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/enchantment-of-the-seas-march-2023.html
-- 2023 Celebrity Equinox pax_ill: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/celebrity-equinox-march-2023.html
-- 2023 Celebrity Equinox pax_total: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/celebrity-equinox-march-2023.html
-- 2023 Celebrity Equinox pax_pct_page: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/celebrity-equinox-march-2023.html
-- 2023 Celebrity Equinox crew_ill: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/celebrity-equinox-march-2023.html
-- 2023 Celebrity Equinox crew_total: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/celebrity-equinox-march-2023.html
-- 2023 Celebrity Equinox crew_pct_page: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/celebrity-equinox-march-2023.html
-- 2023 Celebrity Constellation pax_ill: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/celebrity-constellation-march-2023.html
-- 2023 Celebrity Constellation pax_total: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/celebrity-constellation-march-2023.html
-- 2023 Celebrity Constellation pax_pct_page: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/celebrity-constellation-march-2023.html
-- 2023 Celebrity Constellation crew_ill: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/celebrity-constellation-march-2023.html
-- 2023 Celebrity Constellation crew_total: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/celebrity-constellation-march-2023.html
-- 2023 Celebrity Constellation crew_pct_page: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/celebrity-constellation-march-2023.html
-- 2023 Ruby Princess pax_ill: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/ruby-princess-february-2023.html
-- 2023 Ruby Princess pax_total: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/ruby-princess-february-2023.html
-- 2023 Ruby Princess pax_pct_page: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/ruby-princess-february-2023.html
-- 2023 Ruby Princess crew_ill: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/ruby-princess-february-2023.html
-- 2023 Ruby Princess crew_total: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/ruby-princess-february-2023.html
-- 2023 Ruby Princess crew_pct_page: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/ruby-princess-february-2023.html
-- 2023 Jewel of the Seas pax_ill: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/jewel-of-the-seas-january-2023.html
-- 2023 Jewel of the Seas pax_total: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/jewel-of-the-seas-january-2023.html
-- 2023 Jewel of the Seas pax_pct_page: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/jewel-of-the-seas-january-2023.html
-- 2023 Jewel of the Seas crew_ill: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/jewel-of-the-seas-january-2023.html
-- 2023 Jewel of the Seas crew_total: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/jewel-of-the-seas-january-2023.html
-- 2023 Jewel of the Seas crew_pct_page: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/jewel-of-the-seas-january-2023.html
-- 2023 Brilliance of the Seas pax_ill: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/brilliance-of-the-seas-january-2023.html
-- 2023 Brilliance of the Seas pax_total: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/brilliance-of-the-seas-january-2023.html
-- 2023 Brilliance of the Seas pax_pct_page: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/brilliance-of-the-seas-january-2023.html
-- 2023 Brilliance of the Seas crew_ill: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/brilliance-of-the-seas-january-2023.html
-- 2023 Brilliance of the Seas crew_total: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/brilliance-of-the-seas-january-2023.html
-- 2023 Brilliance of the Seas crew_pct_page: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/brilliance-of-the-seas-january-2023.html
-- 2023 Arcadia pax_ill: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/arcadia-january-2023.html
-- 2023 Arcadia pax_total: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/arcadia-january-2023.html
-- 2023 Arcadia pax_pct_page: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/arcadia-january-2023.html
-- 2023 Arcadia crew_ill: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/arcadia-january-2023.html
-- 2023 Arcadia crew_total: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/arcadia-january-2023.html
-- 2023 Arcadia crew_pct_page: https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/arcadia-january-2023.html
 
 ## Idempotence check
 
