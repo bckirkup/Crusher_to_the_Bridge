@@ -16,6 +16,8 @@ from pathlib import Path
 from typing import Iterable
 from urllib.parse import urljoin
 
+from simulation_utils.paths import resolve_repo_path, validated_open
+
 CURRENT_INDEX = (
     "https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/index.html"
 )
@@ -81,9 +83,11 @@ AGENT_VOCABULARY = (
     "viral gastroenteritis",
     "c. perfringens",
 )
+CRUISE_LINE_HEADER = "cruise line"
+CRUISE_SHIP_HEADER = "cruise ship"
 TABLE_HEADERS = {
-    "cruise line": "cruise_line",
-    "cruise ship": "ship",
+    CRUISE_LINE_HEADER: "cruise_line",
+    CRUISE_SHIP_HEADER: "ship",
     "sailing dates": "voyage_dates_raw",
     "voyage number": None,
     "causative agent": "causative_agent",
@@ -298,7 +302,7 @@ def is_outbreak_table(table: Table) -> bool:
         for cell in table.rows[0]
     }
     return bool(headers & set(TABLE_HEADERS)) and bool(
-        headers & {"cruise line", "cruise ship"}
+        headers & {CRUISE_LINE_HEADER, CRUISE_SHIP_HEADER}
     )
 
 
@@ -381,66 +385,90 @@ def normalize_href(index_url: str, href: str | None) -> str | None:
     return urljoin(index_url, href)
 
 
+def _index_row(
+    cells: list[Cell],
+    columns: dict[str, int],
+    *,
+    index_url: str,
+    year: int,
+    layout: str,
+) -> IndexRow:
+    values = [clean_text(cell.text) for cell in cells]
+    full_span = len(cells) == 1 and cells[0].colspan >= 4
+    if full_span:
+        values = ["", "", values[0], ""]
+        date_cell = Cell()
+    else:
+        if len(values) <= max(columns.values()):
+            raise RuntimeError(
+                f"{index_url}: row has fewer cells than headers; row={values!r}"
+            )
+        date_cell = cells[columns["voyage_dates_raw"]]
+    if not full_span and len(values) == 1:
+        values = ["", "", values[0], ""]
+    elif not full_span and len(values) == 2:
+        values = ["", "", values[0], values[1]]
+    elif not full_span and len(values) == 3:
+        values = ["", *values]
+    if full_span:
+        row_values = {
+            "cruise_line": "",
+            "ship": "",
+            "voyage_dates_raw": values[2],
+            "causative_agent": "",
+            "pax_text": "",
+            "crew_text": "",
+        }
+    else:
+        row_values = {
+            name: values[index]
+            for name, index in columns.items()
+            if index < len(values)
+        }
+    row = IndexRow(
+        year=year,
+        cruise_line=row_values["cruise_line"],
+        ship=row_values["ship"],
+        voyage_dates_raw=row_values["voyage_dates_raw"],
+        causative_agent=row_values["causative_agent"].lower(),
+        href=normalize_href(index_url, date_cell.href),
+        source_url=index_url,
+        layout=layout,
+    )
+    if layout == "index_counts":
+        row.pax_text = row_values["pax_text"]
+        row.crew_text = row_values["crew_text"]
+    return row
+
+
+def _table_index_rows(
+    table: Table,
+    index_url: str,
+    years: set[int],
+) -> list[IndexRow]:
+    columns, layout = table_columns(table, index_url)
+    year = table_year(table.caption)
+    if year not in years:
+        return []
+    return [
+        _index_row(
+            cells,
+            columns,
+            index_url=index_url,
+            year=year,
+            layout=layout,
+        )
+        for cells in expanded_rows(table)[1:]
+    ]
+
+
 def index_rows(page: Page, index_url: str, years: set[int]) -> list[IndexRow]:
     parser = PageParser()
     parser.feed(page.body)
     rows: list[IndexRow] = []
     for table in parser.tables:
-        if not is_outbreak_table(table):
-            continue
-        columns, layout = table_columns(table, index_url)
-        year = table_year(table.caption)
-        if year not in years:
-            continue
-        for cells in expanded_rows(table)[1:]:
-            values = [clean_text(cell.text) for cell in cells]
-            full_span = len(cells) == 1 and cells[0].colspan >= 4
-            if full_span:
-                values = ["", "", values[0], ""]
-                date_cell = Cell()
-            else:
-                if len(values) <= max(columns.values()):
-                    raise RuntimeError(
-                        f"{index_url}: row has fewer cells than headers; "
-                        f"headers={table.rows[0]!r}; row={values!r}"
-                    )
-                date_index = columns["voyage_dates_raw"]
-                date_cell = cells[date_index]
-            if not full_span and len(values) == 1:
-                values = ["", "", values[0], ""]
-            elif not full_span and len(values) == 2:
-                values = ["", "", values[0], values[1]]
-            elif not full_span and len(values) == 3:
-                values = ["", *values]
-            if full_span:
-                row_values = {
-                    "cruise_line": "",
-                    "ship": "",
-                    "voyage_dates_raw": values[2],
-                    "causative_agent": "",
-                    "pax_text": "",
-                    "crew_text": "",
-                }
-            else:
-                row_values = {
-                    name: values[index]
-                    for name, index in columns.items()
-                    if index < len(values)
-                }
-            row = IndexRow(
-                year=year,
-                cruise_line=row_values["cruise_line"],
-                ship=row_values["ship"],
-                voyage_dates_raw=row_values["voyage_dates_raw"],
-                causative_agent=row_values["causative_agent"].lower(),
-                href=normalize_href(index_url, date_cell.href),
-                source_url=index_url,
-                layout=layout,
-            )
-            if layout == "index_counts":
-                row.pax_text = row_values["pax_text"]
-                row.crew_text = row_values["crew_text"]
-            rows.append(row)
+        if is_outbreak_table(table):
+            rows.extend(_table_index_rows(table, index_url, years))
     return rows
 
 
@@ -674,6 +702,14 @@ def resolve_voyage_start(raw: str, index_year: int) -> str:
         return ""
 
 
+def date_year(value: int | None, fallback: int, index_year: int) -> int:
+    if value is None:
+        return fallback
+    if value < 100:
+        return value + (1900 if index_year < 2000 else 2000)
+    return value
+
+
 def voyage_date_parts(
     raw: str, index_year: int
 ) -> tuple[tuple[int, int, int], tuple[int, int, int]] | None:
@@ -683,22 +719,13 @@ def voyage_date_parts(
     first = [int(part) for part in tokens[0].split("/")]
     last = [int(part) for part in tokens[-1].split("/")]
     explicit_year = YEAR_RE.search(raw)
-
-    def year_value(value: int | None, fallback: int) -> int:
-        if value is None:
-            return fallback
-        if value < 100:
-            return value + (1900 if index_year < 2000 else 2000)
-        return value
-
-    start_year = year_value(first[2] if len(first) == 3 else None, index_year)
-    if len(last) == 3:
-        end_year = year_value(last[2], index_year)
-    else:
-        end_year = year_value(
-            int(explicit_year.group(1)) if explicit_year else None,
-            start_year,
-        )
+    start_year = date_year(first[2] if len(first) == 3 else None, index_year, index_year)
+    explicit_end_year = int(explicit_year.group(1)) if explicit_year else None
+    end_year = date_year(
+        last[2] if len(last) == 3 else explicit_end_year,
+        start_year,
+        index_year,
+    )
     if len(tokens) == 1:
         day_only = re.search(
             r"\d{1,2}/\d{1,2}\s*[-–]\s*(\d{1,2})(?:\s|,|$)",
@@ -706,13 +733,15 @@ def voyage_date_parts(
         )
         if day_only:
             last = [first[0], int(day_only.group(1))]
-            if first[0] >= 10 and last[0] <= 3:
-                end_year += 1
         else:
             last = first
-    elif len(last) == 2 and (last[0], last[1]) < (first[0], first[1]):
-        if first[0] >= 10 and last[0] <= 3:
-            end_year = max(end_year, start_year + 1)
+    crosses_new_year = (
+        (first[0] >= 10 and last[0] <= 3)
+        and (len(tokens) == 1 or len(last) == 2)
+        and (last[0], last[1]) < (first[0], first[1])
+    )
+    if crosses_new_year:
+        end_year = max(end_year, start_year + 1)
     return (
         (first[0], first[1], start_year),
         (last[0], last[1], end_year),
@@ -854,6 +883,52 @@ def build_record(
     )
 
 
+def _counts_for_row(
+    row: IndexRow,
+    cache_dir: Path,
+    *,
+    refresh: bool,
+    delay: float,
+    fetched_urls: set[str],
+) -> tuple[tuple[str, str, str, str, str, str], str, str, str, str]:
+    detail_url = (
+        detail_candidate_url(row, row.source_url)
+        if row.layout in {"detail_counts", "detail_required"}
+        else None
+    )
+    page = (
+        try_fetch_detail(
+            cache_dir,
+            detail_url,
+            refresh=refresh,
+            delay=delay,
+            fetched_urls=fetched_urls,
+        )
+        if detail_url
+        else None
+    )
+    if (
+        page is not None
+        and detail_url.startswith("https://www.cdc.gov/")
+        and not detail_matches_row(page, row)
+    ):
+        page = None
+    source_url = detail_url if page is not None else row.source_url
+    if page is not None:
+        parser = PageParser()
+        parser.feed(page.body)
+        source_text = clean_text(" ".join(parser.visible_parts))
+        counts = detail_counts(page)
+        published = counts_published("", "", counts[:3], counts[3:])
+        retrieved = page.retrieved
+    else:
+        source_text = f"{row.pax_text} {row.crew_text}"
+        counts, published = parse_inline_counts(row)
+        index_page = read_cache(cache_dir, row.source_url)
+        retrieved = index_page.retrieved if index_page else date.today().isoformat()
+    return counts, published, source_url, source_text, retrieved
+
+
 def extract_rows(
     rows: list[IndexRow],
     cache_dir: Path,
@@ -865,44 +940,14 @@ def extract_rows(
 ) -> list[dict[str, str]]:
     records: list[dict[str, str]] = []
     for row in rows:
-        detail_url = (
-            detail_candidate_url(row, row.source_url)
-            if row.layout in {"detail_counts", "detail_required"}
-            else None
+        counts, published, source_url, source_text, retrieved = _counts_for_row(
+            row,
+            cache_dir,
+            refresh=refresh,
+            delay=delay,
+            fetched_urls=fetched_urls,
         )
-        page = (
-            try_fetch_detail(
-                cache_dir,
-                detail_url,
-                refresh=refresh,
-                delay=delay,
-                fetched_urls=fetched_urls,
-            )
-            if detail_url
-            else None
-        )
-        if (
-            page is not None
-            and detail_url.startswith("https://www.cdc.gov/")
-            and not detail_matches_row(page, row)
-        ):
-            page = None
-        source_url = detail_url if page is not None else row.source_url
-        if page is not None:
-            parser = PageParser()
-            parser.feed(page.body)
-            source_text = clean_text(" ".join(parser.visible_parts))
-            counts = detail_counts(page)
-            published = counts_published("", "", counts[:3], counts[3:])
-        else:
-            source_text = f"{row.pax_text} {row.crew_text}"
-            counts, published = parse_inline_counts(row)
-        if page is not None:
-            retrieved = page.retrieved
-        else:
-            index_page = read_cache(cache_dir, row.source_url)
-            retrieved = index_page.retrieved if index_page else date.today().isoformat()
-        check_url = detail_url or source_url
+        check_url = source_url
         classify_missing(row, counts, check_url, published, checks)
         percentage_failures(row, counts, check_url, source_text, checks)
         plausibility_failures(row, counts, check_url, checks)
@@ -987,9 +1032,16 @@ def threshold_counts(records: Iterable[dict[str, str]]) -> dict[str, int]:
 
 
 def write_csv(path: Path, records: list[dict[str, str]]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
+    repo_root = Path(__file__).resolve().parents[2]
+    safe_path = resolve_repo_path(str(repo_root), str(path))
     ordered = sorted(records, key=lambda record: record["voyage_end"], reverse=True)
-    with path.open("w", newline="", encoding="utf-8") as handle:
+    with validated_open(
+        safe_path,
+        "w",
+        allowed_roots=(str(repo_root),),
+        newline="",
+        encoding="utf-8",
+    ) as handle:
         writer = csv.DictWriter(handle, fieldnames=CSV_FIELDS, lineterminator="\n")
         writer.writeheader()
         writer.writerows(ordered)
@@ -1191,8 +1243,15 @@ def write_log(
             "extraction from the raw cache and compares the resulting CSV bytes.",
         ]
     )
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    repo_root = Path(__file__).resolve().parents[2]
+    safe_path = resolve_repo_path(str(repo_root), str(path))
+    with validated_open(
+        safe_path,
+        "w",
+        allowed_roots=(str(repo_root),),
+        encoding="utf-8",
+    ) as handle:
+        handle.write("\n".join(lines) + "\n")
 
 
 def run(args: argparse.Namespace) -> None:

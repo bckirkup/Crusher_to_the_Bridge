@@ -27,6 +27,8 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
+from simulation_utils.paths import resolve_repo_path, validated_open
+
 BOOTSTRAP_REPLICATES = 10000
 PERMUTATION_REPLICATES = 10000
 SEED = 20260830
@@ -76,7 +78,13 @@ def load_series(path: Path) -> list[Outbreak]:
     the counts carry more digits.
     """
     outbreaks: list[Outbreak] = []
-    with path.open(newline="", encoding="utf-8") as handle:
+    safe_path = resolve_repo_path(str(path.parent), str(path))
+    with validated_open(
+        safe_path,
+        allowed_roots=(str(path.parent),),
+        encoding="utf-8",
+        newline="",
+    ) as handle:
         for row in csv.DictReader(handle):
             pax = _rate(row["pax_ill"], row["pax_total"])
             if pax is None:
@@ -111,16 +119,16 @@ def _tail_share(sample: list[Outbreak], threshold: float) -> float | None:
 
 
 def _ratio(post: float | None, pre: float | None) -> float | None:
-    if post is None or pre is None or pre == 0.0:
+    if post is None or pre is None or math.isclose(pre, 0.0, abs_tol=1e-12):
         return None
     return post / pre
 
 
-def _a6c(pre: list[Outbreak], post: list[Outbreak]) -> float | None:
+def _a7c(pre: list[Outbreak], post: list[Outbreak]) -> float | None:
     """Difference-in-differences: the passenger-specific component."""
     pax = _ratio(_median_pax(post), _median_pax(pre))
     crew = _ratio(_median_crew(post), _median_crew(pre))
-    if pax is None or crew is None or crew == 0.0:
+    if pax is None or crew is None or math.isclose(crew, 0.0, abs_tol=1e-12):
         return None
     return pax / crew
 
@@ -134,7 +142,7 @@ STATISTICS: dict[str, Statistic] = {
     "A7b_crew_median_ratio": lambda pre, post: _ratio(
         _median_crew(post), _median_crew(pre)
     ),
-    "A7c_did_pax_over_crew": _a6c,
+    "A7c_did_pax_over_crew": _a7c,
 }
 
 # A7d is deliberately absent from STATISTICS. The percentile bootstrap cannot
@@ -432,6 +440,7 @@ def build_report(outbreaks: list[Outbreak]) -> str:
 
 def main() -> None:
     here = Path(__file__).resolve().parent
+    repo_root = here.parents[1]
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--series", type=Path, default=here / "vsp_outbreak_series.csv")
     parser.add_argument(
@@ -440,8 +449,16 @@ def main() -> None:
         default=here / "vsp_covid_discontinuity_findings.md",
     )
     args = parser.parse_args()
-    report = build_report(load_series(args.series))
-    args.out.write_text(report, encoding="utf-8")
+    series_path = resolve_repo_path(str(repo_root), str(args.series))
+    output_path = resolve_repo_path(str(repo_root), str(args.out))
+    report = build_report(load_series(Path(series_path)))
+    with validated_open(
+        output_path,
+        "w",
+        allowed_roots=(str(repo_root),),
+        encoding="utf-8",
+    ) as handle:
+        handle.write(report)
     print(report)
 
 

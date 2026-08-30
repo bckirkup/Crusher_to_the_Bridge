@@ -275,3 +275,34 @@ def test_loader_recomputes_rates_and_tolerates_missing_crew(tmp_path: Path) -> N
     assert outbreaks[0].agent == "norovirus"
     assert outbreaks[1].crew_rate is None
     assert statistics.median([o.pax_rate for o in outbreaks]) > 3.0
+
+
+def test_report_covers_arm_summaries_and_yearly_breakdown() -> None:
+    """The published report includes summaries, intervals, and yearly counts."""
+    outbreaks = [
+        analysis.Outbreak(2015, "pre", "norovirus", 5.0, 2.0, 1200),
+        analysis.Outbreak(2016, "pre", "unknown", 16.0, 4.0, 1400),
+        analysis.Outbreak(2024, "post", "norovirus", 4.0, 3.0, 1300),
+        analysis.Outbreak(2025, "post", "unknown", 20.0, None, 1500),
+    ]
+    report = analysis.build_report(outbreaks)
+    assert "A7a_pax_median_ratio" in report
+    assert "A7d, the upper tail" in report
+    assert "| 2015 | 1 | 1 | 1.00 |" in report
+    assert "| 2025 | 1 | 0 | 0.00 |" in report
+
+
+def test_empty_and_degenerate_statistics_are_reportable() -> None:
+    """Undefined statistics remain explicit rather than being coerced to zero."""
+    assert analysis._describe_arm("empty", []) == [
+        "- **empty**: no posted outbreaks with passenger counts."
+    ]
+    assert analysis._format_statistic("A7x", None, None, None).endswith(
+        "| undefined | | |"
+    )
+    assert analysis.permutation_p(
+        analysis.STATISTICS["A7a_pax_median_ratio"],
+        [],
+        [],
+        random.Random(analysis.SEED),
+    ) is None
