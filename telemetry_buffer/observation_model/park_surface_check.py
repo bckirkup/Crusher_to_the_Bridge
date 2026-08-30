@@ -125,18 +125,18 @@ def main() -> None:
     emit("Predicted steady-state surface loading")
     emit("-" * 78)
     emit(
-        f"{'zone':<8}{'scenario':<36}{'pool':>12}{'copies/swab':>14}"
-        f"{'Park':>16}",
+        f"{'zone':<8} | {'scenario':<34} | {'pool':>11} | "
+        f"{'copies/swab':>11} | {'Park range':>14} | verdict",
     )
     results: dict[str, float] = {}
     for zone_class, label, shedder_hours, susceptible in scenarios:
         pool = steady_state_pool(zone_class, shedder_hours, susceptible, exp_)
         conc = concentration_per_swab(pool, zone_class)
         low, high = PARK[zone_class]
-        verdict = "in range" if low <= conc <= high else "OUT"
+        verdict = "IN RANGE" if low <= conc <= high else "out of range"
         emit(
-            f"{zone_class:<8}{label:<36}{pool:>12.4g}{conc:>14.4g}"
-            f"{f'{low:g}-{high:g} {verdict}':>16}",
+            f"{zone_class:<8} | {label:<34} | {pool:>11.4g} | "
+            f"{conc:>11.4g} | {f'{low:g}-{high:g}':>14} | {verdict}",
         )
         results[label] = conc
     emit()
