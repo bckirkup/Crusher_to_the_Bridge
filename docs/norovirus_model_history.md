@@ -517,6 +517,56 @@ finding about what is still missing, not a reason to revisit the constants.
 Every dose figure is withdrawn again: the fit was against a contact layer that
 no longer exists.
 
+## 9g. Surfaces that nothing ever cleaned, and why cleaning them hurt
+
+Until #355 no mechanism in the model removed pathogen from a surface except
+natural inactivation at 0.25-0.50/day. A cruise ship that never cleans anything
+is not a modelling simplification; it is a missing process, and it had been
+absorbed into the same fitted dose the last three sections withdrew.
+
+The cheap implementation is a single coverage-weighted reduction on the whole
+surface pool, which is the recurring defect of this effort in a new costume:
+replacing a concentrated, spatially heterogeneous process with a well-mixed
+mean. Carling et al. 2009 measured what actually happens — a covert
+fluorescent-marker audit of 8,344 objects in 273 public restrooms on 56 cruise
+ships found **37% cleaned daily** (95% CI 29.2-45.4%, range 4-100% by ship) —
+so 63% of high-touch objects are not reached at all. Averaging over that gives
+every object a small daily reduction and drives the pool towards zero on a
+long enough voyage; the measurement says a persistent reservoir survives
+indefinitely on the objects housekeeping skips.
+
+So the surface pool is now two compartments, cleaned and missed, per zone per
+pathogen, with the aggregate `surface_pools` preserved as their sum so every
+existing reader and dose path is unchanged. A routine pass is a discrete event
+fired off a `SimClock` day-fraction accumulator (one pass/day, exactly one
+event per epoch under the legacy epoch-is-a-day clock) that multiplies **only**
+the cleaned compartment by 10^-1.29 — the midpoint of the two definition-matched
+measurements available, 1.0 log10 for a single soap or 250-ppm-chlorine wipe of
+hNoV on steel (Tuladhar et al. 2012) and 1.57 for targeted wipes and sprays
+tracked with a viral tracer in a hotel lobby (Spitzer et al. 2025).
+
+Outbreak response is a separate method, not a stronger setting of the same one:
+detergent preclean then 5,000 ppm hypochlorite, 1.29 + 3.0 = 4.29 log10 (Park
+et al. 2011; Escudero-Abarca et al. 2022), over a coverage of 0.58 that nests
+the routine 37% and reaches (0.58-0.37)/(1-0.37) = one third of the objects
+routine cleaning misses. Both the log10 additivity and the 0.58 are Grade C and
+recorded in §10. The old fractional knobs `surface_decontamination_factor`
+(0.4/0.5/0.6 across SOP-003/010/016, three different physical claims about the
+same procedure) and the never-read `surface_decay_rate_override` are deleted,
+not aliased.
+
+**Measured, not fitted, and it went the wrong way.** Park's cabin/public
+gradient falls from 14.5x to **11.2x**. Cleaning removes proportionally more
+from a quiet cabin (pool x0.74, continuous loss 0.029/h) than from a busy
+public zone (x0.96, loss 0.33/h), because in the public zone hand pickup
+already clears surfaces faster than a daily pass can. Cabin loading 5,571 ->
+4,120 copies/swab, public 384.9 -> 368.0, both still inside Park's observed
+ranges. Real ships clean cabins and public spaces on different schedules with
+different products, and that asymmetry is the obvious candidate — but no
+measurement of per-zone-class frequency was found, so it is left as ledger
+§4.1 rather than chosen to close the gap. The §9e/§9f conclusion stands: the
+residual is where people vomit.
+
 ## 10. Parameters held fixed by assumption
 
 These are not identified by anything in the fit, and any of them could move the
@@ -543,6 +593,17 @@ over-determined *given* these.
 - The 20% innate non-susceptible ceiling, which is why infection attack rate
   pins at exactly 0.800 and why the fit must be read on reported cases.
 - `shedding_variance_log10` = 1.0: literature-anchored, but to a range.
+- Outbreak-response cleaning coverage 0.58 (§9g): no shipboard measurement
+  exists; carried over from a 34%→53% supervision-and-feedback effect in two
+  hospitals (Murphy et al. 2011) applied to Carling's 37%. Sweep, never assert.
+- Log10 additivity of preclean-then-hypochlorite (1.29 + 3.0). The field
+  reports two-step efficacy that way; the composition is not measured.
+- One housekeeping pass per day, uniform across zone classes: the denominator
+  of Carling's "cleaned on a daily basis", not an observed schedule.
+- Newly deposited surface mass splits between cleaned and missed compartments
+  in proportion to coverage — shedders are assumed to touch reached and missed
+  objects alike. If soiling concentrates on the objects housekeeping skips, the
+  surviving reservoir is larger than modelled.
 
 ## 11. Corrections to claims made during the work
 
