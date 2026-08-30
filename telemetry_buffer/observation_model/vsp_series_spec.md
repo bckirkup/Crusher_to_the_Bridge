@@ -18,25 +18,52 @@ of passengers or crew reporting AGE symptoms to the ship's medical staff**. VSP
 may also post outbreaks of public health significance that miss those criteria,
 so the sample is "posted", not "≥3%".
 
-| era | years | source |
+**Every year is available from a CDC-hosted page**, so `web.archive.org` is not
+the source of record for any of it. CDC maintains its own archive at
+`archive.cdc.gov`, reachable directly under the `www_cdc_gov` path prefix, and
+two pages there carry the entire historical series in one table each with the
+counts inline:
+
+| years | source of record | counts |
 |---|---|---|
-| current | 2026 | `https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/index.html` |
-| current | 2023-2025 | `.../cruise-ship-outbreaks/earlier-outbreaks.html` |
-| 2022 | 2022 | archived snapshot of the above, or the 2022 index; record which |
-| legacy | 1994-2019 | `web.archive.org` snapshot of `https://www.cdc.gov/nceh/vsp/surv/gilist.htm` |
+| 1993-2018 | `https://archive.cdc.gov/www_cdc_gov/nceh/vsp/surv/outbreak/archived-outbreaks-1993-2018.html` | in the table |
+| 2019-2022 | `https://archive.cdc.gov/www_cdc_gov/vessel-sanitation/cruise-ship-outbreaks/earlier-outbreaks-2019-2022.html` | in the table |
+| 2023-2025 | `https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/earlier-outbreaks.html` | detail page per row |
+| current year | `https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/index.html` | detail page per row |
 
-Two page layouts carry the counts:
+Both archive pages use one layout: a single table with columns `Cruise Line`,
+`Cruise Ship`, `Sailing Dates`, `Causative Agent`, `Case Counts (Passengers)`,
+`Case Counts (Crew)`, the counts formatted `84 of 1,986 (4.23%)`, and sailing
+dates fully qualified with four-digit years on both ends
+(`12/29/2022-1/3/2023`), so no century inference is needed. Rows through 2003,
+and two rows in 2004, read **`Data not available`** in both count columns:
+that is CDC's own statement, not a retrieval failure, and it must be recorded
+as such rather than as a parse gap.
 
-- Years through about 2007, the year index table itself carries `Case Counts
-  (Passengers)` and `Case Counts (Crew)` columns, formatted `144 of 2,132
-  (6.75%)`. Take them from the index; no detail fetch needed.
-- Later years, the index carries only line/ship/dates/agent and each row links
-  to a detail page carrying `Number of passengers who ... reported being ill
-  during the voyage out of total number of passengers[ onboard]: 135 of 1318
-  (10.24%)` and the corresponding crew sentence. Wording varies between eras
-  ("who have reported" vs "who reported", with/without "onboard", "Final case
-  counts:"); match on the numeric `N of M (P%)` pattern inside the
-  passenger/crew sentence rather than on exact prose.
+The two live pages carry no counts at all — `Cruise Line`, `Cruise Ship`,
+`Sailing Dates`, `Causative Agent` only — so each row's linked detail page is
+required. Detail pages carry `Number of passengers who ... reported being ill
+during the voyage out of total number of passengers[ onboard]: 135 of 1318
+(10.24%)` and the corresponding crew sentence. Wording varies ("who have
+reported" vs "who reported", with/without "onboard", "Final case counts:"), so
+match on the numeric `N of M (P%)` pattern within the passenger/crew sentence
+rather than on exact prose.
+
+### Cross-source reconciliation, mandatory
+
+The first extraction of this series took 1994-2019 from a `web.archive.org`
+snapshot of the retired `cdc.gov/nceh/vsp/surv/gilist.htm` and its per-outbreak
+detail pages. That gives an independent path to the same numbers, and it is kept
+for exactly that purpose. Reconcile the two row by row, keyed on cruise ship
+plus sailing dates, and log:
+
+- rows present in one path and absent from the other;
+- rows where any of the four counts disagree, with both values and both URLs.
+
+Where they disagree the CDC-hosted page wins and the disagreement stays in the
+log. Agreement across two independently retrieved paths is the strongest
+evidence available here that a count is what CDC published; silent divergence is
+the failure mode this whole exercise exists to prevent.
 
 ## Output
 
@@ -46,7 +73,7 @@ outbreak, sorted by `voyage_end` descending, columns exactly:
 ```
 year,cruise_line,ship,voyage_dates_raw,voyage_end,causative_agent,
 pax_ill,pax_total,pax_pct_page,crew_ill,crew_total,crew_pct_page,
-era,source_url,retrieved
+era,counts_published,source_url,retrieved
 ```
 
 - `year` — calendar year of the index table the row came from, integer.
@@ -60,9 +87,18 @@ era,source_url,retrieved
   not recomputed. Empty where the page omits it.
 - counts — integers with separators stripped. Empty where the page omits the
   crew sentence entirely (some legacy pages do). Never impute.
+- `counts_published` — `full` where both the passenger and crew counts are
+  present, `passenger_only` / `crew_only` where one is, `data_not_available`
+  where the source says so in as many words, and `unparsed` where the source
+  appears to publish counts that could not be read. The last value means a
+  defect; the fourth does not, and collapsing the two loses the distinction
+  between what CDC never published and what we failed to read.
 - `era` — `pre` for `voyage_end` in 2004-01-01..2019-12-31, `shutdown` for
   2020-01-01..2021-12-31, `post` for 2022-01-01 onward, `legacy_pre2004`
-  before that. Keep every row; the analysis selects.
+  before that. Keep every row; the analysis selects. The 2019-2022 archive page
+  carries the 2020 and 2021 voyages, and they belong in the CSV as `shutdown`
+  even though nothing scores them — an era whose rows are absent cannot be
+  distinguished from an era with no outbreaks.
 - `source_url` — the exact URL the counts were read from (detail page where a
   detail page was used, index page otherwise), including the
   `web.archive.org/web/<timestamp>/` prefix where applicable.
@@ -90,6 +126,11 @@ CSV keeps them with empty fields; nothing is dropped silently.
    `pax_pct_page < 3` and `crew_pct_page < 3` — these are the discretionary
    "public health significance" postings, and the analysis needs to know how
    many there are. Do not drop them.
+4b. **Printed-percentage triage.** Classify every failure of check 1 into: CDC
+   truncating rather than rounding (`7.9654` printed as `7.9`), a CDC error of
+   another kind (`0.7375` printed as `0.07`), or a parse error on our side.
+   Resolve each against the CDC-hosted page's own text and say which it is; a
+   bare list of mismatches does not tell a reader whether the dataset is sound.
 5. **Idempotence.** Re-running the fetch script against the raw cache must
    reproduce the CSV byte-for-byte.
 

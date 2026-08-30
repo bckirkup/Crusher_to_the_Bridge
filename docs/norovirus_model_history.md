@@ -657,3 +657,80 @@ conservation, per-capita invariance to occupancy, cross-clock equivalence of
 per-day quantities and epoch-invariance of the dose-response. The audit is not exhausted, and the correct prior is that
 further defects exist. Absence of a further finding is not evidence of
 correctness.
+
+## 9h. The COVID discontinuity was not the discontinuity we had been quoting
+
+The ledger's instrument for the NPI lever was "passenger attack rates fell
+15-20% across the 2020 break, p=0.032, while crew rates held still". That
+sentence was read off `docs/vsp_covid_discontinuity.png`, an operator-supplied
+figure whose per-outbreak table had never been in the repository, so no number
+in it could be checked. Rebuilding the table was supposed to be bookkeeping
+before the refit. It was not.
+
+**The extraction found two defects in itself before it found anything about
+norovirus**, and both are the same defect class the rest of this document is
+about: a check that passes on data that is wrong.
+
+The first was a column misalignment. CDC's outbreak index publishes 2023 and
+2024 in a seven-column table — it inserts `Voyage Number` between `Sailing
+Dates` and `Causative Agent` — while every other year uses six columns. A
+parser binding columns by position therefore read voyage identifiers as
+causative agents for 32 of the 68 postings in the entire post-COVID arm:
+`j301`, `eu241230`, `sn240331016`. Five consistency checks passed on that file,
+including a printed-percentage check, because the counts were in the last two
+columns and were read correctly; only the agent moved. What surfaced it was a
+descriptive quantity nothing was scored against — the norovirus fraction read
+exactly 0.00 in 2023 and 0.00 in 2024, sitting between 0.80 in 2019 and 0.78
+in 2025, and a fraction of zero is not a thing that happens to norovirus on
+cruise ships. The lesson is not "bind by header", though the parser now does
+and now fails loudly on an unrecognised header. It is that the unscored
+descriptive series earned its place: it was the only quantity in the report
+capable of being visibly absurd.
+
+The second was the source of record. The first extraction took 1994-2019 from
+`web.archive.org` snapshots of a retired CDC page. CDC in fact hosts its own
+archive, and two pages there carry 1993-2018 and 2019-2022 as single tables
+with the counts inline. Repointing at those made the provenance defensible,
+recovered the 2020-2021 postings that the snapshot lacked (an era with no rows
+is indistinguishable from an era with no outbreaks), and left the snapshot as an
+independent cross-check: 428 rows, seven count disagreements between the two
+paths, all logged with both URLs. CDC's own `Data not available` for every
+outbreak through 2003 is now recorded as the sentinel it is, rather than
+counted as 91 parse failures.
+
+**Then the measurement contradicted the claim it was built to quantify.**
+Passenger medians barely move across the break: 5.39% to 4.91%, a ratio of
+0.912 (0.788-1.182, p=0.26). There is no detectable level drop, and the 15-20%
+figure is withdrawn. What is there instead is three things the level statistic
+had hidden:
+
+- the crew median *rises*, 1.365x (1.004-1.677, p=0.007), so the
+  passenger-specific component — the passenger shift over the crew shift — is
+  0.668 (0.532-0.907, p<0.001);
+- about half of that crew rise is fleet composition rather than crew behaviour.
+  Post-2020 postings include small expedition vessels, several below VSP's own
+  100-passenger posting criterion, whose crew denominators are a few hundred;
+  holding composition fixed at 1000+ passengers leaves the crew ratio at 1.211
+  (0.846-1.561, p=0.098) and the passenger-specific component at 0.736
+  (0.581-1.053);
+- what actually disappears is the upper tail. On ships carrying 1000+
+  passengers, 11 of 226 pre-2020 postings exceeded 15% of passengers ill and 0
+  of 48 post-2020 do, the worst posting falling from 25.2% to 13.5%. Fisher's
+  exact test gives p=0.22 on counts that sparse, so this is direction, not
+  evidence, and it is recorded as descriptive for exactly that reason.
+
+This matters for the refit in a way a smaller number would not. A model that
+matches the passenger-specific shift by lowering every voyage uniformly and a
+model that matches it by removing the tail are different models with different
+mechanisms, and the level anchors cannot tell them apart. It also removes the
+premise for the passenger-facing-sanitation story as it was stated: crew rates
+did not hold still, so a post-2020 configuration that leaves the crew arm
+untouched contradicts the data rather than matching it.
+
+The statistic itself came within one design revision of asserting the opposite
+with false confidence. The upper-tail ratio was originally scored with a
+percentile bootstrap; with no post-era posting above the threshold, every
+resample returns a tail share of zero, the interval collapses to [0, 0], and it
+excludes 1 — a decisive tail collapse on the evidence of nothing at all. It is
+now reported as counts with Wilson intervals and an exact test, and the
+degenerate case is a regression test.
