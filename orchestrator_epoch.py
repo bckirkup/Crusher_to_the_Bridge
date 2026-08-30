@@ -417,7 +417,6 @@ def _draw_symptom_onset(
     prof: dict[str, Any],
     rng: np.random.Generator,
     epoch: int = 0,
-    emesis_rng: np.random.Generator | None = None,
 ) -> None:
     """One dose-conditioned illness draw for a host past its incubation period."""
     ill_params = prof.get("illness_probability", {})
@@ -429,9 +428,7 @@ def _draw_symptom_onset(
     if rng.random() < ill_prob:
         inf["illness"] = IllnessStatus.SYMPTOMATIC
         inf["onset_time_infected"] = inf.get("time_infected", 0)
-        _draw_emesis_schedule(
-            agent, pid, prof, emesis_rng if emesis_rng is not None else rng,
-        )
+        _draw_emesis_schedule(agent, pid, prof, rng)
         if inf.get("symptom_severity") in (None, "", "asymptomatic"):
             inf["symptom_severity"] = _draw_symptom_severity(prof, rng)
         if agent.illness_status == IllnessStatus.NOT_ILL:
@@ -461,7 +458,6 @@ def _advance_agent_pathogen_infections(
     rng: np.random.Generator,
     strain_registry: StrainRegistry | None = None,
     epoch: int = 0,
-    emesis_rng: np.random.Generator | None = None,
 ) -> None:
     clock = agent.clock
     for pid, inf in tuple(agent.infections.items()):
@@ -484,9 +480,7 @@ def _advance_agent_pathogen_infections(
             # of presenting does not depend on how finely time is cut — and the
             # first chance is the epoch that crosses this host's own drawn
             # incubation period, so onset is not rounded up to a whole day.
-            _draw_symptom_onset(
-                agent, pid, inf, prof, rng, epoch, emesis_rng,
-            )
+            _draw_symptom_onset(agent, pid, inf, prof, rng, epoch)
 
         recovery_day = agent.get_chronic_recovery_day(
             pid, prof.get("recovery_day", 3),
@@ -567,7 +561,6 @@ def step_infection_progression(
             engine.rng,
             strain_registry,
             epoch,
-            confinement_core.rng if confinement_core is not None else None,
         )
 
         _project_legacy_illness(agent)
