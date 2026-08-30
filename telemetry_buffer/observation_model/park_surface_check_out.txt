@@ -24,7 +24,27 @@ Shedder-hour asymmetry required for a 100x gradient, holding the implemented con
   A cabin cannot accumulate that many more shedder-hours than a public zone;
   the gradient is therefore not reachable by hand transfer at any occupancy.
 
-Interpretation: the hand-transfer chain reproduces public-space contamination,
-and cannot reproduce sick-cabin contamination. Park's cabin figures are the
-signature of direct emesis/faecal deposition in a small bathroom, which is a
-deposition mechanism the model does not have.
+Emesis term as implemented
+------------------------------------------------------------------------------
+  mean episode load        1.055e+07 copies
+  episodes per illness-day 0.6667
+  pool gain per episode    cabin 2.029e+06, public 8.115e+06 copies
+
+  single episode, cabin, immediately after: 8.723e+04 copies/swab
+  at Park's stated 1.2-36% swab recovery that reads as 1047-3.14e+04 copies/swab, against Park's observed 80-31217
+
+Time-averaged loading with emesis, swept over cabin localization f
+------------------------------------------------------------------------------
+     f |  cabin copies/swab |  public copies/swab |  gradient | vs Park 100-300x
+  0.50 |          9.866e+04 |           2.993e+04 |    3.297x | out of range
+  0.80 |           1.57e+05 |           1.219e+04 |    12.88x | out of range
+  0.95 |          1.862e+05 |                3314 |    56.18x | out of range
+  0.99 |          1.939e+05 |               948.3 |    204.5x | IN RANGE
+  1.00 |          1.959e+05 |               356.9 |    548.8x | out of range
+
+f is the fraction of a host's vomiting episodes that occur in its own cabin.
+No study measures it. It is NOT a model parameter and the model does not use
+it: emesis is deposited wherever the host is, which is f implied by the
+schedule rather than declared. This sweep exists to report how much of the
+gradient rests on an unmeasured behavioural quantity. Reading f off Park's
+gradient would be fitting, and is refused.

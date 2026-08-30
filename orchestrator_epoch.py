@@ -36,7 +36,10 @@ from engines.infection_dynamics_bridge import (
 from engines.sim_clock import SimClock, config_epochs_for_hours
 from engines.sim_clock import crossed_day_boundary as _crossed_day_boundary
 from engines.strain_state import ImmuneRecord, StrainRegistry
-from engines.transmission_core import TransmissionCore
+from engines.transmission_core import (
+    TransmissionCore,
+    draw_emesis_schedule,
+)
 from engines.wearable_monitor import WearableMonitor
 from orchestrator_types import (
     DEFAULT_AIRBORNE_FRACTION,
@@ -425,6 +428,7 @@ def _draw_symptom_onset(
     if rng.random() < ill_prob:
         inf["illness"] = IllnessStatus.SYMPTOMATIC
         inf["onset_time_infected"] = inf.get("time_infected", 0)
+        draw_emesis_schedule(agent, pid, prof, rng)
         if inf.get("symptom_severity") in (None, "", "asymptomatic"):
             inf["symptom_severity"] = _draw_symptom_severity(prof, rng)
         if agent.illness_status == IllnessStatus.NOT_ILL:
@@ -498,6 +502,8 @@ def _advance_agent_pathogen_infections(
             agent.cumulative_exposure.pop(pid, None)
             agent.cumulative_exposure_by_route.pop(pid, None)
             agent.hand_load_by_pathogen.pop(pid, None)
+            agent.emesis_episode_schedule_by_pathogen.pop(pid, None)
+            agent.emesis_deposition_records_by_pathogen.pop(pid, None)
 
 
 def _project_legacy_illness(agent: Any) -> None:
@@ -551,7 +557,11 @@ def step_infection_progression(
 
     for agent in engine.agents:
         _advance_agent_pathogen_infections(
-            agent, pathogen_profiles, engine.rng, strain_registry, epoch,
+            agent,
+            pathogen_profiles,
+            engine.rng,
+            strain_registry,
+            epoch,
         )
 
         _project_legacy_illness(agent)

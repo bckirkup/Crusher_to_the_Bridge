@@ -548,6 +548,37 @@
           "minimum": 0,
           "description": "Hand-hygiene event rate; defaults to zero because no event model is currently fitted."
         },
+        "emesis_titre_gec_per_ml": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Optional measured emesis norovirus titre in genome copies per millilitre."
+        },
+        "emesis_volume_ml_range": {
+          "type": "array",
+          "items": {"type": "number", "exclusiveMinimum": 0},
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "Optional [low, high] log-uniform emesis volume bounds in millilitres."
+        },
+        "emesis_episodes_range": {
+          "type": "array",
+          "items": {"type": "integer", "minimum": 1},
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "Optional inclusive [low, high] discrete-uniform episode count bounds."
+        },
+        "emesis_aerosol_fraction_range": {
+          "type": "array",
+          "items": {"type": "number", "exclusiveMinimum": 0, "maximum": 1},
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "Optional [low, high] log-uniform aerosol fraction bounds."
+        },
+        "emesis_deposition_area_m2": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Optional measured emesis deposition footprint in square metres."
+        },
         "shedding_variance_log10": {
           "type": "number",
           "minimum": 0,
