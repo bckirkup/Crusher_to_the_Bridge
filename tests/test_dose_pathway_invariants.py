@@ -330,9 +330,6 @@ def test_fomite_delivery_is_conservative_and_intensive() -> None:
         * surface_efficiency
         * 10.0
     )
-    expected_mouth_area = expected_rng.uniform(
-        *transmission_core.HAND_AREA_CM2_RANGE,
-    ) / 1.0e4
     mouth_fraction = expected_rng.uniform(
         *transmission_core.MOUTH_CONTACT_FRACTION_RANGE,
     )
@@ -348,10 +345,8 @@ def test_fomite_delivery_is_conservative_and_intensive() -> None:
     expected_dose = (
         mouth_contacts
         * mouth_fraction
-        * expected_mouth_area
         * mouth_efficiency
         * expected_pickup
-        / expected_mouth_area
     )
     assert delivered == pytest.approx(expected_pickup)
     assert doses[target.agent_id] == pytest.approx(expected_dose)

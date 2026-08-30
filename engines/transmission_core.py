@@ -2314,12 +2314,13 @@ class TransmissionCore:
         profile: dict | None,
     ) -> None:
         target = agent.get_pathogen_hand_target(pathogen_id, profile or {})
-        if target <= 0.0:
+        current = agent.hand_load_by_pathogen.get(pathogen_id, 0.0)
+        if target <= 0.0 and current <= 0.0:
             return
         rate = self._hand_inactivation_rate(agent, pathogen_id, profile)
+        survival = math.exp(-rate * self.clock.hours_per_epoch)
         agent.hand_load_by_pathogen[pathogen_id] = (
-            agent.hand_load_by_pathogen.get(pathogen_id, 0.0)
-            + target * rate * self.clock.hours_per_epoch
+            target + (current - target) * survival
         )
 
     def _decay_hand_load(
@@ -2344,6 +2345,27 @@ class TransmissionCore:
             hand *= math.pow(10.0, -self._hand_hygiene_efficacy(profile))
         agent.hand_load_by_pathogen[pathogen_id] = max(hand, 0.0)
 
+    def _apply_hand_hygiene(
+        self,
+        agent: KorkinAgent,
+        pathogen_id: str,
+        profile: dict | None,
+    ) -> None:
+        """Apply the configured hygiene event after hand relaxation."""
+        hand = agent.hand_load_by_pathogen.get(pathogen_id, 0.0)
+        if hand <= 0.0:
+            return
+        hygiene_rate = float((profile or {}).get(
+            "hand_hygiene_rate_per_hour",
+            HAND_HYGIENE_RATE_PER_HOUR_DEFAULT,
+        ))
+        event_probability = 1.0 - math.exp(
+            -max(hygiene_rate, 0.0) * self.clock.hours_per_epoch,
+        )
+        if event_probability > 0.0 and self.rng.random() < event_probability:
+            hand *= math.pow(10.0, -self._hand_hygiene_efficacy(profile))
+        agent.hand_load_by_pathogen[pathogen_id] = max(hand, 0.0)
+
     def _hand_to_mouth_dose(
         self,
         target: KorkinAgent,
@@ -2352,7 +2374,6 @@ class TransmissionCore:
     ) -> float:
         if hand_load <= 0.0:
             return 0.0
-        hand_area = self.rng.uniform(*HAND_AREA_CM2_RANGE) / 1.0e4
         used_fraction = self.rng.uniform(*MOUTH_CONTACT_FRACTION_RANGE)
         transfer_efficiency = float(np.clip(
             self.rng.normal(*HAND_TO_MOUTH_NORMAL), 0.0, 1.0,
@@ -2360,10 +2381,8 @@ class TransmissionCore:
         dose = (
             self._fomite_mouth_contacts(target, epoch)
             * used_fraction
-            * hand_area
             * transfer_efficiency
             * hand_load
-            / hand_area
         )
         return min(hand_load, max(0.0, dose))
 
@@ -2554,6 +2573,8 @@ class TransmissionCore:
     ) -> None:
         """Surface contamination from shedders; stochastic pickup by later visitors."""
         if pathogen_id == "_default" and not self.pathogen_profiles:
+            # Deprecated compatibility path for unprofiled legacy harnesses;
+            # delete once those harnesses migrate to pathogen profiles.
             self._pathway_fomite_legacy_default(
                 epoch, zone_occupants, agent_doses, matrix,
                 agent_pathway_doses, pathogen_id, ledger,
@@ -2561,12 +2582,13 @@ class TransmissionCore:
             return
         # a) Deposit new fomite mass from current shedders (not confined to cabin)
         for zone_name, occupants in zone_occupants.items():
+            for agent in occupants:
+                self._replenish_hand(agent, pathogen_id, profile)
             shedders = self._get_shedders(occupants, pathogen_id, profile)
             deposits: list[tuple[KorkinAgent, float]] = []
             for agent, _sv in shedders:
                 if self._cabin_confinement_active(agent):
                     continue
-                self._replenish_hand(agent, pathogen_id, profile)
                 hand = agent.hand_load_by_pathogen.get(pathogen_id, 0.0)
                 used_fraction = self.rng.uniform(*SURFACE_CONTACT_FRACTION_RANGE)
                 transfer_efficiency = min(
@@ -2663,7 +2685,7 @@ class TransmissionCore:
 
         for occupants in zone_occupants.values():
             for agent in occupants:
-                self._decay_hand_load(agent, pathogen_id, profile)
+                self._apply_hand_hygiene(agent, pathogen_id, profile)
 
     # ── Pathway 5: Food Contamination ────────────────────────────────
 

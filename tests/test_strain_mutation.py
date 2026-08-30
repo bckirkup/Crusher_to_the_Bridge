@@ -234,7 +234,7 @@ class TestInvariants:
 class TestTransmissionCoreIntegration:
     def test_zero_rate_keeps_every_infection_on_a_founder(self) -> None:
         core = _core(cfg=VARIANT_CFG, profile=_profile_with(mutation_rate=0.0))
-        agents = _population(n_shedders=2, n_susceptible=30)
+        agents = _population(n_shedders=2, n_susceptible=60)
         assert _run(core, agents, epochs=4), "expected transmission to occur"
         assert core.strain_registry is not None
         assert all(
@@ -248,7 +248,7 @@ class TestTransmissionCoreIntegration:
                 mutation_rate=1.0, phenotype_mutation_fraction=0.5,
             ),
         )
-        agents = _population(n_shedders=2, n_susceptible=30)
+        agents = _population(n_shedders=2, n_susceptible=60)
         assert _run(core, agents, epochs=4), "expected transmission to occur"
         registry = core.strain_registry
         assert registry is not None

@@ -234,7 +234,7 @@ class TestStrainAttributionInTransmission:
 
     def test_shedders_get_founder_strains_and_events_name_a_parent(self) -> None:
         core = _core(cfg=VARIANT_CFG)
-        agents = _population(n_shedders=2, n_susceptible=30)
+        agents = _population(n_shedders=2, n_susceptible=60)
         digest = _run(core, agents, epochs=3)
         assert digest, "expected at least one infection to attribute"
         founders = {

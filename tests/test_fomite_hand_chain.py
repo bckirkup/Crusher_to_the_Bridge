@@ -173,6 +173,41 @@ def test_hand_decay_uses_sim_clock_hourly_rate() -> None:
     )
 
 
+def test_replenishment_reaches_the_liu_hand_target() -> None:
+    core = _core(seed=29)
+    agent = _agent(infected=True)
+    profile = _profile(hand_inactivation_rate_per_hour=1.155)
+    target = agent.get_pathogen_hand_target(PATHOGEN, profile)
+
+    for _ in range(24):
+        core._replenish_hand(agent, PATHOGEN, profile)
+
+    assert agent.hand_load_by_pathogen[PATHOGEN] == pytest.approx(
+        target,
+        rel=0.02,
+    )
+
+
+def test_replenishment_is_invariant_to_one_hour_or_half_hour_epochs() -> None:
+    profile = _profile(hand_inactivation_rate_per_hour=1.155)
+    hourly = _core(seed=31)
+    half_hour = _core(seed=31)
+    hourly.clock = SimClock(epoch_duration_hours=1.0, mode=HOURS)
+    half_hour.clock = SimClock(epoch_duration_hours=0.5, mode=HOURS)
+    first = _agent(infected=True)
+    second = _agent(infected=True)
+
+    for _ in range(24):
+        hourly._replenish_hand(first, PATHOGEN, profile)
+    for _ in range(48):
+        half_hour._replenish_hand(second, PATHOGEN, profile)
+
+    assert first.hand_load_by_pathogen[PATHOGEN] == pytest.approx(
+        second.hand_load_by_pathogen[PATHOGEN],
+        rel=1e-9,
+    )
+
+
 def test_empty_fomite_step_is_a_no_op() -> None:
     core = _core()
     before = dict(core.surface_pools)
