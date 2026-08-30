@@ -10,17 +10,17 @@ Sampled expectations of the implemented distributions
 Predicted steady-state surface loading
 ------------------------------------------------------------------------------
 zone     | scenario                           |        pool | copies/swab |     Park range | verdict
-cabin    | sick passenger confined to cabin   |   3.336e+04 |        1434 |       80-31217 | IN RANGE
-cabin    | sick passenger, unconfined         |   1.213e+04 |       521.6 |       80-31217 | IN RANGE
-public   | lounge, 10 shedder-hours/day       |        5534 |       59.49 |         16-113 | IN RANGE
-public   | lounge, 60 shedder-hours/day       |    3.32e+04 |       356.9 |         16-113 | out of range
-public   | lounge, 200 shedder-hours/day      |   1.107e+05 |        1190 |         16-113 | out of range
+cabin    | sick passenger confined to cabin   |   1.295e+05 |        5571 |       80-31217 | IN RANGE
+cabin    | sick passenger, unconfined         |   4.711e+04 |        2026 |       80-31217 | IN RANGE
+public   | lounge, 10 shedder-hours/day       |        5967 |       64.15 |         16-113 | IN RANGE
+public   | lounge, 60 shedder-hours/day       |    3.58e+04 |       384.9 |         16-113 | out of range
+public   | lounge, 200 shedder-hours/day      |   1.193e+05 |        1283 |         16-113 | out of range
 
-Cabin/public gradient: 4.02x
+Cabin/public gradient: 14.5x
 Park observed gradient: roughly 100-300x
 
 Shedder-hour asymmetry required for a 100x gradient, holding the implemented constants fixed:
-  needed shedder-hours(cabin)/shedder-hours(public) = 75
+  needed shedder-hours(cabin)/shedder-hours(public) = 29.33
   A cabin cannot accumulate that many more shedder-hours than a public zone;
   the gradient is therefore not reachable by hand transfer at any occupancy.
 
@@ -36,11 +36,11 @@ Emesis term as implemented
 Time-averaged loading with emesis, swept over cabin localization f
 ------------------------------------------------------------------------------
      f |  cabin copies/swab |  public copies/swab |  gradient | vs Park 100-300x
-  0.50 |          9.866e+04 |           2.993e+04 |    3.297x | out of range
-  0.80 |           1.57e+05 |           1.219e+04 |    12.88x | out of range
-  0.95 |          1.862e+05 |                3314 |    56.18x | out of range
-  0.99 |          1.939e+05 |               948.3 |    204.5x | IN RANGE
-  1.00 |          1.959e+05 |               356.9 |    548.8x | out of range
+  0.50 |          4.776e+04 |                9495 |     5.03x | out of range
+  0.80 |          7.307e+04 |                4029 |    18.14x | out of range
+  0.95 |          8.573e+04 |                1296 |    66.15x | out of range
+  0.99 |          8.911e+04 |               567.1 |    157.1x | IN RANGE
+  1.00 |          8.995e+04 |               384.9 |    233.7x | IN RANGE
 
 f is the fraction of a host's vomiting episodes that occur in its own cabin.
 No study measures it. It is NOT a model parameter and the model does not use
