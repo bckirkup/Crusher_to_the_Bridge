@@ -311,6 +311,64 @@ induced by exposure. Clearance remains the right description of the inoculum's
 fate and worth parameterising from the literature per pathogen; it is not the
 resolution of A1/A2.
 
+## 9c. Route-specific clearance: a real correction that is not the missing mechanism
+
+Literature-derived pre-establishment clearance rates arrived resolved *by route*
+rather than as the single pathogen-wide scalar the specification asked for. That
+distinction matters, and it cuts both ways.
+
+A single `lambda` is a no-op for infection (§9b). A route-varying `lambda` is
+not: with a separate retained pool per route, a delivery `D_j` accrues total
+hazard `r_rate * D_j / lambda_j`, so per-virion infectivity goes as
+`1 / lambda_j`. Clearance therefore *derives* the route efficiency multiplier
+instead of assuming it, and the mean residence time `1 / lambda_j` converts a
+rate into a survival fraction without needing a separately supplied portal
+residence time.
+
+Calibration is forced, not chosen. `alpha` = 0.111 and `beta` = 32.81 were
+fitted to *administered oral* Norwalk inoculum, so every loss between mouth and
+gut epithelium is already inside `r`. The oral route is the reference and
+`r_rate = r * lambda_food`; any other choice multiplies all infectivity by a
+constant. Under the supplied norovirus rates that gives per-virion efficiency
+1.00 for food, 0.50 for direct contact and fomite, and 0.071 for droplet and
+HVAC — a 14-fold discount on the route carrying 94-95% of our establishments.
+Simulation reproduces the closed form to within 0.7%
+(`telemetry_buffer/observation_model/route_clearance_efficiency.py`).
+
+**Consequence 1: every fitted dose is withdrawn again.** All doses quoted so far
+are referenced to efficiency 1.0 on all routes. At fixed delivered dose the
+droplet-dominated mix we actually produce gives infection attack rate 0.147
+against 0.319 for a pure-oral exposure, so the fitted dose rises by roughly
+6.6x. This is a change in what "dose" means, not a retune.
+
+**Consequence 2: it does not resolve A2.** Dose is the one fitted parameter, so
+the fair comparison holds infection attack rate fixed. Rescaled to attack rate
+0.318 at hourly delivery, ill/infected moves from 0.315 (pure oral) to 0.322
+(emission weights) to 0.336 (droplet-dominated) — a 7% relative gain against a
+~1.8x miss. Within a route the hazard is still linear in delivered dose, so
+re-weighting routes rescales the fitted dose and little else.
+
+**The largest single effect rests on the weakest number, and the portal is
+mis-assigned.** `lambda_droplet` = 0.7/h is grade C, annotated "respiratory
+clearance proxy". Norovirus does not replicate in the respiratory tract:
+aerosolised virus deposits in the oropharynx and is swallowed, establishing in
+the gut, so the physically correct rate for that route is the oral one. Re-assign
+the portal and the efficiency spread collapses to at most 2x and the correction
+becomes nearly inert for us. Two grade-C numbers differing 14-fold, selected by
+an unstated portal assumption, is a fit knob until that assumption is stated and
+defended. The open question is not the value of `lambda_droplet` but which
+portal norovirus droplet exposure terminates at.
+
+**A double-count to avoid when the enteric bacteria are added.** A separate
+`gastric_survival_fraction` is mechanistically right and is inert for norovirus
+(value 1.0, acid-stable). But dose-response constants fitted to *ingested
+challenge* doses — norovirus (Teunis), Campylobacter (Black 1988), Vibrio
+(Cash 1974) — already contain gastric survival. Applying a survival fraction of
+0.01-0.1 on top of such a fit discounts the same loss twice. The fraction is
+valid only against a dose-response referenced to the dose arriving at the
+epithelium, or as a *relative* modifier for hosts whose gastric pH differs from
+the challenge-study population.
+
 ## 10. Parameters held fixed by assumption
 
 These are not identified by anything in the fit, and any of them could move the
