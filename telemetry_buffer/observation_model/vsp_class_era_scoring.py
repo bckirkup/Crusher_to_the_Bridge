@@ -24,7 +24,7 @@ Two quantities per class per era:
     the missing denominator is explicit rather than silently absent.
 
 Usage:
-    python3 telemetry_buffer/observation_model/vsp_class_era_scoring.py
+    PYTHONPATH=. python3 telemetry_buffer/observation_model/vsp_class_era_scoring.py
 """
 
 from __future__ import annotations

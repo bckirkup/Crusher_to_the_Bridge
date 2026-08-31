@@ -3,7 +3,10 @@
 Status: Partially implemented. The observed-side A4 targets are derived in
 `telemetry_buffer/observation_model/vsp_class_era_scoring.py` and scored by
 `telemetry_buffer/observation_model/score_anchors.py`; A8/A9 model-side
-aggregation and the ship-tonnage band table remain Proposed.
+aggregation is implemented there using
+`telemetry_buffer/observation_model/midrs_incidence_targets.py` and the source
+record `telemetry_buffer/observation_model/midrs_observed_targets.md`.
+The A10 trajectory channels remain Proposed.
 Owner anchors: A4 (revised), A8 (new), A9 (new), A10 (new)
 Last updated: 2026-08-30
 
@@ -84,7 +87,15 @@ No hull maps to the **large** band (30,001-60,000 GT, roughly 650-1,400
 passengers). Its observed rates are recorded below but nothing is scored
 against them; a fifth hull would be needed.
 
-## A8 -- overall reported AGE incidence, unconditional
+## A8 -- overall reported AGE incidence, unconditional (implemented)
+
+The model-side aggregation is implemented in
+`telemetry_buffer/observation_model/score_anchors.py`. It uses all runs in a
+cell, including non-take-off runs, and weights each reported case by its
+passenger or crew complement over that run's travel-days. The observed targets
+and fixed hull-to-GRT mapping are transcribed in
+`telemetry_buffer/observation_model/midrs_incidence_targets.py` from
+`telemetry_buffer/observation_model/midrs_observed_targets.md`.
 
 Observed, MMWR Table 2, per 100,000 travel days (95% CI):
 
@@ -151,7 +162,13 @@ equality:
 No parameter may be chosen to hit a share. If a share is ever needed as a
 number, it has to come from a shipboard aetiology study, and none was found.
 
-## A9 -- posting probability per voyage
+## A9 -- posting probability per voyage (implemented)
+
+The model-side VSP posting rule and eligibility filter are implemented in
+`telemetry_buffer/observation_model/score_anchors.py`. The denominator is every
+eligible simulated voyage, while ineligible runs are reported separately. The
+fleet target remains an interval spanning the MMWR-investigated and project
+posted outbreak definitions; per-hull numerators are unpublished.
 
 ```text
 A9_observed(band, era) = postings(band, era) / voyages(band, era)
