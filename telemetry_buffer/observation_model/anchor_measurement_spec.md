@@ -79,8 +79,21 @@ response cell, cell medians over ≥ 10 seeds.
 | A1 | Wikswo whole-ship cohort | `ever_ill_attack_rate_passenger` | ≈ 0.154 |
 | A2 | asymptomatic ratio | `ever_ill_attack_rate_passenger / infection_attack_rate_passenger` | 0.68–0.81 (0.59–0.81 if GII.4-weighted) |
 | A3 | infirmary capture | `reported_case_attack_rate_passenger / ever_ill_attack_rate_passenger` | 0.60 ± 0.05 |
-| A4 | VSP distribution | `reported_case_attack_rate_passenger` | inside the hull class IQR |
+| A4 | VSP posted attack rate | `reported_case_attack_rate_passenger` | inside the hull class IQR **derived per hull class × era** from `telemetry_buffer/observation_model/vsp_outbreak_series.csv` by `telemetry_buffer/observation_model/vsp_class_era_scoring.py`; see `telemetry_buffer/observation_model/incidence_and_attack_rate_scoring_spec.md` |
 | A5 | passenger vs crew | `reported_case_attack_rate_passenger / reported_case_attack_rate_crew` | ≈ 3.5 (7% vs 2%) |
+| A8 | unconditional AGE incidence (**Proposed**) | reported cases per 100,000 travel days over all simulated voyages | MMWR Surveill Summ 2021;70(6) by ship-size band, scored as an upper bound plus a reported ratio — `telemetry_buffer/observation_model/incidence_and_attack_rate_scoring_spec.md` |
+| A9 | posting probability (**Proposed**) | simulated voyages passing VSP's posting rule / all simulated voyages | MMWR voyage counts per band (pre arm); reconstructed interval post-2020 — `telemetry_buffer/observation_model/incidence_and_attack_rate_scoring_spec.md` |
+
+A4's target values were previously four hard-coded quantile triples with no
+derivation script and no source note, and they do not reproduce from this
+repository's own series under any band edges tried. They are withdrawn. The
+replacement ships with the code that derives it, and a hull class with fewer
+than ten postings in the scored era carries no A4 anchor at all —
+`mega_cruise_5000` has four pre-2020 and three post-2020 postings.
+A4 remains conditional on VSP posting the voyage, as A7 is: VSP publishes
+nothing about voyages it never posted. A8 and A9 exist to put an
+unconditional channel alongside it, and are Proposed — the model-side
+aggregation and the ship-tonnage band table do not exist yet.
 
 Ratios are computed per seed and then summarised, and separately as a ratio of
 cell medians; both are reported, because they differ materially whenever the
