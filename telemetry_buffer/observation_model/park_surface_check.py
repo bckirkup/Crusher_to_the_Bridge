@@ -62,7 +62,7 @@ def _mean_truncated_lognormal(meanlog: float, sdlog: float, n: int = 400000) -> 
     return float(np.clip(draws, 0.0, 1.0).mean())
 
 
-def _expectations() -> dict[str, float]:
+def expectations() -> dict[str, float]:
     return {
         "hand_area_m2": float(np.mean(tc.HAND_AREA_CM2_RANGE)) / 1.0e4,
         "s_h": float(np.mean(tc.SURFACE_CONTACT_FRACTION_RANGE)),
@@ -75,6 +75,8 @@ def _expectations() -> dict[str, float]:
 def routine_cleaning_multiplier(
     loss_per_hour: float,
     *,
+    coverage: float = tc.ROUTINE_CLEANING_COVERAGE,
+    events_per_day: float = tc.ROUTINE_CLEANING_EVENTS_PER_DAY,
     enabled: bool = True,
 ) -> float:
     """Time-averaged pool with routine cleaning, over the pool without it.
@@ -91,8 +93,6 @@ def routine_cleaning_multiplier(
     """
     if not enabled:
         return 1.0
-    coverage = tc.ROUTINE_CLEANING_COVERAGE
-    events_per_day = tc.ROUTINE_CLEANING_EVENTS_PER_DAY
     if coverage <= 0.0 or events_per_day <= 0.0:
         return 1.0
     kill = 10.0 ** -tc.ROUTINE_CLEANING_LOG10_REDUCTION
@@ -102,6 +102,54 @@ def routine_cleaning_multiplier(
     start_ratio = kill * (1.0 - decayed) / (1.0 - kill * decayed)
     cycle_mean_ratio = 1.0 + (start_ratio - 1.0) * (1.0 - decayed) / tau
     return (1.0 - coverage) + coverage * cycle_mean_ratio
+
+
+def emesis_inclusive_surface_values(
+    fraction: float,
+    exp_: dict[str, float],
+    hand_only: dict[str, float],
+    *,
+    cabin_cleaning_multiplier: float | None = None,
+    public_cleaning_multiplier: float | None = None,
+) -> tuple[float, float, float]:
+    """Return cabin copies, public copies, and gradient with emesis."""
+    per_episode_cabin = emesis_pool_gain_per_episode("cabin")
+    per_episode_public = emesis_pool_gain_per_episode("public")
+    per_illness_hour = episodes_per_illness_day() / 24.0  # clock-exempt: daily-to-hourly conversion
+    lounge_shedder_equivalents = 60.0 / 24.0  # clock-exempt: shedder-hours/day to concurrent shedders
+    loss_cabin = surface_loss_per_hour("cabin", 1.0, exp_)
+    loss_public = surface_loss_per_hour("public", 60.0, exp_)
+    cabin_multiplier = (
+        routine_cleaning_multiplier(loss_cabin)
+        if cabin_cleaning_multiplier is None
+        else cabin_cleaning_multiplier
+    )
+    public_multiplier = (
+        routine_cleaning_multiplier(loss_public)
+        if public_cleaning_multiplier is None
+        else public_cleaning_multiplier
+    )
+    cabin_rate = fraction * per_illness_hour
+    public_rate = (
+        (1.0 - fraction)
+        * per_illness_hour
+        * lounge_shedder_equivalents
+    )
+    cabin_pool = (
+        cabin_rate * per_episode_cabin / loss_cabin * cabin_multiplier
+    )
+    public_pool = (
+        public_rate * per_episode_public / loss_public * public_multiplier
+    )
+    cabin_total = (
+        hand_only["sick passenger confined to cabin"]
+        + concentration_per_swab(cabin_pool, "cabin")
+    )
+    public_total = (
+        hand_only["lounge, 60 shedder-hours/day"]
+        + concentration_per_swab(public_pool, "public")
+    )
+    return cabin_total, public_total, cabin_total / public_total
 
 
 def steady_state_pool(
@@ -235,8 +283,6 @@ def _emit_emesis_section(
     loss_public = surface_loss_per_hour("public", 60.0, exp_)
     clean_cabin = routine_cleaning_multiplier(loss_cabin)
     clean_public = routine_cleaning_multiplier(loss_public)
-    lounge_shedder_equivalents = 60.0 / 24.0  # clock-exempt: shedder-hours/day to concurrent shedders
-
     emit(
         "Time-averaged loading with emesis, swept over cabin localization f",
     )
@@ -245,25 +291,16 @@ def _emit_emesis_section(
         f"{'f':>6} | {'cabin copies/swab':>18} | {'public copies/swab':>19} | "
         f"{'gradient':>9} | vs Park 100-300x",
     )
-    per_illness_hour = per_illness_day / 24.0  # clock-exempt: daily-to-hourly conversion
     for fraction in CABIN_LOCALIZATION_SWEEP:
-        cabin_rate = fraction * per_illness_hour
-        public_rate = (
-            (1.0 - fraction) * per_illness_hour * lounge_shedder_equivalents
+        cabin_total, public_total, gradient = (
+            emesis_inclusive_surface_values(
+                fraction,
+                exp_,
+                hand_only,
+                cabin_cleaning_multiplier=clean_cabin,
+                public_cleaning_multiplier=clean_public,
+            )
         )
-        cabin_pool = cabin_rate * per_episode_cabin / loss_cabin * clean_cabin
-        public_pool = (
-            public_rate * per_episode_public / loss_public * clean_public
-        )
-        cabin_total = (
-            hand_only["sick passenger confined to cabin"]
-            + concentration_per_swab(cabin_pool, "cabin")
-        )
-        public_total = (
-            hand_only["lounge, 60 shedder-hours/day"]
-            + concentration_per_swab(public_pool, "public")
-        )
-        gradient = cabin_total / public_total
         verdict = "IN RANGE" if 100.0 <= gradient <= 300.0 else "out of range"
         emit(
             f"{fraction:>6.2f} | {cabin_total:>18.4g} | {public_total:>19.4g} | "
@@ -294,7 +331,7 @@ def _emit_emesis_section(
 
 
 def main() -> None:
-    exp_ = _expectations()
+    exp_ = expectations()
     lines: list[str] = []
 
     def emit(text: str = "") -> None:

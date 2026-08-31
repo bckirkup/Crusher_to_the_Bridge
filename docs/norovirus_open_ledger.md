@@ -172,16 +172,36 @@ configuration; the design fixes 1,000.
 
 Roughly in dependency order.
 
-1. **Zone-differentiated cleaning schedules.** #355 closed the "nothing cleans
-   surfaces" gap — routine housekeeping is now a discrete daily pass over the
-   measured 37% of objects it reaches, and outbreak-response hypochlorite is a
-   separate, stronger, SOP-triggered mechanism — but it applies one schedule to
-   every zone class. Enhanced sanitation during the COVID era was
-   passenger-facing, and that asymmetry cannot be expressed until coverage is
-   per zone class. Note that the premise has changed: crew rates did *not* hold
-   still across the break, they rose (A7b), so a configuration that leaves the
-   crew arm untouched now contradicts the data rather than matching it. No
-   measurement of per-zone-class frequency was found; do not invent one.
+1. **Zone-differentiated cleaning schedules — swept, bounds sourced, no cell
+   adopted.** #355 closed the "nothing cleans surfaces" gap — routine
+   housekeeping is a discrete pass over the measured 37% of objects it reaches,
+   and outbreak-response hypochlorite is a separate, stronger, SOP-triggered
+   mechanism. A search found no measured cleaning-frequency schedule
+   differentiated by zone class in an accommodation or passenger-vessel
+   setting. The opt-in schedule is therefore swept inside the bounds documented
+   in
+   [`cleaning_schedule_sweep_spec.md`](../telemetry_buffer/observation_model/cleaning_schedule_sweep_spec.md):
+   cabin frequency 0.33–1.0/day, public 1.0–12.0/day, dining/galley/crew_mess
+   1.0–6.0/day; cabin coverage 0.336–0.600, public 0.292–0.454, and
+   dining/galley/crew_mess 0.292–0.600. No sweep cell may be adopted as a
+   parameter value or default.
+
+   Carling et al.'s Grade A 37% measurement is specifically from public
+   restrooms on cruise ships, not cabins. Applying it to cabins is an
+   unsourced extension, not evidence of a cabin schedule. The shipped model
+   retains its uniform default; the schedule sweep exposes this uncertainty
+   without fitting it to an anchor. Its hand-only gradient envelope is
+   8.6635–18.5054x, against 11.1977x for the shipped default: that is a
+   bound on schedule leverage (at most 1.6526x upward), not a test of Park
+   reachability, because the hand-transfer channel was already shown
+   unreachable at any occupancy. The Park comparison is instead made with
+   the emesis-inclusive calculation, swept over the separate, unmeasured
+   cabin-localization fraction f; at f=0.99, 78 of 81 schedule cells reach
+   Park's 100–300x range, and at f=1.00 all 81 do. f is not a schedule
+   parameter and no value is selected. Note that the premise has changed:
+   crew rates did *not* hold still across the break, they rose (A7b), so a
+   configuration that leaves the crew arm untouched now contradicts the data
+   rather than matching it.
 2. **Refit the common dose** against VSP class targets. The contact layer
    (#353) and cleaning (#355) are now in place, so this is next. One common
    dose-response across all four hull classes; no hull-specific pathogen
@@ -231,8 +251,10 @@ is over-determined only *given* them. Full list in §10 of the history document.
 - Log10 additivity of the two-step outbreak procedure (detergent preclean then
   hypochlorite, 1.29 + 3.0 = 4.29). The field reports two-step efficacy that
   way; nobody measured the composition.
-- One housekeeping pass per day, uniform across zone classes — the denominator
-  of Carling's "cleaned on a daily basis", not an observed schedule.
+- Uniform routine cleaning remains the shipped default. One pass per day is the
+  denominator of Carling's "cleaned on a daily basis", not a measured
+  per-zone-class schedule. The optional per-zone-class schedule is swept inside
+  sourced bounds; no sweep cell may be adopted as a parameter value.
 - Newly deposited surface mass is split into cleaned and missed shares in
   proportion to coverage, i.e. shedders touch reached and missed objects alike.
   Untested; if soiling concentrates on the objects housekeeping skips, the

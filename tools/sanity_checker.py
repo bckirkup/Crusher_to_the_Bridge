@@ -51,6 +51,7 @@ from engines.strain_state import (  # noqa: E402
     StrainConfigError,
     StrainEvolutionConfig,
 )
+from engines.transmission_core import HIGH_TOUCH_AREA_M2  # noqa: E402
 from simulation_utils.paths import validated_open  # noqa: E402
 
 
@@ -1338,8 +1339,24 @@ def _check_surface_cleaning(cfg: dict[str, Any], report: Report) -> None:
         report.error(_CONFIG_YAML, "CONFIG",
                      "transmission.surface_cleaning must be a mapping")
         return
-    routine = cleaning.get("routine", {}) or {}
-    outbreak = cleaning.get("outbreak_response", {}) or {}
+    routine = cleaning.get("routine", {})
+    if routine is None:
+        routine = {}
+    outbreak = cleaning.get("outbreak_response", {})
+    if outbreak is None:
+        outbreak = {}
+    if not isinstance(routine, dict):
+        report.error(
+            _CONFIG_YAML, "CONFIG",
+            "surface_cleaning.routine must be a mapping",
+        )
+        routine = {}
+    if not isinstance(outbreak, dict):
+        report.error(
+            _CONFIG_YAML, "CONFIG",
+            "surface_cleaning.outbreak_response must be a mapping",
+        )
+        outbreak = {}
     blocks = (
         ("routine", routine),
         ("outbreak_response", outbreak),
@@ -1362,11 +1379,55 @@ def _check_surface_cleaning(cfg: dict[str, Any], report: Report) -> None:
                 f"surface_cleaning.{name}.log10_reduction must be >= 0",
             )
     events = routine.get("events_per_day")
-    if isinstance(events, (int, float)) and events <= 0:
+    if isinstance(events, (int, float)) and events < 0:
         report.error(
             _CONFIG_YAML, "MATH_BOUND",
-            "surface_cleaning.routine.events_per_day must be > 0",
+            "surface_cleaning.routine.events_per_day must be >= 0",
         )
+    by_zone_class = routine.get("by_zone_class", {})
+    if by_zone_class is None:
+        by_zone_class = {}
+    if not isinstance(by_zone_class, dict):
+        report.error(
+            _CONFIG_YAML, "CONFIG",
+            "surface_cleaning.routine.by_zone_class must be a mapping",
+        )
+        return
+    for zone_class, values in by_zone_class.items():
+        if zone_class not in HIGH_TOUCH_AREA_M2:
+            report.error(
+                _CONFIG_YAML, "CONFIG",
+                f"unknown surface-cleaning zone class: {zone_class}",
+            )
+            continue
+        if not isinstance(values, dict):
+            report.error(
+                _CONFIG_YAML, "CONFIG",
+                f"surface_cleaning.routine.by_zone_class.{zone_class} "
+                "must be a mapping",
+            )
+            continue
+        unknown_fields = set(values) - {"coverage", "events_per_day"}
+        if unknown_fields:
+            report.error(
+                _CONFIG_YAML, "CONFIG",
+                f"unknown fields in surface-cleaning zone class "
+                f"{zone_class}: {sorted(unknown_fields)}",
+            )
+        coverage = values.get("coverage")
+        if isinstance(coverage, (int, float)) and not 0 <= coverage <= 1:
+            report.error(
+                _CONFIG_YAML, "MATH_BOUND",
+                f"surface_cleaning.routine.by_zone_class.{zone_class}."
+                "coverage must be in [0,1]",
+            )
+        events = values.get("events_per_day")
+        if isinstance(events, (int, float)) and events < 0:
+            report.error(
+                _CONFIG_YAML, "MATH_BOUND",
+                f"surface_cleaning.routine.by_zone_class.{zone_class}."
+                "events_per_day must be >= 0",
+            )
 
 
 def _check_variant_surveillance(cfg: dict[str, Any], report: Report) -> None:
