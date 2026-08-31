@@ -100,11 +100,11 @@ def _capacity_band(pax_total: float) -> str:
 def load_postings(path: Path = SERIES) -> list[Posting]:
     """Postings with a usable passenger denominator and rate."""
     out: list[Posting] = []
-    safe_path = resolve_repo_path(str(path.parent), str(path))
+    safe_path = resolve_repo_path(str(SERIES.parent), str(path))
     with validated_open(
         safe_path,
         "r",
-        allowed_roots=(str(path.parent),),
+        allowed_roots=(str(SERIES.parent),),
         encoding="utf-8",
         newline="",
     ) as handle:

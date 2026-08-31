@@ -91,6 +91,12 @@ def _series(tmp_path: Path, rows: list[str]) -> Path:
     return path
 
 
+@pytest.fixture
+def permitted_series_dir() -> object:
+    with tempfile.TemporaryDirectory(dir=scoring.SERIES.parent) as directory:
+        yield Path(directory)
+
+
 @pytest.mark.parametrize(
     ("pax_total", "expected"),
     [
@@ -109,11 +115,11 @@ def test_capacity_band_edges(pax_total: float, expected: str) -> None:
 
 
 def test_load_postings_drops_rows_without_a_passenger_denominator(
-    tmp_path: Path,
+    permitted_series_dir: Path,
 ) -> None:
     """A posting with no usable passenger denominator cannot carry a rate."""
     path = _series(
-        tmp_path,
+        permitted_series_dir,
         [
             _row(pax_total=""),
             _row(pax_ill=""),
@@ -128,20 +134,37 @@ def test_load_postings_drops_rows_without_a_passenger_denominator(
     assert postings[0].pax_rate == pytest.approx(0.05)
 
 
+def test_load_postings_rejects_a_series_outside_the_module_directory(
+    tmp_path: Path,
+    permitted_series_dir: Path,
+) -> None:
+    """The public loader applies the same fixed-root guard as the CLI."""
+    external_path = _series(tmp_path, [_row(pax_ill="50", pax_total="1000")])
+    permitted_path = permitted_series_dir / "series.csv"
+    permitted_path.write_bytes(external_path.read_bytes())
+
+    assert len(scoring.load_postings(permitted_path)) == 1
+
+    with pytest.raises(ValueError, match="escapes"):
+        scoring.load_postings(external_path)
+
+
 @pytest.mark.parametrize("crew_total", ["", "0"])
 def test_load_postings_crew_rate_is_none_without_a_crew_denominator(
-    tmp_path: Path,
+    permitted_series_dir: Path,
     crew_total: str,
 ) -> None:
     """A missing or zero crew complement yields no crew rate, not a zero one."""
-    path = _series(tmp_path, [_row(crew_total=crew_total)])
+    path = _series(permitted_series_dir, [_row(crew_total=crew_total)])
 
     assert scoring.load_postings(path)[0].crew_rate is None
 
 
-def test_load_postings_crew_rate_present_with_a_denominator(tmp_path: Path) -> None:
+def test_load_postings_crew_rate_present_with_a_denominator(
+    permitted_series_dir: Path,
+) -> None:
     """A crew denominator gives the crew rate its own value."""
-    path = _series(tmp_path, [_row(crew_ill="20", crew_total="400")])
+    path = _series(permitted_series_dir, [_row(crew_ill="20", crew_total="400")])
 
     assert scoring.load_postings(path)[0].crew_rate == pytest.approx(0.05)
 
@@ -173,10 +196,12 @@ def test_quantiles_are_monotone_in_the_input() -> None:
         assert shifted[key] == pytest.approx(base[key] + 2.0)
 
 
-def test_era_year_spans_counts_inclusive_calendar_years(tmp_path: Path) -> None:
+def test_era_year_spans_counts_inclusive_calendar_years(
+    permitted_series_dir: Path,
+) -> None:
     """The span is read from the series, so a re-extraction cannot go stale."""
     path = _series(
-        tmp_path,
+        permitted_series_dir,
         [
             _row(year=2006, era="pre"),
             _row(year=2019, era="pre"),
