@@ -213,8 +213,13 @@ VSP_TARGETS = {
 }
 ```
 
-There is no derivation script, no source note, and no dataset in the repository
-from which these reproduce. Recomputing the same statistic from
+There is no derivation script and no dataset in the repository from which these
+reproduce. The ledger did record sample sizes alongside them -- n = 17, 172, 52,
+9 -- and those are the strongest evidence that the source was not this series:
+every revision of `vsp_outbreak_series.csv` in the repository's history (the
+original extraction, the CDC-archive rebase, and the header-bound re-extraction)
+yields 328, 314 and 333 usable postings and a small-class count of 53, 52 and 54,
+never 17, and never a total of 250. Recomputing the same statistic from
 `vsp_outbreak_series.csv` under capacity bands, and under every alternative
 band edge tried (500/700/900/1,000/1,200 for the small class; 1,000-2,500,
 1,200-2,600, 2,387-3,873, 2,500-4,000, and 3,000+/3,873+/4,000+ for the rest),
@@ -224,9 +229,8 @@ landing between 0.0558 and 0.1077. The classic class is close but not equal
 (0.0446/0.0559/0.0776 target against 0.0417/0.0539/0.0726 measured over
 1,000-2,500 passengers).
 
-The values predate the series and most likely descend from the figure the
-earlier ledger entries were read off. **A4's target is therefore withdrawn and
-replaced by values recomputed from the repository's own dataset, per class and
+The values therefore predate the series and their source is unrecorded.
+**A4's target is withdrawn and replaced by values recomputed from the repository's own dataset, per class and
 per era.** The replacement must ship with the code that computes it, so that it
 can never again be a number without a derivation.
 
