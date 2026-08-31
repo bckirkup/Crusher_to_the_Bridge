@@ -88,9 +88,8 @@ same dose, so they cannot be separated by refitting.
 derivation script and no source note, and do not reproduce from
 `telemetry_buffer/observation_model/vsp_outbreak_series.csv` under capacity
 bands or under any alternative band edge tried; the expedition class misses by
-the widest margin. They most likely descend from the same figure the earlier
-ledger entries were read off. They are replaced by values recomputed from the
-series at runtime, per hull class **and per era**, by
+the widest margin. They are replaced by values recomputed from the series at
+runtime, per hull class **and per era**, by
 `telemetry_buffer/observation_model/vsp_class_era_scoring.py`, which
 `score_anchors.py` now calls (`--vsp-era`, default `pre`). Derivation and
 sources: `telemetry_buffer/observation_model/incidence_and_attack_rate_scoring_spec.md`.
