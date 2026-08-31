@@ -42,7 +42,7 @@ If the implementation instead treats an exposure dose as an instantaneous single
 
 ## 2. Traceability to the current code
 
-The current integration seams are `TransmissionCore.execute_transmission()` and `_establish()` in `../../engines/transmission_core.py`, `_advance_agent_pathogen_infections()` in `../../orchestrator_epoch.py`, `KorkinAgent.get_pathogen_shedding()` and `to_schema_dict()` in `../../engines/infection_dynamics_bridge.py`, and `SimClock` in `../../engines/sim_clock.py`. At the pinned snapshot:
+The current integration seams are `TransmissionCore.execute_transmission()` and `_establish()` in `engines/transmission_core.py`, `_advance_agent_pathogen_infections()` in `orchestrator_epoch.py`, `KorkinAgent.get_pathogen_shedding()` and `to_schema_dict()` in `engines/infection_dynamics_bridge.py`, and `SimClock` in `engines/sim_clock.py`. At the pinned snapshot:
 
 - a persistent host/pathogen susceptibility draw is stored in `dose_response_susceptibility`;
 - effective dose is accumulated in `cumulative_exposure` and reset on establishment, but not on recovery;
@@ -158,7 +158,7 @@ Tissue/portal support is optional in the formal specification. Because the curre
 | **CFG-07 Tissue graph integrity** | Validates tissue/portal names and transfer graph. | Duplicate tissue IDs, unknown portal reference, negative transfer rate, deposition fractions summing above 1, transfer edge to self, disconnected allowed site. | All invalid references/rates/fraction sums fail. A disconnected site passes only if explicitly allowed. Fraction sum tolerance is $10^{-8}$. | Schema plus cross-field referential-integrity checks. |
 | **CFG-08 Clock conflict and supported resolution** | Ensures the model runs on one natural-history clock. | Different top-level and voyage `epoch_duration_hours` or `natural_history_clock`; zero/negative epoch duration; valid matching pair. | Every conflict/nonpositive duration fails before agent creation; matching values pass and resolve to exactly one `SimClock`. | Constructor/validator negative tests. |
 | **CFG-09 Unknown keys and retired fields** | Prevents typo-driven silent behavior and defines deprecation. | Insert one unknown key at each new block depth; supply each retired field alone and together with its replacement. | Unknown keys fail. Retired-only fields either fail or emit exactly one documented `DeprecationWarning` and map identically; supplying old and new together must fail if values conflict. | Parameterized warnings/errors and resolved-config equality. |
-| **CFG-10 Shipped-profile validation** | Makes production data a release gate. | Validate every pathogen in `../../data/pathogens/active_profiles.json` against JSON Schema and semantic validators. | Zero errors, unique pathogen IDs, all shedding arrays non-empty, and every enabled new model block complete. Missing optional severity remains allowed only if explicitly documented; it cannot silently activate severity-dependent behavior. | Full data-contract validation and cross-record uniqueness check. |
+| **CFG-10 Shipped-profile validation** | Makes production data a release gate. | Validate every pathogen in `data/pathogens/active_profiles.json` against JSON Schema and semantic validators. | Zero errors, unique pathogen IDs, all shedding arrays non-empty, and every enabled new model block complete. Missing optional severity remains allowed only if explicitly documented; it cannot silently activate severity-dependent behavior. | Full data-contract validation and cross-record uniqueness check. |
 
 ## 11. Telemetry output
 

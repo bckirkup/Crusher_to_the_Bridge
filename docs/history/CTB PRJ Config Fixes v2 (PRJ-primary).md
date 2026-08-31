@@ -18,7 +18,7 @@ Zone naming: Crusher JSON names ARE the source for human-readable IDs.
 
 Going forward, the PRJ files are the primary artifacts. The JSON platform
 files are DERIVED from them (via `--simplify`). The generator
-(`../../scripts/generate_platform_contam_prj.py`) is used only for the initial
+(`scripts/generate_platform_contam_prj.py`) is used only for the initial
 fiction bootstrap; after that, PRJs are edited directly.
 
 The exception is **zone naming**: Crusher's agent model uses the full
@@ -159,8 +159,8 @@ implement in the generator for the fiction bootstrap.
 
 ### Files to modify
 
-- `../../tools/contamw34_prj.py` — AHS schedule emission and path wiring
-- `../../tools/contam_hobbyist.py` — verify `oa_fraction_for_hvac()` reads overrides
+- `tools/contamw34_prj.py` — AHS schedule emission and path wiring
+- `tools/contam_hobbyist.py` — verify `oa_fraction_for_hvac()` reads overrides
 
 ---
 
@@ -182,7 +182,7 @@ Ensure `_hobby.deck_temp_k()` matches on the JSON deck value.
 
 ### Files to modify
 
-- `../../tools/contam_hobbyist.py` — `deck_temp_k()` key matching logic
+- `tools/contam_hobbyist.py` — `deck_temp_k()` key matching logic
 - Verify with a test that prints deck→temp for all mega cruise zones
 
 ---
@@ -221,8 +221,8 @@ Keep `fan_cvf` only for `is_hvac_ducted: true` links.
 
 ### Files to modify
 
-- `../../tools/contamw34_prj.py` — cross-zone path emission logic
-- `../../data/contam_hobbyist/orifice_catalog.json` — add `vertical_shaft` entry
+- `tools/contamw34_prj.py` — cross-zone path emission logic
+- `data/contam_hobbyist/orifice_catalog.json` — add `vertical_shaft` entry
 
 ---
 

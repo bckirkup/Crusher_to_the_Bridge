@@ -24,13 +24,13 @@ lognormal or gamma draw from pathogen-specific parameters.
 succeeds. Store the drawn value as `incubation_days` on the infection record.
 
 **Files to modify**:
-- `../../data/pathogens/active_profiles.json` — Add `incubation_distribution` block to `norwalk_gi` and `sars_cov2_resp`
-- `../../data/pathogens/edison_10pathogen_profiles.json` — Add to all 10 pathogens
-- `../../data/pathogens/enterprise_tos_profiles.json` — Add to Rigelian Fever, Psi-2000
-- `../../data/pathogens/enterprise_tng_profiles.json` — Add to Barclay Protomorphosis, TNG Shipboard Influenza
-- `../../schemas/pathogen_profiles.schema.json` — Validate `incubation_distribution` block
-- `../../engines/infection_dynamics_bridge.py` — At infection establishment, draw from distribution and store as `incubation_days` on infection record
-- `../../orchestrator_epoch.py` — Replace `float(prof.get("symptom_onset_day", ONSET_DAY))` (line 365) with `float(inf.get("incubation_days", prof.get("symptom_onset_day", ONSET_DAY)))`
+- `data/pathogens/active_profiles.json` — Add `incubation_distribution` block to `norwalk_gi` and `sars_cov2_resp`
+- `data/pathogens/edison_10pathogen_profiles.json` — Add to all 10 pathogens
+- `data/pathogens/enterprise_tos_profiles.json` — Add to Rigelian Fever, Psi-2000
+- `data/pathogens/enterprise_tng_profiles.json` — Add to Barclay Protomorphosis, TNG Shipboard Influenza
+- `schemas/pathogen_profiles.schema.json` — Validate `incubation_distribution` block
+- `engines/infection_dynamics_bridge.py` — At infection establishment, draw from distribution and store as `incubation_days` on infection record
+- `orchestrator_epoch.py` — Replace `float(prof.get("symptom_onset_day", ONSET_DAY))` (line 365) with `float(inf.get("incubation_days", prof.get("symptom_onset_day", ONSET_DAY)))`
 
 **Schema for pathogen profile**:
 ```json
@@ -82,8 +82,8 @@ incubation_days *= dose_modifier
 
 **Files to modify**:
 - `data/pathogens/*.json` — Add `incubation_dose_response` block per pathogen
-- `../../schemas/pathogen_profiles.schema.json` — Validate new block
-- `../../engines/infection_dynamics_bridge.py` — Apply dose modifier after incubation draw, before storing on infection record
+- `schemas/pathogen_profiles.schema.json` — Validate new block
+- `engines/infection_dynamics_bridge.py` — Apply dose modifier after incubation draw, before storing on infection record
 
 **Schema**:
 ```json
@@ -117,11 +117,11 @@ incubation_days *= dose_modifier
 by default).
 
 **Files to modify**:
-- `../../crusher_labs/config.yaml` — Add `host_frailty` config block
-- `../../orchestrator_init.py` — Compute `frailty_score` per agent at initialization
-- `../../engines/infection_dynamics_bridge.py` — Optional frailty modifier on incubation
-- `../../engines/wearable_monitor.py` — Frailty-coupled baseline offsets in `_compute_baselines`
-- `../../orchestrator_epoch.py` — Frailty modifier on illness probability
+- `crusher_labs/config.yaml` — Add `host_frailty` config block
+- `orchestrator_init.py` — Compute `frailty_score` per agent at initialization
+- `engines/infection_dynamics_bridge.py` — Optional frailty modifier on incubation
+- `engines/wearable_monitor.py` — Frailty-coupled baseline offsets in `_compute_baselines`
+- `orchestrator_epoch.py` — Frailty modifier on illness probability
 
 **Frailty score** (at agent init):
 ```python

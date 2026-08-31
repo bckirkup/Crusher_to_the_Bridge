@@ -16,15 +16,15 @@ incubation block present vs stripped).
 
 A fourth representation surfaced later, in the *units* rather than the
 distribution: the ABM advances its day-scale clocks once per hourly epoch. See
-[`epoch_time_unit_audit.md`](epoch_time_unit_audit.md); it changes the size of
+[`docs/history/epoch_time_unit_audit.md`](epoch_time_unit_audit.md); it changes the size of
 every effect measured below without changing which representation is which.
 
 ## 1. There are three incubation representations, not one
 
 | # | Where | Form | Consumers |
 |---|-------|------|-----------|
-| A | `../../data/pathogens/active_profiles.json` `incubation` block, read by `../../engines/incubation.py` | per-infection lognormal draw, dose- and host-conditioned, truncated | symptom onset in `orchestrator_epoch`, hence syndromic sick call, clinical instrument day-since-onset, escalation counts, sentinel `onset_epoch` |
-| B | `../../picard_framework/analysis/sentinel/data/incubation_distributions.json` | pathogen-level lognormal in *hours*, discretized to the epoch grid | Stan attribution likelihood, right-censoring factor, Richardson-Lucy back-calculation, port-resolution criterion (spec 1.8), MDHR |
+| A | `data/pathogens/active_profiles.json` `incubation` block, read by `engines/incubation.py` | per-infection lognormal draw, dose- and host-conditioned, truncated | symptom onset in `orchestrator_epoch`, hence syndromic sick call, clinical instrument day-since-onset, escalation counts, sentinel `onset_epoch` |
+| B | `picard_framework/analysis/sentinel/data/incubation_distributions.json` | pathogen-level lognormal in *hours*, discretized to the epoch grid | Stan attribution likelihood, right-censoring factor, Richardson-Lucy back-calculation, port-resolution criterion (spec 1.8), MDHR |
 | C | `ONSET_DAY` fallback in `orchestrator_epoch._incubation_days` | fixed 1.0 day | every profile without an `incubation` block |
 
 Representation C still covers the remaining fixed-onset profiles, including
@@ -89,11 +89,11 @@ Make B a projection of A rather than a parallel file: derive
 B's `generation` and `shedding` kernels where they are — they are not incubation
 and A does not carry them.
 
-Delivered in `../../picard_framework/analysis/sentinel/profile_delays.py`: catalog
+Delivered in `picard_framework/analysis/sentinel/profile_delays.py`: catalog
 entries carrying `pathogen_id` are projections of that profile
 (`median_hours = median_days * 24`, `sigma = log(dispersion)` because the profile
 states a geometric standard deviation, `min_hours`/`max_hours` from the profile's
-clamps), and `../../tests/test_sentinel_profile_delays.py` fails on any drift, on a
+clamps), and `tests/test_sentinel_profile_delays.py` fails on any drift, on a
 `pathogen_id` naming a profile the bundle lacks, and on a linked profile that
 loses its incubation block. `lognormal_delay` gained left truncation so the
 profile's `min_days` survives the projection instead of being dropped. Catalog
@@ -112,7 +112,7 @@ the kernel on a run-level dose summary. Deliverable is a decision plus the
 port-resolution criterion re-derived under it.
 
 **R3 — incubation blocks for the remaining 13 profiles (1–2 sessions).**
-`../ctb_incubation_spec.md` already carries literature values for influenza,
+`docs/ctb_incubation_spec.md` already carries literature values for influenza,
 measles, Legionella, Vibrio, Campylobacter, C. difficile, hantavirus, and
 Ebola. Until this lands, any multi-pathogen result is quoting a 1-day
 incubation for measles. This is the largest fidelity gap of the three, and it is

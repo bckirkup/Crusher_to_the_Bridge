@@ -1,10 +1,10 @@
 > **Status — resolved by PRs #327 and #328:** The `hour = 12` hard-code in
-> `../../engines/infection_dynamics_bridge.py` is gone; the schedule is now
+> `engines/infection_dynamics_bridge.py` is gone; the schedule is now
 > clock-driven. Time-dependent parameters declare their units and are converted
 > through `SimClock`. The canonical specification is now
 > [`../clock_unit_safety_spec.md`](../clock_unit_safety_spec.md), copied from the
 > implementation contract that was previously kept in
-> `../clock_unit_safety_spec.md`.
+> `telemetry_buffer/clock_audit/unit_safety_spec.md`.
 
 # The epoch is a day in the ABM and an hour in the voyage layer
 
@@ -17,7 +17,7 @@ behind papers 1 and 2.
 
 This document records the historical audit and decision request. The
 implementation is resolved by PRs #327 and #328; the canonical implementation
-contract is `../clock_unit_safety_spec.md`.
+contract is `docs/clock_unit_safety_spec.md`.
 
 ## 1. The two contracts
 
@@ -29,21 +29,21 @@ contract is `../clock_unit_safety_spec.md`.
   schedule.
 - `orchestrator_epoch._advance_agent_pathogen_infections` increments
   `inf["time_infected"]` once per epoch, and `time_infected` is documented in
-  `../../engines/infection_dynamics_bridge.py` as an epoch counter converted through
+  `engines/infection_dynamics_bridge.py` as an epoch counter converted through
   `SimClock`; shedding curves are indexed by days since symptom onset.
 - That day counter is compared against day-scale profile parameters:
-  `recovery_day`, the incubation draw from `../../engines/incubation.py` (in days), and
+  `recovery_day`, the incubation draw from `engines/incubation.py` (in days), and
   the 15-entry `shedding_curve_log10` (one entry per day post-onset).
-- `../../data/config/instrument_turnaround.json` states it outright: "1 epoch = 1
+- `data/config/instrument_turnaround.json` states it outright: "1 epoch = 1
   simulation day unless `hours_per_epoch` is overridden", with
   `hours_per_epoch: 24`. Assay turnaround in hours is converted to epochs by
   dividing by 24.
 
 **The voyage, sentinel, and calibration layers say one epoch is one hour.**
 
-- `../../engines/voyage_itinerary.py` defaults `epoch_duration_hours` to 1 and derives
+- `engines/voyage_itinerary.py` defaults `epoch_duration_hours` to 1 and derives
   `epochs_per_day = round(24 / hours)`, so voyage day 1 spans epochs 1–24;
-  `../../tests/test_sentinel_data_contracts.py` pins `epochs_per_day == 24`.
+  `tests/test_sentinel_data_contracts.py` pins `epochs_per_day == 24`.
 - `SentinelLedger` accrues person-hours ashore at `epoch_duration_hours` per
   epoch, and the Stan incubation kernel is specified in hours on a one-hour
   grid.

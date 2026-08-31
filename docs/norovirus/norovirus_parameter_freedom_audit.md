@@ -1,7 +1,7 @@
 # Norovirus parameter freedom: what is still free, and what is off-source
 
 Status: audit, 2026-08-30. Supersedes nothing; it is the inventory behind
-`norovirus_model_history.md` §10, taken after #351, #352, #353, #355 and
+`docs/norovirus/norovirus_model_history.md` §10, taken after #351, #352, #353, #355 and
 #358 and after the finding that `environmental_faecal_release_log10_g_per_epoch`
 no longer moves the attack rate.
 
@@ -60,7 +60,7 @@ that reason and reported whichever way the anchor moves.
 
 ### 3.1 FUT2 non-secretor resistance is switched off in the profile actually used
 
-`../../data/pathogens/active_profiles.json`, `norwalk_gi`:
+`data/pathogens/active_profiles.json`, `norwalk_gi`:
 
 ```json
 "innate_nonsusceptible_fraction": 0.0,
@@ -68,7 +68,7 @@ that reason and reported whichever way the anchor moves.
 ```
 
 The same repository carries `norovirus_gii4` in
-`../../data/pathogens/edison_10pathogen_profiles.json` with the literature value:
+`data/pathogens/edison_10pathogen_profiles.json` with the literature value:
 
 ```json
 "innate_nonsusceptible_fraction": 0.2,
@@ -80,7 +80,7 @@ The campaign uses the first one: `campaign_manifest.json` maps
 profile's own name is "Norwalk Virus (Norovirus GII.4)" and its genotypes are
 GII.4/GII.17/GII.2, so GII.4 secretor dependence applies to it.
 
-Two things follow. First, `norovirus_model_history.md` §10 lists "the 20%
+Two things follow. First, `docs/norovirus/norovirus_model_history.md` §10 lists "the 20%
 innate non-susceptible ceiling, which is why infection attack rate pins at
 exactly 0.800" as a live held-fixed assumption — that statement is false for the
 profile the campaign runs, and the recent probe's unsaturated 0.377 floor is
@@ -152,7 +152,7 @@ runs.
 ### 3.2 Direct-contact transfer fraction is 1.0 against a literature ~0.25
 
 `contact_transfer_fraction` defaults to 1.0 in
-`../../engines/transmission_core.py` and the norovirus profile does not set it, so
+`engines/transmission_core.py` and the norovirus profile does not set it, so
 every direct contact transfers the entire computed dose. §10 records the
 contact-model anchor as ~0.25 and has done since before #353. #353 raised the
 contact kernel to POLYMOD rates without revisiting the transfer fraction, so
@@ -181,7 +181,7 @@ plus a lab-sampling vector:
 "lab_sampling_probability_by_severity":              [0, 0.05, 0.20, 0.60, 0.90]
 ```
 
-`cruise_pathogen_severity_observation_priors_v2.md` §4.1 grades every one
+`docs/norovirus/cruise_pathogen_severity_observation_priors_v2.md` §4.1 grades every one
 of these `[A]` — assumption — and states the position plainly:
 
 > With the default severity vector, the eligible symptomatic mass is about 0.50

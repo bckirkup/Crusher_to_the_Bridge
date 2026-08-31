@@ -20,12 +20,12 @@ be wired to wastewater collection points.
 
 | Component | Location | What it does |
 |---|---|---|
-| `TargetedPCR` | `../../crusher_labs/modalities/targeted_pcr.py` | Ct = -3.322 × log10(M × η) + 40. LOD at Ct 38. |
-| `WastewaterSequencingGrid` | `../../crusher_labs/modalities/sequencing.py` | GRUMB compositional multinomial draws |
-| `LongReadNanoporeSequencing` | `../../crusher_labs/modalities/long_read_sequencing.py` | Nanopore reads with error injection |
-| `ClinicalRDT` | `../../crusher_labs/modalities/clinical_rdt.py` | Phase-dependent sensitivity sigmoid |
+| `TargetedPCR` | `crusher_labs/modalities/targeted_pcr.py` | Ct = -3.322 × log10(M × η) + 40. LOD at Ct 38. |
+| `WastewaterSequencingGrid` | `crusher_labs/modalities/sequencing.py` | GRUMB compositional multinomial draws |
+| `LongReadNanoporeSequencing` | `crusher_labs/modalities/long_read_sequencing.py` | Nanopore reads with error injection |
+| `ClinicalRDT` | `crusher_labs/modalities/clinical_rdt.py` | Phase-dependent sensitivity sigmoid |
 | `clinical_qpcr` | `clinical_instrument_params.json` | Pathogen-specific Se/Sp for clinical specimens |
-| `build_wastewater_pathogen_mass()` | `../../orchestrator_epoch.py` L54 | Aggregates shedder mass into wastewater zones |
+| `build_wastewater_pathogen_mass()` | `orchestrator_epoch.py` L54 | Aggregates shedder mass into wastewater zones |
 
 ## Four modes
 

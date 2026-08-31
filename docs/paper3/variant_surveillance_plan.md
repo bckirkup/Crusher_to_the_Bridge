@@ -2,14 +2,14 @@
 
 > **Status:** Partially implemented. The "Nothing here is implemented yet" claim below is stale (2026-08-20); PR 1-3, 11 and 13 artifacts exist in-tree.
 
-Work plan for `variant_surveillance_spec.md` ("Cruise Ships as
+Work plan for `docs/paper3/variant_surveillance_spec.md` ("Cruise Ships as
 Phylogenomic Observatories"). Written against the code as it stands at the
 merge of #276. Nothing here is implemented yet; this document is the plan and
 the list of places where the spec has to change to survive contact with the
 simulator.
 
-Companion planning docs: `../sentinel/sentinel_surveillance_spec.md` (paper 2, whose
-§5 deferred exactly this work), `../multi_pathogen_model_changes_spec.md`.
+Companion planning docs: `docs/sentinel/sentinel_surveillance_spec.md` (paper 2, whose
+§5 deferred exactly this work), `docs/multi_pathogen_model_changes_spec.md`.
 
 **Integration branch.** All Paper 3 work lands on the long-lived
 `paper3-variant-surveillance` branch, not `main`, so that `main` stays usable
@@ -50,7 +50,7 @@ Six things the spec does not account for. Each is expanded below.
 1. **CTB transmission has no parent.** `TransmissionCore.execute_transmission`
    pools dose per `(agent, pathogen)` across six pathways and then draws
    infection once; the emitted `TransmissionEvent` carries
-   `source_agent_id=None` (`../../engines/transmission_core.py:501`). "The strain the
+   `source_agent_id=None` (`engines/transmission_core.py:501`). "The strain the
    parent transmitted" does not exist as a quantity today. Phase 1's real work
    is a **strain-resolved dose ledger** plus strain composition in the
    environmental pools — not the `StrainState` dataclass.
@@ -80,8 +80,8 @@ Six things the spec does not account for. Each is expanded below.
    layer plumbed `genotype: str | None` through `observations.py`,
    `port_health.py`, `port_ledger.py`, `wastewater_ops.py`, and
    `export_line_list.py` with tests that pin the null
-   (`../../tests/test_sentinel_data_contracts.py:339`,
-   `../../tests/test_sentinel_export_line_list.py:133`). Phase 2 is filling a wired
+   (`tests/test_sentinel_data_contracts.py:339`,
+   `tests/test_sentinel_export_line_list.py:133`). Phase 2 is filling a wired
    socket, and those two tests change meaning deliberately — behind the
    strain-state flag, default off, so every existing run stays bit-identical.
 5. **§2.2 wastewater deconvolution belongs on the amplicon/long-read channel,
@@ -94,10 +94,10 @@ Six things the spec does not account for. Each is expanded below.
 6. **§3's Federation ports are a data file, not code.** Port surveillance
    capability is already a regional JSON library with a schema
    (`picard_framework/analysis/sentinel/data/port_surveillance_<region>.json`,
-   `../../schemas/port_surveillance.schema.json`, four regions). Federation ports are
+   `schemas/port_surveillance.schema.json`, four regions). Federation ports are
    a fifth region; Starfleet itineraries are `voyage_config.json` under the
    existing `enterprise_constitution_tos` / `enterprise_galaxy_tng` platforms.
-   No new port model, per `sentinel_surveillance_spec.md` §1.1.
+   No new port model, per `docs/sentinel/sentinel_surveillance_spec.md` §1.1.
 
 ## 2. What GutModelBacteriocins actually contributes
 
@@ -123,16 +123,16 @@ than a silent identification.
 ## 3. Phase 1 — heritable strain state (PRs 1–5, 3b–3c)
 
 Everything is gated by `variant_surveillance.enabled` (default `false`) in
-`../../crusher_labs/config.yaml`; with the flag off, no RNG draw changes, so golden
+`crusher_labs/config.yaml`; with the flag off, no RNG draw changes, so golden
 tests and the campaign manifests stay bit-identical.
 
 **PR 1 — `StrainState` and the strain registry.**
-New `../../engines/strain_state.py`: frozen `StrainState` dataclass with the spec
+New `engines/strain_state.py`: frozen `StrainState` dataclass with the spec
 §1.1 fields, plus a per-run `StrainRegistry` owning id allocation, the founder
 set, and the census. Per-pathogen strain parameters (§1.3) go into the existing
 pathogen profiles (`data/pathogens/*.json`) as an optional `strain_evolution`
-block, validated by `../../schemas/pathogen_profiles.schema.json` and
-`../../tools/sanity_checker.py` (rates in [0,1], genotype list non-empty,
+block, validated by `schemas/pathogen_profiles.schema.json` and
+`tools/sanity_checker.py` (rates in [0,1], genotype list non-empty,
 multiplier bounds positive). No simulator wiring. Tests: schema + registry
 invariants, and the sanity checker rejecting out-of-range rates.
 
@@ -152,7 +152,7 @@ exposure gets the wrong marginal. Tests: dose conservation (Σ strain doses == l
 dose to float tolerance), parent-draw frequencies matching contribution shares,
 and flag-off byte-identity of a 24-epoch run.
 
-*As built* (`../../engines/strain_dose_ledger.py` + `TransmissionCore`): the ledger is a
+*As built* (`engines/strain_dose_ledger.py` + `TransmissionCore`): the ledger is a
 shadow of the pooled dose rather than a replacement for it, so pooled dose,
 route weighting, susceptibility scaling and the dose-response draw are the
 original code path and the flag-off run makes no extra RNG draw. Three details
@@ -186,7 +186,7 @@ lineage counts, from each source independently — plus bounds (multipliers
 finite and positive, `immune_escape` in [0,1], `generation` monotone along a
 transmission chain and unchanged by within-host draws).
 
-*As built* (`../../engines/strain_mutation.py` + `TransmissionCore`): a mutation mints
+*As built* (`engines/strain_mutation.py` + `TransmissionCore`): a mutation mints
 a new lineage, and a transmission *without* one keeps the parent's strain id, so
 a strain label means one genome rather than one infection — otherwise every
 infection would be its own lineage and both the census and `generation` would
@@ -404,7 +404,7 @@ every host that resolved it fully susceptible) and a row protecting better
 against some other genotype than against itself.
 
 With variant surveillance off nothing is recorded and immunity stays absolute,
-so the legacy compartment is unchanged. Tests in `../../tests/test_immune_history.py`:
+so the legacy compartment is unchanged. Tests in `tests/test_immune_history.py`:
 homologous rechallenge beats heterologous, escape grades protection down
 monotonically to zero, a two-genotype history is scored on the best match,
 repeat exposure does not stack, protection survives the lineage being collected,
@@ -413,17 +413,17 @@ and history length tracks resolved exposures rather than epochs.
 ## 4. Phase 2 — observation models (PRs 6–9)
 
 **PR 6 — clinical specimen sequencing.**
-Extend `../../crusher_labs/modalities/long_read_sequencing.py` and
+Extend `crusher_labs/modalities/long_read_sequencing.py` and
 `targeted_pcr.py` so a typed call is produced from the strain state under the
 §2.1 gate: amplicon target, Ct threshold (reuse the existing Ct/LOD machinery
 rather than a second one), per-base accuracy → probability of a miscalled
 genotype, turnaround from `instrument_turnaround.json`, cost into
-`../../data/config/resource_costs.json`. Accuracy below 100% must be able to produce
+`data/config/resource_costs.json`. Accuracy below 100% must be able to produce
 a *wrong* genotype, not merely a failed call; that is what makes the detection
 speed result honest.
 
 **PR 7 — wastewater strain deconvolution.**
-In `../../picard_framework/analysis/sentinel/wastewater_assays.py`, the
+In `picard_framework/analysis/sentinel/wastewater_assays.py`, the
 `amplicon`/`long_read` modes gain a nested Dirichlet-multinomial over strain
 proportions within the pathogen reads, true proportions weighted by each
 shedder's `get_pathogen_shedding` and smeared by the holding-tank lag already
@@ -445,7 +445,7 @@ the paper's claim about sufficient depth depends on which of the two bites.
 **PR 7b — incubation as a distribution (supersedes the `symptom_onset_day`
 decision).** Parameters and provenance live in
 [`ctb_incubation_spec.md`](../ctb_incubation_spec.md); this section records only
-what the implementation does with them. `../../engines/incubation.py` draws one
+what the implementation does with them. `engines/incubation.py` draws one
 lognormal or gamma incubation period per infection, conditioned on the
 establishing inoculum (`dose_log10_shortening` above `dose_reference_log10`,
 clamped below by a per-pathogen `dose_floor`) and truncated to the pathogen's
@@ -479,7 +479,7 @@ What PR 7b left inconsistent across the repository — three incubation
 representations, a sentinel delay catalog projected only from active profiles,
 12 profiles still on the fixed-onset fallback, and a calibration axis the dose
 term now interacts with — is audited and sequenced in
-[`incubation_reconciliation_plan.md`](../history/incubation_reconciliation_plan.md),
+[`docs/history/incubation_reconciliation_plan.md`](../history/incubation_reconciliation_plan.md),
 together with the re-fit and `main`-exposure calls. Whether the already
 published paper 1 and paper 2 conclusions survive the refinement is a separate
 question with its own paired-arm protocol:
@@ -489,7 +489,7 @@ Running that protocol exposed a deeper unit problem underneath all three
 representations: the ABM treats one epoch as one day while the voyage, sentinel,
 and calibration layers treat it as one hour, so natural history runs 24× fast
 against the itinerary. Audit, measurements, and options in
-[`epoch_time_unit_audit.md`](../history/epoch_time_unit_audit.md); it is a decision for the
+[`docs/history/epoch_time_unit_audit.md`](../history/epoch_time_unit_audit.md); it is a decision for the
 PI, not a change made in passing.
 
 Still unimplemented from the spec, each its own scoped work: the frailty score
@@ -503,9 +503,9 @@ pools, with recovery probability by surface type and time since deposition.
 Small PR; depends entirely on PR 4.
 
 **PR 9 — genotype fields go live end-to-end.**
-Fills the `genotype` sockets in `../../picard_framework/analysis/sentinel/observations.py`, `port_health.py`,
+Fills the `genotype` sockets in `picard_framework/analysis/sentinel/observations.py`, `port_health.py`,
 `port_ledger.py`, `export_line_list.py`, and the campaign bundle; bumps
-`../../schemas/sentinel_observations.schema.json`; adds the per-epoch strain census
+`schemas/sentinel_observations.schema.json`; adds the per-epoch strain census
 (lineage counts, `num_lineages`, `dominant_fraction`) to the telemetry writer,
 with the full lineage event log behind a separate flag because a 8,500-run
 campaign cannot carry per-event logs (see the GutIBM ECR/S3 retention
@@ -522,7 +522,7 @@ that only enter the hazard prior; nothing else in CTB consumes them.
 
 **PR 11 — surveillance cost model and the two-community benefit split
 (decision 4).** The §4 scenarios as Presidio fleet configs over
-`../../crusher_labs/cost_ledger.py` and `resource_costs.json`, with the OIS treatment
+`crusher_labs/cost_ledger.py` and `resource_costs.json`, with the OIS treatment
 already used for interventions. The "variants detected" column of §4 is an
 *output*, not an input, and must be deleted from the config or it becomes a
 circular assumption.
@@ -588,18 +588,18 @@ around nominal), crossed with voyage length so the answer is a timescale rather
 than a single number. Co-infection interference and recombination rate get one
 sensitivity tier each. The spec's 8,500 runs is under half the existing
 mega-campaign, so the AWS Batch Fargate Spot path
-(`../../.agents/skills/aws-batch-campaign`) needs no change beyond a job definition —
+(`.agents/skills/aws-batch-campaign`) needs no change beyond a job definition —
 but the added axes push the count up, so it gets re-counted with
 `count_manifest_cartesian.py` before submitting.
 
 **PR 13 — phylodynamic observables and figures.** Detection-speed curves
 (ship vs ashore), lineage diversity trajectories, retention/bottleneck
 statistics ported from `lineage_tracker`'s definitions, and the investment
-frontier, in `../../picard_framework/analysis/figures.py`.
+frontier, in `picard_framework/analysis/figures.py`.
 
 ## 6. Validation plan
 
-Following `sentinel_surveillance_spec.md` §6, since reviewers will ask the same
+Following `docs/sentinel/sentinel_surveillance_spec.md` §6, since reviewers will ask the same
 questions. Items 1–4 are regime-independent; 5 is new with co-infection:
 
 1. **Neutral-label recovery** — with all phenotype effects off, the observed

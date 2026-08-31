@@ -7,7 +7,7 @@ imperfect: how much diversity was aboard, how fast a new genotype was seen, and
 how much a surveillance channel actually knew about the mixture it sampled.
 
 Every observable is reported per **physical hour**, never per epoch. The epoch
-was the unit that hid a 24x timing error (`../history/epoch_time_unit_audit.md`), and
+was the unit that hid a 24x timing error (`docs/history/epoch_time_unit_audit.md`), and
 an axis labelled "epochs" hides it again.
 
 ## The two inputs

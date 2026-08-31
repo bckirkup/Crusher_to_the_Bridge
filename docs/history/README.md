@@ -21,4 +21,4 @@ need to know *why* something is the way it is.
 | [issue_111_enhanced_wearables_plan.md](issue_111_enhanced_wearables_plan.md) | Plan, partially superseded — confounder-aware scoring landed via [`../WEARABLE_ANOMALY_REDESIGN.md`](../WEARABLE_ANOMALY_REDESIGN.md) |
 | [SOP_CASCADE_RECONFIG.md](SOP_CASCADE_RECONFIG.md) | Design note, "may be partially landed". Prefer `data/config/diagnostic_cascade*.json` and `protocols.json` as the source of truth |
 | [CTB HVAC Star Topology Fix.md](CTB%20HVAC%20Star%20Topology%20Fix.md) | Implemented (merged) — native + ContamX AHS use AHU star topology. Living guidance: [`../CONTAM_INTEROP.md`](../CONTAM_INTEROP.md) |
-| [CTB PRJ Config Fixes v2 (PRJ-primary).md](CTB%20PRJ%20Config%20Fixes%20v2%20(PRJ-primary).md) | Implemented (merged) — PRJ-primary Contam config fixes |
+| [CTB PRJ Config Fixes v2 (PRJ-primary).md](<CTB PRJ Config Fixes v2 (PRJ-primary).md>) | Implemented (merged) — PRJ-primary Contam config fixes |

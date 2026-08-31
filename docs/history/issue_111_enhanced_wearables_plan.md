@@ -2,7 +2,7 @@
 
 > **Status:** Plan / partially superseded. Confounder-aware cascade scoring landed in
 > [WEARABLE_ANOMALY_REDESIGN.md](../WEARABLE_ANOMALY_REDESIGN.md) and
-> `../../engines/wearable_anomaly_scorer.py`. Treat remaining sections as a backlog, not
+> `engines/wearable_anomaly_scorer.py`. Treat remaining sections as a backlog, not
 > current operator guidance. See [docs/README.md](../README.md).
 
 ## Summary
@@ -274,7 +274,7 @@ per-epoch subscription/replacement costs during the simulation.
 
 ### 2. Code Changes
 
-#### 2a. `../../engines/wearable_monitor.py`
+#### 2a. `engines/wearable_monitor.py`
 
 | Change | Description |
 |--------|-------------|
@@ -291,7 +291,7 @@ per-epoch subscription/replacement costs during the simulation.
 | `build_wearable_device_from_config()` | Parse new YAML fields |
 | `build_wearable_monitor_from_config()` | Parse multi-device class_device_map + chronic_disease_device_map |
 
-#### 2b. `../../crusher_labs/modalities/wearable.py` — `WearableDataStream`
+#### 2b. `crusher_labs/modalities/wearable.py` — `WearableDataStream`
 
 | Change | Description |
 |--------|-------------|
@@ -299,33 +299,33 @@ per-epoch subscription/replacement costs during the simulation.
 | Return payload | Add `wearer_only_agents: list[int]` and `staff_visible_agents: list[int]` |
 | Multi-device aggregation | Union anomaly channels, OR fever flags across an agent's devices for fleet summary |
 
-#### 2c. `../../orchestrator_init.py` — `init_wearable_monitors()`
+#### 2c. `orchestrator_init.py` — `init_wearable_monitors()`
 
 | Change | Description |
 |--------|-------------|
 | Pass coverage/visibility maps | Forward from parsed config to `WearableMonitor` |
 | Debit initial device costs | Query `resource_costs.json` for per-device procurement |
 
-#### 2d. `../../orchestrator_epoch.py` — `step_wearable_monitoring()`
+#### 2d. `orchestrator_epoch.py` — `step_wearable_monitoring()`
 
 | Change | Description |
 |--------|-------------|
 | Forward visibility map | From monitor to modality |
 | Debit per-epoch device costs | Subscription / replacement costs via `CostLedger` |
 
-#### 2e. `../../orchestrator_epoch.py` — `step_diagnostic_cascade()`
+#### 2e. `orchestrator_epoch.py` — `step_diagnostic_cascade()`
 
 | Change | Description |
 |--------|-------------|
 | Wearer-only sick-call boost | When an agent has `wearer_only` visibility and their device flags fever/anomaly, boost their `sick_call_probability` for that epoch |
 
-#### 2f. `../../crusher_labs/protocol_engine.py`
+#### 2f. `crusher_labs/protocol_engine.py`
 
 | Change | Description |
 |--------|-------------|
 | No structural changes | Stoplights already key on agent/fleet instruments; visibility filtering happens upstream in `WearableDataStream` |
 
-#### 2g. `../../tools/sanity_checker.py`
+#### 2g. `tools/sanity_checker.py`
 
 | Change | Description |
 |--------|-------------|
@@ -333,13 +333,13 @@ per-epoch subscription/replacement costs during the simulation.
 | `ClassDeviceMapEntry` | Add optional `coverage: float` ([0,1]) and `visibility: str` |
 | `_check_wearable_monitoring()` | Validate new fields, cross-ref confounder channels ⊆ device channels |
 
-#### 2h. `../../data/config/resource_costs.json`
+#### 2h. `data/config/resource_costs.json`
 
 | Change | Description |
 |--------|-------------|
 | Add `wearable_device_costs` block | Per-device procurement + subscription costs |
 
-#### 2i. `../../crusher_labs/config.yaml`
+#### 2i. `crusher_labs/config.yaml`
 
 | Change | Description |
 |--------|-------------|
@@ -370,16 +370,16 @@ This requires adding `"glucose"` to `DEFAULT_CHANNEL_BASELINES`,
 
 | File | New / Modified |
 |------|----------------|
-| `../../tests/test_orchestrator.py` | Extend existing wearable tests for coverage < 1.0, visibility filtering, confounder injection |
-| `../../tests/test_sanity_checker.py` | Add validation tests for new config fields |
-| New: `../../tests/test_wearable_enhanced.py` | Dedicated test file for detection profile math (sensitivity/specificity sampling), confounder bias application, coverage Bernoulli, visibility routing, and economic cost debits |
+| `tests/test_orchestrator.py` | Extend existing wearable tests for coverage < 1.0, visibility filtering, confounder injection |
+| `tests/test_sanity_checker.py` | Add validation tests for new config fields |
+| New: `tests/test_wearable_enhanced.py` | Dedicated test file for detection profile math (sensitivity/specificity sampling), confounder bias application, coverage Bernoulli, visibility routing, and economic cost debits |
 
 #### 2l. Telemetry / recording
 
 | File | Change |
 |------|--------|
-| `../../orchestrator_record.py` | Add `coverage_fraction`, `visibility_breakdown`, `confounder_summary` to epoch wearable_monitoring record |
-| `../../schemas/simulation_history.schema.json` | Extend `wearable_monitoring` object |
+| `orchestrator_record.py` | Add `coverage_fraction`, `visibility_breakdown`, `confounder_summary` to epoch wearable_monitoring record |
+| `schemas/simulation_history.schema.json` | Extend `wearable_monitoring` object |
 
 #### 2m. Documentation
 
@@ -445,7 +445,7 @@ add-ons.  Each phase passes CI independently.
 
 - ~300-400 lines new/modified code in `wearable_monitor.py` (multi-device refactor + confounders + detection profile)
 - ~80 lines in `wearable.py` (multi-device aggregation + visibility routing)
-- ~60 lines in `../../orchestrator_init.py` / `../../orchestrator_epoch.py` (multi-device wiring + chronic-disease device map)
+- ~60 lines in `orchestrator_init.py` / `orchestrator_epoch.py` (multi-device wiring + chronic-disease device map)
 - ~80 lines in `sanity_checker.py` (Pydantic models + validation for multi-device + chronic-disease map)
 - ~60 lines config additions (`config.yaml`, `resource_costs.json`)
 - ~250 lines tests

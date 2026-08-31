@@ -24,7 +24,7 @@ frozen protocol here would have locked in defects that had not yet been found,
 and a clean protocol-plus-fit presentation would lay a tidy surface over the
 defect history below. The discipline substituted for it is workflow
 transparency — this record, priors propagated rather than pinned
-(`../../telemetry_buffer/observation_model/severity_prior_sensitivity_findings.md`),
+(`telemetry_buffer/observation_model/severity_prior_sensitivity_findings.md`),
 and explicit labelling of internal checks as internal.
 
 In particular: a dose-recovery exercise (simulate at a known dose, refit, see
@@ -222,7 +222,7 @@ those runs do not transfer.
 
 Measured after the fix, matched seeds, nothing else changed (120 runs at
 `d557f39` against the same 120 at `7a9b439`;
-`../../telemetry_buffer/observation_model/postfix_anchor_pilot_d557f39/postfix_anchor_findings.md`).
+`telemetry_buffer/observation_model/postfix_anchor_pilot_d557f39/postfix_anchor_findings.md`).
 Natural-history arm, dose 2.0: infection attack rate 0.797 -> 0.407
 (expedition) and 0.794 -> 0.465 (classic); ill/infected 0.264 -> 0.341 and
 0.224 -> 0.364. Direction is uniform across all six natural-history cells,
@@ -288,7 +288,7 @@ grouping, resetting, or leaking a linear accumulator cannot distinguish diffuse
 from concentrated delivery.
 
 Measured over 40,000 hosts at total dose 1000 delivered across five days
-(`../../telemetry_buffer/observation_model/clearance_additivity_check.py`), every
+(`telemetry_buffer/observation_model/clearance_additivity_check.py`), every
 calibrated cell sits on the additive closed form 0.3181 regardless of `lambda`
 or of delivery in 1, 24 or 168 increments; the single departure (0.306 at
 `lambda` = 0.5) is predicted to three decimals by the end-of-voyage truncation
@@ -335,7 +335,7 @@ constant. Under the supplied norovirus rates that gives per-virion efficiency
 1.00 for food, 0.50 for direct contact and fomite, and 0.071 for droplet and
 HVAC — a 14-fold discount on the route carrying 94-95% of our establishments.
 Simulation reproduces the closed form to within 0.7%
-(`../../telemetry_buffer/observation_model/route_clearance_efficiency.py`).
+(`telemetry_buffer/observation_model/route_clearance_efficiency.py`).
 
 **Consequence 1: every fitted dose is withdrawn again.** All doses quoted so far
 are referenced to efficiency 1.0 on all routes. At fixed delivered dose the
@@ -400,12 +400,12 @@ route magnitudes is necessary for A5, not shown to be sufficient: uniform
 itself an assumption, and crew presenteeism and mandatory occupational
 reporting are absent in both directions. The route constants must be fixed on
 physical grounds with sources, not fitted to 2.9. Detail:
-`../../telemetry_buffer/observation_model/a5_role_asymmetry_diagnosis.md`.
+`telemetry_buffer/observation_model/a5_role_asymmetry_diagnosis.md`.
 
 ## 9e. The fomite chain rebuilt from measurements, and the first out-of-sample test
 
 The §9d magnitudes were re-derived rather than rescaled. Detail:
-`../../telemetry_buffer/observation_model/fomite_food_rederivation.md`.
+`telemetry_buffer/observation_model/fomite_food_rederivation.md`.
 
 Two findings came out of the derivation before any code changed. First,
 `dose_adjustment` is not a calibration constant: the shedding curve is log10
@@ -458,7 +458,7 @@ in exactly the zone class where a sick passenger is confined. §9d asked why rol
 structure cannot appear and found the routes carrying it deliver nothing; §9e
 asks why sick cabins are not hotter than lounges and finds the same absence of
 concentrated, localised deposition. Detail:
-`../../telemetry_buffer/observation_model/park_surface_findings.md`.
+`telemetry_buffer/observation_model/park_surface_findings.md`.
 
 None of this is validation. It says the fomite route is now in the right
 numerical territory to be worth testing, which at 0.13 particles per voyage it
@@ -490,7 +490,7 @@ for `crew_contact_multiplier`.
 
 **The inherited Korkin contact kernel.** `AVG_R_POOL` averages 1.333
 contacts/day against POLYMOD's 13.4 (Mossong et al. 2008). §10 recorded this as
-unresolved and `../density_contact_spec.md` had already concluded the
+unresolved and `docs/density_contact_spec.md` had already concluded the
 inherited kernel should be rejected; it never was, because
 `base_contacts_per_day = 13.4` applied only to `density_dependent` and
 `heterogeneous_zone_dose` while the shipped default `per_partner_contact` fell
@@ -590,7 +590,7 @@ over-determined *given* these.
   Grade C. It is the denominator of the fomite pickup model.
 - The fraction of a host's vomiting episodes occurring in its own cabin:
   unmeasured, swept rather than asserted, and not a model parameter (§9f, and
-  `../../telemetry_buffer/observation_model/park_emesis_findings.md`).
+  `telemetry_buffer/observation_model/park_emesis_findings.md`).
 - Confinement attenuation factor 0.05.
 - The 20% innate non-susceptible ceiling, which is why infection attack rate
   pins at exactly 0.800 and why the fit must be read on reported cases.
@@ -664,7 +664,7 @@ correctness.
 
 The ledger's instrument for the NPI lever was "passenger attack rates fell
 15-20% across the 2020 break, p=0.032, while crew rates held still". That
-sentence was read off `vsp_covid_discontinuity.png`, an operator-supplied
+sentence was read off `docs/norovirus/vsp_covid_discontinuity.png`, an operator-supplied
 figure whose per-outbreak table had never been in the repository, so no number
 in it could be checked. Rebuilding the table was supposed to be bookkeeping
 before the refit. It was not.

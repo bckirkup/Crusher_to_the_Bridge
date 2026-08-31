@@ -6,7 +6,7 @@ Revision of the proposed `sentinel_software_spec.md`. Scope: infer pathogen
 introduction hazard at ports of call from ship-side observations (clinical line
 list, wastewater metagenomics, later genomics), pooling across the **fleet**.
 
-Companion of the boundary analysis package (`../preboarding_wearable_decision_model_spec.md`):
+Companion of the boundary analysis package (`docs/preboarding_wearable_decision_model_spec.md`):
 boundary asks *should this passenger board*, sentinel asks *where did the
 pathogen come from*. Both are ancillary inference layers over the same ABM.
 
@@ -17,13 +17,13 @@ list. Eight substantive changes:
 
 ### 1.1 Do not build a second itinerary model
 
-The repo already has a voyage/port layer: `../../engines/voyage_itinerary.py` with
-`../../schemas/voyage_config.schema.json` and per-platform
+The repo already has a voyage/port layer: `engines/voyage_itinerary.py` with
+`schemas/voyage_config.schema.json` and per-platform
 `data/platforms/<id>/voyage_config.json`. It already carries day types
 (`sea_day`/`port_day`/`embarkation`/`disembarkation`), a `port` label,
 `disembark_fraction` (= the proposal's `shore_excursion_rate`),
 disembark/reembark windows, a per-agent `ashore` flag consumed by
-`../../engines/transmission_core.py`, and — critically — a
+`engines/transmission_core.py`, and — critically — a
 `shore_infection_probability` field documented as *"config-only in v1; never
 introduces pathogens"*.
 
@@ -56,7 +56,7 @@ The proposal defers coupled simulation to "future", but the validation plan's
 first item (synthetic voyages with known port hazards) *requires* a generator.
 Phase 2 is therefore promoted, and it is not new machinery: it is activating
 the `shore_infection_probability` stub inside the existing
-`step_mid_cruise_introductions` seam (`../../orchestrator_epoch.py`), drawing over
+`step_mid_cruise_introductions` seam (`orchestrator_epoch.py`), drawing over
 agents already flagged `ashore`. Behind `voyage.shore_exposure.enabled`
 (default false) so every current run and golden test stays bit-identical.
 
@@ -65,9 +65,9 @@ agents already flagged `ashore`. Behind `voyage.shore_exposure.enabled`
 The proposal models `concentration: genome copies/L`. CTB's wastewater
 modality is GRUMB-style **compositional metagenomics**: a
 `WastewaterSequencingGrid` over greywater collection zones
-(`../../orchestrator_init.py`), Dirichlet-multinomial read draws over a
+(`orchestrator_init.py`), Dirichlet-multinomial read draws over a
 multi-kingdom relative-abundance vector, CLR-space anomaly scores
-(`../../crusher_labs/modalities/sequencing.py`). There is no qPCR concentration
+(`crusher_labs/modalities/sequencing.py`). There is no qPCR concentration
 observable in the simulator.
 
 Revised: the sample record carries `pathogen_reads`, `total_reads`,
@@ -82,7 +82,7 @@ and wrong about the range. Compositional metagenomics is blind at the shedder
 prevalences a cruise reaches: with an informative ceiling of `1e-4` of the
 library, 0.26% prevalence expects 0.064 pathogen reads in a 250 000-read
 library. `wastewater_surveillance.assay_mode` therefore selects the laboratory
-(`../../picard_framework/analysis/sentinel/wastewater_assays.py`):
+(`picard_framework/analysis/sentinel/wastewater_assays.py`):
 
 - `metagenomic` — the model described above, unchanged, and the **default** so
   no pre-existing cell changes meaning. Kept as the arm that demonstrates the
@@ -109,7 +109,7 @@ second, aggregate observation of *onset timing*. Treated as an independent
 hazard channel it double-counts the clinical line list. It enters the model as
 an additional observation of the same latent incidence curve.
 
-The generator side of that channel is `../../picard_framework/analysis/sentinel/wastewater_ops.py` (§8): the
+The generator side of that channel is `picard_framework/analysis/sentinel/wastewater_ops.py` (§8): the
 holding tank is an explicit first-order lag on aboard shedder prevalence, so a
 run's samples carry the same residence smearing the fit deconvolves.
 
@@ -131,7 +131,7 @@ Passing a point estimate as `data` fixes the secondary share and lets the port
 hazards absorb every mismatch; the port credible intervals come out far too
 narrow. CTB already produces a *posterior* for onboard transmission (hurdle
 `norovirus_outbreak.stan` + `norovirus_trajectory.stan`, summarized by
-`../../picard_framework/analysis/stan/posterior_summaries.py`). Pass its mean/sd as
+`picard_framework/analysis/stan/posterior_summaries.py`). Pass its mean/sd as
 prior hyperparameters and sample `R_onboard`.
 
 Secondaries are then a discrete renewal term rather than the sketch's
@@ -366,7 +366,7 @@ ride along in an inference PR.
 
 Reuses the existing synthetic-recovery machinery
 (`picard_framework/analysis/stan/synthetic_recovery_*.stan`,
-`../../picard_framework/analysis/synthetic_recovery_postprocess.py`).
+`picard_framework/analysis/synthetic_recovery_postprocess.py`).
 
 1. **Recovery** — generate voyages with known `λ_p` via the Phase 2 generator;
    posterior covers truth at nominal rate across a hazard grid.
@@ -416,7 +416,7 @@ Reuses the existing synthetic-recovery machinery
    identification; stagger port order across the pilot ships deliberately, and
    record shore-excursion status and crew shore leave per person.
 
-Test design follows `../../.agents/skills/ci-test-design`: graded sensitivity
+Test design follows `.agents/skills/ci-test-design`: graded sensitivity
 (raising the true hazard at one port raises its posterior mean, monotonically
 over ≥3 levels) and bounds/invariants (hazards positive and finite,
 attribution shares sum to 1, censoring correction never decreases a late-port
@@ -429,10 +429,10 @@ Devin sessions.
 
 | PR | Content | Est. |
 |---|---|---|
-| 1 | Spec (this doc) + `voyage_config.schema.json` optional port metadata (`port_id`, `region`, `calendar_date`, `crew_shore_leave_fraction`) + `../../schemas/sentinel_observations.schema.json` + `../../picard_framework/analysis/sentinel/itinerary.py` view + fixtures + `../../tests/test_sentinel_data_contracts.py` | 0.5 |
+| 1 | Spec (this doc) + `voyage_config.schema.json` optional port metadata (`port_id`, `region`, `calendar_date`, `crew_shore_leave_fraction`) + `schemas/sentinel_observations.schema.json` + `picard_framework/analysis/sentinel/itinerary.py` view + fixtures + `tests/test_sentinel_data_contracts.py` | 0.5 |
 | 2 | **Foundation.** `export_line_list.py`: per-person onset/exposure line list out of an ABM run dir. Today `orchestrator_record.record_epoch` emits aggregates and drops per-agent blobs in `compact` retention, so no per-person onset epoch survives — every later PR and both synthetic-recovery claims stand on this one. Land it before anything downstream is designed against a guessed schema. | 1 |
 | 3 | ✅ Phase 2 port exposure: `shore_infection_probability` applied as a per-epoch-ashore hazard in `step_shore_introductions`, crew shore leave in `apply_ashore_and_embarkation` (§1.7), both gated on `voyage.shore_exposure.enabled` (default off, `crew_shore_leave_fraction` default 0.0); introductions recorded as `truth_introductions` for recovery scoring; golden-run invariance test when off | 1 |
-| 4 | ✅ `incubation.py` (lognormal/discrete delay pmfs on the epoch grid, forward convolution, strictly-lagged renewal, `observed_onset_fraction` censoring term, censoring-aware Richardson–Lucy back-calculation) + `exposure.py` (per-port × stratum cells, ashore denominators from the ledger or reconstructed from the schedule, ascertainment, log offsets, incubation-weighted port attribution) + `../../picard_framework/analysis/sentinel/data/incubation_distributions.json`. `observations.py` needed no change — PR 1 already parses cases, hours ashore, and `exposure_totals`. Pure numpy, no Stan. | 1 |
+| 4 | ✅ `incubation.py` (lognormal/discrete delay pmfs on the epoch grid, forward convolution, strictly-lagged renewal, `observed_onset_fraction` censoring term, censoring-aware Richardson–Lucy back-calculation) + `exposure.py` (per-port × stratum cells, ashore denominators from the ledger or reconstructed from the schedule, ascertainment, log offsets, incubation-weighted port attribution) + `picard_framework/analysis/sentinel/data/incubation_distributions.json`. `observations.py` needed no change — PR 1 already parses cases, hours ashore, and `exposure_totals`. Pure numpy, no Stan. | 1 |
 | 5 | `sentinel_attribution.stan` + `_sentinel_data.py` + `fit_sentinel_attribution.py`: single-ship Poisson-offset hazards with renewal secondaries and sampled `R_onboard`; fixture posterior for CI | 1.5 |
 | 6 | `sentinel_fleet.stan`: port-visit × ship hierarchy, fleet-time effect, crew repeat exposure; synthetic recovery + null + confounded + censoring suites | 1.5 |
 | 7 | `wastewater_signal.py` beta-binomial channel wired into the latent curve; per-channel `evidence_loglik` | 1 |
@@ -453,7 +453,7 @@ touch the simulator behind default-off flags.
 ## 8. Shipboard wastewater sampling operations
 
 PR 7 gave the fit a wastewater channel; nothing generated samples for it, so its
-value was untestable. `../../picard_framework/analysis/sentinel/wastewater_ops.py` is
+value was untestable. `picard_framework/analysis/sentinel/wastewater_ops.py` is
 the generator, behind `wastewater_surveillance.enabled` (default **false**, so
 every existing run stays bit-identical — the draws also use a separate RNG
 stream so enabling the channel cannot perturb the epidemic it observes).
@@ -483,20 +483,20 @@ multiplying the evidence. `fit_sentinel_fleet` therefore takes
 can be fit under the residence time it was actually sampled with.
 
 The operating envelope this opens up is scanned by `sentinel_ww_ops_scan_v1`
-(9000 runs) — see `sentinel_wastewater_ops_scan.md`.
+(9000 runs) — see `docs/sentinel/sentinel_wastewater_ops_scan.md`.
 
 The port's *own* public health system is a separate, independent observation of
 the same community prevalence that drives λ_p, and is the only external check on
 an inferred port hazard: every port generates syndromic, municipal-WBE,
 laboratory and genotyping signals whatever its real capability, and channels are
-ablated at fleet-analysis time — see `sentinel_port_health.md`. Port signals
+ablated at fleet-analysis time — see `docs/sentinel/sentinel_port_health.md`. Port signals
 never enter the shipboard likelihood; they are a comparison target (§1.3 still
 holds: no observation acquires a port label of its own).
 
 The marginal value of each channel is read off a staircase of separate fits —
 clinical only, then the shipboard wastewater channel, then one port channel at a
 time, then everything — in
-`../../picard_framework/analysis/sentinel/multiphase.py`. Each phase correlates the
+`picard_framework/analysis/sentinel/multiphase.py`. Each phase correlates the
 inferred λ_p against the port channels it retained, excluding (never
 zero-filling) ports whose channel is absent or ablated, and reports the
 truth-recovery correlation as the ceiling those comparisons are judged against.

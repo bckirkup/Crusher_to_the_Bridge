@@ -198,18 +198,18 @@ Add a `is_virtual` flag or check for the `_plenum_` prefix.
 
 ## Files to modify
 
-1. `../../engines/py_contam_bridge.py`:
+1. `engines/py_contam_bridge.py`:
    - `_build_hvac_recirculation_paths()` — replace N×N with star topology
    - `__init__` — create plenum zone nodes
    - `transport_step()` — zero plenum mass after each step
    - `get_transport_summary()` — exclude plenums from summary
 
-2. `../../engines/contamx_transport.py`:
+2. `engines/contamx_transport.py`:
    - Verify ContamX engine already uses the star topology (it does —
      AHS synthesis creates supply/return paths through phantoms)
    - No changes expected
 
-3. `../../orchestrator_init.py` / `../../orchestrator_epoch.py`:
+3. `orchestrator_init.py` / `orchestrator_epoch.py`:
    - Exclude `_plenum_` zones from agent placement and dose calculations
 
 4. `tests/`:

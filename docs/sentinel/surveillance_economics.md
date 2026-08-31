@@ -9,7 +9,7 @@ already produce and computes nothing epidemiological of its own.
 
 ## Why a payer, and not just a total
 
-`../../crusher_labs/cost_ledger.py` already prices surveillance in three units —
+`crusher_labs/cost_ledger.py` already prices surveillance in three units —
 dollars, person-hours, and consumed items — but records only *what* was spent,
 never *who* paid. The paper's question is whether a port would rationally
 contribute, and that question is unanswerable from a single total, because the
@@ -60,7 +60,7 @@ The package exposes two benefit-split shapes:
 
 ## §4 scenarios and provenance
 
-`../../presidio/data/economics/surveillance_scenarios.json` records the five §4
+`presidio/data/economics/surveillance_scenarios.json` records the five §4
 scenarios: Baseline, Minimal, Moderate, Full, and Fleet network. The annual
 costs are rough-order-of-magnitude values from the specification, not
 measurements. The voyage-frequency grid and every allocation quantity are
@@ -79,7 +79,7 @@ separate: `catalog.surveillance_economics_id` identifies the scenario file and
 `catalog.surveillance_scenario_id` selects the scenario. Both conversion rates
 (`labour_conversion_rate` and `consumables_conversion_rate`) are required by
 the scenario analysis API; callers should supply them from the central values
-or sweep grids in `../../data/config/resource_costs.json`.
+or sweep grids in `data/config/resource_costs.json`.
 
 `CostAllocation` entries become `CostLedger` contribution records. They are
 attribution lines alongside ledger expenditure, not new spend. Cash is recorded

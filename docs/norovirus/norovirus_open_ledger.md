@@ -5,7 +5,7 @@
 **Live status as of `1329bbf` (#353 merged).** What is currently withdrawn,
 what each anchor last measured and *when*, and what is outstanding.
 
-`norovirus_model_history.md` is the permanent record of defects and
+`docs/norovirus/norovirus_model_history.md` is the permanent record of defects and
 corrections. This file is the volatile counterpart: it goes stale by design and
 must be updated whenever a model change lands. If the head commit below is not
 the current head, treat every number here as unverified.
@@ -38,7 +38,7 @@ Also withdrawn and not yet replaced:
 
 ## 2. Anchors
 
-Targets, from `../../telemetry_buffer/observation_model/anchor_measurement_spec.md`:
+Targets, from `telemetry_buffer/observation_model/anchor_measurement_spec.md`:
 
 | | quantity | target |
 |---|---|---|
@@ -60,7 +60,7 @@ so the passenger/crew ratio falls by about a third (A7c = 0.668, 0.532-0.907).
 A5 must therefore be quoted per era, not as one era-independent number, and any
 fit that reproduces A5 pooled across both arms is reproducing an average of two
 different ratios. Measured at `e167e32`; see A7 in
-`../../telemetry_buffer/observation_model/anchor_measurement_spec.md`.
+`telemetry_buffer/observation_model/anchor_measurement_spec.md`.
 
 **Last measured values, and this is the part that matters: they are stale.**
 All of the following were taken at `d557f39`, immediately after #346 and
@@ -112,7 +112,7 @@ factor and the per-area concentration cancel exactly. The residual is *where*
 people vomit, and reaching 100x needs 98.5-99.7% of episodes in the host's own
 cabin. That fraction is unmeasured, is not a model parameter, and reading it off
 Park's gradient would be fitting. Refused. Harness:
-`../../telemetry_buffer/observation_model/park_surface_check.py`.
+`telemetry_buffer/observation_model/park_surface_check.py`.
 
 Routine cleaning (#355) moves the gradient the **wrong way**, from 14.5x to
 11.2x, and the reason is instructive: a daily pass over 37% of objects competes
@@ -134,7 +134,7 @@ distinct mechanism), but one schedule still applies to every zone class, so the
 passenger-facing asymmetry cannot yet be expressed.
 
 Two limits on the instrument, from
-`../../telemetry_buffer/observation_model/post_covid_configuration_sources.md`. Every
+`telemetry_buffer/observation_model/post_covid_configuration_sources.md`. Every
 A7 statistic is conditional on VSP posting, so an intervention that stops an
 introduction from taking off is *invisible* to all of them — it prevents the
 posting rather than shrinking it, and pre-boarding screening and denial of
@@ -149,15 +149,15 @@ push was alcohol-rub-centric, and alcohol rub is measurably weaker than soap
 against norovirus (Tuladhar 2015), so it is expected to be near-null here.
 
 The two caveats that blocked it are now handled by construction rather than by
-correction, per `../../telemetry_buffer/observation_model/vsp_covid_discontinuity_design.md`: score only statistics
+correction, per `telemetry_buffer/observation_model/vsp_covid_discontinuity_design.md`: score only statistics
 conditional on posting, so the missing voyage denominator never enters; and run
 VSP's own posting rule over simulated voyages, so both arms are truncated
 identically. The reporting-intensity confound is cancelled by taking the
 passenger shift over the crew shift.
 
 **The "~15-20% drop, p=0.032" figure is withdrawn.** It was read off
-`vsp_covid_discontinuity.png`, whose per-outbreak table was never in the
-repository. Rebuilt from CDC-hosted pages (`../../telemetry_buffer/observation_model/vsp_outbreak_series.csv`, 428
+`docs/norovirus/vsp_covid_discontinuity.png`, whose per-outbreak table was never in the
+repository. Rebuilt from CDC-hosted pages (`telemetry_buffer/observation_model/vsp_outbreak_series.csv`, 428
 postings, `e167e32`), the passenger median moves 5.39% → 4.91%, a ratio of
 0.912 (0.788-1.182, p=0.26) — no detectable level drop. The discontinuity is
 real but it is not that: the crew median rises, the passenger/crew ratio falls

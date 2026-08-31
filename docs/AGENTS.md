@@ -2,6 +2,33 @@
 
 > See also the human docs map: [README.md](README.md).
 
+## Which documents are authoritative
+
+`docs/` is sorted by **subject** into directories, and by **status** into a line
+at the top of each file. Read [README.md](README.md) first; it lists every
+document with its status.
+
+Four rules, because getting these wrong has cost real time:
+
+1. **Never infer implementation state from a filename or a directory.** A file
+   called `*_spec.md` may describe something that does not exist; a file with no
+   inbound links may document a fully implemented subsystem. Check the status
+   line, and check the artifact.
+2. **`proposals/` describes nothing that exists.** Do not cite it as
+   documentation of current behaviour, and do not assume a prescribed filename
+   is the one that landed — at least one proposal there was satisfied in a
+   different location and shape.
+3. **`history/`, `literature/`, and `reports/` are context, not truth.** You do
+   not need them for implementation work. `history/` records why something is the
+   way it is; do not "fix" a historical document's account of where a file used
+   to live.
+4. **A status line can itself be stale.** Where in-tree evidence contradicts a
+   document, the tree wins — then correct the document.
+
+When you finish work that changes a document's implementation state, update its
+status line and move the file if the filing rule in `README.md` now places it
+elsewhere.
+
 ## Cursor Cloud specific instructions
 
 Pure-Python simulation (no databases or external APIs for local dev). **Python 3.11+** required. Docker is used only to package the mega cruise campaign for AWS Batch (see `deploy/aws/`); it is not needed for local development.
@@ -18,7 +45,7 @@ Pure-Python simulation (no databases or external APIs for local dev). **Python 3
 | Streamlit dashboard | `python3 -m streamlit run dashboard.py --server.headless true` | Run orchestrator first for telemetry |
 | Deck asset precompute | `python3 scripts/precompute_deck_assets.py` | Writes `deck_graphics.geojson`, hull PNG, manifest per platform |
 | Sanity checker | `python3 tools/sanity_checker.py --from-config` | Ship + fleet + Stackelberg social configs |
-| Full test suite | `python3 -m pytest tests/ -v --tb=short` | ~875 tests, ~8s |
+| Full test suite | `python3 -m pytest tests/ -v --tb=short` | ~3,240 tests, ~41 min. Fast tier: add `-m 'not slow'` (~4.5 min) |
 | Wearable anomaly scoring | `python3 -m pytest tests/test_wearable_anomaly_scorer.py tests/test_cascade_entry.py -v` | Confounder-aware infection_score + cascade entry fusion |
 | Diagnostic cascade smoke | `python3 -m pytest tests/test_smoke_diagnostic_cascade.py -v` | 6-epoch runs with cascade enabled (standard + multiplex specs) |
 | Long-read / TAT tests | `python3 -m pytest tests/test_long_read_sequencing.py tests/test_instrument_turnaround.py -v` | Nanopore + turnaround queue |
@@ -54,7 +81,7 @@ Install from the hash-pinned lockfile: `pip install --only-binary=:all: --requir
 1. `ruff check` — **F-rules blocking**; E/W/I advisory
 2. `python3 tools/sanity_checker.py --from-config`
 3. `pytest tests/test_json_schema_validation.py -v --tb=short`
-4. `pytest tests/ -v --tb=short --cov --cov-report=term-missing` (~875 tests)
+4. `pytest tests/ -v --tb=short --cov --cov-report=term-missing`
 5. Picard/Presidio/Stackelberg import hygiene
 6. Presidio smoke (`smoke_fleet.json`, 1 cruise)
 7. Orchestrator import hygiene (stoplight deduplication)

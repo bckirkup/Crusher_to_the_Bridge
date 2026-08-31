@@ -8,12 +8,12 @@ residence time a ship must run before wastewater buys port-hazard recovery**.
 
 | Item | Value |
 |---|---|
-| Design | `../../picard_framework/runs/mega_cruise_campaign/sentinel_ww_ops_scan_v1_design.json` |
-| Manifest | `../../picard_framework/runs/mega_cruise_campaign/sentinel_ww_ops_scan_v1_manifest.json` |
+| Design | `picard_framework/runs/mega_cruise_campaign/sentinel_ww_ops_scan_v1_design.json` |
+| Manifest | `picard_framework/runs/mega_cruise_campaign/sentinel_ww_ops_scan_v1_manifest.json` |
 | Runs | **9000** |
 | Tiers | `sr_one_hot_fleet_crossed`, `sr_last_port_hot_fleet_crossed`, `sr_null_fleet_crossed` |
 | Generator | `_iter_sentinel_recovery_runs` in `campaign_runner.py` (shared with `sentinel_synthetic_recovery_v1`) |
-| Simulator layer | `../../picard_framework/analysis/sentinel/wastewater_ops.py` (ops) + `wastewater_assays.py` (laboratory) |
+| Simulator layer | `picard_framework/analysis/sentinel/wastewater_ops.py` (ops) + `wastewater_assays.py` (laboratory) |
 | S3 prefix | `campaign/sentinel_ww_ops_scan_v1/` |
 
 ## Why these two knobs
@@ -21,7 +21,7 @@ residence time a ship must run before wastewater buys port-hazard recovery**.
 The v1 sentinel recovery left the clinical-only model structurally biased
 (~18.5% port-hazard coverage, hazards underestimated ~100×). Wastewater is a
 second observation of the *same* latent incidence curve — it never receives a
-port label of its own (`sentinel_surveillance_spec.md` §1.3) — so its value
+port label of its own (`docs/sentinel/sentinel_surveillance_spec.md` §1.3) — so its value
 is entirely in timing, and timing is exactly what the plumbing degrades:
 
 - **Sampling cadence** sets the temporal resolution the fit can ever recover: a
@@ -102,7 +102,7 @@ labels both as `0` rather than leaving holes in a factorial table.
 - Draws come from a dedicated RNG stream (`seed + 977`), so enabling the channel
   cannot change the epidemic it observes.
 
-Configuration block (`../../crusher_labs/config.yaml`, default **disabled**; distinct
+Configuration block (`crusher_labs/config.yaml`, default **disabled**; distinct
 from the onboard-detection `wastewater_sequencing` grid modality):
 
 ```yaml
@@ -168,12 +168,12 @@ Mode-specific notes:
   shedder prevalence for one expected read. Kept as an explicit comparison arm,
   not as a recommendation.
 - **Long read** carries `turnaround_hours` (12 h, consistent with the shipboard
-  profiles in `../../data/config/long_read_sequencing_params.json`) and an optional
+  profiles in `data/config/long_read_sequencing_params.json`) and an optional
   `genotype`, which is why it belongs at confirmation rather than on a 6-epoch
   cadence.
 
 Rows are heterogeneous by design: a qPCR row omits the read fields, a sequencing
-row omits the Ct. `../../schemas/sentinel_observations.schema.json` therefore requires
+row omits the Ct. `schemas/sentinel_observations.schema.json` therefore requires
 neither, and `observations.py` rejects the incoherent combinations (a non-detect
 that reports a concentration; a quantitative concentration with no LOD to censor
 against).
@@ -192,7 +192,7 @@ arm) and `concentration_fitted` (qPCR arm) separately rather than quoting a slop
 estimated from the prior alone.
 
 Samples reach the fit through the sentinel line list
-(`run.sentinel_line_list` → `wastewater_samples`, `../../schemas/sentinel_observations.schema.json`).
+(`run.sentinel_line_list` → `wastewater_samples`, `schemas/sentinel_observations.schema.json`).
 A run with the channel off still writes clinical cases and exposure totals, which
 is what makes the 270-run control a usable baseline.
 
@@ -255,6 +255,6 @@ A null result is a result: if coverage stays low even at 1-epoch cadence with a
 0.5 h tank, the scan bounds the value of shipboard WBE for port attribution
 instead of recommending it.
 
-See also: `sentinel_surveillance_spec.md` (§1.3 channel semantics, §6
-validation), `../synthetic_recovery_and_vsp_degradation.md` (sibling
-campaigns), `../../.agents/skills/mega-cruise-campaign-local/SKILL.md`.
+See also: `docs/sentinel/sentinel_surveillance_spec.md` (§1.3 channel semantics, §6
+validation), `docs/synthetic_recovery_and_vsp_degradation.md` (sibling
+campaigns), `.agents/skills/mega-cruise-campaign-local/SKILL.md`.

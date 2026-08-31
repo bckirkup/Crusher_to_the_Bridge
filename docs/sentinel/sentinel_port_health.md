@@ -6,11 +6,11 @@ What a port's *own* public health system observes, independently of any ship.
 
 | Item | Value |
 |---|---|
-| Model | `../../picard_framework/analysis/sentinel/port_health.py` |
-| Profile libraries | `../../picard_framework/analysis/sentinel/port_profiles.py` + `data/port_surveillance_<region>.json` |
-| Ledger generation / ablation / CLI | `../../picard_framework/analysis/sentinel/port_ledger.py` |
-| Schemas | `../../schemas/port_surveillance.schema.json` (profiles), `../../schemas/port_surveillance_ledger.schema.json` (generated data) |
-| Tests | `../../tests/test_port_health_surveillance.py` |
+| Model | `picard_framework/analysis/sentinel/port_health.py` |
+| Profile libraries | `picard_framework/analysis/sentinel/port_profiles.py` + `data/port_surveillance_<region>.json` |
+| Ledger generation / ablation / CLI | `picard_framework/analysis/sentinel/port_ledger.py` |
+| Schemas | `schemas/port_surveillance.schema.json` (profiles), `schemas/port_surveillance_ledger.schema.json` (generated data) |
+| Tests | `tests/test_port_health_surveillance.py` |
 
 ## Why
 
@@ -129,7 +129,7 @@ Four cruise theatres plus one fictional network, as data rather than code:
 | `mediterranean` | ESPMI, GRPIR, ITCIV, FRMRS, HRDBV, TRIST | ECDC coordination, EU sewage sentinel WBE |
 | `nordic` | DKCPH, NOOSL, SESTO, DEKEL, ISREY | Best instrumented: 1–2 day delays, high coverage, low LODs |
 | `alaska` | USSEA, USJNU, USKTN, USSIT, CAVAN | US pathways, tiny catchments — the noisiest Poisson regime |
-| `federation` | SBONE, SBELV, FARPT, DSNIN, SBSVF, RISAA, MEMAL, KSEVN | **Fictional** (`../paper3/variant_surveillance_spec.md` §3), for the Enterprise platforms; invented capabilities, not citable ones |
+| `federation` | SBONE, SBELV, FARPT, DSNIN, SBSVF, RISAA, MEMAL, KSEVN | **Fictional** (`docs/paper3/variant_surveillance_spec.md` §3), for the Enterprise platforms; invented capabilities, not citable ones |
 
 The four ports of `sentinel_ww_ops_scan_v1` (USMIA, MXCZM, MXCTM, KYGEC) are all
 profiled. A port called by an itinerary but absent from every library gets a
@@ -168,7 +168,7 @@ an itinerary cannot renumber another port's draws.
 
 ## Multiphase analysis
 
-`../../picard_framework/analysis/sentinel/multiphase.py` runs the staircase — one
+`picard_framework/analysis/sentinel/multiphase.py` runs the staircase — one
 *separate* fit per phase, so a change in an interval belongs to the channel that
 was added and nothing else:
 

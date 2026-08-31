@@ -1,6 +1,6 @@
 # Do the published conclusions survive the incubation refinement?
 
-Companion to [`incubation_reconciliation_plan.md`](history/incubation_reconciliation_plan.md),
+Companion to [`docs/history/incubation_reconciliation_plan.md`](history/incubation_reconciliation_plan.md),
 which says *what* has to be reconciled. This document says how to test whether
 already-published conclusions hold under the refined infection mechanism, in the
 order the author set: paper 3 merges, then paper 2 sensitivity, then paper 1.
@@ -8,7 +8,7 @@ order the author set: paper 3 merges, then paper 2 sensitivity, then paper 1.
 A second switch is now on the table: the natural-history clock advances a
 day-scale counter once per hourly epoch, so a case incubates and clears 24× fast
 against the itinerary calendar. That is audited separately in
-[`epoch_time_unit_audit.md`](history/epoch_time_unit_audit.md) and, if adopted, becomes a
+[`docs/history/epoch_time_unit_audit.md`](history/epoch_time_unit_audit.md) and, if adopted, becomes a
 third arm of the design below rather than a second harness.
 
 The design principle throughout: **paired arms, same seeds, one switch.** The

@@ -35,7 +35,7 @@ The test suite confirms this exactly:
 
 Concretely:
 
-1. **SPEC-CLEAR-01** (already in §3.6): Reset `cumulative_exposure[pathogen_id]` to `0.0` when the infection transitions to `RECOVERED`. This is a one-line addition in the recovery path of `../../orchestrator_epoch.py` (after line 497).
+1. **SPEC-CLEAR-01** (already in §3.6): Reset `cumulative_exposure[pathogen_id]` to `0.0` when the infection transitions to `RECOVERED`. This is a one-line addition in the recovery path of `orchestrator_epoch.py` (after line 497).
 2. The `inoculum_clearance_rate_per_day` parameter from §3.2 handles the auto-decay during periods of no exposure. When this rate is `> 0`, cumulative exposure decays exponentially every epoch regardless of whether new dose arrives — solving the stale-dose problem.
 3. No separate "no-dose window" timer is needed. Exponential decay is both simpler and more biologically defensible than a hard timeout.
 
@@ -254,7 +254,7 @@ The agent has **two parallel state representations**:
 
 **Recommended actions:**
 1. **Document** agent-level `infection_status`, `illness_status`, `time_infected`, `acquired_particles`, and `shedding_multiplier` as **read-only projections** in the spec. Add a `@property` or naming convention to signal this.
-2. **Audit and remove** direct writes to these fields outside `_project_legacy_illness()`, `_establish()`, and `../../orchestrator_init.py` (seed infection). Currently, `infection_dynamics_bridge.py:1426,1474,1513,1558` (legacy fallback paths) also write them — these writes should be guarded by a `_project_legacy_illness()` call rather than inlined.
+2. **Audit and remove** direct writes to these fields outside `_project_legacy_illness()`, `_establish()`, and `orchestrator_init.py` (seed infection). Currently, `infection_dynamics_bridge.py:1426,1474,1513,1558` (legacy fallback paths) also write them — these writes should be guarded by a `_project_legacy_illness()` call rather than inlined.
 3. **Add a deprecation warning** on direct assignment (via `__setattr__` guard or code review policy) to prevent new code from writing to agent-level fields.
 4. **No removal timeline** — the fields stay as derived properties indefinitely.
 
@@ -276,7 +276,7 @@ Replace the TODO at §12.2 (line 989 of the spec) with:
 
 | TODO | Resolution | Code Changes Required | Tests Affected | Risk |
 |---|---|---|---|---|
-| **TODO-1** (cumulative_exposure decay) | §3.2 inoculum_clearance_rate handles decay; add recovery reset (SPEC-CLEAR-01) | 1 line in `../../orchestrator_epoch.py` | 0 | Negligible |
+| **TODO-1** (cumulative_exposure decay) | §3.2 inoculum_clearance_rate handles decay; add recovery reset (SPEC-CLEAR-01) | 1 line in `orchestrator_epoch.py` | 0 | Negligible |
 | **TODO-2** (recovery distribution) | Add optional `recovery` block; default `"fixed"` preserves current behavior | New `sample_recovery()` function; modify `orchestrator_epoch.py:482–487` | 0 at defaults; 16 files if distribution enabled | Low (opt-in) |
 | **TODO-3** (route-specific shedding) | Defer to v2.0; current `transmission_route_weights` sufficient | 0 | 0 | None |
 | **TODO-4** (tissue tropism scope) | No shipped pathogen needs it; schema extension stays optional | 0 | 0 | None |
