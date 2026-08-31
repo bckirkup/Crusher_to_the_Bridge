@@ -163,6 +163,38 @@ This currently matters less than it reads, because direct contact contributes
 13.22 dose units against fomite's 320,318 (§2) — but it will matter as soon as
 the fomite pool is corrected, and it is off-source either way.
 
+### 3.3 Inheritance from a COVID-era fit transfers a value, not its identifiability
+
+This audit grades an inherited parameter as "unsourced". There is a second and
+sharper problem with the inherited values, and it is about what the norovirus
+data can and cannot check.
+
+The model's ancestry was scored against COVID, and COVID and norovirus have
+inverted data availability. COVID on ships produced per-day case series with
+tested denominators on a handful of hulls: a trajectory fit at N of about three.
+Norovirus produces the opposite shape of evidence -- 37,258 voyages across 252
+ships with size- and length-stratified incidence, and 428 posted outbreaks in
+`telemetry_buffer/observation_model/vsp_outbreak_series.csv` -- and no
+within-voyage time series anywhere.
+
+So a parameter that a COVID trajectory fit could identify -- latency, per-contact
+dose, anything whose evidence is the shape of a curve in time -- is **not
+identifiable from any norovirus observation we hold**. Inheriting its value
+inherits an identifiability it no longer has, and no amount of anchor agreement
+recovers it, because every norovirus anchor is a level or a cross-voyage
+gradient rather than a within-voyage curve.
+
+The consequence for grading: provenance grades must distinguish "measured" from
+"identified under COVID-era trajectory data". The second is not evidence for the
+norovirus configuration, and it cannot be re-checked against anything in the
+norovirus anchor set.
+
+**Open item.** This audit does not record which parameters, if any, carry that
+history. No provenance comment or history entry in the repository names a
+parameter as inherited from a COVID trajectory fit, so no list is asserted here.
+Establishing that list is a separate change, as is any re-grading that follows
+from it.
+
 ## 4. Free parameters that act directly on the scored quantity
 
 This is the honest answer to question 2, and the count is worse than the

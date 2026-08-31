@@ -4,7 +4,7 @@ Status: Partially implemented. The observed-side A4 targets are derived in
 `telemetry_buffer/observation_model/vsp_class_era_scoring.py` and scored by
 `telemetry_buffer/observation_model/score_anchors.py`; A8/A9 model-side
 aggregation and the ship-tonnage band table remain Proposed.
-Owner anchors: A4 (revised), A8 (new), A9 (new)
+Owner anchors: A4 (revised), A8 (new), A9 (new), A10 (new)
 Last updated: 2026-08-30
 
 ## Why this exists
@@ -265,6 +265,84 @@ and more contacts, so more voyages cross 3%, while a small ship that does cross
 reproduces one and not the other is telling us which of the two mechanisms it
 has wrong, so the two must be scored together and never averaged.
 
+## A10 -- duration trajectories
+
+Norovirus gives us no within-voyage time series anywhere. There is no shipboard
+norovirus cohort with per-day case counts, so there is no trajectory to fit the
+way a COVID cohort study is fitted. What MMWR 70(6) does contain is two
+*duration* trajectories -- recovered across voyages rather than within one --
+and they are independent of the incidence levels A8 already scores.
+
+### A10a -- incidence against voyage length
+
+The passenger length rates tabulated in the A8 section (13.3, 17.8, 23.2, 35.0,
+40.0 per 100,000 travel days over 3-5, 6-7, 8-10, 11-14 and 15-21 days) are a
+*per-day* rate, and it roughly triples across the range. A per-day rate that
+rises with duration means cumulative incidence grows superlinearly in voyage
+length. That constrains epidemic growth rate rather than level, and it is the
+closest thing to a trajectory this data offers.
+
+Model side: run the same hull at 3-5, 6-7, 8-10, 11-14 and 15-21 day voyage
+lengths and compare the shape of reported cases per travel day against those
+five points. Score the **gradient**, not the levels -- the levels are A8's job,
+and the all-cause/norovirus mix caveat recorded there applies to them.
+
+### A10b -- the crew trajectory as the discriminator
+
+Crew rates over the same five bands are flat: 17.5, 22.1, 19.0, 17.4, 20.9.
+Two populations on the same hulls, one duration-dependent and one not, is a much
+harder constraint than either level alone, and it is the same passenger-versus-
+crew differencing A7 already uses.
+
+Plausible mechanisms, stated without being asserted: crew turnover and crew
+pre-existing immunity from continuous exposure would both flatten the crew
+curve. Neither is measured here. A10b is therefore scored as "passenger gradient
+positive, crew gradient flat" and **not** as a ratio.
+
+### A10c -- outbreak reports against voyage length
+
+MMWR Table 3, 2006-2019. Of 156 passenger AGE *outbreak* reports the
+distribution over the same length bands is 7 (4%), 2 (1%), 30 (19%), 57 (37%),
+60 (38%); of 16 crew outbreak reports it is 6 (38%), 4 (25%), 3 (19%), 2 (13%),
+1 (6%). The passenger outbreak share rises steeply with voyage length while the
+crew share falls steeply -- a second, independent duration trajectory, on the
+outbreak channel rather than the incidence channel, with the same sign contrast
+between the two populations.
+
+**These are shares of outbreak reports, not rates.** Table 3 carries no voyage
+denominator per length band, so converting a share to a per-voyage probability
+requires the Table 1 length denominators (13,772 / 6,031 / 12,239 / 3,111 /
+2,105 voyages). The derived quantity, `passenger outbreak reports / voyages`,
+per 1,000 voyages:
+
+| voyage length | outbreak reports (Table 3) | voyages (Table 1) | per 1,000 voyages |
+|---|---:|---:|---:|
+| 3-5 d | 7 | 13,772 | 0.51 |
+| 6-7 d | 2 | 6,031 | 0.33 |
+| 8-10 d | 30 | 12,239 | 2.45 |
+| 11-14 d | 57 | 3,111 | 18.32 |
+| 15-21 d | 60 | 2,105 | 28.50 |
+
+So the per-voyage outbreak probability rises from roughly 0.5 per 1,000 voyages
+at 3-5 days to roughly 29 per 1,000 at 15-21 days, a factor of about 56 across
+the range. The 6-7 day band sits *below* the 3-5 day band, so the rise is not
+monotone at the short end; the steep part is 8-10 days upward. Both source
+tables are named above so the arithmetic is reproducible.
+
+### The confound, which is a blocker and not a footnote
+
+Length and ship size are confounded in Table 2. Those are marginal rates, not
+adjusted ones, and larger ships in this period disproportionately sailed the
+shorter Caribbean itineraries, so a length gradient partly carries a size
+gradient with the opposite composition. MMWR publishes no size-by-length
+cross-tabulation, so the size mix per length band is unknown, and the same
+confound applies to the Table 3 shares.
+
+A10a and A10c are therefore scored as **sign and rough magnitude of the
+gradient only**. A quantitative growth-rate claim is blocked pending either a
+size-by-length cross-tabulation or a per-voyage reconstruction. Do not present
+this gradient as a clean growth-rate measurement.
+
 ## Era grid and what is missing
 
 | channel | pre (2006-2019) | shutdown (2020-2021) | post (2022-) |
@@ -317,7 +395,7 @@ most that can honestly be claimed until a post-2020 MIDRS analysis exists.
 
 - Jenkins KA, Vaughan GH Jr, Rodriguez LO, Freeland A. Acute Gastroenteritis on
   Cruise Ships -- Maritime Illness Database and Reporting System, United States,
-  2006-2019. MMWR Surveill Summ 2021;70(6):1-19. Tables 1 and 2.
+  2006-2019. MMWR Surveill Summ 2021;70(6):1-19. Tables 1, 2 and 3.
   Retrieved 2026-08-30.
 - CDC Vessel Sanitation Program, Outbreaks on Cruise Ships in VSP's
   Jurisdiction (posting rule). Retrieved 2026-08-30.
