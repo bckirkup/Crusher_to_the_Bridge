@@ -26,10 +26,19 @@ from __future__ import annotations
 import argparse
 import json
 import statistics
+import sys
 import zipfile
 from collections import defaultdict
 from pathlib import Path
 from typing import Any
+
+try:
+    from simulation_utils.paths import validated_open
+except ModuleNotFoundError as error:
+    if error.name != "simulation_utils":
+        raise
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+    from simulation_utils.paths import validated_open  # type: ignore[no-redef]
 
 try:
     from telemetry_buffer.observation_model.vsp_class_era_scoring import (
@@ -231,12 +240,26 @@ def _write_report(
     report: str,
     rows: list[dict[str, Any]],
     cells: dict[tuple[str, str, float], dict[str, Any]],
+    results_root: Path,
 ) -> None:
     """Write the markdown report and its JSON companion."""
-    output_path.write_text(report, encoding="utf-8")
-    json_path = output_path.with_suffix(".json")
-    json_path.write_text(
-        json.dumps(
+    safe_output_path = _validated_report_path(output_path, results_root)
+    allowed_roots = (str(results_root.expanduser().resolve()),)
+    with validated_open(
+        str(safe_output_path),
+        "w",
+        allowed_roots=allowed_roots,
+        encoding="utf-8",
+    ) as handle:
+        handle.write(report)
+    json_path = safe_output_path.with_suffix(".json")
+    with validated_open(
+        str(json_path),
+        "w",
+        allowed_roots=allowed_roots,
+        encoding="utf-8",
+    ) as handle:
+        json.dump(
             {
                 "rows": rows,
                 "cells": {
@@ -244,11 +267,10 @@ def _write_report(
                     for (hull, strategy, dose), cell in cells.items()
                 },
             },
+            handle,
             indent=2,
             default=float,
-        ),
-        encoding="utf-8",
-    )
+        )
 
 
 def _a4_target_lines(
@@ -357,6 +379,7 @@ def main() -> int:
             report,
             rows,
             cells,
+            args.results_root,
         )
     print(report)
     return 0

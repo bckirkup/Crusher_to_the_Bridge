@@ -36,7 +36,10 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any, NamedTuple
 
+from simulation_utils.paths import resolve_repo_path, validated_open
+
 SERIES = Path(__file__).with_name("vsp_outbreak_series.csv")
+REPO_ROOT = Path(__file__).resolve().parents[2]
 
 # Nominal passenger complement of each scored hull, from the platform ids.
 HULL_CAPACITY: dict[str, int] = {
@@ -87,7 +90,14 @@ def _capacity_band(pax_total: float) -> str:
 def load_postings(path: Path = SERIES) -> list[Posting]:
     """Postings with a usable passenger denominator and rate."""
     out: list[Posting] = []
-    with path.open(newline="", encoding="utf-8") as handle:
+    safe_path = resolve_repo_path(str(SERIES.parent), str(path))
+    with validated_open(
+        safe_path,
+        "r",
+        allowed_roots=(str(SERIES.parent),),
+        encoding="utf-8",
+        newline="",
+    ) as handle:
         for row in csv.DictReader(handle):
             pax_total = row["pax_total"].strip()
             pax_ill = row["pax_ill"].strip()
@@ -210,6 +220,11 @@ def _fmt(value: float | None, places: int = 4) -> str:
     return "n/a" if value is None else f"{value:.{places}f}"
 
 
+def _validated_cli_path(path: Path, root: Path) -> Path:
+    """Resolve a CLI path under a fixed root before filesystem access."""
+    return Path(resolve_repo_path(str(root), str(path)))
+
+
 def render(postings: list[Posting]) -> str:
     rates = targets_by_class_era(postings)
     incidence = incidence_by_class_era(postings)
@@ -264,9 +279,17 @@ def main() -> None:
     parser.add_argument("--series", type=Path, default=SERIES)
     parser.add_argument("--out", type=Path, default=None)
     args = parser.parse_args()
-    text = render(load_postings(args.series))
+    series_path = _validated_cli_path(args.series, SERIES.parent)
+    text = render(load_postings(series_path))
     if args.out:
-        args.out.write_text(text, encoding="utf-8")
+        output_path = _validated_cli_path(args.out, REPO_ROOT)
+        with validated_open(
+            str(output_path),
+            "w",
+            allowed_roots=(str(REPO_ROOT),),
+            encoding="utf-8",
+        ) as handle:
+            handle.write(text)
     print(text)
 
 
