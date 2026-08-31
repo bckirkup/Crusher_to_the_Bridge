@@ -1,4 +1,4 @@
-"""Score simulation output against the five literature anchors (A1-A5).
+"""Score simulation output against the anchors A1-A5.
 
 Reads run zips produced by the campaign runner and reports, per
 hull x response x dose cell and conditional on take-off, the anchor
@@ -6,8 +6,16 @@ quantities defined in ``anchor_measurement_spec.md``.  Ratios are reported
 both per-seed (median of ratios) and as a ratio of cell medians, because the
 two diverge whenever a denominator is small.
 
+A1, A2 and A5 are literature targets.  A3 is a construction constraint of the
+observation layer rather than independent evidence
+(``docs/norovirus/norovirus_parameter_freedom_audit.md``).  A4's target is not
+a literature figure at all: it is derived at runtime, per hull class and per
+era, from ``vsp_outbreak_series.csv`` by ``vsp_class_era_scoring.py``, and a
+hull with too few postings gets no A4 verdict.
+
 Usage:
-    python3 score_anchors.py <results-root> [--out report.md]
+    python3 -m telemetry_buffer.observation_model.score_anchors \
+        <results-root> [--out report.md] [--vsp-era pre|post]
 
 ``<results-root>`` is a directory searched recursively for ``*.zip`` runs,
 each containing ``summary.json`` with ``parameters`` and ``derived`` blocks.
@@ -23,14 +31,22 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
-TAKEOFF_PEAK_PREVALENCE = 10
+try:
+    from telemetry_buffer.observation_model.vsp_class_era_scoring import (
+        MIN_POSTINGS_FOR_TARGET,
+        SCORED_ERAS,
+        vsp_attack_rate_targets,
+    )
+except ModuleNotFoundError as error:
+    if error.name != "telemetry_buffer":
+        raise
+    from vsp_class_era_scoring import (  # type: ignore[no-redef]
+        MIN_POSTINGS_FOR_TARGET,
+        SCORED_ERAS,
+        vsp_attack_rate_targets,
+    )
 
-VSP_TARGETS: dict[str, dict[str, float]] = {
-    "expedition_cruise_450": {"median": 0.0856, "q1": 0.0451, "q3": 0.1360},
-    "classic_cruise_1900": {"median": 0.0559, "q1": 0.0446, "q3": 0.0776},
-    "spirit_cruise_3000": {"median": 0.0564, "q1": 0.0444, "q3": 0.0790},
-    "mega_cruise_5000": {"median": 0.0561, "q1": 0.0340, "q3": 0.0745},
-}
+TAKEOFF_PEAK_PREVALENCE = 10
 
 # A1 Wikswo whole-ship cohort illness; A2 asymptomatic ratio (GII.4-weighted
 # lower bound 0.59); A3 capture; A5 passenger:crew reported ratio.
@@ -166,8 +182,19 @@ def summarise_cell(rows: list[dict[str, Any]]) -> dict[str, Any]:
     return cell
 
 
-def verdicts(hull: str, cell: dict[str, Any]) -> dict[str, str]:
-    """PASS/FAIL per anchor on the per-seed medians, plus A4 against VSP."""
+A4_NO_TARGET = "n/a (insufficient VSP postings)"
+
+
+def verdicts(
+    hull: str,
+    cell: dict[str, Any],
+    targets: dict[str, dict[str, float] | None],
+) -> dict[str, str]:
+    """PASS/FAIL per anchor on the per-seed medians, plus A4 against VSP.
+
+    ``targets`` comes from ``vsp_attack_rate_targets`` for the scored era; a
+    hull whose target is ``None`` has too few postings to anchor A4 at all.
+    """
     out: dict[str, str] = {}
     for anchor, (low, high) in ANCHORS.items():
         value = cell.get(anchor) if anchor == "A1_ever_ill_passenger" else (
@@ -178,8 +205,10 @@ def verdicts(hull: str, cell: dict[str, Any]) -> dict[str, str]:
         else:
             out[anchor] = "PASS" if low <= value <= high else "FAIL"
     reported = cell.get("reported_case_attack_rate_passenger")
-    target = VSP_TARGETS.get(hull)
-    if reported is None or target is None:
+    target = targets.get(hull)
+    if target is None:
+        out["A4_vsp_iqr"] = A4_NO_TARGET
+    elif reported is None:
         out["A4_vsp_iqr"] = "n/a"
     else:
         out["A4_vsp_iqr"] = (
@@ -222,7 +251,36 @@ def _write_report(
     )
 
 
-def render(cells: dict[tuple[str, str, float], dict[str, Any]]) -> str:
+def _a4_target_lines(
+    era: str,
+    targets: dict[str, dict[str, float] | None],
+) -> list[str]:
+    """State the era and the postings behind every A4 target that was used."""
+    lines = [
+        f"A4 targets are derived from `vsp_outbreak_series.csv` for the "
+        f"`{era}` era by `vsp_class_era_scoring.py`, and are conditional on "
+        "VSP posting the voyage. A hull with fewer than "
+        f"{MIN_POSTINGS_FOR_TARGET} postings carries no A4 anchor.",
+        "",
+        "| Hull | A4 target IQR | postings |",
+        "|---|---|---:|",
+    ]
+    for hull, target in sorted(targets.items()):
+        if target is None:
+            lines.append(f"| {hull} | none — {A4_NO_TARGET} | - |")
+        else:
+            lines.append(
+                f"| {hull} | {target['q1']:.4f}-{target['q3']:.4f} "
+                f"(median {target['median']:.4f}) | {int(target['n'])} |",
+            )
+    return [*lines, ""]
+
+
+def render(
+    cells: dict[tuple[str, str, float], dict[str, Any]],
+    era: str,
+    targets: dict[str, dict[str, float] | None],
+) -> str:
     """Markdown report: one row per cell, levels then ratios then verdicts."""
     lines = [
         "# Literature anchor scoring",
@@ -233,6 +291,7 @@ def render(cells: dict[tuple[str, str, float], dict[str, Any]]) -> str:
         "denominator is small. Targets and definitions: "
         "`anchor_measurement_spec.md`.",
         "",
+        *_a4_target_lines(era, targets),
         "| Hull | Response | Dose | Takeoff | A1 ever-ill | inf AR (pax) | "
         "A2 ill/inf | A3 rep/ill | A4 reported | A5 pax/crew | Verdicts |",
         "|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---|",
@@ -244,7 +303,7 @@ def render(cells: dict[tuple[str, str, float], dict[str, Any]]) -> str:
         return f"{float(value):.{digits}f}"
 
     for (hull, strategy, dose), cell in sorted(cells.items()):
-        verdict = verdicts(hull, cell)
+        verdict = verdicts(hull, cell, targets)
         failed = [name for name, state in verdict.items() if state == "FAIL"]
         state = "all PASS" if not failed else "FAIL: " + ",".join(
             name.split("_")[0] for name in sorted(failed)
@@ -280,7 +339,10 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("results_root", type=Path)
     parser.add_argument("--out", type=Path, default=None)
+    parser.add_argument("--vsp-era", choices=SCORED_ERAS, default="pre")
     args = parser.parse_args()
+
+    targets = vsp_attack_rate_targets(args.vsp_era)
 
     rows = read_rows(args.results_root)
     grouped: dict[tuple[str, str, float], list[dict[str, Any]]] = defaultdict(list)
@@ -288,7 +350,7 @@ def main() -> int:
         grouped[(row["hull"], row["strategy"], row["dose_adjustment"])].append(row)
     cells = {key: summarise_cell(group) for key, group in grouped.items()}
 
-    report = render(cells)
+    report = render(cells, args.vsp_era, targets)
     if args.out:
         _write_report(
             _validated_report_path(args.out, args.results_root),

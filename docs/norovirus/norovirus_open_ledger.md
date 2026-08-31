@@ -82,14 +82,47 @@ returns roughly parity.** A1 and A3 were not jointly satisfiable with A2 under
 homogeneous exposure — infection attack rate and ill/infected are welded to the
 same dose, so they cannot be separated by refitting.
 
-VSP passenger attack-rate targets, for A4:
+**The four hard-coded VSP class targets are withdrawn.** The triples
+`score_anchors.py` carried (expedition 8.56%, 4.51-13.60%; classic 5.59%,
+4.46-7.76%; spirit 5.64%, 4.44-7.90%; mega 5.61%, 3.40-7.45%) had no
+derivation script and no source note, and do not reproduce from
+`telemetry_buffer/observation_model/vsp_outbreak_series.csv` under capacity
+bands or under any alternative band edge tried; the expedition class misses by
+the widest margin. They are replaced by values recomputed from the series at
+runtime, per hull class **and per era**, by
+`telemetry_buffer/observation_model/vsp_class_era_scoring.py`, which
+`score_anchors.py` now calls (`--vsp-era`, default `pre`). Derivation and
+sources: `telemetry_buffer/observation_model/incidence_and_attack_rate_scoring_spec.md`.
 
-| hull | n | median | IQR |
-|---|---:|---:|---|
-| expedition | 17 | 8.56% | 4.51-13.60% |
-| classic | 172 | 5.59% | 4.46-7.76% |
-| spirit | 52 | 5.64% | 4.44-7.90% |
-| mega | 9 | 5.61% | 3.40-7.45% |
+VSP passenger attack-rate targets, for A4, as now derived (333 of 428 postings
+carry a passenger denominator; the 87 `legacy_pre2004` rows carry none, and the
+5 `shutdown` postings are never pooled into either arm):
+
+| hull | era | n | q1 | median | q3 |
+|---|---|---:|---:|---:|---:|
+| expedition | pre | 34 | 3.70% | 5.07% | 10.18% |
+| expedition | post | 18 | 3.31% | 7.24% | 13.51% |
+| classic | pre | 174 | 4.18% | 5.46% | 7.70% |
+| classic | post | 32 | 4.11% | 5.06% | 6.89% |
+| spirit | pre | 50 | 4.31% | 5.42% | 6.67% |
+| spirit | post | 13 | 3.53% | 4.73% | 6.35% |
+| mega | pre | 4 | — | — | — |
+| mega | post | 3 | — | — | — |
+
+**`mega_cruise_5000` has no usable A4 anchor in either era** — four postings
+before the 2020 break and three after, against a floor of ten. `score_anchors.py`
+reports its A4 verdict as `n/a (insufficient VSP postings)` rather than scoring
+it. That is the hull the campaign manifests centre on, so no mega-hull result
+may be described as passing or failing A4.
+
+**The post-COVID arm has no unconditional incidence observation at all.** The
+only published MIDRS incidence analysis is MMWR Surveill Summ 2021;70(6),
+covering 2006-2019; a search of CDC's VSP data pages, MMWR and the
+peer-reviewed literature found nothing after it. So the proposed A8 channel
+exists for the pre arm only, and the post-2020 health-practice configuration
+changes exactly the channel we have no post-2020 observation for. A pre-arm A8
+match plus a post-arm A4 match is the most that can honestly be claimed until a
+post-2020 MIDRS analysis exists.
 
 ## 3. Out-of-sample checks
 
@@ -212,22 +245,30 @@ Roughly in dependency order.
    model. Expect #353 to push A5 *further* from 2.9 — crew work the highest
    touch-rate zones and their berthing is already ~3x denser than passengers'.
    If it does, that is a finding about what is still missing.
-4. **Score the v4-successor campaign** against VSP class targets.
-5. **Cabin-level environmental compartments.** The finest mixing compartment is
+4. **Score the v4-successor campaign** against VSP class targets, per era,
+   and never on the mega hull's A4.
+5. **A8/A9 model-side aggregation.** The unconditional-incidence and
+   posting-probability channels are specified in
+   `telemetry_buffer/observation_model/incidence_and_attack_rate_scoring_spec.md`
+   and not implemented: they need per-voyage reported cases, complement and
+   voyage days across *all* runs in a cell including non-take-off ones, a VSP
+   posting flag per run, and a sourced ship-to-tonnage band table. None of the
+   three exists yet.
+6. **Cabin-level environmental compartments.** The finest mixing compartment is
    `Cabin_Corridor`: ~37 people in 800 m³ where reality is 2 people in ~40 m³
    (crew 3). `cabin_size` and `cabin_mate_ids` exist but only exempt a mate from
    confinement attenuation. Building this would raise crew rates — away from the
    anchor — so build it honestly and do not expect it to help. No cruise
    platform has four-berth cabins; crew are three.
-6. **Aerosol portal efficiency.** #352 computes and records the emesis aerosol
+7. **Aerosol portal efficiency.** #352 computes and records the emesis aerosol
    load but does not route it into the airborne reservoir. The direction is
    settled (norovirus establishes enterically; inhalation is delivery-to-gut via
    swallowing, so the respiratory clearance proxy is the wrong quantity) but the
    magnitude is not: the 10-30% figure is deposition in mouth/nose/trachea and
    is explicitly **not** an intestinal-delivery fraction.
-7. **Sick-host movement and a bathroom destination.** The Park gradient needs
+8. **Sick-host movement and a bathroom destination.** The Park gradient needs
    it; see §3.
-8. **AWS daughter session: CONTAM vs native accumulation comparison.** Deferred.
+9. **AWS daughter session: CONTAM vs native accumulation comparison.** Deferred.
 
 ## 5. Held fixed by assumption
 

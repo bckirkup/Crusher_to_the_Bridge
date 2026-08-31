@@ -28,6 +28,7 @@ What is over there:
 | Kind | Files |
 |------|-------|
 | Anchor definitions | `anchor_measurement_spec.md`, `score_anchors.py` |
+| Incidence and posted attack rate by class and era | `incidence_and_attack_rate_scoring_spec.md`, `vsp_class_era_scoring.py` |
 | VSP series | `vsp_outbreak_series.csv`, `vsp_series_spec.md`, `vsp_outbreak_series_extraction_log.md`, `fetch_vsp_outbreaks.py` |
 | COVID discontinuity | `vsp_covid_discontinuity_design.md`, `vsp_covid_discontinuity_findings.md`, `vsp_discontinuity_analysis.py`, `post_covid_configuration_sources.md` |
 | Surfaces & cleaning | `park_surface_check.py`, `park_surface_findings.md`, `park_emesis_findings.md`, `cleaning_schedule_sweep.py`, `cleaning_schedule_sweep_spec.md` |
