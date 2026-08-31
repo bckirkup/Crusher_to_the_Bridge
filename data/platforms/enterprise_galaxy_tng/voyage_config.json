@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "platform_class": "galaxy",
-  "description": "FICTIONAL Galaxy-class (TNG) survey itinerary: Starbase 1 -> Farpoint Station -> Deep Space 9 -> Risa -> Starbase 74 -> Starbase 1, over the fictional federation port library (docs/variant_surveillance_spec.md §3). Ports, dates, and ashore windows are invented for the setting, not literature-anchored. Longer and higher-liberty than the Constitution patrol (families aboard), so it gives a different port-call sequence and a larger ashore-hours denominator. effects_enabled=false and shore_exposure.enabled=false, so the itinerary is analysis-only metadata and campaigns stay identical to the pre-itinerary baseline.",
+  "description": "FICTIONAL Galaxy-class (TNG) survey itinerary: Starbase 1 -> Farpoint Station -> Deep Space 9 -> Risa -> Starbase 74 -> Starbase 1, over the fictional federation port library (docs/paper3/variant_surveillance_spec.md §3). Ports, dates, and ashore windows are invented for the setting, not literature-anchored. Longer and higher-liberty than the Constitution patrol (families aboard), so it gives a different port-call sequence and a larger ashore-hours denominator. effects_enabled=false and shore_exposure.enabled=false, so the itinerary is analysis-only metadata and campaigns stay identical to the pre-itinerary baseline.",
   "voyage": {
     "effects_enabled": false,
     "total_epochs": 288,

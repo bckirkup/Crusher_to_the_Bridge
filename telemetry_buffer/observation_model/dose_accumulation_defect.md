@@ -1,7 +1,7 @@
 # Defect: the dose-response is applied per epoch, so infection depends on the clock
 
 Date: 2026-08-29. Analysis commit: `75716b0`. Author: model-development record,
-continues `docs/norovirus_model_history.md`.
+continues `docs/norovirus/norovirus_model_history.md`.
 
 ## What the code does
 
@@ -63,7 +63,7 @@ rate from 0.32 to 0.89 and takes ill/infected from 0.45 to 0.25. Nothing
 physical changed; only the epoch length did.
 
 This is the same class of error as the seven already recorded in
-`docs/norovirus_model_history.md` — a quantity evaluated on the wrong axis —
+`docs/norovirus/norovirus_model_history.md` — a quantity evaluated on the wrong axis —
 and the hourly-epoch migration did not cause it but did amplify it by roughly
 24x in trial count.
 

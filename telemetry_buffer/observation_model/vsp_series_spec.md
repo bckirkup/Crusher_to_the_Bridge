@@ -4,7 +4,7 @@ What the observed COVID discontinuity is measured on. This file specifies the
 extraction only. The statistic computed from it, and the analysis, are specified
 in `vsp_covid_discontinuity_findings.md`; do not compute era comparisons here.
 
-`docs/vsp_covid_discontinuity.png` is an operator-supplied figure over
+`docs/norovirus/vsp_covid_discontinuity.png` is an operator-supplied figure over
 n=261 (2004-2019) and n=64 (2022-2026) posted outbreaks. The underlying
 per-outbreak table has never been in the repository, so no number read off that
 figure can be checked. This extraction replaces it with a table that can be.

@@ -19,7 +19,7 @@ campaign runs. Wearable Tier-0 entry uses confounder-aware `infection_score`
 | `crusher_labs/cascade_entry.py` | Sick-call vs wearable entry fusion |
 | `picard_framework/runs/smoke_cascade_6epoch.json` | 6-epoch standard smoke spec |
 | `picard_framework/runs/smoke_cascade_multiplex_6epoch.json` | Multiplex smoke spec |
-| `docs/SOP_CASCADE_RECONFIG.md` | Design note (partially landed; prefer live JSON) |
+| `docs/history/SOP_CASCADE_RECONFIG.md` | Design note (partially landed; prefer live JSON) |
 
 ## Enable in a Picard run spec
 
@@ -64,7 +64,7 @@ Smoke expected: both 6-epoch specs complete; each epoch records a
 
 - Fleet stoplight SOPs (SOP-013/014) still use shipwide wearable `anomaly_rate`;
   cascade Tier-0 uses `infection_score`.
-- Treat `docs/SOP_CASCADE_RECONFIG.md` as a design note — prefer
+- Treat `docs/history/SOP_CASCADE_RECONFIG.md` as a design note — prefer
   `data/config/diagnostic_cascade*.json` and `data/config/protocols.json` for
   current behavior.
 - Campaign surveillance ladder divergence is covered in

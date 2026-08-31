@@ -7,7 +7,7 @@ what a sequencing channel *should* have reported. Written by
 
 Epochs are the storage unit and physical hours are the reporting unit: the
 artifact carries ``epoch_duration_hours`` so no consumer has to assume one,
-which is the mistake ``docs/epoch_time_unit_audit.md`` documents.
+which is the mistake ``docs/history/epoch_time_unit_audit.md`` documents.
 """
 
 from __future__ import annotations

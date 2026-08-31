@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://crusher-to-the-bridge/schemas/port_surveillance.schema.json",
   "title": "PortSurveillanceProfiles",
-  "description": "Regional library of port public-health surveillance capabilities, keyed by UN-LOCODE. Capability is metadata on generated signals, not a generation gate: every port emits every channel and suppression happens at fleet-analysis time. Consumed by picard_framework/analysis/sentinel/port_profiles.py; see docs/sentinel_port_health.md.",
+  "description": "Regional library of port public-health surveillance capabilities, keyed by UN-LOCODE. Capability is metadata on generated signals, not a generation gate: every port emits every channel and suppression happens at fleet-analysis time. Consumed by picard_framework/analysis/sentinel/port_profiles.py; see docs/sentinel/sentinel_port_health.md.",
   "type": "object",
   "additionalProperties": false,
   "required": ["port_surveillance_profiles"],

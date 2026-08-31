@@ -22,7 +22,7 @@ Two modes exist, and both are needed.
 ``LEGACY_EPOCH_DAY``
     One epoch is one day of natural history regardless of the voyage grid. This
     is what the model did before the clock existed, so it is the control arm for
-    re-testing published results (see ``docs/epoch_time_unit_audit.md``), not a
+    re-testing published results (see ``docs/history/epoch_time_unit_audit.md``), not a
     physical claim.
 
 Day-valued inputs keep their ``*_day``/``*_days`` names; epoch counters keep

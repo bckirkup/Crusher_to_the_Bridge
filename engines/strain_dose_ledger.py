@@ -2,7 +2,7 @@
 
 CTB pools dose per ``(agent, pathogen)`` and then draws infection once, so a
 transmission event has no source and no inheritable strain (see
-``docs/variant_surveillance_plan.md`` §1). This module adds the missing ledger:
+``docs/paper3/variant_surveillance_plan.md`` §1). This module adds the missing ledger:
 each pathway attributes its dose to the strains that emitted it, the summed dose
 still drives the dose-response draw, and on infection the parent is drawn from
 the strain-weighted contributions.

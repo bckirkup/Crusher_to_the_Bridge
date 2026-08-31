@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Paper 3 variant-surveillance campaign tiers (``vs*``).
 
-The five Paper 3 designs (``docs/variant_surveillance_spec.md`` §6) sweep
+The five Paper 3 designs (``docs/paper3/variant_surveillance_spec.md`` §6) sweep
 mutational supply rather than pinning it: a *diversity* regime (multi-genotype
 embarkation, 1–4 founders, nominal per-pathogen rates) and an *emergence*
 regime (one founder, per-transmission and within-host rates swept over roughly

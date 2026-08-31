@@ -187,14 +187,14 @@
           "residual_protection": 0.0
         },
         "min_strain_fraction": 0.001,
-        "notes": "Rates from docs/variant_surveillance_spec.md \u00a71.3. superinfection_susceptibility and recombination_rate are placeholders pending a literature anchor (docs/variant_surveillance_plan.md \u00a77). immune_waning: refractory_days 56 and half_life_days 1095 are anchored on homotypic challenge protection lasting at least months and modelled immunity duration of 4.1-8.7 years (Simmons et al., Emerg Infect Dis 2013); the homotypic HR 0.39 of Ford-Siltz et al. (Clin Infect Dis 2020) is a multi-year hazard ratio, not a per-epoch susceptibility. Both are sensitivity axes. refractory_protection is applied as a per-epoch hazard reduction, so any value below 1.0 leaks at that rate every hour: 1.0 makes within-window re-infection escape-only, which is the intended contract."
+        "notes": "Rates from docs/paper3/variant_surveillance_spec.md \u00a71.3. superinfection_susceptibility and recombination_rate are placeholders pending a literature anchor (docs/paper3/variant_surveillance_plan.md \u00a77). immune_waning: refractory_days 56 and half_life_days 1095 are anchored on homotypic challenge protection lasting at least months and modelled immunity duration of 4.1-8.7 years (Simmons et al., Emerg Infect Dis 2013); the homotypic HR 0.39 of Ford-Siltz et al. (Clin Infect Dis 2020) is a multi-year hazard ratio, not a per-epoch susceptibility. Both are sensitivity axes. refractory_protection is applied as a per-epoch hazard reduction, so any value below 1.0 leaks at that rate every hour: 1.0 makes within-window re-infection escape-only, which is the intended contract."
       },
       "sequencing_assay": {
         "amplicon_target": "Capsid (VP1)",
         "read_accuracy": 0.92,
         "ct_threshold": 30.0,
         "cost_usd": 150.0,
-        "notes": "Assay design from docs/variant_surveillance_spec.md \u00a72.1. read_accuracy is per-read consensus accuracy for this amplicon; read depth and the reporting floor are operator dials set at run time, not pathogen properties."
+        "notes": "Assay design from docs/paper3/variant_surveillance_spec.md \u00a72.1. read_accuracy is per-read consensus accuracy for this amplicon; read depth and the reporting floor are operator dials set at run time, not pathogen properties."
       },
       "presymptomatic_shedding_days": 0.5,
       "presymptomatic_shedding_notes": "Atmar et al., Emerg Infect Dis 2008: virus was first detected in stool at a median approximately 36 hours post-challenge, essentially concurrent with symptom onset; 0.5 days is the generous presymptomatic window.",
@@ -408,14 +408,14 @@
           "residual_protection": 0.05
         },
         "min_strain_fraction": 0.001,
-        "notes": "Rates from docs/variant_surveillance_spec.md \u00a71.3. superinfection_susceptibility and recombination_rate are placeholders pending a literature anchor (docs/variant_surveillance_plan.md \u00a77). immune_waning: refractory_days 90 follows the 90-day reinfection convention; half_life_days 180 reflects rapid waning of protection against infection, with a small residual. Sensitivity axis. refractory_protection is applied as a per-epoch hazard reduction, so any value below 1.0 leaks at that rate every hour: 1.0 makes within-window re-infection escape-only, which is the intended contract."
+        "notes": "Rates from docs/paper3/variant_surveillance_spec.md \u00a71.3. superinfection_susceptibility and recombination_rate are placeholders pending a literature anchor (docs/paper3/variant_surveillance_plan.md \u00a77). immune_waning: refractory_days 90 follows the 90-day reinfection convention; half_life_days 180 reflects rapid waning of protection against infection, with a small residual. Sensitivity axis. refractory_protection is applied as a per-epoch hazard reduction, so any value below 1.0 leaks at that rate every hour: 1.0 makes within-window re-infection escape-only, which is the intended contract."
       },
       "sequencing_assay": {
         "amplicon_target": "Spike + WGS",
         "read_accuracy": 0.97,
         "ct_threshold": 28.0,
         "cost_usd": 100.0,
-        "notes": "Assay design from docs/variant_surveillance_spec.md \u00a72.1. read_accuracy is per-read consensus accuracy for this amplicon; read depth and the reporting floor are operator dials set at run time, not pathogen properties."
+        "notes": "Assay design from docs/paper3/variant_surveillance_spec.md \u00a72.1. read_accuracy is per-read consensus accuracy for this amplicon; read depth and the reporting floor are operator dials set at run time, not pathogen properties."
       },
       "presymptomatic_shedding_days": 2.0,
       "presymptomatic_shedding_notes": "He et al., Nat Med 2020: infectiousness begins approximately 2.3 days before symptom onset; 2.0 days is the profile window."
@@ -602,14 +602,14 @@
           "residual_protection": 0.0
         },
         "min_strain_fraction": 0.001,
-        "notes": "Rates from docs/variant_surveillance_spec.md \u00a71.3. superinfection_susceptibility and recombination_rate are placeholders pending a literature anchor (docs/variant_surveillance_plan.md \u00a77). recombination_rate stands in for reassortment between co-resident segments. immune_waning: strain-specific protection stiff for ~45 days, matched protection halving in about a year as antigenic distance grows. Placeholder pending a literature anchor. refractory_protection is applied as a per-epoch hazard reduction, so any value below 1.0 leaks at that rate every hour: 1.0 makes within-window re-infection escape-only, which is the intended contract."
+        "notes": "Rates from docs/paper3/variant_surveillance_spec.md \u00a71.3. superinfection_susceptibility and recombination_rate are placeholders pending a literature anchor (docs/paper3/variant_surveillance_plan.md \u00a77). recombination_rate stands in for reassortment between co-resident segments. immune_waning: strain-specific protection stiff for ~45 days, matched protection halving in about a year as antigenic distance grows. Placeholder pending a literature anchor. refractory_protection is applied as a per-epoch hazard reduction, so any value below 1.0 leaks at that rate every hour: 1.0 makes within-window re-infection escape-only, which is the intended contract."
       },
       "sequencing_assay": {
         "amplicon_target": "HA + NA",
         "read_accuracy": 0.95,
         "ct_threshold": 30.0,
         "cost_usd": 120.0,
-        "notes": "Assay design from docs/variant_surveillance_spec.md \u00a72.1. read_accuracy is per-read consensus accuracy for this amplicon; read depth and the reporting floor are operator dials set at run time, not pathogen properties."
+        "notes": "Assay design from docs/paper3/variant_surveillance_spec.md \u00a72.1. read_accuracy is per-read consensus accuracy for this amplicon; read depth and the reporting floor are operator dials set at run time, not pathogen properties."
       },
       "presymptomatic_shedding_days": 1.0,
       "presymptomatic_shedding_notes": "Ip et al., Clin Infect Dis 2017: shedding begins approximately 1 day before symptom onset; 1.0 day is the profile window."
@@ -835,14 +835,14 @@
           "residual_protection": 0.0
         },
         "min_strain_fraction": 0.001,
-        "notes": "Rates from docs/variant_surveillance_spec.md \u00a71.3. superinfection_susceptibility and recombination_rate are placeholders pending a literature anchor (docs/variant_surveillance_plan.md \u00a77). Genotype-independent immunity: cross-protection is near-complete. immune_waning: protection after a resolved infection is lifelong on any voyage timescale (long refractory window, no waning term). refractory_protection is applied as a per-epoch hazard reduction, so any value below 1.0 leaks at that rate every hour: 1.0 makes within-window re-infection escape-only, which is the intended contract."
+        "notes": "Rates from docs/paper3/variant_surveillance_spec.md \u00a71.3. superinfection_susceptibility and recombination_rate are placeholders pending a literature anchor (docs/paper3/variant_surveillance_plan.md \u00a77). Genotype-independent immunity: cross-protection is near-complete. immune_waning: protection after a resolved infection is lifelong on any voyage timescale (long refractory window, no waning term). refractory_protection is applied as a per-epoch hazard reduction, so any value below 1.0 leaks at that rate every hour: 1.0 makes within-window re-infection escape-only, which is the intended contract."
       },
       "sequencing_assay": {
         "amplicon_target": "N gene",
         "read_accuracy": 0.98,
         "ct_threshold": 25.0,
         "cost_usd": 100.0,
-        "notes": "Assay design from docs/variant_surveillance_spec.md \u00a72.1. read_accuracy is per-read consensus accuracy for this amplicon; read depth and the reporting floor are operator dials set at run time, not pathogen properties."
+        "notes": "Assay design from docs/paper3/variant_surveillance_spec.md \u00a72.1. read_accuracy is per-read consensus accuracy for this amplicon; read depth and the reporting floor are operator dials set at run time, not pathogen properties."
       },
       "presymptomatic_shedding_days": 0.0
     },

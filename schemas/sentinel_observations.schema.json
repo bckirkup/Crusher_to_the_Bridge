@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://crusher-to-the-bridge/schemas/sentinel_observations.schema.json",
   "title": "SentinelObservations",
-  "description": "Per-voyage sentinel observation bundle: clinical line list plus wastewater samples, keyed to a voyage_config itinerary. Consumed by picard_framework/analysis/sentinel; see docs/sentinel_surveillance_spec.md.",
+  "description": "Per-voyage sentinel observation bundle: clinical line list plus wastewater samples, keyed to a voyage_config itinerary. Consumed by picard_framework/analysis/sentinel; see docs/sentinel/sentinel_surveillance_spec.md.",
   "type": "object",
   "additionalProperties": false,
   "required": ["voyage_id", "ship_id", "clinical_cases"],

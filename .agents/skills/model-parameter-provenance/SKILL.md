@@ -12,8 +12,8 @@ curves, or clearance rates.
 
 It exists because a year of "the model reproduces VSP attack rates" turned out
 to rest on one fitted scalar absorbing at least two order-of-magnitude errors in
-the mechanisms beneath it. The full record is `docs/norovirus_model_history.md`;
-the live status of what is currently withdrawn is `docs/norovirus_open_ledger.md`.
+the mechanisms beneath it. The full record is `docs/norovirus/norovirus_model_history.md`;
+the live status of what is currently withdrawn is `docs/norovirus/norovirus_open_ledger.md`.
 Read the ledger before quoting any dose figure.
 
 ## The first rule: do not fit to the target

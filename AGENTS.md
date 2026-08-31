@@ -17,7 +17,7 @@ read `.agents/skills/model-parameter-provenance/SKILL.md`. Constants carry a
 source and an evidence grade at their definition, and none of them may be
 chosen to make VSP, Park, or the passenger/crew ratio come out right.
 
-`docs/norovirus_open_ledger.md` records what is currently withdrawn. **Every
+`docs/norovirus/norovirus_open_ledger.md` records what is currently withdrawn. **Every
 dose figure in the repository is void pending a refit** — check the ledger
 before quoting one.
 
@@ -66,7 +66,7 @@ docker run --rm picard-campaign --smoke
   a numeric expectation, attribute the move to a specific part of your diff
   before updating it; an unattributed baseline move is a possible defect.
 - Do not fit a physical constant to an anchor the model is scored against.
-- Update `docs/norovirus_open_ledger.md` in the same change as anything that
+- Update `docs/norovirus/norovirus_open_ledger.md` in the same change as anything that
   invalidates a measurement recorded there.
 - Preserve the hash-pinned installation and both CI workflows.
 - Keep substantive Sentinel work under `picard_framework/analysis/stan/` and

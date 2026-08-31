@@ -2,6 +2,33 @@
 
 > See also the human docs map: [README.md](README.md).
 
+## Which documents are authoritative
+
+`docs/` is sorted by **subject** into directories, and by **status** into a line
+at the top of each file. Read [README.md](README.md) first; it lists every
+document with its status.
+
+Four rules, because getting these wrong has cost real time:
+
+1. **Never infer implementation state from a filename or a directory.** A file
+   called `*_spec.md` may describe something that does not exist; a file with no
+   inbound links may document a fully implemented subsystem. Check the status
+   line, and check the artifact.
+2. **`proposals/` describes nothing that exists.** Do not cite it as
+   documentation of current behaviour, and do not assume a prescribed filename
+   is the one that landed — at least one proposal there was satisfied in a
+   different location and shape.
+3. **`history/`, `literature/`, and `reports/` are context, not truth.** You do
+   not need them for implementation work. `history/` records why something is the
+   way it is; do not "fix" a historical document's account of where a file used
+   to live.
+4. **A status line can itself be stale.** Where in-tree evidence contradicts a
+   document, the tree wins — then correct the document.
+
+When you finish work that changes a document's implementation state, update its
+status line and move the file if the filing rule in `README.md` now places it
+elsewhere.
+
 ## Cursor Cloud specific instructions
 
 Pure-Python simulation (no databases or external APIs for local dev). **Python 3.11+** required. Docker is used only to package the mega cruise campaign for AWS Batch (see `deploy/aws/`); it is not needed for local development.
@@ -18,7 +45,7 @@ Pure-Python simulation (no databases or external APIs for local dev). **Python 3
 | Streamlit dashboard | `python3 -m streamlit run dashboard.py --server.headless true` | Run orchestrator first for telemetry |
 | Deck asset precompute | `python3 scripts/precompute_deck_assets.py` | Writes `deck_graphics.geojson`, hull PNG, manifest per platform |
 | Sanity checker | `python3 tools/sanity_checker.py --from-config` | Ship + fleet + Stackelberg social configs |
-| Full test suite | `python3 -m pytest tests/ -v --tb=short` | ~875 tests, ~8s |
+| Full test suite | `python3 -m pytest tests/ -v --tb=short` | ~3,240 tests, ~41 min. Fast tier: add `-m 'not slow'` (~4.5 min) |
 | Wearable anomaly scoring | `python3 -m pytest tests/test_wearable_anomaly_scorer.py tests/test_cascade_entry.py -v` | Confounder-aware infection_score + cascade entry fusion |
 | Diagnostic cascade smoke | `python3 -m pytest tests/test_smoke_diagnostic_cascade.py -v` | 6-epoch runs with cascade enabled (standard + multiplex specs) |
 | Long-read / TAT tests | `python3 -m pytest tests/test_long_read_sequencing.py tests/test_instrument_turnaround.py -v` | Nanopore + turnaround queue |
@@ -54,7 +81,7 @@ Install from the hash-pinned lockfile: `pip install --only-binary=:all: --requir
 1. `ruff check` — **F-rules blocking**; E/W/I advisory
 2. `python3 tools/sanity_checker.py --from-config`
 3. `pytest tests/test_json_schema_validation.py -v --tb=short`
-4. `pytest tests/ -v --tb=short --cov --cov-report=term-missing` (~875 tests)
+4. `pytest tests/ -v --tb=short --cov --cov-report=term-missing`
 5. Picard/Presidio/Stackelberg import hygiene
 6. Presidio smoke (`smoke_fleet.json`, 1 cruise)
 7. Orchestrator import hygiene (stoplight deduplication)
@@ -120,7 +147,7 @@ Install from the hash-pinned lockfile: `pip install --only-binary=:all: --requir
 - **Shedding variance:** `shedding_variance_log10` on pathogen profiles draws a persistent per-agent multiplier at infection (`docs/SHEDDING_AND_CABINMATES.md`).
 - **Cabin-mates:** `mega_cruise_5000` `Cabin_Corridor` zones pair agents into staterooms at init; confinement direct contact is cabin-mate-aware (`assign_cabin_mates` in `orchestrator_init.py`).
 - **Contact mode:** default `transmission.contact_mode: per_partner_contact` (`docs/density_contact_spec.md`): each susceptible receives shedding from the specific partners sampled from the zone, not the zone average. Other modes are `density_dependent`, `heterogeneous_zone_dose`, and `legacy`.
-- **Norovirus fit status:** `docs/norovirus_open_ledger.md` is the live record of what is currently withdrawn — **every dose figure is void pending a refit**. `docs/norovirus_model_history.md` is the permanent defect and revision record. Read the ledger before quoting any dose, route share, or anchor result.
+- **Norovirus fit status:** `docs/norovirus/norovirus_open_ledger.md` is the live record of what is currently withdrawn — **every dose figure is void pending a refit**. `docs/norovirus/norovirus_model_history.md` is the permanent defect and revision record. Read the ledger before quoting any dose, route share, or anchor result.
 - **`dose_adjustment` is not a calibration constant.** It is `−log10` of the grams of stool released to the environment per epoch, and is now spelled `environmental_faecal_release_log10_g_per_epoch` (old key accepted as an alias). Historical fitted values are not validated biological constants.
 - **Multi-pathogen calibration knobs:** `transmission_route_weights`, log10 `environmental_faecal_release_log10_g_per_epoch` (legacy `dose_adjustment`), `innate_nonsusceptible_fraction`, `agent_behavior` dining/free rotation (default off), Dining `food_contamination_multiplier` / `dining_service_type`, env `source_zones` — see `docs/multi_pathogen_model_changes_spec.md`.
 - Ruff lint: **F-rules are blocking** in main CI; E/W/I remain advisory (`continue-on-error` / `|| true`). Keep unused-import and undefined-name findings clean before campaigns.
