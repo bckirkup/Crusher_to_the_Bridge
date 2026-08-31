@@ -1801,6 +1801,8 @@ def extract_timeseries(history: list[dict[str, Any]]) -> list[dict[str, Any]]:
             "cumulative_ever_infected_crew": s.get(
                 "cumulative_ever_infected_crew", 0,
             ),
+            "passenger_complement": s.get("passenger_complement"),
+            "crew_complement": s.get("crew_complement"),
             "infection_attack_rate_passenger": s.get(
                 "infection_attack_rate_passenger", 0.0,
             ),
@@ -1860,6 +1862,21 @@ def compute_derived_metrics(ts: list[dict[str, Any]], num_agents: int) -> dict[s
     peak_epoch = infected_by_epoch.index(peak_infected)
 
     final = ts[-1]
+    passenger_complement = final.get("passenger_complement")
+    crew_complement = final.get("crew_complement")
+    if (
+        isinstance(passenger_complement, bool)
+        or not isinstance(passenger_complement, int)
+        or passenger_complement <= 0
+        or isinstance(crew_complement, bool)
+        or not isinstance(crew_complement, int)
+        or crew_complement <= 0
+        or passenger_complement + crew_complement != num_agents
+    ):
+        raise ValueError(
+            "timeseries role complements must be positive integers summing "
+            f"to num_agents ({num_agents})",
+        )
     recovered = int(final.get("recovered", 0) or 0)
     infected_final = int(final.get("infected", 0) or 0)
     ever_infected = infected_final + recovered
@@ -1900,6 +1917,8 @@ def compute_derived_metrics(ts: list[dict[str, Any]], num_agents: int) -> dict[s
         "reported_case_attack_rate_crew": round(
             float(final.get("reported_case_rate_crew", 0.0) or 0.0), 4,
         ),
+        "passenger_complement": passenger_complement,
+        "crew_complement": crew_complement,
         "vsp_trigger_epoch": vsp_trigger_epoch,
         "peak_prevalence": peak_infected,
         "peak_epoch": peak_epoch,

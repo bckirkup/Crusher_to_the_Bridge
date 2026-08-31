@@ -144,6 +144,23 @@ whereas `telemetry_buffer/observation_model/vsp_outbreak_series.csv` contains
 208 posted outbreaks over the same period. A9 therefore reports an interval
 spanning those definitions rather than silently mixing them.
 
+**Open defect: `HULL_CAPACITY` is a total-agent complement, not a passenger
+complement.** The role split used by the model is authoritative in
+`orchestrator_init.py::role_group_for_agent`: on the expedition reprobe
+summary `..._dose12_..._s503`, `cumulative_ever_infected_passenger = 107` and
+`infection_attack_rate_passenger = 0.338608`, giving
+`round(107 / 0.338608) = 316`; the corresponding crew values are 40 and
+0.298507, giving 134. Thus 316 passengers plus 134 crew equals the
+`num_agents = 450` total. `HULL_CAPACITY["expedition_cruise_450"] = 450`
+therefore denotes the total complement, not the passenger denominator.
+`BAND_EDGES` in `telemetry_buffer/observation_model/vsp_class_era_scoring.py`
+are geometric means of those total complements while binning observed
+passenger counts (`pax_total`), so the A4 class bins inherit this offset.
+The A4 targets merged in #360 are affected and remain unrepaired; recutting
+them is a separate decision. A8's passenger and crew denominators instead
+come from the role-derived complements emitted in each run summary and do
+not use `HULL_CAPACITY`, so A8/A9 are unaffected.
+
 ## 3. Out-of-sample checks
 
 **Park et al. (2015)** — surface swabs during a shipboard outbreak; nothing was

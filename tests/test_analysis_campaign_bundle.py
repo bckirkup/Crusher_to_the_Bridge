@@ -47,6 +47,8 @@ def _ts_point(
         "immune": 0,
         "quarantined": 1 if trigger != "none" else 0,
         "isolated": 0,
+        "passenger_complement": 80,
+        "crew_complement": 20,
         "new_infections": new,
         "total_pathogen_mass": mass,
         "n_zones_contaminated": 1 if mass > 0 else 0,

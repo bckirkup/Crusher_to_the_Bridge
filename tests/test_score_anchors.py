@@ -92,6 +92,12 @@ def _summary(
             "ever_ill_attack_rate_crew": 0.1,
             "vsp_trigger_epoch": 10,
         },
+        "summary": {
+            "cumulative_ever_infected_passenger": 190,
+            "infection_attack_rate_passenger": 0.1,
+            "cumulative_ever_infected_crew": 10,
+            "infection_attack_rate_crew": 0.1,
+        },
     }
 
 
@@ -256,6 +262,9 @@ def test_a9_reports_passenger_trigger_disagreements() -> None:
     cell = score_anchors.summarise_cell([row])
 
     assert cell["A9_flag_disagreements"] == 1
+    assert score_anchors.summarise_cell(
+        [_row(reported_pax=0.03, trigger_epoch=None)],
+    )["A9_flag_disagreements"] == 1
 
 
 
@@ -384,3 +393,117 @@ def test_write_report_rejects_path_outside_root(tmp_path: Path) -> None:
 
     with pytest.raises(ValueError, match="results_root"):
         score_anchors._write_report(outside, "report\n", [], {}, tmp_path)
+
+
+def test_legacy_complement_recovery_accepts_six_digit_rate_rounding() -> None:
+    summary = {
+        "summary": {
+            "cumulative_ever_infected_passenger": 1,
+            "infection_attack_rate_passenger": 0.333333,
+            "cumulative_ever_infected_crew": 1,
+            "infection_attack_rate_crew": 0.5,
+        },
+    }
+
+    assert score_anchors._resolve_complements(summary, 5, "legacy.zip") == (3, 2)
+
+
+def test_legacy_complement_recovery_rejects_invalid_pairs() -> None:
+    summary = {
+        "summary": {
+            "cumulative_ever_infected_passenger": 1,
+            "infection_attack_rate_passenger": 0.333333,
+            "cumulative_ever_infected_crew": 2,
+            "infection_attack_rate_crew": 0.666667,
+        },
+    }
+
+    with pytest.raises(RuntimeError, match="unrecoverable"):
+        score_anchors._resolve_complements(summary, 4, "legacy.zip")
+    with pytest.raises(RuntimeError, match="unrecoverable"):
+        score_anchors._resolve_complements(
+            {"summary": {
+                "cumulative_ever_infected_passenger": 0,
+                "infection_attack_rate_passenger": 0.0,
+                "cumulative_ever_infected_crew": 0,
+                "infection_attack_rate_crew": 0.0,
+            }},
+            3,
+            "zero.zip",
+        )
+
+
+def test_explicit_complements_are_preferred_and_checked_against_recovery() -> None:
+    summary = _summary() | {
+        "derived": _summary()["derived"] | {
+            "passenger_complement": 1900,
+            "crew_complement": 100,
+        },
+    }
+
+    assert score_anchors._resolve_complements(summary, 2000, "run.zip") == (
+        1900,
+        100,
+    )
+    summary["derived"]["passenger_complement"] = 1800
+    summary["derived"]["crew_complement"] = 200
+    with pytest.raises(RuntimeError, match="disagree"):
+        score_anchors._resolve_complements(summary, 2000, "run.zip")
+    summary["derived"]["crew_complement"] = 99
+    with pytest.raises(RuntimeError, match="do not sum"):
+        score_anchors._resolve_complements(summary, 2000, "run.zip")
+
+
+def test_read_rows_collapses_nested_aggregate_duplicates(tmp_path: Path) -> None:
+    first = _summary() | {"run_id": "first"}
+    second = _summary() | {"run_id": "second"}
+    per_run = tmp_path / "per_run"
+    combined = tmp_path / "combined"
+    per_run.mkdir()
+    combined.mkdir()
+    _write_run(per_run, first, "first.zip")
+    _write_run(per_run, second, "second.zip")
+    _write_run(combined, first, "first.zip")
+    _write_run(combined, second, "second.zip")
+    with zipfile.ZipFile(combined / "single.zip", "w") as archive:
+        archive.writestr("first/summary.json", json.dumps(first))
+        archive.writestr("second/summary.json", json.dumps(second))
+    stats: dict[str, Any] = {}
+
+    rows = score_anchors.read_rows(combined, stats)
+
+    assert {row["run_id"] for row in rows} == {"first", "second"}
+    assert stats == {
+        "archives_read": 3,
+        "duplicates_collapsed": 2,
+        "skipped_archives": [],
+        "runs_kept": 2,
+    }
+    assert score_anchors.summarise_cell(rows) == score_anchors.summarise_cell(
+        score_anchors.read_rows(per_run),
+    )
+
+
+def test_read_rows_rejects_conflicting_duplicate_and_reports_skips(
+    tmp_path: Path,
+) -> None:
+    first = _summary() | {"run_id": "first"}
+    conflicting = first | {
+        "derived": first["derived"] | {
+            "reported_case_attack_rate_passenger": 0.07,
+        },
+    }
+    _write_run(tmp_path, first, "first.zip")
+    with zipfile.ZipFile(tmp_path / "aggregate.zip", "w") as archive:
+        archive.writestr("first/summary.json", json.dumps(conflicting))
+    with zipfile.ZipFile(tmp_path / "empty.zip", "w") as archive:
+        archive.writestr("run_spec.json", "{}")
+
+    with pytest.raises(RuntimeError, match="conflicting duplicate.*first"):
+        score_anchors.read_rows(tmp_path)
+
+    (tmp_path / "aggregate.zip").unlink()
+    stats: dict[str, Any] = {}
+    rows = score_anchors.read_rows(tmp_path, stats)
+    assert len(rows) == 1
+    assert stats["skipped_archives"] == [str(tmp_path / "empty.zip")]

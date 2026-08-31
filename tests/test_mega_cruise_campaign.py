@@ -539,7 +539,9 @@ def _sample_history() -> list[dict]:
         {
             "epoch": 0, "trigger_status": "BASELINE",
             "summary": {"susceptible": 10, "infected": 1, "recovered": 0,
-                        "quarantined": 0, "isolated": 0},
+                        "quarantined": 0, "isolated": 0,
+                        "passenger_complement": 900,
+                        "crew_complement": 100},
             "cost_accounting": {"total_financial_usd": 5.0,
                                 "operational_impact_cumulative": 1.0},
             "spaces": {"A": {"concentration_per_m3": 2.0, "pathogen_mass": 3.0}},
@@ -547,7 +549,9 @@ def _sample_history() -> list[dict]:
         {
             "epoch": 1, "trigger_status": "SUSPECTED",
             "summary": {"susceptible": 8, "infected": 3, "recovered": 1,
-                        "quarantined": 2, "isolated": 1},
+                        "quarantined": 2, "isolated": 1,
+                        "passenger_complement": 900,
+                        "crew_complement": 100},
             "cost_accounting": {"total_financial_usd": 9.0,
                                 "operational_impact_cumulative": 2.0},
             "spaces": {"A": {"concentration_per_m3": 0.5, "pathogen_mass": 1.0}},
@@ -555,7 +559,9 @@ def _sample_history() -> list[dict]:
         {
             "epoch": 2, "trigger_status": "CONFIRMED",
             "summary": {"susceptible": 6, "infected": 1, "recovered": 4,
-                        "quarantined": 1, "isolated": 0},
+                        "quarantined": 1, "isolated": 0,
+                        "passenger_complement": 900,
+                        "crew_complement": 100},
             "cost_accounting": {"total_financial_usd": 12.0,
                                 "operational_impact_cumulative": 3.0},
             "spaces": {"A": {"concentration_per_m3": 0.1, "pathogen_mass": 0.0}},
@@ -572,6 +578,8 @@ def test_extract_timeseries_compact_fields() -> None:
     assert ts[0]["max_conc_zone"] == "A"
     assert ts[2]["cumulative_cost_usd"] == pytest.approx(12.0)
     assert ts[2]["trigger_status"] == "CONFIRMED"
+    assert ts[2]["passenger_complement"] == 900
+    assert ts[2]["crew_complement"] == 100
     # Incidence = Δ(I+R): 1, then 3, then 1 — not the old ΔR+I formula.
     assert [e["new_infections"] for e in ts] == [1, 3, 1]
     assert extract_timeseries([]) == []
@@ -590,8 +598,23 @@ def test_compute_derived_metrics() -> None:
     assert derived["attack_rate"] == pytest.approx(0.005)
     assert derived["total_quarantine_person_epochs"] == 3
     assert derived["r_effective_at_peak"] == pytest.approx(3.0)
+    assert derived["passenger_complement"] == 900
+    assert derived["crew_complement"] == 100
     # Empty series must not raise (no max([])).
     assert compute_derived_metrics([], num_agents=1000) == {}
+
+
+def test_compute_derived_metrics_rejects_invalid_role_complements() -> None:
+    point = {
+        "epoch": 0,
+        "infected": 1,
+        "recovered": 0,
+        "passenger_complement": 900,
+        "crew_complement": 99,
+    }
+
+    with pytest.raises(ValueError, match="positive integers summing"):
+        compute_derived_metrics([point], num_agents=1000)
 
 
 @pytest.mark.timeout(180)
