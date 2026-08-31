@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import importlib.util
 import sys
+import tempfile
 from pathlib import Path
 from types import ModuleType
 
@@ -243,6 +244,47 @@ def test_targets_cover_every_hull_class() -> None:
     targets = scoring.vsp_attack_rate_targets("pre")
 
     assert set(targets) == set(scoring.HULL_CAPACITY)
+
+
+def test_cli_paths_are_confined_to_their_declared_roots(tmp_path: Path) -> None:
+    """Series and output CLI paths accept in-tree files and reject escapes."""
+    assert (
+        scoring._validated_cli_path(scoring.SERIES, scoring.SERIES.parent)
+        == scoring.SERIES.resolve()
+    )
+    assert (
+        scoring._validated_cli_path(Path("tests/report.md"), scoring.REPO_ROOT)
+        == (scoring.REPO_ROOT / "tests/report.md").resolve()
+    )
+
+    with pytest.raises(ValueError, match="escapes"):
+        scoring._validated_cli_path(tmp_path / "series.csv", scoring.SERIES.parent)
+    with pytest.raises(ValueError, match="escapes"):
+        scoring._validated_cli_path(Path("../outside.csv"), scoring.SERIES.parent)
+    with pytest.raises(ValueError, match="escapes"):
+        scoring._validated_cli_path(tmp_path / "report.md", scoring.REPO_ROOT)
+    with pytest.raises(ValueError, match="escapes"):
+        scoring._validated_cli_path(Path("../outside.md"), scoring.REPO_ROOT)
+
+
+def test_vsp_cli_writes_a_report_inside_the_repository_root(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """The direct CLI derives targets and writes only to an allowed root."""
+    with tempfile.TemporaryDirectory(dir=scoring.REPO_ROOT) as directory:
+        output = Path(directory) / "vsp_report.md"
+        monkeypatch.setattr(
+            sys,
+            "argv",
+            ["vsp_class_era_scoring.py", "--out", str(output)],
+        )
+
+        scoring.main()
+
+        assert output.is_file()
+        assert "VSP posted-outbreak targets" in output.read_text(encoding="utf-8")
+    assert "VSP posted-outbreak targets" in capsys.readouterr().out
 
 
 def test_anchor_report_identifies_era_and_target_sample_sizes() -> None:
