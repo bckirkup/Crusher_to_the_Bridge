@@ -32,21 +32,11 @@ from __future__ import annotations
 import argparse
 import csv
 import statistics
-import sys
 from collections import defaultdict
 from pathlib import Path
 from typing import Any, NamedTuple
 
-try:
-    from simulation_utils.paths import resolve_repo_path, validated_open
-except ModuleNotFoundError as error:
-    if error.name != "simulation_utils":
-        raise
-    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-    from simulation_utils.paths import (  # type: ignore[no-redef]
-        resolve_repo_path,
-        validated_open,
-    )
+from simulation_utils.paths import resolve_repo_path, validated_open
 
 SERIES = Path(__file__).with_name("vsp_outbreak_series.csv")
 REPO_ROOT = Path(__file__).resolve().parents[2]
