@@ -160,14 +160,14 @@
           "residual_protection": 0.05
         },
         "min_strain_fraction": 0.001,
-        "notes": "Fictional pathogen: rates from docs/variant_surveillance_spec.md \u00a71.3, deliberately more mutationally dynamic than real pathogens. No literature anchor exists. immune_waning values are in-universe placeholders: stiff within a voyage, waning over a deployment. refractory_protection is applied as a per-epoch hazard reduction, so any value below 1.0 leaks at that rate every hour: 1.0 makes within-window re-infection escape-only, which is the intended contract."
+        "notes": "Fictional pathogen: rates from docs/paper3/variant_surveillance_spec.md \u00a71.3, deliberately more mutationally dynamic than real pathogens. No literature anchor exists. immune_waning values are in-universe placeholders: stiff within a voyage, waning over a deployment. refractory_protection is applied as a per-epoch hazard reduction, so any value below 1.0 leaks at that rate every hour: 1.0 makes within-window re-infection escape-only, which is the intended contract."
       },
       "sequencing_assay": {
         "amplicon_target": "16S + virulence",
         "read_accuracy": 0.9,
         "ct_threshold": 32.0,
         "cost_usd": 200.0,
-        "notes": "Assay design from docs/variant_surveillance_spec.md \u00a72.1. read_accuracy is per-read consensus accuracy for this amplicon; read depth and the reporting floor are operator dials set at run time, not pathogen properties."
+        "notes": "Assay design from docs/paper3/variant_surveillance_spec.md \u00a72.1. read_accuracy is per-read consensus accuracy for this amplicon; read depth and the reporting floor are operator dials set at run time, not pathogen properties."
       }
     },
     {
@@ -316,14 +316,14 @@
           "residual_protection": 0.0
         },
         "min_strain_fraction": 0.001,
-        "notes": "Fictional pathogen: rates from docs/variant_surveillance_spec.md \u00a71.3, deliberately more mutationally dynamic than real pathogens. No literature anchor exists. immune_waning values are in-universe placeholders: stiff within a voyage, waning over a deployment. refractory_protection is applied as a per-epoch hazard reduction, so any value below 1.0 leaks at that rate every hour: 1.0 makes within-window re-infection escape-only, which is the intended contract."
+        "notes": "Fictional pathogen: rates from docs/paper3/variant_surveillance_spec.md \u00a71.3, deliberately more mutationally dynamic than real pathogens. No literature anchor exists. immune_waning values are in-universe placeholders: stiff within a voyage, waning over a deployment. refractory_protection is applied as a per-epoch hazard reduction, so any value below 1.0 leaks at that rate every hour: 1.0 makes within-window re-infection escape-only, which is the intended contract."
       },
       "sequencing_assay": {
         "amplicon_target": "BML (behavioral modification locus)",
         "read_accuracy": 0.85,
         "ct_threshold": 20.0,
         "cost_usd": 300.0,
-        "notes": "Assay design from docs/variant_surveillance_spec.md \u00a72.1. read_accuracy is per-read consensus accuracy for this amplicon; read depth and the reporting floor are operator dials set at run time, not pathogen properties."
+        "notes": "Assay design from docs/paper3/variant_surveillance_spec.md \u00a72.1. read_accuracy is per-read consensus accuracy for this amplicon; read depth and the reporting floor are operator dials set at run time, not pathogen properties."
       }
     }
   ]

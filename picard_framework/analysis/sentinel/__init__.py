@@ -3,7 +3,7 @@
 Ancillary to the ship ABM: reads voyage configs and exported observations to
 infer port-specific introduction hazards. The itinerary here is a read-only
 view over ``engines.voyage_itinerary`` config — never a second itinerary model.
-See ``docs/sentinel_surveillance_spec.md``.
+See ``docs/sentinel/sentinel_surveillance_spec.md``.
 """
 
 from __future__ import annotations

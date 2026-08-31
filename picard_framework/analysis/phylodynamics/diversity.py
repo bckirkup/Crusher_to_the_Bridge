@@ -3,7 +3,7 @@
 Every row is one pathogen at one epoch, reported at its physical hour: a
 richness that rises with the mutation rate is only interpretable per hour, and
 a curve plotted against a bare epoch index is how a 24x timing error survived
-review (``docs/epoch_time_unit_audit.md``).
+review (``docs/history/epoch_time_unit_audit.md``).
 
 Richness counts lineages; ``effective_lineages`` is ``exp(H)``, the number of
 equally-common lineages that would carry the same Shannon entropy, which is the

@@ -49,7 +49,7 @@ Stage B defaults to `--outbreaks-only` (hurdle). Use `--no-outbreaks-only` for t
 `sentinel_attribution.stan` estimates a per-port introduction hazard per exposed
 person-hour ashore, with an onboard baseline, renewal secondaries at strictly
 positive lags, and a sampled `R_onboard` — see
-[`docs/sentinel_surveillance_spec.md`](../../../docs/sentinel_surveillance_spec.md).
+[`docs/sentinel/sentinel_surveillance_spec.md`](../../../docs/sentinel/sentinel_surveillance_spec.md).
 Exposure hours enter as offsets, so the ports are compared on a denominator
 rather than on case counts.
 

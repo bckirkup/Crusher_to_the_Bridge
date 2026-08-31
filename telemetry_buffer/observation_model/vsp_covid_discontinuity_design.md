@@ -14,7 +14,7 @@ recorded in the findings note once measured.
 Every anchor in `anchor_measurement_spec.md` is a level. A level target is
 satisfied by any combination of errors that cancels, and this effort's entire
 history is a record of finding such cancellations after the fact: §12 of
-`docs/norovirus_model_history.md`, and the withdrawn "Expedition agreement"
+`docs/norovirus/norovirus_model_history.md`, and the withdrawn "Expedition agreement"
 that turned out to be an inflated infection rate against a deflated illness
 ratio. The COVID break is the first anchor available that is a **difference**
 between two configurations of the same ships, so errors common to both arms
@@ -39,7 +39,7 @@ report GI symptoms to a ship's medical centre changed in 2022 for reasons that
 have nothing to do with transmission.
 
 **The outbreak count has no denominator.** Panel A of
-`docs/vsp_covid_discontinuity.png` shows postings recovering to 14-23/year by
+`docs/norovirus/vsp_covid_discontinuity.png` shows postings recovering to 14-23/year by
 2024-2025 against 10-16/year in 2013-2019, but VSP does not publish voyages
 sailed, and fleet capacity, itinerary mix and ships under jurisdiction all moved
 across the break. The count is uninterpretable as a rate and cannot be a target.

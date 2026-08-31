@@ -2,7 +2,7 @@
   "meta": {
     "description": "Pathogen- and syndrome-aware clinical instrument parameters for Crusher-to-the-Bridge",
     "version": "1.0",
-    "source": "docs/instrument_parameterization_v2.md and docs/clinical_dx_review.md",
+    "source": "docs/instrument_parameterization_v2.md and docs/history/clinical_dx_review.md",
     "notes": [
       "covers_pathogen=false means uninformative (not a true negative).",
       "Multiplex coverage is panel membership under panels.*.pathogens.",

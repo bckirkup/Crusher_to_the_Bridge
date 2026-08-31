@@ -26,7 +26,7 @@ port rotation is therefore a design-spec edit, not a code edit.
 
 The wastewater operations scan (`sentinel_ww_ops_scan_v1`) reuses that expander
 and the `sr_*` generator, adding per-cell `wastewater_surveillance` overrides —
-see `docs/sentinel_wastewater_ops_scan.md`.
+see `docs/sentinel/sentinel_wastewater_ops_scan.md`.
 
 `port_hazards` are per-epoch (hourly) infection probabilities for a person
 ashore, so a value must be read against the ~10-epoch ashore window: 1e-4 is

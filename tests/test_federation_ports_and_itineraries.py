@@ -61,7 +61,7 @@ TNG_BUNDLE = os.path.join(
 TOS_PLATFORM = "enterprise_constitution_tos"
 TNG_PLATFORM = "enterprise_galaxy_tng"
 
-# The routes of docs/variant_surveillance_spec.md §3, home port included at
+# The routes of docs/paper3/variant_surveillance_spec.md §3, home port included at
 # both ends because the voyage begins and ends on that pier.
 TOS_ROUTE = ("SBONE", "SBELV", "KSEVN", "MEMAL", "SBONE")
 TNG_ROUTE = ("SBONE", "FARPT", "DSNIN", "RISAA", "SBSVF", "SBONE")

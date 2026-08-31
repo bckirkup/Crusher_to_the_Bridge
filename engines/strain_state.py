@@ -4,7 +4,7 @@ strain_state.py — Heritable strain identity for variant surveillance (Paper 3)
 Data layer only: this module owns strain identity, per-pathogen evolution
 parameters, and the lineage census. It does not mutate, transmit, or infect —
 those seams arrive with the strain-resolved dose ledger and the mutation
-operator (see ``docs/variant_surveillance_plan.md`` §3).
+operator (see ``docs/paper3/variant_surveillance_plan.md`` §3).
 
 Per-pathogen parameters live in an optional ``strain_evolution`` block on each
 pathogen profile (``data/pathogens/*.json``); absent block means the pathogen

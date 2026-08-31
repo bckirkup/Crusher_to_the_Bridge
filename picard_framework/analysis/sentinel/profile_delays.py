@@ -19,7 +19,7 @@ sentinel's own literature values. And the profile's dose conditioning cannot be
 represented by a single pathogen-level kernel at all: the projection is the
 kernel of a host at the profile's reference dose, so a run whose realized doses
 sit far from that reference has a narrower or wider true kernel than the one the
-estimator uses (see ``docs/incubation_reconciliation_plan.md``, R2).
+estimator uses (see ``docs/history/incubation_reconciliation_plan.md``, R2).
 """
 
 from __future__ import annotations

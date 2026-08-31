@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://crusher-to-the-bridge/schemas/port_surveillance_ledger.schema.json",
   "title": "PortSurveillanceLedger",
-  "description": "Port-side surveillance signals generated for every port of a voyage, one row per port per day, with the latent truth alongside. Signals are null only in an ablated analysis view (see the optional 'ablation' block). Produced by picard_framework/analysis/sentinel/port_ledger.py; see docs/sentinel_port_health.md.",
+  "description": "Port-side surveillance signals generated for every port of a voyage, one row per port per day, with the latent truth alongside. Signals are null only in an ablated analysis view (see the optional 'ablation' block). Produced by picard_framework/analysis/sentinel/port_ledger.py; see docs/sentinel/sentinel_port_health.md.",
   "type": "object",
   "additionalProperties": false,
   "required": ["pathogen", "observations"],
