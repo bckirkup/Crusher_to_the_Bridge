@@ -36,6 +36,27 @@ Also withdrawn and not yet replaced:
   establishing dose" dates from the post-#338 measurement and is stale.
 - **The passenger/crew ratio.** Same reason.
 
+**The standing plan to correct `innate_nonsusceptible_fraction` from 0.0 to 0.2
+is withdrawn: the target is wrong.** Non-secretors are partially susceptible to
+GII, not protected. Teunis et al. 2020, *Epidemics* 32:100401 estimates
+infection risk at one genomic copy separately by secretor status — 0.076 for
+GII in Se+ against 0.015 in Se−, a ~5x reduction rather than protection.
+Rouphael et al. 2022, *JID* is the direct test: GII.2 Snow Mountain virus
+challenge, 44 adults, 36 Se+ and 8 Se−, doses 1.2 × 10⁴ – 1.2 × 10⁷ GEC with
+ID50 5.1 × 10⁵ GEC; at the highest dose 4 of 8 Se− subjects became ill against
+10 of 12 Se+. A fully non-susceptible fraction equal to non-secretor prevalence
+therefore over-corrects. The defensible ceiling is about
+0.2 × (1 − 0.015/0.076) ≈ 0.16, and lower for the mixed GII.4/GII.17/GII.2
+profile the campaign runs, since GII.2 and GII.17 are less secretor-restricted
+(Nordgren & Sharma 2019, *Viruses* 11:226). Both the shipped 0.0 in
+`norwalk_gi` and the "literature" 0.2 in `norovirus_gii4` are outside that
+range, in opposite directions, so the replacement is an interval and not a
+value — 0.00 – 0.16, ideally re-expressed as reduced susceptibility in Se−
+hosts rather than a removed fraction. Derivation and the bounded-screen framing
+that exposed it:
+[`bounded_sensitivity_and_admissible_region_spec.md`](../proposals/bounded_sensitivity_and_admissible_region_spec.md)
+§3.3. No profile JSON is changed by this entry.
+
 ## 2. Anchors
 
 Targets, from `telemetry_buffer/observation_model/anchor_measurement_spec.md`:
