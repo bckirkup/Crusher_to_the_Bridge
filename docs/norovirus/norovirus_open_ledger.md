@@ -339,8 +339,11 @@ is over-determined only *given* them. Full list in §10 of the history document.
 - Fraction of emesis episodes occurring in the host's own cabin — swept, never
   asserted.
 - Confinement attenuation factor 0.05.
-- The 20% innate non-susceptible ceiling, which is why infection attack rate
-  pins at 0.800 and why the fit must be read on reported cases.
+- Secretor-status non-susceptibility. Not a held-fixed 20% ceiling: the profile
+  the campaign runs ships 0.0, no attack-rate ceiling is observed (0.013–0.326
+  across the override arms), and §1 withdraws 0.2 as the correction target. The
+  live liability is that the mechanism is a removed fraction at all, where the
+  evidence is partial susceptibility.
 - Uniform `immune_ratio` across a resident crew and a weekly-turnover passenger
   cohort — an assumption that bears directly on A5.
 - Crew presenteeism and mandatory occupational reporting: absent in both
