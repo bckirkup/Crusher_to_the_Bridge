@@ -404,12 +404,39 @@ def test_reporting_cell_with_zero_outcomes_is_numeric_zero_and_fails() -> None:
     assert verdict["A9"] == "FAIL"
 
 
+def test_tiny_positive_reporting_probability_is_not_report_free() -> None:
+    cell = score_anchors.summarise_cell(
+        [_row(
+            reported_pax=0.0,
+            reported_crew=0.0,
+            sick_call_probability=1e-9,
+        )]
+    )
+
+    assert cell["A8_pax_incidence"] == pytest.approx(0.0)
+    assert cell["A8_A9_no_reporting"] is False
+    verdict, _ = score_anchors.verdicts(
+        "classic_cruise_1900",
+        cell,
+        score_anchors.vsp_attack_rate_targets("pre"),
+    )
+    assert verdict["A8"] == "FAIL"
+
+
+def test_negative_reporting_probability_is_rejected() -> None:
+    row = _row(sick_call_probability=-1e-9)
+
+    with pytest.raises(RuntimeError, match="negative sick_call_probability"):
+        score_anchors.summarise_cell([row])
+
+
 def test_mixed_reporting_mechanisms_are_rejected() -> None:
+    rows = [
+        _row(sick_call_probability=0.0),
+        _row(sick_call_probability=1.0),
+    ]
     with pytest.raises(RuntimeError, match="mixes report-free"):
-        score_anchors.summarise_cell([
-            _row(sick_call_probability=0.0),
-            _row(sick_call_probability=1.0),
-        ])
+        score_anchors.summarise_cell(rows)
 
 
 def test_missing_sick_call_probability_names_archive() -> None:
