@@ -9,7 +9,7 @@ This document outlines the literature and quantitative microbial risk assessment
   window (Atmar et al., Emerg Infect Dis 2008).
 
 ## 2. SARS-CoV-2
-- **Dose-Response**: Beta-Poisson ($lpha=0.18$, $eta=58.0$ based on Watanabe 2020 derived models for SARS-CoV-1 and adapted for CoV-2).
+- **Dose-Response**: Beta-Poisson ($\alpha=0.18$, $\beta=58.0$). **Unsourced.** The previous attribution to "Watanabe 2020 derived models for SARS-CoV-1" was wrong on three counts: the paper is Watanabe et al. 2010, *Risk Analysis* 30(7) (doi:10.1111/j.1539-6924.2010.01427.x); it reports an **exponential** model ($k=4.1\times10^{2}$ PFU) and states the beta-Poisson gave no statistically significant improvement in fit; and its data are murine, with doses in PFU. Candidate replacement in human RNA-copy units: Zhang & Wang 2020, *Clin Infect Dis* (doi:10.1093/cid/ciaa1675), exponential $k=6.4\times10^{4}$–$9.8\times10^{5}$ copies. See `docs/covid/covid_parameter_provenance_audit.md` §2.
 - **Shedding**: Peak viral load near symptom onset (days 4-6), with a
   2.0-day presymptomatic window (He et al., Nat Med 2020).
 

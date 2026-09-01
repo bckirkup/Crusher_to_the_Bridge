@@ -117,6 +117,17 @@ completeness) get sourced and graded individually per
 replacement for the misapplied faecal-release term, §7.1). One scalar,
 fitted only to `covid.T1`/`covid.T3` on Diamond Princess.
 
+> **Correction, 2026-09-01 — see `docs/covid/covid_parameter_provenance_audit.md`.**
+> The list below is not a list of literature values. Of the 25 scalars in
+> `formal_spec_v2.md` Appendix A.2, eight are sourced and seventeen are
+> assumptions or inheritances; the dose-response α/β in particular are Grade C,
+> in a functional form their nominal source explicitly rejected. And the count
+> of one is misleading rather than reassuring: the delivered dose and β enter
+> the beta-Poisson only as the ratio D/β, so a Diamond Princess trajectory pins
+> the composite (emission × route multiplier × transfer) / β and cannot decompose it.
+> β must be fixed from an independent source in the same unit system before the
+> fit, or the fitted scalar has no physical interpretation.
+
 **Fixed from the profile or the literature, not adjusted:** incubation
 distribution (median 5.8 d, dispersion 1.57), shedding curve shape,
 presymptomatic window, recovery day, asymptomatic infectiousness ratio,
@@ -142,7 +153,7 @@ the count, not assert that it is small.
 
 ## 7. Prerequisites
 
-1. **Emission scale re-sourced.** Per `docs/covid_arm_status.md`, the only
+1. **Emission scale re-sourced.** Per `docs/covid/covid_arm_status.md`, the only
    shedding scaler is `environmental_faecal_release_log10_g_per_epoch` — grams
    of stool — and `sars_cov2_resp` pays 3 log10 of it. The profile's N50 is
    quoted in units that same key defines, so the emission scale and the
