@@ -48,6 +48,7 @@ from telemetry_buffer.observation_model.vsp_class_era_scoring import (
     vsp_attack_rate_targets,
 )
 
+SUMMARY_NAME = "summary.json"
 TAKEOFF_PEAK_PREVALENCE = 10
 A9_POSTING_THRESHOLD = 0.03
 A8_A9_NO_REPORTING = (
@@ -74,7 +75,7 @@ ANCHORS: dict[str, tuple[float, float]] = {
 
 def load_summary(path: Path) -> dict[str, Any]:
     with zipfile.ZipFile(path) as archive:
-        return json.loads(archive.read("summary.json"))
+        return json.loads(archive.read(SUMMARY_NAME))
 
 
 def _summary_entries(path: Path) -> list[tuple[str, dict[str, Any]]]:
@@ -83,11 +84,11 @@ def _summary_entries(path: Path) -> list[tuple[str, dict[str, Any]]]:
         names = archive.namelist()
         summary_names = [
             name for name in names
-            if name == "summary.json" or name.endswith("/summary.json")
+            if name == SUMMARY_NAME or name.endswith(f"/{SUMMARY_NAME}")
         ]
         return [
             (
-                f"{path}!{name}" if name != "summary.json" else str(path),
+                f"{path}!{name}" if name != SUMMARY_NAME else str(path),
                 json.loads(archive.read(name)),
             )
             for name in summary_names
@@ -105,7 +106,6 @@ def _valid_complement(value: Any) -> bool:
 def _recover_complements(
     summary: dict[str, Any],
     num_agents: int,
-    path: str,
 ) -> tuple[int, int] | None:
     """Recover complements from pre-complement archives using rounded rates."""
     summary_values = summary.get("summary", {})
@@ -172,14 +172,14 @@ def _resolve_complements(
                 f"{path} has role complements that do not sum to "
                 f"num_agents ({num_agents})",
             )
-        recovered = _recover_complements(summary, num_agents, path)
+        recovered = _recover_complements(summary, num_agents)
         if recovered is not None and recovered != (passenger, crew):
             raise RuntimeError(
                 f"{path} emitted role complements disagree with recoverable "
                 "summary complements",
             )
         return passenger, crew
-    recovered = _recover_complements(summary, num_agents, path)
+    recovered = _recover_complements(summary, num_agents)
     if recovered is None:
         raise RuntimeError(
             f"{path} predates passenger_complement and its complements are "
@@ -205,6 +205,49 @@ def _hours_per_epoch(clock_name: str, path: Path) -> float:
     raise RuntimeError(f"{path} has invalid natural_history_clock: {clock_name!r}")
 
 
+def _ingest_archive(
+    path: Path,
+    by_run_id: dict[str, tuple[dict[str, Any], str]],
+    stats: dict[str, Any],
+) -> None:
+    """Fold every summary in one archive into the run index."""
+    try:
+        entries = _summary_entries(path)
+    except (KeyError, json.JSONDecodeError, zipfile.BadZipFile) as error:
+        raise RuntimeError(f"{path} contains an unreadable summary") from error
+    if not entries:
+        stats["skipped_archives"].append(str(path))
+        return
+    for source_path, summary in entries:
+        _index_run(_read_row(summary, source_path), source_path, by_run_id, stats)
+
+
+def _index_run(
+    row: dict[str, Any],
+    source_path: str,
+    by_run_id: dict[str, tuple[dict[str, Any], str]],
+    stats: dict[str, Any],
+) -> None:
+    """Keep one row per run id, collapsing identical duplicate archives."""
+    run_id = row["run_id"]
+    previous = by_run_id.get(run_id)
+    if previous is None:
+        by_run_id[run_id] = (row, source_path)
+        counter = (
+            "runs_with_explicit_complements"
+            if row["_complement_source"] == "explicit"
+            else "runs_with_recovered_complements"
+        )
+        stats[counter] += 1
+        return
+    if _row_without_source(row) != _row_without_source(previous[0]):
+        raise RuntimeError(
+            f"conflicting duplicate run_id {run_id!r} in "
+            f"{previous[1]} and {source_path}",
+        )
+    stats["duplicates_collapsed"] += 1
+
+
 def read_rows(
     root: Path,
     archive_stats: dict[str, Any] | None = None,
@@ -227,32 +270,7 @@ def read_rows(
     by_run_id: dict[str, tuple[dict[str, Any], str]] = {}
     for path in sorted(root.rglob("*.zip")):
         stats["archives_read"] += 1
-        try:
-            entries = _summary_entries(path)
-        except (KeyError, json.JSONDecodeError, zipfile.BadZipFile) as error:
-            raise RuntimeError(f"{path} contains an unreadable summary") from error
-        if not entries:
-            stats["skipped_archives"].append(str(path))
-            continue
-        for source_path, summary in entries:
-            row = _read_row(summary, source_path)
-            run_id = row["run_id"]
-            previous = by_run_id.get(run_id)
-            if previous is None:
-                by_run_id[run_id] = (row, source_path)
-                counter = (
-                    "runs_with_explicit_complements"
-                    if row["_complement_source"] == "explicit"
-                    else "runs_with_recovered_complements"
-                )
-                stats[counter] += 1
-                continue
-            if _row_without_source(row) != _row_without_source(previous[0]):
-                raise RuntimeError(
-                    f"conflicting duplicate run_id {run_id!r} in "
-                    f"{previous[1]} and {source_path}",
-                )
-            stats["duplicates_collapsed"] += 1
+        _ingest_archive(path, by_run_id, stats)
     rows.extend(row for row, _source in by_run_id.values())
     stats["runs_kept"] = len(rows)
     if not rows:
@@ -365,82 +383,101 @@ def _median(values: list[float]) -> float | None:
     return float(statistics.median(values)) if values else None
 
 
-def summarise_cell(rows: list[dict[str, Any]]) -> dict[str, Any]:
-    """Summarise conditional anchors and unconditional A8/A9 channels."""
-    took_off = [row for row in rows if row["took_off"]]
-    cell: dict[str, Any] = {
-        "n_seeds": len(rows),
-        "n_takeoff": len(took_off),
-        "takeoff_fraction": len(took_off) / len(rows) if rows else 0.0,
-    }
-    eligible = [
+def _run_reports_illness(row: dict[str, Any]) -> bool:
+    """Whether a run models reporting at all.
+
+    A run reports iff its ``sick_call_probability`` is strictly positive.  No
+    tolerance is applied: reading a tiny-but-nonzero probability as report-free
+    would hide a genuine zero prediction behind the no-reporting sentinel.
+    """
+    probability = row["sick_call_probability"]
+    if probability < 0.0:
+        raise RuntimeError(
+            f"{row.get('_source_path', '<row>')} has a negative "
+            f"sick_call_probability: {probability!r}",
+        )
+    return probability > 0.0
+
+
+def _cell_is_report_free(rows: list[dict[str, Any]]) -> bool:
+    """Whether a whole cell is report-free; a mixed cell has no A8/A9."""
+    reporting = [_run_reports_illness(row) for row in rows]
+    if any(reporting) and not all(reporting):
+        raise RuntimeError(
+            "cell mixes report-free and reporting runs; A8/A9 are undefined",
+        )
+    return not any(reporting)
+
+
+def _a9_eligible_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Runs inside the MIDRS complement and voyage-length eligibility window."""
+    return [
         row for row in rows
         if row["passenger_complement"] >= 100
         and 3.0 <= row["voyage_days"] <= 21.0
     ]
-    cell["A9_eligible_runs"] = len(eligible)
-    cell["A9_ineligible_runs"] = len(rows) - len(eligible)
-    reporting_free = [
-        row["sick_call_probability"] == 0.0
-        for row in rows
-    ]
-    if any(reporting_free) and not all(reporting_free):
-        raise RuntimeError(
-            "cell mixes report-free and reporting runs; A8/A9 are undefined",
-        )
-    no_reporting = all(reporting_free)
-    cell["A8_A9_no_reporting"] = no_reporting
-    if no_reporting:
-        cell["A8_pax_incidence"] = A8_A9_NO_REPORTING
-        cell["A8_crew_incidence"] = A8_A9_NO_REPORTING
-        cell["A9_posting_probability"] = A8_A9_NO_REPORTING
-        cell["A9_posted_eligible"] = 0
-        cell["A9_flag_disagreements"] = 0
-    else:
-        pax_case_days = sum(
-            row["reported_case_attack_rate_passenger"]
-            * row["passenger_complement"]
-            for row in rows
-        )
-        crew_case_days = sum(
-            row["reported_case_attack_rate_crew"] * row["crew_complement"]
-            for row in rows
-        )
-        pax_travel_days = sum(
-            row["passenger_complement"] * row["voyage_days"] for row in rows
-        )
-        crew_travel_days = sum(
-            row["crew_complement"] * row["voyage_days"] for row in rows
-        )
-        # Cases = reported rate × complement; travel-days = complement × days.
-        # Dividing gives incidence = 1e5 × reported rate / voyage days.
-        cell["A8_pax_incidence"] = 1e5 * pax_case_days / pax_travel_days
-        cell["A8_crew_incidence"] = 1e5 * crew_case_days / crew_travel_days
-        posted = [
-            row for row in eligible
-            if row["reported_case_attack_rate_passenger"] >= A9_POSTING_THRESHOLD
-            or row["reported_case_attack_rate_crew"] >= A9_POSTING_THRESHOLD
-        ]
-        disagreements = sum(
-            (
-                row["reported_case_attack_rate_passenger"]
-                >= A9_POSTING_THRESHOLD
-            ) != (row["vsp_trigger_epoch"] is not None)
-            for row in rows
-        )
-        cell["A9_eligible_runs"] = len(eligible)
-        cell["A9_posted_eligible"] = len(posted)
-        cell["A9_flag_disagreements"] = disagreements
-        cell["A9_posting_probability"] = (
-            len(posted) / len(eligible) if eligible else None
-        )
-    # Short aliases keep the JSON compact while retaining descriptive names.
-    cell["A8_pax"] = cell["A8_pax_incidence"]
-    cell["A8_crew"] = cell["A8_crew_incidence"]
-    cell["A9"] = cell["A9_posting_probability"]
-    if not took_off:
-        return cell
 
+
+def _no_reporting_channels() -> dict[str, Any]:
+    """A8/A9 fields for a cell whose arm does not model reporting."""
+    return {
+        "A8_pax_incidence": A8_A9_NO_REPORTING,
+        "A8_crew_incidence": A8_A9_NO_REPORTING,
+        "A9_posting_probability": A8_A9_NO_REPORTING,
+        "A9_posted_eligible": 0,
+        "A9_flag_disagreements": 0,
+    }
+
+
+def _a8_a9_channels(
+    rows: list[dict[str, Any]],
+    eligible: list[dict[str, Any]],
+) -> dict[str, Any]:
+    """Travel-day-weighted incidence and posting probability over all runs."""
+    pax_case_days = sum(
+        row["reported_case_attack_rate_passenger"] * row["passenger_complement"]
+        for row in rows
+    )
+    crew_case_days = sum(
+        row["reported_case_attack_rate_crew"] * row["crew_complement"]
+        for row in rows
+    )
+    pax_travel_days = sum(
+        row["passenger_complement"] * row["voyage_days"] for row in rows
+    )
+    crew_travel_days = sum(
+        row["crew_complement"] * row["voyage_days"] for row in rows
+    )
+    posted = [
+        row for row in eligible
+        if row["reported_case_attack_rate_passenger"] >= A9_POSTING_THRESHOLD
+        or row["reported_case_attack_rate_crew"] >= A9_POSTING_THRESHOLD
+    ]
+    disagreements = sum(
+        (
+            row["reported_case_attack_rate_passenger"] >= A9_POSTING_THRESHOLD
+        ) != (row["vsp_trigger_epoch"] is not None)
+        for row in rows
+    )
+    # Cases = reported rate × complement; travel-days = complement × days.
+    # Dividing gives incidence = 1e5 × reported rate / voyage days.
+    return {
+        "A8_pax_incidence": 1e5 * pax_case_days / pax_travel_days,
+        "A8_crew_incidence": 1e5 * crew_case_days / crew_travel_days,
+        "A9_eligible_runs": len(eligible),
+        "A9_posted_eligible": len(posted),
+        "A9_flag_disagreements": disagreements,
+        "A9_posting_probability": (
+            len(posted) / len(eligible) if eligible else None
+        ),
+    }
+
+
+def _add_conditional_medians(
+    cell: dict[str, Any],
+    took_off: list[dict[str, Any]],
+) -> None:
+    """Add the take-off-conditional anchor levels and ratios to a cell."""
     levels = [
         "A1_ever_ill_passenger",
         "infection_attack_rate_passenger",
@@ -472,10 +509,143 @@ def summarise_cell(rows: list[dict[str, Any]]) -> dict[str, Any]:
         cell["reported_case_attack_rate_passenger"] or 0.0,
         cell["reported_case_attack_rate_crew"] or 0.0,
     )
+
+
+def summarise_cell(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    """Summarise conditional anchors and unconditional A8/A9 channels."""
+    took_off = [row for row in rows if row["took_off"]]
+    cell: dict[str, Any] = {
+        "n_seeds": len(rows),
+        "n_takeoff": len(took_off),
+        "takeoff_fraction": len(took_off) / len(rows) if rows else 0.0,
+    }
+    eligible = _a9_eligible_rows(rows)
+    cell["A9_eligible_runs"] = len(eligible)
+    cell["A9_ineligible_runs"] = len(rows) - len(eligible)
+    no_reporting = _cell_is_report_free(rows)
+    cell["A8_A9_no_reporting"] = no_reporting
+    cell.update(
+        _no_reporting_channels()
+        if no_reporting
+        else _a8_a9_channels(rows, eligible),
+    )
+    # Short aliases keep the JSON compact while retaining descriptive names.
+    cell["A8_pax"] = cell["A8_pax_incidence"]
+    cell["A8_crew"] = cell["A8_crew_incidence"]
+    cell["A9"] = cell["A9_posting_probability"]
+    if took_off:
+        _add_conditional_medians(cell, took_off)
     return cell
 
 
 A4_NO_TARGET = "n/a (insufficient VSP postings)"
+
+
+def _conditional_anchor_verdicts(cell: dict[str, Any]) -> dict[str, str]:
+    """PASS/FAIL for the take-off-conditional literature anchors."""
+    out: dict[str, str] = {}
+    for anchor, (low, high) in ANCHORS.items():
+        value = cell.get(anchor) if anchor == "A1_ever_ill_passenger" else (
+            cell.get(f"{anchor}__per_seed_median")
+        )
+        if value is None:
+            out[anchor] = "n/a"
+        else:
+            out[anchor] = "PASS" if low <= value <= high else "FAIL"
+    return out
+
+
+def _a4_verdict(
+    hull: str,
+    cell: dict[str, Any],
+    targets: dict[str, dict[str, float] | None],
+) -> str:
+    """PASS/FAIL of the posted reported attack rate against the VSP IQR."""
+    target = targets.get(hull)
+    if target is None:
+        return A4_NO_TARGET
+    reported = cell.get("reported_case_attack_rate_passenger")
+    if reported is None:
+        return "n/a"
+    return "PASS" if target["q1"] <= reported <= target["q3"] else "FAIL"
+
+
+def _endpoint_ratio(value: float, endpoint: float) -> float:
+    return value / endpoint if endpoint else float("inf")
+
+
+def _a8_verdict(
+    hull: str,
+    cell: dict[str, Any],
+    era: str,
+) -> tuple[str, dict[str, float]]:
+    """A8 verdict plus its endpoint-keyed ratios for one hull's cell."""
+    try:
+        incidence_target = a8_targets(hull, era)
+    except ValueError:
+        incidence_target = None
+    band = HULL_TO_GRT_BAND.get(hull)
+    if incidence_target is None or band in UNMAPPED_GRT_BANDS:
+        reason = (
+            "n/a (GRT band has no project hull)"
+            if band in UNMAPPED_GRT_BANDS
+            else "n/a (unknown hull)"
+        )
+        return reason, {}
+    pax_value = cell.get("A8_pax_incidence")
+    crew_value = cell.get("A8_crew_incidence")
+    if not isinstance(pax_value, (int, float)) or not isinstance(
+        crew_value, (int, float)
+    ):
+        return "n/a", {}
+    pax_target = incidence_target["passenger"]
+    crew_target = incidence_target["crew"]
+    ratios = {
+        "A8_pax_ratio_to_end_of_period": _endpoint_ratio(
+            pax_value, pax_target["end_of_period"],
+        ),
+        "A8_pax_ratio_to_pooled_band": _endpoint_ratio(
+            pax_value, pax_target["pooled_band"],
+        ),
+        "A8_crew_ratio_to_end_of_period": _endpoint_ratio(
+            crew_value, crew_target["end_of_period"],
+        ),
+        "A8_crew_ratio_to_pooled_band": _endpoint_ratio(
+            crew_value, crew_target["pooled_band"],
+        ),
+    }
+    # The two endpoints come from different stratifications, so the pair is
+    # not ordered by construction; sorting keeps the band non-empty.
+    pax_low, pax_high = sorted(
+        (pax_target["end_of_period"], pax_target["pooled_band"]),
+    )
+    crew_low, crew_high = sorted(
+        (crew_target["end_of_period"], crew_target["pooled_band"]),
+    )
+    inside = (
+        pax_low <= pax_value <= pax_high
+        and crew_low <= crew_value <= crew_high
+    )
+    return ("PASS" if inside else "FAIL"), ratios
+
+
+def _a9_verdict(
+    cell: dict[str, Any],
+    era: str,
+) -> tuple[str, dict[str, float]]:
+    """A9 verdict plus its ratios against the investigated/posted interval."""
+    target_a9 = a9_targets(era)
+    if target_a9 is None:
+        return "n/a (post arm has no MIDRS observation)", {}
+    value = cell.get("A9_posting_probability")
+    low, high = target_a9["fleet"]["interval"]
+    if value is None or not isinstance(value, (int, float)):
+        return "n/a (no eligible runs)", {}
+    ratios = {
+        "A9_ratio_to_investigated": value / (low / 1000),
+        "A9_ratio_to_posted": value / (high / 1000),
+    }
+    return ("PASS" if low / 1000 <= value <= high / 1000 else "FAIL"), ratios
 
 
 def verdicts(
@@ -489,26 +659,9 @@ def verdicts(
     ``targets`` comes from ``vsp_attack_rate_targets`` for the scored era; a
     hull whose target is ``None`` has too few postings to anchor A4 at all.
     """
-    out: dict[str, str] = {}
+    out = _conditional_anchor_verdicts(cell)
+    out["A4_vsp_iqr"] = _a4_verdict(hull, cell, targets)
     ratios: dict[str, float] = {}
-    for anchor, (low, high) in ANCHORS.items():
-        value = cell.get(anchor) if anchor == "A1_ever_ill_passenger" else (
-            cell.get(f"{anchor}__per_seed_median")
-        )
-        if value is None:
-            out[anchor] = "n/a"
-        else:
-            out[anchor] = "PASS" if low <= value <= high else "FAIL"
-    reported = cell.get("reported_case_attack_rate_passenger")
-    target = targets.get(hull)
-    if target is None:
-        out["A4_vsp_iqr"] = A4_NO_TARGET
-    elif reported is None:
-        out["A4_vsp_iqr"] = "n/a"
-    else:
-        out["A4_vsp_iqr"] = (
-            "PASS" if target["q1"] <= reported <= target["q3"] else "FAIL"
-        )
     if cell.get("A8_A9_no_reporting"):
         out["A8"] = f"n/a ({A8_A9_NO_REPORTING})"
         out["A9"] = f"n/a ({A8_A9_NO_REPORTING})"
@@ -518,63 +671,10 @@ def verdicts(
         out["A8"] = reason
         out["A9"] = reason
         return out, ratios
-    try:
-        incidence_target = a8_targets(hull, era)
-    except ValueError:
-        incidence_target = None
-    band = HULL_TO_GRT_BAND.get(hull)
-    if incidence_target is None or band in UNMAPPED_GRT_BANDS:
-        reason = (
-            "n/a (GRT band has no project hull)"
-            if band in UNMAPPED_GRT_BANDS
-            else "n/a (unknown hull)"
-        )
-        out["A8"] = reason
-    else:
-        pax_value = cell.get("A8_pax_incidence")
-        crew_value = cell.get("A8_crew_incidence")
-        pax_end = incidence_target["passenger"]["end_of_period"]
-        pax_pooled = incidence_target["passenger"]["pooled_band"]
-        crew_end = incidence_target["crew"]["end_of_period"]
-        crew_pooled = incidence_target["crew"]["pooled_band"]
-        pax_low, pax_high = sorted((pax_end, pax_pooled))
-        crew_low, crew_high = sorted((crew_end, crew_pooled))
-        if not isinstance(pax_value, (int, float)) or not isinstance(
-            crew_value, (int, float)
-        ):
-            out["A8"] = "n/a"
-        else:
-            ratios["A8_pax_ratio_to_end_of_period"] = (
-                pax_value / pax_end if pax_end else float("inf")
-            )
-            ratios["A8_pax_ratio_to_pooled_band"] = (
-                pax_value / pax_pooled if pax_pooled else float("inf")
-            )
-            ratios["A8_crew_ratio_to_end_of_period"] = (
-                crew_value / crew_end if crew_end else float("inf")
-            )
-            ratios["A8_crew_ratio_to_pooled_band"] = (
-                crew_value / crew_pooled if crew_pooled else float("inf")
-            )
-            out["A8"] = (
-                "PASS" if pax_low <= pax_value <= pax_high
-                and crew_low <= crew_value <= crew_high
-                else "FAIL"
-            )
-    target_a9 = a9_targets(era)
-    if target_a9 is None:
-        out["A9"] = "n/a (post arm has no MIDRS observation)"
-    else:
-        value = cell.get("A9_posting_probability")
-        low, high = target_a9["fleet"]["interval"]
-        if value is None or not isinstance(value, (int, float)):
-            out["A9"] = "n/a (no eligible runs)"
-        else:
-            ratios["A9_ratio_to_investigated"] = value / (low / 1000)
-            ratios["A9_ratio_to_posted"] = value / (high / 1000)
-            out["A9"] = (
-                "PASS" if low / 1000 <= value <= high / 1000 else "FAIL"
-            )
+    out["A8"], a8_ratios = _a8_verdict(hull, cell, era)
+    out["A9"], a9_ratios = _a9_verdict(cell, era)
+    ratios.update(a8_ratios)
+    ratios.update(a9_ratios)
     return out, ratios
 
 
@@ -650,14 +750,23 @@ def _a4_target_lines(
     return [*lines, ""]
 
 
-def render(
-    cells: dict[tuple[str, str, float], dict[str, Any]],
+def _fmt(value: Any, digits: int = 4) -> str:
+    """Format a cell value, passing sentinel strings through unchanged."""
+    if value is None:
+        return "-"
+    if isinstance(value, str):
+        return value
+    return f"{float(value):.{digits}f}"
+
+
+def _report_preamble_lines(
     era: str,
     targets: dict[str, dict[str, float] | None],
-    archive_stats: dict[str, Any] | None = None,
-) -> str:
-    """Markdown report: one row per cell, levels then ratios then verdicts."""
-    lines = [
+    archive_stats: dict[str, Any] | None,
+) -> list[str]:
+    """Heading, anchor provenance, ingestion provenance and table header."""
+    stats = archive_stats or {}
+    return [
         "# Literature anchor scoring",
         "",
         "Conditional on take-off (peak prevalence >= "
@@ -677,15 +786,12 @@ def render(
         "",
         (
             "Archive ingestion: "
-            f"{archive_stats.get('archives_read', 0) if archive_stats else 0} "
-            f"archives read, "
-            f"{archive_stats.get('runs_kept', 0) if archive_stats else 0} "
-            f"runs kept, "
-            f"{archive_stats.get('duplicates_collapsed', 0) if archive_stats else 0} "
-            "duplicates collapsed, "
-            f"{archive_stats.get('runs_with_recovered_complements', 0) if archive_stats else 0} "
+            f"{stats.get('archives_read', 0)} archives read, "
+            f"{stats.get('runs_kept', 0)} runs kept, "
+            f"{stats.get('duplicates_collapsed', 0)} duplicates collapsed, "
+            f"{stats.get('runs_with_recovered_complements', 0)} "
             "runs with recovered complements, "
-            f"{archive_stats.get('runs_with_explicit_complements', 0) if archive_stats else 0} "
+            f"{stats.get('runs_with_explicit_complements', 0)} "
             "with explicit complements."
         ),
         "",
@@ -695,45 +801,53 @@ def render(
         "|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---|---:|---|",
     ]
 
-    def fmt(value: Any, digits: int = 4) -> str:
-        if value is None:
-            return "-"
-        if isinstance(value, str):
-            return value
-        return f"{float(value):.{digits}f}"
 
-    for (hull, strategy, dose), cell in sorted(cells.items()):
-        verdict, ratios = verdicts(hull, cell, targets, era)
-        display_cell = {**cell, **ratios}
-        failed = [name for name, state in verdict.items() if state == "FAIL"]
-        state = "all PASS" if not failed else "FAIL: " + ",".join(
-            name.split("_")[0] for name in sorted(failed)
-        )
-        lines.append(
-            f"| {hull} | {strategy} | {dose} | "
-            f"{cell['n_takeoff']}/{cell['n_seeds']} | "
-            f"{fmt(cell.get('A1_ever_ill_passenger'))} | "
-            f"{fmt(cell.get('infection_attack_rate_passenger'))} | "
-            f"{fmt(cell.get('A2_ill_per_infected__per_seed_median'), 3)}"
-            f" ({fmt(cell.get('A2_ill_per_infected__of_medians'), 3)}) | "
-            f"{fmt(cell.get('A3_reported_per_symptomatic__per_seed_median'), 3)}"
-            f" ({fmt(cell.get('A3_reported_per_symptomatic__of_medians'), 3)}) | "
-            f"{fmt(cell.get('reported_case_attack_rate_passenger'))} | "
-            f"{fmt(cell.get('A5_passenger_crew_ratio__per_seed_median'), 2)}"
-            f" ({fmt(cell.get('A5_passenger_crew_ratio__of_medians'), 2)}) | "
-            f"{fmt(display_cell.get('A8_pax_incidence'), 2)} / "
-            f"{fmt(display_cell.get('A8_crew_incidence'), 2)} "
-            f"(ratios {fmt(display_cell.get('A8_pax_ratio_to_end_of_period'), 2)}/"
-            f"{fmt(display_cell.get('A8_pax_ratio_to_pooled_band'), 2)}; "
-            f"{fmt(display_cell.get('A8_crew_ratio_to_end_of_period'), 2)}/"
-            f"{fmt(display_cell.get('A8_crew_ratio_to_pooled_band'), 2)}) | "
-            f"{fmt(display_cell.get('A9_posting_probability'), 4)} "
-            f"(ratios {fmt(display_cell.get('A9_ratio_to_investigated'), 2)}/"
-            f"{fmt(display_cell.get('A9_ratio_to_posted'), 2)}) | "
-            f"{state} |",
-        )
+def _verdict_state(verdict: dict[str, str]) -> str:
+    """Collapse per-anchor verdicts into the table's verdict column."""
+    failed = [name for name, state in verdict.items() if state == "FAIL"]
+    if not failed:
+        return "all PASS"
+    return "FAIL: " + ",".join(name.split("_")[0] for name in sorted(failed))
 
-    lines += ["", "## Undefined ratios (zero denominators, excluded)", ""]
+
+def _cell_line(
+    key: tuple[str, str, float],
+    cell: dict[str, Any],
+    display_cell: dict[str, Any],
+    verdict: dict[str, str],
+) -> str:
+    """One markdown table row for a hull/response/dose cell."""
+    hull, strategy, dose = key
+    return (
+        f"| {hull} | {strategy} | {dose} | "
+        f"{cell['n_takeoff']}/{cell['n_seeds']} | "
+        f"{_fmt(cell.get('A1_ever_ill_passenger'))} | "
+        f"{_fmt(cell.get('infection_attack_rate_passenger'))} | "
+        f"{_fmt(cell.get('A2_ill_per_infected__per_seed_median'), 3)}"
+        f" ({_fmt(cell.get('A2_ill_per_infected__of_medians'), 3)}) | "
+        f"{_fmt(cell.get('A3_reported_per_symptomatic__per_seed_median'), 3)}"
+        f" ({_fmt(cell.get('A3_reported_per_symptomatic__of_medians'), 3)}) | "
+        f"{_fmt(cell.get('reported_case_attack_rate_passenger'))} | "
+        f"{_fmt(cell.get('A5_passenger_crew_ratio__per_seed_median'), 2)}"
+        f" ({_fmt(cell.get('A5_passenger_crew_ratio__of_medians'), 2)}) | "
+        f"{_fmt(display_cell.get('A8_pax_incidence'), 2)} / "
+        f"{_fmt(display_cell.get('A8_crew_incidence'), 2)} "
+        f"(ratios {_fmt(display_cell.get('A8_pax_ratio_to_end_of_period'), 2)}/"
+        f"{_fmt(display_cell.get('A8_pax_ratio_to_pooled_band'), 2)}; "
+        f"{_fmt(display_cell.get('A8_crew_ratio_to_end_of_period'), 2)}/"
+        f"{_fmt(display_cell.get('A8_crew_ratio_to_pooled_band'), 2)}) | "
+        f"{_fmt(display_cell.get('A9_posting_probability'), 4)} "
+        f"(ratios {_fmt(display_cell.get('A9_ratio_to_investigated'), 2)}/"
+        f"{_fmt(display_cell.get('A9_ratio_to_posted'), 2)}) | "
+        f"{_verdict_state(verdict)} |"
+    )
+
+
+def _undefined_ratio_lines(
+    cells: dict[tuple[str, str, float], dict[str, Any]],
+) -> list[str]:
+    """Name the cells whose per-seed ratios had zero denominators."""
+    lines = ["", "## Undefined ratios (zero denominators, excluded)", ""]
     for (hull, strategy, dose), cell in sorted(cells.items()):
         notes = [
             f"{key.split('__')[0]}={cell[key]}"
@@ -742,10 +856,36 @@ def render(
         ]
         if notes:
             lines.append(f"- {hull} / {strategy} / {dose}: " + ", ".join(notes))
+    return lines
+
+
+def _skipped_archive_lines(archive_stats: dict[str, Any] | None) -> list[str]:
+    """Name archives that carried no summary and were therefore skipped."""
     skipped = archive_stats.get("skipped_archives", []) if archive_stats else []
-    if skipped:
-        lines += ["", "## Archives skipped because they contained no summary", ""]
-        lines.extend(f"- `{path}`" for path in skipped)
+    if not skipped:
+        return []
+    return [
+        "",
+        "## Archives skipped because they contained no summary",
+        "",
+        *(f"- `{path}`" for path in skipped),
+    ]
+
+
+def render(
+    cells: dict[tuple[str, str, float], dict[str, Any]],
+    era: str,
+    targets: dict[str, dict[str, float] | None],
+    archive_stats: dict[str, Any] | None = None,
+) -> str:
+    """Markdown report: one row per cell, levels then ratios then verdicts."""
+    lines = _report_preamble_lines(era, targets, archive_stats)
+    for key, cell in sorted(cells.items()):
+        hull = key[0]
+        verdict, ratios = verdicts(hull, cell, targets, era)
+        lines.append(_cell_line(key, cell, {**cell, **ratios}, verdict))
+    lines += _undefined_ratio_lines(cells)
+    lines += _skipped_archive_lines(archive_stats)
     return "\n".join(lines) + "\n"
 
 

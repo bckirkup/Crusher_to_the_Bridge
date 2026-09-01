@@ -1852,16 +1852,11 @@ def _reported_case_counter_exceeded(epoch: dict[str, Any]) -> bool:
     return bool(counter.get("exceeded", False))
 
 
-def compute_derived_metrics(ts: list[dict[str, Any]], num_agents: int) -> dict[str, Any]:
-    """Compute publication-ready scalar metrics from an epoch time series."""
-    if not ts:
-        return {}
-
-    infected_by_epoch = [e["infected"] for e in ts]
-    peak_infected = max(infected_by_epoch)
-    peak_epoch = infected_by_epoch.index(peak_infected)
-
-    final = ts[-1]
+def _validate_role_complements(
+    final: dict[str, Any],
+    num_agents: int,
+) -> tuple[int | None, int | None]:
+    """Validate and return emitted role complements, if present."""
     passenger_complement = final.get("passenger_complement")
     crew_complement = final.get("crew_complement")
     complements_present = (
@@ -1880,6 +1875,25 @@ def compute_derived_metrics(ts: list[dict[str, Any]], num_agents: int) -> dict[s
             "timeseries role complements must be positive integers summing "
             f"to num_agents ({num_agents})",
         )
+    if not complements_present:
+        return None, None
+    return passenger_complement, crew_complement
+
+
+def compute_derived_metrics(ts: list[dict[str, Any]], num_agents: int) -> dict[str, Any]:
+    """Compute publication-ready scalar metrics from an epoch time series."""
+    if not ts:
+        return {}
+
+    infected_by_epoch = [e["infected"] for e in ts]
+    peak_infected = max(infected_by_epoch)
+    peak_epoch = infected_by_epoch.index(peak_infected)
+
+    final = ts[-1]
+    passenger_complement, crew_complement = _validate_role_complements(
+        final,
+        num_agents,
+    )
     recovered = int(final.get("recovered", 0) or 0)
     infected_final = int(final.get("infected", 0) or 0)
     ever_infected = infected_final + recovered
@@ -1937,7 +1951,7 @@ def compute_derived_metrics(ts: list[dict[str, Any]], num_agents: int) -> dict[s
             final.get("susceptible", 0) / max(num_agents, 1), 4,
         ),
     }
-    if complements_present:
+    if passenger_complement is not None:
         derived["passenger_complement"] = passenger_complement
         derived["crew_complement"] = crew_complement
     return derived
