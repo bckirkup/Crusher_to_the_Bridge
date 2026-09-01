@@ -476,6 +476,8 @@ def test_read_rows_collapses_nested_aggregate_duplicates(tmp_path: Path) -> None
     assert stats == {
         "archives_read": 3,
         "duplicates_collapsed": 2,
+        "runs_with_recovered_complements": 2,
+        "runs_with_explicit_complements": 0,
         "skipped_archives": [],
         "runs_kept": 2,
     }

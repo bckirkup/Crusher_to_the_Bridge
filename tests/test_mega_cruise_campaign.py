@@ -604,6 +604,28 @@ def test_compute_derived_metrics() -> None:
     assert compute_derived_metrics([], num_agents=1000) == {}
 
 
+def test_compute_derived_metrics_omits_legacy_role_complements() -> None:
+    point = {
+        "epoch": 0,
+        "infected": 1,
+        "recovered": 0,
+    }
+    derived = compute_derived_metrics([point], num_agents=10)
+    assert "passenger_complement" not in derived
+    assert "crew_complement" not in derived
+
+
+def test_compute_derived_metrics_rejects_half_populated_role_complements() -> None:
+    point = {
+        "epoch": 0,
+        "infected": 1,
+        "recovered": 0,
+        "passenger_complement": 9,
+    }
+    with pytest.raises(ValueError, match="positive integers summing"):
+        compute_derived_metrics([point], num_agents=10)
+
+
 def test_compute_derived_metrics_rejects_invalid_role_complements() -> None:
     point = {
         "epoch": 0,

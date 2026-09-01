@@ -1864,7 +1864,10 @@ def compute_derived_metrics(ts: list[dict[str, Any]], num_agents: int) -> dict[s
     final = ts[-1]
     passenger_complement = final.get("passenger_complement")
     crew_complement = final.get("crew_complement")
-    if (
+    complements_present = (
+        passenger_complement is not None or crew_complement is not None
+    )
+    if complements_present and (
         isinstance(passenger_complement, bool)
         or not isinstance(passenger_complement, int)
         or passenger_complement <= 0
@@ -1894,7 +1897,7 @@ def compute_derived_metrics(ts: list[dict[str, Any]], num_agents: int) -> dict[s
     if peak_epoch > 0 and infected_by_epoch[peak_epoch - 1] > 0:
         new_at_peak = ts[peak_epoch].get("new_infections", 0)
         r_eff_at_peak = new_at_peak / infected_by_epoch[peak_epoch - 1]
-    return {
+    derived = {
         "attack_rate": round(attack_rate, 4),
         "reported_case_attack_rate_passenger": round(
             float(final.get("reported_case_rate_passenger", 0.0) or 0.0),
@@ -1917,8 +1920,6 @@ def compute_derived_metrics(ts: list[dict[str, Any]], num_agents: int) -> dict[s
         "reported_case_attack_rate_crew": round(
             float(final.get("reported_case_rate_crew", 0.0) or 0.0), 4,
         ),
-        "passenger_complement": passenger_complement,
-        "crew_complement": crew_complement,
         "vsp_trigger_epoch": vsp_trigger_epoch,
         "peak_prevalence": peak_infected,
         "peak_epoch": peak_epoch,
@@ -1936,6 +1937,10 @@ def compute_derived_metrics(ts: list[dict[str, Any]], num_agents: int) -> dict[s
             final.get("susceptible", 0) / max(num_agents, 1), 4,
         ),
     }
+    if complements_present:
+        derived["passenger_complement"] = passenger_complement
+        derived["crew_complement"] = crew_complement
+    return derived
 
 
 def _spec_num_agents(spec: dict[str, Any]) -> int:

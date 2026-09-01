@@ -218,6 +218,8 @@ def read_rows(
     stats.update({
         "archives_read": 0,
         "duplicates_collapsed": 0,
+        "runs_with_recovered_complements": 0,
+        "runs_with_explicit_complements": 0,
         "skipped_archives": [],
     })
     by_run_id: dict[str, tuple[dict[str, Any], str]] = {}
@@ -236,6 +238,12 @@ def read_rows(
             previous = by_run_id.get(run_id)
             if previous is None:
                 by_run_id[run_id] = (row, source_path)
+                counter = (
+                    "runs_with_explicit_complements"
+                    if row["_complement_source"] == "explicit"
+                    else "runs_with_recovered_complements"
+                )
+                stats[counter] += 1
                 continue
             if _row_without_source(row) != _row_without_source(previous[0]):
                 raise RuntimeError(
@@ -253,7 +261,11 @@ def read_rows(
 
 
 def _row_without_source(row: dict[str, Any]) -> dict[str, Any]:
-    return {key: value for key, value in row.items() if key != "_source_path"}
+    return {
+        key: value
+        for key, value in row.items()
+        if key not in {"_source_path", "_complement_source"}
+    }
 
 
 def _read_row(summary: dict[str, Any], path: str) -> dict[str, Any]:
@@ -289,6 +301,9 @@ def _read_row(summary: dict[str, Any], path: str) -> dict[str, Any]:
         raise RuntimeError(f"{path} carries no surveillance strategy")
     if hull not in HULL_CAPACITY:
         raise RuntimeError(f"{path} carries unknown hull {hull!r}")
+    complements_are_explicit = (
+        derived.get("passenger_complement") is not None
+    )
     passenger_complement, crew_complement = _resolve_complements(
         summary,
         int(params["num_agents"]),
@@ -314,6 +329,9 @@ def _read_row(summary: dict[str, Any], path: str) -> dict[str, Any]:
         "voyage_days": voyage_days,
         "passenger_complement": passenger_complement,
         "crew_complement": crew_complement,
+        "_complement_source": (
+            "explicit" if complements_are_explicit else "recovered"
+        ),
         "peak_prevalence": int(derived.get("peak_prevalence", 0)),
         "took_off": int(derived.get("peak_prevalence", 0))
         >= TAKEOFF_PEAK_PREVALENCE,
@@ -639,7 +657,11 @@ def render(
             f"{archive_stats.get('runs_kept', 0) if archive_stats else 0} "
             f"runs kept, "
             f"{archive_stats.get('duplicates_collapsed', 0) if archive_stats else 0} "
-            "duplicates collapsed."
+            "duplicates collapsed, "
+            f"{archive_stats.get('runs_with_recovered_complements', 0) if archive_stats else 0} "
+            "runs with recovered complements, "
+            f"{archive_stats.get('runs_with_explicit_complements', 0) if archive_stats else 0} "
+            "with explicit complements."
         ),
         "",
         "| Hull | Response | Dose | Takeoff | A1 ever-ill | inf AR (pax) | "

@@ -247,6 +247,62 @@ def test_compute_derived_metrics_matches_expected() -> None:
     assert m["outbreak_occurred"] is False
     assert m["seed_established"] is True
     assert m["total_quarantine_person_epochs"] == 3  # epochs 3,4,5
+    assert m["passenger_complement"] == 80
+    assert m["crew_complement"] == 20
+
+
+def test_legacy_timeseries_rebundle_omits_role_complements() -> None:
+    timeseries = [
+        {
+            key: value
+            for key, value in _ts_point(0, s=99, i=1, r=0, new=1).items()
+            if key not in {"passenger_complement", "crew_complement"}
+        },
+    ]
+    derived = compute_derived_metrics(timeseries, 100)
+    assert "passenger_complement" not in derived
+    assert "crew_complement" not in derived
+
+
+def test_boundary_row_builder_survives_legacy_timeseries() -> None:
+    from picard_framework.analysis.boundary.export_outbreak_surface import (
+        run_row_from_payload,
+    )
+
+    timeseries = [
+        {
+            key: value
+            for key, value in _ts_point(0, s=99, i=1, r=0, new=1).items()
+            if key not in {"passenger_complement", "crew_complement"}
+        },
+    ]
+    payload = {
+        "run_id": "legacy_norovirus_init1_s1",
+        "summary": {
+            "parameters": {
+                "platform_id": "mega_cruise_5000",
+                "pathogen": "norovirus",
+                "num_agents": 100,
+                "initial_infected": 1,
+            },
+        },
+        "timeseries": timeseries,
+    }
+    row = run_row_from_payload(payload)
+    assert row is not None
+    assert row["num_agents"] == 100
+    assert "passenger_complement" not in row
+    assert "crew_complement" not in row
+    explicit_payload = payload | {
+        "timeseries": [_ts_point(0, s=99, i=1, r=0, new=1)],
+    }
+    from picard_framework.analysis.metrics import build_run_summary_row
+
+    explicit_summary_row = build_run_summary_row(explicit_payload)
+    assert explicit_summary_row["passenger_complement"] == 80
+    assert explicit_summary_row["crew_complement"] == 20
+    explicit_row = run_row_from_payload(explicit_payload)
+    assert explicit_row is not None
 
 
 def _takeoff_curve() -> list[dict]:
