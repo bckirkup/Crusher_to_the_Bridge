@@ -116,9 +116,11 @@ def _summary_counts(
     reported_counts = {"passenger": 0, "crew": 0}
     ill_counts = {"passenger": 0, "crew": 0}
     infected_counts = {"passenger": 0, "crew": 0}
+    group_totals = {"passenger": 0, "crew": 0}
     for agent in agents:
         aid = int(agent["agent_id"])
         group = role_group_for_agent(agent)
+        group_totals[group] += 1
         if aid in state.ever_reported_ids:
             reported_counts[group] += 1
         if aid in state.ever_ill_ids:
@@ -156,6 +158,8 @@ def _summary_counts(
         "cumulative_ever_ill": len(state.ever_ill_ids),
         "cumulative_ever_ill_passenger": ill_counts["passenger"],
         "cumulative_ever_ill_crew": ill_counts["crew"],
+        "passenger_complement": group_totals["passenger"],
+        "crew_complement": group_totals["crew"],
         "reported_case_rate_passenger": round(reported_rates["passenger"], 6),
         "reported_case_rate_crew": round(reported_rates["crew"], 6),
         "infection_attack_rate_passenger": round(infected_rates["passenger"], 6),

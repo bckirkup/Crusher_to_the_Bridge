@@ -115,14 +115,51 @@ reports its A4 verdict as `n/a (insufficient VSP postings)` rather than scoring
 it. That is the hull the campaign manifests centre on, so no mega-hull result
 may be described as passing or failing A4.
 
-**The post-COVID arm has no unconditional incidence observation at all.** The
-only published MIDRS incidence analysis is MMWR Surveill Summ 2021;70(6),
+**A8/A9 are now implemented model-side, but the post-COVID arm has no
+unconditional incidence observation at all.** The model-side channels are in
+`telemetry_buffer/observation_model/score_anchors.py`; their MIDRS constants,
+interval targets and fixed hull-to-GRT mapping are in
+`telemetry_buffer/observation_model/midrs_incidence_targets.py`, sourced from
+`telemetry_buffer/observation_model/midrs_observed_targets.md`. A8 aggregates
+reported cases and travel-days over every run, including non-take-off runs. A9
+applies the VSP 3% passenger-or-crew rule to eligible voyages and reports
+ineligible runs separately. A truth-only arm emits an explicit no-reporting
+sentinel rather than a false zero.
+
+The only published MIDRS incidence analysis is MMWR Surveill Summ 2021;70(6),
 covering 2006-2019; a search of CDC's VSP data pages, MMWR and the
-peer-reviewed literature found nothing after it. So the proposed A8 channel
-exists for the pre arm only, and the post-2020 health-practice configuration
-changes exactly the channel we have no post-2020 observation for. A pre-arm A8
-match plus a post-arm A4 match is the most that can honestly be claimed until a
-post-2020 MIDRS analysis exists.
+peer-reviewed literature found nothing after it. So the post-2020
+health-practice configuration changes exactly the channel we have no post-2020
+observation for. A pre-arm A8 match plus a post-arm A4 match is the most that
+can honestly be claimed until a post-2020 MIDRS analysis exists.
+
+The MIDRS source record carries three conflicts that must remain attached to
+the implementation. First, the MMWR Results prose labels 26.7 and 29.2 as
+mega and super-mega **crew** rates, but Table 2 identifies those as passenger
+rates; the crew values are 14.7 and 16.0, with the crew maximum 19.8 on
+extra-large ships. Second, the reported "80.6% of the 252 ships were extra
+large" is actually 30,039/37,258 voyage reports; the per-ship size distribution
+is unpublished. Third, MMWR counts 156 investigated passenger outbreaks,
+whereas `telemetry_buffer/observation_model/vsp_outbreak_series.csv` contains
+208 posted outbreaks over the same period. A9 therefore reports an interval
+spanning those definitions rather than silently mixing them.
+
+**Open defect: `HULL_CAPACITY` is a total-agent complement, not a passenger
+complement.** The role split used by the model is authoritative in
+`orchestrator_init.py::role_group_for_agent`: on the expedition reprobe
+summary `..._dose12_..._s503`, `cumulative_ever_infected_passenger = 107` and
+`infection_attack_rate_passenger = 0.338608`, giving
+`round(107 / 0.338608) = 316`; the corresponding crew values are 40 and
+0.298507, giving 134. Thus 316 passengers plus 134 crew equals the
+`num_agents = 450` total. `HULL_CAPACITY["expedition_cruise_450"] = 450`
+therefore denotes the total complement, not the passenger denominator.
+`BAND_EDGES` in `telemetry_buffer/observation_model/vsp_class_era_scoring.py`
+are geometric means of those total complements while binning observed
+passenger counts (`pax_total`), so the A4 class bins inherit this offset.
+The A4 targets merged in #360 are affected and remain unrepaired; recutting
+them is a separate decision. A8's passenger and crew denominators instead
+come from the role-derived complements emitted in each run summary and do
+not use `HULL_CAPACITY`, so A8/A9 are unaffected.
 
 ## 3. Out-of-sample checks
 
@@ -247,13 +284,12 @@ Roughly in dependency order.
    If it does, that is a finding about what is still missing.
 4. **Score the v4-successor campaign** against VSP class targets, per era,
    and never on the mega hull's A4.
-5. **A8/A9 model-side aggregation.** The unconditional-incidence and
-   posting-probability channels are specified in
-   `telemetry_buffer/observation_model/incidence_and_attack_rate_scoring_spec.md`
-   and not implemented: they need per-voyage reported cases, complement and
-   voyage days across *all* runs in a cell including non-take-off ones, a VSP
-   posting flag per run, and a sourced ship-to-tonnage band table. None of the
-   three exists yet.
+5. **A8/A9 observation follow-up.** Model-side aggregation and the sourced
+   MIDRS target tables are implemented in
+   `telemetry_buffer/observation_model/score_anchors.py` and
+   `telemetry_buffer/observation_model/midrs_incidence_targets.py`. The
+   post-arm observation remains unavailable, and A10 duration trajectories are
+   still Proposed.
 6. **Cabin-level environmental compartments.** The finest mixing compartment is
    `Cabin_Corridor`: ~37 people in 800 m³ where reality is 2 people in ~40 m³
    (crew 3). `cabin_size` and `cabin_mate_ids` exist but only exempt a mate from

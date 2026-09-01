@@ -81,8 +81,8 @@ response cell, cell medians over ≥ 10 seeds.
 | A3 | infirmary capture | `reported_case_attack_rate_passenger / ever_ill_attack_rate_passenger` | 0.60 ± 0.05 |
 | A4 | VSP posted attack rate | `reported_case_attack_rate_passenger` | inside the hull class IQR **derived per hull class × era** from `telemetry_buffer/observation_model/vsp_outbreak_series.csv` by `telemetry_buffer/observation_model/vsp_class_era_scoring.py`; see `telemetry_buffer/observation_model/incidence_and_attack_rate_scoring_spec.md` |
 | A5 | passenger vs crew | `reported_case_attack_rate_passenger / reported_case_attack_rate_crew` | ≈ 3.5 (7% vs 2%) |
-| A8 | unconditional AGE incidence (**Proposed**) | reported cases per 100,000 travel days over all simulated voyages | MMWR Surveill Summ 2021;70(6) by ship-size band, scored as an upper bound plus a reported ratio — `telemetry_buffer/observation_model/incidence_and_attack_rate_scoring_spec.md` |
-| A9 | posting probability (**Proposed**) | simulated voyages passing VSP's posting rule / all simulated voyages | MMWR voyage counts per band (pre arm); reconstructed interval post-2020 — `telemetry_buffer/observation_model/incidence_and_attack_rate_scoring_spec.md` |
+| A8 | unconditional AGE incidence (**Implemented**) | reported cases per 100,000 travel days over all simulated voyages | MMWR Surveill Summ 2021;70(6) by ship-size band, named end-of-period and pooled-band plausibility endpoints plus ratios — `telemetry_buffer/observation_model/midrs_incidence_targets.py`; source record `telemetry_buffer/observation_model/midrs_observed_targets.md` |
+| A9 | posting probability (**Implemented**) | simulated eligible voyages passing VSP's posting rule / eligible simulated voyages | MMWR investigated versus project posted fleet interval; per-hull numerator unpublished — `telemetry_buffer/observation_model/midrs_incidence_targets.py`; source record `telemetry_buffer/observation_model/midrs_observed_targets.md` |
 | A10a | incidence gradient over voyage length (**Proposed**) | reported cases per travel day across 3-5, 6-7, 8-10, 11-14, 15-21 day voyages | passenger per-day rate rises 13.3 → 40.0 per 100,000 travel days (MMWR Table 2); gradient sign and rough magnitude only — §A10 of `telemetry_buffer/observation_model/incidence_and_attack_rate_scoring_spec.md` |
 | A10b | crew gradient over voyage length (**Proposed**) | the same quantity for crew | crew rates flat (17.5, 22.1, 19.0, 17.4, 20.9); scored as passenger gradient positive with crew gradient flat, never as a ratio — §A10 of `telemetry_buffer/observation_model/incidence_and_attack_rate_scoring_spec.md` |
 | A10c | outbreak probability over voyage length (**Proposed**) | simulated voyages passing the posting rule / all simulated voyages, per length band | derived from MMWR Tables 1 and 3: ≈0.5 → ≈29 posted outbreaks per 1,000 voyages, 3-5 d to 15-21 d — §A10 of `telemetry_buffer/observation_model/incidence_and_attack_rate_scoring_spec.md` |
@@ -94,9 +94,8 @@ replacement ships with the code that derives it, and a hull class with fewer
 than ten postings in the scored era carries no A4 anchor at all —
 `mega_cruise_5000` has four pre-2020 and three post-2020 postings.
 A4 remains conditional on VSP posting the voyage, as A7 is: VSP publishes
-nothing about voyages it never posted. A8 and A9 exist to put an
-unconditional channel alongside it, and are Proposed — the model-side
-aggregation and the ship-tonnage band table do not exist yet.
+nothing about voyages it never posted. A8 and A9 now put implemented
+unconditional channels alongside it. A10 remains Proposed.
 A10 adds the only trajectory evidence norovirus offers: duration gradients
 recovered across voyages, since no within-voyage norovirus time series
 exists. Voyage length and ship size are confounded in the published

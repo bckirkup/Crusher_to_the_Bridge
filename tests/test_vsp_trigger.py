@@ -13,8 +13,8 @@ from engines.infection_dynamics_bridge import (
 from orchestrator_init import (
     compute_group_rates_for_ids,
     load_vsp_trigger_rule,
-    update_ever_infected_ids,
     update_ever_ill_ids,
+    update_ever_infected_ids,
     update_ever_reported_ids,
 )
 from orchestrator_record import _summary_counts
@@ -166,6 +166,8 @@ def test_epoch_rates_use_role_denominators_and_emit_crew_fields() -> None:
     assert summary["infection_attack_rate_crew"] == pytest.approx(1.0)
     assert summary["reported_case_rate_crew"] == pytest.approx(0.5)
     assert summary["ever_ill_rate_crew"] == pytest.approx(0.5)
+    assert summary["passenger_complement"] == 2
+    assert summary["crew_complement"] == 2
     assert summary["infection_attack_rate_passenger"] != pytest.approx(0.75)
 
 
@@ -176,6 +178,8 @@ def test_derived_anchor_fields_are_present_and_bounded() -> None:
             "infected": 1,
             "recovered": 2,
             "susceptible": 7,
+            "passenger_complement": 8,
+            "crew_complement": 2,
             "infection_attack_rate_passenger": 0.4,
             "infection_attack_rate_crew": 0.8,
             "ever_ill_rate_crew": 0.6,
@@ -274,6 +278,8 @@ def test_campaign_metrics_include_reported_case_and_vsp_fields() -> None:
             "infected": 1,
             "recovered": 0,
             "susceptible": 9,
+            "passenger_complement": 8,
+            "crew_complement": 2,
             "new_infections": 1,
             "trigger_status": "none",
             "reported_case_rate_passenger": 0.1,
@@ -317,6 +323,8 @@ def test_campaign_metrics_include_reported_case_and_vsp_fields() -> None:
             "reported_case_rate_passenger": 0.3,
             "cumulative_ever_ill_passenger": 3,
             "ever_ill_rate_passenger": 0.3,
+            "passenger_complement": 8,
+            "crew_complement": 2,
             "vsp_triggered": True,
             "infection_counters": {
                 "passenger_reported_case_rate": {
@@ -340,6 +348,8 @@ def test_campaign_metrics_have_no_vsp_epoch_without_counter() -> None:
             "infected": 1,
             "recovered": 0,
             "susceptible": 9,
+            "passenger_complement": 8,
+            "crew_complement": 2,
             "vsp_triggered": True,
         },
     ]

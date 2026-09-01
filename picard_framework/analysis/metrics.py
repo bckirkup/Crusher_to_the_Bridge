@@ -28,6 +28,8 @@ RUN_SUMMARY_COLUMNS: tuple[str, ...] = (
     "initial_infected",
     "num_agents",
     "num_epochs",
+    "passenger_complement",
+    "crew_complement",
     "attack_rate",
     "infection_attack_rate_passenger",
     "infection_attack_rate_crew",
@@ -136,6 +138,24 @@ def compute_derived_metrics(
     peak_epoch = infected_by_epoch.index(peak_infected)
 
     final = timeseries[-1]
+    passenger_complement = final.get("passenger_complement")
+    crew_complement = final.get("crew_complement")
+    complements_present = (
+        passenger_complement is not None or crew_complement is not None
+    )
+    if complements_present and (
+        isinstance(passenger_complement, bool)
+        or not isinstance(passenger_complement, int)
+        or passenger_complement <= 0
+        or isinstance(crew_complement, bool)
+        or not isinstance(crew_complement, int)
+        or crew_complement <= 0
+        or passenger_complement + crew_complement != num_agents
+    ):
+        raise ValueError(
+            "timeseries role complements must be positive integers summing "
+            f"to num_agents ({num_agents})",
+        )
     recovered = int(final.get("recovered", 0) or 0)
     infected_final = int(final.get("infected", 0) or 0)
     ever_infected = infected_final + recovered
@@ -160,7 +180,7 @@ def compute_derived_metrics(
         new_at_peak = int(timeseries[peak_epoch].get("new_infections", 0) or 0)
         r_eff_at_peak = new_at_peak / infected_by_epoch[peak_epoch - 1]
 
-    return {
+    derived = {
         "attack_rate": round(attack_rate, 4),
         "infection_attack_rate_passenger": round(
             float(final.get("infection_attack_rate_passenger", 0.0) or 0.0),
@@ -194,6 +214,10 @@ def compute_derived_metrics(
             4,
         ),
     }
+    if complements_present:
+        derived["passenger_complement"] = passenger_complement
+        derived["crew_complement"] = crew_complement
+    return derived
 
 
 def _cost_fields(summary: dict[str, Any], timeseries: list[dict[str, Any]]) -> tuple[Any, Any]:
@@ -237,6 +261,8 @@ def build_run_summary_row(payload: dict[str, Any]) -> dict[str, Any]:
     row.update(
         {
             "attack_rate": derived.get("attack_rate"),
+            "passenger_complement": derived.get("passenger_complement"),
+            "crew_complement": derived.get("crew_complement"),
             "outbreak_occurred": derived.get("outbreak_occurred"),
             "peak_prevalence": derived.get("peak_prevalence"),
             "peak_epoch": derived.get("peak_epoch"),

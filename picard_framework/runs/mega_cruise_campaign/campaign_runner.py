@@ -1801,6 +1801,8 @@ def extract_timeseries(history: list[dict[str, Any]]) -> list[dict[str, Any]]:
             "cumulative_ever_infected_crew": s.get(
                 "cumulative_ever_infected_crew", 0,
             ),
+            "passenger_complement": s.get("passenger_complement"),
+            "crew_complement": s.get("crew_complement"),
             "infection_attack_rate_passenger": s.get(
                 "infection_attack_rate_passenger", 0.0,
             ),
@@ -1860,6 +1862,24 @@ def compute_derived_metrics(ts: list[dict[str, Any]], num_agents: int) -> dict[s
     peak_epoch = infected_by_epoch.index(peak_infected)
 
     final = ts[-1]
+    passenger_complement = final.get("passenger_complement")
+    crew_complement = final.get("crew_complement")
+    complements_present = (
+        passenger_complement is not None or crew_complement is not None
+    )
+    if complements_present and (
+        isinstance(passenger_complement, bool)
+        or not isinstance(passenger_complement, int)
+        or passenger_complement <= 0
+        or isinstance(crew_complement, bool)
+        or not isinstance(crew_complement, int)
+        or crew_complement <= 0
+        or passenger_complement + crew_complement != num_agents
+    ):
+        raise ValueError(
+            "timeseries role complements must be positive integers summing "
+            f"to num_agents ({num_agents})",
+        )
     recovered = int(final.get("recovered", 0) or 0)
     infected_final = int(final.get("infected", 0) or 0)
     ever_infected = infected_final + recovered
@@ -1877,7 +1897,7 @@ def compute_derived_metrics(ts: list[dict[str, Any]], num_agents: int) -> dict[s
     if peak_epoch > 0 and infected_by_epoch[peak_epoch - 1] > 0:
         new_at_peak = ts[peak_epoch].get("new_infections", 0)
         r_eff_at_peak = new_at_peak / infected_by_epoch[peak_epoch - 1]
-    return {
+    derived = {
         "attack_rate": round(attack_rate, 4),
         "reported_case_attack_rate_passenger": round(
             float(final.get("reported_case_rate_passenger", 0.0) or 0.0),
@@ -1917,6 +1937,10 @@ def compute_derived_metrics(ts: list[dict[str, Any]], num_agents: int) -> dict[s
             final.get("susceptible", 0) / max(num_agents, 1), 4,
         ),
     }
+    if complements_present:
+        derived["passenger_complement"] = passenger_complement
+        derived["crew_complement"] = crew_complement
+    return derived
 
 
 def _spec_num_agents(spec: dict[str, Any]) -> int:
