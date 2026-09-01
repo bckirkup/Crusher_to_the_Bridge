@@ -33,6 +33,7 @@ def _row(
     voyage_days: float = 7.0,
     trigger_epoch: int | None = 10,
     passenger_complement: int | None = None,
+    sick_call_probability: float = 1.0,
 ) -> dict[str, Any]:
     passenger_complement = (
         score_anchors.HULL_CAPACITY[hull]
@@ -42,6 +43,7 @@ def _row(
     return {
         "hull": hull,
         "strategy": strategy,
+        "sick_call_probability": sick_call_probability,
         "took_off": True,
         "A1_ever_ill_passenger": 0.1,
         "infection_attack_rate_passenger": 0.1,
@@ -70,6 +72,7 @@ def _summary(
     strategy: str = "syndromic",
     reported_pax: float = 0.04,
     reported_crew: float = 0.02,
+    sick_call_probability: float = 1.0,
 ) -> dict[str, Any]:
     return {
         "run_id": "test-run",
@@ -81,6 +84,7 @@ def _summary(
             "num_epochs": num_epochs,
             "num_agents": num_agents,
             "natural_history_clock": clock,
+            "sick_call_probability": sick_call_probability,
         },
         "derived": {
             "peak_prevalence": 20,
@@ -233,22 +237,27 @@ def test_main_reads_runs_and_writes_the_complete_report(
 
 def test_verdicts_score_numeric_unconditional_channels() -> None:
     cell = score_anchors.summarise_cell([_row()])
-    verdict = score_anchors.verdicts("classic_cruise_1900", cell, TARGETS)
+    verdict, ratios = score_anchors.verdicts(
+        "classic_cruise_1900", cell, TARGETS
+    )
 
     assert verdict["A8"] == "FAIL"
     assert verdict["A9"] == "FAIL"
-    assert cell["A8_pax_ratio_to_end"] > 1.0
-    assert cell["A9_ratio_to_investigated"] > 1.0
+    assert ratios["A8_pax_ratio_to_end_of_period"] > 1.0
+    assert ratios["A9_ratio_to_investigated"] > 1.0
+    assert "A8_pax_ratio_to_end_of_period" not in cell
 
 
 def test_verdicts_report_unknown_hull_and_no_eligible_runs() -> None:
     no_eligible = score_anchors.summarise_cell(
         [_row(voyage_days=2.9, passenger_complement=1900)]
     )
-    verdict = score_anchors.verdicts("classic_cruise_1900", no_eligible, TARGETS)
+    verdict, _ = score_anchors.verdicts(
+        "classic_cruise_1900", no_eligible, TARGETS
+    )
     assert verdict["A9"] == "n/a (no eligible runs)"
 
-    unknown = score_anchors.verdicts(
+    unknown, _ = score_anchors.verdicts(
         "unknown_hull",
         no_eligible,
         TARGETS,
@@ -346,6 +355,7 @@ def test_truth_only_arm_has_explicit_no_reporting_sentinel() -> None:
         strategy="none_true",
         reported_pax=0.0,
         reported_crew=0.0,
+        sick_call_probability=0.0,
     )
 
     cell = score_anchors.summarise_cell([row])
@@ -353,13 +363,91 @@ def test_truth_only_arm_has_explicit_no_reporting_sentinel() -> None:
     assert cell["A8_pax_incidence"] == score_anchors.A8_A9_NO_REPORTING
     assert cell["A8_crew_incidence"] == score_anchors.A8_A9_NO_REPORTING
     assert cell["A9_posting_probability"] == score_anchors.A8_A9_NO_REPORTING
-    verdict = score_anchors.verdicts(
+    verdict, _ = score_anchors.verdicts(
         "classic_cruise_1900",
         cell,
         score_anchors.vsp_attack_rate_targets("pre"),
     )
     assert verdict["A8"].startswith("n/a")
-    assert "no reporting" in verdict["A8"]
+    assert "sick_call_probability = 0" in verdict["A8"]
+
+
+@pytest.mark.parametrize("strategy", ["none", "none_env", "none_true"])
+def test_no_reporting_sentinel_uses_sick_call_mechanism(
+    strategy: str,
+) -> None:
+    cell = score_anchors.summarise_cell(
+        [_row(
+            strategy=strategy,
+            reported_pax=0.0,
+            reported_crew=0.0,
+            sick_call_probability=0.0,
+        )]
+    )
+
+    assert cell["A8_pax_incidence"] == score_anchors.A8_A9_NO_REPORTING
+
+
+def test_reporting_cell_with_zero_outcomes_is_numeric_zero_and_fails() -> None:
+    cell = score_anchors.summarise_cell(
+        [_row(reported_pax=0.0, reported_crew=0.0)]
+    )
+
+    assert cell["A8_pax_incidence"] == pytest.approx(0.0)
+    assert cell["A8_crew_incidence"] == pytest.approx(0.0)
+    verdict, _ = score_anchors.verdicts(
+        "classic_cruise_1900",
+        cell,
+        score_anchors.vsp_attack_rate_targets("pre"),
+    )
+    assert verdict["A8"] == "FAIL"
+    assert verdict["A9"] == "FAIL"
+
+
+def test_mixed_reporting_mechanisms_are_rejected() -> None:
+    with pytest.raises(RuntimeError, match="mixes report-free"):
+        score_anchors.summarise_cell([
+            _row(sick_call_probability=0.0),
+            _row(sick_call_probability=1.0),
+        ])
+
+
+def test_missing_sick_call_probability_names_archive() -> None:
+    summary = _summary()
+    del summary["parameters"]["sick_call_probability"]
+
+    with pytest.raises(RuntimeError, match="missing.zip"):
+        score_anchors._read_row(summary, "missing.zip")
+
+
+def test_expedition_a8_plausibility_band_accepts_inverted_endpoints() -> None:
+    target = score_anchors.a8_targets("expedition_cruise_450", "pre")
+    assert target is not None
+    assert target["passenger"] == {
+        "end_of_period": 16.9,
+        "pooled_band": 10.9,
+    }
+    cell = {
+        "A8_A9_no_reporting": False,
+        "A8_pax_incidence": 13.0,
+        "A8_crew_incidence": 5.8,
+        "A9_posting_probability": 0.0,
+    }
+
+    verdict, ratios = score_anchors.verdicts(
+        "expedition_cruise_450",
+        cell,
+        score_anchors.vsp_attack_rate_targets("pre"),
+    )
+
+    assert verdict["A8"] == "PASS"
+    assert ratios["A8_pax_ratio_to_end_of_period"] == pytest.approx(
+        13.0 / 16.9
+    )
+    assert ratios["A8_pax_ratio_to_pooled_band"] == pytest.approx(
+        13.0 / 10.9
+    )
+    assert "A8_pax_ratio_to_end_of_period" not in cell
 
 
 def test_render_reports_unconditional_channels_and_post_arm() -> None:

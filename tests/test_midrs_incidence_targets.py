@@ -13,20 +13,34 @@ def test_midrs_voyage_count_tables_cover_the_source_total() -> None:
 
 
 def test_midrs_rates_and_outbreak_counts_match_recorded_values() -> None:
-    assert targets.MIDRS_PASSENGER_RATES_BY_GRT_BAND["60,001-120,000"] == 23.0
-    assert targets.MIDRS_CREW_RATES_BY_GRT_BAND[">=140,001"] == 16.0
-    assert targets.MIDRS_PASSENGER_RATES_BY_VOYAGE_LENGTH["15-21"] == 40.0
-    assert targets.MIDRS_CREW_RATES_BY_VOYAGE_LENGTH["3-5"] == 17.5
+    assert targets.MIDRS_PASSENGER_RATES_BY_GRT_BAND[
+        "60,001-120,000"
+    ] == pytest.approx(23.0)
+    assert targets.MIDRS_CREW_RATES_BY_GRT_BAND[">=140,001"] == pytest.approx(
+        16.0
+    )
+    assert targets.MIDRS_PASSENGER_RATES_BY_VOYAGE_LENGTH["15-21"] == (
+        pytest.approx(40.0)
+    )
+    assert targets.MIDRS_CREW_RATES_BY_VOYAGE_LENGTH["3-5"] == pytest.approx(
+        17.5
+    )
     assert sum(targets.MIDRS_PASSENGER_OUTBREAKS_BY_VOYAGE_LENGTH.values()) == 156
     assert sum(targets.MIDRS_CREW_OUTBREAKS_BY_VOYAGE_LENGTH.values()) == 16
 
 
-def test_a8_returns_endpoint_to_pooled_intervals() -> None:
+def test_a8_returns_named_endpoint_plausibility_bands() -> None:
     result = targets.a8_targets("classic_cruise_1900", "pre")
 
     assert result is not None
-    assert result["passenger"] == (16.9, 23.0)
-    assert result["crew"] == (5.2, 19.8)
+    assert result["passenger"] == {
+        "end_of_period": 16.9,
+        "pooled_band": 23.0,
+    }
+    assert result["crew"] == {
+        "end_of_period": 5.2,
+        "pooled_band": 19.8,
+    }
     assert result["grt_band"] == "60,001-120,000"
 
 

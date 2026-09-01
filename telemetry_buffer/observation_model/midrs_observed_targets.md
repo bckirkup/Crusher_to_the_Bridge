@@ -102,14 +102,19 @@ pooled rate in Table 2 is an average over a period in which the quantity
 roughly halved, and the pooled 23.0 describes no year in particular.
 
 **Scoring decision.** Our pre-COVID configuration represents late-2010s
-practice, not 2006 practice, so A8's primary pre-arm target is the
-**end-of-period** rate -- 16.9 passengers, 5.2 crew -- with the pooled Table 2
-size-band rate reported alongside as the period average, never instead of it.
+practice, not 2006 practice, so A8 reports a plausibility band with the
+**end-of-period** rate -- 16.9 passengers, 5.2 crew -- and the pooled Table 2
+size-band rate alongside it as the period average, never instead of it. These
+endpoints come from different stratifications: the calendar endpoint is
+fleet-wide, while the pooled rate is GRT-band-specific. The band is not a
+confidence interval. For <=30,000 GRT, the fleet endpoint 16.9 is above the
+pooled band rate 10.9, proving the pair is not ordered by construction.
 Scoring a late-2010s configuration against 23.0 would demand roughly 1.4x the
-incidence the last observed year shows. The two figures must both appear in any
-A8 report, and the size-band and length-band breakdowns are only available
-pooled, so a size-specific target inherits the period average and is used for
-gradient shape rather than level.
+incidence the last observed year shows. No band-specific calendar endpoint is
+reconstructed because MIDRS does not publish one. The two figures must both
+appear in any A8 report, and the size-band and length-band breakdowns are only
+available pooled, so a size-specific target inherits the period average and is
+used for gradient shape rather than level.
 
 The trend also differences: crew fell 2.6x while passengers fell 1.9x, over the
 same voyages and the same reporting system.

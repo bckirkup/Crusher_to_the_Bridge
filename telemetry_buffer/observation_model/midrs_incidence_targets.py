@@ -4,8 +4,9 @@ The source record is transcribed in
 ``telemetry_buffer/observation_model/midrs_observed_targets.md``.  Table 2
 reports rates per 100,000 travel-days pooled across 2006-2019; its passenger
 calendar endpoints fell from 32.5 in 2006 to 16.9 in 2019, while crew rates
-fell from 13.5 to 5.2.  A8 therefore returns an interval from the endpoint
-rate to the pooled band rate rather than treating the pooled rate as a point.
+fell from 13.5 to 5.2.  A8 therefore returns named endpoint values from
+different stratifications as a plausibility band, rather than treating the
+pooled rate as a point or a confidence interval.
 """
 
 from __future__ import annotations
@@ -129,14 +130,17 @@ _CREW_ENDPOINT_BY_BAND = {
 
 
 def a8_targets(hull: str, era: str) -> dict[str, Any] | None:
-    """Return pre-arm A8 intervals for a hull's MIDRS tonnage band.
+    """Return pre-arm A8 plausibility bands for a hull's MIDRS tonnage band.
 
-    Each interval is ``(end_of_period_rate, pooled_band_rate)``.  The pooled
-    Table 2 band rate averages 2006-2019, during which the passenger rate
-    halved from 32.5 to 16.9.  Scoring a late-2010s configuration only against
-    the pooled figure asks for about 1.4 times the last observed incidence.
-    Both endpoints are reported; neither is used alone.  No post-2019 MIDRS
-    analysis exists, so the post arm has no A8 target.
+    Endpoints are returned by name as ``end_of_period`` and ``pooled_band``.
+    They come from different stratifications: the first is the fleet-wide
+    2019 calendar endpoint, while the second is the pooled Table 2 GRT-band
+    rate.  They are therefore a plausibility band, not a confidence interval.
+    For example, the expedition band is ``16.9`` fleet-wide endpoint versus
+    ``10.9`` pooled <=30,000 GRT rate, so its returned pair is intentionally
+    inverted.  The pooled rate averages 2006-2019, during which the passenger
+    rate halved from 32.5 to 16.9.  No post-2019 MIDRS analysis exists, so the
+    post arm has no A8 target.
     """
     if era not in _VALID_ERAS:
         raise ValueError(f"unknown MIDRS era: {era!r}")
@@ -147,14 +151,14 @@ def a8_targets(hull: str, era: str) -> dict[str, Any] | None:
     band = HULL_TO_GRT_BAND[hull]
     return {
         "grt_band": band,
-        "passenger": (
-            _PASSENGER_ENDPOINT_BY_BAND[band],
-            MIDRS_PASSENGER_RATES_BY_GRT_BAND[band],
-        ),
-        "crew": (
-            _CREW_ENDPOINT_BY_BAND[band],
-            MIDRS_CREW_RATES_BY_GRT_BAND[band],
-        ),
+        "passenger": {
+            "end_of_period": _PASSENGER_ENDPOINT_BY_BAND[band],
+            "pooled_band": MIDRS_PASSENGER_RATES_BY_GRT_BAND[band],
+        },
+        "crew": {
+            "end_of_period": _CREW_ENDPOINT_BY_BAND[band],
+            "pooled_band": MIDRS_CREW_RATES_BY_GRT_BAND[band],
+        },
     }
 
 

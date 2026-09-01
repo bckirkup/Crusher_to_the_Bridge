@@ -50,7 +50,9 @@ from telemetry_buffer.observation_model.vsp_class_era_scoring import (
 
 TAKEOFF_PEAK_PREVALENCE = 10
 A9_POSTING_THRESHOLD = 0.03
-A8_A9_NO_REPORTING = "undefined (arm models no reporting)"
+A8_A9_NO_REPORTING = (
+    "undefined (arm does not model reporting: sick_call_probability = 0)"
+)
 
 # A1 Wikswo whole-ship cohort illness; A2 asymptomatic ratio (GII.4-weighted
 # lower bound 0.59); A3 capture; A5 passenger:crew reported ratio.
@@ -273,6 +275,7 @@ def _read_row(summary: dict[str, Any], path: str) -> dict[str, Any]:
     params = summary.get("parameters", {})
     derived = summary.get("derived", {})
     required = ("num_epochs", "num_agents", "natural_history_clock")
+    required = (*required, "sick_call_probability")
     missing = [key for key in required if key not in params]
     if missing:
         raise RuntimeError(f"{path} missing parameters: {', '.join(missing)}")
@@ -320,6 +323,7 @@ def _read_row(summary: dict[str, Any], path: str) -> dict[str, Any]:
         "run_id": summary.get("run_id", path.split("!", maxsplit=1)[0]),
         "hull": hull,
         "strategy": strategy,
+        "sick_call_probability": float(params["sick_call_probability"]),
         "dose_adjustment": float(params.get("dose_adjustment", 0.0)),
         "seed": int(params.get("seed", -1)),
         "num_epochs": int(params["num_epochs"]),
@@ -372,11 +376,15 @@ def summarise_cell(rows: list[dict[str, Any]]) -> dict[str, Any]:
     ]
     cell["A9_eligible_runs"] = len(eligible)
     cell["A9_ineligible_runs"] = len(rows) - len(eligible)
-    no_reporting = all(
-        row["reported_case_attack_rate_passenger"] == 0.0
-        and row["reported_case_attack_rate_crew"] == 0.0
+    reporting_free = [
+        row["sick_call_probability"] == 0.0
         for row in rows
-    ) or all(row["strategy"] == "none_true" for row in rows)
+    ]
+    if any(reporting_free) and not all(reporting_free):
+        raise RuntimeError(
+            "cell mixes report-free and reporting runs; A8/A9 are undefined",
+        )
+    no_reporting = all(reporting_free)
     cell["A8_A9_no_reporting"] = no_reporting
     if no_reporting:
         cell["A8_pax_incidence"] = A8_A9_NO_REPORTING
@@ -471,13 +479,14 @@ def verdicts(
     cell: dict[str, Any],
     targets: dict[str, dict[str, float] | None],
     era: str = "pre",
-) -> dict[str, str]:
+) -> tuple[dict[str, str], dict[str, float]]:
     """PASS/FAIL per anchor on conditional and unconditional channels.
 
     ``targets`` comes from ``vsp_attack_rate_targets`` for the scored era; a
     hull whose target is ``None`` has too few postings to anchor A4 at all.
     """
     out: dict[str, str] = {}
+    ratios: dict[str, float] = {}
     for anchor, (low, high) in ANCHORS.items():
         value = cell.get(anchor) if anchor == "A1_ever_ill_passenger" else (
             cell.get(f"{anchor}__per_seed_median")
@@ -499,12 +508,12 @@ def verdicts(
     if cell.get("A8_A9_no_reporting"):
         out["A8"] = f"n/a ({A8_A9_NO_REPORTING})"
         out["A9"] = f"n/a ({A8_A9_NO_REPORTING})"
-        return out
+        return out, ratios
     if era == "post":
         reason = "n/a (post arm has no MIDRS observation)"
         out["A8"] = reason
         out["A9"] = reason
-        return out
+        return out, ratios
     try:
         incidence_target = a8_targets(hull, era)
     except ValueError:
@@ -520,26 +529,34 @@ def verdicts(
     else:
         pax_value = cell.get("A8_pax_incidence")
         crew_value = cell.get("A8_crew_incidence")
-        pax_low, pax_high = incidence_target["passenger"]
-        crew_low, crew_high = incidence_target["crew"]
+        pax_end = incidence_target["passenger"]["end_of_period"]
+        pax_pooled = incidence_target["passenger"]["pooled_band"]
+        crew_end = incidence_target["crew"]["end_of_period"]
+        crew_pooled = incidence_target["crew"]["pooled_band"]
+        pax_low, pax_high = sorted((pax_end, pax_pooled))
+        crew_low, crew_high = sorted((crew_end, crew_pooled))
         if not isinstance(pax_value, (int, float)) or not isinstance(
             crew_value, (int, float)
         ):
             out["A8"] = "n/a"
         else:
-            pax_ratio_low = pax_value / pax_low if pax_low else float("inf")
-            pax_ratio_high = pax_value / pax_high if pax_high else float("inf")
-            crew_ratio_low = crew_value / crew_low if crew_low else float("inf")
-            crew_ratio_high = crew_value / crew_high if crew_high else float("inf")
+            ratios["A8_pax_ratio_to_end_of_period"] = (
+                pax_value / pax_end if pax_end else float("inf")
+            )
+            ratios["A8_pax_ratio_to_pooled_band"] = (
+                pax_value / pax_pooled if pax_pooled else float("inf")
+            )
+            ratios["A8_crew_ratio_to_end_of_period"] = (
+                crew_value / crew_end if crew_end else float("inf")
+            )
+            ratios["A8_crew_ratio_to_pooled_band"] = (
+                crew_value / crew_pooled if crew_pooled else float("inf")
+            )
             out["A8"] = (
                 "PASS" if pax_low <= pax_value <= pax_high
                 and crew_low <= crew_value <= crew_high
                 else "FAIL"
             )
-            cell["A8_pax_ratio_to_end"] = pax_ratio_low
-            cell["A8_pax_ratio_to_pooled"] = pax_ratio_high
-            cell["A8_crew_ratio_to_end"] = crew_ratio_low
-            cell["A8_crew_ratio_to_pooled"] = crew_ratio_high
     target_a9 = a9_targets(era)
     if target_a9 is None:
         out["A9"] = "n/a (post arm has no MIDRS observation)"
@@ -549,12 +566,12 @@ def verdicts(
         if value is None or not isinstance(value, (int, float)):
             out["A9"] = "n/a (no eligible runs)"
         else:
-            cell["A9_ratio_to_investigated"] = value / (low / 1000)
-            cell["A9_ratio_to_posted"] = value / (high / 1000)
+            ratios["A9_ratio_to_investigated"] = value / (low / 1000)
+            ratios["A9_ratio_to_posted"] = value / (high / 1000)
             out["A9"] = (
                 "PASS" if low / 1000 <= value <= high / 1000 else "FAIL"
             )
-    return out
+    return out, ratios
 
 
 def _validated_report_path(path: Path, results_root: Path) -> Path:
@@ -647,8 +664,12 @@ def render(
         "",
         *_a4_target_lines(era, targets),
         "A4 and A7 are conditional on posting; A8 and A9 are unconditional. "
-        "The pre-arm A8 target is an interval because the observed rate "
-        "halved across the source period, and the post arm has no observation.",
+        "The pre-arm A8 target is a plausibility band, not a confidence "
+        "interval: its fleet-wide calendar endpoint and pooled GRT-band rate "
+        "come from different stratifications. For <=30,000 GRT, the "
+        "fleet endpoint is 16.9 and the pooled rate is 10.9, so the pair is "
+        "not ordered by construction; no band-specific calendar endpoint is "
+        "invented. The post arm has no observation.",
         "",
         (
             "Archive ingestion: "
@@ -678,7 +699,8 @@ def render(
         return f"{float(value):.{digits}f}"
 
     for (hull, strategy, dose), cell in sorted(cells.items()):
-        verdict = verdicts(hull, cell, targets, era)
+        verdict, ratios = verdicts(hull, cell, targets, era)
+        display_cell = {**cell, **ratios}
         failed = [name for name, state in verdict.items() if state == "FAIL"]
         state = "all PASS" if not failed else "FAIL: " + ",".join(
             name.split("_")[0] for name in sorted(failed)
@@ -695,15 +717,15 @@ def render(
             f"{fmt(cell.get('reported_case_attack_rate_passenger'))} | "
             f"{fmt(cell.get('A5_passenger_crew_ratio__per_seed_median'), 2)}"
             f" ({fmt(cell.get('A5_passenger_crew_ratio__of_medians'), 2)}) | "
-            f"{fmt(cell.get('A8_pax_incidence'), 2)} / "
-            f"{fmt(cell.get('A8_crew_incidence'), 2)} "
-            f"(ratios {fmt(cell.get('A8_pax_ratio_to_end'), 2)}/"
-            f"{fmt(cell.get('A8_pax_ratio_to_pooled'), 2)}; "
-            f"{fmt(cell.get('A8_crew_ratio_to_end'), 2)}/"
-            f"{fmt(cell.get('A8_crew_ratio_to_pooled'), 2)}) | "
-            f"{fmt(cell.get('A9_posting_probability'), 4)} "
-            f"(ratios {fmt(cell.get('A9_ratio_to_investigated'), 2)}/"
-            f"{fmt(cell.get('A9_ratio_to_posted'), 2)}) | "
+            f"{fmt(display_cell.get('A8_pax_incidence'), 2)} / "
+            f"{fmt(display_cell.get('A8_crew_incidence'), 2)} "
+            f"(ratios {fmt(display_cell.get('A8_pax_ratio_to_end_of_period'), 2)}/"
+            f"{fmt(display_cell.get('A8_pax_ratio_to_pooled_band'), 2)}; "
+            f"{fmt(display_cell.get('A8_crew_ratio_to_end_of_period'), 2)}/"
+            f"{fmt(display_cell.get('A8_crew_ratio_to_pooled_band'), 2)}) | "
+            f"{fmt(display_cell.get('A9_posting_probability'), 4)} "
+            f"(ratios {fmt(display_cell.get('A9_ratio_to_investigated'), 2)}/"
+            f"{fmt(display_cell.get('A9_ratio_to_posted'), 2)}) | "
             f"{state} |",
         )
 

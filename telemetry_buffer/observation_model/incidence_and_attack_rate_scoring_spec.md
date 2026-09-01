@@ -97,6 +97,13 @@ and fixed hull-to-GRT mapping are transcribed in
 `telemetry_buffer/observation_model/midrs_incidence_targets.py` from
 `telemetry_buffer/observation_model/midrs_observed_targets.md`.
 
+The pre-arm A8 target is a plausibility band whose named endpoints come from
+different stratifications: `end_of_period` is a fleet-wide calendar endpoint,
+while `pooled_band` is the GRT-band average over 2006-2019. It is not a
+confidence interval, and no band-specific calendar endpoint is reconstructed.
+For `<=30,000` GRT, the fleet endpoint is 16.9 while the pooled band rate is
+10.9, demonstrating that the endpoints are not ordered by construction.
+
 Observed, MMWR Table 2, per 100,000 travel days (95% CI):
 
 | VSP band | hull | passengers | crew |

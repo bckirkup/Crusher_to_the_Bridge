@@ -331,7 +331,9 @@ def test_verdict_reports_the_mega_hull_as_unanchored() -> None:
     """A mega-hull A4 result must never read as a pass or a plain n/a."""
     targets = scoring.vsp_attack_rate_targets("pre")
 
-    verdict = score_anchors.verdicts("mega_cruise_5000", _cell(0.05), targets)
+    verdict, _ = score_anchors.verdicts(
+        "mega_cruise_5000", _cell(0.05), targets
+    )
 
     assert verdict["A4_vsp_iqr"] == "n/a (insufficient VSP postings)"
 
@@ -353,6 +355,8 @@ def test_verdict_scores_against_the_classic_pre_iqr(
     """A4 passes inside the derived IQR and fails on either side of it."""
     targets = scoring.vsp_attack_rate_targets("pre")
 
-    verdict = score_anchors.verdicts("classic_cruise_1900", _cell(reported), targets)
+    verdict, _ = score_anchors.verdicts(
+        "classic_cruise_1900", _cell(reported), targets
+    )
 
     assert verdict["A4_vsp_iqr"] == expected
