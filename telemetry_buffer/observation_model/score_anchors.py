@@ -274,8 +274,12 @@ def _read_row(summary: dict[str, Any], path: str) -> dict[str, Any]:
     """Build one scorer row from a root or nested archive summary."""
     params = summary.get("parameters", {})
     derived = summary.get("derived", {})
-    required = ("num_epochs", "num_agents", "natural_history_clock")
-    required = (*required, "sick_call_probability")
+    required = (
+        "num_epochs",
+        "num_agents",
+        "natural_history_clock",
+        "sick_call_probability",
+    )
     missing = [key for key in required if key not in params]
     if missing:
         raise RuntimeError(f"{path} missing parameters: {', '.join(missing)}")
