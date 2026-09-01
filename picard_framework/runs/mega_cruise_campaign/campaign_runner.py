@@ -2043,6 +2043,21 @@ def run_simulation(
         if full_telemetry:
             sim.finalize(display=False)
 
+        profiles_path = resolve_child_path(
+            run_dir, "resolved_pathogen_profiles.json",
+        )
+        with validated_open(
+            profiles_path, "w", allowed_roots=roots, encoding="utf-8",
+        ) as fh:
+            json.dump(
+                {
+                    "pathogen_ids": sorted(sim.pathogen_profiles),
+                    "profiles": sim.pathogen_profiles,
+                },
+                fh,
+                indent=2,
+            )
+
         last = result.history[-1] if result.history else {}
         ts = extract_timeseries(result.history)
         ts_path = resolve_child_path(run_dir, "timeseries.json")
@@ -2054,6 +2069,7 @@ def run_simulation(
             "parameters": parameters_from_spec(spec),
             "num_epochs": result.num_epochs,
             "trigger_status": result.final_trigger_status,
+            "pathogen_ids": sorted(sim.pathogen_profiles),
             "summary": last.get("summary", {}),
             "cost_accounting": last.get("cost_accounting", {}),
             "derived": compute_derived_metrics(ts, _spec_num_agents(spec)),
