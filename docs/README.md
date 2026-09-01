@@ -13,6 +13,7 @@ links to, and several heavily-linked files describe work that is finished.
 |---|---|---|
 | `docs/` root | Operator manuals, the governing specs, and mechanism docs for behaviour that is live in-tree | Working on the simulation |
 | [`norovirus/`](norovirus/) | The norovirus calibration thread: ledger, defect history, provenance audit, observation priors | Touching any epidemiological constant or anchor |
+| [`covid/`](covid/) | The SARS-CoV-2 thread: arm execution status, parameter provenance audit | Touching any `sars_cov2_resp` constant or the COVID fit |
 | [`sentinel/`](sentinel/) | Sentinel surveillance, port health, wastewater ops, shore-side, economics | Working on `picard_framework/analysis/sentinel/`, `shore/`, `economics/` |
 | [`paper3/`](paper3/) | Variant surveillance and phylodynamics | Working on strain state, mutation, lineage observables |
 | [`proposals/`](proposals/) | Documents whose primary artifact **does not exist yet** | Deciding what to build; never as a description of current behaviour |
@@ -122,7 +123,7 @@ longer justifications.
 | Doc | Status |
 |-----|--------|
 | [pathogen_notes.md](pathogen_notes.md) | Living — per-pathogen literature justifications |
-| [covid_arm_status.md](covid_arm_status.md) | Findings — what the `sars_cov2_resp` campaign arm does, and the four reasons it is not yet scoreable |
+| [covid/](covid/) | The SARS-CoV-2 thread — arm status and the parameter provenance audit. Read the audit before quoting any `sars_cov2_resp` constant |
 | [instrument_parameterization_v2.md](instrument_parameterization_v2.md) | Living — feeds `data/config/clinical_instrument_params.json`. v1 is in `history/` |
 | [pricing_notes.md](pricing_notes.md) | Living — assay/labour cost assumptions for `resource_costs.json` |
 | [norovirus/](norovirus/) | The norovirus thread — start at the ledger |

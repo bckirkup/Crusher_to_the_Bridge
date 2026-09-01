@@ -1488,8 +1488,8 @@ All values verified against `data/pathogens/active_profiles.json` at SHA d557f39
 | `category` | `respiratory_viral` | — |
 | `transmission_routes` | `[droplet, hvac_airborne, direct_contact, fomite]` | — |
 | `dose_response.model` | `beta_poisson` | — |
-| `dose_response.alpha` | 0.18 | — |
-| `dose_response.beta` | 58.0 | — |
+| `dose_response.alpha` | 0.18 | Unsourced — covid audit §2 |
+| `dose_response.beta` | 58.0 | Unsourced — covid audit §2 |
 | `illness_probability.eta` | 0.4 | — |
 | `illness_probability.gamma` | 0.12 | — |
 | `incubation.distribution` | `lognormal` | Wei et al. 2021 |
@@ -1500,7 +1500,7 @@ All values verified against `data/pathogens/active_profiles.json` at SHA d557f39
 | `incubation.dose_reference_log10` | 3.43 | Beta-Poisson $$N_{50}$$, model units |
 | `incubation.dose_log10_shortening` | 0.15 | ctb_incubation_spec |
 | `incubation.dose_floor` | 0.3 | ctb_incubation_spec |
-| `recovery_day` | 7 (days from onset) | — |
+| `recovery_day` | 7 (days from onset) | Oordt-Speets 2024; Wu 2023 (duration); deterministic clearance is a convention |
 | `shedding_variance_log10` | 1.2 | — |
 | `presymptomatic_shedding_days` | 2.0 | He et al. 2020 |
 | `dose_adjustment` | 3.0 | — |
@@ -1510,7 +1510,7 @@ All values verified against `data/pathogens/active_profiles.json` at SHA d557f39
 | `observation_model` | `null` (absent) | audit finding 8.6 |
 | `transmission_route_weights` | `{direct_contact: 0.25, droplet: 0.30, hvac_airborne: 0.30, fomite: 0.10, food_contamination: 0.00, environmental_source: 0.05}` | — |
 | `surface_deposition_fraction` | 5e-05 | — |
-| `surface_decay_per_day` | 0.95 | — |
+| `surface_decay_per_day` | 0.95 | van Doremalen et al. 2020 (0.95/day = 5.55 h half-life) |
 | `airborne_half_life_hours` | 1.1 | van Doremalen et al. 2020 |
 | `base_susceptibility` | 1.0 | — |
 | `innate_nonsusceptible_fraction` | 0.0 | — |
