@@ -5,6 +5,11 @@
 These are the search results and review syntheses behind parameter choices. They
 are **not** specifications and nothing in them is authoritative about the model.
 
+The fleet-wide register
+[`../parameter_provenance_register.md`](../parameter_provenance_register.md)
+carries the per-quantity status these tranches are the evidence for; where the two
+disagree, the citation is here and the status is there.
+
 A constant's provenance lives at its point of definition in code, with an
 evidence grade (A = measured in this setting, B = measured in an analogous
 setting, C = inferred or assumed) — see

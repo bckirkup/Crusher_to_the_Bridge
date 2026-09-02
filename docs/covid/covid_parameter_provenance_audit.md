@@ -7,6 +7,11 @@
 > which quantities are identifiable from the Diamond Princess training data
 > fixed in `docs/proposals/covid_trajectory_fit_spec.md`.
 
+> Per-quantity status now lives in the fleet-wide register
+> [`../parameter_provenance_register.md`](../parameter_provenance_register.md),
+> which carries the SARS-CoV-2 rows; this audit holds the evidence and the
+> arguments behind them.
+
 ## Why this exists
 
 The trajectory-fit proposal declared **one** fitted parameter — the respiratory

@@ -122,6 +122,7 @@ longer justifications.
 
 | Doc | Status |
 |-----|--------|
+| [parameter_provenance_register.md](parameter_provenance_register.md) | Register, authoritative — every quantity in all three arms with its provenance class and adoption state. Read it before changing any epidemiological constant, and update it in the same change |
 | [pathogen_notes.md](pathogen_notes.md) | Living — per-pathogen literature justifications |
 | [covid/](covid/) | The SARS-CoV-2 thread — arm status and the parameter provenance audit. Read the audit before quoting any `sars_cov2_resp` constant |
 | [instrument_parameterization_v2.md](instrument_parameterization_v2.md) | Living — feeds `data/config/clinical_instrument_params.json`. v1 is in `history/` |
