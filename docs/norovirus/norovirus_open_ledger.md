@@ -31,9 +31,14 @@ Also withdrawn and not yet replaced:
 - **Any claim that the model reproduces VSP attack rates.** Withdrawn at #346
   and not re-established. Expedition's earlier agreement was a cancellation of
   an inflated infection rate against a deflated illness ratio.
-- **Route shares.** Last measured before #351/#352/#353, all three of which
-  change route magnitudes directly. The often-quoted "droplet carries 94-96% of
-  establishing dose" dates from the post-#338 measurement and is stale.
+- **Route shares.** The often-quoted "droplet carries 94-96% of establishing
+  dose" dates from the post-#338 measurement and remains withdrawn: it predates
+  #351/#352/#353, all three of which change route magnitudes directly. The
+  current measurement is
+  [`route_weight_measurement_findings.md`](../../telemetry_buffer/observation_model/route_weight_measurement_findings.md),
+  taken at `e8b2b95`, which finds droplet no longer dominant and reports mass
+  share and establishment share as distinct objects. It adopts nothing and
+  changes no constant.
 - **The passenger/crew ratio.** Same reason.
 
 **`innate_nonsusceptible_fraction`: the sourced interval is 0.00 – 0.16, and

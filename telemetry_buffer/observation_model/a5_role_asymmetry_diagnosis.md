@@ -1,5 +1,10 @@
 # A5: why the model cannot produce a passenger:crew asymmetry
 
+Status note: the route mix has been re-measured at `e8b2b95` in
+[`route_weight_measurement_findings.md`](route_weight_measurement_findings.md);
+droplet is no longer dominant, so the droplet share quoted below is stale. The
+analysis is kept as the record of the state it diagnosed.
+
 VSP reports passenger attack rates of 5.7–6.9% against crew 2.0–2.4%, a ratio of
 about 2.9 that is stable on both sides of the COVID break. The model returns
 roughly parity. This note records where that parity comes from. It is a

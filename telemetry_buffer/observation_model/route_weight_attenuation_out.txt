@@ -1,0 +1,438 @@
+===== rw_450_s500.log
+epochs=240 agents=450 platform=expedition_cruise_450 seed=500
+
+--- norwalk_gi ---
+pathway                    pre-weight    share    post-weight    share      w
+direct_contact              2.871e+07   0.9619      1.005e+07   0.9728  0.350 (direct_contact)
+fomite                      8.339e+05   0.0279      2.502e+05   0.0242  0.300 (fomite)
+droplet                      2.99e+05   0.0100       2.99e+04   0.0029  0.100 (droplet)
+hvac_airborne                    2940   0.0001            147   0.0000  0.050 (hvac_airborne)
+food                             2247   0.0001          449.3   0.0000  0.200 (food_contamination)
+TOTAL                       2.985e+07   1.0000      1.033e+07   1.0000
+realised attenuation sum(w_r D_r)/sum(D_r) = 0.3461
+
+--- sars_cov2_resp ---
+pathway                    pre-weight    share    post-weight    share      w
+direct_contact                  10.29   0.9420          2.572   0.9312  0.250 (direct_contact)
+droplet                        0.6335   0.0580           0.19   0.0688  0.300 (droplet)
+fomite                      4.871e-05   0.0000      4.871e-06   0.0000  0.100 (fomite)
+hvac_airborne               3.852e-07   0.0000      1.156e-07   0.0000  0.300 (hvac_airborne)
+TOTAL                           10.92   1.0000          2.763   1.0000
+realised attenuation sum(w_r D_r)/sum(D_r) = 0.2529
+
+32839 nonzero exposure events written to /home/ubuntu/exposure_events_expedition_cruise_450_s500.json
+===== rw_450_s501.log
+epochs=240 agents=450 platform=expedition_cruise_450 seed=501
+
+--- norwalk_gi ---
+pathway                    pre-weight    share    post-weight    share      w
+fomite                      1.674e+04   0.8734           5021   0.8565  0.300 (fomite)
+direct_contact                   2394   0.1250          838.1   0.1430  0.350 (direct_contact)
+droplet                         30.94   0.0016          3.094   0.0005  0.100 (droplet)
+food                           0.2923   0.0000        0.05846   0.0000  0.200 (food_contamination)
+hvac_airborne                 0.05639   0.0000       0.002819   0.0000  0.050 (hvac_airborne)
+TOTAL                       1.916e+04   1.0000           5862   1.0000
+realised attenuation sum(w_r D_r)/sum(D_r) = 0.3059
+
+--- sars_cov2_resp ---
+pathway                    pre-weight    share    post-weight    share      w
+direct_contact                   9244   0.9901           2311   0.9882  0.250 (direct_contact)
+droplet                         91.86   0.0098          27.56   0.0118  0.300 (droplet)
+fomite                           0.46   0.0000          0.046   0.0000  0.100 (fomite)
+TOTAL                            9336   1.0000           2339   1.0000
+realised attenuation sum(w_r D_r)/sum(D_r) = 0.2505
+
+22026 nonzero exposure events written to /home/ubuntu/exposure_events_expedition_cruise_450_s501.json
+===== rw_450_s502.log
+epochs=240 agents=450 platform=expedition_cruise_450 seed=502
+
+--- norwalk_gi ---
+pathway                    pre-weight    share    post-weight    share      w
+direct_contact              1.826e+07   0.9587      6.392e+06   0.9674  0.350 (direct_contact)
+fomite                       6.84e+05   0.0359      2.052e+05   0.0311  0.300 (fomite)
+droplet                     1.019e+05   0.0053      1.019e+04   0.0015  0.100 (droplet)
+hvac_airborne                   936.4   0.0000          46.82   0.0000  0.050 (hvac_airborne)
+food                            831.9   0.0000          166.4   0.0000  0.200 (food_contamination)
+TOTAL                       1.905e+07   1.0000      6.607e+06   1.0000
+realised attenuation sum(w_r D_r)/sum(D_r) = 0.3468
+
+--- sars_cov2_resp ---
+pathway                    pre-weight    share    post-weight    share      w
+direct_contact              6.237e+04   0.9686      1.559e+04   0.9626  0.250 (direct_contact)
+droplet                          2020   0.0314          606.1   0.0374  0.300 (droplet)
+fomite                       0.000209   0.0000       2.09e-05   0.0000  0.100 (fomite)
+hvac_airborne               5.023e-09   0.0000      1.507e-09   0.0000  0.300 (hvac_airborne)
+TOTAL                       6.439e+04   1.0000       1.62e+04   1.0000
+realised attenuation sum(w_r D_r)/sum(D_r) = 0.2516
+
+34897 nonzero exposure events written to /home/ubuntu/exposure_events_expedition_cruise_450_s502.json
+===== rw_1900_s500.log
+epochs=240 agents=1900 platform=classic_cruise_1900 seed=500
+
+--- norwalk_gi ---
+pathway                    pre-weight    share    post-weight    share      w
+direct_contact              1.431e+07   0.9697      5.009e+06   0.9814  0.350 (direct_contact)
+fomite                      2.504e+05   0.0170      7.513e+04   0.0147  0.300 (fomite)
+droplet                     1.932e+05   0.0131      1.932e+04   0.0038  0.100 (droplet)
+food                             2592   0.0002          518.4   0.0001  0.200 (food_contamination)
+hvac_airborne                     883   0.0001          44.15   0.0000  0.050 (hvac_airborne)
+TOTAL                       1.476e+07   1.0000      5.104e+06   1.0000
+realised attenuation sum(w_r D_r)/sum(D_r) = 0.3458
+
+--- sars_cov2_resp ---
+pathway                    pre-weight    share    post-weight    share      w
+direct_contact              3.118e+05   0.9350      7.795e+04   0.9231  0.250 (direct_contact)
+droplet                     2.166e+04   0.0650           6498   0.0769  0.300 (droplet)
+fomite                        0.02201   0.0000       0.002201   0.0000  0.100 (fomite)
+TOTAL                       3.335e+05   1.0000      8.445e+04   1.0000
+realised attenuation sum(w_r D_r)/sum(D_r) = 0.2532
+
+117041 nonzero exposure events written to /home/ubuntu/exposure_events_classic_cruise_1900_s500.json
+===== route_weight_attribution.py exposure_events_expedition_cruise_450_s500.json norwalk_gi
+exposure_events_expedition_cruise_450_s500.json: norwalk_gi, 29103 of 32839 exposure events, Beta(0.111, 32.81), pathways ['direct_contact', 'droplet', 'fomite', 'food', 'hvac_airborne']
+
+pre-weight (weights all 1.0): S = 845.3214
+pathway            mass share   establishment share
+direct_contact        0.96188               0.27612
+droplet               0.01002               0.34942
+fomite                0.02793               0.36514
+food                  0.00008               0.00540
+hvac_airborne         0.00010               0.00392
+
+post-weight (shipped weights): S = 425.0525
+pathway            mass share   establishment share
+direct_contact        0.97283               0.41823
+droplet               0.00289               0.15301
+fomite                0.02422               0.42500
+food                  0.00004               0.00296
+hvac_airborne         0.00001               0.00081
+
+dose-scale elasticity, shipped-weight exposures as the base
+     scale            S     S/S(1)
+    0.0600     103.0230     0.2424
+    0.1250     152.7666     0.3594
+    0.2500     218.4376     0.5139
+    0.5000     307.4232     0.7233
+    1.0000     425.0525     1.0000
+    2.0000     576.5305     1.3564
+    2.8890     672.3596     1.5818
+    4.0000     766.8414     1.8041
+    8.0000    1000.6712     2.3542
+
+alternative route multiplier sets, applied to the pre-weight stream
+set                                     S    vs unit   vs shipped
+unit (no route weights)          845.3214     1.0000       1.9887
+shipped route weights            425.0525     0.5028       1.0000
+clearance-derived (v2)           484.8723     0.5736       1.1407
+clearance, oral droplet          628.1792     0.7431       1.4779
+
+where establishment comes from, by exposure percentile
+  exposures below p50: 0.0226% of S
+  exposures below p75: 0.4954% of S
+  exposures below p90: 8.3189% of S
+  exposures below p95: 26.3359% of S
+  exposures below p99: 72.2932% of S
+  dominant pathway among the top 1% of exposures: {'direct_contact': 226, 'fomite': 66}
+===== route_weight_attribution.py exposure_events_expedition_cruise_450_s501.json norwalk_gi
+exposure_events_expedition_cruise_450_s501.json: norwalk_gi, 15617 of 22026 exposure events, Beta(0.111, 32.81), pathways ['direct_contact', 'droplet', 'fomite', 'food', 'hvac_airborne']
+
+pre-weight (weights all 1.0): S = 17.3870
+pathway            mass share   establishment share
+direct_contact        0.12496               0.19213
+droplet               0.00161               0.00595
+fomite                0.87340               0.80185
+food                  0.00002               0.00006
+hvac_airborne         0.00000               0.00001
+
+post-weight (shipped weights): S = 8.9584
+pathway            mass share   establishment share
+direct_contact        0.14297               0.19999
+droplet               0.00053               0.00116
+fomite                0.85649               0.79883
+food                  0.00001               0.00002
+hvac_airborne         0.00000               0.00000
+
+dose-scale elasticity, shipped-weight exposures as the base
+     scale            S     S/S(1)
+    0.0600       1.0379     0.1159
+    0.1250       1.9580     0.2186
+    0.2500       3.4133     0.3810
+    0.5000       5.6718     0.6331
+    1.0000       8.9584     1.0000
+    2.0000      13.4478     1.5011
+    2.8890      16.3562     1.8258
+    4.0000      19.2446     2.1482
+    8.0000      26.4082     2.9479
+
+alternative route multiplier sets, applied to the pre-weight stream
+set                                     S    vs unit   vs shipped
+unit (no route weights)           17.3870     1.0000       1.9409
+shipped route weights              8.9584     0.5152       1.0000
+clearance-derived (v2)            11.9131     0.6852       1.3298
+clearance, oral droplet           11.9575     0.6877       1.3348
+
+where establishment comes from, by exposure percentile
+  exposures below p50: 0.0000% of S
+  exposures below p75: 0.0005% of S
+  exposures below p90: 0.0230% of S
+  exposures below p95: 0.0815% of S
+  exposures below p99: 2.4380% of S
+  dominant pathway among the top 1% of exposures: {'fomite': 132, 'direct_contact': 25}
+===== route_weight_attribution.py exposure_events_expedition_cruise_450_s502.json norwalk_gi
+exposure_events_expedition_cruise_450_s502.json: norwalk_gi, 29395 of 34897 exposure events, Beta(0.111, 32.81), pathways ['direct_contact', 'droplet', 'fomite', 'food', 'hvac_airborne']
+
+pre-weight (weights all 1.0): S = 745.4563
+pathway            mass share   establishment share
+direct_contact        0.95865               0.29015
+droplet               0.00535               0.27724
+fomite                0.03591               0.42676
+food                  0.00004               0.00322
+hvac_airborne         0.00005               0.00264
+
+post-weight (shipped weights): S = 373.0369
+pathway            mass share   establishment share
+direct_contact        0.96737               0.44059
+droplet               0.00154               0.07860
+fomite                0.03106               0.47901
+food                  0.00003               0.00144
+hvac_airborne         0.00001               0.00036
+
+dose-scale elasticity, shipped-weight exposures as the base
+     scale            S     S/S(1)
+    0.0600      95.2214     0.2553
+    0.1250     137.8160     0.3694
+    0.2500     193.9653     0.5200
+    0.5000     270.4666     0.7250
+    1.0000     373.0369     1.0000
+    2.0000     508.5097     1.3632
+    2.8890     596.5037     1.5990
+    4.0000     685.1154     1.8366
+    8.0000     912.5956     2.4464
+
+alternative route multiplier sets, applied to the pre-weight stream
+set                                     S    vs unit   vs shipped
+unit (no route weights)          745.4563     1.0000       1.9983
+shipped route weights            373.0369     0.5004       1.0000
+clearance-derived (v2)           438.5685     0.5883       1.1757
+clearance, oral droplet          536.0655     0.7191       1.4370
+
+where establishment comes from, by exposure percentile
+  exposures below p50: 0.0425% of S
+  exposures below p75: 1.2189% of S
+  exposures below p90: 7.9309% of S
+  exposures below p95: 21.9068% of S
+  exposures below p99: 67.9685% of S
+  dominant pathway among the top 1% of exposures: {'direct_contact': 235, 'fomite': 59}
+===== route_weight_attribution.py exposure_events_classic_cruise_1900_s500.json norwalk_gi
+exposure_events_classic_cruise_1900_s500.json: norwalk_gi, 104451 of 117041 exposure events, Beta(0.111, 32.81), pathways ['direct_contact', 'droplet', 'fomite', 'food', 'hvac_airborne']
+
+pre-weight (weights all 1.0): S = 683.1675
+pathway            mass share   establishment share
+direct_contact        0.96971               0.22456
+droplet               0.01309               0.55183
+fomite                0.01697               0.21451
+food                  0.00018               0.00601
+hvac_airborne         0.00006               0.00309
+
+post-weight (shipped weights): S = 251.0745
+pathway            mass share   establishment share
+direct_contact        0.98139               0.45806
+droplet               0.00378               0.23070
+fomite                0.01472               0.30536
+food                  0.00010               0.00533
+hvac_airborne         0.00001               0.00055
+
+dose-scale elasticity, shipped-weight exposures as the base
+     scale            S     S/S(1)
+    0.0600      57.5817     0.2293
+    0.1250      84.3549     0.3360
+    0.2500     120.9255     0.4816
+    0.5000     173.8459     0.6924
+    1.0000     251.0745     1.0000
+    2.0000     363.7255     1.4487
+    2.8890     442.5731     1.7627
+    4.0000     525.8019     2.0942
+    8.0000     754.1098     3.0035
+
+alternative route multiplier sets, applied to the pre-weight stream
+set                                     S    vs unit   vs shipped
+unit (no route weights)          683.1675     1.0000       2.7210
+shipped route weights            251.0745     0.3675       1.0000
+clearance-derived (v2)           279.5062     0.4091       1.1132
+clearance, oral droplet          461.2403     0.6751       1.8371
+
+where establishment comes from, by exposure percentile
+  exposures below p50: 0.0197% of S
+  exposures below p75: 0.4782% of S
+  exposures below p90: 2.7998% of S
+  exposures below p95: 6.5378% of S
+  exposures below p99: 31.5954% of S
+  dominant pathway among the top 1% of exposures: {'fomite': 511, 'droplet': 35, 'direct_contact': 493, 'food': 6}
+===== route_weight_attribution.py exposure_events_expedition_cruise_450_s500.json sars_cov2_resp
+exposure_events_expedition_cruise_450_s500.json: sars_cov2_resp, 3736 of 32839 exposure events, Beta(0.18, 58.0), pathways ['direct_contact', 'droplet', 'fomite', 'hvac_airborne']
+
+pre-weight (weights all 1.0): S = 0.0319
+pathway            mass share   establishment share
+direct_contact        0.94200               0.93900
+droplet               0.05799               0.06100
+fomite                0.00000               0.00000
+hvac_airborne         0.00000               0.00000
+
+post-weight (shipped weights): S = 0.0084
+pathway            mass share   establishment share
+direct_contact        0.93121               0.93030
+droplet               0.06879               0.06970
+fomite                0.00000               0.00000
+hvac_airborne         0.00000               0.00000
+
+dose-scale elasticity, shipped-weight exposures as the base
+     scale            S     S/S(1)
+    0.0600       0.0005     0.0608
+    0.1250       0.0011     0.1266
+    0.2500       0.0021     0.2528
+    0.5000       0.0042     0.5037
+    1.0000       0.0084     1.0000
+    2.0000       0.0166     1.9714
+    2.8890       0.0237     2.8124
+    4.0000       0.0323     3.8357
+    8.0000       0.0614     7.2954
+
+alternative route multiplier sets, applied to the pre-weight stream
+set                                     S    vs unit   vs shipped
+unit (no route weights)            0.0319     1.0000       3.7898
+shipped route weights              0.0111     0.3477       1.3177
+clearance-derived (v2)             0.0156     0.4879       1.8491
+clearance, oral droplet            0.0164     0.5141       1.9482
+
+where establishment comes from, by exposure percentile
+  exposures below p50: 0.0170% of S
+  exposures below p75: 0.0420% of S
+  exposures below p90: 0.0710% of S
+  exposures below p95: 0.1268% of S
+  exposures below p99: 4.2160% of S
+  dominant pathway among the top 1% of exposures: {'direct_contact': 29, 'droplet': 9}
+===== route_weight_attribution.py exposure_events_expedition_cruise_450_s501.json sars_cov2_resp
+exposure_events_expedition_cruise_450_s501.json: sars_cov2_resp, 6409 of 22026 exposure events, Beta(0.18, 58.0), pathways ['direct_contact', 'droplet', 'fomite']
+
+pre-weight (weights all 1.0): S = 2.7420
+pathway            mass share   establishment share
+direct_contact        0.99011               0.89714
+droplet               0.00984               0.10234
+fomite                0.00005               0.00051
+
+post-weight (shipped weights): S = 1.5503
+pathway            mass share   establishment share
+direct_contact        0.98820               0.94544
+droplet               0.01178               0.05447
+fomite                0.00002               0.00009
+
+dose-scale elasticity, shipped-weight exposures as the base
+     scale            S     S/S(1)
+    0.0600       0.3177     0.2049
+    0.1250       0.5299     0.3418
+    0.2500       0.7971     0.5142
+    0.5000       1.1317     0.7300
+    1.0000       1.5503     1.0000
+    2.0000       2.0879     1.3468
+    2.8890       2.4386     1.5730
+    4.0000       2.7971     1.8042
+    8.0000       3.7609     2.4259
+
+alternative route multiplier sets, applied to the pre-weight stream
+set                                     S    vs unit   vs shipped
+unit (no route weights)            2.7420     1.0000       1.7687
+shipped route weights              1.7039     0.6214       1.0991
+clearance-derived (v2)             1.9398     0.7074       1.2513
+clearance, oral droplet            2.0603     0.7514       1.3290
+
+where establishment comes from, by exposure percentile
+  exposures below p50: 0.0001% of S
+  exposures below p75: 0.0026% of S
+  exposures below p90: 0.2281% of S
+  exposures below p95: 0.9889% of S
+  exposures below p99: 4.5164% of S
+  dominant pathway among the top 1% of exposures: {'droplet': 48, 'direct_contact': 17}
+===== route_weight_attribution.py exposure_events_expedition_cruise_450_s502.json sars_cov2_resp
+exposure_events_expedition_cruise_450_s502.json: sars_cov2_resp, 5502 of 34897 exposure events, Beta(0.18, 58.0), pathways ['direct_contact', 'droplet', 'fomite', 'hvac_airborne']
+
+pre-weight (weights all 1.0): S = 12.2884
+pathway            mass share   establishment share
+direct_contact        0.96862               0.63886
+droplet               0.03138               0.36114
+fomite                0.00000               0.00000
+hvac_airborne         0.00000               0.00000
+
+post-weight (shipped weights): S = 6.6013
+pathway            mass share   establishment share
+direct_contact        0.96258               0.76409
+droplet               0.03742               0.23591
+fomite                0.00000               0.00000
+hvac_airborne         0.00000              -0.00000
+
+dose-scale elasticity, shipped-weight exposures as the base
+     scale            S     S/S(1)
+    0.0600       1.3704     0.2076
+    0.1250       2.1710     0.3289
+    0.2500       3.2291     0.4892
+    0.5000       4.6615     0.7061
+    1.0000       6.6013     1.0000
+    2.0000       9.2721     1.4046
+    2.8890      11.0932     1.6804
+    4.0000      12.9971     1.9689
+    8.0000      18.1777     2.7536
+
+alternative route multiplier sets, applied to the pre-weight stream
+set                                     S    vs unit   vs shipped
+unit (no route weights)           12.2884     1.0000       1.8615
+shipped route weights              6.2436     0.5081       0.9458
+clearance-derived (v2)             6.8003     0.5534       1.0301
+clearance, oral droplet            8.8472     0.7200       1.3402
+
+where establishment comes from, by exposure percentile
+  exposures below p50: -0.0000% of S
+  exposures below p75: 0.0002% of S
+  exposures below p90: 0.0012% of S
+  exposures below p95: 0.8336% of S
+  exposures below p99: 9.1199% of S
+  dominant pathway among the top 1% of exposures: {'droplet': 32, 'direct_contact': 24}
+===== route_weight_attribution.py exposure_events_classic_cruise_1900_s500.json sars_cov2_resp
+exposure_events_classic_cruise_1900_s500.json: sars_cov2_resp, 12590 of 117041 exposure events, Beta(0.18, 58.0), pathways ['direct_contact', 'droplet', 'fomite']
+
+pre-weight (weights all 1.0): S = 55.3392
+pathway            mass share   establishment share
+direct_contact        0.93505               0.18320
+droplet               0.06495               0.81680
+fomite                0.00000               0.00000
+
+post-weight (shipped weights): S = 23.6914
+pathway            mass share   establishment share
+direct_contact        0.92305               0.28329
+droplet               0.07695               0.71671
+fomite                0.00000               0.00000
+
+dose-scale elasticity, shipped-weight exposures as the base
+     scale            S     S/S(1)
+    0.0600       3.8959     0.1644
+    0.1250       5.9261     0.2501
+    0.2500       9.1082     0.3845
+    0.5000      14.5143     0.6126
+    1.0000      23.6914     1.0000
+    2.0000      38.7225     1.6345
+    2.8890      49.8247     2.1031
+    4.0000      61.7176     2.6051
+    8.0000      93.7296     3.9563
+
+alternative route multiplier sets, applied to the pre-weight stream
+set                                     S    vs unit   vs shipped
+unit (no route weights)           55.3392     1.0000       2.3358
+shipped route weights             13.6286     0.2463       0.5753
+clearance-derived (v2)            12.7329     0.2301       0.5374
+clearance, oral droplet           34.5102     0.6236       1.4567
+
+where establishment comes from, by exposure percentile
+  exposures below p50: 0.0035% of S
+  exposures below p75: 0.0131% of S
+  exposures below p90: 0.0319% of S
+  exposures below p95: 0.8855% of S
+  exposures below p99: 48.3020% of S
+  dominant pathway among the top 1% of exposures: {'droplet': 108, 'direct_contact': 18}
