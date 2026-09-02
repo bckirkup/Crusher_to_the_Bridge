@@ -5,6 +5,10 @@ Status: audit, 2026-08-30. Supersedes nothing; it is the inventory behind
 #358 and after the finding that `environmental_faecal_release_log10_g_per_epoch`
 no longer moves the attack rate.
 
+Per-quantity status now lives in the fleet-wide register
+`../parameter_provenance_register.md`, which carries this inventory as its
+degrees-of-freedom section; the measurements and the reasoning stay here.
+
 ## 1. Why this exists
 
 The model used to have one calibration knob per pathogen and several anchors, so
