@@ -94,8 +94,9 @@ Shipped values verified against `data/pathogens/active_profiles.json` and
 | `transmission_route_weights` (6) | 0.35/0.1/0.05/0.3/0.2/0.0 | C | None. Measured to be independent multipliers, not shares; and one parameterisation of the same object as Edison's clearance layer | ⊘ field — they are not weights | #25 |
 | `environmental_faecal_release_log10_g_per_epoch` | 4.0 (`dose_adjustment`) | F → **measured inert** | Ge 2023 measures *total shed genome copies*, which retires the key rather than sourcing it | ⊘ field | #38 |
 | Emesis titre (engine) | 3.9e4 GEC/mL | B, **from the abstract** | Kirby 2016 Table 3: GII.2 = 1.6e5. The abstract pools a 2-subject pilot the Results exclude | ✓ | #38 |
-| Emesis volume, episode count (engine) | ~200–600 mL, 1–3 | B, same defect | Kirby Results: 658.7 mL (GI) / 845.0 (GII.2); 1–7 episodes | ✓ | #38 |
-| `contact_transfer_fraction` (engine) | see ledger | C | ~0.25 anchor; **measured to clear no noise floor anywhere** in the screen | ✓ low priority | #22 |
+| Emesis volume (engine) | 50–800 mL/episode | B | Tung-Thompson 2015, Booth & Frost 2019. The defect is the *per-subject total* it implies — ≈200–600 mL against Kirby's measured 658.7 (GI) / 845.0 (GII.2) | ✓ | #38 |
+| Emesis episode count (engine) | 1–3 | C, inferred | Kirby Results: 1–7 episodes | ✓ | #38 |
+| `contact_transfer_fraction` (engine) | **1.0, by omission** — neither active profile sets it | C | The ~0.25 contact-model anchor is recorded in `norovirus/norovirus_model_history.md` §10 and is itself thinly sourced. Contact is now sampled at POLYMOD rates and transferred at unit efficiency. **Measured to clear no noise floor anywhere** in the screen | ✓ low priority | #22 |
 | `SURFACE_TO_HAND_LOGNORMAL` (engine) | median 0.122 | B | Corroborated: close to measured **wet** finger↔steel transfer (Bidawid 13%, Tuladhar 13%, Dallner 9.2%) | — in tree, corroborated | |
 | Cabin-localization fraction `f` | swept | C, declared | No measurement exists (Wikswo 2009 is the nearest and does not measure it). Park 2015's cabin swabs bear on it | ∅ null | #12 |
 | Observation model (~15 numbers) | — | C / F | One empirical aggregate constrains them jointly, and that aggregate is anchor A3 | ⊘ **A3 is not a test** | #23, #27 |
@@ -136,7 +137,7 @@ must be resolved before it is.
 | Route efficiency (aerosol vs intranasal) | absent | — | The ratio is a **measurable physical quantity spanning at least two orders**. Multiplier withdrawn pending Memoli's primary text; the order-of-magnitude conclusion stands | ⊘ field — needs #25 first | #25 |
 | Emission | — | C | Yan 2017/2018 (EMIT): GM 3.8e4 copies/30 min fine aerosol, 1.2e4 coarse, culturable in 39% of fine. **Uncorrelated with NP swab load** — direct proof that a nasal-indexed curve cannot be an emission rate | ✓ once the shedding path takes a rate | #30 pattern |
 | `surface_decay_per_day` | 0.94 | C | = 1.22 log10/day = **5.9 h half-life** (not the 0.47 / ~15 h stated). Slower than *both* Greatorex 2011 (1.5 h) and Bean 1982 (4.8 h) | ⊘ field — a constant fractional loss cannot carry an RH/matrix-dependent curve | #44 |
-| Same key in the JSON bundle | **4.8** | P | Schema max is 1; the engine clamps to 1.0, i.e. *total* daily loss, silently | **must not be loaded** | #44 |
+| Same key in Edison's *proposed* bundle (not in `data/`) | **4.8**, range [2.0, 16.0] | P | Schema max is 1 (`schemas/pathogen_profiles.schema.json`); the engine clamps with `min(1.0, decay)` (`engines/sim_clock.py`), so 4.8 would silently become *total* daily loss. The in-tree bundle value is 0.94 | **must not be loaded** | #44 |
 | `airborne_half_life_hours` | 1.5 | C | Kormuth 2018: <0.5 log10 loss across 20–98% RH **in respiratory mucus** vs minutes in saline. Interval width is *matrix*, not RH | ✓ as an interval | |
 | `base_susceptibility` | 0.65 | **F, and it is prior immunity** | Not a constant: a per-season, per-route seroprevalence/vaccination input. This is the one place a flu arm could quietly overfit | reclassify as a scenario input | |
 | `surface_deposition_fraction` | 1e-3 | I | 10× the norovirus value, no stated reason | ∅ null + ⊘ field | #42 |
