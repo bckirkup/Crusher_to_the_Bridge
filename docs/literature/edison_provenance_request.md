@@ -90,26 +90,26 @@ convention?
 the SARS-CoV-2 value exactly half of it (5e-5)?**
 We can find no argument for the factor of two.
 
-**Q5. `innate_nonsusceptible_fraction` — and which genogroup is this profile?**
-The Edison bundle carries 0.2 with `nonsusceptible_mechanism =
-FUT2_nonsecretor`; the active profile carries 0.0. We now believe 0.2 is
-**defensible** for a GI.1 arm — Teunis 2020 puts Se− infection risk at one
-genomic copy at 0.00007 against Se+ 0.28 for GI, and Lindesmith 2003 found the
-FUT2 null allele fully penetrant in GI.1 challenge, no nonsecretor infected at
-any dose. For GII the same paper gives 0.015 against 0.076, and non-secretors are
-only partially resistant (Rouphael's GII.2: 4 of 8 Se− ill at top dose;
-Frenck's GII.4: 1 of 17). So the question is not the number but the **arm's
-identity**: was the 0.2 chosen as GI-appropriate full resistance, or as a
-GII-appropriate prevalence that happens to be applied as full removal?
-
-That matters because `norwalk_gi` carries Teunis 2008 GI.1 challenge
-dose-response while being scored against VSP cruise outbreaks that are
-predominantly GII.4 — and GI is 3.7× more infectious per genome copy than GII, so
-switching genogroup moves infectivity and susceptibility in opposite directions.
-**Was the profile ever intended to represent cruise-realistic GII.4, and if so,
-why does it carry GI parameters?** This is our highest-consequence question: in a
+**Q5. `innate_nonsusceptible_fraction` — was 0.2 meant as full resistance or as
+a prevalence?** The Edison bundle carries 0.2 with `nonsusceptible_mechanism =
+FUT2_nonsecretor`; the active profile carries 0.0. The arm is GII — that part we
+have now answered ourselves, from the profile's `name`, `genotypes` and
+`incubation.notes` — and for GII, Teunis 2020 gives Se− infection risk at one
+genomic copy of 0.015 against Se+ 0.076, with non-secretors only partially
+resistant (Rouphael's GII.2: 4 of 8 Se− ill at top dose; Frenck's GII.4: 1 of
+17). A **fully removed** fraction is therefore the wrong shape, whatever its
+size, and its ceiling is ≈0.16. For GI the picture is entirely different — Se−
+0.00007 against Se+ 0.28, and Lindesmith 2003 found the FUT2 null allele fully
+penetrant in GI.1 challenge — so **was the 0.2 taken from GI evidence, or from a
+non-secretor prevalence figure applied as though it were full resistance?** In a
 Morris screen over the sourced box this factor ranks **first** on every passenger
-channel.
+channel, so its mechanism matters more than its value.
+
+This raises Q1 rather than settling it: the arm simulates GII.4 / GII.17 / GII.2
+but its dose-response is recorded as fitted to oral **Norwalk GI.1** inoculum,
+and GI is 3.7× more infectious per genome copy than GII in secretor-positive
+hosts. If that provenance is right, the arm has a genogroup mismatch at its most
+sensitive point.
 
 **Q6. `airborne_half_life_hours = 1.1`, cited in our tables to van Doremalen et
 al. 2020.** That is the SARS-CoV-2 aerosol measurement, and it is the identical

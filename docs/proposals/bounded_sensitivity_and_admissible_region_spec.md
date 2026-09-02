@@ -116,7 +116,7 @@ factors.
 
 | Factor | Transform | Interval | Grade | Basis |
 |---|---|---|---|---|
-| `innate_nonsusceptible_fraction` | linear | **genogroup-conditional**: GI 0.00 – 0.20, GII 0.00 – 0.16 | B | See §3.3. The screen ran the GII interval; for the shipped GI.1 arm the ceiling is the non-secretor prevalence itself |
+| `innate_nonsusceptible_fraction` | linear | 0.00 – 0.16 | B | See §3.3. The arm is GII (declared in `name`, `genotypes` and `incubation.notes`), so the GII partial-susceptibility ceiling governs and the screen's box was correct |
 | `contact_transfer_fraction` | linear | 0.06 – 0.50 | B | Anderson et al. 2021, *AEM* 87(22): 360 fingerpad↔surface transfer events, 20 volunteers, MS2 (non-enveloped surrogate) mean 0.26, Phi6 0.17; surface type and transfer direction both significant, so the spread is the interval and a single number cannot be right for both directions |
 | Emesis titre (GEC/mL) | log10 | Kirby 2016 measured range | B | Already sourced in-tree; carry the study spread, not the point |
 | Emesis volume (mL) | log10 | 50 – 800 | B | Tung-Thompson et al. 2015, already bounded in-tree |
@@ -126,13 +126,18 @@ factors.
 | Reporting-probability scale | linear | 0.5 – 1.5 × | **C, declared** | The observation model's 15 assumed numbers are not independently identified (A3 circularity). Screen them as **one** multiplier on reporting probability, because that is the dimension the single empirical aggregate constrains |
 | `shedding_variance_log10` | linear | study spread | C | Source or declare |
 
-### 3.3 The FUT2 ceiling is genogroup-conditional, and this section had it wrong
+### 3.3 The FUT2 ceiling is genogroup-conditional, and the arm is GII
 
-**Corrected — see
-[`../literature/consensus_tranche_2.md`](../literature/consensus_tranche_2.md) §1.**
-This section previously concluded that the 0.2 target was wrong and the ceiling
-was 0.16. That derivation used the **GII** row of Teunis et al. 2020 and applied
-it to a **GI.1** profile.
+**Corrected twice — see
+[`../literature/consensus_tranche_2.md`](../literature/consensus_tranche_2.md) §1
+and [`../literature/consensus_tranche_3.md`](../literature/consensus_tranche_3.md)
+§1.** The ceiling *is* genogroup-conditional, which tranche 2 established. What
+tranche 2 then got wrong was which genogroup this arm is: it read the
+`pathogen_id` and assumed GI.1, while the profile declares GII.4 in its `name`,
+simulates `GII.4 / GII.17 / GII.2` in `strain_evolution.genotypes`, and carries
+an `incubation.notes` line saying the distribution is "GII rather than the GI the
+pathogen_id implies." **The GII interval governs, and the original 0.00 – 0.16
+conclusion stands.**
 
 Teunis et al. 2020 estimates infection risk at 1 genomic copy separately by
 secretor status *and genogroup*, and the two genogroups are not alike:
@@ -149,11 +154,15 @@ subjects ill at top dose against 10 of 12 Se+) and Frenck et al. 2012 (*JID*,
 GII.4, 1 of 17 Se− ill against 13 of 23 Se+) bracket that partial susceptibility
 from the two directions.
 
-For **GI**, which is what `norwalk_gi` is, the reduction is a factor of ~4,000,
-not ~5. Lindesmith et al. 2003 (*Nature Medicine*, GI.1 challenge) reports the
-FUT2 null allele as **fully penetrant: no nonsecretor developed infection at any
-dose.** A removed fraction is the right mechanism, and the ceiling is the
-non-secretor prevalence itself — 0.2 × (1 − 0.00025) ≈ 0.20.
+For **GI** the reduction is a factor of ~4,000, not ~5: Lindesmith et al. 2003
+(*Nature Medicine*, GI.1 challenge) reports the FUT2 null allele as **fully
+penetrant — no nonsecretor developed infection at any dose**, so a removed
+fraction would be the right mechanism with a ceiling at the non-secretor
+prevalence itself, 0.2 × (1 − 0.00025) ≈ 0.20. **That branch does not apply to
+this arm**, and is retained here only because the inherited dose-response (α
+0.111 / β 32.81, `Person.java`, fitted to oral Norwalk GI.1 inoculum) *is* GI —
+so a future correction of the dose-response to GII, or of the arm to GI, would
+switch which row applies. The two terms must move together or not at all.
 
 Prevalence remains population-specific and is the real source of width: ~20% in
 European-ancestry populations, 29% of the Lindesmith 2003 study sample, 19% in
@@ -161,12 +170,12 @@ the Rwandan cohort of Munyemana et al. 2025 (no norovirus association detected),
 and genotype/population variation is itself an argument for an interval
 (Nordgren & Sharma 2019, *Viruses* 11:226).
 
-**Consequence for #21:** for the shipped GI.1 arm, 0.0 → 0.20 is defensible
-after all, and the shipped 0.0 is the only value outside the range. The prior
-conclusion — that both 0.0 and 0.2 were outside it — held only under the GII
-reading. The larger question this raises, that the arm is GI-parameterised and
-GII-validated, is recorded in the tranche-2 note and is a scope decision rather
-than a parameter choice.
+**Consequence for #21:** both the shipped 0.0 and Edison's 0.2 are outside the
+governing 0.00 – 0.16 interval, in opposite directions, and the real defect is
+the removed-fraction *mechanism* — a partial-susceptibility multiplier is the
+right shape for GII. The larger question the genogroup work raises is not about
+this parameter at all: a GI.1 infectivity curve is driving a GII strain set (§3.3
+above, tranche 3 §1), which is Edison Q1 rather than a scope decision.
 
 The screen in `../norovirus/bounded_screen_results.md` swept 0.00 – 0.16. Its
 ranking is unaffected: extending the upper end to 0.20 can only increase the
