@@ -116,11 +116,18 @@ NOROVIRUS_FACTORS: tuple[Factor, ...] = (
         "log10",
         "B",
     ),
+    # surface_decay_per_day: span of the MNV-1 surrogate literature on
+    # non-porous surfaces at indoor temperature, converted to fractional
+    # daily loss via f = 1 - 10^-k. Low end 0.067 log10/day (Fallahi &
+    # Mattison 2011, ~1 log10 in 15 d on stainless steel); high end
+    # 0.79 log10/day (Kim et al., 25 C / 50% RH, provenance in doubt --
+    # see docs/literature/consensus_tranche_5.md section 1). Grade B:
+    # human norovirus is not culturable, so no direct measurement exists.
     Factor(
         "surface_decay_per_day",
         ("surface_decay_per_day",),
-        0.10,
-        0.60,
+        0.14,
+        0.84,
         "linear",
         "B",
     ),
