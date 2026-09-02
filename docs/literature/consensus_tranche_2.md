@@ -1,8 +1,14 @@
 # Consensus tranche 2 — the high-sensitivity factors, and a genogroup error in our own interval
 
-**Status:** Reference. Search output and its reading. **One correction to a
-previously-published interval**, recorded below and carried into the open ledger.
-No profile JSON, constant or code changed.
+**Status:** Reference, **partly superseded**. Search output and its reading. The
+literature in §1 is sound; **the arm it was attached to is not**. §1 and §2 below
+assert that `norwalk_gi` is a GI.1 profile. It is not — the profile declares
+itself GII.4 in its `name`, `strain_evolution.genotypes` and `incubation.notes`
+— so the GII interval governs the susceptibility term and #367's original
+conclusion stands. See [`consensus_tranche_3.md`](consensus_tranche_3.md) §1 for
+the correction and its consequences. Read the tables below for the
+genogroup-stratified evidence, not for the conclusion about our arm. No profile
+JSON, constant or code changed by either tranche.
 
 Search order was the Morris ranking in
 [`../norovirus/bounded_screen_results.md`](../norovirus/bounded_screen_results.md),
@@ -30,7 +36,10 @@ ways — and the two genogroups are not remotely alike:
 | **GI** | 0.28 | **0.00007** | **0.00025** |
 | GII | 0.076 | 0.015 | 0.197 |
 
-We read the GII row. **Our profile is `norwalk_gi` — GI.1.** For GI, secretor
+We read the GII row. **Our profile is `norwalk_gi` — GI.1.**
+[Corrected in tranche 3 §1: the arm declares itself GII.4 and simulates GII.4 /
+GII.17 / GII.2; only its `pathogen_id` and its inherited dose-response are GI, so
+the GII row is the applicable one for susceptibility after all.] For GI, secretor
 negativity is not a five-fold reduction; it is a factor of four thousand. It is
 corroborated by the strongest study in this literature: Lindesmith et al. 2003,
 *Nature Medicine* (1,131 citations), a GI.1 human challenge in which the FUT2

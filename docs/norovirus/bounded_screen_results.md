@@ -65,17 +65,18 @@ Three consequences, and none of them is what the provenance backlog assumed.
 
 **The top-ranked factor is the one whose target we just withdrew.**
 `innate_nonsusceptible_fraction` leads every passenger channel, and this screen
-swept it over the 0.00–0.16 interval the open ledger carried at the time. That
-interval has since been corrected: it was derived from GII evidence and applied
-to a GI.1 profile, and for GI the removed-fraction mechanism is right with a
-ceiling at the non-secretor prevalence, ≈0.20
-([`../literature/consensus_tranche_2.md`](../literature/consensus_tranche_2.md)
-§1). **The ranking is unaffected** — widening the interval can only increase the
-elementary effects of the factor that already ranked first — but the μ* values
-below are lower bounds for this factor, since they were measured over the
-narrower box. The single most influential factor in the box remains the one whose
-provenance is least settled, which is the top of the queue on consequence rather
-than on how easy the citation is.
+swept it over the 0.00–0.16 interval the open ledger carried at the time. Tranche
+2 argued that box was too narrow because the arm is GI.1; **tranche 3 withdrew
+that argument** — the profile declares itself GII in its `name`, `genotypes` and
+`incubation.notes`, so the GII partial-susceptibility ceiling of ≈0.16 governs
+and **the box swept here was the right one**
+([`../literature/consensus_tranche_3.md`](../literature/consensus_tranche_3.md)
+§1). The μ* values below are therefore measurements over the governing interval,
+not lower bounds over a narrowed one. What remains unsettled is the *mechanism*:
+a fully removed fraction is the wrong shape for partial GII susceptibility, so
+the factor this screen ranks first is still the one whose provenance is least
+settled — top of the queue on consequence rather than on how easy the citation
+is.
 
 **`contact_transfer_fraction` is not worth the sourcing effort it was queued
 for.** Task #22 exists because the shipped 1.0 sits against a ~0.25 literature

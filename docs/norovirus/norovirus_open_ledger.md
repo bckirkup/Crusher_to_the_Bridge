@@ -36,33 +36,48 @@ Also withdrawn and not yet replaced:
   establishing dose" dates from the post-#338 measurement and is stale.
 - **The passenger/crew ratio.** Same reason.
 
-**The withdrawal of the `innate_nonsusceptible_fraction` correction is itself
-withdrawn for `norwalk_gi`: it was derived from the wrong genogroup.** The
-0.00 – 0.16 interval published in #367 used the **GII** row of Teunis et al.
-2020, *Epidemics* 32:100401 — Se+ 0.076 against Se− 0.015 per genomic copy, a
-~5× reduction, which with Rouphael et al. 2022 (*JID*, GII.2, 4 of 8 Se− ill at
-top dose) and Frenck et al. 2012 (*JID*, GII.4, 1 of 17 Se− ill against 13 of 23
-Se+) does establish partial susceptibility **to GII**. The same paper's **GI**
-row is Se+ 0.28 against Se− **0.00007** — a factor of ~4,000, not ~5 — and
-Lindesmith et al. 2003, *Nature Medicine* reports the FUT2 null allele as fully
-penetrant in GI.1 challenge: no nonsecretor was infected **at any dose**. For a
-GI.1 profile the removed-fraction mechanism is correct and the ceiling is the
-non-secretor prevalence itself, ≈0.20. So 0.0 → 0.20 is defensible for the arm
-we ship, and the shipped 0.0 is the only value outside the range.
+**`innate_nonsusceptible_fraction`: the sourced interval is 0.00 – 0.16, and
+both the shipped 0.0 and Edison's 0.2 sit outside it.** This entry has been
+rewritten twice; the sequence matters, because the second reversal was caused by
+reading a paper more carefully than the profile.
 
-**The open question this exposes is larger than the parameter.** `norwalk_gi` is
-GI.1 by name and carries Teunis 2008 GI.1 challenge dose-response, but it is
-scored against VSP cruise outbreaks that are predominantly GII.4, and GI is
-3.7× more infectious per genome copy in Se+ hosts than GII (0.28 vs 0.076). The
-arm is GI-parameterised and GII-validated, and a genogroup switch would move
-infectivity and susceptibility in opposite directions — partially cancelling in
-the aggregate attack rate. Whether this arm is GI.1 or cruise-realistic GII.4 is
-a scope decision and is not settled here. Prevalence is population-specific in
-either case (~20% European-ancestry, 29% of the Lindesmith 2003 sample, 19% in
-the Rwandan cohort of Munyemana et al. 2025), so the replacement remains an
-interval rather than a value. Evidence:
+- #367 withdrew the queued 0.0 → 0.2 correction, using the **GII** row of
+  Teunis et al. 2020, *Epidemics* 32:100401 — Se+ 0.076 against Se− 0.015 per
+  genomic copy, a ~5× reduction rather than an exclusion — corroborated by
+  Rouphael et al. 2022 (*JID*, GII.2: 4 of 8 Se− ill at top dose) and Frenck et
+  al. 2012 (*JID*, GII.4: 1 of 17 Se− ill against 13 of 23 Se+). Non-secretors
+  are partially susceptible to GII, so a fully-removed fraction is the wrong
+  mechanism and its ceiling is ≈0.16.
+- #371 reversed that, on the grounds that the same paper's **GI** row is Se+
+  0.28 against Se− **0.00007** (a factor of ~4,000), with Lindesmith et al.
+  2003, *Nature Medicine* reporting the FUT2 null allele as fully penetrant in
+  GI.1 challenge — no nonsecretor infected **at any dose**. That is correct for
+  GI.1, and #371 asserted `norwalk_gi` is a GI.1 arm.
+- **That assertion was false, and the profile says so.** `norwalk_gi` carries
+  `name: "Norwalk Virus (Norovirus GII.4)"`; its `strain_evolution.genotypes`
+  are `GII.4 / GII.17 / GII.2` at equal prior weight; and its incubation note
+  states outright that the distribution is "GII rather than the GI the
+  pathogen_id implies, because this profile's genotypes are GII.4/GII.17/GII.2."
+  The arm simulates GII. **The GII interval therefore governs, #367's
+  conclusion stands, and Edison's 0.2 is not defensible for this arm.**
+
+**The chimera is real but runs the other way round.** What is mis-genogrouped is
+the *dose-response*, not the susceptibility term: `alpha` 0.111 / `beta` 32.81
+are inherited from `Person.java` and were, per
+[`norovirus_model_history.md`](norovirus_model_history.md) §9c, fitted to
+administered oral **Norwalk (GI.1)** inoculum — while name, genotypes,
+incubation and validation targets are all GII. GI is 3.7× more infectious per
+genome copy in Se+ hosts than GII (0.28 vs 0.076), so the arm is running a GI
+infectivity curve against a GII strain set, and correcting it would move
+infectivity and susceptibility in opposite directions, partially cancelling in
+the aggregate attack rate. Prevalence is population-specific in any case (~20%
+European-ancestry, 29% of the Lindesmith 2003 sample, 19% in the Rwandan cohort
+of Munyemana et al. 2025), so a removed fraction — if the mechanism were right —
+would remain an interval rather than a value. Evidence:
 [`../literature/consensus_tranche_2.md`](../literature/consensus_tranche_2.md)
-§1–§2; derivation:
+§1–§2 and
+[`../literature/consensus_tranche_3.md`](../literature/consensus_tranche_3.md)
+§1; derivation:
 [`bounded_sensitivity_and_admissible_region_spec.md`](../proposals/bounded_sensitivity_and_admissible_region_spec.md)
 §3.3. No profile JSON is changed by this entry.
 
