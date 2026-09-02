@@ -1,8 +1,12 @@
 # Bounded sensitivity and the admissible region: parameters as intervals, not values
 
-> **Status:** Proposed. Nothing in this document is implemented. The harness it
-> specifies (`telemetry_buffer/observation_model/bounded_screen.py`) does not
-> exist.
+> **Status:** Partly implemented. The §2 screen exists as
+> `telemetry_buffer/observation_model/bounded_screen.py` and its first pass over
+> the §3.2 norovirus box is reported in
+> [`norovirus/bounded_screen_results.md`](../norovirus/bounded_screen_results.md).
+> The §2.3 admissible-region search does not exist, the §4 SARS-CoV-2 ledger is
+> deferred behind task #30, and the §5 influenza box has not been run because
+> `influenza_a` is not an active profile.
 
 ## 1. Why this replaces "fit one knob per pathogen"
 
