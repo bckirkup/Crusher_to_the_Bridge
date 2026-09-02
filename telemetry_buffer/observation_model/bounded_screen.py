@@ -57,6 +57,7 @@ from picard_framework.runs.mega_cruise_campaign.campaign_runner import (  # noqa
     extract_timeseries,
 )
 from picard_framework.simulation.ship_simulation import ShipSimulation  # noqa: E402
+from simulation_utils.paths import resolve_repo_path, validated_open  # noqa: E402
 
 Transform = Literal["linear", "log10"]
 
@@ -325,6 +326,11 @@ def noise_floor(
     }
 
 
+def _validated_cli_path(path: Path, root: Path) -> Path:
+    """Resolve a CLI path under a fixed root before any filesystem access."""
+    return Path(resolve_repo_path(str(root), str(path)))
+
+
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     """Command line for the screen."""
     parser = argparse.ArgumentParser(description=__doc__)
@@ -383,8 +389,15 @@ def main(argv: Sequence[str] | None = None) -> int:
             ),
         }
     payload["run"] = run_kwargs
-    args.out.write_text(json.dumps(payload, indent=2), encoding="utf-8")
-    print(json.dumps(payload, indent=2))
+    report = json.dumps(payload, indent=2)
+    with validated_open(
+        str(_validated_cli_path(args.out, REPO_ROOT)),
+        "w",
+        allowed_roots=(str(REPO_ROOT),),
+        encoding="utf-8",
+    ) as handle:
+        handle.write(report)
+    print(report)
     return 0
 
 
