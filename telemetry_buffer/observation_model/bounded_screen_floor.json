@@ -1,0 +1,40 @@
+{
+  "mode": "floor",
+  "seeds": [
+    500,
+    501,
+    502,
+    503,
+    504,
+    505,
+    506,
+    507,
+    508,
+    509,
+    510,
+    511,
+    512,
+    513,
+    514,
+    515,
+    516,
+    517,
+    518,
+    519
+  ],
+  "noise_floor": {
+    "attack_rate": 0.015724452128352266,
+    "ever_ill_attack_rate_passenger": 0.004918172531808088,
+    "reported_case_attack_rate_passenger": 0.004287592257715401,
+    "reported_case_attack_rate_crew": 0.018671945603808377,
+    "vsp_posted": 0.0,
+    "peak_epoch": 62.084725640810696
+  },
+  "run": {
+    "pathogen_id": "norwalk_gi",
+    "bundle": "active_profiles",
+    "platform": "mega_cruise_5000",
+    "epochs": 168,
+    "num_agents": 450
+  }
+}

@@ -326,6 +326,14 @@ Roughly in dependency order.
 8. **Sick-host movement and a bathroom destination.** The Park gradient needs
    it; see §3.
 9. **AWS daughter session: CONTAM vs native accumulation comparison.** Deferred.
+10. **Provenance queue, re-ordered by the bounded screen.** Measured in
+    [`bounded_screen_results.md`](bounded_screen_results.md) §7.
+    `innate_nonsusceptible_fraction` moves to the front on consequence: it is
+    the top-ranked factor while carrying the mechanism §1 withdraws.
+    `contact_transfer_fraction` drops down it — across its whole sourced
+    interval it moves no scored output above the measured noise floor, so the
+    shipped value is still wrong but it is not an exposure. Emesis titre
+    becomes a first-order provenance target, which it was not before.
 
 ## 5. Held fixed by assumption
 

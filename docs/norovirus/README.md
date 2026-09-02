@@ -10,6 +10,7 @@ void pending a refit.
 |-----|--------|------|
 | [norovirus_open_ledger.md](norovirus_open_ledger.md) | Living | What is currently withdrawn, what the anchors are, what is outstanding |
 | [norovirus_model_history.md](norovirus_model_history.md) | Permanent record | Every defect found and revision made, with the numbers each one invalidated. §10 lists parameters held fixed by assumption |
+| [bounded_screen_results.md](bounded_screen_results.md) | Measurement (2026-09-01) | The Morris elementary-effects screen over the seven-factor norovirus box: which scored outputs each factor moves, against a measured noise floor, and what that changes in the provenance queue |
 | [norovirus_parameter_freedom_audit.md](norovirus_parameter_freedom_audit.md) | Audit (2026-08-30) | Which parameters are still free, which are set away from a literature value, and which anchors are circular |
 | [cruise_pathogen_severity_observation_priors_v2.md](cruise_pathogen_severity_observation_priors_v2.md) | Living — prior elicitation | Severity and observation priors for all ten pathogen profiles. Grades its own vectors `[A]` = assumption |
 | `vsp_covid_discontinuity.png` | Figure | The VSP discontinuity plot. **The numbers read off this image are withdrawn** — see the ledger; use the measured series instead |
