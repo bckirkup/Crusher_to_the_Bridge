@@ -31,6 +31,7 @@ import json
 import sys
 import tempfile
 from collections import defaultdict
+from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
@@ -75,13 +76,24 @@ UNIT = dict.fromkeys(SHIPPED, 1.0)
 CLEARANCE_ORAL_DROPLET = {**CLEARANCE, "droplet": 0.500, "hvac_airborne": 0.500}
 
 
-def main(path: Path) -> int:
-    pid = sys.argv[2] if len(sys.argv) > 2 else "norwalk_gi"
-    alpha, beta = DOSE_RESPONSE[pid]
+@dataclass(frozen=True)
+class Attribution:
+    """Mass and establishment attribution over one dose stream."""
 
-    def p_establish(dose: np.ndarray) -> np.ndarray:
-        return 1.0 - hyp1f1(alpha, alpha + beta, -dose)
+    total_establishment: float
+    mass_share: tuple[float, ...]
+    establishment_share: tuple[float, ...]
 
+
+def establishment_probability(
+    dose: np.ndarray | float, alpha: float, beta: float
+) -> np.ndarray:
+    """P(establish | dose) in the exact beta-Poisson Kummer form."""
+    return 1.0 - hyp1f1(alpha, alpha + beta, -np.asarray(dose, dtype=float))
+
+
+def load_events(path: Path, pid: str) -> tuple[list[dict], list[dict]]:
+    """Read the harness's exposure records and keep only *pid*'s events."""
     temp_root = tempfile.gettempdir()
     safe_path = resolve_repo_path(temp_root, str(path))
     with validated_open(
@@ -91,28 +103,55 @@ def main(path: Path) -> int:
     events = [e for e in all_events if e.get("pathogen_id") == pid]
     if not events:
         raise SystemExit(f"no events for {pid} in {path}")
+    return all_events, events
+
+
+def dose_matrices(events: list[dict]) -> tuple[list[str], np.ndarray, np.ndarray]:
+    """Pathway order plus the pre- and post-weight dose matrices."""
     pathways = sorted({k for e in events for k in e["pre"]})
     pre = np.array([[e["pre"].get(k, 0.0) for k in pathways] for e in events])
     post = np.array([[e["post"].get(k, 0.0) for k in pathways] for e in events])
+    return pathways, pre, post
+
+
+def attribute(doses: np.ndarray, alpha: float, beta: float) -> Attribution:
+    """Credit each event's establishment probability across pathways by dose share."""
+    total = doses.sum(axis=1)
+    p = establishment_probability(total, alpha, beta)
+    with np.errstate(invalid="ignore", divide="ignore"):
+        share = np.where(total[:, None] > 0, doses / total[:, None], 0.0)
+    credited = (share * p[:, None]).sum(axis=0)
+    mass = doses.sum(axis=0)
+    return Attribution(
+        total_establishment=float(p.sum()),
+        mass_share=tuple(float(v) for v in mass / mass.sum()),
+        establishment_share=tuple(float(v) for v in credited / credited.sum()),
+    )
+
+
+def main(path: Path) -> int:
+    pid = sys.argv[2] if len(sys.argv) > 2 else "norwalk_gi"
+    alpha, beta = DOSE_RESPONSE[pid]
+
+    def p_establish(dose: np.ndarray) -> np.ndarray:
+        return establishment_probability(dose, alpha, beta)
+
+    all_events, events = load_events(path, pid)
+    pathways, pre, post = dose_matrices(events)
 
     print(f"{path.name}: {pid}, {len(events)} of {len(all_events)} exposure "
           f"events, Beta({alpha}, {beta}), pathways {pathways}")
 
-    def attribute(doses: np.ndarray, label: str) -> None:
-        total = doses.sum(axis=1)
-        p = p_establish(total)
-        with np.errstate(invalid="ignore", divide="ignore"):
-            share = np.where(total[:, None] > 0, doses / total[:, None], 0.0)
-        credited = (share * p[:, None]).sum(axis=0)
-        mass = doses.sum(axis=0)
-        print(f"\n{label}: S = {p.sum():.4f}")
+    def report(doses: np.ndarray, label: str) -> None:
+        att = attribute(doses, alpha, beta)
+        print(f"\n{label}: S = {att.total_establishment:.4f}")
         print(f"{'pathway':16} {'mass share':>12} {'establishment share':>21}")
         for i, name in enumerate(pathways):
-            print(f"{name:16} {mass[i]/mass.sum():12.5f} "
-                  f"{credited[i]/credited.sum():21.5f}")
+            print(f"{name:16} {att.mass_share[i]:12.5f} "
+                  f"{att.establishment_share[i]:21.5f}")
 
-    attribute(pre, "pre-weight (weights all 1.0)")
-    attribute(post, "post-weight (shipped weights)")
+    report(pre, "pre-weight (weights all 1.0)")
+    report(post, "post-weight (shipped weights)")
 
     base = float(p_establish(post.sum(axis=1)).sum())
     print("\ndose-scale elasticity, shipped-weight exposures as the base")
