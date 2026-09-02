@@ -35,11 +35,21 @@ with a host–pathogen agent-based system." PNAS, 2026.*
 
 **Bridge Module:** `engines/infection_dynamics_bridge.py`
 
-The bridge adapts the Java ABM's dose-response model into Python:
+The bridge adapts the Java ABM's dose-response model into Python as a
+persistent **beta-frailty** model — a per-host susceptibility drawn once at
+first exposure and reused for every later epoch:
 
 ```
-P(infection) = 1 − (1 + dose/β)^{−α}
+r ~ Beta(α, β)                     drawn once per host per pathogen
+P(establish this epoch) = 1 − exp(−r × dose_this_epoch)
 ```
+
+The classic approximation `1 − (1 + dose/β)^{−α}` corresponds to a *gamma*
+frailty, not a beta one. It survives only in `_dose_response()`, a
+population-level helper outside the establishment path; at shipped norovirus
+parameters the two agree to <0.001. Note that `r` and `dose` enter strictly as a
+product, so the emission scale and the dose-response parameters are not
+separately identifiable from outcome data.
 
 Where `α` and `β` are pathogen-specific parameters from `active_profiles.json`.
 
