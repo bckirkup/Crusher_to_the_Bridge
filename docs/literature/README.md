@@ -34,3 +34,4 @@ Two warnings, because both are easy to get wrong:
 | `Cruise Ship Dining Model Data.pdf` | Dining service patterns and rotation |
 | `Cruise Ship Outbreak Model Parameterization _ Literature Insights.pdf` | General outbreak-model parameterisation review |
 | `Cruise Ship Medical Care & Staffing_ Practical Reports & Lived Experience.md` | Shipboard medical staffing, clinical operations, infirmary capacity — relevant to the ~0.60 infirmary capture constraint |
+| `parameter_sourcing_bundle.md` | Per-arm count of profile scalars carrying a citation; first Consensus tranche on the blank high-sensitivity factors; the null result on norovirus airborne decay; the question list for Edison Science |
