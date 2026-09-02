@@ -95,6 +95,19 @@ in the same units as our emission term; Killingley is the harder anchor but is
 in TCID50 by the intranasal route, and converting it needs a copies-per-TCID50
 factor that is itself a sourced quantity.
 
+**Update (Consensus tranche 4).** The other half of the pair — an emission
+*rate* in the same units — now has candidates, so §4's non-identifiability can
+be broken from the emission side rather than only from β:
+Lane et al. 2023 measured exhaled SARS-CoV-2 at a mean **80 RNA copies/min**
+over 312 serial breath specimens, and Coleman et al. 2021 measured **63–5,821
+copies per expiratory activity** (≈2–200 copies/min) with 85% of the load in
+fine aerosol and 94% emitted by talking and singing. Ma et al. 2020's exhaled
+breath *condensate* estimate is 10³–10⁵ copies/min — 1–3 orders higher, and the
+gap is method, not variant, which is why the emission term has to enter as an
+interval. Sources, grades and the three caveats that keep Zhang & Wang Grade C
+are in [`../literature/consensus_tranche_4.md`](../literature/consensus_tranche_4.md)
+§2. Nothing is adopted; task #30 remains open.
+
 ## 3. Three values that turn out to be defensible
 
 Sourcing found in the model's favour, which is worth recording as carefully as
