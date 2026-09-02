@@ -29,11 +29,17 @@ from __future__ import annotations
 
 import json
 import sys
+import tempfile
 from collections import defaultdict
 from pathlib import Path
 
 import numpy as np
 from scipy.special import hyp1f1
+
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT))
+
+from simulation_utils.paths import resolve_repo_path, validated_open  # noqa: E402
 
 # Per-pathogen beta-frailty parameters as shipped in active_profiles.json.
 # Both are inherited/adapted values, not measurements: norwalk_gi's pair is the
@@ -76,7 +82,12 @@ def main(path: Path) -> int:
     def p_establish(dose: np.ndarray) -> np.ndarray:
         return 1.0 - hyp1f1(alpha, alpha + beta, -dose)
 
-    all_events = json.loads(path.read_text(encoding="utf-8"))
+    temp_root = tempfile.gettempdir()
+    safe_path = resolve_repo_path(temp_root, str(path))
+    with validated_open(
+        safe_path, encoding="utf-8", allowed_roots=(temp_root,)
+    ) as handle:
+        all_events = json.load(handle)
     events = [e for e in all_events if e.get("pathogen_id") == pid]
     if not events:
         raise SystemExit(f"no events for {pid} in {path}")

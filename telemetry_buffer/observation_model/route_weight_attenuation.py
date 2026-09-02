@@ -30,6 +30,11 @@ from engines.transmission_core import (  # noqa: E402
 )
 from picard_framework.run_spec import PicardRunSpec  # noqa: E402
 from picard_framework.simulation.ship_simulation import ShipSimulation  # noqa: E402
+from simulation_utils.paths import (  # noqa: E402
+    resolve_child_path,
+    resolve_repo_path,
+    validated_open,
+)
 
 PRE: dict[tuple[str, str], float] = defaultdict(float)
 POST: dict[tuple[str, str], float] = defaultdict(float)
@@ -97,8 +102,11 @@ def main() -> int:
         "config_overrides": {"ship_graph": {"num_agents": agents}},
     }
     with tempfile.TemporaryDirectory() as tmp:
-        path = Path(tmp) / "run_spec.json"
-        path.write_text(json.dumps(spec), encoding="utf-8")
+        path = resolve_repo_path(tmp, "run_spec.json")
+        with validated_open(
+            path, "w", allowed_roots=(tmp,), encoding="utf-8"
+        ) as handle:
+            handle.write(json.dumps(spec))
         picard = PicardRunSpec.from_picard_json(str(ROOT), str(path))
         ShipSimulation(picard, display=False).run()
 
@@ -123,8 +131,16 @@ def main() -> int:
             print("realised attenuation sum(w_r D_r)/sum(D_r) = "
                   f"{post_total/pre_total:.4f}")
 
-    out = Path(tempfile.gettempdir()) / f"exposure_events_{platform}_s{seed}.json"
-    out.write_text(json.dumps(EVENTS), encoding="utf-8")
+    # mkdtemp gives a 0700 directory under gettempdir(); the shared temp root
+    # itself is world-writable, which validated_open refuses to write into.
+    temp_root = tempfile.mkdtemp(prefix="route_weight_")
+    out = resolve_child_path(
+        temp_root, f"exposure_events_{platform}_s{seed}.json"
+    )
+    with validated_open(
+        out, "w", allowed_roots=(temp_root,), encoding="utf-8"
+    ) as handle:
+        handle.write(json.dumps(EVENTS))
     print(f"\n{len(EVENTS)} nonzero exposure events written to {out}")
     return 0
 
