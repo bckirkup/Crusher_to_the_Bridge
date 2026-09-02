@@ -90,17 +90,26 @@ convention?
 the SARS-CoV-2 value exactly half of it (5e-5)?**
 We can find no argument for the factor of two.
 
-**Q5. `innate_nonsusceptible_fraction`.**
+**Q5. `innate_nonsusceptible_fraction` — and which genogroup is this profile?**
 The Edison bundle carries 0.2 with `nonsusceptible_mechanism =
-FUT2_nonsecretor`; the active profile carries 0.0. Was 0.2 intended as the
-FUT2 non-secretor prevalence? We are not asking you to defend the number so
-much as the **mechanism**: the evidence we have (Teunis 2020: Se− infection risk
-0.015 vs Se+ 0.076 for GII; Rouphael's GII.2 challenge, 4 of 8 secretor-negatives
-ill at top dose) says non-secretors are *partially* susceptible and
-genotype-dependently so, which a fully removed host fraction cannot represent.
-Was a partial-susceptibility multiplier considered and rejected, or simply not
-reached? This is our highest-consequence question: in a Morris screen over the
-sourced box, this factor ranks **first** on every passenger channel.
+FUT2_nonsecretor`; the active profile carries 0.0. We now believe 0.2 is
+**defensible** for a GI.1 arm — Teunis 2020 puts Se− infection risk at one
+genomic copy at 0.00007 against Se+ 0.28 for GI, and Lindesmith 2003 found the
+FUT2 null allele fully penetrant in GI.1 challenge, no nonsecretor infected at
+any dose. For GII the same paper gives 0.015 against 0.076, and non-secretors are
+only partially resistant (Rouphael's GII.2: 4 of 8 Se− ill at top dose;
+Frenck's GII.4: 1 of 17). So the question is not the number but the **arm's
+identity**: was the 0.2 chosen as GI-appropriate full resistance, or as a
+GII-appropriate prevalence that happens to be applied as full removal?
+
+That matters because `norwalk_gi` carries Teunis 2008 GI.1 challenge
+dose-response while being scored against VSP cruise outbreaks that are
+predominantly GII.4 — and GI is 3.7× more infectious per genome copy than GII, so
+switching genogroup moves infectivity and susceptibility in opposite directions.
+**Was the profile ever intended to represent cruise-realistic GII.4, and if so,
+why does it carry GI parameters?** This is our highest-consequence question: in a
+Morris screen over the sourced box this factor ranks **first** on every passenger
+channel.
 
 **Q6. `airborne_half_life_hours = 1.1`, cited in our tables to van Doremalen et
 al. 2020.** That is the SARS-CoV-2 aerosol measurement, and it is the identical

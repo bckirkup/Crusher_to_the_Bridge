@@ -116,7 +116,7 @@ factors.
 
 | Factor | Transform | Interval | Grade | Basis |
 |---|---|---|---|---|
-| `innate_nonsusceptible_fraction` | linear | 0.00 – 0.16 | B | See §3.3; the 0.2 in `norovirus_gii4` is **above** the sourced ceiling |
+| `innate_nonsusceptible_fraction` | linear | **genogroup-conditional**: GI 0.00 – 0.20, GII 0.00 – 0.16 | B | See §3.3. The screen ran the GII interval; for the shipped GI.1 arm the ceiling is the non-secretor prevalence itself |
 | `contact_transfer_fraction` | linear | 0.06 – 0.50 | B | Anderson et al. 2021, *AEM* 87(22): 360 fingerpad↔surface transfer events, 20 volunteers, MS2 (non-enveloped surrogate) mean 0.26, Phi6 0.17; surface type and transfer direction both significant, so the spread is the interval and a single number cannot be right for both directions |
 | Emesis titre (GEC/mL) | log10 | Kirby 2016 measured range | B | Already sourced in-tree; carry the study spread, not the point |
 | Emesis volume (mL) | log10 | 50 – 800 | B | Tung-Thompson et al. 2015, already bounded in-tree |
@@ -126,34 +126,51 @@ factors.
 | Reporting-probability scale | linear | 0.5 – 1.5 × | **C, declared** | The observation model's 15 assumed numbers are not independently identified (A3 circularity). Screen them as **one** multiplier on reporting probability, because that is the dimension the single empirical aggregate constrains |
 | `shedding_variance_log10` | linear | study spread | C | Source or declare |
 
-### 3.3 The FUT2 ceiling is lower than we have been calling the literature value
+### 3.3 The FUT2 ceiling is genogroup-conditional, and this section had it wrong
 
-Task #21 says to correct `innate_nonsusceptible_fraction` from 0.0 to the
-literature 0.2. That target is wrong, and the interval framing is what exposes
-it.
+**Corrected — see
+[`../literature/consensus_tranche_2.md`](../literature/consensus_tranche_2.md) §1.**
+This section previously concluded that the 0.2 target was wrong and the ceiling
+was 0.16. That derivation used the **GII** row of Teunis et al. 2020 and applied
+it to a **GI.1** profile.
 
 Teunis et al. 2020 estimates infection risk at 1 genomic copy separately by
-secretor status: 0.076 for GII in Se+ subjects, and **0.015 in Se−** — a
-five-fold reduction, not protection. Rouphael et al. 2022 (*JID*, GII.2 Snow
-Mountain virus challenge, 44 adults) is the direct test: at the highest dose,
-4 of 8 secretor-negative subjects became ill, against 10 of 12 secretor-positive.
-Non-secretors are partially susceptible to GII.
+secretor status *and genogroup*, and the two genogroups are not alike:
 
-So a fully non-susceptible fraction equal to non-secretor prevalence
-over-corrects. With prevalence around 0.2 and Se− retaining roughly 0.015/0.076
-≈ 20% of Se+ per-copy risk, the defensible ceiling on a *fully* non-susceptible
-fraction is about 0.2 × (1 − 0.2) ≈ 0.16, and lower for a mixed-genotype
-profile, since GII.2 and GII.17 are less secretor-restricted than GII.4
-(Nordgren & Sharma 2019, *Viruses* 11:226 — susceptibility is genotype-dependent
-and HBGA expression varies substantially between populations, which is itself an
-argument for an interval). Prevalence is population-specific: 19% in the
-Rwandan cohort of Munyemana et al. 2025, with no norovirus association detected.
+| | Se+ | Se− | Se− / Se+ |
+|---|---:|---:|---:|
+| **GI** | 0.28 | **0.00007** | **0.00025** |
+| GII | 0.076 | 0.015 | 0.197 |
 
-**Consequence for #21:** the correct change is not 0.0 → 0.2. It is 0.0 → an
-interval of 0.00 – 0.16 whose upper end is a partial-susceptibility
-approximation, with the mechanism ideally re-expressed as reduced susceptibility
-in Se− hosts rather than a removed fraction. Both the shipped 0.0 and the
-"literature" 0.2 are outside the defensible range, in opposite directions.
+For GII, non-secretors retain about 20% of Se+ per-copy risk — partial
+susceptibility, so a fully removed fraction over-corrects and the ceiling is
+about 0.2 × (1 − 0.2) ≈ 0.16. Rouphael et al. 2022 (*JID*, GII.2, 4 of 8 Se−
+subjects ill at top dose against 10 of 12 Se+) and Frenck et al. 2012 (*JID*,
+GII.4, 1 of 17 Se− ill against 13 of 23 Se+) bracket that partial susceptibility
+from the two directions.
+
+For **GI**, which is what `norwalk_gi` is, the reduction is a factor of ~4,000,
+not ~5. Lindesmith et al. 2003 (*Nature Medicine*, GI.1 challenge) reports the
+FUT2 null allele as **fully penetrant: no nonsecretor developed infection at any
+dose.** A removed fraction is the right mechanism, and the ceiling is the
+non-secretor prevalence itself — 0.2 × (1 − 0.00025) ≈ 0.20.
+
+Prevalence remains population-specific and is the real source of width: ~20% in
+European-ancestry populations, 29% of the Lindesmith 2003 study sample, 19% in
+the Rwandan cohort of Munyemana et al. 2025 (no norovirus association detected),
+and genotype/population variation is itself an argument for an interval
+(Nordgren & Sharma 2019, *Viruses* 11:226).
+
+**Consequence for #21:** for the shipped GI.1 arm, 0.0 → 0.20 is defensible
+after all, and the shipped 0.0 is the only value outside the range. The prior
+conclusion — that both 0.0 and 0.2 were outside it — held only under the GII
+reading. The larger question this raises, that the arm is GI-parameterised and
+GII-validated, is recorded in the tranche-2 note and is a scope decision rather
+than a parameter choice.
+
+The screen in `../norovirus/bounded_screen_results.md` swept 0.00 – 0.16. Its
+ranking is unaffected: extending the upper end to 0.20 can only increase the
+elementary effects of the factor that already ranked first.
 
 ## 4. SARS-CoV-2 factor ledger
 

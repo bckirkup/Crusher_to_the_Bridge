@@ -36,24 +36,33 @@ Also withdrawn and not yet replaced:
   establishing dose" dates from the post-#338 measurement and is stale.
 - **The passenger/crew ratio.** Same reason.
 
-**The standing plan to correct `innate_nonsusceptible_fraction` from 0.0 to 0.2
-is withdrawn: the target is wrong.** Non-secretors are partially susceptible to
-GII, not protected. Teunis et al. 2020, *Epidemics* 32:100401 estimates
-infection risk at one genomic copy separately by secretor status — 0.076 for
-GII in Se+ against 0.015 in Se−, a ~5x reduction rather than protection.
-Rouphael et al. 2022, *JID* is the direct test: GII.2 Snow Mountain virus
-challenge, 44 adults, 36 Se+ and 8 Se−, doses 1.2 × 10⁴ – 1.2 × 10⁷ GEC with
-ID50 5.1 × 10⁵ GEC; at the highest dose 4 of 8 Se− subjects became ill against
-10 of 12 Se+. A fully non-susceptible fraction equal to non-secretor prevalence
-therefore over-corrects. The defensible ceiling is about
-0.2 × (1 − 0.015/0.076) ≈ 0.16, and lower for the mixed GII.4/GII.17/GII.2
-profile the campaign runs, since GII.2 and GII.17 are less secretor-restricted
-(Nordgren & Sharma 2019, *Viruses* 11:226). Both the shipped 0.0 in
-`norwalk_gi` and the "literature" 0.2 in `norovirus_gii4` are outside that
-range, in opposite directions, so the replacement is an interval and not a
-value — 0.00 – 0.16, ideally re-expressed as reduced susceptibility in Se−
-hosts rather than a removed fraction. Derivation and the bounded-screen framing
-that exposed it:
+**The withdrawal of the `innate_nonsusceptible_fraction` correction is itself
+withdrawn for `norwalk_gi`: it was derived from the wrong genogroup.** The
+0.00 – 0.16 interval published in #367 used the **GII** row of Teunis et al.
+2020, *Epidemics* 32:100401 — Se+ 0.076 against Se− 0.015 per genomic copy, a
+~5× reduction, which with Rouphael et al. 2022 (*JID*, GII.2, 4 of 8 Se− ill at
+top dose) and Frenck et al. 2012 (*JID*, GII.4, 1 of 17 Se− ill against 13 of 23
+Se+) does establish partial susceptibility **to GII**. The same paper's **GI**
+row is Se+ 0.28 against Se− **0.00007** — a factor of ~4,000, not ~5 — and
+Lindesmith et al. 2003, *Nature Medicine* reports the FUT2 null allele as fully
+penetrant in GI.1 challenge: no nonsecretor was infected **at any dose**. For a
+GI.1 profile the removed-fraction mechanism is correct and the ceiling is the
+non-secretor prevalence itself, ≈0.20. So 0.0 → 0.20 is defensible for the arm
+we ship, and the shipped 0.0 is the only value outside the range.
+
+**The open question this exposes is larger than the parameter.** `norwalk_gi` is
+GI.1 by name and carries Teunis 2008 GI.1 challenge dose-response, but it is
+scored against VSP cruise outbreaks that are predominantly GII.4, and GI is
+3.7× more infectious per genome copy in Se+ hosts than GII (0.28 vs 0.076). The
+arm is GI-parameterised and GII-validated, and a genogroup switch would move
+infectivity and susceptibility in opposite directions — partially cancelling in
+the aggregate attack rate. Whether this arm is GI.1 or cruise-realistic GII.4 is
+a scope decision and is not settled here. Prevalence is population-specific in
+either case (~20% European-ancestry, 29% of the Lindesmith 2003 sample, 19% in
+the Rwandan cohort of Munyemana et al. 2025), so the replacement remains an
+interval rather than a value. Evidence:
+[`../literature/consensus_tranche_2.md`](../literature/consensus_tranche_2.md)
+§1–§2; derivation:
 [`bounded_sensitivity_and_admissible_region_spec.md`](../proposals/bounded_sensitivity_and_admissible_region_spec.md)
 §3.3. No profile JSON is changed by this entry.
 
