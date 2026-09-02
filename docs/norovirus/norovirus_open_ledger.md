@@ -421,6 +421,22 @@ is over-determined only *given* them. Full list in §10 of the history document.
   log10/day, Leblanc et al. 2019), and the gap inflates the fomite reservoir.
   No human-norovirus dry-surface infectivity decay measurement exists; any
   adopted interval is Grade B at best and must state its medium.
+- The `surface_decay_per_day` interval is now [0.14, 0.84] fractional loss
+  per day, recut in `../literature/consensus_tranche_5.md` §1 from five
+  surrogate studies. It is an order of magnitude wide in rate, and the
+  shipped 0.25 lies inside it near the slow end — Edison's proposed
+  [0.49, 0.84] is the top of the literature, not its span, and the fast-end
+  citation does not check against the paper it names. Every Morris result in
+  `bounded_screen_results.md` was produced on the old [0.10, 0.60] box and
+  must be re-run before the admissible-region search.
+- `surface_deposition_fraction` is misnamed for what it does. The profile key
+  is read in `orchestrator_epoch.py` and added to the **zone/airborne** pool
+  decayed by `airborne_half_life_hours`, not to the fomite surface pool,
+  which is filled by emesis and hand-to-surface back-transfer instead. Its
+  inherited comment ("particles survive 86400 steps = 1 day") is a survival
+  duration offered as a deposition fraction. No study reports deposition as
+  a fraction of total shedding, so the quantity the key asks for may not be
+  measurable. See `../literature/consensus_tranche_5.md` §2.
 - Uniform `immune_ratio` across a resident crew and a weekly-turnover passenger
   cohort — an assumption that bears directly on A5.
 - Crew presenteeism and mandatory occupational reporting: absent in both

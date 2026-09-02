@@ -10,6 +10,15 @@ Nothing here selects a parameter value. The screen ranks factors; §6 of the
 design forbids writing an admissible range back into a profile, and this
 document does not.
 
+**Superseded box, 2026-09-02.** These results were produced with
+`surface_decay_per_day` swept over [0.10, 0.60].
+[`../literature/consensus_tranche_5.md`](../literature/consensus_tranche_5.md)
+§1 recut that interval to [0.14, 0.84] on the surrogate literature. Morris
+elementary effects are differences taken across the whole box, so recutting one
+interval changes the effects of **every** factor, not just that one: the ranking
+below must be re-run before the admissible-region search and must not be patched
+factor-by-factor. The measurement stands as a measurement of the old box.
+
 ## 1. What was run
 
 400 simulations: 10 Morris trajectories over the 7-factor norovirus box of
