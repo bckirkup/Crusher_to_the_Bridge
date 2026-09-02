@@ -352,6 +352,19 @@ is over-determined only *given* them. Full list in §10 of the history document.
   across the override arms), and §1 withdraws 0.2 as the correction target. The
   live liability is that the mechanism is a removed fraction at all, where the
   evidence is partial susceptibility.
+- `airborne_half_life_hours` = 1.1 is cited to van Doremalen et al. 2020, which
+  measured **SARS-CoV-2**, and is the identical value carried by the COVID
+  profile. A search for a norovirus airborne decay measurement returned a null
+  result (see
+  [`../literature/parameter_sourcing_bundle.md`](../literature/parameter_sourcing_bundle.md)
+  §2.3), so this is a cross-pathogen borrow presented as a citation, not a
+  sourced value. Treat as Grade C until it is declared or bounded by deposition
+  physics.
+- `surface_decay_per_day` = 0.25 has no source. It implies 0.125 log10/day,
+  slower than the MNV-1-on-stainless-steel surrogate measurement (≥0.29
+  log10/day, Leblanc et al. 2019), and the gap inflates the fomite reservoir.
+  No human-norovirus dry-surface infectivity decay measurement exists; any
+  adopted interval is Grade B at best and must state its medium.
 - Uniform `immune_ratio` across a resident crew and a weekly-turnover passenger
   cohort — an assumption that bears directly on A5.
 - Crew presenteeism and mandatory occupational reporting: absent in both
