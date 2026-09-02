@@ -35,3 +35,5 @@ Two warnings, because both are easy to get wrong:
 | `Cruise Ship Outbreak Model Parameterization _ Literature Insights.pdf` | General outbreak-model parameterisation review |
 | `Cruise Ship Medical Care & Staffing_ Practical Reports & Lived Experience.md` | Shipboard medical staffing, clinical operations, infirmary capacity — relevant to the ~0.60 infirmary capture constraint |
 | `parameter_sourcing_bundle.md` | Per-arm count of profile scalars carrying a citation; first Consensus tranche on the blank high-sensitivity factors; the null result on norovirus airborne decay; the question list for Edison Science |
+| `edison_provenance_request.md` | The provenance questions put to Edison Science, written to be readable without a checkout — 17 questions across the three arms, none of which a paper can answer |
+| `edison_v3_spec_review.md` | Review of Edison's `formal_spec_v3.md` and `pre_establishment_clearance_params_v3.json`: what they answer (dose-response is beta-frailty, not the classic approximation; shedding curve is copies/g), where they are stale, and the identifiability concern with the clearance rates |
