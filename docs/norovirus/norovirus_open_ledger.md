@@ -358,6 +358,26 @@ Roughly in dependency order.
     interval it moves no scored output above the measured noise floor, so the
     shipped value is still wrong but it is not an exposure. Emesis titre
     becomes a first-order provenance target, which it was not before.
+11. **`EMESIS_TITRE_GEC_PER_ML` = 3.9e4 is the wrong figure from the right
+    paper, and its two companions are also off the measurement.** Traced in
+    [`../literature/consensus_tranche_4.md`](../literature/consensus_tranche_4.md)
+    §1c. 3.9 × 10⁴ is Kirby et al. 2016's **abstract** value for "GII viruses",
+    which pools GII.2 Snow Mountain with a 2-subject GII.1 Hawaii pilot at
+    5.0 × 10³ that the paper's own Results excludes from every genogroup
+    comparison; Table 3 gives GII.2 as **1.6 × 10⁵ GEC/mL** and reports no
+    significant GI/GII difference (p = 0.36 against the abstract's p = 0.02).
+    For a GII.4/GII.17/GII.2 arm the applicable measured value is 4.1× what is
+    shipped. Alongside it, `EMESIS_EPISODES_RANGE` = (1, 3) against a measured
+    1–7 events (mode 1, 32% single), and per-episode volume 50–800 mL log-uniform
+    implying ≈200–600 mL per subject against measured means of 658.7 mL (GI) and
+    845.0 mL (GII.2). Compounded, the pathway sits about an order of magnitude
+    below the measured per-subject cumulative shed — on the screen's
+    second-ranked factor. Not repaired here: the measured object is a
+    heavy-tailed distribution (Kirby's GI mean 8.0 × 10⁵ against Atmar 2008's
+    median 4.1 × 10⁴ for the same genogroup, 20×), so the repair is a
+    distribution plus a corrected episode count, not a swapped point value, and
+    it must go through `model-parameter-provenance` with the goldens moved
+    deliberately.
 
 ## 5. Held fixed by assumption
 
@@ -370,6 +390,13 @@ is over-determined only *given* them. Full list in §10 of the history document.
   by anybody. Permanent Grade C; the gap is the field's, not ours.
 - Fraction of emesis episodes occurring in the host's own cabin — swept, never
   asserted.
+- `EMESIS_AEROSOL_FRACTION_RANGE` (7.2e-7 – 2.67e-4, Tung-Thompson surrogate)
+  has never been checked against a measured airborne concentration, and one
+  exists: Alsved et al. 2019, *CID* — 5–215 copies/m³ beside 26 hospital
+  norovirus patients, positivity associated with vomiting in the previous 3 h.
+  That is a **check**, not a source; choosing the fraction to match it would be
+  fitting. See [`../literature/consensus_tranche_4.md`](../literature/consensus_tranche_4.md)
+  §1d.
 - Confinement attenuation factor 0.05.
 - Secretor-status non-susceptibility. Not a held-fixed 20% ceiling: the profile
   the campaign runs ships 0.0, no attack-rate ceiling is observed (0.013–0.326
