@@ -1,5 +1,10 @@
 # Defect: the dose-response is applied per epoch, so infection depends on the clock
 
+Status note: the route mix has been re-measured at `e8b2b95` in
+[`route_weight_measurement_findings.md`](route_weight_measurement_findings.md);
+droplet is no longer dominant, so the droplet share quoted below is stale. The
+analysis is kept as the record of the state it diagnosed.
+
 Date: 2026-08-29. Analysis commit: `75716b0`. Author: model-development record,
 continues `docs/norovirus/norovirus_model_history.md`.
 
