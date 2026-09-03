@@ -1,6 +1,6 @@
 """Measure the realised route-weight attenuation, per pathogen, over a voyage.
 
-Wraps TransmissionCore._apply_route_weights to accumulate the pre-weight dose
+Wraps TransmissionCore._apply_route_efficiencies to accumulate pre-weight dose
 each pathway delivered and the post-weight dose that actually reached the
 establishment draw, and writes one record per nonzero exposure event for
 `route_weight_attribution.py` to attribute establishment across pathways.
@@ -38,7 +38,7 @@ from simulation_utils.paths import (  # noqa: E402
 
 PRE: dict[tuple[str, str], float] = defaultdict(float)
 POST: dict[tuple[str, str], float] = defaultdict(float)
-_original = TransmissionCore._apply_route_weights
+_original = TransmissionCore._apply_route_efficiencies
 
 
 # One record per nonzero exposure event, pre- and post-weight, so establishment
@@ -146,7 +146,7 @@ def _instrumented(self, profile, agent_doses, agent_pathway_doses):
     )
 
 
-TransmissionCore._apply_route_weights = _instrumented
+TransmissionCore._apply_route_efficiencies = _instrumented
 
 
 def main() -> int:

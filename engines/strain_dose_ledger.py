@@ -108,7 +108,7 @@ def single_strain_mix(
 class StrainDoseLedger:
     """Strain-resolved dose per agent per pathway, for one pathogen pass.
 
-    Kept pathway-resolved because ``transmission_route_weights`` rescales
+    Kept pathway-resolved because ``route_efficiency_multipliers`` rescales
     pathways after the fact; folding early would apply the wrong weight.
     """
 

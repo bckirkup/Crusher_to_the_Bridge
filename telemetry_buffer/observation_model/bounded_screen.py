@@ -84,11 +84,19 @@ class Factor:
 # Norovirus box, spec section 3.2. Every interval is the study spread or an
 # explicitly declared plausible range, never a fitted width.
 NOROVIRUS_FACTORS: tuple[Factor, ...] = (
+    # secretor_negative_relative_susceptibility: susceptibility of a
+    # secretor-negative (FUT2 non-secretor) host relative to a secretor. Low
+    # end below the Teunis 2020 GII point estimate (0.015 / 0.076 = 0.197);
+    # high end from Rouphael's GII.2 challenge, 4 of 8 secretor-negatives ill
+    # at top dose. Grade B: measured for GII, not in this setting.
+    # secretor_negative_fraction stays fixed at 0.20 and out of the box: it is
+    # a demographic input (FUT2 se428 homozygote prevalence), not a biological
+    # free parameter of the transmission model.
     Factor(
-        "innate_nonsusceptible_fraction",
-        ("innate_nonsusceptible_fraction",),
-        0.0,
-        0.16,
+        "secretor_negative_relative_susceptibility",
+        ("secretor_negative_relative_susceptibility",),
+        0.05,
+        0.50,
         "linear",
         "B",
     ),

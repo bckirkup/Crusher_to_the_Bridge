@@ -29,13 +29,13 @@ def _units_at(name: str, unit: float) -> list[float]:
 
 
 def test_linear_factor_maps_unit_endpoints_to_the_interval() -> None:
-    factor = _factor("innate_nonsusceptible_fraction")
+    factor = _factor("secretor_negative_relative_susceptibility")
     assert factor.value(0.0) == pytest.approx(factor.low)
     assert factor.value(1.0) == pytest.approx(factor.high)
 
 
 def test_linear_factor_midpoint_is_the_arithmetic_mean() -> None:
-    factor = _factor("innate_nonsusceptible_fraction")
+    factor = _factor("secretor_negative_relative_susceptibility")
     expected = 0.5 * (factor.low + factor.high)
     assert factor.value(0.5) == pytest.approx(expected)
 

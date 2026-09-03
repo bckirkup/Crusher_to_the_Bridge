@@ -539,6 +539,19 @@ def _project_legacy_illness(agent: Any) -> None:
     )
 
 
+def _airborne_emission_fraction(profile: dict[str, Any]) -> float:
+    """Fraction of a shedder's emission entering the zone airborne reservoir.
+
+    ``surface_deposition_fraction`` is the deprecated alias for the same key.
+    It never fed a surface pool: the fomite reservoir is filled by the emesis
+    and faecal-release paths in ``TransmissionCore`` instead.
+    """
+    for key in ("airborne_emission_fraction", "surface_deposition_fraction"):
+        if key in profile:
+            return float(profile[key] or 0.0)
+    return 1e-4
+
+
 def step_infection_progression(
     engine: KorkinShipEngine,
     pathogen_profiles: dict[str, dict[str, Any]],
@@ -576,7 +589,7 @@ def step_infection_progression(
     if not isinstance(clock, SimClock):
         clock = SimClock()
     for pid, prof in pathogen_profiles.items():
-        dep_frac = prof.get("surface_deposition_fraction", 1e-4)
+        dep_frac = _airborne_emission_fraction(prof)
         survival = clock.survival_from_half_life(
             float(
                 prof.get(

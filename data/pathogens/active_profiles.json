@@ -111,7 +111,7 @@
         "dose_floor": 0.3,
         "notes": "Pooled norovirus GII: mu 0.182, sigma 0.445 (median 1.2 d, GSD 1.56, 95% 0.5-2.9 d) from Lee et al. 2013 via docs/ctb_incubation_spec.md - GII rather than the GI the pathogen_id implies, because this profile's genotypes are GII.4/GII.17/GII.2, and the spec finds no genotype-specific fits within GII. Dose term dose_shift 0.12 / floor 0.3 from the spec. dose_reference_log10 is this profile's own beta-Poisson N50 (16871 particles, alpha 0.111 / beta 32.81), not the spec's 18 RT-PCR units: acquired_particles is in model units, so referencing the literature assay unit would put every simulated host on the dose floor and turn a conditioning term into a constant. Consequence: a typical (near-ID50) host presents at the literature median, and the dose effect is anchored in direction but not calibrated in magnitude. host_factors omitted deliberately: the spec finds no literature support for a frailty effect on incubation, so it stays a sensitivity arm."
       },
-      "surface_deposition_fraction": 0.0001,
+      "airborne_emission_fraction": 0.0001,
       "base_susceptibility": 1.0,
       "microflora_disruption": {
         "causes_disruption": true,
@@ -167,7 +167,7 @@
           }
         ]
       },
-      "transmission_route_weights": {
+      "route_efficiency_multipliers": {
         "direct_contact": 0.35,
         "droplet": 0.1,
         "hvac_airborne": 0.05,
@@ -175,8 +175,9 @@
         "food_contamination": 0.2,
         "environmental_source": 0.0
       },
-      "innate_nonsusceptible_fraction": 0.0,
-      "nonsusceptible_mechanism": "none",
+      "secretor_negative_fraction": 0.2,
+      "secretor_negative_relative_susceptibility": 0.2,
+      "nonsusceptible_mechanism": "fut2_partial",
       "strain_evolution": {
         "mutation_rate": 0.02,
         "phenotype_mutation_fraction": 0.05,
@@ -315,7 +316,7 @@
         "dose_floor": 0.3,
         "notes": "SARS-CoV-2 ancestral: mu 1.758, sigma 0.450 (median 5.8 d, GSD 1.57, 95% 2.3-14.6 d) from Wei et al. 2021 via docs/ctb_incubation_spec.md. Later lineages incubate faster (Omicron median 3.5 d, mu 1.253 / sigma 0.400): set median_days per scenario rather than treating 5.8 as current. Dose term dose_shift 0.15 / floor 0.3 from the spec, referenced to this profile's own beta-Poisson N50 (2670 particles, alpha 0.18 / beta 58) rather than the spec's TCID50 figure, for the model-unit reason given on norwalk_gi."
       },
-      "surface_deposition_fraction": 5e-05,
+      "airborne_emission_fraction": 5e-05,
       "base_susceptibility": 1.0,
       "microflora_disruption": {
         "causes_disruption": true,
@@ -379,7 +380,7 @@
           }
         ]
       },
-      "transmission_route_weights": {
+      "route_efficiency_multipliers": {
         "direct_contact": 0.25,
         "droplet": 0.3,
         "hvac_airborne": 0.3,

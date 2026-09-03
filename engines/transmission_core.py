@@ -249,8 +249,13 @@ DEFAULT_DENSITY_CFG: dict[str, float] = {
 }
 DEFAULT_CONTACT_MODE = "per_partner_contact"
 
-# Per-pathogen route weights (identity default → no change when absent)
-DEFAULT_ROUTE_WEIGHTS: dict[str, float] = {
+# Per-route dose efficiency multipliers (identity default → no change when
+# absent). These are independent per-route multipliers, not normalised shares:
+# the one pathogen with a measured per-portal ratio (influenza, intranasal vs
+# aerosol ID50) differs by orders of magnitude between routes, so a set of
+# shares cannot represent route efficiency. They neither do nor need to sum
+# to 1.
+DEFAULT_ROUTE_EFFICIENCY: dict[str, float] = {
     "direct_contact": 1.0,
     "droplet": 1.0,
     "hvac_airborne": 1.0,
@@ -258,8 +263,11 @@ DEFAULT_ROUTE_WEIGHTS: dict[str, float] = {
     "food_contamination": 1.0,
     "environmental_source": 1.0,
 }
-# Internal pathway dose keys → transmission_route_weights keys
-PATHWAY_WEIGHT_KEYS: dict[str, str] = {
+# Deprecated alias, kept for external readers.
+DEFAULT_ROUTE_WEIGHTS = DEFAULT_ROUTE_EFFICIENCY
+
+# Internal pathway dose keys → route_efficiency_multipliers keys
+PATHWAY_EFFICIENCY_KEYS: dict[str, str] = {
     "direct_contact": "direct_contact",
     "droplet": "droplet",
     "hvac_airborne": "hvac_airborne",
@@ -267,6 +275,8 @@ PATHWAY_WEIGHT_KEYS: dict[str, str] = {
     "food": "food_contamination",
     "environmental": "environmental_source",
 }
+# Deprecated alias, kept for external readers.
+PATHWAY_WEIGHT_KEYS = PATHWAY_EFFICIENCY_KEYS
 
 # Log-sigma defaults for heterogeneous_zone_dose (mean-1 lognormal).
 # Low in cabins (near-uniform stateroom mixing); high in dining/service;
@@ -1399,8 +1409,10 @@ class TransmissionCore:
         if ledger is None:
             return
         pathway_weights = {
-            pathway: float(weights.get(PATHWAY_WEIGHT_KEYS.get(pathway, pathway), 1.0))
-            for pathway in PATHWAY_WEIGHT_KEYS
+            pathway: float(
+                weights.get(PATHWAY_EFFICIENCY_KEYS.get(pathway, pathway), 1.0),
+            )
+            for pathway in PATHWAY_EFFICIENCY_KEYS
         }
         for agent_id in ledger.agent_ids():
             mult = susceptibility.get(agent_id, 1.0)
@@ -2166,7 +2178,7 @@ class TransmissionCore:
                 ledger=ledger,
             )
 
-        self._apply_route_weights(profile, p_agent_doses, p_agent_pw)
+        self._apply_route_efficiencies(profile, p_agent_doses, p_agent_pw)
 
         susceptibility = self._merge_pathogen_doses(
             agents, pathogen_id, p_agent_doses,
@@ -2174,7 +2186,7 @@ class TransmissionCore:
         )
 
         self._fold_strain_doses(
-            pathogen_id, ledger, self._route_weights(profile), susceptibility,
+            pathogen_id, ledger, self._route_efficiencies(profile), susceptibility,
         )
         self._last_pathogen_route_doses[pathogen_id] = {
             aid: dict(pw) for aid, pw in p_agent_pw.items()
@@ -2186,36 +2198,49 @@ class TransmissionCore:
                 key = f"{pw_name}:{pathogen_id}" if pathogen_id != "_default" else pw_name
                 merged[key] = merged.get(key, 0.0) + pw_dose
 
-    def _route_weights(self, profile: dict[str, Any] | None) -> dict[str, float]:
-        """Resolve transmission_route_weights (identity default)."""
-        raw = (profile or {}).get("transmission_route_weights")
+    def _route_efficiencies(
+        self, profile: dict[str, Any] | None,
+    ) -> dict[str, float]:
+        """Resolve route_efficiency_multipliers (identity default).
+
+        ``transmission_route_weights`` is the deprecated alias for the same
+        numbers. Nothing here normalises them: they are independent per-route
+        dose multipliers.
+        """
+        raw = (profile or {}).get("route_efficiency_multipliers")
         if not isinstance(raw, dict) or not raw:
-            return dict(DEFAULT_ROUTE_WEIGHTS)
-        weights = dict(DEFAULT_ROUTE_WEIGHTS)
-        for key in DEFAULT_ROUTE_WEIGHTS:
+            raw = (profile or {}).get("transmission_route_weights")
+        if not isinstance(raw, dict) or not raw:
+            return dict(DEFAULT_ROUTE_EFFICIENCY)
+        weights = dict(DEFAULT_ROUTE_EFFICIENCY)
+        for key in DEFAULT_ROUTE_EFFICIENCY:
             if key in raw:
                 weights[key] = float(raw[key])
         return weights
 
-    def _apply_route_weights(
+    def _apply_route_efficiencies(
         self,
         profile: dict[str, Any] | None,
         agent_doses: dict[int, float],
         agent_pathway_doses: dict[int, dict[str, float]],
     ) -> None:
-        """Scale each pathway's dose contribution by pathogen route weights."""
-        weights = self._route_weights(profile)
-        if all(abs(weights[k] - 1.0) < 1e-15 for k in DEFAULT_ROUTE_WEIGHTS):
+        """Scale each pathway's dose by the pathogen's route efficiency."""
+        weights = self._route_efficiencies(profile)
+        if all(abs(weights[k] - 1.0) < 1e-15 for k in DEFAULT_ROUTE_EFFICIENCY):
             return
         for aid, pw in agent_pathway_doses.items():
             total = 0.0
             for pw_name, pw_dose in pw.items():
-                wkey = PATHWAY_WEIGHT_KEYS.get(pw_name, pw_name)
+                wkey = PATHWAY_EFFICIENCY_KEYS.get(pw_name, pw_name)
                 w = float(weights.get(wkey, 1.0))
                 scaled = pw_dose * w
                 pw[pw_name] = scaled
                 total += scaled
             agent_doses[aid] = total
+
+    # Deprecated method aliases: external probes and tests still call these.
+    _route_weights = _route_efficiencies
+    _apply_route_weights = _apply_route_efficiencies
 
     # ── Pathway 1: Direct Contact ────────────────────────────────────
 
