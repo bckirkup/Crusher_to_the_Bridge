@@ -208,14 +208,10 @@ OUTBREAK_CLEANING_COVERAGE = 0.58
 # 1.25x of Kirby's measured GII.2 per-subject mean of 1.8e7. The interval
 # reproduces the measured mean rather than being fitted to any anchor.
 EMESIS_TOTAL_SHED_GEC_RANGE = (1e5, 1e8)
-# WITHDRAWN as an input (Kirby's abstract pooled-GII figure, which includes a
-# 2-subject GII.1 pilot the paper's own Results excludes; the GII.2 Table 3
-# value is 1.6e5 GEC/mL). No profile key resolves to it any more and the
+# Emesis titre is deliberately absent: no profile key resolves to one, and the
 # emesis record carries titre as a derived diagnostic, episode_load /
-# volume_ml, so the abstract-versus-Results defect cannot return through a
-# config. The constant survives only because importers reference the withdrawn
-# figure.
-EMESIS_TITRE_GEC_PER_ML = 3.9e4
+# volume_ml. The withdrawn figure is recorded in
+# docs/norovirus/norovirus_open_ledger.md.
 # Vomitus volume from Tung-Thompson et al. 2015 and Booth & Frost 2019;
 # measured range, evidence grade B. Still drawn per episode, but it no longer
 # multiplies a titre to make the emitted load: with the per-subject total
