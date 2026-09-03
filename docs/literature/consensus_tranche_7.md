@@ -2,8 +2,9 @@
 
 **Status:** Evidence assembled and interpreted, plus one in-tree measurement.
 **No pathogen-profile constant, no engine constant and no screen interval
-changed by this document**; the change it justifies is specified in §6 and is
-queued, not applied.
+changed by this document**; the change it justifies is specified in §6 and was
+applied in tranche 8, which adds `shedding_duration_days` = 15 to `norwalk_gi`
+and separates the two clocks. The immunocompromise move (#45) remains queued.
 **Scope:** item #45 — moving immunocompromise off the acquisition multiplier
 and onto shedding duration, plus the chronic-shedder importation channel. The
 tranche was opened to source that move and found the field it needs does not

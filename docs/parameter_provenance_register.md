@@ -21,19 +21,17 @@ defensibility claim can rest on.
 
 ## 1. Two axes, because one was hiding half the problem
 
-Provenance class alone was the wrong instrument. Seven quantities in §3 have a
+Provenance class alone was the wrong instrument. Six quantities in §3 have a
 citation and *still cannot be adopted*, because the field they would go into
-cannot express what the paper measured — nine before Wave 1 resolved two of the
-field defects, seven before Wave 2 resolved the norovirus decay unit and built
-the drying axis, six before tranche 6 moved the norovirus dose axis to
-declared-and-swept, five once that list was corrected (#380), and seven again
-because tranche 7 measured two quantities the model cannot express: norovirus
-shedding duration, which has no field at all, and the shedding curve's peak
-magnitude, which is mis-genogrouped and not separately identifiable. The count
-falling and rising is the expected shape: resolving a field defect removes an
-item, and measuring something the model never represented adds one. Classifying
-those as "sourced" would be the most dangerous entry in the table: it would look
-like provenance and encode something the evidence rejects.
+cannot express what the paper measured. The count was seven after tranche 7
+measured two quantities the model could not express: norovirus shedding
+duration, which had no field at all, and the shedding curve's peak magnitude,
+which is mis-genogrouped and not separately identifiable. Tranche 8 removes
+the first blocker: `shedding_duration_days` exists, the shedding clock is
+separate from the illness clock, and the measured interval is adopted at 15
+days (#46). Classifying the remaining blocked quantities as "sourced" would be
+the most dangerous entry in the table: it would look like provenance and encode
+something the evidence rejects.
 
 **Axis 1 — provenance class.**
 
@@ -69,7 +67,7 @@ influenza 2 of ~25):
 |---|---|
 | Quantities that had no usable literature basis and now have one recorded | **28** |
 | — of those, adoptable as they stand | 10 |
-| — blocked by a field or mechanism defect (⊘) | **7** |
+| — blocked by a field or mechanism defect (⊘) | **6** |
 | — adopted in the tree | **2** (the FUT2 pair, Wave 1) |
 | — provenance recovered but mis-genogrouped | **1** (η/γ; the dose-response pair left this row in tranche 6, declared as the GI.1 arm and swept over the GII interval it lies inside) |
 | — refuted, or shown to be unmeasurable (∅) | 5 |
@@ -108,11 +106,12 @@ Shipped values verified against `data/pathogens/active_profiles.json` and
 | `innate_nonsusceptible_fraction` | withdrawn from `norwalk_gi`; deprecated alias | — | The removed-fraction mechanism is refuted for GII and is no longer the norovirus mechanism. Alias retained (rr = 0.0) so the other bundles in `data/pathogens/` keep loading | — superseded | #21 done |
 | **Divergence: campaign vs shipped profile** | campaigns write `innate_nonsusceptible_fraction` | — | `picard_framework/runs/mega_cruise_campaign/campaign_runner.py:988` still writes `innate_nonsusceptible_fraction` into its per-run overrides, so **every campaign run models sterile immunity in a removed fraction** while `data/pathogens/active_profiles.json` models FUT2 partial susceptibility. Behaviour deliberately left unchanged: the campaign *sweeps* the removed fraction, and converting the swept axis to a relative susceptibility is a design decision, not a rename | recorded, unresolved | |
 | `shedding_variance_log10` | 1.0 | C | Teunis 2014, 102 subjects, peaks 10⁵–10⁹/g | ✓ | |
-| `recovery_day` | 3 | I → **M as an illness duration, refuted as an infectious period** | Atmar 2008 measures both in the same 16 subjects: symptomatic illness **1–2 days**, faecal RT-PCR shedding **median 28 days** (13–56). Two independent sources on illness duration (tranche 3 §5) put 3 days inside the illness range | ⊘ **mech — the field is doing two jobs.** `clearance_day = onset_day + recovery_day` ends the infection, and shedding is read from the curve on the same axis, so the illness clock is also the infectious period. **Measured**: only curve indices 0–2 of the authored 15 are ever reached, and **69.1% of the authored symptomatic curve integral is never emitted** ([tranche 7](literature/consensus_tranche_7.md) §2, reproducible via `telemetry_buffer/observation_model/shedding_clock_check.py`). The value stays; the second job moves to a new field | #46 |
-| `shedding_duration_days` | **field does not exist** | **B** as an interval | Cheng 2021 (77 children, GII): rise days 2–9, decline after day 9, most shedding ceased by **day 15**. Atmar 2008 (GI.1 challenge): median **28 days** (13–56). Kirby 2014 (GI.1 and GII.2 challenge, stools to day 35): both genogroups shed **up to 3 weeks past symptom resolution**. Proposed shipped value **15**, the authored curve's own length; interval **[12, 30]** ([tranche 7](literature/consensus_tranche_7.md) §3, §6) | ⊘ **mech — nothing to adopt into.** The change adds a field, not a number: it makes the already-authored tail reachable. Prerequisite for #45, and it will move every norovirus golden number in a known direction (more infectious host-days) | #46 |
+| `recovery_day` | 3 | I → **M as an illness duration** | Atmar 2008 measures both in the same 16 subjects: symptomatic illness **1–2 days**, faecal RT-PCR shedding **median 28 days** (13–56). Two independent sources on illness duration (tranche 3 §5) put 3 days inside the illness range | ✓ **implemented as an illness duration only.** The second job moved to `shedding_duration_days` in tranche 8: `illness_clearance_day = onset_day + recovery_day` now ends the *illness* (and the emesis schedule with it), while the infection and its shedding run to the shedding clock. The value is unchanged | #46 done |
+| `shedding_duration_days` | **15** | **B** as an interval | Cheng 2021 (77 children, GII): rise days 2–9, decline after day 9, most shedding ceased by **day 15**. Atmar 2008 (GI.1 challenge): median **28 days** (13–56). Kirby 2014 (GI.1 and GII.2 challenge, stools to day 35): both genogroups shed **up to 3 weeks past symptom resolution**. Shipped value **15**, the authored curve's own length and Cheng's cessation day; interval **[12, 30]** ([tranche 7](literature/consensus_tranche_7.md) §3, §6). Not fitted to any scored anchor | ✓ **implemented** (tranche 8). The field is optional and absent means the shedding period equals `recovery_day`, so the COVID arm is unchanged; the norovirus host now reaches all 15 authored curve indices and emits **100.0%** of both authored integrals, against 30.9% symptomatic / 75.0% asymptomatic before. Unblocks #45 | #46 done |
+| Curve selection by *current* illness status | symptomatic vs asymptomatic curve re-chosen every epoch | — | — | ✓ **defect, fixed in tranche 8.** Once illness can clear while shedding continues, selecting the curve from `illness == SYMPTOMATIC` silently moved a convalescent host onto the *asymptomatic* curve mid-course. All three selection sites (`get_pathogen_shedding`, `get_pathogen_hand_target`, `strain_shedding_shares`) now select on whether the host ever presented, so the tail read is the tail of the curve the host started on | #46 done |
 | `shedding_curve_log10` peak magnitude | 11.0 log10 copies/g | I → **M, and mis-genogrouped** | 11.0 is Atmar 2008's GI.1 median peak (95×10⁹ = 10^10.98) to two decimals. Kirby 2014 measures GII.2 titres ≈**2 logs below** GI.1 in the same challenge design ([tranche 7](literature/consensus_tranche_7.md) §3) | ⊘ **joint** — unlike the dose axis, this discrepancy is directional and large, but emission scale and dose-response enter as a **product** (#366), so a −2 log emission correction cannot be adopted alone. Declared, not applied | #47 |
 | `immunocompromised_fraction` (config) | 0.05 | **A → B as an era-aware interval** | Harpaz 2016 (NHIS, 2.7% of US adults, 2013), Martinson 2024 (6.6% in 2021, 7.4% in 2022), Lopez-Gigosos 2020 (24 of 1,196 travel-clinic travellers, **2.0%**) → **[0.02, 0.074]**; the width is population and era, not uncertainty ([tranche 7](literature/consensus_tranche_7.md) §5) | ✓ adoptable as an era-aware interval, not a point. Not yet adopted | #45 |
-| `immunocompromised_multiplier` (config) | 2.0 | **F → ∅ refuted as a quantity** | No source measures the relative risk of *acquiring* norovirus while immunocompromised; Green 2014 states the persistence mechanisms are unknown. What is measured is duration and infectiousness: van Beek 2017 (2,182 SOT recipients, 4.6% infected, 22.8% chronic, median **218 days**, 32–1,164), Davis 2020 (20 chronic paediatric cases 37 to >418 days, **infectious** virus shed continuously, HIE-confirmed), Chaimongkol 2024 (chronic shedding **10⁴–10¹¹** copies/g) | ∅ **withdrawn on the record** — an assumption sitting on the one quantity the literature does not measure. Wave 1 made it bite harder by composing multiplicatively instead of overwriting. Moves onto shedding duration once #46 gives it a field; the 7-log magnitude is a swept axis, never a point | #45 |
+| `immunocompromised_multiplier` (config) | 2.0 | **F → ∅ refuted as a quantity** | No source measures the relative risk of *acquiring* norovirus while immunocompromised; Green 2014 states the persistence mechanisms are unknown. What is measured is duration and infectiousness: van Beek 2017 (2,182 SOT recipients, 4.6% infected, 22.8% chronic, median **218 days**, 32–1,164), Davis 2020 (20 chronic paediatric cases 37 to >418 days, **infectious** virus shed continuously, HIE-confirmed), Chaimongkol 2024 (chronic shedding **10⁴–10¹¹** copies/g) | ∅ **withdrawn on the record** — an assumption sitting on the one quantity the literature does not measure. Wave 1 made it bite harder by composing multiplicatively instead of overwriting. Tranche 8 supplies the shedding-duration field, so #45 is now unblocked to move the evidence onto duration; the 7-log magnitude is a swept axis, never a point | #45 |
 | `surface_decay_log10_per_day` | key added, **no profile sets it**; the active profiles still ship the deprecated `surface_decay_per_day` = 0.25 | C → **B in sourced units** | Five surrogate studies → **[0.067, 0.79] log10/day**, Grade B, which is the unit every source measures in; the former [0.14, 0.84] was that same interval converted through f = 1 − 10⁻ᵏ. Shipped 0.25 fractional ↔ −log10(0.75) = **0.125 log10/day**, which lies **inside [0.067, 0.79] near its slow end** (tranche 5 §1) | ✓ interval **adopted in the screen box in sourced units** (#41); conversion now happens in exactly one place, `TransmissionCore._surface_survival`. **Divergence recorded:** shipped profiles ride the deprecated alias, so behaviour is bit-identical and the sourced key is unexercised until a profile adopts it | #41 done |
 | `airborne_emission_fraction` | 1e-4 (renamed from `surface_deposition_fraction`, value unchanged) | **C** unsourced-assumed | No study reports emission to a room reservoir as a fraction of shedding. The field feeds the **airborne** zone reservoir, which is now what it is called; the surface pools are fed by the emesis and faecal-release paths | — not blocked: the ⊘ field defect is **resolved** (#42) and nothing about the field now prevents adoption; it simply has no source | #42 done |
 | `airborne_half_life_hours` | 1.1 | **I, cross-pathogen** | No measurement of airborne norovirus decay exists. The value is van Doremalen's SARS-CoV-2 figure | ∅ null — declare or bound by deposition physics | #39 |
@@ -183,7 +182,7 @@ must be resolved before it is.
 | `base_susceptibility` | 0.65 | **F, and it is prior immunity** | Not a constant: a per-season, per-route seroprevalence/vaccination input. This is the one place a flu arm could quietly overfit | reclassify as a scenario input | |
 | `surface_deposition_fraction` | 1e-3 | I | 10× the norovirus value, no stated reason. The bundle still uses the deprecated key name; the engine reads it through the alias | ∅ null; ⊘ field resolved in the active bundle only (#42) | #42 |
 
-## 4. The seven blocked, and the change each needs
+## 4. The six blocked, and the change each needs
 
 This is the actionable core of the register. In every case the paper exists and
 the field cannot take it, so the next move is a model change, not a search.
@@ -227,16 +226,7 @@ item here, because the genogroup contrast cannot be quantified for it at all.
 5. **The observation model's ~15 numbers** — jointly constrained by a single
    empirical aggregate which *is* anchor A3, so A3 cannot also be a test of them
    (#23, #27).
-6. **Norovirus shedding duration** — `recovery_day` is simultaneously the
-   symptomatic duration (measured, and correct at 3 days) and the infectious
-   period (measured at a median of 28 days, and wrong by an order of magnitude),
-   because the infection clears on the same axis the shedding curve is read on.
-   Two thirds of the authored curve is unreachable as a result, there is no
-   post-symptomatic shedding in the model at all, and immunocompromise cannot be
-   moved onto duration until duration exists. The change separates the two
-   clocks and adds `shedding_duration_days`; it authors no curve value (#46,
-   prerequisite for #45).
-7. **Norovirus shedding-curve peak magnitude** — 11.0 log10 copies/g is Atmar's
+6. **Norovirus shedding-curve peak magnitude** — 11.0 log10 copies/g is Atmar's
    GI.1 median peak to two decimals, and Kirby measures GII.2 about two logs
    below GI.1 in the same challenge design. Unlike the dose axis, where the GII
    interval contained the shipped GI.1 value, this discrepancy is directional and

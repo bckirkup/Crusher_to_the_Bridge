@@ -100,6 +100,7 @@
         "episode_reporting_window_days": 2.0
       },
       "recovery_day": 3,
+      "shedding_duration_days": 15,
       "incubation": {
         "distribution": "lognormal",
         "median_days": 1.2,

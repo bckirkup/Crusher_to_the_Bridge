@@ -510,25 +510,30 @@ Roughly in dependency order.
     an input and the episode count corrected to 1–7. Three inputs collapse to
     one, so the item is closed as a degrees-of-freedom reduction rather than as
     a re-valued titre.
-12. **The infectious period is the illness duration, and two thirds of the
-    authored shedding curve is never emitted.** Measured, not argued:
+12. **Resolved: the infectious period was incorrectly tied to illness duration,
+    and two thirds of the authored shedding curve was never emitted.** Measured,
+    not argued:
     `telemetry_buffer/observation_model/shedding_clock_check.py` drives the real
-    progression seam and reports that a norovirus host reaches only curve
-    indices **0–2 of the authored 15**, clearing on day 3–6 (median 4), so
-    **69.1% of the authored symptomatic curve integral and 25% of the
-    asymptomatic curve are unreachable**. The cause is that
-    `clearance_day = onset_day + recovery_day` ends the infection on the same
-    axis the curve is read on, and `recovery_day` = 3 is an *illness* duration.
-    Atmar 2008 measures both quantities in the same subjects: symptoms 1–2 days,
-    faecal shedding median **28 days** (13–56); Kirby 2014 finds shedding up to
-    three weeks past symptom resolution in both genogroups; Cheng 2021 sees GII
-    shedding cease around day 15. So the model has one clock where the
-    literature measures two, there is no post-symptomatic shedding at all, and
-    the curve's own decay limb is dead code. Not repaired here — the repair adds
-    a separate `shedding_duration_days` (proposed 15, interval [12, 30]) and
-    will move every norovirus golden number in a known direction, more
-    infectious host-days. It is also a prerequisite for the immunocompromise
-    move: duration cannot carry immunocompromise until duration exists. See
+    progression seam. The tranche 7 baseline was a norovirus host reaching only
+    curve indices
+    **0–2 of the authored 15**, clearing on day 3–6 (median 4), with
+    **30.9% symptomatic and 75.0% asymptomatic integral emitted** — equivalently,
+    69.1% and 25.0% unreachable. After tranche 8, the host reaches indices
+    **0–14**, clears on day 15–18 (median 16), and emits **100.0%** of both
+    integrals. The COVID control is unchanged: indices **0–6**, last shedding
+    day median **12** (range 8–22), and **99.8%** of both integrals.
+    The repair separates `recovery_day` as illness duration from
+    `shedding_duration_days` as infectious/shedding duration. Illness and its
+    emesis records clear at onset + 3 days, while infection, hand load and
+    faecal shedding remain active through onset + 15 days. Atmar 2008 measures
+    both quantities in the same subjects: symptoms 1–2 days, faecal shedding
+    median **28 days** (13–56); Kirby 2014 finds shedding up to three weeks past
+    symptom resolution in both genogroups; Cheng 2021 sees GII shedding cease
+    around day 15. The shipped value is **15**, screen interval **[12, 30]**,
+    Grade B, not fitted to any scored anchor. The legacy
+    no-per-pathogen-record path in `engines/infection_dynamics_bridge.py` still
+    uses `ONSET_DAY + RECOVERY_DAY` as a one-clock fallback; that known
+    limitation is unchanged. See
     [`../literature/consensus_tranche_7.md`](../literature/consensus_tranche_7.md).
 
 ## 5. Held fixed by assumption
@@ -538,6 +543,11 @@ is over-determined only *given* them. Full list in §10 of the history document.
 
 - Route weights (contact 0.35, fomite 0.30, food 0.20, droplet 0.10, HVAC 0.05)
   — assumed, not traced to a source. **The largest single unsourced input.**
+- `shedding_duration_days` = **15 days**, screened over **[12, 30]**, Grade B
+  (Atmar 2008, Kirby 2014, Cheng 2021). The shipped value is a declared
+  operational point, not fitted to a scored anchor; the field keeps the
+  illness duration (`recovery_day`) separate from the infectious/shedding
+  duration.
 - `HIGH_TOUCH_AREA_M2` — per-room high-touch area in m² has never been measured
   by anybody. Permanent Grade C; the gap is the field's, not ours.
 - Fraction of emesis episodes occurring in the host's own cabin — swept, never
@@ -561,7 +571,9 @@ is over-determined only *given* them. Full list in §10 of the history document.
   recipients chronic, median 218 days, range 32–1,164; Davis 2020 confirms
   infectious virus, not RNA). Wave 1 made it bite harder by composing
   multiplicatively instead of overwriting, so the 2.0 now genuinely doubles
-  acquisition risk on the one axis the literature does not support. See
+  acquisition risk on the one axis the literature does not support. Tranche 8
+  adds the shedding clock needed to carry the duration evidence; #45 is now
+  unblocked to move immunocompromise onto duration rather than acquisition. See
   [`../literature/consensus_tranche_7.md`](../literature/consensus_tranche_7.md)
   §4–§5.
 - Secretor-status non-susceptibility. Not a held-fixed 20% ceiling: the profile

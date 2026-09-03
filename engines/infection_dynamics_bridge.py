@@ -289,6 +289,22 @@ def shedding_value(day_post_onset: int, is_symptomatic: bool) -> float:
     return max(1.0, math.pow(10, curve[idx] - DOSE_ADJUSTMENT))
 
 
+def ever_presented(inf: dict[str, Any]) -> bool:
+    """Whether this infection ever presented symptomatically.
+
+    The curve a host emits on is fixed at presentation, not re-chosen each
+    epoch: a host whose illness has ended while it is still shedding reads the
+    tail of the curve it started on, instead of switching onto the
+    asymptomatic curve mid-course. The onset and illness clauses keep records
+    built by paths that never set the flag on their original curve.
+    """
+    return (
+        bool(inf.get("presented"))
+        or inf.get("onset_time_infected") is not None
+        or inf.get("illness") == IllnessStatus.SYMPTOMATIC
+    )
+
+
 def draw_shedding_multiplier(
     rng: np.random.Generator,
     profile: dict[str, Any],
@@ -759,23 +775,27 @@ class KorkinAgent:
     def advance_resident_strains(
         self,
         pathogen_id: str,
-        recovery_day: float,
+        shedding_clearance_day: float,
         cleared: list[str] | None = None,
     ) -> int:
-        """Age each resident lineage by an epoch and clear those past recovery.
+        """Age each resident lineage by an epoch and clear those done shedding.
 
-        The threshold is the host's total course in days: incubation/onset plus
-        the symptomatic ``recovery_day`` duration. The lineage counter is in
-        epochs, and the run's clock converts between them. Returns the number
-        still resident, so the caller can hold the pathogen-level infection
-        open until the last lineage clears. Ids of the lineages that cleared
-        this call are appended to ``cleared`` when given, since each one is an
+        The threshold is the host's total infectious course in days:
+        incubation/onset plus the shedding duration, which outlasts the illness
+        whenever the profile says it does. The lineage counter is in epochs,
+        and the run's clock converts between them. Returns the number still
+        resident, so the caller can hold the pathogen-level infection open
+        until the last lineage clears. Ids of the lineages that cleared this
+        call are appended to ``cleared`` when given, since each one is an
         exposure the host now has immune memory of.
         """
         residents = self.resident_strains(pathogen_id)
         for strain_id, resident in tuple(residents.items()):
             resident.time_infected += 1
-            if self.clock.days_elapsed(resident.time_infected) >= recovery_day:
+            if (
+                self.clock.days_elapsed(resident.time_infected)
+                >= shedding_clearance_day
+            ):
                 del residents[strain_id]
                 if cleared is not None:
                     cleared.append(strain_id)
@@ -923,7 +943,7 @@ class KorkinAgent:
         epochs_infected = inf["time_infected"]
         if epochs_infected is None or epochs_infected < 0:
             return 0.0
-        is_symp = inf["illness"] == IllnessStatus.SYMPTOMATIC
+        is_symp = ever_presented(inf)
         curve = profile.get(
             "shedding_curve_log10",
             SYMPTOMATIC_SHEDDING if is_symp else ASYMPTOMATIC_SHEDDING,
@@ -968,7 +988,7 @@ class KorkinAgent:
         epochs_infected = inf.get("time_infected")
         if epochs_infected is None or epochs_infected < 0:
             return 0.0
-        symptomatic = inf["illness"] == IllnessStatus.SYMPTOMATIC
+        symptomatic = ever_presented(inf)
         curve = profile.get(
             "shedding_curve_log10",
             SYMPTOMATIC_SHEDDING if symptomatic else ASYMPTOMATIC_SHEDDING,
@@ -1002,7 +1022,7 @@ class KorkinAgent:
         if len(residents) < 2:
             return {}
         inf = self.infections[pathogen_id]
-        is_symp = inf["illness"] == IllnessStatus.SYMPTOMATIC
+        is_symp = ever_presented(inf)
         curve = profile.get(
             "shedding_curve_log10",
             SYMPTOMATIC_SHEDDING if is_symp else ASYMPTOMATIC_SHEDDING,
