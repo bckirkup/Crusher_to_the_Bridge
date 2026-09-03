@@ -1,10 +1,11 @@
 """test_sanity_checker.py – sanity checker vs orchestrator config paths."""
 from __future__ import annotations
 import os, sys
+import pytest
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, REPO_ROOT)
 from tools.sanity_checker import (
-    Report, paths_from_run_config, run_checks,
+    PathogenProfile, Report, paths_from_run_config, run_checks,
     _check_config_yaml, _check_agent_classes, _check_gender_distribution,
     _check_wearable_monitoring, _check_modality_params, _check_hvac_params,
     _check_emod_progression, _check_escalation_params, _check_fred_behavior,
@@ -401,3 +402,44 @@ def test_from_config_includes_config_yaml_validation() -> None:
         pathogen_file=paths["pathogen_file"], cfg=paths["cfg"],
     )
     _assert_passed(report)
+
+
+def _minimal_pathogen_profile(**overrides: object) -> PathogenProfile:
+    return PathogenProfile(
+        pathogen_id="test",
+        name="Test pathogen",
+        **overrides,
+    )
+
+
+def test_new_pathogen_profile_fields_accept_valid_values() -> None:
+    profile = _minimal_pathogen_profile(
+        surface_decay_log10_per_day=0.25,
+        hand_to_surface_drying_multiplier=0.5,
+        emesis_total_shed_gec_range=[1e5, 1e8],
+    )
+    assert profile.surface_decay_log10_per_day == pytest.approx(0.25)
+    assert profile.hand_to_surface_drying_multiplier == pytest.approx(0.5)
+    assert profile.emesis_total_shed_gec_range == [1e5, 1e8]
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("surface_decay_log10_per_day", -0.01),
+        ("hand_to_surface_drying_multiplier", -0.01),
+        ("hand_to_surface_drying_multiplier", 1.01),
+        ("emesis_total_shed_gec_range", []),
+        ("emesis_total_shed_gec_range", [0.0, 1.0]),
+        ("emesis_total_shed_gec_range", [2.0, 1.0]),
+    ],
+)
+def test_new_pathogen_profile_fields_reject_invalid_values(
+    field: str, value: object,
+) -> None:
+    with pytest.raises(ValueError):
+        _minimal_pathogen_profile(**{field: value})
+
+
+def test_emesis_total_shed_validator_accepts_missing_value() -> None:
+    assert PathogenProfile.emesis_total_shed_ordered(None) is None

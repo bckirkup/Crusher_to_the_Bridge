@@ -91,7 +91,23 @@ BREATHING_RATE_M3_PER_DAY = 14.4
 HAND_AREA_CM2_RANGE = (445.0, 535.0)
 SURFACE_CONTACT_FRACTION_RANGE = (0.008, 0.25)
 MOUTH_CONTACT_FRACTION_RANGE = (0.008, 0.012)
+# Surface -> hand transfer efficiency (pickup direction). Drying is a weak
+# lever here: 2-11% off a dried donor surface (Sharps 2012, via fomite), and
+# 2.0 +/- 2.0% from stainless steel (Tuladhar 2013).
 SURFACE_TO_HAND_LOGNORMAL = (-2.1, 1.4)
+# Hand -> surface transfer efficiency (deposit direction). Identical numbers to
+# the pickup distribution, split out because they are two different measured
+# quantities and the drying lever differs sharply between them: hand -> surface
+# falls from 13% to 0.1% after 10 minutes of drying (Tuladhar 2013) and from
+# 59% to below 1% (Sharps 2012), a ~100x lever that has no counterpart on the
+# pickup side. The shipped distribution is a *wet-contact* parameterisation,
+# defensible against Tuladhar's immediate 13% and Bidawid's 13%; reusing it for
+# a dried donor hand would be about 100x too high.
+HAND_TO_SURFACE_LOGNORMAL = (-2.1, 1.4)
+# Drying-state multiplier on the deposit direction only. Neutral by default, so
+# it reproduces the shipped arithmetic exactly and consumes no RNG; the sourced
+# axis it opens is screened, not asserted (see bounded_screen.py).
+HAND_TO_SURFACE_DRYING_MULTIPLIER = 1.0
 HAND_TO_MOUTH_NORMAL = (0.339, 0.132)
 HAND_INACTIVATION_RATE_PER_HOUR_RANGE = (0.61, 1.7)
 HAND_HYGIENE_EFFICACY_LOG10 = (1.06, 0.54, 0.0, 1.89)
@@ -172,14 +188,41 @@ OUTBREAK_DISINFECTION_LOG10_REDUCTION = (
 # applied to Carling's 37% baseline gives 0.58. Inferred across settings, and
 # it must be swept rather than asserted. Grade C.
 OUTBREAK_CLEANING_COVERAGE = 0.58
-# GII mean titre from Kirby et al. 2016; measured, evidence grade B.
-EMESIS_TITRE_GEC_PER_ML = 3.9e4
+# Per-subject cumulative emesis shed, drawn log-uniform once per symptomatic
+# illness. Kirby et al. 2016, PLoS ONE, Table 3, per-subject cumulative shed in
+# vomitus: GII.2 Snow Mountain mean 1.8e7 GEC (SEM 1.8e7), GI.1 2.3e8, with the
+# per-subject values spanning roughly 1e5-1e8. Grade B: surrogate genotype, as
+# no GII.4 emesis measurement exists (docs/literature/consensus_tranche_4.md
+# section 3).
+#
+# This is the quantity the paper identifies, and it replaces the former
+# volume x titre product. Titre and volume are not independent of the total:
+# the measured GII.2 sample-mean titre (1.6e5 GEC/mL) times the measured mean
+# total volume (845 mL) is 1.35e8, 7.5x the same paper's measured per-subject
+# cumulative 1.8e7, because the titre mean is taken over positive samples on a
+# heavy right tail. Adopting titre and volume as independent inputs therefore
+# overstates emission by an order of magnitude while looking like provenance.
+#
+# The endpoints are set by this arithmetic check, not by tuning: the arithmetic
+# mean of a log-uniform on [1e5, 1e8] is (1e8 - 1e5) / ln(1e3) = 1.45e7, within
+# 1.25x of Kirby's measured GII.2 per-subject mean of 1.8e7. The interval
+# reproduces the measured mean rather than being fitted to any anchor.
+EMESIS_TOTAL_SHED_GEC_RANGE = (1e5, 1e8)
+# Emesis titre is deliberately absent: no profile key resolves to one, and the
+# emesis record carries titre as a derived diagnostic, episode_load /
+# volume_ml. The withdrawn figure is recorded in
+# docs/norovirus/norovirus_open_ledger.md.
 # Vomitus volume from Tung-Thompson et al. 2015 and Booth & Frost 2019;
-# measured range, evidence grade B.
+# measured range, evidence grade B. Still drawn per episode, but it no longer
+# multiplies a titre to make the emitted load: with the per-subject total
+# identified, volume is only the physical volume of the deposit, carried on the
+# record for the deposition geometry and for any concentration-based check.
 EMESIS_VOLUME_ML_RANGE = (50.0, 800.0)
-# Illness episode count inferred from measured episode/illness quantities;
-# evidence grade C.
-EMESIS_EPISODES_RANGE = (1, 3)
+# Emesis events per subject, 1-7 with mode 1 (Kirby et al. 2016, Tables 2-3);
+# measured count, evidence grade B. With the per-illness total identified, the
+# episode count only partitions and times that same total -- it no longer
+# scales emission -- which is why correcting the former (1, 3) is safe.
+EMESIS_EPISODES_RANGE = (1, 7)
 # Aerosol fraction from Tung-Thompson et al. 2015 surrogate measurements;
 # evidence grade B.
 EMESIS_AEROSOL_FRACTION_RANGE = (7.2e-7, 2.67e-4)
@@ -194,7 +237,12 @@ def draw_emesis_schedule(
     profile: dict[str, Any],
     rng: np.random.Generator,
 ) -> None:
-    """Draw onset-relative emesis times once for a symptomatic illness."""
+    """Draw onset-relative emesis times and the illness total, once.
+
+    The per-subject cumulative shed is the identified quantity, so it is drawn
+    once here and partitioned equally over the episodes drawn with it; nothing
+    is drawn per episode at emission time.
+    """
     if not hasattr(agent, "emesis_episode_schedule_by_pathogen"):
         return
     phases = profile.get("clinical_presentation", {}).get("phases", [])
@@ -203,6 +251,7 @@ def draw_emesis_schedule(
     ]
     if not emetic_phases:
         agent.emesis_episode_schedule_by_pathogen[pathogen_id] = []
+        agent.emesis_episode_load_by_pathogen[pathogen_id] = 0.0
         return
     bounds = [
         (
@@ -220,6 +269,15 @@ def draw_emesis_schedule(
     schedule = rng.uniform(window_start, window_end, count)
     agent.emesis_episode_schedule_by_pathogen[pathogen_id] = sorted(
         float(age) for age in schedule
+    )
+    total_low, total_high = profile.get(
+        "emesis_total_shed_gec_range", EMESIS_TOTAL_SHED_GEC_RANGE,
+    )
+    total_shed = math.exp(rng.uniform(
+        math.log(float(total_low)), math.log(float(total_high)),
+    ))
+    agent.emesis_episode_load_by_pathogen[pathogen_id] = (
+        total_shed / max(1, count)
     )
 
 
@@ -1335,12 +1393,23 @@ class TransmissionCore:
         )
 
     def _surface_survival(self, profile: dict[str, Any] | None = None) -> float:
-        """Return one-epoch surface survival for a pathogen profile."""
-        per_day = float(
-            (profile or {}).get(
-                "surface_decay_per_day", DEFAULT_SURFACE_DECAY_PER_DAY,
-            ),
-        )
+        """Return one-epoch surface survival for a pathogen profile.
+
+        Every source measures surface inactivation as a log10 reduction per day,
+        so ``surface_decay_log10_per_day`` is the preferred key and this is the
+        one place the conversion happens: a rate k gives a per-day fraction
+        f = 1 - 10**-k, which then goes through the clock unchanged.
+        ``surface_decay_per_day`` is the deprecated fraction-valued alias, and
+        the shipped profiles still carry it, so behaviour is unchanged.
+        """
+        prof = profile or {}
+        log10_per_day = prof.get("surface_decay_log10_per_day")
+        if log10_per_day is not None:
+            per_day = 1.0 - math.pow(10.0, -float(log10_per_day))
+        else:
+            per_day = float(
+                prof.get("surface_decay_per_day", DEFAULT_SURFACE_DECAY_PER_DAY),
+            )
         return 1.0 - self.clock.decay_per_epoch(per_day)
 
     def _airborne_survival(self, pathogen_id: str) -> float:
@@ -2758,6 +2827,20 @@ class TransmissionCore:
         )
         return min(surface_mass, max(0.0, request))
 
+    @staticmethod
+    def _hand_to_surface_drying(profile: dict | None) -> float:
+        """Drying-state multiplier on hand -> surface transfer efficiency.
+
+        Neutral (1.0) unless a profile opts in, and it draws nothing: which
+        drying state applies to a continuously recontaminated hand is not
+        measured, so the axis is swept rather than valued.
+        """
+        value = (profile or {}).get(
+            "hand_to_surface_drying_multiplier",
+            HAND_TO_SURFACE_DRYING_MULTIPLIER,
+        )
+        return min(1.0, max(0.0, float(value)))
+
     def _hand_inactivation_rate(
         self,
         agent: KorkinAgent,
@@ -2840,6 +2923,36 @@ class TransmissionCore:
                 return low, high
         return default
 
+    @staticmethod
+    def _log_uniform_mean(low: float, high: float) -> float:
+        """Arithmetic mean of a log-uniform variate on [low, high]."""
+        return (high - low) / math.log(high / low)
+
+    def _emesis_episode_load(
+        self,
+        agent: KorkinAgent,
+        pathogen_id: str,
+        profile: dict,
+        scheduled_episodes: int,
+    ) -> float:
+        """Copies expelled in one episode of this illness.
+
+        The identified quantity is the per-subject cumulative shed, drawn once
+        per illness in :func:`draw_emesis_schedule` and partitioned equally over
+        the episodes drawn with it. A harness that writes a schedule directly
+        never made that draw, so it falls back to the interval's arithmetic mean
+        split over the scheduled episodes; the fallback consumes no RNG.
+        """
+        stored = getattr(
+            agent, "emesis_episode_load_by_pathogen", {},
+        ).get(pathogen_id)
+        if stored is not None:
+            return float(stored)
+        low, high = self._emesis_range(
+            profile, "emesis_total_shed_gec_range", EMESIS_TOTAL_SHED_GEC_RANGE,
+        )
+        return self._log_uniform_mean(low, high) / max(1, scheduled_episodes)
+
     def _emesis_phase(
         self,
         agent: KorkinAgent,
@@ -2895,9 +3008,9 @@ class TransmissionCore:
             "emesis_aerosol_fraction_range",
             EMESIS_AEROSOL_FRACTION_RANGE,
         )
-        titre = float(profile.get(
-            "emesis_titre_gec_per_ml", EMESIS_TITRE_GEC_PER_ML,
-        ))
+        episode_load = self._emesis_episode_load(
+            agent, pathogen_id, profile, len(schedule),
+        )
         area = float(profile.get(
             "emesis_deposition_area_m2", EMESIS_DEPOSITION_AREA_M2,
         ))
@@ -2912,7 +3025,6 @@ class TransmissionCore:
             volume = math.exp(self.rng.uniform(
                 math.log(volume_low), math.log(volume_high),
             ))
-            episode_load = volume * titre
             aerosol_fraction = math.exp(self.rng.uniform(
                 math.log(aerosol_low), math.log(aerosol_high),
             ))
@@ -2923,7 +3035,8 @@ class TransmissionCore:
                 "epoch": int(epoch),
                 "zone": zone_name,
                 "volume_ml": volume,
-                "titre_gec_per_ml": titre,
+                # Derived diagnostic, never an input.
+                "titre_gec_per_ml": episode_load / volume,
                 "episode_load": episode_load,
                 "surface_load": surface_load,
                 "aerosol_load": aerosol_load,
@@ -3174,8 +3287,8 @@ class TransmissionCore:
                 used_fraction = self.rng.uniform(*SURFACE_CONTACT_FRACTION_RANGE)
                 transfer_efficiency = min(
                     1.0,
-                    max(0.0, float(self.rng.lognormal(*SURFACE_TO_HAND_LOGNORMAL))),
-                )
+                    max(0.0, float(self.rng.lognormal(*HAND_TO_SURFACE_LOGNORMAL))),
+                ) * self._hand_to_surface_drying(profile)
                 requested = (
                     self._fomite_surface_contacts(zone_name, agent)
                     * used_fraction

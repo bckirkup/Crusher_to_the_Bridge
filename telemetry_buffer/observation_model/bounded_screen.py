@@ -50,7 +50,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from engines.transmission_core import EMESIS_VOLUME_ML_RANGE  # noqa: E402
+from engines.transmission_core import EMESIS_TOTAL_SHED_GEC_RANGE  # noqa: E402
 from picard_framework.run_spec import PicardRunSpec  # noqa: E402
 from picard_framework.runs.mega_cruise_campaign.campaign_runner import (  # noqa: E402
     compute_derived_metrics,
@@ -108,34 +108,48 @@ NOROVIRUS_FACTORS: tuple[Factor, ...] = (
         "linear",
         "B",
     ),
+    # emesis_total_shed_gec: upper end of the per-subject cumulative emesis
+    # shed interval. Kirby et al. 2016 Table 3 -- low end is the GII.2 mean plus
+    # one SEM (1.8e7 + 1.8e7 = 3.6e7), high end the largest per-subject
+    # cumulative mean the paper measures (GI.1, 3.1e8). Grade B: surrogate
+    # genotype. This factor replaces the retired titre and volume factors: the
+    # per-subject total is the quantity Kirby identifies, and titre x volume as
+    # independent inputs overstates it 7.5x.
     Factor(
-        "emesis_titre_gec_per_ml",
-        ("emesis_titre_gec_per_ml",),
-        3.9e3,
-        3.9e5,
+        "emesis_total_shed_gec",
+        ("emesis_total_shed_gec_range", 1),
+        3.6e7,
+        3.1e8,
         "log10",
         "B",
     ),
+    # hand_to_surface_drying_multiplier: drying state of the donor hand on the
+    # deposit direction. Low end is Tuladhar 2013's dried/immediate ratio
+    # (0.1% / 13% = 0.0077); high end is fully wet contact. Grade B. Which
+    # drying state applies to a hand that is continuously recontaminated by its
+    # own shedding is NOT measured, which is exactly why this enters as an axis
+    # to be swept and not as a value.
     Factor(
-        "emesis_volume_ml_high",
-        ("emesis_volume_ml_range", 1),
-        200.0,
-        800.0,
+        "hand_to_surface_drying_multiplier",
+        ("hand_to_surface_drying_multiplier",),
+        0.008,
+        1.0,
         "log10",
         "B",
     ),
-    # surface_decay_per_day: span of the MNV-1 surrogate literature on
-    # non-porous surfaces at indoor temperature, converted to fractional
-    # daily loss via f = 1 - 10^-k. Low end 0.067 log10/day (Fallahi &
-    # Mattison 2011, ~1 log10 in 15 d on stainless steel); high end
-    # 0.79 log10/day (Kim et al., 25 C / 50% RH, provenance in doubt --
-    # see docs/literature/consensus_tranche_5.md section 1). Grade B:
-    # human norovirus is not culturable, so no direct measurement exists.
+    # surface_decay_log10_per_day: span of the MNV-1 surrogate literature on
+    # non-porous surfaces at indoor temperature, in the units it is measured
+    # in. Low end 0.067 log10/day (Fallahi & Mattison 2011, ~1 log10 in 15 d on
+    # stainless steel); high end 0.79 log10/day (Kim et al., 25 C / 50% RH,
+    # provenance in doubt -- see docs/literature/consensus_tranche_5.md
+    # section 1). Grade B: human norovirus is not culturable, so no direct
+    # measurement exists. The conversion to the engine's fractional daily loss
+    # lives at the resolution site in transmission_core._surface_survival.
     Factor(
-        "surface_decay_per_day",
-        ("surface_decay_per_day",),
-        0.14,
-        0.84,
+        "surface_decay_log10_per_day",
+        ("surface_decay_log10_per_day",),
+        0.067,
+        0.79,
         "linear",
         "B",
     ),
@@ -161,7 +175,7 @@ NOROVIRUS_FACTORS: tuple[Factor, ...] = (
 # indexed factor moves one end of a pair; the other end must keep the value
 # the engine would otherwise use, not zero.
 INDEXED_PATH_DEFAULTS: dict[str, tuple[float, ...]] = {
-    "emesis_volume_ml_range": tuple(EMESIS_VOLUME_ML_RANGE),
+    "emesis_total_shed_gec_range": tuple(EMESIS_TOTAL_SHED_GEC_RANGE),
 }
 
 SCORED_OUTPUTS: tuple[str, ...] = (

@@ -1,6 +1,15 @@
 # Emesis deposition: the concentrated mechanism the fomite chain is missing
 
-Authored specification. Every quantity below is taken from a measurement in the
+Authored specification, **partly superseded**. The titre x volume
+parameterisation described in §2 and §4 was withdrawn in Wave 2 (task #38): the
+engine now draws the measured per-subject cumulative shed
+(`EMESIS_TOTAL_SHED_GEC_RANGE`) once per illness and partitions it across
+episodes, and titre is a derived diagnostic rather than an input. See
+`docs/norovirus/norovirus_open_ledger.md` §1 for the withdrawal and its reason;
+the geometry, aerosol split and touchable-fraction sections below still describe
+the implementation.
+
+Every quantity below is taken from a measurement in the
 literature. Nothing here is fitted to VSP, to the passenger:crew ratio of 2.9,
 or to Park et al. In particular §6 states what the model is expected to predict
 *after* this change so the comparison is made against a number written down

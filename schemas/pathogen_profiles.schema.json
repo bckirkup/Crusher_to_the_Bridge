@@ -548,17 +548,19 @@
           "minimum": 0,
           "description": "Hand-hygiene event rate; defaults to zero because no event model is currently fitted."
         },
-        "emesis_titre_gec_per_ml": {
-          "type": "number",
-          "exclusiveMinimum": 0,
-          "description": "Optional measured emesis norovirus titre in genome copies per millilitre."
+        "emesis_total_shed_gec_range": {
+          "type": "array",
+          "items": {"type": "number", "exclusiveMinimum": 0},
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "Optional [low, high] log-uniform bounds on the per-subject cumulative emesis shed in genome copies, drawn once per symptomatic illness and partitioned equally across the drawn episodes. This is the quantity the emesis literature identifies; the withdrawn emesis_titre_gec_per_ml key is not honoured, because titre and volume are not independent of this total."
         },
         "emesis_volume_ml_range": {
           "type": "array",
           "items": {"type": "number", "exclusiveMinimum": 0},
           "minItems": 2,
           "maxItems": 2,
-          "description": "Optional [low, high] log-uniform emesis volume bounds in millilitres."
+          "description": "Optional [low, high] log-uniform emesis volume bounds in millilitres. Physical deposit volume only; it does not multiply a titre to make the emitted load."
         },
         "emesis_episodes_range": {
           "type": "array",
@@ -672,11 +674,23 @@
           "maximum": 1,
           "description": "DEPRECATED alias for airborne_emission_fraction, still honoured. The key never deposited on surfaces."
         },
+        "surface_decay_log10_per_day": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Daily log10 reduction of viable surface-reservoir mass, in the units every source measures. Converted once, at the resolution site, to the fractional daily loss the clock consumes: f = 1 - 10**-k."
+        },
         "surface_decay_per_day": {
           "type": "number",
           "minimum": 0,
           "maximum": 1,
-          "description": "Daily fraction of viable surface-reservoir mass lost."
+          "description": "DEPRECATED fraction-valued alias for surface_decay_log10_per_day, still honoured. Daily fraction of viable surface-reservoir mass lost; the shipped profiles still carry this spelling."
+        },
+        "hand_to_surface_drying_multiplier": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 1.0,
+          "description": "Multiplier on hand-to-surface transfer efficiency for the donor hand's drying state, applied to the deposit direction only. Neutral at 1.0 (wet contact, as shipped). Hand-to-surface transfer falls about 100x with ten minutes of drying, where surface-to-hand barely moves, so the two directions carry separate distributions."
         },
         "airborne_half_life_hours": {
           "type": "number",

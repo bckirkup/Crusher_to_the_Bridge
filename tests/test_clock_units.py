@@ -128,6 +128,18 @@ def test_twenty_four_hourly_epochs_match_one_legacy_epoch() -> None:
     assert math.isfinite(food_hourly)
 
 
+def test_log10_surface_decay_key_converts_to_fraction_once() -> None:
+    clock = SimClock(epoch_duration_hours=1.0, mode="hours")
+    core = TransmissionCore(
+        np.random.default_rng(13),
+        clock=clock,
+    )
+    expected = 1.0 - clock.decay_per_epoch(1.0 - 10.0 ** -0.25)
+    assert core._surface_survival(
+        {"surface_decay_log10_per_day": 0.25},
+    ) == pytest.approx(expected)
+
+
 def _reservoir_core(clock: SimClock) -> TransmissionCore:
     profile = {
         "food_contamination": {
