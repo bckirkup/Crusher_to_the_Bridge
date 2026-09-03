@@ -630,7 +630,7 @@
         },
         "nonsusceptible_mechanism": {
           "type": "string",
-          "description": "Label for innate nonsusceptibility biology (e.g. FUT2_nonsecretor, none)."
+          "description": "Label for the host-genetic nonsusceptibility biology this profile models. Free-form; no code branches on it. Values in use: \"fut2_partial\" (FUT2 non-secretors are partially protected, via secretor_negative_fraction with secretor_negative_relative_susceptibility > 0), \"FUT2_nonsecretor\" (sterile immunity in a removed fraction, the deprecated innate_nonsusceptible_fraction mechanism), \"none\" (no host-genetic mechanism modelled)."
         },
         "dose_response": {
           "type": "object",

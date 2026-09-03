@@ -177,7 +177,7 @@
       },
       "secretor_negative_fraction": 0.2,
       "secretor_negative_relative_susceptibility": 0.2,
-      "nonsusceptible_mechanism": "none",
+      "nonsusceptible_mechanism": "fut2_partial",
       "strain_evolution": {
         "mutation_rate": 0.02,
         "phenotype_mutation_fraction": 0.05,

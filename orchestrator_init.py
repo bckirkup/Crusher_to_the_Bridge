@@ -1202,6 +1202,31 @@ def _normalize_profile_units(
     return normalized
 
 
+# Fallback stream offset for host-genetic draws, used only when the parent
+# generator exposes no seed sequence to spawn from. Arbitrary but fixed, so the
+# derived stream stays reproducible from the config seed alone.
+_HOST_GENETICS_SEED_OFFSET = 917
+
+
+def _host_genetics_rng(
+    rng: np.random.Generator, cfg: dict[str, Any],
+) -> np.random.Generator:
+    """Return an independent stream for per-agent host-genetic draws.
+
+    Host-genetic sampling must not rebase the shared stream: drawing secretor
+    status from ``rng`` makes any change to genetic sampling shift every
+    downstream stochastic decision in the run. ``SeedSequence.spawn`` is
+    deterministic and consumes nothing from the parent; where it is unavailable
+    the stream is derived from ``random_seed`` plus a fixed offset.
+    """
+    seed_seq = getattr(rng.bit_generator, "seed_seq", None)
+    if seed_seq is not None:
+        return np.random.default_rng(seed_seq.spawn(1)[0])
+    return np.random.default_rng(
+        int(cfg.get("random_seed", 0) or 0) + _HOST_GENETICS_SEED_OFFSET,
+    )
+
+
 def _resolve_secretor_status(profile: dict[str, Any]) -> tuple[float, float]:
     """Return (secretor-negative prevalence, relative susceptibility).
 
@@ -1244,13 +1269,14 @@ def init_multi_pathogen(
     imm_mult = mp_cfg.get("immunocompromised_multiplier", 2.0)
     n_immunocompromised = int(len(engine.agents) * imm_frac)
     immunocompromised_ids: set[int] = set()
+    genetics_rng = _host_genetics_rng(rng, cfg)
 
     for agent in engine.agents:
         for pid, prof in pathogen_profiles.items():
             base_susc = prof.get("base_susceptibility", 1.0)
             agent.init_pathogen_susceptibility(pid, base_susc)
             frac, rel_susc = _resolve_secretor_status(prof)
-            drawn = frac > 0.0 and rng.random() < frac
+            drawn = frac > 0.0 and genetics_rng.random() < frac
             agent.secretor_negative_by_pathogen[pid] = drawn
             if drawn:
                 # Secretor-negative hosts are partially, not absolutely,

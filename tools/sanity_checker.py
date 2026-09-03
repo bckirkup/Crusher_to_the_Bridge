@@ -38,6 +38,7 @@ sys.path.insert(0, _REPO_ROOT)
 from pydantic import (  # noqa: E402  (imported after the sys.path insert above)
     BaseModel,
     Field,
+    ValidationInfo,
     field_validator,
     model_validator,
 )
@@ -393,6 +394,7 @@ class PathogenProfile(BaseModel):
     microflora_disruption: dict[str, Any] = {}
     food_contamination: dict[str, Any] = {}
     environmental_contamination: dict[str, Any] = {}
+    route_efficiency_multipliers: dict[str, float] = {}
     transmission_route_weights: dict[str, float] = {}
     innate_nonsusceptible_fraction: float = 0.0
     secretor_negative_fraction: float | None = None
@@ -434,13 +436,17 @@ class PathogenProfile(BaseModel):
             )
         return v
 
-    @field_validator("transmission_route_weights")
+    @field_validator(
+        "route_efficiency_multipliers", "transmission_route_weights",
+    )
     @classmethod
-    def route_weights_non_negative(cls, v: dict[str, float]) -> dict[str, float]:
+    def route_weights_non_negative(
+        cls, v: dict[str, float], info: ValidationInfo,
+    ) -> dict[str, float]:
         for k, val in v.items():
             if float(val) < 0:
                 raise ValueError(
-                    f"transmission_route_weights[{k}] must be non-negative, got {val}"
+                    f"{info.field_name}[{k}] must be non-negative, got {val}"
                 )
         return v
 
@@ -933,27 +939,27 @@ def _check_logical_contradictions(
                         f"'{route}'. Valid routes: {_VALID_TRANSMISSION_ROUTES}",
                     )
 
-            weights = p.transmission_route_weights or {}
-            if weights:
+            # Route efficiencies are independent per-route dose multipliers,
+            # unbounded above; there is deliberately no sum rule. Non-negativity
+            # is enforced by the field validator on both key spellings.
+            if p.route_efficiency_multipliers:
+                field = "route_efficiency_multipliers"
+                efficiencies = p.route_efficiency_multipliers
+            else:
+                field = "transmission_route_weights"
+                efficiencies = p.transmission_route_weights or {}
+            if efficiencies:
                 allowed = {
                     "direct_contact", "droplet", "hvac_airborne",
                     "fomite", "food_contamination", "environmental_source",
                 }
-                unknown = set(weights) - allowed
+                unknown = set(efficiencies) - allowed
                 if unknown:
                     report.warn(
                         _ACTIVE_PROFILES_JSON,
                         "LOGIC_ROUTE",
-                        f"{p.pathogen_id} transmission_route_weights has "
+                        f"{p.pathogen_id} {field} has "
                         f"unknown keys {sorted(unknown)}",
-                    )
-                wsum = sum(float(v) for v in weights.values())
-                if abs(wsum - 1.0) > 0.01:
-                    report.warn(
-                        _ACTIVE_PROFILES_JSON,
-                        "LOGIC_ROUTE",
-                        f"{p.pathogen_id} transmission_route_weights sum to "
-                        f"{wsum:.4f} (expected ≈ 1.0)",
                     )
 
             # Check that shedding curves have reasonable lengths

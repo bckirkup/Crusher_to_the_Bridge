@@ -56,6 +56,17 @@ survives only as a deprecated alias (relative susceptibility 0.0) so the other
 bundles in `data/pathogens/` keep their present behaviour. The history below is
 retained because the sequence of reversals is the reason the mechanism changed.
 
+**The mega-cruise campaign still runs the withdrawn mechanism.**
+`picard_framework/runs/mega_cruise_campaign/campaign_runner.py:988` writes
+`innate_nonsusceptible_fraction` into its per-run overrides, so every campaign
+run rides the deprecated alias at relative susceptibility 0.0 — sterile immunity
+— while `data/pathogens/active_profiles.json` runs partial susceptibility. The
+behaviour is deliberately unchanged: the campaign sweeps the removed fraction,
+and converting that swept axis into a relative susceptibility is a design
+decision rather than a rename. Any campaign result must therefore be read as
+having been produced under the withdrawn mechanism until that decision is
+taken.
+
 **The Morris ranking in
 [`bounded_screen_results.md`](bounded_screen_results.md) is invalidated a second
 time, and by this change.** The screen's seventh factor was
