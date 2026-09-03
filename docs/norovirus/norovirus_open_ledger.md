@@ -106,10 +106,11 @@ expressed unconverted, [0.067, 0.79] log10/day.
 **Hand↔surface transfer is split by direction, and a drying axis is added at
 neutral (Wave 2, task #42 item 3).** `SURFACE_TO_HAND_LOGNORMAL` keeps the pickup
 direction; `HAND_TO_SURFACE_LOGNORMAL` — identical numbers — carries the deposit
-direction, because they are two different measured quantities whose drying lever
-differs by ~20×: surface→hand dries only to 2–11% (Sharps 2012) / 2.0 ± 2.0%
-(Tuladhar 2013), where hand→surface falls 13% → 0.1% with 10 minutes of drying
-(Tuladhar) and 59% → <1% (Sharps). The shipped distribution is therefore a
+direction, because they are two different measured quantities carrying very different
+drying levers: ~100× on the deposit direction, where hand→surface falls
+13% → 0.1% with 10 minutes of drying (Tuladhar 2013) and 59% → <1%
+(Sharps 2012), against only ~5× on pickup, where surface→hand dries to
+2–11% (Sharps) / 2.0 ± 2.0% on steel (Tuladhar). The shipped distribution is therefore a
 **wet-contact** parameterisation, defensible against Tuladhar's and Bidawid's
 immediate 13% and about 100× too high for a dried donor hand. The new
 `hand_to_surface_drying_multiplier` multiplies the deposit side only, defaults to
