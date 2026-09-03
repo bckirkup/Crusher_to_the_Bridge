@@ -33,6 +33,7 @@ from engines.infection_dynamics_bridge import (
     InfectionStatus,
     KorkinShipEngine,
 )
+from engines.initiation import apply_explicit_seeds
 from engines.sim_clock import SimClock, config_epochs_for_hours
 from engines.sim_clock import crossed_day_boundary as _crossed_day_boundary
 from engines.strain_state import ImmuneRecord, StrainRegistry
@@ -246,6 +247,10 @@ def step_mid_cruise_introductions(
     """Introduce new pathogens at their scheduled introduction_epoch."""
     if not pathogen_profiles:
         return
+    plan = getattr(engine, "initiation_plan", None)
+    if plan is not None and not plan.legacy:
+        apply_explicit_seeds(plan, engine, epoch, rng, pathogen_profiles)
+        return
     for pid, prof in pathogen_profiles.items():
         intro_epoch = prof.get("introduction_epoch", 0)
         if intro_epoch == epoch and epoch > 0:
@@ -418,14 +423,25 @@ def _draw_symptom_onset(
     rng: np.random.Generator,
     _epoch: int = 0,
 ) -> None:
-    """One dose-conditioned illness draw for a host past its incubation period."""
-    ill_params = prof.get("illness_probability", {})
-    eta_p = ill_params.get("eta", 0.508)
-    gamma_p = ill_params.get("gamma", 0.095)
-    dose = inf["acquired_particles"]
-    ill_prob = 1.0 - math.pow(1.0 + eta_p * dose, -gamma_p)
-    ill_prob = min(1.0, ill_prob + agent.get_chronic_illness_boost(pid))
-    if rng.random() < ill_prob:
+    """One dose-conditioned illness draw for a host past its incubation period.
+
+    An imported host carries no acquisition dose, so its record states
+    ``will_present`` and that boolean replaces the dose draw: without the seam
+    a dose of zero would make every imported host asymptomatic and the
+    boarding state axis silently void.
+    """
+    forced = inf.get("will_present")
+    if forced is None:
+        ill_params = prof.get("illness_probability", {})
+        eta_p = ill_params.get("eta", 0.508)
+        gamma_p = ill_params.get("gamma", 0.095)
+        dose = inf["acquired_particles"]
+        ill_prob = 1.0 - math.pow(1.0 + eta_p * dose, -gamma_p)
+        ill_prob = min(1.0, ill_prob + agent.get_chronic_illness_boost(pid))
+        presents = rng.random() < ill_prob
+    else:
+        presents = bool(forced)
+    if presents:
         inf["illness"] = IllnessStatus.SYMPTOMATIC
         inf["onset_time_infected"] = inf.get("time_infected", 0)
         inf["presented"] = True

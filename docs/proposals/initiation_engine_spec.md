@@ -1,11 +1,14 @@
 # Initiation engine: a boarding draw as the baseline, explicit seeds as the override
 
-> **Status:** Proposed. Nothing here describes current behaviour. No constant
-> in this document is adopted; the two prevalence intervals it consumes are
-> already recorded in
+> **Status:** Implemented as of this PR, in `engines/initiation.py`, and still
+> off by default: a run with no `initiation` block is bit-identical to the
+> behaviour §1 describes. No constant in this document is adopted; the two
+> prevalence intervals it consumes are already recorded in
 > [`../literature/consensus_tranche_10.md`](../literature/consensus_tranche_10.md)
-> and in the provenance register, and this document adds the mechanism that
-> would let them enter the model at all.
+> and in the provenance register, and nothing ships a value for
+> `never_symptomatic_fraction` — enabling boarding without one is a load
+> error. §1 describes what a legacy run still does; §§3–5 describe the
+> mechanism that now exists.
 
 ## 1. What the model does today
 
@@ -91,7 +94,11 @@ Two blocks, deliberately not one mechanism.
     "enabled": false,                  // default off: bit-identical to today
     "norwalk_gi": {
       "prevalence": {"passenger": 0.025, "crew": 0.007},
-      "age_draw": "duration_equilibrium"
+      "age_draw": "duration_equilibrium",
+      "state_split": {
+        "never_symptomatic_fraction": null,        // swept; no licensed value
+        "presymptomatic_share_of_presenting": 0.04 // derived default, §4
+      }
     }
   },
   "explicit_seeds": [
@@ -126,84 +133,155 @@ and the shipped values are declared as the interval's low end rather than as
 estimates.
 
 **Dose becomes explicit or absent.** `dose: null` means "do not fabricate an
-acquisition dose": the boarded host's presentation is decided by the natural
-history in §4, not by `illness_probability` at a construction constant. Where
-a scenario needs a stated dose — a controlled dose-response experiment — it
+acquisition dose": the boarded host's presentation is decided by the state
+draw of §4, not by `illness_probability` at a construction constant. Where a
+scenario needs a stated dose — a controlled dose-response experiment — it
 writes one, and the number is then in the config where it can be swept and
 audited instead of in the source.
 
-## 4. The infection-age draw, and why it is not a new parameter
+That is not a preference. Neither profile carries a `symptomatic_fraction`:
+presentation is decided *only* by `illness_probability(acquired_particles)`,
+so a host with no acquisition dose has no way to be assigned a presentation at
+all. The state split of §4 is therefore a required input to the boarding
+channel rather than an optional refinement of it — which is the substantive
+reason it is a swept axis and not a derived diagnostic.
 
-Tranche 8 gave the infection axis its own clock (`shedding_duration_days`),
-and #45 gave it a per-host stretch (the chronic median of 218 days). Those two
-fields are sufficient to derive the boarding age distribution, so the
-initiation engine adds no distribution of its own:
+## 4. The state draw and the infection-age draw
+
+A boarded host needs two things the deterministic seed never had: which part
+of its course it is in, and how far into that part. The state comes from the
+swept axis of §5; the age is then conditional on it, and the age needs no
+distribution of its own — tranche 8's `shedding_duration_days` and #45's
+per-host chronic stretch already supply one:
 
 1. draw the host's own shedding duration `D_i` from the profile exactly as an
    infection acquired aboard would;
-2. draw infection age `a ~ Uniform[0, D_i)` — the renewal-theory equilibrium
-   age of an ongoing episode of length `D_i`;
-3. run the existing onset and severity clocks forward to age `a`;
-4. **reject and redraw if the host is symptomatic at boarding**, because the
-   measurement that supplies the prevalence sampled people without
-   diarrhoeal symptoms.
+2. draw the boarding state from `state_split` — never-symptomatic,
+   pre-symptomatic, or convalescent;
+3. draw infection age `a` uniformly over the window that state occupies within
+   `D_i` — the renewal-theory equilibrium age of an ongoing episode of that
+   length, restricted to the state;
+4. run the existing onset and severity clocks forward to age `a`, with the
+   host's presentation history set from step 2 rather than from
+   `illness_probability`.
 
-Step 4 is the part that makes the sample consistent with its own source, and
-step 1 does something the deterministic count cannot: because prevalence is
+Drawing the state first and the age second is deliberate. Drawing the age
+first and reading the state off the clocks — the construction the first
+version of this document recommended — makes the composition a silent function
+of `presymptomatic_shedding_days`, `recovery_day` and
+`shedding_duration_days`, none of which was sourced against a *prevalent*
+sample. Rejection-sampling on "not symptomatic at boarding" would still be
+needed to match the measurement's inclusion criterion, and the two mechanisms
+would then be fighting over the same quantity.
+
+Step 1 does something the deterministic count cannot: because prevalence is
 length-biased, a host with a 218-day duration occupies about 14.5× more of the
 prevalence pool than a 15-day one. The chronic share **among boarders** is
-therefore much higher than the chronic share among infections, and it is a
-*derived, checkable* quantity rather than a knob — which is the correct
-consequence of tranche 10's finding that the chronic shedder's distinguishing
-feature is duration and not prevalence.
+therefore much higher than the chronic share among infections, and it stays a
+*derived, checkable* quantity — which is the correct consequence of tranche
+10's finding that the chronic shedder's distinguishing feature is duration and
+not prevalence.
 
-The prediction to test, at the norovirus profile's GII incubation median of
-1.2 days, `recovery_day` 3 and `shedding_duration_days` 15: of the ages
-admissible under step 4, the pre-symptomatic window is about
-1.2 / (15 − 3) ≈ **10%**. So on a classic hull the realistic baseline delivers
-roughly **3–5 onsets in the first two days plus 30–50 silent shedders**, where
-today's default delivers exactly one onset and no silent shedders. Those
-silent shedders are the mechanism by which a voyage can exceed the 3% posting
-threshold without an identifiable index case — the observable pattern VSP
+**A correction to the first version of this document.** It put the
+pre-symptomatic share of imported hosts at 1.2 / (15 − 3) ≈ 10%, using the GII
+incubation median as the pre-symptomatic window. That is the wrong window. An
+imported host is in the sample because it is *shedding*, and the profile's own
+pre-symptomatic **shedding** window is `presymptomatic_shedding_days` = 0.5
+days (Atmar 2008: stool virus first detected at a median ~36 h, essentially
+concurrent with onset). The admissible non-symptomatic shedding course is
+therefore 0.5 + (15 − 3) = 12.5 days, of which the pre-symptomatic part is
+0.5 / 12.5 ≈ **4%**, not 10%. So on a classic hull the realistic baseline
+delivers roughly **1–2 hosts who will present in the first days, alongside
+30–50 who will not** — where today's default delivers one presenting host and
+no silent shedders.
+
+The correction sharpens the finding rather than weakening it. The count of
+*observable* index cases at embarkation was approximately right all along; what
+is missing from the model is the entire silent shedding pool that accompanies
+them. Those silent shedders are the mechanism by which a voyage can exceed the
+3% posting threshold without an identifiable index case — the pattern VSP
 records and the model currently cannot produce.
 
-## 5. The open decision
+## 5. The imported-host state: an explicit swept axis
 
-Step 4 resolves the imported-host state *given* that the natural-history
-clocks are the right generator for it. It does not resolve one thing, and no
-source in tranche 10 does either: the 2.5% measurement pools genuinely
+No source in tranche 10 resolves this: the 2.5% measurement pools genuinely
 never-symptomatic infection with convalescent shedding after resolved
 symptoms, a distinction this model has only been able to represent since
-tranche 8. Under the §4 construction the split is implied by the profile's own
-`symptomatic_fraction` and clocks rather than chosen — which is the
-defensible option — but it is implied by parameters that were never sourced
-against a *prevalent* sample, so the implied split is a model output that
-nothing yet validates.
+tranche 8. **Decided: the split is an explicit swept axis, not a derived
+output** — the composition is declared in the config, appears in the run
+artifact, and is screened, so a result that depends on it says so.
 
-The alternative is to make the three-way split (pre-symptomatic /
-never-symptomatic / convalescent) an explicit swept axis. That is one more
-knob, against a derived quantity that may be wrong.
+It enters as two independent coordinates rather than as a three-part
+composition, because a simplex cannot be swept one factor at a time and
+because each coordinate then has its own meaning and its own provenance:
 
-Recommendation: take the derived split, and record the implied composition in
-the run artifact so it is falsifiable when a prevalent-sample measurement
-appears. Do not add the axis until the derived value is shown to disagree with
-something.
+| Coordinate | Meaning | Status |
+|---|---|---|
+| `never_symptomatic_fraction` | Share of imported infections that will never present. A property of infection, not of importation — the classical asymptomatic fraction | **Unsourced.** No value shipped; a sourcing tranche is opened for it |
+| `presymptomatic_share_of_presenting` | Of the imported hosts that do present at some point, the share that has not presented yet at boarding | Derived default **0.04** from §4, swept |
+
+The three states follow: `never = f_never`,
+`pre = (1 − f_never) · s_pre`, `convalescent = (1 − f_never) · (1 − s_pre)`.
+The engine validates that both coordinates lie in [0, 1] and reports the
+resulting three-way composition in the artifact; nothing in the config states
+the composition directly, so it cannot be set to something that does not sum
+to one.
+
+`never_symptomatic_fraction` ships **without a value and with the boarding
+gate off**, rather than with a plausible one. It is a measurable quantity —
+challenge studies and community cohorts report it — and it has not been
+searched yet, so filling it in here would be exactly the kind of
+citation-shaped assumption the register exists to prevent. Enabling boarding
+requires setting it explicitly, which makes every run that uses the channel
+carry the choice on the record.
+
+What this costs is one knob, and the accounting is honest about it: the
+initiation engine removes two construction constants (the 1e4 and 1e5 doses)
+and a deterministic count, and adds two swept coordinates of which one is
+sourceable and unsourced. The reason it is worth it is in §3 — with no
+`symptomatic_fraction` in either profile, a dose-free imported host has no
+presentation mechanism at all, so this is not a refinement of the channel but
+a part of it.
 
 ## 6. Prerequisites and verification
 
-- The boarding gate must leave every existing run bit-identical when off, in
-  the manner of `shore_exposure.enabled`: no RNG draws consumed on the off
-  path. This is the property to test first, because tranche 6 showed that a
-  new draw against the shared stream rebases every downstream decision.
-- Host genetics already has a derived stream (#377); the boarding draw needs
-  its own for the same reason.
-- Sensitivity, not goldens, per `ci-test-design`: prevalence up must move
-  boarding count up, the crew and passenger rates must move their own
-  populations only, and the drawn ages must lie in `[0, D_i)` with no
-  symptomatic host at epoch 0.
-- The run artifact records the initiation mode, the drawn counts by role, and
-  the implied state composition of §5, so downstream analysis can tell a
-  prevalence-based run from an explicitly seeded one without re-deriving it.
+Done, in `engines/initiation.py` and its callers:
+
+- The boarding gate leaves every existing run bit-identical when off, in the
+  manner of `shore_exposure.enabled`: a run with no `initiation` key resolves
+  to `InitiationPlan((), (), legacy=True)` and consumes no new draw, which
+  `tests/test_initiation_engine.py` asserts against the parent stream and the
+  24-epoch orchestrator smoke confirms end to end.
+- The boarding draw has its own derived stream, `_boarding_rng`, spawned
+  **third** — after host genetics (#377) and the chronic-shedder stream, and
+  only when boarding is enabled, so neither sibling is rebased.
+- Sensitivity, not goldens, per `ci-test-design`: each prevalence moves its own
+  role's count and leaves the other role's alone, every drawn age lies inside
+  the window its state defines, no host is symptomatic at epoch 0, each
+  `state_split` coordinate moves the realised composition in the one direction
+  it owns, and the chronic share among boarders exceeds the profile's chronic
+  share of infections — the length-bias claim of §4, asserted directly.
+- The run artifact records the initiation mode, the drawn counts by role and
+  pathogen, both `state_split` coordinates as configured, and the realised
+  three-way composition. It is `engine.initiation_manifest`, written under the
+  `"initiation"` key of `resolved_pathogen_profiles.json`, and defaults to
+  `{"mode": "legacy"}` so the key always exists.
+- Enabling boarding with `never_symptomatic_fraction` unset is a load error,
+  not a defaulted run, and so is enabling it for a pathogen whose profile still
+  carries `initial_infected`.
+- The legacy engine-level seed at `10^(9.0 − 4.0)` is retired for any run that
+  declares an `initiation` block; `profile.initial_infected` and
+  `profile.initial_time_infected` still run exactly as before for every run
+  that does not.
+
+Still outstanding:
+
+- `never_symptomatic_fraction` has no shipped value and no source; the register
+  records it as a declared axis, and boarding cannot be enabled until a sweep
+  supplies one.
+- Shipped `norwalk_gi` still carries `initial_infected: 1`, so enabling
+  boarding on the shipped profile is a load error by construction until that
+  field is removed in the same change that turns boarding on.
 - Task #51 (the COVID arm's missing `shedding_duration_days`) is a hard
   prerequisite for enabling boarding on `sars_cov2_resp`: step 1 has nothing
   to draw from until that field exists, and step 2 would silently collapse to
