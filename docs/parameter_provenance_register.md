@@ -65,7 +65,7 @@ influenza 2 of ~25):
 | — of those, adoptable as they stand | 9 |
 | — blocked by a field or mechanism defect (⊘) | **6** |
 | — adopted in the tree | **2** (the FUT2 pair, Wave 1) |
-| — provenance recovered but mis-genogrouped | 2 |
+| — provenance recovered but mis-genogrouped | **1** (η/γ; the dose-response pair left this row in tranche 6, declared as the GI.1 arm and swept over the GII interval it lies inside) |
 | — refuted, or shown to be unmeasurable (∅) | 4 |
 | Profile scalars carrying a citation **in the tree** | still 8 / 6 / 2 |
 
