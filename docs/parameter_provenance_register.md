@@ -16,15 +16,16 @@ defensibility claim can rest on.
 | [`norovirus/norovirus_open_ledger.md`](norovirus/norovirus_open_ledger.md) | **Still authoritative** for what is *withdrawn*. Every dose figure is void pending refit; that record stays there. This register does not restate it |
 | [`covid/covid_parameter_provenance_audit.md`](covid/covid_parameter_provenance_audit.md) | Absorbed as the SARS-CoV-2 rows of §3. Its §2–§5 arguments are not restated here |
 | [`norovirus/norovirus_parameter_freedom_audit.md`](norovirus/norovirus_parameter_freedom_audit.md) | Absorbed as §5. Its measurements (the inert dose knob, the 15 observation-model numbers) stand |
-| [`literature/`](literature/) tranches 1–5 and the Edison reviews | The evidence behind the Evidence column. Contextual: this register is the index into them, and where the two disagree, the tranche document holds the citation and this one holds the status |
+| [`literature/`](literature/) tranches 1–6 and the Edison reviews | The evidence behind the Evidence column. Contextual: this register is the index into them, and where the two disagree, the tranche document holds the citation and this one holds the status |
 | `formal_spec_v2.md` Appendix A | Superseded as a provenance record. Its source column was the baseline this register was built against |
 
 ## 1. Two axes, because one was hiding half the problem
 
-Provenance class alone was the wrong instrument. Seven quantities in §3 have a
+Provenance class alone was the wrong instrument. Six quantities in §3 have a
 citation and *still cannot be adopted*, because the field they would go into
 cannot express what the paper measured — nine before Wave 1 resolved two of the
-field defects. Classifying those as "sourced" would be the most dangerous entry
+field defects, and seven before tranche 6 moved the norovirus dose axis to
+declared-and-swept. Classifying those as "sourced" would be the most dangerous entry
 in the table: it would look like provenance and encode something the evidence
 rejects.
 
@@ -62,7 +63,7 @@ influenza 2 of ~25):
 |---|---|
 | Quantities that had no usable literature basis and now have one recorded | **24** |
 | — of those, adoptable as they stand | 9 |
-| — blocked by a field or mechanism defect (⊘) | **7** |
+| — blocked by a field or mechanism defect (⊘) | **6** |
 | — adopted in the tree | **2** (the FUT2 pair, Wave 1) |
 | — provenance recovered but mis-genogrouped | 2 |
 | — refuted, or shown to be unmeasurable (∅) | 4 |
@@ -73,8 +74,10 @@ FUT2 pair — `secretor_negative_fraction` 0.20 with
 `secretor_negative_relative_susceptibility` 0.20 — by replacing the mechanism
 that blocked them, and resolved the naming defect on the two renamed fields
 (`route_efficiency_multipliers`, `airborne_emission_fraction`) without sourcing
-either. The other in-tree change from the sourcing campaign remains one screening
-interval (`surface_decay_per_day`, [0.10, 0.60] → [0.14, 0.84]). The remaining gap
+either. The other in-tree changes from the sourcing campaign remain two screening
+intervals (`surface_decay_per_day`, [0.10, 0.60] → [0.14, 0.84];
+`secretor_negative_relative_susceptibility`, [0.05, 0.50] → [0.04, 0.83],
+tranche 6). The remaining gap
 is deliberate — adoption is queued behind the mechanism fixes in §4 — but it must
 not be reported as progress on sourcing when it is progress on evidence.
 
@@ -89,10 +92,10 @@ Shipped values verified against `data/pathogens/active_profiles.json` and
 |---|---|---|---|---|---|
 | `incubation` (3 fields) | — | M | Lee 2013, **GII** | — in tree | |
 | `presymptomatic_shedding_days` | 0.5 | M | Atmar 2008 | — in tree | |
-| `dose_response.alpha` / `beta` | 0.111 / 32.81 | I → **M (form and value)** | Teunis 2008 disaggregated GI.1, traced by Edison's bundle | ⊘ mech — **GI.1 inoculum, GII arm** | #21 note |
-| `illness_probability.eta` / `gamma` | 0.508 / 0.095 | I → **M** | Teunis 2008, same table | ⊘ mech — same genogroup mismatch | |
+| `dose_response.alpha` / `beta` | 0.111 / 32.81 | I → **M (form and value)** | The shipped pair is the **disaggregated GI.1 challenge arm** of Teunis 2008, traced by Edison's bundle. Mapped onto α at fixed β = 32.81, the human GII evidence gives **α ∈ [0.072, 0.161]**: Rouphael 2022 GII.2 challenge ID50 5.1e5 → 0.072; Guix 2020 GII outbreak illness ID50 2,934 → 0.154, a *lower* bound on infection α; Ramesh 2020 gnotobiotic-pig GII.4 → 0.149–0.161, Grade C corroboration ([tranche 6](literature/consensus_tranche_6.md) §2) | ✓ **declared and swept** — 0.111 lies inside that interval and within 3% of its geometric centre (0.108), so it is declared as the GI.1 arm rather than refitted; α is queued into the screen box over [0.072, 0.161] with β held fixed, because family + aggregation assumption + dose unit are one categorical choice. **No profile value changes** | #21 note |
+| `illness_probability.eta` / `gamma` | 0.508 / 0.095 | I → **M** | Teunis 2008, same table. The genogroup contrast **cannot be quantified** for this pair either: Teunis 2020's per-copy genogroup figures are aggregate-unit, not disaggregated qPCR-copy ([tranche 6](literature/consensus_tranche_6.md) §3), and Guix's illness ID50 bounds the infection∘illness composite, not η/γ alone | ⊘ mech — same genogroup mismatch, and no GII-specific η/γ measurement exists to replace it | |
 | `secretor_negative_fraction` | 0.20 | B | FUT2 se428 nonsense-homozygote prevalence, European/North American populations ~20% (population genetics, not this setting) | ✓ **adopted** (#21) — demographic input, deliberately outside the screen box | #21 done |
-| `secretor_negative_relative_susceptibility` | 0.20 | B | Teunis 2020 GII rows, 0.015 / 0.076 = 0.197; Rouphael GII.2 challenge (4 of 8 Se− ill at top dose) bounds the high end | ✓ **adopted** (#21); screened over [0.05, 0.50]. Implies a removed-equivalent fraction of 0.20 × 0.80 = **0.16**, the #367 ceiling | #21 done |
+| `secretor_negative_relative_susceptibility` | 0.20 | B | **Genotype-specific**: Kambhampati 2015 pooled secretor:non-secretor odds ratios 9.9 (3.9–24.8) for GII.4 and 2.2 (1.2–4.2) for GII non-4, implying non-secretor relative susceptibility **0.10 (0.04–0.26)** and **0.45 (0.24–0.83)**; the declared genotype mixture GII.4/GII.17/GII.2 straddles both rows ([tranche 6](literature/consensus_tranche_6.md) §4) | ✓ **adopted** (#21); screened over **[0.04, 0.83]**, widened from [0.05, 0.50] — the width is **genotype composition**, not measurement error, and the adopted 0.20 sits inside it and is not refuted. Implies a removed-equivalent fraction of 0.20 × 0.80 = **0.16**, the #367 ceiling | #21 done |
 | `innate_nonsusceptible_fraction` | withdrawn from `norwalk_gi`; deprecated alias | — | The removed-fraction mechanism is refuted for GII and is no longer the norovirus mechanism. Alias retained (rr = 0.0) so the other bundles in `data/pathogens/` keep loading | — superseded | #21 done |
 | **Divergence: campaign vs shipped profile** | campaigns write `innate_nonsusceptible_fraction` | — | `picard_framework/runs/mega_cruise_campaign/campaign_runner.py:988` still writes `innate_nonsusceptible_fraction` into its per-run overrides, so **every campaign run models sterile immunity in a removed fraction** while `data/pathogens/active_profiles.json` models FUT2 partial susceptibility. Behaviour deliberately left unchanged: the campaign *sweeps* the removed fraction, and converting the swept axis to a relative susceptibility is a design decision, not a rename | recorded, unresolved | |
 | `shedding_variance_log10` | 1.0 | C | Teunis 2014, 102 subjects, peaks 10⁵–10⁹/g | ✓ | |
@@ -163,39 +166,41 @@ must be resolved before it is.
 | `base_susceptibility` | 0.65 | **F, and it is prior immunity** | Not a constant: a per-season, per-route seroprevalence/vaccination input. This is the one place a flu arm could quietly overfit | reclassify as a scenario input | |
 | `surface_deposition_fraction` | 1e-3 | I | 10× the norovirus value, no stated reason. The bundle still uses the deprecated key name; the engine reads it through the alias | ∅ null; ⊘ field resolved in the active bundle only (#42) | #42 |
 
-## 4. The seven blocked, and the change each needs
+## 4. The six blocked, and the change each needs
 
 This is the actionable core of the register. In every case the paper exists and
 the field cannot take it, so the next move is a model change, not a search.
 
-1. **Norovirus dose-response and conditional illness** — provenance recovered
-   (Teunis 2008) but tied to a GI.1 oral inoculum while the arm is GII by
-   declaration, name and incubation. Either re-source both for GII or state
-   plainly that a GI.1 dose axis is scored against GII.4 observations.
-2. **Route efficiency, both active arms** — the naming and schema defect is
+Norovirus dose-response left this list in tranche 6: the shipped α/β is declared
+as the disaggregated GI.1 arm and swept over the human GII interval it lies
+inside (§3.1), so no model change is owed. Its conditional-illness partner η/γ
+remains blocked, and its blocker is now carried in its §3.1 row rather than as an
+item here, because the genogroup contrast cannot be quantified for it at all.
+
+1. **Route efficiency, both active arms** — the naming and schema defect is
    resolved (they are declared independent per-route multipliers, not shares, and
    the six numbers were left exactly as shipped). What remains blocked is that
    they duplicate the object Edison's clearance layer parameterises, so the two
    are not separately identifiable: influenza supplies the measured version of the
    same quantity (per-portal efficiency, ≥2 orders) and it cannot be adopted into
    two parameterisations at once (#25).
-3. **Influenza `illness_probability`** — the value is a population fraction and
+2. **Influenza `illness_probability`** — the value is a population fraction and
    the field is a dose-conditional Hill form whose monotonicity Carrat's
    dose-independence rejects. Sourcing 0.67 into η would encode a dose effect the
    evidence denies (#44).
-4. **Influenza and norovirus `surface_decay_per_day`** — a scalar fractional
+3. **Influenza and norovirus `surface_decay_per_day`** — a scalar fractional
    daily loss cannot express humidity-, matrix- and drying-dependent
    non-exponential survival. The norovirus interval is an order of magnitude wide
    *in rate* for this reason, and the influenza bundle's own value converts to a
    half-life slower than both its citations.
-5. **SARS-CoV-2 emission × β** — not separately identifiable: dose and
+4. **SARS-CoV-2 emission × β** — not separately identifiable: dose and
    susceptibility enter the beta-frailty law strictly as a product. Must be
    adopted jointly against a copies-denominated measurement, with β swept over
    the Killingley-to-Zhang & Wang span (#30).
-6. **The observation model's ~15 numbers** — jointly constrained by a single
+5. **The observation model's ~15 numbers** — jointly constrained by a single
    empirical aggregate which *is* anchor A3, so A3 cannot also be a test of them
    (#23, #27).
-7. **The drying-state axis, which does not exist.** Finger↔surface transfer falls
+6. **The drying-state axis, which does not exist.** Finger↔surface transfer falls
    from 13% to 0.1% with ten minutes of drying — a factor-of-100 lever that no
    interval in the box represents, because the model has no wet/dry state. The
    largest single unrepresented uncertainty found in tranche 5.
