@@ -618,6 +618,19 @@ is over-determined only *given* them. Full list in §10 of the history document.
   range, not a measured dispersion. See
   [`../literature/consensus_tranche_7.md`](../literature/consensus_tranche_7.md)
   §4–§5.
+- The **seeded index case's acquisition dose** is a construction constant, in
+  two different values: the legacy engine path seeds `10^(9.0 − 4.0)` = 1e5
+  from the symptomatic curve's day-1 entry, and the pathogen-aware boarding,
+  mid-cruise and shore paths hard-code `1e4`. `acquired_particles` is the
+  argument of `illness_probability`, so these numbers set the index case's
+  probability of ever presenting — 0.643 and 0.555 at this profile's η/γ,
+  against 0.577 at its own beta-Poisson N50 — and neither tracks
+  `environmental_faecal_release_log10_g_per_epoch`, so under the campaign's
+  dose sweep every transmission-acquired dose rescales and the index case's
+  does not. Grade C, no source, no comment at the definition. See
+  [`../proposals/initiation_engine_spec.md`](../proposals/initiation_engine_spec.md)
+  §1 and §3, which replaces it with an explicit config value or with no dose
+  at all.
 - Secretor-status non-susceptibility. Not a held-fixed 20% ceiling: the profile
   the campaign runs ships 0.0, no attack-rate ceiling is observed (0.013–0.326
   across the override arms), and §1 withdraws 0.2 as the correction target. The
