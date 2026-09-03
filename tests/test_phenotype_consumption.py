@@ -341,7 +341,11 @@ class TestImmuneEscapeAxis:
             PATHOGEN, 1e4, 0, strain_id=past.strain_id,
             strain_phenotype=Phenotype.of(past),
         )
-        profile = {**_norwalk_profile(), "recovery_day": 1}
+        profile = {
+            **_norwalk_profile(),
+            "recovery_day": 1,
+            "shedding_duration_days": 1,
+        }
         for _ in range(5):
             _advance_agent_pathogen_infections(
                 agent, {PATHOGEN: profile},

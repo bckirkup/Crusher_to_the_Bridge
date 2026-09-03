@@ -100,8 +100,15 @@ def _resolve(
     epoch: int = 3,
     recovery_day: int = 1,
 ) -> None:
-    """Run through incubation plus the symptomatic recovery duration."""
-    profile = _norwalk_profile(recovery_day=recovery_day)
+    """Run through incubation plus the recovery duration.
+
+    The shedding duration is pinned to ``recovery_day`` so this seam is
+    exercised on one clock, as it was before the shedding clock was split out.
+    """
+    profile = _norwalk_profile(
+        recovery_day=recovery_day,
+        shedding_duration_days=recovery_day,
+    )
     steps = recovery_day + 2
     for _ in range(steps):
         _advance_agent_pathogen_infections(

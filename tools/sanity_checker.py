@@ -388,6 +388,7 @@ class PathogenProfile(BaseModel):
     severity_model: SeverityModel | None = None
     observation_model: ObservationModel | None = None
     recovery_day: int = 3
+    shedding_duration_days: float | None = None
     surface_deposition_fraction: float = 0.0001
     airborne_emission_fraction: float | None = None
     surface_decay_log10_per_day: float | None = None
@@ -1034,6 +1035,26 @@ def _check_logical_contradictions(
                     "MATH_BOUND",
                     f"{p.pathogen_id}.recovery_day = {p.recovery_day} is negative.",
                 )
+
+            # The shedding duration is the infectious period from onset, and a
+            # host cannot stop being infectious before it stops being ill.
+            if p.shedding_duration_days is not None:
+                if p.shedding_duration_days < 0:
+                    report.error(
+                        _ACTIVE_PROFILES_JSON,
+                        "MATH_BOUND",
+                        f"{p.pathogen_id}.shedding_duration_days = "
+                        f"{p.shedding_duration_days} is negative.",
+                    )
+                elif p.shedding_duration_days < p.recovery_day:
+                    report.error(
+                        _ACTIVE_PROFILES_JSON,
+                        "MATH_BOUND",
+                        f"{p.pathogen_id}.shedding_duration_days = "
+                        f"{p.shedding_duration_days} is shorter than "
+                        f"recovery_day = {p.recovery_day}: shedding cannot "
+                        f"end before illness does.",
+                    )
 
             # Verify introduction_epoch is non-negative
             if p.introduction_epoch < 0:

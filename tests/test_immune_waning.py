@@ -581,7 +581,10 @@ class TestLegacyProjection:
         )
         for _ in range(3):
             _advance_agent_pathogen_infections(
-                agent, {PATHOGEN: _profile(recovery_day=1)},
+                agent,
+                {PATHOGEN: _profile(
+                    recovery_day=1, shedding_duration_days=1,
+                )},
                 np.random.default_rng(1), registry, 96,
             )
         _project_legacy_illness(agent)

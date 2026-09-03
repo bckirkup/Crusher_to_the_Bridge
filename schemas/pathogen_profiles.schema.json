@@ -660,6 +660,11 @@
         "severity_model": {"$ref": "#/$defs/SeverityModel"},
         "observation_model": {"$ref": "#/$defs/ObservationModel"},
         "recovery_day": {"type": "integer", "minimum": 0},
+        "shedding_duration_days": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Infectious/shedding period in days from symptom onset, after which the infection clears. This is NOT the illness duration: recovery_day remains the illness duration from onset, and shedding continues past it whenever this field is larger. Absent means the shedding period equals recovery_day."
+        },
         "symptom_onset_day": {"type": "number", "minimum": 0},
         "incubation": {"$ref": "#/$defs/Incubation"},
         "airborne_emission_fraction": {

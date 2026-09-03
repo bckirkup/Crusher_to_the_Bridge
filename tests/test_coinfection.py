@@ -269,7 +269,11 @@ class TestSheddingComposition:
 
 def _advance(agent: KorkinAgent, days: int, *, recovery_day: int = 3) -> None:
     rng = np.random.default_rng(1)
-    profile = {**_norwalk_profile(), "recovery_day": recovery_day}
+    profile = {
+        **_norwalk_profile(),
+        "recovery_day": recovery_day,
+        "shedding_duration_days": recovery_day,
+    }
     for _ in range(days):
         _advance_agent_pathogen_infections(agent, {PATHOGEN: profile}, rng)
 

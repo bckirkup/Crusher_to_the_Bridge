@@ -428,6 +428,7 @@ def _draw_symptom_onset(
     if rng.random() < ill_prob:
         inf["illness"] = IllnessStatus.SYMPTOMATIC
         inf["onset_time_infected"] = inf.get("time_infected", 0)
+        inf["presented"] = True
         draw_emesis_schedule(agent, pid, prof, rng)
         if inf.get("symptom_severity") in (None, "", "asymptomatic"):
             inf["symptom_severity"] = _draw_symptom_severity(prof, rng)
@@ -451,6 +452,31 @@ def _draw_symptom_severity(
     symptomatic_probabilities = np.asarray(probabilities[1:], dtype=float)
     symptomatic_probabilities /= symptomatic_probabilities.sum()
     return str(rng.choice(symptomatic_states, p=symptomatic_probabilities))
+
+
+def _clearance_days(
+    agent: Any,
+    pid: str,
+    prof: dict[str, Any],
+    onset_day: float,
+) -> tuple[float, float]:
+    """Illness and shedding clearance days for one infection, both from onset.
+
+    ``recovery_day`` is the illness duration; ``shedding_duration_days`` is the
+    infectious period, and a profile that omits it says the two coincide. The
+    shedding threshold is never earlier than the illness one, so a host whose
+    illness is extended keeps shedding to the end of that illness.
+    """
+    recovery_day = agent.get_chronic_recovery_day(
+        pid, prof.get("recovery_day", 3),
+    )
+    shedding_duration = float(
+        prof.get("shedding_duration_days", recovery_day),
+    )
+    return (
+        onset_day + recovery_day,
+        onset_day + max(shedding_duration, float(recovery_day)),
+    )
 
 
 def _advance_agent_pathogen_infections(
@@ -483,20 +509,32 @@ def _advance_agent_pathogen_infections(
             # incubation period, so onset is not rounded up to a whole day.
             _draw_symptom_onset(agent, pid, inf, prof, rng, epoch)
 
-        recovery_day = agent.get_chronic_recovery_day(
-            pid, prof.get("recovery_day", 3),
+        illness_clearance_day, shedding_clearance_day = _clearance_days(
+            agent, pid, prof, onset_day,
         )
-        # Recovery is a symptomatic duration measured from onset; the total
-        # course is the host's incubation plus this recovery duration.
-        clearance_day = onset_day + recovery_day
+        if (
+            days_infected >= illness_clearance_day
+            and inf["illness"] == IllnessStatus.SYMPTOMATIC
+        ):
+            # Illness ends on its own clock, and the emesis records are part of
+            # the illness: convalescent shedding is faecal, not emetic.
+            inf["illness"] = IllnessStatus.RECOVERED
+            agent.emesis_episode_schedule_by_pathogen.pop(pid, None)
+            agent.emesis_episode_load_by_pathogen.pop(pid, None)
+            agent.emesis_deposition_records_by_pathogen.pop(pid, None)
         cleared: list[str] = []
         # Co-resident lineages clear on their own clocks, so the pathogen-level
         # infection stays open until the last one goes: a strain acquired on
         # day four is still being shed when the primary infection would have
-        # ended.
-        residents_left = agent.advance_resident_strains(pid, clearance_day, cleared)
+        # ended. A lineage is carried for as long as it is shed, not only for
+        # as long as the host is ill.
+        residents_left = agent.advance_resident_strains(
+            pid, shedding_clearance_day, cleared,
+        )
         _record_cleared_immunity(agent, pid, cleared, strain_registry, epoch)
-        if days_infected >= clearance_day and residents_left == 0:
+        if days_infected >= shedding_clearance_day and residents_left == 0:
+            # The hand load has to survive convalescent shedding, so it is
+            # dropped with the infection rather than with the illness.
             inf["status"] = InfectionStatus.RECOVERED
             inf["illness"] = IllnessStatus.RECOVERED
             agent.cumulative_exposure.pop(pid, None)
