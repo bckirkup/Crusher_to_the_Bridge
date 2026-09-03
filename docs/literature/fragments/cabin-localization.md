@@ -1,6 +1,8 @@
 # Register fragment — cabin-localization fraction `f`
 
 > **Merged.** This fragment was merged into [`../../parameter_provenance_register.md`](../../parameter_provenance_register.md) by the sourcing-wave-1 integration pass, with the lead's corrections applied at merge time. It is kept as the audit trail of what the sourcing unit proposed; it is **not** a live proposal, and where it and the register differ the register holds the status.
+>
+> **Two figures below were corrected at merge and must not be quoted from here.** (1) The household-SAR analogue reads **14–23%** below, but 23% was uncited — the register carries **13.8–23%** with all three sources (Matsuyama 2018 13.8%, Quee 2020 15%, Balachandran 2023 23%) and with Balachandran's two caveats, that its 23% is pooled viral AGE rather than norovirus-specific and is household-size-conditioned. (2) The empirical bound **`f ≤ 0.18–0.45`** was derived from cruise outbreak attack rates, which are the same class of data anchors A4/A8/A9 score against; it is retained as evidence but is barred from entering a likelihood alongside those anchors, and the **structural `f ≤ 0.5` is the headline bound**. The register's §3.1 row and §3.4 rejection row are authoritative on both.
 
 **Status:** additive fragment, tranche 17 / unit `cabin-localization` / task
 **#12**. Not authoritative. This is a *proposal* for one row of

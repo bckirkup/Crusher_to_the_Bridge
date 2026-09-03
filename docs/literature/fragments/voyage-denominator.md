@@ -1,6 +1,8 @@
 # Register fragment — external voyage denominator for VSP posting rates (tranche 18)
 
 > **Merged.** This fragment was merged into [`../../parameter_provenance_register.md`](../../parameter_provenance_register.md) by the sourcing-wave-1 integration pass, with the lead's corrections applied at merge time. It is kept as the audit trail of what the sourcing unit proposed; it is **not** a live proposal, and where it and the register differ the register holds the status.
+>
+> **The grade below was corrected at merge and must not be quoted from here.** The Freeland 2016 counts are claimed as Grade **A** below; the register carries **Grade M, transcription unverified**, because the sourcing unit transcribed the table from a source it could not re-open (cdc.gov returned 403, no PMC copy), the paper's own published per-1,000-voyage rates are not reproducible from those counts for 5 of 7 years, and its text says 133 where its table says 132. The denominator remains **blocked** either way and no posting rate may be computed from these counts until the primary is re-read.
 
 **Status:** Proposed row for `docs/parameter_provenance_register.md` §3.1
 (observation-model block). Not authoritative until the lead merges it. Evidence
