@@ -48,6 +48,10 @@ HAND_LOAD_COPIES = 10.0**3.86
 # norwalk_gi's acute (emetic) clinical phase is dpi 0-2.
 EMETIC_WINDOW_DAYS = 3.0
 
+# Scenario labels reused by the hand-only and emesis-inclusive reports.
+SCENARIO_CABIN_CONFINED = "sick passenger confined to cabin"
+SCENARIO_LOUNGE_60 = "lounge, 60 shedder-hours/day"
+
 # Fraction of a symptomatic host's vomiting episodes that occur in its own
 # cabin rather than wherever it happens to be. THIS QUANTITY IS NOT MEASURED
 # ANYWHERE AND IS NOT A MODEL PARAMETER. It is swept here only to report how
@@ -146,11 +150,11 @@ def emesis_inclusive_surface_values(
         public_rate * per_episode_public / loss_public * public_multiplier
     )
     cabin_total = (
-        hand_only["sick passenger confined to cabin"]
+        hand_only[SCENARIO_CABIN_CONFINED]
         + concentration_per_swab(cabin_pool, "cabin")
     )
     public_total = (
-        hand_only["lounge, 60 shedder-hours/day"]
+        hand_only[SCENARIO_LOUNGE_60]
         + concentration_per_swab(public_pool, "public")
     )
     return cabin_total, public_total, cabin_total / public_total
@@ -359,10 +363,10 @@ def main() -> None:
     # A confined symptomatic passenger is in their cabin ~22 h/day. A public
     # lounge during an outbreak sees many shedders passing through.
     scenarios = [
-        ("cabin", "sick passenger confined to cabin", 22.0, 1.0),
+        ("cabin", SCENARIO_CABIN_CONFINED, 22.0, 1.0),
         ("cabin", "sick passenger, unconfined", 8.0, 1.0),
         ("public", "lounge, 10 shedder-hours/day", 10.0, 60.0),
-        ("public", "lounge, 60 shedder-hours/day", 60.0, 60.0),
+        ("public", SCENARIO_LOUNGE_60, 60.0, 60.0),
         ("public", "lounge, 200 shedder-hours/day", 200.0, 60.0),
     ]
 
@@ -415,11 +419,11 @@ def main() -> None:
         results[f"{label} (no cleaning)"] = bare_conc
     emit()
 
-    cabin = results["sick passenger confined to cabin"]
-    public = results["lounge, 60 shedder-hours/day"]
+    cabin = results[SCENARIO_CABIN_CONFINED]
+    public = results[SCENARIO_LOUNGE_60]
     bare_gradient = (
-        results["sick passenger confined to cabin (no cleaning)"]
-        / results["lounge, 60 shedder-hours/day (no cleaning)"]
+        results[f"{SCENARIO_CABIN_CONFINED} (no cleaning)"]
+        / results[f"{SCENARIO_LOUNGE_60} (no cleaning)"]
     )
     emit(f"Cabin/public gradient: {cabin / public:.3g}x")
     emit(f"Same gradient without routine cleaning: {bare_gradient:.3g}x")

@@ -61,7 +61,7 @@ def _first(manifest: dict[str, Any], tier_id: str) -> tuple[str, dict[str, Any]]
     return next(iter(generate_tier_runs(manifest, tier_id)))
 
 
-@pytest.fixture()
+@pytest.fixture
 def emergence() -> dict[str, Any]:
     return _manifest("paper3_variant_emergence_v1_manifest.json")
 
@@ -374,8 +374,9 @@ def test_unknown_clock_is_refused() -> None:
 
 
 def test_manifest_without_an_incubation_arm_is_refused() -> None:
+    tier = _tier()
     with pytest.raises(variant_campaign.VariantManifestError, match="incubation_arm"):
-        variant_campaign.incubation_arm({}, _tier())
+        variant_campaign.incubation_arm({}, tier)
 
 
 def test_tier_incubation_arm_overrides_the_manifest_default() -> None:
@@ -387,8 +388,9 @@ def test_tier_incubation_arm_overrides_the_manifest_default() -> None:
         )
         == "fixed_onset"
     )
+    bad_tier = _tier(incubation_arm="none")
     with pytest.raises(variant_campaign.VariantManifestError, match="tier"):
-        variant_campaign.incubation_arm(manifest, _tier(incubation_arm="none"))
+        variant_campaign.incubation_arm(manifest, bad_tier)
 
 
 def test_tier_without_a_regime_is_refused() -> None:
@@ -396,8 +398,9 @@ def test_tier_without_a_regime_is_refused() -> None:
     del tier["regime"]
     with pytest.raises(variant_campaign.VariantManifestError, match="regime"):
         variant_campaign.tier_regime(tier)
+    vibes_tier = _tier(regime="vibes")
     with pytest.raises(variant_campaign.VariantManifestError, match="regime"):
-        variant_campaign.tier_regime(_tier(regime="vibes"))
+        variant_campaign.tier_regime(vibes_tier)
 
 
 def test_tier_without_voyage_days_is_refused() -> None:
@@ -408,10 +411,12 @@ def test_tier_without_voyage_days_is_refused() -> None:
 
 
 def test_empty_or_malformed_axis_is_refused() -> None:
+    empty_rates = _tier(mutation_rates=[])
     with pytest.raises(variant_campaign.VariantManifestError, match="mutation_rates"):
-        variant_campaign.tier_axes({}, _tier(mutation_rates=[]))
+        variant_campaign.tier_axes({}, empty_rates)
+    scalar_rates = _tier(mutation_rates=0.02)
     with pytest.raises(variant_campaign.VariantManifestError, match="mutation_rates"):
-        variant_campaign.tier_axes({}, _tier(mutation_rates=0.02))
+        variant_campaign.tier_axes({}, scalar_rates)
 
 
 def test_nonsensical_voyage_lengths_are_refused() -> None:
@@ -495,13 +500,16 @@ def test_agreeing_cli_clock_is_accepted(emergence: dict[str, Any]) -> None:
 
 
 def test_disagreeing_cli_clock_is_refused(emergence: dict[str, Any]) -> None:
+    args = _args("legacy_epoch_day")
     with pytest.raises(SystemExit, match="mismatch"):
-        _resolve_manifest_clock(emergence, _args("legacy_epoch_day"))
+        _resolve_manifest_clock(emergence, args)
 
 
 def test_manifest_with_a_bogus_clock_is_refused() -> None:
+    manifest = {"natural_history_clock": "weeks"}
+    args = _args(None)
     with pytest.raises(SystemExit, match="natural_history_clock"):
-        _resolve_manifest_clock({"natural_history_clock": "weeks"}, _args(None))
+        _resolve_manifest_clock(manifest, args)
 
 
 def test_legacy_manifests_keep_the_cli_as_the_only_clock_source() -> None:

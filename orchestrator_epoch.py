@@ -416,7 +416,7 @@ def _draw_symptom_onset(
     inf: dict[str, Any],
     prof: dict[str, Any],
     rng: np.random.Generator,
-    epoch: int = 0,
+    _epoch: int = 0,
 ) -> None:
     """One dose-conditioned illness draw for a host past its incubation period."""
     ill_params = prof.get("illness_probability", {})

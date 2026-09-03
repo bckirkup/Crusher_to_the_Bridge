@@ -324,7 +324,8 @@ def test_every_diversity_quantity_is_finite_and_in_range() -> None:
     for row in all_diversity_rows(_census(THREE_LINEAGES)):
         assert row.carriers >= 0
         assert row.richness >= 0
-        assert math.isfinite(row.shannon_bits) and row.shannon_bits >= 0.0
+        assert math.isfinite(row.shannon_bits)
+        assert row.shannon_bits >= 0.0
         assert 0.0 <= row.dominant_fraction <= 1.0
         assert 0.0 <= row.turnover <= 1.0
         assert 0.0 <= row.recombinant_fraction <= 1.0
@@ -683,8 +684,9 @@ def test_observed_composition_ignores_another_pathogen() -> None:
 
 def test_an_unknown_channel_is_refused() -> None:
     """Channels are a closed set; a typo must not silently return nothing."""
+    bundle = _bundle()
     with pytest.raises(ValueError, match="unknown detection channel"):
-        observed_composition(_bundle(), PATHOGEN, 0, 1.0, "surface_swab")
+        observed_composition(bundle, PATHOGEN, 0, 1.0, "surface_swab")
 
 
 def test_information_rows_cover_every_census_epoch() -> None:

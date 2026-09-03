@@ -136,11 +136,12 @@ class TestBenefitValuation:
             )
 
     def test_provenance_entries_must_say_something(self) -> None:
+        blank_provenance = dict.fromkeys(VALUATION_PROVENANCE, "  ")
         with pytest.raises(ValueError, match="non-empty"):
             BenefitValuation(
                 usd_per_case_afloat=1.0,
                 usd_per_case_ashore=1.0,
-                provenance=dict.fromkeys(VALUATION_PROVENANCE, "  "),
+                provenance=blank_provenance,
             )
 
     def test_negative_rates_are_refused(self) -> None:
@@ -276,33 +277,33 @@ class TestPayerBenefit:
         assert benefits[PAYER_PUBLIC_HEALTH_AGENCY] == pytest.approx(22.5)
 
     def test_weights_must_cover_every_payer(self) -> None:
+        split = self._split()
+        weights = {PAYER_SHIP_OPERATOR: 1.0}
         with pytest.raises(ValueError, match="every payer"):
-            payer_benefit_usd(self._split(), weights={PAYER_SHIP_OPERATOR: 1.0})
+            payer_benefit_usd(split, weights=weights)
 
     def test_unknown_payers_are_refused(self) -> None:
+        split = self._split()
+        weights = {**DEFAULT_COMMUNITY_WEIGHTS, "harbourmaster": 1.0}
         with pytest.raises(ValueError, match="unknown payer"):
-            payer_benefit_usd(
-                self._split(), weights={**DEFAULT_COMMUNITY_WEIGHTS, "harbourmaster": 1.0},
-            )
+            payer_benefit_usd(split, weights=weights)
 
     def test_weights_within_a_community_must_sum_to_one(self) -> None:
+        split = self._split()
+        weights = {
+            PAYER_SHIP_OPERATOR: 1.0,
+            PAYER_PORT_AUTHORITY: 0.5,
+            PAYER_PUBLIC_HEALTH_AGENCY: 0.9,
+        }
         with pytest.raises(ValueError, match="must sum to 1"):
-            payer_benefit_usd(
-                self._split(),
-                weights={
-                    PAYER_SHIP_OPERATOR: 1.0,
-                    PAYER_PORT_AUTHORITY: 0.5,
-                    PAYER_PUBLIC_HEALTH_AGENCY: 0.9,
-                },
-            )
+            payer_benefit_usd(split, weights=weights)
 
     def test_negative_weights_are_refused(self) -> None:
+        split = self._split()
+        weights = {
+            PAYER_SHIP_OPERATOR: 1.0,
+            PAYER_PORT_AUTHORITY: -0.5,
+            PAYER_PUBLIC_HEALTH_AGENCY: 1.5,
+        }
         with pytest.raises(ValueError, match="weights"):
-            payer_benefit_usd(
-                self._split(),
-                weights={
-                    PAYER_SHIP_OPERATOR: 1.0,
-                    PAYER_PORT_AUTHORITY: -0.5,
-                    PAYER_PUBLIC_HEALTH_AGENCY: 1.5,
-                },
-            )
+            payer_benefit_usd(split, weights=weights)

@@ -105,8 +105,9 @@ def test_all_scenarios_load_and_amortise_by_ships_and_voyages() -> None:
 
 def test_scenario_validation_rejects_zero_voyages() -> None:
     scenario = load_surveillance_scenario(str(SCENARIO_PATH), "minimal")
+    scenario_cls = type(scenario)
     with pytest.raises(ValueError, match="voyages_per_year"):
-        type(scenario)(
+        scenario_cls(
             scenario_id=scenario.scenario_id,
             label=scenario.label,
             onboard_capability=scenario.onboard_capability,
@@ -123,8 +124,10 @@ def test_scenario_validation_rejects_zero_voyages() -> None:
 
 def test_real_shore_counterfactual_flows_into_signed_benefit_split() -> None:
     result = _shore_result()
-    assert math.isfinite(result.total_ship_arm) and result.total_ship_arm >= 0.0
-    assert math.isfinite(result.total_port_arm) and result.total_port_arm >= 0.0
+    assert math.isfinite(result.total_ship_arm)
+    assert result.total_ship_arm >= 0.0
+    assert math.isfinite(result.total_port_arm)
+    assert result.total_port_arm >= 0.0
     assert result.benefit == pytest.approx(result.total_port_arm - result.total_ship_arm)
 
     split = BenefitSplit.from_counterfactuals([result], afloat_cases_averted=12.0)
@@ -182,52 +185,48 @@ def test_willingness_to_pay_rejects_unavailable_shares_and_bad_maps() -> None:
         "port_authority": "shore",
         "public_health_agency": "shore",
     }
-    for split in (
+    unavailable_splits = (
         BenefitSplit(shore_cases_averted=0.0, afloat_cases_averted=0.0),
         BenefitSplit(shore_cases_averted=1.0, afloat_cases_averted=-2.0),
-    ):
+    )
+    for split in unavailable_splits:
         with pytest.raises(ValueError, match="non-positive"):
             willingness_to_pay(costs, valid_map, split)
 
+    incomplete_map = {"ship_operator": "afloat"}
+    unit_split = BenefitSplit(1.0, 1.0)
     with pytest.raises(ValueError, match="exactly every payer"):
-        willingness_to_pay(costs, {"ship_operator": "afloat"}, BenefitSplit(1.0, 1.0))
+        willingness_to_pay(costs, incomplete_map, unit_split)
+
+    unknown_community_map = {**valid_map, "port_authority": "unknown"}
     with pytest.raises(ValueError, match="unknown payer community"):
-        willingness_to_pay(
-            costs,
-            {**valid_map, "port_authority": "unknown"},
-            BenefitSplit(1.0, 1.0),
-        )
+        willingness_to_pay(costs, unknown_community_map, unit_split)
+
     with pytest.raises(ValueError, match="unknown port community"):
         willingness_to_pay(
             costs,
             valid_map,
-            BenefitSplit(1.0, 1.0),
+            unit_split,
             port_community="typo",
         )
+
+    costs_missing_share = {
+        **costs,
+        "port_authority": {"total_usd": 3.0},
+    }
     with pytest.raises(ValueError, match="share_of_total"):
-        willingness_to_pay(
-            {
-                **costs,
-                "port_authority": {"total_usd": 3.0},
-            },
-            valid_map,
-            BenefitSplit(1.0, 1.0),
-        )
+        willingness_to_pay(costs_missing_share, valid_map, unit_split)
+
+    costs_with_extra = {**costs, "unexpected": {"share_of_total": 0.1}}
     with pytest.raises(ValueError, match="exactly every payer"):
-        willingness_to_pay(
-            {**costs, "unexpected": {"share_of_total": 0.1}},
-            valid_map,
-            BenefitSplit(1.0, 1.0),
-        )
+        willingness_to_pay(costs_with_extra, valid_map, unit_split)
+
+    costs_with_object = {
+        **costs,
+        "port_authority": object(),
+    }
     with pytest.raises(TypeError, match="scalar share or ledger report"):
-        willingness_to_pay(
-            {
-                **costs,
-                "port_authority": object(),
-            },
-            valid_map,
-            BenefitSplit(1.0, 1.0),
-        )
+        willingness_to_pay(costs_with_object, valid_map, unit_split)
 
 
 def test_labour_sweep_changes_port_cost_but_not_benefit_share() -> None:
