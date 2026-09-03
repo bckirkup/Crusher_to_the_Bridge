@@ -70,7 +70,7 @@ class PayerPosition:
         A payer contributing nothing has no ratio: every non-zero benefit
         would report an infinite one, which reads as a result and is not.
         """
-        if self.cost_usd == 0.0:
+        if abs(self.cost_usd) < 1e-15:
             return None
         return float(self.benefit_usd / self.cost_usd)
 
