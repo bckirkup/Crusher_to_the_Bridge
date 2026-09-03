@@ -21,10 +21,11 @@ defensibility claim can rest on.
 
 ## 1. Two axes, because one was hiding half the problem
 
-Provenance class alone was the wrong instrument. Six quantities in §3 have a
+Provenance class alone was the wrong instrument. Five quantities in §3 have a
 citation and *still cannot be adopted*, because the field they would go into
 cannot express what the paper measured — nine before Wave 1 resolved two of the
-field defects, and seven before tranche 6 moved the norovirus dose axis to
+field defects, seven before Wave 2 resolved the norovirus decay unit and built
+the drying axis, and six before tranche 6 moved the norovirus dose axis to
 declared-and-swept. Classifying those as "sourced" would be the most dangerous entry
 in the table: it would look like provenance and encode something the evidence
 rejects.
@@ -63,7 +64,7 @@ influenza 2 of ~25):
 |---|---|
 | Quantities that had no usable literature basis and now have one recorded | **24** |
 | — of those, adoptable as they stand | 9 |
-| — blocked by a field or mechanism defect (⊘) | **6** |
+| — blocked by a field or mechanism defect (⊘) | **5** |
 | — adopted in the tree | **2** (the FUT2 pair, Wave 1) |
 | — provenance recovered but mis-genogrouped | **1** (η/γ; the dose-response pair left this row in tranche 6, declared as the GI.1 arm and swept over the GII interval it lies inside) |
 | — refuted, or shown to be unmeasurable (∅) | 4 |
@@ -74,8 +75,11 @@ FUT2 pair — `secretor_negative_fraction` 0.20 with
 `secretor_negative_relative_susceptibility` 0.20 — by replacing the mechanism
 that blocked them, and resolved the naming defect on the two renamed fields
 (`route_efficiency_multipliers`, `airborne_emission_fraction`) without sourcing
-either. The other in-tree changes from the sourcing campaign remain two screening
-intervals (`surface_decay_per_day`, [0.10, 0.60] → [0.14, 0.84];
+either. Wave 2 then adopted the identified emesis total and moved surface decay
+into its sourced unit, and the other in-tree changes from the sourcing campaign
+remain three screening intervals (`surface_decay_log10_per_day`, the recut
+interval in sourced units, [0.067, 0.79]; `hand_to_surface_drying_multiplier`,
+[0.008, 1.0] at a neutral shipped value;
 `secretor_negative_relative_susceptibility`, [0.05, 0.50] → [0.04, 0.83],
 tranche 6). The remaining gap
 is deliberate — adoption is queued behind the mechanism fixes in §4 — but it must
@@ -170,10 +174,19 @@ must be resolved before it is.
 | `base_susceptibility` | 0.65 | **F, and it is prior immunity** | Not a constant: a per-season, per-route seroprevalence/vaccination input. This is the one place a flu arm could quietly overfit | reclassify as a scenario input | |
 | `surface_deposition_fraction` | 1e-3 | I | 10× the norovirus value, no stated reason. The bundle still uses the deprecated key name; the engine reads it through the alias | ∅ null; ⊘ field resolved in the active bundle only (#42) | #42 |
 
-## 4. The six blocked, and the change each needs
+## 4. The five blocked, and the change each needs
 
 This is the actionable core of the register. In every case the paper exists and
 the field cannot take it, so the next move is a model change, not a search.
+
+Two items left this list in Wave 2 and are recorded in their §3.1 rows instead.
+The norovirus half of the surface-decay defect is resolved: the field is now
+`surface_decay_log10_per_day`, the unit every source measures in, and the
+conversion happens in one place (#41 done) — the influenza half survives as item
+3 below. And the drying-state axis **now exists**, as
+`hand_to_surface_drying_multiplier` over [0.008, 1.0], shipping neutral and
+swept; what remains there is that no value is adopted, which is a missing source
+rather than a missing mechanism (#42).
 
 Norovirus dose-response left this list in tranche 6: the shipped α/β is declared
 as the disaggregated GI.1 arm and swept over the human GII interval it lies
@@ -192,11 +205,12 @@ item here, because the genogroup contrast cannot be quantified for it at all.
    the field is a dose-conditional Hill form whose monotonicity Carrat's
    dose-independence rejects. Sourcing 0.67 into η would encode a dose effect the
    evidence denies (#44).
-3. **Influenza and norovirus `surface_decay_per_day`** — a scalar fractional
-   daily loss cannot express humidity-, matrix- and drying-dependent
-   non-exponential survival. The norovirus interval is an order of magnitude wide
-   *in rate* for this reason, and the influenza bundle's own value converts to a
-   half-life slower than both its citations.
+3. **Influenza `surface_decay_per_day`** — the influenza bundle still carries a
+   scalar fractional daily loss, which cannot express humidity-, matrix- and
+   drying-dependent non-exponential survival, and its own value converts to a
+   half-life slower than both its citations. The norovirus half of this item is
+   resolved (see above); influenza has to move to the same sourced unit before
+   any of the bundle is loaded (#44).
 4. **SARS-CoV-2 emission × β** — not separately identifiable: dose and
    susceptibility enter the beta-frailty law strictly as a product. Must be
    adopted jointly against a copies-denominated measurement, with β swept over
@@ -204,10 +218,6 @@ item here, because the genogroup contrast cannot be quantified for it at all.
 5. **The observation model's ~15 numbers** — jointly constrained by a single
    empirical aggregate which *is* anchor A3, so A3 cannot also be a test of them
    (#23, #27).
-6. **The drying-state axis, which does not exist.** Finger↔surface transfer falls
-   from 13% to 0.1% with ten minutes of drying — a factor-of-100 lever that no
-   interval in the box represents, because the model has no wet/dry state. The
-   largest single unrepresented uncertainty found in tranche 5.
 
 ## 5. Degrees of freedom, by provenance
 
