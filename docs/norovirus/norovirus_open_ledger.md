@@ -630,7 +630,14 @@ is over-determined only *given* them. Full list in §10 of the history document.
   does not. Grade C, no source, no comment at the definition. See
   [`../proposals/initiation_engine_spec.md`](../proposals/initiation_engine_spec.md)
   §1 and §3, which replaces it with an explicit config value or with no dose
-  at all.
+  at all. **Both values are now removed from the boarding and the seed
+  paths**, which closes that liability where initiation owns the host: a
+  boarded host carries dose 0.0 and an explicitly seeded one carries the dose
+  its config states, or 0.0 when it states none, and whether the host presents
+  is set by the boarding state axis or by the seed rather than by a
+  construction dose read through `illness_probability`. The two constants
+  survive only on the legacy paths a run without an `initiation` block still
+  takes, which is every run shipped today.
 - Secretor-status non-susceptibility. Not a held-fixed 20% ceiling: the profile
   the campaign runs ships 0.0, no attack-rate ceiling is observed (0.013–0.326
   across the override arms), and §1 withdraws 0.2 as the correction target. The

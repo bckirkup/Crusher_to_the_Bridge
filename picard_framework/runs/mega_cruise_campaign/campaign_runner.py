@@ -34,6 +34,7 @@ from urllib.parse import urlparse
 REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT))
 
+from engines.initiation import LEGACY_MANIFEST  # noqa: E402
 from picard_framework.analysis.sentinel.wastewater_assays import (  # noqa: E402
     DEFAULT_ASSAY_MODE,
 )
@@ -2067,6 +2068,14 @@ def run_simulation(
                 {
                     "pathogen_ids": sorted(sim.pathogen_profiles),
                     "profiles": sim.pathogen_profiles,
+                    # How this run started: a drawn boarding cohort, explicit
+                    # seeds, both, or the legacy per-profile index case. The
+                    # key always exists, so analysis never has to infer it.
+                    "initiation": getattr(
+                        getattr(sim, "engine", None),
+                        "initiation_manifest",
+                        None,
+                    ) or dict(LEGACY_MANIFEST),
                 },
                 fh,
                 indent=2,

@@ -44,6 +44,17 @@ from engines.infection_dynamics_bridge import (
     InfectionStatus,
     KorkinShipEngine,
 )
+from engines.initiation import (
+    LEGACY_MANIFEST,
+    BoardingReport,
+    InitiationPlan,
+    apply_explicit_seeds,
+    build_initiation_manifest,
+    draw_boarding_cohort,
+    initiation_configured,
+    initiation_owned_pathogens,
+    resolve_initiation_plan,
+)
 from engines.py_contam_bridge import ContamTransportEngine
 from engines.sim_clock import SimClock, config_epochs_for_hours
 from engines.wearable_monitor import (
@@ -517,7 +528,13 @@ def build_engine(
     return KorkinShipEngine(
         num_passengers=num_passengers,
         num_crew=num_crew,
-        initial_infected=cfg.get("initial_infected", 1),
+        # The engine's own pathogen-unaware index case is retired for any run
+        # that declares an ``initiation`` block: initiation owns who boards
+        # infected, and a second seed at a construction dose would be
+        # attributable to neither. Runs without the block keep it exactly.
+        initial_infected=(
+            0 if initiation_configured(cfg) else cfg.get("initial_infected", 1)
+        ),
         zones=engine_zones,
         seed=seed,
         vsp_isolation=False,
@@ -1211,6 +1228,9 @@ _HOST_GENETICS_SEED_OFFSET = 917
 # fallback streams never coincide.
 _CHRONIC_SHEDDING_SEED_OFFSET = 4409
 
+# Same role again for the boarding draw, with its own offset.
+_BOARDING_SEED_OFFSET = 8221
+
 # Rejection budget for the truncated chronic-duration draw before clipping.
 _CHRONIC_DURATION_MAX_DRAWS = 32
 
@@ -1249,6 +1269,25 @@ def _chronic_shedding_rng(
         return np.random.default_rng(seed_seq.spawn(1)[0])
     return np.random.default_rng(
         int(cfg.get("random_seed", 0) or 0) + _CHRONIC_SHEDDING_SEED_OFFSET,
+    )
+
+
+def _boarding_rng(
+    rng: np.random.Generator, cfg: dict[str, Any],
+) -> np.random.Generator:
+    """Return an independent stream for the boarding-prevalence draw.
+
+    The third sibling, and spawned third: ``SeedSequence.spawn`` is
+    order-dependent, so this call has to follow the host-genetics and
+    chronic-shedder spawns or both of those streams would be rebased. It is
+    only spawned when boarding is enabled, which is what keeps a run with no
+    ``initiation`` block bit-identical.
+    """
+    seed_seq = getattr(rng.bit_generator, "seed_seq", None)
+    if seed_seq is not None:
+        return np.random.default_rng(seed_seq.spawn(1)[0])
+    return np.random.default_rng(
+        int(cfg.get("random_seed", 0) or 0) + _BOARDING_SEED_OFFSET,
     )
 
 
@@ -1332,6 +1371,79 @@ def _resolve_secretor_status(profile: dict[str, Any]) -> tuple[float, float]:
     return 0.0, 0.0
 
 
+def _seed_legacy_infections(
+    engine: KorkinShipEngine,
+    pathogen_profiles: dict[str, dict[str, Any]],
+    rng: np.random.Generator,
+) -> None:
+    """Seed each profile's epoch-0 index cases by fiat, as before."""
+    for pid, prof in pathogen_profiles.items():
+        intro_epoch = prof.get("introduction_epoch", 0)
+        if intro_epoch == 0:
+            n_init = prof.get("initial_infected", 1)
+            candidates = [
+                a for a in engine.agents
+                if not a.immune
+                and not a.is_infected_with(pid)
+                and a.infection_status != InfectionStatus.RECOVERED
+            ]
+            if candidates:
+                chosen = rng.choice(
+                    candidates,
+                    size=min(n_init, len(candidates)),
+                    replace=False,
+                )
+                # The profile field is days post infection; the record is epochs.
+                epochs_infected = int(round(engine.clock.epochs_for_days(
+                    float(prof.get("initial_time_infected", 0)),
+                )))
+                for agent in chosen:
+                    agent.infect_with_pathogen(
+                        pid, 1e4, 0,
+                        time_infected=epochs_infected, rng=rng, profile=prof,
+                    )
+                    print(f"  Seeded {pid} -> agent {agent.agent_id}")
+
+
+def _run_initiation(
+    engine: KorkinShipEngine,
+    pathogen_profiles: dict[str, dict[str, Any]],
+    cfg: dict[str, Any],
+    plan: InitiationPlan,
+    rng: np.random.Generator,
+) -> None:
+    """Draw the boarding cohort, then apply the epoch-0 explicit seeds.
+
+    Any pathogen initiation does not own keeps its own epoch-0 index case: a
+    norovirus boarding block is not a reason to drop another arm's seeding.
+    """
+    reports: list[BoardingReport] = []
+    if plan.boarding:
+        boarding_rng = _boarding_rng(rng, cfg)
+        for spec in plan.boarding:
+            report = draw_boarding_cohort(
+                spec, engine.agents, pathogen_profiles[spec.pathogen_id],
+                engine.clock, boarding_rng,
+            )
+            reports.append(report)
+            boarded = sum(report.drawn_by_role.values())
+            print(f"  Boarded {spec.pathogen_id} -> {boarded} hosts")
+    engine.initiation_manifest = build_initiation_manifest(plan, reports, [])
+    for record in apply_explicit_seeds(
+        plan, engine, 0, rng, pathogen_profiles,
+    ):
+        print(f"  Seeded {record['pathogen']} -> {record['seeded']} hosts")
+    owned = initiation_owned_pathogens(plan)
+    _seed_legacy_infections(
+        engine,
+        {
+            pid: prof for pid, prof in pathogen_profiles.items()
+            if pid not in owned
+        },
+        rng,
+    )
+
+
 def init_multi_pathogen(
     engine: KorkinShipEngine,
     pathogen_profiles: dict[str, dict[str, Any]],
@@ -1340,11 +1452,19 @@ def init_multi_pathogen(
 ) -> set[int]:
     """Initialize per-pathogen mass pools, susceptibility, and seed infections.
 
+    Initiation is the ``initiation`` block's business when one is configured,
+    and the per-profile index case's when none is: with no block the plan is
+    ``legacy`` and this function consumes exactly the draws it did before.
+
     Returns the set of immunocompromised agent IDs.
     """
     if not pathogen_profiles:
         return set()
 
+    plan = resolve_initiation_plan(cfg, pathogen_profiles)
+    engine.initiation_plan = plan
+    engine.initiation_profiles = pathogen_profiles
+    engine.initiation_manifest = dict(LEGACY_MANIFEST)
     mp_cfg = cfg.get("multi_pathogen", {})
 
     for pid in pathogen_profiles:
@@ -1391,32 +1511,10 @@ def init_multi_pathogen(
             agent.immunocompromised = True
             _assign_chronic_shedding(agent, pathogen_profiles, chronic_rng)
 
-    for pid, prof in pathogen_profiles.items():
-        intro_epoch = prof.get("introduction_epoch", 0)
-        if intro_epoch == 0:
-            n_init = prof.get("initial_infected", 1)
-            candidates = [
-                a for a in engine.agents
-                if not a.immune
-                and not a.is_infected_with(pid)
-                and a.infection_status != InfectionStatus.RECOVERED
-            ]
-            if candidates:
-                chosen = rng.choice(
-                    candidates,
-                    size=min(n_init, len(candidates)),
-                    replace=False,
-                )
-                # The profile field is days post infection; the record is epochs.
-                epochs_infected = int(round(engine.clock.epochs_for_days(
-                    float(prof.get("initial_time_infected", 0)),
-                )))
-                for agent in chosen:
-                    agent.infect_with_pathogen(
-                        pid, 1e4, 0,
-                        time_infected=epochs_infected, rng=rng, profile=prof,
-                    )
-                    print(f"  Seeded {pid} -> agent {agent.agent_id}")
+    if plan.legacy:
+        _seed_legacy_infections(engine, pathogen_profiles, rng)
+    else:
+        _run_initiation(engine, pathogen_profiles, cfg, plan, rng)
     print()
 
     return immunocompromised_ids
