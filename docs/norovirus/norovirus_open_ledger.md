@@ -208,6 +208,15 @@ would remain an interval rather than a value. Evidence:
 [`bounded_sensitivity_and_admissible_region_spec.md`](../proposals/bounded_sensitivity_and_admissible_region_spec.md)
 §3.3. No profile JSON is changed by this entry.
 
+**Withdrawn (2026-09-03): the claim that the chronic immunocompromised shedder
+is the norovirus importation channel.** Stated in PR #383 and in the #45 notes.
+The mechanism stands — a chronic host boards already shedding and never clears
+on a 7–14 day voyage — but the prevalence was never computed. Tranche 10
+computes it two ways, which disagree by 2.5 orders (1.4e-5 to 4.2e-3 of a
+boarding population), and both ends sit one to three orders below the ordinary
+asymptomatic adult channel at 2.5–4%. No chronic-shedder boarding point
+prevalence is licensed; the importation channel is mostly immunocompetent.
+
 ## 2. Anchors
 
 Targets, from `telemetry_buffer/observation_model/anchor_measurement_spec.md`:

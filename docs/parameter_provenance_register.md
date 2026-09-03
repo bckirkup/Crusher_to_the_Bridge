@@ -65,15 +65,21 @@ influenza 2 of ~25):
 
 | | Count |
 |---|---|
-| Quantities that had no usable literature basis and now have one recorded | **31** |
+| Quantities that had no usable literature basis and now have one recorded | **33** |
 | — of those, adoptable as they stand | 10 |
-| — blocked by a field or mechanism defect (⊘) | **7** |
+| — blocked by a field or mechanism defect (⊘) | **9** |
 | — adopted in the tree | **2** (the FUT2 pair, Wave 1) |
 | — provenance recovered but mis-genogrouped | **1** (η/γ; the dose-response pair left this row in tranche 6, declared as the GI.1 arm and swept over the GII interval it lies inside) |
-| — refuted, or shown to be unmeasurable (∅) | 5 |
+| — refuted, or shown to be unmeasurable (∅) | 6 |
 | Profile scalars carrying a citation **in the tree** | still 8 / 6 / 2 |
 
 Tranche 9 adds three SARS-CoV-2 quantities that now have a basis — the aerosol half-life as an interval, the emission-rate bracket, and the severity ladder — and one new blocked row, `shedding_duration_days`, which exists as a field after tranche 8 but is absent on this arm. The in-tree headline is unchanged at 8 / 6 / 2: nothing was adopted.
+
+Tranche 10 adds the norovirus boarding prevalence (⊘ mech: the interval
+exists, the importation channel does not) and the paediatric
+asymptomatic-offset comparison (⊘ setting), and records the
+chronic-shedder boarding prevalence as a bounded ∅. In-tree adoption is
+again unchanged.
 
 The last row is the honest headline, and it has moved once. Wave 1 adopted the
 FUT2 pair — `secretor_negative_fraction` 0.20 with
@@ -132,6 +138,9 @@ Shipped values verified against `data/pathogens/active_profiles.json` and
 | `hand_to_surface_drying_multiplier` | key added, **1.0 (neutral) by default, no profile sets it** | **B** as an interval | The drying lever is ~100× on the deposit direction and only ~5× on pickup: hand→surface falls 13% → 0.1% after 10 min drying (Tuladhar 2013) and 59% → <1% (Sharps 2012). Interval **[0.008, 1.0]**, log10 — 0.008 is Tuladhar's dried/immediate ratio (0.1%/13% = 0.0077), 1.0 is fully wet | ✓ interval **adopted in the screen box**; the value is *not* adopted, because **which drying state applies to a hand continuously recontaminated by its own shedding is not measured**. It enters as a swept axis, at neutral, changing no shipped arithmetic | #42 |
 | Cabin-localization fraction `f` | swept | C, declared | No measurement exists (Wikswo 2009 is the nearest and does not measure it). Park 2015's cabin swabs bear on it | ∅ null | #12 |
 | Observation model (~15 numbers) | — | C / F | One empirical aggregate constrains them jointly, and that aggregate is anchor A3 | ⊘ **A3 is not a test** | #23, #27 |
+| Boarding / importation prevalence | **absent** — the index case is seeded by fiat | **C → B as an interval** | Asymptomatic norovirus RNA in stool, non-outbreak populations: 2.5% of 4,536 healthy asymptomatic adults, mean age 58.0 (Kobayashi 2021, *Clin Microbiol Infect*, DOI 10.1016/j.cmi.2021.06.004); pooled adult 4%, Europe/North America 4%, food handlers 3% across 81 studies (Qi 2018, *EClinicalMedicine*, DOI 10.1016/j.eclinm.2018.09.001); 5 of 707 asymptomatic food handlers = 0.71% (Jeong 2021, *J Food Prot*, DOI 10.4315/jfp-21-136). **Passengers [0.025, 0.040], crew [0.007, 0.030]**, Grade B. Outbreak-population figures (Qi's 18%, Wang 2023's 21.8%) are **excluded as circular** — measured during the event the model is scored on | ⊘ **mech** — no importation channel exists; a host cannot board infected. Sweep the interval once one does ([tranche 10](literature/consensus_tranche_10.md) §3) | #45 |
+| Chronic-shedder boarding prevalence | absent | ∅ **null, bounded** | Derived two ways, disagreeing by 2.5 orders: van Beek's cohort denominator gives **1.4e-5–5.2e-5** of a boarding population (0.117% per patient-year chronic incidence × 218-day median × immunocompromised [0.02, 0.074]); Bok's positivity denominator gives **1.1e-3–4.2e-3** as an **upper bound** (13% positive × 44% persistent, denominator = patients tested while under investigation). Both are **1–3 orders below** the general asymptomatic channel above, and are mostly inside it rather than additive | ∅ **no point value licensed** — chronic shedding enters as a swept **duration** axis on an imported host, not as its own prevalence ([tranche 10](literature/consensus_tranche_10.md) §4) | #45 |
+| `asymptomatic_shedding_log10` (offset) | peak 0.5 log10 below the symptomatic curve | C, **direction confirmed, magnitude open** | Measured symptomatic-versus-asymptomatic stool loads: 8.39 vs 7.15 log10 copies/g, a 1.24-log10 offset (p = 0.011, Vitória cohort, children) and 2.69 × 10⁸ vs 4.32 × 10⁷ GC/g, 0.79 log10 (Dábilla 2017, DOI 10.1016/j.jcv.2016.12.009, children). Both paediatric, so the shipped 0.5 is about half the measured offset, in the conservative direction | ⊘ setting — not adoptable from paediatric data alone; an adult measurement would settle it ([tranche 10](literature/consensus_tranche_10.md) §6) | |
 
 ### 3.2 SARS-CoV-2 (`sars_cov2_resp`) — active, not scoreable
 
@@ -168,9 +177,15 @@ record by the tranche 8 clearance seam. Against a 7–14 day voyage a 218-day
 duration means a chronic host never clears on board, so the quantitatively
 interesting half remains the host who **boards already shedding** — an
 importation channel, quantifiable as boarding prevalence × chronic fraction.
-That channel is deliberately **not** implemented yet: no chronic-shedder point
-prevalence is licensed by the literature so far
-([tranche 7](literature/consensus_tranche_7.md) §6).
+That channel is deliberately **not** implemented yet, and
+[tranche 10](literature/consensus_tranche_10.md) settles why: no
+chronic-shedder point prevalence is licensed — two derivations disagree by
+2.5 orders — and the channel that matters is not this one. Ordinary
+asymptomatic adults board shedding at 2.5–4%, one to three orders above
+the chronic estimate, so importation is real, measured, and mostly
+immunocompetent. What chronic hosts retain is duration, not prevalence:
+218 days against a 7–14 day voyage means a shedder present for the whole
+cruise.
 
 ### 3.3 Influenza A (`influenza_a`) — **not active**, in `edison_10pathogen_profiles.json`
 
