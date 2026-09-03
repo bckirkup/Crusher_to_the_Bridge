@@ -213,6 +213,13 @@ must be resolved before it is.
 This is the actionable core of the register. In every case the paper exists and
 the field cannot take it, so the next move is a model change, not a search.
 
+**The order in which these are taken is not free**, and it is set out in
+[`proposals/defect_resolution_plan.md`](proposals/defect_resolution_plan.md)
+rather than here: items 1–3 are structural prerequisites of the rest, items 4
+and 6 are the same identifiability constraint in two arms and must be adopted
+jointly or not at all, and item 5 is circular with anchor A3 until A3 is
+demoted. Read that plan before starting any single item.
+
 The immunocompromise item left this list in #45 and is recorded in its §3.1 and
 §3.2 rows instead: the mechanism defect was that the only field available was a
 susceptibility multiplier, and the evidence measures duration. The duration
