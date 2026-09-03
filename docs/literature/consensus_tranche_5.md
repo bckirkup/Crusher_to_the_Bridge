@@ -166,7 +166,10 @@ if it were direction.
 **(b) Grove 2015 could not be verified at source.** Two targeted Consensus
 searches on its measured quantity, its stated design (n = 150 transfers, 80
 participants) and its author did not return it. That is a null on verification,
-not a claim the paper does not exist — but the pair 24 % / 0.6 % is currently
+not a claim the paper does not exist — and **that null is now retired**: Grove 2015 was the first
+result of a query in [tranche 12](consensus_tranche_12_contact_transfer.md) and its
+numbers (24 % surface → hand, 0.6 % hand → surface, ≥ 9 replicates) are
+confirmed there — but the pair 24 % / 0.6 % is currently
 Grade C-by-provenance in our hands regardless of the grade Edison assigned it,
 and the verifiable literature above covers the same quantity.
 
@@ -206,7 +209,9 @@ Not "source `surface_deposition_fraction` from 0.6 %". Split into:
 - No measurement of hand→surface transfer under *cruise-ship* soiling,
   humidity or touch pressure. Every value above is a food-contact or
   laboratory assay.
-- Grove et al. 2015 not located by Consensus in two targeted searches (§2b).
+- ~~Grove et al. 2015 not located by Consensus in two targeted searches (§2b).~~
+  **Retired:** tranche 12 retrieved it as a first result and confirmed its
+  numbers; see §2b.
 - No study reports deposition as a *fraction of total shedding*, which is what
   the profile key's units claim to be. The quantity the code asks for may not be
   a measurable one.
