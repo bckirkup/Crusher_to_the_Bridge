@@ -67,6 +67,57 @@ decision rather than a rename. Any campaign result must therefore be read as
 having been produced under the withdrawn mechanism until that decision is
 taken.
 
+**The emesis titre × volume parameterisation is withdrawn and replaced by the
+quantity Kirby identifies (Wave 2, task #38).** `EMESIS_TITRE_GEC_PER_ML` is no
+longer an input: no profile key resolves to a titre, and the emesis record
+carries titre only as a derived diagnostic (`episode_load / volume_ml`). The
+emitted load now comes from `EMESIS_TOTAL_SHED_GEC_RANGE` = (1e5, 1e8) genome
+copies, log-uniform, drawn **once per symptomatic illness** and partitioned
+equally over the episodes drawn with it. Provenance: Kirby et al. 2016 Table 3,
+per-subject **cumulative** emesis shed — GII.2 Snow Mountain 1.8e7 GEC
+(SEM 1.8e7), GI.1 2.3e8, per-subject values spanning ≈1e5–1e8; Grade B on a
+surrogate genotype, because no GII.4 emesis measurement exists (tranche 4 §3).
+The endpoints are set by an arithmetic check and not by tuning: the arithmetic
+mean of a log-uniform on [1e5, 1e8] is (1e8 − 1e5)/ln(1e3) = **1.45e7**, within
+1.25× of the measured 1.8e7. The reason this is a reparameterisation rather than
+a value swap is that the three former inputs are not independent — the measured
+GII.2 titre mean 1.6e5 GEC/mL times the measured mean total volume 845 mL is
+1.35e8, **7.5× above** the same paper's measured cumulative 1.8e7, because the
+titre mean is taken over positive samples on a heavy right tail. Volume stays
+drawn over 50–800 mL as the physical deposit volume only, and
+`EMESIS_EPISODES_RANGE` is corrected to the measured (1, 7): with the total
+identified, the episode count only partitions and times that same total.
+**Every emesis-derived numeric expectation and every RNG-dependent emesis golden
+is invalidated by this change**, since both the magnitude and the emesis draw
+sequence move.
+
+**Surface decay now has a key in the units it is sourced in, and the shipped
+profiles do not use it (Wave 2, task #41).** `surface_decay_log10_per_day` is the
+preferred key; `surface_decay_per_day` is a deprecated fraction-valued alias,
+still honoured, and it is what both active profiles ship. The conversion
+f = 1 − 10⁻ᵏ now happens in exactly one place,
+`TransmissionCore._surface_survival`, instead of living in a comment in
+`bounded_screen.py`. As with the campaign divergence above, the divergence is
+deliberate and recorded rather than fixed: **no shipped profile value changed and
+no profile carries the new key**, so behaviour is bit-identical and the sourced
+key is unexercised by any run until a profile adopts it. The screen box is now
+expressed unconverted, [0.067, 0.79] log10/day.
+
+**Hand↔surface transfer is split by direction, and a drying axis is added at
+neutral (Wave 2, task #42 item 3).** `SURFACE_TO_HAND_LOGNORMAL` keeps the pickup
+direction; `HAND_TO_SURFACE_LOGNORMAL` — identical numbers — carries the deposit
+direction, because they are two different measured quantities whose drying lever
+differs by ~20×: surface→hand dries only to 2–11% (Sharps 2012) / 2.0 ± 2.0%
+(Tuladhar 2013), where hand→surface falls 13% → 0.1% with 10 minutes of drying
+(Tuladhar) and 59% → <1% (Sharps). The shipped distribution is therefore a
+**wet-contact** parameterisation, defensible against Tuladhar's and Bidawid's
+immediate 13% and about 100× too high for a dried donor hand. The new
+`hand_to_surface_drying_multiplier` multiplies the deposit side only, defaults to
+1.0, is set by no profile and consumes no RNG, so it reproduces the shipped
+arithmetic exactly; it is screened over [0.008, 1.0] (log10) because **which
+drying state applies to a hand continuously recontaminated by its own shedding
+is not measured**. That is why it enters as an axis and not as a value.
+
 **The Morris ranking in
 [`bounded_screen_results.md`](bounded_screen_results.md) is invalidated a second
 time, and by this change.** The screen's seventh factor was
@@ -420,7 +471,12 @@ Roughly in dependency order.
     median 4.1 × 10⁴ for the same genogroup, 20×), so the repair is a
     distribution plus a corrected episode count, not a swapped point value, and
     it must go through `model-parameter-provenance` with the goldens moved
-    deliberately.
+    deliberately. **Repaired in Wave 2 as a reparameterisation, not a value
+    swap** — see §1: the pathway is now driven by the measured per-subject
+    cumulative shed, drawn log-uniform once per illness, with titre retired as
+    an input and the episode count corrected to 1–7. Three inputs collapse to
+    one, so the item is closed as a degrees-of-freedom reduction rather than as
+    a re-valued titre.
 
 ## 5. Held fixed by assumption
 
@@ -459,9 +515,11 @@ is over-determined only *given* them. Full list in §10 of the history document.
   log10/day, Leblanc et al. 2019), and the gap inflates the fomite reservoir.
   No human-norovirus dry-surface infectivity decay measurement exists; any
   adopted interval is Grade B at best and must state its medium.
-- The `surface_decay_per_day` interval is now [0.14, 0.84] fractional loss
-  per day, recut in `../literature/consensus_tranche_5.md` §1 from five
-  surrogate studies. It is an order of magnitude wide in rate, and the
+- The decay interval is now carried in the units it is measured in,
+  **[0.067, 0.79] log10/day** on `surface_decay_log10_per_day`, recut in
+  `../literature/consensus_tranche_5.md` §1 from five surrogate studies; the
+  earlier [0.14, 0.84] is the identical interval converted through
+  f = 1 − 10⁻ᵏ (0.067 ↔ 0.143, 0.79 ↔ 0.838). It is an order of magnitude wide in rate, and the
   shipped 0.25 lies inside it near the slow end — Edison's proposed
   [0.49, 0.84] is the top of the literature, not its span, and the fast-end
   citation does not check against the paper it names. Every Morris result in

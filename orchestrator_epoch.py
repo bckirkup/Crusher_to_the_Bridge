@@ -503,6 +503,7 @@ def _advance_agent_pathogen_infections(
             agent.cumulative_exposure_by_route.pop(pid, None)
             agent.hand_load_by_pathogen.pop(pid, None)
             agent.emesis_episode_schedule_by_pathogen.pop(pid, None)
+            agent.emesis_episode_load_by_pathogen.pop(pid, None)
             agent.emesis_deposition_records_by_pathogen.pop(pid, None)
 
 

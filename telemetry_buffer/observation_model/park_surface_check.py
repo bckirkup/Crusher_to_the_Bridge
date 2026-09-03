@@ -67,6 +67,10 @@ def expectations() -> dict[str, float]:
         "hand_area_m2": float(np.mean(tc.HAND_AREA_CM2_RANGE)) / 1.0e4,
         "s_h": float(np.mean(tc.SURFACE_CONTACT_FRACTION_RANGE)),
         "s_m": float(np.mean(tc.MOUTH_CONTACT_FRACTION_RANGE)),
+        # Pickup direction only. The deposit direction is a separate measured
+        # quantity (tc.HAND_TO_SURFACE_LOGNORMAL, with its drying multiplier);
+        # this harness models surface pool -> hand -> mouth and never needs it,
+        # so the two are never compared here.
         "te_sh": _mean_truncated_lognormal(*tc.SURFACE_TO_HAND_LOGNORMAL),
         "te_hm": tc.HAND_TO_MOUTH_NORMAL[0],
     }
@@ -193,12 +197,18 @@ def concentration_per_swab(pool: float, zone_class: str) -> float:
 def mean_episode_load() -> float:
     """Expected genome copies expelled in one vomiting episode.
 
-    Volume is log-uniform over the measured range, so its mean is
-    (hi - lo) / ln(hi / lo) rather than the midpoint.
+    The identified quantity is the per-subject cumulative shed, drawn
+    log-uniform once per illness and partitioned equally over the drawn
+    episodes, so the expectation is E[total] * E[1/n]: the log-uniform mean
+    (hi - lo) / ln(hi / lo) times the mean reciprocal of the discrete-uniform
+    episode count. It is no longer volume x titre, which double-counted a
+    heavy-tailed titre mean against the measured total.
     """
-    low, high = tc.EMESIS_VOLUME_ML_RANGE
-    mean_volume_ml = (high - low) / math.log(high / low)
-    return mean_volume_ml * tc.EMESIS_TITRE_GEC_PER_ML
+    low, high = tc.EMESIS_TOTAL_SHED_GEC_RANGE
+    mean_total = (high - low) / math.log(high / low)
+    episode_low, episode_high = tc.EMESIS_EPISODES_RANGE
+    counts = range(int(episode_low), int(episode_high) + 1)
+    return mean_total * sum(1.0 / n for n in counts) / len(counts)
 
 
 def emesis_pool_gain_per_episode(zone_class: str) -> float:

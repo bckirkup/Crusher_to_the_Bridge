@@ -390,6 +390,9 @@ class PathogenProfile(BaseModel):
     recovery_day: int = 3
     surface_deposition_fraction: float = 0.0001
     airborne_emission_fraction: float | None = None
+    surface_decay_log10_per_day: float | None = None
+    hand_to_surface_drying_multiplier: float | None = None
+    emesis_total_shed_gec_range: list[float] | None = None
     base_susceptibility: float = 1.0
     microflora_disruption: dict[str, Any] = {}
     food_contamination: dict[str, Any] = {}
@@ -466,6 +469,48 @@ class PathogenProfile(BaseModel):
         if v is not None and (v < 0 or v > 1):
             raise ValueError(
                 f"airborne_emission_fraction must be in [0,1], got {v}"
+            )
+        return v
+
+    @field_validator("surface_decay_log10_per_day")
+    @classmethod
+    def surface_decay_log10_non_negative(cls, v: float | None) -> float | None:
+        # surface_decay_per_day is the deprecated fraction-valued alias.
+        if v is not None and v < 0:
+            raise ValueError(
+                f"surface_decay_log10_per_day must be >= 0, got {v}"
+            )
+        return v
+
+    @field_validator("hand_to_surface_drying_multiplier")
+    @classmethod
+    def drying_multiplier_bounded(cls, v: float | None) -> float | None:
+        if v is not None and (v < 0 or v > 1):
+            raise ValueError(
+                "hand_to_surface_drying_multiplier must be in [0,1], "
+                f"got {v}"
+            )
+        return v
+
+    @field_validator("emesis_total_shed_gec_range")
+    @classmethod
+    def emesis_total_shed_ordered(
+        cls, v: list[float] | None,
+    ) -> list[float] | None:
+        if v is None:
+            return v
+        if len(v) != 2:
+            raise ValueError(
+                f"emesis_total_shed_gec_range must be [low, high], got {v}"
+            )
+        low, high = v
+        if low <= 0:
+            raise ValueError(
+                f"emesis_total_shed_gec_range low must be > 0, got {low}"
+            )
+        if low >= high:
+            raise ValueError(
+                f"emesis_total_shed_gec_range low must be < high, got {v}"
             )
         return v
 

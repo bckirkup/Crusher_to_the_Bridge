@@ -8,7 +8,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from engines.transmission_core import EMESIS_VOLUME_ML_RANGE
+from engines.transmission_core import EMESIS_TOTAL_SHED_GEC_RANGE
 from telemetry_buffer.observation_model import bounded_screen
 
 PATHOGEN = "norwalk_gi"
@@ -41,19 +41,19 @@ def test_linear_factor_midpoint_is_the_arithmetic_mean() -> None:
 
 
 def test_log10_factor_maps_unit_endpoints_to_the_interval() -> None:
-    factor = _factor("emesis_titre_gec_per_ml")
+    factor = _factor("emesis_total_shed_gec")
     assert factor.value(0.0) == pytest.approx(factor.low)
     assert factor.value(1.0) == pytest.approx(factor.high)
 
 
 def test_log10_factor_midpoint_is_the_geometric_mean() -> None:
-    factor = _factor("emesis_titre_gec_per_ml")
+    factor = _factor("emesis_total_shed_gec")
     expected = (factor.low * factor.high) ** 0.5
     assert factor.value(0.5) == pytest.approx(expected)
 
 
 def test_log10_factor_is_monotone_increasing_in_the_unit_coordinate() -> None:
-    factor = _factor("emesis_titre_gec_per_ml")
+    factor = _factor("emesis_total_shed_gec")
     values = [factor.value(unit) for unit in (0.0, 0.25, 0.5, 0.75, 1.0)]
     assert values == sorted(values)
 
@@ -80,28 +80,28 @@ def test_indexed_emesis_pair_keeps_the_engine_lower_bound(unit: float) -> None:
     """The screened factor is the upper bound; the lower must not move.
 
     An earlier revision seeded the pair as [0.0, value], which silently moved
-    emesis volume's lower bound from the engine default to zero on every
+    the emesis pair's lower bound from the engine default to zero on every
     design point.
     """
-    factor = _factor("emesis_volume_ml_high")
+    factor = _factor("emesis_total_shed_gec")
     profile = bounded_screen.build_overrides(
         bounded_screen.NOROVIRUS_FACTORS,
         _units_at(factor.name, unit),
         PATHOGEN,
     )[PATHOGEN]
-    pair = profile["emesis_volume_ml_range"]
-    assert pair[0] == pytest.approx(EMESIS_VOLUME_ML_RANGE[0])
+    pair = profile["emesis_total_shed_gec_range"]
+    assert pair[0] == pytest.approx(EMESIS_TOTAL_SHED_GEC_RANGE[0])
 
 
 @pytest.mark.parametrize("unit", [0.0, 0.5, 1.0])
 def test_indexed_emesis_pair_carries_the_screened_upper_bound(unit: float) -> None:
-    factor = _factor("emesis_volume_ml_high")
+    factor = _factor("emesis_total_shed_gec")
     profile = bounded_screen.build_overrides(
         bounded_screen.NOROVIRUS_FACTORS,
         _units_at(factor.name, unit),
         PATHOGEN,
     )[PATHOGEN]
-    pair = profile["emesis_volume_ml_range"]
+    pair = profile["emesis_total_shed_gec_range"]
     assert pair[1] == pytest.approx(factor.value(unit))
 
 
@@ -219,7 +219,7 @@ def test_elementary_effects_rank_a_stronger_factor_above_a_weaker_one(
     weights = dict.fromkeys(
         (factor.name for factor in bounded_screen.NOROVIRUS_FACTORS), 0.1,
     )
-    weights["emesis_titre_gec_per_ml"] = 5.0
+    weights["emesis_total_shed_gec"] = 5.0
     monkeypatch.setattr(bounded_screen, "run_point", _constant_run_point(weights))
 
     effects = bounded_screen.elementary_effects(
@@ -231,7 +231,7 @@ def test_elementary_effects_rank_a_stronger_factor_above_a_weaker_one(
         reverse=True,
     )
 
-    assert ranked[0] == "emesis_titre_gec_per_ml"
+    assert ranked[0] == "emesis_total_shed_gec"
 
 
 def test_elementary_effects_report_no_spread_for_a_linear_response(
@@ -247,7 +247,7 @@ def test_elementary_effects_report_no_spread_for_a_linear_response(
         bounded_screen.NOROVIRUS_FACTORS, 3, [1], np.random.default_rng(7),
     )
 
-    assert effects["surface_decay_per_day"]["attack_rate"]["sigma"] == pytest.approx(
+    assert effects["surface_decay_log10_per_day"]["attack_rate"]["sigma"] == pytest.approx(
         0.0,
     )
 
