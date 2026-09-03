@@ -510,6 +510,26 @@ Roughly in dependency order.
     an input and the episode count corrected to 1–7. Three inputs collapse to
     one, so the item is closed as a degrees-of-freedom reduction rather than as
     a re-valued titre.
+12. **The infectious period is the illness duration, and two thirds of the
+    authored shedding curve is never emitted.** Measured, not argued:
+    `telemetry_buffer/observation_model/shedding_clock_check.py` drives the real
+    progression seam and reports that a norovirus host reaches only curve
+    indices **0–2 of the authored 15**, clearing on day 3–6 (median 4), so
+    **69.1% of the authored symptomatic curve integral and 25% of the
+    asymptomatic curve are unreachable**. The cause is that
+    `clearance_day = onset_day + recovery_day` ends the infection on the same
+    axis the curve is read on, and `recovery_day` = 3 is an *illness* duration.
+    Atmar 2008 measures both quantities in the same subjects: symptoms 1–2 days,
+    faecal shedding median **28 days** (13–56); Kirby 2014 finds shedding up to
+    three weeks past symptom resolution in both genogroups; Cheng 2021 sees GII
+    shedding cease around day 15. So the model has one clock where the
+    literature measures two, there is no post-symptomatic shedding at all, and
+    the curve's own decay limb is dead code. Not repaired here — the repair adds
+    a separate `shedding_duration_days` (proposed 15, interval [12, 30]) and
+    will move every norovirus golden number in a known direction, more
+    infectious host-days. It is also a prerequisite for the immunocompromise
+    move: duration cannot carry immunocompromise until duration exists. See
+    [`../literature/consensus_tranche_7.md`](../literature/consensus_tranche_7.md).
 
 ## 5. Held fixed by assumption
 
@@ -530,6 +550,20 @@ is over-determined only *given* them. Full list in §10 of the history document.
   fitting. See [`../literature/consensus_tranche_4.md`](../literature/consensus_tranche_4.md)
   §1d.
 - Confinement attenuation factor 0.05.
+- `immunocompromised_multiplier` = 2.0 and `immunocompromised_fraction` = 0.05,
+  both defaulted in the multi-pathogen config block rather than in a profile.
+  The prevalence is bounded by measurement — **[0.02, 0.074]** (Lopez-Gigosos
+  2020's 2.0% of 1,196 travel-clinic travellers; NHIS 2.7% in 2013 rising to
+  7.4% in 2022), a width that is era and population rather than uncertainty. The
+  multiplier is **withdrawn as a quantity**: no source measures the relative
+  risk of *acquiring* norovirus while immunocompromised, and what is measured is
+  duration and infectiousness (van Beek 2017: 22.8% of infected transplant
+  recipients chronic, median 218 days, range 32–1,164; Davis 2020 confirms
+  infectious virus, not RNA). Wave 1 made it bite harder by composing
+  multiplicatively instead of overwriting, so the 2.0 now genuinely doubles
+  acquisition risk on the one axis the literature does not support. See
+  [`../literature/consensus_tranche_7.md`](../literature/consensus_tranche_7.md)
+  §4–§5.
 - Secretor-status non-susceptibility. Not a held-fixed 20% ceiling: the profile
   the campaign runs ships 0.0, no attack-rate ceiling is observed (0.013–0.326
   across the override arms), and §1 withdraws 0.2 as the correction target. The
