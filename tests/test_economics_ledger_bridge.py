@@ -151,16 +151,16 @@ class TestAttribution:
         assert by_payer[PAYER_PUBLIC_HEALTH_AGENCY] == pytest.approx(90.0)
 
     def test_an_unknown_medium_is_refused(self) -> None:
+        audit = _audit()
+        attribution = {"goodwill": PAYER_PORT_AUTHORITY}
         with pytest.raises(ValueError, match="unknown medium"):
-            contributions_from_financial_audit(
-                _audit(), attribution={"goodwill": PAYER_PORT_AUTHORITY},
-            )
+            contributions_from_financial_audit(audit, attribution=attribution)
 
     def test_an_unknown_payer_is_refused(self) -> None:
+        audit = _audit()
+        attribution = {MEDIUM_CASH: "harbourmaster"}
         with pytest.raises(ValueError, match="unknown payer"):
-            contributions_from_financial_audit(
-                _audit(), attribution={MEDIUM_CASH: "harbourmaster"},
-            )
+            contributions_from_financial_audit(audit, attribution=attribution)
 
 
 class TestAgainstTheRealLedger:

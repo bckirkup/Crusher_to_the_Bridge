@@ -367,7 +367,7 @@ class ObservationModel(BaseModel):
                 for value in vector
             ):
                 raise ValueError("observation severity vectors must have five bounded values")
-            if vector[0] != 0.0 or any(
+            if abs(vector[0]) >= 1e-15 or any(
                 left > right for left, right in zip(vector, vector[1:])
             ):
                 raise ValueError(

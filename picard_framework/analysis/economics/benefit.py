@@ -189,7 +189,7 @@ class BenefitValuation:
 
 def _ratio(numerator: float, denominator: float) -> float | None:
     """Return a ratio, or ``None`` where the denominator cannot support one."""
-    if denominator == 0.0:
+    if abs(denominator) < 1e-15:
         return None
     return float(numerator / denominator)
 

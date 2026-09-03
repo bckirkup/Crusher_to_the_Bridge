@@ -105,3 +105,99 @@ class TestOisWeightLiveKnob:
         assert rewards[0] - rewards[-1] > 20.0  # live knob
         # Negative control: unrelated recovered=0 fixed; only ois_weight moves.
         assert all(isinstance(r, float) and r == r for r in rewards)  # finite
+
+
+class TestSymptomaticBiodefense:
+    def test_symptomatic_increases_biodefense_penalty(self) -> None:
+        rewards = [
+            _compute_rewards(
+                _history(infected=2, symptomatic=s),
+                DEFAULT_INCENTIVES,
+            )["fleet"]
+            for s in (0, 5, 20)
+        ]
+        assert rewards == sorted(rewards, reverse=True)
+        assert rewards[0] - rewards[-1] > 10.0
+
+
+class TestMainCliWiring:
+    """CLI flag wiring without invoking ShipSimulation."""
+
+    def test_main_applies_cruises_and_utility_dirs(
+        self, monkeypatch: pytest.MonkeyPatch, tmp_path
+    ) -> None:
+        import presidio_runner as pr
+
+        captured: dict = {}
+
+        class FakeSpec:
+            def __init__(self) -> None:
+                self.num_cruises = 1
+                self.social_config = {}
+                self.repo_root = str(tmp_path)
+
+            @classmethod
+            def from_fleet_json(cls, repo_root, path):
+                spec = cls()
+                captured["fleet_path"] = path
+                captured["repo_root"] = repo_root
+                return spec
+
+            @classmethod
+            def default(cls, repo_root):
+                return cls()
+
+        def fake_run(spec, *, display=False):
+            captured["spec"] = spec
+            captured["display"] = display
+
+        monkeypatch.setattr(pr, "PresidioRunSpec", FakeSpec)
+        monkeypatch.setattr(pr, "run", fake_run)
+        monkeypatch.setattr(
+            pr.sys,
+            "argv",
+            [
+                "presidio_runner.py",
+                "--fleet-config",
+                "presidio/data/config/smoke_fleet.json",
+                "--cruises",
+                "3",
+                "--display",
+                "--export-utility-dir",
+                "out/utility",
+                "--import-actions-dir",
+                "out/actions",
+            ],
+        )
+        pr.main()
+        assert captured["display"] is True
+        assert captured["spec"].num_cruises == 3
+        social = captured["spec"].social_config
+        assert "export_utility_dir" in social
+        assert "import_actions_dir" in social
+        assert social["export_utility_dir"].endswith("out/utility")
+        assert social["import_actions_dir"].endswith("out/actions")
+
+    def test_main_default_spec_without_fleet_config(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        import presidio_runner as pr
+
+        seen: dict = {}
+
+        class FakeSpec:
+            def __init__(self) -> None:
+                self.num_cruises = 1
+                self.social_config = None
+
+            @classmethod
+            def default(cls, repo_root):
+                seen["default"] = repo_root
+                return cls()
+
+        monkeypatch.setattr(pr, "PresidioRunSpec", FakeSpec)
+        monkeypatch.setattr(pr, "run", lambda spec, *, display=False: seen.update(ran=True))
+        monkeypatch.setattr(pr.sys, "argv", ["presidio_runner.py"])
+        pr.main()
+        assert seen.get("ran") is True
+        assert "default" in seen

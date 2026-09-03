@@ -99,8 +99,10 @@ def test_recording_contribution_does_not_change_spend_or_balances() -> None:
 
 
 def test_record_contribution_requires_a_contribution_record() -> None:
+    ledger = CostLedger()
+    bad_record = object()
     with pytest.raises(TypeError, match="ContributionRecord"):
-        CostLedger().record_contribution(object())  # type: ignore[arg-type]
+        ledger.record_contribution(bad_record)  # type: ignore[arg-type]
 
 
 def test_no_contribution_audit_remains_byte_identical() -> None:

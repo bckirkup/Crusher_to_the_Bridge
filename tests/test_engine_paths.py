@@ -42,9 +42,9 @@ class TestRegisterIdempotent:
         }
         monkeypatch.setitem(engine_paths.ENGINE_REGISTRY, "fake-engine", fake_entry)
 
-        # Remove any prior insertion from a previous test run in-process.
-        while abs_py in sys.path:
-            sys.path.remove(abs_py)
+        # Isolate sys.path via monkeypatch so teardown restores it.
+        cleaned_path = [p for p in sys.path if p != abs_py]
+        monkeypatch.setattr(sys, "path", cleaned_path)
 
         before = list(sys.path)
         status1 = register_engine_paths(engines=["fake-engine"])

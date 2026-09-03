@@ -1338,7 +1338,7 @@ class TransmissionCore:
             for zone_name in zone_names
         }
         for pathogen_id, pools in self.surface_pools_by_pathogen.items():
-            for zone_name, value in list(pools.items()):
+            for zone_name, value in pools.items():
                 total = max(0.0, float(value))
                 if total <= 0.0:
                     continue
@@ -3110,7 +3110,7 @@ class TransmissionCore:
         target: KorkinAgent,
         zone_name: str,
         surface_mass: float,
-        delivered: float,
+        _delivered: float,
         dose: float,
         prev_occupant_ids: set[int],
         prev_shedders: list[int],

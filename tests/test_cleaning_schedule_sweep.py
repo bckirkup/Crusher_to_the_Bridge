@@ -239,3 +239,65 @@ def test_emesis_sweep_reuses_the_fixed_schedule_grid() -> None:
         assert len(emesis) == 81
         gradients = [cell["emesis_gradient"] for cell in emesis]
         assert all(math.isfinite(value) and value > 0.0 for value in gradients)
+
+
+def test_emesis_cells_defaults_to_full_sweep() -> None:
+    fraction = cleaning_schedule_sweep.CABIN_LOCALIZATION_SWEEP[0]
+    emesis = cleaning_schedule_sweep.emesis_cells(fraction)
+    assert len(emesis) == 81
+    assert all(cell["emesis_gradient"] > 0.0 for cell in emesis)
+
+
+class TestRenderAndMain:
+    """Report render covers envelope lines; main writes the sidecar file."""
+
+    def test_render_reports_finite_envelope(self) -> None:
+        report = cleaning_schedule_sweep._render()
+        assert "Cleaning schedule sweep" in report
+        assert "Hand-only envelope" in report
+        assert "Emesis-inclusive envelope" in report
+        assert "Rule 3:" in report
+        assert "minimum gradient:" in report
+        assert "maximum gradient:" in report
+        # Every numeric gradient token in the table body stays finite.
+        assert "nan" not in report.lower()
+        assert "inf" not in report.lower()
+
+    def test_uniform_emesis_values_grade_with_localization(self) -> None:
+        from telemetry_buffer.observation_model.park_surface_check import expectations
+
+        exp_ = expectations()
+        fractions = list(cleaning_schedule_sweep.CABIN_LOCALIZATION_SWEEP[:3])
+        gradients = [
+            cleaning_schedule_sweep._uniform_emesis_values(f, exp_)[2]
+            for f in fractions
+        ]
+        assert all(math.isfinite(g) and g > 0.0 for g in gradients)
+        # Higher cabin localization raises the cabin/public gradient.
+        assert gradients == sorted(gradients)
+        assert gradients[-1] - gradients[0] > 1.0
+
+    def test_main_writes_output_sidecar(
+        self, tmp_path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+    ) -> None:
+        out = tmp_path / "cleaning_schedule_sweep_out.txt"
+
+        class _FakePath:
+            def __init__(self, *_args, **_kwargs) -> None:
+                pass
+
+            def with_name(self, name: str):
+                assert name == "cleaning_schedule_sweep_out.txt"
+                return out
+
+        monkeypatch.setattr(cleaning_schedule_sweep, "Path", _FakePath)
+        cleaning_schedule_sweep.main()
+        captured = capsys.readouterr().out
+        assert out.is_file()
+        text = out.read_text(encoding="utf-8")
+        assert "Cleaning schedule sweep" in text
+        assert "written:" in captured
+        assert all(
+            math.isfinite(cell["gradient"])
+            for cell in cleaning_schedule_sweep.sweep_cells()
+        )

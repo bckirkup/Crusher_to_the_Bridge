@@ -1149,7 +1149,7 @@ def _validate_symptom_severity_profiles(
                 raise ValueError(
                     f"{pathogen_id}.observation_model.{key} must be finite and bounded",
                 )
-            if numbers[0] != 0.0:
+            if abs(numbers[0]) >= 1e-15:
                 raise ValueError(
                     f"{pathogen_id}.observation_model.{key}[0] must equal 0.0",
                 )
