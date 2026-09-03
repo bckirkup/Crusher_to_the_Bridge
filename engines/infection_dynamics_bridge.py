@@ -338,6 +338,7 @@ class KorkinAgent:
     Multi-pathogen extensions:
     - infections: dict keyed by pathogen_id tracking per-pathogen state
     - susceptibility_multiplier: dict keyed by pathogen_id → scalar
+    - secretor_negative_by_pathogen: dict keyed by pathogen_id → bool
     - microflora_disruption_status: scalar [0.0..1.0] indicating
       compromised native microbiome
     """
@@ -350,6 +351,7 @@ class KorkinAgent:
         "current_location", "schedule",
         # Multi-pathogen extensions
         "infections", "susceptibility_multiplier",
+        "secretor_negative_by_pathogen",
         "dose_response_susceptibility", "cumulative_exposure",
         "cumulative_exposure_by_route",
         "hand_load_by_pathogen", "hand_inactivation_rate_by_pathogen",
@@ -411,6 +413,10 @@ class KorkinAgent:
 
         # Per-pathogen susceptibility scaling (higher = more vulnerable)
         self.susceptibility_multiplier: dict[str, float] = {}
+        # Whether this host drew the secretor-negative (FUT2) phenotype, per
+        # pathogen. Kept explicit so host genetics stay inspectable rather than
+        # being implicit in a susceptibility float.
+        self.secretor_negative_by_pathogen: dict[str, bool] = {}
         # Persistent beta-Poisson host mixing variable, drawn lazily per pathogen.
         self.dose_response_susceptibility: dict[str, float] = {}
         # Effective dose accumulated during the current infection challenge.

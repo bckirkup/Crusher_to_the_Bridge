@@ -388,12 +388,15 @@ class PathogenProfile(BaseModel):
     observation_model: ObservationModel | None = None
     recovery_day: int = 3
     surface_deposition_fraction: float = 0.0001
+    airborne_emission_fraction: float | None = None
     base_susceptibility: float = 1.0
     microflora_disruption: dict[str, Any] = {}
     food_contamination: dict[str, Any] = {}
     environmental_contamination: dict[str, Any] = {}
     transmission_route_weights: dict[str, float] = {}
     innate_nonsusceptible_fraction: float = 0.0
+    secretor_negative_fraction: float | None = None
+    secretor_negative_relative_susceptibility: float | None = None
     nonsusceptible_mechanism: str = "none"
     introduction_epoch: int = 0
     initial_infected: int = 1
@@ -447,6 +450,35 @@ class PathogenProfile(BaseModel):
         if v < 0 or v > 1:
             raise ValueError(
                 f"surface_deposition_fraction must be in [0,1], got {v}"
+            )
+        return v
+
+    @field_validator("airborne_emission_fraction")
+    @classmethod
+    def airborne_emission_bounded(cls, v: float | None) -> float | None:
+        # surface_deposition_fraction is the deprecated alias for this key.
+        if v is not None and (v < 0 or v > 1):
+            raise ValueError(
+                f"airborne_emission_fraction must be in [0,1], got {v}"
+            )
+        return v
+
+    @field_validator("secretor_negative_fraction")
+    @classmethod
+    def secretor_fraction_bounded(cls, v: float | None) -> float | None:
+        if v is not None and (v < 0 or v > 1):
+            raise ValueError(
+                f"secretor_negative_fraction must be in [0,1], got {v}"
+            )
+        return v
+
+    @field_validator("secretor_negative_relative_susceptibility")
+    @classmethod
+    def secretor_relative_bounded(cls, v: float | None) -> float | None:
+        if v is not None and (v < 0 or v > 1):
+            raise ValueError(
+                "secretor_negative_relative_susceptibility must be in [0,1], "
+                f"got {v}"
             )
         return v
 

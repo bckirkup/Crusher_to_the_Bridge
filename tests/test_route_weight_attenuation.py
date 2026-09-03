@@ -10,7 +10,7 @@ from telemetry_buffer.observation_model import route_weight_attenuation as rwa
 
 # Importing the harness installs its monkeypatch on the transmission core; undo
 # it here so the rest of the suite runs against the shipped implementation.
-TransmissionCore._apply_route_weights = rwa._original
+TransmissionCore._apply_route_efficiencies = rwa._original
 
 PATHOGEN = "norwalk_gi"
 OTHER_PATHOGEN = "sars_cov2_resp"

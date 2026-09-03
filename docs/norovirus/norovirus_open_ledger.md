@@ -41,7 +41,34 @@ Also withdrawn and not yet replaced:
   changes no constant.
 - **The passenger/crew ratio.** Same reason.
 
-**`innate_nonsusceptible_fraction`: the sourced interval is 0.00 – 0.16, and
+**The removed-fraction non-secretor mechanism is withdrawn and replaced
+(Wave 1, task #21).** `norwalk_gi` no longer carries
+`innate_nonsusceptible_fraction`. It carries
+`secretor_negative_fraction` 0.20 (FUT2 se428 nonsense-homozygote prevalence in
+European/North American populations, Grade B) with
+`secretor_negative_relative_susceptibility` 0.20 (Teunis 2020 GII rows,
+0.015 / 0.076 = 0.197, Grade B), applied multiplicatively to the host's
+susceptibility multiplier instead of assigning zero. The removed-equivalent
+fraction this implies is 0.20 × (1 − 0.20) = **0.16**, the ceiling published in
+#367, so the arm no longer asserts sterile immunity that Teunis 2020 and
+Rouphael's 4-of-8 GII.2 challenge refute. `innate_nonsusceptible_fraction`
+survives only as a deprecated alias (relative susceptibility 0.0) so the other
+bundles in `data/pathogens/` keep their present behaviour. The history below is
+retained because the sequence of reversals is the reason the mechanism changed.
+
+**The Morris ranking in
+[`bounded_screen_results.md`](bounded_screen_results.md) is invalidated a second
+time, and by this change.** The screen's seventh factor was
+`innate_nonsusceptible_fraction` over [0.00, 0.16]; it is now
+`secretor_negative_relative_susceptibility` over [0.05, 0.50], a different
+factor over a different interval, so every elementary effect in that document is
+stale. The re-run on the recut `surface_decay_per_day` box was **killed part-way
+and never completed**: only the 20-seed noise floor at the new box centre exists,
+and there is no completed screen on either the recut box or the substituted
+factor. Nothing may be ranked from that document until a screen is run on the
+current box.
+
+**`innate_nonsusceptible_fraction` (history): the sourced interval is 0.00 – 0.16, and
 both the shipped 0.0 and Edison's 0.2 sit outside it.** This entry has been
 rewritten twice; the sequence matters, because the second reversal was caused by
 reading a paper more carefully than the profile.
@@ -428,9 +455,13 @@ is over-determined only *given* them. Full list in §10 of the history document.
   [0.49, 0.84] is the top of the literature, not its span, and the fast-end
   citation does not check against the paper it names. Every Morris result in
   `bounded_screen_results.md` was produced on the old [0.10, 0.60] box and
-  must be re-run before the admissible-region search.
-- `surface_deposition_fraction` is misnamed for what it does. The profile key
-  is read in `orchestrator_epoch.py` and added to the **zone/airborne** pool
+  must be re-run before the admissible-region search. The re-run was launched
+  and then killed part-way; the factor substitution in §1 invalidates that
+  document again, independently.
+- `surface_deposition_fraction` was misnamed for what it does; the active
+  profiles now spell it `airborne_emission_fraction` (same values, deprecated
+  alias still read). The key is read in `orchestrator_epoch.py` and added to
+  the **zone/airborne** pool
   decayed by `airborne_half_life_hours`, not to the fomite surface pool,
   which is filled by emesis and hand-to-surface back-transfer instead. Its
   inherited comment ("particles survive 86400 steps = 1 day") is a survival

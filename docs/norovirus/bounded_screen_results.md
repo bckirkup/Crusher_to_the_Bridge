@@ -19,6 +19,14 @@ interval changes the effects of **every** factor, not just that one: the ranking
 below must be re-run before the admissible-region search and must not be patched
 factor-by-factor. The measurement stands as a measurement of the old box.
 
+**Invalidated again by a factor substitution, Wave 1.** The seventh factor is no
+longer `innate_nonsusceptible_fraction` over [0.00, 0.16]: task #21 replaced the
+removed-fraction mechanism with partial susceptibility, and the box now carries
+`secretor_negative_relative_susceptibility` over [0.05, 0.50]. The re-run on the
+recut `surface_decay_per_day` box was **killed part-way and never completed** — a
+killed re-run, not a completed one — so only the 20-seed noise floor at the new
+box centre exists. No ranking in this document describes the current box.
+
 ## 1. What was run
 
 400 simulations: 10 Morris trajectories over the 7-factor norovirus box of

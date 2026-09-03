@@ -1202,6 +1202,26 @@ def _normalize_profile_units(
     return normalized
 
 
+def _resolve_secretor_status(profile: dict[str, Any]) -> tuple[float, float]:
+    """Return (secretor-negative prevalence, relative susceptibility).
+
+    ``secretor_negative_fraction`` with
+    ``secretor_negative_relative_susceptibility`` is preferred.
+    ``innate_nonsusceptible_fraction`` is the deprecated alias and carries
+    relative susceptibility 0.0, reproducing the sterile-immunity behaviour the
+    other bundles in ``data/pathogens/`` were written against.
+    """
+    if "secretor_negative_fraction" in profile:
+        frac = float(profile.get("secretor_negative_fraction") or 0.0)
+        rel = float(
+            profile.get("secretor_negative_relative_susceptibility", 0.0) or 0.0,
+        )
+        return frac, rel
+    if "innate_nonsusceptible_fraction" in profile:
+        return float(profile.get("innate_nonsusceptible_fraction") or 0.0), 0.0
+    return 0.0, 0.0
+
+
 def init_multi_pathogen(
     engine: KorkinShipEngine,
     pathogen_profiles: dict[str, dict[str, Any]],
@@ -1229,9 +1249,15 @@ def init_multi_pathogen(
         for pid, prof in pathogen_profiles.items():
             base_susc = prof.get("base_susceptibility", 1.0)
             agent.init_pathogen_susceptibility(pid, base_susc)
-            nonsus_frac = float(prof.get("innate_nonsusceptible_fraction", 0.0) or 0.0)
-            if nonsus_frac > 0.0 and rng.random() < nonsus_frac:
-                agent.susceptibility_multiplier[pid] = 0.0
+            frac, rel_susc = _resolve_secretor_status(prof)
+            drawn = frac > 0.0 and rng.random() < frac
+            agent.secretor_negative_by_pathogen[pid] = drawn
+            if drawn:
+                # Secretor-negative hosts are partially, not absolutely,
+                # protected against GII norovirus: Teunis 2020 GII infection
+                # risk 0.015 (Se-) vs 0.076 (Se+), and 4 of 8 secretor-negative
+                # challenges became ill at top dose in Rouphael's GII.2 trial.
+                agent.susceptibility_multiplier[pid] *= rel_susc
 
     candidate_ids = [
         a.agent_id for a in engine.agents
@@ -1250,9 +1276,10 @@ def init_multi_pathogen(
             # immunosuppressed host incubates longer as well as infecting easier.
             agent.immunocompromised = True
             for pid in pathogen_profiles:
-                # Preserve innate nonsusceptibility (multiplier 0).
-                if agent.susceptibility_multiplier.get(pid, 1.0) > 0.0:
-                    agent.susceptibility_multiplier[pid] = imm_mult
+                # Multiplicative so base susceptibility, secretor status and
+                # immunocompromise compose. A zero multiplier stays zero, so no
+                # guard is needed to preserve absolute nonsusceptibility.
+                agent.susceptibility_multiplier[pid] *= imm_mult
 
     for pid, prof in pathogen_profiles.items():
         intro_epoch = prof.get("introduction_epoch", 0)

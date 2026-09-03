@@ -584,9 +584,9 @@
           "minimum": 0,
           "description": "σ of log-normal host shedding multiplier (0 = no variance)"
         },
-        "transmission_route_weights": {
+        "route_efficiency_multipliers": {
           "type": "object",
-          "description": "Relative pathway dose multipliers (typically sum to 1.0). Absent → all 1.0 (identity). Keys map to TransmissionCore pathways.",
+          "description": "Independent per-route dose multipliers, one per TransmissionCore pathway. They are NOT normalised shares: they neither do nor need to sum to 1, and where route efficiency has been measured it spans orders of magnitude (influenza intranasal vs aerosol ID50). Absent → all 1.0 (identity).",
           "properties": {
             "direct_contact": {"type": "number", "minimum": 0},
             "droplet": {"type": "number", "minimum": 0},
@@ -597,11 +597,36 @@
           },
           "additionalProperties": false
         },
+        "transmission_route_weights": {
+          "type": "object",
+          "description": "DEPRECATED alias for route_efficiency_multipliers, still honoured. The name invites reading these numbers as normalised shares, which they are not.",
+          "properties": {
+            "direct_contact": {"type": "number", "minimum": 0},
+            "droplet": {"type": "number", "minimum": 0},
+            "hvac_airborne": {"type": "number", "minimum": 0},
+            "fomite": {"type": "number", "minimum": 0},
+            "food_contamination": {"type": "number", "minimum": 0},
+            "environmental_source": {"type": "number", "minimum": 0}
+          },
+          "additionalProperties": false
+        },
+        "secretor_negative_fraction": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Prevalence of the FUT2 secretor-negative host phenotype, drawn per agent. Drawn hosts get secretor_negative_relative_susceptibility applied to their susceptibility multiplier, not zero. Orthogonal to ship_graph.immune_fraction."
+        },
+        "secretor_negative_relative_susceptibility": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Susceptibility of a secretor-negative host relative to a secretor (1.0 = no protection, 0.0 = absolute nonsusceptibility). Partial for GII norovirus."
+        },
         "innate_nonsusceptible_fraction": {
           "type": "number",
           "minimum": 0,
           "maximum": 1,
-          "description": "Fraction of agents with zero susceptibility to this pathogen (e.g. FUT2 non-secretors for norovirus). Orthogonal to ship_graph.immune_fraction."
+          "description": "DEPRECATED alias, still honoured: a host fraction given zero susceptibility, equivalent to secretor_negative_fraction with secretor_negative_relative_susceptibility 0.0. Sterile immunity is refuted for GII norovirus."
         },
         "nonsusceptible_mechanism": {
           "type": "string",
@@ -635,10 +660,17 @@
         "recovery_day": {"type": "integer", "minimum": 0},
         "symptom_onset_day": {"type": "number", "minimum": 0},
         "incubation": {"$ref": "#/$defs/Incubation"},
+        "airborne_emission_fraction": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Fraction of a shedder's per-epoch emission entering the zone airborne reservoir that the HVAC pathway reads. This is NOT a surface deposition fraction: the fomite surface pools are fed by the emesis and faecal-release paths instead."
+        },
         "surface_deposition_fraction": {
           "type": "number",
           "minimum": 0,
-          "maximum": 1
+          "maximum": 1,
+          "description": "DEPRECATED alias for airborne_emission_fraction, still honoured. The key never deposited on surfaces."
         },
         "surface_decay_per_day": {
           "type": "number",
