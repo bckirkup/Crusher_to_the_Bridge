@@ -209,7 +209,6 @@ def print_multi_pathogen(
     pathogen_profiles: dict[str, dict[str, Any]],
     immunocompromised_ids: set[int],
     engine: KorkinShipEngine,
-    imm_mult: float,
     enable_dual_signal: bool,
 ) -> None:
     """Print multi-pathogen engine initialization summary."""
@@ -221,8 +220,15 @@ def print_multi_pathogen(
         for pid, prof in pathogen_profiles.items():
             _print_pathogen_profile(pid, prof)
         print()
-        print(f"  Immunocompromised agents: {len(immunocompromised_ids)}/{len(engine.agents)} "
-              f"(mult={imm_mult}x)")
+        print(f"  Immunocompromised agents: {len(immunocompromised_ids)}/{len(engine.agents)}")
+        for pid, prof in pathogen_profiles.items():
+            frac = prof.get("chronic_shedder_fraction")
+            spec = prof.get("chronic_shedding_duration_days") or {}
+            if frac is None or not spec:
+                continue
+            print(f"      Chronic shedders ({pid}): fraction={frac} of infected "
+                  f"immunocompromised hosts, median={spec.get('median')}d "
+                  f"(range {spec.get('min')}-{spec.get('max')}d)")
         print(f"  Dual-signal shedding: {'enabled' if enable_dual_signal else 'disabled'}")
         print()
 

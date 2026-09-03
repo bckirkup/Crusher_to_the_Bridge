@@ -367,11 +367,12 @@ class TestMultiPathogenParams:
         _check_multi_pathogen_params(cfg, report)
         assert not report.passed
 
-    def test_negative_multiplier(self) -> None:
+    def test_withdrawn_multiplier_warns_but_does_not_fail(self) -> None:
         cfg = {"multi_pathogen": {"immunocompromised_multiplier": -1}}
         report = Report()
         _check_multi_pathogen_params(cfg, report)
-        assert not report.passed
+        assert report.passed
+        assert len(report.warnings) == 1
 
 
 # ── Microflora checks ────────────────────────────────────────────────────

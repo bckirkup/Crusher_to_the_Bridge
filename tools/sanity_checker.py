@@ -90,6 +90,13 @@ _AIR_FLOW_PATHS_JSON = "air_flow_paths.json"
 _RESOURCE_COSTS_JSON = "resource_costs.json"
 _CONFIG_YAML = "config.yaml"
 
+# Sourced interval for immunosuppression prevalence in adults: Harpaz 2016
+# (NHIS 2013, 2.7%), Martinson 2024 (6.6% in 2021, 7.4% in 2022),
+# Lopez-Gigosos 2020 (24 of 1,196 international travellers, 2.0%). Grade B; the
+# width is era and population, not uncertainty. Advisory, not a bound.
+_IMM_FRACTION_LOW = 0.02
+_IMM_FRACTION_HIGH = 0.074
+
 
 class Severity(str, Enum):
     ERROR = "ERROR"
@@ -389,6 +396,8 @@ class PathogenProfile(BaseModel):
     observation_model: ObservationModel | None = None
     recovery_day: int = 3
     shedding_duration_days: float | None = None
+    chronic_shedder_fraction: float | None = None
+    chronic_shedding_duration_days: dict[str, float] | None = None
     surface_deposition_fraction: float = 0.0001
     airborne_emission_fraction: float | None = None
     surface_decay_log10_per_day: float | None = None
@@ -2173,12 +2182,22 @@ def _check_multi_pathogen_params(cfg: dict[str, Any], report: Report) -> None:
             report.error(_CONFIG_YAML, "MATH_BOUND",
                          f"multi_pathogen.immunocompromised_fraction = {imm_frac} "
                          f"outside [0,1]")
-    imm_mult = mp.get("immunocompromised_multiplier")
-    if imm_mult is not None and isinstance(imm_mult, (int, float)):
-        if imm_mult < 0:
-            report.error(_CONFIG_YAML, "MATH_BOUND",
-                         f"multi_pathogen.immunocompromised_multiplier = {imm_mult} "
-                         f"is negative")
+        elif not (_IMM_FRACTION_LOW <= imm_frac <= _IMM_FRACTION_HIGH):
+            report.warn(_CONFIG_YAML, "PROVENANCE",
+                        f"multi_pathogen.immunocompromised_fraction = {imm_frac} "
+                        f"outside the sourced interval "
+                        f"[{_IMM_FRACTION_LOW}, {_IMM_FRACTION_HIGH}] "
+                        f"(Harpaz 2016, Martinson 2024, Lopez-Gigosos 2020); see "
+                        f"docs/parameter_provenance_register.md")
+    if "immunocompromised_multiplier" in mp:
+        report.warn(_CONFIG_YAML, "PROVENANCE",
+                    "multi_pathogen.immunocompromised_multiplier is set but "
+                    "refuted and ignored: it was a susceptibility multiplier on "
+                    "acquisition, the one quantity no source measures. "
+                    "Immunocompromise acts on shedding duration through the "
+                    "pathogen profile's chronic_shedder_fraction and "
+                    "chronic_shedding_duration_days; see "
+                    "docs/parameter_provenance_register.md")
 
 
 def _check_chronic_disease(cfg: dict[str, Any], report: Report) -> None:

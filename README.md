@@ -314,7 +314,6 @@ multi_pathogen:
   profiles_path: "data/pathogens/active_profiles.json"
   enable_coinfection: true
   immunocompromised_fraction: 0.05    # [0,1]
-  immunocompromised_multiplier: 2.0
 ```
 
 Pathogen profiles are defined in JSON files under `data/pathogens/`.

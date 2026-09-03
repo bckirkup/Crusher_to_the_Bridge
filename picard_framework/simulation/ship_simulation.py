@@ -395,9 +395,8 @@ class ShipSimulation:
 
         if self.display:
             from orchestrator_display import print_multi_pathogen
-            imm_mult = self.mp_cfg.get("immunocompromised_multiplier", 2.0)
             print_multi_pathogen(
-                self.pathogen_profiles, set(), self.engine, imm_mult, self.enable_dual_signal,
+                self.pathogen_profiles, set(), self.engine, self.enable_dual_signal,
             )
 
         # Chronic disease assignment

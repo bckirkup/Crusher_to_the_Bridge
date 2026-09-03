@@ -1207,6 +1207,13 @@ def _normalize_profile_units(
 # derived stream stays reproducible from the config seed alone.
 _HOST_GENETICS_SEED_OFFSET = 917
 
+# Same role for the chronic-shedder draws, and a distinct offset so the two
+# fallback streams never coincide.
+_CHRONIC_SHEDDING_SEED_OFFSET = 4409
+
+# Rejection budget for the truncated chronic-duration draw before clipping.
+_CHRONIC_DURATION_MAX_DRAWS = 32
+
 
 def _host_genetics_rng(
     rng: np.random.Generator, cfg: dict[str, Any],
@@ -1225,6 +1232,84 @@ def _host_genetics_rng(
     return np.random.default_rng(
         int(cfg.get("random_seed", 0) or 0) + _HOST_GENETICS_SEED_OFFSET,
     )
+
+
+def _chronic_shedding_rng(
+    rng: np.random.Generator, cfg: dict[str, Any],
+) -> np.random.Generator:
+    """Return an independent stream for chronic-shedder assignment.
+
+    A sibling of the host-genetics stream rather than a reuse of it: each
+    ``spawn`` yields its own child sequence, so adding this draw consumes
+    nothing from the shared stream and leaves every downstream stochastic
+    decision where it was.
+    """
+    seed_seq = getattr(rng.bit_generator, "seed_seq", None)
+    if seed_seq is not None:
+        return np.random.default_rng(seed_seq.spawn(1)[0])
+    return np.random.default_rng(
+        int(cfg.get("random_seed", 0) or 0) + _CHRONIC_SHEDDING_SEED_OFFSET,
+    )
+
+
+def _chronic_shedding_spec(
+    profile: dict[str, Any],
+) -> tuple[float, dict[str, Any]] | None:
+    """Return (chronic fraction, duration spec) when the profile carries both."""
+    frac = profile.get("chronic_shedder_fraction")
+    spec = profile.get("chronic_shedding_duration_days")
+    if frac is None or not isinstance(spec, dict):
+        return None
+    return float(frac), spec
+
+
+def _draw_chronic_duration(
+    spec: dict[str, Any], chronic_rng: np.random.Generator,
+) -> float:
+    """Draw one chronic shedding duration in days.
+
+    Lognormal about the reported median with the declared ``sigma_log``, drawn
+    again while it falls outside the reported ``[min, max]`` and clipped into
+    it if the attempt budget runs out, so the value is always inside the
+    measured range. The distribution is a declared assumption over van Beek
+    2017's measured median and range, not a measured shape.
+    """
+    median = float(spec.get("median", 0.0))
+    if median <= 0.0:
+        return 0.0
+    sigma = float(spec.get("sigma_log", 0.0))
+    low = float(spec.get("min", median))
+    high = float(spec.get("max", median))
+    days = median
+    for _ in range(_CHRONIC_DURATION_MAX_DRAWS):
+        days = float(chronic_rng.lognormal(mean=np.log(median), sigma=sigma))
+        if low <= days <= high:
+            return days
+    return min(max(days, low), high)
+
+
+def _assign_chronic_shedding(
+    agent: Any,
+    pathogen_profiles: dict[str, dict[str, Any]],
+    chronic_rng: np.random.Generator,
+) -> None:
+    """Draw chronic-shedder status and duration for one immunocompromised host.
+
+    Assigned at initialization rather than at infection: whether a host would
+    become a chronic shedder if infected is a host property, it keeps the epoch
+    loop free of new draws, and for a Bernoulli independent of infection it is
+    distributionally identical to van Beek 2017's conditional-on-infection
+    framing. A profile carrying neither key has no chronic mechanism at all.
+    """
+    for pid, prof in pathogen_profiles.items():
+        spec = _chronic_shedding_spec(prof)
+        if spec is None:
+            continue
+        frac, duration_spec = spec
+        if chronic_rng.random() < frac:
+            agent.set_chronic_shedding_duration(
+                pid, _draw_chronic_duration(duration_spec, chronic_rng),
+            )
 
 
 def _resolve_secretor_status(profile: dict[str, Any]) -> tuple[float, float]:
@@ -1266,10 +1351,10 @@ def init_multi_pathogen(
         engine.initialize_pathogen(pid)
 
     imm_frac = mp_cfg.get("immunocompromised_fraction", 0.05)
-    imm_mult = mp_cfg.get("immunocompromised_multiplier", 2.0)
     n_immunocompromised = int(len(engine.agents) * imm_frac)
     immunocompromised_ids: set[int] = set()
     genetics_rng = _host_genetics_rng(rng, cfg)
+    chronic_rng = _chronic_shedding_rng(rng, cfg)
 
     for agent in engine.agents:
         for pid, prof in pathogen_profiles.items():
@@ -1298,14 +1383,13 @@ def init_multi_pathogen(
         for aid in chosen:
             immunocompromised_ids.add(int(aid))
             agent = engine.agents[int(aid)]
-            # Also host biology, not only a susceptibility multiplier: an
-            # immunosuppressed host incubates longer as well as infecting easier.
+            # Host biology, and specifically not acquisition: no source
+            # measures the relative risk of acquiring norovirus while
+            # immunocompromised, while duration is measured directly. The flag
+            # lengthens incubation, drives the wearable path, and selects the
+            # hosts eligible for chronic shedding below.
             agent.immunocompromised = True
-            for pid in pathogen_profiles:
-                # Multiplicative so base susceptibility, secretor status and
-                # immunocompromise compose. A zero multiplier stays zero, so no
-                # guard is needed to preserve absolute nonsusceptibility.
-                agent.susceptibility_multiplier[pid] *= imm_mult
+            _assign_chronic_shedding(agent, pathogen_profiles, chronic_rng)
 
     for pid, prof in pathogen_profiles.items():
         intro_epoch = prof.get("introduction_epoch", 0)
