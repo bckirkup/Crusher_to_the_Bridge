@@ -123,13 +123,45 @@ is not measured**. That is why it enters as an axis and not as a value.
 [`bounded_screen_results.md`](bounded_screen_results.md) is invalidated a second
 time, and by this change.** The screen's seventh factor was
 `innate_nonsusceptible_fraction` over [0.00, 0.16]; it is now
-`secretor_negative_relative_susceptibility` over [0.05, 0.50], a different
-factor over a different interval, so every elementary effect in that document is
-stale. The re-run on the recut `surface_decay_per_day` box was **killed part-way
+`secretor_negative_relative_susceptibility`, now over [0.04, 0.83] (widened in
+tranche 6, below) — a different factor over a different interval, so every
+elementary effect in that document is stale. The re-run on the recut `surface_decay_per_day` box was **killed part-way
 and never completed**: only the 20-seed noise floor at the new box centre exists,
 and there is no completed screen on either the recut box or the substituted
 factor. Nothing may be ranked from that document until a screen is run on the
 current box.
+
+**The “≈3.7× GI-vs-GII infectivity per genome copy” comparison is withdrawn as a
+unit error (tranche 6 §3).** It was published in tranche 3 and repeated when
+Wave 3 was proposed. Reproducing Teunis et al. 2020's single-copy GII risk of
+0.076 inside the shipped beta-Poisson family requires α = 2.85, which implies an
+ID50 of ≈10 genome copies — five orders of magnitude below every challenge
+measurement. Those fits model *aggregation* and report risk per aggregate, not
+per disaggregated qPCR copy, so the two figures were never in the same unit and
+no genogroup infectivity ratio can be read off them.
+
+**The norovirus dose-response is no longer blocked by mechanism: it is declared
+and swept (tranche 6 §2; register §3.1).** The shipped α = 0.111 / β = 32.81 is
+the disaggregated GI.1 challenge arm of Teunis et al. 2008, and it is declared as
+that rather than refitted. Mapped onto α at fixed β = 32.81, the human GII
+evidence gives α ∈ [0.072, 0.161] — Rouphael 2022 GII.2 challenge ID50 5.1×10⁵
+→ 0.072; Guix 2020 GII outbreak illness ID50 2,934 → 0.154, a lower bound on
+infection α; Ramesh 2020 gnotobiotic-pig GII.4 → 0.149–0.161 as Grade C
+corroboration — and 0.111 lies inside it, within 3% of its geometric centre
+(0.108). No profile value changed, and β does not become an independent factor:
+family, aggregation assumption and dose unit are one categorical choice (Liu et
+al. 2026).
+
+**The secretor screen interval widens to [0.04, 0.83], which invalidates the
+pending Morris design again (tranche 6 §4).** Kambhampati 2015's pooled
+secretor:non-secretor odds ratios are genotype-specific — 9.9 (3.9–24.8) for
+GII.4 and 2.2 (1.2–4.2) for GII non-4, implying non-secretor relative
+susceptibility 0.10 (0.04–0.26) and 0.45 (0.24–0.83) — and the declared genotype
+mixture GII.4/GII.17/GII.2 straddles both rows, so the width is genotype
+composition rather than measurement error. The adopted 0.20 stays inside the
+interval and is not refuted, and no profile value changed. The screen box moves,
+so the screen re-run that was already outstanding is invalidated a further time;
+task #36 carries it.
 
 **`innate_nonsusceptible_fraction` (history): the sourced interval is 0.00 – 0.16, and
 both the shipped 0.0 and Edison's 0.2 sit outside it.** This entry has been

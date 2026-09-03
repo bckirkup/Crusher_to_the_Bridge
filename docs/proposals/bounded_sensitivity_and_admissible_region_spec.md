@@ -112,11 +112,27 @@ of the identifiability problem we derived for the COVID emission scale, and it
 means α and β must move together as a family choice, never as two continuous
 factors.
 
+**Norovirus dose-axis treatment (added from
+[`../literature/consensus_tranche_6.md`](../literature/consensus_tranche_6.md)
+§2).** Within the shipped disaggregated beta-Poisson row, sweep **α over
+[0.072, 0.161], log10 transform, Grade B**, with **β held at 32.81**. The
+interval is the human GII evidence mapped onto α at fixed β: Rouphael et al.
+2022 (GII.2 challenge, ID50 5.1×10⁵ → α = 0.072), Guix et al. 2020 (GII
+outbreak illness ID50 2,934 → α = 0.154, a *lower* bound on infection α) and
+Ramesh et al. 2020 (gnotobiotic-pig GII.4 → α = 0.149–0.161, Grade C
+corroboration). The shipped α = 0.111 is the disaggregated GI.1 challenge arm of
+Teunis et al. 2008; it lies inside the interval, within 3% of its geometric
+centre (0.108), so it is declared rather than refitted. **β is not a separate
+continuous factor**: family, aggregation assumption and dose unit are a single
+categorical choice (Liu et al. 2026), so β moves only when the family row above
+changes.
+
 ### 3.2 Continuous factors
 
 | Factor | Transform | Interval | Grade | Basis |
 |---|---|---|---|---|
-| `innate_nonsusceptible_fraction` | linear | 0.00 – 0.16 | B | See §3.3. The arm is GII (declared in `name`, `genotypes` and `incubation.notes`), so the GII partial-susceptibility ceiling governs and the screen's box was correct |
+| `dose_response.alpha` (β fixed at 32.81) | log10 | 0.072 – 0.161 | B | See §3.1: the human GII evidence mapped onto α at fixed β (Rouphael 2022, Guix 2020, Ramesh 2020). β is not a separate factor — family, aggregation assumption and dose unit are one categorical choice (Liu 2026) |
+| `secretor_negative_relative_susceptibility` (replaced `innate_nonsusceptible_fraction` in Wave 1) | linear | 0.04 – 0.83 | B | **Genotype-specific**: Kambhampati 2015 pooled secretor:non-secretor ORs 9.9 (3.9–24.8) for GII.4 and 2.2 (1.2–4.2) for GII non-4 → non-secretor relative susceptibility 0.10 (0.04–0.26) and 0.45 (0.24–0.83); the declared mixture GII.4/GII.17/GII.2 straddles both rows, so the width is *genotype composition*, not measurement error (tranche 6 §4). §3.3 records the GII partial-susceptibility mechanism this replaced |
 | `contact_transfer_fraction` | linear | 0.06 – 0.50 | B | Anderson et al. 2021, *AEM* 87(22): 360 fingerpad↔surface transfer events, 20 volunteers, MS2 (non-enveloped surrogate) mean 0.26, Phi6 0.17; surface type and transfer direction both significant, so the spread is the interval and a single number cannot be right for both directions |
 | Emesis titre (GEC/mL) | log10 | Kirby 2016 measured range | B | Already sourced in-tree; carry the study spread, not the point |
 | Emesis volume (mL) | log10 | 50 – 800 | B | Tung-Thompson et al. 2015, already bounded in-tree |

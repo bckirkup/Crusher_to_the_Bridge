@@ -85,18 +85,23 @@ class Factor:
 # explicitly declared plausible range, never a fitted width.
 NOROVIRUS_FACTORS: tuple[Factor, ...] = (
     # secretor_negative_relative_susceptibility: susceptibility of a
-    # secretor-negative (FUT2 non-secretor) host relative to a secretor. Low
-    # end below the Teunis 2020 GII point estimate (0.015 / 0.076 = 0.197);
-    # high end from Rouphael's GII.2 challenge, 4 of 8 secretor-negatives ill
-    # at top dose. Grade B: measured for GII, not in this setting.
+    # secretor-negative (FUT2 non-secretor) host relative to a secretor. The
+    # interval is genotype-specific, from Kambhampati et al. 2015's pooled
+    # secretor:non-secretor odds ratios -- 9.9 (3.9-24.8) for GII.4 and
+    # 2.2 (1.2-4.2) for GII non-4, i.e. relative susceptibility 0.10
+    # (0.04-0.26) and 0.45 (0.24-0.83). The declared genotype mixture
+    # GII.4 / GII.17 / GII.2 straddles both rows, so the box spans both:
+    # [0.04, 0.83]. Its width is genotype composition, not measurement error
+    # (docs/literature/consensus_tranche_6.md section 4). Grade B: measured for
+    # GII in outbreak and challenge populations, not in this setting.
     # secretor_negative_fraction stays fixed at 0.20 and out of the box: it is
     # a demographic input (FUT2 se428 homozygote prevalence), not a biological
     # free parameter of the transmission model.
     Factor(
         "secretor_negative_relative_susceptibility",
         ("secretor_negative_relative_susceptibility",),
-        0.05,
-        0.50,
+        0.04,
+        0.83,
         "linear",
         "B",
     ),
