@@ -21,11 +21,12 @@ defensibility claim can rest on.
 
 ## 1. Two axes, because one was hiding half the problem
 
-Provenance class alone was the wrong instrument. Nine quantities in §3 have a
+Provenance class alone was the wrong instrument. Seven quantities in §3 have a
 citation and *still cannot be adopted*, because the field they would go into
-cannot express what the paper measured. Classifying those as "sourced" would be
-the most dangerous entry in the table: it would look like provenance and encode
-something the evidence rejects.
+cannot express what the paper measured — nine before Wave 1 resolved two of the
+field defects. Classifying those as "sourced" would be the most dangerous entry
+in the table: it would look like provenance and encode something the evidence
+rejects.
 
 **Axis 1 — provenance class.**
 
