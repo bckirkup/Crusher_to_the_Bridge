@@ -101,6 +101,13 @@
       },
       "recovery_day": 3,
       "shedding_duration_days": 15,
+      "chronic_shedder_fraction": 0.228,
+      "chronic_shedding_duration_days": {
+        "median": 218,
+        "min": 32,
+        "max": 1164,
+        "sigma_log": 1.09
+      },
       "incubation": {
         "distribution": "lognormal",
         "median_days": 1.2,

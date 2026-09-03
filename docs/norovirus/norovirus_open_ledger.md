@@ -536,6 +536,39 @@ Roughly in dependency order.
     limitation is unchanged. See
     [`../literature/consensus_tranche_7.md`](../literature/consensus_tranche_7.md).
 
+13. **Resolved: immunocompromise acted on acquisition, the one quantity nothing
+    measures, and not on duration, which is measured directly.** #45 deleted
+    `immunocompromised_multiplier` = 2.0 from the tree — no source measures the
+    relative risk of *acquiring* norovirus while immunocompromised, and Green
+    2014 states the persistence mechanisms are unknown — and put the measured
+    quantities where they were measured, as pathogen-profile keys on
+    `norwalk_gi` only: `chronic_shedder_fraction` **0.228** (van Beek 2017,
+    *Clin Microbiol Infect* 23(4):265 — 23 of 101 infected solid-organ
+    recipients) and `chronic_shedding_duration_days` with median **218 days**,
+    range **32–1,164** and a declared σ_log of **1.09**. The σ is a
+    distributional assumption of ours, not van Beek's: treating the reported
+    range as an approximate 90% interval, ln(1164/218) = 1.674 and
+    ln(218/32) = 1.919, mean 1.797, ÷1.645 → 1.09. Davis 2020 confirms
+    *infectious* virus (HIE) rather than RNA alone in 20 chronic paediatric
+    cases (37 to >418 days), and van Beek 2017 (*J Infect Dis* 216(9):1132)
+    supports at mean 352 days (76–716). The fraction is conditional on being
+    both immunocompromised and infected; the duration is drawn once per host per
+    profile at initialization on a derived RNG stream, truncated to
+    [32, 1164], and preferred over the profile's `shedding_duration_days`
+    through the infection record by the tranche 8 clearance seam, so a chronic
+    host's illness still clears at onset + `recovery_day` while it keeps
+    shedding past any voyage length. Deliberately **not** done here: no chronic
+    *magnitude* multiplier (Chaimongkol 2024's 10⁴–10¹¹ copies/g is 7 logs wide
+    and already spanned by the `shedding_variance_log10` per-host draw, with no
+    point value to adopt), no severity multiplier (reported but unquantified),
+    and no boarding-prevalence importation channel — that is the
+    quantitatively interesting half, and no chronic-shedder point prevalence is
+    licensed yet
+    ([`../literature/consensus_tranche_7.md`](../literature/consensus_tranche_7.md)
+    §6). **This move is downward on every arm**: 5% of hosts lose a 2×
+    susceptibility multiplier, and the chronic duration only lengthens shedding
+    in the small immunocompromised-and-infected subset.
+
 ## 5. Held fixed by assumption
 
 Live Grade C liabilities. Any of these could move the reported rate; the system
@@ -560,20 +593,20 @@ is over-determined only *given* them. Full list in §10 of the history document.
   fitting. See [`../literature/consensus_tranche_4.md`](../literature/consensus_tranche_4.md)
   §1d.
 - Confinement attenuation factor 0.05.
-- `immunocompromised_multiplier` = 2.0 and `immunocompromised_fraction` = 0.05,
-  both defaulted in the multi-pathogen config block rather than in a profile.
-  The prevalence is bounded by measurement — **[0.02, 0.074]** (Lopez-Gigosos
-  2020's 2.0% of 1,196 travel-clinic travellers; NHIS 2.7% in 2013 rising to
-  7.4% in 2022), a width that is era and population rather than uncertainty. The
-  multiplier is **withdrawn as a quantity**: no source measures the relative
-  risk of *acquiring* norovirus while immunocompromised, and what is measured is
-  duration and infectiousness (van Beek 2017: 22.8% of infected transplant
-  recipients chronic, median 218 days, range 32–1,164; Davis 2020 confirms
-  infectious virus, not RNA). Wave 1 made it bite harder by composing
-  multiplicatively instead of overwriting, so the 2.0 now genuinely doubles
-  acquisition risk on the one axis the literature does not support. Tranche 8
-  adds the shedding clock needed to carry the duration evidence; #45 is now
-  unblocked to move immunocompromise onto duration rather than acquisition. See
+- `immunocompromised_fraction` = 0.05, defaulted in the multi-pathogen config
+  block rather than in a profile, is now **bounded by measurement**:
+  **[0.02, 0.074]**, Grade B (Lopez-Gigosos 2020's 2.0% of 1,196 travel-clinic
+  travellers; NHIS 2.7% in 2013 rising to 7.4% in 2022), a width that is era and
+  population rather than uncertainty. The shipped 0.05 is unchanged and lies
+  inside the interval, the sources sit at the definition, and a value outside
+  the interval draws an advisory sanity-checker warning. The companion key
+  `immunocompromised_multiplier` = 2.0 is **withdrawn and deleted from the
+  tree** (#45): a config still setting it is warned about rather than silently
+  ignored, and the measured quantities enter as duration on the profile — see
+  §4 item 13.
+  Remaining Grade C liability: `chronic_shedding_duration_days.sigma_log` =
+  1.09 is our declared lognormal shape over van Beek's measured median and
+  range, not a measured dispersion. See
   [`../literature/consensus_tranche_7.md`](../literature/consensus_tranche_7.md)
   §4–§5.
 - Secretor-status non-susceptibility. Not a held-fixed 20% ceiling: the profile

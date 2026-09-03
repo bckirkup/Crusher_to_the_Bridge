@@ -378,6 +378,9 @@ class KorkinAgent:
         # Chronic disease extensions
         "chronic_disease_ids", "chronic_pathogen_mods",
         "chronic_wearable_response_scale",
+        # Chronic norovirus shedding: per-pathogen duration for hosts drawn as
+        # chronic shedders at initialization
+        "chronic_shedding_duration_by_pathogen",
         "shedding_multiplier", "cabin_mate_ids", "ashore",
         # Variant surveillance: genotype standing immunity was raised against
         "prior_genotypes", "immune_history",
@@ -464,6 +467,10 @@ class KorkinAgent:
         self.chronic_pathogen_mods: dict[str, dict[str, float]] = {}
         # Aggregate wearable infection response scale from chronic diseases
         self.chronic_wearable_response_scale: float = 1.0
+        # Chronic shedding duration in days from onset, per pathogen, assigned
+        # at initialization to immunocompromised hosts drawn as chronic
+        # shedders. Empty for every other host.
+        self.chronic_shedding_duration_by_pathogen: dict[str, float] = {}
 
         # Legacy single-pathogen shedding host factor (also mirrored on first infection)
         self.shedding_multiplier: float = 1.0
@@ -710,6 +717,12 @@ class KorkinAgent:
             "infection_epoch": epoch,
             "shedding_multiplier": shedding_mult,
         }
+        # A chronic shedder carries its own infectious period, so the record
+        # states the duration this host will shed for and the clearance seam
+        # reads the record before the profile.
+        chronic_days = self.get_chronic_shedding_duration(pathogen_id)
+        if chronic_days is not None:
+            self.infections[pathogen_id]["shedding_duration_days"] = chronic_days
         if strain_id is not None:
             self._write_strain(pathogen_id, strain_id, strain_phenotype)
         # The agent-level fields follow the records: any episode that starts
@@ -1193,6 +1206,21 @@ class KorkinAgent:
             pathogen_id, self.chronic_pathogen_mods.get("default", {}),
         )
         return float(mods.get("severity_multiplier", 1.0))
+
+    def set_chronic_shedding_duration(
+        self, pathogen_id: str, days: float,
+    ) -> None:
+        """Record this host's chronic shedding duration in days from onset."""
+        self.chronic_shedding_duration_by_pathogen[pathogen_id] = float(days)
+
+    def get_chronic_shedding_duration(self, pathogen_id: str) -> float | None:
+        """Return the host's chronic shedding duration, or None if not chronic.
+
+        A chronic shedder's infectious period is a host property assigned at
+        initialization, so it overrides the profile's population shedding
+        duration for this host alone.
+        """
+        return self.chronic_shedding_duration_by_pathogen.get(pathogen_id)
 
     @property
     def has_chronic_disease(self) -> bool:

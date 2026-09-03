@@ -479,14 +479,18 @@ multi_pathogen:
   profiles_path: "data/pathogens/active_profiles.json"
   enable_coinfection: true
   immunocompromised_fraction: 0.05    # [0,1]
-  immunocompromised_multiplier: 2.0
 ```
 
 - `enable_coinfection` — When `true`, agents can carry multiple
   pathogens simultaneously.  Each pathogen maintains independent SIR
   state and shedding curves.
-- `immunocompromised_fraction` — Fraction of agents with elevated
-  susceptibility (dose scaling multiplied by `immunocompromised_multiplier`).
+- `immunocompromised_fraction` — Fraction of agents flagged
+  immunocompromised. Sourced interval [0.02, 0.074]. The flag lengthens
+  incubation, drives the wearable path, and makes a host eligible for
+  chronic shedding (`chronic_shedder_fraction` and
+  `chronic_shedding_duration_days` on the pathogen profile). It does **not**
+  scale acquisition: `immunocompromised_multiplier` is withdrawn and is not
+  read.
 
 ### 3.10 Microflora Disruption
 

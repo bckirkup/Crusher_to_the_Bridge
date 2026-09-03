@@ -457,6 +457,7 @@ def _draw_symptom_severity(
 def _clearance_days(
     agent: Any,
     pid: str,
+    inf: dict[str, Any],
     prof: dict[str, Any],
     onset_day: float,
 ) -> tuple[float, float]:
@@ -466,12 +467,19 @@ def _clearance_days(
     infectious period, and a profile that omits it says the two coincide. The
     shedding threshold is never earlier than the illness one, so a host whose
     illness is extended keeps shedding to the end of that illness.
+
+    The infection record is read before the profile, because a chronic shedder
+    carries a host-specific infectious period stamped onto the record at
+    infection.
     """
     recovery_day = agent.get_chronic_recovery_day(
         pid, prof.get("recovery_day", 3),
     )
     shedding_duration = float(
-        prof.get("shedding_duration_days", recovery_day),
+        inf.get(
+            "shedding_duration_days",
+            prof.get("shedding_duration_days", recovery_day),
+        ),
     )
     return (
         onset_day + recovery_day,
@@ -510,7 +518,7 @@ def _advance_agent_pathogen_infections(
             _draw_symptom_onset(agent, pid, inf, prof, rng, epoch)
 
         illness_clearance_day, shedding_clearance_day = _clearance_days(
-            agent, pid, prof, onset_day,
+            agent, pid, inf, prof, onset_day,
         )
         if (
             days_infected >= illness_clearance_day

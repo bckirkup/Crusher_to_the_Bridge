@@ -665,6 +665,24 @@
           "minimum": 0,
           "description": "Infectious/shedding period in days from symptom onset, after which the infection clears. This is NOT the illness duration: recovery_day remains the illness duration from onset, and shedding continues past it whenever this field is larger. Absent means the shedding period equals recovery_day."
         },
+        "chronic_shedder_fraction": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Probability that a host who is both immunocompromised and infected becomes a chronic shedder. Conditional on both, not a population fraction. van Beek 2017 (Clin Microbiol Infect 23(4):265): 23 of 101 infected solid-organ recipients = 0.228. Absent means this pathogen has no chronic-shedding mechanism."
+        },
+        "chronic_shedding_duration_days": {
+          "type": "object",
+          "description": "Chronic shedding duration in days from onset for hosts drawn as chronic shedders, overriding shedding_duration_days for those hosts. median/min/max are van Beek 2017's measured median and range (218 days, 32-1,164), Grade B. sigma_log is a declared distributional assumption, not a measured figure: treating the reported range as an approximate 90% interval, ln(1164/218) = 1.674 and ln(218/32) = 1.919, mean 1.797, divided by 1.645 gives 1.09. Draws are lognormal about the median and truncated to [min, max].",
+          "required": ["median", "min", "max", "sigma_log"],
+          "properties": {
+            "median": {"type": "number", "minimum": 0},
+            "min": {"type": "number", "minimum": 0},
+            "max": {"type": "number", "minimum": 0},
+            "sigma_log": {"type": "number", "minimum": 0}
+          },
+          "additionalProperties": false
+        },
         "symptom_onset_day": {"type": "number", "minimum": 0},
         "incubation": {"$ref": "#/$defs/Incubation"},
         "airborne_emission_fraction": {

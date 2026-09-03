@@ -377,9 +377,14 @@ targeted_pcr:
 multi_pathogen:
   profiles_path: "data/pathogens/active_profiles.json"
   enable_coinfection: true            # allow agents to carry multiple pathogens
-  # Default susceptibility multiplier for immunocompromised agents
-  immunocompromised_fraction: 0.05    # fraction of agents with elevated susceptibility
-  immunocompromised_multiplier: 2.0   # dose scaling for immunocompromised
+  # Fraction of agents who are immunosuppressed. Self-reported immunosuppression
+  # in adults: 2.7% (Harpaz 2016, NHIS 2013), 6.6% in 2021 and 7.4% in 2022
+  # (Martinson 2024), and 24 of 1,196 travel-clinic international travellers =
+  # 2.0% (Lopez-Gigosos 2020) → interval [0.02, 0.074], Grade B. The width is
+  # era and population, not uncertainty. Immunocompromise acts on shedding
+  # duration (see chronic_shedder_fraction in the pathogen profiles), never on
+  # acquisition: immunocompromised_multiplier is withdrawn and is not read.
+  immunocompromised_fraction: 0.05
 
 # ── Variant Surveillance (heritable strain tracking) ─────────
 # Off by default: with enabled=false no strain is minted and no RNG draw
