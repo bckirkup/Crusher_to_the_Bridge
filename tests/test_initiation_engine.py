@@ -5,7 +5,7 @@ Sensitivity and invariants rather than goldens: each configured coordinate is
 asserted to move the one thing it owns and to leave the others where they
 were, every drawn infection age is asserted to lie inside the window its state
 defines, and the length-bias claim of the spec's §4 is asserted directly
-against the profile's own chronic share.
+against the chronic share of the population the cohort is drawn from.
 """
 
 from __future__ import annotations
@@ -34,16 +34,25 @@ from engines.initiation import (
     resolve_initiation_plan,
 )
 from engines.sim_clock import HOURS, SimClock
-from orchestrator_epoch import _draw_symptom_onset
-from orchestrator_init import _run_initiation, init_multi_pathogen
+from orchestrator_epoch import (
+    _draw_symptom_onset,
+    step_mid_cruise_introductions,
+)
+from orchestrator_init import (
+    _run_initiation,
+    _seed_legacy_infections,
+    init_multi_pathogen,
+)
 
 PATHOGEN = "norwalk_gi"
+OTHER_PATHOGEN = "sars_cov2_resp"
 ZONE = "Cabin_A"
 ONSET_DAYS = 1.0
 RECOVERY_DAYS = 3
 SHEDDING_DAYS = 15.0
 PRESYMPTOMATIC_DAYS = 0.5
 CHRONIC_FRACTION = 0.228
+IMMUNOCOMPROMISED_FRACTION = 0.05
 CHRONIC_SPEC = {
     "median": 218.0, "min": 32.0, "max": 1164.0, "sigma_log": 1.09,
 }
@@ -175,6 +184,31 @@ def _mean_composition(spec: BoardingSpec) -> dict[str, float]:
     return {state: count / drawn for state, count in totals.items()}
 
 
+def _stamp_chronic(engine: _FakeEngine, rng: np.random.Generator) -> int:
+    """Emulate initialization: chronic durations on immunocompromised hosts.
+
+    ``chronic_shedder_fraction`` is a share of immunocompromised hosts, so the
+    population's chronic share is the product of the two fractions and not the
+    profile field on its own.
+    """
+    stamped = 0
+    for agent in engine.agents:
+        immunocompromised = rng.random() < IMMUNOCOMPROMISED_FRACTION
+        if immunocompromised and rng.random() < CHRONIC_FRACTION:
+            agent.set_chronic_shedding_duration(
+                PATHOGEN, float(CHRONIC_SPEC["median"]),
+            )
+            stamped += 1
+    return stamped
+
+
+def _infected_ids(engine: _FakeEngine) -> set[int]:
+    return {
+        agent.agent_id for agent in engine.agents
+        if PATHOGEN in agent.infections
+    }
+
+
 class TestSensitivity:
     def test_passenger_prevalence_moves_the_passenger_count(self) -> None:
         means = [
@@ -255,29 +289,65 @@ class TestSensitivity:
 
 
 class TestLengthBias:
-    def test_chronic_share_among_boarders_exceeds_the_incidence_share(
+    def test_chronic_share_among_boarders_exceeds_the_population_share(
         self,
     ) -> None:
         """The §4 claim: a prevalent sample over-represents long episodes.
 
-        The profile's chronic share is a share of *infections*; a 218-day
-        median episode occupies about 14.5 times as much of the prevalent pool
-        as a 15-day one, so the share among boarders has to be higher.
+        The comparison is against the chronic share of the *population*,
+        which is ``immunocompromised_fraction`` times
+        ``chronic_shedder_fraction``, since the profile field is a share of
+        immunocompromised hosts. A 218-day episode occupies about fifteen
+        times as much of the prevalent pool as a 15-day one, so the share
+        among boarders is higher; the band is broad because the prediction is
+        a consequence of the weighting, not a golden.
         """
         chronic = 0
-        total = 0
-        for seed in SEEDS:
-            engine, _, _ = _draw(_spec(passenger=0.5, crew=0.5), seed)
+        boarders = 0
+        population_chronic = 0
+        population = 0
+        for seed in range(60):
+            engine = _FakeEngine()
+            rng = np.random.default_rng(1000 + seed)
+            population_chronic += _stamp_chronic(engine, rng)
+            population += len(engine.agents)
+            draw_boarding_cohort(
+                _spec(passenger=0.02, crew=0.02), engine.agents,
+                _profile(), engine.clock, rng,
+            )
             for agent in engine.agents:
                 infection = agent.infections.get(PATHOGEN)
                 if infection is None:
                     continue
-                total += 1
+                boarders += 1
                 if infection["shedding_duration_days"] > SHEDDING_DAYS:
                     chronic += 1
-        assert total > 100
-        assert chronic / total > CHRONIC_FRACTION
-        assert chronic / total > 0.5
+        population_share = population_chronic / population
+        boarder_share = chronic / boarders
+        assert boarders > 200
+        assert boarder_share > population_share
+        assert boarder_share > 0.05
+        assert boarder_share < 0.35
+
+    def test_no_boarding_host_is_given_a_re_drawn_duration(self) -> None:
+        """Duration is a host property: unstamped hosts carry the profile's."""
+        engine = _FakeEngine()
+        rng = np.random.default_rng(77)
+        stamped = {
+            agent.agent_id for agent in engine.agents
+            if agent.get_chronic_shedding_duration(PATHOGEN) is not None
+        }
+        assert stamped == set()
+        draw_boarding_cohort(
+            _spec(passenger=0.3, crew=0.3), engine.agents, _profile(),
+            engine.clock, rng,
+        )
+        durations = [
+            agent.infections[PATHOGEN]["shedding_duration_days"]
+            for agent in engine.agents if PATHOGEN in agent.infections
+        ]
+        assert durations
+        assert durations == pytest.approx([SHEDDING_DAYS] * len(durations))
 
     def test_a_profile_without_chronic_keys_boards_one_duration(self) -> None:
         engine, _, _ = _draw(
@@ -340,16 +410,30 @@ class TestInvariants:
         )
 
     def test_gate_off_consumes_no_draws_from_the_parent_stream(self) -> None:
-        engine = _FakeEngine()
-        profiles = {PATHOGEN: _profile()}
+        """A disabled gate takes exactly the draws the legacy path takes.
+
+        The comparison is against a legacy run on the same seed rather than
+        against an untouched stream: a disabled block owns no pathogen, and
+        owning none is not a reason to drop the profile's own index case. So
+        the parent stream has to land in the same place and the same hosts
+        have to be seeded.
+        """
         cfg = {"initiation": {"boarding": {"enabled": False}}}
-        plan = resolve_initiation_plan(cfg, profiles)
-        rng = np.random.default_rng(7)
-        _run_initiation(engine, profiles, cfg, plan, rng)
-        assert rng.random() == pytest.approx(
-            np.random.default_rng(7).random(),
+        gated_engine = _FakeEngine()
+        gated_rng = np.random.default_rng(7)
+        _run_initiation(
+            gated_engine, {PATHOGEN: _profile()}, cfg,
+            resolve_initiation_plan(cfg, {PATHOGEN: _profile()}), gated_rng,
         )
-        assert not any(PATHOGEN in a.infections for a in engine.agents)
+        legacy_engine = _FakeEngine()
+        legacy_rng = np.random.default_rng(7)
+        _seed_legacy_infections(
+            legacy_engine, {PATHOGEN: _profile()}, legacy_rng,
+        )
+        gated = _infected_ids(gated_engine)
+        assert gated_rng.random() == pytest.approx(legacy_rng.random())
+        assert gated == _infected_ids(legacy_engine)
+        assert gated
 
     def test_enabling_boarding_leaves_the_earlier_streams_in_place(
         self,
@@ -651,6 +735,67 @@ class TestManifest:
 
 
 class TestInitWiring:
+    def test_an_unowned_pathogen_keeps_its_epoch_zero_index_case(self) -> None:
+        engine = _FakeEngine()
+        profiles = {
+            PATHOGEN: _profile(),
+            OTHER_PATHOGEN: _profile(
+                introduction_epoch=0, initial_infected=2,
+            ),
+        }
+        init_multi_pathogen(
+            engine, profiles, _cfg(), np.random.default_rng(31),
+        )
+        seeded = [
+            agent for agent in engine.agents
+            if OTHER_PATHOGEN in agent.infections
+        ]
+        assert len(seeded) == 2
+
+    def test_an_unowned_pathogen_still_introduces_mid_cruise(self) -> None:
+        engine = _FakeEngine()
+        profiles = {
+            PATHOGEN: _profile(),
+            OTHER_PATHOGEN: _profile(
+                introduction_epoch=6, initial_infected=1,
+            ),
+        }
+        init_multi_pathogen(
+            engine, profiles, _cfg(), np.random.default_rng(32),
+        )
+        assert not any(
+            OTHER_PATHOGEN in agent.infections for agent in engine.agents
+        )
+        step_mid_cruise_introductions(
+            6, engine, profiles, np.random.default_rng(33),
+        )
+        introduced = [
+            agent for agent in engine.agents
+            if OTHER_PATHOGEN in agent.infections
+        ]
+        assert len(introduced) == 1
+
+    def test_a_pathogen_initiation_owns_is_not_introduced_twice(self) -> None:
+        engine = _FakeEngine()
+        profiles = {PATHOGEN: _profile(introduction_epoch=6)}
+        init_multi_pathogen(
+            engine, profiles, _cfg(passenger=0.1, crew=0.1),
+            np.random.default_rng(34),
+        )
+        boarded = sum(
+            engine.initiation_manifest["boarding"][PATHOGEN][
+                "drawn_by_role"
+            ].values(),
+        )
+        step_mid_cruise_introductions(
+            6, engine, profiles, np.random.default_rng(35),
+        )
+        infected = [
+            agent for agent in engine.agents if PATHOGEN in agent.infections
+        ]
+        assert boarded > 0
+        assert len(infected) == boarded
+
     def test_a_boarding_run_leaves_no_fiat_index_case(self) -> None:
         engine, _ = _init_run(_cfg(passenger=0.2, crew=0.2))
         manifest = engine.initiation_manifest

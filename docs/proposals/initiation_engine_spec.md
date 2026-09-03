@@ -154,8 +154,10 @@ swept axis of §5; the age is then conditional on it, and the age needs no
 distribution of its own — tranche 8's `shedding_duration_days` and #45's
 per-host chronic stretch already supply one:
 
-1. draw the host's own shedding duration `D_i` from the profile exactly as an
-   infection acquired aboard would;
+1. read the host's own shedding duration `D_i` — its stamped chronic stretch
+   if it has one, the profile's `shedding_duration_days` otherwise — and
+   select *which* eligible hosts board with probability proportional to that
+   duration;
 2. draw the boarding state from `state_split` — never-symptomatic,
    pre-symptomatic, or convalescent;
 3. draw infection age `a` uniformly over the window that state occupies within
@@ -174,13 +176,24 @@ sample. Rejection-sampling on "not symptomatic at boarding" would still be
 needed to match the measurement's inclusion criterion, and the two mechanisms
 would then be fighting over the same quantity.
 
-Step 1 does something the deterministic count cannot: because prevalence is
-length-biased, a host with a 218-day duration occupies about 14.5× more of the
-prevalence pool than a 15-day one. The chronic share **among boarders** is
-therefore much higher than the chronic share among infections, and it stays a
-*derived, checkable* quantity — which is the correct consequence of tranche
-10's finding that the chronic shedder's distinguishing feature is duration and
-not prevalence.
+Step 1 does something the deterministic count cannot, and it does it by
+weighting *selection* rather than by drawing a duration. A host's shedding
+duration is already a host property, assigned at initialization, so there is
+nothing to re-draw; what prevalence does is over-represent long episodes in
+proportion to their length, because a host with a 218-day duration sits in the
+boarding population for about 14.5× as much calendar time as a 15-day one and
+is that much likelier to be caught mid-episode. The count still comes from the
+Binomial on the measured prevalence; only the identity of the boarders is
+weighted. The chronic share **among boarders** is therefore higher than the
+chronic share of the population, and it stays a *derived, checkable*
+quantity: with `immunocompromised_fraction` 0.05 and `chronic_shedder_fraction`
+0.228 the population's chronic share is about 1.1%, and weighting a 218-day
+episode against a 15-day one lifts the share among boarders to roughly **14%**
+— the correct consequence of tranche 10's finding that the chronic shedder's
+distinguishing feature is duration and not prevalence. Note which fraction is
+which: `chronic_shedder_fraction` is a share of immunocompromised hosts, and
+applying it to every boarding host would silently promote it to a share of all
+infections.
 
 **A correction to the first version of this document.** It put the
 pre-symptomatic share of imported hosts at 1.2 / (15 − 3) ≈ 10%, using the GII

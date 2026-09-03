@@ -33,7 +33,7 @@ from engines.infection_dynamics_bridge import (
     InfectionStatus,
     KorkinShipEngine,
 )
-from engines.initiation import apply_explicit_seeds
+from engines.initiation import apply_explicit_seeds, initiation_owned_pathogens
 from engines.sim_clock import SimClock, config_epochs_for_hours
 from engines.sim_clock import crossed_day_boundary as _crossed_day_boundary
 from engines.strain_state import ImmuneRecord, StrainRegistry
@@ -248,10 +248,13 @@ def step_mid_cruise_introductions(
     if not pathogen_profiles:
         return
     plan = getattr(engine, "initiation_plan", None)
+    owned: frozenset[str] = frozenset()
     if plan is not None and not plan.legacy:
         apply_explicit_seeds(plan, engine, epoch, rng, pathogen_profiles)
-        return
+        owned = initiation_owned_pathogens(plan)
     for pid, prof in pathogen_profiles.items():
+        if pid in owned:
+            continue
         intro_epoch = prof.get("introduction_epoch", 0)
         if intro_epoch == epoch and epoch > 0:
             n_init = prof.get("initial_infected", 1)

@@ -52,6 +52,7 @@ from engines.initiation import (
     build_initiation_manifest,
     draw_boarding_cohort,
     initiation_configured,
+    initiation_owned_pathogens,
     resolve_initiation_plan,
 )
 from engines.py_contam_bridge import ContamTransportEngine
@@ -1411,7 +1412,11 @@ def _run_initiation(
     plan: InitiationPlan,
     rng: np.random.Generator,
 ) -> None:
-    """Draw the boarding cohort, then apply the epoch-0 explicit seeds."""
+    """Draw the boarding cohort, then apply the epoch-0 explicit seeds.
+
+    Any pathogen initiation does not own keeps its own epoch-0 index case: a
+    norovirus boarding block is not a reason to drop another arm's seeding.
+    """
     reports: list[BoardingReport] = []
     if plan.boarding:
         boarding_rng = _boarding_rng(rng, cfg)
@@ -1428,6 +1433,15 @@ def _run_initiation(
         plan, engine, 0, rng, pathogen_profiles,
     ):
         print(f"  Seeded {record['pathogen']} -> {record['seeded']} hosts")
+    owned = initiation_owned_pathogens(plan)
+    _seed_legacy_infections(
+        engine,
+        {
+            pid: prof for pid, prof in pathogen_profiles.items()
+            if pid not in owned
+        },
+        rng,
+    )
 
 
 def init_multi_pathogen(

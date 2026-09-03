@@ -22,9 +22,6 @@ import numpy as np
 
 from engines.infection_dynamics_bridge import IllnessStatus, InfectionStatus
 
-# Candidate durations generated per boarding host for the length-biased draw.
-_BOARDING_DURATION_CANDIDATES = 64
-
 # Attempts allowed for the state draw before a host is left uninfected, used
 # when the drawn state's window is empty for this host's own duration.
 _STATE_MAX_DRAWS = 8
@@ -267,61 +264,56 @@ def _eligible(agent: Any, pathogen_id: str, role: str | None = None) -> bool:
     )
 
 
-def _duration_candidate(
-    agent: Any,
-    pathogen_id: str,
-    profile: dict[str, Any],
-    rng: np.random.Generator,
-) -> tuple[float, bool]:
-    """One shedding duration this host could be carrying, and whether chronic.
+def _host_duration(
+    agent: Any, pathogen_id: str, profile: dict[str, Any],
+) -> float:
+    """This host's own shedding duration, read as ``_clearance_days`` reads it.
 
-    The profile's own duration mechanism, chronic branch included, rather than
-    a second one: a host already drawn as a chronic shedder at initialization
-    keeps that duration, and otherwise the chronic Bernoulli and its truncated
-    lognormal are the same ones an aboard-acquired infection would run
-    through. ``orchestrator_init`` is imported here rather than at module
-    scope because it imports this module.
+    A host property, not a draw. The chronic-shedder branch has already run at
+    initialization, over the immunocompromised hosts it is defined on, so a
+    chronic host carries its stamped duration here and every other host
+    carries the profile's. Nothing in initiation re-draws it: running the
+    ``chronic_shedder_fraction`` Bernoulli over boarding hosts would promote a
+    share of *immunocompromised hosts* into a share of *all infections*.
     """
-    from orchestrator_init import _chronic_shedding_spec, _draw_chronic_duration
-
     assigned = agent.get_chronic_shedding_duration(pathogen_id)
     if assigned is not None:
-        return float(assigned), True
-    spec = _chronic_shedding_spec(profile)
-    if spec is not None:
-        chronic_fraction, duration_spec = spec
-        if rng.random() < chronic_fraction:
-            return _draw_chronic_duration(duration_spec, rng), True
+        return float(assigned)
     recovery_day = float(profile.get("recovery_day", _DEFAULT_RECOVERY_DAY))
-    return float(profile.get("shedding_duration_days", recovery_day)), False
+    return float(profile.get("shedding_duration_days", recovery_day))
 
 
-def _length_biased_duration(
-    agent: Any,
+def _select_prevalent(
+    pool: list[Any],
+    count: int,
     pathogen_id: str,
     profile: dict[str, Any],
     rng: np.random.Generator,
-) -> tuple[float, bool]:
-    """Draw this host's shedding duration, biased by length.
+) -> Any:
+    """Choose which of the eligible hosts board, weighted by episode length.
 
     A prevalent sample over-represents long episodes in proportion to their
-    length, so a candidate set is generated through the profile's own duration
-    mechanism and one member is selected with probability proportional to its
-    duration. This is an approximation to exact length-biasing: it
-    under-weights the extreme tail beyond the candidate set, since a duration
-    that no candidate happens to realise cannot be selected. It introduces no
-    distribution the profile does not already have.
+    length: a host shedding for 218 days sits in the boarding population for
+    about fifteen times as much calendar time as one shedding for 15 days, so
+    it is that much likelier to be caught mid-episode. The Binomial fixes how
+    many board; this fixes who, with probability proportional to each host's
+    own already-assigned duration. That is the prevalent-sample construction
+    itself rather than an approximation to it, and it introduces no
+    distribution and reinterprets no fraction: the weights are host properties
+    the run already had.
     """
-    candidates = [
-        _duration_candidate(agent, pathogen_id, profile, rng)
-        for _ in range(_BOARDING_DURATION_CANDIDATES)
-    ]
-    weights = np.asarray([days for days, _ in candidates], dtype=float)
-    total = float(weights.sum())
-    if total <= 0.0:
-        return candidates[0]
-    index = int(rng.choice(len(candidates), p=weights / total))
-    return candidates[index]
+    size = min(count, len(pool))
+    weights = np.asarray(
+        [_host_duration(agent, pathogen_id, profile) for agent in pool],
+        dtype=float,
+    )
+    positive = int((weights > 0.0).sum())
+    total = float(weights[weights > 0.0].sum())
+    if total <= 0.0 or positive == 0:
+        return rng.choice(pool, size=size, replace=False)
+    return rng.choice(
+        pool, size=min(size, positive), replace=False, p=weights / total,
+    )
 
 
 def _draw_state(spec: BoardingSpec, rng: np.random.Generator) -> str:
@@ -426,17 +418,13 @@ def _board_one_host(
 ) -> str | None:
     """Give one host a boarding infection; returns its state, or ``None``.
 
-    Duration first, then state, then the age conditional on both: drawing the
+    Duration read, then state, then the age conditional on both: drawing the
     age first and reading the state off the clocks would make the composition
     a silent function of natural-history constants never sourced against a
     prevalent sample.
     """
     pathogen_id = spec.pathogen_id
-    duration_days, chronic = _length_biased_duration(
-        agent, pathogen_id, profile, rng,
-    )
-    if chronic and agent.get_chronic_shedding_duration(pathogen_id) is None:
-        agent.set_chronic_shedding_duration(pathogen_id, duration_days)
+    duration_days = _host_duration(agent, pathogen_id, profile)
     incubation_days = _draw_incubation_days(agent, pathogen_id, profile, rng)
     recovery_day = float(agent.get_chronic_recovery_day(
         pathogen_id, int(profile.get("recovery_day", _DEFAULT_RECOVERY_DAY)),
@@ -482,9 +470,9 @@ def draw_boarding_cohort(
     """Draw one pathogen's boarding cohort over the eligible population.
 
     Per role a Binomial over that role's eligible pool, then a
-    without-replacement choice of who: the measurement is a per-person
-    probability, and the two roles carry rates that differ by about a factor
-    of four, so they are drawn against their own populations.
+    duration-weighted, without-replacement choice of who: the measurement is a
+    per-person probability, and the two roles carry rates that differ by about
+    a factor of four, so they are drawn against their own populations.
     """
     drawn_by_role = dict.fromkeys(_ROLES, 0)
     composition = dict.fromkeys(_STATES, 0)
@@ -502,7 +490,9 @@ def draw_boarding_cohort(
         count = int(rng.binomial(len(pool), prevalence_by_role[role]))
         if count <= 0:
             continue
-        chosen = rng.choice(pool, size=min(count, len(pool)), replace=False)
+        chosen = _select_prevalent(
+            pool, count, spec.pathogen_id, profile, rng,
+        )
         for agent in chosen:
             state = _board_one_host(spec, agent, profile, clock, rng)
             if state is None:
@@ -596,6 +586,7 @@ def apply_explicit_seeds(
 # ── Run artifact ─────────────────────────────────────────────────────────
 
 def _initiation_mode(plan: InitiationPlan) -> str:
+    """Which mechanisms ran, for the run artifact."""
     if plan.legacy:
         return MODE_LEGACY
     if plan.boarding and plan.seeds:
@@ -605,6 +596,23 @@ def _initiation_mode(plan: InitiationPlan) -> str:
     if plan.seeds:
         return MODE_SEEDS
     return MODE_NONE
+
+
+def initiation_owned_pathogens(plan: InitiationPlan) -> frozenset[str]:
+    """The pathogens initiation owns, and only those.
+
+    Ownership is per pathogen, not per run: dropping one pathogen's legacy
+    introduction because a *different* pathogen has a boarding block would be
+    exactly the silent default the spec's §3 forbids. A norovirus boarding
+    block therefore leaves the COVID arm's ``introduction_epoch`` firing as
+    before, while the pathogens named here are not introduced twice.
+    """
+    if plan.legacy:
+        return frozenset()
+    return frozenset(
+        [spec.pathogen_id for spec in plan.boarding]
+        + [seed.pathogen_id for seed in plan.seeds],
+    )
 
 
 def build_initiation_manifest(
