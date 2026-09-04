@@ -418,6 +418,22 @@ def _onset_day(
     return max(0.0, drawn + float(inf.get("strain_incubation_modifier", 0.0)))
 
 
+def _presentation_probability(inf: dict[str, Any], prof: dict[str, Any]) -> float:
+    """Probability of presenting given infection, before the chronic boost.
+
+    A profile carrying ``symptomatic_fraction`` presents at that measured
+    proportion irrespective of acquisition dose; profiles carrying
+    ``illness_probability`` keep the dose-conditional Hill form.
+    """
+    fixed = prof.get("symptomatic_fraction")
+    if fixed is not None:
+        return float(fixed)
+    ill_params = prof.get("illness_probability", {})
+    eta_p = ill_params.get("eta", 0.508)
+    gamma_p = ill_params.get("gamma", 0.095)
+    return 1.0 - math.pow(1.0 + eta_p * inf["acquired_particles"], -gamma_p)
+
+
 def _draw_symptom_onset(
     agent: Any,
     pid: str,
@@ -426,8 +442,10 @@ def _draw_symptom_onset(
     rng: np.random.Generator,
     _epoch: int = 0,
 ) -> None:
-    """One dose-conditioned illness draw for a host past its incubation period.
+    """One presentation draw for a host past its incubation period.
 
+    The draw is dose-conditional for a Hill-form profile and dose-independent
+    for a profile declaring ``symptomatic_fraction``.
     An imported host carries no acquisition dose, so its record states
     ``will_present`` and that boolean replaces the dose draw: without the seam
     a dose of zero would make every imported host asymptomatic and the
@@ -435,11 +453,7 @@ def _draw_symptom_onset(
     """
     forced = inf.get("will_present")
     if forced is None:
-        ill_params = prof.get("illness_probability", {})
-        eta_p = ill_params.get("eta", 0.508)
-        gamma_p = ill_params.get("gamma", 0.095)
-        dose = inf["acquired_particles"]
-        ill_prob = 1.0 - math.pow(1.0 + eta_p * dose, -gamma_p)
+        ill_prob = _presentation_probability(inf, prof)
         ill_prob = min(1.0, ill_prob + agent.get_chronic_illness_boost(pid))
         presents = rng.random() < ill_prob
     else:

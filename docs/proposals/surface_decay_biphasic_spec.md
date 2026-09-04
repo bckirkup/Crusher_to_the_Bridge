@@ -222,31 +222,136 @@ reason it cannot carry an age. Recorded as an open question in §6, not proposed
    deposit-volume distinction available.
 2. **Between-host matrix variability** (§4) has no representation, and would
    need per-host or per-deposit structure the pool cannot carry.
-3. **`k_wet` and `k_dry` are not separately sourced yet.** §1 and §2 establish
-   that two regimes exist; they do not supply two rates. Reading them off the
-   table's short-window and long-window rows would be a fit to our own
-   stratification, not a measurement, and is refused here.
-4. **Is `t_dry` observable in the same studies that report the rates?** Only
-   Greatorex states a drying time at all, and it is an incidental observation in
-   a Results paragraph, not a measurement with dispersion.
+3. **`k_wet` and `k_dry` are separately sourced, in systems that do not match
+   this field.** §1 and §2 of this spec establish only that two regimes exist.
+   §8 now reports two studies that measure both rates on an infectivity
+   endpoint — Rockey 2024 in human saliva, French 2023 in cell-culture medium —
+   so the question is no longer whether the rates exist but whether any measured
+   pair is commensurable with a per-day fomite-pool law. Neither is: both are
+   single-droplet experiments over one to eight hours. Reading rates off this
+   spec's own short-window and long-window rows remains refused as a fit to our
+   own stratification.
+4. **Is `t_dry` observable in the same studies that report the rates?** Yes, and
+   this is resolved: Rockey 2024 measures drying time gravimetrically at three
+   humidities with replicate ranges (0.26 h at 20% RH, 0.54 h at 50%, 1.29 h at
+   80%), and French 2023 measures quasi-equilibrium time per droplet volume and
+   RH. **The open question is now the opposite one** — Rockey finds inactivation
+   *not* associated with drying time, so a measured `t_dry` exists while its
+   status as the causal phase boundary is weaker than §3 assumes.
+5. **Deposit volume is now the sharpest open question, not a footnote to it.**
+   Both sourced triplets are 1–50 µL single droplets; §6.1's volume dependence
+   is the axis along which their rates would have to be extrapolated to a pool.
 
 ## 7. What should happen next, in order
 
-1. **Do not implement anything in this document yet.** Two of its three
-   quantities (`k_wet`, `k_dry`, `t_dry`) have no source, and adopting a
-   biphasic form with fitted rates would replace one unfounded scalar with three
-   unfounded ones — a strictly worse position, and the exact trade the project
-   exists to stop making.
+1. **Do not implement anything in this document yet.** The refusal stands, but
+   §8 has changed its grounds: all three quantities (`k_wet`, `k_dry`, `t_dry`)
+   are now sourced on an infectivity endpoint, and none of the sourced sets is
+   commensurable with a per-day fomite-pool law — they are single-droplet
+   experiments over one to eight hours, they disagree on which phase is faster,
+   and the respiratory matrix shows no phase split at all. Adopting one would
+   still replace one scalar with three quantities plus a choice of matrix,
+   volume, RH and window — the trade the project exists to stop making. It is a
+   selection problem now, not an absence.
 2. **#36 still runs first**, and this document sharpens what it must answer. A
    rate screen over `[0.067, 0.79]` cannot bound a shape change; the screen
    needs a factor that varies the *split* between early and late availability,
    not only the aggregate rate. If the split moves nothing, both this proposal
    and Weibull are moot and #60 closes cheaply.
-3. **Source `t_dry` and the two regime rates properly** if the screen says the
-   split is live — as a sourcing unit with the matrix-selection criterion of §4
-   applied, since the wet-phase rate in particular is where the buffer-matrix
-   studies and the airway-surface-liquid studies most disagree.
+3. **Re-scope the sourcing unit** if the screen says the split is live. The
+   original question — find the two rates and the boundary — is answered by §8.
+   What is unanswered, and what a unit should now ask, is whether a
+   single-droplet rate pair can be carried to a pool at all: that turns on
+   deposit volume (§6.1, §6.5) and on whether the split is a matrix effect
+   rather than a time effect, given that airway surface liquid shows one rate
+   and saliva two.
 4. **#60 should be re-scoped** from "Weibull or exponential-with-covariates" to
    "biphasic-by-drying, or exponential", per arm rather than once for both.
    Weibull was the wrong pair of alternatives: it is the phenomenological
    description of the thing §3 gives a mechanism for.
+
+## 8. Sourcing note: the search for the two rates, and the assay endpoint (R2)
+
+This section closes R2's remaining live question. It **adopts nothing**: no
+value, grade, interval, schema or engine change follows from it, and `k_wet`,
+`k_dry` and `t_dry` are still refused per §7.1.
+
+The full query log, including the filters used and what each of the eleven
+searches returned, is
+[`../literature/consensus_tranche_19_influenza_biphasic_surface.md`](../literature/consensus_tranche_19_influenza_biphasic_surface.md).
+
+**What was searched for.** One influenza surface experiment reporting *infectious*
+virus at enough time points to identify a wet-phase rate, a dry-phase rate and
+the drying boundary, preferably in a respiratory matrix — i.e. the sourcing unit
+§7.3 asks for.
+
+**What came back.** Two studies report all three quantities on an infectivity
+endpoint, which is more than this section originally recorded: the first pass
+read abstracts only, and the abstracts do not contain the Results tables. The
+values are reported in full in
+[`../literature/consensus_tranche_19_influenza_biphasic_surface.md`](../literature/consensus_tranche_19_influenza_biphasic_surface.md)
+§2 and are **not adopted here**:
+
+* **French 2023** (*mBio*, DOI `10.1128/mbio.03452-22`) deposits
+  influenza A in 1–50 µL droplets across three humidities, tracks evaporation to
+  quasi-equilibrium as the phase breakpoint, and reports **both phase rate
+  constants for H1N1pdm09 in all nine conditions** (Table 1, h⁻¹). The phase
+  boundary is measured as a mass plateau, which is §3's mechanism observed
+  directly rather than inferred from window ordering. Two things disqualify it as
+  a parameter source: its matrix is cell-culture medium, which §4's selection
+  criterion excludes, and the wet/dry ordering for influenza is **not
+  consistent** across conditions — in 50 µL droplets at 40% RH the dry phase is
+  the faster one.
+* **Rockey 2024** (*Appl Environ Microbiol*, DOI `10.1128/aem.02010-23`) is the
+  closest matrix match and supplies the whole triplet in a respiratory matrix:
+  H1N1pdm09 in 1 µL saliva droplets at 50% RH decays at **0.010 ± 0.012 log10
+  min⁻¹ wet** (indistinguishable from zero) and **0.036 ± 0.020 log10 min⁻¹
+  dry**, with drying time measured at three humidities. Decisively for this
+  spec, **airway surface liquid shows no wet/dry difference at all** — one rate,
+  0.010 ± 0.0030 log10 min⁻¹ — so in the matrix §4 prefers, the biphasic form is
+  unsupported.
+* **Wei 2026** (*J Hazard Mater*, DOI `10.1016/j.jhazmat.2026.141707`) quantifies
+  evaporation-phase inactivation rate constants two orders of magnitude above
+  suspension-phase constants. It is an airborne system, not a deposited pool, so
+  it bears on the air reservoir rather than on this field.
+* **Qian 2023** (`10.1128/aem.00633-23`) gives respiratory-matrix half-lives of
+  4.5–5.9 h on non-copper surfaces at 23% RH, with donor identity dominating
+  surface material — §4's between-host variability, measured.
+
+**Why §7.1's refusal survives being sourced.** The two triplets are
+incommensurable with the field they would fill and with each other. They disagree
+on which phase is faster; they are single-droplet experiments over one to eight
+hours, while `surface_decay_log10_per_day` is a per-day pool law; the matrix the
+ship setting favours shows no phase split; and Rockey's own analysis attributes
+the dry-phase rate to residue morphology rather than to drying, having found
+inactivation associated with neither protein content, salt content nor drying
+time. Adopting either set would mean choosing a matrix, a droplet volume, an RH
+and a time window — four freedoms in exchange for one scalar, which is the trade
+§7.1 exists to refuse. **The values are therefore reported and the unit stops;
+adoption is a separate decision, and not this unit's.**
+
+**The complication to carry forward.** That airway surface liquid retains
+infectivity with decay unassociated with drying time means the phase boundary may
+not be drying in the matrix this model needs, and the wet/dry split may be partly
+a matrix effect for which §4's selection criterion, not a time axis, is the right
+instrument. §7.3's sourcing unit should be rewritten around deposit volume and
+matrix rather than around finding the two rates, which now exist.
+
+### 8.1 Assay endpoint: infectivity, not RNA
+
+R2's assay-endpoint question is resolved here and is **unaffected** by the scope
+supersession. Greatorex 2011 measures, on the same coupons, 0.06 log10 RNA loss
+against >4.2 log10 infectivity loss at 24 h; Thompson 2017
+(`10.1016/j.jhin.2016.12.003`) recovers viable virus for up to two weeks on
+stainless steel while PCR stays positive for seven. Our pools are denominated in
+genome copies and the dose-response consumes copies, so decaying a pool at an RNA
+rate is dimensionally consistent and epidemiologically wrong by up to four orders:
+it keeps material epidemiologically available long after no infectious virus
+remains.
+
+Tranche 5 §1 resolved this for norovirus in favour of the **infectivity** rate.
+**The influenza row inherits that resolution**: whatever rate or rates eventually
+land in `surface_decay_log10_per_day` for `influenza_a` must be measured on an
+infectivity endpoint, and a genome-copy pool decayed at an infectivity rate is
+carrying an infectivity-equivalent availability state whose conversion is itself
+an open item — not a licence to substitute the RNA rate because the units match.

@@ -191,6 +191,36 @@ gap below the live 16,644 under the nominally same no-aggregation framing, with
 both letters cited and no dose figure changed — every dose figure in this
 repository remains void pending refit.
 
+**The proposal to close that 5.9–12.6× gap by retargeting α/β onto Atmar's
+HID50 is rejected on genogroup, and the gap is reclassified as a
+genogroup-declaration item rather than a residual error.** The narrative review
+of the exchange adds three things the ledger did not have, and the third
+disqualifies the refit. First, **Atmar 2014 fits a logistic model**, not a
+beta-Poisson: its 1,320 gEq (secretor-positive blood group O/A) and 2,800 gEq
+(all secretor-positive, blood group B/AB being wholly resistant in that study)
+are logistic ID50s, with no illness observed below 324 gEq. Importing either
+would change the dose-response *family* as well as its value, and β = 32.81
+would keep no provenance at all once the Teunis fit it was lifted from is
+abandoned — moving α while holding β is retaining half of a rejected fit.
+Second, **the two figures are not interchangeable, and the tree picks 2,800**:
+susceptibility here is gated on secretor status and **not** on ABO, so a
+secretor-positive agent stands for Atmar's whole secretor-positive cohort across
+blood groups, which is the 2,800 arm; the 1,320 arm conditions on O/A hosts this
+model cannot separate, and adopting it without an ABO nonsusceptibility gate
+would overstate susceptibility by exactly the resistant B/AB share. Third, and
+decisively, **Atmar 2014 challenged GI.1 Norwalk while this arm is GII**: the
+`norwalk_gi` id says GI, but the profile's name, its declared genotype mixture
+GII.4/GII.17/GII.2 and its pooled-GII incubation row all say GII, and against
+GII challenge evidence the shipped 16,644 is roughly **30× too sensitive**
+(Rouphael 2022 GII.2 ID50 5.1e5), not 6–13× too insensitive. The two claims sit
+on opposite sides of the shipped value and cannot both be about this arm, so the
+6–13× figure is a GI-vs-GII comparison and not a demonstrated model error. What
+this item now needs is the genogroup declaration, not a fit: declared GII, the
+existing α ∈ [0.072, 0.161] interval stands and Atmar 2014 is out of scope;
+declared GI.1, the target is 2,800 and α/β must be refitted **jointly** to
+Atmar's data and graded as a logistic-to-beta-Poisson transfer. No value moved
+and the withdrawal is unchanged.
+
 **The exact and approximate dose-response forms are also an open implementation
 item, not a repair in this change.** Production reaches
 `_dose_response_hazard` at `engines/transmission_core.py:2082`, through the

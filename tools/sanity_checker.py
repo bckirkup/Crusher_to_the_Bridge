@@ -392,6 +392,7 @@ class PathogenProfile(BaseModel):
     dose_adjustment: float = 1.0
     dose_response: DoseResponse | None = None
     illness_probability: dict[str, float] = {}
+    symptomatic_fraction: float | None = None
     airborne_emission_mode: str | None = None
     severity_model: SeverityModel | None = None
     observation_model: ObservationModel | None = None
@@ -490,6 +491,16 @@ class PathogenProfile(BaseModel):
             raise ValueError(
                 "airborne_emission_mode must be one of "
                 "{'continuous_fraction', 'emesis_conditioned'}, got "
+                f"{v}",
+            )
+        return v
+
+    @field_validator("symptomatic_fraction")
+    @classmethod
+    def symptomatic_fraction_bounds(cls, v: float | None) -> float | None:
+        if v is not None and (v < 0 or v > 1):
+            raise ValueError(
+                "symptomatic_fraction must be within [0.0, 1.0], got "
                 f"{v}",
             )
         return v
@@ -678,6 +689,14 @@ def _check_mathematical_bounds(
                         f"{p.pathogen_id}.illness_probability.{key} = {val} "
                         f"is outside [0.0, 1.0]",
                     )
+            val = p.symptomatic_fraction
+            if val is not None and (val < 0 or val > 1):
+                report.error(
+                    _ACTIVE_PROFILES_JSON,
+                    "MATH_BOUND",
+                    f"{p.pathogen_id}.symptomatic_fraction = {val} "
+                    f"is outside [0.0, 1.0]",
+                )
 
 
 def _check_emesis_airborne_exclusion(

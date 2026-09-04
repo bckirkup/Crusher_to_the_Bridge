@@ -17,6 +17,7 @@ This document outlines the literature and quantitative microbial risk assessment
 - **Dose-Response**: Exponential ($k=0.18$ based on Alford 1966 human challenge studies converted for aerosolized TCID50 limits; often modelled in QMRA between 0.012 - 0.18 depending on strain/route).
 - **Shedding**: Upper respiratory shedding peaks shortly after symptom onset,
   with a 1.0-day presymptomatic window (Ip et al., Clin Infect Dis 2017).
+- **Illness**: Presentation is **dose-independent**: 66.9% of infections are symptomatic (95% CI 58.3-74.5), over 522 infected individuals in 38 subgroups from 56 volunteer challenge studies, inocula 3-7.2 log10 TCID50, with no significant dose association (p = 0.12) — Carrat et al. 2008, *Am J Epidemiol* 167:775-785 (doi:10.1093/aje/kwm375), evidence grade B. The dose-conditional `illness_probability` Hill pair is deleted on this arm: the field is strictly increasing in dose and the measured endpoint is flat over 4.2 orders. The one clinical dose association runs the other way (fever OR 0.56 per log10 TCID50, 0.42-0.73, p<0.001).
 
 ## 4. Measles Virus
 - **Dose-Response**: Exponential ($k=0.5$). Highly infectious via airborne route. Estimated very high probability of infection per inhaled quantum/particle.
