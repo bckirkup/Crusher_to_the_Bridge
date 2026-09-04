@@ -165,6 +165,43 @@ corroboration — and 0.111 lies inside it, within 3% of its geometric centre
 family, aggregation assumption and dose unit are one categorical choice (Liu et
 al. 2026).
 
+**#43's norovirus half is narrowed, not closed.** The published exchange settles
+that the disagreement is statistical rather than biological and that our pair is
+the non-aggregation genome-copy fit; what remains open is whether Teunis's 18 is
+aggregates or copies, which no source we hold settles. The 18 figure is
+reported as an aggregation-model-dependent quantity; on our side the live
+per-agent confluent-hypergeometric beta-Poisson path has an N50 of
+**16,644 copies** and the closed-form helper has an approximate N50 of
+**16,871 copies**. Both give
+**P ≈ 0.047** at `D = 18` to three significant figures, so the trap is unchanged.
+The bundle review had already posed the 18-aggregate reading as an open,
+unverified hypothesis — "16,644 / 18 ≈ 925 genome copies per infectious
+aggregate" — and the collaborator's confirmation is circular rather than
+independent: 16,643.78 / 18 = 924.65, and 18 × 925 agrees with the exact N50 to
+≈0.04%. The aggregate reading is therefore **unverified**, not corroborated,
+and the 925 bridge remains unverified against the primary. It would take
+Teunis et al. 2008's own reported aggregation parameter or aggregate-size
+distribution, read from Table III or the paper's text independently of any ID50
+held here, to settle it. Atmar's reply instead describes "18 genomic
+equivalents ... determined using assumptions about differing amounts of virus
+aggregation", which is unreconciled. The bundle's question therefore exposed a
+process failure: **#43 was filed against a question our own review had already
+posed.** Atmar's measured HID50 of 1,320–2,800 gEq remains an open **5.9–12.6×**
+gap below the live 16,644 under the nominally same no-aggregation framing, with
+both letters cited and no dose figure changed — every dose figure in this
+repository remains void pending refit.
+
+**The exact and approximate dose-response forms are also an open implementation
+item, not a repair in this change.** Production reaches
+`_dose_response_hazard` at `engines/transmission_core.py:2082`, through the
+persistent Beta draw in `_dose_response_susceptibility`; the closed helper
+`_dose_response` at `engines/transmission_core.py:1649` is exercised only by
+`tests/test_dose_pathway_invariants.py:473`. The tree therefore carries two
+spellings of one mechanism — an exact per-agent frailty path in production and
+an approximate population closed form covered by a test — matching the
+duplicate-mechanism archetype in the provenance guidance. Neither function nor
+the test is changed here.
+
 **The secretor screen interval widens to [0.04, 0.83], which invalidates the
 pending Morris design again (tranche 6 §4).** Kambhampati 2015's pooled
 secretor:non-secretor odds ratios are genotype-specific — 9.9 (3.9–24.8) for

@@ -185,11 +185,20 @@ sourcing one:
 
 1. **Rejected — move the arm's dose pipeline to infectious units**, and carry a
    copies↔infectious conversion only where a measurement supplies one.
-2. **Selected — source the conversion**, which is the same question as #43 on
-   the norovirus side (whether Teunis's Table III ID50 of 18 is in aggregates
-   rather than genome copies). Molecular detection is where the project's
-   observational effort is concentrated, so the pipeline should stay in copies
-   and the conversion is what has to be found.
+2. **Selected — source the conversion**, which remains the SARS-CoV-2 question:
+   no SARS-CoV-2 conversion is adopted, and the outstanding copies↔infectious
+   conversion still belongs with the collaborator. The norovirus half of #43 is
+   **narrowed, not closed**: the published exchange settles that the
+   disagreement is statistical rather than biological and that the shipped
+   norovirus pair is the non-aggregation genome-copy fit, while the unit of
+   Teunis's 18 is not settled by any source held here. The aggregate reading and
+   the ≈925
+   copies-per-aggregate bridge remain unverified and circular, and Atmar's
+   genomic-equivalents wording remains unreconciled; Teunis's own aggregation
+   parameter or aggregate-size distribution would be needed to settle that
+   question. R5 is not done; molecular detection is where the project's
+   observational effort is concentrated, so the SARS-CoV-2 conversion is what
+   still has to be found.
 
 Neither may be settled by adopting a convenient ID50: the two available figures
 (Prentiss 361–2,000 particles; Riediker 500/300/100 copies) are **fitted to
