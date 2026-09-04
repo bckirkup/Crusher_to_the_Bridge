@@ -63,14 +63,15 @@ claim than the influenza row: Kim 2012's superiority-of-Weibull is read from its
 abstract and its rate constants were never verified (tranche 5 §1 correction
 (b)), so the form is *unconfirmed*, not refuted.
 
-**And the sourced key is unexercised.** No shipped profile sets
-`surface_decay_log10_per_day`; both active profiles still carry the deprecated
-fraction alias `surface_decay_per_day`, so behaviour is bit-identical to
-pre-#41 and the adopted interval reaches nothing that runs. The
+**And the sourced key was unexercised — this is what R1 fixed, and it is stated
+here in the past tense because R1 has landed on this branch.** No shipped profile
+set `surface_decay_log10_per_day`; both active profiles carried the deprecated
+fraction alias `surface_decay_per_day`, so behaviour was bit-identical to
+pre-#41 and the adopted interval reached nothing that ran. The
 `model-parameter-provenance` skill's rule is explicit — *delete superseded
 constants; never alias them*, because "a stale duplicate of a corrected constant
-is how a correction silently fails to apply". That is the present state
-precisely. Migrating the two profiles onto the sourced key, and deleting the
+is how a correction silently fails to apply". That was the state precisely.
+Migrating the two profiles onto the sourced key, and deleting the
 alias, is a prerequisite for the influenza repair rather than a follow-up: the
 influenza repair introduces the covariate-indexed version of the *same* field,
 and doing that while a fraction-valued alias is still live gives the field three

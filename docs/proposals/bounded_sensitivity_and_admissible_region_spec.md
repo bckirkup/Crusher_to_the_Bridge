@@ -138,7 +138,7 @@ changes.
 | Emesis volume (mL) | log10 | 50 – 800 | B | Tung-Thompson et al. 2015, already bounded in-tree |
 | Cabin-localization fraction `f` | linear | 0.80 – 0.99 | **C, declared** | No measurement exists. Wikswo 2009 is the nearest evidence and does not measure it; recorded as a null result. This factor was already shown to be the binding uncertainty for the Park anchor, so it is the one to watch |
 | `environmental_faecal_release_log10_g_per_epoch` | linear | 4 – 24 | **D, construction** | Not a literature quantity. Included so the screen can confirm the inert-above-8 finding independently, not because a value will be selected |
-| `surface_decay_per_day` | linear | 0.14 – 0.84 | B | Surrogate spread on non-porous surfaces, Fallahi 2011 to the Kim fast cell; recut in tranche 5. Sweeping fractional loss linearly under-covers the slow end — a rate-space sweep is queued |
+| `surface_decay_log10_per_day` | linear | 0.067 – 0.79 | B | Surrogate spread on non-porous surfaces, Fallahi 2011 to the Kim fast cell; recut in tranche 5. The interval was written 0.14 – 0.84 while the field was the fraction-valued `surface_decay_per_day`; that is the *same* interval in the deleted unit (0.067 → 0.143, 0.79 → 0.838 under f = 1 − 10⁻ᵏ), so this is a unit change, not a re-sourcing. Sweeping fractional loss linearly under-covers the slow end — a rate-space sweep is queued |
 | Reporting-probability scale | linear | 0.5 – 1.5 × | **C, declared** | The observation model's 15 assumed numbers are not independently identified (A3 circularity). Screen them as **one** multiplier on reporting probability, because that is the dimension the single empirical aggregate constrains |
 | `shedding_variance_log10` | linear | study spread | C | Source or declare |
 

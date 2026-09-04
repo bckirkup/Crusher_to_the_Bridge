@@ -1172,7 +1172,7 @@ The per-pathogen configuration is defined in `schemas/pathogen_profiles.schema.j
 
       // ── Environmental ──
       "surface_deposition_fraction": "number",
-      "surface_decay_per_day": "number [0,1]",
+      "surface_decay_log10_per_day": "number >= 0",
       "airborne_half_life_hours": "number > 0",
       "contact_transfer_fraction": "number [0,1], default 1.0",
       "base_susceptibility": "number",
@@ -1474,7 +1474,7 @@ All values verified against `data/pathogens/active_profiles.json` at SHA d557f39
 | `observation_model.episode_reporting_window_days` | 2.0 | — |
 | `transmission_route_weights` | `{direct_contact: 0.35, droplet: 0.10, hvac_airborne: 0.05, fomite: 0.30, food_contamination: 0.20, environmental_source: 0.00}` | — |
 | `surface_deposition_fraction` | 0.0001 | ViralParticle.java |
-| `surface_decay_per_day` | 0.25 | — |
+| `surface_decay_log10_per_day` | 0.124939 | Converted from `surface_decay_per_day` = 0.25 by k = −log10(1 − f); value-preserving (R1) |
 | `airborne_half_life_hours` | 1.1 | van Doremalen et al. 2020 |
 | `base_susceptibility` | 1.0 | — |
 | `innate_nonsusceptible_fraction` | 0.0 | — |
@@ -1510,7 +1510,7 @@ All values verified against `data/pathogens/active_profiles.json` at SHA d557f39
 | `observation_model` | `null` (absent) | audit finding 8.6 |
 | `transmission_route_weights` | `{direct_contact: 0.25, droplet: 0.30, hvac_airborne: 0.30, fomite: 0.10, food_contamination: 0.00, environmental_source: 0.05}` | — |
 | `surface_deposition_fraction` | 5e-05 | — |
-| `surface_decay_per_day` | 0.95 | van Doremalen et al. 2020 (0.95/day = 5.55 h half-life) |
+| `surface_decay_log10_per_day` | 1.301030 | van Doremalen et al. 2020 (5.55 h half-life). Converted from `surface_decay_per_day` = 0.95 by k = −log10(1 − f); value-preserving (R1) |
 | `airborne_half_life_hours` | 1.1 | van Doremalen et al. 2020 |
 | `base_susceptibility` | 1.0 | — |
 | `innate_nonsusceptible_fraction` | 0.0 | — |
