@@ -179,20 +179,20 @@ as `cabin_ventilation_type` is today. The three touch points, in ascending cost:
 
 ## 6. What this document does not do
 
-It adopts nothing. No zone is classified, no dilution factor or UV inactivation
-rate is proposed, no AHU membership is changed, no occupancy weighting is
-changed, and no position in §3 is selected. Every quantity a repair would need
-is unsourced: exterior air exchange or dilution, solar inactivation for
+It adopts no environmental value. Items 1 and 2 have classified the settled
+cruise zones for access and duct-membership purposes, removed their recirculating
+AHU memberships, and changed leisure occupancy weighting. No dilution factor or
+UV inactivation rate is proposed, and no position in §3 is selected. Every
+environmental quantity a repair would need is unsourced: exterior air exchange or dilution, solar inactivation for
 norovirus, SARS-CoV-2 and influenza, salt-aerosol effects, wet-surface
 persistence poolside, and the recreational-water claims of §4.
 
 ## 7. Order of work
 
-1. **Fix the capacity-blind `Free` draw** (§2.5). Until leisure occupancy is
-   weighted, no exterior effect can be sized, and the current draw puts a
-   quarter of the ship's leisure hours in the engine room and the laundry.
-2. **Audit AHU membership** (§2.3). No constant needed, and it is the one item
-   that is a defect under all three positions in §3.
+1. **Fix the capacity-blind `Free` draw** (§2.5). **Landed in Item 1.**
+2. **Audit AHU membership** (§2.3). **Landed in Item 2;** no constant was
+   needed, and it is the one item that is a defect under all three positions
+   in §3.
 3. **Then source**, and only then choose between §3(a), (b) and (c). Position
    (c) should be decided together with
    [`surface_decay_biphasic_spec.md`](surface_decay_biphasic_spec.md), because a

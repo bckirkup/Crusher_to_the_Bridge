@@ -33,7 +33,13 @@ def test_cruise_exterior_descriptions_are_not_in_hvac() -> None:
     for platform, expected_exterior in CRUISE_EXTERIORS.items():
         spatial = _load(platform, "spatial_layout.json")
         airflow = _load(platform, "air_flow_paths.json")
-        exterior = {
+        description_backed = {
+            zone["id"]
+            for zone in spatial["zones"]
+            if zone["id"] in expected_exterior and zone.get("description")
+        }
+        assert description_backed == expected_exterior
+        described_open = {
             zone["id"]
             for zone in spatial["zones"]
             if any(
@@ -45,7 +51,7 @@ def test_cruise_exterior_descriptions_are_not_in_hvac() -> None:
             room for group in airflow["hvac_zones"] for room in group["rooms"]
         }
         assert not expected_exterior & covered
-        assert not exterior & covered
+        assert not described_open & covered
 
 
 def test_cruise_exteriors_do_not_share_dining_ahu() -> None:

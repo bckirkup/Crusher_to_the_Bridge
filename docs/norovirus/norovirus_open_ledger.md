@@ -2,7 +2,7 @@
 
 > **Status:** Living
 
-**Live status as of `WORKTREE` (Item 2).** What is currently withdrawn,
+**Live status as of `70c4e00` (Item 2).** What is currently withdrawn,
 what each anchor last measured and *when*, and what is outstanding.
 
 `docs/norovirus/norovirus_model_history.md` is the permanent record of defects and
