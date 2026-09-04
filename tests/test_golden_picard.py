@@ -83,13 +83,15 @@ def test_picard_golden_summary_and_trigger() -> None:
     # Updated 2026-08-23 (onset off the day lattice): the illness hazard opens at
     # each host's drawn incubation period rather than the next whole day, so a
     # host whose draw exceeds a day has not presented yet.  Prior value: 2.
+# Updated 2026-09-03 (capacity-weighted leisure draw): the weighted
+# ``rng.choice`` consumes the seeded stream differently, moving symptomatic
+# from 2 to 1 and the final trigger from CONFIRMED to BASELINE.
     assert fp["susceptible"] == 13
     assert fp["infected"] == 3
-    assert fp["symptomatic"] == 2
+    assert fp["symptomatic"] == 1
     assert fp["recovered"] == 0
     assert fp["immune"] == 4
-    # Own-severity reporting can produce a true-positive sick call inside 24 h.
-    assert fp["trigger_status"] == "CONFIRMED"
+    assert fp["trigger_status"] == "BASELINE"
 
 
 @pytest.mark.timeout(240)
