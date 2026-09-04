@@ -7,11 +7,14 @@ description: Search the peer-reviewed literature with the Consensus MCP server t
 
 The `consensus` MCP server has one tool, `search`, over ~220M papers
 (Semantic Scholar, PubMed, Scopus, ArXiv). It returns title, authors, year,
-journal, citation count, DOI, a Consensus URL, and the abstract.
+journal, citation count, DOI, a Consensus URL, the abstract, and — with
+`include_full_text_chunks=true` — query-relevant excerpts from the paper body:
+Results and Discussion prose, Methods, and tables rendered as markdown.
 
 ```
 mcp_tool(command="call_tool", server="consensus", tool_name="search",
-         tool_args='{"query": "fomite contact rate shared surface touches per hour"}')
+         tool_args='{"query": "fomite contact rate shared surface touches per hour",
+                     "include_full_text_chunks": true, "page_size": 3}')
 ```
 
 Run `mcp_tool(command="list_tools", server="consensus")` for the full,
@@ -34,6 +37,41 @@ review abstracts.
 Search for the mechanism, then separately for the number. The paper that
 establishes that a route matters is usually not the paper that measured its
 rate.
+
+## Full-text chunks: on by default for sourcing
+
+`include_full_text_chunks=true` is the default for any query whose purpose is to
+source a constant, check a definition, or verify a number a document already
+claims. It is not a fallback for when the abstract is thin, and paywall status
+does not predict whether it works — a paywalled *J Infect Dis* paper returned its
+Results and both dose stratifications while two open-access transfer papers
+returned no chunks at all.
+
+Retrieval is **query-relevant**, so the query has to carry the quantity **and
+its unit**: `copies/g of stool`, `GEC/ml`, `log10 per day`, `genome copies per
+day`, `RT-PCR units`, `% transfer`, `copies/m³`, `half-life in hours`. A query
+naming only the mechanism returns the paper's framing sections and misses the
+number.
+
+What chunks contain: a handful of body excerpts per paper, each labelled with the
+section it came from, plus tables as markdown. What they do not contain: the
+whole paper, every stratum of a table, or any guarantee that the specific
+sub-population you need was in the excerpt selected. The pattern to expect is
+one paper with several origins — a peak load body-verified in Results, a duration
+in the same Results, and an illness duration that is in the abstract only.
+
+Record where the number was read, in the register's axis-3 vocabulary
+(`docs/parameter_provenance_register.md` §1): `R`, `Tn`, `Fn·dig`, `Me`, `Ab`,
+`Sec`, `Tr`, or `?nr`. `Ab` on a Grade A constant is not a contradiction — it is
+the defect this axis exists to expose.
+
+**"Not in the chunks" is not a null result.** Absence from the excerpts returned
+is not evidence that the paper omits the quantity, and zero chunks is not
+evidence that a paper is inaccessible. Record it as `?nr` — *not retrieved* — and
+only after at least two differently-phrased attempts, one of them naming the
+table or figure the value is supposed to be in. A null result about the
+literature requires that you queried the quantity by name and unit and still got
+nothing; a `?nr` never licenses one.
 
 ## Filter discipline
 
@@ -71,8 +109,10 @@ measurement.
   file**. Items 15-20 are frequently the measurement papers, because reviews
   rank higher.
 - The abstract is often enough for a magnitude and never enough for a
-  definition. When the constant matters, open the DOI and read what was
-  counted.
+  definition. When the constant matters, re-run the query with
+  `include_full_text_chunks=true`, naming the quantity and its unit, and read
+  what was counted in Methods and Results. Open the DOI when the chunks do not
+  reach the stratum you need — and record which of the two you actually read.
 - Consensus asks for numbered inline citations with hyperlinked titles and the
   exact URLs it returned. Preserve the DOI when it gives one.
 
@@ -115,3 +155,8 @@ Report a null result as a result. "No paper measures total high-touch surface
 area per cabin in m²" is a finding worth recording, and is the honest route to a
 declared Grade C. Inventing a plausible number because the search came back
 empty is the failure mode this skill exists to prevent.
+
+This holds for chunk retrieval too, and is where it is easiest to get wrong: a
+quantity missing from the excerpts a query returned is `?nr`, not absent from the
+paper, and not absent from the literature. Say which of the three you have
+actually established.

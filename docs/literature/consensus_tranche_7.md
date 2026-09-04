@@ -1,5 +1,8 @@
 # Consensus tranche 7 — shedding stops when illness stops, and two thirds of the norovirus curve is never emitted
 
+
+**Register rows fed / supersession.** This tranche feeds `shedding_duration_days`, `immunocompromised_fraction`, and `immunocompromised_multiplier` in §3.1. No later withdrawal or supersession is recorded in the register or the norovirus open ledger.
+
 **Status:** Evidence assembled and interpreted, plus one in-tree measurement.
 **No pathogen-profile constant, no engine constant and no screen interval
 changed by this document**; the change it justifies is specified in §6 and was

@@ -1,5 +1,8 @@
 # Tranche 14 — influenza A on non-porous surfaces is a matrix-and-humidity family of half-lives, and the dose-conditional illness form is refuted at its source
 
+
+**Register rows fed / supersession.** This tranche feeds `surface_decay_log10_per_day` and `illness_probability.eta` / `gamma` in §3.3; no direct link to this tranche remains in the register. No later withdrawal or supersession is recorded in the register or the norovirus open ledger.
+
 **Status:** Evidence assembled. **No profile constant, engine constant, schema or
 config value changes in this document, and none is recommended.** Nothing here
 converts a measured half-life or log10 reduction into `surface_decay_per_day`:

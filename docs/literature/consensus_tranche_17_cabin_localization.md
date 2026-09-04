@@ -1,5 +1,8 @@
 # Tranche 17 — the cabin-localization fraction `f` is not measured anywhere, and the cruise data that exist bound it from above at well under a half
 
+
+**Register rows fed / supersession.** This tranche feeds Cabin-localization fraction `f` in §3.1. No later withdrawal or supersession is recorded in the register or the norovirus open ledger.
+
 **Status:** Evidence assembled and interpreted, **sourcing only**. **No profile
 constant, engine constant, config value or code path changes in this document**,
 and the authoritative register is not edited here — this tranche's proposed

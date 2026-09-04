@@ -1,5 +1,8 @@
 # Consensus tranche 13 — the airborne emission fraction has no measured referent, and the only calicivirus aerosol-decay rate is not norovirus
 
+
+**Register rows fed / supersession.** This tranche feeds `airborne_emission_fraction` and `airborne_half_life_hours` in §3.1. No later withdrawal or supersession is recorded in the register or the norovirus open ledger.
+
 **Status:** Evidence assembled. **No pathogen-profile constant, no engine
 constant and no register row changed by this document.** Nothing here is
 adopted; the proposed register text is in

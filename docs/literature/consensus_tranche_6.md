@@ -1,5 +1,8 @@
 # Consensus tranche 6 — is there a GII dose-response, and what the strain layer can carry
 
+
+**Register rows fed / supersession.** This tranche feeds `dose_response.alpha` / `beta`, `illness_probability.eta` / `gamma`, and `secretor_negative_relative_susceptibility` in §3.1. No later withdrawal or supersession is recorded in the register or the norovirus open ledger.
+
 **Status:** Evidence assembled and interpreted. **No pathogen-profile constant,
 no engine constant and no screen interval changed by this document**; the two
 changes it justifies are listed in §5 and are queued, not applied.

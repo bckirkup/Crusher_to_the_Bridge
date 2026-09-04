@@ -1,5 +1,8 @@
 # Tranche 11 — the never-symptomatic fraction: two designs, two answers, and no adult measured under natural exposure
 
+
+**Register rows fed / supersession.** This tranche feeds `never_symptomatic_fraction` in §3.1. No later withdrawal or supersession is recorded in the register or the norovirus open ledger.
+
 **Status:** Evidence assembled and interpreted. **No profile constant, engine
 constant, config value or register row changes in this document.** Every count
 in §3 and §4 is reproducible from the cited papers; the register contribution is
