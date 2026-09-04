@@ -16,6 +16,22 @@ the paper a number was read from.
 This skill is the other half: what needs sourcing in this transmission and
 natural-history model, and what a hit is allowed to become here.
 
+Where the section gets recorded, in this repo: the register's third axis, whose
+closed vocabulary is `docs/parameter_provenance_register.md` §1 — `R`, `Tn`,
+`Fn·dig`, `Me`, `Ab`, `Sec`, `Tr`, and the retrieval marker `?nr`. Only
+governing citations carry one, the weakest governing origin is printed first,
+and an origin may never move the provenance class or the evidence grade on its
+own. `Ab` on a Grade A constant is not a contradiction — it is the defect the
+axis exists to expose, and `docs/literature/consensus_tranche_21_full_text_reverification.md`
+is the worked pass that populated the column.
+
+`?nr` is a retrieval state and never a null result: absence from the excerpts a
+query returned is not absence from the paper, and zero chunks is not evidence
+that a paper is unreachable. Record `?nr` only after at least two
+differently-phrased attempts, one of them naming the table or figure the value
+is supposed to be in — and see the closing section, which the marker must not be
+read as licensing.
+
 ## Query construction
 
 - Good: `surface touch frequency shared surfaces per hour office video observation`
@@ -76,4 +92,7 @@ Report a null result as a result. "No paper measures total high-touch surface
 area per cabin in m²" is a finding worth recording, and is the honest route to a
 declared Grade C. Inventing a plausible number because the search came back
 empty is the failure mode this skill exists to prevent — and so is filing an
-unread paper as a null result, which is the separate case above.
+unread paper as a null result, which is the separate case above. A quantity
+missing from the excerpts a query returned is a third case again: `?nr`, not
+absent from the paper and not absent from the literature. Say which of the three
+you have actually established.

@@ -1,5 +1,8 @@
 # Tranche 12 — contact transfer efficiency: two directions, two orders of magnitude, and an anchor that belongs to neither
 
+
+**Register rows fed / supersession.** This tranche feeds `contact_transfer_fraction` and the two non-porous fomite-transfer rows in §3.1. No later withdrawal or supersession is recorded in the register or the norovirus open ledger.
+
 **Status:** Evidence assembled. **No profile constant, engine constant or
 screen interval changes in this document.** Nothing here is authoritative about
 the model; the register row this tranche proposes lives in

@@ -1,6 +1,7 @@
 # Edison's norovirus sourcing bundle and influenza parameter bundle: review
 
-Status: received and reviewed. Nothing adopted, no constant changed.
+> **Status:** Historical reference; received and reviewed. Nothing adopted, no
+> constant changed.
 Received 2026-08-30 as `norovirus_parameter_sourcing_bundle.md` (Edison's,
 canonical SHA `a684d1c6`) and `influenza_parameters_bundle.json`.
 Companion to `edison_v3_spec_review.md` and `edison_provenance_request.md`

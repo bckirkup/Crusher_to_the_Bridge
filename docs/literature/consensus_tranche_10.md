@@ -1,5 +1,8 @@
 # Tranche 10 — who boards already shedding: the norovirus importation channel is measured, and it is not the chronic shedder
 
+
+**Register rows fed / supersession.** This tranche feeds Boarding / importation prevalence, chronic-shedder boarding prevalence, and the `asymptomatic_shedding_log10` offset in §3.1. No later withdrawal or supersession is recorded in the register or the norovirus open ledger.
+
 **Status:** Evidence assembled and interpreted. **No profile constant, engine
 constant or screen interval changes in this document.** The arithmetic in §3 and
 §4 is reproducible from the cited papers and the shipped profile; the change it

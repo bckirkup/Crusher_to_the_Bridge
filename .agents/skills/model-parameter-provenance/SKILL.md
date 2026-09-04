@@ -43,14 +43,15 @@ A comment at the definition, not in a doc that will drift:
 ```python
 SURFACE_CONTACTS_PER_HOUR = {
     # University dormitory primary shared surfaces, 10.4-25.4/h; midpoint.
-    # Yuan et al. 2024, Building and Environment. Grade B.
+    # Yuan et al. 2024, Building and Environment. Grade B. Origin: R (Results).
     "cabin": 17.9,
     ...
 }
 ```
 
-State three things: **what was measured**, **in what setting**, and the
-**evidence grade**. Grades used here:
+State four things: **what was measured**, **in what setting**, the
+**evidence grade**, and the **section of origin** — where in the paper the number
+was actually read. Grades used here:
 
 - **A** — direct measurement of this quantity in this setting.
 - **B** — direct measurement in an analogous setting (hotel lobby for a cruise
@@ -58,6 +59,22 @@ State three things: **what was measured**, **in what setting**, and the
 - **C** — inferred, estimated, or a declared assumption. Every Grade C constant
   is a standing liability and must be listed in the history document's
   "held fixed by assumption" section.
+
+**Section of origin is a fourth, independent field.** The comment at the
+definition is the copy of record, so it carries it too, in the register's axis-3
+vocabulary (`docs/parameter_provenance_register.md` §1): `R` Results, `Tn` table
+*n*, `Fn·dig` figure digitized, `Me` Methods, `Ab` abstract only, `Sec`
+secondary, `Tr` transcribed from a non-journal document, `?nr` not retrieved.
+Write it as `Origin: <code>`.
+
+It does not substitute for the grade and may not move it: a Grade A measurement
+of exactly this quantity in exactly this setting can still be `Ab` if the number
+was only ever read in an abstract, and that combination — Grade A, origin `Ab` —
+is the single most common sourcing defect found in this repository's audit. Keep
+the two fields separate and let the pair be visible.
+
+`?nr` is a retrieval state, not an origin and not a null result: it says a query
+naming the quantity and its unit did not return the number, nothing more.
 
 If no source exists, say so explicitly rather than inventing a plausible
 number. Total high-touch surface area per room in m² has never been measured by

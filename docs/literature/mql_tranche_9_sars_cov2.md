@@ -1,5 +1,8 @@
 # Tranche 9 — the DHS Master Question List against the SARS-CoV-2 arm: emission becomes bounded, the denominator stays circular
 
+
+**Register rows fed / supersession.** This tranche feeds `airborne_half_life_hours`, `surface_decay_log10_per_day`, `shedding_curve_log10` magnitude, and `airborne_emission_fraction` in §3.2. No later withdrawal or supersession is recorded in the register or the norovirus open ledger.
+
 **Status:** Evidence assembled and interpreted. **No pathogen-profile constant,
 no engine constant and no screen interval changes in this document.** Three
 in-tree comparisons are computed here and their arithmetic is reproducible from

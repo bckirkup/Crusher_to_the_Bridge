@@ -1,5 +1,8 @@
 # Consensus sourcing, tranche 3
 
+
+**Register rows fed / supersession.** This tranche feeds the historical norovirus genogroup, COVID severity/PCR, total-shedding and emesis rows described in this tranche; its Kirby/Ge conflict is retired by tranche 4 §1, with no other later withdrawal or supersession recorded in the register or the norovirus open ledger.
+
 **Status:** evidence discovery. Nothing here is adopted; no constant, profile
 field or engine path is changed by this document. Candidate values become model
 values only through `model-parameter-provenance`, with a unit check and an
