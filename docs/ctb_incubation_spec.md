@@ -201,7 +201,7 @@ T_inc = T_base * dose_modifier
 
 | Pathogen | dose_shift | dose_floor | ED50 | Source |
 |---|---|---|---|---|
-| Norovirus GII | 0.12 | 0.3 | 18 RT-PCR units | Atmar et al. 2014 [11] |
+| Norovirus GII | 0.12 | 0.3 | see note below — no assay figure is usable here | Atmar et al. 2014 (GI.1) [11]; corrected — see note |
 | SARS-CoV-2 | 0.15 | 0.3 | ~100 TCID50 | Blaurock et al. 2022 [9] |
 | Influenza A | 0.10 | 0.4 | ~1000 TCID50 | Memoli et al.; Fullen et al. [10] |
 | Measles | 0.05 | 0.5 | ~0.2 TCID50 | No direct evidence; conservative |
@@ -215,6 +215,48 @@ The `dose_floor` prevents unrealistically short incubation at extreme doses
 on the fractional incubation. The recommended central value of ~0.12–0.15
 produces ~0.5 day shortening per log10 dose for a pathogen with 4-day baseline,
 consistent with the empirical range.
+
+**The norovirus ED50 cell was wrong in three ways, and no shipped profile ever
+used it.** It read "18 RT-PCR units, Atmar et al. 2014". (a) Atmar et al. 2014
+measures **GI.1 Norwalk**, not GII. (b) Its HID50 is **3.3 RT-PCR units
+(≈1,320 gEq)** for secretor-positive blood-group O or A subjects and **7.0
+(≈2,800 gEq)** across all secretor-positive subjects — not 18. (c) **18 is a
+different quantity in a different unit**: it is Teunis et al. 2008's Table III
+figure, and it is not in RT-PCR units under either available reading of it — at
+Atmar's own implied ≈400 gEq per RT-PCR unit, "18 RT-PCR units" would be ≈7,200
+gEq, while the readings actually on offer are 18 aggregates (≈16,650 genome
+copies) or 18 genomic equivalents, discussed below. Behaviour is unaffected,
+because every shipped profile references its own beta-Poisson N50 in model units
+and says why it refuses the literature assay figure
+(`data/pathogens/active_profiles.json`, `norwalk_gi` notes) — the consequence
+being that the incubation dose axis is referenced to the model's own N50 rather
+than to any assay unit.
+
+**The 18 and the shipped pair are the same dose in two units, but the
+aggregation bridge remains an open primary-text question.** The collaborator's
+reading is 18 aggregates at ≈925 genome copies each, or ≈16,650 copies, while
+the shipped `alpha = 0.111`, `beta = 32.81` pair has an N50 of **16,871
+copies** under the approximate beta-Poisson form the engine implements,
+`1 − (1 + D/β)^−α`. The exact confluent-hypergeometric beta-Poisson value
+recorded in the bundle review is **16,644 copies**; the ≈1.3% difference from
+16,871 is the exact-versus-approximate form, immaterial beside the uncertainty
+on this row and recorded so the two figures are not mistaken for a
+contradiction. The trap is pairing the aggregate-unit 18 with the
+non-aggregation alpha/beta: at `D = 18`, the implemented curve gives
+**P ≈ 0.047**, not 0.5. The bundle review already called the 925 bridge an
+unverified hypothesis — "16,644 / 18 ≈ 925 genome copies per infectious
+aggregate" — so the collaborator's confirmation may not be independent of that
+document: the aggregate reading is corroborated but is still **not read off
+Table III**, and 925 remains unverified against the primary. Atmar's reply
+describes the figure as "18 genomic equivalents ... determined using
+assumptions about differing amounts of virus aggregation", which remains
+unreconciled with the aggregate reading. Atmar's measured HID50 of 1,320–2,800
+gEq is **6–13× below 16,871** under the nominally same no-aggregation framing
+reported by Kirby, Teunis & Moe, so that comparison is an open question
+attributed to the primary texts, not a value to adopt. The model is internally
+consistent on its own dose axis; representing 18 as aggregates would require an
+aggregation distribution step before the dose-response draw, which
+`engines/transmission_core.py` does not have.
 
 #### Pathogen profile schema
 

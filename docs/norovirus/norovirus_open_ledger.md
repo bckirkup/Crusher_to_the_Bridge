@@ -156,6 +156,25 @@ corroboration — and 0.111 lies inside it, within 3% of its geometric centre
 family, aggregation assumption and dose unit are one categorical choice (Liu et
 al. 2026).
 
+**The norovirus half of #43 is answered from the published exchange, but the
+answer is that the two figures were never in conflict.** The 18 figure is
+reported as an aggregation-model-dependent quantity, while the shipped pair is
+the non-aggregation genome-copy fit: the engine's approximate beta-Poisson form
+puts its N50 at **16,871 copies** and gives **P ≈ 0.047** when the aggregate-unit
+18 is incorrectly supplied as a dose. The bundle review had already posed the
+18-aggregate reading as an open, unverified hypothesis — "16,644 / 18 ≈ 925
+genome copies per infectious aggregate" — so the collaborator's confirmation
+may not be independent of our own document. The aggregate reading is
+corroborated but still not read off Table III, and the 925 bridge remains
+unverified against the primary; Atmar's reply instead describes "18 genomic
+equivalents ... determined using assumptions about differing amounts of virus
+aggregation", which is unreconciled. The bundle's question therefore exposed a
+process failure: **#43 was filed against a question our own review had already
+posed.** Atmar's measured HID50 of 1,320–2,800 gEq remains an open 6–13× gap
+below the shipped 16,871 under the nominally same no-aggregation framing, with
+both letters cited and no dose figure changed — every dose figure in this
+repository remains void pending refit.
+
 **The secretor screen interval widens to [0.04, 0.83], which invalidates the
 pending Morris design again (tranche 6 §4).** Kambhampati 2015's pooled
 secretor:non-secretor odds ratios are genotype-specific — 9.9 (3.9–24.8) for
