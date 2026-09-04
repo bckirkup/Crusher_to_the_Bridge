@@ -235,28 +235,29 @@ than to any assay unit.
 **The 18 and the shipped pair are the same dose in two units, but the
 aggregation bridge remains an open primary-text question.** The collaborator's
 reading is 18 aggregates at ≈925 genome copies each, or ≈16,650 copies, while
-the shipped `alpha = 0.111`, `beta = 32.81` pair has an N50 of **16,871
-copies** under the approximate beta-Poisson form the engine implements,
-`1 − (1 + D/β)^−α`. The exact confluent-hypergeometric beta-Poisson value
-recorded in the bundle review is **16,644 copies**; the ≈1.3% difference from
-16,871 is the exact-versus-approximate form, immaterial beside the uncertainty
-on this row and recorded so the two figures are not mistaken for a
-contradiction. The trap is pairing the aggregate-unit 18 with the
-non-aggregation alpha/beta: at `D = 18`, the implemented curve gives
-**P ≈ 0.047**, not 0.5. The bundle review already called the 925 bridge an
-unverified hypothesis — "16,644 / 18 ≈ 925 genome copies per infectious
-aggregate" — so the collaborator's confirmation may not be independent of that
-document: the aggregate reading is corroborated but is still **not read off
-Table III**, and 925 remains unverified against the primary. Atmar's reply
-describes the figure as "18 genomic equivalents ... determined using
-assumptions about differing amounts of virus aggregation", which remains
-unreconciled with the aggregate reading. Atmar's measured HID50 of 1,320–2,800
-gEq is **6–13× below 16,871** under the nominally same no-aggregation framing
-reported by Kirby, Teunis & Moe, so that comparison is an open question
-attributed to the primary texts, not a value to adopt. The model is internally
-consistent on its own dose axis; representing 18 as aggregates would require an
-aggregation distribution step before the dose-response draw, which
-`engines/transmission_core.py` does not have.
+the live per-agent path draws `r ~ Beta(α, β)` and has an exact
+confluent-hypergeometric N50 of **16,644 copies**. The closed-form helper
+`1 − (1 + D/β)^−α` has an approximate N50 of **16,871 copies**; the ≈1.3%
+gap is between the live per-agent mechanism and that test-only helper, not a
+second biological dose figure. The trap is pairing the aggregate-unit 18 with
+the non-aggregation alpha/beta: `P ≈ 0.047` at `D = 18` to three significant
+figures under both forms, not 0.5. The bundle review already called the 925
+bridge an unverified hypothesis — "16,644 / 18 ≈ 925 genome copies per
+infectious aggregate" — so the collaborator's confirmation is circular rather
+than independent: 16,643.78 / 18 = 924.65, and 18 × 925 agrees with the exact
+N50 to ≈0.04%. The aggregate reading is therefore **unverified**, not
+corroborated, and 925 remains unverified against the primary. What would settle
+it is Teunis et al. 2008's own reported aggregation parameter or aggregate-size
+distribution, read from Table III or the paper's text, independently of any ID50
+held here. Atmar's reply describes the figure as "18 genomic equivalents ...
+determined using assumptions about differing amounts of virus aggregation",
+which remains unreconciled with the aggregate reading. Atmar's measured HID50 of
+1,320–2,800 gEq is **5.9–12.6× below 16,644** under the nominally same
+no-aggregation framing reported by Kirby, Teunis & Moe, so that comparison is an
+open question attributed to the primary texts, not a value to adopt. The model
+is internally consistent on its live dose axis; representing 18 as aggregates
+would require an aggregation distribution step before the dose-response draw,
+which `engines/transmission_core.py` does not have.
 
 #### Pathogen profile schema
 

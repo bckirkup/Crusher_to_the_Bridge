@@ -190,9 +190,13 @@ sourcing one:
    conversion still belongs with the collaborator. The norovirus half of #43 is
    answered by the published exchange: the 18 figure is in genomic equivalents
    conditional on an aggregation model, while the shipped norovirus pair is the
-   non-aggregation genome-copy fit. R5 is not done; molecular detection is where
-   the project's observational effort is concentrated, so the SARS-CoV-2
-   conversion is what still has to be found.
+   non-aggregation genome-copy fit. The aggregate reading and the ≈925
+   copies-per-aggregate bridge remain unverified and circular, and Atmar's
+   genomic-equivalents wording remains unreconciled; Teunis's own aggregation
+   parameter or aggregate-size distribution would be needed to settle that
+   question. R5 is not done; molecular detection is where the project's
+   observational effort is concentrated, so the SARS-CoV-2 conversion is what
+   still has to be found.
 
 Neither may be settled by adopting a convenient ID50: the two available figures
 (Prentiss 361–2,000 particles; Riediker 500/300/100 copies) are **fitted to
