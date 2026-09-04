@@ -203,6 +203,15 @@ reason it cannot carry an age. Recorded as an open question in §6, not proposed
   it settles nothing — but it is the only sensitivity evidence there is, and it
   does not point at a dominant factor.
 * **It is not a licence to skip #36.** See §7.
+* **It does not extend to the exterior.** The HVAC-pinned argument that the
+  environmental covariates collapse is sound for the ship's *interior*; it does
+  not hold for the open decks, pool decks and semi-open zones every cruise
+  platform carries, which are neither temperature- nor humidity-pinned.
+  [`exterior_zone_environment_spec.md`](exterior_zone_environment_spec.md)
+  records what the tree asserts about those zones today, and its §3(c) is the
+  connection back to this document: a permanently wet poolside surface may never
+  complete the drying transition, so it would sit in one regime rather than
+  passing through both. Nothing there is adopted either.
 
 ## 6. Open questions
 
