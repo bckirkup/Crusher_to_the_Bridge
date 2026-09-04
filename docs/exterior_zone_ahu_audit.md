@@ -108,6 +108,22 @@ for a separate change. No non-cruise platform was modified here. The remaining
 platform audit (destroyer and Enterprise variants) found no settled exterior
 classification and therefore no changes.
 
+For completeness, the unchanged-platform cross-check recorded the following
+groups, ACH values, and memberships:
+
+| Platform | HVAC groups (ID: ACH — rooms) |
+|---|---|
+| `destroyer_baseline` | `zone_upper`: 6 — Bridge; `zone_main`: 8 — MedBay, Mess_Hall, Galley; `zone_lower`: 10 — Engine_Room, Berthing |
+| `fletcher_class_destroyer` | `HVAC_Superstructure`: 6 — Bridge, CIC, Radio_Room, Gun_Mount_51; `HVAC_Main_Deck_Fwd`: 5 — Officers_Quarters, Wardroom, Sickbay, CPO_Quarters; `HVAC_Main_Deck_Mid`: 8 — Galley, Torpedo_Mount_Midships, Passageway_Main; `HVAC_Berthing`: 4 — Enlisted_Berthing_Fwd, Enlisted_Berthing_Aft, Mess_Deck; `HVAC_Boiler_Rooms`: 25 — Boiler_Room_1, Boiler_Room_2; `HVAC_Engine_Rooms`: 18 — Engine_Room_Fwd, Engine_Room_Aft; `HVAC_Magazines`: 8 — Magazine_Fwd, Magazine_Aft |
+| `enterprise_constitution_tos` | `AHU_EC_D4`–`AHU_EC_D6`: 7 — listed EC passenger branches; `AHU_Command`: 10 — Bridge, BriefRoom, Comms, Library; `AHU_Ops`: 9 — Science1, Science2, Transprt1, Transprt2, Security, Brig, NeckHub; `AHU_Living`: 8 — RecDeck, Gym, Mess_Hall, HeadsMain; `AHU_Medical`: 12 — Sickbay, IsolBay1, IsolBay2; `AHU_Service`: 15 — Galley, StoresDry, StoresCold, Armory; `AHU_Engineering`: 16 — EngMain, WarpCore, EPSDist, Jefferies, Airlock; `AHU_Crew`: 7 — OC_D5_F, OC_D5_M, OC_D5_A, OC_D6_F, OC_D6_M, OC_D6_A |
+| `enterprise_galaxy_tng` | `AHU_EC_D7`–`AHU_EC_D12`: 7 — listed EC passenger branches; `AHU_FC_D23`–`AHU_FC_D25`: 7 — listed FC passenger branches; `AHU_Command`: 10 — Bridge, BriefRoom, Comms; `AHU_Public`: 9 — TenFwd, Arboretum, Holodeck1, Holodeck2, School, CrewLounge, StellarCart, Gym; `AHU_Ops`: 9 — Science1, Science2, Transprt1, Transprt2, Security, Brig, NeckHub; `AHU_Medical`: 12 — Sickbay, IsolBay1, IsolBay2, IsolBay3; `AHU_Service`: 14 — Galley, Mess_Hall, HeadsMain, StoresDry, StoresCold, Armory; `AHU_Engineering`: 16 — MainEng, WarpCore, EPSDist, Jefferies, Deflector; `AHU_Flight`: 12 — ShuttleBay, CargoMain, CargoAux, Airlock; `AHU_Crew`: 7 — OC_D8_F, OC_D8_M, OC_D8_A, OC_D9_F, OC_D9_M, OC_D9_A |
+| `legend_class_nsc` | `HVAC_Superstructure`: 10 — Bridge, CIC; `HVAC_Officer_Spaces`: 8 — Officers_Quarters, Wardroom; `HVAC_Enlisted_Fwd`: 8 — CPO_Berthing, Enlisted_Berthing_Fwd, Crew_Mess; `HVAC_Enlisted_Aft`: 8 — Enlisted_Berthing_Aft, Aviation_Det_Berthing, Boarding_Team_Staging; `HVAC_Medical`: 12 — Sickbay; `HVAC_Galley`: 15 — Galley; `HVAC_Midships_Utility`: 6 — Passageway_Main, Armory; `HVAC_Aviation`: 8 — Helicopter_Hangar, Flight_Deck, Boat_Deck; `HVAC_Engine_Room`: 20 — Engine_Room |
+| `san_antonio_class_lpd` | `HVAC_Superstructure`: 10 — Bridge, CIC, Marine_Planning; `HVAC_Officer_Berthing`: 8 — Ship_Officers_Quarters, Ship_CPO_Quarters, Wardroom; `HVAC_Crew_Habitable`: 8 — Ship_Enlisted_Berthing, Crew_Mess, Passageway_Main; `HVAC_Troop_Berthing`: 7 — Troop_Berthing_Fwd, Troop_Berthing_Mid, Troop_Berthing_Aft, Troop_Mess, Troop_Recreation; `HVAC_Medical`: 12 — Medical_Ward; `HVAC_Galley`: 15 — Galley; `HVAC_Vehicle_Deck`: 10 — Vehicle_Deck; `HVAC_Aviation`: 8 — Hangar, Flight_Deck; `HVAC_Well_Deck`: 6 — Well_Deck; `HVAC_Machinery`: 20 — Engine_Room_Fwd, Engine_Room_Aft |
+
+Their cross-zone links (AHU-to-AHU or retained non-duct access paths) and
+adjacency were unchanged. Effective OA is native fallback `0.2` except the
+two Enterprise platforms, which explicitly declare `0.15`.
+
 ## What this fix is and is not
 
 This fix removes duct coupling from the six cruise platforms while retaining
