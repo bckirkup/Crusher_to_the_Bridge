@@ -392,6 +392,7 @@ class PathogenProfile(BaseModel):
     dose_adjustment: float = 1.0
     dose_response: DoseResponse | None = None
     illness_probability: dict[str, float] = {}
+    symptomatic_fraction: float | None = None
     severity_model: SeverityModel | None = None
     observation_model: ObservationModel | None = None
     recovery_day: int = 3
@@ -666,6 +667,14 @@ def _check_mathematical_bounds(
                         f"{p.pathogen_id}.illness_probability.{key} = {val} "
                         f"is outside [0.0, 1.0]",
                     )
+            val = p.symptomatic_fraction
+            if val is not None and (val < 0 or val > 1):
+                report.error(
+                    _ACTIVE_PROFILES_JSON,
+                    "MATH_BOUND",
+                    f"{p.pathogen_id}.symptomatic_fraction = {val} "
+                    f"is outside [0.0, 1.0]",
+                )
 
 
 def _check_strain_evolution(

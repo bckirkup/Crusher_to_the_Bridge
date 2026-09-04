@@ -1,6 +1,6 @@
 ---
 name: searching-literature-evidence
-description: Search the peer-reviewed literature with the Consensus MCP server to source a model constant, check an anchor, or find measurements of a mechanism — constants, rates, fractions, kernels and anchors in the transmission and natural-history model. Use whenever a constant, rate, fraction, kernel or anchor needs a citation, or when asked what the literature says about a mechanism. Pairs with the org-level consensus-literature-retrieval skill, which owns retrieval mechanics.
+description: Search the peer-reviewed literature with the Consensus MCP server to source a model constant, check an anchor, or find measurements of a mechanism — constants, rates, fractions, kernels and anchors in the transmission and natural-history model, and how to escalate when the abstract will not settle a definition. Use whenever a constant, rate, fraction, kernel or anchor needs a citation, or when asked what the literature says about a mechanism. Pairs with the org-level consensus-literature-retrieval skill, which owns retrieval mechanics.
 ---
 
 # Searching the Literature (Consensus MCP)
@@ -31,6 +31,43 @@ Filters that are specifically wrong for this repo's literature:
   indoor-air journals that most fomite and shedding constants come from.
 - `human` drops exactly the in-vitro transfer and surrogate work (MNV1, Phi6,
   MS2) that quantifies fomite and hand routes.
+
+## When the abstract is not enough
+
+This is the dominant failure mode, not a rare one: a review of eight recent
+literature-sourcing sessions found six of them stalled for want of full text.
+Abstracts settle magnitudes; they almost never settle a **definition** — units
+(infectivity vs RNA), endpoint, denominator, sampling times, matrix — and those
+are what decides whether a number can be adopted at all.
+
+So a paywall is not the end of the search. The ladder, in order:
+
+1. `consensus` MCP `search` with `include_full_text_chunks` — ranking, DOI,
+   abstract, and query-relevant excerpts of the body, tables included. Always
+   first, and often enough to settle the definition on its own. The chunks are
+   query-relevant rather than exhaustive, so silence there is *not retrieved*,
+   not *not measured*.
+2. The DOI itself, then the open routes for the same article: PubMed Central,
+   Europe PMC, the publisher's own HTML, an author or institutional copy.
+   Supplementary tables live here and are frequently where the time-resolved
+   measurements are.
+3. A richer interface, when 1 and 2 cannot settle the definition. Available to
+   this project, by asking rather than by a scripted call: **Consensus Pro
+   reports**, **edison/aviary literature analysis**, and **Google Literature
+   Insights**. Use these to have the *text* read and reduced to the measured
+   quantity, not to re-rank titles.
+
+Record which interface produced each conclusion, alongside the citation. A
+figure that came out of a synthesis interface and a figure read off the paper's
+own table are not the same evidence, and the register has to be able to tell
+them apart.
+
+**A blocked read is not a null result.** "No paper measures this" is a finding
+about the literature and is the honest route to a declared Grade C. "The paper
+that measures this could not be opened" is a finding about our access: it blocks
+the grade, and it must be escalated up the ladder or reported as still blocked.
+Collapsing the second into the first manufactures a Grade C that the literature
+does not support.
 
 ## Turning a hit into a sourced constant
 
@@ -65,4 +102,5 @@ helps destroys that test just as surely as fitting the scalar by hand.
 Report a null result as a result. "No paper measures total high-touch surface
 area per cabin in m²" is a finding worth recording, and is the honest route to a
 declared Grade C. Inventing a plausible number because the search came back
-empty is the failure mode this skill exists to prevent.
+empty is the failure mode this skill exists to prevent — and so is filing an
+unread paper as a null result, which is the separate case above.
