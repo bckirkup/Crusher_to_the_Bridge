@@ -68,11 +68,11 @@ influenza 2 of ~25):
 | Quantities that had no usable literature basis and now have one recorded | **57** |
 | — of those, adoptable as they stand (✓) | 24 |
 | — blocked by a field, mechanism or identifiability defect (⊘) | **21** |
-| — adopted in the tree | **3** (the FUT2 pair, Wave 1, plus the influenza `symptomatic_fraction`, R3) |
+| — adopted in the tree | **4** (the FUT2 pair from Wave 1, the influenza `symptomatic_fraction` from R3, and the norovirus `emesis_conditioned` airborne mode and interval from R4) |
 | — provenance recovered but mis-genogrouped | **1** (η/γ; the dose-response pair left this row in tranche 6, declared as the GI.1 arm and swept over the GII interval it lies inside) |
-| — refuted, or shown to be unmeasurable (∅) | **8** |
+| — refuted, or shown to be unmeasurable (∅) | **7** |
 | Nulls and rejections recorded as results (§3.4) | 16 |
-| Profile scalars carrying a citation **in the tree** | 8 / 6 / 3 |
+| Profile scalars carrying a citation **in the tree** | 8 / 7 / 3 |
 
 **These figures are recounted from §3, not incremented**, so they are not
 comparable line-for-line with the 33 / 9 / 6 published before sourcing wave 1,
@@ -84,8 +84,8 @@ are not quantities at all (the superseded `innate_nonsusceptible_fraction` and
 emesis titre rows, the campaign-versus-profile divergence, the curve-selection
 defect, the emesis degrees-of-freedom reduction), three declared or
 construction inputs (`base_susceptibility` in both arms, secretor/innate
-nonsusceptibility), three still unsourced (`airborne_emission_fraction` in both
-arms, `presymptomatic_share_of_presenting`, which is derived from three profile
+nonsusceptibility), two still unsourced (`airborne_emission_fraction` on the
+SARS-CoV-2 arm, `presymptomatic_share_of_presenting`, which is derived from three profile
 fields rather than measured), and Edison's proposed influenza
 `surface_decay_per_day` key, which is not in the tree — that proposal predates
 R1 and is quoted in the fraction spelling it was written in, which no longer
@@ -93,13 +93,15 @@ exists anywhere; the tree's influenza field is `surface_decay_log10_per_day`.
 That leaves **57**
 recorded. Blocked counts a row when its adoption state is a ⊘ state or says
 "blocked by", and does not count a row whose state records the defect as
-resolved (both `airborne_emission_fraction` rows,
+resolved (the former norovirus `airborne_emission_fraction` row and
 `surface_deposition_fraction`). Refuted-or-unmeasurable counts a row whose own
 adoption state carries ∅ or the word refuted.
 
 R3 moves the influenza presentation quantity from the refuted bucket into the
 adopted tree as `symptomatic_fraction`, deleting the dose-conditional mechanism
-rather than re-sourcing it.
+rather than re-sourcing it; R4 then moves the norovirus airborne quantity into
+the adopted tree by redefining it as the event-conditioned interval and plumbing
+it per emesis event without selecting a point.
 
 Sourcing wave 1 (tranches 11–18) is the largest single move in the table and
 it adopts nothing. It adds five §3.1 rows (GII time-to-peak, GII decline shape,
@@ -121,14 +123,18 @@ asymptomatic-offset comparison (⊘ setting), and records the
 chronic-shedder boarding prevalence as a bounded ∅. In-tree adoption is
 again unchanged.
 
-The last row is the honest headline, and it has moved once. Wave 1 adopted the
+The last row is the honest headline, and it has moved four times. Wave 1 adopted the
 FUT2 pair — `secretor_negative_fraction` 0.20 with
 `secretor_negative_relative_susceptibility` 0.20 — by replacing the mechanism
 that blocked them, and resolved the naming defect on the two renamed fields
 (`route_efficiency_multipliers`, `airborne_emission_fraction`) without sourcing
 either. Wave 2 then adopted the identified emesis total and moved surface decay
-into its sourced unit, and the other in-tree changes from the sourcing campaign
-remain three screening intervals (`surface_decay_log10_per_day`, the recut
+into its sourced unit. R3 then adopted influenza `symptomatic_fraction` by
+deleting the dose-conditional presentation mechanism. R4 then adopted the
+norovirus airborne definition and plumbing while retaining the measured
+per-event interval rather than selecting a point. The other in-tree changes
+from the sourcing campaign remain three screening intervals
+(`surface_decay_log10_per_day`, the recut
 interval in sourced units, [0.067, 0.79]; `hand_to_surface_drying_multiplier`,
 [0.008, 1.0] at a neutral shipped value;
 `secretor_negative_relative_susceptibility`, [0.05, 0.50] → [0.04, 0.83],
@@ -167,7 +173,7 @@ Shipped values verified against `data/pathogens/active_profiles.json` and
 | `chronic_shedder_fraction` (`norwalk_gi`) | **0.228** | **B** | Probability that a host who is both immunocompromised *and* infected becomes a chronic shedder. van Beek 2017 (*Clin Microbiol Infect* 23(4):265): 2,182 solid-organ recipients tested, 101 (4.6%) infected, **23 of 101 = 22.8%** chronic. Davis 2020 confirms *infectious* virus (HIE) rather than RNA alone in 20 chronic paediatric cases | ✓ **adopted** (#45) as a pathogen-profile key on `norwalk_gi` only; `sars_cov2_resp` and the influenza bundle carry nothing, because no sourced chronic duration exists for them, and a profile without the key has no chronic mechanism at all. Conditional on immunocompromise and infection, so it is not a population fraction. Not fitted to any scored anchor | #45 done |
 | `chronic_shedding_duration_days` (`norwalk_gi`) | median **218**, range **32–1,164**, `sigma_log` **1.09** | **B** for median/range; `sigma_log` is a **declared assumption** | van Beek 2017 (*Clin Microbiol Infect* 23(4):265) measures median shedding **218 days**, range **32–1,164**, in the 23 chronic cases; van Beek 2017 (*J Infect Dis* 216(9):1132) is a supporting cohort at mean 352 days, range 76–716; Davis 2020 reports 37 to >418 days of infectious virus. The lognormal *shape* is not van Beek's: treating the reported range as an approximate 90% interval, ln(1164/218) = 1.674 and ln(218/32) = 1.919, mean 1.797, ÷1.645 → **σ = 1.09** | ✓ **adopted** (#45). Drawn once per immunocompromised host per profile at initialization on a derived RNG stream, truncated to [32, 1164] by rejection (clipped only if the 32-draw budget is exhausted), stamped into the infection record at infection and preferred over the profile's `shedding_duration_days` by `_clearance_days`. A chronic host's duration exceeds any voyage, so on board it never clears; the boarding-prevalence importation channel is deliberately **not** implemented here. No chronic *magnitude* knob is added: Chaimongkol 2024 spans 10⁴–10¹¹ copies/g, which the existing `shedding_variance_log10` per-host draw already covers, and no point value exists to adopt | #45 done |
 | `surface_decay_log10_per_day` | **0.124939**, set by the profile; the fraction alias no longer exists | C → **B in sourced units** | Five surrogate studies → **[0.067, 0.79] log10/day**, Grade B, which is the unit every source measures in; the former [0.14, 0.84] was that same interval converted through f = 1 − 10⁻ᵏ. Shipped 0.25 fractional ↔ −log10(0.75) = **0.125 log10/day**, which lies **inside [0.067, 0.79] near its slow end** (tranche 5 §1) | ✓ interval **adopted in the screen box in sourced units** (#41), and as of R1 the shipped value is expressed in that unit too: `norwalk_gi` carries 0.124939 log10/day, `surface_decay_per_day` is deleted from the engine, the schema and every profile, and the conversion is a single function, `transmission_core.surface_fraction_per_day`. **The divergence #41 recorded is closed** — the sourced key is now the only key and is exercised by everything that runs. This changes no value: 0.124939 = −log10(1 − 0.25) reproduces the previous per-day fraction, no golden moved, and the interval is still **adopted for the screen box only**, not as a point estimate | #41, #59 done |
-| `airborne_emission_fraction` | 1e-4 (renamed from `surface_deposition_fraction`, value unchanged) | **C** unsourced-assumed — **∅ null confirmed by search** | **No study reports emission to air as a fraction of a host's shedding**, for norovirus or, in six unfiltered Consensus queries, for any pathogen: shedding is measured in copies/g of stool or vomitus and airborne virus in copies/m³ of room air, never in the same subjects, so the fraction has no commensurable numerator and denominator ([tranche 13](literature/consensus_tranche_13_airborne_fraction.md) §3.1). What is measured instead is **air concentration** — Alsved 2019 5–215 copies/m³ (86 samples, 26 patients), Bonifait 2015 1.35 × 10¹–2.35 × 10³ genomes/m³ (48 samples, 8 facilities), Rupprom 2024 GII 3.4 × 10¹–5.0 × 10³ copies/m³ (60 samples), Kittigul 2025 GII 1.5 × 10²–5.5 × 10³ copies/m³ (WWTP aerosols), Boles 2021 383–684 MNV copies/m³ after a seeded toilet flush — all **Grade B concentrations, not emission rates** (§3.2). **The SARS-CoV-2 row's "derivable" note has no norovirus counterpart**: there is no measured norovirus emission rate to be the numerator (§2, query 5, which returns no norovirus paper at all). The one measured aerosolised fraction, Tung-Thompson 2015 (MS2, simulated vomiting, n = 3/condition, 41 L chamber, corrected for 8.5% sampler efficiency), is **7.2 × 10⁻⁵ % – 2.67 × 10⁻² %**, i.e. a fraction of **7.2 × 10⁻⁷ – 2.67 × 10⁻⁴** — **percent, and misreading the table as fractions overstates it by two decades** — and its denominator is the virus in one expelled bolus, not the host's shedding (§3.3) | — **not blocked, and still unsourced.** The ⊘ field defect stays resolved; the suspicion that the field has no measurable referent is now **searched and confirmed**, not assumed. Adoption is possible only by **redefining the field** as an emesis-event-conditioned aerosolisation fraction, for which Tung-Thompson 2015 would be a Grade B source; as a fraction of continuous shedding, nothing measures it. The shipped 1e-4 falls inside Tung-Thompson's fraction range near its top, which is **coincidence across incompatible denominators and is not provenance** | #42 done (search); redefinition open |
+| `airborne_emission_mode = emesis_conditioned`; `emesis_aerosol_fraction_range` | **[7.2e-7, 2.67e-4]**, declared interval | **B** | The continuous-shedding definition remains **∅ null-confirmed-by-search**: no study reports emission to air as a fraction of a host's shedding, for norovirus or, in six unfiltered Consensus queries, for any pathogen. Shedding is measured in copies/g of stool or vomitus and airborne virus in copies/m³ of room air, never in the same subjects, so that fraction has no commensurable numerator and denominator ([tranche 13](literature/consensus_tranche_13_airborne_fraction.md) §3.1). Conditioned on one emesis event, Tung-Thompson 2015 measured MS2 in simulated vomiting, **n = 3 per condition**, a **41 L chamber**, corrected for **8.5% sampler efficiency**; the denominator is the virus in **one expelled bolus**. Its table is in **percent**, **7.2e-5%–2.67e-2%**, which converts to the declared fraction interval **[7.2e-7, 2.67e-4]**; reading the percentages as fractions would overstate the interval by two decades. The deleted 1e-4 fell inside the converted interval only by coincidence across incompatible denominators and is not corroboration | ✓ **definition and plumbing adopted (R4)**: the norovirus arm emits to air only per emesis event, drawing log-uniformly over the entire declared interval into the zone reservoir exactly once. The value remains an interval; **no point inside it was selected**, and no value was selected to match an anchor or golden | R4 |
 | `airborne_half_life_hours` | 1.1 | **I, cross-pathogen** — **∅ null for human norovirus, reconfirmed** | **No measurement of airborne human norovirus decay exists**; human NoV is not routinely culturable, so airborne NoV work reports RNA persistence, not infectivity decay. The shipped 1.1 remains van Doremalen's SARS-CoV-2 figure, mis-cited there too (van Doremalen measures 2.7 h). Nearest measurement, **Grade B, named calicivirus surrogate**: Zargar 2025 (*J Virol Methods* 335:115144) feline calicivirus in a 25 m³ room-sized aerobiology chamber, six-jet Collison nebuliser, soil load, gelatin slit sampler, PFU assay, **22 ± 2 °C and 50 ± 10% RH** → biological decay **0.0081 ± 0.0031 log10 PFU/m³/min**, which as a unit transformation is t½ = **0.62 h (0.45–1.00 h on ±1 SD)**. **Abstract-verified only** — full text paywalled, so "biological decay" (i.e. corrected for physical loss), the fit form and the run count are unverified; Reckitt-funded air-purifier study. Supporting bounds, no rates: Purhonen 2024 (MNV infectious to 90 min), Alsved 2020 (drying drives infectivity loss), Rupprom 2024 (GII RNA to 120–240 min), Sanka 2026 (MS2/ΦX174 infectious in air at 2 h, absent at 24 h), Donaldson 1976 (FCV RH-sensitive across 30–70%, no rate). Rejected: Dubuis 2020 (ozone), Buonanno 2024 (far-UVC), thermal/surface/water persistence, all SARS-CoV-2 aerosol work ([tranche 13](literature/consensus_tranche_13_airborne_fraction.md) §4–§5) | ∅ **null stands for norovirus.** Either declare the field unsourced, or adopt the FCV surrogate interval **[0.45, 1.00] h** as an explicitly cross-species Grade B stand-in — an adoption decision this tranche does not take. Note the shipped 1.1 sits **outside** that interval; recorded as a fact about the surrogate measurement, not as an argument for any replacement value | #39 |
 | `route_efficiency_multipliers` (6) | 0.35/0.1/0.05/0.3/0.2/0.0 (renamed from `transmission_route_weights`, values unchanged) | C | None. Independent per-route multipliers, not shares — the schema now says so | ⊘ **joint** — the field defect is resolved (#25); these multipliers are not separately identifiable from Edison's pre-establishment clearance layer, which parameterises the same object, so no per-route efficiency can be adopted into one of the two alone | #25 |
 | `environmental_faecal_release_log10_g_per_epoch` | 4.0 (`dose_adjustment`) | F → **measured inert** | Ge 2023 measures *total shed genome copies*, which retires the key rather than sourcing it | ⊘ field | #38 |
@@ -364,6 +370,18 @@ item here, because the genogroup contrast cannot be quantified for it at all.
    Declared, not applied, and it has to be adopted jointly with the dose axis if
    at all (#47).
 
+7. **Norovirus airborne emission** — **resolved by R4, by redefinition.** The
+   continuous-shedding fraction had no commensurable numerator and denominator:
+   shedding is copies/g of stool or vomitus while airborne virus is copies/m³ of
+   room air, never measured in the same subjects. The profile now declares
+   `airborne_emission_mode = emesis_conditioned` and the Tung-Thompson Grade B
+   interval `[7.2e-7, 2.67e-4]`, whose denominator is the virus in one expelled
+   bolus. The engine draws log-uniformly per event and drains that mass into the
+   zone reservoir once; no point inside the interval was selected. The percent
+   table was converted from `7.2e-5%–2.67e-2%`, and the deleted `1e-4` was inside
+   the interval only by coincidence across incompatible denominators, not
+   corroboration.
+
 ## 5. Degrees of freedom, by provenance
 
 Named quantities still free to move, after identifiability collapses some of
@@ -371,7 +389,7 @@ them:
 
 | Arm | Free quantities | Notes |
 |---|---|---|
-| Norovirus | 6 route efficiency multipliers, cabin-localization `f`, `airborne_emission_fraction`, one reporting-probability scale | The reporting scale is the only one constrained by an anchor, and that anchor is A3. The former single dose knob is **measured inert** above release 8 — the fomite pool dominates so completely that a 14-log10 change is byte-identical |
+| Norovirus | 6 route efficiency multipliers, cabin-localization `f`, one reporting-probability scale | The airborne quantity is a measured interval consumed per emesis event, not a free continuous airborne fraction. The reporting scale is the only one constrained by an anchor, and that anchor is A3. The former single dose knob is **measured inert** above release 8 — the fomite pool dominates so completely that a 14-log10 change is byte-identical |
 | SARS-CoV-2 | 1 identifiable composite `(emission × route × transfer)/β`, 6 route efficiency multipliers, a 5-state severity vector, the testing-campaign replica, `airborne_emission_fraction` | The composite is *one* degree of freedom wearing four parameters' clothing. Fitting it while the background is unsourced would absorb their error, which is the failure the whole audit road exists to avoid |
 | Influenza | `base_susceptibility` (prior immunity), plus everything in §3.3 | Not active. The susceptibility term must come from seroprevalence or vaccination coverage for the specific season and route, or the arm has a free knob on its most consequential input. R3 removed the dose-conditional presentation pathway (η/γ deleted), so the arm has one fewer free quantity: `symptomatic_fraction` is measured with a CI and is not a knob. |
 

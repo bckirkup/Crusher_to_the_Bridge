@@ -2,7 +2,7 @@
 
 > **Status:** Living
 
-**Live status as of `70c4e00` (Item 2).** What is currently withdrawn,
+**Live status updated for R4.** What is currently withdrawn,
 what each anchor last measured and *when*, and what is outstanding.
 
 `docs/norovirus/norovirus_model_history.md` is the permanent record of defects and
@@ -754,16 +754,17 @@ is over-determined only *given* them. Full list in §10 of the history document.
   must be re-run before the admissible-region search. The re-run was launched
   and then killed part-way; the factor substitution in §1 invalidates that
   document again, independently.
-- `surface_deposition_fraction` was misnamed for what it does; the active
-  profiles now spell it `airborne_emission_fraction` (same values, deprecated
-  alias still read). The key is read in `orchestrator_epoch.py` and added to
-  the **zone/airborne** pool
-  decayed by `airborne_half_life_hours`, not to the fomite surface pool,
-  which is filled by emesis and hand-to-surface back-transfer instead. Its
-  inherited comment ("particles survive 86400 steps = 1 day") is a survival
-  duration offered as a deposition fraction. No study reports deposition as
-  a fraction of total shedding, so the quantity the key asks for may not be
-  measurable. See `../literature/consensus_tranche_5.md` §2.
+- The former `surface_deposition_fraction` / `airborne_emission_fraction`
+  continuous-shedding definition is deleted from the active norovirus profiles:
+  shedding is measured in copies/g of stool or vomitus while airborne virus is
+  measured in copies/m³ of room air, never in the same subjects. Norovirus now
+  declares `airborne_emission_mode = emesis_conditioned` and
+  `emesis_aerosol_fraction_range = [7.2e-7, 2.67e-4]`; `TransmissionCore` draws
+  log-uniformly per emesis event and drains that mass into the zone airborne
+  reservoir once. Tung-Thompson 2015's table is in percent
+  (7.2e-5%–2.67e-2%), so the declared fractions are the two-decades-smaller
+  conversion. The deleted 1e-4 fell inside the interval only by coincidence
+  across incompatible denominators, not corroboration.
 - Uniform `immune_ratio` across a resident crew and a weekly-turnover passenger
   cohort — an assumption that bears directly on A5.
 - Crew presenteeism and mandatory occupational reporting: absent in both

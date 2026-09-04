@@ -18,7 +18,7 @@ from engines.transmission_core import (
     ContactTracingMatrix,
     TransmissionCore,
 )
-from orchestrator_epoch import step_infection_progression
+from orchestrator_epoch import _airborne_emission_fraction, step_infection_progression
 
 ZONE = "Test_Zone"
 PATHOGEN = "test_pathogen"
@@ -204,6 +204,50 @@ def test_confined_shedder_airborne_deposition_is_attenuated() -> None:
         return engine.get_pathogen_zone_mass(PATHOGEN)[ZONE]
 
     assert deposited(True) == pytest.approx(deposited(False) * 0.05)
+
+
+@pytest.mark.parametrize(
+    ("profile", "expected"),
+    [
+        ({"airborne_emission_mode": "emesis_conditioned"}, 0.0),
+        ({"airborne_emission_fraction": 0.25}, 0.25),
+        ({"surface_deposition_fraction": 0.4}, 0.4),
+        ({}, 1e-4),
+    ],
+)
+def test_airborne_emission_mode_preserves_continuous_helper_contract(
+    profile: dict[str, object],
+    expected: float,
+) -> None:
+    assert _airborne_emission_fraction(profile) == pytest.approx(expected)
+
+
+def test_emesis_mode_removes_continuous_airborne_feed() -> None:
+    emesis_profile = {
+        **AGING_PROFILE,
+        "airborne_emission_mode": "emesis_conditioned",
+    }
+    continuous_profile = {
+        **AGING_PROFILE,
+        "airborne_emission_mode": "continuous_fraction",
+        "airborne_emission_fraction": 1.0,
+    }
+    emesis_engine = _aging_engine(shedder=True)
+    continuous_engine = _aging_engine(shedder=True)
+
+    step_infection_progression(
+        emesis_engine,
+        {PATHOGEN: emesis_profile},
+        epoch=0,
+    )
+    step_infection_progression(
+        continuous_engine,
+        {PATHOGEN: continuous_profile},
+        epoch=0,
+    )
+
+    assert emesis_engine.get_pathogen_zone_mass(PATHOGEN)[ZONE] == pytest.approx(0.0)
+    assert continuous_engine.get_pathogen_zone_mass(PATHOGEN)[ZONE] > 0.0
 
 
 def test_simultaneous_delivery_is_independent_of_occupant_order() -> None:

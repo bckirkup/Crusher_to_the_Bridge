@@ -272,8 +272,10 @@ cabin-localization fraction `f` (unmeasured, swept, and the binding uncertainty
 for Park); outbreak cleaning coverage 0.58 (Grade C, sweep only); log10
 additivity of preclean-then-hypochlorite (Grade C); one housekeeping pass per
 day; the cleaned/missed deposition split; confinement attenuation 0.05;
-`surface_deposition_fraction` 1e-4 and `surface_decay_per_day` 0.25 (no
-provenance comment found); `shedding_variance_log10` 1.0 (anchored to a range,
+the former continuous airborne fraction (now deleted; the measured
+`emesis_aerosol_fraction_range` is consumed per event) and
+`surface_decay_per_day` 0.25 (no provenance comment found);
+`shedding_variance_log10` 1.0 (anchored to a range,
 not a value); and the declared `strain_evolution` placeholders
 (`superinfection_susceptibility`, `recombination_rate_per_day`).
 

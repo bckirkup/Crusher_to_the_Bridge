@@ -10,6 +10,7 @@ from tools.sanity_checker import (
     _check_wearable_monitoring, _check_modality_params, _check_hvac_params,
     _check_emod_progression, _check_escalation_params, _check_fred_behavior,
     _check_multi_pathogen_params, _check_microflora_params,
+    _check_emesis_airborne_exclusion,
 )
 
 
@@ -424,6 +425,30 @@ def test_new_pathogen_profile_fields_accept_valid_values() -> None:
     assert profile.emesis_total_shed_gec_range == [1e5, 1e8]
 
 
+def test_airborne_emission_mode_accepts_supported_values() -> None:
+    for mode in ("continuous_fraction", "emesis_conditioned"):
+        profile = _minimal_pathogen_profile(airborne_emission_mode=mode)
+        assert profile.airborne_emission_mode == mode
+
+
+def test_emesis_airborne_exclusion_checks_raw_profile_keys() -> None:
+    report = Report()
+    _check_emesis_airborne_exclusion(
+        {
+            "pathogens": [
+                {
+                    "pathogen_id": "test",
+                    "airborne_emission_mode": "emesis_conditioned",
+                    "surface_deposition_fraction": 0.0001,
+                },
+            ],
+        },
+        report,
+    )
+    assert not report.passed
+    assert "cannot carry surface_deposition_fraction" in report.errors[0].message
+
+
 @pytest.mark.parametrize(
     ("field", "value"),
     [
@@ -433,6 +458,7 @@ def test_new_pathogen_profile_fields_accept_valid_values() -> None:
         ("emesis_total_shed_gec_range", []),
         ("emesis_total_shed_gec_range", [0.0, 1.0]),
         ("emesis_total_shed_gec_range", [2.0, 1.0]),
+        ("airborne_emission_mode", "unsupported"),
     ],
 )
 def test_new_pathogen_profile_fields_reject_invalid_values(

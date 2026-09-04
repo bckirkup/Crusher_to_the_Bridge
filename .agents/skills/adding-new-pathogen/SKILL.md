@@ -44,7 +44,8 @@ Profiles live in `data/pathogens/active_profiles.json`. Each pathogen entry requ
   },
   "illness_probability": {"eta": 0.6, "gamma": 0.4},
   "recovery_day": 5,
-  "surface_deposition_fraction": 0.3,
+  "airborne_emission_mode": "continuous_fraction",
+  "airborne_emission_fraction": 0.3,
   "base_susceptibility": 1.0,
   "introduction_epoch": 0,
   "initial_infected": 1,
@@ -126,7 +127,11 @@ Edit `data/pathogens/active_profiles.json` and add a new object to the `pathogen
 - For `exponential` model, `dose_response.k` must be > 0
 - `shedding_curve_log10` must be non-empty
 - `shedding_variance_log10` (optional, default 0.0) — σ of log-normal host shedding multiplier; 0.0 = no variance
-- `surface_deposition_fraction` must be in [0.0, 1.0]
+- `airborne_emission_fraction` (continuous mode) must be in [0.0, 1.0];
+  `surface_deposition_fraction` remains a deprecated alias
+- `airborne_emission_mode`, when present, must be `continuous_fraction` or
+  `emesis_conditioned`; an emesis-conditioned profile instead carries its
+  declared `emesis_aerosol_fraction_range` and neither continuous emission key
 - `base_susceptibility` must be >= 0
 - `illness_probability.eta` and `gamma` must be in [0.0, 1.0]
 

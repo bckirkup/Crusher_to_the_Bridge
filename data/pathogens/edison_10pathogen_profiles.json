@@ -62,7 +62,8 @@
         "gamma": 0.095
       },
       "recovery_day": 3,
-      "surface_deposition_fraction": 0.0001,
+      "airborne_emission_mode": "emesis_conditioned",
+      "emesis_aerosol_fraction_range": [7.2e-07, 2.67e-04],
       "base_susceptibility": 1.0,
       "microflora_disruption": {
         "causes_disruption": true,

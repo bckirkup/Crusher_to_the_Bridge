@@ -620,12 +620,16 @@ def _project_legacy_illness(agent: Any) -> None:
 
 
 def _airborne_emission_fraction(profile: dict[str, Any]) -> float:
-    """Fraction of a shedder's emission entering the zone airborne reservoir.
+    """Continuous airborne fraction for a pathogen profile.
 
     ``surface_deposition_fraction`` is the deprecated alias for the same key.
     It never fed a surface pool: the fomite reservoir is filled by the emesis
-    and faecal-release paths in ``TransmissionCore`` instead.
+    and faecal-release paths in ``TransmissionCore`` instead. An
+    ``emesis_conditioned`` arm receives its airborne emission per event from
+    ``TransmissionCore`` rather than through continuous shedding.
     """
+    if profile.get("airborne_emission_mode") == "emesis_conditioned":
+        return 0.0
     for key in ("airborne_emission_fraction", "surface_deposition_fraction"):
         if key in profile:
             return float(profile[key] or 0.0)
@@ -691,6 +695,10 @@ def step_infection_progression(
                         else 1.0
                     )
                     masses[loc] += sv * dep_frac * emission_factor
+        if confinement_core is not None:
+            for zone_name, mass in confinement_core.drain_emesis_aerosol(pid).items():
+                if zone_name in masses:
+                    masses[zone_name] += mass
         engine.set_pathogen_zone_mass(pid, masses)
 
 
