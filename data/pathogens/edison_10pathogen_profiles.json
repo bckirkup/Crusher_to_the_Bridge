@@ -470,10 +470,7 @@
         "model": "exponential",
         "k": 0.18
       },
-      "illness_probability": {
-        "eta": 0.67,
-        "gamma": 0.1
-      },
+      "symptomatic_fraction": 0.669,
       "recovery_day": 5,
       "incubation": {
         "distribution": "lognormal",
