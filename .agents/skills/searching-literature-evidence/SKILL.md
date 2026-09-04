@@ -1,114 +1,46 @@
 ---
 name: searching-literature-evidence
-description: Search the peer-reviewed literature with the Consensus MCP server to source a model constant, check an anchor, or find measurements of a mechanism — query construction, filter discipline, what the results do and do not contain, how to escalate when the abstract will not settle a definition, and how a hit becomes a provenance comment. Use whenever a constant, rate, fraction, kernel or anchor needs a citation, or when asked what the literature says about a mechanism.
+description: Search the peer-reviewed literature with the Consensus MCP server to source a model constant, check an anchor, or find measurements of a mechanism — constants, rates, fractions, kernels and anchors in the transmission and natural-history model, and how to escalate when the abstract will not settle a definition. Use whenever a constant, rate, fraction, kernel or anchor needs a citation, or when asked what the literature says about a mechanism. Pairs with the org-level consensus-literature-retrieval skill, which owns retrieval mechanics.
 ---
 
 # Searching the Literature (Consensus MCP)
 
-The `consensus` MCP server has one tool, `search`, over ~220M papers
-(Semantic Scholar, PubMed, Scopus, ArXiv). It returns title, authors, year,
-journal, citation count, DOI, a Consensus URL, and the abstract.
+## Retrieval mechanics are in the org-level skill
 
-```
-mcp_tool(command="call_tool", server="consensus", tool_name="search",
-         tool_args='{"query": "fomite contact rate shared surface touches per hour"}')
-```
+Load `consensus-literature-retrieval` (`~/.agents/skills/`) before searching. It
+owns the tool surface, `include_full_text_chunks: true` — which is mandatory and
+returns Results, Methods and tables, including for paywalled articles — query
+construction, filter behaviour, result handling, and recording which section of
+the paper a number was read from.
 
-Run `mcp_tool(command="list_tools", server="consensus")` for the full,
-current parameter list before using an unfamiliar filter.
+This skill is the other half: what needs sourcing in this transmission and
+natural-history model, and what a hit is allowed to become here.
 
 ## Query construction
-
-Query in the vocabulary of the paper you want, not the question you have. The
-useful query names the **measured quantity plus its setting**:
 
 - Good: `surface touch frequency shared surfaces per hour office video observation`
 - Weak: `how often do people touch things`
 
-If a search returns reviews and models rather than measurements, add the words
-a measurement paper would carry — `video observation`, `tracer`, `quantitative`,
-`per hour`, `log10 reduction`, `transfer efficiency`, `titre` — and search
-again. Two or three re-phrasings are normal and cheaper than reading twenty
-review abstracts.
-
-Search for the mechanism, then separately for the number. The paper that
-establishes that a route matters is usually not the paper that measured its
-rate.
-
 ## Filter discipline
 
-Default to **no filters**. Every filter silently removes evidence, and the
-corpus ranking is already topical. Set a filter only when the task states the
-constraint:
+Filters that are specifically wrong for this repo's literature:
 
-- `year_min` — only for "recent" / "since 20XX" asks. A 2013 fingerpad transfer
-  study is not stale; transfer physics did not move.
-- `exclude_preprints=true` — when a value must be peer-reviewed to earn its grade.
-- `study_types` / `medical_mode` — clinical-evidence questions (drug efficacy,
-  guidelines), not behavioural or environmental measurements. `medical_mode`
-  restricts to ~8M top medical documents and will drop the built-environment,
-  food-microbiology and indoor-air journals that most fomite and shedding
-  constants come from.
-- `domain` — academic field codes (`med,bio,env,eng`), not web domains.
-- `sjr_max=1` for Q1-only. Do not reach for `sjr_min`; it *excludes* the top
-  tiers, which is almost never wanted.
-- `human`, `controlled`, `sample_size_min`, `citation_min` — only when asked.
-  Filtering to human studies drops exactly the in-vitro transfer and surrogate
-  work (MNV1, Phi6, MS2) that quantifies fomite and hand routes.
-
-Verified behaviour of the ranking: with `domain` and `year_min` set, the top hit
-for the same query changes. Filters reorder as well as remove, so a value found
-under one filter set should be re-checked without them before it is called *the*
-measurement.
-
-## Result handling
-
-- Default page returns 20 papers; `page_size` narrows it (5 works). `page=1`
-  returns a genuinely different set on this organisation's plan, so paginate
-  when the first page is all reviews.
-- Twenty abstracts overflow the tool result. The output is truncated and the
-  full text written to a file named in the truncation notice — **read that
-  file**. Items 15-20 are frequently the measurement papers, because reviews
-  rank higher.
-- The abstract is often enough for a magnitude and never enough for a
-  definition. When the constant matters, open the DOI and read what was
-  counted.
-- Consensus asks for numbered inline citations with hyperlinked titles and the
-  exact URLs it returned. Preserve the DOI when it gives one.
+- `medical_mode` — clinical-evidence questions (drug efficacy, guidelines), not
+  behavioural or environmental measurements. It restricts to ~8M top medical
+  documents and will drop the built-environment, food-microbiology and
+  indoor-air journals that most fomite and shedding constants come from.
+- `human` drops exactly the in-vitro transfer and surrogate work (MNV1, Phi6,
+  MS2) that quantifies fomite and hand routes.
 
 ## When the abstract is not enough
 
-This is the dominant failure mode, not a rare one: a review of eight recent
-literature-sourcing sessions found six of them stalled for want of full text.
-Abstracts settle magnitudes; they almost never settle a **definition** — units
-(infectivity vs RNA), endpoint, denominator, sampling times, matrix — and those
-are what decides whether a number can be adopted at all.
-
-So a paywall is not the end of the search. The ladder, in order:
-
-1. `consensus` MCP `search` — ranking, DOI, abstract. Always first, and enough
-   to decide whether the paper is worth pursuing.
-2. The DOI itself, then the open routes for the same article: PubMed Central,
-   Europe PMC, the publisher's own HTML, an author or institutional copy.
-   Supplementary tables live here and are frequently where the time-resolved
-   measurements are.
-3. A richer interface, when 1 and 2 cannot settle the definition. Available to
-   this project, by asking rather than by a scripted call: **Consensus Pro
-   reports**, **edison/aviary literature analysis**, and **Google Literature
-   Insights**. Use these to have the *text* read and reduced to the measured
-   quantity, not to re-rank titles.
-
-Record which interface produced each conclusion, alongside the citation. A
-figure that came out of a synthesis interface and a figure read off the paper's
-own table are not the same evidence, and the register has to be able to tell
-them apart.
-
-**A blocked read is not a null result.** "No paper measures this" is a finding
-about the literature and is the honest route to a declared Grade C. "The paper
-that measures this could not be opened" is a finding about our access: it blocks
-the grade, and it must be escalated up the ladder or reported as still blocked.
-Collapsing the second into the first manufactures a Grade C that the literature
-does not support.
+The escalation ladder — open routes for the same article, then Consensus Pro,
+edison/aviary or Google Literature Insights, and the rule that a blocked read is
+not a null result — is in the org-level `consensus-literature-retrieval` skill.
+What is specific here: the definition it usually turns on for this model is the
+unit (infectivity vs RNA genome copies), the matrix, and the sampling times, and
+a Grade C declared on an unopened paper is not a null result about the
+literature.
 
 ## Turning a hit into a sourced constant
 
@@ -139,11 +71,6 @@ Do not search for a value that makes an anchor come out right. Sourcing a
 constant independently is what makes the later comparison against VSP, Park, or
 the passenger/crew ratio a real test; screening candidate papers by which value
 helps destroys that test just as surely as fitting the scalar by hand.
-
-Practically: fix the query and the filters from the definition of the quantity,
-before looking at what the model needs. If several papers measure it, take a
-stated central value or the midpoint of the range and say which — not the end
-that helps.
 
 Report a null result as a result. "No paper measures total high-touch surface
 area per cabin in m²" is a finding worth recording, and is the honest route to a
