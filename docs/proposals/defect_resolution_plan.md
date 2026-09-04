@@ -157,6 +157,10 @@ already happened once.
 **#37, the admissible-region feasibility test:** does *any* point inside the
 literature-bounded box satisfy all the anchors simultaneously?
 
+[`bayesian_inference_design.md`](bayesian_inference_design.md) recasts this
+gate as posterior mass in the admissible set; the plan's advance commitment
+about what an infeasible result means is unaffected.
+
 This is the test the whole campaign is for, and **the plan should be read as
 building towards a test we may fail.** Two outcomes:
 
