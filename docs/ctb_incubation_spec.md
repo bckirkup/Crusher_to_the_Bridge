@@ -234,8 +234,7 @@ than to any assay unit.
 
 **A reconciliation is available but unverified and circular, so it is a
 candidate reading rather than a finding:** 18 aggregates at ≈925 copies each
-would put Teunis's figure on our own dose axis. The collaborator's
-reading is 18 aggregates at ≈925 genome copies each, or ≈16,650 copies, while
+would put Teunis's figure on our own dose axis, at ≈16,650 copies, while
 the live per-agent path draws `r ~ Beta(α, β)` and has an exact
 confluent-hypergeometric N50 of **16,644 copies**. The closed-form helper
 `1 − (1 + D/β)^−α` has an approximate N50 of **16,871 copies**; the ≈1.3%

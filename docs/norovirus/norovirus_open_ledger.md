@@ -160,10 +160,10 @@ al. 2026).
 that the disagreement is statistical rather than biological and that our pair is
 the non-aggregation genome-copy fit; what remains open is whether Teunis's 18 is
 aggregates or copies, which no source we hold settles. The 18 figure is
-reported as an aggregation-model-dependent quantity, while the shipped pair is
-the non-aggregation genome-copy fit: the live per-agent
-confluent-hypergeometric beta-Poisson path has an N50 of **16,644 copies** and
-the closed-form helper has an approximate N50 of **16,871 copies**. Both give
+reported as an aggregation-model-dependent quantity; on our side the live
+per-agent confluent-hypergeometric beta-Poisson path has an N50 of
+**16,644 copies** and the closed-form helper has an approximate N50 of
+**16,871 copies**. Both give
 **P ≈ 0.047** at `D = 18` to three significant figures, so the trap is unchanged.
 The bundle review had already posed the 18-aggregate reading as an open,
 unverified hypothesis — "16,644 / 18 ≈ 925 genome copies per infectious
