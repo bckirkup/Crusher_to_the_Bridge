@@ -22,15 +22,13 @@ allowed to become here.
 
 ## Filter discipline
 
-- `study_types` / `medical_mode` — clinical-evidence questions (drug efficacy,
-  guidelines), not behavioural or environmental measurements. `medical_mode`
-  restricts to ~8M top medical documents and will drop the built-environment,
-  food-microbiology and indoor-air journals that most fomite and shedding
-  constants come from.
+- `medical_mode` — clinical-evidence questions (drug efficacy, guidelines), not
+  behavioural or environmental measurements. It restricts to ~8M top medical
+  documents and will drop the built-environment, food-microbiology and
+  indoor-air journals that most fomite and shedding constants come from.
 
-- `human`, `controlled`, `sample_size_min`, `citation_min` — only when asked.
-  Filtering to human studies drops exactly the in-vitro transfer and surrogate
-  work (MNV1, Phi6, MS2) that quantifies fomite and hand routes.
+- `human` drops exactly the in-vitro transfer and surrogate work (MNV1, Phi6,
+  MS2) that quantifies fomite and hand routes.
 
 ## Turning a hit into a sourced constant
 
