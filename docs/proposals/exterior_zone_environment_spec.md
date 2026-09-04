@@ -8,7 +8,7 @@
 
 ## 1. Why this document exists
 
-[`surface_decay_biphasic_spec.md`](surface_decay_biphasic_spec.md) §5 argues
+[`surface_decay_biphasic_spec.md`](surface_decay_biphasic_spec.md) §4 argues
 that the environmental covariates of the influenza surface-decay literature —
 relative humidity, temperature — largely collapse on a cruise ship, because the
 interior is HVAC-pinned near the condition Qian 2023 measured at. That argument
@@ -127,7 +127,7 @@ than more.
 **(b) They are venues with a different environment.** Then `Free` is too coarse:
 zones need an exposure attribute, aerosol needs a dilution factor per exposure
 class, and surface decay needs the zone. This reopens the environmental axis
-[`surface_decay_biphasic_spec.md`](surface_decay_biphasic_spec.md) §5 set aside
+[`surface_decay_biphasic_spec.md`](surface_decay_biphasic_spec.md) §4 set aside
 — as **zone-conditional** rather than global, which is a different claim than
 the one that document makes.
 
