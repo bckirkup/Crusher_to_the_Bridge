@@ -392,6 +392,7 @@ class PathogenProfile(BaseModel):
     dose_adjustment: float = 1.0
     dose_response: DoseResponse | None = None
     illness_probability: dict[str, float] = {}
+    airborne_emission_mode: str | None = None
     severity_model: SeverityModel | None = None
     observation_model: ObservationModel | None = None
     recovery_day: int = 3
@@ -479,6 +480,17 @@ class PathogenProfile(BaseModel):
         if v is not None and (v < 0 or v > 1):
             raise ValueError(
                 f"airborne_emission_fraction must be in [0,1], got {v}"
+            )
+        return v
+
+    @field_validator("airborne_emission_mode")
+    @classmethod
+    def airborne_mode_valid(cls, v: str | None) -> str | None:
+        if v is not None and v not in {"continuous_fraction", "emesis_conditioned"}:
+            raise ValueError(
+                "airborne_emission_mode must be one of "
+                "{'continuous_fraction', 'emesis_conditioned'}, got "
+                f"{v}",
             )
         return v
 
@@ -666,6 +678,26 @@ def _check_mathematical_bounds(
                         f"{p.pathogen_id}.illness_probability.{key} = {val} "
                         f"is outside [0.0, 1.0]",
                     )
+
+
+def _check_emesis_airborne_exclusion(
+    pathogen_data: dict[str, Any] | None,
+    report: Report,
+) -> None:
+    """Ensure emesis-conditioned profiles do not carry continuous aliases."""
+    if not pathogen_data:
+        return
+    for profile in pathogen_data.get("pathogens", []):
+        if profile.get("airborne_emission_mode") != "emesis_conditioned":
+            continue
+        for key in ("airborne_emission_fraction", "surface_deposition_fraction"):
+            if key in profile:
+                report.error(
+                    _ACTIVE_PROFILES_JSON,
+                    "LOGICAL_CONTRADICTION",
+                    f"{profile.get('pathogen_id', '<unknown>')}.airborne_emission_mode "
+                    f"cannot carry {key}",
+                )
 
 
 def _check_strain_evolution(
@@ -2404,6 +2436,7 @@ def run_checks(
     print(f"  {_CYAN}Running mathematical bound checks...{_RESET}")
     pre = len(report.findings)
     _check_mathematical_bounds(protocols, pathogens, report)
+    _check_emesis_airborne_exclusion(pathogen_data, report)
     added = len(report.findings) - pre
     if added:
         print(f"  {_RED}Found {added} issue(s){_RESET}")

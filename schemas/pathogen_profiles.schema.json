@@ -689,7 +689,12 @@
           "type": "number",
           "minimum": 0,
           "maximum": 1,
-          "description": "Fraction of a shedder's per-epoch emission entering the zone airborne reservoir that the HVAC pathway reads. This is NOT a surface deposition fraction: the fomite surface pools are fed by the emesis and faecal-release paths instead."
+          "description": "Fraction of a shedder's per-epoch continuous emission entering the zone airborne reservoir that the HVAC pathway reads. This continuous-shedding fraction is unavailable on an emesis_conditioned arm. This is NOT a surface deposition fraction: the fomite surface pools are fed by the emesis and faecal-release paths instead."
+        },
+        "airborne_emission_mode": {
+          "type": "string",
+          "enum": ["continuous_fraction", "emesis_conditioned"],
+          "description": "Which quantity feeds the zone airborne reservoir. 'continuous_fraction' (the default when the key is absent) multiplies every epoch's continuous shedding by airborne_emission_fraction. 'emesis_conditioned' declares that the arm emits to air only during an emesis event, at the per-event fraction drawn log-uniformly from emesis_aerosol_fraction_range, and forbids airborne_emission_fraction and its surface_deposition_fraction alias on the same profile. norwalk_gi carries 'emesis_conditioned': as a fraction of continuous shedding the quantity has no commensurable numerator and denominator (shedding is copies/g of stool or vomitus, airborne virus copies/m3 of room air, never measured in the same subjects), while conditioned on one expelled bolus it is measured — Tung-Thompson 2015 (MS2 in simulated vomiting, n = 3 per condition, 41 L chamber, corrected for 8.5% sampler efficiency) gives 7.2e-7 to 2.67e-4 of the virus in one bolus, evidence grade B. That source's table is in percent (7.2e-5% to 2.67e-2%); read as fractions it would overstate by two decades. The deleted 1e-4 fell inside the interval by coincidence across incompatible denominators, which is not corroboration."
         },
         "surface_deposition_fraction": {
           "type": "number",
@@ -842,6 +847,10 @@
         {
           "if": {"required": ["observation_model"]},
           "then": {"required": ["severity_model"]}
+        },
+        {
+          "if": {"properties": {"airborne_emission_mode": {"const": "emesis_conditioned"}}, "required": ["airborne_emission_mode"]},
+          "then": {"not": {"anyOf": [{"required": ["airborne_emission_fraction"]}, {"required": ["surface_deposition_fraction"]}]}}
         }
       ],
       "not": {"required": ["symptom_severity"]}
