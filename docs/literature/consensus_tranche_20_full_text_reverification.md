@@ -361,11 +361,22 @@ it was over-applied: MMWR is literature for retrieval purposes.
 
 ## 4. What this changes about how sourcing is run
 
-Both skills are corrected in the same change:
-`searching-literature-evidence` now uses `include_full_text_chunks=true` in its
-worked example and as the default for any sourcing query, names the
-quantity-and-unit rule, states what chunks do and do not contain, and forbids
-recording "not in the chunks" as a null result;
-`model-parameter-provenance` now requires the section of origin in the
-provenance comment at the point of definition, kept separate from the evidence
-grade.
+Both skills are corrected in the same change, and one of them moved underneath
+this pass. R2 trimmed `searching-literature-evidence` to repo-specific guidance
+and delegated the retrieval mechanics — the tool surface, the mandatory
+`include_full_text_chunks: true`, query construction, and section recording — to
+the org-level `consensus-literature-retrieval` skill. The corrections this pass
+owes are therefore filed on the side that is repo-specific: the repo skill now
+names the register's axis-3 vocabulary and where it lives, states the
+quantity-and-unit rule as the condition for a `?nr`, and closes the loophole its
+own final section left open by separating three cases that were being conflated
+— nothing measures this, the paper could not be opened, and the quantity was not
+in the excerpts returned. `model-parameter-provenance` now requires the section
+of origin in the provenance comment at the point of definition, kept separate
+from the evidence grade.
+
+**Open, and outside this change's reach:** the mechanics half of the correction
+belongs in the org-level skill, which is not in this repository. `?nr` as a
+retrieval state, the two-differently-phrased-attempts floor, and "absence from
+the chunks returned is not absence from the paper" should be stated there rather
+than only here.
