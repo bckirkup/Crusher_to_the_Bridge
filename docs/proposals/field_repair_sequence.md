@@ -115,6 +115,20 @@ it, because the influenza evidence base is where the gap is widest.
 Strain is **not** a covariate: Perry 2016 finds strain not significant
 (p = 0.45).
 
+> **R2's scope is superseded on the environmental axes — see
+> [`surface_decay_biphasic_spec.md`](surface_decay_biphasic_spec.md).** The
+> covariate-indexed rate described above is kept as the record of what this
+> sequence thought the repair was; the correction is recorded, not applied
+> retroactively. Its finding is that material, RH and temperature largely
+> collapse for an HVAC-pinned ship — none of the three is model state, and
+> Qian's between-material spread is inside its between-donor spread — while
+> matrix is a selection criterion for sourcing rather than a model covariate.
+> The axis that does not collapse is **time since deposition**: decay is
+> biphasic and the phase boundary is drying, which the field cannot express at
+> all. So R2 and #60 are one question rather than two, and neither is a
+> covariate index. The assay-endpoint resolution stated above — infectivity,
+> not RNA — is unaffected and still holds. No value is proposed there either.
+
 **R3 — Delete the influenza dose dependence in `illness_probability`.** Carrat
 2008 (*Am J Epidemiol* 167:775–785,
 [10.1093/aje/kwm375](https://doi.org/10.1093/aje/kwm375)) measures the
