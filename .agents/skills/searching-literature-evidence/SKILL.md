@@ -58,6 +58,16 @@ unit (infectivity vs RNA genome copies), the matrix, and the sampling times, and
 a Grade C declared on an unopened paper is not a null result about the
 literature.
 
+**When chunks truncate a table, open the open-access record before recording
+`?nr`.** Chunk retrieval returns a window, and a table can be cut mid-body:
+three phrasings of Kirby 2016's Table 3 all stopped after the All-GI row, which
+is the row the register did not need. Europe PMC serves the JATS XML of any
+open-access article at
+`https://www.ebi.ac.uk/europepmc/webservices/rest/<PMCID>/fullTextXML` (resolve
+the PMCID from the DOI with the same API's `search` endpoint), and it carries
+table cells as text. Retrieval is then `full text opened` and the origin is the
+table itself, not `Tn partial`.
+
 ## Turning a hit into a sourced constant
 
 Read `.agents/skills/model-parameter-provenance/SKILL.md` first; this section is

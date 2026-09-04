@@ -88,10 +88,10 @@ of the register and right for a different reason than it claimed:
   attempts each.
 - **What predicts retrieval is whether the body is indexed as chunks**, and that
   is a property of the record, not of the subscription.
-- **The constraint that actually binds** is that a quantity can be
-  chunk-retrievable while the specific stratum the register needs is not: the
-  All-GI aggregate row of Kirby 2016 Table 3 came back; the GII.2 row of the same
-  table did not, twice (§2, F1).
+- **The constraint that actually binds** is that chunk retrieval returns a
+  window that can cut a table mid-body: Kirby 2016 Table 3 stopped at the All-GI
+  row in three phrasings. The missing stratum was recoverable by opening the
+  open-access record, not by re-phrasing (§2, F1).
 
 ---
 
@@ -106,7 +106,7 @@ silently classed.
 
 | Citation | Quantity + unit, as queried | Retrieval | Origin | Verbatim locator |
 |---|---|---|---|---|
-| Kirby 2016 | GII.2 emesis titre, GEC/ml; cumulative emesis shed, GEC | chunks | **R** + **T3 partial** + **Me** | "the cumulative virus shedding per subject was high (1.8×10⁸ GEC +/- 7.8×10⁷, Norwalk and Snow Mountain viruses only)"; Methods: emesis weighed, 1 g treated as 1 ml |
+| Kirby 2016 | GII.2 emesis titre, GEC/ml; cumulative emesis shed, GEC | chunks; **Table 3 opened** (Europe PMC PMC4845978 JATS XML) after three phrasings truncated the table at the All-GI row | **R** + **T3** + **Me** | "the cumulative virus shedding per subject was high (1.8×10⁸ GEC +/- 7.8×10⁷, Norwalk and Snow Mountain viruses only)"; Methods: emesis weighed, 1 g treated as 1 ml; Table 3 study 3 (GII.2 Snow Mountain): sample mean titre 1.6×10⁵ GEC/ml (SEM 4.5×10⁴), subject mean cumulative shed 1.8×10⁷ GEC (SEM 1.8×10⁷) |
 | Atmar 2014 | Norwalk HID50, RT-PCR units | chunks (paywalled) | **R** + Ab | "3.3 RT-PCR units … for secretor-positive blood group O and A participants" and "7.0 RT-PCR units … for all secretor-positive participants" |
 | Atmar 2008 | peak faecal load, genomic copies/g; shedding duration, days; illness duration, days | chunks | **R** (peak, 28 d) + **Ab** (1–2 d illness) | "peaked at a median of 4 days after inoculation"; median peak 95×10⁹ copies/g, range 0.5–1,640×10⁹ |
 | Teunis 2008 | ID50, genome equivalents; aggregate size, particles per aggregate | **not retrieved** (3 attempts) | **?nr** | — |
@@ -184,20 +184,36 @@ silently classed.
 Each is a **finding**, not a fix. No constant, interval, curve entry or test
 expectation is changed by this document.
 
-**F1 — Kirby 2016's GII.2 cumulative emesis shed looks like a transcription
-defect, and the row's own consistency check depends on it.** §3.1 records
-"Kirby 2016 Table 3 … GII.2 Snow Mountain 1.8e7 GEC (SEM 1.8e7), GI.1 2.3e8".
-Kirby's Results prose says the cumulative shedding per subject was 1.8×10⁸ GEC
-± 7.8×10⁷ for "Norwalk and Snow Mountain viruses only" and that the two were
-**similar**; the Table 3 All-GI row retrieved is 2.3×10⁸ (SEM 1.0×10⁸). A GII.2
-value of 1.8e7 is ~13× below GI — inconsistent with "similar" — and is exactly
-10× below the pooled 1.8e8 whose SEM digits it shares. The GII.2 Table 3 row
-itself was **?nr** in two attempts, so this is a candidate defect, not a settled
-one. If it holds, the row's justification that a log-uniform on [1e5, 1e8] has
-mean 1.45e7 "within 1.25× of the measured 1.8e7" loses its check. **The same
-query confirmed the titre row is right**: Results give GII.2 1.6×10⁵ GEC/ml
-against the abstract's pooled 3.9×10⁴, which is the defect the register already
-records.
+**F1 — Kirby 2016's GII.2 cumulative emesis shed is *not* a transcription
+defect: 1.8e7 GEC is what Table 3 says, and the tension is inside the paper.**
+This section originally reported a candidate defect, because chunk retrieval
+never returned the row — a third phrasing again truncated Table 3 immediately
+after the All-GI line. The table was then read from the open-access full text
+(Europe PMC `PMC4845978`, the JATS XML of 10.1371/journal.pone.0143759). Table
+3, study 3 (GII.2 Snow Mountain), reads: 4 subjects with emesis specimens
+(footnote a: two subjects with vomiting excluded for missing samples), 8 emesis
+specimens, 25% of subjects with ≥1 positive emesis, 38% positive samples,
+sample mean titre **1.6×10⁵
+GEC/ml (SEM 4.5×10⁴)**, subject mean cumulative shed **1.8×10⁷ GEC (SEM
+1.8×10⁷)**. §3.1 and the engine comment reproduce that exactly, and the row's
+consistency check — a log-uniform on [1e5, 1e8] having arithmetic mean 1.45e7,
+within 1.25× of 1.8e7 — keeps its basis.
+
+The inconsistency is Kirby's, not the register's, and is recorded here because
+it is what made the number look wrong: the Results prose pools "Norwalk and Snow
+Mountain viruses only" at 1.8×10⁸ ± 7.8×10⁷ (the abstract gives 1.7×10⁸ for the
+same pooled quantity) and calls the two genogroups' cumulative titres
+"similar", while the Discussion says there was "no difference in mean cumulative
+virus shedding between GI and GII infections". Both are compatible with a 13×
+gap between the table means, because the GII.2 mean rests on effectively one
+positive subject — 25% of four — with SEM equal to the mean, while the pooled
+figure is dominated by the 14 GI subjects. "Similar" there is a
+not-significant test at n≈1, not equality of measured means, and the shared
+"1.8" digits are a coincidence of a one-subject mean.
+
+**The titre row is unaffected**: Results and Table 3 agree on GII.2 1.6×10⁵
+GEC/ml against the abstract's pooled 3.9×10⁴, which is the defect the register
+already records.
 
 **F2 — `recovery_day`'s illness duration is abstract-only.** The row states
 "Atmar 2008 measures both in the same 16 subjects: symptomatic illness 1–2 days,
