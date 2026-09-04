@@ -777,6 +777,7 @@ class TransmissionCore:
         # Persistent state: airborne aerosol pools per zone per pathogen
         self.aerosol_pools: dict[str, float] = {}  # aggregate (legacy)
         self.aerosol_pools_by_pathogen: dict[str, dict[str, float]] = {}
+        self.emesis_aerosol_pending_by_pathogen: dict[str, dict[str, float]] = {}
 
         # Pathway 5: food contamination pools per Dining zone per pathogen
         self.food_pools: dict[str, dict[str, float]] = {}
@@ -3032,6 +3033,10 @@ class TransmissionCore:
             ))
             surface_load = episode_load * (1.0 - aerosol_fraction)
             aerosol_load = episode_load * aerosol_fraction
+            pending = self.emesis_aerosol_pending_by_pathogen.setdefault(
+                pathogen_id, {},
+            )
+            pending[zone_name] = pending.get(zone_name, 0.0) + aerosol_load
             pool_gain = surface_load * touchable_fraction
             records.append({
                 "epoch": int(epoch),
@@ -3048,6 +3053,16 @@ class TransmissionCore:
             })
             pool_gain_total += pool_gain
         return pool_gain_total
+
+    def drain_emesis_aerosol(self, pathogen_id: str) -> dict[str, float]:
+        """Per-zone airborne mass from this epoch's emesis events, once.
+
+        The emesis path emits to air per event, at a fraction of the expelled
+        bolus, so the quantity cannot be carried as a fraction of continuous
+        shedding. It is drained rather than read: the caller adds it to the
+        zone reservoir exactly once per epoch.
+        """
+        return self.emesis_aerosol_pending_by_pathogen.pop(pathogen_id, {})
 
     def _deposit_emesis(
         self,

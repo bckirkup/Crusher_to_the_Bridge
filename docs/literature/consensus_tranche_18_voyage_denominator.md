@@ -1,7 +1,7 @@
 # Tranche 18 — the voyage denominator for VSP posting rates: CDC published one for 2008–2014, only in aggregate for 2006–2019, and nothing outside CDC matches the jurisdiction
 
 
-**Register rows fed / supersession.** This tranche feeds the VSP posting-rate denominator in §3.4. The access claim that the Freeland/MMWR voyage counts were transcribed from a source that could not be re-opened is superseded: the MMWR body text was retrieved as full-text chunks on 2026-09-04 and reproduces every count; see tranche 19 F7 and `fragments/voyage-denominator-origin.md`.
+**Register rows fed / supersession.** This tranche feeds the VSP posting-rate denominator in §3.4. The access claim that the Freeland/MMWR voyage counts were transcribed from a source that could not be re-opened is superseded: the MMWR body text was retrieved as full-text chunks on 2026-09-04 and reproduces every count; see tranche 20 F7 and `fragments/voyage-denominator-origin.md`.
 
 **Status:** Evidence assembled. **No profile constant, engine constant, anchor
 target or observation-model constant changes in this document.** Nothing here is

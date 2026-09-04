@@ -121,7 +121,8 @@ JSON schemas live in `schemas/`:
 
 The sanity checker uses **pydantic models** for strict structural validation beyond what JSON Schema alone catches:
 
-- **Mathematical bounds**: `volume_m3 > 0`, `ach >= 0`, `flow_rate_m3h >= 0`, `financial_usd >= 0`, `surface_deposition_fraction in [0,1]`, `base_susceptibility >= 0`
+- **Mathematical bounds**: `volume_m3 > 0`, `ach >= 0`, `flow_rate_m3h >= 0`, `financial_usd >= 0`, continuous `airborne_emission_fraction` (or deprecated `surface_deposition_fraction`) in [0,1], `base_susceptibility >= 0`
+- **Airborne mode contract**: `emesis_conditioned` profiles carry neither continuous emission key; their per-event aerosol interval is declared separately
 - **Graph referential integrity**: HVAC zone rooms must reference valid spatial zones, cross-zone links must reference valid HVAC zones, adjacency edges must reference valid spatial zones
 - **Logical contradictions**: Dose-response model parameters validated (beta_poisson requires alpha+beta > 0, exponential requires k > 0)
 - **Protocol structure**: Valid stoplight levels, non-negative costs and labor

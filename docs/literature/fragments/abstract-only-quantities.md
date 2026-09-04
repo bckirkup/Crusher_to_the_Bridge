@@ -1,11 +1,11 @@
-# Register fragment — six quantities whose governing number is abstract-only (tranche 19)
+# Register fragment — six quantities whose governing number is abstract-only (tranche 20)
 
 > **Not merged.** Proposed amendments to `docs/parameter_provenance_register.md`
 > §3.1 and §3.3. Not authoritative until the lead merges it. Evidence:
-> [`../consensus_tranche_19_full_text_reverification.md`](../consensus_tranche_19_full_text_reverification.md)
+> [`../consensus_tranche_20_full_text_reverification.md`](../consensus_tranche_20_full_text_reverification.md)
 > findings **F2**, **F3**, **F5**, **F6**, **F8**, **F11**.
 
-**Status:** Additive fragment, not authoritative until the lead merges it. Evidence: tranche 19.
+**Status:** Additive fragment, not authoritative until the lead merges it. Evidence: tranche 20.
 
 **Nothing changes but the record of where the number was read.** No constant,
 interval, curve entry or grade is moved by this fragment. Each row below is
@@ -20,7 +20,7 @@ lead**, which the register's axis-3 rule reserves.
 | `chronic_shedder_fraction` (`norwalk_gi`) (§3.1) | unchanged | unchanged | *Annotation:* van Beek 2017's chronic **duration** (median 218 d, range 32–1,164) is body-verified in a Results chunk; the **4.6% infected and 23/101 = 22.8% chronic** fractions appeared only in the abstract, and the Results chunks returned other denominators. Davis 2020's infectious-shedding confirmation is body-verified (**F5**) | van Beek 2017: **Ab**, Davis 2020: **R** | unchanged | — |
 | `hand_to_surface_drying_multiplier` (§3.1) | unchanged | unchanged | *Annotation:* both papers behind the ~100× lever returned **zero chunks** in 2 attempts each, despite both being open access. The interval [0.008, 1.0] is arithmetic on two abstracts: Tuladhar 2013 "13 ± 16% on the first … 0.1 ± 0.2% [after] 10 min of drying" and Sharps 2012's 59% → <1% (**F6**) | Tuladhar 2013: **Ab**, Sharps 2012: **Ab** | unchanged | — |
 | `asymptomatic_shedding_log10` (offset), paediatric community (§3.1) | unchanged | unchanged | *Annotation:* Barreira 2009 reports the two medians (8.39 and 7.15 log10 copies/g) and the p-value; the **1.24-log10 offset is arithmetic on them** and is stated in no retrieved text. Dábilla 2017's 0.79 was **?nr** in 2 attempts (**F8**) | Barreira 2009: **Ab** (offset derived, not reported), Dábilla 2017: **?nr** | unchanged | — |
-| `illness_probability.eta` / `gamma` (§3.3, influenza) | unchanged | unchanged | *Annotation:* Carrat 2008 returned three body chunks — "Infection and viral shedding", "Clinical illness", "Discussion" — and the governing **66.9% symptomatic** appears in none of them; it is in the abstract. The paper's body is indexed and the relevant section was retrieved, so this is not an access limitation (**F11**) | Carrat 2008: **Ab** | unchanged | — |
+| `symptomatic_fraction` (§3.3, influenza; **the row this annotation was written against, `illness_probability.eta`/`gamma`, was deleted by R3 and the same 66.9% adopted here instead**) | unchanged | unchanged | *Annotation:* Carrat 2008 returned three body chunks — "Infection and viral shedding", "Clinical illness", "Discussion" — and the governing **66.9% symptomatic** appears in none of them; it is in the abstract. The paper's body is indexed and the relevant section was retrieved, so this is not an access limitation (**F11**) | Carrat 2008: **Ab** | unchanged | — |
 
 ## Section-of-origin ledger
 

@@ -1,11 +1,11 @@
-# Register fragment — four rows whose citations did not resolve, and one candidate transcription defect (tranche 19)
+# Register fragment — four rows whose citations did not resolve, and one candidate transcription defect (tranche 20)
 
 > **Not merged.** Proposed amendments to `docs/parameter_provenance_register.md`
 > §3.1 and §3.2. Not authoritative until the lead merges it. Evidence:
-> [`../consensus_tranche_19_full_text_reverification.md`](../consensus_tranche_19_full_text_reverification.md)
+> [`../consensus_tranche_20_full_text_reverification.md`](../consensus_tranche_20_full_text_reverification.md)
 > findings **F1**, **F4**, **F9**, **F10**.
 
-**Status:** Additive fragment, not authoritative until the lead merges it. Evidence: tranche 19.
+**Status:** Additive fragment, not authoritative until the lead merges it. Evidence: tranche 20.
 
 **No value is corrected here.** F1 in particular is reported as a **candidate**
 defect and deliberately not fixed: the deciding table row was not retrieved, so

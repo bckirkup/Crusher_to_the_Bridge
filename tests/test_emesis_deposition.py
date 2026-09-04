@@ -112,6 +112,21 @@ def test_emesis_partition_conserves_episode_load() -> None:
     ) == pytest.approx(record["episode_load"], rel=1e-12)
 
 
+def test_emesis_aerosol_is_drained_once_within_declared_range() -> None:
+    profile = _profile(
+        airborne_emission_mode="emesis_conditioned",
+        emesis_aerosol_fraction_range=[7.2e-7, 2.67e-4],
+    )
+    core = _core(seed=41)
+    record = _deposit_once(core, _agent(), profile)
+
+    drained = core.drain_emesis_aerosol(PATHOGEN)
+    assert drained[ZONE] > 0.0
+    assert drained[ZONE] >= 7.2e-7 * record["episode_load"]
+    assert drained[ZONE] <= 2.67e-4 * record["episode_load"]
+    assert core.drain_emesis_aerosol(PATHOGEN) == {}
+
+
 def test_expected_emitted_load_matches_ge_cross_check() -> None:
     """Modelled per-illness shed against Ge et al. 2023's measured totals.
 

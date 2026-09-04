@@ -109,6 +109,55 @@ class TestDoseAdjustmentContracts:
             assert isinstance(p["dose_adjustment"], (int, float))
 
 
+class TestNorovirusAirborneContracts:
+    @pytest.mark.parametrize(
+        "bundle,pathogen_id",
+        [
+            ("active_profiles.json", "norwalk_gi"),
+            ("edison_10pathogen_profiles.json", "norovirus_gii4"),
+        ],
+    )
+    def test_norovirus_uses_emesis_conditioned_airborne_range(
+        self,
+        bundle: str,
+        pathogen_id: str,
+    ) -> None:
+        data = json.loads((REPO_ROOT / "data/pathogens" / bundle).read_text())
+        profile = next(
+            p for p in data["pathogens"] if p["pathogen_id"] == pathogen_id
+        )
+        assert profile["airborne_emission_mode"] == "emesis_conditioned"
+        assert profile["emesis_aerosol_fraction_range"] == [7.2e-7, 2.67e-4]
+        assert "airborne_emission_fraction" not in profile
+        assert "surface_deposition_fraction" not in profile
+
+    @pytest.mark.parametrize("bundle", ["active_profiles.json", "edison_10pathogen_profiles.json"])
+    def test_covid_continuous_airborne_scope_guard(self, bundle: str) -> None:
+        data = json.loads((REPO_ROOT / "data/pathogens" / bundle).read_text())
+        profile = next(
+            p for p in data["pathogens"] if p["pathogen_id"] == "sars_cov2_resp"
+        )
+        key = (
+            "airborne_emission_fraction"
+            if bundle == "active_profiles.json"
+            else "surface_deposition_fraction"
+        )
+        assert profile[key] == pytest.approx(5e-5)
+        assert "airborne_emission_mode" not in profile
+
+
+class TestInfluenzaPresentationContract:
+    def test_influenza_uses_dose_independent_presentation(self) -> None:
+        data = json.loads(
+            (REPO_ROOT / "data/pathogens/edison_10pathogen_profiles.json").read_text(),
+        )
+        influenza = next(
+            p for p in data["pathogens"] if p["pathogen_id"] == "influenza_a"
+        )
+        assert influenza["symptomatic_fraction"] == pytest.approx(0.669)
+        assert "illness_probability" not in influenza
+
+
 class TestInnateNonsusceptibility:
     def test_nonsus_fraction_zeroes_multiplier(self) -> None:
         class _FakeEngine:

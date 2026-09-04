@@ -1,13 +1,13 @@
-# Register fragment — voyage denominator: the transcription is now confirmed against MMWR body text (tranche 19)
+# Register fragment — voyage denominator: the transcription is now confirmed against MMWR body text (tranche 20)
 
 > **Not merged.** Proposed amendment to `docs/parameter_provenance_register.md`
 > §3.1, observation-model block, row "External voyage denominator for VSP
 > posting rates". Not authoritative until the lead merges it. Evidence:
-> [`../consensus_tranche_19_full_text_reverification.md`](../consensus_tranche_19_full_text_reverification.md)
+> [`../consensus_tranche_20_full_text_reverification.md`](../consensus_tranche_20_full_text_reverification.md)
 > §3.1 and finding **F7**. Supersedes the access claim in
 > [`voyage-denominator.md`](voyage-denominator.md), not its numbers.
 
-**Status:** Additive fragment, not authoritative until the lead merges it. Evidence: tranche 19.
+**Status:** Additive fragment, not authoritative until the lead merges it. Evidence: tranche 20.
 
 **No count changes.** The register's numbers are reproduced verbatim by the
 source's own body text; what changes is that "transcription unverified" no

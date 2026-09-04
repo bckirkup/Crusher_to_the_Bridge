@@ -1,6 +1,6 @@
 ---
 name: searching-literature-evidence
-description: Search the peer-reviewed literature with the Consensus MCP server to source a model constant, check an anchor, or find measurements of a mechanism — query construction, filter discipline, what the results do and do not contain, and how a hit becomes a provenance comment. Use whenever a constant, rate, fraction, kernel or anchor needs a citation, or when asked what the literature says about a mechanism.
+description: Search the peer-reviewed literature with the Consensus MCP server to source a model constant, check an anchor, or find measurements of a mechanism — query construction, filter discipline, what the results do and do not contain, how to escalate when the abstract will not settle a definition, and how a hit becomes a provenance comment. Use whenever a constant, rate, fraction, kernel or anchor needs a citation, or when asked what the literature says about a mechanism.
 ---
 
 # Searching the Literature (Consensus MCP)
@@ -116,6 +116,50 @@ measurement.
 - Consensus asks for numbered inline citations with hyperlinked titles and the
   exact URLs it returned. Preserve the DOI when it gives one.
 
+## When the abstract is not enough
+
+This is the dominant failure mode, not a rare one: a review of eight recent
+literature-sourcing sessions found six of them stalled for want of full text.
+Abstracts settle magnitudes; they almost never settle a **definition** — units
+(infectivity vs RNA), endpoint, denominator, sampling times, matrix — and those
+are what decides whether a number can be adopted at all.
+
+So a paywall is not the end of the search. The ladder, in order:
+
+1. `consensus` MCP `search` **with `include_full_text_chunks=true`** — ranking,
+   DOI, abstract, and the body excerpts the section above describes. Always
+   first, and it now settles many definitions outright: paywall status does not
+   predict whether the body comes back. Re-query before climbing, naming the
+   quantity and its unit, then the table or figure by number.
+2. The DOI itself, then the open routes for the same article: PubMed Central,
+   Europe PMC, the publisher's own HTML, an author or institutional copy.
+   Supplementary tables live here and are frequently where the time-resolved
+   measurements are. This is where to go when the chunks reach the paper but not
+   the stratum you need — the common case is a table whose aggregate row returns
+   and whose subgroup row does not.
+3. A richer interface, when 1 and 2 cannot settle the definition. Available to
+   this project, by asking rather than by a scripted call: **Consensus Pro
+   reports**, **edison/aviary literature analysis**, and **Google Literature
+   Insights**. Use these to have the *text* read and reduced to the measured
+   quantity, not to re-rank titles.
+
+Record which interface produced each conclusion, alongside the citation. A
+figure that came out of a synthesis interface and a figure read off the paper's
+own table are not the same evidence, and the register has to be able to tell
+them apart.
+
+Rung 1 is not optional before rungs 2 and 3, and it changes what "blocked"
+means: a paper whose body returned chunks is not access-blocked, and a paper
+that returned none has not been shown to be — the ladder is about the *quantity*
+remaining unsettled, not about the paper being unreachable.
+
+**A blocked read is not a null result.** "No paper measures this" is a finding
+about the literature and is the honest route to a declared Grade C. "The paper
+that measures this could not be opened" is a finding about our access: it blocks
+the grade, and it must be escalated up the ladder or reported as still blocked.
+Collapsing the second into the first manufactures a Grade C that the literature
+does not support.
+
 ## Turning a hit into a sourced constant
 
 Read `.agents/skills/model-parameter-provenance/SKILL.md` first; this section is
@@ -154,7 +198,8 @@ that helps.
 Report a null result as a result. "No paper measures total high-touch surface
 area per cabin in m²" is a finding worth recording, and is the honest route to a
 declared Grade C. Inventing a plausible number because the search came back
-empty is the failure mode this skill exists to prevent.
+empty is the failure mode this skill exists to prevent — and so is filing an
+unread paper as a null result, which is the separate case above.
 
 This holds for chunk retrieval too, and is where it is easiest to get wrong: a
 quantity missing from the excerpts a query returned is `?nr`, not absent from the

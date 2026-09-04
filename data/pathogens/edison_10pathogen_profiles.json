@@ -62,7 +62,8 @@
         "gamma": 0.095
       },
       "recovery_day": 3,
-      "surface_deposition_fraction": 0.0001,
+      "airborne_emission_mode": "emesis_conditioned",
+      "emesis_aerosol_fraction_range": [7.2e-07, 2.67e-04],
       "base_susceptibility": 1.0,
       "microflora_disruption": {
         "causes_disruption": true,
@@ -470,10 +471,7 @@
         "model": "exponential",
         "k": 0.18
       },
-      "illness_probability": {
-        "eta": 0.67,
-        "gamma": 0.1
-      },
+      "symptomatic_fraction": 0.669,
       "recovery_day": 5,
       "incubation": {
         "distribution": "lognormal",

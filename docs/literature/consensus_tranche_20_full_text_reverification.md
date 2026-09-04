@@ -1,6 +1,13 @@
-# Tranche 19 — re-verification with full-text chunks: what the register's citations actually say, and where the number was read
+# Tranche 20 — re-verification with full-text chunks: what the register's citations actually say, and where the number was read
 
-**Register rows fed / supersession.** This tranche feeds the evidence-bearing register rows reverified in §1; its four proposed evidence/origin amendments are listed in `fragments/`. No tranche-19 finding is withdrawn; finding F7 supersedes tranche 18's former access claim, and tranche 16's Teunis-2015 explanation is superseded as stated there.
+**Relation to tranche 19.** Tranche 19 (influenza biphasic surface) reached the
+same methodological conclusion independently and from the other end: full text
+overturned an abstract-level null, and the quantities it wanted sat in a Results
+table absent from the abstract. Neither tranche supersedes the other — 19
+establishes that the null was false for one row, this one establishes how far
+that generalises across every cited row, and both feed the same skill correction.
+
+**Register rows fed / supersession.** This tranche feeds the evidence-bearing register rows reverified in §1; its four proposed evidence/origin amendments are listed in `fragments/`. No tranche-20 finding is withdrawn; finding F7 supersedes tranche 18's former access claim, and tranche 16's Teunis-2015 explanation is superseded as stated there.
 
 **Status:** Evidence assembled. **No epidemiological constant, profile value,
 curve entry, engine default, anchor target or test expectation changes in this
@@ -56,7 +63,9 @@ interval); `recovery_day`; `chronic_shedder_fraction`;
 `hand_to_surface_drying_multiplier`; the two `asymptomatic_shedding_log10`
 offset rows; `shedding_curve_log10` decline shape; the two non-porous transfer
 fractions; `never_symptomatic_fraction`; and influenza
-`illness_probability.eta`/`gamma`. No fragment is adopted here.
+`illness_probability.eta`/`gamma` — which R3 deleted between this pass and the
+merge, its 66.9% moving to `symptomatic_fraction`, so that annotation now reads
+against the replacement row (F11). No fragment is adopted here.
 
 ### 0.3 The fan-out conclusion this pass contradicts
 
@@ -111,7 +120,7 @@ silently classed.
 | Freeland 2016 | VSP-report voyages per year, count | chunks | **R** (MMWR body) | "a total of 32,084 voyages required submission of a VSP report, ranging annually from 4,404 in 2012 to 4,808 in 2014 (Table); among these, 29,107 (90.7%) were voyages of 3–21 days and included >100 passengers" |
 | Jenkins 2021 | unduplicated voyages, count; rate per 10⁷ travel days | chunks | **R** + Ab | body chunk carries the voyage count and the travel-day denominator |
 | Koo 1996 | qualifying voyages, count | not retrieved (2 attempts) | **?nr** | — |
-| Tung-Thompson 2015 | aerosolised fraction, % of total virus | chunks; the percentage range absent (2 attempts) | **R** + **?nr** for the range | "there was evidence of aerosolized MS2 after every simulated vomiting episode (Fig 3)" |
+| Tung-Thompson 2015 | aerosolised fraction, % of total virus | chunks; the range retrieved on the third attempt, phrased as the paper phrases it (**corrected** from `?nr`, see F12) | **R** | "The amount of MS2 aerosolized as a percent of total virus 'vomited' ranged from a low of 7.2 x 10−5 ± 0.00006 to a high of 2.67 x 10−2 ± 0.03 (Table 2)" |
 | Booth & Frost 2019 | vomitus volume, ml per episode | quantity absent (2 attempts) | **?nr** | — |
 | Zargar 2025 | FCV airborne decay, log10 PFU/m³/min | abstract only | **Ab** | "rates of biological decay of HCoV-OC43, RV-14 and FCV were … 0.0081 ± 0.0031 (as log10 PFU/m³/min)" |
 | van Doremalen 2020 | aerosol half-life, hours | abstract only (2 attempts) | **Ab** | — |
@@ -251,6 +260,28 @@ illness", "Discussion" — and 66.9% appears in **none** of them; it is in the
 abstract. This is the clearest case of the pattern the axis exists to catch: a
 paper whose body is retrievable, whose relevant section is retrievable, and
 whose governing number is still only in the abstract.
+
+F11 landed on a moving row. Between this re-verification and the merge, R3
+deleted the influenza `illness_probability` η/γ pair and adopted the same 66.9%
+(CI 0.583–0.745) as a dose-independent `symptomatic_fraction`, on a row that
+reads "verified in Carrat's Results". The two readings are not symmetrical
+evidence: R3's rests on the opened paper, F11's on retrieval, and a `?nr` cannot
+refute an opened PDF. What F11 establishes is narrower and still worth carrying
+on the row — the number is **not reproducible from chunk retrieval**, so any
+later re-check of this constant has to open the paper rather than re-query it.
+The origin cell records `Ab` plus that qualification; nothing about the adopted
+0.669 is contested here.
+
+**F12 — one of this tranche's own ledger rows was wrong, and re-query fixed
+it.** §1 recorded Tung-Thompson 2015's aerosolised-fraction *range* as `?nr`
+after two attempts, which is exactly the state that must never be read as
+absence. Re-queried on 2026-09-04 as "percent of total virus vomited", the
+Results prose came back carrying it verbatim: "The amount of MS2 aerosolized as
+a percent of total virus 'vomited' ranged from a low of 7.2 x 10−5 ± 0.00006 to
+a high of 2.67 x 10−2 ± 0.03 (Table 2)". The origin is **R**, not `?nr`, and the
+ledger row is corrected in place. This is the ledger's own demonstration of the
+rule: two phrasings are a floor, not a guarantee, and the phrasing that worked
+was the paper's, not the register's.
 
 **No finding contradicted a shipped value in a way that would move it**, and
 none is proposed for adoption here.

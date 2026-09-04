@@ -657,6 +657,12 @@
             "gamma": {"type": "number", "minimum": 0, "maximum": 1}
           }
         },
+        "symptomatic_fraction": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Dose-independent probability that an infected host presents, drawn once past incubation. Mutually exclusive with illness_probability: a profile declares either the dose-conditional Hill pair or this measured proportion, never both. influenza_a carries 0.669, 95% CI 0.583-0.745, evidence grade B: Carrat 2008 (Am J Epidemiol 2008;167:775-785, DOI 10.1093/aje/kwm375) measures the proportion of symptomatic infection as 66.9% (95% CI 58.3, 74.5) over 522 infected individuals in 38 subgroups from 56 volunteer challenge studies (1,280 challenged), with no significant association with the initial infectious dose (p = 0.12) across inocula spanning 3-7.2 log10 TCID50. The Hill form 1 - (1 + eta*dose)^-gamma is strictly increasing in dose and the measured endpoint is flat over 4.2 orders, so the eta/gamma pair is deleted on that arm rather than re-sourced. B and not A because Carrat is a pooled cross-study meta-regression in clinical facilities, an analogous setting rather than the target setting."
+        },
         "severity_model": {"$ref": "#/$defs/SeverityModel"},
         "observation_model": {"$ref": "#/$defs/ObservationModel"},
         "recovery_day": {"type": "integer", "minimum": 0},
@@ -689,7 +695,12 @@
           "type": "number",
           "minimum": 0,
           "maximum": 1,
-          "description": "Fraction of a shedder's per-epoch emission entering the zone airborne reservoir that the HVAC pathway reads. This is NOT a surface deposition fraction: the fomite surface pools are fed by the emesis and faecal-release paths instead."
+          "description": "Fraction of a shedder's per-epoch continuous emission entering the zone airborne reservoir that the HVAC pathway reads. This continuous-shedding fraction is unavailable on an emesis_conditioned arm. This is NOT a surface deposition fraction: the fomite surface pools are fed by the emesis and faecal-release paths instead."
+        },
+        "airborne_emission_mode": {
+          "type": "string",
+          "enum": ["continuous_fraction", "emesis_conditioned"],
+          "description": "Which quantity feeds the zone airborne reservoir. 'continuous_fraction' (the default when the key is absent) multiplies every epoch's continuous shedding by airborne_emission_fraction. 'emesis_conditioned' declares that the arm emits to air only during an emesis event, at the per-event fraction drawn log-uniformly from emesis_aerosol_fraction_range, and forbids airborne_emission_fraction and its surface_deposition_fraction alias on the same profile. norwalk_gi carries 'emesis_conditioned': as a fraction of continuous shedding the quantity has no commensurable numerator and denominator (shedding is copies/g of stool or vomitus, airborne virus copies/m3 of room air, never measured in the same subjects), while conditioned on one expelled bolus it is measured — Tung-Thompson 2015 (MS2 in simulated vomiting, n = 3 per condition, 41 L chamber, corrected for 8.5% sampler efficiency) gives 7.2e-7 to 2.67e-4 of the virus in one bolus, evidence grade B. That source's table is in percent (7.2e-5% to 2.67e-2%); read as fractions it would overstate by two decades. The deleted 1e-4 fell inside the interval by coincidence across incompatible denominators, which is not corroboration."
         },
         "surface_deposition_fraction": {
           "type": "number",
@@ -842,6 +853,13 @@
         {
           "if": {"required": ["observation_model"]},
           "then": {"required": ["severity_model"]}
+        },
+        {
+          "if": {"properties": {"airborne_emission_mode": {"const": "emesis_conditioned"}}, "required": ["airborne_emission_mode"]},
+          "then": {"not": {"anyOf": [{"required": ["airborne_emission_fraction"]}, {"required": ["surface_deposition_fraction"]}]}}
+        },
+        {
+          "not": {"required": ["illness_probability", "symptomatic_fraction"]}
         }
       ],
       "not": {"required": ["symptom_severity"]}

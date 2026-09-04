@@ -909,7 +909,8 @@ pools per room.  Key properties:
 | `environmental_contamination` | object | Optional; `source_zones` scopes colonization (absent → ship-wide legacy) |
 | `dose_response` | object | `{model, alpha, beta}` — Korkin Lab dose-response parameters |
 | `recovery_day` | int | Day of infection → Recovered transition |
-| `surface_deposition_fraction` | float | Fraction [0,1] of shed mass deposited on surfaces |
+| `airborne_emission_fraction` | float | Continuous-shedding fraction [0,1] entering the zone airborne reservoir; deprecated `surface_deposition_fraction` is an alias |
+| `airborne_emission_mode` | string | `continuous_fraction` (default when absent) or `emesis_conditioned`; the latter uses the declared per-event aerosol interval |
 | `microflora_disruption` | object | Controls GRUMB dual-signal shedding (kingdom-level CLR shifts) |
 | `introduction_epoch` | int | When pathogen enters simulation (0 = start, >0 = mid-cruise) |
 
@@ -924,7 +925,7 @@ pools per room.  Key properties:
   "shedding_curve_log10": [2.0, 4.0, 6.0, 7.0, 7.5, 7.0, 6.0, 5.0, 4.0, 3.0, 2.0, 1.0, 1.0, 1.0, 1.0],
   "dose_response": {"model": "beta_poisson", "alpha": 0.06, "beta": 10.0},
   "recovery_day": 10,
-  "surface_deposition_fraction": 0.01,
+  "airborne_emission_fraction": 0.01,
   "base_susceptibility": 1.0,
   "microflora_disruption": {
     "causes_disruption": true,
@@ -1291,7 +1292,7 @@ or:
 
   [ERROR] spatial_layout.json → zone "Engine_Room": volume_m3 = -150 (must be positive)
   [ERROR] air_flow_paths.json → cross_zone_link "HVAC_Z1→Ghost_Zone": destination does not exist
-  [ERROR] active_profiles.json → norwalk_gi: surface_deposition_fraction = 1.5 (must be ≤ 1.0)
+  [ERROR] active_profiles.json → norwalk_gi: airborne_emission_fraction = 1.5 (must be ≤ 1.0)
   [WARN]  protocols.json → SOP-002: costs_per_epoch.financial_usd ($350) approaches starting budget
 ```
 

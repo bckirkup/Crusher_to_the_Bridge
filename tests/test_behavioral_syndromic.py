@@ -22,6 +22,91 @@ from telemetry_buffer.agent_axes import (
 
 
 class TestBehavioralSyndromic:
+    @staticmethod
+    def _presentation_rate(
+        profile: dict,
+        dose: float,
+        *,
+        seed: int,
+        draws: int = 5000,
+    ) -> float:
+        class Host:
+            illness_status = IllnessStatus.NOT_ILL
+
+            @staticmethod
+            def get_chronic_illness_boost(_pid: str) -> float:
+                return 0.0
+
+        rng = np.random.default_rng(seed)
+        presents = 0
+        for _ in range(draws):
+            infection = {
+                "acquired_particles": dose,
+                "time_infected": 0,
+                "illness": IllnessStatus.NOT_ILL,
+            }
+            _draw_symptom_onset(Host(), "test_pathogen", infection, profile, rng)
+            presents += infection["illness"] == IllnessStatus.SYMPTOMATIC
+        return presents / draws
+
+    def test_symptomatic_fraction_is_dose_independent(self) -> None:
+        profile = {"symptomatic_fraction": 0.669}
+        low = self._presentation_rate(profile, 1.0, seed=21)
+        high = self._presentation_rate(profile, 1e9, seed=21)
+        assert low == pytest.approx(0.669, abs=0.02)
+        assert high == pytest.approx(0.669, abs=0.02)
+        assert low == pytest.approx(high, abs=0.02)
+
+    def test_hill_presentation_remains_dose_conditional(self) -> None:
+        profile = {"illness_probability": {"eta": 0.508, "gamma": 0.095}}
+        low = self._presentation_rate(profile, 1.0, seed=22)
+        high = self._presentation_rate(profile, 1e9, seed=22)
+        assert high > low
+
+    def test_fixed_fraction_wins_and_chronic_boost_is_additive(self) -> None:
+        class Host:
+            illness_status = IllnessStatus.NOT_ILL
+
+            @staticmethod
+            def get_chronic_illness_boost(_pid: str) -> float:
+                return 0.3
+
+        profile = {
+            "symptomatic_fraction": 0.5,
+            "illness_probability": {"eta": 0.0, "gamma": 1.0},
+        }
+        rng = np.random.default_rng(23)
+        presents = 0
+        for _ in range(5000):
+            infection = {
+                "acquired_particles": 1e9,
+                "time_infected": 0,
+                "illness": IllnessStatus.NOT_ILL,
+            }
+            _draw_symptom_onset(Host(), "test_pathogen", infection, profile, rng)
+            presents += infection["illness"] == IllnessStatus.SYMPTOMATIC
+        assert presents / 5000 == pytest.approx(0.8, abs=0.025)
+
+    def test_will_present_overrides_both_presentation_branches(self) -> None:
+        class Host:
+            illness_status = IllnessStatus.NOT_ILL
+
+            @staticmethod
+            def get_chronic_illness_boost(_pid: str) -> float:
+                return 0.3
+
+        profile = {
+            "symptomatic_fraction": 1.0,
+            "illness_probability": {"eta": 0.0, "gamma": 1.0},
+        }
+        infection = {
+            "acquired_particles": 1e9,
+            "will_present": False,
+            "illness": IllnessStatus.NOT_ILL,
+        }
+        _draw_symptom_onset(Host(), "test_pathogen", infection, profile, np.random.default_rng(24))
+        assert infection["illness"] == IllnessStatus.NOT_ILL
+
     def test_five_state_severity_is_drawn_once_per_episode(self) -> None:
         class Host:
             illness_status = IllnessStatus.NOT_ILL
