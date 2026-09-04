@@ -21,7 +21,7 @@ field value and does not add the field to platform files.
 
 ## Audit of current token decisions
 
-Every platform's token-filter decisions was audited against the zone's own
+Every platform's token-filter decisions were audited against each zone's own
 description:
 
 | Platform | Free-typed zones excluded from passenger leisure |
