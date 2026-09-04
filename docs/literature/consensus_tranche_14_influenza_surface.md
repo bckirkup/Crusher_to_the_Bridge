@@ -110,6 +110,11 @@ The contradiction is reported, not adjudicated. Perry (mucin/serum, 18–25 °C,
 undetectable by 24 h) are both direct measurements on stainless steel by
 infectivity assay, and they disagree by more than a factor of ten in time.
 
+> A later reading of this same table on a different axis — time since
+> deposition rather than matrix — is
+> [`../proposals/surface_decay_biphasic_spec.md`](../proposals/surface_decay_biphasic_spec.md).
+> It adopts no value and changes nothing recorded here.
+
 ### 2.2 The null result for Q1
 
 **No study measures `surface_decay_per_day` as the field defines it.** Nothing
