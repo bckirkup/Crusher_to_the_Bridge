@@ -1587,7 +1587,8 @@ class KorkinShipEngine:
                 work = str(self.rng.choice(self._free_zones))
             free = (
                 self._resolve_zone(free_pref, self._free_zones)
-                if free_pref else weighted_zone_choice(self._leisure_catalog, self.rng)
+                if free_pref
+                else weighted_zone_choice(self._leisure_catalog, self.rng) or "unknown"
             )
 
             agent = KorkinAgent(
@@ -1645,7 +1646,7 @@ class KorkinShipEngine:
                 else self._room_zones
             )
             dining = self.rng.choice(self._dining_zones)
-            free = weighted_zone_choice(self._leisure_catalog, self.rng)
+            free = weighted_zone_choice(self._leisure_catalog, self.rng) or "unknown"
             work = self.rng.choice(self._free_zones)
             gender = self._assign_gender()
             schedule = list(PASSENGER_SCHEDULE)
@@ -1684,7 +1685,7 @@ class KorkinShipEngine:
                 else self._room_zones
             )
             dining = self.rng.choice(self._dining_zones)
-            free = weighted_zone_choice(self._leisure_catalog, self.rng)
+            free = weighted_zone_choice(self._leisure_catalog, self.rng) or "unknown"
             work = self.rng.choice(self._free_zones + self._dining_zones)
             gender = self._assign_gender()
             schedule = list(CREW_SCHEDULE)

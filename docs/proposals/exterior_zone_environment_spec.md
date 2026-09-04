@@ -1,10 +1,9 @@
 # Exterior and pool-deck zones: what the model currently asserts about them
 
-> **Status:** Proposed. **Nothing here is implemented.** No zone attribute, no
-> dilution factor, no inactivation constant, no AHU membership change and no
-> occupancy change is made by this document, and none is recommended yet. It
-> records the reasoning that is currently missing, and the seams a repair would
-> use.
+> **Status:** Partially implemented. §7 steps 1 and 2 have landed: leisure
+> draws are capacity-weighted and access-filtered, and settled exterior zones
+> are removed from recirculating AHU groups. This proposal still describes the
+> unimplemented environmental work; it does not document current behavior.
 
 ## 1. Why this document exists
 
@@ -51,7 +50,7 @@ The **only** outdoor-air concept in the engine is
 that outdoor air dilutes aerosol — it just applies the idea to balconies and not
 to the pool deck.
 
-### 2.3 The current treatment is not neutral; the sign is reversed
+### 2.3 The pre-change treatment was not neutral; the sign was reversed
 
 Open decks are members of recirculating AHU networks:
 
@@ -84,7 +83,7 @@ handrail decays at exactly the rate of a cabin doorknob. Whatever the
 [biphasic spec](surface_decay_biphasic_spec.md) concludes about drying, it
 currently could not be applied differently to a deck that never dries.
 
-### 2.5 How much exterior exposure there is, is currently arbitrary
+### 2.5 How much exterior exposure there was pre-change is currently arbitrary
 
 Leisure location is assigned by `free = rng.choice(self._free_zones)` in
 `engines/infection_dynamics_bridge.py` — **uniform over the `Free` zones,
@@ -198,3 +197,17 @@ persistence poolside, and the recreational-water claims of §4.
    (c) should be decided together with
    [`surface_decay_biphasic_spec.md`](surface_decay_biphasic_spec.md), because a
    never-drying surface is the same mechanism seen from the other end.
+
+## 8. Closing status after Items 1 and 2
+
+The verified Mega discrepancy was `28.6%` of uniform leisure draws to the six
+service/control zones versus `1.703%` of listed Free-zone capacity. The
+capacity-weighted, access-filtered draw landed in Item 1. Exterior-zone AHU
+membership removal landed in Item 2.
+
+`free_zone_rotation_probability` remains `0.0`. The default is not a behavioural claim: at zero, each host holds a single leisure venue for the entire voyage, which no observation supports — passengers circulate between venues. It is retained here because raising it requires a venue-rotation rate nobody has sourced, and because zero is the documented golden-stability default (`docs/OPERATORS_MANUAL_SHIP.md`). What the capacity weighting changes is *which* venue that single draw lands on: leisure exposure across the population is now distributed in proportion to listed venue capacity rather than uniformly over the `Free` zone list, and crew-only machinery, service and control spaces are no longer drawn as passenger leisure venues at all. The fixed-assignment approximation remains wrong at the level of the individual host. Sourcing a rotation rate is a follow-up; nothing here licenses a value.
+
+The ContamX transport benchmark now injects at indoor `Windjammer`, the largest
+recirculating public network venue. `CentralPark` is no longer ducted, so using
+it would reduce the comparison to adjacency-only. The PRJ remains untouched and
+its missing ambient path remains an open item.

@@ -37,7 +37,9 @@ def test_spirit_3000_corridor_topology() -> None:
     assert vents == {"balcony_partial", "interior_hvac", "atrium_view"}
     assert all(len(z["id"]) <= 15 for z in zones)
     covered = {r for hz in airflow["hvac_zones"] for r in hz["rooms"]}
-    assert covered == {z["id"] for z in zones}
+    # Deliberate contract change: exterior zones are no longer duct-coupled.
+    exterior = {"MainPool", "AftPool", "SportsDeck"}
+    assert covered == {z["id"] for z in zones} - exterior
     assert spatial["deck_dimensions"] == {"length_m": 290.0, "beam_m": 36.0}
     crew_ahus = [hz for hz in airflow["hvac_zones"] if hz["id"].startswith("AHU_Crew_D")]
     assert len(crew_ahus) == 3
@@ -90,7 +92,9 @@ def test_classic_1900_corridor_topology() -> None:
     assert vents == {"balcony_partial", "interior_hvac", "atrium_view"}
     assert all(len(z["id"]) <= 15 for z in zones)
     covered = {r for hz in airflow["hvac_zones"] for r in hz["rooms"]}
-    assert covered == {z["id"] for z in zones}
+    # Deliberate contract change: exterior zones are no longer duct-coupled.
+    exterior = {"PoolDeck"}
+    assert covered == {z["id"] for z in zones} - exterior
     assert spatial["graywater_zones"] == ["Engine_Room"]
     assert spatial["deck_dimensions"] == {"length_m": 238.0, "beam_m": 32.0}
     # Cross-deck passenger trunk present
@@ -146,7 +150,9 @@ def test_expedition_450_corridor_topology() -> None:
     assert all(len(z["id"]) <= 15 for z in zones)
 
     covered = {r for hz in airflow["hvac_zones"] for r in hz["rooms"]}
-    assert covered == {z["id"] for z in zones}
+    # Deliberate contract change: exterior zones are no longer duct-coupled.
+    exterior = {"PoolDeck"}
+    assert covered == {z["id"] for z in zones} - exterior
     assert spatial["graywater_zones"] == ["Engine_Room"]
     assert spatial["deck_dimensions"] == {"length_m": 160.0, "beam_m": 21.0}
 

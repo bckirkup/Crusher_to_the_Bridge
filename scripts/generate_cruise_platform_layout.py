@@ -208,7 +208,7 @@ def build_air_flow_paths(
                 "id": f"{recipe.pax_ahu_prefix}{deck}",
                 "rooms": _pax_ids_on_deck(recipe.pax_corridors, deck),
                 "ach": recipe.pax_ahu_ach,
-                "description": f"Deck {deck} cabin fan-coil branch.",
+                "description": f"Deck {deck} passenger cabin fan-coil branch.",
             })
     for bank in recipe.extra_corridors:
         # One AHU per extra bank deck: AHU_{prefix}_D{n}
@@ -308,10 +308,18 @@ def build_air_flow_paths(
 
     # Every zone must appear in exactly one HVAC group
     covered = {r for hz in hvac for r in hz["rooms"]}
-    missing = zone_ids - covered
+    expected_covered = zone_ids - set(recipe.exterior_zones)
+    missing = expected_covered - covered
     if missing:
         raise ValueError(
-            f"{recipe.platform_id}: zones missing from HVAC rooms: {sorted(missing)}"
+            f"{recipe.platform_id}: non-exterior zones missing from HVAC rooms: "
+            f"{sorted(missing)}"
+        )
+    covered_exterior = set(recipe.exterior_zones) & covered
+    if covered_exterior:
+        raise ValueError(
+            f"{recipe.platform_id}: exterior zones covered by HVAC rooms: "
+            f"{sorted(covered_exterior)}"
         )
 
     return {
