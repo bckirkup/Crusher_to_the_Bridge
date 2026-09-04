@@ -304,5 +304,14 @@ inference over those fields would launder the defect rather than expose it.
    independent per-arm.
 4. **How far the field repairs of §1 go before inference starts** — all four, or
    the two that touch the anchors.
-5. **Whether the fleet aggregates are prior or likelihood in the first fit.**
-   §3 permits either; it forbids both.
+5. ~~**Whether the fleet aggregates are prior or likelihood in the first fit.**~~
+   **Settled: likelihood.** The fleet statistics are a generated quantity — the
+   number of ships of each class with a recorded outbreak against a traffic
+   background — so they cannot also be external evidence constraining the
+   parameters that generate them. The ruling adds a prohibition this document
+   did not carry (no parameter indexed by hull class; era differences enter only
+   through one shared operational-state vector), bars A4/A9/A7c from that fit's
+   prior, withdraws for that fit the readmission of `f ≤ 0.18–0.45` derived in
+   §3, and promotes the blocked voyage denominator (#13) to a prerequisite.
+   Recorded, with the cost and the degrees-of-freedom count it implies, in
+   [`fleet_emergence_decision.md`](fleet_emergence_decision.md).

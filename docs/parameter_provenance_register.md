@@ -372,6 +372,16 @@ worth recording as the register's own precedent: the norovirus dose knob (inert)
 and `contact_transfer_fraction` (clears no noise floor anywhere across its whole
 sourced interval — correct it, but do not prioritise it).
 
+How many of these the **data** can separate is a different question from how many
+are free, and it is the smaller number. Counting the informative cells in the
+fleet observable — posted outbreaks by hull class and era against a traffic
+background, two of whose eight class-era cells (mega) are unusable — gives an
+expectation of order **five** identifiable composites on the norovirus arm
+against the nine named above, with the rest pinned by prior or frozen:
+[`proposals/fleet_emergence_decision.md`](proposals/fleet_emergence_decision.md)
+§4.3. That is a prediction for #36 and #37 to measure, not a count this register
+adopts, and it moves no row here.
+
 ## 6. Rules this register is held to
 
 Unchanged from `.agents/skills/model-parameter-provenance/SKILL.md`, restated
