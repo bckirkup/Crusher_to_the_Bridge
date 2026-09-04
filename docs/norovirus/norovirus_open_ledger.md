@@ -220,6 +220,11 @@ existing α ∈ [0.072, 0.161] interval stands and Atmar 2014 is out of scope;
 declared GI.1, the target is 2,800 and α/β must be refitted **jointly** to
 Atmar's data and graded as a logistic-to-beta-Poisson transfer. No value moved
 and the withdrawal is unchanged.
+[`proposals/pathogen_class_structure_decision.md`](../proposals/pathogen_class_structure_decision.md)
+then settles how the ~2.6 logs of spread across these measurements is
+*structured* — as GII.4-versus-non-GII.4 classes, with the shares declared from
+external typing rather than fitted, since the VSP series carries no genotype in
+any of its 428 postings — and adopts no dose value either.
 
 **The exact and approximate dose-response forms are also an open implementation
 item, not a repair in this change.** Production reaches
