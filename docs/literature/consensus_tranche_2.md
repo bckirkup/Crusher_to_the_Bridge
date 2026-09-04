@@ -1,5 +1,8 @@
 # Consensus tranche 2 — the high-sensitivity factors, and a genogroup error in our own interval
 
+
+**Register rows fed / supersession.** This tranche feeds the historical norovirus secretor/genogroup, emesis, influenza emission/dose-response and conditional-illness rows described in this tranche; its §1–§2 arm assignment is superseded by tranche 3 §1, and the Kirby/Ge conflict is later retired by tranche 4 §1.
+
 **Status:** Reference, **partly superseded**. Search output and its reading. The
 literature in §1 is sound; **the arm it was attached to is not**. §1 and §2 below
 assert that `norwalk_gi` is a GI.1 profile. It is not — the profile declares

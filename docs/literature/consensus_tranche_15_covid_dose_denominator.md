@@ -1,5 +1,8 @@
 # Tranche 15 — the SARS-CoV-2 dose denominator in genome copies: no non-circular ID50 exists, and the conversion that would rescue Killingley is measured but ~2.7 logs wide
 
+
+**Register rows fed / supersession.** This tranche feeds the SARS-CoV-2 `dose_response.alpha` / `beta` and copies-per-infectious-unit rows in §3.2. No later withdrawal or supersession is recorded in the register or the norovirus open ledger.
+
 **Status:** Evidence assembled and interpreted. **No pathogen-profile constant,
 no engine constant and no screen interval changes in this document.** Nothing
 here is adopted; the register contribution is proposed in

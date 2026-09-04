@@ -1,5 +1,8 @@
 # Consensus sourcing, tranche 4
 
+
+**Register rows fed / supersession.** This tranche feeds the historical emesis titre/volume rows and SARS-CoV-2 emission/dose-response rows described in this tranche; no direct link to this tranche remains in the register. No later withdrawal or supersession is recorded in the register or the norovirus open ledger.
+
 **Status:** evidence discovery. Nothing here is adopted; no constant, profile
 field or engine path is changed by this document. Candidate values become model
 values only through `model-parameter-provenance`, with a unit check and an

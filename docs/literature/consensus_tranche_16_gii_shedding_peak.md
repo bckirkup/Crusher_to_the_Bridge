@@ -1,5 +1,8 @@
 # Tranche 16 — the GII faecal shedding time course: measured, but not where the model reads it
 
+
+**Register rows fed / supersession.** This tranche feeds the GII faecal shedding time-course, peak, time-to-peak, decline-shape and asymptomatic-offset rows in §3.1. The explanation that Teunis 2015 values were digitized because publishers' Results sections were unreachable is superseded for Teunis 2015: its body is chunk-indexed, though the specific medians were absent from what it returned — the digitization itself stands (tranche 21 §3.3).
+
 **Status:** Evidence assembled. **No profile constant, engine constant, curve
 entry or register row changes in this document.** Nothing here is adopted; the
 register contribution is the fragment

@@ -16,6 +16,22 @@ the paper a number was read from.
 This skill is the other half: what needs sourcing in this transmission and
 natural-history model, and what a hit is allowed to become here.
 
+Where the section gets recorded, in this repo: the register's third axis, whose
+closed vocabulary is `docs/parameter_provenance_register.md` §1 — `R`, `Tn`,
+`Fn·dig`, `Me`, `Ab`, `Sec`, `Tr`, and the retrieval marker `?nr`. Only
+governing citations carry one, the weakest governing origin is printed first,
+and an origin may never move the provenance class or the evidence grade on its
+own. `Ab` on a Grade A constant is not a contradiction — it is the defect the
+axis exists to expose, and `docs/literature/consensus_tranche_21_full_text_reverification.md`
+is the worked pass that populated the column.
+
+`?nr` is a retrieval state and never a null result: absence from the excerpts a
+query returned is not absence from the paper, and zero chunks is not evidence
+that a paper is unreachable. Record `?nr` only after at least two
+differently-phrased attempts, one of them naming the table or figure the value
+is supposed to be in — and see the closing section, which the marker must not be
+read as licensing.
+
 ## Query construction
 
 - Good: `surface touch frequency shared surfaces per hour office video observation`
@@ -41,6 +57,16 @@ What is specific here: the definition it usually turns on for this model is the
 unit (infectivity vs RNA genome copies), the matrix, and the sampling times, and
 a Grade C declared on an unopened paper is not a null result about the
 literature.
+
+**When chunks truncate a table, open the open-access record before recording
+`?nr`.** Chunk retrieval returns a window, and a table can be cut mid-body:
+three phrasings of Kirby 2016's Table 3 all stopped after the All-GI row, which
+is the row the register did not need. Europe PMC serves the JATS XML of any
+open-access article at
+`https://www.ebi.ac.uk/europepmc/webservices/rest/<PMCID>/fullTextXML` (resolve
+the PMCID from the DOI with the same API's `search` endpoint), and it carries
+table cells as text. Retrieval is then `full text opened` and the origin is the
+table itself, not `Tn partial`.
 
 ## Turning a hit into a sourced constant
 
@@ -76,4 +102,7 @@ Report a null result as a result. "No paper measures total high-touch surface
 area per cabin in m²" is a finding worth recording, and is the honest route to a
 declared Grade C. Inventing a plausible number because the search came back
 empty is the failure mode this skill exists to prevent — and so is filing an
-unread paper as a null result, which is the separate case above.
+unread paper as a null result, which is the separate case above. A quantity
+missing from the excerpts a query returned is a third case again: `?nr`, not
+absent from the paper and not absent from the literature. Say which of the three
+you have actually established.
