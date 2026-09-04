@@ -171,21 +171,9 @@
       "overrides": {"remove": ["norwalk_gi"]}
     },
     "influenza": {
-      "bundle": "edison_10pathogen_profiles",
+      "bundle": "active_profiles",
       "pathogen_id": "influenza_a",
-      "overrides": {
-        "remove": [
-          "norovirus_gii4",
-          "sars_cov2_resp",
-          "measles_virus",
-          "legionella_pneumophila",
-          "vibrio_cholerae_parahaemolyticus",
-          "campylobacter_jejuni",
-          "clostridioides_difficile",
-          "andes_hantavirus",
-          "ebola_virus"
-        ]
-      }
+      "overrides": {"remove": ["norwalk_gi", "sars_cov2_resp"]}
     },
     "measles": {
       "bundle": "edison_10pathogen_profiles",

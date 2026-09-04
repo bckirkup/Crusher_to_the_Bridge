@@ -430,7 +430,11 @@
             "null"
           ]
         },
-        "evidence_grade": {"type": "string"}
+        "evidence_grade": {"type": "string"},
+        "notes": {
+          "type": "string",
+          "description": "Provenance prose for the split: what was measured, in what population, and which numbers here are declared rather than measured."
+        }
       },
       "additionalProperties": false
     },
@@ -463,7 +467,28 @@
           "maxItems": 5,
           "items": {"type": "number", "minimum": 0, "maximum": 1}
         },
-        "active_screening": {"type": ["object", "null"]},
+        "active_screening": {
+          "type": ["object", "null"],
+          "properties": {
+            "enabled": {"type": "boolean"},
+            "modality": {"type": ["string", "null"]},
+            "selection_probability_per_day": {
+              "type": ["number", "null"],
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Daily probability that a symptomatic host who never presented is reached by a case-finding campaign."
+            },
+            "selection_probability_by_time": {"type": ["array", "null"]},
+            "notes": {"type": "string"}
+          },
+          "additionalProperties": false
+        },
+        "assay_sensitivity": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Time-invariant probability that a specimen from a truly infected host tests positive."
+        },
         "lab_sampling_probability_by_severity": {
           "type": "array",
           "minItems": 5,
@@ -483,6 +508,11 @@
         "episode_reporting_window_days": {
           "type": "number",
           "exclusiveMinimum": 0
+        },
+        "evidence_grade": {"type": "string"},
+        "notes": {
+          "type": "string",
+          "description": "Provenance prose for the ascertainment vectors, including which of them are declared scenario axes rather than measurements."
         }
       },
       "additionalProperties": false
@@ -842,7 +872,11 @@
         "^environmental_faecal_release_log10_g_per_epoch$": {
           "type": "number",
           "minimum": 0,
-          "description": "Preferred physical key: -log10 grams of stool released to the environment per epoch."
+          "description": "Enteric physical key: -log10 grams of stool released to the environment per epoch."
+        },
+        "^environmental_release_log10_per_day$": {
+          "type": "number",
+          "description": "Matrix-neutral release normalizer: log10 offset from the shedding curve's assay unit to material released to the environment per day, converted to the epoch through SimClock."
         }
       },
       "allOf": [

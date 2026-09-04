@@ -340,7 +340,13 @@ def test_overrides_do_not_leak_between_runs(emergence: dict[str, Any]) -> None:
         )
     ]
     removes = {json.dumps(s["pathogen_overrides"]["remove"]) for s in specs}
-    assert removes == {json.dumps(["sars_cov2_resp"])}
+    # One removal list for every run in the tier, and it isolates norovirus:
+    # the list is derived from the bundle, so it grows with the bundle while
+    # never dropping the arm's own pathogen.
+    assert len(removes) == 1
+    removed = set(specs[0]["pathogen_overrides"]["remove"])
+    assert "sars_cov2_resp" in removed
+    assert "norwalk_gi" not in removed
     base = emergence["pathogen_configs"]["norovirus"]["overrides"]
     assert base == {"remove": ["sars_cov2_resp"]}  # manifest never mutated
 

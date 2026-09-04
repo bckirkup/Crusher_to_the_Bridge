@@ -225,7 +225,10 @@ class TestDesignResolution:
         }
         bundle, pid, over = ia._pathogen_config(manifest, "norovirus")
         assert (bundle, pid) == ("active_profiles", "norwalk_gi")
-        assert over == {"remove": ["x"]}
+        # The declared removal survives normalization; the rest of the list is
+        # the bundle-derived isolation of the named pathogen.
+        assert over["remove"][0] == "x"
+        assert "norwalk_gi" not in over["remove"]
 
     def test_run_ids_are_unique_per_arm_itinerary_and_seed(self):
         ids = {

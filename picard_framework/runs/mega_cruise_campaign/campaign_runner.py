@@ -38,6 +38,9 @@ from engines.initiation import LEGACY_MANIFEST  # noqa: E402
 from picard_framework.analysis.sentinel.wastewater_assays import (  # noqa: E402
     DEFAULT_ASSAY_MODE,
 )
+from picard_framework.pathogen_overrides import (  # noqa: E402
+    isolate_arm_overrides,
+)
 from picard_framework.runs.mega_cruise_campaign import (  # noqa: E402
     sentinel_recovery,
     variant_campaign,
@@ -762,7 +765,9 @@ def get_pathogen_config(
     overrides = cfg.get("overrides")
     if isinstance(overrides, list):
         overrides = {"remove": overrides}
-    return bundle, pathogen_id, overrides
+    return bundle, pathogen_id, isolate_arm_overrides(
+        bundle, pathogen_id, overrides,
+    )
 
 
 def combo_overrides(manifest: dict[str, Any], combo: str) -> tuple[str, dict[str, Any]]:

@@ -6,6 +6,9 @@ Syndromic surveillance – models sick-call reporting with:
 - A parameterizable probability that truly symptomatic agents report.
 - Optional detection_delay_hours gate after symptom onset.
 - Optional proactive crew screening on a fixed interval.
+- A molecular ascertainment rung (specimen collection plus assay) kept
+  separate from the syndromic rung, so a laboratory-confirmed count is
+  not the same observable as a medically attended one.
 - FRED-style categorized background noise (seasickness, fatigue,
   minor injury) so healthy agents generate realistic false-signal
   clutter with specific complaint reasons.
@@ -111,6 +114,11 @@ class SyndromicSurveillance:
         # First epoch agent observed symptomatic (for detection_delay_hours)
         self._symptom_onset_epoch: dict[int, int] = {}
         self._first_sick_call_epoch: dict[int, int] = {}
+        # One specimen per agent per pathogen, keyed (pathogen_id, agent_id):
+        # a case swabbed on day two is not a second case when it is still
+        # sick on day three.
+        self._lab_sampled: dict[tuple[str, int], int] = {}
+        self._lab_confirmed: dict[tuple[str, int], int] = {}
 
         # None → built-in defaults; explicit [] disables background noise categories.
         if noise_categories is None:
@@ -305,6 +313,10 @@ class SyndromicSurveillance:
                     "symptom_severity": infection.get("symptom_severity", ""),
                 })
 
+        molecular = self.collect_specimens(
+            agents, epoch, sick_call_ids,
+        )
+
         return {
             "modality": self.name,
             "epoch": epoch,
@@ -317,6 +329,157 @@ class SyndromicSurveillance:
             "total_agents": len(agents),
             "first_detection_events": detection_events,
             "episode_detection_telemetry": episode_telemetry,
+            **molecular,
+        }
+
+    # ── molecular ascertainment rung ──────────────────────────────────────
+    #
+    # Kept apart from the sick-call roster above because the two are
+    # different observables: Ward 2010 counted 176/1,970 NAT-confirmed
+    # passengers on the same voyage that sent 13/1,970 to the infirmary.
+    # Collapsing them would make one anchor unreachable whenever the other
+    # is matched.
+
+    def collect_specimens(
+        self,
+        agents: list[dict[str, Any]],
+        epoch: int,
+        sick_call_ids: list[int],
+    ) -> dict[str, Any]:
+        """Draw specimens and assay results for this epoch.
+
+        Presentation to sick call makes an agent eligible for a specimen;
+        ``active_screening`` additionally reaches symptomatic agents who
+        never presented, which is how case-finding campaigns differ from
+        passive infirmary records.
+        """
+        presenting = {int(aid) for aid in sick_call_ids}
+        sampled: dict[str, list[int]] = {}
+        confirmed: dict[str, list[int]] = {}
+        for pathogen_id, model in self._molecular_models().items():
+            drawn, positive = self._sample_pathogen(
+                agents, epoch, presenting, pathogen_id, model,
+            )
+            if drawn:
+                sampled[pathogen_id] = drawn
+            if positive:
+                confirmed[pathogen_id] = positive
+        sampled_union = sorted({aid for ids in sampled.values() for aid in ids})
+        confirmed_union = sorted(
+            {aid for ids in confirmed.values() for aid in ids},
+        )
+        return {
+            "lab_sampled_agents": sampled_union,
+            "lab_confirmed_agents": confirmed_union,
+            "lab_sampled_by_pathogen": sampled,
+            "lab_confirmed_by_pathogen": confirmed,
+            "lab_sampled_count": len(sampled_union),
+            "lab_confirmed_count": len(confirmed_union),
+        }
+
+    def _sample_pathogen(
+        self,
+        agents: list[dict[str, Any]],
+        epoch: int,
+        presenting: set[int],
+        pathogen_id: str,
+        model: dict[str, Any],
+    ) -> tuple[list[int], list[int]]:
+        drawn: list[int] = []
+        positive: list[int] = []
+        for agent in agents:
+            aid = int(agent["agent_id"])
+            if (pathogen_id, aid) in self._lab_sampled:
+                continue
+            infection = (agent.get("pathogen_infections") or {}).get(
+                pathogen_id, {},
+            ) or {}
+            probability = self._specimen_probability(
+                model, infection, presented=aid in presenting,
+            )
+            if probability <= 0.0 or self.rng.random() >= probability:
+                continue
+            self._lab_sampled[(pathogen_id, aid)] = int(epoch)
+            drawn.append(aid)
+            if self._assay_positive(model, infection):
+                self._lab_confirmed[(pathogen_id, aid)] = int(epoch)
+                positive.append(aid)
+        return drawn, positive
+
+    def _specimen_probability(
+        self,
+        model: dict[str, Any],
+        infection: dict[str, Any],
+        *,
+        presented: bool,
+    ) -> float:
+        """Per-epoch probability that this agent yields a specimen."""
+        severity = str(infection.get("symptom_severity") or "")
+        symptomatic = infection.get("illness") == "SYMPTOMATIC"
+        index = self._severity_index(model, severity) if symptomatic else None
+        if presented:
+            # A complaint that is not this pathogen still reaches the
+            # clinician, and swabbing it is what makes test positivity an
+            # emergent quantity rather than one by construction.
+            reference = index if index is not None else model["mild_index"]
+            return float(model["sampling"][reference])
+        if not symptomatic or index is None:
+            return 0.0
+        return self.clock.probability_per_epoch(
+            float(model["screening_probability_per_day"]),
+        )
+
+    def _assay_positive(
+        self,
+        model: dict[str, Any],
+        infection: dict[str, Any],
+    ) -> bool:
+        if infection.get("status") != "INFECTED":
+            return False
+        return bool(self.rng.random() < model["sensitivity"])
+
+    @staticmethod
+    def _severity_index(
+        model: dict[str, Any],
+        severity: str,
+    ) -> int | None:
+        states = model["states"]
+        return states.index(severity) if severity in states else None
+
+    def _molecular_models(self) -> dict[str, dict[str, Any]]:
+        """Molecular parameters for every profile that declares them."""
+        models: dict[str, dict[str, Any]] = {}
+        for pathogen_id, profile in self.symptom_severity_profiles.items():
+            model = self._molecular_model(profile)
+            if model is not None:
+                models[str(pathogen_id)] = model
+        return models
+
+    @staticmethod
+    def _molecular_model(profile: dict[str, Any]) -> dict[str, Any] | None:
+        """Extract specimen and assay terms, or None when undeclared."""
+        severity = profile.get("severity_model")
+        observation = profile.get("observation_model")
+        if not isinstance(severity, dict) or not isinstance(observation, dict):
+            return None
+        sampling = list(
+            observation.get("lab_sampling_probability_by_severity") or [],
+        )
+        states = list(severity.get("states") or [])
+        if len(sampling) != len(states) or not sampling:
+            return None
+        screening = observation.get("active_screening") or {}
+        enabled = bool(screening.get("enabled"))
+        return {
+            "states": states,
+            "sampling": [float(value) for value in sampling],
+            "mild_index": states.index("mild") if "mild" in states else 0,
+            "screening_probability_per_day": (
+                float(screening.get("selection_probability_per_day") or 0.0)
+                if enabled
+                else 0.0
+            ),
+            "sensitivity": float(observation.get("assay_sensitivity", 1.0)),
         }
 
     def _severity_hazard(

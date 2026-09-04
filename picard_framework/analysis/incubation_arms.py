@@ -57,7 +57,10 @@ from picard_framework.analysis.sentinel_recovery_postprocess import (
 )
 from picard_framework.analysis.stan._data import cmdstan_available
 from picard_framework.analysis.stan._sampler_options import SamplerOptions
-from picard_framework.pathogen_overrides import load_pathogen_bundle
+from picard_framework.pathogen_overrides import (
+    isolate_arm_overrides,
+    load_pathogen_bundle,
+)
 from picard_framework.runs.mega_cruise_campaign import sentinel_recovery
 from simulation_utils.paths import validate_path_component, validated_open
 
@@ -582,10 +585,16 @@ def _pathogen_config(
     overrides = cfg.get("overrides")
     if isinstance(overrides, list):
         overrides = {"remove": list(overrides)}
+    bundle = str(cfg.get("bundle") or "active_profiles")
+    pathogen_id = str(cfg["pathogen_id"])
     return (
-        str(cfg.get("bundle") or "active_profiles"),
-        str(cfg["pathogen_id"]),
-        dict(overrides) if isinstance(overrides, dict) else None,
+        bundle,
+        pathogen_id,
+        isolate_arm_overrides(
+            bundle,
+            pathogen_id,
+            dict(overrides) if isinstance(overrides, dict) else None,
+        ),
     )
 
 

@@ -49,18 +49,34 @@ ENVIRONMENTAL_FAECAL_RELEASE_LOG10_G_PER_EPOCH = 4.0
 DOSE_ADJUSTMENT = ENVIRONMENTAL_FAECAL_RELEASE_LOG10_G_PER_EPOCH
 
 
+def environmental_release_log10_per_day(
+    profile: dict[str, Any] | None,
+) -> float:
+    """Normalizer from the shedding curve's assay unit to released material.
+
+    Key precedence is matrix-neutral first: a respiratory profile releases
+    exhaled aerosol, not grams of stool, so it declares
+    ``environmental_release_log10_per_day`` and the two enteric names
+    remain as aliases for the profiles that measured stool. The returned
+    offset applies to a daily amount; the caller converts the resulting
+    emission to the epoch through ``SimClock.amount_per_epoch``.
+    """
+    values = profile or {}
+    for key in (
+        "environmental_release_log10_per_day",
+        "environmental_faecal_release_log10_g_per_epoch",
+        "dose_adjustment",
+    ):
+        if key in values:
+            return float(values[key])
+    return float(ENVIRONMENTAL_FAECAL_RELEASE_LOG10_G_PER_EPOCH)
+
+
 def environmental_faecal_release_log10_g_per_epoch(
     profile: dict[str, Any] | None,
 ) -> float:
-    """Read the preferred stool-release key with legacy compatibility."""
-    values = profile or {}
-    return float(values.get(
-        "environmental_faecal_release_log10_g_per_epoch",
-        values.get(
-            "dose_adjustment",
-            ENVIRONMENTAL_FAECAL_RELEASE_LOG10_G_PER_EPOCH,
-        ),
-    ))
+    """Enteric-named alias retained for existing call sites."""
+    return environmental_release_log10_per_day(profile)
 
 # Dose-response coefficients: "Norwalk virus: How infectious is it?" Table III.
 ALPHA = 0.111
@@ -421,6 +437,8 @@ class KorkinAgent:
         # Chronic norovirus shedding: per-pathogen duration for hosts drawn as
         # chronic shedders at initialization
         "chronic_shedding_duration_by_pathogen",
+        # What the manifest gave this host: vaccination and antiviral status
+        "pharma_by_pathogen",
         "shedding_multiplier", "cabin_mate_ids", "ashore",
         # Variant surveillance: genotype standing immunity was raised against
         "prior_genotypes", "immune_history",
@@ -511,6 +529,11 @@ class KorkinAgent:
         # at initialization to immunocompromised hosts drawn as chronic
         # shedders. Empty for every other host.
         self.chronic_shedding_duration_by_pathogen: dict[str, float] = {}
+        # Per-pathogen vaccination and antiviral status drawn from the
+        # manifest at initialization. Kept off susceptibility_multiplier's
+        # books as a record so a run can report who was covered, not only
+        # what their susceptibility ended up being.
+        self.pharma_by_pathogen: dict[str, dict[str, Any]] = {}
 
         # Legacy single-pathogen shedding host factor (also mirrored on first infection)
         self.shedding_multiplier: float = 1.0
@@ -1003,7 +1026,7 @@ class KorkinAgent:
         )
         if not is_symp:
             curve = profile.get("asymptomatic_shedding_log10", curve)
-        adj = environmental_faecal_release_log10_g_per_epoch(profile)
+        adj = environmental_release_log10_per_day(profile)
         host_mult = inf.get("shedding_multiplier", 1.0)
         residents = self.resident_strains(pathogen_id)
         if residents:
@@ -1082,7 +1105,7 @@ class KorkinAgent:
         )
         if not is_symp:
             curve = profile.get("asymptomatic_shedding_log10", curve)
-        adj = environmental_faecal_release_log10_g_per_epoch(profile)
+        adj = environmental_release_log10_per_day(profile)
         emissions = self._resident_emissions(
             residents, curve, adj, self.clock, profile,
         )
