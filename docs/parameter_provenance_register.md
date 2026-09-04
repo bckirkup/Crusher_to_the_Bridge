@@ -283,6 +283,10 @@ and 6 are the same identifiability constraint in two arms and must be adopted
 jointly or not at all, and item 5 is circular with anchor A3 until A3 is
 demoted. Read that plan before starting any single item.
 
+How these blocked rows are re-read before any inference runs is set out in
+[`proposals/bayesian_inference_design.md`](proposals/bayesian_inference_design.md),
+which **re-grades no row and adopts no value**.
+
 The immunocompromise item left this list in #45 and is recorded in its §3.1 and
 §3.2 rows instead: the mechanism defect was that the only field available was a
 susceptibility multiplier, and the evidence measures duration. The duration
