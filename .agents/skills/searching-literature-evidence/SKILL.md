@@ -13,20 +13,22 @@ returns Results, Methods and tables, including for paywalled articles — query
 construction, filter behaviour, result handling, and recording which section of
 the paper a number was read from.
 
-This skill is the other half: what needs sourcing in [this transmission and natural-history model], and what a hit is
-allowed to become here.
+This skill is the other half: what needs sourcing in this transmission and
+natural-history model, and what a hit is allowed to become here.
 
 ## Query construction
 
-- Good: `surface touch frequency shared surfaces per hour office video observation` (also: `fomite contact rate shared surface touches per hour`)
+- Good: `surface touch frequency shared surfaces per hour office video observation`
+- Weak: `how often do people touch things`
 
 ## Filter discipline
+
+Filters that are specifically wrong for this repo's literature:
 
 - `medical_mode` — clinical-evidence questions (drug efficacy, guidelines), not
   behavioural or environmental measurements. It restricts to ~8M top medical
   documents and will drop the built-environment, food-microbiology and
   indoor-air journals that most fomite and shedding constants come from.
-
 - `human` drops exactly the in-vitro transfer and surrogate work (MNV1, Phi6,
   MS2) that quantifies fomite and hand routes.
 
