@@ -86,8 +86,12 @@ def test_picard_golden_summary_and_trigger() -> None:
     # Updated 2026-09-03 (capacity-weighted leisure draw): the weighted
     # ``rng.choice`` consumes the seeded stream differently, moving symptomatic
     # from 2 to 1 and the final trigger from CONFIRMED to BASELINE.
-    assert fp["susceptible"] == 13
-    assert fp["infected"] == 3
+    # Updated 2026-09-04 (influenza A activated in active_profiles.json): the
+    # legacy config loads the whole active bundle, so a third profile with
+    # ``initial_infected: 1`` seeds one more index case.  Prior values were
+    # susceptible 13 / infected 3.
+    assert fp["susceptible"] == 12
+    assert fp["infected"] == 4
     assert fp["symptomatic"] == 1
     assert fp["recovered"] == 0
     assert fp["immune"] == 4

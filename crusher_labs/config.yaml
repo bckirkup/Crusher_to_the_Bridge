@@ -386,6 +386,43 @@ multi_pathogen:
   # acquisition: immunocompromised_multiplier is withdrawn and is not read.
   immunocompromised_fraction: 0.05
 
+# ── Vaccination and antivirals (manifest axes) ───────────────
+# Declared per pathogen and absent by default: a run that says nothing here
+# draws nothing and stays bit-identical to one from before this block existed.
+# Both interventions split into an acquisition axis and an illness axis
+# because the evidence does. Ge 2025 pools vaccine efficacy against
+# laboratory-confirmed influenza at 48.5% (41.9-54.3, 26 RCTs) while Presa
+# 2025 reports "morbidity benefits amid low infection prevention"; Zhao 2024's
+# WHO network meta-analysis puts oseltamivir post-exposure prophylaxis at
+# RR 0.40 (0.26-0.62) against symptomatic influenza and finds little or no
+# effect on asymptomatic infection. So both acquisition axes default to zero
+# and are swept, never fitted: folding either into a profile's
+# base_susceptibility would let it absorb transmission error instead.
+#
+# The commented block below is the Ward 2010 / Millman 2015 regimen — crew
+# vaccination at Millman's measured coverage, empiric treatment of cases and
+# chemoprophylaxis of crew contacts — recorded here because those voyages'
+# attack rates are post-intervention and cannot be reproduced without it.
+#
+# pharmaceutical_interventions:
+#   influenza_a:
+#     vaccination:
+#       coverage_by_role: {crew: 0.955, passenger: 0.0}
+#       efficacy_against_acquisition: 0.0
+#       efficacy_against_illness: 0.4848
+#     antiviral:
+#       treatment:
+#         coverage_by_role: {crew: 1.0, passenger: 1.0}
+#         start_hours_after_onset: 24.0
+#         window_hours: 48.0
+#         illness_reduction_days: 1.0
+#         shedding_reduction_days: 1.0
+#         transmission_multiplier: 1.0
+#       prophylaxis:
+#         coverage_by_role: {crew: 1.0, passenger: 0.0}
+#         efficacy_against_acquisition: 0.0
+#         efficacy_against_illness: 0.60
+
 # ── Variant Surveillance (heritable strain tracking) ─────────
 # Off by default: with enabled=false no strain is minted and no RNG draw
 # changes, so legacy runs and campaign goldens stay bit-identical.

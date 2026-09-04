@@ -350,6 +350,7 @@ class ObservationModel(BaseModel):
     reporting_probability_by_severity_post_recognition: list[float]
     active_screening: dict[str, Any] | None = None
     lab_sampling_probability_by_severity: list[float] = []
+    assay_sensitivity: float = 1.0
     assay_sensitivity_by_time_since_infection: Any | None = None
     episode_reporting_window_days: float
 
@@ -375,11 +376,29 @@ class ObservationModel(BaseModel):
                 )
         if self.episode_reporting_window_days <= 0:
             raise ValueError("episode_reporting_window_days must be positive")
+        if not 0.0 <= self.assay_sensitivity <= 1.0:
+            raise ValueError("assay_sensitivity must lie in [0, 1]")
+        self._validate_active_screening()
         if self.assay_sensitivity_by_time_since_infection is not None:
             raise NotImplementedError(
                 "time-varying assay sensitivity is not implemented",
             )
         return self
+
+    def _validate_active_screening(self) -> None:
+        screening = self.active_screening or {}
+        if screening.get("selection_probability_by_time") is not None:
+            raise NotImplementedError(
+                "time-varying screening selection is not implemented",
+            )
+        selection = screening.get("selection_probability_per_day")
+        if selection is None:
+            return
+        value = float(selection)
+        if not 0.0 <= value <= 1.0:
+            raise ValueError(
+                "selection_probability_per_day must lie in [0, 1]",
+            )
 
 
 class PathogenProfile(BaseModel):

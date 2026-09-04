@@ -55,6 +55,10 @@ from engines.initiation import (
     initiation_owned_pathogens,
     resolve_initiation_plan,
 )
+from engines.pharmaceutical_interventions import (
+    assign_host_pharmacology,
+    resolve_pharmacology,
+)
 from engines.py_contam_bridge import ContamTransportEngine
 from engines.sim_clock import SimClock, config_epochs_for_hours
 from engines.wearable_monitor import (
@@ -1190,6 +1194,38 @@ def _validate_symptom_severity_profiles(
             raise NotImplementedError(
                 f"{pathogen_id}: time-varying assay sensitivity is not implemented",
             )
+        _validate_molecular_observation(pathogen_id, observation)
+
+
+def _validate_molecular_observation(
+    pathogen_id: str,
+    observation: dict[str, Any],
+) -> None:
+    """Check the specimen-collection and assay terms of one observation model."""
+    screening = observation.get("active_screening") or {}
+    if not isinstance(screening, dict):
+        raise ValueError(
+            f"{pathogen_id}.observation_model.active_screening must be an object",
+        )
+    if screening.get("selection_probability_by_time") is not None:
+        raise NotImplementedError(
+            f"{pathogen_id}: time-varying screening selection is not implemented",
+        )
+    probabilities = (
+        ("assay_sensitivity", observation.get("assay_sensitivity")),
+        (
+            "active_screening.selection_probability_per_day",
+            screening.get("selection_probability_per_day"),
+        ),
+    )
+    for key, raw in probabilities:
+        if raw is None:
+            continue
+        value = float(raw)
+        if not np.isfinite(value) or not 0.0 <= value <= 1.0:
+            raise ValueError(
+                f"{pathogen_id}.observation_model.{key} must lie in [0, 1]",
+            )
 
 
 def _normalize_profile_units(
@@ -1233,6 +1269,9 @@ _CHRONIC_SHEDDING_SEED_OFFSET = 4409
 # Same role again for the boarding draw, with its own offset.
 _BOARDING_SEED_OFFSET = 8221
 
+# Same role again for the vaccination and antiviral coverage draws.
+_PHARMACOLOGY_SEED_OFFSET = 6133
+
 # Rejection budget for the truncated chronic-duration draw before clipping.
 _CHRONIC_DURATION_MAX_DRAWS = 32
 
@@ -1271,6 +1310,24 @@ def _chronic_shedding_rng(
         return np.random.default_rng(seed_seq.spawn(1)[0])
     return np.random.default_rng(
         int(cfg.get("random_seed", 0) or 0) + _CHRONIC_SHEDDING_SEED_OFFSET,
+    )
+
+
+def _pharmacology_rng(
+    rng: np.random.Generator, cfg: dict[str, Any],
+) -> np.random.Generator:
+    """Return an independent stream for vaccination and antiviral coverage.
+
+    A sibling of the host-genetics stream, for the same reason: a run that
+    turns coverage on must not thereby move every other stochastic decision
+    in the run, or coverage and everything else would move together and the
+    sweep would be uninterpretable.
+    """
+    seed_seq = getattr(rng.bit_generator, "seed_seq", None)
+    if seed_seq is not None:
+        return np.random.default_rng(seed_seq.spawn(1)[0])
+    return np.random.default_rng(
+        int(cfg.get("random_seed", 0) or 0) + _PHARMACOLOGY_SEED_OFFSET,
     )
 
 
@@ -1491,6 +1548,16 @@ def init_multi_pathogen(
                 # risk 0.015 (Se-) vs 0.076 (Se+), and 4 of 8 secretor-negative
                 # challenges became ill at top dose in Rouphael's GII.2 trial.
                 agent.susceptibility_multiplier[pid] *= rel_susc
+
+    pharmacology = resolve_pharmacology(cfg)
+    if pharmacology:
+        # Spawned only when a manifest declares coverage. SeedSequence.spawn
+        # is order-dependent, so an unconditional spawn here would shift the
+        # boarding stream below and move every golden on runs that declare
+        # no pharmacology at all.
+        assign_host_pharmacology(
+            engine.agents, pharmacology, _pharmacology_rng(rng, cfg),
+        )
 
     candidate_ids = [
         a.agent_id for a in engine.agents

@@ -241,12 +241,18 @@ immunocompetent. What chronic hosts retain is duration, not prevalence:
 218 days against a 7–14 day voyage means a shedder present for the whole
 cruise.
 
-### 3.3 Influenza A (`influenza_a`) — **not active**, in `edison_10pathogen_profiles.json`
+### 3.3 Influenza A (`influenza_a`) — **active** in `active_profiles.json`
 
-Not in `active_profiles.json`. Nothing here is loaded by a run today, and §4.4
-must be resolved before it is.
+The pooled arm is loaded by a run today: one `influenza_a` profile with no
+subtype-specific biology, scored on **MAARI and NAT-confirmed infection as
+separate observation rungs**, and its Edison bundle counterpart is *not* the
+profile that loads (§3.3's `surface_decay` row still refuses the Edison value).
+§4.4 remains open, and the fields it concerns are declared and swept rather
+than fitted — `base_susceptibility` stays a scenario input, and the
+vaccination and antiviral coverage that every shipboard anchor was measured
+under is a manifest axis (§3.3.2), not a pathogen constant.
 
-What activating it would require, in what order, is sequenced in
+What activation required, in what order, is sequenced in
 [`proposals/influenza_arm_activation_plan.md`](proposals/influenza_arm_activation_plan.md);
 the shipboard evidence it would be scored against is assembled in
 [tranche 20](literature/consensus_tranche_20_shipboard_influenza_anchors.md).
@@ -270,7 +276,7 @@ outbreak reports in §3.3.1 — declared as a *likelihood*, never as a prior.
 | `surface_deposition_fraction` | 1e-3 | I | 10× the norovirus value, no stated reason. The bundle still uses the deprecated key name; the engine reads it through the alias — i.e. it is an **airborne emission fraction**, feeding the airborne zone reservoir. The Emission row above is the reason a *fraction* is the wrong form: Yan's emission is uncorrelated with NP load, so it cannot be a share of a nasal-swab-indexed curve. Same defect class R4 resolved for norovirus by redefining the field | ∅ null; ⊘ field resolved in the active bundle only (#42) | #42 |
 | `dose_adjustment` | 1.5 | **I — no referent on this arm** | The key is now spelled `environmental_faecal_release_log10_g_per_epoch` and means −log10 of the **grams of stool** released to the environment per epoch. On a respiratory pathogen it denotes nothing, and it multiplies into dose. Not a sourcing question | **must not be loaded**: remove or replace at activation (plan §1) | |
 | `transmission_route_weights` | 0.2 / 0.35 / 0.3 / 0.15 (**sums to 1.0**) | **I — unit mismatch** | Authored as a mixture of shares; the engine reads the key as the deprecated alias of `route_efficiency_multipliers`, which are **independent per-route dose multipliers, not shares**. Renaming without re-deriving would reinterpret a mixture as five efficiencies | **must not be loaded** as-is (plan §1) | |
-| `observation_model`, `severity_model` | **absent** | — | Both active profiles carry them; this arm has neither, so an activated arm would emit *infections* against anchors that are all reported *illness*. The capture fraction is not transferable: norovirus anchor A3 is **0.60 ± 0.05**, while Ward 2010 measures 0.7% presenting to the infirmary against 8.9% NAT-confirmed infection on one voyage — **≈0.08**, ~7× lower ([tranche 20](literature/consensus_tranche_20_shipboard_influenza_anchors.md) §2). MAARI also over-counts influenza **2–5×** (22–57% of tested cases confirmed), and HAI-only serology under-counts infection by ~a third (31% of SHIVERS seroconversions were NAI-only) | ⊘ field — the substantive activation work (plan §3.1) | |
+| `observation_model`, `severity_model` | **absent** | — | Both active profiles carry them; this arm has neither, so an activated arm would emit *infections* against anchors that are all reported *illness*. The capture fraction is not transferable: norovirus anchor A3 is **0.60 ± 0.05**, while Ward 2010 measures 0.7% presenting to the infirmary against 8.9% NAT-confirmed infection on one voyage — **≈0.08**, ~7× lower ([tranche 20](literature/consensus_tranche_20_shipboard_influenza_anchors.md) §2). MAARI also over-counts influenza **2–5×** (22–57% of tested cases confirmed), and HAI-only serology under-counts infection by ~a third (31% of SHIVERS seroconversions were NAI-only) | ✓ **both now present on the active profile**, and the two endpoints are emitted as **separate rungs** rather than one capture fraction: a MAARI reporting model (severity-conditioned, pre- and post-recognition) and an independent molecular/NAT model (passive sampling of presenting cases plus optional active screening, with its own assay sensitivity), so a scenario can miss one rung and hit the other. Norovirus's A3 = 0.60 is **not** reused here, and no capture probability on this arm was chosen to reproduce Ward's ≈0.08 or Millman's 3.1–6.2% | |
 | `recovery_day` vs `shedding_curve_log10` | 5 against a 15-day curve, no `shedding_duration_days` | — | The two clocks coincide, as they did on the norovirus arm before #43 — but the consequence here is small: the curve peaks at day 3, so ~99.7% of the linear-scale integral falls inside the window. Separate the clocks at activation rather than relying on that | minor; plan §1 | |
 
 #### 3.3.1 Candidate anchors — declared, not adopted
@@ -302,6 +308,32 @@ reporting to CDC is voluntary, and the maritime threshold is **1.38 ILI cases
 per 1,000 traveler-days** — a different functional form from VSP's
 passenger-fraction rule. Where #13 blocks norovirus's posting rate on the
 denominator, influenza's numerator is self-selected as well.
+
+#### 3.3.2 Vaccination and oseltamivir — manifest axes, not pathogen constants
+
+Every candidate anchor in §3.3.1 was measured **under intervention**: Ward's
+voyage treated cases and gave the crew prophylaxis, and both Millman ships ran
+empiric treatment plus chemoprophylaxis of contacts. So 8.9% / 3.7% / 6.2% are
+post-intervention observations, and an arm with no pharmacology cannot be
+scored against them at all. The knobs live in the run manifest
+(`pharmaceutical_interventions.<pathogen_id>`), keyed by role, and none of them
+was chosen to reproduce an anchor.
+
+Two axes, kept apart because the evidence splits that way and a single
+"protection" scalar would hide it: **acquisition** (does the host get infected)
+and **illness given infection** (does an infected host become a case). Neither
+is folded into `base_susceptibility`, which stays pathogen biology.
+
+| Quantity | Default | Class | Evidence / interval | State |
+|---|---|---|---|---|
+| `vaccination.efficacy_against_illness` | **0.4848**, 95% CI [0.419, 0.5429] | **B** | Ge 2025 (*Clin Microbiol Infect*, DOI 10.1016/j.cmi.2025.09.005): pooled VE against **laboratory-confirmed** influenza across 26 RCTs / 104,931 participants. A pooled RCT meta-analysis in the general population, not a measurement in the target setting, so B is the ceiling | ✓ adopted as the illness-axis default; overridable per run |
+| `vaccination.efficacy_against_acquisition` | **0.0** | **B — an explicit zero** | Not an unsourced default. Presa 2025 titles the finding "morbidity benefits amid low infection prevention"; on the ships themselves Millman's crew were 90% / 95.5% covered with 93.9% / 100% of crew MAARI cases vaccinated, Brotherton 2003 found no significant protection, and Ortiz 2023 found HAI ≥40 does not separate infected from uninfected (OR 0.81 per two-fold, p = 0.126) | ✓ adopted as zero and **exposed as a sweep**; it is the field where a flu arm would otherwise absorb transmission error |
+| `antiviral.prophylaxis.efficacy_against_illness` | **0.60** (RR 0.40, 95% CI 0.26–0.62) | **B** | Zhao 2024 (*Lancet* 404:1841, WHO guideline network meta-analysis, DOI 10.1016/S0140-6736(24)01357-6): oseltamivir post-exposure prophylaxis against **symptomatic** influenza, moderate certainty | ✓ adopted |
+| `antiviral.prophylaxis.efficacy_against_acquisition` | **0.0** | **B — an explicit zero** | Same review: neuraminidase inhibitors "probably ha[ve] little or no effect on prevention of **asymptomatic** influenza virus infection" | ✓ adopted as zero |
+| `antiviral.treatment.illness_reduction_days` / `shedding_reduction_days` | **1.0 day** | **B** | Fry 2014 (*Lancet Infect Dis* 14:109, RCT, n = 1,190): median symptom duration 3 vs 4 days; virus isolation cut 15.2% / 30.2% / 47.5% at days 2 / 4 / 7 | ✓ adopted; applied to the treated host's own natural history at onset, not to the profile |
+| `antiviral.treatment.transmission_multiplier` | **1.0 (no effect)** | **C — interval spans no effect** | Ng 2010: household secondary infection odds **0.54 (0.11–2.57)** with treatment within 24 h. Whether treating an index case reduces onward transmission is not established | ✓ adopted as no effect; the field exists so the question can be **swept rather than assumed** |
+| `antiviral.treatment.window_hours` | **48.0** | **declared operational cutoff, not a constant** | Fry 2014 still measured a shedding effect past 48 h, so this is a policy boundary rather than a measured biological limit | declared; a dose arriving after the window is no dose |
+| `coverage_by_role` (vaccination, treatment, prophylaxis) | **{} — nobody covered** | scenario input | Millman's *measured* crew coverage (90% Ship A, 95.5% Ship B) appears only as a worked example in `crusher_labs/config.yaml`, commented out — it is not a default. A role absent from the map is uncovered, so a partially-specified manifest cannot quietly cover everybody | declared and swept, never fitted |
 
 ### 3.4 Nulls and rejections recorded by sourcing wave 1
 

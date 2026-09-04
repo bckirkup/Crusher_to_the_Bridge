@@ -52,9 +52,22 @@ class TestPathogenProfiles:
         assert len(ids) == len(set(ids)), f"Duplicate pathogen_id found: {ids}"
 
     def test_dose_response_valid(self, profiles: dict) -> None:
+        """Each dose-response carries positive parameters for its own family.
+
+        The engine reads ``alpha``/``beta`` or ``k`` depending on ``model``,
+        so a beta-Poisson check applied to an exponential arm would demand
+        parameters that arm never uses.
+        """
         for p in profiles["pathogens"]:
             if "dose_response" in p:
                 dr = p["dose_response"]
+                model = dr.get("model", "beta_poisson")
+                assert model in {"beta_poisson", "exponential"}, (
+                    f"{p['pathogen_id']}: unknown dose_response model {model}"
+                )
+                if model == "exponential":
+                    assert dr.get("k", 0) > 0, f"{p['pathogen_id']}: k must be > 0"
+                    continue
                 assert dr.get("alpha", 0) > 0, f"{p['pathogen_id']}: alpha must be > 0"
                 assert dr.get("beta", 0) > 0, f"{p['pathogen_id']}: beta must be > 0"
 

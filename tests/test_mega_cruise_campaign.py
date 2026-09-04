@@ -15,6 +15,9 @@ sys.path.insert(0, str(REPO_ROOT))
 
 from typing import Any  # noqa: E402
 
+from picard_framework.pathogen_overrides import (  # noqa: E402
+    load_pathogen_bundle,
+)
 from picard_framework.runs.mega_cruise_campaign.campaign_runner import (  # noqa: E402
     ShardBundle,
     _campaign_parser,
@@ -1625,6 +1628,21 @@ def _calibration_manifest() -> dict[str, Any]:
     return load_manifest(CALIBRATION_MANIFEST)
 
 
+def _assert_isolates(spec: dict[str, Any], pathogen_id: str) -> None:
+    """An arm removes every pathogen in its bundle except its own.
+
+    Asserted as a set relation rather than a literal list because the
+    removals are derived from the bundle, so adding a pathogen to the bundle
+    extends the list without changing the arm's contract.
+    """
+    bundle = load_pathogen_bundle(
+        str(REPO_ROOT / "data" / "pathogens" / "active_profiles.json"),
+    )
+    removed = set(spec["pathogen_overrides"]["remove"])
+    assert pathogen_id not in removed
+    assert set(bundle) - {pathogen_id} <= removed
+
+
 def test_calibration_manifest_loads() -> None:
     manifest = _calibration_manifest()
     assert manifest["campaign"] == "multi_platform_calibration_v1"
@@ -1887,7 +1905,7 @@ def test_c1_sets_platform_agents_dose_and_init() -> None:
     assert spec["config_overrides"]["ship_graph"]["num_agents"] == 450
     assert spec["pathogen_overrides"]["norwalk_gi"]["dose_adjustment"] == pytest.approx(5.0)
     assert spec["pathogen_overrides"]["norwalk_gi"]["initial_infected"] == 1
-    assert spec["pathogen_overrides"]["remove"] == ["sars_cov2_resp"]
+    _assert_isolates(spec, "norwalk_gi")
     assert spec["run"]["num_epochs"] == 168
     assert spec["campaign_parameters"]["dose_adjustment"] == pytest.approx(5.0)
     assert spec["campaign_parameters"]["n_init"] == 1
@@ -1930,7 +1948,7 @@ def test_c2_sweeps_immunity_across_platforms() -> None:
     assert sample["config_overrides"]["ship_graph"]["num_agents"] == 1910
     # No dose/init patch when tier omits those fields.
     assert "norwalk_gi" not in sample.get("pathogen_overrides", {})
-    assert sample["pathogen_overrides"]["remove"] == ["sars_cov2_resp"]
+    _assert_isolates(sample, "norwalk_gi")
 
 
 def test_c2_accepts_singular_dose_adjustment_after_c1() -> None:
@@ -1960,7 +1978,7 @@ def test_c3_sarscov2_multi_platform_dose_sweep() -> None:
     assert sample["config_overrides"]["ship_graph"]["num_agents"] == 450
     assert sample["pathogen_overrides"]["sars_cov2_resp"]["dose_adjustment"] == pytest.approx(10.0)
     assert sample["pathogen_overrides"]["sars_cov2_resp"]["initial_infected"] == 1
-    assert sample["pathogen_overrides"]["remove"] == ["norwalk_gi"]
+    _assert_isolates(sample, "sars_cov2_resp")
     assert sample["catalog"]["pathogen_bundle_id"] == "active_profiles"
 
 

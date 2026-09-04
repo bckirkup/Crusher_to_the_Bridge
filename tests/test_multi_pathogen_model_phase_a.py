@@ -102,11 +102,30 @@ class TestDoseAdjustmentContracts:
         "bundle",
         ["active_profiles.json", "edison_10pathogen_profiles.json"],
     )
-    def test_every_profile_has_dose_adjustment(self, bundle: str) -> None:
+    def test_every_profile_declares_a_release_normalizer(
+        self, bundle: str,
+    ) -> None:
+        """No profile may fall back to the norovirus release default.
+
+        The accepted names are the precedence list in
+        ``environmental_release_log10_per_day``: a respiratory profile
+        declares release of exhaled material, not grams of stool, so
+        requiring the enteric name of the key would force it to misdeclare
+        its own matrix.
+        """
+        accepted = (
+            "environmental_release_log10_per_day",
+            "environmental_faecal_release_log10_g_per_epoch",
+            "dose_adjustment",
+        )
         data = json.loads((REPO_ROOT / "data/pathogens" / bundle).read_text())
         for p in data["pathogens"]:
-            assert "dose_adjustment" in p, p["pathogen_id"]
-            assert isinstance(p["dose_adjustment"], (int, float))
+            declared = [key for key in accepted if key in p]
+            assert declared, p["pathogen_id"]
+            for key in declared:
+                assert isinstance(p[key], (int, float)), (
+                    f"{p['pathogen_id']}.{key}"
+                )
 
 
 class TestNorovirusAirborneContracts:

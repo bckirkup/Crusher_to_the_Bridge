@@ -28,9 +28,15 @@ HISTORY_PATH = os.path.join(REPO_ROOT, "telemetry_buffer", "simulation_history.j
 # Updated 2026-09-03 (capacity-weighted leisure draw): the weighted
 # ``rng.choice`` consumes the seeded stream differently, moving symptomatic
 # from 2 to 1 and the final trigger from CONFIRMED to BASELINE.
+# Updated 2026-09-04 (influenza A activated in active_profiles.json): the
+# default legacy config loads the whole active bundle, so a third profile with
+# ``initial_infected: 1`` seeds one more index case in the default run.
+# Infected 3 -> 4 and susceptible 13 -> 12 are that one seed; campaign arms stay
+# single-pathogen because ``isolate_arm_overrides`` derives their removals from
+# the bundle rather than from a hand-written list.
 EXPECTED_SUMMARY = {
-    "susceptible": 13,
-    "infected": 3,
+    "susceptible": 12,
+    "infected": 4,
     "symptomatic": 1,
     "recovered": 0,
     "immune": 4,

@@ -34,6 +34,10 @@ from engines.infection_dynamics_bridge import (
     KorkinShipEngine,
 )
 from engines.initiation import apply_explicit_seeds, initiation_owned_pathogens
+from engines.pharmaceutical_interventions import (
+    apply_treatment_at_onset,
+    illness_multiplier,
+)
 from engines.sim_clock import SimClock, config_epochs_for_hours
 from engines.sim_clock import crossed_day_boundary as _crossed_day_boundary
 from engines.strain_state import ImmuneRecord, StrainRegistry
@@ -450,11 +454,17 @@ def _draw_symptom_onset(
     ``will_present`` and that boolean replaces the dose draw: without the seam
     a dose of zero would make every imported host asymptomatic and the
     boarding state axis silently void.
+
+    Vaccination and prophylaxis scale this draw rather than the acquisition
+    that preceded it, because that is where their measured effect sits: both
+    reduce symptomatic influenza while leaving infection itself largely
+    untouched.
     """
     forced = inf.get("will_present")
     if forced is None:
         ill_prob = _presentation_probability(inf, prof)
         ill_prob = min(1.0, ill_prob + agent.get_chronic_illness_boost(pid))
+        ill_prob *= illness_multiplier(agent, pid)
         presents = rng.random() < ill_prob
     else:
         presents = bool(forced)
@@ -463,6 +473,7 @@ def _draw_symptom_onset(
         inf["onset_time_infected"] = inf.get("time_infected", 0)
         inf["presented"] = True
         draw_emesis_schedule(agent, pid, prof, rng)
+        apply_treatment_at_onset(agent, pid, inf, prof)
         if inf.get("symptom_severity") in (None, "", "asymptomatic"):
             inf["symptom_severity"] = _draw_symptom_severity(prof, rng)
         if agent.illness_status == IllnessStatus.NOT_ILL:
@@ -506,7 +517,7 @@ def _clearance_days(
     infection.
     """
     recovery_day = agent.get_chronic_recovery_day(
-        pid, prof.get("recovery_day", 3),
+        pid, inf.get("recovery_day", prof.get("recovery_day", 3)),
     )
     shedding_duration = float(
         inf.get(

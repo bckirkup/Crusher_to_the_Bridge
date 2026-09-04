@@ -479,6 +479,145 @@
       },
       "presymptomatic_shedding_days": 2.0,
       "presymptomatic_shedding_notes": "He et al., Nat Med 2020: infectiousness begins approximately 2.3 days before symptom onset; 2.0 days is the profile window."
+    },
+    {
+      "pathogen_id": "influenza_a",
+      "name": "Influenza A (pooled)",
+      "category": "respiratory_viral",
+      "notes": "Pooled influenza A: no subtype-specific biology. The Edison bundle's H1N1/H3N2 strain table, base_susceptibility 0.65, dose_adjustment, surface_deposition_fraction and share-valued transmission_route_weights are deliberately not carried over; see docs/parameter_provenance_register.md section 3.3 for why each is refused, and docs/proposals/influenza_arm_activation_plan.md for the activation sequence. Scored rungs are MAARI and NAT-confirmed infection, kept separate.",
+      "surface_decay_log10_per_day": 1.221849,
+      "airborne_half_life_hours": 1.5,
+      "transmission_routes": [
+        "direct_contact",
+        "droplet",
+        "hvac_airborne",
+        "fomite"
+      ],
+      "shedding_curve_log10": [2.5, 4.5, 6.5, 7.2, 6.8, 5.8, 4.8, 3.8, 3.0, 2.2, 1.5, 1.0, 0.5, 0.0, 0.0],
+      "asymptomatic_shedding_log10": [2.0, 3.5, 5.0, 5.6, 5.2, 4.4, 3.5, 2.6, 1.8, 1.0, 0.5, 0.0, 0.0, 0.0, 0.0],
+      "presymptomatic_shedding_days": 1.0,
+      "presymptomatic_shedding_notes": "Ip et al., Clin Infect Dis 2017: shedding begins approximately 1 day before symptom onset; 1.0 day is the profile window.",
+      "environmental_release_log10_per_day": 0.82,
+      "environmental_release_notes": "Level, not shape. Emission is 10^(curve - this value) per day, converted to the epoch by SimClock, so 0.82 sets the symptomatic peak (curve 7.2) to 10^6.38 = 2.4e6 copies per day, which is Yan 2018 (EMIT, PNAS 115:1081, DOI 10.1073/pnas.1716561115) exhaled geometric means 3.8e4 fine + 1.2e4 coarse copies per 30-min sample extrapolated to 24 h. Grade C: the measurement is exhaled breath in a clinical facility, and Yan finds exhaled load uncorrelated with NP swab load, so the nasal-indexed curve supplies only the temporal shape while the level is pinned to a measured exhaled rate. Excludes hand contamination and large-droplet spray, so it is a lower bound on total release. Declared, and selected against no anchor.",
+      "airborne_emission_mode": "continuous_fraction",
+      "airborne_emission_fraction": 0.76,
+      "airborne_emission_notes": "Fine (<=5 um) share of exhaled emission, 3.8e4 / (3.8e4 + 1.2e4) = 0.76 from the same Yan 2018 paired measurement. The coarse remainder deposits near the source, which is what the fomite route draws on. Replaces the Edison bundle's surface_deposition_fraction 1e-3, which was the deprecated alias of this key with no stated referent.",
+      "dose_response": {
+        "model": "exponential",
+        "k": 0.18
+      },
+      "symptomatic_fraction": 0.669,
+      "severity_model": {
+        "states": [
+          "asymptomatic",
+          "subclinical",
+          "mild",
+          "moderate",
+          "severe_critical"
+        ],
+        "base_probabilities": [0.2, 0.131, 0.459, 0.2, 0.01],
+        "evidence_grade": "B for the two rungs Carrat measures, P for the splits inside them",
+        "notes": "Carrat 2008 (DOI 10.1093/aje/kwm375) fixes two rungs: any symptoms 66.9% of infections, so asymptomatic + subclinical = 0.331; lower-respiratory symptoms 21.0% of infections, read as moderate or worse. Mild = 0.669 - 0.210 = 0.459 is then implied. The two splits inside those rungs (asymptomatic vs subclinical 0.200/0.131, moderate vs severe_critical 0.200/0.010) are declared, not measured, and are swept. No value here was chosen against Ward 2010 or Millman 2015."
+      },
+      "observation_model": {
+        "system": "MAARI",
+        "syndrome_case_eligibility_by_severity": [0.0, 0.0, 0.85, 1.0, 1.0],
+        "reporting_probability_by_severity_pre_recognition": [0.0, 0.0, 0.1, 0.55, 1.0],
+        "reporting_probability_by_severity_post_recognition": [0.0, 0.0, 0.18, 0.7, 1.0],
+        "active_screening": {
+          "enabled": false,
+          "modality": null,
+          "selection_probability_per_day": 0.0,
+          "selection_probability_by_time": null,
+          "notes": "Off by default, which makes the arm's baseline passive infirmary ascertainment. Ward 2010's research testing of a whole voyage is represented by enabling this and raising selection_probability_per_day, not by widening the sampling vector below: a case-finding campaign reaches symptomatic hosts who never presented, and passive sampling cannot."
+        },
+        "lab_sampling_probability_by_severity": [0.0, 0.0, 0.35, 0.6, 0.9],
+        "assay_sensitivity": 0.95,
+        "assay_sensitivity_by_time_since_infection": null,
+        "episode_reporting_window_days": 3.0,
+        "evidence_grade": "P - declared observation-layer scenario axes",
+        "notes": "Every number here is declared and swept, because the arm's candidate anchors are themselves observation-layer quantities: setting these to reproduce Ward's 0.7% presenting or Millman's 3.7%/6.2% MAARI would make those anchors unfalsifiable. Recorded for comparison rather than calibration: these values imply a pre-recognition medically-attended fraction near 0.16 per infection against the roughly 0.08 Ward measures on one voyage (0.7% presenting against 8.9% NAT-confirmed), so the arm starts about 2x too visible and closing that is the sweep's job. assay_sensitivity 0.95 is RT-PCR on an adequate NP specimen (Grade C), kept separate from the sampling vector so that detection-technology scenarios move sensitivity without moving clinical behaviour."
+      },
+      "incubation": {
+        "distribution": "lognormal",
+        "median_days": 1.4,
+        "dispersion": 1.51,
+        "min_days": 0.5,
+        "max_days": 7.0,
+        "dose_reference_log10": 0.59,
+        "dose_log10_shortening": 0.1,
+        "dose_floor": 0.4,
+        "notes": "Human influenza A: mu 0.336, sigma 0.412 (median 1.4 d, GSD 1.51) from Lessler et al. 2009 via docs/ctb_incubation_spec.md, truncated 0.5-7.0 d to match the tng_shipboard_influenza analogue that already carries this same kernel as a shape. Dose terms dose_shift 0.10 / floor 0.4 from the spec. dose_reference_log10 0.59 is this profile's own exponential-model N50 (ln(2)/k = 0.693/0.18 = 3.85 particles), the exponential analogue of the beta-Poisson N50 convention documented on norwalk_gi in active_profiles.json: acquired_particles is in model units, so referencing a literature TCID50 or EID50 figure would put every simulated host on the dose floor and turn a conditioning term into a constant. Consequence: a near-ID50 host presents at the literature median, and the dose effect is anchored in direction but not calibrated in magnitude. host_factors omitted, as on the shipped profiles."
+      },
+      "recovery_day": 5,
+      "shedding_duration_days": 7,
+      "shedding_duration_notes": "Separated from recovery_day 5 so clinical resolution does not end shedding, the defect fixed for norovirus in #43. Seven days spans Carrat 2008's reported shedding through about day 5 plus Ip 2017's presymptomatic day; the 15-value curve's tail beyond it contributes under 1% of the linear-scale integral.",
+      "base_susceptibility": 1.0,
+      "base_susceptibility_notes": "Deliberately 1.0, not the Edison bundle's 0.65. Prior immunity is a per-season, subtype- and age-conditioned scenario input: on Ward's single voyage pdm09 ran at RR 17.4 in children 3-6 with zero cases over 65 while H3N2 was flat across every age band, so no scalar represents it. It is declared on the manifest and swept, never fitted here.",
+      "innate_nonsusceptible_fraction": 0.0,
+      "nonsusceptible_mechanism": "none",
+      "microflora_disruption": {
+        "causes_disruption": true,
+        "disruption_type": "respiratory",
+        "disruption_magnitude": 0.5,
+        "affected_kingdoms": {
+          "Bacteria": {
+            "Staphylococcus_aureus": 2.2,
+            "Streptococcus_pneumoniae": 2.0,
+            "Lactobacillus": -1.4
+          },
+          "Fungi": {
+            "Candida_spp": 1.3
+          },
+          "Virus": {
+            "Influenza_A": 10.0
+          }
+        }
+      },
+      "food_contamination": {
+        "enabled": false
+      },
+      "clinical_presentation": {
+        "syndromes": [
+          "respiratory"
+        ],
+        "sample_types": [
+          "np_swab"
+        ],
+        "phases": [
+          {
+            "name": "acute",
+            "dpi_min": 0,
+            "dpi_max": 3,
+            "features": [
+              "fever",
+              "cough",
+              "myalgia",
+              "sore_throat"
+            ]
+          },
+          {
+            "name": "resolving",
+            "dpi_min": 4,
+            "dpi_max": null,
+            "features": [
+              "cough",
+              "fatigue"
+            ]
+          }
+        ]
+      },
+      "sequencing_assay": {
+        "amplicon_target": "HA + NA",
+        "read_accuracy": 0.95,
+        "ct_threshold": 30.0,
+        "cost_usd": 120.0,
+        "notes": "Assay design from docs/paper3/variant_surveillance_spec.md \u00a72.1. read_accuracy is per-read consensus accuracy for this amplicon; read depth and the reporting floor are operator dials set at run time, not pathogen properties."
+      },
+      "shedding_variance_log10": 1.0,
+      "introduction_epoch": 0,
+      "initial_infected": 1,
+      "initial_time_infected": 0
     }
   ]
 }

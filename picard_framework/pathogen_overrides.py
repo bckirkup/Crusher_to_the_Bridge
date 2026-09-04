@@ -14,6 +14,7 @@ import json
 import os
 from typing import Any
 
+from picard_framework.catalog.registry import CatalogRegistry
 from simulation_utils.paths import validated_open
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -43,6 +44,31 @@ def load_pathogen_bundle(path: str) -> dict[str, dict[str, Any]]:
             raise ValueError("pathogen bundle entry missing pathogen_id")
         profiles[str(pid)] = dict(entry)
     return profiles
+
+
+def isolate_arm_overrides(
+    bundle_id: str,
+    pathogen_id: str,
+    overrides: dict[str, Any] | None,
+) -> dict[str, Any] | None:
+    """Extend an arm's ``remove`` list to every other pathogen in its bundle.
+
+    A campaign arm names the one pathogen it studies, so co-circulation of
+    anything else in the bundle is not part of its contract. Deriving the
+    removals from the bundle rather than from a hand-written list keeps an
+    arm isolated when a pathogen is added to the bundle it draws on.
+    """
+    registry = CatalogRegistry.from_repo(REPO_ROOT)
+    try:
+        path = registry.resolve_pathogen_bundle(bundle_id)
+    except KeyError:
+        return overrides
+    others = [
+        pid for pid in load_pathogen_bundle(path) if pid != str(pathogen_id)
+    ]
+    declared = list((overrides or {}).get("remove", []))
+    merged = declared + [pid for pid in others if pid not in declared]
+    return {**(overrides or {}), "remove": merged}
 
 
 def apply_pathogen_overrides(

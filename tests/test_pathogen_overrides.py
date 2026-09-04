@@ -102,7 +102,9 @@ def test_ship_simulation_uses_resolved_pathogen_profiles() -> None:
                     },
                     "run": {"random_seed": 42, "num_epochs": 1, "write_ground_truth": False},
                     "legacy_yaml": os.path.join(REPO_ROOT, "crusher_labs/config.yaml"),
-                    "pathogen_overrides": {"remove": ["sars_cov2_resp"]},
+                    "pathogen_overrides": {
+                        "remove": ["sars_cov2_resp", "influenza_a"],
+                    },
                 },
                 fh,
             )
