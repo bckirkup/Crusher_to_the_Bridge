@@ -62,7 +62,7 @@ removed.
 ## Adding a parameter safely
 
 1. Name the parameter with its physical unit, such as
-   `surface_decay_per_day`, `detection_delay_hours`, or
+   `surface_decay_log10_per_day`, `detection_delay_hours`, or
    `contact_rate_per_hour`.
 2. Add the canonical key to the applicable schema and configuration.
 3. Read it through the appropriate `SimClock` helper at the consumer boundary.

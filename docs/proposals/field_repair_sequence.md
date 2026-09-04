@@ -1,6 +1,11 @@
 # Field repair sequence: four defects, four different repairs, and only one is a curve
 
-> **Status:** Proposed. **Nothing here is implemented and no value is adopted.**
+> **Status:** **R1 landed** (this branch: the fraction alias is deleted and both
+> bundles are on `surface_decay_log10_per_day`); **R2–R5 proposed, and not
+> implemented**. **No value is adopted** — R1 was a value-preserving unit
+> migration, not a repair, so no register value, grade or interval moved with
+> it. §1's account of the pre-R1 state is kept as the reason the migration was
+> needed, not as a description of the tree.
 > It sequences the field repairs that
 > [`bayesian_inference_design.md`](bayesian_inference_design.md) §1 requires
 > before any inference runs, and it **corrects that document's §1**, which
@@ -58,14 +63,15 @@ claim than the influenza row: Kim 2012's superiority-of-Weibull is read from its
 abstract and its rate constants were never verified (tranche 5 §1 correction
 (b)), so the form is *unconfirmed*, not refuted.
 
-**And the sourced key is unexercised.** No shipped profile sets
-`surface_decay_log10_per_day`; both active profiles still carry the deprecated
-fraction alias `surface_decay_per_day`, so behaviour is bit-identical to
-pre-#41 and the adopted interval reaches nothing that runs. The
+**And the sourced key was unexercised — this is what R1 fixed, and it is stated
+here in the past tense because R1 has landed on this branch.** No shipped profile
+set `surface_decay_log10_per_day`; both active profiles carried the deprecated
+fraction alias `surface_decay_per_day`, so behaviour was bit-identical to
+pre-#41 and the adopted interval reached nothing that ran. The
 `model-parameter-provenance` skill's rule is explicit — *delete superseded
 constants; never alias them*, because "a stale duplicate of a corrected constant
-is how a correction silently fails to apply". That is the present state
-precisely. Migrating the two profiles onto the sourced key, and deleting the
+is how a correction silently fails to apply". That was the state precisely.
+Migrating the two profiles onto the sourced key, and deleting the
 alias, is a prerequisite for the influenza repair rather than a follow-up: the
 influenza repair introduces the covariate-indexed version of the *same* field,
 and doing that while a fraction-valued alias is still live gives the field three
@@ -80,9 +86,9 @@ update.
 ## 2. Sequence
 
 **R1 — Migrate the active profiles onto `surface_decay_log10_per_day` and delete
-the fraction alias.** No behaviour change intended; the two conversions above
-are the entire content. Attribution rule: any moved golden stops the change.
-Prerequisite for R2.
+the fraction alias. Landed.** No behaviour change intended; the two conversions
+above are the entire content. Attribution rule: any moved golden stops the
+change — none moved. Prerequisite for R2, which is now unblocked.
 
 **R2 — Influenza `surface_decay_per_day` becomes a covariate-indexed rate.**
 The register's own evidence dictates the covariates, and it contains one

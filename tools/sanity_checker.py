@@ -485,7 +485,6 @@ class PathogenProfile(BaseModel):
     @field_validator("surface_decay_log10_per_day")
     @classmethod
     def surface_decay_log10_non_negative(cls, v: float | None) -> float | None:
-        # surface_decay_per_day is the deprecated fraction-valued alias.
         if v is not None and v < 0:
             raise ValueError(
                 f"surface_decay_log10_per_day must be >= 0, got {v}"

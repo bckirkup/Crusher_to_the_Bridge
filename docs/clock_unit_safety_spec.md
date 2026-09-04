@@ -89,7 +89,7 @@ emit a deprecation warning. Loader-level, not call-site-level.
 | `colonization_rate_per_epoch` | `colonization_rate_per_day` | day |
 | `spore_decay_rate_per_epoch` | `spore_decay_rate_per_day` | day |
 | `exposure_probability_per_epoch` | `exposure_probability_per_day` | day |
-| `SURFACE_DECAY_RATE` (module const) | profile `surface_decay_per_day` + `DEFAULT_SURFACE_DECAY_PER_DAY` | day |
+| `SURFACE_DECAY_RATE` (module const) | profile `surface_decay_log10_per_day` + `DEFAULT_SURFACE_DECAY_LOG10_PER_DAY` | day |
 | `ENV_DECAY_RATE`, `AIRBORNE_COMPOSITION_RETENTION` | profile `airborne_half_life_hours` via `survival_from_half_life` | hour |
 | `baseline_surveillance_costs_per_epoch` | `baseline_surveillance_costs_per_day` | day |
 | `sick_call_probability` | `sick_call_probability_per_day` | day |
@@ -119,15 +119,18 @@ run-scoped: document, do not convert.
 
 ## Literature values
 
-Surface persistence on hard non-porous surfaces at ~20-23 C, expressed as
-fraction of viable titre lost per day (`surface_decay_per_day`):
+Surface persistence on hard non-porous surfaces at ~20-23 C, authored as a
+log10 reduction of viable titre per day (`surface_decay_log10_per_day`), the
+unit the sources measure in; `surface_fraction_per_day` in
+`engines/transmission_core.py` is the one place it becomes the fractional
+daily loss the clock consumes, as f = 1 - 10**-k:
 
 | Pathogen | Value | Anchor |
 |---|---|---|
-| `norwalk_gi` | 0.25 (T90 ~= 8 d) | hNV/MNV/FCV tenacity on stainless steel and plastic over 70 d at RT (Res. Note, J Food Prot); MNV-1 6.2-log loss by d30 residue-free = 0.21 log/d (Takahashi et al., PLoS ONE 2011, e21951); Verhaelen et al., Food Microbiol 2019 |
-| `sars_cov2_resp` | 0.95 | half-life 5.6 h on stainless steel (van Doremalen et al., NEJM 2020;382:1564) |
-| influenza A | 0.94 | viable 24-48 h on steel/plastic, t½ ~= 6 h (Bean et al., J Infect Dis 1982;146:47) |
-| default | 0.50 | conservative midpoint for unparameterised agents |
+| `norwalk_gi` | 0.124939 log10/d (T90 ~= 8 d) | hNV/MNV/FCV tenacity on stainless steel and plastic over 70 d at RT (Res. Note, J Food Prot); MNV-1 6.2-log loss by d30 residue-free = 0.21 log/d (Takahashi et al., PLoS ONE 2011, e21951); Verhaelen et al., Food Microbiol 2019 |
+| `sars_cov2_resp` | 1.301030 log10/d | half-life 5.6 h on stainless steel (van Doremalen et al., NEJM 2020;382:1564) |
+| influenza A | 1.221849 log10/d | viable 24-48 h on steel/plastic, t½ ~= 6 h (Bean et al., J Infect Dis 1982;146:47) |
+| default | 0.301030 log10/d | conservative midpoint for unparameterised agents |
 
 The old global 0.05/epoch is retained by nobody: read as per-day it is far too
 slow for the respiratory agents and roughly right for norovirus; the per-pathogen

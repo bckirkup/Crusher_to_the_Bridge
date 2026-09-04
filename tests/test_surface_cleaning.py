@@ -26,12 +26,14 @@ def _core(
     log10_reduction: float = ROUTINE_CLEANING_LOG10_REDUCTION,
     events_per_day: float = 1.0,
     clock: SimClock | None = None,
-    surface_decay_per_day: float = 0.25,
+    surface_decay_log10_per_day: float = 0.124939,
 ) -> TransmissionCore:
     return TransmissionCore(
         np.random.default_rng(11),
         pathogen_profiles={
-            PATHOGEN: {"surface_decay_per_day": surface_decay_per_day},
+            PATHOGEN: {
+                "surface_decay_log10_per_day": surface_decay_log10_per_day,
+            },
         },
         zone_types={ZONE: "Work"},
         clock=clock,

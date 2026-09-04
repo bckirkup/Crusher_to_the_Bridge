@@ -91,17 +91,21 @@ identified, the episode count only partitions and times that same total.
 is invalidated by this change**, since both the magnitude and the emesis draw
 sequence move.
 
-**Surface decay now has a key in the units it is sourced in, and the shipped
-profiles do not use it (Wave 2, task #41).** `surface_decay_log10_per_day` is the
-preferred key; `surface_decay_per_day` is a deprecated fraction-valued alias,
-still honoured, and it is what both active profiles ship. The conversion
-f = 1 − 10⁻ᵏ now happens in exactly one place,
-`TransmissionCore._surface_survival`, instead of living in a comment in
-`bounded_screen.py`. As with the campaign divergence above, the divergence is
-deliberate and recorded rather than fixed: **no shipped profile value changed and
-no profile carries the new key**, so behaviour is bit-identical and the sourced
-key is unexercised by any run until a profile adopts it. The screen box is now
-expressed unconverted, [0.067, 0.79] log10/day.
+**Surface decay is now in the units it is sourced in, everywhere (Wave 2 task
+#41, completed by R1/#59).** `surface_decay_log10_per_day` is the **only** key:
+the deprecated fraction-valued alias `surface_decay_per_day` is deleted from the
+engine, the schema and every profile, and a profile that still spells it that way
+falls through to the default rather than being honoured. `norwalk_gi` carries
+**0.124939 log10/day**. The conversion f = 1 − 10⁻ᵏ happens in exactly one
+function, `transmission_core.surface_fraction_per_day`, instead of living in a
+comment in `bounded_screen.py`. **No measurement recorded here is invalidated:**
+0.124939 = −log10(1 − 0.25) reproduces the previous per-day fraction exactly, so
+no shipped behaviour and no golden moved — this is a unit migration, not a
+refit. The divergence #41 recorded is therefore closed rather than carried: the
+sourced key is now the only key, and it is exercised by everything that runs.
+The screen box is expressed unconverted, [0.067, 0.79] log10/day, and remains
+adopted **for the screen box only** — the shipped 0.124939 is still an unsourced
+value that happens to lie inside it near the slow end.
 
 **Hand↔surface transfer is split by direction, and a drying axis is added at
 neutral (Wave 2, task #42 item 3).** `SURFACE_TO_HAND_LOGNORMAL` keeps the pickup
@@ -651,7 +655,8 @@ is over-determined only *given* them. Full list in §10 of the history document.
   §2.3), so this is a cross-pathogen borrow presented as a citation, not a
   sourced value. Treat as Grade C until it is declared or bounded by deposition
   physics.
-- `surface_decay_per_day` = 0.25 has no source. It implies 0.125 log10/day,
+- The shipped rate, **0.124939 log10/day** (spelled `surface_decay_per_day` =
+  0.25 until R1 migrated it), has no source. It implies 0.125 log10/day,
   slower than the MNV-1-on-stainless-steel surrogate measurement (≥0.29
   log10/day, Leblanc et al. 2019), and the gap inflates the fomite reservoir.
   No human-norovirus dry-surface infectivity decay measurement exists; any

@@ -36,7 +36,7 @@ def _core(
         routine["by_zone_class"] = by_zone_class
     return TransmissionCore(
         np.random.default_rng(11),
-        pathogen_profiles={PATHOGEN: {"surface_decay_per_day": 0.25}},
+        pathogen_profiles={PATHOGEN: {"surface_decay_log10_per_day": 0.124939}},
         zone_types=ZONES,
         clock=clock,
         cfg={

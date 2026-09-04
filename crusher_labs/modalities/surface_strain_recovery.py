@@ -18,7 +18,10 @@ import numpy as np
 
 from engines.sim_clock import LEGACY_CLOCK, SimClock
 from engines.strain_dose_ledger import UNREPORTABLE_GENOTYPES
-from engines.transmission_core import DEFAULT_SURFACE_DECAY_PER_DAY
+from engines.transmission_core import (
+    DEFAULT_SURFACE_DECAY_LOG10_PER_DAY,
+    surface_fraction_per_day,
+)
 
 STATUS_NOT_CONFIGURED = "not_configured"
 STATUS_NO_DEPOSITION = "no_deposition"
@@ -130,7 +133,7 @@ def surface_persistence(
     """Surface mass retained after ``epochs_since_deposition`` epochs."""
     epochs = max(int(epochs_since_deposition), 0)
     survival = 1.0 - clock.decay_per_epoch(
-        DEFAULT_SURFACE_DECAY_PER_DAY,
+        surface_fraction_per_day(DEFAULT_SURFACE_DECAY_LOG10_PER_DAY),
     )
     return float(survival ** epochs)
 

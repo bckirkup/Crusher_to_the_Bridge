@@ -35,7 +35,7 @@ Profiles live in `data/pathogens/active_profiles.json`. Each pathogen entry requ
     "alpha": 0.04,
     "beta": 0.055
   },
-  "surface_decay_per_day": 0.25,
+  "surface_decay_log10_per_day": 0.124939,
   "airborne_half_life_hours": 1.1,
   "food_contamination": {
     "enabled": true,
@@ -81,6 +81,10 @@ campaign compatibility.
 
 **`transmission_route_weights`** (optional; default all 1.0) scale each
 pathway's dose contribution. Prefer weights that sum to ≈1.0.
+
+**`surface_decay_log10_per_day`** is a **log10 reduction per day**, the unit
+every surface-persistence source measures in; it is converted once, at the
+resolution site, to the fractional daily loss the clock consumes.
 
 **`innate_nonsusceptible_fraction`** draws per-agent zero susceptibility for
 this pathogen only (e.g. FUT2 for norovirus). Orthogonal to

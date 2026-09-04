@@ -30,7 +30,7 @@ def _profile(*, food: bool = False) -> dict:
         "asymptomatic_shedding_log10": [2.0] * 12,
         "symptom_onset_day": 0.0,
         "airborne_half_life_hours": 1.0,
-        "surface_decay_per_day": 0.5,
+        "surface_decay_log10_per_day": 0.301030,
         "dose_response": {
             "model": "exponential",
             "k": 0.01,

@@ -702,12 +702,6 @@
           "minimum": 0,
           "description": "Daily log10 reduction of viable surface-reservoir mass, in the units every source measures. Converted once, at the resolution site, to the fractional daily loss the clock consumes: f = 1 - 10**-k."
         },
-        "surface_decay_per_day": {
-          "type": "number",
-          "minimum": 0,
-          "maximum": 1,
-          "description": "DEPRECATED fraction-valued alias for surface_decay_log10_per_day, still honoured. Daily fraction of viable surface-reservoir mass lost; the shipped profiles still carry this spelling."
-        },
         "hand_to_surface_drying_multiplier": {
           "type": "number",
           "minimum": 0,
