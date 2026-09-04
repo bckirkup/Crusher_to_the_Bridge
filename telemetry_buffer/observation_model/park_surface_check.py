@@ -165,7 +165,7 @@ def steady_state_pool(
     shedder_hours_per_day: float,
     susceptible_present: float,
     exp_: dict[str, float],
-    surface_decay_per_day: float = 0.25,
+    surface_decay_log10_per_day: float = 0.124939,
     cleaning: bool = True,
 ) -> float:
     """Copies resident on a zone's high-touch surfaces at steady state.
@@ -185,7 +185,7 @@ def steady_state_pool(
     )
 
     loss_per_hour = surface_loss_per_hour(
-        zone_class, susceptible_present, exp_, surface_decay_per_day,
+        zone_class, susceptible_present, exp_, surface_decay_log10_per_day,
     )
     uncleaned = deposition_per_hour / loss_per_hour
     return uncleaned * routine_cleaning_multiplier(
@@ -232,7 +232,7 @@ def surface_loss_per_hour(
     zone_class: str,
     susceptible_present: float,
     exp_: dict[str, float],
-    surface_decay_per_day: float = 0.25,
+    surface_decay_log10_per_day: float = 0.124939,
 ) -> float:
     """Inactivation plus pickup by every susceptible hand on the pool."""
     area = tc.HIGH_TOUCH_AREA_M2[zone_class]
@@ -240,8 +240,9 @@ def surface_loss_per_hour(
     pickup_fraction_per_person_hour = (
         contacts * exp_["s_h"] * (exp_["hand_area_m2"] / area) * exp_["te_sh"]
     )
+    decay_fraction_per_day = 1.0 - 10.0 ** -surface_decay_log10_per_day
     return (
-        surface_decay_per_day / 24.0  # clock-exempt: daily-to-hourly conversion
+        decay_fraction_per_day / 24.0  # clock-exempt: daily-to-hourly conversion
         + pickup_fraction_per_person_hour * susceptible_present
     )
 

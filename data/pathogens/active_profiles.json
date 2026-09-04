@@ -7,7 +7,7 @@
   "pathogens": [
     {
       "pathogen_id": "norwalk_gi",
-      "surface_decay_per_day": 0.25,
+      "surface_decay_log10_per_day": 0.124939,
       "airborne_half_life_hours": 1.1,
       "name": "Norwalk Virus (Norovirus GII.4)",
       "category": "enteric_viral",
@@ -258,7 +258,7 @@
     },
     {
       "pathogen_id": "sars_cov2_resp",
-      "surface_decay_per_day": 0.95,
+      "surface_decay_log10_per_day": 1.301030,
       "airborne_half_life_hours": 1.1,
       "name": "SARS-CoV-2 (Respiratory)",
       "category": "respiratory_viral",

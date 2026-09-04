@@ -8,7 +8,7 @@
   "pathogens": [
     {
       "pathogen_id": "norovirus_gii4",
-      "surface_decay_per_day": 0.25,
+      "surface_decay_log10_per_day": 0.124939,
       "airborne_half_life_hours": 1.1,
       "name": "Norovirus GII.4",
       "category": "enteric_viral",
@@ -209,7 +209,7 @@
     },
     {
       "pathogen_id": "sars_cov2_resp",
-      "surface_decay_per_day": 0.95,
+      "surface_decay_log10_per_day": 1.301030,
       "airborne_half_life_hours": 1.1,
       "name": "SARS-CoV-2",
       "category": "respiratory_viral",
@@ -422,7 +422,7 @@
     },
     {
       "pathogen_id": "influenza_a",
-      "surface_decay_per_day": 0.94,
+      "surface_decay_log10_per_day": 1.221849,
       "airborne_half_life_hours": 1.5,
       "name": "Influenza A",
       "category": "respiratory_viral",
@@ -994,7 +994,6 @@
     },
     {
       "pathogen_id": "vibrio_cholerae_parahaemolyticus",
-      "surface_decay_per_day": 0.50,
       "airborne_half_life_hours": 1.1,
       "name": "Vibrio cholerae/parahaemolyticus",
       "category": "enteric_bacterial",
@@ -1131,7 +1130,6 @@
     },
     {
       "pathogen_id": "campylobacter_jejuni",
-      "surface_decay_per_day": 0.50,
       "airborne_half_life_hours": 1.1,
       "name": "Campylobacter jejuni",
       "category": "enteric_bacterial",
