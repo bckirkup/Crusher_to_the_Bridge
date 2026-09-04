@@ -16,7 +16,7 @@ defensibility claim can rest on.
 | [`norovirus/norovirus_open_ledger.md`](norovirus/norovirus_open_ledger.md) | **Still authoritative** for what is *withdrawn*. Every dose figure is void pending refit; that record stays there. This register does not restate it |
 | [`covid/covid_parameter_provenance_audit.md`](covid/covid_parameter_provenance_audit.md) | Absorbed as the SARS-CoV-2 rows of §3. Its §2–§5 arguments are not restated here. Extended by [tranche 9](literature/mql_tranche_9_sars_cov2.md), which cross-checks the arm against the DHS Master Question List. |
 | [`norovirus/norovirus_parameter_freedom_audit.md`](norovirus/norovirus_parameter_freedom_audit.md) | Absorbed as §5. Its measurements (the inert dose knob, the 15 observation-model numbers) stand |
-| [`literature/`](literature/) tranches 1–18 and the Edison reviews | The evidence behind the Evidence column. Contextual: this register is the index into them, and where the two disagree, the tranche document holds the citation and this one holds the status |
+| [`literature/`](literature/) tranches 1–19 and the Edison reviews | The evidence behind the Evidence column. Contextual: this register is the index into them, and where the two disagree, the tranche document holds the citation and this one holds the status |
 | `formal_spec_v2.md` Appendix A | Superseded as a provenance record. Its source column was the baseline this register was built against |
 
 ## 1. Three axes, because each was hiding what the others could not say
