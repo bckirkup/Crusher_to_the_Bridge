@@ -163,11 +163,13 @@ characterise the Killingley inoculum in copies), while the pipeline's dose is in
 copies. Two admissible routes, and the choice is a design decision rather than a
 sourcing one:
 
-1. **Move the arm's dose pipeline to infectious units**, and carry a
+1. **Rejected — move the arm's dose pipeline to infectious units**, and carry a
    copies↔infectious conversion only where a measurement supplies one.
-2. **Source the conversion**, which is the same question as #43 on the norovirus
-   side (whether Teunis's Table III ID50 of 18 is in aggregates rather than
-   genome copies).
+2. **Selected — source the conversion**, which is the same question as #43 on
+   the norovirus side (whether Teunis's Table III ID50 of 18 is in aggregates
+   rather than genome copies). Molecular detection is where the project's
+   observational effort is concentrated, so the pipeline should stay in copies
+   and the conversion is what has to be found.
 
 Neither may be settled by adopting a convenient ID50: the two available figures
 (Prentiss 361–2,000 particles; Riediker 500/300/100 copies) are **fitted to
@@ -175,6 +177,13 @@ attack-rate data from high-attack-rate ship and superspreading events**, so
 using them and then conditioning on Diamond Princess would put the same voyage
 on both sides of the inference — barred by the per-fit circularity rule of
 `bayesian_inference_design.md` §3. R5 gates #30, #33 and #34.
+
+The conversion is likely covariate-dependent — by specimen, variant, and point
+in the infection course — which is what the register's `∅ null in copies`
+marker already says. Sourcing "a conversion" may therefore return a function
+rather than a scalar, and the trap is adopting a single figure because it is
+the only one that turned up. That would make R5 the second curve-valued repair,
+so the same dimensional rule applies to it as to R2.
 
 ## 3. What this does to the register's counts
 
@@ -207,4 +216,6 @@ change moves it and says which row it moved.
    as collateral. Converting a placeholder is not a repair; dropping the key and
    letting them fall back to the default, as the other seven inherited pathogens
    already do, is the honest option.
-3. **R5's route**, which is a modelling decision and gates three tasks.
+
+**Decided:** R5 takes route 2 (source a copies conversion), as recorded in §2
+R5; it is no longer an open question.
