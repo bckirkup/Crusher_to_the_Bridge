@@ -291,6 +291,11 @@ FOMITE_CONTACT_AREA_M2 = 2e-4
 # Default surface decay rate, in the log10-per-day unit every source measures.
 DEFAULT_SURFACE_DECAY_LOG10_PER_DAY = 0.301030
 
+
+def surface_fraction_per_day(log10_per_day: float) -> float:
+    """Convert a measured log10 reduction per day to the fractional daily loss the clock consumes."""
+    return 1.0 - math.pow(10.0, -float(log10_per_day))
+
 # R0-calibrated contact pool (from Person.java avgR array) — legacy contact_mode
 AVG_R_POOL = [1, 2, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2]
 # Mean daily contacts, POLYMOD 8-country diary study (Mossong et al. 2008,
@@ -1396,16 +1401,17 @@ class TransmissionCore:
         """Return one-epoch surface survival for a pathogen profile.
 
         Every source measures surface inactivation as a log10 reduction per day,
-        so ``surface_decay_log10_per_day`` is the preferred key and this is the
-        one place the conversion happens: a rate k gives a per-day fraction
-        f = 1 - 10**-k, which then goes through the clock unchanged.
+        so ``surface_decay_log10_per_day`` is the only key; a profile without it
+        falls back to ``DEFAULT_SURFACE_DECAY_LOG10_PER_DAY``, not to another
+        spelling. The conversion to the fractional daily loss the clock consumes
+        is ``surface_fraction_per_day``, the single place it is expressed.
         """
         prof = profile or {}
         log10_per_day = float(prof.get(
             "surface_decay_log10_per_day",
             DEFAULT_SURFACE_DECAY_LOG10_PER_DAY,
         ))
-        per_day = 1.0 - math.pow(10.0, -log10_per_day)
+        per_day = surface_fraction_per_day(log10_per_day)
         return 1.0 - self.clock.decay_per_epoch(per_day)
 
     def _airborne_survival(self, pathogen_id: str) -> float:

@@ -240,7 +240,9 @@ def surface_loss_per_hour(
     pickup_fraction_per_person_hour = (
         contacts * exp_["s_h"] * (exp_["hand_area_m2"] / area) * exp_["te_sh"]
     )
-    decay_fraction_per_day = 1.0 - 10.0 ** -surface_decay_log10_per_day
+    decay_fraction_per_day = tc.surface_fraction_per_day(
+        surface_decay_log10_per_day,
+    )
     return (
         decay_fraction_per_day / 24.0  # clock-exempt: daily-to-hourly conversion
         + pickup_fraction_per_person_hour * susceptible_present

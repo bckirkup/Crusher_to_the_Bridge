@@ -7,7 +7,11 @@ import pytest
 
 from crusher_labs import _warn_legacy_config_units, build_modalities
 from crusher_labs.cost_ledger import CostLedger
-from engines.transmission_core import ContactTracingMatrix, TransmissionCore
+from engines.transmission_core import (
+    ContactTracingMatrix,
+    TransmissionCore,
+    surface_fraction_per_day,
+)
 from engines.sim_clock import (
     HOURS,
     SimClock,
@@ -153,6 +157,33 @@ def test_deprecated_fraction_alias_is_inert() -> None:
     assert core._surface_survival(
         {"surface_decay_log10_per_day": 1.301030},
     ) < default
+
+
+@pytest.mark.parametrize(
+    ("log10_per_day", "fraction_per_day"),
+    [(0.301030, 0.50), (0.124939, 0.25), (1.301030, 0.95)],
+)
+def test_surface_fraction_helper_round_trips(
+    log10_per_day: float,
+    fraction_per_day: float,
+) -> None:
+    assert surface_fraction_per_day(log10_per_day) == pytest.approx(
+        fraction_per_day, abs=1e-6,
+    )
+
+
+@pytest.mark.parametrize("log10_per_day", [0.124939, 0.301030, 1.301030])
+def test_surface_survival_uses_the_single_conversion(
+    log10_per_day: float,
+) -> None:
+    clock = SimClock(epoch_duration_hours=1.0, mode="hours")
+    core = TransmissionCore(np.random.default_rng(13), clock=clock)
+    expected = 1.0 - clock.decay_per_epoch(
+        surface_fraction_per_day(log10_per_day),
+    )
+    assert core._surface_survival(
+        {"surface_decay_log10_per_day": log10_per_day},
+    ) == pytest.approx(expected)
 
 
 def _reservoir_core(clock: SimClock) -> TransmissionCore:
