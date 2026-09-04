@@ -36,6 +36,24 @@ friendlier value converts information into a number that agrees with you.
 Corollary: when a measured range is wide, take a stated central value or the
 midpoint and say which. Do not take the end that helps.
 
+## Freeze the interval before fitting
+
+Bounds are dated and frozen before the fit runs. A fit anywhere inside a frozen
+box is not tuning-to-target: the interval was set from evidence independently
+of the fit, and that is the condition this skill requires. Widening a frozen
+interval requires new evidence and a register entry; a fit failure is never its
+justification.
+
+A parameter pinned at an interval boundary is a **boundary-pinned flag**, not a
+pass. It means the fit wanted to leave the box and the boundary is doing work
+evidence should be doing.
+
+An empty box is a mechanism finding. Run the recurring defect archetype check
+first (see **The recurring defect archetype** below): a well-mixed pool standing
+in for a small number of concentrated events is the first check. Do not widen
+the interval to rescue a fit. Widening needs new evidence and a register entry,
+never a fit failure as its justification.
+
 ## Every constant carries its provenance at the point of definition
 
 A comment at the definition, not in a doc that will drift:
@@ -43,6 +61,7 @@ A comment at the definition, not in a doc that will drift:
 ```python
 SURFACE_CONTACTS_PER_HOUR = {
     # University dormitory primary shared surfaces, 10.4-25.4/h; midpoint.
+    # Interval: 10.4-25.4/h (measured range); Shape: U.
     # Yuan et al. 2024, Building and Environment. Grade B. Origin: R (Results).
     "cabin": 17.9,
     ...

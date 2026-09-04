@@ -30,7 +30,9 @@ query returned is not absence from the paper, and zero chunks is not evidence
 that a paper is unreachable. Record `?nr` only after at least two
 differently-phrased attempts, one of them naming the table or figure the value
 is supposed to be in — and see the closing section, which the marker must not be
-read as licensing.
+read as licensing. Once the ladder is exhausted through E3, record `?nr-term`;
+rephrasing after E1 is exhausted is forbidden, and `?nr-term` is reopened only
+by a new route or a new paper.
 
 ## Query construction
 
@@ -67,6 +69,31 @@ open-access article at
 the PMCID from the DOI with the same API's `search` endpoint), and it carries
 table cells as text. Retrieval is then `full text opened` and the origin is the
 table itself, not `Tn partial`.
+
+## Sourcing ladder and stopping rules
+
+The repository ladder is an escalation policy; the org-level
+`consensus-literature-retrieval` skill still owns retrieval mechanics and
+delegation:
+
+| Tier | Action | Cap |
+|---|---|---|
+| **E0** | Triage, zero queries: is the quantity expressible in the field, measurable in principle, and commensurable with what assays report? Decide terminal classes before retrieval | 0 |
+| **E1** | Consensus chunks, quantity **and** unit named, ≥2 differently-phrased attempts | 3 |
+| **E2** | **Route switch**, not rephrasing: name the table or figure; use Europe PMC JATS XML, publisher HTML, or agency full text | 2 |
+| **E3** | Identity resolution — wrong author/year/paper is distinct from a wrong query | 2 |
+| **E4** | Stop and escalate to the lead | — |
+
+The ceiling is seven queries per row. The Kirby Table 3 paragraph above is the
+worked E2 case: its route switch, rather than another phrasing, is what settled
+the row. Rephrasing after E1 is exhausted is the specific behaviour this ladder
+forbids.
+
+A pass ends when either the marginal yield is below one row closed or terminated
+per 15 queries across the wave, or leverage is exhausted and every remaining
+open row is L0 or L1. A row that reaches E4 in two different passes is not
+queried a third time; it is promoted to a decision for the lead with the
+options written out.
 
 ## Turning a hit into a sourced constant
 

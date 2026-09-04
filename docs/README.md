@@ -74,6 +74,7 @@ python3 presidio_runner.py \
 
 | Doc | Status |
 |-----|--------|
+| [sourcing_protocol.md](sourcing_protocol.md) | Living — process of record; no sourcing pass has run under it yet |
 | [formal_spec_v2.md](formal_spec_v2.md) | Final, implementer-ready. §8 tissue tropism is an optional extension, default-off, not implemented |
 | [clock_unit_safety_spec.md](clock_unit_safety_spec.md) | Implemented (`engines/sim_clock.py`, `tests/test_clock_units.py`) |
 | [ai_handshake.md](ai_handshake.md) | Living — architecture manifest for external LLMs |
