@@ -1,6 +1,11 @@
 # Field repair sequence: four defects, four different repairs, and only one is a curve
 
-> **Status:** Proposed. **Nothing here is implemented and no value is adopted.**
+> **Status:** **R1 landed** (this branch: the fraction alias is deleted and both
+> bundles are on `surface_decay_log10_per_day`); **R2–R5 proposed, and not
+> implemented**. **No value is adopted** — R1 was a value-preserving unit
+> migration, not a repair, so no register value, grade or interval moved with
+> it. §1's account of the pre-R1 state is kept as the reason the migration was
+> needed, not as a description of the tree.
 > It sequences the field repairs that
 > [`bayesian_inference_design.md`](bayesian_inference_design.md) §1 requires
 > before any inference runs, and it **corrects that document's §1**, which
@@ -80,9 +85,9 @@ update.
 ## 2. Sequence
 
 **R1 — Migrate the active profiles onto `surface_decay_log10_per_day` and delete
-the fraction alias.** No behaviour change intended; the two conversions above
-are the entire content. Attribution rule: any moved golden stops the change.
-Prerequisite for R2.
+the fraction alias. Landed.** No behaviour change intended; the two conversions
+above are the entire content. Attribution rule: any moved golden stops the
+change — none moved. Prerequisite for R2, which is now unblocked.
 
 **R2 — Influenza `surface_decay_per_day` becomes a covariate-indexed rate.**
 The register's own evidence dictates the covariates, and it contains one
