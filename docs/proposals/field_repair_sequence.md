@@ -188,9 +188,11 @@ sourcing one:
 2. **Selected — source the conversion**, which remains the SARS-CoV-2 question:
    no SARS-CoV-2 conversion is adopted, and the outstanding copies↔infectious
    conversion still belongs with the collaborator. The norovirus half of #43 is
-   answered by the published exchange: the 18 figure is in genomic equivalents
-   conditional on an aggregation model, while the shipped norovirus pair is the
-   non-aggregation genome-copy fit. The aggregate reading and the ≈925
+   **narrowed, not closed**: the published exchange settles that the
+   disagreement is statistical rather than biological and that the shipped
+   norovirus pair is the non-aggregation genome-copy fit, while the unit of
+   Teunis's 18 is not settled by any source held here. The aggregate reading and
+   the ≈925
    copies-per-aggregate bridge remain unverified and circular, and Atmar's
    genomic-equivalents wording remains unreconciled; Teunis's own aggregation
    parameter or aggregate-size distribution would be needed to settle that

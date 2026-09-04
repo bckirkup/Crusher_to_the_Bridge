@@ -232,8 +232,9 @@ and says why it refuses the literature assay figure
 being that the incubation dose axis is referenced to the model's own N50 rather
 than to any assay unit.
 
-**The 18 and the shipped pair are the same dose in two units, but the
-aggregation bridge remains an open primary-text question.** The collaborator's
+**A reconciliation is available but unverified and circular, so it is a
+candidate reading rather than a finding:** 18 aggregates at ≈925 copies each
+would put Teunis's figure on our own dose axis. The collaborator's
 reading is 18 aggregates at ≈925 genome copies each, or ≈16,650 copies, while
 the live per-agent path draws `r ~ Beta(α, β)` and has an exact
 confluent-hypergeometric N50 of **16,644 copies**. The closed-form helper

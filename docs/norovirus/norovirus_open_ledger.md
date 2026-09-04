@@ -156,8 +156,10 @@ corroboration — and 0.111 lies inside it, within 3% of its geometric centre
 family, aggregation assumption and dose unit are one categorical choice (Liu et
 al. 2026).
 
-**The norovirus half of #43 is answered from the published exchange, but the
-answer is that the two figures were never in conflict.** The 18 figure is
+**#43's norovirus half is narrowed, not closed.** The published exchange settles
+that the disagreement is statistical rather than biological and that our pair is
+the non-aggregation genome-copy fit; what remains open is whether Teunis's 18 is
+aggregates or copies, which no source we hold settles. The 18 figure is
 reported as an aggregation-model-dependent quantity, while the shipped pair is
 the non-aggregation genome-copy fit: the live per-agent
 confluent-hypergeometric beta-Poisson path has an N50 of **16,644 copies** and
