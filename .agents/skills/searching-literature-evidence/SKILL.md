@@ -34,40 +34,13 @@ Filters that are specifically wrong for this repo's literature:
 
 ## When the abstract is not enough
 
-This is the dominant failure mode, not a rare one: a review of eight recent
-literature-sourcing sessions found six of them stalled for want of full text.
-Abstracts settle magnitudes; they almost never settle a **definition** — units
-(infectivity vs RNA), endpoint, denominator, sampling times, matrix — and those
-are what decides whether a number can be adopted at all.
-
-So a paywall is not the end of the search. The ladder, in order:
-
-1. `consensus` MCP `search` with `include_full_text_chunks` — ranking, DOI,
-   abstract, and query-relevant excerpts of the body, tables included. Always
-   first, and often enough to settle the definition on its own. The chunks are
-   query-relevant rather than exhaustive, so silence there is *not retrieved*,
-   not *not measured*.
-2. The DOI itself, then the open routes for the same article: PubMed Central,
-   Europe PMC, the publisher's own HTML, an author or institutional copy.
-   Supplementary tables live here and are frequently where the time-resolved
-   measurements are.
-3. A richer interface, when 1 and 2 cannot settle the definition. Available to
-   this project, by asking rather than by a scripted call: **Consensus Pro
-   reports**, **edison/aviary literature analysis**, and **Google Literature
-   Insights**. Use these to have the *text* read and reduced to the measured
-   quantity, not to re-rank titles.
-
-Record which interface produced each conclusion, alongside the citation. A
-figure that came out of a synthesis interface and a figure read off the paper's
-own table are not the same evidence, and the register has to be able to tell
-them apart.
-
-**A blocked read is not a null result.** "No paper measures this" is a finding
-about the literature and is the honest route to a declared Grade C. "The paper
-that measures this could not be opened" is a finding about our access: it blocks
-the grade, and it must be escalated up the ladder or reported as still blocked.
-Collapsing the second into the first manufactures a Grade C that the literature
-does not support.
+The escalation ladder — open routes for the same article, then Consensus Pro,
+edison/aviary or Google Literature Insights, and the rule that a blocked read is
+not a null result — is in the org-level `consensus-literature-retrieval` skill.
+What is specific here: the definition it usually turns on for this model is the
+unit (infectivity vs RNA genome copies), the matrix, and the sampling times, and
+a Grade C declared on an unopened paper is not a null result about the
+literature.
 
 ## Turning a hit into a sourced constant
 
