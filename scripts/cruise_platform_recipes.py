@@ -81,6 +81,7 @@ class CruisePlatformRecipe:
     # Rooms that are cabin corridors are filled by the generator for
     # AHU_Pax_D* / AHU_Crew* ids listed in auto_* below.
     public_hvac: tuple[HvacGroupRecipe, ...]
+    exterior_zones: tuple[str, ...] = ()
     # Optional additional cabin-corridor banks (e.g. Galaxy family suites).
     extra_corridors: tuple[CorridorRecipe, ...] = ()
     auto_pax_ahu: bool = True
@@ -319,6 +320,7 @@ EXPEDITION_CRUISE_450 = CruisePlatformRecipe(
         id_prefix="CC",
     ),
     public_zones=_expedition_public_zones(),
+    exterior_zones=("PoolDeck",),
     public_hvac=(
         HvacGroupRecipe(
             "AHU_Public_Fwd",
@@ -328,7 +330,7 @@ EXPEDITION_CRUISE_450 = CruisePlatformRecipe(
         ),
         HvacGroupRecipe(
             "AHU_Public_Aft",
-            ("PoolDeck", "CasualDining", "Gym", "Spa"),
+            ("CasualDining", "Gym", "Spa"),
             8.0,
             "Aft public venues.",
         ),
@@ -630,6 +632,7 @@ CLASSIC_CRUISE_1900 = CruisePlatformRecipe(
         id_prefix="CC",
     ),
     public_zones=_classic_public_zones(),
+    exterior_zones=("PoolDeck",),
     public_hvac=(
         HvacGroupRecipe(
             "AHU_Public_Fwd",
@@ -645,7 +648,7 @@ CLASSIC_CRUISE_1900 = CruisePlatformRecipe(
         ),
         HvacGroupRecipe(
             "AHU_Public_Aft",
-            ("PoolDeck", "LidoBuffet", "SpaFit"),
+            ("LidoBuffet", "SpaFit"),
             10.0,
             "Aft pool / buffet / spa.",
         ),
@@ -976,6 +979,7 @@ SPIRIT_CRUISE_3000 = CruisePlatformRecipe(
         id_prefix="CC",
     ),
     public_zones=_spirit_public_zones(),
+    exterior_zones=("MainPool", "AftPool", "SportsDeck"),
     public_hvac=(
         HvacGroupRecipe(
             "AHU_Public_Fwd",
@@ -991,8 +995,8 @@ SPIRIT_CRUISE_3000 = CruisePlatformRecipe(
         ),
         HvacGroupRecipe(
             "AHU_Public_Aft",
-            ("MainPool", "AftPool", "LidoBuffet", "PizzaGrill", "SpaFit",
-             "KidsClub", "TeenZone", "SpecialtyC", "SportsDeck"),
+            ("LidoBuffet", "PizzaGrill", "SpaFit", "KidsClub", "TeenZone",
+             "SpecialtyC"),
             10.0,
             "Aft pools / buffet / spa / sports.",
         ),
@@ -1061,4 +1065,3 @@ RECIPES: dict[str, CruisePlatformRecipe] = {
     CLASSIC_CRUISE_1900.platform_id: CLASSIC_CRUISE_1900,
     SPIRIT_CRUISE_3000.platform_id: SPIRIT_CRUISE_3000,
 }
-

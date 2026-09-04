@@ -25,16 +25,19 @@ HISTORY_PATH = os.path.join(REPO_ROOT, "telemetry_buffer", "simulation_history.j
 # each host's own drawn incubation period rather than at the next whole day, so a
 # case whose draw exceeds 1 day has not presented by epoch 23.  Prior expectation
 # under the hours clock was symptomatic 2.
+# Updated 2026-09-03 (capacity-weighted leisure draw): the weighted
+# ``rng.choice`` consumes the seeded stream differently, moving symptomatic
+# from 2 to 1 and the final trigger from CONFIRMED to BASELINE.
 EXPECTED_SUMMARY = {
     "susceptible": 13,
     "infected": 3,
-    "symptomatic": 2,
+    "symptomatic": 1,
     "recovered": 0,
     "immune": 4,
 }
-# The own-severity reporting model permits a true-positive call within the
-# first day, so this golden now reaches clinical confirmation.
-EXPECTED_TRIGGER = "CONFIRMED"
+# The weighted leisure draw changes the seeded stream, so no true-positive call
+# occurs within the first day.
+EXPECTED_TRIGGER = "BASELINE"
 
 
 def _run_orchestrator(epochs: int = 24) -> list[dict]:

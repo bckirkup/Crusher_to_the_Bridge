@@ -25,6 +25,31 @@ PAX_SECTIONS = ("Port", "Stbd", "Central")
 PAX_SUBSECTIONS = ("Fwd", "Mid", "Aft")
 CREW_DECKS = [1, 2, 3, 4]
 CREW_SECTIONS = ("Fwd", "Mid", "Aft")
+EXTERIOR_ZONES = {
+    "Main_Pool_Deck",
+    "Sports_Court",
+    "Waterpark",
+    "CentralPark",
+    "Aqua_Theater",
+}
+LEGACY_TO_MEGA_ZONE = {
+    "Spa_Fitness_Complex": "SpaFitness",
+    "Central_Park_Open_Atrium": "CentralPark",
+    "Shopping_Retail_Block": "ShopRetail",
+    "Library_Card_Room": "LibraryCard",
+    "Comedy_Club_Lounge": "ComedyClub",
+    "Main_Dining_Room_Lower": "MainDining_L",
+    "Main_Dining_Room_Upper": "MainDining_U",
+    "Windjammer_Buffet": "Windjammer",
+    "Specialty_Restaurant_Block_A": "SpecRest_A",
+    "Specialty_Restaurant_Block_B": "SpecRest_B",
+    "Cafe_Bakery_Block": "CafeBakery",
+    "Crew_Mess_Forward": "CrewMess_Fwd",
+    "Buffet_Galley_Upper": "BuffetGal_U",
+    "Specialty_Galley_Block": "SpecGalley",
+    "Waste_Treatment_Plant": "WasteTreat",
+    "Engine_Control_Room": "EngControl",
+}
 
 PAX_DECK_Y = {6: 51.5, 7: 47.0, 8: 42.5, 9: 38.0, 10: 33.5, 11: 29.0, 12: 24.5, 13: 20.0, 14: 15.5}
 CREW_DECK_Y = {1: 88, 2: 82, 3: 76, 4: 70}
@@ -67,7 +92,24 @@ def _crew_display(deck: int, section: str) -> dict[str, float]:
 
 def _public_zones(legacy: dict[str, Any]) -> list[dict[str, Any]]:
     skip_prefixes = ("Passenger_Cabins_", "Crew_Quarters_")
-    return [deepcopy(z) for z in legacy["zones"] if not z["id"].startswith(skip_prefixes)]
+    zones = [
+        deepcopy(z) for z in legacy["zones"] if not z["id"].startswith(skip_prefixes)
+    ]
+    for zone in zones:
+        zone["id"] = LEGACY_TO_MEGA_ZONE.get(zone["id"], zone["id"])
+    return zones
+
+
+def _rename_zone(value: str) -> str:
+    return LEGACY_TO_MEGA_ZONE.get(value, value)
+
+
+def _rename_link(link: dict[str, Any]) -> dict[str, Any]:
+    renamed = dict(link)
+    for endpoint in ("from", "to"):
+        if endpoint in renamed:
+            renamed[endpoint] = _rename_zone(renamed[endpoint])
+    return renamed
 
 
 def _pax_corridor_zones() -> list[dict[str, Any]]:
@@ -208,7 +250,7 @@ def _crew_adjacency() -> list[dict[str, str]]:
 def _public_adjacency(legacy_airflow: dict[str, Any]) -> list[dict[str, str]]:
     skip = ("Passenger_Cabins", "Crew_Quarters")
     out = [
-        link for link in legacy_airflow.get("adjacency", [])
+        _rename_link(link) for link in legacy_airflow.get("adjacency", [])
         if not any(link["from"].startswith(p) or link["to"].startswith(p) for p in skip)
     ]
     out.extend([
@@ -225,15 +267,22 @@ def build_air_flow_paths(legacy_airflow: dict[str, Any], zone_ids: set[str]) -> 
         if hz["id"].startswith("AHU_Network_Cabins"):
             continue
         entry = dict(hz)
+        entry["rooms"] = [_rename_zone(room) for room in entry.get("rooms", [])]
+        entry["rooms"] = [
+            room for room in entry.get("rooms", [])
+            if room not in EXTERIOR_ZONES
+        ]
         if entry["id"] == "AHU_Network_Crew_Accommodation":
-            entry["rooms"] = [r for r in entry["rooms"] if r.startswith("Crew_Mess")]
+            entry["rooms"] = [
+                r for r in entry["rooms"] if r in {"Crew_Mess_Main", "CrewMess_Fwd"}
+            ]
         public_hvac.append(entry)
 
     pax_hvac = [{
         "id": f"AHU_Pax_Deck_D{deck}",
         "rooms": _pax_zones_on_deck(deck),
         "ach": 6.0,
-        "description": f"Deck {deck} passenger cabin fan-coil branch.",
+        "description": f"Deck {deck} passenger cabin fan-coil branch (corridor sections).",
     } for deck in PAX_DECKS]
 
     crew_hvac = [{
@@ -244,7 +293,7 @@ def build_air_flow_paths(legacy_airflow: dict[str, Any], zone_ids: set[str]) -> 
     } for deck in CREW_DECKS]
 
     cross_links = [
-        cl for cl in legacy_airflow.get("cross_zone_links", [])
+        _rename_link(cl) for cl in legacy_airflow.get("cross_zone_links", [])
         if not cl["from"].startswith("AHU_Network_Cabins")
     ]
     for i, deck in enumerate(PAX_DECKS[:-1]):
@@ -255,6 +304,7 @@ def build_air_flow_paths(legacy_airflow: dict[str, Any], zone_ids: set[str]) -> 
             "flow_rate_m3h": 1200.0,
             "is_hvac_ducted": True,
             "path": f"Pax_Trunk_D{deck}_D{nxt}",
+            "description": "Main AHU trunk cross-deck recirculation (passenger cabins).",
         })
     for i, deck in enumerate(CREW_DECKS[:-1]):
         nxt = CREW_DECKS[i + 1]
@@ -264,6 +314,7 @@ def build_air_flow_paths(legacy_airflow: dict[str, Any], zone_ids: set[str]) -> 
             "flow_rate_m3h": 800.0,
             "is_hvac_ducted": True,
             "path": f"Crew_Trunk_D{deck}_D{nxt}",
+            "description": "Crew accommodation trunk cross-deck link.",
         })
     for deck in PAX_DECKS:
         cross_links.append({
@@ -272,6 +323,7 @@ def build_air_flow_paths(legacy_airflow: dict[str, Any], zone_ids: set[str]) -> 
             "flow_rate_m3h": 1500.0,
             "is_hvac_ducted": True,
             "path": f"Cabin_Relief_D{deck}",
+            "description": "Corridor relief exhaust to atrium/promenade trunk.",
         })
     cross_links.append({
         "from": "AHU_Crew_Deck_D4",
@@ -279,6 +331,7 @@ def build_air_flow_paths(legacy_airflow: dict[str, Any], zone_ids: set[str]) -> 
         "flow_rate_m3h": 2000.0,
         "is_hvac_ducted": False,
         "path": "Crew_to_Engine_Stairwell",
+        "description": "Lower crew decks draw toward engine negative pressure.",
     })
 
     adjacency = [
@@ -288,7 +341,14 @@ def build_air_flow_paths(legacy_airflow: dict[str, Any], zone_ids: set[str]) -> 
 
     return {
         "platform": "mega_cruise_5000",
-        "description": "HVAC for mega_cruise_5000 cabin-corridor layout.",
+        "description": (
+            "HVAC for mega_cruise_5000 cabin-corridor layout. Nine deck-level "
+            "passenger AHU branches, four crew-deck branches, plus existing "
+            "public/service networks. Cross-deck trunk links at reduced flow "
+            "vs legacy two-zone cabin model."
+        ),
+        "oa_fraction": legacy_airflow.get("oa_fraction", 0.2),
+        "hvac_duty": legacy_airflow.get("hvac_duty", 0.5),
         "hvac_zones": public_hvac + pax_hvac + crew_hvac,
         "cross_zone_links": cross_links,
         "adjacency": adjacency,

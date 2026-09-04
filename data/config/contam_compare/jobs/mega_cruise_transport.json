@@ -3,7 +3,7 @@
   "mode": "transport",
   "platform": "mega_cruise_5000",
   "epochs": 8,
-  "inject": ["CentralPark:1e6"],
+  "inject": ["Windjammer:1e6"],
   "repeats": 2,
   "description": "Mega cruise — large-network transport divergence + timing"
 }

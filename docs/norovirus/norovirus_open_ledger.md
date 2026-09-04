@@ -2,7 +2,7 @@
 
 > **Status:** Living
 
-**Live status as of `1329bbf` (#353 merged).** What is currently withdrawn,
+**Live status as of `70c4e00` (Item 2).** What is currently withdrawn,
 what each anchor last measured and *when*, and what is outstanding.
 
 `docs/norovirus/norovirus_model_history.md` is the permanent record of defects and
@@ -25,6 +25,15 @@ raised the direct-contact kernel about 10x and the shared-surface touch rates
 run since.
 
 Also withdrawn and not yet replaced:
+
+**Leisure-venue assignment and exterior-zone AHU membership changed.** The
+`Free`-zone leisure draw is now capacity-weighted over passenger-accessible
+venues instead of uniform over every `Free` zone, and exterior zones — open-air,
+semi-open and open-aft decks — are no longer members of recirculating AHU
+networks on any cruise platform. Both change zone occupancy and zone-to-zone
+airborne coupling, so any attack-rate, route-share or dose measurement taken
+before this commit is not transferable across it. No constant, grade or interval
+changes here.
 
 - **The v4 campaign** and every campaign before it. Each was invalidated by a
   defect found after it ran (§12 of the history).

@@ -137,6 +137,6 @@ longer justifications.
 | How to run ship/fleet | Ship or game-theory operator manual, + this index if entry points change |
 | Agent/CI commands | `AGENTS.md` + matching `.agents/skills/` |
 | JSON contracts | `schemas/README.md` + schema files |
-| ContamX / HVAC physics | `CONTAM_INTEROP.md` (+ audit notes if fidelity claims change) |
+| ContamX / HVAC physics | `CONTAM_INTEROP.md` and [`exterior_zone_ahu_audit.md`](exterior_zone_ahu_audit.md) |
 | An epidemiological constant | The constant's provenance comment, `norovirus/norovirus_open_ledger.md` if it invalidates a recorded measurement, and `norovirus/norovirus_model_history.md` if it is a defect |
 | A document's implementation state | Its status header — and move the file if the filing rule above now puts it elsewhere |

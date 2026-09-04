@@ -89,7 +89,7 @@ Key knobs in `crusher_labs/config.yaml` (overridable via Picard `config_override
 |------|---------|-------|
 | `transmission.contact_mode` | `density_dependent` | Also `legacy` or opt-in `heterogeneous_zone_dose` |
 | `agent_behavior.dining_rotation_probability` | `0.0` | Keep 0 for golden stability; raise in campaigns for venue mixing |
-| `agent_behavior.free_zone_rotation_probability` | `0.0` | Same pattern for Free zones |
+| `agent_behavior.free_zone_rotation_probability` | `0.0` | Same pattern for Free zones; the underlying draw is capacity-weighted over passenger-accessible venues |
 | `voyage.effects_enabled` | `false` | Flag-gated port/embarkation effects; see [ship_operations_spec.md](ship_operations_spec.md) |
 
 Pathogen profiles (`data/pathogens/`): `dose_adjustment` (log10 shedding offset),

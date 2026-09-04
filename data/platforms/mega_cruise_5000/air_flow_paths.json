@@ -18,7 +18,6 @@
     {
       "id": "AHU_Network_Midship_Atrium",
       "rooms": [
-        "CentralPark",
         "Royal_Promenade",
         "ShopRetail",
         "Casino",
@@ -31,9 +30,6 @@
     {
       "id": "AHU_Network_Aft_Dining_Rec",
       "rooms": [
-        "Main_Pool_Deck",
-        "Sports_Court",
-        "Waterpark",
         "Pool_Bar_Grill",
         "Kids_Club",
         "Teen_Zone",
@@ -43,7 +39,6 @@
         "SpecRest_A",
         "SpecRest_B",
         "CafeBakery",
-        "Aqua_Theater",
         "Ice_Rink_Studio"
       ],
       "ach": 10.0,

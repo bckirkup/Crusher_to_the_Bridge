@@ -148,6 +148,46 @@ DEFAULT_AGENT_BEHAVIOR: dict[str, Any] = {
     },
 }
 
+# Passenger leisure access. No zone record on any platform carries an access
+# field, so crew-only machinery and service spaces are identified from tokens
+# their own name, deck and description already use. Interim measure; the
+# durable fix is proposed in docs/proposals/zone_access_attribute_spec.md.
+NON_LEISURE_ZONE_TOKENS = (
+    "engine", "machinery", "waste", "laundry", "stores", "provision",
+    "galley", "bridge", "navigation", "technical",
+)
+
+
+def is_leisure_accessible(zone: dict[str, Any]) -> bool:
+    """Return whether a zone is suitable for passenger leisure access."""
+    text = " ".join(
+        str(zone.get(field, ""))
+        for field in ("name", "deck", "description")
+    ).lower()
+    return not any(token in text for token in NON_LEISURE_ZONE_TOKENS)
+
+
+def weighted_zone_choice(
+    catalog: list[dict[str, Any]], rng: np.random.Generator,
+) -> str | None:
+    """Draw a zone with probability proportional to its capacity."""
+    if not catalog:
+        return None
+    labels: list[str] = []
+    weights: list[float] = []
+    for entry in catalog:
+        cap = entry.get("max_occupancy")
+        try:
+            capacity = float(cap) if cap is not None else 100.0
+        except (TypeError, ValueError):
+            capacity = 100.0
+        labels.append(str(entry["name"]))
+        weights.append(max(capacity, 1.0))
+    total = sum(weights)
+    probs = [weight / total for weight in weights]
+    return str(rng.choice(labels, p=probs))
+
+
 # Crew behavior schedule meal tokens (shared across class schedules)
 MEAL_BREAKFAST = "Meal:Breakfast"
 MEAL_LUNCH = "Meal:Lunch"
@@ -542,7 +582,7 @@ class KorkinAgent:
         *,
         rng: np.random.Generator | None = None,
         dining_catalog: list[dict[str, Any]] | None = None,
-        free_zones: list[str] | None = None,
+        free_catalog: list[dict[str, Any]] | None = None,
         agent_behavior: dict[str, Any] | None = None,
     ) -> str:
         """Determine where this agent should be at the given hour.
@@ -565,7 +605,7 @@ class KorkinAgent:
         if activity == "Free":
             return self._resolve_free_location(
                 rng=rng,
-                free_zones=free_zones,
+                free_catalog=free_catalog,
                 agent_behavior=agent_behavior,
             )
         if activity == "Work":
@@ -648,19 +688,19 @@ class KorkinAgent:
         self,
         *,
         rng: np.random.Generator | None,
-        free_zones: list[str] | None,
+        free_catalog: list[dict[str, Any]] | None,
         agent_behavior: dict[str, Any] | None,
     ) -> str:
         behavior = agent_behavior or {}
         p_rotate = float(behavior.get("free_zone_rotation_probability", 0.0) or 0.0)
         if (
             rng is None
-            or not free_zones
+            or not free_catalog
             or p_rotate <= 0.0
             or rng.random() >= p_rotate
         ):
             return self.free_zone
-        return str(rng.choice(free_zones))
+        return weighted_zone_choice(free_catalog, rng) or self.free_zone
 
     def init_pathogen_susceptibility(
         self, pathogen_id: str, base_susceptibility: float = 1.0,
@@ -1368,6 +1408,17 @@ class KorkinShipEngine:
 
         self._dining_zones = [z["name"] for z in self.zones if z["type"] == "Dining"]
         self._free_zones = [z["name"] for z in self.zones if z["type"] == "Free"]
+        self._leisure_catalog: list[dict[str, Any]] = [
+            {"name": z["name"], "max_occupancy": z.get("max_occupancy")}
+            for z in self.zones
+            if z.get("type") == "Free" and is_leisure_accessible(z)
+        ]
+        if not self._leisure_catalog:
+            self._leisure_catalog = [
+                {"name": z["name"], "max_occupancy": z.get("max_occupancy")}
+                for z in self.zones
+                if z.get("type") == "Free"
+            ]
         self._room_zones = [
             z["name"] for z in self.zones
             if z["type"] in ("Room", "Cabin_Corridor")
@@ -1536,7 +1587,8 @@ class KorkinShipEngine:
                 work = str(self.rng.choice(self._free_zones))
             free = (
                 self._resolve_zone(free_pref, self._free_zones)
-                if free_pref else str(self.rng.choice(self._free_zones))
+                if free_pref
+                else weighted_zone_choice(self._leisure_catalog, self.rng) or "unknown"
             )
 
             agent = KorkinAgent(
@@ -1594,7 +1646,7 @@ class KorkinShipEngine:
                 else self._room_zones
             )
             dining = self.rng.choice(self._dining_zones)
-            free = self.rng.choice(self._free_zones)
+            free = weighted_zone_choice(self._leisure_catalog, self.rng) or "unknown"
             work = self.rng.choice(self._free_zones)
             gender = self._assign_gender()
             schedule = list(PASSENGER_SCHEDULE)
@@ -1633,7 +1685,7 @@ class KorkinShipEngine:
                 else self._room_zones
             )
             dining = self.rng.choice(self._dining_zones)
-            free = self.rng.choice(self._free_zones)
+            free = weighted_zone_choice(self._leisure_catalog, self.rng) or "unknown"
             work = self.rng.choice(self._free_zones + self._dining_zones)
             gender = self._assign_gender()
             schedule = list(CREW_SCHEDULE)
@@ -1767,7 +1819,7 @@ class KorkinShipEngine:
                 randomness,
                 rng=self.rng,
                 dining_catalog=self._dining_catalog,
-                free_zones=self._free_zones,
+                free_catalog=self._leisure_catalog,
                 agent_behavior=behavior,
             )
 

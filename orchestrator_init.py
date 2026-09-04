@@ -102,6 +102,7 @@ def load_spatial_layout(cfg: dict[str, Any]) -> list[dict[str, Any]] | None:
             "cabin_ventilation_type": z.get("cabin_ventilation_type", ""),
             "cabin_size": z.get("cabin_size"),
             "max_occupancy": z.get("max_occupancy"),
+            "description": z.get("description", ""),
             "dining_service_type": z.get("dining_service_type", ""),
             "food_contamination_multiplier": z.get("food_contamination_multiplier"),
         }
@@ -507,6 +508,7 @@ def build_engine(
             "type": z["type"],
             "capacity": z.get("traffic", "medium"),
             "max_occupancy": z.get("max_occupancy"),
+            "description": z.get("description", ""),
             "dining_service_type": z.get("dining_service_type", ""),
             "food_contamination_multiplier": z.get("food_contamination_multiplier"),
         }

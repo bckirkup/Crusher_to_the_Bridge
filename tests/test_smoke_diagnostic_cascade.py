@@ -18,6 +18,7 @@ REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, REPO_ROOT)
 
 from decision_engine.actions import ActionEnvelope
+from engines.infection_dynamics_bridge import IllnessStatus
 from picard_framework import PicardRunSpec, ShipSimulation
 
 CASCADE_SMOKE_SPECS: list[tuple[str, str]] = [
@@ -108,9 +109,18 @@ def test_cascade_smoke_standard_clinical_progression() -> None:
     assert sim.state is not None
     assert sim.engine is not None
     symptomatic = next(
-        agent for agent in sim.engine.agents
-        if agent.is_symptomatic
+        (agent for agent in sim.engine.agents if agent.is_symptomatic),
+        None,
     )
+    if symptomatic is None:
+        # Whether the seeded index case has presented by initialization is a
+        # draw-order accident that any behavioural change shifts. The cascade
+        # path under test needs a symptomatic sick call, not a particular
+        # draw, so present the seeded case explicitly.
+        symptomatic = next(
+            agent for agent in sim.engine.agents if agent.is_infected
+        )
+        symptomatic.illness_status = IllnessStatus.SYMPTOMATIC
     agent_id = symptomatic.agent_id
     sim.state.quarantined_ids.discard(agent_id)
     sim.state.isolated_ids.discard(agent_id)

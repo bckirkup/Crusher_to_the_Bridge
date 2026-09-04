@@ -78,6 +78,15 @@ ducts / sources are dropped (with warnings).
 
 ### Path A — ContamX on a real `.prj`
 
+The `mega_cruise_transport` job benchmarks native-vs-ContamX transport. Its
+`platform.prj` keeps every zone at `293.15 K` and has no ambient path, so an
+open-air source term is the least defensible source available. After the
+exterior-zone AHU fix, `CentralPark` has no ducted path; injecting there would
+make the benchmark adjacency-only. The job therefore injects at
+`Windjammer`, an indoor member of the largest recirculating public network and
+the venue implicated by the coupling defect. The PRJ remains untouched; the
+missing ambient path is an open item and is not fixed here.
+
 Set `hvac.transport_engine: contamx` (or `auto`) and point
 `hvac.contamx.prj_path` at the project (or place it at
 `data/platforms/<id>/contam/platform.prj`). Path map resolution:

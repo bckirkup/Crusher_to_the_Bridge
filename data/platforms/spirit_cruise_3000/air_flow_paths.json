@@ -134,15 +134,12 @@
     {
       "id": "AHU_Public_Aft",
       "rooms": [
-        "MainPool",
-        "AftPool",
         "LidoBuffet",
         "PizzaGrill",
         "SpaFit",
         "KidsClub",
         "TeenZone",
-        "SpecialtyC",
-        "SportsDeck"
+        "SpecialtyC"
       ],
       "ach": 10.0,
       "description": "Aft pools / buffet / spa / sports."
