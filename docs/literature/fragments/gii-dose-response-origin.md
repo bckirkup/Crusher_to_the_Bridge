@@ -1,13 +1,13 @@
-# Register fragment — the GII α interval's origins: one endpoint body-verified, the other abstract-only, and the shipped pair's own source unreached (tranche 20)
+# Register fragment — the GII α interval's origins: one endpoint body-verified, the other abstract-only, and the shipped pair's own source unreached (tranche 21)
 
 > **Not merged.** Proposed amendment to `docs/parameter_provenance_register.md`
 > §3.1, rows `dose_response.alpha` / `beta` and
 > `illness_probability.eta` / `gamma`. Not authoritative until the lead merges
 > it. Evidence:
-> [`../consensus_tranche_20_full_text_reverification.md`](../consensus_tranche_20_full_text_reverification.md)
+> [`../consensus_tranche_21_full_text_reverification.md`](../consensus_tranche_21_full_text_reverification.md)
 > §1, §3 and findings **F9** and **F10**.
 
-**Status:** Additive fragment, not authoritative until the lead merges it. Evidence: tranche 20.
+**Status:** Additive fragment, not authoritative until the lead merges it. Evidence: tranche 21.
 
 **No dose figure changes and none is proposed.** Every dose figure in this
 repository is void pending refit

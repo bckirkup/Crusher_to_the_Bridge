@@ -22,7 +22,7 @@ closed vocabulary is `docs/parameter_provenance_register.md` §1 — `R`, `Tn`,
 governing citations carry one, the weakest governing origin is printed first,
 and an origin may never move the provenance class or the evidence grade on its
 own. `Ab` on a Grade A constant is not a contradiction — it is the defect the
-axis exists to expose, and `docs/literature/consensus_tranche_20_full_text_reverification.md`
+axis exists to expose, and `docs/literature/consensus_tranche_21_full_text_reverification.md`
 is the worked pass that populated the column.
 
 `?nr` is a retrieval state and never a null result: absence from the excerpts a

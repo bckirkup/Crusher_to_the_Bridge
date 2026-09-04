@@ -6,6 +6,16 @@
 > adoption count. It is a finding about the *shape* of surface inactivation and
 > a proposed representation for it; the value that would go into any such
 > representation is not proposed here.
+>
+> **Superseded in part.** [Tranche 19](../literature/consensus_tranche_19_influenza_biphasic_surface.md)
+> §2 found the missing rates in full text, and they argue *against* this
+> document's form for the matrix a ship deposit resembles: Rockey 2024 measures
+> a wet/dry split in saliva but **none in human airway surface liquid**, and
+> French 2023's phase ordering reverses between conditions. The proposal is
+> therefore recorded as **refused on evidence rather than for want of
+> sourcing** — see [`influenza_arm_activation_plan.md`](influenza_arm_activation_plan.md)
+> §4. That deletes three proposed degrees of freedom and changes no value,
+> grade, interval or adoption count, here or in the register.
 
 **Scope:** R2 of [`field_repair_sequence.md`](field_repair_sequence.md)
 (item #44, influenza surface decay), and item #60, the deferred

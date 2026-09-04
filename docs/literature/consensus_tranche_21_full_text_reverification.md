@@ -1,4 +1,4 @@
-# Tranche 20 — re-verification with full-text chunks: what the register's citations actually say, and where the number was read
+# Tranche 21 — re-verification with full-text chunks: what the register's citations actually say, and where the number was read
 
 **Relation to tranche 19.** Tranche 19 (influenza biphasic surface) reached the
 same methodological conclusion independently and from the other end: full text
@@ -66,6 +66,15 @@ fractions; `never_symptomatic_fraction`; and influenza
 `illness_probability.eta`/`gamma` — which R3 deleted between this pass and the
 merge, its 66.9% moving to `symptomatic_fraction`, so that annotation now reads
 against the replacement row (F11). No fragment is adopted here.
+
+**Rows the pass does not cover.** R5 added four §3.3 influenza rows after the
+sweep ran — `dose_adjustment`, `transmission_route_weights`,
+`observation_model`/`severity_model`, and the `recovery_day`-versus-curve row.
+Their `Origin` cells say so rather than carrying an origin this pass did not
+establish; three of the four are unit- or referent-defect rows that cite nothing
+to have an origin for, and the fourth cites the shipboard-anchor tranche, which
+sourced its own numbers from full text independently. Coverage is therefore
+every cited row **as of the sweep**, not every cited row now.
 
 ### 0.3 The fan-out conclusion this pass contradicts
 

@@ -1,11 +1,11 @@
-# Register fragment — six quantities whose governing number is abstract-only (tranche 20)
+# Register fragment — six quantities whose governing number is abstract-only (tranche 21)
 
 > **Not merged.** Proposed amendments to `docs/parameter_provenance_register.md`
 > §3.1 and §3.3. Not authoritative until the lead merges it. Evidence:
-> [`../consensus_tranche_20_full_text_reverification.md`](../consensus_tranche_20_full_text_reverification.md)
+> [`../consensus_tranche_21_full_text_reverification.md`](../consensus_tranche_21_full_text_reverification.md)
 > findings **F2**, **F3**, **F5**, **F6**, **F8**, **F11**.
 
-**Status:** Additive fragment, not authoritative until the lead merges it. Evidence: tranche 20.
+**Status:** Additive fragment, not authoritative until the lead merges it. Evidence: tranche 21.
 
 **Nothing changes but the record of where the number was read.** No constant,
 interval, curve entry or grade is moved by this fragment. Each row below is

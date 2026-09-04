@@ -24,4 +24,4 @@ Proposed replacement for the existing `never_symptomatic_fraction` row:
 
 Not recorded: this fragment predates the register's section-of-origin axis. The
 retrieval ledger covering its citations is
-[tranche 20](../consensus_tranche_20_full_text_reverification.md) §1.
+[tranche 21](../consensus_tranche_21_full_text_reverification.md) §1.
