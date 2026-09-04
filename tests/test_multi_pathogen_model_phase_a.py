@@ -109,6 +109,18 @@ class TestDoseAdjustmentContracts:
             assert isinstance(p["dose_adjustment"], (int, float))
 
 
+class TestInfluenzaPresentationContract:
+    def test_influenza_uses_dose_independent_presentation(self) -> None:
+        data = json.loads(
+            (REPO_ROOT / "data/pathogens/edison_10pathogen_profiles.json").read_text(),
+        )
+        influenza = next(
+            p for p in data["pathogens"] if p["pathogen_id"] == "influenza_a"
+        )
+        assert influenza["symptomatic_fraction"] == pytest.approx(0.669)
+        assert "illness_probability" not in influenza
+
+
 class TestInnateNonsusceptibility:
     def test_nonsus_fraction_zeroes_multiplier(self) -> None:
         class _FakeEngine:

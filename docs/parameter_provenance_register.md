@@ -68,11 +68,11 @@ influenza 2 of ~25):
 | Quantities that had no usable literature basis and now have one recorded | **57** |
 | — of those, adoptable as they stand (✓) | 24 |
 | — blocked by a field, mechanism or identifiability defect (⊘) | **21** |
-| — adopted in the tree | **2** (the FUT2 pair, Wave 1) |
+| — adopted in the tree | **3** (the FUT2 pair, Wave 1, plus the influenza `symptomatic_fraction`, R3) |
 | — provenance recovered but mis-genogrouped | **1** (η/γ; the dose-response pair left this row in tranche 6, declared as the GI.1 arm and swept over the GII interval it lies inside) |
-| — refuted, or shown to be unmeasurable (∅) | 9 |
+| — refuted, or shown to be unmeasurable (∅) | **8** |
 | Nulls and rejections recorded as results (§3.4) | 16 |
-| Profile scalars carrying a citation **in the tree** | still 8 / 6 / 2 |
+| Profile scalars carrying a citation **in the tree** | 8 / 6 / 3 |
 
 **These figures are recounted from §3, not incremented**, so they are not
 comparable line-for-line with the 33 / 9 / 6 published before sourcing wave 1,
@@ -96,6 +96,10 @@ recorded. Blocked counts a row when its adoption state is a ⊘ state or says
 resolved (both `airborne_emission_fraction` rows,
 `surface_deposition_fraction`). Refuted-or-unmeasurable counts a row whose own
 adoption state carries ∅ or the word refuted.
+
+R3 moves the influenza presentation quantity from the refuted bucket into the
+adopted tree as `symptomatic_fraction`, deleting the dose-conditional mechanism
+rather than re-sourcing it.
 
 Sourcing wave 1 (tranches 11–18) is the largest single move in the table and
 it adopts nothing. It adds five §3.1 rows (GII time-to-peak, GII decline shape,
@@ -240,7 +244,7 @@ must be resolved before it is.
 |---|---|---|---|---|---|
 | Incubation | — | M | Lessler 2009, median 1.4 d | — in tree | |
 | `presymptomatic_shedding_days` | 1.0 | M | Ip 2017, ~1 d | — in tree | |
-| `illness_probability.eta` / `gamma` | 0.67 / 0.1 | C shipped; **evidence B** | **Refuted at the cited source, verified in Carrat's Results** — graded **B, not A**: Carrat 2008 is a **pooled meta-regression** across 56 volunteer challenge studies in clinical facilities, which is a measurement in an analogous setting and a cross-study regression rather than a direct measurement in the target setting, so B is the ceiling under this register's own class definitions (*Am J Epidemiol* 2008;167:775–785, DOI 10.1093/aje/kwm375): "The proportion of symptomatic infection (any symptoms) was 66.9 percent (95 percent CI: 58.3, 74.5). No significant difference was noted according to the virus type … or the initial infectious dose (p = 0.12)." Denominator **522 infected individuals in 38 subgroups**, from 56 studies / 1,280 challenged, inoculum **3–7.2 log10 TCID50** (4.2 orders). Lower-respiratory symptoms 21.0% (14.0–30.3) likewise dose-independent. The one clinical dose association runs the **wrong way**: fever OR **0.56 per log10 TCID50** (0.42–0.73, p<0.001), which the authors call striking and unexplained. The only contrary claim found is Teunis 2010 (DOI 10.1016/j.epidem.2010.10.001), whose "slightly higher illness risk due to the higher doses involved" is an output of a **fitted** hierarchical dose-response model, class C, and therefore circular for an attack-rate-scored model | ⊘ mech → **refuted**: the field `1 − (1 + η·dose)^−γ` is strictly increasing in dose and the measured endpoint is flat over 4.2 orders. 0.67 is a pooled population fraction with a CI, not a dose-curve parameter. No replacement form proposed here | #44 |
+| `symptomatic_fraction` — presentation given infection, dose-independent (**replaces** the deleted `illness_probability.eta` / `gamma` = 0.67 / 0.1) | **0.669**, 95% CI **[0.583, 0.745]** | **B** | **Refuted at the cited source, verified in Carrat's Results** — graded **B, not A**: Carrat 2008 is a **pooled meta-regression** across 56 volunteer challenge studies in clinical facilities, which is a measurement in an analogous setting and a cross-study regression rather than a direct measurement in the target setting, so B is the ceiling under this register's own class definitions (*Am J Epidemiol* 2008;167:775–785, DOI 10.1093/aje/kwm375): "The proportion of symptomatic infection (any symptoms) was 66.9 percent (95 percent CI: 58.3, 74.5). No significant difference was noted according to the virus type … or the initial infectious dose (p = 0.12)." Denominator **522 infected individuals in 38 subgroups**, from 56 studies / 1,280 challenged, inoculum **3–7.2 log10 TCID50** (4.2 orders). Lower-respiratory symptoms 21.0% (14.0–30.3) likewise dose-independent. The one clinical dose association runs the **wrong way**: fever OR **0.56 per log10 TCID50** (0.42–0.73, p<0.001), which the authors call striking and unexplained. The only contrary claim found is Teunis 2010 (DOI 10.1016/j.epidem.2010.10.001), whose "slightly higher illness risk due to the higher doses involved" is an output of a **fitted** hierarchical dose-response model, class C, and therefore circular for an attack-rate-scored model — recorded and rejected in §3.4 | ✓ **adopted by deleting the mechanism (R3)**: the Hill field `1 − (1 + η·dose)^−γ` is strictly increasing in dose while the measured endpoint is flat over 4.2 orders, so the η/γ pair is **deleted on this arm rather than re-sourced** and presentation reads the measured proportion directly from `symptomatic_fraction`. The shipped 0.67 was this same pooled population fraction standing in an η slot, where it meant a dose-curve parameter; the repair moves it to a field where it means what Carrat measured, at the reported 0.669. The 95% CI is the screening interval and **no point inside it was selected against any anchor**. The influenza arm loses a dose-conditional degree of freedom, which is the intended direction | #44 |
 | `dose_response.k` | 0.18 (exponential) | C | Alford 1966 **aerosol** ID50 0.6–3 TCID50; Memoli 2015 **intranasal** — and Edison's two bundles disagree on it by 1–2 orders (α/β → 902 TCID50 vs a quoted 10⁴–10⁵) | ⊘ joint + unresolved citation | #44 |
 | Route efficiency (aerosol vs intranasal) | absent | — | The ratio is a **measurable physical quantity spanning at least two orders**. Multiplier withdrawn pending Memoli's primary text; the order-of-magnitude conclusion stands | ⊘ field — needs #25 first | #25 |
 | Emission | — | C | Yan 2017/2018 (EMIT): GM 3.8e4 copies/30 min fine aerosol, 1.2e4 coarse, culturable in 39% of fine. **Uncorrelated with NP swab load** — direct proof that a nasal-indexed curve cannot be an emission rate | ✓ once the shedding path takes a rate | #30 pattern |
@@ -322,10 +326,14 @@ item here, because the genogroup contrast cannot be quantified for it at all.
    are not separately identifiable: influenza supplies the measured version of the
    same quantity (per-portal efficiency, ≥2 orders) and it cannot be adopted into
    two parameterisations at once (#25).
-2. **Influenza `illness_probability`** — the value is a population fraction and
-   the field is a dose-conditional Hill form whose monotonicity Carrat's
-   dose-independence rejects. Sourcing 0.67 into η would encode a dose effect the
-   evidence denies (#44).
+2. **Influenza `illness_probability`** — **resolved by R3, by deletion.** The
+   value was a population fraction and the field a dose-conditional Hill form
+   whose monotonicity Carrat's dose-independence rejects, so sourcing 0.67 into
+   η would have encoded a dose effect the evidence denies. The η/γ pair is now
+   deleted on this arm and presentation reads a dose-independent
+   `symptomatic_fraction` of 0.669 (95% CI 0.583–0.745, Grade B, Carrat 2008).
+   The Hill form stays on the two active arms, where it is blocked for its own
+   reasons (§3.1, §3.2) (#44).
 3. **Influenza `surface_decay_log10_per_day`** — R1 moved the influenza bundle
    onto the sourced unit along with everything else, so this item is no longer
    about units: what survives is that a **scalar** cannot express humidity-,
@@ -365,7 +373,7 @@ them:
 |---|---|---|
 | Norovirus | 6 route efficiency multipliers, cabin-localization `f`, `airborne_emission_fraction`, one reporting-probability scale | The reporting scale is the only one constrained by an anchor, and that anchor is A3. The former single dose knob is **measured inert** above release 8 — the fomite pool dominates so completely that a 14-log10 change is byte-identical |
 | SARS-CoV-2 | 1 identifiable composite `(emission × route × transfer)/β`, 6 route efficiency multipliers, a 5-state severity vector, the testing-campaign replica, `airborne_emission_fraction` | The composite is *one* degree of freedom wearing four parameters' clothing. Fitting it while the background is unsourced would absorb their error, which is the failure the whole audit road exists to avoid |
-| Influenza | `base_susceptibility` (prior immunity), plus everything in §3.3 | Not active. The susceptibility term must come from seroprevalence or vaccination coverage for the specific season and route, or the arm has a free knob on its most consequential input |
+| Influenza | `base_susceptibility` (prior immunity), plus everything in §3.3 | Not active. The susceptibility term must come from seroprevalence or vaccination coverage for the specific season and route, or the arm has a free knob on its most consequential input. R3 removed the dose-conditional presentation pathway (η/γ deleted), so the arm has one fewer free quantity: `symptomatic_fraction` is measured with a CI and is not a knob. |
 
 Two of these were *removed* by measurement rather than by sourcing, which is
 worth recording as the register's own precedent: the norovirus dose knob (inert),
