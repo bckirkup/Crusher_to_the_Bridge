@@ -2,8 +2,10 @@
 
 > **Status:** Living — process of record; no sourcing pass has run under it yet.
 
-All six decisions in proposal §9 were approved on 2026-09-04. Decision 6 is
-front-loading: one anchor-harness perturbation pass before any query spend.
+Approved 2026-09-04, including the front-loading it implies: the leverage
+ranking of §3 runs one anchor-harness perturbation pass before any query is
+spent. No constant, curve entry, profile value or engine default changed when
+this landed.
 
 ## 0. What is wrong with both of the approaches we have tried
 
@@ -12,7 +14,7 @@ constraint is full-text access" was wrong, and it converted an unattempted route
 into a documented conclusion. The re-verification pass went the other way: it
 spent about half its queries re-attacking rows that were never going to close by
 rephrasing, because nothing in the process could say *this row is finished*. A
-`?nr` row is currently always eligible for one more query, which is Zeno's
+`?nr` row was always eligible for one more query, which is Zeno's
 staircase — every pass re-litigates the same eighteen rows and each one closes a
 smaller fraction.
 
@@ -34,7 +36,7 @@ inside the observation window.** So a closed row delivers four things, not one:
 |---|---|
 | **Interval** | The bounds the evidence actually supports for *this quantity in this setting*, with the basis stated (measured range, pooled CI, across-study spread, declared bound) |
 | **Shape** | The distributional form the evidence supports over those bounds — whether a sweep or a draw should be uniform over the range or concentrated near a central value |
-| **Origin** | Axis 3, unchanged; use the vocabulary in [the register's §1](parameter_provenance_register.md#1-three-axes-because-each-was-hiding-what-the-others-could-not-say) |
+| **Origin** | Axis 3, unchanged; use the vocabulary in [the register's §1](parameter_provenance_register.md#1-five-axes-because-each-hides-what-the-others-cannot-say) |
 | **Grade** | A/B/C, unchanged, and still independent of origin |
 
 The shipped point value remains whatever the model runs; the interval and shape
@@ -55,10 +57,7 @@ range, a midpoint pinned as a point, an interval inherited from a paper that
 measured a different denominator — narrows the feasible box for free. It is the
 mechanism by which the box goes empty, and an empty box from over-narrowing is
 indistinguishable from an empty box caused by a wrong mechanism. When the
-evidence is wide, the honest width *is* the result. Never record an interval
-narrower than the evidence supports: manufactured precision is what makes the
-feasible box go empty, and an empty box from over-narrowing cannot be told apart
-from an empty box caused by a wrong mechanism.
+evidence is wide, the honest width *is* the result.
 
 Sourcing therefore runs to the width where S1 and S2 meet, and no further in
 either direction.
@@ -89,7 +88,7 @@ order, which is uncorrelated with leverage.
 | **E1** | Consensus chunks, quantity **and** unit named, ≥2 differently-phrased attempts | 3 |
 | **E2** | **Route switch**, not rephrasing: name the table or figure; Europe PMC JATS XML for any open-access record; publisher HTML; agency full text for MMWR-class documents | 2 |
 | **E3** | Identity resolution — wrong author/year/paper is a distinct failure from wrong query | 2 |
-| **E4** | Stop and escalate to you | — |
+| **E4** | Stop and escalate to the lead | — |
 
 Seven queries per row, ceiling. The Kirby row is the worked case for why E2 is
 a separate tier and must be reached before a `?nr` is recorded: three phrasings
@@ -124,7 +123,7 @@ A wave ends, and the pass reports, when either holds:
 - **leverage exhaustion** — every remaining open row is L0 or L1.
 
 A row that has hit E4 in two different passes is not queried a third time; it is
-promoted to a decision for you, with the options written out. That is the
+promoted to a decision for the lead, with the options written out. That is the
 anti-asymptote rule: repeated failure escalates in *kind*, never in volume.
 
 ## 7. What "we are good" means on the fit side
