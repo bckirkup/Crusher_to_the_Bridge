@@ -41,6 +41,14 @@ Four in-tree instances, all confirmed by search rather than by argument:
 | `airborne_emission_fraction` | emission as a fraction of shedding | emission in absolute units — copies/minute or copies/hour. The field's *definition* has no referent, so the search returns `∅` however it is phrased |
 | SARS-CoV-2 copies per infectious unit | an implied constant | no fixed conversion across specimen, variant, or point in the infection course. Not a missing number: an absent constant |
 
+> **Correction:** The four rows above are four different defects with four
+> different remedies; only influenza `surface_decay_per_day` is curve-shaped.
+> The claim that `airborne_emission_fraction` has no measurable referent under
+> any phrasing is withdrawn: the register records that field defect as
+> resolved and names a Grade B source under an emesis-event-conditioned
+> definition. The corrected table is [§0 of
+> `field_repair_sequence.md`](field_repair_sequence.md#0-the-correction).
+
 The remedy in each case is a covariate-indexed parameter — a prior over
 functions with the conditioning variables explicit (material, RH, temperature,
 dose, day-since-onset) — or a field deletion. Both are structural work, and both
