@@ -79,8 +79,10 @@ Two further gaps are also only closeable by CDC, not by literature:
 
 - **No annual resolution outside 2008–2014.** 2004–2007 and 2015–2019 have no
   annual voyage count in any unit; Jenkins publishes one pooled 2006–2019 total.
-- **No post-2020 denominator of any kind.** The arm that exists to measure the
-  post-COVID discontinuity cannot express it as a rate at all.
+- **No post-2020 voyage count.** The post-COVID arm now carries a Grade C
+  bracket built from CDC's inspection census (below), which is a fleet count
+  scaled by a declared voyages-per-ship-year; only CDC can replace that
+  assumption with a measurement.
 
 ## What is being asked for
 
@@ -139,11 +141,12 @@ none of them has a central value to read off:
 |---|---|---|
 | Annual qualifying voyages, 2008–2014 | per year, e.g. 2010 **[4,155, 5,527]**, 2014 **[4,387, 5,000]**, the other five **[analysed, required]** | one rule for all seven years: span both published columns and the count the printed rate implies, so the 2010 misprint widens the year instead of deleting it. Grade **M**, origin T1 |
 | Annual qualifying voyages, 2006–2007 and 2015–2019 | **[3,964, 5,527]** each | the union envelope of the seven bracketed years, on a declared stationarity assumption. Grade **C**, swept, never centred |
-| Annual qualifying voyages, 2020– | **∅ null** | nothing published can bound it; a fleet that stopped sailing cannot be assumed unchanged (see below — the public pages cover these years, but only as a numerator) |
+| Annual qualifying voyages, 2023–2025 | 2023 **[4,640, 6,471]**, 2024 **[5,084, 7,090]**, 2025 **[6,108, 8,517]** | the 2006–2019 envelope scaled by the VSP inspection census ratio (136/149/179 ships against a 2014–2019 mean of 116.2), on the declared assumption that voyages per ship-year are unchanged. Grade **C**, swept, never centred |
+| Annual qualifying voyages, 2020–2022 and 2026 | **∅ null** | 2020–2022 is the inspection pause, when the census measures the programme rather than the fleet; 2026 is not a complete year. The public pages cover all of these years, but only as a numerator |
 | "Unduplicated voyage report" as a share of a required-report voyage | **0.48–0.67** | 37,258 against fourteen years of the envelope. A *measure of the mismatch*, not a conversion factor |
 | Posting step, posted ÷ investigated | **[0.53, 1.0]** | observed 2008–2014 floor (9/17 in 2013; the seven years run 0.53–0.93, mean 0.70) up to the structural ceiling that a posting presupposes an investigation. The Jenkins-window 1.33 is excluded because it breaks that ceiling, and is kept visible for the same reason |
 
-### Why the public pages cannot supply the post-2020 range
+### Why the public pages cannot supply the post-2020 range, and what does
 
 The pages *do* cover 2020 onward, which makes the null look like an omission, so
 it is worth stating exactly what they contain. They list the voyages CDC posted —
@@ -153,10 +156,59 @@ sailed, in any era: both denominator columns this tree carries come from MMWR,
 which stops at 2019. The only fleet-side quantity the pages yield is the number
 of distinct ships they name, 1–19 per year against hundreds under jurisdiction,
 which is a floor on the fleet loose by more than an order of magnitude and
-therefore not a denominator. Bounding the post arm would mean assuming voyages
-per ship per year, and that number is exactly what the pandemic changed. So the
-post-2020 arm compares postings to postings, and the annual voyage count for
-those years is one of the things the request is for.
+therefore not a denominator.
+
+The fleet term comes from a different CDC product instead: the **VSP inspection
+record**, queried month by month from the [inspection query
+tool](https://wwwn.cdc.gov/inspectionquerytool/InspectionSearch.aspx) into
+`telemetry_buffer/observation_model/vsp_inspection_series.csv` — 1,901
+inspections of 248 distinct ships, 2014–2026, retrieved 2026-09-05. The [green
+sheet](https://wwwn.cdc.gov/inspectionquerytool/InspectionGreenSheetRpt.aspx)
+states that the tool covers "each ship in VSP jurisdiction", which is the
+population Freeland's voyages are drawn from — unlike the COVID-19 colour-status
+reports ([cdc/114411](https://stacks.cdc.gov/view/cdc/114411), method in
+[cdc/107289](https://stacks.cdc.gov/view/cdc/107289)), whose 113-ship enrolment
+is voluntary, U.S.-waters-only and ≥250-capacity, and whose colours are
+seven-day ship statuses rather than voyages.
+
+Distinct ships inspected per year: 108, 118, 122, 121, 117, 111 for 2014–2019,
+then 31 (to March), 0, 28 (from October) across the pause, then 136, 149, 179
+for 2023–2025. So the fleet is *measured* on both sides of the pandemic with one
+instrument, and the ratio of censuses (1.17, 1.28, 1.54) carries the pre-2020
+voyage envelope across the discontinuity. Two things that buys and two it does
+not:
+
+- It is still not a voyage count. Voyages per ship-year enters as a **declared
+  assumption** (unchanged from 2014–2019), which is why the bracket is Grade C
+  and why nothing inside it may be adopted as an estimate.
+- The census counts ships *inspected*, so each year is a floor. Inspections per
+  inspected ship fall from 1.45–1.73 before the pause to 1.31–1.40 after, so the
+  modern census is the deeper undercount and the ratio is conservative.
+- It refuses the pause rather than smoothing it: 2020–2022 stay null, because a
+  census taken while inspections were suspended measures the programme.
+- It does not touch the numerator question, which stays exactly as above.
+
+So the post-2020 arm can be swept against a wide voyage bracket for 2023–2025,
+and the annual voyage count that would replace the assumption is still one of the
+things this request is for.
+
+### Sources identified and not retrieved
+
+These would measure the quantity the post-2020 bracket currently assumes, or
+support work beyond the denominator. None of them has been retrieved, so none of
+them enters any interval; they are recorded here so a later reader does not
+re-derive the search, and so the assumption above is visibly an assumption
+rather than an absence of alternatives.
+
+| Source | What it would give | Why it is not in the tree |
+|---|---|---|
+| [CruiseDig historic itinerary database](https://cruisedig.com/historic-database-all-past-cruise-ship-itineraries) | Voyages directly: per-ship itineraries with dates and ports from ~2013 onward, deliverable as an Excel extract — i.e. the voyages-per-ship-year the fleet ratio declares | Historic extracts carry a service charge and were not purchased. Coverage is also unreconciled: an itinerary aggregator's population is not "voyages under VSP jurisdiction, 3–21 days, >100 passengers", so even once retrieved it would enter as a bracket over an inclusion-rule mismatch, not as a count |
+| [thecruiseglobe](https://thecruiseglobe.com/) | Schedules and itineraries, same shape | The data sit inside an application rather than a retrievable dataset |
+| CDC VSP **per-ship inspection reports**, and the corrective-action and mitigation reports attached to them, via the same [query tool](https://wwwn.cdc.gov/inspectionquerytool/InspectionSearch.aspx) | Not a denominator at all: ship-level operating conditions, deficiency classes, and what was done about them — a risk-factor and mitigation-effectiveness dataset covering the same hulls the posting series names | Available and unexploited by choice. It is a plausible source of covariates (galley and potable-water deficiencies, outbreak-management deficiencies, sanitation scores) and of an intervention-effectiveness check, but every use of it would be a new sourcing exercise with its own population and time coverage, and none of it converts a ship-year into a voyage |
+
+The register carries only the census counts this record was harvested for. The
+inspection *scores* are in `vsp_inspection_series.csv` because they came with the
+query, and no parameter reads them.
 
 What a reply changes is the width of those intervals, and in one case their
 number: annual investigated counts for 2006–2007 and 2015–2019 would replace the

@@ -104,20 +104,71 @@ def test_uncovered_pre_covid_years_are_null_not_estimated(year: int) -> None:
     assert vd.missing_denominator_reason(year) == vd.NO_ANNUAL_DENOMINATOR
 
 
-@pytest.mark.parametrize("year", [2022, 2026])
-def test_post_covid_years_name_the_post_arm_gap(year: int) -> None:
+@pytest.mark.parametrize("year", [2020, 2021, 2022])
+def test_the_inspection_pause_years_stay_null(year: int) -> None:
+    """The census measures the programme, not the fleet, while sailing stopped."""
+    assert vd.post_covid_denominator_interval(year) is None
     assert vd.posting_rate_interval(year, 10) is None
-    assert vd.missing_denominator_reason(year) == vd.NO_POST_COVID_DENOMINATOR
+    assert vd.missing_denominator_reason(year) == vd.NO_PAUSE_ERA_DENOMINATOR
 
 
-def test_the_public_pages_supply_a_post_2020_numerator_only() -> None:
+def test_an_incomplete_year_has_no_census_and_so_no_bracket() -> None:
+    assert vd.post_covid_denominator_interval(2026) is None
+    assert vd.posting_rate_interval(2026, 10) is None
+    assert vd.missing_denominator_reason(2026) == vd.NO_CENSUS_DENOMINATOR
+
+
+def test_the_public_pages_supply_the_post_2020_numerator_only() -> None:
+    """Postings come from the outbreak pages; the fleet comes from inspections."""
     postings = vd.postings_by_year()
 
     for year in (2020, 2021, 2022, 2023, 2024, 2025, 2026):
         assert postings.get(year, 0) > 0
         assert vd.annual_denominator_interval(year) is None
-        assert vd.posting_rate_interval(year, postings[year]) is None
-    assert "numerator" in vd.NO_POST_COVID_DENOMINATOR
+
+
+def test_the_inspection_census_tracks_the_fleet_it_is_scaling() -> None:
+    census = vd.ships_inspected_by_year()
+
+    for year in vd.CENSUS_YEARS_PRE_COVID + vd.CENSUS_YEARS_POST_COVID:
+        assert census[year]["ships"] > 100
+        assert census[year]["inspections"] >= census[year]["ships"]
+    for year in (2020, 2022):
+        assert census[year]["ships"] < 40
+    assert 2021 not in census
+
+
+def test_the_fleet_ratio_grows_with_the_post_pause_census() -> None:
+    ratios = [vd.fleet_ratio(year) for year in vd.CENSUS_YEARS_POST_COVID]
+
+    assert ratios[0] < ratios[1] < ratios[2]
+    assert ratios == pytest.approx([1.171, 1.283, 1.541], abs=0.001)
+    assert vd.fleet_ratio(2016) is None
+    assert vd.fleet_ratio(2021) is None
+
+
+def test_the_post_covid_bracket_is_the_envelope_scaled_by_the_census() -> None:
+    """Wide by construction: a ship census times a declared voyages-per-ship."""
+    envelope = vd.stationarity_denominator_interval()
+
+    for year in vd.CENSUS_YEARS_POST_COVID:
+        low, high = vd.post_covid_denominator_interval(year)
+        ratio = vd.fleet_ratio(year)
+        assert low == pytest.approx(envelope[0] * ratio, abs=1)
+        assert high == pytest.approx(envelope[1] * ratio, abs=1)
+        assert high > low > envelope[0]
+    assert vd.post_covid_denominator_interval(2024) == (5_084, 7_090)
+    assert "declared, not sourced" in vd.FLEET_RATIO_ASSUMPTION
+    assert "floor" in vd.CENSUS_COVERAGE_CAVEAT
+
+
+def test_the_post_covid_posting_rate_spans_the_grade_c_bracket() -> None:
+    low, high = vd.posting_rate_interval(2024, 18)
+    bracket = vd.post_covid_denominator_interval(2024)
+
+    assert low == pytest.approx(18_000 / bracket[1])
+    assert high == pytest.approx(18_000 / bracket[0])
+    assert high / low > 1.3
 
 
 def test_posting_rate_moves_with_the_numerator() -> None:
@@ -127,10 +178,12 @@ def test_posting_rate_moves_with_the_numerator() -> None:
     assert rates[2] == pytest.approx(4 * rates[0])
 
 
-def test_series_diagnostic_covers_only_the_freeland_window() -> None:
+def test_series_diagnostic_pools_only_the_measured_window() -> None:
     observed = vd.observed_posting_rates()
 
-    assert observed["covered_years"] == vd.DENOMINATOR_YEARS
+    assert observed["covered_years"] == (
+        vd.DENOMINATOR_YEARS + vd.CENSUS_YEARS_POST_COVID
+    )
     assert observed["pooled"]["postings"] == 91
     low, high = observed["pooled"]["per_1000_voyages"]
     assert (low, high) == pytest.approx((2.836, 3.126), abs=0.001)
@@ -177,7 +230,7 @@ def test_stationarity_bracket_is_the_union_and_is_declared_not_measured() -> Non
     for year in vd.JENKINS_ONLY_YEARS:
         assert year not in vd.DENOMINATOR_YEARS
         assert vd.JENKINS_WINDOW[0] <= year <= vd.JENKINS_WINDOW[1]
-    assert vd.missing_denominator_reason(2022) == vd.NO_POST_COVID_DENOMINATOR
+    assert vd.missing_denominator_reason(2022) == vd.NO_PAUSE_ERA_DENOMINATOR
 
 
 def test_jenkins_unit_is_a_fraction_of_a_required_report_voyage() -> None:
