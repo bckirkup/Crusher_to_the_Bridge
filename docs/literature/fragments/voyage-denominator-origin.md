@@ -2,8 +2,10 @@
 
 > **Merged by #13.** The origin correction below (`Tr` → `R`) is now carried by
 > the register row itself, which also corrects this fragment's "5 of 7 years"
-> reproducibility figure to **1 of 7 reproducing**, measured in-tree. Kept as
-> the audit trail; the register holds the status.
+> reproducibility figure to **1 of 7 reproducing**, measured in-tree, and grades
+> how far the other six miss: **≤8.5%, mean 4.8%** against the required-report
+> column, with 2010 the sole material outlier. Kept as the audit trail; the
+> register holds the status.
 >
 > Proposed amendment to `docs/parameter_provenance_register.md`
 > §3.1, observation-model block, row "External voyage denominator for VSP

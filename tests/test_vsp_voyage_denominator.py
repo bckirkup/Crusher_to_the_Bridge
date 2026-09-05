@@ -28,7 +28,11 @@ def test_the_two_cdc_voyage_units_do_not_reconcile() -> None:
 
 
 def test_published_rates_are_not_reproducible_from_the_published_counts() -> None:
-    """One year reproduces; four fall outside the bracket the units span."""
+    """One year reproduces to one decimal; four sit outside the unit bracket.
+
+    Three of those four (2012, 2013, 2014) miss the nearer edge by 0.02-0.12
+    per 1,000, which is rounding-scale; the width is graded separately below.
+    """
     check = vd.published_rate_check()
     reproduced = {
         year: unit
@@ -44,6 +48,41 @@ def test_published_rates_are_not_reproducible_from_the_published_counts() -> Non
 
     assert reproduced == {2012: "over_analysed"}
     assert outside == {2010, 2012, 2013, 2014}
+
+
+def test_the_published_rates_miss_the_required_column_by_single_percents() -> None:
+    """The disagreement is bounded: <=8.5% everywhere except the flagged year."""
+    residuals = vd.published_rate_residuals()
+    graded = {
+        year: abs(row["relative_over_required"])
+        for year, row in residuals.items()
+        if year not in vd.FREELAND_INCONSISTENT_YEARS
+    }
+
+    assert max(graded.values()) < 0.09
+    assert sum(graded.values()) / len(graded) < 0.05
+    # The residual changes sign across years, so it is scatter rather than a
+    # systematic offset that some third voyage unit would remove.
+    signs = {row["residual_over_required"] > 0 for row in residuals.values()}
+    assert signs == {True, False}
+
+
+def test_only_2010_needs_more_voyages_than_either_column_publishes() -> None:
+    """2014 also overshoots, but by 4%; only 2010 overshoots beyond rounding."""
+    overshoot = {
+        year: row["implied_denominator"] / vd.FREELAND_VOYAGES_REQUIRING_REPORT[year]
+        for year, row in vd.published_rate_residuals().items()
+        if row["implied_denominator"] > vd.FREELAND_VOYAGES_REQUIRING_REPORT[year]
+    }
+
+    assert set(overshoot) == {2010, 2014}
+    assert overshoot[2014] < 1.05
+    assert {year for year, ratio in overshoot.items() if ratio > 1.1} == set(
+        vd.FREELAND_INCONSISTENT_YEARS
+    )
+    assert vd.published_rate_residuals()[2010]["implied_denominator"] == pytest.approx(
+        5_526, abs=1
+    )
 
 
 @pytest.mark.parametrize("year", [2008, 2011, 2014])

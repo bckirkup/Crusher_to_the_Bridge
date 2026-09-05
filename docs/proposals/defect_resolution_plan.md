@@ -180,8 +180,14 @@ postings against 132 investigations in Freeland's window, 208 against 156 in
 Jenkins's — so no ratio converts one into the other. Freeland's own printed
 per-1,000-voyage rates are reproducible from Freeland's own counts for 1 of 7
 years and fall outside the bracket its two units span in 4 of 7, which is why
-both units are carried rather than either quoted. And the post-2020 arm has no
-voyage count of any kind, so the discontinuity that arm exists to measure cannot
+both units are carried rather than either quoted — though the miss is small and
+graded, not open-ended: `published_rate_residuals()` puts the printed rates on
+the required-report column to within 4.8% on average and 8.5% at worst in six
+of the seven years, with 2010 the lone material outlier (its printed 3.8 needs
+~5,526 voyages, above either published count, so one of that year's three cells
+is misprinted). The denominator is uncertain by about a tenth, not unknown; what
+blocks the row is the numerator definition, not this residual. And the post-2020
+arm has no voyage count of any kind, so the discontinuity that arm exists to measure cannot
 be written as a rate at all — the class-composition observable of
 [`fleet_emergence_decision.md`](fleet_emergence_decision.md) §3 remains the only
 fleet statistic available there.

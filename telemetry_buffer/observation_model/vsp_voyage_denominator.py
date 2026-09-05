@@ -20,6 +20,15 @@ years of a period whose traffic grew.  Which of "voyage", "voyage report" and
 "arrival" each number counts is not stated in either paper, so this module
 carries both and refuses to pick one.
 
+How far apart the two Freeland columns are is small and measured, not open:
+the analysed subset is 5.4-12.7% below the required-report count year by year,
+and ``published_rate_residuals`` shows the paper's own printed rates sit on the
+required-report column to within 4.8% on average (worst 8.5%) in six of the
+seven years.  Only 2010 disagrees materially: its printed 3.8 per 1,000 needs
+~5,526 voyages, more than either column publishes, so one of that year's three
+cells is misprinted.  The denominator therefore enters as a ~10%-wide interval
+with one flagged year, which is a bounded uncertainty rather than an unknown.
+
 Nothing here is fitted and nothing here is a target.  ``a9_targets`` in
 ``midrs_incidence_targets.py`` continues to score against the Jenkins
 denominator it has always used; the Freeland-window rates below are a
@@ -94,6 +103,11 @@ FREELAND_PUBLISHED_RATE_PER_1000: dict[int, float] = {
 # (unduplicated) 37,258").  One total for 2006-2019; no annual resolution.
 JENKINS_VOYAGE_REPORTS_2006_2019 = 37_258
 JENKINS_WINDOW = (2006, 2019)
+
+# The one year whose three published cells (rate, outbreaks, both voyage
+# counts) cannot be made consistent with each other: 3.8 per 1,000 on 21
+# outbreaks implies ~5,526 voyages, above the 4,627 required-report count.
+FREELAND_INCONSISTENT_YEARS = (2010,)
 
 FREELAND_UNIT_REQUIRED = "voyages required to submit a VSP report"
 FREELAND_UNIT_ANALYSED = "voyages of 3-21 d carrying >100 passengers"
@@ -184,12 +198,12 @@ def published_rate_check() -> dict[int, dict[str, float]]:
     """Recompute Freeland's own published rates from its own table.
 
     The paper prints an investigated-outbreak rate per 1,000 voyages; dividing
-    its outbreak counts by either of its voyage counts reproduces that printed
-    rate for one year out of seven (2012, over the analysed subset), and in
-    four of the seven it falls outside the bracket the two units span at all.
-    So the pairing between the published rate and the published counts is not
-    recoverable, which is the reason the denominator enters as an interval
-    rather than as whichever column happens to be quoted.
+    its outbreak counts by either voyage count reproduces the printed rate to
+    its single decimal in only one year (2012, over the analysed subset), but
+    the misses are small and one-sided rather than arbitrary --- see
+    ``published_rate_residuals`` for how small.  The exact pairing between the
+    printed rate and the printed counts is not recoverable, which is why the
+    denominator enters as an interval; the interval is narrow.
     """
     return {
         year: {
@@ -206,6 +220,44 @@ def published_rate_check() -> dict[int, dict[str, float]]:
             ),
         }
         for year in DENOMINATOR_YEARS
+    }
+
+
+def published_rate_residuals() -> dict[int, dict[str, float]]:
+    """How far each printed Freeland rate sits from each published column.
+
+    This is the quantified version of the disagreement above.  Against the
+    required-report column the printed rates are off by 0.21 per 1,000 on
+    average (4.8%, worst 8.5%) once 2010 is set aside, which is the scale of
+    one-decimal rounding plus a plausible mid-year revision, not a unit error;
+    against the analysed subset the average is 0.27 (7.2%, worst 14.0%).  So
+    the printed rates behave like the required-report column, the interval this
+    module carries spans the residual, and 2010 is separately flagged.
+
+    ``implied_denominator`` is the voyage count each printed rate would need at
+    the printed outbreak count: it lands between the two columns in three
+    years, within 4% of the nearer column in three more, and 19% above the
+    larger column only in 2010.
+    """
+    return {
+        year: {
+            "implied_denominator": (
+                1_000
+                * FREELAND_PASSENGER_OUTBREAKS_INVESTIGATED[year]
+                / FREELAND_PUBLISHED_RATE_PER_1000[year]
+            ),
+            **{
+                f"residual_{column}": values[column] - values["published"]
+                for column in ("over_required", "over_analysed")
+            },
+            **{
+                f"relative_{column}": (
+                    (values[column] - values["published"]) / values["published"]
+                )
+                for column in ("over_required", "over_analysed")
+            },
+        }
+        for year, values in published_rate_check().items()
     }
 
 
