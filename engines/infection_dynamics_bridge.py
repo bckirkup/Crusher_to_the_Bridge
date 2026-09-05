@@ -1569,6 +1569,43 @@ class KorkinShipEngine:
         """
         return max(1, int(round(self.clock.epochs_for_days(1.0))))
 
+    def _allocate_class_counts(
+        self,
+        total: int,
+    ) -> list[tuple[dict[str, Any], int]]:
+        """Head count per configured agent class.
+
+        A class may declare a ``count`` instead of a ``fraction``, which is
+        what a replayed historical population needs: a published 2,666/1,045
+        split is a pair of counts, and rounding it through fractions moves a
+        person between roles. Fractions still allocate by proportion with the
+        remainder going to the first class, so a generic config is unchanged.
+        """
+        declared = [cls_cfg.get("count") for cls_cfg in self._agent_classes]
+        if all(value is not None for value in declared):
+            counts: list[tuple[dict[str, Any], int]] = [
+                (cls_cfg, int(value))
+                for cls_cfg, value in zip(self._agent_classes, declared, strict=True)
+            ]
+            allocated = sum(count for _, count in counts)
+            if allocated != total:
+                raise ValueError(
+                    f"agent_classes counts total {allocated} but the population "
+                    f"is {total}",
+                )
+            return counts
+
+        counts = []
+        allocated = 0
+        for cls_cfg in self._agent_classes:
+            count = int(total * cls_cfg.get("fraction", 0.0))
+            counts.append((cls_cfg, count))
+            allocated += count
+        if allocated < total and counts:
+            first_cls, first_count = counts[0]
+            counts[0] = (first_cls, first_count + (total - allocated))
+        return counts
+
     def _initialize_agents_from_classes(
         self,
         start_id: int,
@@ -1579,18 +1616,7 @@ class KorkinShipEngine:
         total = self.num_passengers + self.num_crew
         agent_id = start_id
 
-        # Build ordered list of (class_cfg, count) pairs
-        class_counts: list[tuple[dict[str, Any], int]] = []
-        allocated = 0
-        for cls_cfg in self._agent_classes:
-            fraction = cls_cfg.get("fraction", 0.0)
-            count = int(total * fraction)
-            class_counts.append((cls_cfg, count))
-            allocated += count
-        # Assign remainder to the first class
-        if allocated < total and class_counts:
-            first_cls, first_count = class_counts[0]
-            class_counts[0] = (first_cls, first_count + (total - allocated))
+        class_counts = self._allocate_class_counts(total)
 
         agents_left = sum(c for _, c in class_counts)
 
