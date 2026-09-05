@@ -437,6 +437,12 @@ class PathogenProfile(BaseModel):
     environmental_contamination: dict[str, Any] = {}
     route_efficiency_multipliers: dict[str, float] = {}
     transmission_route_weights: dict[str, float] = {}
+    # Declared only to be refused (#25), so they take any shape: a profile
+    # carrying one is rejected for existing, not for being malformed.
+    pre_establishment_clearance: Any = None
+    route_clearance_rate_per_hour: Any = None
+    route_clearance_rates_per_hour: Any = None
+    gastric_survival_fraction: Any = None
     innate_nonsusceptible_fraction: float = 0.0
     secretor_negative_fraction: float | None = None
     secretor_negative_relative_susceptibility: float | None = None
@@ -450,6 +456,33 @@ class PathogenProfile(BaseModel):
     strain_evolution: dict[str, Any] = {}
     sequencing_assay: dict[str, Any] = {}
     symptom_severity: dict[str, Any] | None = None
+
+    @model_validator(mode="after")
+    def one_route_efficiency_parameterisation(self) -> "PathogenProfile":
+        """Route efficiency is parameterised once, by the multipliers (#25)."""
+        clearance = {
+            "pre_establishment_clearance": self.pre_establishment_clearance,
+            "route_clearance_rate_per_hour": self.route_clearance_rate_per_hour,
+            "route_clearance_rates_per_hour": (
+                self.route_clearance_rates_per_hour
+            ),
+            "gastric_survival_fraction": self.gastric_survival_fraction,
+        }
+        for name, value in clearance.items():
+            if value is not None:
+                raise ValueError(
+                    f"{name} parameterises route efficiency a second time; "
+                    "route_efficiency_multipliers owns it. Convert measured "
+                    "clearance rates with engines.transmission_core."
+                    "route_efficiency_from_clearance_rates and declare the "
+                    "result there",
+                )
+        if self.route_efficiency_multipliers and self.transmission_route_weights:
+            raise ValueError(
+                "route_efficiency_multipliers and its deprecated alias "
+                "transmission_route_weights are the same field; declare one",
+            )
+        return self
 
     @model_validator(mode="after")
     def reject_retired_severity_model(self) -> "PathogenProfile":

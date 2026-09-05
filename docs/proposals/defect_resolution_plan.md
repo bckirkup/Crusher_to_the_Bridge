@@ -64,7 +64,7 @@ the register's §4 no longer has an entry whose blocker is the shape of a field.
 | A2 | `sars_cov2_resp` gets `shedding_duration_days` | #51 | **Resolved:** the arm carries `shedding_duration_days` 15 on the sourced RNA-positivity interval [10.8, 18.4], and `recovery_day` 7 still clears the illness, so the two clocks are separate. The field takes the **detectability** endpoint rather than the infectious one, because the curve it releases is a nasal RNA concentration; splitting *those* two clocks is a further structural item and is recorded, not fixed. The tranche-8 clock separation never reached this arm: shedding still clears at `recovery_day` 7 and 7 of 15 authored curve days are unreachable. Negligible for dose (0.02% of curve mass) and decisive for *detectability*, which is what the COVID arm is scored on |
 | A3 | Symptom severity gets a trajectory | #48 | **Resolved.** Severity was drawn once at onset and held for the whole illness, so what an observer saw did not vary over the course — and observability is the quantity this model exists to predict. The onset draw is now the *peak* of the course and `severity_model.trajectory_ladder_offsets_by_day` says how far below it the host reads on each illness day, on the same onset axis as the shedding curve. The field ships absent on every profile, which holds the peak and is the previous behaviour exactly: what the path is belongs to Track C (#27, #31), and adopting one before the seam existed would have been sourcing a number no field could hold |
 | A4 | Influenza `surface_decay_per_day` becomes a rate; `illness_probability` stops being dose-conditional | #44 | **Resolved, in two landed changes and one refusal.** Register §4 items 2 and 3. The Hill form could not express Carrat's dose *in*dependence, and R3 deleted it rather than sourcing 0.67 into η: both influenza profiles now carry `symptomatic_fraction` 0.669 and presentation is dose-independent. The fractional daily loss is gone too — R1 put every profile in both bundles on `surface_decay_log10_per_day`, the unit every source measures in. What remains of the surface row is not a field shape this track can fix: the axis the scalar cannot express is *time since deposition*, and [`surface_decay_biphasic_spec.md`](surface_decay_biphasic_spec.md) §7.1 refuses the biphasic form **on evidence** — the respiratory matrix a ship deposit resembles shows no wet/dry split at all. That is a shape question for #36 to make live before #60 answers it, not a structural prerequisite of Track B |
-| A5 | Route efficiency vs. the clearance layer: pick one parameterisation | #25 | Register §4 item 1. Six route multipliers and Edison's per-portal clearance layer parameterise the same object, so neither is identifiable while both exist. This is a structural choice, not a search |
+| A5 | Route efficiency vs. the clearance layer: pick one parameterisation | #25 | **Resolved.** Register §4 item 1. Six route multipliers and Edison's per-portal clearance layer parameterise the same object, so neither was identifiable while both could exist — a structural choice, not a search, and it was made in favour of the multipliers. `route_efficiency_multipliers` is the sole owner; a measured clearance rate is a *derivation* of it, `route_efficiency_from_clearance_rates` returning `λ_reference/λ_j` against a declared reference portal, so only the ratios enter and the absolute rate scale cannot rescale the already-degenerate dose axis. The schema and the loader refuse a clearance layer beside it — `pre_establishment_clearance`, `route_clearance_rate_per_hour`, `gastric_survival_fraction` — including at inert defaults, because shipping a layer at no-op is how it becomes live later. No value moved: the six numbers ship as before, and which portal a route terminates at is Track C's question (#27) |
 
 **A1 goes first, and this reverses my earlier recommendation.** I argued for
 doing the extraction *after* the symptom curve, on the grounds that pure
@@ -81,6 +81,17 @@ the curve lived in different modules with nothing owning "which curve is this
 host on".
 
 A2–A5 are independent of each other and can run in any order after A1.
+
+**Track A is done, and the one thing it did not do was refused rather than
+skipped.** A1, A2, A3 and A5 landed, and A4's two register items landed as R1
+and R3. What survives is the influenza scalar surface-decay rate, whose remedy
+would be the biphasic wet/dry form — and §7.1 of the spec refuses that form on
+evidence, because the matrix a ship deposit resembles shows no wet/dry split.
+A shape that the literature does not support is not a field defect this track
+can repair; #36 decides whether the question is live at all. So the exit
+condition holds in the sense that matters: no entry in the register's §4 is
+waiting on a field a *sourced* number could not be written into today. The next
+unblocked work is Track B.
 
 ## 4. Track B — anchors: what we are allowed to score against
 

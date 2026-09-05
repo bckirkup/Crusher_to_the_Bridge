@@ -624,7 +624,7 @@
         },
         "route_efficiency_multipliers": {
           "type": "object",
-          "description": "Independent per-route dose multipliers, one per TransmissionCore pathway. They are NOT normalised shares: they neither do nor need to sum to 1, and where route efficiency has been measured it spans orders of magnitude (influenza intranasal vs aerosol ID50). Absent → all 1.0 (identity).",
+          "description": "Independent per-route dose multipliers, one per TransmissionCore pathway. They are NOT normalised shares: they neither do nor need to sum to 1, and where route efficiency has been measured it spans orders of magnitude (influenza intranasal vs aerosol ID50). Absent → all 1.0 (identity). This is the model's only parameterisation of route efficiency: a measured per-route clearance rate enters through engines.transmission_core.route_efficiency_from_clearance_rates and is declared here, never as a clearance layer beside it.",
           "properties": {
             "direct_contact": {"type": "number", "minimum": 0},
             "droplet": {"type": "number", "minimum": 0},
@@ -900,6 +900,21 @@
         },
         {
           "not": {"required": ["illness_probability", "symptomatic_fraction"]}
+        },
+        {
+          "description": "Route efficiency has one parameterisation. route_efficiency_multipliers and its deprecated alias transmission_route_weights are the same field, and declaring both hides which one the loader reads.",
+          "not": {"required": ["route_efficiency_multipliers", "transmission_route_weights"]}
+        },
+        {
+          "description": "A per-route clearance rate and a route efficiency multiplier parameterise the same quantity, so neither is identifiable while both exist. Convert rates with engines.transmission_core.route_efficiency_from_clearance_rates and declare the result as route_efficiency_multipliers.",
+          "not": {
+            "anyOf": [
+              {"required": ["pre_establishment_clearance"]},
+              {"required": ["route_clearance_rate_per_hour"]},
+              {"required": ["route_clearance_rates_per_hour"]},
+              {"required": ["gastric_survival_fraction"]}
+            ]
+          }
         }
       ],
       "not": {"required": ["symptom_severity"]}
