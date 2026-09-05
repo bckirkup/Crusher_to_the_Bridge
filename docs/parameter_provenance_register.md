@@ -520,7 +520,12 @@ item here, because the genogroup contrast cannot be quantified for it at all.
    deposition** — decay is biphasic and the boundary is drying — which makes
    this item and #60's shape question one question. Nothing is sourced or
    adopted there, so this row's status, grade and interval are unchanged
-   (#44).
+   (#44). That spec's §7.1 **refuses** the biphasic form on evidence — the
+   wet/dry split appears in saliva and not in the airway surface liquid a ship
+   deposit resembles, and the phase ordering reverses between conditions — so
+   the remedy is deferred behind #36 rather than pending, and Track A item A4
+   is closed on that basis: what is left here is a shape question for the
+   screen, not a field that cannot hold its measurement.
 4. **SARS-CoV-2 emission × β** — not separately identifiable: dose and
    susceptibility enter the beta-frailty law strictly as a product. Must be
    adopted jointly against a copies-denominated measurement, with β swept over
