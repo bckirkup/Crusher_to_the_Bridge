@@ -32,6 +32,46 @@ definition to make a rate come out — prohibited by
 [`../sourcing_protocol.md`](../sourcing_protocol.md) and
 `.agents/skills/model-parameter-provenance/SKILL.md`.
 
+### What the public pages already answer, and what that changes
+
+The three live pages — [current](https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/index.html),
+[2023–2025](https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/earlier-outbreaks.html),
+[archived 2019–2022](https://archive.cdc.gov/www_cdc_gov/vessel-sanitation/cruise-ship-outbreaks/earlier-outbreaks-2019-2022.html)
+and the [archived 1993–2018](https://archive.cdc.gov/www_cdc_gov/nceh/vsp/surv/outbreak/archived-outbreaks-1993-2018.html)
+list — are all four already scraped into `vsp_outbreak_series.csv`, and re-read on
+2026-09-05 their tables still match it voyage for voyage (19 rows 2019–2022, 14
+for 2023, 18 for 2024, 23 for 2025, 9 so far in 2026; years keyed on sailing
+start, as CDC groups them). So nothing on the numerator side is missing, but two
+of them state the **posting criterion in print**, which narrows the request:
+
+> Ship is under VSP jurisdiction (on voyages including both U.S. and foreign
+> ports) … Voyage has 3% or more of passengers **or crew** reporting symptoms of
+> GI illness to the ship's medical staff … We may also post other outbreaks of
+> public health significance.
+
+So posting is *not* an unstated editorial act, and the crew clause and the
+discretionary clause are candidate explanations for postings the MMWR passenger
+counts would not carry. Measured against our own series, they are too small to be
+the explanation: of the 208 posted rows in Jenkins's window, **206 are ≥3%
+passengers**, exactly **1** is crew-only (Carnival Conquest 2019, 0.52% pax /
+3.02% crew) and **2** are below 3% on both — three rows, against an excess of 52.
+
+What the criterion does do is sharpen the mismatch into an arithmetic
+contradiction between CDC's own two summaries. Posting requires an investigation,
+so posted counts should never exceed investigated ones; yet on the published
+numbers:
+
+- **2008–2014:** 132 investigated, **91** posted → 41 investigated and not posted,
+  under a criterion that reads the same as the investigation threshold.
+- **2006–2007 plus 2015–2019:** Jenkins's 156 less Freeland's 132 leaves **~24**
+  investigated for those seven years, against **117** posted (60 in 2006–2007
+  alone, all ≥3% passengers, and 57 in 2015–2019).
+
+Both cannot be counts of the same event class as the public list, and applying
+Freeland's own 3–21-day filter to our rows (91 → 84, 208 → 192) does not close
+either side. That is the question to put to CDC, and it is more specific than
+"the ratio inverts".
+
 Two further gaps are also only closeable by CDC, not by literature:
 
 - **No annual resolution outside 2008–2014.** 2004–2007 and 2015–2019 have no
@@ -60,10 +100,13 @@ An extract from the Maritime Illness Database and Reporting System (MIDRS),
 Plus, in prose, the three definitional statements without which the columns
 cannot be used:
 
-6. **The posting criterion.** What determines whether an investigated outbreak
-   receives a public outbreak-update page — is it a threshold, a discretionary
-   decision, or a change in policy over time? This is the question the two
-   inverted ratios above raise, and the single most valuable line in the reply.
+6. **Which investigated outbreaks reach the public list.** The criterion itself
+   is published (VSP jurisdiction, ≥3% of passengers *or* crew, plus discretion
+   for other outbreaks of public health significance), so the open part is
+   whether it applied in the same form across 2004–2026 and, given it did, how
+   132 investigated passenger outbreaks in 2008–2014 sit against 91 postings
+   while the seven years Jenkins's total leaves at ~24 investigated carry 117
+   postings. This is the single most valuable line in the reply.
 7. **The unit reconciliation.** Whether "voyage", "voyage report" and
    "unduplicated voyage report" denote the same countable event, and if not,
    how Freeland's 29,107 (2008–2014) sits inside Jenkins's 37,258 (2006–2019),
@@ -111,10 +154,10 @@ pooled total for 2006-2019, and nothing has been published for 2020 onward.
 
 More importantly, the numerator definitions do not match. Over 2008-2014 the
 public list holds 91 voyages against the 132 passenger outbreaks Freeland
-reports as investigated; over 2006-2019 it holds 208 against Jenkins's 156. The
-relation inverts, so the public list is evidently neither a subset of the
-investigated outbreaks nor a fixed share of them, and I do not want to assume a
-conversion between them.
+reports as investigated; over 2006-2019 it holds 208 against Jenkins's 156. Since
+a posting presupposes an investigation, the two cannot both be counts of the
+same event class as the public list, and I do not want to assume a conversion
+between them.
 
 If it is possible to provide an extract from MIDRS, I am asking for annual
 figures for calendar years 2004-2026:
@@ -131,8 +174,15 @@ identifiable data.
 Three questions matter as much as the counts, and I would be grateful for even
 a brief answer to any of them:
 
-  6. What determines whether an investigated outbreak receives a public
-     outbreak update page, and has that criterion changed over time?
+  6. The posting criterion on your pages (VSP jurisdiction, 3% or more of
+     passengers or crew, plus discretion for other outbreaks of public health
+     significance) reads much like the investigation threshold, but the counts
+     do not line up either way: 132 investigated against 91 posted in
+     2008-2014, while the 2006-2007 and 2015-2019 years carry 117 postings
+     against the roughly 24 investigations Jenkins's total leaves for them
+     once Freeland's 132 are removed. Has the posting criterion applied in the
+     same form throughout, and are Freeland's and Jenkins's outbreak counts
+     defined the same way as each other?
   7. Do "voyage", "voyage report" and "unduplicated voyage report" count the
      same event across the two MMWR reports? As published, Freeland's 29,107
      voyages for 2008-2014 inside Jenkins's 37,258 for 2006-2019 would leave
@@ -163,7 +213,7 @@ Recorded in advance, so the reply cannot be read selectively after the fact.
 | Reply | Consequence in the model |
 |---|---|
 | Annual counts arrive with a stated posting criterion | The B4 register row unblocks: a posting rate becomes computable per year in one declared unit, and A9 can be re-expressed on an annual denominator instead of a pooled period average. The posting step still enters as a **declared** ascertainment quantity, not a fitted one. |
-| Counts arrive, posting criterion not explained | Denominator gaps close; the numerator mismatch does **not**. The rate stays blocked, and the alternative becomes modelling the posting step as a swept observation-model parameter (a new Track B item), not choosing a ratio. |
+| Counts arrive, but the posted-vs-investigated definitions are not reconciled | Denominator gaps close; the numerator mismatch does **not**. The rate stays blocked, and the alternative becomes modelling the posting step as a swept observation-model parameter (a new Track B item), not choosing a ratio. |
 | Only 2008–2014 confirmed, nothing new | No change. The row stays blocked with its current four reasons and the class-composition observable remains the only post-2020 fleet statistic. |
 | The 2010 erratum is identified | `FREELAND_INCONSISTENT_YEARS` in `telemetry_buffer/observation_model/vsp_voyage_denominator.py` loses its entry and the corrected cell is quoted with the correction's origin; the residual assessment is restated. |
 | No reply, or declined | This document moves to `history/` with the outcome recorded, so the request is not silently repeated. |
