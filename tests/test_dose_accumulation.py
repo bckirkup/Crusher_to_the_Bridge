@@ -8,13 +8,13 @@ import numpy as np
 import pytest
 
 from engines.infection_dynamics_bridge import (
-    InfectionStatus,
     IllnessStatus,
+    InfectionStatus,
     KorkinAgent,
     illness_probability,
 )
+from engines.natural_history import advance_infections
 from engines.transmission_core import TransmissionCore
-from orchestrator_epoch import _advance_agent_pathogen_infections
 
 PATHOGEN = "dose_test_pathogen"
 ZONE = "Dose_Test_Zone"
@@ -217,7 +217,7 @@ def test_recovery_clears_exposure_but_preserves_susceptibility() -> None:
     agent.cumulative_exposure_by_route[PATHOGEN] = {"fomite": 0.25}
     agent.dose_response_susceptibility[PATHOGEN] = 0.125
 
-    _advance_agent_pathogen_infections(
+    advance_infections(
         agent,
         {PATHOGEN: {**_profile(), "recovery_day": 0}},
         np.random.default_rng(17),

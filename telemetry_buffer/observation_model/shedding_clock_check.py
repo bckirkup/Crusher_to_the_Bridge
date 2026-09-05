@@ -31,9 +31,7 @@ from engines.infection_dynamics_bridge import (  # noqa: E402
     InfectionStatus,
     KorkinAgent,
 )
-from orchestrator_epoch import (  # noqa: E402
-    _advance_agent_pathogen_infections,
-)
+from engines.natural_history import advance_infections  # noqa: E402
 
 PROFILE_PATH = REPO_ROOT / "data" / "pathogens" / "active_profiles.json"
 HOSTS = 200
@@ -88,7 +86,7 @@ def _one_host(pathogen_id: str, profile: dict, seed: int) -> tuple[int, set[int]
             index = math.floor(elapsed - _onset_days(infection, profile, clock))
             indices.add(max(0, index))
             last_day = int(elapsed)
-        _advance_agent_pathogen_infections(
+        advance_infections(
             agent, {pathogen_id: profile}, rng, epoch=epoch,
         )
     return last_day, indices

@@ -37,12 +37,12 @@ from engines.infection_dynamics_bridge import (  # noqa: E402
     IllnessStatus,
     KorkinAgent,
 )
-from engines.strain_state import ImmuneRecord, Phenotype  # noqa: E402
-from orchestrator_epoch import (  # noqa: E402
+from engines.natural_history import (  # noqa: E402
     ONSET_DAY,
-    _advance_agent_pathogen_infections,
-    _incubation_days,
+    advance_infections,
+    incubation_days,
 )
+from engines.strain_state import ImmuneRecord, Phenotype  # noqa: E402
 from tools.sanity_checker import (  # noqa: E402
     PathogenProfile,
     PathogensFile,
@@ -386,7 +386,7 @@ def _onset_day(
     prof = {**profile, "recovery_day": 40}
     rng = np.random.default_rng(seed)
     for _ in range(30):
-        _advance_agent_pathogen_infections(host, {PATHOGEN: prof}, rng)
+        advance_infections(host, {PATHOGEN: prof}, rng)
         inf = host.infections[PATHOGEN]
         if inf["illness"] == IllnessStatus.SYMPTOMATIC:
             return int(inf["time_infected"])
@@ -400,10 +400,10 @@ class TestProgressionSeam:
         agent.infect_with_pathogen(PATHOGEN, 1e6, 0)
         profile = _profile()
         rng = np.random.default_rng(1)
-        first = _incubation_days(agent, PATHOGEN, agent.infections[PATHOGEN],
+        first = incubation_days(agent, PATHOGEN, agent.infections[PATHOGEN],
                                  profile, rng)
         for _ in range(5):
-            again = _incubation_days(agent, PATHOGEN, agent.infections[PATHOGEN],
+            again = incubation_days(agent, PATHOGEN, agent.infections[PATHOGEN],
                                      profile, rng)
             assert again == first
 
@@ -414,7 +414,7 @@ class TestProgressionSeam:
         for aid in range(40):
             agent = _agent(aid)
             agent.infect_with_pathogen(RESPIRATORY, 1e4, 0)
-            periods.add(round(_incubation_days(
+            periods.add(round(incubation_days(
                 agent, RESPIRATORY, agent.infections[RESPIRATORY], profile, rng,
             ), 6))
         assert len(periods) > 1
@@ -425,7 +425,7 @@ class TestProgressionSeam:
         agent = _agent()
         agent.infect_with_pathogen(PATHOGEN, 1e12, 0)
         rng = np.random.default_rng(3)
-        drawn = _incubation_days(agent, PATHOGEN, agent.infections[PATHOGEN],
+        drawn = incubation_days(agent, PATHOGEN, agent.infections[PATHOGEN],
                                  profile, rng)
         assert drawn == pytest.approx(ONSET_DAY)
 
@@ -443,11 +443,11 @@ class TestProgressionSeam:
         agent.infect_with_pathogen(RESPIRATORY, 1e4, 0)
         inf = agent.infections[RESPIRATORY]
         rng = np.random.default_rng(7)
-        base = _incubation_days(agent, RESPIRATORY, inf, profile, rng)
+        base = incubation_days(agent, RESPIRATORY, inf, profile, rng)
         inf["strain_incubation_modifier"] = 2.0
         del inf["incubation_days"]
         rng = np.random.default_rng(7)
-        assert _incubation_days(agent, RESPIRATORY, inf, profile, rng) == base
+        assert incubation_days(agent, RESPIRATORY, inf, profile, rng) == base
 
     def test_the_variant_modifier_shifts_the_drawn_period(self) -> None:
         """The modifier moves this host's own period, not a shared onset day."""
@@ -456,10 +456,10 @@ class TestProgressionSeam:
         agent = _agent()
         agent.infect_with_pathogen(RESPIRATORY, 1e4, 0)
         inf = agent.infections[RESPIRATORY]
-        drawn = _incubation_days(agent, RESPIRATORY, inf, profile, rng)
+        drawn = incubation_days(agent, RESPIRATORY, inf, profile, rng)
         assert drawn > 1.0
         inf["strain_incubation_modifier"] = -drawn - 5.0
-        from orchestrator_epoch import _onset_day as onset_day
+        from engines.natural_history import onset_day
         assert onset_day(agent, RESPIRATORY, inf, profile, rng) == 0.0
 
     def test_faster_variants_are_live_for_a_slow_pathogen(self) -> None:
@@ -526,7 +526,7 @@ def _period(
     agent = _agent()
     agent.immunocompromised = immunocompromised
     agent.infect_with_pathogen(pathogen_id, dose, 0)
-    return _incubation_days(
+    return incubation_days(
         agent, pathogen_id, agent.infections[pathogen_id], profile, rng,
     )
 

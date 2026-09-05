@@ -21,6 +21,11 @@ from typing import Any
 import numpy as np
 
 from engines.infection_dynamics_bridge import IllnessStatus, InfectionStatus
+from engines.natural_history import (
+    DEFAULT_RECOVERY_DAY,
+    draw_symptom_severity,
+    incubation_days,
+)
 
 # Attempts allowed for the state draw before a host is left uninfected, used
 # when the drawn state's window is empty for this host's own duration.
@@ -46,7 +51,6 @@ MODE_BOARDING_AND_SEEDS = "boarding+seeds"
 LEGACY_MANIFEST: dict[str, Any] = {"mode": MODE_LEGACY}
 
 _ASYMPTOMATIC_SEVERITY = "asymptomatic"
-_DEFAULT_RECOVERY_DAY = 3
 
 
 @dataclass(frozen=True)
@@ -267,7 +271,7 @@ def _eligible(agent: Any, pathogen_id: str, role: str | None = None) -> bool:
 def _host_duration(
     agent: Any, pathogen_id: str, profile: dict[str, Any],
 ) -> float:
-    """This host's own shedding duration, read as ``_clearance_days`` reads it.
+    """This host's own shedding duration, read as ``clearance_days`` reads it.
 
     A host property, not a draw. The chronic-shedder branch has already run at
     initialization, over the immunocompromised hosts it is defined on, so a
@@ -279,7 +283,7 @@ def _host_duration(
     assigned = agent.get_chronic_shedding_duration(pathogen_id)
     if assigned is not None:
         return float(assigned)
-    recovery_day = float(profile.get("recovery_day", _DEFAULT_RECOVERY_DAY))
+    recovery_day = float(profile.get("recovery_day", DEFAULT_RECOVERY_DAY))
     return float(profile.get("shedding_duration_days", recovery_day))
 
 
@@ -361,17 +365,14 @@ def _draw_incubation_days(
     profile: dict[str, Any],
     rng: np.random.Generator,
 ) -> float:
-    """This host's incubation period, through the epoch loop's own mechanism.
+    """This host's incubation period, through the natural-history owner.
 
     Drawn against a scratch record and stamped onto the real one by the caller,
-    so ``_onset_day`` later reads the value the boarding windows were built
-    from. ``orchestrator_epoch`` is imported here rather than at module scope
-    to keep the module graph acyclic.
+    so ``onset_day`` later reads the value the boarding windows were built
+    from.
     """
-    from orchestrator_epoch import _incubation_days
-
     scratch: dict[str, Any] = {"acquired_particles": 0.0}
-    return float(_incubation_days(agent, pathogen_id, scratch, profile, rng))
+    return float(incubation_days(agent, pathogen_id, scratch, profile, rng))
 
 
 def _write_presentation_history(
@@ -388,8 +389,6 @@ def _write_presentation_history(
     what ``illness_probability`` would otherwise have decided, and the epoch
     loop reads it in place of the dose draw.
     """
-    from orchestrator_epoch import _draw_symptom_severity
-
     if state == STATE_PRESYMPTOMATIC:
         inf["illness"] = IllnessStatus.NOT_ILL
         inf["will_present"] = True
@@ -406,7 +405,7 @@ def _write_presentation_history(
     inf["onset_time_infected"] = int(
         round(clock.epochs_for_days(incubation_days)),
     )
-    inf["symptom_severity"] = _draw_symptom_severity(profile, rng)
+    inf["symptom_severity"] = draw_symptom_severity(profile, rng)
 
 
 def _board_one_host(
@@ -427,7 +426,7 @@ def _board_one_host(
     duration_days = _host_duration(agent, pathogen_id, profile)
     incubation_days = _draw_incubation_days(agent, pathogen_id, profile, rng)
     recovery_day = float(agent.get_chronic_recovery_day(
-        pathogen_id, int(profile.get("recovery_day", _DEFAULT_RECOVERY_DAY)),
+        pathogen_id, int(profile.get("recovery_day", DEFAULT_RECOVERY_DAY)),
     ))
     presymptomatic_days = float(
         profile.get("presymptomatic_shedding_days", 0.0) or 0.0,

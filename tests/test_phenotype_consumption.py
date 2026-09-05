@@ -23,16 +23,16 @@ from engines.infection_dynamics_bridge import (  # noqa: E402
     InfectionStatus,
     KorkinAgent,
 )
+from engines.natural_history import (  # noqa: E402
+    ONSET_DAY,
+    advance_infections,
+)
 from engines.strain_state import (  # noqa: E402
     Phenotype,
     StrainEvolutionConfig,
     StrainRegistry,
 )
 from engines.transmission_core import TransmissionCore  # noqa: E402
-from orchestrator_epoch import (  # noqa: E402
-    ONSET_DAY,
-    _advance_agent_pathogen_infections,
-)
 
 PATHOGEN = "norwalk_gi"
 VARIANT_CFG = {"variant_surveillance": {"enabled": True}}
@@ -210,7 +210,7 @@ def _onset_day(
     profile = {**profile, "recovery_day": 30}
     rng = np.random.default_rng(seed)
     for _ in range(12):
-        _advance_agent_pathogen_infections(agent, {PATHOGEN: profile}, rng)
+        advance_infections(agent, {PATHOGEN: profile}, rng)
         inf = agent.infections[PATHOGEN]
         if inf["illness"] == IllnessStatus.SYMPTOMATIC:
             return int(inf["time_infected"])
@@ -232,7 +232,7 @@ class TestIncubationAxis:
         profile = _norwalk_profile()
         profile.pop("incubation", None)
         profile["recovery_day"] = 30
-        _advance_agent_pathogen_infections(untracked, {PATHOGEN: profile}, rng)
+        advance_infections(untracked, {PATHOGEN: profile}, rng)
         assert untracked.infections[PATHOGEN]["illness"] == IllnessStatus.SYMPTOMATIC
 
     def test_faster_onset_cannot_precede_the_first_evaluated_day(self) -> None:
@@ -347,7 +347,7 @@ class TestImmuneEscapeAxis:
             "shedding_duration_days": 1,
         }
         for _ in range(5):
-            _advance_agent_pathogen_infections(
+            advance_infections(
                 agent, {PATHOGEN: profile},
                 np.random.default_rng(3), registry, 4,
             )
@@ -399,7 +399,7 @@ class TestUnrelatedKnobs:
             rng = np.random.default_rng(3)
             profile = {**_norwalk_profile(), "recovery_day": 30}
             for _ in range(12):
-                _advance_agent_pathogen_infections(agent, {PATHOGEN: profile}, rng)
+                advance_infections(agent, {PATHOGEN: profile}, rng)
                 inf = agent.infections[PATHOGEN]
                 if inf["illness"] == IllnessStatus.SYMPTOMATIC:
                     onsets.append(int(inf["time_infected"]))

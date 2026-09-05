@@ -8,13 +8,13 @@ import numpy as np
 import pytest
 
 from engines.infection_dynamics_bridge import IllnessStatus, KorkinAgent
+from engines.natural_history import advance_infections
 from engines.sim_clock import HOURS, SimClock
 from engines.transmission_core import (
     EMESIS_TOTAL_SHED_GEC_RANGE,
     ContactTracingMatrix,
     TransmissionCore,
 )
-from orchestrator_epoch import _advance_agent_pathogen_infections
 
 PATHOGEN = "norwalk_gi"
 ZONE = "Cabin_A"
@@ -227,7 +227,7 @@ def test_emesis_schedule_is_cleared_on_reinfection_and_recovery() -> None:
     agent.infections[PATHOGEN]["onset_time_infected"] = 0
     agent.emesis_episode_schedule_by_pathogen[PATHOGEN] = [0.0]
     agent.emesis_deposition_records_by_pathogen[PATHOGEN] = [{"epoch": 0}]
-    _advance_agent_pathogen_infections(
+    advance_infections(
         agent,
         {PATHOGEN: profile},
         np.random.default_rng(3),

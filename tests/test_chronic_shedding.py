@@ -21,8 +21,8 @@ from engines.infection_dynamics_bridge import (
     InfectionStatus,
     KorkinAgent,
 )
+from engines.natural_history import advance_infections
 from engines.sim_clock import HOURS, SimClock
-from orchestrator_epoch import _advance_agent_pathogen_infections
 from orchestrator_init import _draw_chronic_duration, init_multi_pathogen
 from tools.sanity_checker import Report, _check_multi_pathogen_params
 
@@ -167,7 +167,7 @@ def _run(
             illness=infection["illness"],
             shedding=agent.get_pathogen_shedding(PATHOGEN, profile),
         ))
-        _advance_agent_pathogen_infections(
+        advance_infections(
             agent, {PATHOGEN: profile}, rng, epoch=epoch,
         )
     return trace
