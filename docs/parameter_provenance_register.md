@@ -473,6 +473,54 @@ search; each is a result.
 | Influenza illness-given-infection, dose dependence | The only contrary claim to Carrat's dose-independence is Teunis 2010, whose higher illness risk at higher dose is an output of a **fitted** hierarchical dose-response model — class C, and circular for an attack-rate-scored model | rejected, recorded; mechanism deleted by R3 |
 | VSP posting-rate denominator outside CDC | MARAD/BTS US-departure cruises and BREA/CLIA embarkations are **measured or estimated in a different population** (US departures including domestic, no ≥13-pax or foreign-itinerary filter) and are excluded as denominators; CLIA global volumes are part projection ([tranche 18](literature/consensus_tranche_18_voyage_denominator.md)) | rejected, recorded |
 
+### 3.5 Boarding-channel defaults for every other shipped profile (#54 follow-on)
+
+Every shipped profile except `legionella_pneumophila` now carries its own
+`boarding` block and `initial_infected: null`, so the profile — not
+`config.yaml` — states how the pathogen is introduced. Legionella stays a
+fiat `initial_infected: 0` because its modelled reservoir is the ship's water
+and cooling plant, not an embarking host. Two mechanisms, chosen per pathogen
+by the shape of the import, not by the size of the number:
+
+- **`prevalence`** — independent passenger and crew Binomial draws over the
+  embarking population. For endemic pathogens where the literature measures
+  community carriage.
+- **`party`** — one per-voyage Bernoulli event with the stated probability;
+  on success one travelling party of the stated size boards with every member
+  infected, drawn as cabin-mates first and same-zone otherwise. For imported
+  pathogens where the realistic event is "a small group, all infected, and
+  very unlikely more than one such group" — an independent per-person draw
+  over 7,000 heads has the wrong shape for these. The party probability and
+  size are campaign axes (`boarding_party_points`), not measured constants.
+
+Every value below is a **plausible default for an unswept run**, not an
+adopted constant: incidence varies with season, itinerary and the status of
+the ports of call, and campaigns are expected to move these through
+`config_overrides["initiation"]["boarding"]`. Sourcing was a single Consensus
+pass per pathogen (Grade C unless stated); the four starship profiles are
+**fiction-grade (X)** by declaration.
+
+| Pathogen | Mode | Default | `never_symptomatic_fraction` | Basis |
+|---|---|---|---|---|
+| `norovirus_gii4` | prevalence | pax 0.0325, crew 0.0185 | 0.29 (adult challenge) | Same interval rows as `norwalk_gi` (§3.1); GII.4 has no separate boarding-prevalence measurement |
+| `sars_cov2_resp` | prevalence | pax 0.010, crew 0.006 | 0.35 | Presymptomatic share 0.30. Community point prevalence is entirely wave-dependent; the true never-symptomatic fraction is lower than "no symptoms at testing", which pooled reviews conflate — defaults sit in the middle of that spread, C |
+| `influenza_a` | prevalence | pax 0.008, crew 0.005 | 0.44 | Presymptomatic share 0.30. ~44% of RT-PCR-confirmed infections asymptomatic in the PHIRST household cohort; prevalence is a temperate in-season carriage figure and is the most seasonally variable default in this table, C |
+| `measles_virus` | party | p 0.02, size 2 | 0.05 | Import is a household; subclinical infection in protected hosts is a secondary immune response, not an unvaccinated-traveller fraction, so the fraction is a small placeholder, C |
+| `vibrio_cholerae_parahaemolyticus` | party | p 0.03, size 3 | 0.75 | Asymptomatic carriage dominates cholera infection; strongly context-dependent, C |
+| `campylobacter_jejuni` | prevalence | pax 0.030, crew 0.030 | 0.60 | ~3% culture/PCR positivity in screened healthy adults, C |
+| `clostridioides_difficile` | prevalence | pax 0.076, crew 0.076 | 0.90 | Pooled toxigenic asymptomatic colonisation 7.6%, high heterogeneity; colonisation is overwhelmingly asymptomatic, C |
+| `andes_hantavirus` | party | p 0.005, size 3 | 0.05 | Person-to-person clusters (Epuyén) are the only import shape the literature shows; no boarding prevalence is measured, C |
+| `ebola_virus` | party | p 0.002, size 3 | 0.03 | ~3.3% seropositivity among symptom-free contacts, and seropositivity is not shown to be transmissible infection, so the fraction is a ceiling, C |
+| `barclay_protomorphosis` | party | p 1.0, size 1, crew | 0.0 | Fiction: a single crew index case, X |
+| `tng_shipboard_influenza` | prevalence | pax 0.010, crew 0.020 | 0.40 | Fiction, mirrors `influenza_a`, X |
+| `rigelian_fever` | party | p 1.0, size 2 | 0.10 | Fiction, X |
+| `psi_2000_polywater` | party | p 1.0, size 1, crew | 0.0 | Fiction, X |
+
+Campaign tiers whose runs are conditional on an import (`t1`, `t3`, `t9`)
+set `boarding_party_points: [{"probability": 1.0}]` so a party pathogen's
+baseline is "given the party boarded", with the profile's own size; the
+default probability is for unconditional voyage-level designs.
+
 ## 4. The five blocked and one resolved, and the change each needs
 
 This is the actionable core of the register. In every case the paper exists and

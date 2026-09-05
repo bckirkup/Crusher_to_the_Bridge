@@ -206,6 +206,7 @@
       "dose_adjustments": [
         5.7
       ],
+      "fiat_index_case": true,
       "initial_infected_values": [
         1,
         2,
@@ -333,6 +334,7 @@
       "dose_adjustments": [
         1.5
       ],
+      "fiat_index_case": true,
       "initial_infected_values": [
         1,
         2,
@@ -463,6 +465,7 @@
       "dose_adjustments": [
         2.0
       ],
+      "fiat_index_case": true,
       "initial_infected_values": [
         1,
         2,
@@ -595,6 +598,7 @@
         5.0,
         6.5
       ],
+      "fiat_index_case": true,
       "initial_infected_values": [
         1,
         2,
@@ -674,6 +678,7 @@
         1.0,
         2.0
       ],
+      "fiat_index_case": true,
       "initial_infected_values": [
         1,
         2,
@@ -756,6 +761,7 @@
         1.5,
         2.5
       ],
+      "fiat_index_case": true,
       "initial_infected_values": [
         1,
         2,

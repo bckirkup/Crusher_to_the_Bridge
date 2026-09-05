@@ -27,7 +27,12 @@ from engines.infection_dynamics_bridge import (
     InfectionStatus,
     KorkinShipEngine,
 )
-from engines.initiation import apply_explicit_seeds, initiation_owned_pathogens
+from engines.initiation import (
+    apply_explicit_seeds,
+    draw_port_call,
+    initiation_owned_pathogens,
+    record_boarding_reports,
+)
 from engines.natural_history import advance_infections, project_legacy_illness
 from engines.sim_clock import SimClock, config_epochs_for_hours
 from engines.strain_state import StrainRegistry
@@ -230,20 +235,29 @@ def step_mid_cruise_introductions(
     pathogen_profiles: dict[str, dict[str, Any]],
     rng: np.random.Generator,
 ) -> None:
-    """Introduce new pathogens at their scheduled introduction_epoch."""
+    """Introduce new pathogens at their scheduled introduction_epoch.
+
+    A pathogen initiation owns arrives by its own channel at this port call —
+    a boarding draw over the embarking population, or a stated seed — and is
+    skipped by the legacy stated-count introduction below. A null
+    ``initial_infected`` states no fiat index case.
+    """
     if not pathogen_profiles:
         return
     plan = getattr(engine, "initiation_plan", None)
     owned: frozenset[str] = frozenset()
     if plan is not None and not plan.legacy:
         apply_explicit_seeds(plan, engine, epoch, rng, pathogen_profiles)
+        record_boarding_reports(
+            engine, draw_port_call(plan, engine, epoch, pathogen_profiles),
+        )
         owned = initiation_owned_pathogens(plan)
     for pid, prof in pathogen_profiles.items():
         if pid in owned:
             continue
         intro_epoch = prof.get("introduction_epoch", 0)
         if intro_epoch == epoch and epoch > 0:
-            n_init = prof.get("initial_infected", 1)
+            n_init = prof.get("initial_infected", 1) or 0
             candidates = [
                 a for a in engine.agents
                 if not a.immune

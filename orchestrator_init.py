@@ -50,7 +50,7 @@ from engines.initiation import (
     InitiationPlan,
     apply_explicit_seeds,
     build_initiation_manifest,
-    draw_boarding_cohort,
+    draw_port_call,
     initiation_configured,
     initiation_owned_pathogens,
     resolve_initiation_plan,
@@ -1720,22 +1720,20 @@ def _run_initiation(
     plan: InitiationPlan,
     rng: np.random.Generator,
 ) -> None:
-    """Draw the boarding cohort, then apply the epoch-0 explicit seeds.
+    """Draw the sailing-port boarding cohort, then the epoch-0 explicit seeds.
 
     Any pathogen initiation does not own keeps its own epoch-0 index case: a
     norovirus boarding block is not a reason to drop another arm's seeding.
+    Specs boarding at a later port call keep the same stream, which the epoch
+    loop reads from ``engine.boarding_rng``.
     """
     reports: list[BoardingReport] = []
     if plan.boarding:
-        boarding_rng = _boarding_rng(rng, cfg)
-        for spec in plan.boarding:
-            report = draw_boarding_cohort(
-                spec, engine.agents, pathogen_profiles[spec.pathogen_id],
-                engine.clock, boarding_rng,
-            )
-            reports.append(report)
+        engine.boarding_rng = _boarding_rng(rng, cfg)
+        reports = draw_port_call(plan, engine, 0, pathogen_profiles)
+        for report in reports:
             boarded = sum(report.drawn_by_role.values())
-            print(f"  Boarded {spec.pathogen_id} -> {boarded} hosts")
+            print(f"  Boarded {report.pathogen_id} -> {boarded} hosts")
     engine.initiation_manifest = build_initiation_manifest(plan, reports, [])
     for record in apply_explicit_seeds(
         plan, engine, 0, rng, pathogen_profiles,

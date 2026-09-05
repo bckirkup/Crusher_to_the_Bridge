@@ -388,34 +388,21 @@ targeted_pcr:
   cadence: 4                          # baseline; escalation overrides to 1
 
 # ── Initiation: how the voyage starts with infection aboard ───
-# norwalk_gi boards through the prevalence channel of engines/initiation.py
-# (docs/proposals/initiation_engine_spec.md); its profile carries no
-# initial_infected, and the engine refuses both mechanisms at once.
+# The loaded pathogens board through engines/initiation.py
+# (docs/proposals/initiation_engine_spec.md): a per-person prevalence draw for
+# the endemic ones and a clustered travelling party for the imported ones.
+# Their profiles carry no initial_infected, and the engine refuses both
+# mechanisms at once.
 initiation:
   boarding:
+    # The channel switch, and only the switch: each pathogen's own coordinates
+    # ship in its profile (data/pathogens/*.json, "boarding"), so that a run
+    # loading one bundle cannot inherit a block naming a pathogen it never
+    # loads. Campaign arms override any coordinate per pathogen under
+    # initiation.boarding.<pathogen_id>, and an arm that wants a stated index
+    # case instead disables it there. Grades and sources for the shipped
+    # values: docs/parameter_provenance_register.md.
     enabled: true
-    norwalk_gi:
-      prevalence:
-        # Per-person probability of arriving already shedding, by role.
-        # Interval [0.025, 0.040] passenger and [0.007, 0.030] crew, Grade B
-        # (docs/parameter_provenance_register.md, "Boarding / importation
-        # prevalence"); the midpoint of each interval, stated as a midpoint.
-        # Campaign runs override both from their own swept grid.
-        passenger: 0.0325
-        crew: 0.0185
-      state_split:
-        # No point is licensed for this model's population: two admissible,
-        # unpooled intervals, adult challenge [0.22, 0.36] and community
-        # cohorts [0.59, 0.68], kept as separate regimes because the gap
-        # between them is measured by neither and because the community
-        # interval is paediatric-leaning against a mean age of 72.6
-        # (consensus tranche 24 §F4). This is the midpoint of the
-        # adult-challenge regime, and the axis is swept, not adopted:
-        # picard_framework/runs/mega_cruise_campaign/boarding_axis.py.
-        never_symptomatic_fraction: 0.29
-        # Derived from the profile's own shedding geometry,
-        # 0.5 / (0.5 + 15 - 3) = 0.04, Grade C; swept, not measured.
-        presymptomatic_share_of_presenting: 0.04
 
 # ── Multi-Pathogen Configuration ──────────────────────────────
 multi_pathogen:

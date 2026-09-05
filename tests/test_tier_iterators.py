@@ -139,7 +139,9 @@ def test_path_overrides_dose_grades_and_init_is_independent() -> None:
         IndexCaseAxis,
     )
 
-    fiat = IndexCaseAxis.for_tier({"initial_infected": 3}, "sars_cov2_resp")
+    fiat = IndexCaseAxis.for_tier(
+        {"initial_infected": 3, "fiat_index_case": True}, "sars_cov2_resp",
+    )
     doses = [1.0, 5.0, 10.6]
     seen = []
     for dose in doses:

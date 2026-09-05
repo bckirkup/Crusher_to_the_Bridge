@@ -200,3 +200,13 @@ narrows or widens, and which the later #54 resolution sweeps rather than adopts.
 profile (`initial_infected: null`); `crusher_labs/config.yaml`, which now carries
 an `initiation.boarding` block; and the boarding gate, which is open for
 `norwalk_gi` with the never-symptomatic coordinate supplied by the campaign axis.
+
+**Changed again, by #54's follow-on:** the coordinates moved off `config.yaml`
+and onto each profile, so every shipped pathogen except `legionella_pneumophila`
+boards through its own block and `config.yaml` keeps only the gate. The two
+never-symptomatic regimes recorded here are unchanged and remain unpooled;
+they now apply to `norwalk_gi` and `norovirus_gii4`, and the other pathogens
+carry their own Consensus-sourced plausible defaults (register §3.5), each a
+swept starting point rather than an adopted value. Nothing in §§1–3 is
+narrowed by that pass: no adult natural-exposure design with an infection
+denominator was found for any of them either.

@@ -1673,16 +1673,21 @@ def generate_tier_runs(
             if natural_history_clock is not None
             else None
         )
-        factors = {
-            **boarding_axis.recorded_factors(bundle, pathogen_overrides, factors),
-            **factors,
-        }
+        # The tier's own party point reaches the iterators that carry no
+        # boarding axis; a swept axis has already stamped its own.
+        swept = {**boarding_axis.tier_party_factors(tier), **factors}
         cfg = merge_cfg(
             _CAMPAIGN_ESCALATION_DEFAULTS,
             config_overrides,
             clock_cfg,
-            boarding_axis.initiation_override(bundle, pathogen_overrides, factors),
+            boarding_axis.initiation_override(bundle, pathogen_overrides, swept),
         )
+        # Effective coordinates, not only the swept ones, and derived from the
+        # sweep rather than from the config the override just built.
+        factors = {
+            **boarding_axis.recorded_factors(bundle, pathogen_overrides, swept),
+            **factors,
+        }
         params = _campaign_parameters(
             tier_id=tier_id,
             run_id=rid,

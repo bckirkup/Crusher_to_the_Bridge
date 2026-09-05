@@ -218,6 +218,7 @@
         10.0,
         15.0
       ],
+      "fiat_index_case": true,
       "initial_infected_values": [
         1
       ],

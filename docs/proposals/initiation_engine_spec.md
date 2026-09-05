@@ -314,9 +314,41 @@ Landed with #54 (Track C, C1):
   declares `fiat_index_case: true`. Analysis reads the effective introduction
   count from the manifest's `drawn_by_role` when a run boarded.
 
+Extended with #54's follow-on, to every shipped profile:
+
+- **Coordinates live on the profile, not in `config.yaml`.** Each profile
+  carries its own `boarding` block, so a scenario that loads a narrowed bundle
+  neither inherits another pathogen's coordinates nor names an absent pathogen
+  — which was a load error while the shipped block was global. `config.yaml`
+  keeps only `initiation.boarding.enabled: true`; a config block still merges
+  over the profile's, coordinate by coordinate.
+- **Ownership is derived, not enumerated.** `initiation_owned_pathogens`
+  reports whatever the resolved plan holds, and the campaign's
+  `boarding_axis.shipped_boarding_blocks()` reads the bundles, so adding a
+  pathogen with a block is sufficient and no list needs editing.
+- **A second mode, `party`, for imports that arrive as a group.** One
+  per-voyage Bernoulli at `party.probability`; on success one party of
+  `party.size` boards, every member infected, selected cabin-mates-first and
+  then same-zone, in the stated `role`. It is a distinct mechanism from
+  `prevalence` and may not carry prevalence coordinates at the same time; the
+  manifest records probability, size, role, whether the party boarded, and the
+  realised composition, and run ids tag it `pty<permille>n<size>`. It exists
+  because independent per-person draws over 7,000 heads are the wrong shape
+  for Andes hantavirus, Ebola, measles or cholera: the realistic import is one
+  small travelling party in which everyone is infected.
+- **Per-pathogen `enabled: false`** withdraws one pathogen from the channel
+  without disabling boarding for the rest, and a profile that keeps a fiat
+  count (`legionella_pneumophila`, whose reservoir is the ship's water plant)
+  simply carries no block.
+- **Staged introductions stay staged.** A block's `epoch` draws that pathogen
+  at that port call rather than at embarkation, and the boarding cohort size is
+  independent of the introduction epoch.
+
 Still outstanding:
 
 - Task #51 (the COVID arm's missing `shedding_duration_days`) is a hard
   prerequisite for enabling boarding on `sars_cov2_resp`: step 1 has nothing
   to draw from until that field exists, and step 2 would silently collapse to
-  the illness clock.
+  the illness clock. The profile now carries a boarding block, so a run that
+  boards COVID takes the illness clock until #51 lands — the shedding draw
+  is the open half, not the introduction.

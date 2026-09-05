@@ -26,8 +26,10 @@ from engines.initiation import (
     MODE_LEGACY,
     MODE_SEEDS,
     STATE_CONVALESCENT,
+    STATE_INCUBATING,
     STATE_NEVER_SYMPTOMATIC,
     STATE_PRESYMPTOMATIC,
+    BoardingParty,
     BoardingSpec,
     build_initiation_manifest,
     draw_boarding_cohort,
@@ -758,7 +760,10 @@ class TestManifest:
         assert set(drawn) == {"passenger", "crew"}
         assert set(manifest["boarding"][PATHOGEN]["composition"]) == {
             STATE_NEVER_SYMPTOMATIC, STATE_PRESYMPTOMATIC, STATE_CONVALESCENT,
+            STATE_INCUBATING,
         }
+        assert manifest["boarding_mode"] == {PATHOGEN: "prevalence"}
+        assert manifest["party"] == {}
 
 
 class TestInitWiring:
@@ -802,26 +807,47 @@ class TestInitWiring:
         ]
         assert len(introduced) == 1
 
-    def test_a_pathogen_initiation_owns_is_not_introduced_twice(self) -> None:
+    def test_a_staged_pathogen_boards_at_its_port_call_once(self) -> None:
         engine = _FakeEngine()
         profiles = {PATHOGEN: _profile(introduction_epoch=6)}
         init_multi_pathogen(
             engine, profiles, _cfg(passenger=0.1, crew=0.1),
             np.random.default_rng(34),
         )
+        assert engine.initiation_manifest["boarding_epoch"] == {PATHOGEN: 6}
+        assert PATHOGEN not in engine.initiation_manifest["boarding"]
+        assert not [a for a in engine.agents if PATHOGEN in a.infections]
+        step_mid_cruise_introductions(
+            5, engine, profiles, np.random.default_rng(35),
+        )
+        assert not [a for a in engine.agents if PATHOGEN in a.infections]
+        step_mid_cruise_introductions(
+            6, engine, profiles, np.random.default_rng(35),
+        )
         boarded = sum(
             engine.initiation_manifest["boarding"][PATHOGEN][
                 "drawn_by_role"
             ].values(),
-        )
-        step_mid_cruise_introductions(
-            6, engine, profiles, np.random.default_rng(35),
         )
         infected = [
             agent for agent in engine.agents if PATHOGEN in agent.infections
         ]
         assert boarded > 0
         assert len(infected) == boarded
+
+    def test_a_block_epoch_overrides_the_profile_schedule(self) -> None:
+        cfg = _cfg(passenger=0.1, crew=0.1)
+        cfg["initiation"]["boarding"][PATHOGEN]["epoch"] = 2
+        plan = resolve_initiation_plan(
+            cfg, {PATHOGEN: _profile(introduction_epoch=6)},
+        )
+        assert plan.boarding[0].epoch == 2
+
+    def test_a_negative_epoch_is_refused(self) -> None:
+        cfg = _cfg(passenger=0.1, crew=0.1)
+        cfg["initiation"]["boarding"][PATHOGEN]["epoch"] = -1
+        with pytest.raises(ValueError, match="epoch = -1"):
+            resolve_initiation_plan(cfg, {PATHOGEN: _profile()})
 
     def test_a_boarding_run_leaves_no_fiat_index_case(self) -> None:
         engine, _ = _init_run(_cfg(passenger=0.2, crew=0.2))
@@ -849,3 +875,250 @@ class TestInitWiring:
         ]
         assert len(infected) == 2
         assert engine.initiation_manifest == {"mode": MODE_LEGACY}
+
+
+# ── Party mode and profile-carried blocks ────────────────────────────────
+
+_SPLIT = {
+    "never_symptomatic_fraction": 0.2,
+    "presymptomatic_share_of_presenting": 0.3,
+}
+
+
+def _party_spec(
+    probability: float = 1.0, size: int = 3, role: str = "passenger",
+    never: float = 0.2, pre_share: float = 0.3,
+) -> BoardingSpec:
+    return BoardingSpec(
+        pathogen_id=PATHOGEN,
+        passenger_prevalence=0.0,
+        crew_prevalence=0.0,
+        never_symptomatic_fraction=never,
+        presymptomatic_share_of_presenting=pre_share,
+        party=BoardingParty(probability=probability, size=size, role=role),
+    )
+
+
+def _party_block(**party: Any) -> dict[str, Any]:
+    return {
+        "mode": "party",
+        "party": {"probability": 1.0, "size": 3, "role": "passenger", **party},
+        "state_split": dict(_SPLIT),
+    }
+
+
+def _cabin(engine: _FakeEngine, ids: set[int]) -> None:
+    for agent in engine.agents:
+        if agent.agent_id in ids:
+            agent.cabin_mate_ids = frozenset(ids - {agent.agent_id})
+
+
+class TestPartyMode:
+    def test_a_party_is_all_or_nothing(self) -> None:
+        sizes = {
+            sum(_draw(_party_spec(probability=0.5, size=4), seed)[2]
+                .drawn_by_role.values())
+            for seed in range(40)
+        }
+        assert sizes == {0, 4}
+
+    def test_party_probability_moves_how_often_a_party_boards(self) -> None:
+        def rate(probability: float) -> float:
+            boarded = [
+                sum(_draw(_party_spec(probability=probability), seed)[2]
+                    .drawn_by_role.values()) > 0
+                for seed in range(60)
+            ]
+            return sum(boarded) / len(boarded)
+
+        assert rate(0.0) == 0.0
+        assert rate(0.2) < rate(0.8)
+        assert rate(1.0) == 1.0
+
+    def test_party_size_is_the_drawn_count_when_one_boards(self) -> None:
+        for size in (1, 2, 5):
+            _, _, report = _draw(_party_spec(size=size), 3)
+            assert sum(report.drawn_by_role.values()) == size
+
+    def test_the_party_stays_in_its_role(self) -> None:
+        _, _, report = _draw(_party_spec(role="crew", size=3), 5)
+        assert report.drawn_by_role == {"passenger": 0, "crew": 3}
+
+    def test_the_party_shares_a_cabin_when_one_holds_it(self) -> None:
+        engine = _FakeEngine()
+        cabins = [set(range(i, i + 4)) for i in range(0, PASSENGERS, 4)]
+        for cabin in cabins:
+            _cabin(engine, cabin)
+        draw_boarding_cohort(
+            _party_spec(size=3), engine.agents, _profile(), engine.clock,
+            np.random.default_rng(11),
+        )
+        infected = _infected_ids(engine)
+        assert len(infected) == 3
+        assert any(infected <= cabin for cabin in cabins)
+
+    def test_a_party_member_is_never_convalescent(self) -> None:
+        composition: dict[str, int] = {}
+        for seed in SEEDS:
+            _, _, report = _draw(_party_spec(size=6), seed)
+            for state, count in report.composition.items():
+                composition[state] = composition.get(state, 0) + count
+        assert composition[STATE_CONVALESCENT] == 0
+        assert composition[STATE_INCUBATING] > 0
+
+    def test_an_incubating_member_will_present_and_is_not_yet_ill(self) -> None:
+        engine, _, _ = _draw(_party_spec(size=6, never=0.0, pre_share=0.0), 2)
+        infections = [
+            agent.infections[PATHOGEN] for agent in engine.agents
+            if PATHOGEN in agent.infections
+        ]
+        assert infections
+        for inf in infections:
+            assert inf["will_present"] is True
+            assert inf["illness"] == IllnessStatus.NOT_ILL
+            assert inf["status"] == InfectionStatus.INFECTED
+
+    def test_no_party_consumes_no_further_draws(self) -> None:
+        rng = np.random.default_rng(4)
+        engine = _FakeEngine()
+        draw_boarding_cohort(
+            _party_spec(probability=0.0), engine.agents, _profile(),
+            engine.clock, rng,
+        )
+        assert rng.random() == np.random.default_rng(4).random(2)[1]
+
+
+class TestPartyResolution:
+    def test_a_party_block_resolves_to_party_mode(self) -> None:
+        plan = resolve_initiation_plan(
+            {"initiation": {"boarding": {"enabled": True, PATHOGEN: _party_block()}}},
+            {PATHOGEN: _profile()},
+        )
+        (spec,) = plan.boarding
+        assert spec.mode == "party"
+        assert spec.party == BoardingParty(1.0, 3, "passenger")
+        assert spec.passenger_prevalence == 0.0
+
+    def test_a_party_alongside_a_prevalence_is_an_error(self) -> None:
+        block = _party_block()
+        block["prevalence"] = {"passenger": 0.1, "crew": 0.1}
+        with pytest.raises(ValueError, match="also carries a prevalence"):
+            resolve_initiation_plan(
+                {"initiation": {"boarding": {"enabled": True, PATHOGEN: block}}},
+                {PATHOGEN: _profile()},
+            )
+
+    @pytest.mark.parametrize(
+        ("party", "match"),
+        [
+            ({"size": 0}, "party.size"),
+            ({"role": "officer"}, "party.role"),
+            ({"probability": 1.5}, "party.probability"),
+            ({"probability": None}, "party.probability"),
+        ],
+    )
+    def test_a_malformed_party_is_an_error(
+        self, party: dict[str, Any], match: str,
+    ) -> None:
+        with pytest.raises(ValueError, match=match):
+            resolve_initiation_plan(
+                {"initiation": {"boarding": {
+                    "enabled": True, PATHOGEN: _party_block(**party),
+                }}},
+                {PATHOGEN: _profile()},
+            )
+
+    def test_an_unknown_mode_is_an_error(self) -> None:
+        block = _party_block()
+        block["mode"] = "cluster"
+        with pytest.raises(ValueError, match="mode"):
+            resolve_initiation_plan(
+                {"initiation": {"boarding": {"enabled": True, PATHOGEN: block}}},
+                {PATHOGEN: _profile()},
+            )
+
+    def test_the_manifest_records_the_party(self) -> None:
+        engine = _FakeEngine()
+        plan = resolve_initiation_plan(
+            {"initiation": {"boarding": {"enabled": True, PATHOGEN: _party_block()}}},
+            {PATHOGEN: _profile()},
+        )
+        report = draw_boarding_cohort(
+            plan.boarding[0], engine.agents, _profile(), engine.clock,
+            np.random.default_rng(0),
+        )
+        manifest = build_initiation_manifest(plan, [report], [])
+        assert manifest["boarding_mode"] == {PATHOGEN: "party"}
+        assert manifest["party"][PATHOGEN] == {
+            "probability": 1.0, "size": 3, "role": "passenger",
+        }
+
+
+class TestProfileCarriedBlocks:
+    def _profiles(self) -> dict[str, dict[str, Any]]:
+        return {
+            PATHOGEN: _profile(boarding={
+                "prevalence": {"passenger": 0.05, "crew": 0.02},
+                "state_split": dict(_SPLIT),
+            }),
+            OTHER_PATHOGEN: _profile(boarding=_party_block()),
+        }
+
+    def test_every_loaded_profile_with_a_block_boards(self) -> None:
+        plan = resolve_initiation_plan(
+            {"initiation": {"boarding": {"enabled": True}}}, self._profiles(),
+        )
+        assert {s.pathogen_id: s.mode for s in plan.boarding} == {
+            PATHOGEN: "prevalence", OTHER_PATHOGEN: "party",
+        }
+
+    def test_a_narrowed_run_inherits_no_stale_block(self) -> None:
+        profiles = self._profiles()
+        del profiles[PATHOGEN]
+        plan = resolve_initiation_plan(
+            {"initiation": {"boarding": {"enabled": True}}}, profiles,
+        )
+        assert [s.pathogen_id for s in plan.boarding] == [OTHER_PATHOGEN]
+
+    def test_a_config_override_lands_on_one_coordinate(self) -> None:
+        plan = resolve_initiation_plan(
+            {"initiation": {"boarding": {
+                "enabled": True,
+                PATHOGEN: {"state_split": {"never_symptomatic_fraction": 0.6}},
+            }}},
+            self._profiles(),
+        )
+        spec = next(s for s in plan.boarding if s.pathogen_id == PATHOGEN)
+        assert spec.never_symptomatic_fraction == pytest.approx(0.6)
+        assert spec.passenger_prevalence == pytest.approx(0.05)
+        assert spec.presymptomatic_share_of_presenting == pytest.approx(0.3)
+
+    def test_a_per_pathogen_disable_is_the_fiat_opt_out(self) -> None:
+        profiles = self._profiles()
+        profiles[PATHOGEN]["initial_infected"] = 2
+        plan = resolve_initiation_plan(
+            {"initiation": {"boarding": {
+                "enabled": True, PATHOGEN: {"enabled": False},
+            }}},
+            profiles,
+        )
+        assert [s.pathogen_id for s in plan.boarding] == [OTHER_PATHOGEN]
+
+    def test_a_profile_block_over_a_fiat_index_case_is_an_error(self) -> None:
+        profiles = self._profiles()
+        profiles[PATHOGEN]["initial_infected"] = 2
+        with pytest.raises(ValueError, match="initial_infected"):
+            resolve_initiation_plan(
+                {"initiation": {"boarding": {"enabled": True}}}, profiles,
+            )
+
+    def test_a_config_block_over_an_unloaded_pathogen_is_an_error(self) -> None:
+        profiles = self._profiles()
+        del profiles[OTHER_PATHOGEN]
+        with pytest.raises(ValueError, match="absent from the loaded profiles"):
+            resolve_initiation_plan(
+                {"initiation": {"boarding": {
+                    "enabled": True, OTHER_PATHOGEN: {"enabled": True},
+                }}},
+                profiles,
+            )

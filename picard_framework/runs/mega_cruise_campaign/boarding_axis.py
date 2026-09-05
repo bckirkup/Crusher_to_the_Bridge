@@ -29,23 +29,61 @@ Evidence, from ``docs/parameter_provenance_register.md``:
 
 from __future__ import annotations
 
+import os
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from functools import lru_cache
 from itertools import product
 from typing import Any
 
+from engines.initiation import BOARDING_MODE_PREVALENCE as MODE_PREVALENCE
 from picard_framework.catalog.registry import CatalogRegistry
 from picard_framework.pathogen_overrides import (
     REPO_ROOT,
     load_pathogen_bundle,
 )
 
-# Pathogens the shipped ``initiation`` block owns. A pathogen listed here may
-# not carry a profile ``initial_infected``, and no campaign tier may sweep one
-# for it: the engine would ignore the field, and the incidence would be
-# attributable to neither mechanism.
-BOARDING_PATHOGEN_IDS = frozenset({"norwalk_gi"})
+BUNDLE_DIR = os.path.join(REPO_ROOT, "data", "pathogens")
+
+
+@lru_cache(maxsize=None)
+def shipped_boarding_blocks() -> dict[str, dict[str, Any]]:
+    """Every shipped profile's own boarding block, by pathogen id.
+
+    Ownership is data, not a list kept here: a profile that ships a
+    ``boarding`` block is owned by the initiation engine, and one that does
+    not keeps whatever mechanism it always had. Adding a pathogen to the
+    channel is therefore an edit to its profile, and this module cannot fall
+    out of step with the bundles.
+    """
+    blocks: dict[str, dict[str, Any]] = {}
+    for name in sorted(os.listdir(BUNDLE_DIR)):
+        if not name.endswith(".json"):
+            continue
+        for pid, profile in load_pathogen_bundle(
+            os.path.join(BUNDLE_DIR, name),
+        ).items():
+            block = profile.get("boarding")
+            if isinstance(block, Mapping):
+                blocks[str(pid)] = dict(block)
+    return blocks
+
+
+def boarding_pathogen_ids() -> frozenset[str]:
+    """The pathogens the shipped profiles put on the boarding channel.
+
+    A pathogen here may not carry a profile ``initial_infected``, and no
+    campaign tier may sweep one for it: the engine would ignore the field, and
+    the incidence would be attributable to neither mechanism.
+    """
+    return frozenset(shipped_boarding_blocks())
+
+
+def boarding_mode(pathogen_id: str) -> str:
+    """Which draw a pathogen boards by: the independent prevalence, or a party."""
+    block = shipped_boarding_blocks().get(str(pathogen_id), {})
+    return str(block.get("mode") or MODE_PREVALENCE)
+
 
 # never_symptomatic_fraction, as two unpooled regimes (interval endpoints and
 # midpoint). Neither regime licenses a point; a run states which regime and
@@ -88,6 +126,20 @@ FACTOR_PRESYMPTOMATIC = "presymptomatic_share_of_presenting"
 FACTOR_PASSENGER_PREVALENCE = "boarding_passenger_prevalence"
 FACTOR_CREW_PREVALENCE = "boarding_crew_prevalence"
 
+# The clustered import's two coordinates. They are only meaningful for a
+# party-mode pathogen, and a tier sweeping them names the pathogen it studies:
+# how often a party embarks and how large it is are that import's properties,
+# not a ship-wide setting.
+PARTY_KEY = "boarding_party_points"
+FACTOR_PARTY_PROBABILITY = "boarding_party_probability"
+FACTOR_PARTY_SIZE = "boarding_party_size"
+
+# Which pathogen the run's swept boarding coordinates belong to. An axis for
+# a named pathogen stamps it, and ``initiation_override`` then writes that
+# pathogen's block and nobody else's; a run without it is sweeping the state
+# split for every independent-prevalence pathogen it loads.
+FACTOR_SWEPT_PATHOGEN = "boarding_pathogen"
+
 # The count a fiat-index-case design states. Its presence in a run's factors is
 # what withdraws the run's ``initiation`` block: the two mechanisms are
 # exclusive, and the one the run recorded is the one the engine must use.
@@ -96,7 +148,7 @@ FACTOR_FIAT_COUNT = "n_init"
 
 def owns(pathogen_id: str) -> bool:
     """Whether initiation owns this pathogen, so boarding is its mechanism."""
-    return str(pathogen_id) in BOARDING_PATHOGEN_IDS
+    return str(pathogen_id) in boarding_pathogen_ids()
 
 
 def declares_fiat_index_case(tier: Mapping[str, Any]) -> bool:
@@ -131,6 +183,57 @@ def presymptomatic_tag(value: float) -> str:
 def prevalence_tag(passenger: float, crew: float) -> str:
     """Run-id fragment naming the swept boarding prevalence pair."""
     return f"bp{_permille_tag(passenger)}c{_permille_tag(crew)}"
+
+
+def party_tag(probability: float, size: int | None) -> str:
+    """Run-id fragment naming the swept party coordinates."""
+    suffix = "" if size is None else f"n{int(size)}"
+    return f"pty{_permille_tag(probability)}{suffix}"
+
+
+def _party_point(raw: Any) -> tuple[float, int | None]:
+    """One party point; a stated size, or the pathogen's own when omitted.
+
+    A tier that studies dynamics conditional on an import sweeps only the
+    probability — each party-mode pathogen keeps the party size its own
+    profile states, since a shared size would be one pathogen's.
+    """
+    if isinstance(raw, Mapping):
+        size = raw.get("size")
+        return float(raw["probability"]), None if size is None else int(size)
+    probability, size = raw
+    return float(probability), None if size is None else int(size)
+
+
+def party_points(tier: Mapping[str, Any]) -> list[tuple[float, int | None] | None]:
+    """The tier's party sweep; ``[None]`` — the profile's own — when unswept."""
+    if PARTY_KEY not in tier:
+        return [None]
+    points: list[tuple[float, int | None] | None] = [
+        _party_point(raw) for raw in tier[PARTY_KEY]
+    ]
+    if not points:
+        raise ValueError(f"tier {PARTY_KEY} is empty")
+    tags = [party_tag(p, n) for p, n in points if p is not None]
+    if len(set(tags)) != len(tags):
+        raise ValueError(
+            f"tier {PARTY_KEY} = {points!r} collapses to run-id tags "
+            f"{tags!r}: two points on the sweep would share a run id",
+        )
+    return points
+
+
+def profile_party(pathogen_id: str) -> tuple[float, int | None] | None:
+    """A party-mode pathogen's own shipped coordinates, for an unswept run."""
+    party = shipped_boarding_blocks().get(str(pathogen_id), {}).get("party")
+    if not isinstance(party, Mapping):
+        return None
+    return float(party["probability"]), int(party["size"])
+
+
+def sweeps_party(tier: Mapping[str, Any]) -> bool:
+    """Whether the tier declares the party axis, so ids must name it."""
+    return PARTY_KEY in tier
 
 
 def _unique_tags(values: Sequence[float], tag: Any, location: str) -> None:
@@ -246,6 +349,7 @@ def run_id_tags(
     presymptomatic_share: float,
     passenger_prevalence: float,
     crew_prevalence: float,
+    party: tuple[float, int | None] | None = None,
 ) -> list[str]:
     """Run-id fragments for the boarding coordinates this tier actually sweeps.
 
@@ -259,8 +363,11 @@ def run_id_tags(
         tags.append(never_symptomatic_tag(never_symptomatic_fraction))
     if sweeps_presymptomatic(tier):
         tags.append(presymptomatic_tag(presymptomatic_share))
-    if sweeps_prevalence(tier):
+    prevalence_mode = boarding_mode(pathogen_id) == MODE_PREVALENCE
+    if sweeps_prevalence(tier) and prevalence_mode:
         tags.append(prevalence_tag(passenger_prevalence, crew_prevalence))
+    if sweeps_party(tier) and party is not None and not prevalence_mode:
+        tags.append(party_tag(*party))
     return tags
 
 
@@ -270,14 +377,20 @@ def point_factors(
     presymptomatic_share: float = DEFAULT_PRESYMPTOMATIC_SHARE,
     passenger_prevalence: float = DEFAULT_PASSENGER_PREVALENCE,
     crew_prevalence: float = DEFAULT_CREW_PREVALENCE,
+    party: tuple[float, int | None] | None = None,
 ) -> dict[str, float]:
     """Factor labels for one boarding grid point, for ``yield_run``."""
-    return {
+    factors: dict[str, float] = {
         FACTOR_NEVER_SYMPTOMATIC: float(never_symptomatic_fraction),
         FACTOR_PRESYMPTOMATIC: float(presymptomatic_share),
         FACTOR_PASSENGER_PREVALENCE: float(passenger_prevalence),
         FACTOR_CREW_PREVALENCE: float(crew_prevalence),
     }
+    if party is not None:
+        factors[FACTOR_PARTY_PROBABILITY] = float(party[0])
+        if party[1] is not None:
+            factors[FACTOR_PARTY_SIZE] = int(party[1])
+    return factors
 
 
 @dataclass(frozen=True)
@@ -288,16 +401,31 @@ class BoardingPoint:
     presymptomatic_share: float
     passenger_prevalence: float
     crew_prevalence: float
+    party: tuple[float, int | None] | None = None
 
 
-def boarding_points(tier: Mapping[str, Any]) -> tuple[BoardingPoint, ...]:
-    """The tier's boarding grid: never-symptomatic × presymptomatic × prevalence."""
+def boarding_points(
+    tier: Mapping[str, Any], mode: str = MODE_PREVALENCE,
+) -> tuple[BoardingPoint, ...]:
+    """The tier's grid for one mode: never-symptomatic × presymptomatic × mechanism.
+
+    A pathogen only takes the axis its own mechanism reads. Crossing a
+    clustered import against a per-person prevalence grid would multiply the
+    run count by a coordinate the draw never consults, and the extra runs
+    would be replicates wearing distinct run ids.
+    """
+    prevalence = (
+        prevalence_points(tier) if mode == MODE_PREVALENCE
+        else ((DEFAULT_PASSENGER_PREVALENCE, DEFAULT_CREW_PREVALENCE),)
+    )
+    parties = party_points(tier) if mode != MODE_PREVALENCE else [None]
     return tuple(
-        BoardingPoint(nsf, psp, passenger, crew)
-        for nsf, psp, (passenger, crew) in product(
+        BoardingPoint(nsf, psp, passenger, crew, party)
+        for nsf, psp, (passenger, crew), party in product(
             never_symptomatic_values(tier),
             presymptomatic_values(tier),
-            prevalence_points(tier),
+            prevalence,
+            parties,
         )
     )
 
@@ -333,7 +461,10 @@ class IndexCaseAxis:
         """Read the tier's axis; ``legacy_default`` is the unswept count for an unowned pathogen (``None`` leaves the bundle's own)."""
         if owns(pathogen_id) and not declares_fiat_index_case(tier):
             refuse_legacy_count_axis(tier, pathogen_id)
-            return cls(pathogen_id, tier, boarding_points(tier))
+            return cls(
+                pathogen_id, tier,
+                boarding_points(tier, boarding_mode(pathogen_id)),
+            )
         return cls(pathogen_id, tier, tuple(
             legacy_count_values(tier, defaults=defaults, default=legacy_default),
         ))
@@ -347,18 +478,25 @@ class IndexCaseAxis:
                 presymptomatic_share=point.presymptomatic_share,
                 passenger_prevalence=point.passenger_prevalence,
                 crew_prevalence=point.crew_prevalence,
+                party=point.party,
             )
         return [] if point is None else [f"init{int(point)}"]
 
     def factors(self, point: Any) -> dict[str, Any]:
         """campaign_parameters labels for this point."""
         if self.boarding:
-            return point_factors(
-                never_symptomatic_fraction=point.never_symptomatic_fraction,
-                presymptomatic_share=point.presymptomatic_share,
-                passenger_prevalence=point.passenger_prevalence,
-                crew_prevalence=point.crew_prevalence,
-            )
+            party = point.party or profile_party(self.pathogen_id)
+            factors = {
+                FACTOR_SWEPT_PATHOGEN: self.pathogen_id,
+                **point_factors(
+                    never_symptomatic_fraction=point.never_symptomatic_fraction,
+                    presymptomatic_share=point.presymptomatic_share,
+                    passenger_prevalence=point.passenger_prevalence,
+                    crew_prevalence=point.crew_prevalence,
+                    party=party,
+                ),
+            }
+            return _drop_inapplicable(self.pathogen_id, factors)
         return {} if point is None else {FACTOR_FIAT_COUNT: int(point)}
 
     def pathogen_overrides(
@@ -430,6 +568,43 @@ _FACTOR_DEFAULTS: dict[str, float] = {
 }
 
 
+def _party_from_factors(
+    factors: Mapping[str, Any],
+) -> tuple[float, int | None] | None:
+    """The party coordinates a tier swept, if it swept any."""
+    if FACTOR_PARTY_PROBABILITY not in factors:
+        return None
+    size = factors.get(FACTOR_PARTY_SIZE)
+    return (
+        float(factors[FACTOR_PARTY_PROBABILITY]),
+        None if size is None else int(size),
+    )
+
+
+def _profile_size(pathogen_id: str) -> int | None:
+    """The party size the pathogen's own profile states."""
+    party = profile_party(pathogen_id)
+    return None if party is None else party[1]
+
+
+def _drop_inapplicable(
+    pathogen_id: str, factors: dict[str, Any],
+) -> dict[str, Any]:
+    """Strip the coordinates the pathogen's own mode cannot use.
+
+    A clustered import has no per-person prevalence and an independent draw
+    has no party, so stamping both into ``campaign_parameters`` would record a
+    number the engine never read — the failure mode this migration exists to
+    end.
+    """
+    unused = (
+        (FACTOR_PARTY_PROBABILITY, FACTOR_PARTY_SIZE)
+        if boarding_mode(pathogen_id) == MODE_PREVALENCE
+        else (FACTOR_PASSENGER_PREVALENCE, FACTOR_CREW_PREVALENCE)
+    )
+    return {k: v for k, v in factors.items() if k not in unused}
+
+
 def _coordinates(factors: Mapping[str, Any]) -> dict[str, float]:
     """All four coordinates, the tier's where it swept them, register defaults elsewhere."""
     return {
@@ -468,7 +643,120 @@ def active_boarding_pathogens(
             present.add(str(patch["pathogen_id"]))
     for pid in overrides.get("remove") or ():
         present.discard(str(pid))
-    return frozenset(BOARDING_PATHOGEN_IDS & present)
+    return frozenset(boarding_pathogen_ids() & present)
+
+
+def swept_pathogens(
+    active: frozenset[str], pathogen: str | None, party: bool = False,
+) -> tuple[str, ...]:
+    """Which active pathogens the tier's swept coordinates are written for.
+
+    An arm that names the pathogen it studies moves that pathogen's
+    coordinates and nobody else's, so a co-circulating import keeps its own
+    profile defaults instead of inheriting the studied pathogen's sweep. A
+    tier that names none is sweeping the state split itself, which is a
+    property of the independent-prevalence draw: the clustered imports keep
+    their profiles there too, since their party coordinates are a different
+    axis (``boarding_party_points``).
+    """
+    if pathogen is not None:
+        return (str(pathogen),) if str(pathogen) in active else ()
+    return tuple(
+        pid for pid in sorted(active)
+        if party or boarding_mode(pid) == MODE_PREVALENCE
+    )
+
+
+def profile_coords(pathogen_id: str) -> dict[str, Any]:
+    """The coordinates a pathogen's own profile block states, as factors."""
+    block = shipped_boarding_blocks().get(str(pathogen_id), {})
+    split = block.get("state_split") or {}
+    prevalence = block.get("prevalence") or {}
+    party = block.get("party") or {}
+    sources = (
+        (FACTOR_NEVER_SYMPTOMATIC, split, "never_symptomatic_fraction"),
+        (FACTOR_PRESYMPTOMATIC, split, "presymptomatic_share_of_presenting"),
+        (FACTOR_PASSENGER_PREVALENCE, prevalence, "passenger"),
+        (FACTOR_CREW_PREVALENCE, prevalence, "crew"),
+        (FACTOR_PARTY_PROBABILITY, party, "probability"),
+        (FACTOR_PARTY_SIZE, party, "size"),
+    )
+    return {
+        factor: source[key]
+        for factor, source, key in sources
+        if key in source
+    }
+
+
+_COORDINATE_FACTORS = frozenset({
+    FACTOR_NEVER_SYMPTOMATIC,
+    FACTOR_PRESYMPTOMATIC,
+    FACTOR_PASSENGER_PREVALENCE,
+    FACTOR_CREW_PREVALENCE,
+    FACTOR_PARTY_PROBABILITY,
+    FACTOR_PARTY_SIZE,
+})
+
+
+def tier_party_factors(tier: Mapping[str, Any]) -> dict[str, Any]:
+    """A tier-wide party point, for iterators that carry no boarding axis.
+
+    A tier studying dynamics conditional on an import states one point, which
+    every party-mode pathogen in the tier takes. More than one point is a
+    sweep, and a sweep is the axis's to stamp per run so the run ids tell the
+    points apart.
+    """
+    if not sweeps_party(tier):
+        return {}
+    points = party_points(tier)
+    if len(points) != 1 or points[0] is None:
+        return {}
+    probability, size = points[0]
+    factors: dict[str, Any] = {FACTOR_PARTY_PROBABILITY: float(probability)}
+    if size is not None:
+        factors[FACTOR_PARTY_SIZE] = int(size)
+    return factors
+
+
+def _swept_block(
+    pathogen_id: str, factors: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Only the coordinates this tier swept: the profile keeps the rest.
+
+    Writing an unswept coordinate would overwrite the pathogen's own default
+    with another pathogen's — a tier sweeping norovirus's never-symptomatic
+    interval would silently restate campylobacter's — and the incidence would
+    then be attributable to the campaign rather than to the profile.
+    """
+    block: dict[str, Any] = {}
+    split = {
+        key: float(factors[factor])
+        for factor, key in (
+            (FACTOR_NEVER_SYMPTOMATIC, "never_symptomatic_fraction"),
+            (FACTOR_PRESYMPTOMATIC, "presymptomatic_share_of_presenting"),
+        )
+        if factor in factors
+    }
+    if split:
+        block["state_split"] = split
+    if boarding_mode(pathogen_id) == MODE_PREVALENCE:
+        prevalence = {
+            key: float(factors[factor])
+            for factor, key in (
+                (FACTOR_PASSENGER_PREVALENCE, "passenger"),
+                (FACTOR_CREW_PREVALENCE, "crew"),
+            )
+            if factor in factors
+        }
+        if prevalence:
+            block["prevalence"] = prevalence
+        return block
+    party = _party_from_factors(factors)
+    if party is not None:
+        block["party"] = {"probability": party[0]}
+        if party[1] is not None:
+            block["party"]["size"] = party[1]
+    return block
 
 
 def initiation_override(
@@ -485,23 +773,23 @@ def initiation_override(
     does not load. Withdrawing it is a null, not a disabled gate: a disabled
     gate is still a declared ``initiation`` block, and declaring one retires
     the engine's own pathogen-unaware index case for that run.
+
+    Only the swept pathogens get a block: every other loaded pathogen boards
+    at its profile's own coordinates, which is what makes the channel usable
+    by a bundle of sixteen rather than by one.
     """
     active = active_boarding_pathogens(bundle, pathogen_overrides)
     if not active or FACTOR_FIAT_COUNT in (factors or {}):
         return {"initiation": None}
-    coords = _coordinates(factors or {})
+    factors = factors or {}
+    pathogen = factors.get(FACTOR_SWEPT_PATHOGEN)
     boarding: dict[str, Any] = {"enabled": True}
-    for pathogen_id in sorted(active):
-        boarding[pathogen_id] = {
-            "prevalence": {
-                "passenger": coords[FACTOR_PASSENGER_PREVALENCE],
-                "crew": coords[FACTOR_CREW_PREVALENCE],
-            },
-            "state_split": {
-                "never_symptomatic_fraction": coords[FACTOR_NEVER_SYMPTOMATIC],
-                "presymptomatic_share_of_presenting": coords[FACTOR_PRESYMPTOMATIC],
-            },
-        }
+    for pathogen_id in swept_pathogens(
+        active, pathogen, FACTOR_PARTY_PROBABILITY in factors,
+    ):
+        block = _swept_block(pathogen_id, factors)
+        if block:
+            boarding[pathogen_id] = block
     return {"initiation": {"boarding": boarding}}
 
 
@@ -509,15 +797,28 @@ def recorded_factors(
     bundle: str,
     pathogen_overrides: Mapping[str, Any] | None,
     factors: Mapping[str, Any] | None = None,
-) -> dict[str, float]:
+) -> dict[str, Any]:
     """The coordinates a boarding run must stamp into ``campaign_parameters``.
 
-    All four, swept or not: a parameters block naming only the swept ones
-    would leave the rest to be re-derived from a config file that may have
-    moved since. Empty for a run that boards nothing.
+    The effective ones, not only the swept ones: a parameters block naming
+    just the sweep would leave the rest to be re-derived from profile files
+    that may have moved since. A run boarding one pathogen records that
+    pathogen's own coordinates under its sweep; a multi-pathogen run records
+    only what it swept, since no single value is every pathogen's. Empty for a
+    run that boards nothing.
     """
-    if not active_boarding_pathogens(bundle, pathogen_overrides):
+    active = active_boarding_pathogens(bundle, pathogen_overrides)
+    factors = factors or {}
+    if not active or FACTOR_FIAT_COUNT in factors:
         return {}
-    if FACTOR_FIAT_COUNT in (factors or {}):
-        return {}
-    return _coordinates(factors or {})
+    swept = {k: v for k, v in factors.items() if k in _COORDINATE_FACTORS}
+    named = factors.get(FACTOR_SWEPT_PATHOGEN)
+    target = str(named) if named is not None else (
+        next(iter(active)) if len(active) == 1 else None
+    )
+    if target is None:
+        return swept
+    recorded: dict[str, Any] = {**profile_coords(target), **swept}
+    if named is not None:
+        recorded[FACTOR_SWEPT_PATHOGEN] = str(named)
+    return _drop_inapplicable(target, recorded)

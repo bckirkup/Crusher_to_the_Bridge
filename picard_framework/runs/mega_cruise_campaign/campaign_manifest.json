@@ -6,7 +6,8 @@
   "default_num_agents": 7000,
   "tiers": {
     "t1_pathogen_baselines": {
-      "description": "Each pathogen alone, default HVAC, no surveillance",
+      "description": "Each pathogen alone, default HVAC, no surveillance. Party-mode importers (measles, vibrio, hantavirus, ebola) board conditional on the party embarking, each at its own profile's party size: the baseline is the dynamics given an import, not the rare per-voyage chance of one.",
+      "boarding_party_points": [{ "probability": 1.0 }],
       "pathogens": [
         "norovirus",
         "sarscov2",
@@ -52,7 +53,8 @@
       "seeds": [42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56]
     },
     "t3_surveillance_sweep": {
-      "description": "All pathogens × 4 surveillance strategies",
+      "description": "All pathogens × 4 surveillance strategies. Party-mode importers board conditional on the party embarking, as in T1.",
+      "boarding_party_points": [{ "probability": 1.0 }],
       "pathogens": [
         "norovirus",
         "sarscov2",
@@ -101,9 +103,8 @@
       "seeds": [42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61]
     },
     "t6_dose_response": {
-      "description": "Vary how infection arrives × pre-existing immunity. norovirus arrives through the boarding channel initiation owns, so its axis is that channel's own coordinates (never-symptomatic fraction × boarding prevalence, 3 × 2 cells); the other three arrive by the fiat count they always had (6 cells), which keeps the tier square.",
+      "description": "Vary how infection arrives × pre-existing immunity. All four pathogens arrive through the boarding channel initiation owns, so the axis is that channel's own coordinates (never-symptomatic fraction × boarding prevalence, 3 × 2 cells per pathogen). The register's norovirus prevalence pairs are swept for each as the tier's common grid; a pathogen's own seasonal or port-status prevalence is a campaign-time adjustment, not a shipped constant.",
       "pathogens": ["norovirus", "sarscov2", "influenza", "cdiff"],
-      "initial_infected": [1, 2, 5, 10, 20, 50],
       "never_symptomatic_regime": "adult_challenge",
       "boarding_prevalence_points": [
         {"passenger": 0.025, "crew": 0.007},
@@ -128,7 +129,8 @@
       "seeds": [42, 43, 44, 45, 46, 47, 48, 49, 50, 51]
     },
     "t9_slow_pathogens": {
-      "description": "Extended 21-day runs for slow incubation pathogens",
+      "description": "Extended 21-day runs for slow incubation pathogens. Party-mode importers board conditional on the party embarking, as in T1.",
+      "boarding_party_points": [{ "probability": 1.0 }],
       "pathogens": ["measles", "legionella", "hantavirus", "ebola"],
       "epochs": 504,
       "surveillance_strategies": ["none", "syndromic", "cascade", "cascade_mpx"],
