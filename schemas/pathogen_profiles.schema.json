@@ -866,7 +866,11 @@
           }
         },
         "introduction_epoch": {"type": "integer", "minimum": 0},
-        "initial_infected": {"type": "integer", "minimum": 0},
+        "initial_infected": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "description": "Fiat epoch-0 index cases. Null means the profile states none, which is required of any pathogen the initiation engine owns: engines/initiation.py refuses a boarding block or an explicit seed over a profile index case."
+        },
         "initial_time_infected": {
           "type": "integer",
           "minimum": 0,

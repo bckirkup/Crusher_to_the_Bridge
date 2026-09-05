@@ -14,7 +14,6 @@ from picard_framework.runs.mega_cruise_campaign.tier_iterators import (  # noqa:
     _STANDARD_ITERS,
     _latency_from_level,
     _lockdown_tag,
-    _path_overrides,
     dispatch_standard_or_calibration,
 )
 
@@ -136,12 +135,21 @@ def test_lockdown_tag_never_versus_numeric_rates() -> None:
 
 
 def test_path_overrides_dose_grades_and_init_is_independent() -> None:
+    from picard_framework.runs.mega_cruise_campaign.boarding_axis import (
+        IndexCaseAxis,
+    )
+
+    fiat = IndexCaseAxis.for_tier({"initial_infected": 3}, "sars_cov2_resp")
     doses = [1.0, 5.0, 10.6]
     seen = []
     for dose in doses:
-        over = _path_overrides({}, "norwalk_gi", dose, 3)
-        seen.append(over["norwalk_gi"]["dose_adjustment"])
-        assert over["norwalk_gi"]["initial_infected"] == 3
+        over = fiat.pathogen_overrides({}, 3, dose_adjustment=dose)
+        seen.append(over["sars_cov2_resp"]["dose_adjustment"])
+        assert over["sars_cov2_resp"]["initial_infected"] == 3
     assert seen == doses
-    no_patch = _path_overrides({"keep": 1}, "norwalk_gi", None, None)
+    no_patch = fiat.pathogen_overrides({"keep": 1}, None)
     assert no_patch == {"keep": 1}
+    # The pathogen initiation owns takes the dose but never a count.
+    boarding = IndexCaseAxis.for_tier({}, "norwalk_gi")
+    over = boarding.pathogen_overrides({}, boarding.points[0], dose_adjustment=10.6)
+    assert over == {"norwalk_gi": {"dose_adjustment": 10.6}}

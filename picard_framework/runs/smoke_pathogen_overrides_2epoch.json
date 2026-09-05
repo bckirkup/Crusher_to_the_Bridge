@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "description": "2-epoch smoke run with pathogen_overrides applied at PicardRunSpec construction.",
+  "description": "2-epoch smoke run with pathogen_overrides applied at PicardRunSpec construction. A fiat index-case probe: initiation is withdrawn so the norwalk_gi count override is honoured instead of the shipped boarding block.",
   "catalog": {
     "platform_id": "destroyer_baseline",
     "pathogen_bundle_id": "active_profiles"
@@ -11,11 +11,16 @@
     "write_ground_truth": false
   },
   "legacy_yaml": "crusher_labs/config.yaml",
+  "config_overrides": {
+    "initiation": null
+  },
   "pathogen_overrides": {
     "norwalk_gi": {
       "initial_infected": 2
     },
-    "remove": ["sars_cov2_resp"]
+    "remove": [
+      "sars_cov2_resp"
+    ]
   },
   "actors": [],
   "incentives": {}

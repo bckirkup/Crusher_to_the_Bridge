@@ -80,6 +80,7 @@
       "platform": "expedition_cruise_450",
       "pathogen": "norovirus",
       "dose_adjustments": [4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5],
+      "fiat_index_case": true,
       "initial_infected_values": [1],
       "surveillance_strategies": [
         "none_response",
@@ -96,6 +97,7 @@
       "platform": "classic_cruise_1900",
       "pathogen": "norovirus",
       "dose_adjustments": [4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5],
+      "fiat_index_case": true,
       "initial_infected_values": [4],
       "surveillance_strategies": [
         "none_response",
@@ -112,6 +114,7 @@
       "platform": "spirit_cruise_3000",
       "pathogen": "norovirus",
       "dose_adjustments": [4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5],
+      "fiat_index_case": true,
       "initial_infected_values": [7],
       "surveillance_strategies": [
         "none_response",
@@ -128,6 +131,7 @@
       "platform": "mega_cruise_5000",
       "pathogen": "norovirus",
       "dose_adjustments": [4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5],
+      "fiat_index_case": true,
       "initial_infected_values": [11],
       "surveillance_strategies": [
         "none_response",
@@ -144,6 +148,7 @@
       "platform": "expedition_cruise_450",
       "pathogen": "norovirus",
       "dose_adjustments": [6.0],
+      "fiat_index_case": true,
       "initial_infected_values": [1],
       "surveillance_strategies": ["none_response", "syndromic_comp85"],
       "epochs": 168,
@@ -154,6 +159,7 @@
       "platform": "classic_cruise_1900",
       "pathogen": "norovirus",
       "dose_adjustments": [6.0],
+      "fiat_index_case": true,
       "initial_infected_values": [1],
       "surveillance_strategies": ["none_response", "syndromic_comp85"],
       "epochs": 168,
@@ -164,6 +170,7 @@
       "platform": "spirit_cruise_3000",
       "pathogen": "norovirus",
       "dose_adjustments": [6.0],
+      "fiat_index_case": true,
       "initial_infected_values": [1],
       "surveillance_strategies": ["none_response", "syndromic_comp85"],
       "epochs": 168,
@@ -174,6 +181,7 @@
       "platform": "mega_cruise_5000",
       "pathogen": "norovirus",
       "dose_adjustments": [6.0],
+      "fiat_index_case": true,
       "initial_infected_values": [1],
       "surveillance_strategies": ["none_response", "syndromic_comp85"],
       "epochs": 168,

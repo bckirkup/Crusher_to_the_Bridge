@@ -78,6 +78,7 @@
       "dose_adjustments": [
         10.6
       ],
+      "fiat_index_case": true,
       "initial_infected_values": [
         1,
         2,

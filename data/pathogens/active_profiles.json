@@ -173,7 +173,7 @@
         "decay_rate_per_day": 0.1
       },
       "introduction_epoch": 0,
-      "initial_infected": 1,
+      "initial_infected": null,
       "initial_time_infected": 0,
       "shedding_variance_log10": 1.0,
       "clinical_presentation": {

@@ -22,7 +22,7 @@
   },
   "tiers": {
     "sr1_ridge": {
-      "description": "Six ridge / off-ridge parameter vectors for Stan recovery",
+      "description": "Six ridge / off-ridge parameter vectors for Stan recovery. Infection arrives through the boarding channel initiation owns, at the register's prevalence midpoints, rather than by a fiat count: the count was never this tier's design variable.",
       "pathogen": "norovirus",
       "platforms": [
         "expedition_cruise_450",
@@ -30,7 +30,6 @@
         "spirit_cruise_3000",
         "mega_cruise_5000"
       ],
-      "initial_infected": 3,
       "surveillance_strategies": ["syndromic"],
       "epochs": 168,
       "parameter_vectors": [

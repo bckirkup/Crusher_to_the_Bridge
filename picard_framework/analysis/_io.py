@@ -177,12 +177,19 @@ def load_run_zip(zip_path: str) -> dict[str, Any] | None:
             summary = _read("summary.json")
             if summary is None:
                 return None
+            resolved = _read("resolved_pathogen_profiles.json")
+            initiation = (
+                resolved.get("initiation") if isinstance(resolved, dict) else None
+            )
             return {
                 "zip_path": zip_path,
                 "run_id": str(summary.get("run_id") or Path(zip_path).stem),
                 "summary": summary,
                 "timeseries": _read("timeseries.json") or [],
                 "run_spec": _read("run_spec.json") or {},
+                # How the run started, so analysis reads a drawn boarding
+                # cohort as such instead of looking for a configured count.
+                "initiation": initiation or {},
             }
     except (zipfile.BadZipFile, OSError):
         return None

@@ -113,6 +113,7 @@
       "description": "Fleet pool: four hulls x founders x voyage length x investment tier, norovirus",
       "regime": "diversity",
       "pathogen": "norovirus",
+      "fiat_index_case": true,
       "platforms": [
         "expedition_cruise_450",
         "classic_cruise_1900",
@@ -229,6 +230,7 @@
       "description": "Fleet pool, emergence arm: rare-lineage detection power across hulls at three per-transmission rates",
       "regime": "emergence",
       "pathogen": "norovirus",
+      "fiat_index_case": true,
       "platforms": [
         "expedition_cruise_450",
         "classic_cruise_1900",

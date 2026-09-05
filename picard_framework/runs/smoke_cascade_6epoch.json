@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "description": "6-epoch smoke run with standard diagnostic cascade enabled (Tier 0-3, RDT at Tier 1).",
+  "description": "6-epoch smoke run with standard diagnostic cascade enabled (Tier 0-3, RDT at Tier 1). A fiat index-case probe on a 20-agent crew: initiation is withdrawn and one norwalk_gi index case is seeded, because a boarding draw at shipped prevalence has no case to present on a crew this small.",
   "catalog": {
     "platform_id": "destroyer_baseline",
     "pathogen_bundle_id": "active_profiles"
@@ -15,6 +15,12 @@
     "diagnostic_cascade": {
       "enabled": true,
       "config_path": "data/config/diagnostic_cascade.json"
+    },
+    "initiation": null
+  },
+  "pathogen_overrides": {
+    "norwalk_gi": {
+      "initial_infected": 1
     }
   },
   "actors": [],

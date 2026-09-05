@@ -504,7 +504,7 @@ class PathogenProfile(BaseModel):
     secretor_negative_relative_susceptibility: float | None = None
     nonsusceptible_mechanism: str = "none"
     introduction_epoch: int = 0
-    initial_infected: int = 1
+    initial_infected: int | None = 1
     initial_time_infected: int = 0
     shedding_profile: dict[str, Any] = {}
     incubation: dict[str, Any] = {}

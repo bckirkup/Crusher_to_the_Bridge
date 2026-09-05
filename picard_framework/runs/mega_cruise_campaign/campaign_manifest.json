@@ -101,9 +101,14 @@
       "seeds": [42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61]
     },
     "t6_dose_response": {
-      "description": "Vary initial infected count × pre-existing immunity",
+      "description": "Vary how infection arrives × pre-existing immunity. norovirus arrives through the boarding channel initiation owns, so its axis is that channel's own coordinates (never-symptomatic fraction × boarding prevalence, 3 × 2 cells); the other three arrive by the fiat count they always had (6 cells), which keeps the tier square.",
       "pathogens": ["norovirus", "sarscov2", "influenza", "cdiff"],
       "initial_infected": [1, 2, 5, 10, 20, 50],
+      "never_symptomatic_regime": "adult_challenge",
+      "boarding_prevalence_points": [
+        {"passenger": 0.025, "crew": 0.007},
+        {"passenger": 0.040, "crew": 0.030}
+      ],
       "pre_immunity_fractions": [0.0, 0.1, 0.2, 0.4, 0.6],
       "seeds": [42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71]
     },

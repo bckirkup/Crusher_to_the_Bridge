@@ -148,6 +148,7 @@ def run_row_from_payload(
         run_spec=run_spec,
         run_id=run_id,
         timeseries=timeseries,
+        initiation=payload.get("initiation"),
     )
     if k is None:
         return None

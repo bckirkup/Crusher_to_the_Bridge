@@ -104,7 +104,7 @@ class TestArmSwitch:
             pathogen_id="norwalk_gi",
             base_overrides={"remove": ["sars_cov2_resp"]},
             dose_adjustment=10.6,
-            n_init=0,
+            seeding_patch={},
         )
         resolved = apply_pathogen_overrides(PROFILES, over)
         assert "incubation" not in resolved["norwalk_gi"]
@@ -116,7 +116,7 @@ class TestArmSwitch:
             pathogen_id="norwalk_gi",
             base_overrides={"remove": ["sars_cov2_resp"]},
             dose_adjustment=10.6,
-            n_init=0,
+            seeding_patch={},
         )
         resolved = apply_pathogen_overrides(PROFILES, over)
         assert resolved["norwalk_gi"]["incubation"]["median_days"] == pytest.approx(1.2)
@@ -127,7 +127,7 @@ class TestArmSwitch:
             "pathogen_id": "norwalk_gi",
             "base_overrides": {"remove": ["sars_cov2_resp"]},
             "dose_adjustment": 10.6,
-            "n_init": 0,
+            "seeding_patch": {},
         }
         dist = apply_pathogen_overrides(
             PROFILES, ia.arm_pathogen_overrides(arm=ia.ARM_DISTRIBUTION, **kwargs),
@@ -144,7 +144,7 @@ class TestArmSwitch:
             "pathogen_id": "norwalk_gi",
             "base_overrides": None,
             "dose_adjustment": 10.6,
-            "n_init": 3,
+            "seeding_patch": {"initial_infected": 3},
         }
         for arm in ia.ARMS:
             resolved = apply_pathogen_overrides(
@@ -161,7 +161,7 @@ class TestArmSwitch:
                 pathogen_id="p",
                 base_overrides=None,
                 dose_adjustment=1.0,
-                n_init=0,
+                seeding_patch={},
             )
 
     def test_unknown_arm_is_rejected(self):
@@ -172,7 +172,7 @@ class TestArmSwitch:
                 pathogen_id="norwalk_gi",
                 base_overrides=None,
                 dose_adjustment=1.0,
-                n_init=0,
+                seeding_patch={},
             )
 
     def test_base_overrides_are_not_mutated(self):
@@ -183,7 +183,7 @@ class TestArmSwitch:
             pathogen_id="norwalk_gi",
             base_overrides=base,
             dose_adjustment=1.0,
-            n_init=0,
+            seeding_patch={},
         )
         assert base == {"remove": ["sars_cov2_resp"]}
 
@@ -299,7 +299,7 @@ class TestDesignResolution:
             run_id="rid",
             hazards={"MXCZM": 0.001},
             dose_adjustment=10.6,
-            n_init=0,
+            seeding_factors={},
         )
         assert params["hazard_profile"] == ia.DEFAULT_HAZARD_PROFILE
         assert params["fleet_config"] == ia.DEFAULT_FLEET_CONFIG
@@ -430,7 +430,7 @@ class TestExtractLayout:
                 run_id=run_id,
                 hazards={"MXCZM": 0.001},
                 dose_adjustment=10.6,
-                n_init=0,
+                seeding_factors={},
             ),
             "itinerary": {"schema_version": "1.0", "voyage": {"itinerary": []}},
             "observations": _observations([("1", 50, 74)]),
@@ -634,7 +634,7 @@ class TestFitAndCompareStages:
                 run_id=f"{arm}__standard__s300",
                 hazards={"MXCZM": 0.001},
                 dose_adjustment=10.6,
-                n_init=0,
+                seeding_factors={},
             ),
             "itinerary": {"schema_version": "1.0", "voyage": {"itinerary": []}},
             "observations": _observations([("1", 50, 74)]),
@@ -721,7 +721,7 @@ class TestDefensiveEdges:
                 pathogen_id="norwalk_gi",
                 base_overrides=None,
                 dose_adjustment=10.6,
-                n_init=0,
+                seeding_patch={},
             )
 
     def test_a_sole_pathogen_config_needs_no_naming(self):

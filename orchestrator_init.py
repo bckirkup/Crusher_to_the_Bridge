@@ -1680,11 +1680,15 @@ def _seed_legacy_infections(
     pathogen_profiles: dict[str, dict[str, Any]],
     rng: np.random.Generator,
 ) -> None:
-    """Seed each profile's epoch-0 index cases by fiat, as before."""
+    """Seed each profile's epoch-0 index cases by fiat, as before.
+
+    A null ``initial_infected`` states no fiat index case, which is what a
+    pathogen the initiation engine owns carries.
+    """
     for pid, prof in pathogen_profiles.items():
         intro_epoch = prof.get("introduction_epoch", 0)
         if intro_epoch == 0:
-            n_init = prof.get("initial_infected", 1)
+            n_init = prof.get("initial_infected", 1) or 0
             candidates = [
                 a for a in engine.agents
                 if not a.immune
