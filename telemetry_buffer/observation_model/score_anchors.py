@@ -45,7 +45,7 @@ from telemetry_buffer.observation_model.midrs_incidence_targets import (
     a9_targets,
 )
 from telemetry_buffer.observation_model.vsp_class_era_scoring import (
-    HULL_CAPACITY,
+    HULL_PASSENGER_CAPACITY,
     MIN_POSTINGS_FOR_TARGET,
     SCORED_ERAS,
     vsp_attack_rate_targets,
@@ -337,7 +337,7 @@ def _read_row(summary: dict[str, Any], path: str) -> dict[str, Any]:
     strategy = str(params.get("surveillance") or "")
     if not strategy:
         raise RuntimeError(f"{path} carries no surveillance strategy")
-    if hull not in HULL_CAPACITY:
+    if hull not in HULL_PASSENGER_CAPACITY:
         raise RuntimeError(f"{path} carries unknown hull {hull!r}")
     complements_are_explicit = (
         derived.get("passenger_complement") is not None

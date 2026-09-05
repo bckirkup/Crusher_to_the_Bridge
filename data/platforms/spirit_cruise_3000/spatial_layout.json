@@ -1,6 +1,10 @@
 {
   "platform": "spirit_cruise_3000",
   "description": "Extra-large Spirit-class cruise (~2,100 passengers + ~900 crew = 3,000). Carnival Spirit / HAL Vista / Princess Grand archetype: ~290m LOA \u00d7 36m beam, ~86,000 GT. Cabin-corridor resolution (48 pax + 9 crew corridors). Key venues: 3+ specialty restaurants, second pool, teen zone, sports deck, nightclub, isolation ward. CDC Extra-Large AGE target 22.1/100K TD (calibration deferred).",
+  "nominal_complement": {
+    "passengers": 2100,
+    "crew": 900
+  },
   "isolation_unit_capacity": 0,
   "deck_dimensions": {
     "length_m": 290.0,

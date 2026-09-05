@@ -8,6 +8,16 @@
   "properties": {
     "platform": {"type": "string"},
     "description": {"type": "string"},
+    "nominal_complement": {
+      "type": "object",
+      "required": ["passengers", "crew"],
+      "properties": {
+        "passengers": {"type": "integer", "minimum": 0},
+        "crew": {"type": "integer", "minimum": 0}
+      },
+      "additionalProperties": false,
+      "description": "Archetype complement of the hull, split by role. Passengers and crew are separate populations: a passenger denominator must never be compared against their sum."
+    },
     "deck_dimensions": {
       "type": "object",
       "properties": {

@@ -1,6 +1,10 @@
 {
   "platform": "expedition_cruise_450",
   "description": "Small/medium expedition cruise (~300 passengers + ~150 crew = 450). Silver Cloud / Le Bor\u00e9al / Viking Star class archetype: ~160m LOA \u00d7 21m beam, ~17,000 GT. Cabin-corridor resolution (12 pax + 4 crew corridors). Supersedes expedition_cruise_300. CDC Small/Medium AGE target 9.06/100K TD (calibration deferred).",
+  "nominal_complement": {
+    "passengers": 300,
+    "crew": 150
+  },
   "isolation_unit_capacity": 0,
   "deck_dimensions": {
     "length_m": 160.0,

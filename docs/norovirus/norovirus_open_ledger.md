@@ -384,22 +384,28 @@ VSP passenger attack-rate targets, for A4, as now derived (333 of 428 postings
 carry a passenger denominator; the 87 `legacy_pre2004` rows carry none, and the
 5 `shutdown` postings are never pooled into either arm):
 
+Binned on **passenger** complements as of B3 (#29); the earlier cut of this
+table binned passenger denominators against passenger-plus-crew totals and is
+superseded:
+
 | hull | era | n | q1 | median | q3 |
 |---|---|---:|---:|---:|---:|
-| expedition | pre | 34 | 3.70% | 5.07% | 10.18% |
-| expedition | post | 18 | 3.31% | 7.24% | 13.51% |
-| classic | pre | 174 | 4.18% | 5.46% | 7.70% |
-| classic | post | 32 | 4.11% | 5.06% | 6.89% |
-| spirit | pre | 50 | 4.31% | 5.42% | 6.67% |
-| spirit | post | 13 | 3.53% | 4.73% | 6.35% |
-| mega | pre | 4 | — | — | — |
+| expedition | pre | 21 | 4.00% | 5.32% | 10.45% |
+| expedition | post | 12 | 3.22% | 7.42% | 13.74% |
+| classic | pre | 95 | 4.15% | 5.52% | 7.82% |
+| classic | post | 8 | — | — | — |
+| spirit | pre | 130 | 4.18% | 5.26% | 7.24% |
+| spirit | post | 43 | 3.72% | 4.95% | 6.95% |
+| mega | pre | 16 | 3.55% | 6.00% | 7.49% |
 | mega | post | 3 | — | — | — |
 
-**`mega_cruise_5000` has no usable A4 anchor in either era** — four postings
-before the 2020 break and three after, against a floor of ten. `score_anchors.py`
-reports its A4 verdict as `n/a (insufficient VSP postings)` rather than scoring
-it. That is the hull the campaign manifests centre on, so no mega-hull result
-may be described as passing or failing A4.
+Against the floor of ten postings, the recut moves anchors in both directions:
+**`mega_cruise_5000` gains a pre-2020 A4 anchor** (16 postings, where the
+total-agent bins gave it four) and **`classic_cruise_1900` loses its post-2020
+one** (8 postings, where they gave it 32). `score_anchors.py` reports a
+withheld cell as `n/a (insufficient VSP postings)` rather than scoring it, so
+no post-2020 classic result and no post-2020 mega result may be described as
+passing or failing A4.
 
 **A8/A9 are now implemented model-side, but the post-COVID arm has no
 unconditional incidence observation at all.** The model-side channels are in
@@ -430,8 +436,8 @@ whereas `telemetry_buffer/observation_model/vsp_outbreak_series.csv` contains
 208 posted outbreaks over the same period. A9 therefore reports an interval
 spanning those definitions rather than silently mixing them.
 
-**Open defect: `HULL_CAPACITY` is a total-agent complement, not a passenger
-complement.** The role split used by the model is authoritative in
+**Resolved in B3 (#29): `HULL_CAPACITY` was a total-agent complement, not a
+passenger complement.** The role split used by the model is authoritative in
 `orchestrator_init.py::role_group_for_agent`: on the expedition reprobe
 summary `..._dose12_..._s503`, `cumulative_ever_infected_passenger = 107` and
 `infection_attack_rate_passenger = 0.338608`, giving
@@ -441,9 +447,15 @@ summary `..._dose12_..._s503`, `cumulative_ever_infected_passenger = 107` and
 therefore denotes the total complement, not the passenger denominator.
 `BAND_EDGES` in `telemetry_buffer/observation_model/vsp_class_era_scoring.py`
 are geometric means of those total complements while binning observed
-passenger counts (`pax_total`), so the A4 class bins inherit this offset.
-The A4 targets merged in #360 are affected and remain unrepaired; recutting
-them is a separate decision. A8's passenger and crew denominators instead
+passenger counts (`pax_total`), so the A4 class bins inherited this offset.
+**Repaired in B3 (#29):** each hull's `spatial_layout.json` now declares
+`nominal_complement` as a passengers/crew split, `HULL_PASSENGER_CAPACITY`
+reads the passenger half, and `BAND_EDGES` are geometric means of those
+passenger complements (636 / 1,684 / 3,240). The A4 targets merged in #360 are
+superseded by the recut table above. Still unrepaired: the hull-to-GRT
+mapping behind A8/A9 picked representative ships for the classic and spirit
+hulls against the same total-agent figures, so their GRT band is one band too
+high pending two re-sourced representative ships. A8's passenger and crew denominators instead
 come from the role-derived complements emitted in each run summary and do
 not use `HULL_CAPACITY`, so A8/A9 are unaffected.
 
@@ -569,7 +581,7 @@ Roughly in dependency order.
    touch-rate zones and their berthing is already ~3x denser than passengers'.
    If it does, that is a finding about what is still missing.
 4. **Score the v4-successor campaign** against VSP class targets, per era,
-   and never on the mega hull's A4.
+   and never on a withheld A4 cell (post-2020 classic, post-2020 mega).
 5. **A8/A9 observation follow-up.** Model-side aggregation and the sourced
    MIDRS target tables are implemented in
    `telemetry_buffer/observation_model/score_anchors.py` and

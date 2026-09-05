@@ -1,6 +1,10 @@
 {
   "platform": "mega_cruise_5000",
   "description": "Mega cruise ship (~5,000 passengers, ~2,000 crew), Oasis-class scale. Cabin-corridor resolution: 81 passenger corridor sections (~67 pax each) and 12 crew corridor sections (~170 crew each) replace legacy well-mixed berthing blocks. See docs/PLATFORM_CABIN_REVISION.md; legacy topology archived as messy_cruise_500.",
+  "nominal_complement": {
+    "passengers": 5000,
+    "crew": 2000
+  },
   "isolation_unit_capacity": 0,
   "deck_dimensions": {
     "length_m": 362,
