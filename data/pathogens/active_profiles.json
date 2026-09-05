@@ -314,6 +314,8 @@
         "gamma": 0.12
       },
       "recovery_day": 7,
+      "shedding_duration_days": 15,
+      "shedding_duration_notes": "Separated from recovery_day 7 so clinical resolution does not end shedding, the defect fixed for norovirus in #43 (#51). The curve is a nasal RNA concentration and this arm is scored on PCR detectability, so the clock carries the upper-respiratory RNA-positivity duration, not the infectious one: Cevik 2020 (10.1016/S2666-5247(20)30172-5; meta-analysis of 43 studies, 3229 individuals) pooled mean 17.0 d (95% CI 15.5-18.6), Fontana 2020 (10.1017/ice.2020.1273; 28 studies) pooled median 18.4 d (15.5-21.3), Wu 2023 (10.1016/j.ijid.2023.02.011; Omicron meta-analysis) mean PCR positivity 10.82 d (10.23-11.42). Interval [10.8, 18.4]; 15 is the authored curve's own length and within 0.4 d of the interval midpoint (14.6), chosen for neither anchor. Grade B, Origin R. Viable-virus duration is much shorter (no culture past day 9 of illness in Cevik's review; 5.16 d for Omicron, 4.18-6.14, Wu 2023; culture positivity 83/52/13.5/8% at days 5/7/10/14, Keske 2023), so the tail days 8-14 overstate infectious emission by the 0.02% of curve mass they carry; a separate infectious-duration field is not added here.",
       "incubation": {
         "distribution": "lognormal",
         "median_days": 5.8,

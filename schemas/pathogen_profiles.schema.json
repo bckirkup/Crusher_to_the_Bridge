@@ -699,7 +699,7 @@
         "shedding_duration_days": {
           "type": "number",
           "minimum": 0,
-          "description": "Infectious/shedding period in days from symptom onset, after which the infection clears. This is NOT the illness duration: recovery_day remains the illness duration from onset, and shedding continues past it whenever this field is larger. Absent means the shedding period equals recovery_day."
+          "description": "Infectious/shedding period in days from symptom onset, after which the infection clears. This is NOT the illness duration: recovery_day remains the illness duration from onset, and shedding continues past it whenever this field is larger. Absent means the shedding period equals recovery_day. The endpoint is the one the arm's shedding_curve_log10 is measured on: an infectivity curve bounds a viable-shedding period, an RNA-concentration curve (sars_cov2_resp) bounds a detectability period, which is the longer of the two."
         },
         "chronic_shedder_fraction": {
           "type": "number",
