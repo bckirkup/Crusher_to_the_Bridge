@@ -141,3 +141,50 @@ def test_the_posting_numerator_is_wider_than_the_investigated_one() -> None:
     investigated = sum(vd.FREELAND_PASSENGER_OUTBREAKS_INVESTIGATED.values())
 
     assert posted < investigated
+
+
+def test_annual_bracket_spans_both_columns_and_the_implied_count() -> None:
+    """One rule for all seven years; it widens only where the table disagrees."""
+    for year in vd.DENOMINATOR_YEARS:
+        low, high = vd.annual_denominator_interval(year)
+        assert low <= vd.FREELAND_VOYAGES_ANALYSED[year]
+        assert high >= vd.FREELAND_VOYAGES_REQUIRING_REPORT[year]
+        assert low <= vd.implied_denominator(year) <= high
+
+    assert vd.annual_denominator_interval(2008) == (4_098, 4_694)
+    assert vd.annual_denominator_interval(2010) == (4_155, 5_527)
+    assert vd.annual_denominator_interval(2014) == (4_387, 5_000)
+    assert vd.annual_denominator_interval(2007) is None
+    assert vd.annual_denominator_interval(2022) is None
+
+
+def test_stationarity_bracket_is_the_union_and_is_declared_not_measured() -> None:
+    low, high = vd.stationarity_denominator_interval()
+
+    assert (low, high) == (3_964, 5_527)
+    assert high / low > 1.3
+    assert "declared, not sourced" in vd.STATIONARITY_ASSUMPTION
+    for year in vd.JENKINS_ONLY_YEARS:
+        assert year not in vd.DENOMINATOR_YEARS
+        assert vd.JENKINS_WINDOW[0] <= year <= vd.JENKINS_WINDOW[1]
+    assert vd.missing_denominator_reason(2022) == vd.NO_POST_COVID_DENOMINATOR
+
+
+def test_jenkins_unit_is_a_fraction_of_a_required_report_voyage() -> None:
+    """37,258 over fourteen years of the declared bracket is ~half a voyage each."""
+    low, high = vd.jenkins_unit_ratio_interval()
+
+    assert (low, high) == pytest.approx((0.4815, 0.6714), abs=0.0005)
+    assert high < 1.0
+
+
+def test_posting_step_is_bounded_by_the_observed_floor_and_the_ceiling() -> None:
+    step = vd.posted_to_investigated()
+
+    assert set(step["by_year"]) == set(vd.DENOMINATOR_YEARS)
+    assert min(step["by_year"].values()) == pytest.approx(9 / 17)
+    assert max(step["by_year"].values()) == pytest.approx(14 / 15)
+    assert step["interval"] == (pytest.approx(9 / 17), 1.0)
+    assert step["observed_mean"] == pytest.approx(0.701, abs=0.001)
+    assert step["jenkins_ratio"] == pytest.approx(208 / 156)
+    assert step["jenkins_ratio"] > vd.POSTED_TO_INVESTIGATED_CEILING

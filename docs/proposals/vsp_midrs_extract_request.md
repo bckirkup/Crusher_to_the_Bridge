@@ -2,8 +2,11 @@
 
 > **Status:** Proposed — drafted, not yet sent. The artifact this document
 > specifies (a CDC-supplied annual extract) does not exist. Nothing in the tree
-> may assume it will arrive; the register row it would unblock stays blocked
-> until it does.
+> may assume it will arrive. The tree does not wait on it either: the disputed
+> quantities are carried as **declared intervals** in
+> `telemetry_buffer/observation_model/vsp_voyage_denominator.py` (see "Until a
+> reply arrives" below), so a reply would *narrow* them rather than unblock a
+> blank.
 
 ## Why this request exists
 
@@ -125,6 +128,26 @@ One small correction query, worth including because it is cheap and specific:
    4.54 and 5.05 respectively. Which of the three 2010 cells is the erratum? (In
    the other six years the printed rates track the required-report column to
    within 8.5%, mean 4.8%, so 2010 is the only year that does not reconcile.)
+
+## Until a reply arrives: what the disputed numbers are bounded to
+
+The uncertainty is carried, not deferred. Every interval below is fixed from
+published counts or from a stated assumption, before any anchor is evaluated, and
+none of them has a central value to read off:
+
+| Disputed quantity | Interval | Basis |
+|---|---|---|
+| Annual qualifying voyages, 2008–2014 | per year, e.g. 2010 **[4,155, 5,527]**, 2014 **[4,387, 5,000]**, the other five **[analysed, required]** | one rule for all seven years: span both published columns and the count the printed rate implies, so the 2010 misprint widens the year instead of deleting it. Grade **M**, origin T1 |
+| Annual qualifying voyages, 2006–2007 and 2015–2019 | **[3,964, 5,527]** each | the union envelope of the seven bracketed years, on a declared stationarity assumption. Grade **C**, swept, never centred |
+| Annual qualifying voyages, 2020– | **∅ null** | nothing published can bound it; a fleet that stopped sailing cannot be assumed unchanged |
+| "Unduplicated voyage report" as a share of a required-report voyage | **0.48–0.67** | 37,258 against fourteen years of the envelope. A *measure of the mismatch*, not a conversion factor |
+| Posting step, posted ÷ investigated | **[0.53, 1.0]** | observed 2008–2014 floor (9/17 in 2013; the seven years run 0.53–0.93, mean 0.70) up to the structural ceiling that a posting presupposes an investigation. The Jenkins-window 1.33 is excluded because it breaks that ceiling, and is kept visible for the same reason |
+
+What a reply changes is the width of those intervals, and in one case their
+number: annual investigated counts for 2006–2007 and 2015–2019 would replace the
+stationarity assumption with measurement, and a statement of how postings map to
+investigations would collapse the posting interval to a documented figure. What
+no reply changes is the rule that the posting step is swept, not fitted.
 
 ## Draft message
 

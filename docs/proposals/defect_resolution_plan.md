@@ -202,10 +202,23 @@ holds the missing annual years and the absent post-2020 count, so the question
 leaves the plan as an external data request:
 [`vsp_midrs_extract_request.md`](vsp_midrs_extract_request.md), which records in
 advance what each possible reply does and does not license. Until it is answered
-the row stays blocked; a reply that supplies counts but not the posting
-criterion closes the denominator gaps only, and the remaining move would then be
-to declare and sweep the posting step as an observation-model parameter, never
-to fit it.
+the row stays blocked as a *rate*; a reply that supplies counts but not the
+posting criterion closes the denominator gaps only, and the remaining move would
+then be to declare and sweep the posting step as an observation-model parameter,
+never to fit it.
+
+Blocked does not mean unquantified. `vsp_voyage_denominator.py` now carries the
+disputed quantities as frozen intervals: the 2008-2014 denominators bracket both
+published columns and the count each printed rate implies (one rule for all
+seven years, so 2010's misprint widens that year rather than removing it),
+2006-2007 and 2015-2019 take the union envelope [3,964, 5,527] as a declared
+Grade C stationarity assumption, Jenkins's pooled total works out to 0.48-0.67
+of a required-report voyage per year as a measure of the unit mismatch, and the
+posting step is bounded to [0.53, 1.0] --- the observed 2008-2014 floor up to the
+structural ceiling that a posting presupposes an investigation, with the
+Jenkins-window ratio of 1.33 excluded because it violates that ceiling. Every
+one of those is swept, none is centred, and post-2020 stays null because no
+source can bound it.
 
 ## 5. Track C — intervals: no scored parameter stays a point value
 

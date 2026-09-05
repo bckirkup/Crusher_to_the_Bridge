@@ -29,6 +29,17 @@ seven years.  Only 2010 disagrees materially: its printed 3.8 per 1,000 needs
 cells is misprinted.  The denominator therefore enters as a ~10%-wide interval
 with one flagged year, which is a bounded uncertainty rather than an unknown.
 
+Where the sources disagree with each other, the disagreement is carried as an
+interval rather than left as a blank: ``annual_denominator_interval`` brackets
+both published columns and the count each printed rate implies,
+``stationarity_denominator_interval`` states what the years outside Freeland's
+table can be bounded to and on what assumption, ``posted_to_investigated``
+bounds the posting step, and ``jenkins_unit_ratio_interval`` says how much
+smaller an "unduplicated voyage report" must be than a required-report voyage
+for the two papers to be describing the same fleet.  Post-2020 stays empty:
+nothing has been published that could bound it, and an interval invented for it
+would be a number with no source.
+
 Nothing here is fitted and nothing here is a target.  ``a9_targets`` in
 ``midrs_incidence_targets.py`` continues to score against the Jenkins
 denominator it has always used; the Freeland-window rates below are a
@@ -39,10 +50,14 @@ published count.
 from __future__ import annotations
 
 import csv
+import math
 from pathlib import Path
 from typing import Any, NamedTuple
 
 from simulation_utils.paths import validated_open
+from telemetry_buffer.observation_model.midrs_incidence_targets import (
+    MIDRS_PASSENGER_OUTBREAKS_INVESTIGATED,
+)
 
 SERIES_PATH = Path(__file__).resolve().parent / "vsp_outbreak_series.csv"
 
@@ -127,6 +142,35 @@ NO_POST_COVID_DENOMINATOR = (
 )
 
 DENOMINATOR_YEARS = tuple(sorted(FREELAND_VOYAGES_ANALYSED))
+
+# The public posting criterion, quoted from CDC's own outbreak-update pages
+# (https://www.cdc.gov/vessel-sanitation/cruise-ship-outbreaks/index.html,
+# retrieved 2026-09-05).  Grade A for what CDC says it does *now*; Origin: Tr
+# (transcribed from a program web page, not a journal).  It is not evidence
+# that the same criterion held in earlier years, which is one of the questions
+# docs/proposals/vsp_midrs_extract_request.md asks.
+POSTING_CRITERION = (
+    "ship under VSP jurisdiction (voyage includes both US and foreign ports); "
+    "3% or more of passengers OR crew reporting GI illness to the ship's "
+    "medical staff; CDC may also post other outbreaks of public health "
+    "significance"
+)
+
+# Years Jenkins's window covers that Freeland's table does not.  These are the
+# years the pooled total has to accommodate and no annual source describes.
+JENKINS_ONLY_YEARS = (2006, 2007, 2015, 2016, 2017, 2018, 2019)
+
+# The structural ceiling on the posting step: a voyage cannot be posted without
+# having been investigated, so posted/investigated <= 1 whatever the counts say.
+# It is combinatorial, not epidemiological, and holds for every year.
+POSTED_TO_INVESTIGATED_CEILING = 1.0
+
+STATIONARITY_ASSUMPTION = (
+    "annual VSP-jurisdiction voyage counts outside 2008-2014 lie within the "
+    "envelope Freeland's seven years span; declared, not sourced, because no "
+    "annual count is published for those years and the excluded MARAD/CLIA "
+    "series count a different population (tranche 18 SS4-5)"
+)
 
 
 class AnnualDenominator(NamedTuple):
@@ -295,4 +339,112 @@ def observed_posting_rates(path: Path = SERIES_PATH) -> dict[str, Any]:
             ),
             "units": (FREELAND_UNIT_REQUIRED, FREELAND_UNIT_ANALYSED),
         },
+    }
+
+
+def implied_denominator(year: int) -> float:
+    """Voyages the printed rate needs at the printed outbreak count."""
+    return (
+        1_000
+        * FREELAND_PASSENGER_OUTBREAKS_INVESTIGATED[year]
+        / FREELAND_PUBLISHED_RATE_PER_1000[year]
+    )
+
+
+def annual_denominator_interval(year: int) -> tuple[int, int] | None:
+    """Bracket every voyage count Freeland's own table supports for ``year``.
+
+    One rule, applied to all seven years without exception: the low end is the
+    smaller of the analysed subset and the count the printed rate implies, the
+    high end is the larger of the required-report column and that same implied
+    count.  It therefore spans the two published units *and* the internal
+    inconsistency, so 2010 widens to ~[4155, 5527] instead of being dropped and
+    2014 to [4387, 5000], without anyone deciding which of the three
+    disagreeing cells is the misprint.
+
+    Grade **M**: the endpoints are published counts or arithmetic on published
+    counts, but which one is the quantity is unresolved.  Origin: T1.
+    """
+    if year not in FREELAND_VOYAGES_ANALYSED:
+        return None
+    implied = implied_denominator(year)
+    low = min(FREELAND_VOYAGES_ANALYSED[year], math.floor(implied))
+    high = max(FREELAND_VOYAGES_REQUIRING_REPORT[year], math.ceil(implied))
+    return (low, high)
+
+
+def stationarity_denominator_interval() -> tuple[int, int]:
+    """The declared bracket for years Freeland's table does not cover.
+
+    The union of the seven annual brackets: any year whose count sits inside
+    the envelope 2008-2014 spans falls in here.  This is a **Grade C declared
+    assumption** (``STATIONARITY_ASSUMPTION``), not a measurement, and it is
+    deliberately wide, [3964, 5527] -- 2009's analysed subset sets the floor
+    and 2010's misprint the ceiling.  It applies to ``JENKINS_ONLY_YEARS``
+    only; post-2020 gets nothing, because assuming a fleet that stopped sailing
+    was unchanged is not conservatism, it is invention.
+    """
+    brackets = [annual_denominator_interval(year) for year in DENOMINATOR_YEARS]
+    return (
+        min(bracket[0] for bracket in brackets if bracket),
+        max(bracket[1] for bracket in brackets if bracket),
+    )
+
+
+def jenkins_unit_ratio_interval() -> tuple[float, float]:
+    """How small an "unduplicated voyage report" must be to fit Jenkins's total.
+
+    Under ``STATIONARITY_ASSUMPTION`` the fourteen years of Jenkins's window
+    hold 14 x the declared bracket of voyages, so Jenkins's single published
+    37,258 corresponds to ~0.48-0.67 of a required-report voyage each.  A ratio
+    that far below 1 is the quantitative form of the units not matching: it is
+    reported so the mismatch has a size, and it is **not** a conversion factor
+    to multiply anything by.
+    """
+    low_year, high_year = stationarity_denominator_interval()
+    span = JENKINS_WINDOW[1] - JENKINS_WINDOW[0] + 1
+    return (
+        JENKINS_VOYAGE_REPORTS_2006_2019 / (span * high_year),
+        JENKINS_VOYAGE_REPORTS_2006_2019 / (span * low_year),
+    )
+
+
+def posted_to_investigated(path: Path = SERIES_PATH) -> dict[str, Any]:
+    """Bound the posting step: posted voyages per outbreak investigated.
+
+    Only 2008-2014 carries both counts annually, and there the ratio runs
+    0.53-0.93 with no trend, so the *interval* is that observed floor up to the
+    structural ceiling of 1.0 -- the mean 0.70 is reported and deliberately not
+    adopted, because a central value here would be the fitted conversion this
+    row exists to refuse.
+
+    The Jenkins window is excluded from the interval on a structural ground
+    rather than a convenient one: 208 postings against 156 investigated
+    outbreaks is a ratio above 1, which the ceiling forbids, so that pair
+    cannot be two counts of the same event class.  ``jenkins_ratio`` is
+    returned anyway so the contradiction stays visible.
+    """
+    postings = postings_by_year(path)
+    by_year = {
+        year: postings.get(year, 0)
+        / FREELAND_PASSENGER_OUTBREAKS_INVESTIGATED[year]
+        for year in DENOMINATOR_YEARS
+    }
+    ratios = list(by_year.values())
+    return {
+        "by_year": by_year,
+        "interval": (min(ratios), POSTED_TO_INVESTIGATED_CEILING),
+        "observed_mean": sum(ratios) / len(ratios),
+        "jenkins_ratio": (
+            sum(
+                count
+                for year, count in postings.items()
+                if JENKINS_WINDOW[0] <= year <= JENKINS_WINDOW[1]
+            )
+            / MIDRS_PASSENGER_OUTBREAKS_INVESTIGATED
+        ),
+        "ceiling_basis": (
+            "a posting presupposes an investigation, so the ratio cannot "
+            "exceed 1 for any year"
+        ),
     }
