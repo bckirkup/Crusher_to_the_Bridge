@@ -311,6 +311,23 @@ as that rather than attributed to either factor. The train/test split is already
 `covid_trajectory_fit_spec.md` §7, before implementation, and must not be
 revisited after seeing which hull fits.
 
+**All four D items are done, and the out-of-sample answer is a miss.** #34 fits
+Θ = 1e6 on Diamond Princess (decade grid 1e4–1e9, six candidates, seed
+20200205, interior winner) against two training observables only — the 197
+recorded onsets and the 634 campaign positives — and scores the held-out hulls
+with it in a separate command that cannot feed back:
+`covid.H1` **misses** (0 of 160 campaign specimens positive against 128/217),
+`covid.H2` is **undefined** (no positives to take a share of), `covid.H3`
+**misses** the cross-ship tail placement, and `covid.H4` is **unscorable** —
+no serology instrument exists in the observation model. The split is unchanged,
+nothing was widened and no constant moved to close the gap. The diagnosis
+handed to #36 is that the expedition hull's epidemic does not take off at all
+at the fitted Θ (22 of 223 ever infected over 28 days), which localises the
+failure in the transfer of the *mixing* geometry between a 3,711-host quarantined
+liner and a 223-host expedition vessel rather than in the value of Θ. Reports:
+`telemetry_buffer/observation_model/covid_theta_fit.json` and
+`covid_theta_held_out.json`.
+
 **Track E, the pre/post-COVID regime.** #9 (the formal_spec_v2 3.7 NPI
 dose-reduction interface) → #10 (pre-2020 and post-2020 configuration sets built
 from the literature, not from the target) → #11 (score jointly on levels and on

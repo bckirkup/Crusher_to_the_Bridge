@@ -161,6 +161,9 @@ class SyndromicSurveillance:
         self._campaign_rng = _molecular_stream(self.rng, _CAMPAIGN_SPAWN_KEY)
         self._campaigns = self._index_campaigns(testing_campaigns)
         self._campaign_days_run: set[tuple[str, int]] = set()
+        # One entry per specimen the campaign took, in the order taken: what
+        # the ship's own testing log held at the end of the voyage.
+        self._campaign_specimen_log: list[dict[str, Any]] = []
         # Symptom-onset channel: the first epoch each host presented symptoms,
         # whether or not it was free to report them (an isolated host still
         # has an onset day), and the subset whose onset entered the record.
@@ -424,6 +427,10 @@ class SyndromicSurveillance:
                 campaign_confirmed[pathogen_id] = [
                     aid for aid in positive if aid in on_roster
                 ]
+                self._log_campaign_specimens(
+                    agents, epoch, pathogen_id, roster,
+                    set(campaign_confirmed[pathogen_id]),
+                )
         sampled_union = sorted({aid for ids in sampled.values() for aid in ids})
         confirmed_union = sorted(
             {aid for ids in confirmed.values() for aid in ids},
@@ -727,6 +734,49 @@ class SyndromicSurveillance:
         if severity not in model["states"]:
             return False
         return float(model["eligibility"][model["states"].index(severity)]) > 0.0
+
+    def _log_campaign_specimens(
+        self,
+        agents: list[dict[str, Any]],
+        epoch: int,
+        pathogen_id: str,
+        roster: list[int],
+        positive: set[int],
+    ) -> None:
+        """Record this campaign day's specimens as a testing log would.
+
+        ``symptomatic_at_specimen`` is what the record could say when the
+        swab was taken: whether that host had already presented symptoms by
+        then, not whether it ever would. The published asymptomatic shares
+        (Mizumoto 2020 for Diamond Princess, Ing 2020 for Greg Mortimer)
+        are shares at the time of testing, so this is the matching quantity.
+        """
+        by_id = {int(a["agent_id"]): a for a in agents}
+        day = self.clock.day_index(int(epoch))
+        for aid in roster:
+            agent = by_id.get(int(aid), {})
+            onset_epoch = self._presentation_onset_epoch.get(int(aid))
+            self._campaign_specimen_log.append({
+                "agent_id": int(aid),
+                "pathogen_id": str(pathogen_id),
+                "epoch": int(epoch),
+                "day": day,
+                "positive": int(aid) in positive,
+                "symptomatic_at_specimen": (
+                    onset_epoch is not None and int(onset_epoch) <= int(epoch)
+                ),
+                "role": "crew" if _agent_is_crew(agent) else "passenger",
+            })
+
+    def campaign_specimen_log(
+        self,
+        pathogen_id: str,
+    ) -> list[dict[str, Any]]:
+        """Campaign specimens taken for this pathogen, in the order taken."""
+        return [
+            dict(entry) for entry in self._campaign_specimen_log
+            if entry["pathogen_id"] == str(pathogen_id)
+        ]
 
     def onset_observation_curve(
         self,

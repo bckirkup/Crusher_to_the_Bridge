@@ -63,6 +63,9 @@ SCHEMA_DATA_MAP: dict[str, list[str]] = {
     "covid_hull_scenarios.schema.json": [
         "data/scenarios/covid_hull_scenarios.json",
     ],
+    "covid_fit_targets.schema.json": [
+        "data/observation/covid_fit_targets.json",
+    ],
     "spatial_layout.schema.json": [],
     "air_flow_paths.schema.json": [],
     "preboarding_decision_scenario.schema.json": [
