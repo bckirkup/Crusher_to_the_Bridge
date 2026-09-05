@@ -527,7 +527,17 @@ item here, because the genogroup contrast cannot be quantified for it at all.
    the Killingley-to-Zhang & Wang span (#30).
 5. **The observation model's ~15 numbers** — jointly constrained by a single
    empirical aggregate which *is* anchor A3, so A3 cannot also be a test of them
-   (#23, #27).
+   (#23, #27). Track A3 (#48) changed what those numbers are read against and
+   adopted nothing: the onset draw is now the *peak* of the course, and
+   `severity_model.trajectory_ladder_offsets_by_day` — rungs below that peak,
+   one entry per illness day on the same onset axis as the shedding curve —
+   says what an observer sees on each day of it. **No profile declares a
+   path**, which holds the peak for the whole illness and reproduces the
+   previous behaviour exactly, so this row's status, grade and interval are
+   unchanged and this register gains no quantity. A declared path is a sourcing
+   question owned by this item and by the SARS-CoV-2 severity row in §3.2
+   (#31), and it inherits that row's constraint: the ladder reads on age, and
+   Tabata/Diamond Princess remains barred.
 6. **Norovirus shedding-curve peak magnitude** — 11.0 log10 copies/g is Atmar's
    GI.1 median peak to two decimals, and Kirby measures GII.2 about two logs
    below GI.1 in the same challenge design. Unlike the dose axis, where the GII

@@ -1194,7 +1194,40 @@ def _validate_symptom_severity_profiles(
             raise NotImplementedError(
                 f"{pathogen_id}: time-varying assay sensitivity is not implemented",
             )
+        _validate_severity_trajectory(pathogen_id, severity)
         _validate_molecular_observation(pathogen_id, observation)
+
+
+def _validate_severity_trajectory(
+    pathogen_id: str,
+    severity: dict[str, Any],
+) -> None:
+    """Check the within-illness severity path, when one is declared.
+
+    Entries are rungs below the peak, so a positive entry would ask a course to
+    exceed the state it drew; an absent trajectory holds the peak, which is the
+    behaviour of every profile that declares none.
+    """
+    offsets = severity.get("trajectory_ladder_offsets_by_day")
+    if offsets is None:
+        return
+    if not isinstance(offsets, list) or not offsets:
+        raise ValueError(
+            f"{pathogen_id}.severity_model.trajectory_ladder_offsets_by_day "
+            "must be a non-empty list",
+        )
+    for offset in offsets:
+        if isinstance(offset, bool) or not isinstance(offset, int):
+            raise ValueError(
+                f"{pathogen_id}.severity_model."
+                "trajectory_ladder_offsets_by_day entries must be integers",
+            )
+        if offset > 0:
+            raise ValueError(
+                f"{pathogen_id}.severity_model."
+                "trajectory_ladder_offsets_by_day entries are rungs below the "
+                "peak and must not be positive",
+            )
 
 
 def _validate_molecular_observation(

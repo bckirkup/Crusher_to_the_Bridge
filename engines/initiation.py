@@ -405,7 +405,10 @@ def _write_presentation_history(
     inf["onset_time_infected"] = int(
         round(clock.epochs_for_days(incubation_days)),
     )
+    # A convalescent boarding host is past its course, so the peak it carries
+    # is the state it ends on: the trajectory is not replayed backwards.
     inf["symptom_severity"] = draw_symptom_severity(profile, rng)
+    inf["symptom_severity_peak"] = inf["symptom_severity"]
 
 
 def _board_one_host(

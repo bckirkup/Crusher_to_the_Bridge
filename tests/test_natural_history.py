@@ -31,6 +31,7 @@ from engines.natural_history import (
     incubation_days,
     onset_day,
     project_legacy_illness,
+    severity_on_day,
 )
 from engines.sim_clock import HOURS, SimClock
 
@@ -48,7 +49,12 @@ _OWNED = (
     "advance_infections",
     "project_legacy_illness",
     "record_cleared_immunity",
+    "severity_on_day",
 )
+
+_STATES = [
+    "asymptomatic", "subclinical", "mild", "moderate", "severe_critical",
+]
 
 
 def _defined_functions(module: object) -> set[str]:
@@ -179,3 +185,113 @@ class TestTimelineInvariants:
         assert inf["symptom_severity"] == "asymptomatic"
         assert inf.get("presented") is None
         assert inf["status"] == InfectionStatus.RECOVERED
+
+
+def _severity_profile(offsets: list[int] | None = None, **overrides: Any) -> dict:
+    severity: dict[str, Any] = {
+        "states": _STATES,
+        "base_probabilities": [0.0, 0.0, 0.0, 0.0, 1.0],
+    }
+    if offsets is not None:
+        severity["trajectory_ladder_offsets_by_day"] = offsets
+    return _profile(recovery_day=5, severity_model=severity, **overrides)
+
+
+def _course(hours: float, profile: dict[str, Any]) -> list[tuple[int, str]]:
+    """Visible severity on each illness day of one host's whole course."""
+    clock = SimClock(epoch_duration_hours=hours, mode=HOURS)
+    agent = _agent(clock)
+    rng = np.random.default_rng(7)
+    seen: list[tuple[int, str]] = []
+    for _ in range(int(clock.epochs_for_days(10))):
+        advance_infections(agent, {PATHOGEN: profile}, rng)
+        inf = agent.infections[PATHOGEN]
+        if inf["illness"] != IllnessStatus.SYMPTOMATIC:
+            continue
+        onset = int(inf["onset_time_infected"])
+        day = clock.day_index(max(0, (inf["time_infected"] or 0) - onset))
+        entry = (day, str(inf["symptom_severity"]))
+        if entry not in seen:
+            seen.append(entry)
+    return seen
+
+
+class TestSeverityTrajectory:
+    """Severity is a course, not a single draw held for the whole illness."""
+
+    @pytest.mark.parametrize("hours", [1.0, 6.0, 24.0])
+    def test_a_profile_with_no_trajectory_holds_the_state_it_drew(
+        self, hours: float,
+    ) -> None:
+        seen = _course(hours, _severity_profile())
+        assert seen, "the host never became symptomatic"
+        assert {severity for _, severity in seen} == {"severe_critical"}
+
+    @pytest.mark.parametrize("hours", [1.0, 6.0, 24.0])
+    def test_the_declared_ladder_is_what_an_observer_sees_day_by_day(
+        self, hours: float,
+    ) -> None:
+        """One entry per illness day, read off the peak, last entry held.
+
+        Timestep-invariant: the path is read from the peak and the day, so
+        cutting time more finely does not move it.
+        """
+        profile = _severity_profile([0, 0, -1, -2])
+        by_day = dict(_course(hours, profile))
+        assert by_day[0] == "severe_critical"
+        assert by_day[1] == "severe_critical"
+        assert by_day[2] == "moderate"
+        assert by_day[3] == "mild"
+        assert by_day[max(by_day)] == "mild"
+
+    @pytest.mark.parametrize(
+        "offsets,expected",
+        [
+            ([0], "severe_critical"),
+            ([-1], "moderate"),
+            ([-2], "mild"),
+            ([-3], "subclinical"),
+            ([-9], "subclinical"),
+        ],
+    )
+    def test_a_deeper_ladder_reads_a_milder_state_and_floors_at_subclinical(
+        self, offsets: list[int], expected: str,
+    ) -> None:
+        """Graded: distinct depths give distinct states until the floor.
+
+        The floor is subclinical, never asymptomatic: that rung means the host
+        never presented, which the presentation draw owns and a day of the
+        course cannot undo.
+        """
+        seen = _course(6.0, _severity_profile(offsets))
+        assert {severity for _, severity in seen} == {expected}
+
+    @pytest.mark.parametrize("peak", _STATES[1:])
+    @pytest.mark.parametrize("offsets", [[0], [-1, -2], [0, -1, -4]])
+    def test_no_day_of_any_course_exceeds_the_peak_or_leaves_the_ladder(
+        self, peak: str, offsets: list[int],
+    ) -> None:
+        profile = _severity_profile(offsets)
+        peak_index = _STATES.index(peak)
+        for day in range(12):
+            state = severity_on_day(profile, peak, day)
+            assert state in _STATES[1:]
+            assert 1 <= _STATES.index(state) <= peak_index
+
+    def test_an_asymptomatic_host_is_not_moved_onto_the_ladder(self) -> None:
+        profile = _severity_profile([0, -1], symptomatic_fraction=0.0)
+        clock = SimClock(epoch_duration_hours=6.0, mode=HOURS)
+        agent = _agent(clock)
+        rng = np.random.default_rng(5)
+        for _ in range(int(clock.epochs_for_days(10))):
+            advance_infections(agent, {PATHOGEN: profile}, rng)
+            inf = agent.infections[PATHOGEN]
+            assert inf.get("symptom_severity", "asymptomatic") == "asymptomatic"
+            assert "symptom_severity_peak" not in inf
+
+    def test_a_record_written_before_the_seam_existed_still_resolves(self) -> None:
+        """No peak on the record means no trajectory to read: hold the state."""
+        profile = _severity_profile([0, -2])
+        assert severity_on_day(profile, "moderate", 1) == "subclinical"
+        legacy = _profile(severity_model={"states": _STATES})
+        assert severity_on_day(legacy, "moderate", 5) == "moderate"

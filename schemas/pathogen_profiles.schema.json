@@ -430,6 +430,12 @@
             "null"
           ]
         },
+        "trajectory_ladder_offsets_by_day": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "integer", "maximum": 0},
+          "description": "Within-illness severity path, authored on the onset axis one entry per day like shedding_curve_log10, with the last entry held for a longer illness. Each entry is a count of severity rungs BELOW the state drawn at onset, which the trajectory makes the peak of the course rather than the whole of it; 0 is the peak and no entry may be positive. The floor is the mildest symptomatic rung, never asymptomatic, because that rung means the host never presented. Absent means the peak is held for the whole illness, which is what every observer saw before this field existed and what every profile still declares: the path is a sourcing question (Track C), not a structural one."
+        },
         "evidence_grade": {"type": "string"},
         "notes": {
           "type": "string",
