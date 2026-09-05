@@ -352,6 +352,32 @@ Immunity is deliberately not an NPI: `ship_graph.immune_fraction` is swept
 it pushes A7 the opposite way to every intervention and folding it into a
 hygiene multiplier would let the two cancel invisibly.
 
+**#11 is done as a procedure, and it has nothing to score yet.**
+`telemetry_buffer/observation_model/era_joint_scoring.py` fits the common dose on
+the pre arm alone — `fit_common_dose` refuses any run not labelled `era = "pre"`,
+and what it returns is the *set* of dose cells the pre-2020 levels admit, never a
+ranked best dose — then reads A7c at each post-arm sweep point held at those same
+doses. A post run at a rejected dose is reported unscored rather than scored, a
+post run that does not state a coordinate for every swept lever of #10 is an
+error, and a fit whose recorded `arms_seen` is anything but `("pre",)` cannot
+score A7c at all. Simulated voyages enter either arm only through VSP's own
+posting rule (≥100 passengers, 3–21 days, ≥3% of passengers or of crew), applied
+identically to both, because a simulated fleet mean and a posted-outbreak median
+are not the same quantity. Three consequences worth stating:
+
+- The scored anchor is **A7c**, the passenger-specific component, against the
+  measurement's own 0.53–0.91. The composition-controlled 0.581–1.053 is carried
+  beside every verdict as context and never substituted for it, because it
+  contains 1.
+- The report names the anchor that rejected each dose and the six declared
+  absences of #10, so an **empty region is diagnosable**: it says which half
+  failed, and it is a result rather than licence to widen a target.
+- Nothing here searches. A7c is read once per post-arm point and cannot promote a
+  dose the pre-2020 levels rejected or rescue one they did.
+
+What it does not yet have is arms to read: the pre/post sweep of #10 has not been
+run, so no admissible region — empty or otherwise — is reported yet.
+
 D and E are independent of each other.
 
 ## 7. The gate, and what it means to fail it

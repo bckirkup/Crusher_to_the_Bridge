@@ -304,6 +304,25 @@ def _row_without_source(row: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _era_coordinates(params: dict[str, Any], path: str) -> dict[str, float]:
+    """The era sweep position a run was generated at, if it declares one.
+
+    Coordinates are read as stated and not defaulted: a partially declared
+    position is an error here rather than a silently completed box corner.
+    """
+    raw = params.get("era_coordinates", {})
+    if not isinstance(raw, dict):
+        raise RuntimeError(f"{path} has non-mapping era_coordinates: {raw!r}")
+    out: dict[str, float] = {}
+    for name, value in raw.items():
+        if isinstance(value, bool) or not isinstance(value, (int, float)):
+            raise RuntimeError(
+                f"{path} era coordinate {name!r} is not numeric: {value!r}",
+            )
+        out[str(name)] = float(value)
+    return out
+
+
 def _read_row(summary: dict[str, Any], path: str) -> dict[str, Any]:
     """Build one scorer row from a root or nested archive summary."""
     params = summary.get("parameters", {})
@@ -363,6 +382,13 @@ def _read_row(summary: dict[str, Any], path: str) -> dict[str, Any]:
         "strategy": strategy,
         "sick_call_probability": float(params["sick_call_probability"]),
         "dose_adjustment": float(params.get("dose_adjustment", 0.0)),
+        # Which A7 arm the run belongs to, and where in the era's swept box it
+        # sat.  Empty when the run was not produced by an era sweep; the joint
+        # scorer (era_joint_scoring.py) refuses an unlabelled arm rather than
+        # assuming one, because guessing the arm is guessing the train/test
+        # split A7c is scored against.
+        "era": str(params.get("era", "")),
+        "era_coordinates": _era_coordinates(params, path),
         "seed": int(params.get("seed", -1)),
         "num_epochs": int(params["num_epochs"]),
         "num_agents": int(params["num_agents"]),

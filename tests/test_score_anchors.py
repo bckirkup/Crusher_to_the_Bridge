@@ -166,6 +166,38 @@ def test_read_rows_rejects_missing_duration_parameters(tmp_path: Path) -> None:
         score_anchors.read_rows(tmp_path)
 
 
+def test_read_rows_carries_the_era_and_its_sweep_position(tmp_path: Path) -> None:
+    summary = _summary()
+    summary["parameters"]["era"] = "post"
+    summary["parameters"]["era_coordinates"] = {"hvac.filter_efficiency": 0.25}
+    _write_run(tmp_path, summary)
+
+    row = score_anchors.read_rows(tmp_path)[0]
+
+    assert row["era"] == "post"
+    assert row["era_coordinates"] == {"hvac.filter_efficiency": 0.25}
+
+
+def test_read_rows_leaves_a_run_that_declares_no_era_unlabelled(
+    tmp_path: Path,
+) -> None:
+    _write_run(tmp_path, _summary())
+
+    row = score_anchors.read_rows(tmp_path)[0]
+
+    assert row["era"] == ""
+    assert row["era_coordinates"] == {}
+
+
+def test_read_rows_rejects_a_non_numeric_era_coordinate(tmp_path: Path) -> None:
+    summary = _summary()
+    summary["parameters"]["era_coordinates"] = {"hvac.filter_efficiency": "high"}
+    _write_run(tmp_path, summary)
+
+    with pytest.raises(RuntimeError, match="is not numeric"):
+        score_anchors.read_rows(tmp_path)
+
+
 def test_a4_target_lines_include_target_and_insufficient_branches() -> None:
     lines = score_anchors._a4_target_lines("pre", TARGETS)
     header = "\n".join(lines)
