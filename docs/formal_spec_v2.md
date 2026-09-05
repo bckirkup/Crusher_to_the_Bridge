@@ -286,6 +286,8 @@ def deliver_dose(agent, pathogen_id, raw_dose, route, profile, dt_hours):
 
 Non-pharmacological interventions — masks, gloves, hand sanitizer, enhanced sanitation — operate on the same pre-establishment pathway as biological clearance. They reduce the effective dose that enters the cumulative exposure accumulator. This section defines the **interface** consumed by the intervention/compliance layer (specified separately); it does not define intervention policies or compliance models.
 
+**Implemented (#9):** `engines/non_pharmaceutical_interventions.py` owns the declaration and the per-host assignment; `engines/transmission_core.py` applies it per route after `route_efficiency_multipliers` and before gastric survival. A measure must carry a source. No measure ships, so the interface is inert by default.
+
 #### 3.7.1 Per-Agent Route-Specific Dose Reduction
 
 Each agent carries an optional `dose_reduction_multipliers` dict mapping route names to a surviving fraction $\in [0, 1]$:
@@ -308,6 +310,8 @@ $$
 where $m_{i,r}$ is the agent's dose reduction multiplier for route $r$.
 
 #### 3.7.2 Reference NPI Efficacy Values
+
+**None of the values in this table is adopted, and none carries provenance.** They were written into this spec without sources or evidence grades, so they are illustrative magnitudes for the interface, not sourced parameters; a measure only enters a run once #10 sources its magnitude and records it in the register.
 
 | Intervention | Route Affected | Multiplier $m$ | Range | Notes |
 |---|---|---|---|---|

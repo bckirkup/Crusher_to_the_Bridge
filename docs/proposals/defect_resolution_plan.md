@@ -271,8 +271,20 @@ revisited after seeing which hull fits.
 **Track E, the pre/post-COVID regime.** #9 (the formal_spec_v2 3.7 NPI
 dose-reduction interface) → #10 (pre-2020 and post-2020 configuration sets built
 from the literature, not from the target) → #11 (score jointly on levels and on
-the A6 discontinuity). Depends on Track B, because #11 scores against A6 and the
-recut class bins.
+the **A7** discontinuity). Depends on Track B, because #11 scores against A7 and
+the recut class bins. Earlier revisions of this paragraph wrote A6 for the
+discontinuity; A6 is the superspreader proxy and is deliberately not scored the
+same way (`anchor_measurement_spec.md`), so #11 must not be built against it.
+
+**#9 is done and adopts nothing.** `engines/non_pharmaceutical_interventions.py`
+gives a measure a source, a per-role coverage, a compliance and a per-route
+surviving fraction; the engine applies it per host after route efficiency and
+before gastric survival, so an NPI is what the operator put between a route and
+a portal rather than a second copy of the route's own efficiency. No measure
+ships — `config.yaml` carries the shape commented out with its magnitudes
+written `XXX` — so #9 changes no output and #10 owns every number, including
+whether the post-2020 buffet-entry prompt's two arms (soap vs. alcohol rub,
+which Tuladhar 2015 separates by 3–4 log10 on GII.4) survive sourcing at all.
 
 D and E are independent of each other.
 

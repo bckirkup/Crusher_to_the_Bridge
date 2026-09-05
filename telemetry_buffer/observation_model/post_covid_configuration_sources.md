@@ -12,6 +12,20 @@ Nothing here is a fitted quantity and nothing here was selected because it
 reproduces A7. Several of these entries push the prediction the wrong way, and
 they are kept for that reason.
 
+**Where an entry here can now land (#9).** `non_pharmaceutical_interventions` in
+`crusher_labs/config.yaml` takes a named measure with a source, a per-role
+coverage, a compliance and a per-route surviving fraction, applied per host
+between route efficiency and gastric survival. It ships empty: the shape is
+commented out with magnitudes written `XXX`, and #10 owns whether any entry
+below survives sourcing into a number. Two constraints the interface enforces
+rather than assumes. **Who does it and what it does are separate arms** — in
+§2.2, being actively reminded at the buffet door sets coverage, while the
+soap-versus-rub gap sets the route multiplier, and one hygiene multiplier cannot
+carry both. **A measure's routes
+are the transmission routes, not the ship's plant**: filtration and surface
+cleaning are already parameterised as ship configuration, so an air- or
+surface-side change belongs there and would be double-counted here.
+
 ## 1. The identifiability problem this exists to answer
 
 Interventions divide into two classes with completely different visibility in

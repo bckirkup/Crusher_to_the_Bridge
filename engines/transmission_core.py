@@ -1528,8 +1528,14 @@ class TransmissionCore:
         ledger: StrainDoseLedger | None,
         weights: dict[str, float],
         susceptibility: dict[int, float],
+        npi: dict[int, dict[str, float]] | None = None,
     ) -> None:
-        """Merge one pathogen pass's ledger into the epoch's strain doses."""
+        """Merge one pathogen pass's ledger into the epoch's strain doses.
+
+        The strain shadow is scaled by the same per-route factors the doses
+        were, so a host's NPIs shift attribution exactly as they shift the
+        dose rather than leaving the shadow at the unreduced shares.
+        """
         if ledger is None:
             return
         pathway_weights = {
@@ -1543,9 +1549,29 @@ class TransmissionCore:
             by_pathogen = self._strain_doses.setdefault(agent_id, {})
             bucket = by_pathogen.setdefault(pathogen_id, {})
             for contributor, dose in ledger.strain_doses(
-                agent_id, pathway_weights,
+                agent_id,
+                self._host_pathway_weights(
+                    pathway_weights, (npi or {}).get(agent_id),
+                ),
             ).items():
                 bucket[contributor] = bucket.get(contributor, 0.0) + dose * mult
+
+    @staticmethod
+    def _host_pathway_weights(
+        pathway_weights: dict[str, float],
+        reductions: dict[str, float] | None,
+    ) -> dict[str, float]:
+        """Fold one host's NPI multipliers into the pathway weights."""
+        if not reductions:
+            return pathway_weights
+        return {
+            pathway: weight * float(
+                reductions.get(
+                    PATHWAY_EFFICIENCY_KEYS.get(pathway, pathway), 1.0,
+                ),
+            )
+            for pathway, weight in pathway_weights.items()
+        }
 
     def _draw_source(self, agent_id: int, pathogen_id: str) -> Contributor:
         """Draw the parent strain (and its shedder) from the dose shares.
@@ -2303,6 +2329,8 @@ class TransmissionCore:
             )
 
         self._apply_route_efficiencies(profile, p_agent_doses, p_agent_pw)
+        npi = self._npi_route_multipliers(agents)
+        self._apply_npi_dose_reduction(npi, p_agent_doses, p_agent_pw)
 
         susceptibility = self._merge_pathogen_doses(
             agents, pathogen_id, p_agent_doses,
@@ -2311,6 +2339,7 @@ class TransmissionCore:
 
         self._fold_strain_doses(
             pathogen_id, ledger, self._route_efficiencies(profile), susceptibility,
+            npi,
         )
         self._last_pathogen_route_doses[pathogen_id] = {
             aid: dict(pw) for aid, pw in p_agent_pw.items()
@@ -2358,6 +2387,46 @@ class TransmissionCore:
                 wkey = PATHWAY_EFFICIENCY_KEYS.get(pw_name, pw_name)
                 w = float(weights.get(wkey, 1.0))
                 scaled = pw_dose * w
+                pw[pw_name] = scaled
+                total += scaled
+            agent_doses[aid] = total
+
+    @staticmethod
+    def _npi_route_multipliers(
+        agents: list[KorkinAgent],
+    ) -> dict[int, dict[str, float]]:
+        """Collect the hosts whose declared NPIs reduce an incoming dose.
+
+        Empty when no measure was declared, which is what keeps a run
+        without an ``non_pharmaceutical_interventions`` block identical.
+        """
+        return {
+            agent.agent_id: agent.dose_reduction_multipliers
+            for agent in agents
+            if agent.dose_reduction_multipliers
+        }
+
+    @staticmethod
+    def _apply_npi_dose_reduction(
+        npi: dict[int, dict[str, float]],
+        agent_doses: dict[int, float],
+        agent_pathway_doses: dict[int, dict[str, float]],
+    ) -> None:
+        """Scale each host's pathway doses by its own NPI multipliers.
+
+        Applied after route efficiency and before susceptibility, gastric
+        survival and cumulative exposure, per formal_spec_v2 §3.7: route
+        efficiency is how well the route delivers to a portal, and an NPI
+        is what the operator put between the two.
+        """
+        for aid, pw in agent_pathway_doses.items():
+            reductions = npi.get(aid)
+            if not reductions:
+                continue
+            total = 0.0
+            for pw_name, pw_dose in pw.items():
+                wkey = PATHWAY_EFFICIENCY_KEYS.get(pw_name, pw_name)
+                scaled = pw_dose * float(reductions.get(wkey, 1.0))
                 pw[pw_name] = scaled
                 total += scaled
             agent_doses[aid] = total
