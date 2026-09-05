@@ -8,7 +8,10 @@ two diverge whenever a denominator is small.
 
 A1, A2 and A5 are literature targets.  A3 is a construction constraint of the
 observation layer rather than independent evidence
-(``docs/norovirus/norovirus_parameter_freedom_audit.md``).  A4's target is not
+(``docs/norovirus/norovirus_parameter_freedom_audit.md``), so it is reported
+as a diagnostic band and carries no verdict: the observation model's own
+parameters are what put reported/symptomatic where it is, and a quantity the
+layer was built to produce cannot also test the layer.  A4's target is not
 a literature figure at all: it is derived at runtime, per hull class and per
 era, from ``vsp_outbreak_series.csv`` by ``vsp_class_era_scoring.py``, and a
 hull with too few postings gets no A4 verdict.
@@ -56,21 +59,31 @@ A8_A9_NO_REPORTING = (
 )
 
 # A1 Wikswo whole-ship cohort illness; A2 asymptomatic ratio (GII.4-weighted
-# lower bound 0.59); A3 capture; A5 passenger:crew reported ratio.
-#
+# lower bound 0.59); A5 passenger:crew reported ratio.
+ANCHORS: dict[str, tuple[float, float]] = {
+    "A1_ever_ill_passenger": (0.10, 0.22),
+    "A2_ill_per_infected": (0.59, 0.81),
+    "A5_passenger_crew_ratio": (2.5, 4.5),
+}
+
 # A3 is reported over *symptomatic*, because that is the denominator this
 # scorer has: the 0.60 infirmary-capture figure is reported over AGE-eligible,
 # and the five-state observation layer puts reported/symptomatic at 0.40 for
 # the same parameter set (eligibility [0,.55,.98,1,1] absorbs the difference).
-# Scoring the measured reported/symptomatic against 0.60 would demand 1.5x the
-# reporting the literature chain allows. Reported/eligible is not scored here
-# because the runs do not emit an AGE-eligible count.
-ANCHORS: dict[str, tuple[float, float]] = {
-    "A1_ever_ill_passenger": (0.10, 0.22),
-    "A2_ill_per_infected": (0.59, 0.81),
+# Reported/eligible is not available here because the runs do not emit an
+# AGE-eligible count.
+#
+# The 0.35-0.45 band is therefore what the observation layer's own capture and
+# eligibility parameters construct, not an independent measurement of it, so
+# it is a construction band and not an anchor: it is reported beside the
+# measured ratio and excluded from every verdict. Scoring it would test the
+# observation model against a target derived from the observation model.
+CONSTRUCTION_BANDS: dict[str, tuple[float, float]] = {
     "A3_reported_per_symptomatic": (0.35, 0.45),
-    "A5_passenger_crew_ratio": (2.5, 4.5),
 }
+IN_BAND = "in band (not scored)"
+OUT_OF_BAND = "out of band (not scored)"
+BAND_UNDEFINED = "n/a (not scored)"
 
 
 def load_summary(path: Path) -> dict[str, Any]:
@@ -555,6 +568,23 @@ def _conditional_anchor_verdicts(cell: dict[str, Any]) -> dict[str, str]:
     return out
 
 
+def construction_band_states(cell: dict[str, Any]) -> dict[str, str]:
+    """Where the construction-constrained ratios sit, without a verdict.
+
+    A3 is what the observation layer's capture and eligibility parameters
+    construct, so its band is a diagnostic: the states this returns never
+    enter ``verdicts`` and never become a PASS or a FAIL.
+    """
+    out: dict[str, str] = {}
+    for name, (low, high) in CONSTRUCTION_BANDS.items():
+        value = cell.get(f"{name}__per_seed_median")
+        if value is None:
+            out[name] = BAND_UNDEFINED
+        else:
+            out[name] = IN_BAND if low <= value <= high else OUT_OF_BAND
+    return out
+
+
 def _a4_verdict(
     hull: str,
     cell: dict[str, Any],
@@ -776,6 +806,14 @@ def _report_preamble_lines(
         "`anchor_measurement_spec.md`.",
         "",
         *_a4_target_lines(era, targets),
+        "A3 is a construction constraint of the observation layer, not an "
+        "anchor: the "
+        f"{CONSTRUCTION_BANDS['A3_reported_per_symptomatic'][0]:.2f}-"
+        f"{CONSTRUCTION_BANDS['A3_reported_per_symptomatic'][1]:.2f} band is "
+        "what that layer's own capture and eligibility parameters produce, so "
+        "it is reported for diagnosis and carries no verdict. The verdict "
+        "column covers A1, A2, A4, A5, A8 and A9 only.",
+        "",
         "A4 and A7 are conditional on posting; A8 and A9 are unconditional. "
         "The pre-arm A8 target is a plausibility band, not a confidence "
         "interval: its fleet-wide calendar endpoint and pooled GRT-band rate "
@@ -796,7 +834,8 @@ def _report_preamble_lines(
         ),
         "",
         "| Hull | Response | Dose | Takeoff | A1 ever-ill | inf AR (pax) | "
-        "A2 ill/inf | A3 rep/ill | A4 reported | A5 pax/crew | "
+        "A2 ill/inf | A3 rep/ill (construction) | A4 reported | "
+        "A5 pax/crew | "
         "A8 pax/crew per 100k-days | A9 per 1k voyages | Verdicts |",
         "|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---|---:|---|",
     ]
@@ -818,6 +857,7 @@ def _cell_line(
 ) -> str:
     """One markdown table row for a hull/response/dose cell."""
     hull, strategy, dose = key
+    band_states = construction_band_states(cell)
     return (
         f"| {hull} | {strategy} | {dose} | "
         f"{cell['n_takeoff']}/{cell['n_seeds']} | "
@@ -826,7 +866,8 @@ def _cell_line(
         f"{_fmt(cell.get('A2_ill_per_infected__per_seed_median'), 3)}"
         f" ({_fmt(cell.get('A2_ill_per_infected__of_medians'), 3)}) | "
         f"{_fmt(cell.get('A3_reported_per_symptomatic__per_seed_median'), 3)}"
-        f" ({_fmt(cell.get('A3_reported_per_symptomatic__of_medians'), 3)}) | "
+        f" ({_fmt(cell.get('A3_reported_per_symptomatic__of_medians'), 3)})"
+        f" [{band_states['A3_reported_per_symptomatic']}] | "
         f"{_fmt(cell.get('reported_case_attack_rate_passenger'))} | "
         f"{_fmt(cell.get('A5_passenger_crew_ratio__per_seed_median'), 2)}"
         f" ({_fmt(cell.get('A5_passenger_crew_ratio__of_medians'), 2)}) | "

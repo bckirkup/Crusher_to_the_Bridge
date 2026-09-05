@@ -624,3 +624,63 @@ def test_read_rows_rejects_conflicting_duplicate_and_reports_skips(
     rows = score_anchors.read_rows(tmp_path, stats)
     assert len(rows) == 1
     assert stats["skipped_archives"] == [str(tmp_path / "empty.zip")]
+
+
+class TestA3IsNotScored:
+    """A3 is a construction constraint of the observation layer (#23)."""
+
+    def test_a3_is_absent_from_the_scored_anchors(self) -> None:
+        assert "A3_reported_per_symptomatic" not in score_anchors.ANCHORS
+        assert score_anchors.CONSTRUCTION_BANDS == {
+            "A3_reported_per_symptomatic": (0.35, 0.45),
+        }
+
+    def test_no_a3_ratio_produces_a_verdict(self) -> None:
+        # Ratios spanning well below, inside and well above the band.
+        for reported_pax in (0.01, 0.04, 0.09):
+            cell = score_anchors.summarise_cell([_row(reported_pax=reported_pax)])
+            verdict, _ = score_anchors.verdicts(
+                "classic_cruise_1900", cell, TARGETS
+            )
+
+            assert not [name for name in verdict if name.startswith("A3")]
+            assert score_anchors._verdict_state(verdict).count("A3") == 0
+
+    def test_band_state_grades_the_ratio_without_passing_or_failing(
+        self,
+    ) -> None:
+        states = [
+            score_anchors.construction_band_states(
+                score_anchors.summarise_cell([_row(reported_pax=reported_pax)])
+            )["A3_reported_per_symptomatic"]
+            for reported_pax in (0.01, 0.04, 0.09)
+        ]
+
+        assert states == [
+            score_anchors.OUT_OF_BAND,
+            score_anchors.IN_BAND,
+            score_anchors.OUT_OF_BAND,
+        ]
+        assert not any("PASS" in state or "FAIL" in state for state in states)
+
+    def test_band_state_is_undefined_when_the_ratio_is(self) -> None:
+        cell = score_anchors.summarise_cell([_row(trigger_epoch=None)])
+        del cell["A3_reported_per_symptomatic__per_seed_median"]
+
+        assert score_anchors.construction_band_states(cell) == {
+            "A3_reported_per_symptomatic": score_anchors.BAND_UNDEFINED,
+        }
+
+    def test_report_marks_the_a3_column_as_unscored(self) -> None:
+        report = score_anchors.render(
+            {
+                ("classic_cruise_1900", "syndromic", 1.0):
+                    score_anchors.summarise_cell([_row(reported_pax=0.04)]),
+            },
+            "pre",
+            TARGETS,
+        )
+
+        assert "A3 rep/ill (construction)" in report
+        assert "construction constraint of the observation layer" in report
+        assert f"[{score_anchors.IN_BAND}]" in report

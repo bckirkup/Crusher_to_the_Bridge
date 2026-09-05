@@ -101,17 +101,29 @@ what fits.
 
 | | Item | Task | Depends on |
 |---|---|---|---|
-| B1 | Demote A3 from scored anchor to construction constraint | #23 | — |
+| B1 | Demote A3 from scored anchor to construction constraint | #23 | — (**resolved**, see below) |
 | B2 | The observation model's ~15 numbers: source them or declare them | #27 | B1 |
 | B3 | Recut the A4 class bins | #29 | — |
 | B4 | An external voyage denominator for VSP posting rates | #13 | — |
 | B5 | Measure or externally bound the cabin-localization fraction `f` | #12 | — |
 
-**B1 before B2, because the two are currently circular.** Register §4 item 5:
-the observation model's fifteen numbers are jointly constrained by a single
+**B1 is resolved.** `score_anchors.py` scored A3 against 0.35–0.45 while its own
+module docstring already called A3 a construction constraint, so the scorer was
+testing the observation layer against a target that layer's capture and
+eligibility parameters produce. A3 now sits in `CONSTRUCTION_BANDS`, is reported
+beside the measured ratio as `in band (not scored)` or `out of band (not
+scored)`, and enters no verdict — the verdict column is A1, A2, A4, A5, A8, A9.
+Nothing was re-sourced and no interval moved; what changed is what the number is
+allowed to mean.
+
+**B1 before B2, because the two were circular.** Register §4 item 5: the
+observation model's fifteen numbers are jointly constrained by a single
 empirical aggregate, and that aggregate *is* anchor A3 — so A3 cannot also be a
-test of them. Sourcing them while A3 is still scored would be fitting to the
-target through fifteen intermediaries. B3 is a plain defect (the bins bin
+test of them. Sourcing them while A3 was still scored would have been fitting to
+the target through fifteen intermediaries. **B1 has landed, so B2 is unblocked**;
+the band A3 is now reported against is a wiring check, and reading in-band as
+agreement would restore the circularity the demotion removed. B3 is a plain
+defect (the bins bin
 passenger counts against total-agent capacities). B4 and B5 are searches with no
 in-repo prerequisite and can run in parallel with Track A.
 
