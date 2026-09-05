@@ -3,7 +3,45 @@
 Status note: the route mix has been re-measured at `e8b2b95` in
 [`route_weight_measurement_findings.md`](route_weight_measurement_findings.md);
 droplet is no longer dominant, so the droplet share quoted below is stale. The
-analysis is kept as the record of the state it diagnosed.
+analysis is kept as the record of the state it diagnosed. **The conclusion was
+re-measured on the rebuilt structure under item C7 and it holds** — see
+"Re-measured after the rebuild" below.
+
+## Re-measured after the rebuild (C7)
+
+The diagnosis was drawn on a structure that no longer exists: the emesis path
+was re-parameterised (#38), the route weights were re-measured, and initiation
+moved into its own engine. The question was whether the parity was an artifact
+of droplet dominance, in which case retiring droplet dominance should have moved
+it. It does not.
+
+```bash
+python3 scripts/release_axis_role_retest.py \
+  --seeds 6 --out reports/c7_release_axis_role_retest.json
+```
+
+`expedition_cruise_450` (300 passengers, 150 crew), 168 epochs, seeds 500–505,
+`initial_infected = 5`, at six faecal-release values, in both surveillance arms.
+Passenger:crew ratios on the seed means:
+
+| Arm | Ever-ill ratio | Reported-case ratio |
+|---|---:|---:|
+| syndromic | 1.07–1.14 | 1.07–1.13 |
+| `none_true` | 1.01–1.08 | no denominator (nothing is reported) |
+
+VSP's ratio is about 2.9. The rebuilt model returns 1.0–1.14 across twelve
+design points, so **the parity is not droplet's doing** and the mechanism
+paragraphs below, though stale in their route shares, are stale in their
+*evidence* rather than in their conclusion. Ratios are taken on seed means and
+not per seed, because a seed whose crew arm is empty has no ratio and dropping
+it would bias what remains; the `none_true` reported column is `None` for that
+reason, which is a statement about the denominator and not a ratio of zero.
+
+Two things this is not. It is not a VSP comparison: one hull, six seeds, no
+posting-rule filter. And it is not a target — nothing here licenses moving a
+route or transfer constant toward 2.9, which is the move the program exists to
+prevent. The re-test's function is to stop the parity from being attributed to a
+structure that has since been replaced.
 
 VSP reports passenger attack rates of 5.7–6.9% against crew 2.0–2.4%, a ratio of
 about 2.9 that is stable on both sides of the COVID break. The model returns
