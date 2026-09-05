@@ -267,6 +267,13 @@ hvac:
                                     #   MERV-13 = 0.50 (commercial standard)
                                     #   MERV-16 = 0.95 (hospital grade)
                                     #   HEPA    = 0.999 (biocontainment)
+                                    # The MERV labels above are unsourced. The
+                                    # Healthy Sail Panel reports MERV 8 at 30%
+                                    # over 3-10 um and MERV 13 at 90% over
+                                    # 0.3-1 um, so 0.50 matches neither, and
+                                    # E/#10 sweeps [0.0, 0.30] pre-2020 and
+                                    # [0.90, 0.99] post-2020 instead of
+                                    # redefaulting this value.
   natural_decay_rate: 0.10          # fraction of airborne pathogen lost per
                                     # epoch to settling + viral inactivation
   filter_type: "MERV-13"           # human-readable label for console output
@@ -437,11 +444,16 @@ multi_pathogen:
 # 0 is no effect and 1 is the reference efficacy.
 #
 # The block below is the post-2020 buffet-entry prompt as a *shape*, with
-# the magnitudes left as XXX because E/#10 has to source them: the prompt's
-# coverage and the chosen hand-hygiene action's route efficacy are separate
-# arms, since alcohol rub sits 3-4 log10 below soap on GII.4 (Tuladhar 2015)
-# and collapsing them into one hygiene multiplier would hide which one the
-# post-2020 arm is actually asserting.
+# the magnitudes left as XXX because they are swept, not shipped: E/#10 put
+# them in telemetry_buffer/observation_model/era_configuration_sets.py as
+# spans with a coordinate per lever, and era_config_patch('post', ...)
+# generates this block per sweep point. Sourcing kept the two arms apart:
+# the prompt's coverage, its compliance, the action's per-act removal and the
+# share of hand-mediated dose it acts on are four separate levers, since
+# alcohol rub sits 3-4 log10 below soap on GII.4 genomic copies (Tuladhar
+# 2015) and collapsing them into one hygiene multiplier would hide which one
+# the post-2020 arm is actually asserting. On *infectious* MNV1 the same
+# paper's soap and rub intervals overlap, which is the span both arms use.
 #
 # non_pharmaceutical_interventions:
 #   buffet_entry_handwash_prompt:

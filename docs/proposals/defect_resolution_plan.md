@@ -321,6 +321,37 @@ written `XXX` — so #9 changes no output and #10 owns every number, including
 whether the post-2020 buffet-entry prompt's two arms (soap vs. alcohol rub,
 which Tuladhar 2015 separates by 3–4 log10 on GII.4) survive sourcing at all.
 
+**#10 is done, and it adopts no magnitude either.**
+`telemetry_buffer/observation_model/era_configuration_sets.py` holds both arms as
+lever sets: one swept lever for the pre arm, ten for the post arm, and
+`era_config_patch` refuses to build either unless the caller states a coordinate
+in [0, 1] for every one of them, so no era acquires a point value by omission.
+The buffet prompt is two measures of four levers each — coverage, compliance, a
+sourced `removal_log10`, and an unsourced `hand_share` that alone can produce no
+reduction. Three findings #11 inherits:
+
+- The soap-versus-rub separation quoted above is on **genomic copies**. On
+  infectious MNV1 Tuladhar's own intervals overlap (>3.0 ± 0.4 against
+  2.8 ± 1.5), so both arms are carried at the infectious spans — the weaker
+  separation — and the wider genomic gap is recorded and unused.
+- The shipped `hvac.filter_efficiency` of 0.50, whose comment labels it
+  `MERV-13`, lies in **neither** era's sourced span (pre [0.0, 0.30], post
+  [0.90, 0.99] from the Healthy Sail Panel's own MERV 8 / MERV 13 figures): it
+  is a post-pandemic label on a value matching no filter, in an arm whose
+  anchors are overwhelmingly pre-2020. It is swept per era rather than
+  redefaulted, because moving the default moves every golden.
+- Six documented post-2020 mechanisms enter as **declared absences** rather than
+  numbers — ≥6 ACH (no field: the native transport has only
+  `natural_decay_rate`), staff-assisted buffet service, isolation capacity,
+  touchless fittings, pre-boarding screening (takeoff-preventing, so invisible
+  to A7 by construction) and the cleaning schedule. #11 therefore cannot report
+  that "the post-2020 configuration" was applied while meaning a third of it.
+
+Immunity is deliberately not an NPI: `ship_graph.immune_fraction` is swept
+[0.0, 0.2] with only its **sign** sourced (O'Reilly 2021, Lappe 2023), because
+it pushes A7 the opposite way to every intervention and folding it into a
+hygiene multiplier would let the two cancel invisibly.
+
 D and E are independent of each other.
 
 ## 7. The gate, and what it means to fail it

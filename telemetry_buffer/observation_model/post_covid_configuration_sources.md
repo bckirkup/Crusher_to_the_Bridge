@@ -162,6 +162,45 @@ and an explanation, **not** a successful prediction. The honest test is whether
 a configuration built only from §2 reproduces A7c = 0.668 (0.532-0.907) when
 run at the pre-2020 dose, and that has not been run.
 
+## 4a. Where the configuration now lives (#10)
+
+`era_configuration_sets.py` is the executable half of this audit: the pre-2020
+and post-2020 lever sets, each entry carrying the span it is swept over, its
+grade and its origin. Three properties of it are worth stating here because
+they are what §2 licenses and no more.
+
+**Every lever is a span, and no era has a default coordinate.**
+`era_config_patch(era, coordinates)` refuses to build an arm unless the caller
+states a position in [0, 1] for every swept lever, so neither arm can acquire a
+point value by omission. Ten coordinates are required for the post arm, one for
+the pre arm.
+
+**The buffet prompt is four levers per arm, twice.** §2.2's two arms — "would
+you like to wash your hands" and "would you like sanitiser" — are separate
+measures, each split into coverage (who is reminded), compliance (who acts),
+`removal_log10` (what the act removes: the only sourced part) and `hand_share`
+(how much of the host's hand-mediated dose passes through the washed state,
+which nothing measures). With `hand_share` at 0 the route multiplier is exactly
+1.0, so the unsourced lever cannot manufacture a reduction on its own.
+
+**Two findings, neither of them a knob.** First, §2.2's soap-versus-rub gap is
+a gap in *genomic copies*; on infectious MNV1 Tuladhar's own intervals overlap
+(soap >3.0 ± 0.4 against rub 2.8 ± 1.5), so both arms are carried at their
+infectious-titre spans — the weaker separation — and the wide genomic gap is
+recorded but unused. Second, §2.1's figures put MERV 8 at 30% and MERV 13 at
+90%, which makes the shipped `hvac.filter_efficiency` of 0.50 — whose comment
+labels it `MERV-13` — a value inside **neither** era: above any pre-2020
+filter, below the post-2020 one it is named after, and carried by an arm whose
+anchors are overwhelmingly pre-2020. The value is not changed here; #11 sweeps
+the era spans and the register row records the mismatch.
+
+Recommendation 30's ≥6 ACH is quantified and still does not enter: the native
+transport has no air-change term, so the post arm is configured *without*
+ventilation, along with the four §3 mechanisms and the cleaning schedule of §5.
+All six are declared as `unrepresented` levers rather than dropped, so #11
+cannot report that the post-2020 configuration was applied while silently
+meaning two thirds of it was.
+
 ## 5. Still missing
 
 - Per-zone-class cleaning frequency and coverage. The Healthy Sail Panel says
