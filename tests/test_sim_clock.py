@@ -24,6 +24,7 @@ from engines.infection_dynamics_bridge import (
     KorkinAgent,
     KorkinShipEngine,
 )
+from engines.natural_history import advance_infections
 from engines.sim_clock import (
     HOURS,
     LEGACY_CLOCK,
@@ -32,7 +33,6 @@ from engines.sim_clock import (
     crossed_day_boundary,
 )
 from engines.wearable_monitor import _compute_infection_delta
-from orchestrator_epoch import _advance_agent_pathogen_infections
 
 HOURLY = SimClock(epoch_duration_hours=1.0, mode=HOURS)
 SIX_HOURLY = SimClock(epoch_duration_hours=6.0, mode=HOURS)
@@ -232,7 +232,7 @@ def _infected_agent(clock: SimClock) -> KorkinAgent:
 def _advance(agent: KorkinAgent, epochs: int) -> None:
     rng = np.random.default_rng(7)
     for _ in range(epochs):
-        _advance_agent_pathogen_infections(agent, {"noro": NORO}, rng)
+        advance_infections(agent, {"noro": NORO}, rng)
 
 
 def test_hourly_clock_clears_after_incubation_plus_three_symptomatic_days() -> None:
@@ -265,9 +265,9 @@ def test_onset_waits_for_a_day_of_incubation_on_the_hourly_grid() -> None:
     agent = _infected_agent(HOURLY)
     rng = _AlwaysIllRng()
     for _ in range(23):
-        _advance_agent_pathogen_infections(agent, {"noro": NORO}, rng)
+        advance_infections(agent, {"noro": NORO}, rng)
     assert agent.infections["noro"]["illness"] == IllnessStatus.NOT_ILL
-    _advance_agent_pathogen_infections(agent, {"noro": NORO}, rng)
+    advance_infections(agent, {"noro": NORO}, rng)
     assert agent.infections["noro"]["illness"] == IllnessStatus.SYMPTOMATIC
 
 
@@ -305,7 +305,7 @@ def test_the_illness_draw_is_per_day_not_per_epoch(
     agent = _infected_agent(clock)
     rng = _NeverIllRng()
     for _ in range(epochs):
-        _advance_agent_pathogen_infections(agent, {"noro": NORO}, rng)
+        advance_infections(agent, {"noro": NORO}, rng)
     assert rng.draws == expected_draws
     assert agent.infections["noro"]["illness"] == IllnessStatus.RECOVERED
 
@@ -459,7 +459,7 @@ def test_onset_is_not_rounded_up_to_a_whole_voyage_day() -> None:
     rng = _AlwaysIllRng()
     onset_epoch = None
     for epoch in range(1, 73):
-        _advance_agent_pathogen_infections(agent, {"noro": profile}, rng)
+        advance_infections(agent, {"noro": profile}, rng)
         if (
             onset_epoch is None
             and agent.infections["noro"]["illness"] == IllnessStatus.SYMPTOMATIC
@@ -474,7 +474,7 @@ def test_late_incubation_extends_recovery_and_resets_symptom_day() -> None:
     agent = _infected_agent(HOURLY)
     rng = _AlwaysIllRng()
     for epoch in range(72):
-        _advance_agent_pathogen_infections(agent, {"noro": profile}, rng, epoch=epoch)
+        advance_infections(agent, {"noro": profile}, rng, epoch=epoch)
 
     infection = agent.infections["noro"]
     telemetry = agent.to_schema_dict()["pathogen_infections"]["noro"]
@@ -484,7 +484,7 @@ def test_late_incubation_extends_recovery_and_resets_symptom_day() -> None:
     assert telemetry["days_since_symptom_onset"] == 1
 
     for epoch in range(72, 120):
-        _advance_agent_pathogen_infections(agent, {"noro": profile}, rng, epoch=epoch)
+        advance_infections(agent, {"noro": profile}, rng, epoch=epoch)
     assert agent.infections["noro"]["status"] == InfectionStatus.RECOVERED
 
 
@@ -601,7 +601,7 @@ def test_the_sentinel_visible_onset_is_the_hosts_own_incubation_period() -> None
     onset_epoch = None
     for epoch in range(1, 73):
         engine._advance_illness_and_recovery()
-        _advance_agent_pathogen_infections(agent, {"noro": NORO}, rng)
+        advance_infections(agent, {"noro": NORO}, rng)
         if onset_epoch is None and agent.illness_status == IllnessStatus.SYMPTOMATIC:
             onset_epoch = epoch
     assert onset_epoch == 29  # 1.2 days, not the fallback's 24 epochs

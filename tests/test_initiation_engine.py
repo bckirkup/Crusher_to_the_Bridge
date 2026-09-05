@@ -33,9 +33,11 @@ from engines.initiation import (
     draw_boarding_cohort,
     resolve_initiation_plan,
 )
+from engines.natural_history import (
+    draw_symptom_onset,
+)
 from engines.sim_clock import HOURS, SimClock
 from orchestrator_epoch import (
-    _draw_symptom_onset,
     step_mid_cruise_introductions,
 )
 from orchestrator_init import (
@@ -483,7 +485,7 @@ class TestEpochSeam:
         agent.infect_with_pathogen(PATHOGEN, 0.0, 0, time_infected=2)
         infection = agent.infections[PATHOGEN]
         infection["will_present"] = True
-        _draw_symptom_onset(
+        draw_symptom_onset(
             agent, PATHOGEN, infection, _profile(), np.random.default_rng(1),
         )
         assert infection["illness"] == IllnessStatus.SYMPTOMATIC
@@ -494,7 +496,7 @@ class TestEpochSeam:
         agent.infect_with_pathogen(PATHOGEN, 0.0, 0, time_infected=2)
         infection = agent.infections[PATHOGEN]
         infection["will_present"] = False
-        _draw_symptom_onset(
+        draw_symptom_onset(
             agent, PATHOGEN, infection, _profile(), np.random.default_rng(1),
         )
         assert infection["illness"] == IllnessStatus.NOT_ILL
@@ -504,7 +506,7 @@ class TestEpochSeam:
         agent = _agent(3, "passenger")
         agent.infect_with_pathogen(PATHOGEN, 1e6, 0, time_infected=2)
         infection = agent.infections[PATHOGEN]
-        _draw_symptom_onset(
+        draw_symptom_onset(
             agent, PATHOGEN, infection, _profile(), np.random.default_rng(0),
         )
         assert "will_present" not in infection

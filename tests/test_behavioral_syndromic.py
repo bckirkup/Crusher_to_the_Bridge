@@ -13,7 +13,7 @@ sys.path.insert(0, REPO_ROOT)
 
 from crusher_labs.modalities.syndromic import SyndromicSurveillance
 from engines.infection_dynamics_bridge import IllnessStatus
-from orchestrator_epoch import _draw_symptom_onset, _draw_symptom_severity
+from engines.natural_history import draw_symptom_onset, draw_symptom_severity
 from telemetry_buffer.agent_axes import (
     COMPLIANCE_COMPLIANT,
     INFECTION_INFECTED,
@@ -45,7 +45,7 @@ class TestBehavioralSyndromic:
                 "time_infected": 0,
                 "illness": IllnessStatus.NOT_ILL,
             }
-            _draw_symptom_onset(Host(), "test_pathogen", infection, profile, rng)
+            draw_symptom_onset(Host(), "test_pathogen", infection, profile, rng)
             presents += infection["illness"] == IllnessStatus.SYMPTOMATIC
         return presents / draws
 
@@ -83,7 +83,7 @@ class TestBehavioralSyndromic:
                 "time_infected": 0,
                 "illness": IllnessStatus.NOT_ILL,
             }
-            _draw_symptom_onset(Host(), "test_pathogen", infection, profile, rng)
+            draw_symptom_onset(Host(), "test_pathogen", infection, profile, rng)
             presents += infection["illness"] == IllnessStatus.SYMPTOMATIC
         assert presents / 5000 == pytest.approx(0.8, abs=0.025)
 
@@ -104,7 +104,7 @@ class TestBehavioralSyndromic:
             "will_present": False,
             "illness": IllnessStatus.NOT_ILL,
         }
-        _draw_symptom_onset(Host(), "test_pathogen", infection, profile, np.random.default_rng(24))
+        draw_symptom_onset(Host(), "test_pathogen", infection, profile, np.random.default_rng(24))
         assert infection["illness"] == IllnessStatus.NOT_ILL
 
     def test_five_state_severity_is_drawn_once_per_episode(self) -> None:
@@ -132,9 +132,9 @@ class TestBehavioralSyndromic:
         }
         host = Host()
         rng = np.random.default_rng(4)
-        _draw_symptom_onset(host, "norwalk_gi", infection, profile, rng)
+        draw_symptom_onset(host, "norwalk_gi", infection, profile, rng)
         first = infection["symptom_severity"]
-        _draw_symptom_onset(host, "norwalk_gi", infection, {
+        draw_symptom_onset(host, "norwalk_gi", infection, {
             **profile,
             "severity_model": {
                 "states": [
@@ -160,7 +160,7 @@ class TestBehavioralSyndromic:
         states = ("subclinical", "mild", "moderate", "severe_critical")
         counts = {name: 0 for name in states}
         for _ in range(20000):
-            counts[_draw_symptom_severity(profile, rng)] += 1
+            counts[draw_symptom_severity(profile, rng)] += 1
         total = sum(counts.values())
         symptomatic = np.array([0.55, 0.19, 0.009, 0.001])
         symptomatic /= symptomatic.sum()
@@ -420,7 +420,7 @@ class TestBehavioralSyndromic:
         }
         host = Host()
         rng = np.random.default_rng(8)
-        _draw_symptom_onset(host, "norwalk_gi", infection, profile, rng)
+        draw_symptom_onset(host, "norwalk_gi", infection, profile, rng)
         assert infection["symptom_severity"] == "asymptomatic"
         assert infection["illness"] == IllnessStatus.NOT_ILL
 
@@ -428,7 +428,7 @@ class TestBehavioralSyndromic:
             **profile,
             "illness_probability": {"eta": 1.0, "gamma": 1.0},
         }
-        _draw_symptom_onset(
+        draw_symptom_onset(
             host,
             "norwalk_gi",
             infection,
@@ -448,7 +448,7 @@ class TestBehavioralSyndromic:
                 "base_probabilities": [0.0, 0.0, 0.0, 0.0, 1.0],
             },
         }
-        _draw_symptom_onset(
+        draw_symptom_onset(
             host,
             "norwalk_gi",
             infection,

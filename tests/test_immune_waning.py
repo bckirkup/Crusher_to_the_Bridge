@@ -32,7 +32,12 @@ from engines.infection_dynamics_bridge import (  # noqa: E402
     InfectionStatus,
     KorkinAgent,
 )
+from engines.natural_history import (  # noqa: E402
+    advance_infections,
+    project_legacy_illness,
+)
 from engines.sim_clock import HOURS, LEGACY_EPOCH_DAY, SimClock  # noqa: E402
+from engines.strain_dose_ledger import UNRESOLVED_STRAIN  # noqa: E402
 from engines.strain_state import (  # noqa: E402
     IMMUNITY_AT_EMBARKATION,
     ImmuneRecord,
@@ -43,12 +48,7 @@ from engines.strain_state import (  # noqa: E402
     StrainRegistry,
     StrainState,
 )
-from engines.strain_dose_ledger import UNRESOLVED_STRAIN  # noqa: E402
 from engines.transmission_core import TransmissionCore  # noqa: E402
-from orchestrator_epoch import (  # noqa: E402
-    _advance_agent_pathogen_infections,
-    _project_legacy_illness,
-)
 
 PATHOGEN = "norwalk_gi"
 SARS = "sars_cov2_resp"
@@ -540,7 +540,7 @@ class TestLegacyProjection:
         agent.infect_with_pathogen(PATHOGEN, 1e4, 5, time_infected=5)
         agent.infections[PATHOGEN]["illness"] = IllnessStatus.SYMPTOMATIC
         agent.illness_status = IllnessStatus.NOT_ILL
-        _project_legacy_illness(agent)
+        project_legacy_illness(agent)
         assert agent.illness_status == IllnessStatus.SYMPTOMATIC
         assert agent.infection_status == InfectionStatus.INFECTED
 
@@ -551,7 +551,7 @@ class TestLegacyProjection:
         agent.illness_status = IllnessStatus.SYMPTOMATIC
         agent.infections[PATHOGEN]["status"] = InfectionStatus.RECOVERED
         agent.infections[PATHOGEN]["illness"] = IllnessStatus.RECOVERED
-        _project_legacy_illness(agent)
+        project_legacy_illness(agent)
         assert agent.infection_status == InfectionStatus.RECOVERED
         assert agent.illness_status == IllnessStatus.RECOVERED
 
@@ -560,14 +560,14 @@ class TestLegacyProjection:
         agent.infect_with_pathogen(PATHOGEN, 1e4, 5)
         agent.illness_status = IllnessStatus.SYMPTOMATIC
         agent.infections[PATHOGEN]["illness"] = IllnessStatus.NOT_ILL
-        _project_legacy_illness(agent)
+        project_legacy_illness(agent)
         assert agent.illness_status == IllnessStatus.NOT_ILL
 
     def test_a_host_without_records_keeps_the_fallback_state(self) -> None:
         agent = _agent()
         agent.infection_status = InfectionStatus.INFECTED
         agent.illness_status = IllnessStatus.SYMPTOMATIC
-        _project_legacy_illness(agent)
+        project_legacy_illness(agent)
         assert agent.illness_status == IllnessStatus.SYMPTOMATIC
 
     def test_a_second_episode_reopens_the_legacy_fields(self) -> None:
@@ -580,14 +580,14 @@ class TestLegacyProjection:
             strain_id=first.strain_id, strain_phenotype=Phenotype.of(first),
         )
         for _ in range(3):
-            _advance_agent_pathogen_infections(
+            advance_infections(
                 agent,
                 {PATHOGEN: _profile(
                     recovery_day=1, shedding_duration_days=1,
                 )},
                 np.random.default_rng(1), registry, 96,
             )
-        _project_legacy_illness(agent)
+        project_legacy_illness(agent)
         assert agent.infection_status == InfectionStatus.RECOVERED
 
         second = registry.mint(PATHOGEN, genotype=GENOTYPES[1])

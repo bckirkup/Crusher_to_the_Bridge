@@ -23,6 +23,9 @@ from engines.infection_dynamics_bridge import (  # noqa: E402
     InfectionStatus,
     KorkinAgent,
 )
+from engines.natural_history import (  # noqa: E402
+    advance_infections,
+)
 from engines.strain_state import (  # noqa: E402
     IMMUNITY_AT_EMBARKATION,
     IMMUNITY_FROM_INFECTION,
@@ -32,9 +35,6 @@ from engines.strain_state import (  # noqa: E402
     StrainRegistry,
 )
 from engines.transmission_core import TransmissionCore  # noqa: E402
-from orchestrator_epoch import (  # noqa: E402
-    _advance_agent_pathogen_infections,
-)
 from tools.sanity_checker import (  # noqa: E402
     PathogenProfile,
     Report,
@@ -111,7 +111,7 @@ def _resolve(
     )
     steps = recovery_day + 2
     for _ in range(steps):
-        _advance_agent_pathogen_infections(
+        advance_infections(
             agent, {PATHOGEN: profile}, np.random.default_rng(1), registry, epoch,
         )
 

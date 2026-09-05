@@ -26,14 +26,14 @@ from engines.infection_dynamics_bridge import (  # noqa: E402
     InfectionStatus,
     KorkinAgent,
 )
+from engines.natural_history import (  # noqa: E402
+    advance_infections,
+)
 from engines.strain_state import (  # noqa: E402
     Phenotype,
     StrainEvolutionConfig,
 )
 from engines.transmission_core import TransmissionCore  # noqa: E402
-from orchestrator_epoch import (  # noqa: E402
-    _advance_agent_pathogen_infections,
-)
 
 PATHOGEN = "norwalk_gi"
 VARIANT_CFG = {"variant_surveillance": {"enabled": True}}
@@ -275,7 +275,7 @@ def _advance(agent: KorkinAgent, days: int, *, recovery_day: int = 3) -> None:
         "shedding_duration_days": recovery_day,
     }
     for _ in range(days):
-        _advance_agent_pathogen_infections(agent, {PATHOGEN: profile}, rng)
+        advance_infections(agent, {PATHOGEN: profile}, rng)
 
 
 class TestPerStrainRecovery:

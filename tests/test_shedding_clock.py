@@ -18,9 +18,9 @@ from engines.infection_dynamics_bridge import (
     InfectionStatus,
     KorkinAgent,
 )
+from engines.natural_history import advance_infections
 from engines.sim_clock import HOURS, SimClock
 from engines.transmission_core import TransmissionCore
-from orchestrator_epoch import _advance_agent_pathogen_infections
 
 PATHOGEN = "test_pathogen"
 ZONE = "Cabin_A"
@@ -124,7 +124,7 @@ def _run(
             shedding=agent.get_pathogen_shedding(PATHOGEN, profile),
             hand_target=agent.get_pathogen_hand_target(PATHOGEN, profile),
         ))
-        _advance_agent_pathogen_infections(
+        advance_infections(
             agent, {PATHOGEN: profile}, rng, epoch=epoch,
         )
     return trace
@@ -332,7 +332,7 @@ class TestEmesisStaysIllnessLinked:
         rng = np.random.default_rng(7)
         epochs = round((ONSET_DAYS + RECOVERY_DAYS + 1.0) * clock.epochs_per_day)
         for epoch in range(epochs):
-            _advance_agent_pathogen_infections(
+            advance_infections(
                 agent, {PATHOGEN: profile}, rng, epoch=epoch,
             )
 
