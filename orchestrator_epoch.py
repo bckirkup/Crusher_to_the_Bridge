@@ -23,6 +23,7 @@ from crusher_labs.modalities.long_read_sequencing import (
 from crusher_labs.modalities.wearable import WearableDataStream
 from engines.infection_dynamics_bridge import (
     DEFAULT_AIRBORNE_HALF_LIFE_HOURS,
+    UNSOURCED_AIRBORNE_EMISSION_FRACTION,
     InfectionStatus,
     KorkinShipEngine,
 )
@@ -331,18 +332,21 @@ def step_shore_introductions(
 def _airborne_emission_fraction(profile: dict[str, Any]) -> float:
     """Continuous airborne fraction for a pathogen profile.
 
-    ``surface_deposition_fraction`` is the deprecated alias for the same key.
-    It never fed a surface pool: the fomite reservoir is filled by the emesis
-    and faecal-release paths in ``TransmissionCore`` instead. An
-    ``emesis_conditioned`` arm receives its airborne emission per event from
-    ``TransmissionCore`` rather than through continuous shedding.
+    The share of the emission an arm already computes that stays in zone air,
+    so it is dimensionless only where the arm's level is a measured release
+    rate rather than a specimen titre. ``surface_deposition_fraction`` is the
+    deprecated alias for the same key. It never fed a surface pool: the fomite
+    reservoir is filled by the emesis and faecal-release paths in
+    ``TransmissionCore`` instead. An ``emesis_conditioned`` arm receives its
+    airborne emission per event from ``TransmissionCore`` rather than through
+    continuous shedding.
     """
     if profile.get("airborne_emission_mode") == "emesis_conditioned":
         return 0.0
     for key in ("airborne_emission_fraction", "surface_deposition_fraction"):
         if key in profile:
             return float(profile[key] or 0.0)
-    return 1e-4
+    return UNSOURCED_AIRBORNE_EMISSION_FRACTION
 
 
 def step_infection_progression(
