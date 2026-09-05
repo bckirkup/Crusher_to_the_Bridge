@@ -104,7 +104,7 @@ what fits.
 | B1 | Demote A3 from scored anchor to construction constraint | #23 | — (**resolved**, see below) |
 | B2 | The observation model's ~15 numbers: source them or declare them | #27 | B1 (**resolved as a declaration**, see below) |
 | B3 | Recut the A4 class bins | #29 | — (**resolved**, see below) |
-| B4 | An external voyage denominator for VSP posting rates | #13 | — |
+| B4 | An external voyage denominator for VSP posting rates | #13 | — (**resolved as a declaration; the series stays blocked**, see below) |
 | B5 | Measure or externally bound the cabin-localization fraction `f` | #12 | — |
 
 **B1 is resolved.** `score_anchors.py` scored A3 against 0.35–0.45 while its own
@@ -158,6 +158,33 @@ recorded: the hull-to-GRT mapping behind A8/A9 chose representative ships for
 the classic and spirit hulls against the same total-agent figures, so their
 band is one band too high until two ships at ~1,350 and ~2,100 passengers are
 sourced.
+
+**B4 is resolved as a declaration, and it resolves by making the gap explicit
+rather than by closing it.** The search was already done and had already failed:
+CDC publishes annual voyage counts for 2008–2014 only (Freeland 2016, in two
+units — voyages required to report, and the 3–21 d / >100 pax subset analysed),
+one pooled 2006–2019 total in a third unit (Jenkins 2021, unduplicated voyage
+reports), and nothing at all after 2019. What was wrong was not the absence but
+the silence about it: A9 divided by Jenkins's 37,258 with no unit or window
+recorded, so a period average in voyage *reports* read as a voyage rate.
+`midrs_incidence_targets.py` now declares that denominator's unit, window and
+source in the target itself and in the scoring report, and
+`vsp_voyage_denominator.py` carries the two Freeland series side by side, the
+reason each uncovered year is uncovered, and the posting rate the project's own
+numerator would give under each unit as a diagnostic **no anchor scores**.
+
+Three findings that keep the row blocked in the register rather than clearing
+it. The numerator is *posted* outbreaks against denominators CDC pairs with
+*investigated* outbreaks, and the two definitions point opposite ways — 91
+postings against 132 investigations in Freeland's window, 208 against 156 in
+Jenkins's — so no ratio converts one into the other. Freeland's own printed
+per-1,000-voyage rates are reproducible from Freeland's own counts for 1 of 7
+years and fall outside the bracket its two units span in 4 of 7, which is why
+both units are carried rather than either quoted. And the post-2020 arm has no
+voyage count of any kind, so the discontinuity that arm exists to measure cannot
+be written as a rate at all — the class-composition observable of
+[`fleet_emergence_decision.md`](fleet_emergence_decision.md) §3 remains the only
+fleet statistic available there.
 
 ## 5. Track C — intervals: no scored parameter stays a point value
 

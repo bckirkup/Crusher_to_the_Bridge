@@ -163,3 +163,10 @@ made explicit in the scorer, A9 is reported as an interval spanning both.
   compared one at a time, never pooled by us.
 - **Everything after 2019.** No MIDRS surveillance summary covers the post-COVID
   period, so A8 and A9 have no post-arm observation at all.
+- **An annual denominator, in a defined voyage unit.** Table 1's 37,258 is a
+  single pooled total of *unduplicated voyage reports* over fourteen years, so
+  A9's target is a period average and no year of it can be separated out. The
+  only annual counts CDC publishes are Freeland 2016's, for 2008-2014, in two
+  other units that do not reconcile with this one; #13 declares the unit used
+  here rather than closing the gap, and carries the Freeland series as a
+  diagnostic in `vsp_voyage_denominator.py`.

@@ -13,7 +13,14 @@ from __future__ import annotations
 
 from typing import Any
 
+# The A9 denominator, declared rather than assumed (#13).  It is Jenkins's
+# count of *unduplicated voyage reports* pooled over 2006-2019, not a count of
+# voyages per year and not the unit Freeland 2016 publishes annually; see
+# ``vsp_voyage_denominator.py`` for the two counts side by side and for what
+# the same numerator gives under the other one.
 MIDRS_TOTAL_VOYAGES = 37_258
+MIDRS_DENOMINATOR_UNIT = "unduplicated voyage reports, pooled 2006-2019"
+MIDRS_DENOMINATOR_WINDOW = (2006, 2019)
 MIDRS_PASSENGER_OUTBREAKS_INVESTIGATED = 156
 MIDRS_PASSENGER_OUTBREAKS_POSTED = 208
 
@@ -183,6 +190,11 @@ def a9_targets(era: str) -> dict[str, Any] | None:
     in the project's series, both divided by the same 37,258 voyage reports.
     Table 3 supplies no GRT-band outbreak numerator, so per-hull targets are
     explicitly unavailable rather than inferred.
+
+    The denominator is declared in the returned ``fleet`` block: it is one
+    pooled 2006-2019 count in Jenkins's own unit, so the target is a
+    period average and no year of it is separable.  The post arm keeps no
+    target because no voyage count has been published for that era at all.
     """
     if era not in _VALID_ERAS:
         raise ValueError(f"unknown MIDRS era: {era!r}")
@@ -204,6 +216,12 @@ def a9_targets(era: str) -> dict[str, Any] | None:
             "definitions": {
                 "investigated": "MMWR investigated passenger outbreaks",
                 "posted": "project VSP posted series",
+            },
+            "denominator": {
+                "voyages": MIDRS_TOTAL_VOYAGES,
+                "unit": MIDRS_DENOMINATOR_UNIT,
+                "window": MIDRS_DENOMINATOR_WINDOW,
+                "source": "Jenkins 2021 (MMWR SS 70(6)), Table 1",
             },
         },
         "per_hull": {
