@@ -61,7 +61,7 @@ from picard_framework.pathogen_overrides import (
     isolate_arm_overrides,
     load_pathogen_bundle,
 )
-from picard_framework.runs.mega_cruise_campaign import sentinel_recovery
+from picard_framework.runs.mega_cruise_campaign import boarding_axis, sentinel_recovery
 from simulation_utils.paths import validate_path_component, validated_open
 
 ARM_DISTRIBUTION = "distribution"
@@ -174,9 +174,15 @@ def arm_pathogen_overrides(
     pathogen_id: str,
     base_overrides: Mapping[str, Any] | None,
     dose_adjustment: float,
-    n_init: int,
+    seeding_patch: Mapping[str, Any],
 ) -> dict[str, Any]:
-    """Run-spec pathogen overrides for one arm — the only thing that differs."""
+    """Run-spec pathogen overrides for one arm — the only thing that differs.
+
+    ``seeding_patch`` is how the voyage starts, from
+    :func:`sentinel_recovery.onboard_seeding`: a fiat index-case count for a
+    pathogen initiation does not own, and empty for one it does, whose cohort
+    is drawn from boarding prevalence instead.
+    """
     if arm not in ARMS:
         raise SystemExit(f"unknown arm {arm!r}")
     over: dict[str, Any] = {
@@ -195,7 +201,7 @@ def arm_pathogen_overrides(
         over["add"] = [*(over.get("add") or []), strip_incubation(profile)]
     patch = dict(over.get(pathogen_id) or {})
     patch["dose_adjustment"] = float(dose_adjustment)
-    patch["initial_infected"] = int(n_init)
+    patch.update(seeding_patch)
     over[pathogen_id] = patch
     return over
 
@@ -228,6 +234,7 @@ def run_spec_payload(
     pathogen_overrides: Mapping[str, Any],
     bundle: str,
     line_list_path: str,
+    seeding_factors: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Picard run spec for one voyage of one arm."""
     defaults = manifest.get("defaults") or {}
@@ -240,6 +247,9 @@ def run_spec_payload(
         },
         "voyage": dict(voyage),
         "voyage_id": run_id,
+        **boarding_axis.initiation_override(
+            bundle, pathogen_overrides, seeding_factors or {},
+        ),
         **_surveillance_override(manifest, design.surveillance),
     }
     return {
@@ -273,7 +283,7 @@ def voyage_params(
     run_id: str,
     hazards: Mapping[str, float],
     dose_adjustment: float,
-    n_init: int,
+    seeding_factors: Mapping[str, Any],
 ) -> dict[str, Any]:
     """``meta.json`` for the extract layout the fleet fitter consumes."""
     return {
@@ -287,7 +297,7 @@ def voyage_params(
         "seed": int(seed),
         "epochs": int(design.epochs),
         "dose_adjustment": float(dose_adjustment),
-        "initial_infected": int(n_init),
+        **dict(seeding_factors),
         "R_onboard": float(design.r_onboard),
         "hazard_profile": design.hazard_profile,
         "fleet_config": design.fleet_config,
@@ -362,7 +372,9 @@ def simulate_voyage(
     """Run one voyage and return its extract record."""
     defaults = manifest.get("defaults") or {}
     dose = float(defaults.get("dose_adjustment", 10.6))
-    n_init = sentinel_recovery.initial_infected(dict(hazards), design.r_onboard)
+    seeding = sentinel_recovery.onboard_seeding(
+        dict(hazards), design.r_onboard, pathogen_id, dict(defaults),
+    )
     run_id = voyage_run_id(arm, variant, seed)
     dest = ensure_out_dir(os.path.join(arm_dir, "voyages", run_id))
     days = sentinel_recovery.stamp_port_hazards(
@@ -381,7 +393,7 @@ def simulate_voyage(
         pathogen_id=pathogen_id,
         base_overrides=base_overrides,
         dose_adjustment=dose,
-        n_init=n_init,
+        seeding_patch=seeding.pathogen_patch,
     )
     line_list = os.path.join(dest, "line_list.json")
     spec_path = os.path.join(dest, "run_spec.json")
@@ -398,6 +410,7 @@ def simulate_voyage(
             pathogen_overrides=overrides,
             bundle=bundle,
             line_list_path=line_list,
+            seeding_factors=seeding.factors,
         ),
     )
     started = time.time()
@@ -414,7 +427,7 @@ def simulate_voyage(
         run_id=run_id,
         hazards=hazards,
         dose_adjustment=dose,
-        n_init=n_init,
+        seeding_factors=seeding.factors,
     )
     params["wall_seconds"] = round(time.time() - started, 1)
     return {

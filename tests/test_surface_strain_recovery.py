@@ -430,6 +430,9 @@ class TestSurfaceReservoirIntegration:
         enabled_spec = PicardRunSpec.from_legacy_yaml(
             str(REPO_ROOT), num_epochs=epochs,
         )
+        # A fiat ten-host seed is this test's design, so the shipped boarding
+        # block is withdrawn rather than left to refuse the count.
+        enabled_spec.legacy_cfg["initiation"] = None
         enabled_spec.pathogen_profiles[PATHOGEN]["initial_infected"] = 10
         variant_cfg = copy.deepcopy(
             enabled_spec.legacy_cfg["variant_surveillance"],

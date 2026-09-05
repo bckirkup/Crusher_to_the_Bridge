@@ -36,6 +36,9 @@ from itertools import product
 from typing import Any, Iterator, Mapping, Sequence
 
 from picard_framework.pathogen_overrides import load_pathogen_bundle
+from picard_framework.runs.mega_cruise_campaign.boarding_axis import (
+    IndexCaseAxis,
+)
 
 CLOCK_HOURS = "hours"
 CLOCK_LEGACY_EPOCH_DAY = "legacy_epoch_day"
@@ -272,7 +275,8 @@ def _pathogen_overrides(
     pathogen_id: str,
     arm: str,
     dose_adjustment: float,
-    initial_infected: int,
+    index_axis: IndexCaseAxis,
+    index_point: Any,
     cell: Mapping[str, Any],
 ) -> dict[str, Any]:
     over: dict[str, Any] = {
@@ -284,9 +288,10 @@ def _pathogen_overrides(
             *(over.get("add") or []),
             fixed_onset_profile(bundle, pathogen_id),
         ]
+    over = index_axis.pathogen_overrides(
+        over, index_point, dose_adjustment=float(dose_adjustment),
+    )
     patch = dict(over.get(pathogen_id) or {})
-    patch["dose_adjustment"] = float(dose_adjustment)
-    patch["initial_infected"] = int(initial_infected)
     strain_patch = _strain_evolution_patch(cell)
     if strain_patch:
         patch["strain_evolution"] = {
@@ -355,6 +360,7 @@ def _run_id(
     arm: str,
     pathogen: str,
     cell: Mapping[str, Any],
+    index_tags: Sequence[str] = (),
 ) -> str:
     parts = [
         short,
@@ -365,6 +371,7 @@ def _run_id(
         str(cell["platform"]),
         f"d{int(cell['voyage_days'])}",
         f"f{int(cell['founder_strains'])}",
+        *index_tags,
     ]
     for key, tag, _param, _field in _RATE_AXES:
         source_key = _RATE_AXIS_ALIASES.get(key, key)
@@ -409,16 +416,18 @@ def iter_variant_runs(
     bundle, pathogen_id, base_overrides = get_pathogen_config(manifest, pathogen)
     defaults = manifest.get("defaults") or {}
     dose = float(tier.get("dose_adjustment", defaults["dose_adjustment"]))
-    n_init = int(tier.get("initial_infected", defaults["initial_infected"]))
+    index_axis = IndexCaseAxis.for_tier(
+        tier, pathogen_id, defaults=defaults, legacy_default=None,
+    )
     short = tier_id.split("_", 1)[0]
     axes = tier_axes(manifest, tier, platform_override=platform_override)
     keys = tuple(axes)
-    for combo in product(*axes.values()):
+    for point, combo in product(index_axis.points, product(*axes.values())):
         cell = dict(zip(keys, combo))
         epochs = epochs_override or epochs_for_days(manifest, cell["voyage_days"])
         run_id = _run_id(
             short=short, tier=tier, regime=regime, clock=clock, arm=arm,
-            pathogen=pathogen, cell=cell,
+            pathogen=pathogen, cell=cell, index_tags=index_axis.tags(point),
         )
         yield yield_run(
             run_id,
@@ -429,7 +438,8 @@ def iter_variant_runs(
                 pathogen_id=pathogen_id,
                 arm=arm,
                 dose_adjustment=dose,
-                initial_infected=n_init,
+                index_axis=index_axis,
+                index_point=point,
                 cell=cell,
             ),
             config_overrides=merge_cfg(
@@ -456,6 +466,6 @@ def iter_variant_runs(
             regime=regime,
             incubation_arm=arm,
             dose_adjustment=dose,
-            n_init=n_init,
+            **index_axis.factors(point),
             **_cell_parameters(cell),
         )

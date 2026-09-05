@@ -89,7 +89,18 @@
         "decay_rate_per_day": 0.1
       },
       "introduction_epoch": 0,
-      "initial_infected": 1,
+      "initial_infected": null,
+      "boarding": {
+        "mode": "prevalence",
+        "prevalence": {
+          "passenger": 0.0325,
+          "crew": 0.0185
+        },
+        "state_split": {
+          "never_symptomatic_fraction": 0.29,
+          "presymptomatic_share_of_presenting": 0.04
+        }
+      },
       "initial_time_infected": 0,
       "shedding_variance_log10": 1.5,
       "clinical_presentation": {
@@ -291,7 +302,18 @@
         "enabled": false
       },
       "introduction_epoch": 6,
-      "initial_infected": 1,
+      "initial_infected": null,
+      "boarding": {
+        "mode": "prevalence",
+        "prevalence": {
+          "passenger": 0.01,
+          "crew": 0.006
+        },
+        "state_split": {
+          "never_symptomatic_fraction": 0.35,
+          "presymptomatic_share_of_presenting": 0.3
+        }
+      },
       "initial_time_infected": 0,
       "shedding_variance_log10": 1.2,
       "clinical_presentation": {
@@ -510,7 +532,18 @@
         "enabled": false
       },
       "introduction_epoch": 12,
-      "initial_infected": 1,
+      "initial_infected": null,
+      "boarding": {
+        "mode": "prevalence",
+        "prevalence": {
+          "passenger": 0.008,
+          "crew": 0.005
+        },
+        "state_split": {
+          "never_symptomatic_fraction": 0.44,
+          "presymptomatic_share_of_presenting": 0.3
+        }
+      },
       "initial_time_infected": 0,
       "shedding_variance_log10": 1.0,
       "clinical_presentation": {
@@ -687,7 +720,19 @@
         "enabled": false
       },
       "introduction_epoch": 20,
-      "initial_infected": 1,
+      "initial_infected": null,
+      "boarding": {
+        "mode": "party",
+        "party": {
+          "probability": 0.02,
+          "size": 2,
+          "role": "passenger"
+        },
+        "state_split": {
+          "never_symptomatic_fraction": 0.05,
+          "presymptomatic_share_of_presenting": 0.0
+        }
+      },
       "initial_time_infected": 0,
       "shedding_variance_log10": 0.8,
       "clinical_presentation": {
@@ -1074,7 +1119,19 @@
         "decay_rate_per_day": 0.1
       },
       "introduction_epoch": 40,
-      "initial_infected": 1,
+      "initial_infected": null,
+      "boarding": {
+        "mode": "party",
+        "party": {
+          "probability": 0.03,
+          "size": 3,
+          "role": "passenger"
+        },
+        "state_split": {
+          "never_symptomatic_fraction": 0.75,
+          "presymptomatic_share_of_presenting": 0.0
+        }
+      },
       "initial_time_infected": 0,
       "shedding_variance_log10": 1.0,
       "clinical_presentation": {
@@ -1205,7 +1262,18 @@
         "decay_rate_per_day": 0.05
       },
       "introduction_epoch": 50,
-      "initial_infected": 1,
+      "initial_infected": null,
+      "boarding": {
+        "mode": "prevalence",
+        "prevalence": {
+          "passenger": 0.03,
+          "crew": 0.03
+        },
+        "state_split": {
+          "never_symptomatic_fraction": 0.6,
+          "presymptomatic_share_of_presenting": 0.0
+        }
+      },
       "initial_time_infected": 0,
       "shedding_variance_log10": 1.0,
       "clinical_presentation": {
@@ -1336,7 +1404,18 @@
         "enabled": false
       },
       "introduction_epoch": 60,
-      "initial_infected": 1,
+      "initial_infected": null,
+      "boarding": {
+        "mode": "prevalence",
+        "prevalence": {
+          "passenger": 0.076,
+          "crew": 0.076
+        },
+        "state_split": {
+          "never_symptomatic_fraction": 0.9,
+          "presymptomatic_share_of_presenting": 0.0
+        }
+      },
       "initial_time_infected": 0,
       "shedding_variance_log10": 1.5,
       "clinical_presentation": {
@@ -1476,7 +1555,19 @@
         "enabled": false
       },
       "introduction_epoch": 70,
-      "initial_infected": 1,
+      "initial_infected": null,
+      "boarding": {
+        "mode": "party",
+        "party": {
+          "probability": 0.005,
+          "size": 3,
+          "role": "passenger"
+        },
+        "state_split": {
+          "never_symptomatic_fraction": 0.05,
+          "presymptomatic_share_of_presenting": 0.0
+        }
+      },
       "initial_time_infected": 0,
       "shedding_variance_log10": 1.0,
       "clinical_presentation": {
@@ -1610,7 +1701,19 @@
         "enabled": false
       },
       "introduction_epoch": 80,
-      "initial_infected": 1,
+      "initial_infected": null,
+      "boarding": {
+        "mode": "party",
+        "party": {
+          "probability": 0.002,
+          "size": 3,
+          "role": "passenger"
+        },
+        "state_split": {
+          "never_symptomatic_fraction": 0.03,
+          "presymptomatic_share_of_presenting": 0.0
+        }
+      },
       "initial_time_infected": 0,
       "shedding_variance_log10": 1.5,
       "clinical_presentation": {

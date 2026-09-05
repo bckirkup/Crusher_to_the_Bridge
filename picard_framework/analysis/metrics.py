@@ -300,6 +300,7 @@ def build_run_summary_row(payload: dict[str, Any]) -> dict[str, Any]:
             else {},
             run_id=str(row.get("run_id") or ""),
             timeseries=timeseries,
+            initiation=payload.get("initiation"),
         )
     return row
 

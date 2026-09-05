@@ -113,6 +113,7 @@
       "description": "Investment frontier: four tiers x four hulls, norovirus",
       "regime": "investment",
       "pathogen": "norovirus",
+      "fiat_index_case": true,
       "platforms": [
         "expedition_cruise_450",
         "classic_cruise_1900",
@@ -201,6 +202,7 @@
       "description": "Investment frontier at a 10-day voyage on the largest hull, where within-voyage diversity has time to accumulate",
       "regime": "investment",
       "pathogen": "norovirus",
+      "fiat_index_case": true,
       "platforms": [
         "mega_cruise_5000"
       ],

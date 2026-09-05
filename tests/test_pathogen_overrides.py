@@ -33,7 +33,7 @@ def test_apply_pathogen_overrides_patches_and_removes() -> None:
     )
     assert "sars_cov2_resp" not in resolved
     assert resolved["norwalk_gi"]["initial_infected"] == 5
-    assert base["norwalk_gi"]["initial_infected"] == 1
+    assert base["norwalk_gi"]["initial_infected"] is None
 
 
 def test_apply_pathogen_overrides_adds_profile() -> None:

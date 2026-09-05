@@ -4,6 +4,8 @@ from __future__ import annotations
 from itertools import product
 from typing import Any, Iterator
 
+from picard_framework.runs.mega_cruise_campaign import boarding_axis
+
 
 def _pathogen_bundle(ctx: Any, pathogen: str) -> tuple[str, Any, dict[str, Any]]:
     return ctx.get_pathogen_config(ctx.manifest, pathogen)
@@ -45,31 +47,13 @@ def _lockdown_tag(lockdown_ar: Any) -> tuple[float | None, str]:
     return lockdown_val, tag
 
 
-def _path_overrides(
-    base: dict[str, Any] | None,
-    pathogen_id: str,
-    dose: Any,
-    n_init: Any,
-) -> dict[str, Any]:
-    path_over = dict(base or {})
-    patch: dict[str, Any] = {}
-    if dose is not None:
-        patch["dose_adjustment"] = float(dose)
-    if n_init is not None:
-        patch["initial_infected"] = int(n_init)
-    if not patch:
-        return path_over
-    path_over[pathogen_id] = {**(path_over.get(pathogen_id) or {}), **patch}
-    return path_over
-
-
 def _calibration_rid(
     ctx: Any,
     *,
     pathogen: str,
     plat: str,
     dose: Any,
-    n_init: Any,
+    index_tags: list[str],
     alpha: Any,
     cmode: Any,
     sweep_epochs: bool,
@@ -81,8 +65,7 @@ def _calibration_rid(
     parts = [ctx.short, pathogen, plat]
     if dose is not None:
         parts.append(ctx.dose_tag(dose))
-    if n_init is not None:
-        parts.append(f"init{int(n_init)}")
+    parts.extend(index_tags)
     if alpha is not None:
         parts.append(ctx.alpha_tag(alpha))
     if cmode is not None:
@@ -211,31 +194,28 @@ def _iter_t5_runs(ctx: Any) -> Iterator[tuple[str, dict[str, Any]]]:
             surveillance=sname,
         )
 
+
 def _iter_t6_runs(ctx: Any) -> Iterator[tuple[str, dict[str, Any]]]:
     immunities = ctx.tier.get("pre_immunity_fractions", [None])
-    for pathogen, n_init, imm_frac, seed in product(
-        ctx.tier["pathogens"],
-        ctx.tier["initial_infected"],
-        immunities,
-        ctx.tier["seeds"],
-    ):
+    for pathogen in ctx.tier["pathogens"]:
         bundle, pathogen_id, overrides = ctx.get_pathogen_config(ctx.manifest, pathogen)
-        path_over = dict(overrides or {})
-        path_over[pathogen_id] = {
-            **(path_over.get(pathogen_id) or {}),
-            "initial_infected": int(n_init),
-        }
-        cfg_over, imm_tag = ctx.immunity_override(imm_frac)
-        yield ctx.yield_run(
-            f"{ctx.short}_{pathogen}_init{n_init}{imm_tag}_s{seed}",
-            bundle=bundle,
-            pathogen_overrides=path_over,
-            config_overrides=cfg_over,
-            seed=seed,
-            pathogen=pathogen,
-            n_init=int(n_init),
-            immunity=imm_frac,
-        )
+        index_axis = boarding_axis.axis_for_mixed_tier(ctx.tier, pathogen_id)
+        for point, imm_frac, seed in product(
+            index_axis.points, immunities, ctx.tier["seeds"],
+        ):
+            cfg_over, imm_tag = ctx.immunity_override(imm_frac)
+            tags = "".join(f"_{tag}" for tag in index_axis.tags(point))
+            yield ctx.yield_run(
+                f"{ctx.short}_{pathogen}{tags}{imm_tag}_s{seed}",
+                bundle=bundle,
+                pathogen_overrides=index_axis.pathogen_overrides(overrides, point),
+                config_overrides=cfg_over,
+                seed=seed,
+                pathogen=pathogen,
+                immunity=imm_frac,
+                **index_axis.factors(point),
+            )
+
 
 def _iter_t7_runs(ctx: Any) -> Iterator[tuple[str, dict[str, Any]]]:
     immunities = ctx.tier.get("pre_immunity_fractions", [None])
@@ -563,10 +543,11 @@ def _iter_calibration_runs(ctx: Any) -> Iterator[tuple[str, dict[str, Any]]]:
     ]
     epoch_list, sweep_epochs = _calibration_epochs(ctx)
     hvac = {"hvac": ctx.tier["hvac"]} if ctx.tier.get("hvac") else None
-    for plat, dose, n_init, alpha, cmode, imm_frac, n_epochs, sname, seed in product(
+    index_axis = ctx.calibration_index_axis(ctx.tier, pathogen_id)
+    for plat, dose, point, alpha, cmode, imm_frac, n_epochs, sname, seed in product(
         platforms,
         ctx.calibration_dose_values(ctx.tier),
-        ctx.calibration_init_values(ctx.tier),
+        index_axis.points,
         ctx.density_exponent_values(ctx.tier),
         ctx.contact_mode_values(ctx.tier),
         ctx.tier.get("pre_immunity_fractions", [None]),
@@ -581,7 +562,7 @@ def _iter_calibration_runs(ctx: Any) -> Iterator[tuple[str, dict[str, Any]]]:
                 pathogen=pathogen,
                 plat=plat,
                 dose=dose,
-                n_init=n_init,
+                index_tags=index_axis.tags(point),
                 alpha=alpha,
                 cmode=cmode,
                 sweep_epochs=sweep_epochs,
@@ -591,8 +572,10 @@ def _iter_calibration_runs(ctx: Any) -> Iterator[tuple[str, dict[str, Any]]]:
                 seed=seed,
             ),
             bundle=bundle,
-            pathogen_overrides=_path_overrides(
-                base_overrides, pathogen_id, dose, n_init,
+            pathogen_overrides=index_axis.pathogen_overrides(
+                base_overrides,
+                point,
+                dose_adjustment=None if dose is None else float(dose),
             ),
             config_overrides=ctx.merge_cfg(
                 ctx.surv_cfgs.get(sname),
@@ -612,10 +595,10 @@ def _iter_calibration_runs(ctx: Any) -> Iterator[tuple[str, dict[str, Any]]]:
             epochs=int(n_epochs),
             surveillance=sname,
             dose_adjustment=dose,
-            n_init=n_init,
             immunity=imm_frac,
             density_exponent=alpha,
             contact_mode=cmode,
+            **index_axis.factors(point),
         )
 
 

@@ -1,6 +1,6 @@
 {
   "campaign": "vsp_degradation_v1",
-  "description": "VSP shadow stress-test: factor-at-a-time + interaction panels at dose=10.6, alpha_c=0.75. Design: vsp_degradation_sweep_v1_design.json.",
+  "description": "VSP shadow stress-test: factor-at-a-time + interaction panels at dose=10.6, alpha_c=0.75. Design: vsp_degradation_sweep_v1_design.json. Infection arrives through the boarding channel initiation owns, at the register's prevalence midpoints; the fiat index-case count this campaign used to default to was never one of its factors.",
   "platform": "mega_cruise_5000",
   "default_epochs": 168,
   "default_num_agents": 7000,
@@ -23,7 +23,6 @@
   "defaults": {
     "dose_adjustment": 10.6,
     "density_exponent": 0.75,
-    "initial_infected": 3,
     "nominal_values": {
       "vsp_threshold": 0.05,
       "detection_delay": 1,

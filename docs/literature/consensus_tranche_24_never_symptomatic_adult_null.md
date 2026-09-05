@@ -4,7 +4,10 @@
 **re-searched and confirmed**. **No profile constant, engine constant, config
 value or interval changes in this document.** One structural finding about
 `initial_infected` (#54) is recorded here and acted on in `engines/initiation.py`
-in the same change.
+in the same change. **#54 is since resolved** (Track C, C1): the shipped
+`norwalk_gi` profile now boards through `initiation.boarding` with
+`never_symptomatic_fraction` supplied as a swept interval, never a point — §3
+records both the original blocker and how it was cleared.
 
 Tranche 11 searched `never_symptomatic_fraction` and found two admissible
 designs — adult challenge studies at `[0.22, 0.36]` and community birth cohorts
@@ -125,10 +128,10 @@ not conservative in a known direction for a geriatric population — the age tre
 is measured only over the range where immunity is being acquired, and nothing
 measures where it goes after that.
 
-## §3 — the structural half (#54): why the shipped profile keeps `initial_infected`, and what changed instead
+## §3 — the structural half (#54): why the shipped profile kept `initial_infected`, what changed instead, and how the block was cleared
 
-Migrating `norwalk_gi` off `initial_infected` has a destination — the boarding
-prevalence channel of `engines/initiation.py` — and that destination is closed:
+**As found (first pass of this tranche).** Migrating `norwalk_gi` off `initial_infected` has a destination — the boarding
+prevalence channel of `engines/initiation.py` — and that destination was closed:
 enabling boarding requires `state_split.never_symptomatic_fraction`, §1–§2 license
 no value for it, and the engine refuses to default one. The intermediate move —
 keeping the fiat index case but relocating it to `initiation.explicit_seeds` in
@@ -151,11 +154,37 @@ The corresponding engine defect is that the collision was silent at all: the
 existing load error covered `boarding` over `initial_infected` but not
 `explicit_seeds` over it. That is now one refusal covering both mechanisms
 (`_refuse_legacy_index_case`), so the migration cannot be performed halfway
-without the run failing to load and saying why. **The shipped `norwalk_gi`
-profile is unchanged: it keeps `initial_infected: 1`,** and the migration is
+without the run failing to load and saying why. At that point the shipped `norwalk_gi`
+profile was left at `initial_infected: 1` and the migration was
 recorded as blocked on two named prerequisites — a licensed or swept
 `never_symptomatic_fraction`, and re-keying the campaign's index-case axis onto
 whichever channel replaces the field.
+
+**Resolution (#54 / C1).** Both prerequisites were met without licensing a value:
+
+- `never_symptomatic_fraction` enters as a **swept axis**, not a point. The two
+  tranche-11 intervals stay **separate regimes** — `adult_challenge`
+  `[0.22, 0.36]` and `community_cohort` `[0.59, 0.68]` — and a campaign tier
+  names which regime it sweeps (`never_symptomatic_regime`) or lists explicit
+  fractions (`never_symptomatic_fractions`). The union is deliberately not
+  offered as a single range: §F4 shows the paediatric interval is not
+  transportable to a mean-age-72.6 population and that the fraction falls with
+  age, so the adult-challenge regime is the campaign default. Its midpoint
+  (0.29) is the coordinate an unswept run carries and is recorded as a campaign
+  parameter, **not** adopted into the register as a value.
+- `crusher_labs/config.yaml` gained an `initiation.boarding.norwalk_gi` block
+  carrying all four `BoardingSpec` coordinates: prevalence at the register
+  interval midpoints (passenger 0.0325, crew 0.0185), the adult midpoint above,
+  and the derived `presymptomatic_share_of_presenting` 0.04. The shipped
+  profile's `initial_infected` is `null`, so `_refuse_legacy_index_case` passes
+  and `initiation_owned_pathogens` drops `norwalk_gi` from legacy seeding.
+- The campaign axis was re-keyed (`picard_framework/runs/mega_cruise_campaign/
+  boarding_axis.py`): every site that wrote `path_over["norwalk_gi"]
+  ["initial_infected"]` now writes `config_overrides["initiation"]["boarding"]`,
+  the run id carries the swept coordinate (`nsf22`, `bp25c7`, `psp4`) instead
+  of `init<N>`, and a tier that still lists a count axis for an owned pathogen
+  is a generation error unless it declares `fiat_index_case: true`. Unowned
+  pathogens keep their legacy count axis unchanged.
 
 ## §4 — what changes, and what does not
 
@@ -165,6 +194,19 @@ and state, to record the second-pass null and the #54 blocker; the
 section; and the seed-side load error plus its two tests.
 
 **Does not change:** the two tranche-11 intervals, which no source in this pass
-narrows or widens; the shipped `norwalk_gi` profile; `crusher_labs/config.yaml`,
-which still has no `initiation` block and so still runs legacy; and the boarding
-gate, which stays shut.
+narrows or widens, and which the later #54 resolution sweeps rather than adopts.
+
+**Changed later, by the #54 resolution recorded in §3:** the shipped `norwalk_gi`
+profile (`initial_infected: null`); `crusher_labs/config.yaml`, which now carries
+an `initiation.boarding` block; and the boarding gate, which is open for
+`norwalk_gi` with the never-symptomatic coordinate supplied by the campaign axis.
+
+**Changed again, by #54's follow-on:** the coordinates moved off `config.yaml`
+and onto each profile, so every shipped pathogen except `legionella_pneumophila`
+boards through its own block and `config.yaml` keeps only the gate. The two
+never-symptomatic regimes recorded here are unchanged and remain unpooled;
+they now apply to `norwalk_gi` and `norovirus_gii4`, and the other pathogens
+carry their own Consensus-sourced plausible defaults (register §3.5), each a
+swept starting point rather than an adopted value. Nothing in §§1–3 is
+narrowed by that pass: no adult natural-exposure design with an infection
+denominator was found for any of them either.

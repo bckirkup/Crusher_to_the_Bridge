@@ -114,6 +114,7 @@
     5.0,
     5.5
    ],
+   "fiat_index_case": true,
    "initial_infected_values": [
     1
    ],
@@ -154,6 +155,7 @@
     5.0,
     5.5
    ],
+   "fiat_index_case": true,
    "initial_infected_values": [
     4
    ],
@@ -194,6 +196,7 @@
     5.0,
     5.5
    ],
+   "fiat_index_case": true,
    "initial_infected_values": [
     7
    ],
@@ -234,6 +237,7 @@
     5.0,
     5.5
    ],
+   "fiat_index_case": true,
    "initial_infected_values": [
     11
    ],
@@ -265,6 +269,7 @@
    "dose_adjustments": [
     3.0
    ],
+   "fiat_index_case": true,
    "initial_infected_values": [
     1
    ],
@@ -293,6 +298,7 @@
    "dose_adjustments": [
     3.0
    ],
+   "fiat_index_case": true,
    "initial_infected_values": [
     1
    ],
@@ -321,6 +327,7 @@
    "dose_adjustments": [
     3.0
    ],
+   "fiat_index_case": true,
    "initial_infected_values": [
     1
    ],
@@ -349,6 +356,7 @@
    "dose_adjustments": [
     3.0
    ],
+   "fiat_index_case": true,
    "initial_infected_values": [
     1
    ],

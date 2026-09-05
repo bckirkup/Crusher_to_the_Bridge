@@ -173,7 +173,18 @@
         "decay_rate_per_day": 0.1
       },
       "introduction_epoch": 0,
-      "initial_infected": 1,
+      "initial_infected": null,
+      "boarding": {
+        "mode": "prevalence",
+        "prevalence": {
+          "passenger": 0.0325,
+          "crew": 0.0185
+        },
+        "state_split": {
+          "never_symptomatic_fraction": 0.29,
+          "presymptomatic_share_of_presenting": 0.04
+        }
+      },
       "initial_time_infected": 0,
       "shedding_variance_log10": 1.0,
       "clinical_presentation": {
@@ -582,7 +593,18 @@
         "enabled": false
       },
       "introduction_epoch": 6,
-      "initial_infected": 1,
+      "initial_infected": null,
+      "boarding": {
+        "mode": "prevalence",
+        "prevalence": {
+          "passenger": 0.01,
+          "crew": 0.006
+        },
+        "state_split": {
+          "never_symptomatic_fraction": 0.35,
+          "presymptomatic_share_of_presenting": 0.3
+        }
+      },
       "initial_time_infected": 0,
       "shedding_variance_log10": 1.2,
       "clinical_presentation": {
@@ -850,7 +872,18 @@
       },
       "shedding_variance_log10": 1.0,
       "introduction_epoch": 0,
-      "initial_infected": 1,
+      "initial_infected": null,
+      "boarding": {
+        "mode": "prevalence",
+        "prevalence": {
+          "passenger": 0.008,
+          "crew": 0.005
+        },
+        "state_split": {
+          "never_symptomatic_fraction": 0.44,
+          "presymptomatic_share_of_presenting": 0.3
+        }
+      },
       "initial_time_infected": 0
     }
   ]

@@ -47,18 +47,50 @@ def parse_run_tags(run_id: str) -> dict[str, str | None]:
 _INIT_TAG = re.compile(r"(?:^|_)init(\d+)(?:_|$)", re.IGNORECASE)
 
 
+def drawn_boarding_introductions(initiation: Any) -> int | None:
+    """Introductions a boarding run actually drew, from its initiation manifest.
+
+    A boarding run has no configured index-case count: the cohort is drawn from
+    role prevalence, so ``k`` is the realised draw the manifest records, not a
+    setting to be read back off the run spec.
+    """
+    if not isinstance(initiation, dict):
+        return None
+    boarding = initiation.get("boarding")
+    if not isinstance(boarding, dict) or not boarding:
+        return None
+    total = 0
+    for report in boarding.values():
+        by_role = (report or {}).get("drawn_by_role") if isinstance(report, dict) else None
+        if not isinstance(by_role, dict):
+            return None
+        for count in by_role.values():
+            try:
+                total += int(count)
+            except (TypeError, ValueError):
+                return None
+    return total
+
+
 def resolve_initial_infected(
     *,
     parameters: dict[str, Any] | None = None,
     run_spec: dict[str, Any] | None = None,
     run_id: str = "",
     timeseries: Any = None,
+    initiation: Any = None,
 ) -> int | None:
     """Best-effort infectious introductions ``k`` for one campaign run.
 
-    Order: parameters → pathogen_overrides → ``initN`` run_id tag →
-    epoch-0 ``infected`` / ``new_infections``.
+    Order: drawn boarding cohort → parameters → pathogen_overrides → ``initN``
+    run_id tag → epoch-0 ``infected`` / ``new_infections``. The drawn cohort
+    comes first because a boarding run's ``k`` is a realised draw, and any
+    count elsewhere in that run's metadata describes a mechanism it did not use.
     """
+    drawn = drawn_boarding_introductions(initiation)
+    if drawn is not None:
+        return drawn
+
     params = parameters or {}
     for key in ("initial_infected", "n_initial_infected", "n_index"):
         if params.get(key) is not None and params.get(key) != "":

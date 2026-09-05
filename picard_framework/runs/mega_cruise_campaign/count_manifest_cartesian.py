@@ -16,7 +16,44 @@ from typing import Any
 REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT))
 
-from picard_framework.runs.mega_cruise_campaign import variant_campaign  # noqa: E402
+from picard_framework.runs.mega_cruise_campaign import (  # noqa: E402
+    boarding_axis,
+    variant_campaign,
+)
+
+
+def _tier_pathogen_ids(manifest: dict[str, Any], tier: dict[str, Any]) -> list[str]:
+    """Profile ids the tier runs, resolved through the manifest's own labels."""
+    labels = tier.get("pathogens") or [
+        tier.get("pathogen") or manifest.get("pathogen") or "",
+    ]
+    configs = manifest.get("pathogen_configs") or {}
+    ids: list[str] = []
+    for label in labels:
+        config = configs.get(str(label)) or {}
+        ids.append(str(config.get("pathogen_id") or label))
+    return ids
+
+
+def index_axis_size(manifest: dict[str, Any], tier: dict[str, Any]) -> int:
+    """How many runs the tier's index-case axis contributes per other cell.
+
+    The axis is a fiat count sweep for a pathogen initiation does not own and
+    the boarding grid for one it does. Pathogen is not a multiplied dimension
+    in this arithmetic count, so a mixed tier whose two mechanisms disagree on
+    length cannot be counted here and says so rather than reporting one of them.
+    """
+    sizes = {
+        len(boarding_axis.axis_for_mixed_tier(tier, pathogen_id).points)
+        for pathogen_id in _tier_pathogen_ids(manifest, tier)
+    }
+    if len(sizes) > 1:
+        raise ValueError(
+            f"tier's pathogens disagree on index-axis length ({sorted(sizes)}): "
+            "the boarding grid and the fiat count sweep must be the same size "
+            "for the arithmetic count to describe both",
+        )
+    return sizes.pop() if sizes else 1
 
 
 def tier_cartesian(manifest: dict[str, Any], tier: dict[str, Any]) -> int:
@@ -53,7 +90,6 @@ def tier_cartesian(manifest: dict[str, Any], tier: dict[str, Any]) -> int:
         return len(plats) * n_knobs * len(surv) * len(seeds)
 
     doses = tier.get("dose_adjustments") or [tier.get("dose_adjustment")]
-    inits = tier.get("initial_infected_values") or [tier.get("initial_infected")]
     imm = tier.get("pre_immunity_fractions") or [None]
     dens = tier.get("density_exponents") or [None]
     cmodes = tier.get("contact_modes") or [None]
@@ -61,7 +97,7 @@ def tier_cartesian(manifest: dict[str, Any], tier: dict[str, Any]) -> int:
     return (
         len(plats)
         * len(doses)
-        * len(inits)
+        * index_axis_size(manifest, tier)
         * len(dens)
         * len(cmodes)
         * len(imm)

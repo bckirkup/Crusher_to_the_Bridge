@@ -22,6 +22,7 @@
         15.0,
         20.0
       ],
+      "fiat_index_case": true,
       "initial_infected_values": [
         1,
         5
@@ -67,6 +68,7 @@
         15.0,
         20.0
       ],
+      "fiat_index_case": true,
       "initial_infected_values": [
         1,
         5
@@ -107,6 +109,7 @@
         15.0,
         20.0
       ],
+      "fiat_index_case": true,
       "initial_infected_values": [
         1,
         5
@@ -141,6 +144,7 @@
         10.0,
         15.0
       ],
+      "fiat_index_case": true,
       "initial_infected_values": [
         1,
         5
@@ -214,6 +218,7 @@
         10.0,
         15.0
       ],
+      "fiat_index_case": true,
       "initial_infected_values": [
         1
       ],
@@ -302,6 +307,7 @@
         "none_true",
         "syndromic"
       ],
+      "fiat_index_case": true,
       "initial_infected_values": [
         1
       ],
@@ -351,6 +357,7 @@
         "none_true",
         "syndromic"
       ],
+      "fiat_index_case": true,
       "initial_infected_values": [
         1
       ],

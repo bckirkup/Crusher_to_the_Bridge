@@ -387,6 +387,23 @@ targeted_pcr:
   lod_ct_threshold: 38.0              # Ct > this ⇒ Negative
   cadence: 4                          # baseline; escalation overrides to 1
 
+# ── Initiation: how the voyage starts with infection aboard ───
+# The loaded pathogens board through engines/initiation.py
+# (docs/proposals/initiation_engine_spec.md): a per-person prevalence draw for
+# the endemic ones and a clustered travelling party for the imported ones.
+# Their profiles carry no initial_infected, and the engine refuses both
+# mechanisms at once.
+initiation:
+  boarding:
+    # The channel switch, and only the switch: each pathogen's own coordinates
+    # ship in its profile (data/pathogens/*.json, "boarding"), so that a run
+    # loading one bundle cannot inherit a block naming a pathogen it never
+    # loads. Campaign arms override any coordinate per pathogen under
+    # initiation.boarding.<pathogen_id>, and an arm that wants a stated index
+    # case instead disables it there. Grades and sources for the shipped
+    # values: docs/parameter_provenance_register.md.
+    enabled: true
+
 # ── Multi-Pathogen Configuration ──────────────────────────────
 multi_pathogen:
   profiles_path: "data/pathogens/active_profiles.json"

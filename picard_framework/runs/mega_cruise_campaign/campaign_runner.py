@@ -45,8 +45,12 @@ from picard_framework.pathogen_overrides import (  # noqa: E402
     isolate_arm_overrides,
 )
 from picard_framework.runs.mega_cruise_campaign import (  # noqa: E402
+    boarding_axis,
     sentinel_recovery,
     variant_campaign,
+)
+from picard_framework.runs.mega_cruise_campaign.boarding_axis import (  # noqa: E402
+    IndexCaseAxis,
 )
 from picard_framework.runs.mega_cruise_campaign.tier_iterators import (  # noqa: E402
     dispatch_standard_or_calibration,
@@ -973,63 +977,51 @@ def _iter_synthetic_recovery_runs(
         fallback_platform=manifest["platform"],
         platform_override=platform_override,
     )
-    n_init = int(tier.get("initial_infected", 3))
     strategies = list(tier.get("surveillance_strategies") or ["syndromic"])
     vectors = list(tier["parameter_vectors"])
     default_agents = int(manifest.get("default_num_agents", 7000))
-    for plat in platforms:
+    index_axis = IndexCaseAxis.for_tier(tier, pathogen_id)
+    for plat, vec, point, sname, seed in product(
+        platforms, vectors, index_axis.points, strategies, tier["seeds"],
+    ):
         n_agents = _platform_num_agents(
             plat,
             num_agents_override=num_agents_override,
             tier=tier,
             default_agents=default_agents,
         )
-        for vec in vectors:
-            dose = float(vec["dose_adj"])
-            alpha = float(vec["alpha_c"])
-            nonsus = float(vec.get("non_susceptible", 0.0))
-            vec_id = str(vec.get("id", "vec"))
-            path_over = dict(base_overrides or {})
-            path_over[pathogen_id] = {
-                **(path_over.get(pathogen_id) or {}),
-                "dose_adjustment": dose,
-                "initial_infected": n_init,
-                "innate_nonsusceptible_fraction": nonsus,
-            }
-            dens_over = _density_contact_override(alpha)
-            for sname in strategies:
-                for seed in tier["seeds"]:
-                    rid = "_".join(
-                        [
-                            "sr",
-                            pathogen,
-                            plat,
-                            vec_id,
-                            _dose_tag(dose),
-                            _alpha_tag(alpha),
-                            f"init{n_init}",
-                            sname,
-                            f"s{seed}",
-                        ]
-                    )
-                    yield yield_run(
-                        rid,
-                        bundle=bundle,
-                        pathogen_overrides=path_over,
-                        config_overrides=merge_cfg(
-                            surv_cfgs.get(sname), dens_over,
-                        ),
-                        seed=seed,
-                        num_agents=n_agents,
-                        pathogen=pathogen,
-                        platform_id=plat,
-                        surveillance=sname,
-                        dose_adjustment=dose,
-                        density_exponent=alpha,
-                        n_init=n_init,
-                        non_susceptible=nonsus,
-                        parameter_vector=vec_id,
-                    )
+        dose = float(vec["dose_adj"])
+        alpha = float(vec["alpha_c"])
+        nonsus = float(vec.get("non_susceptible", 0.0))
+        vec_id = str(vec.get("id", "vec"))
+        path_over = index_axis.pathogen_overrides(
+            base_overrides, point,
+            dose_adjustment=dose, innate_nonsusceptible_fraction=nonsus,
+        )
+        rid = "_".join(
+            [
+                "sr", pathogen, plat, vec_id, _dose_tag(dose), _alpha_tag(alpha),
+                *index_axis.tags(point), sname, f"s{seed}",
+            ]
+        )
+        yield yield_run(
+            rid,
+            bundle=bundle,
+            pathogen_overrides=path_over,
+            config_overrides=merge_cfg(
+                surv_cfgs.get(sname), _density_contact_override(alpha),
+            ),
+            seed=seed,
+            num_agents=n_agents,
+            pathogen=pathogen,
+            platform_id=plat,
+            surveillance=sname,
+            dose_adjustment=dose,
+            density_exponent=alpha,
+            non_susceptible=nonsus,
+            parameter_vector=vec_id,
+            **index_axis.factors(point),
+        )
 
 
 def _wastewater_scan_cells(tier: dict[str, Any]) -> list[dict[str, Any]]:
@@ -1126,12 +1118,14 @@ def _iter_sentinel_recovery_runs(
             hazards,
         )
         r_val = float(r_onboard)
-        n_init = sentinel_recovery.initial_infected(hazards, r_val)
+        seeding = sentinel_recovery.onboard_seeding(
+            hazards, r_val, pathogen_id, tier,
+        )
         path_over = dict(base_overrides or {})
         path_over[pathogen_id] = {
             **(path_over.get(pathogen_id) or {}),
             "dose_adjustment": dose,
-            "initial_infected": n_init,
+            **seeding.pathogen_patch,
         }
         voyage = sentinel_recovery.voyage_override(
             days=days,
@@ -1163,9 +1157,9 @@ def _iter_sentinel_recovery_runs(
             surveillance=sname,
             dose_adjustment=dose,
             density_exponent=alpha,
-            n_init=n_init,
             R_onboard=r_val,
             hazard_profile=hazard_profile,
+            **seeding.factors,
             fleet_config=fleet_config,
             itinerary_variant=variant,
             port_hazards=hazards,
@@ -1241,13 +1235,13 @@ def _iter_vsp_degradation_runs(
             raise ValueError(f"manifest defaults.nominal_values missing {k}")
     dose = float(tier.get("dose_adjustment", defaults.get("dose_adjustment", 10.6)))
     alpha = float(tier.get("density_exponent", defaults.get("density_exponent", 0.75)))
-    n_init = int(tier.get("initial_infected", defaults.get("initial_infected", 3)))
     strategies = list(tier.get("surveillance_strategies") or ["syndromic"])
     dens_over = _density_contact_override(alpha)
     knobs_list = _iter_vsp_knob_combos(tier, nominal)
     default_agents = int(manifest.get("default_num_agents", 7000))
-    for plat, knobs, sname, seed in product(
-        platforms, knobs_list, strategies, tier["seeds"],
+    index_axis = IndexCaseAxis.for_tier(tier, pathogen_id, defaults=defaults)
+    for plat, knobs, point, sname, seed in product(
+        platforms, knobs_list, index_axis.points, strategies, tier["seeds"],
     ):
         n_agents = _platform_num_agents(
             plat,
@@ -1255,17 +1249,14 @@ def _iter_vsp_degradation_runs(
             tier=tier,
             default_agents=default_agents,
         )
-        path_over = dict(base_overrides or {})
-        path_over[pathogen_id] = {
-            **(path_over.get(pathogen_id) or {}),
-            "dose_adjustment": dose,
-            "initial_infected": n_init,
-        }
+        path_over = index_axis.pathogen_overrides(
+            base_overrides, point, dose_adjustment=dose,
+        )
         tags = _vd_active_knob_tags(tier, knobs)
         rid = "_".join(
             [
                 "vd", pathogen, plat, *tags, _dose_tag(dose), _alpha_tag(alpha),
-                f"init{n_init}", sname, f"s{seed}",
+                *index_axis.tags(point), sname, f"s{seed}",
             ]
         )
         yield yield_run(
@@ -1282,8 +1273,8 @@ def _iter_vsp_degradation_runs(
             surveillance=sname,
             dose_adjustment=dose,
             density_exponent=alpha,
-            n_init=n_init,
             vsp_threshold=float(knobs["vsp_threshold"]),
+            **index_axis.factors(point),
             detection_delay_hours=int(knobs["detection_delay"]),
             isolation_compliance=float(knobs["isolation_compliance"]),
             sick_call_probability=float(knobs["sick_call_probability"]),
@@ -1330,16 +1321,9 @@ def _calibration_dose_values(tier: dict[str, Any]) -> list[float | None]:
     return [None]
 
 
-def _calibration_init_values(tier: dict[str, Any]) -> list[int | None]:
-    """Initial-infected sweep; accepts ``initial_infected_values`` or ``initial_infected``."""
-    if "initial_infected_values" in tier:
-        return [int(n) for n in tier["initial_infected_values"]]
-    if "initial_infected" in tier:
-        raw = tier["initial_infected"]
-        if isinstance(raw, list):
-            return [int(n) for n in raw]
-        return [int(raw)]
-    return [None]
+def _calibration_index_axis(tier: dict[str, Any], pathogen_id: str) -> IndexCaseAxis:
+    """Index-case axis for a calibration tier: the boarding grid for an owned pathogen, else the fiat count sweep (``None`` leaves the bundle's own)."""
+    return IndexCaseAxis.for_tier(tier, pathogen_id, legacy_default=None)
 
 
 def make_picard_spec(
@@ -1689,9 +1673,21 @@ def generate_tier_runs(
             if natural_history_clock is not None
             else None
         )
+        # The tier's own party point reaches the iterators that carry no
+        # boarding axis; a swept axis has already stamped its own.
+        swept = {**boarding_axis.tier_party_factors(tier), **factors}
         cfg = merge_cfg(
-            _CAMPAIGN_ESCALATION_DEFAULTS, config_overrides, clock_cfg,
+            _CAMPAIGN_ESCALATION_DEFAULTS,
+            config_overrides,
+            clock_cfg,
+            boarding_axis.initiation_override(bundle, pathogen_overrides, swept),
         )
+        # Effective coordinates, not only the swept ones, and derived from the
+        # sweep rather than from the config the override just built.
+        factors = {
+            **boarding_axis.recorded_factors(bundle, pathogen_overrides, swept),
+            **factors,
+        }
         params = _campaign_parameters(
             tier_id=tier_id,
             run_id=rid,
@@ -1736,7 +1732,7 @@ def generate_tier_runs(
         resolve_tier_platforms=_resolve_tier_platforms,
         platform_num_agents=_platform_num_agents,
         calibration_dose_values=_calibration_dose_values,
-        calibration_init_values=_calibration_init_values,
+        calibration_index_axis=_calibration_index_axis,
         density_exponent_values=_density_exponent_values,
         contact_mode_values=_contact_mode_values,
         density_contact_override=_density_contact_override,

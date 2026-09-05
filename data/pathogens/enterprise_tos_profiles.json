@@ -90,7 +90,19 @@
         "enabled": false
       },
       "introduction_epoch": 0,
-      "initial_infected": 1,
+      "initial_infected": null,
+      "boarding": {
+        "mode": "party",
+        "party": {
+          "probability": 1.0,
+          "size": 2,
+          "role": "passenger"
+        },
+        "state_split": {
+          "never_symptomatic_fraction": 0.1,
+          "presymptomatic_share_of_presenting": 0.0
+        }
+      },
       "initial_time_infected": 0,
       "transmission_route_weights": {
         "direct_contact": 0.25,
@@ -255,7 +267,19 @@
         "enabled": false
       },
       "introduction_epoch": 3,
-      "initial_infected": 1,
+      "initial_infected": null,
+      "boarding": {
+        "mode": "party",
+        "party": {
+          "probability": 1.0,
+          "size": 1,
+          "role": "crew"
+        },
+        "state_split": {
+          "never_symptomatic_fraction": 0.0,
+          "presymptomatic_share_of_presenting": 0.0
+        }
+      },
       "initial_time_infected": 0,
       "transmission_route_weights": {
         "direct_contact": 0.25,

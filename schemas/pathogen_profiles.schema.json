@@ -866,7 +866,49 @@
           }
         },
         "introduction_epoch": {"type": "integer", "minimum": 0},
-        "initial_infected": {"type": "integer", "minimum": 0},
+        "initial_infected": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "description": "Fiat epoch-0 index cases. Null means the profile states none, which is required of any pathogen the initiation engine owns: engines/initiation.py refuses a boarding block or an explicit seed over a profile index case."
+        },
+        "boarding": {
+          "type": "object",
+          "description": "The pathogen's default boarding channel for engines/initiation.py: either an independent per-person prevalence (mode 'prevalence', the default) or one clustered travelling party (mode 'party'). Campaign config initiation.boarding.<pathogen_id> overrides these coordinates key by key; a profile carrying this block must carry initial_infected null. Values are campaign defaults, adjustable by season and port status, graded in docs/parameter_provenance_register.md.",
+          "additionalProperties": false,
+          "required": ["state_split"],
+          "properties": {
+            "mode": {"type": "string", "enum": ["prevalence", "party"]},
+            "enabled": {"type": "boolean"},
+            "prevalence": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["passenger", "crew"],
+              "properties": {
+                "passenger": {"type": "number", "minimum": 0, "maximum": 1},
+                "crew": {"type": "number", "minimum": 0, "maximum": 1}
+              }
+            },
+            "party": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["probability", "size"],
+              "properties": {
+                "probability": {"type": "number", "minimum": 0, "maximum": 1, "description": "Per-voyage chance that an infected party embarks at all."},
+                "size": {"type": "integer", "minimum": 1, "description": "Infected members of the party when one embarks."},
+                "role": {"type": "string", "enum": ["passenger", "crew"]}
+              }
+            },
+            "state_split": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["never_symptomatic_fraction", "presymptomatic_share_of_presenting"],
+              "properties": {
+                "never_symptomatic_fraction": {"type": "number", "minimum": 0, "maximum": 1},
+                "presymptomatic_share_of_presenting": {"type": "number", "minimum": 0, "maximum": 1}
+              }
+            }
+          }
+        },
         "initial_time_infected": {
           "type": "integer",
           "minimum": 0,

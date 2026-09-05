@@ -18,6 +18,7 @@
         12.75,
         13.0
       ],
+      "fiat_index_case": true,
       "initial_infected_values": [
         1
       ],
@@ -83,6 +84,7 @@
         12.75,
         13.0
       ],
+      "fiat_index_case": true,
       "initial_infected_values": [
         1
       ],
@@ -148,6 +150,7 @@
         12.75,
         13.0
       ],
+      "fiat_index_case": true,
       "initial_infected_values": [
         1
       ],
@@ -213,6 +216,7 @@
         12.75,
         13.0
       ],
+      "fiat_index_case": true,
       "initial_infected_values": [
         1
       ],

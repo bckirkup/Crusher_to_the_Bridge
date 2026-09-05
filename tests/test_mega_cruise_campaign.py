@@ -166,16 +166,47 @@ def test_t2_sweeps_outdoor_air_fraction() -> None:
     assert seen == oa_names
 
 
-def test_t6_sweeps_initial_infected_and_pre_immunity() -> None:
+def test_t6_stamps_no_fiat_count_on_any_pathogen() -> None:
     manifest = load_manifest()
     runs = list(generate_tier_runs(manifest, "t6_dose_response"))
-    # New top dose value and a non-zero immunity level are both generated.
+    # Every pathogen in the tier boards; none is given a count, and the
+    # immunity axis still crosses the boarding grid.
     sample = next(
         s for rid, s in runs
-        if "init50" in rid and "imm40" in rid and "norovirus" in rid
+        if "nsf36" in rid and "imm40" in rid and "sarscov2" in rid
     )
-    assert sample["pathogen_overrides"]["norwalk_gi"]["initial_infected"] == 50
+    assert "initial_infected" not in (
+        sample["pathogen_overrides"].get("sars_cov2_resp") or {}
+    )
     assert sample["config_overrides"]["ship_graph"]["immune_fraction"] == pytest.approx(0.4)
+    assert [rid for rid, _ in runs if "_init" in rid] == []
+    assert all("n_init" not in s["campaign_parameters"] for _, s in runs)
+
+
+def test_t6_sweeps_the_boarding_channel_for_the_pathogen_initiation_owns() -> None:
+    manifest = load_manifest()
+    runs = [
+        (rid, spec) for rid, spec in generate_tier_runs(manifest, "t6_dose_response")
+        if "norovirus" in rid
+    ]
+    # The tier's own boarding grid: 3 never-symptomatic points × 2 prevalence
+    # pairs, named in the run id and carried by the run's initiation config.
+    assert len({rid.split("_norovirus_")[1].split("_imm")[0] for rid, _ in runs}) == 6
+    rid, spec = next(
+        (rid, spec) for rid, spec in runs if "nsf22" in rid and "bp25c7" in rid
+    )
+    assert "imm" in rid
+    boarding = spec["config_overrides"]["initiation"]["boarding"]
+    # Only the studied pathogen's block is written: a co-loaded pathogen
+    # boards at its own profile coordinates.
+    assert set(boarding) == {"enabled", "norwalk_gi"}
+    noro = boarding["norwalk_gi"]
+    assert noro["prevalence"] == {"passenger": 0.025, "crew": 0.007}
+    assert noro["state_split"]["never_symptomatic_fraction"] == pytest.approx(0.22)
+    assert spec["campaign_parameters"]["boarding_pathogen"] == "norwalk_gi"
+    assert "initial_infected" not in (
+        spec["pathogen_overrides"].get("norwalk_gi") or {}
+    )
 
 
 def test_t7_sweeps_pre_immunity_with_compliance() -> None:
@@ -270,6 +301,9 @@ def test_natural_history_clock_changes_single_run(
             config_overrides={
                 "natural_history_clock": clock,
                 "ship_graph": {"num_agents": 20},
+                # A fiat index case is this probe's own design, so the
+                # shipped boarding channel is withdrawn for the run.
+                "initiation": None,
             },
             seed=200,
             epochs=24,
@@ -292,11 +326,15 @@ def test_natural_history_clock_changes_single_run(
     assert summaries["hours"]["derived"] != summaries["legacy_epoch_day"]["derived"]
 
 
-def test_t6_sets_initial_infected_on_pathogen_id() -> None:
+def test_t6_boards_influenza_on_its_own_pathogen_id() -> None:
     manifest = load_manifest()
     runs = list(generate_tier_runs(manifest, "t6_dose_response"))
-    sample = next(s for rid, s in runs if "init5_" in rid and "norovirus" in rid)
-    assert sample["pathogen_overrides"]["norwalk_gi"]["initial_infected"] == 5
+    sample = next(s for rid, s in runs if "bp40c30" in rid and "influenza" in rid)
+    flu = sample["config_overrides"]["initiation"]["boarding"]["influenza_a"]
+    assert flu["prevalence"] == {"passenger": 0.040, "crew": 0.030}
+    assert "initial_infected" not in (
+        sample["pathogen_overrides"].get("influenza_a") or {}
+    )
 
 
 def test_t7_sets_quarantine_compliance() -> None:
@@ -2178,7 +2216,17 @@ def test_synthetic_recovery_cartesian_and_generator() -> None:
     assert "ridge_" in rid or "off_ridge" in rid
     noro = spec["pathogen_overrides"]["norwalk_gi"]
     assert "dose_adjustment" in noro
-    assert noro["initial_infected"] == 3
+    assert "initial_infected" not in noro
+    assert "init" not in rid
+    boarding = spec["config_overrides"]["initiation"]["boarding"]["norwalk_gi"]
+    assert boarding["prevalence"] == {"passenger": 0.0325, "crew": 0.0185}
+    assert boarding["state_split"] == {
+        "never_symptomatic_fraction": 0.29,
+        "presymptomatic_share_of_presenting": 0.04,
+    }
+    params = spec["campaign_parameters"]
+    assert params["never_symptomatic_fraction"] == pytest.approx(0.29)
+    assert params["boarding_passenger_prevalence"] == pytest.approx(0.0325)
     assert "innate_nonsusceptible_fraction" in noro
     tx = spec["config_overrides"]["transmission"]
     assert tx["contact_mode"] == "density_dependent"
@@ -2257,8 +2305,15 @@ def test_sentinel_recovery_cartesian_and_generator() -> None:
     assert hazards == {"MXCZM": 0.0001, "MXCTM": 0.0001, "KYGEC": 0.0001}
     params = spec["campaign_parameters"]
     assert params["R_onboard"] == pytest.approx(0.0)
-    assert params["n_init"] == 0
-    assert spec["pathogen_overrides"]["norwalk_gi"]["initial_infected"] == 0
+    # Clean embarkation for the pathogen initiation owns is a zero boarding
+    # prevalence for both roles, not a fiat count of zero.
+    assert "n_init" not in params
+    assert params["boarding_passenger_prevalence"] == pytest.approx(0.0)
+    assert params["boarding_crew_prevalence"] == pytest.approx(0.0)
+    assert "initial_infected" not in spec["pathogen_overrides"]["norwalk_gi"]
+    boarding = spec["config_overrides"]["initiation"]["boarding"]["norwalk_gi"]
+    assert boarding["prevalence"] == {"passenger": 0.0, "crew": 0.0}
+    assert boarding["state_split"]["never_symptomatic_fraction"] == pytest.approx(0.29)
     sea = voyage["defaults"]["sea_day"]["contact_rate_multiplier"]
     assert sea == pytest.approx(0.0)
 
@@ -2313,5 +2368,12 @@ def test_sentinel_recovery_null_onboard_seed() -> None:
         for rid, spec in generate_tier_runs(manifest, "sr_null_single")
         if spec["campaign_parameters"]["R_onboard"] == 0.0
     ]
-    assert seeded[0]["pathogen_overrides"]["norwalk_gi"]["initial_infected"] == 1
-    assert empty[0]["pathogen_overrides"]["norwalk_gi"]["initial_infected"] == 0
+    def prevalence(spec: dict[str, Any]) -> dict[str, float]:
+        return spec["config_overrides"]["initiation"]["boarding"]["norwalk_gi"][
+            "prevalence"
+        ]
+
+    assert prevalence(seeded[0]) == {"passenger": 0.0325, "crew": 0.0185}
+    assert prevalence(empty[0]) == {"passenger": 0.0, "crew": 0.0}
+    for spec in (seeded[0], empty[0]):
+        assert "initial_infected" not in spec["pathogen_overrides"]["norwalk_gi"]

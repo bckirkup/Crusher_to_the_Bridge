@@ -113,6 +113,7 @@
       "description": "Diversity arm: 1-4 founders at nominal rates, norovirus",
       "regime": "diversity",
       "pathogen": "norovirus",
+      "fiat_index_case": true,
       "platforms": [
         "classic_cruise_1900"
       ],
@@ -159,6 +160,7 @@
       "description": "Emergence arm: single founder, per-transmission mutation rate over ~2 decades around nominal, norovirus",
       "regime": "emergence",
       "pathogen": "norovirus",
+      "fiat_index_case": true,
       "platforms": [
         "classic_cruise_1900"
       ],
@@ -208,6 +210,7 @@
       "description": "Emergence arm: single founder, within-host mutation rate from off to an order above the per-transmission rate, norovirus",
       "regime": "emergence",
       "pathogen": "norovirus",
+      "fiat_index_case": true,
       "platforms": [
         "classic_cruise_1900"
       ],
@@ -257,6 +260,7 @@
       "description": "Paired control: identical diversity cells on the pre-#290 fixed-onset process, norovirus",
       "regime": "diversity",
       "pathogen": "norovirus",
+      "fiat_index_case": true,
       "platforms": [
         "classic_cruise_1900"
       ],
@@ -493,6 +497,7 @@
       "description": "Sensitivity tier: superinfection_susceptibility (co-infection interference), an unanchored parameter reported as a surface",
       "regime": "interference",
       "pathogen": "norovirus",
+      "fiat_index_case": true,
       "platforms": [
         "classic_cruise_1900"
       ],
@@ -542,6 +547,7 @@
       "description": "Sensitivity tier: recombination_rate, also unanchored, at two co-resident founders",
       "regime": "recombination",
       "pathogen": "norovirus",
+      "fiat_index_case": true,
       "platforms": [
         "classic_cruise_1900"
       ],

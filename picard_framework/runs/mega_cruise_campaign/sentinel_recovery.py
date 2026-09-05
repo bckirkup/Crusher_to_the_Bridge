@@ -11,8 +11,13 @@ different region is a configuration change, not a code change.
 from __future__ import annotations
 
 import copy
+from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any
+
+from picard_framework.runs.mega_cruise_campaign.boarding_axis import (
+    IndexCaseAxis,
+)
 
 CAMPAIGN_DIR = Path(__file__).resolve().parent
 REPO_ROOT = CAMPAIGN_DIR.parents[2]
@@ -56,11 +61,56 @@ def parse_tier_labels(tier_id: str, tier: dict[str, Any]) -> tuple[str, str]:
     return rest, "single"
 
 
-def initial_infected(hazards: dict[str, Any], r_onboard: float) -> int:
-    """Shore-seeded when any λ_p > 0; one index case for onboard-only confound."""
+def embarks_clean(hazards: dict[str, Any], r_onboard: float) -> bool:
+    """Whether the voyage starts with nobody infected aboard.
+
+    Shore-seeded when any λ_p > 0, so the recovered port hazard is not
+    confounded by importation; also clean when there is neither a hazard nor
+    any onboard transmission to observe. Only the onboard-only confound arm
+    (no hazard, R_onboard > 0) embarks with infection aboard.
+    """
     if any(float(v) > 0.0 for v in hazards.values()):
-        return 0
-    return 1 if float(r_onboard) > 0.0 else 0
+        return True
+    return float(r_onboard) <= 0.0
+
+
+@dataclass(frozen=True)
+class OnboardSeeding:
+    """How one sentinel run starts: a profile patch and its parameter labels."""
+
+    pathogen_patch: dict[str, Any]
+    factors: dict[str, Any]
+
+
+def onboard_seeding(
+    hazards: dict[str, Any],
+    r_onboard: float,
+    pathogen_id: str,
+    tier: dict[str, Any],
+) -> OnboardSeeding:
+    """The run's onboard seeding for this pathogen.
+
+    A pathogen initiation owns embarks through the boarding channel: the
+    confound arm boards at the tier's single coordinate point, and a clean
+    embarkation is a zero boarding prevalence for both roles rather than a
+    fiat count of zero. Any other pathogen keeps its one fiat index case for
+    the confound arm and zero otherwise, as before.
+    """
+    axis = IndexCaseAxis.for_tier(tier, pathogen_id, legacy_default=1)
+    if len(axis.points) != 1:
+        raise ValueError(
+            f"sentinel recovery tier sweeps {len(axis.points)} index-case "
+            f"points for {pathogen_id}; its run ids are keyed by port hazard "
+            "and R_onboard alone, so it takes exactly one",
+        )
+    clean = embarks_clean(hazards, r_onboard)
+    point = axis.points[0]
+    if not axis.boarding:
+        n_init = 0 if clean else int(point)
+        return OnboardSeeding({"initial_infected": n_init}, {"n_init": n_init})
+    if clean:
+        point = replace(point, passenger_prevalence=0.0, crew_prevalence=0.0)
+    return OnboardSeeding({}, axis.factors(point))
 
 
 def itinerary_days(manifest: dict[str, Any], variant: str) -> list[dict[str, Any]]:

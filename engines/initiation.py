@@ -7,6 +7,17 @@ inside its own course, so its infection age has to be drawn rather than set to
 zero. **Explicit seeds** are the scenario override: a stated number of index
 cases at a stated epoch, additive with boarding by construction.
 
+Boarding has two draw modes, because independent per-person draws are the
+wrong shape for a pathogen nobody carries in the embarkation population. A
+rare import — Andes virus, Ebola — arrives as one travelling party that was
+exposed together at a common source: either no such party is aboard, or a
+whole cabin group of them is. ``mode: party`` draws that all-or-nothing
+cluster; ``mode: prevalence`` draws the independent Binomial that an endemic
+community prevalence licenses. Rescaling the independent draw cannot produce a
+clustered import, which is the archetype recorded in
+``.agents/skills/model-parameter-provenance/SKILL.md``: a well-mixed pool
+standing in for a small number of concentrated events.
+
 With no ``initiation`` block in the config the plan is ``legacy`` and every
 caller runs the paths it ran before, consuming exactly the draws it consumed
 before. See ``docs/proposals/initiation_engine_spec.md`` for the design and
@@ -39,7 +50,22 @@ _ROLES = (ROLE_PASSENGER, ROLE_CREW)
 STATE_NEVER_SYMPTOMATIC = "never_symptomatic"
 STATE_PRESYMPTOMATIC = "presymptomatic"
 STATE_CONVALESCENT = "convalescent"
-_STATES = (STATE_NEVER_SYMPTOMATIC, STATE_PRESYMPTOMATIC, STATE_CONVALESCENT)
+# Party mode only: infected at the common exposure, not yet shedding. A
+# prevalent sample never contains it (a prevalence is of hosts shedding), and a
+# party that has already had a case in it does not board, so it replaces the
+# convalescent state there.
+STATE_INCUBATING = "incubating"
+_STATES = (
+    STATE_NEVER_SYMPTOMATIC, STATE_PRESYMPTOMATIC, STATE_CONVALESCENT,
+    STATE_INCUBATING,
+)
+
+# The two boarding draw modes. Which one a pathogen uses is a claim about the
+# embarkation population, not a tuning choice: a prevalence needs a measured
+# per-person carriage rate to exist, and a rare import has none.
+BOARDING_MODE_PREVALENCE = "prevalence"
+BOARDING_MODE_PARTY = "party"
+_BOARDING_MODES = (BOARDING_MODE_PREVALENCE, BOARDING_MODE_PARTY)
 
 MODE_LEGACY = "legacy"
 MODE_NONE = "none"
@@ -55,6 +81,22 @@ _ASYMPTOMATIC_SEVERITY = "asymptomatic"
 
 
 @dataclass(frozen=True)
+class BoardingParty:
+    """One clustered import: a travelling party exposed at a common source.
+
+    ``probability`` is per voyage, not per person — the chance that any such
+    party embarks at all — and ``size`` is how many of it are infected when one
+    does. The two are separate because they answer different questions and the
+    literature supports them differently: whether an imported case sails is a
+    route and season property, how large its travelling group is is not.
+    """
+
+    probability: float
+    size: int
+    role: str
+
+
+@dataclass(frozen=True)
 class BoardingSpec:
     """One pathogen's boarding channel, as configured."""
 
@@ -63,6 +105,15 @@ class BoardingSpec:
     crew_prevalence: float
     never_symptomatic_fraction: float
     presymptomatic_share_of_presenting: float
+    party: BoardingParty | None = None
+    epoch: int = 0
+
+    @property
+    def mode(self) -> str:
+        """Which draw this pathogen boards by."""
+        if self.party is None:
+            return BOARDING_MODE_PREVALENCE
+        return BOARDING_MODE_PARTY
 
 
 @dataclass(frozen=True)
@@ -158,6 +209,101 @@ def _refuse_legacy_index_case(
     )
 
 
+def _resolve_mode(block: dict[str, Any], location: str) -> str:
+    """Which draw mode this block asks for, defaulting to the prevalence."""
+    mode = str(block.get("mode") or BOARDING_MODE_PREVALENCE)
+    if mode not in _BOARDING_MODES:
+        raise ValueError(
+            f"{location}.mode = {mode!r} is not one of "
+            f"{list(_BOARDING_MODES)}: a boarding draw is either an "
+            "independent per-person prevalence or one clustered party",
+        )
+    return mode
+
+
+def _resolve_party(block: dict[str, Any], location: str) -> BoardingParty:
+    """The ``party`` coordinates, refusing a prevalence alongside them.
+
+    A block carrying both would be two mechanisms for one import, and the
+    resulting count would be attributable to neither.
+    """
+    if block.get("prevalence"):
+        raise ValueError(
+            f"{location} is in party mode and also carries a prevalence: a "
+            "clustered import and an independent per-person draw are "
+            "alternative mechanisms, so keep one of them",
+        )
+    party = block.get("party") or {}
+    size = int(party.get("size", 0) or 0)
+    if size < 1:
+        raise ValueError(
+            f"{location}.party.size = {size} is below one: a party that "
+            "boards has at least one infected member, and no party aboard "
+            "is what party.probability expresses",
+        )
+    role = str(party.get("role") or ROLE_PASSENGER)
+    if role not in _ROLES:
+        raise ValueError(
+            f"{location}.party.role = {role!r} is neither "
+            f"{ROLE_PASSENGER!r} nor {ROLE_CREW!r}, and agent roles carry no "
+            "other value",
+        )
+    return BoardingParty(
+        probability=_fraction(
+            party.get("probability"),
+            f"{location}.party.probability",
+            "it is the per-voyage chance that such a party embarks at all, "
+            "so it is not defaulted from a per-person prevalence",
+        ),
+        size=size,
+        role=role,
+    )
+
+
+def _resolve_prevalence(
+    block: dict[str, Any], location: str,
+) -> tuple[float, float]:
+    """The two per-role boarding prevalences."""
+    prevalence = block.get("prevalence") or {}
+    requirement = "a boarding prevalence is a per-person probability"
+    return (
+        _fraction(
+            prevalence.get(ROLE_PASSENGER),
+            f"{location}.prevalence.passenger",
+            requirement,
+        ),
+        _fraction(
+            prevalence.get(ROLE_CREW),
+            f"{location}.prevalence.crew",
+            requirement,
+        ),
+    )
+
+
+def _resolve_epoch(
+    block: dict[str, Any], profile: dict[str, Any], location: str,
+) -> int:
+    """Which port call this cohort embarks at, the sailing port by default.
+
+    A staged bundle introduces its pathogens at successive port calls, and
+    that schedule is the profile's ``introduction_epoch``: it survives the
+    migration off the fiat index case, because *when* a pathogen arrives and
+    *how many* arrive are different claims. A block may state its own epoch to
+    override the profile's.
+    """
+    stated = block.get("epoch")
+    epoch = int(
+        profile.get("introduction_epoch", 0) or 0 if stated is None
+        else stated,
+    )
+    if epoch < 0:
+        raise ValueError(
+            f"{location}.epoch = {epoch} is negative, and the voyage has no "
+            "port call before it sails",
+        )
+    return epoch
+
+
 def _resolve_boarding_spec(
     pathogen_id: str,
     block: dict[str, Any],
@@ -167,20 +313,20 @@ def _resolve_boarding_spec(
     location = f"initiation.boarding.{pathogen_id}"
     profile = _known_pathogen(pathogen_id, location, pathogen_profiles)
     _refuse_legacy_index_case(pathogen_id, location, profile, "is enabled")
-    prevalence = block.get("prevalence") or {}
     split = block.get("state_split") or {}
+    party = (
+        _resolve_party(block, location)
+        if _resolve_mode(block, location) == BOARDING_MODE_PARTY
+        else None
+    )
+    passenger, crew = (
+        (0.0, 0.0) if party is not None
+        else _resolve_prevalence(block, location)
+    )
     return BoardingSpec(
         pathogen_id=pathogen_id,
-        passenger_prevalence=_fraction(
-            prevalence.get(ROLE_PASSENGER),
-            f"{location}.prevalence.passenger",
-            "a boarding prevalence is a per-person probability",
-        ),
-        crew_prevalence=_fraction(
-            prevalence.get(ROLE_CREW),
-            f"{location}.prevalence.crew",
-            "a boarding prevalence is a per-person probability",
-        ),
+        passenger_prevalence=passenger,
+        crew_prevalence=crew,
         never_symptomatic_fraction=_fraction(
             split.get("never_symptomatic_fraction"),
             f"{location}.state_split.never_symptomatic_fraction",
@@ -193,19 +339,84 @@ def _resolve_boarding_spec(
             f"{location}.state_split.presymptomatic_share_of_presenting",
             "it is a share of the imported hosts that do present",
         ),
+        party=party,
+        epoch=_resolve_epoch(block, profile, location),
     )
+
+
+def _boarding_enabled(block: Any, whole: dict[str, Any]) -> bool:
+    """Whether one pathogen's block is on, under the channel's own switch.
+
+    A per-pathogen ``enabled: false`` is the fiat opt-out: the profile bundle
+    ships every pathogen's boarding coordinates, and an arm that wants a fiat
+    index case for one of them withdraws that one rather than the channel.
+    """
+    if not whole.get("enabled", False):
+        return False
+    return bool((block or {}).get("enabled", True))
+
+
+def _merge_block(base: Any, override: Any) -> Any:
+    """Config over profile, one nested mapping level at a time; null erases."""
+    if not isinstance(base, dict) or not isinstance(override, dict):
+        return override
+    merged = dict(base)
+    for key, value in override.items():
+        merged[key] = _merge_block(base.get(key), value)
+    return merged
+
+
+def profile_boarding_block(profile: dict[str, Any]) -> dict[str, Any] | None:
+    """The boarding coordinates a pathogen profile ships, if it ships any.
+
+    The profile is where a pathogen's own defaults live, so that each bundle
+    carries the coordinates for exactly the pathogens it loads: a ship-wide
+    config cannot name pathogens from a bundle it does not load, and an arm
+    that narrows its profiles must not inherit blocks for the ones it dropped.
+    """
+    block = profile.get("boarding")
+    return dict(block) if isinstance(block, dict) else None
+
+
+def boarding_blocks(
+    raw: dict[str, Any],
+    pathogen_profiles: dict[str, dict[str, Any]],
+) -> dict[str, dict[str, Any]]:
+    """Effective per-pathogen blocks: profile defaults under config overrides.
+
+    Every loaded profile that ships a ``boarding`` block is a candidate, and so
+    is every pathogen the config names — a config block over an unloaded
+    pathogen stays an error, since nothing would honour it.
+    """
+    blocks: dict[str, dict[str, Any]] = {}
+    for pathogen_id, profile in pathogen_profiles.items():
+        shipped = profile_boarding_block(profile)
+        if shipped is not None:
+            blocks[str(pathogen_id)] = shipped
+    for pathogen_id, block in raw.items():
+        if pathogen_id == "enabled":
+            continue
+        merged = _merge_block(blocks.get(str(pathogen_id), {}), block or {})
+        blocks[str(pathogen_id)] = merged
+    return blocks
 
 
 def _resolve_boarding(
     raw: dict[str, Any],
     pathogen_profiles: dict[str, dict[str, Any]],
 ) -> tuple[BoardingSpec, ...]:
+    """Every enabled pathogen block, profile defaults under config overrides.
+
+    The per-pathogen ``enabled: false`` survives the merge, so an arm can
+    withdraw one pathogen's boarding (its fiat opt-out) while the bundle's
+    other pathogens keep theirs.
+    """
     if not raw.get("enabled", False):
         return ()
     return tuple(
-        _resolve_boarding_spec(str(pathogen_id), block or {}, pathogen_profiles)
-        for pathogen_id, block in sorted(raw.items())
-        if pathogen_id != "enabled"
+        _resolve_boarding_spec(pathogen_id, block, pathogen_profiles)
+        for pathogen_id, block in sorted(boarding_blocks(raw, pathogen_profiles).items())
+        if _boarding_enabled(block, raw)
     )
 
 
@@ -345,17 +556,25 @@ def _select_prevalent(
 
 
 def _draw_state(spec: BoardingSpec, rng: np.random.Generator) -> str:
-    """Draw the boarding state from the two configured split coordinates."""
+    """Draw the boarding state from the two configured split coordinates.
+
+    The presenting-but-not-presymptomatic remainder is convalescent in a
+    prevalent sample and still incubating in a travelling party.
+    """
     never = spec.never_symptomatic_fraction
     presenting = 1.0 - never
     share = spec.presymptomatic_share_of_presenting
+    remainder = (
+        STATE_INCUBATING if spec.party is not None else STATE_CONVALESCENT
+    )
+    states = (STATE_NEVER_SYMPTOMATIC, STATE_PRESYMPTOMATIC, remainder)
     weights = np.asarray(
         [never, presenting * share, presenting * (1.0 - share)], dtype=float,
     )
     total = float(weights.sum())
     if total <= 0.0:
         return STATE_NEVER_SYMPTOMATIC
-    return str(rng.choice(_STATES, p=weights / total))
+    return str(rng.choice(states, p=weights / total))
 
 
 def _state_window(
@@ -370,8 +589,11 @@ def _state_window(
     ``None`` when the window is empty — a convalescent host needs a shedding
     duration that outlasts its illness — and the caller then redraws the state.
     """
-    low = max(0.0, incubation_days - presymptomatic_days)
-    if state == STATE_PRESYMPTOMATIC:
+    shedding_onset = max(0.0, incubation_days - presymptomatic_days)
+    low = shedding_onset
+    if state == STATE_INCUBATING:
+        low, high = 0.0, shedding_onset
+    elif state == STATE_PRESYMPTOMATIC:
         high = incubation_days
     elif state == STATE_NEVER_SYMPTOMATIC:
         high = incubation_days + duration_days
@@ -414,7 +636,7 @@ def _write_presentation_history(
     what ``illness_probability`` would otherwise have decided, and the epoch
     loop reads it in place of the dose draw.
     """
-    if state == STATE_PRESYMPTOMATIC:
+    if state in (STATE_PRESYMPTOMATIC, STATE_INCUBATING):
         inf["illness"] = IllnessStatus.NOT_ILL
         inf["will_present"] = True
         return
@@ -488,6 +710,60 @@ def _board_one_host(
     return state
 
 
+def _party_rank(seed: Any, agent: Any) -> int:
+    """How close a host is to the party's first member: cabin, then zone."""
+    if agent.agent_id in seed.cabin_mate_ids:
+        return 0
+    if seed.home_zone is not None and agent.home_zone == seed.home_zone:
+        return 1
+    return 2
+
+
+def _select_party(
+    pool: list[Any], size: int, rng: np.random.Generator,
+) -> list[Any]:
+    """One travelling party: a first member, then its cabin mates, then its zone.
+
+    The cluster is in *who* boards, not in their natural history: each member
+    still draws its own state and infection age below, because a shared
+    exposure fixes when the party was infected far less tightly than it fixes
+    that they were infected together.
+    """
+    if not pool or size <= 0:
+        return []
+    order = list(rng.permutation(len(pool)))
+    first = pool[order[0]]
+    rest = [pool[index] for index in order[1:]]
+    rest.sort(key=lambda agent: _party_rank(first, agent))
+    return [first, *rest[: size - 1]]
+
+
+def _draw_party_cohort(
+    spec: BoardingSpec,
+    agents: list[Any],
+    profile: dict[str, Any],
+    clock: Any,
+    rng: np.random.Generator,
+) -> BoardingReport:
+    """The clustered import: with ``party.probability``, one whole party."""
+    party = spec.party
+    drawn_by_role = dict.fromkeys(_ROLES, 0)
+    composition = dict.fromkeys(_STATES, 0)
+    if party is None or rng.random() >= party.probability:
+        return BoardingReport(spec.pathogen_id, drawn_by_role, composition)
+    pool = [
+        agent for agent in agents
+        if _eligible(agent, spec.pathogen_id, party.role)
+    ]
+    for agent in _select_party(pool, party.size, rng):
+        state = _board_one_host(spec, agent, profile, clock, rng)
+        if state is None:
+            continue
+        drawn_by_role[party.role] += 1
+        composition[state] += 1
+    return BoardingReport(spec.pathogen_id, drawn_by_role, composition)
+
+
 def draw_boarding_cohort(
     spec: BoardingSpec,
     agents: list[Any],
@@ -497,11 +773,15 @@ def draw_boarding_cohort(
 ) -> BoardingReport:
     """Draw one pathogen's boarding cohort over the eligible population.
 
-    Per role a Binomial over that role's eligible pool, then a
-    duration-weighted, without-replacement choice of who: the measurement is a
-    per-person probability, and the two roles carry rates that differ by about
-    a factor of four, so they are drawn against their own populations.
+    In prevalence mode, per role a Binomial over that role's eligible pool,
+    then a duration-weighted, without-replacement choice of who: the
+    measurement is a per-person probability, and the two roles carry rates
+    that differ by about a factor of four, so they are drawn against their own
+    populations. In party mode the draw is the all-or-nothing cluster of
+    ``_draw_party_cohort``.
     """
+    if spec.party is not None:
+        return _draw_party_cohort(spec, agents, profile, clock, rng)
     drawn_by_role = dict.fromkeys(_ROLES, 0)
     composition = dict.fromkeys(_STATES, 0)
     prevalence_by_role = {
@@ -626,6 +906,42 @@ def _initiation_mode(plan: InitiationPlan) -> str:
     return MODE_NONE
 
 
+def draw_port_call(
+    plan: InitiationPlan,
+    engine: Any,
+    epoch: int,
+    profiles: dict[str, dict[str, Any]],
+) -> list[BoardingReport]:
+    """Board every pathogen whose port call is this epoch.
+
+    Embarkation is not one event: a staged bundle boards its pathogens at
+    successive port calls, so each draw belongs to the epoch its own spec
+    names rather than to initialization alone. They share the one boarding
+    stream held on the engine, so a later call does not rebase the first.
+    """
+    return [
+        draw_boarding_cohort(
+            spec, engine.agents, profiles[spec.pathogen_id],
+            engine.clock, engine.boarding_rng,
+        )
+        for spec in plan.boarding
+        if spec.epoch == epoch
+    ]
+
+
+def record_boarding_reports(engine: Any, reports: list[BoardingReport]) -> None:
+    """Fold a port call's draws into the manifest already written."""
+    manifest = getattr(engine, "initiation_manifest", None)
+    if not reports or not isinstance(manifest, dict):
+        return
+    boarding = manifest.setdefault("boarding", {})
+    for report in reports:
+        boarding[report.pathogen_id] = {
+            "drawn_by_role": dict(report.drawn_by_role),
+            "composition": dict(report.composition),
+        }
+
+
 def initiation_owned_pathogens(plan: InitiationPlan) -> frozenset[str]:
     """The pathogens initiation owns, and only those.
 
@@ -665,6 +981,19 @@ def build_initiation_manifest(
                 "composition": dict(report.composition),
             }
             for report in reports
+        },
+        "boarding_mode": {spec.pathogen_id: spec.mode for spec in plan.boarding},
+        "boarding_epoch": {
+            spec.pathogen_id: spec.epoch for spec in plan.boarding
+        },
+        "party": {
+            spec.pathogen_id: {
+                "probability": spec.party.probability,
+                "size": spec.party.size,
+                "role": spec.party.role,
+            }
+            for spec in plan.boarding
+            if spec.party is not None
         },
         "prevalence": {
             spec.pathogen_id: {
