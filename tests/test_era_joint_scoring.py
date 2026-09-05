@@ -135,9 +135,11 @@ def test_the_post_arm_must_state_every_swept_coordinate() -> None:
     partial = dict(POST_COORDINATES)
     partial.pop("ship_graph.immune_fraction")
     post = _arm("post", coordinates=partial, seeds=2)
+    fit = _fit_of((1.0,))
+    pre = _arm("pre")
 
     with pytest.raises(RuntimeError, match="ship_graph.immune_fraction"):
-        joint.score_discontinuity(_fit_of((1.0,)), _arm("pre"), post)
+        joint.score_discontinuity(fit, pre, post)
 
 
 def test_a_dose_the_pre_levels_admit_enters_the_fit() -> None:
@@ -273,12 +275,12 @@ def test_a_post_point_at_a_rejected_dose_is_not_scored_at_all() -> None:
 
 
 def test_a_post_arm_run_at_a_dose_the_pre_arm_never_ran_is_refused() -> None:
+    fit = _fit_of((1.0,))
+    pre = _arm("pre", dose=1.0)
+    post = _arm("post", dose=3.0, seeds=2)
+
     with pytest.raises(RuntimeError, match="no pre-arm counterpart"):
-        joint.score_discontinuity(
-            _fit_of((1.0,)),
-            _arm("pre", dose=1.0),
-            _arm("post", dose=3.0, seeds=2),
-        )
+        joint.score_discontinuity(fit, pre, post)
 
 
 def test_a_fit_that_saw_more_than_the_pre_arm_cannot_score_a7c() -> None:
@@ -288,9 +290,11 @@ def test_a_fit_that_saw_more_than_the_pre_arm_cannot_score_a7c() -> None:
         cell_verdicts={},
         arms_seen=("pre", "post"),
     )
+    pre = _arm("pre")
+    post = _arm("post", seeds=2)
 
     with pytest.raises(RuntimeError, match="only evidence if the fit"):
-        joint.score_discontinuity(tainted, _arm("pre"), _arm("post", seeds=2))
+        joint.score_discontinuity(tainted, pre, post)
 
 
 def test_a_post_arm_with_no_posted_voyage_scores_neither_pass_nor_fail() -> None:
@@ -393,7 +397,7 @@ def test_the_cli_exit_code_reports_an_empty_region(
 ) -> None:
     _write(tmp_path / "pre", _summary("pre", PRE_COORDINATES))
     _write(tmp_path / "post", _summary("post", POST_COORDINATES))
-    report = tmp_path / "report.md"
+    report = tmp_path / "post" / "report.md"
     monkeypatch.setattr(
         "sys.argv",
         [
@@ -409,3 +413,26 @@ def test_the_cli_exit_code_reports_an_empty_region(
 
     assert joint.main() == 1
     assert joint.EMPTY_REGION_NOTE in report.read_text(encoding="utf-8")
+
+
+def test_the_cli_refuses_to_write_outside_the_scored_tree(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _write(tmp_path / "pre", _summary("pre", PRE_COORDINATES))
+    _write(tmp_path / "post", _summary("post", POST_COORDINATES))
+    monkeypatch.setattr(
+        "sys.argv",
+        [
+            "era_joint_scoring",
+            "--pre-root",
+            str(tmp_path / "pre"),
+            "--post-root",
+            str(tmp_path / "post"),
+            "--out",
+            str(tmp_path / "elsewhere.md"),
+        ],
+    )
+
+    with pytest.raises(ValueError, match="outside allowed roots"):
+        joint.main()

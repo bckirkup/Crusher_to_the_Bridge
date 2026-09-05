@@ -41,6 +41,10 @@ Usage::
 
     PYTHONPATH=. python3 telemetry_buffer/observation_model/era_joint_scoring.py \
         --pre-root <pre-arm results> --post-root <post-arm results> [--out report.md]
+
+Reports are written inside the post-arm results tree, as ``score_anchors``
+writes inside the tree it scored: a CLI path is not trusted to name a
+destination outside the run it describes.
 """
 
 from __future__ import annotations
@@ -54,6 +58,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
+from simulation_utils.paths import validated_open
 from telemetry_buffer.observation_model import score_anchors
 from telemetry_buffer.observation_model.era_configuration_sets import (
     UNREPRESENTED,
@@ -510,6 +515,18 @@ def _summary(
     }
 
 
+def _write_inside(root: Path, path: Path, text: str) -> None:
+    """Write *text* to *path*, which must lie inside the scored results tree."""
+    base = str(root.expanduser().resolve())
+    with validated_open(
+        str(path.expanduser().resolve()),
+        "w",
+        allowed_roots=(base,),
+        encoding="utf-8",
+    ) as handle:
+        handle.write(text)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--pre-root", type=Path, required=True)
@@ -520,13 +537,14 @@ def main() -> int:
     fit, points = score(args.pre_root, args.post_root)
     report = render(fit, points)
     if args.out is not None:
-        args.out.write_text(report, encoding="utf-8")
+        _write_inside(args.post_root, args.out, report)
     else:
         print(report)
     if args.json_out is not None:
-        args.json_out.write_text(
+        _write_inside(
+            args.post_root,
+            args.json_out,
             json.dumps(_summary(fit, points), indent=2, sort_keys=True) + "\n",
-            encoding="utf-8",
         )
     return 0 if admissible_region(points) else 1
 
