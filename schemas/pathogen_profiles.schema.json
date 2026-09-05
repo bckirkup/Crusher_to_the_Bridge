@@ -408,6 +408,17 @@
           "maxItems": 5,
           "items": {"type": "number", "minimum": 0, "maximum": 1}
         },
+        "base_probabilities_by_age_band": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {
+            "type": "array",
+            "minItems": 5,
+            "maxItems": 5,
+            "items": {"type": "number", "minimum": 0, "maximum": 1}
+          },
+          "description": "Per-age-band five-state distributions, keyed by the exact age_band label an agent profile assigns. The lookup is by exact label and a band the profile does not name reads base_probabilities, which is therefore the declared reference vector rather than a population average: the population configs state no numeric span for their named bands (child, young_adult, adult, middle_aged, senior), so interpolating between labels would invent the spans. Entry [0] must equal base_probabilities[0] on every band, because the draw renormalises over the four symptomatic states and a differing asymptomatic entry would declare a presenting fraction that is silently discarded; presentation is symptomatic_fraction's, and a band moves only the case mix inside it."
+        },
         "prior": {
           "type": "object",
           "required": ["type", "parameters"],
@@ -502,14 +513,10 @@
           "items": {"type": "number", "minimum": 0, "maximum": 1}
         },
         "assay_sensitivity_by_time_since_infection": {
-          "type": [
-            "array",
-            "object",
-            "number",
-            "string",
-            "boolean",
-            "null"
-          ]
+          "type": ["array", "null"],
+          "minItems": 1,
+          "items": {"type": "number", "minimum": 0, "maximum": 1},
+          "description": "Probability that a specimen from a truly infected host tests positive, one entry per day since INFECTION, with the last entry held for a longer infection, like shedding_curve_log10. Null means the assay is time-invariant and assay_sensitivity is read instead; the two are mutually exclusive, because a scalar declared beside a curve is a second parameterisation of one quantity and hides which the loader reads. This clock is detectability and is not the infectiousness clock: RNA positivity outlasts culture positivity, so a profile may test positive on a day it emits nothing."
         },
         "episode_reporting_window_days": {
           "type": "number",
@@ -600,7 +607,13 @@
         },
         "asymptomatic_shedding_log10": {
           "type": "array",
-          "items": {"type": "number", "minimum": 0}
+          "items": {"type": "number", "minimum": 0},
+          "description": "Day-by-day shedding rate (log10 copies) for a host that never presents, on the same axis as shedding_curve_log10. Equal curves mean no symptom-conditioned offset is claimed; see asymptomatic_shedding_notes for what the offset a profile does declare is sourced against."
+        },
+        "asymptomatic_shedding_notes": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Literature provenance or rationale for asymptomatic_shedding_log10, including whether any offset from the symptomatic curve is measured or declared."
         },
         "presymptomatic_shedding_days": {
           "type": "number",
@@ -741,6 +754,11 @@
             "eta": {"type": "number", "minimum": 0, "maximum": 1},
             "gamma": {"type": "number", "minimum": 0, "maximum": 1}
           }
+        },
+        "symptomatic_fraction_notes": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Literature provenance or rationale for symptomatic_fraction, including the denominator the proportion was measured on."
         },
         "symptomatic_fraction": {
           "type": "number",
@@ -949,6 +967,11 @@
         },
         {
           "not": {"required": ["illness_probability", "symptomatic_fraction"]}
+        },
+        {
+          "description": "symptomatic_fraction_notes documents a field, so it may not be present without it.",
+          "if": {"required": ["symptomatic_fraction_notes"]},
+          "then": {"required": ["symptomatic_fraction"]}
         },
         {
           "description": "Route efficiency has one parameterisation. route_efficiency_multipliers and its deprecated alias transmission_route_weights are the same field, and declaring both hides which one the loader reads.",

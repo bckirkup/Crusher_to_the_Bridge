@@ -316,30 +316,234 @@
       ],
       "asymptomatic_shedding_log10": [
         3.0,
-        4.5,
-        6.0,
-        7.0,
-        7.5,
-        7.0,
-        6.0,
         5.0,
-        4.0,
+        7.0,
+        8.5,
+        9.0,
+        8.5,
+        7.5,
+        6.5,
+        5.5,
+        4.5,
         3.5,
         3.0,
         2.5,
         2.0,
-        2.0,
         2.0
       ],
+      "asymptomatic_shedding_notes": "Equal to shedding_curve_log10: no symptom-conditioned offset is claimed on this arm. The shipped curve carried a 1.0-1.5 log10 offset below the symptomatic peak with no source, and it is REFUTED - measured upper-respiratory viral loads are similar between symptomatic and asymptomatic people through the first week (docs/literature/mql_tranche_9_sars_cov2.md, corroborated in docs/literature/edison_covid_influenza_bundle_review.md). Removing it is #31's action on the register's asymptomatic_shedding_log10 row. Equality is the null, not a claim that the two curves are identical past week one, where the measurements thin out; a separate asymptomatic curve returns only with a measurement to put in it.",
       "dose_adjustment": 3.0,
       "dose_response": {
         "model": "beta_poisson",
         "alpha": 0.18,
         "beta": 58.0
       },
-      "illness_probability": {
-        "eta": 0.4,
-        "gamma": 0.12
+      "symptomatic_fraction": 0.69,
+      "symptomatic_fraction_notes": "0.69 = 1 - 0.31, the asymptomatic share among people found by SCREENING rather than by symptoms, Buitrago-Garcia 2020 (PLoS Med 17(9):e1003346), Grade B. Screened is the right denominator because a symptom-based denominator conditions on the outcome being measured. Sah 2021's 35.1% (PNAS 118(34):e2109229118) is the alternative and is a declared scenario axis, giving 0.649. This replaces illness_probability eta 0.4 / gamma 0.12, deleted as unattributed near-neighbours of norovirus's Korkin pair: the Hill form is strictly increasing in dose and no dose-conditional presentation measurement exists for SARS-CoV-2, so the arm carries a measured proportion instead, as influenza_a does after Carrat.",
+      "severity_model": {
+        "states": [
+          "asymptomatic",
+          "subclinical",
+          "mild",
+          "moderate",
+          "severe_critical"
+        ],
+        "base_probabilities": [
+          0.31,
+          0.0,
+          0.669,
+          0.0164,
+          0.0046
+        ],
+        "base_probabilities_by_age_band": {
+          "0-4": [
+            0.31,
+            0.0,
+            0.68897,
+            0.000942,
+            8.8e-05
+          ],
+          "5-17": [
+            0.31,
+            0.0,
+            0.6878,
+            0.00196,
+            0.00024
+          ],
+          "child": [
+            0.31,
+            0.0,
+            0.6878,
+            0.00196,
+            0.00024
+          ],
+          "18-24": [
+            0.31,
+            0.0,
+            0.6853,
+            0.00407,
+            0.00063
+          ],
+          "18-34": [
+            0.31,
+            0.0,
+            0.6853,
+            0.00407,
+            0.00063
+          ],
+          "young_adult": [
+            0.31,
+            0.0,
+            0.6853,
+            0.00407,
+            0.00063
+          ],
+          "25-34": [
+            0.31,
+            0.0,
+            0.6853,
+            0.00407,
+            0.00063
+          ],
+          "35-44": [
+            0.31,
+            0.0,
+            0.6801,
+            0.0082,
+            0.0017
+          ],
+          "35-49": [
+            0.31,
+            0.0,
+            0.669,
+            0.0164,
+            0.0046
+          ],
+          "adult": [
+            0.31,
+            0.0,
+            0.669,
+            0.0164,
+            0.0046
+          ],
+          "45-54": [
+            0.31,
+            0.0,
+            0.669,
+            0.0164,
+            0.0046
+          ],
+          "50-64": [
+            0.31,
+            0.0,
+            0.646,
+            0.032,
+            0.012
+          ],
+          "middle_aged": [
+            0.31,
+            0.0,
+            0.646,
+            0.032,
+            0.012
+          ],
+          "55+": [
+            0.31,
+            0.0,
+            0.601,
+            0.056,
+            0.033
+          ],
+          "65-74": [
+            0.31,
+            0.0,
+            0.601,
+            0.056,
+            0.033
+          ],
+          "senior": [
+            0.31,
+            0.0,
+            0.519,
+            0.088,
+            0.083
+          ],
+          "75+": [
+            0.31,
+            0.0,
+            0.387,
+            0.109,
+            0.194
+          ]
+        },
+        "fatality_probability_by_severity": null,
+        "evidence_grade": "B for the age ladder (Herrera-Esposito 2022) and the asymptomatic share (Buitrago-Garcia 2020); C for the band-to-decade mapping and the declared subclinical null",
+        "notes": "Age-conditioned, and the age dependence is the sourced part. Herrera-Esposito & de los Campos 2022 (BMC Infect Dis 22:311, DOI 10.1186/s12879-022-07262-0) estimate infection-severe (ISR) and infection-critical (ICR) rates by age decade from multi-country seroprevalence studies, Grade B: ISR 0.103% (0-9) to 30.3% (80+), ICR 0.0088% to 19.4%, age-logistic slopes 0.076 and 0.099 per year. Those rates are denominated in INFECTIONS, which is the denominator these five states use, so moderate = ISR - ICR (severe, not critical) and severe_critical = ICR read straight off that table. Wiersinga 2020's 81%/14%/5% mild/severe/critical ladder is NOT used numerically: its denominator is diagnosed cases, and its hospitalised shares exceed the infection-denominated rates by more than an order, so importing it would silently change the denominator. Tabata and every other Diamond Princess severity report is BARRED here - Diamond Princess is Track D's training hull, and severity read off it would make the held-out score circular. asymptomatic 0.31 is the screened denominator of Buitrago-Garcia 2020 (PLoS Med 17(9):e1003346), matching symptomatic_fraction 0.69; Sah 2021's 35.1% is the alternative denominator and is the declared axis for it, not an average taken with it. Declared, not measured, and marked as such: (1) subclinical is 0.0 because no source separates a subclinical rung from mild on this arm, and a null is the honest entry rather than an invented split - mild therefore carries the whole non-hospitalised symptomatic mass; (2) each band reads the decade containing its midpoint, an open-ended band taking its lower bound plus five years, because no population config in this repository states a numeric span for its named bands or an age distribution inside any band; (3) child, young_adult, adult, middle_aged and senior are read as 5-17, 18-34, 35-49, 50-64 and 65+, which the picard population config leaves unstated; (4) base_probabilities is a fallback for a band this block does not name, set to the adult vector so an unnamed band reads a mid-range case mix rather than either tail - it is not a population average and carries no evidential claim. Cruise passengers are not a general population (Pavli's measured mean passenger age is 72.6), which is why the ladder reads the agent's age instead of one vector. No entry was chosen against Diamond Princess, Greg Mortimer, Willebrand or any attack rate Track D scores."
+      },
+      "observation_model": {
+        "system": "SYMPTOM_ONSET_AND_PCR",
+        "syndrome_case_eligibility_by_severity": [
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "reporting_probability_by_severity_pre_recognition": [
+          0.0,
+          0.0,
+          0.15,
+          0.7,
+          1.0
+        ],
+        "reporting_probability_by_severity_post_recognition": [
+          0.0,
+          0.0,
+          0.3,
+          0.85,
+          1.0
+        ],
+        "active_screening": {
+          "enabled": false,
+          "modality": null,
+          "selection_probability_per_day": 0.0,
+          "selection_probability_by_time": null,
+          "notes": "Off, so the arm's baseline is passive ascertainment. The Diamond Princess daily campaign and Greg Mortimer's ship-wide test event are case-finding campaigns that reach hosts who never presented; they are represented by enabling this in the #33 scenarios, never by widening the sampling vector."
+        },
+        "lab_sampling_probability_by_severity": [
+          0.0,
+          0.0,
+          0.4,
+          0.75,
+          0.95
+        ],
+        "assay_sensitivity_by_time_since_infection": [
+          0.0,
+          0.0,
+          0.11,
+          0.22,
+          0.33,
+          0.62,
+          0.68,
+          0.74,
+          0.8,
+          0.765,
+          0.729,
+          0.694,
+          0.658,
+          0.623,
+          0.588,
+          0.552,
+          0.517,
+          0.482,
+          0.446,
+          0.411,
+          0.375,
+          0.34
+        ],
+        "episode_reporting_window_days": 7.0,
+        "evidence_grade": "B for the PCR sensitivity anchors (Kucirka 2020); C for the declared reporting and sampling vectors and for the interpolation between anchors",
+        "notes": "Two observables, kept apart: symptom onset (a dated presentation) and a PCR positive (a specimen plus an assay). Track D scores COVID on confirmed cases and onset dates, so neither may be read off truth state, and the sick-call hazard the syndromic modality applies to norovirus is NOT this arm's ascertainment channel. The three severity vectors are declared, class C, and are the arm's declared axis: eligibility 0 on the two rungs that never present, 1 on mild and above because a dated onset needs only symptoms; passive reporting rises with severity and rises again once an outbreak is recognised. They are not set to reproduce any Diamond Princess or Greg Mortimer count - the campaigns those hulls ran are active screening, added as scenarios in #33, and active_screening is off here so the profile's own baseline is passive infirmary ascertainment. assay_sensitivity_by_time_since_infection is sourced: Kucirka 2020 (Ann Intern Med 173(4):262, DOI 10.7326/M20-1495) reports RT-PCR false-negative rates by day since exposure - 100% on day 1, 67% on day 4, 38% on day 5, a minimum of 20% on day 8, rising to 66% on day 21 - inverted to sensitivity here and linearly interpolated between those five reported days, which is the declared part. Grade B for the anchors, C for the interpolation. The curve is indexed by days since INFECTION and its last entry is held, like a shedding curve. Detectability and infectiousness stay on separate clocks: shedding_duration_days 15 is upper-respiratory RNA positivity, culture positivity ends far earlier, and this curve moves only whether a specimen tests positive. episode_reporting_window_days 7.0 is recovery_day, declared. Fatality is not modelled on this arm, so no IFR ladder is declared here; Levin 2020's age-specific IFR is recorded in the register and enters nothing."
       },
       "recovery_day": 7,
       "shedding_duration_days": 15,

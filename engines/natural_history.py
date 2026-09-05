@@ -64,12 +64,14 @@ __all__ = [
     "draw_symptom_onset",
     "draw_symptom_severity",
     "ever_presented",
+    "host_age_band",
     "incubation_days",
     "onset_day",
     "presentation_probability",
     "project_legacy_illness",
     "record_cleared_immunity",
     "severity_on_day",
+    "severity_probabilities",
 ]
 
 
@@ -201,7 +203,9 @@ def draw_symptom_onset(
         draw_emesis_schedule(agent, pid, prof, rng)
         apply_treatment_at_onset(agent, pid, inf, prof)
         if inf.get("symptom_severity") in (None, "", "asymptomatic"):
-            inf["symptom_severity"] = draw_symptom_severity(prof, rng)
+            inf["symptom_severity"] = draw_symptom_severity(
+                prof, rng, host_age_band(agent),
+            )
         inf["symptom_severity_peak"] = inf["symptom_severity"]
         inf["symptom_severity"] = severity_on_day(
             prof, inf["symptom_severity_peak"], 0,
@@ -212,19 +216,58 @@ def draw_symptom_onset(
         inf["symptom_severity"] = "asymptomatic"
 
 
+def host_age_band(agent: Any) -> str:
+    """The age band label one host carries, or the empty string.
+
+    Every agent the run builds carries ``age_band``; the fallback exists for
+    the minimal hosts that exercise the presentation draw alone, and it reads
+    the profile's declared reference vector rather than inventing a band.
+    """
+    try:
+        band = agent.age_band
+    except AttributeError:
+        return ""
+    return str(band or "")
+
+
+def severity_probabilities(
+    severity: dict[str, Any],
+    age_band: str = "",
+) -> list[float]:
+    """The five-state distribution one host's age band reads.
+
+    ``base_probabilities_by_age_band`` is an exact-label lookup, as the
+    incubation host factors are, and ``base_probabilities`` is the declared
+    reference vector a band the profile does not name reads: severity that
+    spans orders of magnitude across age cannot be interpolated between two
+    labels whose numeric spans the population configs never state.
+    """
+    by_band = severity.get("base_probabilities_by_age_band") or {}
+    vector = by_band.get(age_band) if age_band else None
+    if vector is None:
+        vector = severity.get("base_probabilities") or []
+    return [float(value) for value in vector]
+
+
 def draw_symptom_severity(
     profile: dict[str, Any],
     rng: np.random.Generator,
+    age_band: str = "",
 ) -> str:
     """Draw one symptomatic state from the renormalised five-state prior.
 
     The state drawn is the **peak** of the course. Where the profile declares a
     trajectory, ``severity_on_day`` reads the day the host is on and returns
     what an observer sees on it, which is at or below this state.
+
+    Where the profile declares ``base_probabilities_by_age_band`` the draw is
+    conditioned on the host's band; the renormalisation over the four
+    symptomatic states is unchanged, so what the band moves is the case mix
+    within presentation and not the probability of presenting.
     """
     severity = profile.get("severity_model", {})
     states = severity.get("states", [])
-    probabilities = severity.get("base_probabilities", [])
+    probabilities = severity_probabilities(severity, age_band)
     if len(states) != 5 or len(probabilities) != 5:
         return ""
     symptomatic_states = [str(state) for state in states[1:]]
