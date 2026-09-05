@@ -165,31 +165,43 @@ corroboration — and 0.111 lies inside it, within 3% of its geometric centre
 family, aggregation assumption and dose unit are one categorical choice (Liu et
 al. 2026).
 
-**#43's norovirus half is narrowed, not closed.** The published exchange settles
-that the disagreement is statistical rather than biological and that our pair is
-the non-aggregation genome-copy fit; what remains open is whether Teunis's 18 is
-aggregates or copies, which no source we hold settles. The 18 figure is
-reported as an aggregation-model-dependent quantity; on our side the live
-per-agent confluent-hypergeometric beta-Poisson path has an N50 of
-**16,644 copies** and the closed-form helper has an approximate N50 of
-**16,871 copies**. Both give
-**P ≈ 0.047** at `D = 18` to three significant figures, so the trap is unchanged.
-The bundle review had already posed the 18-aggregate reading as an open,
-unverified hypothesis — "16,644 / 18 ≈ 925 genome copies per infectious
-aggregate" — and the collaborator's confirmation is circular rather than
-independent: 16,643.78 / 18 = 924.65, and 18 × 925 agrees with the exact N50 to
-≈0.04%. The aggregate reading is therefore **unverified**, not corroborated,
-and the 925 bridge remains unverified against the primary. It would take
-Teunis et al. 2008's own reported aggregation parameter or aggregate-size
-distribution, read from Table III or the paper's text independently of any ID50
-held here, to settle it. Atmar's reply instead describes "18 genomic
+**#43's norovirus half is closed on the unit, and the ≈925 copies-per-aggregate
+bridge is withdrawn (tranche 23).** The dose axis of the shipped row is
+**administered genome copies (gEq/GEC)** — the unit both challenge inocula were
+quantified in, and the unit in which Kirby, Teunis & Moe and Atmar's reply agree
+that the two studies' no-aggregation models give similar estimates. On our side
+the live per-agent confluent-hypergeometric beta-Poisson path has an N50 of
+**16,644 copies** and the closed-form helper an approximate **16,871 copies**;
+both give **P ≈ 0.047** at `D = 18`, so pairing "ID50 = 18" with this row stays
+arithmetically impossible whatever unit the 18 is in.
+
+The 925 figure was `16,643.78 / 18 = 924.65` — the N50 it was derived from — and
+is **withdrawn as circular**. Its published replacement is **µ_c = 517**, the
+aggregate-size parameter in Kirby's Figure 1 caption, which belongs to the
+*pooled aggregation-corrected* fit (α = .024, β = .017) rather than to our
+no-aggregation row — that row has no aggregation parameter, which is what "no
+aggregation" means. **The ~100× aggregation fork is retracted, and the arithmetic
+is why:** that pooled fit's exact N50 is 1.85 aggregates, and 1.85 × 517 = 954
+copies, within 6% of Teunis's aggregated ID50 of 1,015 gEq. An aggregate-unit
+axis re-expresses the same dose; it does not move it by two orders of magnitude.
+
+What is **not** settled is Teunis's own wording, and it is contested in print
+rather than merely unread: Kirby's letter reports the disaggregated HID50 as
+**18.2 GEC, 95% CI 1.03–4,350 GEC**; Atmar's reply calls the 18 "genomic
 equivalents ... determined using assumptions about differing amounts of virus
-aggregation", which is unreconciled. The bundle's question therefore exposed a
-process failure: **#43 was filed against a question our own review had already
-posed.** Atmar's measured HID50 of 1,320–2,800 gEq remains an open **5.9–12.6×**
-gap below the live 16,644 under the nominally same no-aggregation framing, with
-both letters cited and no dose figure changed — every dose figure in this
-repository remains void pending refit.
+aggregation" and argues Teunis's own 0/9 at 324 gEq and 0/8 at 32.4 gEq make it
+untenable; the collaborator bundle reads the Results sentence as 18 *single
+virions* under a hypothetical fully disaggregated inoculum, and is cited as
+**Sec** for that. Teunis 2008's body text and Table III are **?nr** — paywalled,
+no body from Europe PMC, two chunk queries returned the abstract only — so the
+row-structure claims rest on secondary analysis. Nothing above depends on the
+wording. **#43 was still filed against a question our own review had already
+posed**, and it is withdrawn rather than sent. Atmar's measured HID50 of
+1,320–2,800 gEq remains an open **5.9–12.6×** gap below the live 16,644 under the
+same no-aggregation framing, and **is now declared as a span on the dose axis**,
+[1.32×10³, 1.69×10⁴] gEq, `logU`, **declared and not applied** so the #36 screen
+and #37 admissible-region test expose it rather than absorb it. No dose figure
+changed — every dose figure in this repository remains void pending refit.
 
 **The proposal to close that 5.9–12.6× gap by retargeting α/β onto Atmar's
 HID50 is rejected on genogroup, and the gap is reclassified as a
@@ -198,10 +210,18 @@ of the exchange adds three things the ledger did not have, and the third
 disqualifies the refit. First, **Atmar 2014 fits a logistic model**, not a
 beta-Poisson: its 1,320 gEq (secretor-positive blood group O/A) and 2,800 gEq
 (all secretor-positive, blood group B/AB being wholly resistant in that study)
-are logistic ID50s, with no illness observed below 324 gEq. Importing either
+are logistic ID50s, with no infection observed below 324 gEq. Importing either
 would change the dose-response *family* as well as its value, and β = 32.81
 would keep no provenance at all once the Teunis fit it was lifted from is
 abandoned — moving α while holding β is retaining half of a rejected fit.
+**Corrected by tranche 23: the family is not what produces the gap.** Kirby's
+Figure 1 caption reports an *exact beta-Poisson* refit of Atmar's own data with
+no aggregation — the same family and assumption as our row — at α = .28,
+β = .58, whose exact N50 recomputed in-repo is 4.16 dose units, ≈**1,660 gEq**
+at Atmar's ≈400 gEq per RT-PCR unit (the caption does not state its unit; that
+conversion is an inference, grade C). Family and value move together and the
+~10× distance from 16,644 survives, so the refusal to retarget α/β rests on the
+genogroup argument below and on the after-the-gate boundary, not on family.
 Second, **the two figures are not interchangeable, and the tree picks 2,800**:
 susceptibility here is gated on secretor status and **not** on ABO, so a
 secretor-positive agent stands for Atmar's whole secretor-positive cohort across

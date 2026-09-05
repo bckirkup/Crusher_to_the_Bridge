@@ -127,7 +127,7 @@ any interval lands after the Track A item that owns its field.**
 | C3 | Norovirus shedding-curve peak magnitude | #47 | Same identifiability as C2 in the other arm: a −2 log emission correction applied alone is absorbed into an unidentified quantity. Declared, not applied, unless adopted with the dose axis |
 | C4 | `airborne_emission_fraction`, and a swept result for the drying axis | #42 | No study reports emission as a fraction of shedding, so the *definition* is the construction. The drying multiplier ships neutral and needs a swept result before any value is adopted |
 | C5 | `contact_transfer_fraction` | #22 | Deliberately last in this track: it clears no noise floor anywhere across its whole sourced interval. Correct it; do not prioritise it |
-| C6 | Ask Edison whether the Teunis Table III ID50 of 18 is in aggregates | #43 | **Send this now.** It is the only item with external latency, and it is the same unit trap that produced the withdrawn 3.7× genogroup ratio |
+| C6 | ~~Ask Edison whether the Teunis Table III ID50 of 18 is in aggregates~~ **Done: question withdrawn, answered from the published exchange** | #43 | **Closed by [tranche 23](../literature/consensus_tranche_23_teunis_atmar_dose_unit.md).** The axis is genome copies; the ≈925 copies-per-aggregate bridge is withdrawn as circular and replaced by Kirby's published µ_c = 517, which retracts the ~100× aggregation fork; the dose-axis span [1.32×10³, 1.69×10⁴] gEq is declared and not applied. Teunis 2008's Table III stays `?nr` (paywalled) and its "18" is recorded as contested in print, not settled. No external latency remains |
 | C7 | Re-tests the rebuild invalidated: Alsved airborne check, A5 role asymmetry, faecal-release plateau under syndromic surveillance | #39, #40, #24 | These are conclusions drawn on a structure that no longer exists. They are cheap and they are not optional |
 
 ## 6. Tracks D and E — the two things the intervals are for
@@ -213,9 +213,10 @@ downstream of all three; the gate is last.
 | Gate | #36, #37 (+#16, #17) | ~2 sessions plus campaign wall-clock |
 
 Roughly **17 sessions of work, and nearer 10 elapsed** with A/B/C overlapped.
-Two costs are not working time and should be started immediately rather than
-scheduled: the Edison question (C6) and the campaign image and Spot submission
-(#16, #17).
+One cost is not working time and should be started immediately rather than
+scheduled: the campaign image and Spot submission (#16, #17). The other, the
+Edison question (C6), no longer exists — it was answered from the published
+exchange and withdrawn rather than sent.
 
 ## 9. What this plan deliberately does not do
 
