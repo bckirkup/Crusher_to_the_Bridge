@@ -54,6 +54,26 @@ PLENUM_VOLUME_M3 = 0.001
 PATH_TYPE_HVAC_RETURN = "hvac_return"
 PATH_TYPE_HVAC_SUPPLY = "hvac_supply"
 
+# η for a caller that supplies no filter at all.  UNSOURCED: its old config
+# comment called it MERV-13, but the Healthy Sail Panel reports MERV 8 at 30%
+# removal over 3-10 um and MERV 13 at 90% over 0.3-1 um, so 0.50 is above every
+# pre-2020 filter and below the class it was named after.  E/#10 sweeps
+# [0.0, 0.30] pre-2020 and [0.90, 0.99] post-2020, and neither era may reach
+# this value: a configuration must state its own η rather than inherit one, so
+# an omitted key raises instead of silently landing here.
+UNSOURCED_LEGACY_FILTER_EFFICIENCY = 0.50
+
+
+def require_filter_efficiency(hvac_cfg: dict[str, Any]) -> float:
+    """η stated by a configuration, never defaulted on its behalf."""
+    if "filter_efficiency" not in hvac_cfg:
+        raise KeyError(
+            "hvac.filter_efficiency is unset: state it, because the removal "
+            "efficiency of a plant that is not described is not "
+            f"{UNSOURCED_LEGACY_FILTER_EFFICIENCY}",
+        )
+    return float(hvac_cfg["filter_efficiency"])
+
 
 def is_plenum_zone(zone_id: str) -> bool:
     """True for virtual AHU plenum nodes excluded from epidemic reporting."""
@@ -187,11 +207,10 @@ class ContamTransportEngine:
     air_flow_paths : dict
         Parsed ``air_flow_paths.json`` content.
     filter_efficiency : float
-        HVAC filter efficiency η ∈ [0, 1]. Standard values:
-        - MERV-8:  0.20  (residential baseline)
-        - MERV-13: 0.50  (commercial standard)
-        - MERV-16: 0.95  (hospital grade)
-        - HEPA:    0.999 (clean room / biocontainment)
+        HVAC filter efficiency η ∈ [0, 1].  Defaults to
+        ``UNSOURCED_LEGACY_FILTER_EFFICIENCY`` for callers that do not model
+        filtration; a run built from a configuration must state it, and an era
+        arm must state a swept coordinate.
     natural_decay_rate : float
         Continuous natural decay rate λ [1/h] for settling and
         viral inactivation (folded into removal rate ``k``).
@@ -202,7 +221,7 @@ class ContamTransportEngine:
         self,
         spatial_layout: dict[str, Any],
         air_flow_paths: dict[str, Any],
-        filter_efficiency: float = 0.50,
+        filter_efficiency: float = UNSOURCED_LEGACY_FILTER_EFFICIENCY,
         natural_decay_rate: float = 0.10,
         clock: SimClock | None = None,
     ) -> None:
@@ -638,7 +657,7 @@ def _build_native_engine(
     return ContamTransportEngine(
         spatial_layout=spatial,
         air_flow_paths=airflow,
-        filter_efficiency=hvac_cfg.get("filter_efficiency", 0.50),
+        filter_efficiency=require_filter_efficiency(hvac_cfg),
         natural_decay_rate=hvac_cfg.get("natural_decay_rate", 0.10),
         clock=clock,
     )

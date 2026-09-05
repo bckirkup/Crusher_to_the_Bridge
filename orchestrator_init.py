@@ -63,7 +63,10 @@ from engines.pharmaceutical_interventions import (
     assign_host_pharmacology,
     resolve_pharmacology,
 )
-from engines.py_contam_bridge import ContamTransportEngine
+from engines.py_contam_bridge import (
+    UNSOURCED_LEGACY_FILTER_EFFICIENCY,
+    ContamTransportEngine,
+)
 from engines.sim_clock import SimClock, config_epochs_for_hours
 from engines.wearable_monitor import (
     WearableMonitor,
@@ -2047,7 +2050,9 @@ def init_protocol_engine(
     protocol_engine = ProtocolEngine(standing_protocols, cost_ledger)
 
     original_filter_eff = (
-        contam_engine.filter_efficiency if contam_engine is not None else 0.50
+        contam_engine.filter_efficiency
+        if contam_engine is not None
+        else UNSOURCED_LEGACY_FILTER_EFFICIENCY
     )
 
     print_protocol_engine(standing_protocols, cost_ledger)

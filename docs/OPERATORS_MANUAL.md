@@ -312,9 +312,11 @@ README) or set `CONTAMX_BINARY`.
 
 ```yaml
 hvac:
-  filter_efficiency: 0.50      # [0,1] — MERV-8=0.20, MERV-13=0.50, HEPA=0.999
+  filter_efficiency: 0.50      # [0,1] — UNSOURCED; the Healthy Sail Panel puts
+                               # MERV 8 at 0.30 and MERV 13 at 0.90, so 0.50 is
+                               # neither, and era arms state a swept coordinate
   natural_decay_rate: 0.10     # fraction lost per epoch to settling/inactivation
-  filter_type: "MERV-13"       # human-readable label
+  filter_type: "unlabelled"    # human-readable label; a label is not a source
   transport_engine: "native"   # native | contamx | auto
   contamx:
     binary_path: ""

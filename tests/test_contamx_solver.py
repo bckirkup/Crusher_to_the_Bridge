@@ -40,6 +40,7 @@ from engines.contamx_transport import (  # noqa: E402
     _path_map_from_airflow,
 )
 from engines.py_contam_bridge import (  # noqa: E402
+    UNSOURCED_LEGACY_FILTER_EFFICIENCY,
     ContamTransportEngine,
     build_transport_engine,
 )
@@ -156,7 +157,12 @@ def test_build_transport_engine_contamx_falls_back_to_native():
             "spatial_layout": "data/platforms/destroyer_baseline/spatial_layout.json",
             "air_flow_paths": "data/platforms/destroyer_baseline/air_flow_paths.json",
         },
-        "hvac": {"transport_engine": "contamx"},
+        # η is stated because a config no longer inherits one; this test is
+        # about engine selection, so it states the legacy non-era value.
+        "hvac": {
+            "transport_engine": "contamx",
+            "filter_efficiency": UNSOURCED_LEGACY_FILTER_EFFICIENCY,
+        },
     }
     engine = build_transport_engine(str(REPO_ROOT), cfg)
     # No binary in CI -> falls back to the native engine (not the subclass).
@@ -170,7 +176,7 @@ def test_build_transport_engine_native_default_unchanged():
             "spatial_layout": "data/platforms/destroyer_baseline/spatial_layout.json",
             "air_flow_paths": "data/platforms/destroyer_baseline/air_flow_paths.json",
         },
-        "hvac": {},
+        "hvac": {"filter_efficiency": UNSOURCED_LEGACY_FILTER_EFFICIENCY},
     }
     engine = build_transport_engine(str(REPO_ROOT), cfg)
     assert type(engine) is ContamTransportEngine
@@ -348,7 +354,12 @@ def test_contamx_live_run_smoke():
             "spatial_layout": "data/platforms/destroyer_baseline/spatial_layout.json",
             "air_flow_paths": "data/platforms/destroyer_baseline/air_flow_paths.json",
         },
-        "hvac": {"transport_engine": "contamx"},
+        # η is stated because a config no longer inherits one; this test is
+        # about engine selection, so it states the legacy non-era value.
+        "hvac": {
+            "transport_engine": "contamx",
+            "filter_efficiency": UNSOURCED_LEGACY_FILTER_EFFICIENCY,
+        },
     }
     engine = build_contamx_engine(str(REPO_ROOT), cfg)
     assert isinstance(engine, ContamXTransportEngine)
