@@ -306,18 +306,46 @@ def test_noise_floor_of_a_single_seed_is_zero(
     assert floor["peak_epoch"] == pytest.approx(0.0)
 
 
-def test_suppression_zeroes_every_other_pathogen_in_the_bundle() -> None:
-    suppressed = bounded_screen.suppress_other_pathogens("active_profiles", PATHOGEN)
+def test_isolation_withdraws_every_other_pathogens_boarding() -> None:
+    boarding = bounded_screen.withdraw_other_boarding(
+        "active_profiles", PATHOGEN,
+    )["boarding"]
 
-    assert PATHOGEN not in suppressed
-    assert suppressed
-    assert set(suppressed) >= {"influenza_a", "sars_cov2_resp"}
-    assert all(patch == {"initial_infected": 0} for patch in suppressed.values())
+    assert PATHOGEN not in boarding
+    assert set(boarding) >= {"influenza_a", "sars_cov2_resp"}
+    assert all(
+        patch == {"enabled": False}
+        for name, patch in boarding.items()
+        if name != "enabled"
+    )
 
 
-def test_suppression_of_a_pathogen_absent_from_the_bundle_is_refused() -> None:
+def test_isolation_keeps_the_boarding_channel_itself_on() -> None:
+    """The block replaces the config's section, so it carries the switch."""
+    boarding = bounded_screen.withdraw_other_boarding(
+        "active_profiles", PATHOGEN,
+    )["boarding"]
+
+    assert boarding["enabled"] is True
+
+
+def test_isolation_of_a_pathogen_absent_from_the_bundle_is_refused() -> None:
     with pytest.raises(KeyError, match="declares no pathogen"):
-        bounded_screen.suppress_other_pathogens("active_profiles", "not_a_pathogen")
+        bounded_screen.withdraw_other_boarding("active_profiles", "not_a_pathogen")
+
+
+def test_isolation_of_a_pathogen_that_does_not_board_is_refused(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Withdrawing the others would leave the run with no arrival at all."""
+    monkeypatch.setattr(
+        bounded_screen,
+        "load_pathogen_bundle",
+        lambda path: {PATHOGEN: {}, "influenza_a": {"boarding": {}}},
+    )
+
+    with pytest.raises(KeyError, match="ships no boarding block"):
+        bounded_screen.withdraw_other_boarding("active_profiles", PATHOGEN)
 
 
 def _captured_spec(monkeypatch: pytest.MonkeyPatch) -> dict[str, object]:
@@ -366,9 +394,10 @@ def test_an_isolated_run_seeds_only_the_screened_pathogen(
         num_agents=10,
     )
 
-    overrides = seen["spec"]["pathogen_overrides"]
-    assert overrides["influenza_a"]["initial_infected"] == 0
-    assert "initial_infected" not in overrides[PATHOGEN]
+    boarding = seen["spec"]["config_overrides"]["initiation"]["boarding"]
+    assert boarding["influenza_a"] == {"enabled": False}
+    assert PATHOGEN not in boarding
+    assert "initial_infected" not in seen["spec"]["pathogen_overrides"][PATHOGEN]
 
 
 def test_a_bundle_run_leaves_the_declared_seeding_alone(
@@ -389,6 +418,7 @@ def test_a_bundle_run_leaves_the_declared_seeding_alone(
     )
 
     assert list(seen["spec"]["pathogen_overrides"]) == [PATHOGEN]
+    assert "initiation" not in seen["spec"]["config_overrides"]
 
 
 def test_the_recorded_run_declares_which_seeding_it_used(

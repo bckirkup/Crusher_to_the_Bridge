@@ -1,8 +1,9 @@
 # Morris screen #36 on the rebuilt model: one factor resolves, five do not
 
-Status: measurement, 2026-09-05. Supersedes
+Status: measurement of a retired initial condition, 2026-09-05. Supersedes
 [`bounded_screen_results.md`](bounded_screen_results.md), which measured a box
-that no longer exists. Design:
+that no longer exists — and is itself **superseded on arrival** by #54/#440,
+which landed the day after these runs; see §0. Design:
 `../proposals/bounded_sensitivity_and_admissible_region_spec.md` §2. Harness:
 `../../telemetry_buffer/observation_model/bounded_screen.py`. Raw output:
 `../../telemetry_buffer/observation_model/bounded_screen_isolated_36.json` and
@@ -12,6 +13,26 @@ Nothing here selects a parameter value, and this is not the feasibility test.
 The screen ranks factors; §6 of the design forbids writing an admissible range
 back into a profile, and #37 is a separate measurement that this one does not
 anticipate.
+
+## 0. Superseded on arrival: the seeding this measured no longer exists
+
+Every design point below starts from **one fiat norovirus index case**. #54/#440
+("Board every shipped pathogen") landed a day later and moved arrival into each
+pathogen's own profile as a boarding prevalence draw — `norwalk_gi` boards
+3.25% of passengers and 1.85% of crew — with the initiation engine owning it and
+refusing a profile that also states an index count.
+
+That is a different initial-condition model, not a re-plumbing of this one. At
+this document's own box centre, hull, agent count, horizon and seed, the
+boarding arm reports a **passenger infection attack rate of 0.0759 against the
+≈0.005 recorded here**, and a peak at epoch 61 rather than 8. §3's reading of
+why five factors sat below the floor — an epidemic at the edge of extinction —
+is precisely the condition a ~15× denser arrival removes, so neither the
+ranking nor the floor may be carried forward: the floor was measured under the
+same retired condition. The harness has been repaired to isolate through the
+initiation channel instead (`initiation.boarding.<pathogen>.enabled = false`),
+so a replacement pass is runnable; until one is run, nothing here restricts
+which factors #37 searches.
 
 ## 1. What was run
 

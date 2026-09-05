@@ -427,6 +427,16 @@ screen's one input to #37 is a budget: a design resolving one factor of six at
 five seeds per point says the region search is seed-bound, not
 trajectory-bound.
 
+**And it has already been overtaken, in the way this row warned about.**
+#54/#440 landed the day after those runs and replaced the one fiat index case
+with a boarding prevalence draw the initiation engine owns; at the same box
+centre the passenger infection attack rate moves from ≈0.005 to 0.0759. The
+screen's ranking and its floor both describe the retired condition, so neither
+restricts #37, and the "five factors unresolved" reading — attributed there to
+an epidemic near extinction — is the finding most likely to change under the
+denser arrival. The harness now isolates through the initiation channel and a
+replacement pass is runnable; it has not been run.
+
 **#37, the admissible-region feasibility test:** does *any* point inside the
 literature-bounded box satisfy all the anchors simultaneously?
 
