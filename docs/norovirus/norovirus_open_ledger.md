@@ -566,9 +566,13 @@ Roughly in dependency order.
    reachability, because the hand-transfer channel was already shown
    unreachable at any occupancy. The Park comparison is instead made with
    the emesis-inclusive calculation, swept over the separate, unmeasured
-   cabin-localization fraction f; at f=0.99, 78 of 81 schedule cells reach
-   Park's 100–300x range, and at f=1.00 all 81 do. f is not a schedule
-   parameter and no value is selected. Note that the premise has changed:
+   fraction of a host's emesis episodes occurring in its own cabin; at 0.99,
+   78 of 81 schedule cells reach Park's 100–300x range, and at 1.00 all 81 do.
+   That fraction is not a schedule parameter and no value is selected. It was
+   spelled "cabin-localization fraction f" until #12 and is now
+   `EMESIS_IN_OWN_CABIN_SWEEP`: it counts episode locations, not transmission
+   events, so the register's `f ≤ 0.5`-scale ceiling never applied to it.
+   Note that the premise has changed:
    crew rates did *not* hold still across the break, they rose (A7b), so a
    configuration that leaves the crew arm untouched now contradicts the data
    rather than matching it.

@@ -23,9 +23,14 @@ support it.
 Two factors named in the spec are deliberately absent, both for the same
 reason -- they are not simulation parameters:
 
-  * The cabin-localization fraction f is a parameter of the Park surface
-    harness only (park_surface_check.CABIN_LOCALIZATION_SWEEP). It enters the
-    Park anchor channel and cannot be screened here.
+  * The factor the spec's section 3.2 lists as "cabin-localization fraction f"
+    at 0.80-0.99 is the fraction of a host's emesis episodes happening in its
+    own cabin, and it is a parameter of the Park surface harness only
+    (park_surface_check.EMESIS_IN_OWN_CABIN_SWEEP). It enters the Park anchor
+    channel and cannot be screened here. It is a different quantity from the
+    register's cabin-localization fraction f, which is a share of transmission
+    events bounded by cabin_localization_ceiling; that one is emergent from
+    berthing and confinement rather than set, so it is not a factor either.
   * The dose-response model family is categorical. Per spec section 2.2 the
     whole design is re-run per family (`--dose-family`) and the between-family
     spread is reported separately, never interpolated.
