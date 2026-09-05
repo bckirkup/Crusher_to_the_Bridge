@@ -103,7 +103,7 @@
       "properties": {
         "instrument_class": {
           "type": "string",
-          "description": "Observation engine instrument class name",
+          "description": "Observation engine instrument class name. 'scenario_calendar' is the exception: no instrument reports it, so a protocol triggered on it never fires reactively and activates only when a scenario schedule (engines/scenario_schedule.py) names it on a simulated day.",
           "enum": [
             "continuous_air_sampler",
             "targeted_surface_swab",
@@ -113,7 +113,8 @@
             "clinical_microbiology",
             "wearable_physiological_monitor",
             "wearable_fleet_monitor",
-            "detection_escalation"
+            "detection_escalation",
+            "scenario_calendar"
           ]
         },
         "stoplight_level": {

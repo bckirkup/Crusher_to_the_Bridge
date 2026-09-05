@@ -36,6 +36,7 @@ from engines.py_contam_bridge import (
 from engines.py_contam_bridge import (
     load_spatial_layout as load_platform_layout,
 )
+from engines.scenario_schedule import ScenarioSchedule, resolve_scenario_schedule
 from engines.sim_clock import SimClock
 from engines.transmission_core import (
     DEFAULT_CONFINEMENT_ISOLATION_FACTOR,
@@ -277,6 +278,7 @@ class ShipSimulation:
         self._wastewater_routing: dict[str, str] = {}
         self.surface_recovery_config: SurfaceRecoveryConfig | None = None
         self.surface_recovery_rng: np.random.Generator | None = None
+        self.scenario_schedule = ScenarioSchedule()
 
 
     @property
@@ -364,6 +366,7 @@ class ShipSimulation:
         # One clock for the whole run: the itinerary sets the epoch length and
         # the natural history reads it, so the two cannot drift apart.
         self.clock = SimClock.for_run(cfg, voyage_cfg)
+        self.scenario_schedule = resolve_scenario_schedule(cfg)
         self.pathogen_profiles = load_pathogen_profiles(cfg)
         self.modalities = build_modalities(
             cfg,
@@ -786,6 +789,7 @@ class ShipSimulation:
             decision_ctx=dr.decision_ctx if dr else None,
             valid_zones=set(self.zone_names),
         )
+        self.scenario_schedule.apply(epoch, self.clock, state.forced_protocol_ids)
         fred_agents = [
             {
                 "agent_id": a.agent_id,
@@ -1235,11 +1239,23 @@ class ShipSimulation:
         )
         work.applied = _merge_applied(work.applied, cmd_applied)
 
+    def _authorized_sop_ids(self, work: _EpochWork) -> list[str] | None:
+        """Command's SOP authorization, with the scenario calendar's entries added.
+
+        A scheduled protocol replays something that historically happened; it
+        is an event fact, not a proposal the simulated command may decline.
+        """
+        authorized = work.dr.decision_ctx.authorized_sop_ids if work.dr else None
+        if authorized is None:
+            return None
+        scheduled = self.scenario_schedule.protocol_ids & work.state.forced_protocol_ids
+        return list(authorized) + sorted(scheduled - set(authorized))
+
     def _step_protocols(self, work: _EpochWork) -> None:
         reset_modifiers(
             self.contam_engine, self.tx_core, self.proto_ctx.original_filter_eff,
         )
-        authorized = work.dr.decision_ctx.authorized_sop_ids if work.dr else None
+        authorized = self._authorized_sop_ids(work)
         work.active_mods = self.proto_ctx.protocol_engine.evaluate_epoch(
             work.epoch,
             work.stoplights,
@@ -1248,10 +1264,8 @@ class ShipSimulation:
             cascade_context=build_cascade_context(work.state, work.cascade_result),
             trigger_status=work.state.trigger_status,
         )
-        if work.dr is not None and work.dr.decision_ctx.authorized_sop_ids is not None:
-            work.active_mods = filter_active_modifiers(
-                work.active_mods, work.dr.decision_ctx.authorized_sop_ids,
-            )
+        if authorized is not None:
+            work.active_mods = filter_active_modifiers(work.active_mods, authorized)
         work.merged_mods = self.proto_ctx.protocol_engine.get_merged_modifiers(
             work.active_mods,
         )

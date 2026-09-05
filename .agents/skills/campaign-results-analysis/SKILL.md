@@ -86,6 +86,27 @@ python3 deploy/aws/aggregate_results.py ./results/ \
 Flattens each zip’s `summary.json` (`parameters.*`, `derived.*`, costs) into one
 row per run.
 
+## Check the swept axis resolved (do this first)
+
+```bash
+python3 -m picard_framework.analysis.sweep_degeneracy campaign_summary.csv \
+  --axis parameters.dose_adjustment \
+  --outputs derived.infection_attack_rate_passenger \
+            derived.reported_case_attack_rate_passenger \
+            derived.peak_prevalence \
+  --group parameters.platform_id --group parameters.surveillance \
+  --replicate parameters.seed --fail-on-degenerate
+```
+
+Reports which rungs of the axis produced identical output at every shared seed,
+and the fraction of rungs that are distinguishable at all. A resolved fraction
+below 1.0 means part of the ladder is replication rather than design, and any
+interval read across that stretch is an artefact of the replication.
+
+Read it before scoring, and run it on a two-rung local probe before submitting a
+campaign: C1 spent 2,880 Batch runs on nine rungs that were one design point
+(`docs/norovirus/c1_reported_case_bracket_result.md`).
+
 ## Epidemic curves / frontiers (ops)
 
 ```bash

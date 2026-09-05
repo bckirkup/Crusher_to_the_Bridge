@@ -321,6 +321,25 @@ def _era_coordinates(params: dict[str, Any], path: str) -> dict[str, float]:
     return out
 
 
+def _declared_reporting_hazard(params: dict[str, Any], path: str) -> float:
+    """Per-day sick-call hazard the run declared, under either unit name.
+
+    ``sick_call_probability_per_day`` is the current name and
+    ``sick_call_probability`` the legacy one; both are per-day hazards that
+    ``SimClock`` converts to the epoch. A run that declares neither is refused
+    rather than read at the shipped default, because whether a run reports at
+    all decides which anchors it can be scored against.
+    """
+    for key in ("sick_call_probability_per_day", "sick_call_probability"):
+        if key in params:
+            return float(params[key])
+    raise RuntimeError(
+        f"{path} declares no sick-call hazard: expected "
+        "parameters.sick_call_probability_per_day or "
+        "parameters.sick_call_probability",
+    )
+
+
 def _read_row(summary: dict[str, Any], path: str) -> dict[str, Any]:
     """Build one scorer row from a root or nested archive summary."""
     params = summary.get("parameters", {})
@@ -329,11 +348,11 @@ def _read_row(summary: dict[str, Any], path: str) -> dict[str, Any]:
         "num_epochs",
         "num_agents",
         "natural_history_clock",
-        "sick_call_probability",
     )
     missing = [key for key in required if key not in params]
     if missing:
         raise RuntimeError(f"{path} missing parameters: {', '.join(missing)}")
+    sick_call_probability = _declared_reporting_hazard(params, path)
     if "infection_attack_rate_passenger" not in derived:
         raise RuntimeError(
             f"{path} predates the denominator fix: no "
@@ -378,7 +397,7 @@ def _read_row(summary: dict[str, Any], path: str) -> dict[str, Any]:
         "run_id": summary.get("run_id", path.split("!", maxsplit=1)[0]),
         "hull": hull,
         "strategy": strategy,
-        "sick_call_probability": float(params["sick_call_probability"]),
+        "sick_call_probability": sick_call_probability,
         "dose_adjustment": float(params.get("dose_adjustment", 0.0)),
         # Which A7 arm the run belongs to, and where in the era's swept box it
         # sat.  Empty when the run was not produced by an era sweep; the joint

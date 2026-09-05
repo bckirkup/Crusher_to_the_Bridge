@@ -68,6 +68,37 @@ def _build_device_map(
     return device_map
 
 
+def age_band_probabilities(
+    template: dict[str, Any],
+) -> tuple[list[str], np.ndarray | None]:
+    """The template's age bands and the probability each is drawn with.
+
+    ``age_bands`` alone draws uniformly (``None`` probabilities, so the draw
+    consumes the stream exactly as every bundle before weights existed did).
+    ``age_band_weights`` declares a composition — one non-negative weight per
+    band, normalised here — so a scenario can carry a measured age table
+    instead of a uniform one. A malformed declaration is a load error rather
+    than a silently uniform population.
+    """
+    bands = [str(band) for band in template.get("age_bands", ["adult"])]
+    if not bands:
+        raise ValueError("age_bands must name at least one band")
+    weights = template.get("age_band_weights")
+    if weights is None:
+        return bands, None
+    values = np.asarray([float(w) for w in weights], dtype=float)
+    if values.shape != (len(bands),):
+        raise ValueError(
+            f"age_band_weights has {values.size} entries for {len(bands)} age_bands",
+        )
+    if not np.all(np.isfinite(values)) or np.any(values < 0.0):
+        raise ValueError("age_band_weights must be finite and non-negative")
+    total = float(values.sum())
+    if total <= 0.0:
+        raise ValueError("age_band_weights must have a positive sum")
+    return bands, values / total
+
+
 def _profile_for_agent(
     agent: Any,
     templates: dict[str, Any],
@@ -81,8 +112,8 @@ def _profile_for_agent(
     role = getattr(agent, "role", "passenger")
     gender = getattr(agent, "gender", "unknown")
     tmpl = templates.get(cls, default_template)
-    age_bands = tmpl.get("age_bands", ["adult"])
-    age_band = str(rng.choice(age_bands))
+    age_bands, band_p = age_band_probabilities(tmpl)
+    age_band = str(rng.choice(age_bands, p=band_p))
     immune = bool(getattr(agent, "immune", False))
     immuno = False
     if not immune and immunocompromised_fraction > 0:
