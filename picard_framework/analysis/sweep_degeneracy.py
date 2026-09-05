@@ -32,6 +32,9 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any, Iterable, Mapping, Sequence
 
+from picard_framework.analysis._io import allowed_roots, safe_path
+from simulation_utils.paths import validated_open
+
 DEFAULT_REPLICATE = "parameters.seed"
 
 
@@ -195,9 +198,26 @@ def format_report(
     return "\n".join(lines) + "\n"
 
 
-def load_rows(path: Path) -> list[dict[str, str]]:
-    with path.open(encoding="utf-8", newline="") as handle:
+def load_rows(path: Path | str) -> list[dict[str, str]]:
+    """Read a flattened campaign summary from a path confined to the CWD."""
+    with validated_open(
+        safe_path(path),
+        allowed_roots=allowed_roots(),
+        encoding="utf-8",
+        newline="",
+    ) as handle:
         return list(csv.DictReader(handle))
+
+
+def write_report(path: Path | str, report: str) -> None:
+    """Write the Markdown report to a path confined to the CWD."""
+    with validated_open(
+        safe_path(path),
+        "w",
+        allowed_roots=allowed_roots(),
+        encoding="utf-8",
+    ) as handle:
+        handle.write(report)
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -224,7 +244,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         replicate=args.replicate,
     )
     if args.out is not None:
-        args.out.write_text(report, encoding="utf-8")
+        write_report(args.out, report)
     else:
         sys.stdout.write(report)
     if args.fail_on_degenerate and degenerate_rung_groups(

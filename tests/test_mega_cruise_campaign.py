@@ -437,6 +437,22 @@ def test_an_explicit_hazard_override_is_not_overwritten_by_the_base() -> None:
     assert "sick_call_probability_per_day" not in params
 
 
+def test_a_base_config_with_no_hazard_is_refused_not_defaulted(monkeypatch) -> None:
+    """No silent fallback: an arm whose hazard is undeclared is an error."""
+    from picard_framework.runs.mega_cruise_campaign import campaign_runner
+
+    monkeypatch.setattr(
+        campaign_runner,
+        "_base_syndromic_config",
+        lambda: {"background_noise_rate": 0.0},
+    )
+
+    with pytest.raises(ValueError, match="no syndromic sick-call hazard"):
+        campaign_runner._record_reporting_hazard(
+            {"platform_id": "expedition_cruise_450"},
+        )
+
+
 def test_t13_sweeps_wearable_detection_sensitivity() -> None:
     manifest = _v4_manifest_or_stub()
     runs = list(generate_tier_runs(manifest, "t13_wearable_sensitivity"))
