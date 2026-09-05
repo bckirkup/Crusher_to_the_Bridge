@@ -1,11 +1,20 @@
 # Field repair sequence: four defects, four different repairs, and only one is a curve
 
-> **Status:** **R1 landed** (this branch: the fraction alias is deleted and both
-> bundles are on `surface_decay_log10_per_day`); **R2–R5 proposed, and not
-> implemented**. **No value is adopted** — R1 was a value-preserving unit
-> migration, not a repair, so no register value, grade or interval moved with
-> it. §1's account of the pre-R1 state is kept as the reason the migration was
-> needed, not as a description of the tree.
+> **Status:** **R1, R3 and R4 have landed** (PRs #394, #402, #405): the
+> fraction alias is deleted and both bundles are on
+> `surface_decay_log10_per_day`; influenza presentation is dose-independent
+> `symptomatic_fraction` and the Hill form is gone; norovirus
+> `airborne_emission_fraction` is emesis-event-conditioned. **R5 is a decision
+> record only** (PR #393 changed this document and nothing else — no unit moved
+> in the pipeline). **R2 is not implemented, and is now refused on evidence**
+> rather than merely pending — see
+> [`surface_decay_biphasic_spec.md`](surface_decay_biphasic_spec.md) §7.1,
+> which also re-scopes R2's axis from environmental covariates to time since
+> deposition. **R1 adopted no value** — it was a value-preserving unit
+> migration, so no register value, grade or interval moved with it; R3 resolved
+> its row by *deletion*, and R4 moved the register row it names. §1's account
+> of the pre-repair state is kept as the reason each migration was needed, not
+> as a description of the tree.
 > It sequences the field repairs that
 > [`bayesian_inference_design.md`](bayesian_inference_design.md) §1 requires
 > before any inference runs, and it **corrects that document's §1**, which
