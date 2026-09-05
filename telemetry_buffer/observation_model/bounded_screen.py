@@ -35,6 +35,20 @@ reason -- they are not simulation parameters:
     whole design is re-run per family (`--dose-family`) and the between-family
     spread is reported separately, never interpolated.
 
+One pathogen at a time. Every scored output is a host-level quantity: the
+agent-level infection and illness fields are a projection across all of a
+host's lineages (natural_history.project_legacy_illness), and the summary
+counters, the reported-case ladder and the VSP threshold all read that
+projection. A run of the shipped bundle seeds norovirus, influenza and
+SARS-CoV-2 together, so its outputs are not attributable to any one of them --
+at the box centre the co-seeded configuration reports an attack rate of 0.43
+where norovirus alone reports 0.005. The screen therefore suppresses the seeds
+of every other pathogen in the bundle (`--co-seeded isolated`, the default) so
+that an elementary effect of a norovirus factor is read off a norovirus
+epidemic. `--co-seeded bundle` keeps the bundle's own seeding, and is a
+different scenario rather than a variant of the same one: its outputs are
+composite and its ranking may not be compared with the isolated one.
+
 The observation model's ascertainment vectors are absent for the third reason
 and are handled the same way. They are declared rather than sourced (#27) and
 they are not separately identifiable, so they are not continuous factors: the
@@ -240,6 +254,30 @@ def build_overrides(
     return {pathogen_id: profile}
 
 
+def suppress_other_pathogens(
+    bundle: str,
+    pathogen_id: str,
+) -> dict[str, dict[str, object]]:
+    """Seed counts that leave ``pathogen_id`` as the bundle's only index case.
+
+    Only the seeds move: every other pathogen keeps its declared profile, so
+    the suppression is a statement about this run's initial condition and not
+    an edit of the model.
+    """
+    path = CatalogRegistry.from_repo(str(REPO_ROOT)).resolve_pathogen_bundle(bundle)
+    profiles = load_pathogen_bundle(path)
+    if pathogen_id not in profiles:
+        raise KeyError(
+            f"bundle {bundle!r} declares no pathogen {pathogen_id!r}; "
+            f"declared: {sorted(profiles)}",
+        )
+    return {
+        other: {"initial_infected": 0}
+        for other in profiles
+        if other != pathogen_id
+    }
+
+
 def observation_scenario_patch(
     bundle: str,
     pathogen_id: str,
@@ -280,9 +318,12 @@ def run_point(
     epochs: int,
     num_agents: int,
     observation_scenario: str | None = None,
+    co_seeded: str = "isolated",
 ) -> dict[str, float]:
     """Run one design point at one seed and return the scored outputs."""
     overrides = build_overrides(factors, units, pathogen_id)
+    if co_seeded == "isolated":
+        overrides.update(suppress_other_pathogens(bundle, pathogen_id))
     if observation_scenario is not None:
         overrides[pathogen_id]["observation_model"] = observation_scenario_patch(
             bundle, pathogen_id, observation_scenario,
@@ -437,6 +478,17 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
             "spread, never interpolate between them."
         ),
     )
+    parser.add_argument(
+        "--co-seeded",
+        choices=("isolated", "bundle"),
+        default="isolated",
+        help=(
+            "isolated: suppress every other pathogen's seeds, so the scored "
+            "host-level outputs belong to --pathogen-id. bundle: keep the "
+            "bundle's own seeding; the outputs are then composite and the "
+            "ranking is not comparable with an isolated run."
+        ),
+    )
     parser.add_argument("--num-agents", type=int, default=450)
     parser.add_argument("--epochs", type=int, default=168)
     parser.add_argument("--trajectories", type=int, default=10)
@@ -459,6 +511,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         "epochs": args.epochs,
         "num_agents": args.num_agents,
         "observation_scenario": args.observation_scenario,
+        "co_seeded": args.co_seeded,
     }
     if args.mode == "floor":
         seeds = [args.seed_base + i for i in range(args.floor_seeds)]

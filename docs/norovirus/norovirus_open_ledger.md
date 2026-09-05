@@ -46,6 +46,21 @@ changes here.
   [`c1_reported_case_bracket_result.md`](c1_reported_case_bracket_result.md).
   Its syndromic arm is separately unscored: the runs recorded no sick-call
   hazard, and the scorer will not assume one.
+- **Any host-level attack rate taken from a co-seeded bundle run, for any one
+  pathogen.** Every agent-level infection and illness field is a projection
+  across all of a host's lineages
+  (`natural_history.project_legacy_illness`), and the summary counters, the
+  reported-case ladder and the VSP threshold all read that projection, so a run
+  of `active_profiles` — which seeds norovirus, influenza A and SARS-CoV-2 with
+  one index case each — reports the union and attributes it to nothing. Measured
+  at the Morris box centre over seeds 500-502: attack rate 0.4348 co-seeded
+  against 0.0052 with norovirus alone, `vsp_posted` 1.0 against 0.0, peak epoch
+  166 against 8. The influenza arm was activated at `f95677c` (2026-09-04),
+  after the 2026-09-01 Morris pass, so the contamination is post-dated to that
+  measurement rather than an explanation of it; it is nonetheless why the #36
+  re-run isolates the screened pathogen (`--co-seeded isolated`, the default in
+  `bounded_screen.py`). A composite run is a legitimate scenario, but it is a
+  different scenario, and its ranking may not be compared with an isolated one.
 - **Any claim that the model reproduces VSP attack rates.** Withdrawn at #346
   and not re-established. Expedition's earlier agreement was a cancellation of
   an inflated infection rate against a deflated illness ratio.
