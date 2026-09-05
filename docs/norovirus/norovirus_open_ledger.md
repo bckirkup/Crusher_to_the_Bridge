@@ -613,7 +613,15 @@ Roughly in dependency order.
     the top-ranked factor while carrying the mechanism §1 withdraws.
     `contact_transfer_fraction` drops down it — across its whole sourced
     interval it moves no scored output above the measured noise floor, so the
-    shipped value is still wrong but it is not an exposure. Emesis titre
+    shipped value is still wrong but it is not an exposure. **That screen row is
+    withdrawn and the item is closed by retirement (#22):** the field stood in
+    the same position of the same product as
+    `route_efficiency_multipliers["direct_contact"]`, so the design ranged half
+    of a product and its μ\* is not a sensitivity of contact transfer at all. The
+    field is deleted from the engine, the schema and the box, and refused at
+    load; the route keeps one owner
+    ([`../literature/consensus_tranche_12_contact_transfer.md`](../literature/consensus_tranche_12_contact_transfer.md)
+    §10). No other row in that screen is affected. Emesis titre
     becomes a first-order provenance target, which it was not before.
 11. **`EMESIS_TITRE_GEC_PER_ML` = 3.9e4 is the wrong figure from the right
     paper, and its two companions are also off the measurement.** Traced in

@@ -1178,7 +1178,10 @@ The per-pathogen configuration is defined in `schemas/pathogen_profiles.schema.j
       "surface_deposition_fraction": "number",
       "surface_decay_log10_per_day": "number >= 0",
       "airborne_half_life_hours": "number > 0",
-      "contact_transfer_fraction": "number [0,1], default 1.0",
+      // "contact_transfer_fraction" is RETIRED and refused at load (#22): it
+      // scaled the direct-contact pathway dose from the same position as
+      // route_efficiency_multipliers["direct_contact"], so only the product
+      // was identifiable. The multipliers own the route.
       "base_susceptibility": "number",
       "innate_nonsusceptible_fraction": "number",
 
@@ -1561,7 +1564,7 @@ All values verified against `data/pathogens/active_profiles.json` at SHA d557f39
 | Added shedding curves to Appendix A | A.1, A.2 | v1 omitted the actual curve values. Added complete 15-entry curves from `active_profiles.json`. |
 | Added observation model values to Appendix A | A.1 | v1 omitted shipped observation model arrays. Added complete values. |
 | Noted `severity_model`/`observation_model` null for SARS-CoV-2 | A.2 | Explicit documentation of audit finding 8.6. |
-| Added `contact_transfer_fraction` | §10.1 | Schema-defined field with default 1.0. Omitted in v1. |
+| Added `contact_transfer_fraction` | §10.1 | Schema-defined field with default 1.0. Omitted in v1. **Superseded (#22): the field is retired and refused at load — it was not identifiable against `route_efficiency_multipliers["direct_contact"]`.** |
 
 ### Mathematical Clarifications
 

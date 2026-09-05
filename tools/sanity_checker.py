@@ -498,6 +498,7 @@ class PathogenProfile(BaseModel):
     route_clearance_rate_per_hour: Any = None
     route_clearance_rates_per_hour: Any = None
     gastric_survival_fraction: Any = None
+    contact_transfer_fraction: Any = None
     innate_nonsusceptible_fraction: float = 0.0
     secretor_negative_fraction: float | None = None
     secretor_negative_relative_susceptibility: float | None = None
@@ -532,6 +533,13 @@ class PathogenProfile(BaseModel):
                     "route_efficiency_from_clearance_rates and declare the "
                     "result there",
                 )
+        if self.contact_transfer_fraction is not None:
+            raise ValueError(
+                "contact_transfer_fraction scales the direct-contact pathway "
+                "dose from the same position as route_efficiency_multipliers"
+                "['direct_contact'], so only their product is identifiable; "
+                "the multipliers own the route (#22)",
+            )
         if self.route_efficiency_multipliers and self.transmission_route_weights:
             raise ValueError(
                 "route_efficiency_multipliers and its deprecated alias "

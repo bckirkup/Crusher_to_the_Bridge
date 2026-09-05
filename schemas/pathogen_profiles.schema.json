@@ -828,13 +828,6 @@
           "exclusiveMinimum": 0,
           "description": "Airborne decay half-life in hours, excluding ventilation."
         },
-        "contact_transfer_fraction": {
-          "type": "number",
-          "minimum": 0,
-          "maximum": 1,
-          "default": 1.0,
-          "description": "Fraction of a contacted partner's emission that reaches the target."
-        },
         "food_contamination": {
           "$ref": "#/$defs/FoodContamination"
         },
@@ -987,6 +980,10 @@
               {"required": ["gastric_survival_fraction"]}
             ]
           }
+        },
+        {
+          "description": "contact_transfer_fraction scaled the direct-contact pathway dose from the same position as route_efficiency_multipliers['direct_contact'], so only their product was identifiable. Declare direct-contact efficiency once, there (#22).",
+          "not": {"required": ["contact_transfer_fraction"]}
         }
       ],
       "not": {"required": ["symptom_severity"]}

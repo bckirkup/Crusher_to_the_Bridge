@@ -264,7 +264,8 @@ def test_elementary_effects_count_one_effect_per_factor_per_trajectory(
         bounded_screen.NOROVIRUS_FACTORS, 4, [1], np.random.default_rng(9),
     )
 
-    assert effects["contact_transfer_fraction"]["vsp_posted"]["n"] == pytest.approx(4.0)
+    first = bounded_screen.NOROVIRUS_FACTORS[0].name
+    assert effects[first]["vsp_posted"]["n"] == pytest.approx(4.0)
 
 
 def test_noise_floor_is_the_seed_to_seed_standard_deviation(

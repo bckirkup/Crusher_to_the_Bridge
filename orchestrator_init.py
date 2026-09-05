@@ -1147,6 +1147,14 @@ def _validate_route_parameterisation(
                     "route_efficiency_from_clearance_rates and declare the "
                     "result there",
                 )
+        if "contact_transfer_fraction" in profile:
+            raise ValueError(
+                f"{pathogen_id}.contact_transfer_fraction scaled the "
+                "direct-contact pathway dose from the same position as "
+                "route_efficiency_multipliers['direct_contact'], so only "
+                "their product was identifiable; declare direct-contact "
+                "efficiency once, there (#22)",
+            )
         if (
             "route_efficiency_multipliers" in profile
             and "transmission_route_weights" in profile

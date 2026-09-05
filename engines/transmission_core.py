@@ -2359,6 +2359,12 @@ class TransmissionCore:
         ``transmission_route_weights`` is the deprecated alias for the same
         numbers. Nothing here normalises them: they are independent per-route
         dose multipliers.
+
+        This is the sole owner of per-route efficiency (#25). A second
+        multiplier standing on one route occupies the same position in the
+        product and only the product is identifiable, which is why the retired
+        ``contact_transfer_fraction`` is refused at load rather than defaulted
+        (#22).
         """
         raw = (profile or {}).get("route_efficiency_multipliers")
         if not isinstance(raw, dict) or not raw:
@@ -2457,27 +2463,22 @@ class TransmissionCore:
         n_occupants: int,
         r0_draw: int,
         cabin_confinement: bool,
-        transfer_fraction: float = 1.0,
     ) -> float:
         if self.contact_mode == "per_partner_contact":
             sampled, _ = self._sample_contact_partners(
                 shedders, n_occupants, r0_draw,
             )
             return self._per_partner_contact_dose(
-                target, sampled, cabin_confinement, transfer_fraction,
+                target, sampled, cabin_confinement,
             )
         if cabin_confinement:
             dose = 0.0
             for shedder, sv in shedders:
                 pair_factor = self._cabin_pair_contact_factor(shedder, target)
                 dose += sv * pair_factor / n_occupants * r0_draw
-            return dose * transfer_fraction
+            return dose
         dose = total_shedding / n_occupants * r0_draw
-        return (
-            dose
-            * transfer_fraction
-            * self._confinement_factor(target)
-        )
+        return dose * self._confinement_factor(target)
 
     def _sample_contact_partners(
         self,
@@ -2507,7 +2508,6 @@ class TransmissionCore:
         target: KorkinAgent,
         sampled_shedders: list[tuple[KorkinAgent, float]],
         cabin_confinement: bool,
-        transfer_fraction: float = 1.0,
     ) -> float:
         """Sum sampled partner shedding without zone-average dilution."""
         dose = 0.0
@@ -2515,11 +2515,7 @@ class TransmissionCore:
             if cabin_confinement:
                 shedding *= self._cabin_pair_contact_factor(shedder, target)
             dose += shedding
-        return (
-            dose
-            * transfer_fraction
-            * self._confinement_factor(target)
-        )
+        return dose * self._confinement_factor(target)
 
     def _effective_contacts(self, n_occupants: int, agent: KorkinAgent) -> int:
         """Occupancy-scaled contact draw for density_dependent contact_mode.
@@ -2626,9 +2622,6 @@ class TransmissionCore:
             shedder_ids = [s.agent_id for s, _ in shedders]
             n_occupants = max(len(occupants), 1)
             zone_dc_factor = self._direct_contact_zone_factor(zone_name)
-            transfer_fraction = float(
-                (profile or {}).get("contact_transfer_fraction", 1.0),
-            )
             cabin_confinement = self._zone_has_cabin_confinement(
                 zone_name, shedders, susceptible,
             )
@@ -2647,12 +2640,11 @@ class TransmissionCore:
                     )
                     dose = self._per_partner_contact_dose(
                         target, sampled_shedders, cabin_confinement,
-                        transfer_fraction,
                     )
                 else:
                     dose = self._direct_contact_dose(
                         target, shedders, total_shedding, n_occupants, r0_draw,
-                        cabin_confinement, transfer_fraction,
+                        cabin_confinement,
                     )
                 dose *= self.direct_contact_scalar
                 dose *= zone_dc_factor
