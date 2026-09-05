@@ -39,11 +39,9 @@ from typing import Any
 from engines.sim_clock import HOURS, HOURS_PER_DAY, LEGACY_EPOCH_DAY, SimClock
 from simulation_utils.paths import validated_open
 from telemetry_buffer.observation_model.midrs_incidence_targets import (
-    HULL_TO_GRT_BAND,
     MIDRS_DENOMINATOR_UNIT,
     MIDRS_DENOMINATOR_WINDOW,
     MIDRS_TOTAL_VOYAGES,
-    UNMAPPED_GRT_BANDS,
     a8_targets,
     a9_targets,
 )
@@ -633,6 +631,31 @@ def _endpoint_ratio(value: float, endpoint: float) -> float:
     return value / endpoint if endpoint else float("inf")
 
 
+def _a8_role_ratios(role: str, value: float, target: dict[str, Any]) -> dict[str, float]:
+    """Ratios of one role's incidence to each end of its plausibility band."""
+    pooled_low, pooled_high = target["pooled_band"]
+    return {
+        f"A8_{role}_ratio_to_end_of_period": _endpoint_ratio(
+            value, target["end_of_period"],
+        ),
+        f"A8_{role}_ratio_to_pooled_band_low": _endpoint_ratio(value, pooled_low),
+        f"A8_{role}_ratio_to_pooled_band_high": _endpoint_ratio(value, pooled_high),
+    }
+
+
+def _a8_band(target: dict[str, Any]) -> tuple[float, float]:
+    """One role's plausibility band, spanning both stratifications.
+
+    The fleet-wide endpoint and the pooled band rates come from different
+    stratifications, so they are not ordered by construction; and a hull whose
+    tonnage interval meets two GRT bands carries both bands' pooled rates.  The
+    band is the envelope of all of them.
+    """
+    pooled_low, pooled_high = target["pooled_band"]
+    endpoint = target["end_of_period"]
+    return (min(endpoint, pooled_low), max(endpoint, pooled_high))
+
+
 def _a8_verdict(
     hull: str,
     cell: dict[str, Any],
@@ -642,15 +665,9 @@ def _a8_verdict(
     try:
         incidence_target = a8_targets(hull, era)
     except ValueError:
-        incidence_target = None
-    band = HULL_TO_GRT_BAND.get(hull)
-    if incidence_target is None or band in UNMAPPED_GRT_BANDS:
-        reason = (
-            "n/a (GRT band has no project hull)"
-            if band in UNMAPPED_GRT_BANDS
-            else "n/a (unknown hull)"
-        )
-        return reason, {}
+        return "n/a (unknown hull)", {}
+    if incidence_target is None:
+        return "n/a", {}
     pax_value = cell.get("A8_pax_incidence")
     crew_value = cell.get("A8_crew_incidence")
     if not isinstance(pax_value, (int, float)) or not isinstance(
@@ -660,27 +677,11 @@ def _a8_verdict(
     pax_target = incidence_target["passenger"]
     crew_target = incidence_target["crew"]
     ratios = {
-        "A8_pax_ratio_to_end_of_period": _endpoint_ratio(
-            pax_value, pax_target["end_of_period"],
-        ),
-        "A8_pax_ratio_to_pooled_band": _endpoint_ratio(
-            pax_value, pax_target["pooled_band"],
-        ),
-        "A8_crew_ratio_to_end_of_period": _endpoint_ratio(
-            crew_value, crew_target["end_of_period"],
-        ),
-        "A8_crew_ratio_to_pooled_band": _endpoint_ratio(
-            crew_value, crew_target["pooled_band"],
-        ),
+        **_a8_role_ratios("pax", pax_value, pax_target),
+        **_a8_role_ratios("crew", crew_value, crew_target),
     }
-    # The two endpoints come from different stratifications, so the pair is
-    # not ordered by construction; sorting keeps the band non-empty.
-    pax_low, pax_high = sorted(
-        (pax_target["end_of_period"], pax_target["pooled_band"]),
-    )
-    crew_low, crew_high = sorted(
-        (crew_target["end_of_period"], crew_target["pooled_band"]),
-    )
+    pax_low, pax_high = _a8_band(pax_target)
+    crew_low, crew_high = _a8_band(crew_target)
     inside = (
         pax_low <= pax_value <= pax_high
         and crew_low <= crew_value <= crew_high
@@ -912,9 +913,11 @@ def _cell_line(
         f"{_fmt(display_cell.get('A8_pax_incidence'), 2)} / "
         f"{_fmt(display_cell.get('A8_crew_incidence'), 2)} "
         f"(ratios {_fmt(display_cell.get('A8_pax_ratio_to_end_of_period'), 2)}/"
-        f"{_fmt(display_cell.get('A8_pax_ratio_to_pooled_band'), 2)}; "
+        f"{_fmt(display_cell.get('A8_pax_ratio_to_pooled_band_low'), 2)}-"
+        f"{_fmt(display_cell.get('A8_pax_ratio_to_pooled_band_high'), 2)}; "
         f"{_fmt(display_cell.get('A8_crew_ratio_to_end_of_period'), 2)}/"
-        f"{_fmt(display_cell.get('A8_crew_ratio_to_pooled_band'), 2)}) | "
+        f"{_fmt(display_cell.get('A8_crew_ratio_to_pooled_band_low'), 2)}-"
+        f"{_fmt(display_cell.get('A8_crew_ratio_to_pooled_band_high'), 2)}) | "
         f"{_fmt(display_cell.get('A9_posting_probability'), 4)} "
         f"(ratios {_fmt(display_cell.get('A9_ratio_to_investigated'), 2)}/"
         f"{_fmt(display_cell.get('A9_ratio_to_posted'), 2)}) | "

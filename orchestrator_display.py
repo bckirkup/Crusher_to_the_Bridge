@@ -164,7 +164,7 @@ def print_contam_engine(
     thin = "─" * 80
     if contam_engine is not None:
         hvac_cfg = cfg.get("hvac", {})
-        filter_type = hvac_cfg.get("filter_type", "MERV-13")
+        filter_type = hvac_cfg.get("filter_type", "unlabelled")
         print(thin)
         print("  CONTAM TRANSPORT ENGINE  ·  py-contam multi-zone airflow initialized")
         print(thin)

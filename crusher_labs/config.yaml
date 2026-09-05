@@ -262,21 +262,28 @@ transmission:
 
 # ── HVAC / CONTAM Transport ────────────────────────────────────
 hvac:
-  filter_efficiency: 0.50           # η – HVAC filter removal efficiency
-                                    #   MERV-8  = 0.20 (residential baseline)
-                                    #   MERV-13 = 0.50 (commercial standard)
-                                    #   MERV-16 = 0.95 (hospital grade)
-                                    #   HEPA    = 0.999 (biocontainment)
-                                    # The MERV labels above are unsourced. The
+  filter_efficiency: 0.50           # η – HVAC filter removal efficiency.
+                                    # UNSOURCED, and it is a filter class the
+                                    # sourced record does not contain: the
                                     # Healthy Sail Panel reports MERV 8 at 30%
                                     # over 3-10 um and MERV 13 at 90% over
-                                    # 0.3-1 um, so 0.50 matches neither, and
-                                    # E/#10 sweeps [0.0, 0.30] pre-2020 and
-                                    # [0.90, 0.99] post-2020 instead of
-                                    # redefaulting this value.
+                                    # 0.3-1 um, so 0.50 is above every
+                                    # pre-2020 filter and below the MERV-13 it
+                                    # used to be labelled. E/#10 sweeps
+                                    # [0.0, 0.30] pre-2020 and [0.90, 0.99]
+                                    # post-2020; an era arm must state a
+                                    # coordinate and never inherits this
+                                    # value. It stays here as the non-era
+                                    # baseline the goldens were generated at,
+                                    # and replacing it with a point inside
+                                    # either sourced span would be choosing a
+                                    # value rather than sourcing one.
   natural_decay_rate: 0.10          # fraction of airborne pathogen lost per
                                     # epoch to settling + viral inactivation
-  filter_type: "MERV-13"           # human-readable label for console output
+  filter_type: "unlabelled"        # human-readable label for console output.
+                                   # Was "MERV-13", which η = 0.50 is not:
+                                   # the Healthy Sail Panel puts MERV 13 at
+                                   # 90% removal. A label is not a source.
   transport_engine: "native"        # airflow solver: native | contamx | auto
                                     #   native  = pure-Python ContamTransportEngine (default)
                                     #   contamx = real NIST ContamX solver (opt-in);

@@ -40,9 +40,11 @@ from engines.contamx_runner import (
     run_contamx,
 )
 from engines.py_contam_bridge import (
+    UNSOURCED_LEGACY_FILTER_EFFICIENCY,
     ContamAirflowPath,
     ContamTransportEngine,
     is_plenum_zone,
+    require_filter_efficiency,
 )
 from engines.sim_clock import SimClock
 from simulation_utils.paths import (
@@ -65,7 +67,7 @@ class ContamXTransportEngine(ContamTransportEngine):
         spatial_layout: dict[str, Any],
         path_map: list[tuple[str, str, bool]] | list[dict[str, Any]],
         path_flows_m3h: dict[int, float],
-        filter_efficiency: float = 0.50,
+        filter_efficiency: float = UNSOURCED_LEGACY_FILTER_EFFICIENCY,
         natural_decay_rate: float = 0.10,
         *,
         path_map_entries: list[dict[str, Any]] | None = None,
@@ -318,7 +320,7 @@ def build_contamx_engine(
     # build_transport_engine before _build_native_engine).
     if "oa_fraction" in hvac_cfg:
         airflow = {**airflow, "oa_fraction": float(hvac_cfg["oa_fraction"])}
-    filter_eff = hvac_cfg.get("filter_efficiency", 0.50)
+    filter_eff = require_filter_efficiency(hvac_cfg)
     decay_rate = hvac_cfg.get("natural_decay_rate", 0.10)
 
     prj_path = resolve_contam_prj_path(repo_root, cfg, spatial)

@@ -983,18 +983,30 @@ def test_resume_downloads_s3_completed_log(
 
 def test_native_oa_fraction_changes_supply_flow() -> None:
     """hvac.oa_fraction must change native recirculated supply (sensitivity)."""
-    from engines.py_contam_bridge import build_transport_engine
+    from engines.py_contam_bridge import (
+        UNSOURCED_LEGACY_FILTER_EFFICIENCY,
+        build_transport_engine,
+    )
 
     base_cfg = {
         "ship_graph": {
             "spatial_layout": "data/platforms/mega_cruise_5000/spatial_layout.json",
             "air_flow_paths": "data/platforms/mega_cruise_5000/air_flow_paths.json",
         },
-        "hvac": {"transport_engine": "native", "oa_fraction": 0.2},
+        # η stated rather than inherited; this test varies oa_fraction only.
+        "hvac": {
+            "transport_engine": "native",
+            "oa_fraction": 0.2,
+            "filter_efficiency": UNSOURCED_LEGACY_FILTER_EFFICIENCY,
+        },
     }
     high_oa = {
         **base_cfg,
-        "hvac": {"transport_engine": "native", "oa_fraction": 0.4},
+        "hvac": {
+            "transport_engine": "native",
+            "oa_fraction": 0.4,
+            "filter_efficiency": UNSOURCED_LEGACY_FILTER_EFFICIENCY,
+        },
     }
     from engines.py_contam_bridge import PATH_TYPE_HVAC_SUPPLY
 
@@ -1019,6 +1031,7 @@ def test_native_oa_fraction_changes_supply_flow() -> None:
 def test_contamx_build_applies_hvac_oa_fraction(monkeypatch: pytest.MonkeyPatch) -> None:
     """build_contamx_engine must re-apply hvac.oa_fraction after disk reload."""
     from engines import contamx_transport as cx
+    from engines.py_contam_bridge import UNSOURCED_LEGACY_FILTER_EFFICIENCY
 
     captured: dict[str, Any] = {}
 
@@ -1057,7 +1070,12 @@ def test_contamx_build_applies_hvac_oa_fraction(monkeypatch: pytest.MonkeyPatch)
         lambda *a, **k: {"oa_fraction": 0.2},
     )
 
-    cfg = {"hvac": {"oa_fraction": 0.35}}
+    cfg = {
+        "hvac": {
+            "oa_fraction": 0.35,
+            "filter_efficiency": UNSOURCED_LEGACY_FILTER_EFFICIENCY,
+        },
+    }
     engine = cx.build_contamx_engine(str(REPO_ROOT), cfg)
     assert captured["oa_fraction"] == pytest.approx(0.35)
     assert engine._oa_fraction == pytest.approx(0.35)

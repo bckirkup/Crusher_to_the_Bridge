@@ -153,11 +153,10 @@ passenger halves, so no edge is chosen and changing a complement moves them.
 The recut moves anchor availability in both directions — the mega hull gains a
 pre-2020 A4 anchor (4 postings became 16) and the classic hull loses its
 post-2020 one (32 became 8) — which is a change in *which cells are scored*,
-decided by a posting floor rather than by any result. Left unrepaired and
-recorded: the hull-to-GRT mapping behind A8/A9 chose representative ships for
-the classic and spirit hulls against the same total-agent figures, so their
-band is one band too high until two ships at ~1,350 and ~2,100 passengers are
-sourced.
+decided by a posting floor rather than by any result. Recorded here and repaired later (§10): the
+hull-to-GRT mapping behind A8/A9 chose representative ships for the classic and
+spirit hulls against the same total-agent figures, so their band was one band
+too high.
 
 **B4 is resolved as a declaration, and it resolves by making the gap explicit
 rather than by closing it.** The search was already done and had already failed:
@@ -339,7 +338,8 @@ reduction. Three findings #11 inherits:
   [0.90, 0.99] from the Healthy Sail Panel's own MERV 8 / MERV 13 figures): it
   is a post-pandemic label on a value matching no filter, in an arm whose
   anchors are overwhelmingly pre-2020. It is swept per era rather than
-  redefaulted, because moving the default moves every golden.
+  redefaulted, because moving the default moves every golden; §10 closes the
+  path by which a run could reach it without saying so.
 - Six documented post-2020 mechanisms enter as **declared absences** rather than
   numbers — ≥6 ACH (no field: the native transport has only
   `natural_decay_rate`), staff-assisted buffet service, isolation capacity,
@@ -457,3 +457,36 @@ exchange and withdrawn rather than sent.
 - It does not add a parameter anywhere. Every item either removes a degree of
   freedom, converts a point to an interval, or fixes a field's shape.
 - It does not promise the model will pass. See §7.
+
+## 10. The two defects recorded in passing, repaired
+
+**A8/A9's hull-to-GRT mapping no longer names a ship per hull.** The old map
+paired each hull with one representative vessel and inherited B3's defect twice:
+Coral Princess (1,970 lower berths) and Voyager class (3,114) were matched to the
+classic and spirit hulls by their *total* complements, so both hulls scored
+against a tonnage band above their own. Picking two better ships would repeat the
+method, and the record does not identify a canonical ship for a synthetic hull.
+The four published tonnage/berth pairs are used instead for the only thing they
+jointly measure — space ratio, 41.7–57.1 GT per lower berth — and a hull's
+passenger complement (from B3's `nominal_complement`) maps through that span to a
+tonnage *interval*. Every band the interval meets is kept, so the classic hull
+(≈56,300–77,100 GT) carries both the 30,001–60,000 and 60,001–120,000 pooled
+rates and A8 scores it against the envelope of the two; deciding which side of
+60,000 GT it falls on would be a midpoint, and nothing in the record decides it.
+Widening a target is only admissible because the width is the published spread of
+real ships, not a response to a failure: a hull outside the envelope still fails,
+and 120,001–140,000 now maps to no hull at all. A9's per-hull numerator remains
+unpublished, so it stays null per hull.
+
+**`hvac.filter_efficiency` = 0.50 stays put, and stops being reachable by
+accident.** The value is not replaced: every candidate replacement is a point
+inside a sourced span, which is the choice the whole plan refuses, and the
+non-era goldens were generated at 0.50. What was wrong is that it was also the
+value a run got when it said nothing — `hvac_cfg.get("filter_efficiency", 0.50)`
+in both transport builders — so an era arm with a dropped coordinate would have
+run a filter belonging to neither era while reporting an era. The fallback is now
+`require_filter_efficiency`, which raises on an absent key; the constant is named
+`UNSOURCED_LEGACY_FILTER_EFFICIENCY` and documented as unsourced where it is
+defined; and the `MERV-13` label is gone from the config, the manual and the
+README, because the span that names MERV 13 puts it at 0.90 and a label that
+contradicts its own source is a claim rather than a note.

@@ -11,7 +11,13 @@ pooled rate as a point or a confidence interval.
 
 from __future__ import annotations
 
-from typing import Any
+import math
+from fractions import Fraction
+from typing import Any, NamedTuple
+
+from telemetry_buffer.observation_model.vsp_class_era_scoring import (
+    HULL_PASSENGER_CAPACITY,
+)
 
 # The A9 denominator, declared rather than assumed (#13).  It is Jenkins's
 # count of *unduplicated voyage reports* pooled over 2006-2019, not a count of
@@ -121,33 +127,100 @@ MIDRS_CREW_OUTBREAKS_BY_VOYAGE_LENGTH: dict[str, int] = {
 MIDRS_PASSENGER_CALENDAR_ENDPOINTS = (32.5, 16.9)
 MIDRS_CREW_CALENDAR_ENDPOINTS = (13.5, 5.2)
 
-HULL_TO_GRT_BAND: dict[str, str] = {
-    # Silver Wind, 16,800 GT, 294 passengers.
-    "expedition_cruise_450": GRT_BAND_LE_30000,
-    # Coral Princess, 91,627 GT, 1,970 passengers.
-    "classic_cruise_1900": GRT_BAND_60001_120000,
-    # Voyager class, approximately 138,000 GT, 3,114 passengers.
-    "spirit_cruise_3000": GRT_BAND_120001_140000,
-    # Oasis class, approximately 225,282 GT, 5,400 passengers.
-    "mega_cruise_5000": GRT_BAND_GE_140001,
+# Numeric limits of the MMWR Table 2 tonnage strata, in gross tons.  The
+# labels partition the integers, so 120,000 is the extra-large band and
+# 120,001 the mega one.
+GRT_BAND_LIMITS: dict[str, tuple[int, float]] = {
+    GRT_BAND_LE_30000: (0, 30_000),
+    GRT_BAND_30001_60000: (30_001, 60_000),
+    GRT_BAND_60001_120000: (60_001, 120_000),
+    GRT_BAND_120001_140000: (120_001, 140_000),
+    GRT_BAND_GE_140001: (140_001, math.inf),
 }
 
-UNMAPPED_GRT_BANDS = (GRT_BAND_30001_60000,)
+
+class SpaceRatioAnchor(NamedTuple):
+    """A real ship whose tonnage and lower-berth capacity are both published."""
+
+    ship: str
+    gross_tonnage: int
+    passengers: int
+
+    @property
+    def gt_per_passenger(self) -> Fraction:
+        """Space ratio, exact so that a band edge is not a rounding artefact."""
+        return Fraction(self.gross_tonnage, self.passengers)
+
+
+# MMWR strata are gross registered tonnage while the project's hulls are
+# passenger complements, so the mapping needs a space ratio.  These four ships
+# publish both figures.  None of them *is* a hull, and no hull is anchored to
+# one of them: a single representative ship is what put the classic and spirit
+# hulls one band too high, because the ship was chosen against the hull's
+# passenger-plus-crew total.  Grade C, origin Tr (operator specifications).
+SPACE_RATIO_ANCHORS: tuple[SpaceRatioAnchor, ...] = (
+    SpaceRatioAnchor("Silver Wind", 16_800, 294),
+    SpaceRatioAnchor("Coral Princess", 91_627, 1_970),
+    SpaceRatioAnchor("Voyager class", 138_000, 3_114),
+    SpaceRatioAnchor("Oasis class", 225_282, 5_400),
+)
+
+# 41.7-57.1 GT/pax across those four.  The ratio tightens with ship size, but
+# that is an observation of four ships rather than a sourced relation, so the
+# whole span applies at every complement; narrowing it per hull would be a
+# choice, and the choice would decide band membership.
+SPACE_RATIO_SPAN: tuple[Fraction, Fraction] = (
+    min(anchor.gt_per_passenger for anchor in SPACE_RATIO_ANCHORS),
+    max(anchor.gt_per_passenger for anchor in SPACE_RATIO_ANCHORS),
+)
+
+
+def grt_bands_for_complement(passengers: int) -> tuple[str, ...]:
+    """Every tonnage band a hull of this passenger complement can occupy.
+
+    The complement is converted to a tonnage *interval* by the published space
+    ratios, and every band that interval meets is returned.  An interval
+    straddling a band edge therefore returns two bands instead of the one its
+    midpoint would land in: which side of the edge such a ship sits on is not
+    determined by anything in the record, and a midpoint would decide it.
+    """
+    low = passengers * SPACE_RATIO_SPAN[0]
+    high = passengers * SPACE_RATIO_SPAN[1]
+    return tuple(
+        band
+        for band, (band_low, band_high) in GRT_BAND_LIMITS.items()
+        if low <= band_high and high >= band_low
+    )
+
+
+# Derived from each hull's declared passenger complement (#29), never from its
+# platform id and never from its passenger-plus-crew total.  The spirit hull is
+# a soft edge: 2,100 passengers at Silver Wind's 400/7 GT/pax is exactly
+# 120,000 GT, the top of the extra-large band, so one more ton of space ratio
+# would add the mega band to it.
+HULL_TO_GRT_BANDS: dict[str, tuple[str, ...]] = {
+    hull: grt_bands_for_complement(passengers)
+    for hull, passengers in HULL_PASSENGER_CAPACITY.items()
+}
+
+# Bands no hull can occupy.  Their observed rates are transcribed above and
+# nothing is scored against them.
+UNMAPPED_GRT_BANDS: tuple[str, ...] = tuple(
+    band
+    for band in GRT_BAND_LIMITS
+    if all(band not in bands for bands in HULL_TO_GRT_BANDS.values())
+)
 _VALID_ERAS = ("pre", "post")
 _NO_HULL_A9_REASON = "per-hull outbreak numerator unpublished"
 
-_PASSENGER_ENDPOINT_BY_BAND = {
-    GRT_BAND_LE_30000: MIDRS_PASSENGER_CALENDAR_ENDPOINTS[1],
-    GRT_BAND_60001_120000: MIDRS_PASSENGER_CALENDAR_ENDPOINTS[1],
-    GRT_BAND_120001_140000: MIDRS_PASSENGER_CALENDAR_ENDPOINTS[1],
-    GRT_BAND_GE_140001: MIDRS_PASSENGER_CALENDAR_ENDPOINTS[1],
-}
-_CREW_ENDPOINT_BY_BAND = {
-    GRT_BAND_LE_30000: MIDRS_CREW_CALENDAR_ENDPOINTS[1],
-    GRT_BAND_60001_120000: MIDRS_CREW_CALENDAR_ENDPOINTS[1],
-    GRT_BAND_120001_140000: MIDRS_CREW_CALENDAR_ENDPOINTS[1],
-    GRT_BAND_GE_140001: MIDRS_CREW_CALENDAR_ENDPOINTS[1],
-}
+
+def _pooled_span(
+    bands: tuple[str, ...],
+    rates: dict[str, float],
+) -> tuple[float, float]:
+    """Envelope of the pooled rates of every band a hull's interval meets."""
+    values = [rates[band] for band in bands]
+    return (min(values), max(values))
 
 
 def a8_targets(hull: str, era: str) -> dict[str, Any] | None:
@@ -162,23 +235,32 @@ def a8_targets(hull: str, era: str) -> dict[str, Any] | None:
     inverted.  The pooled rate averages 2006-2019, during which the passenger
     rate halved from 32.5 to 16.9.  No post-2019 MIDRS analysis exists, so the
     post arm has no A8 target.
+
+    ``pooled_band`` is a ``(low, high)`` envelope over every tonnage band the
+    hull's complement admits, so a hull whose tonnage interval straddles a band
+    edge is scored against both bands rather than against whichever one a
+    representative ship happened to fall in.  A hull inside a single band gets
+    that band's rate as both ends.  ``end_of_period`` is fleet-wide and does
+    not depend on the band.
     """
     if era not in _VALID_ERAS:
         raise ValueError(f"unknown MIDRS era: {era!r}")
-    if hull not in HULL_TO_GRT_BAND:
+    if hull not in HULL_TO_GRT_BANDS:
         raise ValueError(f"unknown hull: {hull!r}")
     if era == "post":
         return None
-    band = HULL_TO_GRT_BAND[hull]
+    bands = HULL_TO_GRT_BANDS[hull]
     return {
-        "grt_band": band,
+        "grt_bands": bands,
         "passenger": {
-            "end_of_period": _PASSENGER_ENDPOINT_BY_BAND[band],
-            "pooled_band": MIDRS_PASSENGER_RATES_BY_GRT_BAND[band],
+            "end_of_period": MIDRS_PASSENGER_CALENDAR_ENDPOINTS[1],
+            "pooled_band": _pooled_span(
+                bands, MIDRS_PASSENGER_RATES_BY_GRT_BAND,
+            ),
         },
         "crew": {
-            "end_of_period": _CREW_ENDPOINT_BY_BAND[band],
-            "pooled_band": MIDRS_CREW_RATES_BY_GRT_BAND[band],
+            "end_of_period": MIDRS_CREW_CALENDAR_ENDPOINTS[1],
+            "pooled_band": _pooled_span(bands, MIDRS_CREW_RATES_BY_GRT_BAND),
         },
     }
 
@@ -226,7 +308,7 @@ def a9_targets(era: str) -> dict[str, Any] | None:
         },
         "per_hull": {
             hull: {"target": None, "reason": _NO_HULL_A9_REASON}
-            for hull in HULL_TO_GRT_BAND
+            for hull in HULL_TO_GRT_BANDS
         },
         "passenger_by_voyage_length": by_length,
         "per_length": by_length,

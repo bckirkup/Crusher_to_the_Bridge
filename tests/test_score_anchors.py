@@ -490,7 +490,7 @@ def test_expedition_a8_plausibility_band_accepts_inverted_endpoints() -> None:
     assert target is not None
     assert target["passenger"] == {
         "end_of_period": 16.9,
-        "pooled_band": 10.9,
+        "pooled_band": (10.9, 10.9),
     }
     cell = {
         "A8_A9_no_reporting": False,
@@ -509,10 +509,56 @@ def test_expedition_a8_plausibility_band_accepts_inverted_endpoints() -> None:
     assert ratios["A8_pax_ratio_to_end_of_period"] == pytest.approx(
         13.0 / 16.9
     )
-    assert ratios["A8_pax_ratio_to_pooled_band"] == pytest.approx(
+    assert ratios["A8_pax_ratio_to_pooled_band_low"] == pytest.approx(
+        13.0 / 10.9
+    )
+    assert ratios["A8_pax_ratio_to_pooled_band_high"] == pytest.approx(
         13.0 / 10.9
     )
     assert "A8_pax_ratio_to_end_of_period" not in cell
+
+
+def test_a8_scores_a_straddling_hull_against_both_of_its_bands() -> None:
+    # The classic hull's complement admits 30,001-60,000 and 60,001-120,000, so
+    # its crew band runs to the lower band's 16.7 rather than stopping at the
+    # single band a representative ship was picked into.
+    cell = {
+        "A8_A9_no_reporting": False,
+        "A8_pax_incidence": 20.0,
+        "A8_crew_incidence": 17.0,
+        "A9_posting_probability": 0.0,
+    }
+
+    verdict, ratios = score_anchors.verdicts(
+        "classic_cruise_1900",
+        cell,
+        score_anchors.vsp_attack_rate_targets("pre"),
+    )
+
+    assert verdict["A8"] == "PASS"
+    assert ratios["A8_crew_ratio_to_pooled_band_low"] == pytest.approx(
+        17.0 / 16.7
+    )
+    assert ratios["A8_crew_ratio_to_pooled_band_high"] == pytest.approx(
+        17.0 / 19.8
+    )
+
+
+def test_a8_still_fails_outside_the_widened_band() -> None:
+    cell = {
+        "A8_A9_no_reporting": False,
+        "A8_pax_incidence": 20.0,
+        "A8_crew_incidence": 45.0,
+        "A9_posting_probability": 0.0,
+    }
+
+    verdict, _ = score_anchors.verdicts(
+        "classic_cruise_1900",
+        cell,
+        score_anchors.vsp_attack_rate_targets("pre"),
+    )
+
+    assert verdict["A8"] == "FAIL"
 
 
 def test_render_reports_unconditional_channels_and_post_arm() -> None:

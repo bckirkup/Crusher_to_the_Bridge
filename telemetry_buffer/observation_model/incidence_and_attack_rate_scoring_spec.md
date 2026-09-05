@@ -65,40 +65,57 @@ to a per-voyage cumulative reported incidence by multiplying by voyage days.
 ## Hull class to VSP ship-size band
 
 MMWR strata are gross registered tonnage, our hulls are passenger complements,
-so the mapping needs a space ratio. Each hull is anchored to a real ship whose
-tonnage and capacity are both published, rather than to an assumed ratio.
+so the mapping needs a space ratio. Four real ships publish both figures, and
+they bound the ratio at 41.7-57.1 GT/pax:
 
-| hull | pax | representative ship | tonnage | GT/pax | VSP band |
-|---|---|---|---|---|---|
-| `expedition_cruise_450` | 450 | Silver Wind | 16,800 GT / 294 pax | 57.1 | extra small/small/medium (<=30,000) |
-| `classic_cruise_1900` | 1,900 | Coral Princess | 91,627 GT / 1,970 pax | 46.5 | extra large (60,001-120,000) |
-| `spirit_cruise_3000` | 3,000 | Voyager class | 138,000 GT / 3,114 pax | 44.3 | mega (120,001-140,000) |
-| `mega_cruise_5000` | 5,000 | Oasis class | 225,282 GT / 5,400 pax | 41.7 | super mega (>=140,001) |
+| ship | tonnage | passengers | GT/pax |
+|---|---:|---:|---:|
+| Silver Wind | 16,800 GT | 294 | 57.1 |
+| Coral Princess | 91,627 GT | 1,970 | 46.5 |
+| Voyager class | 138,000 GT | 3,114 | 44.3 |
+| Oasis class | 225,282 GT | 5,400 | 41.7 |
 
-**The `pax` column of this table is the platform id, not the hull's passenger
-complement, and for two of the four hulls those differ.** The declared
-complements are 300 + 150, 1,350 + 560, 2,100 + 900 and 5,000 + 2,000
-passengers and crew: the expedition and mega representative ships were chosen
-against a passenger figure (294 against 300, 5,400 against 5,000) while the
-classic and spirit ships were chosen against a passenger-plus-crew total
-(1,970 against 1,350, 3,114 against 2,100). Re-anchoring those two hulls needs
-two new representative ships with published tonnage at ~1,350 and ~2,100
-passengers, which is a sourcing task and not this defect's fix; until it is
-done the A8/A9 GRT band of the classic and spirit hulls is one band too high
-and both anchors are provisional there. Recorded as an open item rather than
-repaired by picking whichever ship keeps the current band.
+No hull is anchored to one of those ships. Anchoring each hull to a single
+representative ship was the earlier form of this mapping, and it is what put
+two hulls in the wrong band: the expedition and mega ships were picked against
+a passenger figure (294 against 300, 5,400 against 5,000) while the classic and
+spirit ships were picked against a passenger-plus-crew total (1,970 against
+1,350, 3,114 against 2,100), the same platform-id-versus-complement confusion
+recut for A4 in #29. The declared complements are 300 + 150, 1,350 + 560,
+2,100 + 900 and 5,000 + 2,000 passengers and crew, and the mapping now reads
+`nominal_complement.passengers` for every hull.
 
-Space ratio runs 42-57 GT/pax across the four, tightening with size, which is
-the expected direction: expedition tonnage buys space per passenger, mega
-tonnage buys passengers. Each mapping is unambiguous at the ratio of its own
-anchor ship -- no hull sits within 15% of a band edge -- except that at the
-low end the expedition hull would need a ratio below 67 GT/pax to stay inside
-the <=30,000 band, which Silver Wind's 57.1 satisfies but not by much for a
-higher-space-ratio expedition vessel. Record that as the one soft edge.
+Each complement becomes a tonnage *interval* at the ratio span, and every band
+that interval meets is carried:
 
-No hull maps to the **large** band (30,001-60,000 GT, roughly 650-1,400
-passengers). Its observed rates are recorded below but nothing is scored
-against them; a fifth hull would be needed.
+| hull | passengers | tonnage interval | VSP bands |
+|---|---:|---|---|
+| `expedition_cruise_450` | 300 | 12,516-17,143 GT | extra small/small/medium (<=30,000) |
+| `classic_cruise_1900` | 1,350 | 56,320-77,143 GT | large (30,001-60,000) + extra large (60,001-120,000) |
+| `spirit_cruise_3000` | 2,100 | 87,610-120,000 GT | extra large (60,001-120,000) |
+| `mega_cruise_5000` | 5,000 | 208,594-285,714 GT | super mega (>=140,001) |
+
+The ratio tightens with size across those four ships -- expedition tonnage buys
+space per passenger, mega tonnage buys passengers -- but four ships are not a
+sourced relation, so the whole span applies at every complement rather than a
+size-dependent narrowing that would decide band membership by fiat. Where the
+interval straddles an edge, both bands score, and the A8 target becomes the
+envelope of both bands' rates: the classic hull's crew band widens to
+16.7-19.8. That is wider than the single-ship mapping and it is wider by
+construction, not because anything failed.
+
+Two soft edges are worth recording. The spirit hull's ceiling, 2,100 passengers
+at Silver Wind's 400/7 GT/pax, is exactly 120,000 GT -- the top of the extra
+large band -- so a marginally higher space ratio would add the mega band to it.
+And the expedition hull would leave the <=30,000 band above 100 GT/pax, which
+none of the four ships approaches but a high-space-ratio expedition vessel
+could.
+
+No hull can occupy the **mega** band (120,001-140,000 GT) alone: the spirit
+hull stops at its lower edge and the mega hull starts above its upper one. Its
+observed rates are recorded below but nothing is scored against them. The large
+band (30,001-60,000 GT) is no longer unscored -- the classic hull's interval
+reaches into it.
 
 ## A8 -- overall reported AGE incidence, unconditional (implemented)
 
@@ -106,13 +123,14 @@ The model-side aggregation is implemented in
 `telemetry_buffer/observation_model/score_anchors.py`. It uses all runs in a
 cell, including non-take-off runs, and weights each reported case by its
 passenger or crew complement over that run's travel-days. The observed targets
-and fixed hull-to-GRT mapping are transcribed in
+and the hull-to-GRT band derivation live in
 `telemetry_buffer/observation_model/midrs_incidence_targets.py` from
 `telemetry_buffer/observation_model/midrs_observed_targets.md`.
 
 The pre-arm A8 target is a plausibility band whose named endpoints come from
 different stratifications: `end_of_period` is a fleet-wide calendar endpoint,
-while `pooled_band` is the GRT-band average over 2006-2019. It is not a
+while `pooled_band` is a `(low, high)` envelope of the GRT-band averages over
+2006-2019 for every band the hull's tonnage interval meets. It is not a
 confidence interval, and no band-specific calendar endpoint is reconstructed.
 For `<=30,000` GRT, the fleet endpoint is 16.9 while the pooled band rate is
 10.9, demonstrating that the endpoints are not ordered by construction.
@@ -122,9 +140,9 @@ Observed, MMWR Table 2, per 100,000 travel days (95% CI):
 | VSP band | hull | passengers | crew |
 |---|---|---|---|
 | <=30,000 | `expedition_cruise_450` | 10.9 (9.94-12.1) | 6.4 (5.52-7.45) |
-| 30,001-60,000 | *(unmapped)* | 23.7 (23.2-24.2) | 16.7 (16.1-17.4) |
-| 60,001-120,000 | `classic_cruise_1900` | 23.0 (22.9-23.1) | 19.8 (19.6-20.0) |
-| 120,001-140,000 | `spirit_cruise_3000` | 26.7 (26.1-27.4) | 14.7 (14.0-15.4) |
+| 30,001-60,000 | `classic_cruise_1900` | 23.7 (23.2-24.2) | 16.7 (16.1-17.4) |
+| 60,001-120,000 | `classic_cruise_1900`, `spirit_cruise_3000` | 23.0 (22.9-23.1) | 19.8 (19.6-20.0) |
+| 120,001-140,000 | *(unmapped)* | 26.7 (26.1-27.4) | 14.7 (14.0-15.4) |
 | >=140,001 | `mega_cruise_5000` | 29.2 (27.8-30.5) | 16.0 (14.8-17.4) |
 
 Voyage-length rates from the same table, passengers then crew:

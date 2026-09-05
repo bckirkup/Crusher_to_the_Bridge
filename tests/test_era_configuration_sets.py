@@ -14,7 +14,14 @@ import math
 
 import pytest
 
+import yaml
+
 from engines.non_pharmaceutical_interventions import resolve_npi
+from engines.py_contam_bridge import (
+    UNSOURCED_LEGACY_FILTER_EFFICIENCY,
+    build_transport_engine,
+    require_filter_efficiency,
+)
 from telemetry_buffer.observation_model.era_configuration_sets import (
     ERAS,
     POST_LEVERS,
@@ -321,11 +328,41 @@ def test_the_sourced_filter_spans_are_the_healthy_sail_panel_figures() -> None:
 
 
 def test_the_shipped_filter_efficiency_belongs_to_neither_era() -> None:
-    shipped = 0.50
+    with open("crusher_labs/config.yaml", encoding="utf-8") as fh:
+        shipped = yaml.safe_load(fh)["hvac"]["filter_efficiency"]
     pre = levers("pre")[0].span
     post = levers("post")[0].span
+
+    assert shipped == UNSOURCED_LEGACY_FILTER_EFFICIENCY
     assert shipped > pre[1]
     assert shipped < post[0]
+
+
+def test_the_shipped_filter_carries_no_class_label_it_does_not_have() -> None:
+    # 0.50 was shipped labelled "MERV-13", the class the post-2020 span puts at
+    # 0.90.  A label that contradicts the sourced span is a claim, not a note.
+    with open("crusher_labs/config.yaml", encoding="utf-8") as fh:
+        hvac = yaml.safe_load(fh)["hvac"]
+
+    assert "MERV" not in hvac["filter_type"]
+
+
+def test_an_absent_filter_efficiency_is_refused_rather_than_defaulted() -> None:
+    with pytest.raises(KeyError, match="filter_efficiency"):
+        require_filter_efficiency({"natural_decay_rate": 0.10})
+
+
+@pytest.mark.parametrize("era", ERAS)
+def test_an_era_coordinate_survives_into_the_engine(era: str) -> None:
+    coordinate = levers(era)[0].span[0]
+    cfg = {"hvac": {**era_config_patch(era, _corner(era, 0.0))["hvac"]}}
+    cfg["hvac"]["filter_efficiency"] = coordinate
+
+    engine = build_transport_engine(".", cfg)
+
+    assert engine is not None
+    assert engine.filter_efficiency == coordinate
+    assert engine.filter_efficiency != UNSOURCED_LEGACY_FILTER_EFFICIENCY
 
 
 def test_the_removal_spans_are_tuladhars_infectious_titre_figures() -> None:
