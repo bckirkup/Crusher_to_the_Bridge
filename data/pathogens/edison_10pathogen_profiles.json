@@ -265,6 +265,8 @@
         "gamma": 0.12
       },
       "recovery_day": 7,
+      "shedding_duration_days": 15,
+      "shedding_duration_notes": "Same value, interval and sourcing as the sars_cov2_resp arm in active_profiles.json (A2, #51): upper-respiratory RNA-positivity duration, interval [10.8, 18.4] d from Cevik 2020, Fontana 2020 and Wu 2023, shipped 15. Carried here because the campaign manifests run this bundle, so leaving it out would sweep the arm whose curve tail is unreachable.",
       "surface_deposition_fraction": 5e-05,
       "base_susceptibility": 1.0,
       "microflora_disruption": {

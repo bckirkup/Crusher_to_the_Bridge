@@ -1,7 +1,7 @@
 # Tranche 9 — the DHS Master Question List against the SARS-CoV-2 arm: emission becomes bounded, the denominator stays circular
 
 
-**Register rows fed / supersession.** This tranche feeds `airborne_half_life_hours`, `surface_decay_log10_per_day`, `shedding_curve_log10` magnitude, and `airborne_emission_fraction` in §3.2. No later withdrawal or supersession is recorded in the register or the norovirus open ledger.
+**Register rows fed / supersession.** This tranche feeds `airborne_half_life_hours`, `surface_decay_log10_per_day`, `shedding_curve_log10` magnitude, and `airborne_emission_fraction` in §3.2. No later withdrawal or supersession is recorded in the register or the norovirus open ledger. §5's defect is **resolved**, not superseded: A2 (#51) adopts `shedding_duration_days` = 15 on the sourcing of [tranche 22](consensus_tranche_22_covid_shedding_duration.md), so the arithmetic here describes the arm before that change.
 
 **Status:** Evidence assembled and interpreted. **No pathogen-profile constant,
 no engine constant and no screen interval changes in this document.** Three

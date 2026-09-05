@@ -7,7 +7,9 @@ it keeps emitting on the curve it presented on.
 
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
 
 import numpy as np
@@ -17,11 +19,13 @@ from engines.infection_dynamics_bridge import (
     IllnessStatus,
     InfectionStatus,
     KorkinAgent,
+    environmental_release_log10_per_day,
 )
 from engines.natural_history import advance_infections
 from engines.sim_clock import HOURS, SimClock
 from engines.transmission_core import TransmissionCore
 
+REPO_ROOT = Path(__file__).resolve().parent.parent
 PATHOGEN = "test_pathogen"
 ZONE = "Cabin_A"
 ONSET_DAYS = 1.0
@@ -199,8 +203,8 @@ class TestIllnessAndSheddingClocksSeparate:
             )
 
     def test_absent_field_keeps_the_single_clock(self) -> None:
-        # The COVID arm carries no shedding_duration_days, so it must clear on
-        # recovery_day exactly as it did before the two clocks were split.
+        # A profile that omits the field says the two clocks coincide, and must
+        # clear on recovery_day exactly as it did before they were split.
         without = _profile()
         without.pop("shedding_duration_days")
         equal = _profile(shedding_duration_days=float(RECOVERY_DAYS))
@@ -311,6 +315,88 @@ class TestCurveIsFixedAtPresentation:
         assert all(
             np.isfinite(sample.hand_target) for sample in convalescent
         )
+
+
+def _shipped(pathogen_id: str) -> dict[str, Any]:
+    path = REPO_ROOT / "data" / "pathogens" / "active_profiles.json"
+    with path.open(encoding="utf-8") as handle:
+        profiles = json.load(handle)["pathogens"]
+    return next(
+        profile for profile in profiles
+        if profile["pathogen_id"] == pathogen_id
+    )
+
+
+class TestShippedRespiratoryArmReachesItsCurve:
+    """The COVID arm's two clocks, against the profile the model ships.
+
+    #51: the arm carried a 15-point curve and no shedding duration, so it
+    cleared at ``recovery_day`` 7 and the tail was unreachable. The sourced
+    interval is the upper-respiratory RNA-positivity duration, [10.8, 18.4] d.
+    """
+
+    def test_the_two_clocks_are_declared_and_differ(self) -> None:
+        covid = _shipped("sars_cov2_resp")
+        duration = covid["shedding_duration_days"]
+
+        assert covid["recovery_day"] == 7
+        assert duration > covid["recovery_day"]
+        assert 10.8 <= duration <= 18.4
+        assert duration == len(covid["shedding_curve_log10"])
+        assert duration == len(covid["asymptomatic_shedding_log10"])
+
+    @pytest.mark.parametrize("presented", [True, False])
+    def test_every_authored_curve_index_is_emitted(
+        self, presented: bool,
+    ) -> None:
+        covid = _shipped("sars_cov2_resp")
+        curve_key = (
+            "shedding_curve_log10" if presented
+            else "asymptomatic_shedding_log10"
+        )
+        if not presented:
+            # eta 0 holds the host off the symptomatic curve for the whole
+            # course; every other field stays as shipped.
+            covid["illness_probability"] = dict(
+                covid["illness_probability"], eta=0.0,
+            )
+        clock = _clock()
+        release = environmental_release_log10_per_day(covid)
+        trace = _run(
+            _agent(presented=presented, clock=clock),
+            covid,
+            float(covid["shedding_duration_days"]) + 3.0,
+        )
+
+        for index, log10_value in enumerate(covid[curve_key]):
+            sample = _first(
+                trace, lambda s, day=index: s.days >= ONSET_DAYS + day,
+            )
+            expected = clock.amount_per_epoch(
+                10.0 ** (log10_value - release),
+            )
+            assert sample.status == InfectionStatus.INFECTED
+            assert sample.shedding == pytest.approx(expected, rel=1e-9)
+
+    def test_illness_ends_on_recovery_day_and_shedding_outlasts_it(
+        self,
+    ) -> None:
+        covid = _shipped("sars_cov2_resp")
+        illness_end = ONSET_DAYS + covid["recovery_day"]
+        shedding_end = ONSET_DAYS + covid["shedding_duration_days"]
+        trace = _run(_agent(presented=True), covid, shedding_end + 3.0)
+
+        recovered = _first(
+            trace, lambda sample: sample.illness == IllnessStatus.RECOVERED,
+        )
+        assert recovered.days == pytest.approx(illness_end, abs=0.1)
+        assert recovered.status == InfectionStatus.INFECTED
+        convalescent = [
+            sample for sample in trace
+            if illness_end <= sample.days < shedding_end
+        ]
+        assert min(sample.shedding for sample in convalescent) > 0.0
+        assert _clearance_day(trace) == pytest.approx(shedding_end, abs=0.1)
 
 
 class TestEmesisStaysIllnessLinked:
