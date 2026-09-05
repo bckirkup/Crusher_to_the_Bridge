@@ -40,6 +40,9 @@ from engines.sim_clock import HOURS, HOURS_PER_DAY, LEGACY_EPOCH_DAY, SimClock
 from simulation_utils.paths import validated_open
 from telemetry_buffer.observation_model.midrs_incidence_targets import (
     HULL_TO_GRT_BAND,
+    MIDRS_DENOMINATOR_UNIT,
+    MIDRS_DENOMINATOR_WINDOW,
+    MIDRS_TOTAL_VOYAGES,
     UNMAPPED_GRT_BANDS,
     a8_targets,
     a9_targets,
@@ -821,6 +824,15 @@ def _report_preamble_lines(
         "fleet endpoint is 16.9 and the pooled rate is 10.9, so the pair is "
         "not ordered by construction; no band-specific calendar endpoint is "
         "invented. The post arm has no observation.",
+        "",
+        "A9's denominator is declared, not assumed: "
+        f"{MIDRS_TOTAL_VOYAGES:,} {MIDRS_DENOMINATOR_UNIT} "
+        f"({MIDRS_DENOMINATOR_WINDOW[0]}-{MIDRS_DENOMINATOR_WINDOW[1]}, "
+        "Jenkins 2021 Table 1). It is a pooled period total in one CDC voyage "
+        "unit; the annual counts Freeland 2016 publishes for 2008-2014 are in "
+        "another unit that does not reconcile with it, and are carried as a "
+        "diagnostic by `vsp_voyage_denominator.py` rather than scored. No "
+        "voyage count of any kind is published for the post arm.",
         "",
         (
             "Archive ingestion: "

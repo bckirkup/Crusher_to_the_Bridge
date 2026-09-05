@@ -104,7 +104,7 @@ what fits.
 | B1 | Demote A3 from scored anchor to construction constraint | #23 | — (**resolved**, see below) |
 | B2 | The observation model's ~15 numbers: source them or declare them | #27 | B1 (**resolved as a declaration**, see below) |
 | B3 | Recut the A4 class bins | #29 | — (**resolved**, see below) |
-| B4 | An external voyage denominator for VSP posting rates | #13 | — |
+| B4 | An external voyage denominator for VSP posting rates | #13 | — (**resolved as a declaration; the series stays blocked**, see below) |
 | B5 | Measure or externally bound the cabin-localization fraction `f` | #12 | — |
 
 **B1 is resolved.** `score_anchors.py` scored A3 against 0.35–0.45 while its own
@@ -158,6 +158,67 @@ recorded: the hull-to-GRT mapping behind A8/A9 chose representative ships for
 the classic and spirit hulls against the same total-agent figures, so their
 band is one band too high until two ships at ~1,350 and ~2,100 passengers are
 sourced.
+
+**B4 is resolved as a declaration, and it resolves by making the gap explicit
+rather than by closing it.** The search was already done and had already failed:
+CDC publishes annual voyage counts for 2008–2014 only (Freeland 2016, in two
+units — voyages required to report, and the 3–21 d / >100 pax subset analysed),
+one pooled 2006–2019 total in a third unit (Jenkins 2021, unduplicated voyage
+reports), and nothing at all after 2019. What was wrong was not the absence but
+the silence about it: A9 divided by Jenkins's 37,258 with no unit or window
+recorded, so a period average in voyage *reports* read as a voyage rate.
+`midrs_incidence_targets.py` now declares that denominator's unit, window and
+source in the target itself and in the scoring report, and
+`vsp_voyage_denominator.py` carries the two Freeland series side by side, the
+reason each uncovered year is uncovered, and the posting rate the project's own
+numerator would give under each unit as a diagnostic **no anchor scores**.
+
+Three findings that keep the row blocked in the register rather than clearing
+it. The numerator is *posted* outbreaks against denominators CDC pairs with
+*investigated* outbreaks, and the two definitions point opposite ways — 91
+postings against 132 investigations in Freeland's window, 208 against 156 in
+Jenkins's — so no ratio converts one into the other. Freeland's own printed
+per-1,000-voyage rates are reproducible from Freeland's own counts for 1 of 7
+years and fall outside the bracket its two units span in 4 of 7, which is why
+both units are carried rather than either quoted — though the miss is small and
+graded, not open-ended: `published_rate_residuals()` puts the printed rates on
+the required-report column to within 4.8% on average and 8.5% at worst in six
+of the seven years, with 2010 the lone material outlier (its printed 3.8 needs
+~5,526 voyages, above either published count, so one of that year's three cells
+is misprinted). The denominator is uncertain by about a tenth, not unknown; what
+blocks the row is the numerator definition, not this residual. And the post-2020
+arm has no voyage count of any kind, so the discontinuity that arm exists to measure cannot
+be written as a rate at all — the class-composition observable of
+[`fleet_emergence_decision.md`](fleet_emergence_decision.md) §3 remains the only
+fleet statistic available there.
+
+**The numerator mismatch is nobody's task, so it is now somebody's request.**
+None of B1–B5 owns it, and no literature search can close it: the posted count
+runs 91 against Freeland's 132 investigated outbreaks but 208 against Jenkins's
+156, so the ratio inverts and the two products are counting different events —
+deriving a conversion from those two ratios would be choosing a definition to
+make a rate come out. The only source that can answer is CDC VSP, which also
+holds the missing annual years and the absent post-2020 count, so the question
+leaves the plan as an external data request:
+[`vsp_midrs_extract_request.md`](vsp_midrs_extract_request.md), which records in
+advance what each possible reply does and does not license. Until it is answered
+the row stays blocked as a *rate*; a reply that supplies counts but not the
+posting criterion closes the denominator gaps only, and the remaining move would
+then be to declare and sweep the posting step as an observation-model parameter,
+never to fit it.
+
+Blocked does not mean unquantified. `vsp_voyage_denominator.py` now carries the
+disputed quantities as frozen intervals: the 2008-2014 denominators bracket both
+published columns and the count each printed rate implies (one rule for all
+seven years, so 2010's misprint widens that year rather than removing it),
+2006-2007 and 2015-2019 take the union envelope [3,964, 5,527] as a declared
+Grade C stationarity assumption, Jenkins's pooled total works out to 0.48-0.67
+of a required-report voyage per year as a measure of the unit mismatch, and the
+posting step is bounded to [0.53, 1.0] --- the observed 2008-2014 floor up to the
+structural ceiling that a posting presupposes an investigation, with the
+Jenkins-window ratio of 1.33 excluded because it violates that ceiling. Every
+one of those is swept, none is centred, and post-2020 stays null because no
+source can bound it.
 
 ## 5. Track C — intervals: no scored parameter stays a point value
 

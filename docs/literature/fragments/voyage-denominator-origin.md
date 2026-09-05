@@ -1,13 +1,20 @@
 # Register fragment — voyage denominator: the transcription is now confirmed against MMWR body text (tranche 21)
 
-> **Not merged.** Proposed amendment to `docs/parameter_provenance_register.md`
+> **Merged by #13.** The origin correction below (`Tr` → `R`) is now carried by
+> the register row itself, which also corrects this fragment's "5 of 7 years"
+> reproducibility figure to **1 of 7 reproducing**, measured in-tree, and grades
+> how far the other six miss: **≤8.5%, mean 4.8%** against the required-report
+> column, with 2010 the sole material outlier. Kept as the audit trail; the
+> register holds the status.
+>
+> Proposed amendment to `docs/parameter_provenance_register.md`
 > §3.1, observation-model block, row "External voyage denominator for VSP
-> posting rates". Not authoritative until the lead merges it. Evidence:
+> posting rates". Evidence:
 > [`../consensus_tranche_21_full_text_reverification.md`](../consensus_tranche_21_full_text_reverification.md)
 > §3.1 and finding **F7**. Supersedes the access claim in
 > [`voyage-denominator.md`](voyage-denominator.md), not its numbers.
 
-**Status:** Additive fragment, not authoritative until the lead merges it. Evidence: tranche 21.
+**Status:** Additive fragment, merged into the register by #13. Evidence: tranche 21.
 
 **No count changes.** The register's numbers are reproduced verbatim by the
 source's own body text; what changes is that "transcription unverified" no
