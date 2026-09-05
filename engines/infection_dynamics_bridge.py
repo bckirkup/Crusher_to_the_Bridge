@@ -48,6 +48,18 @@ ASYMPTOMATIC_SHEDDING = [7.75, 9.5, 10.5, 10.0, 9.0, 8.0, 7.75, 7.75, 7.75, 7.75
 ENVIRONMENTAL_FAECAL_RELEASE_LOG10_G_PER_EPOCH = 4.0
 DOSE_ADJUSTMENT = ENVIRONMENTAL_FAECAL_RELEASE_LOG10_G_PER_EPOCH
 
+# Hand-route absolute load, and the faecal peak it was measured alongside.
+# Hand rinses from 6 experimentally infected GI.1 (Norwalk) subjects, 18/71
+# samples positive, mean 3.86 log10 genome-equivalent copies per hand.
+# Liu et al. 2013, Appl Environ Microbiol 79:7875. Grade B. Origin: Ab.
+HAND_LOAD_LOG10_GEC = 3.86
+# The faecal-curve peak the hand load is read against, so the hand route
+# tracks the curve instead of pinning one absolute load for every genogroup.
+# Not a measurement of the hand route: it is the GI.1 peak of the shipped
+# curve, and their difference (-7.14 log10 g of stool per hand) is a derived
+# bridge no study has measured. Class X (convention). Origin: Sec.
+HAND_LOAD_REFERENCE_PEAK_LOG10 = 11.0
+
 
 def environmental_release_log10_per_day(
     profile: dict[str, Any] | None,
@@ -1080,8 +1092,8 @@ class KorkinAgent:
             return 0.0
         idx = min(max(curve_index, 0), len(curve) - 1)
         return (
-            math.pow(10.0, 3.86)
-            * math.pow(10.0, curve[idx] - 11.0)
+            math.pow(10.0, HAND_LOAD_LOG10_GEC)
+            * math.pow(10.0, curve[idx] - HAND_LOAD_REFERENCE_PEAK_LOG10)
             * float(inf.get("shedding_multiplier", 1.0))
         )
 

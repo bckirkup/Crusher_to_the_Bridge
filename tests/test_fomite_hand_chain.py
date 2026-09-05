@@ -7,6 +7,8 @@ import pytest
 
 import engines.transmission_core as transmission_core
 from engines.infection_dynamics_bridge import (
+    HAND_LOAD_LOG10_GEC,
+    HAND_LOAD_REFERENCE_PEAK_LOG10,
     IllnessStatus,
     KorkinAgent,
 )
@@ -185,6 +187,53 @@ def test_replenishment_reaches_the_liu_hand_target() -> None:
     assert agent.hand_load_by_pathogen[PATHOGEN] == pytest.approx(
         target,
         rel=0.02,
+    )
+
+
+def test_hand_target_is_the_liu_load_at_the_reference_peak() -> None:
+    """The hand route's absolute level is Liu's measurement, not a free scale.
+
+    Change detector: the shipped curve peaks at the reference peak, so the
+    target must land on 10^3.86 GEC per hand exactly. If either constant
+    moves, the hand route stops reproducing the only study that has measured
+    a hand load in infected hosts.
+    """
+    agent = _agent(infected=True)
+    profile = _profile(
+        shedding_curve_log10=[HAND_LOAD_REFERENCE_PEAK_LOG10] * 12,
+    )
+    assert agent.get_pathogen_hand_target(PATHOGEN, profile) == pytest.approx(
+        10.0 ** HAND_LOAD_LOG10_GEC,
+    )
+
+
+@pytest.mark.parametrize("peak", [7.0, 8.0, 9.1, 10.0])
+def test_a_peak_shift_moves_the_faecal_and_hand_routes_by_one_factor(
+    peak: float,
+) -> None:
+    """A curve-peak change is one exposure scale across both enteric routes.
+
+    Both the environmental emission and the hand target read the same curve
+    index, so replacing the GI.1 peak with a GII peak multiplies each by the
+    same 10^(peak - reference). It cannot be adopted for the faecal route
+    alone, and it relocates Liu's measured hand load by that factor.
+    """
+    agent = _agent(infected=True)
+    reference = _profile(
+        shedding_curve_log10=[HAND_LOAD_REFERENCE_PEAK_LOG10] * 12,
+        dose_adjustment=4.0,
+    )
+    shifted = _profile(
+        shedding_curve_log10=[peak] * 12,
+        dose_adjustment=4.0,
+    )
+    factor = 10.0 ** (peak - HAND_LOAD_REFERENCE_PEAK_LOG10)
+
+    assert agent.get_pathogen_shedding(PATHOGEN, shifted) == pytest.approx(
+        agent.get_pathogen_shedding(PATHOGEN, reference) * factor,
+    )
+    assert agent.get_pathogen_hand_target(PATHOGEN, shifted) == pytest.approx(
+        agent.get_pathogen_hand_target(PATHOGEN, reference) * factor,
     )
 
 
