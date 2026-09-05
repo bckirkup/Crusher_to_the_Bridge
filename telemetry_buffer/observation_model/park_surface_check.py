@@ -57,7 +57,12 @@ SCENARIO_LOUNGE_60 = "lounge, 60 shedder-hours/day"
 # ANYWHERE AND IS NOT A MODEL PARAMETER. It is swept here only to report how
 # sensitive the cabin/public gradient is to it. It must not be read off Park
 # and written into the model; see the note printed at the end.
-CABIN_LOCALIZATION_SWEEP = (0.50, 0.80, 0.95, 0.99, 1.00)
+#
+# It is NOT the cabin-localization fraction f of task #12, which is a share of
+# transmission events and is capped near a half by occupancy combinatorics
+# (cabin_localization_ceiling). Nothing caps an episode-location fraction at a
+# half, and the two quantities were both spelled "cabin localization" until #12.
+EMESIS_IN_OWN_CABIN_SWEEP = (0.50, 0.80, 0.95, 0.99, 1.00)
 
 
 def _mean_truncated_lognormal(meanlog: float, sdlog: float, n: int = 400000) -> float:
@@ -301,14 +306,15 @@ def _emit_emesis_section(
     clean_cabin = routine_cleaning_multiplier(loss_cabin)
     clean_public = routine_cleaning_multiplier(loss_public)
     emit(
-        "Time-averaged loading with emesis, swept over cabin localization f",
+        "Time-averaged loading with emesis, swept over emesis-in-own-cabin"
+        " fraction",
     )
     emit("-" * 78)
     emit(
-        f"{'f':>6} | {'cabin copies/swab':>18} | {'public copies/swab':>19} | "
+        f"{'in-cab':>6} | {'cabin copies/swab':>18} | {'public copies/swab':>19} | "
         f"{'gradient':>9} | vs Park 100-300x",
     )
-    for fraction in CABIN_LOCALIZATION_SWEEP:
+    for fraction in EMESIS_IN_OWN_CABIN_SWEEP:
         cabin_total, public_total, gradient = (
             emesis_inclusive_surface_values(
                 fraction,

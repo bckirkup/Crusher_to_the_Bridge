@@ -234,7 +234,7 @@ def test_sweep_grid_has_specified_endpoints_and_geometric_midpoints() -> None:
 
 def test_emesis_sweep_reuses_the_fixed_schedule_grid() -> None:
     cells = cleaning_schedule_sweep.sweep_cells()
-    for fraction in cleaning_schedule_sweep.CABIN_LOCALIZATION_SWEEP:
+    for fraction in cleaning_schedule_sweep.EMESIS_IN_OWN_CABIN_SWEEP:
         emesis = cleaning_schedule_sweep.emesis_cells(fraction, cells)
         assert len(emesis) == 81
         gradients = [cell["emesis_gradient"] for cell in emesis]
@@ -242,7 +242,7 @@ def test_emesis_sweep_reuses_the_fixed_schedule_grid() -> None:
 
 
 def test_emesis_cells_defaults_to_full_sweep() -> None:
-    fraction = cleaning_schedule_sweep.CABIN_LOCALIZATION_SWEEP[0]
+    fraction = cleaning_schedule_sweep.EMESIS_IN_OWN_CABIN_SWEEP[0]
     emesis = cleaning_schedule_sweep.emesis_cells(fraction)
     assert len(emesis) == 81
     assert all(cell["emesis_gradient"] > 0.0 for cell in emesis)
@@ -267,13 +267,13 @@ class TestRenderAndMain:
         from telemetry_buffer.observation_model.park_surface_check import expectations
 
         exp_ = expectations()
-        fractions = list(cleaning_schedule_sweep.CABIN_LOCALIZATION_SWEEP[:3])
+        fractions = list(cleaning_schedule_sweep.EMESIS_IN_OWN_CABIN_SWEEP[:3])
         gradients = [
             cleaning_schedule_sweep._uniform_emesis_values(f, exp_)[2]
             for f in fractions
         ]
         assert all(math.isfinite(g) and g > 0.0 for g in gradients)
-        # Higher cabin localization raises the cabin/public gradient.
+        # More emesis in the host's own cabin raises the cabin/public gradient.
         assert gradients == sorted(gradients)
         assert gradients[-1] - gradients[0] > 1.0
 

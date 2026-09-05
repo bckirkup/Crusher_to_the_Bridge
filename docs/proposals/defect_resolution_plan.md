@@ -105,7 +105,7 @@ what fits.
 | B2 | The observation model's ~15 numbers: source them or declare them | #27 | B1 (**resolved as a declaration**, see below) |
 | B3 | Recut the A4 class bins | #29 | — (**resolved**, see below) |
 | B4 | An external voyage denominator for VSP posting rates | #13 | — (**resolved as a declaration; the series stays blocked**, see below) |
-| B5 | Measure or externally bound the cabin-localization fraction `f` | #12 | — |
+| B5 | Measure or externally bound the cabin-localization fraction `f` | #12 | — (**resolved as an external ceiling; still no measurement and no lower bound**, see below) |
 
 **B1 is resolved.** `score_anchors.py` scored A3 against 0.35–0.45 while its own
 module docstring already called A3 a construction constraint, so the scorer was
@@ -237,6 +237,41 @@ CruiseDig's paid historic itinerary extract, thecruiseglobe's in-app schedules,
 and CDC's per-ship inspection and mitigation reports as a risk-factor dataset
 --- are identified, unretrieved, and recorded in the request document so the
 assumption stays visible as one.
+
+**B5 is resolved on its second clause, not its first: `f` is externally
+bounded, and it is still measured nowhere.** Tranche 17's search stands --- no
+study on any ship reports the share of norovirus transmission occurring between
+cabinmates, and the tighter empirical `f <= 0.18-0.45` is derived from the same
+cruise attack rates A4/A8/A9 score against, so it cannot constrain a sweep those
+anchors also score. What #12 adds is the missing external input to the one bound
+that needs no epidemiology at all. The ceiling `f <= 1 - cabins/occupants` is
+occupancy combinatorics --- every cabin's first case was infected elsewhere by
+construction --- and it needs a berthing plan, which the operators publish: in
+cruise-industry practice occupancy is passengers per *lower berth*, two per
+cabin by definition, and Carnival's own note says percentages above 100% mean
+more than two passengers occupied some cabins. So published occupancy *is*
+occupants per two cabins, and `f <= 1 - 1/(2 x occupancy)`.
+
+That moves the bound, and in the direction that matters: every published full
+year since the restart is at or above unity (CCL 100% / 105%, RCL 105.6% /
+108.5%), so the fleet-wide ceiling is **0.500-0.539** and 0.5 is its *floor*,
+not the ceiling. The register's previous `f <= 0.5` was slightly too tight
+rather than conservative, which is the kind of error a structural bound is
+supposed to be immune to. Per hull the same identity runs off the declared
+berthing plan instead: `default_cabin_size` puts passengers in doubles, crew in
+triples and officers in singles, giving whole-hull 0.53-0.55, crew-only ~0.66,
+passenger-only <=0.50, and *below* 0.5 for naval hulls with single cabins.
+`cabin_localization_ceiling.py` computes all of it and returns nothing but
+bounds: no lower bound (`f = 0` is not excluded), no central value.
+
+B5 also found a name collision, which is why the Park harness changes in the
+same item. The factor the sensitivity spec lists as "cabin-localization fraction
+`f`, 0.80-0.99" is not this `f` at all --- it is the fraction of a symptomatic
+host's *emesis episodes* that occur in its own cabin, an episode-location
+fraction that nothing caps near a half, and it is a parameter of the Park
+surface harness only. Under one name, its 0.80-1.00 range read as a claim about
+transmission localization that sits entirely above the transmission ceiling. It
+is now `EMESIS_IN_OWN_CABIN_SWEEP`, and a test asserts the old name is gone.
 
 ## 5. Track C — intervals: no scored parameter stays a point value
 

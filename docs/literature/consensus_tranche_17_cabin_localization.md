@@ -159,6 +159,36 @@ double occupancy, so **`f ≤ 0.5`**. Any value above 0.5 asserts that more cabi
 occupants were infected in their cabin than there were non-index occupants to
 infect. This holds whatever the literature says.
 
+#### 5.1.1 The berthing plan the ceiling needs is published (added under #12)
+
+Written over a mixed plan the ceiling is `f ≤ 1 − cabins/occupants`, and "predominantly
+double occupancy" is the one input §5.1 asserted rather than sourced. It is
+sourceable, and from capacity accounting rather than from any outbreak, so it
+enters beside the scored attack-rate anchors without the circularity of §5.2:
+
+* **Occupancy is passengers per lower berth, two berths per cabin by
+  definition.** Carnival Corporation's quarterly statistical information carries
+  the note that percentages above 100% "indicate that on average more than two
+  passengers occupied some cabins"; Royal Caribbean reports the same measure as
+  load factor on double-occupancy capacity. Published occupancy `o` is therefore
+  exactly `occupants / (2 × cabins)`, giving **`f ≤ 1 − 1/(2o)`**.
+* **Every published full year since the restart is at or above unity.** CCL
+  **100%** FY2023 and **105%** FY2024 (4Q2024 earnings release, statistical
+  information); RCL **105.6%** FY2023 and **108.5%** FY2024 (4Q/FY2024 earnings
+  release, 8-K filed 2025-01-28). Those four operator-years bracket the ceiling
+  at **0.500 ≤ ceiling ≤ 0.539**.
+* **A single-hull check, independent of any operator average.** Symphony of the
+  Seas: 2,759 staterooms, 5,518 guests at double occupancy, 6,680 maximum. The
+  double figure is exactly 2 × staterooms, which is the lower-berth definition
+  visible in one fact sheet; the maximum figure gives `f ≤ 0.587` if every upper
+  berth on the largest hull afloat were sold.
+
+Two readings this does **not** license. The interval 0.500–0.539 is not an
+interval for `f`: it is the range of the *ceiling*, and `f = 0` remains
+admissible under all of it. And the ceiling is population- and plan-specific, so
+it cannot be quoted flat — crew berthed in triples carry ~0.66, officers in
+singles carry 0, and a hull's aggregate depends on its mix.
+
 ### 5.2 The bound implied by the cruise cabinmate associations
 
 The three cruise studies report an association, not a fraction. Under two stated
@@ -302,7 +332,9 @@ what §9 records.
 
 * No Grade A measurement of `f` exists. The register's existing null for #12 is
   correct and is not refuted by this tranche.
-* The defensible statements are: `f ≤ 0.5` structurally at double occupancy, and
+* The defensible statements are: `f ≤ 1 − cabins/occupants` structurally (`0.5`
+  at exact double occupancy, **0.500–0.539** over the published operator-years
+  of §5.1.1), and
   `f ≤ 0.18–0.45` from the cruise cabinmate associations under the stated
   assumptions (§5.2), all of which over-attribute to the cabin.
 * **No lower bound is supported.** No central value is proposed, and none should

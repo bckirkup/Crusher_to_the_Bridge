@@ -11,7 +11,7 @@ import math
 from pathlib import Path
 
 from telemetry_buffer.observation_model.park_surface_check import (
-    CABIN_LOCALIZATION_SWEEP,
+    EMESIS_IN_OWN_CABIN_SWEEP,
     concentration_per_swab,
     emesis_inclusive_surface_values,
     expectations,
@@ -248,7 +248,7 @@ def _render() -> str:
             "-" * 78,
         ]
     )
-    for fraction in CABIN_LOCALIZATION_SWEEP:
+    for fraction in EMESIS_IN_OWN_CABIN_SWEEP:
         emesis = emesis_cells(fraction, cells)
         emesis_gradients = [cell["emesis_gradient"] for cell in emesis]
         _, _, default_emesis_gradient = _uniform_emesis_values(
