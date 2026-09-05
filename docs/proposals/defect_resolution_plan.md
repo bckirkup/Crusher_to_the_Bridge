@@ -187,10 +187,11 @@ of the seven years, with 2010 the lone material outlier (its printed 3.8 needs
 ~5,526 voyages, above either published count, so one of that year's three cells
 is misprinted). The denominator is uncertain by about a tenth, not unknown; what
 blocks the row is the numerator definition, not this residual. And the post-2020
-arm has no voyage count of any kind, so the discontinuity that arm exists to measure cannot
-be written as a rate at all — the class-composition observable of
+arm has no published voyage count, so the discontinuity that arm exists to
+measure is expressible only against a Grade C bracket built from CDC's
+inspection census (below) — the class-composition observable of
 [`fleet_emergence_decision.md`](fleet_emergence_decision.md) §3 remains the only
-fleet statistic available there.
+*measured* fleet statistic there.
 
 **The numerator mismatch is nobody's task, so it is now somebody's request.**
 None of B1–B5 owns it, and no literature search can close it: the posted count
@@ -217,8 +218,25 @@ of a required-report voyage per year as a measure of the unit mismatch, and the
 posting step is bounded to [0.53, 1.0] --- the observed 2008-2014 floor up to the
 structural ceiling that a posting presupposes an investigation, with the
 Jenkins-window ratio of 1.33 excluded because it violates that ceiling. Every
-one of those is swept, none is centred, and post-2020 stays null because no
-source can bound it.
+one of those is swept and none is centred.
+
+Post-2020 is bounded where a fleet was there to measure and null where it was
+not. The fleet term stops being an assumption: CDC's inspection query tool
+covers every ship in VSP jurisdiction, and harvesting it month by month
+(`vsp_inspection_series.csv`, 1,901 inspections of 248 ships, 2014-2026) gives a
+census of 108-122 ships per year before the pandemic against 136/149/179 in
+2023/2024/2025, so the same instrument measures both sides of the discontinuity.
+Scaling the pre-pandemic envelope by those census ratios (1.17, 1.28, 1.54)
+gives 2023 [4,640, 6,471], 2024 [5,084, 7,090] and 2025 [6,108, 8,517] --- Grade
+C, because voyages per ship-year enters as a declared assumption and a ship
+census is not a voyage count. 2020-2022 stay null: the record dates the pause
+itself (last inspection March 2020, first resumed October 2022), and a census
+taken while inspections were suspended measures the programme rather than the
+fleet. The sources that would replace the assumption with a measurement ---
+CruiseDig's paid historic itinerary extract, thecruiseglobe's in-app schedules,
+and CDC's per-ship inspection and mitigation reports as a risk-factor dataset
+--- are identified, unretrieved, and recorded in the request document so the
+assumption stays visible as one.
 
 ## 5. Track C — intervals: no scored parameter stays a point value
 

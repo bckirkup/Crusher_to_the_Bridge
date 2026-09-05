@@ -36,20 +36,25 @@ both published columns and the count each printed rate implies,
 table can be bounded to and on what assumption, ``posted_to_investigated``
 bounds the posting step, and ``jenkins_unit_ratio_interval`` says how much
 smaller an "unduplicated voyage report" must be than a required-report voyage
-for the two papers to be describing the same fleet.  Post-2020 stays empty:
-nothing has been published that could bound it, and an interval invented for it
-would be a number with no source.
+for the two papers to be describing the same fleet.  Post-2020 is bounded only
+where a fleet census exists (2023 onward, below); nothing published bounds the
+2020-2022 pause and no interval is invented for it.
 
-CDC's own outbreak pages do not close the post-2020 gap, and it is worth being
-precise about why, because they visibly *do* cover those years.  What they cover
-is the numerator: they list the voyages CDC posted (4 in 2020, 1 in 2021, 4 in
-2022, then 14, 18, 23 and 9 so far), and they have never published a count of
-voyages sailed in any era --- both counts this module carries came from MMWR,
-which stops at 2019.  The only fleet quantity derivable from the pages is the
-number of distinct ships they name, 1-19 per year against hundreds under
-jurisdiction, which bounds the fleet from below by a factor that makes it
-useless as a denominator.  So the post arm compares postings to postings and
-never a rate to a rate.
+CDC's outbreak pages do not close the post-2020 gap: they cover those years as
+a numerator only (4, 1, 4, 14, 18, 23 and 9 postings), and the 1-19 distinct
+ships they name per year are a floor on the fleet loose by more than an order
+of magnitude.  What does bound the post-2020 fleet is a different CDC product,
+the VSP inspection record (``vsp_inspection_series.csv``): every ship under
+VSP jurisdiction is inspected, so the distinct ships inspected in a year is a
+census of the population the posting series is drawn from, taken with the same
+instrument before and after the pandemic.  ``ships_inspected_by_year`` reads
+it, and ``post_covid_denominator_interval`` scales the pre-pandemic envelope by
+the census ratio.  That scaling rests on one declared assumption --- voyages
+per ship-year unchanged --- and it is a ship census, never a voyage count, so
+the result is Grade C.  The inspection record also fixes when the fleet was
+not a fleet: inspections stop in March 2020 and resume in October 2022, and
+for those years the census measures the programme's activity rather than the
+fleet, so 2020-2022 stay null.
 
 Nothing here is fitted and nothing here is a target.  ``a9_targets`` in
 ``midrs_incidence_targets.py`` continues to score against the Jenkins
@@ -71,6 +76,7 @@ from telemetry_buffer.observation_model.midrs_incidence_targets import (
 )
 
 SERIES_PATH = Path(__file__).resolve().parent / "vsp_outbreak_series.csv"
+INSPECTION_PATH = Path(__file__).resolve().parent / "vsp_inspection_series.csv"
 
 # Freeland A, Vaughan GH Jr, Banerjee E, et al. Acute gastroenteritis on cruise
 # ships - United States, 2008-2014. MMWR 2016;65(1):1-5.  Grade A (direct count
@@ -147,11 +153,16 @@ NO_ANNUAL_DENOMINATOR = (
     "MARAD/BTS departures and CLIA/BREA embarkations count a different "
     "population and are excluded (tranche 18 SS4-5)"
 )
-NO_POST_COVID_DENOMINATOR = (
-    "no VSP voyage count of any kind has been published for the post-2020 "
-    "era, so the post arm has no posting-rate denominator; CDC's outbreak "
-    "pages supply postings only (a numerator), and the 1-19 distinct ships "
-    "they name per year are a floor on the fleet, not a count of its voyages"
+NO_PAUSE_ERA_DENOMINATOR = (
+    "VSP inspections stop in March 2020 and resume in October 2022, so for "
+    "2020-2022 the inspection census measures programme activity rather than "
+    "the fleet and cannot be scaled into a voyage count; CDC's outbreak pages "
+    "supply postings only (a numerator) and no voyage count exists for any "
+    "part of the pause"
+)
+NO_CENSUS_DENOMINATOR = (
+    "no complete VSP inspection census for this year, so the fleet ratio the "
+    "post-2020 bracket is built from cannot be formed"
 )
 
 DENOMINATOR_YEARS = tuple(sorted(FREELAND_VOYAGES_ANALYSED))
@@ -186,6 +197,45 @@ STATIONARITY_ASSUMPTION = (
 )
 
 
+# The VSP inspection record, harvested from CDC's inspection query tool
+# (https://wwwn.cdc.gov/inspectionquerytool/InspectionSearch.aspx, month by
+# month 2014-2026, retrieved 2026-09-05) into vsp_inspection_series.csv: 1,901
+# inspections of 248 distinct ships.  Grade A for what it is --- a count of
+# inspections CDC performed --- and it is a *ship* census, never a voyage count.
+# Origin: Tr (transcribed from a programme query tool, not a journal).  The
+# green sheet says the tool covers "each ship in VSP jurisdiction", which is the
+# same population Freeland's voyage counts are drawn from.
+CENSUS_YEARS_PRE_COVID = (2014, 2015, 2016, 2017, 2018, 2019)
+
+# Years the census can carry a fleet ratio: the pause has ended and the year is
+# complete.  2026 is excluded because it is still running, not because it is
+# missing.
+CENSUS_YEARS_POST_COVID = (2023, 2024, 2025)
+
+# The pause the inspection record itself dates: last inspection March 2020,
+# first resumed inspection October 2022.
+VSP_INSPECTION_PAUSE = (2020, 2022)
+
+FLEET_RATIO_ASSUMPTION = (
+    "voyages per ship-year in 2023-2025 equal voyages per ship-year in "
+    "2014-2019, so the pre-pandemic voyage envelope can be scaled by the ratio "
+    "of inspection censuses; declared, not sourced, because no post-2020 "
+    "voyage count exists to check it against.  Itinerary aggregators could "
+    "measure it (docs/proposals/vsp_midrs_extract_request.md, external "
+    "sources) but none was retrieved"
+)
+
+# Inspections per inspected ship falls from 1.70 in 2014-2017 to 1.31 in 2024,
+# so the post-pandemic census misses a larger share of the fleet than the
+# pre-pandemic one.  That biases the ratio, and it biases it downward: the
+# bracket understates the modern fleet rather than flattering it.
+CENSUS_COVERAGE_CAVEAT = (
+    "the census counts ships inspected, not ships under jurisdiction, so each "
+    "year is a floor; inspections per inspected ship are lower after the pause "
+    "(1.31-1.40 vs 1.45-1.73), which makes the ratio conservative"
+)
+
+
 class AnnualDenominator(NamedTuple):
     """The two published voyage counts for one year, kept side by side."""
 
@@ -210,8 +260,12 @@ def missing_denominator_reason(year: int) -> str | None:
     """Why ``year`` has no denominator, or ``None`` when it has one."""
     if year in FREELAND_VOYAGES_ANALYSED:
         return None
+    if year in CENSUS_YEARS_POST_COVID:
+        return None
+    if VSP_INSPECTION_PAUSE[0] <= year <= VSP_INSPECTION_PAUSE[1]:
+        return NO_PAUSE_ERA_DENOMINATOR
     if year > JENKINS_WINDOW[1]:
-        return NO_POST_COVID_DENOMINATOR
+        return NO_CENSUS_DENOMINATOR
     return NO_ANNUAL_DENOMINATOR
 
 
@@ -242,10 +296,16 @@ def posting_rate_interval(
     the sources do not support.  It is a *posting* rate: the numerator counts
     voyages CDC posted publicly, not the outbreaks it investigated, and the
     two differ by about a third (``midrs_observed_targets.md`` conflict 3).
+
+    For ``CENSUS_YEARS_POST_COVID`` the interval spans the Grade C
+    ``post_covid_denominator_interval`` instead, and is wider for it.
     """
     denominator = annual_denominator(year)
     if denominator is None:
-        return None
+        bracket = post_covid_denominator_interval(year)
+        if bracket is None:
+            return None
+        return (1_000 * postings / bracket[1], 1_000 * postings / bracket[0])
     high = 1_000 * postings / denominator.voyages_analysed
     low = 1_000 * postings / denominator.voyages_requiring_report
     return (low, high)
@@ -323,8 +383,8 @@ def observed_posting_rates(path: Path = SERIES_PATH) -> dict[str, Any]:
 
     Years with a denominator carry an interval; every other year carries the
     reason it has none.  This is a diagnostic and no anchor scores against it:
-    it covers 7 of the series' 23 denominator-bearing years, in a unit CDC
-    does not resolve, against a numerator CDC does not publish.
+    it covers 10 of the series' 23 years with postings (7 Grade M, 3 Grade C),
+    in a unit CDC does not resolve, against a numerator CDC does not publish.
     """
     postings = postings_by_year(path)
     per_year: dict[int, dict[str, Any]] = {}
@@ -336,7 +396,9 @@ def observed_posting_rates(path: Path = SERIES_PATH) -> dict[str, Any]:
             "no_denominator_reason": missing_denominator_reason(year),
         }
     covered = [year for year in per_year if per_year[year]["per_1000_voyages"]]
-    pooled_postings = sum(postings[year] for year in covered)
+    # Pooled over Freeland's years only: the post-2020 bracket is Grade C and a
+    # different unit, so pooling it into a measured rate would launder it.
+    pooled_postings = sum(postings[year] for year in DENOMINATOR_YEARS)
     return {
         "per_year": per_year,
         "covered_years": tuple(covered),
@@ -394,14 +456,89 @@ def stationarity_denominator_interval() -> tuple[int, int]:
     assumption** (``STATIONARITY_ASSUMPTION``), not a measurement, and it is
     deliberately wide, [3964, 5527] -- 2009's analysed subset sets the floor
     and 2010's misprint the ceiling.  It applies to ``JENKINS_ONLY_YEARS``
-    only; post-2020 gets nothing, because assuming a fleet that stopped sailing
-    was unchanged is not conservatism, it is invention.
+    as-is; post-2020 never takes it unscaled, because assuming a fleet that
+    stopped sailing was unchanged is not conservatism, it is invention ---
+    ``post_covid_denominator_interval`` scales it by a measured fleet ratio
+    instead, and only for years in which a fleet was there to measure.
     """
     brackets = [annual_denominator_interval(year) for year in DENOMINATOR_YEARS]
     return (
         min(bracket[0] for bracket in brackets if bracket),
         max(bracket[1] for bracket in brackets if bracket),
     )
+
+
+def ships_inspected_by_year(
+    path: Path = INSPECTION_PATH,
+) -> dict[int, dict[str, int]]:
+    """Distinct ships inspected, and inspections performed, per year.
+
+    The census of the population the posting series is drawn from.  It is a
+    floor on the fleet in every year (``CENSUS_COVERAGE_CAVEAT``) and it is not
+    a voyage count in any year.
+    """
+    ships: dict[int, set[str]] = {}
+    inspections: dict[int, int] = {}
+    with validated_open(
+        str(path),
+        "r",
+        allowed_roots=(str(path.parent),),
+        encoding="utf-8",
+        newline="",
+    ) as handle:
+        for row in csv.DictReader(handle):
+            year = int(row["inspection_date"].rsplit("/", 1)[1])
+            ships.setdefault(year, set()).add(row["ship"])
+            inspections[year] = inspections.get(year, 0) + 1
+    return {
+        year: {
+            "ships": len(names),
+            "inspections": inspections[year],
+        }
+        for year, names in sorted(ships.items())
+    }
+
+
+def fleet_ratio(year: int, path: Path = INSPECTION_PATH) -> float | None:
+    """``year``'s inspection census over the mean pre-pandemic census.
+
+    Both terms come from the same instrument, so the coverage each misses
+    cancels to first order and what survives is the change in fleet size:
+    1.17 in 2023, 1.28 in 2024, 1.54 in 2025 against a 2014-2019 mean of 116.2
+    ships.  ``None`` for any year outside ``CENSUS_YEARS_POST_COVID``.
+    """
+    if year not in CENSUS_YEARS_POST_COVID:
+        return None
+    census = ships_inspected_by_year(path)
+    baseline = sum(
+        census[pre]["ships"] for pre in CENSUS_YEARS_PRE_COVID
+    ) / len(CENSUS_YEARS_PRE_COVID)
+    return census[year]["ships"] / baseline
+
+
+def post_covid_denominator_interval(
+    year: int,
+    path: Path = INSPECTION_PATH,
+) -> tuple[int, int] | None:
+    """The post-pandemic voyage bracket for ``year``, or ``None``.
+
+    The pre-pandemic envelope scaled by the fleet ratio, which gives [4640,
+    6471] for 2023, [5084, 7090] for 2024 and [6108, 8517] for 2025.  **Grade
+    C**: the fleet term is measured, the voyages-per-ship-year term is the
+    declared ``FLEET_RATIO_ASSUMPTION``, and a ship census cannot become a
+    voyage count without it.  Origin: Tr for the census, T1 for the envelope.
+
+    It is wide on purpose and it is not a count: it exists so the post-2020 arm
+    can be swept rather than dropped, and no value inside it may be adopted as
+    an estimate.  2020-2022 return ``None`` --- the pause is when the census
+    stops describing a fleet, which is exactly when a fleet ratio would be
+    doing the most work.
+    """
+    ratio = fleet_ratio(year, path)
+    if ratio is None:
+        return None
+    low, high = stationarity_denominator_interval()
+    return (math.floor(low * ratio), math.ceil(high * ratio))
 
 
 def jenkins_unit_ratio_interval() -> tuple[float, float]:
