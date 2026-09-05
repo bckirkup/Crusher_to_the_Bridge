@@ -208,12 +208,23 @@ the original claim turns out to have been read off a censored output.
 
 ### 3.2 Direct-contact transfer fraction is 1.0 against a literature ~0.25
 
-`contact_transfer_fraction` defaults to 1.0 in
-`engines/transmission_core.py` and the norovirus profile does not set it, so
-every direct contact transfers the entire computed dose. §10 records the
+> **Closed by retirement, not by sourcing (#22).** The field is deleted from the
+> engine, the schema and the bounded-screen box, and refused at load: it
+> multiplied the direct-contact pathway dose from the same position as
+> `route_efficiency_multipliers["direct_contact"]`, so only their product was
+> ever identifiable and the ~0.25 anchor below is not a quantity the field could
+> have carried. The route keeps one owner, whose own value is untraced. The
+> paragraphs below are the state before that change; the ~0.25 remains refuted
+> as a direction-free quantity. See
+> [`../literature/consensus_tranche_12_contact_transfer.md`](../literature/consensus_tranche_12_contact_transfer.md)
+> §10 and the register.
+
+`contact_transfer_fraction` defaulted to 1.0 in
+`engines/transmission_core.py` and the norovirus profile did not set it, so
+every direct contact transferred the entire computed dose. §10 records the
 contact-model anchor as ~0.25 and has done since before #353. #353 raised the
 contact kernel to POLYMOD rates without revisiting the transfer fraction, so
-contact is now sampled at a measured rate and transferred at an unsourced
+contact was sampled at a measured rate and transferred at an unsourced
 efficiency.
 
 This currently matters less than it reads, because direct contact contributes

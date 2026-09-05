@@ -277,6 +277,15 @@ is now `EMESIS_IN_OWN_CABIN_SWEEP`, and a test asserts the old name is gone.
 Task #35 is the umbrella. This track can start during Track A, but **adoption of
 any interval lands after the Track A item that owns its field.**
 
+> **All seven items are closed.** One adopted interval in the whole track
+> (influenza's fine-aerosol share, C4), three declared-not-applied (C6, C3, and
+> the SARS-CoV-2 half of C4), three refusals (C1 and C2 on evidence, C5 on
+> identifiability), and C7's re-tests re-run. No constant moved except that
+> adoption. The one item left open is **#54**, which needs the campaign's swept
+> `initial_infected` axis re-keyed before `norwalk_gi` can move to
+> `initiation.explicit_seeds`. Two screen inputs changed under #36/#37: the #22
+> row is withdrawn as aliased and the C6 dose span is declared, not applied.
+
 | | Item | Task | Note |
 |---|---|---|---|
 | C1 | `never_symptomatic_fraction`, and migrate `norwalk_gi` off `initial_infected` | #53, #54 | Gates the boarding channel built in #388. Exclude outbreak-conditioned asymptomatic prevalence (18–22%) for the tranche-10 reason: it is conditioned on the outcome being scored. **#53 refused on evidence by [tranche 24](../literature/consensus_tranche_24_never_symptomatic_adult_null.md)**: the null is now twice-searched and structural — every adult natural-exposure design fails at the *denominator* (asymptomatic-only screening, AGE-triggered enrolment, or positive-specimen share, the last length-biased upward by convalescent shedding), so the two tranche-11 intervals stand unpooled and no value is licensed. **#54 blocked, not done:** the destination channel needs the refused coordinate, and the intermediate move — relocating the fiat index case into `initiation.explicit_seeds` — would silently override the campaign's swept `initial_infected` axis, since initiation ownership drops a pathogen from legacy seeding while the run id keeps the `init<N>` label. That collision is now a load error on both mechanisms rather than a silent one; the shipped profile keeps `initial_infected: 1` |

@@ -85,7 +85,13 @@ this is the largest lever in the arm:
   (`transmission_core.py` `_pathway_direct_contact`, default 1.0) — no surface
   is involved. Its sourced screen interval is 0.06–0.50, i.e. it is already not
   shipped at 1.0 in the bounded box (`bounded_screen.py`), and task #22 tracks
-  it against a ~0.25 anchor.
+  it against a ~0.25 anchor. **Note added later (#22 closed):** the field is
+  retired and refused at load — it multiplied the direct-contact pathway dose
+  from the same position as `route_efficiency_multipliers["direct_contact"]`, so
+  only the product was identifiable, the 0.06–0.50 screen row is withdrawn as
+  aliased, and the ~0.25 anchor stays refuted as a direction-free quantity. The
+  correction in this bullet — that Grove's surface→hand figure does not belong
+  on this key — stands and is now moot.
 - **Surface→hand already exists and is already sourced.** #351's fomite
   re-derivation replaced the lumped constants with a measured chain:
   `SURFACE_TO_HAND_LOGNORMAL = (-2.1, 1.4)`, median 0.12, mean 0.33, cited to
