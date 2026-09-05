@@ -1,7 +1,9 @@
 # Review: Edison's `formal_spec_v3.md` and `pre_establishment_clearance_params_v3.json`
 
 **Status:** Review of two received artifacts. Nothing adopted; no constant, schema
-or profile changed by this document.
+or profile changed by this document. §4 records what A5 (#25) later settled about
+the shape of any adoption of the clearance layer — no value, grade or interval
+moved with it.
 
 Both files were supplied on 2026-08-30. They are relevant to the provenance work
 in [`parameter_sourcing_bundle.md`](parameter_sourcing_bundle.md) and to the
@@ -88,6 +90,25 @@ genuine model gap. Three conditions would make adoption safe:
    outputs are insensitive to across 0.07–0.5 costs us nothing, and one they are
    sensitive to must be resolved before it is used.
 3. Never fit a clearance rate and a dose scale against the same observation.
+
+**A5 (#25) has since settled the *shape* of any adoption, and it is not a
+second layer.** Route efficiency has one owning field,
+`route_efficiency_multipliers`; a per-route clearance rate parameterises the
+same quantity, so a clearance layer standing beside the multipliers leaves
+neither identifiable — condition 3 in the form the tree can enforce. Measured
+rates now enter *through* the multipliers, by
+`engines.transmission_core.route_efficiency_from_clearance_rates`, which returns
+`lambda_reference / lambda_j` against a **declared** reference portal: the
+portal the dose-response was fitted to, whose upstream losses its constants
+already contain. Only the ratios survive that conversion, which is exactly why
+it is safe — the absolute rate scale, the part that would have rescaled the dose
+axis, cannot enter. A profile declaring `pre_establishment_clearance`,
+`route_clearance_rate_per_hour` or `gastric_survival_fraction` is refused by the
+schema and by the loader, inert defaults included, since shipping the layer at
+no-op is how it becomes live later. Condition 1 is therefore met by there being
+no layer to ship, and condition 2 still stands unmet: the rates are Grade C, the
+reference portal is the §3.3.2 substantive claim below and is unsourced, and
+nothing here adopts a value.
 
 The one piece of the proposal that is a *substantive claim* rather than a knob is
 the portal-assignment note in §3.3.2: for norovirus, virus inhaled via droplet or

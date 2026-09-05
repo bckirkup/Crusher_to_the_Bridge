@@ -341,6 +341,58 @@ PATHWAY_EFFICIENCY_KEYS: dict[str, str] = {
 # Deprecated alias, kept for external readers.
 PATHWAY_WEIGHT_KEYS = PATHWAY_EFFICIENCY_KEYS
 
+
+def route_efficiency_from_clearance_rates(
+    rates_per_hour: dict[str, float],
+    reference_route: str,
+) -> dict[str, float]:
+    """Route efficiency multipliers implied by per-route clearance rates.
+
+    Inoculum retained at portal *j* and cleared at ``lambda_j`` accrues total
+    hazard proportional to ``D_j / lambda_j``, so per-virion efficiency goes as
+    the mean residence time ``1 / lambda_j``. A dose-response is fitted to
+    inoculum administered at one portal, and every loss upstream of that portal
+    is already inside its constants, so that portal is the reference:
+    ``lambda_reference / lambda_j``, identically 1.0 on the reference route. Any
+    other reference multiplies every route by one constant, which the dose scale
+    absorbs.
+
+    This is the only route by which a clearance rate enters the model. Route
+    efficiency has one owning field, ``route_efficiency_multipliers``; a
+    clearance layer standing beside it would parameterise the same quantity
+    twice and neither would be identifiable, so profiles declaring one are
+    refused at load. Which portal an exposure route terminates at is a claim
+    about the pathogen and not a default: ``reference_route`` is required, and
+    only the routes supplied are returned.
+    """
+    if reference_route not in DEFAULT_ROUTE_EFFICIENCY:
+        raise ValueError(
+            f"reference_route {reference_route!r} is not a transmission route; "
+            f"expected one of {sorted(DEFAULT_ROUTE_EFFICIENCY)}",
+        )
+    rates: dict[str, float] = {}
+    for route, rate in rates_per_hour.items():
+        if route not in DEFAULT_ROUTE_EFFICIENCY:
+            raise ValueError(
+                f"clearance rate given for unknown route {route!r}; "
+                f"expected one of {sorted(DEFAULT_ROUTE_EFFICIENCY)}",
+            )
+        value = float(rate)
+        if not math.isfinite(value) or value <= 0.0:
+            raise ValueError(
+                f"clearance rate for {route!r} must be finite and positive, "
+                f"got {rate!r}: a zero rate is an infinite residence time",
+            )
+        rates[route] = value
+    reference = rates.get(reference_route)
+    if reference is None:
+        raise ValueError(
+            f"no clearance rate given for the reference route "
+            f"{reference_route!r}; without it the multipliers have no scale",
+        )
+    return {route: reference / rate for route, rate in rates.items()}
+
+
 # Log-sigma defaults for heterogeneous_zone_dose (mean-1 lognormal).
 # Low in cabins (near-uniform stateroom mixing); high in dining/service;
 # medium-high in free/common areas. Not the default contact_mode.

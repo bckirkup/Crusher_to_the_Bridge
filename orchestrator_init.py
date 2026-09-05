@@ -1081,6 +1081,7 @@ def load_pathogen_profiles(
             str(pid): dict(prof) for pid, prof in resolved.items()
         }
         _validate_symptom_severity_profiles(profiles)
+        _validate_route_parameterisation(profiles)
         return _normalize_profile_units(profiles)
 
     profiles_path = mp_cfg.get("profiles_path", "data/pathogens/active_profiles.json")
@@ -1094,7 +1095,46 @@ def load_pathogen_profiles(
         pid = p.get("pathogen_id", "unknown")
         profiles[pid] = p
     _validate_symptom_severity_profiles(profiles)
+    _validate_route_parameterisation(profiles)
     return _normalize_profile_units(profiles)
+
+
+# Per-route clearance parameterises route efficiency, which
+# route_efficiency_multipliers owns: the two are not separately identifiable,
+# so a profile declaring either of these is refused rather than silently
+# ignored (#25).
+CLEARANCE_PARAMETERISATION_KEYS = (
+    "pre_establishment_clearance",
+    "route_clearance_rate_per_hour",
+    "route_clearance_rates_per_hour",
+    "gastric_survival_fraction",
+)
+
+
+def _validate_route_parameterisation(
+    profiles: dict[str, dict[str, Any]],
+) -> None:
+    """Hold route efficiency to one parameterisation per profile."""
+    for pathogen_id, profile in profiles.items():
+        for key in CLEARANCE_PARAMETERISATION_KEYS:
+            if key in profile:
+                raise ValueError(
+                    f"{pathogen_id}.{key} parameterises route efficiency a "
+                    "second time; route_efficiency_multipliers owns it. "
+                    "Convert measured clearance rates with "
+                    "engines.transmission_core."
+                    "route_efficiency_from_clearance_rates and declare the "
+                    "result there",
+                )
+        if (
+            "route_efficiency_multipliers" in profile
+            and "transmission_route_weights" in profile
+        ):
+            raise ValueError(
+                f"{pathogen_id} declares route_efficiency_multipliers and its "
+                "deprecated alias transmission_route_weights; the loader "
+                "would silently use the first, so declare one",
+            )
 
 
 def _validate_symptom_severity_profiles(
