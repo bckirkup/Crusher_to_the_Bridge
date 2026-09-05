@@ -414,6 +414,19 @@ structure or the box. Running it earlier does not produce a partial answer; it
 produces an answer to a question about a model that no longer exists. That has
 already happened once.
 
+**Run, 2026-09-05:**
+[`../norovirus/bounded_screen_isolated_36.md`](../norovirus/bounded_screen_isolated_36.md).
+350 runs on the completed Tracks A and C, six factors, matched seeds, other
+bundle pathogens' seeds suppressed. One factor resolves above the measured noise
+floor (`environmental_faecal_release_log10_g_per_epoch`, the box's only Grade D
+interval); five do not, and no factor resolves on the crew reported-case
+channel. The surface-shape question A4 left to this screen is **not made live by
+it**: `surface_decay_log10_per_day` sits at 0.19–0.58 of the critical value on
+every output, so #60 has no sensitivity result licensing a biphasic form. The
+screen's one input to #37 is a budget: a design resolving one factor of six at
+five seeds per point says the region search is seed-bound, not
+trajectory-bound.
+
 **#37, the admissible-region feasibility test:** does *any* point inside the
 literature-bounded box satisfy all the anchors simultaneously?
 

@@ -168,6 +168,23 @@ and there is no completed screen on either the recut box or the substituted
 factor. Nothing may be ranked from that document until a screen is run on the
 current box.
 
+**That screen has now been run, isolated, and it is
+[`bounded_screen_isolated_36.md`](bounded_screen_isolated_36.md) (#36,
+2026-09-05).** 350 runs, 10 trajectories over the current six factors, 5 matched
+seeds per point, `--co-seeded isolated`, against a 20-seed floor at the same
+centre. It resolves **one** factor above that floor —
+`environmental_faecal_release_log10_g_per_epoch`, monotone, ratio 1.6–2.0 on the
+whole-ship and both passenger channels — and places the other five below it,
+including every factor on the crew reported-case channel. `peak_epoch` carries no
+ranking and `vsp_posted` cannot be thresholded from a centre that never posts. It
+is a ranking and nothing else: no interval moves, no admissible region follows,
+and #37 is a separate measurement. Two things it changes here: the resolved
+factor is the box's only grade-D one, so the scored outputs are dominated over
+this box by the quantity with the least right to its interval; and five
+unresolved factors is a statement about the design, since at 450 agents with one
+index case the isolated epidemic sits near extinction (centre attack rate ≈0.005)
+and the seed budget, not the trajectory count, is what binds.
+
 **The “≈3.7× GI-vs-GII infectivity per genome copy” comparison is withdrawn as a
 unit error (tranche 6 §3).** It was published in tranche 3 and repeated when
 Wave 3 was proposed. Reproducing Teunis et al. 2020's single-copy GII risk of

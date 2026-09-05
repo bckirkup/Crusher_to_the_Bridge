@@ -1,0 +1,294 @@
+{
+  "mode": "screen",
+  "seeds": [
+    500,
+    501,
+    502,
+    503,
+    504
+  ],
+  "trajectories": 10,
+  "factors": [
+    {
+      "name": "secretor_negative_relative_susceptibility",
+      "low": 0.04,
+      "high": 0.83,
+      "transform": "linear",
+      "grade": "B"
+    },
+    {
+      "name": "emesis_total_shed_gec",
+      "low": 36000000.0,
+      "high": 310000000.0,
+      "transform": "log10",
+      "grade": "B"
+    },
+    {
+      "name": "hand_to_surface_drying_multiplier",
+      "low": 0.008,
+      "high": 1.0,
+      "transform": "log10",
+      "grade": "B"
+    },
+    {
+      "name": "surface_decay_log10_per_day",
+      "low": 0.067,
+      "high": 0.79,
+      "transform": "linear",
+      "grade": "B"
+    },
+    {
+      "name": "shedding_variance_log10",
+      "low": 0.5,
+      "high": 1.5,
+      "transform": "linear",
+      "grade": "C"
+    },
+    {
+      "name": "environmental_faecal_release_log10_g_per_epoch",
+      "low": 4.0,
+      "high": 24.0,
+      "transform": "linear",
+      "grade": "D"
+    }
+  ],
+  "effects": {
+    "secretor_negative_relative_susceptibility": {
+      "attack_rate": {
+        "mu_star": 0.003000000000000001,
+        "mu": 0.00019799999999999955,
+        "sigma": 0.004600265209746066,
+        "n": 10.0
+      },
+      "ever_ill_attack_rate_passenger": {
+        "mu_star": 0.0026609999999999976,
+        "mu": -0.00018899999999999999,
+        "sigma": 0.004047049542568016,
+        "n": 10.0
+      },
+      "reported_case_attack_rate_passenger": {
+        "mu_star": 0.0026579999999999993,
+        "mu": -0.00018599999999999945,
+        "sigma": 0.004051883512639522,
+        "n": 10.0
+      },
+      "reported_case_attack_rate_crew": {
+        "mu_star": 0.0006750000000000001,
+        "mu": 0.00022500000000000002,
+        "sigma": 0.0012772039774444804,
+        "n": 10.0
+      },
+      "vsp_posted": {
+        "mu_star": 0.06000000000000001,
+        "mu": 0.0,
+        "sigma": 0.14142135623730953,
+        "n": 10.0
+      },
+      "peak_epoch": {
+        "mu_star": 8.819999999999999,
+        "mu": 7.799999999999997,
+        "sigma": 11.96076920603353,
+        "n": 10.0
+      }
+    },
+    "emesis_total_shed_gec": {
+      "attack_rate": {
+        "mu_star": 0.005399999999999999,
+        "mu": 0.004728,
+        "sigma": 0.006644745292334387,
+        "n": 10.0
+      },
+      "ever_ill_attack_rate_passenger": {
+        "mu_star": 0.0027599999999999994,
+        "mu": 0.0010439999999999994,
+        "sigma": 0.003568775700432852,
+        "n": 10.0
+      },
+      "reported_case_attack_rate_passenger": {
+        "mu_star": 0.003875999999999999,
+        "mu": 0.0010319999999999995,
+        "sigma": 0.00494059105775817,
+        "n": 10.0
+      },
+      "reported_case_attack_rate_crew": {
+        "mu_star": 0.005373,
+        "mu": 0.004029,
+        "sigma": 0.0049289562789702245,
+        "n": 10.0
+      },
+      "vsp_posted": {
+        "mu_star": 0.06000000000000001,
+        "mu": 0.0,
+        "sigma": 0.14142135623730953,
+        "n": 10.0
+      },
+      "peak_epoch": {
+        "mu_star": 22.59,
+        "mu": -18.09,
+        "sigma": 33.850568680599736,
+        "n": 10.0
+      }
+    },
+    "hand_to_surface_drying_multiplier": {
+      "attack_rate": {
+        "mu_star": 0.003461999999999999,
+        "mu": 0.0005339999999999986,
+        "sigma": 0.004768307875966062,
+        "n": 10.0
+      },
+      "ever_ill_attack_rate_passenger": {
+        "mu_star": 0.0019049999999999998,
+        "mu": 0.0009510000000000005,
+        "sigma": 0.0025837201860882688,
+        "n": 10.0
+      },
+      "reported_case_attack_rate_passenger": {
+        "mu_star": 0.0014309999999999995,
+        "mu": 0.00029099999999999986,
+        "sigma": 0.0022490909274638054,
+        "n": 10.0
+      },
+      "reported_case_attack_rate_crew": {
+        "mu_star": 0.0004469999999999998,
+        "mu": -3.0000000000002245e-06,
+        "sigma": 0.0010536080865293314,
+        "n": 10.0
+      },
+      "vsp_posted": {
+        "mu_star": 0.030000000000000006,
+        "mu": -0.030000000000000006,
+        "sigma": 0.09486832980505139,
+        "n": 10.0
+      },
+      "peak_epoch": {
+        "mu_star": 5.4300000000000015,
+        "mu": -0.4499999999999984,
+        "sigma": 9.96418586739529,
+        "n": 10.0
+      }
+    },
+    "surface_decay_log10_per_day": {
+      "attack_rate": {
+        "mu_star": 0.006135,
+        "mu": -0.005072999999999999,
+        "sigma": 0.007229943983185486,
+        "n": 10.0
+      },
+      "ever_ill_attack_rate_passenger": {
+        "mu_star": 0.002097,
+        "mu": -0.0009510000000000001,
+        "sigma": 0.0031466506002414693,
+        "n": 10.0
+      },
+      "reported_case_attack_rate_passenger": {
+        "mu_star": 0.003039000000000001,
+        "mu": -0.001323,
+        "sigma": 0.0045512734481681074,
+        "n": 10.0
+      },
+      "reported_case_attack_rate_crew": {
+        "mu_star": 0.0017909999999999998,
+        "mu": 3.0000000000000945e-06,
+        "sigma": 0.0029850108877523375,
+        "n": 10.0
+      },
+      "vsp_posted": {
+        "mu_star": 0.030000000000000006,
+        "mu": -0.030000000000000006,
+        "sigma": 0.09486832980505139,
+        "n": 10.0
+      },
+      "peak_epoch": {
+        "mu_star": 21.6,
+        "mu": 14.040000000000003,
+        "sigma": 28.693135067468667,
+        "n": 10.0
+      }
+    },
+    "shedding_variance_log10": {
+      "attack_rate": {
+        "mu_star": 0.0036689999999999995,
+        "mu": 0.0017969999999999983,
+        "sigma": 0.0053558650095012665,
+        "n": 10.0
+      },
+      "ever_ill_attack_rate_passenger": {
+        "mu_star": 0.0012359999999999997,
+        "mu": -9.599999999999987e-05,
+        "sigma": 0.0021739733209034553,
+        "n": 10.0
+      },
+      "reported_case_attack_rate_passenger": {
+        "mu_star": 0.0020730000000000006,
+        "mu": 0.0005610000000000001,
+        "sigma": 0.0026385242087197157,
+        "n": 10.0
+      },
+      "reported_case_attack_rate_crew": {
+        "mu_star": 0.001119,
+        "mu": 0.000675,
+        "sigma": 0.0023709597212943118,
+        "n": 10.0
+      },
+      "vsp_posted": {
+        "mu_star": 0.030000000000000006,
+        "mu": 0.030000000000000006,
+        "sigma": 0.09486832980505139,
+        "n": 10.0
+      },
+      "peak_epoch": {
+        "mu_star": 9.93,
+        "mu": 5.670000000000003,
+        "sigma": 13.526603416970573,
+        "n": 10.0
+      }
+    },
+    "environmental_faecal_release_log10_g_per_epoch": {
+      "attack_rate": {
+        "mu_star": 0.023406,
+        "mu": -0.023406,
+        "sigma": 0.025676221684663807,
+        "n": 10.0
+      },
+      "ever_ill_attack_rate_passenger": {
+        "mu_star": 0.009888,
+        "mu": -0.009888,
+        "sigma": 0.010979846993469444,
+        "n": 10.0
+      },
+      "reported_case_attack_rate_passenger": {
+        "mu_star": 0.008262,
+        "mu": -0.008262,
+        "sigma": 0.009323799654647242,
+        "n": 10.0
+      },
+      "reported_case_attack_rate_crew": {
+        "mu_star": 0.004475999999999999,
+        "mu": -0.002244,
+        "sigma": 0.006999382829935793,
+        "n": 10.0
+      },
+      "vsp_posted": {
+        "mu_star": 0.15000000000000002,
+        "mu": -0.15000000000000002,
+        "sigma": 0.158113883008419,
+        "n": 10.0
+      },
+      "peak_epoch": {
+        "mu_star": 59.160000000000004,
+        "mu": -59.160000000000004,
+        "sigma": 62.40285249890425,
+        "n": 10.0
+      }
+    }
+  },
+  "run": {
+    "pathogen_id": "norwalk_gi",
+    "bundle": "active_profiles",
+    "platform": "mega_cruise_5000",
+    "epochs": 168,
+    "num_agents": 450,
+    "observation_scenario": null,
+    "co_seeded": "isolated"
+  }
+}
