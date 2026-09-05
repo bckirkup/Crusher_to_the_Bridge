@@ -78,7 +78,7 @@ response cell, cell medians over ≥ 10 seeds.
 |---|---|---|---|
 | A1 | Wikswo whole-ship cohort | `ever_ill_attack_rate_passenger` | ≈ 0.154 |
 | A2 | asymptomatic ratio | `ever_ill_attack_rate_passenger / infection_attack_rate_passenger` | 0.68–0.81 (0.59–0.81 if GII.4-weighted) |
-| A3 | infirmary capture | `reported_case_attack_rate_passenger / ever_ill_attack_rate_passenger` | 0.60 ± 0.05 |
+| A3 | infirmary capture (**construction constraint, not scored**) | `reported_case_attack_rate_passenger / ever_ill_attack_rate_passenger` | reported against a 0.35–0.45 construction band; **no verdict** (#23) |
 | A4 | VSP posted attack rate | `reported_case_attack_rate_passenger` | inside the hull class IQR **derived per hull class × era** from `telemetry_buffer/observation_model/vsp_outbreak_series.csv` by `telemetry_buffer/observation_model/vsp_class_era_scoring.py`; see `telemetry_buffer/observation_model/incidence_and_attack_rate_scoring_spec.md` |
 | A5 | passenger vs crew | `reported_case_attack_rate_passenger / reported_case_attack_rate_crew` | ≈ 3.5 (7% vs 2%) |
 | A8 | unconditional AGE incidence (**Implemented**) | reported cases per 100,000 travel days over all simulated voyages | MMWR Surveill Summ 2021;70(6) by ship-size band, named end-of-period and pooled-band plausibility endpoints plus ratios — `telemetry_buffer/observation_model/midrs_incidence_targets.py`; source record `telemetry_buffer/observation_model/midrs_observed_targets.md` |
@@ -108,8 +108,27 @@ Seeds with a zero denominator are excluded from the per-seed ratio and counted.
 
 A2 is a *prediction*, not a fitted quantity: `P(ill | infected)` is the Teunis
 η/γ function of the inoculum each host actually received, so A2 is a statement
-about dose magnitude and its variance, and A1/A2/A3 cannot all be satisfied by
+about dose magnitude and its variance, and A1 and A2 cannot both be satisfied by
 scaling mean dose alone.
+
+## A3 is a construction constraint, not an anchor (#23)
+
+The observation model's fifteen numbers are jointly constrained by one
+empirical aggregate, and that aggregate is A3 itself
+(`docs/norovirus/norovirus_parameter_freedom_audit.md` §4.2). A quantity the
+layer's own capture and eligibility parameters were set to produce cannot also
+be a test of them, so `score_anchors.py` reports the measured
+reported/symptomatic ratio beside a 0.35–0.45 construction band and gives it
+**no PASS/FAIL**; the verdict column covers A1, A2, A4, A5, A8 and A9 only.
+
+The band is 0.35–0.45 rather than the 0.60 ± 0.05 infirmary-capture figure
+because the two have different denominators: 0.60 is reported over
+AGE-eligible, and the five-state layer puts reported/symptomatic at 0.40 for
+the same parameter set (eligibility `[0, .55, .98, 1, 1]` absorbs the
+difference). Reported/eligible is not reported here because the runs emit no
+AGE-eligible count. Reading the band as agreement is the circularity this
+demotion exists to prevent: it says the layer is wired as declared, not that
+the declaration is right.
 
 ## A6, deliberately not scored the same way
 
