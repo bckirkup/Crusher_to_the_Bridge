@@ -519,6 +519,55 @@
         "notes": {
           "type": "string",
           "description": "Provenance prose for the ascertainment vectors, including which of them are declared scenario axes rather than measurements."
+        },
+        "prior": {
+          "type": "object",
+          "description": "How the declared ascertainment vectors carry their uncertainty (#27). Only a scenario set is expressible: the vectors are jointly constrained by one empirical aggregate and are not individually identified, so uncertainty travels as whole coherent ladders. Component-wise low/high bounds are refused because they generate reporting ladders no observer could exhibit. active_scenario must name a member and must match the vectors the profile is running, so switching scenarios moves the name and every vector together.",
+          "required": ["type", "active_scenario", "scenarios"],
+          "properties": {
+            "type": {"type": "string", "const": "scenario_set"},
+            "active_scenario": {"type": "string", "minLength": 1},
+            "scenarios": {
+              "type": "object",
+              "minProperties": 1,
+              "additionalProperties": {
+                "type": "object",
+                "required": [
+                  "syndrome_case_eligibility_by_severity",
+                  "reporting_probability_by_severity_pre_recognition",
+                  "reporting_probability_by_severity_post_recognition",
+                  "source"
+                ],
+                "properties": {
+                  "syndrome_case_eligibility_by_severity": {
+                    "type": "array",
+                    "minItems": 5,
+                    "maxItems": 5,
+                    "items": {"type": "number", "minimum": 0, "maximum": 1}
+                  },
+                  "reporting_probability_by_severity_pre_recognition": {
+                    "type": "array",
+                    "minItems": 5,
+                    "maxItems": 5,
+                    "items": {"type": "number", "minimum": 0, "maximum": 1}
+                  },
+                  "reporting_probability_by_severity_post_recognition": {
+                    "type": "array",
+                    "minItems": 5,
+                    "maxItems": 5,
+                    "items": {"type": "number", "minimum": 0, "maximum": 1}
+                  },
+                  "source": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Where this ladder comes from and what class it is. A scenario is a declaration, so this says who declared it and on what argument, never which anchor it reproduces."
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          },
+          "additionalProperties": false
         }
       },
       "additionalProperties": false

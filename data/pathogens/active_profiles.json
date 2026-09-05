@@ -97,7 +97,35 @@
         },
         "lab_sampling_probability_by_severity": [0, 0.05, 0.20, 0.60, 0.90],
         "assay_sensitivity_by_time_since_infection": null,
-        "episode_reporting_window_days": 2.0
+        "episode_reporting_window_days": 2.0,
+        "evidence_grade": "C - declared observation process, not identified (#27)",
+        "notes": "Every number in this block is a declared assumption, class C, origin Tr: the three severity vectors are Table 2 and section 4.1 of docs/norovirus/cruise_pathogen_severity_observation_priors_v2.md, which grades each entry [A] (assumed prior) and states that the decomposition is not identified by the one cruise investigation behind it - many severity-specific vectors give the same weighted fraction. That one aggregate is anchor A3, which is why A3 no longer scores (#23). Consequence, stated rather than repaired: the reported-attack-rate comparison against VSP is CONDITIONAL on this assumed observation process, and agreement with a reported rate is not evidence that these fifteen numbers are right. No entry was chosen against A1, A2, A3, A5 or any VSP quantity. Uncertainty is carried by prior.scenarios as whole coherent vectors, never by sweeping components independently, per section 8 of the same document: independent component sweeps produce reporting ladders no observer could exhibit. lab_sampling_probability_by_severity is operational rather than biological (section 9 there) and moves lab-confirmed counts only, not the VSP reported rate; it stays a declared axis. episode_reporting_window_days 2.0 is the illness duration the vectors were elicited over (uncomplicated norovirus 1-3 days), also declared.",
+        "prior": {
+          "type": "scenario_set",
+          "active_scenario": "base_reporting",
+          "scenarios": {
+            "base_reporting": {
+              "syndrome_case_eligibility_by_severity": [0, 0.55, 0.98, 1, 1],
+              "reporting_probability_by_severity_pre_recognition": [
+                0, 0.45, 0.70, 0.94, 1
+              ],
+              "reporting_probability_by_severity_post_recognition": [
+                0, 0.50, 0.76, 0.96, 1
+              ],
+              "source": "priors v2 Table 2 and section 4.1: the shipped decomposition, weighted eligible-case reporting about 0.61 against the 0.60 [E] aggregate. Class C, origin Tr. Not identified by that aggregate."
+            },
+            "isolation_avoidance_post_recognition": {
+              "syndrome_case_eligibility_by_severity": [0, 0.55, 0.98, 1, 1],
+              "reporting_probability_by_severity_pre_recognition": [
+                0, 0.45, 0.70, 0.94, 1
+              ],
+              "reporting_probability_by_severity_post_recognition": [
+                0, 0.25, 0.55, 0.95, 1
+              ],
+              "source": "priors v2 section 4.1, stated verbatim there: anticipated cabin isolation suppresses subclinical and mild presentation after outbreak recognition while moderate and severe cases stay hard to conceal. Class C, origin Tr. Direction is argued in the source; magnitude is declared."
+            }
+          }
+        }
       },
       "recovery_day": 3,
       "shedding_duration_days": 15,
