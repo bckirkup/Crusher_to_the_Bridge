@@ -9,6 +9,11 @@ Syndromic surveillance – models sick-call reporting with:
 - A molecular ascertainment rung (specimen collection plus assay) kept
   separate from the syndromic rung, so a laboratory-confirmed count is
   not the same observable as a medically attended one.
+- Optional replicated testing campaigns (``crusher_labs.testing_campaign``)
+  that spend a published daily specimen count down a published eligibility
+  ladder, and a symptom-onset channel that records the onset day of
+  confirmed cases - the observable the COVID trajectory is scored on, which
+  is neither the sick-call roster nor the truth channel.
 - FRED-style categorized background noise (seasickness, fatigue,
   minor injury) so healthy agents generate realistic false-signal
   clutter with specific complaint reasons.
@@ -19,10 +24,12 @@ Syndromic surveillance – models sick-call reporting with:
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from typing import Any
 
 import numpy as np
 
+from crusher_labs.testing_campaign import TestingCampaign
 from engines.sim_clock import SimClock
 from simulation_utils.numeric import default_simulation_rng
 
@@ -39,12 +46,17 @@ def _symptomatic_infection(agent: dict[str, Any]) -> dict[str, Any]:
     )
 
 
-# Spawn key for the molecular rung's own stream. Large so it cannot collide
-# with the sequential keys ``SeedSequence.spawn`` hands out.
+# Spawn keys for the molecular rung's and the campaign roster's own streams.
+# Large so they cannot collide with the sequential keys ``SeedSequence.spawn``
+# hands out.
 _MOLECULAR_SPAWN_KEY = 7919
+_CAMPAIGN_SPAWN_KEY = 7927
 
 
-def _molecular_stream(rng: np.random.Generator) -> np.random.Generator:
+def _molecular_stream(
+    rng: np.random.Generator,
+    spawn_key: int = _MOLECULAR_SPAWN_KEY,
+) -> np.random.Generator:
     """Return an independent generator for specimen and assay draws.
 
     The laboratory modalities share one generator, so a specimen draw taken
@@ -56,10 +68,10 @@ def _molecular_stream(rng: np.random.Generator) -> np.random.Generator:
     if isinstance(seed_seq, np.random.SeedSequence):
         child = np.random.SeedSequence(
             seed_seq.entropy,
-            spawn_key=(*seed_seq.spawn_key, _MOLECULAR_SPAWN_KEY),
+            spawn_key=(*seed_seq.spawn_key, spawn_key),
         )
         return np.random.default_rng(child)
-    return np.random.default_rng(_MOLECULAR_SPAWN_KEY)
+    return np.random.default_rng(spawn_key)
 
 
 def _agent_is_crew(agent: dict[str, Any]) -> bool:
@@ -97,6 +109,7 @@ class SyndromicSurveillance:
         symptom_severity_profiles: dict[str, dict[str, Any]] | None = None,
         clock: SimClock | None = None,
         rng: np.random.Generator | None = None,
+        testing_campaigns: Iterable[TestingCampaign] | None = None,
     ) -> None:
         self.sick_call_probability = sick_call_probability
         self.sick_call_severity_mode = sick_call_severity_mode
@@ -143,6 +156,16 @@ class SyndromicSurveillance:
         # sick on day three.
         self._lab_sampled: dict[tuple[str, int], int] = {}
         self._lab_confirmed: dict[tuple[str, int], int] = {}
+        # Replicated campaigns, one per pathogen; each spends its day's
+        # capacity exactly once, on the first epoch of that day.
+        self._campaign_rng = _molecular_stream(self.rng, _CAMPAIGN_SPAWN_KEY)
+        self._campaigns = self._index_campaigns(testing_campaigns)
+        self._campaign_days_run: set[tuple[str, int]] = set()
+        # Symptom-onset channel: the first epoch each host presented symptoms,
+        # whether or not it was free to report them (an isolated host still
+        # has an onset day), and the subset whose onset entered the record.
+        self._presentation_onset_epoch: dict[int, int] = {}
+        self._onset_observations: dict[tuple[str, int], dict[str, Any]] = {}
 
         # None → built-in defaults; explicit [] disables background noise categories.
         if noise_categories is None:
@@ -282,10 +305,10 @@ class SyndromicSurveillance:
             aid = agent["agent_id"]
             is_isolated = agent_is_isolated(agent)
             _, _, compliance = resolve_agent_axes(agent)
-            is_symptomatic = (
-                agent_has_symptomatic_presentation(agent)
-                or compliance == COMPLIANCE_NON_COMPLIANT
-            )
+            presenting = agent_has_symptomatic_presentation(agent)
+            if presenting and aid not in self._presentation_onset_epoch:
+                self._presentation_onset_epoch[aid] = int(epoch)
+            is_symptomatic = presenting or compliance == COMPLIANCE_NON_COMPLIANT
 
             if is_isolated:
                 continue
@@ -340,6 +363,7 @@ class SyndromicSurveillance:
         molecular = self.collect_specimens(
             agents, epoch, sick_call_ids,
         )
+        onset_observations = self._record_onset_observations(agents, epoch)
 
         return {
             "modality": self.name,
@@ -354,6 +378,8 @@ class SyndromicSurveillance:
             "first_detection_events": detection_events,
             "episode_detection_telemetry": episode_telemetry,
             **molecular,
+            "onset_observations": onset_observations,
+            "onset_observation_count": len(onset_observations),
         }
 
     # ── molecular ascertainment rung ──────────────────────────────────────
@@ -380,14 +406,24 @@ class SyndromicSurveillance:
         presenting = {int(aid) for aid in sick_call_ids}
         sampled: dict[str, list[int]] = {}
         confirmed: dict[str, list[int]] = {}
+        campaign_rosters: dict[str, list[int]] = {}
+        campaign_confirmed: dict[str, list[int]] = {}
         for pathogen_id, model in self._molecular_models().items():
+            roster = self._campaign_roster(agents, epoch, pathogen_id)
             drawn, positive = self._sample_pathogen(
                 agents, epoch, presenting, pathogen_id, model,
+                forced=set(roster),
             )
             if drawn:
                 sampled[pathogen_id] = drawn
             if positive:
                 confirmed[pathogen_id] = positive
+            if roster:
+                on_roster = set(roster)
+                campaign_rosters[pathogen_id] = roster
+                campaign_confirmed[pathogen_id] = [
+                    aid for aid in positive if aid in on_roster
+                ]
         sampled_union = sorted({aid for ids in sampled.values() for aid in ids})
         confirmed_union = sorted(
             {aid for ids in confirmed.values() for aid in ids},
@@ -399,6 +435,8 @@ class SyndromicSurveillance:
             "lab_confirmed_by_pathogen": confirmed,
             "lab_sampled_count": len(sampled_union),
             "lab_confirmed_count": len(confirmed_union),
+            "campaign_specimens_by_pathogen": campaign_rosters,
+            "campaign_confirmed_by_pathogen": campaign_confirmed,
         }
 
     def _sample_pathogen(
@@ -408,9 +446,12 @@ class SyndromicSurveillance:
         presenting: set[int],
         pathogen_id: str,
         model: dict[str, Any],
+        *,
+        forced: set[int] | None = None,
     ) -> tuple[list[int], list[int]]:
         drawn: list[int] = []
         positive: list[int] = []
+        scheduled = forced or set()
         for agent in agents:
             aid = int(agent["agent_id"])
             if (pathogen_id, aid) in self._lab_sampled:
@@ -420,6 +461,7 @@ class SyndromicSurveillance:
             ) or {}
             probability = self._specimen_probability(
                 model, infection, presented=aid in presenting,
+                scheduled=aid in scheduled,
             )
             if probability <= 0.0 or self._molecular_rng.random() >= probability:
                 continue
@@ -436,8 +478,16 @@ class SyndromicSurveillance:
         infection: dict[str, Any],
         *,
         presented: bool,
+        scheduled: bool = False,
     ) -> float:
-        """Per-epoch probability that this agent yields a specimen."""
+        """Per-epoch probability that this agent yields a specimen.
+
+        A host on a campaign roster is swabbed with certainty: the record
+        says the specimen was taken, and whether it comes back positive is
+        the assay's draw, not this one.
+        """
+        if scheduled:
+            return 1.0
         severity = str(infection.get("symptom_severity") or "")
         symptomatic = infection.get("illness") == "SYMPTOMATIC"
         index = self._severity_index(model, severity) if symptomatic else None
@@ -533,6 +583,165 @@ class SyndromicSurveillance:
                 )
             ],
         }
+
+    # ── replicated testing campaigns ──────────────────────────────────────
+
+    def _index_campaigns(
+        self,
+        campaigns: Iterable[TestingCampaign] | None,
+    ) -> dict[str, TestingCampaign]:
+        """Key campaigns by pathogen, refusing two for one pathogen.
+
+        A campaign needs a molecular model to hand its specimens to, so a
+        campaign for a pathogen whose profile declares no specimen sampling
+        is a configuration error rather than a silent no-op.
+        """
+        indexed: dict[str, TestingCampaign] = {}
+        models = self._molecular_models()
+        for campaign in campaigns or ():
+            pathogen_id = campaign.pathogen_id
+            if pathogen_id in indexed:
+                raise ValueError(
+                    f"two testing campaigns declared for {pathogen_id}: "
+                    f"{indexed[pathogen_id].campaign_id} and "
+                    f"{campaign.campaign_id}",
+                )
+            if pathogen_id not in models:
+                raise ValueError(
+                    f"testing campaign {campaign.campaign_id} targets "
+                    f"{pathogen_id}, whose profile declares no "
+                    "observation_model.lab_sampling_probability_by_severity",
+                )
+            indexed[pathogen_id] = campaign
+        return indexed
+
+    def _campaign_roster(
+        self,
+        agents: list[dict[str, Any]],
+        epoch: int,
+        pathogen_id: str,
+    ) -> list[int]:
+        """Hosts the pathogen's campaign swabs this epoch.
+
+        A campaign day is spent on the first epoch of that simulated day and
+        never again: the record gives a count per day, and a test event is a
+        concentrated one, not a rate spread over the hours.
+        """
+        campaign = self._campaigns.get(pathogen_id)
+        if campaign is None:
+            return []
+        day_index = self.clock.day_index(int(epoch))
+        key = (pathogen_id, day_index)
+        if key in self._campaign_days_run:
+            return []
+        self._campaign_days_run.add(key)
+        confirmed = {
+            aid for (pid, aid) in self._lab_confirmed if pid == pathogen_id
+        }
+        sampled = {
+            aid for (pid, aid) in self._lab_sampled if pid == pathogen_id
+        }
+        return campaign.specimen_roster(
+            agents, day_index,
+            confirmed_ids=confirmed,
+            already_sampled=sampled,
+            rng=self._campaign_rng,
+        )
+
+    def campaign_for(self, pathogen_id: str) -> TestingCampaign | None:
+        return self._campaigns.get(str(pathogen_id))
+
+    # ── symptom-onset channel ─────────────────────────────────────────────
+    #
+    # The Diamond Princess onset curve (NIID field briefing, 19 Feb 2020) is
+    # onset dates among confirmed cases with a recorded onset: 197 of 619
+    # cases by 20 Feb. It is a different observable from the sick-call
+    # roster - a host swabbed on a campaign day and confirmed positive has
+    # an onset date whether or not it ever reported to the infirmary - and
+    # from the truth channel, which knows every onset including the ones no
+    # record ever held. A host enters this channel only once it is
+    # laboratory-confirmed and presenting a syndrome-eligible severity;
+    # the day recorded is the day it first presented.
+
+    def _record_onset_observations(
+        self,
+        agents: list[dict[str, Any]],
+        epoch: int,
+    ) -> list[dict[str, Any]]:
+        recorded: list[dict[str, Any]] = []
+        for agent in agents:
+            aid = int(agent["agent_id"])
+            onset_epoch = self._presentation_onset_epoch.get(aid)
+            if onset_epoch is None:
+                continue
+            for pathogen_id, infection in (
+                agent.get("pathogen_infections") or {}
+            ).items():
+                record = self._onset_observation(
+                    agent, aid, str(pathogen_id), infection or {},
+                    onset_epoch, int(epoch),
+                )
+                if record is not None:
+                    recorded.append(record)
+        return recorded
+
+    def _onset_observation(
+        self,
+        agent: dict[str, Any],
+        aid: int,
+        pathogen_id: str,
+        infection: dict[str, Any],
+        onset_epoch: int,
+        epoch: int,
+    ) -> dict[str, Any] | None:
+        key = (pathogen_id, aid)
+        if key in self._onset_observations or key not in self._lab_confirmed:
+            return None
+        if infection.get("illness") != "SYMPTOMATIC":
+            return None
+        severity = str(infection.get("symptom_severity") or "")
+        if not self._onset_eligible(pathogen_id, severity):
+            return None
+        record = {
+            "agent_id": aid,
+            "pathogen_id": pathogen_id,
+            "onset_epoch": int(onset_epoch),
+            "onset_day": self.clock.day_index(int(onset_epoch)),
+            "recorded_epoch": int(epoch),
+            "confirmed_epoch": int(self._lab_confirmed[key]),
+            "symptom_severity": severity,
+            "role": "crew" if _agent_is_crew(agent) else "passenger",
+        }
+        self._onset_observations[key] = record
+        return record
+
+    def _onset_eligible(self, pathogen_id: str, severity: str) -> bool:
+        """Whether this severity presents a syndrome the record can date.
+
+        Read from the profile's ``syndrome_case_eligibility_by_severity``;
+        a profile without one treats every symptomatic host as datable.
+        """
+        model = self._severity_model(pathogen_id)
+        if model is None or not model["eligibility"]:
+            return True
+        if severity not in model["states"]:
+            return False
+        return float(model["eligibility"][model["states"].index(severity)]) > 0.0
+
+    def onset_observation_curve(
+        self,
+        pathogen_id: str,
+    ) -> dict[int, dict[str, int]]:
+        """Recorded onsets by onset day, split passenger/crew."""
+        curve: dict[int, dict[str, int]] = {}
+        for (pid, _aid), record in self._onset_observations.items():
+            if pid != str(pathogen_id):
+                continue
+            day = curve.setdefault(
+                int(record["onset_day"]), {"passenger": 0, "crew": 0},
+            )
+            day[record["role"]] += 1
+        return dict(sorted(curve.items()))
 
     def _severity_hazard(
         self,

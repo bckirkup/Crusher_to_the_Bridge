@@ -1,0 +1,77 @@
+{
+  "schema_version": "1.0.0",
+  "notes": "Published shipboard SARS-CoV-2 testing campaigns, replicated as an observation process. Every number here is read off a published event record - a daily specimen count or an eligibility sequence - and none of it is fitted or chosen to reproduce a case count. The counts are capacities, not outcomes: how many specimens the campaign took on a day, in what order it reached hosts. Whether a specimen tests positive is the assay's business (observation_model.assay_sensitivity_by_time_since_infection on the pathogen profile), never this file's.",
+  "campaigns": [
+    {
+      "campaign_id": "diamond_princess_2020",
+      "pathogen_id": "sars_cov2_resp",
+      "start_date": "2020-02-05",
+      "reference_population": 3711,
+      "source": "Test volumes: Mizumoto 2020, Eurosurveillance 25(10):2000180, DOI 10.2807/1560-7917.ES.2020.25.10.2000180, Table 1 (daily reported tests, 5-20 Feb 2020, cumulative 3,063). Eligibility sequence: Yamahata & Shibata 2020, JMIR Public Health Surveill 6(2):e18821, DOI 10.2196/18821, Results (the six-step order testing was extended in); corroborated by the NIID field briefing of 19 Feb 2020, which dates the shift to all passengers to 11 Feb and describes it as over-80s first, then over-75s, then over-70s, crew last.",
+      "evidence_grade": "A for the daily volumes and for the eligibility sequence, both taken from the event record; C for the reporting-date-as-collection-date identification and for mapping the published age thresholds onto this repository's age-band vocabulary",
+      "notes": "The two days with no reported volume (11 and 14 Feb) schedule no specimens. That is read off the cumulative column rather than assumed: the reported cumulative total steps 439 -> 492 -> 713 across 10-13 Feb, so the sum of the reported daily counts closes exactly on the published 3,063, and the gaps are missing reporting dates rather than unrecorded tests. Two identifications are declared and are the Grade C part. (1) The published dates are REPORTING dates; the replica takes the specimen on the reported day, so any collection-to-report lag is absorbed as zero, which is the threat covid_trajectory_fit_spec.md section 8 records against covid.T3 and the reason the onset channel is the primary observable. (2) The age thresholds in the published ladder are 80, 75 and 70 years, and this repository's age bands are 65-74 and 75+ with semantic aliases, which cannot express an 80-year or a 70-year cut. Steps 2 and 3 of the ladder therefore collapse onto the 75+ band and step 4 onto 65-74. The collapse is a coarsening of a measured rule, not a new number, and it is stated rather than smoothed. Repeat specimens are not scheduled: the record includes double tests, and the runtime takes one specimen per host per pathogen, so the replica's specimen total is an upper bound on distinct hosts reached rather than a reproduction of the test count.",
+      "eligibility_tiers": {
+        "symptomatic_or_contact": {
+          "rule": "symptomatic_or_cabin_contact",
+          "notes": "Step 1 of the published ladder: symptomatic patients and their close contacts. Close contact is read as a cabin mate of an already confirmed case, which is the contact the ship's own record could identify under cabin quarantine."
+        },
+        "age_75_plus_or_comorbid": {
+          "rule": "passengers_in_age_bands",
+          "age_bands": ["75+"],
+          "include_comorbid": true,
+          "notes": "Steps 2 and 3 collapsed: people aged 80 and above and people with comorbidities, then people aged 75 and above. The band vocabulary cannot separate 80 from 75."
+        },
+        "age_65_74": {
+          "rule": "passengers_in_age_bands",
+          "age_bands": ["65-74", "senior", "55+"],
+          "include_comorbid": false,
+          "notes": "Step 4, people aged 70 and above, coarsened to the band that contains the 70s. The semantic aliases are included because a population built with them carries no finer age information."
+        },
+        "other_passengers": {
+          "rule": "remaining_passengers",
+          "notes": "Step 5, all other passengers."
+        },
+        "crew": {
+          "rule": "crew",
+          "notes": "Step 6, all crew members, after the passengers."
+        }
+      },
+      "days": [
+        {"date": "2020-02-05", "day_offset": 0, "tests": 31, "tiers": ["symptomatic_or_contact", "age_75_plus_or_comorbid"]},
+        {"date": "2020-02-06", "day_offset": 1, "tests": 71, "tiers": ["symptomatic_or_contact", "age_75_plus_or_comorbid"]},
+        {"date": "2020-02-07", "day_offset": 2, "tests": 171, "tiers": ["symptomatic_or_contact", "age_75_plus_or_comorbid"]},
+        {"date": "2020-02-08", "day_offset": 3, "tests": 6, "tiers": ["symptomatic_or_contact", "age_75_plus_or_comorbid"]},
+        {"date": "2020-02-09", "day_offset": 4, "tests": 57, "tiers": ["symptomatic_or_contact", "age_75_plus_or_comorbid"]},
+        {"date": "2020-02-10", "day_offset": 5, "tests": 103, "tiers": ["symptomatic_or_contact", "age_75_plus_or_comorbid"]},
+        {"date": "2020-02-11", "day_offset": 6, "tests": null, "tiers": ["symptomatic_or_contact", "age_75_plus_or_comorbid", "age_65_74", "other_passengers", "crew"]},
+        {"date": "2020-02-12", "day_offset": 7, "tests": 53, "tiers": ["symptomatic_or_contact", "age_75_plus_or_comorbid", "age_65_74", "other_passengers", "crew"]},
+        {"date": "2020-02-13", "day_offset": 8, "tests": 221, "tiers": ["symptomatic_or_contact", "age_75_plus_or_comorbid", "age_65_74", "other_passengers", "crew"]},
+        {"date": "2020-02-14", "day_offset": 9, "tests": null, "tiers": ["symptomatic_or_contact", "age_75_plus_or_comorbid", "age_65_74", "other_passengers", "crew"]},
+        {"date": "2020-02-15", "day_offset": 10, "tests": 217, "tiers": ["symptomatic_or_contact", "age_75_plus_or_comorbid", "age_65_74", "other_passengers", "crew"]},
+        {"date": "2020-02-16", "day_offset": 11, "tests": 289, "tiers": ["symptomatic_or_contact", "age_75_plus_or_comorbid", "age_65_74", "other_passengers", "crew"]},
+        {"date": "2020-02-17", "day_offset": 12, "tests": 504, "tiers": ["symptomatic_or_contact", "age_75_plus_or_comorbid", "age_65_74", "other_passengers", "crew"]},
+        {"date": "2020-02-18", "day_offset": 13, "tests": 681, "tiers": ["symptomatic_or_contact", "age_75_plus_or_comorbid", "age_65_74", "other_passengers", "crew"]},
+        {"date": "2020-02-19", "day_offset": 14, "tests": 607, "tiers": ["symptomatic_or_contact", "age_75_plus_or_comorbid", "age_65_74", "other_passengers", "crew"]},
+        {"date": "2020-02-20", "day_offset": 15, "tests": 52, "tiers": ["symptomatic_or_contact", "age_75_plus_or_comorbid", "age_65_74", "other_passengers", "crew"]}
+      ]
+    },
+    {
+      "campaign_id": "greg_mortimer_2020",
+      "pathogen_id": "sars_cov2_resp",
+      "start_date": null,
+      "reference_population": 223,
+      "source": "Ing 2020, Thorax 75(8):693, DOI 10.1136/thoraxjnl-2020-215091, Results and published addendum: one ship-wide test event on day 20 of the voyage, 217 individual test results, 128 passengers and 95 crew embarked.",
+      "evidence_grade": "A for the single test event and its volume; C for the day-20 alignment, which the scenario supplies",
+      "notes": "One day, one tier, no ordering: every host aboard is eligible at once, which is why this hull is the held-out one. If a fit only reproduces the trajectory under the Diamond Princess ladder, the ladder is absorbing the error, and a campaign with no ladder is the check on that. The volume is the published 217 test results rather than the 221 believed aboard at the test event - the addendum records that discrepancy explicitly, and the tested denominator is what the observation process delivered. The date is the paper's day 20; which simulated day that is belongs to the scenario, not to this file.",
+      "eligibility_tiers": {
+        "everyone": {
+          "rule": "everyone",
+          "notes": "Ship-wide testing of all passengers and crew, in no published order."
+        }
+      },
+      "days": [
+        {"date": "voyage day 20", "day_offset": 0, "tests": 217, "tiers": ["everyone"]}
+      ]
+    }
+  ]
+}

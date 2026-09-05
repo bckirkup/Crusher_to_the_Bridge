@@ -1385,6 +1385,7 @@ class KorkinAgent:
             "role": self.role,
             "agent_class": self.agent_class,
             "gender": self.gender,
+            "age_band": self.age_band,
             "days_post_infection": self.days_post_infection if self.is_infected else None,
             "pathogen_infections": pathogen_states,
             "susceptibility_multiplier": dict(self.susceptibility_multiplier),
