@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
+import json
 import math
+from pathlib import Path
 
 import numpy as np
 import pytest
+from scipy.stats import beta as beta_dist
 
 from engines.infection_dynamics_bridge import (
     IllnessStatus,
@@ -22,6 +25,7 @@ from orchestrator_epoch import _airborne_emission_fraction, step_infection_progr
 
 ZONE = "Test_Zone"
 PATHOGEN = "test_pathogen"
+REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
 def _profile(*, food: bool = False) -> dict:
@@ -517,3 +521,82 @@ def test_doses_and_dose_response_are_bounded_and_monotone() -> None:
     probabilities = [core._dose_response(PATHOGEN, dose) for dose in doses]
     assert all(0.0 <= value <= 1.0 for value in probabilities)
     assert probabilities == sorted(probabilities)
+
+
+def _beta_poisson_core(alpha: float, beta: float) -> TransmissionCore:
+    core = _core()
+    core.pathogen_profiles[PATHOGEN]["dose_response"] = {
+        "model": "beta_poisson",
+        "alpha": alpha,
+        "beta": beta,
+    }
+    return core
+
+
+@pytest.mark.parametrize("scale", [10.0, 100.0, 1000.0])
+def test_dose_and_susceptibility_enter_only_as_a_product(scale: float) -> None:
+    """Emission scale and host susceptibility are one factor, not two.
+
+    Establishment reads `susceptibility * effective_dose`, so dividing the
+    susceptibility draw and multiplying the dose by the same factor is the same
+    host, exactly. A screen that carries an emission-scale factor and a
+    dose-response factor separately is therefore screening one factor twice
+    (register §3.2, tranche 25 §1).
+    """
+    core = _beta_poisson_core(0.18, 58.0)
+    for susceptibility in (3.1e-3, 1e-4, 0.5):
+        for dose in (1.0, 5.0e4, 1.0e7):
+            plain = _agent(1)
+            plain.dose_response_susceptibility[PATHOGEN] = susceptibility
+            rescaled = _agent(2)
+            rescaled.dose_response_susceptibility[PATHOGEN] = (
+                susceptibility / scale
+            )
+            assert core._dose_response_hazard(
+                plain,
+                PATHOGEN,
+                dose,
+            ) == pytest.approx(
+                core._dose_response_hazard(rescaled, PATHOGEN, dose * scale),
+                abs=1e-15,
+            )
+
+
+def test_beta_rescales_the_susceptibility_draw() -> None:
+    """At the shipped COVID pair, `beta` is a scale on the draw, not a shape.
+
+    `Beta(alpha, beta * c)` is `Beta(alpha, beta) / c` to within a fraction of a
+    percent across the whole body of the distribution once beta >> alpha, so a
+    sweep over `beta` and a sweep over the emission scale traverse the same
+    one-parameter family. This holds the aliasing that tranche 25 §1 records
+    against the pair the profile actually ships: if the pair moves into a
+    regime where beta no longer acts as a scale, that reasoning has to be
+    redone rather than inherited.
+    """
+    profile = next(
+        entry
+        for entry in json.loads(
+            (
+                REPO_ROOT / "data" / "pathogens" / "active_profiles.json"
+            ).read_text(encoding="utf-8"),
+        )["pathogens"]
+        if entry["pathogen_id"] == "sars_cov2_resp"
+    )
+    response = profile["dose_response"]
+    assert response.get("model", "beta_poisson") == "beta_poisson"
+    alpha = float(response["alpha"])
+    beta = float(response["beta"])
+
+    quantiles = [0.05, 0.25, 0.5, 0.75, 0.95]
+    reference = beta_dist.ppf(quantiles, alpha, beta)
+    for scale in (10.0, 1.0e2, 1.0e3, 1.0e4):
+        scaled = beta_dist.ppf(quantiles, alpha, beta * scale)
+        ratios = [
+            observed / (expected / scale)
+            for observed, expected in zip(scaled, reference)
+        ]
+        assert all(abs(ratio - 1.0) < 0.01 for ratio in ratios), ratios
+        assert alpha / (alpha + beta * scale) == pytest.approx(
+            alpha / (alpha + beta) / scale,
+            rel=0.01,
+        )

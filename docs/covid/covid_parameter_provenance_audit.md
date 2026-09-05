@@ -90,15 +90,22 @@ units the model does not use.
 | Watanabe 2010 (mice, SARS-CoV-1) | exponential | $k = 4.1\times10^{2}$ | 280 (illness) | PFU |
 | Zhang & Wang 2020, *Clin Infect Dis* [10.1093/cid/ciaa1675](https://doi.org/10.1093/cid/ciaa1675) | exponential | $k = 6.4\times10^{4}$–$9.8\times10^{5}$ | $4.4\times10^{4}$–$6.8\times10^{5}$ | **RNA copies** |
 | Killingley 2022, *Nat Med* [10.1038/s41591-022-01780-9](https://doi.org/10.1038/s41591-022-01780-9) | human challenge | 10 TCID50 infected 18/36 (~53%) | ~10 | TCID50, intranasal |
-| Miura 2022 preprint [10.1101/2022.04.07.22273549](https://doi.org/10.1101/2022.04.07.22273549) | beta-Poisson with individual variation | fitted to the above | — | TCID50 |
+| Miura 2023, *Epidemics* [10.1016/j.epidem.2023.100691](https://doi.org/10.1016/j.epidem.2023.100691) (published form of the 2022 preprint) | beta-Poisson with individual variation | **not fitted to Killingley** — the paper's own point is that a single dose level cannot identify the individual-variation parameters | — | TCID50 |
 
 The active profile's $N_{50}$ is **2,670 model units**. If model units are RNA
 copies — which is what the shedding curve's $10^{9}$ implies — the profile is
 **17–254× more sensitive** than the only human-deduced copy-based dose-response.
-Zhang & Wang is the natural replacement candidate because it is the one stated
-in the same units as our emission term; Killingley is the harder anchor but is
-in TCID50 by the intranasal route, and converting it needs a copies-per-TCID50
-factor that is itself a sourced quantity.
+Zhang & Wang was recorded here as the natural replacement candidate because it
+is the one stated in the same units as our emission term. **That candidacy is
+withdrawn** by
+[`../literature/consensus_tranche_25_covid_emission_beta_alias.md`](../literature/consensus_tranche_25_covid_emission_beta_alias.md)
+§3: its human calibration runs through an infection-risk meta-analysis and its
+dose term through exhaled shedding, so adopting it would fix one factor of the
+emission × susceptibility product from data about the product. Killingley is the
+harder anchor but is in TCID50 by the intranasal route, and converting it needs a
+copies-per-TCID50 factor that is itself a sourced quantity — measured, and 2.7
+logs wide (tranche 15). Neither endpoint survives, so there is no span to sweep
+and the denominator is refused rather than replaced.
 
 **Update (Consensus tranche 4).** The other half of the pair — an emission
 *rate* in the same units — now has candidates, so §4's non-identifiability can
@@ -177,11 +184,17 @@ and nothing else. Two consequences:
    magnitude, $\beta$, the route multipliers, the deposition fraction), and a
    good fit is not evidence about any one of them.
 2. $\beta$ must therefore be **fixed from an independent source before the fit**,
-   not left free and not "checked afterwards". If it is fixed to Zhang & Wang in
-   RNA copies, then the fitted emission scale becomes interpretable as copies
-   emitted per hour and can be compared against Coleman — which turns the fit
-   into a test. That comparison is the only route by which this arm becomes
-   physics rather than curve-matching.
+   not left free and not "checked afterwards". Fixing it to Zhang & Wang would
+   have made the fitted emission scale interpretable as copies emitted per hour
+   and comparable against Coleman — which is what would turn the fit into a
+   test. **That route is closed** (§2, tranche 25 §3): Zhang & Wang's copies
+   denominator is not independent of the emission factor it would license. No
+   admissible independent source for the denominator has been found, so the
+   composite $\Theta$ stays the fitted quantity and must be reported as a
+   composite. Note also that the per-host path is stronger than the ratio
+   $D/\beta$ above: `_dose_response_hazard` reads
+   `susceptibility × effective_dose`, so the aliasing is exact for a fixed host
+   and not an artefact of the closed form.
 
 ## 5. Two quantities that must not be fitted, because they are scored
 
@@ -208,9 +221,14 @@ The four prerequisites in `docs/proposals/covid_trajectory_fit_spec.md` §7 stan
 with one added and one sharpened:
 
 1. **Re-source $\beta$ and the emission scale together, in one unit system**
-   (RNA copies), fixing $\beta$ from Zhang & Wang before any fit. Sharpened: this
-   is not optional tidying, it is the condition under which the fit is
-   identifiable at all (§4).
+   (RNA copies). Sharpened: this is not optional tidying, it is the condition
+   under which the fit is identifiable at all (§4). **Attempted and refused**
+   (tranche 25): the emission side is bounded by measurement at
+   $[4.2\times10^{3}, 5.8\times10^{7}]$ copies per hour-equivalent, but no
+   admissible copies-denominated dose-response exists, so this prerequisite is
+   currently *unmeetable* rather than outstanding. The consequence is that the
+   fit remains a fit of the composite, and (per the closing paragraph) its output
+   must not be reported as an emission rate.
 2. **Re-derive the emission term as a rate,** not as a nasal-fluid concentration,
    against Coleman 2021 for the aerosol fraction. The current $10^{9}$ peak is a
    dimensional error.
