@@ -25,14 +25,17 @@ import time
 import traceback
 import zipfile
 from collections import OrderedDict
+from functools import lru_cache
 from itertools import product
 from pathlib import Path
-from types import SimpleNamespace
+from types import MappingProxyType, SimpleNamespace
 from typing import Any, Iterator, Mapping, Sequence
 from urllib.parse import urlparse
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT))
+
+import yaml  # noqa: E402
 
 from engines.initiation import LEGACY_MANIFEST  # noqa: E402
 from picard_framework.analysis.sentinel.wastewater_assays import (  # noqa: E402
@@ -1355,7 +1358,7 @@ def make_picard_spec(
             "write_ground_truth": write_ground_truth,
             "history_retention": retention,
         },
-        "legacy_yaml": "crusher_labs/config.yaml",
+        "legacy_yaml": LEGACY_CONFIG_RELPATH,
         "actors": [],
         "incentives": {},
     }
@@ -1386,6 +1389,13 @@ def make_picard_spec(
     return spec
 
 
+# Legacy config every campaign spec loads; the base for any surveillance knob
+# a tier does not override.
+LEGACY_CONFIG_RELPATH = "crusher_labs/config.yaml"
+_SYNDROMIC_HAZARD_KEYS: tuple[str, ...] = (
+    "sick_call_probability_per_day",
+    "sick_call_probability",
+)
 _HVAC_PARAM_MAP: tuple[tuple[str, str], ...] = (
     ("transport_engine", "transport_engine"),
     ("filter_efficiency", "filter_efficiency"),
@@ -1411,6 +1421,41 @@ def _copy_present(
         if dest in skip_if_present and dest in params:
             continue
         params[dest] = source[src]
+
+
+@lru_cache(maxsize=1)
+def _base_syndromic_config() -> Mapping[str, Any]:
+    """The ``syndromic`` block of the legacy config every campaign spec loads."""
+    with validated_open(
+        str(REPO_ROOT / LEGACY_CONFIG_RELPATH),
+        allowed_roots=(_REPO_ROOT_STR,),
+        encoding="utf-8",
+    ) as fh:
+        loaded = yaml.safe_load(fh) or {}
+    return MappingProxyType(dict(loaded.get("syndromic") or {}))
+
+
+def _record_reporting_hazard(params: dict[str, Any]) -> None:
+    """Record the sick-call hazard the run will actually use.
+
+    A surveillance arm that overrides nothing still reports at the hazard the
+    legacy config declares, and a summary that omits it cannot be scored
+    against the reported-case anchors without assuming a value. The effective
+    hazard is therefore written into the parameters block for every arm, and a
+    config declaring no hazard under either unit name is an error rather than a
+    silent fallback.
+    """
+    if any(key in params for key in _SYNDROMIC_HAZARD_KEYS):
+        return
+    base = _base_syndromic_config()
+    for key in _SYNDROMIC_HAZARD_KEYS:
+        if key in base:
+            params["sick_call_probability_per_day"] = float(base[key])
+            return
+    raise ValueError(
+        f"{LEGACY_CONFIG_RELPATH} declares no syndromic sick-call hazard "
+        "under sick_call_probability_per_day or sick_call_probability",
+    )
 
 
 def _fill_override_params(params: dict[str, Any], cfg: Mapping[str, Any]) -> None:
@@ -1448,12 +1493,19 @@ def _fill_override_params(params: dict[str, Any], cfg: Mapping[str, Any]) -> Non
         syn,
         (
             ("sick_call_probability", "sick_call_probability"),
+            (
+                "sick_call_probability_per_day",
+                "sick_call_probability_per_day",
+            ),
             ("activation_delay_hours", "surveillance_delay_epochs"),
         ),
         skip_if_present=frozenset({
-            "sick_call_probability", "surveillance_delay_epochs",
+            "sick_call_probability",
+            "sick_call_probability_per_day",
+            "surveillance_delay_epochs",
         }),
     )
+    _record_reporting_hazard(params)
     esc = cfg.get("escalation") or {}
     latency = esc.get("decision_latency") or {}
     _copy_present(
@@ -1561,6 +1613,12 @@ def parameters_from_spec(spec: dict[str, Any]) -> dict[str, Any]:
         cfg.get("wearable_monitoring") or {},
         (("deployment_profile", "wearables"),),
     )
+    _copy_present(
+        params,
+        cfg.get("syndromic") or {},
+        tuple((key, key) for key in _SYNDROMIC_HAZARD_KEYS),
+    )
+    _record_reporting_hazard(params)
     # Drop empty / None so aggregate columns stay sparse.
     return {k: v for k, v in params.items() if v is not None and v != ""}
 

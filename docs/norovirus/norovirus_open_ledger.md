@@ -37,6 +37,30 @@ changes here.
 
 - **The v4 campaign** and every campaign before it. Each was invalidated by a
   defect found after it ran (§12 of the history).
+- **The C1 reported-case bracket (2,880 runs, 2026-09-05).** Withdrawn as a
+  bracket, not as runs. Its nine `dose_adjustment` rungs 12.0-14.0 produced
+  bit-identical output at every seed across all 47 recorded outputs — resolved
+  fraction 1/9 — so the ladder sat entirely inside the region where the
+  environmental-release term has already gone to zero, and no dose interval,
+  empty or non-empty, may be quoted from it. Measured in
+  [`c1_reported_case_bracket_result.md`](c1_reported_case_bracket_result.md).
+  Its syndromic arm is separately unscored: the runs recorded no sick-call
+  hazard, and the scorer will not assume one.
+- **Any host-level attack rate taken from a co-seeded bundle run, for any one
+  pathogen.** Every agent-level infection and illness field is a projection
+  across all of a host's lineages
+  (`natural_history.project_legacy_illness`), and the summary counters, the
+  reported-case ladder and the VSP threshold all read that projection, so a run
+  of `active_profiles` — which seeds norovirus, influenza A and SARS-CoV-2 with
+  one index case each — reports the union and attributes it to nothing. Measured
+  at the Morris box centre over seeds 500-502: attack rate 0.4348 co-seeded
+  against 0.0052 with norovirus alone, `vsp_posted` 1.0 against 0.0, peak epoch
+  166 against 8. The influenza arm was activated at `f95677c` (2026-09-04),
+  after the 2026-09-01 Morris pass, so the contamination is post-dated to that
+  measurement rather than an explanation of it; it is nonetheless why the #36
+  re-run isolates the screened pathogen (`--co-seeded isolated`, the default in
+  `bounded_screen.py`). A composite run is a legitimate scenario, but it is a
+  different scenario, and its ranking may not be compared with an isolated one.
 - **Any claim that the model reproduces VSP attack rates.** Withdrawn at #346
   and not re-established. Expedition's earlier agreement was a cancellation of
   an inflated infection rate against a deflated illness ratio.
@@ -579,7 +603,12 @@ Roughly in dependency order.
 2. **Refit the common dose** against VSP class targets. The contact layer
    (#353) and cleaning (#355) are now in place, so this is next. One common
    dose-response across all four hull classes; no hull-specific pathogen
-   biology, ever.
+   biology, ever. The first attempt (C1, 2,880 runs) is withdrawn by §1: its
+   ladder was degenerate, and a replacement must be sited where the axis
+   resolves — checked with `picard_framework/analysis/sweep_degeneracy.py` on a
+   short probe *before* submission — and must hold the surveillance response
+   fixed while the dose moves, since the two arms differ 6-80x in infection
+   attack rate at the same dose and seed.
 3. **Re-measure route shares and the passenger/crew ratio** on the refitted
    model. Expect #353 to push A5 *further* from 2.9 — crew work the highest
    touch-rate zones and their berthing is already ~3x denser than passengers'.

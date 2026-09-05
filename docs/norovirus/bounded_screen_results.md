@@ -27,6 +27,16 @@ recut `surface_decay_per_day` box was **killed part-way and never completed** â€
 killed re-run, not a completed one â€” so only the 20-seed noise floor at the new
 box centre exists. No ranking in this document describes the current box.
 
+**The scored outputs are host-level, and the bundle now co-seeds.** Every
+attack-rate output here reads the agent-level illness projection, which unions a
+host's lineages; `active_profiles` seeds three pathogens with one index case
+each. The influenza arm was activated after this pass (`f95677c`, 2026-09-04),
+so these numbers are not themselves influenza-contaminated, but a re-run of this
+command would be: at the box centre the co-seeded configuration reports attack
+rate 0.4348 where norovirus alone reports 0.0052. The harness therefore
+suppresses the other pathogens' seeds by default (`--co-seeded isolated`), and
+the #36 re-run is an isolated one.
+
 ## 1. What was run
 
 400 simulations: 10 Morris trajectories over the 7-factor norovirus box of

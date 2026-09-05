@@ -202,6 +202,7 @@ class TestLaw5ReferentialIntegrity:
             "wearable_physiological_monitor",
             "wearable_fleet_monitor",
             "detection_escalation",
+            "scenario_calendar",
         }
         protocols = self._load_json("data/config/protocols.json")
         for proto in protocols.get("protocols", []):

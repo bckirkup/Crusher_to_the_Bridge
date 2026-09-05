@@ -430,6 +430,56 @@ def test_t12_sweeps_sick_call_probability() -> None:
     assert sample["campaign_parameters"]["sick_call_probability"] == pytest.approx(0.1)
 
 
+def test_every_arm_records_the_hazard_it_will_report_at() -> None:
+    """An arm that overrides nothing still reports, so the hazard is recorded.
+
+    A summary that omits it cannot be scored against the reported-case anchors
+    without assuming a value, which is how the C1 syndromic arm became
+    unscorable.
+    """
+    manifest = load_manifest(REPORTED_CASE_REFIT_MANIFEST)
+    runs = list(generate_tier_runs(manifest, "c1_expedition_cruise_450"))
+
+    syndromic = next(s for rid, s in runs if "_syndromic_" in rid)
+    silent = next(s for rid, s in runs if "_none_true_" in rid)
+
+    assert "sick_call_probability" not in syndromic["config_overrides"].get(
+        "syndromic", {},
+    )
+    assert syndromic["campaign_parameters"][
+        "sick_call_probability_per_day"
+    ] == pytest.approx(0.70)
+    assert silent["campaign_parameters"][
+        "sick_call_probability"
+    ] == pytest.approx(0.0)
+
+
+def test_an_explicit_hazard_override_is_not_overwritten_by_the_base() -> None:
+    manifest = _v4_manifest_or_stub()
+    runs = list(generate_tier_runs(manifest, "t12_surveillance_sensitivity"))
+    sample = next(s for rid, s in runs if "scp10" in rid)
+
+    params = sample["campaign_parameters"]
+    assert params["sick_call_probability"] == pytest.approx(0.1)
+    assert "sick_call_probability_per_day" not in params
+
+
+def test_a_base_config_with_no_hazard_is_refused_not_defaulted(monkeypatch) -> None:
+    """No silent fallback: an arm whose hazard is undeclared is an error."""
+    from picard_framework.runs.mega_cruise_campaign import campaign_runner
+
+    monkeypatch.setattr(
+        campaign_runner,
+        "_base_syndromic_config",
+        lambda: {"background_noise_rate": 0.0},
+    )
+
+    with pytest.raises(ValueError, match="no syndromic sick-call hazard"):
+        campaign_runner._record_reporting_hazard(
+            {"platform_id": "expedition_cruise_450"},
+        )
+
+
 def test_t13_sweeps_wearable_detection_sensitivity() -> None:
     manifest = _v4_manifest_or_stub()
     runs = list(generate_tier_runs(manifest, "t13_wearable_sensitivity"))

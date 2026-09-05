@@ -107,6 +107,12 @@ def _space_entries(
     return out
 
 
+def _campaign_count(syn_result: dict[str, Any], key: str) -> int:
+    """Specimens (or confirmations) a replicated testing campaign spent this epoch."""
+    by_pathogen = syn_result.get(key) or {}
+    return sum(len(ids) for ids in by_pathogen.values())
+
+
 def _summary_counts(
     agents: list[dict[str, Any]],
     engine: KorkinShipEngine,
@@ -147,6 +153,9 @@ def _summary_counts(
         "quarantined": len(state.quarantined_ids),
         "quarantine_refusers": len(state.quarantine_refusers),
         "sick_call_count": syn_result["sick_call_count"],
+        "campaign_specimens": _campaign_count(syn_result, "campaign_specimens_by_pathogen"),
+        "campaign_confirmed": _campaign_count(syn_result, "campaign_confirmed_by_pathogen"),
+        "onset_observation_count": int(syn_result.get("onset_observation_count", 0)),
         "disrupted_microflora_count": disrupted_count,
         "cumulative_reported_cases": len(state.ever_reported_ids),
         "cumulative_reported_cases_passenger": reported_counts["passenger"],
@@ -336,6 +345,13 @@ def record_epoch(  # NOSONAR
             "first_detection_events": syn_result.get(
                 "first_detection_events", [],
             ),
+            "campaign_specimens_by_pathogen": syn_result.get(
+                "campaign_specimens_by_pathogen", {},
+            ),
+            "campaign_confirmed_by_pathogen": syn_result.get(
+                "campaign_confirmed_by_pathogen", {},
+            ),
+            "onset_observations": syn_result.get("onset_observations", []),
         },
         "air_sniffer": air_results,
         "surface_swab": swab_results,
