@@ -314,6 +314,7 @@ class DoseResponse(BaseModel):
 class SeverityModel(BaseModel):
     states: list[str]
     base_probabilities: list[float]
+    base_probabilities_by_age_band: dict[str, list[float]] = {}
     prior: dict[str, Any] = {}
     fatality_probability_by_severity: Any | None = None
     trajectory_ladder_offsets_by_day: list[int] | None = None
@@ -349,6 +350,32 @@ class SeverityModel(BaseModel):
             )
         return self
 
+    @model_validator(mode="after")
+    def validate_age_bands(self) -> "SeverityModel":
+        """Per-band vectors are distributions that move only the case mix.
+
+        The draw renormalises over the four symptomatic states, so a band's
+        asymptomatic entry must equal the reference vector's or it would
+        declare a presenting fraction the draw discards unseen.
+        """
+        reference = self.base_probabilities[0]
+        for band, vector in self.base_probabilities_by_age_band.items():
+            label = f"severity_model.base_probabilities_by_age_band.{band}"
+            if len(vector) != 5 or any(
+                not math.isfinite(value) or not 0.0 <= value <= 1.0
+                for value in vector
+            ):
+                raise ValueError(f"{label} must have five bounded values")
+            if not math.isclose(sum(vector), 1.0):
+                raise ValueError(f"{label} must sum to 1.0")
+            if not math.isclose(vector[0], reference):
+                raise ValueError(
+                    f"{label}[0] must equal base_probabilities[0]: a band "
+                    "moves the case mix inside presentation, never the "
+                    "asymptomatic share",
+                )
+        return self
+
 
 class ObservationModel(BaseModel):
     system: str
@@ -357,7 +384,7 @@ class ObservationModel(BaseModel):
     reporting_probability_by_severity_post_recognition: list[float]
     active_screening: dict[str, Any] | None = None
     lab_sampling_probability_by_severity: list[float] = []
-    assay_sensitivity: float = 1.0
+    assay_sensitivity: float | None = None
     assay_sensitivity_by_time_since_infection: Any | None = None
     episode_reporting_window_days: float
 
@@ -383,14 +410,42 @@ class ObservationModel(BaseModel):
                 )
         if self.episode_reporting_window_days <= 0:
             raise ValueError("episode_reporting_window_days must be positive")
-        if not 0.0 <= self.assay_sensitivity <= 1.0:
+        if self.assay_sensitivity is not None and not (
+            0.0 <= self.assay_sensitivity <= 1.0
+        ):
             raise ValueError("assay_sensitivity must lie in [0, 1]")
         self._validate_active_screening()
-        if self.assay_sensitivity_by_time_since_infection is not None:
-            raise NotImplementedError(
-                "time-varying assay sensitivity is not implemented",
-            )
+        self._validate_sensitivity_curve()
         return self
+
+    def _validate_sensitivity_curve(self) -> None:
+        """A day-indexed detectability curve, or nothing.
+
+        Only a list is implemented: it is indexed by days since infection and
+        its last entry is held. A scalar declared beside it is refused as a
+        second parameterisation of the same quantity.
+        """
+        curve = self.assay_sensitivity_by_time_since_infection
+        if curve is None:
+            return
+        if not isinstance(curve, list):
+            raise NotImplementedError(
+                "only a day-indexed list of assay sensitivities is implemented",
+            )
+        if not curve or any(
+            not math.isfinite(float(value)) or not 0.0 <= float(value) <= 1.0
+            for value in curve
+        ):
+            raise ValueError(
+                "assay_sensitivity_by_time_since_infection must be a "
+                "non-empty list of probabilities",
+            )
+        if self.assay_sensitivity is not None:
+            raise ValueError(
+                "assay_sensitivity and "
+                "assay_sensitivity_by_time_since_infection are one quantity: "
+                "declare the curve or the scalar, not both",
+            )
 
     def _validate_active_screening(self) -> None:
         screening = self.active_screening or {}

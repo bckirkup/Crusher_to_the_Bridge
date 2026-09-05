@@ -1209,6 +1209,7 @@ def _validate_symptom_severity_profiles(
             raise ValueError(
                 f"{pathogen_id}.severity_model.base_probabilities[0] must be < 1",
             )
+        _validate_severity_age_bands(pathogen_id, severity)
         if not isinstance(observation, dict):
             raise ValueError(
                 f"{pathogen_id}.observation_model must be an object",
@@ -1228,13 +1229,92 @@ def _validate_symptom_severity_profiles(
             raise NotImplementedError(
                 f"{pathogen_id}: severity-conditioned fatality is not implemented",
             )
-        if observation.get("assay_sensitivity_by_time_since_infection") is not None:
-            raise NotImplementedError(
-                f"{pathogen_id}: time-varying assay sensitivity is not implemented",
-            )
+        _validate_assay_sensitivity_curve(pathogen_id, observation)
         _validate_severity_trajectory(pathogen_id, severity)
         _validate_molecular_observation(pathogen_id, observation)
         _validate_observation_scenario_set(pathogen_id, observation)
+
+
+def _validate_assay_sensitivity_curve(
+    pathogen_id: str,
+    observation: dict[str, Any],
+) -> None:
+    """Check the per-day PCR sensitivity curve, when a profile declares one.
+
+    A list is a day-indexed detectability curve on the days-since-infection
+    axis, read by the molecular rung with its last entry held. Any other shape
+    stays unimplemented rather than silently ignored, and a scalar
+    ``assay_sensitivity`` beside a curve is refused: two parameterisations of
+    one quantity leave which the loader reads to the reader's guess.
+    """
+    curve = observation.get("assay_sensitivity_by_time_since_infection")
+    if curve is None:
+        return
+    label = (
+        f"{pathogen_id}.observation_model"
+        ".assay_sensitivity_by_time_since_infection"
+    )
+    if not isinstance(curve, list):
+        raise NotImplementedError(
+            f"{pathogen_id}: only a day-indexed list of assay sensitivities "
+            "is implemented",
+        )
+    if not curve:
+        raise ValueError(f"{label} must be non-empty")
+    values = [float(value) for value in curve]
+    if not all(np.isfinite(value) and 0.0 <= value <= 1.0 for value in values):
+        raise ValueError(f"{label} entries must be finite probabilities")
+    if observation.get("assay_sensitivity") is not None:
+        raise ValueError(
+            f"{pathogen_id}.observation_model declares both assay_sensitivity "
+            "and assay_sensitivity_by_time_since_infection; they are one "
+            "quantity, so declare the curve or the scalar and not both",
+        )
+
+
+def _validate_severity_vector(label: str, array: Any) -> list[float]:
+    """Check one five-state severity distribution and return it as floats."""
+    if not isinstance(array, list) or len(array) != 5:
+        raise ValueError(f"{label} must have length 5")
+    numbers = [float(value) for value in array]
+    if not all(np.isfinite(value) and 0.0 <= value <= 1.0 for value in numbers):
+        raise ValueError(f"{label} must be finite and bounded")
+    if not np.isclose(sum(numbers), 1.0):
+        raise ValueError(f"{label} must sum to 1.0")
+    if numbers[0] >= 1.0:
+        raise ValueError(f"{label}[0] must be < 1")
+    return numbers
+
+
+def _validate_severity_age_bands(
+    pathogen_id: str,
+    severity: dict[str, Any],
+) -> None:
+    """Check the per-age-band severity vectors, when a profile declares them.
+
+    The draw renormalises over the four symptomatic states, so a band vector
+    whose asymptomatic entry differed from the reference one would declare an
+    asymptomatic share the draw then discards: the presenting fraction is
+    ``symptomatic_fraction``'s and a band may only move the case mix inside it.
+    That is enforced rather than documented, because the discarded entry would
+    be invisible in every output.
+    """
+    by_band = severity.get("base_probabilities_by_age_band")
+    if by_band is None:
+        return
+    label = f"{pathogen_id}.severity_model.base_probabilities_by_age_band"
+    if not isinstance(by_band, dict) or not by_band:
+        raise ValueError(f"{label} must be a non-empty object")
+    reference = float(severity["base_probabilities"][0])
+    for band, vector in by_band.items():
+        numbers = _validate_severity_vector(f"{label}.{band}", vector)
+        if not np.isclose(numbers[0], reference):
+            raise ValueError(
+                f"{label}.{band}[0] is {numbers[0]} against the reference "
+                f"vector's {reference}; the severity draw renormalises over "
+                "the symptomatic states, so a band moves the case mix and "
+                "never the asymptomatic share",
+            )
 
 
 def _validate_ascertainment_vector(label: str, array: Any) -> list[float]:

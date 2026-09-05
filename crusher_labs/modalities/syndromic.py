@@ -460,7 +460,29 @@ class SyndromicSurveillance:
     ) -> bool:
         if infection.get("status") != "INFECTED":
             return False
-        return bool(self._molecular_rng.random() < model["sensitivity"])
+        sensitivity = self._assay_sensitivity(model, infection)
+        return bool(self._molecular_rng.random() < sensitivity)
+
+    def _assay_sensitivity(
+        self,
+        model: dict[str, Any],
+        infection: dict[str, Any],
+    ) -> float:
+        """Detectability of this host's specimen on the day it is taken.
+
+        A profile declaring ``assay_sensitivity_by_time_since_infection``
+        reads the day of infection the host is on, with the curve's last entry
+        held, so an early swab and a late one are different observations of
+        the same infection. Detectability is its own clock: a host past the
+        culture-positive window still tests positive at the curve's tail.
+        """
+        curve = model["sensitivity_by_day"]
+        if not curve:
+            return float(model["sensitivity"])
+        # ``time_infected`` counts epochs, so the clock is where the two
+        # units meet, as ``days_post_infection`` reads it elsewhere.
+        day = self.clock.day_index(int(infection.get("time_infected") or 0))
+        return float(curve[min(max(day, 0), len(curve) - 1)])
 
     @staticmethod
     def _severity_index(
@@ -503,7 +525,13 @@ class SyndromicSurveillance:
                 if enabled
                 else 0.0
             ),
-            "sensitivity": float(observation.get("assay_sensitivity", 1.0)),
+            "sensitivity": float(observation.get("assay_sensitivity") or 1.0),
+            "sensitivity_by_day": [
+                float(value) for value in (
+                    observation.get("assay_sensitivity_by_time_since_infection")
+                    or []
+                )
+            ],
         }
 
     def _severity_hazard(

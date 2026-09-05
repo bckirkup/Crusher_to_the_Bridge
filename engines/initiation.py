@@ -24,6 +24,7 @@ from engines.infection_dynamics_bridge import IllnessStatus, InfectionStatus
 from engines.natural_history import (
     DEFAULT_RECOVERY_DAY,
     draw_symptom_severity,
+    host_age_band,
     incubation_days,
 )
 
@@ -405,6 +406,7 @@ def _write_presentation_history(
     clock: Any,
     profile: dict[str, Any],
     rng: np.random.Generator,
+    age_band: str = "",
 ) -> None:
     """Set the presentation history the boarding state implies.
 
@@ -430,7 +432,7 @@ def _write_presentation_history(
     )
     # A convalescent boarding host is past its course, so the peak it carries
     # is the state it ends on: the trajectory is not replayed backwards.
-    inf["symptom_severity"] = draw_symptom_severity(profile, rng)
+    inf["symptom_severity"] = draw_symptom_severity(profile, rng, age_band)
     inf["symptom_severity_peak"] = inf["symptom_severity"]
 
 
@@ -481,6 +483,7 @@ def _board_one_host(
     inf["shedding_duration_days"] = duration_days
     _write_presentation_history(
         inf, state, incubation_days, clock, profile, rng,
+        host_age_band(agent),
     )
     return state
 

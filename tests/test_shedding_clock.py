@@ -355,11 +355,9 @@ class TestShippedRespiratoryArmReachesItsCurve:
             else "asymptomatic_shedding_log10"
         )
         if not presented:
-            # eta 0 holds the host off the symptomatic curve for the whole
-            # course; every other field stays as shipped.
-            covid["illness_probability"] = dict(
-                covid["illness_probability"], eta=0.0,
-            )
+            # A zero presenting fraction holds the host off the symptomatic
+            # curve for the whole course; every other field stays as shipped.
+            covid["symptomatic_fraction"] = 0.0
         clock = _clock()
         release = environmental_release_log10_per_day(covid)
         trace = _run(
