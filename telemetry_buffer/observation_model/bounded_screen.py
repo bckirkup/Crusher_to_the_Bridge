@@ -29,6 +29,15 @@ reason -- they are not simulation parameters:
   * The dose-response model family is categorical. Per spec section 2.2 the
     whole design is re-run per family (`--dose-family`) and the between-family
     spread is reported separately, never interpolated.
+
+The observation model's ascertainment vectors are absent for the third reason
+and are handled the same way. They are declared rather than sourced (#27) and
+they are not separately identifiable, so they are not continuous factors: the
+design is re-run per declared scenario (`--observation-scenario`, a member of
+the profile's `observation_model.prior.scenarios`) and the between-scenario
+spread is reported separately. A screen that ranged one reporting probability
+over an interval would be sweeping a component of a ladder no observer could
+exhibit.
 """
 
 from __future__ import annotations
@@ -51,6 +60,11 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from engines.transmission_core import EMESIS_TOTAL_SHED_GEC_RANGE  # noqa: E402
+from orchestrator_init import SCENARIO_VECTORS  # noqa: E402
+from picard_framework.catalog.registry import CatalogRegistry  # noqa: E402
+from picard_framework.pathogen_overrides import (  # noqa: E402
+    load_pathogen_bundle,
+)
 from picard_framework.run_spec import PicardRunSpec  # noqa: E402
 from picard_framework.runs.mega_cruise_campaign.campaign_runner import (  # noqa: E402
     compute_derived_metrics,
@@ -219,6 +233,35 @@ def build_overrides(
     return {pathogen_id: profile}
 
 
+def observation_scenario_patch(
+    bundle: str,
+    pathogen_id: str,
+    scenario: str,
+) -> dict[str, object]:
+    """The whole declared ascertainment ladder a named scenario stands for.
+
+    Read from the profile rather than written here, because the screen selects
+    no value: a scenario is a declaration the profile already carries. All
+    three vectors and the active name move together, which is also what the
+    loader requires of the resolved profile.
+    """
+    path = CatalogRegistry.from_repo(str(REPO_ROOT)).resolve_pathogen_bundle(bundle)
+    profile = load_pathogen_bundle(path).get(pathogen_id, {})
+    prior = (profile.get("observation_model") or {}).get("prior") or {}
+    scenarios = prior.get("scenarios") or {}
+    declared = scenarios.get(scenario)
+    if declared is None:
+        raise KeyError(
+            f"{pathogen_id} declares no observation scenario {scenario!r}; "
+            f"declared: {sorted(scenarios)}",
+        )
+    patch: dict[str, object] = {
+        key: list(declared[key]) for key in SCENARIO_VECTORS
+    }
+    patch["prior"] = {"active_scenario": scenario}
+    return patch
+
+
 def run_point(
     factors: Sequence[Factor],
     units: Sequence[float],
@@ -229,8 +272,14 @@ def run_point(
     platform: str,
     epochs: int,
     num_agents: int,
+    observation_scenario: str | None = None,
 ) -> dict[str, float]:
     """Run one design point at one seed and return the scored outputs."""
+    overrides = build_overrides(factors, units, pathogen_id)
+    if observation_scenario is not None:
+        overrides[pathogen_id]["observation_model"] = observation_scenario_patch(
+            bundle, pathogen_id, observation_scenario,
+        )
     spec = {
         "schema_version": "1.0.0",
         "description": "bounded_screen",
@@ -245,7 +294,7 @@ def run_point(
         "actors": [],
         "incentives": {},
         "config_overrides": {"ship_graph": {"num_agents": int(num_agents)}},
-        "pathogen_overrides": build_overrides(factors, units, pathogen_id),
+        "pathogen_overrides": overrides,
     }
     with tempfile.TemporaryDirectory() as tmp:
         spec_path = Path(tmp) / "run_spec.json"
@@ -372,6 +421,15 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--pathogen-id", default="norwalk_gi")
     parser.add_argument("--bundle", default="active_profiles")
     parser.add_argument("--platform", default="mega_cruise_5000")
+    parser.add_argument(
+        "--observation-scenario",
+        default=None,
+        help=(
+            "Name a declared observation_model.prior scenario to run the whole "
+            "design under. Categorical: re-run per scenario and report the "
+            "spread, never interpolate between them."
+        ),
+    )
     parser.add_argument("--num-agents", type=int, default=450)
     parser.add_argument("--epochs", type=int, default=168)
     parser.add_argument("--trajectories", type=int, default=10)
@@ -393,6 +451,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         "platform": args.platform,
         "epochs": args.epochs,
         "num_agents": args.num_agents,
+        "observation_scenario": args.observation_scenario,
     }
     if args.mode == "floor":
         seeds = [args.seed_base + i for i in range(args.floor_seeds)]

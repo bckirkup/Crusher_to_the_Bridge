@@ -102,7 +102,7 @@ what fits.
 | | Item | Task | Depends on |
 |---|---|---|---|
 | B1 | Demote A3 from scored anchor to construction constraint | #23 | — (**resolved**, see below) |
-| B2 | The observation model's ~15 numbers: source them or declare them | #27 | B1 |
+| B2 | The observation model's ~15 numbers: source them or declare them | #27 | B1 (**resolved as a declaration**, see below) |
 | B3 | Recut the A4 class bins | #29 | — |
 | B4 | An external voyage denominator for VSP posting rates | #13 | — |
 | B5 | Measure or externally bound the cabin-localization fraction `f` | #12 | — |
@@ -123,9 +123,27 @@ test of them. Sourcing them while A3 was still scored would have been fitting to
 the target through fifteen intermediaries. **B1 has landed, so B2 is unblocked**;
 the band A3 is now reported against is a wiring check, and reading in-band as
 agreement would restore the circularity the demotion removed. B3 is a plain
-defect (the bins bin
-passenger counts against total-agent capacities). B4 and B5 are searches with no
-in-repo prerequisite and can run in parallel with Track A.
+defect (the bins bin passenger counts against total-agent capacities). B4 and B5
+are searches with no in-repo prerequisite and can run in parallel with Track A.
+
+**B2 resolved on the second branch of its own title: declared, not sourced.**
+The document these vectors come from,
+[`../norovirus/cruise_pathogen_severity_observation_priors_v2.md`](../norovirus/cruise_pathogen_severity_observation_priors_v2.md),
+grades every entry `[A]` — assumed prior — and states that the decomposition is
+**not identified** by the one cruise investigation behind it, since many
+severity-specific vectors give the same weighted fraction. There is therefore
+nothing to source, and the alternative to saying so was choosing values against
+the aggregate B1 had just stopped scoring. So the profile block now carries its
+class (`C`, origin `Tr`), its origin, and the consequence in prose: the
+reported-attack-rate comparison against VSP is *conditional* on this assumed
+observation process, and agreement with a reported rate is not evidence the
+fifteen numbers are right. Uncertainty travels as `observation_model.prior`, a
+two-member `scenario_set` of whole ladders — the loader refuses a scenario that
+moves one component, or one that sits beside a stale `active_scenario`, and
+`bounded_screen.py` re-runs the design **per scenario** instead of ranging a
+reporting probability over an interval, which would sweep a ladder no observer
+could exhibit. No number moved: `base_reporting` is the shipped decomposition
+unchanged, so orchestrator output is byte-identical.
 
 ## 5. Track C — intervals: no scored parameter stays a point value
 

@@ -1110,6 +1110,23 @@ CLEARANCE_PARAMETERISATION_KEYS = (
     "gastric_survival_fraction",
 )
 
+# The three vectors a declared observation scenario must move together: they
+# are one ladder from severity to a surveillance record, so a scenario that
+# named only some of them would be a component sweep wearing a scenario's
+# name (#27).
+SCENARIO_VECTORS = (
+    "syndrome_case_eligibility_by_severity",
+    "reporting_probability_by_severity_pre_recognition",
+    "reporting_probability_by_severity_post_recognition",
+)
+
+# Lab sampling is operational rather than clinical behaviour, so it is checked
+# with the others but is not part of a reporting scenario.
+ASCERTAINMENT_VECTORS = (
+    *SCENARIO_VECTORS,
+    "lab_sampling_probability_by_severity",
+)
+
 
 def _validate_route_parameterisation(
     profiles: dict[str, dict[str, Any]],
@@ -1192,34 +1209,11 @@ def _validate_symptom_severity_profiles(
             raise ValueError(
                 f"{pathogen_id}.observation_model must be an object",
             )
-        arrays = (
-            "syndrome_case_eligibility_by_severity",
-            "reporting_probability_by_severity_pre_recognition",
-            "reporting_probability_by_severity_post_recognition",
-            "lab_sampling_probability_by_severity",
-        )
-        for key in arrays:
-            array = observation.get(key)
-            if not isinstance(array, list) or len(array) != 5:
-                raise ValueError(
-                    f"{pathogen_id}.observation_model.{key} must have length 5",
-                )
-            numbers = [float(value) for value in array]
-            if not all(
-                np.isfinite(value) and 0.0 <= value <= 1.0
-                for value in numbers
-            ):
-                raise ValueError(
-                    f"{pathogen_id}.observation_model.{key} must be finite and bounded",
-                )
-            if abs(numbers[0]) >= 1e-15:
-                raise ValueError(
-                    f"{pathogen_id}.observation_model.{key}[0] must equal 0.0",
-                )
-            if any(left > right for left, right in zip(numbers, numbers[1:])):
-                raise ValueError(
-                    f"{pathogen_id}.observation_model.{key} must be non-decreasing",
-                )
+        for key in ASCERTAINMENT_VECTORS:
+            _validate_ascertainment_vector(
+                f"{pathogen_id}.observation_model.{key}",
+                observation.get(key),
+            )
         window = observation.get("episode_reporting_window_days")
         if window is None or not np.isfinite(float(window)) or float(window) <= 0:
             raise ValueError(
@@ -1236,6 +1230,68 @@ def _validate_symptom_severity_profiles(
             )
         _validate_severity_trajectory(pathogen_id, severity)
         _validate_molecular_observation(pathogen_id, observation)
+        _validate_observation_scenario_set(pathogen_id, observation)
+
+
+def _validate_ascertainment_vector(label: str, array: Any) -> list[float]:
+    """Check one five-state ascertainment vector and return it as floats."""
+    if not isinstance(array, list) or len(array) != 5:
+        raise ValueError(f"{label} must have length 5")
+    numbers = [float(value) for value in array]
+    if not all(np.isfinite(value) and 0.0 <= value <= 1.0 for value in numbers):
+        raise ValueError(f"{label} must be finite and bounded")
+    if abs(numbers[0]) >= 1e-15:
+        raise ValueError(f"{label}[0] must equal 0.0")
+    if any(left > right for left, right in zip(numbers, numbers[1:])):
+        raise ValueError(f"{label} must be non-decreasing")
+    return numbers
+
+
+def _validate_observation_scenario_set(
+    pathogen_id: str,
+    observation: dict[str, Any],
+) -> None:
+    """Check a declared observation prior, when the profile declares one.
+
+    The prior exists because the ascertainment vectors are assumed rather than
+    identified (#27), and the only defensible representation of that is a set
+    of whole coherent vectors. Two things are therefore enforced. Every
+    scenario carries all three vectors, so no arm can move one component of a
+    reporting ladder and leave the rest of it behind. And the named active
+    scenario must be the one the profile is actually running, so a scenario
+    switch is a switch between declared members rather than a free edit beside
+    a stale name.
+    """
+    prior = observation.get("prior")
+    if prior is None:
+        return
+    label = f"{pathogen_id}.observation_model.prior"
+    if not isinstance(prior, dict) or prior.get("type") != "scenario_set":
+        raise ValueError(f"{label}.type must be 'scenario_set'")
+    scenarios = prior.get("scenarios")
+    if not isinstance(scenarios, dict) or not scenarios:
+        raise ValueError(f"{label}.scenarios must be a non-empty object")
+    for name, scenario in scenarios.items():
+        if not isinstance(scenario, dict):
+            raise ValueError(f"{label}.scenarios.{name} must be an object")
+        for key in SCENARIO_VECTORS:
+            _validate_ascertainment_vector(
+                f"{label}.scenarios.{name}.{key}",
+                scenario.get(key),
+            )
+    active = prior.get("active_scenario")
+    if active not in scenarios:
+        raise ValueError(
+            f"{label}.active_scenario must name a declared scenario, "
+            f"got {active!r}",
+        )
+    for key in SCENARIO_VECTORS:
+        if not np.allclose(scenarios[active][key], observation[key]):
+            raise ValueError(
+                f"{pathogen_id}.observation_model.{key} does not match "
+                f"scenario {active!r}; a scenario switch must move every "
+                "vector and the active_scenario name together",
+            )
 
 
 def _validate_severity_trajectory(
