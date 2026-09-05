@@ -398,6 +398,16 @@ levels-only dose bracket — are infrastructure with wall-clock cost and no
 in-repo dependency. Start them early; they are the only items whose duration is
 not our own working time.
 
+They have run, and the C1 bracket they submitted returned nothing: all nine
+`dose_adjustment` rungs produced identical output at every seed, so 2,880 runs
+were 320 distinct runs replicated across a ladder sited where the axis is flat
+([`../norovirus/c1_reported_case_bracket_result.md`](../norovirus/c1_reported_case_bracket_result.md)).
+A sweep that cannot distinguish its own rungs is a third way to waste a
+campaign, beside the two in §1, and it is the one that survives a completely
+successful run. Every campaign submitted from here on states which axis it is
+resolving and is checked for resolution on a short probe *before* submission,
+with `picard_framework/analysis/sweep_degeneracy.py`.
+
 **#36, the Morris screen, re-run on the rebuilt structure.** It cannot run until
 Tracks A and C are complete, because every item in them changes either the
 structure or the box. Running it earlier does not produce a partial answer; it
