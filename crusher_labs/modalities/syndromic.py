@@ -39,6 +39,29 @@ def _symptomatic_infection(agent: dict[str, Any]) -> dict[str, Any]:
     )
 
 
+# Spawn key for the molecular rung's own stream. Large so it cannot collide
+# with the sequential keys ``SeedSequence.spawn`` hands out.
+_MOLECULAR_SPAWN_KEY = 7919
+
+
+def _molecular_stream(rng: np.random.Generator) -> np.random.Generator:
+    """Return an independent generator for specimen and assay draws.
+
+    The laboratory modalities share one generator, so a specimen draw taken
+    from it would shift every RDT, PCR and sequencing draw that follows.
+    Deriving the child from the parent's entropy, without calling ``spawn``,
+    leaves the parent's own spawn counter untouched.
+    """
+    seed_seq = getattr(rng.bit_generator, "seed_seq", None)
+    if isinstance(seed_seq, np.random.SeedSequence):
+        child = np.random.SeedSequence(
+            seed_seq.entropy,
+            spawn_key=(*seed_seq.spawn_key, _MOLECULAR_SPAWN_KEY),
+        )
+        return np.random.default_rng(child)
+    return np.random.default_rng(_MOLECULAR_SPAWN_KEY)
+
+
 def _agent_is_crew(agent: dict[str, Any]) -> bool:
     role = str(agent.get("role") or "").lower()
     if role == "crew":
@@ -109,6 +132,7 @@ class SyndromicSurveillance:
             interval = int(crew_screening_interval_epochs)
             self.crew_screening_interval_epochs = interval if interval > 0 else None
         self.rng = rng if rng is not None else default_simulation_rng()
+        self._molecular_rng = _molecular_stream(self.rng)
         # Sticky per-agent compliance class for the cruise (compliant/reluctant/defiant)
         self._compliance_class: dict[int, str] = {}
         # First epoch agent observed symptomatic (for detection_delay_hours)
@@ -397,7 +421,7 @@ class SyndromicSurveillance:
             probability = self._specimen_probability(
                 model, infection, presented=aid in presenting,
             )
-            if probability <= 0.0 or self.rng.random() >= probability:
+            if probability <= 0.0 or self._molecular_rng.random() >= probability:
                 continue
             self._lab_sampled[(pathogen_id, aid)] = int(epoch)
             drawn.append(aid)
@@ -436,7 +460,7 @@ class SyndromicSurveillance:
     ) -> bool:
         if infection.get("status") != "INFECTED":
             return False
-        return bool(self.rng.random() < model["sensitivity"])
+        return bool(self._molecular_rng.random() < model["sensitivity"])
 
     @staticmethod
     def _severity_index(
