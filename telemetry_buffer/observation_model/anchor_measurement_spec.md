@@ -172,8 +172,9 @@ voyage; VSP publishes no voyage denominator, so nothing here is per voyage.
 | A7d | share of postings above 15% of passengers ill | 18/262 → 2/66; on 1000+ pax ships 11/226 → 0/48 | direction only, Fisher p=0.22; never a fitted target |
 | A7e | postings per year, norovirus fraction | descriptive | never scored, no denominator |
 
-**A7c is the scored anchor; A7a, A7b and A7d are reported context.** Three
-things about it must travel with the number wherever it is quoted:
+**A7c is the scored anchor; A7a, A7b and A7d are reported context.** The three
+things below travel with the number wherever it is quoted, and `era_joint_scoring.py`
+enforces all three mechanically rather than by convention:
 
 1. It is scored as an *out-of-sample prediction*. The common dose is fitted on
    the pre-2020 arm alone; the post-2020 arm runs at that same dose with an
