@@ -423,6 +423,38 @@ multi_pathogen:
 #         efficacy_against_acquisition: 0.0
 #         efficacy_against_illness: 0.60
 
+# ── Non-pharmaceutical interventions (formal_spec_v2 3.7) ────
+# Absent by default, and no magnitude ships: a measure declares, per route,
+# the fraction of the external dose that still reaches a covered host, and
+# must carry its own source. See engines/non_pharmaceutical_interventions.py
+# for the boundaries — this is not route efficiency (pathogen biology, in
+# the pathogen profiles) and not the ship's plant (hvac.filter_efficiency
+# and transmission.surface_cleaning above already own those).
+#
+# Routes: direct_contact, droplet, hvac_airborne, fomite,
+# food_contamination, environmental_source. An unnamed route is unreduced.
+# Effective multiplier is 1 - compliance * (1 - reference), so compliance
+# 0 is no effect and 1 is the reference efficacy.
+#
+# The block below is the post-2020 buffet-entry prompt as a *shape*, with
+# the magnitudes left as XXX because E/#10 has to source them: the prompt's
+# coverage and the chosen hand-hygiene action's route efficacy are separate
+# arms, since alcohol rub sits 3-4 log10 below soap on GII.4 (Tuladhar 2015)
+# and collapsing them into one hygiene multiplier would hide which one the
+# post-2020 arm is actually asserting.
+#
+# non_pharmaceutical_interventions:
+#   buffet_entry_handwash_prompt:
+#     source: "..."
+#     coverage_by_role: {passenger: XXX, crew: XXX}
+#     compliance: XXX
+#     reference_multipliers: {fomite: XXX, food_contamination: XXX}
+#   buffet_entry_sanitizer_prompt:
+#     source: "..."
+#     coverage_by_role: {passenger: XXX, crew: XXX}
+#     compliance: XXX
+#     reference_multipliers: {fomite: XXX}
+
 # ── Variant Surveillance (heritable strain tracking) ─────────
 # Off by default: with enabled=false no strain is minted and no RNG draw
 # changes, so legacy runs and campaign goldens stay bit-identical.

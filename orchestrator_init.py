@@ -55,6 +55,10 @@ from engines.initiation import (
     initiation_owned_pathogens,
     resolve_initiation_plan,
 )
+from engines.non_pharmaceutical_interventions import (
+    assign_host_npi,
+    resolve_npi,
+)
 from engines.pharmaceutical_interventions import (
     assign_host_pharmacology,
     resolve_pharmacology,
@@ -1401,6 +1405,9 @@ _BOARDING_SEED_OFFSET = 8221
 # Same role again for the vaccination and antiviral coverage draws.
 _PHARMACOLOGY_SEED_OFFSET = 6133
 
+# And again for who a non-pharmaceutical measure reaches.
+_NPI_SEED_OFFSET = 6141
+
 # Rejection budget for the truncated chronic-duration draw before clipping.
 _CHRONIC_DURATION_MAX_DRAWS = 32
 
@@ -1457,6 +1464,24 @@ def _pharmacology_rng(
         return np.random.default_rng(seed_seq.spawn(1)[0])
     return np.random.default_rng(
         int(cfg.get("random_seed", 0) or 0) + _PHARMACOLOGY_SEED_OFFSET,
+    )
+
+
+def _npi_rng(
+    rng: np.random.Generator, cfg: dict[str, Any],
+) -> np.random.Generator:
+    """Return an independent stream for non-pharmaceutical coverage draws.
+
+    Same reason as the pharmacology stream, and the same conditional spawn:
+    turning a measure on must move the measure and nothing else, or the
+    pre/post-COVID comparison would be reading a reseeded run rather than
+    an intervened one.
+    """
+    seed_seq = getattr(rng.bit_generator, "seed_seq", None)
+    if seed_seq is not None:
+        return np.random.default_rng(seed_seq.spawn(1)[0])
+    return np.random.default_rng(
+        int(cfg.get("random_seed", 0) or 0) + _NPI_SEED_OFFSET,
     )
 
 
@@ -1686,6 +1711,14 @@ def init_multi_pathogen(
         # no pharmacology at all.
         assign_host_pharmacology(
             engine.agents, pharmacology, _pharmacology_rng(rng, cfg),
+        )
+
+    npi_measures = resolve_npi(cfg)
+    if npi_measures:
+        # Conditional for the same reason: a run that declares no measure
+        # spawns nothing and keeps every downstream stream where it was.
+        assign_host_npi(
+            engine.agents, npi_measures, _npi_rng(rng, cfg),
         )
 
     candidate_ids = [

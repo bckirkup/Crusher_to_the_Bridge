@@ -451,6 +451,9 @@ class KorkinAgent:
         "chronic_shedding_duration_by_pathogen",
         # What the manifest gave this host: vaccination and antiviral status
         "pharma_by_pathogen",
+        # What the operator's non-pharmaceutical measures do to this host's
+        # incoming dose, by route, and which measures reached it
+        "dose_reduction_multipliers", "npi_measures",
         "shedding_multiplier", "cabin_mate_ids", "ashore",
         # Variant surveillance: genotype standing immunity was raised against
         "prior_genotypes", "immune_history",
@@ -546,6 +549,10 @@ class KorkinAgent:
         # books as a record so a run can report who was covered, not only
         # what their susceptibility ended up being.
         self.pharma_by_pathogen: dict[str, dict[str, Any]] = {}
+        # Empty means no measure reaches this host, so every route's dose
+        # arrives unreduced; see engines/non_pharmaceutical_interventions.py.
+        self.dose_reduction_multipliers: dict[str, float] = {}
+        self.npi_measures: tuple[str, ...] = ()
 
         # Legacy single-pathogen shedding host factor (also mirrored on first infection)
         self.shedding_multiplier: float = 1.0
