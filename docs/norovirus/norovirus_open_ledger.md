@@ -61,6 +61,22 @@ changes here.
   re-run isolates the screened pathogen (`--co-seeded isolated`, the default in
   `bounded_screen.py`). A composite run is a legitimate scenario, but it is a
   different scenario, and its ranking may not be compared with an isolated one.
+- **The #36 Morris ranking (350 runs, 2026-09-05), as a statement about the
+  current model.** Withdrawn on its initial condition, not on its arithmetic.
+  Every one of its design points started from one fiat norovirus index case;
+  #54/#440 landed the day after those runs and moved arrival into each
+  pathogen's profile as a boarding prevalence draw (`norwalk_gi`: 3.25% of
+  passengers, 1.85% of crew), which the initiation engine now owns outright.
+  The regime is different, not merely re-plumbed: at the same box centre, same
+  hull, agents, horizon and seed, the boarding arm reports a passenger
+  infection attack rate of **0.0759 against ≈0.005** under one index case, and
+  a peak at epoch 61 rather than 8. The screen's own §3 reading — that five of
+  six factors sat below the floor because the isolated epidemic was near
+  extinction — is exactly what a ~15× denser arrival changes, so the ranking
+  may not be carried into #37 as a restriction on which factors it searches.
+  The measurement stands as a measurement of the retired condition; a
+  replacement pass needs its own floor, because the floor was taken under the
+  same retired condition.
 - **Any claim that the model reproduces VSP attack rates.** Withdrawn at #346
   and not re-established. Expedition's earlier agreement was a cancellation of
   an inflated infection rate against a deflated illness ratio.

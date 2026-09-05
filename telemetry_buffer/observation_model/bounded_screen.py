@@ -39,15 +39,26 @@ One pathogen at a time. Every scored output is a host-level quantity: the
 agent-level infection and illness fields are a projection across all of a
 host's lineages (natural_history.project_legacy_illness), and the summary
 counters, the reported-case ladder and the VSP threshold all read that
-projection. A run of the shipped bundle seeds norovirus, influenza and
+projection. A run of the shipped bundle boards norovirus, influenza and
 SARS-CoV-2 together, so its outputs are not attributable to any one of them --
-at the box centre the co-seeded configuration reports an attack rate of 0.43
-where norovirus alone reports 0.005. The screen therefore suppresses the seeds
-of every other pathogen in the bundle (`--co-seeded isolated`, the default) so
-that an elementary effect of a norovirus factor is read off a norovirus
-epidemic. `--co-seeded bundle` keeps the bundle's own seeding, and is a
-different scenario rather than a variant of the same one: its outputs are
-composite and its ranking may not be compared with the isolated one.
+under the retired one-index-case arrival the co-seeded configuration reported
+an attack rate of 0.43 at the box centre where norovirus alone reported 0.005,
+and under boarding norovirus alone reports 0.08. The screen therefore
+withdraws every other pathogen's boarding cohort (`--co-seeded isolated`, the
+default) so that an elementary effect of a norovirus factor is read off a
+norovirus epidemic.
+`--co-seeded bundle` keeps the bundle's own initiation, and is a different
+scenario rather than a variant of the same one: its outputs are composite and
+its ranking may not be compared with the isolated one.
+
+Isolation goes through the initiation engine's own per-pathogen opt-out
+(`initiation.boarding.<pathogen>.enabled = false`), not through the retired
+`initial_infected` field: since the boarding migration the engine owns every
+shipped pathogen's arrival and refuses a profile that also states a fiat index
+count, so a run patching that field is rejected rather than isolated. Note
+that the arrival mechanism changed with it -- a boarding prevalence draw, not
+one index case -- and a screen or floor measured under the retired condition
+describes a model that no longer exists.
 
 The observation model's ascertainment vectors are absent for the third reason
 and are handled the same way. They are declared rather than sourced (#27) and
@@ -254,15 +265,18 @@ def build_overrides(
     return {pathogen_id: profile}
 
 
-def suppress_other_pathogens(
+def withdraw_other_boarding(
     bundle: str,
     pathogen_id: str,
-) -> dict[str, dict[str, object]]:
-    """Seed counts that leave ``pathogen_id`` as the bundle's only index case.
+) -> dict[str, object]:
+    """An initiation block that leaves ``pathogen_id`` the only one boarding.
 
-    Only the seeds move: every other pathogen keeps its declared profile, so
-    the suppression is a statement about this run's initial condition and not
-    an edit of the model.
+    Only the channel switch moves: every other pathogen keeps its declared
+    boarding coordinates and its whole profile, so the withdrawal is a
+    statement about this run's initial condition and not an edit of the model.
+    The block restates ``enabled: true`` because it is merged over the config's
+    initiation section rather than into it, and a block that dropped the
+    channel switch would withdraw the screened pathogen's own arrival too.
     """
     path = CatalogRegistry.from_repo(str(REPO_ROOT)).resolve_pathogen_bundle(bundle)
     profiles = load_pathogen_bundle(path)
@@ -271,11 +285,17 @@ def suppress_other_pathogens(
             f"bundle {bundle!r} declares no pathogen {pathogen_id!r}; "
             f"declared: {sorted(profiles)}",
         )
-    return {
-        other: {"initial_infected": 0}
-        for other in profiles
-        if other != pathogen_id
-    }
+    if not profiles[pathogen_id].get("boarding"):
+        raise KeyError(
+            f"{pathogen_id} ships no boarding block in bundle {bundle!r}: "
+            "withdrawing the others would leave the run with no arrival of "
+            "the pathogen being screened",
+        )
+    boarding: dict[str, object] = {"enabled": True}
+    for other in profiles:
+        if other != pathogen_id:
+            boarding[other] = {"enabled": False}
+    return {"boarding": boarding}
 
 
 def observation_scenario_patch(
@@ -322,8 +342,9 @@ def run_point(
 ) -> dict[str, float]:
     """Run one design point at one seed and return the scored outputs."""
     overrides = build_overrides(factors, units, pathogen_id)
+    config_overrides: dict[str, object] = {"ship_graph": {"num_agents": int(num_agents)}}
     if co_seeded == "isolated":
-        overrides.update(suppress_other_pathogens(bundle, pathogen_id))
+        config_overrides["initiation"] = withdraw_other_boarding(bundle, pathogen_id)
     if observation_scenario is not None:
         overrides[pathogen_id]["observation_model"] = observation_scenario_patch(
             bundle, pathogen_id, observation_scenario,
@@ -341,7 +362,7 @@ def run_point(
         "legacy_yaml": "crusher_labs/config.yaml",
         "actors": [],
         "incentives": {},
-        "config_overrides": {"ship_graph": {"num_agents": int(num_agents)}},
+        "config_overrides": config_overrides,
         "pathogen_overrides": overrides,
     }
     with tempfile.TemporaryDirectory() as tmp:
