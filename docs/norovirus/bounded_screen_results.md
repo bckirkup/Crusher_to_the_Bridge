@@ -1,6 +1,9 @@
 # Morris screen over the norovirus box: what the scored outputs actually move on
 
-Status: measurement, 2026-09-01. Design:
+Status: superseded measurement, 2026-09-01. The screen on the current box is
+[`bounded_screen_isolated_36.md`](bounded_screen_isolated_36.md) (#36,
+2026-09-05, isolated seeding); it shares no comparable row with this one, and no
+ranking here may be carried forward. Design:
 `docs/proposals/bounded_sensitivity_and_admissible_region_spec.md` §2. Harness:
 `telemetry_buffer/observation_model/bounded_screen.py`. Raw output:
 `telemetry_buffer/observation_model/bounded_screen_norovirus.json` and
