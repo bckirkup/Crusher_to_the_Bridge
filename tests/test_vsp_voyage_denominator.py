@@ -110,6 +110,16 @@ def test_post_covid_years_name_the_post_arm_gap(year: int) -> None:
     assert vd.missing_denominator_reason(year) == vd.NO_POST_COVID_DENOMINATOR
 
 
+def test_the_public_pages_supply_a_post_2020_numerator_only() -> None:
+    postings = vd.postings_by_year()
+
+    for year in (2020, 2021, 2022, 2023, 2024, 2025, 2026):
+        assert postings.get(year, 0) > 0
+        assert vd.annual_denominator_interval(year) is None
+        assert vd.posting_rate_interval(year, postings[year]) is None
+    assert "numerator" in vd.NO_POST_COVID_DENOMINATOR
+
+
 def test_posting_rate_moves_with_the_numerator() -> None:
     rates = [vd.posting_rate_interval(2012, n)[1] for n in (5, 10, 20)]
 

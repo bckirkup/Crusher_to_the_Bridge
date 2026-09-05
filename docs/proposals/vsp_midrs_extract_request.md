@@ -139,9 +139,24 @@ none of them has a central value to read off:
 |---|---|---|
 | Annual qualifying voyages, 2008–2014 | per year, e.g. 2010 **[4,155, 5,527]**, 2014 **[4,387, 5,000]**, the other five **[analysed, required]** | one rule for all seven years: span both published columns and the count the printed rate implies, so the 2010 misprint widens the year instead of deleting it. Grade **M**, origin T1 |
 | Annual qualifying voyages, 2006–2007 and 2015–2019 | **[3,964, 5,527]** each | the union envelope of the seven bracketed years, on a declared stationarity assumption. Grade **C**, swept, never centred |
-| Annual qualifying voyages, 2020– | **∅ null** | nothing published can bound it; a fleet that stopped sailing cannot be assumed unchanged |
+| Annual qualifying voyages, 2020– | **∅ null** | nothing published can bound it; a fleet that stopped sailing cannot be assumed unchanged (see below — the public pages cover these years, but only as a numerator) |
 | "Unduplicated voyage report" as a share of a required-report voyage | **0.48–0.67** | 37,258 against fourteen years of the envelope. A *measure of the mismatch*, not a conversion factor |
 | Posting step, posted ÷ investigated | **[0.53, 1.0]** | observed 2008–2014 floor (9/17 in 2013; the seven years run 0.53–0.93, mean 0.70) up to the structural ceiling that a posting presupposes an investigation. The Jenkins-window 1.33 is excluded because it breaks that ceiling, and is kept visible for the same reason |
+
+### Why the public pages cannot supply the post-2020 range
+
+The pages *do* cover 2020 onward, which makes the null look like an omission, so
+it is worth stating exactly what they contain. They list the voyages CDC posted —
+4 in 2020, 1 in 2021, 4 in 2022, then 14, 18, 23 and 9 so far — which is the
+**numerator** of a posting rate. They have never published the number of voyages
+sailed, in any era: both denominator columns this tree carries come from MMWR,
+which stops at 2019. The only fleet-side quantity the pages yield is the number
+of distinct ships they name, 1–19 per year against hundreds under jurisdiction,
+which is a floor on the fleet loose by more than an order of magnitude and
+therefore not a denominator. Bounding the post arm would mean assuming voyages
+per ship per year, and that number is exactly what the pandemic changed. So the
+post-2020 arm compares postings to postings, and the annual voyage count for
+those years is one of the things the request is for.
 
 What a reply changes is the width of those intervals, and in one case their
 number: annual investigated counts for 2006–2007 and 2015–2019 would replace the

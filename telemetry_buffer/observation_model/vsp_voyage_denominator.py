@@ -40,6 +40,17 @@ for the two papers to be describing the same fleet.  Post-2020 stays empty:
 nothing has been published that could bound it, and an interval invented for it
 would be a number with no source.
 
+CDC's own outbreak pages do not close the post-2020 gap, and it is worth being
+precise about why, because they visibly *do* cover those years.  What they cover
+is the numerator: they list the voyages CDC posted (4 in 2020, 1 in 2021, 4 in
+2022, then 14, 18, 23 and 9 so far), and they have never published a count of
+voyages sailed in any era --- both counts this module carries came from MMWR,
+which stops at 2019.  The only fleet quantity derivable from the pages is the
+number of distinct ships they name, 1-19 per year against hundreds under
+jurisdiction, which bounds the fleet from below by a factor that makes it
+useless as a denominator.  So the post arm compares postings to postings and
+never a rate to a rate.
+
 Nothing here is fitted and nothing here is a target.  ``a9_targets`` in
 ``midrs_incidence_targets.py`` continues to score against the Jenkins
 denominator it has always used; the Freeland-window rates below are a
@@ -138,7 +149,9 @@ NO_ANNUAL_DENOMINATOR = (
 )
 NO_POST_COVID_DENOMINATOR = (
     "no VSP voyage count of any kind has been published for the post-2020 "
-    "era, so the post arm has no posting-rate denominator"
+    "era, so the post arm has no posting-rate denominator; CDC's outbreak "
+    "pages supply postings only (a numerator), and the 1-19 distinct ships "
+    "they name per year are a floor on the fleet, not a count of its voyages"
 )
 
 DENOMINATOR_YEARS = tuple(sorted(FREELAND_VOYAGES_ANALYSED))
