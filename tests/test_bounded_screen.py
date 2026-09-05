@@ -306,6 +306,115 @@ def test_noise_floor_of_a_single_seed_is_zero(
     assert floor["peak_epoch"] == pytest.approx(0.0)
 
 
+def test_suppression_zeroes_every_other_pathogen_in_the_bundle() -> None:
+    suppressed = bounded_screen.suppress_other_pathogens("active_profiles", PATHOGEN)
+
+    assert PATHOGEN not in suppressed
+    assert suppressed
+    assert set(suppressed) >= {"influenza_a", "sars_cov2_resp"}
+    assert all(patch == {"initial_infected": 0} for patch in suppressed.values())
+
+
+def test_suppression_of_a_pathogen_absent_from_the_bundle_is_refused() -> None:
+    with pytest.raises(KeyError, match="declares no pathogen"):
+        bounded_screen.suppress_other_pathogens("active_profiles", "not_a_pathogen")
+
+
+def _captured_spec(monkeypatch: pytest.MonkeyPatch) -> dict[str, object]:
+    """Run one design point against a stub simulation and keep its spec."""
+    seen: dict[str, object] = {}
+
+    def _from_json(root: str, path: str) -> str:
+        seen["spec"] = json.loads(Path(path).read_text(encoding="utf-8"))
+        return "spec"
+
+    class _Result:
+        history: list[dict[str, object]] = []
+
+    class _Sim:
+        def __init__(self, spec: object, display: bool = False) -> None:
+            self._spec = spec
+
+        def run(self) -> _Result:
+            return _Result()
+
+    monkeypatch.setattr(
+        bounded_screen.PicardRunSpec, "from_picard_json", staticmethod(_from_json),
+    )
+    monkeypatch.setattr(bounded_screen, "ShipSimulation", _Sim)
+    monkeypatch.setattr(
+        bounded_screen, "compute_derived_metrics", lambda ts, n: {},
+    )
+    monkeypatch.setattr(bounded_screen, "extract_timeseries", lambda history: [])
+    return seen
+
+
+def test_an_isolated_run_seeds_only_the_screened_pathogen(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The scored outputs are host-level, so a co-seed would contaminate them."""
+    seen = _captured_spec(monkeypatch)
+
+    bounded_screen.run_point(
+        bounded_screen.NOROVIRUS_FACTORS,
+        [0.5] * len(bounded_screen.NOROVIRUS_FACTORS),
+        seed=500,
+        pathogen_id=PATHOGEN,
+        bundle="active_profiles",
+        platform="mega_cruise_5000",
+        epochs=2,
+        num_agents=10,
+    )
+
+    overrides = seen["spec"]["pathogen_overrides"]
+    assert overrides["influenza_a"]["initial_infected"] == 0
+    assert "initial_infected" not in overrides[PATHOGEN]
+
+
+def test_a_bundle_run_leaves_the_declared_seeding_alone(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    seen = _captured_spec(monkeypatch)
+
+    bounded_screen.run_point(
+        bounded_screen.NOROVIRUS_FACTORS,
+        [0.5] * len(bounded_screen.NOROVIRUS_FACTORS),
+        seed=500,
+        pathogen_id=PATHOGEN,
+        bundle="active_profiles",
+        platform="mega_cruise_5000",
+        epochs=2,
+        num_agents=10,
+        co_seeded="bundle",
+    )
+
+    assert list(seen["spec"]["pathogen_overrides"]) == [PATHOGEN]
+
+
+def test_the_recorded_run_declares_which_seeding_it_used(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    monkeypatch.setattr(
+        bounded_screen,
+        "noise_floor",
+        lambda factors, seeds, **_kwargs: dict.fromkeys(
+            bounded_screen.SCORED_OUTPUTS, 0.0,
+        ),
+    )
+
+    with tempfile.TemporaryDirectory(dir=bounded_screen.REPO_ROOT) as directory:
+        out = Path(directory) / "floor.json"
+        bounded_screen.main(
+            ["--mode", "floor", "--floor-seeds", "2", "--out", str(out)],
+        )
+        payload = json.loads(out.read_text(encoding="utf-8"))
+
+    capsys.readouterr()
+
+    assert payload["run"]["co_seeded"] == "isolated"
+
+
 def test_parse_args_defaults_are_the_published_design() -> None:
     """Change-detector: these defaults are the executed pass on record."""
     args = bounded_screen.parse_args(["--out", "screen.json"])
