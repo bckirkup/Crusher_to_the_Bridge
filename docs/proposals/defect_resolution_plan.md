@@ -103,7 +103,7 @@ what fits.
 |---|---|---|---|
 | B1 | Demote A3 from scored anchor to construction constraint | #23 | — (**resolved**, see below) |
 | B2 | The observation model's ~15 numbers: source them or declare them | #27 | B1 (**resolved as a declaration**, see below) |
-| B3 | Recut the A4 class bins | #29 | — |
+| B3 | Recut the A4 class bins | #29 | — (**resolved**, see below) |
 | B4 | An external voyage denominator for VSP posting rates | #13 | — |
 | B5 | Measure or externally bound the cabin-localization fraction `f` | #12 | — |
 
@@ -122,8 +122,7 @@ empirical aggregate, and that aggregate *is* anchor A3 — so A3 cannot also be 
 test of them. Sourcing them while A3 was still scored would have been fitting to
 the target through fifteen intermediaries. **B1 has landed, so B2 is unblocked**;
 the band A3 is now reported against is a wiring check, and reading in-band as
-agreement would restore the circularity the demotion removed. B3 is a plain
-defect (the bins bin passenger counts against total-agent capacities). B4 and B5
+agreement would restore the circularity the demotion removed. B4 and B5
 are searches with no in-repo prerequisite and can run in parallel with Track A.
 
 **B2 resolved on the second branch of its own title: declared, not sourced.**
@@ -144,6 +143,21 @@ moves one component, or one that sits beside a stale `active_scenario`, and
 reporting probability over an interval, which would sweep a ladder no observer
 could exhibit. No number moved: `base_reporting` is the shipped decomposition
 unchanged, so orchestrator output is byte-identical.
+
+**B3 is resolved.** It was a plain defect: A4's denominator is passengers, but
+the bins compared `pax_total` against the platform ids, three of which name a
+passenger-plus-crew total. Each hull now declares `nominal_complement` as a
+passengers/crew split in its own `spatial_layout.json` (300+150, 1,350+560,
+2,100+900, 5,000+2,000) and the band edges are the geometric means of the
+passenger halves, so no edge is chosen and changing a complement moves them.
+The recut moves anchor availability in both directions — the mega hull gains a
+pre-2020 A4 anchor (4 postings became 16) and the classic hull loses its
+post-2020 one (32 became 8) — which is a change in *which cells are scored*,
+decided by a posting floor rather than by any result. Left unrepaired and
+recorded: the hull-to-GRT mapping behind A8/A9 chose representative ships for
+the classic and spirit hulls against the same total-agent figures, so their
+band is one band too high until two ships at ~1,350 and ~2,100 passengers are
+sourced.
 
 ## 5. Track C — intervals: no scored parameter stays a point value
 

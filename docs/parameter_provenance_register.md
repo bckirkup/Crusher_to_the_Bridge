@@ -574,6 +574,20 @@ item here, because the genogroup contrast cannot be quantified for it at all.
    question owned by this item and by the SARS-CoV-2 severity row in §3.2
    (#31), and it inherits that row's constraint: the ladder reads on age, and
    Tabata/Diamond Princess remains barred.
+
+   **B3 (#29) has landed alongside it, on the observation side.** A4's
+   denominator is passengers, but its class bins compared VSP `pax_total`
+   against the platform ids, three of which name a passenger-plus-crew total.
+   Each hull now declares `nominal_complement` (passengers and crew, separate
+   populations) in its own `spatial_layout.json` and the band edges are the
+   geometric means of the passenger halves — 636 / 1,684 / 3,240 — so an edge
+   is derived rather than chosen. No epidemiological constant moved and no row
+   here changes grade; the A4 *targets* are runtime-derived from
+   `vsp_outbreak_series.csv` and move with the bins, which withdraws the
+   post-2020 classic cell (8 postings) and supplies a pre-2020 mega cell (16),
+   both by the ten-posting floor rather than by any result. The hull-to-GRT
+   mapping behind A8/A9 carries the same defect in its representative ships
+   for the classic and spirit hulls and is recorded as open, not repaired.
 6. **Norovirus shedding-curve peak magnitude** — 11.0 log10 copies/g is Atmar's
    GI.1 median peak to two decimals, and Kirby measures GII.2 about two logs
    below GI.1 in the same challenge design. Unlike the dose axis, where the GII
@@ -615,7 +629,8 @@ sourced interval — correct it, but do not prioritise it).
 How many of these the **data** can separate is a different question from how many
 are free, and it is the smaller number. Counting the informative cells in the
 fleet observable — posted outbreaks by hull class and era against a traffic
-background, two of whose eight class-era cells (mega) are unusable — gives an
+background, two of whose eight class-era cells (post-2020 classic, post-2020
+mega) are unusable under the passenger-complement bins recut in #29 — gives an
 expectation of order **five** identifiable composites on the norovirus arm
 against the nine named above, with the rest pinned by prior or frozen:
 [`proposals/fleet_emergence_decision.md`](proposals/fleet_emergence_decision.md)

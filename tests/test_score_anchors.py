@@ -36,7 +36,7 @@ def _row(
     sick_call_probability: float = 1.0,
 ) -> dict[str, Any]:
     passenger_complement = (
-        score_anchors.HULL_CAPACITY[hull]
+        score_anchors.HULL_PASSENGER_CAPACITY[hull]
         if passenger_complement is None
         else passenger_complement
     )
@@ -293,8 +293,14 @@ def test_a8_uses_travel_day_weighting_for_heterogeneous_cell() -> None:
 
     cell = score_anchors.summarise_cell([first, second])
 
-    expected_pax = 1e5 * (0.03 * 1900 + 0.12 * 1900) / (1900 * 3 + 1900 * 6)
-    expected_crew = 1e5 * (0.03 * 100 + 0.12 * 600) / (100 * 3 + 600 * 6)
+    pax = score_anchors.HULL_PASSENGER_CAPACITY["classic_cruise_1900"]
+    first_crew, second_crew = 2_000 - pax, 2_500 - pax
+    expected_pax = 1e5 * (0.03 * pax + 0.12 * pax) / (pax * 3 + pax * 6)
+    expected_crew = (
+        1e5
+        * (0.03 * first_crew + 0.12 * second_crew)
+        / (first_crew * 3 + second_crew * 6)
+    )
     assert cell["A8_pax_incidence"] == pytest.approx(expected_pax)
     assert cell["A8_crew_incidence"] == pytest.approx(expected_crew)
     unweighted_pax = (1e5 * 0.03 / 3.0 + 1e5 * 0.12 / 6.0) / 2

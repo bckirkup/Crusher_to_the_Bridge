@@ -10,6 +10,8 @@ that moved it saying so.  Design and provenance:
 from __future__ import annotations
 
 import importlib.util
+import json
+import math
 import sys
 import tempfile
 from pathlib import Path
@@ -36,21 +38,21 @@ SERIES_HEADER = (
 # `vsp_outbreak_series_extraction_log.md`. Change-detector: a move means the
 # series was re-extracted, and every A4 target moved with it.
 EXPECTED_COUNTS = {
-    ("expedition_cruise_450", "pre"): 34,
-    ("expedition_cruise_450", "post"): 18,
-    ("classic_cruise_1900", "pre"): 174,
-    ("classic_cruise_1900", "post"): 32,
-    ("spirit_cruise_3000", "pre"): 50,
-    ("spirit_cruise_3000", "post"): 13,
-    ("mega_cruise_5000", "pre"): 4,
+    ("expedition_cruise_450", "pre"): 21,
+    ("expedition_cruise_450", "post"): 12,
+    ("classic_cruise_1900", "pre"): 95,
+    ("classic_cruise_1900", "post"): 8,
+    ("spirit_cruise_3000", "pre"): 130,
+    ("spirit_cruise_3000", "post"): 43,
+    ("mega_cruise_5000", "pre"): 16,
     ("mega_cruise_5000", "post"): 3,
 }
 
-# The one hull-era cell whose quantiles are pinned outright: the classic pre
-# arm carries 174 postings, so it is the least noise-sensitive of the eight.
-CLASSIC_PRE_Q1 = 0.0418
-CLASSIC_PRE_MEDIAN = 0.0546
-CLASSIC_PRE_Q3 = 0.0770
+# The one hull-era cell whose quantiles are pinned outright: the spirit pre
+# arm carries 130 postings, so it is the least noise-sensitive of the eight.
+SPIRIT_PRE_Q1 = 0.0418
+SPIRIT_PRE_MEDIAN = 0.0526
+SPIRIT_PRE_Q3 = 0.0724
 QUANTILE_TOLERANCE = 5e-5
 
 
@@ -100,18 +102,46 @@ def permitted_series_dir() -> object:
 @pytest.mark.parametrize(
     ("pax_total", "expected"),
     [
-        (924.0, "expedition_cruise_450"),
-        (925.0, "classic_cruise_1900"),
-        (2386.0, "classic_cruise_1900"),
-        (2387.0, "spirit_cruise_3000"),
-        (3872.0, "spirit_cruise_3000"),
-        (3873.0, "mega_cruise_5000"),
+        (636.0, "expedition_cruise_450"),
+        (637.0, "classic_cruise_1900"),
+        (1683.0, "classic_cruise_1900"),
+        (1684.0, "spirit_cruise_3000"),
+        (3240.0, "spirit_cruise_3000"),
+        (3241.0, "mega_cruise_5000"),
         (6364.0, "mega_cruise_5000"),
     ],
 )
 def test_capacity_band_edges(pax_total: float, expected: str) -> None:
     """Each band edge is closed below and open above, with no gap at the top."""
     assert scoring._capacity_band(pax_total) == expected
+
+
+def test_hull_capacities_are_the_declared_passenger_complements() -> None:
+    """The bins carry passenger capacities, never passenger-plus-crew totals."""
+    layouts = Path(__file__).resolve().parents[1] / "data" / "platforms"
+    for hull, capacity in scoring.HULL_PASSENGER_CAPACITY.items():
+        declared = json.loads(
+            (layouts / hull / "spatial_layout.json").read_text(encoding="utf-8"),
+        )["nominal_complement"]
+
+        assert capacity == declared["passengers"]
+        assert capacity < declared["passengers"] + declared["crew"]
+
+
+def test_band_edges_are_geometric_means_of_adjacent_capacities() -> None:
+    """An edge sits at the ratio midpoint of the two complements it separates."""
+    edges = scoring._band_edges({"small": 100, "large": 400, "middle": 200})
+
+    assert [hull for _, hull in edges] == ["small", "middle", "large"]
+    assert edges[0][0] == pytest.approx(math.sqrt(100 * 200))
+    assert edges[1][0] == pytest.approx(math.sqrt(200 * 400))
+    assert edges[2][0] == float("inf")
+
+
+def test_a_posting_at_a_hull_complement_lands_in_that_hull() -> None:
+    """Each declared complement bins to its own hull, not to a larger one."""
+    for hull, capacity in scoring.HULL_PASSENGER_CAPACITY.items():
+        assert scoring._capacity_band(float(capacity)) == hull
 
 
 def test_load_postings_drops_rows_without_a_passenger_denominator(
@@ -225,30 +255,28 @@ def test_shipped_series_posting_counts(key: tuple[str, str], expected: int) -> N
     assert cells[key]["n"] == expected
 
 
-def test_shipped_series_classic_pre_quantiles() -> None:
+def test_shipped_series_spirit_pre_quantiles() -> None:
     """Change-detector on the one cell whose target values are pinned."""
     cell = scoring.targets_by_class_era(scoring.load_postings())[
-        ("classic_cruise_1900", "pre")
+        ("spirit_cruise_3000", "pre")
     ]
 
-    assert cell["q1"] == pytest.approx(CLASSIC_PRE_Q1, abs=QUANTILE_TOLERANCE)
+    assert cell["q1"] == pytest.approx(SPIRIT_PRE_Q1, abs=QUANTILE_TOLERANCE)
     assert cell["median"] == pytest.approx(
-        CLASSIC_PRE_MEDIAN,
+        SPIRIT_PRE_MEDIAN,
         abs=QUANTILE_TOLERANCE,
     )
-    assert cell["q3"] == pytest.approx(CLASSIC_PRE_Q3, abs=QUANTILE_TOLERANCE)
+    assert cell["q3"] == pytest.approx(SPIRIT_PRE_Q3, abs=QUANTILE_TOLERANCE)
 
 
-def test_targets_withheld_for_the_mega_hull() -> None:
-    """Four postings are not an anchor, in either era."""
-    assert scoring.vsp_attack_rate_targets("pre")["mega_cruise_5000"] is None
+def test_targets_withheld_where_the_postings_are_too_thin() -> None:
+    """Three and eight postings are not anchors; sixteen is."""
     assert scoring.vsp_attack_rate_targets("post")["mega_cruise_5000"] is None
+    assert scoring.vsp_attack_rate_targets("post")["classic_cruise_1900"] is None
+    assert scoring.vsp_attack_rate_targets("pre")["mega_cruise_5000"] is not None
 
 
-@pytest.mark.parametrize(
-    "hull",
-    ["expedition_cruise_450", "classic_cruise_1900", "spirit_cruise_3000"],
-)
+@pytest.mark.parametrize("hull", sorted(scoring.HULL_PASSENGER_CAPACITY))
 def test_targets_are_ordered_quantiles_with_their_postings(hull: str) -> None:
     """Every issued target is a real IQR and carries the n behind it."""
     target = scoring.vsp_attack_rate_targets("pre")[hull]
@@ -268,7 +296,7 @@ def test_targets_cover_every_hull_class() -> None:
     """Every scored hull gets a key, present or explicitly withheld."""
     targets = scoring.vsp_attack_rate_targets("pre")
 
-    assert set(targets) == set(scoring.HULL_CAPACITY)
+    assert set(targets) == set(scoring.HULL_PASSENGER_CAPACITY)
 
 
 def test_cli_paths_are_confined_to_their_declared_roots(tmp_path: Path) -> None:
@@ -319,7 +347,17 @@ def test_anchor_report_identifies_era_and_target_sample_sizes() -> None:
     report = score_anchors.render({}, "pre", targets)
 
     assert "`pre` era" in report
-    assert "| classic_cruise_1900 | 0.0418-0.0770 (median 0.0546) | 174 |" in report
+    assert "| spirit_cruise_3000 | 0.0418-0.0724 (median 0.0526) | 130 |" in report
+
+
+def test_anchor_report_names_the_cells_with_too_few_postings() -> None:
+    """A withheld cell reads as unanchored rather than as a passing one."""
+    report = score_anchors.render(
+        {},
+        "post",
+        scoring.vsp_attack_rate_targets("post"),
+    )
+
     assert "| mega_cruise_5000 | none — n/a (insufficient VSP postings) | - |" in report
 
 
@@ -329,7 +367,7 @@ def _cell(reported: float) -> dict[str, float]:
 
 def test_verdict_reports_the_mega_hull_as_unanchored() -> None:
     """A mega-hull A4 result must never read as a pass or a plain n/a."""
-    targets = scoring.vsp_attack_rate_targets("pre")
+    targets = scoring.vsp_attack_rate_targets("post")
 
     verdict, _ = score_anchors.verdicts(
         "mega_cruise_5000", _cell(0.05), targets

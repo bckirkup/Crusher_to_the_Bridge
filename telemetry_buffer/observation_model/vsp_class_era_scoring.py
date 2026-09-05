@@ -31,6 +31,8 @@ from __future__ import annotations
 
 import argparse
 import csv
+import json
+import math
 import statistics
 from collections import defaultdict
 from pathlib import Path
@@ -40,25 +42,69 @@ from simulation_utils.paths import resolve_repo_path, validated_open
 
 SERIES = Path(__file__).with_name("vsp_outbreak_series.csv")
 REPO_ROOT = Path(__file__).resolve().parents[2]
+PLATFORMS = REPO_ROOT / "data" / "platforms"
 
-# Nominal passenger complement of each scored hull, from the platform ids.
-HULL_CAPACITY: dict[str, int] = {
-    "expedition_cruise_450": 450,
-    "classic_cruise_1900": 1900,
-    "spirit_cruise_3000": 3000,
-    "mega_cruise_5000": 5000,
+# The hulls A4 scores, in ascending order of passenger complement.
+SCORED_HULLS: tuple[str, ...] = (
+    "expedition_cruise_450",
+    "classic_cruise_1900",
+    "spirit_cruise_3000",
+    "mega_cruise_5000",
+)
+
+
+def _read_passenger_complement(hull: str) -> int:
+    """Passenger complement declared by the hull's own spatial layout.
+
+    The platform id is not the passenger complement: three of the four ids
+    name the passenger-plus-crew total (``expedition_cruise_450`` berths 300
+    passengers and 150 crew) while ``mega_cruise_5000`` names passengers alone
+    (5,000 passengers plus 2,000 crew).  Read the declared split rather than
+    the id so that a passenger denominator is never compared against a
+    total-agent capacity.
+    """
+    layout = PLATFORMS / hull / "spatial_layout.json"
+    with validated_open(
+        str(layout),
+        "r",
+        allowed_roots=(str(PLATFORMS),),
+        encoding="utf-8",
+    ) as handle:
+        complement = json.load(handle).get("nominal_complement")
+    if not isinstance(complement, dict) or "passengers" not in complement:
+        raise RuntimeError(
+            f"{hull} declares no nominal_complement.passengers: A4 cannot bin "
+            "passenger denominators without a passenger capacity",
+        )
+    return int(complement["passengers"])
+
+
+# Passenger complement of each scored hull, from the platform declarations.
+HULL_PASSENGER_CAPACITY: dict[str, int] = {
+    hull: _read_passenger_complement(hull) for hull in SCORED_HULLS
 }
 
-# Capacity band edges assigning a posted outbreak to the hull whose complement
-# it most nearly matches.  Edges are the geometric means of adjacent nominal
-# complements, so the assignment is scale-symmetric rather than favouring the
-# larger class: sqrt(450*1900)=925, sqrt(1900*3000)=2387, sqrt(3000*5000)=3873.
-BAND_EDGES: list[tuple[float, str]] = [
-    (925.0, "expedition_cruise_450"),
-    (2387.0, "classic_cruise_1900"),
-    (3873.0, "spirit_cruise_3000"),
-    (float("inf"), "mega_cruise_5000"),
-]
+
+def _band_edges(capacities: dict[str, int]) -> list[tuple[float, str]]:
+    """Geometric-mean edges between adjacent passenger complements.
+
+    Geometric rather than arithmetic means keep the assignment
+    scale-symmetric, so a posting equidistant in ratio from two complements is
+    not pushed into the larger class.  The topmost edge is infinite: a posting
+    above the largest complement still belongs to the largest hull.
+    """
+    ordered = sorted(capacities.items(), key=lambda item: item[1])
+    edges: list[tuple[float, str]] = []
+    for (hull, capacity), (_, larger) in zip(ordered, ordered[1:]):
+        edges.append((math.sqrt(capacity * larger), hull))
+    edges.append((float("inf"), ordered[-1][0]))
+    return edges
+
+
+# Capacity band edges assigning a posted outbreak to the hull whose *passenger*
+# complement it most nearly matches: sqrt(300*1350)=636, sqrt(1350*2100)=1684,
+# sqrt(2100*5000)=3240.
+BAND_EDGES: list[tuple[float, str]] = _band_edges(HULL_PASSENGER_CAPACITY)
 
 # Eras present in the series, in chronological order.  ``shutdown`` (2020-2021)
 # is reported but never scored and never pooled into either arm: cruising was
@@ -166,15 +212,17 @@ def vsp_attack_rate_targets(
 ) -> dict[str, dict[str, float] | None]:
     """A4 quantile targets per hull for one era, or ``None`` where too thin.
 
-    ``mega_cruise_5000`` carries 4 pre-2020 and 3 post-2020 postings, so it has
-    no usable A4 anchor and returns ``None`` rather than a quantile triple read
-    off four points; ``MIN_POSTINGS_FOR_TARGET`` is that floor.
+    On passenger complements, ``mega_cruise_5000`` carries 16 pre-2020 and 3
+    post-2020 postings and ``classic_cruise_1900`` carries 8 post-2020, so the
+    post arm of those two classes returns ``None`` rather than a quantile
+    triple read off a handful of points; ``MIN_POSTINGS_FOR_TARGET`` is that
+    floor.
     """
     if era not in ERAS:
         raise ValueError(f"unknown era {era!r}; expected one of {ERAS}")
     rates = targets_by_class_era(load_postings(series))
     out: dict[str, dict[str, float] | None] = {}
-    for hull in HULL_CAPACITY:
+    for hull in HULL_PASSENGER_CAPACITY:
         cell = rates.get((hull, era))
         if cell is None or cell["n"] < MIN_POSTINGS_FOR_TARGET:
             out[hull] = None
@@ -240,7 +288,7 @@ def render(postings: list[Posting]) -> str:
         "| hull | era | n | q1 | median | q3 | max |",
         "|---|---|---|---|---|---|---|",
     ]
-    for hull in HULL_CAPACITY:
+    for hull in HULL_PASSENGER_CAPACITY:
         for era in ERAS:
             row = rates.get((hull, era))
             if not row:
@@ -262,7 +310,7 @@ def render(postings: list[Posting]) -> str:
         "| hull | era | postings | years | postings/year |",
         "|---|---|---|---|---|",
     ]
-    for hull in HULL_CAPACITY:
+    for hull in HULL_PASSENGER_CAPACITY:
         for era in ERAS:
             row = incidence.get((hull, era))
             if not row:

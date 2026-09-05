@@ -75,6 +75,19 @@ tonnage and capacity are both published, rather than to an assumed ratio.
 | `spirit_cruise_3000` | 3,000 | Voyager class | 138,000 GT / 3,114 pax | 44.3 | mega (120,001-140,000) |
 | `mega_cruise_5000` | 5,000 | Oasis class | 225,282 GT / 5,400 pax | 41.7 | super mega (>=140,001) |
 
+**The `pax` column of this table is the platform id, not the hull's passenger
+complement, and for two of the four hulls those differ.** The declared
+complements are 300 + 150, 1,350 + 560, 2,100 + 900 and 5,000 + 2,000
+passengers and crew: the expedition and mega representative ships were chosen
+against a passenger figure (294 against 300, 5,400 against 5,000) while the
+classic and spirit ships were chosen against a passenger-plus-crew total
+(1,970 against 1,350, 3,114 against 2,100). Re-anchoring those two hulls needs
+two new representative ships with published tonnage at ~1,350 and ~2,100
+passengers, which is a sourcing task and not this defect's fix; until it is
+done the A8/A9 GRT band of the classic and spirit hulls is one band too high
+and both anchors are provisional there. Recorded as an open item rather than
+repaired by picking whichever ship keeps the current band.
+
 Space ratio runs 42-57 GT/pax across the four, tightening with size, which is
 the expected direction: expedition tonnage buys space per passenger, mega
 tonnage buys passengers. Each mapping is unambiguous at the ratio of its own
@@ -258,32 +271,52 @@ The values therefore predate the series and their source is unrecorded.
 per era.** The replacement must ship with the code that computes it, so that it
 can never again be a number without a derivation.
 
+### The bins are passenger complements, not passenger-plus-crew totals
+
+A posting's denominator is passengers aboard, so the class it is assigned to
+must be the hull whose *passenger* complement it most nearly matches. The
+first cut of this scoring binned `pax_total` against the platform ids -- 450,
+1,900, 3,000, 5,000 -- three of which name the passenger-plus-crew total, so a
+1,600-passenger posting was scored against a hull that carries 1,350
+passengers and 560 crew. Every posting above the expedition class sat one band
+too low.
+
+`vsp_class_era_scoring.py` therefore reads each hull's declared
+`nominal_complement.passengers` from its own `spatial_layout.json` and takes
+the band edges as the geometric means of adjacent complements:
+sqrt(300 x 1,350) = 636, sqrt(1,350 x 2,100) = 1,684,
+sqrt(2,100 x 5,000) = 3,240. Geometric rather than arithmetic keeps the
+assignment scale-symmetric. No edge is chosen: change a complement in a
+platform file and the edges move with it.
+
 ### Measured, from `vsp_outbreak_series.csv`
 
-Reported passenger attack rate among posted outbreaks, by capacity band. 333 of
-428 postings carry a passenger denominator; the 87 `legacy_pre2004` rows carry
-none at all, so that era cannot be scored.
+Reported passenger attack rate among posted outbreaks, by passenger-complement
+band. 333 of 428 postings carry a passenger denominator; the 87
+`legacy_pre2004` rows carry none at all, so that era cannot be scored.
 
 | hull | era | n | q1 | median | q3 | max |
 |---|---|---|---|---|---|---|
-| `expedition_cruise_450` | pre | 34 | 0.0370 | 0.0507 | 0.1018 | 0.4265 |
-| `expedition_cruise_450` | post | 18 | 0.0331 | 0.0724 | 0.1351 | 0.2903 |
-| `classic_cruise_1900` | pre | 174 | 0.0418 | 0.0546 | 0.0770 | 0.2519 |
-| `classic_cruise_1900` | post | 32 | 0.0411 | 0.0506 | 0.0689 | 0.1248 |
-| `spirit_cruise_3000` | pre | 50 | 0.0431 | 0.0542 | 0.0667 | 0.2064 |
-| `spirit_cruise_3000` | post | 13 | 0.0353 | 0.0473 | 0.0635 | 0.1349 |
-| `mega_cruise_5000` | pre | 4 | 0.0298 | 0.0535 | 0.0782 | 0.0893 |
+| `expedition_cruise_450` | pre | 21 | 0.0400 | 0.0532 | 0.1045 | 0.4265 |
+| `expedition_cruise_450` | post | 12 | 0.0322 | 0.0742 | 0.1374 | 0.2903 |
+| `classic_cruise_1900` | pre | 95 | 0.0415 | 0.0552 | 0.0782 | 0.3027 |
+| `classic_cruise_1900` | post | 8 | -- | -- | -- | 0.1381 |
+| `spirit_cruise_3000` | pre | 130 | 0.0418 | 0.0526 | 0.0724 | 0.2242 |
+| `spirit_cruise_3000` | post | 43 | 0.0372 | 0.0495 | 0.0695 | 0.1349 |
+| `mega_cruise_5000` | pre | 16 | 0.0355 | 0.0600 | 0.0749 | 0.0893 |
 | `mega_cruise_5000` | post | 3 | -- | -- | -- | -- |
 
-**The mega hull has no usable A4 anchor in either era** -- four postings before
-the break and three after. That is the hull the campaign manifests centre on.
-Its A8 anchor rests on 292 voyages, which is thin but real; its A4 anchor is
-not an anchor. Say so wherever a mega-hull A4 result is reported.
+Which cells clear the ten-posting floor moves with the bins, in both
+directions: **the mega hull gains a pre-2020 A4 anchor** (16 postings, not
+four -- the hull the campaign manifests centre on is no longer unanchored
+before the break) and **the classic hull loses its post-2020 one** (8
+postings, not 32). The mega post-2020 arm remains unanchored at three
+postings. Say so wherever a withheld A4 result is reported; a withheld cell is
+not a passing one.
 
 Note the direction disagreement worth keeping in view: A8 says passenger
 incidence *rises* with ship size (10.9 to 29.2), while A4 says the posted
-attack rate is flat to *falling* with size (expedition medians are the highest
-of the four). Both can be true at once -- bigger ships have more introductions
+attack rate is flat with size (the four medians span 0.053-0.060 pre-2020). Both can be true at once -- bigger ships have more introductions
 and more contacts, so more voyages cross 3%, while a small ship that does cross
 3% crosses it with a handful of cases and can run much further. A model that
 reproduces one and not the other is telling us which of the two mechanisms it
