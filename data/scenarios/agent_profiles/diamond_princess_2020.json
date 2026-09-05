@@ -1,0 +1,35 @@
+{
+  "schema_version": "1.0.0",
+  "description": "Agent profile templates for the Diamond Princess training hull. The only thing this bundle carries beyond the repository default is the age composition, because that event's population was far older than a generic cruise population and the severity model is age-conditioned.",
+  "age_composition_derivation": {
+    "published_inputs": [
+      "NIID Field Briefing (20 February 2020) whole-ship age table by decade: 0–9: 16, 10–19: 23, 20–29: 347, 30–39: 428, 40–49: 334, 50–59: 398, 60–69: 923, 70–79: 1015, 80–89: 216, 90–99: 11 (total 3711)",
+      "Tsuboi 2020 (DOI 10.35772/ghm.2020.01037) per-role ages: passengers mean 66.0 (range 2–98), crew mean 36.6 (range 19–64)"
+    ],
+    "steps": [
+      "The published table is decadal and the repository's age bands are not, so decade counts were split onto the disjoint band partition 0-4 / 5-17 / 18-34 / 35-49 / 50-64 / 65-74 / 75+ assuming ages are uniform inside a published decade. That uniformity is a DECLARED ASSUMPTION (grade C); it is the only interpolation in the derivation.",
+      "The published table is whole-ship, and applying it to crew would put a fifth of the crew over 75, which the published crew range 19–64 excludes. Crew are therefore given only the three bands inside that range, weighted 0.50 / 0.35 / 0.15, which reproduces the published crew mean (band midpoints give 36.3 against a published 36.6).",
+      "Passenger weights are the whole-ship band counts minus the crew band counts implied by those weights at 1045 crew. The result reproduces the published passenger mean (66.3 against 66.0) without either mean having been fitted: only the crew shape is chosen, and it is chosen against a published moment of the same quantity, not against anything the model is scored on."
+    ],
+    "refusals": [
+      "No age figure here comes from a case, positivity or severity count on this hull. The age composition describes who was aboard; it is not tuned to any anchor the fit is scored against.",
+      "The 80+, 75+ and 70+ thresholds the testing campaign actually used cannot all be expressed in this vocabulary; the campaign record declares that coarsening itself and this bundle does not paper over it."
+    ]
+  },
+  "default_template": {
+    "age_bands": ["adult"],
+    "monitored_channels": ["heart_rate", "body_temp", "spo2", "respiratory_rate"]
+  },
+  "class_templates": {
+    "passenger_general": {
+      "age_bands": ["0-4", "5-17", "18-34", "35-49", "50-64", "65-74", "75+"],
+      "age_band_weights": [8.0, 26.4, 43.1, 182.25, 702.75, 969.0, 734.5],
+      "monitored_channels": ["heart_rate", "body_temp", "spo2", "respiratory_rate"]
+    },
+    "crew_general": {
+      "age_bands": ["18-34", "35-49", "50-64"],
+      "age_band_weights": [0.5, 0.35, 0.15],
+      "monitored_channels": ["heart_rate", "body_temp", "spo2", "respiratory_rate"]
+    }
+  }
+}

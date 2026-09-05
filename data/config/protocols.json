@@ -556,6 +556,26 @@
       },
       "category": "intervention",
       "required_cascade_tier": 3
+    },
+    {
+      "protocol_id": "SOP-017",
+      "name": "Replayed Cabin Quarantine of All Passengers",
+      "description": "Confine every passenger to quarters while all crew classes remain operational. This is the passenger/crew asymmetry both replayed COVID hulls actually ran: Diamond Princess quarantined passengers in their cabins from 5 February 2020 while crew continued essential service, and Greg Mortimer confined all passengers from voyage day 8 while crew kept working. SOP-011 covers the reactive version of the same idea for symptomatic passengers only; this one is the whole-passenger-body order that an authority issued on a known date, so its trigger is unreachable by design (no instrument reports 'scenario_calendar') and it activates only when a scenario schedule names it — see engines/scenario_schedule.py. It declares no compliance, PPE or efficacy figure: what confinement does to transmission is whatever the existing movement and contact machinery does with a confined agent.",
+      "trigger": {
+        "instrument_class": "scenario_calendar",
+        "stoplight_level": "RED"
+      },
+      "modifiers": {
+        "confine_all_to_quarters": true,
+        "exempt_classes": [
+          "crew_general",
+          "crew_medical",
+          "crew_engineering",
+          "crew_galley"
+        ]
+      },
+      "category": "intervention",
+      "required_cascade_tier": null
     }
   ]
 }

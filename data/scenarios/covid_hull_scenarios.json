@@ -1,0 +1,234 @@
+{
+  "schema_version": "1.0.0",
+  "description": "The two SARS-CoV-2 hull scenarios of the COVID arm: the Diamond Princess training hull and the Greg Mortimer held-out hull. Each record is the event geometry — duration, population, passenger/crew structure, the quarantine calendar and the testing-campaign alignment — and nothing else. No record carries a biological constant: both hulls read the same sars_cov2_resp profile, the same day-indexed PCR sensitivity curve and the same severity model, so a difference in outcome between them is a difference in the event, not in the pathogen.",
+  "split": {
+    "fixed_by": "docs/proposals/covid_trajectory_fit_spec.md §7",
+    "fixed_before_implementation": true,
+    "training": ["diamond_princess_2020"],
+    "held_out": ["greg_mortimer_2020"],
+    "held_out_aggregates": ["willebrand_2022_cross_ship_attack_rates"],
+    "note": "The split was written down before any of this was implemented and is not revisitable after seeing which hull fits. Θ (= emission × per-copy risk, one composite) is fitted on the training hull alone; the held-out entries are scored once and reported whatever they show. Loaders expose the split as data so that a fitting run cannot silently widen its training set."
+  },
+  "scenarios": [
+    {
+      "scenario_id": "diamond_princess_2020",
+      "hull_name": "Diamond Princess",
+      "event": "SARS-CoV-2 outbreak and onboard cabin quarantine, Yokohama, 20 January – 20 February 2020",
+      "split_role": "training",
+      "pathogen_id": "sars_cov2_resp",
+      "platform_id": "mega_cruise_5000",
+      "agent_profile_bundle": "data/scenarios/agent_profiles/diamond_princess_2020.json",
+      "clock": {
+        "epoch_duration_hours": 1,
+        "natural_history_clock": "hours"
+      },
+      "duration_days": 32,
+      "day_zero": "2020-01-20",
+      "population": {
+        "total": 3711,
+        "passengers": 2666,
+        "crew": 1045
+      },
+      "role_classes": [
+        {
+          "class_id": "passenger_general",
+          "role_group": "passenger",
+          "count": 2666
+        },
+        {
+          "class_id": "crew_general",
+          "role_group": "crew",
+          "count": 1045
+        }
+      ],
+      "initiation": {
+        "explicit_seeds": [
+          {
+            "pathogen": "sars_cov2_resp",
+            "count": 1,
+            "role": "passenger",
+            "epoch": 0,
+            "infection_age_days": 0.0
+          }
+        ]
+      },
+      "scheduled_protocols": [
+        {
+          "protocol_id": "SOP-017",
+          "start_day": 16,
+          "end_day": 30,
+          "calendar": "5–19 February 2020"
+        }
+      ],
+      "testing_campaign": {
+        "campaign_id": "diamond_princess_2020",
+        "start_day": 16,
+        "calendar": "5–20 February 2020"
+      },
+      "provenance": [
+        {
+          "field": "population.total / passengers / crew",
+          "value": "3711 = 2666 passengers + 1045 crew",
+          "source": "Tsuboi 2020, Glob Health Med, DOI 10.35772/ghm.2020.01037",
+          "grade": "A"
+        },
+        {
+          "field": "duration_days / day_zero",
+          "value": "32 days from 20 January 2020, the departure date the outbreak's earliest onsets are counted from",
+          "source": "Yamagishi 2020, Eurosurveillance, DOI 10.2807/1560-7917.es.2020.25.23.2000272 (earliest confirmed onset 22 January, 'two days after the cruise ship left port'); Tsuboi 2020 (febrile cases counted 20 January – 22 February)",
+          "grade": "A",
+          "note": "The window runs to 20 February so it contains the whole published testing campaign; the fit spec calls this a ~4-week confined event."
+        },
+        {
+          "field": "scheduled_protocols[SOP-017] window",
+          "value": "simulated days 16–30 = 5–19 February 2020",
+          "source": "NIID Field Briefing, 20 February 2020; Tsuboi 2020",
+          "grade": "A",
+          "note": "Passengers confined to cabins; crew continued essential service duties throughout, which is what SOP-017 encodes by exempting every crew class."
+        },
+        {
+          "field": "testing_campaign.start_day",
+          "value": "simulated day 16 = 5 February 2020, the campaign record's first dated day",
+          "source": "data/observation/covid_testing_campaigns.json (Mizumoto 2020, Yamahata 2020, NIID Field Briefing)",
+          "grade": "A"
+        },
+        {
+          "field": "role_classes[].age_band_weights",
+          "value": "see data/scenarios/agent_profiles/diamond_princess_2020.json",
+          "source": "NIID Field Briefing age table; Tsuboi 2020 per-role mean ages",
+          "grade": "B",
+          "note": "Coarsened onto the repository's age-band vocabulary and decomposed by role; the derivation and its declared assumptions are in the bundle."
+        },
+        {
+          "field": "initiation.explicit_seeds[0].infection_age_days",
+          "value": "0.0 — DECLARED ASSUMPTION, not sourced",
+          "source": "∅",
+          "grade": "declared",
+          "note": "One infected passenger is placed at embarkation because the introduction happened before day 0 and no retrieved source gives the index case's infection age at boarding. The consequence is recorded rather than removed: with the profile's incubation median of 5.8 days, simulated onsets begin later than the recorded 22 January onset. Choosing an infection age that reproduces 22 January would be tuning the scenario to a scored anchor, so it is refused and left as a declared axis for the #36 screen."
+        },
+        {
+          "field": "platform_id",
+          "value": "mega_cruise_5000 — DECLARED SUBSTITUTION",
+          "source": "∅",
+          "grade": "declared",
+          "note": "The repository has no Diamond Princess deck plan. mega_cruise_5000 is the smallest platform whose nominal complement (5000 passengers, 2000 crew) holds 3711 people, so the hull geometry, cabin pairing and HVAC topology are that platform's and not Diamond Princess's. Declared as a scenario axis, not fitted."
+        }
+      ],
+      "refusals": [
+        "No compliance, PPE or quarantine-efficacy number is declared here. The fit spec fixes quarantine efficacy as an outcome of the existing movement and contact machinery, so covid.T2 tests the contact model rather than a fitted compliance figure.",
+        "The post-12-February reduction in infection odds (Kobayashi 2021) is an observation about this event, not a parameter: nothing in this record encodes it.",
+        "No severity or mortality figure from this hull enters the scenario; severity lives in the pathogen profile and was sourced independently in #31."
+      ]
+    },
+    {
+      "scenario_id": "greg_mortimer_2020",
+      "hull_name": "Greg Mortimer",
+      "event": "SARS-CoV-2 outbreak during an Antarctic/South Georgia expedition voyage, mid-March – April 2020",
+      "split_role": "held_out",
+      "pathogen_id": "sars_cov2_resp",
+      "platform_id": "expedition_cruise_450",
+      "agent_profile_bundle": null,
+      "clock": {
+        "epoch_duration_hours": 1,
+        "natural_history_clock": "hours"
+      },
+      "duration_days": 28,
+      "day_zero": "voyage day 0 (embarkation, mid-March 2020)",
+      "population": {
+        "total": 223,
+        "passengers": 128,
+        "crew": 95
+      },
+      "role_classes": [
+        {
+          "class_id": "passenger_general",
+          "role_group": "passenger",
+          "count": 128
+        },
+        {
+          "class_id": "crew_general",
+          "role_group": "crew",
+          "count": 95
+        }
+      ],
+      "initiation": {
+        "explicit_seeds": [
+          {
+            "pathogen": "sars_cov2_resp",
+            "count": 1,
+            "role": "passenger",
+            "epoch": 0,
+            "infection_age_days": 0.0
+          }
+        ]
+      },
+      "scheduled_protocols": [
+        {
+          "protocol_id": "SOP-017",
+          "start_day": 8,
+          "end_day": 27,
+          "calendar": "voyage day 8 (first symptomatic case) to the end of the 28-day event"
+        }
+      ],
+      "testing_campaign": {
+        "campaign_id": "greg_mortimer_2020",
+        "start_day": 20,
+        "calendar": "voyage day 20, the single ship-wide test event"
+      },
+      "provenance": [
+        {
+          "field": "population.total / passengers / crew",
+          "value": "223 aboard = 128 passengers + 95 crew; 217 of them were tested",
+          "source": "Ing 2020, Thorax, DOI 10.1136/thoraxjnl-2020-215091; Keeley 2020, Thorax, DOI 10.1136/thoraxjnl-2020-215337 (223 aboard)",
+          "grade": "A",
+          "note": "223 is who was aboard and 217 is the tested denominator; the 217 lives in the campaign record as that day's test budget, not here."
+        },
+        {
+          "field": "duration_days",
+          "value": "28 days, to the first cohort's disembarkation",
+          "source": "Keeley 2020 (asymptomatic status followed 'until day 28, when the first cohort of passengers disembarked')",
+          "grade": "A"
+        },
+        {
+          "field": "scheduled_protocols[SOP-017] start_day",
+          "value": "voyage day 8",
+          "source": "Keeley 2020 ('At day 8, the first member developed symptoms. Despite immediate imposition of cabin isolation of all passengers and strict personal protective equipment use by crew…'); Ing 2020",
+          "grade": "A",
+          "note": "Cabin isolation of all passengers, crew still working — the same asymmetry as the training hull, so both hulls use SOP-017."
+        },
+        {
+          "field": "testing_campaign.start_day",
+          "value": "voyage day 20",
+          "source": "Ing 2020; Keeley 2020 ('128 (59.0%) of those on board tested positive … on day 20, when everyone was screened with an RT-PCR-based test')",
+          "grade": "A"
+        },
+        {
+          "field": "age composition",
+          "value": "∅ null — no age table",
+          "source": "∅",
+          "grade": "null",
+          "note": "Neither Ing 2020 nor Keeley 2020 publishes an age distribution for this hull, so the scenario declares none and the repository's default profile bundle stands. This is an honest null rather than a borrowed Diamond Princess table: age enters the severity split only, and the asymptomatic share the hull is scored on is age-invariant in the current profile, so a borrowed table would add no information while looking sourced."
+        },
+        {
+          "field": "initiation.explicit_seeds[0].infection_age_days",
+          "value": "0.0 — DECLARED ASSUMPTION, not sourced",
+          "source": "∅",
+          "grade": "declared",
+          "note": "All 223 aboard passed a temperature and symptom screen before embarkation (Keeley 2020), so an introduction at day 0 is consistent with the record, but the index case was never identified and the assumption is declared, not measured. It is the same declaration as the training hull's, deliberately: a held-out hull whose seed was chosen differently from the training hull's would not be scoring the same model."
+        },
+        {
+          "field": "platform_id",
+          "value": "expedition_cruise_450 — DECLARED SUBSTITUTION",
+          "source": "∅",
+          "grade": "declared",
+          "note": "No Greg Mortimer deck plan exists in the repository; expedition_cruise_450 (300 passengers, 150 crew nominal) is the expedition-class platform that holds 223. Declared, not fitted."
+        }
+      ],
+      "refusals": [
+        "128/217 positive and 81% of positives asymptomatic are what this hull is SCORED against (covid.H1/H2). They are recorded in the fit spec and the campaign record as observations; nothing in this scenario is set to reproduce them.",
+        "Crew PPE is not represented. Its transmission reduction would be an invented constant, and this hull is held out, so an unsourced modifier here would corrupt the only out-of-sample test the arm has.",
+        "This hull may not be used to fit or select Θ, nor to choose any value in either scenario record."
+      ]
+    }
+  ]
+}
