@@ -608,6 +608,31 @@ class TestPlanResolution:
                 _cfg(), {PATHOGEN: _profile(initial_infected=1)},
             )
 
+    def test_a_seed_over_a_fiat_index_case_is_an_error(self) -> None:
+        with pytest.raises(ValueError, match="initial_infected"):
+            resolve_initiation_plan(
+                {
+                    "initiation": {
+                        "explicit_seeds": [{"pathogen": PATHOGEN, "count": 2}],
+                    },
+                },
+                {PATHOGEN: _profile(initial_infected=1)},
+            )
+
+    def test_a_seed_leaves_another_pathogens_index_case_alone(self) -> None:
+        plan = resolve_initiation_plan(
+            {
+                "initiation": {
+                    "explicit_seeds": [{"pathogen": PATHOGEN, "count": 2}],
+                },
+            },
+            {
+                PATHOGEN: _profile(),
+                OTHER_PATHOGEN: _profile(initial_infected=3),
+            },
+        )
+        assert len(plan.seeds) == 1
+
     def test_an_unset_never_symptomatic_fraction_is_an_error(self) -> None:
         cfg = _cfg()
         cfg["initiation"]["boarding"][PATHOGEN]["state_split"][
