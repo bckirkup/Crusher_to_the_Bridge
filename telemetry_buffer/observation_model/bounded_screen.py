@@ -124,14 +124,16 @@ NOROVIRUS_FACTORS: tuple[Factor, ...] = (
         "linear",
         "B",
     ),
-    Factor(
-        "contact_transfer_fraction",
-        ("contact_transfer_fraction",),
-        0.06,
-        0.50,
-        "linear",
-        "B",
-    ),
+    # contact_transfer_fraction is withdrawn from the box (#22). It scaled the
+    # direct-contact pathway dose from the same position as
+    # route_efficiency_multipliers["direct_contact"], so the two were one
+    # factor and the design would have ranged half of a product while the
+    # other half stayed fixed. Its 0.06-0.50 interval was the spread of
+    # Anderson et al. 2021's direction-free MS2 fingerpad<->surface events,
+    # which docs/literature/consensus_tranche_12_contact_transfer.md refutes as
+    # a direction-free quantity. The field is now refused at load and the route
+    # keeps one owner, whose own value is untraced and therefore not a sourced
+    # interval either -- so no replacement factor is asserted here.
     # emesis_total_shed_gec: upper end of the per-subject cumulative emesis
     # shed interval. Kirby et al. 2016 Table 3 -- low end is the GII.2 mean plus
     # one SEM (1.8e7 + 1.8e7 = 3.6e7), high end the largest per-subject

@@ -1,5 +1,7 @@
 # Register fragment — `contact_transfer_fraction` (task #22)
 
+> **Superseded on the engine row.** The `contact_transfer_fraction` row below is history: the field was **retired and refused at load** by the C5 change (#22), because it multiplied the direct-contact pathway dose from the same position as `route_efficiency_multipliers["direct_contact"]` and only the product was identifiable. The two fomite rows stand. See [`../consensus_tranche_12_contact_transfer.md`](../consensus_tranche_12_contact_transfer.md) §10 and the register.
+
 > **Merged.** This fragment was merged into [`../../parameter_provenance_register.md`](../../parameter_provenance_register.md) by the sourcing-wave-1 integration pass, with the lead's corrections applied at merge time. It is kept as the audit trail of what the sourcing unit proposed; it is **not** a live proposal, and where it and the register differ the register holds the status.
 
 **Status:** Additive fragment merged into

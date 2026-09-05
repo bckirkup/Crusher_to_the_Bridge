@@ -183,7 +183,13 @@ the axis:
    drying multiplier moves a deposit into a pool the same agents then draw from,
    so the CRN pairing does not hold the epidemic's branch fixed. This is the #22
    result (`contact_transfer_fraction` clears no floor anywhere on its interval)
-   reproduced on the moisture axis of the same route.
+   reproduced on the moisture axis of the same route. **Note added later:** the
+   #22 screen entry is withdrawn as aliased against
+   `route_efficiency_multipliers["direct_contact"]`
+   ([tranche 12](consensus_tranche_12_contact_transfer.md) §10), so the parallel
+   is to that factor's *magnitude*, not to a result that still stands. The
+   drying-axis sweep above is unaffected: the drying multiplier is the sole
+   owner of its axis.
 2. **The one output that moves is a timing statistic, and it moves for a reason
    that is not the drying physics.** `peak_epoch`'s 23× span is carried by a
    single seed (506 in the two low-multiplier points) whose incidence peaks at epoch

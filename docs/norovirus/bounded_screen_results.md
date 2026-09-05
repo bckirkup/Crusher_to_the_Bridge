@@ -103,6 +103,18 @@ crew reported-case channel. The value should still be corrected, because a
 wrong value is wrong, but it is not an exposure and it should not be ahead of
 anything.
 
+> **Withdrawn by the C5 resolution (#22), and not by the ranking above.** The
+> field multiplied the direct-contact pathway dose from the same position as
+> `route_efficiency_multipliers["direct_contact"]`, so this design ranged half
+> of a product while the other half stayed fixed. An elementary effect measured
+> that way is aliased, so **the ratios reported here for this factor are not a
+> sensitivity result about contact transfer** and must not be cited as one. The
+> field is now retired and refused at load, the box no longer carries it, and
+> the conclusion that it "is not worth sourcing" is superseded by a stronger
+> one: it was never separately identifiable. See
+> [`../literature/consensus_tranche_12_contact_transfer.md`](../literature/consensus_tranche_12_contact_transfer.md)
+> §10. Every other factor in this screen is unaffected.
+
 **The inert dose knob is not inert across the box.**
 `environmental_faecal_release_log10_g_per_epoch` ranks third on both passenger
 channels. That does not contradict the earlier finding that dose 10 → 24 was
@@ -136,7 +148,9 @@ Two rows are non-monotone across the box — `surface_decay_per_day` on
 corner probed. It does fire inside the box: μ\* between 0.03 and 0.09 across
 six of the seven factors, with physically coherent signs (non-susceptibility,
 surface decay and faecal release push posting down; titre, transfer fraction
-and shedding heterogeneity push it up).
+and shedding heterogeneity push it up). The transfer-fraction row is the
+withdrawn aliased factor and its sign carries the direct-contact route
+efficiency with it.
 
 The honest reading is not "the expedition hull never posts" but **posting is
 reachable only in a thin part of the sourced box**, and this design cannot
@@ -173,7 +187,9 @@ configuration any anchor uses.
 - `innate_nonsusceptible_fraction` (#21) moves to the front — top-ranked factor,
   known-wrong mechanism.
 - `contact_transfer_fraction` (#22) drops — below floor across every scored
-  output over its whole sourced interval.
+  output over its whole sourced interval. **Superseded**: the item is closed by
+  retirement, the factor is out of the box, and its effect here was aliased
+  against the direct-contact route efficiency (see the withdrawal note above).
 - Emesis titre becomes a first-order provenance target, which it was not before.
 - The faecal-release factor stays withdrawn as a calibration axis and is now
   documented as interval-dependent rather than simply inert.

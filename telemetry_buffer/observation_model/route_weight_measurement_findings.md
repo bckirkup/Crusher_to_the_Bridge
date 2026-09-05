@@ -177,10 +177,14 @@ multiplying every exposure:
 | 4.000 | 1.804 | 2.126 |
 | 8.000 | 2.354 | 3.055 |
 
-An 8.3x range in delivered dose (`contact_transfer_fraction` 0.06-0.5, the
-sourced interval in `bounded_screen_norovirus.json`) buys 2.1-3.0x in
+An 8.3x range in delivered dose (0.06-0.5; measured here through the retired
+`contact_transfer_fraction`, which multiplied the direct-contact pathway dose
+from the same position as `route_efficiency_multipliers["direct_contact"]` and
+is now refused at load - the same 8.3x is reachable through the surviving
+owner, so the dose-to-establishment result below stands and only its label
+changes, #22) buys 2.1-3.0x in
 establishment, and establishment is bounded above by the susceptible pool well
-before that. This is the mechanical reason `contact_transfer_fraction` cleared
+before that. This is the mechanical reason the direct-contact dose factor cleared
 nothing above the noise floor in the Morris screen
 (`docs/norovirus/bounded_screen_results.md`): the factor moves total dose by
 almost an order of magnitude and the establishment channel absorbs most of it.

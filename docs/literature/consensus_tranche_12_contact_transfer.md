@@ -1,13 +1,14 @@
 # Tranche 12 — contact transfer efficiency: two directions, two orders of magnitude, and an anchor that belongs to neither
 
 
-**Register rows fed / supersession.** This tranche feeds `contact_transfer_fraction` and the two non-porous fomite-transfer rows in §3.1. No later withdrawal or supersession is recorded in the register or the norovirus open ledger.
+**Register rows fed / supersession.** This tranche feeds `contact_transfer_fraction` and the two non-porous fomite-transfer rows in §3.1. The fomite rows stand. The `contact_transfer_fraction` row is **closed by §10**: the field was retired in the C5 change (#22) because it was not identifiable against `route_efficiency_multipliers["direct_contact"]`, so the sourcing question §6–§7 could not answer is now moot rather than open. The two directional fomite intervals are unaffected — they belong to a different mechanism (§7).
 
 **Status:** Evidence assembled. **No profile constant, engine constant or
 screen interval changes in this document.** Nothing here is authoritative about
 the model; the register row this tranche proposes lives in
 [`fragments/contact-transfer.md`](fragments/contact-transfer.md) and is the
-lead's to merge.
+lead's to merge. **§10 was added later and does change the model**: it records
+the C5 resolution, in which the engine field was retired.
 
 **Scope:** task #22 — `contact_transfer_fraction`. The repository carries an
 approximate **0.25** anchor for a hand/surface contact transfer fraction whose
@@ -354,3 +355,45 @@ unit's to do.
   any use of it.
 * **No maritime measurement exists** (§6.1), so nothing here can be graded A,
   and no amount of further searching in this literature will change that.
+
+## 10. Closure of the engine field (C5 / #22): the defect is identifiability, not sourcing
+
+Added when Track C item C5 resolved. §6.4 established that the field's own
+definition has no measured denominator anywhere in this literature. Reading the
+code for the resolution found the prior reason the field could not be sourced:
+**it was never a separately identifiable quantity in the first place.**
+
+`contact_transfer_fraction` multiplied the direct-contact pathway dose inside
+`_direct_contact_dose` / `_per_partner_contact_dose`, and
+`_apply_route_efficiencies` multiplies that same pathway's dose by
+`route_efficiency_multipliers["direct_contact"]` a few lines later, for every
+host, with nothing between them. Two scalars standing in the same position of a
+product are one degree of freedom: no run and no observation can distinguish
+(a, b) from (a·b, 1). Sourcing an interval for one half of a product while the
+other half is fixed at an untraced value would have declared a precision the
+model cannot express, and screening it — the PR #368 box ranged it over
+0.06–0.50 — ranged half of a product, which is why the recorded near-zero
+`mu_star` is not usable as a sensitivity result about contact transfer either.
+
+This is the same defect archetype the repository already recorded twice: route
+efficiency has one owner (#25, the clearance-layer refusal), and the SARS-CoV-2
+emission scale × β pair is one axis (#30 / C2). The C5 change therefore retires
+the field rather than sourcing it: it is deleted from the engine, from the
+schema, and from the screen box, and it is refused at load by the loader, the
+schema and the sanity checker so it cannot return as a silent second layer. The
+surviving owner keeps the route's whole expressible range — the retired
+0.06–0.50 span is reachable through
+`route_efficiency_multipliers["direct_contact"]` alone.
+
+**Two further queries, both negative.** Run before the retirement, to check
+whether the §6.3/§6.4 nulls were an artefact of this tranche's query framing.
+Both unfiltered, Consensus MCP, abstracts only:
+
+| Query | Result |
+| --- | --- |
+| "hand-to-hand transfer efficiency of norovirus or norovirus surrogate between human volunteers percent transferred" | 20 papers, **no new evidence**. Returns the §2–§4 set (Bidawid 2004, Grove 2015, Dallner 2021, Tuladhar 2013 …), every one of them a hand↔surface or hand↔food pair. §6.3 stands: no norovirus or norovirus-surrogate person-to-person transfer measurement exists in this literature |
+| "fraction of virus shed by an infected person that is delivered to a susceptible contact per close-contact event quantitative exposure model" | 20 papers, **no measurement of the field's denominator**. Everything returned is a transmission-probability or dose-response model — Zhang & Wang 2020 (the k already refused in [tranche 25](consensus_tranche_25_covid_emission_beta_alias.md)), Prentiss 2022's Wells-Riley quanta back-out, Goyal 2021's viral-load transmission model. These *infer* a per-exposure risk from an outbreak or an anchor; none *measures* what fraction of an emitter's shed virus reaches a contact. §6.4 stands, and a value taken from any of them would be anchor-derived |
+
+No further searching on this field is warranted: the field no longer exists,
+and the quantity it named is not measured in this literature under either
+framing.
