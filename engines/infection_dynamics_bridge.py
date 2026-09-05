@@ -1367,6 +1367,7 @@ class KorkinAgent:
                 "pathogen_id": pid,
                 "status": inf["status"].name,
                 "illness": inf["illness"].name,
+                "time_infected": inf["time_infected"],
                 "days_post_infection": (
                     None if inf["time_infected"] is None
                     else self.clock.day_index(inf["time_infected"])

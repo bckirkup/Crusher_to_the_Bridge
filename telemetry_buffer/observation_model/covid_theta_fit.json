@@ -1,0 +1,344 @@
+{
+  "boundary_pinned": false,
+  "contract": {
+    "attribution_to_either_factor": null,
+    "beta": null,
+    "emission_bracket_copies_per_epoch": [
+      4200.0,
+      58000000.0
+    ],
+    "emission_bracket_evidence_grade": "B",
+    "fitted_against_hull": "diamond_princess_2020",
+    "fitted_dimension": 1,
+    "fitted_quantity": "Theta = respiratory emission scale x per-copy risk",
+    "per_copy_risk": null,
+    "refusals": [
+      "The composite is never split into its factors, and no value of beta is reported: the two factors enter the hazard as a product, so outbreak data cannot separate them and this arm does not pretend to."
+    ]
+  },
+  "declared_assumptions": [
+    {
+      "evidence_grade": "B for the shape, from the profile's own sourced curve",
+      "name": "shedding curve enters as shape only",
+      "source": "data/pathogens/active_profiles.json sars_cov2_resp shedding_curve_log10 / asymptomatic_shedding_log10",
+      "value": "shedding_curve_log10 shifted so the symptomatic peak is 0; the measured asymptomatic offset is preserved by shifting both curves by the same amount"
+    },
+    {
+      "evidence_grade": "declared, not sourced",
+      "name": "dose_adjustment folded into Theta",
+      "source": "The respiratory arm's inherited dose_adjustment is an emission-side scalar of the previous dose representation. Leaving it in place would put a second multiplier on the one axis Theta occupies, which would make the composite unidentifiable against itself.",
+      "value": "dose_adjustment = 0 while Theta is fitted"
+    },
+    {
+      "evidence_grade": "A",
+      "name": "immunologically naive population",
+      "source": "SARS-CoV-2 in February 2020: no prior population immunity existed to a pathogen first reported eight weeks earlier. The engine's inherited default immune fraction is a cruise-era figure for endemic pathogens and is wrong for this event.",
+      "value": "ship_graph.immune_fraction = 0.0"
+    },
+    {
+      "evidence_grade": "A",
+      "name": "instruments the hulls did not carry are off",
+      "source": "Neither 2020 hull carried wearable monitors or a tiered diagnostic cascade; the record is a testing campaign and a clinical log. Leaving them on would add case-finding no observer had.",
+      "value": "wearable_monitoring and diagnostic_cascade disabled"
+    },
+    {
+      "evidence_grade": "A - matches how both sources define it",
+      "name": "asymptomatic means asymptomatic at specimen",
+      "source": "Mizumoto 2020 (320/634 at confirmation) and Ing 2020 (104/128 at the time of testing) both report shares at testing, not final outcome shares.",
+      "value": "campaign specimens are scored asymptomatic when no symptom onset had been recorded for that host by the day of the swab"
+    },
+    {
+      "evidence_grade": "A",
+      "name": "onset denominator is the recorded-onset subset",
+      "source": "The published Diamond Princess curve dates 197 of the cases; the rest had onset imputed. covid_trajectory_fit_spec.md section 8 records the identification.",
+      "value": "the onset channel counts laboratory-confirmed hosts presenting a syndrome-eligible severity, not every confirmed case"
+    }
+  ],
+  "evaluations": [
+    {
+      "loss": 4.894416444184046,
+      "observables": {
+        "asymptomatic_share": 0.8725490196078431,
+        "campaign_asymptomatic_positives": 89,
+        "campaign_positives": 102,
+        "campaign_specimens": 2504,
+        "crew_onsets_after": 1,
+        "crew_onsets_before": 0,
+        "onsets_before_split_day": 1,
+        "onsets_on_or_after_split_day": 74,
+        "passenger_onsets_after": 14,
+        "passenger_onsets_before": 1,
+        "positive_share": 0.04073482428115016,
+        "recorded_onsets": 75,
+        "scenario_id": "diamond_princess_2020",
+        "seed": 20200205,
+        "theta": 10000.0
+      },
+      "seed": 20200205,
+      "terms": [
+        {
+          "anchor_id": "covid.T1",
+          "observed": 75.0,
+          "quantity": "recorded_onsets",
+          "residual": 0.9326066494443557,
+          "target": 197.0
+        },
+        {
+          "anchor_id": "covid.T1",
+          "observed": 74.0,
+          "quantity": "onsets_on_or_after_split_day",
+          "residual": 0.6236025691693182,
+          "target": 163.0
+        },
+        {
+          "anchor_id": "covid.T3",
+          "observed": 102.0,
+          "quantity": "campaign_positives",
+          "residual": 3.338207225570372,
+          "target": 634.0
+        }
+      ],
+      "theta": 10000.0
+    },
+    {
+      "loss": 0.7016805840590162,
+      "observables": {
+        "asymptomatic_share": 0.9403508771929825,
+        "campaign_asymptomatic_positives": 268,
+        "campaign_positives": 285,
+        "campaign_specimens": 2407,
+        "crew_onsets_after": 5,
+        "crew_onsets_before": 0,
+        "onsets_before_split_day": 0,
+        "onsets_on_or_after_split_day": 208,
+        "passenger_onsets_after": 22,
+        "passenger_onsets_before": 0,
+        "positive_share": 0.11840465309513917,
+        "recorded_onsets": 208,
+        "scenario_id": "diamond_princess_2020",
+        "seed": 20200205,
+        "theta": 100000.0
+      },
+      "seed": 20200205,
+      "terms": [
+        {
+          "anchor_id": "covid.T1",
+          "observed": 208.0,
+          "quantity": "recorded_onsets",
+          "residual": 0.002952221694606267,
+          "target": 197.0
+        },
+        {
+          "anchor_id": "covid.T1",
+          "observed": 208.0,
+          "quantity": "onsets_on_or_after_split_day",
+          "residual": 0.059432529895906513,
+          "target": 163.0
+        },
+        {
+          "anchor_id": "covid.T3",
+          "observed": 285.0,
+          "quantity": "campaign_positives",
+          "residual": 0.6392958324685034,
+          "target": 634.0
+        }
+      ],
+      "theta": 100000.0
+    },
+    {
+      "loss": 0.6127652711450511,
+      "observables": {
+        "asymptomatic_share": 0.9563218390804598,
+        "campaign_asymptomatic_positives": 416,
+        "campaign_positives": 435,
+        "campaign_specimens": 2342,
+        "crew_onsets_after": 17,
+        "crew_onsets_before": 0,
+        "onsets_before_split_day": 1,
+        "onsets_on_or_after_split_day": 288,
+        "passenger_onsets_after": 44,
+        "passenger_onsets_before": 0,
+        "positive_share": 0.18573868488471393,
+        "recorded_onsets": 289,
+        "scenario_id": "diamond_princess_2020",
+        "seed": 20200205,
+        "theta": 1000000.0
+      },
+      "seed": 20200205,
+      "terms": [
+        {
+          "anchor_id": "covid.T1",
+          "observed": 289.0,
+          "quantity": "recorded_onsets",
+          "residual": 0.1468598365917065,
+          "target": 197.0
+        },
+        {
+          "anchor_id": "covid.T1",
+          "observed": 288.0,
+          "quantity": "onsets_on_or_after_split_day",
+          "residual": 0.3240003420940072,
+          "target": 163.0
+        },
+        {
+          "anchor_id": "covid.T3",
+          "observed": 435.0,
+          "quantity": "campaign_positives",
+          "residual": 0.1419050924593374,
+          "target": 634.0
+        }
+      ],
+      "theta": 1000000.0
+    },
+    {
+      "loss": 1.9643479747462953,
+      "observables": {
+        "asymptomatic_share": 0.9821428571428571,
+        "campaign_asymptomatic_positives": 275,
+        "campaign_positives": 280,
+        "campaign_specimens": 2483,
+        "crew_onsets_after": 0,
+        "crew_onsets_before": 0,
+        "onsets_before_split_day": 1,
+        "onsets_on_or_after_split_day": 80,
+        "passenger_onsets_after": 12,
+        "passenger_onsets_before": 1,
+        "positive_share": 0.11276681433749497,
+        "recorded_onsets": 81,
+        "scenario_id": "diamond_princess_2020",
+        "seed": 20200205,
+        "theta": 10000000.0
+      },
+      "seed": 20200205,
+      "terms": [
+        {
+          "anchor_id": "covid.T1",
+          "observed": 81.0,
+          "quantity": "recorded_onsets",
+          "residual": 0.7898846929224367,
+          "target": 197.0
+        },
+        {
+          "anchor_id": "covid.T1",
+          "observed": 80.0,
+          "quantity": "onsets_on_or_after_split_day",
+          "residual": 0.506550434588905,
+          "target": 163.0
+        },
+        {
+          "anchor_id": "covid.T3",
+          "observed": 280.0,
+          "quantity": "campaign_positives",
+          "residual": 0.6679128472349535,
+          "target": 634.0
+        }
+      ],
+      "theta": 10000000.0
+    },
+    {
+      "loss": 2.3801201917435537,
+      "observables": {
+        "asymptomatic_share": 0.9755813953488373,
+        "campaign_asymptomatic_positives": 839,
+        "campaign_positives": 860,
+        "campaign_specimens": 2291,
+        "crew_onsets_after": 15,
+        "crew_onsets_before": 0,
+        "onsets_before_split_day": 2,
+        "onsets_on_or_after_split_day": 519,
+        "passenger_onsets_after": 75,
+        "passenger_onsets_before": 1,
+        "positive_share": 0.3753819292885203,
+        "recorded_onsets": 521,
+        "scenario_id": "diamond_princess_2020",
+        "seed": 20200205,
+        "theta": 100000000.0
+      },
+      "seed": 20200205,
+      "terms": [
+        {
+          "anchor_id": "covid.T1",
+          "observed": 521.0,
+          "quantity": "recorded_onsets",
+          "residual": 0.9458463309598064,
+          "target": 197.0
+        },
+        {
+          "anchor_id": "covid.T1",
+          "observed": 519.0,
+          "quantity": "onsets_on_or_after_split_day",
+          "residual": 1.341319951962004,
+          "target": 163.0
+        },
+        {
+          "anchor_id": "covid.T3",
+          "observed": 860.0,
+          "quantity": "campaign_positives",
+          "residual": 0.0929539088217432,
+          "target": 634.0
+        }
+      ],
+      "theta": 100000000.0
+    },
+    {
+      "loss": 2.314158786091551,
+      "observables": {
+        "asymptomatic_share": 0.9703872437357631,
+        "campaign_asymptomatic_positives": 852,
+        "campaign_positives": 878,
+        "campaign_specimens": 2267,
+        "crew_onsets_after": 16,
+        "crew_onsets_before": 0,
+        "onsets_before_split_day": 5,
+        "onsets_on_or_after_split_day": 508,
+        "passenger_onsets_after": 47,
+        "passenger_onsets_before": 3,
+        "positive_share": 0.38729598588442876,
+        "recorded_onsets": 513,
+        "scenario_id": "diamond_princess_2020",
+        "seed": 20200205,
+        "theta": 1000000000.0
+      },
+      "seed": 20200205,
+      "terms": [
+        {
+          "anchor_id": "covid.T1",
+          "observed": 513.0,
+          "quantity": "recorded_onsets",
+          "residual": 0.9159870360531227,
+          "target": 197.0
+        },
+        {
+          "anchor_id": "covid.T1",
+          "observed": 508.0,
+          "quantity": "onsets_on_or_after_split_day",
+          "residual": 1.2921579273871882,
+          "target": 163.0
+        },
+        {
+          "anchor_id": "covid.T3",
+          "observed": 878.0,
+          "quantity": "campaign_positives",
+          "residual": 0.10601382265123985,
+          "target": 634.0
+        }
+      ],
+      "theta": 1000000000.0
+    }
+  ],
+  "grid": [
+    10000.0,
+    100000.0,
+    1000000.0,
+    10000000.0,
+    100000000.0,
+    1000000000.0
+  ],
+  "implied_per_copy_risk_interval": [
+    0.017241379310344827,
+    238.0952380952381
+  ],
+  "loss": 0.6127652711450511,
+  "seed": 20200205,
+  "theta": 1000000.0
+}

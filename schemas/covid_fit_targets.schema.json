@@ -1,0 +1,86 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "covid_fit_targets.schema.json",
+  "title": "COVID arm fit targets",
+  "description": "The scored observables of the COVID arm, one row per anchor, each carrying the side of the fixed train/test split it belongs to, the observation channel it is read from, its source and its evidence grade. Nothing here is a model parameter: a row is a quantity an observer of the real event held.",
+  "type": "object",
+  "required": ["schema_version", "split", "anchors"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"type": "string"},
+    "notes": {"type": "string"},
+    "split": {
+      "type": "object",
+      "description": "The declaration that fixes which anchors a fit may read. training_anchors and held_out_anchors must together cover the anchor rows exactly; fitted_against must be a subset of training_anchors.",
+      "required": [
+        "fixed_by",
+        "fixed_before_implementation",
+        "training_anchors",
+        "fitted_against",
+        "held_out_anchors"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "fixed_by": {"type": "string", "minLength": 1},
+        "fixed_before_implementation": {"type": "boolean"},
+        "training_anchors": {
+          "type": "array", "minItems": 1, "uniqueItems": true,
+          "items": {"type": "string"}
+        },
+        "fitted_against": {
+          "type": "array", "minItems": 1, "uniqueItems": true,
+          "items": {"type": "string"}
+        },
+        "held_out_anchors": {
+          "type": "array", "minItems": 1, "uniqueItems": true,
+          "items": {"type": "string"}
+        },
+        "note": {"type": "string"}
+      }
+    },
+    "anchors": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "anchor_id",
+          "split_role",
+          "scenario_id",
+          "observable",
+          "channel",
+          "values",
+          "source",
+          "evidence_grade"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "anchor_id": {"type": "string", "pattern": "^covid\\.[TH][0-9]+$"},
+          "split_role": {"type": "string", "enum": ["training", "held_out"]},
+          "scenario_id": {
+            "description": "The hull this anchor was measured on; null for an aggregate across voyages the repository does not hold.",
+            "type": ["string", "null"]
+          },
+          "observable": {"type": "string", "minLength": 1},
+          "channel": {
+            "description": "The observation channel the anchor is scored against. A truth-state channel is not admissible.",
+            "type": "string",
+            "enum": [
+              "onset_observations",
+              "campaign_confirmed",
+              "serology"
+            ]
+          },
+          "values": {"type": "object", "minProperties": 1},
+          "source": {"type": "string", "minLength": 10},
+          "evidence_grade": {"type": "string", "minLength": 1},
+          "scorable": {
+            "description": "Absent means scorable; false declares that no instrument in the observation model measures this quantity.",
+            "type": "boolean"
+          },
+          "notes": {"type": "string"}
+        }
+      }
+    }
+  }
+}

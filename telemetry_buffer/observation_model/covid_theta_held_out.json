@@ -1,0 +1,58 @@
+{
+  "observables": [
+    {
+      "asymptomatic_share": null,
+      "campaign_asymptomatic_positives": 0,
+      "campaign_positives": 0,
+      "campaign_specimens": 160,
+      "crew_onsets_after": 0,
+      "crew_onsets_before": 0,
+      "onsets_before_split_day": 0,
+      "onsets_on_or_after_split_day": 0,
+      "passenger_onsets_after": 0,
+      "passenger_onsets_before": 0,
+      "positive_share": 0.0,
+      "recorded_onsets": 0,
+      "scenario_id": "greg_mortimer_2020",
+      "seed": 20200205,
+      "theta": 1000000.0
+    }
+  ],
+  "scores": [
+    {
+      "anchor_id": "covid.H1",
+      "note": "0/160 campaign specimens positive. Undefined when the campaign took no specimens: a hull with no epidemic still has a test day, and reporting 0/0 as a hit would be a scoring error.",
+      "observed": 0.0,
+      "quantity": "campaign positive share",
+      "target": 0.5899,
+      "verdict": "miss"
+    },
+    {
+      "anchor_id": "covid.H2",
+      "note": "0/0 positives asymptomatic at the swab. Paired with covid.T4: the same biology has to give about half asymptomatic under rolling symptom-led testing and four fifths under one-shot universal testing.",
+      "observed": null,
+      "quantity": "asymptomatic share among positives",
+      "target": 0.8125,
+      "verdict": "undefined"
+    },
+    {
+      "anchor_id": "covid.H3",
+      "note": "Both replayed hulls are right-tail voyages of the 104 in the distribution, so what two hulls can test is placement in the tail. The 0.2% median needs the other 102 voyages' geometries, which this repository does not have; that channel is left unscored rather than approximated.",
+      "observed": 0.0,
+      "quantity": "placement of both hulls above the cross-ship IQR",
+      "target": 0.015,
+      "verdict": "miss"
+    },
+    {
+      "anchor_id": "covid.H4",
+      "note": "Declared unscorable rather than approximated: no serology or IgG channel exists in the observation model, and the closest available channel (PCR under a campaign) measures a different quantity at a different time. Substituting PCR for serology here would score the model against an anchor it has no instrument for.",
+      "observed": null,
+      "quantity": "serology-based case ascertainment in a repatriated subgroup",
+      "target": null,
+      "verdict": "unscorable"
+    }
+  ],
+  "seed": 20200205,
+  "split_preserved": true,
+  "theta": 1000000.0
+}

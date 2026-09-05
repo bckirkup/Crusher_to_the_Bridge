@@ -28,6 +28,7 @@ from crusher_labs.testing_campaign import (
     TestingCampaign,
     load_campaigns,
 )
+from engines.infection_dynamics_bridge import KorkinAgent
 from engines.sim_clock import SimClock
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -452,6 +453,51 @@ class TestCampaignInsideTheModality:
         assert result["campaign_confirmed_by_pathogen"][PATHOGEN] == []
         assert result["lab_confirmed_count"] == 0
 
+    def test_the_specimen_log_holds_one_entry_per_swab_in_order(self) -> None:
+        surveillance = _surveillance(_campaign([5, 3]), curve=[1.0])
+        ship = _ship(200, 0, infected=200)
+        for epoch in range(5):
+            surveillance.query_ground_truth({"agents": ship, "epoch": epoch})
+        log = surveillance.campaign_specimen_log(PATHOGEN)
+
+        assert len(log) == 8
+        assert [entry["day"] for entry in log] == [0] * 5 + [1] * 3
+        assert [entry["epoch"] for entry in log] == [0] * 5 + [4] * 3
+        assert len({entry["agent_id"] for entry in log}) == 8
+        assert all(entry["positive"] for entry in log)
+        assert surveillance.campaign_specimen_log("norwalk_gi") == []
+
+    def test_specimen_positivity_in_the_log_is_the_assay_draw(self) -> None:
+        surveillance = _surveillance(_campaign([40]), curve=[0.0])
+        surveillance.query_ground_truth(
+            {"agents": _ship(200, 0, infected=200), "epoch": 0},
+        )
+        log = surveillance.campaign_specimen_log(PATHOGEN)
+
+        assert len(log) == 40
+        assert not any(entry["positive"] for entry in log)
+
+    def test_symptomatic_at_specimen_is_the_state_when_swabbed(self) -> None:
+        """A host that presents after its swab is asymptomatic in the log."""
+        surveillance = _surveillance(_campaign([2, 2]), curve=[1.0])
+        ship = [
+            _agent(0, infected=True, symptomatic=True),
+            _agent(1, infected=True),
+            _agent(2, infected=True),
+            _agent(3, infected=True),
+        ]
+        surveillance.query_ground_truth({"agents": ship, "epoch": 0})
+        ship[1]["pathogen_infections"][PATHOGEN]["illness"] = "SYMPTOMATIC"
+        ship[1]["pathogen_infections"][PATHOGEN]["symptom_severity"] = "mild"
+        ship[1]["symptom_presentation"] = "mild"
+        for epoch in range(1, 5):
+            surveillance.query_ground_truth({"agents": ship, "epoch": epoch})
+        log = surveillance.campaign_specimen_log(PATHOGEN)
+        first_day = {e["agent_id"]: e["symptomatic_at_specimen"] for e in log[:2]}
+
+        assert first_day[0] is True
+        assert first_day[1] is False
+
     def test_no_campaign_means_no_campaign_keys_are_populated(self) -> None:
         surveillance = _surveillance(None)
         result = surveillance.query_ground_truth({"agents": _ship(), "epoch": 0})
@@ -472,6 +518,55 @@ class TestCampaignInsideTheModality:
                 symptom_severity_profiles={},
                 testing_campaigns=[_campaign([1])],
             )
+
+
+class TestAssayReadsTheEnginePayload:
+    """The seam the unit fixtures bypass: the engine's own agent export.
+
+    The assay reads ``time_infected`` off ``pathogen_infections``; a payload
+    that omits it silently reads day zero of the sensitivity curve, where a
+    day-indexed PCR curve is 0.0, and every campaign swab comes back
+    negative regardless of how many infected hosts are on the roster.
+    """
+
+    @staticmethod
+    def _engine_agent(aid: int, epochs_infected: int) -> dict[str, Any]:
+        clock = SimClock(epoch_duration_hours=6.0, mode="hours")
+        agent = KorkinAgent(
+            agent_id=aid, role="passenger", immune=False,
+            home_zone="Cabin_A", dining_zone="MainDining_L",
+            work_zone="Main_Pool_Deck", free_zone="Main_Pool_Deck",
+            schedule=["home"] * 4,
+        )
+        agent.clock = clock
+        agent.infect_with_pathogen(PATHOGEN, 100.0, 0, rng=np.random.default_rng(aid))
+        agent.infections[PATHOGEN]["time_infected"] = epochs_infected
+        return agent.to_schema_dict()
+
+    def test_payload_carries_the_epoch_counter_the_assay_reads(self) -> None:
+        payload = self._engine_agent(1, 8)["pathogen_infections"][PATHOGEN]
+
+        assert payload["status"] == "INFECTED"
+        assert payload["time_infected"] == 8
+        assert payload["days_post_infection"] == 2
+
+    def test_late_swab_of_engine_agents_is_positive_at_the_curve_tail(
+        self,
+    ) -> None:
+        curve = [0.0, 0.0, 0.9]
+        shares = []
+        for epochs_infected in (0, 8):
+            surveillance = _surveillance(_campaign([150]), curve=curve)
+            ship = [self._engine_agent(aid, epochs_infected) for aid in range(150)]
+            result = surveillance.query_ground_truth(
+                {"agents": ship, "epoch": 0},
+            )
+            shares.append(
+                len(result["campaign_confirmed_by_pathogen"][PATHOGEN]) / 150,
+            )
+
+        assert shares[0] == pytest.approx(0.0)
+        assert shares[1] == pytest.approx(0.9, abs=0.08)
 
 
 class TestSymptomOnsetChannel:

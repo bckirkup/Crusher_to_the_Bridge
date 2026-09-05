@@ -1,8 +1,15 @@
 # SARS-CoV-2 trajectory fit — training and out-of-sample design
 
-> **Status:** Proposal, 2026-09-01. **Nothing here is implemented.** Per
-> `docs/AGENTS.md`, a document in `proposals/` describes no existing behaviour.
-> Prerequisites in §7 must land before any of it can run.
+> **Status:** Design implemented, 2026-09-05 (Track D #31/#33/#32/#34). The
+> split in §2, the anchors in §3 and the single-quantity rule in §5 are now
+> code and data: `data/observation/covid_fit_targets.json`,
+> `picard_framework/covid_theta_fit.py` and `tools/fit_covid_theta.py`. The fit
+> has been run once and its held-out score recorded, in
+> `telemetry_buffer/observation_model/covid_theta_fit.json` and
+> `covid_theta_held_out.json`. Θ = 1e6 on Diamond Princess; the transfer to the
+> Greg Mortimer hull misses, which is the §8 failure mode arriving on schedule.
+> The prose below is the pre-registration and is left as written — it is what
+> the split was fixed against, and it is not edited to match the outcome.
 
 ## 1. Why this arm is shaped differently from the norovirus arm
 

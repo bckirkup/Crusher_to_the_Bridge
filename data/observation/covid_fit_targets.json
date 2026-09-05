@@ -1,0 +1,148 @@
+{
+  "schema_version": "1.0.0",
+  "notes": "The scored observables of the COVID arm, one row per anchor of docs/proposals/covid_trajectory_fit_spec.md section 3, each tagged with the side of the fixed train/test split it belongs to. Every value here is a quantity an observer of the real event held: a count of recorded onsets, a count of specimens and positives, a share among positives, or an attack-rate distribution across voyages. No row is a truth-channel quantity and no row is fitted. The split tag is the machine-readable half of the split declaration in data/scenarios/covid_hull_scenarios.json: the objective may only read rows tagged training, and the loader refuses to hand a held_out row to a fit.",
+  "split": {
+    "fixed_by": "docs/proposals/covid_trajectory_fit_spec.md section 7",
+    "fixed_before_implementation": true,
+    "training_anchors": ["covid.T1", "covid.T2", "covid.T3", "covid.T4"],
+    "fitted_against": ["covid.T1", "covid.T3"],
+    "held_out_anchors": ["covid.H1", "covid.H2", "covid.H3", "covid.H4"],
+    "note": "covid.T2 and covid.T4 are training-side diagnostics and are reported, not summed into the objective: the fit spec section 5 fits the one composite against covid.T1 and covid.T3 only, and a diagnostic that entered the objective would stop being a test of the mechanism."
+  },
+  "anchors": [
+    {
+      "anchor_id": "covid.T1",
+      "split_role": "training",
+      "scenario_id": "diamond_princess_2020",
+      "observable": "recorded symptom-onset count, and the onset-date split at 6 February 2020",
+      "channel": "onset_observations",
+      "values": {
+        "recorded_onsets": 197,
+        "recorded_onsets_range": [197, 199],
+        "onsets_before_day": 34,
+        "onsets_on_or_after_day": 163,
+        "split_day_index": 17,
+        "split_calendar_date": "2020-02-06"
+      },
+      "source": "MHLW/NIID Diamond Princess epidemic curve (200223_epi_curveENG) and the NIID field briefing of 19 February 2020: onset dates among confirmed cases with a recorded onset.",
+      "evidence_grade": "A",
+      "notes": "The denominator is the recorded-onset subset, not the full case count: the published curve dates 197 of the cases and the remainder had onset imputed from a report lag (fit spec section 8). Day 17 is 6 February on the scenario's day_zero of 20 January 2020."
+    },
+    {
+      "anchor_id": "covid.T2",
+      "split_role": "training",
+      "scenario_id": "diamond_princess_2020",
+      "observable": "direction of the onset-curve turn at the 5 February cabin quarantine, passengers versus crew",
+      "channel": "onset_observations",
+      "values": {
+        "quarantine_day_index": 16,
+        "window_days": 7,
+        "passenger_direction": "decrease",
+        "crew_direction": "persist"
+      },
+      "source": "Same epidemic curve, read as a direction rather than a level: passenger onsets fall away after the quarantine date and crew onsets continue later, the crew having gone on working through it.",
+      "evidence_grade": "A",
+      "notes": "Scored as a direction because that is what the record supports without a deconvolution of onset onto infection date. A level can be matched by many parameter combinations; a subpopulation-specific turn at an enumerated date is far harder to satisfy by accident, which is why the fit spec calls this the load-bearing training observable. It is a diagnostic and never a term of the objective."
+    },
+    {
+      "anchor_id": "covid.T3",
+      "split_role": "training",
+      "scenario_id": "diamond_princess_2020",
+      "observable": "cumulative PCR positives under the published test schedule, by 20 February 2020",
+      "channel": "campaign_confirmed",
+      "values": {
+        "cumulative_tests": 3063,
+        "cumulative_positives": 634,
+        "through_day_index": 31,
+        "daily_examples": [
+          {"date": "2020-02-05", "tests": 31, "positives": 10},
+          {"date": "2020-02-18", "tests": 681, "positives": 88}
+        ]
+      },
+      "source": "Mizumoto 2020, Eurosurveillance 25(10):2000180, Table 1.",
+      "evidence_grade": "A",
+      "notes": "The test volumes are the campaign record's capacities and are reproduced by construction, so only the positives are a model output. Secondary to covid.T1 because it moves with test volume: if the campaign replica is wrong the fit absorbs the error into biology (fit spec section 8)."
+    },
+    {
+      "anchor_id": "covid.T4",
+      "split_role": "training",
+      "scenario_id": "diamond_princess_2020",
+      "observable": "asymptomatic share among positives at the time of testing",
+      "channel": "campaign_confirmed",
+      "values": {
+        "asymptomatic": 320,
+        "positives": 634,
+        "share": 0.5047,
+        "through_day_index": 31
+      },
+      "source": "Mizumoto 2020 (320 of 634 asymptomatic at confirmation by 20 February); final count 311 of 712 in Willebrand 2022, Eurosurveillance 27(1).",
+      "evidence_grade": "A",
+      "notes": "Asymptomatic here means no onset had been recorded for that host by the day its specimen was taken, which is what the ship's own record could say. Paired with covid.H2 it is a test of the observation layer rather than of the biology: roughly half asymptomatic under rolling symptom-prioritised testing against 81% under one-shot universal testing should both come out of the same biology. Diagnostic, never a term of the objective."
+    },
+    {
+      "anchor_id": "covid.H1",
+      "split_role": "held_out",
+      "scenario_id": "greg_mortimer_2020",
+      "observable": "PCR positive fraction on the single ship-wide test day",
+      "channel": "campaign_confirmed",
+      "values": {
+        "positives": 128,
+        "tested": 217,
+        "share": 0.5899,
+        "aboard": 223
+      },
+      "source": "Ing 2020, Thorax 75(8):693-694, DOI 10.1136/thoraxjnl-2020-215091.",
+      "evidence_grade": "A"
+    },
+    {
+      "anchor_id": "covid.H2",
+      "split_role": "held_out",
+      "scenario_id": "greg_mortimer_2020",
+      "observable": "asymptomatic share among positives under near-complete testing",
+      "channel": "campaign_confirmed",
+      "values": {
+        "asymptomatic": 104,
+        "positives": 128,
+        "share": 0.8125
+      },
+      "source": "Ing 2020 (104 of 128 asymptomatic at the time of testing; 24 symptomatic).",
+      "evidence_grade": "A"
+    },
+    {
+      "anchor_id": "covid.H3",
+      "split_role": "held_out",
+      "scenario_id": null,
+      "observable": "cross-ship attack-rate distribution, 79 ships and 104 voyages to October 2020",
+      "channel": "campaign_confirmed",
+      "values": {
+        "ships": 79,
+        "voyages": 104,
+        "median_attack_rate": 0.002,
+        "iqr_attack_rate": [0.0003, 0.015],
+        "mean_attack_rate": 0.037,
+        "median_cases_per_ship": 3,
+        "outlier_case_counts": {"diamond_princess": 712, "ruby_princess": 907}
+      },
+      "source": "Willebrand 2022, Eurosurveillance 27(1):2100213.",
+      "evidence_grade": "A for the aggregate, C for any single ship",
+      "notes": "Scored as a placement question, not a fitted distribution: where do the two simulated hulls fall in it. The distribution is violently right-skewed and both hulls of this arm are drawn from its right tail, so what this anchor can test with two voyages is whether the model puts them in the tail; whether the model would also reproduce the 0.2% median needs the other 102 voyages' geometries, which this repository does not have. That limit is declared rather than papered over, and the channel it cannot cover is reported as undefined."
+    },
+    {
+      "anchor_id": "covid.H4",
+      "split_role": "held_out",
+      "scenario_id": null,
+      "observable": "serology-based case ascertainment in a repatriated subgroup",
+      "channel": "serology",
+      "values": {
+        "cases_by_pcr_or_igg": 45,
+        "subgroup": 49,
+        "asymptomatic_share": 0.42,
+        "fever_reported_share_among_symptomatic": 0.15
+      },
+      "source": "Rockett et al., repatriated Diamond Princess cohort, Epidemiol Infect (PMC7900670).",
+      "evidence_grade": "B - a self-selected subgroup of one hull",
+      "scorable": false,
+      "notes": "Declared unscorable rather than approximated: no serology or IgG channel exists in the observation model, and the closest available channel (PCR under a campaign) measures a different quantity at a different time. Substituting PCR for serology here would score the model against an anchor it has no instrument for."
+    }
+  ]
+}
