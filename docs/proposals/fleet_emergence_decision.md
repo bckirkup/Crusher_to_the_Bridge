@@ -206,16 +206,21 @@ From the register §5, unchanged by this document:
 | Arm | Free | Windows recorded in the register |
 |---|---|---|
 | Norovirus | 6 route-efficiency multipliers, cabin-localization `f`, `airborne_emission_fraction`, one reporting-probability scale | `surface_decay_log10_per_day` [0.067, 0.79]; `hand_to_surface_drying_multiplier` [0.008, 1.0]; `secretor_negative_relative_susceptibility` [0.04, 0.83]; `shedding_duration_days` [12, 30]; α [0.072, 0.161] at β = 32.81; GII peak [7.0, 9.1] log10 copies/g; boarding prevalence, passengers [0.025, 0.040] and crew [0.007, 0.030]; cleaning frequency cabin 0.33–1.0/day, public 1.0–12.0/day, dining/galley/crew_mess 1.0–6.0/day, with coverages 0.336–0.600, 0.292–0.454, 0.292–0.600 |
-| SARS-CoV-2 | 1 identifiable composite `(emission × route × transfer)/β`, 6 route multipliers, a 5-state severity vector, the testing-campaign replica, `airborne_emission_fraction` | The composite is one degree of freedom wearing four parameters' clothing; β sweeps the Killingley-to-Zhang & Wang span. Blocked on #43, the copies conversion |
+| SARS-CoV-2 | 1 identifiable composite `(emission × route)/β` (`transfer` was a fourth name for the same position and is retired, #22), 6 route multipliers, a 5-state severity vector, the testing-campaign replica, `airborne_emission_fraction` | The composite is one degree of freedom wearing three parameters' clothing; β sweeps the Killingley-to-Zhang & Wang span. Blocked on #43, the copies conversion |
 | Influenza | `base_susceptibility`, plus everything in §3.3 | Not active. Must come from seroprevalence or vaccination coverage for the specific season and route |
 
-Two were removed by *measurement* rather than by sourcing, and they are the
+One was removed by *measurement* rather than by sourcing, and it is the
 precedent for how this list shrinks: the norovirus dose knob is measured inert
-above release 8 (a 14-log10 change is byte-identical), and
-`contact_transfer_fraction` clears no noise floor anywhere across its whole
-sourced interval. Influenza's dose-dependent illness form (R3) removes a third
-by deletion — Carrat's endpoint is flat across 4.2 logs, so the form is refuted
-and `eta` already equals the measured fraction rounded.
+above release 8 (a 14-log10 change is byte-identical). `contact_transfer_fraction`
+was the second example here, on the grounds that it cleared no noise floor across
+its sourced interval; **that reading is withdrawn (#22)** — it stood in the same
+position of the same product as `route_efficiency_multipliers["direct_contact"]`,
+so the screen ranged half of a product, and the field is removed by retirement
+and refused at load rather than by measurement. The count of free parameters
+above is unchanged: the route multipliers already carried the axis. Influenza's
+dose-dependent illness form (R3) removes a third by deletion — Carrat's endpoint
+is flat across 4.2 logs, so the form is refuted and `eta` already equals the
+measured fraction rounded.
 
 ### 4.3 What the fleet observable can carry
 
