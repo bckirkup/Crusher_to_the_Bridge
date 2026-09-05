@@ -108,14 +108,21 @@ Two blocks, deliberately not one mechanism.
 }
 ```
 
-**Precedence is an error, not a default.** If `boarding.enabled` is true for a
-pathogen and that pathogen also carries a legacy `initial_infected`, the run
-fails to load. A voyage must not silently receive both a drawn cohort and a
-fiat index case, because the resulting incidence would be attributable to
-neither. Scenario runs that want both — a Diamond Princess index case *on top
-of* a realistic boarding cohort — say so by writing the seed into
-`explicit_seeds`, which is additive by construction and appears in the run
-artifact as such.
+**Precedence is an error, not a default.** If **either** mechanism names a
+pathogen whose profile still carries a legacy `initial_infected`, the run fails
+to load — boarding, because a voyage must not silently receive both a drawn
+cohort and a fiat index case; `explicit_seeds`, because initiation ownership is
+per pathogen and an owned pathogen is dropped from legacy seeding, so the
+profile field would be **ignored rather than honoured** and the campaign's swept
+`initial_infected` axis would silently become the seed's count under an
+unchanged `init<N>` run id. Either way the resulting incidence would be
+attributable to neither number. So the `explicit_seeds` example above is
+writable only once `norwalk_gi`'s profile field is nulled **and** the campaign
+axis is re-keyed onto the seed; a scenario that wants a Diamond Princess index
+case *on top of* a realistic boarding cohort states both under `initiation`,
+which is additive by construction and appears in the run artifact as such
+([tranche 24](../literature/consensus_tranche_24_never_symptomatic_adult_null.md)
+§3).
 
 **Legacy compatibility is preserved by the default.** With
 `boarding.enabled: false`, `profile.initial_infected` and
@@ -280,8 +287,8 @@ Done, in `engines/initiation.py` and its callers:
   `"initiation"` key of `resolved_pathogen_profiles.json`, and defaults to
   `{"mode": "legacy"}` so the key always exists.
 - Enabling boarding with `never_symptomatic_fraction` unset is a load error,
-  not a defaulted run, and so is enabling it for a pathogen whose profile still
-  carries `initial_infected`.
+  not a defaulted run, and so is naming a pathogen whose profile still carries
+  `initial_infected` — from **either** mechanism, boarding or `explicit_seeds`.
 - The legacy engine-level seed at `10^(9.0 − 4.0)` is retired for any run that
   declares an `initiation` block; `profile.initial_infected` and
   `profile.initial_time_infected` still run exactly as before for every run
@@ -289,12 +296,18 @@ Done, in `engines/initiation.py` and its callers:
 
 Still outstanding:
 
-- `never_symptomatic_fraction` has no shipped value and no source; the register
-  records it as a declared axis, and boarding cannot be enabled until a sweep
-  supplies one.
+- `never_symptomatic_fraction` has no shipped value and **twice-searched no
+  source**: the second pass
+  ([tranche 24](../literature/consensus_tranche_24_never_symptomatic_adult_null.md))
+  found the null structural — no adult natural-exposure design has an
+  infection-level denominator — so the register records the axis and boarding
+  cannot be enabled until a sweep supplies a coordinate.
 - Shipped `norwalk_gi` still carries `initial_infected: 1`, so enabling
   boarding on the shipped profile is a load error by construction until that
-  field is removed in the same change that turns boarding on.
+  field is removed in the same change that turns boarding on. Removing it
+  **earlier** is not a free intermediate step: the mega-cruise campaign sweeps
+  `initial_infected` as a pathogen override, and whatever channel replaces the
+  field has to carry that axis before the field can go.
 - Task #51 (the COVID arm's missing `shedding_duration_days`) is a hard
   prerequisite for enabling boarding on `sars_cov2_resp`: step 1 has nothing
   to draw from until that field exists, and step 2 would silently collapse to

@@ -132,6 +132,31 @@ def _known_pathogen(
     return pathogen_profiles[pathogen_id]
 
 
+def _refuse_legacy_index_case(
+    pathogen_id: str,
+    location: str,
+    profile: dict[str, Any],
+    mechanism: str,
+) -> None:
+    """Refuse an initiation mechanism layered over ``profile.initial_infected``.
+
+    Ownership is per pathogen, and an owned pathogen is dropped from legacy
+    seeding: leaving the profile field set would make the run's index-case
+    count silently the initiation block's rather than the profile's, so a
+    sweep over ``initial_infected`` would move a label and nothing else.
+    """
+    if profile.get("initial_infected") is None:
+        return
+    raise ValueError(
+        f"{location} {mechanism} while the {pathogen_id} profile carries "
+        f"initial_infected={profile['initial_infected']!r}: initiation owns "
+        f"{pathogen_id}, so that profile field would be ignored rather than "
+        "honoured, and the resulting incidence would be attributable to "
+        "neither. Null the profile field, or leave initiation without this "
+        "pathogen",
+    )
+
+
 def _resolve_boarding_spec(
     pathogen_id: str,
     block: dict[str, Any],
@@ -140,14 +165,7 @@ def _resolve_boarding_spec(
     """One ``initiation.boarding.<pathogen>`` block, fully validated."""
     location = f"initiation.boarding.{pathogen_id}"
     profile = _known_pathogen(pathogen_id, location, pathogen_profiles)
-    if profile.get("initial_infected") is not None:
-        raise ValueError(
-            f"{location} is enabled while the {pathogen_id} profile carries "
-            f"initial_infected={profile['initial_infected']!r}: a drawn cohort "
-            "and a fiat index case cannot both seed one voyage, because the "
-            "resulting incidence would be attributable to neither. Null the "
-            "profile field or move the index case into initiation.explicit_seeds",
-        )
+    _refuse_legacy_index_case(pathogen_id, location, profile, "is enabled")
     prevalence = block.get("prevalence") or {}
     split = block.get("state_split") or {}
     return BoardingSpec(
@@ -197,7 +215,12 @@ def _resolve_seed(
 ) -> ExplicitSeed:
     location = f"initiation.explicit_seeds[{index}]"
     pathogen_id = str(raw.get("pathogen") or "")
-    _known_pathogen(pathogen_id, f"{location}.pathogen", pathogen_profiles)
+    profile = _known_pathogen(
+        pathogen_id, f"{location}.pathogen", pathogen_profiles,
+    )
+    _refuse_legacy_index_case(
+        pathogen_id, location, profile, "seeds that pathogen",
+    )
     count = int(raw.get("count", 1))
     if count < 0:
         raise ValueError(
