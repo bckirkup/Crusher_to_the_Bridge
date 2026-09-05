@@ -13,7 +13,11 @@ sys.path.insert(0, REPO_ROOT)
 
 from crusher_labs.modalities.syndromic import SyndromicSurveillance
 from engines.infection_dynamics_bridge import IllnessStatus
-from engines.natural_history import draw_symptom_onset, draw_symptom_severity
+from engines.natural_history import (
+    draw_symptom_onset,
+    draw_symptom_severity,
+    severity_on_day,
+)
 from telemetry_buffer.agent_axes import (
     COMPLIANCE_COMPLIANT,
     INFECTION_INFECTED,
@@ -217,6 +221,63 @@ class TestBehavioralSyndromic:
             )
         assert counts["severe_critical"] > counts["moderate"] > counts["mild"]
         assert counts["mild"] > counts["subclinical"]
+
+    def test_what_the_observer_sees_follows_the_severity_trajectory(self) -> None:
+        """The sick-call hazard is read off the day, not off the onset draw.
+
+        Observability is the quantity the model exists to predict, so a course
+        that descends the ladder must be less likely to be reported on its
+        later days than on its peak. The severity the observer reads is
+        whatever natural history has written on the record this epoch.
+        """
+        profile = {
+            "norwalk_gi": {
+                "severity_model": {
+                    "states": [
+                        "asymptomatic", "subclinical", "mild", "moderate",
+                        "severe_critical",
+                    ],
+                    "base_probabilities": [0.0, 0.0, 0.0, 0.0, 1.0],
+                    "trajectory_ladder_offsets_by_day": [0, -1, -2, -3],
+                },
+                "observation_model": {
+                    "syndrome_case_eligibility_by_severity": [0, 0.55, 0.98, 1, 1],
+                    "reporting_probability_by_severity_pre_recognition": [
+                        0, 0.45, 0.70, 0.94, 1,
+                    ],
+                    "reporting_probability_by_severity_post_recognition": [
+                        0, 0.50, 0.76, 0.96, 1,
+                    ],
+                    "episode_reporting_window_days": 2.0,
+                },
+            },
+        }
+        syn = SyndromicSurveillance(
+            background_noise_rate=0.0,
+            symptom_severity_profiles=profile,
+            rng=np.random.default_rng(7),
+        )
+        infection = {
+            "pathogen_id": "norwalk_gi",
+            "illness": "SYMPTOMATIC",
+            "symptom_severity": "severe_critical",
+        }
+        agent = {
+            "agent_id": 1,
+            "infection_state": INFECTION_INFECTED,
+            "symptom_presentation": PRESENTATION_SYMPTOMATIC,
+            "compliance_status": COMPLIANCE_COMPLIANT,
+            "pathogen_infections": {"norwalk_gi": infection},
+        }
+        hazards = []
+        for day in range(4):
+            infection["symptom_severity"] = severity_on_day(
+                profile["norwalk_gi"], "severe_critical", day,
+            )
+            hazards.append(syn._severity_hazard(agent))
+        assert hazards == sorted(hazards, reverse=True)
+        assert hazards[0] > hazards[-1]
+        assert len(set(hazards)) == len(hazards)
 
     def test_five_state_analytic_cross_checks(self) -> None:
         base = np.array([0.25, 0.55, 0.19, 0.009, 0.001])

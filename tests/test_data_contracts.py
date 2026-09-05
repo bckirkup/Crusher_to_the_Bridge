@@ -151,6 +151,52 @@ class TestPathogenProfiles:
                 {invalid["pathogen_id"]: invalid},
             )
 
+    def test_severity_trajectory_rejects_a_rung_above_the_peak(
+        self,
+        profiles: dict,
+    ) -> None:
+        from orchestrator_init import _validate_symptom_severity_profiles
+
+        invalid = deepcopy(profiles["pathogens"][0])
+        invalid["severity_model"]["trajectory_ladder_offsets_by_day"] = [0, 1]
+        with pytest.raises(ValueError, match="must not be positive"):
+            _validate_symptom_severity_profiles(
+                {invalid["pathogen_id"]: invalid},
+            )
+
+    @pytest.mark.parametrize("offsets", [[], [0, -1.5], [0, True]])
+    def test_severity_trajectory_rejects_a_malformed_ladder(
+        self,
+        profiles: dict,
+        offsets: list,
+    ) -> None:
+        from orchestrator_init import _validate_symptom_severity_profiles
+
+        invalid = deepcopy(profiles["pathogens"][0])
+        invalid["severity_model"]["trajectory_ladder_offsets_by_day"] = offsets
+        with pytest.raises(ValueError):
+            _validate_symptom_severity_profiles(
+                {invalid["pathogen_id"]: invalid},
+            )
+
+    def test_shipped_profiles_declare_no_severity_trajectory(
+        self,
+        profiles: dict,
+    ) -> None:
+        """The path is a Track C sourcing question, not a structural one.
+
+        The seam exists so a sourced trajectory has somewhere to land. Until
+        one is sourced, every shipped profile holds its peak, so this test
+        fails the day a path is authored without a register entry behind it.
+        """
+        declared = [
+            p["pathogen_id"] for p in profiles["pathogens"]
+            if (p.get("severity_model") or {}).get(
+                "trajectory_ladder_offsets_by_day",
+            ) is not None
+        ]
+        assert declared == []
+
     def test_legacy_three_stratum_severity_is_rejected(self, profiles: dict) -> None:
         from orchestrator_init import _validate_symptom_severity_profiles
 

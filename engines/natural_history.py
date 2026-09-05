@@ -69,6 +69,7 @@ __all__ = [
     "presentation_probability",
     "project_legacy_illness",
     "record_cleared_immunity",
+    "severity_on_day",
 ]
 
 
@@ -201,6 +202,10 @@ def draw_symptom_onset(
         apply_treatment_at_onset(agent, pid, inf, prof)
         if inf.get("symptom_severity") in (None, "", "asymptomatic"):
             inf["symptom_severity"] = draw_symptom_severity(prof, rng)
+        inf["symptom_severity_peak"] = inf["symptom_severity"]
+        inf["symptom_severity"] = severity_on_day(
+            prof, inf["symptom_severity_peak"], 0,
+        )
         if agent.illness_status == IllnessStatus.NOT_ILL:
             agent.illness_status = IllnessStatus.SYMPTOMATIC
     else:
@@ -211,7 +216,12 @@ def draw_symptom_severity(
     profile: dict[str, Any],
     rng: np.random.Generator,
 ) -> str:
-    """Draw one symptomatic state from the renormalised five-state prior."""
+    """Draw one symptomatic state from the renormalised five-state prior.
+
+    The state drawn is the **peak** of the course. Where the profile declares a
+    trajectory, ``severity_on_day`` reads the day the host is on and returns
+    what an observer sees on it, which is at or below this state.
+    """
     severity = profile.get("severity_model", {})
     states = severity.get("states", [])
     probabilities = severity.get("base_probabilities", [])
@@ -221,6 +231,57 @@ def draw_symptom_severity(
     symptomatic_probabilities = np.asarray(probabilities[1:], dtype=float)
     symptomatic_probabilities /= symptomatic_probabilities.sum()
     return str(rng.choice(symptomatic_states, p=symptomatic_probabilities))
+
+
+def severity_on_day(
+    prof: dict[str, Any],
+    peak_severity: str,
+    day_index: int,
+) -> str:
+    """The severity an observer sees on one day of a course peaking at ``peak``.
+
+    ``severity_model.trajectory_ladder_offsets_by_day`` is authored on the
+    onset axis, one entry per day, like the shedding curve, and its last entry
+    is held for a longer illness. Each entry is a count of rungs below the
+    peak, so an absent trajectory holds the peak for the whole illness — the
+    single-state behaviour this replaces, and what every shipped profile still
+    gets.
+
+    The floor is the mildest symptomatic rung. A host carrying ``SYMPTOMATIC``
+    illness is never moved onto the asymptomatic rung: that rung means the host
+    never presented, which is what the presentation draw decides and not
+    something a day of the course can undo.
+    """
+    severity = prof.get("severity_model") or {}
+    offsets = severity.get("trajectory_ladder_offsets_by_day") or []
+    states = [str(state) for state in severity.get("states") or []]
+    if not offsets or peak_severity not in states:
+        return peak_severity
+    peak_index = states.index(peak_severity)
+    if peak_index <= 1:
+        return peak_severity
+    offset = int(offsets[min(max(day_index, 0), len(offsets) - 1)])
+    return states[min(peak_index, max(1, peak_index + offset))]
+
+
+def _advance_severity(
+    clock: Any,
+    inf: dict[str, Any],
+    prof: dict[str, Any],
+    epochs_infected: int,
+) -> None:
+    """Move this epoch's visible severity along the host's own course.
+
+    Read from the peak and the day rather than accumulated from the last
+    epoch, so the path does not depend on how finely time is cut and a record
+    written before this seam existed still resolves.
+    """
+    peak = inf.get("symptom_severity_peak")
+    onset_time = inf.get("onset_time_infected")
+    if not peak or onset_time is None:
+        return
+    day_index = clock.day_index(max(0, epochs_infected - int(onset_time)))
+    inf["symptom_severity"] = severity_on_day(prof, peak, day_index)
 
 
 def clearance_days(
@@ -293,6 +354,8 @@ def advance_infections(
             # first chance is the epoch that crosses this host's own drawn
             # incubation period, so onset is not rounded up to a whole day.
             draw_symptom_onset(agent, pid, inf, prof, rng, epoch)
+        elif inf["illness"] == IllnessStatus.SYMPTOMATIC:
+            _advance_severity(clock, inf, prof, epochs_infected)
 
         illness_clearance_day, shedding_clearance_day = clearance_days(
             agent, pid, inf, prof, onset,

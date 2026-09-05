@@ -316,6 +316,7 @@ class SeverityModel(BaseModel):
     base_probabilities: list[float]
     prior: dict[str, Any] = {}
     fatality_probability_by_severity: Any | None = None
+    trajectory_ladder_offsets_by_day: list[int] | None = None
     evidence_grade: str = ""
 
     @model_validator(mode="after")
@@ -339,6 +340,12 @@ class SeverityModel(BaseModel):
         if self.fatality_probability_by_severity is not None:
             raise NotImplementedError(
                 "severity-conditioned fatality is not implemented",
+            )
+        offsets = self.trajectory_ladder_offsets_by_day
+        if offsets is not None and (not offsets or any(off > 0 for off in offsets)):
+            raise ValueError(
+                "severity_model.trajectory_ladder_offsets_by_day entries are "
+                "rungs below the peak: non-empty and never positive",
             )
         return self
 
