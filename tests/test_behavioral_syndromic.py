@@ -321,6 +321,44 @@ class TestBehavioralSyndromic:
             1.0 - (1.0 - 1.0 * 0.94) ** 0.5,
         )
 
+    def test_specimen_draws_leave_the_shared_stream_untouched(self) -> None:
+        profile = {
+            "norwalk_gi": {
+                "severity_model": {
+                    "states": ["asymptomatic", "mild", "severe_critical"],
+                },
+                "observation_model": {
+                    "lab_sampling_probability_by_severity": [0, 0.9, 0.9],
+                    "assay_sensitivity": 0.5,
+                },
+            },
+        }
+        agents = [
+            {
+                "agent_id": aid,
+                "pathogen_infections": {
+                    "norwalk_gi": {
+                        "status": "INFECTED",
+                        "illness": "SYMPTOMATIC",
+                        "symptom_severity": "mild",
+                    },
+                },
+            }
+            for aid in range(20)
+        ]
+        shared = np.random.default_rng(5)
+        syn = SyndromicSurveillance(
+            symptom_severity_profiles=profile, rng=shared,
+        )
+        result = syn.collect_specimens(agents, 1, [a["agent_id"] for a in agents])
+        assert 0 < result["lab_sampled_count"] <= 20
+        assert shared.bit_generator.state == np.random.default_rng(5).bit_generator.state
+
+        again = SyndromicSurveillance(
+            symptom_severity_profiles=profile, rng=np.random.default_rng(5),
+        ).collect_specimens(agents, 1, [a["agent_id"] for a in agents])
+        assert again == result
+
     def test_unknown_state_raises_but_legacy_profile_uses_base_hazard(self) -> None:
         profile = {
             "norwalk_gi": {
