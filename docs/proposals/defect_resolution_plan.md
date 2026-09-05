@@ -192,6 +192,21 @@ be written as a rate at all — the class-composition observable of
 [`fleet_emergence_decision.md`](fleet_emergence_decision.md) §3 remains the only
 fleet statistic available there.
 
+**The numerator mismatch is nobody's task, so it is now somebody's request.**
+None of B1–B5 owns it, and no literature search can close it: the posted count
+runs 91 against Freeland's 132 investigated outbreaks but 208 against Jenkins's
+156, so the ratio inverts and the two products are counting different events —
+deriving a conversion from those two ratios would be choosing a definition to
+make a rate come out. The only source that can answer is CDC VSP, which also
+holds the missing annual years and the absent post-2020 count, so the question
+leaves the plan as an external data request:
+[`vsp_midrs_extract_request.md`](vsp_midrs_extract_request.md), which records in
+advance what each possible reply does and does not license. Until it is answered
+the row stays blocked; a reply that supplies counts but not the posting
+criterion closes the denominator gaps only, and the remaining move would then be
+to declare and sweep the posting step as an observation-model parameter, never
+to fit it.
+
 ## 5. Track C — intervals: no scored parameter stays a point value
 
 Task #35 is the umbrella. This track can start during Track A, but **adoption of
