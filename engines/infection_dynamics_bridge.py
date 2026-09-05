@@ -113,8 +113,18 @@ RECOVERY_DAY = 3
 ONSET_DAY = 1
 
 # Environmental deposition: fraction of shedding that deposits on surfaces
-# (ViralParticle.java: particles survive 86400 steps = 1 day)
+# (ViralParticle.java: particles survive 86400 steps = 1 day). Unsourced
+# (class I, register 3.4): no study reports a deposited share of shedding.
+# Legacy paths only — a profiled arm deposits through the emesis and
+# faecal-release paths instead.
 SURFACE_DEPOSITION_FRACTION = 1e-4
+
+# Airborne share of emission for a continuous arm that declares none. The same
+# unsourced 1e-4, inherited by the norovirus arm before the field was
+# redefined; measured fine shares are [0.76, 0.92] (tranche 27), three to four
+# orders away. No active profile reads this: both continuous arms declare
+# airborne_emission_fraction and the norovirus arm is emesis-conditioned.
+UNSOURCED_AIRBORNE_EMISSION_FRACTION = 1e-4
 
 # Aerosol half-life fallback for the pathogen-agnostic zone-mass path.
 # van Doremalen et al., NEJM 2020;382:1564 (SARS-CoV-2 aerosol half-life).

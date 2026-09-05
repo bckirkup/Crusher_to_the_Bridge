@@ -10,6 +10,7 @@ import pytest
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
 from engines.infection_dynamics_bridge import (  # noqa: E402
+    UNSOURCED_AIRBORNE_EMISSION_FRACTION,
     IllnessStatus,
     InfectionStatus,
     KorkinAgent,
@@ -18,6 +19,7 @@ from engines.transmission_core import (  # noqa: E402
     DEFAULT_ROUTE_WEIGHTS,
     TransmissionCore,
 )
+from orchestrator_epoch import _airborne_emission_fraction  # noqa: E402
 from orchestrator_init import init_multi_pathogen  # noqa: E402
 
 
@@ -149,6 +151,29 @@ class TestNorovirusAirborneContracts:
         assert profile["emesis_aerosol_fraction_range"] == [7.2e-7, 2.67e-4]
         assert "airborne_emission_fraction" not in profile
         assert "surface_deposition_fraction" not in profile
+
+    def test_active_arms_never_inherit_the_unsourced_airborne_fraction(
+        self,
+    ) -> None:
+        """Every active arm declares its airborne share or takes none.
+
+        ``UNSOURCED_AIRBORNE_EMISSION_FRACTION`` is class I, three to four
+        orders below the measured fine shares (tranche 27), so an arm reaching
+        it would be running on an unsourced constant silently.
+        """
+        data = json.loads(
+            (REPO_ROOT / "data/pathogens/active_profiles.json").read_text(),
+        )
+        for profile in data["pathogens"]:
+            declared = (
+                "airborne_emission_fraction" in profile
+                or "surface_deposition_fraction" in profile
+            )
+            emesis = profile.get("airborne_emission_mode") == "emesis_conditioned"
+            assert declared or emesis, profile["pathogen_id"]
+            assert _airborne_emission_fraction(profile) != pytest.approx(
+                UNSOURCED_AIRBORNE_EMISSION_FRACTION,
+            ), profile["pathogen_id"]
 
     @pytest.mark.parametrize("bundle", ["active_profiles.json", "edison_10pathogen_profiles.json"])
     def test_covid_continuous_airborne_scope_guard(self, bundle: str) -> None:
