@@ -54,6 +54,59 @@ named faecal release and behaves like faecal release. What it means is that
 "fit one common dose against the VSP class targets" no longer describes an
 operation the model supports.
 
+## 2a. Re-measured with response active (C7), and one output was censored
+
+§2's probe predates the emesis rebuild (#38), the initiation engine, and the
+route-weight re-measurement, and it was taken under `none_true`. Re-run on both
+arms, six release values against six seeds:
+
+```bash
+python3 scripts/release_axis_role_retest.py \
+  --seeds 6 --out reports/c7_release_axis_role_retest.json
+```
+
+`expedition_cruise_450` (300 passengers, 150 crew), 168 epochs,
+`initial_infected = 5`, seeds 500–505, release ∈ {4, 6, 8, 12, 16, 24}, arms
+read from `campaign_manifest.json` rather than restated. Means over seeds:
+
+| Arm | Release | Infection AR | Ever-ill, pax | Ever-ill, crew | Reported, pax |
+|---|---:|---:|---:|---:|---:|
+| syndromic | 4 | 0.631 | 0.334 | 0.294 | 0.332 |
+| syndromic | 6 | 0.604 | 0.266 | 0.238 | 0.266 |
+| syndromic | 8 | 0.727 | 0.315 | 0.296 | 0.315 |
+| syndromic | 12 / 16 / 24 | 0.721 | 0.322 | 0.285 | 0.322 |
+| `none_true` | 4 | **0.800** | 0.725 | 0.679 | 0.000 |
+| `none_true` | 6 | **0.800** | 0.753 | 0.695 | 0.000 |
+| `none_true` | 8 | **0.800** | 0.751 | 0.726 | 0.000 |
+| `none_true` | 12 / 16 / 24 | **0.800** | 0.747 | 0.738 | 0.000 |
+
+Three results.
+
+1. **The plateau survives with outbreak response active.** Above release 8 the
+   syndromic arm's means span 0.006 on infection AR and 0.007–0.011 on the role
+   attack rates, against a top-value seed SD of 0.13–0.30 — **0.03–0.05 of one
+   seed's spread**, on every scored output including VSP posting. So the C1
+   ladder is flat in the configuration the campaign actually runs, and the
+   question §3.1 left open is closed.
+2. **The plateau's edge is 12, not 8.** 12, 16 and 24 are identical to each
+   other; 8 differs from them by 0.007–0.011. §2's "byte-identical from 8
+   upward" was measured on a coarser grid and is corrected here rather than
+   restated.
+3. **`none_true` infection AR is censored, so its flatness measured nothing.**
+   0.8000 appears at every release value on every seed with zero spread,
+   because it *is* the susceptible fraction: `IMMUNE_RATIO = 0.2` removes 20% of
+   the complement and the unmitigated epidemic takes the rest. A ceiling cannot
+   report a parameter's effect, and §10's struck claim that infection AR "pins
+   at exactly 0.800" was describing this ceiling, not a pinned fit — the
+   sentence is wrong about the mechanism and right about the number. Only the
+   ever-ill split, which is not at the ceiling, still moves there (0.003–0.011,
+   ≤0.23 SD).
+
+None of this is a licence to move the term: it remains `⊘ field`, a release
+quantity with no adoptable value, and the re-test scores no anchor. What it
+establishes is that a refit on this axis has nothing to fit *in either arm*, and
+that one of the two arms was never evidence for that in the first place.
+
 ## 3. Parameters set away from an available literature value
 
 These are the answer to question 1. Both push the attack rate **up**, and
@@ -142,16 +195,16 @@ What these runs are not: a VSP comparison. One 450-berth hull, five seeds, no
 posting-rule filter, and outbreak response active throughout. They size the
 parameter's effect; they do not score an anchor.
 
-#### An open question this raised
+#### An open question this raised, now measured (C7)
 
 Under `none_true` surveillance the faecal-release term was inert from 8 upward
 (§2). Under syndromic surveillance, release 4 and 24 differ substantially in
 both arms — consistent with §2, since 4 sits below the plateau, but the absolute
 levels are three to eight times lower than the `none_true` probe at matching
 release. Outbreak response is doing most of that work. Whether the plateau above
-release 8 survives with response active has not been measured, and it should be
-before the C1 ladder is declared flat in the configuration the campaign actually
-runs.
+release 8 survives with response active was not measured; item C7 measured it,
+and §2a records the answer. The plateau survives, and the `none_true` half of
+the original claim turns out to have been read off a censored output.
 
 ### 3.2 Direct-contact transfer fraction is 1.0 against a literature ~0.25
 

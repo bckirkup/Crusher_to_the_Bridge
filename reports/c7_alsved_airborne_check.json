@@ -1,0 +1,66 @@
+{
+  "pathogen_id": "norwalk_gi",
+  "measured": {
+    "source": "Alsved et al. 2019, Clin Infect Dis",
+    "copies_per_m3": [
+      5.0,
+      215.0
+    ],
+    "window_hours": 3.0,
+    "origin": "R",
+    "grade": "B"
+  },
+  "model_inputs": {
+    "emesis_total_shed_gec_range": [
+      100000.0,
+      100000000.0
+    ],
+    "emesis_episodes_range": [
+      1,
+      7
+    ],
+    "emesis_aerosol_fraction_range": [
+      7.2e-07,
+      0.000267
+    ],
+    "airborne_half_life_hours": 1.1,
+    "ventilation_factor": 0.5
+  },
+  "episode_aerosol_mass_gec": {
+    "low": 0.010285714285714285,
+    "high": 26700.0
+  },
+  "window_mean_factor": 0.44910505184962585,
+  "as_implemented": {
+    "largest_zone": {
+      "volume_m3": 1200.0,
+      "instant_copies_per_m3_low": 4.2857142857142855e-06,
+      "instant_copies_per_m3_high": 11.125,
+      "window_mean_copies_per_m3_low": 1.924735936498396e-06,
+      "window_mean_copies_per_m3_high": 4.996293701827088
+    },
+    "smallest_zone": {
+      "volume_m3": 900.0,
+      "instant_copies_per_m3_low": 5.714285714285714e-06,
+      "instant_copies_per_m3_high": 14.833333333333334,
+      "window_mean_copies_per_m3_low": 2.5663145819978617e-06,
+      "window_mean_copies_per_m3_high": 6.66172493576945
+    }
+  },
+  "containment": {
+    "largest_zone": {
+      "overlaps_measured": false,
+      "ratio_high_to_measured_low": 0.9992587403654175,
+      "ratio_high_to_measured_high": 0.02323857535733529
+    },
+    "smallest_zone": {
+      "overlaps_measured": true,
+      "ratio_high_to_measured_low": 1.33234498715389,
+      "ratio_high_to_measured_high": 0.030984767143113722
+    }
+  },
+  "implied_room_volume_m3": {
+    "low_m3": 2.148542440742396e-05,
+    "high_m3": 2398.2209768770017
+  }
+}

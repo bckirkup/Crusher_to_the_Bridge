@@ -716,12 +716,19 @@ is over-determined only *given* them. Full list in §10 of the history document.
 - Fraction of emesis episodes occurring in the host's own cabin — swept, never
   asserted.
 - `EMESIS_AEROSOL_FRACTION_RANGE` (7.2e-7 – 2.67e-4, Tung-Thompson surrogate)
-  has never been checked against a measured airborne concentration, and one
-  exists: Alsved et al. 2019, *CID* — 5–215 copies/m³ beside 26 hospital
-  norovirus patients, positivity associated with vomiting in the previous 3 h.
-  That is a **check**, not a source; choosing the fraction to match it would be
-  fitting. See [`../literature/consensus_tranche_4.md`](../literature/consensus_tranche_4.md)
-  §1d.
+  **has now been checked** against a measured airborne concentration: Alsved et
+  al. 2019, *CID* — 5–215 copies/m³ beside 26 hospital norovirus patients,
+  positivity associated with vomiting in the previous 3 h. The check is
+  `scripts/alsved_airborne_check.py` and it **decides nothing about the value**:
+  the interval's ceiling reaches 5.0–6.7 copies/m³ in a 900–1200 m³ zone, at the
+  measurement's floor, and the 6.4-decade interval constrains
+  fraction × total shed ÷ volume jointly — inverting the comparison admits
+  receiving volumes across five decades. So there is no over-emission to
+  correct, and the fraction remains an interval with no point selected;
+  choosing it to match the measurement would be fitting. See
+  [`../literature/consensus_tranche_4.md`](../literature/consensus_tranche_4.md)
+  §1d and
+  [tranche 28](../literature/consensus_tranche_28_airborne_norovirus_out_of_sample.md).
 - Confinement attenuation factor 0.05.
 - `immunocompromised_fraction` = 0.05, defaulted in the multi-pathogen config
   block rather than in a profile, is now **bounded by measurement**:
