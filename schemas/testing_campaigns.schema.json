@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "testing_campaigns.schema.json",
+  "title": "Testing Campaigns",
+  "description": "Published shipboard testing campaigns replicated as an observation process: how many specimens were taken on each day of the event record, and the order eligibility reached hosts. Assay behaviour is not declared here; it belongs to the pathogen profile's observation_model.",
+  "type": "object",
+  "required": ["campaigns"],
+  "properties": {
+    "schema_version": {"type": "string"},
+    "notes": {"type": "string"},
+    "campaigns": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/Campaign"}
+    }
+  },
+  "$defs": {
+    "Campaign": {
+      "type": "object",
+      "required": [
+        "campaign_id", "pathogen_id", "source", "evidence_grade",
+        "eligibility_tiers", "days"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "campaign_id": {"type": "string", "minLength": 1},
+        "pathogen_id": {"type": "string", "minLength": 1},
+        "start_date": {
+          "type": ["string", "null"],
+          "description": "Reporting date the campaign's day_offset 0 falls on, or null where the record dates the event only by voyage day."
+        },
+        "reference_population": {"type": ["integer", "null"], "minimum": 1},
+        "source": {"type": "string", "minLength": 1},
+        "evidence_grade": {"type": "string", "minLength": 1},
+        "notes": {"type": "string"},
+        "eligibility_tiers": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {"$ref": "#/$defs/Tier"}
+        },
+        "days": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/CampaignDay"}
+        }
+      }
+    },
+    "Tier": {
+      "type": "object",
+      "required": ["rule"],
+      "additionalProperties": false,
+      "properties": {
+        "rule": {
+          "type": "string",
+          "enum": [
+            "symptomatic_or_cabin_contact",
+            "passengers_in_age_bands",
+            "remaining_passengers",
+            "crew",
+            "everyone"
+          ]
+        },
+        "age_bands": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1}
+        },
+        "include_comorbid": {"type": "boolean"},
+        "notes": {"type": "string"}
+      }
+    },
+    "CampaignDay": {
+      "type": "object",
+      "required": ["day_offset", "tests", "tiers"],
+      "additionalProperties": false,
+      "properties": {
+        "date": {"type": "string"},
+        "day_offset": {"type": "integer", "minimum": 0},
+        "tests": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "description": "Specimens the record reports for this day. Null where the record has no volume for the date; a null schedules no specimens rather than an imputed count."
+        },
+        "tiers": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string", "minLength": 1},
+          "description": "Eligibility tiers in force, in the order the campaign reached them."
+        }
+      }
+    }
+  }
+}

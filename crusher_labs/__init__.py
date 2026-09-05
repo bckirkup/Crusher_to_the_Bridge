@@ -49,6 +49,11 @@ from crusher_labs.observation_core import (
     WastewaterSequencingGrid,
 )
 from crusher_labs.protocol_engine import ProtocolEngine
+from crusher_labs.testing_campaign import (
+    CAMPAIGN_DATA_PATH,
+    TestingCampaign,
+    load_campaigns,
+)
 from engines.sim_clock import SimClock, config_epochs_for_hours
 from simulation_utils.paths import resolve_repo_path, validated_open
 
@@ -175,6 +180,38 @@ def metagenomic_sequencing_params(cfg: dict[str, Any] | None = None) -> dict[str
     }
 
 
+def testing_campaigns_from_config(
+    syn_cfg: dict[str, Any],
+) -> list[TestingCampaign]:
+    """Resolve ``syndromic.testing_campaigns`` into campaign objects.
+
+    Each entry names a campaign in the campaign data file and the simulated
+    day its first recorded day falls on::
+
+        testing_campaigns:
+          campaign_file: data/observation/covid_testing_campaigns.json
+          campaigns:
+            - campaign_id: diamond_princess_2020
+              start_day: 16
+
+    The alignment is the scenario's statement; the volumes and the ladder are
+    the record's.
+    """
+    block = syn_cfg.get("testing_campaigns")
+    if not block:
+        return []
+    path = block.get("campaign_file", CAMPAIGN_DATA_PATH)
+    entries = block.get("campaigns") or []
+    start_days = {
+        str(entry["campaign_id"]): int(entry.get("start_day", 0))
+        for entry in entries
+    }
+    loaded = load_campaigns(
+        path, start_days=start_days, campaign_ids=list(start_days),
+    )
+    return [loaded[campaign_id] for campaign_id in start_days]
+
+
 def build_modalities(
     cfg: dict[str, Any] | None = None,
     rng: np.random.Generator | None = None,
@@ -239,6 +276,7 @@ def build_modalities(
             symptom_severity_profiles=pathogen_profiles,
             clock=run_clock,
             rng=rng,
+            testing_campaigns=testing_campaigns_from_config(syn_cfg),
         ),
         "clinical_rdt": ClinicalRDT(
             base_sensitivity=rdt_cfg.get("base_sensitivity", 0.95),

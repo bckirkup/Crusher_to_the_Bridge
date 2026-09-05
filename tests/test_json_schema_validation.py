@@ -57,6 +57,9 @@ SCHEMA_DATA_MAP: dict[str, list[str]] = {
         "data/pathogens/enterprise_tng_profiles.json",
         "data/pathogens/enterprise_tos_profiles.json",
     ],
+    "testing_campaigns.schema.json": [
+        "data/observation/covid_testing_campaigns.json",
+    ],
     "spatial_layout.schema.json": [],
     "air_flow_paths.schema.json": [],
     "preboarding_decision_scenario.schema.json": [
