@@ -699,9 +699,60 @@ person-to-person-plus-environmental together are 25/41, and the model's
 contact, droplet and fomite routes are not separated in the review's
 categories.
 
+**The symptomatic-to-asymptomatic reproduction-number ratio** is the second
+external constraint on something other than a level, and the model has not been
+measured against it. Sukhrie 2012 (DOI 10.1093/cid/cir971, five GII.4
+healthcare-facility outbreaks, all patients and staff sampled with and without
+symptoms) puts R at **1.64 (95% CI 1.56-1.70)** with diarrhoea against **0.85
+(0.55-1.05)** without: a ratio of **0.52**, CI corners **[0.32, 0.67]**. It is
+non-circular against A1/A2/A4/A8 because it is a within-outbreak ratio of
+reproduction numbers in hospitals rather than a cruise attack rate or posting
+rate, and it is an **upper bound** on the ratio applying to a
+`never_symptomatic` host, because Sukhrie's exposed arm is "without diarrhoea"
+and so contains vomiting-only cases while ours has no symptoms at all.
+
+The model's realised ratio is expected to sit near 1.0, because symptom status
+reaches `transmission_core` through the **emesis path and nowhere else** -
+faecal deposition, hand load, food deposition and direct contact are per-copy
+identical for a carrier and an ill case. That is the check's point: it measures
+a structural gap rather than a mis-set constant, and **no constant may be moved
+to reproduce 0.52** ([tranche 31](../literature/consensus_tranche_31_symptom_conditioned_spreading.md)
+§3.2, §4.2). Adopting 0.52 as a per-copy multiplier is separately refused:
+R is net of every route including the emesis path already in tree, so it would
+double-count by exactly the amount emesis already supplies.
+
 ## 4. Outstanding
 
 Roughly in dependency order.
+
+0. **`SYMP-EFF-01`: the sentinel and the transmission side ride one quantity,
+   and the term that would separate them does not exist.** Norovirus boards at
+   a prevalence of **asymptomatic faecal RNA carriage** (Grade B on its own
+   denominator: Kobayashi 2021, Qi 2018, Jeong 2021), which is exactly the
+   quantity **wastewater surveillance detects** - and the same emission is what
+   the fomite route delivers dose from, because the sentinel samples the
+   greywater fraction of the same zone pools that `ENV_DELIVERY_FRACTION_PER_DAY`
+   draws on. So there is no admissible change to asymptomatic detectability
+   that does not move asymptomatic infectiousness by the same factor, and the
+   #37 posting-rate diagnosis cannot be resolved by adjusting either the
+   prevalence or the asymptomatic shedding offset - **neither is a free
+   parameter, because there is no free parameter**. The adult literature
+   declines to shrink either: Teunis 2014 finds asymptomatic shedding markedly
+   similar to symptomatic across peak, time-to-peak, duration and AUC, and
+   states that the greater contribution of symptomatic cases must therefore be
+   caused by higher **spreading efficiency**. That term is measured (§3's
+   check) and absent here. Two candidate shapes are recorded and **neither is
+   chosen**: hand contamination scaling with defecation events per day - which
+   is what the Sukhrie and Teunis authors' own hygiene attribution points at,
+   and which subsumes the whole-gut-transit and diarrhoeal-liquid gaps left
+   open at the deposition constants by #447 - or a declared swept axis with
+   Grade B direction and declared magnitude. A GC:PFU conversion is **refused**:
+   1.4-4.3 log10 wide and matrix-dependent, and exactly absorbed by the
+   dose-response intercept, whose axis is administered genome copies
+   ([tranche 31](../literature/consensus_tranche_31_symptom_conditioned_spreading.md) §4.1).
+   Nothing downstream of this - the next admissible-box sweep included - is
+   interpretable until the term exists or its absence is a declared condition
+   of the design.
 
 1. **`FOOD-ARCH-01`: repaired in form, and half of it remains open.** The
    deposition side is closed: the food route now composes its deposit the way
