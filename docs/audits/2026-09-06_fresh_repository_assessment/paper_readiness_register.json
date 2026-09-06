@@ -1,0 +1,259 @@
+[
+  {
+    "paper_id": "M01",
+    "prospective_paper": "Model validation and calibration",
+    "source_crosswalk": "Shared core; r7 F01",
+    "domain_blockers": [
+      "DIM-01",
+      "DIM-02",
+      "DIM-03",
+      "DIM-04",
+      "PROV-01",
+      "STAN-02",
+      "LEG-01"
+    ],
+    "notes": "Fresh r9 bounded four-chain execution exists for all nine models, but no real-data calibration, simulation-based recovery, posterior-predictive scientific validation, or immutable campaign lineage is demonstrated.",
+    "readiness_status": "BLOCKED",
+    "exploratory_campaign": "BLOCKED: immutable attempt and exact run fingerprint absent",
+    "confirmatory_campaign": "BLOCKED: no analysis-plan freeze/intent enforcement and immutable attempt absent",
+    "revision_campaign": "BLOCKED: no parent-child campaign record or immutable attempt",
+    "review_response_campaign": "BLOCKED: no review_response_id, parent-child record, or figure/table lineage",
+    "immutable_attempts": false,
+    "exact_run_fingerprints": false,
+    "figure_table_lineage": false,
+    "parent_child_campaign_records": false,
+    "common_blockers": [
+      "CAMP-01",
+      "CAMP-02",
+      "CAMP-03",
+      "CAMP-04",
+      "CAMP-07",
+      "PUB-04"
+    ],
+    "campaign_size": "NOT ASSESSED: no approved estimand, precision target, or frozen factor grid; no size invented",
+    "acceptance_test": "Execute one 1-run lifecycle qualification for each intent with unique campaign UID, parent linkage, exclusive attempt directory, exact run/analysis fingerprints, and figure/table input hashes; all mutation/overwrite/stale-cache probes fail closed.",
+    "r11_stan_evidence_effect": "No readiness-label change: r9 establishes bounded execution, not scientific validation or immutable campaign lineage."
+  },
+  {
+    "paper_id": "M02",
+    "prospective_paper": "Medical diagnostics and observation",
+    "source_crosswalk": "Crusher labs / observation; part of source-defined Paper 1/2",
+    "domain_blockers": [
+      "ARCH-01",
+      "ARCH-02",
+      "ARCH-03",
+      "PROV-03"
+    ],
+    "notes": "Runtime schemas and observation uniqueness/missing-value contracts are incomplete.",
+    "readiness_status": "BLOCKED",
+    "exploratory_campaign": "BLOCKED: immutable attempt and exact run fingerprint absent",
+    "confirmatory_campaign": "BLOCKED: no analysis-plan freeze/intent enforcement and immutable attempt absent",
+    "revision_campaign": "BLOCKED: no parent-child campaign record or immutable attempt",
+    "review_response_campaign": "BLOCKED: no review_response_id, parent-child record, or figure/table lineage",
+    "immutable_attempts": false,
+    "exact_run_fingerprints": false,
+    "figure_table_lineage": false,
+    "parent_child_campaign_records": false,
+    "common_blockers": [
+      "CAMP-01",
+      "CAMP-02",
+      "CAMP-03",
+      "CAMP-04",
+      "CAMP-07",
+      "PUB-04"
+    ],
+    "campaign_size": "NOT ASSESSED: no approved estimand, precision target, or frozen factor grid; no size invented",
+    "acceptance_test": "Execute one 1-run lifecycle qualification for each intent with unique campaign UID, parent linkage, exclusive attempt directory, exact run/analysis fingerprints, and figure/table input hashes; all mutation/overwrite/stale-cache probes fail closed.",
+    "r11_stan_evidence_effect": "No readiness-label change: r9 establishes bounded execution, not scientific validation or immutable campaign lineage."
+  },
+  {
+    "paper_id": "M03",
+    "prospective_paper": "Wearables",
+    "source_crosswalk": "wearable monitoring and surveillance tiers",
+    "domain_blockers": [
+      "PROV-01",
+      "CAMP-01"
+    ],
+    "notes": "The bounded parameter recovery explicitly sampled rather than enumerated 596 wearable leaves; readiness cannot be inferred from the current provenance inventory.",
+    "readiness_status": "BLOCKED",
+    "exploratory_campaign": "BLOCKED: immutable attempt and exact run fingerprint absent",
+    "confirmatory_campaign": "BLOCKED: no analysis-plan freeze/intent enforcement and immutable attempt absent",
+    "revision_campaign": "BLOCKED: no parent-child campaign record or immutable attempt",
+    "review_response_campaign": "BLOCKED: no review_response_id, parent-child record, or figure/table lineage",
+    "immutable_attempts": false,
+    "exact_run_fingerprints": false,
+    "figure_table_lineage": false,
+    "parent_child_campaign_records": false,
+    "common_blockers": [
+      "CAMP-01",
+      "CAMP-02",
+      "CAMP-03",
+      "CAMP-04",
+      "CAMP-07",
+      "PUB-04"
+    ],
+    "campaign_size": "NOT ASSESSED: no approved estimand, precision target, or frozen factor grid; no size invented",
+    "acceptance_test": "Execute one 1-run lifecycle qualification for each intent with unique campaign UID, parent linkage, exclusive attempt directory, exact run/analysis fingerprints, and figure/table input hashes; all mutation/overwrite/stale-cache probes fail closed.",
+    "r11_stan_evidence_effect": "No readiness-label change: r9 establishes bounded execution, not scientific validation or immutable campaign lineage."
+  },
+  {
+    "paper_id": "M04",
+    "prospective_paper": "Wastewater surveillance",
+    "source_crosswalk": "sentinel_ww_ops_scan; source-defined Paper 2",
+    "domain_blockers": [
+      "STAN-02",
+      "STAN-04",
+      "STAN-05",
+      "LEG-02",
+      "ARCH-02"
+    ],
+    "notes": "Fresh sentinel_fleet completed four chains but failed the declared tail-ESS smoke threshold for prior-only ww_slope in a clinical-only fixture; active wastewater likelihood geometry, recovery, posterior-predictive validation, and real-data validation remain untested.",
+    "readiness_status": "BLOCKED",
+    "exploratory_campaign": "BLOCKED: immutable attempt and exact run fingerprint absent",
+    "confirmatory_campaign": "BLOCKED: no analysis-plan freeze/intent enforcement and immutable attempt absent",
+    "revision_campaign": "BLOCKED: no parent-child campaign record or immutable attempt",
+    "review_response_campaign": "BLOCKED: no review_response_id, parent-child record, or figure/table lineage",
+    "immutable_attempts": false,
+    "exact_run_fingerprints": false,
+    "figure_table_lineage": false,
+    "parent_child_campaign_records": false,
+    "common_blockers": [
+      "CAMP-01",
+      "CAMP-02",
+      "CAMP-03",
+      "CAMP-04",
+      "CAMP-07",
+      "PUB-04"
+    ],
+    "campaign_size": "NOT ASSESSED: no approved estimand, precision target, or frozen factor grid; no size invented",
+    "acceptance_test": "Execute one 1-run lifecycle qualification for each intent with unique campaign UID, parent linkage, exclusive attempt directory, exact run/analysis fingerprints, and figure/table input hashes; all mutation/overwrite/stale-cache probes fail closed.",
+    "r11_stan_evidence_effect": "No readiness-label change: r9 establishes bounded execution, not scientific validation or immutable campaign lineage."
+  },
+  {
+    "paper_id": "M05",
+    "prospective_paper": "Medical response and decision policies",
+    "source_crosswalk": "decision engine / protocols / economics; source-defined Paper 1",
+    "domain_blockers": [
+      "DIM-03",
+      "DIM-06",
+      "PROV-03",
+      "ARCH-01"
+    ],
+    "notes": "Recurring protocol cost time base remains an ambiguity; economics placeholders/source anchoring require resolution.",
+    "readiness_status": "BLOCKED",
+    "exploratory_campaign": "BLOCKED: immutable attempt and exact run fingerprint absent",
+    "confirmatory_campaign": "BLOCKED: no analysis-plan freeze/intent enforcement and immutable attempt absent",
+    "revision_campaign": "BLOCKED: no parent-child campaign record or immutable attempt",
+    "review_response_campaign": "BLOCKED: no review_response_id, parent-child record, or figure/table lineage",
+    "immutable_attempts": false,
+    "exact_run_fingerprints": false,
+    "figure_table_lineage": false,
+    "parent_child_campaign_records": false,
+    "common_blockers": [
+      "CAMP-01",
+      "CAMP-02",
+      "CAMP-03",
+      "CAMP-04",
+      "CAMP-07",
+      "PUB-04"
+    ],
+    "campaign_size": "NOT ASSESSED: no approved estimand, precision target, or frozen factor grid; no size invented",
+    "acceptance_test": "Execute one 1-run lifecycle qualification for each intent with unique campaign UID, parent linkage, exclusive attempt directory, exact run/analysis fingerprints, and figure/table input hashes; all mutation/overwrite/stale-cache probes fail closed.",
+    "r11_stan_evidence_effect": "No readiness-label change: r9 establishes bounded execution, not scientific validation or immutable campaign lineage."
+  },
+  {
+    "paper_id": "M06",
+    "prospective_paper": "HVAC and airborne transmission",
+    "source_crosswalk": "c13 Contam comparisons; r7 F04",
+    "domain_blockers": [
+      "DIM-02",
+      "PROV-01",
+      "EXT-03"
+    ],
+    "notes": "ContamX live integration was inaccessible; native fallback is not equivalence evidence. Restricted geometry authorization applies.",
+    "readiness_status": "BLOCKED",
+    "exploratory_campaign": "BLOCKED: immutable attempt and exact run fingerprint absent",
+    "confirmatory_campaign": "BLOCKED: no analysis-plan freeze/intent enforcement and immutable attempt absent",
+    "revision_campaign": "BLOCKED: no parent-child campaign record or immutable attempt",
+    "review_response_campaign": "BLOCKED: no review_response_id, parent-child record, or figure/table lineage",
+    "immutable_attempts": false,
+    "exact_run_fingerprints": false,
+    "figure_table_lineage": false,
+    "parent_child_campaign_records": false,
+    "common_blockers": [
+      "CAMP-01",
+      "CAMP-02",
+      "CAMP-03",
+      "CAMP-04",
+      "CAMP-07",
+      "PUB-04"
+    ],
+    "campaign_size": "NOT ASSESSED: no approved estimand, precision target, or frozen factor grid; no size invented",
+    "acceptance_test": "Execute one 1-run lifecycle qualification for each intent with unique campaign UID, parent linkage, exclusive attempt directory, exact run/analysis fingerprints, and figure/table input hashes; all mutation/overwrite/stale-cache probes fail closed.",
+    "r11_stan_evidence_effect": "No readiness-label change: r9 establishes bounded execution, not scientific validation or immutable campaign lineage."
+  },
+  {
+    "paper_id": "M07",
+    "prospective_paper": "Fleet-to-port public-health inference",
+    "source_crosswalk": "Sentinel attribution/fleet; source-defined Paper 2",
+    "domain_blockers": [
+      "STAN-02",
+      "STAN-04",
+      "STAN-05",
+      "ARCH-02",
+      "ARCH-03"
+    ],
+    "notes": "Fresh Sentinel models completed bounded four-chain synthetic runs (attribution PASS; fleet FAIL on prior-only ww_slope tail ESS), but neither is scientifically validated; fit status can still report completion without a diagnostic gate.",
+    "readiness_status": "BLOCKED",
+    "exploratory_campaign": "BLOCKED: immutable attempt and exact run fingerprint absent",
+    "confirmatory_campaign": "BLOCKED: no analysis-plan freeze/intent enforcement and immutable attempt absent",
+    "revision_campaign": "BLOCKED: no parent-child campaign record or immutable attempt",
+    "review_response_campaign": "BLOCKED: no review_response_id, parent-child record, or figure/table lineage",
+    "immutable_attempts": false,
+    "exact_run_fingerprints": false,
+    "figure_table_lineage": false,
+    "parent_child_campaign_records": false,
+    "common_blockers": [
+      "CAMP-01",
+      "CAMP-02",
+      "CAMP-03",
+      "CAMP-04",
+      "CAMP-07",
+      "PUB-04"
+    ],
+    "campaign_size": "NOT ASSESSED: no approved estimand, precision target, or frozen factor grid; no size invented",
+    "acceptance_test": "Execute one 1-run lifecycle qualification for each intent with unique campaign UID, parent linkage, exclusive attempt directory, exact run/analysis fingerprints, and figure/table input hashes; all mutation/overwrite/stale-cache probes fail closed.",
+    "r11_stan_evidence_effect": "No readiness-label change: r9 establishes bounded execution, not scientific validation or immutable campaign lineage."
+  },
+  {
+    "paper_id": "M08",
+    "prospective_paper": "Ship-based early detection of pathogen variants",
+    "source_crosswalk": "source-defined Paper 3 / phylodynamics",
+    "domain_blockers": [
+      "PUB-01",
+      "PROV-01",
+      "CAMP-07"
+    ],
+    "notes": "Paper 3 tiers are deferred in the inspected manifests and depend on the c1_* chain.",
+    "readiness_status": "BLOCKED",
+    "exploratory_campaign": "BLOCKED: immutable attempt and exact run fingerprint absent",
+    "confirmatory_campaign": "BLOCKED: no analysis-plan freeze/intent enforcement and immutable attempt absent",
+    "revision_campaign": "BLOCKED: no parent-child campaign record or immutable attempt",
+    "review_response_campaign": "BLOCKED: no review_response_id, parent-child record, or figure/table lineage",
+    "immutable_attempts": false,
+    "exact_run_fingerprints": false,
+    "figure_table_lineage": false,
+    "parent_child_campaign_records": false,
+    "common_blockers": [
+      "CAMP-01",
+      "CAMP-02",
+      "CAMP-03",
+      "CAMP-04",
+      "CAMP-07",
+      "PUB-04"
+    ],
+    "campaign_size": "NOT ASSESSED: no approved estimand, precision target, or frozen factor grid; no size invented",
+    "acceptance_test": "Execute one 1-run lifecycle qualification for each intent with unique campaign UID, parent linkage, exclusive attempt directory, exact run/analysis fingerprints, and figure/table input hashes; all mutation/overwrite/stale-cache probes fail closed.",
+    "r11_stan_evidence_effect": "No readiness-label change: r9 establishes bounded execution, not scientific validation or immutable campaign lineage."
+  }
+]

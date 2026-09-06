@@ -33,6 +33,7 @@ definitions for all data contracts used in the Crusher-to-the-Bridge platform.
 
 | File | Validates | Path |
 |------|-----------|------|
+| `publication_campaign_provenance.schema.json` | Immutable campaign identity and parent/revision lineage | Campaign archive provenance envelope |
 | `simulation_history.schema.json` | Per-epoch simulation state | `telemetry_buffer/simulation_history.json` |
 | `lab_notebook.schema.json` | Diagnostic records & audit | `telemetry_buffer/artificial_lab_notebook.json` |
 
@@ -67,4 +68,11 @@ the sanity checker:
 
 ```bash
 python tools/sanity_checker.py
+```
+
+
+Validate and fingerprint the proposed publication campaign envelope:
+
+```bash
+python tools/campaign_fingerprint.py docs/examples/publication_campaign_provenance.example.json --validate
 ```
