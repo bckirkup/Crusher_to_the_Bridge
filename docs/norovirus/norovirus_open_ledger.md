@@ -77,6 +77,27 @@ changes here.
   The measurement stands as a measurement of the retired condition; a
   replacement pass needs its own floor, because the floor was taken under the
   same retired condition.
+- **Every food-route dose, route share and posting rate measured before the
+  FOOD-ARCH-01 deposition repair.** The route's deposit was a fixed share of
+  every zone shedder's whole faecal emission; it is now contacts × per-contact
+  transfer × hand load with the hand depleted. The shipped contact rate was set
+  so the *expected* deposit at the shipped hand load and release adjustment is
+  unchanged, and the orchestrator smoke did not move, so this withdrawal is
+  narrower than DIM-01's: the level is preserved in expectation. What is not
+  preserved is the route's *response* — it now varies with hand load, hygiene,
+  role and the swept contact rate, and no longer with the release adjustment —
+  so any statement of the form "the food route carries X% of dose" or "factor Y
+  moves the food route" predates its mechanism and must be re-measured. This
+  compounds the withdrawal below rather than replacing it. The replacement
+  measurement is
+  `telemetry_buffer/observation_model/route_weight_measurement_findings.md` §8:
+  under boarding, on the shipped grid, the food route delivers **2e-7 of
+  pre-weight norovirus dose**, against the withdrawn 93-99.9%. The per-shedder
+  deposit is preserved in expectation, so the collapse is the loss of the
+  whole-emission coupling (a hand load saturates where an emission does not) and
+  the per-head division of the pool, not a chosen magnitude. The model now sits
+  far below Mouchtouri 2024's 7.3-32% food-involved outbreak share, having sat
+  far above it; that is a recorded discrepancy, not a target.
 - **Every food-route dose and route share measured on the hourly grid before
   the pool fractions were unit-declared (Edison DIM-01).** `FOOD_INGESTION_FRACTION`
   0.05 and `ENV_DELIVERY_FRACTION` 0.01 were applied once per *epoch* with no
@@ -646,11 +667,76 @@ vessels, several below VSP's own 100-passenger criterion, are posted post-2020.
 Detecting an effect of this size needs hundreds of posted simulated voyages per
 configuration; the design fixes 1,000.
 
+**Mouchtouri et al. (2024) route-mode counts — a new out-of-sample check, and
+the model currently fails it.** The systematic review of 45 norovirus outbreaks
+on 26 cruise ships, 1990-2020, reports source and mode for 41. From its Table 3
+(read from the Europe PMC JATS full text, PMC10986668): person-to-person 14,
+person-to-person plus environmental 11, multiple modes 10, **food-borne 3**,
+waterborne 3, unknown 4. So food as the **sole** mode is 3/41 = **7.3%**, and
+counting every mixed-mode outbreak as food-involved bounds food involvement
+above at 13/41 = **32%**.
+
+The last route measurement puts the **food route at 93-99.9% of delivered
+dose**. That is inconsistent with the setting's own outbreak record by an order
+of magnitude, and it is the first external constraint this repository has on
+route *shares* rather than on levels. It is admissible precisely because a
+mode-attribution count is a different observable from A1/A2/A4/A8; the paper's
+attack-rate columns are deliberately not used, and no constant may be moved to
+bring the share into 7-32% ([tranche 29](../literature/consensus_tranche_29_food_and_environmental_deposition.md) §5). What the check does not do is say which
+route should carry the dose instead: person-to-person and
+person-to-person-plus-environmental together are 25/41, and the model's
+contact, droplet and fomite routes are not separated in the review's
+categories.
+
 ## 4. Outstanding
 
 Roughly in dependency order.
 
-1. **Zone-differentiated cleaning schedules — swept, bounds sourced, no cell
+1. **`FOOD-ARCH-01`: repaired in form, and half of it remains open.** The
+   deposition side is closed: the food route now composes its deposit the way
+   the fomite route does — contacts × per-contact transfer × hand load,
+   subtracted from the hand — so `FOOD_DEPOSITION_FRACTION_OF_EMISSION` is
+   retired, the hygiene levers reach the route through the hand it deposits
+   from, and the crew food-handler channel exists as its own (inferred)
+   multiplier. The shipped contact rate, 0.6/day, is the corridor arithmetic
+   below read backwards, so the repair did **not** choose a new magnitude at
+   the shipped point; it is a declared sweep axis, and a physically plausible
+   rate of a few contacts per meal is 5–17× higher, which the box must measure
+   rather than the default assert. Two consequences are recorded, not repaired:
+   the deposit no longer scales with
+   `environmental_faecal_release_log10_g_per_epoch` at all (hand load is
+   measured against the curve peak instead), which retires the coupling through
+   which #36's one resolved factor reached this route; and
+   **`FOOD_INGESTION_FRACTION_PER_DAY` = 0.05 against a 0.1/day decay is
+   untouched**, so the 85.5%/day carry-over identified below as the actual
+   mechanism behind the route's dose share is still standing. The paragraphs
+   below are the statement of the original defect.
+
+   The fomite path replenishes a
+   per-hand load from a measured target, counts contacts, draws a transfer
+   efficiency per event, applies the drying multiplier and **subtracts the
+   deposit from the hand**. The food path multiplies the whole faecal emission
+   by one constant, for every shedder in the zone, with no hand, no contact
+   count, no depletion and no hygiene lever — so the NPI interface (#9/#10),
+   whose buffet-prompt arms act on hand-mediated routes, has almost nothing to
+   act on in the route that carries the dose.
+
+   The sourcing pass ([tranche 29](../literature/consensus_tranche_29_food_and_environmental_deposition.md)) establishes that the parts for a decomposed food
+   route are already in hand — hand load Grade B in tree (Liu 2013), hand to
+   **food** transfer Grade B at 0.3-46% per contact (Bidawid 2004, Tuladhar
+   2013, Rönnqvist 2014, Grove 2015), contact rate ∅ null and therefore
+   sweepable — and that the shipped `FOOD_DEPOSITION_FRACTION_OF_EMISSION` =
+   1e-4 is **equivalent to 0.3-46 bare-hand food-contact events per shedder per
+   day**, i.e. inside an admissible corridor. So the food route's dominance is
+   not that constant's magnitude. It is
+   `FOOD_INGESTION_FRACTION_PER_DAY` = 0.05 against a 0.1/day decay, which
+   leaves **85.5% of the pool standing each day**: the pool integrates every
+   shedder's deposits across the voyage and delivers to every occupant every
+   day. That carry-over is food-service logistics declared as a rate, and no
+   literature search can raise its grade. Of those two, the deposition form is
+   now repaired and the ingestion carry-over is not.
+
+2. **Zone-differentiated cleaning schedules — swept, bounds sourced, no cell
    adopted.** #355 closed the "nothing cleans surfaces" gap — routine
    housekeeping is a discrete pass over the measured 37% of objects it reaches,
    and outbreak-response hypochlorite is a separate, stronger, SOP-triggered
@@ -684,7 +770,7 @@ Roughly in dependency order.
    crew rates did *not* hold still across the break, they rose (A7b), so a
    configuration that leaves the crew arm untouched now contradicts the data
    rather than matching it.
-2. **Refit the common dose** against VSP class targets. The contact layer
+3. **Refit the common dose** against VSP class targets. The contact layer
    (#353) and cleaning (#355) are now in place, so this is next. One common
    dose-response across all four hull classes; no hull-specific pathogen
    biology, ever. The first attempt (C1, 2,880 runs) is withdrawn by §1: its
@@ -693,13 +779,13 @@ Roughly in dependency order.
    short probe *before* submission — and must hold the surveillance response
    fixed while the dose moves, since the two arms differ 6-80x in infection
    attack rate at the same dose and seed.
-3. **Re-measure route shares and the passenger/crew ratio** on the refitted
+4. **Re-measure route shares and the passenger/crew ratio** on the refitted
    model. Expect #353 to push A5 *further* from 2.9 — crew work the highest
    touch-rate zones and their berthing is already ~3x denser than passengers'.
    If it does, that is a finding about what is still missing.
-4. **Score the v4-successor campaign** against VSP class targets, per era,
+5. **Score the v4-successor campaign** against VSP class targets, per era,
    and never on a withheld A4 cell (post-2020 classic, post-2020 mega).
-5. **A8/A9 need a fleet-scale cell before they can score anything.** #37 showed
+6. **A8/A9 need a fleet-scale cell before they can score anything.** #37 showed
    the two anchors as mapped cannot be satisfied by a cell of replicate runs of
    one configuration at all: A4 is outbreak-conditional and A8 unconditional on
    the same numerator (23x apart in A8's units), and A9's target needs >=180
@@ -711,7 +797,7 @@ Roughly in dependency order.
    `telemetry_buffer/observation_model/midrs_incidence_targets.py`. The
    post-arm observation remains unavailable, and A10 duration trajectories are
    still Proposed.
-6. **The observation model's capture saturates at 1.0, and A3 says it should
+7. **The observation model's capture saturates at 1.0, and A3 says it should
    not.** Measured across #37's 128 points: reported/ever-ill rises with epidemic
    size and reaches 1.0 in exactly the region where A1 is in band, so A3 is out
    of its 0.35-0.45 construction band at 123 of 128 points and A4 inherits A1's
@@ -719,22 +805,22 @@ Roughly in dependency order.
    showing up as a scored consequence; it must be repaired in the observation
    model, and A4 re-read afterwards, before an A1/A4 incompatibility means
    anything about transmission.
-7. **Cabin-level environmental compartments.** The finest mixing compartment is
+8. **Cabin-level environmental compartments.** The finest mixing compartment is
    `Cabin_Corridor`: ~37 people in 800 m³ where reality is 2 people in ~40 m³
    (crew 3). `cabin_size` and `cabin_mate_ids` exist but only exempt a mate from
    confinement attenuation. Building this would raise crew rates — away from the
    anchor — so build it honestly and do not expect it to help. No cruise
    platform has four-berth cabins; crew are three.
-8. **Aerosol portal efficiency.** #352 computes and records the emesis aerosol
+9. **Aerosol portal efficiency.** #352 computes and records the emesis aerosol
    load but does not route it into the airborne reservoir. The direction is
    settled (norovirus establishes enterically; inhalation is delivery-to-gut via
    swallowing, so the respiratory clearance proxy is the wrong quantity) but the
    magnitude is not: the 10-30% figure is deposition in mouth/nose/trachea and
    is explicitly **not** an intestinal-delivery fraction.
-9. **Sick-host movement and a bathroom destination.** The Park gradient needs
+10. **Sick-host movement and a bathroom destination.** The Park gradient needs
    it; see §3.
-10. **AWS daughter session: CONTAM vs native accumulation comparison.** Deferred.
-11. **Provenance queue, re-ordered by the bounded screen.** Measured in
+11. **AWS daughter session: CONTAM vs native accumulation comparison.** Deferred.
+12. **Provenance queue, re-ordered by the bounded screen.** Measured in
     [`bounded_screen_results.md`](bounded_screen_results.md) §7.
     `innate_nonsusceptible_fraction` moves to the front on consequence: it is
     the top-ranked factor while carrying the mechanism §1 withdraws.
@@ -750,7 +836,7 @@ Roughly in dependency order.
     ([`../literature/consensus_tranche_12_contact_transfer.md`](../literature/consensus_tranche_12_contact_transfer.md)
     §10). No other row in that screen is affected. Emesis titre
     becomes a first-order provenance target, which it was not before.
-12. **`EMESIS_TITRE_GEC_PER_ML` = 3.9e4 is the wrong figure from the right
+13. **`EMESIS_TITRE_GEC_PER_ML` = 3.9e4 is the wrong figure from the right
     paper, and its two companions are also off the measurement.** Traced in
     [`../literature/consensus_tranche_4.md`](../literature/consensus_tranche_4.md)
     §1c. 3.9 × 10⁴ is Kirby et al. 2016's **abstract** value for "GII viruses",
@@ -775,7 +861,7 @@ Roughly in dependency order.
     an input and the episode count corrected to 1–7. Three inputs collapse to
     one, so the item is closed as a degrees-of-freedom reduction rather than as
     a re-valued titre.
-13. **Resolved: the infectious period was incorrectly tied to illness duration,
+14. **Resolved: the infectious period was incorrectly tied to illness duration,
     and two thirds of the authored shedding curve was never emitted.** Measured,
     not argued:
     `telemetry_buffer/observation_model/shedding_clock_check.py` drives the real
@@ -801,7 +887,7 @@ Roughly in dependency order.
     limitation is unchanged. See
     [`../literature/consensus_tranche_7.md`](../literature/consensus_tranche_7.md).
 
-14. **Resolved: immunocompromise acted on acquisition, the one quantity nothing
+15. **Resolved: immunocompromise acted on acquisition, the one quantity nothing
     measures, and not on duration, which is measured directly.** #45 deleted
     `immunocompromised_multiplier` = 2.0 from the tree — no source measures the
     relative risk of *acquiring* norovirus while immunocompromised, and Green
@@ -875,7 +961,7 @@ is over-determined only *given* them. Full list in §10 of the history document.
   `immunocompromised_multiplier` = 2.0 is **withdrawn and deleted from the
   tree** (#45): a config still setting it is warned about rather than silently
   ignored, and the measured quantities enter as duration on the profile — see
-  §4 item 13.
+  §4 item 15.
   Remaining Grade C liability: `chronic_shedding_duration_days.sigma_log` =
   1.09 is our declared lognormal shape over van Beek's measured median and
   range, not a measured dispersion. See

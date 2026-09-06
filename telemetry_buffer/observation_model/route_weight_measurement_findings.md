@@ -225,3 +225,36 @@ emission scale and `beta` together.
   norovirus is transmitted on real ships; it is a description of what this code
   currently does.
 - The absolute level of any attack rate. `S` is not an attack rate.
+
+## 8. Post-`FOOD-ARCH-01` food share, measured under boarding
+
+Measurement, adopted nothing. Harness as above, one run: `active_profiles`,
+168 epochs, 450 agents on `mega_cruise_5000`, seed 7, after the hand-mediated
+food route landed (contacts × per-contact transfer × hand load, with depletion).
+
+| pathway | pre-weight dose | share | post-weight share |
+|---|---|---|---|
+| direct_contact | 3.399e+07 | 0.9970 | 0.9979 |
+| fomite | 7.30e+04 | 0.0021 | 0.0018 |
+| droplet | 2.972e+04 | 0.0009 | 0.0002 |
+| hvac_airborne | 529.5 | ~0 | ~0 |
+| food | 6.11 | 2e-7 | 1e-7 |
+
+This is the direction nobody predicted. The withdrawn pre-repair figure had the
+food route at 93–99.9% of delivered dose; bounded by a hand load whose ceiling
+is 10^3.86 GEC and divided per head across a dining zone's occupants, it now
+delivers ~1e-7 of it. The route did not move by a chosen magnitude — the shipped
+contact rate is the retired constant's own composition read backwards — so the
+collapse is the removal of the whole-emission coupling, not a new value: the old
+form scaled the deposit with each shedder's entire per-epoch emission and with
+`environmental_faecal_release_log10_g_per_epoch`, the box's one Grade D axis,
+while a hand load saturates.
+
+Against the one external, non-circular check
+(Mouchtouri et al. 2024: food the sole mode in 7.3% of cruise outbreaks, food
+involved in 32% counting mixed modes) the model now sits far **below** the
+check, having sat far above it. That is recorded as a discrepancy, not a target:
+no food parameter may be selected to close it. The two candidate structural
+causes are the per-head division of a well-mixed pool (a communal serving is not
+well mixed over an entire dining zone) and the null contact rate, and both are
+open in `docs/parameter_provenance_register.md`.
