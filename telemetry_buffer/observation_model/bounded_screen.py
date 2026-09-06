@@ -327,6 +327,53 @@ def observation_scenario_patch(
     return patch
 
 
+def build_run_spec(
+    factors: Sequence[Factor],
+    units: Sequence[float],
+    *,
+    seed: int,
+    pathogen_id: str,
+    bundle: str,
+    platform: str,
+    epochs: int,
+    num_agents: int,
+    description: str = "bounded_screen",
+    observation_scenario: str | None = None,
+    co_seeded: str = "isolated",
+) -> dict[str, object]:
+    """The Picard spec for one design point at one seed.
+
+    Shared with the admissible-region gate so that a box coordinate means the
+    same run in both: a gate that built its own spec could differ from the
+    screen in the arrival channel or the isolation mechanism, and the two
+    results would then be about different models.
+    """
+    overrides = build_overrides(factors, units, pathogen_id)
+    config_overrides: dict[str, object] = {"ship_graph": {"num_agents": int(num_agents)}}
+    if co_seeded == "isolated":
+        config_overrides["initiation"] = withdraw_other_boarding(bundle, pathogen_id)
+    if observation_scenario is not None:
+        overrides[pathogen_id]["observation_model"] = observation_scenario_patch(
+            bundle, pathogen_id, observation_scenario,
+        )
+    return {
+        "schema_version": "1.0.0",
+        "description": description,
+        "catalog": {"platform_id": platform, "pathogen_bundle_id": bundle},
+        "run": {
+            "random_seed": int(seed),
+            "num_epochs": int(epochs),
+            "write_ground_truth": False,
+            "history_retention": "compact",
+        },
+        "legacy_yaml": "crusher_labs/config.yaml",
+        "actors": [],
+        "incentives": {},
+        "config_overrides": config_overrides,
+        "pathogen_overrides": overrides,
+    }
+
+
 def run_point(
     factors: Sequence[Factor],
     units: Sequence[float],
@@ -341,30 +388,18 @@ def run_point(
     co_seeded: str = "isolated",
 ) -> dict[str, float]:
     """Run one design point at one seed and return the scored outputs."""
-    overrides = build_overrides(factors, units, pathogen_id)
-    config_overrides: dict[str, object] = {"ship_graph": {"num_agents": int(num_agents)}}
-    if co_seeded == "isolated":
-        config_overrides["initiation"] = withdraw_other_boarding(bundle, pathogen_id)
-    if observation_scenario is not None:
-        overrides[pathogen_id]["observation_model"] = observation_scenario_patch(
-            bundle, pathogen_id, observation_scenario,
-        )
-    spec = {
-        "schema_version": "1.0.0",
-        "description": "bounded_screen",
-        "catalog": {"platform_id": platform, "pathogen_bundle_id": bundle},
-        "run": {
-            "random_seed": int(seed),
-            "num_epochs": int(epochs),
-            "write_ground_truth": False,
-            "history_retention": "compact",
-        },
-        "legacy_yaml": "crusher_labs/config.yaml",
-        "actors": [],
-        "incentives": {},
-        "config_overrides": config_overrides,
-        "pathogen_overrides": overrides,
-    }
+    spec = build_run_spec(
+        factors,
+        units,
+        seed=seed,
+        pathogen_id=pathogen_id,
+        bundle=bundle,
+        platform=platform,
+        epochs=epochs,
+        num_agents=num_agents,
+        observation_scenario=observation_scenario,
+        co_seeded=co_seeded,
+    )
     with tempfile.TemporaryDirectory() as tmp:
         spec_path = Path(tmp) / "run_spec.json"
         spec_path.write_text(json.dumps(spec), encoding="utf-8")

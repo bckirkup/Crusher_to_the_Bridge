@@ -482,7 +482,7 @@ def test_missing_sick_call_probability_names_archive() -> None:
     del summary["parameters"]["sick_call_probability"]
 
     with pytest.raises(RuntimeError, match="missing.zip"):
-        score_anchors._read_row(summary, "missing.zip")
+        score_anchors.row_from_summary(summary, "missing.zip")
 
 
 def test_hazard_is_read_under_the_per_day_unit_name() -> None:
@@ -491,7 +491,7 @@ def test_hazard_is_read_under_the_per_day_unit_name() -> None:
     del summary["parameters"]["sick_call_probability"]
     summary["parameters"]["sick_call_probability_per_day"] = 0.70
 
-    row = score_anchors._read_row(summary, "run.zip")
+    row = score_anchors.row_from_summary(summary, "run.zip")
 
     assert row["sick_call_probability"] == pytest.approx(0.70)
     assert score_anchors._run_reports_illness(row) is True
@@ -501,7 +501,7 @@ def test_per_day_name_takes_precedence_over_the_legacy_name() -> None:
     summary = _summary(sick_call_probability=0.0)
     summary["parameters"]["sick_call_probability_per_day"] = 0.70
 
-    row = score_anchors._read_row(summary, "run.zip")
+    row = score_anchors.row_from_summary(summary, "run.zip")
 
     assert row["sick_call_probability"] == pytest.approx(0.70)
 

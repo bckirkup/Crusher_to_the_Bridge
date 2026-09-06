@@ -4,8 +4,14 @@
 > `telemetry_buffer/observation_model/bounded_screen.py` and its first pass over
 > the §3.2 norovirus box is reported in
 > [`norovirus/bounded_screen_results.md`](../norovirus/bounded_screen_results.md).
-> The §2.3 admissible-region search does not exist, the §4 SARS-CoV-2 ledger is
-> deferred behind task #30, and the §5 influenza box has not been run because
+> The §2.3 admissible-region search exists as
+> `telemetry_buffer/observation_model/admissible_region.py` and has been run over
+> the full six-factor box; the region is empty, and
+> [`norovirus/admissible_region_37.md`](../norovirus/admissible_region_37.md)
+> reports the binding constraints and the four ways that run departs from §2.3 —
+> notably that it samples the whole box rather than §2.3's #36-screened subset,
+> because the screen it would restrict to is superseded. The §4 SARS-CoV-2 ledger
+> is deferred behind task #30, and the §5 influenza box has not been run because
 > `influenza_a` is not an active profile.
 
 ## 1. Why this replaces "fit one knob per pathogen"

@@ -233,7 +233,9 @@ def _ingest_archive(
         stats["skipped_archives"].append(str(path))
         return
     for source_path, summary in entries:
-        _index_run(_read_row(summary, source_path), source_path, by_run_id, stats)
+        _index_run(
+            row_from_summary(summary, source_path), source_path, by_run_id, stats,
+        )
 
 
 def _index_run(
@@ -340,8 +342,13 @@ def _declared_reporting_hazard(params: dict[str, Any], path: str) -> float:
     )
 
 
-def _read_row(summary: dict[str, Any], path: str) -> dict[str, Any]:
-    """Build one scorer row from a root or nested archive summary."""
+def row_from_summary(summary: dict[str, Any], path: str) -> dict[str, Any]:
+    """Build one scorer row from a root or nested archive summary.
+
+    Public because a design that scores runs it holds in memory -- the
+    admissible-region gate -- must produce rows the same way an archive scan
+    does, rather than reimplementing the anchor arithmetic beside it.
+    """
     params = summary.get("parameters", {})
     derived = summary.get("derived", {})
     required = (
@@ -662,7 +669,7 @@ def _a8_role_ratios(role: str, value: float, target: dict[str, Any]) -> dict[str
     }
 
 
-def _a8_band(target: dict[str, Any]) -> tuple[float, float]:
+def a8_band(target: dict[str, Any]) -> tuple[float, float]:
     """One role's plausibility band, spanning both stratifications.
 
     The fleet-wide endpoint and the pooled band rates come from different
@@ -699,8 +706,8 @@ def _a8_verdict(
         **_a8_role_ratios("pax", pax_value, pax_target),
         **_a8_role_ratios("crew", crew_value, crew_target),
     }
-    pax_low, pax_high = _a8_band(pax_target)
-    crew_low, crew_high = _a8_band(crew_target)
+    pax_low, pax_high = a8_band(pax_target)
+    crew_low, crew_high = a8_band(crew_target)
     inside = (
         pax_low <= pax_value <= pax_high
         and crew_low <= crew_value <= crew_high
