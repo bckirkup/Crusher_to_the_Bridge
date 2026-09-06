@@ -793,6 +793,57 @@ Roughly in dependency order.
    remediation records are a candidate non-circular source for the last of
    those, at the same provenance standing as B4's inspection census.
 
+   **The deposition-channel sourcing pass has now been run
+   ([tranche 30](../literature/consensus_tranche_30_food_deposition_channels.md)),
+   over the general food-service literature and not only the cruise literature,
+   and it separates the three channels rather than filling them.** Nothing
+   below moved a constant, and no channel was implemented.
+
+   - **Source-contaminated product is the best-sourced of the three, and the
+     only one that deposits with no occupant involved.** Oysters at the point a
+     ship provisions them are measured at Grade A for the EU supply: **10.8%**
+     of 2,129 dispatch-centre samples positive at a mean **168 copies/g**,
+     against **34.5%** of 2,180 production-area samples at **337 copies/g**,
+     Class A areas 3.7% against Class B 20.0% (EFSA/Aerts 2019); retail leafy
+     greens and berries at **2.2–5.3%** and **<2–3.6%** (Cook 2019, Torok
+     2019). It stays unimplemented for a stated reason: the measurement is per
+     **gram of a named commodity** and the pool is per **zone** with no
+     commodity, so adopting it is a structure change gated on **servings per
+     voyage** and **grams per serving**, and neither quantity exists. Sourcing
+     it does not license adding it.
+   - **Emesis into food is refused, not merely unsourced.** No study measures
+     what fraction of emesis mass reaches food; and the model already carries
+     emesis as a discrete event feeding the **airborne** reservoir, which is
+     the mechanism the one detailed dining-room emesis outbreak actually
+     supports — food could not be implicated, attack rate fell with distance
+     from the vomiter (Marks 2000). A food-pool term sized by the same event
+     would double-count it absent a measured destination split. This is the
+     channel that would most easily have closed the Mouchtouri gap, which is
+     why it is written down as refused.
+   - **The food-handler channel is bounded on the wrong denominator.**
+     Work-while-ill is measured in the analogous setting — 11.9% of 491 workers
+     worked ≥2 shifts while vomiting or with diarrhoea in the previous year
+     (Sumner 2011), ~20% ≥1 shift (Carpenter 2013), ~70% of 426 restaurant
+     managers ever, with a third of restaurant policies silent on exclusion
+     (Norton 2015) — but every figure is **12-month worker-level recall**,
+     where a per-shift probability is what is needed, and the model has no
+     food-handler shift to attach one to.
+
+   Two by-products bear on the box rather than on the food route.
+   `FOOD_HAND_CONTACTS_PER_DAY` = 0.6/day is now flagged **plausibly low by an
+   order of magnitude** against the nearest measured analogues (hand-to-mouth
+   6–7/h during eating, Wilson 2020; ~3.1 hand-hygiene occasions per
+   handler-hour, Mohamed 2024) — neither is a hand→food contact, so the value
+   is unchanged and the flag is a reason to sweep it, and it is the
+   first-ranked candidate explanation for the route's 2e-7 dose share. And
+   **the VSP ship-year score panel is closed as a parameter source and as a
+   between-ship spread proxy**: the join has been run and is null (1,197
+   inspections, mean 95.7, pre-outbreak 96.4 vs 95.1, p = 0.42 — Taylor 2018),
+   and the score does not track the mechanism, being uncorrelated with the one
+   objective hygiene audit that does discriminate pre-outbreak ships (r² =
+   0.002, p = 0.75 — Carling 2009). Violation **content** — what a 95 has that
+   a 100 does not — remains a live mechanism observable; the score does not.
+
    The fomite path replenishes a
    per-hand load from a measured target, counts contacts, draws a transfer
    efficiency per event, applies the drying multiplier and **subtracts the
