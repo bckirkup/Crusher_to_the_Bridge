@@ -75,6 +75,10 @@ Two credential contexts, both short-lived:
 | `sentinel_nuts_entrypoint.py` | One AWS Batch array child for a Sentinel Engine C NUTS cell. | — |
 | `batch_job_definition_sentinel_nuts.json` | EC2 NUTS ladder job definition using the existing analysis image and log group. | `<ACCOUNT_ID>`, `<REGION>`, `<BUCKET>` |
 | `submit_sentinel_nuts.sh` / `monitor_sentinel_nuts.sh` | Submit and monitor rung-scoped Sentinel NUTS arrays. | — |
+| `Dockerfile.design` | Slim worker image for the bounded designs (Morris screen, feasibility gate): no CmdStan, `ENTRYPOINT ["python3"]` so the job definition names the script. Pushed as the `bounded-design-*` tag of the `picard-boundary-analysis` repository, which with `picard-campaign` is the only repository the deploy role may push to. | — |
+| `bounded_design_entrypoint.py` | One array child of a bounded design (`--design screen\|region`). Shard index from `AWS_BATCH_JOB_ARRAY_INDEX`; skips work whose artifact is already in S3, and a gate shard resumes its own point stream from S3 after a Spot reclaim. | — |
+| `batch_job_definition_bounded_design.json` | EC2 Spot job definition for the bounded designs (1 vCPU / 4096 MB, 10 attempts). | `<ACCOUNT_ID>`, `<REGION>`, `<BUCKET>` |
+| `submit_bounded_design.sh` | Submit one bounded design as a Spot array of `<shard-count>` children (`screen` or `region`); design size via `TRAJECTORIES` / `SOBOL_M` / `SEEDS` / `DESIGN_SEED`. Shards pool only through the design's own merge step. | — |
 | `aggregate_results.py` | Read shard zips/manifests under `./results/`, merge one row per run into CSV/JSON | — |
 
 Replace `<ACCOUNT_ID>`, `<REGION>`, `<BUCKET>`, and `<EXTERNAL_ID>` placeholders

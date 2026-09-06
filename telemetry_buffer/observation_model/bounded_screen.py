@@ -75,10 +75,11 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import os
 import statistics
 import sys
 import tempfile
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
@@ -549,21 +550,37 @@ def morris_trajectory(
     return np.array(points), order
 
 
-def elementary_effects(
+def trajectory_differences(
     factors: Sequence[Factor],
     trajectories: int,
     seeds: Sequence[int],
     rng: np.random.Generator,
+    *,
+    shard_count: int = 1,
+    shard_index: int = 0,
     **run_kwargs: object,
-) -> dict[str, dict[str, dict[str, float]]]:
-    """Run the Morris design and return mu-star and sigma per factor/output."""
+) -> dict[str, dict[str, list[float]]]:
+    """Raw elementary effects, one entry per trajectory that moved a factor.
+
+    A shard runs the trajectories congruent to ``shard_index`` and skips the
+    rest -- but every trajectory is still *drawn*, so the design a shard
+    evaluates is the design the unsharded screen would have evaluated at the
+    same ``--design-seed``. Effects from disjoint shards concatenate, because
+    Morris averages over trajectories and a trajectory is self-contained.
+    """
+    if shard_count < 1 or not 0 <= shard_index < shard_count:
+        raise ValueError(
+            f"shard {shard_index} outside 0..{shard_count - 1}",
+        )
     levels = 4
     delta = levels / (2.0 * (levels - 1))
     effects: dict[str, dict[str, list[float]]] = {
         factor.name: {name: [] for name in SCORED_OUTPUTS} for factor in factors
     }
-    for _ in range(trajectories):
+    for trajectory in range(trajectories):
         points, order = morris_trajectory(len(factors), rng, levels=levels)
+        if trajectory % shard_count != shard_index:
+            continue
         previous = seed_mean(factors, points[0], seeds, **run_kwargs)
         for step, index in enumerate(order, start=1):
             current = seed_mean(factors, points[step], seeds, **run_kwargs)
@@ -572,6 +589,13 @@ def elementary_effects(
                     (current[name] - previous[name]) / delta,
                 )
             previous = current
+    return effects
+
+
+def summarise_effects(
+    effects: Mapping[str, Mapping[str, Sequence[float]]],
+) -> dict[str, dict[str, dict[str, float]]]:
+    """mu-star, mu, sigma and n per factor and output over raw effects."""
     return {
         factor_name: {
             name: {
@@ -580,10 +604,38 @@ def elementary_effects(
                 "sigma": statistics.stdev(values) if len(values) > 1 else 0.0,
                 "n": float(len(values)),
             }
+            if values else
+            {"mu_star": 0.0, "mu": 0.0, "sigma": 0.0, "n": 0.0}
             for name, values in per_output.items()
         }
         for factor_name, per_output in effects.items()
     }
+
+
+def merge_effects(
+    shards: Sequence[Mapping[str, Mapping[str, Sequence[float]]]],
+) -> dict[str, dict[str, list[float]]]:
+    """Concatenate the raw effects of disjoint shards, factor by factor."""
+    merged: dict[str, dict[str, list[float]]] = {}
+    for shard in shards:
+        for factor_name, per_output in shard.items():
+            block = merged.setdefault(factor_name, {})
+            for name, values in per_output.items():
+                block.setdefault(name, []).extend(float(v) for v in values)
+    return merged
+
+
+def elementary_effects(
+    factors: Sequence[Factor],
+    trajectories: int,
+    seeds: Sequence[int],
+    rng: np.random.Generator,
+    **run_kwargs: object,
+) -> dict[str, dict[str, dict[str, float]]]:
+    """Run the Morris design and return mu-star and sigma per factor/output."""
+    return summarise_effects(
+        trajectory_differences(factors, trajectories, seeds, rng, **run_kwargs),
+    )
 
 
 def noise_floor(
@@ -613,7 +665,11 @@ def _validated_cli_path(path: Path, root: Path) -> Path:
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     """Command line for the screen."""
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--mode", choices=("floor", "screen"), default="screen")
+    parser.add_argument(
+        "--mode",
+        choices=("floor", "screen", "merge"),
+        default="screen",
+    )
     parser.add_argument("--pathogen-id", default="norwalk_gi")
     parser.add_argument("--bundle", default="active_profiles")
     parser.add_argument("--platform", default="mega_cruise_5000")
@@ -644,8 +700,84 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--floor-seeds", type=int, default=20)
     parser.add_argument("--seed-base", type=int, default=500)
     parser.add_argument("--design-seed", type=int, default=17)
+    parser.add_argument(
+        "--shard-count",
+        type=int,
+        default=1,
+        help=(
+            "Split the trajectories across this many workers. The design is "
+            "drawn whole in every shard, so a sharded run evaluates the same "
+            "design as an unsharded one at the same --design-seed."
+        ),
+    )
+    parser.add_argument(
+        "--shard-index",
+        type=int,
+        default=None,
+        help=(
+            "This worker's shard. Defaults to AWS_BATCH_JOB_ARRAY_INDEX when "
+            "--shard-count > 1, so a Batch array child needs no argument."
+        ),
+    )
+    parser.add_argument(
+        "--shards",
+        type=Path,
+        nargs="*",
+        default=(),
+        help="Shard reports to combine in --mode merge",
+    )
     parser.add_argument("--out", type=Path, required=True)
     return parser.parse_args(argv)
+
+
+def resolve_shard_index(shard_count: int, declared: int | None) -> int:
+    """This worker's shard, from the flag or the Batch array index."""
+    if declared is not None:
+        return declared
+    if shard_count == 1:
+        return 0
+    raw = os.environ.get("AWS_BATCH_JOB_ARRAY_INDEX")
+    if raw is None:
+        raise SystemExit(
+            "--shard-count > 1 needs --shard-index or "
+            "AWS_BATCH_JOB_ARRAY_INDEX",
+        )
+    return int(raw)
+
+
+def load_shard_reports(paths: Sequence[Path]) -> list[dict[str, object]]:
+    """Shard reports in shard order, refusing a design they do not share."""
+    reports = []
+    for path in paths:
+        with validated_open(
+            str(_validated_cli_path(path, REPO_ROOT)),
+            allowed_roots=(str(REPO_ROOT),),
+            encoding="utf-8",
+        ) as handle:
+            reports.append(json.load(handle))
+    designs = {
+        json.dumps(
+            {
+                "seeds": report.get("seeds"),
+                "trajectories": report.get("trajectories"),
+                "design_seed": report.get("design_seed"),
+                "run": report.get("run"),
+            },
+            sort_keys=True,
+        )
+        for report in reports
+    }
+    if len(designs) > 1:
+        raise SystemExit(
+            "shard reports disagree on the design; effects from different "
+            "designs may not be pooled",
+        )
+    indices = [report.get("shard_index") for report in reports]
+    if len(set(indices)) != len(indices):
+        raise SystemExit(
+            f"duplicate shard indices {indices}: effects would double-count",
+        )
+    return sorted(reports, key=lambda report: int(report["shard_index"] or 0))
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -661,6 +793,16 @@ def main(argv: Sequence[str] | None = None) -> int:
         "observation_scenario": args.observation_scenario,
         "co_seeded": args.co_seeded,
     }
+    declared_box = [
+        {
+            "name": f.name,
+            "low": f.low,
+            "high": f.high,
+            "transform": f.transform,
+            "grade": f.grade,
+        }
+        for f in factors
+    ]
     if args.mode == "floor":
         seeds = [args.seed_base + i for i in range(args.floor_seeds)]
         payload: dict[str, object] = {
@@ -668,26 +810,45 @@ def main(argv: Sequence[str] | None = None) -> int:
             "seeds": seeds,
             "noise_floor": noise_floor(factors, seeds, **run_kwargs),
         }
+    elif args.mode == "merge":
+        shards = load_shard_reports(args.shards)
+        raw = merge_effects(
+            [shard["raw_effects"] for shard in shards],  # type: ignore[arg-type]
+        )
+        first = shards[0] if shards else {}
+        payload = {
+            "mode": "screen",
+            "merged_shards": [shard["shard_index"] for shard in shards],
+            "seeds": first.get("seeds"),
+            "trajectories": first.get("trajectories"),
+            "design_seed": first.get("design_seed"),
+            "factors": first.get("factors", declared_box),
+            "effects": summarise_effects(raw),
+        }
+        run_kwargs = dict(first.get("run", run_kwargs))  # type: ignore[arg-type]
     else:
         seeds = [args.seed_base + i for i in range(args.seeds)]
         rng = np.random.default_rng(args.design_seed)
+        shard_index = resolve_shard_index(args.shard_count, args.shard_index)
+        raw = trajectory_differences(
+            factors,
+            args.trajectories,
+            seeds,
+            rng,
+            shard_count=args.shard_count,
+            shard_index=shard_index,
+            **run_kwargs,
+        )
         payload = {
             "mode": "screen",
             "seeds": seeds,
             "trajectories": args.trajectories,
-            "factors": [
-                {
-                    "name": f.name,
-                    "low": f.low,
-                    "high": f.high,
-                    "transform": f.transform,
-                    "grade": f.grade,
-                }
-                for f in factors
-            ],
-            "effects": elementary_effects(
-                factors, args.trajectories, seeds, rng, **run_kwargs,
-            ),
+            "design_seed": args.design_seed,
+            "shard_count": args.shard_count,
+            "shard_index": shard_index,
+            "factors": declared_box,
+            "raw_effects": raw,
+            "effects": summarise_effects(raw),
         }
     payload["run"] = run_kwargs
     report = json.dumps(payload, indent=2)

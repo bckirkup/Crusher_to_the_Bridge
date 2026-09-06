@@ -94,6 +94,31 @@ Only over the factors that cleared the noise floor:
 procedure. It may be reported, and it may not be written back into a profile as
 a new central estimate; that would be fitting to the anchors by a longer route.
 
+### 2.4 Execution: the design shards, and only whole designs are read
+
+Both designs are embarrassingly parallel in a unit that is self-contained — a
+Morris *trajectory* for §2.1, a Sobol' *point* for §2.3 — so a run may be split
+across AWS Batch EC2 Spot array children (`deploy/aws/submit_bounded_design.sh`,
+`deploy/aws/bounded_design_entrypoint.py`) with the array index as the shard
+index. Two properties keep that from changing what is being measured:
+
+- **The design does not depend on the shard count.** Every shard draws the
+  whole design from `--design-seed` and evaluates only the units congruent to
+  its index, so a sharded run evaluates the design an unsharded run would have
+  evaluated at the same seed, and the common random numbers of §2.1 are the same
+  five (or thirty) seeds at every point in every shard.
+- **A shard is not a result.** Shards pool through an explicit merge
+  (`bounded_screen.py --mode merge`, `admissible_region.py --merge`) that
+  refuses reports drawn from different designs, refuses a duplicated shard
+  index, and — for the gate — refuses a grid with a hole in it. The gate's
+  verdict is a statement about the whole box; summarising the shards that
+  happened to finish would silently narrow it, which is exactly the failure
+  mode §6 forbids by a longer route.
+
+Sharding buys design size, not licence: a screen large enough to separate μ*
+from the §2.1 noise floor is a different thing from a screen whose factors were
+chosen after seeing it.
+
 ## 3. Norovirus factor ledger
 
 Bounds are the measured spread across studies, materials, or populations for

@@ -1,0 +1,51 @@
+# Bounded-design worker image — one shard of the Morris screen or of the
+# feasibility gate, run as an AWS Batch EC2 Spot array child.
+#
+# Build (from the repository root) and push as a distinct tag of the existing
+# analysis ECR repository, which is the only repository the deploy role may
+# push to besides picard-campaign:
+#   docker build -f deploy/aws/Dockerfile.design -t picard-bounded-design .
+#   docker tag picard-bounded-design \
+#     <ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/picard-boundary-analysis:bounded-design-v1
+# Smoke test (no AWS; the entrypoint refuses to guess a shard):
+#   docker run --rm picard-bounded-design deploy/aws/bounded_design_entrypoint.py --help
+#
+# Separate from the campaign image because a Batch job definition can override
+# a container's command but not its entrypoint, and separate from
+# Dockerfile.analysis because neither design needs CmdStan.
+FROM python:3.11-slim
+
+WORKDIR /app
+
+ENV PYTHONPATH=/app \
+    PYTHONUTF8=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    UV_NO_CACHE=1 \
+    UV_PYTHON_DOWNLOADS=never \
+    PATH=/app/.venv/bin:$PATH
+
+COPY --from=ghcr.io/astral-sh/uv:0.7.9 /uv /bin/uv
+
+# Locked resolution from uv.lock (hash-verified) + wheels-only
+# (Sonar docker:S8541 / S8544).
+COPY pyproject.toml uv.lock ./
+RUN uv sync --locked --all-extras --no-install-project --no-build
+
+COPY picard_framework/ ./picard_framework/
+COPY crusher_labs/ ./crusher_labs/
+COPY engines/ ./engines/
+COPY decision_engine/ ./decision_engine/
+COPY simulation_utils/ ./simulation_utils/
+COPY telemetry_buffer/ ./telemetry_buffer/
+COPY data/ ./data/
+COPY schemas/ ./schemas/
+COPY deploy/aws/bounded_design_entrypoint.py ./deploy/aws/bounded_design_entrypoint.py
+COPY orchestrator.py ./
+COPY orchestrator_chronic.py orchestrator_display.py orchestrator_epoch.py ./
+COPY orchestrator_init.py orchestrator_record.py orchestrator_types.py ./
+
+RUN useradd --create-home --uid 10001 design && chown -R design:design /app
+USER design
+
+# The job definition supplies the worker script as argv[0].
+ENTRYPOINT ["python3"]

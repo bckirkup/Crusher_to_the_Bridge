@@ -610,9 +610,9 @@ def test_screen_mode_writes_the_effects_and_the_declared_box(
 ) -> None:
     monkeypatch.setattr(
         bounded_screen,
-        "elementary_effects",
+        "trajectory_differences",
         lambda factors, trajectories, seeds, rng, **_kwargs: {
-            factor.name: {"attack_rate": {"mu_star": 1.0}} for factor in factors
+            factor.name: {"attack_rate": [1.0, -1.0]} for factor in factors
         },
     )
 
@@ -636,3 +636,177 @@ def test_screen_mode_writes_the_effects_and_the_declared_box(
         [factor.name for factor in bounded_screen.NOROVIRUS_FACTORS],
         sorted(factor.name for factor in bounded_screen.NOROVIRUS_FACTORS),
     )
+
+
+def _stub_seed_mean(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Make a design point's score a cheap deterministic function of the point.
+
+    The sharding claim is about which design points a worker evaluates and how
+    the differences pool, not about the simulation, so the simulation is
+    replaced by an arithmetic surrogate: identical shard arithmetic on a
+    surrogate is the whole property under test.
+    """
+    def score(
+        factors: list[bounded_screen.Factor],
+        units: list[float],
+        seeds: list[int],
+        **_kwargs: object,
+    ) -> dict[str, float]:
+        weighted = sum((index + 1) * unit for index, unit in enumerate(units))
+        return {
+            name: weighted + 0.1 * position + 0.001 * len(seeds)
+            for position, name in enumerate(bounded_screen.SCORED_OUTPUTS)
+        }
+
+    monkeypatch.setattr(bounded_screen, "seed_mean", score)
+
+
+def _raw(
+    trajectories: int,
+    *,
+    shard_count: int,
+    shard_index: int,
+) -> dict[str, dict[str, list[float]]]:
+    return bounded_screen.trajectory_differences(
+        bounded_screen.NOROVIRUS_FACTORS,
+        trajectories,
+        [500, 501],
+        np.random.default_rng(17),
+        shard_count=shard_count,
+        shard_index=shard_index,
+    )
+
+
+def test_shards_partition_the_unsharded_design_exactly(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_seed_mean(monkeypatch)
+    whole = _raw(6, shard_count=1, shard_index=0)
+    shards = [_raw(6, shard_count=3, shard_index=i) for i in range(3)]
+    pooled = bounded_screen.merge_effects(shards)
+
+    for factor in bounded_screen.NOROVIRUS_FACTORS:
+        for name in bounded_screen.SCORED_OUTPUTS:
+            assert sorted(pooled[factor.name][name]) == pytest.approx(
+                sorted(whole[factor.name][name]),
+            )
+
+
+def test_every_trajectory_lands_in_exactly_one_shard(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_seed_mean(monkeypatch)
+    counts = [
+        len(
+            _raw(7, shard_count=3, shard_index=index)[
+                bounded_screen.NOROVIRUS_FACTORS[0].name
+            ]["attack_rate"],
+        )
+        for index in range(3)
+    ]
+
+    assert (counts, sum(counts)) == ([3, 2, 2], 7)
+
+
+def test_merged_summary_equals_the_unsharded_summary(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_seed_mean(monkeypatch)
+    direct = bounded_screen.summarise_effects(_raw(6, shard_count=1, shard_index=0))
+    merged = bounded_screen.summarise_effects(
+        bounded_screen.merge_effects(
+            [_raw(6, shard_count=2, shard_index=i) for i in range(2)],
+        ),
+    )
+    name = bounded_screen.NOROVIRUS_FACTORS[1].name
+
+    for statistic in ("mu_star", "mu", "sigma", "n"):
+        assert merged[name]["attack_rate"][statistic] == pytest.approx(
+            direct[name]["attack_rate"][statistic],
+        )
+
+
+@pytest.mark.parametrize(
+    ("shard_count", "shard_index"),
+    [(0, 0), (3, 3), (3, -1)],
+)
+def test_a_shard_outside_the_partition_is_refused(
+    shard_count: int,
+    shard_index: int,
+) -> None:
+    with pytest.raises(ValueError, match="outside"):
+        _raw(2, shard_count=shard_count, shard_index=shard_index)
+
+
+def test_batch_array_index_supplies_the_shard(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("AWS_BATCH_JOB_ARRAY_INDEX", "5")
+
+    assert bounded_screen.resolve_shard_index(8, None) == 5
+
+
+def test_a_sharded_worker_without_an_index_refuses_to_guess(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("AWS_BATCH_JOB_ARRAY_INDEX", raising=False)
+
+    with pytest.raises(SystemExit, match="shard-index"):
+        bounded_screen.resolve_shard_index(8, None)
+
+
+def _write_shard(directory: Path, index: int, **overrides: object) -> Path:
+    payload: dict[str, object] = {
+        "mode": "screen",
+        "seeds": [500, 501],
+        "trajectories": 6,
+        "design_seed": 17,
+        "shard_count": 3,
+        "shard_index": index,
+        "run": {"pathogen_id": PATHOGEN},
+        "raw_effects": {"f": {"attack_rate": [float(index)]}},
+    }
+    payload.update(overrides)
+    path = directory / f"shard_{index}.json"
+    path.write_text(json.dumps(payload), encoding="utf-8")
+    return path
+
+
+def test_merge_refuses_two_shards_of_the_same_index() -> None:
+    with tempfile.TemporaryDirectory(dir=bounded_screen.REPO_ROOT) as directory:
+        root = Path(directory)
+        first = _write_shard(root, 1)
+        duplicate = root / "again.json"
+        duplicate.write_text(first.read_text(encoding="utf-8"), encoding="utf-8")
+
+        with pytest.raises(SystemExit, match="double-count"):
+            bounded_screen.load_shard_reports([first, duplicate])
+
+
+def test_merge_refuses_shards_drawn_from_different_designs() -> None:
+    with tempfile.TemporaryDirectory(dir=bounded_screen.REPO_ROOT) as directory:
+        root = Path(directory)
+        paths = [_write_shard(root, 0), _write_shard(root, 1, design_seed=99)]
+
+        with pytest.raises(SystemExit, match="disagree on the design"):
+            bounded_screen.load_shard_reports(paths)
+
+
+def test_merge_mode_pools_the_shard_effects(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    with tempfile.TemporaryDirectory(dir=bounded_screen.REPO_ROOT) as directory:
+        root = Path(directory)
+        paths = [_write_shard(root, index) for index in (2, 0, 1)]
+        out = root / "merged.json"
+        argv = ["--mode", "merge", "--out", str(out), "--shards"]
+        assert bounded_screen.main([*argv, *(str(path) for path in paths)]) == 0
+        payload = json.loads(out.read_text(encoding="utf-8"))
+
+    capsys.readouterr()
+
+    assert (
+        payload["merged_shards"],
+        payload["effects"]["f"]["attack_rate"]["n"],
+        payload["effects"]["f"]["attack_rate"]["mu"],
+    ) == ([0, 1, 2], 3.0, 1.0)
