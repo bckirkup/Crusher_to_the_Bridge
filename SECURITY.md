@@ -40,8 +40,9 @@ will be patched on `main` and disclosed in the next release notes.
 
 ### Dependency Hygiene
 
-- All Python dependencies are listed in `requirements.txt` with minimum
-  version pins.
+- All Python dependencies are declared in `pyproject.toml` and resolved in
+  `uv.lock`, which pins every version with its wheel hash; installs use
+  `uv sync --locked` so a stale or edited lock fails rather than drifts.
 - CI runs on Python 3.11 and 3.12 against `ubuntu-latest`.
 - No native C extensions or binary blobs are bundled; all simulation
   logic is pure Python + NumPy.

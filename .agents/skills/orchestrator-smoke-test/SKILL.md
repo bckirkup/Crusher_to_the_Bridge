@@ -7,7 +7,7 @@ description: Run the Crusher-to-the-Bridge orchestrator for a quick 24-epoch smo
 
 ## Prerequisites
 
-- Python 3.11+ with dependencies from `requirements.lock.txt` (or `requirements.txt`)
+- Python 3.11+ with dependencies from `uv.lock` (see Setup in `AGENTS.md`)
 - Working directory: **repo root**
 
 ## Devin Secrets Needed
@@ -120,7 +120,7 @@ python3 scripts/precompute_deck_assets.py
 
 - **ModuleNotFoundError**: Ensure `PYTHONPATH` includes the repo root, or run from the repo root.
 - **FileNotFoundError on spatial_layout.json**: Verify the platform path in `crusher_labs/config.yaml` points to a valid `data/platforms/<platform>/` directory.
-- **numpy/pydantic not found**: Run `pip install --only-binary=:all: --require-hashes -r requirements.lock.txt`.
+- **numpy/pydantic not found**: Run `uv sync --locked --all-extras --no-install-project --no-build`.
 
 
 Picard programmatic equivalent: see `.agents/skills/picard-ship-simulation/SKILL.md`.

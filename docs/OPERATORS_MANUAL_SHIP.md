@@ -9,7 +9,8 @@
 ## Quick Start
 
 ```bash
-pip install -r requirements.txt
+uv sync --locked --all-extras --no-install-project --no-build
+source .venv/bin/activate   # or prefix commands with `uv run`
 python3 tools/sanity_checker.py --from-config
 python3 orchestrator.py              # 24 epochs (config.yaml default)
 python3 orchestrator.py --epochs 250

@@ -7,7 +7,7 @@ description: Run the complete Crusher-to-the-Bridge pytest suite including data 
 
 ## Prerequisites
 
-- Python 3.11+ with dependencies from `requirements.lock.txt` (or `requirements.txt`)
+- Python 3.11+ with dependencies from `uv.lock` (see Setup in `AGENTS.md`)
 - Working directory: **repo root**
 
 ## Devin Secrets Needed
@@ -154,7 +154,7 @@ Expected: 24-epoch run completes; final epoch includes OIS fields.
 ## CI Pipeline Equivalence
 
 The full CI pipeline (`.github/workflows/ci.yml`) runs these steps in order:
-1. `pip install --only-binary=:all: --require-hashes -r requirements.lock.txt`
+1. `uv sync --locked --all-extras --no-install-project --no-build`
 2. `ruff check ...` — static analysis (advisory, `continue-on-error: true`)
 3. `python3 tools/sanity_checker.py --from-config` — config validation
 4. `pytest tests/test_json_schema_validation.py -v --tb=short` — JSON schema validation
@@ -171,7 +171,7 @@ Framework-focused CI (`.github/workflows/picard-presidio.yml`) runs a ~190+ test
 
 To replicate main CI locally:
 ```bash
-pip install --only-binary=:all: --require-hashes -r requirements.lock.txt && \
+uv sync --locked --all-extras --no-install-project --no-build && \
 python3 tools/sanity_checker.py --from-config && \
 ruff check --select E,F,W,I --ignore E501,E741 --target-version py311 \
   engines/ crusher_labs/ picard_framework/ decision_engine/ orchestrator*.py \

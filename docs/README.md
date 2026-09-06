@@ -45,7 +45,8 @@ working in.
 ## First successful run
 
 ```bash
-pip install -r requirements.txt
+uv sync --locked --all-extras --no-install-project --no-build
+source .venv/bin/activate   # or prefix commands with `uv run`
 python3 tools/sanity_checker.py --from-config
 python3 orchestrator.py                          # 24 epochs
 python3 -m streamlit run dashboard.py --server.headless true

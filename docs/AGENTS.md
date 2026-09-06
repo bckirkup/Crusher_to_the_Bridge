@@ -74,7 +74,7 @@ Pure-Python simulation (no databases or external APIs for local dev). **Python 3
 
 ### CI (replicate locally)
 
-Install from the hash-pinned lockfile: `pip install --only-binary=:all: --require-hashes -r requirements.lock.txt`.
+Install from the lockfile: `uv sync --locked --all-extras --no-install-project --no-build`.
 
 **Main** (`.github/workflows/ci.yml` on `main` PRs):
 

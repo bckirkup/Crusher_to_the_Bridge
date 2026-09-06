@@ -5,7 +5,7 @@ REM  run_campaign.bat — Mega Cruise ~17780 Picard campaign (Windows)
 REM
 REM  Prerequisites:
 REM    - Python 3.11+ on PATH as "python" or "python3"
-REM    - pip install -r requirements.txt  (from repo root)
+REM    - uv sync --locked --all-extras --no-install-project --no-build  (from repo root)
 REM
 REM  From the repo root (or double-click this file):
 REM    run_campaign.bat --smoke

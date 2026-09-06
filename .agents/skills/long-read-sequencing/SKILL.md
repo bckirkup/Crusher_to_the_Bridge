@@ -7,7 +7,7 @@ description: Configure and test Oxford Nanopore long-read verification, instrume
 
 ## Prerequisites
 
-- Python 3.11+ with `requirements.txt` installed
+- Python 3.11+ with dependencies from `uv.lock` (`uv sync --locked --all-extras --no-install-project --no-build`)
 - Working directory: repo root
 
 ## Config files

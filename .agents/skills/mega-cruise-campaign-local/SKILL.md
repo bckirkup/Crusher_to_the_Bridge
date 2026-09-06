@@ -11,7 +11,7 @@ Post-run analysis: `.agents/skills/campaign-results-analysis/SKILL.md`.
 
 ## Prerequisites
 
-- Python 3.11+; install from `requirements.lock.txt` (or `requirements.txt` for editable local work)
+- Python 3.11+; install with `uv sync --locked --all-extras --no-install-project --no-build`
 - Working directory: **repo root**
 - Platform data for `mega_cruise_5000` under `data/platforms/`
 

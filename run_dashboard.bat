@@ -11,7 +11,7 @@ set PYTHONIOENCODING=utf-8
 python scripts/precompute_deck_assets.py
 if %ERRORLEVEL% NEQ 0 (
     echo ERROR: precompute failed. Install dashboard dependencies:
-    echo   pip install -r requirements.txt
+    echo   uv sync --locked --all-extras --no-install-project --no-build
     pause
     exit /b 1
 )
@@ -21,7 +21,7 @@ echo [2/3] Running orchestrator (24-epoch simulation)...
 python orchestrator.py
 if %ERRORLEVEL% NEQ 0 (
     echo ERROR: orchestrator.py failed. Make sure dependencies are installed:
-    echo   pip install -r requirements.txt
+    echo   uv sync --locked --all-extras --no-install-project --no-build
     pause
     exit /b 1
 )

@@ -100,11 +100,14 @@ a data migration for a naming nit.
 
 ## Supply-Chain Rules
 
-- Keep `--require-hashes -r requirements.lock.txt` on pip installs.
-- Keep `--only-binary=:all:` on published-package installs.
-- If uv is introduced in a future workflow, use its frozen/locked mode and
-  `--no-build` safeguards; this repository does not use uv for dependency
-  installation today.
+- Dependencies install only from `uv.lock`: `uv sync --locked --all-extras --no-install-project --no-build`.
+  `--locked` refuses a stale lock, `--no-build` refuses source distributions
+  (wheels only), and `--no-install-project` keeps the environment to the
+  declared dependencies.
+- Any remaining `pip install` (none in CI today) keeps `--only-binary=:all:`
+  and version pins or hashes; `scripts/sonar_guard.py` enforces both forms.
+- Regenerate the lock only with `uv lock` after editing `pyproject.toml`;
+  never hand-edit `uv.lock`.
 
 ## Validation
 

@@ -3,7 +3,8 @@
 ## Setup
 
 ```bash
-python3 -m pip install --only-binary=:all: --require-hashes -r requirements.lock.txt
+uv sync --locked --all-extras --no-install-project --no-build
+source .venv/bin/activate
 pre-commit install
 ```
 
@@ -68,6 +69,8 @@ docker run --rm picard-campaign --smoke
 - Do not fit a physical constant to an anchor the model is scored against.
 - Update `docs/norovirus/norovirus_open_ledger.md` in the same change as anything that
   invalidates a measurement recorded there.
-- Preserve the hash-pinned installation and both CI workflows.
+- Preserve the locked `uv sync` installation (`--locked --no-build`, wheels only
+  from `uv.lock`) and both CI workflows. Regenerate `uv.lock` only with
+  `uv lock` after changing `pyproject.toml`.
 - Keep substantive Sentinel work under `picard_framework/analysis/stan/` and
   `picard_framework/runs/` separate from mechanical maintenance.

@@ -4,7 +4,7 @@
 #
 # NOT for ABM Spot shards — use root Dockerfile / picard-campaign for Phase 1.
 #
-# Hash-pinned lock + wheels-only (Sonar docker:S8541 / S8544), matching root Dockerfile.
+# Locked uv.lock resolution + wheels-only (Sonar docker:S8541 / S8544), matching root Dockerfile.
 
 FROM python:3.11-slim-bookworm
 
@@ -13,8 +13,12 @@ WORKDIR /app
 ENV PYTHONPATH=/app \
     PYTHONUTF8=1 \
     PYTHONDONTWRITEBYTECODE=1 \
-    PIP_NO_CACHE_DIR=1 \
+    UV_NO_CACHE=1 \
+    UV_PYTHON_DOWNLOADS=never \
+    PATH=/app/.venv/bin:$PATH \
     CMDSTAN=/opt/cmdstan/cmdstan-2.39.0
+
+COPY --from=ghcr.io/astral-sh/uv:0.7.9 /uv /bin/uv
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
         build-essential \
@@ -26,8 +30,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Install dependencies first for better layer caching.
-COPY requirements.lock.txt ./
-RUN pip install --no-cache-dir --only-binary=:all: --require-hashes -r requirements.lock.txt \
+COPY pyproject.toml uv.lock ./
+RUN uv sync --locked --all-extras --no-install-project --no-build \
     && python -c "import cmdstanpy; cmdstanpy.install_cmdstan(dir='/opt/cmdstan')" \
     && useradd --create-home --uid 10001 analysis \
     && chown -R analysis:analysis /app /opt/cmdstan

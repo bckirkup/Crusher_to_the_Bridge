@@ -137,7 +137,7 @@ CSV keeps them with empty fields; nothing is dropped silently.
 ## Script
 
 `telemetry_buffer/observation_model/fetch_vsp_outbreaks.py`, stdlib plus
-whatever is already in `requirements.lock.txt` only. Requirements:
+whatever is already in `uv.lock` only. Requirements:
 
 - Caches every fetched page under a path outside the repository, default
   `~/vsp_cache/`, keyed by URL; `--refresh` refetches, default reuses the cache.
