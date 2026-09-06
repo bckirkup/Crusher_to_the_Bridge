@@ -39,6 +39,10 @@ COPY simulation_utils/ ./simulation_utils/
 COPY telemetry_buffer/ ./telemetry_buffer/
 COPY data/ ./data/
 COPY schemas/ ./schemas/
+# The decision runtime reads its class-interaction matrix, diffusion
+# configuration and global-health timeline from here; without them a shard
+# scores a different model than the local screen it must pool with.
+COPY presidio/data/ ./presidio/data/
 COPY deploy/aws/bounded_design_entrypoint.py ./deploy/aws/bounded_design_entrypoint.py
 COPY orchestrator.py ./
 COPY orchestrator_chronic.py orchestrator_display.py orchestrator_epoch.py ./

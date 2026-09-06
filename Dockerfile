@@ -34,6 +34,10 @@ COPY simulation_utils/ ./simulation_utils/
 COPY telemetry_buffer/ ./telemetry_buffer/
 COPY data/ ./data/
 COPY schemas/ ./schemas/
+# The decision runtime reads its class-interaction matrix, diffusion
+# configuration and global-health timeline from here; without them a run is
+# silently a different model.
+COPY presidio/data/ ./presidio/data/
 COPY orchestrator.py ./
 COPY orchestrator_chronic.py orchestrator_display.py orchestrator_epoch.py ./
 COPY orchestrator_init.py orchestrator_record.py orchestrator_types.py ./

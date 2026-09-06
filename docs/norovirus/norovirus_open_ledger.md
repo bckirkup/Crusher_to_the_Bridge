@@ -26,6 +26,22 @@ run since.
 
 Also withdrawn and not yet replaced:
 
+**Every figure computed inside a container before `PKG-02` is not comparable
+with a figure computed in a checkout.** The campaign, design and analysis images
+never copied `presidio/data/`, and the decision runtime treated an absent
+class-interaction matrix, information-diffusion configuration or global-health
+timeline as a licence to use empty defaults. A container therefore scored a
+ship whose social layer was off while reporting the same run spec. The
+divergence is not small in the places it reaches: on one Morris design point the
+merged AWS screen and the local screen differ in 55 raw effect entries, and
+deleting `presidio/` from a local checkout reproduces the container trace
+md5-identically. The 20-shard `bounded_design_v1` screen
+(`6ca5b363-f1d2-4e94-9719-e903a1605288`, all 20 children SUCCEEDED) is
+operationally complete and **scientifically superseded**: it must be re-run on
+the repaired image before any μ\* from it is read, and it is in any case only
+sensitivity information, never a value or an interval. `PKG-02` ships the data
+in all three images and makes an absent runtime input an error.
+
 **Hand recontamination became an event, not a per-epoch relaxation
 (`SYMP-EFF-01`, §4 item 0).** A norovirus host's hand load is now returned to
 the measured Liu ceiling at a Poisson defecation event and decays between
