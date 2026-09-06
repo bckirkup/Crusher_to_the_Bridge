@@ -2,11 +2,14 @@
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
 from typing import Any
 
 import pytest
 
 from telemetry_buffer.observation_model import admissible_region as gate
+from telemetry_buffer.observation_model import score_anchors
 from telemetry_buffer.observation_model.bounded_screen import NOROVIRUS_FACTORS
 
 TARGETS: dict[str, dict[str, float] | None] = {
@@ -283,3 +286,177 @@ def test_a_gate_run_isolates_the_pathogen_through_initiation() -> None:
     assert boarding["sars_cov2_resp"] == {"enabled": False}
     assert "norwalk_gi" not in boarding
     assert spec["pathogen_overrides"]["norwalk_gi"]
+
+
+def test_an_unknown_hull_yields_no_a8_interval_and_no_a4_a8_comparison() -> None:
+    a8 = gate._a8_measurements("nonesuch_hull", _cell(), "pre")
+    assert a8["passenger"]["interval"] is None
+    assert a8["passenger"]["position"] == gate.UNDETERMINED
+    assert not gate.a4_a8_definitional_conflict("nonesuch_hull", "pre", 7.0)[
+        "comparable"
+    ]
+
+
+def test_a9_is_declared_unresolvable_where_the_era_has_no_target() -> None:
+    resolution = gate.a9_design_resolution(1_000, "post")
+    assert not resolution["resolvable"]
+    assert "post" in resolution["reason"]
+
+
+def test_a_measurement_that_is_not_a_mapping_contributes_no_miss_side() -> None:
+    assert gate._fail_sides(None) == []
+    assert gate._fail_sides(0.5) == []
+
+
+def _canonical_row(seed: int) -> dict[str, Any]:
+    """One scorer row, built the way an archive row is built."""
+    return score_anchors.row_from_summary(
+        {
+            "run_id": f"probe_s{seed}",
+            "parameters": {
+                "platform_id": "mega_cruise_5000",
+                "surveillance": gate.SURVEILLANCE_LABEL,
+                "seed": seed,
+                "num_epochs": 168,
+                "num_agents": 450,
+                "natural_history_clock": "hours",
+                "sick_call_probability_per_day": 1.0,
+                "era": "pre",
+            },
+            "derived": {
+                "peak_prevalence": 40,
+                "passenger_complement": 321,
+                "crew_complement": 129,
+                "ever_ill_attack_rate_passenger": 0.15,
+                "ever_ill_attack_rate_crew": 0.05,
+                "infection_attack_rate_passenger": 0.21,
+                "infection_attack_rate_crew": 0.07,
+                "reported_case_attack_rate_passenger": 0.05,
+                "reported_case_attack_rate_crew": 0.016,
+                "vsp_trigger_epoch": 40,
+            },
+        },
+        f"probe_s{seed}.zip",
+    )
+
+
+def test_a_point_is_one_cell_over_the_matched_seed_set(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    seen: list[int] = []
+
+    def fake_run_row(_factors, _units, *, seed, design, point_index):
+        assert design.platform == "mega_cruise_5000"
+        assert point_index == 3
+        seen.append(seed)
+        return _canonical_row(seed)
+
+    monkeypatch.setattr(gate, "run_row", fake_run_row)
+    point = gate.evaluate_point(
+        [0.5] * len(NOROVIRUS_FACTORS),
+        point_index=3,
+        seeds=[500, 501, 502],
+        design=gate.Design(),
+    )
+    assert seen == [500, 501, 502]
+    assert point["cell"]["n_seeds"] == 3
+    assert set(point["verdicts"]) >= {"A1_ever_ill_passenger", "A8", "A9"}
+    assert point["classification"]["design_limited"] == ["A9"]
+    assert set(point["factors"]) == {factor.name for factor in NOROVIRUS_FACTORS}
+
+
+def _stub_point(index: int) -> dict[str, Any]:
+    point = _point(_verdicts(), {"x": float(index)})
+    point["point_index"] = index
+    point["cell"] = _cell()
+    return point
+
+
+def test_every_evaluated_point_is_streamed_and_completed_ones_are_not_rerun(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    evaluated: list[int] = []
+
+    def fake_evaluate_point(_units, *, point_index, seeds, design):
+        assert len(seeds) == 2
+        assert design.era == "pre"
+        evaluated.append(point_index)
+        return _stub_point(point_index)
+
+    monkeypatch.setattr(gate, "evaluate_point", fake_evaluate_point)
+    streamed: list[int] = []
+    points = gate.evaluate_design(
+        [[0.1] * len(NOROVIRUS_FACTORS)] * 4,
+        seeds=[500, 501],
+        design=gate.Design(),
+        on_point=lambda point: streamed.append(point["point_index"]),
+        start_index=2,
+    )
+    assert evaluated == [2, 3]
+    assert streamed == [2, 3]
+    assert [point["point_index"] for point in points] == [2, 3]
+
+
+def test_the_command_line_declares_the_design_and_accepts_overrides() -> None:
+    default = gate.parse_args(["--out", "report.json"])
+    assert default.sobol_m == 7
+    assert default.seeds == 5
+    assert default.era == "pre"
+    assert default.platform == "mega_cruise_5000"
+    assert default.stream is None
+    assert not default.resume
+    overridden = gate.parse_args(
+        [
+            "--out", "report.json",
+            "--stream", "points.jsonl",
+            "--resume",
+            "--era", "post",
+            "--sobol-m", "2",
+            "--seeds", "3",
+            "--workers", "4",
+            "--observation-scenario", "low_capture",
+        ],
+    )
+    assert overridden.era == "post"
+    assert overridden.sobol_m == 2
+    assert overridden.workers == 4
+    assert overridden.observation_scenario == "low_capture"
+    assert overridden.resume
+
+
+def test_the_gate_writes_its_report_and_resumes_from_its_own_stream(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setattr(gate, "REPO_ROOT", tmp_path)
+    evaluated: list[int] = []
+
+    def fake_evaluate_point(_units, *, point_index, seeds, design):
+        evaluated.append(point_index)
+        return _stub_point(point_index)
+
+    monkeypatch.setattr(gate, "evaluate_point", fake_evaluate_point)
+    out = tmp_path / "report.json"
+    stream = tmp_path / "points.jsonl"
+    argv = [
+        "--out", str(out),
+        "--stream", str(stream),
+        "--sobol-m", "1",
+        "--seeds", "2",
+    ]
+    assert gate.main(argv) == 0
+    assert evaluated == [0, 1]
+    payload = json.loads(out.read_text(encoding="utf-8"))
+    assert payload["mode"] == "feasibility_gate"
+    assert payload["summary"]["n_points"] == 2
+    assert payload["design"]["required_anchors"] == list(gate.REQUIRED_ANCHORS)
+    assert [factor["name"] for factor in payload["factors"]] == [
+        factor.name for factor in NOROVIRUS_FACTORS
+    ]
+    assert len(stream.read_text(encoding="utf-8").strip().splitlines()) == 2
+
+    evaluated.clear()
+    assert gate.main([*argv, "--resume"]) == 0
+    assert evaluated == []
+    resumed = json.loads(out.read_text(encoding="utf-8"))
+    assert resumed["summary"]["n_points"] == 2
