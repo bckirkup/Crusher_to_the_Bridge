@@ -925,6 +925,9 @@ def load_shard_reports(paths: Sequence[Path]) -> list[dict[str, object]]:
 def main(argv: Sequence[str] | None = None) -> int:
     """Run the floor or the screen and write the result as JSON."""
     args = parse_args(argv)
+    # Resolved before the design runs: an unwritable destination is a typo,
+    # and discovering it after the last design point discards the whole run.
+    out = _validated_cli_path(args.out, REPO_ROOT)
     factors = NOROVIRUS_FACTORS
     run_kwargs = {
         "pathogen_id": args.pathogen_id,
@@ -1014,7 +1017,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     payload["run"] = run_kwargs
     report = json.dumps(payload, indent=2)
     with validated_open(
-        str(_validated_cli_path(args.out, REPO_ROOT)),
+        str(out),
         "w",
         allowed_roots=(str(REPO_ROOT),),
         encoding="utf-8",

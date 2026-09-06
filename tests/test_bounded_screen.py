@@ -569,6 +569,22 @@ def test_cli_output_paths_reject_an_absolute_escape(tmp_path: Path) -> None:
         )
 
 
+def test_an_unwritable_out_path_is_refused_before_the_design_runs(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    def refuse(*_args: object, **_kwargs: object) -> dict[str, float]:
+        raise AssertionError("the design ran before --out was resolved")
+
+    monkeypatch.setattr(bounded_screen, "trajectory_differences", refuse)
+    monkeypatch.setattr(bounded_screen, "noise_floor", refuse)
+
+    with pytest.raises(ValueError, match="escapes"):
+        bounded_screen.main(
+            ["--mode", "screen", "--out", str(tmp_path / "screen.json")],
+        )
+
+
 def test_cli_output_paths_reject_a_relative_escape() -> None:
     with pytest.raises(ValueError, match="escapes"):
         bounded_screen._validated_cli_path(

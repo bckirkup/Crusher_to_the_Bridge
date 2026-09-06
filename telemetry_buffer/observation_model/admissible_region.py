@@ -826,6 +826,9 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
 def main(argv: Sequence[str] | None = None) -> int:
     """Sample the box, score every point, and write the gate's report."""
     args = parse_args(argv)
+    # Resolved before the grid runs: an unwritable destination is a typo, and
+    # discovering it after the last Sobol' point discards the whole run.
+    out = _validated_cli_path(args.out, REPO_ROOT)
     design = Design(
         pathogen_id=args.pathogen_id,
         bundle=args.bundle,
@@ -881,7 +884,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         }
     if args.merge:
         payload["merged_streams"] = [str(path) for path in args.merge]
-    report = _write_json(args.out, payload)
+    report = _write_json(out, payload)
     print(json.dumps(payload["summary"], indent=2))
     return 0 if report else 1
 
