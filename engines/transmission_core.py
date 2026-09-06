@@ -3650,54 +3650,80 @@ class TransmissionCore:
             if food_zones[zone_name] <= 0:
                 continue
 
-            # Dose to susceptible agents eating here
-            susceptible = self._get_susceptible(occupants, pathogen_id)
-            zone_mult = self._food_zone_multiplier(zone_name)
-            food_attribution = attribution(
-                ledger,
-                self._reservoir_mix(FOOD_RESERVOIR, pathogen_id, zone_name),
-            )
-            n_occupants = max(len(occupants), 1)
-            pool_before = food_zones[zone_name]
-            per_head = (
-                pool_before
-                / n_occupants
-                * self._food_ingestion_per_epoch(fc)
-                * zone_mult
-            )
-            delivered_each = per_head * self._delivery_scale(
-                per_head * len(susceptible), pool_before,
-            )
-            for target in susceptible:
-                dose = self._accumulate(
-                    target.agent_id, "food", delivered_each,
-                    agent_doses, agent_pathway_doses, food_attribution,
-                )
+            if not occupants:
+                continue
 
-                matrix.food_contamination_exposures.append({
-                    "target_id": target.agent_id,
-                    "zone": zone_name,
-                    "pathogen_id": pathogen_id,
-                    "food_pool_mass": round(pool_before, 4),
-                    "food_zone_multiplier": zone_mult,
-                    "dose": round(dose, 4),
-                })
-            remaining = max(
-                0.0, pool_before - delivered_each * len(susceptible),
+            self._food_ingestion(
+                zone_name, occupants, food_zones, fc, agent_doses, matrix,
+                agent_pathway_doses, pathogen_id, ledger,
             )
-            food_zones[zone_name] = remaining
-            if pool_before > 0.0 and remaining < pool_before:
-                self._reservoir.decay(
-                    remaining / pool_before,
-                    ReservoirComposition.key(
-                        FOOD_RESERVOIR, pathogen_id, zone_name,
-                    ),
-                )
 
         if owns_hands:
             for zone_name in food_zones:
                 for agent in zone_occupants.get(zone_name, []):
                     self._apply_hand_hygiene(agent, pathogen_id, profile)
+
+    def _food_ingestion(
+        self,
+        zone_name: str,
+        occupants: list[KorkinAgent],
+        food_zones: dict[str, float],
+        fc: dict[str, Any],
+        agent_doses: dict[int, float],
+        matrix: ContactTracingMatrix,
+        agent_pathway_doses: dict[int, dict[str, float]] | None,
+        pathogen_id: str,
+        ledger: StrainDoseLedger | None,
+    ) -> None:
+        """Eat one zone's standing food pool down, and dose whoever it can.
+
+        Every diner present takes an equal share of the pool off it, because a
+        share eaten by an immune or already-infected diner is eaten, not left
+        on the buffet for the next epoch; only a susceptible diner's share
+        becomes a dose. Removing only the susceptible shares made a zone's
+        pool -- and so every remaining susceptible's dose -- rise with the
+        immune fraction, on top of the rise deposition already gives it.
+        """
+        susceptible = self._get_susceptible(occupants, pathogen_id)
+        zone_mult = self._food_zone_multiplier(zone_name)
+        food_attribution = attribution(
+            ledger,
+            self._reservoir_mix(FOOD_RESERVOIR, pathogen_id, zone_name),
+        )
+        n_occupants = len(occupants)
+        pool_before = food_zones[zone_name]
+        per_head = (
+            pool_before
+            / n_occupants
+            * self._food_ingestion_per_epoch(fc)
+            * zone_mult
+        )
+        eaten_each = per_head * self._delivery_scale(
+            per_head * n_occupants, pool_before,
+        )
+        for target in susceptible:
+            dose = self._accumulate(
+                target.agent_id, "food", eaten_each,
+                agent_doses, agent_pathway_doses, food_attribution,
+            )
+
+            matrix.food_contamination_exposures.append({
+                "target_id": target.agent_id,
+                "zone": zone_name,
+                "pathogen_id": pathogen_id,
+                "food_pool_mass": round(pool_before, 4),
+                "food_zone_multiplier": zone_mult,
+                "dose": round(dose, 4),
+            })
+        remaining = max(0.0, pool_before - eaten_each * n_occupants)
+        food_zones[zone_name] = remaining
+        if pool_before > 0.0 and remaining < pool_before:
+            self._reservoir.decay(
+                remaining / pool_before,
+                ReservoirComposition.key(
+                    FOOD_RESERVOIR, pathogen_id, zone_name,
+                ),
+            )
 
     def _food_deposits(
         self,

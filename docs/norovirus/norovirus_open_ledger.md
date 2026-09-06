@@ -94,10 +94,21 @@ changes here.
   under boarding, on the shipped grid, the food route delivers **2e-7 of
   pre-weight norovirus dose**, against the withdrawn 93-99.9%. The per-shedder
   deposit is preserved in expectation, so the collapse is the loss of the
-  whole-emission coupling (a hand load saturates where an emission does not) and
-  the per-head division of the pool, not a chosen magnitude. The model now sits
-  far below Mouchtouri 2024's 7.3-32% food-involved outbreak share, having sat
-  far above it; that is a recorded discrepancy, not a target.
+  whole-emission coupling (a hand load saturates where an emission does not),
+  not a chosen magnitude. **Correction, FOOD-PERHEAD-01:** that entry also
+  attributed the collapse in part to "the per-head division of the pool", and
+  the attribution was wrong. The divisor is scale-neutral in both currencies —
+  mass delivered is exactly independent of how many diners share the pool, and
+  per-head dose is zone-size invariant at steady state, because deposits scale
+  with the shedders present while consumption is a fraction of the pool (§9 of
+  the findings). It is also the *generous* choice on establishment rather than
+  the conservative one: expected infections rise with the number sharing a
+  fixed mass, since concentrating it wastes supra-saturating dose. The model
+  now sits far below Mouchtouri 2024's 7.3-32% food-involved outbreak share,
+  having sat far above it; that is a recorded discrepancy, not a target, and
+  the candidate cause that survives the probes is a deposition channel with no
+  term in the route at all — emesis into or near food, and product contaminated
+  before it meets a hand — not the allocation rule.
 - **Every food-route dose and route share measured on the hourly grid before
   the pool fractions were unit-declared (Edison DIM-01).** `FOOD_INGESTION_FRACTION`
   0.05 and `ENV_DELIVERY_FRACTION` 0.01 were applied once per *epoch* with no
@@ -711,6 +722,25 @@ Roughly in dependency order.
    untouched**, so the 85.5%/day carry-over identified below as the actual
    mechanism behind the route's dose share is still standing. The paragraphs
    below are the statement of the original defect.
+
+   **`FOOD-PERHEAD-01`, the allocation follow-up: one defect closed, and the
+   allocation rule exonerated.** The pool was depleted by the susceptible
+   shares only, so an immune or already-infected diner's food stayed standing
+   and every remaining susceptible's dose rose with the immune fraction —
+   bounded by `(decay + f)/decay` = 1.5× at the shipped rates, and of the wrong
+   sign, since prevalence already raises deposition. Every diner present now
+   eats an equal share off the pool and only a susceptible one takes a dose
+   from it. What the probes did **not** find is any dependence of the route's
+   size on the per-head divisor (§9 of the findings). Two things stay open, and
+   neither is a value: eating is not a representable event — `f` is a declared
+   pool turnover, so a zone of 3,000 diners consumes the same mass per day as a
+   zone of 2, and "dose per meal" has no referent, which is where whole-gut
+   transit and the diarrhoeal-liquid objection below attach; and the deposition
+   channel that could carry Mouchtouri's mass — emesis into or near food,
+   product contaminated before it meets a hand, and a food handler working
+   while shedding — has no term in the route at all. VSP's own inspection and
+   remediation records are a candidate non-circular source for the last of
+   those, at the same provenance standing as B4's inspection census.
 
    The fomite path replenishes a
    per-hand load from a measured target, counts contacts, draws a transfer

@@ -337,3 +337,82 @@ def test_the_shipped_contact_rate_reproduces_the_retired_emission_share() -> Non
     assert _mean_deposit(core, agent, hand, draws=2000) == pytest.approx(
         retired, rel=0.1,
     )
+
+
+# ── The allocation rule: who eats the pool, and who takes a dose ──────
+
+
+def _immune(agent_id: int) -> KorkinAgent:
+    agent = _agent(agent_id=agent_id, infected=False)
+    agent.immune = True
+    return agent
+
+
+def _eat_once(occupants: list[KorkinAgent], pool: float) -> tuple[float, float]:
+    """One ingestion step on a standing pool; no deposition, no growth.
+
+    Returns the pool left and the dose one susceptible diner took.
+    """
+    profile = _profile()
+    profile["environmental_contamination"] = {"person_to_person": False}
+    core = _core(profile=profile, seed=53)
+    core.food_pools[PATHOGEN][ZONE] = pool
+    for agent in occupants:
+        agent.hand_load_by_pathogen[PATHOGEN] = 0.0
+    doses: dict[int, float] = {}
+    core._pathway_food_contamination(
+        0,
+        {ZONE: occupants},
+        doses,
+        ContactTracingMatrix(epoch=0),
+        pathogen_id=PATHOGEN,
+        profile=profile,
+    )
+    susceptible = [a for a in occupants if not a.immune and not a.is_infected_with(PATHOGEN)]
+    dose = doses.get(susceptible[0].agent_id, 0.0) if susceptible else 0.0
+    return core.food_pools[PATHOGEN][ZONE], dose
+
+
+@pytest.mark.parametrize("n_immune", [0, 5, 15, 19])
+def test_an_immune_diners_share_is_eaten_not_left_on_the_buffet(
+    n_immune: int,
+) -> None:
+    """The pool is depleted by everyone present, dosed only where it can be.
+
+    Removing only the susceptible shares left the immune fraction's food
+    standing, so a zone's pool -- and every remaining susceptible's dose --
+    rose with the immune fraction.
+    """
+    naive = [_agent(agent_id=100 + i, infected=False) for i in range(20 - n_immune)]
+    immune = [_immune(200 + i) for i in range(n_immune)]
+    reference_pool, reference_dose = _eat_once(
+        [_agent(agent_id=100 + i, infected=False) for i in range(20)], 1000.0,
+    )
+    pool, dose = _eat_once(naive + immune, 1000.0)
+    assert pool == pytest.approx(reference_pool, rel=1e-9)
+    assert dose == pytest.approx(reference_dose, rel=1e-9)
+
+
+def test_a_zone_of_immune_diners_still_eats_the_pool_down() -> None:
+    pool, dose = _eat_once([_immune(300 + i) for i in range(10)], 1000.0)
+    assert dose == pytest.approx(0.0)
+    assert pool < 1000.0
+
+
+def test_an_empty_food_zone_loses_nothing() -> None:
+    pool, _dose = _eat_once([], 1000.0)
+    assert pool == pytest.approx(1000.0)
+
+
+@pytest.mark.parametrize("n_diners", [2, 20, 200])
+def test_the_mass_eaten_does_not_depend_on_how_many_share_it(
+    n_diners: int,
+) -> None:
+    """A declared pool turnover removes a share of the pool, not an intake per
+    diner, so zone size moves each diner's dose and not the mass removed."""
+    pool, dose = _eat_once(
+        [_agent(agent_id=400 + i, infected=False) for i in range(n_diners)],
+        1000.0,
+    )
+    assert dose * n_diners == pytest.approx(1000.0 - pool, rel=1e-9)
+    assert 1000.0 - pool == pytest.approx(2.135, rel=0.02)
