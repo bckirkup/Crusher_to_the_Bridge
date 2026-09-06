@@ -527,6 +527,15 @@ HAND_TO_FOOD_TRANSFER_FRACTION_RANGE = (0.003, 0.46)
 # interior deposits more than the retired constant did; and unlike that
 # constant this deposit no longer scales with the swept release adjustment,
 # because hand load is measured directly against the curve peak.
+# Tranche 30 found the nearest measured analogues, and both sit an order of
+# magnitude above this rate without measuring it: hand-to-*mouth* contacts
+# during eating run at a median 7/h, adults 6/h and an adult 75th percentile
+# of 11/h (Wilson 2020, J Expo Sci Environ Epidemiol, 263 people observed
+# 30 min each; Grade B, origin R), and hand-hygiene-requiring occasions in a
+# sandwich factory at ~3.1 per handler-hour (Mohamed 2024, J Food Prot, 588
+# occasions, 12 handlers, 16 h of CCTV). Neither is a hand-to-*food* contact,
+# so neither replaces this value; together they make it plausibly low by an
+# order of magnitude, which is a reason to sweep it and not to reset it.
 # No source: declared assumption, swept. Grade C. Origin: n/a.
 FOOD_HAND_CONTACTS_PER_DAY = 0.6
 
@@ -538,6 +547,16 @@ FOOD_HAND_CONTACTS_PER_DAY = 0.6
 # restaurant is 12.7× on shared surfaces (Jin 2022, the same study behind
 # ``CREW_SERVICE_SURFACE_CONTACTS_PER_HOUR``). Carried across from surface
 # contacts to food contacts, which is an inference, not a measurement.
+# Note what this multiplier is *not*: it scales a service-zone crew agent's
+# contact rate, and carries no probability that the handler is shedding while
+# working. That quantity is bounded in the general food-service literature but
+# on the wrong denominator — 11.9 % of 491 US food workers worked two or more
+# shifts while vomiting or with diarrhoea in the previous year (Sumner 2011),
+# ~20 % at least one shift (Carpenter 2013), and one third of restaurants have
+# no policy stating when an ill worker is excluded (Norton 2015) — all
+# 12-month worker-level recall, where a per-shift probability is what would be
+# needed, and there is no food-handler shift in the model to attach one to
+# (tranche 30 §2). Recorded as bounded and not adoptable.
 # Grade C inferred. Origin: Jin 2022 ratio, transferred across contact type.
 FOOD_HANDLER_CONTACT_MULTIPLIER = 12.7
 
