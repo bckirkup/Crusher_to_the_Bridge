@@ -46,7 +46,7 @@ from engines.pharmaceutical_interventions import (
 )
 from engines.sim_clock import crossed_day_boundary
 from engines.strain_state import ImmuneRecord, StrainRegistry
-from engines.transmission_core import draw_emesis_schedule
+from engines.transmission_core import draw_emesis_schedule, draw_symptom_axes
 
 # Earliest day post-infection symptoms can appear (Person.java: dpi >= 1),
 # before any strain-specific incubation modifier. Used only by pathogens
@@ -200,6 +200,7 @@ def draw_symptom_onset(
         inf["illness"] = IllnessStatus.SYMPTOMATIC
         inf["onset_time_infected"] = inf.get("time_infected", 0)
         inf["presented"] = True
+        draw_symptom_axes(inf, prof, rng)
         draw_emesis_schedule(agent, pid, prof, rng)
         apply_treatment_at_onset(agent, pid, inf, prof)
         if inf.get("symptom_severity") in (None, "", "asymptomatic"):

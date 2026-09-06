@@ -972,11 +972,31 @@
                   }
                 }
               }
+            },
+            "symptom_axis_probabilities": {
+              "type": "object",
+              "description": "Illness-class shares for a symptomatic host: which symptom axes it expresses. Absent means every feature the phase declares applies to every symptomatic host.",
+              "properties": {
+                "vomiting": {"type": "number", "minimum": 0, "maximum": 1},
+                "diarrhoea_given_vomiting": {"type": "number", "minimum": 0, "maximum": 1},
+                "diarrhoea_given_no_vomiting": {"type": "number", "minimum": 0, "maximum": 1},
+                "notes": {"type": "string"}
+              },
+              "additionalProperties": false
             }
           }
         }
       },
       "patternProperties": {
+        "^stool_events_per_day$": {
+          "type": "object",
+          "description": "Defecation events per day by symptom class; the only channel through which symptom status reaches the faecal-hand-fomite-food chain. Absent means the hand load relaxes continuously toward its ceiling instead.",
+          "properties": {
+            "baseline": {"type": "number", "exclusiveMinimum": 0},
+            "diarrhoeal": {"type": "number", "exclusiveMinimum": 0}
+          },
+          "additionalProperties": false
+        },
         "^environmental_faecal_release_log10_g_per_epoch$": {
           "type": "number",
           "minimum": 0,
