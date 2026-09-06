@@ -75,6 +75,14 @@ def _agent(agent_id: int, strain_id: str) -> KorkinAgent:
     agent.infect_with_pathogen(PATHOGEN, 1e4, 0, time_infected=2)
     agent.infections[PATHOGEN]["illness"] = "symptomatic"
     agent.assign_strain(PATHOGEN, strain_id)
+    # Hands are recontaminated at defecation events now, not held at the
+    # measured ceiling every epoch, so a one-epoch deposition test has to say
+    # which side of an event its hosts are on. These are freshly contaminated;
+    # otherwise what this test asserts about lineage recovery would depend on
+    # whether three Poisson draws happened to fire in epoch 0.
+    agent.hand_load_by_pathogen[PATHOGEN] = (
+        agent.get_pathogen_hand_target(PATHOGEN, _profile())
+    )
     return agent
 
 
@@ -426,7 +434,11 @@ class TestSurfaceReservoirIntegration:
         # Rebaselined for the dose-pathway dimensional fix: corrected
         # per-epoch shedding is 24x smaller, so the run must supply enough
         # biological time and seeded hosts to clear the 1e-4 swab quantisation.
-        epochs = 48
+        # Rebaselined again for the stool-event hand model: a hand is
+        # recontaminated once per defecation rather than every epoch, so the
+        # faecal injection into the surface reservoir is roughly an order of
+        # magnitude smaller and the run needs a second biological day.
+        epochs = 96
         enabled_spec = PicardRunSpec.from_legacy_yaml(
             str(REPO_ROOT), num_epochs=epochs,
         )

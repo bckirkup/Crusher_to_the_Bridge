@@ -54,7 +54,7 @@ from engines.infection_dynamics_bridge import (
     InfectionStatus,
     KorkinAgent,
 )
-from engines.sim_clock import LEGACY_EPOCH_DAY, SimClock
+from engines.sim_clock import HOURS_PER_DAY, LEGACY_EPOCH_DAY, SimClock
 from engines.strain_dose_ledger import (
     UNRESOLVED_STRAIN,
     Contributor,
@@ -110,6 +110,39 @@ HAND_TO_SURFACE_LOGNORMAL = (-2.1, 1.4)
 HAND_TO_SURFACE_DRYING_MULTIPLIER = 1.0
 HAND_TO_MOUTH_NORMAL = (0.339, 0.132)
 HAND_INACTIVATION_RATE_PER_HOUR_RANGE = (0.61, 1.7)
+# Defecation events per day: the frequency at which a faecally shedding host
+# recontaminates its own hands, and so the only quantity through which symptom
+# status reaches the faecal-hand-fomite-food chain. Two arms, because that is
+# what the symptom axis changes; the per-event hand load is the same measured
+# Liu ceiling in both. Applies only to a profile that declares
+# ``stool_events_per_day``; a profile without it keeps the continuous
+# relaxation this pair replaces.
+#
+# Non-diarrhoeal arm: US adults reporting normal bowel habits, 95.9% between 3
+# and 21 bowel movements per week = 0.43-3.0/day, with once daily the single
+# most common habit and only 40% of men / 33% of women on a regular 24 h cycle.
+# Interval: 0.43-3.0/day; Shape: U. Mitsuhashi et al. 2017, Am J Gastroenterol
+# (NHANES 2009-2010, N=4,775), and Heaton et al. 1992, Gut (N=1,897 prospective
+# diaries). Grade B: general adult population standing in for a passenger
+# complement. Origin: Ab.
+BASELINE_STOOL_EVENTS_PER_DAY = 1.0
+# Diarrhoeal arm: adults presenting with acute gastroenteritis, mean stool
+# frequency 5.63 +/- 1.43/day at presentation falling to 1.65 +/- 0.65/day by
+# day 7. Interval: 3.0-8.5/day, floored at the >=3 unformed stools/24 h that
+# *defines* acute diarrhoea (the case definition Kirby et al. 2016 scored
+# norovirus challenge subjects against) and ceilinged at mean + 2 SD; Shape: U.
+# Patel et al. 2025, BMC Nutrition (MAESTRO, 683 AGE patients, 239 sites,
+# India). Grade C: mixed-aetiology care-seeking AGE under probiotic treatment,
+# not norovirus-confirmed and not a community cohort, so the arm is swept
+# rather than asserted. Origin: Ab. No norovirus-specific stools-per-day
+# distribution was retrieved; the challenge literature reports the case
+# definition and total stool weight, not an event rate (Atmar 2008, Kirby
+# 2016), and a case-definition threshold is not a mean.
+DIARRHOEAL_STOOL_EVENTS_PER_DAY = 5.63
+# Feature names any enteric profile may use for the diarrhoeal phase feature.
+DIARRHOEAL_PHASE_FEATURES = frozenset({
+    "watery_diarrhea", "diarrhea", "bloody_diarrhea",
+})
 HAND_HYGIENE_EFFICACY_LOG10 = (1.06, 0.54, 0.0, 1.89)
 HAND_HYGIENE_RATE_PER_HOUR_DEFAULT = 0.0
 NON_EATING_MOUTH_CONTACTS_PER_HOUR = (2.9, 2.5)
@@ -231,6 +264,60 @@ EMESIS_AEROSOL_FRACTION_RANGE = (7.2e-7, 2.67e-4)
 EMESIS_DEPOSITION_AREA_M2 = 7.8
 
 
+VOMITING_AXIS = "vomiting"
+DIARRHOEA_AXIS = "diarrhoea"
+
+
+def has_symptom_axis(inf: dict[str, Any], axis: str) -> bool:
+    """Whether one infection record carries a symptom axis.
+
+    A record with no drawn axes carries every feature its phase declares, so a
+    profile that declares no axis probabilities behaves as it did before the
+    axes existed.
+    """
+    axes = inf.get("symptom_axes")
+    if not isinstance(axes, dict):
+        return True
+    return bool(axes.get(axis, True))
+
+
+def draw_symptom_axes(
+    inf: dict[str, Any],
+    profile: dict[str, Any],
+    rng: np.random.Generator,
+) -> None:
+    """Draw which symptom classes one symptomatic host expresses.
+
+    Vomiting and diarrhoea are independent observables in the challenge
+    literature, not two labels for one severity: 72% of symptomatic GII.2
+    subjects vomited (70% GI.1), and of those who vomited 50% also met the
+    diarrhoea case definition (57% GI.1). Kirby et al. 2016, PLoS ONE
+    (DOI 10.1371/journal.pone.0143759), Tables 1-2; human challenge subjects,
+    Grade B for an adult passenger complement, origin Tn. A symptomatic host
+    that does not vomit met the illness definition through diarrhoea, so the
+    diarrhoea share of non-vomiters defaults to 1: that is the case definition
+    closing the classes, not a measurement, and a profile may declare it.
+
+    A profile declaring no ``symptom_axis_probabilities`` draws nothing and
+    consumes no RNG.
+    """
+    shares = profile.get("clinical_presentation", {}).get(
+        "symptom_axis_probabilities",
+    )
+    if not isinstance(shares, dict):
+        return
+    vomits = bool(rng.random() < float(shares.get("vomiting", 1.0)))
+    key = (
+        "diarrhoea_given_vomiting" if vomits
+        else "diarrhoea_given_no_vomiting"
+    )
+    diarrhoea = bool(rng.random() < float(shares.get(key, 1.0)))
+    inf["symptom_axes"] = {
+        VOMITING_AXIS: vomits,
+        DIARRHOEA_AXIS: diarrhoea,
+    }
+
+
 def draw_emesis_schedule(
     agent: Any,
     pathogen_id: str,
@@ -241,9 +328,16 @@ def draw_emesis_schedule(
 
     The per-subject cumulative shed is the identified quantity, so it is drawn
     once here and partitioned equally over the episodes drawn with it; nothing
-    is drawn per episode at emission time.
+    is drawn per episode at emission time. A host whose drawn symptom axes
+    exclude vomiting draws no schedule at all.
     """
     if not hasattr(agent, "emesis_episode_schedule_by_pathogen"):
+        return
+    if not has_symptom_axis(
+        agent.infections.get(pathogen_id) or {}, VOMITING_AXIS,
+    ):
+        agent.emesis_episode_schedule_by_pathogen[pathogen_id] = []
+        agent.emesis_episode_load_by_pathogen[pathogen_id] = 0.0
         return
     phases = profile.get("clinical_presentation", {}).get("phases", [])
     emetic_phases = [
@@ -3093,15 +3187,110 @@ class TransmissionCore:
         pathogen_id: str,
         profile: dict | None,
     ) -> None:
+        """Relax one host's hand load over one epoch.
+
+        A profile declaring ``stool_events_per_day`` recontaminates the hand at
+        a defecation *event*: between events the load only decays, and an event
+        returns it to the measured Liu ceiling. A profile without that
+        declaration keeps the continuous relaxation toward the ceiling, which
+        holds every shedding host's hand near its maximum at all times.
+        """
         target = agent.get_pathogen_hand_target(pathogen_id, profile or {})
         current = agent.hand_load_by_pathogen.get(pathogen_id, 0.0)
         if target <= 0.0 and current <= 0.0:
             return
         rate = self._hand_inactivation_rate(agent, pathogen_id, profile)
         survival = math.exp(-rate * self.clock.hours_per_epoch)
-        agent.hand_load_by_pathogen[pathogen_id] = (
-            target + (current - target) * survival
+        events_per_day = self._stool_event_rate_per_day(
+            agent, pathogen_id, profile,
         )
+        if events_per_day is None:
+            agent.hand_load_by_pathogen[pathogen_id] = (
+                target + (current - target) * survival
+            )
+            return
+        if pathogen_id not in agent.hand_load_by_pathogen:
+            current = self._stationary_hand_load(
+                target, rate, events_per_day,
+            )
+        decayed = current * survival
+        if self._stool_event_occurs(events_per_day):
+            decayed = max(decayed, target)
+        agent.hand_load_by_pathogen[pathogen_id] = decayed
+
+    def _stationary_hand_load(
+        self,
+        target: float,
+        inactivation_rate_per_hour: float,
+        events_per_day: float,
+    ) -> float:
+        """Hand load for a host first seen mid-illness.
+
+        A host that has been shedding since before this epoch has already
+        defecated; starting its hand at zero would make every host's first
+        exposure depend on when the first event happens to fall. The backward
+        recurrence time of a Poisson process is exponential with the same
+        rate, so the load is the ceiling decayed over that draw.
+        """
+        rate = max(events_per_day, 1e-9)
+        since_days = float(self.rng.exponential(1.0 / rate))
+        return target * math.exp(
+            -inactivation_rate_per_hour * since_days * HOURS_PER_DAY,
+        )
+
+    def _stool_event_occurs(self, events_per_day: float) -> bool:
+        """Whether at least one defecation event falls in this epoch."""
+        expected = max(0.0, events_per_day) * self.clock.day_fraction_per_epoch
+        probability = 1.0 - math.exp(-expected)
+        return bool(self.rng.random() < probability)
+
+    def _stool_event_rate_per_day(
+        self,
+        agent: KorkinAgent,
+        pathogen_id: str,
+        profile: dict | None,
+    ) -> float | None:
+        """Defecation events per day for one host, or ``None``.
+
+        ``None`` means the profile declares no stool-event arms, so this host's
+        hand is maintained by the continuous path instead.
+        """
+        arms = (profile or {}).get("stool_events_per_day")
+        if not isinstance(arms, dict):
+            return None
+        baseline = float(arms.get(
+            "baseline", BASELINE_STOOL_EVENTS_PER_DAY,
+        ))
+        if not self._diarrhoea_active(agent, pathogen_id, profile or {}):
+            return baseline
+        return float(arms.get(
+            "diarrhoeal", DIARRHOEAL_STOOL_EVENTS_PER_DAY,
+        ))
+
+    def _diarrhoea_active(
+        self,
+        agent: KorkinAgent,
+        pathogen_id: str,
+        profile: dict,
+    ) -> bool:
+        """Whether this host is passing diarrhoeal stool in this epoch.
+
+        Three conditions, all independent of the RNA it emits: the host is
+        currently symptomatic, its drawn symptom axes include diarrhoea, and
+        the phase its infection age falls in declares the diarrhoeal feature.
+        A never-symptomatic, incubating or convalescent host therefore sheds
+        RNA on its own curve while defecating at the non-diarrhoeal rate.
+        """
+        eligible = self._symptomatic_phase(agent, pathogen_id, profile)
+        if eligible is None:
+            return False
+        phase, _ = eligible
+        if not has_symptom_axis(
+            agent.infections.get(pathogen_id) or {}, DIARRHOEA_AXIS,
+        ):
+            return False
+        features = set(phase.get("features", []))
+        return bool(features & DIARRHOEAL_PHASE_FEATURES)
 
     def _apply_hand_hygiene(
         self,
@@ -3167,12 +3356,13 @@ class TransmissionCore:
         )
         return self._log_uniform_mean(low, high) / max(1, scheduled_episodes)
 
-    def _emesis_phase(
-        self,
+    @staticmethod
+    def _symptomatic_phase(
         agent: KorkinAgent,
         pathogen_id: str,
         profile: dict,
     ) -> tuple[dict, float] | None:
+        """The clinical phase one currently symptomatic host sits in."""
         inf = agent.infections.get(pathogen_id)
         if (
             inf is None
@@ -3189,7 +3379,21 @@ class TransmissionCore:
             profile.get("clinical_presentation", {}),
             math.floor(age),
         )
-        if phase is None or "vomiting" not in phase.get("features", []):
+        if phase is None:
+            return None
+        return phase, age
+
+    def _emesis_phase(
+        self,
+        agent: KorkinAgent,
+        pathogen_id: str,
+        profile: dict,
+    ) -> tuple[dict, float] | None:
+        eligible = self._symptomatic_phase(agent, pathogen_id, profile)
+        if eligible is None:
+            return None
+        phase, age = eligible
+        if "vomiting" not in phase.get("features", []):
             return None
         return phase, age
 

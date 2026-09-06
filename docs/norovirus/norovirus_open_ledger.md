@@ -26,6 +26,17 @@ run since.
 
 Also withdrawn and not yet replaced:
 
+**Hand recontamination became an event, not a per-epoch relaxation
+(`SYMP-EFF-01`, §4 item 0).** A norovirus host's hand load is now returned to
+the measured Liu ceiling at a Poisson defecation event and decays between
+events, instead of relaxing toward the ceiling every epoch. Any route share,
+surface-reservoir mass or fomite/food dose measurement taken before this change
+is **not transferable across it**: the same probe's total surface mass moves
+about five orders (5.87e6 -> 53.0) at an unchanged epidemic size. Two
+surface-lineage-recovery test expectations moved and are attributed to this
+change rather than rebaselined silently. No shedding curve, hand target,
+wastewater path, grade or interval changes here.
+
 **Leisure-venue assignment and exterior-zone AHU membership changed.** The
 `Free`-zone leisure draw is now capacity-weighted over passenger-accessible
 venues instead of uniform over every `Free` zone, and exterior zones — open-air,
@@ -725,8 +736,8 @@ double-count by exactly the amount emesis already supplies.
 
 Roughly in dependency order.
 
-0. **`SYMP-EFF-01`: the sentinel and the transmission side ride one quantity,
-   and the term that would separate them does not exist.** Norovirus boards at
+0. **`SYMP-EFF-01`: the missing term now exists as a rate, and the shared
+   quantity is narrowed rather than separated.** Norovirus boards at
    a prevalence of **asymptomatic faecal RNA carriage** (Grade B on its own
    denominator: Kobayashi 2021, Qi 2018, Jeong 2021), which is exactly the
    quantity **wastewater surveillance detects** - and the same emission is what
@@ -741,18 +752,44 @@ Roughly in dependency order.
    similar to symptomatic across peak, time-to-peak, duration and AUC, and
    states that the greater contribution of symptomatic cases must therefore be
    caused by higher **spreading efficiency**. That term is measured (§3's
-   check) and absent here. Two candidate shapes are recorded and **neither is
-   chosen**: hand contamination scaling with defecation events per day - which
-   is what the Sukhrie and Teunis authors' own hygiene attribution points at,
-   and which subsumes the whole-gut-transit and diarrhoeal-liquid gaps left
-   open at the deposition constants by #447 - or a declared swept axis with
-   Grade B direction and declared magnitude. A GC:PFU conversion is **refused**:
-   1.4-4.3 log10 wide and matrix-dependent, and exactly absorbed by the
-   dose-response intercept, whose axis is administered genome copies
+   check) and absent here. Of the two candidate shapes recorded, **the first
+   landed and the second was refused**: hand contamination now scales with
+   defecation events per day, which is what the Sukhrie and Teunis authors' own
+   hygiene attribution points at, rather than a per-copy symptom multiplier. A
+   GC:PFU conversion is **refused**: 1.4-4.3 log10 wide and matrix-dependent,
+   and exactly absorbed by the dose-response intercept, whose axis is
+   administered genome copies
    ([tranche 31](../literature/consensus_tranche_31_symptom_conditioned_spreading.md) §4.1).
-   Nothing downstream of this - the next admissible-box sweep included - is
-   interpretable until the term exists or its absence is a declared condition
-   of the design.
+
+   **What the mechanism is, and what it is not.** A profile declaring
+   `stool_events_per_day` recontaminates a shedding host's hand at a defecation
+   *event* drawn as a Poisson thinning on the epoch grid, and between events the
+   hand only decays; the event rate has two independently sourced arms,
+   non-diarrhoeal **[0.43, 3.0]/day** (Grade B) and diarrhoeal **[3.0, 8.5]/day**
+   (Grade C, swept), and the diarrhoeal arm applies only to a host that is
+   symptomatic, drew the diarrhoea axis, and is in a phase declaring the
+   diarrhoeal feature
+   ([tranche 32](../literature/consensus_tranche_32_stool_event_frequency.md)).
+   **Continuous RNA emission is untouched**: the shedding curves, hand target,
+   zone pools and the greywater sentinel read the same numbers they read before,
+   so a never-symptomatic carrier still appears in wastewater. What it no longer
+   does is have its hand held at the Liu ceiling every epoch.
+
+   **Still open, and not claimed closed.** The sentinel and the fomite route
+   still consume one emission, because the sentinel samples the greywater
+   fraction of the same zone pools; the mechanism reduces how much a carrier
+   injects into those pools without separating the two readings. The
+   whole-gut-transit and diarrhoeal-liquid gaps at the deposition constants
+   (#447) remain open: the event *rate* is now symptom-conditioned, the
+   per-event hand load is still the single Liu ceiling on both arms.
+
+   **Measured consequence, withdrawn as a result and recorded as a magnitude.**
+   Over a 48-epoch 10-seed probe with lineage tracking on, total surface mass
+   fell from **5.87e6 to 53.0** while infected hosts moved 12 -> 13, so the
+   continuous path was maintaining a faecal injection of one ceiling hand-load
+   per shedding host per **epoch** - 24/day on the hourly grid - that the dose
+   pathway barely consumed. Every dose figure remains void per §1; this is a
+   before/after of one structural change, not a fit.
 
 1. **`FOOD-ARCH-01`: repaired in form, and half of it remains open.** The
    deposition side is closed: the food route now composes its deposit the way

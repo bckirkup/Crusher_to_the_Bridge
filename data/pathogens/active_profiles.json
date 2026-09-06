@@ -149,6 +149,7 @@
       },
       "airborne_emission_mode": "emesis_conditioned",
       "emesis_aerosol_fraction_range": [7.2e-07, 2.67e-04],
+      "stool_events_per_day": {"baseline": 1.0, "diarrhoeal": 5.63},
       "base_susceptibility": 1.0,
       "microflora_disruption": {
         "causes_disruption": true,
@@ -213,7 +214,13 @@
               "watery_diarrhea"
             ]
           }
-        ]
+        ],
+        "symptom_axis_probabilities": {
+          "vomiting": 0.72,
+          "diarrhoea_given_vomiting": 0.5,
+          "diarrhoea_given_no_vomiting": 1.0,
+          "notes": "Kirby et al. 2016, PLoS ONE (DOI 10.1371/journal.pone.0143759), Tables 1-2: 72% of symptomatic GII.2 Snow Mountain challenge subjects vomited (GI.1 Norwalk 70%), and of the GII vomiters 50% also met the diarrhoea case definition (>=3 unformed stools or >=400 g unformed stool in 24 h; GI.1 57%). Grade B, origin Tn - human challenge adults standing in for a passenger complement, GII values taken because this profile's genotypes are GII. diarrhoea_given_no_vomiting = 1.0 is not measured: illness is defined as vomiting and/or diarrhoea, so a symptomatic non-vomiter met the definition through diarrhoea. These are illness-class shares, not shedding: an asymptomatic or convalescent host draws no axes and its RNA emission is untouched."
+        }
       },
       "route_efficiency_multipliers": {
         "direct_contact": 0.35,
