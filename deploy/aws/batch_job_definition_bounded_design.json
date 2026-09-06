@@ -9,6 +9,7 @@
       "--design", "Ref::design",
       "--shard-count", "Ref::shard_count",
       "--trajectories", "Ref::trajectories",
+      "--seed-shards", "Ref::seed_shards",
       "--sobol-m", "Ref::sobol_m",
       "--seeds", "Ref::seeds",
       "--design-seed", "Ref::design_seed",
@@ -36,8 +37,9 @@
   },
   "parameters": {
     "design": "screen",
-    "shard_count": "20",
+    "shard_count": "200",
     "trajectories": "20",
+    "seed_shards": "10",
     "sobol_m": "7",
     "seeds": "30",
     "design_seed": "17",

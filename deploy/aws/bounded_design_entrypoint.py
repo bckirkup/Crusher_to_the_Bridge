@@ -110,6 +110,7 @@ def _screen_argv(args: argparse.Namespace, shard: int, out: Path) -> list[str]:
         "--design-seed", str(args.design_seed),
         "--shard-count", str(args.shard_count),
         "--shard-index", str(shard),
+        "--seed-shards", str(args.seed_shards),
         "--out", str(out),
     ]
 
@@ -151,6 +152,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--epochs", type=int, default=168)
     parser.add_argument("--num-agents", type=int, default=450)
     parser.add_argument("--trajectories", type=int, default=20)
+    parser.add_argument("--seed-shards", type=int, default=1)
     parser.add_argument("--sobol-m", type=int, default=7)
     parser.add_argument("--seeds", type=int, default=30)
     parser.add_argument("--design-seed", type=int, default=17)

@@ -612,7 +612,13 @@ def test_screen_mode_writes_the_effects_and_the_declared_box(
         bounded_screen,
         "trajectory_differences",
         lambda factors, trajectories, seeds, rng, **_kwargs: {
-            factor.name: {"attack_rate": [1.0, -1.0]} for factor in factors
+            factor.name: {
+                "attack_rate": [
+                    {"trajectory": 0.0, "seeds": 2.0, "value": 1.0},
+                    {"trajectory": 1.0, "seeds": 2.0, "value": -1.0},
+                ],
+            }
+            for factor in factors
         },
     )
 
@@ -661,19 +667,32 @@ def _stub_seed_mean(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(bounded_screen, "seed_mean", score)
 
 
+_SEEDS = [500, 501, 502, 503]
+
+
 def _raw(
     trajectories: int,
     *,
     shard_count: int,
     shard_index: int,
-) -> dict[str, dict[str, list[float]]]:
+    seed_shards: int = 1,
+) -> dict[str, dict[str, list[bounded_screen.RawEffect]]]:
     return bounded_screen.trajectory_differences(
         bounded_screen.NOROVIRUS_FACTORS,
         trajectories,
-        [500, 501],
+        _SEEDS,
         np.random.default_rng(17),
         shard_count=shard_count,
         shard_index=shard_index,
+        seed_shards=seed_shards,
+    )
+
+
+def _pooled(
+    shards: list[dict[str, dict[str, list[bounded_screen.RawEffect]]]],
+) -> dict[str, dict[str, list[float]]]:
+    return bounded_screen.pool_effects(
+        bounded_screen.merge_effects(shards), len(_SEEDS),
     )
 
 
@@ -681,15 +700,112 @@ def test_shards_partition_the_unsharded_design_exactly(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     _stub_seed_mean(monkeypatch)
-    whole = _raw(6, shard_count=1, shard_index=0)
-    shards = [_raw(6, shard_count=3, shard_index=i) for i in range(3)]
-    pooled = bounded_screen.merge_effects(shards)
+    whole = _pooled([_raw(6, shard_count=1, shard_index=0)])
+    pooled = _pooled([_raw(6, shard_count=3, shard_index=i) for i in range(3)])
 
     for factor in bounded_screen.NOROVIRUS_FACTORS:
         for name in bounded_screen.SCORED_OUTPUTS:
-            assert sorted(pooled[factor.name][name]) == pytest.approx(
-                sorted(whole[factor.name][name]),
+            assert pooled[factor.name][name] == pytest.approx(
+                whole[factor.name][name],
             )
+
+
+def test_seed_block_shards_pool_to_the_unsharded_design(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """3 trajectory rows x 2 seed blocks = 6 shards reproduce the whole."""
+    _stub_seed_mean(monkeypatch)
+    whole = _pooled([_raw(6, shard_count=1, shard_index=0)])
+    pooled = _pooled([
+        _raw(6, shard_count=6, shard_index=i, seed_shards=2) for i in range(6)
+    ])
+
+    for factor in bounded_screen.NOROVIRUS_FACTORS:
+        for name in bounded_screen.SCORED_OUTPUTS:
+            assert pooled[factor.name][name] == pytest.approx(
+                whole[factor.name][name],
+            )
+
+
+def test_a_seed_sharded_worker_evaluates_only_its_seed_block(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_seed_mean(monkeypatch)
+    records = _raw(2, shard_count=2, shard_index=1, seed_shards=2)[
+        bounded_screen.NOROVIRUS_FACTORS[0].name
+    ]["attack_rate"]
+
+    assert (
+        sorted({int(r["trajectory"]) for r in records}),
+        {int(r["seeds"]) for r in records},
+    ) == ([0, 1], {2})
+
+
+def test_a_missing_seed_block_is_refused_not_averaged(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_seed_mean(monkeypatch)
+    shards = [_raw(2, shard_count=2, shard_index=0, seed_shards=2)]
+
+    with pytest.raises(ValueError, match="pools 2 seeds, design has 4"):
+        _pooled(shards)
+
+
+def test_a_duplicated_seed_block_is_refused(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_seed_mean(monkeypatch)
+    one = _raw(2, shard_count=2, shard_index=0, seed_shards=2)
+
+    with pytest.raises(ValueError, match="pools 4 seeds, design has 2"):
+        bounded_screen.pool_effects(
+            bounded_screen.merge_effects([one, one]), 2,
+        )
+
+
+def test_seed_blocks_pool_by_a_seed_weighted_mean() -> None:
+    pooled = bounded_screen.pool_effects(
+        {"f": {"attack_rate": [
+            {"trajectory": 0.0, "seeds": 1.0, "value": 1.0},
+            {"trajectory": 0.0, "seeds": 3.0, "value": 5.0},
+            {"trajectory": 1.0, "seeds": 4.0, "value": -2.0},
+        ]}},
+        4,
+    )
+
+    assert pooled["f"]["attack_rate"] == [4.0, -2.0]
+
+
+@pytest.mark.parametrize(("shard_count", "seed_shards"), [(6, 4), (6, 0)])
+def test_seed_shards_must_divide_the_shard_count(
+    shard_count: int,
+    seed_shards: int,
+) -> None:
+    with pytest.raises(ValueError, match="must divide"):
+        bounded_screen.shard_coordinates(shard_count, 0, seed_shards)
+
+
+def test_seed_shards_cannot_exceed_the_seeds() -> None:
+    with pytest.raises(ValueError, match="exceeds"):
+        bounded_screen.seed_block(_SEEDS, 5, 0)
+
+
+def test_shard_coordinates_lay_rows_of_seed_blocks() -> None:
+    assert [
+        bounded_screen.shard_coordinates(6, i, 2) for i in range(6)
+    ] == [(3, 0, 0), (3, 0, 1), (3, 1, 0), (3, 1, 1), (3, 2, 0), (3, 2, 1)]
+
+
+def test_legacy_whole_seed_effects_pool_as_complete_trajectories() -> None:
+    pooled = bounded_screen.pool_effects(
+        bounded_screen.merge_effects(
+            [{"f": {"attack_rate": [1.0, 3.0]}}, {"f": {"attack_rate": [5.0]}}],
+            4,
+        ),
+        4,
+    )
+
+    assert sorted(pooled["f"]["attack_rate"]) == [1.0, 3.0, 5.0]
 
 
 def test_every_trajectory_lands_in_exactly_one_shard(
@@ -712,11 +828,11 @@ def test_merged_summary_equals_the_unsharded_summary(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     _stub_seed_mean(monkeypatch)
-    direct = bounded_screen.summarise_effects(_raw(6, shard_count=1, shard_index=0))
+    direct = bounded_screen.summarise_effects(
+        _pooled([_raw(6, shard_count=1, shard_index=0)]),
+    )
     merged = bounded_screen.summarise_effects(
-        bounded_screen.merge_effects(
-            [_raw(6, shard_count=2, shard_index=i) for i in range(2)],
-        ),
+        _pooled([_raw(6, shard_count=4, shard_index=i, seed_shards=2) for i in range(4)]),
     )
     name = bounded_screen.NOROVIRUS_FACTORS[1].name
 
@@ -781,6 +897,15 @@ def test_merge_refuses_two_shards_of_the_same_index() -> None:
 
         with pytest.raises(SystemExit, match="double-count"):
             bounded_screen.load_shard_reports([first, duplicate])
+
+
+def test_merge_refuses_a_design_missing_a_shard() -> None:
+    with tempfile.TemporaryDirectory(dir=bounded_screen.REPO_ROOT) as directory:
+        root = Path(directory)
+        paths = [_write_shard(root, 0), _write_shard(root, 2)]
+
+        with pytest.raises(SystemExit, match=r"shards \[1\] of 3 are absent"):
+            bounded_screen.load_shard_reports(paths)
 
 
 def test_merge_refuses_shards_drawn_from_different_designs() -> None:

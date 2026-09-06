@@ -4,6 +4,12 @@
 # design units congruent to i, and the shards pool afterwards through the
 # design's own merge step (bounded_screen.py --mode merge,
 # admissible_region.py --merge). A shard is not a verdict.
+#
+# Size the array by wall-time, not by trajectory count: for the screen,
+# SEED_SHARDS splits each trajectory's seed set into blocks, so
+# shard-count = trajectory shards x SEED_SHARDS may approach the queue's
+# vCPU ceiling (256). 20 trajectories x 30 seeds at SEED_SHARDS=10 gives
+# 200 shards of 33 runs each (~15 min) instead of 20 shards of 330.
 set -euo pipefail
 
 USAGE="usage: submit_bounded_design.sh <screen|region> <shard-count> <bucket> [region] [queue] [job-definition]"
@@ -23,6 +29,7 @@ esac
 # arguments the local run used, so a Batch run and a local run are the same
 # design at the same --design-seed.
 TRAJECTORIES="${TRAJECTORIES:-20}"
+SEED_SHARDS="${SEED_SHARDS:-1}"
 SOBOL_M="${SOBOL_M:-7}"
 SEEDS="${SEEDS:-30}"
 DESIGN_SEED="${DESIGN_SEED:-17}"
@@ -34,6 +41,7 @@ echo "  name         : $JOB_NAME"
 echo "  design       : $DESIGN"
 echo "  array size   : $SHARD_COUNT"
 echo "  trajectories : $TRAJECTORIES (screen)"
+echo "  seed shards  : $SEED_SHARDS (screen)"
 echo "  sobol m      : $SOBOL_M (region)"
 echo "  seeds/point  : $SEEDS"
 echo "  design seed  : $DESIGN_SEED"
@@ -46,6 +54,6 @@ env -u AWS_ACCESS_KEY_ID -u AWS_SECRET_ACCESS_KEY -u AWS_SESSION_TOKEN \
   --job-queue "$JOB_QUEUE" \
   --job-definition "$JOB_DEFINITION" \
   --array-properties "size=$SHARD_COUNT" \
-  --parameters "design=$DESIGN,shard_count=$SHARD_COUNT,trajectories=$TRAJECTORIES,sobol_m=$SOBOL_M,seeds=$SEEDS,design_seed=$DESIGN_SEED,s3_prefix=$S3_PREFIX" \
+  --parameters "design=$DESIGN,shard_count=$SHARD_COUNT,trajectories=$TRAJECTORIES,seed_shards=$SEED_SHARDS,sobol_m=$SOBOL_M,seeds=$SEEDS,design_seed=$DESIGN_SEED,s3_prefix=$S3_PREFIX" \
   --region "$AWS_REGION" \
   --query 'jobId' --output text
