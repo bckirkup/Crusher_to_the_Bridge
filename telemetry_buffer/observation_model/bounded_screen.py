@@ -220,6 +220,74 @@ NOROVIRUS_FACTORS: tuple[Factor, ...] = (
         "linear",
         "D",
     ),
+    # stool_events_per_day.baseline: defecation events per day for a host not
+    # passing diarrhoeal stool -- the rate at which its hand returns to the
+    # measured Liu ceiling, and so the only quantity through which a
+    # never-symptomatic carrier, an incubating host or a convalescent boarder
+    # reaches the faecal-hand-fomite-food chain. Interval is US adult bowel
+    # habit: 95.9% between 3 and 21 movements per week (Mitsuhashi 2017,
+    # NHANES, N = 4,775), with once daily modal but not majority (Heaton 1992,
+    # N = 1,897 prospective diaries). Grade B: general adult population
+    # standing in for a passenger complement.
+    Factor(
+        "stool_events_baseline_per_day",
+        ("stool_events_per_day", "baseline"),
+        0.43,
+        3.0,
+        "linear",
+        "B",
+    ),
+    # stool_events_per_day.diarrhoeal: the same rate while passing diarrhoeal
+    # stool. Floor is the >=3 unformed stools/24 h that *defines* acute
+    # diarrhoea, the case definition Kirby 2016 scored norovirus challenge
+    # subjects against; ceiling is mean + 2 SD of the one available mean,
+    # 5.63 +/- 1.43/day at presentation (Patel 2025, MAESTRO, 683 AGE
+    # patients). Grade C: mixed-aetiology care-seeking AGE under probiotic
+    # treatment, not norovirus-confirmed -- no norovirus-specific stool-event
+    # distribution exists (docs/literature/consensus_tranche_32_stool_event_frequency.md
+    # section 2), which is why this is swept and not asserted.
+    Factor(
+        "stool_events_diarrhoeal_per_day",
+        ("stool_events_per_day", "diarrhoeal"),
+        3.0,
+        8.5,
+        "linear",
+        "C",
+    ),
+    # food_contamination.hand_food_contacts_per_day: bare-hand contacts with
+    # communal food per shedder per day of presence in a food zone. The
+    # quantity is null in the literature after four queries across two
+    # tranches (register section 3.4), so the interval is the *composition* the
+    # retired emission share is equivalent to at the shipped hand load and
+    # transfer range -- 0.3-46 contacts/day (tranche 29 section 2) -- and the
+    # shipped 0.6 sits near its floor while the nearest measured analogues
+    # (hand-to-mouth 6-7/h while eating, Wilson 2020; 3.1 hygiene occasions per
+    # handler-hour, Mohamed 2024) sit far above it. Grade C declared: the
+    # interval is a corridor, not a measurement of this quantity.
+    Factor(
+        "food_hand_contacts_per_day",
+        ("food_contamination", "hand_food_contacts_per_day"),
+        0.3,
+        46.0,
+        "log10",
+        "C",
+    ),
+    # food_contamination.ingestion_fraction_per_day: share of a food pool eaten
+    # per diner per day, i.e. food-service turnover rather than virology, which
+    # is why the engine takes an override and why it is swept. The shipped 0.05
+    # leaves 85.5% of the pool standing each day against the 0.1/day decay, and
+    # that carry-over -- not the deposition share -- is what made the food route
+    # 93-99.9% of delivered dose before FOOD-ARCH-01 (tranche 29 section 3). The
+    # ceiling is a pool turned over roughly three times a day, i.e. per meal
+    # service. Grade C declared: no study measures a pool-turnover fraction.
+    Factor(
+        "food_ingestion_fraction_per_day",
+        ("food_contamination", "ingestion_fraction_per_day"),
+        0.05,
+        3.0,
+        "log10",
+        "C",
+    ),
 )
 
 # Engine defaults for the profile keys a factor addresses by index. An
@@ -247,22 +315,46 @@ def build_overrides(
     """Turn unit-hypercube coordinates into a pathogen override block."""
     profile: dict[str, object] = {}
     for factor, unit in zip(factors, units, strict=True):
-        value = factor.value(float(unit))
-        key = factor.path[0]
-        if len(factor.path) == 1:
-            profile[key] = value
-            continue
-        index = int(factor.path[1])
-        current = profile.get(key)
+        _assign_factor(profile, factor.path, factor.value(float(unit)))
+    return {pathogen_id: profile}
+
+
+def _assign_factor(
+    block: dict[str, object],
+    path: Sequence[object],
+    value: float,
+) -> None:
+    """Write *value* at *path* inside an override block.
+
+    A path element is a key into a nested block or an index into a pair. A
+    nested block is written partially on purpose: run-spec overrides deep-merge
+    onto the profile, so a sibling key no factor addresses keeps the value the
+    profile declares. A pair does not merge, so an indexed factor restates the
+    engine's other end rather than leaving it zero.
+    """
+    key = str(path[0])
+    if len(path) == 1:
+        block[key] = value
+        return
+    tail = path[1]
+    if isinstance(tail, int):
+        current = block.get(key)
         if not isinstance(current, list):
             default = INDEXED_PATH_DEFAULTS.get(key)
             if default is None:
-                raise KeyError(f"no engine default recorded for indexed key {key!r}")
+                raise KeyError(
+                    f"no engine default recorded for indexed key {key!r}",
+                )
             current = list(default)
         pair = list(current)
-        pair[index] = value
-        profile[key] = pair
-    return {pathogen_id: profile}
+        pair[tail] = value
+        block[key] = pair
+        return
+    nested = block.get(key)
+    if not isinstance(nested, dict):
+        nested = {}
+    _assign_factor(nested, path[1:], value)
+    block[key] = nested
 
 
 def withdraw_other_boarding(

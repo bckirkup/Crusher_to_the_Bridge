@@ -9,6 +9,7 @@ import numpy as np
 import pytest
 
 from engines.transmission_core import EMESIS_TOTAL_SHED_GEC_RANGE
+from picard_framework.pathogen_overrides import deep_merge_dict
 from telemetry_buffer.observation_model import bounded_screen
 
 PATHOGEN = "norwalk_gi"
@@ -116,6 +117,98 @@ def test_unrecorded_indexed_key_raises_rather_than_defaulting() -> None:
     )
     with pytest.raises(KeyError, match="unknown_pair"):
         bounded_screen.build_overrides([unknown], [0.5], PATHOGEN)
+
+
+@pytest.mark.parametrize(
+    ("name", "block", "key"),
+    [
+        ("stool_events_baseline_per_day", "stool_events_per_day", "baseline"),
+        ("stool_events_diarrhoeal_per_day", "stool_events_per_day", "diarrhoeal"),
+        (
+            "food_hand_contacts_per_day",
+            "food_contamination",
+            "hand_food_contacts_per_day",
+        ),
+        (
+            "food_ingestion_fraction_per_day",
+            "food_contamination",
+            "ingestion_fraction_per_day",
+        ),
+    ],
+)
+@pytest.mark.parametrize("unit", [0.0, 0.5, 1.0])
+def test_nested_factor_lands_at_its_declared_key(
+    name: str,
+    block: str,
+    key: str,
+    unit: float,
+) -> None:
+    factor = _factor(name)
+    profile = bounded_screen.build_overrides(
+        bounded_screen.NOROVIRUS_FACTORS,
+        _units_at(name, unit),
+        PATHOGEN,
+    )[PATHOGEN]
+    nested = profile[block]
+    assert isinstance(nested, dict)
+    assert nested[key] == pytest.approx(factor.value(unit))
+
+
+def test_nested_factors_sharing_a_block_both_land() -> None:
+    """Two factors in one block compose rather than overwrite each other."""
+    units = [
+        1.0 if factor.name in {
+            "stool_events_baseline_per_day",
+            "stool_events_diarrhoeal_per_day",
+        } else 0.0
+        for factor in bounded_screen.NOROVIRUS_FACTORS
+    ]
+    profile = bounded_screen.build_overrides(
+        bounded_screen.NOROVIRUS_FACTORS, units, PATHOGEN,
+    )[PATHOGEN]
+    assert profile["stool_events_per_day"] == {
+        "baseline": pytest.approx(_factor("stool_events_baseline_per_day").high),
+        "diarrhoeal": pytest.approx(
+            _factor("stool_events_diarrhoeal_per_day").high,
+        ),
+    }
+
+
+def test_nested_override_leaves_the_profile_siblings_standing() -> None:
+    """A partial block must deep-merge, not replace the profile's own keys.
+
+    The food block carries decay and handler multipliers the box does not
+    address; a screen that replaced the block would silently drop them.
+    """
+    base = {PATHOGEN: {"food_contamination": {"decay_rate_per_day": 0.1}}}
+    patch = bounded_screen.build_overrides(
+        bounded_screen.NOROVIRUS_FACTORS,
+        _units_at("food_hand_contacts_per_day", 1.0),
+        PATHOGEN,
+    )
+    merged = deep_merge_dict(base[PATHOGEN], patch[PATHOGEN])
+    assert merged["food_contamination"]["decay_rate_per_day"] == pytest.approx(0.1)
+    assert merged["food_contamination"]["hand_food_contacts_per_day"] == (
+        pytest.approx(_factor("food_hand_contacts_per_day").high)
+    )
+
+
+def test_the_box_screens_the_repaired_faecal_and_food_mechanism() -> None:
+    """The stool-event and food-route axes are in the box, once each.
+
+    SYMP-EFF-01 made the defecation rate the only channel by which symptom
+    status reaches the faecal chain, and FOOD-ARCH-01 made contacts and
+    ingestion the food route's own quantities; a screen that omitted them
+    would rank the model as it stood before either.
+    """
+    names = [factor.name for factor in bounded_screen.NOROVIRUS_FACTORS]
+    for name in (
+        "stool_events_baseline_per_day",
+        "stool_events_diarrhoeal_per_day",
+        "food_hand_contacts_per_day",
+        "food_ingestion_fraction_per_day",
+    ):
+        assert names.count(name) == 1
 
 
 def _constant_run_point(weights: dict[str, float]):
