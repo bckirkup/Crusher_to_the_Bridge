@@ -57,6 +57,17 @@ over four seeds, not a model difference. Both merge refusals still fire
 `bounded_design_v1` reports stay in S3 as the record of what the degraded image
 produced.
 
+**The re-run screen has landed and its verdict is one Grade D factor
+(history §9k).** `bounded_design_v2` (200/200 children, merged in
+`telemetry_buffer/observation_model/bounded_screen_v2_merged.json`) ranks
+`environmental_faecal_release_log10_g_per_epoch` first on all six outputs by
+13x over the next factor on attack rate; the four food/faecal-chain axes rank
+third to sixth, 35-151x below it. The degraded-image `v1` merge is kept beside
+it (`bounded_screen_v1_merged.json`, labelled) and differs by at most a factor
+1.2 on any mu\* except the smallest. This is a ranking: it selects no value,
+narrows no interval, and the admissible-region question from #37 is untouched
+by it.
+
 **Hand recontamination became an event, not a per-epoch relaxation
 (`SYMP-EFF-01`, §4 item 0).** A norovirus host's hand load is now returned to
 the measured Liu ceiling at a Poisson defecation event and decays between
