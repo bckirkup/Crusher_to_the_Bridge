@@ -1,0 +1,37 @@
+{
+  "schema_version": "1.0.0",
+  "campaign_uid": "3c1f882f-98ac-4c52-97a4-94d73d21a401",
+  "paper_id": "M01",
+  "run_intent": "qualification",
+  "analysis_plan_id": null,
+  "review_response_id": null,
+  "source": {
+    "repository": "https://github.com/bckirkup/Crusher_to_the_Bridge",
+    "commit_sha": "07561adf2b93ff6b358859fb382b253c08828156",
+    "tree_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "dirty": false
+  },
+  "environment": {
+    "lock_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+    "platform": "linux-x86_64",
+    "python": "3.11.2",
+    "container_digest": null
+  },
+  "inputs": [
+    {
+      "path": "campaign.json",
+      "sha256": "2222222222222222222222222222222222222222222222222222222222222222"
+    }
+  ],
+  "effective_config_sha256": "3333333333333333333333333333333333333333333333333333333333333333",
+  "seed_policy": {
+    "policy": "fixed predeclared seed list",
+    "seeds_sha256": "4444444444444444444444444444444444444444444444444444444444444444"
+  },
+  "lineage": {
+    "parent_campaign_uid": null,
+    "supersedes": [],
+    "reason": "Lifecycle qualification"
+  },
+  "created_utc": "2026-09-06T00:00:00Z"
+}

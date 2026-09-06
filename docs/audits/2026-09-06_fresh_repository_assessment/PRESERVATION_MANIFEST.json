@@ -1,0 +1,98 @@
+{
+  "schema_version": "1.0",
+  "audited_source_sha": "07561adf2b93ff6b358859fb382b253c08828156",
+  "preservation_base_sha": "13118d16c960fbd58cab441353afb51914ab019d",
+  "generated_utc": "2026-09-06T10:44:00Z",
+  "files": [
+    {
+      "path": "docs/audits/2026-09-06_fresh_repository_assessment/CORRECTED_INTEGRATED_ASSESSMENT.md",
+      "bytes": 16328,
+      "sha256": "8efb9e1cbf202a01da02ead80f5f9e981d26cbdbc980a11d407995957f88406d"
+    },
+    {
+      "path": "docs/audits/2026-09-06_fresh_repository_assessment/CORRECTION_NOTICE.md",
+      "bytes": 9250,
+      "sha256": "6e0aef88d0b170f4c797ce58dcfe0bb30ec2559dc40cf0ee2ea25a99d17e06a5"
+    },
+    {
+      "path": "docs/audits/2026-09-06_fresh_repository_assessment/ESTABLISHED_FINDINGS_SUMMARY.md",
+      "bytes": 1684,
+      "sha256": "cf3a91122806be4469917748d424f5e14e6d483c01782f5b06df7a41cd675276"
+    },
+    {
+      "path": "docs/audits/2026-09-06_fresh_repository_assessment/PAPER_PROGRAM_DEPENDENCY_VIEW.md",
+      "bytes": 2215,
+      "sha256": "06579374f1ae939bf4b15438301cb628f4f83d19c6d9a796d92f9628d0392311"
+    },
+    {
+      "path": "docs/audits/2026-09-06_fresh_repository_assessment/POST_AUDIT_BASELINE_DRIFT.md",
+      "bytes": 1075,
+      "sha256": "f01d8a607a4997c4496202335dcb447fbf788d55844f70a493d67d141413dab4"
+    },
+    {
+      "path": "docs/audits/2026-09-06_fresh_repository_assessment/README.md",
+      "bytes": 2134,
+      "sha256": "d95c29272f36806c904a25983b8ef511b9b0ffce9c8402690aa0e0748949c534"
+    },
+    {
+      "path": "docs/audits/2026-09-06_fresh_repository_assessment/REMEDIATION_TRANCHE_MAP.md",
+      "bytes": 13954,
+      "sha256": "550534b626c8f755e2b3b2a2000263413a4cf5c5baa3e952644a77d6e8f26dcf"
+    },
+    {
+      "path": "docs/audits/2026-09-06_fresh_repository_assessment/finding_register.json",
+      "bytes": 67830,
+      "sha256": "c264d62ac05d10c5cd19dc280c924c9f43224a6583040fa4d3eee0b78af0e5c5"
+    },
+    {
+      "path": "docs/audits/2026-09-06_fresh_repository_assessment/finding_register.schema.json",
+      "bytes": 1983,
+      "sha256": "0f20c86531d2a3fea5ea909bb98d8fcd0f45ae06a3e6284bcb722e72f464af59"
+    },
+    {
+      "path": "docs/audits/2026-09-06_fresh_repository_assessment/human_integration_register.json",
+      "bytes": 17317,
+      "sha256": "a0ed7e8139096f8340fe28e2372f2a26cc918ba5ec9e2ab79131a7a0477cc455"
+    },
+    {
+      "path": "docs/audits/2026-09-06_fresh_repository_assessment/paper_readiness_register.json",
+      "bytes": 13661,
+      "sha256": "ca110d87698075ebc3d479fa3a5a5bb1df1ae5666a7e9025c7654f653b2e2f3e"
+    },
+    {
+      "path": "docs/audits/2026-09-06_fresh_repository_assessment/stan_model_register.json",
+      "bytes": 24278,
+      "sha256": "04741fd70f86655da1d232b067f68913792518a8979b8f9f8fd5c0be42cc7cba"
+    },
+    {
+      "path": "docs/examples/publication_campaign_provenance.example.json",
+      "bytes": 1210,
+      "sha256": "d81ec2fbd909d08fb2505c395f0fac716e58378c87a0929bcbda4c2ff11277a7"
+    },
+    {
+      "path": "docs/proposals/publication_campaign_provenance_spec.md",
+      "bytes": 1108,
+      "sha256": "1f7b3b25fb1d5fd22682b0203e1f2c03c1244f12609186fd94717f08a398f2e1"
+    },
+    {
+      "path": "schemas/README.md",
+      "bytes": 3724,
+      "sha256": "f7599bc1d2afb4bb8517c2e6fd78409665d6fcc65bb3e45e3bde7110933a0295"
+    },
+    {
+      "path": "schemas/publication_campaign_provenance.schema.json",
+      "bytes": 4202,
+      "sha256": "161166ec9b5d8b5a21d5f261d988d366a00ed157286ed83a0469c4f41fac1732"
+    },
+    {
+      "path": "tests/test_campaign_fingerprint.py",
+      "bytes": 1302,
+      "sha256": "05496174818115d2290c5f6fa14f8d93c0c4d5de117429d2d7e61ea062965b63"
+    },
+    {
+      "path": "tools/campaign_fingerprint.py",
+      "bytes": 1841,
+      "sha256": "f616f7d5ad5881de8689681895110b79965ee7ca2b61bd38b172871d5a25374d"
+    }
+  ]
+}
