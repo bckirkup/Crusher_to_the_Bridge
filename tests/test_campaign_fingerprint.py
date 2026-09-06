@@ -74,3 +74,97 @@ def test_safe_read_allows_paths_under_cwd(
     target = tmp_path / "manifest.json"
     target.write_text('{"ok": true}', encoding="utf-8")
     assert json.loads(mod._safe_read_text(Path("manifest.json"))) == {"ok": True}
+
+
+def _write_manifest(directory: Path, payload: dict | None = None) -> Path:
+    """Write a provenance envelope under *directory* for CLI tests."""
+    path = directory / "manifest.json"
+    path.write_text(json.dumps(payload or fixture()), encoding="utf-8")
+    return path
+
+
+def test_validate_accepts_the_example_envelope(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """``validate`` loads the schema through the confined reader."""
+    pytest.importorskip("jsonschema")
+    monkeypatch.chdir(ROOT)
+    schema = Path("schemas/publication_campaign_provenance.schema.json")
+    mod.validate(fixture(), schema)
+
+
+def test_validate_requires_jsonschema(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Missing jsonschema fails closed with a clear SystemExit."""
+    monkeypatch.chdir(ROOT)
+    real_import = __import__
+
+    def _block_jsonschema(name: str, *args: object, **kwargs: object):
+        if name == "jsonschema":
+            raise ImportError("blocked for test")
+        return real_import(name, *args, **kwargs)
+
+    monkeypatch.setattr("builtins.__import__", _block_jsonschema)
+    with pytest.raises(SystemExit, match="jsonschema"):
+        mod.validate(fixture(), Path("schemas/publication_campaign_provenance.schema.json"))
+
+
+def test_main_prints_fingerprint(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """CLI happy path prints the canonical fingerprint and exits 0."""
+    monkeypatch.chdir(tmp_path)
+    manifest = _write_manifest(tmp_path)
+    monkeypatch.setattr(
+        "sys.argv",
+        ["campaign_fingerprint", str(manifest.name)],
+    )
+    assert mod.main() == 0
+    assert capsys.readouterr().out.strip() == mod.canonical_fingerprint(fixture())
+
+
+def test_main_verify_rejects_mismatch(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """``--verify`` fails closed when the stored fingerprint disagrees."""
+    monkeypatch.chdir(tmp_path)
+    payload = fixture()
+    payload["run_fingerprint"] = "0" * 64
+    manifest = _write_manifest(tmp_path, payload)
+    monkeypatch.setattr(
+        "sys.argv",
+        ["campaign_fingerprint", str(manifest.name), "--verify"],
+    )
+    assert mod.main() == 2
+    assert "fingerprint mismatch" in capsys.readouterr().out
+
+
+def test_main_validate_flag(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """``--validate`` runs schema validation before fingerprinting."""
+    pytest.importorskip("jsonschema")
+    # Schema lives in the repo; confine reads under cwd, so run from ROOT and
+    # place the manifest beside a copy-free relative path.
+    monkeypatch.chdir(ROOT)
+    manifest = Path("docs/examples/publication_campaign_provenance.example.json")
+    monkeypatch.setattr(
+        "sys.argv",
+        [
+            "campaign_fingerprint",
+            str(manifest),
+            "--validate",
+            "--schema",
+            "schemas/publication_campaign_provenance.schema.json",
+        ],
+    )
+    assert mod.main() == 0
+    assert capsys.readouterr().out.strip() == mod.canonical_fingerprint(fixture())
