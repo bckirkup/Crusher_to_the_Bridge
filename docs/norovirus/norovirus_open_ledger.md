@@ -42,6 +42,21 @@ the repaired image before any μ\* from it is read, and it is in any case only
 sensitivity information, never a value or an interval. `PKG-02` ships the data
 in all three images and makes an absent runtime input an error.
 
+`bounded-design-v3` closes the equivalence check the repair was made for. The
+four-child seed-sharding smoke re-run on the repaired image
+(`7e542e5f-1b8c-4b2c-af27-c44bdf1b3b7d`, 2 trajectories x 4 seeds, 2 seed
+blocks, `--design-seed 17`) produces shard artifacts whose raw effects are
+**identical** to a local run of the same four shards, factor by factor and
+trajectory by trajectory, where the pre-repair image differed in 55 entries.
+Against a local *unsharded* screen the merged result agrees to 8e-15 relative
+in the 25 pooled per-trajectory effects that move at all, which is the floating
+point associativity of a seed-weighted mean over two blocks versus one mean
+over four seeds, not a model difference. Both merge refusals still fire
+(a missing shard; a duplicated seed block). The re-run 200-shard screen is
+`bounded_design_v2` (`77d99c06-485d-4bed-8e87-8bcb6663fad2`); the
+`bounded_design_v1` reports stay in S3 as the record of what the degraded image
+produced.
+
 **Hand recontamination became an event, not a per-epoch relaxation
 (`SYMP-EFF-01`, §4 item 0).** A norovirus host's hand load is now returned to
 the measured Liu ceiling at a Poisson defecation event and decays between

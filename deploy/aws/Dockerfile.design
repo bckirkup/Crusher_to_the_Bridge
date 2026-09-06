@@ -6,7 +6,7 @@
 # push to besides picard-campaign:
 #   docker build -f deploy/aws/Dockerfile.design -t picard-bounded-design .
 #   docker tag picard-bounded-design \
-#     <ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/picard-boundary-analysis:bounded-design-v1
+#     <ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/picard-boundary-analysis:bounded-design-v3
 # Smoke test (no AWS; the entrypoint refuses to guess a shard):
 #   docker run --rm picard-bounded-design deploy/aws/bounded_design_entrypoint.py --help
 #
