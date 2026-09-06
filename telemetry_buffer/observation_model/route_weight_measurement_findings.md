@@ -255,6 +255,61 @@ Against the one external, non-circular check
 involved in 32% counting mixed modes) the model now sits far **below** the
 check, having sat far above it. That is recorded as a discrepancy, not a target:
 no food parameter may be selected to close it. The two candidate structural
-causes are the per-head division of a well-mixed pool (a communal serving is not
-well mixed over an entire dining zone) and the null contact rate, and both are
-open in `docs/parameter_provenance_register.md`.
+causes were named as the per-head division of a well-mixed pool (a communal
+serving is not well mixed over an entire dining zone) and the null contact
+rate. **§9 falsifies the first of them**; both remain open in
+`docs/parameter_provenance_register.md`.
+
+## 9. The per-head divisor is scale-neutral, so it is not why the route is small
+
+Measurement, adopted nothing. Ingestion stepped directly on one Dining zone
+with deposition and net growth off, then at steady state with deposition on.
+
+**Fixed pool, 10^6 copies, one epoch.** The mass delivered does not depend on
+how many diners share it, because a declared pool turnover removes a share of
+the *pool*, not an intake per diner:
+
+| diners | dose/host | mass delivered | E[infections] at k=0.01 |
+|---|---|---|---|
+| 2 | 1067 | 2135 | 2.0 |
+| 10 | 213.5 | 2135 | 8.8 |
+| 50 | 42.7 | 2135 | 17.4 |
+| 200 | 10.67 | 2135 | 20.3 |
+| 1000 | 2.135 | 2135 | 21.1 |
+| 3000 | 0.712 | 2135 | 21.3 |
+
+A route *share* is measured on mass, so the divisor cannot have moved §8's
+number at all. It cannot have moved the establishment share either, in the
+direction assumed: expected infections **rise** with the number sharing the
+pool, because concentrating a fixed mass on few hosts wastes supra-saturating
+dose. Mean-field well-mixing is the generous choice here, not the conservative
+one.
+
+**Steady state, 5% prevalence, decay 0.1/day, 240 epochs.** Deposits scale with
+the shedders present while consumption is a fraction of the pool, so the 1/N
+dilution cancels and per-head dose is zone-size invariant:
+
+| diners | pool | pool/diner | dose/host/epoch |
+|---|---|---|---|
+| 20 | 4.78e+03 | 239 | 0.511 |
+| 100 | 2.47e+04 | 247 | 0.528 |
+| 500 | 1.25e+05 | 250 | 0.535 |
+| 2000 | 5.00e+05 | 250 | 0.535 |
+
+What remains is a deposition-currency asymmetry, not an allocation one: a hand
+load is a *stock* capped at Liu's 10^3.86 GEC, giving ~42 copies per shedder per
+epoch at the shipped contact rate, while direct contact draws on the emission
+*flux*, ~10^7 per epoch. Three and a half orders of magnitude, and the hand
+ceiling is the measured leg. The mass Mouchtouri's check would require is
+therefore missing from a deposition channel the route has no term for at all —
+emesis into or near food, and product contaminated before it meets a hand —
+which no change to the allocation rule can supply.
+
+**One defect the probes did find.** Removal was `f × pool × susceptible/N`, so
+an immune or already-infected diner's share stayed in the pool: the standing
+pool, and hence every remaining susceptible's dose, rose with the immune
+fraction (0.533 → 0.637 per epoch as susceptibles went 95 → 5 of 100, bounded
+by `(decay + f)/decay` = 1.5×). Prevalence already raises deposition, so this
+was a second, unintended prevalence coupling of the wrong sign. Every diner
+present now eats an equal share off the pool and only a susceptible one takes a
+dose from it; the same sweep is flat at 0.528.
