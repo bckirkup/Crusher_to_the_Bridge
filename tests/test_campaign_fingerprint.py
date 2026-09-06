@@ -21,6 +21,19 @@ def fixture() -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def validator():
+    jsonschema = pytest.importorskip("jsonschema")
+    schema = json.loads(
+        (ROOT / "schemas/publication_campaign_provenance.schema.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    return jsonschema.Draft202012Validator(
+        schema,
+        format_checker=jsonschema.FormatChecker(),
+    )
+
+
 def test_fingerprint_is_order_independent() -> None:
     left = fixture()
     right = dict(reversed(list(left.items())))
@@ -42,63 +55,35 @@ def test_outputs_do_not_change_pre_run_fingerprint() -> None:
 
 
 def test_example_validates() -> None:
-    jsonschema = pytest.importorskip("jsonschema")
-    schema_path = ROOT / "schemas/publication_campaign_provenance.schema.json"
-    schema = json.loads(schema_path.read_text(encoding="utf-8"))
-    jsonschema.Draft202012Validator(
-        schema,
-        format_checker=jsonschema.FormatChecker(),
-    ).validate(fixture())
+    validator().validate(fixture())
 
 
-def test_safe_read_rejects_path_escape(
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    """CLI path arguments must stay under the process working directory."""
-    outside = tmp_path / "outside.json"
-    outside.write_text("{}", encoding="utf-8")
-    inside = tmp_path / "workspace"
-    inside.mkdir()
-    monkeypatch.chdir(inside)
-    with pytest.raises(ValueError, match="escapes"):
-        mod._safe_read_text(outside)
+@pytest.mark.parametrize("intent", ["confirmatory", "revision"])
+def test_planned_intents_require_plan_and_parent(intent: str) -> None:
+    payload = fixture()
+    payload["run_intent"] = intent
+    assert list(validator().iter_errors(payload))
+    payload["analysis_plan_id"] = "plan-v1"
+    payload["lineage"]["parent_campaign_uid"] = "92b44427-ad2d-4c3b-93c7-67f856487324"
+    validator().validate(payload)
 
 
-def test_safe_read_allows_paths_under_cwd(
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    """Relative paths under the working directory remain readable."""
-    monkeypatch.chdir(tmp_path)
-    target = tmp_path / "manifest.json"
-    target.write_text('{"ok": true}', encoding="utf-8")
-    assert json.loads(mod._safe_read_text(Path("manifest.json"))) == {"ok": True}
+def test_review_response_requires_plan_review_and_parent() -> None:
+    payload = fixture()
+    payload["run_intent"] = "review_response"
+    assert list(validator().iter_errors(payload))
+    payload["analysis_plan_id"] = "plan-v1"
+    payload["review_response_id"] = "review-2-comment-7"
+    payload["lineage"]["parent_campaign_uid"] = "92b44427-ad2d-4c3b-93c7-67f856487324"
+    validator().validate(payload)
 
 
-def _write_manifest(directory: Path, payload: dict | None = None) -> Path:
-    """Write a provenance envelope under *directory* for CLI tests."""
-    path = directory / "manifest.json"
-    path.write_text(json.dumps(payload or fixture()), encoding="utf-8")
-    return path
-
-
-def test_validate_accepts_the_example_envelope(
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    """``validate`` loads the schema through the confined reader."""
+def test_validate_uses_repository_schema() -> None:
     pytest.importorskip("jsonschema")
-    monkeypatch.chdir(ROOT)
-    schema = Path("schemas/publication_campaign_provenance.schema.json")
-    mod.validate(fixture(), schema)
+    mod.validate(fixture())
 
 
-def test_validate_requires_jsonschema(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    """Missing jsonschema fails closed with a clear SystemExit."""
-    monkeypatch.chdir(ROOT)
+def test_validate_requires_jsonschema(monkeypatch: pytest.MonkeyPatch) -> None:
     real_import = __import__
 
     def _block_jsonschema(name: str, *args: object, **kwargs: object):
@@ -108,63 +93,43 @@ def test_validate_requires_jsonschema(
 
     monkeypatch.setattr("builtins.__import__", _block_jsonschema)
     with pytest.raises(SystemExit, match="jsonschema"):
-        mod.validate(fixture(), Path("schemas/publication_campaign_provenance.schema.json"))
+        mod.validate(fixture())
 
 
-def test_main_prints_fingerprint(
+def test_cli_validate_and_verify(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
-    """CLI happy path prints the canonical fingerprint and exits 0."""
     monkeypatch.chdir(tmp_path)
-    manifest = _write_manifest(tmp_path)
-    monkeypatch.setattr(
-        "sys.argv",
-        ["campaign_fingerprint", str(manifest.name)],
-    )
-    assert mod.main() == 0
-    assert capsys.readouterr().out.strip() == mod.canonical_fingerprint(fixture())
+    payload = fixture()
+    payload["run_fingerprint"] = mod.canonical_fingerprint(payload)
+    path = tmp_path / "manifest.json"
+    path.write_text(json.dumps(payload), encoding="utf-8")
+    assert mod.main([str(path), "--validate", "--verify"]) == 0
+    assert mod.canonical_fingerprint(payload) in capsys.readouterr().out
 
 
-def test_main_verify_rejects_mismatch(
+def test_cli_rejects_mismatched_fingerprint(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
-    capsys: pytest.CaptureFixture[str],
 ) -> None:
-    """``--verify`` fails closed when the stored fingerprint disagrees."""
     monkeypatch.chdir(tmp_path)
     payload = fixture()
     payload["run_fingerprint"] = "0" * 64
-    manifest = _write_manifest(tmp_path, payload)
-    monkeypatch.setattr(
-        "sys.argv",
-        ["campaign_fingerprint", str(manifest.name), "--verify"],
-    )
-    assert mod.main() == 2
-    assert "fingerprint mismatch" in capsys.readouterr().out
+    path = tmp_path / "manifest.json"
+    path.write_text(json.dumps(payload), encoding="utf-8")
+    assert mod.main([str(path), "--verify"]) == 2
 
 
-def test_main_validate_flag(
+def test_cli_rejects_path_outside_working_directory(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
-    capsys: pytest.CaptureFixture[str],
 ) -> None:
-    """``--validate`` runs schema validation before fingerprinting."""
-    pytest.importorskip("jsonschema")
-    # Schema lives in the repo; confine reads under cwd, so run from ROOT and
-    # place the manifest beside a copy-free relative path.
-    monkeypatch.chdir(ROOT)
-    manifest = Path("docs/examples/publication_campaign_provenance.example.json")
-    monkeypatch.setattr(
-        "sys.argv",
-        [
-            "campaign_fingerprint",
-            str(manifest),
-            "--validate",
-            "--schema",
-            "schemas/publication_campaign_provenance.schema.json",
-        ],
-    )
-    assert mod.main() == 0
-    assert capsys.readouterr().out.strip() == mod.canonical_fingerprint(fixture())
+    outside = tmp_path / "outside.json"
+    outside.write_text(json.dumps(fixture()), encoding="utf-8")
+    inside = tmp_path / "inside"
+    inside.mkdir()
+    monkeypatch.chdir(inside)
+    with pytest.raises(SystemExit, match="must remain under"):
+        mod.main([str(outside)])
