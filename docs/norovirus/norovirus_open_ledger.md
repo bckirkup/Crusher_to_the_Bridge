@@ -77,6 +77,19 @@ changes here.
   The measurement stands as a measurement of the retired condition; a
   replacement pass needs its own floor, because the floor was taken under the
   same retired condition.
+- **Every food-route dose and route share measured on the hourly grid before
+  the pool fractions were unit-declared (Edison DIM-01).** `FOOD_INGESTION_FRACTION`
+  0.05 and `ENV_DELIVERY_FRACTION` 0.01 were applied once per *epoch* with no
+  clock conversion, so on the shipped 1 h grid a food pool was eaten down at
+  24 days' worth of ingestion per day — about 14× the daily-grid delivery
+  over 24 physical hours. They are now `FOOD_INGESTION_FRACTION_PER_DAY`
+  (compounding, `decay_per_epoch`) and `ENV_DELIVERY_FRACTION_PER_DAY`
+  (dividing, `amount_per_epoch`); the two deposition shares are shares of an
+  already per-epoch emission and were not converted. No value changed. This
+  sits under #37's empty region and the "every voyage posts" rate measured
+  after it (food was 93-99.9% of delivered dose in the last route
+  measurement), so neither may be read as a property of the model until
+  re-run. Which of the six factors' magnitudes it moves is not yet measured.
 - **Any claim that the model reproduces VSP attack rates.** Withdrawn at #346
   and not re-established. Expedition's earlier agreement was a cancellation of
   an inflated infection rate against a deflated illness ratio.

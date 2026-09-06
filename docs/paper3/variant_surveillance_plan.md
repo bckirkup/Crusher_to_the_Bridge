@@ -341,7 +341,8 @@ upstream shedders remain the fallback for air the composition does not yet
 cover. A zone-scoped environmental reservoir is minted a founder lineage at its
 own standing mass the first time it is read (a spa biofilm or spore load has a
 lineage no host deposited), and under strain tracking a shedding occupant now
-adds `ENV_HOST_DEPOSITION_FRACTION` of its emission to both the reservoir and
+adds `ENV_HOST_DEPOSITION_FRACTION_OF_EMISSION` of its emission to both the
+reservoir and
 its composition, so the two describe the same pool. With tracking off no
 composition exists and no host input is added, so the scalar reservoir is the
 legacy reservoir exactly.

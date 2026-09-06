@@ -111,6 +111,26 @@ emit a deprecation warning. Loader-level, not call-site-level.
 | `shore_infection_probability` | `shore_infection_probability_per_hour` | hour (matches Sentinel lambda_p, per person-hour) |
 | `py_contam_bridge.HOURS_PER_EPOCH` | `clock.hours_per_epoch` (no constant) | hour |
 
+### Pool fractions in `engines/transmission_core.py` (pass 3)
+
+Four module constants on the food and environmental routes were missed by the
+scan above, two of them by carrying a `_PER_EPOCH` name that asserted the unit
+the scan looks for. They do not all take the same treatment, because they are
+not all the same kind of quantity:
+
+| Constant | Kind | Read to the epoch by |
+|---|---|---|
+| `FOOD_INGESTION_FRACTION_PER_DAY` | fractional removal from a standing pool | `decay_per_epoch` (compounds) |
+| `ENV_DELIVERY_FRACTION_PER_DAY` | daily flux out of a load delivery does not deplete | `amount_per_epoch` (divides) |
+| `FOOD_DEPOSITION_FRACTION_OF_EMISSION` | share of an emission | nothing — the emission is already per-epoch |
+| `ENV_HOST_DEPOSITION_FRACTION_OF_EMISSION` | share of an emission | nothing — same |
+
+The deposition shares multiply `get_pathogen_shedding()`, which returns
+`amount_per_epoch(...)`; converting them again would divide the deposit by the
+epochs in a day a second time. Removals and fluxes are authored per day and
+must be converted, or the hourly grid removes twenty-four days of ingestion per
+day — on the route this document records as 93-99.9% of delivered dose.
+
 Mutation on *transmission* (`mutation_rate`) is per infection event, not per
 epoch — leave it alone but document it as event-scoped. Per-test diagnostic
 sensitivity/specificity, per-read error rates, quarantine-compliance class

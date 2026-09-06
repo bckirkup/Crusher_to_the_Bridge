@@ -498,19 +498,40 @@ NON_MATE_CONFINEMENT_CONTACT_FACTOR = 0.01
 # Hallway encounter rate vs well-mixed ward (Cabin_Corridor zones)
 DEFAULT_CORRIDOR_DIRECT_CONTACT_FACTOR = 0.15
 
-# Fraction of shedding deposited into food pools in Dining-type zones
-FOOD_DEPOSITION_FRACTION_PER_EPOCH = 1e-4
+# Share of a shedding host's emission deposited into food pools in Dining-type
+# zones. A share of an emission, not a rate: the emission it multiplies is
+# already the epoch's amount (``get_pathogen_shedding`` returns
+# ``amount_per_epoch``), so this fraction is dimensionless and the deposit is
+# grid-invariant without conversion. Converting it a second time through a
+# clock helper would divide the deposit by the epochs in a day.
+# Open on provenance: the emission it takes a share of is total faecal
+# shedding, with no distinction between formed stool and diarrhoeal liquid
+# during the symptomatic window, and no gut-transit lag between ingestion and
+# shedding; a sourced value would have to say which of those it measured.
+# No source: declared assumption. Grade C. Origin: n/a.
+FOOD_DEPOSITION_FRACTION_OF_EMISSION = 1e-4
 
-# Fraction of food-pool pathogen ingested per agent per epoch
-FOOD_INGESTION_FRACTION = 0.05
+# Fraction of a food pool's standing pathogen mass ingested per agent per day.
+# A fractional removal from a stock, so it compounds within a day and is read
+# to the epoch through ``SimClock.decay_per_epoch``. The unit is declared here,
+# not the shape: a constant fraction is continuous grazing, not sized meals at
+# set hours, and the value is not a measurement of either.
+# No source: declared assumption. Grade C. Origin: n/a.
+FOOD_INGESTION_FRACTION_PER_DAY = 0.05
 
-# Fraction of environmental load delivered per zone per epoch
-ENV_DELIVERY_FRACTION = 0.01
+# Fraction of the standing environmental load delivered to a zone per day.
+# Delivery does not deplete the load, so a day's flux divides linearly across
+# the day's epochs: read through ``SimClock.amount_per_epoch``.
+# No source: declared assumption. Grade C. Origin: n/a.
+ENV_DELIVERY_FRACTION_PER_DAY = 0.01
 
-# Fraction of a shedding host's emission entering a zone-scoped environmental
+# Share of a shedding host's emission entering a zone-scoped environmental
 # reservoir (spore shedding into a spa or ward). Applied only under variant
 # surveillance, since it adds a host input the scalar reservoir never had.
-ENV_HOST_DEPOSITION_FRACTION = 1e-4
+# A share of an already per-epoch emission, like the food deposition share,
+# so it is dimensionless and takes no clock conversion.
+# No source: declared assumption. Grade C. Origin: n/a.
+ENV_HOST_DEPOSITION_FRACTION_OF_EMISSION = 1e-4
 
 # Reservoir kinds tracked by the strain composition shadow of the pools
 SURFACE_RESERVOIR = "surface"
@@ -772,6 +793,16 @@ class TransmissionCore:
         self.clock = clock if clock is not None else SimClock.from_config(cfg)
         self.inhaled_air_volume_m3_per_epoch = self.clock.amount_per_epoch(
             BREATHING_RATE_M3_PER_DAY,
+        )
+        # Two pool fractions read off a standing mass rather than off an
+        # emission, so each needs the conversion its own kinetics implies:
+        # ingestion removes a share of the pool and compounds, while delivery
+        # is a flux out of an undepleted load and divides.
+        self.food_ingestion_fraction_per_epoch = self.clock.decay_per_epoch(
+            FOOD_INGESTION_FRACTION_PER_DAY,
+        )
+        self.env_delivery_fraction_per_epoch = self.clock.amount_per_epoch(
+            ENV_DELIVERY_FRACTION_PER_DAY,
         )
         self.zone_volumes = zone_volumes or {}
         self.pathogen_profiles = pathogen_profiles or {}
@@ -1201,7 +1232,7 @@ class TransmissionCore:
         self._seed_environmental_composition(pathogen_id, zone_name, level)
         self._reservoir.decay(factor, key)
         deposits = [
-            (agent, sv * ENV_HOST_DEPOSITION_FRACTION)
+            (agent, sv * ENV_HOST_DEPOSITION_FRACTION_OF_EMISSION)
             for agent, sv in self._get_shedders(occupants, pathogen_id, profile)
         ]
         self._deposit_reservoir_strains(
@@ -3543,7 +3574,7 @@ class TransmissionCore:
                         a,
                         sv
                         * self.confinement_emission_factor(a)
-                        * FOOD_DEPOSITION_FRACTION_PER_EPOCH,
+                        * FOOD_DEPOSITION_FRACTION_OF_EMISSION,
                     )
                     for a, sv in shedders
                 ],
@@ -3552,7 +3583,7 @@ class TransmissionCore:
                 food_zones[zone_name] += (
                     sv
                     * self.confinement_emission_factor(agent)
-                    * FOOD_DEPOSITION_FRACTION_PER_EPOCH
+                    * FOOD_DEPOSITION_FRACTION_OF_EMISSION
                 )
 
             # Net growth (reproduction minus decay), applied to the pool and to
@@ -3581,7 +3612,10 @@ class TransmissionCore:
             n_occupants = max(len(occupants), 1)
             pool_before = food_zones[zone_name]
             per_head = (
-                pool_before / n_occupants * FOOD_INGESTION_FRACTION * zone_mult
+                pool_before
+                / n_occupants
+                * self.food_ingestion_fraction_per_epoch
+                * zone_mult
             )
             delivered_each = per_head * self._delivery_scale(
                 per_head * len(susceptible), pool_before,
@@ -3693,7 +3727,7 @@ class TransmissionCore:
         # Deliver to all zones (environmental pathogen is HVAC-systemic)
         for zone_name, occupants in zone_occupants.items():
             volume = self.zone_volumes.get(zone_name, 100.0)
-            delivered = load * ENV_DELIVERY_FRACTION
+            delivered = load * self.env_delivery_fraction_per_epoch
             concentration = delivered / max(volume, 1.0)
 
             susceptible = self._get_susceptible(occupants, pathogen_id)
