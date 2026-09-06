@@ -97,15 +97,16 @@ def load_bundle(source: str) -> ObservationBundle | None:
 
 def hours_grid(census: CensusArtifact, points: int = DEFAULT_CURVE_POINTS) -> tuple[float, ...]:
     """Evenly spaced physical-hour grid spanning the census."""
-    if not census.epochs or points < 1:
-        return ()
-    last = max(row.epoch for row in census.epochs)
-    end = census.hours(last)
-    if points == 1 or end <= 0.0:
-        return (end,)
-    step = end / (points - 1)
-    return tuple(round(step * i, 6) for i in range(points))
-
+    values: list[float] = []
+    if census.epochs and points >= 1:
+        last = max(row.epoch for row in census.epochs)
+        end = census.hours(last)
+        if points == 1 or end <= 0.0:
+            values.append(end)
+        else:
+            step = end / (points - 1)
+            values.extend(round(step * i, 6) for i in range(points))
+    return tuple(values)
 
 def _diversity_summaries(census: CensusArtifact) -> dict[str, Any]:
     return {
