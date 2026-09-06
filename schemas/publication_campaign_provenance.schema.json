@@ -208,5 +208,71 @@
       "type": "string",
       "pattern": "^[0-9a-f]{64}$"
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "run_intent": {
+            "enum": [
+              "confirmatory",
+              "revision"
+            ]
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "analysis_plan_id"
+        ],
+        "properties": {
+          "analysis_plan_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "lineage": {
+            "properties": {
+              "parent_campaign_uid": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "run_intent": {
+            "const": "review_response"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "analysis_plan_id",
+          "review_response_id"
+        ],
+        "properties": {
+          "analysis_plan_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "review_response_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "lineage": {
+            "properties": {
+              "parent_campaign_uid": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
 }
