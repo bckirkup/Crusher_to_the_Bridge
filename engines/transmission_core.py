@@ -508,7 +508,25 @@ DEFAULT_CORRIDOR_DIRECT_CONTACT_FACTOR = 0.15
 # shedding, with no distinction between formed stool and diarrhoeal liquid
 # during the symptomatic window, and no gut-transit lag between ingestion and
 # shedding; a sourced value would have to say which of those it measured.
-# No source: declared assumption. Grade C. Origin: n/a.
+# Sourced as a corridor, not as a value (tranche 29 §2). The literature
+# measures no fraction-of-emission for any food route, but the two legs a
+# decomposed one needs are both measured: virus per hand (``HAND_LOAD_LOG10_GEC``
+# = 3.86, Liu 2013) and hand → food transfer per contact, 0.3–46 % on food
+# material across norovirus and its surrogates (Bidawid 2004 finger → ham
+# 46 ± 20.3 %, → lettuce 18 ± 5.7 %; Tuladhar 2013 → cucumber 7 ± 8 %,
+# → tomato 0.3 ± 0.5 %; Rönnqvist 2014 glove → cucumber 1.5 ± 1.9 %;
+# Grove 2015 hand → lettuce 25 %). Composed against this profile's peak
+# emission, 1e-4 is equivalent to 0.3–46 bare-hand food-contact events per
+# shedder per day, so the value sits inside an admissible corridor; the
+# contact rate itself is measured by nobody, which is why the corridor cannot
+# be collapsed to a sourced value here.
+# Structural gap recorded as FOOD-ARCH-01, not repaired: unlike the fomite
+# route this deposit takes no hand load, counts no contacts, depletes no hand
+# and admits no hygiene lever, and it applies to every shedder in the zone
+# rather than to food handlers — whereas NEARS attributes ~40 % of outbreaks
+# with identified contributing factors to an ill or infectious food worker
+# (Moritz 2023).
+# Declared assumption inside a Grade B corridor. Grade C. Origin: Tr.
 FOOD_DEPOSITION_FRACTION_OF_EMISSION = 1e-4
 
 # Fraction of a food pool's standing pathogen mass ingested per agent per day.
@@ -516,12 +534,26 @@ FOOD_DEPOSITION_FRACTION_OF_EMISSION = 1e-4
 # to the epoch through ``SimClock.decay_per_epoch``. The unit is declared here,
 # not the shape: a constant fraction is continuous grazing, not sized meals at
 # set hours, and the value is not a measurement of either.
+# Not a biological quantity, and no literature search can raise its grade
+# (tranche 29 §3): with the shipped decay of 0.1/day it leaves 85.5 % of the
+# pool standing each day, which is a statement about food-service turnover —
+# how long served food remains available before it is eaten or discarded — not
+# about virus. Virus persistence on food is the conservative half of that
+# product and is supported (HuNoV < 1 log in 1–2 weeks on produce, Cook 2016;
+# MNV infectivity 1 log in 4 days on lettuce ≈ 0.44/day, Fallahi 2011, i.e. 4×
+# faster than the shipped decay). The carry-over, not the deposition share, is
+# what makes this route dominate delivered dose.
 # No source: declared assumption. Grade C. Origin: n/a.
 FOOD_INGESTION_FRACTION_PER_DAY = 0.05
 
 # Fraction of the standing environmental load delivered to a zone per day.
 # Delivery does not deplete the load, so a day's flux divides linearly across
 # the day's epochs: read through ``SimClock.amount_per_epoch``.
+# Searched and null (tranche 29 §8): nothing measures occupant intake as a
+# fraction of a standing zone load. The only values published in this shape are
+# environmental transmission rates of fitted compartmental models (e.g. Gogovi
+# 2025), rejected as model outputs under the register's standing rule, and the
+# nearest empirical analogue is chemical hand-to-mouth exposure, not virus.
 # No source: declared assumption. Grade C. Origin: n/a.
 ENV_DELIVERY_FRACTION_PER_DAY = 0.01
 
@@ -530,6 +562,9 @@ ENV_DELIVERY_FRACTION_PER_DAY = 0.01
 # surveillance, since it adds a host input the scalar reservoir never had.
 # A share of an already per-epoch emission, like the food deposition share,
 # so it is dimensionless and takes no clock conversion.
+# Searched and null (tranche 29 §8), and unlike the food share it cannot even
+# be composed: the reservoir it feeds is not a defined material, so no transfer
+# assay is commensurable with it.
 # No source: declared assumption. Grade C. Origin: n/a.
 ENV_HOST_DEPOSITION_FRACTION_OF_EMISSION = 1e-4
 
