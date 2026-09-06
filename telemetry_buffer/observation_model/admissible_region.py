@@ -58,6 +58,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import os
 import sys
 import tempfile
 from collections.abc import Iterable, Sequence
@@ -619,12 +620,26 @@ def evaluate_design(
     workers: int = 1,
     on_point: Any = None,
     start_index: int = 0,
+    completed: Sequence[int] = (),
+    shard_count: int = 1,
+    shard_index: int = 0,
 ) -> list[dict[str, Any]]:
-    """Evaluate every sampled point, streaming each result to ``on_point``."""
+    """Evaluate this shard's sampled points, streaming each to ``on_point``.
+
+    Points are independent cells, so a shard takes the design indices
+    congruent to ``shard_index`` and the union over shards is the whole grid.
+    ``completed`` names indices already on disk, which is what makes a resume
+    safe when the shard's indices are not contiguous.
+    """
+    if shard_count < 1 or not 0 <= shard_index < shard_count:
+        raise ValueError(f"shard {shard_index} outside 0..{shard_count - 1}")
+    already = set(completed)
     jobs = [
         (units, index, seeds, design)
         for index, units in enumerate(units_grid)
         if index >= start_index
+        and index % shard_count == shard_index
+        and index not in already
     ]
     results: list[dict[str, Any]] = []
     if workers <= 1:
@@ -670,6 +685,80 @@ def _read_completed(path: Path) -> list[dict[str, Any]]:
     return sorted(points, key=lambda point: point["point_index"])
 
 
+def _pooled_points(
+    streams: Sequence[Path],
+    *,
+    expected: int,
+) -> list[dict[str, Any]]:
+    """Pool shard streams into one point list, refusing gaps and repeats.
+
+    A partial grid is refused rather than summarised: the gate's verdict is a
+    statement about the whole box, and a summary over the shards that happened
+    to finish would silently narrow it.
+    """
+    pooled: dict[int, dict[str, Any]] = {}
+    for stream in streams:
+        for point in _read_completed(stream):
+            index = int(point["point_index"])
+            if index in pooled:
+                raise SystemExit(
+                    f"point {index} appears in more than one shard stream",
+                )
+            pooled[index] = point
+    missing = sorted(set(range(expected)) - set(pooled))
+    if missing:
+        raise SystemExit(
+            f"{len(missing)} of {expected} design points are absent "
+            f"(first: {missing[:5]}); the gate scores a whole grid",
+        )
+    return [pooled[index] for index in sorted(pooled)]
+
+
+def _run_shard(
+    args: argparse.Namespace,
+    grid: Sequence[Sequence[float]],
+    seeds: Sequence[int],
+    design: Design,
+) -> list[dict[str, Any]]:
+    """Evaluate this worker's share of the design, resuming its own stream."""
+    shard_index = args.shard_index
+    if shard_index is None:
+        raw = os.environ.get("AWS_BATCH_JOB_ARRAY_INDEX")
+        if args.shard_count > 1 and raw is None:
+            raise SystemExit(
+                "--shard-count > 1 needs --shard-index or "
+                "AWS_BATCH_JOB_ARRAY_INDEX",
+            )
+        shard_index = int(raw) if raw is not None else 0
+    done = _read_completed(args.stream) if (args.resume and args.stream) else []
+    stream_path = (
+        _validated_cli_path(args.stream, REPO_ROOT) if args.stream else None
+    )
+
+    def record(point: dict[str, Any]) -> None:
+        if stream_path is None:
+            return
+        with validated_open(
+            str(stream_path),
+            "a",
+            allowed_roots=(str(REPO_ROOT),),
+            encoding="utf-8",
+        ) as handle:
+            handle.write(json.dumps(point) + "\n")
+
+    fresh = evaluate_design(
+        grid,
+        seeds=seeds,
+        design=design,
+        workers=args.workers,
+        on_point=record,
+        completed=[int(point["point_index"]) for point in done],
+        shard_count=args.shard_count,
+        shard_index=shard_index,
+    )
+    return [*done, *fresh]
+
+
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     """Command line for the gate."""
     parser = argparse.ArgumentParser(description=__doc__)
@@ -689,6 +778,31 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--seed-base", type=int, default=500)
     parser.add_argument("--design-seed", type=int, default=37)
     parser.add_argument("--workers", type=int, default=1)
+    parser.add_argument(
+        "--shard-count",
+        type=int,
+        default=1,
+        help="Split the design points across this many workers",
+    )
+    parser.add_argument(
+        "--shard-index",
+        type=int,
+        default=None,
+        help=(
+            "This worker's shard; defaults to AWS_BATCH_JOB_ARRAY_INDEX when "
+            "--shard-count > 1"
+        ),
+    )
+    parser.add_argument(
+        "--merge",
+        type=Path,
+        nargs="*",
+        default=(),
+        help=(
+            "Point streams (JSONL) to pool into one gate report instead of "
+            "running the design"
+        ),
+    )
     parser.add_argument(
         "--observation-scenario",
         default=None,
@@ -724,34 +838,15 @@ def main(argv: Sequence[str] | None = None) -> int:
     factors = NOROVIRUS_FACTORS
     seeds = [args.seed_base + index for index in range(args.seeds)]
     grid = sobol_units(len(factors), args.sobol_m, args.design_seed)
-    done = _read_completed(args.stream) if (args.resume and args.stream) else []
-    stream_path = (
-        _validated_cli_path(args.stream, REPO_ROOT) if args.stream else None
-    )
+    if args.merge:
+        points = _pooled_points(args.merge, expected=len(grid))
+    else:
+        points = _run_shard(args, grid, seeds, design)
 
-    def record(point: dict[str, Any]) -> None:
-        if stream_path is None:
-            return
-        with validated_open(
-            str(stream_path),
-            "a",
-            allowed_roots=(str(REPO_ROOT),),
-            encoding="utf-8",
-        ) as handle:
-            handle.write(json.dumps(point) + "\n")
-
-    fresh = evaluate_design(
-        grid,
-        seeds=seeds,
-        design=design,
-        workers=args.workers,
-        on_point=record,
-        start_index=len(done),
-    )
-    points = [*done, *fresh]
+    sharded = not args.merge and args.shard_count > 1
     payload = {
-        "mode": "feasibility_gate",
-        "box": "full six-factor norovirus box (no #36 restriction)",
+        "mode": "feasibility_gate_shard" if sharded else "feasibility_gate",
+        "box": f"full {len(factors)}-factor norovirus box (no #36 restriction)",
         "factors": [
             {
                 "name": factor.name,
@@ -774,6 +869,18 @@ def main(argv: Sequence[str] | None = None) -> int:
         "summary": summarise_design(points, design, seeds),
         "points": points,
     }
+    if sharded:
+        payload["shard"] = {
+            "shard_count": args.shard_count,
+            "points_in_shard": len(points),
+            "design_points": len(grid),
+            "note": (
+                "a shard's summary describes its own points only; pool the "
+                "streams with --merge before reading a gate verdict"
+            ),
+        }
+    if args.merge:
+        payload["merged_streams"] = [str(path) for path in args.merge]
     report = _write_json(args.out, payload)
     print(json.dumps(payload["summary"], indent=2))
     return 0 if report else 1

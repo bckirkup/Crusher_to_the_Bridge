@@ -21,6 +21,9 @@ telemetry_buffer/*
 !telemetry_buffer/__init__.py
 !telemetry_buffer/agent_axes.py
 !telemetry_buffer/schema.py
+# The bounded designs (Morris screen, feasibility gate) run from this package in
+# the Dockerfile.design worker; its modules only, never its result artifacts.
+!telemetry_buffer/observation_model/*.py
 
 # Dashboard / GIS-only assets not needed by the headless campaign runner
 dashboard/
