@@ -498,36 +498,48 @@ NON_MATE_CONFINEMENT_CONTACT_FACTOR = 0.01
 # Hallway encounter rate vs well-mixed ward (Cabin_Corridor zones)
 DEFAULT_CORRIDOR_DIRECT_CONTACT_FACTOR = 0.15
 
-# Share of a shedding host's emission deposited into food pools in Dining-type
-# zones. A share of an emission, not a rate: the emission it multiplies is
-# already the epoch's amount (``get_pathogen_shedding`` returns
-# ``amount_per_epoch``), so this fraction is dimensionless and the deposit is
-# grid-invariant without conversion. Converting it a second time through a
-# clock helper would divide the deposit by the epochs in a day.
-# Open on provenance: the emission it takes a share of is total faecal
-# shedding, with no distinction between formed stool and diarrhoeal liquid
-# during the symptomatic window, and no gut-transit lag between ingestion and
-# shedding; a sourced value would have to say which of those it measured.
-# Sourced as a corridor, not as a value (tranche 29 §2). The literature
-# measures no fraction-of-emission for any food route, but the two legs a
-# decomposed one needs are both measured: virus per hand (``HAND_LOAD_LOG10_GEC``
-# = 3.86, Liu 2013) and hand → food transfer per contact, 0.3–46 % on food
-# material across norovirus and its surrogates (Bidawid 2004 finger → ham
-# 46 ± 20.3 %, → lettuce 18 ± 5.7 %; Tuladhar 2013 → cucumber 7 ± 8 %,
-# → tomato 0.3 ± 0.5 %; Rönnqvist 2014 glove → cucumber 1.5 ± 1.9 %;
-# Grove 2015 hand → lettuce 25 %). Composed against this profile's peak
-# emission, 1e-4 is equivalent to 0.3–46 bare-hand food-contact events per
-# shedder per day, so the value sits inside an admissible corridor; the
-# contact rate itself is measured by nobody, which is why the corridor cannot
-# be collapsed to a sourced value here.
-# Structural gap recorded as FOOD-ARCH-01, not repaired: unlike the fomite
-# route this deposit takes no hand load, counts no contacts, depletes no hand
-# and admits no hygiene lever, and it applies to every shedder in the zone
-# rather than to food handlers — whereas NEARS attributes ~40 % of outbreaks
-# with identified contributing factors to an ill or infectious food worker
-# (Moritz 2023).
-# Declared assumption inside a Grade B corridor. Grade C. Origin: Tr.
-FOOD_DEPOSITION_FRACTION_OF_EMISSION = 1e-4
+# Hand → food transfer efficiency per bare-hand contact with communal or
+# served food. Span of the measured means across food matrices and studies:
+# finger → tomato 0.3 ± 0.5 % and → cucumber 7 ± 8 % (Tuladhar 2013, MNV-1),
+# glove → cucumber 1.5 ± 1.9 % (Rönnqvist 2014, human norovirus), finger pad →
+# lettuce 18 ± 5.7 % and → ham 46 ± 20.3 % (Bidawid 2004, FCV infectivity),
+# hand → lettuce 25 % (Grove 2015). Direct measurement of this quantity on
+# this material, but in the laboratory and mostly on surrogates, so B is the
+# ceiling exactly as it is for the non-porous fomite legs in tranche 12.
+# The span is read as a per-contact draw; a uniform draw across it is a
+# convention, not a measured distribution. Grade B (interval), shape Grade X.
+HAND_TO_FOOD_TRANSFER_FRACTION_RANGE = (0.003, 0.46)
+
+# Bare-hand contacts with communal or served food, per shedder per day of
+# presence in a food zone. ∅ null in the literature (tranche 29 §4): nothing
+# measures how often a person touches communal food, and the nearest
+# retrievals are bacterial loads on self-service touchscreens and touch
+# frequencies from indoor-chemical exposure work. It is therefore declared,
+# and it is the axis this route must be swept on rather than valued at.
+# The shipped number is not a measurement and is not a new assumption: it is
+# the retired ``FOOD_DEPOSITION_FRACTION_OF_EMISSION`` = 1e-4 re-expressed in
+# the composed units, so that decomposing the route does not silently move its
+# magnitude. At the shipped hand load (10^3.86 referenced to a curve peak of
+# 10^11.0) and release adjustment (10^4.0/day), 1e-4 of the emission is 1e3
+# copies/day, and 1e3 / (E[transfer] × 10^3.86) = 0.6 contacts/day. Two things
+# follow and are recorded rather than repaired: a physically plausible rate is
+# a few contacts per meal, i.e. 5–17× higher, so the sourced corridor's own
+# interior deposits more than the retired constant did; and unlike that
+# constant this deposit no longer scales with the swept release adjustment,
+# because hand load is measured directly against the curve peak.
+# No source: declared assumption, swept. Grade C. Origin: n/a.
+FOOD_HAND_CONTACTS_PER_DAY = 0.6
+
+# Multiplier on the food-contact rate for crew working a service zone, i.e.
+# the food-handler channel. NEARS attributes ~40 % of retail outbreaks with
+# identified contributing factors to food contamination by an ill or
+# infectious food worker (Moritz 2023), so the channel is real; its *rate* is
+# not measured, and the only measured staff-vs-diner contact ratio in a
+# restaurant is 12.7× on shared surfaces (Jin 2022, the same study behind
+# ``CREW_SERVICE_SURFACE_CONTACTS_PER_HOUR``). Carried across from surface
+# contacts to food contacts, which is an inference, not a measurement.
+# Grade C inferred. Origin: Jin 2022 ratio, transferred across contact type.
+FOOD_HANDLER_CONTACT_MULTIPLIER = 12.7
 
 # Fraction of a food pool's standing pathogen mass ingested per agent per day.
 # A fractional removal from a stock, so it compounds within a day and is read
@@ -542,8 +554,9 @@ FOOD_DEPOSITION_FRACTION_OF_EMISSION = 1e-4
 # product and is supported (HuNoV < 1 log in 1–2 weeks on produce, Cook 2016;
 # MNV infectivity 1 log in 4 days on lettuce ≈ 0.44/day, Fallahi 2011, i.e. 4×
 # faster than the shipped decay). The carry-over, not the deposition share, is
-# what makes this route dominate delivered dose.
-# No source: declared assumption. Grade C. Origin: n/a.
+# what makes this route dominate delivered dose, which is why the profile may
+# override it (``food_contamination.ingestion_fraction_per_day``) and sweep it.
+# No source: declared assumption, swept. Grade C. Origin: n/a.
 FOOD_INGESTION_FRACTION_PER_DAY = 0.05
 
 # Fraction of the standing environmental load delivered to a zone per day.
@@ -3582,10 +3595,11 @@ class TransmissionCore:
     ) -> None:
         """Food contamination in Dining-type zones.
 
-        Infected agents shedding in a food zone deposit pathogen into a
-        persistent food pool.  The pool grows each epoch (bacterial
-        reproduction) and decays slowly.  Susceptible agents eating in the
-        zone receive an ingestion dose from the pool.
+        Contamination enters through hands, one contact at a time: a shedder
+        present in a food zone touches communal food, transfers a measured
+        fraction of what is on the hand, and loses it off the hand. Susceptible
+        agents eating in the zone receive an ingestion dose from the standing
+        pool, which grows and decays between epochs.
         """
         fc = (profile or {}).get("food_contamination", {})
         if not fc.get("enabled", False):
@@ -3596,30 +3610,29 @@ class TransmissionCore:
             return
 
         growth_factor, decay_factor = self._food_rate_factors(fc)
+        # The fomite pathway owns hand relaxation and hygiene for every
+        # occupant of every zone, and runs before this one, so this route
+        # deposits from post-hygiene hands. It runs under the same
+        # ``person_to_person`` switch; when that is off, this route still needs
+        # a hand to deposit from, so it maintains the hands it uses itself.
+        owns_hands = not (profile or {}).get(
+            "environmental_contamination", {},
+        ).get("person_to_person", True)
 
         for zone_name in food_zones:
             occupants = zone_occupants.get(zone_name, [])
+            if owns_hands:
+                for agent in occupants:
+                    self._replenish_hand(agent, pathogen_id, profile)
 
-            # Deposit from shedders present in this food zone
-            shedders = self._get_shedders(occupants, pathogen_id, profile)
-            self._deposit_reservoir_strains(
-                FOOD_RESERVOIR, pathogen_id, zone_name,
-                [
-                    (
-                        a,
-                        sv
-                        * self.confinement_emission_factor(a)
-                        * FOOD_DEPOSITION_FRACTION_OF_EMISSION,
-                    )
-                    for a, sv in shedders
-                ],
+            deposits = self._food_deposits(
+                zone_name, occupants, pathogen_id, profile, fc,
             )
-            for agent, sv in shedders:
-                food_zones[zone_name] += (
-                    sv
-                    * self.confinement_emission_factor(agent)
-                    * FOOD_DEPOSITION_FRACTION_OF_EMISSION
-                )
+            self._deposit_reservoir_strains(
+                FOOD_RESERVOIR, pathogen_id, zone_name, deposits,
+            )
+            for _agent, deposit in deposits:
+                food_zones[zone_name] += deposit
 
             # Net growth (reproduction minus decay), applied to the pool and to
             # its composition together so the two stay proportional
@@ -3649,7 +3662,7 @@ class TransmissionCore:
             per_head = (
                 pool_before
                 / n_occupants
-                * self.food_ingestion_fraction_per_epoch
+                * self._food_ingestion_per_epoch(fc)
                 * zone_mult
             )
             delivered_each = per_head * self._delivery_scale(
@@ -3680,6 +3693,80 @@ class TransmissionCore:
                         FOOD_RESERVOIR, pathogen_id, zone_name,
                     ),
                 )
+
+        if owns_hands:
+            for zone_name in food_zones:
+                for agent in zone_occupants.get(zone_name, []):
+                    self._apply_hand_hygiene(agent, pathogen_id, profile)
+
+    def _food_deposits(
+        self,
+        zone_name: str,
+        occupants: list[KorkinAgent],
+        pathogen_id: str,
+        profile: dict | None,
+        food_cfg: dict[str, Any],
+    ) -> list[tuple[KorkinAgent, float]]:
+        """Hand-borne deposits into one zone's food pool, depleting the hands.
+
+        Composed the way the fomite deposit is — contacts x per-contact
+        transfer x what is on the hand — rather than as a share of the
+        depositor's whole emission, which no assay measures and which let a
+        hygiene lever pass straight through this route (FOOD-ARCH-01).
+        """
+        deposits: list[tuple[KorkinAgent, float]] = []
+        for agent, _sv in self._get_shedders(occupants, pathogen_id, profile):
+            if self._cabin_confinement_active(agent):
+                continue
+            hand = agent.hand_load_by_pathogen.get(pathogen_id, 0.0)
+            if hand <= 0.0:
+                continue
+            transfer = self.rng.uniform(*HAND_TO_FOOD_TRANSFER_FRACTION_RANGE)
+            requested = (
+                self._food_hand_contacts(zone_name, agent, food_cfg)
+                * transfer
+                * hand
+            )
+            deposit = min(hand, max(0.0, requested))
+            if deposit <= 0.0:
+                continue
+            agent.hand_load_by_pathogen[pathogen_id] = hand - deposit
+            deposits.append((agent, deposit))
+        return deposits
+
+    def _food_hand_contacts(
+        self,
+        zone_name: str,
+        agent: KorkinAgent,
+        food_cfg: dict[str, Any],
+    ) -> float:
+        """Bare-hand food contacts this agent makes in this zone this epoch.
+
+        A count per day of presence, so it divides across the day's epochs.
+        Crew working a service zone are the food-handler channel and take the
+        handler multiplier.
+        """
+        per_day = float(food_cfg.get(
+            "hand_food_contacts_per_day", FOOD_HAND_CONTACTS_PER_DAY,
+        ))
+        if agent.role == "crew" and zone_name in self._service_zones:
+            per_day *= float(food_cfg.get(
+                "food_handler_contact_multiplier",
+                FOOD_HANDLER_CONTACT_MULTIPLIER,
+            ))
+        return self.clock.amount_per_epoch(max(per_day, 0.0))
+
+    def _food_ingestion_per_epoch(self, food_cfg: dict[str, Any]) -> float:
+        """Share of the standing pool eaten per agent per epoch.
+
+        A removal from a stock, so it compounds within the day. Overridable
+        per profile because it is food-service turnover rather than virology
+        and has to be swept (tranche 29 §3).
+        """
+        configured = food_cfg.get("ingestion_fraction_per_day")
+        if configured is None:
+            return self.food_ingestion_fraction_per_epoch
+        return self.clock.decay_per_epoch(max(float(configured), 0.0))
 
     def _food_rate_factors(self, food_cfg: dict[str, Any]) -> tuple[float, float]:
         growth = food_cfg.get(

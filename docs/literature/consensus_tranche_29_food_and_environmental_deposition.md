@@ -193,6 +193,16 @@ constant in this tranche may be moved to bring the share to 7–32 %.
 
 ## 6. The structural finding, stated as a defect rather than acted on
 
+> **Repaired after this tranche was written.** `FOOD-ARCH-01` is closed: the
+> food route now composes the deposit as contacts × per-contact transfer × hand
+> load and depletes the hand, `FOOD_DEPOSITION_FRACTION_OF_EMISSION` is retired,
+> and the shipped contact rate is §2's equivalence arithmetic read backwards
+> (0.6/day), so the repair changed the route's *form* without choosing a new
+> magnitude. The section below is left as written, because it is the statement
+> of the defect the repair answers. The evidence it rests on is unchanged: the
+> contact rate is still ∅ null and is now an explicit sweep axis rather than a
+> component folded into a constant.
+
 `FOOD-ARCH-01`. The food route is the fomite route with three of its four
 stages missing. The fomite path in `transmission_core.py` replenishes a hand
 load from the measured target, draws a per-event transfer efficiency, counts
