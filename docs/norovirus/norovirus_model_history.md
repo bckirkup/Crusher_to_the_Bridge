@@ -822,3 +822,47 @@ which the same run spec means two different models. Any figure computed in a
 container before this change is withdrawn in the open ledger, including the
 20-shard `bounded_design_v1` screen, which completed operationally with zero
 failed children and must nonetheless be re-run.
+
+## 9k. The re-run screen: the food work is defensible and it bought no leverage
+
+`bounded_design_v2` (`77d99c06-485d-4bed-8e87-8bcb6663fad2`) re-ran the ten-factor
+screen on the repaired image: 200 children, 20 trajectories x 10 seed blocks of 3
+seeds, `--design-seed 17`, all 200 SUCCEEDED, ~25 min wall clock against ~2.2 h
+for the 20-shard arrangement and ~40 h serial. The merge accepted all 200 shards
+and all 30 seeds.
+
+The ranking is unchanged from #441 and #442, and it is still one factor:
+`environmental_faecal_release_log10_g_per_epoch` (Grade D, and not a biological
+constant but the log10 grams of stool released per epoch) carries mu\* 0.2681 on
+total attack rate, where the next factor, `shedding_variance_log10` (Grade C),
+carries 0.0210 and every remaining factor is under 0.0085. On `vsp_posted` the
+same factor moves posting by 0.70 across its interval against 0.098 for the
+second.
+
+The four axes the food and faecal-chain work added rank third to sixth on attack
+rate and are an order of magnitude and a half below the Grade D factor:
+`food_hand_contacts_per_day` 0.0076 (35x below), `stool_events_baseline_per_day`
+0.0072 (37x), `food_ingestion_fraction_per_day` 0.0062 (43x), and
+`stool_events_diarrhoeal_per_day` 0.0018 (151x). On `vsp_posted` the gap narrows
+to roughly 10x for the two food axes and 70x for the diarrhoeal rate. So the
+answer to what the food attention bought is: a mechanism that is sourced instead
+of declared, an immune-diner defect fixed, a deposition channel refused on
+double-counting grounds, and a diarrhoea feature finally read — and almost no
+movement in the outputs the anchors score. `sigma` is at or above `mu\*` for
+every factor and every output, so these are interaction- and threshold-dominated
+effects, not gradients.
+
+One honest consequence for #459: at production scale the degraded social layer
+barely moved this screen. Merging the superseded `bounded_design_v1` shards for
+comparison gives the same top factor on all six outputs, maximum rank
+displacement 2, and every mu\* within 0.83-1.08x except
+`stool_events_diarrhoeal_per_day` on `vsp_posted`, which doubles off 0.005 —
+i.e. one posting flip on the smallest effect in the screen. The packaging defect
+was real, was worth fixing, and would have invalidated any figure read from a
+container; it was not what was hiding an admissible region. Both merged reports
+are kept, `v1` labelled as degraded-image output.
+
+None of this selects a value or narrows an interval. A Grade D factor dominating
+the screen means the screen cannot say whether the mechanisms are jointly
+consistent with the anchors; it says which axis a measurement would be worth
+most on, and that axis is the one that was never a biological constant.
