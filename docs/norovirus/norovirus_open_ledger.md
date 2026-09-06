@@ -88,7 +88,16 @@ changes here.
   role and the swept contact rate, and no longer with the release adjustment —
   so any statement of the form "the food route carries X% of dose" or "factor Y
   moves the food route" predates its mechanism and must be re-measured. This
-  compounds the withdrawal below rather than replacing it.
+  compounds the withdrawal below rather than replacing it. The replacement
+  measurement is
+  `telemetry_buffer/observation_model/route_weight_measurement_findings.md` §8:
+  under boarding, on the shipped grid, the food route delivers **2e-7 of
+  pre-weight norovirus dose**, against the withdrawn 93-99.9%. The per-shedder
+  deposit is preserved in expectation, so the collapse is the loss of the
+  whole-emission coupling (a hand load saturates where an emission does not) and
+  the per-head division of the pool, not a chosen magnitude. The model now sits
+  far below Mouchtouri 2024's 7.3-32% food-involved outbreak share, having sat
+  far above it; that is a recorded discrepancy, not a target.
 - **Every food-route dose and route share measured on the hourly grid before
   the pool fractions were unit-declared (Edison DIM-01).** `FOOD_INGESTION_FRACTION`
   0.05 and `ENV_DELIVERY_FRACTION` 0.01 were applied once per *epoch* with no
