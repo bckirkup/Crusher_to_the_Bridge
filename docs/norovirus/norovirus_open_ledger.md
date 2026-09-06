@@ -516,6 +516,44 @@ high pending two re-sourced representative ships. A8's passenger and crew denomi
 come from the role-derived complements emitted in each run summary and do
 not use `HULL_CAPACITY`, so A8/A9 are unaffected.
 
+### The #37 feasibility gate: empty, and two of six anchors never became evidence
+
+**Run, 2026-09-06:**
+[`admissible_region_37.md`](admissible_region_37.md). 128 Sobol' points over the
+full six-factor box, 5 matched seeds each, `mega_cruise_5000`, pre-2020,
+norovirus isolated at the boarding channel. **0 of 128 points admissible**; the
+best passes two of the five scoreable anchors, and every anchor pair passes
+jointly zero times except A5+A4 (twice).
+
+What binds, and this is what stops the result being read as structural
+infeasibility:
+
+- **A8 and A9 are unusable as currently mapped, not failed.** A4 is conditional
+  on a posted outbreak and A8 is unconditional over all travel-days, on the same
+  numerator: converted to A8's units at these runs' 5.19-day voyage, A4's target
+  is 683-1,442 per 100,000 travel-days against A8's 16.9-29.2 — 23x apart, so no
+  parameter value satisfies both in a cell of identically distributed voyages.
+  A9's target likewise cannot be represented by 5 runs (it needs >=180 eligible
+  voyages for one posting to land inside 0.00419-0.00558) and is reported
+  design-limited rather than waived.
+- **A1 against A2 is the one genuinely structural tension.** Both are inside the
+  box's reach separately (8 and 2 passes) and never together: ill/infected is
+  dose-dependent, so A2 reaches 0.59 only at an ever-ill attack rate of
+  0.30-0.32, against A1's ceiling of 0.22; inside A1's band it tops out at 0.544,
+  short of A2's floor by 1.08x. A5 sits the same way: over the 24 points where
+  the ratio is in band, A1 never exceeds 0.073.
+- **A1 against A4 binds in the observation model.** A4's reported band lies
+  entirely below A1's ever-ill band, so both can hold only if reported/ever-ill
+  is ~0.16-0.75 — roughly what A3 asserts. The shipped observation model's
+  capture instead **rises with epidemic size and saturates at 1.0**, and A3 lands
+  out of its 0.35-0.45 construction band at 123 of 128 points. That capture
+  saturation is a defect of the observation model (§4.7), not grounds to widen
+  either anchor.
+
+No interval was widened, no endpoint selected, no anchor dropped and no constant
+refitted after this gate ran. Unlike #36 this design is not near extinction: the
+take-off fraction is 1.0 at all 128 points.
+
 ## 3. Out-of-sample checks
 
 **Park et al. (2015)** — surface swabs during a shipboard outbreak; nothing was
@@ -648,28 +686,42 @@ Roughly in dependency order.
    If it does, that is a finding about what is still missing.
 4. **Score the v4-successor campaign** against VSP class targets, per era,
    and never on a withheld A4 cell (post-2020 classic, post-2020 mega).
-5. **A8/A9 observation follow-up.** Model-side aggregation and the sourced
+5. **A8/A9 need a fleet-scale cell before they can score anything.** #37 showed
+   the two anchors as mapped cannot be satisfied by a cell of replicate runs of
+   one configuration at all: A4 is outbreak-conditional and A8 unconditional on
+   the same numerator (23x apart in A8's units), and A9's target needs >=180
+   eligible voyages to be attainable. Either the gate's cell becomes a fleet
+   spanning outbreak and quiet voyages, or both anchors are withdrawn from the
+   verdict until it does. Model-side aggregation and the sourced
    MIDRS target tables are implemented in
    `telemetry_buffer/observation_model/score_anchors.py` and
    `telemetry_buffer/observation_model/midrs_incidence_targets.py`. The
    post-arm observation remains unavailable, and A10 duration trajectories are
    still Proposed.
-6. **Cabin-level environmental compartments.** The finest mixing compartment is
+6. **The observation model's capture saturates at 1.0, and A3 says it should
+   not.** Measured across #37's 128 points: reported/ever-ill rises with epidemic
+   size and reaches 1.0 in exactly the region where A1 is in band, so A3 is out
+   of its 0.35-0.45 construction band at 123 of 128 points and A4 inherits A1's
+   value. This is the fifteen declared, unsourced observation numbers of B2/#27
+   showing up as a scored consequence; it must be repaired in the observation
+   model, and A4 re-read afterwards, before an A1/A4 incompatibility means
+   anything about transmission.
+7. **Cabin-level environmental compartments.** The finest mixing compartment is
    `Cabin_Corridor`: ~37 people in 800 m³ where reality is 2 people in ~40 m³
    (crew 3). `cabin_size` and `cabin_mate_ids` exist but only exempt a mate from
    confinement attenuation. Building this would raise crew rates — away from the
    anchor — so build it honestly and do not expect it to help. No cruise
    platform has four-berth cabins; crew are three.
-7. **Aerosol portal efficiency.** #352 computes and records the emesis aerosol
+8. **Aerosol portal efficiency.** #352 computes and records the emesis aerosol
    load but does not route it into the airborne reservoir. The direction is
    settled (norovirus establishes enterically; inhalation is delivery-to-gut via
    swallowing, so the respiratory clearance proxy is the wrong quantity) but the
    magnitude is not: the 10-30% figure is deposition in mouth/nose/trachea and
    is explicitly **not** an intestinal-delivery fraction.
-8. **Sick-host movement and a bathroom destination.** The Park gradient needs
+9. **Sick-host movement and a bathroom destination.** The Park gradient needs
    it; see §3.
-9. **AWS daughter session: CONTAM vs native accumulation comparison.** Deferred.
-10. **Provenance queue, re-ordered by the bounded screen.** Measured in
+10. **AWS daughter session: CONTAM vs native accumulation comparison.** Deferred.
+11. **Provenance queue, re-ordered by the bounded screen.** Measured in
     [`bounded_screen_results.md`](bounded_screen_results.md) §7.
     `innate_nonsusceptible_fraction` moves to the front on consequence: it is
     the top-ranked factor while carrying the mechanism §1 withdraws.
@@ -685,7 +737,7 @@ Roughly in dependency order.
     ([`../literature/consensus_tranche_12_contact_transfer.md`](../literature/consensus_tranche_12_contact_transfer.md)
     §10). No other row in that screen is affected. Emesis titre
     becomes a first-order provenance target, which it was not before.
-11. **`EMESIS_TITRE_GEC_PER_ML` = 3.9e4 is the wrong figure from the right
+12. **`EMESIS_TITRE_GEC_PER_ML` = 3.9e4 is the wrong figure from the right
     paper, and its two companions are also off the measurement.** Traced in
     [`../literature/consensus_tranche_4.md`](../literature/consensus_tranche_4.md)
     §1c. 3.9 × 10⁴ is Kirby et al. 2016's **abstract** value for "GII viruses",
@@ -710,7 +762,7 @@ Roughly in dependency order.
     an input and the episode count corrected to 1–7. Three inputs collapse to
     one, so the item is closed as a degrees-of-freedom reduction rather than as
     a re-valued titre.
-12. **Resolved: the infectious period was incorrectly tied to illness duration,
+13. **Resolved: the infectious period was incorrectly tied to illness duration,
     and two thirds of the authored shedding curve was never emitted.** Measured,
     not argued:
     `telemetry_buffer/observation_model/shedding_clock_check.py` drives the real
@@ -736,7 +788,7 @@ Roughly in dependency order.
     limitation is unchanged. See
     [`../literature/consensus_tranche_7.md`](../literature/consensus_tranche_7.md).
 
-13. **Resolved: immunocompromise acted on acquisition, the one quantity nothing
+14. **Resolved: immunocompromise acted on acquisition, the one quantity nothing
     measures, and not on duration, which is measured directly.** #45 deleted
     `immunocompromised_multiplier` = 2.0 from the tree — no source measures the
     relative risk of *acquiring* norovirus while immunocompromised, and Green

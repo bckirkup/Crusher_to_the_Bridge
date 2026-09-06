@@ -461,6 +461,27 @@ literature-bounded box satisfy all the anchors simultaneously?
 gate as posterior mass in the admissible set; the plan's advance commitment
 about what an infeasible result means is unaffected.
 
+**Run, 2026-09-06:**
+[`../norovirus/admissible_region_37.md`](../norovirus/admissible_region_37.md).
+128 Sobol' points over the **full** six-factor box (not #36's screened subset,
+which the boarding migration retired), 5 matched seeds each, `mega_cruise_5000`,
+pre-2020, norovirus isolated at the boarding channel. **The region is empty:**
+0 of 128 admissible, the best point passing two of five scoreable anchors, and
+every anchor pair jointly passing zero times except A5+A4.
+
+And the stop rule below applies to the *reading* of that result as much as to
+the response, because two of the six required anchors never became evidence.
+A4 is conditional on a posted outbreak while A8 is unconditional over all
+travel-days on the same numerator — 23x apart once converted into common units —
+so no parameter value satisfies both in a cell of replicate runs of one
+configuration; and A9's target needs at least 180 eligible voyages per cell to
+be attainable at all, so it is reported design-limited. Of the pairs that do
+bind, A1-vs-A4 binds inside the assumed observation model (capture saturates at
+1.0, and A3 lands outside its construction band at 123 of 128 points), which
+leaves **A1 against A2 as the only genuinely structural tension**: ill/infected
+reaches its literature floor only at an attack rate half again above A1's
+ceiling. That is the finding, and it is recorded rather than repaired.
+
 This is the test the whole campaign is for, and **the plan should be read as
 building towards a test we may fail.** Two outcomes:
 
