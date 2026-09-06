@@ -8,7 +8,7 @@ description: Run and develop Picard_Framework ship-level steppable simulations. 
 ## Prerequisites
 
 - Python 3.11+, repo root on `PYTHONPATH`
-- `pip install --only-binary=:all: --require-hashes -r requirements.lock.txt` (or `requirements.txt` for editable local work)
+- `uv sync --locked --all-extras --no-install-project --no-build`
 
 ## Quick commands
 

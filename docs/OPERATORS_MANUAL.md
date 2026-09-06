@@ -34,7 +34,8 @@
 ### Prerequisites
 
 ```bash
-pip install -r requirements.txt
+uv sync --locked --all-extras --no-install-project --no-build
+source .venv/bin/activate   # or prefix commands with `uv run`
 # Optional: pip install check-jsonschema
 ```
 

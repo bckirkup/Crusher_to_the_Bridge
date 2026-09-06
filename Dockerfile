@@ -13,12 +13,16 @@ WORKDIR /app
 ENV PYTHONPATH=/app \
     PYTHONUTF8=1 \
     PYTHONDONTWRITEBYTECODE=1 \
-    PIP_NO_CACHE_DIR=1
+    UV_NO_CACHE=1 \
+    UV_PYTHON_DOWNLOADS=never \
+    PATH=/app/.venv/bin:$PATH
+
+COPY --from=ghcr.io/astral-sh/uv:0.7.9 /uv /bin/uv
 
 # Install dependencies first for better layer caching.
-# Hash-pinned lock + wheels-only (Sonar docker:S8541 / S8544).
-COPY requirements.lock.txt ./
-RUN pip install --no-cache-dir --only-binary=:all: --require-hashes -r requirements.lock.txt
+# Locked resolution from uv.lock (hash-verified) + wheels-only (Sonar docker:S8541 / S8544).
+COPY pyproject.toml uv.lock ./
+RUN uv sync --locked --all-extras --no-install-project --no-build
 
 # Copy only the code and data the headless campaign runner needs (explicit
 # paths rather than `COPY . .` so nothing outside these is ever added).

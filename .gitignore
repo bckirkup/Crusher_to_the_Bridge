@@ -120,3 +120,6 @@ out_test_fleet_fit/
 sentinel_smoke/
 out_test_sentinel_cli/
 
+
+# uv-managed virtual environment
+.venv/

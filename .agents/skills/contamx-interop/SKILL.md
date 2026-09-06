@@ -7,7 +7,7 @@ description: Run and debug ContamX vs native HVAC transport (SIM reader, AHS bri
 
 ## Prerequisites
 
-- Python 3.11+ with repo `requirements.txt`
+- Python 3.11+ with dependencies from `uv.lock` (`uv sync --locked --all-extras --no-install-project --no-build`)
 - Working directory: repo root
 - ContamX binary optional (offline tests use fixtures; live compare needs NIST ContamX)
 

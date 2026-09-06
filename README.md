@@ -12,7 +12,8 @@ maritime disease outbreaks.
 
 ```bash
 # Install dependencies (Python 3.11+)
-pip install -r requirements.txt
+uv sync --locked --all-extras --no-install-project --no-build
+source .venv/bin/activate   # or prefix commands with `uv run`
 
 # Validate configuration (JSON + crusher_labs/config.yaml)
 python3 tools/sanity_checker.py --from-config
@@ -642,7 +643,7 @@ honest as the suite grows:
 
 | Layer | Where | What it enforces |
 |-------|-------|------------------|
-| **Hash-pinned installs** | `requirements.lock.txt` | CI and agents install with `pip install --only-binary=:all: --require-hashes -r requirements.lock.txt` so published wheels are pinned and reproducible |
+| **Locked installs** | `uv.lock` | CI, Docker, and agents install with `uv sync --locked --all-extras --no-install-project --no-build` so every dependency resolves to the locked, hash-verified published wheel |
 | **Pre-commit** | `.pre-commit-config.yaml` | Local Ruff autofix, `scripts/sonar_guard.py` on Python + workflow YAML, and [zizmor](https://github.com/woodruffw/zizmor) on GitHub Actions |
 | **Blocking Ruff lint** | `.github/workflows/ci.yml` (`lint`) | `F` (undefined names / unused imports) plus `E`/`W`/`I`/`C901` on production packages; line-length `E501` and ambiguous-name `E741` ignored; repository `C901` ceiling ratchets downward only |
 | **Sonar mechanical guards** | `scripts/sonar_guard.py` (CI + pre-commit) | Fast, conservative checks for Sonar-class patterns and unsafe workflow install commands without waiting on a live Sonar scan |
