@@ -44,6 +44,10 @@ COPY simulation_utils/ ./simulation_utils/
 COPY telemetry_buffer/ ./telemetry_buffer/
 COPY schemas/ ./schemas/
 COPY data/ ./data/
+# The decision runtime reads its class-interaction matrix, diffusion
+# configuration and global-health timeline from here; without them a run is
+# silently a different model.
+COPY presidio/data/ ./presidio/data/
 COPY scripts/ ./scripts/
 COPY deploy/aws/boundary_analysis_entrypoint.py ./deploy/aws/boundary_analysis_entrypoint.py
 COPY deploy/aws/sentinel_recovery_analysis_entrypoint.py ./deploy/aws/sentinel_recovery_analysis_entrypoint.py

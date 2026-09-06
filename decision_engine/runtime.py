@@ -58,8 +58,6 @@ class DecisionRuntime:
         engine: Any,
         profile_path: str,
     ) -> dict[int, AgentProfile]:
-        if not os.path.isfile(profile_path):
-            return {}
         bundle = load_agent_profile_bundle(profile_path)
         wm = run_spec.legacy_cfg.get("wearable_monitoring", {})
         raw_map = wm.get("class_device_map", {})
@@ -81,9 +79,20 @@ class DecisionRuntime:
         )
 
     @staticmethod
-    def _load_json_if_exists(repo: str, path_key: str, default_path_fn: Any) -> str | None:
+    def _required_input(repo: str, path_key: str | None, default_path_fn: Any) -> str:
+        """Resolve one runtime input, refusing to run without it.
+
+        The social layer's inputs shape every epoch's decisions, so a run that
+        cannot find one would score a different model under the same run spec.
+        A missing file is a packaging or configuration error, never a default.
+        """
         resolved = resolve_repo_path(repo, path_key or default_path_fn(repo))
-        return resolved if os.path.isfile(resolved) else None
+        if not os.path.isfile(resolved):
+            raise FileNotFoundError(
+                f"decision runtime input missing: {resolved} "
+                f"(repo_root={repo})",
+            )
+        return resolved
 
     @classmethod
     def from_run_spec(cls, run_spec: Any, engine: Any, proto_ctx: Any) -> DecisionRuntime:
@@ -91,28 +100,25 @@ class DecisionRuntime:
         social = cls._resolve_social_config(run_spec)
         rt = cls(repo_root=repo, social_config=social)
 
-        profile_path = resolve_repo_path(
-            repo, social.get("agent_profile_bundle") or default_bundle_path(repo),
+        profile_path = cls._required_input(
+            repo, social.get("agent_profile_bundle"), default_bundle_path,
         )
         rt.profiles = cls._load_agent_profiles(run_spec, engine, profile_path)
 
-        ci_path = cls._load_json_if_exists(
+        ci_path = cls._required_input(
             repo, social.get("class_interactions"), ClassInteractionMatrix.default_path,
         )
-        if ci_path:
-            rt.class_matrix = ClassInteractionMatrix.from_json(ci_path)
+        rt.class_matrix = ClassInteractionMatrix.from_json(ci_path)
 
-        diff_path = cls._load_json_if_exists(
+        diff_path = cls._required_input(
             repo, social.get("information_diffusion"), InformationDiffusionEngine.default_path,
         )
-        if diff_path:
-            rt.information_engine = InformationDiffusionEngine.from_config_path(diff_path)
+        rt.information_engine = InformationDiffusionEngine.from_config_path(diff_path)
 
-        gh_path = cls._load_json_if_exists(
+        gh_path = cls._required_input(
             repo, social.get("global_health_timeline"), default_timeline_path,
         )
-        if gh_path:
-            rt.global_health_timeline = load_global_health_timeline(gh_path)
+        rt.global_health_timeline = load_global_health_timeline(gh_path)
 
         rt.all_protocol_ids = [
             p.protocol_id for p in proto_ctx.standing_protocols

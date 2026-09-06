@@ -785,3 +785,40 @@ emesis-inclusive gradient envelopes are respectively 3.01078–6.43105x,
 may be read back into the model or adopted as a parameter value. A future
 measured per-zone-class schedule may narrow the bounds, but the no-selection
 rule remains.
+
+## 9j. PKG-02: the container ran a different model, and said nothing
+
+Seed-level Morris sharding (#457) was validated by comparing a merged AWS screen
+against a local unsharded screen on the same design seed. They differed in 55
+raw effect entries. Local sharded and local unsharded output were identical, and
+two independent AWS submissions were identical to each other, so the pooling
+arithmetic was exonerated in both directions and the difference had to be in the
+execution environment.
+
+It was. `deploy/aws/Dockerfile.design`, `deploy/aws/Dockerfile.analysis` and the
+root `Dockerfile` copied `data/` and `schemas/` but never `presidio/data/`, so
+the class-interaction matrix, the information-diffusion configuration and the
+global-health timeline were absent in every image. `DecisionRuntime.from_run_spec`
+resolved each of those with an `os.path.isfile` test and simply skipped the load
+when the file was missing, leaving an empty `ClassInteractionMatrix`, a default
+diffusion engine and an empty timeline. The Stackelberg social layer therefore
+ran degraded, and the run reported success.
+
+The isolating test was to copy the deployed image's `/app` tree next to the
+checkout, diff it, and then delete `presidio/` from a local copy: the resulting
+per-epoch trace is md5-identical to the container trace
+(`70008e84b83f5f8a5eb9539b60222215`) while the intact checkout gives
+`6ae534de2d82be4146915bb951b2f043`. Restoring or removing platform PNGs, deck
+GeoJSON, generated telemetry and the ContamX assets changed nothing, and the
+image matched the checkout on model code, NumPy version and architecture. After
+the repair the image reproduces the local trace exactly.
+
+Two things follow. First, the divergence appeared at epoch 147 in operational
+state and epoch 160 in infection state, which is why it read as noise rather
+than as a missing subsystem — a silent default is at its most dangerous when it
+is nearly right. Second, an absent input is now a `FileNotFoundError` naming the
+path, for the agent-profile bundle as well: the runtime no longer has a mode in
+which the same run spec means two different models. Any figure computed in a
+container before this change is withdrawn in the open ledger, including the
+20-shard `bounded_design_v1` screen, which completed operationally with zero
+failed children and must nonetheless be re-run.
