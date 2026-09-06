@@ -107,11 +107,23 @@ index. Two properties keep that from changing what is being measured:
   its index, so a sharded run evaluates the design an unsharded run would have
   evaluated at the same seed, and the common random numbers of §2.1 are the same
   five (or thirty) seeds at every point in every shard.
+- **The shard count is set by wall-time, not by the unit count.** An
+  elementary effect is a difference of seed means, so it is linear in the
+  seeds: `--seed-shards` splits the common seed set into disjoint blocks, one
+  worker takes one block of one trajectory row, and the merge recombines the
+  partial effects of a trajectory by a seed-weighted mean. A screen of 20
+  trajectories can therefore occupy 200 workers rather than 20, which is the
+  difference between a quarter of an hour and two hours on the Spot queue.
+  The seeds a block evaluates are fixed by the block index, not by the
+  worker's arrival, so the common random numbers survive the split.
 - **A shard is not a result.** Shards pool through an explicit merge
   (`bounded_screen.py --mode merge`, `admissible_region.py --merge`) that
   refuses reports drawn from different designs, refuses a duplicated shard
-  index, and — for the gate — refuses a grid with a hole in it. The gate's
-  verdict is a statement about the whole box; summarising the shards that
+  index, refuses a design with an absent shard, refuses a trajectory whose
+  seed blocks do not account for exactly the design's seeds, and — for the
+  gate — refuses a grid with a hole in it. A worker's own `effects` block is
+  descriptive of its trajectories over its own seed block and is superseded by
+  the merge. The gate's verdict is a statement about the whole box; summarising the shards that
   happened to finish would silently narrow it, which is exactly the failure
   mode §6 forbids by a longer route.
 

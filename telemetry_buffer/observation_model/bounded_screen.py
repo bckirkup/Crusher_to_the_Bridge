@@ -550,6 +550,53 @@ def morris_trajectory(
     return np.array(points), order
 
 
+RawEffect = dict[str, float]
+"""One partial elementary effect: ``{"trajectory", "seeds", "value"}``.
+
+``value`` is the effect measured over ``seeds`` seeds of trajectory
+``trajectory``. Because an elementary effect is a difference of seed means,
+it is linear in the seeds, so partial effects over disjoint seed blocks of
+the same trajectory pool to the full-seed effect by a seed-weighted mean.
+"""
+
+
+def shard_coordinates(
+    shard_count: int,
+    shard_index: int,
+    seed_shards: int,
+) -> tuple[int, int, int]:
+    """(trajectory shards, trajectory residue, seed block) of one worker.
+
+    ``shard_count`` workers are laid out as ``trajectory_shards`` rows of
+    ``seed_shards`` seed blocks each, so a worker owns the trajectories
+    congruent to its row and one block of the seed set.
+    """
+    if shard_count < 1 or not 0 <= shard_index < shard_count:
+        raise ValueError(
+            f"shard {shard_index} outside 0..{shard_count - 1}",
+        )
+    if seed_shards < 1 or shard_count % seed_shards:
+        raise ValueError(
+            f"--seed-shards {seed_shards} must divide --shard-count "
+            f"{shard_count}",
+        )
+    trajectory_shards = shard_count // seed_shards
+    return (
+        trajectory_shards,
+        shard_index // seed_shards,
+        shard_index % seed_shards,
+    )
+
+
+def seed_block(seeds: Sequence[int], seed_shards: int, block: int) -> list[int]:
+    """The seeds a worker in ``block`` of ``seed_shards`` evaluates."""
+    if seed_shards > len(seeds):
+        raise ValueError(
+            f"--seed-shards {seed_shards} exceeds the {len(seeds)} seeds",
+        )
+    return [int(s) for s in seeds[block::seed_shards]]
+
+
 def trajectory_differences(
     factors: Sequence[Factor],
     trajectories: int,
@@ -558,38 +605,83 @@ def trajectory_differences(
     *,
     shard_count: int = 1,
     shard_index: int = 0,
+    seed_shards: int = 1,
     **run_kwargs: object,
-) -> dict[str, dict[str, list[float]]]:
-    """Raw elementary effects, one entry per trajectory that moved a factor.
+) -> dict[str, dict[str, list[RawEffect]]]:
+    """Raw elementary effects, one record per trajectory that moved a factor.
 
-    A shard runs the trajectories congruent to ``shard_index`` and skips the
-    rest -- but every trajectory is still *drawn*, so the design a shard
-    evaluates is the design the unsharded screen would have evaluated at the
-    same ``--design-seed``. Effects from disjoint shards concatenate, because
-    Morris averages over trajectories and a trajectory is self-contained.
+    A shard runs the trajectories congruent to its row and skips the rest --
+    but every trajectory is still *drawn*, so the design a shard evaluates is
+    the design the unsharded screen would have evaluated at the same
+    ``--design-seed``. With ``seed_shards > 1`` the shard also evaluates only
+    its block of the seed set, and its records are partial effects that
+    :func:`pool_effects` recombines seed-weighted. Effects from disjoint
+    shards therefore pool exactly: Morris averages over trajectories, a
+    trajectory is self-contained, and an effect is linear in the seeds.
     """
-    if shard_count < 1 or not 0 <= shard_index < shard_count:
-        raise ValueError(
-            f"shard {shard_index} outside 0..{shard_count - 1}",
-        )
+    trajectory_shards, residue, block = shard_coordinates(
+        shard_count, shard_index, seed_shards,
+    )
+    own_seeds = seed_block(seeds, seed_shards, block)
     levels = 4
     delta = levels / (2.0 * (levels - 1))
-    effects: dict[str, dict[str, list[float]]] = {
+    effects: dict[str, dict[str, list[RawEffect]]] = {
         factor.name: {name: [] for name in SCORED_OUTPUTS} for factor in factors
     }
     for trajectory in range(trajectories):
         points, order = morris_trajectory(len(factors), rng, levels=levels)
-        if trajectory % shard_count != shard_index:
+        if trajectory % trajectory_shards != residue:
             continue
-        previous = seed_mean(factors, points[0], seeds, **run_kwargs)
+        previous = seed_mean(factors, points[0], own_seeds, **run_kwargs)
         for step, index in enumerate(order, start=1):
-            current = seed_mean(factors, points[step], seeds, **run_kwargs)
+            current = seed_mean(factors, points[step], own_seeds, **run_kwargs)
             for name in SCORED_OUTPUTS:
-                effects[factors[index].name][name].append(
-                    (current[name] - previous[name]) / delta,
-                )
+                effects[factors[index].name][name].append({
+                    "trajectory": float(trajectory),
+                    "seeds": float(len(own_seeds)),
+                    "value": (current[name] - previous[name]) / delta,
+                })
             previous = current
     return effects
+
+
+def pool_effects(
+    raw: Mapping[str, Mapping[str, Sequence[Mapping[str, float]]]],
+    total_seeds: int,
+) -> dict[str, dict[str, list[float]]]:
+    """One effect per trajectory from its seed-block partials.
+
+    Partials of the same trajectory are combined by a seed-weighted mean and
+    must account for exactly ``total_seeds`` seeds: a trajectory whose seed
+    blocks are incomplete or duplicated is refused rather than averaged over
+    the seeds that happened to arrive.
+    """
+    pooled: dict[str, dict[str, list[float]]] = {}
+    for factor_name, per_output in raw.items():
+        block = pooled.setdefault(factor_name, {})
+        for name, records in per_output.items():
+            by_trajectory: dict[int, list[Mapping[str, float]]] = {}
+            for record in records:
+                by_trajectory.setdefault(
+                    int(record["trajectory"]), [],
+                ).append(record)
+            values: list[float] = []
+            for trajectory in sorted(by_trajectory):
+                parts = by_trajectory[trajectory]
+                seen = sum(int(p["seeds"]) for p in parts)
+                if seen != total_seeds:
+                    raise ValueError(
+                        f"{factor_name}/{name} trajectory {trajectory} pools "
+                        f"{seen} seeds, design has {total_seeds}",
+                    )
+                if len(parts) == 1:
+                    values.append(float(parts[0]["value"]))
+                    continue
+                values.append(
+                    sum(p["seeds"] * p["value"] for p in parts) / total_seeds,
+                )
+            block[name] = values
+    return pooled
 
 
 def summarise_effects(
@@ -612,16 +704,41 @@ def summarise_effects(
     }
 
 
+def _as_record(
+    raw: Mapping[str, float] | float,
+    total_seeds: int,
+    legacy_id: int,
+) -> RawEffect:
+    """A raw effect record; a bare number is a whole-seed-set legacy effect."""
+    if isinstance(raw, Mapping):
+        return {key: float(value) for key, value in raw.items()}
+    return {
+        "trajectory": float(-legacy_id),
+        "seeds": float(total_seeds),
+        "value": float(raw),
+    }
+
+
 def merge_effects(
-    shards: Sequence[Mapping[str, Mapping[str, Sequence[float]]]],
-) -> dict[str, dict[str, list[float]]]:
-    """Concatenate the raw effects of disjoint shards, factor by factor."""
-    merged: dict[str, dict[str, list[float]]] = {}
+    shards: Sequence[Mapping[str, Mapping[str, Sequence[Mapping[str, float] | float]]]],
+    total_seeds: int = 0,
+) -> dict[str, dict[str, list[RawEffect]]]:
+    """Concatenate the raw effect records of disjoint shards, factor by factor.
+
+    Reports written before seed sharding carry bare numbers, each an effect
+    over the whole seed set; they are given unique negative trajectory ids so
+    that :func:`pool_effects` treats each as complete.
+    """
+    merged: dict[str, dict[str, list[RawEffect]]] = {}
+    legacy_id = 0
     for shard in shards:
         for factor_name, per_output in shard.items():
             block = merged.setdefault(factor_name, {})
-            for name, values in per_output.items():
-                block.setdefault(name, []).extend(float(v) for v in values)
+            for name, records in per_output.items():
+                target = block.setdefault(name, [])
+                for raw in records:
+                    legacy_id += 1
+                    target.append(_as_record(raw, total_seeds, legacy_id))
     return merged
 
 
@@ -634,7 +751,12 @@ def elementary_effects(
 ) -> dict[str, dict[str, dict[str, float]]]:
     """Run the Morris design and return mu-star and sigma per factor/output."""
     return summarise_effects(
-        trajectory_differences(factors, trajectories, seeds, rng, **run_kwargs),
+        pool_effects(
+            trajectory_differences(
+                factors, trajectories, seeds, rng, **run_kwargs,
+            ),
+            len(seeds),
+        ),
     )
 
 
@@ -720,6 +842,17 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         ),
     )
     parser.add_argument(
+        "--seed-shards",
+        type=int,
+        default=1,
+        help=(
+            "Split each trajectory's seed set into this many blocks, so "
+            "--shard-count may exceed --trajectories. Must divide "
+            "--shard-count; the merge refuses a trajectory whose seed blocks "
+            "are not all present."
+        ),
+    )
+    parser.add_argument(
         "--shards",
         type=Path,
         nargs="*",
@@ -761,6 +894,8 @@ def load_shard_reports(paths: Sequence[Path]) -> list[dict[str, object]]:
                 "seeds": report.get("seeds"),
                 "trajectories": report.get("trajectories"),
                 "design_seed": report.get("design_seed"),
+                "shard_count": report.get("shard_count"),
+                "seed_shards": report.get("seed_shards", 1),
                 "run": report.get("run"),
             },
             sort_keys=True,
@@ -776,6 +911,13 @@ def load_shard_reports(paths: Sequence[Path]) -> list[dict[str, object]]:
     if len(set(indices)) != len(indices):
         raise SystemExit(
             f"duplicate shard indices {indices}: effects would double-count",
+        )
+    expected = int(reports[0].get("shard_count") or len(reports)) if reports else 0
+    missing = sorted(set(range(expected)) - {int(i or 0) for i in indices})
+    if missing:
+        raise SystemExit(
+            f"incomplete design: shards {missing} of {expected} are absent; a "
+            "partial design is not a screen",
         )
     return sorted(reports, key=lambda report: int(report["shard_index"] or 0))
 
@@ -812,18 +954,27 @@ def main(argv: Sequence[str] | None = None) -> int:
         }
     elif args.mode == "merge":
         shards = load_shard_reports(args.shards)
-        raw = merge_effects(
-            [shard["raw_effects"] for shard in shards],  # type: ignore[arg-type]
-        )
         first = shards[0] if shards else {}
+        design_seeds = list(first.get("seeds") or ())  # type: ignore[call-overload]
+        try:
+            pooled = pool_effects(
+                merge_effects(
+                    [shard["raw_effects"] for shard in shards],  # type: ignore[arg-type]
+                    len(design_seeds),
+                ),
+                len(design_seeds),
+            )
+        except ValueError as exc:
+            raise SystemExit(f"incomplete design: {exc}") from exc
         payload = {
             "mode": "screen",
             "merged_shards": [shard["shard_index"] for shard in shards],
-            "seeds": first.get("seeds"),
+            "seeds": design_seeds,
             "trajectories": first.get("trajectories"),
             "design_seed": first.get("design_seed"),
+            "seed_shards": first.get("seed_shards", 1),
             "factors": first.get("factors", declared_box),
-            "effects": summarise_effects(raw),
+            "effects": summarise_effects(pooled),
         }
         run_kwargs = dict(first.get("run", run_kwargs))  # type: ignore[arg-type]
     else:
@@ -837,7 +988,12 @@ def main(argv: Sequence[str] | None = None) -> int:
             rng,
             shard_count=args.shard_count,
             shard_index=shard_index,
+            seed_shards=args.seed_shards,
             **run_kwargs,
+        )
+        own_seeds = seed_block(
+            seeds, args.seed_shards,
+            shard_coordinates(args.shard_count, shard_index, args.seed_shards)[2],
         )
         payload = {
             "mode": "screen",
@@ -846,9 +1002,14 @@ def main(argv: Sequence[str] | None = None) -> int:
             "design_seed": args.design_seed,
             "shard_count": args.shard_count,
             "shard_index": shard_index,
+            "seed_shards": args.seed_shards,
             "factors": declared_box,
             "raw_effects": raw,
-            "effects": summarise_effects(raw),
+            "effects_scope": (
+                "this shard's trajectories over its own seed block only: "
+                "descriptive, superseded by --mode merge, never a verdict"
+            ),
+            "effects": summarise_effects(pool_effects(raw, len(own_seeds))),
         }
     payload["run"] = run_kwargs
     report = json.dumps(payload, indent=2)
