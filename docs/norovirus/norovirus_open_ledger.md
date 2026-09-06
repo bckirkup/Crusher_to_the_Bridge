@@ -77,6 +77,27 @@ changes here.
   The measurement stands as a measurement of the retired condition; a
   replacement pass needs its own floor, because the floor was taken under the
   same retired condition.
+- **Every food-route dose, route share and posting rate measured before the
+  FOOD-ARCH-01 deposition repair.** The route's deposit was a fixed share of
+  every zone shedder's whole faecal emission; it is now contacts × per-contact
+  transfer × hand load with the hand depleted. The shipped contact rate was set
+  so the *expected* deposit at the shipped hand load and release adjustment is
+  unchanged, and the orchestrator smoke did not move, so this withdrawal is
+  narrower than DIM-01's: the level is preserved in expectation. What is not
+  preserved is the route's *response* — it now varies with hand load, hygiene,
+  role and the swept contact rate, and no longer with the release adjustment —
+  so any statement of the form "the food route carries X% of dose" or "factor Y
+  moves the food route" predates its mechanism and must be re-measured. This
+  compounds the withdrawal below rather than replacing it. The replacement
+  measurement is
+  `telemetry_buffer/observation_model/route_weight_measurement_findings.md` §8:
+  under boarding, on the shipped grid, the food route delivers **2e-7 of
+  pre-weight norovirus dose**, against the withdrawn 93-99.9%. The per-shedder
+  deposit is preserved in expectation, so the collapse is the loss of the
+  whole-emission coupling (a hand load saturates where an emission does not) and
+  the per-head division of the pool, not a chosen magnitude. The model now sits
+  far below Mouchtouri 2024's 7.3-32% food-involved outbreak share, having sat
+  far above it; that is a recorded discrepancy, not a target.
 - **Every food-route dose and route share measured on the hourly grid before
   the pool fractions were unit-declared (Edison DIM-01).** `FOOD_INGESTION_FRACTION`
   0.05 and `ENV_DELIVERY_FRACTION` 0.01 were applied once per *epoch* with no
@@ -671,8 +692,27 @@ categories.
 
 Roughly in dependency order.
 
-1. **`FOOD-ARCH-01`: the food route is the fomite route with three of its four
-   stages missing — recorded, not repaired.** The fomite path replenishes a
+1. **`FOOD-ARCH-01`: repaired in form, and half of it remains open.** The
+   deposition side is closed: the food route now composes its deposit the way
+   the fomite route does — contacts × per-contact transfer × hand load,
+   subtracted from the hand — so `FOOD_DEPOSITION_FRACTION_OF_EMISSION` is
+   retired, the hygiene levers reach the route through the hand it deposits
+   from, and the crew food-handler channel exists as its own (inferred)
+   multiplier. The shipped contact rate, 0.6/day, is the corridor arithmetic
+   below read backwards, so the repair did **not** choose a new magnitude at
+   the shipped point; it is a declared sweep axis, and a physically plausible
+   rate of a few contacts per meal is 5–17× higher, which the box must measure
+   rather than the default assert. Two consequences are recorded, not repaired:
+   the deposit no longer scales with
+   `environmental_faecal_release_log10_g_per_epoch` at all (hand load is
+   measured against the curve peak instead), which retires the coupling through
+   which #36's one resolved factor reached this route; and
+   **`FOOD_INGESTION_FRACTION_PER_DAY` = 0.05 against a 0.1/day decay is
+   untouched**, so the 85.5%/day carry-over identified below as the actual
+   mechanism behind the route's dose share is still standing. The paragraphs
+   below are the statement of the original defect.
+
+   The fomite path replenishes a
    per-hand load from a measured target, counts contacts, draws a transfer
    efficiency per event, applies the drying multiplier and **subtracts the
    deposit from the hand**. The food path multiplies the whole faecal emission
@@ -693,9 +733,8 @@ Roughly in dependency order.
    leaves **85.5% of the pool standing each day**: the pool integrates every
    shedder's deposits across the voyage and delivers to every occupant every
    day. That carry-over is food-service logistics declared as a rate, and no
-   literature search can raise its grade. Repairing either is a
-   model-structure change with a moved-golden footprint on every food-route
-   figure, and neither is authorised here.
+   literature search can raise its grade. Of those two, the deposition form is
+   now repaired and the ingestion carry-over is not.
 
 2. **Zone-differentiated cleaning schedules — swept, bounds sourced, no cell
    adopted.** #355 closed the "nothing cleans surfaces" gap — routine

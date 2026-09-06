@@ -122,12 +122,16 @@ not all the same kind of quantity:
 |---|---|---|
 | `FOOD_INGESTION_FRACTION_PER_DAY` | fractional removal from a standing pool | `decay_per_epoch` (compounds) |
 | `ENV_DELIVERY_FRACTION_PER_DAY` | daily flux out of a load delivery does not deplete | `amount_per_epoch` (divides) |
-| `FOOD_DEPOSITION_FRACTION_OF_EMISSION` | share of an emission | nothing — the emission is already per-epoch |
-| `ENV_HOST_DEPOSITION_FRACTION_OF_EMISSION` | share of an emission | nothing — same |
+| `FOOD_HAND_CONTACTS_PER_DAY` | count of events per day of presence | `amount_per_epoch` (divides) |
+| `ENV_HOST_DEPOSITION_FRACTION_OF_EMISSION` | share of an emission | nothing — the emission is already per-epoch |
 
-The deposition shares multiply `get_pathogen_shedding()`, which returns
-`amount_per_epoch(...)`; converting them again would divide the deposit by the
-epochs in a day a second time. Removals and fluxes are authored per day and
+`FOOD_DEPOSITION_FRACTION_OF_EMISSION` was retired by the FOOD-ARCH-01 repair:
+the food deposit is now contacts × per-contact transfer × hand load, where the
+hand load is a stock (no conversion), the transfer is a dimensionless
+per-contact draw (no conversion) and only the contact count carries a unit.
+The remaining deposition share multiplies `get_pathogen_shedding()`, which
+returns `amount_per_epoch(...)`; converting it again would divide the deposit
+by the epochs in a day a second time. Removals and fluxes are authored per day and
 must be converted, or the hourly grid removes twenty-four days of ingestion per
 day — on the route this document records as 93-99.9% of delivered dose.
 
