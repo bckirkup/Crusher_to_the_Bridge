@@ -33,7 +33,7 @@ from engines.strain_dose_ledger import (  # noqa: E402
 from engines.strain_state import Phenotype, StrainRegistry  # noqa: E402
 from engines.transmission_core import (  # noqa: E402
     AIRBORNE_RESERVOIR,
-    ENV_HOST_DEPOSITION_FRACTION,
+    ENV_HOST_DEPOSITION_FRACTION_OF_EMISSION,
     ENV_RESERVOIR,
     SURFACE_RESERVOIR,
     ContactTracingMatrix,
@@ -353,7 +353,7 @@ class TestPoolAttribution:
         )
         assert (None in {aid for _, aid in contributors}), "founder lineage expected"
         assert 1 in {aid for _, aid in contributors}, "host deposit expected"
-        assert ENV_HOST_DEPOSITION_FRACTION > 0.0
+        assert ENV_HOST_DEPOSITION_FRACTION_OF_EMISSION > 0.0
 
     def test_untracked_runs_keep_the_scalar_reservoir_untouched(self) -> None:
         """With the flag off no host input is added and no composition is kept."""

@@ -92,7 +92,8 @@ full classic voyage is 0.13 particles against 7.0e7 for droplet. The cause is
 arithmetic, in two places:
 
 1. Emission split. `SURFACE_DEPOSITION_FRACTION = 1e-4` and
-   `FOOD_DEPOSITION_FRACTION_PER_EPOCH = 1e-4` against
+   `FOOD_DEPOSITION_FRACTION_OF_EMISSION = 1e-4` (then spelled
+   `FOOD_DEPOSITION_FRACTION_PER_EPOCH`) against
    `DROPLET_AEROSOL_FRACTION = 0.05` — a 500× handicap at the source. The
    surface constant's comment cites a Java particle *survival duration*
    (86 400 steps), which is not a deposition fraction; the constant appears to

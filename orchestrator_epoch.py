@@ -1117,8 +1117,8 @@ def surveillance_activation_delay_epochs(
 
     Reads ``activation_delay_hours`` from ``syndromic`` and/or
     ``diagnostic_cascade`` (campaign T11 sets both to the same value).
-    Takes the max so a single-sided override still works. Negative values
-    clamp to 0.
+    Takes the max so a single-sided override still works. A negative delay
+    is refused at the config boundary.
     """
     if not cfg:
         return 0
@@ -1132,10 +1132,7 @@ def surveillance_activation_delay_epochs(
             "activation_delay_epochs",
             clock or SimClock.from_config({}),
         ))
-    delay = 0
-    for value in raw:
-        delay = max(delay, int(value or 0))
-    return max(0, delay)
+    return max((int(value or 0) for value in raw), default=0)
 
 
 def surveillance_is_active(

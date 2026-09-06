@@ -18,6 +18,7 @@ from engines.infection_dynamics_bridge import (
 )
 from engines.sim_clock import SimClock
 from engines.transmission_core import (
+    FOOD_INGESTION_FRACTION_PER_DAY,
     ContactTracingMatrix,
     TransmissionCore,
 )
@@ -415,8 +416,13 @@ def test_food_delivery_is_conservative_and_intensive() -> None:
         pathogen_id=PATHOGEN,
         profile=core.pathogen_profiles[PATHOGEN],
     )
-    assert doses[target.agent_id] == pytest.approx(0.5)
-    assert core.food_pools[PATHOGEN][ZONE] == pytest.approx(9.5)
+    # One hour of the daily 5% ingestion fraction, not the whole day's 5%:
+    # 10.0 * (1 - 0.95 ** (1 / 24)). The pre-DIM-01 expectations were 0.5 and
+    # 9.5, which were a day's ingestion taken in an hour.
+    per_epoch = core.clock.decay_per_epoch(FOOD_INGESTION_FRACTION_PER_DAY)
+    assert doses[target.agent_id] == pytest.approx(10.0 * per_epoch)
+    assert doses[target.agent_id] == pytest.approx(0.0213494, abs=1e-7)
+    assert core.food_pools[PATHOGEN][ZONE] == pytest.approx(10.0 - 10.0 * per_epoch)
 
 
 def test_reservoir_doses_are_invariant_to_scaled_zone_size(
@@ -600,3 +606,58 @@ def test_beta_rescales_the_susceptibility_draw() -> None:
             alpha / (alpha + beta) / scale,
             rel=0.01,
         )
+
+
+def _food_route_over_one_day(epoch_duration_hours: float) -> tuple[float, float]:
+    """Pool left and dose delivered after 24 physical hours of eating."""
+    clock = SimClock(epoch_duration_hours=epoch_duration_hours, mode="hours")
+    core = _core(clock=clock, food=True)
+    core.food_pools[PATHOGEN][ZONE] = 10.0
+    occupants = [_agent(agent_id) for agent_id in range(1, 11)]
+    agent_doses: dict[int, float] = {}
+    for epoch in range(int(round(24.0 / epoch_duration_hours))):
+        core._pathway_food_contamination(
+            epoch,
+            {ZONE: occupants},
+            agent_doses,
+            ContactTracingMatrix(epoch=epoch),
+            pathogen_id=PATHOGEN,
+            profile=core.pathogen_profiles[PATHOGEN],
+        )
+    return core.food_pools[PATHOGEN][ZONE], sum(agent_doses.values())
+
+
+def test_food_ingestion_is_the_same_day_on_every_clock_grid() -> None:
+    """A day of eating removes one day's fraction, not one per epoch.
+
+    The ingestion fraction is a share of a standing pool, so an hourly grid
+    that applied it once per epoch would empty the pool twenty-four times as
+    fast as the daily grid the constant was written on — and food is the
+    dominant route in delivered dose, so that is a resolution-dependent model
+    rather than a rounding difference.
+    """
+    hourly_pool, hourly_dose = _food_route_over_one_day(1.0)
+    six_pool, six_dose = _food_route_over_one_day(6.0)
+    daily_pool, daily_dose = _food_route_over_one_day(24.0)
+
+    assert hourly_pool == pytest.approx(daily_pool, abs=1e-6)
+    assert six_pool == pytest.approx(daily_pool, abs=1e-6)
+    assert hourly_dose == pytest.approx(daily_dose, abs=1e-6)
+    assert six_dose == pytest.approx(daily_dose, abs=1e-6)
+    # The day did happen: a fifth of the pool is not still sitting there.
+    assert daily_pool < 10.0
+    assert daily_dose > 0.0
+
+
+def test_environmental_delivery_is_the_same_day_on_every_clock_grid() -> None:
+    """Delivery out of an undepleted load is a daily flux, so it divides."""
+    def delivered(epoch_duration_hours: float) -> float:
+        clock = SimClock(epoch_duration_hours=epoch_duration_hours, mode="hours")
+        core = _core(clock=clock)
+        return sum(
+            core.env_delivery_fraction_per_epoch
+            for _ in range(int(round(24.0 / epoch_duration_hours)))
+        )
+
+    assert delivered(1.0) == pytest.approx(delivered(24.0), abs=1e-9)
+    assert delivered(6.0) == pytest.approx(delivered(24.0), abs=1e-9)

@@ -71,6 +71,8 @@ def config_epochs_for_hours(
     value = float(raw)
     if not math.isfinite(value):
         raise ValueError(f"{canonical_key} must be finite")
+    if value < 0.0:
+        raise ValueError(f"{canonical_key} must be non-negative, got {value}")
     return clock.epochs_for_hours(value)
 
 
@@ -96,7 +98,24 @@ def config_epochs_for_days(
     value = float(raw)
     if not math.isfinite(value):
         raise ValueError(f"{canonical_key} must be finite")
+    if value < 0.0:
+        raise ValueError(f"{canonical_key} must be non-negative, got {value}")
     return max(0, int(math.ceil(clock.epochs_for_days(value))))
+
+
+def _physical_duration(value: float, unit: str) -> float:
+    """A duration read off the physical scale, which cannot run backwards.
+
+    A negative or non-finite duration is a sign or unit-entry error at the
+    caller, and clamping it to zero turns that error into an instantaneous
+    operation that no output distinguishes from a correctly-configured one.
+    """
+    duration = float(value)
+    if not math.isfinite(duration):
+        raise ValueError(f"duration in {unit} must be finite, got {duration}")
+    if duration < 0.0:
+        raise ValueError(f"duration in {unit} must be non-negative, got {duration}")
+    return duration
 
 
 def _epoch_duration_hours(
@@ -158,6 +177,11 @@ class SimClock:
     def __post_init__(self) -> None:
         if self.mode not in MODES:
             raise ValueError(f"unknown natural-history clock mode: {self.mode!r}")
+        if not math.isfinite(self.epoch_duration_hours):
+            raise ValueError(
+                "epoch_duration_hours must be finite, got "
+                f"{self.epoch_duration_hours}",
+            )
         if self.epoch_duration_hours <= 0:
             raise ValueError(
                 f"epoch_duration_hours must be positive, got {self.epoch_duration_hours}",
@@ -261,7 +285,7 @@ class SimClock:
 
     def epochs_for_days(self, days: float) -> float:
         """Epochs a ``days``-long interval of natural history occupies."""
-        return float(days) * self.epochs_per_day
+        return _physical_duration(days, "days") * self.epochs_per_day
 
     def epochs_for_hours(self, hours: float) -> int:
         """Whole epochs a wall-clock delay of ``hours`` occupies, rounded up.
@@ -269,7 +293,7 @@ class SimClock:
         Turnaround is a delay before a result exists, so a partial epoch still
         costs one.
         """
-        return max(0, int(math.ceil(float(hours) / self.hours_per_epoch)))
+        return int(math.ceil(_physical_duration(hours, "hours") / self.hours_per_epoch))
 
     # ── construction ──────────────────────────────────────────────────────
 

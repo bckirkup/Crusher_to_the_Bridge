@@ -120,7 +120,7 @@ mean the same thing:
 |---|---|---|---|
 | `surface_deposition_fraction` (profile key) | read in `orchestrator_epoch.py` as `prof.get("surface_deposition_fraction", 1e-4)` | shedding × confinement emission factor | `engine.get_pathogen_zone_mass(pid)` — the **zone/airborne** pool that is decayed by `airborne_half_life_hours` in the same loop |
 | `SURFACE_DEPOSITION_FRACTION = 1e-4` | `engines/infection_dynamics_bridge.py` | `agent.current_shedding` | `_zone_pathogen_mass` — the **legacy** path |
-| `ENV_HOST_DEPOSITION_FRACTION = 1e-4` | env source path | host shedding | zone-scoped environmental reservoir |
+| `ENV_HOST_DEPOSITION_FRACTION_OF_EMISSION = 1e-4` | env source path | host shedding | zone-scoped environmental reservoir |
 | hand→surface deposit | `engines/transmission_core.py` | agent hand load | `_deposit_surface_mass` — the **modern fomite surface pool** |
 
 The modern fomite pool is *not* filled by the profile key. It is filled by

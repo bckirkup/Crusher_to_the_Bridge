@@ -77,6 +77,17 @@ def test_configuration_conversions_reject_nonfinite_values(value: float) -> None
         )
 
 
+@pytest.mark.parametrize("value", [-2, -0.5, -48])
+def test_configuration_conversions_reject_negative_durations(value: float) -> None:
+    clock = SimClock(epoch_duration_hours=1.0, mode=HOURS)
+    with pytest.raises(ValueError, match="non-negative"):
+        config_epochs_for_hours({"delay_hours": value}, "delay_hours", "delay_epochs", clock)
+    with pytest.raises(ValueError, match="non-negative"):
+        config_epochs_for_days(
+            {"duration_days": value}, "duration_days", "duration_epochs", clock,
+        )
+
+
 def test_conversion_helpers_are_legacy_identities() -> None:
     clock = SimClock(mode="legacy_epoch_day")
     assert clock.day_fraction_per_epoch == pytest.approx(1.0)

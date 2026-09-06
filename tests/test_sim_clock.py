@@ -57,6 +57,20 @@ def test_rejects_nonpositive_epoch_duration(hours: float) -> None:
         SimClock(epoch_duration_hours=hours, mode=HOURS)
 
 
+@pytest.mark.parametrize("hours", [float("nan"), float("inf"), float("-inf")])
+@pytest.mark.parametrize("mode", [HOURS, LEGACY_EPOCH_DAY])
+def test_rejects_nonfinite_epoch_duration(hours: float, mode: str) -> None:
+    with pytest.raises(ValueError, match="must be finite"):
+        SimClock(epoch_duration_hours=hours, mode=mode)
+
+
+def test_a_finite_clock_yields_finite_conversions() -> None:
+    for clock in (HOURLY, SIX_HOURLY, LEGACY_CLOCK):
+        for value in (clock.amount_per_epoch(10.0), clock.probability_per_epoch(0.3),
+                      clock.decay_per_epoch(0.5), clock.day_fraction_per_epoch):
+            assert np.isfinite(value)
+
+
 def test_legacy_clock_is_one_day_per_epoch() -> None:
     assert LEGACY_CLOCK.mode == LEGACY_EPOCH_DAY
     assert LEGACY_CLOCK.days_elapsed(3) == pytest.approx(3.0)
@@ -91,7 +105,20 @@ def test_delay_hours_round_up_to_whole_epochs() -> None:
     assert HOURLY.epochs_for_hours(24) == 24
     assert SIX_HOURLY.epochs_for_hours(5) == 1
     assert SIX_HOURLY.epochs_for_hours(7) == 2
-    assert SIX_HOURLY.epochs_for_hours(-3) == 0
+
+
+@pytest.mark.parametrize("value", [-3.0, -1e-9, float("nan"), float("inf")])
+def test_a_delay_that_runs_backwards_or_never_ends_is_refused(value: float) -> None:
+    for clock in (HOURLY, SIX_HOURLY, LEGACY_CLOCK):
+        with pytest.raises(ValueError, match="duration in hours"):
+            clock.epochs_for_hours(value)
+        with pytest.raises(ValueError, match="duration in days"):
+            clock.epochs_for_days(value)
+
+
+def test_a_zero_delay_is_instantaneous() -> None:
+    assert SIX_HOURLY.epochs_for_hours(0) == 0
+    assert SIX_HOURLY.epochs_for_days(0) == 0.0
 
 
 def test_from_config_reads_the_voyage_epoch_duration() -> None:

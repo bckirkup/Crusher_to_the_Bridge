@@ -31,9 +31,13 @@ def test_delay_reads_max_of_syndromic_and_cascade() -> None:
         "syndromic": {"activation_delay_epochs": 24},
         "diagnostic_cascade": {"activation_delay_epochs": 72},
     }) == 72
-    assert surveillance_activation_delay_epochs({
-        "syndromic": {"activation_delay_epochs": -3},
-    }) == 0
+
+
+def test_a_negative_activation_delay_is_refused_not_clamped() -> None:
+    with pytest.raises(ValueError, match="non-negative"):
+        surveillance_activation_delay_epochs({
+            "syndromic": {"activation_delay_epochs": -3},
+        })
 
 
 def test_surveillance_is_active_is_0_based() -> None:
