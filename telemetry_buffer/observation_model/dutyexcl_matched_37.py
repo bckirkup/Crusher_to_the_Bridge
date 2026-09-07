@@ -160,7 +160,7 @@ def paired_deltas(
     deltas: dict[str, Any] = {}
     for field in PAIRED_FIELDS:
         diffs = [float(arm[seed][field]) - float(row[field]) for seed, row in base.items()]
-        moved = sum(1 for diff in diffs if diff != 0.0)
+        moved = sum(1 for diff in diffs if abs(diff) > 0.0)
         deltas[field] = {
             "mean_change": round(sum(diffs) / len(diffs), 8) if diffs else None,
             "changed_pairs": moved,

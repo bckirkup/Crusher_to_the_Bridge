@@ -138,6 +138,30 @@ def test_a_cell_only_artifact_is_refused_because_it_has_no_voyages(tmp_path):
         artifact.unlink()
 
 
+def _write(name, points):
+    path = Path(matched.REPO_ROOT) / "telemetry_buffer" / name
+    path.write_text(json.dumps({"points": points}))
+    return path
+
+
+def test_the_cli_reads_two_arms_and_writes_the_matched_read_out(capsys):
+    off = _write("dutyexcl_test_off.json", [_point(3, [_row(seed=1, crew=0.05)])])
+    on = _write("dutyexcl_test_on.json", [_point(3, [_row(seed=1)])])
+    out = Path(matched.REPO_ROOT) / "telemetry_buffer" / "dutyexcl_test_out.json"
+    try:
+        matched.main(["--baseline", str(off), "--exclusion", str(on), "--out", str(out)])
+        record = json.loads(out.read_text())
+        assert "McNemar" in capsys.readouterr().out
+    finally:
+        for path in (off, on, out):
+            path.unlink(missing_ok=True)
+    assert record["design"]["points"] == [3]
+    assert record["pooled"]["baseline"]["posted"] == 1
+    assert record["pooled"]["exclusion"]["posted"] == 0
+    assert record["pooled"]["discordance"]["lost"] == 1
+    assert record["per_point"][0]["baseline"]["channels"]["crew_only"] == 1
+
+
 def test_the_arms_of_the_analysed_campaign_are_the_same_size_and_paired():
     record = json.loads(ANALYSIS.read_text())
     pooled = record["pooled"]
