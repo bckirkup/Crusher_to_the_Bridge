@@ -1,0 +1,3145 @@
+{
+  "n_points": 16,
+  "n_voyages": 23040,
+  "posting_threshold": 0.03,
+  "points": [
+    {
+      "point_index": 0,
+      "n_voyages": 1440,
+      "took_off": 1437,
+      "posted": 79,
+      "posting_frequency": 0.054861,
+      "posting_interval_95": [
+        0.043671,
+        0.067907
+      ],
+      "classes": {
+        "no_infection": 0,
+        "infected_no_illness": 704,
+        "ill_no_report": 176,
+        "reported_below_threshold": 481,
+        "posted": 79
+      },
+      "posting_channels": {
+        "passenger_only": 26,
+        "crew_only": 41,
+        "both": 12
+      },
+      "rates": {
+        "infection_attack_rate_passenger": {
+          "zero_fraction": 0.0,
+          "quantiles": [
+            0.0222,
+            0.0348,
+            0.0443,
+            0.057,
+            0.0665,
+            0.0918,
+            0.1487
+          ],
+          "nonzero_quantiles": [
+            0.0222,
+            0.0348,
+            0.0443,
+            0.057,
+            0.0665,
+            0.0918,
+            0.1487
+          ]
+        },
+        "A1_ever_ill_passenger": {
+          "zero_fraction": 0.49306,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0032,
+            0.0063,
+            0.0222,
+            0.0728
+          ],
+          "nonzero_quantiles": [
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0063,
+            0.0127,
+            0.0316,
+            0.0728
+          ]
+        },
+        "reported_case_attack_rate_passenger": {
+          "zero_fraction": 0.61528,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0032,
+            0.0222,
+            0.0728
+          ],
+          "nonzero_quantiles": [
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0063,
+            0.0127,
+            0.0348,
+            0.0728
+          ]
+        },
+        "reported_case_attack_rate_crew": {
+          "zero_fraction": 0.77569,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0299,
+            0.1269
+          ],
+          "nonzero_quantiles": [
+            0.0075,
+            0.0075,
+            0.0075,
+            0.0149,
+            0.0224,
+            0.0746,
+            0.1269
+          ]
+        }
+      },
+      "quiet_reported_passenger": {
+        "zero_fraction": 0.64658,
+        "quantiles": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0032,
+          0.0127,
+          0.0285
+        ],
+        "nonzero_quantiles": [
+          0.0032,
+          0.0032,
+          0.0032,
+          0.0032,
+          0.0095,
+          0.0222,
+          0.0285
+        ]
+      },
+      "posted_reported_passenger": {
+        "zero_fraction": 0.07595,
+        "quantiles": [
+          0.0,
+          0.0,
+          0.0095,
+          0.0285,
+          0.038,
+          0.0538,
+          0.0728
+        ],
+        "nonzero_quantiles": [
+          0.0032,
+          0.0032,
+          0.0127,
+          0.0316,
+          0.038,
+          0.0538,
+          0.0728
+        ]
+      },
+      "posted_infection_passenger": {
+        "zero_fraction": 0.0,
+        "quantiles": [
+          0.0285,
+          0.0443,
+          0.0696,
+          0.0918,
+          0.1076,
+          0.1297,
+          0.1487
+        ],
+        "nonzero_quantiles": [
+          0.0285,
+          0.0443,
+          0.0696,
+          0.0918,
+          0.1076,
+          0.1297,
+          0.1487
+        ]
+      },
+      "gate_180_posted": 8
+    },
+    {
+      "point_index": 12,
+      "n_voyages": 1440,
+      "took_off": 1437,
+      "posted": 66,
+      "posting_frequency": 0.045833,
+      "posting_interval_95": [
+        0.035622,
+        0.057945
+      ],
+      "classes": {
+        "no_infection": 0,
+        "infected_no_illness": 752,
+        "ill_no_report": 148,
+        "reported_below_threshold": 474,
+        "posted": 66
+      },
+      "posting_channels": {
+        "passenger_only": 26,
+        "crew_only": 34,
+        "both": 6
+      },
+      "rates": {
+        "infection_attack_rate_passenger": {
+          "zero_fraction": 0.0,
+          "quantiles": [
+            0.0222,
+            0.0316,
+            0.0443,
+            0.057,
+            0.0665,
+            0.0918,
+            0.1487
+          ],
+          "nonzero_quantiles": [
+            0.0222,
+            0.0316,
+            0.0443,
+            0.057,
+            0.0665,
+            0.0918,
+            0.1487
+          ]
+        },
+        "A1_ever_ill_passenger": {
+          "zero_fraction": 0.53056,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0063,
+            0.0222,
+            0.0728
+          ],
+          "nonzero_quantiles": [
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0063,
+            0.0127,
+            0.0316,
+            0.0728
+          ]
+        },
+        "reported_case_attack_rate_passenger": {
+          "zero_fraction": 0.63403,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0032,
+            0.019,
+            0.0728
+          ],
+          "nonzero_quantiles": [
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0127,
+            0.0316,
+            0.0728
+          ]
+        },
+        "reported_case_attack_rate_crew": {
+          "zero_fraction": 0.76597,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0224,
+            0.1194
+          ],
+          "nonzero_quantiles": [
+            0.0075,
+            0.0075,
+            0.0075,
+            0.0149,
+            0.0224,
+            0.0522,
+            0.1194
+          ]
+        }
+      },
+      "quiet_reported_passenger": {
+        "zero_fraction": 0.65502,
+        "quantiles": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0032,
+          0.0158,
+          0.0285
+        ],
+        "nonzero_quantiles": [
+          0.0032,
+          0.0032,
+          0.0032,
+          0.0032,
+          0.0095,
+          0.0222,
+          0.0285
+        ]
+      },
+      "posted_reported_passenger": {
+        "zero_fraction": 0.19697,
+        "quantiles": [
+          0.0,
+          0.0,
+          0.0063,
+          0.0253,
+          0.0411,
+          0.0506,
+          0.0728
+        ],
+        "nonzero_quantiles": [
+          0.0032,
+          0.0063,
+          0.0127,
+          0.0316,
+          0.0411,
+          0.0506,
+          0.0728
+        ]
+      },
+      "posted_infection_passenger": {
+        "zero_fraction": 0.0,
+        "quantiles": [
+          0.0253,
+          0.0443,
+          0.0633,
+          0.0918,
+          0.1108,
+          0.1361,
+          0.1487
+        ],
+        "nonzero_quantiles": [
+          0.0253,
+          0.0443,
+          0.0633,
+          0.0918,
+          0.1108,
+          0.1361,
+          0.1487
+        ]
+      },
+      "gate_180_posted": 7
+    },
+    {
+      "point_index": 18,
+      "n_voyages": 1440,
+      "took_off": 1436,
+      "posted": 76,
+      "posting_frequency": 0.052778,
+      "posting_interval_95": [
+        0.041805,
+        0.065617
+      ],
+      "classes": {
+        "no_infection": 0,
+        "infected_no_illness": 738,
+        "ill_no_report": 160,
+        "reported_below_threshold": 466,
+        "posted": 76
+      },
+      "posting_channels": {
+        "passenger_only": 23,
+        "crew_only": 42,
+        "both": 11
+      },
+      "rates": {
+        "infection_attack_rate_passenger": {
+          "zero_fraction": 0.0,
+          "quantiles": [
+            0.0222,
+            0.0348,
+            0.0443,
+            0.0538,
+            0.0665,
+            0.0949,
+            0.1709
+          ],
+          "nonzero_quantiles": [
+            0.0222,
+            0.0348,
+            0.0443,
+            0.0538,
+            0.0665,
+            0.0949,
+            0.1709
+          ]
+        },
+        "A1_ever_ill_passenger": {
+          "zero_fraction": 0.51806,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0063,
+            0.0253,
+            0.0886
+          ],
+          "nonzero_quantiles": [
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0063,
+            0.0127,
+            0.0316,
+            0.0886
+          ]
+        },
+        "reported_case_attack_rate_passenger": {
+          "zero_fraction": 0.62986,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0032,
+            0.0222,
+            0.0854
+          ],
+          "nonzero_quantiles": [
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0063,
+            0.0127,
+            0.0316,
+            0.0854
+          ]
+        },
+        "reported_case_attack_rate_crew": {
+          "zero_fraction": 0.76736,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0299,
+            0.1194
+          ],
+          "nonzero_quantiles": [
+            0.0075,
+            0.0075,
+            0.0075,
+            0.0149,
+            0.0224,
+            0.0672,
+            0.1194
+          ]
+        }
+      },
+      "quiet_reported_passenger": {
+        "zero_fraction": 0.65836,
+        "quantiles": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0032,
+          0.0158,
+          0.0285
+        ],
+        "nonzero_quantiles": [
+          0.0032,
+          0.0032,
+          0.0032,
+          0.0032,
+          0.0095,
+          0.0222,
+          0.0285
+        ]
+      },
+      "posted_reported_passenger": {
+        "zero_fraction": 0.11842,
+        "quantiles": [
+          0.0,
+          0.0,
+          0.0095,
+          0.0253,
+          0.038,
+          0.0538,
+          0.0854
+        ],
+        "nonzero_quantiles": [
+          0.0032,
+          0.0032,
+          0.0127,
+          0.0316,
+          0.038,
+          0.0538,
+          0.0854
+        ]
+      },
+      "posted_infection_passenger": {
+        "zero_fraction": 0.0,
+        "quantiles": [
+          0.0253,
+          0.0443,
+          0.0728,
+          0.0886,
+          0.1108,
+          0.1329,
+          0.1709
+        ],
+        "nonzero_quantiles": [
+          0.0253,
+          0.0443,
+          0.0728,
+          0.0886,
+          0.1108,
+          0.1329,
+          0.1709
+        ]
+      },
+      "gate_180_posted": 7
+    },
+    {
+      "point_index": 20,
+      "n_voyages": 1440,
+      "took_off": 1436,
+      "posted": 72,
+      "posting_frequency": 0.05,
+      "posting_interval_95": [
+        0.039324,
+        0.062555
+      ],
+      "classes": {
+        "no_infection": 0,
+        "infected_no_illness": 782,
+        "ill_no_report": 158,
+        "reported_below_threshold": 428,
+        "posted": 72
+      },
+      "posting_channels": {
+        "passenger_only": 26,
+        "crew_only": 37,
+        "both": 9
+      },
+      "rates": {
+        "infection_attack_rate_passenger": {
+          "zero_fraction": 0.0,
+          "quantiles": [
+            0.0222,
+            0.0316,
+            0.0443,
+            0.0538,
+            0.0665,
+            0.0886,
+            0.1519
+          ],
+          "nonzero_quantiles": [
+            0.0222,
+            0.0316,
+            0.0443,
+            0.0538,
+            0.0665,
+            0.0886,
+            0.1519
+          ]
+        },
+        "A1_ever_ill_passenger": {
+          "zero_fraction": 0.54861,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0032,
+            0.0222,
+            0.0823
+          ],
+          "nonzero_quantiles": [
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0063,
+            0.0127,
+            0.0348,
+            0.0823
+          ]
+        },
+        "reported_case_attack_rate_passenger": {
+          "zero_fraction": 0.65972,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0032,
+            0.0222,
+            0.0791
+          ],
+          "nonzero_quantiles": [
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0127,
+            0.0348,
+            0.0791
+          ]
+        },
+        "reported_case_attack_rate_crew": {
+          "zero_fraction": 0.80833,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0224,
+            0.1194
+          ],
+          "nonzero_quantiles": [
+            0.0075,
+            0.0075,
+            0.0075,
+            0.0149,
+            0.0299,
+            0.0672,
+            0.1194
+          ]
+        }
+      },
+      "quiet_reported_passenger": {
+        "zero_fraction": 0.68713,
+        "quantiles": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0032,
+          0.0158,
+          0.0285
+        ],
+        "nonzero_quantiles": [
+          0.0032,
+          0.0032,
+          0.0032,
+          0.0032,
+          0.0095,
+          0.0253,
+          0.0285
+        ]
+      },
+      "posted_reported_passenger": {
+        "zero_fraction": 0.13889,
+        "quantiles": [
+          0.0,
+          0.0,
+          0.0063,
+          0.0285,
+          0.0411,
+          0.0601,
+          0.0791
+        ],
+        "nonzero_quantiles": [
+          0.0032,
+          0.0032,
+          0.0158,
+          0.0316,
+          0.0411,
+          0.0601,
+          0.0791
+        ]
+      },
+      "posted_infection_passenger": {
+        "zero_fraction": 0.0,
+        "quantiles": [
+          0.0316,
+          0.0443,
+          0.0665,
+          0.0949,
+          0.1044,
+          0.1329,
+          0.1519
+        ],
+        "nonzero_quantiles": [
+          0.0316,
+          0.0443,
+          0.0665,
+          0.0949,
+          0.1044,
+          0.1329,
+          0.1519
+        ]
+      },
+      "gate_180_posted": 8
+    },
+    {
+      "point_index": 36,
+      "n_voyages": 1440,
+      "took_off": 1436,
+      "posted": 60,
+      "posting_frequency": 0.041667,
+      "posting_interval_95": [
+        0.031944,
+        0.05331
+      ],
+      "classes": {
+        "no_infection": 0,
+        "infected_no_illness": 844,
+        "ill_no_report": 138,
+        "reported_below_threshold": 398,
+        "posted": 60
+      },
+      "posting_channels": {
+        "passenger_only": 21,
+        "crew_only": 31,
+        "both": 8
+      },
+      "rates": {
+        "infection_attack_rate_passenger": {
+          "zero_fraction": 0.0,
+          "quantiles": [
+            0.0222,
+            0.0316,
+            0.0443,
+            0.0538,
+            0.0633,
+            0.0854,
+            0.1709
+          ],
+          "nonzero_quantiles": [
+            0.0222,
+            0.0316,
+            0.0443,
+            0.0538,
+            0.0633,
+            0.0854,
+            0.1709
+          ]
+        },
+        "A1_ever_ill_passenger": {
+          "zero_fraction": 0.59653,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0032,
+            0.0222,
+            0.0759
+          ],
+          "nonzero_quantiles": [
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0063,
+            0.0127,
+            0.0316,
+            0.0759
+          ]
+        },
+        "reported_case_attack_rate_passenger": {
+          "zero_fraction": 0.69306,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0032,
+            0.019,
+            0.0728
+          ],
+          "nonzero_quantiles": [
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0127,
+            0.0348,
+            0.0728
+          ]
+        },
+        "reported_case_attack_rate_crew": {
+          "zero_fraction": 0.83125,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0224,
+            0.1269
+          ],
+          "nonzero_quantiles": [
+            0.0075,
+            0.0075,
+            0.0075,
+            0.0149,
+            0.0224,
+            0.0746,
+            0.1269
+          ]
+        }
+      },
+      "quiet_reported_passenger": {
+        "zero_fraction": 0.71159,
+        "quantiles": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0032,
+          0.0127,
+          0.0285
+        ],
+        "nonzero_quantiles": [
+          0.0032,
+          0.0032,
+          0.0032,
+          0.0032,
+          0.0095,
+          0.0222,
+          0.0285
+        ]
+      },
+      "posted_reported_passenger": {
+        "zero_fraction": 0.26667,
+        "quantiles": [
+          0.0,
+          0.0,
+          0.0,
+          0.0253,
+          0.0443,
+          0.0696,
+          0.0728
+        ],
+        "nonzero_quantiles": [
+          0.0032,
+          0.0032,
+          0.0158,
+          0.0348,
+          0.0538,
+          0.0696,
+          0.0728
+        ]
+      },
+      "posted_infection_passenger": {
+        "zero_fraction": 0.0,
+        "quantiles": [
+          0.0253,
+          0.0411,
+          0.0601,
+          0.0886,
+          0.1108,
+          0.1456,
+          0.1709
+        ],
+        "nonzero_quantiles": [
+          0.0253,
+          0.0411,
+          0.0601,
+          0.0886,
+          0.1108,
+          0.1456,
+          0.1709
+        ]
+      },
+      "gate_180_posted": 8
+    },
+    {
+      "point_index": 46,
+      "n_voyages": 1440,
+      "took_off": 1436,
+      "posted": 46,
+      "posting_frequency": 0.031944,
+      "posting_interval_95": [
+        0.02348,
+        0.042381
+      ],
+      "classes": {
+        "no_infection": 0,
+        "infected_no_illness": 815,
+        "ill_no_report": 174,
+        "reported_below_threshold": 405,
+        "posted": 46
+      },
+      "posting_channels": {
+        "passenger_only": 17,
+        "crew_only": 26,
+        "both": 3
+      },
+      "rates": {
+        "infection_attack_rate_passenger": {
+          "zero_fraction": 0.0,
+          "quantiles": [
+            0.0222,
+            0.0316,
+            0.0443,
+            0.0538,
+            0.0633,
+            0.0854,
+            0.1297
+          ],
+          "nonzero_quantiles": [
+            0.0222,
+            0.0316,
+            0.0443,
+            0.0538,
+            0.0633,
+            0.0854,
+            0.1297
+          ]
+        },
+        "A1_ever_ill_passenger": {
+          "zero_fraction": 0.57153,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0032,
+            0.0158,
+            0.0506
+          ],
+          "nonzero_quantiles": [
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0063,
+            0.0095,
+            0.0285,
+            0.0506
+          ]
+        },
+        "reported_case_attack_rate_passenger": {
+          "zero_fraction": 0.69236,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0032,
+            0.0158,
+            0.0506
+          ],
+          "nonzero_quantiles": [
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0095,
+            0.0285,
+            0.0506
+          ]
+        },
+        "reported_case_attack_rate_crew": {
+          "zero_fraction": 0.83403,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0224,
+            0.1119
+          ],
+          "nonzero_quantiles": [
+            0.0075,
+            0.0075,
+            0.0075,
+            0.0149,
+            0.0224,
+            0.0597,
+            0.1119
+          ]
+        }
+      },
+      "quiet_reported_passenger": {
+        "zero_fraction": 0.70947,
+        "quantiles": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0032,
+          0.0127,
+          0.0285
+        ],
+        "nonzero_quantiles": [
+          0.0032,
+          0.0032,
+          0.0032,
+          0.0032,
+          0.0095,
+          0.0222,
+          0.0285
+        ]
+      },
+      "posted_reported_passenger": {
+        "zero_fraction": 0.17391,
+        "quantiles": [
+          0.0,
+          0.0,
+          0.0032,
+          0.019,
+          0.0348,
+          0.0475,
+          0.0506
+        ],
+        "nonzero_quantiles": [
+          0.0032,
+          0.0032,
+          0.0127,
+          0.0316,
+          0.0411,
+          0.0475,
+          0.0506
+        ]
+      },
+      "posted_infection_passenger": {
+        "zero_fraction": 0.0,
+        "quantiles": [
+          0.0253,
+          0.0443,
+          0.0665,
+          0.0854,
+          0.1013,
+          0.1203,
+          0.1297
+        ],
+        "nonzero_quantiles": [
+          0.0253,
+          0.0443,
+          0.0665,
+          0.0854,
+          0.1013,
+          0.1203,
+          0.1297
+        ]
+      },
+      "gate_180_posted": 6
+    },
+    {
+      "point_index": 102,
+      "n_voyages": 1440,
+      "took_off": 1439,
+      "posted": 91,
+      "posting_frequency": 0.063194,
+      "posting_interval_95": [
+        0.051182,
+        0.077024
+      ],
+      "classes": {
+        "no_infection": 0,
+        "infected_no_illness": 582,
+        "ill_no_report": 208,
+        "reported_below_threshold": 559,
+        "posted": 91
+      },
+      "posting_channels": {
+        "passenger_only": 30,
+        "crew_only": 45,
+        "both": 16
+      },
+      "rates": {
+        "infection_attack_rate_passenger": {
+          "zero_fraction": 0.0,
+          "quantiles": [
+            0.0222,
+            0.0348,
+            0.0475,
+            0.0601,
+            0.0696,
+            0.0981,
+            0.1519
+          ],
+          "nonzero_quantiles": [
+            0.0222,
+            0.0348,
+            0.0475,
+            0.0601,
+            0.0696,
+            0.0981,
+            0.1519
+          ]
+        },
+        "A1_ever_ill_passenger": {
+          "zero_fraction": 0.41042,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0032,
+            0.0063,
+            0.0253,
+            0.0696
+          ],
+          "nonzero_quantiles": [
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0063,
+            0.0127,
+            0.0316,
+            0.0696
+          ]
+        },
+        "reported_case_attack_rate_passenger": {
+          "zero_fraction": 0.55486,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0032,
+            0.0253,
+            0.0696
+          ],
+          "nonzero_quantiles": [
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0063,
+            0.0127,
+            0.0316,
+            0.0696
+          ]
+        },
+        "reported_case_attack_rate_crew": {
+          "zero_fraction": 0.65764,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0075,
+            0.0299,
+            0.1119
+          ],
+          "nonzero_quantiles": [
+            0.0075,
+            0.0075,
+            0.0075,
+            0.0149,
+            0.0224,
+            0.0522,
+            0.1119
+          ]
+        }
+      },
+      "quiet_reported_passenger": {
+        "zero_fraction": 0.58562,
+        "quantiles": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0032,
+          0.0158,
+          0.0285
+        ],
+        "nonzero_quantiles": [
+          0.0032,
+          0.0032,
+          0.0032,
+          0.0032,
+          0.0095,
+          0.0222,
+          0.0285
+        ]
+      },
+      "posted_reported_passenger": {
+        "zero_fraction": 0.0989,
+        "quantiles": [
+          0.0,
+          0.0,
+          0.0095,
+          0.0316,
+          0.038,
+          0.0601,
+          0.0696
+        ],
+        "nonzero_quantiles": [
+          0.0032,
+          0.0063,
+          0.0158,
+          0.0316,
+          0.038,
+          0.0601,
+          0.0696
+        ]
+      },
+      "posted_infection_passenger": {
+        "zero_fraction": 0.0,
+        "quantiles": [
+          0.0285,
+          0.0443,
+          0.0759,
+          0.0918,
+          0.1139,
+          0.1329,
+          0.1519
+        ],
+        "nonzero_quantiles": [
+          0.0285,
+          0.0443,
+          0.0759,
+          0.0918,
+          0.1139,
+          0.1329,
+          0.1519
+        ]
+      },
+      "gate_180_posted": 9
+    },
+    {
+      "point_index": 107,
+      "n_voyages": 1440,
+      "took_off": 1440,
+      "posted": 1439,
+      "posting_frequency": 0.999306,
+      "posting_interval_95": [
+        0.996137,
+        0.999982
+      ],
+      "classes": {
+        "no_infection": 0,
+        "infected_no_illness": 0,
+        "ill_no_report": 0,
+        "reported_below_threshold": 1,
+        "posted": 1439
+      },
+      "posting_channels": {
+        "passenger_only": 33,
+        "crew_only": 1,
+        "both": 1405
+      },
+      "rates": {
+        "infection_attack_rate_passenger": {
+          "zero_fraction": 0.0,
+          "quantiles": [
+            0.1044,
+            0.2057,
+            0.2722,
+            0.3165,
+            0.3576,
+            0.4051,
+            0.4873
+          ],
+          "nonzero_quantiles": [
+            0.1044,
+            0.2057,
+            0.2722,
+            0.3165,
+            0.3576,
+            0.4051,
+            0.4873
+          ]
+        },
+        "A1_ever_ill_passenger": {
+          "zero_fraction": 0.0,
+          "quantiles": [
+            0.0253,
+            0.0791,
+            0.1203,
+            0.1551,
+            0.1835,
+            0.231,
+            0.288
+          ],
+          "nonzero_quantiles": [
+            0.0253,
+            0.0791,
+            0.1203,
+            0.1551,
+            0.1835,
+            0.231,
+            0.288
+          ]
+        },
+        "reported_case_attack_rate_passenger": {
+          "zero_fraction": 0.0,
+          "quantiles": [
+            0.0253,
+            0.0791,
+            0.1203,
+            0.1551,
+            0.1835,
+            0.231,
+            0.288
+          ],
+          "nonzero_quantiles": [
+            0.0253,
+            0.0791,
+            0.1203,
+            0.1551,
+            0.1835,
+            0.231,
+            0.288
+          ]
+        },
+        "reported_case_attack_rate_crew": {
+          "zero_fraction": 0.0,
+          "quantiles": [
+            0.0075,
+            0.0448,
+            0.0896,
+            0.1269,
+            0.1716,
+            0.2313,
+            0.3358
+          ],
+          "nonzero_quantiles": [
+            0.0075,
+            0.0448,
+            0.0896,
+            0.1269,
+            0.1716,
+            0.2313,
+            0.3358
+          ]
+        }
+      },
+      "quiet_reported_passenger": {
+        "zero_fraction": 0.0,
+        "quantiles": [
+          0.0253,
+          0.0253,
+          0.0253,
+          0.0253,
+          0.0253,
+          0.0253,
+          0.0253
+        ],
+        "nonzero_quantiles": [
+          0.0253,
+          0.0253,
+          0.0253,
+          0.0253,
+          0.0253,
+          0.0253,
+          0.0253
+        ]
+      },
+      "posted_reported_passenger": {
+        "zero_fraction": 0.0,
+        "quantiles": [
+          0.0285,
+          0.0791,
+          0.1203,
+          0.1551,
+          0.1835,
+          0.231,
+          0.288
+        ],
+        "nonzero_quantiles": [
+          0.0285,
+          0.0791,
+          0.1203,
+          0.1551,
+          0.1835,
+          0.231,
+          0.288
+        ]
+      },
+      "posted_infection_passenger": {
+        "zero_fraction": 0.0,
+        "quantiles": [
+          0.1044,
+          0.2089,
+          0.2722,
+          0.3165,
+          0.3576,
+          0.4051,
+          0.4873
+        ],
+        "nonzero_quantiles": [
+          0.1044,
+          0.2089,
+          0.2722,
+          0.3165,
+          0.3576,
+          0.4051,
+          0.4873
+        ]
+      },
+      "gate_180_posted": 179
+    },
+    {
+      "point_index": 126,
+      "n_voyages": 1440,
+      "took_off": 1436,
+      "posted": 55,
+      "posting_frequency": 0.038194,
+      "posting_interval_95": [
+        0.0289,
+        0.049427
+      ],
+      "classes": {
+        "no_infection": 0,
+        "infected_no_illness": 808,
+        "ill_no_report": 151,
+        "reported_below_threshold": 426,
+        "posted": 55
+      },
+      "posting_channels": {
+        "passenger_only": 17,
+        "crew_only": 32,
+        "both": 6
+      },
+      "rates": {
+        "infection_attack_rate_passenger": {
+          "zero_fraction": 0.0,
+          "quantiles": [
+            0.0222,
+            0.0316,
+            0.0443,
+            0.0538,
+            0.0633,
+            0.0854,
+            0.1392
+          ],
+          "nonzero_quantiles": [
+            0.0222,
+            0.0316,
+            0.0443,
+            0.0538,
+            0.0633,
+            0.0854,
+            0.1392
+          ]
+        },
+        "A1_ever_ill_passenger": {
+          "zero_fraction": 0.56806,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0032,
+            0.019,
+            0.0665
+          ],
+          "nonzero_quantiles": [
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0063,
+            0.0095,
+            0.0285,
+            0.0665
+          ]
+        },
+        "reported_case_attack_rate_passenger": {
+          "zero_fraction": 0.67292,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0032,
+            0.0158,
+            0.0633
+          ],
+          "nonzero_quantiles": [
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0095,
+            0.0285,
+            0.0633
+          ]
+        },
+        "reported_case_attack_rate_crew": {
+          "zero_fraction": 0.83542,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0224,
+            0.1343
+          ],
+          "nonzero_quantiles": [
+            0.0075,
+            0.0075,
+            0.0075,
+            0.0149,
+            0.0224,
+            0.0672,
+            0.1343
+          ]
+        }
+      },
+      "quiet_reported_passenger": {
+        "zero_fraction": 0.69242,
+        "quantiles": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0032,
+          0.0127,
+          0.0285
+        ],
+        "nonzero_quantiles": [
+          0.0032,
+          0.0032,
+          0.0032,
+          0.0032,
+          0.0095,
+          0.0222,
+          0.0285
+        ]
+      },
+      "posted_reported_passenger": {
+        "zero_fraction": 0.18182,
+        "quantiles": [
+          0.0,
+          0.0,
+          0.0063,
+          0.019,
+          0.0348,
+          0.0538,
+          0.0633
+        ],
+        "nonzero_quantiles": [
+          0.0032,
+          0.0063,
+          0.0095,
+          0.0316,
+          0.038,
+          0.0601,
+          0.0633
+        ]
+      },
+      "posted_infection_passenger": {
+        "zero_fraction": 0.0,
+        "quantiles": [
+          0.0285,
+          0.0411,
+          0.0696,
+          0.0854,
+          0.1013,
+          0.1266,
+          0.1392
+        ],
+        "nonzero_quantiles": [
+          0.0285,
+          0.0411,
+          0.0696,
+          0.0854,
+          0.1013,
+          0.1266,
+          0.1392
+        ]
+      },
+      "gate_180_posted": 7
+    },
+    {
+      "point_index": 142,
+      "n_voyages": 1440,
+      "took_off": 1436,
+      "posted": 54,
+      "posting_frequency": 0.0375,
+      "posting_interval_95": [
+        0.028294,
+        0.048648
+      ],
+      "classes": {
+        "no_infection": 0,
+        "infected_no_illness": 839,
+        "ill_no_report": 144,
+        "reported_below_threshold": 403,
+        "posted": 54
+      },
+      "posting_channels": {
+        "passenger_only": 19,
+        "crew_only": 24,
+        "both": 11
+      },
+      "rates": {
+        "infection_attack_rate_passenger": {
+          "zero_fraction": 0.0,
+          "quantiles": [
+            0.0222,
+            0.0316,
+            0.0443,
+            0.0538,
+            0.0633,
+            0.0854,
+            0.1297
+          ],
+          "nonzero_quantiles": [
+            0.0222,
+            0.0316,
+            0.0443,
+            0.0538,
+            0.0633,
+            0.0854,
+            0.1297
+          ]
+        },
+        "A1_ever_ill_passenger": {
+          "zero_fraction": 0.58819,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0032,
+            0.019,
+            0.057
+          ],
+          "nonzero_quantiles": [
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0063,
+            0.0127,
+            0.0316,
+            0.057
+          ]
+        },
+        "reported_case_attack_rate_passenger": {
+          "zero_fraction": 0.68889,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0032,
+            0.0158,
+            0.057
+          ],
+          "nonzero_quantiles": [
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0127,
+            0.0348,
+            0.057
+          ]
+        },
+        "reported_case_attack_rate_crew": {
+          "zero_fraction": 0.83403,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0224,
+            0.1343
+          ],
+          "nonzero_quantiles": [
+            0.0075,
+            0.0075,
+            0.0075,
+            0.0149,
+            0.0224,
+            0.0597,
+            0.1343
+          ]
+        }
+      },
+      "quiet_reported_passenger": {
+        "zero_fraction": 0.70924,
+        "quantiles": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0032,
+          0.0127,
+          0.0285
+        ],
+        "nonzero_quantiles": [
+          0.0032,
+          0.0032,
+          0.0032,
+          0.0032,
+          0.0095,
+          0.0222,
+          0.0285
+        ]
+      },
+      "posted_reported_passenger": {
+        "zero_fraction": 0.16667,
+        "quantiles": [
+          0.0,
+          0.0,
+          0.0063,
+          0.0316,
+          0.038,
+          0.0475,
+          0.057
+        ],
+        "nonzero_quantiles": [
+          0.0032,
+          0.0032,
+          0.0158,
+          0.0348,
+          0.038,
+          0.0506,
+          0.057
+        ]
+      },
+      "posted_infection_passenger": {
+        "zero_fraction": 0.0,
+        "quantiles": [
+          0.0253,
+          0.0443,
+          0.0665,
+          0.0886,
+          0.1044,
+          0.1234,
+          0.1297
+        ],
+        "nonzero_quantiles": [
+          0.0253,
+          0.0443,
+          0.0665,
+          0.0886,
+          0.1044,
+          0.1234,
+          0.1297
+        ]
+      },
+      "gate_180_posted": 6
+    },
+    {
+      "point_index": 145,
+      "n_voyages": 1440,
+      "took_off": 1435,
+      "posted": 81,
+      "posting_frequency": 0.05625,
+      "posting_interval_95": [
+        0.044918,
+        0.069432
+      ],
+      "classes": {
+        "no_infection": 0,
+        "infected_no_illness": 812,
+        "ill_no_report": 147,
+        "reported_below_threshold": 400,
+        "posted": 81
+      },
+      "posting_channels": {
+        "passenger_only": 24,
+        "crew_only": 36,
+        "both": 21
+      },
+      "rates": {
+        "infection_attack_rate_passenger": {
+          "zero_fraction": 0.0,
+          "quantiles": [
+            0.0222,
+            0.0316,
+            0.0443,
+            0.0538,
+            0.0633,
+            0.0886,
+            0.1867
+          ],
+          "nonzero_quantiles": [
+            0.0222,
+            0.0316,
+            0.0443,
+            0.0538,
+            0.0633,
+            0.0886,
+            0.1867
+          ]
+        },
+        "A1_ever_ill_passenger": {
+          "zero_fraction": 0.56944,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0032,
+            0.0253,
+            0.0949
+          ],
+          "nonzero_quantiles": [
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0063,
+            0.0127,
+            0.038,
+            0.0949
+          ]
+        },
+        "reported_case_attack_rate_passenger": {
+          "zero_fraction": 0.67153,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0032,
+            0.0253,
+            0.0886
+          ],
+          "nonzero_quantiles": [
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0158,
+            0.0411,
+            0.0886
+          ]
+        },
+        "reported_case_attack_rate_crew": {
+          "zero_fraction": 0.81181,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0299,
+            0.1343
+          ],
+          "nonzero_quantiles": [
+            0.0075,
+            0.0075,
+            0.0075,
+            0.0149,
+            0.0299,
+            0.0672,
+            0.1343
+          ]
+        }
+      },
+      "quiet_reported_passenger": {
+        "zero_fraction": 0.70567,
+        "quantiles": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0032,
+          0.0158,
+          0.0285
+        ],
+        "nonzero_quantiles": [
+          0.0032,
+          0.0032,
+          0.0032,
+          0.0032,
+          0.0095,
+          0.0253,
+          0.0285
+        ]
+      },
+      "posted_reported_passenger": {
+        "zero_fraction": 0.09877,
+        "quantiles": [
+          0.0,
+          0.0,
+          0.0095,
+          0.0316,
+          0.0411,
+          0.0665,
+          0.0886
+        ],
+        "nonzero_quantiles": [
+          0.0032,
+          0.0032,
+          0.0158,
+          0.0348,
+          0.0443,
+          0.0665,
+          0.0886
+        ]
+      },
+      "posted_infection_passenger": {
+        "zero_fraction": 0.0,
+        "quantiles": [
+          0.0285,
+          0.0506,
+          0.0696,
+          0.0918,
+          0.1171,
+          0.1551,
+          0.1867
+        ],
+        "nonzero_quantiles": [
+          0.0285,
+          0.0506,
+          0.0696,
+          0.0918,
+          0.1171,
+          0.1551,
+          0.1867
+        ]
+      },
+      "gate_180_posted": 8
+    },
+    {
+      "point_index": 171,
+      "n_voyages": 1440,
+      "took_off": 1437,
+      "posted": 75,
+      "posting_frequency": 0.052083,
+      "posting_interval_95": [
+        0.041184,
+        0.064852
+      ],
+      "classes": {
+        "no_infection": 0,
+        "infected_no_illness": 830,
+        "ill_no_report": 141,
+        "reported_below_threshold": 394,
+        "posted": 75
+      },
+      "posting_channels": {
+        "passenger_only": 27,
+        "crew_only": 37,
+        "both": 11
+      },
+      "rates": {
+        "infection_attack_rate_passenger": {
+          "zero_fraction": 0.0,
+          "quantiles": [
+            0.0222,
+            0.0316,
+            0.0443,
+            0.0538,
+            0.0633,
+            0.0886,
+            0.1772
+          ],
+          "nonzero_quantiles": [
+            0.0222,
+            0.0316,
+            0.0443,
+            0.0538,
+            0.0633,
+            0.0886,
+            0.1772
+          ]
+        },
+        "A1_ever_ill_passenger": {
+          "zero_fraction": 0.58333,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0032,
+            0.0222,
+            0.1076
+          ],
+          "nonzero_quantiles": [
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0063,
+            0.0127,
+            0.0348,
+            0.1076
+          ]
+        },
+        "reported_case_attack_rate_passenger": {
+          "zero_fraction": 0.68125,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0032,
+            0.0222,
+            0.1076
+          ],
+          "nonzero_quantiles": [
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0158,
+            0.038,
+            0.1076
+          ]
+        },
+        "reported_case_attack_rate_crew": {
+          "zero_fraction": 0.81736,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0224,
+            0.1194
+          ],
+          "nonzero_quantiles": [
+            0.0075,
+            0.0075,
+            0.0075,
+            0.0149,
+            0.0299,
+            0.0821,
+            0.1194
+          ]
+        }
+      },
+      "quiet_reported_passenger": {
+        "zero_fraction": 0.71136,
+        "quantiles": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0032,
+          0.0158,
+          0.0285
+        ],
+        "nonzero_quantiles": [
+          0.0032,
+          0.0032,
+          0.0032,
+          0.0032,
+          0.0095,
+          0.0253,
+          0.0285
+        ]
+      },
+      "posted_reported_passenger": {
+        "zero_fraction": 0.13333,
+        "quantiles": [
+          0.0,
+          0.0,
+          0.0063,
+          0.0316,
+          0.0411,
+          0.0633,
+          0.1076
+        ],
+        "nonzero_quantiles": [
+          0.0032,
+          0.0032,
+          0.0127,
+          0.0316,
+          0.0443,
+          0.0665,
+          0.1076
+        ]
+      },
+      "posted_infection_passenger": {
+        "zero_fraction": 0.0,
+        "quantiles": [
+          0.0253,
+          0.0443,
+          0.0665,
+          0.0854,
+          0.1076,
+          0.1424,
+          0.1772
+        ],
+        "nonzero_quantiles": [
+          0.0253,
+          0.0443,
+          0.0665,
+          0.0854,
+          0.1076,
+          0.1424,
+          0.1772
+        ]
+      },
+      "gate_180_posted": 8
+    },
+    {
+      "point_index": 172,
+      "n_voyages": 1440,
+      "took_off": 1437,
+      "posted": 60,
+      "posting_frequency": 0.041667,
+      "posting_interval_95": [
+        0.031944,
+        0.05331
+      ],
+      "classes": {
+        "no_infection": 0,
+        "infected_no_illness": 812,
+        "ill_no_report": 156,
+        "reported_below_threshold": 412,
+        "posted": 60
+      },
+      "posting_channels": {
+        "passenger_only": 19,
+        "crew_only": 35,
+        "both": 6
+      },
+      "rates": {
+        "infection_attack_rate_passenger": {
+          "zero_fraction": 0.0,
+          "quantiles": [
+            0.0222,
+            0.0316,
+            0.0443,
+            0.0538,
+            0.0633,
+            0.0854,
+            0.1487
+          ],
+          "nonzero_quantiles": [
+            0.0222,
+            0.0316,
+            0.0443,
+            0.0538,
+            0.0633,
+            0.0854,
+            0.1487
+          ]
+        },
+        "A1_ever_ill_passenger": {
+          "zero_fraction": 0.57153,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0032,
+            0.0222,
+            0.0665
+          ],
+          "nonzero_quantiles": [
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0063,
+            0.0095,
+            0.0285,
+            0.0665
+          ]
+        },
+        "reported_case_attack_rate_passenger": {
+          "zero_fraction": 0.67986,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0032,
+            0.019,
+            0.0665
+          ],
+          "nonzero_quantiles": [
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0127,
+            0.0316,
+            0.0665
+          ]
+        },
+        "reported_case_attack_rate_crew": {
+          "zero_fraction": 0.82986,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0224,
+            0.1493
+          ],
+          "nonzero_quantiles": [
+            0.0075,
+            0.0075,
+            0.0075,
+            0.0149,
+            0.0224,
+            0.0522,
+            0.1493
+          ]
+        }
+      },
+      "quiet_reported_passenger": {
+        "zero_fraction": 0.70145,
+        "quantiles": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0032,
+          0.0127,
+          0.0285
+        ],
+        "nonzero_quantiles": [
+          0.0032,
+          0.0032,
+          0.0032,
+          0.0032,
+          0.0095,
+          0.0253,
+          0.0285
+        ]
+      },
+      "posted_reported_passenger": {
+        "zero_fraction": 0.18333,
+        "quantiles": [
+          0.0,
+          0.0,
+          0.0032,
+          0.0222,
+          0.0348,
+          0.0506,
+          0.0665
+        ],
+        "nonzero_quantiles": [
+          0.0032,
+          0.0032,
+          0.0095,
+          0.0316,
+          0.0411,
+          0.0633,
+          0.0665
+        ]
+      },
+      "posted_infection_passenger": {
+        "zero_fraction": 0.0,
+        "quantiles": [
+          0.0253,
+          0.0411,
+          0.0665,
+          0.0854,
+          0.1044,
+          0.1329,
+          0.1487
+        ],
+        "nonzero_quantiles": [
+          0.0253,
+          0.0411,
+          0.0665,
+          0.0854,
+          0.1044,
+          0.1329,
+          0.1487
+        ]
+      },
+      "gate_180_posted": 8
+    },
+    {
+      "point_index": 202,
+      "n_voyages": 1440,
+      "took_off": 1436,
+      "posted": 69,
+      "posting_frequency": 0.047917,
+      "posting_interval_95": [
+        0.03747,
+        0.060253
+      ],
+      "classes": {
+        "no_infection": 0,
+        "infected_no_illness": 786,
+        "ill_no_report": 169,
+        "reported_below_threshold": 416,
+        "posted": 69
+      },
+      "posting_channels": {
+        "passenger_only": 25,
+        "crew_only": 33,
+        "both": 11
+      },
+      "rates": {
+        "infection_attack_rate_passenger": {
+          "zero_fraction": 0.0,
+          "quantiles": [
+            0.0222,
+            0.0316,
+            0.0443,
+            0.0538,
+            0.0665,
+            0.0886,
+            0.1614
+          ],
+          "nonzero_quantiles": [
+            0.0222,
+            0.0316,
+            0.0443,
+            0.0538,
+            0.0665,
+            0.0886,
+            0.1614
+          ]
+        },
+        "A1_ever_ill_passenger": {
+          "zero_fraction": 0.55347,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0032,
+            0.0222,
+            0.0728
+          ],
+          "nonzero_quantiles": [
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0063,
+            0.0127,
+            0.0316,
+            0.0728
+          ]
+        },
+        "reported_case_attack_rate_passenger": {
+          "zero_fraction": 0.67083,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0032,
+            0.019,
+            0.0696
+          ],
+          "nonzero_quantiles": [
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0063,
+            0.0127,
+            0.0348,
+            0.0696
+          ]
+        },
+        "reported_case_attack_rate_crew": {
+          "zero_fraction": 0.79861,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0224,
+            0.1716
+          ],
+          "nonzero_quantiles": [
+            0.0075,
+            0.0075,
+            0.0075,
+            0.0149,
+            0.0224,
+            0.0597,
+            0.1716
+          ]
+        }
+      },
+      "quiet_reported_passenger": {
+        "zero_fraction": 0.69657,
+        "quantiles": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0032,
+          0.0127,
+          0.0285
+        ],
+        "nonzero_quantiles": [
+          0.0032,
+          0.0032,
+          0.0032,
+          0.0032,
+          0.0095,
+          0.0222,
+          0.0285
+        ]
+      },
+      "posted_reported_passenger": {
+        "zero_fraction": 0.15942,
+        "quantiles": [
+          0.0,
+          0.0,
+          0.0063,
+          0.0316,
+          0.038,
+          0.0633,
+          0.0696
+        ],
+        "nonzero_quantiles": [
+          0.0032,
+          0.0032,
+          0.0127,
+          0.0316,
+          0.0411,
+          0.0633,
+          0.0696
+        ]
+      },
+      "posted_infection_passenger": {
+        "zero_fraction": 0.0,
+        "quantiles": [
+          0.0253,
+          0.0443,
+          0.0665,
+          0.0949,
+          0.1108,
+          0.1361,
+          0.1614
+        ],
+        "nonzero_quantiles": [
+          0.0253,
+          0.0443,
+          0.0665,
+          0.0949,
+          0.1108,
+          0.1361,
+          0.1614
+        ]
+      },
+      "gate_180_posted": 8
+    },
+    {
+      "point_index": 206,
+      "n_voyages": 1440,
+      "took_off": 1438,
+      "posted": 78,
+      "posting_frequency": 0.054167,
+      "posting_interval_95": [
+        0.043049,
+        0.067144
+      ],
+      "classes": {
+        "no_infection": 0,
+        "infected_no_illness": 692,
+        "ill_no_report": 187,
+        "reported_below_threshold": 483,
+        "posted": 78
+      },
+      "posting_channels": {
+        "passenger_only": 23,
+        "crew_only": 40,
+        "both": 15
+      },
+      "rates": {
+        "infection_attack_rate_passenger": {
+          "zero_fraction": 0.0,
+          "quantiles": [
+            0.0222,
+            0.0348,
+            0.0443,
+            0.057,
+            0.0665,
+            0.0918,
+            0.1519
+          ],
+          "nonzero_quantiles": [
+            0.0222,
+            0.0348,
+            0.0443,
+            0.057,
+            0.0665,
+            0.0918,
+            0.1519
+          ]
+        },
+        "A1_ever_ill_passenger": {
+          "zero_fraction": 0.4875,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0032,
+            0.0063,
+            0.0222,
+            0.0823
+          ],
+          "nonzero_quantiles": [
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0063,
+            0.0127,
+            0.0316,
+            0.0823
+          ]
+        },
+        "reported_case_attack_rate_passenger": {
+          "zero_fraction": 0.61736,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0032,
+            0.0222,
+            0.0823
+          ],
+          "nonzero_quantiles": [
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0063,
+            0.0127,
+            0.0348,
+            0.0823
+          ]
+        },
+        "reported_case_attack_rate_crew": {
+          "zero_fraction": 0.75625,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0299,
+            0.1119
+          ],
+          "nonzero_quantiles": [
+            0.0075,
+            0.0075,
+            0.0075,
+            0.0149,
+            0.0224,
+            0.0522,
+            0.1119
+          ]
+        }
+      },
+      "quiet_reported_passenger": {
+        "zero_fraction": 0.64537,
+        "quantiles": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0032,
+          0.0158,
+          0.0285
+        ],
+        "nonzero_quantiles": [
+          0.0032,
+          0.0032,
+          0.0032,
+          0.0032,
+          0.0095,
+          0.0222,
+          0.0285
+        ]
+      },
+      "posted_reported_passenger": {
+        "zero_fraction": 0.12821,
+        "quantiles": [
+          0.0,
+          0.0,
+          0.0063,
+          0.0285,
+          0.0411,
+          0.0601,
+          0.0823
+        ],
+        "nonzero_quantiles": [
+          0.0032,
+          0.0032,
+          0.0127,
+          0.0316,
+          0.0411,
+          0.0633,
+          0.0823
+        ]
+      },
+      "posted_infection_passenger": {
+        "zero_fraction": 0.0,
+        "quantiles": [
+          0.0253,
+          0.0475,
+          0.0696,
+          0.0949,
+          0.1076,
+          0.1424,
+          0.1519
+        ],
+        "nonzero_quantiles": [
+          0.0253,
+          0.0475,
+          0.0696,
+          0.0949,
+          0.1076,
+          0.1424,
+          0.1519
+        ]
+      },
+      "gate_180_posted": 9
+    },
+    {
+      "point_index": 243,
+      "n_voyages": 1440,
+      "took_off": 1440,
+      "posted": 1436,
+      "posting_frequency": 0.997222,
+      "posting_interval_95": [
+        0.992903,
+        0.999243
+      ],
+      "classes": {
+        "no_infection": 0,
+        "infected_no_illness": 0,
+        "ill_no_report": 0,
+        "reported_below_threshold": 4,
+        "posted": 1436
+      },
+      "posting_channels": {
+        "passenger_only": 93,
+        "crew_only": 4,
+        "both": 1339
+      },
+      "rates": {
+        "infection_attack_rate_passenger": {
+          "zero_fraction": 0.0,
+          "quantiles": [
+            0.0601,
+            0.1709,
+            0.2373,
+            0.2785,
+            0.3196,
+            0.3734,
+            0.462
+          ],
+          "nonzero_quantiles": [
+            0.0601,
+            0.1709,
+            0.2373,
+            0.2785,
+            0.3196,
+            0.3734,
+            0.462
+          ]
+        },
+        "A1_ever_ill_passenger": {
+          "zero_fraction": 0.0,
+          "quantiles": [
+            0.0127,
+            0.057,
+            0.0949,
+            0.1266,
+            0.1582,
+            0.2025,
+            0.269
+          ],
+          "nonzero_quantiles": [
+            0.0127,
+            0.057,
+            0.0949,
+            0.1266,
+            0.1582,
+            0.2025,
+            0.269
+          ]
+        },
+        "reported_case_attack_rate_passenger": {
+          "zero_fraction": 0.0,
+          "quantiles": [
+            0.0095,
+            0.057,
+            0.0949,
+            0.1266,
+            0.1582,
+            0.2025,
+            0.269
+          ],
+          "nonzero_quantiles": [
+            0.0095,
+            0.057,
+            0.0949,
+            0.1266,
+            0.1582,
+            0.2025,
+            0.269
+          ]
+        },
+        "reported_case_attack_rate_crew": {
+          "zero_fraction": 0.00278,
+          "quantiles": [
+            0.0,
+            0.0299,
+            0.0672,
+            0.1045,
+            0.1418,
+            0.2015,
+            0.2836
+          ],
+          "nonzero_quantiles": [
+            0.0075,
+            0.0299,
+            0.0672,
+            0.1045,
+            0.1418,
+            0.2015,
+            0.2836
+          ]
+        }
+      },
+      "quiet_reported_passenger": {
+        "zero_fraction": 0.0,
+        "quantiles": [
+          0.0095,
+          0.0095,
+          0.0095,
+          0.0222,
+          0.0222,
+          0.0253,
+          0.0253
+        ],
+        "nonzero_quantiles": [
+          0.0095,
+          0.0095,
+          0.0095,
+          0.0222,
+          0.0222,
+          0.0253,
+          0.0253
+        ]
+      },
+      "posted_reported_passenger": {
+        "zero_fraction": 0.0,
+        "quantiles": [
+          0.0253,
+          0.057,
+          0.0949,
+          0.1266,
+          0.1582,
+          0.2025,
+          0.269
+        ],
+        "nonzero_quantiles": [
+          0.0253,
+          0.057,
+          0.0949,
+          0.1266,
+          0.1582,
+          0.2025,
+          0.269
+        ]
+      },
+      "posted_infection_passenger": {
+        "zero_fraction": 0.0,
+        "quantiles": [
+          0.1013,
+          0.1709,
+          0.2373,
+          0.2785,
+          0.3196,
+          0.3734,
+          0.462
+        ],
+        "nonzero_quantiles": [
+          0.1013,
+          0.1709,
+          0.2373,
+          0.2785,
+          0.3196,
+          0.3734,
+          0.462
+        ]
+      },
+      "gate_180_posted": 180
+    }
+  ],
+  "groups": [
+    {
+      "group": "quietest",
+      "points": [
+        46,
+        142,
+        12,
+        18,
+        126,
+        0,
+        20,
+        36,
+        145,
+        171,
+        172,
+        202
+      ],
+      "n_voyages": 17280,
+      "posted": 793,
+      "posting_frequency": 0.045891,
+      "posting_interval_95": [
+        0.042819,
+        0.049117
+      ],
+      "per_point_posted": [
+        46,
+        54,
+        66,
+        76,
+        55,
+        79,
+        72,
+        60,
+        81,
+        75,
+        60,
+        69
+      ],
+      "classes": {
+        "no_infection": 0,
+        "infected_no_illness": 9522,
+        "ill_no_report": 1862,
+        "reported_below_threshold": 5103,
+        "posted": 793
+      },
+      "posting_channels": {
+        "passenger_only": 270,
+        "crew_only": 408,
+        "both": 115
+      },
+      "rates": {
+        "infection_attack_rate_passenger": {
+          "zero_fraction": 0.0,
+          "quantiles": [
+            0.0222,
+            0.0316,
+            0.0443,
+            0.0538,
+            0.0665,
+            0.0886,
+            0.1867
+          ],
+          "nonzero_quantiles": [
+            0.0222,
+            0.0316,
+            0.0443,
+            0.0538,
+            0.0665,
+            0.0886,
+            0.1867
+          ]
+        },
+        "A1_ever_ill_passenger": {
+          "zero_fraction": 0.5577,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0032,
+            0.0222,
+            0.1076
+          ],
+          "nonzero_quantiles": [
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0063,
+            0.0127,
+            0.0316,
+            0.1076
+          ]
+        },
+        "reported_case_attack_rate_passenger": {
+          "zero_fraction": 0.6658,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0032,
+            0.019,
+            0.1076
+          ],
+          "nonzero_quantiles": [
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0127,
+            0.0348,
+            0.1076
+          ]
+        },
+        "reported_case_attack_rate_crew": {
+          "zero_fraction": 0.80914,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0224,
+            0.1716
+          ],
+          "nonzero_quantiles": [
+            0.0075,
+            0.0075,
+            0.0075,
+            0.0149,
+            0.0224,
+            0.0672,
+            0.1716
+          ]
+        }
+      }
+    },
+    {
+      "group": "transition",
+      "points": [
+        102,
+        206
+      ],
+      "n_voyages": 2880,
+      "posted": 169,
+      "posting_frequency": 0.058681,
+      "posting_interval_95": [
+        0.050375,
+        0.067896
+      ],
+      "per_point_posted": [
+        91,
+        78
+      ],
+      "classes": {
+        "no_infection": 0,
+        "infected_no_illness": 1274,
+        "ill_no_report": 395,
+        "reported_below_threshold": 1042,
+        "posted": 169
+      },
+      "posting_channels": {
+        "passenger_only": 53,
+        "crew_only": 85,
+        "both": 31
+      },
+      "rates": {
+        "infection_attack_rate_passenger": {
+          "zero_fraction": 0.0,
+          "quantiles": [
+            0.0222,
+            0.0348,
+            0.0475,
+            0.057,
+            0.0696,
+            0.0949,
+            0.1519
+          ],
+          "nonzero_quantiles": [
+            0.0222,
+            0.0348,
+            0.0475,
+            0.057,
+            0.0696,
+            0.0949,
+            0.1519
+          ]
+        },
+        "A1_ever_ill_passenger": {
+          "zero_fraction": 0.44896,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0032,
+            0.0063,
+            0.0253,
+            0.0823
+          ],
+          "nonzero_quantiles": [
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0063,
+            0.0127,
+            0.0316,
+            0.0823
+          ]
+        },
+        "reported_case_attack_rate_passenger": {
+          "zero_fraction": 0.58611,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0032,
+            0.0222,
+            0.0823
+          ],
+          "nonzero_quantiles": [
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0063,
+            0.0127,
+            0.0348,
+            0.0823
+          ]
+        },
+        "reported_case_attack_rate_crew": {
+          "zero_fraction": 0.70694,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0075,
+            0.0299,
+            0.1119
+          ],
+          "nonzero_quantiles": [
+            0.0075,
+            0.0075,
+            0.0075,
+            0.0149,
+            0.0224,
+            0.0522,
+            0.1119
+          ]
+        }
+      }
+    },
+    {
+      "group": "a1_band",
+      "points": [
+        243,
+        107
+      ],
+      "n_voyages": 2880,
+      "posted": 2875,
+      "posting_frequency": 0.998264,
+      "posting_interval_95": [
+        0.995953,
+        0.999436
+      ],
+      "per_point_posted": [
+        1436,
+        1439
+      ],
+      "classes": {
+        "no_infection": 0,
+        "infected_no_illness": 0,
+        "ill_no_report": 0,
+        "reported_below_threshold": 5,
+        "posted": 2875
+      },
+      "posting_channels": {
+        "passenger_only": 126,
+        "crew_only": 5,
+        "both": 2744
+      },
+      "rates": {
+        "infection_attack_rate_passenger": {
+          "zero_fraction": 0.0,
+          "quantiles": [
+            0.0601,
+            0.1835,
+            0.25,
+            0.2975,
+            0.3386,
+            0.3924,
+            0.4873
+          ],
+          "nonzero_quantiles": [
+            0.0601,
+            0.1835,
+            0.25,
+            0.2975,
+            0.3386,
+            0.3924,
+            0.4873
+          ]
+        },
+        "A1_ever_ill_passenger": {
+          "zero_fraction": 0.0,
+          "quantiles": [
+            0.0127,
+            0.0665,
+            0.1076,
+            0.1392,
+            0.1741,
+            0.2215,
+            0.288
+          ],
+          "nonzero_quantiles": [
+            0.0127,
+            0.0665,
+            0.1076,
+            0.1392,
+            0.1741,
+            0.2215,
+            0.288
+          ]
+        },
+        "reported_case_attack_rate_passenger": {
+          "zero_fraction": 0.0,
+          "quantiles": [
+            0.0095,
+            0.0665,
+            0.1076,
+            0.1392,
+            0.1741,
+            0.2215,
+            0.288
+          ],
+          "nonzero_quantiles": [
+            0.0095,
+            0.0665,
+            0.1076,
+            0.1392,
+            0.1741,
+            0.2215,
+            0.288
+          ]
+        },
+        "reported_case_attack_rate_crew": {
+          "zero_fraction": 0.00139,
+          "quantiles": [
+            0.0,
+            0.0373,
+            0.0746,
+            0.1119,
+            0.1567,
+            0.2164,
+            0.3358
+          ],
+          "nonzero_quantiles": [
+            0.0075,
+            0.0373,
+            0.0746,
+            0.1119,
+            0.1567,
+            0.2164,
+            0.3358
+          ]
+        }
+      }
+    }
+  ]
+}

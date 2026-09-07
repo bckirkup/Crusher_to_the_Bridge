@@ -706,6 +706,30 @@ dose ladder. The bound is a ceiling read off A8's cell mean and the posting
 count; the shard streams keep cells, not per-run rows, so the within-point
 distribution itself is not recoverable from the artifact.
 
+**Re-run of the quiet corner at 1,440 seeds, 2026-09-05:**
+[`lowposting_region_37.md`](lowposting_region_37.md), harness
+`telemetry_buffer/observation_model/gate37_lowposting.py`. 16 of the same grid
+indices, 1,440 matched seeds each with every voyage's row retained — 23,040
+voyages, 384/384 Batch children succeeded. The ceiling above is now a
+measurement, and four things change:
+
+- **The posting floor is real, not a resolution artifact.** The quietest point
+  posts 46 of 1,440 = **3.194% [2.348%, 4.238%]**, and none of the sixteen exact
+  intervals reaches A9's 0.42-0.56%; the 1,440-seed frequencies reproduce the
+  180-seed counts point for point.
+- **Extinction exists at 0.26%** (45 of 17,280 quiet-region voyages fail
+  take-off with peak prevalence 9 against 10), so "take-off 1.0" above was a
+  180-seed resolution statement, not a structural one.
+- **Conditional on posting, the reported passenger attack rate is median 4.11%,
+  IQR 3.48-5.06%** — measured, replacing the <=6.0% ceiling, and still inside
+  A4's IQR. Quiet-region mass is 55.1% infected-but-no-illness, 10.8% ill with
+  nothing reported, 29.5% reported below threshold.
+- **51.5% of the quiet region's postings are crew-only.** The crew complement is
+  134, so five reported crew cases (3.73%) post a voyage; the passenger channel
+  alone posts on 2.228%, still 4.0x A9's ceiling. The in-sim `vsp_trigger_epoch`
+  fires only on the passenger channel while A9 scores both — a definitional gap
+  in the trigger, not a parameter, recorded as outstanding.
+
 ## 3. Out-of-sample checks
 
 **Park et al. (2015)** — surface swabs during a shipboard outbreak; nothing was
