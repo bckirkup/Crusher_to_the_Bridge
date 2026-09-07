@@ -1,6 +1,8 @@
 # #37 on the full box: the admissible region is empty, and three of the six anchors are why
 
-Status: measurement, 2026-09-06. Design:
+Status: measurement, 2026-09-06; design limitations superseded by
+[`admissible_region_37_v2.md`](admissible_region_37_v2.md) (ten factors, 180
+seeds, A9 scored), findings not. Design:
 `../proposals/bounded_sensitivity_and_admissible_region_spec.md` §2.3, with the
 deviations in §1 stated rather than assumed. Harness:
 `../../telemetry_buffer/observation_model/admissible_region.py`. Raw output:
