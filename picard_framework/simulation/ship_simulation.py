@@ -29,6 +29,12 @@ from decision_engine.actions import ActionEnvelope
 from decision_engine.experience import ExperienceStore
 from decision_engine.protocol_filter import eligible_protocol_ids, filter_active_modifiers
 from decision_engine.runtime import DecisionRuntime
+from engines.crew_duty_exclusion import (
+    CrewDutyExclusionTracker,
+)
+from engines.crew_duty_exclusion import (
+    build_tracker as build_crew_duty_exclusion_tracker,
+)
 from engines.py_contam_bridge import (
     build_transport_engine,
     load_air_flow_paths,
@@ -63,6 +69,7 @@ from orchestrator_epoch import (
     step_cascade_cost_accounting,
     step_cost_accounting,
     step_counter_thresholds,
+    step_crew_duty_exclusion,
     step_diagnostic_cascade,
     step_fred_compliance,
     step_infection_progression,
@@ -252,6 +259,7 @@ class ShipSimulation:
         self.engine = None
         self.contam_engine = None
         self.tx_core = None
+        self.crew_exclusion: CrewDutyExclusionTracker | None = None
         self.obs = None
         self.proto_ctx = None
         self.pathogen_profiles: dict[str, dict[str, Any]] = {}
@@ -469,6 +477,12 @@ class ShipSimulation:
             voyage_config=voyage_cfg,
         )
         self.state = sim_state
+        self.crew_exclusion = build_crew_duty_exclusion_tracker(
+            cfg.get("crew_duty_exclusion"),
+            self.engine.agents,
+            self.tx_core.service_zones if self.tx_core is not None else (),
+            rng=self.rng,
+        )
         self._init_sentinel_ledger(voyage_cfg)
         self._init_wastewater_ops(voyage_cfg)
         self._init_surface_strain_recovery()
@@ -1336,6 +1350,9 @@ class ShipSimulation:
         )
         step_long_read_cost_accounting(
             work.epoch, self.proto_ctx, work.long_read_ordered_count,
+        )
+        step_crew_duty_exclusion(
+            work.epoch, work.agents, work.state, self.clock, self.crew_exclusion,
         )
         step_quarantine_confinement(
             work.epoch, work.agents, work.merged_mods, work.state.trigger_status,

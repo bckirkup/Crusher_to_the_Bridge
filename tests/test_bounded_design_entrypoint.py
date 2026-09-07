@@ -52,7 +52,7 @@ def test_a_named_subset_reaches_the_gate_with_its_own_indices(
     if expected is None:
         assert "--only-points" not in argv
     else:
-        assert argv[argv.index("--only-points") + 1:] == expected
+        assert argv[argv.index("--only-points") + 1:][:len(expected)] == expected
 
 
 @pytest.mark.parametrize("selection", ["7,x", "-3", "1;2"])
@@ -64,6 +64,34 @@ def test_a_subset_that_is_not_design_indices_is_refused(selection: str) -> None:
             Path("/tmp/out.json"),
             Path("/tmp/rows.jsonl"),
         )
+
+
+@pytest.mark.parametrize(
+    ("arm", "flagged"),
+    [("off", False), ("on", True)],
+)
+def test_the_duty_exclusion_arm_is_off_unless_the_submission_asks_for_it(
+    arm: str,
+    flagged: bool,
+) -> None:
+    """The matched baseline is the same command line minus one flag."""
+    argv = _region_argv(
+        _region_args("--crew-duty-exclusion", arm),
+        0,
+        Path("/tmp/out.json"),
+        Path("/tmp/rows.jsonl"),
+    )
+    assert ("--crew-duty-exclusion" in argv) is flagged
+
+
+def test_the_duty_exclusion_arm_defaults_to_the_baseline() -> None:
+    argv = _region_argv(
+        _region_args(),
+        0,
+        Path("/tmp/out.json"),
+        Path("/tmp/rows.jsonl"),
+    )
+    assert "--crew-duty-exclusion" not in argv
 
 
 def test_the_screen_shard_is_unaffected_by_the_region_subset_flags() -> None:

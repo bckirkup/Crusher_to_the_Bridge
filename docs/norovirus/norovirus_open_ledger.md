@@ -1351,8 +1351,17 @@ is over-determined only *given* them. Full list in §10 of the history document.
   duration are stated by the regulation, so the structure carries no free
   magnitude; the **compliance share is ∅ null** for the maritime arm, and the
   land-based presenteeism bound (tranche 30 §1) is on the wrong denominator and
-  the wrong regime. Not implemented, and neither the rule nor a compliance value
-  may be read off A9 — see
+  the wrong regime. The rule is now **implemented as a declared operational
+  arm** (`crew_duty_exclusion` in `crusher_labs/config.yaml`,
+  `engines/crew_duty_exclusion.py`), `enabled: false` by default so every prior
+  run and campaign keeps meaning what it meant. It fires from the first
+  identified crew case rather than at ALERT, holds a food employee 48 h and
+  other crew 24 h symptom-free through the existing quarantine machinery, and
+  leaves passengers untouched. It introduces no epidemiological constant and no
+  second ascertainment probability — it reuses `ever_reported_ids` — and
+  `compliance_fraction` defaults to 1.0 as the *enforced upper bound on what
+  the structure can remove*, not an estimate, the maritime share being ∅ null.
+  Neither the rule nor a compliance value may be read off A9 — see
   `docs/literature/consensus_tranche_33_crew_duty_exclusion.md`. The same probe
   removed each crew exposure multiplier in turn at the quietest gate point and
   found **no** order-of-magnitude effect on either channel (36 seeds, weak

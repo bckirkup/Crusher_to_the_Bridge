@@ -3,7 +3,7 @@
   "type": "container",
   "platformCapabilities": ["EC2"],
   "containerProperties": {
-    "image": "<ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/picard-boundary-analysis:bounded-design-v5",
+    "image": "<ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/picard-boundary-analysis:bounded-design-v6",
     "command": [
       "deploy/aws/bounded_design_entrypoint.py",
       "--design", "Ref::design",
@@ -11,6 +11,7 @@
       "--trajectories", "Ref::trajectories",
       "--seed-shards", "Ref::seed_shards",
       "--only-points", "Ref::only_points",
+      "--crew-duty-exclusion", "Ref::crew_duty_exclusion",
       "--sobol-m", "Ref::sobol_m",
       "--seeds", "Ref::seeds",
       "--design-seed", "Ref::design_seed",
@@ -42,6 +43,7 @@
     "trajectories": "20",
     "seed_shards": "10",
     "only_points": "",
+    "crew_duty_exclusion": "off",
     "sobol_m": "7",
     "seeds": "30",
     "design_seed": "17",

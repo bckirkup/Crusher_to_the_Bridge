@@ -1126,6 +1126,17 @@ class TransmissionCore:
         return config
 
     @property
+    def service_zones(self) -> frozenset[str]:
+        """Zones where a crew member is doing food service.
+
+        The same set the crew contact multiplier, the service-surface contact
+        rate and the food-handler multiplier key off, exposed read-only so a
+        consumer cannot silently disagree with the transmission model about
+        who is a food employee.
+        """
+        return frozenset(self._service_zones)
+
+    @property
     def strain_tracking(self) -> bool:
         """True when doses are attributed to strains."""
         return self.strain_registry is not None
