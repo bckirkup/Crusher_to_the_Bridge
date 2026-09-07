@@ -36,6 +36,12 @@ esac
 # Design sizes come from the flags, not from this script: they are the
 # arguments the local run used, so a Batch run and a local run are the same
 # design at the same --design-seed.
+# PLATFORM names the hull, and the hull names the complement: the design reads
+# nominal_complement from the platform's own spatial layout and refuses a
+# complement that is not its hull's, so a class arm is submitted by naming the
+# class rather than by stating an agent count. One arm per class; the arms
+# differ by hull and by S3_PREFIX and in nothing else.
+PLATFORM="${PLATFORM:-classic_cruise_1900}"
 TRAJECTORIES="${TRAJECTORIES:-20}"
 SEED_SHARDS="${SEED_SHARDS:-1}"
 ONLY_POINTS="${ONLY_POINTS:-}"
@@ -52,6 +58,7 @@ JOB_NAME="${JOB_NAME:-picard-bounded-${DESIGN}-$(date +%Y%m%d-%H%M%S)}"
 echo "Submitting bounded design array:"
 echo "  name         : $JOB_NAME"
 echo "  design       : $DESIGN"
+echo "  platform     : $PLATFORM"
 echo "  array size   : $SHARD_COUNT"
 echo "  trajectories : $TRAJECTORIES (screen)"
 echo "  seed shards  : $SEED_SHARDS"
@@ -65,8 +72,8 @@ echo "  s3 prefix    : $S3_PREFIX"
 
 # JSON rather than key=value shorthand: a point selection is itself
 # comma-separated, and the shorthand would read it as further parameters.
-PARAMETERS=$(printf '{"design":"%s","shard_count":"%s","trajectories":"%s","seed_shards":"%s","only_points":"%s","crew_duty_exclusion":"%s","sobol_m":"%s","seeds":"%s","design_seed":"%s","s3_prefix":"%s"}' \
-  "$DESIGN" "$SHARD_COUNT" "$TRAJECTORIES" "$SEED_SHARDS" "$ONLY_POINTS" \
+PARAMETERS=$(printf '{"design":"%s","platform":"%s","shard_count":"%s","trajectories":"%s","seed_shards":"%s","only_points":"%s","crew_duty_exclusion":"%s","sobol_m":"%s","seeds":"%s","design_seed":"%s","s3_prefix":"%s"}' \
+  "$DESIGN" "$PLATFORM" "$SHARD_COUNT" "$TRAJECTORIES" "$SEED_SHARDS" "$ONLY_POINTS" \
   "$CREW_DUTY_EXCLUSION" "$SOBOL_M" "$SEEDS" "$DESIGN_SEED" "$S3_PREFIX")
 
 env -u AWS_ACCESS_KEY_ID -u AWS_SECRET_ACCESS_KEY -u AWS_SESSION_TOKEN \

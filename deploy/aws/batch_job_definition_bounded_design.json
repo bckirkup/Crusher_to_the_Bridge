@@ -7,6 +7,7 @@
     "command": [
       "deploy/aws/bounded_design_entrypoint.py",
       "--design", "Ref::design",
+      "--platform", "Ref::platform",
       "--shard-count", "Ref::shard_count",
       "--trajectories", "Ref::trajectories",
       "--seed-shards", "Ref::seed_shards",
@@ -39,6 +40,7 @@
   },
   "parameters": {
     "design": "screen",
+    "platform": "classic_cruise_1900",
     "shard_count": "200",
     "trajectories": "20",
     "seed_shards": "10",
