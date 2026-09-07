@@ -1,0 +1,37 @@
+{
+  "schema_version": "1.0",
+  "historical_audit_sha": "07561adf2b93ff6b358859fb382b253c08828156",
+  "remediation_commit": "7f9e2be45bb740520f8a1ca5ce9b0a973d6d9414",
+  "independent_verification_sha": "327e07bc8919c87cff94e33e3c20c2d0d1548c9e",
+  "verified_utc": "2026-09-07T01:41:00Z",
+  "environment": {
+    "python": "3.13.7",
+    "scipy": "1.18.1",
+    "test_runner": "pytest 9.1.1",
+    "notes": "isolated minimal environment; ambient PYTHONPATH cleared; dedicated TMPDIR"
+  },
+  "result": {
+    "selected_tests_passed": 103,
+    "failed": 0,
+    "warnings": 7,
+    "exit_code": 0
+  },
+  "dispositions": [
+    {
+      "finding_id": "DIM-01",
+      "status": "REMEDIATED_CONFIRMED",
+      "evidence": "24-hour food pool and delivered dose agree across 1h, 6h, and 24h grids to committed tolerances; environmental delivery invariance also passed."
+    },
+    {
+      "finding_id": "DIM-02",
+      "status": "REMEDIATED_CONFIRMED",
+      "evidence": "NaN and positive/negative infinity epoch durations raise ValueError in hours and legacy modes."
+    },
+    {
+      "finding_id": "DIM-03",
+      "status": "REMEDIATED_CONFIRMED",
+      "evidence": "Negative/nonfinite hour/day durations and negative activation delay are rejected rather than clamped."
+    }
+  ],
+  "scope_limit": "Focused acceptance-test execution only; does not re-adjudicate other r11 findings or publication readiness."
+}
