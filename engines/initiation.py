@@ -882,8 +882,9 @@ def apply_explicit_seeds(
         _apply_one_seed(
             seed, engine, epoch, rng, resolved.get(seed.pathogen_id, {}),
         )
-        for seed in plan.seeds
+        for index, seed in enumerate(plan.seeds)
         if seed.epoch == epoch
+        and claim_arrival(engine, ("seed", index, epoch))
     ]
     manifest = getattr(engine, "initiation_manifest", None)
     if records and isinstance(manifest, dict):
@@ -906,13 +907,34 @@ def _initiation_mode(plan: InitiationPlan) -> str:
     return MODE_NONE
 
 
+def claim_arrival(engine: Any, key: tuple[Any, ...]) -> bool:
+    """Whether this arrival has not already been applied on this engine.
+
+    An arrival is one event per spec per port call, and it is offered twice at
+    the sailing port: initialization draws epoch 0's cohort and applies its
+    seeds, and the epoch loop then reaches epoch 0 and offers the same
+    schedule again. Without the claim the second offer draws an independent
+    cohort over the same eligible population, so the realized boarding
+    prevalence is the sum of two Binomials rather than the per-person
+    probability the spec states.
+    """
+    applied = getattr(engine, "initiation_applied", None)
+    if applied is None:
+        applied = set()
+        engine.initiation_applied = applied
+    if key in applied:
+        return False
+    applied.add(key)
+    return True
+
+
 def draw_port_call(
     plan: InitiationPlan,
     engine: Any,
     epoch: int,
     profiles: dict[str, dict[str, Any]],
 ) -> list[BoardingReport]:
-    """Board every pathogen whose port call is this epoch.
+    """Board every pathogen whose port call is this epoch, once.
 
     Embarkation is not one event: a staged bundle boards its pathogens at
     successive port calls, so each draw belongs to the epoch its own spec
@@ -926,6 +948,7 @@ def draw_port_call(
         )
         for spec in plan.boarding
         if spec.epoch == epoch
+        and claim_arrival(engine, ("boarding", spec.pathogen_id, epoch))
     ]
 
 

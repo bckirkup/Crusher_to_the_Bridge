@@ -866,3 +866,57 @@ None of this selects a value or narrows an interval. A Grade D factor dominating
 the screen means the screen cannot say whether the mechanisms are jointly
 consistent with the anchors; it says which axis a measurement would be worth
 most on, and that axis is the one that was never a biological constant.
+
+## 9l. The sailing port was called twice, and its cohort drawn twice
+
+`ARRIVE-01`. A boarding spec states a per-person arrival probability over the
+eligible population at one port call. Epoch 0's port call was offered to the
+engine twice: `orchestrator_init._run_initiation` draws it and applies epoch 0's
+explicit seeds, and the epoch loop then reaches epoch 0 and offers the same
+schedule again through `orchestrator_epoch.step_mid_cruise_introductions`. The
+`epoch > 0` guard existed only on the legacy fiat-index path, so the modern
+initiation plan drew a second independent Binomial over the same eligible
+population, and epoch-0 explicit seeds were applied twice.
+
+Realized arrival prevalence was therefore the sum of two draws over a
+shrinking eligible pool rather than the probability the profile declares.
+Measured over 40 voyages of the quiet-region point (`mega_cruise_5000`,
+`norwalk_gi` declaring 3.25% of passengers and 1.85% of crew): passengers
+boarded infected at **5.09%** (643 of 12,640) and crew at **3.32%** (178 of
+5,360), i.e. 1.57x and 1.79x their declared rates. After the repair a single
+voyage draws once — 6 of 259 eligible passengers at seed 1, 7 of 253 at seed 2 —
+consistent with the declared 3.25%.
+
+The correction is a claim per `(mechanism, spec, epoch)` on the engine, so an
+arrival is applied by whichever caller reaches it first and the other caller
+finds it taken. Later port calls are untouched: a spec scheduled at epoch 6 is
+not claimed at epoch 0 and still boards exactly once at epoch 6.
+
+Why it matters beyond arithmetic: VSP posts a voyage at 3% of a complement, the
+crew complement is 134, and a 3.32% crew arrival prevalence delivers ~4.4 crew
+cases before any onboard transmission occurs — the trigger is five. The
+double-drawn arrival is therefore capable of posting a voyage on its own, which
+is the regime every campaign since #54/#440 has been scored in.
+
+The same 40-voyage diagnostic — taken under the double draw, so its levels
+belong to that regime — answers the crew-transmission question that prompted the
+search, and the answer is that crew are not amplified onboard.
+Onboard transmission is sparse (103 events in 40 voyages, 2.6 per voyage, all
+fomite or food; no direct-contact or droplet event appeared) and per capita it
+is the same for both roles: 72 events on 12,640 passenger-voyages (0.57%) and 31
+on 5,360 crew-voyages (0.58%). The crew channel is import-dominated — 178
+imported against 31 acquired — so the crew-only postings that carry 51.5% of the
+quiet region's postings (#467) are an arrival-prevalence phenomenon, not a
+crew-contact one, and the `crew_contact_multiplier`, service-surface and
+food-handler factors are not implicated by this measurement. Source attribution
+is unavailable in this configuration: `TransmissionCore._draw_source` names a
+shedder only when strain attribution is active, and all 103 events carry an
+unresolved source, so a crew-source versus passenger-source split remains
+unmeasured.
+
+Invalidates, as arrival regimes: the `bounded_design_v2` screen
+(`77d99c06`), the #37 v2 ten-factor gate (`245fc5d4`, 256 x 180), the
+quiet-corner run (`da6965ec`, 12 points x 1,440) and the matched duty-exclusion
+pair (#470). Their arithmetic stands; the condition they were computed under is
+not the declared one. Nothing here selects a value, moves a constant or narrows
+an interval.
