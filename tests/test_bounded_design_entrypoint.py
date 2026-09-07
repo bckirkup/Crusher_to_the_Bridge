@@ -115,3 +115,13 @@ def test_a_region_shard_starts_its_seeds_at_the_stage_base() -> None:
     )
     assert argv[argv.index("--seed-base") + 1] == "524"
     assert argv[argv.index("--seeds") + 1] == "24"
+
+
+def test_the_whole_grid_is_named_rather_than_left_empty() -> None:
+    from deploy.aws.bounded_design_entrypoint import _only_points
+
+    assert _only_points("all") == []
+    assert _only_points("") == []
+    assert _only_points("7, 13,204") == ["7", "13", "204"]
+    with pytest.raises(SystemExit):
+        _only_points("7,all")

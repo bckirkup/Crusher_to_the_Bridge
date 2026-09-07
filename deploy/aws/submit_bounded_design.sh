@@ -44,7 +44,7 @@ esac
 PLATFORM="${PLATFORM:-classic_cruise_1900}"
 TRAJECTORIES="${TRAJECTORIES:-20}"
 SEED_SHARDS="${SEED_SHARDS:-1}"
-ONLY_POINTS="${ONLY_POINTS:-}"
+ONLY_POINTS="${ONLY_POINTS:-all}"
 # CREW_DUTY_EXCLUSION=on turns on VSP's regulated duty exclusion (2018
 # Operations Manual 4.4.1.1.1). Off is the matched baseline arm: the same
 # points, the same seeds, the same --design-seed, one operational rule apart.
@@ -65,7 +65,7 @@ echo "  platform     : $PLATFORM"
 echo "  array size   : $SHARD_COUNT"
 echo "  trajectories : $TRAJECTORIES (screen)"
 echo "  seed shards  : $SEED_SHARDS"
-echo "  only points  : ${ONLY_POINTS:-<whole grid>} (region)"
+echo "  only points  : $ONLY_POINTS (region)"
 echo "  duty excl.   : $CREW_DUTY_EXCLUSION (region)"
 echo "  sobol m      : $SOBOL_M (region)"
 echo "  seeds/point  : $SEEDS"
@@ -76,6 +76,7 @@ echo "  s3 prefix    : $S3_PREFIX"
 
 # JSON rather than key=value shorthand: a point selection is itself
 # comma-separated, and the shorthand would read it as further parameters.
+# Batch refuses an empty parameter value: the whole grid is named "all".
 PARAMETERS=$(printf '{"design":"%s","platform":"%s","shard_count":"%s","trajectories":"%s","seed_shards":"%s","only_points":"%s","crew_duty_exclusion":"%s","sobol_m":"%s","seeds":"%s","seed_base":"%s","design_seed":"%s","s3_prefix":"%s"}' \
   "$DESIGN" "$PLATFORM" "$SHARD_COUNT" "$TRAJECTORIES" "$SEED_SHARDS" "$ONLY_POINTS" \
   "$CREW_DUTY_EXCLUSION" "$SOBOL_M" "$SEEDS" "$SEED_BASE" "$DESIGN_SEED" "$S3_PREFIX")

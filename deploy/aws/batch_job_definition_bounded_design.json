@@ -45,7 +45,7 @@
     "shard_count": "200",
     "trajectories": "20",
     "seed_shards": "10",
-    "only_points": "",
+    "only_points": "all",
     "crew_duty_exclusion": "off",
     "sobol_m": "7",
     "seeds": "30",

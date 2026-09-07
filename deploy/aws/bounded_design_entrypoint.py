@@ -131,13 +131,19 @@ def _screen_argv(args: argparse.Namespace, shard: int, out: Path) -> list[str]:
     ]
 
 
+WHOLE_GRID = "all"
+
+
 def _only_points(raw: str) -> list[str]:
     """The design indices a subset re-run names, as a comma-separated list.
 
     A Batch parameter is one string, so the selection arrives as ``"7,13,204"``
-    rather than as repeated arguments. An index that is not an integer is
+    rather than as repeated arguments. Batch refuses an empty parameter value,
+    so the whole grid is named ``"all"``. An index that is not an integer is
     refused here: a mistyped subset would otherwise re-run the wrong points.
     """
+    if raw.strip() == WHOLE_GRID:
+        return []
     indices = [part.strip() for part in raw.split(",") if part.strip()]
     for index in indices:
         if not index.isdigit():
