@@ -759,6 +759,24 @@ def _run_shard(
     return [*done, *fresh]
 
 
+def _require_scoring_inputs(design: Design) -> None:
+    """Load every anchor target before the first voyage runs.
+
+    A cell is scored only after all its seeds have run, so a missing VSP
+    series would surface hours in and discard the whole shard; the anchors
+    the cell will be scored against are read here, at the price of one file
+    open, and an absent one is refused before any compute is spent.
+    """
+    try:
+        vsp_attack_rate_targets(design.era)
+        a9_targets(design.era)
+    except FileNotFoundError as exc:
+        raise SystemExit(
+            f"anchor scoring input missing: {exc.filename}; the gate cannot "
+            "score a cell without it, so it refuses to run one",
+        ) from exc
+
+
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     """Command line for the gate."""
     parser = argparse.ArgumentParser(description=__doc__)
@@ -844,6 +862,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.merge:
         points = _pooled_points(args.merge, expected=len(grid))
     else:
+        _require_scoring_inputs(design)
         points = _run_shard(args, grid, seeds, design)
 
     sharded = not args.merge and args.shard_count > 1

@@ -24,6 +24,10 @@ telemetry_buffer/*
 # The bounded designs (Morris screen, feasibility gate) run from this package in
 # the Dockerfile.design worker; its modules only, never its result artifacts.
 !telemetry_buffer/observation_model/*.py
+# The gate scores every cell against the VSP series; without it a shard runs
+# all its voyages and then cannot score them.
+!telemetry_buffer/observation_model/vsp_outbreak_series.csv
+!telemetry_buffer/observation_model/vsp_inspection_series.csv
 
 # Dashboard / GIS-only assets not needed by the headless campaign runner
 dashboard/
