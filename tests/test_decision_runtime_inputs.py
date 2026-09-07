@@ -10,6 +10,7 @@ the build context, and an absent file is an error rather than a default.
 from __future__ import annotations
 
 import os
+import re
 import sys
 from pathlib import Path
 
@@ -23,6 +24,7 @@ from decision_engine.information.diffusion import InformationDiffusionEngine  # 
 from decision_engine.intelligence import default_timeline_path  # noqa: E402
 from decision_engine.runtime import DecisionRuntime  # noqa: E402
 from decision_engine.social.class_interactions import ClassInteractionMatrix  # noqa: E402
+from telemetry_buffer.observation_model.vsp_class_era_scoring import SERIES  # noqa: E402
 
 DEFAULT_INPUT_PATHS = (
     default_bundle_path(str(REPO_ROOT)),
@@ -31,11 +33,34 @@ DEFAULT_INPUT_PATHS = (
     InformationDiffusionEngine.default_path(str(REPO_ROOT)),
 )
 
+# Read at scoring time, not at boot: an image without it runs every voyage of
+# a gate shard and then cannot score the cell.
+SCORING_INPUT_PATHS = (str(SERIES),)
+
 IMAGES = (
     REPO_ROOT / "Dockerfile",
     REPO_ROOT / "deploy" / "aws" / "Dockerfile.design",
     REPO_ROOT / "deploy" / "aws" / "Dockerfile.analysis",
 )
+
+
+def _ignore_regex(pattern: str) -> re.Pattern[str]:
+    pattern = pattern.rstrip("/")
+    escaped = re.escape(pattern).replace(r"\*\*", ".*").replace(r"\*", "[^/]*")
+    return re.compile(rf"^{escaped}(/.*)?$")
+
+
+def _dockerignored(relative: str) -> bool:
+    """Whether the build context drops ``relative`` (last matching rule wins)."""
+    ignored = False
+    for raw in (REPO_ROOT / ".dockerignore").read_text(encoding="utf-8").splitlines():
+        line = raw.strip()
+        if not line or line.startswith("#"):
+            continue
+        negate = line.startswith("!")
+        if _ignore_regex(line.lstrip("!")).match(relative):
+            ignored = not negate
+    return ignored
 
 
 def _copied_sources(dockerfile: Path) -> list[str]:
@@ -55,7 +80,7 @@ def test_every_default_runtime_input_exists_in_the_checkout(path: str) -> None:
 
 
 @pytest.mark.parametrize("dockerfile", IMAGES, ids=lambda p: p.name)
-@pytest.mark.parametrize("path", DEFAULT_INPUT_PATHS)
+@pytest.mark.parametrize("path", DEFAULT_INPUT_PATHS + SCORING_INPUT_PATHS)
 def test_every_image_running_the_model_carries_its_runtime_inputs(
     dockerfile: Path,
     path: str,
@@ -66,6 +91,15 @@ def test_every_image_running_the_model_carries_its_runtime_inputs(
         str(relative) == source or str(relative).startswith(source.rstrip("/") + "/")
         for source in sources
     ), f"{dockerfile.name} does not copy {relative}"
+    assert not _dockerignored(str(relative)), f".dockerignore drops {relative}"
+
+
+def test_the_ignore_matcher_reads_docker_rules_as_docker_does() -> None:
+    assert _dockerignored("telemetry_buffer/bounded_screen_38.json")
+    assert _dockerignored("telemetry_buffer/observation_model/local_merged.json")
+    assert not _dockerignored("telemetry_buffer/observation_model/admissible_region.py")
+    assert not _dockerignored("engines/transmission_core.py")
+    assert _dockerignored("third_party/contamx/bin/contamx3")
 
 
 def test_a_missing_runtime_input_is_refused_rather_than_defaulted(
