@@ -39,6 +39,10 @@ esac
 TRAJECTORIES="${TRAJECTORIES:-20}"
 SEED_SHARDS="${SEED_SHARDS:-1}"
 ONLY_POINTS="${ONLY_POINTS:-}"
+# CREW_DUTY_EXCLUSION=on turns on VSP's regulated duty exclusion (2018
+# Operations Manual 4.4.1.1.1). Off is the matched baseline arm: the same
+# points, the same seeds, the same --design-seed, one operational rule apart.
+CREW_DUTY_EXCLUSION="${CREW_DUTY_EXCLUSION:-off}"
 SOBOL_M="${SOBOL_M:-7}"
 SEEDS="${SEEDS:-30}"
 DESIGN_SEED="${DESIGN_SEED:-17}"
@@ -52,6 +56,7 @@ echo "  array size   : $SHARD_COUNT"
 echo "  trajectories : $TRAJECTORIES (screen)"
 echo "  seed shards  : $SEED_SHARDS"
 echo "  only points  : ${ONLY_POINTS:-<whole grid>} (region)"
+echo "  duty excl.   : $CREW_DUTY_EXCLUSION (region)"
 echo "  sobol m      : $SOBOL_M (region)"
 echo "  seeds/point  : $SEEDS"
 echo "  design seed  : $DESIGN_SEED"
@@ -60,9 +65,9 @@ echo "  s3 prefix    : $S3_PREFIX"
 
 # JSON rather than key=value shorthand: a point selection is itself
 # comma-separated, and the shorthand would read it as further parameters.
-PARAMETERS=$(printf '{"design":"%s","shard_count":"%s","trajectories":"%s","seed_shards":"%s","only_points":"%s","sobol_m":"%s","seeds":"%s","design_seed":"%s","s3_prefix":"%s"}' \
+PARAMETERS=$(printf '{"design":"%s","shard_count":"%s","trajectories":"%s","seed_shards":"%s","only_points":"%s","crew_duty_exclusion":"%s","sobol_m":"%s","seeds":"%s","design_seed":"%s","s3_prefix":"%s"}' \
   "$DESIGN" "$SHARD_COUNT" "$TRAJECTORIES" "$SEED_SHARDS" "$ONLY_POINTS" \
-  "$SOBOL_M" "$SEEDS" "$DESIGN_SEED" "$S3_PREFIX")
+  "$CREW_DUTY_EXCLUSION" "$SOBOL_M" "$SEEDS" "$DESIGN_SEED" "$S3_PREFIX")
 
 env -u AWS_ACCESS_KEY_ID -u AWS_SECRET_ACCESS_KEY -u AWS_SESSION_TOKEN \
   AWS_PROFILE=picard aws batch submit-job \

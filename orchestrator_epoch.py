@@ -21,6 +21,12 @@ from crusher_labs.modalities.long_read_sequencing import (
     LongReadVerificationRequest,
 )
 from crusher_labs.modalities.wearable import WearableDataStream
+from engines.crew_duty_exclusion import (
+    ACTION_EXCLUDED,
+    ACTION_REFUSED,
+    ACTION_RELEASED,
+    CrewDutyExclusionTracker,
+)
 from engines.infection_dynamics_bridge import (
     DEFAULT_AIRBORNE_HALF_LIFE_HOURS,
     UNSOURCED_AIRBORNE_EMISSION_FRACTION,
@@ -888,6 +894,97 @@ def confine_all_agents(
             agent_class=agent.get("agent_class"),
             is_symptomatic=agent_requires_confinement(agent),
         )
+
+
+def step_crew_duty_exclusion(
+    epoch: int,
+    agents: list[dict[str, Any]],
+    state: SimulationState,
+    clock: SimClock,
+    tracker: CrewDutyExclusionTracker | None,
+) -> None:
+    """VSP's standing duty exclusion for crew meeting the AGE case definition.
+
+    Unlike ``step_quarantine_confinement`` this is not gated on escalation
+    status: the regulation applies from the first identified case, which is
+    the whole of its difference from SOP-008. It removes a crew member the
+    ship has already identified (``ever_reported_ids``) and holds them off
+    duty until symptom-free for the manual's duration — 48 h for food
+    employees, 24 h otherwise — then returns them to work.
+
+    Passengers are never touched here: the manual only advises isolation of
+    them, and folding them in would be an unsourced widening of the rule.
+    """
+    if tracker is None or not tracker.enabled:
+        return
+
+    # The AGE case definition is clinical, so presentation decides it here;
+    # ``agent_requires_confinement`` would also catch a quarantine refuser,
+    # who is not a case.
+    still_symptomatic = {
+        int(agent["agent_id"])
+        for agent in agents
+        if agent_has_symptomatic_presentation(agent)
+    }
+    tracker.note_symptoms(epoch, still_symptomatic & tracker.excluded_ids)
+
+    for agent in agents:
+        aid = int(agent["agent_id"])
+        if aid not in tracker.crew_ids or aid in tracker.excluded_ids:
+            continue
+        if aid not in still_symptomatic or aid not in state.ever_reported_ids:
+            continue
+        _admit_to_duty_exclusion(epoch, aid, state, tracker)
+
+    _release_cleared_crew(epoch, state, clock, tracker)
+
+
+def _admit_to_duty_exclusion(
+    epoch: int,
+    aid: int,
+    state: SimulationState,
+    tracker: CrewDutyExclusionTracker,
+) -> None:
+    """Take one identified crew case off duty, subject to the compliance arm."""
+    if not tracker.complies(aid):
+        state.compliance_log.append({
+            "epoch": epoch, "agent_id": aid, "action": ACTION_REFUSED,
+            "compliance_class": None,
+        })
+        return
+    tracker.excluded_ids.add(aid)
+    tracker.note_symptoms(epoch, (aid,))
+    state.quarantined_ids.add(aid)
+    state.quarantine_refusers.discard(aid)
+    state.compliance_log.append({
+        "epoch": epoch, "agent_id": aid, "action": ACTION_EXCLUDED,
+        "compliance_class": None,
+        "food_employee": aid in tracker.food_employee_ids,
+    })
+
+
+def _release_cleared_crew(
+    epoch: int,
+    state: SimulationState,
+    clock: SimClock,
+    tracker: CrewDutyExclusionTracker,
+) -> None:
+    """Return crew to work once the symptom-free clock has run out.
+
+    A crew member the outbreak response is *independently* holding — under a
+    lockdown or a counter threshold — stays confined: this rule releases its
+    own exclusion, not somebody else's confinement.
+    """
+    for aid in sorted(tracker.due_for_release(epoch, clock)):
+        tracker.excluded_ids.discard(aid)
+        tracker.last_symptom_epoch.pop(aid, None)
+        if STATUS_RANK.get(state.trigger_status, 0) >= STATUS_RANK[STATUS_ALERT]:
+            continue
+        state.quarantined_ids.discard(aid)
+        state.compliance_log.append({
+            "epoch": epoch, "agent_id": aid, "action": ACTION_RELEASED,
+            "compliance_class": None,
+        })
 
 
 def apply_outbreak_surface_disinfection(

@@ -433,6 +433,7 @@ def build_run_spec(
     description: str = "bounded_screen",
     observation_scenario: str | None = None,
     co_seeded: str = "isolated",
+    crew_duty_exclusion: bool = False,
 ) -> dict[str, object]:
     """The Picard spec for one design point at one seed.
 
@@ -449,6 +450,11 @@ def build_run_spec(
         overrides[pathogen_id]["observation_model"] = observation_scenario_patch(
             bundle, pathogen_id, observation_scenario,
         )
+    if crew_duty_exclusion:
+        # The regulated arm: VSP's crew duty exclusion on, everything else
+        # identical to the baseline spec, so a matched-seed difference is
+        # attributable to the operational rule and nothing else.
+        config_overrides["crew_duty_exclusion"] = {"enabled": True}
     return {
         "schema_version": "1.0.0",
         "description": description,
@@ -479,6 +485,7 @@ def run_point(
     num_agents: int,
     observation_scenario: str | None = None,
     co_seeded: str = "isolated",
+    crew_duty_exclusion: bool = False,
 ) -> dict[str, float]:
     """Run one design point at one seed and return the scored outputs."""
     spec = build_run_spec(
@@ -492,6 +499,7 @@ def run_point(
         num_agents=num_agents,
         observation_scenario=observation_scenario,
         co_seeded=co_seeded,
+        crew_duty_exclusion=crew_duty_exclusion,
     )
     with tempfile.TemporaryDirectory() as tmp:
         spec_path = Path(tmp) / "run_spec.json"

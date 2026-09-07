@@ -158,6 +158,11 @@ def _region_argv(
     selection = _only_points(args.only_points)
     if selection:
         argv += ["--only-points", *selection]
+    # A Batch parameter is a string, so the arm arrives as on/off rather than
+    # as the presence of a flag; the two arms must otherwise be the same
+    # design at the same --design-seed for the seeds to be matched.
+    if args.crew_duty_exclusion == "on":
+        argv += ["--crew-duty-exclusion"]
     return argv
 
 
@@ -175,6 +180,9 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--trajectories", type=int, default=20)
     parser.add_argument("--seed-shards", type=int, default=1)
     parser.add_argument("--only-points", default="")
+    parser.add_argument(
+        "--crew-duty-exclusion", default="off", choices=("on", "off"),
+    )
     parser.add_argument("--sobol-m", type=int, default=7)
     parser.add_argument("--seeds", type=int, default=30)
     parser.add_argument("--design-seed", type=int, default=17)

@@ -195,6 +195,30 @@ fred_behavior:
     - {reason: "fatigue",      probability_per_day: 0.0030, syndrome: "systemic_febrile"}
     - {reason: "minor_injury", probability_per_day: 0.0020, syndrome: "wound_soft_tissue"}
 
+# ── VSP crew duty exclusion (regulated, not epidemiological) ──
+# CDC VSP 2018 Operations Manual 4.4.1.1.1 requires a crew member meeting the
+# AGE case definition to be taken off duty and isolated — food employees until
+# symptom-free for a minimum of 48 hours with documented medical clearance,
+# other crew for 24 hours. Passengers are only advised to isolate (4.4.2.1), so
+# this rule is crew-only. Unlike SOP-008 it is not gated on escalation status.
+#
+# Off by default so that every existing run and campaign keeps meaning what it
+# meant; the arm is turned on explicitly (config override) and its effect
+# measured against the identical baseline seeds. compliance_fraction is an
+# operational arm, not a measurement: the maritime compliance share is null in
+# the literature, and 1.0 states the enforced-regulation upper bound on what
+# the structure can remove. No value here may be chosen by which one
+# reproduces an anchor.
+crew_duty_exclusion:
+  enabled: false
+  food_employee_symptom_free_hours: 48
+  nonfood_crew_symptom_free_hours: 24
+  compliance_fraction: 1.0
+  # The manual requires medical approval before return but states no interval;
+  # null in the maritime literature, so 0.0 h holds release at the stated
+  # minimum and longer reviews are a declared arm.
+  medical_clearance_delay_hours: 0
+
 # ── EMOD-Style Clinical Progression ──────────────────────────
 emod_progression:
   # Advisory values only; progression uses pathogen profiles, not this block.

@@ -951,3 +951,43 @@ def test_merge_mode_pools_the_shard_effects(
         payload["effects"]["f"]["attack_rate"]["n"],
         payload["effects"]["f"]["attack_rate"]["mu"],
     ) == ([0, 1, 2], 3.0, 1.0)
+
+
+def _spec(*, crew_duty_exclusion: bool) -> dict[str, object]:
+    return bounded_screen.build_run_spec(
+        bounded_screen.NOROVIRUS_FACTORS,
+        [0.5] * len(bounded_screen.NOROVIRUS_FACTORS),
+        seed=11,
+        pathogen_id=PATHOGEN,
+        bundle="active_profiles",
+        platform="mega_cruise_5000",
+        epochs=24,
+        num_agents=200,
+        crew_duty_exclusion=crew_duty_exclusion,
+    )
+
+
+def test_the_baseline_arm_carries_no_duty_exclusion_block() -> None:
+    """Every run before this arm existed means what it meant."""
+    overrides = _spec(crew_duty_exclusion=False)["config_overrides"]
+
+    assert "crew_duty_exclusion" not in overrides
+
+
+def test_the_regulated_arm_turns_the_duty_exclusion_on() -> None:
+    overrides = _spec(crew_duty_exclusion=True)["config_overrides"]
+
+    assert overrides["crew_duty_exclusion"] == {"enabled": True}
+
+
+def test_the_two_arms_differ_in_that_block_and_nothing_else() -> None:
+    """Matched seeds only mean something if the rest of the spec is equal."""
+    baseline = _spec(crew_duty_exclusion=False)
+    regulated = _spec(crew_duty_exclusion=True)
+    stripped = dict(regulated["config_overrides"])
+    stripped.pop("crew_duty_exclusion")
+
+    assert stripped == baseline["config_overrides"]
+    assert {k: v for k, v in regulated.items() if k != "config_overrides"} == {
+        k: v for k, v in baseline.items() if k != "config_overrides"
+    }

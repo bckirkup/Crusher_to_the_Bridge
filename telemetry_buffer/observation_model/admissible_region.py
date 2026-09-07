@@ -158,6 +158,9 @@ class Design:
     era: str = "pre"
     co_seeded: str = "isolated"
     observation_scenario: str | None = None
+    # The regulated operational arm, off unless a run asks for it: a design
+    # carries it so baseline and intervention differ in this field alone.
+    crew_duty_exclusion: bool = False
 
     def run_kwargs(self) -> dict[str, Any]:
         return {
@@ -168,6 +171,7 @@ class Design:
             "num_agents": self.num_agents,
             "co_seeded": self.co_seeded,
             "observation_scenario": self.observation_scenario,
+            "crew_duty_exclusion": self.crew_duty_exclusion,
         }
 
 
@@ -1162,6 +1166,15 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         default=None,
         help="A declared observation_model.prior scenario to run the box under",
     )
+    parser.add_argument(
+        "--crew-duty-exclusion",
+        action="store_true",
+        help=(
+            "turn on VSP's regulated crew duty exclusion (2018 Operations "
+            "Manual 4.4.1.1.1); off by default so the same design and seeds "
+            "give the matched baseline"
+        ),
+    )
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument(
         "--stream",
@@ -1229,6 +1242,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         num_agents=args.num_agents,
         era=args.era,
         observation_scenario=args.observation_scenario,
+        crew_duty_exclusion=args.crew_duty_exclusion,
     )
     factors = NOROVIRUS_FACTORS
     seeds = [args.seed_base + index for index in range(args.seeds)]
