@@ -148,6 +148,32 @@ the other, stated, for both the observed and the model side; mixing them
 inflates or deflates the posting rate by up to a third. Until that choice is
 made explicit in the scorer, A9 is reported as an interval spanning both.
 
+**4. Which complement carries a posting is measurable, and it is passengers.**
+The reporting rule is 3% of passengers *or* 3% of crew, so the numerator of
+either definition is a set of channels, not a single rate. Classifying the 208
+postings in the 2006-2019 window on rates recomputed from their published
+counts gives 182 passenger-only, 22 both, **1 crew-only**, and 3 at neither;
+the 3 include the two rows whose hosted `pax_ill` lost a leading digit (2013
+Celebrity Millennium, 2011 Sea Princess, both already triaged in the extraction
+log), so on the printed percentages the passenger channel carries 206 of 208.
+The crew-only count is 1 either way, a crew-only share of 0.5%.
+
+MMWR's own investigated counts bound the same quantity more loosely and in the
+same direction: Table 3 reports 156 passenger outbreaks against 16 crew
+outbreaks, so at most 9.3% of investigated outbreaks were crew outbreaks --
+and that arm is not disjoint from the passenger arm, since a voyage can cross
+3% in both. Between the two products the observed crew contribution to a
+posting sits somewhere in 0.5-9.3%, which is a ceiling either definition
+respects.
+
+This is a measurement of CDC's record, not a modelling preference, and it is
+what makes the simulated crew arm a defect candidate: in the gate's
+lowest-posting region 408 of 793 postings (51.5%) were crew-only and 523 (66%)
+had crew at or above 3%, an order of magnitude above the observed ceiling. The
+model's own passenger-or-crew scorer stays on the policy rule; the passenger
+channel is reported beside it so the comparison is against a numerator of the
+same construction as A9's.
+
 ## What is still missing
 
 - **Outbreak counts by GRT band.** Table 3 breaks the 156 outbreaks down by

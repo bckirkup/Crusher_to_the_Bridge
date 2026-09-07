@@ -99,6 +99,18 @@ the passenger channel, the quiet region posts on 385 of 17,280 voyages =
 the excess, but it carries the majority of it through a five-case trigger on a
 small denominator.
 
+CDC's own record puts a ceiling on that channel. Classifying the 208 postings
+of the 2006-2019 window on their published counts gives **1 crew-only** (0.5%),
+and MMWR's investigated counts give 16 crew outbreaks against 156 passenger
+ones, so no more than 9.3% of observed outbreaks were crew outbreaks — a
+non-disjoint arm, so the true crew-only share is at the low end
+(`midrs_observed_targets.md` section 4). The quiet region's 51.5% crew-only,
+and 66% with crew at or above 3%, is an order of magnitude above that ceiling.
+That is a second discrepancy with the observed record, independent of the A9
+frequency shortfall, and it is a measurement rather than a preference: nothing
+here licenses a minimum-case floor, since the observed crew-only rows include
+one-case postings on small complements.
+
 Two consequences worth separating:
 
 1. The ship's own VSP trigger (`vsp_trigger_epoch`) is set on exactly the
@@ -133,6 +145,26 @@ Follow-ups, in the order they change the verdict:
    ill passengers, so the model already separates infection from illness — what
    it does not do is make that separation change transmission.
 2. State A9's conditioning on the crew complement, or score the two channels
-   separately; at 134 crew the anchor band is sub-case.
+   separately; at 134 crew the anchor band is sub-case. **Done for the observed
+   side:** 206 of 208 postings are passenger-channel on the printed
+   percentages, exactly one is crew-only under either reading, and the scorer
+   now reports `A9_posting_probability_passenger_channel` beside the
+   authoritative passenger-**or**-crew rule, which is unchanged.
 3. Give the in-sim VSP trigger the crew arm the scorer already applies, so
    `vsp_trigger_epoch` and A9 count the same event.
+4. **The crew channel's asymmetry is now sourced, and it is a missing
+   structure, not a parameter.** VSP's 2018 Operations Manual §4.4.1.1.1
+   *requires* isolation of a crew member meeting the AGE case definition — food
+   employees until 48 h symptom-free with documented medical clearance before
+   return to work — where §4.4.2.1 only *advises* it of passengers. The model
+   has no standing equivalent: symptom-triggered removal exists only as SOP-008
+   gated at escalation status ALERT, the one gate this region never reaches, so
+   a symptomatic crew member works the voyage under `crew_contact_multiplier`
+   2.0, `CREW_SERVICE_SURFACE_CONTACTS_PER_HOUR` 545.4 and
+   `FOOD_HANDLER_CONTACT_MULTIPLIER` 12.7. Removing each of those two
+   multipliers in turn at point 46 (36 seeds) moved neither channel by an order
+   of magnitude — a negative result with weak power, and the reason to go at the
+   structure rather than the constants. Bound on what it can buy: the crew
+   channel is 51.5% of this region's postings, and passenger-only scoring is
+   still 2.23%, ~4× A9's ceiling. See
+   [tranche 33](../literature/consensus_tranche_33_crew_duty_exclusion.md).
