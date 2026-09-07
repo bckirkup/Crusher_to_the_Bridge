@@ -48,13 +48,14 @@ from telemetry_buffer.observation_model.midrs_incidence_targets import (
 from telemetry_buffer.observation_model.vsp_class_era_scoring import (
     HULL_PASSENGER_CAPACITY,
     MIN_POSTINGS_FOR_TARGET,
+    POSTING_THRESHOLD,
     SCORED_ERAS,
     vsp_attack_rate_targets,
 )
 
 SUMMARY_NAME = "summary.json"
 TAKEOFF_PEAK_PREVALENCE = 10
-A9_POSTING_THRESHOLD = 0.03
+A9_POSTING_THRESHOLD = POSTING_THRESHOLD
 A8_A9_NO_REPORTING = (
     "undefined (arm does not model reporting: sick_call_probability = 0)"
 )
@@ -490,7 +491,9 @@ def _no_reporting_channels() -> dict[str, Any]:
         "A8_pax_incidence": A8_A9_NO_REPORTING,
         "A8_crew_incidence": A8_A9_NO_REPORTING,
         "A9_posting_probability": A8_A9_NO_REPORTING,
+        "A9_posting_probability_passenger_channel": A8_A9_NO_REPORTING,
         "A9_posted_eligible": 0,
+        "A9_posted_passenger_channel": 0,
         "A9_flag_disagreements": 0,
     }
 
@@ -519,6 +522,14 @@ def _a8_a9_channels(
         if row["reported_case_attack_rate_passenger"] >= A9_POSTING_THRESHOLD
         or row["reported_case_attack_rate_crew"] >= A9_POSTING_THRESHOLD
     ]
+    # A9's two numerators are both counts of *passenger* outbreaks, and only
+    # one of the 208 postings in ``vsp_outbreak_series.csv`` was carried by
+    # crew alone, so the passenger channel is reported beside the or-rule
+    # rather than mixed into it.
+    posted_pax = [
+        row for row in eligible
+        if row["reported_case_attack_rate_passenger"] >= A9_POSTING_THRESHOLD
+    ]
     disagreements = sum(
         (
             row["reported_case_attack_rate_passenger"] >= A9_POSTING_THRESHOLD
@@ -532,9 +543,13 @@ def _a8_a9_channels(
         "A8_crew_incidence": 1e5 * crew_case_days / crew_travel_days,
         "A9_eligible_runs": len(eligible),
         "A9_posted_eligible": len(posted),
+        "A9_posted_passenger_channel": len(posted_pax),
         "A9_flag_disagreements": disagreements,
         "A9_posting_probability": (
             len(posted) / len(eligible) if eligible else None
+        ),
+        "A9_posting_probability_passenger_channel": (
+            len(posted_pax) / len(eligible) if eligible else None
         ),
     }
 

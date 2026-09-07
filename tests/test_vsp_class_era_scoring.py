@@ -19,7 +19,7 @@ from types import ModuleType
 
 import pytest
 
-from telemetry_buffer.observation_model import score_anchors
+from telemetry_buffer.observation_model import score_anchors, vsp_class_era_scoring
 
 HARNESS = (
     Path(__file__).resolve().parents[1]
@@ -398,3 +398,68 @@ def test_verdict_scores_against_the_classic_pre_iqr(
     )
 
     assert verdict["A4_vsp_iqr"] == expected
+
+
+def _posting(pax_rate: float, crew_rate: float | None, year: int = 2010):
+    return scoring.Posting(
+        year=year,
+        era="pre",
+        hull="classic_cruise_1900",
+        pax_total=1000,
+        pax_rate=pax_rate,
+        crew_rate=crew_rate,
+    )
+
+
+def test_posting_channels_classify_each_arm_of_the_or_rule() -> None:
+    """Passenger, crew, both, neither and unclassifiable are five disjoint sets."""
+    channels = scoring.observed_posting_channels(
+        [
+            _posting(0.05, 0.01),
+            _posting(0.01, 0.05),
+            _posting(0.05, 0.05),
+            _posting(0.01, 0.01),
+            _posting(0.05, None),
+        ],
+    )
+
+    assert channels["passenger_only"] == 1
+    assert channels["crew_only"] == 1
+    assert channels["both"] == 1
+    assert channels["neither_at_threshold"] == 1
+    assert channels["crew_rate_unpublished"] == 1
+
+
+def test_a_posting_with_no_published_crew_rate_is_not_a_passenger_posting() -> None:
+    """An unpublished crew percentage is unclassifiable, not a negative."""
+    channels = scoring.observed_posting_channels([_posting(0.05, None)])
+
+    assert channels["passenger_only"] == 0
+    assert scoring.observed_crew_only_share([_posting(0.05, None)]) is None
+
+
+def test_crew_alone_almost_never_carries_a_posting_in_the_cdc_record() -> None:
+    """A9's window: one posted outbreak of 207 crossed 3% on crew only.
+
+    Change-detector on the observed numerator's composition. The model's own
+    crew arm carries 51.5% of the low-posting region's postings, two orders
+    above this, which is what makes the arm a defect candidate rather than a
+    definitional preference.
+    """
+    first, last = scoring.MIDRS_WINDOW
+    window = [
+        posting for posting in scoring.load_postings()
+        if first <= posting.year <= last
+    ]
+
+    channels = scoring.observed_posting_channels(window)
+    assert channels["crew_only"] == 1
+    assert channels["passenger_only"] + channels["both"] == 204
+    assert scoring.observed_crew_only_share(window) < 0.01
+
+
+def test_the_series_and_the_scorer_share_one_posting_threshold() -> None:
+    """One 3% rule, defined where the CDC series is read."""
+    assert score_anchors.A9_POSTING_THRESHOLD is (
+        vsp_class_era_scoring.POSTING_THRESHOLD
+    )

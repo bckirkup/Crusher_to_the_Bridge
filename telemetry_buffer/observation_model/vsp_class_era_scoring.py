@@ -205,6 +205,62 @@ def targets_by_class_era(postings: list[Posting]) -> dict[tuple[str, str], Any]:
 
 MIN_POSTINGS_FOR_TARGET = 10
 
+# The VSP reporting rule: a voyage is posted when 3% of *either* complement is
+# reported ill.  One definition, used by both the observed series read here and
+# the model side in ``score_anchors.py``, which imports it.
+POSTING_THRESHOLD = 0.03
+
+
+def observed_posting_channels(postings: list[Posting]) -> dict[str, int]:
+    """Which complement carried each posted outbreak CDC actually published.
+
+    The rule is an ``or`` over two complements, so a posting can be carried by
+    passengers, by crew, or by both, and A9's numerator is one of those sets.
+    Postings whose crew percentage was never published cannot be classified
+    and are counted separately rather than folded into the passenger arm.
+    """
+    channels = {
+        "passenger_only": 0,
+        "crew_only": 0,
+        "both": 0,
+        "neither_at_threshold": 0,
+        "crew_rate_unpublished": 0,
+    }
+    for posting in postings:
+        pax = posting.pax_rate >= POSTING_THRESHOLD
+        if posting.crew_rate is None:
+            channels["crew_rate_unpublished"] += 1
+            continue
+        crew = posting.crew_rate >= POSTING_THRESHOLD
+        if pax and crew:
+            channels["both"] += 1
+        elif pax:
+            channels["passenger_only"] += 1
+        elif crew:
+            channels["crew_only"] += 1
+        else:
+            channels["neither_at_threshold"] += 1
+    return channels
+
+
+def observed_crew_only_share(postings: list[Posting]) -> float | None:
+    """Share of classifiable postings that crew alone carried across 3%.
+
+    This is the observed counterpart of the model's crew arm: A9's numerators
+    are passenger outbreak counts, so how much of CDC's own posted record the
+    crew rule contributes is a measurement, not a modelling choice.
+    """
+    channels = observed_posting_channels(postings)
+    classifiable = (
+        channels["passenger_only"]
+        + channels["crew_only"]
+        + channels["both"]
+        + channels["neither_at_threshold"]
+    )
+    if not classifiable:
+        return None
+    return channels["crew_only"] / classifiable
+
 
 def vsp_attack_rate_targets(
     era: str = "pre",
@@ -264,6 +320,27 @@ def incidence_by_class_era(postings: list[Posting]) -> dict[tuple[str, str], Any
     return out
 
 
+# The window Jenkins 2021 pools, and so the window A9's numerators come from.
+MIDRS_WINDOW: tuple[int, int] = (2006, 2019)
+
+
+def _channel_rows(postings: list[Posting]) -> list[tuple[str, list[Posting]]]:
+    """Posting subsets worth classifying by channel, most specific first."""
+    first, last = MIDRS_WINDOW
+    rows: list[tuple[str, list[Posting]]] = [
+        (
+            f"MIDRS window {first}-{last}",
+            [p for p in postings if first <= p.year <= last],
+        ),
+    ]
+    rows += [
+        (era, [p for p in postings if p.era == era])
+        for era in ERAS
+    ]
+    rows.append(("whole series", postings))
+    return [(label, subset) for label, subset in rows if subset]
+
+
 def _fmt(value: float | None, places: int = 4) -> str:
     return "n/a" if value is None else f"{value:.{places}f}"
 
@@ -298,6 +375,35 @@ def render(postings: list[Posting]) -> str:
                 f"{_fmt(row.get('median'))} | {_fmt(row.get('q3'))} | "
                 f"{_fmt(row.get('max'))} |",
             )
+    lines += [
+        "",
+        "## Which complement carried the posting",
+        "",
+        "VSP posts on 3% of passengers *or* 3% of crew, so A9's numerator is "
+        "one of these sets and must say which. Crew alone almost never "
+        "carries a posting in CDC's own record.",
+        "",
+        "Classified on rates recomputed from the published counts. Two rows in "
+        "the MIDRS window (2013 Celebrity Millennium, 2011 Sea Princess) land "
+        "in `neither` only because CDC's hosted table dropped a leading digit "
+        "from `pax_ill`, already recorded in the extraction log against the "
+        "archived per-outbreak pages; on the printed percentages both are "
+        "passenger-channel, giving 206 of 208. The crew-only count is 1 under "
+        "either reading.",
+        "",
+        "| subset | n | passenger only | crew only | both | neither | "
+        "crew % unpublished | crew-only share |",
+        "|---|---|---|---|---|---|---|---|",
+    ]
+    for label, subset in _channel_rows(postings):
+        channels = observed_posting_channels(subset)
+        share = observed_crew_only_share(subset)
+        lines.append(
+            f"| {label} | {len(subset)} | {channels['passenger_only']} | "
+            f"{channels['crew_only']} | {channels['both']} | "
+            f"{channels['neither_at_threshold']} | "
+            f"{channels['crew_rate_unpublished']} | {_fmt(share)} |",
+        )
     lines += [
         "",
         "## Posting count per class-year (NOT a per-voyage rate)",

@@ -650,7 +650,15 @@ FOOD_HAND_CONTACTS_PER_DAY = 0.6
 # no policy stating when an ill worker is excluded (Norton 2015) — all
 # 12-month worker-level recall, where a per-shift probability is what would be
 # needed, and there is no food-handler shift in the model to attach one to
-# (tranche 30 §2). Recorded as bounded and not adoptable.
+# (tranche 30 §2). Recorded as bounded and not adoptable — and those figures
+# are land-based, where VSP's crew arm is the opposite regime: a crew member
+# meeting the AGE case definition is *required* to be isolated, a food employee
+# until 48 h symptom-free with documented medical clearance before returning to
+# work (VSP 2018 Operations Manual §4.4.1.1.1), where the same manual only
+# *advises* it of passengers. No standing exclusion of that kind exists here;
+# the model's only symptom-triggered removal is SOP-008, gated at escalation
+# status ALERT (tranche 33). The multiplier is not a stand-in for it and does
+# not move to compensate.
 # Grade C inferred. Origin: Jin 2022 ratio, transferred across contact type.
 FOOD_HANDLER_CONTACT_MULTIPLIER = 12.7
 

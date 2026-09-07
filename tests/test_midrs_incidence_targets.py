@@ -5,6 +5,7 @@ from __future__ import annotations
 import pytest
 
 from telemetry_buffer.observation_model import midrs_incidence_targets as targets
+from telemetry_buffer.observation_model import vsp_class_era_scoring as vsp
 
 
 def test_midrs_voyage_count_tables_cover_the_source_total() -> None:
@@ -103,3 +104,30 @@ def test_a9_exposes_competing_fleet_definitions_and_unmapped_band() -> None:
 def test_a9_rejects_invalid_era() -> None:
     with pytest.raises(ValueError, match="unknown MIDRS era"):
         targets.a9_targets("future")
+
+
+def test_crew_channel_share_is_bounded_by_both_cdc_products() -> None:
+    """The crew rule carries 0.5-9.3% of the observed record, not half of it."""
+    share = targets.observed_crew_channel_share()
+
+    assert share["posted_series_crew_only"] == pytest.approx(0.0048, abs=1e-4)
+    assert share["investigated_crew_outbreak_share"] == pytest.approx(
+        0.0930, abs=1e-4
+    )
+    low, high = share["interval"]
+    assert low < high
+    assert share["basis"]
+
+
+def test_the_crew_only_posting_count_is_what_the_series_classifies() -> None:
+    """The recorded constant is a reading of the series, not an assertion."""
+    first, last = vsp.MIDRS_WINDOW
+    window = [
+        posting
+        for posting in vsp.load_postings()
+        if first <= posting.year <= last
+    ]
+    channels = vsp.observed_posting_channels(window)
+
+    assert len(window) == targets.MIDRS_PASSENGER_OUTBREAKS_POSTED
+    assert channels["crew_only"] == targets.MIDRS_CREW_ONLY_POSTINGS

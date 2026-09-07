@@ -730,6 +730,24 @@ measurement, and four things change:
   fires only on the passenger channel while A9 scores both — a definitional gap
   in the trigger, not a parameter, recorded as outstanding.
 
+**A9's numerator is passenger-channel, measured, 2026-09-05:** the reporting
+rule is 3% of passengers *or* 3% of crew, so both of A9's numerators are sets of
+channels and had to say which. Classifying the 208 postings of the 2006-2019
+window on rates recomputed from their published counts gives 182 passenger-only,
+22 both, **1 crew-only**, 3 at neither; the 3 include the two rows whose hosted
+`pax_ill` dropped a leading digit (2013 Celebrity Millennium, 2011 Sea Princess,
+already triaged in the extraction log), so on the printed percentages the
+passenger channel carries 206 of 208. MMWR's investigated counts bound the same
+quantity loosely and in the same direction — 16 crew outbreaks against 156
+passenger — so the observed crew contribution sits in **0.5-9.3%** against the
+quiet region's 51.5% crew-only and 66% crew-at-threshold. The rule stays
+passengers-or-crew; `score_anchors` now reports
+`A9_posting_probability_passenger_channel` beside the or-rule so a crew arm
+firing on a different scale is visible rather than pooled away. No threshold
+moved and no floor was introduced: the observed crew-only rows include one-case
+postings on small complements, so no universal minimum-case publication rule is
+sourceable from the series. Recorded in `midrs_observed_targets.md` section 4.
+
 ## 3. Out-of-sample checks
 
 **Park et al. (2015)** — surface swabs during a shipboard outbreak; nothing was
@@ -1321,7 +1339,24 @@ is over-determined only *given* them. Full list in §10 of the history document.
 - Uniform `immune_ratio` across a resident crew and a weekly-turnover passenger
   cohort — an assumption that bears directly on A5.
 - Crew presenteeism and mandatory occupational reporting: absent in both
-  directions.
+  directions, and the regulated direction is now sourced. VSP's 2018 Operations
+  Manual §4.4.1.1.1 **requires** isolation of a crew member meeting the AGE case
+  definition — food employees until 48 h symptom-free with documented medical
+  clearance before return to work, nonfood employees 24 h — where §4.4.2.1 only
+  *advises* it of passengers. The model has no such rule: symptom-triggered
+  removal exists only as SOP-008 gated at escalation status ALERT, which never
+  fires in the quiet region, so a symptomatic crew member works the voyage under
+  `crew_contact_multiplier` 2.0, `CREW_SERVICE_SURFACE_CONTACTS_PER_HOUR` 545.4
+  and `FOOD_HANDLER_CONTACT_MULTIPLIER` 12.7. The exclusion's trigger and
+  duration are stated by the regulation, so the structure carries no free
+  magnitude; the **compliance share is ∅ null** for the maritime arm, and the
+  land-based presenteeism bound (tranche 30 §1) is on the wrong denominator and
+  the wrong regime. Not implemented, and neither the rule nor a compliance value
+  may be read off A9 — see
+  `docs/literature/consensus_tranche_33_crew_duty_exclusion.md`. The same probe
+  removed each crew exposure multiplier in turn at the quietest gate point and
+  found **no** order-of-magnitude effect on either channel (36 seeds, weak
+  power); no multiplier moved.
 - `OUTBREAK_CLEANING_COVERAGE` 0.58 — no shipboard measurement exists. Carried
   over from a 34%→53% supervision-and-feedback effect in two hospitals
   (Murphy 2011) applied to Carling's 37%. Sweep it; never assert it.

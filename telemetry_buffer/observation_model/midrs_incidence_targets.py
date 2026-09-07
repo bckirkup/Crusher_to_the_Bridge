@@ -124,6 +124,36 @@ MIDRS_CREW_OUTBREAKS_BY_VOYAGE_LENGTH: dict[str, int] = {
     VOYAGE_LENGTH_15_21: 1,
 }
 
+# The crew arm of the posting rule, as CDC's own products record it.  The
+# posted series carries exactly one crew-only posting in 208 (0.48%); MMWR
+# investigated 16 crew outbreaks against 156 passenger ones (9.30%), an arm
+# that is *not* disjoint from the passenger one, so it is a ceiling rather
+# than a second estimate.  Neither number is a modelling choice and neither
+# licenses a minimum-case publication floor: the observed crew-only rows
+# include single-case postings on small complements.
+MIDRS_CREW_ONLY_POSTINGS = 1
+MIDRS_CREW_OUTBREAKS_INVESTIGATED = 16
+
+
+def observed_crew_channel_share() -> dict[str, Any]:
+    """Bound the share of observed postings the crew rule alone carries."""
+    posted = MIDRS_CREW_ONLY_POSTINGS / MIDRS_PASSENGER_OUTBREAKS_POSTED
+    investigated = MIDRS_CREW_OUTBREAKS_INVESTIGATED / (
+        MIDRS_CREW_OUTBREAKS_INVESTIGATED
+        + MIDRS_PASSENGER_OUTBREAKS_INVESTIGATED
+    )
+    return {
+        "posted_series_crew_only": posted,
+        "investigated_crew_outbreak_share": investigated,
+        "interval": (posted, investigated),
+        "basis": (
+            "crew-only postings in the project series (2006-2019) as the "
+            "point measurement; MMWR Table 3 crew outbreaks as a ceiling, "
+            "since a crew outbreak may also have crossed 3% of passengers"
+        ),
+    }
+
+
 MIDRS_PASSENGER_CALENDAR_ENDPOINTS = (32.5, 16.9)
 MIDRS_CREW_CALENDAR_ENDPOINTS = (13.5, 5.2)
 
@@ -277,6 +307,14 @@ def a9_targets(era: str) -> dict[str, Any] | None:
     pooled 2006-2019 count in Jenkins's own unit, so the target is a
     period average and no year of it is separable.  The post arm keeps no
     target because no voyage count has been published for that era at all.
+
+    Both numerators are overwhelmingly passenger-channel: 1 of the 208 postings
+    crossed 3% on crew alone, and MMWR counts 16 crew outbreaks against 156
+    passenger ones, so the observed crew contribution to a posting sits in
+    0.5-9.3% (``midrs_observed_targets.md`` section 4).  The reporting rule
+    itself stays passengers *or* crew; the model side reports its passenger
+    channel beside the or-rule so a crew arm firing on a different scale is
+    visible rather than pooled away.
     """
     if era not in _VALID_ERAS:
         raise ValueError(f"unknown MIDRS era: {era!r}")
