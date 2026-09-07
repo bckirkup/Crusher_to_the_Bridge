@@ -3,7 +3,7 @@
   "type": "container",
   "platformCapabilities": ["EC2"],
   "containerProperties": {
-    "image": "<ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/picard-boundary-analysis:bounded-design-v3",
+    "image": "<ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/picard-boundary-analysis:bounded-design-v4",
     "command": [
       "deploy/aws/bounded_design_entrypoint.py",
       "--design", "Ref::design",

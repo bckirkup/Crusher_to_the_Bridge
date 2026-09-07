@@ -460,3 +460,24 @@ def test_the_gate_writes_its_report_and_resumes_from_its_own_stream(
     assert evaluated == []
     resumed = json.loads(out.read_text(encoding="utf-8"))
     assert resumed["summary"]["n_points"] == 2
+
+
+def test_a_missing_scoring_input_is_refused_before_any_voyage_runs(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    evaluated: list[int] = []
+
+    def fake_evaluate_point(_units, *, point_index, seeds, design):
+        evaluated.append(point_index)
+        return _stub_point(point_index)
+
+    def missing_series(_era):
+        raise FileNotFoundError(2, "No such file", "vsp_outbreak_series.csv")
+
+    monkeypatch.setattr(gate, "REPO_ROOT", tmp_path)
+    monkeypatch.setattr(gate, "evaluate_point", fake_evaluate_point)
+    monkeypatch.setattr(gate, "vsp_attack_rate_targets", missing_series)
+    with pytest.raises(SystemExit, match="vsp_outbreak_series.csv"):
+        gate.main(["--out", str(tmp_path / "r.json"), "--sobol-m", "1", "--seeds", "1"])
+    assert evaluated == []
