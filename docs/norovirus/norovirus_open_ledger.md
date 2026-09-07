@@ -652,6 +652,41 @@ No interval was widened, no endpoint selected, no anchor dropped and no constant
 refitted after this gate ran. Unlike #36 this design is not near extinction: the
 take-off fraction is 1.0 at all 128 points.
 
+### The #37 re-run on the repaired structure: still empty, and now nothing is design-limited
+
+**Run, 2026-09-07:**
+[`admissible_region_37_v2.md`](admissible_region_37_v2.md). 256 Sobol' points over
+the **full ten-factor box** (the six above plus the two stool-event and two
+food-route axes), **180 matched seeds each** — 46,080 voyages, 256/256 AWS Batch
+children succeeded. **0 of 256 points admissible, 0 pending, 0 unscored**, and
+**every** pairwise joint pass count is zero, including A5+A4.
+
+What this adds to the row above:
+
+- **A9 scores for the first time, and fails high across the whole box.** 180
+  seeds is the smallest cell in which one posting can land inside 0.00419-0.00558,
+  so `design_limited_anchors` is now empty. The *quietest* point in the box posts
+  on 0.0333 of eligible voyages (6 of 180) — **6.0x above A9's ceiling** — and
+  A8 fails high at every point in both channels (quietest passenger cell 40.2 per
+  100,000 travel-days against 29.2). The take-off fraction is 1.0 at all 256
+  points: not one of 46,080 voyages went extinct. The emptiness is therefore no
+  longer attributable to anchors that never became evidence.
+- **A1-vs-A2 reproduces with four more swept axes and 36x the seeds.** Inside
+  A1's band ill/infected spans 0.436-0.562, short of A2's floor by 1.05x (1.08x
+  before). Those same 13 points post on 0.994-1.0 of voyages.
+- **A5 no longer reaches its floor at all** (0.427-1.805 against 2.5-4.5), and is
+  undefined at 211 of 256 points.
+- **The A4/A8 conflict is now computed in-run**: at 7.075-day voyages A4's band
+  implies 501-1,059 per 100,000 travel-days against A8's 16.9-29.2, separation
+  factor 17.2, no overlap.
+- **A3 is out of its construction band at 134 of 135 defined points**, so the
+  capture-saturation defect (§4.7) is unchanged.
+
+This strengthens the tranche-31 diagnosis into the binding gap: with no
+symptom-conditioned spreading-efficiency term, every voyage takes off, so the
+quiet/outbreak mixture A8 and A9 measure is unreachable from any point of the
+sourced box. No interval widened, no anchor dropped, no constant moved.
+
 ## 3. Out-of-sample checks
 
 **Park et al. (2015)** — surface swabs during a shipboard outbreak; nothing was
