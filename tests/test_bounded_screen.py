@@ -10,6 +10,10 @@ import pytest
 
 from engines.transmission_core import EMESIS_TOTAL_SHED_GEC_RANGE
 from picard_framework.pathogen_overrides import deep_merge_dict
+from simulation_utils.platform_complement import (
+    declared_total,
+    declaring_platforms,
+)
 from telemetry_buffer.observation_model import bounded_screen
 
 PATHOGEN = "norwalk_gi"
@@ -539,7 +543,11 @@ def test_the_recorded_run_declares_which_seeding_it_used(
 
 
 def test_parse_args_defaults_are_the_published_design() -> None:
-    """Change-detector: these defaults are the executed pass on record."""
+    """Change-detector: these defaults are the executed pass on record.
+
+    The complement is no longer among them -- it is the hull's declaration, so
+    the default is ``None`` and the design reads the layout.
+    """
     args = bounded_screen.parse_args(["--out", "screen.json"])
 
     assert (
@@ -550,8 +558,29 @@ def test_parse_args_defaults_are_the_published_design() -> None:
         args.seed_base,
         args.design_seed,
         args.epochs,
-        args.num_agents,
-    ) == ("screen", 10, 5, 20, 500, 17, 168, 450)
+    ) == ("screen", 10, 5, 20, 500, 17, 168)
+    assert args.num_agents is None
+    assert args.platform in declaring_platforms()
+
+
+def test_an_omitted_complement_is_the_hulls_and_a_wrong_one_is_refused(
+) -> None:
+    """The screen may not run one class's population in another's layout."""
+    args = bounded_screen.parse_args(["--out", "screen.json"])
+    run = bounded_screen.run_metadata(args)
+
+    assert run["num_agents"] == declared_total(args.platform)
+
+    with pytest.raises(ValueError, match="classless"):
+        bounded_screen.run_metadata(
+            bounded_screen.parse_args(
+                [
+                    "--out", "screen.json",
+                    "--platform", "mega_cruise_5000",
+                    "--num-agents", "450",
+                ],
+            ),
+        )
 
 
 def test_cli_output_paths_are_confined_to_the_repository_root() -> None:

@@ -81,8 +81,13 @@ from picard_framework.runs.mega_cruise_campaign.campaign_runner import (  # noqa
 )
 from picard_framework.simulation.ship_simulation import ShipSimulation  # noqa: E402
 from simulation_utils.paths import resolve_repo_path, validated_open  # noqa: E402
+from simulation_utils.platform_complement import (  # noqa: E402
+    declared_total,
+    require_declared_total,
+)
 from telemetry_buffer.observation_model import score_anchors  # noqa: E402
 from telemetry_buffer.observation_model.bounded_screen import (  # noqa: E402
+    DEFAULT_PLATFORM,
     NOROVIRUS_FACTORS,
     Factor,
     build_run_spec,
@@ -152,9 +157,16 @@ class Design:
 
     pathogen_id: str = "norwalk_gi"
     bundle: str = "active_profiles"
-    platform: str = "mega_cruise_5000"
+    # The hull the observed record is mostly made of, shared with the screen:
+    # 66% of the postings in `vsp_outbreak_series.csv` carry 600-2,200
+    # passengers, against 3.6% above 3,600.  `mega_cruise_5000` was the
+    # default and is both the rarest class and the dearest to run.
+    platform: str = DEFAULT_PLATFORM
     epochs: int = 168
-    num_agents: int = 450
+    # Not a free field: the complement is the hull's, and a run that states
+    # another one is not a run of that class.  ``None`` reads the
+    # declaration; a stated value must equal it.
+    num_agents: int | None = None
     era: str = "pre"
     co_seeded: str = "isolated"
     observation_scenario: str | None = None
@@ -162,13 +174,20 @@ class Design:
     # carries it so baseline and intervention differ in this field alone.
     crew_duty_exclusion: bool = False
 
+    @property
+    def complement(self) -> int:
+        """Agents this design runs: the hull's declaration, or nothing."""
+        if self.num_agents is None:
+            return declared_total(self.platform)
+        return require_declared_total(self.platform, self.num_agents)
+
     def run_kwargs(self) -> dict[str, Any]:
         return {
             "pathogen_id": self.pathogen_id,
             "bundle": self.bundle,
             "platform": self.platform,
             "epochs": self.epochs,
-            "num_agents": self.num_agents,
+            "num_agents": self.complement,
             "co_seeded": self.co_seeded,
             "observation_scenario": self.observation_scenario,
             "crew_duty_exclusion": self.crew_duty_exclusion,
@@ -234,7 +253,7 @@ def run_row(
         clock_mode = simulation.clock.mode
         hazard = _effective_reporting_hazard(dict(simulation.cfg))
     derived = compute_derived_metrics(
-        extract_timeseries(result.history), design.num_agents,
+        extract_timeseries(result.history), design.complement,
     )
     run_id = f"{spec['description']}"
     summary = {
@@ -245,7 +264,7 @@ def run_row(
             "surveillance": SURVEILLANCE_LABEL,
             "seed": int(seed),
             "num_epochs": int(design.epochs),
-            "num_agents": int(design.num_agents),
+            "num_agents": int(design.complement),
             "natural_history_clock": clock_mode,
             "sick_call_probability_per_day": hazard,
             "era": design.era,
@@ -1103,9 +1122,18 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--pathogen-id", default="norwalk_gi")
     parser.add_argument("--bundle", default="active_profiles")
-    parser.add_argument("--platform", default="mega_cruise_5000")
+    parser.add_argument("--platform", default=Design.platform)
     parser.add_argument("--era", default="pre", choices=("pre", "post"))
-    parser.add_argument("--num-agents", type=int, default=450)
+    parser.add_argument(
+        "--num-agents",
+        type=int,
+        default=None,
+        help=(
+            "agents to run; omit to take the hull's declared complement. A "
+            "stated value must equal it, since a complement that is not the "
+            "hull's makes every per-complement quantity classless"
+        ),
+    )
     parser.add_argument("--epochs", type=int, default=168)
     parser.add_argument(
         "--sobol-m",

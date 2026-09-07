@@ -920,3 +920,54 @@ quiet-corner run (`da6965ec`, 12 points x 1,440) and the matched duty-exclusion
 pair (#470). Their arithmetic stands; the condition they were computed under is
 not the declared one. Nothing here selects a value, moves a constant or narrows
 an interval.
+
+## 9m. The complement was not the hull's, and no hull required it to be
+
+`COMPLEMENT-01`. Every bounded screen and every feasibility gate ran
+`--platform mega_cruise_5000 --num-agents 450`: a hull declaring 5,000
+passengers and 2,000 crew, populated with 316 passengers and 134 crew. That is
+the expedition class's complement in the mega class's spatial graph, and it is
+the Korkin-era 450-agent complement surviving a hull change it was never
+re-sized for.
+
+It was constructible because complement and platform were independent fields
+with independent defaults, in two places. The mega-cruise campaign carried its
+own table (`expedition 450 / classic 1910 / spirit 3000 / mega 7000`), while the
+observation model's `Design` and both design CLIs declared `num_agents = 450`
+next to `platform = "mega_cruise_5000"`. B3 (#29) repaired the *capacity
+constants* — each hull's `spatial_layout.json` gained a passengers/crew
+`nominal_complement`, and A4's band edges were recut on the passenger half —
+but nothing ever bound a *run's* complement to the hull it named, so the defect
+B3 fixed in the scoring path stayed alive in the execution path.
+
+What it costs is not a perturbation of a rate but the class of the run:
+
+- **The VSP trigger is 3% of a complement.** On 134 crew that is 5 cases; the
+  observed postings sit on a median 830 crew, and only ~4% of them on 200 or
+  fewer. A reported crew prevalence below 3% crosses a 134-person threshold by
+  chance far more often than an 830-person one, so the posting frequency A9 is
+  scored on was read off a denominator no observed voyage has.
+- **Occupancy was ~1/15 of nominal.** The density kernel's reference occupancy
+  is 50 persons; 450 agents spread over the mega layout's 129 zones is not the
+  density any class sails at, and the campaign's own timing note already
+  recorded attack rate *falling* with complement on the fixed hull (0.0067 at
+  450 to 0.0015 at 5,000), which is a density artifact rather than biology.
+- **Mega is the rarest observed class and the dearest to run.** In
+  `vsp_outbreak_series.csv`, 66.1% of the 333 postings with usable complements
+  carry 600-2,200 passengers and 3.6% carry more than 3,600; a mega voyage costs
+  roughly 700 s against 207 s for a classic one.
+
+The repair makes the complement a derived quantity with one reader.
+`simulation_utils/platform_complement.py` reads `nominal_complement` from the
+hull's own `spatial_layout.json`; an omitted complement is the hull's
+declaration, a stated one is refused unless it equals it, and a platform that
+declares none is refused rather than defaulted. The campaign's table is now
+generated from those declarations, so it cannot drift, and the default design
+hull is `classic_cruise_1900` — the modal observed class — rather than mega.
+
+Invalidates, as complements: every screen and gate run to date, including those
+already withdrawn as arrival regimes under `ARRIVE-01` (§9l). Their arithmetic
+stands and belongs to no ship class. Nothing here selects a value, moves a
+constant or narrows an interval; the class-weighted A9 re-scoring this enables
+still needs a class-stratified voyage denominator, which the posted-outbreak
+class shares cannot supply.

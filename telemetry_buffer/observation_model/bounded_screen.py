@@ -103,6 +103,15 @@ from picard_framework.runs.mega_cruise_campaign.campaign_runner import (  # noqa
 )
 from picard_framework.simulation.ship_simulation import ShipSimulation  # noqa: E402
 from simulation_utils.paths import resolve_repo_path, validated_open  # noqa: E402
+from simulation_utils.platform_complement import (  # noqa: E402
+    declared_total,
+    require_declared_total,
+)
+
+# The class the observed VSP record is mostly made of -- 66% of the postings
+# in `vsp_outbreak_series.csv` carry 600-2,200 passengers -- and a third of the
+# cost of the mega hull a voyage.
+DEFAULT_PLATFORM = "classic_cruise_1900"
 
 Transform = Literal["linear", "log10"]
 
@@ -802,7 +811,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     )
     parser.add_argument("--pathogen-id", default="norwalk_gi")
     parser.add_argument("--bundle", default="active_profiles")
-    parser.add_argument("--platform", default="mega_cruise_5000")
+    parser.add_argument("--platform", default=DEFAULT_PLATFORM)
     parser.add_argument(
         "--observation-scenario",
         default=None,
@@ -823,7 +832,16 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
             "ranking is not comparable with an isolated run."
         ),
     )
-    parser.add_argument("--num-agents", type=int, default=450)
+    parser.add_argument(
+        "--num-agents",
+        type=int,
+        default=None,
+        help=(
+            "agents to run; omit to take the hull's declared complement. A "
+            "stated value must equal it: a complement that is not the hull's "
+            "puts one class's population in another class's spatial graph"
+        ),
+    )
     parser.add_argument("--epochs", type=int, default=168)
     parser.add_argument("--trajectories", type=int, default=10)
     parser.add_argument("--seeds", type=int, default=5)
@@ -930,6 +948,28 @@ def load_shard_reports(paths: Sequence[Path]) -> list[dict[str, object]]:
     return sorted(reports, key=lambda report: int(report["shard_index"] or 0))
 
 
+def run_metadata(args: argparse.Namespace) -> dict[str, object]:
+    """What every run of this design shares, complement included.
+
+    The complement is the hull's declaration, not a flag with its own default:
+    a stated one is refused unless it is the hull's, so a screen cannot put
+    one class's population in another class's spatial graph.
+    """
+    return {
+        "pathogen_id": args.pathogen_id,
+        "bundle": args.bundle,
+        "platform": args.platform,
+        "epochs": args.epochs,
+        "num_agents": (
+            declared_total(args.platform)
+            if args.num_agents is None
+            else require_declared_total(args.platform, args.num_agents)
+        ),
+        "observation_scenario": args.observation_scenario,
+        "co_seeded": args.co_seeded,
+    }
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     """Run the floor or the screen and write the result as JSON."""
     args = parse_args(argv)
@@ -937,15 +977,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     # and discovering it after the last design point discards the whole run.
     out = _validated_cli_path(args.out, REPO_ROOT)
     factors = NOROVIRUS_FACTORS
-    run_kwargs = {
-        "pathogen_id": args.pathogen_id,
-        "bundle": args.bundle,
-        "platform": args.platform,
-        "epochs": args.epochs,
-        "num_agents": args.num_agents,
-        "observation_scenario": args.observation_scenario,
-        "co_seeded": args.co_seeded,
-    }
+    run_kwargs = run_metadata(args)
     declared_box = [
         {
             "name": f.name,
