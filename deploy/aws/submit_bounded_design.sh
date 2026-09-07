@@ -36,15 +36,24 @@ esac
 # Design sizes come from the flags, not from this script: they are the
 # arguments the local run used, so a Batch run and a local run are the same
 # design at the same --design-seed.
+# PLATFORM names the hull, and the hull names the complement: the design reads
+# nominal_complement from the platform's own spatial layout and refuses a
+# complement that is not its hull's, so a class arm is submitted by naming the
+# class rather than by stating an agent count. One arm per class; the arms
+# differ by hull and by S3_PREFIX and in nothing else.
+PLATFORM="${PLATFORM:-classic_cruise_1900}"
 TRAJECTORIES="${TRAJECTORIES:-20}"
 SEED_SHARDS="${SEED_SHARDS:-1}"
-ONLY_POINTS="${ONLY_POINTS:-}"
+ONLY_POINTS="${ONLY_POINTS:-all}"
 # CREW_DUTY_EXCLUSION=on turns on VSP's regulated duty exclusion (2018
 # Operations Manual 4.4.1.1.1). Off is the matched baseline arm: the same
 # points, the same seeds, the same --design-seed, one operational rule apart.
 CREW_DUTY_EXCLUSION="${CREW_DUTY_EXCLUSION:-off}"
 SOBOL_M="${SOBOL_M:-7}"
 SEEDS="${SEEDS:-30}"
+# A staged campaign extends a cell with new seeds; each stage starts where
+# the previous one ended (500, 524, 572, ...), so no voyage is counted twice.
+SEED_BASE="${SEED_BASE:-500}"
 DESIGN_SEED="${DESIGN_SEED:-17}"
 S3_PREFIX="${S3_PREFIX:-s3://${BUCKET}/campaign/bounded_design_v1/}"
 JOB_NAME="${JOB_NAME:-picard-bounded-${DESIGN}-$(date +%Y%m%d-%H%M%S)}"
@@ -52,22 +61,25 @@ JOB_NAME="${JOB_NAME:-picard-bounded-${DESIGN}-$(date +%Y%m%d-%H%M%S)}"
 echo "Submitting bounded design array:"
 echo "  name         : $JOB_NAME"
 echo "  design       : $DESIGN"
+echo "  platform     : $PLATFORM"
 echo "  array size   : $SHARD_COUNT"
 echo "  trajectories : $TRAJECTORIES (screen)"
 echo "  seed shards  : $SEED_SHARDS"
-echo "  only points  : ${ONLY_POINTS:-<whole grid>} (region)"
+echo "  only points  : $ONLY_POINTS (region)"
 echo "  duty excl.   : $CREW_DUTY_EXCLUSION (region)"
 echo "  sobol m      : $SOBOL_M (region)"
 echo "  seeds/point  : $SEEDS"
+echo "  seed base    : $SEED_BASE"
 echo "  design seed  : $DESIGN_SEED"
 echo "  queue        : $JOB_QUEUE"
 echo "  s3 prefix    : $S3_PREFIX"
 
 # JSON rather than key=value shorthand: a point selection is itself
 # comma-separated, and the shorthand would read it as further parameters.
-PARAMETERS=$(printf '{"design":"%s","shard_count":"%s","trajectories":"%s","seed_shards":"%s","only_points":"%s","crew_duty_exclusion":"%s","sobol_m":"%s","seeds":"%s","design_seed":"%s","s3_prefix":"%s"}' \
-  "$DESIGN" "$SHARD_COUNT" "$TRAJECTORIES" "$SEED_SHARDS" "$ONLY_POINTS" \
-  "$CREW_DUTY_EXCLUSION" "$SOBOL_M" "$SEEDS" "$DESIGN_SEED" "$S3_PREFIX")
+# Batch refuses an empty parameter value: the whole grid is named "all".
+PARAMETERS=$(printf '{"design":"%s","platform":"%s","shard_count":"%s","trajectories":"%s","seed_shards":"%s","only_points":"%s","crew_duty_exclusion":"%s","sobol_m":"%s","seeds":"%s","seed_base":"%s","design_seed":"%s","s3_prefix":"%s"}' \
+  "$DESIGN" "$PLATFORM" "$SHARD_COUNT" "$TRAJECTORIES" "$SEED_SHARDS" "$ONLY_POINTS" \
+  "$CREW_DUTY_EXCLUSION" "$SOBOL_M" "$SEEDS" "$SEED_BASE" "$DESIGN_SEED" "$S3_PREFIX")
 
 env -u AWS_ACCESS_KEY_ID -u AWS_SECRET_ACCESS_KEY -u AWS_SESSION_TOKEN \
   AWS_PROFILE=picard aws batch submit-job \

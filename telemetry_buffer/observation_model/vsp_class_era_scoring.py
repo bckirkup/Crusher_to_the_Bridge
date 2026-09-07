@@ -31,7 +31,6 @@ from __future__ import annotations
 
 import argparse
 import csv
-import json
 import math
 import statistics
 from collections import defaultdict
@@ -39,10 +38,10 @@ from pathlib import Path
 from typing import Any, NamedTuple
 
 from simulation_utils.paths import resolve_repo_path, validated_open
+from simulation_utils.platform_complement import declared_complement
 
 SERIES = Path(__file__).with_name("vsp_outbreak_series.csv")
 REPO_ROOT = Path(__file__).resolve().parents[2]
-PLATFORMS = REPO_ROOT / "data" / "platforms"
 
 # The hulls A4 scores, in ascending order of passenger complement.
 SCORED_HULLS: tuple[str, ...] = (
@@ -61,22 +60,12 @@ def _read_passenger_complement(hull: str) -> int:
     passengers and 150 crew) while ``mega_cruise_5000`` names passengers alone
     (5,000 passengers plus 2,000 crew).  Read the declared split rather than
     the id so that a passenger denominator is never compared against a
-    total-agent capacity.
+    total-agent capacity.  The declaration is read by
+    ``simulation_utils.platform_complement``, which is also what a *run's*
+    complement comes from, so the class A4 bins on and the class a voyage is
+    sailed as cannot diverge.
     """
-    layout = PLATFORMS / hull / "spatial_layout.json"
-    with validated_open(
-        str(layout),
-        "r",
-        allowed_roots=(str(PLATFORMS),),
-        encoding="utf-8",
-    ) as handle:
-        complement = json.load(handle).get("nominal_complement")
-    if not isinstance(complement, dict) or "passengers" not in complement:
-        raise RuntimeError(
-            f"{hull} declares no nominal_complement.passengers: A4 cannot bin "
-            "passenger denominators without a passenger capacity",
-        )
-    return int(complement["passengers"])
+    return declared_complement(hull)[0]
 
 
 # Passenger complement of each scored hull, from the platform declarations.

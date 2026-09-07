@@ -76,6 +76,15 @@ def test_hourly_reporting_drives_autonomous_escalation() -> None:
     """
     epochs = 168
     spec = PicardRunSpec.from_legacy_yaml(REPO_ROOT, num_epochs=epochs)
+    # The ladder needs a case aboard, and the smoke complement is 20 agents:
+    # at the declared boarding prevalence a single draw boards nobody about
+    # half the time. It used to arrive anyway because epoch 0's port call was
+    # drawn twice (ARRIVE-01), so this test was reading the defect rather than
+    # the reporting path. A stated index case makes the introduction the
+    # scenario's, not the seed's.
+    spec.legacy_cfg.setdefault("initiation", {})["explicit_seeds"] = [
+        {"pathogen": "norwalk_gi", "count": 1, "epoch": 0},
+    ]
     sim = ShipSimulation(spec, display=False, repo_root=REPO_ROOT)
     sim.initialize()
 

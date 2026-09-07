@@ -8,6 +8,10 @@ from typing import Any
 
 import pytest
 
+from simulation_utils.platform_complement import (
+    declared_total,
+    declaring_platforms,
+)
 from telemetry_buffer.observation_model import admissible_region as gate
 from telemetry_buffer.observation_model import score_anchors
 from telemetry_buffer.observation_model.bounded_screen import NOROVIRUS_FACTORS
@@ -346,7 +350,7 @@ def test_a_point_is_one_cell_over_the_matched_seed_set(
     seen: list[int] = []
 
     def fake_run_row(_factors, _units, *, seed, design, point_index):
-        assert design.platform == "mega_cruise_5000"
+        assert design.complement == declared_total(design.platform)
         assert point_index == 3
         seen.append(seed)
         return _canonical_row(seed)
@@ -402,7 +406,11 @@ def test_the_command_line_declares_the_design_and_accepts_overrides() -> None:
     assert default.sobol_m == 7
     assert default.seeds == 5
     assert default.era == "pre"
-    assert default.platform == "mega_cruise_5000"
+    # Not a pinned hull: whatever the default is, its complement is the one
+    # its own layout declares -- 450 agents on the 7,000-agent mega hull was
+    # the defect, and it was constructible because these two were independent.
+    assert default.platform in declaring_platforms()
+    assert default.num_agents is None
     assert default.stream is None
     assert not default.resume
     overridden = gate.parse_args(

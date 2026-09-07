@@ -64,6 +64,10 @@ from simulation_utils.paths import (  # noqa: E402
     validate_path_component,
     validated_open,
 )
+from simulation_utils.platform_complement import (  # noqa: E402
+    declared_total,
+    declaring_platforms,
+)
 
 CAMPAIGN_DIR = Path(__file__).resolve().parent
 MANIFEST_PATH = CAMPAIGN_DIR / "campaign_manifest.json"
@@ -814,13 +818,12 @@ def _immunity_override(
     )
 
 
-# Canonical ship-class populations for multi-platform calibration (c1–c6, a2).
-# classic_cruise_1900 is named for CDC "Large" ~1900 but ships 1910 agents.
+# Ship-class populations are the hulls' own declarations, not a table here:
+# a second table drifts from the first, and one did -- the observation model's
+# designs defaulted to 450 agents on every hull.  ``platform_id`` is not the
+# complement (classic_cruise_1900 berths 1,910; mega_cruise_5000 berths 7,000).
 _PLATFORM_DEFAULT_AGENTS: dict[str, int] = {
-    "expedition_cruise_450": 450,
-    "classic_cruise_1900": 1910,
-    "spirit_cruise_3000": 3000,
-    "mega_cruise_5000": 7000,
+    hull: declared_total(hull) for hull in declaring_platforms()
 }
 
 

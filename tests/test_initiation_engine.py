@@ -835,6 +835,51 @@ class TestInitWiring:
         assert boarded > 0
         assert len(infected) == boarded
 
+    def test_the_sailing_port_cohort_boards_once(self) -> None:
+        """Initialization and the epoch loop both offer epoch 0's port call.
+
+        The cohort is the spec's per-person probability over the eligible
+        population, so a second Binomial over the same population at the same
+        port call would double the realized arrival prevalence.
+        """
+        engine = _FakeEngine()
+        profiles = {PATHOGEN: _profile()}
+        init_multi_pathogen(
+            engine, profiles, _cfg(passenger=0.1, crew=0.1),
+            np.random.default_rng(41),
+        )
+        boarded = sum(
+            engine.initiation_manifest["boarding"][PATHOGEN][
+                "drawn_by_role"
+            ].values(),
+        )
+        at_init = _infected_ids(engine)
+        step_mid_cruise_introductions(
+            0, engine, profiles, np.random.default_rng(42),
+        )
+        assert boarded > 0
+        assert len(at_init) == boarded
+        assert _infected_ids(engine) == at_init
+
+    def test_an_epoch_zero_seed_is_applied_once(self) -> None:
+        engine = _FakeEngine()
+        profiles = {PATHOGEN: _profile()}
+        cfg = {
+            "initiation": {
+                "explicit_seeds": [
+                    {"pathogen": PATHOGEN, "count": 3, "epoch": 0},
+                ],
+            },
+            "multi_pathogen": {"immunocompromised_fraction": 0.05},
+        }
+        init_multi_pathogen(engine, profiles, cfg, np.random.default_rng(43))
+        at_init = _infected_ids(engine)
+        step_mid_cruise_introductions(
+            0, engine, profiles, np.random.default_rng(44),
+        )
+        assert len(at_init) == 3
+        assert _infected_ids(engine) == at_init
+
     def test_a_block_epoch_overrides_the_profile_schedule(self) -> None:
         cfg = _cfg(passenger=0.1, crew=0.1)
         cfg["initiation"]["boarding"][PATHOGEN]["epoch"] = 2

@@ -866,3 +866,108 @@ None of this selects a value or narrows an interval. A Grade D factor dominating
 the screen means the screen cannot say whether the mechanisms are jointly
 consistent with the anchors; it says which axis a measurement would be worth
 most on, and that axis is the one that was never a biological constant.
+
+## 9l. The sailing port was called twice, and its cohort drawn twice
+
+`ARRIVE-01`. A boarding spec states a per-person arrival probability over the
+eligible population at one port call. Epoch 0's port call was offered to the
+engine twice: `orchestrator_init._run_initiation` draws it and applies epoch 0's
+explicit seeds, and the epoch loop then reaches epoch 0 and offers the same
+schedule again through `orchestrator_epoch.step_mid_cruise_introductions`. The
+`epoch > 0` guard existed only on the legacy fiat-index path, so the modern
+initiation plan drew a second independent Binomial over the same eligible
+population, and epoch-0 explicit seeds were applied twice.
+
+Realized arrival prevalence was therefore the sum of two draws over a
+shrinking eligible pool rather than the probability the profile declares.
+Measured over 40 voyages of the quiet-region point (`mega_cruise_5000`,
+`norwalk_gi` declaring 3.25% of passengers and 1.85% of crew): passengers
+boarded infected at **5.09%** (643 of 12,640) and crew at **3.32%** (178 of
+5,360), i.e. 1.57x and 1.79x their declared rates. After the repair a single
+voyage draws once — 6 of 259 eligible passengers at seed 1, 7 of 253 at seed 2 —
+consistent with the declared 3.25%.
+
+The correction is a claim per `(mechanism, spec, epoch)` on the engine, so an
+arrival is applied by whichever caller reaches it first and the other caller
+finds it taken. Later port calls are untouched: a spec scheduled at epoch 6 is
+not claimed at epoch 0 and still boards exactly once at epoch 6.
+
+Why it matters beyond arithmetic: VSP posts a voyage at 3% of a complement, the
+crew complement is 134, and a 3.32% crew arrival prevalence delivers ~4.4 crew
+cases before any onboard transmission occurs — the trigger is five. The
+double-drawn arrival is therefore capable of posting a voyage on its own, which
+is the regime every campaign since #54/#440 has been scored in.
+
+The same 40-voyage diagnostic — taken under the double draw, so its levels
+belong to that regime — answers the crew-transmission question that prompted the
+search, and the answer is that crew are not amplified onboard.
+Onboard transmission is sparse (103 events in 40 voyages, 2.6 per voyage, all
+fomite or food; no direct-contact or droplet event appeared) and per capita it
+is the same for both roles: 72 events on 12,640 passenger-voyages (0.57%) and 31
+on 5,360 crew-voyages (0.58%). The crew channel is import-dominated — 178
+imported against 31 acquired — so the crew-only postings that carry 51.5% of the
+quiet region's postings (#467) are an arrival-prevalence phenomenon, not a
+crew-contact one, and the `crew_contact_multiplier`, service-surface and
+food-handler factors are not implicated by this measurement. Source attribution
+is unavailable in this configuration: `TransmissionCore._draw_source` names a
+shedder only when strain attribution is active, and all 103 events carry an
+unresolved source, so a crew-source versus passenger-source split remains
+unmeasured.
+
+Invalidates, as arrival regimes: the `bounded_design_v2` screen
+(`77d99c06`), the #37 v2 ten-factor gate (`245fc5d4`, 256 x 180), the
+quiet-corner run (`da6965ec`, 12 points x 1,440) and the matched duty-exclusion
+pair (#470). Their arithmetic stands; the condition they were computed under is
+not the declared one. Nothing here selects a value, moves a constant or narrows
+an interval.
+
+## 9m. The complement was not the hull's, and no hull required it to be
+
+`COMPLEMENT-01`. Every bounded screen and every feasibility gate ran
+`--platform mega_cruise_5000 --num-agents 450`: a hull declaring 5,000
+passengers and 2,000 crew, populated with 316 passengers and 134 crew. That is
+the expedition class's complement in the mega class's spatial graph, and it is
+the Korkin-era 450-agent complement surviving a hull change it was never
+re-sized for.
+
+It was constructible because complement and platform were independent fields
+with independent defaults, in two places. The mega-cruise campaign carried its
+own table (`expedition 450 / classic 1910 / spirit 3000 / mega 7000`), while the
+observation model's `Design` and both design CLIs declared `num_agents = 450`
+next to `platform = "mega_cruise_5000"`. B3 (#29) repaired the *capacity
+constants* — each hull's `spatial_layout.json` gained a passengers/crew
+`nominal_complement`, and A4's band edges were recut on the passenger half —
+but nothing ever bound a *run's* complement to the hull it named, so the defect
+B3 fixed in the scoring path stayed alive in the execution path.
+
+What it costs is not a perturbation of a rate but the class of the run:
+
+- **The VSP trigger is 3% of a complement.** On 134 crew that is 5 cases; the
+  observed postings sit on a median 830 crew, and only ~4% of them on 200 or
+  fewer. A reported crew prevalence below 3% crosses a 134-person threshold by
+  chance far more often than an 830-person one, so the posting frequency A9 is
+  scored on was read off a denominator no observed voyage has.
+- **Occupancy was ~1/15 of nominal.** The density kernel's reference occupancy
+  is 50 persons; 450 agents spread over the mega layout's 129 zones is not the
+  density any class sails at, and the campaign's own timing note already
+  recorded attack rate *falling* with complement on the fixed hull (0.0067 at
+  450 to 0.0015 at 5,000), which is a density artifact rather than biology.
+- **Mega is the rarest observed class and the dearest to run.** In
+  `vsp_outbreak_series.csv`, 66.1% of the 333 postings with usable complements
+  carry 600-2,200 passengers and 3.6% carry more than 3,600; a mega voyage costs
+  roughly 700 s against 207 s for a classic one.
+
+The repair makes the complement a derived quantity with one reader.
+`simulation_utils/platform_complement.py` reads `nominal_complement` from the
+hull's own `spatial_layout.json`; an omitted complement is the hull's
+declaration, a stated one is refused unless it equals it, and a platform that
+declares none is refused rather than defaulted. The campaign's table is now
+generated from those declarations, so it cannot drift, and the default design
+hull is `classic_cruise_1900` — the modal observed class — rather than mega.
+
+Invalidates, as complements: every screen and gate run to date, including those
+already withdrawn as arrival regimes under `ARRIVE-01` (§9l). Their arithmetic
+stands and belongs to no ship class. Nothing here selects a value, moves a
+constant or narrows an interval; the class-weighted A9 re-scoring this enables
+still needs a class-stratified voyage denominator, which the posted-outbreak
+class shares cannot supply.

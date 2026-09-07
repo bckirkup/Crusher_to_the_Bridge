@@ -187,6 +187,14 @@ on the *mega hull*, not the `classic_cruise_1900` and `mega_cruise_5000`
 layouts. A per-class screen has to move the platform id with the complement,
 and these timings will not transfer to it.
 
+**Superseded by `COMPLEMENT-01` (history §9m).** The pairing these timings were
+taken under is no longer constructible: a run's complement is now the one its
+hull declares, and a stated complement that is not the hull's is refused. So
+the three figures above are three complements on one hull rather than three
+classes, and the classes' costs must be re-measured at their own complements
+(450 / 1,910 / 3,000 / 7,000). The screened default is now
+`classic_cruise_1900`, the modal observed class, not mega.
+
 One observation from those runs that is worth an explanation before it is
 relied upon: at the fixed box centre, attack rate *falls* as the complement
 grows on the same hull — 0.0067 at 450, ~0.0038 at 1900, ~0.0015 at 5000. A

@@ -35,6 +35,10 @@ _REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
+from telemetry_buffer.observation_model.bounded_screen import (  # noqa: E402
+    DEFAULT_PLATFORM,
+)
+
 _BUCKET_CHARS = set("abcdefghijklmnopqrstuvwxyz0123456789.-")
 _KEY_CHARS = set(
     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._/-",
@@ -96,6 +100,18 @@ def _already_uploaded(client: Any, bucket: str, key: str) -> bool:
     return True
 
 
+def _complement_argv(args: argparse.Namespace) -> list[str]:
+    """The complement flag, or nothing so the hull's declaration is used.
+
+    A stated complement is passed through and the design refuses it unless it
+    is the hull's, so a job definition cannot put one class's population in
+    another class's spatial graph.
+    """
+    if args.num_agents is None:
+        return []
+    return ["--num-agents", str(args.num_agents)]
+
+
 def _screen_argv(args: argparse.Namespace, shard: int, out: Path) -> list[str]:
     return [
         sys.executable,
@@ -104,7 +120,7 @@ def _screen_argv(args: argparse.Namespace, shard: int, out: Path) -> list[str]:
         "--pathogen-id", args.pathogen_id,
         "--platform", args.platform,
         "--epochs", str(args.epochs),
-        "--num-agents", str(args.num_agents),
+        *_complement_argv(args),
         "--trajectories", str(args.trajectories),
         "--seeds", str(args.seeds),
         "--design-seed", str(args.design_seed),
@@ -115,13 +131,19 @@ def _screen_argv(args: argparse.Namespace, shard: int, out: Path) -> list[str]:
     ]
 
 
+WHOLE_GRID = "all"
+
+
 def _only_points(raw: str) -> list[str]:
     """The design indices a subset re-run names, as a comma-separated list.
 
     A Batch parameter is one string, so the selection arrives as ``"7,13,204"``
-    rather than as repeated arguments. An index that is not an integer is
+    rather than as repeated arguments. Batch refuses an empty parameter value,
+    so the whole grid is named ``"all"``. An index that is not an integer is
     refused here: a mistyped subset would otherwise re-run the wrong points.
     """
+    if raw.strip() == WHOLE_GRID:
+        return []
     indices = [part.strip() for part in raw.split(",") if part.strip()]
     for index in indices:
         if not index.isdigit():
@@ -142,9 +164,10 @@ def _region_argv(
         "--platform", args.platform,
         "--era", args.era,
         "--epochs", str(args.epochs),
-        "--num-agents", str(args.num_agents),
+        *_complement_argv(args),
         "--sobol-m", str(args.sobol_m),
         "--seeds", str(args.seeds),
+        "--seed-base", str(args.seed_base),
         "--design-seed", str(args.design_seed),
         "--seed-shards", str(args.seed_shards),
         "--shard-count", str(args.shard_count),
@@ -173,10 +196,10 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--s3-prefix", required=True)
     parser.add_argument("--shard-count", type=int, required=True)
     parser.add_argument("--pathogen-id", default="norwalk_gi")
-    parser.add_argument("--platform", default="mega_cruise_5000")
+    parser.add_argument("--platform", default=DEFAULT_PLATFORM)
     parser.add_argument("--era", default="pre", choices=("pre", "post"))
     parser.add_argument("--epochs", type=int, default=168)
-    parser.add_argument("--num-agents", type=int, default=450)
+    parser.add_argument("--num-agents", type=int, default=None)
     parser.add_argument("--trajectories", type=int, default=20)
     parser.add_argument("--seed-shards", type=int, default=1)
     parser.add_argument("--only-points", default="")
@@ -185,6 +208,9 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     parser.add_argument("--sobol-m", type=int, default=7)
     parser.add_argument("--seeds", type=int, default=30)
+    # A staged campaign extends a cell with new voyages, not repeated ones:
+    # each stage starts its seeds where the previous stage's ended.
+    parser.add_argument("--seed-base", type=int, default=500)
     parser.add_argument("--design-seed", type=int, default=17)
     return parser.parse_args(argv)
 

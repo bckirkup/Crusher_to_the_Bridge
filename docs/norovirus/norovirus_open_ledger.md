@@ -16,6 +16,44 @@ Read this before quoting any dose figure or anchor result.
 
 ## 1. Currently withdrawn
 
+**Every screen and gate result to date belongs to no ship class, before
+`COMPLEMENT-01` (history §9m).** They ran `mega_cruise_5000` — a hull declaring
+5,000 passengers and 2,000 crew — with `num_agents = 450`, i.e. 316 passengers
+and 134 crew: the expedition class's complement in the mega class's spatial
+graph. Complement and platform were independent fields with independent
+defaults in two places (the campaign's own table, and the observation model's
+`Design` plus both design CLIs), so B3 (#29), which repaired the capacity
+*constants*, left the execution path free to pair any complement with any hull.
+Two consequences bite the anchors directly: VSP posts at 3% of a complement, so
+every posting frequency was scored where the trigger is 5 crew cases out of 134
+against observed postings' median 830 crew (only ~4% at 200 or fewer), and zone
+occupancy was ~1/15 of nominal against the density kernel's reference occupancy
+of 50. The repair derives the complement from the hull's declared
+`nominal_complement` with one reader, refuses a stated complement that is not
+the hull's, and moves the default hull to `classic_cruise_1900`, the modal
+observed class (66.1% of postings carry 600-2,200 passengers; 3.6% carry more
+than 3,600). No constant moves. The class-weighted A9 re-scoring this enables
+still requires a class-stratified voyage denominator; posted-outbreak class
+shares are outcome-conditioned and cannot serve as fleet weights.
+
+**Every arrival prevalence, and every posting rate measured under one, is void
+before `ARRIVE-01` (history §9l).** Epoch 0's port call was offered to the
+engine twice — once by initialization, once when the epoch loop reached epoch 0
+— so a boarding spec's per-person probability was realized as two independent
+Binomials over the same eligible population, and epoch-0 explicit seeds were
+applied twice. Measured over 40 voyages of the quiet-region point, passengers
+arrived infected at 5.09% against a declared 3.25% and crew at 3.32% against a
+declared 1.85%. This is not a small perturbation of the anchors that failed: at
+3.32%, arrival alone delivers about 4.4 of the 5 cases VSP's 3%-of-134 crew
+trigger needs, so a voyage could post before any transmission occurred. Every
+campaign since boarding landed at #54/#440 — the `bounded_design_v2` screen, the
+#37 v2 ten-factor gate, the 1,440-seed quiet corner and the matched
+duty-exclusion pair — was computed in that regime and must be re-run before its
+posting frequencies are read as the declared model's. Their conditional outbreak
+magnitudes and factor rankings are affected too, in an unmeasured direction.
+Nothing in the repair moves a constant: the spec's declared prevalence is what
+now obtains.
+
 **Every dose figure in this repository is void.**
 `environmental_faecal_release_log10_g_per_epoch` (the old `dose_adjustment`,
 still accepted as a legacy alias) was last fitted against a contact layer that no
