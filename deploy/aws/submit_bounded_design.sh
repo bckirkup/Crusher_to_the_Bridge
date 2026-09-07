@@ -10,6 +10,14 @@
 # shard-count = trajectory shards x SEED_SHARDS may approach the queue's
 # vCPU ceiling (256). 20 trajectories x 30 seeds at SEED_SHARDS=10 gives
 # 200 shards of 33 runs each (~15 min) instead of 20 shards of 330.
+#
+# For the gate, SEED_SHARDS does the same to a point's matched seed set, and a
+# seed-sharded gate shard uploads rows rather than a scored cell: the merge
+# pools a point's blocks and scores the whole cell, because A9 is a frequency
+# over the matched seed set and a block of it is not a small cell.
+# ONLY_POINTS="7,13,204" re-runs named indices of the same Sobol' grid at their
+# own grid coordinates, which is how a region of the design is resolved more
+# finely without moving any interval.
 set -euo pipefail
 
 USAGE="usage: submit_bounded_design.sh <screen|region> <shard-count> <bucket> [region] [queue] [job-definition]"
@@ -30,6 +38,7 @@ esac
 # design at the same --design-seed.
 TRAJECTORIES="${TRAJECTORIES:-20}"
 SEED_SHARDS="${SEED_SHARDS:-1}"
+ONLY_POINTS="${ONLY_POINTS:-}"
 SOBOL_M="${SOBOL_M:-7}"
 SEEDS="${SEEDS:-30}"
 DESIGN_SEED="${DESIGN_SEED:-17}"
@@ -41,12 +50,19 @@ echo "  name         : $JOB_NAME"
 echo "  design       : $DESIGN"
 echo "  array size   : $SHARD_COUNT"
 echo "  trajectories : $TRAJECTORIES (screen)"
-echo "  seed shards  : $SEED_SHARDS (screen)"
+echo "  seed shards  : $SEED_SHARDS"
+echo "  only points  : ${ONLY_POINTS:-<whole grid>} (region)"
 echo "  sobol m      : $SOBOL_M (region)"
 echo "  seeds/point  : $SEEDS"
 echo "  design seed  : $DESIGN_SEED"
 echo "  queue        : $JOB_QUEUE"
 echo "  s3 prefix    : $S3_PREFIX"
+
+# JSON rather than key=value shorthand: a point selection is itself
+# comma-separated, and the shorthand would read it as further parameters.
+PARAMETERS=$(printf '{"design":"%s","shard_count":"%s","trajectories":"%s","seed_shards":"%s","only_points":"%s","sobol_m":"%s","seeds":"%s","design_seed":"%s","s3_prefix":"%s"}' \
+  "$DESIGN" "$SHARD_COUNT" "$TRAJECTORIES" "$SEED_SHARDS" "$ONLY_POINTS" \
+  "$SOBOL_M" "$SEEDS" "$DESIGN_SEED" "$S3_PREFIX")
 
 env -u AWS_ACCESS_KEY_ID -u AWS_SECRET_ACCESS_KEY -u AWS_SESSION_TOKEN \
   AWS_PROFILE=picard aws batch submit-job \
@@ -54,6 +70,6 @@ env -u AWS_ACCESS_KEY_ID -u AWS_SECRET_ACCESS_KEY -u AWS_SESSION_TOKEN \
   --job-queue "$JOB_QUEUE" \
   --job-definition "$JOB_DEFINITION" \
   --array-properties "size=$SHARD_COUNT" \
-  --parameters "design=$DESIGN,shard_count=$SHARD_COUNT,trajectories=$TRAJECTORIES,seed_shards=$SEED_SHARDS,sobol_m=$SOBOL_M,seeds=$SEEDS,design_seed=$DESIGN_SEED,s3_prefix=$S3_PREFIX" \
+  --parameters "$PARAMETERS" \
   --region "$AWS_REGION" \
   --query 'jobId' --output text
