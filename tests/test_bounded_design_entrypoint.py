@@ -104,3 +104,14 @@ def test_the_screen_shard_is_unaffected_by_the_region_subset_flags() -> None:
     argv = _screen_argv(args, 1, Path("/tmp/out.json"))
     assert argv[argv.index("--seed-shards") + 1] == "5"
     assert "--only-points" not in argv
+
+
+def test_a_region_shard_starts_its_seeds_at_the_stage_base() -> None:
+    argv = _region_argv(
+        _region_args("--seed-base", "524", "--seeds", "24"),
+        0,
+        Path("/tmp/out.json"),
+        Path("/tmp/rows.jsonl"),
+    )
+    assert argv[argv.index("--seed-base") + 1] == "524"
+    assert argv[argv.index("--seeds") + 1] == "24"

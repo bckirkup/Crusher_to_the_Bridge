@@ -15,6 +15,7 @@
       "--crew-duty-exclusion", "Ref::crew_duty_exclusion",
       "--sobol-m", "Ref::sobol_m",
       "--seeds", "Ref::seeds",
+      "--seed-base", "Ref::seed_base",
       "--design-seed", "Ref::design_seed",
       "--s3-prefix", "Ref::s3_prefix"
     ],
@@ -48,6 +49,7 @@
     "crew_duty_exclusion": "off",
     "sobol_m": "7",
     "seeds": "30",
+    "seed_base": "500",
     "design_seed": "17",
     "s3_prefix": "s3://<BUCKET>/campaign/bounded_design_v2/"
   },

@@ -51,6 +51,9 @@ ONLY_POINTS="${ONLY_POINTS:-}"
 CREW_DUTY_EXCLUSION="${CREW_DUTY_EXCLUSION:-off}"
 SOBOL_M="${SOBOL_M:-7}"
 SEEDS="${SEEDS:-30}"
+# A staged campaign extends a cell with new seeds; each stage starts where
+# the previous one ended (500, 524, 572, ...), so no voyage is counted twice.
+SEED_BASE="${SEED_BASE:-500}"
 DESIGN_SEED="${DESIGN_SEED:-17}"
 S3_PREFIX="${S3_PREFIX:-s3://${BUCKET}/campaign/bounded_design_v1/}"
 JOB_NAME="${JOB_NAME:-picard-bounded-${DESIGN}-$(date +%Y%m%d-%H%M%S)}"
@@ -66,15 +69,16 @@ echo "  only points  : ${ONLY_POINTS:-<whole grid>} (region)"
 echo "  duty excl.   : $CREW_DUTY_EXCLUSION (region)"
 echo "  sobol m      : $SOBOL_M (region)"
 echo "  seeds/point  : $SEEDS"
+echo "  seed base    : $SEED_BASE"
 echo "  design seed  : $DESIGN_SEED"
 echo "  queue        : $JOB_QUEUE"
 echo "  s3 prefix    : $S3_PREFIX"
 
 # JSON rather than key=value shorthand: a point selection is itself
 # comma-separated, and the shorthand would read it as further parameters.
-PARAMETERS=$(printf '{"design":"%s","platform":"%s","shard_count":"%s","trajectories":"%s","seed_shards":"%s","only_points":"%s","crew_duty_exclusion":"%s","sobol_m":"%s","seeds":"%s","design_seed":"%s","s3_prefix":"%s"}' \
+PARAMETERS=$(printf '{"design":"%s","platform":"%s","shard_count":"%s","trajectories":"%s","seed_shards":"%s","only_points":"%s","crew_duty_exclusion":"%s","sobol_m":"%s","seeds":"%s","seed_base":"%s","design_seed":"%s","s3_prefix":"%s"}' \
   "$DESIGN" "$PLATFORM" "$SHARD_COUNT" "$TRAJECTORIES" "$SEED_SHARDS" "$ONLY_POINTS" \
-  "$CREW_DUTY_EXCLUSION" "$SOBOL_M" "$SEEDS" "$DESIGN_SEED" "$S3_PREFIX")
+  "$CREW_DUTY_EXCLUSION" "$SOBOL_M" "$SEEDS" "$SEED_BASE" "$DESIGN_SEED" "$S3_PREFIX")
 
 env -u AWS_ACCESS_KEY_ID -u AWS_SECRET_ACCESS_KEY -u AWS_SESSION_TOKEN \
   AWS_PROFILE=picard aws batch submit-job \

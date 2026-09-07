@@ -161,6 +161,7 @@ def _region_argv(
         *_complement_argv(args),
         "--sobol-m", str(args.sobol_m),
         "--seeds", str(args.seeds),
+        "--seed-base", str(args.seed_base),
         "--design-seed", str(args.design_seed),
         "--seed-shards", str(args.seed_shards),
         "--shard-count", str(args.shard_count),
@@ -201,6 +202,9 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     parser.add_argument("--sobol-m", type=int, default=7)
     parser.add_argument("--seeds", type=int, default=30)
+    # A staged campaign extends a cell with new voyages, not repeated ones:
+    # each stage starts its seeds where the previous stage's ended.
+    parser.add_argument("--seed-base", type=int, default=500)
     parser.add_argument("--design-seed", type=int, default=17)
     return parser.parse_args(argv)
 
