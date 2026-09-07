@@ -32,7 +32,15 @@ from typing import Any, Iterable, Sequence
 from scipy.stats import beta
 
 from simulation_utils.paths import resolve_repo_path, validated_open
+from telemetry_buffer.observation_model.midrs_incidence_targets import (
+    HULL_TO_GRT_BANDS,
+    MIDRS_VOYAGE_COUNTS_BY_GRT_BAND,
+)
 from telemetry_buffer.observation_model.score_anchors import A9_POSTING_THRESHOLD
+from telemetry_buffer.observation_model.vsp_class_era_scoring import (
+    MIDRS_WINDOW,
+    load_postings,
+)
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
@@ -44,6 +52,35 @@ STOP_MASS = 0.95
 # MIDRS eligibility, as ``score_anchors._a9_eligible_rows`` applies it.
 MIN_PASSENGERS = 100
 VOYAGE_DAYS: tuple[float, float] = (3.0, 21.0)
+
+BAND_MASS = 0.95
+
+
+def hull_posting_band(hull: str, band_mass: float = BAND_MASS) -> tuple[float, float]:
+    """The posting-rate interval a hull is scored against, from its own record.
+
+    The numerator is the series' postings assigned to the hull by passenger
+    complement inside the MIDRS window; the denominator is MIDRS voyages in
+    the tonnage bands that complement can occupy.  A hull that can occupy
+    several bands has a denominator *interval*, so the band is the envelope
+    of the Jeffreys intervals at its smallest and largest denominators: the
+    record does not say how many of a shared band's voyages are this hull's,
+    and a point estimate would decide it.  A hull with no mapped band, or no
+    postings and no voyages, falls back to the fleet band.
+    """
+    k = sum(
+        1 for p in load_postings()
+        if p.hull == hull and MIDRS_WINDOW[0] <= p.year <= MIDRS_WINDOW[1]
+    )
+    counts = [MIDRS_VOYAGE_COUNTS_BY_GRT_BAND[b] for b in HULL_TO_GRT_BANDS.get(hull, ())]
+    if not counts:
+        return A9_BAND
+    tail = (1.0 - band_mass) / 2.0
+    a = JEFFREYS[0] + k
+    low = float(beta.ppf(tail, a, JEFFREYS[1] + sum(counts) - k))
+    high = float(beta.ppf(1.0 - tail, a, JEFFREYS[1] + min(counts) - k))
+    return (low, high)
+
 
 CHANNELS: tuple[str, ...] = ("or_rule", "passenger")
 CONTINUE = "continue"
@@ -134,7 +171,9 @@ def pool_cells(paths: Sequence[Path]) -> dict[tuple[str, int], list[dict[str, An
     }
 
 
-def score_cell(rows: Sequence[dict[str, Any]]) -> dict[str, Any]:
+def score_cell(
+    rows: Sequence[dict[str, Any]], band: tuple[float, float] = A9_BAND,
+) -> dict[str, Any]:
     """One cell's counts, posteriors and decision, both channels."""
     voyages = [row for row in rows if eligible(row)]
     n = len(voyages)
@@ -144,7 +183,7 @@ def score_cell(rows: Sequence[dict[str, Any]]) -> dict[str, Any]:
     }
     channels = {}
     for channel in CHANNELS:
-        mass = band_mass(counts[channel], n)
+        mass = band_mass(counts[channel], n, band)
         channels[channel] = {
             "posted": counts[channel],
             **mass,
@@ -152,6 +191,7 @@ def score_cell(rows: Sequence[dict[str, Any]]) -> dict[str, Any]:
         }
     decisions = {channels[channel]["decision"] for channel in CHANNELS}
     return {
+        "band": list(band),
         "eligible_runs": n,
         "seeds": [int(row["seed"]) for row in rows],
         "channels": channels,
@@ -190,11 +230,13 @@ def next_stage(cells: dict[str, dict[int, dict[str, Any]]]) -> dict[str, Any]:
 def readout(paths: Sequence[Path]) -> dict[str, Any]:
     pooled = pool_cells(paths)
     cells: dict[str, dict[int, dict[str, Any]]] = defaultdict(dict)
+    bands = {hull: hull_posting_band(hull) for hull, _ in pooled}
     for (hull, index), rows in pooled.items():
-        cells[hull][index] = score_cell(rows)
+        cells[hull][index] = score_cell(rows, bands[hull])
     return {
         "mode": "staged_posting_readout",
         "a9_band": list(A9_BAND),
+        "hull_bands": {hull: list(band) for hull, band in bands.items()},
         "prior": {"family": "beta", "a": JEFFREYS[0], "b": JEFFREYS[1]},
         "stop_mass": STOP_MASS,
         "cells": {hull: dict(sorted(points.items())) for hull, points in cells.items()},
@@ -218,6 +260,8 @@ def render(report: dict[str, Any]) -> str:
             )
     lines.append("")
     lines.append("Posterior columns are the passenger channel; decision needs both.")
+    for hull, band in report["hull_bands"].items():
+        lines.append(f"{hull}: scored against [{band[0]:.4f}, {band[1]:.4f}]")
     for hull, plan in report["next_stage"].items():
         lines.append(
             f"{hull}: continue {len(plan['only_points'])} point(s) "

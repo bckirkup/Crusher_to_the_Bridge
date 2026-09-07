@@ -91,3 +91,28 @@ def test_hulls_are_separate_cells_and_a_decided_hull_has_no_next_points(tmp_path
         assert report["next_stage"]["expedition_cruise_450"]["only_points"] == [12]
     finally:
         path.unlink()
+
+
+def test_each_hull_is_scored_against_its_own_record() -> None:
+    bands = {hull: spr.hull_posting_band(hull) for hull in spr.HULL_TO_GRT_BANDS}
+    for low, high in bands.values():
+        assert 0.0 < low < high < 1.0
+    # A hull that can occupy several tonnage bands carries its denominator
+    # uncertainty as width; one confined to a single band is narrower.
+    widths = {hull: high - low for hull, (low, high) in bands.items()}
+    multi = [h for h, b in spr.HULL_TO_GRT_BANDS.items() if len(b) > 1]
+    single = [h for h, b in spr.HULL_TO_GRT_BANDS.items() if len(b) == 1]
+    assert multi and single
+    assert max(widths[h] for h in multi) > min(widths[h] for h in single)
+    # Asking for more mass widens the band; an unmapped hull falls back.
+    narrow = spr.hull_posting_band(single[0], band_mass=0.5)
+    assert narrow[0] > bands[single[0]][0] and narrow[1] < bands[single[0]][1]
+    assert spr.hull_posting_band("no_such_hull") == spr.A9_BAND
+
+
+def test_the_band_decides_the_verdict(tmp_path: Path) -> None:
+    rows = [_row(seed, 0.04 if seed < 2 else 0.0) for seed in range(40)]
+    loud = spr.score_cell(rows, band=(0.001, 0.005))
+    quiet = spr.score_cell(rows, band=(0.02, 0.30))
+    assert loud["channels"]["passenger"]["above"] > quiet["channels"]["passenger"]["above"]
+    assert loud["band"] == [0.001, 0.005]
