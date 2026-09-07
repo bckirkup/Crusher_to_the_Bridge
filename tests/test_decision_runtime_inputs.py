@@ -3,14 +3,15 @@
 A container that cannot find the class-interaction matrix, the diffusion
 configuration or the global-health timeline used to fall back to empty
 defaults, so the same run spec scored one model in a checkout and a different
-one on Batch. These tests hold both halves of the repair: the files travel in
-the build context, and an absent file is an error rather than a default.
+one on Batch. These tests hold the runtime half of the repair: an absent file is
+an error rather than a default. Whether the files reach each image is not a
+question about these four files -- ``tests/test_image_build_context.py`` asks
+it of every tracked file the images copy.
 """
 
 from __future__ import annotations
 
 import os
-import re
 import sys
 from pathlib import Path
 
@@ -24,7 +25,6 @@ from decision_engine.information.diffusion import InformationDiffusionEngine  # 
 from decision_engine.intelligence import default_timeline_path  # noqa: E402
 from decision_engine.runtime import DecisionRuntime  # noqa: E402
 from decision_engine.social.class_interactions import ClassInteractionMatrix  # noqa: E402
-from telemetry_buffer.observation_model.vsp_class_era_scoring import SERIES  # noqa: E402
 
 DEFAULT_INPUT_PATHS = (
     default_bundle_path(str(REPO_ROOT)),
@@ -33,73 +33,10 @@ DEFAULT_INPUT_PATHS = (
     InformationDiffusionEngine.default_path(str(REPO_ROOT)),
 )
 
-# Read at scoring time, not at boot: an image without it runs every voyage of
-# a gate shard and then cannot score the cell.
-SCORING_INPUT_PATHS = (str(SERIES),)
-
-IMAGES = (
-    REPO_ROOT / "Dockerfile",
-    REPO_ROOT / "deploy" / "aws" / "Dockerfile.design",
-    REPO_ROOT / "deploy" / "aws" / "Dockerfile.analysis",
-)
-
-
-def _ignore_regex(pattern: str) -> re.Pattern[str]:
-    pattern = pattern.rstrip("/")
-    escaped = re.escape(pattern).replace(r"\*\*", ".*").replace(r"\*", "[^/]*")
-    return re.compile(rf"^{escaped}(/.*)?$")
-
-
-def _dockerignored(relative: str) -> bool:
-    """Whether the build context drops ``relative`` (last matching rule wins)."""
-    ignored = False
-    for raw in (REPO_ROOT / ".dockerignore").read_text(encoding="utf-8").splitlines():
-        line = raw.strip()
-        if not line or line.startswith("#"):
-            continue
-        negate = line.startswith("!")
-        if _ignore_regex(line.lstrip("!")).match(relative):
-            ignored = not negate
-    return ignored
-
-
-def _copied_sources(dockerfile: Path) -> list[str]:
-    sources: list[str] = []
-    for line in dockerfile.read_text(encoding="utf-8").splitlines():
-        stripped = line.strip()
-        if not stripped.startswith("COPY ") or "--from=" in stripped:
-            continue
-        parts = stripped.split()[1:-1]
-        sources.extend(parts)
-    return sources
-
 
 @pytest.mark.parametrize("path", DEFAULT_INPUT_PATHS)
 def test_every_default_runtime_input_exists_in_the_checkout(path: str) -> None:
     assert os.path.isfile(path), path
-
-
-@pytest.mark.parametrize("dockerfile", IMAGES, ids=lambda p: p.name)
-@pytest.mark.parametrize("path", DEFAULT_INPUT_PATHS + SCORING_INPUT_PATHS)
-def test_every_image_running_the_model_carries_its_runtime_inputs(
-    dockerfile: Path,
-    path: str,
-) -> None:
-    relative = Path(path).relative_to(REPO_ROOT)
-    sources = _copied_sources(dockerfile)
-    assert any(
-        str(relative) == source or str(relative).startswith(source.rstrip("/") + "/")
-        for source in sources
-    ), f"{dockerfile.name} does not copy {relative}"
-    assert not _dockerignored(str(relative)), f".dockerignore drops {relative}"
-
-
-def test_the_ignore_matcher_reads_docker_rules_as_docker_does() -> None:
-    assert _dockerignored("telemetry_buffer/bounded_screen_38.json")
-    assert _dockerignored("telemetry_buffer/observation_model/local_merged.json")
-    assert not _dockerignored("telemetry_buffer/observation_model/admissible_region.py")
-    assert not _dockerignored("engines/transmission_core.py")
-    assert _dockerignored("third_party/contamx/bin/contamx3")
 
 
 def test_a_missing_runtime_input_is_refused_rather_than_defaulted(
