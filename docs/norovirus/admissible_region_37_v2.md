@@ -113,6 +113,62 @@ Reported/symptomatic spans 0–1.0 and lands inside B1/#23's construction band o
 at 1.0 rather than sitting in the band, which is where the A1-versus-A4
 incompatibility continues to live.
 
+### 3.6 The posted voyages are the right size; there are 20× too many of them, and the quiet ones are not clean
+
+A9's per-point pass/fail hides the shape of the failure, so this section reads
+the posting counts directly. **36,087 of 46,080 voyages (78.3%) stayed below the
+0.03 reported-attack-rate posting threshold** — quiet voyages are the rule, not
+the exception. The anchor still fails because it needs them to be nearly the
+*only* case: the median point posts on 20 of 180 voyages (11.1%) against A9's
+0.42–0.56%, a factor of ~23; 242 of 256 points produce at least one quiet
+voyage, and 14 post on all 180.
+
+Where the quiet voyages live is the finding:
+
+| A1 ever-ill AR at the point | points | voyages below the posting threshold |
+|---|---:|---|
+| < 0.01 | 217 | 34,829 / 39,060 (89%) |
+| 0.01 – 0.05 | 13 | 1,113 / 2,340 (48%) |
+| 0.05 – 0.10 | 10 | 143 / 1,800 (8%) |
+| **0.10 – 0.22 (A1 in band)** | **13** | **2 / 2,340 (0.09%)** |
+| > 0.22 | 3 | 0 / 540 |
+
+There is no region that is simultaneously epidemiologically real and mostly
+quiet. The box offers near-nothing or near-certain posting, and A1's band is
+entirely inside the second.
+
+**The bimodality is within a point, not only between points.** At the 222 points
+that post on under half their voyages, **176 have a median voyage that reports
+nothing at all** — reported and ever-ill attack rates of exactly zero — while
+that same median voyage's **infection attack rate is 5.1–5.7%** (interquartile):
+infection spreads and produces no ill passenger. Meanwhile the same 180 voyages
+carry enough reported cases for a cell mean of 0.45–0.79% (interquartile), which
+bounds the conditional mean among posting voyages at **≤ 5.5–6.8% reported
+attack rate** (median bound 6.0%, 2.0× the threshold; the matching lower bound
+is uninformative, so this is a ceiling, not an estimate).
+The bound is derived from the cell's own travel-day-weighted A8 mean and its
+posting count — the shard streams keep cells, not per-run rows, so the full
+within-point distribution is not recoverable from the committed artifact.
+
+That ceiling lands **inside A4's posted-outbreak IQR of 3.55–7.49%**. So
+conditional on posting, the model's outbreaks are about the right magnitude;
+what is wrong is their frequency, by a factor of ~23, and the fact that the
+voyages in between are not small outbreaks but symptomless infection at ~5%
+prevalence. A4 nevertheless fails low at 228 points, because it is scored on the
+*median* voyage of a cell whose median voyage reports nothing — which is §3.4's
+conditioning defect showing up as a level error.
+
+This distinguishes two repairs that A9's tally alone does not. The excess is not
+a missing gradation in outbreak size; it is that a symptomless 5%-infection
+voyage is one draw away from a 6% reported outbreak under the same parameters.
+That points at symptom conversion and the ill-per-infected path, i.e. the
+missing symptom-conditioned spreading-efficiency term (§4's first follow-up),
+rather than at seeding heterogeneity or a wider dose ladder.
+
+Harness for this section:
+`../../telemetry_buffer/observation_model/gate37_quiet_voyages.py`, which reads
+the committed merged artifact and prints every number above.
+
 ## 4. What this licenses, and what it does not
 
 - **Licensed:** no point of the sampled ten-factor box satisfies the six

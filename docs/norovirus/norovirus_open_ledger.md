@@ -687,6 +687,25 @@ symptom-conditioned spreading-efficiency term, every voyage takes off, so the
 quiet/outbreak mixture A8 and A9 measure is unreachable from any point of the
 sourced box. No interval widened, no anchor dropped, no constant moved.
 
+**Read-out, 2026-09-08** (§3.6 of the same report, harness
+`telemetry_buffer/observation_model/gate37_quiet_voyages.py`): take-off at 1.0 is
+*not* every voyage posting, and conflating the two overstated the failure.
+**36,087 of 46,080 voyages (78.3%) stayed below the 0.03 posting threshold**, and
+the median point posts on 20 of 180 (11.1%) — 23x A9's target rather than
+uniformly loud. What the box lacks is the middle: quiet voyages sit almost
+entirely at points with an ever-ill attack rate under 0.01 (89% quiet over 217
+points), while inside A1's band 2,338 of 2,340 voyages post. At the 222 points
+posting on under half their voyages, 176 have a median voyage that reports
+**nothing** while carrying a 5.1-5.7% *infection* attack rate, and the cell mean
+bounds the posting voyages' reported rate at <=5.5-6.8% — inside A4's posted-
+outbreak IQR of 3.55-7.49%. So the outbreaks are the right size and ~23x too
+frequent, and the voyages between them are symptomless infection rather than
+small outbreaks. That is a symptom-conversion statement, which points at the
+absent spreading-efficiency term rather than at seeding heterogeneity or a wider
+dose ladder. The bound is a ceiling read off A8's cell mean and the posting
+count; the shard streams keep cells, not per-run rows, so the within-point
+distribution itself is not recoverable from the artifact.
+
 ## 3. Out-of-sample checks
 
 **Park et al. (2015)** — surface swabs during a shipboard outbreak; nothing was
