@@ -748,6 +748,32 @@ moved and no floor was introduced: the observed crew-only rows include one-case
 postings on small complements, so no universal minimum-case publication rule is
 sourceable from the series. Recorded in `midrs_observed_targets.md` section 4.
 
+**The regulated crew duty exclusion is implemented and measured, and it is not
+the A9 defect, 2026-09-05:** VSP's 2018 Operations Manual 4.4.1.1.1 *requires*
+symptomatic crew off duty — food employees 48 h symptom-free with documented
+medical clearance, other crew 24 h — where 4.4.2.1 only advises isolation of
+passengers, and the model had the crew exposure multipliers with no counterpart
+exclusion. `SOP-VSP-CREW-01` adds it as a standing operational rule, off by
+default, and it is numerically inert when off (in the campaign image, current
+`main` reproduces #467's 17,280 archived rows exactly). Run as a matched arm over
+the same twelve quiet points, factor vectors, 1,440 seeds and seed order —
+common random numbers, one difference — with `compliance_fraction` at **1.0**,
+the declared enforced-regulation upper bound rather than an estimate, since
+maritime compliance is null in the literature: postings fall **793 → 780 of
+17,280**, crew-only 408 → 391, and paired that is 51 voyages stopping and 38
+starting, McNemar's exact **p = 0.20**. The exclusion arm posts on 4.514%
+[4.209%, 4.834%] against A9's 0.42-0.56%. So the mechanism is **neither
+sufficient nor necessary** for A9: 7.5× above the ceiling with it on, and its
+effect on the scored quantity is not resolvable at 17,280 matched voyages. The
+reason is structural rather than parametric — VSP's numerator is cumulative
+reported cases and the rule cannot fire before the first crew case is
+*identified* (first admission at epoch 59-93 of 168), so it prunes the tail of a
+chain whose first five cases are already counted. What stays implicated is
+upstream: crew infection rate, crew-versus-passenger reporting, and the
+3%-of-134 five-case trigger. Measurement:
+[`dutyexcl_matched_37.md`](dutyexcl_matched_37.md). No constant moved, and no
+compliance value was chosen to move an anchor.
+
 ## 3. Out-of-sample checks
 
 **Park et al. (2015)** — surface swabs during a shipboard outbreak; nothing was

@@ -1,0 +1,2314 @@
+{
+  "design": {
+    "points": [
+      0,
+      12,
+      18,
+      20,
+      36,
+      46,
+      126,
+      142,
+      145,
+      171,
+      172,
+      202
+    ],
+    "voyages_per_point": [
+      1440,
+      1440,
+      1440,
+      1440,
+      1440,
+      1440,
+      1440,
+      1440,
+      1440,
+      1440,
+      1440,
+      1440
+    ],
+    "arms": {
+      "baseline": "crew_duty_exclusion off",
+      "exclusion": "crew_duty_exclusion on, compliance_fraction 1.0"
+    }
+  },
+  "targets": {
+    "A9_posting_frequency": [
+      0.0042,
+      0.0056
+    ],
+    "observed_crew_channel_share": [
+      0.0048,
+      0.093
+    ]
+  },
+  "pooled": {
+    "point_index": null,
+    "baseline": {
+      "n_voyages": 17280,
+      "posted": 793,
+      "posting_frequency": 0.045891,
+      "posting_interval_95": [
+        0.042819,
+        0.049117
+      ],
+      "channels": {
+        "passenger_only": 270,
+        "crew_only": 408,
+        "both": 115
+      },
+      "quiet": 16487,
+      "crew_channel_share": 0.659521,
+      "reported_passenger": {
+        "zero_fraction": 0.6658,
+        "quantiles": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0032,
+          0.019,
+          0.1076
+        ],
+        "nonzero_quantiles": [
+          0.0032,
+          0.0032,
+          0.0032,
+          0.0032,
+          0.0127,
+          0.0348,
+          0.1076
+        ]
+      },
+      "reported_crew": {
+        "zero_fraction": 0.80914,
+        "quantiles": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0224,
+          0.1716
+        ],
+        "nonzero_quantiles": [
+          0.0075,
+          0.0075,
+          0.0075,
+          0.0149,
+          0.0224,
+          0.0672,
+          0.1716
+        ]
+      }
+    },
+    "exclusion": {
+      "n_voyages": 17280,
+      "posted": 780,
+      "posting_frequency": 0.045139,
+      "posting_interval_95": [
+        0.042091,
+        0.048341
+      ],
+      "channels": {
+        "passenger_only": 272,
+        "crew_only": 391,
+        "both": 117
+      },
+      "quiet": 16500,
+      "crew_channel_share": 0.651282,
+      "reported_passenger": {
+        "zero_fraction": 0.66719,
+        "quantiles": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0032,
+          0.019,
+          0.0981
+        ],
+        "nonzero_quantiles": [
+          0.0032,
+          0.0032,
+          0.0032,
+          0.0032,
+          0.0127,
+          0.0348,
+          0.0981
+        ]
+      },
+      "reported_crew": {
+        "zero_fraction": 0.80914,
+        "quantiles": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0224,
+          0.1716
+        ],
+        "nonzero_quantiles": [
+          0.0075,
+          0.0075,
+          0.0075,
+          0.0149,
+          0.0224,
+          0.0597,
+          0.1716
+        ]
+      }
+    },
+    "discordance": {
+      "gained": 38,
+      "lost": 51,
+      "discordant": 89,
+      "p_value": 0.20311682
+    },
+    "transitions": {
+      "quiet -> quiet": 16449,
+      "crew_only -> crew_only": 355,
+      "quiet -> crew_only": 26,
+      "passenger_only -> passenger_only": 250,
+      "both -> both": 92,
+      "crew_only -> quiet": 41,
+      "passenger_only -> quiet": 8,
+      "passenger_only -> both": 12,
+      "both -> crew_only": 10,
+      "both -> quiet": 2,
+      "crew_only -> both": 9,
+      "quiet -> passenger_only": 8,
+      "quiet -> both": 4,
+      "both -> passenger_only": 11,
+      "crew_only -> passenger_only": 3
+    },
+    "paired_deltas": {
+      "infection_attack_rate_passenger": {
+        "mean_change": -6.016e-05,
+        "changed_pairs": 453,
+        "changed_fraction": 0.026215
+      },
+      "infection_attack_rate_crew": {
+        "mean_change": -0.00013686,
+        "changed_pairs": 563,
+        "changed_fraction": 0.032581
+      },
+      "A1_ever_ill_passenger": {
+        "mean_change": -1.62e-05,
+        "changed_pairs": 482,
+        "changed_fraction": 0.027894
+      },
+      "ever_ill_attack_rate_crew": {
+        "mean_change": -8.896e-05,
+        "changed_pairs": 517,
+        "changed_fraction": 0.029919
+      },
+      "reported_case_attack_rate_passenger": {
+        "mean_change": -1.44e-05,
+        "changed_pairs": 479,
+        "changed_fraction": 0.02772
+      },
+      "reported_case_attack_rate_crew": {
+        "mean_change": -9.031e-05,
+        "changed_pairs": 519,
+        "changed_fraction": 0.030035
+      },
+      "peak_prevalence": {
+        "mean_change": -0.01730324,
+        "changed_pairs": 305,
+        "changed_fraction": 0.01765
+      }
+    }
+  },
+  "per_point": [
+    {
+      "point_index": 0,
+      "baseline": {
+        "n_voyages": 1440,
+        "posted": 79,
+        "posting_frequency": 0.054861,
+        "posting_interval_95": [
+          0.043671,
+          0.067907
+        ],
+        "channels": {
+          "passenger_only": 26,
+          "crew_only": 41,
+          "both": 12
+        },
+        "quiet": 1361,
+        "crew_channel_share": 0.670886,
+        "reported_passenger": {
+          "zero_fraction": 0.61528,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0032,
+            0.0222,
+            0.0728
+          ],
+          "nonzero_quantiles": [
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0063,
+            0.0127,
+            0.0348,
+            0.0728
+          ]
+        },
+        "reported_crew": {
+          "zero_fraction": 0.77569,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0299,
+            0.1269
+          ],
+          "nonzero_quantiles": [
+            0.0075,
+            0.0075,
+            0.0075,
+            0.0149,
+            0.0224,
+            0.0746,
+            0.1269
+          ]
+        }
+      },
+      "exclusion": {
+        "n_voyages": 1440,
+        "posted": 76,
+        "posting_frequency": 0.052778,
+        "posting_interval_95": [
+          0.041805,
+          0.065617
+        ],
+        "channels": {
+          "passenger_only": 23,
+          "crew_only": 41,
+          "both": 12
+        },
+        "quiet": 1364,
+        "crew_channel_share": 0.697368,
+        "reported_passenger": {
+          "zero_fraction": 0.61736,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0032,
+            0.0222,
+            0.0728
+          ],
+          "nonzero_quantiles": [
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0063,
+            0.0127,
+            0.0316,
+            0.0728
+          ]
+        },
+        "reported_crew": {
+          "zero_fraction": 0.77569,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0299,
+            0.1493
+          ],
+          "nonzero_quantiles": [
+            0.0075,
+            0.0075,
+            0.0075,
+            0.0149,
+            0.0224,
+            0.0672,
+            0.1493
+          ]
+        }
+      },
+      "discordance": {
+        "gained": 3,
+        "lost": 6,
+        "discordant": 9,
+        "p_value": 0.5078125
+      },
+      "transitions": {
+        "quiet -> quiet": 1358,
+        "crew_only -> crew_only": 37,
+        "quiet -> crew_only": 3,
+        "passenger_only -> passenger_only": 23,
+        "both -> both": 10,
+        "crew_only -> quiet": 3,
+        "passenger_only -> quiet": 2,
+        "passenger_only -> both": 1,
+        "both -> crew_only": 1,
+        "both -> quiet": 1,
+        "crew_only -> both": 1
+      },
+      "paired_deltas": {
+        "infection_attack_rate_passenger": {
+          "mean_change": -0.00016278,
+          "changed_pairs": 49,
+          "changed_fraction": 0.034028
+        },
+        "infection_attack_rate_crew": {
+          "mean_change": -0.00029056,
+          "changed_pairs": 58,
+          "changed_fraction": 0.040278
+        },
+        "A1_ever_ill_passenger": {
+          "mean_change": -5.729e-05,
+          "changed_pairs": 51,
+          "changed_fraction": 0.035417
+        },
+        "ever_ill_attack_rate_crew": {
+          "mean_change": -0.00012438,
+          "changed_pairs": 43,
+          "changed_fraction": 0.029861
+        },
+        "reported_case_attack_rate_passenger": {
+          "mean_change": -5.514e-05,
+          "changed_pairs": 49,
+          "changed_fraction": 0.034028
+        },
+        "reported_case_attack_rate_crew": {
+          "mean_change": -0.00012958,
+          "changed_pairs": 43,
+          "changed_fraction": 0.029861
+        },
+        "peak_prevalence": {
+          "mean_change": -0.04305556,
+          "changed_pairs": 32,
+          "changed_fraction": 0.022222
+        }
+      }
+    },
+    {
+      "point_index": 12,
+      "baseline": {
+        "n_voyages": 1440,
+        "posted": 66,
+        "posting_frequency": 0.045833,
+        "posting_interval_95": [
+          0.035622,
+          0.057945
+        ],
+        "channels": {
+          "passenger_only": 26,
+          "crew_only": 34,
+          "both": 6
+        },
+        "quiet": 1374,
+        "crew_channel_share": 0.606061,
+        "reported_passenger": {
+          "zero_fraction": 0.63403,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0032,
+            0.019,
+            0.0728
+          ],
+          "nonzero_quantiles": [
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0127,
+            0.0316,
+            0.0728
+          ]
+        },
+        "reported_crew": {
+          "zero_fraction": 0.76597,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0224,
+            0.1194
+          ],
+          "nonzero_quantiles": [
+            0.0075,
+            0.0075,
+            0.0075,
+            0.0149,
+            0.0224,
+            0.0522,
+            0.1194
+          ]
+        }
+      },
+      "exclusion": {
+        "n_voyages": 1440,
+        "posted": 65,
+        "posting_frequency": 0.045139,
+        "posting_interval_95": [
+          0.035007,
+          0.057174
+        ],
+        "channels": {
+          "passenger_only": 25,
+          "crew_only": 33,
+          "both": 7
+        },
+        "quiet": 1375,
+        "crew_channel_share": 0.615385,
+        "reported_passenger": {
+          "zero_fraction": 0.63472,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0032,
+            0.019,
+            0.0791
+          ],
+          "nonzero_quantiles": [
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0127,
+            0.0316,
+            0.0791
+          ]
+        },
+        "reported_crew": {
+          "zero_fraction": 0.76597,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0224,
+            0.1045
+          ],
+          "nonzero_quantiles": [
+            0.0075,
+            0.0075,
+            0.0075,
+            0.0149,
+            0.0224,
+            0.0448,
+            0.1045
+          ]
+        }
+      },
+      "discordance": {
+        "gained": 4,
+        "lost": 5,
+        "discordant": 9,
+        "p_value": 1.0
+      },
+      "transitions": {
+        "quiet -> quiet": 1370,
+        "crew_only -> crew_only": 31,
+        "both -> both": 6,
+        "passenger_only -> quiet": 2,
+        "passenger_only -> passenger_only": 23,
+        "crew_only -> quiet": 3,
+        "passenger_only -> both": 1,
+        "quiet -> passenger_only": 2,
+        "quiet -> crew_only": 2
+      },
+      "paired_deltas": {
+        "infection_attack_rate_passenger": {
+          "mean_change": -0.0001166,
+          "changed_pairs": 46,
+          "changed_fraction": 0.031944
+        },
+        "infection_attack_rate_crew": {
+          "mean_change": -0.00030563,
+          "changed_pairs": 52,
+          "changed_fraction": 0.036111
+        },
+        "A1_ever_ill_passenger": {
+          "mean_change": -1.069e-05,
+          "changed_pairs": 41,
+          "changed_fraction": 0.028472
+        },
+        "ever_ill_attack_rate_crew": {
+          "mean_change": -0.00013472,
+          "changed_pairs": 48,
+          "changed_fraction": 0.033333
+        },
+        "reported_case_attack_rate_passenger": {
+          "mean_change": -6.04e-06,
+          "changed_pairs": 39,
+          "changed_fraction": 0.027083
+        },
+        "reported_case_attack_rate_crew": {
+          "mean_change": -0.00020215,
+          "changed_pairs": 46,
+          "changed_fraction": 0.031944
+        },
+        "peak_prevalence": {
+          "mean_change": -0.02638889,
+          "changed_pairs": 27,
+          "changed_fraction": 0.01875
+        }
+      }
+    },
+    {
+      "point_index": 18,
+      "baseline": {
+        "n_voyages": 1440,
+        "posted": 76,
+        "posting_frequency": 0.052778,
+        "posting_interval_95": [
+          0.041805,
+          0.065617
+        ],
+        "channels": {
+          "passenger_only": 23,
+          "crew_only": 42,
+          "both": 11
+        },
+        "quiet": 1364,
+        "crew_channel_share": 0.697368,
+        "reported_passenger": {
+          "zero_fraction": 0.62986,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0032,
+            0.0222,
+            0.0854
+          ],
+          "nonzero_quantiles": [
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0063,
+            0.0127,
+            0.0316,
+            0.0854
+          ]
+        },
+        "reported_crew": {
+          "zero_fraction": 0.76736,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0299,
+            0.1194
+          ],
+          "nonzero_quantiles": [
+            0.0075,
+            0.0075,
+            0.0075,
+            0.0149,
+            0.0224,
+            0.0672,
+            0.1194
+          ]
+        }
+      },
+      "exclusion": {
+        "n_voyages": 1440,
+        "posted": 74,
+        "posting_frequency": 0.051389,
+        "posting_interval_95": [
+          0.040564,
+          0.064087
+        ],
+        "channels": {
+          "passenger_only": 24,
+          "crew_only": 38,
+          "both": 12
+        },
+        "quiet": 1366,
+        "crew_channel_share": 0.675676,
+        "reported_passenger": {
+          "zero_fraction": 0.63125,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0032,
+            0.0222,
+            0.0949
+          ],
+          "nonzero_quantiles": [
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0063,
+            0.0127,
+            0.0316,
+            0.0949
+          ]
+        },
+        "reported_crew": {
+          "zero_fraction": 0.76736,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0299,
+            0.1194
+          ],
+          "nonzero_quantiles": [
+            0.0075,
+            0.0075,
+            0.0075,
+            0.0149,
+            0.0224,
+            0.0672,
+            0.1194
+          ]
+        }
+      },
+      "discordance": {
+        "gained": 5,
+        "lost": 7,
+        "discordant": 12,
+        "p_value": 0.77441406
+      },
+      "transitions": {
+        "quiet -> quiet": 1359,
+        "quiet -> both": 1,
+        "crew_only -> crew_only": 35,
+        "passenger_only -> passenger_only": 22,
+        "crew_only -> quiet": 5,
+        "quiet -> passenger_only": 1,
+        "crew_only -> both": 2,
+        "both -> both": 9,
+        "both -> passenger_only": 1,
+        "both -> quiet": 1,
+        "quiet -> crew_only": 3,
+        "passenger_only -> quiet": 1
+      },
+      "paired_deltas": {
+        "infection_attack_rate_passenger": {
+          "mean_change": -0.00011674,
+          "changed_pairs": 54,
+          "changed_fraction": 0.0375
+        },
+        "infection_attack_rate_crew": {
+          "mean_change": -0.00013972,
+          "changed_pairs": 63,
+          "changed_fraction": 0.04375
+        },
+        "A1_ever_ill_passenger": {
+          "mean_change": -5.486e-05,
+          "changed_pairs": 51,
+          "changed_fraction": 0.035417
+        },
+        "ever_ill_attack_rate_crew": {
+          "mean_change": -4.66e-05,
+          "changed_pairs": 52,
+          "changed_fraction": 0.036111
+        },
+        "reported_case_attack_rate_passenger": {
+          "mean_change": -4.167e-05,
+          "changed_pairs": 50,
+          "changed_fraction": 0.034722
+        },
+        "reported_case_attack_rate_crew": {
+          "mean_change": -2.076e-05,
+          "changed_pairs": 53,
+          "changed_fraction": 0.036806
+        },
+        "peak_prevalence": {
+          "mean_change": -0.03819444,
+          "changed_pairs": 37,
+          "changed_fraction": 0.025694
+        }
+      }
+    },
+    {
+      "point_index": 20,
+      "baseline": {
+        "n_voyages": 1440,
+        "posted": 72,
+        "posting_frequency": 0.05,
+        "posting_interval_95": [
+          0.039324,
+          0.062555
+        ],
+        "channels": {
+          "passenger_only": 26,
+          "crew_only": 37,
+          "both": 9
+        },
+        "quiet": 1368,
+        "crew_channel_share": 0.638889,
+        "reported_passenger": {
+          "zero_fraction": 0.65972,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0032,
+            0.0222,
+            0.0791
+          ],
+          "nonzero_quantiles": [
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0127,
+            0.0348,
+            0.0791
+          ]
+        },
+        "reported_crew": {
+          "zero_fraction": 0.80833,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0224,
+            0.1194
+          ],
+          "nonzero_quantiles": [
+            0.0075,
+            0.0075,
+            0.0075,
+            0.0149,
+            0.0299,
+            0.0672,
+            0.1194
+          ]
+        }
+      },
+      "exclusion": {
+        "n_voyages": 1440,
+        "posted": 74,
+        "posting_frequency": 0.051389,
+        "posting_interval_95": [
+          0.040564,
+          0.064087
+        ],
+        "channels": {
+          "passenger_only": 28,
+          "crew_only": 38,
+          "both": 8
+        },
+        "quiet": 1366,
+        "crew_channel_share": 0.621622,
+        "reported_passenger": {
+          "zero_fraction": 0.66181,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0032,
+            0.0222,
+            0.0759
+          ],
+          "nonzero_quantiles": [
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0127,
+            0.0348,
+            0.0759
+          ]
+        },
+        "reported_crew": {
+          "zero_fraction": 0.80833,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0224,
+            0.1194
+          ],
+          "nonzero_quantiles": [
+            0.0075,
+            0.0075,
+            0.0075,
+            0.0149,
+            0.0299,
+            0.0522,
+            0.1194
+          ]
+        }
+      },
+      "discordance": {
+        "gained": 3,
+        "lost": 1,
+        "discordant": 4,
+        "p_value": 0.625
+      },
+      "transitions": {
+        "quiet -> quiet": 1365,
+        "both -> crew_only": 1,
+        "passenger_only -> passenger_only": 25,
+        "crew_only -> crew_only": 35,
+        "both -> both": 6,
+        "passenger_only -> quiet": 1,
+        "quiet -> crew_only": 2,
+        "crew_only -> both": 2,
+        "both -> passenger_only": 2,
+        "quiet -> passenger_only": 1
+      },
+      "paired_deltas": {
+        "infection_attack_rate_passenger": {
+          "mean_change": -7.25e-05,
+          "changed_pairs": 37,
+          "changed_fraction": 0.025694
+        },
+        "infection_attack_rate_crew": {
+          "mean_change": -8.278e-05,
+          "changed_pairs": 47,
+          "changed_fraction": 0.032639
+        },
+        "A1_ever_ill_passenger": {
+          "mean_change": -3.931e-05,
+          "changed_pairs": 44,
+          "changed_fraction": 0.030556
+        },
+        "ever_ill_attack_rate_crew": {
+          "mean_change": -6.757e-05,
+          "changed_pairs": 41,
+          "changed_fraction": 0.028472
+        },
+        "reported_case_attack_rate_passenger": {
+          "mean_change": -3.729e-05,
+          "changed_pairs": 43,
+          "changed_fraction": 0.029861
+        },
+        "reported_case_attack_rate_crew": {
+          "mean_change": -6.243e-05,
+          "changed_pairs": 41,
+          "changed_fraction": 0.028472
+        },
+        "peak_prevalence": {
+          "mean_change": -0.02361111,
+          "changed_pairs": 31,
+          "changed_fraction": 0.021528
+        }
+      }
+    },
+    {
+      "point_index": 36,
+      "baseline": {
+        "n_voyages": 1440,
+        "posted": 60,
+        "posting_frequency": 0.041667,
+        "posting_interval_95": [
+          0.031944,
+          0.05331
+        ],
+        "channels": {
+          "passenger_only": 21,
+          "crew_only": 31,
+          "both": 8
+        },
+        "quiet": 1380,
+        "crew_channel_share": 0.65,
+        "reported_passenger": {
+          "zero_fraction": 0.69306,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0032,
+            0.019,
+            0.0728
+          ],
+          "nonzero_quantiles": [
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0127,
+            0.0348,
+            0.0728
+          ]
+        },
+        "reported_crew": {
+          "zero_fraction": 0.83125,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0224,
+            0.1269
+          ],
+          "nonzero_quantiles": [
+            0.0075,
+            0.0075,
+            0.0075,
+            0.0149,
+            0.0224,
+            0.0746,
+            0.1269
+          ]
+        }
+      },
+      "exclusion": {
+        "n_voyages": 1440,
+        "posted": 58,
+        "posting_frequency": 0.040278,
+        "posting_interval_95": [
+          0.030724,
+          0.05176
+        ],
+        "channels": {
+          "passenger_only": 24,
+          "crew_only": 27,
+          "both": 7
+        },
+        "quiet": 1382,
+        "crew_channel_share": 0.586207,
+        "reported_passenger": {
+          "zero_fraction": 0.69236,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0032,
+            0.019,
+            0.0823
+          ],
+          "nonzero_quantiles": [
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0127,
+            0.0348,
+            0.0823
+          ]
+        },
+        "reported_crew": {
+          "zero_fraction": 0.83125,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0224,
+            0.1269
+          ],
+          "nonzero_quantiles": [
+            0.0075,
+            0.0075,
+            0.0075,
+            0.0149,
+            0.0224,
+            0.0672,
+            0.1269
+          ]
+        }
+      },
+      "discordance": {
+        "gained": 2,
+        "lost": 4,
+        "discordant": 6,
+        "p_value": 0.6875
+      },
+      "transitions": {
+        "quiet -> quiet": 1378,
+        "crew_only -> passenger_only": 1,
+        "passenger_only -> passenger_only": 20,
+        "crew_only -> quiet": 4,
+        "crew_only -> crew_only": 26,
+        "both -> both": 6,
+        "passenger_only -> both": 1,
+        "both -> crew_only": 1,
+        "quiet -> passenger_only": 2,
+        "both -> passenger_only": 1
+      },
+      "paired_deltas": {
+        "infection_attack_rate_passenger": {
+          "mean_change": -1.792e-05,
+          "changed_pairs": 36,
+          "changed_fraction": 0.025
+        },
+        "infection_attack_rate_crew": {
+          "mean_change": -0.00010882,
+          "changed_pairs": 48,
+          "changed_fraction": 0.033333
+        },
+        "A1_ever_ill_passenger": {
+          "mean_change": 8.54e-06,
+          "changed_pairs": 34,
+          "changed_fraction": 0.023611
+        },
+        "ever_ill_attack_rate_crew": {
+          "mean_change": -0.00016563,
+          "changed_pairs": 43,
+          "changed_fraction": 0.029861
+        },
+        "reported_case_attack_rate_passenger": {
+          "mean_change": 1.09e-05,
+          "changed_pairs": 34,
+          "changed_fraction": 0.023611
+        },
+        "reported_case_attack_rate_crew": {
+          "mean_change": -0.00016069,
+          "changed_pairs": 44,
+          "changed_fraction": 0.030556
+        },
+        "peak_prevalence": {
+          "mean_change": -0.01388889,
+          "changed_pairs": 25,
+          "changed_fraction": 0.017361
+        }
+      }
+    },
+    {
+      "point_index": 46,
+      "baseline": {
+        "n_voyages": 1440,
+        "posted": 46,
+        "posting_frequency": 0.031944,
+        "posting_interval_95": [
+          0.02348,
+          0.042381
+        ],
+        "channels": {
+          "passenger_only": 17,
+          "crew_only": 26,
+          "both": 3
+        },
+        "quiet": 1394,
+        "crew_channel_share": 0.630435,
+        "reported_passenger": {
+          "zero_fraction": 0.69236,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0032,
+            0.0158,
+            0.0506
+          ],
+          "nonzero_quantiles": [
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0095,
+            0.0285,
+            0.0506
+          ]
+        },
+        "reported_crew": {
+          "zero_fraction": 0.83403,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0224,
+            0.1119
+          ],
+          "nonzero_quantiles": [
+            0.0075,
+            0.0075,
+            0.0075,
+            0.0149,
+            0.0224,
+            0.0597,
+            0.1119
+          ]
+        }
+      },
+      "exclusion": {
+        "n_voyages": 1440,
+        "posted": 46,
+        "posting_frequency": 0.031944,
+        "posting_interval_95": [
+          0.02348,
+          0.042381
+        ],
+        "channels": {
+          "passenger_only": 16,
+          "crew_only": 26,
+          "both": 4
+        },
+        "quiet": 1394,
+        "crew_channel_share": 0.652174,
+        "reported_passenger": {
+          "zero_fraction": 0.69306,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0032,
+            0.0127,
+            0.0538
+          ],
+          "nonzero_quantiles": [
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0095,
+            0.0285,
+            0.0538
+          ]
+        },
+        "reported_crew": {
+          "zero_fraction": 0.83403,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0224,
+            0.097
+          ],
+          "nonzero_quantiles": [
+            0.0075,
+            0.0075,
+            0.0075,
+            0.0149,
+            0.0224,
+            0.0522,
+            0.097
+          ]
+        }
+      },
+      "discordance": {
+        "gained": 1,
+        "lost": 1,
+        "discordant": 2,
+        "p_value": 1.0
+      },
+      "transitions": {
+        "quiet -> quiet": 1393,
+        "crew_only -> crew_only": 24,
+        "passenger_only -> passenger_only": 15,
+        "passenger_only -> both": 2,
+        "crew_only -> quiet": 1,
+        "quiet -> crew_only": 1,
+        "both -> both": 2,
+        "both -> crew_only": 1,
+        "crew_only -> passenger_only": 1
+      },
+      "paired_deltas": {
+        "infection_attack_rate_passenger": {
+          "mean_change": -1.993e-05,
+          "changed_pairs": 27,
+          "changed_fraction": 0.01875
+        },
+        "infection_attack_rate_crew": {
+          "mean_change": -0.00017083,
+          "changed_pairs": 31,
+          "changed_fraction": 0.021528
+        },
+        "A1_ever_ill_passenger": {
+          "mean_change": 9.1e-06,
+          "changed_pairs": 28,
+          "changed_fraction": 0.019444
+        },
+        "ever_ill_attack_rate_crew": {
+          "mean_change": -7.243e-05,
+          "changed_pairs": 30,
+          "changed_fraction": 0.020833
+        },
+        "reported_case_attack_rate_passenger": {
+          "mean_change": -2.08e-06,
+          "changed_pairs": 29,
+          "changed_fraction": 0.020139
+        },
+        "reported_case_attack_rate_crew": {
+          "mean_change": -7.771e-05,
+          "changed_pairs": 31,
+          "changed_fraction": 0.021528
+        },
+        "peak_prevalence": {
+          "mean_change": -0.00347222,
+          "changed_pairs": 14,
+          "changed_fraction": 0.009722
+        }
+      }
+    },
+    {
+      "point_index": 126,
+      "baseline": {
+        "n_voyages": 1440,
+        "posted": 55,
+        "posting_frequency": 0.038194,
+        "posting_interval_95": [
+          0.0289,
+          0.049427
+        ],
+        "channels": {
+          "passenger_only": 17,
+          "crew_only": 32,
+          "both": 6
+        },
+        "quiet": 1385,
+        "crew_channel_share": 0.690909,
+        "reported_passenger": {
+          "zero_fraction": 0.67292,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0032,
+            0.0158,
+            0.0633
+          ],
+          "nonzero_quantiles": [
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0095,
+            0.0285,
+            0.0633
+          ]
+        },
+        "reported_crew": {
+          "zero_fraction": 0.83542,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0224,
+            0.1343
+          ],
+          "nonzero_quantiles": [
+            0.0075,
+            0.0075,
+            0.0075,
+            0.0149,
+            0.0224,
+            0.0672,
+            0.1343
+          ]
+        }
+      },
+      "exclusion": {
+        "n_voyages": 1440,
+        "posted": 51,
+        "posting_frequency": 0.035417,
+        "posting_interval_95": [
+          0.026481,
+          0.046306
+        ],
+        "channels": {
+          "passenger_only": 19,
+          "crew_only": 29,
+          "both": 3
+        },
+        "quiet": 1389,
+        "crew_channel_share": 0.627451,
+        "reported_passenger": {
+          "zero_fraction": 0.67431,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0032,
+            0.0158,
+            0.0696
+          ],
+          "nonzero_quantiles": [
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0095,
+            0.0285,
+            0.0696
+          ]
+        },
+        "reported_crew": {
+          "zero_fraction": 0.83542,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0224,
+            0.1194
+          ],
+          "nonzero_quantiles": [
+            0.0075,
+            0.0075,
+            0.0075,
+            0.0149,
+            0.0224,
+            0.0597,
+            0.1194
+          ]
+        }
+      },
+      "discordance": {
+        "gained": 4,
+        "lost": 8,
+        "discordant": 12,
+        "p_value": 0.38769531
+      },
+      "transitions": {
+        "quiet -> quiet": 1381,
+        "crew_only -> passenger_only": 1,
+        "passenger_only -> passenger_only": 17,
+        "crew_only -> crew_only": 23,
+        "crew_only -> quiet": 8,
+        "quiet -> crew_only": 4,
+        "both -> both": 3,
+        "both -> crew_only": 2,
+        "both -> passenger_only": 1
+      },
+      "paired_deltas": {
+        "infection_attack_rate_passenger": {
+          "mean_change": -7.278e-05,
+          "changed_pairs": 32,
+          "changed_fraction": 0.022222
+        },
+        "infection_attack_rate_crew": {
+          "mean_change": -0.00015535,
+          "changed_pairs": 45,
+          "changed_fraction": 0.03125
+        },
+        "A1_ever_ill_passenger": {
+          "mean_change": -4.389e-05,
+          "changed_pairs": 39,
+          "changed_fraction": 0.027083
+        },
+        "ever_ill_attack_rate_crew": {
+          "mean_change": -0.00016576,
+          "changed_pairs": 45,
+          "changed_fraction": 0.03125
+        },
+        "reported_case_attack_rate_passenger": {
+          "mean_change": -4.625e-05,
+          "changed_pairs": 39,
+          "changed_fraction": 0.027083
+        },
+        "reported_case_attack_rate_crew": {
+          "mean_change": -0.00018118,
+          "changed_pairs": 44,
+          "changed_fraction": 0.030556
+        },
+        "peak_prevalence": {
+          "mean_change": -0.03194444,
+          "changed_pairs": 22,
+          "changed_fraction": 0.015278
+        }
+      }
+    },
+    {
+      "point_index": 142,
+      "baseline": {
+        "n_voyages": 1440,
+        "posted": 54,
+        "posting_frequency": 0.0375,
+        "posting_interval_95": [
+          0.028294,
+          0.048648
+        ],
+        "channels": {
+          "passenger_only": 19,
+          "crew_only": 24,
+          "both": 11
+        },
+        "quiet": 1386,
+        "crew_channel_share": 0.648148,
+        "reported_passenger": {
+          "zero_fraction": 0.68889,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0032,
+            0.0158,
+            0.057
+          ],
+          "nonzero_quantiles": [
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0127,
+            0.0348,
+            0.057
+          ]
+        },
+        "reported_crew": {
+          "zero_fraction": 0.83403,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0224,
+            0.1343
+          ],
+          "nonzero_quantiles": [
+            0.0075,
+            0.0075,
+            0.0075,
+            0.0149,
+            0.0224,
+            0.0597,
+            0.1343
+          ]
+        }
+      },
+      "exclusion": {
+        "n_voyages": 1440,
+        "posted": 53,
+        "posting_frequency": 0.036806,
+        "posting_interval_95": [
+          0.027689,
+          0.047868
+        ],
+        "channels": {
+          "passenger_only": 20,
+          "crew_only": 23,
+          "both": 10
+        },
+        "quiet": 1387,
+        "crew_channel_share": 0.622642,
+        "reported_passenger": {
+          "zero_fraction": 0.68889,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0032,
+            0.0158,
+            0.057
+          ],
+          "nonzero_quantiles": [
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0127,
+            0.0316,
+            0.057
+          ]
+        },
+        "reported_crew": {
+          "zero_fraction": 0.83403,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0224,
+            0.1194
+          ],
+          "nonzero_quantiles": [
+            0.0075,
+            0.0075,
+            0.0075,
+            0.0149,
+            0.0224,
+            0.0597,
+            0.1194
+          ]
+        }
+      },
+      "discordance": {
+        "gained": 2,
+        "lost": 3,
+        "discordant": 5,
+        "p_value": 1.0
+      },
+      "transitions": {
+        "quiet -> quiet": 1384,
+        "passenger_only -> passenger_only": 19,
+        "both -> both": 9,
+        "crew_only -> crew_only": 21,
+        "both -> passenger_only": 1,
+        "crew_only -> quiet": 3,
+        "both -> crew_only": 1,
+        "quiet -> crew_only": 1,
+        "quiet -> both": 1
+      },
+      "paired_deltas": {
+        "infection_attack_rate_passenger": {
+          "mean_change": -1.535e-05,
+          "changed_pairs": 29,
+          "changed_fraction": 0.020139
+        },
+        "infection_attack_rate_crew": {
+          "mean_change": -0.00011403,
+          "changed_pairs": 34,
+          "changed_fraction": 0.023611
+        },
+        "A1_ever_ill_passenger": {
+          "mean_change": -4.31e-06,
+          "changed_pairs": 30,
+          "changed_fraction": 0.020833
+        },
+        "ever_ill_attack_rate_crew": {
+          "mean_change": -8.792e-05,
+          "changed_pairs": 29,
+          "changed_fraction": 0.020139
+        },
+        "reported_case_attack_rate_passenger": {
+          "mean_change": -8.75e-06,
+          "changed_pairs": 30,
+          "changed_fraction": 0.020833
+        },
+        "reported_case_attack_rate_crew": {
+          "mean_change": -6.208e-05,
+          "changed_pairs": 28,
+          "changed_fraction": 0.019444
+        },
+        "peak_prevalence": {
+          "mean_change": -0.00902778,
+          "changed_pairs": 13,
+          "changed_fraction": 0.009028
+        }
+      }
+    },
+    {
+      "point_index": 145,
+      "baseline": {
+        "n_voyages": 1440,
+        "posted": 81,
+        "posting_frequency": 0.05625,
+        "posting_interval_95": [
+          0.044918,
+          0.069432
+        ],
+        "channels": {
+          "passenger_only": 24,
+          "crew_only": 36,
+          "both": 21
+        },
+        "quiet": 1359,
+        "crew_channel_share": 0.703704,
+        "reported_passenger": {
+          "zero_fraction": 0.67153,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0032,
+            0.0253,
+            0.0886
+          ],
+          "nonzero_quantiles": [
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0158,
+            0.0411,
+            0.0886
+          ]
+        },
+        "reported_crew": {
+          "zero_fraction": 0.81181,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0299,
+            0.1343
+          ],
+          "nonzero_quantiles": [
+            0.0075,
+            0.0075,
+            0.0075,
+            0.0149,
+            0.0299,
+            0.0672,
+            0.1343
+          ]
+        }
+      },
+      "exclusion": {
+        "n_voyages": 1440,
+        "posted": 79,
+        "posting_frequency": 0.054861,
+        "posting_interval_95": [
+          0.043671,
+          0.067907
+        ],
+        "channels": {
+          "passenger_only": 22,
+          "crew_only": 35,
+          "both": 22
+        },
+        "quiet": 1361,
+        "crew_channel_share": 0.721519,
+        "reported_passenger": {
+          "zero_fraction": 0.675,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0032,
+            0.0253,
+            0.0981
+          ],
+          "nonzero_quantiles": [
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0063,
+            0.0158,
+            0.038,
+            0.0981
+          ]
+        },
+        "reported_crew": {
+          "zero_fraction": 0.81181,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0299,
+            0.1343
+          ],
+          "nonzero_quantiles": [
+            0.0075,
+            0.0075,
+            0.0075,
+            0.0149,
+            0.0299,
+            0.0672,
+            0.1343
+          ]
+        }
+      },
+      "discordance": {
+        "gained": 4,
+        "lost": 6,
+        "discordant": 10,
+        "p_value": 0.75390625
+      },
+      "transitions": {
+        "quiet -> quiet": 1355,
+        "passenger_only -> passenger_only": 21,
+        "both -> both": 20,
+        "passenger_only -> quiet": 2,
+        "crew_only -> crew_only": 31,
+        "quiet -> crew_only": 3,
+        "crew_only -> quiet": 4,
+        "crew_only -> both": 1,
+        "quiet -> passenger_only": 1,
+        "both -> crew_only": 1,
+        "passenger_only -> both": 1
+      },
+      "paired_deltas": {
+        "infection_attack_rate_passenger": {
+          "mean_change": -7.917e-05,
+          "changed_pairs": 40,
+          "changed_fraction": 0.027778
+        },
+        "infection_attack_rate_crew": {
+          "mean_change": -0.0001191,
+          "changed_pairs": 49,
+          "changed_fraction": 0.034028
+        },
+        "A1_ever_ill_passenger": {
+          "mean_change": -3.937e-05,
+          "changed_pairs": 52,
+          "changed_fraction": 0.036111
+        },
+        "ever_ill_attack_rate_crew": {
+          "mean_change": -5.14e-06,
+          "changed_pairs": 55,
+          "changed_fraction": 0.038194
+        },
+        "reported_case_attack_rate_passenger": {
+          "mean_change": -3.694e-05,
+          "changed_pairs": 53,
+          "changed_fraction": 0.036806
+        },
+        "reported_case_attack_rate_crew": {
+          "mean_change": -5.28e-06,
+          "changed_pairs": 55,
+          "changed_fraction": 0.038194
+        },
+        "peak_prevalence": {
+          "mean_change": -0.02013889,
+          "changed_pairs": 32,
+          "changed_fraction": 0.022222
+        }
+      }
+    },
+    {
+      "point_index": 171,
+      "baseline": {
+        "n_voyages": 1440,
+        "posted": 75,
+        "posting_frequency": 0.052083,
+        "posting_interval_95": [
+          0.041184,
+          0.064852
+        ],
+        "channels": {
+          "passenger_only": 27,
+          "crew_only": 37,
+          "both": 11
+        },
+        "quiet": 1365,
+        "crew_channel_share": 0.64,
+        "reported_passenger": {
+          "zero_fraction": 0.68125,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0032,
+            0.0222,
+            0.1076
+          ],
+          "nonzero_quantiles": [
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0158,
+            0.038,
+            0.1076
+          ]
+        },
+        "reported_crew": {
+          "zero_fraction": 0.81736,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0224,
+            0.1194
+          ],
+          "nonzero_quantiles": [
+            0.0075,
+            0.0075,
+            0.0075,
+            0.0149,
+            0.0299,
+            0.0821,
+            0.1194
+          ]
+        }
+      },
+      "exclusion": {
+        "n_voyages": 1440,
+        "posted": 76,
+        "posting_frequency": 0.052778,
+        "posting_interval_95": [
+          0.041805,
+          0.065617
+        ],
+        "channels": {
+          "passenger_only": 26,
+          "crew_only": 35,
+          "both": 15
+        },
+        "quiet": 1364,
+        "crew_channel_share": 0.657895,
+        "reported_passenger": {
+          "zero_fraction": 0.68333,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0032,
+            0.0222,
+            0.0918
+          ],
+          "nonzero_quantiles": [
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0158,
+            0.038,
+            0.0918
+          ]
+        },
+        "reported_crew": {
+          "zero_fraction": 0.81736,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0224,
+            0.1418
+          ],
+          "nonzero_quantiles": [
+            0.0075,
+            0.0075,
+            0.0075,
+            0.0149,
+            0.0224,
+            0.0821,
+            0.1418
+          ]
+        }
+      },
+      "discordance": {
+        "gained": 4,
+        "lost": 3,
+        "discordant": 7,
+        "p_value": 1.0
+      },
+      "transitions": {
+        "quiet -> quiet": 1361,
+        "crew_only -> both": 3,
+        "quiet -> crew_only": 2,
+        "crew_only -> crew_only": 31,
+        "passenger_only -> passenger_only": 24,
+        "both -> both": 8,
+        "passenger_only -> both": 3,
+        "crew_only -> quiet": 3,
+        "both -> crew_only": 2,
+        "quiet -> passenger_only": 1,
+        "quiet -> both": 1,
+        "both -> passenger_only": 1
+      },
+      "paired_deltas": {
+        "infection_attack_rate_passenger": {
+          "mean_change": 2.424e-05,
+          "changed_pairs": 34,
+          "changed_fraction": 0.023611
+        },
+        "infection_attack_rate_crew": {
+          "mean_change": 0.0001191,
+          "changed_pairs": 49,
+          "changed_fraction": 0.034028
+        },
+        "A1_ever_ill_passenger": {
+          "mean_change": 2.222e-05,
+          "changed_pairs": 38,
+          "changed_fraction": 0.026389
+        },
+        "ever_ill_attack_rate_crew": {
+          "mean_change": 4.66e-05,
+          "changed_pairs": 45,
+          "changed_fraction": 0.03125
+        },
+        "reported_case_attack_rate_passenger": {
+          "mean_change": 3.083e-05,
+          "changed_pairs": 38,
+          "changed_fraction": 0.026389
+        },
+        "reported_case_attack_rate_crew": {
+          "mean_change": 5.16e-05,
+          "changed_pairs": 48,
+          "changed_fraction": 0.033333
+        },
+        "peak_prevalence": {
+          "mean_change": 0.02986111,
+          "changed_pairs": 28,
+          "changed_fraction": 0.019444
+        }
+      }
+    },
+    {
+      "point_index": 172,
+      "baseline": {
+        "n_voyages": 1440,
+        "posted": 60,
+        "posting_frequency": 0.041667,
+        "posting_interval_95": [
+          0.031944,
+          0.05331
+        ],
+        "channels": {
+          "passenger_only": 19,
+          "crew_only": 35,
+          "both": 6
+        },
+        "quiet": 1380,
+        "crew_channel_share": 0.683333,
+        "reported_passenger": {
+          "zero_fraction": 0.67986,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0032,
+            0.019,
+            0.0665
+          ],
+          "nonzero_quantiles": [
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0127,
+            0.0316,
+            0.0665
+          ]
+        },
+        "reported_crew": {
+          "zero_fraction": 0.82986,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0224,
+            0.1493
+          ],
+          "nonzero_quantiles": [
+            0.0075,
+            0.0075,
+            0.0075,
+            0.0149,
+            0.0224,
+            0.0522,
+            0.1493
+          ]
+        }
+      },
+      "exclusion": {
+        "n_voyages": 1440,
+        "posted": 58,
+        "posting_frequency": 0.040278,
+        "posting_interval_95": [
+          0.030724,
+          0.05176
+        ],
+        "channels": {
+          "passenger_only": 18,
+          "crew_only": 32,
+          "both": 8
+        },
+        "quiet": 1382,
+        "crew_channel_share": 0.689655,
+        "reported_passenger": {
+          "zero_fraction": 0.68264,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0032,
+            0.019,
+            0.0728
+          ],
+          "nonzero_quantiles": [
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0127,
+            0.0316,
+            0.0728
+          ]
+        },
+        "reported_crew": {
+          "zero_fraction": 0.82986,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0224,
+            0.1194
+          ],
+          "nonzero_quantiles": [
+            0.0075,
+            0.0075,
+            0.0075,
+            0.0149,
+            0.0224,
+            0.0597,
+            0.1194
+          ]
+        }
+      },
+      "discordance": {
+        "gained": 4,
+        "lost": 6,
+        "discordant": 10,
+        "p_value": 0.75390625
+      },
+      "transitions": {
+        "quiet -> quiet": 1376,
+        "crew_only -> crew_only": 29,
+        "passenger_only -> passenger_only": 17,
+        "crew_only -> quiet": 6,
+        "both -> both": 5,
+        "both -> passenger_only": 1,
+        "quiet -> both": 1,
+        "passenger_only -> both": 2,
+        "quiet -> crew_only": 3
+      },
+      "paired_deltas": {
+        "infection_attack_rate_passenger": {
+          "mean_change": -4.826e-05,
+          "changed_pairs": 30,
+          "changed_fraction": 0.020833
+        },
+        "infection_attack_rate_crew": {
+          "mean_change": -0.00012451,
+          "changed_pairs": 37,
+          "changed_fraction": 0.025694
+        },
+        "A1_ever_ill_passenger": {
+          "mean_change": 6.67e-06,
+          "changed_pairs": 32,
+          "changed_fraction": 0.022222
+        },
+        "ever_ill_attack_rate_crew": {
+          "mean_change": -0.0001091,
+          "changed_pairs": 38,
+          "changed_fraction": 0.026389
+        },
+        "reported_case_attack_rate_passenger": {
+          "mean_change": 6.46e-06,
+          "changed_pairs": 33,
+          "changed_fraction": 0.022917
+        },
+        "reported_case_attack_rate_crew": {
+          "mean_change": -9.861e-05,
+          "changed_pairs": 38,
+          "changed_fraction": 0.026389
+        },
+        "peak_prevalence": {
+          "mean_change": -0.00902778,
+          "changed_pairs": 19,
+          "changed_fraction": 0.013194
+        }
+      }
+    },
+    {
+      "point_index": 202,
+      "baseline": {
+        "n_voyages": 1440,
+        "posted": 69,
+        "posting_frequency": 0.047917,
+        "posting_interval_95": [
+          0.03747,
+          0.060253
+        ],
+        "channels": {
+          "passenger_only": 25,
+          "crew_only": 33,
+          "both": 11
+        },
+        "quiet": 1371,
+        "crew_channel_share": 0.637681,
+        "reported_passenger": {
+          "zero_fraction": 0.67083,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0032,
+            0.019,
+            0.0696
+          ],
+          "nonzero_quantiles": [
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0063,
+            0.0127,
+            0.0348,
+            0.0696
+          ]
+        },
+        "reported_crew": {
+          "zero_fraction": 0.79861,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0224,
+            0.1716
+          ],
+          "nonzero_quantiles": [
+            0.0075,
+            0.0075,
+            0.0075,
+            0.0149,
+            0.0224,
+            0.0597,
+            0.1716
+          ]
+        }
+      },
+      "exclusion": {
+        "n_voyages": 1440,
+        "posted": 70,
+        "posting_frequency": 0.048611,
+        "posting_interval_95": [
+          0.038088,
+          0.061021
+        ],
+        "channels": {
+          "passenger_only": 27,
+          "crew_only": 34,
+          "both": 9
+        },
+        "quiet": 1370,
+        "crew_channel_share": 0.614286,
+        "reported_passenger": {
+          "zero_fraction": 0.67153,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0032,
+            0.0222,
+            0.0791
+          ],
+          "nonzero_quantiles": [
+            0.0032,
+            0.0032,
+            0.0032,
+            0.0063,
+            0.0127,
+            0.0348,
+            0.0791
+          ]
+        },
+        "reported_crew": {
+          "zero_fraction": 0.79861,
+          "quantiles": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0224,
+            0.1716
+          ],
+          "nonzero_quantiles": [
+            0.0075,
+            0.0075,
+            0.0075,
+            0.0149,
+            0.0224,
+            0.0522,
+            0.1716
+          ]
+        }
+      },
+      "discordance": {
+        "gained": 2,
+        "lost": 1,
+        "discordant": 3,
+        "p_value": 1.0
+      },
+      "transitions": {
+        "quiet -> quiet": 1369,
+        "crew_only -> crew_only": 32,
+        "passenger_only -> passenger_only": 24,
+        "both -> both": 8,
+        "both -> passenger_only": 3,
+        "quiet -> crew_only": 2,
+        "crew_only -> quiet": 1,
+        "passenger_only -> both": 1
+      },
+      "paired_deltas": {
+        "infection_attack_rate_passenger": {
+          "mean_change": -2.41e-05,
+          "changed_pairs": 39,
+          "changed_fraction": 0.027083
+        },
+        "infection_attack_rate_crew": {
+          "mean_change": -0.00015014,
+          "changed_pairs": 50,
+          "changed_fraction": 0.034722
+        },
+        "A1_ever_ill_passenger": {
+          "mean_change": 8.75e-06,
+          "changed_pairs": 42,
+          "changed_fraction": 0.029167
+        },
+        "ever_ill_attack_rate_crew": {
+          "mean_change": -0.00013493,
+          "changed_pairs": 48,
+          "changed_fraction": 0.033333
+        },
+        "reported_case_attack_rate_passenger": {
+          "mean_change": 1.319e-05,
+          "changed_pairs": 42,
+          "changed_fraction": 0.029167
+        },
+        "reported_case_attack_rate_crew": {
+          "mean_change": -0.00013479,
+          "changed_pairs": 48,
+          "changed_fraction": 0.033333
+        },
+        "peak_prevalence": {
+          "mean_change": -0.01875,
+          "changed_pairs": 25,
+          "changed_fraction": 0.017361
+        }
+      }
+    }
+  ]
+}
