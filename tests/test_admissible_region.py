@@ -481,3 +481,318 @@ def test_a_missing_scoring_input_is_refused_before_any_voyage_runs(
     with pytest.raises(SystemExit, match="vsp_outbreak_series.csv"):
         gate.main(["--out", str(tmp_path / "r.json"), "--sobol-m", "1", "--seeds", "1"])
     assert evaluated == []
+
+
+def _quiet_row(seed: int, reported: float) -> dict[str, Any]:
+    """One scorer row whose reported passenger rate is set by the caller."""
+    row = _canonical_row(seed)
+    row["reported_case_attack_rate_passenger"] = reported
+    row["reported_case_attack_rate_crew"] = 0.0
+    row["vsp_trigger_epoch"] = (
+        40 if reported >= score_anchors.A9_POSTING_THRESHOLD else None
+    )
+    return row
+
+
+def _rate(seed: int) -> float:
+    """A voyage's reported rate: one seed in five posts, the rest are quiet."""
+    return 0.09 if seed % 5 == 0 else 0.001 * (seed % 5)
+
+
+def _point_with_rows(
+    monkeypatch: pytest.MonkeyPatch,
+    seeds: list[int],
+) -> dict[str, Any]:
+    monkeypatch.setattr(
+        gate,
+        "run_row",
+        lambda _f, _u, *, seed, design, point_index: _quiet_row(seed, _rate(seed)),
+    )
+    return gate.evaluate_point(
+        [0.5] * len(NOROVIRUS_FACTORS),
+        point_index=7,
+        seeds=seeds,
+        design=gate.Design(),
+    )
+
+
+def test_a_point_keeps_one_run_vector_per_seed_beside_its_cell(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    seeds = list(range(500, 520))
+    point = _point_with_rows(monkeypatch, seeds)
+    runs = point["runs"]
+    assert [run["seed"] for run in runs] == seeds
+    assert set(runs[0]) == set(gate.RETAINED_RUN_FIELDS)
+    posting = [
+        run for run in runs
+        if run["reported_case_attack_rate_passenger"]
+        >= score_anchors.A9_POSTING_THRESHOLD
+    ]
+    assert len(posting) == point["cell"]["A9_posted_eligible"]
+    # The retained vectors carry the within-point spread the cell hides.
+    assert len({run["reported_case_attack_rate_passenger"] for run in runs}) > 1
+
+
+def test_the_retained_vectors_track_the_cell_when_the_voyages_change(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    quiet = _point_with_rows(monkeypatch, list(range(501, 505)))
+    mixed = _point_with_rows(monkeypatch, list(range(500, 520)))
+    assert quiet["cell"]["A9_posted_eligible"] == 0
+    assert mixed["cell"]["A9_posted_eligible"] > 0
+    assert len(quiet["runs"]) == 4
+    assert len(mixed["runs"]) == 20
+
+
+@pytest.mark.parametrize("count", [1, 2, 3, 5])
+def test_seed_blocks_partition_the_matched_set_exactly(count: int) -> None:
+    seeds = list(range(500, 515))
+    blocks = gate.seed_blocks(seeds, count)
+    assert len(blocks) == count
+    pooled = sorted(seed for block in blocks for seed in block)
+    assert pooled == seeds
+
+
+def test_more_blocks_than_seeds_is_refused_rather_than_left_empty() -> None:
+    with pytest.raises(ValueError, match="empty"):
+        gate.seed_blocks([500, 501], 3)
+
+
+def test_a_selection_keeps_the_grid_indices_and_refuses_one_outside() -> None:
+    grid = [[0.1], [0.2], [0.3], [0.4]]
+    assert gate.selected_indices(grid) == [0, 1, 2, 3]
+    assert gate.selected_indices(grid, [3, 1, 3]) == [1, 3]
+    with pytest.raises(ValueError, match="outside the grid"):
+        gate.selected_indices(grid, [1, 9])
+
+
+def _write_blocks(
+    tmp_path: Path,
+    blocks: list[dict[str, Any]],
+    name: str = "rows.jsonl",
+) -> Path:
+    stream = tmp_path / name
+    with stream.open("w", encoding="utf-8") as handle:
+        for block in blocks:
+            handle.write(json.dumps(block) + "\n")
+    return stream
+
+
+def test_pooled_seed_blocks_score_the_cell_an_unsharded_point_would_score(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    seeds = list(range(500, 512))
+    unsharded = _point_with_rows(monkeypatch, seeds)
+    blocks = [
+        gate.evaluate_block(
+            [0.5] * len(NOROVIRUS_FACTORS),
+            point_index=7,
+            block_index=index,
+            seeds=block,
+            design=gate.Design(),
+        )
+        for index, block in enumerate(gate.seed_blocks(seeds, 4))
+    ]
+    monkeypatch.setattr(gate, "REPO_ROOT", tmp_path)
+    pooled = gate.pooled_row_points(
+        [_write_blocks(tmp_path, blocks)],
+        expected=[7],
+        seeds=seeds,
+        seed_shards=4,
+        design=gate.Design(),
+    )
+    assert len(pooled) == 1
+    assert pooled[0]["cell"] == unsharded["cell"]
+    assert pooled[0]["verdicts"] == unsharded["verdicts"]
+    assert sorted(run["seed"] for run in pooled[0]["runs"]) == seeds
+
+
+def test_a_cell_missing_a_seed_block_is_refused_rather_than_scored_small(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    seeds = list(range(500, 508))
+    split = gate.seed_blocks(seeds, 2)
+    monkeypatch.setattr(
+        gate,
+        "run_row",
+        lambda _f, _u, *, seed, design, point_index: _quiet_row(seed, _rate(seed)),
+    )
+    first = gate.evaluate_block(
+        [0.5] * len(NOROVIRUS_FACTORS),
+        point_index=7,
+        block_index=0,
+        seeds=split[0],
+        design=gate.Design(),
+    )
+    monkeypatch.setattr(gate, "REPO_ROOT", tmp_path)
+    stream = _write_blocks(tmp_path, [first])
+    with pytest.raises(SystemExit, match="missing seed block"):
+        gate.pooled_row_points(
+            [stream],
+            expected=[7],
+            seeds=seeds,
+            seed_shards=2,
+            design=gate.Design(),
+        )
+    with pytest.raises(SystemExit, match="design points are absent"):
+        gate.pooled_row_points(
+            [stream],
+            expected=[7, 8],
+            seeds=seeds,
+            seed_shards=1,
+            design=gate.Design(),
+        )
+
+
+def test_a_seed_block_pooled_twice_is_refused(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setattr(gate, "REPO_ROOT", tmp_path)
+    block = {
+        "kind": gate.ROWS_RECORD,
+        "point_index": 7,
+        "block_index": 0,
+        "units": [0.5],
+        "seeds": [500],
+        "rows": [_quiet_row(500, 0.001)],
+    }
+    stream = _write_blocks(tmp_path, [block, dict(block)])
+    with pytest.raises(SystemExit, match="more than one shard stream"):
+        gate.pooled_row_points(
+            [stream],
+            expected=[7],
+            seeds=[500],
+            seed_shards=1,
+            design=gate.Design(),
+        )
+
+
+def test_pooling_a_different_seed_set_than_the_design_is_refused(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setattr(gate, "REPO_ROOT", tmp_path)
+    block = {
+        "kind": gate.ROWS_RECORD,
+        "point_index": 7,
+        "block_index": 0,
+        "units": [0.5],
+        "seeds": [500],
+        "rows": [_quiet_row(500, 0.001)],
+    }
+    stream = _write_blocks(tmp_path, [block])
+    with pytest.raises(SystemExit, match="pools 1 seeds"):
+        gate.pooled_row_points(
+            [stream],
+            expected=[7],
+            seeds=[500, 501],
+            seed_shards=1,
+            design=gate.Design(),
+        )
+
+
+def test_block_shards_cover_every_point_and_block_exactly_once(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    ran: list[tuple[int, int]] = []
+
+    def fake_block(_units, *, point_index, block_index, seeds, design):
+        ran.append((point_index, block_index))
+        return {
+            "kind": gate.ROWS_RECORD,
+            "point_index": point_index,
+            "block_index": block_index,
+            "units": [0.5],
+            "seeds": list(seeds),
+            "rows": [],
+        }
+
+    monkeypatch.setattr(gate, "evaluate_block", fake_block)
+    grid = [[0.1] * len(NOROVIRUS_FACTORS) for _ in range(4)]
+    covered: list[tuple[int, int]] = []
+    for shard in range(3):
+        covered += [
+            (record["point_index"], record["block_index"])
+            for record in gate.evaluate_blocks(
+                grid,
+                seeds=list(range(500, 504)),
+                design=gate.Design(),
+                seed_shards=2,
+                shard_count=3,
+                shard_index=shard,
+                only=[1, 2],
+            )
+        ]
+    assert sorted(covered) == [(1, 0), (1, 1), (2, 0), (2, 1)]
+    assert sorted(ran) == sorted(covered)
+
+
+def test_a_named_subset_is_the_only_thing_a_subset_run_evaluates(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setattr(gate, "REPO_ROOT", tmp_path)
+    evaluated: list[int] = []
+
+    def fake_evaluate_point(_units, *, point_index, seeds, design):
+        evaluated.append(point_index)
+        return _stub_point(point_index)
+
+    monkeypatch.setattr(gate, "evaluate_point", fake_evaluate_point)
+    out = tmp_path / "subset.json"
+    assert gate.main([
+        "--out", str(out),
+        "--sobol-m", "2",
+        "--seeds", "2",
+        "--only-points", "1", "3",
+    ]) == 0
+    assert evaluated == [1, 3]
+    payload = json.loads(out.read_text(encoding="utf-8"))
+    assert payload["design"]["selected_points"] == [1, 3]
+    assert payload["summary"]["n_points"] == 2
+
+
+def test_a_seed_sharded_shard_reports_units_and_no_verdict(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setattr(gate, "REPO_ROOT", tmp_path)
+    monkeypatch.setattr(
+        gate,
+        "run_row",
+        lambda _f, _u, *, seed, design, point_index: _quiet_row(seed, _rate(seed)),
+    )
+    out = tmp_path / "block.json"
+    stream = tmp_path / "block.jsonl"
+    assert gate.main([
+        "--out", str(out),
+        "--stream", str(stream),
+        "--sobol-m", "1",
+        "--seeds", "4",
+        "--seed-shards", "2",
+        "--only-points", "0",
+    ]) == 0
+    payload = json.loads(out.read_text(encoding="utf-8"))
+    assert payload["mode"] == "feasibility_gate_rows_shard"
+    assert "summary" not in payload
+    assert payload["units"] == [
+        {"point_index": 0, "block_index": 0, "n_rows": 2},
+        {"point_index": 0, "block_index": 1, "n_rows": 2},
+    ]
+    merged = tmp_path / "merged.json"
+    assert gate.main([
+        "--out", str(merged),
+        "--merge", str(stream),
+        "--sobol-m", "1",
+        "--seeds", "4",
+        "--seed-shards", "2",
+        "--only-points", "0",
+    ]) == 0
+    pooled = json.loads(merged.read_text(encoding="utf-8"))
+    assert pooled["summary"]["n_points"] == 1
+    assert pooled["points"][0]["cell"]["n_seeds"] == 4
+    assert len(pooled["points"][0]["runs"]) == 4

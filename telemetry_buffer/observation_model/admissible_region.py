@@ -112,6 +112,29 @@ REQUIRED_ANCHORS: tuple[str, ...] = (
 # label rather than a missing one.
 SURVEILLANCE_LABEL = "legacy_config_baseline"
 
+# What a point record keeps per voyage. Chosen as the columns the anchors are
+# computed from -- one voyage's contribution to A1, A2, A8 and A9, plus whether
+# it took off and when it tripped the ship's own trigger.
+RETAINED_RUN_FIELDS: tuple[str, ...] = (
+    "seed",
+    "took_off",
+    "peak_prevalence",
+    "A1_ever_ill_passenger",
+    "ever_ill_attack_rate_crew",
+    "infection_attack_rate_passenger",
+    "infection_attack_rate_crew",
+    "reported_case_attack_rate_passenger",
+    "reported_case_attack_rate_crew",
+    "A2_ill_per_infected",
+    "A3_reported_per_symptomatic",
+    "A5_passenger_crew_ratio",
+    "vsp_trigger_epoch",
+)
+
+# Stream records come in two kinds: a scored point, or the rows of one seed
+# block of a point. The kind is written down rather than guessed at merge.
+ROWS_RECORD = "rows"
+
 ADMISSIBLE = "admissible"
 ADMISSIBLE_PENDING = "admissible_pending_design_limited"
 INADMISSIBLE = "inadmissible"
@@ -470,26 +493,34 @@ def classify(
     }
 
 
-def evaluate_point(
+def run_digest(row: dict[str, Any]) -> dict[str, Any]:
+    """The per-voyage quantities a point record keeps beside its cell.
+
+    A cell summary answers what the anchors ask of a set of voyages and nothing
+    about the set's shape, so a within-point distribution -- whether a point
+    mixes quiet voyages with outbreaks, or is one or the other -- is
+    unrecoverable once the rows are dropped. These are the columns the anchors
+    are computed from, kept per seed; the rest of a scorer row is per-point
+    identity that would repeat 180 times.
+    """
+    return {field: row[field] for field in RETAINED_RUN_FIELDS}
+
+
+def score_point(
+    rows: Sequence[dict[str, Any]],
     units: Sequence[float],
     *,
     point_index: int,
-    seeds: Sequence[int],
     design: Design,
     factors: Sequence[Factor] = NOROVIRUS_FACTORS,
 ) -> dict[str, Any]:
-    """Run one box point over the matched seed set and score its cell."""
-    rows = [
-        run_row(
-            factors,
-            units,
-            seed=seed,
-            design=design,
-            point_index=point_index,
-        )
-        for seed in seeds
-    ]
-    cell = score_anchors.summarise_cell(rows)
+    """Score one point's cell from its rows, however those rows were produced.
+
+    Separate from running them so that seed-block shards, which each hold part
+    of a cell, are scored by the same arithmetic as an unsharded point: a cell
+    is a function of its rows alone.
+    """
+    cell = score_anchors.summarise_cell(list(rows))
     targets = vsp_attack_rate_targets(design.era)
     verdicts, ratios = score_anchors.verdicts(
         design.platform, cell, targets, design.era,
@@ -500,11 +531,97 @@ def evaluate_point(
         "units": [float(unit) for unit in units],
         "factors": factor_values(factors, units),
         "cell": cell,
+        "runs": [run_digest(row) for row in rows],
         "verdicts": verdicts,
         "ratios": ratios,
         "measurements": measurements(design.platform, cell, targets, design.era),
         "construction_bands": score_anchors.construction_band_states(cell),
         "classification": classify(verdicts, limited),
+    }
+
+
+def evaluate_point(
+    units: Sequence[float],
+    *,
+    point_index: int,
+    seeds: Sequence[int],
+    design: Design,
+    factors: Sequence[Factor] = NOROVIRUS_FACTORS,
+) -> dict[str, Any]:
+    """Run one box point over the matched seed set and score its cell."""
+    rows = point_rows(
+        units, point_index=point_index, seeds=seeds, design=design, factors=factors,
+    )
+    return score_point(
+        rows, units, point_index=point_index, design=design, factors=factors,
+    )
+
+
+def point_rows(
+    units: Sequence[float],
+    *,
+    point_index: int,
+    seeds: Sequence[int],
+    design: Design,
+    factors: Sequence[Factor] = NOROVIRUS_FACTORS,
+) -> list[dict[str, Any]]:
+    """The scorer rows for one point over the seeds given."""
+    return [
+        run_row(
+            factors,
+            units,
+            seed=seed,
+            design=design,
+            point_index=point_index,
+        )
+        for seed in seeds
+    ]
+
+
+def seed_blocks(seeds: Sequence[int], count: int) -> list[list[int]]:
+    """Split a point's matched seed set into ``count`` interleaved blocks.
+
+    Interleaved rather than contiguous so that a block is not a systematically
+    early or late slice of the seed sequence; the union is the whole set either
+    way, which is what makes the pooled cell equal an unsharded one.
+    """
+    if count < 1:
+        raise ValueError(f"seed-shard count must be positive, got {count}")
+    blocks = [list(seeds[index::count]) for index in range(count)]
+    empty = [index for index, block in enumerate(blocks) if not block]
+    if empty:
+        raise ValueError(
+            f"{count} seed blocks over {len(seeds)} seeds leaves "
+            f"block(s) {empty} empty",
+        )
+    return blocks
+
+
+def evaluate_block(
+    units: Sequence[float],
+    *,
+    point_index: int,
+    block_index: int,
+    seeds: Sequence[int],
+    design: Design,
+    factors: Sequence[Factor] = NOROVIRUS_FACTORS,
+) -> dict[str, Any]:
+    """Run one (point, seed-block) unit and return its rows unscored.
+
+    A block holds part of a cell, and part of a cell has no anchor verdict --
+    A9 is a frequency over the whole matched set. The block therefore carries
+    rows and its own coordinates, and scoring happens when the blocks pool.
+    """
+    rows = point_rows(
+        units, point_index=point_index, seeds=seeds, design=design, factors=factors,
+    )
+    return {
+        "kind": ROWS_RECORD,
+        "point_index": point_index,
+        "block_index": block_index,
+        "units": [float(unit) for unit in units],
+        "seeds": [int(seed) for seed in seeds],
+        "rows": rows,
     }
 
 
@@ -612,6 +729,71 @@ def _point_job(payload: tuple[Sequence[float], int, Sequence[int], Design]) -> d
     return evaluate_point(units, point_index=index, seeds=seeds, design=design)
 
 
+def _block_job(
+    payload: tuple[Sequence[float], int, int, Sequence[int], Design],
+) -> dict[str, Any]:
+    units, index, block, seeds, design = payload
+    return evaluate_block(
+        units,
+        point_index=index,
+        block_index=block,
+        seeds=seeds,
+        design=design,
+    )
+
+
+def _run_jobs(
+    jobs: Sequence[Any],
+    job: Any,
+    *,
+    workers: int,
+    on_result: Any,
+) -> list[dict[str, Any]]:
+    """Run work units, streaming each finished one to ``on_result``."""
+    results: list[dict[str, Any]] = []
+
+    def keep(record: dict[str, Any]) -> None:
+        results.append(record)
+        if on_result is not None:
+            on_result(record)
+
+    if workers <= 1:
+        for payload in jobs:
+            keep(job(payload))
+        return results
+    with ProcessPoolExecutor(max_workers=workers) as pool:
+        for record in pool.map(job, jobs):
+            keep(record)
+    return results
+
+
+def _check_shard(shard_count: int, shard_index: int) -> None:
+    if shard_count < 1 or not 0 <= shard_index < shard_count:
+        raise ValueError(f"shard {shard_index} outside 0..{shard_count - 1}")
+
+
+def selected_indices(
+    units_grid: Sequence[Sequence[float]],
+    only: Sequence[int] = (),
+) -> list[int]:
+    """The design indices this run evaluates, defaulting to the whole grid.
+
+    A subset keeps the *grid's own* indices rather than renumbering, so a point
+    re-run on its own carries the same coordinates and the same name it had in
+    the full design and the two records are comparable.
+    """
+    if not only:
+        return list(range(len(units_grid)))
+    chosen = sorted(set(int(index) for index in only))
+    outside = [index for index in chosen if not 0 <= index < len(units_grid)]
+    if outside:
+        raise ValueError(
+            f"design point(s) {outside} are outside the grid of "
+            f"{len(units_grid)} points",
+        )
+    return chosen
+
+
 def evaluate_design(
     units_grid: Sequence[Sequence[float]],
     *,
@@ -623,38 +805,63 @@ def evaluate_design(
     completed: Sequence[int] = (),
     shard_count: int = 1,
     shard_index: int = 0,
+    only: Sequence[int] = (),
 ) -> list[dict[str, Any]]:
     """Evaluate this shard's sampled points, streaming each to ``on_point``.
 
-    Points are independent cells, so a shard takes the design indices
-    congruent to ``shard_index`` and the union over shards is the whole grid.
+    Points are independent cells, so a shard takes every ``shard_count``-th
+    point of the selection and the union over shards is the selection.
     ``completed`` names indices already on disk, which is what makes a resume
     safe when the shard's indices are not contiguous.
     """
-    if shard_count < 1 or not 0 <= shard_index < shard_count:
-        raise ValueError(f"shard {shard_index} outside 0..{shard_count - 1}")
+    _check_shard(shard_count, shard_index)
     already = set(completed)
     jobs = [
-        (units, index, seeds, design)
-        for index, units in enumerate(units_grid)
+        (units_grid[index], index, seeds, design)
+        for position, index in enumerate(selected_indices(units_grid, only))
         if index >= start_index
-        and index % shard_count == shard_index
+        and position % shard_count == shard_index
         and index not in already
     ]
-    results: list[dict[str, Any]] = []
-    if workers <= 1:
-        for job in jobs:
-            point = _point_job(job)
-            results.append(point)
-            if on_point is not None:
-                on_point(point)
-        return results
-    with ProcessPoolExecutor(max_workers=workers) as pool:
-        for point in pool.map(_point_job, jobs):
-            results.append(point)
-            if on_point is not None:
-                on_point(point)
-    return results
+    return _run_jobs(jobs, _point_job, workers=workers, on_result=on_point)
+
+
+def evaluate_blocks(
+    units_grid: Sequence[Sequence[float]],
+    *,
+    seeds: Sequence[int],
+    design: Design,
+    seed_shards: int,
+    workers: int = 1,
+    on_block: Any = None,
+    completed: Sequence[tuple[int, int]] = (),
+    shard_count: int = 1,
+    shard_index: int = 0,
+    only: Sequence[int] = (),
+) -> list[dict[str, Any]]:
+    """Evaluate this shard's (point, seed-block) units, unscored.
+
+    The work unit is a seed block of a point rather than a whole point, so a
+    cell of many hundreds of voyages -- which is what resolving a posting
+    frequency near a thousandth requires -- can be spread over a whole array
+    instead of sitting in one child for hours. Nothing is scored here: the
+    blocks pool into cells at merge.
+    """
+    _check_shard(shard_count, shard_index)
+    blocks = seed_blocks(seeds, seed_shards)
+    already = {(int(point), int(block)) for point, block in completed}
+    units_of_work = [
+        (index, block_index)
+        for index in selected_indices(units_grid, only)
+        for block_index in range(len(blocks))
+    ]
+    jobs = [
+        (units_grid[index], index, block_index, blocks[block_index], design)
+        for position, (index, block_index) in enumerate(units_of_work)
+        if position % shard_count == shard_index
+        and (index, block_index) not in already
+    ]
+    return _run_jobs(jobs, _block_job, workers=workers, on_result=on_block)
 
 
 def _validated_cli_path(path: Path, root: Path) -> Path:
@@ -674,7 +881,7 @@ def _write_json(path: Path, payload: dict[str, Any]) -> str:
 
 
 def _read_completed(path: Path) -> list[dict[str, Any]]:
-    """Points already recorded in a stream file, in index order."""
+    """Records already in a stream file, in point-index order."""
     resolved = _validated_cli_path(path, REPO_ROOT)
     if not resolved.exists():
         return []
@@ -685,12 +892,21 @@ def _read_completed(path: Path) -> list[dict[str, Any]]:
     return sorted(points, key=lambda point: point["point_index"])
 
 
+def _refuse_missing(pooled: Sequence[int], expected: Sequence[int]) -> None:
+    missing = sorted(set(expected) - set(pooled))
+    if missing:
+        raise SystemExit(
+            f"{len(missing)} of {len(expected)} design points are absent "
+            f"(first: {missing[:5]}); the gate scores a whole selection",
+        )
+
+
 def _pooled_points(
     streams: Sequence[Path],
     *,
-    expected: int,
+    expected: Sequence[int],
 ) -> list[dict[str, Any]]:
-    """Pool shard streams into one point list, refusing gaps and repeats.
+    """Pool scored-point streams into one list, refusing gaps and repeats.
 
     A partial grid is refused rather than summarised: the gate's verdict is a
     statement about the whole box, and a summary over the shards that happened
@@ -705,13 +921,111 @@ def _pooled_points(
                     f"point {index} appears in more than one shard stream",
                 )
             pooled[index] = point
-    missing = sorted(set(range(expected)) - set(pooled))
-    if missing:
-        raise SystemExit(
-            f"{len(missing)} of {expected} design points are absent "
-            f"(first: {missing[:5]}); the gate scores a whole grid",
-        )
+    _refuse_missing(sorted(pooled), expected)
     return [pooled[index] for index in sorted(pooled)]
+
+
+def _pooled_blocks(
+    streams: Sequence[Path],
+) -> dict[int, dict[int, dict[str, Any]]]:
+    """Row records by point and seed block, refusing a block twice."""
+    pooled: dict[int, dict[int, dict[str, Any]]] = {}
+    for stream in streams:
+        for record in _read_completed(stream):
+            index = int(record["point_index"])
+            block = int(record["block_index"])
+            if block in pooled.setdefault(index, {}):
+                raise SystemExit(
+                    f"point {index} seed block {block} appears in more than "
+                    "one shard stream",
+                )
+            pooled[index][block] = record
+    return pooled
+
+
+def pooled_row_points(
+    streams: Sequence[Path],
+    *,
+    expected: Sequence[int],
+    seeds: Sequence[int],
+    seed_shards: int,
+    design: Design,
+    factors: Sequence[Factor] = NOROVIRUS_FACTORS,
+) -> list[dict[str, Any]]:
+    """Pool seed-block rows into scored points, refusing an incomplete cell.
+
+    A cell missing one of its blocks is not a smaller cell: A9 is a frequency
+    over the matched set, so scoring what arrived would report a posting rate
+    over an unstated denominator. The pooled seeds must be the design's seeds
+    exactly, each once.
+    """
+    pooled = _pooled_blocks(streams)
+    _refuse_missing(sorted(pooled), expected)
+    wanted = sorted(int(seed) for seed in seeds)
+    points: list[dict[str, Any]] = []
+    for index in sorted(pooled):
+        blocks = pooled[index]
+        absent = sorted(set(range(seed_shards)) - set(blocks))
+        if absent:
+            raise SystemExit(
+                f"point {index} is missing seed block(s) {absent} of "
+                f"{seed_shards}; a cell is scored whole or not at all",
+            )
+        # Seed order, not block order: the cell's sums then run in the order
+        # an unsharded point would run them, and the two are bit-identical.
+        rows = sorted(
+            (row for block in blocks.values() for row in block["rows"]),
+            key=lambda row: int(row["seed"]),
+        )
+        got = [int(row["seed"]) for row in rows]
+        if got != wanted:
+            raise SystemExit(
+                f"point {index} pools {len(got)} seeds, the design has "
+                f"{len(wanted)}: a cell must be the matched seed set",
+            )
+        points.append(
+            score_point(
+                rows,
+                blocks[sorted(blocks)[0]]["units"],
+                point_index=index,
+                design=design,
+                factors=factors,
+            ),
+        )
+    return points
+
+
+def _shard_index(args: argparse.Namespace) -> int:
+    """This worker's shard, from the flag or the Batch array index."""
+    if args.shard_index is not None:
+        return int(args.shard_index)
+    raw = os.environ.get("AWS_BATCH_JOB_ARRAY_INDEX")
+    if args.shard_count > 1 and raw is None:
+        raise SystemExit(
+            "--shard-count > 1 needs --shard-index or "
+            "AWS_BATCH_JOB_ARRAY_INDEX",
+        )
+    return int(raw) if raw is not None else 0
+
+
+def _stream_writer(args: argparse.Namespace) -> Any:
+    """A sink appending each finished work unit to ``--stream``."""
+    stream_path = (
+        _validated_cli_path(args.stream, REPO_ROOT) if args.stream else None
+    )
+
+    def record(unit: dict[str, Any]) -> None:
+        if stream_path is None:
+            return
+        with validated_open(
+            str(stream_path),
+            "a",
+            allowed_roots=(str(REPO_ROOT),),
+            encoding="utf-8",
+        ) as handle:
+            handle.write(json.dumps(unit) + "\n")
+
+    return record
 
 
 def _run_shard(
@@ -721,40 +1035,43 @@ def _run_shard(
     design: Design,
 ) -> list[dict[str, Any]]:
     """Evaluate this worker's share of the design, resuming its own stream."""
-    shard_index = args.shard_index
-    if shard_index is None:
-        raw = os.environ.get("AWS_BATCH_JOB_ARRAY_INDEX")
-        if args.shard_count > 1 and raw is None:
-            raise SystemExit(
-                "--shard-count > 1 needs --shard-index or "
-                "AWS_BATCH_JOB_ARRAY_INDEX",
-            )
-        shard_index = int(raw) if raw is not None else 0
     done = _read_completed(args.stream) if (args.resume and args.stream) else []
-    stream_path = (
-        _validated_cli_path(args.stream, REPO_ROOT) if args.stream else None
-    )
-
-    def record(point: dict[str, Any]) -> None:
-        if stream_path is None:
-            return
-        with validated_open(
-            str(stream_path),
-            "a",
-            allowed_roots=(str(REPO_ROOT),),
-            encoding="utf-8",
-        ) as handle:
-            handle.write(json.dumps(point) + "\n")
-
     fresh = evaluate_design(
         grid,
         seeds=seeds,
         design=design,
         workers=args.workers,
-        on_point=record,
+        on_point=_stream_writer(args),
         completed=[int(point["point_index"]) for point in done],
         shard_count=args.shard_count,
-        shard_index=shard_index,
+        shard_index=_shard_index(args),
+        only=args.only_points,
+    )
+    return [*done, *fresh]
+
+
+def _run_block_shard(
+    args: argparse.Namespace,
+    grid: Sequence[Sequence[float]],
+    seeds: Sequence[int],
+    design: Design,
+) -> list[dict[str, Any]]:
+    """Evaluate this worker's (point, seed-block) units, resuming its stream."""
+    done = _read_completed(args.stream) if (args.resume and args.stream) else []
+    fresh = evaluate_blocks(
+        grid,
+        seeds=seeds,
+        design=design,
+        seed_shards=args.seed_shards,
+        workers=args.workers,
+        on_block=_stream_writer(args),
+        completed=[
+            (int(record["point_index"]), int(record["block_index"]))
+            for record in done
+        ],
+        shard_count=args.shard_count,
+        shard_index=_shard_index(args),
+        only=args.only_points,
     )
     return [*done, *fresh]
 
@@ -812,6 +1129,25 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         ),
     )
     parser.add_argument(
+        "--seed-shards",
+        type=int,
+        default=1,
+        help=(
+            "Split each point's matched seed set across this many work units; "
+            "shards then stream rows and the merge scores the pooled cells"
+        ),
+    )
+    parser.add_argument(
+        "--only-points",
+        type=int,
+        nargs="*",
+        default=(),
+        help=(
+            "Evaluate only these design indices of the same Sobol' grid, "
+            "keeping their grid coordinates and names"
+        ),
+    )
+    parser.add_argument(
         "--merge",
         type=Path,
         nargs="*",
@@ -841,6 +1177,44 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
+def _write_block_shard(
+    args: argparse.Namespace,
+    out: Path,
+    blocks: Sequence[dict[str, Any]],
+    selection: Sequence[int],
+) -> int:
+    """Write a seed-block shard's manifest, which carries no verdict.
+
+    A block is part of a cell, so there is nothing here to summarise: the file
+    records which units ran, and the rows live in the stream the merge pools.
+    """
+    payload: dict[str, Any] = {
+        "mode": "feasibility_gate_rows_shard",
+        "design": {
+            "sobol_log2_points": args.sobol_m,
+            "design_seed": args.design_seed,
+            "selected_points": list(selection),
+            "seeds": args.seeds,
+            "seed_shards": args.seed_shards,
+        },
+        "units": [
+            {
+                "point_index": record["point_index"],
+                "block_index": record["block_index"],
+                "n_rows": len(record["rows"]),
+            }
+            for record in blocks
+        ],
+        "note": (
+            "seed blocks hold part of a cell and are unscored; pool the "
+            "streams with --merge --seed-shards to score the cells"
+        ),
+    }
+    report = _write_json(out, payload)
+    print(json.dumps({"units": len(payload["units"])}, indent=2))
+    return 0 if report else 1
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     """Sample the box, score every point, and write the gate's report."""
     args = parse_args(argv)
@@ -859,12 +1233,26 @@ def main(argv: Sequence[str] | None = None) -> int:
     factors = NOROVIRUS_FACTORS
     seeds = [args.seed_base + index for index in range(args.seeds)]
     grid = sobol_units(len(factors), args.sobol_m, args.design_seed)
-    if args.merge:
-        points = _pooled_points(args.merge, expected=len(grid))
+    selection = selected_indices(grid, args.only_points)
+    rows_mode = args.seed_shards > 1
+    if args.merge and rows_mode:
+        points = pooled_row_points(
+            args.merge,
+            expected=selection,
+            seeds=seeds,
+            seed_shards=args.seed_shards,
+            design=design,
+            factors=factors,
+        )
+    elif args.merge:
+        points = _pooled_points(args.merge, expected=selection)
     else:
         _require_scoring_inputs(design)
-        points = _run_shard(args, grid, seeds, design)
+        runner = _run_block_shard if rows_mode else _run_shard
+        points = runner(args, grid, seeds, design)
 
+    if rows_mode and not args.merge:
+        return _write_block_shard(args, out, points, selection)
     sharded = not args.merge and args.shard_count > 1
     payload = {
         "mode": "feasibility_gate_shard" if sharded else "feasibility_gate",
@@ -885,6 +1273,10 @@ def main(argv: Sequence[str] | None = None) -> int:
             "seeds": seeds,
             "required_anchors": list(REQUIRED_ANCHORS),
             "construction_only": list(score_anchors.CONSTRUCTION_BANDS),
+            "selected_points": (
+                list(selection) if args.only_points else "whole grid"
+            ),
+            "seed_shards": args.seed_shards,
             **design.run_kwargs(),
             "era": design.era,
         },

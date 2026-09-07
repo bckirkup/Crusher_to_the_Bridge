@@ -116,6 +116,21 @@ index. Two properties keep that from changing what is being measured:
   difference between a quarter of an hour and two hours on the Spot queue.
   The seeds a block evaluates are fixed by the block index, not by the
   worker's arrival, so the common random numbers survive the split.
+- **A gate seed block is rows, not a cell.** The gate's anchors are not linear
+  in the seeds — A9 is the frequency with which a cell's voyages post, and A8 a
+  cell-level incidence — so a block of a point's matched seed set cannot be
+  scored and averaged the way a trajectory's partial effect can. With
+  `--seed-shards`, a gate worker therefore streams its voyages' retained rows
+  and scores nothing; the merge pools a point's blocks, checks that the pooled
+  seeds are exactly the design's seeds for that point, and scores the whole cell
+  once. This is what makes a frequency near 10^-3 reachable at all: it is the
+  seed count, not the point count, that sets the resolution of A9, and 180 seeds
+  cannot express a rate below 1/180.
+- **A subset re-run keeps the grid's own indices.** `--only-points` evaluates
+  named indices of the same Sobol' grid at the same `--design-seed`, so a point
+  re-run at more seeds is the same point in the same box, not a new design over
+  a narrowed region. Reporting a subset as though it were the design is the
+  §2.3 error in miniature; a subset result is a statement about those points.
 - **A shard is not a result.** Shards pool through an explicit merge
   (`bounded_screen.py --mode merge`, `admissible_region.py --merge`) that
   refuses reports drawn from different designs, refuses a duplicated shard

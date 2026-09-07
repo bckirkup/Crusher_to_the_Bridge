@@ -115,13 +115,27 @@ def _screen_argv(args: argparse.Namespace, shard: int, out: Path) -> list[str]:
     ]
 
 
+def _only_points(raw: str) -> list[str]:
+    """The design indices a subset re-run names, as a comma-separated list.
+
+    A Batch parameter is one string, so the selection arrives as ``"7,13,204"``
+    rather than as repeated arguments. An index that is not an integer is
+    refused here: a mistyped subset would otherwise re-run the wrong points.
+    """
+    indices = [part.strip() for part in raw.split(",") if part.strip()]
+    for index in indices:
+        if not index.isdigit():
+            raise SystemExit(f"--only-points takes design indices: {raw!r}")
+    return indices
+
+
 def _region_argv(
     args: argparse.Namespace,
     shard: int,
     out: Path,
     stream: Path,
 ) -> list[str]:
-    return [
+    argv = [
         sys.executable,
         "telemetry_buffer/observation_model/admissible_region.py",
         "--pathogen-id", args.pathogen_id,
@@ -132,12 +146,19 @@ def _region_argv(
         "--sobol-m", str(args.sobol_m),
         "--seeds", str(args.seeds),
         "--design-seed", str(args.design_seed),
+        "--seed-shards", str(args.seed_shards),
         "--shard-count", str(args.shard_count),
         "--shard-index", str(shard),
         "--stream", str(stream),
         "--resume",
         "--out", str(out),
     ]
+    # A subset re-run keeps the grid's own indices, so the array is sized by
+    # the selection while every point means what it meant in the full design.
+    selection = _only_points(args.only_points)
+    if selection:
+        argv += ["--only-points", *selection]
+    return argv
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -153,6 +174,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--num-agents", type=int, default=450)
     parser.add_argument("--trajectories", type=int, default=20)
     parser.add_argument("--seed-shards", type=int, default=1)
+    parser.add_argument("--only-points", default="")
     parser.add_argument("--sobol-m", type=int, default=7)
     parser.add_argument("--seeds", type=int, default=30)
     parser.add_argument("--design-seed", type=int, default=17)
