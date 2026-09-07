@@ -14,24 +14,33 @@ from typing import Any
 
 import pytest
 
+import telemetry_buffer.observation_model.gate37_quiet_voyages as quiet_voyages
 from telemetry_buffer.observation_model.gate37_quiet_voyages import (
     DEFAULT_ARTIFACT,
     by_a1_band,
     conditional_levels,
+    load_points,
     posting_totals,
+    report,
     voyage_days,
 )
 from telemetry_buffer.observation_model.score_anchors import A9_POSTING_THRESHOLD
 
 
-def _point(a1: float, posted: int, incidence: float, seeds: int = 180) -> dict[str, Any]:
+def _point(
+    a1: float,
+    posted: int,
+    incidence: float,
+    seeds: int = 180,
+    reported: float = 0.0,
+) -> dict[str, Any]:
     return {
         "cell": {
             "A1_ever_ill_passenger": a1,
             "A9_eligible_runs": seeds,
             "A9_posted_eligible": posted,
             "A8_pax_incidence": incidence,
-            "reported_case_attack_rate_passenger": 0.0,
+            "reported_case_attack_rate_passenger": reported,
             "infection_attack_rate_passenger": 0.05,
         },
     }
@@ -81,6 +90,50 @@ def test_a_louder_cell_raises_the_bound_monotonically() -> None:
 def test_points_that_post_on_most_voyages_are_out_of_scope() -> None:
     assert conditional_levels([_point(0.15, 180, 900.0)], days=7.0)["n_points"] == 0
     assert conditional_levels([_point(0.0, 0, 0.0)], days=7.0)["n_points"] == 0
+
+
+def test_the_report_states_the_counts_its_own_cells_imply() -> None:
+    points = [
+        _point(0.001, 6, 400.0, reported=0.03),
+        _point(0.15, 180, 900.0),
+    ]
+    lines = report(points)
+    assert "2 points, 360 eligible voyages" in lines[0]
+    assert "174 (48.333%)" in lines[1]
+    # One point posts on every voyage, one does not; both bands are named.
+    assert "points with at least one quiet voyage: 1" in "\n".join(lines)
+    assert "points posting on every voyage: 1" in "\n".join(lines)
+    assert sum(1 for line in lines if line.startswith("  [")) == 2
+
+
+def test_the_report_says_so_when_no_point_is_quiet_enough_to_bound() -> None:
+    lines = report([_point(0.15, 180, 900.0, reported=0.30)])
+    assert "no point posts on under half its voyages" in lines
+    assert not any("E[reported AR | posted]" in line for line in lines)
+
+
+def test_a_quiet_point_reaches_the_reported_bracket_lines() -> None:
+    lines = "\n".join(report([_point(0.02, 10, 400.0, reported=0.005)]))
+    assert "1 points posting on under half their voyages" in lines
+    assert "E[reported AR | posted] <=" in lines
+    assert "median ceiling / threshold:" in lines
+
+
+def test_an_artifact_is_read_from_inside_the_repository_and_nowhere_else(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    inside = tmp_path / "repo"
+    inside.mkdir()
+    monkeypatch.setattr(quiet_voyages, "REPO_ROOT", inside)
+    points = [_point(0.02, 10, 400.0, reported=0.005)]
+    (inside / "points.json").write_text(json.dumps({"points": points}), encoding="utf-8")
+    assert load_points(inside / "points.json") == points
+
+    outside = tmp_path / "points.json"
+    outside.write_text(json.dumps({"points": points}), encoding="utf-8")
+    with pytest.raises(ValueError):
+        load_points(outside)
 
 
 @pytest.mark.skipif(not DEFAULT_ARTIFACT.exists(), reason="merged gate artifact absent")

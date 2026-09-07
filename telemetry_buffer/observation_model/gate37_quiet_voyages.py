@@ -118,53 +118,80 @@ def conditional_levels(
         "median_voyage_reported": _quartiles(medians),
         "median_voyage_infection": _quartiles(infections),
         "cell_mean_reported": _quartiles(means),
-        "silent_median_points": sum(1 for value in medians if value == 0.0),
+        # A reported attack rate is a non-negative fraction, so "not one case"
+        # is the bottom of its range rather than an exact float comparison.
+        "silent_median_points": sum(1 for value in medians if value <= 0.0),
     }
+
+
+def _band_lines(points: Sequence[dict[str, Any]]) -> list[str]:
+    lines = ["", "quiet voyages by the point's ever-ill attack rate:"]
+    for row in by_a1_band(points):
+        low, high = row["band"]
+        if not row["points"]:
+            continue
+        share = row["quiet"] / row["eligible"]
+        lines.append(
+            f"  [{low:.2f}, {high:.2f}): {row['points']:3d} points, "
+            f"{row['quiet']:6d}/{row['eligible']:6d} quiet ({share:.1%})",
+        )
+    return lines
+
+
+def _level_lines(levels: dict[str, Any]) -> list[str]:
+    if not levels["n_points"]:
+        return ["", "no point posts on under half its voyages"]
+    ceiling = levels["ceiling_quartiles"][2]
+    return [
+        "",
+        f"at the {levels['n_points']} points posting on under half their voyages:",
+        f"  median voyage reported AR:  {levels['median_voyage_reported']}",
+        f"  median voyage infection AR: {levels['median_voyage_infection']}",
+        f"  cell mean reported AR:      {levels['cell_mean_reported']}",
+        f"  E[reported AR | posted] <=  {levels['ceiling_quartiles']}",
+        f"  E[reported AR | posted] >=  {levels['floor_quartiles']}",
+        "  points whose median voyage reports nothing: "
+        f"{levels['silent_median_points']}",
+        f"  median ceiling / threshold: {ceiling / A9_POSTING_THRESHOLD:.2f}x",
+    ]
+
+
+def report(points: Sequence[dict[str, Any]]) -> list[str]:
+    """The whole read-out as lines, so the arithmetic is testable without stdout."""
+    days = voyage_days(points)
+    eligible, quiet = posting_totals(points)
+    counts = sorted(point["cell"]["A9_posted_eligible"] for point in points)
+    loudest = max(counts)
+    lines = [
+        f"{len(points)} points, {eligible} eligible voyages, {days:.3f} voyage-days",
+        f"below the {A9_POSTING_THRESHOLD} posting threshold: "
+        f"{quiet} ({quiet / eligible:.3%})",
+        f"per-point postings, quartiles: {_quartiles(counts)}",
+        f"points with at least one quiet voyage: "
+        f"{sum(1 for k in counts if k < loudest)}",
+        f"points posting on every voyage: "
+        f"{sum(1 for k in counts if k >= loudest)}",
+    ]
+    lines += _band_lines(points)
+    lines += _level_lines(conditional_levels(points, days))
+    return lines
+
+
+def load_points(artifact: Path) -> list[dict[str, Any]]:
+    """Read a merged gate artifact's point records from inside the repository."""
+    resolved = resolve_repo_path(str(REPO_ROOT), str(artifact))
+    with validated_open(
+        resolved, allowed_roots=(str(REPO_ROOT),), encoding="utf-8",
+    ) as handle:
+        return json.load(handle)["points"]
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--artifact", type=Path, default=DEFAULT_ARTIFACT)
     args = parser.parse_args()
-    artifact = resolve_repo_path(str(REPO_ROOT), str(args.artifact))
-    with validated_open(
-        artifact, allowed_roots=(str(REPO_ROOT),), encoding="utf-8",
-    ) as handle:
-        points = json.load(handle)["points"]
-    days = voyage_days(points)
-    eligible, quiet = posting_totals(points)
-    counts = sorted(point["cell"]["A9_posted_eligible"] for point in points)
-
-    print(f"{len(points)} points, {eligible} eligible voyages, {days:.3f} voyage-days")
-    print(f"below the {A9_POSTING_THRESHOLD} posting threshold: {quiet} ({quiet / eligible:.3%})")
-    print(f"per-point postings, quartiles: {_quartiles(counts)}")
-    print(f"points with at least one quiet voyage: {sum(1 for k in counts if k < max(counts))}")
-    print(f"points posting on every voyage: {sum(1 for k in counts if k == max(counts))}")
-
-    print("\nquiet voyages by the point's ever-ill attack rate:")
-    for row in by_a1_band(points):
-        low, high = row["band"]
-        if not row["points"]:
-            continue
-        share = row["quiet"] / row["eligible"]
-        print(
-            f"  [{low:.2f}, {high:.2f}): {row['points']:3d} points, "
-            f"{row['quiet']:6d}/{row['eligible']:6d} quiet ({share:.1%})",
-        )
-
-    levels = conditional_levels(points, days)
-    print(f"\nat the {levels['n_points']} points posting on under half their voyages:")
-    print(f"  median voyage reported AR:  {levels['median_voyage_reported']}")
-    print(f"  median voyage infection AR: {levels['median_voyage_infection']}")
-    print(f"  cell mean reported AR:      {levels['cell_mean_reported']}")
-    print(f"  E[reported AR | posted] <=  {levels['ceiling_quartiles']}")
-    print(f"  E[reported AR | posted] >=  {levels['floor_quartiles']}")
-    print(
-        "  points whose median voyage reports nothing: "
-        f"{levels['silent_median_points']}",
-    )
-    ceiling = levels["ceiling_quartiles"][2]
-    print(f"  median ceiling / threshold: {ceiling / A9_POSTING_THRESHOLD:.2f}x")
+    for line in report(load_points(args.artifact)):
+        print(line)
 
 
 if __name__ == "__main__":
