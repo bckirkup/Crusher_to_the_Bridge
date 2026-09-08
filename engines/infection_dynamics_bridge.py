@@ -1477,6 +1477,7 @@ class KorkinShipEngine:
             z["name"] for z in self.zones
             if z["type"] in ("Room", "Cabin_Corridor")
         ]
+        self._crew_corridor_by_work_zone: dict[str, str] = {}
         self._all_zone_names = [z["name"] for z in self.zones]
         self._dining_catalog: list[dict[str, Any]] = []
         for z in self.zones:
@@ -1536,6 +1537,27 @@ class KorkinShipEngine:
         if fallback_zones:
             return str(self.rng.choice(fallback_zones))
         return "unknown"
+
+    def _resolve_crew_home(self, preference: str, work_zone: str) -> str:
+        """Berth crew by department: one home corridor per work zone.
+
+        Crew cabins sit near the workplace and roommates are drawn from the
+        same department and shift, so every crew member working *work_zone*
+        shares a corridor. Work zones are dealt onto the matching corridors
+        round-robin in order of first appearance, which keeps corridor loads
+        balanced without any department being split. Falls back to the
+        preference draw when no corridor matches.
+        """
+        matches = sorted(
+            z for z in self._room_zones if preference.lower() in z.lower()
+        )
+        if not matches:
+            return self._resolve_zone(preference, self._room_zones)
+        corridor = self._crew_corridor_by_work_zone.get(work_zone)
+        if corridor is None:
+            corridor = matches[len(self._crew_corridor_by_work_zone) % len(matches)]
+            self._crew_corridor_by_work_zone[work_zone] = corridor
+        return corridor
 
     def _initialize_agents(self) -> None:
         """Create the full agent population.
@@ -1657,7 +1679,6 @@ class KorkinShipEngine:
                     immune_remaining -= 1
             agents_left -= 1
 
-            home = self._resolve_zone(home_pref, self._room_zones)
             dining = str(self.rng.choice(self._dining_zones))
             if duty_zone:
                 work = self._resolve_zone(duty_zone, self._free_zones + self._dining_zones)
@@ -1665,6 +1686,10 @@ class KorkinShipEngine:
                 work = str(self.rng.choice(self._free_zones + self._dining_zones))
             else:
                 work = str(self.rng.choice(self._free_zones))
+            if role_group == "crew":
+                home = self._resolve_crew_home(home_pref, work)
+            else:
+                home = self._resolve_zone(home_pref, self._room_zones)
             free = (
                 self._resolve_zone(free_pref, self._free_zones)
                 if free_pref

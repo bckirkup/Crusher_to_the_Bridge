@@ -519,7 +519,8 @@
         "y": 50.0
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 6 Port Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial."
+      "description": "Passenger cabin corridor, Deck 6 Port Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D6_P_M",
@@ -533,7 +534,8 @@
         "y": 50.0
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 6 Port Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial."
+      "description": "Passenger cabin corridor, Deck 6 Port Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D6_P_A",
@@ -547,7 +549,8 @@
         "y": 50.0
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 6 Port Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial."
+      "description": "Passenger cabin corridor, Deck 6 Port Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D6_S_F",
@@ -561,7 +564,8 @@
         "y": 53.0
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 6 Stbd Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial."
+      "description": "Passenger cabin corridor, Deck 6 Stbd Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D6_S_M",
@@ -575,7 +579,8 @@
         "y": 53.0
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 6 Stbd Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial."
+      "description": "Passenger cabin corridor, Deck 6 Stbd Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D6_S_A",
@@ -589,7 +594,8 @@
         "y": 53.0
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 6 Stbd Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial."
+      "description": "Passenger cabin corridor, Deck 6 Stbd Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D6_C_F",
@@ -603,7 +609,8 @@
         "y": 51.5
       },
       "cabin_ventilation_type": "atrium_view",
-      "description": "Passenger cabin corridor, Deck 6 Central Fwd. ~10 cabins, ~67 pax, ventilation=atrium_view."
+      "description": "Passenger cabin corridor, Deck 6 Central Fwd. ~10 cabins, ~67 pax, ventilation=atrium_view.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D6_C_M",
@@ -617,7 +624,8 @@
         "y": 51.5
       },
       "cabin_ventilation_type": "atrium_view",
-      "description": "Passenger cabin corridor, Deck 6 Central Mid. ~10 cabins, ~67 pax, ventilation=atrium_view."
+      "description": "Passenger cabin corridor, Deck 6 Central Mid. ~10 cabins, ~67 pax, ventilation=atrium_view.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D6_C_A",
@@ -631,7 +639,8 @@
         "y": 51.5
       },
       "cabin_ventilation_type": "atrium_view",
-      "description": "Passenger cabin corridor, Deck 6 Central Aft. ~10 cabins, ~67 pax, ventilation=atrium_view."
+      "description": "Passenger cabin corridor, Deck 6 Central Aft. ~10 cabins, ~67 pax, ventilation=atrium_view.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D7_P_F",
@@ -645,7 +654,8 @@
         "y": 45.5
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 7 Port Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial."
+      "description": "Passenger cabin corridor, Deck 7 Port Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D7_P_M",
@@ -659,7 +669,8 @@
         "y": 45.5
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 7 Port Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial."
+      "description": "Passenger cabin corridor, Deck 7 Port Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D7_P_A",
@@ -673,7 +684,8 @@
         "y": 45.5
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 7 Port Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial."
+      "description": "Passenger cabin corridor, Deck 7 Port Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D7_S_F",
@@ -687,7 +699,8 @@
         "y": 48.5
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 7 Stbd Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial."
+      "description": "Passenger cabin corridor, Deck 7 Stbd Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D7_S_M",
@@ -701,7 +714,8 @@
         "y": 48.5
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 7 Stbd Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial."
+      "description": "Passenger cabin corridor, Deck 7 Stbd Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D7_S_A",
@@ -715,7 +729,8 @@
         "y": 48.5
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 7 Stbd Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial."
+      "description": "Passenger cabin corridor, Deck 7 Stbd Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D7_C_F",
@@ -729,7 +744,8 @@
         "y": 47.0
       },
       "cabin_ventilation_type": "atrium_view",
-      "description": "Passenger cabin corridor, Deck 7 Central Fwd. ~10 cabins, ~67 pax, ventilation=atrium_view."
+      "description": "Passenger cabin corridor, Deck 7 Central Fwd. ~10 cabins, ~67 pax, ventilation=atrium_view.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D7_C_M",
@@ -743,7 +759,8 @@
         "y": 47.0
       },
       "cabin_ventilation_type": "atrium_view",
-      "description": "Passenger cabin corridor, Deck 7 Central Mid. ~10 cabins, ~67 pax, ventilation=atrium_view."
+      "description": "Passenger cabin corridor, Deck 7 Central Mid. ~10 cabins, ~67 pax, ventilation=atrium_view.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D7_C_A",
@@ -757,7 +774,8 @@
         "y": 47.0
       },
       "cabin_ventilation_type": "atrium_view",
-      "description": "Passenger cabin corridor, Deck 7 Central Aft. ~10 cabins, ~67 pax, ventilation=atrium_view."
+      "description": "Passenger cabin corridor, Deck 7 Central Aft. ~10 cabins, ~67 pax, ventilation=atrium_view.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D8_P_F",
@@ -771,7 +789,8 @@
         "y": 41.0
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 8 Port Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial."
+      "description": "Passenger cabin corridor, Deck 8 Port Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D8_P_M",
@@ -785,7 +804,8 @@
         "y": 41.0
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 8 Port Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial."
+      "description": "Passenger cabin corridor, Deck 8 Port Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D8_P_A",
@@ -799,7 +819,8 @@
         "y": 41.0
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 8 Port Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial."
+      "description": "Passenger cabin corridor, Deck 8 Port Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D8_S_F",
@@ -813,7 +834,8 @@
         "y": 44.0
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 8 Stbd Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial."
+      "description": "Passenger cabin corridor, Deck 8 Stbd Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D8_S_M",
@@ -827,7 +849,8 @@
         "y": 44.0
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 8 Stbd Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial."
+      "description": "Passenger cabin corridor, Deck 8 Stbd Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D8_S_A",
@@ -841,7 +864,8 @@
         "y": 44.0
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 8 Stbd Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial."
+      "description": "Passenger cabin corridor, Deck 8 Stbd Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D8_C_F",
@@ -855,7 +879,8 @@
         "y": 42.5
       },
       "cabin_ventilation_type": "atrium_view",
-      "description": "Passenger cabin corridor, Deck 8 Central Fwd. ~10 cabins, ~67 pax, ventilation=atrium_view."
+      "description": "Passenger cabin corridor, Deck 8 Central Fwd. ~10 cabins, ~67 pax, ventilation=atrium_view.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D8_C_M",
@@ -869,7 +894,8 @@
         "y": 42.5
       },
       "cabin_ventilation_type": "atrium_view",
-      "description": "Passenger cabin corridor, Deck 8 Central Mid. ~10 cabins, ~67 pax, ventilation=atrium_view."
+      "description": "Passenger cabin corridor, Deck 8 Central Mid. ~10 cabins, ~67 pax, ventilation=atrium_view.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D8_C_A",
@@ -883,7 +909,8 @@
         "y": 42.5
       },
       "cabin_ventilation_type": "atrium_view",
-      "description": "Passenger cabin corridor, Deck 8 Central Aft. ~10 cabins, ~67 pax, ventilation=atrium_view."
+      "description": "Passenger cabin corridor, Deck 8 Central Aft. ~10 cabins, ~67 pax, ventilation=atrium_view.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D9_P_F",
@@ -897,7 +924,8 @@
         "y": 36.5
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 9 Port Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial."
+      "description": "Passenger cabin corridor, Deck 9 Port Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D9_P_M",
@@ -911,7 +939,8 @@
         "y": 36.5
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 9 Port Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial."
+      "description": "Passenger cabin corridor, Deck 9 Port Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D9_P_A",
@@ -925,7 +954,8 @@
         "y": 36.5
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 9 Port Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial."
+      "description": "Passenger cabin corridor, Deck 9 Port Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D9_S_F",
@@ -939,7 +969,8 @@
         "y": 39.5
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 9 Stbd Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial."
+      "description": "Passenger cabin corridor, Deck 9 Stbd Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D9_S_M",
@@ -953,7 +984,8 @@
         "y": 39.5
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 9 Stbd Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial."
+      "description": "Passenger cabin corridor, Deck 9 Stbd Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D9_S_A",
@@ -967,7 +999,8 @@
         "y": 39.5
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 9 Stbd Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial."
+      "description": "Passenger cabin corridor, Deck 9 Stbd Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D9_C_F",
@@ -981,7 +1014,8 @@
         "y": 38.0
       },
       "cabin_ventilation_type": "interior_hvac",
-      "description": "Passenger cabin corridor, Deck 9 Central Fwd. ~10 cabins, ~67 pax, ventilation=interior_hvac."
+      "description": "Passenger cabin corridor, Deck 9 Central Fwd. ~10 cabins, ~67 pax, ventilation=interior_hvac.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D9_C_M",
@@ -995,7 +1029,8 @@
         "y": 38.0
       },
       "cabin_ventilation_type": "interior_hvac",
-      "description": "Passenger cabin corridor, Deck 9 Central Mid. ~10 cabins, ~67 pax, ventilation=interior_hvac."
+      "description": "Passenger cabin corridor, Deck 9 Central Mid. ~10 cabins, ~67 pax, ventilation=interior_hvac.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D9_C_A",
@@ -1009,7 +1044,8 @@
         "y": 38.0
       },
       "cabin_ventilation_type": "interior_hvac",
-      "description": "Passenger cabin corridor, Deck 9 Central Aft. ~10 cabins, ~67 pax, ventilation=interior_hvac."
+      "description": "Passenger cabin corridor, Deck 9 Central Aft. ~10 cabins, ~67 pax, ventilation=interior_hvac.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D10_P_F",
@@ -1023,7 +1059,8 @@
         "y": 32.0
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 10 Port Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial."
+      "description": "Passenger cabin corridor, Deck 10 Port Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D10_P_M",
@@ -1037,7 +1074,8 @@
         "y": 32.0
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 10 Port Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial."
+      "description": "Passenger cabin corridor, Deck 10 Port Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D10_P_A",
@@ -1051,7 +1089,8 @@
         "y": 32.0
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 10 Port Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial."
+      "description": "Passenger cabin corridor, Deck 10 Port Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D10_S_F",
@@ -1065,7 +1104,8 @@
         "y": 35.0
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 10 Stbd Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial."
+      "description": "Passenger cabin corridor, Deck 10 Stbd Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D10_S_M",
@@ -1079,7 +1119,8 @@
         "y": 35.0
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 10 Stbd Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial."
+      "description": "Passenger cabin corridor, Deck 10 Stbd Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D10_S_A",
@@ -1093,7 +1134,8 @@
         "y": 35.0
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 10 Stbd Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial."
+      "description": "Passenger cabin corridor, Deck 10 Stbd Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D10_C_F",
@@ -1107,7 +1149,8 @@
         "y": 33.5
       },
       "cabin_ventilation_type": "interior_hvac",
-      "description": "Passenger cabin corridor, Deck 10 Central Fwd. ~10 cabins, ~67 pax, ventilation=interior_hvac."
+      "description": "Passenger cabin corridor, Deck 10 Central Fwd. ~10 cabins, ~67 pax, ventilation=interior_hvac.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D10_C_M",
@@ -1121,7 +1164,8 @@
         "y": 33.5
       },
       "cabin_ventilation_type": "interior_hvac",
-      "description": "Passenger cabin corridor, Deck 10 Central Mid. ~10 cabins, ~67 pax, ventilation=interior_hvac."
+      "description": "Passenger cabin corridor, Deck 10 Central Mid. ~10 cabins, ~67 pax, ventilation=interior_hvac.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D10_C_A",
@@ -1135,7 +1179,8 @@
         "y": 33.5
       },
       "cabin_ventilation_type": "interior_hvac",
-      "description": "Passenger cabin corridor, Deck 10 Central Aft. ~10 cabins, ~67 pax, ventilation=interior_hvac."
+      "description": "Passenger cabin corridor, Deck 10 Central Aft. ~10 cabins, ~67 pax, ventilation=interior_hvac.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D11_P_F",
@@ -1149,7 +1194,8 @@
         "y": 27.5
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 11 Port Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial."
+      "description": "Passenger cabin corridor, Deck 11 Port Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D11_P_M",
@@ -1163,7 +1209,8 @@
         "y": 27.5
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 11 Port Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial."
+      "description": "Passenger cabin corridor, Deck 11 Port Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D11_P_A",
@@ -1177,7 +1224,8 @@
         "y": 27.5
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 11 Port Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial."
+      "description": "Passenger cabin corridor, Deck 11 Port Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D11_S_F",
@@ -1191,7 +1239,8 @@
         "y": 30.5
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 11 Stbd Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial."
+      "description": "Passenger cabin corridor, Deck 11 Stbd Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D11_S_M",
@@ -1205,7 +1254,8 @@
         "y": 30.5
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 11 Stbd Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial."
+      "description": "Passenger cabin corridor, Deck 11 Stbd Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D11_S_A",
@@ -1219,7 +1269,8 @@
         "y": 30.5
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 11 Stbd Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial."
+      "description": "Passenger cabin corridor, Deck 11 Stbd Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D11_C_F",
@@ -1233,7 +1284,8 @@
         "y": 29.0
       },
       "cabin_ventilation_type": "interior_hvac",
-      "description": "Passenger cabin corridor, Deck 11 Central Fwd. ~10 cabins, ~67 pax, ventilation=interior_hvac."
+      "description": "Passenger cabin corridor, Deck 11 Central Fwd. ~10 cabins, ~67 pax, ventilation=interior_hvac.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D11_C_M",
@@ -1247,7 +1299,8 @@
         "y": 29.0
       },
       "cabin_ventilation_type": "interior_hvac",
-      "description": "Passenger cabin corridor, Deck 11 Central Mid. ~10 cabins, ~67 pax, ventilation=interior_hvac."
+      "description": "Passenger cabin corridor, Deck 11 Central Mid. ~10 cabins, ~67 pax, ventilation=interior_hvac.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D11_C_A",
@@ -1261,7 +1314,8 @@
         "y": 29.0
       },
       "cabin_ventilation_type": "interior_hvac",
-      "description": "Passenger cabin corridor, Deck 11 Central Aft. ~10 cabins, ~67 pax, ventilation=interior_hvac."
+      "description": "Passenger cabin corridor, Deck 11 Central Aft. ~10 cabins, ~67 pax, ventilation=interior_hvac.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D12_P_F",
@@ -1275,7 +1329,8 @@
         "y": 23.0
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 12 Port Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial."
+      "description": "Passenger cabin corridor, Deck 12 Port Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D12_P_M",
@@ -1289,7 +1344,8 @@
         "y": 23.0
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 12 Port Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial."
+      "description": "Passenger cabin corridor, Deck 12 Port Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D12_P_A",
@@ -1303,7 +1359,8 @@
         "y": 23.0
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 12 Port Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial."
+      "description": "Passenger cabin corridor, Deck 12 Port Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D12_S_F",
@@ -1317,7 +1374,8 @@
         "y": 26.0
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 12 Stbd Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial."
+      "description": "Passenger cabin corridor, Deck 12 Stbd Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D12_S_M",
@@ -1331,7 +1389,8 @@
         "y": 26.0
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 12 Stbd Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial."
+      "description": "Passenger cabin corridor, Deck 12 Stbd Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D12_S_A",
@@ -1345,7 +1404,8 @@
         "y": 26.0
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 12 Stbd Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial."
+      "description": "Passenger cabin corridor, Deck 12 Stbd Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D12_C_F",
@@ -1359,7 +1419,8 @@
         "y": 24.5
       },
       "cabin_ventilation_type": "interior_hvac",
-      "description": "Passenger cabin corridor, Deck 12 Central Fwd. ~10 cabins, ~67 pax, ventilation=interior_hvac."
+      "description": "Passenger cabin corridor, Deck 12 Central Fwd. ~10 cabins, ~67 pax, ventilation=interior_hvac.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D12_C_M",
@@ -1373,7 +1434,8 @@
         "y": 24.5
       },
       "cabin_ventilation_type": "interior_hvac",
-      "description": "Passenger cabin corridor, Deck 12 Central Mid. ~10 cabins, ~67 pax, ventilation=interior_hvac."
+      "description": "Passenger cabin corridor, Deck 12 Central Mid. ~10 cabins, ~67 pax, ventilation=interior_hvac.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D12_C_A",
@@ -1387,7 +1449,8 @@
         "y": 24.5
       },
       "cabin_ventilation_type": "interior_hvac",
-      "description": "Passenger cabin corridor, Deck 12 Central Aft. ~10 cabins, ~67 pax, ventilation=interior_hvac."
+      "description": "Passenger cabin corridor, Deck 12 Central Aft. ~10 cabins, ~67 pax, ventilation=interior_hvac.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D13_P_F",
@@ -1401,7 +1464,8 @@
         "y": 18.5
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 13 Port Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial."
+      "description": "Passenger cabin corridor, Deck 13 Port Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D13_P_M",
@@ -1415,7 +1479,8 @@
         "y": 18.5
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 13 Port Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial."
+      "description": "Passenger cabin corridor, Deck 13 Port Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D13_P_A",
@@ -1429,7 +1494,8 @@
         "y": 18.5
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 13 Port Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial."
+      "description": "Passenger cabin corridor, Deck 13 Port Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D13_S_F",
@@ -1443,7 +1509,8 @@
         "y": 21.5
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 13 Stbd Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial."
+      "description": "Passenger cabin corridor, Deck 13 Stbd Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D13_S_M",
@@ -1457,7 +1524,8 @@
         "y": 21.5
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 13 Stbd Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial."
+      "description": "Passenger cabin corridor, Deck 13 Stbd Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D13_S_A",
@@ -1471,7 +1539,8 @@
         "y": 21.5
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 13 Stbd Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial."
+      "description": "Passenger cabin corridor, Deck 13 Stbd Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D13_C_F",
@@ -1485,7 +1554,8 @@
         "y": 20.0
       },
       "cabin_ventilation_type": "interior_hvac",
-      "description": "Passenger cabin corridor, Deck 13 Central Fwd. ~10 cabins, ~67 pax, ventilation=interior_hvac."
+      "description": "Passenger cabin corridor, Deck 13 Central Fwd. ~10 cabins, ~67 pax, ventilation=interior_hvac.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D13_C_M",
@@ -1499,7 +1569,8 @@
         "y": 20.0
       },
       "cabin_ventilation_type": "interior_hvac",
-      "description": "Passenger cabin corridor, Deck 13 Central Mid. ~10 cabins, ~67 pax, ventilation=interior_hvac."
+      "description": "Passenger cabin corridor, Deck 13 Central Mid. ~10 cabins, ~67 pax, ventilation=interior_hvac.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D13_C_A",
@@ -1513,7 +1584,8 @@
         "y": 20.0
       },
       "cabin_ventilation_type": "interior_hvac",
-      "description": "Passenger cabin corridor, Deck 13 Central Aft. ~10 cabins, ~67 pax, ventilation=interior_hvac."
+      "description": "Passenger cabin corridor, Deck 13 Central Aft. ~10 cabins, ~67 pax, ventilation=interior_hvac.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D14_P_F",
@@ -1527,7 +1599,8 @@
         "y": 14.0
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 14 Port Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial."
+      "description": "Passenger cabin corridor, Deck 14 Port Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D14_P_M",
@@ -1541,7 +1614,8 @@
         "y": 14.0
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 14 Port Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial."
+      "description": "Passenger cabin corridor, Deck 14 Port Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D14_P_A",
@@ -1555,7 +1629,8 @@
         "y": 14.0
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 14 Port Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial."
+      "description": "Passenger cabin corridor, Deck 14 Port Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D14_S_F",
@@ -1569,7 +1644,8 @@
         "y": 17.0
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 14 Stbd Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial."
+      "description": "Passenger cabin corridor, Deck 14 Stbd Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D14_S_M",
@@ -1583,7 +1659,8 @@
         "y": 17.0
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 14 Stbd Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial."
+      "description": "Passenger cabin corridor, Deck 14 Stbd Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D14_S_A",
@@ -1597,7 +1674,8 @@
         "y": 17.0
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 14 Stbd Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial."
+      "description": "Passenger cabin corridor, Deck 14 Stbd Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D14_C_F",
@@ -1611,7 +1689,8 @@
         "y": 15.5
       },
       "cabin_ventilation_type": "interior_hvac",
-      "description": "Passenger cabin corridor, Deck 14 Central Fwd. ~10 cabins, ~67 pax, ventilation=interior_hvac."
+      "description": "Passenger cabin corridor, Deck 14 Central Fwd. ~10 cabins, ~67 pax, ventilation=interior_hvac.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D14_C_M",
@@ -1625,7 +1704,8 @@
         "y": 15.5
       },
       "cabin_ventilation_type": "interior_hvac",
-      "description": "Passenger cabin corridor, Deck 14 Central Mid. ~10 cabins, ~67 pax, ventilation=interior_hvac."
+      "description": "Passenger cabin corridor, Deck 14 Central Mid. ~10 cabins, ~67 pax, ventilation=interior_hvac.",
+      "cabin_size": 2
     },
     {
       "id": "PC_D14_C_A",
@@ -1639,7 +1719,8 @@
         "y": 15.5
       },
       "cabin_ventilation_type": "interior_hvac",
-      "description": "Passenger cabin corridor, Deck 14 Central Aft. ~10 cabins, ~67 pax, ventilation=interior_hvac."
+      "description": "Passenger cabin corridor, Deck 14 Central Aft. ~10 cabins, ~67 pax, ventilation=interior_hvac.",
+      "cabin_size": 2
     },
     {
       "id": "CC_D1_F",
@@ -1653,7 +1734,8 @@
         "y": 88
       },
       "cabin_ventilation_type": "interior_hvac",
-      "description": "Crew cabin corridor, Deck 1 Fwd. ~35 shared cabins, higher density, interior HVAC."
+      "description": "Crew cabin corridor, Deck 1 Fwd. ~35 shared cabins, higher density, interior HVAC.",
+      "cabin_size": 2
     },
     {
       "id": "CC_D1_M",
@@ -1667,7 +1749,8 @@
         "y": 88
       },
       "cabin_ventilation_type": "interior_hvac",
-      "description": "Crew cabin corridor, Deck 1 Mid. ~35 shared cabins, higher density, interior HVAC."
+      "description": "Crew cabin corridor, Deck 1 Mid. ~35 shared cabins, higher density, interior HVAC.",
+      "cabin_size": 2
     },
     {
       "id": "CC_D1_A",
@@ -1681,7 +1764,8 @@
         "y": 88
       },
       "cabin_ventilation_type": "interior_hvac",
-      "description": "Crew cabin corridor, Deck 1 Aft. ~35 shared cabins, higher density, interior HVAC."
+      "description": "Crew cabin corridor, Deck 1 Aft. ~35 shared cabins, higher density, interior HVAC.",
+      "cabin_size": 2
     },
     {
       "id": "CC_D2_F",
@@ -1695,7 +1779,8 @@
         "y": 82
       },
       "cabin_ventilation_type": "interior_hvac",
-      "description": "Crew cabin corridor, Deck 2 Fwd. ~35 shared cabins, higher density, interior HVAC."
+      "description": "Crew cabin corridor, Deck 2 Fwd. ~35 shared cabins, higher density, interior HVAC.",
+      "cabin_size": 2
     },
     {
       "id": "CC_D2_M",
@@ -1709,7 +1794,8 @@
         "y": 82
       },
       "cabin_ventilation_type": "interior_hvac",
-      "description": "Crew cabin corridor, Deck 2 Mid. ~35 shared cabins, higher density, interior HVAC."
+      "description": "Crew cabin corridor, Deck 2 Mid. ~35 shared cabins, higher density, interior HVAC.",
+      "cabin_size": 2
     },
     {
       "id": "CC_D2_A",
@@ -1723,7 +1809,8 @@
         "y": 82
       },
       "cabin_ventilation_type": "interior_hvac",
-      "description": "Crew cabin corridor, Deck 2 Aft. ~35 shared cabins, higher density, interior HVAC."
+      "description": "Crew cabin corridor, Deck 2 Aft. ~35 shared cabins, higher density, interior HVAC.",
+      "cabin_size": 2
     },
     {
       "id": "CC_D3_F",
@@ -1737,7 +1824,8 @@
         "y": 76
       },
       "cabin_ventilation_type": "interior_hvac",
-      "description": "Crew cabin corridor, Deck 3 Fwd. ~35 shared cabins, higher density, interior HVAC."
+      "description": "Crew cabin corridor, Deck 3 Fwd. ~35 shared cabins, higher density, interior HVAC.",
+      "cabin_size": 2
     },
     {
       "id": "CC_D3_M",
@@ -1751,7 +1839,8 @@
         "y": 76
       },
       "cabin_ventilation_type": "interior_hvac",
-      "description": "Crew cabin corridor, Deck 3 Mid. ~35 shared cabins, higher density, interior HVAC."
+      "description": "Crew cabin corridor, Deck 3 Mid. ~35 shared cabins, higher density, interior HVAC.",
+      "cabin_size": 2
     },
     {
       "id": "CC_D3_A",
@@ -1765,7 +1854,8 @@
         "y": 76
       },
       "cabin_ventilation_type": "interior_hvac",
-      "description": "Crew cabin corridor, Deck 3 Aft. ~35 shared cabins, higher density, interior HVAC."
+      "description": "Crew cabin corridor, Deck 3 Aft. ~35 shared cabins, higher density, interior HVAC.",
+      "cabin_size": 2
     },
     {
       "id": "CC_D4_F",
@@ -1779,7 +1869,8 @@
         "y": 70
       },
       "cabin_ventilation_type": "interior_hvac",
-      "description": "Crew cabin corridor, Deck 4 Fwd. ~35 shared cabins, higher density, interior HVAC."
+      "description": "Crew cabin corridor, Deck 4 Fwd. ~35 shared cabins, higher density, interior HVAC.",
+      "cabin_size": 2
     },
     {
       "id": "CC_D4_M",
@@ -1793,7 +1884,8 @@
         "y": 70
       },
       "cabin_ventilation_type": "interior_hvac",
-      "description": "Crew cabin corridor, Deck 4 Mid. ~35 shared cabins, higher density, interior HVAC."
+      "description": "Crew cabin corridor, Deck 4 Mid. ~35 shared cabins, higher density, interior HVAC.",
+      "cabin_size": 2
     },
     {
       "id": "CC_D4_A",
@@ -1807,7 +1899,8 @@
         "y": 70
       },
       "cabin_ventilation_type": "interior_hvac",
-      "description": "Crew cabin corridor, Deck 4 Aft. ~35 shared cabins, higher density, interior HVAC."
+      "description": "Crew cabin corridor, Deck 4 Aft. ~35 shared cabins, higher density, interior HVAC.",
+      "cabin_size": 2
     }
   ],
   "graywater_zones": [

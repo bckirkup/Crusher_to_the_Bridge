@@ -1082,7 +1082,7 @@ class ShipSimulation:
         swab: dict[str, Any],
     ) -> None:
         recovered_mass = float(swab.get("recovered_mass", 0.0))
-        aggregate = float(self.tx_core.surface_pools.get(zone_name, 0.0))
+        aggregate = float(self.tx_core.zone_surface_mass(zone_name))
         if recovered_mass <= 0.0 or aggregate <= 0.0:
             return
         by_pathogen: dict[str, dict[str, float]] = {}
@@ -1103,13 +1103,13 @@ class ShipSimulation:
         recovered_mass: float,
         aggregate: float,
     ) -> dict[str, float] | None:
-        composition = self.tx_core.surface_lineage_masses(
+        composition = self.tx_core.zone_surface_lineage_masses(
             pathogen_id, zone_name,
         )
         pathogen_mass = sum(composition.values())
         if pathogen_mass <= 0.0:
             return None
-        epochs = self.tx_core.surface_epochs_since_deposition(
+        epochs = self.tx_core.zone_surface_epochs_since_deposition(
             pathogen_id, zone_name, work.epoch,
         )
         if not composition or epochs is None:

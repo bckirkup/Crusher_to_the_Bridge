@@ -190,6 +190,7 @@ def test_expedition_450_cabin_mates_pair() -> None:
         def __init__(self, agent_id: str, home_zone: str) -> None:
             self.agent_id = agent_id
             self.home_zone = home_zone
+            self.agent_class = "passenger_standard"
             self.cabin_mate_ids = frozenset()
 
     # Four agents in one corridor → two cabins of size 2

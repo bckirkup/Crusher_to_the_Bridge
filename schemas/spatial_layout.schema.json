@@ -129,6 +129,14 @@
           "type": "integer",
           "minimum": 1,
           "description": "Stateroom occupancy for cabin-mate pairing (default: 2 pax, 3 crew)"
+        },
+        "cabin_size_by_class": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "description": "Stateroom occupancy per agent_class, overriding cabin_size for that class (e.g. junior galley ranks berthed 3-4 where the corridor norm is 2)"
         }
       }
     }
