@@ -1422,7 +1422,18 @@ is over-determined only *given* them. Full list in §10 of the history document.
   conversion. The deleted 1e-4 fell inside the interval only by coincidence
   across incompatible denominators, not corroboration.
 - Uniform `immune_ratio` across a resident crew and a weekly-turnover passenger
-  cohort — an assumption that bears directly on A5.
+  cohort — an assumption that bears directly on A5. Tranche 34
+  (`docs/literature/consensus_tranche_34_crew_immunity.md`) sourced the crew
+  side: the crew deficit is measured (passenger:crew AR **4.3** pooled, **10.1**
+  person-to-person, Mouchtouri 2024 Tables 2–3) and the cruise literature
+  attributes it to **segregated crew sleeping, dining and boarding areas**, not
+  to host biology. Crew-specific prior immunity, comorbidity effects on
+  norovirus *susceptibility*, and a voyage-to-voyage carried immune state are
+  all **∅ null**; the last is also a **structural gap** — the engine resets
+  every agent to one role-blind `immune_fraction` at each voyage start, so a
+  carried crew state has no field to live in. A role-stratified prior-immune
+  share is at most a declared sensitivity axis; no value for it, and no move in
+  `immune_fraction` or the susceptibility draw, may be read off A5 or A9.
 - Crew presenteeism and mandatory occupational reporting: absent in both
   directions, and the regulated direction is now sourced. VSP's 2018 Operations
   Manual §4.4.1.1.1 **requires** isolation of a crew member meeting the AGE case
