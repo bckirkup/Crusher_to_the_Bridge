@@ -828,7 +828,12 @@
       },
       "cabin_ventilation_type": "interior_hvac",
       "cabin_size": 3,
-      "description": "Crew cabin corridor, Deck 1 Fwd. ~95 crew, interior HVAC."
+      "description": "Crew cabin corridor, Deck 1 Fwd. ~95 crew, interior HVAC.",
+      "cabin_size_by_class": {
+        "crew_galley": 4,
+        "crew_engineering": 2,
+        "crew_medical": 2
+      }
     },
     {
       "id": "CC_D1_A",
@@ -843,7 +848,12 @@
       },
       "cabin_ventilation_type": "interior_hvac",
       "cabin_size": 3,
-      "description": "Crew cabin corridor, Deck 1 Aft. ~95 crew, interior HVAC."
+      "description": "Crew cabin corridor, Deck 1 Aft. ~95 crew, interior HVAC.",
+      "cabin_size_by_class": {
+        "crew_galley": 4,
+        "crew_engineering": 2,
+        "crew_medical": 2
+      }
     },
     {
       "id": "CC_D2_F",
@@ -858,7 +868,12 @@
       },
       "cabin_ventilation_type": "interior_hvac",
       "cabin_size": 3,
-      "description": "Crew cabin corridor, Deck 2 Fwd. ~95 crew, interior HVAC."
+      "description": "Crew cabin corridor, Deck 2 Fwd. ~95 crew, interior HVAC.",
+      "cabin_size_by_class": {
+        "crew_galley": 4,
+        "crew_engineering": 2,
+        "crew_medical": 2
+      }
     },
     {
       "id": "CC_D2_A",
@@ -873,7 +888,12 @@
       },
       "cabin_ventilation_type": "interior_hvac",
       "cabin_size": 3,
-      "description": "Crew cabin corridor, Deck 2 Aft. ~95 crew, interior HVAC."
+      "description": "Crew cabin corridor, Deck 2 Aft. ~95 crew, interior HVAC.",
+      "cabin_size_by_class": {
+        "crew_galley": 4,
+        "crew_engineering": 2,
+        "crew_medical": 2
+      }
     },
     {
       "id": "CC_D3_F",
@@ -888,7 +908,12 @@
       },
       "cabin_ventilation_type": "interior_hvac",
       "cabin_size": 3,
-      "description": "Crew cabin corridor, Deck 3 Fwd. ~95 crew, interior HVAC."
+      "description": "Crew cabin corridor, Deck 3 Fwd. ~95 crew, interior HVAC.",
+      "cabin_size_by_class": {
+        "crew_galley": 4,
+        "crew_engineering": 2,
+        "crew_medical": 2
+      }
     },
     {
       "id": "CC_D3_A",
@@ -903,7 +928,12 @@
       },
       "cabin_ventilation_type": "interior_hvac",
       "cabin_size": 3,
-      "description": "Crew cabin corridor, Deck 3 Aft. ~95 crew, interior HVAC."
+      "description": "Crew cabin corridor, Deck 3 Aft. ~95 crew, interior HVAC.",
+      "cabin_size_by_class": {
+        "crew_galley": 4,
+        "crew_engineering": 2,
+        "crew_medical": 2
+      }
     }
   ]
 }

@@ -77,8 +77,14 @@ def test_published_occupancy_puts_the_ceiling_above_one_half() -> None:
     ["mega_cruise_5000", "classic_cruise_1900", "spirit_cruise_3000",
      "expedition_cruise_450"],
 )
-def test_cruise_hulls_are_not_berthed_at_a_flat_one_half(platform: str) -> None:
-    """Crew triples put every cruise hull's own ceiling above 0.5."""
+def test_cruise_hulls_carry_their_own_declared_ceiling(platform: str) -> None:
+    """Each hull's ceiling follows its declared crew berthing, not a flat 0.5.
+
+    Passengers are berthed two to a cabin everywhere, so their arm sits at or
+    under 0.5; the crew arm sits at the ceiling its declared ``cabin_size``
+    implies (0.5 for the two-berth mega/expedition norm, 2/3 for the
+    three-berth classic/spirit norm), and the whole hull lies between them.
+    """
     layout = _layout(platform)
     whole = clc.platform_ceiling(layout, default_cabin_size)
     crew = clc.platform_ceiling(layout, default_cabin_size, clc.is_crew_cabin_zone)
@@ -87,9 +93,16 @@ def test_cruise_hulls_are_not_berthed_at_a_flat_one_half(platform: str) -> None:
         default_cabin_size,
         lambda zone_id: not clc.is_crew_cabin_zone(zone_id),
     )
-    assert 0.53 < whole.ceiling < 0.56
-    assert crew.ceiling > whole.ceiling > passengers.ceiling
-    assert passengers.ceiling <= 0.5
+    crew_sizes = {
+        default_cabin_size(z["id"], z["type"], z.get("cabin_size"))
+        for z in layout["zones"]
+        if z["type"] == "Cabin_Corridor" and clc.is_crew_cabin_zone(z["id"])
+    }
+    assert len(crew_sizes) == 1
+    declared = clc.ceiling_from_cabin_sizes({crew_sizes.pop(): 1}).ceiling
+    assert crew.ceiling == pytest.approx(declared, abs=0.02)
+    assert crew.ceiling >= whole.ceiling >= passengers.ceiling
+    assert 0.45 < passengers.ceiling <= 0.5
     assert whole.occupants == crew.occupants + passengers.occupants
 
 

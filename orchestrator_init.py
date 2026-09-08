@@ -42,6 +42,7 @@ from engines.infection_dynamics_bridge import (
     VSP_RULE_INSTANT_PREVALENCE,
     VSP_RULE_REPORTED_PASSENGER_CASES,
     InfectionStatus,
+    KorkinAgent,
     KorkinShipEngine,
 )
 from engines.initiation import (
@@ -112,6 +113,7 @@ def load_spatial_layout(cfg: dict[str, Any]) -> list[dict[str, Any]] | None:
             "deck": z.get("deck", "main"),
             "cabin_ventilation_type": z.get("cabin_ventilation_type", ""),
             "cabin_size": z.get("cabin_size"),
+            "cabin_size_by_class": dict(z.get("cabin_size_by_class") or {}),
             "max_occupancy": z.get("max_occupancy"),
             "description": z.get("description", ""),
             "dining_service_type": z.get("dining_service_type", ""),
@@ -136,7 +138,7 @@ def default_cabin_size(zone_name: str, zone_type: str, cabin_size: int | None) -
 
 
 def assign_cabin_mates(
-    agents: list[Any],
+    agents: list[KorkinAgent],
     zones: list[dict[str, Any]],
 ) -> None:
     """Pair agents into cabins within each ``Cabin_Corridor`` zone.
@@ -144,23 +146,31 @@ def assign_cabin_mates(
     Applies to cabin-corridor platforms (mega_cruise_5000, expedition_cruise_450,
     and other recipe-generated cruise classes). Sets ``cabin_mate_ids`` on each
     agent to the other occupants of the same stateroom. Non-cabin zones are skipped.
+
+    Cabins are filled within one ``agent_class`` at a time, so cabin mates share
+    a department (crew are berthed by department and shift; passengers by
+    booking class). A zone's ``cabin_size_by_class`` overrides ``cabin_size``
+    for the classes it names, e.g. junior galley ranks berthed three or four
+    to a cabin where the corridor norm is two.
     """
     zone_meta = {z["name"]: z for z in zones}
-    agents_by_zone: dict[str, list[Any]] = defaultdict(list)
+    agents_by_cabin_group: dict[tuple[str, str], list[KorkinAgent]] = defaultdict(list)
     for agent in agents:
-        agents_by_zone[agent.home_zone].append(agent)
+        group = (agent.home_zone, agent.agent_class)
+        agents_by_cabin_group[group].append(agent)
 
-    for zone_name, zone_agents in agents_by_zone.items():
+    for (zone_name, agent_class), group_agents in agents_by_cabin_group.items():
         meta = zone_meta.get(zone_name, {})
+        by_class = meta.get("cabin_size_by_class") or {}
         cabin_size = default_cabin_size(
             zone_name,
             meta.get("type", ""),
-            meta.get("cabin_size"),
+            by_class.get(agent_class, meta.get("cabin_size")),
         )
         if cabin_size is None or cabin_size < 1:
             continue
-        for i in range(0, len(zone_agents), cabin_size):
-            cabin_group = zone_agents[i : i + cabin_size]
+        for i in range(0, len(group_agents), cabin_size):
+            cabin_group = group_agents[i : i + cabin_size]
             cabin_ids = {a.agent_id for a in cabin_group}
             for agent in cabin_group:
                 agent.cabin_mate_ids = frozenset(cabin_ids - {agent.agent_id})

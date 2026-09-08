@@ -592,8 +592,15 @@ DEFAULT_CONFINEMENT_ISOLATION_FACTOR = 0.05
 # Direct contact between confined agent and non-cabin-mate (closed door)
 NON_MATE_CONFINEMENT_CONTACT_FACTOR = 0.01
 
-# Hallway encounter rate vs well-mixed ward (Cabin_Corridor zones)
+# Hallway encounter rate vs well-mixed ward (Cabin_Corridor zones). Applies
+# to the corridor residual only: a cabin is its own compartment and its
+# occupants meet at full strength (see ``_cabin_compartments``).
 DEFAULT_CORRIDOR_DIRECT_CONTACT_FACTOR = 0.15
+
+# Key separator for the cabin compartments a Cabin_Corridor is split into.
+# A compartment is one stateroom: the agent and its ``cabin_mate_ids``,
+# labelled by the lowest agent id in the cabin.
+CABIN_COMPARTMENT_SEPARATOR = "::cabin"
 
 # Hand → food transfer efficiency per bare-hand contact with communal or
 # served food. Span of the measured means across food matrices and studies:
@@ -2186,9 +2193,94 @@ class TransmissionCore:
         return 1.0
 
     def _direct_contact_zone_factor(self, zone_name: str) -> float:
+        if self._is_cabin_compartment(zone_name):
+            return 1.0
         if self.zone_types.get(zone_name) == "Cabin_Corridor":
             return self.corridor_direct_contact_factor
         return 1.0
+
+    @staticmethod
+    def _is_cabin_compartment(zone_name: str) -> bool:
+        return CABIN_COMPARTMENT_SEPARATOR in zone_name
+
+    @staticmethod
+    def compartment_parent(zone_name: str) -> str:
+        """The ship zone a compartment key belongs to (identity for zones)."""
+        return zone_name.split(CABIN_COMPARTMENT_SEPARATOR, 1)[0]
+
+    def _cabin_compartment_key(self, zone_name: str, agent: KorkinAgent) -> str:
+        label = min(set(agent.cabin_mate_ids) | {agent.agent_id})
+        key = f"{zone_name}{CABIN_COMPARTMENT_SEPARATOR}{label}"
+        self.zone_types.setdefault(key, "Cabin_Corridor")
+        return key
+
+    def _cabin_compartments(
+        self,
+        zone_occupants: dict[str, list[KorkinAgent]],
+    ) -> dict[str, list[KorkinAgent]]:
+        """Split each Cabin_Corridor's occupants into staterooms.
+
+        Other zones pass through unchanged. An agent with no cabin mates is a
+        single cabin. The corridor itself is not returned: hallway encounters
+        are the direct-contact residual, handled by ``_direct_contact_units``.
+        """
+        out: dict[str, list[KorkinAgent]] = {}
+        for zone_name, occupants in zone_occupants.items():
+            if (
+                self.zone_types.get(zone_name) != "Cabin_Corridor"
+                or self._is_cabin_compartment(zone_name)
+            ):
+                out[zone_name] = occupants
+                continue
+            for agent in occupants:
+                key = self._cabin_compartment_key(zone_name, agent)
+                out.setdefault(key, []).append(agent)
+        return out
+
+    def zone_surface_keys(self, zone_name: str) -> list[str]:
+        """A zone's own surface key plus every cabin compartment within it."""
+        prefix = zone_name + CABIN_COMPARTMENT_SEPARATOR
+        keys = {zone_name}
+        keys.update(k for k in self.surface_pools if k.startswith(prefix))
+        for pools in self.surface_pools_by_pathogen.values():
+            keys.update(k for k in pools if k.startswith(prefix))
+        return sorted(keys)
+
+    def zone_surface_mass(self, zone_name: str, pathogen_id: str | None = None) -> float:
+        """Surface mass on a zone plus every cabin compartment within it."""
+        pools = (
+            self.surface_pools if pathogen_id is None
+            else self.surface_pools_by_pathogen.get(pathogen_id, {})
+        )
+        return sum(pools.get(key, 0.0) for key in self.zone_surface_keys(zone_name))
+
+    def zone_surface_lineage_masses(
+        self,
+        pathogen_id: str,
+        zone_name: str,
+    ) -> dict[str, float]:
+        """Genotype composition pooled over a zone and its cabin compartments."""
+        grouped: dict[str, float] = {}
+        for key in self.zone_surface_keys(zone_name):
+            for genotype, mass in self.surface_lineage_masses(pathogen_id, key).items():
+                grouped[genotype] = grouped.get(genotype, 0.0) + mass
+        return grouped
+
+    def zone_surface_epochs_since_deposition(
+        self,
+        pathogen_id: str,
+        zone_name: str,
+        current_epoch: int,
+    ) -> int | None:
+        """Epochs since the freshest deposit on a zone or any cabin within it."""
+        ages = [
+            age for age in (
+                self.surface_epochs_since_deposition(pathogen_id, key, current_epoch)
+                for key in self.zone_surface_keys(zone_name)
+            )
+            if age is not None
+        ]
+        return min(ages) if ages else None
 
     def _is_quarantined(self, agent: KorkinAgent) -> bool:
         return agent.agent_id in self._quarantined_ids
@@ -2859,80 +2951,150 @@ class TransmissionCore:
         profile: dict | None = None,
         ledger: StrainDoseLedger | None = None,
     ) -> None:
-        """Person-to-person transmission via close contact in shared rooms."""
+        """Person-to-person transmission via close contact in shared rooms.
+
+        A ``Cabin_Corridor`` is not one room. Its occupants meet their own
+        cabin at full strength (one compartment per stateroom) and the rest of
+        the corridor only as the hallway residual, scaled by
+        ``corridor_direct_contact_factor`` and excluding cabin mates already
+        met inside.
+        """
+        for unit_name, occupants, hallway in self._direct_contact_units(
+            zone_occupants,
+        ):
+            self._direct_contact_unit(
+                epoch, unit_name, occupants, hallway, agent_doses, matrix,
+                agent_pathway_doses, pathogen_id, profile, ledger,
+            )
+
+    def _direct_contact_units(
+        self,
+        zone_occupants: dict[str, list[KorkinAgent]],
+    ) -> list[tuple[str, list[KorkinAgent], bool]]:
+        """Mixing units for direct contact: (name, occupants, is_hallway)."""
+        units: list[tuple[str, list[KorkinAgent], bool]] = []
+        for zone_name, occupants in zone_occupants.items():
+            if self.zone_types.get(zone_name) != "Cabin_Corridor":
+                units.append((zone_name, occupants, False))
+                continue
+            cabins = self._cabin_compartments({zone_name: occupants})
+            units.extend(
+                (key, members, False)
+                for key, members in cabins.items()
+                if len(members) > 1
+            )
+            units.append((zone_name, occupants, True))
+        return units
+
+    @staticmethod
+    def _hallway_shedders(
+        target: KorkinAgent,
+        shedders: list[tuple[KorkinAgent, float]],
+    ) -> list[tuple[KorkinAgent, float]]:
+        """Shedders a target can meet in the corridor: everyone but cabin mates."""
+        return [
+            (s, sv) for s, sv in shedders
+            if s.agent_id not in target.cabin_mate_ids
+        ]
+
+    def _direct_contact_unit(
+        self,
+        epoch: int,
+        unit_name: str,
+        occupants: list[KorkinAgent],
+        hallway: bool,
+        agent_doses: dict[int, float],
+        matrix: ContactTracingMatrix,
+        agent_pathway_doses: dict[int, dict[str, float]] | None,
+        pathogen_id: str,
+        profile: dict | None,
+        ledger: StrainDoseLedger | None,
+    ) -> None:
+        """Direct-contact doses for every susceptible in one mixing unit."""
         use_het = self.contact_mode == "heterogeneous_zone_dose"
         use_partner = self.contact_mode == "per_partner_contact"
-        for zone_name, occupants in zone_occupants.items():
-            shedders = self._get_shedders(occupants, pathogen_id, profile)
-            susceptible = self._get_susceptible(occupants, pathogen_id)
-            if not shedders or not susceptible:
-                continue
+        shedders = self._get_shedders(occupants, pathogen_id, profile)
+        susceptible = self._get_susceptible(occupants, pathogen_id)
+        if not shedders or not susceptible:
+            return
 
-            total_shedding = sum(sv for _, sv in shedders)
-            shedder_ids = [s.agent_id for s, _ in shedders]
-            n_occupants = max(len(occupants), 1)
-            zone_dc_factor = self._direct_contact_zone_factor(zone_name)
-            cabin_confinement = self._zone_has_cabin_confinement(
-                zone_name, shedders, susceptible,
+        zone_name = self.compartment_parent(unit_name)
+        total_shedding = sum(sv for _, sv in shedders)
+        shedder_ids = [s.agent_id for s, _ in shedders]
+        n_occupants = max(len(occupants), 1)
+        zone_dc_factor = self._direct_contact_zone_factor(unit_name)
+        cabin_confinement = self._zone_has_cabin_confinement(
+            zone_name, shedders, susceptible,
+        )
+        zone_mix = (
+            None if cabin_confinement
+            else self._shedder_mix(shedders, pathogen_id)
+        )
+
+        for target in susceptible:
+            r0_draw = self._draw_contact_multiplier(
+                n_occupants, target, epoch,
             )
-            zone_mix = (
-                None if cabin_confinement
-                else self._shedder_mix(shedders, pathogen_id)
+            sampled_shedders = shedders
+            n_contacts = r0_draw
+            if use_partner:
+                sampled_shedders, n_contacts = self._sample_contact_partners(
+                    shedders, n_occupants, r0_draw,
+                )
+                if hallway:
+                    sampled_shedders = self._hallway_shedders(
+                        target, sampled_shedders,
+                    )
+                dose = self._per_partner_contact_dose(
+                    target, sampled_shedders, cabin_confinement,
+                )
+            else:
+                unit_shedders = shedders
+                unit_shedding = total_shedding
+                if hallway:
+                    unit_shedders = self._hallway_shedders(target, shedders)
+                    unit_shedding = sum(sv for _, sv in unit_shedders)
+                dose = self._direct_contact_dose(
+                    target, unit_shedders, unit_shedding, n_occupants, r0_draw,
+                    cabin_confinement,
+                )
+            dose *= self.direct_contact_scalar
+            dose *= zone_dc_factor
+            exposure_factor = 1.0
+            if use_het:
+                exposure_factor = self._zone_exposure_factor(zone_name)
+                dose *= exposure_factor
+            mix = self._direct_contact_mix(
+                target,
+                sampled_shedders,
+                pathogen_id,
+                None if use_partner else zone_mix,
+            )
+            dose = self._accumulate(
+                target.agent_id, "direct_contact", dose,
+                agent_doses, agent_pathway_doses,
+                attribution(ledger, mix),
             )
 
-            for target in susceptible:
-                r0_draw = self._draw_contact_multiplier(
-                    n_occupants, target, epoch,
-                )
-                sampled_shedders = shedders
-                n_contacts = r0_draw
-                if use_partner:
-                    sampled_shedders, n_contacts = self._sample_contact_partners(
-                        shedders, n_occupants, r0_draw,
-                    )
-                    dose = self._per_partner_contact_dose(
-                        target, sampled_shedders, cabin_confinement,
-                    )
-                else:
-                    dose = self._direct_contact_dose(
-                        target, shedders, total_shedding, n_occupants, r0_draw,
-                        cabin_confinement,
-                    )
-                dose *= self.direct_contact_scalar
-                dose *= zone_dc_factor
-                exposure_factor = 1.0
-                if use_het:
-                    exposure_factor = self._zone_exposure_factor(zone_name)
-                    dose *= exposure_factor
-                mix = self._direct_contact_mix(
-                    target,
-                    sampled_shedders,
-                    pathogen_id,
-                    None if use_partner else zone_mix,
-                )
-                dose = self._accumulate(
-                    target.agent_id, "direct_contact", dose,
-                    agent_doses, agent_pathway_doses,
-                    attribution(ledger, mix),
-                )
-
-                rec: dict[str, Any] = {
-                    "target_id": target.agent_id,
-                    "zone": zone_name,
-                    "source_ids": shedder_ids,
-                    "pathogen_id": pathogen_id,
-                    "dose": round(dose, 4),
-                    "occupant_count": len(occupants),
-                    "r0_draw": r0_draw,
-                }
-                if use_partner:
-                    rec["source_ids"] = [
-                        shedder.agent_id for shedder, _ in sampled_shedders
-                    ]
-                    rec["n_contacts"] = n_contacts
-                if use_het:
-                    rec["zone_exposure_factor"] = round(exposure_factor, 6)
-                matrix.shared_room_exposures.append(rec)
+            rec: dict[str, Any] = {
+                "target_id": target.agent_id,
+                "zone": zone_name,
+                "source_ids": shedder_ids,
+                "pathogen_id": pathogen_id,
+                "dose": round(dose, 4),
+                "occupant_count": len(occupants),
+                "r0_draw": r0_draw,
+            }
+            if unit_name != zone_name:
+                rec["compartment"] = unit_name
+            if use_partner:
+                rec["source_ids"] = [
+                    shedder.agent_id for shedder, _ in sampled_shedders
+                ]
+                rec["n_contacts"] = n_contacts
+            if use_het:
+                rec["zone_exposure_factor"] = round(exposure_factor, 6)
+            matrix.shared_room_exposures.append(rec)
 
     # ── Pathway 2: Short-Range Droplet ───────────────────────────────
 
@@ -3618,7 +3780,7 @@ class TransmissionCore:
 
         matrix.fomite_trailing_exposures.append({
             "target_id": target.agent_id,
-            "zone": zone_name,
+            "zone": self.compartment_parent(zone_name),
             "pathogen_id": pathogen_id,
             "surface_mass": round(surface_mass, 4),
             "dose": round(credited_dose, 4),
@@ -3748,7 +3910,14 @@ class TransmissionCore:
         profile: dict | None = None,
         ledger: StrainDoseLedger | None = None,
     ) -> None:
-        """Surface contamination from shedders; stochastic pickup by later visitors."""
+        """Surface contamination from shedders; stochastic pickup by later visitors.
+
+        In a ``Cabin_Corridor`` a shedder's hands touch the stateroom's own
+        surfaces (its toilet and fittings), so each cabin compartment carries
+        its own pool. Occupants pick up from their cabin's pool and from any
+        mass already on the corridor itself (emesis, an environmental source),
+        so a contaminated hallway still reaches the cabins along it.
+        """
         if pathogen_id == "_default" and not self.pathogen_profiles:
             # Deprecated compatibility path for unprofiled legacy harnesses;
             # delete once those harnesses migrate to pathogen profiles.
@@ -3757,6 +3926,9 @@ class TransmissionCore:
                 agent_pathway_doses, pathogen_id, ledger,
             )
             return
+        pickup_units = dict(zone_occupants)
+        zone_occupants = self._cabin_compartments(zone_occupants)
+        pickup_units.update(zone_occupants)
         # a) Deposit new fomite mass from current shedders (not confined to cabin)
         for zone_name, occupants in zone_occupants.items():
             for agent in occupants:
@@ -3797,7 +3969,7 @@ class TransmissionCore:
                     self._surface_last_deposition_epoch[key] = int(epoch)
 
         # b) Fomite trailing detection + pickup
-        for zone_name, occupants in zone_occupants.items():
+        for zone_name, occupants in pickup_units.items():
             path_pools = self.surface_pools_by_pathogen.get(pathogen_id)
             if path_pools is None:
                 surface_mass = self.surface_pools.get(zone_name, 0.0)
@@ -4404,7 +4576,9 @@ class TransmissionCore:
         """Snapshot current occupancy for next epoch's fomite trailing."""
         self._prev_zone_occupants = {}
         self._prev_zone_shedders = {}
-        for zone_name, occupants in zone_occupants.items():
+        snapshot = dict(zone_occupants)
+        snapshot.update(self._cabin_compartments(zone_occupants))
+        for zone_name, occupants in snapshot.items():
             self._prev_zone_occupants[zone_name] = {
                 a.agent_id for a in occupants
             }
