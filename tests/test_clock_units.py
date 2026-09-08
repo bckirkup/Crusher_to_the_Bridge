@@ -351,11 +351,11 @@ def test_engine_contacts_match_daily_mean_at_hourly_resolution() -> None:
     target = type("Target", (), {"current_location": "", "role": "passenger"})()
     draws = 4000
     hourly_total = sum(
-        sum(hourly._effective_contacts(50, target) for _ in range(24))
+        sum(hourly._effective_contacts(50, target, 0) for _ in range(24))
         for _ in range(draws)
     ) / draws
     legacy_mean = sum(
-        legacy._effective_contacts(50, target) for _ in range(draws)
+        legacy._effective_contacts(50, target, 0) for _ in range(draws)
     ) / draws
     assert hourly_total == pytest.approx(legacy_mean, abs=0.35)
-    assert hourly._effective_contacts(50, target) <= 2
+    assert hourly._effective_contacts(50, target, 0) <= 2

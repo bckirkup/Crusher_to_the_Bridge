@@ -206,6 +206,20 @@ class CrewDutyExclusionTracker:
         }
 
 
+def is_food_employee(agent: Any, service_zones: Iterable[str]) -> bool:
+    """True when this agent is crew whose work zone is a service zone.
+
+    The one definition of food-employee status in the model: the duty
+    exclusion's 48-hour clause and the transmission core's food-handler
+    exposure read it from here, so the two cannot disagree about who is a
+    food employee.
+    """
+    return (
+        getattr(agent, "role", "") == CREW_ROLE
+        and getattr(agent, "work_zone", "") in set(service_zones)
+    )
+
+
 def food_employee_ids(
     agents: Iterable[Any],
     service_zones: Iterable[str],
@@ -215,8 +229,7 @@ def food_employee_ids(
     return frozenset(
         int(agent.agent_id)
         for agent in agents
-        if getattr(agent, "role", "") == CREW_ROLE
-        and getattr(agent, "work_zone", "") in zones
+        if is_food_employee(agent, zones)
     )
 
 

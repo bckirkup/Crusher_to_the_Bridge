@@ -16,6 +16,27 @@ Read this before quoting any dose figure or anchor result.
 
 ## 1. Currently withdrawn
 
+**Every crew attack rate and crew-channel posting measured before
+`FOOD-ROLE-01` was measured with the whole crew as food handlers at every
+meal.** The transmission core's food-handler test was `role == crew and zone in
+service_zones`, where the service set is every Dining zone plus every Galley;
+`CrewMess` is Dining on every hull and each agent's dining zone is drawn across
+the whole Dining set, so every crew member — engineer, medic, deckhand — took
+the Jin 2022 restaurant-staff surface rate (`CREW_SERVICE_SURFACE_CONTACTS_PER_HOUR`
+545.4/h against the diners' 42.8/h) and the inferred 12.7× food-handler contact
+multiplier for the duration of every meal, while the `crew_mess` diner rate in
+the surface table was unreachable. The repair makes the channel a duty state:
+the agent is a food employee by the VSP duty exclusion's own definition (crew
+whose work zone is a service zone, one predicate `is_food_employee` shared by
+both), is in that work zone, and is scheduled `Work`; crew eating are diners.
+No constant moves. The class-mixed staged campaign (expedition/classic/spirit
+stage 0–2, mega stage 0–1) and every earlier gate carried this defect, so their
+crew attack rates (2–5× the observed crew medians on posted voyages), A5 ratios
+(1.0–1.5 against a measured 4.3) and crew-only posting shares (23% against 1 of
+208 observed) are not the declared model's and must be re-measured. Their
+passenger-channel results are affected in an unmeasured direction through the
+shared surface and food pools.
+
 **Every screen and gate result to date belongs to no ship class, before
 `COMPLEMENT-01` (history §9m).** They ran `mega_cruise_5000` — a hull declaring
 5,000 passengers and 2,000 crew — with `num_agents = 450`, i.e. 316 passengers

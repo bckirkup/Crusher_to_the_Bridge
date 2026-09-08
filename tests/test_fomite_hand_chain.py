@@ -90,7 +90,7 @@ def test_pickup_is_bounded_and_monotonic_in_surface_pool() -> None:
     for pool in (1.0, 10.0, 100.0):
         core = _core()
         requests.append(core._fomite_pickup_request(
-            _agent(), ZONE, pool,
+            _agent(), ZONE, pool, 0,
         ))
     assert requests == sorted(requests)
     assert all(0.0 <= value <= pool for value, pool in zip(
@@ -109,7 +109,7 @@ def test_pickup_is_monotonic_in_shared_surface_touch_frequency(
             {**transmission_core.SURFACE_CONTACTS_PER_HOUR, "public": frequency},
         )
         core = _core(seed=13)
-        values.append(core._fomite_pickup_request(_agent(), ZONE, 10.0))
+        values.append(core._fomite_pickup_request(_agent(), ZONE, 10.0, 0))
     assert values == sorted(values)
 
 
@@ -286,7 +286,7 @@ def test_surface_pool_hand_pool_and_dose_do_not_create_mass(
     core.surface_pools_by_pathogen[PATHOGEN][ZONE] = 100.0
     monkeypatch.setattr(
         core, "_fomite_pickup_request",
-        lambda _target, _zone, _pool: 10.0,
+        lambda _target, _zone, _pool, _epoch: 10.0,
     )
     before = 100.0
     doses: dict[int, float] = {}
@@ -315,7 +315,9 @@ def test_fomite_delivery_is_per_capita_invariant_to_occupancy() -> None:
         targets = [_agent(i) for i in range(count)]
         core.surface_pools[ZONE] = 100.0
         core.surface_pools_by_pathogen[PATHOGEN][ZONE] = 100.0
-        core._fomite_pickup_request = lambda _target, _zone, _pool: 1.0
+        core._fomite_pickup_request = (
+            lambda _target, _zone, _pool, _epoch: 1.0
+        )
         core._hand_to_mouth_dose = (
             lambda _target, _epoch, hand_load: hand_load * 0.01
         )

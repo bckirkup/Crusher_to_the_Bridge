@@ -45,6 +45,7 @@ from typing import Any
 import numpy as np
 
 from crusher_labs.clinical_presentation import resolve_phase
+from engines.crew_duty_exclusion import is_food_employee
 from engines.infection_dynamics_bridge import (
     ALPHA,
     BETA,
@@ -167,8 +168,10 @@ SURFACE_CONTACTS_PER_HOUR = {
     "crew_mess": 42.8,
 }
 # Same restaurant, same study, same hour: staff touch shared surfaces 12.7x
-# more than diners do. Touch rate is a property of the activity, not only of
-# the room, so crew working a service zone take the staff rate.
+# more than diners do. Touch rate is a property of the activity, not the room,
+# so it is the shift that carries this rate: a food employee working its
+# service zone, not any crew member present in one (a crew member eating in
+# the crew mess is a diner, and takes the diner rate).
 CREW_SERVICE_SURFACE_CONTACTS_PER_HOUR = 545.4
 HIGH_TOUCH_AREA_M2 = {
     "cabin": 1.5,
@@ -1135,6 +1138,36 @@ class TransmissionCore:
         who is a food employee.
         """
         return frozenset(self._service_zones)
+
+    def _scheduled_activity(self, agent: KorkinAgent, epoch: int) -> str:
+        """This agent's scheduled activity at *epoch*."""
+        schedule = getattr(agent, "schedule", None)
+        if not schedule:
+            return ""
+        hour = self.clock.hour_of_day(epoch)
+        return str(schedule[hour % len(schedule)])
+
+    def _on_service_duty(
+        self,
+        agent: KorkinAgent,
+        zone_name: str,
+        epoch: int,
+    ) -> bool:
+        """True when *agent* is a food employee on shift in *zone_name*.
+
+        Presence in a service zone is not the food-handler channel. Every crew
+        member eats three times a day, ``CrewMess`` is a Dining zone on every
+        hull, and dining zones are drawn across the whole Dining set, so a
+        role-and-location test makes an engineer at lunch a galley worker. The
+        channel is a duty state: the zone is this agent's own work zone, and
+        the schedule has it working rather than eating or off watch.
+        """
+        return (
+            zone_name in self._service_zones
+            and is_food_employee(agent, self._service_zones)
+            and getattr(agent, "work_zone", "") == zone_name
+            and self._scheduled_activity(agent, epoch) == "Work"
+        )
 
     @property
     def strain_tracking(self) -> bool:
@@ -2728,11 +2761,16 @@ class TransmissionCore:
             dose += shedding
         return dose * self._confinement_factor(target)
 
-    def _effective_contacts(self, n_occupants: int, agent: KorkinAgent) -> int:
+    def _effective_contacts(
+        self,
+        n_occupants: int,
+        agent: KorkinAgent,
+        epoch: int,
+    ) -> int:
         """Occupancy-scaled contact draw for density_dependent contact_mode.
 
-        contacts ≈ base * (n / ref)^α, optionally multiplied for crew in
-        Dining/Galley service zones, capped, then Poisson-sampled.
+        contacts ≈ base * (n / ref)^α, optionally multiplied for a food
+        employee working its service zone, capped, then Poisson-sampled.
         """
         cfg = self.density_cfg
         ref = max(float(cfg["reference_occupancy"]), 1e-9)
@@ -2742,7 +2780,7 @@ class TransmissionCore:
 
         raw = base * (max(n_occupants, 0) / ref) ** alpha
         loc = getattr(agent, "current_location", None) or ""
-        if getattr(agent, "role", "") == "crew" and loc in self._service_zones:
+        if self._on_service_duty(agent, loc, epoch):
             raw *= float(cfg.get("crew_contact_multiplier", 1.0))
         raw *= float(self.voyage_contact_multiplier)
 
@@ -2760,10 +2798,11 @@ class TransmissionCore:
         self,
         n_occupants: int,
         target: KorkinAgent,
+        epoch: int,
     ) -> int:
         """Return r0_draw for direct contact under the active contact_mode."""
         if self.contact_mode in ("density_dependent", "heterogeneous_zone_dose"):
-            return self._effective_contacts(n_occupants, target)
+            return self._effective_contacts(n_occupants, target, epoch)
         if self.contact_mode == "legacy":
             base = int(self.rng.choice(AVG_R_POOL))
             # Legacy mode: still scale by voyage contact multiplier when active
@@ -2810,7 +2849,7 @@ class TransmissionCore:
 
     def _pathway_direct_contact(
         self,
-        _epoch: int,
+        epoch: int,
         zone_occupants: dict[str, list[KorkinAgent]],
         agent_doses: dict[int, float],
         matrix: ContactTracingMatrix,
@@ -2842,7 +2881,9 @@ class TransmissionCore:
             )
 
             for target in susceptible:
-                r0_draw = self._draw_contact_multiplier(n_occupants, target)
+                r0_draw = self._draw_contact_multiplier(
+                    n_occupants, target, epoch,
+                )
                 sampled_shedders = shedders
                 n_contacts = r0_draw
                 if use_partner:
@@ -3094,25 +3135,18 @@ class TransmissionCore:
     def _fomite_surface_contacts(
         self,
         zone_name: str,
-        agent: KorkinAgent | None = None,
+        agent: KorkinAgent | None,
+        epoch: int,
     ) -> float:
         zone_class = self._fomite_zone_class(zone_name)
-        if (
-            agent is not None
-            and getattr(agent, "role", "") == "crew"
-            and zone_name in self._service_zones
-        ):
+        if agent is not None and self._on_service_duty(agent, zone_name, epoch):
             hourly = CREW_SERVICE_SURFACE_CONTACTS_PER_HOUR
         else:
             hourly = SURFACE_CONTACTS_PER_HOUR[zone_class]
         return hourly * self.clock.hours_per_epoch
 
     def _fomite_is_eating(self, target: KorkinAgent, epoch: int) -> bool:
-        if not target.schedule:
-            return False
-        hour = self.clock.hour_of_day(epoch)
-        activity = target.schedule[hour % len(target.schedule)]
-        return str(activity).startswith("Meal")
+        return self._scheduled_activity(target, epoch).startswith("Meal")
 
     def _fomite_mouth_contacts(
         self,
@@ -3135,6 +3169,7 @@ class TransmissionCore:
         target: KorkinAgent,
         zone_name: str,
         surface_mass: float,
+        epoch: int,
     ) -> float:
         """Mass one target transfers from surface to hands."""
         if self._cabin_confinement_active(target):
@@ -3147,7 +3182,7 @@ class TransmissionCore:
         )
         area = self._fomite_surface_area(zone_name)
         request = (
-            self._fomite_surface_contacts(zone_name, target)
+            self._fomite_surface_contacts(zone_name, target, epoch)
             * (used_fraction * hand_area / area)
             * transfer_efficiency
             * surface_mass
@@ -3741,7 +3776,7 @@ class TransmissionCore:
                     max(0.0, float(self.rng.lognormal(*HAND_TO_SURFACE_LOGNORMAL))),
                 ) * self._hand_to_surface_drying(profile)
                 requested = (
-                    self._fomite_surface_contacts(zone_name, agent)
+                    self._fomite_surface_contacts(zone_name, agent, epoch)
                     * used_fraction
                     * transfer_efficiency
                     * hand
@@ -3788,7 +3823,7 @@ class TransmissionCore:
                 (
                     target,
                     self._fomite_pickup_request(
-                        target, zone_name, surface_mass,
+                        target, zone_name, surface_mass, epoch,
                     ),
                 )
                 for target in susceptible
@@ -3868,7 +3903,7 @@ class TransmissionCore:
                     self._replenish_hand(agent, pathogen_id, profile)
 
             deposits = self._food_deposits(
-                zone_name, occupants, pathogen_id, profile, fc,
+                zone_name, occupants, pathogen_id, profile, fc, epoch,
             )
             self._deposit_reservoir_strains(
                 FOOD_RESERVOIR, pathogen_id, zone_name, deposits,
@@ -3974,6 +4009,7 @@ class TransmissionCore:
         pathogen_id: str,
         profile: dict | None,
         food_cfg: dict[str, Any],
+        epoch: int,
     ) -> list[tuple[KorkinAgent, float]]:
         """Hand-borne deposits into one zone's food pool, depleting the hands.
 
@@ -3991,7 +4027,7 @@ class TransmissionCore:
                 continue
             transfer = self.rng.uniform(*HAND_TO_FOOD_TRANSFER_FRACTION_RANGE)
             requested = (
-                self._food_hand_contacts(zone_name, agent, food_cfg)
+                self._food_hand_contacts(zone_name, agent, food_cfg, epoch)
                 * transfer
                 * hand
             )
@@ -4007,17 +4043,19 @@ class TransmissionCore:
         zone_name: str,
         agent: KorkinAgent,
         food_cfg: dict[str, Any],
+        epoch: int,
     ) -> float:
         """Bare-hand food contacts this agent makes in this zone this epoch.
 
-        A count per day of presence, so it divides across the day's epochs.
-        Crew working a service zone are the food-handler channel and take the
-        handler multiplier.
+        A count per day of presence, so it divides across the day's epochs. A
+        food employee on shift in its own service zone is the food-handler
+        channel and takes the handler multiplier; a crew member eating in a
+        dining zone is a diner and does not.
         """
         per_day = float(food_cfg.get(
             "hand_food_contacts_per_day", FOOD_HAND_CONTACTS_PER_DAY,
         ))
-        if agent.role == "crew" and zone_name in self._service_zones:
+        if self._on_service_duty(agent, zone_name, epoch):
             per_day *= float(food_cfg.get(
                 "food_handler_contact_multiplier",
                 FOOD_HANDLER_CONTACT_MULTIPLIER,

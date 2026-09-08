@@ -50,6 +50,7 @@ def _agent(
     *,
     role: str = "passenger",
     infected: bool = True,
+    activity: str = "Meal:Lunch",
 ) -> KorkinAgent:
     agent = KorkinAgent(
         agent_id=agent_id,
@@ -59,7 +60,7 @@ def _agent(
         dining_zone=ZONE,
         work_zone=ZONE,
         free_zone=ZONE,
-        schedule=["Meal:Lunch"] * 24,
+        schedule=[activity] * 24,
     )
     agent.current_location = ZONE
     if infected:
@@ -89,7 +90,7 @@ def _deposit(core: TransmissionCore, agent: KorkinAgent, hand: float) -> float:
     agent.hand_load_by_pathogen[PATHOGEN] = hand
     profile = core.pathogen_profiles[PATHOGEN]
     deposits = core._food_deposits(
-        ZONE, [agent], PATHOGEN, profile, profile["food_contamination"],
+        ZONE, [agent], PATHOGEN, profile, profile["food_contamination"], 0,
     )
     return sum(mass for _agent, mass in deposits)
 
@@ -121,7 +122,7 @@ def test_deposit_never_exceeds_the_hand_and_leaves_it_depleted() -> None:
     for _ in range(50):
         before = agent.hand_load_by_pathogen[PATHOGEN]
         deposits = core._food_deposits(
-            ZONE, [agent], PATHOGEN, profile, profile["food_contamination"],
+            ZONE, [agent], PATHOGEN, profile, profile["food_contamination"], 0,
         )
         mass = sum(m for _a, m in deposits)
         after = agent.hand_load_by_pathogen[PATHOGEN]
@@ -154,11 +155,19 @@ def test_deposit_is_monotone_in_the_food_contact_rate() -> None:
     assert means[2] > means[1]
 
 
-def test_a_crew_food_handler_deposits_more_than_a_diner() -> None:
-    """NEARS' ill-food-worker channel exists; its rate is inferred, not measured."""
+def test_the_handler_channel_is_a_shift_and_not_a_role_in_a_room() -> None:
+    """NEARS' ill-food-worker channel exists; its rate is inferred, not measured.
+
+    The multiplier belongs to a food employee working its own service zone.
+    Crew eating in a dining zone are diners, so they deposit as passengers do.
+    """
     hand = 1e6  # far above what the handler multiplier can strip in one epoch
     diner = _mean_deposit(_core(seed=19), _agent(role="passenger"), hand)
-    handler = _mean_deposit(_core(seed=19), _agent(role="crew"), hand)
+    crew_eating = _mean_deposit(_core(seed=19), _agent(role="crew"), hand)
+    handler = _mean_deposit(
+        _core(seed=19), _agent(role="crew", activity="Work"), hand,
+    )
+    assert crew_eating == pytest.approx(diner, rel=0.1)
     assert handler > diner
     assert handler == pytest.approx(
         diner * transmission_core.FOOD_HANDLER_CONTACT_MULTIPLIER, rel=0.1,

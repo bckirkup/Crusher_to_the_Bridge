@@ -48,7 +48,7 @@ transmission:
     exponent: 0.5                      # α: contacts = base * (n/ref)^α
 
     # Role-specific overrides
-    crew_contact_multiplier: 2.0       # crew in dining/service zones contact more people
+    crew_contact_multiplier: 2.0       # food employees on shift in their service zone contact more people
                                        # (they serve many passengers sequentially)
 ```
 
@@ -129,6 +129,14 @@ this without needing a separate contact model for crew.
 
 Service zones = all zones with type "Dining" or containing "Galley" in the ID.
 Populated at engine initialization from the spatial layout.
+
+The multiplier is a duty state, not a room (FOOD-ROLE-01): it applies to a
+food employee — crew whose work zone is a service zone, the same definition the
+VSP duty exclusion uses (`engines/crew_duty_exclusion.is_food_employee`) —
+while the schedule has that agent at `Work` in its own work zone. Crew eating
+in `CrewMess` or any dining room are diners, and take the diner rate. The same
+rule gates `CREW_SERVICE_SURFACE_CONTACTS_PER_HOUR` and
+`FOOD_HANDLER_CONTACT_MULTIPLIER` in the fomite and food routes.
 
 ### Campaign parameters for calibration
 
