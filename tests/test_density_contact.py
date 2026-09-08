@@ -20,6 +20,7 @@ def _agent(
     *,
     role: str = "passenger",
     infected: bool = False,
+    activity: str = "home",
 ) -> KorkinAgent:
     a = KorkinAgent(
         agent_id=aid,
@@ -29,7 +30,7 @@ def _agent(
         dining_zone="MainDining",
         work_zone=loc,
         free_zone=loc,
-        schedule=["home"] * 24,
+        schedule=[activity] * 24,
     )
     if infected:
         a.infection_status = InfectionStatus.INFECTED
@@ -94,7 +95,7 @@ class TestDensityContactMode:
         agent = _agent(1, zone, infected=True)
         expected_daily = sum(AVG_R_POOL) / len(AVG_R_POOL)
         daily_draws = [
-            sum(hourly._draw_contact_multiplier(10, agent) for _ in range(24))
+            sum(hourly._draw_contact_multiplier(10, agent, 0) for _ in range(24))
             for _ in range(8000)
         ]
         assert sum(daily_draws) / len(daily_draws) == pytest.approx(
@@ -119,20 +120,20 @@ class TestDensityContactMode:
         agent = _agent(1, "Lounge")
         n_samples = 8000
         draws_n = [
-            sum(hourly._effective_contacts(50, agent) for _ in range(24))
+            sum(hourly._effective_contacts(50, agent, 0) for _ in range(24))
             for _ in range(n_samples)
         ]
         draws_2n = [
-            sum(hourly._effective_contacts(100, agent) for _ in range(24))
+            sum(hourly._effective_contacts(100, agent, 0) for _ in range(24))
             for _ in range(n_samples)
         ]
         mean_n = sum(draws_n) / n_samples
         mean_2n = sum(draws_2n) / n_samples
         legacy_n = [
-            legacy._effective_contacts(50, agent) for _ in range(n_samples)
+            legacy._effective_contacts(50, agent, 0) for _ in range(n_samples)
         ]
         legacy_2n = [
-            legacy._effective_contacts(100, agent) for _ in range(n_samples)
+            legacy._effective_contacts(100, agent, 0) for _ in range(n_samples)
         ]
         assert mean_n == pytest.approx(1.33, rel=0.08)
         assert mean_n == pytest.approx(sum(legacy_n) / n_samples, rel=0.08)
@@ -158,11 +159,14 @@ class TestDensityContactMode:
         n_samples = 6000
         for n_occ in (5, 50, 200):
             draws = [
-                sum(hourly._effective_contacts(n_occ, agent) for _ in range(24))
+                sum(
+                    hourly._effective_contacts(n_occ, agent, 0)
+                    for _ in range(24)
+                )
                 for _ in range(n_samples)
             ]
             legacy_draws = [
-                legacy._effective_contacts(n_occ, agent)
+                legacy._effective_contacts(n_occ, agent, 0)
                 for _ in range(n_samples)
             ]
             assert sum(draws) / n_samples == pytest.approx(1.33, rel=0.08)
@@ -170,8 +174,8 @@ class TestDensityContactMode:
                 sum(legacy_draws) / n_samples, rel=0.08,
             )
 
-    def test_crew_multiplier_applies_in_dining(self) -> None:
-        """Crew in Dining get multiplied contacts; crew in cabins do not."""
+    def test_crew_multiplier_applies_on_a_service_shift(self) -> None:
+        """On-shift service crew get multiplied contacts; diners do not."""
         dens = {
             "reference_occupancy": 50,
             "base_contacts_per_day": 4.0,
@@ -188,35 +192,43 @@ class TestDensityContactMode:
         assert "MainDining" in hourly._service_zones
         assert "Main_Galley_Aft" in hourly._service_zones
 
-        crew_dining = _agent(1, "MainDining", role="crew")
-        crew_cabin = _agent(2, "CrewCabin", role="crew")
-        pax_dining = _agent(3, "MainDining", role="passenger")
+        crew_on_shift = _agent(1, "MainDining", role="crew", activity="Work")
+        crew_eating = _agent(
+            2, "MainDining", role="crew", activity="Meal_Lunch",
+        )
+        crew_cabin = _agent(3, "CrewCabin", role="crew", activity="Work")
+        pax_dining = _agent(4, "MainDining", role="passenger")
 
         n_samples = 5000
         def hourly_daily_mean(agent: KorkinAgent) -> float:
             return sum(
-                sum(hourly._effective_contacts(50, agent) for _ in range(24))
+                sum(hourly._effective_contacts(50, agent, 0) for _ in range(24))
                 for _ in range(n_samples)
             ) / n_samples
 
         def legacy_mean(agent: KorkinAgent) -> float:
             return sum(
-                legacy._effective_contacts(50, agent)
+                legacy._effective_contacts(50, agent, 0)
                 for _ in range(n_samples)
             ) / n_samples
 
-        mean_crew_dining = hourly_daily_mean(crew_dining)
+        mean_on_shift = hourly_daily_mean(crew_on_shift)
+        mean_crew_eating = hourly_daily_mean(crew_eating)
         mean_crew_cabin = hourly_daily_mean(crew_cabin)
         mean_pax_dining = hourly_daily_mean(pax_dining)
-        legacy_crew_dining = legacy_mean(crew_dining)
-        legacy_crew_cabin = legacy_mean(crew_cabin)
-        legacy_pax_dining = legacy_mean(pax_dining)
-        assert mean_crew_dining == pytest.approx(8.0, rel=0.08)
+        assert mean_on_shift == pytest.approx(8.0, rel=0.08)
+        assert mean_crew_eating == pytest.approx(4.0, rel=0.08)
         assert mean_crew_cabin == pytest.approx(4.0, rel=0.08)
         assert mean_pax_dining == pytest.approx(4.0, rel=0.08)
-        assert mean_crew_dining == pytest.approx(legacy_crew_dining, rel=0.08)
-        assert mean_crew_cabin == pytest.approx(legacy_crew_cabin, rel=0.08)
-        assert mean_pax_dining == pytest.approx(legacy_pax_dining, rel=0.08)
+        assert mean_on_shift == pytest.approx(
+            legacy_mean(crew_on_shift), rel=0.08,
+        )
+        assert mean_crew_cabin == pytest.approx(
+            legacy_mean(crew_cabin), rel=0.08,
+        )
+        assert mean_pax_dining == pytest.approx(
+            legacy_mean(pax_dining), rel=0.08,
+        )
 
     def test_max_contacts_cap(self) -> None:
         """Contacts never exceed max_contacts even at high occupancy."""
@@ -231,7 +243,7 @@ class TestDensityContactMode:
         agent = _agent(1, "Lounge")
         for _ in range(2000):
             # raw = 5 * (10000/10)^1 = 5000 → capped at 7
-            assert core._effective_contacts(10_000, agent) <= 7
+            assert core._effective_contacts(10_000, agent, 0) <= 7
 
     def test_exponent_sensitivity_changes_r0_draw(self) -> None:
         """Changing exponent changes r0_draw under fixed seed and occupancy."""

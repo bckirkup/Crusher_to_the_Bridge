@@ -16,16 +16,23 @@ from engines.transmission_core import (
 )
 
 
-def _agent(agent_id: int, zone: str, role: str = "passenger") -> KorkinAgent:
+def _agent(
+    agent_id: int,
+    zone: str,
+    role: str = "passenger",
+    *,
+    activity: str = "Free",
+    work_zone: str | None = None,
+) -> KorkinAgent:
     agent = KorkinAgent(
         agent_id=agent_id,
         role=role,
         immune=False,
         home_zone=zone,
         dining_zone=zone,
-        work_zone=zone,
+        work_zone=zone if work_zone is None else work_zone,
         free_zone=zone,
-        schedule=["Free"] * 24,
+        schedule=[activity] * 24,
     )
     agent.current_location = zone
     return agent
@@ -44,26 +51,41 @@ def _core(
     )
 
 
-def test_surface_touch_rates_are_zone_and_role_aware() -> None:
+def test_the_staff_surface_rate_belongs_to_the_shift_not_the_room() -> None:
     zone = "MainDining"
     core = _core(zone, "Dining")
     passenger = _agent(1, zone)
-    crew = _agent(2, zone, role="crew")
-
-    assert core._fomite_surface_contacts(zone, passenger) == pytest.approx(
-        SURFACE_CONTACTS_PER_HOUR["dining"],
+    on_shift = _agent(2, zone, role="crew", activity="Work")
+    eating = _agent(3, zone, role="crew", activity="Meal_Lunch")
+    off_duty_zone = _agent(
+        4, zone, role="crew", activity="Work", work_zone="Engine",
     )
-    assert core._fomite_surface_contacts(zone, crew) == pytest.approx(
+
+    assert core._fomite_surface_contacts(zone, on_shift, 0) == pytest.approx(
         CREW_SERVICE_SURFACE_CONTACTS_PER_HOUR,
+    )
+    for diner in (passenger, eating, off_duty_zone):
+        assert core._fomite_surface_contacts(zone, diner, 0) == pytest.approx(
+            SURFACE_CONTACTS_PER_HOUR["dining"],
+        )
+
+
+def test_crew_eating_in_the_crew_mess_takes_the_diner_rate() -> None:
+    zone = "CrewMess"
+    core = _core(zone, "Dining")
+    crew = _agent(1, zone, role="crew", activity="Meal_Dinner")
+
+    assert core._fomite_surface_contacts(zone, crew, 0) == pytest.approx(
+        SURFACE_CONTACTS_PER_HOUR["crew_mess"],
     )
 
 
 def test_crew_in_non_service_zone_uses_zone_rate() -> None:
     zone = "CrewCabin"
     core = _core(zone, "Room")
-    crew = _agent(1, zone, role="crew")
+    crew = _agent(1, zone, role="crew", activity="Work")
 
-    assert core._fomite_surface_contacts(zone, crew) == pytest.approx(
+    assert core._fomite_surface_contacts(zone, crew, 0) == pytest.approx(
         SURFACE_CONTACTS_PER_HOUR["cabin"],
     )
 
@@ -74,8 +96,8 @@ def test_surface_touch_rates_scale_with_epoch_hours() -> None:
     half_hour = _core(zone, "Free", hours=0.5)
     passenger = _agent(1, zone)
 
-    assert hourly._fomite_surface_contacts(zone, passenger) == pytest.approx(
-        2.0 * half_hour._fomite_surface_contacts(zone, passenger),
+    assert hourly._fomite_surface_contacts(zone, passenger, 0) == pytest.approx(
+        2.0 * half_hour._fomite_surface_contacts(zone, passenger, 0),
     )
 
 
@@ -91,11 +113,11 @@ def test_default_contact_draws_match_polymod_and_are_timestep_invariant() -> Non
     target = _agent(1, "Lounge")
     samples = 4000
     hourly_means = [
-        sum(hourly._draw_contact_multiplier(10, target) for _ in range(24))
+        sum(hourly._draw_contact_multiplier(10, target, 0) for _ in range(24))
         for _ in range(samples)
     ]
     daily_draws = [
-        daily._draw_contact_multiplier(10, target)
+        daily._draw_contact_multiplier(10, target, 0)
         for _ in range(samples)
     ]
 
@@ -116,6 +138,6 @@ def test_legacy_contact_draws_remain_in_avg_r_pool() -> None:
         cfg={"transmission": {"contact_mode": "legacy"}},
     )
     target = _agent(1, "Lounge")
-    draws = [core._draw_contact_multiplier(10, target) for _ in range(1000)]
+    draws = [core._draw_contact_multiplier(10, target, 0) for _ in range(1000)]
 
     assert set(draws) <= set(AVG_R_POOL)
