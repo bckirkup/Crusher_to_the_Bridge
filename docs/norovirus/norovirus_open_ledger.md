@@ -1200,9 +1200,20 @@ Roughly in dependency order.
 8. **Cabin-level environmental compartments.** The finest mixing compartment is
    `Cabin_Corridor`: ~37 people in 800 m³ where reality is 2 people in ~40 m³
    (crew 3). `cabin_size` and `cabin_mate_ids` exist but only exempt a mate from
-   confinement attenuation. Building this would raise crew rates — away from the
-   anchor — so build it honestly and do not expect it to help. No cruise
-   platform has four-berth cabins; crew are three.
+   confinement attenuation. **Sourced in
+   [tranche 35](../literature/consensus_tranche_35_crew_berthing.md):** MLC
+   2006 caps passenger-ship crew rooms at four; the documented norm is two
+   (all Icon-class crew staterooms), two to four on 1990s hulls, two to three
+   on expedition ships, one for officers; roommates are drawn by department
+   and shift; and the cabin is where the record puts the risk (ill cabin-mate
+   RR 3.0 in passengers, aOR 3.27 in crew; NoV on the crew cabin toilet, not
+   the crew galley). The engine's crew corridor ward (37–40, `cabin_size: 3`)
+   is larger than its passenger ward (25, `cabin_size: 2`), so the *model's*
+   crew mix more at night than its passengers — the same sign as every other
+   crew defect. The earlier note here that building the cabin "would raise
+   crew rates" was a guess for 3- vs 2-berth cabins under corridor mixing and
+   is withdrawn as a prediction: the direction is to be measured on AWS, not
+   assumed. The corridor factors (0.15 direct, 0.25 zone) remain undeclared.
 9. **Aerosol portal efficiency.** #352 computes and records the emesis aerosol
    load but does not route it into the airborne reservoir. The direction is
    settled (norovirus establishes enterically; inhalation is delivery-to-gut via
