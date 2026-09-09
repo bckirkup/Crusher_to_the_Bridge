@@ -1,7 +1,12 @@
 # AERO-NEAR-01: a near-field air compartment over the seating unit and the cabin
 
-> **Status:** Proposed. Nothing here exists in-tree. No constant is adopted,
-> no value is fitted, and the sourcing tranche in §6 has not been run. Filed
+> **Status:** Proposed, **sourced**. Nothing here exists in-tree. No constant
+> is adopted and no value is fitted. The §6 sourcing tranche **has now been
+> run** — [tranche 36](../literature/consensus_tranche_36_near_field_air.md) —
+> and its result is that the *structure* below is licensed, the two rings of §5
+> are bounded by measurement, and the one magnitude the structure needs (the
+> near-field effective volume, equivalently the near/far exchange rate) is
+> **∅ null on search** and ships as declared geometry plus a swept axis. Filed
 > for every active pathogen arm, not for norovirus alone.
 
 ## 1. The defect
@@ -51,8 +56,10 @@ them:
   air stream, with none at tables outside it; the Jin 2022 / Zhang 2021 video
   studies cited for `DINE-PARTY-01` are the same setting's close-contact and
   surface record. A well-mixed dining room cannot produce that pattern.
-  (Citations in this section are from memory pending the §6 retrieval; none
-  is a constant.)
+  Now retrieved and quantified in
+  [tranche 36](../literature/consensus_tranche_36_near_field_air.md) §2:
+  31.25% at the immediate neighbouring tables against 0% remote, 45.45% inside
+  the recirculating air-conditioning zone against 0% outside it.
 - **Influenza** (`influenza_a`, inactive; see
   `influenza_arm_activation_plan.md`): same physics as SARS-CoV-2 with a
   different emission spectrum; the arm must not activate onto a route that
@@ -115,15 +122,56 @@ one further declaration per table-service venue: a table graph (grid or list of
 neighbour pairs) or, minimally, a declared number of neighbouring tables and
 the rule that consecutively dealt tables are neighbours. The record supports
 two rings (same table; tables sharing the air stream) and nothing finer; a
-continuous distance kernel would be invented. Spacing between tables — the
+continuous distance kernel would be invented. Tranche 36 §2 bounds the rings
+from Li 2021's Table 3 (**CFD exposure**, index table = 1): same air stream
+**0.76–1.04**, same HVAC zone but downstream **0.40–0.47**, remote tables
+**0.04–0.23** — an envelope for the ordering test of §8, not a value, and
+measured in a room at 0.9 L/s/person. Spacing between tables — the
 operator's second lever — enters as the neighbour ring's near/far exchange
 rate, not as a fitted distance. Buffet venues have no fixed tables and are
 out of scope for adjacency; their seating half, if any, is a separate item.
 
-## 6. Sourcing tranche (before any value ships)
+## 6. Sourcing tranche — **run**, in [tranche 36](../literature/consensus_tranche_36_near_field_air.md)
 
-Per `docs/sourcing_protocol.md` and the `searching-literature-evidence` skill;
-the Consensus budget is 8 searches to 1 Oct.
+Consensus was **exhausted for the period**, so every row was retrieved by the
+approved open-full-text fallback (Europe PMC `fullTextXML`; the Cambridge Core
+open PDF for the one paper PMC holds only as a scan). A blocked read is not a
+null result. Answers, in the order asked:
+
+1. **Answered, Grade B.** Parhizkar 2022 (27 m³ chamber, ~3 ACH, VOC breath
+   tracer at 0.76/1.52/2.28 m against the exhaust as the volume average):
+   **~36–44% above the other distances in the first 20 min**, decaying to
+   **~18% / ~11% / ~7.5% above the volume average** by the end of the 60-minute
+   trials. Licenses the two-compartment form and its time-dependence; bounds
+   the steady-state seated enhancement at tens of percent, not decades;
+   refuses a distance kernel.
+2. **Answered, two rings and no more.** Li 2021: attack rate **31.25%** at the
+   immediate neighbouring tables against **0%** remote, **45.45%** in the ABC
+   air-conditioning zone against **0%** outside it; measured ethane nearly flat
+   (1.00/0.92/0.96 at TA/TB/TC, 0.55–0.86 elsewhere), with the order-of-magnitude
+   separation appearing only in the **CFD** droplet-nuclei exposure column.
+3. **Answered for SARS-CoV-2, ∅ null for influenza.** Sharing a bedroom:
+   **aOR 2.99 (1.35–6.71)** (Brown 2023, n = 943) and **×4.5** from
+   **aOR 0.22 (0.10–0.41)** for *not* sharing (Sun 2023, Costa Rica) —
+   converging with the cruise cabin-mate **RR 3.0 / aOR 3.27** of tranche 35.
+   The influenza household literature does not stratify by sleeping
+   compartment. These are infection odds over three routes the cabin already
+   has, so they are the **post-repair check**, not a parameter.
+4. **Null, and the null narrows the arm.** Norovirus airborne material is
+   **emesis-conditioned** (Alsved 2020: 21/86 samples, 10/26 patients, **OR
+   8.1** within 3 h of vomiting, 5–215 copies/m³); the 2024 review lists
+   respiratory emission, toilet-flush aerosol, diarrhoea aerosolisation and
+   airborne infectivity as unresolved. The only distance gradient in the record
+   is Marks 2000's attack rate by table around a vomiting diner —
+   **91 / 71 / 56 / 50 / 40 / 25%**, trend P ≈ 0.0007 — which becomes the
+   norovirus out-of-sample check for this change.
+
+**The magnitude is still absent.** No study measures a near-field effective
+volume or exchange rate for a table or a bedroom, so the exchange parameter
+ships as a declared swept axis with the volume derived from declared geometry
+(`cabin_size` + MLC floor areas; `dining_table_size` + seated spacing).
+
+The original questions, retained:
 
 1. Near-field / far-field concentration ratio versus distance for exhaled
    aerosol at seated conversational distance (~1 m) and at 2–3 m, indoor,
