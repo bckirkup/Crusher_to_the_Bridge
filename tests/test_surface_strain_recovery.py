@@ -438,14 +438,18 @@ class TestSurfaceReservoirIntegration:
         # recontaminated once per defecation rather than every epoch, so the
         # faecal injection into the surface reservoir is roughly an order of
         # magnitude smaller and the run needs a second biological day.
+        # Rebaselined for DINE-SEG-01 (crew seated in the crew mess,
+        # passengers in the passenger venues): the ten seeded hosts' surface
+        # deposition is now split across role-segregated venues and no swabbed
+        # zone clears the quantisation at 96 epochs, so the seed doubles.
         epochs = 96
         enabled_spec = PicardRunSpec.from_legacy_yaml(
             str(REPO_ROOT), num_epochs=epochs,
         )
-        # A fiat ten-host seed is this test's design, so the shipped boarding
+        # A fiat twenty-host seed is this test's design, so the shipped boarding
         # block is withdrawn rather than left to refuse the count.
         enabled_spec.legacy_cfg["initiation"] = None
-        enabled_spec.pathogen_profiles[PATHOGEN]["initial_infected"] = 10
+        enabled_spec.pathogen_profiles[PATHOGEN]["initial_infected"] = 20
         variant_cfg = copy.deepcopy(
             enabled_spec.legacy_cfg["variant_surveillance"],
         )
