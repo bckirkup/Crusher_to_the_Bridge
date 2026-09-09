@@ -37,6 +37,7 @@ if str(_REPO_ROOT) not in sys.path:
 
 from telemetry_buffer.observation_model.bounded_screen import (  # noqa: E402
     DEFAULT_PLATFORM,
+    FACTOR_SETS,
 )
 
 _BUCKET_CHARS = set("abcdefghijklmnopqrstuvwxyz0123456789.-")
@@ -186,6 +187,12 @@ def _region_argv(
     # design at the same --design-seed for the seeds to be matched.
     if args.crew_duty_exclusion == "on":
         argv += ["--crew-duty-exclusion"]
+    # SURF-KO-01 arrives the same way, and for the same reason: the knocked-out
+    # arm and its baseline are one design, one design seed and one seed base,
+    # differing in this string alone.
+    if args.service_surface_knockout == "on":
+        argv += ["--service-surface-knockout"]
+    argv += ["--factor-set", args.factor_set]
     return argv
 
 
@@ -205,6 +212,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--only-points", default="")
     parser.add_argument(
         "--crew-duty-exclusion", default="off", choices=("on", "off"),
+    )
+    parser.add_argument(
+        "--service-surface-knockout", default="off", choices=("on", "off"),
+    )
+    parser.add_argument(
+        "--factor-set", default="norovirus", choices=sorted(FACTOR_SETS),
     )
     parser.add_argument("--sobol-m", type=int, default=7)
     parser.add_argument("--seeds", type=int, default=30)

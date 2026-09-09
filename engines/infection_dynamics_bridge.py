@@ -101,6 +101,9 @@ DEFAULT_NUM_PASSENGERS = 1888
 DEFAULT_NUM_CREW = 814
 IMMUNE_RATIO = 0.2
 
+ROLE_PASSENGER = "passenger"
+ROLE_CREW = "crew"
+
 # Containment threshold (from Agent.java)
 VSP_THRESHOLD_FRACTION = 0.03
 VSP_RULE_REPORTED_PASSENGER_CASES = "reported_passenger_cases"
@@ -137,6 +140,110 @@ SEIQR_SIGMA = 0.20
 SEIQR_GAMMA_RATE = 0.091
 SEIQR_INCUBATION_DAYS = 5
 SEIQR_INFECTIOUS_DAYS = 11
+
+
+# ── Immunity at embarkation ──────────────────────────────────────────────
+
+@dataclass
+class _ImmunePool:
+    """A share of a named population drawn immune, one host at a time.
+
+    The draw is sequential and without replacement: the pool holds how many
+    immune hosts it still owes and how many hosts it has left to offer them
+    to, so the share it delivers is exact rather than binomial.
+    """
+
+    remaining: int
+    hosts_left: int
+
+    def draw(self, rng: np.random.Generator) -> bool:
+        """Whether the next host of this pool boards immune."""
+        immune = False
+        if (
+            self.remaining > 0
+            and self.hosts_left > 0
+            and rng.random() < self.remaining / self.hosts_left
+        ):
+            immune = True
+            self.remaining -= 1
+        self.hosts_left -= 1
+        return immune
+
+
+class _ImmunityAtEmbarkation:
+    """Who boards already immune, over the whole complement or by role.
+
+    The shipped model is one role-blind pool: a single fraction of the
+    complement, so a crew member and a passenger board immune at the same
+    rate. That is a statement about prior exposure, and prior exposure is the
+    one thing the two roles demonstrably do not share -- a crew member sails
+    for years where a passenger sails for a week (IMMUNE-ROLE-01).
+
+    Role stratification is therefore a second pool rather than a scaled first
+    one, and it is off unless a run declares a crew fraction: with one pool
+    the draws are the shipped run's, host for host.
+
+    What this does *not* represent, and what the engine has no term for at
+    all: immunity carried from one voyage to the next. Every voyage re-draws
+    from the declared fraction, so the fraction is immunity *at embarkation*
+    and the carried state remains a structural gap
+    (docs/literature/consensus_tranche_34_crew_immunity.md).
+    """
+
+    WHOLE_COMPLEMENT = "*"
+
+    def __init__(self, pools: dict[str, _ImmunePool]) -> None:
+        self._pools = pools
+
+    @classmethod
+    def role_blind(cls, complement: int, fraction: float) -> _ImmunityAtEmbarkation:
+        """One pool over the whole complement, the shipped behaviour."""
+        return cls({
+            cls.WHOLE_COMPLEMENT: _ImmunePool(
+                int(complement * fraction), complement,
+            ),
+        })
+
+    @classmethod
+    def by_role(
+        cls,
+        *,
+        passengers: int,
+        crew: int,
+        passenger_fraction: float,
+        crew_fraction: float,
+    ) -> _ImmunityAtEmbarkation:
+        """One pool per role, each with its own declared fraction."""
+        return cls({
+            ROLE_PASSENGER: _ImmunePool(
+                int(passengers * passenger_fraction), passengers,
+            ),
+            ROLE_CREW: _ImmunePool(int(crew * crew_fraction), crew),
+        })
+
+    def draw(self, role_group: str, rng: np.random.Generator) -> bool:
+        """Whether the next host of *role_group* boards immune."""
+        pool = self._pools.get(role_group)
+        if pool is None:
+            pool = self._pools.get(self.WHOLE_COMPLEMENT)
+        if pool is None:
+            raise ValueError(
+                f"role-stratified immunity has no pool for role {role_group!r}: "
+                f"declared pools are {sorted(self._pools)}",
+            )
+        return pool.draw(rng)
+
+
+def _validated_immune_fraction(value: float | None) -> float | None:
+    """A per-person probability of boarding immune, or ``None`` for unset."""
+    if value is None:
+        return None
+    fraction = float(value)
+    if not math.isfinite(fraction) or not 0.0 <= fraction <= 1.0:
+        raise ValueError(
+            f"crew_immune_ratio must be a finite fraction in [0, 1], got {value!r}",
+        )
+    return fraction
 
 
 # ── Enumerations ─────────────────────────────────────────────────────────
@@ -1515,6 +1622,7 @@ class KorkinShipEngine:
         initial_infected: int = 1,
         zones: list[dict[str, str]] | None = None,
         immune_ratio: float = IMMUNE_RATIO,
+        crew_immune_ratio: float | None = None,
         vsp_isolation: bool = True,
         seed: int = 42,
         agent_classes: list[dict[str, Any]] | None = None,
@@ -1535,6 +1643,11 @@ class KorkinShipEngine:
         self.num_crew = num_crew
         self.initial_infected = initial_infected
         self.immune_ratio = immune_ratio
+        # IMMUNE-ROLE-01. ``None`` is one role-blind pool, the shipped model;
+        # a stated fraction gives crew their own pool and leaves passengers on
+        # ``immune_ratio``. It is immunity at embarkation either way: nothing
+        # carries between voyages.
+        self.crew_immune_ratio = _validated_immune_fraction(crew_immune_ratio)
         self.vsp_isolation = vsp_isolation
         self.vsp_trigger_rule = vsp_trigger_rule
         self._agent_classes = agent_classes
@@ -1706,18 +1819,18 @@ class KorkinShipEngine:
         distributed across the defined classes.  Otherwise falls back to
         the legacy two-class (passenger / crew) split.
         """
-        total = self.num_passengers + self.num_crew
-        immune_remaining = int(total * self.immune_ratio)
         infected_remaining = self.initial_infected
         agent_id = 0
 
         if self._agent_classes:
             agent_id = self._initialize_agents_from_classes(
-                agent_id, immune_remaining, infected_remaining,
+                agent_id, infected_remaining,
             )
         else:
             agent_id = self._initialize_agents_legacy(
-                agent_id, immune_remaining, infected_remaining,
+                agent_id,
+                self._immunity_by_role(self.num_passengers, self.num_crew),
+                infected_remaining,
             )
 
         for agent in self.agents:
@@ -1731,6 +1844,25 @@ class KorkinShipEngine:
         of the shedding curve, which is one epoch only when an epoch is a day.
         """
         return max(1, int(round(self.clock.epochs_for_days(1.0))))
+
+    def _immunity_by_role(
+        self, passengers: int, crew: int,
+    ) -> _ImmunityAtEmbarkation:
+        """The immunity draw this run boards with, given its role counts.
+
+        One pool over the complement unless a crew fraction is declared, so a
+        run that declares none consumes the RNG exactly as before.
+        """
+        if self.crew_immune_ratio is None:
+            return _ImmunityAtEmbarkation.role_blind(
+                passengers + crew, self.immune_ratio,
+            )
+        return _ImmunityAtEmbarkation.by_role(
+            passengers=passengers,
+            crew=crew,
+            passenger_fraction=self.immune_ratio,
+            crew_fraction=self.crew_immune_ratio,
+        )
 
     def _allocate_class_counts(
         self,
@@ -1772,7 +1904,6 @@ class KorkinShipEngine:
     def _initialize_agents_from_classes(
         self,
         start_id: int,
-        immune_remaining: int,
         infected_remaining: int,
     ) -> int:
         """Create agents distributed across configured agent classes."""
@@ -1780,15 +1911,21 @@ class KorkinShipEngine:
         agent_id = start_id
 
         class_counts = self._allocate_class_counts(total)
-
-        agents_left = sum(c for _, c in class_counts)
+        # The role counts a role-stratified pool is a share of are the classes'
+        # own, not the engine's arguments: a class allocation rounds, and a
+        # fraction of a count that is not the one being filled is not that
+        # fraction.
+        by_role: dict[str, int] = {}
+        for cls_cfg, count in class_counts:
+            role = str(cls_cfg.get("role_group", ROLE_CREW))
+            by_role[role] = by_role.get(role, 0) + count
+        immunity = self._immunity_by_role(
+            by_role.get(ROLE_PASSENGER, 0), by_role.get(ROLE_CREW, 0),
+        )
 
         for cls_cfg, count in class_counts:
-            agent_id, immune_remaining, infected_remaining, agents_left = (
-                self._spawn_class_agents(
-                    cls_cfg, count, agent_id,
-                    immune_remaining, infected_remaining, agents_left,
-                )
+            agent_id, infected_remaining = self._spawn_class_agents(
+                cls_cfg, count, agent_id, immunity, infected_remaining,
             )
 
         return agent_id
@@ -1798,12 +1935,11 @@ class KorkinShipEngine:
         cls_cfg: dict[str, Any],
         count: int,
         agent_id: int,
-        immune_remaining: int,
+        immunity: _ImmunityAtEmbarkation,
         infected_remaining: int,
-        agents_left: int,
-    ) -> tuple[int, int, int, int]:
+    ) -> tuple[int, int]:
         class_id = cls_cfg.get("class_id", "crew_general")
-        role_group = cls_cfg.get("role_group", "crew")
+        role_group = cls_cfg.get("role_group", ROLE_CREW)
         schedule_template = CLASS_SCHEDULES.get(
             class_id, CREW_SCHEDULE if role_group == "crew" else PASSENGER_SCHEDULE,
         )
@@ -1812,12 +1948,7 @@ class KorkinShipEngine:
         free_pref = cls_cfg.get("free_zone_preference", "")
 
         for _ in range(count):
-            immune = False
-            if immune_remaining > 0 and agents_left > 0:
-                if self.rng.random() < immune_remaining / agents_left:
-                    immune = True
-                    immune_remaining -= 1
-            agents_left -= 1
+            immune = immunity.draw(role_group, self.rng)
 
             dining = self._draw_dining_zone(role_group)
             if duty_zone:
@@ -1853,7 +1984,7 @@ class KorkinShipEngine:
             self.agents.append(agent)
             agent_id += 1
 
-        return agent_id, immune_remaining, infected_remaining, agents_left
+        return agent_id, infected_remaining
 
     def _seed_initial_infection(
         self, agent: KorkinAgent, rng: np.random.Generator,
@@ -1870,22 +2001,15 @@ class KorkinShipEngine:
     def _initialize_agents_legacy(
         self,
         start_id: int,
-        immune_remaining: int,
+        immunity: _ImmunityAtEmbarkation,
         infected_remaining: int,
     ) -> int:
         """Legacy two-class (passenger/crew) initialization."""
         agent_id = start_id
 
-        agents_left = self.num_passengers + self.num_crew
-
         # Passengers
         for _ in range(self.num_passengers):
-            immune = False
-            if immune_remaining > 0 and agents_left > 0:
-                if self.rng.random() < immune_remaining / agents_left:
-                    immune = True
-                    immune_remaining -= 1
-            agents_left -= 1
+            immune = immunity.draw(ROLE_PASSENGER, self.rng)
 
             home = self.rng.choice(
                 [z for z in self._room_zones if "Pax_" in z or "Passenger" in z or "Berthing" in z]
@@ -1920,12 +2044,7 @@ class KorkinShipEngine:
 
         # Crew
         for _ in range(self.num_crew):
-            immune = False
-            if immune_remaining > 0 and agents_left > 0:
-                if self.rng.random() < immune_remaining / agents_left:
-                    immune = True
-                    immune_remaining -= 1
-            agents_left -= 1
+            immune = immunity.draw(ROLE_CREW, self.rng)
 
             home = self.rng.choice(
                 [z for z in self._room_zones if "Crew_Corridor" in z or "Crew" in z or "Berthing" in z]

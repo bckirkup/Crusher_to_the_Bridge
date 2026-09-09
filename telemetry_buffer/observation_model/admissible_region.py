@@ -88,7 +88,7 @@ from simulation_utils.platform_complement import (  # noqa: E402
 from telemetry_buffer.observation_model import score_anchors  # noqa: E402
 from telemetry_buffer.observation_model.bounded_screen import (  # noqa: E402
     DEFAULT_PLATFORM,
-    NOROVIRUS_FACTORS,
+    FACTOR_SETS,
     Factor,
     build_run_spec,
 )
@@ -173,6 +173,20 @@ class Design:
     # The regulated operational arm, off unless a run asks for it: a design
     # carries it so baseline and intervention differ in this field alone.
     crew_duty_exclusion: bool = False
+    # SURF-KO-01, the same way: a diagnostic knockout of the staff
+    # surface-touch rate, off unless a run asks, so the knocked-out arm and
+    # its baseline differ in this field and nothing else.
+    service_surface_knockout: bool = False
+    # Which box the design's coordinates are coordinates *of*. Carried here
+    # rather than passed alongside because every work unit already carries a
+    # design: a shard that resolved its own factor list could sample a
+    # different box from the one the report names.
+    factor_set: str = "norovirus"
+
+    @property
+    def factors(self) -> tuple[Factor, ...]:
+        """The factors this design's unit coordinates address."""
+        return FACTOR_SETS[self.factor_set]
 
     @property
     def complement(self) -> int:
@@ -191,7 +205,21 @@ class Design:
             "co_seeded": self.co_seeded,
             "observation_scenario": self.observation_scenario,
             "crew_duty_exclusion": self.crew_duty_exclusion,
+            "service_surface_knockout": self.service_surface_knockout,
         }
+
+
+def _design_factors(
+    design: Design,
+    factors: Sequence[Factor] | None,
+) -> Sequence[Factor]:
+    """The factors a work unit addresses: those stated, else the design's.
+
+    Defaulting through the design rather than a module constant is what keeps
+    a shard honest: every worker resolves the box from the same field the
+    report names it by, so a wider box cannot be sampled as the narrow one.
+    """
+    return design.factors if factors is None else factors
 
 
 def sobol_units(dimensions: int, log2_points: int, seed: int) -> list[list[float]]:
@@ -535,7 +563,7 @@ def score_point(
     *,
     point_index: int,
     design: Design,
-    factors: Sequence[Factor] = NOROVIRUS_FACTORS,
+    factors: Sequence[Factor] | None = None,
 ) -> dict[str, Any]:
     """Score one point's cell from its rows, however those rows were produced.
 
@@ -543,6 +571,7 @@ def score_point(
     of a cell, are scored by the same arithmetic as an unsharded point: a cell
     is a function of its rows alone.
     """
+    factors = _design_factors(design, factors)
     cell = score_anchors.summarise_cell(list(rows))
     targets = vsp_attack_rate_targets(design.era)
     verdicts, ratios = score_anchors.verdicts(
@@ -569,9 +598,10 @@ def evaluate_point(
     point_index: int,
     seeds: Sequence[int],
     design: Design,
-    factors: Sequence[Factor] = NOROVIRUS_FACTORS,
+    factors: Sequence[Factor] | None = None,
 ) -> dict[str, Any]:
     """Run one box point over the matched seed set and score its cell."""
+    factors = _design_factors(design, factors)
     rows = point_rows(
         units, point_index=point_index, seeds=seeds, design=design, factors=factors,
     )
@@ -586,12 +616,13 @@ def point_rows(
     point_index: int,
     seeds: Sequence[int],
     design: Design,
-    factors: Sequence[Factor] = NOROVIRUS_FACTORS,
+    factors: Sequence[Factor] | None = None,
 ) -> list[dict[str, Any]]:
     """The scorer rows for one point over the seeds given."""
+    resolved = _design_factors(design, factors)
     return [
         run_row(
-            factors,
+            resolved,
             units,
             seed=seed,
             design=design,
@@ -627,7 +658,7 @@ def evaluate_block(
     block_index: int,
     seeds: Sequence[int],
     design: Design,
-    factors: Sequence[Factor] = NOROVIRUS_FACTORS,
+    factors: Sequence[Factor] | None = None,
 ) -> dict[str, Any]:
     """Run one (point, seed-block) unit and return its rows unscored.
 
@@ -635,6 +666,7 @@ def evaluate_block(
     A9 is a frequency over the whole matched set. The block therefore carries
     rows and its own coordinates, and scoring happens when the blocks pool.
     """
+    factors = _design_factors(design, factors)
     rows = point_rows(
         units, point_index=point_index, seeds=seeds, design=design, factors=factors,
     )
@@ -973,7 +1005,7 @@ def pooled_row_points(
     seeds: Sequence[int],
     seed_shards: int,
     design: Design,
-    factors: Sequence[Factor] = NOROVIRUS_FACTORS,
+    factors: Sequence[Factor] | None = None,
 ) -> list[dict[str, Any]]:
     """Pool seed-block rows into scored points, refusing an incomplete cell.
 
@@ -982,6 +1014,7 @@ def pooled_row_points(
     over an unstated denominator. The pooled seeds must be the design's seeds
     exactly, each once.
     """
+    factors = _design_factors(design, factors)
     pooled = _pooled_blocks(streams)
     _refuse_missing(sorted(pooled), expected)
     wanted = sorted(int(seed) for seed in seeds)
@@ -1203,6 +1236,26 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
             "give the matched baseline"
         ),
     )
+    parser.add_argument(
+        "--service-surface-knockout",
+        action="store_true",
+        help=(
+            "SURF-KO-01: put a food employee on shift on the diner's "
+            "surface-touch rate instead of the staff rate it was measured "
+            "at; off by default so the same design and seeds give the "
+            "matched baseline"
+        ),
+    )
+    parser.add_argument(
+        "--factor-set",
+        default="norovirus",
+        choices=sorted(FACTOR_SETS),
+        help=(
+            "which box to sample: 'norovirus' is the ten-factor biology box, "
+            "'expedition_sensitivity' adds the boarding-prevalence and "
+            "crew-immunity axes (a different dimension, so a different grid)"
+        ),
+    )
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument(
         "--stream",
@@ -1271,8 +1324,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         era=args.era,
         observation_scenario=args.observation_scenario,
         crew_duty_exclusion=args.crew_duty_exclusion,
+        service_surface_knockout=args.service_surface_knockout,
+        factor_set=args.factor_set,
     )
-    factors = NOROVIRUS_FACTORS
+    factors = design.factors
     seeds = [args.seed_base + index for index in range(args.seeds)]
     grid = sobol_units(len(factors), args.sobol_m, args.design_seed)
     selection = selected_indices(grid, args.only_points)
@@ -1298,7 +1353,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     sharded = not args.merge and args.shard_count > 1
     payload = {
         "mode": "feasibility_gate_shard" if sharded else "feasibility_gate",
-        "box": f"full {len(factors)}-factor norovirus box (no #36 restriction)",
+        "box": f"{args.factor_set}: {len(factors)} factors",
         "factors": [
             {
                 "name": factor.name,

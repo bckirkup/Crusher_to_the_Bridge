@@ -114,6 +114,11 @@ from simulation_utils.platform_complement import (  # noqa: E402
 DEFAULT_PLATFORM = "classic_cruise_1900"
 
 Transform = Literal["linear", "log10"]
+# Where a factor's value lands. A pathogen factor is a property of the
+# organism and is written into its profile; a run factor is a property of the
+# voyage -- who boards immune, what the operator does -- and is written into
+# the run's configuration, where the engine reads it.
+Target = Literal["pathogen", "run"]
 
 
 @dataclass(frozen=True)
@@ -126,6 +131,7 @@ class Factor:
     high: float
     transform: Transform
     grade: str
+    target: Target = "pathogen"
 
     def value(self, unit: float) -> float:
         """Map a unit-hypercube coordinate onto the sourced interval."""
@@ -307,6 +313,68 @@ INDEXED_PATH_DEFAULTS: dict[str, tuple[float, ...]] = {
     "emesis_total_shed_gec_range": tuple(EMESIS_TOTAL_SHED_GEC_RANGE),
 }
 
+# The three-arm expedition sensitivity (SURF-KO-01 / boarding / IMMUNE-ROLE-01).
+# Two of the three arms are continuous and enter here as axes over the box;
+# the third is a knockout and enters as a switch on the run spec, because a
+# rate that is either the staff's or the diner's has no interval between them.
+EXPEDITION_SENSITIVITY_FACTORS: tuple[Factor, ...] = (
+    # boarding.prevalence.passenger: the share of embarking passengers already
+    # infected. Interval from the register's boarding row -- Kobayashi 2021,
+    # Qi 2018, Jeong 2021 -- with outbreak-population prevalences excluded as
+    # circular. Grade B: measured in travelling and general populations, not
+    # at a cruise gangway. The shipped 0.0325 is this interval's midpoint,
+    # which is a default and never was a measurement, and that is why the
+    # campaign sweeps the interval instead of standing on it.
+    Factor(
+        "boarding_prevalence_passenger",
+        ("boarding", "prevalence", "passenger"),
+        0.025,
+        0.040,
+        "linear",
+        "B",
+    ),
+    # boarding.prevalence.crew: the same quantity for crew, swept
+    # independently because it is a different population sampled at a
+    # different time -- crew join between voyages and are not the passenger
+    # draw. Same sources, same grade, shipped 0.0185 again the midpoint.
+    Factor(
+        "boarding_prevalence_crew",
+        ("boarding", "prevalence", "crew"),
+        0.007,
+        0.030,
+        "linear",
+        "B",
+    ),
+    # ship_graph.crew_immune_fraction: the share of crew boarding immune
+    # (IMMUNE-ROLE-01), against the role-blind 0.2 the complement otherwise
+    # carries. The composition this axis was to be derived from -- career
+    # length x cumulative infection incidence x immunity duration -- does not
+    # close on the record: Radic 2020 gives service length (46% of 523 crew at
+    # 6+ years) and Yu 2023 gives GI blockade-antibody duration (2.3-4.8 y,
+    # 3.6-5.9%/y decay), but the middle term, cumulative adult norovirus
+    # infection incidence, was not retrieved, and no study measures crew
+    # norovirus seroprevalence at all (tranche 34). Two of three terms do not
+    # make a fraction. The axis is therefore the whole admissible [0, 1],
+    # declared: it spans crew less immune than passengers, which a novel GII.4
+    # against a naive complement permits, through crew wholly protected.
+    # Grade D, null-sourced, and no point in it may be adopted because it
+    # reproduces A5 or a posting rate.
+    Factor(
+        "crew_immune_fraction",
+        ("ship_graph", "crew_immune_fraction"),
+        0.0,
+        1.0,
+        "linear",
+        "D",
+        target="run",
+    ),
+)
+
+FACTOR_SETS: dict[str, tuple[Factor, ...]] = {
+    "norovirus": NOROVIRUS_FACTORS,
+    "expedition_sensitivity": NOROVIRUS_FACTORS + EXPEDITION_SENSITIVITY_FACTORS,
+}
+
 SCORED_OUTPUTS: tuple[str, ...] = (
     "attack_rate",
     "ever_ill_attack_rate_passenger",
@@ -325,8 +393,46 @@ def build_overrides(
     """Turn unit-hypercube coordinates into a pathogen override block."""
     profile: dict[str, object] = {}
     for factor, unit in zip(factors, units, strict=True):
+        if factor.target != "pathogen":
+            continue
         _assign_factor(profile, factor.path, factor.value(float(unit)))
     return {pathogen_id: profile}
+
+
+def build_run_overrides(
+    factors: Sequence[Factor],
+    units: Sequence[float],
+) -> dict[str, object]:
+    """The config overrides this point's run-target factors stand for.
+
+    A voyage property -- who boards immune -- is not a property of the
+    pathogen, so it is written where the engine reads it rather than into a
+    profile that every other hull and run shares.
+    """
+    block: dict[str, object] = {}
+    for factor, unit in zip(factors, units, strict=True):
+        if factor.target != "run":
+            continue
+        _assign_factor(block, factor.path, factor.value(float(unit)))
+    return block
+
+
+def _merge_run_overrides(
+    config_overrides: dict[str, object],
+    run_overrides: dict[str, object],
+) -> None:
+    """Fold run-target factor values into *config_overrides* in place.
+
+    A run factor addressing a block the spec already writes -- ``ship_graph``
+    carries the complement -- must join it rather than replace it, or the
+    hull would lose its declared complement to an immunity axis.
+    """
+    for block, value in run_overrides.items():
+        existing = config_overrides.get(block)
+        if isinstance(value, dict) and isinstance(existing, dict):
+            config_overrides[block] = {**existing, **value}
+        else:
+            config_overrides[block] = value
 
 
 def _assign_factor(
@@ -443,6 +549,7 @@ def build_run_spec(
     observation_scenario: str | None = None,
     co_seeded: str = "isolated",
     crew_duty_exclusion: bool = False,
+    service_surface_knockout: bool = False,
 ) -> dict[str, object]:
     """The Picard spec for one design point at one seed.
 
@@ -453,6 +560,7 @@ def build_run_spec(
     """
     overrides = build_overrides(factors, units, pathogen_id)
     config_overrides: dict[str, object] = {"ship_graph": {"num_agents": int(num_agents)}}
+    _merge_run_overrides(config_overrides, build_run_overrides(factors, units))
     if co_seeded == "isolated":
         config_overrides["initiation"] = withdraw_other_boarding(bundle, pathogen_id)
     if observation_scenario is not None:
@@ -464,6 +572,12 @@ def build_run_spec(
         # identical to the baseline spec, so a matched-seed difference is
         # attributable to the operational rule and nothing else.
         config_overrides["crew_duty_exclusion"] = {"enabled": True}
+    if service_surface_knockout:
+        # SURF-KO-01: the diagnostic arm. A food employee on shift touches
+        # shared surfaces at the diner's rate instead of the staff rate it
+        # was measured at, so a matched-seed difference is what that one rate
+        # carries -- a knockout to read, not a rate to adopt.
+        config_overrides["service_surface_knockout"] = {"enabled": True}
     return {
         "schema_version": "1.0.0",
         "description": description,
@@ -495,6 +609,7 @@ def run_point(
     observation_scenario: str | None = None,
     co_seeded: str = "isolated",
     crew_duty_exclusion: bool = False,
+    service_surface_knockout: bool = False,
 ) -> dict[str, float]:
     """Run one design point at one seed and return the scored outputs."""
     spec = build_run_spec(
@@ -509,6 +624,7 @@ def run_point(
         observation_scenario=observation_scenario,
         co_seeded=co_seeded,
         crew_duty_exclusion=crew_duty_exclusion,
+        service_surface_knockout=service_surface_knockout,
     )
     with tempfile.TemporaryDirectory() as tmp:
         spec_path = Path(tmp) / "run_spec.json"
