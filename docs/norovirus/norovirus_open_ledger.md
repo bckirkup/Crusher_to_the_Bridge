@@ -1536,6 +1536,25 @@ Roughly in dependency order.
     susceptibility multiplier, and the chronic duration only lengthens shedding
     in the small immunocompromised-and-infected subset.
 
+16. **`AERO-NEAR-01`: the short-range inhalation route has no sub-room unit.**
+    `_pathway_droplet` divides every shedder's aerosol emission by the whole
+    zone's declared `volume_m3` and doses every occupant identically, so a
+    cabin mate breathes the corridor's 450–600 m³ rather than a cabin's
+    ~20–30 m³ and a table party the dining room's 1,050 m³. `BERTH-01` gave
+    the cabin its contact unit and fomite pool but not its air; `DINE-PARTY-01`
+    gave the table its contact pool but not its air. For norovirus the route
+    is fed only by emesis episodes, so the exposure that matters is whoever
+    shares air with the vomiting host — the table (Marks 2000's
+    distance-from-table gradient) or the cabin — and whether it carries
+    material dose is a measurement to make; for the SARS-CoV-2 arm the
+    restaurant record is a table/adjacent-table record that a well-mixed room
+    cannot produce. The requirement is filed pathogen-general, with the
+    seating declarations (`meal_seatings`, occupancy bound,
+    `dining_table_size`, table adjacency) as operator levers:
+    [`../proposals/near_field_air_spec.md`](../proposals/near_field_air_spec.md).
+    Off by default and bit-identical when off; sourcing precedes any value; no
+    constant here is chosen against a scored quantity.
+
 ## 5. Held fixed by assumption
 
 Live Grade C liabilities. Any of these could move the reported rate; the system
