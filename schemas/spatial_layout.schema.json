@@ -137,6 +137,11 @@
             "minimum": 1
           },
           "description": "Stateroom occupancy per agent_class, overriding cabin_size for that class (e.g. junior galley ranks berthed 3-4 where the corridor norm is 2)"
+        },
+        "meal_seatings": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Number of successive diner cohorts a Dining zone serves per meal (1 = the whole complement sits at once; 2 = early/late seatings). Each cohort's meal block is offset by one block length."
         }
       }
     }

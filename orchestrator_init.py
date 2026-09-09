@@ -118,6 +118,7 @@ def load_spatial_layout(cfg: dict[str, Any]) -> list[dict[str, Any]] | None:
             "description": z.get("description", ""),
             "dining_service_type": z.get("dining_service_type", ""),
             "food_contamination_multiplier": z.get("food_contamination_multiplier"),
+            "meal_seatings": z.get("meal_seatings"),
         }
         for z in layout.get("zones", [])
     ]
@@ -532,6 +533,7 @@ def build_engine(
             "description": z.get("description", ""),
             "dining_service_type": z.get("dining_service_type", ""),
             "food_contamination_multiplier": z.get("food_contamination_multiplier"),
+            "meal_seatings": z.get("meal_seatings"),
         }
         for z in zones
     ]

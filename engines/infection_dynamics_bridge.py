@@ -324,6 +324,49 @@ PASSENGER_FAMILY_SCHEDULE = [
     "Free", "Free", "Free", "Sleep",
 ]
 
+# Meal-block token prefix shared by every schedule above.
+MEAL_PREFIX = "Meal"
+
+
+def stagger_meal_seating(
+    schedule: list[str], seating: int, seatings: int,
+) -> list[str]:
+    """The schedule as cohort ``seating`` of ``seatings`` successive sittings.
+
+    A meal block of ``L`` hours served in ``S`` sittings is cut into
+    seat-turns of ``max(L // S, 1)`` hours; cohort ``k`` sits for the
+    ``k``-th turn, so at any hour one cohort is in the room and the venue's
+    service window is the template block (extended only when the turns do
+    not fit inside it). A turn that lands outside the block swaps places
+    with the activity it displaces; vacated hours inside the block become
+    ``Free``. With one sitting the schedule is unchanged. Hours wrap around
+    the 24-hour day.
+    """
+    if seatings <= 1:
+        return list(schedule)
+    n = len(schedule)
+    out = list(schedule)
+    hour = 0
+    while hour < n:
+        activity = schedule[hour]
+        if not activity.startswith(MEAL_PREFIX):
+            hour += 1
+            continue
+        end = hour
+        while end < n and schedule[end] == activity:
+            end += 1
+        block = set(range(hour, end))
+        turn = max((end - hour) // seatings, 1)
+        landing = [(hour + seating * turn + o) % n for o in range(turn)]
+        displaced = [schedule[t] for t in landing if t not in block]
+        for h in sorted(block - set(landing)):
+            out[h] = displaced.pop(0) if displaced else "Free"
+        for t in landing:
+            out[t] = activity
+        hour = end
+    return out
+
+
 # Lookup table: class_id → default schedule
 CLASS_SCHEDULES: dict[str, list[str]] = {
     "passenger_general": PASSENGER_SCHEDULE,
@@ -471,7 +514,7 @@ class KorkinAgent:
         # What the operator's non-pharmaceutical measures do to this host's
         # incoming dose, by route, and which measures reached it
         "dose_reduction_multipliers", "npi_measures",
-        "shedding_multiplier", "cabin_mate_ids", "ashore",
+        "shedding_multiplier", "cabin_mate_ids", "ashore", "meal_seating",
         # Variant surveillance: genotype standing immunity was raised against
         "prior_genotypes", "immune_history",
         # Host biology read by the incubation distribution
@@ -515,6 +558,8 @@ class KorkinAgent:
         self.free_zone = free_zone
         self.current_location = home_zone
         self.schedule = list(schedule)
+        # Which of the dining venue's successive cohorts this agent eats with.
+        self.meal_seating: int = 0
 
         # Multi-pathogen co-infection tracking:
         # {pathogen_id: {"status": InfectionStatus, "illness": IllnessStatus,
@@ -1510,10 +1555,14 @@ class KorkinShipEngine:
                 "name": z["name"],
                 "service_type": stype,
                 "max_occupancy": z.get("max_occupancy"),
+                "meal_seatings": max(int(z.get("meal_seatings") or 1), 1),
                 "food_contamination_multiplier": z.get(
                     "food_contamination_multiplier",
                 ),
             })
+        self._meal_seatings_by_zone: dict[str, int] = {
+            str(e["name"]): int(e["meal_seatings"]) for e in self._dining_catalog
+        }
         self._crew_dining_catalog = self._dining_catalog_for(CREW_DINING_SERVICE_TYPES)
         self._passenger_dining_catalog = self._dining_catalog_for(
             PASSENGER_DINING_SERVICE_TYPES,
@@ -1567,6 +1616,16 @@ class KorkinShipEngine:
             else self._passenger_dining_catalog
         )
         return weighted_zone_choice(catalog, self.rng) or "unknown"
+
+    def _seated_schedule(
+        self, template: list[str], dining_zone: str,
+    ) -> tuple[list[str], int]:
+        """The template as one uniformly drawn cohort of the venue's sittings."""
+        seatings = self._meal_seatings_by_zone.get(dining_zone, 1)
+        if seatings <= 1:
+            return list(template), 0
+        seating = int(self.rng.integers(seatings))
+        return stagger_meal_seating(list(template), seating, seatings), seating
 
     def _resolve_zone(self, preference: str, fallback_zones: list[str]) -> str:
         """Pick a zone matching *preference* substring, or fall back."""
@@ -1734,14 +1793,16 @@ class KorkinShipEngine:
                 if free_pref
                 else weighted_zone_choice(self._leisure_catalog, self.rng) or "unknown"
             )
+            schedule, seating = self._seated_schedule(schedule_template, dining)
 
             agent = KorkinAgent(
                 agent_id=agent_id, role=role_group, immune=immune,
                 home_zone=home, dining_zone=dining,
                 work_zone=work, free_zone=free,
-                schedule=list(schedule_template),
+                schedule=schedule,
                 agent_class=class_id, gender=self._assign_gender(),
             )
+            agent.meal_seating = seating
 
             if not immune and infected_remaining > 0:
                 self._seed_initial_infection(agent, self.rng)
@@ -1793,7 +1854,7 @@ class KorkinShipEngine:
             free = weighted_zone_choice(self._leisure_catalog, self.rng) or "unknown"
             work = self.rng.choice(self._free_zones)
             gender = self._assign_gender()
-            schedule = list(PASSENGER_SCHEDULE)
+            schedule, seating = self._seated_schedule(PASSENGER_SCHEDULE, dining)
 
             agent = KorkinAgent(
                 agent_id=agent_id, role="passenger", immune=immune,
@@ -1801,6 +1862,7 @@ class KorkinShipEngine:
                 work_zone=work, free_zone=free, schedule=schedule,
                 agent_class="passenger_general", gender=gender,
             )
+            agent.meal_seating = seating
 
             if not immune and infected_remaining > 0:
                 agent.infection_status = InfectionStatus.INFECTED
@@ -1832,7 +1894,7 @@ class KorkinShipEngine:
             free = weighted_zone_choice(self._leisure_catalog, self.rng) or "unknown"
             work = self.rng.choice(self._free_zones + self._dining_zones)
             gender = self._assign_gender()
-            schedule = list(CREW_SCHEDULE)
+            schedule, seating = self._seated_schedule(CREW_SCHEDULE, dining)
 
             agent = KorkinAgent(
                 agent_id=agent_id, role="crew", immune=immune,
@@ -1840,6 +1902,7 @@ class KorkinShipEngine:
                 work_zone=work, free_zone=free, schedule=schedule,
                 agent_class="crew_general", gender=gender,
             )
+            agent.meal_seating = seating
 
             if not immune and infected_remaining > 0:
                 agent.infection_status = InfectionStatus.INFECTED

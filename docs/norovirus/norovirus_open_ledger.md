@@ -88,6 +88,33 @@ frequency stays 7–19× above expedition's 0.59–1.60% band. Every pre-`DINE-S
 frequency and attack rate is superseded, on every hull, in a direction measured
 only on expedition.
 
+**`SEAT-01` gives every Dining zone a declared number of meal seatings**, and
+until it lands every venue seated its whole assigned complement in the same
+hour: the passenger schedule puts every passenger at breakfast 09–10, lunch
+12–13 and dinner 18–19 simultaneously, so `classic_cruise_1900` seated 1,350
+passengers in 1,230 declared seats and `spirit_cruise_3000` 2,100 in 1,760, and
+every crew mess (60 seats for 150 crew on expedition) held the whole crew at
+once — a physical impossibility the `max_occupancy` declaration never
+enforced. The declaration is operational, not epidemiological: passenger
+venues on the classic, spirit and mega hulls declare **2** sittings (traditional
+main-dining-room service is two assigned dinner seatings, early and late — Royal
+Caribbean's own dining FAQ, and the same practice on Carnival/NCL-era hulls;
+breakfast and lunch are open-seating within a service window of about two
+hours, which the same cut represents), expedition's passenger venues declare
+**1** (the 300-seat MainDining seats the 300-passenger complement in one open
+sitting, as expedition operators describe — unassigned tables, the whole ship
+dines together), and every crew mess declares **2** (crew accounts describe
+mess windows of 2–3.5 hours served buffet-style across shifts; the *lower* end
+is taken, since fewer sittings keep the room denser). Each diner is dealt a
+cohort at spawn; a two-hour block in two sittings is two one-hour turns, so the
+service window is unchanged and the room holds half its complement at any hour.
+No constant moves. A venue without the declaration (every legacy and naval
+hull, and every synthetic test layout) is bit-identical to before. **The
+`DINE-SEG-01` and `BERTH-01` expedition figures above stand for the passenger
+venues** (single sitting on that hull) **but the crew-mess half of them was
+measured with the whole crew in a 60-seat room at once;** the matched reprise
+follows on Batch and this entry will carry it.
+
 **Every screen and gate result to date belongs to no ship class, before
 `COMPLEMENT-01` (history §9m).** They ran `mega_cruise_5000` — a hull declaring
 5,000 passengers and 2,000 crew — with `num_agents = 450`, i.e. 316 passengers
