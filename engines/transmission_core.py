@@ -602,6 +602,23 @@ DEFAULT_CORRIDOR_DIRECT_CONTACT_FACTOR = 0.15
 # labelled by the lowest agent id in the cabin.
 CABIN_COMPARTMENT_SEPARATOR = "::cabin"
 
+# Share of a seated diner's direct contacts that fall within its own table
+# party rather than elsewhere in the venue (other tables, staff). Video
+# observation of a full lunch service in a table-service restaurant (Zhang et
+# al. 2021, J Infect 83:207, doi:10.1016/j.jinf.2021.05.030; ~13,000
+# close-contact episodes, >40,000 touches): no close contact between diners at
+# different tables, and 0 % of a diner's touches on another table's diners or
+# objects (Results, Table 3: self 97.9 %, same table 2.1 %, other table 0 %,
+# staff 0 %). Corroborated on a second service (Zhang et al. 2022, J Infect,
+# doi:10.1016/j.jinf.2022.08.029: 3,108 close contacts, none between the
+# source diners and the diners at two of the other tables). Grade B (analogous setting:
+# a land restaurant, not a ship's dining room), origin R + T3. The residual
+# staff–diner close contacts those studies do record are small and not
+# tabulated as a share, so they are absorbed at 1.0 and stand as the open
+# term; the share is a sweep axis on [0, 1] where 0 is the venue-wide draw
+# the model made before parties existed (bit-identical), not a fitted value.
+DEFAULT_DINING_PARTY_CONTACT_SHARE = 1.0
+
 # Hand → food transfer efficiency per bare-hand contact with communal or
 # served food. Span of the measured means across food matrices and studies:
 # finger → tomato 0.3 ± 0.5 % and → cucumber 7 ± 8 % (Tuladhar 2013, MNV-1),
@@ -777,6 +794,17 @@ def _parse_contact_mode(tx: dict[str, Any]) -> str:
     if mode not in CONTACT_MODES:
         return DEFAULT_CONTACT_MODE
     return mode
+
+
+def _parse_dining_party_share(tx: dict[str, Any]) -> float:
+    raw = tx.get("dining_party_contact_share", DEFAULT_DINING_PARTY_CONTACT_SHARE)
+    share = float(raw)
+    if not math.isfinite(share) or not 0.0 <= share <= 1.0:
+        raise ValueError(
+            "transmission.dining_party_contact_share must be in [0, 1], "
+            f"got {raw!r}",
+        )
+    return share
 
 
 def _parse_density_cfg(tx: dict[str, Any]) -> dict[str, float]:
@@ -990,6 +1018,9 @@ class TransmissionCore:
         self.confinement_isolation_factor = confinement_isolation_factor
         self.corridor_direct_contact_factor = corridor_direct_contact_factor
         self.food_zone_multipliers = food_zone_multipliers or {}
+        self.dining_party_contact_share = _parse_dining_party_share(
+            (cfg or {}).get("transmission", {}) or {},
+        )
         self._quarantined_ids: set[int] = set()
         # Voyage layer contact scale (1.0 when effects disabled)
         self.voyage_contact_multiplier: float = 1.0
@@ -2839,6 +2870,44 @@ class TransmissionCore:
         )
         return [shedders[int(index)] for index in np.atleast_1d(indices)], k
 
+    def _seated_partner_sample(
+        self,
+        target: KorkinAgent,
+        shedders: list[tuple[KorkinAgent, float]],
+        present_ids: frozenset[int],
+        n_occupants: int,
+        r0_draw: int,
+        zone_name: str,
+    ) -> tuple[list[tuple[KorkinAgent, float]], int] | None:
+        """Partners for a diner seated with its table party, or None.
+
+        A diner at its own venue's table splits its contact draw between the
+        party present at the table and the rest of the room by
+        ``dining_party_contact_share``; the draw itself is unchanged, only who
+        it lands on. Anyone without a party in this venue (staff on shift,
+        buffet diners) keeps the venue-wide draw, as does every diner when the
+        share is 0.
+        """
+        party = target.dining_party_ids
+        share = self.dining_party_contact_share
+        if not party or share <= 0.0 or zone_name != target.dining_zone:
+            return None
+        n_party = 1 + len(party & present_ids)
+        k = max(int(r0_draw), 0)
+        if share >= 1.0 or k == 0:
+            k_party = k
+        else:
+            k_party = int(self.rng.binomial(k, share))
+        party_shedders = [(s, sv) for s, sv in shedders if s.agent_id in party]
+        floor_shedders = [(s, sv) for s, sv in shedders if s.agent_id not in party]
+        at_table, n_table = self._sample_contact_partners(
+            party_shedders, n_party, k_party,
+        )
+        on_floor, n_floor = self._sample_contact_partners(
+            floor_shedders, n_occupants - n_party + 1, k - k_party,
+        )
+        return at_table + on_floor, n_table + n_floor
+
     def _per_partner_contact_dose(
         self,
         target: KorkinAgent,
@@ -2958,6 +3027,10 @@ class TransmissionCore:
         the corridor only as the hallway residual, scaled by
         ``corridor_direct_contact_factor`` and excluding cabin mates already
         met inside.
+
+        A table-service dining room is one room, but a seated diner's contact
+        draw lands on its own table party by ``dining_party_contact_share``
+        (``_seated_partner_sample``, ``per_partner_contact`` mode only).
         """
         for unit_name, occupants, hallway in self._direct_contact_units(
             zone_occupants,
@@ -3030,6 +3103,7 @@ class TransmissionCore:
             None if cabin_confinement
             else self._shedder_mix(shedders, pathogen_id)
         )
+        present_ids = frozenset(a.agent_id for a in occupants)
 
         for target in susceptible:
             r0_draw = self._draw_contact_multiplier(
@@ -3038,8 +3112,15 @@ class TransmissionCore:
             sampled_shedders = shedders
             n_contacts = r0_draw
             if use_partner:
-                sampled_shedders, n_contacts = self._sample_contact_partners(
-                    shedders, n_occupants, r0_draw,
+                seated = self._seated_partner_sample(
+                    target, shedders, present_ids, n_occupants, r0_draw,
+                    zone_name,
+                )
+                sampled_shedders, n_contacts = (
+                    seated if seated is not None
+                    else self._sample_contact_partners(
+                        shedders, n_occupants, r0_draw,
+                    )
                 )
                 if hallway:
                     sampled_shedders = self._hallway_shedders(

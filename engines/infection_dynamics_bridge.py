@@ -193,6 +193,43 @@ DEFAULT_AGENT_BEHAVIOR: dict[str, Any] = {
 CREW_DINING_SERVICE_TYPES = frozenset({"crew_mess"})
 PASSENGER_DINING_SERVICE_TYPES = frozenset({"mdr", "buffet", "specialty"})
 
+# Dining service whose diners hold one table for the meal, so the table and
+# not the room is the group they meet. Cruise lines publish exactly this for
+# the main and specialty rooms: traditional dining seats a guest at "a
+# consistent table" for the voyage, at one of the line's declared table sizes
+# (Carnival, "Table Sizes": tables for 2, 4, 6, 8 and 10; Royal Caribbean's
+# traditional seating: an assigned table and waiter each night). A buffet is
+# excluded: its diners take a tray to whatever seat is free, which is the
+# venue-wide draw the model already makes. A crew mess is excluded too, on the
+# accounts sourced in tranche 35 that describe it as self-service at open
+# tables across successive short sittings. Documentary evidence, Grade C.
+SEATED_PARTY_DINING_SERVICE_TYPES = frozenset({"mdr", "specialty"})
+
+# Diners per table where a seated venue declares no ``dining_table_size``.
+# The published cruise range is 2–10 with round tables at 6–10 (Carnival,
+# "Table Sizes"); nothing publishes the distribution over that range, so this
+# is the range's interior declared as one value and left as a structural sweep
+# axis, not a measurement. Documentary interval, Grade C.
+DEFAULT_DINING_TABLE_SIZE = 6
+
+
+def resolve_dining_service_type(zone: dict[str, Any]) -> str:
+    """A Dining zone's declared service type, or the one its name implies."""
+    stype = str(zone.get("dining_service_type") or "")
+    if stype:
+        return stype
+    name = str(zone.get("name") or zone.get("id") or "").lower()
+    if "galley" in name:
+        return "galley"
+    if "mess" in name:
+        return "crew_mess"
+    if any(x in name for x in ("buffet", "lido", "windjammer", "grill", "cafe")):
+        return "buffet"
+    if "spec" in name:
+        return "specialty"
+    return "mdr"
+
+
 # Passenger leisure access. No zone record on any platform carries an access
 # field, so crew-only machinery and service spaces are identified from tokens
 # their own name, deck and description already use. Interim measure; the
@@ -515,6 +552,7 @@ class KorkinAgent:
         # incoming dose, by route, and which measures reached it
         "dose_reduction_multipliers", "npi_measures",
         "shedding_multiplier", "cabin_mate_ids", "ashore", "meal_seating",
+        "dining_party_ids",
         # Variant surveillance: genotype standing immunity was raised against
         "prior_genotypes", "immune_history",
         # Host biology read by the incubation distribution
@@ -620,6 +658,10 @@ class KorkinAgent:
         self.shedding_multiplier: float = 1.0
         # Cabin-mate agent IDs sharing the same stateroom (mega_cruise_5000)
         self.cabin_mate_ids: frozenset[int] = frozenset()
+        # The other diners seated at this host's table in its own dining venue,
+        # empty in a venue whose service is not seated at a fixed table (a
+        # buffet) and for anyone with no seat there (staff on shift).
+        self.dining_party_ids: frozenset[int] = frozenset()
         # Voyage layer: passenger ashore during port/disembark windows
         self.ashore: bool = False
 
@@ -1451,6 +1493,8 @@ class KorkinAgent:
             result["chronic_disease_ids"] = list(self.chronic_disease_ids)
         if self.cabin_mate_ids:
             result["cabin_mate_ids"] = sorted(self.cabin_mate_ids)
+        if self.dining_party_ids:
+            result["dining_party_ids"] = sorted(self.dining_party_ids)
         return result
 
 
@@ -1538,19 +1582,7 @@ class KorkinShipEngine:
         for z in self.zones:
             if z.get("type") != "Dining":
                 continue
-            stype = str(z.get("dining_service_type") or "")
-            if not stype:
-                name = str(z["name"]).lower()
-                if "galley" in name:
-                    stype = "galley"
-                elif "mess" in name:
-                    stype = "crew_mess"
-                elif any(x in name for x in ("buffet", "lido", "windjammer", "grill", "cafe")):
-                    stype = "buffet"
-                elif "spec" in name:
-                    stype = "specialty"
-                else:
-                    stype = "mdr"
+            stype = resolve_dining_service_type(z)
             self._dining_catalog.append({
                 "name": z["name"],
                 "service_type": stype,

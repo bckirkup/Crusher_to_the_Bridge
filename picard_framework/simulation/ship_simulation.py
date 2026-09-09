@@ -85,6 +85,7 @@ from orchestrator_init import (
     apply_voyage_dining_meal_weights,
     apply_voyage_medical_response,
     assign_cabin_mates,
+    assign_dining_parties,
     build_engine,
     check_escalation,
     compute_group_rates_for_ids,
@@ -389,6 +390,7 @@ class ShipSimulation:
             print_korkin_engine(self.engine)
 
         assign_cabin_mates(self.engine.agents, ship["zones"])
+        assign_dining_parties(self.engine.agents, ship["zones"])
 
         self.contam_engine = build_transport_engine(
             self.repo_root, cfg, clock=self.clock,
