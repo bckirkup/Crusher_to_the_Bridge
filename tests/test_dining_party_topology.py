@@ -104,7 +104,9 @@ class TestAssignDiningParties:
             assign_dining_parties(agents, ZONES)
             return [a.dining_party_ids for a in agents]
 
-        assert parties() == parties()
+        first = parties()
+        second = parties()
+        assert first == second
 
 
 def _core(share: float | None, seed: int = 11) -> TransmissionCore:

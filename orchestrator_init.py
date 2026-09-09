@@ -200,6 +200,21 @@ def _seated_diners_in_booking_order(
     return ordered
 
 
+def _table_size_by_zone(zones: list[dict[str, Any]]) -> dict[str, int]:
+    """Table size of each table-service Dining zone, by zone name."""
+    sizes: dict[str, int] = {}
+    for z in zones:
+        if z.get("type") != "Dining":
+            continue
+        if resolve_dining_service_type(z) not in SEATED_PARTY_DINING_SERVICE_TYPES:
+            continue
+        declared = z.get("dining_table_size")
+        size = int(declared) if declared is not None else DEFAULT_DINING_TABLE_SIZE
+        if size >= 1:
+            sizes[str(z["name"])] = size
+    return sizes
+
+
 def assign_dining_parties(
     agents: list[KorkinAgent],
     zones: list[dict[str, Any]],
@@ -215,17 +230,7 @@ def assign_dining_parties(
     ``dining_table_size`` or ``DEFAULT_DINING_TABLE_SIZE``; the last table of
     a sitting takes the remainder. Deterministic: no random draw.
     """
-    table_size_by_zone: dict[str, int] = {}
-    for z in zones:
-        if z.get("type") != "Dining":
-            continue
-        if resolve_dining_service_type(z) not in SEATED_PARTY_DINING_SERVICE_TYPES:
-            continue
-        declared = z.get("dining_table_size")
-        size = int(declared) if declared is not None else DEFAULT_DINING_TABLE_SIZE
-        if size >= 1:
-            table_size_by_zone[str(z["name"])] = size
-
+    table_size_by_zone = _table_size_by_zone(zones)
     sittings: dict[tuple[str, int], list[KorkinAgent]] = defaultdict(list)
     for agent in agents:
         agent.dining_party_ids = frozenset()
