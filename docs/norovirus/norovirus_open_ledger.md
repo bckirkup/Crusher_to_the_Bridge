@@ -199,6 +199,38 @@ accounts describe, not a shortfall. The passenger two-thirds bound is now held
 by test; the crew bound is the room. No literature index carries any of this,
 and no seating count is chosen against a scored quantity.
 
+**`DINE-PARTY-01` seats table-service diners at fixed tables and makes the
+table, not the room, a seated diner's direct-contact pool.** Before it, a
+diner's partners at every meal were drawn uniformly from everyone in the venue,
+whatever the service: a main dining room and a buffet were the same well-mixed
+room. Now each sitting of every `mdr` and `specialty` venue is dealt to tables
+of the venue's declared `dining_table_size` (default 6; the last table takes the
+remainder; a cabin is dealt contiguously so a booking shares a table), fixed
+for the voyage as assigned seating is, and a diner's contact draw at its own
+venue lands on the party present at its table by
+`transmission.dining_party_contact_share` (default **1**: the table is the
+mixing unit for the meal). The draw itself — POLYMOD 13.4/day, role-blind — is
+unchanged; only who it lands on. Buffet and crew-mess diners, staff on shift in
+the room, and every diner at a share of 0 keep the venue-wide draw, and a share
+of 0 is bit-identical to `SEAT-02` (checked on expedition, 200 agents, 240
+epochs). What the record supports (Transcribed, analogous-setting, Grade C):
+restaurant video studies put a same-table diner's share of another diner's
+close contact and surface exposure two orders above other tables' (Zhang 2021,
+Guangzhou, >13,000 close-contact episodes and >40,000 touches, one table 97.9%
+self / 2.1% same-table / 0% other-table for a surface class; Jin 2022, Table 3,
+3.5% of viral load on same-table private surfaces vs 0.03% at other tables);
+the hotel-restaurant norovirus reanalyses model parties as the unit and route
+between them through waiters (Xiao 2017) and find attack rate falling with
+distance from the index table (Marks 2000). Public cruise documentation puts
+main-dining tables at 2, 4, 6, 8 and 10 with the same table and waiter each
+night in traditional dining, so 6 is a declared centre of a documented 2–10
+range, not a measured constant. None of it is a cruise measurement, none of it
+gives a within-party contact share, and no value here is chosen against a
+scored quantity: the share is the swept axis (0 = the pre-party room, 1 = the
+table), the table size a per-venue declaration. **The `SEAT-02` expedition
+figures above are the last measured with a well-mixed dining room**; the
+matched reprise is recorded when it lands.
+
 **Every screen and gate result to date belongs to no ship class, before
 `COMPLEMENT-01` (history §9m).** They ran `mega_cruise_5000` — a hull declaring
 5,000 passengers and 2,000 crew — with `num_agents = 450`, i.e. 316 passengers

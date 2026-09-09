@@ -39,11 +39,14 @@ from crusher_labs.protocol_engine import (
     load_protocols,
 )
 from engines.infection_dynamics_bridge import (
+    DEFAULT_DINING_TABLE_SIZE,
+    SEATED_PARTY_DINING_SERVICE_TYPES,
     VSP_RULE_INSTANT_PREVALENCE,
     VSP_RULE_REPORTED_PASSENGER_CASES,
     InfectionStatus,
     KorkinAgent,
     KorkinShipEngine,
+    resolve_dining_service_type,
 )
 from engines.initiation import (
     LEGACY_MANIFEST,
@@ -119,6 +122,7 @@ def load_spatial_layout(cfg: dict[str, Any]) -> list[dict[str, Any]] | None:
             "dining_service_type": z.get("dining_service_type", ""),
             "food_contamination_multiplier": z.get("food_contamination_multiplier"),
             "meal_seatings": z.get("meal_seatings"),
+            "dining_table_size": z.get("dining_table_size"),
         }
         for z in layout.get("zones", [])
     ]
@@ -175,6 +179,72 @@ def assign_cabin_mates(
             cabin_ids = {a.agent_id for a in cabin_group}
             for agent in cabin_group:
                 agent.cabin_mate_ids = frozenset(cabin_ids - {agent.agent_id})
+
+
+def _seated_diners_in_booking_order(
+    diners: list[KorkinAgent],
+) -> list[KorkinAgent]:
+    """Diners of one sitting, each cabin's occupants kept contiguous."""
+    by_id = {a.agent_id: a for a in diners}
+    ordered: list[KorkinAgent] = []
+    seen: set[int] = set()
+    for agent in sorted(diners, key=lambda a: a.agent_id):
+        if agent.agent_id in seen:
+            continue
+        booking = [agent.agent_id, *sorted(agent.cabin_mate_ids)]
+        for member_id in booking:
+            member = by_id.get(member_id)
+            if member is not None and member_id not in seen:
+                seen.add(member_id)
+                ordered.append(member)
+    return ordered
+
+
+def _table_size_by_zone(zones: list[dict[str, Any]]) -> dict[str, int]:
+    """Table size of each table-service Dining zone, by zone name."""
+    sizes: dict[str, int] = {}
+    for z in zones:
+        if z.get("type") != "Dining":
+            continue
+        if resolve_dining_service_type(z) not in SEATED_PARTY_DINING_SERVICE_TYPES:
+            continue
+        declared = z.get("dining_table_size")
+        size = int(declared) if declared is not None else DEFAULT_DINING_TABLE_SIZE
+        if size >= 1:
+            sizes[str(z["name"])] = size
+    return sizes
+
+
+def assign_dining_parties(
+    agents: list[KorkinAgent],
+    zones: list[dict[str, Any]],
+) -> None:
+    """Seat the diners of each table-service venue at fixed tables.
+
+    Sets ``dining_party_ids`` on each diner to the others at its table. Only
+    venues whose service type is in ``SEATED_PARTY_DINING_SERVICE_TYPES`` are
+    seated; buffet, crew-mess and galley diners keep an empty party. Tables
+    are dealt within one sitting (``meal_seating``) so a party is always in
+    the room together, and a cabin's occupants are dealt contiguously so a
+    booking shares a table as fixed seating does. Table size is the venue's
+    ``dining_table_size`` or ``DEFAULT_DINING_TABLE_SIZE``; the last table of
+    a sitting takes the remainder. Deterministic: no random draw.
+    """
+    table_size_by_zone = _table_size_by_zone(zones)
+    sittings: dict[tuple[str, int], list[KorkinAgent]] = defaultdict(list)
+    for agent in agents:
+        agent.dining_party_ids = frozenset()
+        if agent.dining_zone in table_size_by_zone:
+            sittings[(agent.dining_zone, agent.meal_seating)].append(agent)
+
+    for (zone_name, _seating), diners in sittings.items():
+        size = table_size_by_zone[zone_name]
+        ordered = _seated_diners_in_booking_order(diners)
+        for i in range(0, len(ordered), size):
+            table = ordered[i : i + size]
+            table_ids = {a.agent_id for a in table}
+            for agent in table:
+                agent.dining_party_ids = frozenset(table_ids - {agent.agent_id})
 
 
 def load_platform_layout_doc(cfg: dict[str, Any]) -> dict[str, Any] | None:

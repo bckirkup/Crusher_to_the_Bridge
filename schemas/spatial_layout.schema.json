@@ -142,6 +142,11 @@
           "type": "integer",
           "minimum": 1,
           "description": "Number of successive sittings a Dining zone serves per meal (1 = the whole assigned complement sits at once). Diners are dealt to sittings in rotation; each meal block is cut into seat-turns of max(block_hours // sittings, 1) hours and sitting k takes the k-th turn, so a sitting holds at most ceil(assigned / sittings) diners. Declared so a venue never runs at or over max_occupancy in any hour."
+        },
+        "dining_table_size": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Diners per fixed table in a table-service Dining zone (dining_service_type mdr or specialty). Diners of one sitting are dealt to tables of this size, cabins kept together, and a diner's direct-contact draw at its meal lands on its table party by transmission.dining_party_contact_share. Ignored for buffet, crew_mess and galley zones. Defaults to the engine's DEFAULT_DINING_TABLE_SIZE when absent."
         }
       }
     }
