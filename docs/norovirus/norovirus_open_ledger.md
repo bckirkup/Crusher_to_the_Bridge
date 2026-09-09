@@ -227,9 +227,36 @@ night in traditional dining, so 6 is a declared centre of a documented 2–10
 range, not a measured constant. None of it is a cruise measurement, none of it
 gives a within-party contact share, and no value here is chosen against a
 scored quantity: the share is the swept axis (0 = the pre-party room, 1 = the
-table), the table size a per-venue declaration. **The `SEAT-02` expedition
-figures above are the last measured with a well-mixed dining room**; the
-matched reprise is recorded when it lands.
+table), the table size a per-venue declaration.
+
+**Measured, and it is a null.** Matched expedition stage-0 reprise (Batch
+`14dfa232`, image `bounded-design-v16`, the same 256-point grid, 6 seeds a
+point, seed base 500, design seed 37 as the `SEAT-02` reprise `56ecc95f`; 1,536
+voyages matched run-for-run, 1,066 of them bit-identical):
+
+| | `SEAT-02` | `DINE-PARTY-01` |
+|---|---:|---:|
+| postings (OR rule) | 158 (10.29%) | 158 (10.29%) |
+| crew-only postings | 10 | 7 |
+| mean pax infection AR | 5.495% | 5.490% |
+| mean crew infection AR | 3.551% | 3.527% |
+| A5 (infection, pax:crew) | 1.547 | 1.557 |
+| points with no posting in 6 seeds | 216 | 219 of 256 |
+
+Paired: Δ pax −0.004 pp (se 0.06), Δ crew −0.025 pp (se 0.067), posting flips 15
+off / 15 on (two-sided sign p = 1.0). At 1,536 voyages the change is
+indistinguishable from RNG divergence on every channel. Read: with the contact
+*count* fixed at POLYMOD 13.4/day, restricting a seated diner's partners from
+the room to a fixed table of six changes who is met without changing how many,
+and on this hull that reallocation carries no measurable dose — the same
+readout the three preceding topology repairs gave for the crew arm. It does not
+license the inverse claim: the two mechanisms that would make seating matter are
+not in the tree yet, namely class-directed contact scaling
+(`CONTACT-SCALE-01`, `N_target^φ` from Shirreff 2024) and a sub-room air
+compartment (`AERO-NEAR-01`, §4 item 16), and the table's *repeat*-contact
+structure has no representation while partners are redrawn independently each
+epoch. The finite-sample statement is what is recorded here: on this grid, with
+this seed set, no effect resolved.
 
 **Every screen and gate result to date belongs to no ship class, before
 `COMPLEMENT-01` (history §9m).** They ran `mega_cruise_5000` — a hull declaring
