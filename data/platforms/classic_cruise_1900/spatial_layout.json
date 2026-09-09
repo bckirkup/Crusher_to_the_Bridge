@@ -94,7 +94,7 @@
       "description": "Crew mess. Deck 1. ~200 seats.",
       "dining_service_type": "crew_mess",
       "food_contamination_multiplier": 1.0,
-      "meal_seatings": 2
+      "meal_seatings": 4
     },
     {
       "id": "MainGalley",

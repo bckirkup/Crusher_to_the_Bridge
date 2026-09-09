@@ -1563,6 +1563,9 @@ class KorkinShipEngine:
         self._meal_seatings_by_zone: dict[str, int] = {
             str(e["name"]): int(e["meal_seatings"]) for e in self._dining_catalog
         }
+        self._diners_dealt_by_zone: dict[str, int] = {
+            name: 0 for name in self._meal_seatings_by_zone
+        }
         self._crew_dining_catalog = self._dining_catalog_for(CREW_DINING_SERVICE_TYPES)
         self._passenger_dining_catalog = self._dining_catalog_for(
             PASSENGER_DINING_SERVICE_TYPES,
@@ -1620,11 +1623,18 @@ class KorkinShipEngine:
     def _seated_schedule(
         self, template: list[str], dining_zone: str,
     ) -> tuple[list[str], int]:
-        """The template as one uniformly drawn cohort of the venue's sittings."""
+        """The template as the next cohort dealt at the venue.
+
+        Diners are dealt to a venue's sittings in rotation, as a fixed seating
+        plan does, so no sitting holds more than ``ceil(assigned / seatings)``
+        diners and the hourly room count is bounded, not merely expected.
+        """
         seatings = self._meal_seatings_by_zone.get(dining_zone, 1)
         if seatings <= 1:
             return list(template), 0
-        seating = int(self.rng.integers(seatings))
+        dealt = self._diners_dealt_by_zone.get(dining_zone, 0)
+        self._diners_dealt_by_zone[dining_zone] = dealt + 1
+        seating = dealt % seatings
         return stagger_meal_seating(list(template), seating, seatings), seating
 
     def _resolve_zone(self, preference: str, fallback_zones: list[str]) -> str:

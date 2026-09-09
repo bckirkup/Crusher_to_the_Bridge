@@ -112,8 +112,59 @@ No constant moves. A venue without the declaration (every legacy and naval
 hull, and every synthetic test layout) is bit-identical to before. **The
 `DINE-SEG-01` and `BERTH-01` expedition figures above stand for the passenger
 venues** (single sitting on that hull) **but the crew-mess half of them was
-measured with the whole crew in a 60-seat room at once;** the matched reprise
-follows on Batch and this entry will carry it.
+measured with the whole crew in a 60-seat room at once.** The matched
+expedition reprise (Batch `f243a31c`, image `bounded-design-v13`, 1,536 voyages
+matched by `run_id` to `DINE-SEG-01`) measured the crew-mess half: postings 169
+(11.0%) → 182 (11.85%), crew-only postings 6 → 16, mean crew infection AR
+3.55% → 3.66% (Δ +0.12 pp, se 0.08), mean passenger infection AR 5.82% → 6.03%
+(Δ +0.20 pp, se 0.09), A5 1.64 → 1.65; 810 voyages bit-identical, posting flips
+25 off / 38 on (exact two-sided p = 0.13). Halving crew-mess density did not
+lower crew infection; nothing on this hull is resolved as changed. The classic
+reprise (`88428bc0`, 48 shards) is the first classic run after all four repairs
+and is read cumulatively against the original classic stage 0 when it lands.
+
+**`SEAT-02` gives every dining venue on every hull at least two sittings, dealt
+so no venue runs at or over its declared seats in any hour.** `SEAT-01` left
+expedition's passenger venues at one sitting and dealt cohorts by a uniform
+draw, so a venue's hourly occupancy was only bounded in expectation. Now every
+Dining zone with diners declares ≥ 2 sittings and the engine deals diners to a
+venue's sittings in rotation, as a fixed seating plan does, so a sitting holds
+at most `ceil(assigned / seatings)` diners. The counts are set from the hull's
+own declarations — the role complement's capacity-weighted share of the venue,
+divided by the sittings, must sit under the venue's `max_occupancy` with
+headroom for the venue draw's variance — and from nothing scored: expedition
+passenger venues **2** (300 passengers in 450 seat-turns), every other
+passenger venue stays at **2**, crew messes **3** on expedition (150 crew, 60
+seats → 50 a sitting) and mega (2,000 crew, 1,050 seats), **4** on classic (560
+crew, 200 seats → 140) and spirit (900 crew, 310 seats), where three sittings
+left 187/200 and 242/250 expected in the room. A crew mess in three or four
+one-hour sittings is a mess serving across shifts, which is what crew accounts
+describe; a passenger two-hour block in two sittings is unchanged from
+`SEAT-01`. No constant moves. Venues without the declaration are bit-identical
+to before; every declared venue's RNG stream differs from `SEAT-01` because the
+cohort is no longer drawn. **Every `SEAT-01` figure is superseded** by the
+matched Batch reprises that follow; this entry will carry them.
+
+The load these declarations put in a room, checked against public operating
+documentation (Transcribed, documentary — not literature): a fixed-seating
+dining room is observed running at roughly two-thirds of its seats, and the
+published seat inventories agree — Spirit-class *Carnival Spirit*, 2,124
+passengers, one 1,300-seat dining room in two fixed sittings (Cruise Critic,
+Frommer's, CruiseMapper) is 82% a sitting only if every passenger attends, and
+they do not (buffet 1,458 seats alongside); *Liberty of the Seas*, 3,634
+passengers, 652 + 500 + 883 dining-room seats in two sittings (cruisedeckplans),
+89% likewise. The hulls here seat every passenger at every meal in a declared
+venue, so their expected load per sitting is the comparable figure: expedition
+33%, classic 55%, spirit 60%, mega 43% — at or under the observed two-thirds
+everywhere. Crew messes run 63–83% a sitting (expedition 83%, spirit 73%,
+classic 70%, mega 63%); crew accounts describe the mess as buffet service over
+a 2–3.5 h window per meal (breakfast 06:00–09:00, dinner 17:00–20:30, Emma
+Cruises 2020; crew-center.com AIDA Hyperion; joannetai.com 2025) with crowded
+tables and queues at the lunch peak, which is three to four one-hour sittings
+with the room near full at the peak — so the higher crew load is what the
+accounts describe, not a shortfall. The passenger two-thirds bound is now held
+by test; the crew bound is the room. No literature index carries any of this,
+and no seating count is chosen against a scored quantity.
 
 **Every screen and gate result to date belongs to no ship class, before
 `COMPLEMENT-01` (history §9m).** They ran `mega_cruise_5000` — a hull declaring

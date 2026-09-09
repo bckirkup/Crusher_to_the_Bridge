@@ -30,7 +30,7 @@
       "description": "Main dining room with assigned seating. Deck 5. ~300 seats.",
       "dining_service_type": "mdr",
       "food_contamination_multiplier": 1.0,
-      "meal_seatings": 1
+      "meal_seatings": 2
     },
     {
       "id": "CasualDining",
@@ -46,7 +46,7 @@
       "description": "Casual dining (table service / MDR). Deck 7. ~150 seats.",
       "dining_service_type": "mdr",
       "food_contamination_multiplier": 1.0,
-      "meal_seatings": 1
+      "meal_seatings": 2
     },
     {
       "id": "CrewMess",
@@ -62,7 +62,7 @@
       "description": "Crew mess. Deck 2. ~60 seats.",
       "dining_service_type": "crew_mess",
       "food_contamination_multiplier": 1.0,
-      "meal_seatings": 2
+      "meal_seatings": 3
     },
     {
       "id": "MainGalley",
