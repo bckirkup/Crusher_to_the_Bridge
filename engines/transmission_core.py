@@ -409,6 +409,27 @@ DEFAULT_DENSITY_CFG: dict[str, float] = {
 }
 DEFAULT_CONTACT_MODE = "per_partner_contact"
 
+# CONTACT-SCALE-01: how a person's contacts divide between the classes present.
+# Shirreff et al. 2024 (Epidemics 47:100807; 2,114 wearers, 15 hospital wards,
+# 33,946 proximity-sensor contacts) fit contact rate against the number of
+# persons actually present as c = a(phi) * N^phi, with a(phi) renormalised so
+# total contact time is conserved: phi = 0 is frequency-dependent, phi = 1
+# linear density-dependent. Two findings, Grade B (analogous confined
+# institution), origin R + Fig 1/3: a person's contacts with *everyone* present
+# are frequency-dependent (credibility intervals include zero ward by ward, and
+# the aggregate favours phi = 0) -- which is the POLYMOD draw above and is left
+# alone -- while contacts *directed at a subpopulation* scale with that
+# subpopulation's density, superlinearly (phi > 1) in several wards for
+# patient-to-patient and nurse-to-patient contact, and negatively in a few.
+# So the exponent here divides a draw whose total it never changes. No value is
+# adopted: nothing measures phi for a dining room or a cruise ship, so it is a
+# declared swept axis and the default reproduces the shipped model exactly.
+DEFAULT_CONTACT_CLASS_EXPONENT = 0.0
+# Refusal band on the declaration, not an interval and not a prior: wide enough
+# to contain the reported ward posteriors (below zero through above one) and
+# narrow enough that a typo cannot enter as a contact kernel.
+CONTACT_CLASS_EXPONENT_BOUNDS = (-2.0, 3.0)
+
 # Per-route dose efficiency multipliers (identity default → no change when
 # absent). These are independent per-route multipliers, not normalised shares:
 # the one pathogen with a measured per-portal ratio (influenza, intranasal vs
@@ -807,6 +828,25 @@ def _parse_dining_party_share(tx: dict[str, Any]) -> float:
     return share
 
 
+def _parse_contact_class_exponent(tx: dict[str, Any]) -> float:
+    """Read the class-directed contact exponent phi (CONTACT-SCALE-01).
+
+    phi = 0 (the default) leaves a target's contacts distributed over the other
+    occupants exactly as before, and takes the same code path, so a run is
+    bit-identical to the pre-change tree. Non-zero phi reweights *which* class
+    the same number of contacts land on; it never changes how many.
+    """
+    raw = tx.get("contact_class_exponent", DEFAULT_CONTACT_CLASS_EXPONENT)
+    phi = float(raw)
+    low, high = CONTACT_CLASS_EXPONENT_BOUNDS
+    if not math.isfinite(phi) or not low <= phi <= high:
+        raise ValueError(
+            "transmission.contact_class_exponent must be finite in "
+            f"[{low}, {high}], got {raw!r}",
+        )
+    return phi
+
+
 def _parse_service_surface_knockout(cfg: dict[str, Any]) -> bool:
     """Whether this run knocks out the service-surface rate (SURF-KO-01).
 
@@ -1047,6 +1087,9 @@ class TransmissionCore:
         )
         self.service_surface_knockout = _parse_service_surface_knockout(
             cfg or {},
+        )
+        self.contact_class_exponent = _parse_contact_class_exponent(
+            (cfg or {}).get("transmission", {}) or {},
         )
         self._quarantined_ids: set[int] = set()
         # Voyage layer contact scale (1.0 when effects disabled)
@@ -2879,8 +2922,20 @@ class TransmissionCore:
         shedders: list[tuple[KorkinAgent, float]],
         n_occupants: int,
         r0_draw: int,
+        class_counts: dict[str, int] | None = None,
     ) -> tuple[list[tuple[KorkinAgent, float]], int]:
-        """Sample distinct shedding partners for one target."""
+        """Sample distinct shedding partners for one target.
+
+        With ``contact_class_exponent`` at its default 0 the draw is uniform
+        over the other occupants, which is the shipped model; *class_counts* is
+        then ignored and this method is entered and left on the same path as
+        before. Non-zero phi routes through ``_sample_partners_by_class``,
+        which divides the *same* draw between the classes present.
+        """
+        if class_counts and self.contact_class_exponent != 0.0:
+            return self._sample_partners_by_class(
+                shedders, class_counts, r0_draw,
+            )
         eligible = max(n_occupants - 1, 0)
         k = min(max(int(r0_draw), 0), eligible)
         if eligible <= 0 or k <= 0 or not shedders:
@@ -2897,12 +2952,84 @@ class TransmissionCore:
         )
         return [shedders[int(index)] for index in np.atleast_1d(indices)], k
 
+    def _class_draw_weights(self, class_counts: dict[str, int]) -> list[float]:
+        """Share of a contact draw each class receives, in key order.
+
+        Contacts directed at a class scale as ``N_class ** phi`` (Shirreff
+        2024), and the draw is renormalised over the classes present so its
+        total is unchanged — the aggregate stays frequency-dependent, which is
+        what that study measures. The per-class share is therefore
+        ``N_c ** (1 + phi)`` normalised, since a class of ``N_c`` eligible
+        partners already receives ``N_c`` of the uniform draw's weight.
+        """
+        power = 1.0 + self.contact_class_exponent
+        raw = [float(max(n, 0)) ** power for n in class_counts.values()]
+        total = sum(raw)
+        if total <= 0.0:
+            return [0.0 for _ in raw]
+        return [w / total for w in raw]
+
+    def _sample_partners_by_class(
+        self,
+        shedders: list[tuple[KorkinAgent, float]],
+        class_counts: dict[str, int],
+        r0_draw: int,
+    ) -> tuple[list[tuple[KorkinAgent, float]], int]:
+        """Split one contact draw between classes, then sample within each.
+
+        The number of contacts is not touched: ``r0_draw`` is allocated over
+        the classes present by ``_class_draw_weights`` and each class's share
+        is sampled from that class's own pool by the unchanged hypergeometric
+        draw. A class's allocation is capped by its eligible pool exactly as a
+        whole-room draw is capped by the room.
+        """
+        k = max(int(r0_draw), 0)
+        weights = self._class_draw_weights(class_counts)
+        if k <= 0 or sum(weights) <= 0.0:
+            return [], 0
+        allocation = self.rng.multinomial(k, weights)
+        sampled: list[tuple[KorkinAgent, float]] = []
+        drawn = 0
+        for (role, n_class), k_class in zip(
+            class_counts.items(), allocation, strict=True,
+        ):
+            class_shedders = [
+                (s, sv) for s, sv in shedders if s.role == role
+            ]
+            partners, n_drawn = self._sample_contact_partners(
+                class_shedders, int(n_class) + 1, int(k_class),
+            )
+            sampled.extend(partners)
+            drawn += n_drawn
+        return sampled, drawn
+
+    def _pool_class_counts(
+        self,
+        occupants: Iterable[KorkinAgent],
+        target: KorkinAgent,
+    ) -> dict[str, int] | None:
+        """Eligible partners in a pool by role, or None when there is nothing to divide.
+
+        None keeps the caller on the uniform draw without iterating the pool,
+        so the default run does no extra work and consumes no extra RNG.
+        """
+        if self.contact_class_exponent == 0.0:
+            return None
+        counts: dict[str, int] = {}
+        for agent in occupants:
+            counts[agent.role] = counts.get(agent.role, 0) + 1
+        counts[target.role] = counts.get(target.role, 1) - 1
+        present = {role: n for role, n in counts.items() if n > 0}
+        # One class present is one class to allocate to: the exponent has
+        # nothing to divide, so the pool keeps the uniform draw and its RNG.
+        return present if len(present) > 1 else None
+
     def _seated_partner_sample(
         self,
         target: KorkinAgent,
         shedders: list[tuple[KorkinAgent, float]],
+        occupants: list[KorkinAgent],
         present_ids: frozenset[int],
-        n_occupants: int,
         r0_draw: int,
         zone_name: str,
     ) -> tuple[list[tuple[KorkinAgent, float]], int] | None:
@@ -2913,12 +3040,14 @@ class TransmissionCore:
         ``dining_party_contact_share``; the draw itself is unchanged, only who
         it lands on. Anyone without a party in this venue (staff on shift,
         buffet diners) keeps the venue-wide draw, as does every diner when the
-        share is 0.
+        share is 0. Each of the two pools then divides its own share between
+        the classes sitting in it, under ``contact_class_exponent``.
         """
         party = target.dining_party_ids
         share = self.dining_party_contact_share
         if not party or share <= 0.0 or zone_name != target.dining_zone:
             return None
+        n_occupants = max(len(occupants), 1)
         n_party = 1 + len(party & present_ids)
         k = max(int(r0_draw), 0)
         if share >= 1.0 or k == 0:
@@ -2929,9 +3058,15 @@ class TransmissionCore:
         floor_shedders = [(s, sv) for s, sv in shedders if s.agent_id not in party]
         at_table, n_table = self._sample_contact_partners(
             party_shedders, n_party, k_party,
+            self._pool_class_counts(
+                (a for a in occupants if a.agent_id in party), target,
+            ),
         )
         on_floor, n_floor = self._sample_contact_partners(
             floor_shedders, n_occupants - n_party + 1, k - k_party,
+            self._pool_class_counts(
+                (a for a in occupants if a.agent_id not in party), target,
+            ),
         )
         return at_table + on_floor, n_table + n_floor
 
@@ -3058,6 +3193,10 @@ class TransmissionCore:
         A table-service dining room is one room, but a seated diner's contact
         draw lands on its own table party by ``dining_party_contact_share``
         (``_seated_partner_sample``, ``per_partner_contact`` mode only).
+
+        Within whichever pool a target draws from, ``contact_class_exponent``
+        sets how the same draw divides between the classes in it: 0, the
+        default, is the uniform draw this model has always made.
         """
         for unit_name, occupants, hallway in self._direct_contact_units(
             zone_occupants,
@@ -3140,13 +3279,14 @@ class TransmissionCore:
             n_contacts = r0_draw
             if use_partner:
                 seated = self._seated_partner_sample(
-                    target, shedders, present_ids, n_occupants, r0_draw,
+                    target, shedders, occupants, present_ids, r0_draw,
                     zone_name,
                 )
                 sampled_shedders, n_contacts = (
                     seated if seated is not None
                     else self._sample_contact_partners(
                         shedders, n_occupants, r0_draw,
+                        self._pool_class_counts(occupants, target),
                     )
                 )
                 if hallway:

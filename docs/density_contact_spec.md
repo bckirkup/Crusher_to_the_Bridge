@@ -234,3 +234,52 @@ Use for sensitivity only: compare conclusions under `density_dependent` vs
 `c6_heterogeneous_sensitivity`). Empirically: reject inherited Korkin kernel →
 test density-dependent across platforms → test whether within-zone stochasticity
 materially changes conclusions (realism vs overfitting).
+
+---
+
+## `CONTACT-SCALE-01`: class-directed scaling under `per_partner_contact`
+
+**Status: implemented, off by default** (`transmission.contact_class_exponent`,
+default `0.0`, which is the shipped model and the same code path).
+
+The default mode draws a host's contacts from POLYMOD 13.4/day and lets the zone
+decide only *who* the partners are, uniformly over co-located occupants — the
+`φ = 0` end of this document's axis, in the aggregate. Shirreff et al. 2024
+(*Epidemics* 47:100807, 2,114 proximity-sensor wearers, 15 hospital wards,
+33,946 contacts) fits `c = a(φ)·N^φ` ward by ward against the number of persons
+present and finds the aggregate frequency-dependent — so the fixed daily total
+stands as measured and is **not** rescaled here — while contacts *directed at a
+subpopulation* scale with that subpopulation's density, above unity in several
+wards and below zero in a few.
+
+So the exponent divides a draw whose size it never changes:
+
+```yaml
+transmission:
+  contact_class_exponent: 0.0   # φ; 0 = the shipped uniform draw, bit-identical
+```
+
+- a target's classes are the passenger/crew roles **eligible in its own pool**,
+  which is the table party, the rest of the dining room, the cabin, or the zone,
+  whichever the target is drawing from;
+- class `c` receives `N_c^(1+φ)` of the draw, normalised over the classes
+  present — the `+1` because `N_c` eligible partners already hold `N_c` of the
+  uniform draw's weight, so `φ = 0` reproduces the share-of-the-room draw
+  exactly;
+- each class's share is then sampled from that class's own pool by the unchanged
+  hypergeometric draw, so partners stay distinct and present;
+- a pool with one class present keeps the uniform path at every `φ`, consuming
+  no extra RNG.
+
+`φ` is a **declared swept axis**, not a value: nothing measures it for a dining
+room, a crew mess or a cruise ship, and the ward exponents differ by pair type,
+by ward and between day and night. The configured `[-2, 3]` is a refusal band
+around the reported posteriors, not an interval. `φ` may not be chosen because
+it moves an anchor — this is the first mechanism by which passenger density can
+reach the crew arm, which makes the sweep the test.
+
+Invariants held by `tests/test_contact_class_scaling.py`: default and `φ = 0`
+run-identical; one class present identical at every `φ`; a rising `φ` directs
+monotonically fewer contacts at the sparser class; `n_contacts ≤ r0_draw`
+always, with equality whenever no class's pool is exhausted; doses finite and
+non-negative; partners distinct and present; weights normalised.
