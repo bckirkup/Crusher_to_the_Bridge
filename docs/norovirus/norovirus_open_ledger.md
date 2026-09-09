@@ -145,6 +145,27 @@ to before; every declared venue's RNG stream differs from `SEAT-01` because the
 cohort is no longer drawn. **Every `SEAT-01` figure is superseded** by the
 matched Batch reprises that follow; this entry will carry them.
 
+The load these declarations put in a room, checked against public operating
+documentation (Transcribed, documentary — not literature): a fixed-seating
+dining room is observed running at roughly two-thirds of its seats, and the
+published seat inventories agree — Spirit-class *Carnival Spirit*, 2,124
+passengers, one 1,300-seat dining room in two fixed sittings (Cruise Critic,
+Frommer's, CruiseMapper) is 82% a sitting only if every passenger attends, and
+they do not (buffet 1,458 seats alongside); *Liberty of the Seas*, 3,634
+passengers, 652 + 500 + 883 dining-room seats in two sittings (cruisedeckplans),
+89% likewise. The hulls here seat every passenger at every meal in a declared
+venue, so their expected load per sitting is the comparable figure: expedition
+33%, classic 55%, spirit 60%, mega 43% — at or under the observed two-thirds
+everywhere. Crew messes run 63–83% a sitting (expedition 83%, spirit 73%,
+classic 70%, mega 63%); crew accounts describe the mess as buffet service over
+a 2–3.5 h window per meal (breakfast 06:00–09:00, dinner 17:00–20:30, Emma
+Cruises 2020; crew-center.com AIDA Hyperion; joannetai.com 2025) with crowded
+tables and queues at the lunch peak, which is three to four one-hour sittings
+with the room near full at the peak — so the higher crew load is what the
+accounts describe, not a shortfall. The passenger two-thirds bound is now held
+by test; the crew bound is the room. No literature index carries any of this,
+and no seating count is chosen against a scored quantity.
+
 **Every screen and gate result to date belongs to no ship class, before
 `COMPLEMENT-01` (history §9m).** They ran `mega_cruise_5000` — a hull declaring
 5,000 passengers and 2,000 crew — with `num_agents = 450`, i.e. 316 passengers

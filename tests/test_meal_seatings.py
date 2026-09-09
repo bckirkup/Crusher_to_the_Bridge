@@ -138,17 +138,23 @@ class TestDeclarationsAgainstComplements:
     def test_expected_diners_per_sitting_stay_under_the_declared_seats(self, hull: str) -> None:
         """Venues are drawn by capacity, so a venue's expected share of its
         role's complement is complement * seats / role seats; one sitting of
-        that must fit the room with headroom for the draw's variance."""
+        that must fit the room with headroom for the draw's variance.
+
+        Passenger rooms are held to the ~2/3 load that fixed-seating service
+        is documented running at; crew messes, documented as full at the
+        peak of a 2-3.5 h service window, only to the room itself."""
         doc = _layout(hull)
-        for role, types in (("passengers", PASSENGER_DINING_SERVICE_TYPES),
-                            ("crew", frozenset({"crew_mess"}))):
+        for role, types, load in (
+            ("passengers", PASSENGER_DINING_SERVICE_TYPES, 2 / 3),
+            ("crew", frozenset({"crew_mess"}), 0.9),
+        ):
             venues = [z for z in doc["zones"] if z.get("dining_service_type") in types]
             role_seats = sum(z["max_occupancy"] for z in venues)
             complement = doc["nominal_complement"][role]
             for z in venues:
                 expected = complement * z["max_occupancy"] / role_seats
                 per_sitting = expected / z["meal_seatings"]
-                assert per_sitting <= 0.9 * z["max_occupancy"], (
+                assert per_sitting <= load * z["max_occupancy"], (
                     f"{hull}/{z['id']}: {per_sitting:.0f} expected per sitting "
                     f"in {z['max_occupancy']} seats"
                 )
