@@ -62,10 +62,31 @@ its 0.59–1.60% band. Every pre-`BERTH-01` frequency and attack rate is
 therefore also superseded, on every hull, in a direction measured only on
 expedition.
 
-**`DINE-SEG-01` seats crew in the crew mess and passengers in the passenger
-venues** (§4 item 8), which ends the shared-dining-room structure every result
-above was measured on. Its expedition reprise is pending; until it lands the
-`BERTH-01` figures are the latest matched measurement.
+**`DINE-SEG-01` (PR #476) seats crew in the crew mess and passengers in the
+passenger venues** (§4 item 8), which ends the shared-dining-room structure
+every result above was measured on, **and it was measured the same way (Batch
+`da6275de`, image `bounded-design-v12`, same 1,536 matched voyages against the
+`BERTH-01` reprise):** postings 143 → 169 (9.3% → 11.0%; paired flips 9 off /
+35 on, exact two-sided p ≈ 1e-4), crew-only postings 7 → 6, mean passenger
+infection AR 5.51% → 5.82% (paired Δ +0.31 pp, se 0.08), crew 3.59% → 3.55%
+(Δ −0.05 pp, se 0.09 — indistinguishable from zero), A5 1.53 → 1.64, points at
+0/6 218 → 211 of 256; posted passenger AR median 12.0% → 12.7%, posted crew AR
+median 10.1% → 9.0%; 660 voyages bit-identical. Read: taking the quarter of
+passengers out of the CrewMess and Galley puts the whole complement into two
+passenger dining rooms, which are denser and infect passengers slightly more;
+taking three quarters of crew out of those rooms does **not** lower crew
+infection at all. So crew were not catching it as fellow diners either. Of the
+routes crew share with passengers, berthing (`BERTH-01`) and dining are now
+both eliminated as the source of the crew excess on this hull; what remains
+shared is the work shift in passenger service zones (with the Jin 545/h
+service-surface rate), the leisure catalogue (no crew recreation zone is
+declared), and hallway residuals. A5 has moved 1.61 → 1.53 → 1.64 across two
+structural repairs against a measured 4.3, so the asymmetry is not going to
+come out of topology repairs of the size that remain; the finite-sample
+reading is that the model's crew route is on the work shift. The posting
+frequency stays 7–19× above expedition's 0.59–1.60% band. Every pre-`DINE-SEG-01`
+frequency and attack rate is superseded, on every hull, in a direction measured
+only on expedition.
 
 **Every screen and gate result to date belongs to no ship class, before
 `COMPLEMENT-01` (history §9m).** They ran `mega_cruise_5000` — a hull declaring
@@ -1244,8 +1265,9 @@ Roughly in dependency order.
    passengers in its `mdr`/`buffet`/`specialty` venues, each by declared
    capacity, and the per-meal rotation (off in every campaign) respects the
    same line; crew *working* a passenger venue still do so through their work
-   zone. No constant moves, and the effect is to be measured on AWS, not
-   assumed. Still open: crew leisure is drawn from the passenger leisure
+   zone. No constant moves; the matched expedition reprise is in §1 (crew
+   infection unchanged, passenger infection up a third of a point). Still
+   open: crew leisure is drawn from the passenger leisure
    catalogue because no hull declares a crew recreation space (crew bar, crew
    deck) — that is a zone declaration to source, not an assignment defect.
    **Sourced in
