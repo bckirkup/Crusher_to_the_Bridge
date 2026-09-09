@@ -143,7 +143,40 @@ describe; a passenger two-hour block in two sittings is unchanged from
 `SEAT-01`. No constant moves. Venues without the declaration are bit-identical
 to before; every declared venue's RNG stream differs from `SEAT-01` because the
 cohort is no longer drawn. **Every `SEAT-01` figure is superseded** by the
-matched Batch reprises that follow; this entry will carry them.
+matched Batch reprises below.
+
+Expedition reprise (Batch `56ecc95f`, image `bounded-design-v15`, 1,536
+voyages matched by `run_id` to the `SEAT-01` reprise `f243a31c`; a first
+submission, `20bd9f20`, ran the campaign image's entrypoint by build error and
+produced nothing): postings 182 (11.85%) → 158 (10.29%), crew-only postings
+16 → 10, mean passenger infection AR 6.03% → 5.50% (Δ −0.53 pp, se 0.09),
+mean crew infection AR 3.66% → 3.55% (Δ −0.11 pp, se 0.08), A5 1.65 → 1.55,
+points at 0/6 200 → 216 of 256; 822 voyages bit-identical, posting flips 45
+off / 21 on (exact two-sided p = 0.004). Posted passenger AR median 11.9% →
+11.7%. So taking expedition's passenger venues from one sitting to two lowers
+passenger infection by about a twelfth and postings by about an eighth — a
+resolved, real reduction at 1,536 voyages — while crew, whose mess went from
+two to three sittings, do not move within error. A5 falls again: the fourth
+structural repair in a row that lowers passenger transmission and leaves crew
+where they were. Cumulatively across `FOOD-ROLE-01`, `BERTH-01`, `DINE-SEG-01`,
+`SEAT-01`, `SEAT-02` on this matched grid: postings 173 → 158 (11.3% → 10.3%),
+A5 1.60 → 1.55, against the hull's own record of 0.59–1.60% postings and the
+literature's 4.3. Finite-sample findings on one Sobol grid, not a bound on the
+box.
+
+Classic `SEAT-01` reprise (`88428bc0`, 48 shards, 1,536 voyages matched to
+the original classic stage 0, which predates all four repairs, so this reading
+is cumulative `FOOD-ROLE-01` + `BERTH-01` + `DINE-SEG-01` + `SEAT-01`; it does
+not carry `SEAT-02`'s crew-mess change from 2 to 4 sittings): postings 365
+(23.8%) → 278 (18.1%), crew-only 68 → 71, mean passenger infection AR
+7.88% → 6.41% (Δ −1.47 pp, se 0.10), mean crew 7.50% → 5.55% (Δ −1.95 pp, se
+0.12), A5 1.05 → 1.16, points at 0/6 106 → 146 of 256; 23 voyages
+bit-identical, flips 120 off / 33 on (p < 1e-6). Posted passenger AR median
+8.3% → 11.3%, crew 10.3% → 9.8%. On the hull where passengers went from 1,350
+in 1,230 seats at once to sittings, both roles fall by a fifth to a quarter,
+crew slightly more — the one hull where crew moved — but the posting rate is
+still ~10× the top of the classic record's 0.15–1.85% band and A5 still ~1.2
+against 4.3.
 
 The load these declarations put in a room, checked against public operating
 documentation (Transcribed, documentary — not literature): a fixed-seating
